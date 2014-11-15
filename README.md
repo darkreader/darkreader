@@ -1,4 +1,4 @@
-darkreaderchrome
+DarkReader
 ================
 
 DarkReader Chrome extension

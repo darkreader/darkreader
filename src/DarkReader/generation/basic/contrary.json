@@ -1,0 +1,13 @@
+﻿{
+    "commonSelectors": "img, iframe, video",
+    "specials": [
+        {
+            "urlPattern": "youtube\\.com",
+            "selectors": "iframe, .html5-video-player, div:not(.html5-video-player) img"
+        },
+        {
+            "urlPattern": "google\\.",
+            "selectors": "img, iframe, video, span.gb_X.gbii"
+        }
+    ]
+}

@@ -1,0 +1,17 @@
+﻿{{
+    "manifest_version": 2,
+    "name": "Dark Reader",
+    "version": "1.1.3",
+    "description": "Keep your eyes, Dark Reader.",
+    "browser_action": {
+        "default_title": "Dark Reader",
+        "default_icon": "img/dr_active_19.png"
+    },
+    "icons": {
+        "16": "img/dr_16.png",
+        "48": "img/dr_48.png",
+        "128": "img/dr_128.png"
+    },
+    "background": { "page": "background.html" },
+    "permissions": [ "tabs", "http://*/*", "https://*/*" ]
+}

@@ -1,0 +1,4 @@
+darkreaderchrome
+================
+
+DarkReader Chrome extension

@@ -1,4 +1,4 @@
-DarkReader
+DarkReader for Google Chrome
 ================
 This extension inverts brightness of web pages and aims to reduce eyestrain while browsing the web.
 [Visit Chrome Web Store](https://chrome.google.com/webstore/detail/dark-reader/eimadpbcbfnmbkopoojfekhnkhdbieeh) for more info.

@@ -21,7 +21,7 @@ The extension simply adds a stylesheet which inverts colors of the whole page an
 2. [TypeScript 1.3 for VS2013](https://visualstudiogallery.msdn.microsoft.com/955e0262-0858-40c9-ab5a-1acc680e9bfd).
 
 ## Fixing the inversion of specific blocks
-If some blocks of web page should not be inverted [the contrary.json](https://github.com/alexanderby/darkreader/blob/master/src/DarkReader/generation/basic/contrary.json) file should be edited. The ```urlPattern``` value contains a [regular expression](http://regexr.com/) for matching page's URL and ```selectors``` value contains [CSS selectors](https://developer.mozilla.org/en-US/docs/Web/Guide/CSS/Getting_Started/Selectors) for matching the specific blocks. If there would be no matches found for page URL, then ```commonSelectors``` valus would be used to generate CSS.
+If some blocks of web page should not be inverted the [contrary.json](https://github.com/alexanderby/darkreader/blob/master/src/DarkReader/generation/basic/contrary.json) file should be edited. The ```urlPattern``` value contains a [regular expression](http://regexr.com/) for matching page's URL and ```selectors``` value contains [CSS selectors](https://developer.mozilla.org/en-US/docs/Web/Guide/CSS/Getting_Started/Selectors) for matching the specific blocks. If there would be no matches found for page URL, then ```commonSelectors``` valus would be used to generate CSS.
 ```JSON
 ﻿{
     "commonSelectors": "img, iframe, video",
@@ -40,4 +40,4 @@ If some blocks of web page should not be inverted [the contrary.json](https://gi
 
 ## Building and debugging
 In order to build and debug the project launch the [DRChromeStarter_build.cmd](https://github.com/alexanderby/darkreader/blob/master/build/DRChromeStarter_build.cmd). Open the [Chrome's extensions page](https://support.google.com/chrome/answer/187443). Enable the **Developer mode**, press **Load unpacked extension** button, navigate to your build output folder.
-After making any code changes, the project should be rebuilt using the command line script and reloaded in Extension page by pressing the **Reload (Ctrl+R)** hyperlink.
+After making any code changes, the project should be rebuilt using the command line script and reloaded in **Extension page** by pressing the **Reload (Ctrl+R)** hyperlink.

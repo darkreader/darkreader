@@ -11,10 +11,16 @@
 
         constructor() {
             // Load rules and contrary selectors
-            this.contrarySelectors = <ContrarySelectors>parseJsonFile('contrary.json');
-            var rules = <CssRules>parseJsonFile('rules.json');
-            this.leadingRule = rules.leadingRule;
-            this.contraryRule = rules.contraryRule;
+            // TODO: Sync?
+            parseJsonFile('contrary.json', (result: ContrarySelectors, err) => {
+                if (err) throw err;
+                this.contrarySelectors = result;
+            });
+            parseJsonFile('rules.json', (result: CssRules, err) => {
+                var rules = result;
+                this.leadingRule = rules.leadingRule;
+                this.contraryRule = rules.contraryRule;
+            });
         }
 
         /**
@@ -34,7 +40,7 @@
          * @param url Web-site address.
          */
         createSpecialCssCode(url: string): string {
-            //console.log('cs: ' + this._counterSelectors);
+            console.log('css for url: ' + url);
             var found: UrlSelectors;
             this.contrarySelectors.specials.forEach((s) => {
                 var matches = url.match(new RegExp(s.urlPattern, 'i'));
@@ -45,7 +51,7 @@
             if (!found) {
                 return null;
             }
-            //console.log('matched: ' + foundSelector.pattern);
+            console.log('matched: ' + found.urlPattern);
             return [
                 'html',
                 this.leadingRule,
@@ -55,18 +61,23 @@
         }
     }
 
-    function parseJsonFile<T>(url: string): T {
-        var result = null;
+    /**
+     * Loads and parses JSON from file to object.
+     * 
+     */
+    function parseJsonFile<T>(url: string, callback: (result: T, error) => void) {
         var xobj = new XMLHttpRequest();
         xobj.overrideMimeType("application/json");
         xobj.open('GET', url, true);
         xobj.onreadystatechange = () => {
             if (xobj.readyState == 4 && xobj.status == 200) {
-                result = JSON.parse(xobj.responseText).selectors;
+                callback(JSON.parse(xobj.responseText), null);
             }
         };
+        xobj.onerror = (err) => {
+            callback(null, err.error);
+        };
         xobj.send(null);
-        return result;
     }
 
     interface ContrarySelectors {

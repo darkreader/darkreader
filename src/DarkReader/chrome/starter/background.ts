@@ -20,6 +20,6 @@ window.onload = () => {
     // On button click
     chrome.browserAction.onClicked.addListener((tab) => {
         // Switch app state
-        app.isEnabled = !app.isEnabled;
+        app.switch();
     });
 } 

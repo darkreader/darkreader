@@ -75,7 +75,7 @@
         }
 
         private tabUpdateListener = (tabId: number, info: chrome.tabs.TabChangeInfo, tab: chrome.tabs.Tab) => {
-            //console.log('Tab: ' + tab.id + ', status: ' + info.status);
+            console.log('Tab: ' + tab.id + ', status: ' + info.status);
 
             if (info.status === 'loading') {
                 //if (info.status === 'loading' || info.status === 'complete') {
@@ -93,14 +93,14 @@
          * @param tab If null than current tab will be processed.
          */
         private addCssToTab(tab: chrome.tabs.Tab) {
-            // Prevent throwing errors on specific chrome adresses
-            if (tab && tab.url && (tab.url.indexOf('chrome') === 0)) {
-                return;
-            }
+            //// Prevent throwing errors on specific chrome adresses
+            //if (tab && tab.url && (tab.url.indexOf('chrome') === 0)) {
+            //    return;
+            //}
 
             if (tab) { // Somewhere null is called.
                 var id = tab ? tab.id : null;
-                var url = tab ? tab.url : null;
+                var url = tab ? tab.url : '';
                 chrome.tabs.executeScript(id, {
                     code: this.getCode_addCss(url),
                     runAt: 'document_start'
@@ -134,83 +134,41 @@
             }
 
             //var code = "alert('Add CSS');"
-            var code =
-
-                //"if (!observer) {" +
-                //"var color = document.documentElement.style.backgroundColor;" +
-                //"document.documentElement.style.backgroundColor = '#222';" +
-                //"var observer = new MutationObserver(function (mutations) {" +
-                //"mutations.forEach(function (mutation) {" +
-                //"if (mutation.target.nodeName == 'BODY') {" +
-                //"observer.disconnect();" +
-                //"document.documentElement.style.backgroundColor = color || '';" +
-                //"}" +
-                //"});" +
-                //"});" +
-                //"}" +
-                //"observer.observe(document, { childList: true, subtree: true });" +
-
-                //"var prevStyle = document.getElementById('dark-reader-style'); " +
-                //"if (!prevStyle) {" +
-                //"var css = '" + css + "'; " +
-                //"var style = document.createElement('style'); " +
-                //"style.setAttribute('id', 'dark-reader-style'); " +
-                //"style.type = 'text/css'; " +
-                //"style.appendChild(document.createTextNode(css)); " +
-                //"var head = document.getElementsByTagName('head')[0]; " +
-                //"head.appendChild(style); " +
-                //"} ";
-
-
-                //"var color = document.documentElement.style.backgroundColor;" +
-                //"document.documentElement.style.backgroundColor = '#222';" +
-
-                "var prevStyle = document.getElementById('dark-reader-style'); " +
-                "if (!prevStyle) {" +
-                "var css = '" + css + "'; " +
-                "var style = document.createElement('style'); " +
-                "style.setAttribute('id', 'dark-reader-style'); " +
-                "style.type = 'text/css'; " +
-                "style.appendChild(document.createTextNode(css)); " +
-                "var head = document.getElementsByTagName('head')[0]; " +
-                "head.appendChild(style); " +
-                "} ";
-            //"} " +
-
-            //"document.documentElement.style.backgroundColor = color || '';";
-
-
-            //var color = document.documentElement.style.backgroundColor;
-            //document.documentElement.style.backgroundColor = "black";
-            //var observer = new MutationObserver(function (mutations) {
-            //    mutations.forEach(function (mutation) {
-            //        observer.disconnect();
-            //        document.documentElement.style.backgroundColor = color || "";
-            //    });
-            //});
-            //observer.observe(document.body, { childList: false, subtree: false });
-
-            //var color = document.documentElement.style.backgroundColor;
-            //document.documentElement.style.backgroundColor = "black";
-            //var observer = new MutationObserver(function (mutations) {
-            //    mutations.forEach(function (mutation) {
-            //        if (mutation.target.nodeName == "BODY") {
-            //            observer.disconnect();
-            //            document.documentElement.style.backgroundColor = color || "";
-            //        }
-            //    });
-            //});
-            //observer.observe(document, { childList: true, subtree: true });
-
-            //var prevStyle = document.getElementById('dark-reader-style');
-            //if (prevStyle) return; // Style is already set, exit.
-            //var css = 'Your style here';
-            //var style = document.createElement('style');
-            //style.setAttribute('id', 'dark-reader-style');
-            //style.type = 'text/css';
-            //style.appendChild(document.createTextNode(css));
-            //var head = document.getElementsByTagName('head')[0];
-            //head.appendChild(style);
+            var code = [
+                "console.log('Executing DR script...');",
+                "var addDRStyle = addDRStyle || function() {",
+                "   var css = '" + css + "';",
+                "   var style = document.createElement('style');",
+                "   style.setAttribute('id', 'dark-reader-style');",
+                "   style.type = 'text/css';",
+                "   style.appendChild(document.createTextNode(css));",
+                "   var head = document.getElementsByTagName('head')[0];",
+                "   head.appendChild(style);",
+                "}",
+                "var head = document.getElementsByTagName('head')[0];",
+                "if (head) {",
+                "   var prevStyle = document.getElementById('dark-reader-style');",
+                "   if (!prevStyle) {",
+                "       addDRStyle();",
+                "       console.log('Added DR style.');",
+                "   }",
+                "}",
+                "else if (!dr_observer) {",
+                "   var dr_observer = new MutationObserver(function (mutations) {",
+                "       mutations.forEach(function (mutation) {",
+                "           if (mutation.target.nodeName == 'BODY' || mutation.target.nodeName == 'HEAD') {",
+                "               dr_observer.disconnect();",
+                "               var prevStyle = document.getElementById('dark-reader-style');",
+                "               if (!prevStyle) {",
+                "                   addDRStyle();",
+                "                   console.log('Added DR style using observer.');",
+                "               }",
+                "           }",
+                "       });",
+                "   });",
+                "   dr_observer.observe(document, { childList: true, subtree: true });",
+                "}"
+            ].join('\n');
 
             return code;
         }
@@ -218,11 +176,8 @@
         private getCode_removeCss() {
             //var code = "alert('Remove CSS');"
             var code =
-                "var style = document.getElementById('dark-reader-style'); " +
-                "style && style.parentNode.removeChild(style); ";
-
-            //var style = document.getElementById('dark-reader-style');
-            //style && style.parentNode.removeChild(style);
+                "var style = document.getElementById('dark-reader-style');\n" +
+                "style && style.parentNode.removeChild(style);";
 
             return code;
         }

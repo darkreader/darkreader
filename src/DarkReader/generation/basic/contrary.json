@@ -7,7 +7,7 @@
         },
         {
             "urlPattern": "google\\.",
-            "selectors": "img, iframe, video, embed, .gbii, .gbip"
+            "selectors": "img, iframe, video, embed, .gbii, .gbip, .azp"
         }
     ]
 }

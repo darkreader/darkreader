@@ -1,4 +1,4 @@
 ﻿{
-    "leadingRule": "{ -webkit-filter: invert(100%) hue-rotate(180deg) contrast(80%) sepia(20%) grayscale(30%) !important; min-height: 100% !important; height: 100%; }",
-    "contraryRule": "{ -webkit-filter: invert(100%) hue-rotate(180deg) !important; }"
+    "leadingRule": "{ -webkit-filter: invert(100%) hue-rotate(180deg) contrast(80%) sepia(10%) grayscale(30%) brightness(115%) !important; min-height: 100% !important; height: 100%; }",
+    "contraryRule": "{ -webkit-filter: brightness(90%) invert(100%) hue-rotate(180deg) !important; }"
 }

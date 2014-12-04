@@ -25,37 +25,25 @@
 
         /**
          * Generates css code.
+         * @param [config] Empty object (no config is used).
+         * @param [url] Web-site address.
          */
-        createCssCode(): string {
-            return [
-                'html',
-                this.leadingRule,
-                this.contrarySelectors.commonSelectors,
-                this.contraryRule
-            ].join(' ');
-        }
-
-        /**
-         * Generates css code for specific web-site.
-         * @param url Web-site address.
-         */
-        createSpecialCssCode(url: string): string {
+        createCssCode(config: {}, url: string): string {
             console.log('css for url: ' + url);
             var found: UrlSelectors;
-            this.contrarySelectors.specials.forEach((s) => {
-                var matches = url.match(new RegExp(s.urlPattern, 'i'));
-                if (matches && matches.length > 0) {
-                    found = s;
-                }
-            });
-            if (!found) {
-                return null;
+            if (url) {
+                // Search for match with given URL
+                this.contrarySelectors.specials.forEach((s) => {
+                    var matches = url.match(new RegExp(s.urlPattern, 'i'));
+                    if (matches && matches.length > 0) {
+                        found = s;
+                    }
+                });
             }
-            console.log('matched: ' + found.urlPattern);
             return [
                 'html',
                 this.leadingRule,
-                found.selectors,
+                found ? found.selectors : this.contrarySelectors.commonSelectors,
                 this.contraryRule
             ].join(' ');
         }

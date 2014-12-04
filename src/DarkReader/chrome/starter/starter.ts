@@ -125,13 +125,7 @@
         }
 
         private getCode_addCss(url?: string) {
-            var css: string;
-            if (url) {
-                css = this.generator.createSpecialCssCode(url, {});
-            }
-            if (!css) {
-                css = this.generator.createCssCode({});
-            }
+            var css = this.generator.createCssCode({}, url);
 
             //var code = "alert('Add CSS');"
             var code = [

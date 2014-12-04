@@ -7,14 +7,8 @@
         /**
          * Generates CSS code.
          * @param config Generator configuration.
+         * @param [url] Web-site address. If not specified than common rule will be used.
          */
-        createCssCode(config: TConfig): string;
-
-        /**
-         * Generates CSS code for specific web-site.
-         * @param url Web-site address.
-         * @param config Generator configuration.
-         */
-        createSpecialCssCode(url: string, config: TConfig): string;
+        createCssCode(config: TConfig, url: string): string;
     }
 }

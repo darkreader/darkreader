@@ -68,13 +68,17 @@
     <Content Include="img\dr_inactive_38.png" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="generation\basic\contrary.json" />
+    <Content Include="generation\rules\contrary.json" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="generation\basic\rules.json" />
+    <Content Include="generation\rules\rules.json" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="chrome\starter\manifest.json" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="chrome\pro\" />
+    <Folder Include="generation\configurable\" />
   </ItemGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
     <TypeScriptCompileOnSaveEnabled>False</TypeScriptCompileOnSaveEnabled>

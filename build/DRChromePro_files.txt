@@ -1,0 +1,7 @@
+..\src\DarkReader\app\app.ts
+..\src\DarkReader\app\event.ts
+..\src\DarkReader\chrome\extension.ts
+..\src\DarkReader\generation\generator.ts
+..\src\DarkReader\generation\basic\basic.ts
+..\src\DarkReader\chrome\pro\background.ts
+..\src\DarkReader\typings\chrome\chrome.d.ts

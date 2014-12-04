@@ -1,6 +1,7 @@
 ﻿module DarkReader {
+
     /**
-     * Defines switchable application.
+     * Defines switchable and configurable application.
      */
     export class Application<TConfig> {
 
@@ -9,7 +10,7 @@
 
         /**
          * Creates an application.
-         * @param config Application configuration.
+         * @param config Default application configuration.
          */
         constructor(config: TConfig) {
             this.config = config;
@@ -64,10 +65,10 @@
         /**
          * Gets or sets generator configuration.
          */
-        get config() { return this.config; }
+        get config() { return this._config; }
         set config(config: TConfig) {
             this._config = config;
-            if (this._isEnabled) {
+            if (this.isEnabled) {
                 this.onConfigSetup.invoke(config);
             }
         }
@@ -76,5 +77,13 @@
          * Event which fires on configuration setup.
          */
         onConfigSetup = new Event<TConfig>();
+    }
+
+    /**
+     * Defines application configuration store.
+     */
+    export interface AppConfigStore<TConfig> {
+        enabled: boolean;
+        config: TConfig;
     }
 }

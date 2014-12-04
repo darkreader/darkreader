@@ -45,8 +45,10 @@
   </PropertyGroup>
   <ItemGroup>
     <TypeScriptCompile Include="app\app.ts" />
+    <TypeScriptCompile Include="chrome\extension.ts" />
+    <!--<TypeScriptCompile Include="chrome\pro\background.ts" />
+    <TypeScriptCompile Include="chrome\pro\popup.ts" />-->
     <TypeScriptCompile Include="chrome\starter\background.ts" />
-    <TypeScriptCompile Include="chrome\starter\starter.ts" />
     <TypeScriptCompile Include="app\event.ts" />
     <TypeScriptCompile Include="generation\basic\basic.ts" />
     <TypeScriptCompile Include="generation\generator.ts" />
@@ -58,6 +60,8 @@
     <TypeScriptCompile Include="typings\webrtc\RTCPeerConnection.d.ts" />
   </ItemGroup>
   <ItemGroup>
+    <!--<Content Include="chrome\pro\background.html" />
+    <Content Include="chrome\pro\popup.html" />-->
     <Content Include="chrome\starter\background.html" />
     <Content Include="img\dr_128.png" />
     <Content Include="img\dr_16.png" />
@@ -77,9 +81,11 @@
     <Content Include="chrome\starter\manifest.json" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="chrome\pro\" />
     <Folder Include="generation\configurable\" />
   </ItemGroup>
+  <!--<ItemGroup>
+    <Content Include="chrome\pro\manifest.json" />
+  </ItemGroup>-->
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
     <TypeScriptCompileOnSaveEnabled>False</TypeScriptCompileOnSaveEnabled>
   </PropertyGroup>

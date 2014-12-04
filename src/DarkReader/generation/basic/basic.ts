@@ -28,7 +28,7 @@
          * @param [config] Empty object (no config is used).
          * @param [url] Web-site address.
          */
-        createCssCode(config: {}, url: string): string {
+        createCssCode(config: {}, url?: string): string {
             console.log('css for url: ' + url);
             var found: UrlSelectors;
             if (url) {
@@ -39,6 +39,9 @@
                         found = s;
                     }
                 });
+                if (found) {
+                    console.log('url matches ' + found.urlPattern);
+                }
             }
             return [
                 'html',

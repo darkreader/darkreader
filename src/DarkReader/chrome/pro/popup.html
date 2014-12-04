@@ -1,14 +1,19 @@
 ﻿<!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-    <title></title>
+    <title>Dark Reader settings</title>
+    <script src="popup.js" defer></script>
+    <link rel="stylesheet" type="text/css" href="style/style.css" />
 </head>
 <body>
-    <label>
+    <!--<label>
         <input type="checkbox" id="enabled" />
         Enable
     </label>
-    <div id="status"></div>
-    <script src="popup.js"></script>
+    <div id="status"></div>-->
+    <main>
+        <section><span id="logo">Dark&nbsp;Reader</span><span class="toggle" id="switch-app"><span class="on active">on</span><span class="off">off</span></span></section>
+        <section id="mode-section"><span class="square-button"></span><span class="toggle" id="switch-mode"><span class="on active">dark</span><span class="off">light</span></span><span class="square-button"></span></section>
+    </main>
 </body>
 </html>

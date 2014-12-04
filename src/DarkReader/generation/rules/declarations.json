@@ -1,0 +1,4 @@
+﻿{
+    "leadingDeclaration": "{ -webkit-filter: invert(100%) hue-rotate(180deg) contrast(80%) sepia(10%) grayscale(30%) brightness(115%) !important; min-height: 100% !important; height: 100%; }",
+    "contraryDeclaration": "{ -webkit-filter: brightness(90%) invert(100%) hue-rotate(180deg) !important; }"
+}

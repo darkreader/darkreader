@@ -1,0 +1,63 @@
+﻿body {
+  display: flex;
+  background-color: gray;
+  align-items: center;
+  justify-content: center;
+}
+main {
+  width: 16em;
+  margin: 1em;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  background-color: lightgray;
+}
+main > * ~ * {
+  margin-top: 1em;
+}
+section {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+#logo {
+  display: inline-block;
+  flex: none;
+}
+.toggle {
+  padding: 0.25em;
+  background-color: blue;
+  display: inline-block;
+}
+.toggle > span {
+  height: 1.5em;
+  width: 50%;
+  display: inline-block;
+  text-align: center;
+  line-height: 1.5em;
+}
+.toggle span.active {
+  background-color: lightblue;
+}
+#switch-app {
+  width: 100%;
+  margin-left: 0.5em;
+}
+.square-button {
+  width: 2em;
+  height: 2em;
+  box-sizing: border-box;
+  display: inline-block;
+  border: 0.25em solid blue;
+  background-color: lightblue;
+  flex: none;
+}
+.square-button :hover {
+  background-color: white;
+}
+#switch-mode {
+  width: 100%;
+  margin: 0 0.5em;
+}
+/*# sourceMappingURL=style.css.map */

@@ -1,6 +1,7 @@
 # Ignore compiled JavaScript
 *.js
 *.map
+*.min.css
 
 # Build: allow cmd, txt
 build/*

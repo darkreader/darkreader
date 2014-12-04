@@ -1,12 +1,11 @@
-﻿var app: DarkReader.Application<{}>;
-
-window.onload = () => {
+﻿module DarkReader.Chrome.Starter.Background {
+    
     // Initialize extension with no configuration
-    app = new DarkReader.Chrome.ChromeExtension({}, new DarkReader.Generation.BasicCssGenerator());
+    var app = new DarkReader.Chrome.Extension({}, new DarkReader.Generation.BasicCssGenerator());
 
     // On extension button click
     chrome.browserAction.onClicked.addListener((tab) => {
         // Switch app state
         app.switch();
     });
-} 
+}

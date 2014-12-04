@@ -4,7 +4,7 @@
      * Chrome extension base.
      * Extension uses CSS generator to process opened web pages.
      */
-    export class ChromeExtension<TConfig> extends Application<TConfig> {
+    export class Extension<TConfig> extends Application<TConfig> {
 
         protected generator: Generation.ICssGenerator<TConfig>;
 
@@ -27,6 +27,14 @@
 
             // Load saved configuration from Chrome storage
             this.loadStore();
+
+            // Save config and state on any change
+            this.onSwitch.addHandler((enabled) => {
+                this.saveStore();
+            }, this);
+            this.onConfigSetup.addHandler((config) => {
+                this.saveStore();
+            }, this);
         }
 
 
@@ -222,6 +230,8 @@
                     this.disable();
                 }
                 this.config = store.config;
+                console.log('loaded:');
+                console.log(store);
             });
         }
 
@@ -233,7 +243,10 @@
                 enabled: this.isEnabled,
                 config: this.config
             };
-            chrome.storage.sync.set(store, () => { });
+            chrome.storage.sync.set(store, () => {
+                console.log('saved:');
+                console.log(store);
+            });
         }
     }
 } 

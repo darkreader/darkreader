@@ -5,22 +5,14 @@
      */
     export /*sealed*/ class BasicCssGenerator implements ICssGenerator<{}> {
 
-        private contrarySelectors: ContrarySelectors;
         private leadingDeclaration: string;
         private contraryDeclaration: string;
 
         constructor() {
-            // Load rules and contrary selectors
-            // TODO: Sync?
-            parseJsonFile('contrary.json', (result: ContrarySelectors, err) => {
-                if (err) throw err;
-                this.contrarySelectors = result;
-            });
-            parseJsonFile('declarations.json', (result: CssDeclarations, err) => {
-                var decs = result;
-                this.leadingDeclaration = decs.leadingDeclaration;
-                this.contraryDeclaration = decs.contraryDeclaration;
-            });
+            // Load styles
+            var decs = readJsonSync<CssDeclarations>('declarations.json');
+            this.leadingDeclaration = decs.leadingDeclaration;
+            this.contraryDeclaration = decs.contraryDeclaration;
         }
 
         /**
@@ -30,23 +22,10 @@
          */
         createCssCode(config?: {}, url?: string): string {
             console.log('css for url: ' + url);
-            var found: UrlSelectors;
-            if (url) {
-                // Search for match with given URL
-                this.contrarySelectors.specials.forEach((s) => {
-                    var matches = url.match(new RegExp(s.urlPattern, 'i'));
-                    if (matches && matches.length > 0) {
-                        found = s;
-                    }
-                });
-                if (found) {
-                    console.log('url matches ' + found.urlPattern);
-                }
-            }
             return [
                 'html',
                 this.leadingDeclaration,
-                found ? found.selectors : this.contrarySelectors.commonSelectors,
+                getSelectorsFor(url),
                 this.contraryDeclaration
             ].join(' ');
         }

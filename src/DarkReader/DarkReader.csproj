@@ -45,6 +45,7 @@
   </PropertyGroup>
   <ItemGroup>
     <TypeScriptCompile Include="app\app.ts" />
+    <TypeScriptCompile Include="app\json.ts" />
     <TypeScriptCompile Include="chrome\extension.ts" />
     <TypeScriptCompile Include="chrome\pro\background.ts" />
     <TypeScriptCompile Include="chrome\pro\popup.ts" />

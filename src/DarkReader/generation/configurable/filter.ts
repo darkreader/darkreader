@@ -28,14 +28,7 @@
          * Creates configurable CSS-generator based on CSS-filters.
          * @param prefix Vendor prefix ('-webkit-', '-moz-' etc).
          */
-        constructor(public prefix: string) {
-            // Load contrary selectors
-            // TODO: Sync?
-            parseJsonFile('contrary.json', (result: ContrarySelectors, err) => {
-                if (err) throw err;
-                this.contrarySelectors = result;
-            });
-        }
+        constructor(public prefix: string) { }
 
         /**
          * Generates CSS code.
@@ -44,7 +37,7 @@
          */
         createCssCode(config: FilterConfig, url: string): string {
             console.log('css for url: ' + url);
-            var selectors = this.getSelectors(url);
+            var selectors = getSelectorsFor(url);
             var parts: string[] = [];
             parts.push('html', this.createLeadingDeclaration(config));
             if (config.mode === FilterMode.dark)
@@ -77,7 +70,7 @@
             result += config.brightness == 100 ? ''
             : 'brightness(' + config.brightness + '%) ';
 
-            result += '!important; }';
+            result += '!important; min-height: 100% !important; }';
 
             return result;
         }
@@ -117,26 +110,5 @@
             return result;
         }
 
-        /**
-         * Returns selectors, configured for given URL.
-         * @param [url] If not specified, common selectors will be used.
-         */
-        protected getSelectors(url?: string): string {
-            var found: UrlSelectors;
-            if (url) {
-                // Search for match with given URL
-                this.contrarySelectors.specials.forEach((s) => {
-                    var matches = url.match(new RegExp(s.urlPattern, 'i'));
-                    if (matches && matches.length > 0) {
-                        found = s;
-                    }
-                });
-                if (found)
-                    console.log('url matches ' + found.urlPattern);
-            }
-            return found ?
-                found.selectors
-                : this.contrarySelectors.commonSelectors
-        }
     }
 } 

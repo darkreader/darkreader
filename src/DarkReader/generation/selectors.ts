@@ -11,22 +11,29 @@
     }
 
     /**
-     * Loads and parses JSON from file to object.
-     * @param url Path to JSON file.
-     * @param callback Handles parsed result or error.
+     * Static contrary selectors dictionary.
      */
-    export function parseJsonFile<T>(url: string, callback: (result: T, error) => void) {
-        var xobj = new XMLHttpRequest();
-        xobj.overrideMimeType("application/json");
-        xobj.open('GET', url, true);
-        xobj.onreadystatechange = () => {
-            if (xobj.readyState == 4 && xobj.status == 200) {
-                callback(JSON.parse(xobj.responseText), null);
-            }
-        };
-        xobj.onerror = (err) => {
-            callback(null, err.error);
-        };
-        xobj.send(null);
+    export var contrarySelectors = readJsonSync<UrlSelectors>('contrary.json');
+
+    /**
+     * Returns selectors, configured for given URL.
+     * @param url If no matches found, common selectors will be used.
+     */
+    export function getSelectorsFor(url: string): string {
+        var found: UrlSelectors;
+        if (url) {
+            // Search for match with given URL
+            this.contrarySelectors.specials.forEach((s) => {
+                var matches = url.match(new RegExp(s.urlPattern, 'i'));
+                if (matches && matches.length > 0) {
+                    found = s;
+                }
+            });
+            if (found)
+                console.log('url matches ' + found.urlPattern);
+        }
+        return found ?
+            found.selectors
+            : this.contrarySelectors.commonSelectors
     }
 }

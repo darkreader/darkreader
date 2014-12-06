@@ -65,6 +65,7 @@
   <ItemGroup>
     <Content Include="chrome\pro\background.html" />
     <Content Include="chrome\pro\popup.html" />
+    <Content Include="chrome\pro\style\dark-reader-type-narrow.svg" />
     <Content Include="chrome\pro\style\style.css">
       <DependentUpon>style.less</DependentUpon>
     </Content>
@@ -72,6 +73,7 @@
       <DependentUpon>style.css</DependentUpon>
     </Content>
     <Content Include="chrome\starter\background.html" />
+    <Content Include="chrome\pro\style\dark-reader-type.svg" />
     <Content Include="img\dr_128.png" />
     <Content Include="img\dr_16.png" />
     <Content Include="img\dr_48.png" />

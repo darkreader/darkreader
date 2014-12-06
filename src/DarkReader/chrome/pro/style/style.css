@@ -24,6 +24,14 @@ section {
 #logo {
   display: inline-block;
   flex: none;
+  height: 1.5em;
+}
+#logo > img {
+  height: 1.5em;
+  line-height: 1.5em;
+}
+#dark-reader-logo {
+  fill: red;
 }
 .toggle {
   padding: 0.25em;

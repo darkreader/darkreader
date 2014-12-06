@@ -5,7 +5,7 @@
   justify-content: center;
 }
 main {
-  width: 16em;
+  width: 20em;
   margin: 1em;
   display: flex;
   flex-direction: column;
@@ -24,11 +24,11 @@ section {
 #logo {
   display: inline-block;
   flex: none;
-  height: 1.5em;
+  height: 2em;
 }
 #logo > img {
-  height: 1.5em;
-  line-height: 1.5em;
+  height: 2em;
+  line-height: 2em;
 }
 #dark-reader-logo {
   fill: red;

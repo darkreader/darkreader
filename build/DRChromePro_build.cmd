@@ -8,6 +8,7 @@ XCOPY ..\src\DarkReader\chrome\pro\background.html %outfolder%\ /d /y
 XCOPY ..\src\DarkReader\chrome\pro\popup.html %outfolder%\ /d /y
 XCOPY ..\src\DarkReader\chrome\pro\popup.js %outfolder%\ /d /y
 XCOPY ..\src\DarkReader\chrome\pro\manifest.json %outfolder%\ /d /y
+XCOPY ..\src\DarkReader\chrome\pro\img\* %outfolder%\img\ /d /y
 XCOPY ..\src\DarkReader\chrome\pro\style\style.css %outfolder%\style\ /d /y
 XCOPY ..\src\DarkReader\generation\rules\*.json %outfolder%\ /d /y
 XCOPY ..\src\DarkReader\img\*.* %outfolder%\img\ /d /y

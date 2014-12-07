@@ -1,83 +1,301 @@
-﻿body {
+﻿@import url(http://fonts.googleapis.com/css?family=Open+Sans);
+
+@color-back: #00222b;
+@color-active: #216778;
+@color-border: @color-active;
+@color-hover: #114857;
+@color-fore: #ffffff;
+@color-description: #37abc8;
+@color-header: #e96c4c;
+@font-family: 'Open Sans', 'Segoe UI', 'Helvetica Neue', sans-serif;
+@size-control-inner: 2em;
+@size-control-description: 0.875em;
+@size-border: 0.1875em;
+@size-indent-big: 1em;
+@size-indent-small: 0.625em;
+@size-main: 1em;
+
+
+//-----
+// MAIN
+//-----
+
+div, span, p, a, h3, section, label {
+    padding: 0;
+    margin: 0;
+}
+
+h3 {
+    color: @color-header;
+    text-align: center;
+}
+
+body {
     display: flex;
-    background-color: gray;
-    align-items: center;
+    background-color: @color-back;
+    font-family: @font-family;
+    align-items: flex-start;
     justify-content: center;
+    cursor: default;
 }
 
 main {
     width: 20em;
-    margin: 1em;
+    margin: @size-indent-big;
     display: flex;
     flex-direction: column;
     align-items: stretch;
     justify-content: flex-start;
-    background-color: lightgray;
 
-    > * ~ * {
-        margin-top: 1em;
+    > *:not(:first-child) {
+        margin-top: @size-indent-big;
     }
 }
 
 
-section {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
+//-----
+// LOGO
+//-----
 
 #logo {
     display: inline-block;
     flex: none;
-    height:2em;
-}
-#logo>img{
-    height:2em;
-    line-height:2em;
-}
-#dark-reader-logo{
-    fill:red;
-}
-
-.toggle {
-    padding: 0.25em;
-    background-color: blue;
-    display: inline-block;
-
-    > span {
-        height: 1.5em;
-        width: 50%;
-        display: inline-block;
-        text-align: center;
-        line-height: 1.5em;
-    }
-
-    span.active {
-        background-color: lightblue;
-    }
-}
-
-#switch-app {
-    width: 100%;
-    margin-left: 0.5em;
-}
-
-
-.square-button {
-    width: 2em;
     height: 2em;
-    box-sizing: border-box;
-    display: inline-block;
-    border: 0.25em solid blue;
-    background-color: lightblue;
+}
+
+
+//------------
+// TOP SECTION
+//------------
+
+#section-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+
+    > *:not(:first-child) {
+        margin-left: @size-indent-small;
+    }
+}
+
+// Description block
+#description {
+    text-align: center;
+    color: @color-description;
+    position: relative;
+    top: -0.125em;
+    text-wrap: none;
     flex: none;
 
-    :hover {
-        background-color: white;
+    p {
+        white-space: nowrap;
     }
 }
 
-#switch-mode {
+// App switch
+#switch-app {
     width: 100%;
-    margin: 0 0.5em;
+}
+
+
+//---------------
+// SWITCH CONTROL
+//---------------
+
+// BASE SWITCH
+.switch {
+    border: @size-border solid @color-border;
+
+    > .on, > .off {
+        display: inline-block;
+        height: @size-control-inner;
+        line-height: @size-control-inner;
+        color: @color-fore;
+        text-align: center;
+        cursor: pointer;
+        width: 50%;
+
+        &:hover {
+            background-color: @color-hover;
+        }
+
+        &:active,
+        &.active {
+            background-color: @color-active;
+            cursor: default;
+        }
+    }
+}
+
+
+//------------------
+// SETTINGS SECTIONS
+//------------------
+
+.settings-section {
+    display: flex;
+    flex-flow: column nowrap;
+    align-items: stretch;
+    justify-content: flex-start;
+
+    > *:not(:first-child) {
+        margin-top: @size-indent-small;
+    }
+}
+
+
+// COMMON DARKREADER CONTROL CONTAINER
+.control-container() {
+    > .line {
+        display: flex;
+        flex-flow: row nowrap;
+        align-items: stretch;
+
+        > *:not(:first-child) {
+            margin-left: @size-indent-small;
+        }
+    }
+
+    > .status {
+        text-align: center;
+        color: @color-description;
+        font-size: @size-control-description;
+    }
+}
+
+
+// SWITCH WITH DESCRIPTION
+.switch-with-desc {
+    display: inline-block;
+
+    > .status {
+        text-align: center;
+        color: @color-description;
+        font-size: @size-control-description;
+    }
+}
+
+// SWITCH WITH BUTTONS
+.switch-with-buttons {
+    .control-container();
+
+    > .line {
+        > .switch {
+            width: 100%;
+        }
+    }
+}
+
+// SWITCH FOR FILTER MODE
+#switch-mode {
+    .button-down {
+        background-image: url('../img/mode_dark_32.svg');
+    }
+
+    .button-up {
+        background-image: url('../img/mode_light_32.svg');
+    }
+}
+
+
+//-----------------
+// BUTTON WITH ICON
+//-----------------
+
+.icon-button {
+    width: 2em;
+    height: 2em;
+    display: inline-block;
+    border: @size-border solid @color-border;
+    flex: none;
+    background-size: contain;
+    cursor: pointer;
+
+    &:hover {
+        background-color: @color-hover;
+    }
+
+    &:active {
+        background-color: @color-active;
+    }
+}
+
+
+//----------------
+// UP-DOWN CONTROL
+//----------------
+
+.updown {
+    .control-container();
+
+    > .line {
+
+        > .button-down {
+            background-image: url('../img/icon-left_white_16.svg');
+        }
+
+        > .button-up {
+            background-image: url('../img/icon-right_white_16.svg');
+        }
+
+        > .bar {
+            border: @size-border solid @color-border;
+            position: relative;
+            width: 100%;
+
+            > .value {
+                display: inline-block;
+                background-color: @color-active;
+                width: 30%; // TODO: Set from JS.
+                height: @size-control-inner;
+            }
+
+            > label {
+                position: absolute;
+                display: inline-block;
+                height: @size-control-inner;
+                line-height: @size-control-inner;
+                color: @color-fore;
+                text-align: center;
+                width: 100%;
+                left: 0;
+                z-index: 2;
+            }
+        }
+    }
+}
+
+
+//-------------
+// FONT CONTROL
+//-------------
+
+.font-control {
+    .control-container();
+
+    > .line {
+        > .check {
+            background-image: url('../img/icon-check_white_16.svg'); // TODO: Set from JS.
+        }
+
+        > input {
+            width: 100%;
+            font-size: 1em;
+            border: @size-border solid @color-border;
+            background-color: @color-back;
+            outline: none;
+            color: @color-description;
+            padding: 0 @size-indent-small;
+            //padding-right: @size-control-inner+3*@size-border+2*@size-indent-small; // HACK: Centrify text
+            //text-align: center;
+            &:hover {
+                background-color: @color-hover;
+            }
+
+            &:focus {
+                background-color: @color-active;
+                color: @color-fore;
+            }
+        }
+    }
 }

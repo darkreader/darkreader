@@ -6,15 +6,112 @@
     <link rel="stylesheet" type="text/css" href="style/style.css" />
 </head>
 <body>
-    <!--<label>
-        <input type="checkbox" id="enabled" />
-        Enable
-    </label>
-    <div id="status"></div>-->
     <main>
-        <section><img src="style/dark-reader-type.svg" /></section>
-        <section><span id="logo"><!--Dark&nbsp;Reader--><img src="style/dark-reader-type.svg"/></span><span class="toggle" id="switch-app"><span class="on active">on</span><span class="off">off</span></span></section>
-        <section id="mode-section"><span class="square-button"></span><span class="toggle" id="switch-mode"><span class="on active">dark</span><span class="off">light</span></span><span class="square-button"></span></section>
+        <img id="logo" src="img/dark-reader-type.svg" alt="Dark Reader" />
+
+        <section id="section-top">
+            <div id="description"><p>Adjust settings that<br />better fit your screen</p></div>
+            <div id="switch-app" class="switch-with-desc">
+                <div class="switch">
+                    <span class="on active">On</span><span class="off">Off</span>
+                </div>
+                <p class="status">press Ctrl+D</p>
+            </div>
+        </section>
+
+        <section id="filter-settings" class="settings-section">
+            <h3>Filter settings</h3>
+
+            <!-- MODE -->
+            <div id="switch-mode" class="switch-with-buttons">
+                <div class="line">
+                    <span class="icon-button button-down"></span>
+                    <span class="switch">
+                        <span class="on active">Dark</span><span class="off">Light</span>
+                    </span>
+                    <span class="icon-button button-up"></span>
+                </div>
+                <p class="status">Mode</p>
+            </div>
+
+            <!-- BRIGHTNESS -->
+            <div id="updown-brightness" class="updown">
+                <div class="line">
+                    <span class="icon-button button-down"></span>
+                    <span class="bar">
+                        <span class="value">&nbsp;</span>
+                        <label>Brightness</label>
+                    </span>
+                    <span class="icon-button button-up"></span>
+                </div>
+                <p class="status">-20</p>
+            </div>
+
+            <!-- CONTRAST -->
+            <div id="updown-contrast" class="updown">
+                <div class="line">
+                    <span class="icon-button button-down"></span>
+                    <span class="bar">
+                        <span class="value">&nbsp;</span>
+                        <label>Contrast</label>
+                    </span>
+                    <span class="icon-button button-up"></span>
+                </div>
+                <p class="status">-20</p>
+            </div>
+
+            <!-- GRAYSCALE -->
+            <div id="updown-grayscale" class="updown">
+                <div class="line">
+                    <span class="icon-button button-down"></span>
+                    <span class="bar">
+                        <span class="value">&nbsp;</span>
+                        <label>Grayscale</label>
+                    </span>
+                    <span class="icon-button button-up"></span>
+                </div>
+                <p class="status">+30</p>
+            </div>
+
+            <!-- SEPIA -->
+            <div id="updown-sepia" class="updown">
+                <div class="line">
+                    <span class="icon-button button-down"></span>
+                    <span class="bar">
+                        <span class="value">&nbsp;</span>
+                        <label>Sepia</label>
+                    </span>
+                    <span class="icon-button button-up"></span>
+                </div>
+                <p class="status">+30</p>
+            </div>
+        </section>
+
+        <section id="font-settings" class="settings-section">
+            <h3>Font settings</h3>
+
+            <!-- Font -->
+            <div id="control-usefont" class="font-control">
+                <div class="line">
+                    <span class="check icon-button"></span>
+                    <input type="text" value="Segoe UI" />
+                </div>
+                <p class="status">Enter the name of the font</p>
+            </div>
+
+            <!-- TEXT STROKE -->
+            <div id="updown-textstroke" class="updown">
+                <div class="line">
+                    <span class="icon-button button-down"></span>
+                    <span class="bar">
+                        <span class="value">&nbsp;</span>
+                        <label>Text stroke</label>
+                    </span>
+                    <span class="icon-button button-up"></span>
+                </div>
+                <p class="status">+0.3</p>
+            </div>
+        </section>
     </main>
 </body>
 </html>

@@ -64,8 +64,12 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="chrome\pro\background.html" />
+    <Content Include="chrome\pro\img\icon-check_white_16.svg" />
+    <Content Include="chrome\pro\img\icon-right_white_16.svg" />
+    <Content Include="chrome\pro\img\icon-left_white_16.svg" />
+    <Content Include="chrome\pro\img\mode_dark_32.svg" />
+    <Content Include="chrome\pro\img\mode_light_32.svg" />
     <Content Include="chrome\pro\popup.html" />
-    <Content Include="chrome\pro\style\dark-reader-type-narrow.svg" />
     <Content Include="chrome\pro\style\style.css">
       <DependentUpon>style.less</DependentUpon>
     </Content>
@@ -73,7 +77,7 @@
       <DependentUpon>style.css</DependentUpon>
     </Content>
     <Content Include="chrome\starter\background.html" />
-    <Content Include="chrome\pro\style\dark-reader-type.svg" />
+    <Content Include="chrome\pro\img\dark-reader-type.svg" />
     <Content Include="img\dr_128.png" />
     <Content Include="img\dr_16.png" />
     <Content Include="img\dr_48.png" />

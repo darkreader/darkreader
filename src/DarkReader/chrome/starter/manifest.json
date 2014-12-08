@@ -14,4 +14,12 @@
     },
     "background": { "page": "background.html" },
     "permissions": [ "tabs", "storage", "http://*/*", "https://*/*" ]
+    "commands": {
+        "toggle": {
+            "suggested_key": {
+                "default": "Alt+Shift+D"
+            },
+            "description": "Toggle On/Off"
+        }
+    }
 }

@@ -48,7 +48,9 @@
     <TypeScriptCompile Include="app\json.ts" />
     <TypeScriptCompile Include="chrome\extension.ts" />
     <TypeScriptCompile Include="chrome\pro\background.ts" />
+    <TypeScriptCompile Include="chrome\pro\popup.controls.ts" />
     <TypeScriptCompile Include="chrome\pro\popup.ts" />
+    <TypeScriptCompile Include="chrome\pro\popup.controller.ts" />
     <TypeScriptCompile Include="chrome\starter\background.ts" />
     <TypeScriptCompile Include="app\event.ts" />
     <TypeScriptCompile Include="generation\basic\basic.ts" />

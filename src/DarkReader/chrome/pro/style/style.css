@@ -5,7 +5,8 @@ p,
 a,
 h3,
 section,
-label {
+label,
+input {
   padding: 0;
   margin: 0;
 }
@@ -50,10 +51,7 @@ main > *:not(:first-child) {
   color: #37abc8;
   position: relative;
   top: -0.125em;
-  text-wrap: none;
   flex: none;
-}
-#description p {
   white-space: nowrap;
 }
 #toggle-app {
@@ -62,8 +60,8 @@ main > *:not(:first-child) {
 .toggle {
   border: 0.1875em solid #216778;
 }
-.toggle > .on,
-.toggle > .off {
+.toggle .on,
+.toggle .off {
   display: inline-block;
   height: 2em;
   line-height: 2em;
@@ -72,14 +70,14 @@ main > *:not(:first-child) {
   cursor: pointer;
   width: 50%;
 }
-.toggle > .on:hover,
-.toggle > .off:hover {
-  background-color: #114857;
+.toggle .on:hover,
+.toggle .off:hover {
+  background-color: #113a49;
 }
-.toggle > .on:active,
-.toggle > .off:active,
-.toggle > .on.active,
-.toggle > .off.active {
+.toggle .on:active,
+.toggle .off:active,
+.toggle .on.active,
+.toggle .off.active {
   background-color: #216778;
   cursor: default;
 }
@@ -92,14 +90,10 @@ main > *:not(:first-child) {
 .settings-section > *:not(:first-child) {
   margin-top: 0.625em;
 }
-<<<<<<< HEAD
 .toggle-with-status {
   display: inline-block;
 }
-.toggle-with-status > .status {
-=======
-  display: inline-block;
->>>>>>> origin/master
+.toggle-with-status .status {
   text-align: center;
   color: #37abc8;
   font-size: 0.875em;
@@ -112,12 +106,12 @@ main > *:not(:first-child) {
 .toggle-with-buttons > .line > *:not(:first-child) {
   margin-left: 0.625em;
 }
-.toggle-with-buttons > .status {
+.toggle-with-buttons .status {
   text-align: center;
   color: #37abc8;
   font-size: 0.875em;
 }
-.toggle-with-buttons > .line > .toggle {
+.toggle-with-buttons .toggle {
   width: 100%;
 }
 #toggle-mode .button-down {
@@ -136,7 +130,7 @@ main > *:not(:first-child) {
   cursor: pointer;
 }
 .icon-button:hover {
-  background-color: #114857;
+  background-color: #113a49;
 }
 .icon-button:active {
   background-color: #216778;
@@ -149,29 +143,29 @@ main > *:not(:first-child) {
 .updown > .line > *:not(:first-child) {
   margin-left: 0.625em;
 }
-.updown > .status {
+.updown .status {
   text-align: center;
   color: #37abc8;
   font-size: 0.875em;
 }
-.updown > .line > .button-down {
+.updown .button-down {
   background-image: url('../img/icon-left_white_16.svg');
 }
-.updown > .line > .button-up {
+.updown .button-up {
   background-image: url('../img/icon-right_white_16.svg');
 }
-.updown > .line > .bar {
+.updown .trackbar {
   border: 0.1875em solid #216778;
   position: relative;
   width: 100%;
 }
-.updown > .line > .bar > .value {
+.updown .trackbar .value {
   display: inline-block;
   background-color: #216778;
   width: 30%;
   height: 2em;
 }
-.updown > .line > .bar > label {
+.updown .trackbar label {
   position: absolute;
   display: inline-block;
   height: 2em;
@@ -182,23 +176,45 @@ main > *:not(:first-child) {
   left: 0;
   z-index: 2;
 }
-.font-control > .line {
+.font-set > .line {
   display: flex;
   flex-flow: row nowrap;
   align-items: stretch;
 }
-.font-control > .line > *:not(:first-child) {
+.font-set > .line > *:not(:first-child) {
   margin-left: 0.625em;
 }
-.font-control > .status {
+.font-set .status {
   text-align: center;
   color: #37abc8;
   font-size: 0.875em;
 }
-.font-control > .line > .check {
+.font-set input[type=checkbox] {
+  display: inline-block;
+  border: 0.1875em solid #216778;
+  flex: none;
+  background-size: contain;
+  cursor: pointer;
+  -webkit-appearance: none;
+  width: 2em;
+  height: 2em;
+  font-size: 1em;
+  box-sizing: content-box;
+  outline: none;
+}
+.font-set input[type=checkbox]:hover {
+  background-color: #113a49;
+}
+.font-set input[type=checkbox]:active {
+  background-color: #216778;
+}
+.font-set input[type=checkbox]:checked {
   background-image: url('../img/icon-check_white_16.svg');
 }
-.font-control > .line > input {
+.font-set input[type=checkbox]:active {
+  background-color: #113a49;
+}
+.font-set input[type=text] {
   width: 100%;
   font-size: 1em;
   border: 0.1875em solid #216778;
@@ -206,12 +222,13 @@ main > *:not(:first-child) {
   outline: none;
   color: #37abc8;
   padding: 0 0.625em;
+  line-height: 2em;
 }
-.font-control > .line > input:hover {
-  background-color: #114857;
+.font-set input[type=text]:hover {
+  background-color: #113a49;
 }
-.font-control > .line > input:focus {
-  background-color: #216778;
+.font-set input[type=text]:focus {
+  background-color: #113a49;
   color: #ffffff;
 }
 /*# sourceMappingURL=style.css.map */

@@ -3,7 +3,7 @@
 @color-back: #00222b;
 @color-active: #216778;
 @color-border: @color-active;
-@color-hover: #114857;
+@color-hover: #113a49;
 @color-fore: #ffffff;
 @color-description: #37abc8;
 @color-header: #e96c4c;
@@ -20,7 +20,7 @@
 // MAIN
 //-----
 
-div, span, p, a, h3, section, label {
+div, span, p, a, h3, section, label, input {
     padding: 0;
     margin: 0;
 }
@@ -84,12 +84,8 @@ main {
     color: @color-description;
     position: relative;
     top: -0.125em;
-    text-wrap: none;
     flex: none;
-
-    p {
-        white-space: nowrap;
-    }
+    white-space: nowrap;
 }
 
 // App toggle
@@ -106,7 +102,7 @@ main {
 .toggle {
     border: @size-border solid @color-border;
 
-    > .on, > .off {
+    .on, .off {
         display: inline-block;
         height: @size-control-inner;
         line-height: @size-control-inner;
@@ -156,7 +152,7 @@ main {
         }
     }
 
-    > .status {
+    .status {
         text-align: center;
         color: @color-description;
         font-size: @size-control-description;
@@ -165,13 +161,10 @@ main {
 
 
 // TOGGLE WITH DESCRIPTION
-<<<<<<< HEAD
 .toggle-with-status {
-=======
->>>>>>> origin/master
     display: inline-block;
 
-    > .status {
+    .status {
         text-align: center;
         color: @color-description;
         font-size: @size-control-description;
@@ -182,10 +175,8 @@ main {
 .toggle-with-buttons {
     .control-container();
 
-    > .line {
-        > .toggle {
-            width: 100%;
-        }
+    .toggle {
+        width: 100%;
     }
 }
 
@@ -231,39 +222,36 @@ main {
 .updown {
     .control-container();
 
-    > .line {
+    .button-down {
+        background-image: url('../img/icon-left_white_16.svg');
+    }
 
-        > .button-down {
-            background-image: url('../img/icon-left_white_16.svg');
+    .button-up {
+        background-image: url('../img/icon-right_white_16.svg');
+    }
+
+    .trackbar {
+        border: @size-border solid @color-border;
+        position: relative;
+        width: 100%;
+
+        .value {
+            display: inline-block;
+            background-color: @color-active;
+            width: 30%; // TODO: Set from JS.
+            height: @size-control-inner;
         }
 
-        > .button-up {
-            background-image: url('../img/icon-right_white_16.svg');
-        }
-
-        > .bar {
-            border: @size-border solid @color-border;
-            position: relative;
+        label {
+            position: absolute;
+            display: inline-block;
+            height: @size-control-inner;
+            line-height: @size-control-inner;
+            color: @color-fore;
+            text-align: center;
             width: 100%;
-
-            > .value {
-                display: inline-block;
-                background-color: @color-active;
-                width: 30%; // TODO: Set from JS.
-                height: @size-control-inner;
-            }
-
-            > label {
-                position: absolute;
-                display: inline-block;
-                height: @size-control-inner;
-                line-height: @size-control-inner;
-                color: @color-fore;
-                text-align: center;
-                width: 100%;
-                left: 0;
-                z-index: 2;
-            }
+            left: 0;
+            z-index: 2;
         }
     }
 }
@@ -273,32 +261,45 @@ main {
 // FONT CONTROL
 //-------------
 
-.font-control {
+.font-set {
     .control-container();
 
-    > .line {
-        > .check {
-            background-image: url('../img/icon-check_white_16.svg'); // TODO: Set from JS.
+    input[type=checkbox] {
+        .icon-button;
+        -webkit-appearance: none;
+        width: @size-control-inner;
+        height: @size-control-inner;
+        font-size: 1em;
+        box-sizing: content-box;
+        outline: none;
+
+        &:checked {
+            background-image: url('../img/icon-check_white_16.svg');
         }
 
-        > input {
-            width: 100%;
-            font-size: 1em;
-            border: @size-border solid @color-border;
-            background-color: @color-back;
-            outline: none;
-            color: @color-description;
-            padding: 0 @size-indent-small;
-            //padding-right: @size-control-inner+3*@size-border+2*@size-indent-small; // HACK: Centrify text
-            //text-align: center;
-            &:hover {
-                background-color: @color-hover;
-            }
+        &:active {
+            background-color: @color-hover;
+        }
+    }
 
-            &:focus {
-                background-color: @color-active;
-                color: @color-fore;
-            }
+    input[type=text] {
+        width: 100%;
+        font-size: 1em;
+        border: @size-border solid @color-border;
+        background-color: @color-back;
+        outline: none;
+        color: @color-description;
+        padding: 0 @size-indent-small;
+        line-height: @size-control-inner;
+        //padding-right: @size-control-inner+3*@size-border+2*@size-indent-small; // HACK: Centrify text
+        //text-align: center;
+        &:hover {
+            background-color: @color-hover;
+        }
+
+        &:focus {
+            background-color: @color-hover;
+            color: @color-fore;
         }
     }
 }

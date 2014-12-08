@@ -5,7 +5,7 @@
 
     // On extension button click
     chrome.browserAction.onClicked.addListener((tab) => {
-        // Switch app state
-        app.switch();
+        // Toggle app state
+        app.toggle();
     });
 }

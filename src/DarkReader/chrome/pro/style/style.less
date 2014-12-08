@@ -92,18 +92,18 @@ main {
     }
 }
 
-// App switch
-#switch-app {
+// App toggle
+#toggle-app {
     width: 100%;
 }
 
 
 //---------------
-// SWITCH CONTROL
+// TOGGLE CONTROL
 //---------------
 
-// BASE SWITCH
-.switch {
+// BASE TOGGLE
+.toggle {
     border: @size-border solid @color-border;
 
     > .on, > .off {
@@ -164,8 +164,8 @@ main {
 }
 
 
-// SWITCH WITH DESCRIPTION
-.switch-with-desc {
+// TOGGLE WITH DESCRIPTION
+.toggle-with-desc {
     display: inline-block;
 
     > .status {
@@ -175,19 +175,19 @@ main {
     }
 }
 
-// SWITCH WITH BUTTONS
-.switch-with-buttons {
+// TOGGLE WITH BUTTONS
+.toggle-with-buttons {
     .control-container();
 
     > .line {
-        > .switch {
+        > .toggle {
             width: 100%;
         }
     }
 }
 
-// SWITCH FOR FILTER MODE
-#switch-mode {
+// TOGGLE FOR FILTER MODE
+#toggle-mode {
     .button-down {
         background-image: url('../img/mode_dark_32.svg');
     }

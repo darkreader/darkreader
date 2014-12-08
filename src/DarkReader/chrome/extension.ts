@@ -23,18 +23,24 @@
                 path: this.iconPaths.inactive
             });
 
-            this.onSwitch.addHandler(this.onAppSwitch, this);
+            this.onToggle.addHandler(this.onAppToggle, this);
 
             // Load saved configuration from Chrome storage
             this.loadStore();
 
             // Save config and state on any change
-            this.onSwitch.addHandler((enabled) => {
+            this.onToggle.addHandler((enabled) => {
                 this.saveStore();
             }, this);
             this.onConfigSetup.addHandler((config) => {
                 this.saveStore();
             }, this);
+
+            // Subscribe on keyboard shortcut
+            chrome.commands.onCommand.addListener((command) => {
+                if (command === 'toggle')
+                    this.toggle();
+            });
         }
 
 
@@ -42,7 +48,7 @@
         // Switch ON/OFF
         //--------------
 
-        protected onAppSwitch(isEnabled: boolean) {
+        protected onAppToggle(isEnabled: boolean) {
             if (isEnabled) {
                 //
                 // Switch ON

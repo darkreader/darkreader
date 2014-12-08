@@ -1,7 +1,7 @@
 ﻿module DarkReader {
 
     /**
-     * Defines switchable and configurable application.
+     * Defines toggleable and configurable application.
      */
     export class Application<TConfig> {
 
@@ -31,7 +31,7 @@
          */
         enable() {
             if (!this.isEnabled) {
-                this.switch();
+                this.toggle();
             }
         }
 
@@ -40,22 +40,22 @@
          */
         disable() {
             if (this.isEnabled) {
-                this.switch();
+                this.toggle();
             }
         }
 
         /**
-         *  Switches application state.
+         * Toggles application state.
          */
-        switch() {
+        toggle() {
             this._isEnabled = !this._isEnabled;
-            this.onSwitch.invoke(this._isEnabled);
+            this.onToggle.invoke(this._isEnabled);
         }
 
         /**
          * Event which fires on app state change.
          */
-        onSwitch = new Event<boolean>();
+        onToggle = new Event<boolean>();
 
 
         //-----------------------------------

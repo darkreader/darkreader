@@ -92,10 +92,14 @@ main > *:not(:first-child) {
 .settings-section > *:not(:first-child) {
   margin-top: 0.625em;
 }
+<<<<<<< HEAD
 .toggle-with-status {
   display: inline-block;
 }
 .toggle-with-status > .status {
+=======
+  display: inline-block;
+>>>>>>> origin/master
   text-align: center;
   color: #37abc8;
   font-size: 0.875em;

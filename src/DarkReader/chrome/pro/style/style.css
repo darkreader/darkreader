@@ -56,14 +56,14 @@ main > *:not(:first-child) {
 #description p {
   white-space: nowrap;
 }
-#switch-app {
+#toggle-app {
   width: 100%;
 }
-.switch {
+.toggle {
   border: 0.1875em solid #216778;
 }
-.switch > .on,
-.switch > .off {
+.toggle > .on,
+.toggle > .off {
   display: inline-block;
   height: 2em;
   line-height: 2em;
@@ -72,14 +72,14 @@ main > *:not(:first-child) {
   cursor: pointer;
   width: 50%;
 }
-.switch > .on:hover,
-.switch > .off:hover {
+.toggle > .on:hover,
+.toggle > .off:hover {
   background-color: #114857;
 }
-.switch > .on:active,
-.switch > .off:active,
-.switch > .on.active,
-.switch > .off.active {
+.toggle > .on:active,
+.toggle > .off:active,
+.toggle > .on.active,
+.toggle > .off.active {
   background-color: #216778;
   cursor: default;
 }
@@ -92,34 +92,34 @@ main > *:not(:first-child) {
 .settings-section > *:not(:first-child) {
   margin-top: 0.625em;
 }
-.switch-with-desc {
+.toggle-with-status {
   display: inline-block;
 }
-.switch-with-desc > .status {
+.toggle-with-status > .status {
   text-align: center;
   color: #37abc8;
   font-size: 0.875em;
 }
-.switch-with-buttons > .line {
+.toggle-with-buttons > .line {
   display: flex;
   flex-flow: row nowrap;
   align-items: stretch;
 }
-.switch-with-buttons > .line > *:not(:first-child) {
+.toggle-with-buttons > .line > *:not(:first-child) {
   margin-left: 0.625em;
 }
-.switch-with-buttons > .status {
+.toggle-with-buttons > .status {
   text-align: center;
   color: #37abc8;
   font-size: 0.875em;
 }
-.switch-with-buttons > .line > .switch {
+.toggle-with-buttons > .line > .toggle {
   width: 100%;
 }
-#switch-mode .button-down {
+#toggle-mode .button-down {
   background-image: url('../img/mode_dark_32.svg');
 }
-#switch-mode .button-up {
+#toggle-mode .button-up {
   background-image: url('../img/mode_light_32.svg');
 }
 .icon-button {

@@ -11,8 +11,13 @@
          * @param handler Function which will be called when event happens.
          * @param thisArg Context of handler.
          */
-        addHandler(handler: EventHandler<TEventArgs>, thisArg: any) {
+        addHandler(handler: EventHandler<TEventArgs>, thisArg: any): Subscription<TEventArgs> {
             this._handlers.push({ handler: handler, scope: thisArg });
+            return {
+                event: this,
+                handler: handler,
+                scope: thisArg
+            };
         }
 
         /**
@@ -57,5 +62,14 @@
          * @param args Event arguments.
          */
         (args: TEventArgs): void;
+    }
+
+    /**
+     * Contains info about event and it's handler.
+     */
+    export interface Subscription<T> {
+        event: Event<T>;
+        handler: EventHandler<T>;
+        scope: any;
     }
 }

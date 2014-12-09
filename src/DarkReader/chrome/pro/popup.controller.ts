@@ -53,13 +53,24 @@
 
                 // Set controls values
                 this.toggleMode.toggle.isOn = !!cfg.mode; // Attention, enum.
+
                 this.updownBrightness.trackBar.value = cfg.brightness - 50;
+                this.updownBrightness.status.message = cfg.brightness > 100 ? '+' + (cfg.brightness - 100) : cfg.brightness < 100 ? '-' + (100 - cfg.brightness) : 'off';
+
                 this.updownContrast.trackBar.value = cfg.contrast - 50;
+                this.updownContrast.status.message = cfg.contrast > 100 ? '+' + (cfg.contrast - 100) : cfg.contrast < 100 ? '-' + (100 - cfg.contrast) : 'off';
+
                 this.updownGrayscale.trackBar.value = cfg.grayscale;
+                this.updownGrayscale.status.message = cfg.grayscale > 0 ? '+' + cfg.grayscale : 'off';
+
                 this.updownSepia.trackBar.value = cfg.sepia;
+                this.updownSepia.status.message = cfg.sepia > 0 ? '+' + cfg.sepia : 'off';
+
                 this.fontSet.isFontUsed = cfg.usefont;
                 this.fontSet.fontFamily = cfg.fontfamily;
+
                 this.updownTextStroke.trackBar.value = cfg.textstroke * 100;
+                this.updownTextStroke.status.message = cfg.textstroke > 0 ? '+' + cfg.textstroke : 'off';
             }, this));
 
 
@@ -153,41 +164,13 @@
 
         private initControls() {
             this.toggleApp = new ToggleWithStatus('toggle-app');
-
             this.toggleMode = new ToggleWithButtons('toggle-mode');
-
             this.updownBrightness = new UpDown('updown-brightness');
-            this.updownBrightness.trackBar.onUserSetValue.addHandler(v => {
-                this.updownBrightness.status.message =
-                (v > 50 ? '+' + v.toString()
-                : v < 50 ? v.toString()
-                : 'off');
-            }, this);
-
             this.updownContrast = new UpDown('updown-contrast');
-            this.updownContrast.trackBar.onUserSetValue.addHandler(v => {
-                this.updownContrast.status.message =
-                (v > 50 ? '+' + v.toString()
-                : v < 50 ? v.toString()
-                : 'off');
-            }, this);
-
             this.updownGrayscale = new UpDown('updown-grayscale');
-            this.updownGrayscale.trackBar.onUserSetValue.addHandler(v => {
-                this.updownGrayscale.status.message = v > 0 ? '+' + v.toString() : 'off';
-            }, this);
-
             this.updownSepia = new UpDown('updown-sepia');
-            this.updownSepia.trackBar.onUserSetValue.addHandler(v => {
-                this.updownSepia.status.message = v > 0 ? '+' + v.toString() : 'off';
-            }, this);
-
             this.fontSet = new FontSet('control-usefont');
-
             this.updownTextStroke = new UpDown('updown-textstroke');
-            this.updownTextStroke.trackBar.onUserSetValue.addHandler(v => {
-                this.updownTextStroke.status.message = v > 0 ? '+' + (v / 100).toString() : 'off';
-            }, this);
         }
     }
 } 

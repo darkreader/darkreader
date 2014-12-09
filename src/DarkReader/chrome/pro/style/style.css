@@ -231,4 +231,7 @@ main > *:not(:first-child) {
   background-color: #113a49;
   color: #ffffff;
 }
+.font-set input[type=text]::selection {
+  background-color: #e96c4c;
+}
 /*# sourceMappingURL=style.css.map */

@@ -51,7 +51,7 @@
                 // Add contrary rule
                 parts.push(selectors, this.createContraryDeclaration(config));
 
-            if (config.usefont)
+            if (config.usefont || config.textstroke > 0)
                 // Add text rule
                 parts.push('*', this.createTextDeclaration(config));
 
@@ -101,20 +101,24 @@
             return result;
         }
 
-        // Should be used only if 'usefont' is 'true'
+        // Should be used only if 'usefont' is 'true' or 'stroke' > 0
         protected createTextDeclaration(config: FilterConfig): string {
             var result = '{ ';
 
-            // TODO: Validate...
-            result += !config.fontfamily ? ''
-            : 'font-family: '
-            + config.fontfamily
-            + '!important; ';
+            if (config.usefont) {
+                // TODO: Validate...
+                result += !config.fontfamily ? ''
+                : 'font-family: '
+                + config.fontfamily + ' '
+                + '!important; ';
+            }
 
-            result += config.textstroke == 0 ? ''
-            : this.prefix + 'text-stroke: '
-            + config.textstroke
-            + '!important; ';
+            if (config.textstroke > 0) {
+                result += config.textstroke == 0 ? ''
+                : this.prefix + 'text-stroke: '
+                + config.textstroke + 'px '
+                + '!important; ';
+            }
 
             result += '}';
 

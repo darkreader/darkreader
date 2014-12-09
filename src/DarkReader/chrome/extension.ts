@@ -24,6 +24,7 @@
             });
 
             this.onToggle.addHandler(this.onAppToggle, this);
+            this.onConfigSetup.addHandler(this.onSetConfig, this);
 
             // Load saved configuration from Chrome storage
             this.loadStore();
@@ -38,8 +39,10 @@
 
             // Subscribe on keyboard shortcut
             chrome.commands.onCommand.addListener((command) => {
-                if (command === 'toggle')
+                if (command === 'toggle') {
+                    console.log('toggle command entered');
                     this.toggle();
+                }
             });
         }
 
@@ -90,6 +93,20 @@
                 chrome.tabs.query({}, (tabs) => {
                     tabs.forEach((tab) => {
                         this.removeCssFromTab(tab);
+                    });
+                });
+            }
+        }
+
+        onSetConfig(config: TConfig) {
+            if (this.isEnabled) {
+                // Update style for current tab
+                chrome.tabs.getCurrent((t) => { this.updateCssInTab(t) });
+
+                // Update style for all tabs
+                chrome.tabs.query({}, (tabs) => {
+                    tabs.forEach((tab) => {
+                        this.updateCssInTab(tab);
                     });
                 });
             }
@@ -158,13 +175,33 @@
             });
         }
 
+        /**
+         * Updates CSS in tab.
+         * @param tab If null than current tab will be processed.
+         */
+        protected updateCssInTab(tab: chrome.tabs.Tab) {
+            // Prevent throwing errors on specific chrome adresses
+            if (tab && tab.url && (tab.url.indexOf('chrome') === 0)) {
+                return;
+            }
+
+            if (tab) { // Somewhere null is called.
+                var id = tab ? tab.id : null;
+                var url = tab ? tab.url : '';
+                chrome.tabs.executeScript(id, {
+                    code: this.getCode_updateCss(url),
+                    runAt: 'document_start'
+                });
+            }
+        }
+
         protected getCode_addCss(url?: string) {
             var css = this.generator.createCssCode(this.config, url);
 
             //var code = "alert('Add CSS');"
             var code = [
                 "console.log('Executing DR script...');",
-                "var addDRStyle = addDRStyle || function() {",
+                "var addDRStyle = function() {",
                 "   var css = '" + css + "';",
                 "   var style = document.createElement('style');",
                 "   style.setAttribute('id', 'dark-reader-style');",
@@ -206,6 +243,35 @@
             var code =
                 "var style = document.getElementById('dark-reader-style');\n" +
                 "style && style.parentNode.removeChild(style);";
+
+            return code;
+        }
+
+        protected getCode_updateCss(url?: string) {
+            var css = this.generator.createCssCode(this.config, url);
+
+            //var code = "alert('Update CSS');"
+            var code = [
+                "console.log('Executing DR script...');",
+                "var addDRStyle = function() {",
+                "   var css = '" + css + "';",
+                "   var style = document.createElement('style');",
+                "   style.setAttribute('id', 'dark-reader-style');",
+                "   style.type = 'text/css';",
+                "   style.appendChild(document.createTextNode(css));",
+                "   var head = document.getElementsByTagName('head')[0];",
+                "   head.appendChild(style);",
+                "}",
+                "var head = document.getElementsByTagName('head')[0];",
+                "if (head) {",
+                "   var prevStyle = document.getElementById('dark-reader-style');",
+                "   if (prevStyle) {",
+                "       prevStyle.parentElement.removeChild(prevStyle);",
+                "   }",
+                "   addDRStyle();",
+                "   console.log('Updated DR style.');",
+                "}"
+            ].join('\n');
 
             return code;
         }

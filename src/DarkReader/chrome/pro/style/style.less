@@ -1,4 +1,6 @@
-﻿@import url(http://fonts.googleapis.com/css?family=Open+Sans);
+﻿// TODO: Build with command line.
+
+@import url(http://fonts.googleapis.com/css?family=Open+Sans);
 
 @color-back: #00222b;
 @color-active: #216778;
@@ -300,6 +302,10 @@ main {
         &:focus {
             background-color: @color-hover;
             color: @color-fore;
+        }
+
+        &::selection {
+            background-color: @color-header;
         }
     }
 }

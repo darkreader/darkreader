@@ -68,9 +68,7 @@
         get config() { return this._config; }
         set config(config: TConfig) {
             this._config = config;
-            if (this.isEnabled) {
-                this.onConfigSetup.invoke(config);
-            }
+            this.onConfigSetup.invoke(config);
         }
 
         /**

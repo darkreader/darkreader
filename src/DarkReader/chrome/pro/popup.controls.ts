@@ -67,8 +67,8 @@
         private _isOn: boolean = false;
 
         protected initContent() {
-            this.elementOn = getChildByClassName(this.element, 'on');
-            this.elementOff = getChildByClassName(this.element, 'off');
+            this.elementOn = <HTMLElement>this.element.querySelector('.on');
+            this.elementOff = <HTMLElement>this.element.querySelector('.off');
 
             if (!this.elementOn || !this.elementOff)
                 throw new Error('Unable to create toggle. Wrong DOM.');
@@ -178,8 +178,8 @@
         status: Status;
 
         protected initContent() {
-            this.toggle = new Toggle(getChildByClassName(this.element, 'toggle'));
-            this.status = new Status(getChildByClassName(this.element, 'status'));
+            this.toggle = new Toggle(<HTMLElement>this.element.querySelector('.toggle'));
+            this.status = new Status(<HTMLElement>this.element.querySelector('.status'));
         }
     }
 
@@ -193,8 +193,8 @@
 
         protected initContent() {
             super.initContent();
-            this.buttonOn = new Button(getChildByClassName(this.element, 'button-down'));
-            this.buttonOff = new Button(getChildByClassName(this.element, 'button-up'));
+            this.buttonOn = new Button(<HTMLElement>this.element.querySelector('.button-down'));
+            this.buttonOff = new Button(<HTMLElement>this.element.querySelector('.button-up'));
         }
 
         protected initEvents() {
@@ -213,7 +213,6 @@
         }
     }
 
-
     /**
      * Track bar.
      */
@@ -230,7 +229,7 @@
         private _value: number;
 
         protected initContent() {
-            this.elementValue = getChildByClassName(this.element, 'value');
+            this.elementValue = <HTMLElement>this.element.querySelector('.value');
             this.elementLabel = this.element.getElementsByTagName('label').item(0);
 
             if (!this.elementValue || !this.elementLabel)
@@ -278,10 +277,10 @@
         protected step = 10;
 
         protected initContent() {
-            this.buttonUp = new Button(getChildByClassName(this.element, 'button-up'));
-            this.buttonDown = new Button(getChildByClassName(this.element, 'button-down'));
-            this.trackBar = new TrackBar(getChildByClassName(this.element, 'trackbar'));
-            this.status = new Status(getChildByClassName(this.element, 'status'));
+            this.buttonUp = new Button(<HTMLElement>this.element.querySelector('.button-up'));
+            this.buttonDown = new Button(<HTMLElement>this.element.querySelector('.button-down'));
+            this.trackBar = new TrackBar(<HTMLElement>this.element.querySelector('.trackbar'));
+            this.status = new Status(<HTMLElement>this.element.querySelector('.status'));
         }
 
         protected initEvents() {
@@ -318,10 +317,12 @@
         private _fontFamily: string;
 
         protected initContent() {
-            this.status = new Status(getChildByClassName(this.element, 'status'));
-            var inputs = this.element.getElementsByTagName('input');
-            this.checkbox = inputs.item(0);
-            this.textbox = inputs.item(1);
+            this.status = new Status(<HTMLElement>this.element.querySelector('.status'));
+            this.checkbox = <HTMLInputElement>this.element.querySelector('input[type=checkbox]');
+            this.textbox = <HTMLInputElement>this.element.querySelector('input[type=text]');
+
+            if (!this.checkbox || !this.textbox)
+                throw new Error('Unable to create font set. Wrong DOM.');
         }
 
 
@@ -363,11 +364,9 @@
             };
             // No focus on 'Enter' key
             this.textbox.onkeypress = (e) => {
-                (<any>document.activeElement).blur();
-            };
-            // Select all text on click
-            this.textbox.onclick = (e) => {
-                this.textbox.select();
+                if (e.keyCode === 13) {
+                    (<any>document.activeElement).blur();
+                }
             };
         }
 
@@ -386,12 +385,12 @@
     // HELPERS
     //--------
 
-    /**
-     * Returns the first element's child with the given class name.
-     * @param element Container element.
-     * @param className Class name.
-     */
-    function getChildByClassName(element: HTMLElement, className: string): HTMLElement {
-        return <HTMLElement>element.getElementsByClassName(className).item(0);
-    }
+    ///**
+    // * Returns the first element's child with the given class name.
+    // * @param element Container element.
+    // * @param className Class name.
+    // */
+    //function getChildByClassName(element: HTMLElement, className: string): HTMLElement {
+    //    return <HTMLElement>element.getElementsByClassName(className).item(0);
+    //}
 } 

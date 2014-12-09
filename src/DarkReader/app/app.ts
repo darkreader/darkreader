@@ -58,9 +58,9 @@
         onToggle = new Event<boolean>();
 
 
-        //-----------------------------------
-        // Generator configuration management
-        //-----------------------------------
+        //-------------------------
+        // Configuration management
+        //-------------------------
 
         /**
          * Gets or sets generator configuration.

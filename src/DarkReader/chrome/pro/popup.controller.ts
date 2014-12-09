@@ -3,18 +3,24 @@
      * Pop-up page controller.
      */
     export class PopupController {
+
+        /**
+         * Creates pop-up controller.
+         * @param app Chrome extension that manages filter configuration.
+         */
         constructor(private app: Application<Generation.FilterConfig>) {
             this.initControls();
 
             this.subscriptions = [];
             this.registerEventsHandlers();
 
-            // Subscribe for window closing
+            // Before window closed -> unregister handlers.
             window.onbeforeunload = (e) => {
                 this.unregisterEventsHandlers();
             };
 
             // Set values for the first time
+            this.app.onToggle.invoke(this.app.isEnabled);
             this.app.onConfigSetup.invoke(this.app.config);
         }
 
@@ -29,8 +35,9 @@
          * Registers events handlers.
          */
         private registerEventsHandlers() {
+
             //------------------------
-            // From background to view
+            // From background to view  <---
             //------------------------
 
             // On toggle
@@ -45,11 +52,10 @@
 
 
             //------------------------
-            // From view to background
+            // From view to background  --->
             //------------------------
 
             this.toggleApp.toggle.onUserToggle.addHandler((isOn) => {
-                console.log('toggle');
                 if (isOn) {
                     this.app.enable();
                 }

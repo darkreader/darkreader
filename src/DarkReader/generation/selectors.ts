@@ -5,6 +5,7 @@
         specials: UrlSelectors[];
     }
 
+    // TODO: Humanize URLs (replace regexps with 'google.*', 'youtube.com' etc).
     export interface UrlSelectors {
         urlPattern: string;
         selectors: string;

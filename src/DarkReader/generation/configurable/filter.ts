@@ -38,12 +38,23 @@
         createCssCode(config: FilterConfig, url: string): string {
             console.log('css for url: ' + url);
             var selectors = getSelectorsFor(url);
+
+            //
+            // Combine CSS
+
             var parts: string[] = [];
+
+            // Add leading rule.
             parts.push('html', this.createLeadingDeclaration(config));
+
             if (config.mode === FilterMode.dark)
+                // Add contrary rule
                 parts.push(selectors, this.createContraryDeclaration(config));
+
             if (config.usefont)
+                // Add text rule
                 parts.push('*', this.createTextDeclaration(config));
+
             return parts.join(' ');
         }
 

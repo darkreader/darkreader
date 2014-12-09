@@ -23,7 +23,7 @@
     /**
      * Loads and parses JSON from file to object synchronously.
      * @param url Path to JSON file.
-     * @param [onerror] Handles parsed result or error.
+     * @param [onerror] Handles error.
      */
     export function readJsonSync<T>(url: string, onerror?: (error) => void): T {
         var result: T = null;

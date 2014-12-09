@@ -18,7 +18,7 @@
     "commands": {
         "toggle": {
             "suggested_key": {
-                "default": "Shift+Alt+D"
+                "default": "Alt+Shift+D"
             },
             "description": "Toggle On/Off"
         }

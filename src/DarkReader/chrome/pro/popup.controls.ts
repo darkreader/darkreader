@@ -9,8 +9,19 @@
     export class Control {
         protected element: HTMLElement;
 
+        /**
+         * Creates the control in element with given ID.
+         */
         constructor(elementId: string);
+
+        /**
+         * Creates the control in the given element.
+         */
         constructor(element: HTMLElement);
+
+        /**
+         * Creates the control.
+         */
         constructor(elementOrId) {
             var element = typeof elementOrId === 'string' ?
                 document.getElementById(elementOrId)
@@ -22,10 +33,23 @@
             this.element = element;
             this.initContent();
             this.initEvents();
+            this.initComplete();
         }
 
+        /**
+         * Performs control's content initialization.
+         */
         protected initContent() { }
+
+        /**
+         * Performs control's events initialization.
+         */
         protected initEvents() { }
+
+        /**
+         * Is invoked after control's initialization is complete.
+         */
+        protected initComplete() { }
     }
 
 
@@ -53,6 +77,7 @@
             this.isOn = false;
         }
 
+
         /**
          * Gets or sets toggle value.
          */
@@ -64,16 +89,15 @@
 
             // DOM
             if (on) {
-                console.log('set toggle on');
                 this.elementOn.classList.add('active');
                 this.elementOff.classList.remove('active');
             }
             else {
-                console.log('set toggle off');
                 this.elementOff.classList.add('active');
                 this.elementOn.classList.remove('active');
             }
         }
+
 
         protected initEvents() {
             this.onUserToggle = new Event<boolean>();
@@ -86,7 +110,6 @@
             };
             // Switch off
             this.elementOff.onclick = () => {
-                console.log('element off clicked');
                 if (this.isOn === true) {
                     this.onUserToggle.invoke(false);
                 }

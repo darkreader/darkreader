@@ -13,7 +13,7 @@
         "128": "img/dr_128.png"
     },
     "background": { "page": "background.html" },
-    "permissions": [ "tabs", "storage", "http://*/*", "https://*/*" ]
+    "permissions": [ "tabs", "storage", "http://*/*", "https://*/*" ],
     "commands": {
         "toggle": {
             "suggested_key": {

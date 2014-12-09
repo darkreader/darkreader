@@ -278,8 +278,8 @@
         protected step = 10;
 
         protected initContent() {
-            this.buttonUp = new Button(getChildByClassName(this.element, 'button-down'));
-            this.buttonDown = new Button(getChildByClassName(this.element, 'button-up'));
+            this.buttonUp = new Button(getChildByClassName(this.element, 'button-up'));
+            this.buttonDown = new Button(getChildByClassName(this.element, 'button-down'));
             this.trackBar = new TrackBar(getChildByClassName(this.element, 'trackbar'));
             this.status = new Status(getChildByClassName(this.element, 'status'));
         }
@@ -314,6 +314,8 @@
         status: Status;
         private checkbox: HTMLInputElement;
         private textbox: HTMLInputElement;
+        private _isFontUsed: boolean;
+        private _fontFamily: string;
 
         protected initContent() {
             this.status = new Status(getChildByClassName(this.element, 'status'));
@@ -322,7 +324,35 @@
             this.textbox = inputs.item(1);
         }
 
+
+        /**
+         * Gets or sets whether custom font is used.
+         */
+        get isFontUsed() {
+            return this._isFontUsed;
+        }
+        set isFontUsed(use) {
+            this._isFontUsed = use;
+
+            // DOM
+            this.checkbox.checked = use;
+        }
+
+        get fontFamily() {
+            return this._fontFamily;
+        }
+        set fontFamily(font) {
+            this._fontFamily = font;
+
+            // DOM
+            this.textbox.value = font;
+        }
+
+
         protected initEvents() {
+            this.onUserCheckChange = new Event<boolean>();
+            this.onUserTextChange = new Event<string>();
+
             // On check change
             this.checkbox.onchange = (e) => {
                 this.onUserCheckChange.invoke(this.checkbox.checked);

@@ -12,8 +12,8 @@
     }
 
     export enum FilterMode {
-        light,
-        dark
+        light = 0,
+        dark = 1
     }
 
     /**

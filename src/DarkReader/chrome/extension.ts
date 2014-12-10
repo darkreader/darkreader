@@ -98,7 +98,7 @@
             }
         }
 
-        onSetConfig(config: TConfig) {
+        protected onSetConfig(config: TConfig) {
             if (this.isEnabled) {
                 // Update style for current tab
                 chrome.tabs.getCurrent((t) => { this.updateCssInTab(t) });
@@ -118,11 +118,18 @@
         //-------------------------
 
         protected addTabListener() {
-            chrome.tabs.onUpdated.addListener(this.tabUpdateListener);
+            if (chrome.tabs.onUpdated.hasListener(this.tabUpdateListener)) {
+                console.log('Tab listener is already present.');
+            }
+            else {
+                chrome.tabs.onUpdated.addListener(this.tabUpdateListener);
+                console.log('Tab listener added.');
+            }
         }
 
         protected removeTabListener() {
             chrome.tabs.onUpdated.removeListener(this.tabUpdateListener);
+            console.log('Tab listener removed.');
         }
 
         protected tabUpdateListener = (tabId: number, info: chrome.tabs.TabChangeInfo, tab: chrome.tabs.Tab) => {

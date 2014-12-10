@@ -69,6 +69,9 @@
             if (config.mode === FilterMode.dark)
                 result += 'invert(100%) hue-rotate(180deg) ';
 
+            result += config.brightness == 100 ? ''
+            : 'brightness(' + config.brightness + '%) ';
+
             result += config.contrast == 100 ? ''
             : 'contrast(' + config.contrast + '%) ';
 
@@ -77,9 +80,6 @@
 
             result += config.sepia == 0 ? ''
             : 'sepia(' + config.sepia + '%) ';
-
-            result += config.brightness == 100 ? ''
-            : 'brightness(' + config.brightness + '%) ';
 
             result += '!important; min-height: 100% !important; }';
 

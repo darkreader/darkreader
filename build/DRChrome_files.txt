@@ -4,6 +4,6 @@
 ..\src\DarkReader\chrome\extension.ts
 ..\src\DarkReader\generation\generator.ts
 ..\src\DarkReader\generation\selectors.ts
-..\src\DarkReader\generation\configurable\filter.ts
-..\src\DarkReader\chrome\pro\background.ts
+..\src\DarkReader\generation\filter.ts
+..\src\DarkReader\chrome\content\background.ts
 ..\src\DarkReader\typings\chrome\chrome.d.ts

@@ -47,15 +47,13 @@
     <TypeScriptCompile Include="app\app.ts" />
     <TypeScriptCompile Include="app\json.ts" />
     <TypeScriptCompile Include="chrome\extension.ts" />
-    <TypeScriptCompile Include="chrome\pro\background.ts" />
-    <TypeScriptCompile Include="chrome\pro\popup.controls.ts" />
-    <TypeScriptCompile Include="chrome\pro\popup.ts" />
-    <TypeScriptCompile Include="chrome\pro\popup.controller.ts" />
-    <TypeScriptCompile Include="chrome\starter\background.ts" />
+    <TypeScriptCompile Include="chrome\content\background.ts" />
+    <TypeScriptCompile Include="chrome\content\popup.controls.ts" />
+    <TypeScriptCompile Include="chrome\content\popup.ts" />
+    <TypeScriptCompile Include="chrome\content\popup.controller.ts" />
     <TypeScriptCompile Include="app\event.ts" />
-    <TypeScriptCompile Include="generation\basic\basic.ts" />
     <TypeScriptCompile Include="generation\selectors.ts" />
-    <TypeScriptCompile Include="generation\configurable\filter.ts" />
+    <TypeScriptCompile Include="generation\filter.ts" />
     <TypeScriptCompile Include="generation\generator.ts" />
     <TypeScriptCompile Include="typings\chrome\chrome-app.d.ts" />
     <TypeScriptCompile Include="typings\chrome\chrome.d.ts" />
@@ -65,21 +63,20 @@
     <TypeScriptCompile Include="typings\webrtc\RTCPeerConnection.d.ts" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="chrome\pro\background.html" />
-    <Content Include="chrome\pro\img\icon-check_white_16.svg" />
-    <Content Include="chrome\pro\img\icon-right_white_16.svg" />
-    <Content Include="chrome\pro\img\icon-left_white_16.svg" />
-    <Content Include="chrome\pro\img\mode_dark_32.svg" />
-    <Content Include="chrome\pro\img\mode_light_32.svg" />
-    <Content Include="chrome\pro\popup.html" />
-    <Content Include="chrome\pro\style\style.css">
+    <Content Include="chrome\content\background.html" />
+    <Content Include="chrome\content\img\icon-check_white_16.svg" />
+    <Content Include="chrome\content\img\icon-right_white_16.svg" />
+    <Content Include="chrome\content\img\icon-left_white_16.svg" />
+    <Content Include="chrome\content\img\mode_dark_32.svg" />
+    <Content Include="chrome\content\img\mode_light_32.svg" />
+    <Content Include="chrome\content\popup.html" />
+    <Content Include="chrome\content\style\style.css">
       <DependentUpon>style.less</DependentUpon>
     </Content>
-    <Content Include="chrome\pro\style\style.min.css">
+    <Content Include="chrome\content\style\style.min.css">
       <DependentUpon>style.css</DependentUpon>
     </Content>
-    <Content Include="chrome\starter\background.html" />
-    <Content Include="chrome\pro\img\dark-reader-type.svg" />
+    <Content Include="chrome\content\img\dark-reader-type.svg" />
     <Content Include="img\dr_128.png" />
     <Content Include="img\dr_16.png" />
     <Content Include="img\dr_48.png" />
@@ -89,22 +86,16 @@
     <Content Include="img\dr_inactive_38.png" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="generation\rules\contrary.json" />
+    <Content Include="generation\contrary.json" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="generation\rules\declarations.json" />
+    <Content Include="chrome\content\style\style.less" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="chrome\starter\manifest.json" />
+    <Content Include="chrome\content\manifest.json" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="chrome\pro\style\style.less" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="chrome\pro\manifest.json" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="chrome\pro\style\style.css.map">
+    <Content Include="chrome\content\style\style.css.map">
       <DependentUpon>style.css</DependentUpon>
     </Content>
   </ItemGroup>

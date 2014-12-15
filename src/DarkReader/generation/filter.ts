@@ -91,8 +91,7 @@
             var result = '{ ' + this.prefix + 'filter: ';
 
             // Less/more brightness for inverted items
-            result += config.brightness == 100 ? ''
-            : 'brightness(' + (200 - config.brightness) + '%) ';
+            result += 'brightness(' + (config.brightness - 25) + '%) ';
 
             result += 'invert(100%) hue-rotate(180deg) ';
 

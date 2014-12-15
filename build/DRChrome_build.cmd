@@ -1,5 +1,5 @@
 PROMPT $g
-SET outfolder=DRChromePro
+SET outfolder=DRChrome
 
 ECHO "*** Compiling TS to single 'src\darkreader.js'... ***"
 "C:\Program Files (x86)\Microsoft SDKs\TypeScript\1.1\tsc.exe" @DRChrome_files.txt --out %outfolder%\src\darkreader.js -t ES5 --declaration

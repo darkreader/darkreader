@@ -36,26 +36,32 @@
          * @param [url] Web-site address. If not specified than common contrary selectors will be used.
          */
         createCssCode(config: FilterConfig, url: string): string {
-            console.log('css for url: ' + url);
-            var selectors = getSelectorsFor(url);
+            if (isUrlInIgnoreList(url)) {
+                return '';
+            }
+            else {
 
-            //
-            // Combine CSS
+                console.log('css for url: ' + url);
+                var selectors = getSelectorsFor(url);
 
-            var parts: string[] = [];
+                //
+                // Combine CSS
 
-            // Add leading rule.
-            parts.push('html', this.createLeadingDeclaration(config));
+                var parts: string[] = [];
 
-            if (config.mode === FilterMode.dark)
-                // Add contrary rule
-                parts.push(selectors, this.createContraryDeclaration(config));
+                // Add leading rule.
+                parts.push('html', this.createLeadingDeclaration(config));
 
-            if (config.usefont || config.textstroke > 0)
-                // Add text rule
-                parts.push('*', this.createTextDeclaration(config));
+                if (config.mode === FilterMode.dark)
+                    // Add contrary rule
+                    parts.push(selectors, this.createContraryDeclaration(config));
 
-            return parts.join(' ');
+                if (config.usefont || config.textstroke > 0)
+                    // Add text rule
+                    parts.push('*', this.createTextDeclaration(config));
+
+                return parts.join(' ');
+            }
         }
 
 
@@ -91,7 +97,7 @@
             var result = '{ ' + this.prefix + 'filter: ';
 
             // Less/more brightness for inverted items
-            result += 'brightness(' + (config.brightness - 25) + '%) ';
+            result += 'brightness(' + (config.brightness - 20) + '%) ';
 
             result += 'invert(100%) hue-rotate(180deg) ';
 

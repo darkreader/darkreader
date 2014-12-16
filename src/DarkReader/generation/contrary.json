@@ -2,11 +2,11 @@
     "commonSelectors": "img, iframe, video, embed",
     "specials": [
         {
-            "urlPattern": "youtube\\.com",
+            "url": "youtube.com",
             "selectors": "iframe/*, .html5-video-player:not(.ideal-aspect),*/ .html5-video-player:not(:-webkit-full-screen), #theater-background, div:not(.html5-video-player) img"
         },
         {
-            "urlPattern": "google\\.",
+            "url": "google.*",
             "selectors": "img, iframe, video, embed, .gbii, .gbip, .azp, .aLF-aPX-KP"
         }
     ]

@@ -5,16 +5,10 @@
         specials: UrlSelectors[];
     }
 
-    // TODO: Humanize URLs (replace regexps with 'google.*', 'youtube.com' etc).
     export interface UrlSelectors {
-        urlPattern: string;
+        url: string;
         selectors: string;
     }
-
-    /**
-     * Static contrary selectors dictionary.
-     */
-    export var contrarySelectors = readJsonSync<UrlSelectors>('contrary.json');
 
     /**
      * Returns selectors, configured for given URL.
@@ -24,17 +18,28 @@
         var found: UrlSelectors;
         if (url) {
             // Search for match with given URL
-            this.contrarySelectors.specials.forEach((s) => {
-                var matches = url.match(new RegExp(s.urlPattern, 'i'));
-                if (matches && matches.length > 0) {
+            contrarySelectors.specials.forEach((s) => {
+                if (isUrlMatched(url, s.url)) {
                     found = s;
                 }
             });
             if (found)
-                console.log('url matches ' + found.urlPattern);
+                console.log('url matches ' + found.url);
         }
         return found ?
             found.selectors
-            : this.contrarySelectors.commonSelectors
+            : contrarySelectors.commonSelectors
     }
+
+    /**
+     * Static contrary selectors dictionary.
+     */
+    export var contrarySelectors = (function () {
+        var selectors = readJsonSync<ContrarySelectors>('contrary.json');
+
+        // Sort URLs from specials ("google.com") to generics ("google.*").
+        selectors.specials.sort(urlTemplateSorter);
+
+        return selectors;
+    })();
 }

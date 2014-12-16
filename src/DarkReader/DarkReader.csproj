@@ -52,6 +52,7 @@
     <TypeScriptCompile Include="chrome\content\popup.ts" />
     <TypeScriptCompile Include="chrome\content\popup.controller.ts" />
     <TypeScriptCompile Include="app\event.ts" />
+    <TypeScriptCompile Include="generation\ignore.ts" />
     <TypeScriptCompile Include="generation\selectors.ts" />
     <TypeScriptCompile Include="generation\filter.ts" />
     <TypeScriptCompile Include="generation\generator.ts" />
@@ -98,6 +99,9 @@
     <Content Include="chrome\content\style\style.css.map">
       <DependentUpon>style.css</DependentUpon>
     </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="generation\ignore.json" />
   </ItemGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
     <TypeScriptCompileOnSaveEnabled>False</TypeScriptCompileOnSaveEnabled>

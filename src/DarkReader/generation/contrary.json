@@ -3,7 +3,7 @@
     "specials": [
         {
             "url": "youtube.com",
-            "selectors": "iframe/*, .html5-video-player:not(.ideal-aspect),*/ .html5-video-player:not(:-webkit-full-screen), #theater-background, div:not(.html5-video-player) img"
+            "selectors": "iframe, .html5-video-player:not(:-webkit-full-screen), #theater-background, div:not(.html5-video-player) img"
         },
         {
             "url": "google.*",

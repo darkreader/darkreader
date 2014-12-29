@@ -11,7 +11,8 @@
         <img id="logo" src="img/dark-reader-type.svg" alt="Dark Reader" />
 
         <section id="section-top">
-            <p id="description">Adjust settings that<br />better fit your screen</p>
+            <p id="description-app" class="description">Adjust settings that<br />better fit your screen</p>
+            <!-- APP TOGGLE -->
             <div id="toggle-app" class="toggle-with-status">
                 <div class="toggle">
                     <span class="on active">On</span><span class="off">Off</span>
@@ -20,100 +21,120 @@
             </div>
         </section>
 
-        <section id="filter-settings" class="settings-section">
-            <h3>Filter settings</h3>
+        <div class="tab-panel">
+            <nav class="tab-panel-buttons">
+                <span class="tab-panel-button active">Filter</span>
+                <span class="tab-panel-button">Font</span>
+                <span class="tab-panel-button">Ignore list</span>
+            </nav>
+            <div class="tab-panel-content">
+                <!-- FILTER -->
+                <section id="section-filter-settings" class="tab active settings-list">
+                    <!-- Mode -->
+                    <div id="toggle-mode" class="toggle-with-buttons">
+                        <div class="line">
+                            <span class="icon-button button-down"></span>
+                            <span class="toggle">
+                                <span class="on active">Dark</span><span class="off">Light</span>
+                            </span>
+                            <span class="icon-button button-up"></span>
+                        </div>
+                        <p class="status">Mode</p>
+                    </div>
 
-            <!-- MODE -->
-            <div id="toggle-mode" class="toggle-with-buttons">
-                <div class="line">
-                    <span class="icon-button button-down"></span>
-                    <span class="toggle">
-                        <span class="on active">Dark</span><span class="off">Light</span>
-                    </span>
-                    <span class="icon-button button-up"></span>
-                </div>
-                <p class="status">Mode</p>
+                    <!-- Brightness -->
+                    <div id="updown-brightness" class="updown">
+                        <div class="line">
+                            <span class="icon-button button-down"></span>
+                            <span class="trackbar">
+                                <span class="value">&nbsp;</span>
+                                <label>Brightness</label>
+                            </span>
+                            <span class="icon-button button-up"></span>
+                        </div>
+                        <p class="status">-20</p>
+                    </div>
+
+                    <!-- Contrast -->
+                    <div id="updown-contrast" class="updown">
+                        <div class="line">
+                            <span class="icon-button button-down"></span>
+                            <span class="trackbar">
+                                <span class="value">&nbsp;</span>
+                                <label>Contrast</label>
+                            </span>
+                            <span class="icon-button button-up"></span>
+                        </div>
+                        <p class="status">-20</p>
+                    </div>
+
+                    <!-- Grayscale -->
+                    <div id="updown-grayscale" class="updown">
+                        <div class="line">
+                            <span class="icon-button button-down"></span>
+                            <span class="trackbar">
+                                <span class="value">&nbsp;</span>
+                                <label>Grayscale</label>
+                            </span>
+                            <span class="icon-button button-up"></span>
+                        </div>
+                        <p class="status">+30</p>
+                    </div>
+
+                    <!-- Sepia -->
+                    <div id="updown-sepia" class="updown">
+                        <div class="line">
+                            <span class="icon-button button-down"></span>
+                            <span class="trackbar">
+                                <span class="value">&nbsp;</span>
+                                <label>Sepia</label>
+                            </span>
+                            <span class="icon-button button-up"></span>
+                        </div>
+                        <p class="status">+30</p>
+                    </div>
+                </section>
+
+                <!-- FONT -->
+                <section id="section-font-settings" class="tab settings-list">
+                    <!-- Font -->
+                    <div id="control-usefont" class="font-set">
+                        <div class="line">
+                            <input type="checkbox" checked="checked" />
+                            <!--<span class="check icon-button"></span>-->
+                            <input type="text" value="Segoe UI" />
+                        </div>
+                        <p class="status">Enter the name of the font</p>
+                    </div>
+
+                    <!-- Text stroke -->
+                    <div id="updown-textstroke" class="updown">
+                        <div class="line">
+                            <span class="icon-button button-down"></span>
+                            <span class="trackbar">
+                                <span class="value">&nbsp;</span>
+                                <label>Text stroke</label>
+                            </span>
+                            <span class="icon-button button-up"></span>
+                        </div>
+                        <p class="status">+0.3</p>
+                    </div>
+                </section>
+
+                <!-- IGNORE LIST -->
+                <section id="section-ignore-list" class="tab settings-list">
+                    <div class="ignore-list">
+                        <input type="text" value="google.*" placeholder="mail.google.com" />
+                        <input type="text" placeholder="mail.google.com" />
+                    </div>
+                    <p class="description">
+                        Please, share your ignore list.<br />
+                        Send it to <strong>darkreaderapp@gmail.com</strong>
+                    </p>
+                </section>
             </div>
-
-            <!-- BRIGHTNESS -->
-            <div id="updown-brightness" class="updown">
-                <div class="line">
-                    <span class="icon-button button-down"></span>
-                    <span class="trackbar">
-                        <span class="value">&nbsp;</span>
-                        <label>Brightness</label>
-                    </span>
-                    <span class="icon-button button-up"></span>
-                </div>
-                <p class="status">-20</p>
-            </div>
-
-            <!-- CONTRAST -->
-            <div id="updown-contrast" class="updown">
-                <div class="line">
-                    <span class="icon-button button-down"></span>
-                    <span class="trackbar">
-                        <span class="value">&nbsp;</span>
-                        <label>Contrast</label>
-                    </span>
-                    <span class="icon-button button-up"></span>
-                </div>
-                <p class="status">-20</p>
-            </div>
-
-            <!-- GRAYSCALE -->
-            <div id="updown-grayscale" class="updown">
-                <div class="line">
-                    <span class="icon-button button-down"></span>
-                    <span class="trackbar">
-                        <span class="value">&nbsp;</span>
-                        <label>Grayscale</label>
-                    </span>
-                    <span class="icon-button button-up"></span>
-                </div>
-                <p class="status">+30</p>
-            </div>
-
-            <!-- SEPIA -->
-            <div id="updown-sepia" class="updown">
-                <div class="line">
-                    <span class="icon-button button-down"></span>
-                    <span class="trackbar">
-                        <span class="value">&nbsp;</span>
-                        <label>Sepia</label>
-                    </span>
-                    <span class="icon-button button-up"></span>
-                </div>
-                <p class="status">+30</p>
-            </div>
-        </section>
-
-        <section id="font-settings" class="settings-section">
-            <h3>Font settings</h3>
-
-            <!-- Font -->
-            <div id="control-usefont" class="font-set">
-                <div class="line">
-                    <input type="checkbox" checked="checked" />
-                    <!--<span class="check icon-button"></span>-->
-                    <input type="text" value="Segoe UI" />
-                </div>
-                <p class="status">Enter the name of the font</p>
-            </div>
-
-            <!-- TEXT STROKE -->
-            <div id="updown-textstroke" class="updown">
-                <div class="line">
-                    <span class="icon-button button-down"></span>
-                    <span class="trackbar">
-                        <span class="value">&nbsp;</span>
-                        <label>Text stroke</label>
-                    </span>
-                    <span class="icon-button button-up"></span>
-                </div>
-                <p class="status">+0.3</p>
-            </div>
-        </section>
+        </div>
+        <p class="description">DarkReaderApp@gmail.com</p>
     </main>
 </body>
 </html>

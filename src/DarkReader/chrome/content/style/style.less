@@ -81,13 +81,16 @@ main {
 }
 
 // Description block
-#description {
+.description {
     text-align: center;
     color: @color-description;
+    white-space: nowrap;
+}
+
+#description-app {
     position: relative;
     top: -0.125em;
     flex: none;
-    white-space: nowrap;
 }
 
 // App toggle
@@ -126,11 +129,71 @@ main {
 }
 
 
+//----------
+// TAB PANEL
+//----------
+
+.tab-panel {
+    .tab-panel-buttons {
+        display: flex;
+        flex-flow: row nowrap;
+        align-items: stretch;
+        justify-content: center;
+        width: 100%;
+
+        .tab-panel-button {
+            color: @color-border;
+            display: inline-block;
+            padding-right: @size-indent-small;
+            padding-left: @size-indent-small;
+            height: @size-control-inner;
+            line-height: @size-control-inner;
+            font-size: larger;
+            font-weight: bold;
+            //border-top: @size-border solid transparent;
+            border-bottom: @size-border solid @color-border;
+            cursor: pointer;
+
+            &.active {
+                color: @color-header;
+                border-top: @size-border solid @color-border;
+                border-right: @size-border solid @color-border;
+                //border-bottom: @size-border solid transparent;
+                border-bottom: none;
+                border-left: @size-border solid @color-border;
+                cursor: default;
+            }
+
+            &:hover:not(.active) {
+                background-color: @color-hover;
+                color: @color-description;
+            }
+        }
+
+        &:before,
+        &:after {
+            content: "";
+            display: inline-block;
+            flex: 1;
+            border-bottom: @size-border solid @color-border;
+        }
+    }
+
+    .tab-panel-content {
+        margin-top: @size-indent-big;
+
+        .tab:not(.active) {
+            display: none;
+        }
+    }
+}
+
+
 //------------------
 // SETTINGS SECTIONS
 //------------------
 
-.settings-section {
+.settings-list {
     display: flex;
     flex-flow: column nowrap;
     align-items: stretch;
@@ -264,6 +327,32 @@ main {
 // FONT CONTROL
 //-------------
 
+// TEXTBOX
+input[type=text] {
+    width: 100%;
+    box-sizing: border-box;
+    font-size: 1em;
+    border: @size-border solid @color-border;
+    background-color: @color-back;
+    outline: none;
+    color: @color-description;
+    padding: 0 @size-indent-small;
+    line-height: @size-control-inner;
+
+    &:hover {
+        background-color: @color-hover;
+    }
+
+    &:focus {
+        background-color: @color-hover;
+        color: @color-fore;
+    }
+
+    &::selection {
+        background-color: @color-header;
+    }
+}
+
 .font-set {
     .control-container();
 
@@ -284,29 +373,27 @@ main {
             background-color: @color-hover;
         }
     }
+}
+
+//------------
+// IGNORE LIST
+//------------
+
+.ignore-list {
+    width: 100%;
+    border: @size-border solid @color-border;
+    display: flex;
+    flex-flow: column nowrap;
 
     input[type=text] {
-        width: 100%;
-        font-size: 1em;
-        border: @size-border solid @color-border;
-        background-color: @color-back;
-        outline: none;
-        color: @color-description;
-        padding: 0 @size-indent-small;
-        line-height: @size-control-inner;
-        //padding-right: @size-control-inner+3*@size-border+2*@size-indent-small; // HACK: Centrify text
-        //text-align: center;
-        &:hover {
-            background-color: @color-hover;
-        }
+        border: none;
+    }
 
-        &:focus {
-            background-color: @color-hover;
-            color: @color-fore;
-        }
+    input[type=text]:not(:first-child) {
+        border-top: @size-border/2 solid @color-border;
+    }
 
-        &::selection {
-            background-color: @color-header;
-        }
+    ::-webkit-input-placeholder {
+        color: @color-border;
     }
 }

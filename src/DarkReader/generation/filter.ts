@@ -9,6 +9,7 @@
         usefont: boolean;
         fontfamily: string;
         textstroke: number;
+        ignorelist: string[];
     }
 
     export enum FilterMode {
@@ -36,11 +37,15 @@
          * @param [url] Web-site address. If not specified than common contrary selectors will be used.
          */
         createCssCode(config: FilterConfig, url: string): string {
+            // Check in default ignore list
             if (isUrlInIgnoreList(url)) {
                 return '';
             }
+            // Check in user's ignore list
+            else if (isUrlInIgnoreList(url, config.ignorelist)) {
+                return '';
+            }
             else {
-
                 console.log('css for url: ' + url);
                 var selectors = getSelectorsFor(url);
 

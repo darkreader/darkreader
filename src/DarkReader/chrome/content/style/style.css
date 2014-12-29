@@ -46,13 +46,15 @@ main > *:not(:first-child) {
 #section-top > *:not(:first-child) {
   margin-left: 0.625em;
 }
-#description {
+.description {
   text-align: center;
   color: #37abc8;
+  white-space: nowrap;
+}
+#description-app {
   position: relative;
   top: -0.125em;
   flex: none;
-  white-space: nowrap;
 }
 #toggle-app {
   width: 100%;
@@ -81,13 +83,57 @@ main > *:not(:first-child) {
   background-color: #216778;
   cursor: default;
 }
-.settings-section {
+.tab-panel .tab-panel-buttons {
+  display: flex;
+  flex-flow: row nowrap;
+  align-items: stretch;
+  justify-content: center;
+  width: 100%;
+}
+.tab-panel .tab-panel-buttons .tab-panel-button {
+  color: #216778;
+  display: inline-block;
+  padding-right: 0.625em;
+  padding-left: 0.625em;
+  height: 2em;
+  line-height: 2em;
+  font-size: larger;
+  font-weight: bold;
+  border-bottom: 0.1875em solid #216778;
+  cursor: pointer;
+}
+.tab-panel .tab-panel-buttons .tab-panel-button.active {
+  color: #e96c4c;
+  border-top: 0.1875em solid #216778;
+  border-right: 0.1875em solid #216778;
+  border-bottom: none;
+  border-left: 0.1875em solid #216778;
+  cursor: default;
+}
+.tab-panel .tab-panel-buttons .tab-panel-button:hover:not(.active) {
+  background-color: #113a49;
+  color: #37abc8;
+}
+.tab-panel .tab-panel-buttons:before,
+.tab-panel .tab-panel-buttons:after {
+  content: "";
+  display: inline-block;
+  flex: 1;
+  border-bottom: 0.1875em solid #216778;
+}
+.tab-panel .tab-panel-content {
+  margin-top: 1em;
+}
+.tab-panel .tab-panel-content .tab:not(.active) {
+  display: none;
+}
+.settings-list {
   display: flex;
   flex-flow: column nowrap;
   align-items: stretch;
   justify-content: flex-start;
 }
-.settings-section > *:not(:first-child) {
+.settings-list > *:not(:first-child) {
   margin-top: 0.625em;
 }
 .toggle-with-status {
@@ -177,6 +223,27 @@ main > *:not(:first-child) {
   top: 0;
   z-index: 2;
 }
+input[type=text] {
+  width: 100%;
+  box-sizing: border-box;
+  font-size: 1em;
+  border: 0.1875em solid #216778;
+  background-color: #00222b;
+  outline: none;
+  color: #37abc8;
+  padding: 0 0.625em;
+  line-height: 2em;
+}
+input[type=text]:hover {
+  background-color: #113a49;
+}
+input[type=text]:focus {
+  background-color: #113a49;
+  color: #ffffff;
+}
+input[type=text]::selection {
+  background-color: #e96c4c;
+}
 .font-set > .line {
   display: flex;
   flex-flow: row nowrap;
@@ -215,24 +282,19 @@ main > *:not(:first-child) {
 .font-set input[type=checkbox]:active {
   background-color: #113a49;
 }
-.font-set input[type=text] {
+.ignore-list {
   width: 100%;
-  font-size: 1em;
   border: 0.1875em solid #216778;
-  background-color: #00222b;
-  outline: none;
-  color: #37abc8;
-  padding: 0 0.625em;
-  line-height: 2em;
+  display: flex;
+  flex-flow: column nowrap;
 }
-.font-set input[type=text]:hover {
-  background-color: #113a49;
+.ignore-list input[type=text] {
+  border: none;
 }
-.font-set input[type=text]:focus {
-  background-color: #113a49;
-  color: #ffffff;
+.ignore-list input[type=text]:not(:first-child) {
+  border-top: 0.09375em solid #216778;
 }
-.font-set input[type=text]::selection {
-  background-color: #e96c4c;
+.ignore-list ::-webkit-input-placeholder {
+  color: #216778;
 }
 /*# sourceMappingURL=style.css.map */

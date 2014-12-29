@@ -3,8 +3,9 @@
     /**
      * Determines whether URL is in ignore list.
      * @param url URL.
+     * @param [list] List to search into. If not specified, the default list will be used.
      */
-    export function isUrlInIgnoreList(url: string) {
+    export function isUrlInIgnoreList(url: string, list = ignoreList) {
         var found = false;
         ignoreList.forEach((t) => {
             if (isUrlMatched(url, t)) {

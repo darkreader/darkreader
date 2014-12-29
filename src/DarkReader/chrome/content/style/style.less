@@ -198,14 +198,19 @@ main {
 // BUTTON WITH ICON
 //-----------------
 
-.icon-button {
-    width: 2em;
+.button {
+    min-width: 2em;
+    box-sizing: padding-box;
     height: 2em;
     display: inline-block;
     border: @size-border solid @color-border;
     flex: none;
     background-size: contain;
     cursor: pointer;
+    line-height: 2em;
+    text-align: center;
+    padding: 0 @size-indent-small;
+    color: @color-fore;
 
     &:hover {
         background-color: @color-hover;
@@ -264,49 +269,64 @@ main {
 // FONT CONTROL
 //-------------
 
-.font-set {
-    .control-container();
+// CHECKBOX
+input[type=checkbox] {
+    .button;
+    -webkit-appearance: none;
+    width: @size-control-inner;
+    height: @size-control-inner;
+    font-size: 1em;
+    box-sizing: content-box;
+    outline: none;
 
-    input[type=checkbox] {
-        .icon-button;
-        -webkit-appearance: none;
-        width: @size-control-inner;
-        height: @size-control-inner;
-        font-size: 1em;
-        box-sizing: content-box;
-        outline: none;
-
-        &:checked {
-            background-image: url('../img/icon-check_white_16.svg');
-        }
-
-        &:active {
-            background-color: @color-hover;
-        }
+    &:checked {
+        background-image: url('../img/icon-check_white_16.svg');
     }
 
-    input[type=text] {
-        width: 100%;
-        font-size: 1em;
-        border: @size-border solid @color-border;
-        background-color: @color-back;
-        outline: none;
-        color: @color-description;
-        padding: 0 @size-indent-small;
-        line-height: @size-control-inner;
-        //padding-right: @size-control-inner+3*@size-border+2*@size-indent-small; // HACK: Centrify text
-        //text-align: center;
-        &:hover {
-            background-color: @color-hover;
-        }
+    &:active {
+        background-color: @color-hover;
+    }
+}
 
-        &:focus {
-            background-color: @color-hover;
-            color: @color-fore;
-        }
+//TEXTBOX
+input[type=text] {
+    width: 100%;
+    font-size: 1em;
+    border: @size-border solid @color-border;
+    background-color: @color-back;
+    outline: none;
+    color: @color-description;
+    padding: 0 @size-indent-small;
+    line-height: @size-control-inner;
+    //padding-right: @size-control-inner+3*@size-border+2*@size-indent-small; // HACK: Centrify text
+    //text-align: center;
+    &:hover {
+        background-color: @color-hover;
+    }
 
-        &::selection {
-            background-color: @color-header;
-        }
+    &:focus {
+        background-color: @color-hover;
+        color: @color-fore;
+    }
+
+    &::selection {
+        background-color: @color-header;
+    }
+}
+
+.font-set {
+    .control-container();
+}
+
+
+//------------
+// IGNORE LIST
+//------------
+
+.ignore-list {
+    .control-container();
+
+    > *:not(:first-child) {
+        margin-top: @size-indent-small;
     }
 }

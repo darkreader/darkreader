@@ -12,6 +12,7 @@
 
         <section id="section-top">
             <p id="description">Adjust settings that<br />better fit your screen</p>
+            <!-- APP TOGGLE -->
             <div id="toggle-app" class="toggle-with-status">
                 <div class="toggle">
                     <span class="on active">On</span><span class="off">Off</span>
@@ -20,17 +21,18 @@
             </div>
         </section>
 
+        <!-- FILTER -->
         <section id="filter-settings" class="settings-section">
             <h3>Filter settings</h3>
 
             <!-- MODE -->
             <div id="toggle-mode" class="toggle-with-buttons">
                 <div class="line">
-                    <span class="icon-button button-down"></span>
+                    <span class="button button-down"></span>
                     <span class="toggle">
                         <span class="on active">Dark</span><span class="off">Light</span>
                     </span>
-                    <span class="icon-button button-up"></span>
+                    <span class="button button-up"></span>
                 </div>
                 <p class="status">Mode</p>
             </div>
@@ -38,12 +40,12 @@
             <!-- BRIGHTNESS -->
             <div id="updown-brightness" class="updown">
                 <div class="line">
-                    <span class="icon-button button-down"></span>
+                    <span class="button button-down"></span>
                     <span class="trackbar">
                         <span class="value">&nbsp;</span>
                         <label>Brightness</label>
                     </span>
-                    <span class="icon-button button-up"></span>
+                    <span class="button button-up"></span>
                 </div>
                 <p class="status">-20</p>
             </div>
@@ -51,12 +53,12 @@
             <!-- CONTRAST -->
             <div id="updown-contrast" class="updown">
                 <div class="line">
-                    <span class="icon-button button-down"></span>
+                    <span class="button button-down"></span>
                     <span class="trackbar">
                         <span class="value">&nbsp;</span>
                         <label>Contrast</label>
                     </span>
-                    <span class="icon-button button-up"></span>
+                    <span class="button button-up"></span>
                 </div>
                 <p class="status">-20</p>
             </div>
@@ -64,12 +66,12 @@
             <!-- GRAYSCALE -->
             <div id="updown-grayscale" class="updown">
                 <div class="line">
-                    <span class="icon-button button-down"></span>
+                    <span class="button button-down"></span>
                     <span class="trackbar">
                         <span class="value">&nbsp;</span>
                         <label>Grayscale</label>
                     </span>
-                    <span class="icon-button button-up"></span>
+                    <span class="button button-up"></span>
                 </div>
                 <p class="status">+30</p>
             </div>
@@ -77,17 +79,18 @@
             <!-- SEPIA -->
             <div id="updown-sepia" class="updown">
                 <div class="line">
-                    <span class="icon-button button-down"></span>
+                    <span class="button button-down"></span>
                     <span class="trackbar">
                         <span class="value">&nbsp;</span>
                         <label>Sepia</label>
                     </span>
-                    <span class="icon-button button-up"></span>
+                    <span class="button button-up"></span>
                 </div>
                 <p class="status">+30</p>
             </div>
         </section>
 
+        <!-- FONT -->
         <section id="font-settings" class="settings-section">
             <h3>Font settings</h3>
 
@@ -95,7 +98,7 @@
             <div id="control-usefont" class="font-set">
                 <div class="line">
                     <input type="checkbox" checked="checked" />
-                    <!--<span class="check icon-button"></span>-->
+                    <!--<span class="check button"></span>-->
                     <input type="text" value="Segoe UI" />
                 </div>
                 <p class="status">Enter the name of the font</p>
@@ -104,15 +107,33 @@
             <!-- TEXT STROKE -->
             <div id="updown-textstroke" class="updown">
                 <div class="line">
-                    <span class="icon-button button-down"></span>
+                    <span class="button button-down"></span>
                     <span class="trackbar">
                         <span class="value">&nbsp;</span>
                         <label>Text stroke</label>
                     </span>
-                    <span class="icon-button button-up"></span>
+                    <span class="button button-up"></span>
                 </div>
                 <p class="status">+0.3</p>
             </div>
+        </section>
+
+        <!-- IGNORE LIST -->
+        <section id="ignore-list" class="settings-section">
+            <h3>Ignore list</h3>
+
+            <div class="ignore-list">
+                <div class="line">
+                    <input type="text" value="google.com" />
+                    <span class="button">Remove</span>
+                </div>
+                <div class="line">
+                    <input type="text" value="google.*" />
+                    <span class="button">Remove</span>
+                </div>
+            </div>
+
+            <span class="button">Add</span>
         </section>
     </main>
 </body>

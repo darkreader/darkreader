@@ -128,7 +128,7 @@
      */
     export class Button extends Control {
         /*
-            <span class="button"></span>
+            <span class="icon-button"></span>
         */
 
         protected initEvents() {

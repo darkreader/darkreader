@@ -120,24 +120,19 @@ main > *:not(:first-child) {
 #toggle-mode .button-up {
   background-image: url('../img/mode_light_32.svg');
 }
-.button {
-  min-width: 2em;
-  box-sizing: padding-box;
+.icon-button {
+  width: 2em;
   height: 2em;
   display: inline-block;
   border: 0.1875em solid #216778;
   flex: none;
   background-size: contain;
   cursor: pointer;
-  line-height: 2em;
-  text-align: center;
-  padding: 0 0.625em;
-  color: #ffffff;
 }
-.button:hover {
+.icon-button:hover {
   background-color: #113a49;
 }
-.button:active {
+.icon-button:active {
   background-color: #216778;
 }
 .updown > .line {
@@ -182,57 +177,6 @@ main > *:not(:first-child) {
   top: 0;
   z-index: 2;
 }
-input[type=checkbox] {
-  min-width: 2em;
-  box-sizing: padding-box;
-  display: inline-block;
-  border: 0.1875em solid #216778;
-  flex: none;
-  background-size: contain;
-  cursor: pointer;
-  line-height: 2em;
-  text-align: center;
-  padding: 0 0.625em;
-  color: #ffffff;
-  -webkit-appearance: none;
-  width: 2em;
-  height: 2em;
-  font-size: 1em;
-  box-sizing: content-box;
-  outline: none;
-}
-input[type=checkbox]:hover {
-  background-color: #113a49;
-}
-input[type=checkbox]:active {
-  background-color: #216778;
-}
-input[type=checkbox]:checked {
-  background-image: url('../img/icon-check_white_16.svg');
-}
-input[type=checkbox]:active {
-  background-color: #113a49;
-}
-input[type=text] {
-  width: 100%;
-  font-size: 1em;
-  border: 0.1875em solid #216778;
-  background-color: #00222b;
-  outline: none;
-  color: #37abc8;
-  padding: 0 0.625em;
-  line-height: 2em;
-}
-input[type=text]:hover {
-  background-color: #113a49;
-}
-input[type=text]:focus {
-  background-color: #113a49;
-  color: #ffffff;
-}
-input[type=text]::selection {
-  background-color: #e96c4c;
-}
 .font-set > .line {
   display: flex;
   flex-flow: row nowrap;
@@ -246,20 +190,49 @@ input[type=text]::selection {
   color: #37abc8;
   font-size: 0.875em;
 }
-.ignore-list > .line {
-  display: flex;
-  flex-flow: row nowrap;
-  align-items: stretch;
+.font-set input[type=checkbox] {
+  display: inline-block;
+  border: 0.1875em solid #216778;
+  flex: none;
+  background-size: contain;
+  cursor: pointer;
+  -webkit-appearance: none;
+  width: 2em;
+  height: 2em;
+  font-size: 1em;
+  box-sizing: content-box;
+  outline: none;
 }
-.ignore-list > .line > *:not(:first-child) {
-  margin-left: 0.625em;
+.font-set input[type=checkbox]:hover {
+  background-color: #113a49;
 }
-.ignore-list .status {
-  text-align: center;
+.font-set input[type=checkbox]:active {
+  background-color: #216778;
+}
+.font-set input[type=checkbox]:checked {
+  background-image: url('../img/icon-check_white_16.svg');
+}
+.font-set input[type=checkbox]:active {
+  background-color: #113a49;
+}
+.font-set input[type=text] {
+  width: 100%;
+  font-size: 1em;
+  border: 0.1875em solid #216778;
+  background-color: #00222b;
+  outline: none;
   color: #37abc8;
-  font-size: 0.875em;
+  padding: 0 0.625em;
+  line-height: 2em;
 }
-.ignore-list > *:not(:first-child) {
-  margin-top: 0.625em;
+.font-set input[type=text]:hover {
+  background-color: #113a49;
+}
+.font-set input[type=text]:focus {
+  background-color: #113a49;
+  color: #ffffff;
+}
+.font-set input[type=text]::selection {
+  background-color: #e96c4c;
 }
 /*# sourceMappingURL=style.css.map */

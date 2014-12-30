@@ -71,10 +71,12 @@ main > *:not(:first-child) {
   text-align: center;
   cursor: pointer;
   width: 50%;
+  transition: background-color 0.25s;
 }
 .toggle .on:hover,
 .toggle .off:hover {
   background-color: #113a49;
+  transition: background-color 0.125s;
 }
 .toggle .on:active,
 .toggle .off:active,
@@ -174,9 +176,11 @@ main > *:not(:first-child) {
   flex: none;
   background-size: contain;
   cursor: pointer;
+  transition: background-color 0.25s;
 }
 .icon-button:hover {
   background-color: #113a49;
+  transition: background-color 0.125s;
 }
 .icon-button:active {
   background-color: #216778;
@@ -233,9 +237,11 @@ input[type=text] {
   color: #37abc8;
   padding: 0 0.625em;
   line-height: 2em;
+  transition: background-color 0.25s;
 }
 input[type=text]:hover {
   background-color: #113a49;
+  transition: background-color 0.125s;
 }
 input[type=text]:focus {
   background-color: #113a49;
@@ -263,6 +269,7 @@ input[type=text]::selection {
   flex: none;
   background-size: contain;
   cursor: pointer;
+  transition: background-color 0.25s;
   -webkit-appearance: none;
   width: 2em;
   height: 2em;
@@ -272,6 +279,7 @@ input[type=text]::selection {
 }
 .font-set input[type=checkbox]:hover {
   background-color: #113a49;
+  transition: background-color 0.125s;
 }
 .font-set input[type=checkbox]:active {
   background-color: #216778;

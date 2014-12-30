@@ -16,6 +16,8 @@
 @size-indent-big: 1em;
 @size-indent-small: 0.625em;
 @size-main: 1em;
+@trans-back-slow: background-color 0.25s;
+@trans-back-fast: background-color 0.125s;
 
 
 //-----
@@ -115,9 +117,11 @@ main {
         text-align: center;
         cursor: pointer;
         width: 50%;
+        transition: @trans-back-slow;
 
         &:hover {
             background-color: @color-hover;
+            transition: @trans-back-fast;
         }
 
         &:active,
@@ -269,9 +273,11 @@ main {
     flex: none;
     background-size: contain;
     cursor: pointer;
+    transition: @trans-back-slow;
 
     &:hover {
         background-color: @color-hover;
+        transition: @trans-back-fast;
     }
 
     &:active {
@@ -338,9 +344,11 @@ input[type=text] {
     color: @color-description;
     padding: 0 @size-indent-small;
     line-height: @size-control-inner;
+    transition: @trans-back-slow;
 
     &:hover {
         background-color: @color-hover;
+        transition: @trans-back-fast;
     }
 
     &:focus {

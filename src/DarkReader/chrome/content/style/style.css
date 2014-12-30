@@ -127,16 +127,11 @@ main > *:not(:first-child) {
 }
 .tab-panel .tab-panel-content {
   margin-top: 1em;
-  height: 20em;
+  height: 21em;
   overflow-y: auto;
-}
-.tab-panel .tab-panel-content .tab {
-  transition: none;
 }
 .tab-panel .tab-panel-content .tab:not(.active) {
   display: none;
-  opacity: 0;
-  transition: opacity 0.25s ease-out, display 0.25s;
 }
 .settings-list {
   display: flex;
@@ -208,10 +203,54 @@ main > *:not(:first-child) {
   font-size: 0.875em;
 }
 .updown .button-down {
-  background-image: url('../img/icon-left_white_16.svg');
+  position: relative;
+}
+.updown .button-down:before {
+  content: "";
+  display: inline-block;
+  background-color: #ffffff;
+  position: absolute;
+  top: 0.25em;
+  left: 0.8125em;
+  height: 0.75em;
+  width: 0.25em;
+  transform: skewX(-45deg);
+}
+.updown .button-down:after {
+  content: "";
+  display: inline-block;
+  background-color: #ffffff;
+  position: absolute;
+  top: 1em;
+  left: 0.8125em;
+  height: 0.75em;
+  width: 0.25em;
+  transform: skewX(45deg);
 }
 .updown .button-up {
-  background-image: url('../img/icon-right_white_16.svg');
+  position: relative;
+}
+.updown .button-up:before {
+  content: "";
+  display: inline-block;
+  background-color: #ffffff;
+  position: absolute;
+  top: 0.25em;
+  left: 1em;
+  height: 0.75em;
+  width: 0.25em;
+  transform: skewX(45deg);
+}
+.updown .button-up:after {
+  content: "";
+  display: inline-block;
+  background-color: #ffffff;
+  position: absolute;
+  top: 1em;
+  left: 1em;
+  height: 0.75em;
+  width: 0.25em;
+  transform: skewX(-45deg);
 }
 .updown .trackbar {
   border: 0.1875em solid #216778;
@@ -294,7 +333,29 @@ input[type=text]::selection {
   background-color: #216778;
 }
 .font-set input[type=checkbox]:checked {
-  background-image: url('../img/icon-check_white_16.svg');
+  position: relative;
+}
+.font-set input[type=checkbox]:checked:before {
+  content: "";
+  display: inline-block;
+  background-color: #ffffff;
+  position: absolute;
+  left: 0.25em;
+  top: 1.125em;
+  height: 0.25em;
+  width: 0.5em;
+  transform: skewY(45deg);
+}
+.font-set input[type=checkbox]:checked:after {
+  content: "";
+  display: inline-block;
+  background-color: #ffffff;
+  position: absolute;
+  top: 0.875em;
+  left: 0.75em;
+  height: 0.25em;
+  width: 1em;
+  transform: skewY(-45deg);
 }
 .font-set input[type=checkbox]:active {
   background-color: #113a49;

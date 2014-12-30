@@ -65,9 +65,6 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="chrome\content\background.html" />
-    <Content Include="chrome\content\img\icon-check_white_16.svg" />
-    <Content Include="chrome\content\img\icon-right_white_16.svg" />
-    <Content Include="chrome\content\img\icon-left_white_16.svg" />
     <Content Include="chrome\content\img\mode_dark_32.svg" />
     <Content Include="chrome\content\img\mode_light_32.svg" />
     <Content Include="chrome\content\popup.html" />

@@ -51,7 +51,9 @@
             this.subscriptions.push(this.app.onConfigSetup.addHandler((cfg) => {
                 this.currentConfig = cfg;
 
+                //
                 // Set controls values
+
                 this.toggleMode.toggle.isOn = !!cfg.mode; // Attention, enum.
 
                 this.updownBrightness.trackBar.value = cfg.brightness - 50;
@@ -71,6 +73,8 @@
 
                 this.updownTextStroke.trackBar.value = cfg.textstroke * 100;
                 this.updownTextStroke.status.message = cfg.textstroke > 0 ? '+' + cfg.textstroke : 'off';
+
+                this.ignoreList.values = cfg.ignorelist;
             }, this));
 
 
@@ -137,6 +141,20 @@
                 this.currentConfig.textstroke = value / 100;
                 this.app.config = this.currentConfig;
             }, this);
+
+            // Ignore list
+            this.ignoreList.onValuesChanged.addHandler((values) => {
+                this.currentConfig.ignorelist = values;
+                this.app.config = this.currentConfig;
+            }, this);
+
+
+            // Set focus when ignorelist tab is opened
+            this.tabPanel.onTabSwitch.addHandler(index=> {
+                if (index === 2) {
+                    this.ignoreList.setFocus();
+                }
+            }, this);
         }
 
         /**
@@ -161,6 +179,8 @@
         updownSepia: UpDown;
         fontSet: FontSet;
         updownTextStroke: UpDown;
+        tabPanel: TabPanel;
+        ignoreList: IgnoreList;
 
         private initControls() {
             this.toggleApp = new ToggleWithStatus('toggle-app');
@@ -171,6 +191,8 @@
             this.updownSepia = new UpDown('updown-sepia');
             this.fontSet = new FontSet('control-usefont');
             this.updownTextStroke = new UpDown('updown-textstroke');
+            this.tabPanel = new TabPanel('tab-panel');
+            this.ignoreList = new IgnoreList('ignore-list');
         }
     }
 } 

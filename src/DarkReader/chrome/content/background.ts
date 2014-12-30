@@ -8,7 +8,8 @@
         sepia: 10,
         usefont: false,
         fontfamily: 'Segoe UI',
-        textstroke: 0
+        textstroke: 0,
+        ignorelist: []
     };
 
     // Initialize extension

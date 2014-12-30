@@ -7,7 +7,7 @@
      */
     export function isUrlInIgnoreList(url: string, list = ignoreList) {
         var found = false;
-        ignoreList.forEach((t) => {
+        list.forEach((t) => {
             if (isUrlMatched(url, t)) {
                 found = true;
             }

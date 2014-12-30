@@ -33,7 +33,7 @@
             this.element = element;
             this.initContent();
             this.initEvents();
-            this.initComplete();
+            this.onInitComplete();
         }
 
         /**
@@ -49,7 +49,7 @@
         /**
          * Is invoked after control's initialization is complete.
          */
-        protected initComplete() { }
+        protected onInitComplete() { }
     }
 
 
@@ -339,6 +339,9 @@
             this.checkbox.checked = use;
         }
 
+        /**
+         * Gets or sets font family.
+         */
         get fontFamily() {
             return this._fontFamily;
         }
@@ -378,6 +381,121 @@
          * Fires when user has edited the text.
          */
         onUserTextChange: Event<string>;
+    }
+
+
+    /**
+     * Tab panel.
+     */
+    export class TabPanel extends Control {
+        private tabs: HTMLElement[];
+        private buttons: HTMLElement[];
+
+        protected initContent() {
+            this.tabs = Array.prototype.slice.call(this.element.querySelectorAll('.tab'));
+            this.buttons = Array.prototype.slice.call(this.element.querySelectorAll('.tab-panel-button'));
+        }
+
+        protected initEvents() {
+            this.buttons.forEach((b, i) => {
+                b.onclick = () => this.switchTab(i);
+            });
+            this.onTabSwitch = new Event<number>();
+        }
+
+        private switchTab(index: number) {
+            this.buttons.forEach((b) => b.classList.remove('active'));
+            this.buttons[index].classList.add('active');
+
+            this.tabs.forEach((t) => t.classList.remove('active'));
+            this.tabs[index].classList.add('active');
+
+            this.onTabSwitch.invoke(index);
+        }
+
+        /**
+         * Fires when user has switched a tab.
+         */
+        onTabSwitch: Event<number>;
+    }
+
+
+    /**
+     * Ignore list.
+     */
+    export class IgnoreList extends Control {
+        private _values: string[];
+
+        /**
+         * Gets or sets ignore list.
+         */
+        get values() {
+            return this._values;
+        }
+        set values(list) {
+            this._values = list;
+
+            //
+            // DOM
+
+            // Remove children
+            while (this.element.firstChild) {
+                this.element.removeChild(this.element.firstChild);
+            }
+
+            // Add textboxes
+            list.forEach((value) => this.addTextBox(value));
+
+            // Add final empty textbox
+            this.addTextBox('');
+            this.setFocus();
+        }
+
+        private addTextBox(value: string): HTMLInputElement {
+            var textBox = document.createElement('input');
+            textBox.type = 'text';
+            textBox.placeholder = 'mail.google.com';
+            textBox.value = value;
+            textBox.onchange = (e) => {
+                var values = this.getInputValues();
+                this.onValuesChanged.invoke(values);
+            };
+            this.element.appendChild(textBox);
+            return textBox;
+        }
+
+        private getInputValues(): string[] {
+            var values = [];
+            var children = <HTMLInputElement[]>Array.prototype.slice.call(this.element.children);
+            children.forEach((c) => {
+                var v = c.value.trim();
+
+                // Validate
+                if (!!v.match(this.regex)) {
+                    values.push(v);
+                }
+            });
+
+            return values;
+        }
+
+        private regex = /^([^\.\s]+?\.?)+$/;
+
+        /**
+         * Sets the focus to the last textbox.
+         */
+        setFocus() {
+            (<HTMLInputElement>this.element.lastChild).focus();
+        }
+
+        protected initEvents() {
+            this.onValuesChanged = new Event<string[]>();
+        }
+
+        /**
+         * Fires when user changes any value.
+         */
+        onValuesChanged: Event<string[]>;
     }
 
 

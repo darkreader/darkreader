@@ -1,7 +1,7 @@
 ﻿{
     "manifest_version": 2,
     "name": "Dark Reader",
-    "version": "2.0.5",
+    "version": "2.0.6",
     "description": "Keep your eyes, Dark Reader.",
     "browser_action": {
         "default_title": "Dark Reader",

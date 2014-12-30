@@ -103,6 +103,7 @@ main > *:not(:first-child) {
   font-weight: bold;
   border-bottom: 0.1875em solid #216778;
   cursor: pointer;
+  transition: background-color 0.25s;
 }
 .tab-panel .tab-panel-buttons .tab-panel-button.active {
   color: #e96c4c;
@@ -115,6 +116,7 @@ main > *:not(:first-child) {
 .tab-panel .tab-panel-buttons .tab-panel-button:hover:not(.active) {
   background-color: #113a49;
   color: #37abc8;
+  transition: background-color 0.125s;
 }
 .tab-panel .tab-panel-buttons:before,
 .tab-panel .tab-panel-buttons:after {
@@ -125,9 +127,16 @@ main > *:not(:first-child) {
 }
 .tab-panel .tab-panel-content {
   margin-top: 1em;
+  height: 20em;
+  overflow-y: auto;
+}
+.tab-panel .tab-panel-content .tab {
+  transition: none;
 }
 .tab-panel .tab-panel-content .tab:not(.active) {
   display: none;
+  opacity: 0;
+  transition: opacity 0.25s ease-out, display 0.25s;
 }
 .settings-list {
   display: flex;
@@ -291,7 +300,6 @@ input[type=text]::selection {
   background-color: #113a49;
 }
 .ignore-list {
-  width: 100%;
   border: 0.1875em solid #216778;
   display: flex;
   flex-flow: column nowrap;

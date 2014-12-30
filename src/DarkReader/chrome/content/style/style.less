@@ -157,6 +157,7 @@ main {
             //border-top: @size-border solid transparent;
             border-bottom: @size-border solid @color-border;
             cursor: pointer;
+            transition: @trans-back-slow;
 
             &.active {
                 color: @color-header;
@@ -171,6 +172,7 @@ main {
             &:hover:not(.active) {
                 background-color: @color-hover;
                 color: @color-description;
+                transition: @trans-back-fast;
             }
         }
 
@@ -185,9 +187,17 @@ main {
 
     .tab-panel-content {
         margin-top: @size-indent-big;
+        height: 20em;
+        overflow-y: auto;
 
-        .tab:not(.active) {
-            display: none;
+        .tab {
+            transition: none;
+
+            &:not(.active) {
+                display: none;
+                opacity: 0;
+                transition: opacity 0.25s ease-out, display 0.25s;
+            }
         }
     }
 }
@@ -388,7 +398,6 @@ input[type=text] {
 //------------
 
 .ignore-list {
-    width: 100%;
     border: @size-border solid @color-border;
     display: flex;
     flex-flow: column nowrap;

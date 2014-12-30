@@ -1,5 +1,5 @@
 ﻿{
-    "commonSelectors": "img, iframe:not(:-webkit-full-screen), video:not(:-webkit-full-screen), embed:not(:-webkit-full-screen)",
+    "commonSelectors": "img, iframe:not(:-webkit-full-screen), video:not(:-webkit-full-screen), embed:not(:-webkit-full-screen), object:not(:-webkit-full-screen)",
     "specials": [
         {
             "url": "youtube.com",

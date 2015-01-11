@@ -16,6 +16,14 @@
         {
             "url": "onliner.*",
             "selectors": "img, iframe:not(:-webkit-full-screen), video:not(:-webkit-full-screen), embed:not(:-webkit-full-screen), .b-tile, .b-teasers-1__teaser, .b-teasers-2__teaser"
+        },
+        {
+            "url": "spotify.com",
+            "selectors": "img, iframe:not(:-webkit-full-screen), video:not(:-webkit-full-screen), embed:not(:-webkit-full-screen), .hero, .header-main, .search-bar, #bg-wrap, #main" 
+        },
+        {
+            "url": "wikipedia.org",
+            "selectors": "img:not(.mwe-math-fallback-image-inline.tex), iframe:not(:-webkit-full-screen), video:not(:-webkit-full-screen), embed:not(:-webkit-full-screen)" 
         }
     ]
 }

@@ -40,7 +40,7 @@
 
     function createUrlRegex(urlTemplate: string): RegExp {
         ///^(.*?\:\/\/)?.*?\.?(google\.[^\.]+?)(\/.*)?$/i
-        var result = '^(.*?\\:\\/\\/)?.*?\\.?';
+        var result = '^(.*?\\:\\/\\/)?[^\/]*?\\.?';
 
         // Remove protocol?
         urlTemplate = urlTemplate.replace(/^.*?\/\//, '');

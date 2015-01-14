@@ -47,6 +47,7 @@ Besides using settings-page ignore list, dark-themed web-sites can be added into
     "mail.google.com",
     "google.com/mail"
 ]
+```
 
 ## Building and debugging
 In order to build and debug the project, launch the [DRChrome_build.cmd](https://github.com/alexanderby/darkreader/blob/master/build/DRChrome_build.cmd). Open the [Chrome's extensions page](https://support.google.com/chrome/answer/187443). Enable the **Developer mode**, press **Load unpacked extension** button, navigate to your built output folder.

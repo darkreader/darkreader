@@ -46,22 +46,6 @@
         // Sort URLs from specials ("google.com") to generics ("google.*").
         selectors.specials.sort(urlTemplateSorter);
 
-        //// Try load remote
-        //readJson<ContrarySelectors>(
-        //    'https://github.com/alexanderby/darkreader/raw/master/src/DarkReader/generation/contrary.json',
-        //    function (result, error) {
-        //        if (!error) {
-        //            selectors = result;
-        //        }
-        //        else {
-        //            // Load locally if error
-        //            selectors = readJsonSync<ContrarySelectors>('contrary.json');
-        //        }
-
-        //        // Sort URLs from specials ("google.com") to generics ("google.*").
-        //        selectors.specials.sort(urlTemplateSorter);
-        //    });
-
         return selectors;
     })();
 }

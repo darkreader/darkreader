@@ -32,21 +32,6 @@
 
         list.sort(urlTemplateSorter);
 
-        //// Try load remote
-        //readJson<string[]>(
-        //    'https://github.com/alexanderby/darkreader/raw/master/src/DarkReader/generation/ignore.json',
-        //    function (result, error) {
-        //        if (!error) {
-        //            list = result;
-        //        }
-        //        else {
-        //            // Load locally if error
-        //            list = readJsonSync<string[]>('ignore.json');
-        //        }
-
-        //        list.sort(urlTemplateSorter);
-        //    });
-
         return list;
     })();
 

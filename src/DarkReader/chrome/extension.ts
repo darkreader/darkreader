@@ -1,7 +1,7 @@
 ﻿module DarkReader.Chrome {
 
     /**
-     * Chrome extension base.
+     * Chrome extension.
      * Extension uses CSS generator to process opened web pages.
      */
     export class Extension<TConfig> extends Application<TConfig> {
@@ -135,7 +135,7 @@
         protected tabUpdateListener = (tabId: number, info: chrome.tabs.TabChangeInfo, tab: chrome.tabs.Tab) => {
             console.log('Tab: ' + tab.id + ', status: ' + info.status);
 
-            if (info.status === 'loading') {
+            if (/*info.status === 'loading'*/true) {
                 //if (info.status === 'loading' || info.status === 'complete') {
                 this.addCssToTab(tab);
             }

@@ -22,10 +22,34 @@
      * Static ignore list.
      */
     export var ignoreList = (function () {
-        var list = readJsonSync<string[]>('ignore.json');
+        var list: string[];
+
+        // Try load remote
+        list = readJsonSync<string[]>(
+            'https://raw.githubusercontent.com/alexanderby/darkreader/master/src/DarkReader/generation/ignore.json',
+            // Load locally if error
+            function (error) { list = readJsonSync<string[]>('ignore.json'); });
+
         list.sort(urlTemplateSorter);
+
+        //// Try load remote
+        //readJson<string[]>(
+        //    'https://github.com/alexanderby/darkreader/raw/master/src/DarkReader/generation/ignore.json',
+        //    function (result, error) {
+        //        if (!error) {
+        //            list = result;
+        //        }
+        //        else {
+        //            // Load locally if error
+        //            list = readJsonSync<string[]>('ignore.json');
+        //        }
+
+        //        list.sort(urlTemplateSorter);
+        //    });
+
         return list;
     })();
+
 
     /**
      * Determines whether URL matches the template.

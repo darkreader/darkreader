@@ -1,0 +1,4 @@
+..\src\DarkReader\chrome\content\popup.controls.ts
+..\src\DarkReader\chrome\content\popup.controller.ts
+..\src\DarkReader\chrome\content\popup.ts
+..\src\DarkReader\typings\chrome\chrome.d.ts

@@ -43,7 +43,8 @@
             // Load locally if error
             function (error) { selectors = readJsonSync<ContrarySelectors>('contrary.json') });
 
-        // Sort URLs from specials ("google.com") to generics ("google.*").
+        //selectors = readJsonSync<ContrarySelectors>('contrary.json')
+
         selectors.specials.sort(urlTemplateSorter);
 
         return selectors;

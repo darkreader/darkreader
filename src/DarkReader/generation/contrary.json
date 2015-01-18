@@ -1,5 +1,5 @@
 ﻿{
-    "commonSelectors": "img, iframe, video, embed, object",
+    "commonSelectors": "img, iframe, video, embed, object, *[style*=\"background:url\"], *[style*=\"background-image:url\"], *[style*=\"background: url\"], *[style*=\"background-image: url\"]",
     "specials": [
         {
             "url": "youtube.com",
@@ -12,10 +12,6 @@
         {
             "url": "vk.com",
             "selectors": "img, iframe, video, embed, .video_image_div, #layer_bg"
-        },
-        {
-            "url": "onliner.*",
-            "selectors": "img, iframe, video, embed, .b-tile, .b-teasers-1__teaser, .b-teasers-2__teaser"
         },
         {
             "url": "spotify.com",

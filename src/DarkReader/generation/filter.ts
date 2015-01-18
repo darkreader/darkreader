@@ -65,6 +65,9 @@
                     // Add text rule
                     parts.push('*', this.createTextDeclaration(config));
 
+                // Full screen fix
+                parts.push('*:' + this.prefix + 'full-screen', '{ ' + this.prefix + 'filter: none; }');
+
                 return parts.join(' ');
             }
         }

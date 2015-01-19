@@ -41,7 +41,10 @@
         selectors = readJsonSync<ContrarySelectors>(
             'https://raw.githubusercontent.com/alexanderby/darkreader/master/src/DarkReader/generation/contrary.json',
             // Load locally if error
-            function (error) { selectors = readJsonSync<ContrarySelectors>('contrary.json') });
+            function (error) {
+                selectors = readJsonSync<ContrarySelectors>('contrary.json');
+                console.log('Loaded local contrary selectors. Remote error: ' + error);
+            });
 
         //selectors = readJsonSync<ContrarySelectors>('contrary.json')
 

@@ -24,14 +24,19 @@
     export var ignoreList = (function () {
         var list: string[];
 
-        // Try load remote
-        list = readJsonSync<string[]>(
-            'https://raw.githubusercontent.com/alexanderby/darkreader/master/src/DarkReader/generation/ignore.json',
-            // Load locally if error
-            function (error) {
-                list = readJsonSync<string[]>('ignore.json');
-                console.log('Loaded local ignore list. Remote error: ' + error);
-            });
+        readJson<string[]>({
+            url: 'https://raw.githubusercontent.com/alexanderby/darkreader/master/src/DarkReader/generation/ignore.json',
+            async: false,
+            onSuccess: (result) => list = result,
+            onFailure: (error) => readJson<string[]>({
+                url: 'ignore.json',
+                async: false,
+                onSuccess: (result) => {
+                    list = result;
+                    console.log('Loaded local ignore list. Remote error: ' + error);
+                }
+            })
+        });
 
         list.sort(urlTemplateSorter);
 

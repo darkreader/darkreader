@@ -37,15 +37,19 @@
     export var contrarySelectors = (function () {
         var selectors: ContrarySelectors;
 
-        // Try load remote
-        selectors = readJsonSync<ContrarySelectors>(
-            'https://raw.githubusercontent.com/alexanderby/darkreader/master/src/DarkReader/generation/contrary.json',
-            // Load locally if error
-            function (error) {
-                selectors = readJsonSync<ContrarySelectors>('contrary.json');
-                console.log('Loaded local contrary selectors. Remote error: ' + error);
-            });
-
+        readJson<ContrarySelectors>({
+            url: 'https://raw.githubusercontent.com/alexanderby/darkreader/master/src/DarkReader/generation/contrary.json',
+            async: false,
+            onSuccess: (result) => selectors = result,
+            onFailure: (error) => readJson<ContrarySelectors>({
+                url: 'contrary.json',
+                async: false,
+                onSuccess: (result) => {
+                    selectors = result;
+                    console.log('Loaded local contrary selectors. Remote error: ' + error);
+                }
+            })
+        });
         //selectors = readJsonSync<ContrarySelectors>('contrary.json')
 
         selectors.specials.sort(urlTemplateSorter);

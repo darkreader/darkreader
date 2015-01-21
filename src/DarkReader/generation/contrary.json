@@ -1,5 +1,5 @@
 ﻿{
-    "commonSelectors": "img, iframe, video, embed, object, *[style*=\"background:url\"], *[style*=\"background-image:url\"], *[style*=\"background: url\"], *[style*=\"background-image: url\"]",
+    "commonSelectors": "img, iframe, video, embed, object, *[style*=\"background:url\"]:empty, *[style*=\"background-image:url\"]:empty, *[style*=\"background: url\"]:empty, *[style*=\"background-image: url\"]:empty",
     "specials": [
         {
             "url": "youtube.com",
@@ -12,6 +12,10 @@
         {
             "url": "google.com.*",
             "selectors": "img, iframe, video, embed, .gbii, .gbip, .azp, .aLF-aPX-KP"
+        },
+        {
+            "url": "granttree.co.uk",
+            "selectors": "img, iframe, video, embed, .team-member>photo"
         },
         {
             "url": "vk.com",

@@ -15,7 +15,7 @@
         },
         {
             "url": "granttree.co.uk",
-            "selectors": "img, iframe, video, embed, .team-member>photo"
+            "selectors": "img, iframe, video, embed, .photo"
         },
         {
             "url": "vk.com",

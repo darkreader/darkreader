@@ -1,10 +1,6 @@
 ﻿{
-    "commonSelectors": "img, iframe, video, embed, object, *[style*=\"background:url\"]:empty, *[style*=\"background-image:url\"]:empty, *[style*=\"background: url\"]:empty, *[style*=\"background-image: url\"]:empty",
+    "commonSelectors": "img, iframe, video, *:not(object)>embed, object, *[style*=\"background:url\"]:empty, *[style*=\"background-image:url\"]:empty, *[style*=\"background: url\"]:empty, *[style*=\"background-image: url\"]:empty",
     "specials": [
-        {
-            "url": "youtube.com",
-            "selectors": "iframe, .html5-video-player, #theater-background, div:not(.html5-video-player) img"
-        },
         {
             "url": "google.*",
             "selectors": "img, iframe, video, embed, .gbii, .gbip, .azp, .aLF-aPX-KP"
@@ -18,16 +14,20 @@
             "selectors": "img, iframe, video, embed, .photo"
         },
         {
-            "url": "vk.com",
-            "selectors": "img, iframe, video, embed, .video_image_div, #layer_bg"
-        },
-        {
             "url": "spotify.com",
             "selectors": "img, iframe, video, embed, .hero, .header-main, .search-bar, #bg-wrap, #main" 
         },
         {
+            "url": "vk.com",
+            "selectors": "img, iframe, video, embed, .video_image_div, #layer_bg"
+        },
+        {
             "url": "wikipedia.org",
             "selectors": "img:not(.mwe-math-fallback-image-inline.tex), iframe, video, embed" 
+        },
+        {
+            "url": "youtube.com",
+            "selectors": "iframe, .html5-video-player, #theater-background, div:not(.html5-video-player) img"
         }
     ]
 }

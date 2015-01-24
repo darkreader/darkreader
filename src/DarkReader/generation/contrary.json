@@ -14,6 +14,10 @@
             "selectors": "img, iframe, video, embed, .photo"
         },
         {
+            "url": "inpad.com.tw",
+            "selectors": "{common}, *[style*=\"background-image:url\"]"
+        },
+        {
             "url": "spotify.com",
             "selectors": "img, iframe, video, embed, .hero, .header-main, .search-bar, #bg-wrap, #main" 
         },

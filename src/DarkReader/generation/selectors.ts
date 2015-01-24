@@ -52,6 +52,14 @@
         });
         //selectors = readJsonSync<ContrarySelectors>('contrary.json')
 
+        // Replace "{common}" with common selectors
+        selectors.specials.forEach((s) => {
+            s.selectors = s.selectors.replace(
+                /\{common\}/ig,
+                selectors.commonSelectors);
+        });
+
+        // Sort
         selectors.specials.sort(urlTemplateSorter);
 
         return selectors;

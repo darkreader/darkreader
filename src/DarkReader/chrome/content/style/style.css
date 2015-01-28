@@ -1,4 +1,9 @@
-﻿@import url(http://fonts.googleapis.com/css?family=Open+Sans);
+﻿@font-face {
+  font-family: 'Open Sans';
+  src: url('../font/OpenSans-Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
 div,
 span,
 p,

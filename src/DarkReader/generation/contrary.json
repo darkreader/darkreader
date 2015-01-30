@@ -19,7 +19,7 @@
         },
         {
             "url": "mail.live.com",
-            "selectors": "img:not([src=\"https://a.gfx.ms/rte_metro2.png\"]), video, object, .ComposeContent"
+            "selectors": ".ComposeContent { background-color:white; } img:not([src=\"https://a.gfx.ms/rte_metro2.png\"]), video, object, .ComposeContent"
         },
         {
             "url": "spotify.com",

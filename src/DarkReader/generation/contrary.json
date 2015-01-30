@@ -18,6 +18,10 @@
             "selectors": "{common}, *[style*=\"background-image:url\"]"
         },
         {
+            "url": "mail.live.com",
+            "selectors": "img:not([src=\"https://a.gfx.ms/rte_metro2.png\"]), video, object, .ComposeContent"
+        },
+        {
             "url": "spotify.com",
             "selectors": "img, iframe, video, embed, .hero, .header-main, .search-bar, #bg-wrap, #main" 
         },

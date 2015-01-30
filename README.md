@@ -49,6 +49,21 @@ Besides using settings-page ignore list, dark-themed web-sites can be added into
 ]
 ```
 
+## Custom CSS-rules
+Custom CSS-rules can be applied for fixing things, which cannot be corrected with contrary revertions. They are located in [rules.json](https://github.com/alexanderby/darkreader/blob/master/src/DarkReader/generation/rules.json) file. The ```url``` value contains URL-template, the ```rule``` value contains a CSS-rule. If web-site is not ignored, then both the inversion rules and custom rule will be used.
+```JSON
+﻿[
+    {
+        "url": "youtube.com",
+        "rule": "div { background-color:red; }"
+    },
+    {
+        "url": "google.*",
+        "rule": "div { background-color:blue; }"
+    }
+]
+```
+
 ## Building and debugging
 In order to build and debug the project, launch the [DRChrome_build.cmd](https://github.com/alexanderby/darkreader/blob/master/build/DRChrome_build.cmd). Open the [Chrome's extensions page](https://support.google.com/chrome/answer/187443). Enable the **Developer mode**, press **Load unpacked extension** button, navigate to your built output folder.
 After making any code changes, the project should be rebuilt using the command line script and reloaded in **Extension page** by pressing the **Reload (Ctrl+R)** hyperlink.

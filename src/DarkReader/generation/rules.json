@@ -1,0 +1,6 @@
+﻿[
+    {
+        "url": "mail.live.com",
+        "rule": ".ComposeContent { background-color: white; }"
+    }
+]

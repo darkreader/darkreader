@@ -11,7 +11,7 @@
     }
 
     /**
-     * Returns selectors, configured for given URL.
+     * Returns contrary-selectors, configured for given URL.
      * @param url If no matches found, common selectors will be used.
      */
     export function getSelectorsFor(url: string): string {

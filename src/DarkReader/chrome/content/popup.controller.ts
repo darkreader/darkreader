@@ -22,8 +22,8 @@
             };
 
             // Set values for the first time
-            this.app.onToggle.invoke(this.app.isEnabled);
-            this.app.onConfigSetup.invoke(this.app.config);
+            this.onAppToggle(this.app.isEnabled);
+            this.onSetConfig(this.app.config);
         }
 
 
@@ -43,39 +43,10 @@
             //------------------------
 
             // On toggle
-            this.subscriptions.push(this.app.onToggle.addHandler(isOn => {
-                this.toggleApp.toggle.isOn = isOn;
-            }, this));
+            this.subscriptions.push(this.app.onToggle.addHandler(this.onAppToggle, this));
 
             // On config setup
-            this.subscriptions.push(this.app.onConfigSetup.addHandler((cfg) => {
-                this.currentConfig = cfg;
-
-                //
-                // Set controls values
-
-                this.toggleMode.toggle.isOn = !!cfg.mode; // Attention, enum.
-
-                this.updownBrightness.trackBar.value = cfg.brightness - 50;
-                this.updownBrightness.status.message = cfg.brightness > 100 ? '+' + (cfg.brightness - 100) : cfg.brightness < 100 ? '-' + (100 - cfg.brightness) : 'off';
-
-                this.updownContrast.trackBar.value = cfg.contrast - 50;
-                this.updownContrast.status.message = cfg.contrast > 100 ? '+' + (cfg.contrast - 100) : cfg.contrast < 100 ? '-' + (100 - cfg.contrast) : 'off';
-
-                this.updownGrayscale.trackBar.value = cfg.grayscale;
-                this.updownGrayscale.status.message = cfg.grayscale > 0 ? '+' + cfg.grayscale : 'off';
-
-                this.updownSepia.trackBar.value = cfg.sepia;
-                this.updownSepia.status.message = cfg.sepia > 0 ? '+' + cfg.sepia : 'off';
-
-                this.fontSet.isFontUsed = cfg.usefont;
-                this.fontSet.fontFamily = cfg.fontfamily;
-
-                this.updownTextStroke.trackBar.value = cfg.textstroke * 100;
-                this.updownTextStroke.status.message = cfg.textstroke > 0 ? '+' + cfg.textstroke : 'off';
-
-                this.ignoreList.values = cfg.ignorelist;
-            }, this));
+            this.subscriptions.push(this.app.onConfigSetup.addHandler(this.onSetConfig, this));
 
 
             //------------------------
@@ -95,8 +66,8 @@
             // Mode toggle
             this.toggleMode.toggle.onUserToggle.addHandler((isOn) => {
                 this.currentConfig.mode = isOn ?
-                Generation.FilterMode.dark
-                : Generation.FilterMode.light
+                    Generation.FilterMode.dark
+                    : Generation.FilterMode.light
                 this.app.config = this.currentConfig;
             }, this);
 
@@ -152,7 +123,13 @@
             // Set focus when ignorelist tab is opened
             this.tabPanel.onTabSwitch.addHandler(index=> {
                 if (index === 2) {
+                    // Scroll down so that message is visible
+                    var content = document.querySelector('.tab-panel-content');
+                    if (content)
+                        content.scrollTop = content.scrollHeight;
+
                     this.ignoreList.setFocus();
+
                 }
             }, this);
         }
@@ -165,6 +142,42 @@
                 s.event.removeHandler(s.handler);
             });
         }
+
+        //
+        // App event handlers
+
+        private onSetConfig = (cfg: Generation.FilterConfig) => {
+            this.currentConfig = cfg;
+
+            //
+            // Set controls values
+
+            this.toggleMode.toggle.isOn = !!cfg.mode; // Attention, enum.
+
+            this.updownBrightness.trackBar.value = cfg.brightness - 50;
+            this.updownBrightness.status.message = cfg.brightness > 100 ? '+' + (cfg.brightness - 100) : cfg.brightness < 100 ? '-' + (100 - cfg.brightness) : 'off';
+
+            this.updownContrast.trackBar.value = cfg.contrast - 50;
+            this.updownContrast.status.message = cfg.contrast > 100 ? '+' + (cfg.contrast - 100) : cfg.contrast < 100 ? '-' + (100 - cfg.contrast) : 'off';
+
+            this.updownGrayscale.trackBar.value = cfg.grayscale;
+            this.updownGrayscale.status.message = cfg.grayscale > 0 ? '+' + cfg.grayscale : 'off';
+
+            this.updownSepia.trackBar.value = cfg.sepia;
+            this.updownSepia.status.message = cfg.sepia > 0 ? '+' + cfg.sepia : 'off';
+
+            this.fontSet.isFontUsed = cfg.usefont;
+            this.fontSet.fontFamily = cfg.fontfamily;
+
+            this.updownTextStroke.trackBar.value = cfg.textstroke * 100;
+            this.updownTextStroke.status.message = cfg.textstroke > 0 ? '+' + cfg.textstroke : 'off';
+
+            this.ignoreList.values = cfg.ignorelist;
+        };
+
+        private onAppToggle = (isOn: boolean) => {
+            this.toggleApp.toggle.isOn = isOn;
+        };
 
 
         //---------

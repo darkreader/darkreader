@@ -7,7 +7,7 @@
      * Base control.
      */
     export class Control {
-        protected element: HTMLElement;
+        element: HTMLElement;
 
         /**
          * Creates the control in element with given ID.

@@ -103,7 +103,11 @@
     /**
      * URL template sorter.
      */
-    export var urlTemplateSorter = (a, b) => {
+    export var urlTemplateSorter = (a: { url?: string }, b: { url?: string }) => {
+        if (typeof a === 'string')
+            a = { url: <string>a };
+        if (typeof b === 'string')
+            b = { url: <string>b };
         var slashIndexA = a.url.indexOf('/');
         var slashIndexB = b.url.indexOf('/');
         var addressA = a.url.substring(0, slashIndexA);

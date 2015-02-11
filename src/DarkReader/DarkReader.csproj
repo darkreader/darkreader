@@ -20,7 +20,7 @@
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <DebugType>full</DebugType>
     <DebugSymbols>true</DebugSymbols>
-    <TypeScriptToolsVersion>1.1</TypeScriptToolsVersion>
+    <TypeScriptToolsVersion>1.4</TypeScriptToolsVersion>
     <FileUpgradeFlags>
     </FileUpgradeFlags>
     <UpgradeBackupLocation>
@@ -53,6 +53,7 @@
     <TypeScriptCompile Include="chrome\content\popup.controller.ts" />
     <TypeScriptCompile Include="app\event.ts" />
     <TypeScriptCompile Include="generation\ignore.ts" />
+    <TypeScriptCompile Include="generation\rules.ts" />
     <TypeScriptCompile Include="generation\selectors.ts" />
     <TypeScriptCompile Include="generation\filter.ts" />
     <TypeScriptCompile Include="generation\generator.ts" />
@@ -99,6 +100,9 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="generation\ignore.json" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="generation\rules.json" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="chrome\content\font\OpenSans-Regular.ttf" />

@@ -37,9 +37,12 @@
          * @param [url] Web-site address. If not specified than common contrary selectors will be used.
          */
         createCssCode(config: FilterConfig, url: string): string {
+            // Search for custom rule
+            var rule = getRuleFor(url);
+
             // Check in default ignore list
             if (isUrlInIgnoreList(url)) {
-                return '';
+                return rule ? rule : '';
             }
             // Check in user's ignore list
             else if (isUrlInIgnoreList(url, config.ignorelist)) {
@@ -55,20 +58,23 @@
                 var parts: string[] = [];
 
                 // Add leading rule.
-                parts.push('html', this.createLeadingDeclaration(config));
+                parts.push('html ' + this.createLeadingDeclaration(config));
 
                 if (config.mode === FilterMode.dark)
                     // Add contrary rule
-                    parts.push(selectors, this.createContraryDeclaration(config));
+                    parts.push(selectors + ' ' + this.createContraryDeclaration(config));
 
                 if (config.usefont || config.textstroke > 0)
                     // Add text rule
-                    parts.push('*', this.createTextDeclaration(config));
+                    parts.push('* ' + this.createTextDeclaration(config));
 
                 // Full screen fix
-                parts.push('*:' + this.prefix + 'full-screen', '{ ' + this.prefix + 'filter: none !important; }');
+                parts.push('*:' + this.prefix + 'full-screen { ' + this.prefix + 'filter: none !important; }');
 
-                return parts.join(' ');
+                if (rule)
+                    parts.push(rule);
+
+                return parts.join('\\n');
             }
         }
 

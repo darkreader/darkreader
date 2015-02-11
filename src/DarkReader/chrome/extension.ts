@@ -68,7 +68,7 @@
                 chrome.tabs.getCurrent((t) => { this.addCssToTab(t) });
 
                 // Set style for all tabs
-                chrome.tabs.query({}, (tabs) => {
+                chrome.tabs.query({},(tabs) => {
                     tabs.forEach((tab) => {
                         this.addCssToTab(tab);
                     });
@@ -90,7 +90,7 @@
                 this.removeCssFromTab(null);
 
                 // Remove style from all tabs
-                chrome.tabs.query({}, (tabs) => {
+                chrome.tabs.query({},(tabs) => {
                     tabs.forEach((tab) => {
                         this.removeCssFromTab(tab);
                     });
@@ -104,7 +104,7 @@
                 chrome.tabs.getCurrent((t) => { this.updateCssInTab(t) });
 
                 // Update style for all tabs
-                chrome.tabs.query({}, (tabs) => {
+                chrome.tabs.query({},(tabs) => {
                     tabs.forEach((tab) => {
                         this.updateCssInTab(tab);
                     });
@@ -207,14 +207,26 @@
 
             //var code = "alert('Add CSS');"
             var code = [
-                "console.log('Executing DR script...');",
+                "console.log('Executing DR script (add)...');",
+            //"debugger;",
                 "var addDRStyle = function() {",
                 "   var css = '" + css + "';",
                 "   var style = document.createElement('style');",
                 "   style.setAttribute('id', 'dark-reader-style');",
                 "   style.type = 'text/css';",
                 "   style.appendChild(document.createTextNode(css));",
-                "   var head = document.getElementsByTagName('head')[0];",
+                "   var heads = document.getElementsByTagName('head');",
+                "   var head;",
+                "   if (heads && heads[0]) {",
+                "       head = heads[0];",
+                "   } else {",
+                "       var html = document.children[0];",
+                "       head = document.createElement('head');",
+                "       if (html.children.length > 0)",
+                "           html.insertBefore(head, html.firstChild);",
+                "       else",
+                "           html.appendChild(head);",
+                "   }",
                 "   head.appendChild(style);",
                 "}",
                 "var head = document.getElementsByTagName('head')[0];",
@@ -225,20 +237,36 @@
                 "       console.log('Added DR style.');",
                 "   }",
                 "}",
-                "else if (!dr_observer) {",
-                "   var dr_observer = new MutationObserver(function (mutations) {",
-                "       mutations.forEach(function (mutation) {",
-                "           if (mutation.target.nodeName == 'BODY' || mutation.target.nodeName == 'HEAD') {",
-                "               dr_observer.disconnect();",
-                "               var prevStyle = document.getElementById('dark-reader-style');",
-                "               if (!prevStyle) {",
-                "                   addDRStyle();",
-                "                   console.log('Added DR style using observer.');",
+                "else {",
+                "   (function () {",
+                "       addDRStyle();",
+                "       console.log('Added DR style without head.');",
+                "       var dr_observer = new MutationObserver(function (mutations) {",
+                "           for (var i = 0; i < mutations.length; i++) {",
+                "               if (mutations[i].target.nodeName == 'BODY' || mutations[i].target.nodeName == 'HEAD') {",
+                "                   dr_observer.disconnect();",
+                "                   var prevStyle = document.getElementById('dark-reader-style');",
+                "                   if (!prevStyle) {",
+                "                       addDRStyle();",
+                "                       console.log('Added DR style using observer.');",
+                "                   }",
+                "                   break;",
                 "               }",
                 "           }",
                 "       });",
-                "   });",
-                "   dr_observer.observe(document, { childList: true, subtree: true });",
+                "       dr_observer.observe(document, { childList: true, subtree: true });",
+                "       var fn = function() {",
+                "           if (document.readyState === 'complete') {",
+                "               var prevStyle = document.getElementById('dark-reader-style');",
+                "               if (!prevStyle) {",
+                "                   addDRStyle();",
+                "                   console.log('Added DR style on load.');",
+                "               }",
+                "           }",
+                "           document.removeEventListener('readystatechange', fn);",
+                "       };",
+                "       document.addEventListener('readystatechange', fn);",
+                "   })();",
                 "}"
             ].join('\n');
 
@@ -248,6 +276,7 @@
         protected getCode_removeCss() {
             //var code = "alert('Remove CSS');"
             var code =
+                "console.log('Executing DR script (remove)...');\n" +
                 "var style = document.getElementById('dark-reader-style');\n" +
                 "style && style.parentNode.removeChild(style);";
 
@@ -259,7 +288,7 @@
 
             //var code = "alert('Update CSS');"
             var code = [
-                "console.log('Executing DR script...');",
+                "console.log('Executing DR script (update)...');",
                 "var addDRStyle = function() {",
                 "   var css = '" + css + "';",
                 "   var style = document.createElement('style');",
@@ -301,7 +330,7 @@
                 enabled: false,
                 config: this.config
             };
-            chrome.storage.sync.get(defaultStore, (store: AppConfigStore<TConfig>) => {
+            chrome.storage.sync.get(defaultStore,(store: AppConfigStore<TConfig>) => {
                 if (store.enabled) {
                     this.enable();
                 }
@@ -322,7 +351,7 @@
                 enabled: this.isEnabled,
                 config: this.config
             };
-            chrome.storage.sync.set(store, () => {
+            chrome.storage.sync.set(store,() => {
                 console.log('saved:');
                 console.log(store);
             });

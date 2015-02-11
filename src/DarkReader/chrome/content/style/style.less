@@ -489,3 +489,29 @@ input[type=text] {
         color: @color-border;
     }
 }
+
+//------------
+// SCROLL BARS
+//------------
+
+::-webkit-scrollbar {
+    background-color: @color-back;
+    width: @size-main;
+}
+
+::-webkit-scrollbar-track {
+    //margin: 1em;
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: @color-hover;
+    border-left: @size-border*2 solid @color-back;
+
+    &:hover {
+        background-color: lighten(@color-hover,2%);
+    }
+
+    &:active {
+        background-color: @color-active;
+    }
+}

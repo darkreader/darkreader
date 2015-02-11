@@ -379,4 +379,18 @@ input[type=text]::selection {
 .ignore-list ::-webkit-input-placeholder {
   color: #216778;
 }
+::-webkit-scrollbar {
+  background-color: #00222b;
+  width: 1em;
+}
+::-webkit-scrollbar-thumb {
+  background-color: #113a49;
+  border-left: 0.375em solid #00222b;
+}
+::-webkit-scrollbar-thumb:hover {
+  background-color: #134151;
+}
+::-webkit-scrollbar-thumb:active {
+  background-color: #216778;
+}
 /*# sourceMappingURL=style.css.map */

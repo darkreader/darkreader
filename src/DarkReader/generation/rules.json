@@ -1,5 +1,9 @@
 ﻿[
     {
+        "url": "ign.com",
+        "rule": "#review-promo { background-color: white; }"
+    },
+    {
         "url": "mail.live.com",
         "rule": ".ComposeContent { background-color: white; }"
     }

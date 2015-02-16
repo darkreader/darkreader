@@ -6,5 +6,9 @@
     {
         "url": "mail.live.com",
         "rule": ".ComposeContent { background-color: white; }"
+    },
+    {
+        "url": "ubi.com",
+        "rule": "html, body { background: white !important; }"
     }
 ]

@@ -3,7 +3,7 @@
     "specials": [
         {
             "url": "basho.com",
-            "selectors": "iframe, video, embed, object, #site-navigation, footer, *:not(.lang):not(#foot-logo)>img"
+            "selectors": "iframe, video, embed, object, #site-navigation, footer, header, .featured-news-wrapper, *:not(.lang):not(#foot-logo)>img"
         },
         {
             "url": "google.*",

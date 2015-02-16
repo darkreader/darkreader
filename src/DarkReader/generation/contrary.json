@@ -2,6 +2,10 @@
     "commonSelectors": "img, iframe, video, *:not(object):not(body)>embed, object, *[style*=\"background:url\"]:empty, *[style*=\"background-image:url\"]:empty, *[style*=\"background: url\"]:empty, *[style*=\"background-image: url\"]:empty",
     "specials": [
         {
+            "url": "basho.com",
+            "selectors": "iframe, video, embed, object, #site-navigation, footer, *:not(.lang):not(#foot-logo)>img"
+        },
+        {
             "url": "google.*",
             "selectors": "img, iframe, video, embed, .gbii, .gbip, .azp, .aLF-aPX-KP"
         },

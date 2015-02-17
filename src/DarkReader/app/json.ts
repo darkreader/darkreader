@@ -15,24 +15,27 @@
                 }
                 else {
                     var error = new Error(xobj.status + ': ' + xobj.statusText);
-                    if (params.onFailure) {
-                        params.onFailure(error);
-                    }
-                    else {
-                        throw error;
-                    }
+                    onError(error);
                 }
             }
         };
-        xobj.onerror = (err) => {
+        xobj.onerror = (err) => onError(err.error);
+
+        try {
+            xobj.send(null);
+        }
+        catch (e) {
+            onError(e);
+        }
+
+        function onError(err: Error) {
             if (params.onFailure) {
-                params.onFailure(err.error);
+                params.onFailure(err);
             }
             else {
-                throw err.error;
+                throw err;
             }
-        };
-        xobj.send(null);
+        }
     }
 
     export interface JsonRequestParams<T> {

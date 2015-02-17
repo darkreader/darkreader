@@ -11,7 +11,9 @@
         xobj.onreadystatechange = () => {
             if (xobj.readyState == 4) {
                 if (xobj.status == 200) {
-                    params.onSuccess(JSON.parse(xobj.responseText));
+                    // Remove comments
+                    var resultText = xobj.responseText.replace(/(\".*?(\\\".*?)*?\")|(\/\*(.|[\r\n])*?\*\/)|(\/\/.*?[\r\n])/gm, '$1');
+                    params.onSuccess(JSON.parse(resultText));
                 }
                 else {
                     var error = new Error(xobj.status + ': ' + xobj.statusText);

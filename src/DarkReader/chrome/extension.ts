@@ -20,7 +20,10 @@
 
             // Default icon
             chrome.browserAction.setIcon({
-                path: this.iconPaths.inactive
+                path: {
+                    '19': this.iconPaths.inactive_19,
+                    '38': this.iconPaths.inactive_19
+                }
             });
 
             this.onToggle.addHandler(this.onAppToggle, this);
@@ -44,6 +47,11 @@
                     this.toggle();
                 }
             });
+
+            // TODO: Try to remove CSS before ext disabling or removal.
+            window.onbeforeunload = (e) => {
+                this.onAppToggle(false); // Nothing happens
+            };
         }
 
 
@@ -58,7 +66,10 @@
 
                 // Change icon
                 chrome.browserAction.setIcon({
-                    path: this.iconPaths.active
+                    path: {
+                        '19': this.iconPaths.active_19,
+                        '38': this.iconPaths.active_38
+                    }
                 });
 
                 // Subscribe to tab updates
@@ -80,7 +91,10 @@
 
                 // Change icon
                 chrome.browserAction.setIcon({
-                    path: this.iconPaths.inactive
+                    path: {
+                        '19': this.iconPaths.inactive_19,
+                        '38': this.iconPaths.inactive_38
+                    }
                 });
 
                 // Unsubscribe from tab updates
@@ -313,8 +327,10 @@
         }
 
         iconPaths = {
-            active: 'img/dr_active_19.png',
-            inactive: 'img/dr_inactive_19.png'
+            active_19: 'img/dr_active_19.png',
+            active_38: 'img/dr_active_38.png',
+            inactive_19: 'img/dr_inactive_19.png',
+            inactive_38: 'img/dr_inactive_38.png'
         }
 
 

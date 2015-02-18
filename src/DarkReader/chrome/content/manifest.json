@@ -1,11 +1,11 @@
 ﻿{
     "manifest_version": 2,
     "name": "Dark Reader",
-    "version": "2.3.1",
+    "version": "2.3.2",
     "description": "Keep your eyes, Dark Reader.",
     "browser_action": {
         "default_title": "Dark Reader",
-        "default_icon": "img/dr_active_19.png",
+        "default_icon": "img/dr_active_38.png",
         "default_popup": "popup.html"
     },
     "icons": {

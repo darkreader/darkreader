@@ -38,6 +38,10 @@
             "selectors": "img, iframe, video, embed, .hero, .header-main, .search-bar, #bg-wrap, #main" 
         },
         {
+            "url": "twitch.tv",
+            "selectors": "{common}, #site_footer, #carousel_background:after, #left_col" 
+        },
+        {
             "url": "vk.com",
             "selectors": "img, iframe, video, embed, .video_image_div, #layer_bg"
         },

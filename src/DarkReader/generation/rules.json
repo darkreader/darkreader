@@ -8,6 +8,10 @@
         "rule": ".ComposeContent { background-color: white; }"
     },
     {
+        "url": "twitch.tv",
+        "rule": "html, .nav, #carousel, .dark_wrapper ul { background-color: white !important; } .dark_wrapper * { color:black !important; }"
+    },
+    {
         "url": "ubi.com",
         "rule": "html, body { background: white !important; }"
     }

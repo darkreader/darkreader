@@ -6,11 +6,15 @@
             "selectors": "iframe, video, embed, object, #site-navigation, footer, header, .featured-news-wrapper, *:not(.lang):not(#foot-logo)>img"
         },
         {
+            "url": "gigaom.com",
+            "selectors": "{common}, .bg"
+        },
+        {
             "url": "google.*",
             "selectors": "img, iframe, video, embed, .gbii, .gbip, .azp, .aLF-aPX-KP"
         },
         {
-            "url": "google.com.*",
+            "url": "google.*.*",
             "selectors": "img, iframe, video, embed, .gbii, .gbip, .azp, .aLF-aPX-KP"
         },
         {
@@ -51,7 +55,7 @@
         },
         {
             "url": "youtube.com",
-            "selectors": "iframe, .html5-video-player, #theater-background, div:not(.html5-video-player) img"
+            "selectors": "iframe, .html5-video-player, #theater-background, div:not(.html5-video-player), img:not(.channel-header-profile-image), .has-custom-banner"
         }
     ]
 }

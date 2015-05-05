@@ -55,7 +55,7 @@
         },
         {
             "url": "youtube.com",
-            "selectors": "iframe, .html5-video-player, #theater-background, div:not(.html5-video-player), img:not(.channel-header-profile-image), .has-custom-banner"
+            "selectors": "iframe, .html5-video-player, .has-custom-banner, #theater-background, div:not(.html5-video-player):not(.has-custom-banner) img"
         }
     ]
 }

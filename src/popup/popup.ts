@@ -35,7 +35,7 @@ module DarkReader.Popup {
         });
     }
 
-    // Create controller
+    // Create window
     export var popupWindow = new PopupWindow(ext);
 
     // Disable text selection

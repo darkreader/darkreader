@@ -66,8 +66,6 @@ module DarkReader {
                     console.log('Toggle command entered');
                     this.enabled = !this.enabled;
                 }
-            });
-            chrome.commands.onCommand.addListener((command) => {
                 if (command === 'addSite') {
                     console.log('Add Site command entered');
                     chrome.tabs.getCurrent((t) => {

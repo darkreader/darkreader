@@ -1,5 +1,6 @@
 # Ignore compiled JavaScript and CSS
 *.js
+!gruntfile.js
 !src/lib/**/*.js
 *.map
 *.css

@@ -1,0 +1,78 @@
+﻿@import "../../lib/xp/style/_variables.less";
+
+//--------------------------
+//   Override XP variables
+//--------------------------
+
+// Colors of panels
+@color-back: #00222b;
+@color-hover: #113a49;
+@color-active: #216778;
+@color-fore: #37abc8;
+@color-fore-error: #e96c4c;
+@color-fore-link: #37abc8;
+
+// Colors of controls
+@color-control-back: #00222b;
+@color-control-hover: #113a49;
+@color-control-active: #216778;
+@color-control-fore: #ffffff;
+
+// Colors of inputs
+@color-input-back: #00222b;
+@color-input-hover: #113a49;
+@color-input-active: #113a49;
+@color-input-fore: #37abc8;
+@color-input-fore-active: #ffffff;
+@color-input-fore-placeholder: #216778;
+
+// Colors of modal
+@color-modal-tint: fadeout(@color-back,30%);
+
+// Font
+@font-family: 'Segoe UI',sans-serif;
+
+//---------------------------
+//   Dark Reader variables
+//---------------------------
+
+@color-back: #00222b;
+@color-active: #216778;
+@color-border: @color-active;
+@color-hover: #113a49;
+@color-fore: #ffffff;
+@color-description: #37abc8;
+@color-header: #e96c4c;
+@font-family: 'Open Sans', 'Segoe UI', 'Helvetica Neue', sans-serif;
+@size-control-inner: 2em;
+@size-control-description: 0.875em;
+@size-border: 0.1875em;
+@size-indent-big: 1em;
+@size-indent-small: 0.625em;
+@size-content-width: 20em;
+@size-main: 1em;
+@time-fast: 0.125s;
+@time-slow: 0.25s;
+
+// Common DarkReader control container
+// |===line===|
+// |..status..|
+.controlContainer() {
+    .line {
+        display: flex;
+        flex-flow: row nowrap;
+        align-items: stretch;
+
+        > *:not(:first-child) {
+            margin-left: @size-indent-small;
+        }
+    }
+
+    .status {
+        text-align: center;
+        color: @color-description;
+        font-size: @size-control-description;
+        line-height: normal;
+        min-height: initial;
+    }
+}

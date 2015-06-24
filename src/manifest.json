@@ -1,0 +1,38 @@
+﻿{
+    "manifest_version": 2,
+    "name": "Dark Reader",
+    "version": "3.0.0",
+    "description": "Keep your eyes, Dark Reader.",
+    "browser_action": {
+        "default_title": "Dark Reader",
+        "default_icon": "img/dr_active_38.png",
+        "default_popup": "popup/popup.html"
+    },
+    "icons": {
+        "16": "img/dr_16.png",
+        "48": "img/dr_48.png",
+        "128": "img/dr_128.png"
+    },
+    "background": { "page": "background/background.html" },
+    "permissions": [
+        "fontSettings",
+        "storage",
+        "tabs",
+        "http://*/*",
+        "https://*/*"
+    ],
+    "commands": {
+        "toggle": {
+            "suggested_key": {
+                "default": "Alt+Shift+D"
+            },
+            "description": "Toggle On/Off"
+        },
+        "addSite": {
+            "suggested_key": {
+                "default": "Alt+Shift+S"
+            },
+            "description": "Add current site to list"
+        }
+    }
+}

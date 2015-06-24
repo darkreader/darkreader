@@ -1,0 +1,250 @@
+﻿//@import url(http://fonts.googleapis.com/css?family=Open+Sans);
+
+@import "../../lib/xp/style/_variables.less";
+@import "../../lib/xp/style/_xp.less";
+
+@font-face {
+    font-family: 'Open Sans';
+    src: url('../font/OpenSans-Regular.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@import "_variables.less";
+@import "_font_select.less";
+@import "_site_list.less";
+@import "_tab_panel.less";
+@import "_toggle.less";
+@import "_up_down.less";
+
+/*----------
+    Window
+------------*/
+
+.Window {
+    //background-color: @color-back;
+    //font-size: @size-main;
+    font-size: 75%; // Chrome Extension font size
+    margin: 0;
+    padding: 1.5em;
+    width: @size-content-width+3em;
+
+    > *:not(:first-child) {
+        margin-top: @size-indent-small;
+    }
+}
+
+.hidden {
+    display: none !important; // Is overriden at least for .CheckBox .text
+}
+
+/*--------
+    Logo
+----------*/
+
+#logo {
+    display: inline-block;
+    flex: none;
+    height: 2em;
+}
+
+
+/*---------------
+    Top section
+----------------*/
+
+// Description message
+.description {
+    color: @color-description;
+    line-height: normal;
+    text-align: center;
+    white-space: pre-line;
+}
+
+#topSection {
+    margin-top: @size-indent-big;
+}
+
+#appDescription {
+    height: @size-control-inner+@size-border*2;
+    margin-right: @size-indent-small;
+}
+
+// App toggle
+#appToggle {
+    .controlContainer();
+}
+
+/*------------
+    Settings
+--------------*/
+
+.controlContainer {
+    .controlContainer();
+}
+
+/* Toggle for filter mode */
+#modeToggle {
+
+    .darkMode {
+        background-image: url('../img/mode_dark_32.svg');
+    }
+
+    .lightMode {
+        background-image: url('../img/mode_light_32.svg');
+    }
+}
+
+/* Button with icon (without text) */
+.iconButton {
+    //background-color: @color-back;
+    border: @size-border solid @color-border;
+    box-sizing: content-box;
+    cursor: pointer;
+    display: inline-block;
+    flex: none;
+    height: @size-control-inner;
+    overflow: hidden;
+    padding: 0;
+    transition: background-color @time-slow;
+    width: @size-control-inner;
+
+    &:hover {
+        transition: background-color @time-fast;
+    }
+    /*&:hover:not(.disabled):not(.checked) {
+        background-color: @color-hover;
+        transition: background-color @time-fast;
+    }*/
+    // TODO: Remove :not(.disabled) in XP.
+    /*&:active:not(.disabled),
+    &.checked:not(.disabled) {
+        background-color: @color-active;
+    }*/
+    .icon {
+        background-size: contain;
+        margin: 0;
+        height: @size-control-inner;
+        width: @size-control-inner;
+    }
+}
+
+/*----------
+    Font
+------------*/
+
+/* Check box */
+.CheckBox {
+    cursor: pointer;
+
+    > input[type=checkbox] {
+        &:checked + .check {
+            // Bigger check-mark
+            &:before {
+                background-color: @color-fore;
+                height: 0.25em;
+                left: 0.25em;
+                top: 1.125em;
+                width: 0.5em;
+            }
+
+            &:after {
+                background-color: @color-fore;
+                height: 0.25em;
+                left: 0.75em;
+                top: 0.875em;
+                width: 1em;
+            }
+        }
+    }
+
+    .check {
+        border: @size-border solid @color-border;
+        box-sizing: content-box;
+        height: @size-control-inner;
+        margin: 0;
+        width: @size-control-inner;
+        // Cross
+        &:before,
+        &:after {
+            background-color: @color-input-fore-placeholder;
+            content: "";
+            display: inline-block;
+            height: 0.25em;
+            left: 0.25em;
+            position: absolute;
+            transition-duration: @time-fast;
+            transition-property: all;
+            top: 0.875em;
+            width: 1.5em;
+        }
+
+        &:before {
+            transform: skewY(45deg);
+        }
+
+        &:after {
+            transform: skewY(-45deg);
+        }
+    }
+}
+
+/* Text box */
+.TextBox {
+    border: @size-border solid @color-border;
+    box-sizing: content-box;
+    height: @size-control-inner;
+    min-width: 0;
+    padding: 0 @size-indent-small;
+    transition: background-color @time-fast,color @time-slow;
+    width: auto;
+
+    &:focus {
+        transition: background-color @time-fast,color @time-fast;
+    }
+
+    &::selection {
+        background-color: @color-header;
+    }
+}
+
+/*-------------
+    Site list
+---------------*/
+
+// Display site list splitted with toggle button
+.siteListParent {
+    margin-top: 0 !important;
+}
+
+.SiteList {
+    border-top: none;
+}
+
+/*---------------
+    SCROLL BARS
+-----------------*/
+
+.HBox, .VBox, .TextArea {
+    &::-webkit-scrollbar {
+        background-color: @color-back;
+        width: @size-main+@size-border*2;
+    }
+
+    &::-webkit-scrollbar-track {
+        //margin: 1em;
+    }
+
+    &::-webkit-scrollbar-thumb {
+        background-color: @color-hover;
+        border-left: @size-border*2 solid @color-back;
+
+        &:hover {
+            background-color: lighten(@color-hover,2%);
+        }
+
+        &:active {
+            background-color: @color-active;
+        }
+    }
+}

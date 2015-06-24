@@ -1,0 +1,13 @@
+﻿/// <reference path="chrome/chrome.d.ts"/>
+/// <reference path="xp/xp.d.ts"/>
+/// <reference path="../background/config_management.ts"/>
+/// <reference path="../background/extension.ts"/>
+/// <reference path="../background/filter_css_generator.ts"/>
+/// <reference path="../background/background.ts"/>
+/// <reference path="../popup/popup.ts"/>
+/// <reference path="../popup/ui/font_select.ts"/>
+/// <reference path="../popup/ui/popup_window.ts"/>
+/// <reference path="../popup/ui/site_list.ts"/>
+/// <reference path="../popup/ui/tab_panel.ts"/>
+/// <reference path="../popup/ui/toggle.ts"/>
+/// <reference path="../popup/ui/up_down.ts"/>

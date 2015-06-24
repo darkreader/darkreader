@@ -1,0 +1,33 @@
+﻿@import "_variables.less";
+
+/*-----------------
+   Toggle control
+-------------------*/
+
+.Toggle {
+    border: @size-border solid @color-border;
+    box-sizing: content-box;
+    display: flex;
+
+    .on, .off {
+        color: @color-fore;
+        cursor: pointer;
+        display: inline-block;
+        height: @size-control-inner;
+        line-height: @size-control-inner;
+        text-align: center;
+        transition: background-color @time-slow;
+        width: 50%;
+
+        &:hover {
+            background-color: @color-hover;
+            transition: background-color @time-fast;
+        }
+
+        &:active,
+        &.active {
+            background-color: @color-active;
+            cursor: default;
+        }
+    }
+}

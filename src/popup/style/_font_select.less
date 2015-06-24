@@ -1,0 +1,79 @@
+﻿@import "_variables.less";
+
+/*----------------
+    Font select
+------------------*/
+
+.FontSelect {
+    border: @size-border solid @color-border;
+    position: absolute;
+    width: /*17em*/ @size-content-width - @size-control-inner - @size-border * 2 - @size-indent-small;
+    z-index: 3;
+
+    .fontSelectLine {
+
+        .TextBox.fontSelectTextBox {
+            border: none;
+
+            &:not(:first-child) {
+                border-top: @size-border/2 solid @color-border;
+            }
+        }
+
+        .Button.fontSelectTick {
+            border: none;
+
+            .icon.down {
+                position: relative;
+
+                &:before,
+                &:after {
+                    background-color: @color-input-fore-active;
+                    content: "";
+                    display: inline-block;
+                    height: 0.25em;
+                    position: absolute;
+                    top: 0.875em;
+                    width: 0.75em;
+                }
+
+                &:before {
+                    left: 0.25em;
+                    transform: skewY(45deg);
+                }
+
+                &:after {
+                    left: 1em;
+                    transform: skewY(-45deg);
+                }
+            }
+        }
+    }
+
+    .fontList {
+        max-height: 16em;
+        transition: max-height @time-slow*2;
+
+        &.collapsed {
+            max-height: 0;
+            transition: max-height @time-fast;
+        }
+
+        .fontItem {
+            background-color: @color-back;
+            color: @color-description;
+            cursor: pointer;
+            justify-content: flex-start;
+            padding: 0 @size-indent-small;
+
+            &:hover {
+                background-color: @color-hover;
+            }
+
+            &:active {
+                background-color: @color-active;
+                color: @color-input-fore-active;
+            }
+        }
+    }
+}

@@ -1,0 +1,19 @@
+﻿@import "_variables.less";
+
+/*---------------
+    Site list
+-----------------*/
+
+.SiteList {
+    border: @size-border solid @color-border;
+    flex: none;
+
+    .TextBox.siteListTextBox {
+        border: none;
+        height: 1.5em;
+
+        &:not(:first-child) {
+            border-top: @size-border/2 solid @color-border;
+        }
+    }
+}

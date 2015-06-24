@@ -1,0 +1,41 @@
+{
+  "name": "DarkReader",
+  "version": "3.0.0",
+  "description": "Keep your eyes, Dark Reader",
+  "main": "gruntfile.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/alexanderby/darkreader.git"
+  },
+  "keywords": [
+    "dark",
+    "reader",
+    "chrome",
+    "extension",
+    "eye",
+    "care",
+    "invert",
+    "colors",
+    "high",
+    "contrast"
+  ],
+  "author": "Alexander Shutov <shutovby@gmail.com> (http://shutov.by/)",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/alexanderby/darkreader/issues"
+  },
+  "homepage": "https://github.com/alexanderby/darkreader",
+  "devDependencies": {
+    "create-grunt-tasks": "^0.7.1",
+    "grunt": "^0.4.5",
+    "grunt-concurrent": "^2.0.0",
+    "grunt-contrib-clean": "^0.6.0",
+    "grunt-contrib-copy": "^0.8.0",
+    "grunt-contrib-less": "^1.0.1",
+    "grunt-contrib-watch": "^0.6.1",
+    "grunt-typescript": "^0.6.2"
+  }
+}

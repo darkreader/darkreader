@@ -68,7 +68,10 @@ module DarkReader {
                 }
                 if (command === 'addSite') {
                     console.log('Add Site command entered');
-                    chrome.tabs.getCurrent((t) => {
+                    chrome.tabs.query({ active: true, lastFocusedWindow: true },(tabs) => {
+                        // Some bug: if command executed
+                        // from popup, query returns [].
+                        var t = tabs[0];
                         var match = t.url.match(/^(.*?:\/\/)?(.+?)(\/|$)/);
                         if (match && match[2]) {
                             this.config.siteList.push(match[2]);
@@ -108,7 +111,13 @@ module DarkReader {
                 this.addTabListener();
 
                 // Set style for current tab
-                chrome.tabs.getCurrent((t) => { this.addCssToTab(t) });
+                // Returns undefined.
+                //chrome.tabs.getCurrent((t) => { this.addCssToTab(t) });
+                chrome.tabs.query({ active: true, lastFocusedWindow: true },(tabs) => {
+                    if (tabs[0]) {
+                        this.addCssToTab(tabs[0]);
+                    }
+                });
 
                 // Set style for all tabs
                 chrome.tabs.query({},(tabs) => {

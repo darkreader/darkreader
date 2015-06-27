@@ -11,11 +11,11 @@
         },
         {
             "url": "google.*",
-            "selectors": "img, iframe, video, embed, .gbii, .gbip, .azp, .aLF-aPX-KP"
+            "selectors": "img:not(.irc_mi):not(.irc_rii), iframe, video, embed, .gbii, .gbip, .azp, .aLF-aPX-KP, .irc_bg, .RY3tic"
         },
         {
             "url": "google.*.*",
-            "selectors": "img, iframe, video, embed, .gbii, .gbip, .azp, .aLF-aPX-KP"
+            "selectors": "img:not(.irc_mi):not(.irc_rii), iframe, video, embed, .gbii, .gbip, .azp, .aLF-aPX-KP, .irc_bg, .RY3tic"
         },
         {
             "url": "granttree.co.uk",

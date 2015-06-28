@@ -1,5 +1,7 @@
 DarkReader for Google Chrome
 ================
+![Dark Reader screenshot](https://github.com/alexanderby/darkreader/blob/master/promo/screenshots/screenshot_filter.png)
+
 This extension inverts brightness of web pages and aims to reduce eyestrain while browsing the web.
 [Visit Chrome Web Store](https://chrome.google.com/webstore/detail/dark-reader/eimadpbcbfnmbkopoojfekhnkhdbieeh) for more info.
 
@@ -15,14 +17,8 @@ The extension simply adds a stylesheet which inverts colors of the whole page an
     }
 </style>
 ```
-
-## Tools for editing and building
-1. [Visual Studio 2013](http://www.visualstudio.com/downloads/download-visual-studio-vs).
-2. [TypeScript 1.3 for VS2013](https://visualstudiogallery.msdn.microsoft.com/955e0262-0858-40c9-ab5a-1acc680e9bfd).
-3. [Web Essentials for VS2013](http://vswebessentials.com/download).
-
 ## Fixing the inversion of specific blocks
-If some blocks of web page should not be inverted, the [contrary.json](https://github.com/alexanderby/darkreader/blob/master/src/DarkReader/generation/contrary.json) file should be edited. The ```url``` value contains URL-template for matching page's URL and ```selectors``` value contains [CSS selectors](https://developer.mozilla.org/en-US/docs/Web/Guide/CSS/Getting_Started/Selectors) for matching the specific blocks. If there would be no matches found for page URL, then ```commonSelectors``` values would be used to generate CSS.
+If some blocks of web page should not be inverted, the [sites_fixes.json](https://github.com/alexanderby/darkreader/blob/master/src/config/sites_fixes.json) file should be edited. The ```url``` value contains URL-template for matching page's URL and ```selectors``` value contains [CSS selectors](https://developer.mozilla.org/en-US/docs/Web/Guide/CSS/Getting_Started/Selectors) for matching the specific blocks that should not be inverted. If there would be no matches found for page URL, then ```commonSelectors``` values would be used to generate CSS. The ```rules``` value is used to fix things which cannot be corrected with contrary revertions.
 ```JSON
 ﻿{
     "commonSelectors": "img, iframe, video",
@@ -33,14 +29,15 @@ If some blocks of web page should not be inverted, the [contrary.json](https://g
         },
         {
             "url": "google.*",
-            "selectors": "img, iframe, video, span.gb_X.gbii"
+            "selectors": "img, iframe, video, span.gb_X.gbii",
+            "rules": "body { background-color: white !important; }"
         }
     ]
 }
 ```
 
-## Using ignore list to prevent some web-sites inversion
-Besides using settings-page ignore list, dark-themed web-sites can be added into inner ignore list ([ignore.json](https://github.com/alexanderby/darkreader/blob/master/src/DarkReader/generation/ignore.json)) to make them ignored by default. Possible values for matching the web-site URL are listed below.
+## List of sites with dark background
+Besides using settings-page site list, dark-themed web-sites can be added into global dark sites list ([dark_sites.json](https://github.com/alexanderby/darkreader/blob/master/src/config/dark_sites.json)) to make them not inverted by default. Possible values for matching the web-site URL are listed below.
 ```JSON
 ﻿[
     "google.*",
@@ -49,23 +46,9 @@ Besides using settings-page ignore list, dark-themed web-sites can be added into
 ]
 ```
 
-## Custom CSS-rules
-Custom CSS-rules can be applied for fixing things, which cannot be corrected with contrary revertions. They are located in [rules.json](https://github.com/alexanderby/darkreader/blob/master/src/DarkReader/generation/rules.json) file. The ```url``` value contains URL-template, the ```rule``` value contains a CSS-rule. If web-site is not ignored, then both the inversion rules and custom rule will be used.
-```JSON
-﻿[
-    {
-        "url": "youtube.com",
-        "rule": "div { background-color:red; }"
-    },
-    {
-        "url": "google.*",
-        "rule": "div { background-color:blue; }"
-    }
-]
-```
-
 ## Building and debugging
-In order to build and debug the project, launch the [DRChrome_build.cmd](https://github.com/alexanderby/darkreader/blob/master/build/DRChrome_build.cmd). Open the [Chrome's extensions page](https://support.google.com/chrome/answer/187443). Enable the **Developer mode**, press **Load unpacked extension** button, navigate to your built output folder.
-After making any code changes, the project should be rebuilt using the command line script and reloaded in **Extension page** by pressing the **Reload (Ctrl+R)** hyperlink.
+In order to build and debug the project install the [nodejs](https://nodejs.org/) and [grunt task runner](http://gruntjs.com/). Launch the ```> grunt debug``` task. Open the [Chrome's extensions page](https://support.google.com/chrome/answer/187443). Enable the **Developer mode**, press **Load unpacked extension** button, navigate to project's ```src/``` folder.
+After making any code changes, the project should be recompiled (```debug-watch``` task may be used for auto-compile) and reloaded in **Extension page** by pressing the **Reload (Ctrl+R)** hyperlink.
+For editing the [sites_fixes.json](https://github.com/alexanderby/darkreader/blob/master/src/config/sites_fixes.json) and [dark_sites.json](https://github.com/alexanderby/darkreader/blob/master/src/config/dark_sites.json) files any text editor may be used. For editing TypeScript and LESS files you may use [Visual Studio Code](https://code.visualstudio.com), [Visual Studio Community 2013](https://www.visualstudio.com/en-us/products/visual-studio-community-vs.aspx) or any other web IDE.
 
 ## Good luck!

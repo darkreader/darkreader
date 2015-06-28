@@ -7,6 +7,7 @@
 .TabPanel {
     .tabPanelButtons {
         align-items: stretch;
+        flex: none;
         display: flex;
         flex-flow: row nowrap;
         justify-content: center;
@@ -71,7 +72,8 @@
     }
 
     .tabPanelContainer {
-        height: 21em;
+        //height: 21em;
+        flex: 1 1 auto;
         margin-top: @size-indent-big;
         overflow-y: auto;
 

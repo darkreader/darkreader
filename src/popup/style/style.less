@@ -21,16 +21,45 @@
     Window
 ------------*/
 
-.Window {
+html {
+    height: auto;
+}
+
+.Window, body {
     //background-color: @color-back;
+    box-sizing: content-box;
+    font-family: @font-family;
     //font-size: @size-main;
     font-size: 75%; // Chrome Extension font size
+    height: @size-content-height;
     margin: 0;
     padding: 1.5em;
-    width: @size-content-width+3em;
+    width: @size-content-width;
 
     > *:not(:first-child) {
         margin-top: @size-indent-small;
+    }
+    /* Loading... */
+    &:after {
+        background-color: @color-back;
+        color: @color-header;
+        content: "Loading...";
+        display: block;
+        height: 100%;
+        left: 0;
+        opacity: 0;
+        padding-top: 30%;
+        pointer-events: none;
+        position: absolute;
+        text-align: center;
+        top: 0;
+        transition: opacity 1s;
+        width: 100%;
+        z-index: 999;
+    }
+
+    &.loading:after {
+        opacity: 1;
     }
 }
 

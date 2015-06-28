@@ -36,7 +36,13 @@ module DarkReader.Popup {
     }
 
     // Create window
-    export var popupWindow = new PopupWindow(ext);
+    //export var popupWindow = new PopupWindow(ext);
+    // BUG: Chrome popup is not showed until <body>
+    // ends being processed so timeout needs to be used.
+    export var popupWindow: PopupWindow;
+    setTimeout(() => {
+        popupWindow = new PopupWindow(ext);
+    }, 100);
 
     // Disable text selection
     document.onselectstart = (e) => false;

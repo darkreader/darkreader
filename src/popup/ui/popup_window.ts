@@ -9,12 +9,12 @@ module DarkReader.Popup {
                 //
                 // ---- Logo ----
 
-                new xp.Html({ html: '<img id="logo" src="img/dark-reader-type.svg" alt="Dark Reader" />' }),
+                new xp.Html({ html: '<img id="logo" src="img/dark-reader-type.svg" alt="Dark Reader" />', flex: 'none' }),
 
                 //
                 // ---- Top section ----
 
-                new xp.HBox({ name: 'topSection', itemsAlign: 'top' }, [
+                new xp.HBox({ name: 'topSection', itemsAlign: 'top', flex: 'none' }, [
                     new xp.Label({
                         name: 'appDescription',
                         style: 'description',
@@ -34,7 +34,7 @@ module DarkReader.Popup {
                 //
                 // ---- Tab panel ----
 
-                new TabPanel({ onTabSwitched: (t) => t.tabName === 'Site list' && this.siteList.focus() }, [
+                new TabPanel({ onTabSwitched: (t) => t.tabName === 'Site list' && this.siteList.focus(), flex: 'stretch' }, [
 
                     //
                     // ---- Filter ----
@@ -202,6 +202,7 @@ module DarkReader.Popup {
                 // ---- Title ----
 
                 new xp.Html({
+                    flex: 'none',
                     html: `
                     <p class="description">Some things should not be inverted?
                         Please, send a website address at
@@ -209,6 +210,12 @@ module DarkReader.Popup {
                     `
                 }),
             ]);
+
+            // BUG: Seems flexbox rendering bug, so timeout is needed.
+            setTimeout(() => {
+                this.domElement.classList.remove('loading');
+            }, 100);
+            //this.domElement.classList.remove('loading');
         }
 
         private siteList: SiteList;

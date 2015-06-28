@@ -68,17 +68,21 @@ module DarkReader {
                 }
                 if (command === 'addSite') {
                     console.log('Add Site command entered');
-                    chrome.tabs.query({ active: true, lastFocusedWindow: true },(tabs) => {
+                    chrome.tabs.query({ active: true },(tabs) => {
                         // Some bug: if command executed
                         // from popup, query returns [].
-                        var t = tabs[0];
-                        var match = t.url.match(/^(.*?:\/\/)?(.+?)(\/|$)/);
-                        if (match && match[2]) {
-                            this.config.siteList.push(match[2]);
-                        }
-                        else {
-                            console.warn('URL "' + t.url + '" didn\'t match.');
-                        }
+                        // "currentWindow:true" doesn't work.
+                        tabs.forEach((t) => {
+                            var match = t.url.match(/^(.*?:\/\/)?(.+?)(\/|$)/);
+                            if (match && match[2]) {
+                                if (this.config.siteList.indexOf(match[2]) < 0) {
+                                    this.config.siteList.push(match[2]);
+                                }
+                            }
+                            else {
+                                console.warn('URL "' + t.url + '" didn\'t match.');
+                            }
+                        });
                     });
                 }
             });
@@ -109,18 +113,16 @@ module DarkReader {
 
                 // Subscribe to tab updates
                 this.addTabListener();
-
-                // Set style for current tab
-                // Returns undefined.
-                //chrome.tabs.getCurrent((t) => { this.addCssToTab(t) });
-                chrome.tabs.query({ active: true, lastFocusedWindow: true },(tabs) => {
-                    if (tabs[0]) {
-                        this.addCssToTab(tabs[0]);
-                    }
+                
+                // Set style for active tabs
+                chrome.tabs.query({ active: true },(tabs) => {
+                    tabs.forEach((tab) => {
+                        this.addCssToTab(tab);
+                    });
                 });
 
                 // Set style for all tabs
-                chrome.tabs.query({},(tabs) => {
+                chrome.tabs.query({ active: false },(tabs) => {
                     tabs.forEach((tab) => {
                         this.addCssToTab(tab);
                     });
@@ -141,11 +143,15 @@ module DarkReader {
                 // Unsubscribe from tab updates
                 this.removeTabListener();
 
-                // Remove style from current tab
-                this.removeCssFromTab(null);
+                // Remove style from active tabs
+                chrome.tabs.query({ active: true },(tabs) => {
+                    tabs.forEach((tab) => {
+                        this.removeCssFromTab(tab);
+                    });
+                });
 
                 // Remove style from all tabs
-                chrome.tabs.query({},(tabs) => {
+                chrome.tabs.query({ active: false },(tabs) => {
                     tabs.forEach((tab) => {
                         this.removeCssFromTab(tab);
                     });
@@ -156,10 +162,14 @@ module DarkReader {
         protected onConfigPropChanged() {
             if (this.enabled) {
                 // Update style for current tab
-                chrome.tabs.getCurrent((t) => { this.updateCssInTab(t) });
+                chrome.tabs.query({ active: true },(tabs) => {
+                    tabs.forEach((tab) => {
+                        this.updateCssInTab(tab);
+                    });
+                });
 
                 // Update style for all tabs
-                chrome.tabs.query({},(tabs) => {
+                chrome.tabs.query({ active: false },(tabs) => {
                     tabs.forEach((tab) => {
                         this.updateCssInTab(tab);
                     });

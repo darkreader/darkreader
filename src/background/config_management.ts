@@ -155,7 +155,10 @@ module DarkReader {
     function readJson<T>(params: JsonRequestParams<T>) {
         var xobj = new XMLHttpRequest();
         xobj.overrideMimeType("application/json");
-        xobj.open('GET', params.url, params.async);
+        xobj.open(
+            'GET',
+            params.url + '?nocache=' + new Date().getTime(),
+            params.async);
         xobj.onreadystatechange = () => {
             if (xobj.readyState == 4) {
                 if (xobj.status == 200) {

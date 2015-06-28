@@ -422,25 +422,24 @@ module DarkReader {
                     }
                     console.log('loaded legacy config:');
                     console.log(store);
-                });
-            chrome.storage.sync.get(defaultStore,(store: AppConfigStore) => {
-                if (!store.config) {
-                    store.config = defaultFilterConfig;
-                }
-                if (!Array.isArray(store.config.siteList)) {
-                    var arr = [];
-                    for (var key in store.config.siteList) {
-                        arr[key] = store.config.siteList[key];
-                    }
-                    store.config.siteList = arr;
-                }
-                this.config = <ObservableFilterConfig>xp.observable(store.config);
-                this.enabled = store.enabled;
-                console.log('loaded:');
-                console.log(store);
-            });
 
-            // TODO: Copy obsolete properties!
+                    chrome.storage.sync.get(defaultStore,(store: AppConfigStore) => {
+                        if (!store.config) {
+                            store.config = defaultFilterConfig;
+                        }
+                        if (!Array.isArray(store.config.siteList)) {
+                            var arr = [];
+                            for (var key in store.config.siteList) {
+                                arr[key] = store.config.siteList[key];
+                            }
+                            store.config.siteList = arr;
+                        }
+                        this.config = <ObservableFilterConfig>xp.observable(store.config);
+                        this.enabled = store.enabled;
+                        console.log('loaded:');
+                        console.log(store);
+                    });
+                });
         }
 
         /**

@@ -48,7 +48,9 @@ Besides using settings-page site list, dark-themed web-sites can be added into g
 
 ## Building and debugging
 In order to build and debug the project install the [nodejs](https://nodejs.org/) and [grunt task runner](http://gruntjs.com/). Launch the ```> grunt debug``` task. Open the [Chrome's extensions page](https://support.google.com/chrome/answer/187443). Enable the **Developer mode**, press **Load unpacked extension** button, navigate to project's ```src/``` folder.
+
 After making any code changes, the project should be recompiled (```debug-watch``` task may be used for auto-compile) and reloaded in **Extension page** by pressing the **Reload (Ctrl+R)** hyperlink.
+
 For editing the [sites_fixes.json](https://github.com/alexanderby/darkreader/blob/master/src/config/sites_fixes.json) and [dark_sites.json](https://github.com/alexanderby/darkreader/blob/master/src/config/dark_sites.json) files any text editor may be used. For editing TypeScript and LESS files you may use [Visual Studio Code](https://code.visualstudio.com), [Visual Studio Community 2013](https://www.visualstudio.com/en-us/products/visual-studio-community-vs.aspx) or any other web IDE.
 
 ## Good luck!

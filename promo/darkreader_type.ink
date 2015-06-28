@@ -3,7 +3,7 @@
  "id": "381cf8ec-7cf6-4193-8206-c0a2d3ff7b30",
  "width": "1280",
  "height": "128",
- "currentLayer": "13",
+ "currentLayer": "238",
  "selectedElements": [],
  "layers": [
   {
@@ -95,10 +95,6 @@
       "S",
       "c",
       212,
-      0,
-      "S",
-      "c",
-      160,
       0,
       "S",
       "P",
@@ -229,10 +225,6 @@
       "S",
       "c",
       429,
-      0,
-      "S",
-      "c",
-      386,
       0,
       "S",
       "P",
@@ -422,10 +414,6 @@
       0,
       "a",
       3.141592653589793,
-      "S",
-      "c",
-      926,
-      0,
       "S",
       "P",
       "c",
@@ -732,14 +720,14 @@
       "S"
      ],
      "doc-model": "Curve",
-     "doc-model-id": "14"
+     "doc-model-id": "237"
     }
    ],
    "isExpanded": true,
    "locked": false,
    "hidden": false,
    "doc-model": "Layer",
-   "doc-model-id": "13"
+   "doc-model-id": "238"
   }
  ],
  "rulers": [],

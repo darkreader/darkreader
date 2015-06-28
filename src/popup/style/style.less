@@ -34,6 +34,7 @@ html {
     height: @size-content-height;
     margin: 0;
     padding: 1.5em;
+    position: relative;
     width: @size-content-width;
 
     > *:not(:first-child) {
@@ -42,13 +43,14 @@ html {
     /* Loading... */
     &:after {
         background-color: @color-back;
+        box-sizing: border-box;
         color: @color-header;
         content: "Loading...";
         display: block;
         height: 100%;
         left: 0;
         opacity: 0;
-        padding-top: 30%;
+        padding-top: 50%;
         pointer-events: none;
         position: absolute;
         text-align: center;

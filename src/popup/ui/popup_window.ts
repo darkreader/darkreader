@@ -25,8 +25,27 @@ module DarkReader.Popup {
                             value: '{enabled}'
                         }),
                         new xp.Label({
-                            style: 'status',
-                            text: 'hotkey: Alt+Shift+D'
+                            style: 'status shortcut',
+                            //text: 'hotkey: Alt+Shift+D'
+                            // TODO: Refactor commands. Edit chrome type definition.
+                            init: (l) => {
+                                (<any>chrome.commands).getAll((commands: { description: string; name: string; shortcut: string; }[]) => {
+                                    if (commands) {
+                                        var cmd = commands.filter((c) => c.name === 'toggle')[0];
+                                        if (cmd) {
+                                            l.text = cmd.shortcut ?
+                                                'hotkey: ' + cmd.shortcut
+                                                : 'setup a hotkey'
+                                        }
+                                    }
+                                });
+                            },
+                            onClick: () => {
+                                chrome.tabs.create({
+                                    url: 'chrome://extensions/configureCommands',
+                                    active: true
+                                });
+                            }
                         })
                     ])
                 ]),
@@ -190,8 +209,27 @@ module DarkReader.Popup {
                                 init: (sl) => this.siteList = sl
                             }),
                             new xp.Label({
-                                style: 'description',
-                                text: 'hotkey for adding site: Alt+Shift+S'
+                                style: 'description shortcut',
+                                //text: 'hotkey for adding site: Alt+Shift+S'
+                                // TODO: Refactor commands. Edit chrome type definition.
+                                init: (l) => {
+                                    (<any>chrome.commands).getAll((commands: { description: string; name: string; shortcut: string; }[]) => {
+                                        if (commands) {
+                                            var cmd = commands.filter((c) => c.name === 'addSite')[0];
+                                            if (cmd) {
+                                                l.text = cmd.shortcut ?
+                                                    'hotkey for adding site: ' + cmd.shortcut
+                                                    : 'setup a hotkey for adding site'
+                                            }
+                                        }
+                                    });
+                                },
+                                onClick: () => {
+                                    chrome.tabs.create({
+                                        url: 'chrome://extensions/configureCommands',
+                                        active: true
+                                    });
+                                }
                             })
                         ]),
                     ])

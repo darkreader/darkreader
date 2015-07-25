@@ -72,7 +72,8 @@ var xp;
         /**
          * Configures what output messages will be display.
          */
-        Log.DisplayMessages = 2 /* Info */ | 4 /* Warn */ | 8 /* Error */ | 16 /* Misc */ | 32 /* Binding */ | 64 /* UI */ | 128 /* Test */;
+        Log.DisplayMessages = HeatLevel.Info | HeatLevel.Warn | HeatLevel.Error
+            | Domain.Misc | Domain.Binding | Domain.UI | Domain.Test;
         /**
          * Writes a message to console.
          * @param level Importance level.
@@ -85,7 +86,8 @@ var xp;
             for (var _i = 3; _i < arguments.length; _i++) {
                 args[_i - 3] = arguments[_i];
             }
-            if ((domain & Log.DisplayMessages) > 0 && (level & Log.DisplayMessages) > 0) {
+            if ((domain & Log.DisplayMessages) > 0
+                && (level & Log.DisplayMessages) > 0) {
                 var output;
                 if (typeof msgOrAny === 'string') {
                     args.unshift(msgOrAny);
@@ -95,16 +97,16 @@ var xp;
                     output = msgOrAny;
                 }
                 switch (level) {
-                    case 1 /* Log */:
+                    case HeatLevel.Log:
                         console.log(output);
                         break;
-                    case 2 /* Info */:
+                    case HeatLevel.Info:
                         console.info(output);
                         break;
-                    case 4 /* Warn */:
+                    case HeatLevel.Warn:
                         console.warn(output);
                         break;
-                    case 8 /* Error */:
+                    case HeatLevel.Error:
                         console.error(output);
                         break;
                     default:
@@ -117,17 +119,13 @@ var xp;
         if (!window.console)
             window.console = {};
         if (!window.console.log)
-            window.console.log = function () {
-            };
+            window.console.log = function () { };
         if (!window.console.info)
-            window.console.info = function () {
-            };
+            window.console.info = function () { };
         if (!window.console.warn)
-            window.console.warn = function () {
-            };
+            window.console.warn = function () { };
         if (!window.console.error)
-            window.console.error = function () {
-            };
+            window.console.error = function () { };
     })(Log = xp.Log || (xp.Log = {}));
 })(xp || (xp = {}));
 var xp;
@@ -164,7 +162,12 @@ var xp;
             }
             // Simple types
             var itemType = typeof item;
-            if (item === null || itemType === 'string' || itemType === 'boolean' || itemType === 'number' || itemType === 'undefined' || itemType === 'function') {
+            if (item === null
+                || itemType === 'string'
+                || itemType === 'boolean'
+                || itemType === 'number'
+                || itemType === 'undefined'
+                || itemType === 'function') {
                 return item;
             }
             else if (item instanceof Object) {
@@ -563,7 +566,9 @@ var xp;
      * @param obj Object.
      */
     function isNotifier(obj) {
-        return obj && typeof obj === 'object' && 'onPropertyChanged' in obj;
+        return (obj
+            && typeof obj === 'object'
+            && 'onPropertyChanged' in obj);
     }
     xp.isNotifier = isNotifier;
     /**
@@ -614,7 +619,10 @@ var xp;
          * @param source Source object.
          */
         ObservableObject.isConvertable = function (source) {
-            return (typeof source === 'object' && !isNotifier(source) && source !== null && !(source instanceof Date));
+            return (typeof source === 'object'
+                && !isNotifier(source)
+                && source !== null
+                && !(source instanceof Date));
         };
         /**
          * Adds property to INotifier.
@@ -787,7 +795,9 @@ var xp;
             this.appendIndexProperty();
             // Notify
             this.onCollectionChanged.invoke({
-                action: moving ? 4 /* Attach */ : 0 /* Create */,
+                action: moving ?
+                    CollectionChangeAction.Attach
+                    : CollectionChangeAction.Create,
                 newIndex: index,
                 newItem: item
             });
@@ -806,7 +816,9 @@ var xp;
             this.deleteIndexProperty();
             // Notify
             this.onCollectionChanged.invoke({
-                action: moving ? 5 /* Detach */ : 2 /* Delete */,
+                action: moving ?
+                    CollectionChangeAction.Detach
+                    : CollectionChangeAction.Delete,
                 oldIndex: index,
                 oldItem: item
             });
@@ -828,7 +840,7 @@ var xp;
                     value = _this.createNotifierIfPossible(value);
                     // Notify
                     _this.onCollectionChanged.invoke({
-                        action: 1 /* Replace */,
+                        action: CollectionChangeAction.Replace,
                         oldIndex: index,
                         newIndex: index,
                         oldItem: _this.inner[index],
@@ -868,7 +880,7 @@ var xp;
             this.inner.move(from, to);
             // Notify
             this.onCollectionChanged.invoke({
-                action: 3 /* Move */,
+                action: CollectionChangeAction.Move,
                 oldIndex: from,
                 newIndex: to,
                 oldItem: this.inner[to],
@@ -913,6 +925,7 @@ var xp;
                 this.move(0, length - 1 - i); // Collection notifications are inside move()
             }
             this.__sorting__ = false;
+            // Notify of properties changes
             for (var i = 0; i < length; i++) {
                 // Middle item was not changed
                 if (!(length % 2 === 1 && Math.floor(length / 2) === i)) {
@@ -962,7 +975,7 @@ var xp;
             for (var _i = 2; _i < arguments.length; _i++) {
                 items[_i - 2] = arguments[_i];
             }
-            if (start === void 0) {
+            if (start === void 0 /* || (items && items.length === 0)*/ /*TypeScript creates an empty Array*/) {
                 throw new Error('The specified arguments may lead to unexpected result.');
             }
             if (start < 0)
@@ -1016,12 +1029,8 @@ var xp;
             }
             return this.inner.concat.apply(this.inner, arguments);
         };
-        ObservableCollection.prototype.join = function (separator) {
-            return this.inner.join.apply(this.inner, arguments);
-        };
-        ObservableCollection.prototype.slice = function (start, end) {
-            return this.inner.slice.apply(this.inner, arguments);
-        };
+        ObservableCollection.prototype.join = function (separator) { return this.inner.join.apply(this.inner, arguments); };
+        ObservableCollection.prototype.slice = function (start, end) { return this.inner.slice.apply(this.inner, arguments); };
         /**
          * Method called by JSON.stringify()
          */
@@ -1029,43 +1038,21 @@ var xp;
             return this.inner;
         };
         //toString(): string { return this.inner.toString(); }
-        ObservableCollection.prototype.toString = function () {
-            return Object.prototype.toString.call(this);
-        };
+        ObservableCollection.prototype.toString = function () { return Object.prototype.toString.call(this); };
         //toString(): string { return '[object Array]'; }
-        ObservableCollection.prototype.toLocaleString = function () {
-            return this.inner.toLocaleString();
-        };
-        ObservableCollection.prototype.indexOf = function (searchElement, fromIndex) {
-            return this.inner.indexOf.apply(this.inner, arguments);
-        };
-        ObservableCollection.prototype.lastIndexOf = function (searchElement, fromIndex) {
-            return this.inner.lastIndexOf.apply(this.inner, arguments);
-        };
+        ObservableCollection.prototype.toLocaleString = function () { return this.inner.toLocaleString(); };
+        ObservableCollection.prototype.indexOf = function (searchElement, fromIndex) { return this.inner.indexOf.apply(this.inner, arguments); };
+        ObservableCollection.prototype.lastIndexOf = function (searchElement, fromIndex) { return this.inner.lastIndexOf.apply(this.inner, arguments); };
         //------------------
         // Iteration methods
         //------------------
-        ObservableCollection.prototype.forEach = function (callbackfn, thisArg) {
-            return this.inner.forEach.apply(this.inner, arguments);
-        };
-        ObservableCollection.prototype.every = function (callbackfn, thisArg) {
-            return this.inner.every.apply(this.inner, arguments);
-        };
-        ObservableCollection.prototype.some = function (callbackfn, thisArg) {
-            return this.inner.some.apply(this.inner, arguments);
-        };
-        ObservableCollection.prototype.filter = function (callbackfn, thisArg) {
-            return this.inner.filter.apply(this.inner, arguments);
-        };
-        ObservableCollection.prototype.map = function (callbackfn, thisArg) {
-            return this.inner.map.apply(this.inner, arguments);
-        };
-        ObservableCollection.prototype.reduce = function (callbackfn, initialValue) {
-            return this.inner.reduce.apply(this.inner, arguments);
-        };
-        ObservableCollection.prototype.reduceRight = function (callbackfn, initialValue) {
-            return this.inner.reduceRight.apply(this.inner, arguments);
-        };
+        ObservableCollection.prototype.forEach = function (callbackfn, thisArg) { return this.inner.forEach.apply(this.inner, arguments); };
+        ObservableCollection.prototype.every = function (callbackfn, thisArg) { return this.inner.every.apply(this.inner, arguments); };
+        ObservableCollection.prototype.some = function (callbackfn, thisArg) { return this.inner.some.apply(this.inner, arguments); };
+        ObservableCollection.prototype.filter = function (callbackfn, thisArg) { return this.inner.filter.apply(this.inner, arguments); };
+        ObservableCollection.prototype.map = function (callbackfn, thisArg) { return this.inner.map.apply(this.inner, arguments); };
+        ObservableCollection.prototype.reduce = function (callbackfn, initialValue) { return this.inner.reduce.apply(this.inner, arguments); };
+        ObservableCollection.prototype.reduceRight = function (callbackfn, initialValue) { return this.inner.reduceRight.apply(this.inner, arguments); };
         return ObservableCollection;
     })(xp.ObservableObject);
     xp.ObservableCollection = ObservableCollection;
@@ -1233,7 +1220,7 @@ var xp;
                 this.resultField = this.func.apply(null, params);
             }
             catch (e) {
-                xp.Log.write(4 /* Warn */, 32 /* Binding */, 'Expression error: ' + e);
+                xp.Log.write(xp.Log.HeatLevel.Warn, xp.Log.Domain.Binding, 'Expression error: ' + e);
                 this.resultField = null;
             }
             this.onPropertyChanged.invoke('result');
@@ -1331,6 +1318,11 @@ var xp;
         // Precedence
         // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Operator_Precedence#Table
         var parsers = [
+            //{
+            //    op: '()',
+            //    fn: (a) => a,
+            //    split: splitMiddle
+            //},
             {
                 op: '?:',
                 fn: function (a, b, c) { return a ? b : c; },
@@ -1362,78 +1354,63 @@ var xp;
                 op: '||',
                 fn: function (a, b) { return a || b; },
                 split: splitLeftRight
-            },
-            {
+            }, {
                 op: '&&',
                 fn: function (a, b) { return a && b; },
                 split: splitLeftRight
-            },
-            {
+            }, {
                 op: '!==',
                 fn: function (a, b) { return a !== b; },
                 split: splitLeftRight
-            },
-            {
+            }, {
                 op: '===',
                 fn: function (a, b) { return a === b; },
                 split: splitLeftRight
-            },
-            {
+            }, {
                 op: '!=',
                 fn: function (a, b) { return a != b; },
                 split: splitLeftRight
-            },
-            {
+            }, {
                 op: '==',
                 fn: function (a, b) { return a == b; },
                 split: splitLeftRight
-            },
-            {
+            }, {
                 op: '>=',
                 fn: function (a, b) { return a >= b; },
                 split: splitLeftRight
-            },
-            {
+            }, {
                 op: '>',
                 fn: function (a, b) { return a > b; },
                 split: splitLeftRight
-            },
-            {
+            }, {
                 op: '<=',
                 fn: function (a, b) { return a <= b; },
                 split: splitLeftRight
-            },
-            {
+            }, {
                 op: '<',
                 fn: function (a, b) { return a < b; },
                 split: splitLeftRight
-            },
-            {
+            }, {
                 op: '-',
                 fn: function (a, b) { return a - b; },
                 split: splitLeftRight
-            },
-            {
+            }, {
                 op: '+',
                 fn: function (a, b) { return a + b; },
                 split: splitLeftRight
-            },
-            {
+            }, {
                 op: '/',
                 fn: function (a, b) { return a / b; },
                 split: splitLeftRight
-            },
-            {
+            }, {
                 op: '*',
                 fn: function (a, b) { return a * b; },
                 split: splitLeftRight
-            },
-            {
+            }, {
                 op: 'typeof',
                 fn: function (a) { return typeof a; },
                 split: splitRight
-            },
-            {
+            }, {
                 op: '!',
                 fn: function (a) { return !a; },
                 split: splitRight
@@ -1486,7 +1463,7 @@ var xp;
                     var objPath = xp.Path.getObjectPath(propPath);
                     var lastObj = xp.Path.getPropertyByPath(value, objPath, false);
                     if (typeof lastObj !== 'object' || lastObj === null) {
-                        xp.Log.write(2 /* Info */, 32 /* Binding */, 'Unable to execute expression: Item supposed to be an object.');
+                        xp.Log.write(xp.Log.HeatLevel.Info, xp.Log.Domain.Binding, 'Unable to execute expression: Item supposed to be an object.');
                         // TODO: Throw error?
                         return;
                     }
@@ -1514,6 +1491,7 @@ var xp;
                         return lastObj[propName].apply(lastObj, params);
                     }
                 }
+                // Couldn't resolve
                 throw new Error('Expression scope doesn\'t contain "' + expr + '".');
             }
             // Get parser at current level
@@ -1612,7 +1590,9 @@ var xp;
                 this.pathObjects = [];
             }
             this.pathObjects[startIndex] = {
-                obj: startIndex === 0 ? this.scope : xp.Path.getPropertyByPath(this.scope, parts.slice(0, startIndex).join('.'))
+                obj: startIndex === 0 ?
+                    this.scope
+                    : xp.Path.getPropertyByPath(this.scope, parts.slice(0, startIndex).join('.'))
             };
             var po = this.pathObjects;
             for (var i = startIndex; i < parts.length; i++) {
@@ -1717,7 +1697,7 @@ var xp;
             }
         };
         BindingManager.prototype.logMessage = function (message) {
-            xp.Log.write(1 /* Log */, 32 /* Binding */, 'BM of "{0}#{1}.{2}": {3}', xp.getClassName(this.target), this.target['name'], this.targetPropertyPath, message);
+            xp.Log.write(xp.Log.HeatLevel.Log, xp.Log.Domain.Binding, 'BM of "{0}#{1}.{2}": {3}', xp.getClassName(this.target), this.target['name'], this.targetPropertyPath, message);
         };
         return BindingManager;
     })();
@@ -1793,8 +1773,10 @@ var xp;
          */
         Model.property = function (obj, prop, value, opts) {
             opts = opts || {};
-            var convertToObservable = xp.isNotifier(value);
-            var convertNested = value instanceof xp.ObservableObject ? value['__convertNested__'] : false;
+            var convertToObservable = opts.convertToObservable || xp.isNotifier(value);
+            var convertNested = opts.convertNested || (value instanceof xp.ObservableObject
+                ? value['__convertNested__']
+                : false);
             if (opts.enumerable === void 0) {
                 opts.enumerable = true;
             }
@@ -1867,6 +1849,76 @@ var xp;
         return Model;
     })();
     xp.Model = Model;
+    /**
+     * Model property decorator.
+     */
+    function property(opts) {
+        opts = opts || {};
+        return function (proto, propName) {
+            var convertToObservable = opts.convertToObservable;
+            var convertNested = opts.convertNested;
+            var enumerable = opts.enumerable === void 0 ? true : opts.enumerable;
+            var fieldName = '_' + propName;
+            // Getter
+            if (opts.getterConvertor) {
+                var getterConvertor = opts.getterConvertor;
+                var getter = function () { return getterConvertor(this[fieldName]); };
+            }
+            else {
+                var getter = function () { return this[fieldName]; };
+            }
+            // Setter
+            if (opts.setterConvertor) {
+                var setterConvertor = opts.setterConvertor;
+                if (convertToObservable) {
+                    var setter = function (v) {
+                        if (xp.ObservableObject.isConvertable(v)) {
+                            v = xp.observable(v, convertNested);
+                        }
+                        this[fieldName] = setterConvertor(v);
+                        this.onPropertyChanged.invoke(propName);
+                    };
+                }
+                else {
+                    var setter = function (v) {
+                        this[fieldName] = setterConvertor(v);
+                        this.onPropertyChanged.invoke(propName);
+                    };
+                }
+            }
+            else {
+                if (convertToObservable) {
+                    var setter = function (v) {
+                        if (xp.ObservableObject.isConvertable(v)) {
+                            v = xp.observable(v, convertNested);
+                        }
+                        this[fieldName] = v;
+                        this.onPropertyChanged.invoke(propName);
+                    };
+                }
+                else {
+                    var setter = function (v) {
+                        this[fieldName] = v;
+                        this.onPropertyChanged.invoke(propName);
+                    };
+                }
+            }
+            // Define property
+            Object.defineProperty(proto, propName, {
+                get: getter,
+                set: setter,
+                configurable: true,
+                enumerable: enumerable
+            });
+            // Define field
+            Object.defineProperty(proto, fieldName, {
+                writable: true,
+                configurable: true
+            });
+        };
+    }
+    xp.property = property;
+    ;
 })(xp || (xp = {}));
 var xp;
 (function (xp) {
@@ -1974,6 +2026,80 @@ var xp;
 })(xp || (xp = {}));
 var xp;
 (function (xp) {
+    // TODO: Serialize and restore circular references (e.g. by "id" like in Inker).
+    /**
+     * Serializes item to JSON.
+     * @param item Item to serialize.
+     * @param writeModel Specifies whether to write models prototypes names (adds __xp_model__ property). Default is true.
+     * @param replacer A function that transforms the result.
+     * @param whiteSpace Specifies whether to add white space into output. Default is " ".
+     */
+    function serialize(item, writeModel, replacer, whiteSpace) {
+        if (writeModel === void 0) { writeModel = true; }
+        if (whiteSpace === void 0) { whiteSpace = ' '; }
+        return JSON.stringify(item, function (k, v) {
+            if (writeModel
+                && v !== null
+                && typeof v === 'object'
+                && !Array.isArray(v)
+                && !(Object.getPrototypeOf(v) === Object)) {
+                // Add model name
+                v['__xp_model__'] = xp.getClassName(v);
+            }
+            if (replacer) {
+                v = replacer(k, v);
+            }
+            return v;
+        }, whiteSpace);
+    }
+    xp.serialize = serialize;
+    /**
+     * Deserializes JSON string and restores models.
+     * @param json JSON string.
+     * @param models Array of models' constructors. Each constructor must be parameterless.
+     * @param reviver A function which prescribes how the value is transformed. Is called before model restore.
+     */
+    function deserialize(json, models, reviver) {
+        // Create "name"-"constructor" doctionary.
+        var modelsDictionary = {};
+        models && models.forEach(function (m) {
+            var name = m.toString().match(/^function\s*(.*?)\s*\(/)[1];
+            if (name in modelsDictionary) {
+                throw new Error('Duplicate model name: "' + name + '".');
+            }
+            modelsDictionary[name] = m;
+        });
+        return JSON.parse(json, function (k, v) {
+            if (reviver) {
+                v = reviver(k, v);
+            }
+            if (typeof v === 'object' && v !== null && '__xp_model__' in v) {
+                if (v['__xp_model__'] === 'ObservableObject' || v['__xp_model__'] === 'ObservableCollection') {
+                    // Create observable
+                    delete v['__xp_model__'];
+                    return xp.observable(v);
+                }
+                //
+                // Restore model
+                var ctor = modelsDictionary[v['__xp_model__']];
+                if (!ctor) {
+                    throw new Error('No costructor specified for model "' + v['__xp_model__'] + '".');
+                }
+                var model = new ctor();
+                for (var prop in v) {
+                    if (prop !== '__xp_model__') {
+                        model[prop] = v[prop];
+                    }
+                }
+                return model;
+            }
+            return v;
+        });
+    }
+    xp.deserialize = deserialize;
+})(xp || (xp = {}));
+var xp;
+(function (xp) {
     function createEventArgs(control, domEventObject) {
         var rect = control.domElement.getBoundingClientRect();
         var e = {
@@ -2043,6 +2169,7 @@ var xp;
          * Returns element's template.
          */
         Element.prototype.getTemplate = function () {
+            //return document.createElement('div');
             throw new Error('Unable to create an instance of an abstract element.');
         };
         /**
@@ -2497,7 +2624,7 @@ var xp;
                 var _this = this;
                 if (this.bindings.get('scope') && scope !== this.parent.scope)
                     scope = new xp.Scope(scope, this.parent.scope);
-                xp.Log.write(1 /* Log */, 64 /* UI */ | 32 /* Binding */, '{0}:{1}: Set data scope "{2}".', xp.getClassName(this), this.name || '-', scope);
+                xp.Log.write(xp.Log.HeatLevel.Log, xp.Log.Domain.UI | xp.Log.Domain.Binding, '{0}:{1}: Set data scope "{2}".', xp.getClassName(this), this.name || '-', scope);
                 this._scope = scope;
                 this.bindings.pairs.forEach(function (p) {
                     var setter = p.key;
@@ -2524,7 +2651,7 @@ var xp;
          * @param value Value, that user inputs.
          */
         Element.prototype.onInput = function (setter, value) {
-            xp.Log.write(1 /* Log */, 64 /* UI */, '{0}:{1}.{2}: Input "{3}".', xp.getClassName(this), this.name || '-', setter, value);
+            xp.Log.write(xp.Log.HeatLevel.Log, xp.Log.Domain.UI, '{0}:{1}.{2}: Input "{3}".', xp.getClassName(this), this.name || '-', setter, value);
             if (typeof setter === 'string') {
                 xp.Path.setPropertyByPath(this, setter, value);
             }
@@ -2769,8 +2896,8 @@ var xp;
         };
         Placeholder.prototype.setDefaults = function () {
             _super.prototype.setDefaults.call(this);
-            this.width = '100%';
-            this.height = '100%';
+            //this.width = '100%';
+            //this.height = '100%';
         };
         return Placeholder;
     })(xp.Element);
@@ -3128,7 +3255,8 @@ var xp;
             for (var prop in markup) {
                 m[prop] = markup[prop];
             }
-            if ((m.html && m.url) || !(m.html || m.url)) {
+            if ((m.html && m.url)
+                || !(m.html || m.url)) {
                 throw new Error('One property, "html" or "url", must be specified.');
             }
             if (m.html) {
@@ -3203,7 +3331,7 @@ var xp;
             _super.call(this, markup);
             children && children.forEach(function (c) { return _this.append(c); });
             // Set named children
-            if (true) {
+            if (true /*Object.getPrototypeOf(this).constructor.isView*/) {
                 //
                 // TODO: Prevent name collision and unnecessary named children properties set.
                 // Maybe use TypeScript 1.5 metadata.
@@ -3697,24 +3825,24 @@ var xp;
                             var collection = items;
                             _this.itemsRegistar.subscribe(collection.onCollectionChanged, function (args) {
                                 switch (args.action) {
-                                    case 4 /* Attach */:
-                                    case 0 /* Create */:
+                                    case xp.CollectionChangeAction.Attach:
+                                    case xp.CollectionChangeAction.Create:
                                         _this.addItem(args.newIndex, args.newItem);
                                         break;
-                                    case 5 /* Detach */:
-                                    case 2 /* Delete */:
+                                    case xp.CollectionChangeAction.Detach:
+                                    case xp.CollectionChangeAction.Delete:
                                         // Remove replacement handler
                                         var found = _this.itemReplacementHandlers.filter(function (h) { return h.item === args.oldItem; })[0];
                                         found.holder.onPropertyChanged.removeHandler(found.handler);
                                         _this.itemReplacementHandlers.splice(_this.itemReplacementHandlers.indexOf(found), 1);
                                         _this.children[args.oldIndex].remove();
                                         break;
-                                    case 1 /* Replace */:
+                                    case xp.CollectionChangeAction.Replace:
                                         if (!_this.itemReplacementToken) {
                                             _this.children[args.newIndex].scope[_this.itemId] = args.newItem;
                                         }
                                         break;
-                                    case 3 /* Move */:
+                                    case xp.CollectionChangeAction.Move:
                                         _this.insert(_this.children[args.oldIndex], args.newIndex);
                                         break;
                                     default:
@@ -3755,7 +3883,7 @@ var xp;
         };
         List.prototype.addItem = function (index, item) {
             // Create child
-            var child = this.itemCreator();
+            var child = this.itemCreator(item);
             child.name = xp.createUuid();
             child.useParentScope = false;
             // Append child
@@ -3913,7 +4041,9 @@ var xp;
          * Closes the dialog.
          */
         Modal.prototype.close = function () {
-            var result = this.onClose ? this.onClose() : true;
+            var result = this.onClose ?
+                this.onClose()
+                : true;
             if (result)
                 xp.Window.instance.closeModal();
         };
@@ -3982,8 +4112,7 @@ var xp;
             }
             // Create buttons
             actions = actions || {
-                'OK': function () {
-                }
+                'OK': function () { }
             };
             var hbox = new xp.HBox({
                 contentAlign: 'right'

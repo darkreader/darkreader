@@ -478,7 +478,7 @@ declare module xp {
          * @param path Path to bind to.
          * @param options Options.
          */
-        constructor(target: any, targetPropertyPath: string, scope: Object, path: string, defaultValue?: any);
+        constructor(target: Object, targetPropertyPath: string, scope: Object, path: string, defaultValue?: any);
         private pathParts;
         private pathObjects;
         /**
@@ -562,7 +562,13 @@ declare module xp {
         setterConvertor?: (v) => any;
         getterConvertor?: (v) => any;
         enumerable?: boolean;
+        convertToObservable?: boolean;
+        convertNested?: boolean;
     }
+    /**
+     * Model property decorator.
+     */
+    function property(opts?: ModelPropertyOptions): PropertyDecorator;
 }
 declare module xp {
     /**
@@ -576,13 +582,32 @@ declare module xp {
          * @param source Source object. Should be observable.
          * @param parent Parent scope. Should be observable.
          */
-        constructor(source: any, parent: Object);
+        constructor(source: Object, parent: Object);
         /**
          * Must be called when the scope object is not used anymore.
          * Otherwise source object changes would be reflected.
          */
         unsubscribeScopeFromChanges(): void;
     }
+}
+declare module xp {
+    /**
+     * Serializes item to JSON.
+     * @param item Item to serialize.
+     * @param writeModel Specifies whether to write models prototypes names (adds __xp_model__ property). Default is true.
+     * @param replacer A function that transforms the result.
+     * @param whiteSpace Specifies whether to add white space into output. Default is " ".
+     */
+    function serialize(item: any, writeModel?: boolean, replacer?: (k: string, v: any) => any, whiteSpace?: string): string;
+    /**
+     * Deserializes JSON string and restores models.
+     * @param json JSON string.
+     * @param models Array of models' constructors. Each constructor must be parameterless.
+     * @param reviver A function which prescribes how the value is transformed. Is called before model restore.
+     */
+    function deserialize(json: string, models?: {
+        new (): Object;
+    }[], reviver?: (k: string, v: any) => any): any;
 }
 declare type domEvent = Event;
 declare type domMouseEvent = MouseEvent;
@@ -704,7 +729,7 @@ declare module xp {
          * @param prop Property name.
          * @param options Property options.
          */
-        protected defineProperty(prop: string, options: PropertyOptions): void;
+        protected defineProperty(prop: string, options: ElementPropertyOptions): void;
         /**
          * Defines element's properties.
          */
@@ -817,7 +842,7 @@ declare module xp {
          */
         onScopeChanged: xp.Event<Object>;
     }
-    interface PropertyOptions {
+    interface ElementPropertyOptions {
         setter?: (v) => void;
         getter?: () => any;
         observable?: boolean;
@@ -1123,7 +1148,7 @@ declare module xp {
     interface ListMarkup<T extends List> extends VBoxMarkup<T> {
         items?: any[] | string;
         itemId?: string;
-        itemCreator?: () => Element;
+        itemCreator?: (item?: any) => Element;
     }
     /**
      * List container.
@@ -1131,7 +1156,7 @@ declare module xp {
     class List extends VBox {
         items: any[];
         itemId: string;
-        itemCreator: () => Element;
+        itemCreator: (item?: any) => Element;
         constructor(markup?: ListMarkup<List>);
         protected getTemplate(): HTMLElement;
         protected setDefaults(): void;

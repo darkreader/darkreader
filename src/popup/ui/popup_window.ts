@@ -29,6 +29,10 @@ module DarkReader.Popup {
                             //text: 'hotkey: Alt+Shift+D'
                             // TODO: Refactor commands. Edit chrome type definition.
                             init: (l) => {
+                                if (!chrome.commands) {
+                                    l.text = 'hotkey';
+                                    return;
+                                }
                                 (<any>chrome.commands).getAll((commands: { description: string; name: string; shortcut: string; }[]) => {
                                     if (commands) {
                                         var cmd = commands.filter((c) => c.name === 'toggle')[0];
@@ -213,6 +217,10 @@ module DarkReader.Popup {
                                 //text: 'hotkey for adding site: Alt+Shift+S'
                                 // TODO: Refactor commands. Edit chrome type definition.
                                 init: (l) => {
+                                    if (!chrome.commands) {
+                                        l.text = 'hotkey';
+                                        return;
+                                    }
                                     (<any>chrome.commands).getAll((commands: { description: string; name: string; shortcut: string; }[]) => {
                                         if (commands) {
                                             var cmd = commands.filter((c) => c.name === 'addSite')[0];

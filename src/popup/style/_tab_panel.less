@@ -11,6 +11,9 @@
         display: flex;
         flex-flow: row nowrap;
         justify-content: center;
+        // WARNING: Some flexbox bug with border-top at child.
+        // A scrollbar appears.
+        overflow-y: hidden;
         width: 100%;
 
         .tabPanelButton {

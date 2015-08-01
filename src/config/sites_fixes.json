@@ -31,6 +31,10 @@
             "selectors": "{common}, *[style*=\"background-image:url\"]"
         },
         {
+            "url": "io9.com",
+            "rules": "html { height: auto; }"
+        },
+        {
             "url": "lifehacker.com",
             "rules": "html { height: auto; }"
         },

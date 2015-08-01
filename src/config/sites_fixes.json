@@ -32,11 +32,12 @@
         },
         {
             "url": "io9.com",
-            "rules": "html { height: auto; }"
+            "rules": "html { height: auto !important; }"
         },
         {
             "url": "lifehacker.com",
-            "rules": "html { height: auto; }"
+            "selectors": "{common}, .videoCube a .thumbBlock",
+            "rules": "html { height: auto !important; }"
         },
         {
             "url": "mail.live.com",

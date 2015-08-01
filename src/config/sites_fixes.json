@@ -31,6 +31,10 @@
             "selectors": "{common}, *[style*=\"background-image:url\"]"
         },
         {
+            "url": "lifehacker.com",
+            "rules": "html { height: auto; }"
+        },
+        {
             "url": "mail.live.com",
             "selectors": ".ComposeContent { background-color:white; } img:not([src=\"https://a.gfx.ms/rte_metro2.png\"]), video, object, .ComposeContent",
             "rules": ".ComposeContent { background-color: white; }"

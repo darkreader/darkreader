@@ -109,10 +109,21 @@ module DarkReader {
                 parts.push('*:-webkit-full-screen { -webkit-filter: none !important; }');
 
                 // --- WARNING! HACK! ---
-                if (config.mode === FilterMode.dark && this.issue501582) {
+                if (this.issue501582) {
                     // Chrome 45 temp <html> background fix
                     // https://code.google.com/p/chromium/issues/detail?id=501582
-                    parts.push('html { background: inherit !important; }');
+                    //parts.push('html { background: inherit !important; }'); // Works not always.
+                    let b: number;
+                    if (config.mode === FilterMode.dark) {
+                        b = config.brightness < 100 ? 0 : (config.brightness - 100);
+                    } else {
+                        b = config.brightness > 100 ? 100 : config.brightness;
+                    }
+                    b = 50 * (1 - config.contrast / 100) + b * config.contrast / 100;
+                    if (b < 0) { b = 0; }
+                    if (b > 100) { b = 100; }
+                    b = Math.round(255 * b / 100);
+                    parts.push(`html { background: rgb(${b},${b},${b}) !important; }`);
                 }
 
                 if (fix.rules) {
@@ -151,7 +162,7 @@ module DarkReader {
             result += config.sepia == 0 ? ''
                 : 'sepia(' + config.sepia + '%) ';
 
-            result += '!important; min-height: 100% !important; }';
+            result += '!important; min-height: 100% !important; height: auto; }';
 
             return result;
         }

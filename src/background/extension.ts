@@ -68,7 +68,7 @@ module DarkReader {
                 }
                 if (command === 'addSite') {
                     console.log('Add Site command entered');
-                    chrome.tabs.query({ active: true },(tabs) => {
+                    chrome.tabs.query({ active: true }, (tabs) => {
                         // Some bug: if command executed
                         // from popup, query returns [].
                         // "currentWindow:true" doesn't work.
@@ -115,14 +115,14 @@ module DarkReader {
                 this.addTabListener();
                 
                 // Set style for active tabs
-                chrome.tabs.query({ active: true },(tabs) => {
+                chrome.tabs.query({ active: true }, (tabs) => {
                     tabs.forEach((tab) => {
                         this.addCssToTab(tab);
                     });
                 });
 
                 // Set style for all tabs
-                chrome.tabs.query({ active: false },(tabs) => {
+                chrome.tabs.query({ active: false }, (tabs) => {
                     tabs.forEach((tab) => {
                         this.addCssToTab(tab);
                     });
@@ -144,14 +144,14 @@ module DarkReader {
                 this.removeTabListener();
 
                 // Remove style from active tabs
-                chrome.tabs.query({ active: true },(tabs) => {
+                chrome.tabs.query({ active: true }, (tabs) => {
                     tabs.forEach((tab) => {
                         this.removeCssFromTab(tab);
                     });
                 });
 
                 // Remove style from all tabs
-                chrome.tabs.query({ active: false },(tabs) => {
+                chrome.tabs.query({ active: false }, (tabs) => {
                     tabs.forEach((tab) => {
                         this.removeCssFromTab(tab);
                     });
@@ -162,14 +162,14 @@ module DarkReader {
         protected onConfigPropChanged() {
             if (this.enabled) {
                 // Update style for current tab
-                chrome.tabs.query({ active: true },(tabs) => {
+                chrome.tabs.query({ active: true }, (tabs) => {
                     tabs.forEach((tab) => {
                         this.updateCssInTab(tab);
                     });
                 });
 
                 // Update style for all tabs
-                chrome.tabs.query({ active: false },(tabs) => {
+                chrome.tabs.query({ active: false }, (tabs) => {
                     tabs.forEach((tab) => {
                         this.updateCssInTab(tab);
                     });
@@ -275,80 +275,74 @@ module DarkReader {
             var css = this.generator.createCssCode(this.config, url);
 
             //var code = "alert('Add CSS');"
-            var code = [
-                "console.log('Executing DR script (add)...');",
-            //"debugger;",
-                "var addDRStyle = function() {",
-                "   var css = '" + css + "';",
-                "   var style = document.createElement('style');",
-                "   style.setAttribute('id', 'dark-reader-style');",
-                "   style.type = 'text/css';",
-                "   style.appendChild(document.createTextNode(css));",
-                "   var heads = document.getElementsByTagName('head');",
-                "   var head;",
-                "   if (heads && heads[0]) {",
-                "       head = heads[0];",
-                "   } else {",
-                "       var html = document.children[0];",
-                "       head = document.createElement('head');",
-                "       if (html.children.length > 0)",
-                "           html.insertBefore(head, html.firstChild);",
-                "       else",
-                "           html.appendChild(head);",
-                "   }",
-                "   head.appendChild(style);",
-                "}",
-                "var head = document.getElementsByTagName('head')[0];",
-                "if (head) {",
-                "   var prevStyle = document.getElementById('dark-reader-style');",
-                "   if (!prevStyle) {",
-                "       addDRStyle();",
-                "       console.log('Added DR style.');",
-                "   }",
-                "}",
-                "else {",
-                "   (function () {",
-                "       addDRStyle();",
-                "       console.log('Added DR style without head.');",
-                "       var dr_observer = new MutationObserver(function (mutations) {",
-                "           for (var i = 0; i < mutations.length; i++) {",
-                "               if (mutations[i].target.nodeName == 'BODY' || mutations[i].target.nodeName == 'HEAD') {",
-                "                   dr_observer.disconnect();",
-                "                   var prevStyle = document.getElementById('dark-reader-style');",
-                "                   if (!prevStyle) {",
-                "                       addDRStyle();",
-                "                       console.log('Added DR style using observer.');",
-                "                   }",
-                "                   break;",
-                "               }",
-                "           }",
-                "       });",
-                "       dr_observer.observe(document, { childList: true, subtree: true });",
-                "       var fn = function() {",
-                "           if (document.readyState === 'complete') {",
-                "               var prevStyle = document.getElementById('dark-reader-style');",
-                "               if (!prevStyle) {",
-                "                   addDRStyle();",
-                "                   console.log('Added DR style on load.');",
-                "               }",
-                "           }",
-                "           document.removeEventListener('readystatechange', fn);",
-                "       };",
-                "       document.addEventListener('readystatechange', fn);",
-                "   })();",
-                "}"
-            ].join('\n');
-
+            var code = `
+console.log('Executing DR script (add)...');
+//debugger;
+var addDRStyle = function() {
+    var css = '${css}';
+    var style = document.createElement('style');
+    style.setAttribute('id', 'dark-reader-style');
+    style.type = 'text/css';
+    style.appendChild(document.createTextNode(css));
+    var head = document.querySelector('head');
+    if (!head) {
+        var html = document.querySelector('html');
+        head = document.createElement('head');
+        if (html.childElementCount > 0) {
+            html.insertBefore(head, html.firstElementChild);
+        } else {
+            html.appendChild(head);
+        }
+    }
+    head.appendChild(style);
+};
+var head = document.querySelector('head');
+if (head) {
+    var prevStyle = document.getElementById('dark-reader-style');
+    if (!prevStyle) {
+        addDRStyle();
+        console.log('Added DR style.');
+    }
+} else {
+    (function() {
+        addDRStyle();
+        console.log('Added DR style without head.');
+        var dr_observer = new MutationObserver(function(mutations) {
+            for (var i = 0; i < mutations.length; i++) {
+                if (mutations[i].target.nodeName == 'BODY' || mutations[i].target.nodeName == 'HEAD') {
+                    dr_observer.disconnect();
+                    var prevStyle = document.getElementById('dark-reader-style');
+                    if (!prevStyle) {
+                        addDRStyle();
+                        console.log('Added DR style using observer.');
+                    }
+                    break;
+                }
+            }
+        });
+        dr_observer.observe(document, { childList: true, subtree: true });
+        var fn = function() {
+            var prevStyle = document.getElementById('dark-reader-style');
+            if (!prevStyle) {
+                addDRStyle();
+                console.log('Added DR style on load.');
+            }
+            document.removeEventListener('readystatechange', fn);
+        };
+        document.addEventListener('readystatechange', fn);
+    })();
+}
+`;
             return code;
         }
 
         protected getCode_removeCss() {
             //var code = "alert('Remove CSS');"
-            var code =
-                "console.log('Executing DR script (remove)...');\n" +
-                "var style = document.getElementById('dark-reader-style');\n" +
-                "style && style.parentNode.removeChild(style);";
-
+            var code = `
+console.log('Executing DR script (remove)...');
+var style = document.getElementById('dark-reader-style');
+style && style.parentNode.removeChild(style);
+`;
             return code;
         }
 
@@ -356,28 +350,27 @@ module DarkReader {
             var css = this.generator.createCssCode(this.config, url);
 
             //var code = "alert('Update CSS');"
-            var code = [
-                "console.log('Executing DR script (update)...');",
-                "var addDRStyle = function() {",
-                "   var css = '" + css + "';",
-                "   var style = document.createElement('style');",
-                "   style.setAttribute('id', 'dark-reader-style');",
-                "   style.type = 'text/css';",
-                "   style.appendChild(document.createTextNode(css));",
-                "   var head = document.getElementsByTagName('head')[0];",
-                "   head.appendChild(style);",
-                "}",
-                "var head = document.getElementsByTagName('head')[0];",
-                "if (head) {",
-                "   var prevStyle = document.getElementById('dark-reader-style');",
-                "   if (prevStyle) {",
-                "       prevStyle.parentElement.removeChild(prevStyle);",
-                "   }",
-                "   addDRStyle();",
-                "   console.log('Updated DR style.');",
-                "}"
-            ].join('\n');
-
+            var code = `
+console.log('Executing DR script (update)...');
+var addDRStyle = function() {
+    var css = '${css}';
+    var style = document.createElement('style');
+    style.setAttribute('id', 'dark-reader-style');
+    style.type = 'text/css';
+    style.appendChild(document.createTextNode(css));
+    var head = document.querySelector('head');
+    head.appendChild(style);
+}
+var head = document.querySelector('head');
+if (head) {
+    var prevStyle = document.getElementById('dark-reader-style');
+    if (prevStyle) {
+        prevStyle.parentElement.removeChild(prevStyle);
+    }
+    addDRStyle();
+    console.log('Updated DR style.');
+}
+`;
             return code;
         }
 
@@ -405,41 +398,41 @@ module DarkReader {
                     textstroke: null,
                     usefont: null
                 }
-            },(store: { config: ObsoleteFilterConfig }) => {
-                    if (store.config) {
-                        if (store.config.fontfamily !== null) {
-                            defaultFilterConfig.fontFamily = store.config.fontfamily;
-                        }
-                        if (store.config.ignorelist !== null) {
-                            defaultFilterConfig.siteList = store.config.ignorelist;
-                        }
-                        if (store.config.textstroke !== null) {
-                            defaultFilterConfig.textStroke = store.config.textstroke;
-                        }
-                        if (store.config.usefont !== null) {
-                            defaultFilterConfig.useFont = store.config.usefont;
-                        }
+            }, (store: { config: ObsoleteFilterConfig }) => {
+                if (store.config) {
+                    if (store.config.fontfamily !== null) {
+                        defaultFilterConfig.fontFamily = store.config.fontfamily;
                     }
-                    console.log('loaded legacy config:');
-                    console.log(store);
+                    if (store.config.ignorelist !== null) {
+                        defaultFilterConfig.siteList = store.config.ignorelist;
+                    }
+                    if (store.config.textstroke !== null) {
+                        defaultFilterConfig.textStroke = store.config.textstroke;
+                    }
+                    if (store.config.usefont !== null) {
+                        defaultFilterConfig.useFont = store.config.usefont;
+                    }
+                }
+                console.log('loaded legacy config:');
+                console.log(store);
 
-                    chrome.storage.sync.get(defaultStore,(store: AppConfigStore) => {
-                        if (!store.config) {
-                            store.config = defaultFilterConfig;
+                chrome.storage.sync.get(defaultStore, (store: AppConfigStore) => {
+                    if (!store.config) {
+                        store.config = defaultFilterConfig;
+                    }
+                    if (!Array.isArray(store.config.siteList)) {
+                        var arr = [];
+                        for (var key in store.config.siteList) {
+                            arr[key] = store.config.siteList[key];
                         }
-                        if (!Array.isArray(store.config.siteList)) {
-                            var arr = [];
-                            for (var key in store.config.siteList) {
-                                arr[key] = store.config.siteList[key];
-                            }
-                            store.config.siteList = arr;
-                        }
-                        this.config = <ObservableFilterConfig>xp.observable(store.config);
-                        this.enabled = store.enabled;
-                        console.log('loaded:');
-                        console.log(store);
-                    });
+                        store.config.siteList = arr;
+                    }
+                    this.config = <ObservableFilterConfig>xp.observable(store.config);
+                    this.enabled = store.enabled;
+                    console.log('loaded:');
+                    console.log(store);
                 });
+            });
         }
 
         /**
@@ -450,7 +443,7 @@ module DarkReader {
                 enabled: this.enabled,
                 config: this.config
             };
-            chrome.storage.sync.set(store,() => {
+            chrome.storage.sync.set(store, () => {
                 console.log('saved:');
                 console.log(store);
             });
@@ -484,4 +477,4 @@ module DarkReader {
     export interface ObservableFilterConfig extends FilterConfig, xp.Notifier {
         siteList: xp.ObservableCollection<string>;
     }
-} 
+}

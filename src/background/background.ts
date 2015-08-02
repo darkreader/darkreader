@@ -3,7 +3,10 @@
 module DarkReader.Background {
 
     // Initialize extension
-    export var extension = new DarkReader.Extension(
-        new DarkReader.FilterCssGenerator());
+    export var extension: DarkReader.Extension;
+    loadConfigs(() => {
+        extension = new DarkReader.Extension(
+            new DarkReader.FilterCssGenerator());
+    });
 
 }

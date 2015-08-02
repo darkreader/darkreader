@@ -8,8 +8,6 @@ module DarkReader {
     //
     //--------------------------------
 
-    // TODO: Asynchronous first remote load?
-
     var CONFIG_URLs = {
         darkSites: {
             remote: 'https://raw.githubusercontent.com/alexanderby/darkreader/master/src/config/dark_sites.json',
@@ -20,57 +18,148 @@ module DarkReader {
             local: '../config/sites_fixes.json'
         }
     };
+    var REMOTE_TIMEOUT_MS = 10 * 1000;
+    var RELOAD_INTERVAL_MS = 15 * 60 * 1000;
 
     /**
      * List of sites with dark theme (whick should not be inverted).
      */
-    export var DARK_SITES = loadConfigWithFallbackSync<string[]>({
-        remoteUrl: CONFIG_URLs.darkSites.remote,
-        localUrl: CONFIG_URLs.darkSites.local
-    }).sort(urlTemplateSorter);
+    export var DARK_SITES: string[];
 
     /**
      * Fixes for specific sites (selectors which should not be inverted).
      */
-    export var SITES_FIXES = (() => {
-        var result = loadConfigWithFallbackSync<SitesFixes>({
-            remoteUrl: CONFIG_URLs.sitesFixes.remote,
-            localUrl: CONFIG_URLs.sitesFixes.local
-        });
-        // Replace "{common}" with common selectors
-        result.specials.forEach((s) => {
-            s.selectors = s.selectors.replace(
-                /\{common\}/ig,
-                result.commonSelectors);
-        });
-        return result;
-    })();
+    export var SITES_FIXES: SitesFixes;
 
     //
-    // ----- Reload configs every hour ------
-
-    setInterval(() => {
+    // ----- Load configs ------
+    
+    export function loadConfigs(done?: () => void) {
+        function onInvalidData(desc) {
+            console.warn('Invalid data: ' + desc);
+        }
+        var loadedDarkSites = false;
+        var loadedSitesFixes = false;
+        var onLoadedDarkSites = function(sites: string[]) {
+            // Validate sites
+            if (!Array.isArray(sites)) {
+                sites = [];
+                onInvalidData('List is not an array.');
+            }
+            for (var i = sites.length - 1; i >= 0; i--) {
+                if (typeof sites[i] !== 'string') {
+                    sites.splice(i, 1);
+                    onInvalidData('URL is not a string.');
+                }
+            }
+            sites.sort(urlTemplateSorter);
+            
+            // End
+            DARK_SITES = sites;
+            loadedDarkSites = true;
+            if (done && loadedSitesFixes) {
+                done();
+            }
+        };
+        var onLoadedSitesFixes = function(fixes: SitesFixes) {
+            // Validate fixes
+            if (fixes === null || typeof fixes !== 'object') {
+                fixes = {
+                    commonSelectors: '',
+                    specials: []
+                };
+                onInvalidData('Fix is not an object.')
+            }
+            if (typeof fixes.commonSelectors !== 'string') {
+                fixes.commonSelectors = '';
+                onInvalidData('Missing common selectors.')
+            }
+            if (!Array.isArray(fixes.specials)) {
+                fixes.specials = [];
+                onInvalidData('Missing special selectors.');
+            }
+            for (var i = fixes.specials.length - 1; i >= 0; i--) {
+                if (typeof fixes.specials[i].url !== 'string') {
+                    fixes.specials.splice(i, 1);
+                    onInvalidData('Wrong URL.');
+                    continue;
+                }
+                if (typeof fixes.specials[i].selectors !== 'string') {
+                    fixes.specials[i].selectors = fixes.commonSelectors;
+                    // TODO: Optional "selectors" property.
+                    onInvalidData('Missing selectors.');
+                }
+                if (fixes.specials[i].rules !== void 0
+                    && typeof fixes.specials[i].rules !== 'string'
+                    ) {
+                    fixes.specials[i].rules = '';
+                    onInvalidData('Rule is not a string.');
+                    continue;
+                }
+            }
+            // Sort like templates?
+            
+            // Replace "{common}" with common selectors
+            fixes.specials.forEach((s) => {
+                s.selectors = s.selectors.replace(
+                    /\{common\}/ig,
+                    fixes.commonSelectors);
+            });
+            
+            // End
+            SITES_FIXES = fixes;
+            loadedSitesFixes = true;
+            if (done && loadedDarkSites) {
+                done();
+            }
+        };
+        
+        // Load start
         readJson<string[]>({
             url: CONFIG_URLs.darkSites.remote,
             async: true,
-            onSuccess: (result) => DARK_SITES = result.sort(urlTemplateSorter),
-            onFailure: (error) => console.warn('Dark Sites load error: ' + error)
+            timeout: REMOTE_TIMEOUT_MS,
+            onSuccess: (result) => {
+                onLoadedDarkSites(result)
+            },
+            onFailure: (error) => {
+                console.warn('Dark Sites remote load error: ' + error);
+                readJson<string[]>({
+                    url: CONFIG_URLs.darkSites.local,
+                    async: true,
+                    onSuccess: (result) => {
+                        onLoadedDarkSites(result);
+                    },
+                    onFailure: (error) => {
+                        console.warn('Fatal sh*t, local Dark Sites were not loaded: ' + error);
+                    }
+                });
+            }
         });
         readJson<SitesFixes>({
             url: CONFIG_URLs.sitesFixes.remote,
             async: true,
+            timeout: REMOTE_TIMEOUT_MS,
             onSuccess: (result) => {
-                // Replace "{common}" with common selectors
-                result.specials.forEach((s) => {
-                    s.selectors = s.selectors.replace(
-                        /\{common\}/ig,
-                        result.commonSelectors);
-                });
-                SITES_FIXES = result;
+                onLoadedSitesFixes(result)
             },
-            onFailure: (error) => console.warn('Sites Fixes load error: ' + error)
+            onFailure: (error) => {
+                console.warn('Sites Fixes remote load error: ' + error);
+                readJson<SitesFixes>({
+                    url: CONFIG_URLs.sitesFixes.local,
+                    async: true,
+                    onSuccess: (result) => {
+                        onLoadedSitesFixes(result);
+                    },
+                    onFailure: (error) => {
+                        console.warn('Fatal sh*t, local Sites Fixes were not loaded: ' + error);
+                    }
+                });
+            }
         });
-    }, 60 * 60 * 1000);
+    }
+
+    setInterval(loadConfigs, RELOAD_INTERVAL_MS); // Reload periodically
 
     export interface SitesFixes {
         commonSelectors: string;
@@ -120,35 +209,6 @@ module DarkReader {
     // ---------- Data loading -----------
 
     /**
-     * Loads config from remote source
-     * or from local on error (synchronous).
-     */
-    function loadConfigWithFallbackSync<T>(opts: {
-        remoteUrl: string;
-        localUrl: string;
-    }) {
-        var data: T;
-
-        // Load remote config
-        readJson<T>({
-            url: opts.remoteUrl,
-            async: false,
-            onSuccess: (result) => data = result,
-            // On failure load local config
-            onFailure: (error) => readJson<T>({
-                url: opts.localUrl,
-                async: false,
-                onSuccess: (result) => {
-                    data = result;
-                    console.warn('Loaded local config. Remote error: ' + error);
-                }
-            })
-        });
-
-        return data;
-    }
-
-    /**
      * Loads and parses JSON from file to object.
      * @param params Object containing request parameters.
      */
@@ -165,7 +225,13 @@ module DarkReader {
                     // Remove comments
                     var resultText = xobj.responseText
                         .replace(/(\".*?(\\\".*?)*?\")|(\/\*(.|[\r\n])*?\*\/)|(\/\/.*?[\r\n])/gm, '$1');
-                    params.onSuccess(JSON.parse(resultText));
+                    try {
+                        var json = JSON.parse(resultText);
+                        params.onSuccess(json);
+                    }
+                    catch (e) {
+                        onError(e);
+                    }
                 }
                 else {
                     var error = new Error(xobj.status + ': ' + xobj.statusText);
@@ -174,6 +240,13 @@ module DarkReader {
             }
         };
         xobj.onerror = (err) => onError((<any>err).error);
+        if (params.timeout) {
+            xobj.timeout = params.timeout;
+            xobj.ontimeout = () => {
+                var err = new Error('Config loading stopped due to timeout.');
+                onError(err);
+            };
+        }
 
         try {
             xobj.send(null);
@@ -197,6 +270,7 @@ module DarkReader {
         async: boolean;
         onSuccess: (result: T) => void;
         onFailure?: (error) => void;
+        timeout?: number;
     }
 
 

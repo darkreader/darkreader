@@ -112,7 +112,7 @@ module DarkReader {
                 if (config.mode === FilterMode.dark && this.issue501582) {
                     // Chrome 45 temp <html> background fix
                     // https://code.google.com/p/chromium/issues/detail?id=501582
-                    parts.push('html { background: black !important; }');
+                    parts.push('html { background: inherit !important; }');
                 }
 
                 if (fix.rules) {

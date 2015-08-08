@@ -65,24 +65,16 @@ module DarkReader.Popup {
                     // Add new font items
                     this.fontList.removeChildren();
                     if (fonts) {
-                        // NOTE: Slow fonts rendering when many fonts installed.
-                        // So using timeout to prevent UI lock.
                         fonts = fonts.slice(0);
-                        var addFont = () => {
-                            if (fonts.length === 0) {
-                                return;
-                            }
-                            var f = fonts.shift();
+                        for (var i = 0; i < fonts.length; i++) {
                             var l = new xp.Label({
                                 style: 'fontItem',
-                                text: f,
-                                init: (l) => l.domElement.style.fontFamily = f,
-                                onClick: () => this.onPickFont(f)
+                                text: fonts[i],
+                                init: (l) => l.domElement.style.fontFamily = fonts[i],
+                                onClick: () => this.onPickFont(fonts[i])
                             });
                             this.fontList.append(l);
-                            setTimeout(addFont, 10);
-                        };
-                        addFont();
+                        }
                     }
                 }
             });

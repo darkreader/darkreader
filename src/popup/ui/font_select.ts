@@ -67,13 +67,15 @@ module DarkReader.Popup {
                     if (fonts) {
                         fonts = fonts.slice(0);
                         for (var i = 0; i < fonts.length; i++) {
-                            var l = new xp.Label({
-                                style: 'fontItem',
-                                text: fonts[i],
-                                init: (l) => l.domElement.style.fontFamily = fonts[i],
-                                onClick: () => this.onPickFont(fonts[i])
-                            });
-                            this.fontList.append(l);
+                            ((fontName: string) => {
+                                var l = new xp.Label({
+                                    style: 'fontItem',
+                                    text: fontName,
+                                    init: (l) => l.domElement.style.fontFamily = fontName,
+                                    onClick: () => this.onPickFont(fontName)
+                                });
+                                this.fontList.append(l);
+                            })(fonts[i])
                         }
                     }
                 }

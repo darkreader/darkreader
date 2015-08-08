@@ -24,7 +24,7 @@ module DarkReader {
             // Define properties
             xp.Model.property(this, 'enabled', false);
             xp.Model.property(this, 'config', null);
-            xp.Model.property(this, 'fontList', []);
+            xp.Model.property(this, 'fonts', []);
 
             // Handle config changes
             var prevEnabled = false;

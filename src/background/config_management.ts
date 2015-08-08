@@ -20,6 +20,8 @@ module DarkReader {
     };
     var REMOTE_TIMEOUT_MS = 10 * 1000;
     var RELOAD_INTERVAL_MS = 15 * 60 * 1000;
+    export var DEBUG = chrome.runtime.id !== 'eimadpbcbfnmbkopoojfekhnkhdbieeh';
+    var DEBUG_LOCAL_CONFIGS = DEBUG;
 
     /**
      * List of sites with dark theme (whick should not be inverted).
@@ -115,48 +117,73 @@ module DarkReader {
         };
         
         // Load start
-        readJson<string[]>({
-            url: CONFIG_URLs.darkSites.remote,
-            async: true,
-            timeout: REMOTE_TIMEOUT_MS,
-            onSuccess: (result) => {
-                onLoadedDarkSites(result)
-            },
-            onFailure: (error) => {
-                console.warn('Dark Sites remote load error: ' + error);
-                readJson<string[]>({
-                    url: CONFIG_URLs.darkSites.local,
-                    async: true,
-                    onSuccess: (result) => {
-                        onLoadedDarkSites(result);
-                    },
-                    onFailure: (error) => {
-                        console.warn('Fatal sh*t, local Dark Sites were not loaded: ' + error);
-                    }
-                });
-            }
-        });
-        readJson<SitesFixes>({
-            url: CONFIG_URLs.sitesFixes.remote,
-            async: true,
-            timeout: REMOTE_TIMEOUT_MS,
-            onSuccess: (result) => {
-                onLoadedSitesFixes(result)
-            },
-            onFailure: (error) => {
-                console.warn('Sites Fixes remote load error: ' + error);
-                readJson<SitesFixes>({
-                    url: CONFIG_URLs.sitesFixes.local,
-                    async: true,
-                    onSuccess: (result) => {
-                        onLoadedSitesFixes(result);
-                    },
-                    onFailure: (error) => {
-                        console.warn('Fatal sh*t, local Sites Fixes were not loaded: ' + error);
-                    }
-                });
-            }
-        });
+        if (!DEBUG_LOCAL_CONFIGS) {
+            // Load remote and local as fallback
+            readJson<string[]>({
+                url: CONFIG_URLs.darkSites.remote,
+                async: true,
+                timeout: REMOTE_TIMEOUT_MS,
+                onSuccess: (result) => {
+                    onLoadedDarkSites(result)
+                },
+                onFailure: (error) => {
+                    console.warn('Dark Sites remote load error: ' + error);
+                    readJson<string[]>({
+                        url: CONFIG_URLs.darkSites.local,
+                        async: true,
+                        onSuccess: (result) => {
+                            onLoadedDarkSites(result);
+                        },
+                        onFailure: (error) => {
+                            console.warn('Fatal sh*t, local Dark Sites were not loaded: ' + error);
+                        }
+                    });
+                }
+            });
+            readJson<SitesFixes>({
+                url: CONFIG_URLs.sitesFixes.remote,
+                async: true,
+                timeout: REMOTE_TIMEOUT_MS,
+                onSuccess: (result) => {
+                    onLoadedSitesFixes(result)
+                },
+                onFailure: (error) => {
+                    console.warn('Sites Fixes remote load error: ' + error);
+                    readJson<SitesFixes>({
+                        url: CONFIG_URLs.sitesFixes.local,
+                        async: true,
+                        onSuccess: (result) => {
+                            onLoadedSitesFixes(result);
+                        },
+                        onFailure: (error) => {
+                            console.warn('Fatal sh*t, local Sites Fixes were not loaded: ' + error);
+                        }
+                    });
+                }
+            });
+        } else {
+            // Load local configs only
+            readJson<string[]>({
+                url: CONFIG_URLs.darkSites.local,
+                async: true,
+                onSuccess: (result) => {
+                    onLoadedDarkSites(result);
+                },
+                onFailure: (error) => {
+                    throw new Error('Local Dark Sites were not loaded: ' + error);
+                }
+            });
+            readJson<SitesFixes>({
+                url: CONFIG_URLs.sitesFixes.local,
+                async: true,
+                onSuccess: (result) => {
+                    onLoadedSitesFixes(result);
+                },
+                onFailure: (error) => {
+                    throw new Error('Local Sites Fixes were not loaded: ' + error);
+                }
+            });
+        }
     }
 
     setInterval(loadConfigs, RELOAD_INTERVAL_MS); // Reload periodically

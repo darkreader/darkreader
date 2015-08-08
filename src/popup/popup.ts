@@ -1,14 +1,27 @@
 ﻿/// <reference path="../typings/refs.d.ts"/>
 
 module DarkReader.Popup {
+    
+    // Create window
+    export var popupWindow: PopupWindow;
 
     if ((<any>window).chrome && (<any>window).chrome.extension) {
         // Access extension from the background
-        var ext = <Extension>(<any>chrome.extension.getBackgroundPage()).DarkReader.Background.extension;
+        var background = <typeof DarkReader.Background>(<any>chrome.extension.getBackgroundPage()).DarkReader.Background;
+
+        if (background.extension) {
+            // BUG: Chrome popup is not shown until <body>
+            // ends being processed so timeout needs to be used.
+            setTimeout(() => popupWindow = new PopupWindow(background.extension), 100);
+        } else {
+            background.onExtensionLoaded.addHandler((ext) => {
+                setTimeout(() => popupWindow = new PopupWindow(ext), 100);
+            });
+        }
     }
     else {
         // Mock for tests
-        var ext = <Extension>xp.observable({
+        popupWindow = new PopupWindow(<Extension>xp.observable({
             enabled: true,
             config: <FilterConfig>{
                 mode: 1/*DarkReader.FilterMode.dark*/,
@@ -32,17 +45,8 @@ module DarkReader.Popup {
                 'Segoe UI',
                 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'
             ]
-        });
+        }));
     }
-
-    // Create window
-    //export var popupWindow = new PopupWindow(ext);
-    // BUG: Chrome popup is not showed until <body>
-    // ends being processed so timeout needs to be used.
-    export var popupWindow: PopupWindow;
-    setTimeout(() => {
-        popupWindow = new PopupWindow(ext);
-    }, 100);
 
     // Disable text selection
     document.onselectstart = (e) => false;

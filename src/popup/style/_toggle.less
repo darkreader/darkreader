@@ -8,6 +8,7 @@
     border: @size-border solid @color-border;
     box-sizing: content-box;
     display: flex;
+    position: relative;
 
     .on, .off {
         color: @color-fore;
@@ -18,16 +19,26 @@
         text-align: center;
         transition: background-color @time-slow;
         width: 50%;
+        z-index: 1;
 
-        &:hover {
+        &:hover:not(:active):not(.active) {
             background-color: @color-hover;
             transition: background-color @time-fast;
         }
-
-        &:active,
-        &.active {
-            background-color: @color-active;
-            cursor: default;
-        }
+    }
+    
+    // Slider
+    &:before {
+        background-color: @color-active;
+        content: "";
+        height: 100%;
+        left: 50%;
+        position: absolute;
+        transition: left @time-fast;
+        width: 50%;
+    }
+    
+    &.switchedOn:before{
+        left: 0;
     }
 }

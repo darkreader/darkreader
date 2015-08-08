@@ -51,9 +51,11 @@
                     if (switchedOn) {
                         this.elementOn.classList.add('active');
                         this.elementOff.classList.remove('active');
+                        this.domElement.classList.add('switchedOn');
                     } else {
                         this.elementOff.classList.add('active');
                         this.elementOn.classList.remove('active');
+                        this.domElement.classList.remove('switchedOn');
                     }
                 }
             });

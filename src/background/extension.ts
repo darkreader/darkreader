@@ -276,7 +276,7 @@ module DarkReader {
 
             //var code = "alert('Add CSS');"
             var code = `
-console.log('Executing DR script (add)...');
+${DEBUG ? "console.log('Executing DR script (add)...');" : ""}
 //debugger;
 var addDRStyle = function() {
     var css = '${css}';
@@ -301,12 +301,12 @@ if (head) {
     var prevStyle = document.getElementById('dark-reader-style');
     if (!prevStyle) {
         addDRStyle();
-        console.log('Added DR style.');
+        ${DEBUG ? "console.log('Added DR style.');" : ""}
     }
 } else {
     (function() {
         addDRStyle();
-        console.log('Added DR style without head.');
+        ${DEBUG ? "console.log('Added DR style without head.');" : ""}
         var dr_observer = new MutationObserver(function(mutations) {
             for (var i = 0; i < mutations.length; i++) {
                 if (mutations[i].target.nodeName == 'BODY' || mutations[i].target.nodeName == 'HEAD') {
@@ -314,7 +314,7 @@ if (head) {
                     var prevStyle = document.getElementById('dark-reader-style');
                     if (!prevStyle) {
                         addDRStyle();
-                        console.log('Added DR style using observer.');
+                        ${DEBUG ? "console.log('Added DR style using observer.');" : ""}
                     }
                     break;
                 }
@@ -325,7 +325,7 @@ if (head) {
             var prevStyle = document.getElementById('dark-reader-style');
             if (!prevStyle) {
                 addDRStyle();
-                console.log('Added DR style on load.');
+                ${DEBUG ? "console.log('Added DR style on load.');" : ""}
             }
             document.removeEventListener('readystatechange', fn);
         };
@@ -339,7 +339,7 @@ if (head) {
         protected getCode_removeCss() {
             //var code = "alert('Remove CSS');"
             var code = `
-console.log('Executing DR script (remove)...');
+${DEBUG ? "console.log('Executing DR script (remove)...');" : ""}
 var style = document.getElementById('dark-reader-style');
 style && style.parentNode.removeChild(style);
 `;
@@ -351,7 +351,7 @@ style && style.parentNode.removeChild(style);
 
             //var code = "alert('Update CSS');"
             var code = `
-console.log('Executing DR script (update)...');
+${DEBUG ? "console.log('Executing DR script (update)...');" : ""}
 var addDRStyle = function() {
     var css = '${css}';
     var style = document.createElement('style');
@@ -368,7 +368,7 @@ if (head) {
         prevStyle.parentElement.removeChild(prevStyle);
     }
     addDRStyle();
-    console.log('Updated DR style.');
+    ${DEBUG ? "console.log('Updated DR style.');" : ""}
 }
 `;
             return code;

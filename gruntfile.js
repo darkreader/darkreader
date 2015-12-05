@@ -99,6 +99,7 @@ module.exports = function (grunt) {
             });
 
         // --- Reload chrome extensions ---
+        // WARNING: Seems like reloading doesn't work anymore in Chrome 45?
         create.task('ext-reload')
             .sub(function () {
                 // Create server to communicate with Google Chrome reload extension

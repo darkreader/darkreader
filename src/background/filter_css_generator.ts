@@ -93,37 +93,32 @@ module DarkReader {
                 var parts: string[] = [];
 
                 // Add leading rule.
-                parts.push('html ' + this.createLeadingDeclaration(config));
+                parts.push(this.createLeadingRule(config));
 
                 if (config.mode === FilterMode.dark)
                     // Add contrary rule
                     if (fix.selectors) {
-                        parts.push(fix.selectors + ' ' + this.createContraryDeclaration(config));
+                        parts.push(this.createContraryRule(config, fix.selectors));
                     }
 
                 if (config.useFont || config.textStroke > 0)
                     // Add text rule
                     parts.push('* ' + this.createTextDeclaration(config));
+                    
+                // Fix <html> height
+                parts.push('html { min-height: 100% !important; }');
 
                 // Full screen fix
                 parts.push('*:-webkit-full-screen { -webkit-filter: none !important; }');
 
                 // --- WARNING! HACK! ---
                 if (this.issue501582) {
-                    // Chrome 45 temp <html> background fix
+                    // NOTE: Chrome 45 temp <html> background fix
                     // https://code.google.com/p/chromium/issues/detail?id=501582
-                    //parts.push('html { background: inherit !important; }'); // Works not always.
-                    let b: number;
-                    if (config.mode === FilterMode.dark) {
-                        b = config.brightness < 100 ? 0 : (config.brightness - 100);
-                    } else {
-                        b = config.brightness > 100 ? 100 : config.brightness;
-                    }
-                    b = 50 * (1 - config.contrast / 100) + b * config.contrast / 100;
-                    if (b < 0) { b = 0; }
-                    if (b > 100) { b = 100; }
-                    b = Math.round(255 * b / 100);
-                    parts.push(`html { background: rgb(${b},${b},${b}) !important; }`);
+                    
+                    // Additional element
+                    parts.push('html { position: relative; }')
+                    parts.push('html:before { background-color: white; content: ""; position: absolute; top: 0; left: 0; bottom: 0; right: 0; z-index: -2147483648; }');
                 }
 
                 if (fix.rules) {
@@ -144,8 +139,8 @@ module DarkReader {
         // CSS Declarations
         //-----------------
 
-        protected createLeadingDeclaration(config: FilterConfig): string {
-            var result = '{ -webkit-filter: ';
+        protected createLeadingRule(config: FilterConfig): string {
+            var result = 'html { -webkit-filter: ';
 
             if (config.mode === FilterMode.dark)
                 result += 'invert(100%) hue-rotate(180deg) ';
@@ -162,14 +157,14 @@ module DarkReader {
             result += config.sepia == 0 ? ''
                 : 'sepia(' + config.sepia + '%) ';
 
-            result += '!important; min-height: 100% !important; height: auto; }';
+            result += '!important; }';
 
             return result;
         }
 
         // Should be used in 'dark mode' only
-        protected createContraryDeclaration(config: FilterConfig): string {
-            var result = '{ -webkit-filter: ';
+        protected createContraryRule(config: FilterConfig, selectorsToFix: string): string {
+            var result = selectorsToFix + ' { -webkit-filter: ';
 
             // Less/more brightness for inverted items
             result += 'brightness(' + (config.brightness - 20) + '%) ';

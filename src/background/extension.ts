@@ -75,8 +75,12 @@ module DarkReader {
                         tabs.forEach((t) => {
                             var match = t.url.match(/^(.*?:\/\/)?(.+?)(\/|$)/);
                             if (match && match[2]) {
-                                if (this.config.siteList.indexOf(match[2]) < 0) {
+                                var index = this.config.siteList.indexOf(match[2]);
+                                if (index < 0) {
                                     this.config.siteList.push(match[2]);
+                                } else {
+                                    // Remove site from list
+                                    this.config.siteList.splice(index, 1);
                                 }
                             }
                             else {

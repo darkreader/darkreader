@@ -35,7 +35,7 @@
             "suggested_key": {
                 "default": "Alt+Shift+A"
             },
-            "description": "Add current site to list"
+            "description": "Add current site to list (or remove)"
         }
     }
 }

@@ -20,9 +20,7 @@
         "fontSettings",
         "storage",
         "tabs",
-        "http://*/*",
-        "https://*/*",
-        "file://*"
+        "<all_urls>"
     ],
     "commands": {
         "toggle": {

@@ -14,14 +14,29 @@ module DarkReader.Popup {
             // ends being processed so timeout needs to be used.
             setTimeout(() => popupWindow = new PopupWindow(background.extension), 100);
         } else {
-            background.onExtensionLoaded.addHandler((ext) => {
+            var onExtLoaded = (ext: DarkReader.Extension) => {
                 setTimeout(() => popupWindow = new PopupWindow(ext), 100);
-            });
+                background.onExtensionLoaded.removeHandler(onExtLoaded);
+            };
+            background.onExtensionLoaded.addHandler(onExtLoaded);
         }
+    
+        // Remove popup and unbind from model
+        window.addEventListener('unload', (e) => {
+            popupWindow.scope = null;
+            popupWindow.remove();
+        });
     }
     else {
         // Mock for tests
-        popupWindow = new PopupWindow(<Extension>xp.observable({
+        popupWindow = getMockPopup();
+    }
+
+    // Disable text selection
+    document.onselectstart = (e) => false;
+
+    function getMockPopup() {
+        return new PopupWindow(<Extension>xp.observable({
             enabled: true,
             config: <FilterConfig>{
                 mode: 1/*DarkReader.FilterMode.dark*/,
@@ -47,7 +62,4 @@ module DarkReader.Popup {
             ]
         }));
     }
-
-    // Disable text selection
-    document.onselectstart = (e) => false;
 }

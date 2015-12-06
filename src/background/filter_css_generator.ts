@@ -81,7 +81,7 @@ module DarkReader {
                 || (!isUrlInDarkList
                     && !config.invertListed
                     && !isUrlInUserList)
-                ) {
+            ) {
                 console.log('Creating CSS for url: ' + url);
 
                 // Search for custom fix
@@ -116,9 +116,42 @@ module DarkReader {
                     // NOTE: Chrome 45 temp <html> background fix
                     // https://code.google.com/p/chromium/issues/detail?id=501582
                     
-                    // Additional element
-                    parts.push('html { position: relative; }')
-                    parts.push('html:before { background-color: white; content: ""; position: absolute; top: 0; left: 0; bottom: 0; right: 0; z-index: -2147483648; }');
+                    //
+                    // Interpolate background color (fastest, no script required).
+                    // http://www.w3.org/TR/filter-effects/#brightnessEquivalent
+                    
+                    // Brightness
+                    var value = config.mode === FilterMode.dark ? 0 : 1;
+                    value = value * (config.brightness) / 100;
+                    
+                    // Contrast
+                    value = value * (config.contrast) / 100 - (0.5 * config.contrast / 100) + 0.5
+                    
+                    // Grayscale?
+                    
+                    // Sepia
+                    var rgbaMatrix = [[value], [value], [value], [1]];
+                    var sepia = config.sepia / 100;
+                    var sepiaMatrix = [
+                        [(0.393 + 0.607 * (1 - sepia)), (0.769 - 0.769 * (1 - sepia)), (0.189 - 0.189 * (1 - sepia)), 0],
+                        [(0.349 - 0.349 * (1 - sepia)), (0.686 + 0.314 * (1 - sepia)), (0.168 - 0.168 * (1 - sepia)), 0],
+                        [(0.272 - 0.272 * (1 - sepia)), (0.534 - 0.534 * (1 - sepia)), (0.131 + 0.869 * (1 - sepia)), 0],
+                        [0, 0, 0, 1]
+                    ];
+                    var resultMatrix = multiplyMatrices(sepiaMatrix, rgbaMatrix);
+                    var r = resultMatrix[0][0], g = resultMatrix[1][0], b = resultMatrix[2][0];
+                    
+                    // Result color
+                    if (r > 1) r = 1; if (r < 0) r = 0;
+                    if (g > 1) g = 1; if (g < 0) g = 0;
+                    if (b > 1) b = 1; if (b < 0) b = 0;
+                    var color = {
+                        r: Math.round(255 * r),
+                        g: Math.round(255 * g),
+                        b: Math.round(255 * b),
+                        toString() { return `rgb(${this.r},${this.g},${this.b})`; }
+                    };
+                    parts.push(`html { background: ${color} !important; }`);
                 }
 
                 if (fix.rules) {
@@ -199,5 +232,21 @@ module DarkReader {
 
             return result;
         }
+    }
+    
+    // http://stackoverflow.com/a/27205510/4137472
+    function multiplyMatrices(m1: number[][], m2: number[][]) {
+        var result: number[][] = [];
+        for (var i = 0; i < m1.length; i++) {
+            result[i] = [];
+            for (var j = 0; j < m2[0].length; j++) {
+                var sum = 0;
+                for (var k = 0; k < m1[0].length; k++) {
+                    sum += m1[i][k] * m2[k][j];
+                }
+                result[i][j] = sum;
+            }
+        }
+        return result;
     }
 } 

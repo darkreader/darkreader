@@ -68,26 +68,7 @@ module DarkReader {
                 }
                 if (command === 'addSite') {
                     console.log('Add Site command entered');
-                    chrome.tabs.query({ active: true }, (tabs) => {
-                        // Some bug: if command executed
-                        // from popup, query returns [].
-                        // "currentWindow:true" doesn't work.
-                        tabs.forEach((t) => {
-                            var match = t.url.match(/^(.*?:\/\/)?(.+?)(\/|$)/);
-                            if (match && match[2]) {
-                                var index = this.config.siteList.indexOf(match[2]);
-                                if (index < 0) {
-                                    this.config.siteList.push(match[2]);
-                                } else {
-                                    // Remove site from list
-                                    this.config.siteList.splice(index, 1);
-                                }
-                            }
-                            else {
-                                console.warn('URL "' + t.url + '" didn\'t match.');
-                            }
-                        });
-                    });
+                    this.toggleCurrentSite();
                 }
             });
 
@@ -98,9 +79,8 @@ module DarkReader {
         }
 
 
-        //--------------
-        // Switch ON/OFF
-        //--------------
+        //-----------------------
+        //     Switch ON/OFF
 
         protected onAppToggle() {
             if (this.enabled) {
@@ -161,6 +141,34 @@ module DarkReader {
                     });
                 });
             }
+        }
+
+        protected toggleCurrentSite() {
+            // Get active tab from tast focused window,
+            // add it's URL to Sites List (or remove).
+            chrome.tabs.query({
+                active: true,
+                lastFocusedWindow: true
+            }, (tabs) => {
+                if (tabs.length > 0) {
+                    var match = tabs[0].url.match(/^(.*?:\/\/)?(.+?)(\/|$)/);
+                    if (match && match[2]) {
+                        var index = this.config.siteList.indexOf(match[2]);
+                        if (index < 0) {
+                            this.config.siteList.push(match[2]);
+                        } else {
+                            // Remove site from list
+                            this.config.siteList.splice(index, 1);
+                        }
+                    }
+                    else {
+                        console.warn('URL "' + tabs[0].url + '" didn\'t match.');
+                    }
+                }
+                // WARNING: Noticed bug: when calling
+                // command from Popup page, tabs==[],
+                // but currently is not reproducable,
+            });
         }
 
         protected onConfigPropChanged() {

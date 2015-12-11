@@ -236,12 +236,6 @@ module DarkReader.Popup {
                     `
                 }),
             ]);
-
-            // BUG: Seems flexbox rendering bug, so timeout is needed.
-            setTimeout(() => {
-                this.domElement.classList.remove('loading');
-            }, 100);
-            //this.domElement.classList.remove('loading');
         }
 
         private siteList: SiteList;

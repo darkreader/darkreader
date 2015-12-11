@@ -10,12 +10,10 @@ module DarkReader.Popup {
         var background = <typeof DarkReader.Background>(<any>chrome.extension.getBackgroundPage()).DarkReader.Background;
 
         if (background.extension) {
-            // BUG: Chrome popup is not shown until <body>
-            // ends being processed so timeout needs to be used.
-            setTimeout(() => popupWindow = new PopupWindow(background.extension), 100);
+            popupWindow = new PopupWindow(background.extension);
         } else {
             var onExtLoaded = (ext: DarkReader.Extension) => {
-                setTimeout(() => popupWindow = new PopupWindow(ext), 100);
+                popupWindow = new PopupWindow(ext);
                 background.onExtensionLoaded.removeHandler(onExtLoaded);
             };
             background.onExtensionLoaded.addHandler(onExtLoaded);

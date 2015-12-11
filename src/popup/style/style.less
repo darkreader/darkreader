@@ -40,29 +40,6 @@ html {
     > *:not(:first-child) {
         margin-top: @size-indent-small;
     }
-    /* Loading... */
-    &:after {
-        background-color: @color-back;
-        box-sizing: border-box;
-        color: @color-header;
-        content: "Loading...";
-        display: block;
-        height: 100%;
-        left: 0;
-        opacity: 0;
-        padding-top: 50%;
-        pointer-events: none;
-        position: absolute;
-        text-align: center;
-        top: 0;
-        transition: opacity 1s;
-        width: 100%;
-        z-index: 999;
-    }
-
-    &.loading:after {
-        opacity: 1;
-    }
 }
 
 .hidden {

@@ -30,7 +30,6 @@ module DarkReader.Popup {
                             if (this.isListExpanded) {
                                 this.collapseList();
                             } else {
-                                this.expandList();
                                 this.scrollToItemByText(this.textBox.text);
                             }
                         }
@@ -44,7 +43,6 @@ module DarkReader.Popup {
             ]);
             this.onClick.addHandler((e) => e.domEvent.stopPropagation());
             this.outerClickHandler = () => this.collapseList();
-            //this.bind('fonts', 'fonts');
         }
 
         protected getTemplate() {
@@ -62,29 +60,13 @@ module DarkReader.Popup {
             super.defineProperties();
             this.defineProperty('fonts', {
                 setter: (fonts: string[]) => {
-                    // Add new font items
-                    this.fontList.removeChildren();
-                    if (fonts) {
-                        fonts = fonts.slice(0);
-                        for (var i = 0; i < fonts.length; i++) {
-                            ((fontName: string) => {
-                                var l = new xp.Label({
-                                    style: 'fontItem',
-                                    text: fontName,
-                                    init: (l) => l.domElement.style.fontFamily = fontName,
-                                    onClick: () => this.onPickFont(fontName)
-                                });
-                                this.fontList.append(l);
-                            })(fonts[i])
-                        }
-                    }
+                    this.areFontsRendered = false;
                 }
             });
             this.defineProperty('selectedFont', {
                 setter: (font: string) => {
                     this.textBox.text = font;
                 }
-                //observable: true
             });
         }
 
@@ -92,9 +74,17 @@ module DarkReader.Popup {
         private get isListExpanded() {
             return !this.fontList.domElement.classList.contains('collapsed');
         }
-        private expandList() {
-            this.fontList.domElement.classList.remove('collapsed');
-            window.addEventListener('click', this.outerClickHandler);
+        private expandList(done?: () => void) {
+            var expand = () => {
+                this.fontList.domElement.classList.remove('collapsed');
+                window.addEventListener('click', this.outerClickHandler);
+                done && done();
+            };
+            if (!this.areFontsRendered) {
+                this.renderFonts(this.fonts, expand);
+            } else {
+                expand();
+            }
         }
         private collapseList() {
             this.fontList.domElement.classList.add('collapsed');
@@ -111,36 +101,60 @@ module DarkReader.Popup {
         }
 
         private scrollToItemByText(text: string) {
-            if (!this.isListExpanded) {
-                this.expandList();
-            }
-            text = text.toLowerCase().trim();
-            for (var i = 0; i < this.fonts.length; i++) {
-                if (this.fonts[i].toLowerCase().indexOf(text) === 0) {
-                    // Scroll to item
-                    var item = this.fontList.children.filter((c: xp.Label) => c.text === this.fonts[i])[0];
-                    if (item) {
-                        item.domElement.scrollIntoView(true);
+            var onListExpanded = () => {
+                text = text.toLowerCase().trim();
+                for (var i = 0; i < this.fonts.length; i++) {
+                    if (this.fonts[i].toLowerCase().indexOf(text) === 0) {
+                        // Scroll to item
+                        var item = this.fontList.children.filter((c: xp.Label) => c.text === this.fonts[i])[0];
+                        if (item) {
+                            item.domElement.scrollIntoView(true);
+                        }
+                        break;
                     }
-                    break;
+                    // TODO: Search by font name words.
                 }
-                //var parts = this.fonts[i].toLowerCase().split(' ');
-                //for (var j = 0; j < parts.length; j++) {
-                //    if (parts[j].indexOf(text) === 0) {
-                //        // Scroll to item
-                //        var item = this.fontList.children.filter((c: xp.Label) => c.text === this.fonts[i])[0];
-                //        if (item) {
-                //            item.domElement.scrollIntoView(true);
-                //        }
-                //        break;
-                //    }
-                //}
+            };
+            if (!this.isListExpanded) {
+                this.expandList(onListExpanded);
+            } else {
+                onListExpanded();
+            }
+        }
+
+        private areFontsRendered: boolean;
+        private renderFonts(fonts: string[], done?: () => void) {
+            // Add new font items
+            this.domElement.classList.add('renderingFonts');
+            this.fontList.removeChildren();
+            if (fonts) {
+                // WARNING: Slow fonts rendering (100 fonts >1000ms).
+                setTimeout(() => {
+                    fonts = fonts.slice(0);
+                    console.time('Rendering fonts');
+                    for (var i = 0; i < fonts.length; i++) {
+                        ((font) => {
+                            this.fontList.append(new xp.Label({
+                                style: 'fontItem',
+                                text: font,
+                                onClick: () => this.onPickFont(font),
+                                init: (el) => el.domElement.style.fontFamily = font
+                            }));
+                        })(fonts[i]);
+                    }
+                    setTimeout(() => {
+                        console.timeEnd('Rendering fonts');
+                        this.domElement.classList.remove('renderingFonts');
+                        this.areFontsRendered = true;
+                        done && done();
+                    }, 0);
+                }, 100); // Timeout needed as far as "Loading" message is not shown.
             }
         }
     }
 
     export interface FontSelectMarkup extends xp.VBoxMarkup<FontSelect> {
         selectedFont?: string;
-        fonts?: string[]|string;
+        fonts?: string[] | string;
     }
 }

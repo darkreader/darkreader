@@ -147,18 +147,6 @@ module DarkReader.Popup {
                     // ---- Font ----
 
                     new Tab({ tabName: 'Font' }, [
-                        //// Select font
-                        //new xp.VBox({ style: 'controlContainer' }, [
-                        //    new xp.HBox({ style: 'line' }, [
-                        //        new xp.CheckBox({
-                        //            checked: '{config.useFont}'
-                        //        }),
-                        //        new xp.TextBox({
-                        //            text: '{config.fontFamily}'
-                        //        })
-                        //    ]),
-                        //    new xp.Label({ style: 'status', text: 'Select a font' })
-                        //]),
                         // Select font
                         new xp.VBox({ style: 'controlContainer' }, [
                             new xp.HBox({ style: 'line' }, [
@@ -193,14 +181,6 @@ module DarkReader.Popup {
                     // ---- Site list ----
 
                     new Tab({ tabName: 'Site list' }, [
-                        //new xp.VBox({ style: 'controlContainer' }, [
-                        //    new Toggle({
-                        //        switchedOn: '{config.invertListed}',
-                        //        labelOn: 'Invert listed only',
-                        //        labelOff: 'Not invert listed'
-                        //    }),
-                        //    new xp.Label({ style: 'status', text: 'Choose if listed sites are inverted' })
-                        //]),
                         new Toggle({
                             value: '{config.invertListed}',
                             labelOn: 'Invert listed only',

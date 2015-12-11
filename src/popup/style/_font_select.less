@@ -48,6 +48,11 @@
                 }
             }
         }
+        
+        &:after {
+            opacity: 0;
+            transition: opacity @time-slow;
+        }
     }
 
     .fontList {
@@ -74,6 +79,19 @@
                 background-color: @color-active;
                 color: @color-input-fore-active;
             }
+        }
+    }
+    
+    &.renderingFonts {
+        .fontSelectLine:after {
+            color: @color-input-fore-placeholder;
+            content: "Loading...";
+            display: inline-block;
+            line-height: @size-control-inner;
+            opacity: 1;
+            position: absolute;
+            right: @size-control-inner+@size-indent-small;
+            top: 0;
         }
     }
 }

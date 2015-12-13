@@ -36,16 +36,16 @@
                 }
                 if (prop === 'config') {
                     var onCfgPropChange = () => {
-                        // TODO: Handle more precise changes (eg: if site
-                        // added to list -> process only this site, but
-                        // not all the tabs).
-                        this.onConfigPropChanged();
-                        this.saveUserSettings();
-                    };
-                    this.config.onPropertyChanged.addHandler(onCfgPropChange);
-                    this.config.siteList.onCollectionChanged.addHandler(onCfgPropChange);
-                }
-            });
+                        this.config.onPropertyChanged.addHandler(() => {
+                            this.onConfigPropChanged();
+                            this.saveUserSettings();
+                        });
+                        this.config.siteList.onCollectionChanged.addHandler((args) => {
+                            this.onSiteListChanged(args.newItem || args.oldItem);
+                            this.saveUserSettings();
+                        });
+                    }
+                });
 
             // Default icon
             chrome.browserAction.setIcon({
@@ -129,7 +129,7 @@
                 // Set style for all tabs
                 chrome.tabs.query({ active: false }, (tabs) => {
                     tabs.forEach((tab) => {
-                        this.addCssToTab(tab);
+                        setTimeout(() => this.addCssToTab(tab), 0);
                     });
                 });
             }
@@ -210,7 +210,27 @@
                 // Update style for all tabs
                 chrome.tabs.query({ active: false }, (tabs) => {
                     tabs.forEach((tab) => {
+                        setTimeout(() => this.updateCssInTab(tab), 0);
+                    });
+                });
+            }
+        }
+
+        protected onSiteListChanged(changedUrl: string) {
+            if (this.enabled) {
+                // Update style for current tab
+                chrome.tabs.query({ active: true }, (tabs) => {
+                    tabs.forEach((tab) => {
                         this.updateCssInTab(tab);
+                    });
+                });
+                
+                // Update style for other matching tabs
+                chrome.tabs.query({ active: false }, (tabs) => {
+                    tabs.forEach((tab) => {
+                        if (isUrlInList(tab.url, [changedUrl])) {
+                            setTimeout(() => this.updateCssInTab(tab), 0);
+                        }
                     });
                 });
             }
@@ -472,15 +492,22 @@ if (head) {
          * Saves configuration to Chrome storage.
          */
         protected saveUserSettings() {
-            var store: AppConfigStore = {
-                enabled: this.enabled,
-                config: this.config
-            };
-            chrome.storage.sync.set(store, () => {
-                console.log('saved:');
-                console.log(store);
-            });
+            // NOTE: Debounce config saving.
+            if (this.savedTimeout) {
+                clearTimeout(this.savedTimeout);
+            }
+            this.savedTimeout = setTimeout(() => {
+                var store: AppConfigStore = {   
+                    enabled: this.enabled,
+                    config: this.config
+                };
+                chrome.storage.sync.set(store, () => {
+                    console.log('saved', store);
+                    this.savedTimeout = null;
+                });
+            }, SAVE_CONFIG_TIMEOUT);
         }
+        private savedTimeout: number;
 
         //---------------------------
         //   Getting the font list
@@ -500,7 +527,9 @@ if (head) {
         active_38: '../img/dr_active_38.png',
         inactive_19: '../img/dr_inactive_19.png',
         inactive_38: '../img/dr_inactive_38.png'
-    }
+    };
+
+    var SAVE_CONFIG_TIMEOUT = 1000;
 
     interface AppConfigStore {
         enabled: boolean;
@@ -509,5 +538,28 @@ if (head) {
 
     export interface ObservableFilterConfig extends FilterConfig, xp.Notifier {
         siteList: xp.ObservableCollection<string>;
+    }
+
+    function debounce<T extends Function>(func: T, wait: number): T {
+        var timeout, args, context, timestamp, result;
+
+        function later() {
+            var last = Date.now() - timestamp;
+            if (last < wait && last > 0) {
+                timeout = setTimeout(later, wait - last);
+            } else {
+                timeout = null;
+                result = func.apply(context, args);
+                if (!timeout) context = args = null;
+            }
+        };
+
+        return <any>function debounced() {
+            context = this;
+            args = arguments;
+            timestamp = Date.now();
+            if (!timeout) timeout = setTimeout(later, wait);
+            return result;
+        };
     }
 }

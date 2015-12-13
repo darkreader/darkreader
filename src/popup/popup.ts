@@ -58,7 +58,7 @@
                 'Segoe UI',
                 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'
             ],
-            getCurrentTabInfo: function(callback) { callback({ host: 'server1.mail.veryverylongnameveryverylongnameveryverylongnameveryverylongname.com' }); }
+            getActiveTabInfo: function(callback) { callback({ host: 'server1.mail.veryverylongnameveryverylongnameveryverylongnameveryverylongname.com' }); }
         }));
     }
 }

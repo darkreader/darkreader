@@ -23,8 +23,7 @@
                             name: 'siteToggle',
                             onClick: () => {
                                 ext.toggleCurrentSite();
-                            },
-                            init: (btn) => this.initSiteToggleButton(btn, ext)
+                            }
                         }),
                         new HotkeyLink({
                             commandName: 'addSite',
@@ -208,9 +207,12 @@
                     `
                 }),
             ]);
+
+            this.initSiteToggleButton(this.siteToggle, ext);
         }
 
         private siteList: SiteList;
+        private siteToggle: xp.Button;
 
         protected getTemplate() {
             // Clear body
@@ -222,7 +224,7 @@
         }
 
         private initSiteToggleButton(btn: xp.Button, ext: Extension) {
-            ext.getCurrentTabInfo((info) => {
+            ext.getActiveTabInfo((info) => {
                 // NOTE: Disable button if toggle has no effect.
                 var toggleHasEffect = () => {
                     return (!info.isChromePage
@@ -230,16 +232,18 @@
                             && info.isInDarkList));
                 };
                 btn.enabled = ext.enabled && toggleHasEffect();
-                ext.onPropertyChanged.addHandler((prop) => {
+                var changeReg = new xp.EventRegistrar();
+                changeReg.subscribe(ext.onPropertyChanged, (prop) => {
                     if (prop === 'enabled') {
                         btn.enabled = ext.enabled && toggleHasEffect();
                     }
                 });
-                ext.config.onPropertyChanged.addHandler((prop) => {
+                changeReg.subscribe(ext.config.onPropertyChanged, (prop) => {
                     if (prop === 'invertListed') {
                         btn.enabled = ext.enabled && toggleHasEffect();
                     }
                 });
+                this.onRemoved.addHandler(() => changeReg.unsubscribeAll());
 
                 // Set button text
                 if (info.host) {

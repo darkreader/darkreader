@@ -22,32 +22,11 @@
                         new Toggle({
                             value: '{enabled}'
                         }),
-                        new xp.Label({
-                            style: 'status shortcut',
-                            //text: 'hotkey: Alt+Shift+D'
-                            // TODO: Refactor commands. Edit chrome type definition.
-                            init: (l) => {
-                                if (!chrome.commands) {
-                                    l.text = 'hotkey';
-                                    return;
-                                }
-                                (<any>chrome.commands).getAll((commands: { description: string; name: string; shortcut: string; }[]) => {
-                                    if (commands) {
-                                        var cmd = commands.filter((c) => c.name === 'toggle')[0];
-                                        if (cmd) {
-                                            l.text = cmd.shortcut ?
-                                                'hotkey: ' + cmd.shortcut
-                                                : 'setup a hotkey'
-                                        }
-                                    }
-                                });
-                            },
-                            onClick: () => {
-                                chrome.tabs.create({
-                                    url: 'chrome://extensions/configureCommands',
-                                    active: true
-                                });
-                            }
+                        new HotkeyLink({
+                            commandName: 'toggle',
+                            noHotkeyText: 'setup a hotkey',
+                            hotkeyTextTemplate: 'hotkey: #HOTKEY',
+                            style: 'status'
                         })
                     ])
                 ]),
@@ -190,34 +169,14 @@
                                 sites: '{config.siteList}',
                                 init: (sl) => this.siteList = sl
                             }),
-                            new xp.Label({
-                                style: 'description shortcut',
-                                //text: 'hotkey for adding site: Alt+Shift+S'
-                                // TODO: Refactor commands. Edit chrome type definition.
-                                init: (l) => {
-                                    if (!chrome.commands) {
-                                        l.text = 'hotkey';
-                                        return;
-                                    }
-                                    (<any>chrome.commands).getAll((commands: { description: string; name: string; shortcut: string; }[]) => {
-                                        if (commands) {
-                                            var cmd = commands.filter((c) => c.name === 'addSite')[0];
-                                            if (cmd) {
-                                                l.text = cmd.shortcut ?
-                                                    'hotkey for adding site: ' + cmd.shortcut
-                                                    : 'setup a hotkey for adding site'
-                                            }
-                                        }
-                                    });
-                                },
-                                onClick: () => {
-                                    chrome.tabs.create({
-                                        url: 'chrome://extensions/configureCommands',
-                                        active: true
-                                    });
-                                }
+
+                            new HotkeyLink({
+                                commandName: 'addSite',
+                                noHotkeyText: 'setup a hotkey for adding site',
+                                hotkeyTextTemplate: 'hotkey for adding site: #HOTKEY',
+                                style: 'description'
                             })
-                        ]),
+                        ])
                     ])
 
                 ]),

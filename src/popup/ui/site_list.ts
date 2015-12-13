@@ -32,7 +32,7 @@
                     if (!sites) {
                         return;
                     }
-                    this.sitesChangeRegistrar.subscribe(sites.onCollectionChanged,(args) => {
+                    this.sitesChangeRegistrar.subscribe(sites.onCollectionChanged, (args) => {
                         switch (args.action) {
                             case xp.CollectionChangeAction.Create:
                                 this.addTextBox(args.newItem, args.newIndex);
@@ -99,6 +99,6 @@
     }
 
     export interface SiteListMarkup extends xp.VBoxMarkup<SiteList> {
-        sites?: xp.ObservableCollection<string>|string;
+        sites?: xp.ObservableCollection<string> | string;
     }
 } 

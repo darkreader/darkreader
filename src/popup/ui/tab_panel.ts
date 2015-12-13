@@ -1,6 +1,4 @@
-﻿/// <reference path="../../typings/refs.d.ts"/>
-
-module DarkReader.Popup {
+﻿module DarkReader.Popup {
     
     /**
      * Tab panel.

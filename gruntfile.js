@@ -1,6 +1,5 @@
 module.exports = function (grunt) {
     require('create-grunt-tasks')(grunt, function (create) {
-        var config = getConfig();
         
         //
         // --- Release task ---
@@ -10,8 +9,9 @@ module.exports = function (grunt) {
                 'build/'
             ])
             .sub('typescript', {
-                src: config.tsFiles,
+                src: 'src/**/*.ts',
                 dest: 'build/',
+                expand: true,
                 options: { target: 'es5' }
             })
             .sub('less', {
@@ -48,8 +48,7 @@ module.exports = function (grunt) {
 
         create.task('debug-js')
             .sub('typescript', {
-                cwd: 'src/',
-                src: config.tsFiles,
+                src: 'src/**/*.ts',
                 options: {
                     sourceMap: true,
                     declaration: false,
@@ -79,8 +78,7 @@ module.exports = function (grunt) {
 
         create.task('debug-watch-js')
             .sub('typescript', {
-                cwd: 'src/',
-                src: config.tsFiles,
+                src: 'src/**/*.ts',
                 options: {
                     sourceMap: true,
                     declaration: false,
@@ -150,21 +148,3 @@ module.exports = function (grunt) {
             });
     });
 };
-
-function getConfig() {
-    return {
-        tsFiles: [
-            'src/background/background.ts',
-            'src/background/config_management.ts',
-            'src/background/extension.ts',
-            'src/background/filter_css_generator.ts',
-            'src/popup/popup.ts',
-            'src/popup/ui/font_select.ts',
-            'src/popup/ui/popup_window.ts',
-            'src/popup/ui/site_list.ts',
-            'src/popup/ui/tab_panel.ts',
-            'src/popup/ui/toggle.ts',
-            'src/popup/ui/up_down.ts'
-        ]
-    };
-}

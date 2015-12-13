@@ -1,6 +1,4 @@
-﻿/// <reference path="../../typings/refs.d.ts"/>
-
-module DarkReader.Popup {
+﻿module DarkReader.Popup {
 
     export class PopupWindow extends xp.Window {
         constructor(ext: Extension) {

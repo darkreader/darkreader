@@ -1,6 +1,4 @@
-﻿/// <reference path="../typings/refs.d.ts"/>
-
-module DarkReader.Background {
+﻿module DarkReader.Background {
 
     // Initialize extension
     export var extension: DarkReader.Extension;

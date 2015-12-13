@@ -1,6 +1,4 @@
-﻿/// <reference path="../typings/refs.d.ts"/>
-
-module DarkReader {
+﻿module DarkReader {
 
     /**
      * Chrome extension.
@@ -143,31 +141,44 @@ module DarkReader {
             }
         }
 
-        protected toggleCurrentSite() {
-            // Get active tab from tast focused window,
-            // add it's URL to Sites List (or remove).
+        /**
+         * Returns URL of active tab
+         * of last focused window.
+         */
+        getCurrentUrl(callback: (url: string) => void) {
+            // Get active tab from tast focused window
             chrome.tabs.query({
                 active: true,
                 lastFocusedWindow: true
             }, (tabs) => {
                 if (tabs.length > 0) {
-                    var match = tabs[0].url.match(/^(.*?:\/\/)?(.+?)(\/|$)/);
-                    if (match && match[2]) {
-                        var index = this.config.siteList.indexOf(match[2]);
-                        if (index < 0) {
-                            this.config.siteList.push(match[2]);
-                        } else {
-                            // Remove site from list
-                            this.config.siteList.splice(index, 1);
-                        }
-                    }
-                    else {
-                        console.warn('URL "' + tabs[0].url + '" didn\'t match.');
-                    }
+                    callback(tabs[0].url);
+                } else {
+                    callback(''); // throw Error?
                 }
                 // WARNING: Noticed bug: when calling
                 // command from Popup page, tabs==[],
-                // but currently is not reproducable,
+                // but currently is not reproducable.
+            });
+        }
+
+        protected toggleCurrentSite() {
+            // Get active tab from tast focused window,
+            // add it's URL to Sites List (or remove).
+            this.getCurrentUrl((url) => {
+                var match = url.match(/^(.*?:\/\/)?(.+?)(\/|$)/);
+                if (match && match[2]) {
+                    var index = this.config.siteList.indexOf(match[2]);
+                    if (index < 0) {
+                        this.config.siteList.push(match[2]);
+                    } else {
+                        // Remove site from list
+                        this.config.siteList.splice(index, 1);
+                    }
+                }
+                else {
+                    console.warn(`URL "${url}" didn't match.`);
+                }
             });
         }
 

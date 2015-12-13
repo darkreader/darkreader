@@ -35,17 +35,16 @@
                     prevEnabled = this.enabled;
                 }
                 if (prop === 'config') {
-                    var onCfgPropChange = () => {
-                        this.config.onPropertyChanged.addHandler(() => {
-                            this.onConfigPropChanged();
-                            this.saveUserSettings();
-                        });
-                        this.config.siteList.onCollectionChanged.addHandler((args) => {
-                            this.onSiteListChanged(args.newItem || args.oldItem);
-                            this.saveUserSettings();
-                        });
-                    }
-                });
+                    this.config.onPropertyChanged.addHandler(() => {
+                        this.onConfigPropChanged();
+                        this.saveUserSettings();
+                    });
+                    this.config.siteList.onCollectionChanged.addHandler((args) => {
+                        this.onSiteListChanged(args.newItem || args.oldItem);
+                        this.saveUserSettings();
+                    });
+                }
+            });
 
             // Default icon
             chrome.browserAction.setIcon({
@@ -497,7 +496,7 @@ if (head) {
                 clearTimeout(this.savedTimeout);
             }
             this.savedTimeout = setTimeout(() => {
-                var store: AppConfigStore = {   
+                var store: AppConfigStore = {
                     enabled: this.enabled,
                     config: this.config
                 };

@@ -92,6 +92,8 @@ module DarkReader {
 
                 var parts: string[] = [];
 
+                parts.push('@media screen {');
+
                 // Add leading rule.
                 parts.push(this.createLeadingRule(config));
 
@@ -157,6 +159,8 @@ module DarkReader {
                 if (fix.rules) {
                     parts.push(fix.rules);
                 }
+
+                parts.push('}');
 
                 // TODO: Formatting for readability.
                 return parts.join('\\n');

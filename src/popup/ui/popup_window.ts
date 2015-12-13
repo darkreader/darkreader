@@ -13,19 +13,65 @@
                 // ---- Top section ----
 
                 new xp.HBox({ name: 'topSection', itemsAlign: 'top', flex: 'none' }, [
-                    new xp.Label({
-                        name: 'appDescription',
-                        style: 'description',
-                        text: 'Adjust settings that\nbetter fit your screen'
-                    }),
-                    new xp.VBox({ flex: 'stretch', name: 'appToggle' }, [
+                    // new xp.Label({
+                    //     name: 'appDescription',
+                    //     style: 'description',
+                    //     text: 'Adjust settings that\nbetter fit your screen'
+                    // }),
+                    new xp.VBox({ flex: 'stretch', style: 'controlContainer siteToggleContainer' }, [
+                        new xp.Button({
+                            name: 'siteToggle',
+                            onClick: () => {
+                                ext.toggleCurrentSite();
+                            },
+                            init: (btn) => {
+                                setTimeout(() => {
+                                    ext.getCurrentTabInfo((info) => {
+                                        // NOTE: Disable button if toggle has no effect.
+                                        var toggleHasEffect = () => {
+                                            return (!info.isChromePage
+                                                && !(!ext.config.invertListed
+                                                    && info.isInDarkList));
+                                        };
+                                        btn.enabled = ext.enabled && toggleHasEffect();
+                                        ext.onPropertyChanged.addHandler((prop) => {
+                                            if (prop === 'enabled') {
+                                                btn.enabled = ext.enabled && toggleHasEffect();
+                                            }
+                                        });
+                                        ext.config.onPropertyChanged.addHandler((prop) => {
+                                            if (prop === 'invertListed') {
+                                                btn.enabled = ext.enabled && toggleHasEffect();
+                                            }
+                                        });
+
+                                        // Set button text
+                                        if (info.host) {
+                                            // HACK: Try to break URLs at dots.
+                                            btn.text = '*';
+                                            (<HTMLElement>btn.domElement.querySelector('.text')).innerHTML = '<wbr>' + info.host.replace(/\./g, '<wbr>.');
+                                        } else {
+                                            btn.text = 'current site';
+                                        }
+                                    });
+                                }, 100);
+                            }
+                        }),
+                        new HotkeyLink({
+                            commandName: 'addSite',
+                            noHotkeyText: 'setup a hotkey',
+                            hotkeyTextTemplate: 'toggle current site\nhotkey: #HOTKEY',
+                            style: 'status'
+                        })
+                    ]),
+                    new xp.VBox({ flex: 'stretch', style: 'controlContainer' }, [
                         new Toggle({
                             value: '{enabled}'
                         }),
                         new HotkeyLink({
                             commandName: 'toggle',
                             noHotkeyText: 'setup a hotkey',
-                            hotkeyTextTemplate: 'hotkey: #HOTKEY',
+                            hotkeyTextTemplate: 'toggle extension\nhotkey: #HOTKEY',
                             style: 'status'
                         })
                     ])

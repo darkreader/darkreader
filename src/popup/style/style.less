@@ -84,9 +84,35 @@ html {
     margin-right: @size-indent-small;
 }
 
-// App toggle
-#appToggle {
-    .controlContainer();
+.siteToggleContainer {
+    flex: none !important;
+    margin-right: @size-indent-small;
+    width: 55%;
+}
+
+#siteToggle {
+    border: @size-border solid @color-border;
+    box-sizing: content-box;
+    cursor: pointer;
+    height: @size-control-inner;
+    min-width: @size-control-inner;
+    overflow: hidden;
+    padding: 0;
+    transition: background-color @time-slow, width @time-slow;
+
+    &:hover {
+        transition: background-color @time-fast;
+    }
+    
+    .text {
+        width: 100%;
+        word-break: break-word;
+        
+        &:before {
+            color: @color-input-fore;
+            content: "Toggle ";
+        }
+    }
 }
 
 /*------------
@@ -111,7 +137,6 @@ html {
 
 /* Button with icon (without text) */
 .iconButton {
-    //background-color: @color-back;
     border: @size-border solid @color-border;
     box-sizing: content-box;
     cursor: pointer;
@@ -126,15 +151,7 @@ html {
     &:hover {
         transition: background-color @time-fast;
     }
-    /*&:hover:not(.disabled):not(.checked) {
-        background-color: @color-hover;
-        transition: background-color @time-fast;
-    }*/
-    // TODO: Remove :not(.disabled) in XP.
-    /*&:active:not(.disabled),
-    &.checked:not(.disabled) {
-        background-color: @color-active;
-    }*/
+    
     .icon {
         background-size: contain;
         margin: 0;
@@ -245,9 +262,9 @@ html {
         width: @size-main+@size-border*2;
     }
 
-    &::-webkit-scrollbar-track {
-        //margin: 1em;
-    }
+    // &::-webkit-scrollbar-track {
+    //     margin: 1em;
+    // }
 
     &::-webkit-scrollbar-thumb {
         background-color: @color-hover;

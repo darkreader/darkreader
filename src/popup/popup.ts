@@ -24,15 +24,17 @@
         });
     }
     else {
-        // Mock for tests
         popupWindow = getMockPopup();
     }
 
     // Disable text selection
     document.onselectstart = (e) => false;
 
+    /**
+     * Mock for tests.
+     */
     function getMockPopup() {
-        return new PopupWindow(<Extension>xp.observable({
+        return new PopupWindow(<Extension><any>xp.observable({
             enabled: true,
             config: <FilterConfig>{
                 mode: 1/*DarkReader.FilterMode.dark*/,
@@ -55,7 +57,8 @@
                 'Open Sans',
                 'Segoe UI',
                 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'
-            ]
+            ],
+            getCurrentTabInfo: function(callback) { callback({ host: 'server1.mail.veryverylongnameveryverylongnameveryverylongnameveryverylongname.com' }); }
         }));
     }
 }

@@ -142,42 +142,58 @@
         }
 
         /**
-         * Returns URL of active tab
+         * Returns info of active tab
          * of last focused window.
          */
-        getCurrentUrl(callback: (url: string) => void) {
+        getCurrentTabInfo(callback: (res: { url: string; host: string; isChromePage: boolean; isInDarkList: boolean; }) => void) {
             // Get active tab from tast focused window
             chrome.tabs.query({
                 active: true,
                 lastFocusedWindow: true
             }, (tabs) => {
+                var result = {
+                    url: '',
+                    host: '',
+                    isChromePage: false,
+                    isInDarkList: false
+                };
                 if (tabs.length > 0) {
-                    callback(tabs[0].url);
+                    var url = tabs[0].url;
+                    var match = url.match(/^(.*?:\/{2,3})?(.+?)(\/|$)/);
+                    if (match && match[2]) {
+                        result = {
+                            url: url,
+                            host: match[2],
+                            isChromePage: (url.indexOf('chrome://') === 0 || url.indexOf('https://chrome.google.com/webstore') === 0),
+                            isInDarkList: isUrlInList(url, DARK_SITES)
+                        };
+                    } else {
+                        console.warn(`URL "${tabs[0].url}" didn't match.`);
+                    }
                 } else {
-                    callback(''); // throw Error?
+                    console.warn(`Unable to get URL. Tab not found.`);
                 }
+                callback(result);
                 // WARNING: Noticed bug: when calling
                 // command from Popup page, tabs==[],
                 // but currently is not reproducable.
             });
         }
 
-        protected toggleCurrentSite() {
-            // Get active tab from tast focused window,
-            // add it's URL to Sites List (or remove).
-            this.getCurrentUrl((url) => {
-                var match = url.match(/^(.*?:\/\/)?(.+?)(\/|$)/);
-                if (match && match[2]) {
-                    var index = this.config.siteList.indexOf(match[2]);
+        /**
+         * Adds host name of last focused tab
+         * into Sites List (ore removes).
+         */
+        toggleCurrentSite() {
+            this.getCurrentTabInfo((info) => {
+                if (info.host) {
+                    var index = this.config.siteList.indexOf(info.host);
                     if (index < 0) {
-                        this.config.siteList.push(match[2]);
+                        this.config.siteList.push(info.host);
                     } else {
                         // Remove site from list
                         this.config.siteList.splice(index, 1);
                     }
-                }
-                else {
-                    console.warn(`URL "${url}" didn't match.`);
                 }
             });
         }
@@ -237,25 +253,31 @@
         // Add/remove css to tab
         //
         //----------------------
+        
+        protected canInjectScript(tab: chrome.tabs.Tab) {
+            // Prevent throwing errors on specific chrome adresses
+            return !(tab
+                && tab.url
+                && tab.url.indexOf('chrome') === 0
+                && tab.url.indexOf('https://chrome.google.com/webstore') === 0
+            );
+        }
 
         /**
          * Adds CSS to tab.
          * @param tab If null than current tab will be processed.
          */
         protected addCssToTab(tab: chrome.tabs.Tab) {
-            // Prevent throwing errors on specific chrome adresses
-            if (tab && tab.url && (tab.url.indexOf('chrome') === 0)) {
+            if (!this.canInjectScript(tab)) {
                 return;
             }
 
-            if (tab) { // Somewhere null is called.
-                var id = tab ? tab.id : null;
-                var url = tab ? tab.url : '';
-                chrome.tabs.executeScript(id, {
-                    code: this.getCode_addCss(url),
-                    runAt: 'document_start'
-                });
-            }
+            var id = tab ? tab.id : null;
+            var url = tab ? tab.url : '';
+            chrome.tabs.executeScript(id, {
+                code: this.getCode_addCss(url),
+                runAt: 'document_start'
+            });
         }
 
         /**
@@ -263,8 +285,7 @@
          * @param tab If null than current tab will be processed.
          */
         protected removeCssFromTab(tab: chrome.tabs.Tab) {
-            // Prevent throwing errors on specific chrome adresses
-            if (tab && tab.url && (tab.url.indexOf('chrome') === 0)) {
+            if (!this.canInjectScript(tab)) {
                 return;
             }
 
@@ -279,19 +300,16 @@
          * @param tab If null than current tab will be processed.
          */
         protected updateCssInTab(tab: chrome.tabs.Tab) {
-            // Prevent throwing errors on specific chrome adresses
-            if (tab && tab.url && (tab.url.indexOf('chrome') === 0)) {
+            if (!this.canInjectScript(tab)) {
                 return;
             }
 
-            if (tab) { // Somewhere null is called.
-                var id = tab ? tab.id : null;
-                var url = tab ? tab.url : '';
-                chrome.tabs.executeScript(id, {
-                    code: this.getCode_updateCss(url),
-                    runAt: 'document_start'
-                });
-            }
+            var id = tab ? tab.id : null;
+            var url = tab ? tab.url : '';
+            chrome.tabs.executeScript(id, {
+                code: this.getCode_updateCss(url),
+                runAt: 'document_start'
+            });
         }
 
         protected getCode_addCss(url?: string) {

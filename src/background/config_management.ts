@@ -91,7 +91,7 @@
                 }
                 if (fixes.specials[i].rules !== void 0
                     && typeof fixes.specials[i].rules !== 'string'
-                    ) {
+                ) {
                     fixes.specials[i].rules = '';
                     onInvalidData('Rule is not a string.');
                     continue;
@@ -328,11 +328,10 @@
     }
 
     function createUrlRegex(urlTemplate: string): RegExp {
-        ///^(.*?\:\/\/)?.*?\.?(google\.[^\.]+?)(\/.*)?$/i
-        var result = '^(.*?\\:\\/\\/)?[^\/]*?\\.?';
+        var result = '^(.*?\\:\\/{2,3})?[^\/]*?\\.?';
 
         // Remove protocol?
-        urlTemplate = urlTemplate.replace(/^.*?\/\//, '');
+        urlTemplate = urlTemplate.replace(/^.*?\/{2,3}/, '');
 
         // Remove last slash
         urlTemplate = urlTemplate.replace(/\/$/, '');

@@ -9,9 +9,9 @@ module.exports = function (grunt) {
                 'build/'
             ])
             .sub('typescript', {
+                cwd: 'src',
                 src: 'src/**/*.ts',
                 dest: 'build/',
-                expand: true,
                 options: { target: 'es5' }
             })
             .sub('less', {

@@ -24,43 +24,12 @@
                             onClick: () => {
                                 ext.toggleCurrentSite();
                             },
-                            init: (btn) => {
-                                setTimeout(() => {
-                                    ext.getCurrentTabInfo((info) => {
-                                        // NOTE: Disable button if toggle has no effect.
-                                        var toggleHasEffect = () => {
-                                            return (!info.isChromePage
-                                                && !(!ext.config.invertListed
-                                                    && info.isInDarkList));
-                                        };
-                                        btn.enabled = ext.enabled && toggleHasEffect();
-                                        ext.onPropertyChanged.addHandler((prop) => {
-                                            if (prop === 'enabled') {
-                                                btn.enabled = ext.enabled && toggleHasEffect();
-                                            }
-                                        });
-                                        ext.config.onPropertyChanged.addHandler((prop) => {
-                                            if (prop === 'invertListed') {
-                                                btn.enabled = ext.enabled && toggleHasEffect();
-                                            }
-                                        });
-
-                                        // Set button text
-                                        if (info.host) {
-                                            // HACK: Try to break URLs at dots.
-                                            btn.text = '*';
-                                            (<HTMLElement>btn.domElement.querySelector('.text')).innerHTML = '<wbr>' + info.host.replace(/\./g, '<wbr>.');
-                                        } else {
-                                            btn.text = 'current site';
-                                        }
-                                    });
-                                }, 100);
-                            }
+                            init: (btn) => this.initSiteToggleButton(btn, ext)
                         }),
                         new HotkeyLink({
                             commandName: 'addSite',
-                            noHotkeyText: 'setup a hotkey',
-                            hotkeyTextTemplate: 'toggle current site\nhotkey: #HOTKEY',
+                            noHotkeyText: 'setup current site\ntoggle hotkey',
+                            hotkeyTextTemplate: 'toggle current site\n#HOTKEY',
                             style: 'status'
                         })
                     ]),
@@ -70,8 +39,8 @@
                         }),
                         new HotkeyLink({
                             commandName: 'toggle',
-                            noHotkeyText: 'setup a hotkey',
-                            hotkeyTextTemplate: 'toggle extension\nhotkey: #HOTKEY',
+                            noHotkeyText: 'setup extension\ntoggle hotkey',
+                            hotkeyTextTemplate: 'toggle extension\n#HOTKEY',
                             style: 'status'
                         })
                     ])
@@ -80,7 +49,7 @@
                 //
                 // ---- Tab panel ----
 
-                new TabPanel({ onTabSwitched: (t) => t.tabName === 'Site list' && this.siteList.focus(), flex: 'stretch' }, [
+                new TabPanel({ onTabSwitched: (t) => t.tabName === 'Site list' && this.siteList.focus(), flex: 'stretch', enabled: '{enabled}' }, [
 
                     //
                     // ---- Filter ----
@@ -250,6 +219,37 @@
                     document.body.lastElementChild);
             }
             return super.getTemplate();
+        }
+
+        private initSiteToggleButton(btn: xp.Button, ext: Extension) {
+            ext.getCurrentTabInfo((info) => {
+                // NOTE: Disable button if toggle has no effect.
+                var toggleHasEffect = () => {
+                    return (!info.isChromePage
+                        && !(!ext.config.invertListed
+                            && info.isInDarkList));
+                };
+                btn.enabled = ext.enabled && toggleHasEffect();
+                ext.onPropertyChanged.addHandler((prop) => {
+                    if (prop === 'enabled') {
+                        btn.enabled = ext.enabled && toggleHasEffect();
+                    }
+                });
+                ext.config.onPropertyChanged.addHandler((prop) => {
+                    if (prop === 'invertListed') {
+                        btn.enabled = ext.enabled && toggleHasEffect();
+                    }
+                });
+
+                // Set button text
+                if (info.host) {
+                    // HACK: Try to break URLs at dots.
+                    btn.text = '*';
+                    (<HTMLElement>btn.domElement.querySelector('.text')).innerHTML = '<wbr>' + info.host.replace(/\./g, '<wbr>.');
+                } else {
+                    btn.text = 'current site';
+                }
+            });
         }
     }
 } 

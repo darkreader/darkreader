@@ -36,6 +36,10 @@ module.exports = function (grunt) {
                 dest: 'build/',
                 expand: true
             })
+            .sub('zip', {
+                src: ['build/**/*.*'],
+                dest: 'build.zip'
+            })
             .sub('ext-reload');
 
         //

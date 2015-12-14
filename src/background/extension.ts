@@ -73,42 +73,7 @@
             this.getFontList((fonts) => this.fonts = fonts);
 
             // TODO: Try to remove CSS before ext disabling or removal.
-            
-            // Get active tab
-            // Get active tab from tast focused window
-            chrome.tabs.query({
-                active: true,
-                lastFocusedWindow: true
-            }, (tabs) => {
-                if (tabs.length === 1) {
-                    this.activeTab = tabs[0];
-                } else {
-                    throw new Error('Unexpected active tabs count.');
-                }
-                // WARNING: Noticed bug: when calling
-                // command from Popup page, tabs==[],
-                // but currently is not reproducable.
-            });
-            chrome.tabs.onActivated.addListener((info) => {
-                chrome.tabs.get(info.tabId, (t) => {
-                    this.activeTab = t;
-                });
-            });
-            chrome.windows.onFocusChanged.addListener((windowId) => {
-                chrome.tabs.query({
-                    active: true,
-                    windowId: windowId
-                }, (tabs) => {
-                    if (tabs.length === 1) {
-                        this.activeTab = tabs[0];
-                    } else {
-                        throw new Error('Unexpected active tabs count.');
-                    }
-                });
-            });
         }
-
-        protected activeTab: chrome.tabs.Tab;
 
 
         //-----------------------
@@ -180,15 +145,28 @@
          * of last focused window.
          */
         getActiveTabInfo(callback: (res: { url: string; host: string; isChromePage: boolean; isInDarkList: boolean; }) => void) {
-            var url = this.activeTab.url;
-            var host = url.match(/^(.*?:\/{2,3})?(.+?)(\/|$)/)[2];
-            var result = {
-                url: url,
-                host: host,
-                isChromePage: (url.indexOf('chrome://') === 0 || url.indexOf('https://chrome.google.com/webstore') === 0),
-                isInDarkList: isUrlInList(url, DARK_SITES)
-            };
-            callback(result);
+            chrome.tabs.query({
+                active: true,
+                lastFocusedWindow: true
+            }, (tabs) => {
+                if (tabs.length === 1) {
+                    var url = tabs[0].url;
+                    var host = url.match(/^(.*?:\/{2,3})?(.+?)(\/|$)/)[2];
+                    var result = {
+                        url: url,
+                        host: host,
+                        isChromePage: (url.indexOf('chrome://') === 0 || url.indexOf('https://chrome.google.com/webstore') === 0),
+                        isInDarkList: isUrlInList(url, DARK_SITES)
+                    };
+                    callback(result);
+                } else {
+                    if (DEBUG) {
+                        throw new Error('Unexpected tabs count.');
+                    }
+                    console.warn('Unexpected tabs count.');
+                    callback({ url: '', host: '', isChromePage: false, isInDarkList: false });
+                }
+            });
         }
 
         /**

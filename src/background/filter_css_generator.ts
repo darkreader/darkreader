@@ -34,14 +34,14 @@
     export var DEFAULT_FILTER_CONFIG: DarkReader.FilterConfig = {
         mode: DarkReader.FilterMode.dark,
         brightness: 110,
-        contrast: 80,
-        grayscale: 30,
+        contrast: 90,
+        grayscale: 20,
         sepia: 10,
         useFont: false,
         fontFamily: 'Segoe UI',
         textStroke: 0,
-        siteList: [],
-        invertListed: false
+        invertListed: false,
+        siteList: []
     };
 
     /**

@@ -265,10 +265,10 @@
         
         protected canInjectScript(tab: chrome.tabs.Tab) {
             // Prevent throwing errors on specific chrome adresses
-            return !(tab
+            return (tab
                 && tab.url
-                && tab.url.indexOf('chrome') === 0
-                && tab.url.indexOf('https://chrome.google.com/webstore') === 0
+                && tab.url.indexOf('chrome://') !== 0
+                && tab.url.indexOf('https://chrome.google.com/webstore') !== 0
             );
         }
 

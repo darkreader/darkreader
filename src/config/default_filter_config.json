@@ -1,12 +1,12 @@
 {
 	"mode": 1,
 	"brightness": 110,
-	"contrast": 80,
-	"grayscale": 30,
+	"contrast": 90,
+	"grayscale": 20,
 	"sepia": 10,
 	"useFont": false,
-	"fontFamily": "SegoeUI",
+	"fontFamily": "Segoe UI",
 	"textStroke": 0,
-	"siteList": [],
-	"invertListed": false
+	"invertListed": false,
+	"siteList": []
 }

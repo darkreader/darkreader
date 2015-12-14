@@ -14,6 +14,9 @@
         sitesFixes: {
             remote: 'https://raw.githubusercontent.com/alexanderby/darkreader/master/src/config/sites_fixes.json',
             local: '../config/sites_fixes.json'
+        },
+        defaultFilterConfig: {
+            local: '../config/default_filter_config.json'
         }
     };
     var REMOTE_TIMEOUT_MS = 10 * 1000;
@@ -35,12 +38,81 @@
     // ----- Load configs ------
     
     export function loadConfigs(done?: () => void) {
-        function onInvalidData(desc) {
-            console.warn('Invalid data: ' + desc);
+        if (!DEBUG_LOCAL_CONFIGS) {
+            
+            //
+            // Load remote and local as fallback
+            
+            Promise.all<any>([
+                
+                //
+                // Load dark sites
+                
+                readJson<string[]>({
+                    url: CONFIG_URLs.darkSites.remote,
+                    timeout: REMOTE_TIMEOUT_MS
+                }).then((res) => {
+                    return res;
+                }).catch((err) => {
+                    console.error('Dark Sites remote load error', err);
+                    return readJson<string[]>({
+                        url: CONFIG_URLs.darkSites.local
+                    });
+                }).then((res) => DARK_SITES = handleDarkSites(res)),
+
+                //
+                // Load sites fixes
+                
+                readJson<SitesFixes>({
+                    url: CONFIG_URLs.sitesFixes.remote,
+                    timeout: REMOTE_TIMEOUT_MS
+                }).then((res) => {
+                    return res;
+                }).catch((err) => {
+                    console.error('Sites Fixes remote load error', err);
+                    return readJson<SitesFixes>({
+                        url: CONFIG_URLs.sitesFixes.local
+                    });
+                }).then((res) => SITES_FIXES = handleSitesFixes(res)),
+                
+                //
+                // Load default filter config
+                
+                readJson<FilterConfig>({
+                    url: CONFIG_URLs.defaultFilterConfig.local
+                }).then((res) => DEFAULT_FILTER_CONFIG = handleFilterConfig(res))
+
+            ]).then(() => done && done(),
+                (err) => console.error('Fatality', err));
+        } else {
+            // Load local configs only
+            Promise.all<any>([
+                // Load dark sites
+                readJson<string[]>({
+                    url: CONFIG_URLs.darkSites.local
+                }).then((res) => DARK_SITES = handleDarkSites(res)),
+
+                // Load sites fixes
+                readJson<SitesFixes>({
+                    url: CONFIG_URLs.sitesFixes.local
+                }).then((res) => SITES_FIXES = handleSitesFixes(res)),
+                
+                // Load default filter config
+                readJson<FilterConfig>({
+                    url: CONFIG_URLs.defaultFilterConfig.local
+                }).then((res) => DEFAULT_FILTER_CONFIG = handleFilterConfig(res))
+
+            ]).then(() => done && done(),
+                (err) => console.error('Fatality', err));
         }
-        var loadedDarkSites = false;
-        var loadedSitesFixes = false;
-        var onLoadedDarkSites = function(sites: string[]) {
+        
+        // --------- Data handling ----------
+        
+        function onInvalidData(desc) {
+            if (DEBUG) throw new Error(desc);
+            console.error('Invalid data: ' + desc);
+        }
+        function handleDarkSites(sites: string[]) {
             // Validate sites
             if (!Array.isArray(sites)) {
                 sites = [];
@@ -53,15 +125,9 @@
                 }
             }
             sites.sort(urlTemplateSorter);
-            
-            // End
-            DARK_SITES = sites;
-            loadedDarkSites = true;
-            if (done && loadedSitesFixes) {
-                done();
-            }
+            return sites;
         };
-        var onLoadedSitesFixes = function(fixes: SitesFixes) {
+        function handleSitesFixes(fixes: SitesFixes) {
             // Validate fixes
             if (fixes === null || typeof fixes !== 'object') {
                 fixes = {
@@ -105,82 +171,21 @@
                     /\{common\}/ig,
                     fixes.commonSelectors);
             });
-            
-            // End
-            SITES_FIXES = fixes;
-            loadedSitesFixes = true;
-            if (done && loadedDarkSites) {
-                done();
-            }
+
+            return fixes;
         };
-        
-        // Load start
-        if (!DEBUG_LOCAL_CONFIGS) {
-            // Load remote and local as fallback
-            readJson<string[]>({
-                url: CONFIG_URLs.darkSites.remote,
-                async: true,
-                timeout: REMOTE_TIMEOUT_MS,
-                onSuccess: (result) => {
-                    onLoadedDarkSites(result)
-                },
-                onFailure: (error) => {
-                    console.warn('Dark Sites remote load error: ' + error);
-                    readJson<string[]>({
-                        url: CONFIG_URLs.darkSites.local,
-                        async: true,
-                        onSuccess: (result) => {
-                            onLoadedDarkSites(result);
-                        },
-                        onFailure: (error) => {
-                            console.warn('Fatal sh*t, local Dark Sites were not loaded: ' + error);
-                        }
-                    });
+        function handleFilterConfig(config: FilterConfig) {
+            if (config === null || typeof config !== 'object') {
+                config = DEFAULT_FILTER_CONFIG;
+            } else {
+                for (var prop in DEFAULT_FILTER_CONFIG) {
+                    if (typeof config[prop] !== typeof DEFAULT_FILTER_CONFIG[prop]) {
+                        onInvalidData(`Invalid config property "${prop}"`);
+                        config[prop] = DEFAULT_FILTER_CONFIG[prop];
+                    }
                 }
-            });
-            readJson<SitesFixes>({
-                url: CONFIG_URLs.sitesFixes.remote,
-                async: true,
-                timeout: REMOTE_TIMEOUT_MS,
-                onSuccess: (result) => {
-                    onLoadedSitesFixes(result)
-                },
-                onFailure: (error) => {
-                    console.warn('Sites Fixes remote load error: ' + error);
-                    readJson<SitesFixes>({
-                        url: CONFIG_URLs.sitesFixes.local,
-                        async: true,
-                        onSuccess: (result) => {
-                            onLoadedSitesFixes(result);
-                        },
-                        onFailure: (error) => {
-                            console.warn('Fatal sh*t, local Sites Fixes were not loaded: ' + error);
-                        }
-                    });
-                }
-            });
-        } else {
-            // Load local configs only
-            readJson<string[]>({
-                url: CONFIG_URLs.darkSites.local,
-                async: true,
-                onSuccess: (result) => {
-                    onLoadedDarkSites(result);
-                },
-                onFailure: (error) => {
-                    throw new Error('Local Dark Sites were not loaded: ' + error);
-                }
-            });
-            readJson<SitesFixes>({
-                url: CONFIG_URLs.sitesFixes.local,
-                async: true,
-                onSuccess: (result) => {
-                    onLoadedSitesFixes(result);
-                },
-                onFailure: (error) => {
-                    throw new Error('Local Sites Fixes were not loaded: ' + error);
-                }
-            });
+            }
+            return config;
         }
     }
 
@@ -237,64 +242,41 @@
      * Loads and parses JSON from file to object.
      * @param params Object containing request parameters.
      */
-    function readJson<T>(params: JsonRequestParams<T>) {
-        var xobj = new XMLHttpRequest();
-        xobj.overrideMimeType("application/json");
-        xobj.open(
-            'GET',
-            params.url + '?nocache=' + new Date().getTime(),
-            params.async);
-        xobj.onreadystatechange = () => {
-            if (xobj.readyState == 4) {
-                if (xobj.status == 200) {
+    function readJson<T>(params: JsonRequestParams<T>): Promise<T> {
+        var promise = new Promise((resolve, reject) => {
+
+            var request = new XMLHttpRequest();
+            request.overrideMimeType("application/json");
+            request.open(
+                'GET',
+                params.url + '?nocache=' + new Date().getTime(),
+                true
+            );
+            request.onload = () => {
+                if (request.status >= 200 && request.status < 300) {
                     // Remove comments
-                    var resultText = xobj.responseText
+                    var resultText = request.responseText
                         .replace(/(\".*?(\\\".*?)*?\")|(\/\*(.|[\r\n])*?\*\/)|(\/\/.*?[\r\n])/gm, '$1');
-                    try {
-                        var json = JSON.parse(resultText);
-                        params.onSuccess(json);
-                    }
-                    catch (e) {
-                        onError(e);
-                    }
+
+                    var json = JSON.parse(resultText);
+                    resolve(json);
                 }
                 else {
-                    var error = new Error(xobj.status + ': ' + xobj.statusText);
-                    onError(error);
+                    reject(new Error(request.status + ': ' + request.statusText));
                 }
-            }
-        };
-        xobj.onerror = (err) => onError((<any>err).error);
-        if (params.timeout) {
-            xobj.timeout = params.timeout;
-            xobj.ontimeout = () => {
-                var err = new Error('Config loading stopped due to timeout.');
-                onError(err);
             };
-        }
-
-        try {
-            xobj.send(null);
-        }
-        catch (e) {
-            onError(e);
-        }
-
-        function onError(err: Error) {
-            if (params.onFailure) {
-                params.onFailure(err);
+            request.onerror = (err: ErrorEvent) => reject(err.error);
+            if (params.timeout) {
+                request.timeout = params.timeout;
+                request.ontimeout = () => reject(new Error('Config loading stopped due to timeout.'));
             }
-            else {
-                throw err;
-            }
-        }
+            request.send();
+        });
+        return promise;
     }
 
     interface JsonRequestParams<T> {
         url: string;
-        async: boolean;
-        onSuccess: (result: T) => void;
-        onFailure?: (error) => void;
         timeout?: number;
     }
 

@@ -134,7 +134,7 @@
                 // Remove style from all tabs
                 chrome.tabs.query({ active: false }, (tabs) => {
                     tabs.forEach((tab) => {
-                        this.removeCssFromTab(tab);
+                        setTimeout(() => this.removeCssFromTab(tab), 0);
                     });
                 });
             }
@@ -144,7 +144,7 @@
          * Returns info of active tab
          * of last focused window.
          */
-        getActiveTabInfo(callback: (res: { url: string; host: string; isChromePage: boolean; isInDarkList: boolean; }) => void) {
+        getActiveTabInfo(callback: (res: TabInfo) => void) {
             chrome.tabs.query({
                 active: true,
                 lastFocusedWindow: true
@@ -152,7 +152,7 @@
                 if (tabs.length === 1) {
                     var url = tabs[0].url;
                     var host = url.match(/^(.*?:\/{2,3})?(.+?)(\/|$)/)[2];
-                    var result = {
+                    var result: TabInfo = {
                         url: url,
                         host: host,
                         isChromePage: (url.indexOf('chrome://') === 0 || url.indexOf('https://chrome.google.com/webstore') === 0),
@@ -171,7 +171,7 @@
 
         /**
          * Adds host name of last focused tab
-         * into Sites List (ore removes).
+         * into Sites List (or removes).
          */
         toggleCurrentSite() {
             this.getActiveTabInfo((info) => {
@@ -529,26 +529,10 @@ if (head) {
         siteList: xp.ObservableCollection<string>;
     }
 
-    function debounce<T extends Function>(func: T, wait: number): T {
-        var timeout, args, context, timestamp, result;
-
-        function later() {
-            var last = Date.now() - timestamp;
-            if (last < wait && last > 0) {
-                timeout = setTimeout(later, wait - last);
-            } else {
-                timeout = null;
-                result = func.apply(context, args);
-                if (!timeout) context = args = null;
-            }
-        };
-
-        return <any>function debounced() {
-            context = this;
-            args = arguments;
-            timestamp = Date.now();
-            if (!timeout) timeout = setTimeout(later, wait);
-            return result;
-        };
+    export interface TabInfo {
+        url: string;
+        host: string;
+        isChromePage: boolean;
+        isInDarkList: boolean;
     }
 }

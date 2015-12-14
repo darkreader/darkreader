@@ -31,22 +31,8 @@
 
         protected defineProperties() {
             super.defineProperties();
-            //this.defineProperty('switchedOn', {
-            //    setter: (switchedOn:boolean) => {
-            //        if (switchedOn) {
-            //            this.elementOn.classList.add('active');
-            //            this.elementOff.classList.remove('active');
-            //        } else {
-            //            this.elementOff.classList.add('active');
-            //            this.elementOn.classList.remove('active');
-            //        }
-            //    }
-            //});
             this.defineProperty('value', {
                 setter: (v) => {
-                    //if (v !== this.valueOn || v !== this.valueOff) {
-                    //    throw new Error('Unexpected value.');
-                    //}
                     var switchedOn = v === this.valueOn;
                     if (switchedOn) {
                         this.elementOn.classList.add('active');
@@ -91,7 +77,6 @@
     }
 
     export interface ToggleMarkup extends xp.ElementMarkup<Toggle> {
-        //switchedOn?: boolean|string;
         value?: any|string;
         valueOn?: any|string;
         valueOff?: any|string;

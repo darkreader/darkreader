@@ -22,7 +22,7 @@
     var DEBUG_LOCAL_CONFIGS = DEBUG;
 
     /**
-     * List of sites with dark theme (whick should not be inverted).
+     * List of sites with dark theme (which should not be inverted).
      */
     export var DARK_SITES: string[];
 

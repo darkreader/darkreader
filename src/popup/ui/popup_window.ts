@@ -29,7 +29,8 @@
                             commandName: 'addSite',
                             noHotkeyText: 'setup current site\ntoggle hotkey',
                             hotkeyTextTemplate: 'toggle current site\n#HOTKEY',
-                            style: 'status'
+                            style: 'status',
+                            enabled: '{enabled}'
                         })
                     ]),
                     new xp.VBox({ flex: 'stretch', style: 'controlContainer' }, [
@@ -204,7 +205,8 @@
                     <p class="description">Some things should not be inverted?
                         Please, send a website address at
                         <strong>darkReaderApp@gmail.com</strong></p>
-                    `
+                    `,
+                    enabled: '{enabled}'
                 }),
             ]);
 

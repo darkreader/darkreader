@@ -94,6 +94,18 @@
                     this.activeTab = t;
                 });
             });
+            chrome.windows.onFocusChanged.addListener((windowId) => {
+                chrome.tabs.query({
+                    active: true,
+                    windowId: windowId
+                }, (tabs) => {
+                    if (tabs.length === 1) {
+                        this.activeTab = tabs[0];
+                    } else {
+                        throw new Error('Unexpected active tabs count.');
+                    }
+                });
+            });
         }
 
         protected activeTab: chrome.tabs.Tab;

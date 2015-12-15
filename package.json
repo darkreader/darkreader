@@ -37,7 +37,6 @@
     "grunt-contrib-less": "^1.0.1",
     "grunt-contrib-watch": "^0.6.1",
     "grunt-typescript": "^0.6.2",
-    "grunt-zip": "^0.17.1",
-    "socket.io": "^1.3.7"
+    "grunt-zip": "^0.17.1"
   }
 }

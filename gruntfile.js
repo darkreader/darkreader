@@ -101,17 +101,16 @@ module.exports = function (grunt) {
             });
 
         // --- Reload chrome extensions ---
-        // WARNING: Seems like reloading doesn't work anymore in Chrome 45?
         create.task('ext-reload')
             .sub(function () {
-                // Create server to communicate with Google Chrome reload extension
-                // https://chrome.google.com/webstore/detail/chrome-unpacked-extension/fddfkmklefkhanofhlohnkemejcbamln?utm_source=chrome-app-launcher-info-dialog
+                // Create server to communicate with extension
                 var done = this.async();
-                var server = require('http').createServer();
-                var io = require('socket.io')(server);
+                var server = require('http').createServer(function (req, res) {
+                    res.end('reload');
+                });
                 var connected = false;
                 var sockets = {};
-                var socketId = 0;
+                var socketCount = 0;
                 var closeServer = function () {
                     server.close(function () {
                         grunt.log.writeln('Server closed gracefully.');
@@ -126,19 +125,17 @@ module.exports = function (grunt) {
                     }, 2000);
                 };
                 server.on('connection', function (socket) {
-                    sockets[socketId++] = socket;
-                });
-                io.sockets.on('connection', function (socket) {
+                    sockets[socketCount++] = socket;
                     if (!connected) {
                         grunt.log.writeln('Auto-reloader connected.');
-                        socket.emit('file.change', {});
+                        socket.emit('reload', {});
                         connected = true;
                         setTimeout(function () {
                             closeServer();
                         }, 1000);
                     }
                 });
-                io.sockets.on('error', function (e) {
+                server.on('error', function (e) {
                     grunt.log.writeln('Server error: ' + e.description);
                     closeServer();
                 });

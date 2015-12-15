@@ -268,6 +268,7 @@
             return (tab
                 && tab.url
                 && tab.url.indexOf('chrome://') !== 0
+                && tab.url.indexOf('chrome-extension://') !== 0
                 && tab.url.indexOf('https://chrome.google.com/webstore') !== 0
             );
         }

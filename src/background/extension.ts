@@ -25,24 +25,16 @@
             xp.Model.property(this, 'fonts', []);
 
             // Handle config changes
-            var prevEnabled = false;
+            var changeReg = new xp.EventRegistrar();
             this.onPropertyChanged.addHandler((prop) => {
                 if (prop === 'enabled') {
-                    if (prevEnabled !== this.enabled) {
-                        this.onAppToggle();
-                        this.saveUserSettings();
-                    }
-                    prevEnabled = this.enabled;
+                    this.onAppToggle();
                 }
                 if (prop === 'config') {
-                    this.config.onPropertyChanged.addHandler(() => {
-                        this.onConfigPropChanged();
-                        this.saveUserSettings();
-                    });
-                    this.config.siteList.onCollectionChanged.addHandler((args) => {
-                        this.onSiteListChanged(args.newItem || args.oldItem);
-                        this.saveUserSettings();
-                    });
+                    changeReg.unsubscribeAll();
+                    changeReg.subscribe(this.config.onPropertyChanged, this.onConfigPropChanged, this);
+                    changeReg.subscribe(this.config.siteList.onCollectionChanged, this.onConfigPropChanged, this);
+                    this.onConfigPropChanged();
                 }
             });
 
@@ -73,78 +65,18 @@
             this.getFontList((fonts) => this.fonts = fonts);
 
             // TODO: Try to remove CSS before ext disabling or removal.
-        }
-
-
-        //-----------------------
-        //     Switch ON/OFF
-
-        protected onAppToggle() {
-            if (this.enabled) {
-                //
-                // Switch ON
-
-                // Change icon
-                chrome.browserAction.setIcon({
-                    path: {
-                        '19': ICON_PATHS.active_19,
-                        '38': ICON_PATHS.active_38
-                    }
-                });
-
-                // Subscribe to tab updates
-                this.addTabListener();
-                
-                // Set style for active tabs
-                chrome.tabs.query({ active: true }, (tabs) => {
-                    tabs.forEach((tab) => {
-                        this.addCssToTab(tab);
-                    });
-                });
-
-                // Set style for all tabs
-                chrome.tabs.query({ active: false }, (tabs) => {
-                    tabs.forEach((tab) => {
-                        setTimeout(() => this.addCssToTab(tab), 0);
-                    });
-                });
-            }
-            else {
-                //
-                // Switch OFF
-
-                // Change icon
-                chrome.browserAction.setIcon({
-                    path: {
-                        '19': ICON_PATHS.inactive_19,
-                        '38': ICON_PATHS.inactive_38
-                    }
-                });
-
-                // Unsubscribe from tab updates
-                this.removeTabListener();
-
-                // Remove style from active tabs
-                chrome.tabs.query({ active: true }, (tabs) => {
-                    tabs.forEach((tab) => {
-                        this.removeCssFromTab(tab);
-                    });
-                });
-
-                // Remove style from all tabs
-                chrome.tabs.query({ active: false }, (tabs) => {
-                    tabs.forEach((tab) => {
-                        setTimeout(() => this.removeCssFromTab(tab), 0);
-                    });
-                });
-            }
+            window.addEventListener('unload', () => {
+                chrome.tabs.query({}, (tabs) => {
+                    tabs.forEach(this.removeStyleFromTab, this);
+                })
+            });
         }
 
         /**
          * Returns info of active tab
          * of last focused window.
          */
-        getActiveTabInfo(callback: (res: TabInfo) => void) {
+        getActiveTabInfo(callback: (info: TabInfo) => void) {
             chrome.tabs.query({
                 active: true,
                 lastFocusedWindow: true
@@ -152,18 +84,18 @@
                 if (tabs.length === 1) {
                     var url = tabs[0].url;
                     var host = url.match(/^(.*?:\/{2,3})?(.+?)(\/|$)/)[2];
-                    var result: TabInfo = {
+                    var info: TabInfo = {
                         url: url,
                         host: host,
-                        isChromePage: (url.indexOf('chrome://') === 0 || url.indexOf('https://chrome.google.com/webstore') === 0),
+                        isChromePage: (url.indexOf('chrome') === 0 || url.indexOf('https://chrome.google.com/webstore') === 0),
                         isInDarkList: isUrlInList(url, DARK_SITES)
                     };
-                    callback(result);
+                    callback(info);
                 } else {
                     if (DEBUG) {
                         throw new Error('Unexpected tabs count.');
                     }
-                    console.warn('Unexpected tabs count.');
+                    console.error('Unexpected tabs count.');
                     callback({ url: '', host: '', isChromePage: false, isInDarkList: false });
                 }
             });
@@ -187,42 +119,85 @@
             });
         }
 
-        protected onConfigPropChanged() {
+
+        //------------------------------------
+        //
+        //       Handle config changes
+        //
+
+        protected onAppToggle() {
             if (this.enabled) {
-                // Update style for current tab
-                chrome.tabs.query({ active: true }, (tabs) => {
-                    tabs.forEach((tab) => {
-                        this.updateCssInTab(tab);
-                    });
+                //
+                // Switch ON
+
+                // Change icon
+                chrome.browserAction.setIcon({
+                    path: {
+                        '19': ICON_PATHS.active_19,
+                        '38': ICON_PATHS.active_38
+                    }
                 });
 
-                // Update style for all tabs
-                chrome.tabs.query({ active: false }, (tabs) => {
-                    tabs.forEach((tab) => {
-                        setTimeout(() => this.updateCssInTab(tab), 0);
-                    });
-                });
-            }
-        }
-
-        protected onSiteListChanged(changedUrl: string) {
-            if (this.enabled) {
-                // Update style for current tab
+                // Subscribe to tab updates
+                this.addTabListeners();
+                
+                // Set style for active tabs
                 chrome.tabs.query({ active: true }, (tabs) => {
-                    tabs.forEach((tab) => {
-                        this.updateCssInTab(tab);
-                    });
+                    tabs.forEach(this.addStyleToTab, this);
                 });
                 
-                // Update style for other matching tabs
+                // Update style for other tabs
                 chrome.tabs.query({ active: false }, (tabs) => {
                     tabs.forEach((tab) => {
-                        if (isUrlInList(tab.url, [changedUrl])) {
-                            setTimeout(() => this.updateCssInTab(tab), 0);
-                        }
+                        setTimeout(() => this.addStyleToTab(tab), 0);
                     });
                 });
             }
+            else {
+                //
+                // Switch OFF
+
+                // Change icon
+                chrome.browserAction.setIcon({
+                    path: {
+                        '19': ICON_PATHS.inactive_19,
+                        '38': ICON_PATHS.inactive_38
+                    }
+                });
+
+                // Unsubscribe from tab updates
+                this.removeTabListeners();
+
+                // Remove style from active tabs
+                chrome.tabs.query({ active: true }, (tabs) => {
+                    tabs.forEach(this.removeStyleFromTab, this);
+                });
+
+                // Remove style from other tabs
+                chrome.tabs.query({ active: false }, (tabs) => {
+                    tabs.forEach((tab) => {
+                        setTimeout(() => this.removeStyleFromTab(tab), 0);
+                    });
+                });
+            }
+            this.saveUserSettings();
+        }
+
+        protected onConfigPropChanged() {
+            if (this.enabled) {
+                // Update style for active tabs
+                chrome.tabs.query({ active: true }, (tabs) => {
+                    tabs.forEach(this.addStyleToTab, this);
+                });
+                
+                // Update style for other tabs
+                chrome.tabs.query({ active: false }, (tabs) => {
+                    tabs.forEach((tab) => {
+                        setTimeout(() => this.addStyleToTab(tab), 0);
+                    });
+                });
+            }
+            this.saveUserSettings();
         }
 
 
@@ -232,28 +207,19 @@
         //
         //-------------------------
 
-        protected addTabListener() {
-            if (chrome.tabs.onUpdated.hasListener(this.tabUpdateListener)) {
-                console.log('Tab listener is already present.');
-            }
-            else {
+        protected addTabListeners() {
+            if (!chrome.tabs.onUpdated.hasListener(this.tabUpdateListener)) {
                 chrome.tabs.onUpdated.addListener(this.tabUpdateListener);
-                console.log('Tab listener added.');
             }
         }
 
-        protected removeTabListener() {
+        protected removeTabListeners() {
             chrome.tabs.onUpdated.removeListener(this.tabUpdateListener);
-            console.log('Tab listener removed.');
         }
 
         protected tabUpdateListener = (tabId: number, info: chrome.tabs.TabChangeInfo, tab: chrome.tabs.Tab) => {
-            console.log('Tab: ' + tab.id + ', status: ' + info.status);
-
-            if (/*info.status === 'loading'*/true) {
-                //if (info.status === 'loading' || info.status === 'complete') {
-                this.addCssToTab(tab);
-            }
+            console.log('Tab updated: ' + tab.id + ', status: ' + info.status);
+            this.addStyleToTab(tab);
         }
 
 
@@ -267,152 +233,96 @@
             // Prevent throwing errors on specific chrome adresses
             return (tab
                 && tab.url
-                && tab.url.indexOf('chrome://') !== 0
-                && tab.url.indexOf('chrome-extension://') !== 0
+                && tab.url.indexOf('chrome') !== 0
                 && tab.url.indexOf('https://chrome.google.com/webstore') !== 0
             );
         }
 
         /**
-         * Adds CSS to tab.
-         * @param tab If null than current tab will be processed.
+         * Adds style to tab.
          */
-        protected addCssToTab(tab: chrome.tabs.Tab) {
+        protected addStyleToTab(tab: chrome.tabs.Tab) {
             if (!this.canInjectScript(tab)) {
                 return;
             }
             chrome.tabs.executeScript(tab.id, {
-                code: this.getCode_addCss(tab.url),
+                code: this.getCode_addStyle(tab.url),
                 runAt: 'document_start'
             });
         }
 
         /**
-         * Removes CSS from tab.
-         * @param tab If null than current tab will be processed.
+         * Removes style from tab.
          */
-        protected removeCssFromTab(tab: chrome.tabs.Tab) {
+        protected removeStyleFromTab(tab: chrome.tabs.Tab) {
             if (!this.canInjectScript(tab)) {
                 return;
             }
             chrome.tabs.executeScript(tab.id, {
-                code: this.getCode_removeCss()
+                code: this.getCode_removeStyle()
             });
         }
 
-        /**
-         * Updates CSS in tab.
-         * @param tab If null than current tab will be processed.
-         */
-        protected updateCssInTab(tab: chrome.tabs.Tab) {
-            if (!this.canInjectScript(tab)) {
-                return;
-            }
-            chrome.tabs.executeScript(tab.id, {
-                code: this.getCode_updateCss(tab.url),
-                runAt: 'document_start'
-            });
-        }
-
-        protected getCode_addCss(url?: string) {
+        protected getCode_addStyle(url?: string) {
             var css = this.generator.createCssCode(this.config, url);
-
-            //var code = "alert('Add CSS');"
             var code = `
 ${DEBUG ? "console.log('Executing DR script (add)...');" : ""}
 //debugger;
-var addDRStyle = function() {
+var createDRStyle = function() {
     var css = '${css}';
     var style = document.createElement('style');
     style.setAttribute('id', 'dark-reader-style');
     style.type = 'text/css';
     style.appendChild(document.createTextNode(css));
-    var head = document.querySelector('head');
-    if (!head) {
-        var html = document.querySelector('html');
-        head = document.createElement('head');
-        if (html.childElementCount > 0) {
-            html.insertBefore(head, html.firstElementChild);
-        } else {
-            html.appendChild(head);
-        }
-    }
-    head.appendChild(style);
+    return style;
 };
-var head = document.querySelector('head');
-if (head) {
+if (document.head) {
+    var style = createDRStyle();
     var prevStyle = document.getElementById('dark-reader-style');
     if (!prevStyle) {
-        addDRStyle();
+        document.head.appendChild(style);
         ${DEBUG ? "console.log('Added DR style.');" : ""}
+    } else if (style.textContent.replace(/^\\s*/gm, '') !== prevStyle.textContent.replace(/^\\s*/gm, '')) {
+        prevStyle.parentElement.removeChild(prevStyle);
+        document.head.appendChild(style);
+        ${DEBUG ? "console.log('Updated DR style.');" : ""}
     }
 } else {
-    (function() {
-        addDRStyle();
-        ${DEBUG ? "console.log('Added DR style without head.');" : ""}
-        var dr_observer = new MutationObserver(function(mutations) {
-            for (var i = 0; i < mutations.length; i++) {
-                if (mutations[i].target.nodeName == 'BODY' || mutations[i].target.nodeName == 'HEAD') {
-                    dr_observer.disconnect();
-                    var prevStyle = document.getElementById('dark-reader-style');
-                    if (!prevStyle) {
-                        addDRStyle();
-                        ${DEBUG ? "console.log('Added DR style using observer.');" : ""}
-                    }
-                    break;
+    var dr_observer = new MutationObserver(function (mutations) {
+        for (var i = 0; i < mutations.length; i++) {
+            if (mutations[i].target.nodeName === 'HEAD') {
+                dr_observer.disconnect();
+                var prevStyle = document.getElementById('dark-reader-style');
+                if (!prevStyle) {
+                    var style = createDRStyle();
+                    document.head.appendChild(style);
+                    ${DEBUG ? "console.log('Added DR style using observer.');" : ""}
                 }
+                break;
             }
-        });
-        dr_observer.observe(document, { childList: true, subtree: true });
-        var fn = function() {
-            var prevStyle = document.getElementById('dark-reader-style');
-            if (!prevStyle) {
-                addDRStyle();
-                ${DEBUG ? "console.log('Added DR style on load.');" : ""}
-            }
-            document.removeEventListener('readystatechange', fn);
-        };
-        document.addEventListener('readystatechange', fn);
-    })();
+        }
+    });
+    dr_observer.observe(document, { childList: true, subtree: true });
+    var onReady = function() {
+        var prevStyle = document.getElementById('dark-reader-style');
+        if (!prevStyle) {
+            var style = createDRStyle();
+            document.head.appendChild(style);
+            ${DEBUG ? "console.log('Added DR style on load.');" : ""}
+        }
+        document.removeEventListener('readystatechange', onReady);
+    };
+    document.addEventListener('readystatechange', onReady);
 }
 `;
             return code;
         }
 
-        protected getCode_removeCss() {
-            //var code = "alert('Remove CSS');"
+        protected getCode_removeStyle() {
             var code = `
 ${DEBUG ? "console.log('Executing DR script (remove)...');" : ""}
 var style = document.getElementById('dark-reader-style');
-style && style.parentNode.removeChild(style);
-`;
-            return code;
-        }
-
-        protected getCode_updateCss(url?: string) {
-            var css = this.generator.createCssCode(this.config, url);
-
-            //var code = "alert('Update CSS');"
-            var code = `
-${DEBUG ? "console.log('Executing DR script (update)...');" : ""}
-var addDRStyle = function() {
-    var css = '${css}';
-    var style = document.createElement('style');
-    style.setAttribute('id', 'dark-reader-style');
-    style.type = 'text/css';
-    style.appendChild(document.createTextNode(css));
-    var head = document.querySelector('head');
-    head.appendChild(style);
-}
-var head = document.querySelector('head');
-if (head) {
-    var prevStyle = document.getElementById('dark-reader-style');
-    if (prevStyle) {
-        prevStyle.parentElement.removeChild(prevStyle);
-    }
-    addDRStyle();
-    ${DEBUG ? "console.log('Updated DR style.');" : ""}
-}
+style && style.parentElement.removeChild(style);
 `;
             return code;
         }
@@ -433,48 +343,20 @@ if (head) {
                 enabled: true,
                 config: defaultFilterConfig
             };
-            // Read legacy config
-            chrome.storage.sync.get({
-                config: <ObsoleteFilterConfig>{
-                    fontfamily: null,
-                    ignorelist: null,
-                    textstroke: null,
-                    usefont: null
+            chrome.storage.sync.get(defaultStore, (store: AppConfigStore) => {
+                if (!store.config) {
+                    store.config = defaultFilterConfig;
                 }
-            }, (store: { config: ObsoleteFilterConfig }) => {
-                if (store.config) {
-                    if (store.config.fontfamily !== null) {
-                        defaultFilterConfig.fontFamily = store.config.fontfamily;
+                if (!Array.isArray(store.config.siteList)) {
+                    var arr = [];
+                    for (var key in store.config.siteList) {
+                        arr[key] = store.config.siteList[key];
                     }
-                    if (store.config.ignorelist !== null) {
-                        defaultFilterConfig.siteList = store.config.ignorelist;
-                    }
-                    if (store.config.textstroke !== null) {
-                        defaultFilterConfig.textStroke = store.config.textstroke;
-                    }
-                    if (store.config.usefont !== null) {
-                        defaultFilterConfig.useFont = store.config.usefont;
-                    }
+                    store.config.siteList = arr;
                 }
-                console.log('loaded legacy config:');
-                console.log(store);
-
-                chrome.storage.sync.get(defaultStore, (store: AppConfigStore) => {
-                    if (!store.config) {
-                        store.config = defaultFilterConfig;
-                    }
-                    if (!Array.isArray(store.config.siteList)) {
-                        var arr = [];
-                        for (var key in store.config.siteList) {
-                            arr[key] = store.config.siteList[key];
-                        }
-                        store.config.siteList = arr;
-                    }
-                    this.config = <ObservableFilterConfig>xp.observable(store.config);
-                    this.enabled = store.enabled;
-                    console.log('loaded:');
-                    console.log(store);
-                });
+                this.config = <ObservableFilterConfig>xp.observable(store.config);
+                this.enabled = store.enabled;
+                console.log('loaded', store);
             });
         }
 
@@ -499,10 +381,10 @@ if (head) {
         }
         private savedTimeout: number;
 
-        //---------------------------
-        //   Getting the font list
-        //---------------------------
-
+        /**
+         * Returns the list of fonts
+         * installed in system.
+         */
         protected getFontList(onReturned: (fonts: string[]) => void) {
             chrome.fontSettings.getFontList((res) => {
                 // id or name?
@@ -511,6 +393,9 @@ if (head) {
             });
         }
     }
+    
+    //
+    // ---------- Constants --------------------
 
     var ICON_PATHS = {
         active_19: '../img/dr_active_19.png',
@@ -520,6 +405,10 @@ if (head) {
     };
 
     var SAVE_CONFIG_TIMEOUT = 1000;
+    
+    
+    //
+    // --------- Interfaces --------------
 
     interface AppConfigStore {
         enabled: boolean;

@@ -304,15 +304,25 @@ if (document.head) {
     });
     dr_observer.observe(document, { childList: true, subtree: true });
     var onReady = function() {
+        if (document.readyState !== 'complete') { 
+            return;
+        }
+        if (!document.head) {
+            var head = document.createElement('head');
+            document.documentElement.insertBefore(head, document.documentElement.firstElementChild);
+        }
         var prevStyle = document.getElementById('dark-reader-style');
         if (!prevStyle) {
             var style = createDRStyle();
             document.head.appendChild(style);
-            ${DEBUG ? "console.log('Added DR style on load.');" : ""}
+            ${DEBUG ? "console.log('Added DR style on document ready.');" : ""}
         }
         document.removeEventListener('readystatechange', onReady);
     };
     document.addEventListener('readystatechange', onReady);
+    if (document.readyState === 'complete') { 
+        onReady();
+    }
 }
 `;
             return code;

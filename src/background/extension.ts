@@ -288,10 +288,11 @@ if (document.head) {
         ${DEBUG ? "console.log('Updated DR style.');" : ""}
     }
 } else {
-    var dr_observer = new MutationObserver(function (mutations) {
+    var drObserver = new MutationObserver(function (mutations) {
         for (var i = 0; i < mutations.length; i++) {
             if (mutations[i].target.nodeName === 'HEAD') {
-                dr_observer.disconnect();
+                drObserver.disconnect();
+                document.removeEventListener('readystatechange', onReady);
                 var prevStyle = document.getElementById('dark-reader-style');
                 if (!prevStyle) {
                     var style = createDRStyle();
@@ -302,11 +303,13 @@ if (document.head) {
             }
         }
     });
-    dr_observer.observe(document, { childList: true, subtree: true });
+    drObserver.observe(document, { childList: true, subtree: true });
     var onReady = function() {
         if (document.readyState !== 'complete') { 
             return;
         }
+        drObserver.disconnect();
+        document.removeEventListener('readystatechange', onReady);
         if (!document.head) {
             var head = document.createElement('head');
             document.documentElement.insertBefore(head, document.documentElement.firstElementChild);
@@ -317,7 +320,6 @@ if (document.head) {
             document.head.appendChild(style);
             ${DEBUG ? "console.log('Added DR style on document ready.');" : ""}
         }
-        document.removeEventListener('readystatechange', onReady);
     };
     document.addEventListener('readystatechange', onReady);
     if (document.readyState === 'complete') { 

@@ -6,6 +6,11 @@
             "selectors": "iframe, video, embed, object, #site-navigation, footer, header, .featured-news-wrapper, *:not(.lang):not(#foot-logo)>img"
         },
         {
+            "url": "facebook.com",
+            "selectors": "{common}, ._3ixn, ._2teu",
+            "rules": "._4d3w .stageWrapper { background: white; }"
+        },
+        {
             "url": "gigaom.com",
             "selectors": "{common}, .bg"
         },

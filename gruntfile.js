@@ -75,7 +75,7 @@ module.exports = function (grunt) {
             
         create.task('debug-watch')
             .sub('concurrent', {
-                tasks: ['debug-watch-js', 'debug-watch-css'],
+                tasks: ['debug-watch-js', 'debug-watch-css', 'debug-watch-other'],
                 options: {
                     logConcurrentOutput: true
                 },
@@ -99,6 +99,12 @@ module.exports = function (grunt) {
             .sub('watch', {
                 files: ['src/**/*.less'],
                 tasks: ['debug-css', 'ext-reload']
+            });
+            
+        create.task('debug-watch-other')
+            .sub('watch', {
+                files: ['src/**/*.{json,html,png,svg,ttf}'],
+                tasks: ['ext-reload']
             });
 
         // --- Reload chrome extensions ---

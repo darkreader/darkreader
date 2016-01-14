@@ -109,7 +109,7 @@
                 parts.push('html { min-height: 100% !important; }');
 
                 // Full screen fix
-                parts.push('*:-webkit-full-screen { -webkit-filter: none !important; }');
+                parts.push('*:-webkit-full-screen, *:-webkit-full-screen * { -webkit-filter: none !important; }');
 
                 // --- WARNING! HACK! ---
                 if (this.issue501582) {

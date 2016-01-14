@@ -7,8 +7,8 @@
         },
         {
             "url": "facebook.com",
-            "selectors": "{common}, ._3ixn, ._2teu",
-            "rules": "._4d3w .stageWrapper { background: white; }"
+            "selectors": "{common}, ._3ixn, ._2teu, .uiStreamStory",
+            "rules": "._4d3w .stageWrapper { background: white; } .uiStreamStory video { -webkit-filter: none !important; }"
         },
         {
             "url": "gigaom.com",
@@ -60,8 +60,8 @@
         },
         {
             "url": "twitch.tv",
-            "selectors": "{common}, #site_footer, #carousel_background:after, #left_col",
-            "rules": "html, .nav, #carousel, .dark_wrapper ul { background-color: white !important; } .dark_wrapper * { color:black !important; }"
+            "selectors": "{common}, #site_footer, #carousel_background:after, #left_col, #player",
+            "rules": "html, .nav, #carousel, .dark_wrapper ul { background-color: white !important; } .dark_wrapper * { color:black !important; } #player * { -webkit-filter: none !important; }"
         },
         {
             "url": "ubi.com",

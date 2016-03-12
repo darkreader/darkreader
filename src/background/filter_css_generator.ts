@@ -101,10 +101,14 @@
                         parts.push(this.createContraryRule(config, fix.selectors));
                     }
 
-                if (config.useFont || config.textStroke > 0)
+                if (config.useFont || config.textStroke > 0) {
                     // Add text rule
-                    parts.push('* ' + this.createTextDeclaration(config));
-                    
+                    parts.push(`* ${this.createTextDeclaration(config)}`);
+                }
+
+                // Fix bad font hinting after inversion                    
+                parts.push('html { text-shadow: 0 0 0 !important; }');
+
                 // Fix <html> height
                 parts.push('html { min-height: 100% !important; }');
 
@@ -181,16 +185,16 @@
                 result += 'invert(100%) hue-rotate(180deg) ';
 
             result += config.brightness == 100 ? ''
-                : 'brightness(' + config.brightness + '%) ';
+                : `brightness(${config.brightness}%) `;
 
             result += config.contrast == 100 ? ''
-                : 'contrast(' + config.contrast + '%) ';
+                : `contrast(${config.contrast}%) `;
 
             result += config.grayscale == 0 ? ''
-                : 'grayscale(' + config.grayscale + '%) ';
+                : `grayscale(${config.grayscale}%) `;
 
             result += config.sepia == 0 ? ''
-                : 'sepia(' + config.sepia + '%) ';
+                : `sepia(${config.sepia}%) `;
 
             result += '!important; }';
 
@@ -202,7 +206,7 @@
             var result = selectorsToFix + ' { -webkit-filter: ';
 
             // Less/more brightness for inverted items
-            result += 'brightness(' + (config.brightness - 20) + '%) ';
+            result += `brightness(${(config.brightness - 20)}%) `;
 
             result += 'invert(100%) hue-rotate(180deg) ';
 
@@ -225,9 +229,7 @@
 
             if (config.textStroke > 0) {
                 result += config.textStroke == 0 ? ''
-                    : '-webkit-text-stroke: '
-                    + config.textStroke + 'px '
-                    + '!important; ';
+                    : `-webkit-text-stroke: ${config.textStroke}px !important;`;
             }
 
             result += '}';

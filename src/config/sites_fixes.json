@@ -2,6 +2,11 @@
     "commonSelectors": "img, iframe, video, *:not(object):not(body)>embed, object, *[style*=\"background:url\"]:empty, *[style*=\"background-image:url\"]:empty, *[style*=\"background: url\"]:empty, *[style*=\"background-image: url\"]:empty",
     "specials": [
         {
+          "url": "airbnb.com",
+          "selectors": "{common}, .background-cover, #footer, #photo-modal, *[style*=\"background:url\"]:empty, *[style*=\"background-image:url\"], *[style*=\"background-image: url\"]",
+          "rules": "#footer *, #photo-modal * { -webkit-filter: none !important; }"
+        },
+        {
             "url": "basho.com",
             "selectors": "iframe, video, embed, object, #site-navigation, footer, header, .featured-news-wrapper, *:not(.lang):not(#foot-logo)>img"
         },
@@ -16,11 +21,11 @@
         },
         {
             "url": "google.*",
-            "selectors": "img:not(.irc_mi):not(.irc_rii):not(.amI):not(.amJ), iframe, video, embed, .gbii, .gbip, .azp, .aLF-aPX-KP, .irc_bg, .RY3tic"
+            "selectors": "img:not(.irc_mi):not(.irc_rii):not(.amI):not(.amJ), iframe, video, embed, .gbii, .gbip, .azp, .aLF-aPX-KP, .irc_bg, .RY3tic, canvas.circle"
         },
         {
             "url": "google.*.*",
-            "selectors": "img:not(.irc_mi):not(.irc_rii):not(.amI):not(.amJ), iframe, video, embed, .gbii, .gbip, .azp, .aLF-aPX-KP, .irc_bg, .RY3tic"
+            "selectors": "img:not(.irc_mi):not(.irc_rii):not(.amI):not(.amJ), iframe, video, embed, .gbii, .gbip, .azp, .aLF-aPX-KP, .irc_bg, .RY3tic, canvas.circle"
         },
         {
             "url": "granttree.co.uk",

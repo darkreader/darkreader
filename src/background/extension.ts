@@ -140,12 +140,12 @@
 
                 // Subscribe to tab updates
                 this.addTabListeners();
-                
+
                 // Set style for active tabs
                 chrome.tabs.query({ active: true }, (tabs) => {
                     tabs.forEach(this.addStyleToTab, this);
                 });
-                
+
                 // Update style for other tabs
                 chrome.tabs.query({ active: false }, (tabs) => {
                     tabs.forEach((tab) => {
@@ -189,7 +189,7 @@
                 chrome.tabs.query({ active: true }, (tabs) => {
                     tabs.forEach(this.addStyleToTab, this);
                 });
-                
+
                 // Update style for other tabs
                 chrome.tabs.query({ active: false }, (tabs) => {
                     tabs.forEach((tab) => {
@@ -211,15 +211,27 @@
             if (!chrome.tabs.onUpdated.hasListener(this.tabUpdateListener)) {
                 chrome.tabs.onUpdated.addListener(this.tabUpdateListener);
             }
+            // Replace fires instead of update when page loaded from cache
+            // https://bugs.chromium.org/p/chromium/issues/detail?id=109557
+            // https://bugs.chromium.org/p/chromium/issues/detail?id=116379
+            if (!chrome.tabs.onReplaced.hasListener(this.tabReplaceListener)) {
+                chrome.tabs.onReplaced.addListener(this.tabReplaceListener);
+            }
         }
 
         protected removeTabListeners() {
             chrome.tabs.onUpdated.removeListener(this.tabUpdateListener);
+            chrome.tabs.onReplaced.removeListener(this.tabReplaceListener);
         }
 
         protected tabUpdateListener = (tabId: number, info: chrome.tabs.TabChangeInfo, tab: chrome.tabs.Tab) => {
-            console.log('Tab updated: ' + tab.id + ', status: ' + info.status);
+            console.log(`Tab updated: ${tab.id}, status: ${info.status}`);
             this.addStyleToTab(tab);
+        }
+
+        protected tabReplaceListener = (addedTabId: number, replacedTabId: number) => {
+            console.log(`Tab ${replacedTabId} replaced with ${addedTabId}`);
+            chrome.tabs.get(addedTabId, (tab) => this.addStyleToTab(tab));
         }
 
 
@@ -228,7 +240,7 @@
         // Add/remove css to tab
         //
         //----------------------
-        
+
         protected canInjectScript(tab: chrome.tabs.Tab) {
             // Prevent throwing errors on specific chrome adresses
             return (tab
@@ -405,7 +417,7 @@ style && style.parentElement.removeChild(style);
             });
         }
     }
-    
+
     //
     // ---------- Constants --------------------
 
@@ -417,8 +429,8 @@ style && style.parentElement.removeChild(style);
     };
 
     var SAVE_CONFIG_TIMEOUT = 1000;
-    
-    
+
+
     //
     // --------- Interfaces --------------
 

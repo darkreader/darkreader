@@ -73,7 +73,7 @@
         {
             "url": "twitch.tv",
             "selectors": "{common}, #site_footer, #carousel_background:after, #left_col, #player, .badge",
-            "rules": "#carousel, .chat-container, .conversations-list-header, .dark_wrapper ul, html, .nav, .js-conversations-list, .js-conversations-list-bottom-bar { background-color: white !important; } .chat_text_input, .colon, .dark_wrapper *, .message, .room-title { color:black !important;} .chat_text_input { border: 1px solid black !important;} #player * { -webkit-filter: none !important;}"
+            "rules": "#carousel, .chat-container, .conversations-list-header, .dark_wrapper ul, html, .nav, .js-conversations-list, .js-conversations-list-bottom-bar, .rightcol-content > .top { background-color: white !important; } .chat_text_input, .colon, .dark_wrapper *, .message, .room-title, .selected > a { color:black !important;} .chat_text_input { border: 1px solid black !important;} #player * { -webkit-filter: none !important;}"
         },
         {
             "url": "ubi.com",

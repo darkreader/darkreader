@@ -58,6 +58,11 @@
             "rules": ".ComposeContent { background-color: white; }"
         },
         {
+            "url": "pandora.com",
+            "selectors": "#body, .contentbox, #detailContainer, #mainContent, .slidesBackground, .slidesForeground",
+            "rules": ".skinContainer, .slidesBackground, .slidesForeground, #trackDetail, .track_detail_close { background-color: black !important; } .fxCol-cont-1, .jspContainer, #trackInfoButtons { background-color: white !important; } #brandingBar, .contentnav, .top { background-color: #3d4043 !important;} #playerBar { background-color: #0d0d0d !important;}"
+        },
+        {
             "url": "shop.ubi.com",
             "selectors": "{common} #topNavbar, #UplayHeader"
         },
@@ -67,8 +72,8 @@
         },
         {
             "url": "twitch.tv",
-            "selectors": "{common}, #site_footer, #carousel_background:after, #left_col, #player, .theatre > #right_col > .rightcol-content, .theatre > #right_col > .rightcol-content > .top, .theatre > * > * > * > * > .js-conversations-list, .theatre > * > * > * > * > .js-conversations-list-bottom-bar",
-            "rules": "html, .nav, #carousel, .dark_wrapper ul { background-color: white !important; } .dark_wrapper * { color:black !important; } #player * { -webkit-filter: none !important; } .theatre > #right_col > .rightcol-content > .top { background-color: white !important; } .theatre > #right_col > .rightcol-content > .top > ul > li > a { color: black !important;} .theatre > * > * > * > * > * > * > * > * > * > * > * > * > * > img { -webkit-filter: none !important; filter: none !important;}"
+            "selectors": "{common}, #site_footer, #carousel_background:after, #left_col, #player, .badge",
+            "rules": "#carousel, .chat-container, .conversations-list-header, .dark_wrapper ul, html, .nav, .js-conversations-list, .js-conversations-list-bottom-bar { background-color: white !important; } .chat_text_input, .colon, .dark_wrapper *, .message, .room-title { color:black !important;} .chat_text_input { border: 1px solid black !important;} #player * { -webkit-filter: none !important;}"
         },
         {
             "url": "ubi.com",
@@ -91,11 +96,6 @@
         {
             "url": "youtube.com",
             "selectors": "iframe, .html5-video-player, .has-custom-banner, #theater-background, *:not(.html5-video-player):not(.channel-header-profile-image-container):not(.html5-storyboard-filmstrip):not(.html5-storyboard-framepreview):not(.html5-storyboard-lens) > img"
-        },
-        {
-            "url": "pandora.com",
-            "selectors": "#body, .slidesBackground, .slidesForeground, #detailContainer, #mainContent, .contentbox",
-            "rules": "#trackDetail, .track_detail_close, .slidesBackground, .slidesForeground, .skinContainer { background-color: black !important; } .contentnav, .top, #brandingBar { background-color: #3d4043 !important;} #playerBar { background-color: #0d0d0d !important;}"
         }
     ]
 }

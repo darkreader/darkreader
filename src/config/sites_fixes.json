@@ -21,12 +21,12 @@
         },
         {
             "url": "google.*",
-            "selectors": "img:not(.irc_mi):not(.irc_rii):not(.irc_mut):not(.amI):not(.amJ):not(.adk):not(.adj):not([src*="ic_"]):not([src*="black"]), iframe, video, embed, .gbii, .gbip, .azp, .aLF-aPX-KP, .irc_bg, .RY3tic, canvas.circle",
+            "selectors": "img:not(.irc_mi):not(.irc_rii):not(.irc_mut):not(.amI):not(.amJ):not(.adk):not(.adj):not([src*=\"ic_\"]):not([src*=\"black\"]), iframe, video, embed, .gbii, .gbip, .azp, .aLF-aPX-KP, .irc_bg, .RY3tic, canvas.circle",
             "rules": ".pI { background: rgba(255,255,255,.7) !important; } .eB { 0 4px 32px rgba(255,255,255,.4) !important; }"
         },
         {
             "url": "google.*.*",
-            "selectors": "img:not(.irc_mi):not(.irc_rii):not(.irc_mut):not(.amI):not(.amJ):not(.adk):not(.adj):not([src*="ic_"]):not([src*="black"]), iframe, video, embed, .gbii, .gbip, .azp, .aLF-aPX-KP, .irc_bg, .RY3tic, canvas.circle",
+            "selectors": "img:not(.irc_mi):not(.irc_rii):not(.irc_mut):not(.amI):not(.amJ):not(.adk):not(.adj):not([src*=\"ic_\"]):not([src*=\"black\"]), iframe, video, embed, .gbii, .gbip, .azp, .aLF-aPX-KP, .irc_bg, .RY3tic, canvas.circle",
             "rules": ".pI { background: rgba(255,255,255,.7) !important; } .eB { 0 4px 32px rgba(255,255,255,.4) !important; }"
         },
         {

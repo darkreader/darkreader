@@ -59,10 +59,13 @@
 // |===line===|
 // |..status..|
 .controlContainer() {
+    overflow: visible !important;
+    
     .line {
+        align-items: stretch;
         display: flex;
         flex-flow: row nowrap;
-        align-items: stretch;
+        overflow: visible;
 
         > *:not(:first-child) {
             margin-left: @size-indent-small;
@@ -70,15 +73,20 @@
     }
 
     .status {
-        text-align: center;
         color: @color-description;
         font-size: @size-control-description;
         line-height: normal;
         min-height: initial;
-        white-space: pre-wrap;
+        overflow: hidden;
+        text-align: center;
+        white-space: nowrap;
         
         &.disabled {
             opacity: 0.5;
         }
+    }
+    
+    .HBox {
+        overflow: visible;
     }
 }

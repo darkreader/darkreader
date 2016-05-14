@@ -141,7 +141,7 @@
                     new Tab({ tabName: 'Font' }, [
                         // Select font
                         new xp.VBox({ style: 'controlContainer' }, [
-                            new xp.HBox({ style: 'line' }, [
+                            new xp.HBox({ style: 'line fontSelectContainer' }, [
                                 new xp.CheckBox({
                                     checked: '{config.useFont}'
                                 }),

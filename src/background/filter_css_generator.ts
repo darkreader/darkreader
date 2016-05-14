@@ -106,8 +106,9 @@
                     parts.push(`* ${this.createTextDeclaration(config)}`);
                 }
 
-                // Fix bad font hinting after inversion                    
+                // Fix bad font hinting after inversion
                 parts.push('html { text-shadow: 0 0 0 !important; }');
+                parts.push('em, strong, b { -webkit-text-stroke: 0.5px; }');
 
                 // Fix <html> height
                 parts.push('html { min-height: 100% !important; }');

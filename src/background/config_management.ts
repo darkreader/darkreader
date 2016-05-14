@@ -36,18 +36,18 @@
 
     //
     // ----- Load configs ------
-    
+
     export function loadConfigs(done?: () => void) {
         if (!DEBUG_LOCAL_CONFIGS) {
-            
+
             //
             // Load remote and local as fallback
-            
+
             Promise.all<any>([
-                
+
                 //
                 // Load dark sites
-                
+
                 readJson<string[]>({
                     url: CONFIG_URLs.darkSites.remote,
                     timeout: REMOTE_TIMEOUT_MS
@@ -62,7 +62,7 @@
 
                 //
                 // Load sites fixes
-                
+
                 readJson<SitesFixes>({
                     url: CONFIG_URLs.sitesFixes.remote,
                     timeout: REMOTE_TIMEOUT_MS
@@ -74,10 +74,10 @@
                         url: CONFIG_URLs.sitesFixes.local
                     });
                 }).then((res) => SITES_FIXES = handleSitesFixes(res)),
-                
+
                 //
                 // Load default filter config
-                
+
                 readJson<FilterConfig>({
                     url: CONFIG_URLs.defaultFilterConfig.local
                 }).then((res) => DEFAULT_FILTER_CONFIG = handleFilterConfig(res))
@@ -96,7 +96,7 @@
                 readJson<SitesFixes>({
                     url: CONFIG_URLs.sitesFixes.local
                 }).then((res) => SITES_FIXES = handleSitesFixes(res)),
-                
+
                 // Load default filter config
                 readJson<FilterConfig>({
                     url: CONFIG_URLs.defaultFilterConfig.local
@@ -105,9 +105,9 @@
             ]).then(() => done && done(),
                 (err) => console.error('Fatality', err));
         }
-        
+
         // --------- Data handling ----------
-        
+
         function onInvalidData(desc) {
             if (DEBUG) throw new Error(desc);
             console.error('Invalid data: ' + desc);
@@ -164,7 +164,7 @@
                 }
             }
             // Sort like templates?
-            
+
             // Replace "{common}" with common selectors
             fixes.specials.forEach((s) => {
                 s.selectors = s.selectors.replace(
@@ -283,7 +283,7 @@
 
     //
     // ---------- URL template matching ----------------
-    
+
     /**
      * Determines whether URL has a match in URL template list.
      * @param url Site URL.
@@ -310,43 +310,65 @@
     }
 
     function createUrlRegex(urlTemplate: string): RegExp {
-        var result = '^(.*?\\:\\/{2,3})?[^\/]*?\\.?';
+        urlTemplate = urlTemplate.trim();
+        var exactBeginning = (urlTemplate[0] === '^');
+        var exactEnding = (urlTemplate[urlTemplate.length - 1] === '$');
 
-        // Remove protocol?
-        urlTemplate = urlTemplate.replace(/^.*?\/{2,3}/, '');
-
-        // Remove last slash
-        urlTemplate = urlTemplate.replace(/\/$/, '');
+        urlTemplate = (urlTemplate
+            .replace(/^\^/, '') // Remove ^ at start
+            .replace(/\$$/, '') // Remove $ at end
+            .replace(/^.*?\/{2,3}/, '') // Remove scheme
+            .replace(/\?.*$/, '') // Remove query
+            .replace(/\/$/, '') // Remove last slash
+        );
 
         var slashIndex: number;
-        var address: string;
+        var beforeSlash: string;
         if ((slashIndex = urlTemplate.indexOf('/')) >= 0) {
-            address = urlTemplate.substring(0, slashIndex); // google.*
-            var path = urlTemplate.substring(slashIndex); // /login/abc
+            beforeSlash = urlTemplate.substring(0, slashIndex); // google.*
+            var afterSlash = urlTemplate.replace('$', '').substring(slashIndex); // /login/abc
         }
         else {
-            address = urlTemplate;
+            beforeSlash = urlTemplate.replace('$', '');
         }
 
-        // Address group
-        var addressParts = address.split('.');
+        //
+        // SCHEME and SUBDOMAINS
+
+        var result = (exactBeginning ?
+            '^(.*?\\:\\/{2,3})?' // Scheme
+            : '^(.*?\\:\\/{2,3})?([^\/]*?\\.)?' // Scheme and subdomains
+        );
+
+        //
+        // HOST and PORT
+
+        var hostParts = beforeSlash.split('.');
         result += '(';
-        for (var i = 0; i < addressParts.length; i++) {
-            if (addressParts[i] === '*') {
-                addressParts[i] = '[^\\.]+?';
+        for (var i = 0; i < hostParts.length; i++) {
+            if (hostParts[i] === '*') {
+                hostParts[i] = '[^\\.\\/]+?';
             }
         }
-        result += addressParts.join('\\.');
+        result += hostParts.join('\\.');
         result += ')';
 
-        if (path) {
-            // Path group
+        //
+        // PATH and QUERY
+
+        if (afterSlash) {
             result += '(';
-            result += path.replace('/', "\\/");
+            result += afterSlash.replace('/', '\\/');
             result += ')';
         }
 
-        result += '(\\/.*)?$';
+        result += (exactEnding ?
+            '(\\/?(\\?[^\/]*?)?)$' // All following queries
+            : '(\\/?.*?)$' // All following paths and queries
+        );
+
+        //
+        // Result
 
         var regex = new RegExp(result, 'i');
         return regex;
@@ -362,8 +384,8 @@
             b = { url: <string>b };
         var slashIndexA = a.url.indexOf('/');
         var slashIndexB = b.url.indexOf('/');
-        var addressA = a.url.substring(0, slashIndexA);
-        var addressB = b.url.substring(0, slashIndexB);
+        var addressA = a.url.replace('^', '').substring(0, slashIndexA);
+        var addressB = b.url.replace('^', '').substring(0, slashIndexB);
         var reverseA = addressA.split('.').reverse().join('.').toLowerCase(); // com.google
         var reverseB = addressB.split('.').reverse().join('.').toLowerCase(); // *.google
 

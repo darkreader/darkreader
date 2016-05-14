@@ -24,6 +24,6 @@
             req.onerror = () => setTimeout(listen, 2000);
             req.send();
         };
-        listen();
+        setTimeout(listen, 2000);
     }
 }

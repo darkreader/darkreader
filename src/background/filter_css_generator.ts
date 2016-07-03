@@ -11,7 +11,7 @@
         textStroke: number;
         siteList: string[];
         invertListed: boolean;
-        
+
         // OBSOLETE
         //usefont: boolean;
         //fontfamily: string;
@@ -84,7 +84,7 @@
 
                 // Search for custom fix
                 var fix = getFixesFor(url);
-                
+
                 //
                 // Combine CSS
 
@@ -108,10 +108,9 @@
 
                 // Fix bad font hinting after inversion
                 parts.push('html { text-shadow: 0 0 0 !important; }');
-                parts.push('em, strong, b { -webkit-text-stroke: 0.5px; }');
 
-                // Fix <html> height
-                parts.push('html { min-height: 100% !important; }');
+                // TODO: text-stroke is blurry, but need some way to add more contrast to bold text.
+                // parts.push('em, strong, b { -webkit-text-stroke: 0.5px; }');
 
                 // Full screen fix
                 parts.push('*:-webkit-full-screen, *:-webkit-full-screen * { -webkit-filter: none !important; }');
@@ -120,20 +119,20 @@
                 if (this.issue501582) {
                     // NOTE: Chrome 45 temp <html> background fix
                     // https://code.google.com/p/chromium/issues/detail?id=501582
-                    
+
                     //
                     // Interpolate background color (fastest, no script required).
                     // http://www.w3.org/TR/filter-effects/#brightnessEquivalent
-                    
+
                     // Brightness
                     var value = config.mode === FilterMode.dark ? 0 : 1;
                     value = value * (config.brightness) / 100;
-                    
+
                     // Contrast
                     value = value * (config.contrast) / 100 - (0.5 * config.contrast / 100) + 0.5
-                    
+
                     // Grayscale?
-                    
+
                     // Sepia
                     var rgbaMatrix = [[value], [value], [value], [1]];
                     var sepia = config.sepia / 100;
@@ -145,7 +144,7 @@
                     ];
                     var resultMatrix = multiplyMatrices(sepiaMatrix, rgbaMatrix);
                     var r = resultMatrix[0][0], g = resultMatrix[1][0], b = resultMatrix[2][0];
-                    
+
                     // Result color
                     if (r > 1) r = 1; if (r < 0) r = 0;
                     if (g > 1) g = 1; if (g < 0) g = 0;
@@ -238,7 +237,7 @@
             return result;
         }
     }
-    
+
     // http://stackoverflow.com/a/27205510/4137472
     function multiplyMatrices(m1: number[][], m2: number[][]) {
         var result: number[][] = [];

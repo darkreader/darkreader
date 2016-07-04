@@ -63,6 +63,11 @@
             "rules": ".skinContainer, .slidesBackground, .slidesForeground, #trackDetail, .track_detail_close { background-color: black !important; } .fxCol-cont-1, .jspContainer, #trackInfoButtons { background-color: white !important; } #brandingBar, .contentnav, .top { background-color: #3d4043 !important;} #playerBar { background-color: #0d0d0d !important;}"
         },
         {
+            "url": "producthunt.com",
+            "selectors": "{common} .backgroundImage_1hK9M",
+            "rules": ".backgroundImage_1hK9M img, .backgroundImage_1hK9M .backgroundImage_1hK9M { -webkit-filter: none !important; }"
+        },
+        {
             "url": "shop.ubi.com",
             "selectors": "{common} #topNavbar, #UplayHeader"
         },

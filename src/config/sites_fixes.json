@@ -64,7 +64,7 @@
         },
         {
             "url": "producthunt.com",
-            "selectors": "{common}, .backgroundImage_1hK9M",
+            "selectors": "{common}, .backgroundImage_1hK9M, .v-image",
             "rules": ".backgroundImage_1hK9M img, .backgroundImage_1hK9M .backgroundImage_1hK9M { -webkit-filter: none !important; }"
         },
         {

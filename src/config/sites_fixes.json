@@ -69,7 +69,7 @@
         },
         {
             "url": "shop.ubi.com",
-            "selectors": "{common} #topNavbar, #UplayHeader"
+            "selectors": "{common}, #topNavbar, #UplayHeader"
         },
         {
             "url": "spotify.com",

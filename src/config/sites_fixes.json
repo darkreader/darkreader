@@ -65,7 +65,7 @@
         {
             "url": "producthunt.com",
             "selectors": "{common}, .backgroundImage_1hK9M, .v-image",
-            "rules": ".backgroundImage_1hK9M img, .backgroundImage_1hK9M .backgroundImage_1hK9M { -webkit-filter: none !important; }"
+            "rules": ".backgroundImage_1hK9M img, .backgroundImage_1hK9M .backgroundImage_1hK9M, .v-image .post-detail--body--gallery-fullscreen--image { -webkit-filter: none !important; } .post-detail--body--gallery-fullscreen--image { background-color: black; }"
         },
         {
             "url": "shop.ubi.com",

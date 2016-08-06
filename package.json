@@ -1,6 +1,6 @@
 {
   "name": "DarkReader",
-  "version": "3.4.2",
+  "version": "3.4.3",
   "description": "Keep your eyes, Dark Reader",
   "main": "gruntfile.js",
   "scripts": {

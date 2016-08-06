@@ -180,8 +180,8 @@
 
             // Replace "{common}" with common selectors
             fixes.specials.forEach((s) => {
-                s.selectors.forEach((s) => {
-                    s.replace(
+                s.selectors = s.selectors.map((s) => {
+                    return s.replace(
                         /\{common\}/ig,
                         joinLines(fixes.commonSelectors, ',')
                     );
@@ -431,7 +431,7 @@
         if (typeof lines === 'string') {
             return lines;
         }
-        return (<string[]>lines).join(separator + '\n');
+        return (<string[]>lines).join(separator + '\\n');
     }
 
     function isStringOrArray(item) {

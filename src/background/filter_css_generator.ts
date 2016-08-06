@@ -213,9 +213,6 @@
         protected createContraryRule(config: FilterConfig, selectorsToFix: string): string {
             var result = selectorsToFix + ' {\\n  -webkit-filter: ';
 
-            // Less/more brightness for inverted items
-            result += `brightness(${(config.brightness - 20)}%) `;
-
             result += 'invert(100%) hue-rotate(180deg) ';
 
             result += '!important;\\n}';

@@ -93,27 +93,32 @@
                 parts.push('@media screen {');
 
                 // Add leading rule.
+                parts.push('\\n/* Leading rule */');
                 parts.push(this.createLeadingRule(config));
 
                 if (config.mode === FilterMode.dark)
                     // Add contrary rule
                     if (fix.selectors) {
-                        parts.push(this.createContraryRule(config, fix.selectors));
+                        parts.push('\\n/* Contrary rule */');
+                        parts.push(this.createContraryRule(config, fix.selectors.join(',\\n')));
                     }
 
                 if (config.useFont || config.textStroke > 0) {
                     // Add text rule
+                    parts.push('\\n/* Font */');
                     parts.push(`* ${this.createTextDeclaration(config)}`);
                 }
 
                 // Fix bad font hinting after inversion
-                parts.push('html { text-shadow: 0 0 0 !important; }');
+                parts.push('\\n/* Text contrast */');
+                parts.push('html {\\n  text-shadow: 0 0 0 !important;\\n}');
 
                 // TODO: text-stroke is blurry, but need some way to add more contrast to bold text.
                 // parts.push('em, strong, b { -webkit-text-stroke: 0.5px; }');
 
                 // Full screen fix
-                parts.push('*:-webkit-full-screen, *:-webkit-full-screen * { -webkit-filter: none !important; }');
+                parts.push('\\n/* Full screen */');
+                parts.push('*:-webkit-full-screen, *:-webkit-full-screen * {\\n  -webkit-filter: none !important;\\n}');
 
                 // --- WARNING! HACK! ---
                 if (this.issue501582) {
@@ -155,13 +160,16 @@
                         b: Math.round(255 * b),
                         toString() { return `rgb(${this.r},${this.g},${this.b})`; }
                     };
-                    parts.push(`html { background: ${color} !important; }`);
+                    parts.push('\\n/* Page background */');
+                    parts.push(`html {\\n  background: ${color} !important;\\n}`);
                 }
 
                 if (fix.rules) {
-                    parts.push(fix.rules);
+                    parts.push('\\n/* Custom rules */');
+                    parts.push(fix.rules.join('\\n'));
                 }
 
+                parts.push('');
                 parts.push('}');
 
                 // TODO: Formatting for readability.
@@ -179,7 +187,7 @@
         //-----------------
 
         protected createLeadingRule(config: FilterConfig): string {
-            var result = 'html { -webkit-filter: ';
+            var result = 'html {\\n  -webkit-filter: ';
 
             if (config.mode === FilterMode.dark)
                 result += 'invert(100%) hue-rotate(180deg) ';
@@ -196,28 +204,28 @@
             result += config.sepia == 0 ? ''
                 : `sepia(${config.sepia}%) `;
 
-            result += '!important; }';
+            result += '!important;\\n}';
 
             return result;
         }
 
         // Should be used in 'dark mode' only
         protected createContraryRule(config: FilterConfig, selectorsToFix: string): string {
-            var result = selectorsToFix + ' { -webkit-filter: ';
+            var result = selectorsToFix + ' {\\n  -webkit-filter: ';
 
             // Less/more brightness for inverted items
             result += `brightness(${(config.brightness - 20)}%) `;
 
             result += 'invert(100%) hue-rotate(180deg) ';
 
-            result += '!important; }';
+            result += '!important;\\n}';
 
             return result;
         }
 
         // Should be used only if 'usefont' is 'true' or 'stroke' > 0
         protected createTextDeclaration(config: FilterConfig): string {
-            var result = '{ ';
+            var result = '{\\n  ';
 
             if (config.useFont) {
                 // TODO: Validate...
@@ -232,7 +240,7 @@
                     : `-webkit-text-stroke: ${config.textStroke}px !important;`;
             }
 
-            result += '}';
+            result += '\\n}';
 
             return result;
         }

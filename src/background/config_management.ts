@@ -12,8 +12,8 @@
             local: '../config/dark_sites.json'
         },
         sitesFixes: {
-            remote: 'https://raw.githubusercontent.com/alexanderby/darkreader/master/src/config/sites_fixes.json',
-            local: '../config/sites_fixes.json'
+            remote: 'https://raw.githubusercontent.com/alexanderby/darkreader/master/src/config/sites_fixes_v2.json',
+            local: '../config/sites_fixes_v2.json'
         },
         defaultFilterConfig: {
             local: '../config/default_filter_config.json'
@@ -131,45 +131,61 @@
             // Validate fixes
             if (fixes === null || typeof fixes !== 'object') {
                 fixes = {
-                    commonSelectors: '',
+                    commonSelectors: [],
+                    commonRules: [],
                     specials: []
                 };
                 onInvalidData('Fix is not an object.')
             }
-            if (typeof fixes.commonSelectors !== 'string') {
-                fixes.commonSelectors = '';
+            if (!isStringOrArray(fixes.commonSelectors)) {
+                fixes.commonSelectors = [];
                 onInvalidData('Missing common selectors.')
             }
             if (!Array.isArray(fixes.specials)) {
                 fixes.specials = [];
                 onInvalidData('Missing special selectors.');
             }
+            if (typeof fixes.commonSelectors === 'string') {
+                fixes.commonSelectors = [<any>fixes.commonSelectors];
+            }
+            if (typeof fixes.specials === 'string') {
+                fixes.specials = [<any>fixes.specials];
+            }
             for (var i = fixes.specials.length - 1; i >= 0; i--) {
-                if (typeof fixes.specials[i].url !== 'string') {
+                let s = fixes.specials[i];
+                if (!isStringOrArray(s.url)) {
                     fixes.specials.splice(i, 1);
                     onInvalidData('Wrong URL.');
                     continue;
                 }
-                if (typeof fixes.specials[i].selectors !== 'string') {
-                    fixes.specials[i].selectors = fixes.commonSelectors;
+                if (!isStringOrArray(s.selectors)) {
+                    s.selectors = fixes.commonSelectors;
                     // TODO: Optional "selectors" property.
                     onInvalidData('Missing selectors.');
                 }
-                if (fixes.specials[i].rules !== void 0
-                    && typeof fixes.specials[i].rules !== 'string'
+                if (s.rules !== undefined &&
+                    !isStringOrArray(s.rules)
                 ) {
-                    fixes.specials[i].rules = '';
-                    onInvalidData('Rule is not a string.');
-                    continue;
+                    s.rules = [];
+                    onInvalidData('Invalid CSS rules.');
+                }
+                if (typeof s.selectors === 'string') {
+                    s.selectors = [<any>s.selectors];
+                }
+                if (typeof s.rules === 'string') {
+                    s.rules = [<any>s.rules];
                 }
             }
             // Sort like templates?
 
             // Replace "{common}" with common selectors
             fixes.specials.forEach((s) => {
-                s.selectors = s.selectors.replace(
-                    /\{common\}/ig,
-                    fixes.commonSelectors);
+                s.selectors.forEach((s) => {
+                    s.replace(
+                        /\{common\}/ig,
+                        joinLines(fixes.commonSelectors, ',')
+                    );
+                });
             });
 
             return fixes;
@@ -192,14 +208,15 @@
     setInterval(loadConfigs, RELOAD_INTERVAL_MS); // Reload periodically
 
     export interface SitesFixes {
-        commonSelectors: string;
+        commonSelectors: string[];
+        commonRules: string[];
         specials: SiteFix[];
     }
 
     export interface SiteFix {
-        url: string;
-        selectors?: string;
-        rules?: string;
+        url: string | string[];
+        selectors?: string[];
+        rules?: string[];
     }
 
     /**
@@ -208,24 +225,30 @@
      * @param url Site URL.
      */
     export function getFixesFor(url: string): {
-        selectors?: string;
-        rules?: string;
+        selectors?: string[];
+        rules?: string[];
     } {
         var found: SiteFix;
         if (url) {
             // Search for match with given URL
-            SITES_FIXES.specials.forEach((s) => {
-                if (isUrlMatched(url, s.url)) {
-                    found = s;
+            loop: for (var i = 0; i < SITES_FIXES.specials.length; i++) {
+                let s = SITES_FIXES.specials[i];
+                let urls: string[] = typeof s.url === 'string' ? [<string>s.url] : <string[]>s.url;
+                for (var j = 0; j < urls.length; j++) {
+                    if (isUrlMatched(url, urls[j])) {
+                        found = s;
+                        break loop;
+                    }
                 }
-            });
+            }
             if (found) {
                 console.log('URL matches ' + found.url);
             }
         }
         return (found ?
-            found
-            : { selectors: SITES_FIXES.commonSelectors });
+            found :
+            { selectors: SITES_FIXES.commonSelectors }
+        );
     }
 
 
@@ -403,4 +426,15 @@
             return -pathA.localeCompare(pathB);
         }
     };
+
+    function joinLines(lines: string | string[], separator = ''): string {
+        if (typeof lines === 'string') {
+            return lines;
+        }
+        return (<string[]>lines).join(separator + '\n');
+    }
+
+    function isStringOrArray(item) {
+        return (typeof item === 'string' || Array.isArray(item));
+    }
 }

@@ -8,7 +8,7 @@ This extension inverts brightness of web pages and aims to reduce eyestrain whil
 ## How to contribute
 
 If some site is already dark, you can add it to [dark_sites.json](https://github.com/alexanderby/darkreader/blob/master/src/config/dark_sites.json) file.
-If some parts of web-pages are wrongly inverted, you can specify necessary CSS selectors at [sites_fixes.json](https://github.com/alexanderby/darkreader/blob/master/src/config/sites_fixes.json).
+If some parts of web-pages are wrongly inverted, you can specify necessary CSS selectors at [sites_fixes_v2.json](https://github.com/alexanderby/darkreader/blob/master/src/config/sites_fixes_v2.json).
 Notice that merged changes to these files are automatically delivered to all users **within 15 minutes**.
 
 In order to build and debug the extension install the [nodejs](https://nodejs.org/) and [grunt task runner](http://gruntjs.com/). Launch the ```> grunt debug``` task. Open the [Chrome's extensions page](https://support.google.com/chrome/answer/187443). Enable the **Developer mode**, press **Load unpacked extension** button, navigate to project's ```src/``` folder.

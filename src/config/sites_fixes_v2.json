@@ -96,6 +96,10 @@
             ]
         },
         {
+            "url": "play.afreecatv.com",
+            "selectors": "{common}, #afreecatv_player"
+        },
+        {
             "url": "producthunt.com",
             "selectors": "{common}, .backgroundImage_1hK9M, .v-image",
             "rules": [

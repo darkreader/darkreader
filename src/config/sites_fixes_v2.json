@@ -116,11 +116,11 @@
         {
             "url": "slack.com",
             "selectors": [
-                "img, {common}",
-                "#col_channels, #team_menu, .image_bg"
+                "{common}",
+                "#col_channels, #team_menu, figure"
             ],
             "rules": [
-                "#col_channels *, #team_menu *, .image_bg * { -webkit-filter: none !important; }"
+                "#col_channels *, #team_menu *, figure * { -webkit-filter: none !important; }"
             ]
         },
         {

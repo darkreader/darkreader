@@ -121,6 +121,16 @@
             ]
         },
         {
+            "url": "tpondemand.com",
+            "selectors": [
+                "{common}",
+                ".tau-cover-view__overlay, .tau-app-secondary-pane, .app-header, .uv-popover-content"
+            ],
+            "rules": [
+                ".tau-app-secondary-pane *, .app-header * { -webkit-filter: none !important; }"
+            ]
+        },
+        {
             "url": "twitch.tv",
             "selectors": [
                 "{common}",

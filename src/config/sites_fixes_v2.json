@@ -27,12 +27,11 @@
             "selectors": [
                 "{common}",
                 "._3ixn, ._2teu, .uiStreamStory",
-                ".userContentWrapper canvas, ._4lqu, ._4lqt",
-                "#pagelet_bluebar"
+                ".userContentWrapper canvas, ._4lqu, ._4lqt"
             ],
             "rules": [
                 "._4d3w .stageWrapper { background: white; }",
-                ".uiStreamStory video, #pagelet_bluebar * { -webkit-filter: none !important; }"
+                ".uiStreamStory video { -webkit-filter: none !important; }"
             ]
         },
         {

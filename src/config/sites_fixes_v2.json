@@ -1,4 +1,4 @@
-﻿{
+{
     "commonSelectors": [
         "img, iframe, video, *:not(object):not(body)>embed, object",
         "*[style*=\"background:url\"]:empty, *[style*=\"background-image:url\"]:empty",
@@ -165,10 +165,11 @@
             "url": "vk.com",
             "selectors": [
                 "{common}",
-                "#video_player, *[style*=\"url\"]"
+                "#video_player, *[style*=\"url\"], .mv_playlist, .page_header_cont"
             ],
             "rules": [
-                "#video_player *, *[style*=\"url\"] * { -webkit-filter: none !important; }"
+                "#video_player *, *[style*=\"url\"] *, .mv_playlist *, .page_header_cont * { -webkit-filter: none !important; }",
+                ".mv_layer_bg { background: white !important; }"
             ]
         },
         {

@@ -163,7 +163,13 @@
         },
         {
             "url": "vk.com",
-            "selectors": "img, iframe, video, embed, .video_image_div, #layer_bg"
+            "selectors": [
+                "{common}",
+                "#video_player, *[style*=\"url\"]"
+            ],
+            "rules": [
+                "#video_player *, *[style*=\"url\"] * { -webkit-filter: none !important; }"
+            ]
         },
         {
             "url": "web.whatsapp.com",

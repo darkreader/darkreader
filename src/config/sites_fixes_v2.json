@@ -79,6 +79,16 @@
             "rules": "html { height: auto !important; }"
         },
         {
+            "url": "linkedin.com",
+            "selectors": [
+                "{common}",
+                "#top-header, #responsive-nav-scrollable"
+            ],
+            "rules": [
+                "#top-header *, #responsive-nav-scrollable * { -webkit-filter: none !important; }"
+            ]
+        },
+        {
             "url": "mail.live.com",
             "selectors": [
                 "img:not([src=\"https://a.gfx.ms/rte_metro2.png\"])",

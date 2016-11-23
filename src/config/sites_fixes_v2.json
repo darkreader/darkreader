@@ -114,6 +114,16 @@
             "selectors": "{common}, #topNavbar, #UplayHeader"
         },
         {
+            "url": "slack.com",
+            "selectors": [
+                "img, {common}",
+                "#col_channels, #team_menu, .image_bg"
+            ],
+            "rules": [
+                "#col_channels *, #team_menu *, .image_bg * { -webkit-filter: none !important; }"
+            ]
+        },
+        {
             "url": "spotify.com",
             "selectors": [
                 "img, iframe, video, embed",

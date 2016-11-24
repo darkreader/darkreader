@@ -127,10 +127,10 @@
             "url": "slack.com",
             "selectors": [
                 "{common}",
-                "#col_channels, #team_menu, figure"
+                "#col_channels, #team_menu, figure, *[style*=\"url\"]"
             ],
             "rules": [
-                "#col_channels *, #team_menu *, figure * { -webkit-filter: none !important; }"
+                "#col_channels *, #team_menu *, figure *, *[style*=\"url\"] * { -webkit-filter: none !important; }"
             ]
         },
         {

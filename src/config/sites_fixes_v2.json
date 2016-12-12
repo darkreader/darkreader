@@ -27,7 +27,8 @@
             "selectors": [
                 "{common}",
                 "._3ixn, ._2teu, .uiStreamStory",
-                ".userContentWrapper canvas, ._4lqu, ._4lqt"
+                ".userContentWrapper canvas, ._4lqu, ._4lqt",
+                "._24ws"
             ],
             "rules": [
                 "._4d3w .stageWrapper { background: white; }",

@@ -27,7 +27,8 @@
             "selectors": [
                 "{common}",
                 "._3ixn, ._2teu, .uiStreamStory",
-                ".userContentWrapper canvas, ._4lqu, ._4lqt"
+                ".userContentWrapper canvas, ._4lqu, ._4lqt",
+                "._24ws"
             ],
             "rules": [
                 "._4d3w .stageWrapper { background: white; }",
@@ -196,12 +197,6 @@
             "selectors": [
                 "iframe, .html5-video-player, .has-custom-banner, #theater-background",
                 "*:not(.html5-video-player):not(.channel-header-profile-image-container):not(.html5-storyboard-filmstrip):not(.html5-storyboard-framepreview):not(.html5-storyboard-lens) > img"
-            ]
-        },
-        {
-            "url": "facebook.com",
-            "selectors": [
-                "._24ws"
             ]
         }
     ]

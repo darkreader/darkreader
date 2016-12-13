@@ -25,6 +25,7 @@
         {
             "url": "bbc.com",
             "selectors": [
+                "{common}",
                 "div.orb-nav-section.orb-nav-blocks > a > img"
             ]
         },
@@ -176,6 +177,7 @@
         {
             "url": "twitter.com",
             "selectors": [
+                "{common}",
                 ".tcu-textEllipse--multiline"
             ]
         },

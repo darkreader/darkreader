@@ -25,6 +25,7 @@
         {
             "url": "bbc.com",
             "selectors": [
+                "{common}",
                 "div.orb-nav-section.orb-nav-blocks > a > img"
             ]
         },
@@ -175,8 +176,10 @@
         },
         {
             "url": "twitter.com",
-            "selectors": ["div.SummaryCard-contentContainer.TwitterCardsGrid-col--12 > div > p",
-            "div.SummaryCard-contentContainer.TwitterCardsGrid-col--12 > div > h2"
+            "selectors": [                
+                "{common}",
+                "div.SummaryCard-contentContainer.TwitterCardsGrid-col--12 > div > p",
+                "div.SummaryCard-contentContainer.TwitterCardsGrid-col--12 > div > h2"
             ]
         },
         {

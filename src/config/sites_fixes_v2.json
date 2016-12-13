@@ -176,10 +176,9 @@
         },
         {
             "url": "twitter.com",
-            "selectors": [                
+            "selectors": [
                 "{common}",
-                "div.SummaryCard-contentContainer.TwitterCardsGrid-col--12 > div > p",
-                "div.SummaryCard-contentContainer.TwitterCardsGrid-col--12 > div > h2"
+                ".tcu-textEllipse--multiline"
             ]
         },
         {

@@ -176,8 +176,7 @@
         {
             "url": "twitter.com",
             "selectors": [
-                ".TwitterCard-title js-cardClick tcu-textEllipse--multiline",
-                ".tcu-resetMargin u-block TwitterCardsGrid-col--spacerTop tcu-textEllipse--multiline"
+                ".tcu-textEllipse--multiline"
             ]
         },
         {

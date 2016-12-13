@@ -23,12 +23,18 @@
             ]
         },
         {
+            "url": "bbc.com",
+            "selectors": [
+                "div.orb-nav-section.orb-nav-blocks > a > img"
+            ]
+        },
+        {
             "url": "facebook.com",
             "selectors": [
                 "{common}",
                 "._3ixn, ._2teu, .uiStreamStory",
                 ".userContentWrapper canvas, ._4lqu, ._4lqt",
-                "._24ws"
+                "._24ws, ._1z0-"
             ],
             "rules": [
                 "._4d3w .stageWrapper { background: white; }",
@@ -165,6 +171,12 @@
                 ".chat_text_input, .colon, .dark_wrapper *, .message, .room-title, .selected > a { color:black !important;}",
                 ".chat_text_input { border: 1px solid black !important;}",
                 "#player * { -webkit-filter: none !important;}"
+            ]
+        },
+        {
+            "url": "twitter.com",
+            "selectors": ["div.SummaryCard-contentContainer.TwitterCardsGrid-col--12 > div > p",
+            "div.SummaryCard-contentContainer.TwitterCardsGrid-col--12 > div > h2"
             ]
         },
         {

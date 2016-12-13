@@ -198,6 +198,12 @@
                 "iframe, .html5-video-player, .has-custom-banner, #theater-background",
                 "*:not(.html5-video-player):not(.channel-header-profile-image-container):not(.html5-storyboard-filmstrip):not(.html5-storyboard-framepreview):not(.html5-storyboard-lens) > img"
             ]
+        },
+        {
+            "url": "bbc.com",
+            "selectors": [
+                "div.orb-nav-section.orb-nav-blocks > a > img"
+            ]
         }
     ]
 }

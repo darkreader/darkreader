@@ -162,7 +162,7 @@
             "url": "twitch.tv",
             "selectors": [
                 "{common}",
-                "#site_footer, #carousel_background:after, #left_col, #player, .badge"
+                "#site_footer, #carousel_background:after, #left_col, .player, .badge"
             ],
             "rules": [
                 "#carousel, .chat-container, .conversations-list-header { background-color: white !important; }",
@@ -171,7 +171,7 @@
                 ".rightcol-content > .top { background-color: white !important; }",
                 ".chat_text_input, .colon, .dark_wrapper *, .message, .room-title, .selected > a { color:black !important;}",
                 ".chat_text_input { border: 1px solid black !important;}",
-                "#player * { -webkit-filter: none !important;}"
+                ".player * { -webkit-filter: none !important;}"
             ]
         },
         {

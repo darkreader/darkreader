@@ -149,6 +149,19 @@
             ]
         },
         {
+            "url": [
+                "stackexchange.com",
+                "askubuntu.com",
+                "mathoverflow.com",
+                "serverfault.com",
+                "stackapps.com",
+                "stackoverflow.com",
+                "superuser.com"
+            ],
+            "selectors": "{common}",
+            "rules": "#hlogo a { text-indent: -256em !important; }"
+        },
+        {
             "url": "tpondemand.com",
             "selectors": [
                 "{common}",

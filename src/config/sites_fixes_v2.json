@@ -128,6 +128,10 @@
             ]
         },
         {
+            "url": "reddit.com",
+            "selectors": "{common}, #header-img"
+        },
+        {
             "url": "shop.ubi.com",
             "selectors": "{common}, #topNavbar, #UplayHeader"
         },

@@ -90,6 +90,7 @@
             "url": "linkedin.com",
             "selectors": [
                 "{common}",
+                "*[style*=\"background-image: url\"]",
                 "#top-header, #responsive-nav-scrollable"
             ],
             "rules": [

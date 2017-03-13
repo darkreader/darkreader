@@ -58,9 +58,7 @@
             ],
             "rules": [
                 ".pI { background: rgba(255,255,255,.7) !important; }",
-                ".eB { backgroud: rgba(255,255,255,.4) !important; }",
-                "iframe[tabindex=\"-1\"], #docs-aria-speakable { display: none; }",
-                "#docs-a11y-aria-toggle, .docs-texteventtarget-iframe { display: none; }"
+                ".eB { backgroud: rgba(255,255,255,.4) !important; }"
             ]
         },
         {

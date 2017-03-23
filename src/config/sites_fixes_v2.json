@@ -140,11 +140,11 @@
             "selectors": [
                 "{common}",
                 ".client_channels_list_container",
-                "#col_channels, #team_menu, figure, *[style*=\"url\"]"
+                "figure, *[style*=\"url\"]"
             ],
             "rules": [
                 ".client_channels_list_container * { -webkit-filter: none !important; }",
-                "#col_channels *, #team_menu *, figure *, *[style*=\"url\"] * { -webkit-filter: none !important; }"
+                "figure *, *[style*=\"url\"] * { -webkit-filter: none !important; }"
             ]
         },
         {

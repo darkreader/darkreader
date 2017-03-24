@@ -226,6 +226,13 @@
             "selectors": "img:not(.mwe-math-fallback-image-inline), iframe, video, embed"
         },
         {
+            "url": "wolfram.com",
+            "selectors": "{common}",
+            "rules": [
+                ".numberedequation, .displayformula { -webkit-filter: none !important; }"
+            ]
+        },
+        {
             "url": "youtube.com",
             "selectors": [
                 "iframe, .html5-video-player, .has-custom-banner, #theater-background",

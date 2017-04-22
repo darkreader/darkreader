@@ -104,6 +104,11 @@
             "rules": ".ComposeContent { background-color: white; }"
         },
         {
+            "url": "onliner.by",
+            "selectors": "{common}, .b-tile-main, .b-teasers-2__teaser, .news-tiles__subtitle, .b-opinions-main-2__tile",
+            "rules": ".b-opinions-main-2__tile .b-opinions-main-2__portrait { -webkit-filter: none !important; }"
+        },
+        {
             "url": "pandora.com",
             "selectors": "#body, .contentbox, #detailContainer, #mainContent, .slidesBackground, .slidesForeground",
             "rules": [

@@ -110,7 +110,7 @@
                 "music.yandex.kz",
                 "music.yandex.ua"
             ],
-            "selectors":".page-artist__concerts .concert a.concert__cover"
+            "selectors":"a[style*=\"background-image: url\"]"
         },
         {
             "url": "onliner.by",

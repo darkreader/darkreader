@@ -247,6 +247,14 @@
             "rules": [
                 "#watch-appbar-playlist * { -webkit-filter: none !important; }"
             ]
+        },
+        {
+            "url": [
+                "music.yandex.ru",
+                "music.yandex.ua",
+                "music.yandex.by"
+            ],
+            "selectors":".page-artist__concerts .concert a.concert__cover"
         }
     ]
 }

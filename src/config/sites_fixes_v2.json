@@ -104,6 +104,15 @@
             "rules": ".ComposeContent { background-color: white; }"
         },
         {
+            "url": [
+                "music.yandex.by",
+                "music.yandex.ru",
+                "music.yandex.kz",
+                "music.yandex.ua"
+            ],
+            "selectors":".page-artist__concerts .concert a.concert__cover"
+        },
+        {
             "url": "onliner.by",
             "selectors": "{common}, .b-tile-main, .b-teasers-2__teaser, .news-tiles__subtitle, .b-opinions-main-2__tile, .news-header__top > .news-header__title",
             "rules": ".b-opinions-main-2__tile .b-opinions-main-2__portrait { -webkit-filter: none !important; }"
@@ -247,14 +256,6 @@
             "rules": [
                 "#watch-appbar-playlist * { -webkit-filter: none !important; }"
             ]
-        },
-        {
-            "url": [
-                "music.yandex.by",
-                "music.yandex.ru",
-                "music.yandex.ua"
-            ],
-            "selectors":".page-artist__concerts .concert a.concert__cover"
         }
     ]
 }

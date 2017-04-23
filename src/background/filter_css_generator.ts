@@ -96,12 +96,20 @@
                 parts.push('\\n/* Leading rule */');
                 parts.push(this.createLeadingRule(config));
 
-                if (config.mode === FilterMode.dark)
+                if (config.mode === FilterMode.dark) {
                     // Add contrary rule
                     if (fix.selectors) {
                         parts.push('\\n/* Contrary rule */');
                         parts.push(this.createContraryRule(config, fix.selectors.join(',\\n')));
                     }
+                    
+                    // Add dark scroll
+                    parts.push('\\n/* Scroll */')
+                    parts.push('::-webkit-scrollbar {\\n  max-width: 10px !important;\\n  max-height: 10px !important;\\n  background: #1d1d1d !important;\\n}')
+                    parts.push('::-webkit-scrollbar-track, ::-webkit-scrollbar-corner {\\n  background: #1d1d1d !important;\\n}')
+                    parts.push('::-webkit-scrollbar-thumb {\\n  background: rgba(175, 175, 175, .5) !important;\\n}')
+                    parts.push('::-webkit-scrollbar-thumb:hover {\\n  background: rgba(65, 131, 196, .8) !important;\\n}')
+                }
 
                 if (config.useFont || config.textStroke > 0) {
                     // Add text rule

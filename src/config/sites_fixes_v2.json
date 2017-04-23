@@ -250,9 +250,9 @@
         },
         {
             "url": [
+                "music.yandex.by",
                 "music.yandex.ru",
-                "music.yandex.ua",
-                "music.yandex.by"
+                "music.yandex.ua"
             ],
             "selectors":".page-artist__concerts .concert a.concert__cover"
         }

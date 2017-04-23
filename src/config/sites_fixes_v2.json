@@ -31,6 +31,10 @@
             ]
         },
         {
+            "url": "dailymail.co.uk",
+            "rules": ".masthead img#logo { filter: none !important; }"
+        },
+        {
             "url": "facebook.com",
             "selectors": [
                 "{common}",

@@ -16,6 +16,10 @@
             "rules": "#footer *, #photo-modal * { -webkit-filter: none !important; }"
         },
         {
+            "url": "askubuntu.com",
+            "rules":"body { background: #fff !important }"
+        },
+        {
             "url": "basho.com",
             "selectors": [
                 "{common}",

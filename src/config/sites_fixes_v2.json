@@ -110,7 +110,7 @@
                 "music.yandex.kz",
                 "music.yandex.ua"
             ],
-            "selectors":"a[style*=\"background-image: url\"]"
+            "selectors":"{common}, a[style*=\"background-image: url\"]"
         },
         {
             "url": "onliner.by",

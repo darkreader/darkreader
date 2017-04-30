@@ -104,6 +104,10 @@
             "rules": ".ComposeContent { background-color: white; }"
         },
         {
+            "url": "",
+            "selectors": "#headerBar, .toggleNav, .footerContainer"
+        },
+        {
             "url": "onliner.by",
             "selectors": "{common}, .b-tile-main, .b-teasers-2__teaser, .news-tiles__subtitle, .b-opinions-main-2__tile, .news-header__top > .news-header__title",
             "rules": ".b-opinions-main-2__tile .b-opinions-main-2__portrait { -webkit-filter: none !important; }"

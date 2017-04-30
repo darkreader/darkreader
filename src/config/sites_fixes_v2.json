@@ -104,6 +104,15 @@
             "rules": ".ComposeContent { background-color: white; }"
         },
         {
+            "url": [
+                "music.yandex.by",
+                "music.yandex.ru",
+                "music.yandex.kz",
+                "music.yandex.ua"
+            ],
+            "selectors":"a[style*=\"background-image: url\"]"
+        },
+        {
             "url": "onliner.by",
             "selectors": "{common}, .b-tile-main, .b-teasers-2__teaser, .news-tiles__subtitle, .b-opinions-main-2__tile, .news-header__top > .news-header__title",
             "rules": ".b-opinions-main-2__tile .b-opinions-main-2__portrait { -webkit-filter: none !important; }"

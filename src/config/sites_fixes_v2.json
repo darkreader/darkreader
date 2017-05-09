@@ -104,7 +104,7 @@
             "rules": ".ComposeContent { background-color: white; }"
         },
         {
-            "url": "",
+            "url": "nuclide.io",
             "selectors": "#headerBar, .toggleNav, .footerContainer"
         },
         {

@@ -104,6 +104,10 @@
             "rules": ".ComposeContent { background-color: white; }"
         },
         {
+            "url": "messenger.com",
+            "selectors": "._4tsk"
+        },
+        {
             "url": [
                 "music.yandex.by",
                 "music.yandex.ru",

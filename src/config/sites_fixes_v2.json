@@ -260,6 +260,10 @@
             "rules": [
                 "#watch-appbar-playlist * { -webkit-filter: none !important; }"
             ]
+        },
+        {
+            "url":"yandex.ru/pogoda/*",
+            "selectors":"{common}, .icon[class*=\"icon_moon_\"]"
         }
     ]
 }

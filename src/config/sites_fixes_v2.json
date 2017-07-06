@@ -3,7 +3,8 @@
         "img, iframe, video, *:not(object):not(body)>embed, object",
         "svg image",
         "*[style*=\"background:url\"]:empty, *[style*=\"background-image:url\"]:empty",
-        "*[style*=\"background: url\"]:empty, *[style*=\"background-image: url\"]:empty"
+        "*[style*=\"background: url\"]:empty, *[style*=\"background-image: url\"]:empty",
+        "twitterwidget"
     ],
     "specials": [
         {

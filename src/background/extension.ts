@@ -410,11 +410,15 @@ style && style.parentElement.removeChild(style);
          * installed in system.
          */
         protected getFontList(onReturned: (fonts: string[]) => void) {
-            chrome.fontSettings.getFontList((res) => {
-                // id or name?
-                var fonts = res.map((r) => r.fontId);
-                onReturned(fonts);
-            });
+            if(chrome.fontSettings != undefined){
+                chrome.fontSettings.getFontList(function (res) {
+                    // id or name?
+                    var fonts = res.map(function (r) { return r.fontId; });
+                    onReturned(fonts);
+                });
+            } else {
+                onReturned([]);
+            }
         }
     }
 

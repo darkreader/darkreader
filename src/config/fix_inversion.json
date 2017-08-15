@@ -8,7 +8,9 @@
             "twitterwidget"
         ],
         "noinvert": [],
-        "removebg": [],
+        "removebg": [
+            "iframe:not([title=\"Disqus\"])"
+        ],
         "rules": []
     },
     "sites": [

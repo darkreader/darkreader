@@ -58,13 +58,13 @@
             var m = navigator.userAgent.toLowerCase().match(/chrom[e|ium]\/([^ ]+)/);
             if (m && m[1]) {
                 var chromeVersion = m[1];
-                if (chromeVersion >= '45.0.2431.0') {
-                    this.issue501582 = true;
+                if (chromeVersion < '45.0.2431.0') {
+                    this.filterAppliesToHtml = true;
                 }
             }
         }
 
-        issue501582: boolean;
+        filterAppliesToHtml: boolean;
 
         /**
          * Generates CSS code.
@@ -120,10 +120,7 @@
                 parts.push('\\n/* Full screen */');
                 parts.push('*:-webkit-full-screen, *:-webkit-full-screen * {\\n  -webkit-filter: none !important;\\n}');
 
-                // --- WARNING! HACK! ---
-                if (this.issue501582) {
-                    // NOTE: Chrome 45 temp <html> background fix
-                    // https://code.google.com/p/chromium/issues/detail?id=501582
+                if (!this.filterAppliesToHtml) {
 
                     //
                     // Interpolate background color (fastest, no script required).

@@ -4,7 +4,7 @@
   "description": "Keep your eyes, Dark Reader",
   "scripts": {
     "debug": "grunt debug && grunt debug-watch",
-    "release": "grunt release",
+    "release": "npm test && grunt release",
     "test": "node src/config/validate.js"
   },
   "private": true,

@@ -1,8 +1,9 @@
 # Ignore compiled JavaScript and CSS
 #-----------------------------------
 *.js
-!gruntfile.js
+!Gruntfile.js
 !src/lib/**/*.js
+!src/config/validate.js
 *.map
 *.css
 

@@ -96,12 +96,11 @@
                 parts.push('\\n/* Leading rule */');
                 parts.push(this.createLeadingRule(config));
 
-                if (config.mode === FilterMode.dark)
+                if (config.mode === FilterMode.dark) {
                     // Add contrary rule
-                    if (fix.selectors) {
-                        parts.push('\\n/* Contrary rule */');
-                        parts.push(this.createContraryRule(config, fix.selectors.join(',\\n')));
-                    }
+                    parts.push('\\n/* Contrary rule */');
+                    parts.push(this.createContraryRule(config, fix));
+                }
 
                 if (config.useFont || config.textStroke > 0) {
                     // Add text rule
@@ -207,12 +206,32 @@
         }
 
         // Should be used in 'dark mode' only
-        protected createContraryRule(config: FilterConfig, selectorsToFix: string): string {
-            var result = selectorsToFix + ' {\\n  -webkit-filter: ';
+        protected createContraryRule(config: FilterConfig, fix: InversionFix): string {
 
-            result += 'invert(100%) hue-rotate(180deg) ';
+            var parts: string[] = [];
 
-            result += '!important;\\n}';
+            if (fix.invert.length > 0) {
+                var invert = fix.invert.join(',\\n') + ' {\\n  -webkit-filter: ';
+                invert += 'invert(100%) hue-rotate(180deg) ';
+                invert += '!important;\\n}';
+                parts.push(invert);
+            }
+
+            if (fix.noinvert.length > 0) {
+                var noInvert = fix.noinvert.join(',\\n') + ' {\\n  -webkit-filter: ';
+                noInvert += 'none ';
+                noInvert += '!important;\\n}';
+                parts.push(noInvert);
+            }
+
+            if (fix.removebg.length > 0) {
+                var removeBg = fix.removebg.join(',\\n') + ' {\\n  background: ';
+                removeBg += 'white ';
+                removeBg += '!important;\\n}';
+                parts.push(removeBg);
+            }
+
+            var result = parts.join('\\n');
 
             return result;
         }
@@ -255,4 +274,4 @@
         }
         return result;
     }
-} 
+}

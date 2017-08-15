@@ -11,12 +11,12 @@
             remote: 'https://raw.githubusercontent.com/alexanderby/darkreader/master/src/config/dark_sites.json',
             local: '../config/dark_sites.json'
         },
-        sitesFixes: {
-            remote: 'https://raw.githubusercontent.com/alexanderby/darkreader/master/src/config/sites_fixes_v2.json',
-            local: '../config/sites_fixes_v2.json'
+        inversionFixes: {
+            remote: 'https://raw.githubusercontent.com/alexanderby/darkreader/master/src/config/fix_inversion.json',
+            local: '../config/fix_inversion.json'
         },
         defaultFilterConfig: {
-            local: '../config/default_filter_config.json'
+            local: '../config/filter_config.json'
         }
     };
     var REMOTE_TIMEOUT_MS = 10 * 1000;
@@ -32,7 +32,7 @@
     /**
      * Fixes for specific sites (selectors which should not be inverted).
      */
-    export var SITES_FIXES: SitesFixes;
+    export var INVERSION_FIXES: InversionFixes;
 
     //
     // ----- Load configs ------
@@ -61,19 +61,19 @@
                 }).then((res) => DARK_SITES = handleDarkSites(res)),
 
                 //
-                // Load sites fixes
+                // Load inversion fixes
 
-                readJson<SitesFixes>({
-                    url: CONFIG_URLs.sitesFixes.remote,
+                readJson<InversionFixes>({
+                    url: CONFIG_URLs.inversionFixes.remote,
                     timeout: REMOTE_TIMEOUT_MS
                 }).then((res) => {
                     return res;
                 }).catch((err) => {
-                    console.error('Sites Fixes remote load error', err);
-                    return readJson<SitesFixes>({
-                        url: CONFIG_URLs.sitesFixes.local
+                    console.error('Inversion Fixes remote load error', err);
+                    return readJson<InversionFixes>({
+                        url: CONFIG_URLs.inversionFixes.local
                     });
-                }).then((res) => SITES_FIXES = handleSitesFixes(res)),
+                }).then((res) => INVERSION_FIXES = handleInversionFixes(res)),
 
                 //
                 // Load default filter config
@@ -93,9 +93,9 @@
                 }).then((res) => DARK_SITES = handleDarkSites(res)),
 
                 // Load sites fixes
-                readJson<SitesFixes>({
-                    url: CONFIG_URLs.sitesFixes.local
-                }).then((res) => SITES_FIXES = handleSitesFixes(res)),
+                readJson<InversionFixes>({
+                    url: CONFIG_URLs.inversionFixes.local
+                }).then((res) => INVERSION_FIXES = handleInversionFixes(res)),
 
                 // Load default filter config
                 readJson<FilterConfig>({
@@ -116,80 +116,57 @@
             // Validate sites
             if (!Array.isArray(sites)) {
                 sites = [];
-                onInvalidData('List is not an array.');
+                onInvalidData('Dark Sites list is not an array.');
             }
             for (var i = sites.length - 1; i >= 0; i--) {
                 if (typeof sites[i] !== 'string') {
                     sites.splice(i, 1);
-                    onInvalidData('URL is not a string.');
                 }
             }
             sites.sort(urlTemplateSorter);
             return sites;
-        };
-        function handleSitesFixes(fixes: SitesFixes) {
+        }
+        function handleInversionFixes(fixes: InversionFixes) {
             // Validate fixes
             if (fixes === null || typeof fixes !== 'object') {
                 fixes = {
-                    commonSelectors: [],
-                    commonRules: [],
-                    specials: []
+                    common: <any>{},
+                    sites: []
                 };
-                onInvalidData('Fix is not an object.')
+                onInvalidData('Inversion Fix config is not an object.')
             }
-            if (!isStringOrArray(fixes.commonSelectors)) {
-                fixes.commonSelectors = [];
-                onInvalidData('Missing common selectors.')
+            if (!fixes.common) {
+                fixes.common = <any>{};
             }
-            if (!Array.isArray(fixes.specials)) {
-                fixes.specials = [];
-                onInvalidData('Missing special selectors.');
+            fixes.common.invert = toStringArray(fixes.common.invert);
+            fixes.common.noinvert = toStringArray(fixes.common.noinvert);
+            fixes.common.removebg = toStringArray(fixes.common.removebg);
+            fixes.common.rules = toStringArray(fixes.common.rules);
+            if (!Array.isArray(fixes.sites)) {
+                fixes.sites = [];
             }
-            if (typeof fixes.commonSelectors === 'string') {
-                fixes.commonSelectors = [<any>fixes.commonSelectors];
-            }
-            if (typeof fixes.specials === 'string') {
-                fixes.specials = [<any>fixes.specials];
-            }
-            for (var i = fixes.specials.length - 1; i >= 0; i--) {
-                let s = fixes.specials[i];
+            for (var i = fixes.sites.length - 1; i >= 0; i--) {
+                let s = fixes.sites[i];
                 if (!isStringOrArray(s.url)) {
-                    fixes.specials.splice(i, 1);
-                    onInvalidData('Wrong URL.');
+                    fixes.sites.splice(i, 1);
                     continue;
                 }
-                if (!isStringOrArray(s.selectors)) {
-                    s.selectors = fixes.commonSelectors;
-                    // TODO: Optional "selectors" property.
-                    onInvalidData('Missing selectors.');
-                }
-                if (s.rules !== undefined &&
-                    !isStringOrArray(s.rules)
-                ) {
-                    s.rules = [];
-                    onInvalidData('Invalid CSS rules.');
-                }
-                if (typeof s.selectors === 'string') {
-                    s.selectors = [<any>s.selectors];
-                }
-                if (typeof s.rules === 'string') {
-                    s.rules = [<any>s.rules];
-                }
+                s.invert = toStringArray(s.invert);
+                s.noinvert = toStringArray(s.noinvert);
+                s.removebg = toStringArray(s.removebg);
+                s.rules = toStringArray(s.rules);
             }
-            // Sort like templates?
 
-            // Replace "{common}" with common selectors
-            fixes.specials.forEach((s) => {
-                s.selectors = s.selectors.map((s) => {
-                    return s.replace(
-                        /\{common\}/ig,
-                        joinLines(fixes.commonSelectors, ',')
-                    );
-                });
+            // Add common selectors and rules
+            fixes.sites.forEach((s) => {
+                s.invert = fixes.common.invert.concat(s.invert);
+                s.noinvert = fixes.common.noinvert.concat(s.noinvert);
+                s.removebg = fixes.common.removebg.concat(s.removebg);
+                s.rules = fixes.common.rules.concat(s.rules);
             });
 
             return fixes;
-        };
+        }
         function handleFilterConfig(config: FilterConfig) {
             if (config === null || typeof config !== 'object') {
                 config = DEFAULT_FILTER_CONFIG;
@@ -207,16 +184,20 @@
 
     setInterval(loadConfigs, RELOAD_INTERVAL_MS); // Reload periodically
 
-    export interface SitesFixes {
-        commonSelectors: string[];
-        commonRules: string[];
-        specials: SiteFix[];
+    export interface InversionFixes {
+        common: InversionFix;
+        sites: SiteFix[];
     }
 
-    export interface SiteFix {
+    export interface InversionFix {
+        invert: string[];
+        noinvert: string[];
+        removebg: string[];
+        rules: string[];
+    }
+
+    export interface SiteFix extends InversionFix {
         url: string | string[];
-        selectors?: string[];
-        rules?: string[];
     }
 
     /**
@@ -224,15 +205,12 @@
      * If no matches found, common fixes will be returned.
      * @param url Site URL.
      */
-    export function getFixesFor(url: string): {
-        selectors?: string[];
-        rules?: string[];
-    } {
+    export function getFixesFor(url: string): InversionFix {
         var found: SiteFix;
         if (url) {
             // Search for match with given URL
-            loop: for (var i = 0; i < SITES_FIXES.specials.length; i++) {
-                let s = SITES_FIXES.specials[i];
+            loop: for (var i = 0; i < INVERSION_FIXES.sites.length; i++) {
+                let s = INVERSION_FIXES.sites[i];
                 let urls: string[] = typeof s.url === 'string' ? [<string>s.url] : <string[]>s.url;
                 for (var j = 0; j < urls.length; j++) {
                     if (isUrlMatched(url, urls[j])) {
@@ -247,7 +225,12 @@
         }
         return (found ?
             found :
-            { selectors: SITES_FIXES.commonSelectors }
+            {
+                invert: INVERSION_FIXES.common.invert,
+                noinvert: INVERSION_FIXES.common.noinvert,
+                removebg: INVERSION_FIXES.common.removebg,
+                rules: INVERSION_FIXES.common.rules
+            }
         );
     }
 
@@ -436,5 +419,15 @@
 
     function isStringOrArray(item) {
         return (typeof item === 'string' || Array.isArray(item));
+    }
+
+    function toStringArray(value: string | string[]): string[] {
+        if (Array.isArray(value)) {
+            return <string[]>value;
+        }
+        if (value) {
+            return [<string>value];
+        }
+        return [];
     }
 }

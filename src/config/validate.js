@@ -1,5 +1,5 @@
 var darkSites = require('./dark_sites');
-var fixes = require('./sites_fixes_v2');
+var fixes = require('./fix_inversion');
 
 var total = 0;
 var passed = 0;
@@ -37,13 +37,10 @@ validate('Dark Sites should not have protocol', darkSites.every(function (u) {
 }));
 validate('Dark Sites are sorted alphabetically', JSON.stringify(darkSites) === JSON.stringify(darkSites.slice().sort()));
 
-validate('Sites Fixes is an object', (typeof fixes === 'object' && !Array.isArray(fixes) && !(fixes instanceof Date)));
-validate('Common Selectors section is an array', Array.isArray(fixes.commonSelectors));
-validate('Every Common Selectors item is a string', fixes.commonSelectors.every(function (s) {
-    return (s && typeof s === 'string');
-}));
-validate('Special Selectors section is an array', Array.isArray(fixes.specials));
-validate('Each fix has valid URL or multiple URLs', fixes.specials.every(function (fix) {
+validate('Inversion Fixes is an object', (typeof fixes === 'object' && !Array.isArray(fixes) && !(fixes instanceof Date)));
+validate('Correct Common Fixes structure', (typeof fixes.common === 'object' && Array.isArray(fixes.common.invert) && Array.isArray(fixes.common.noinvert) && Array.isArray(fixes.common.removebg) && Array.isArray(fixes.common.rules)));
+validate('Sites Fixes section is an array', Array.isArray(fixes.sites));
+validate('Each fix has valid URL or multiple URLs', fixes.sites.every(function (fix) {
     return (typeof fix.url === 'string'
         || (Array.isArray(fix.url)
             && fix.url.every(function (u) {
@@ -51,20 +48,27 @@ validate('Each fix has valid URL or multiple URLs', fixes.specials.every(functio
             })));
 }));
 validate('Sites Fixes are sorted alphabetically by URL', (function () {
-    var urls = fixes.specials.map(function (fix) {
+    var urls = fixes.sites.map(function (fix) {
         return (Array.isArray(fix.url) ? fix.url[0] : fix.url);
     });
     return JSON.stringify(urls) === JSON.stringify(urls.slice().sort());
 })());
-validate('Selectors should be a string or an array', fixes.specials.every(function (fix) {
-    return (!fix.selectors
-        || typeof fix.selectors === 'string'
-        || (Array.isArray(fix.selectors)
-            && fix.selectors.every(function (s) {
-                return (s && typeof s === 'string');
-            })));
+validate('Selectors should be a string or an array', fixes.sites.every(function (fix) {
+    function isUndefinedOrStringOrArray(value) {
+        return (!value
+            || typeof value === 'string'
+            || (Array.isArray(value)
+                && value.every(function (s) {
+                    return (s && typeof s === 'string');
+                })))
+    }
+    return (
+        isUndefinedOrStringOrArray(fix.invert)
+        && isUndefinedOrStringOrArray(fix.noinvert)
+        && isUndefinedOrStringOrArray(fix.removebg)
+    );
 }));
-validate('Rules should be a string or an array', fixes.specials.every(function (fix) {
+validate('Rules should be a string or an array', fixes.sites.every(function (fix) {
     return (!fix.rules
         || typeof fix.rules === 'string'
         || (Array.isArray(fix.rules)

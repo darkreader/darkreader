@@ -281,7 +281,7 @@
 ${DEBUG ? "console.log('Executing DR script (add)...');" : ""}
 //debugger;
 var createDRStyle = function() {
-    var css = '${css}';
+    var css = '${css.replace(/'/g, '\\\'')}';
     var style = document.createElement('style');
     style.setAttribute('id', 'dark-reader-style');
     style.type = 'text/css';

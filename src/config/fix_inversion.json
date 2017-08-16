@@ -1,15 +1,18 @@
 {
     "common": {
         "invert": [
-            "img, iframe, video, *:not(object):not(body)>embed, object",
+            "img, iframe, video, :not(object):not(body)>embed, object",
             "svg image",
-            "*[style*=\"background:url\"]:empty, *[style*=\"background-image:url\"]:empty",
-            "*[style*=\"background: url\"]:empty, *[style*=\"background-image: url\"]:empty",
+            "[style*='background:url'], [style*='background-image:url']",
+            "[style*='background: url'], [style*='background-image: url']",
             "twitterwidget"
         ],
-        "noinvert": [],
+        "noinvert": [
+            "[style*='background:url'] *, [style*='background-image:url'] *",
+            "[style*='background: url'] *, [style*='background-image: url'] *"
+        ],
         "removebg": [
-            "iframe:not([title=\"Disqus\"])"
+            "iframe:not([title='Disqus'])"
         ],
         "rules": []
     },
@@ -17,8 +20,7 @@
         {
             "url": "airbnb.com",
             "invert": [
-                ".background-cover, #footer, #photo-modal",
-                "*[style*=\"background-image:url\"], *[style*=\"background-image: url\"]"
+                ".background-cover, #footer, #photo-modal"
             ],
             "noinvert": "#footer *, #photo-modal *"
         },
@@ -26,7 +28,7 @@
             "url": "basho.com",
             "invert": [
                 "#site-navigation, footer, header, .featured-news-wrapper",
-                "*:not(.lang):not(#foot-logo)>img"
+                ":not(.lang):not(#foot-logo)>img"
             ]
         },
         {
@@ -55,8 +57,11 @@
                 "google.*.*"
             ],
             "invert": [
-                "img:not(.irc_mi):not(.irc_rii):not(.irc_mut):not(.amI):not(.amJ):not(.adk):not(.adj):not([src*=\"ic_\"]):not([src*=\"black\"])",
-                "iframe, video, embed, .gbii, .gbip, .azp, .aLF-aPX-KP, .irc_bg, .RY3tic, canvas.circle"
+                ".gbii, .gbip, .azp, .aLF-aPX-KP, .irc_bg, .RY3tic, canvas.circle"
+            ],
+            "noinvert": [
+                ".irc_mi, .irc_rii, .irc_mut, .amI, .amJ, .adk, .adj, [src*='ic_'], [src*='black']",
+                "input[style*='data:image']"
             ],
             "rules": [
                 ".pI { background: rgba(255,255,255,.7) !important; }",
@@ -73,10 +78,6 @@
             "removebg": "#review-promo"
         },
         {
-            "url": "inpad.com.tw",
-            "invert": "*[style*=\"background-image:url\"]"
-        },
-        {
             "url": "io9.com",
             "rules": "html { height: auto !important; }"
         },
@@ -88,7 +89,6 @@
         {
             "url": "linkedin.com",
             "invert": [
-                "*[style*=\"background-image: url\"]",
                 "#top-header, #responsive-nav-scrollable"
             ],
             "noinvert": [
@@ -98,7 +98,7 @@
         {
             "url": "mail.live.com",
             "invert": [
-                "img:not([src=\"https://a.gfx.ms/rte_metro2.png\"])",
+                "img:not([src='https://a.gfx.ms/rte_metro2.png'])",
                 "video, object, .ComposeContent"
             ],
             "removebg": ".ComposeContent"
@@ -108,21 +108,12 @@
             "invert": "._4tsk"
         },
         {
-            "url": [
-                "music.yandex.by",
-                "music.yandex.ru",
-                "music.yandex.kz",
-                "music.yandex.ua"
-            ],
-            "invert": "a[style*=\"background-image: url\"]"
-        },
-        {
             "url": "onliner.by",
             "invert": [
                 ".b-tile-main, .b-teasers-2__teaser, .news-tiles__subtitle",
                 ".b-opinions-main-2__tile, .news-header__top > .news-header__title"
             ],
-            "noinvert": ".b-opinions-main-2__tile .b-opinions-main-2__portrait"
+            "noinvert": ".b-opinions-main-2__tile *"
         },
         {
             "url": "pandora.com",
@@ -142,9 +133,8 @@
             "url": "producthunt.com",
             "invert": ".backgroundImage_1hK9M, .v-image",
             "noinvert": [
-                ".backgroundImage_1hK9M img",
-                ".backgroundImage_1hK9M .backgroundImage_1hK9M",
-                ".v-image .post-detail--body--gallery-fullscreen--image"
+                ".backgroundImage_1hK9M *",
+                ".v-image *"
             ],
             "rules": [
                 ".post-detail--body--gallery-fullscreen--image { background-color: black; }"
@@ -162,11 +152,11 @@
             "url": "slack.com",
             "invert": [
                 ".client_channels_list_container",
-                "figure, *[style*=\"url\"]"
+                "figure"
             ],
             "noinvert": [
                 ".client_channels_list_container *",
-                "figure *, *[style*=\"url\"] *"
+                "figure *"
             ]
         },
         {
@@ -229,10 +219,10 @@
         {
             "url": "vk.com",
             "invert": [
-                "#video_player, *[style*=\"url\"], .mv_playlist, .page_header_cont"
+                "#video_player, .mv_playlist, .page_header_cont"
             ],
             "noinvert": [
-                "#video_player *, *[style*=\"url\"] *, .mv_playlist *, .page_header_cont *"
+                "#video_player *, .mv_playlist *, .page_header_cont *"
             ],
             "removebg": [
                 ".mv_layer_bg"
@@ -245,7 +235,7 @@
         },
         {
             "url": "wikipedia.org",
-            "invert": "img:not(.mwe-math-fallback-image-inline), iframe, video, embed"
+            "noinvert": ".mwe-math-fallback-image-inline"
         },
         {
             "url": "wolfram.com",
@@ -256,11 +246,12 @@
         {
             "url": "youtube.com",
             "invert": [
-                "iframe, .html5-video-player, .has-custom-banner, #theater-background",
-                "#watch-appbar-playlist",
-                "*:not(.html5-video-player):not(.channel-header-profile-image-container):not(.html5-storyboard-filmstrip):not(.html5-storyboard-framepreview):not(.html5-storyboard-lens) > img"
+                ".html5-video-player, .has-custom-banner, #theater-background",
+                "#watch-appbar-playlist"
             ],
             "noinvert": [
+                ".html5-video-player *",
+                ".has-custom-banner *",
                 "#watch-appbar-playlist *"
             ]
         }

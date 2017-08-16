@@ -117,7 +117,7 @@ html {
         width: 100%;
         word-break: break-word;
         
-        &:before {
+        &::before {
             color: @color-input-fore;
             content: "Toggle ";
         }
@@ -180,7 +180,7 @@ html {
     > input[type=checkbox] {
         &:checked + .check {
             // Bigger check-mark
-            &:before {
+            &::before {
                 background-color: @color-fore;
                 height: 0.25em;
                 left: 0.25em;
@@ -188,7 +188,7 @@ html {
                 width: 0.5em;
             }
 
-            &:after {
+            &::after {
                 background-color: @color-fore;
                 height: 0.25em;
                 left: 0.75em;
@@ -205,8 +205,8 @@ html {
         margin: 0;
         width: @size-control-inner;
         // Cross
-        &:before,
-        &:after {
+        &::before,
+        &::after {
             background-color: @color-input-fore-placeholder;
             content: "";
             display: inline-block;
@@ -219,11 +219,11 @@ html {
             width: 1.5em;
         }
 
-        &:before {
+        &::before {
             transform: skewY(45deg);
         }
 
-        &:after {
+        &::after {
             transform: skewY(-45deg);
         }
     }

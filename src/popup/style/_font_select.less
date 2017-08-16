@@ -36,8 +36,8 @@
             .icon.down {
                 position: relative;
 
-                &:before,
-                &:after {
+                &::before,
+                &::after {
                     background-color: @color-input-fore-active;
                     content: "";
                     display: inline-block;
@@ -47,25 +47,26 @@
                     width: 0.75em;
                 }
 
-                &:before {
+                &::before {
                     left: 0.25em;
                     transform: skewY(45deg);
                 }
 
-                &:after {
+                &::after {
                     left: 1em;
                     transform: skewY(-45deg);
                 }
             }
         }
         
-        &:after {
+        &::after {
             opacity: 0;
             transition: opacity @time-slow;
         }
     }
 
     .fontList {
+        background-color: @color-back;
         max-height: 16em;
         transition: max-height @time-slow*2;
 
@@ -93,7 +94,7 @@
     }
     
     &.renderingFonts {
-        .fontSelectLine:after {
+        .fontSelectLine::after {
             color: @color-input-fore-placeholder;
             content: "Loading...";
             display: inline-block;

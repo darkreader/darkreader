@@ -25,9 +25,8 @@
             border-top: 0 solid @color-border;
             cursor: pointer;
             display: inline-block;
-            height: @size-control-inner;
-            line-height: @size-control-inner;
-            font-size: larger;
+            height: @size-control-inner*1.1;
+            line-height: @size-control-inner*1.1;
             font-weight: bold;
             //border-top: @size-border solid transparent;
             padding-bottom: 0;
@@ -39,6 +38,7 @@
 
             .text {
                 color: @color-border;
+                font-size: 1.2em;
             }
 
             &.active {
@@ -66,8 +66,8 @@
             }
         }
 
-        &:before,
-        &:after {
+        &::before,
+        &::after {
             border-bottom: @size-border solid @color-border;
             content: "";
             display: inline-block;

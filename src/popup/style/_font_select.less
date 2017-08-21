@@ -15,6 +15,7 @@
     border: @size-border solid @color-border;
     left: @fontSelectCheckboxMargin;
     margin: 0 !important;
+    overflow: hidden !important; // Hack: Chrome 62 fix.
     position: absolute;
     top: 0;
     width: @size-content-width - @fontSelectCheckboxMargin;

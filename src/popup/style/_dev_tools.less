@@ -1,0 +1,62 @@
+@import "_variables.less";
+
+/*---------------
+    Dev tools
+-----------------*/
+
+@dev-tools-top-padding: @size-logo-height + @size-indent-big;
+
+.DevTools {
+    background: @color-back;
+    bottom: -10em - @size-indent-big - @size-content-padding;
+    height: 10em;
+    margin-bottom: @size-content-padding;
+    overflow: visible !important;
+    position: absolute;
+    transition: bottom @time-slow, height @time-slow;
+    width: @size-content-width;
+    z-index: 3;
+    
+    &.open {
+        bottom: 0;
+        height: @size-content-height - @dev-tools-top-padding;
+    }
+
+    .devToolsTitle {
+        font-size: 1.2em;
+    }
+
+    .devToolsCloseButton {
+        cursor: pointer;
+        position: absolute;
+        right: 0;
+        top: 0;
+    }
+
+    .inversionFixEditor {
+
+        .TextArea {
+            font-family: monospace;
+            margin-bottom: @size-indent-small;
+            white-space: pre;
+        }
+
+        .Button {
+            border: @size-border solid @color-border;
+            cursor: pointer;
+            width: 100%;
+            &:not(:first-child) {
+                margin-left: @size-indent-small;
+            }
+        }
+
+        .inversionFixErrorText {
+            color: @color-error;
+            user-select: initial;
+
+            &:empty {
+                display: none;
+            }
+        }
+    }
+}

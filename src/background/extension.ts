@@ -416,6 +416,47 @@ style && style.parentElement.removeChild(style);
                 onReturned(fonts);
             });
         }
+
+
+        //-------------------------------------
+        //
+        //          Developer tools
+        //
+        //-------------------------------------
+
+        protected getSavedDevInversionFixes() {
+            return localStorage.getItem('dev_inversion_fixes') || null;
+        }
+
+        protected saveDevInversionFixes(json: string) {
+            localStorage.setItem('dev_inversion_fixes', json);
+        }
+
+        getDevInversionFixesText() {
+            var fixes = this.getSavedDevInversionFixes();
+            var text = formatJson(fixes ? JSON.parse(fixes) : copyJson(RAW_INVERSION_FIXES));
+            return text;
+        }
+
+        resetDevInversionFixes() {
+            localStorage.removeItem('dev_inversion_fixes');
+            handleInversionFixes(copyJson(RAW_INVERSION_FIXES));
+            this.onConfigPropChanged();
+        }
+
+        applyDevInversionFixes(json: string, callback: (err: Error) => void) {
+            var obj;
+            try {
+                obj = JSON.parse(json);
+                var text = formatJson(obj);
+                this.saveDevInversionFixes(text);
+                handleInversionFixes(obj);
+                this.onConfigPropChanged();
+                callback(null);
+            } catch (err) {
+                callback(err);
+            }
+        }
     }
 
     //

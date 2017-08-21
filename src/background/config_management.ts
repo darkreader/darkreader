@@ -34,6 +34,11 @@
      */
     export var INVERSION_FIXES: InversionFixes;
 
+    /**
+     * Raw inversion fixes (for editing purposes).
+     */
+    export var RAW_INVERSION_FIXES: any;
+
     //
     // ----- Load configs ------
 
@@ -58,7 +63,7 @@
                     return readJson<string[]>({
                         url: CONFIG_URLs.darkSites.local
                     });
-                }).then((res) => DARK_SITES = handleDarkSites(res)),
+                }).then((res) => handleDarkSites(res, onInvalidData)),
 
                 //
                 // Load inversion fixes
@@ -73,14 +78,17 @@
                     return readJson<InversionFixes>({
                         url: CONFIG_URLs.inversionFixes.local
                     });
-                }).then((res) => INVERSION_FIXES = handleInversionFixes(res)),
+                }).then((res) => {
+                    RAW_INVERSION_FIXES = res;
+                    handleInversionFixes(copyJson(res), onInvalidData);
+                }),
 
                 //
                 // Load default filter config
 
                 readJson<FilterConfig>({
                     url: CONFIG_URLs.defaultFilterConfig.local
-                }).then((res) => DEFAULT_FILTER_CONFIG = handleFilterConfig(res))
+                }).then((res) => handleFilterConfig(res, onInvalidData))
 
             ]).then(() => done && done(),
                 (err) => console.error('Fatality', err));
@@ -90,17 +98,20 @@
                 // Load dark sites
                 readJson<string[]>({
                     url: CONFIG_URLs.darkSites.local
-                }).then((res) => DARK_SITES = handleDarkSites(res)),
+                }).then((res) => handleDarkSites(res, onInvalidData)),
 
                 // Load sites fixes
                 readJson<InversionFixes>({
                     url: CONFIG_URLs.inversionFixes.local
-                }).then((res) => INVERSION_FIXES = handleInversionFixes(res)),
+                }).then((res) => {
+                    RAW_INVERSION_FIXES = res;
+                    handleInversionFixes(copyJson(res), onInvalidData);
+                }),
 
                 // Load default filter config
                 readJson<FilterConfig>({
                     url: CONFIG_URLs.defaultFilterConfig.local
-                }).then((res) => DEFAULT_FILTER_CONFIG = handleFilterConfig(res))
+                }).then((res) => handleFilterConfig(res, onInvalidData))
 
             ]).then(() => done && done(),
                 (err) => console.error('Fatality', err));
@@ -112,73 +123,72 @@
             if (DEBUG) throw new Error(desc);
             console.error('Invalid data: ' + desc);
         }
-        function handleDarkSites(sites: string[]) {
-            // Validate sites
-            if (!Array.isArray(sites)) {
-                sites = [];
-                onInvalidData('Dark Sites list is not an array.');
-            }
-            for (var i = sites.length - 1; i >= 0; i--) {
-                if (typeof sites[i] !== 'string') {
-                    sites.splice(i, 1);
-                }
-            }
-            sites.sort(urlTemplateSorter);
-            return sites;
-        }
-        function handleInversionFixes(fixes: InversionFixes) {
-            // Validate fixes
-            if (fixes === null || typeof fixes !== 'object') {
-                fixes = {
-                    common: <any>{},
-                    sites: []
-                };
-                onInvalidData('Inversion Fix config is not an object.')
-            }
-            if (!fixes.common) {
-                fixes.common = <any>{};
-            }
-            fixes.common.invert = toStringArray(fixes.common.invert);
-            fixes.common.noinvert = toStringArray(fixes.common.noinvert);
-            fixes.common.removebg = toStringArray(fixes.common.removebg);
-            fixes.common.rules = toStringArray(fixes.common.rules);
-            if (!Array.isArray(fixes.sites)) {
-                fixes.sites = [];
-            }
-            for (var i = fixes.sites.length - 1; i >= 0; i--) {
-                let s = fixes.sites[i];
-                if (!isStringOrArray(s.url)) {
-                    fixes.sites.splice(i, 1);
-                    continue;
-                }
-                s.invert = toStringArray(s.invert);
-                s.noinvert = toStringArray(s.noinvert);
-                s.removebg = toStringArray(s.removebg);
-                s.rules = toStringArray(s.rules);
-            }
+    }
 
-            // Add common selectors and rules
-            fixes.sites.forEach((s) => {
-                s.invert = fixes.common.invert.concat(s.invert);
-                s.noinvert = fixes.common.noinvert.concat(s.noinvert);
-                s.removebg = fixes.common.removebg.concat(s.removebg);
-                s.rules = fixes.common.rules.concat(s.rules);
-            });
-
-            return fixes;
+    function handleDarkSites(sites: string[], onerror?: (err: string) => void) {
+        // Validate sites
+        if (!Array.isArray(sites)) {
+            sites = [];
+            onerror && onerror('Dark Sites list is not an array.');
         }
-        function handleFilterConfig(config: FilterConfig) {
-            if (config === null || typeof config !== 'object') {
-                config = DEFAULT_FILTER_CONFIG;
-            } else {
-                for (var prop in DEFAULT_FILTER_CONFIG) {
-                    if (typeof config[prop] !== typeof DEFAULT_FILTER_CONFIG[prop]) {
-                        onInvalidData(`Invalid config property "${prop}"`);
-                        config[prop] = DEFAULT_FILTER_CONFIG[prop];
-                    }
+        for (var i = sites.length - 1; i >= 0; i--) {
+            if (typeof sites[i] !== 'string') {
+                sites.splice(i, 1);
+            }
+        }
+        sites.sort(urlTemplateSorter);
+        DARK_SITES = sites;
+    }
+    export function handleInversionFixes(fixes: InversionFixes, onerror?: (err: string) => void) {
+        // Validate fixes
+        if (fixes === null || typeof fixes !== 'object') {
+            fixes = {
+                common: <any>{},
+                sites: []
+            };
+            onerror && onerror('Inversion Fix config is not an object.')
+        }
+        if (!fixes.common) {
+            fixes.common = <any>{};
+        }
+        fixes.common.invert = toStringArray(fixes.common.invert);
+        fixes.common.noinvert = toStringArray(fixes.common.noinvert);
+        fixes.common.removebg = toStringArray(fixes.common.removebg);
+        fixes.common.rules = toStringArray(fixes.common.rules);
+        if (!Array.isArray(fixes.sites)) {
+            fixes.sites = [];
+        }
+        for (var i = fixes.sites.length - 1; i >= 0; i--) {
+            let s = fixes.sites[i];
+            if (!isStringOrArray(s.url)) {
+                fixes.sites.splice(i, 1);
+                continue;
+            }
+            s.invert = toStringArray(s.invert);
+            s.noinvert = toStringArray(s.noinvert);
+            s.removebg = toStringArray(s.removebg);
+            s.rules = toStringArray(s.rules);
+        }
+
+        // Add common selectors and rules
+        fixes.sites.forEach((s) => {
+            s.invert = fixes.common.invert.concat(s.invert);
+            s.noinvert = fixes.common.noinvert.concat(s.noinvert);
+            s.removebg = fixes.common.removebg.concat(s.removebg);
+            s.rules = fixes.common.rules.concat(s.rules);
+        });
+
+        INVERSION_FIXES = fixes;
+    }
+    function handleFilterConfig(config: FilterConfig, onerror?: (err: string) => void) {
+        if (config !== null && typeof config === 'object') {
+            for (var prop in DEFAULT_FILTER_CONFIG) {
+                if (typeof config[prop] !== typeof DEFAULT_FILTER_CONFIG[prop]) {
+                    onerror && onerror(`Invalid config property "${prop}"`);
+                    config[prop] = DEFAULT_FILTER_CONFIG[prop];
                 }
             }
-            return config;
+            DEFAULT_FILTER_CONFIG = config;
         }
     }
 
@@ -429,5 +439,13 @@
             return [<string>value];
         }
         return [];
+    }
+
+    export function formatJson(obj) {
+        return JSON.stringify(obj, null, 4) + '\n';
+    }
+
+    export function copyJson(obj) {
+        return JSON.parse(JSON.stringify(obj));
     }
 }

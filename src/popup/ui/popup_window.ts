@@ -2,7 +2,7 @@
 
     export class PopupWindow extends xp.Window {
         constructor(ext: Extension) {
-            super({ title: 'Dark Reader settings', scope: ext }, [
+            super({ title: 'Dark Reader settings', scope: ext, scrollBar: 'none' }, [
 
                 //
                 // ---- Logo ----
@@ -134,7 +134,7 @@
                                 : 'off'
                         }),
                     ]),
-                    
+
                     //
                     // ---- Font ----
 
@@ -195,19 +195,49 @@
                     ])
 
                 ]),
-                
-                //
-                // ---- Title ----
 
-                new xp.Html({
-                    flex: 'none',
-                    html: `
-                    <p class="description">Some things should not be inverted?
-                        Please, send a website address at
-                        <strong>darkReaderApp@gmail.com</strong></p>
-                    `,
-                    enabled: '{enabled}'
-                }),
+                //
+                // ---- Footer ----
+
+                new xp.VBox({ name: 'footer', flex: 'none', itemsIndent: 'none' }, [
+                    new xp.Html({
+                        flex: 'none',
+                        html: `
+                        <p class="description">Some things should not be inverted?
+                            You can <strong>help and fix it</strong>, here is a tool
+                        `,
+                        enabled: '{enabled}'
+                    }),
+                    new xp.Button({
+                        text: '🛠 Open developer tools',
+                        onClick: () => this.devTools.isOpen = true
+                    })
+                ]),
+
+                //
+                // ---- Dev Tools ----
+
+                new DevTools({
+                    init: (dt) => this.devTools = dt,
+                    isOpen: false,
+                    inversionFixText: ext.getDevInversionFixesText(),
+                    onApply: (text) => {
+                        ext.applyDevInversionFixes(text, (err) => {
+                            if (err) {
+                                this.devTools.inversionFixErrorText = err.message;
+                                // Todo: Highlight error.
+                            } else {
+                                this.devTools.inversionFixErrorText = '';
+                                this.devTools.inversionFixText = ext.getDevInversionFixesText();
+                            }
+                        });
+                    },
+                    onReset: () => {
+                        ext.resetDevInversionFixes();
+                        this.devTools.inversionFixErrorText = '';
+                        this.devTools.inversionFixText = ext.getDevInversionFixesText();
+                    }
+                })
             ]);
 
             this.initSiteToggleButton(this.siteToggle, ext);
@@ -215,6 +245,7 @@
 
         private siteList: SiteList;
         private siteToggle: xp.Button;
+        private devTools: DevTools;
 
         protected getTemplate() {
             // Clear body

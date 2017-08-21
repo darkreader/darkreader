@@ -11,6 +11,7 @@
 }
 
 @import "_variables.less";
+@import "_dev_tools.less";
 @import "_font_select.less";
 @import "_site_list.less";
 @import "_tab_panel.less";
@@ -22,7 +23,8 @@
 ------------*/
 
 html {
-    height: auto;
+    height: initial;
+    overflow: hidden;
 }
 
 .Window, body {
@@ -33,7 +35,7 @@ html {
     font-size: 75%; // Chrome Extension font size
     height: @size-content-height;
     margin: 0;
-    padding: 1.5em;
+    padding: @size-content-padding;
     position: relative;
     width: @size-content-width;
 
@@ -53,7 +55,7 @@ html {
 #logo {
     display: inline-block;
     flex: none;
-    height: 2em;
+    height: @size-logo-height;
 }
 
 
@@ -290,5 +292,20 @@ html {
         &:active {
             background-color: @color-active;
         }
+    }
+}
+
+
+/*------------
+    Footer
+-------------*/
+
+#footer {
+    .description {
+        margin-bottom: 0.25em;
+    }
+    .Button {
+        border: @size-border solid @color-border;
+        cursor: pointer;
     }
 }

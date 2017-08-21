@@ -1,4 +1,5 @@
 {
+    "OBSOLETE": "use fix_inversion.json",
     "commonSelectors": [
         "img, iframe, video, *:not(object):not(body)>embed, object",
         "svg image",

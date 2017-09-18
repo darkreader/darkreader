@@ -2,14 +2,13 @@
     "common": {
         "invert": [
             "img, iframe, video, :not(object):not(body)>embed, object",
+            "canvas",
             "svg image",
-            "[style*='background:url'], [style*='background-image:url']",
-            "[style*='background: url'], [style*='background-image: url']",
+            ":not(input)[style*='background'][style*='url']",
             "twitterwidget"
         ],
         "noinvert": [
-            "[style*='background:url'] *, [style*='background-image:url'] *",
-            "[style*='background: url'] *, [style*='background-image: url'] *"
+            "[style*='background'][style*='url'] *"
         ],
         "removebg": [
             "iframe:not([title='Disqus'])"

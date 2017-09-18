@@ -1,9 +1,14 @@
 ﻿module DarkReader.Popup {
-    
+
     // Create window
     export var popupWindow: PopupWindow;
 
-    if ((<any>window).chrome && (<any>window).chrome.extension) {
+    // Edge fix
+    if ((<any>window).chrome && !chrome.extension && (<any>window).browser && (<any>window).browser.extension) {
+        chrome.extension = (<any>window).browser.extension;
+    }
+
+    if ((<any>window).chrome && chrome.extension) {
         // Access extension from the background
         var background = <typeof DarkReader.Background>(<any>chrome.extension.getBackgroundPage()).DarkReader.Background;
 
@@ -16,7 +21,7 @@
             };
             background.onExtensionLoaded.addHandler(onExtLoaded);
         }
-    
+
         // Remove popup and unbind from model
         window.addEventListener('unload', (e) => {
             popupWindow.scope = null;

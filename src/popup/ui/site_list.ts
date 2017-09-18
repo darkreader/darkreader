@@ -95,6 +95,8 @@
          */
         focus() {
             this.children[this.children.length - 1].focus();
+            const container = this.parent.domElement;
+            container.scrollTop = container.scrollHeight;
         }
     }
 

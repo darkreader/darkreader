@@ -252,6 +252,9 @@
                 ".html5-video-player *",
                 ".has-custom-banner *",
                 "#watch-appbar-playlist *"
+            ],
+            "rules": [
+                "#scrim.app-drawer { background: rgba(255, 255, 255, 0.5); }"
             ]
         }
     ]

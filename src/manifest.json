@@ -2,10 +2,14 @@
     "manifest_version": 2,
     "name": "Dark Reader",
     "version": "3.4.3",
+    "author": "Alexander Shutov",
     "description": "Care your eyes, invert page colors, use dark theme for night and daily browsing.",
     "browser_action": {
         "default_title": "Dark Reader",
-        "default_icon": "img/dr_active_38.png",
+        "default_icon": {
+            "38": "img/dr_active_38.png",
+            "19": "img/dr_active_19.png"
+        },
         "default_popup": "popup/popup.html"
     },
     "icons": {
@@ -14,6 +18,7 @@
         "128": "img/dr_128.png"
     },
     "background": {
+        "persistent": true,
         "page": "background/background.html"
     },
     "permissions": [

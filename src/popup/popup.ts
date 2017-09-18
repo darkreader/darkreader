@@ -32,9 +32,6 @@
         popupWindow = getMockPopup();
     }
 
-    // Disable text selection
-    document.onselectstart = (e) => false;
-
     /**
      * Mock for tests.
      */
@@ -63,7 +60,7 @@
                 'Segoe UI',
                 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'
             ],
-            getActiveTabInfo: function(callback) { callback({ host: 'server1.mail.veryverylongnameveryverylongnameveryverylongnameveryverylongname.com' }); }
+            getActiveTabInfo: function (callback) { callback({ host: 'server1.mail.veryverylongnameveryverylongnameveryverylongnameveryverylongname.com' }); }
         }));
     }
 }

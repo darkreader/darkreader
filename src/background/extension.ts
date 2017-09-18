@@ -410,7 +410,7 @@ style && style.parentElement.removeChild(style);
          * installed in system.
          */
         protected getFontList(onReturned: (fonts: string[]) => void) {
-            if (typeof chrome.fontSettings !== 'function') {
+            if (!chrome.fontSettings) {
                 // Todo: Remove it as soon as Firefox and Edge get support.
                 setTimeout(() => onReturned([
                     'serif',

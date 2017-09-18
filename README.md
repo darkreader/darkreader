@@ -11,9 +11,55 @@ This extension **inverts brightness** of web pages and aims to **reduce eyestrai
 
 If some site is **already dark**, you can **add it to [dark_sites.json](https://github.com/alexanderby/darkreader/blob/master/src/config/dark_sites.json) file** *(please, preserve alphabetical order)*.
 
-If some **parts** of web-pages are **wrongly inverted**, you can specify necessary **CSS selectors** at **[sites_fixes_v2.json](https://github.com/alexanderby/darkreader/blob/master/src/config/sites_fixes_v2.json) file** *(please, preserve alphabetical order by URL, use short selectors, preserve whitespace indentation and code style)*.
+If some **parts** of web-pages are **wrongly inverted**, you can specify necessary **CSS selectors** at **[fix_inversion.json](https://github.com/alexanderby/darkreader/blob/master/src/config/fix_inversion.json) file** *(please, preserve alphabetical order by URL, use short selectors, preserve whitespace indentation and code style)*.
 
 Notice that merged changes to these files are automatically delivered to all users **within 15 minutes**.
+
+#### Using Dev Tools
+
+- Open **Chrome Dev Tools** (F12).
+- Click on **element picker** (top-left corner).
+- Pick wrongly inverted element.
+- Choose a **[selector](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Selectors)** for that element or all similar elements (e.g. if element has `class="x-icon small"` selector may look like `.x-icon`).
+- Click **Dark Reader icon**.
+- Click **Open developer tools** (at bottom).
+- Under `sites` section add a block containing URL and selectors to invert.
+```json
+...
+"sites": [
+    {
+        "url": "example.com",
+        "invert": ".x-icon"
+    }
+]
+```
+- It is also possible to specify multiple selectors (comma-separated list or an array) and custom CSS rules. If chosen element contains images or other content that becomes wrongly displayed, `noinvert` rule can be used. `removebg` removes background image from element.
+```json
+...
+"sites": [
+    {
+        "url": "example.com",
+        "invert": [
+            ".x-icon, .x-button",
+            "#player .player-button"
+        ],
+        "noinvert": "#player *",
+        "removebg": ".bg-photo",
+        "rules": ".overlay { background: rgba(255,255,255,0.5); }"
+    }
+]
+```
+- Click **Apply**.
+- If the **fix worked** open **[fix_inversion.json](https://github.com/alexanderby/darkreader/blob/master/src/config/fix_inversion.json) file**.
+- Click **edit** (sign-in to GitHub first).
+- **Insert your fix** there. Preserve **alphabetical order** by URL, use 4 spaces for indentation.
+- Provide a **short description** of what you have done.
+- Click **Propose file change**.
+- Review your changes. Click **Create pull request**.
+- The Travis CI will run tests reviewing your changes.
+- If you see a **red cross** click **Details** and see what is wrong.
+- When you see a **green checkmark** than everything is fine.
+- Dark Reader developer will **review** and merge your changes making them available for all users.
 
 ### Adding new features or fixing bugs
 

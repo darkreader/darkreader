@@ -55,7 +55,17 @@ module DarkReader.Popup {
                             text: 'Apply',
                             onClick: () => markup.onApply(this.inversionFixText)
                         })
-                    ])
+                    ]),
+
+                    new xp.Html({
+                        html: `
+                            <div class="description selectable">
+                                Read about this tool <strong><a href="https://github.com/alexanderby/darkreader#how-to-contribute" target="_blank">here</a></strong>. If a <strong>popular</strong>
+                                website looks incorrect e-mail to
+                                <strong>DarkReaderApp@gmail.com</strong>
+                            </div>
+                        `
+                    })
                 ])
 
             ]);

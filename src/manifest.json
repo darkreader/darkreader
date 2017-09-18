@@ -1,4 +1,10 @@
 ﻿{
+    "applications": {
+        "gecko": {
+            "id": "addon@darkreader.com",
+            "strict_min_version": "42.0"
+        }
+    },
     "manifest_version": 2,
     "name": "Dark Reader",
     "version": "3.4.3",

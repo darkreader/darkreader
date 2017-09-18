@@ -31,7 +31,7 @@
   },
   "homepage": "https://github.com/alexanderby/darkreader",
   "devDependencies": {
-    "create-grunt-tasks": "^0.7.1",
+    "create-grunt-tasks": "^0.8.0",
     "grunt": "^0.4.5",
     "grunt-concurrent": "^2.0.0",
     "grunt-contrib-clean": "^0.6.0",

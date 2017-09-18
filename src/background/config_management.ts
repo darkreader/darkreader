@@ -21,7 +21,10 @@
     };
     var REMOTE_TIMEOUT_MS = 10 * 1000;
     var RELOAD_INTERVAL_MS = 15 * 60 * 1000;
-    export var DEBUG = chrome.runtime.id !== 'eimadpbcbfnmbkopoojfekhnkhdbieeh';
+    export var DEBUG = [
+        'eimadpbcbfnmbkopoojfekhnkhdbieeh',
+        'addon@darkreader.org'
+    ].indexOf(chrome.runtime.id) < 0;
     var DEBUG_LOCAL_CONFIGS = DEBUG;
 
     /**

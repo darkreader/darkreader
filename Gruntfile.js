@@ -1,9 +1,9 @@
 module.exports = function (grunt) {
     require('create-grunt-tasks')(grunt, function (create) {
-        
+
         //
         // --- Release task ---
-        
+
         create.task('release')
             .sub('clean', [
                 'build/'
@@ -41,11 +41,41 @@ module.exports = function (grunt) {
                 dest: 'build.zip',
                 compression: 'DEFLATE'
             })
+            // Firefox
+            .sub('clean', 'build-firefox')
+            .sub('copy', {
+                expand: true,
+                cwd: 'build/',
+                src: '**/*.*',
+                dest: 'build-firefox/'
+            })
+            .sub('copy', {
+                expand: true,
+                cwd: 'src/',
+                src: 'manifest.json',
+                dest: 'build-firefox/',
+                options: {
+                    process: (content) => {
+                        const fs = require('fs');
+                        const path = require('path');
+                        const obj = JSON.parse(content);
+                        const ff = fs.readFileSync('src/manifest_firefox.json');
+                        const ext = JSON.parse(ff);
+                        Object.assign(obj, ext);
+                        return JSON.stringify(obj, null, 4);
+                    }
+                }
+            })
+            .sub('zip', {
+                src: ['build-firefox/**/*.*'],
+                dest: 'build-firefox.zip',
+                compression: 'DEFLATE'
+            })
             .sub('ext-reload');
 
         //
         // --- Debug tasks ---
-        
+
         create.task('debug')
             .sub('debug-js')
             .sub('debug-css')
@@ -70,9 +100,9 @@ module.exports = function (grunt) {
                     paths: ['src/']
                 }
             });
-            
+
         // ---- Watch ----
-            
+
         create.task('debug-watch')
             .sub('concurrent', {
                 tasks: ['debug-watch-js', 'debug-watch-css', 'debug-watch-other'],
@@ -100,7 +130,7 @@ module.exports = function (grunt) {
                 files: ['src/**/*.less'],
                 tasks: ['debug-css', 'ext-reload']
             });
-            
+
         create.task('debug-watch-other')
             .sub('watch', {
                 files: ['src/**/*.{json,html,png,svg,ttf}'],
@@ -147,7 +177,7 @@ module.exports = function (grunt) {
                     closeServer();
                 });
                 server.listen(8890);
-                
+
                 // Close server if no listeners
                 setTimeout(function () {
                     grunt.log.writeln('Auto-reloader did not connect.');

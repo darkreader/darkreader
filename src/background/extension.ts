@@ -410,6 +410,18 @@ style && style.parentElement.removeChild(style);
          * installed in system.
          */
         protected getFontList(onReturned: (fonts: string[]) => void) {
+            if (typeof chrome.fontSettings !== 'function') {
+                // Todo: Remove it as soon as Firefox and Edge get support.
+                setTimeout(() => onReturned([
+                    'serif',
+                    'sans-serif',
+                    'monospace',
+                    'cursive',
+                    'fantasy',
+                    'system-ui'
+                ]));
+                return;
+            }
             chrome.fontSettings.getFontList((res) => {
                 // id or name?
                 var fonts = res.map((r) => r.fontId);

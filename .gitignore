@@ -11,6 +11,8 @@
 #-----------------------------------
 build/*
 build.zip
+build-firefox/*
+build-firefox.zip
 
 #Node.js modules
 #-----------------------------------

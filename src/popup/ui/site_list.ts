@@ -66,7 +66,7 @@
                             // Add new site
                             this.sites.push(value);
                             textBox.text = '';
-                            textBox.focus();
+                            this.focus();
                         }
                     }
                     else {

@@ -1,8 +1,9 @@
 {
     "common": {
         "invert": [
-            "img, iframe, video, :not(object):not(body)>embed, object",
+            "img, video, :not(object):not(body)>embed, object",
             "canvas",
+            "iframe:not([title='Disqus'])",
             "svg image",
             ":not(input)[style*='background'][style*='url']",
             "twitterwidget"

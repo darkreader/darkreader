@@ -37,6 +37,10 @@
             ]
         },
         {
+            "url": "docs.google.com",
+            "noinvert": "canvas"
+        },
+        {
             "url": "facebook.com",
             "invert": [
                 "._3ixn, ._2teu, .uiStreamStory",

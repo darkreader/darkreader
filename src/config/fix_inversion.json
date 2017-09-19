@@ -5,14 +5,11 @@
             "canvas",
             "iframe",
             "svg image",
-            "[style*='background:url'], [style*='background-image:url']",
-            "[style*='background: url'], [style*='background-image: url']",
+            ":not(input)[style*='background'][style*='url']",
             "twitterwidget"
         ],
         "noinvert": [
-            "[style*='background:url'], [style*='background-image:url']",
-            "[style*='background: url'], [style*='background-image: url']",
-            "input"
+            "[style*='background'][style*='url'] *"
         ],
         "removebg": [],
         "rules": [
@@ -258,6 +255,7 @@
             ],
             "noinvert": [
                 ".html5-video-player *",
+                ".html5-video-player [style*='background'][style*='url']",
                 ".has-custom-banner *",
                 "#watch-appbar-playlist *"
             ],

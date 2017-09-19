@@ -11,6 +11,7 @@
         "noinvert": [
             "[style*='background'][style*='url'] *"
         ],
+        "removebg": [],
         "rules": [
             "#disqus_thread > :first-child { background: black !important; }"
         ]

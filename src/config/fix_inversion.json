@@ -3,7 +3,7 @@
         "invert": [
             "img, video, :not(object):not(body)>embed, object",
             "canvas",
-            "iframe:not([title='Disqus'])",
+            "iframe",
             "svg image",
             ":not(input)[style*='background'][style*='url']",
             "twitterwidget"
@@ -11,10 +11,9 @@
         "noinvert": [
             "[style*='background'][style*='url'] *"
         ],
-        "removebg": [
-            "iframe:not([title='Disqus'])"
-        ],
-        "rules": []
+        "rules": [
+            "#disqus_thread > :first-child { background: black !important; }"
+        ]
     },
     "sites": [
         {

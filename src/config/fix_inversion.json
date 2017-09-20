@@ -201,10 +201,11 @@
         {
             "url": "twitch.tv",
             "invert": [
-                "#site_footer, #carousel_background::after, #left_col, .player, .badge"
+                "#site_footer, #carousel_background::after, #left_col, .player, .badge",
+                ".social-column, .top-nav"
             ],
             "noinvert": [
-                ".player *"
+                ".player *, .social-column *, .top-nav *"
             ],
             "removebg": [
                 "#carousel, .chat-container, .conversations-list-header",

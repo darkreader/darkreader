@@ -40,6 +40,15 @@
             ]
         },
         {
+            "url": "ebay.com",
+            "invert": [
+                "body[style*='background-image: url'] img",
+                "body[style*='background-image: url'] video",
+                "body[style*='background-image: url'] [style*='background-image: url']"
+            ],
+            "noinvert": "body[style*='background-image: url']"
+        },
+        {
             "url": "facebook.com",
             "invert": [
                 "._3ixn, ._2teu, .uiStreamStory",

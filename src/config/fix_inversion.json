@@ -2,7 +2,6 @@
     "common": {
         "invert": [
             "img, video, :not(object):not(body)>embed, object",
-            "canvas",
             "iframe",
             "svg image",
             "[style*='background:url'], [style*='background-image:url']",
@@ -39,10 +38,6 @@
             "invert": [
                 "div.orb-nav-section.orb-nav-blocks > a > img"
             ]
-        },
-        {
-            "url": "docs.google.com",
-            "noinvert": "canvas"
         },
         {
             "url": "facebook.com",

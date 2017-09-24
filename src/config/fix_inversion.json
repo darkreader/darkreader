@@ -238,7 +238,7 @@
                 "#logoBlock, #navigation, #moderatorBar, #unityhacks_sidebar, #exposeMask",
                 ".banner_owner, .banner_staff, .banner_supportleader, .banner_supporter",
                 ".banner_designer, .banner_honorable, .banner_premium",
-                ".PopupOpen, .categoryStrip, .secondaryContent h3, .callToAction, .sectionHeaders, .button",
+                ".PopupOpen, .categoryStrip, .secondaryContent h3, .callToAction, .sectionHeaders, .button, .xenOverlay .section .heading, .xenOverlay .sectionMain .heading overlayOnly",
                 ".messageHeading, .subHeading, .ToggleTrigger, .prefix, .xenTooltip, .activated, .redactor_dropdown",
                 "[title='Unread messages']",
                 "footer"

@@ -229,6 +229,22 @@
             "removebg": "html, body"
         },
         {
+            "url": "unityhacks.com",
+            "noinvert": [
+                "#logo *, #taigachat_toolbar *",
+                ".listItemText h3, .pollBlock .pollResult div, .pollBlock .pollResult h3, .redactor_MessageEditor"
+            ],
+            "invert": [
+                "#logoBlock, #navigation, #moderatorBar, #unityhacks_sidebar, #exposeMask",
+                ".banner_owner, .banner_staff, .banner_supportleader, .banner_supporter",
+                ".banner_designer, .banner_honorable, .banner_premium",
+                ".PopupOpen, .categoryStrip, .secondaryContent h3, .callToAction, .sectionHeaders, .button",
+                ".messageHeading, .subHeading, .ToggleTrigger, .prefix, .event .icon, .xenTooltip, .redactor_box",
+                "[title='Unread messages']",
+                "footer"
+            ]
+        },
+        {
             "url": "vk.com",
             "invert": [
                 "#video_player, .mv_playlist, .page_header_cont"

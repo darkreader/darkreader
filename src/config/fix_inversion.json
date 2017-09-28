@@ -6,12 +6,14 @@
             "svg image",
             "[style*='background:url'], [style*='background-image:url']",
             "[style*='background: url'], [style*='background-image: url']",
+            "[background]",
             "twitterwidget"
         ],
         "noinvert": [
             "[style*='background:url'] *, [style*='background-image:url'] *",
             "[style*='background: url'] *, [style*='background-image: url'] *",
-            "input"
+            "input",
+            "[background] *"
         ],
         "removebg": [],
         "rules": [

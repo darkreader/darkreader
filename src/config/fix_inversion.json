@@ -68,7 +68,7 @@
                 "google.*.*"
             ],
             "invert": [
-                ".gbii, .gbip, .azp, .aLF-aPX-KP, .irc_bg, .RY3tic, canvas.circle"
+                "table[background], .gbii, .gbip, .azp, .aLF-aPX-KP, .irc_bg, .RY3tic, canvas.circle"
             ],
             "noinvert": [
                 ".irc_mi, .irc_rii, .irc_mut, .amI, .amJ, .adk, .adj, [src*='ic_'], [src*='black']",

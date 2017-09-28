@@ -6,12 +6,14 @@
             "svg image",
             "[style*='background:url'], [style*='background-image:url']",
             "[style*='background: url'], [style*='background-image: url']",
+            "[background]",
             "twitterwidget"
         ],
         "noinvert": [
             "[style*='background:url'] *, [style*='background-image:url'] *",
             "[style*='background: url'] *, [style*='background-image: url'] *",
-            "input"
+            "input",
+            "[background] *"
         ],
         "removebg": [],
         "rules": [
@@ -68,7 +70,7 @@
                 "google.*.*"
             ],
             "invert": [
-                "table[background], .gbii, .gbip, .azp, .aLF-aPX-KP, .irc_bg, .RY3tic, canvas.circle"
+                ".gbii, .gbip, .azp, .aLF-aPX-KP, .irc_bg, .RY3tic, canvas.circle"
             ],
             "noinvert": [
                 ".irc_mi, .irc_rii, .irc_mut, .amI, .amJ, .adk, .adj, [src*='ic_'], [src*='black']",

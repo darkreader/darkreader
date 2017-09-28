@@ -42,7 +42,7 @@
             ]
         },
         {
-            "url": "ebay.com",
+            "url": "ebay.*",
             "invert": [
                 "body[style*='background-image: url'] img",
                 "body[style*='background-image: url'] video",

@@ -6,12 +6,14 @@
             "svg image",
             "[style*='background:url'], [style*='background-image:url']",
             "[style*='background: url'], [style*='background-image: url']",
+            "[background]",
             "twitterwidget"
         ],
         "noinvert": [
             "[style*='background:url'] *, [style*='background-image:url'] *",
             "[style*='background: url'] *, [style*='background-image: url'] *",
-            "input"
+            "input",
+            "[background] *"
         ],
         "removebg": [],
         "rules": [
@@ -40,7 +42,7 @@
             ]
         },
         {
-            "url": "ebay.com",
+            "url": "ebay.*",
             "invert": [
                 "body[style*='background-image: url'] img",
                 "body[style*='background-image: url'] video",
@@ -242,6 +244,9 @@
                 ".xenOverlay .section .heading, .xenOverlay .sectionMain .heading overlayOnly",
                 ".messageHeading, .subHeading, .ToggleTrigger, .prefix, .xenTooltip, .activated",
                 ".redactor_dropdown, .errorOverlay, .sectionHeaders, .button",
+                ".banner_designer, .banner_honorable, .banner_premium",
+                ".PopupOpen, .categoryStrip, .secondaryContent h3, .callToAction, .sectionHeaders, .button, .xenOverlay .section .heading, .xenOverlay .sectionMain .heading overlayOnly",
+                ".messageHeading, .subHeading, .ToggleTrigger, .prefix, .xenTooltip, .activated, .redactor_dropdown",
                 "[title='Unread messages']",
                 "footer"
             ]

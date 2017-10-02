@@ -234,20 +234,20 @@
             "url": "unityhacks.com",
             "noinvert": [
                 "#logo *, #taigachat_toolbar *",
-                ".listItemText h3, .pollBlock .pollResult div, .pollBlock .pollResult h3, .redactor_MessageEditor"
+                ".listItemText h3, .pollBlock .pollResult div",
+                ".pollBlock .pollResult h3, .redactor_MessageEditor"
             ],
             "invert": [
-                "#logoBlock, #navigation, #moderatorBar, #unityhacks_sidebar, #exposeMask",
-                ".banner_owner, .banner_staff, .banner_supportleader, .banner_supporter",
-                ".banner_partner, .banner_designer, .banner_honorable, .banner_premium",
-                ".PopupOpen, .categoryStrip, .secondaryContent h3, .callToAction",
-                ".xenOverlay .section .heading, .xenOverlay .sectionMain .heading overlayOnly",
-                ".messageHeading, .subHeading, .ToggleTrigger, .prefix, .xenTooltip, .activated",
+                "#unityhacks_sidebar, #exposeMask",
+                "#logoBlock, #navigation, #moderatorBar",
+                ".xenOverlay .sectionMain .heading overlayOnly",
+                ".banner_owner, .banner_staff, .banner_supportleader",
+                ".banner_supporter, .banner_partner, .banner_designer",
+                ".banner_promoter, .banner_honorable, .banner_premium",
+                ".messageHeading, .subHeading, .ToggleTrigger, .prefix",
+                ".callToAction, .xenOverlay .section .heading, .xenTooltip",
                 ".redactor_dropdown, .errorOverlay, .sectionHeaders, .button",
-                ".banner_designer, .banner_honorable, .banner_premium",
-                ".PopupOpen, .categoryStrip, .secondaryContent h3, .callToAction, .sectionHeaders",
-                ".button, .xenOverlay .section .heading, .xenOverlay .sectionMain .heading overlayOnly",
-                ".messageHeading, .subHeading, .ToggleTrigger, .prefix, .xenTooltip, .activated, .redactor_dropdown",
+                ".PopupOpen, .categoryStrip, .secondaryContent h3, .activated",
                 "[title='Unread messages']",
                 "footer"
             ]

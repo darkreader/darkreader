@@ -78,7 +78,8 @@
             ],
             "rules": [
                 ".pI { background: rgba(255,255,255,.7) !important; }",
-                ".eB { background: rgba(255,255,255,.4) !important; }"
+                ".eB { background: rgba(255,255,255,.4) !important; }",
+                ".aR { color: rgba(255,255,255,.7) !important; }"
             ]
         },
         {

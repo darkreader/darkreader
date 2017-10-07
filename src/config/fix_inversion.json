@@ -29,6 +29,12 @@
             "noinvert": "#footer *, #photo-modal *"
         },
         {
+            "url": "atlassian.net",
+            "invert": [
+                ".EditPage_withPanels_3Hr, #toolbar, #savebar-container"
+            ]
+        },
+        {
             "url": "basho.com",
             "invert": [
                 "#site-navigation, footer, header, .featured-news-wrapper",

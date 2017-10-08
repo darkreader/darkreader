@@ -205,6 +205,11 @@
             "noinvert": [
                 ".tau-app-secondary-pane *, .app-header *"
             ]
+        },{
+            "url": "tvtime.com",
+            "noinvert": [
+                ".page-sidebar *, .page-left *"
+            ]
         },
         {
             "url": "twitch.tv",

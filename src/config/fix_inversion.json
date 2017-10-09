@@ -207,6 +207,12 @@
             ]
         },
         {
+            "url": "tvtime.com",
+            "noinvert": [
+                ".page-sidebar *, .page-left *"
+            ]
+        },
+        {
             "url": "twitch.tv",
             "invert": [
                 "#site_footer, #carousel_background::after, #left_col, .player, .badge",

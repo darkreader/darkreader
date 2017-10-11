@@ -15,7 +15,9 @@
             "input",
             "[background] *"
         ],
-        "removebg": [],
+        "removebg": [
+            "img, iframe"
+        ],
         "rules": [
             "#disqus_thread > :first-child { background: black !important; }"
         ]

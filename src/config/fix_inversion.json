@@ -305,6 +305,12 @@
             "rules": [
                 "#scrim.app-drawer { background: rgba(255, 255, 255, 0.5); }"
             ]
+        },
+        {
+            "url": "fronter.com",
+            "rules": [
+                "html *{ background-color: white; }"
+            ]
         }
     ]
 }

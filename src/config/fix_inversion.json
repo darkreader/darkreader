@@ -16,7 +16,7 @@
             "[background] *"
         ],
         "removebg": [
-            "img, iframe"
+            "iframe"
         ],
         "rules": [
             "#disqus_thread > :first-child { background: black !important; }"
@@ -286,6 +286,10 @@
         {
             "url": "wikipedia.org",
             "noinvert": ".mwe-math-fallback-image-inline"
+        },
+        {
+            "url": "wikiwand.com",
+            "removebg": "img"
         },
         {
             "url": "wolfram.com",

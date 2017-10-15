@@ -125,6 +125,10 @@
             "removebg": ".ComposeContent"
         },
         {
+            "url": "medium.com",
+            "noinvert": ".canvas-renderer"
+        },
+        {
             "url": "messenger.com",
             "invert": "._4tsk"
         },

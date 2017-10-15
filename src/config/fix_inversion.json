@@ -16,7 +16,7 @@
             "[background] *"
         ],
         "removebg": [
-            "iframe"
+            "iframe:not([title='Disqus'])"
         ],
         "rules": [
             "#disqus_thread > :first-child { background: black !important; }"

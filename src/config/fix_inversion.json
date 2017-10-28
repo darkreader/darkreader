@@ -166,6 +166,10 @@
             ]
         },
         {
+            "url": "reactjs.org",
+            "invert": ".gatsby-highlight"
+        },
+        {
             "url": "reddit.com",
             "invert": "#header-img"
         },

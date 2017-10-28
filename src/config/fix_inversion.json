@@ -287,6 +287,15 @@
             ]
         },
         {
+            "url": "vuejs.org",
+            "invert": [
+                ".content, pre, h3, p"
+            ],
+            "noinvert": [
+                "img"
+            ]
+        },
+        {
             "url": "web.whatsapp.com",
             "invert": ".qrcode .icon-logo",
             "rules": ".qrcode { border: 8px solid black; }"

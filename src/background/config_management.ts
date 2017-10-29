@@ -1,4 +1,11 @@
-﻿module DarkReader {
+import { FilterConfig } from './filter_css_generator';
+
+export const configStore: {
+    DEFAULT_FILTER_CONFIG?: FilterConfig;
+    DARK_SITES?: string[];
+    INVERSION_FIXES?: InversionFixes;
+    RAW_INVERSION_FIXES?: any;
+} = {};
 
     //--------------------------------
     //
@@ -26,21 +33,6 @@
         'addon@darkreader.org'
     ].indexOf(chrome.runtime.id) < 0;
     var DEBUG_LOCAL_CONFIGS = DEBUG;
-
-    /**
-     * List of sites with dark theme (which should not be inverted).
-     */
-    export var DARK_SITES: string[];
-
-    /**
-     * Fixes for specific sites (selectors which should not be inverted).
-     */
-    export var INVERSION_FIXES: InversionFixes;
-
-    /**
-     * Raw inversion fixes (for editing purposes).
-     */
-    export var RAW_INVERSION_FIXES: any;
 
     //
     // ----- Load configs ------
@@ -82,7 +74,7 @@
                         url: CONFIG_URLs.inversionFixes.local
                     });
                 }).then((res) => {
-                    RAW_INVERSION_FIXES = res;
+                    configStore.RAW_INVERSION_FIXES = res;
                     handleInversionFixes(copyJson(res), onInvalidData);
                 }),
 
@@ -107,7 +99,7 @@
                 readJson<InversionFixes>({
                     url: CONFIG_URLs.inversionFixes.local
                 }).then((res) => {
-                    RAW_INVERSION_FIXES = res;
+                    configStore.RAW_INVERSION_FIXES = res;
                     handleInversionFixes(copyJson(res), onInvalidData);
                 }),
 
@@ -140,7 +132,7 @@
             }
         }
         sites.sort(urlTemplateSorter);
-        DARK_SITES = sites;
+        configStore.DARK_SITES = sites;
     }
     export function handleInversionFixes(fixes: InversionFixes, onerror?: (err: string) => void) {
         // Validate fixes
@@ -181,9 +173,10 @@
             s.rules = fixes.common.rules.concat(s.rules);
         });
 
-        INVERSION_FIXES = fixes;
+        configStore.INVERSION_FIXES = fixes;
     }
     function handleFilterConfig(config: FilterConfig, onerror?: (err: string) => void) {
+        const { DEFAULT_FILTER_CONFIG } = configStore;
         if (config !== null && typeof config === 'object') {
             for (var prop in DEFAULT_FILTER_CONFIG) {
                 if (typeof config[prop] !== typeof DEFAULT_FILTER_CONFIG[prop]) {
@@ -191,7 +184,7 @@
                     config[prop] = DEFAULT_FILTER_CONFIG[prop];
                 }
             }
-            DEFAULT_FILTER_CONFIG = config;
+            configStore.DEFAULT_FILTER_CONFIG = config;
         }
     }
 
@@ -219,6 +212,7 @@
      * @param url Site URL.
      */
     export function getFixesFor(url: string): InversionFix {
+        const { INVERSION_FIXES } = configStore;
         var found: SiteFix;
         if (url) {
             // Search for match with given URL
@@ -291,7 +285,7 @@
             }
             request.send();
         });
-        return promise;
+        return promise as Promise<T>;
     }
 
     interface JsonRequestParams<T> {
@@ -396,11 +390,13 @@
     /**
      * URL template sorter.
      */
-    export var urlTemplateSorter = (a: { url?: string }, b: { url?: string }) => {
-        if (typeof a === 'string')
-            a = { url: <string>a };
-        if (typeof b === 'string')
-            b = { url: <string>b };
+    export var urlTemplateSorter = ($a: { url?: string } | string, $b: { url?: string } | string) => {
+        let a: { url?: string };
+        let b: { url?: string };
+        if (typeof $a === 'string')
+            a = { url: <string>$a };
+        if (typeof $b === 'string')
+            b = { url: <string>$b };
         var slashIndexA = a.url.indexOf('/');
         var slashIndexB = b.url.indexOf('/');
         var addressA = a.url.replace('^', '').substring(0, slashIndexA);
@@ -451,4 +447,3 @@
     export function copyJson(obj) {
         return JSON.parse(JSON.stringify(obj));
     }
-}

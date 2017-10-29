@@ -7,19 +7,19 @@
     "browser_action": {
         "default_title": "Dark Reader",
         "default_icon": {
-            "38": "img/dr_active_38.png",
-            "19": "img/dr_active_19.png"
+            "38": "icons/dr_active_38.png",
+            "19": "icons/dr_active_19.png"
         },
-        "default_popup": "popup/popup.html"
+        "default_popup": "ui/popup/index.html"
     },
     "icons": {
-        "16": "img/dr_16.png",
-        "48": "img/dr_48.png",
-        "128": "img/dr_128.png"
+        "16": "icons/dr_16.png",
+        "48": "icons/dr_48.png",
+        "128": "icons/dr_128.png"
     },
     "background": {
         "persistent": true,
-        "page": "background/background.html"
+        "page": "background/index.html"
     },
     "permissions": [
         "fontSettings",

@@ -1,9 +1,10 @@
 {
   "name": "darkreader",
-  "version": "3.4.3",
+  "version": "3.5.0",
   "description": "Keep your eyes, Dark Reader",
   "scripts": {
-    "debug": "grunt debug && grunt debug-watch",
+    "debug": "grunt debug --stack",
+    "_debug": "grunt debug && grunt debug-watch",
     "release": "npm test && grunt release",
     "test": "node src/config/validate.js"
   },
@@ -12,33 +13,25 @@
     "type": "git",
     "url": "https://github.com/alexanderby/darkreader.git"
   },
-  "keywords": [
-    "dark",
-    "reader",
-    "chrome",
-    "extension",
-    "eye",
-    "care",
-    "invert",
-    "colors",
-    "high",
-    "contrast"
-  ],
   "author": "Alexander Shutov <shutovby@gmail.com> (http://shutov.by/)",
-  "license": "ISC",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/alexanderby/darkreader/issues"
   },
   "homepage": "https://github.com/alexanderby/darkreader",
   "devDependencies": {
+    "@alexlur/rollup-plugin-typescript": "^1.0.4",
+    "@types/chrome": "0.0.50",
     "create-grunt-tasks": "^0.8.0",
-    "grunt": "^0.4.5",
-    "grunt-concurrent": "^2.0.0",
-    "grunt-contrib-clean": "^0.6.0",
-    "grunt-contrib-copy": "^0.8.0",
-    "grunt-contrib-less": "^1.0.1",
-    "grunt-contrib-watch": "^0.6.1",
-    "grunt-typescript": "^0.6.2",
-    "grunt-zip": "^0.17.1"
+    "grunt": "^1.0.1",
+    "grunt-concurrent": "^2.3.1",
+    "grunt-contrib-clean": "^1.1.0",
+    "grunt-contrib-copy": "^1.0.0",
+    "grunt-contrib-less": "^1.4.1",
+    "grunt-contrib-watch": "^1.0.0",
+    "grunt-rollup": "^6.0.0",
+    "grunt-zip": "^0.17.1",
+    "malevic": "^0.8.4",
+    "typescript": "^2.5.3"
   }
 }

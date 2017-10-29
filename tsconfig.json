@@ -1,0 +1,16 @@
+{
+    "compilerOptions": {
+        "target": "es2015",
+        "baseUrl": ".",
+        "moduleResolution": "node",
+        "lib": [
+            "es2015",
+            "dom"
+        ],
+        "jsx": "react",
+        "jsxFactory": "html"
+    },
+    "exclude": [
+        "node_modules"
+    ]
+}

@@ -1,4 +1,4 @@
-module DarkReader.Popup {
+module _DarkReader.Popup {
 
     /**
      * Developer tools panel.

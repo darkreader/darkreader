@@ -8,11 +8,10 @@ module.exports = function (grunt) {
             .sub('clean', [
                 'build/'
             ])
-            .sub('typescript', {
+            .sub('ts', {
                 cwd: 'src',
                 src: 'src/**/*.ts',
-                dest: 'build/',
-                options: { target: 'es5' }
+                dest: 'build/'
             })
             .sub('less', {
                 files: {
@@ -78,27 +77,79 @@ module.exports = function (grunt) {
 
         create.task('debug')
             .sub('debug-js')
-            .sub('debug-css')
+            // .sub('debug-css')
+            .sub('debug-copy')
             .sub('ext-reload');
 
-        create.task('debug-js')
-            .sub('typescript', {
-                src: 'src/**/*.ts',
+        function createJSConfig({ input, output, globalName, dependencies = {} }) {
+            const depsNames = Object.keys(dependencies);
+            return {
                 options: {
-                    sourceMap: true,
-                    declaration: false,
-                    target: 'es5'
+                    format: 'iife',
+                    moduleName: globalName,
+                    useStrict: true,
+                    // sourceMap: 'inline',
+                    external: depsNames,
+                    globals: dependencies,
+                    plugins: [
+                        require('@alexlur/rollup-plugin-typescript')({
+                            typescript: require('typescript')
+                        })
+                    ]
+                },
+                files: {
+                    [output]: input
                 }
-            });
+            };
+        }
+
+        create.task('debug-js')
+            .sub('rollup', createJSConfig({
+                input: 'src/ui/popup/index.tsx',
+                output: 'debug/ui/popup/index.js',
+                globalName: 'DarkReader.UI.Popup',
+                dependencies: {
+                    'malevic': 'Malevic',
+                    'malevic/forms': 'Malevic.Forms'
+                }
+            }))
+            .sub('rollup', createJSConfig({
+                input: 'src/background/index.ts',
+                output: 'debug/background/index.js',
+                globalName: 'DarkReader.Background',
+            }));
 
         create.task('debug-css')
             .sub('less', {
                 files: {
-                    'src/popup/style/style.css': 'src/popup/style/style.less'
+                    'debug/ui/popup/style.css': 'src/popup/style/style.less'
                 },
                 options: {
                     paths: ['src/']
                 }
+            });
+
+        create.task('debug-copy')
+            .sub('copy', {
+                expand: true,
+                cwd: 'src/',
+                src: [
+                    'background/index.html',
+                    'config/**/*.*',
+                    'img/**/*.*',
+                    'ui/popup/index.html',
+                    'manifest.json',
+                ],
+                dest: 'debug/'
+            })
+            .sub('copy', {
+                expand: true,
+                cwd: 'node_modules/malevic/umd/',
+                src: [
+                    'index.js',
+                    'forms.js',
+                ],
+                dest: 'debug/lib/malevic/'
             });
 
         // ---- Watch ----
@@ -112,17 +163,9 @@ module.exports = function (grunt) {
             });
 
         create.task('debug-watch-js')
-            .sub('typescript', {
-                src: 'src/**/*.ts',
-                options: {
-                    sourceMap: true,
-                    declaration: false,
-                    target: 'es5',
-                    watch: {
-                        path: 'src',
-                        after: ['ext-reload']
-                    }
-                }
+            .sub('watch', {
+                files: ['src/**/*.ts'],
+                tasks: ['debug-js', 'ext-reload']
             });
 
         create.task('debug-watch-css')

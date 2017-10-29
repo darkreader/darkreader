@@ -1,12 +1,12 @@
-﻿module DarkReader.Background {
+import { Extension } from './extension';
+import { FilterCssGenerator } from './filter_css_generator';
+import { loadConfigs, DEBUG } from './config_management';
 
     // Initialize extension
-    export var extension: DarkReader.Extension;
-    export var onExtensionLoaded = new xp.Event<Extension>();
+    export var extension: Extension;
     loadConfigs(() => {
-        extension = new DarkReader.Extension(
-            new DarkReader.FilterCssGenerator());
-        onExtensionLoaded.invoke(extension);
+        extension = new Extension(
+            new FilterCssGenerator());
     });
 
     if (DEBUG) {
@@ -26,4 +26,3 @@
         };
         setTimeout(listen, 2000);
     }
-}

@@ -59,6 +59,12 @@
             "noinvert": "body[style*='background-image: url']"
         },
         {
+            "url": "evernote.com",
+            "noinvert": [
+                "iframe"
+            ]
+        },
+        {
             "url": "facebook.com",
             "invert": [
                 "._3ixn, ._2teu, .uiStreamStory",

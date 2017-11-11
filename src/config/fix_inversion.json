@@ -139,6 +139,10 @@
             "invert": "._4tsk"
         },
         {
+            "url": "na.op.gg",
+            "invert": ".__sprite"
+        },
+        {
             "url": "onliner.by",
             "invert": [
                 ".b-tile-main, .b-teasers-2__teaser, .news-tiles__subtitle",

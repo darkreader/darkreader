@@ -267,7 +267,7 @@
             "noinvert": [
                 "#logo *, #taigachat_toolbar *",
                 ".listItemText h3, .pollBlock .pollResult div",
-                ".pollBlock .pollResult h3, .redactor_MessageEditor"
+                ".pollBlock .pollResult h3"
             ],
             "invert": [
                 "#unityhacks_sidebar, #exposeMask",
@@ -277,9 +277,9 @@
                 ".banner_supporter, .banner_partner, .banner_designer",
                 ".banner_promoter, .banner_honorable, .banner_premium",
                 ".messageHeading, .subHeading, .ToggleTrigger, .prefix",
+                ".PopupOpen, .categoryStrip, .secondaryContent h3, .LTR",
                 ".callToAction, .xenOverlay .section .heading, .xenTooltip",
                 ".redactor_dropdown, .errorOverlay, .sectionHeaders, .button",
-                ".PopupOpen, .categoryStrip, .secondaryContent h3, .activated",
                 "[title='Unread messages']",
                 "footer"
             ]

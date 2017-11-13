@@ -184,6 +184,11 @@
             "invert": "#header-img"
         },
         {
+            "url": "semlar.com",
+            "invert": ".thumbnail, .col-sm-2, .img-rounded, #alert-list, .background-texture",
+            "noinvert": "img"
+        },
+        {
             "url": "shop.ubi.com",
             "invert": "#topNavbar, #UplayHeader"
         },

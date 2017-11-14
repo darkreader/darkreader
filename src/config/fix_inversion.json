@@ -50,6 +50,17 @@
             ]
         },
         {
+            "url": [
+                "bit-tech.net",
+                "forums.bit-tech.net"
+            ],
+            "invert": [
+                "div#subNav, div#anotherSubNav, .footerContainer, div.footer, #bitFooter, .nodeIcon",
+                "li.navTab.forums.selected, li.navTab.xengallery.selected, li.navTab.members.selected"
+            ],
+            "removebg": "#blurBackground, .background-image, #headerMover, #loginBar"
+        },
+        {
             "url": "ebay.*",
             "invert": [
                 "body[style*='background-image: url'] img",

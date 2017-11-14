@@ -16,7 +16,7 @@
             "[background] *"
         ],
         "removebg": [
-            "iframe:not([title='Disqus'])"
+            "iframe:not([title='Disqus']):not([src*='ihlenndgcmojhcghmfjfneahoeklbjjh'])"
         ],
         "rules": [
             "#disqus_thread > :first-child { background: black !important; }"
@@ -57,6 +57,12 @@
                 "body[style*='background-image: url'] [style*='background-image: url']"
             ],
             "noinvert": "body[style*='background-image: url']"
+        },
+        {
+            "url": "evernote.com",
+            "noinvert": [
+                "iframe"
+            ]
         },
         {
             "url": "facebook.com",
@@ -133,6 +139,10 @@
             "invert": "._4tsk"
         },
         {
+            "url": "na.op.gg",
+            "invert": ".__sprite"
+        },
+        {
             "url": "onliner.by",
             "invert": [
                 ".b-tile-main, .b-teasers-2__teaser, .news-tiles__subtitle",
@@ -166,8 +176,17 @@
             ]
         },
         {
+            "url": "reactjs.org",
+            "invert": ".gatsby-highlight"
+        },
+        {
             "url": "reddit.com",
             "invert": "#header-img"
+        },
+        {
+            "url": "semlar.com",
+            "invert": ".thumbnail, .col-sm-2, .img-rounded, #alert-list, .background-texture",
+            "noinvert": "img"
         },
         {
             "url": "shop.ubi.com",
@@ -253,7 +272,7 @@
             "noinvert": [
                 "#logo *, #taigachat_toolbar *",
                 ".listItemText h3, .pollBlock .pollResult div",
-                ".pollBlock .pollResult h3, .redactor_MessageEditor"
+                ".pollBlock .pollResult h3"
             ],
             "invert": [
                 "#unityhacks_sidebar, #exposeMask",
@@ -263,9 +282,9 @@
                 ".banner_supporter, .banner_partner, .banner_designer",
                 ".banner_promoter, .banner_honorable, .banner_premium",
                 ".messageHeading, .subHeading, .ToggleTrigger, .prefix",
+                ".PopupOpen, .categoryStrip, .secondaryContent h3, .LTR",
                 ".callToAction, .xenOverlay .section .heading, .xenTooltip",
                 ".redactor_dropdown, .errorOverlay, .sectionHeaders, .button",
-                ".PopupOpen, .categoryStrip, .secondaryContent h3, .activated",
                 "[title='Unread messages']",
                 "footer"
             ]
@@ -280,6 +299,15 @@
             ],
             "removebg": [
                 ".mv_layer_bg"
+            ]
+        },
+        {
+            "url": "vuejs.org",
+            "invert": [
+                ".content, pre, h3, p"
+            ],
+            "noinvert": [
+                "img"
             ]
         },
         {

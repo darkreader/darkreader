@@ -187,6 +187,10 @@
             ]
         },
         {
+            "url": "quora.com",
+            "invert": ".section_photo"
+        },
+        {
             "url": "reactjs.org",
             "invert": ".gatsby-highlight"
         },

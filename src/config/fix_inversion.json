@@ -176,6 +176,11 @@
             "invert": "#afreecatv_player"
         },
         {
+            "url": "poeaffix.net",
+            "invert": "#header",
+            "noinvert": "img"
+        },
+        {
             "url": "producthunt.com",
             "invert": ".backgroundImage_1hK9M, .v-image",
             "noinvert": [

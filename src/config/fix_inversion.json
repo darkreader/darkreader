@@ -157,7 +157,10 @@
             "invert": "._4tsk"
         },
         {
-            "url": "my.mail.ru",
+            "url": [
+                "my.mail.ru/mail",
+                "my.mail.ru/music"
+            ],
             "invert": [
                 ".b-head-layer_music",
                 ".b-head__menu__logo",

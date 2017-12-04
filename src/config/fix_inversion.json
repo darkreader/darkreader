@@ -61,7 +61,7 @@
             "removebg": "#blurBackground, .background-image, #headerMover, #loginBar"
         },
         {
-            "url": "*.bytesloader.com",
+            "url": "bytesloader.com",
             "invert": ".footer-distributed, .navbar-inverse"
         },
         {

@@ -61,6 +61,10 @@
             "removebg": "#blurBackground, .background-image, #headerMover, #loginBar"
         },
         {
+            "url": "bytesloader.com",
+            "invert": ".footer-distributed, .navbar-inverse"
+        },
+        {
             "url": "ebay.*",
             "invert": [
                 "body[style*='background-image: url'] img",

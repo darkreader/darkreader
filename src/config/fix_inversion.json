@@ -65,6 +65,10 @@
             "invert": ".footer-distributed, .navbar-inverse"
         },
         {
+            "url": "docs.microsoft.com",
+            "invert": ".theme-dark"
+        },
+        {
             "url": "ebay.*",
             "invert": [
                 "body[style*='background-image: url'] img",
@@ -166,6 +170,10 @@
             "noinvert": ".b-opinions-main-2__tile *"
         },
         {
+            "url": "outlook.live.com",
+            "invert": "#O365_NavHeader"
+        },
+        {
             "url": "pandora.com",
             "invert": "#body, .contentbox, #detailContainer, #mainContent, .slidesBackground, .slidesForeground",
             "rules": [
@@ -206,6 +214,10 @@
         {
             "url": "reddit.com",
             "invert": "#header-img"
+        },
+        {
+            "url": "redmine",
+            "invert": "#top-menu, #header"
         },
         {
             "url": "semlar.com",

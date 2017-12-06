@@ -146,12 +146,70 @@
             "removebg": ".ComposeContent"
         },
         {
+            "url": "mathprofi.ru",
+            "noinvert": [
+                "p > em > img",
+                "p > img"
+            ]
+        },
+        {
             "url": "medium.com",
             "noinvert": ".canvas-renderer"
         },
         {
             "url": "messenger.com",
             "invert": "._4tsk"
+        },
+        {
+            "url": [
+                "my.mail.ru/vk",
+                "my.mail.ru/mail",
+                "my.mail.ru/music"
+            ],
+            "invert": [
+                ".b-head-layer_music",
+                ".b-head__menu__logo",
+                ".b-head__portal-navigation-wrapper",
+                ".b-history-event__videoevent-name",
+                ".b-music__genre__header__info",
+                ".b-music__playlists--tile__item__controls",
+                ".b-music__playlists--tile__item__stats",
+                ".b-music__section__content",
+                ".b-music__section__footer",
+                ".b-music__section__row",
+                ".b-music__top-artists__item__cover",
+                ".b-music__top-artists__item__info",
+                ".b-music__user-header__content",
+                ".b-music__user-header__controls",
+                ".b-music__user-header__title",
+                ".b-popup__fade",
+                ".btn-import",
+                ".filed-images",
+                ".l-music__menu-main",
+                ".l-music__portal-navigation",
+                ".l-music__search-form",
+                ".l-music__sidebar__playlist-playing > .cover",
+                ".playlists-block",
+                ".profile__cover_empty_female",
+                ".profile__cover_empty_man",
+                ".smiles",
+                ".songs-table__row__col__cover",
+                ".ui-button-main"
+            ],
+            "noinvert": [
+                "html",
+                ".b-music__artist-header__content",
+                ".b-music__artist-header__cover",
+                ".b-music__section__cell",
+                ".fixed-menu > .b-music__section__footer",
+                ".l-mm__avatar",
+                ".l-music__player__song__cover",
+                ".playlists-block"
+            ],
+            "removebg": ".b-music__user-header__bg--no-profile-cover",
+            "rules": [
+                ".l-music { background: #111 }"
+            ]
         },
         {
             "url": "na.op.gg",

@@ -146,6 +146,10 @@
             "removebg": ".ComposeContent"
         },
         {
+            "url": "mathpages.com",
+            "noinvert": "img"
+        },
+        {
             "url": "mathprofi.ru",
             "noinvert": [
                 "p > em > img",

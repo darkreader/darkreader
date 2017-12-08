@@ -65,6 +65,13 @@
             "invert": ".footer-distributed, .navbar-inverse"
         },
         {
+            "url": "duckduckgo.com",
+            "invert": [
+                "#logo_homepage_link",
+                "span.header__logo.js-logo-ddg"
+            ]
+        },
+        {
             "url": "ebay.*",
             "invert": [
                 "body[style*='background-image: url'] img",

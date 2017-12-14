@@ -63,7 +63,8 @@
         {
             "url": "bytesloader.com",
             "invert": ".footer-distributed, .navbar-inverse"
-        },{
+        },
+        {
             "url": "dedication.pl*",
             "invert": ".wwzing"
         },

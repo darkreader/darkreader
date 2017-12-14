@@ -115,6 +115,14 @@
             "invert": "img, iframe, video, embed, .photo"
         },
         {
+            "url": "hysterical-amusement.surge.sh",
+            "invert": [
+                "body",
+                ".instructionsContainer",
+                "#liveOutput"
+            ]
+        },
+        {
             "url": "ign.com",
             "invert": ".video_embed_content-poster, .video_embed_content-poster-play-button",
             "removebg": "#review-promo"

@@ -65,6 +65,10 @@
             "invert": ".footer-distributed, .navbar-inverse"
         },
         {
+            "url": "docs.microsoft.com",
+            "invert": ".theme-dark"
+        },
+        {
             "url": "ebay.*",
             "invert": [
                 "body[style*='background-image: url'] img",
@@ -234,6 +238,10 @@
                 ".b-opinions-main-2__tile, .news-header__top > .news-header__title"
             ],
             "noinvert": ".b-opinions-main-2__tile *"
+        },
+        {
+            "url": "outlook.live.com",
+            "invert": "#O365_NavHeader"
         },
         {
             "url": "pandora.com",

@@ -448,7 +448,7 @@
                 ".zen__item-title"
             ],
             "noinvert": [
-				".afisha__film-image",
+		".afisha__film-image",
                 ".stream-intro__vod-preview"
             ]
         },

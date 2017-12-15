@@ -216,10 +216,6 @@
             "invert": "#header-img"
         },
         {
-            "url": "redmine",
-            "invert": "#top-menu, #header"
-        },
-        {
             "url": "semlar.com",
             "invert": ".thumbnail, .col-sm-2, .img-rounded, #alert-list, .background-texture",
             "noinvert": "img"

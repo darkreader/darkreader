@@ -65,12 +65,27 @@
             "invert": ".footer-distributed, .navbar-inverse"
         },
         {
+            "url": "dedication.pl",
+            "invert": ".wwzing"
+        },
+        {
             "url": "deviantart.com",
             "invert": [
                 "#navbar-menu",
                 "#overhead-collect",
                 ".text-wrap",
                 ".thumb > .info"
+            ]
+        },
+        {
+            "url": "docs.microsoft.com",
+            "invert": ".theme-dark"
+        },
+        {
+            "url": "duckduckgo.com",
+            "invert": [
+                "#logo_homepage_link",
+                "span.header__logo.js-logo-ddg"
             ]
         },
         {
@@ -111,7 +126,7 @@
                 ".gbii, .gbip, .azp, .aLF-aPX-KP, .irc_bg, .RY3tic, canvas.circle"
             ],
             "noinvert": [
-                ".irc_mi, .irc_rii, .irc_mut, .amI, .amJ, .adk, .adj, [src*='ic_'], [src*='black']",
+                ".irc_mi, .irc_rii, .irc_mut, .act-icon-dark-gray, .amI, .amJ, .adk, .adj, [src*='ic_'], [src*='black']",
                 "input[style*='data:image']"
             ],
             "rules": [
@@ -122,6 +137,14 @@
         {
             "url": "granttree.co.uk",
             "invert": "img, iframe, video, embed, .photo"
+        },
+        {
+            "url": "hysterical-amusement.surge.sh",
+            "invert": [
+                "body",
+                ".instructionsContainer",
+                "#liveOutput"
+            ]
         },
         {
             "url": "ign.com",
@@ -241,6 +264,10 @@
                 ".b-opinions-main-2__tile, .news-header__top > .news-header__title"
             ],
             "noinvert": ".b-opinions-main-2__tile *"
+        },
+        {
+            "url": "outlook.live.com",
+            "invert": "#O365_NavHeader"
         },
         {
             "url": "pandora.com",

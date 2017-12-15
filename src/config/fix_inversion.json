@@ -69,6 +69,15 @@
             "invert": ".wwzing"
         },
         {
+            "url": "deviantart.com",
+            "invert": [
+                "#navbar-menu",
+                "#overhead-collect",
+                ".text-wrap",
+                ".thumb > .info"
+            ]
+        },
+        {
             "url": "docs.microsoft.com",
             "invert": ".theme-dark"
         },
@@ -173,7 +182,10 @@
             "noinvert": "img"
         },
         {
-            "url": "mathprofi.ru",
+            "url": [
+                "mathprofi.ru",
+                "mathprofi.net"
+            ],
             "noinvert": [
                 "p > em > img",
                 "p > img"
@@ -191,7 +203,10 @@
             "url": [
                 "my.mail.ru/vk",
                 "my.mail.ru/mail",
-                "my.mail.ru/music"
+                "my.mail.ru/music",
+                "my.mail.ru/ok",
+                "my.mail.ru/bk",
+                "my.mail.ru/list"
             ],
             "invert": [
                 ".b-head-layer_music",
@@ -430,6 +445,7 @@
         },
         {
             "url": "wikipedia.org",
+            "invert": ".mwe-popups-discreet > svg",
             "noinvert": ".mwe-math-fallback-image-inline"
         },
         {
@@ -440,6 +456,27 @@
             "url": "wolfram.com",
             "noinvert": [
                 ".numberedequation, .displayformula"
+            ]
+        },
+        {
+            "url": "yandex.ru",
+            "invert": [
+                ".afisha__content",
+                ".b-ico",
+                ".favicon",
+                ".informers3__icon",
+                ".notifications_type_traffic__icon",
+                ".p1917__item-title",
+                ".p1917__item-type",
+                ".places__content-wrapper",
+                ".schedule__icon",
+                ".stream-intro__content",
+                ".zen__item-domain",
+                ".zen__item-title"
+            ],
+            "noinvert": [
+                ".afisha__film-image",
+                ".stream-intro__vod-preview"
             ]
         },
         {

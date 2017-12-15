@@ -65,6 +65,10 @@
             "invert": ".footer-distributed, .navbar-inverse"
         },
         {
+            "url": "dedication.pl",
+            "invert": ".wwzing"
+        },
+        {
             "url": "docs.microsoft.com",
             "invert": ".theme-dark"
         },

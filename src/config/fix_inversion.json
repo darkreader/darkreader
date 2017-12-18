@@ -152,6 +152,10 @@
             "removebg": "#review-promo"
         },
         {
+            "url": "imdb.com",
+            "invert": "#nb20, .vital, .poster, .slate, .slate_fade_top, .slate_fade_bottom"
+        },
+        {
             "url": "io9.com",
             "rules": "html { height: auto !important; }"
         },

@@ -74,7 +74,17 @@
                 "#navbar-menu",
                 "#overhead-collect",
                 ".text-wrap",
-                ".thumb > .info"
+                ".thumb > .info",
+                ".mobileMenuWrapper",
+                ".tv150-tag",
+                ".hero",
+                ".hero-thumb",
+                ".hero-thumb > .info",
+                ".loggedOut",
+                ".minibrowse-mobile-paddles-container"
+            ],
+            "noinvert": [
+                ".tt-crop > .tinythumb"
             ]
         },
         {
@@ -116,6 +126,16 @@
         {
             "url": "gigaom.com",
             "invert": ".bg"
+        },
+        {
+            "url": "github.com",
+            "invert": [
+                ".jumbotron-codelines",
+                ".bg-gray-light",
+                ".bg-gray-dark",
+                ".bg-gray-light .btn-block",
+                ".bg-gray-dark .form-group"
+            ]
         },
         {
             "url": [
@@ -210,7 +230,8 @@
                 "my.mail.ru/music",
                 "my.mail.ru/ok",
                 "my.mail.ru/bk",
-                "my.mail.ru/list"
+                "my.mail.ru/list",
+                "my.mail.ru/gmail.com"
             ],
             "invert": [
                 ".b-head-layer_music",

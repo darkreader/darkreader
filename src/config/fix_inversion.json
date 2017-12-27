@@ -1,6 +1,7 @@
 {
     "common": {
         "invert": [
+            "#discourse-comments",
             "img, video, :not(object):not(body)>embed, object",
             "iframe",
             "svg image",

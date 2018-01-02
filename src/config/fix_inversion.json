@@ -342,11 +342,11 @@
                 "rubydoc.info"
             ],
             "invert": [
-                "header#navbar"
+                "#navbar"
             ],
             "noinvert": [
-                "header#navbar a > img",
-                "iframe#nav"
+                "#navbar a > img",
+                "#nav"
             ]
         },
         {

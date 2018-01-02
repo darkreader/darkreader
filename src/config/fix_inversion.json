@@ -7,7 +7,7 @@
             "[style*='background:url'], [style*='background-image:url']",
             "[style*='background: url'], [style*='background-image: url']",
             "[background]",
-            "twitterwidget" 
+            "twitterwidget"
         ],
         "noinvert": [
             "[style*='background:url'] *, [style*='background-image:url'] *",

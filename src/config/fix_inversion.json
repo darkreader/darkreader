@@ -301,6 +301,13 @@
             "noinvert": ".b-opinions-main-2__tile *"
         },
         {
+            "url": "openclassrooms.com",
+            "invert": [
+                "code.ace"
+            ],
+            "noinvert": "[class*=ace] *"
+        },
+        {
             "url": "outlook.live.com",
             "invert": "#O365_NavHeader"
         },

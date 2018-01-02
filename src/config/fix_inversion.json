@@ -114,6 +114,16 @@
             ]
         },
         {
+            "url": [
+                "exhentai.org",
+                "e-hentai.org"
+            ],
+            "invert": [
+                "#gd1",
+                ".gdtm > div"
+            ]
+        },
+        {
             "url": "facebook.com",
             "invert": [
                 "._3ixn, ._2teu, .uiStreamStory",

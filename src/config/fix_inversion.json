@@ -347,6 +347,19 @@
             "invert": "#header-img"
         },
         {
+            "url": [
+                "ruby.sketchup.com",
+                "rubydoc.info"
+            ],
+            "invert": [
+                "#navbar"
+            ],
+            "noinvert": [
+                "#navbar a > img",
+                "#nav"
+            ]
+        },
+        {
             "url": "semlar.com",
             "invert": ".thumbnail, .col-sm-2, .img-rounded, #alert-list, .background-texture",
             "noinvert": "img"

@@ -7,14 +7,12 @@
             "[style*='background:url'], [style*='background-image:url']",
             "[style*='background: url'], [style*='background-image: url']",
             "[background]",
-            "twitterwidget",
-            "code.ace"
+            "twitterwidget" 
         ],
         "noinvert": [
             "[style*='background:url'] *, [style*='background-image:url'] *",
             "[style*='background: url'] *, [style*='background-image: url'] *",
             "input",
-            "[class*=ace] *",
             "[background] *"
         ],
         "removebg": [
@@ -291,6 +289,13 @@
                 ".b-opinions-main-2__tile, .news-header__top > .news-header__title"
             ],
             "noinvert": ".b-opinions-main-2__tile *"
+        },
+        {
+            "url": "openclassrooms.com",
+            "invert": [
+                "code.ace"
+            ],
+            "noinvert": "[class*=ace] *"
         },
         {
             "url": "outlook.live.com",

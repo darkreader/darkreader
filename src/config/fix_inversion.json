@@ -7,12 +7,14 @@
             "[style*='background:url'], [style*='background-image:url']",
             "[style*='background: url'], [style*='background-image: url']",
             "[background]",
-            "twitterwidget"
+            "twitterwidget",
+            "code.ace"
         ],
         "noinvert": [
             "[style*='background:url'] *, [style*='background-image:url'] *",
             "[style*='background: url'] *, [style*='background-image: url'] *",
             "input",
+            "[class*=ace] *",
             "[background] *"
         ],
         "removebg": [

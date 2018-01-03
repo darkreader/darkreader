@@ -128,7 +128,12 @@
             "invert": [
                 "._3ixn, ._2teu, .uiStreamStory",
                 ".userContentWrapper canvas, ._4lqu, ._4lqt",
-                "._24ws, ._1z0-"
+                "._24ws, ._1z0-",
+                "._2s1x ._2s1y",
+                ".__tw",
+                "#js_9 > div > div > div._2t-e > div:nth-child(1) > h1 > a",
+                "#js_3lc",
+                "#u_0_a > div:nth-child(1) > div:nth-child(1) > div > a > span"
             ],
             "noinvert": ".uiStreamStory video",
             "removebg": "._4d3w .stageWrapper"

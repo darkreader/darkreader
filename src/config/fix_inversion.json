@@ -502,12 +502,15 @@
             "url": "wikia.com",
             "invert": [
                 ".wds-global-footer",
+                ".wds-global-footer__header",
                 "#WikiaBarWrapper"
             ],
             "rules": [
                 "body.background-dynamic.skin-oasis::after, body.background-dynamic.skin-oasis::before, .WikiaSiteWrapper, #WikiaPageBackground {background: #fff !important}",
                 "#WikiaPage, .page-header__title {color: #000 !important}",
-                ".pi-title, .pi-header {color: #000 !important; background-color: #eee !important}"
+                ".article-tabs-active, .article-tabs-inactive, h2, table, table td, table th, table th a, table font, .pi-title, .pi-header, .pi-background, .pi-image-collection-tabs {color: #000 !important; background: #eee !important; background-color: #eee !important}",
+                ".current {background: #ccc !important}",
+                ".background-image-gradient {display: none}"
             ]
         },
         {

@@ -31,6 +31,51 @@
             "noinvert": "#footer *, #photo-modal *"
         },
         {
+            "url": [
+                "app.sketchup.com",
+                "edu.sketchup.com" 
+            ],
+            "invert": [
+                "#canvas",
+                "#layers-container-overlay .sp-picker-container",
+                ".about-tab img",
+                ".bottom-bar-brand-logo",
+                ".download-card-image",
+                ".category-thumbnail > img",
+                ".component-thumbnail > img",
+                ".dimension-details-section-header",
+                ".display-secondary-detail",
+                ".entity-info-label",
+                ".entity-info-layer-material-icon > img",
+                ".files-tab-header img",
+                ".layer-thumbnail > img",
+                ".login-email",
+                ".login-picture",
+                ".material-instance > img",
+                ".options-label:not(.option-toggle)",
+                ".option-toggle-label",
+                ".scene-attributes-title",
+                ".scene-properties-title",
+                ".scene-details .labeled-checkbox > div:first-child",
+                ".scene-thumbnail > img",
+                ".sp-input-container",
+                ".thumbnail img"
+            ],
+            "noinvert": [
+                "#instructorIframe",
+                "img",
+                ".checkbox-label .checkbox-checkmark",
+                ".entity-info-input",
+                ".entity-info-back-material-container > .inline-div",
+                ".entity-info-layer-material-container > .inline-div",
+                ".entity-info-layer-material-icon[style*='background-image: url']",
+                ".scene-description"
+            ],
+            "rules": [
+                ".entity-info-label, .options-label, .dimension-details-section-header, .scene-details, .scene-attributes-title, .scene-properties-title, .scene-description { color: #C9C9C9 !important; }"
+            ]
+        },
+        {
             "url": "atlassian.net",
             "invert": [
                 ".EditPage_withPanels_3Hr, #toolbar, #savebar-container"

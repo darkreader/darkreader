@@ -84,6 +84,7 @@
                 ".minibrowse-mobile-paddles-container"
             ],
             "noinvert": [
+                ".extra-info .avatar",
                 ".tt-crop > .tinythumb"
             ]
         },
@@ -221,8 +222,7 @@
                 "mathprofi.net"
             ],
             "noinvert": [
-                "p > em > img",
-                "p > img"
+                "p img"
             ]
         },
         {
@@ -475,7 +475,7 @@
         {
             "url": "vk.com",
             "invert": [
-                "#video_player, .mv_playlist, .page_header_cont"
+                "#video_player, .mv_playlist, .page_header_cont, .page_album_title"
             ],
             "noinvert": [
                 "#video_player *, .mv_playlist *, .page_header_cont *"
@@ -497,6 +497,21 @@
             "url": "web.whatsapp.com",
             "invert": ".qrcode .icon-logo",
             "rules": ".qrcode { border: 8px solid black; }"
+        },
+        {
+            "url": "wikia.com",
+            "invert": [
+                ".wds-global-footer",
+                ".wds-global-footer__header",
+                "#WikiaBarWrapper"
+            ],
+            "rules": [
+                "body.background-dynamic.skin-oasis::after, body.background-dynamic.skin-oasis::before, .WikiaSiteWrapper, #WikiaPageBackground {background: #fff !important}",
+                "#WikiaPage, .page-header__title {color: #000 !important}",
+                ".article-tabs-active, .article-tabs-inactive, h2, table, table td, table th, table th a, table font, .pi-title, .pi-header, .pi-background, .pi-image-collection-tabs {color: #000 !important; background: #eee !important; background-color: #eee !important}",
+                ".current {background: #ccc !important}",
+                ".background-image-gradient {display: none}"
+            ]
         },
         {
             "url": "wikipedia.org",

@@ -505,7 +505,7 @@
                 "#WikiaBarWrapper"
             ],
             "rules": [
-                "body.background-dynamic.skin-oasis::after, body.background-dynamic.skin-oasis::before, body.background-dynamic.skin-oasis::before, .WikiaSiteWrapper, #WikiaPageBackground {background: #fff !important}",
+                "body.background-dynamic.skin-oasis::after, body.background-dynamic.skin-oasis::before, .WikiaSiteWrapper, #WikiaPageBackground {background: #fff !important}",
                 "#WikiaPage, .page-header__title {color: #000 !important}",
                 ".pi-title, .pi-header {color: #000 !important; background-color: #eee !important}"
             ]

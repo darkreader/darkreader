@@ -31,7 +31,10 @@
             "noinvert": "#footer *, #photo-modal *"
         },
         {
-            "url": [ "app.sketchup.com", "edu.sketchup.com" ],
+            "url": [
+                "app.sketchup.com",
+                "edu.sketchup.com" 
+            ],
             "invert": [
                 "#canvas",
                 "#layers-container-overlay .sp-picker-container",

@@ -234,6 +234,12 @@
             "invert": "._4tsk"
         },
         {
+            "url": "mp.weixin.qq.com/wiki",
+            "noinvert": [
+                ".res_iframe"
+            ]
+        },
+        {
             "url": [
                 "my.mail.ru/vk",
                 "my.mail.ru/mail",

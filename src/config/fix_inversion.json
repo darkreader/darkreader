@@ -499,6 +499,22 @@
             "rules": ".qrcode { border: 8px solid black; }"
         },
         {
+            "url": "*.wikia.com",
+            "invert": [
+                "body:not([class*=dark-theme]) #WikiaPage",
+                "#globalNavigation",
+                "div.wds-dropdown__content"
+            ],
+            "noinvert": [
+                "html",
+                "body[class*=dark-theme] *",
+                "#globalNavigation *",
+                ".wds-community-header, .wds-community-header *",
+                ".wds-dropdown__content *"
+            ],
+            "rules": "body[class*=wiki-wikia] .WikiaSiteWrapper { background-color: black }"
+        },
+        {
             "url": "wikipedia.org",
             "invert": ".mwe-popups-discreet > svg",
             "noinvert": ".mwe-math-fallback-image-inline"

@@ -134,6 +134,38 @@
             "removebg": "._4d3w .stageWrapper"
         },
         {
+            "url": "^www.gamepedia.com",
+            "invert": [
+                ".netbar",
+                "header",
+                "footer",
+                ".site-overlay",
+                "#above-header"
+            ],
+            "noinvert": [
+                ".netbar *",
+                "header *",
+                "footer *",
+                "#scroll-background *",
+                "#above-header *"
+            ],
+            "rules": "body #site { background-color: white !important; }"
+        },
+        {
+            "url": "*.gamepedia.com",
+            "invert": [
+                "body:not([class*=dark]) #content"
+            ],
+            "noinvert": [
+                "html",
+                "#netbar *",
+                "body[class*=dark] *",
+                "#mw-navigation *",
+                "#mw-panel *",
+                "#footer *"
+            ]
+        },
+        {
             "url": "gigaom.com",
             "invert": ".bg"
         },

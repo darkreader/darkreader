@@ -499,6 +499,33 @@
             "rules": ".qrcode { border: 8px solid black; }"
         },
         {
+            "url": [
+                "^www.wikia.com/explore",
+                "^fandom.wikia.com"
+            ],
+            "invert": [
+                ".hero-block",
+                ".hub-feed",
+                "body.search",
+                "body.search > [class*=global-navigation]",
+                "body.search > footer"
+            ],
+            "noinvert": [
+                "html",
+                ".feed-container *",
+                "body.search > [class*=global-navigation] *",
+                "body.search > footer *"
+            ],
+            "rules": "body.search > [class*=global-navigation] { z-index: 1 }"
+        },
+        {
+            "url": "^www.wikia.com/(signin|register)",
+            "invert": [
+                "header",
+                ".signup-provider-facebook"
+            ]
+        },
+        {
             "url": "*.wikia.com",
             "invert": [
                 "body:not([class*=dark-theme]) #WikiaPage",

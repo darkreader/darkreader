@@ -17,7 +17,6 @@
     "destinytracker.com",
     "discordapp.com",
     "dotabuff.com",
-    "fandom.wikia.com",
     "ffmpeg.org",
     "filterblade.xyz",
     "frootvpn.com",
@@ -59,6 +58,5 @@
     "um.mos.ru",
     "vinesauce.com",
     "www.gdax.com",
-    "^www.wikia.com/explore",
     "yandexdataschool.ru/$"
 ]

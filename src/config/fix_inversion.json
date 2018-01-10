@@ -88,6 +88,7 @@
                 ".minibrowse-mobile-paddles-container"
             ],
             "noinvert": [
+                ".extra-info .avatar",
                 ".tt-crop > .tinythumb"
             ]
         },
@@ -226,8 +227,7 @@
                 "mathprofi.net"
             ],
             "noinvert": [
-                "p > em > img",
-                "p > img"
+                "p img"
             ]
         },
         {
@@ -486,7 +486,7 @@
         {
             "url": "vk.com",
             "invert": [
-                "#video_player, .mv_playlist, .page_header_cont"
+                "#video_player, .mv_playlist, .page_header_cont, .page_album_title"
             ],
             "noinvert": [
                 "#video_player *, .mv_playlist *, .page_header_cont *"

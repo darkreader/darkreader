@@ -491,6 +491,11 @@
             ]
         },
         {
+            "url": "vocabolario.sns.it",
+            "noinvert": "body[background]",
+            "invert": "img[src]"
+        },
+        {
             "url": "vuejs.org",
             "invert": [
                 ".content, pre, h3, p"

@@ -161,7 +161,8 @@
             ],
             "noinvert": [
                 ".irc_mi, .irc_rii, .irc_mut, .act-icon-dark-gray, .amI, .amJ, .adk, .adj, [src*='ic_'], [src*='black']",
-                "input[style*='data:image']"
+                "input[style*='data:image']",
+                "img[src*='/books/content?']"
             ],
             "rules": [
                 ".pI { background: rgba(255,255,255,.7) !important; }",

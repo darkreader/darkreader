@@ -133,10 +133,12 @@
             "invert": [
                 "._3ixn, ._2teu, .uiStreamStory",
                 ".userContentWrapper canvas, ._4lqu, ._4lqt",
-                "._24ws, ._1z0-"
+                "._24ws, ._1z0-",
+                "._19eb"
             ],
             "noinvert": ".uiStreamStory video",
-            "removebg": "._4d3w .stageWrapper"
+            "removebg": "._4d3w .stageWrapper",
+            "rules": "._2s1x ._2s1y { background: #9BB5E8 !important; color: black !important; border-bottom-color: #92A6CA !important; }"
         },
         {
             "url": "gigaom.com",

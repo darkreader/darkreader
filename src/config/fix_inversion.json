@@ -529,6 +529,7 @@
             "url": "*.wikia.com",
             "invert": [
                 "body:not([class*=dark-theme]) #WikiaPage",
+                "body.mobile-wiki, body.mobile-wiki footer, .side-nav-drawer",
                 "#globalNavigation",
                 "div.wds-dropdown__content"
             ],

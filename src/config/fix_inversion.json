@@ -50,6 +50,10 @@
             ]
         },
         {
+            "url": "betterexplained.com",
+            "noinvert": "img.tex"
+        },
+        {
             "url": [
                 "bit-tech.net",
                 "forums.bit-tech.net"

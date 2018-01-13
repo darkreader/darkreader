@@ -183,14 +183,7 @@
                 ".instructionsContainer",
                 "#liveOutput"
             ]
-        },
-        {
-            "url": "khanacademy.org",
-            "invert": [
-                ".task-container",
-                ".modal-backdrop"
-            ]
-        },    
+        },  
         {
             "url": "ign.com",
             "invert": ".video_embed_content-poster, .video_embed_content-poster-play-button",
@@ -204,6 +197,12 @@
             "url": "io9.com",
             "rules": "html { height: auto !important; }"
         },
+        {
+            "url": "khanacademy.org",
+            "invert": [
+                ".task-container .modal-backdrop"
+            ]
+        },          
         {
             "url": "lifehacker.com",
             "invert": ".videoCube a .thumbBlock",

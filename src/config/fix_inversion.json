@@ -198,6 +198,12 @@
             "rules": "html { height: auto !important; }"
         },
         {
+            "url": "khanacademy.org",
+            "invert": [
+                ".task-container .modal-backdrop"
+            ]
+        },
+        {
             "url": "lifehacker.com",
             "invert": ".videoCube a .thumbBlock",
             "rules": "html { height: auto !important; }"

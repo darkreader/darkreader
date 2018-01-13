@@ -183,7 +183,7 @@
                 ".instructionsContainer",
                 "#liveOutput"
             ]
-        },  
+        },
         {
             "url": "ign.com",
             "invert": ".video_embed_content-poster, .video_embed_content-poster-play-button",

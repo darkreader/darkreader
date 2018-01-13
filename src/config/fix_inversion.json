@@ -202,7 +202,7 @@
             "invert": [
                 ".task-container .modal-backdrop"
             ]
-        },          
+        },
         {
             "url": "lifehacker.com",
             "invert": ".videoCube a .thumbBlock",

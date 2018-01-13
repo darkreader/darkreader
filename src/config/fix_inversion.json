@@ -380,6 +380,12 @@
             ]
         },
         {
+            "url": "scotch.io",
+            "invert": [
+                ".language-js, .language-javascript"
+            ]
+        },
+        {
             "url": "semlar.com",
             "invert": ".thumbnail, .col-sm-2, .img-rounded, #alert-list, .background-texture",
             "noinvert": "img"

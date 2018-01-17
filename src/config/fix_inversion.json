@@ -204,6 +204,10 @@
             ]
         },
         {
+            "url": "libretexts.org",
+            "noinvert": "img"
+        },
+        {
             "url": "lifehacker.com",
             "invert": ".videoCube a .thumbBlock",
             "rules": "html { height: auto !important; }"

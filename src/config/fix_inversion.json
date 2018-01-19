@@ -141,6 +141,10 @@
             "rules": "._2s1x ._2s1y { background: #9BB5E8 !important; color: black !important; border-bottom-color: #92A6CA !important; }"
         },
         {
+            "url": "feynmanlectures.caltech.edu",
+            "noinvert": "img"
+        },
+        {
             "url": "gigaom.com",
             "invert": ".bg"
         },

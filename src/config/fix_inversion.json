@@ -226,6 +226,12 @@
             ]
         },
         {
+            "url": "livescience.com",
+            "invert": [
+                "background-color"
+            ]
+        },
+        {
             "url": "mail.live.com",
             "invert": [
                 "img:not([src='https://a.gfx.ms/rte_metro2.png'])",

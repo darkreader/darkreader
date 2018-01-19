@@ -552,7 +552,7 @@
             ]
         },
         {
-            "url": "yandex.ru",
+            "url": "yandex.*",
             "invert": [
                 ".afisha__content",
                 ".b-ico",
@@ -565,7 +565,8 @@
                 ".schedule__icon",
                 ".stream-intro__content",
                 ".zen__item-domain",
-                ".zen__item-title"
+                ".zen__item-title",
+                "[class*='icon_moon_']"
             ],
             "noinvert": [
                 ".afisha__film-image",

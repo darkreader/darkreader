@@ -155,7 +155,8 @@
                 ".bg-gray-light",
                 ".bg-gray-dark",
                 ".bg-gray-light .btn-block",
-                ".bg-gray-dark .form-group"
+                ".bg-gray-dark .form-group",
+                ".Header"
             ]
         },
         {

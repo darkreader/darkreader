@@ -152,10 +152,18 @@
             "url": "github.com",
             "invert": [
                 ".jumbotron-codelines",
-                ".bg-gray-light",
                 ".bg-gray-dark",
-                ".bg-gray-light .btn-block",
-                ".bg-gray-dark .form-group"
+                ".bg-gray-dark .form-group",
+                ".header-logo-invertocat, .notification-indicator",
+                ".label, .label-color"
+            ],
+            "rules": [
+                "header { background-color: #dae1e7 !important; }",
+                ".Header .header-search-wrapper { background-color: rgba(0, 0, 0, 0.125) !important; }",
+                "header, .HeaderNavlink, .Header .header-search-input, .Header .header-search-input::placeholder { color: rgba(0, 0, 0, 0.75) !important; }",
+                ".Header .header-search-scope { color: rgba(0, 0, 0, 0.75) !important; border-right-color: #ccd7e1 !important; }",
+                ".select-menu-item.navigation-focus, .select-menu-item.navigation-focus.selected, .select-menu-item.navigation-focus.select-menu-action, .select-menu-item.navigation-focus .description-inline { color: black !important; background: #93c6ff !important }",
+                ".select-menu-item.navigation-focus>.octicon, .select-menu-item.navigation-focus.selected>.octicon, .select-menu-item.navigation-focus.select-menu-action>.octicon, .select-menu-item.navigation-focus .description-inline>.octicon { color: black !important; }"
             ]
         },
         {

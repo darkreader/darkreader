@@ -548,8 +548,8 @@
             "url": "wikipedia.org",
             "invert": ".mwe-popups-discreet > svg",
             "noinvert": [
-              ".mwe-math-fallback-image-inline",
-              ".mwe-math-fallback-image-display"
+                ".mwe-math-fallback-image-inline",
+                ".mwe-math-fallback-image-display"
             ]
         },
         {

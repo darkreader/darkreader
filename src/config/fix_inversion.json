@@ -93,6 +93,10 @@
             ]
         },
         {
+            "url": "docs.google.com",
+            "invert": ".jfk-palette-colorswatch"
+        },
+        {
             "url": "docs.microsoft.com",
             "invert": ".theme-dark"
         },

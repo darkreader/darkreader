@@ -93,7 +93,7 @@
             ]
         },
         {
-            "url": "docs.google.com/document/*",
+            "url": "docs.google.com",
             "invert": ".jfk-palette-colorswatch"
         },
         {

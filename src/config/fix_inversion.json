@@ -547,7 +547,10 @@
         {
             "url": "wikipedia.org",
             "invert": ".mwe-popups-discreet > svg",
-            "noinvert": ".mwe-math-fallback-image-inline"
+            "noinvert": [
+                ".mwe-math-fallback-image-inline",
+                ".mwe-math-fallback-image-display"
+            ]
         },
         {
             "url": "wikiwand.com",

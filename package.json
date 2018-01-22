@@ -1,7 +1,7 @@
 {
   "name": "darkreader",
-  "version": "3.4.3",
-  "description": "Keep your eyes, Dark Reader",
+  "version": "3.5.1",
+  "description": "Dark theme for every website",
   "scripts": {
     "debug": "grunt debug && grunt debug-watch",
     "release": "npm test && grunt release",

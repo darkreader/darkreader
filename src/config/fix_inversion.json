@@ -176,7 +176,7 @@
                 "google.*.*"
             ],
             "invert": [
-                ".gbii, .gbip, .azp, .aLF-aPX-KP, .irc_bg, .RY3tic, canvas.circle"
+                ".gb_2, .gb_M, .gsri_a, .gbii, .gbip, .azp, .aLF-aPX-KP, .irc_bg, .RY3tic, canvas.circle"
             ],
             "noinvert": [
                 ".irc_mi, .irc_rii, .irc_mut, .act-icon-dark-gray, .amI, .amJ, .adk, .adj, [src*='ic_'], [src*='black']",

@@ -424,7 +424,7 @@
             "url": "slack.com",
             "invert": [
                 ".client_channels_list_container",
-                "figure"
+                "figure, .member_preview_link.member_image"
             ],
             "noinvert": [
                 ".client_channels_list_container *",

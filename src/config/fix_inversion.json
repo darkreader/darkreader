@@ -117,6 +117,10 @@
             "noinvert": "body[style*='background-image: url']"
         },
         {
+            "url": "electronics-tutorials.ws",
+            "removebg": "img"
+        },
+        {
             "url": "evernote.com",
             "noinvert": [
                 "iframe"

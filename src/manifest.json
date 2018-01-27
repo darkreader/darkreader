@@ -1,44 +1,49 @@
 ﻿{
-    "manifest_version": 2,
-    "name": "Dark Reader",
-    "version": "3.5.1",
     "author": "Alexander Shutov",
-    "description": "Dark theme for every website. Care your eyes, use Dark Reader for night and daily browsing.",
-    "browser_action": {
-        "default_title": "Dark Reader",
-        "default_icon": {
-            "38": "img/dr_active_38.png",
-            "19": "img/dr_active_19.png"
-        },
-        "default_popup": "popup/popup.html"
+    "background": {
+        "page": "background/background.html",
+        "persistent": true
     },
+    "browser_action": {
+        "default_icon": {
+            "19": "img/dr_active_19.png",
+            "38": "img/dr_active_38.png"
+        },
+        "default_popup": "popup/popup.html",
+        "default_title": "Dark Reader"
+    },
+    "commands": {
+        "addSite": {
+            "description": "Toggle current site",
+            "suggested_key": {
+                "default": "Alt+Shift+A"
+            }
+        },
+        "toggle": {
+            "description": "Toggle On/Off",
+            "suggested_key": {
+                "default": "Alt+Shift+D"
+            }
+        }
+    },
+    "description": "Dark theme for every website. Care your eyes, use Dark Reader for night and daily browsing.",
     "icons": {
         "16": "img/dr_16.png",
         "48": "img/dr_48.png",
         "128": "img/dr_128.png"
     },
-    "background": {
-        "persistent": true,
-        "page": "background/background.html"
-    },
+    "Key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAqBY2tfTtJYiVMirbII2r3WofqCDaxS2zwPddSsgxUWKRm/MW/ymL2ZaP24MmwnegGIoxHkBVyi4cps4/q76c98ViyijoQvdJjAv3ZtUOwbWlYnZ5pU6gPCeZrScHxoTJdxxJJ30DZpMc6qsc3yJVQJlABG2FQFPrhPEGFLP9sCq/M7pY1xH++KsG+jYLB6cU3ItvZ4zntUXRwG2ZBx+XZelsd6FdkVXbDXj/47TNk2Qq8PAqyiK45GgQ+KJjuISAo89ip1xI4tONLCjSHPinD3nz6HiMikQzwn4L8SsB4Wy7rBhMhPRGIWbwHed+L+W3LXhB05Lhwk0YxuOb7QNWRQIDAQAB",
+    "manifest_version": 2,
+    "name": "Dark Reader",
     "permissions": [
         "fontSettings",
         "storage",
         "tabs",
         "<all_urls>"
     ],
-    "commands": {
-        "toggle": {
-            "suggested_key": {
-                "default": "Alt+Shift+D"
-            },
-            "description": "Toggle On/Off"
-        },
-        "addSite": {
-            "suggested_key": {
-                "default": "Alt+Shift+A"
-            },
-            "description": "Toggle current site"
-        }
+    "version": "3.5.1",
+    "-ms-preload": {
+        "backgroundScript": "backgroundScriptsAPIBridge.js",
+        "contentScript": "contentScriptsAPIBridge.js"
     }
 }

@@ -121,6 +121,14 @@
             "removebg": "img"
         },
         {
+            "url": "electronjs.org",
+            "invert": [
+                "header",
+                ".jumbotron-home",
+                ".highlight-dark"
+            ]
+        },
+        {
             "url": "evernote.com",
             "noinvert": [
                 "iframe"
@@ -461,6 +469,17 @@
             ],
             "noinvert": [
                 ".tau-app-secondary-pane *, .app-header *"
+            ]
+        },
+        {
+            "url": "tproger.ru",
+            "invert": [
+                ".top-duft-punk",
+                "#colophon"
+            ],
+            "noinvert": [
+                ".text_logo img",
+                ".tmenu_icon"
             ]
         },
         {

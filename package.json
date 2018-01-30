@@ -1,6 +1,6 @@
 {
   "name": "darkreader",
-  "version": "3.5.1",
+  "version": "3.5.2",
   "description": "Dark theme for every website",
   "scripts": {
     "debug": "grunt debug && grunt debug-watch",

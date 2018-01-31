@@ -549,6 +549,7 @@
                 ".page_album_title",
                 ".article_snippet__fade",
                 ".article_snippet__info",
+                ".article_snippet__read_btn",
                 "#layer_bg",
                 "#pv_more_acts_tt",
                 ".login_app_devices"
@@ -557,7 +558,7 @@
                 "#video_player *, .mv_playlist *, .page_header_cont *"
             ],
             "removebg": [
-                ".mv_layer_bg, .pv_bottom_info"
+                ".mv_layer_bg, .pv_bottom_info, .pv_img_area_wrap"
             ],
             "rules": [
                 ".pv_bottom_info * {color: #000 !important}",

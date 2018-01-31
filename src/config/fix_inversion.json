@@ -543,13 +543,25 @@
         {
             "url": "vk.com",
             "invert": [
-                "#video_player, .mv_playlist, .page_header_cont, .page_album_title"
+                "#video_player",
+                ".mv_playlist",
+                ".page_header_cont",
+                ".page_album_title",
+                ".article_snippet__fade",
+                ".article_snippet__info",
+                "#layer_bg",
+                "#pv_more_acts_tt",
+                ".login_app_devices"
             ],
             "noinvert": [
                 "#video_player *, .mv_playlist *, .page_header_cont *"
             ],
             "removebg": [
-                ".mv_layer_bg"
+                ".mv_layer_bg, .pv_bottom_info"
+            ],
+            "rules": [
+                ".pv_bottom_info * {color: #000 !important}",
+                "#pv_more_acts_tt * {color: #eee !important}"
             ]
         },
         {

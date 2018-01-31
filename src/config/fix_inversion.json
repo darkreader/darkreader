@@ -556,7 +556,8 @@
                 "#z_photoview",
                 ".articleSnippet__inner",
                 ".articleSnippet_button",
-                ".vv_summary"
+                ".vv_summary",
+                ".thumb_map:after"
             ],
             "noinvert": [
                 "#video_player *, .mv_playlist *, .page_header_cont *, #z_photoview img"

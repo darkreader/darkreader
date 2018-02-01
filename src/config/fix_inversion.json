@@ -226,6 +226,11 @@
             "rules": "html { height: auto !important; }"
         },
         {
+            "url": "javarepl.com",
+            "removebg": "body",
+            "invert": ".terminal-content"
+        },
+        {
             "url": "khanacademy.org",
             "invert": [
                 ".task-container .modal-backdrop"

@@ -429,6 +429,10 @@
             "noinvert": "img"
         },
         {
+            "url": "sharepoint.com",
+            "noinvert": "iframe"
+        },
+        {
             "url": "shop.ubi.com",
             "invert": "#topNavbar, #UplayHeader"
         },

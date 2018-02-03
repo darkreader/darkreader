@@ -237,6 +237,39 @@
             ]
         },
         {
+            "url": "kinopoisk.ru",
+            "invert": [
+                "#GOWrapper, #external_header_wrapper",
+                ".header-fresh-search-partial-component_theme_default",
+                ".header-fresh-partial-component_theme_light",
+                ".footer-v2-partial-component__navigation-wrapper",
+                ".footer-v2-partial-component__bottom-navigation",
+                ".header-fresh-partial-component__dropdown",
+                ".info_title .gradient, .info_title .gradient_director",
+                ".movie-ticket-button, .movie-trailer-button",
+                ".randomMovie .name, .picAndNums, .promo-special",
+                ".flag, .main_info__quote, .feedback_img",
+                ".main_slider_arrow, #top_3banners",
+                ".yearsBox, .bottom_bg, .insert",
+                ".trailer_descr, .arrow, .play",
+                ".kp2-authapi-overlay, .kp2-authapi-paranja",
+                ".app__sticky-header, .search-suggest__content",
+                ".video-snippet__inner:after, .video-snippet__content",
+                ".tabs__tab_selected"
+            ],
+            "noinvert": [
+                ".right-slider p, #top_3banners img, .zod img",
+                ".peopleInfo table img, .date img, .rating img"
+            ],
+            "removebg": [
+                "#content_block, .box_block table table *"
+            ],
+            "rules": [
+                ".discovery-trailers-overlay {background: rgba(255,255,255,0.8) !important}",
+                "#popup_info_wrapper * {color: #bbb !important}"
+            ]
+        },
+        {
             "url": "libretexts.org",
             "noinvert": "img"
         },

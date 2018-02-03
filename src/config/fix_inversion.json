@@ -317,6 +317,15 @@
             "invert": "._4tsk"
         },
         {
+            "url": "^metro.ru/(library|tales)",
+            "invert": "#header",
+            "noinvert": "#header img"
+        },
+        {
+            "url": "metro.ru",
+            "noinvert": "html, html img"
+        },
+        {
             "url": "mp.weixin.qq.com/wiki",
             "noinvert": [
                 ".res_iframe"

@@ -610,23 +610,38 @@
         {
             "url": "yandex.*",
             "invert": [
-                ".afisha__content",
-                ".b-ico",
+                ".afisha",
                 ".favicon",
-                ".informers3__icon",
-                ".notifications_type_traffic__icon",
-                ".p1917__item-title",
-                ".p1917__item-type",
+                ".informers7__icon",
                 ".places__content-wrapper",
                 ".schedule__icon",
-                ".stream-intro__content",
+                ".stream-intro",
                 ".zen__item-domain",
                 ".zen__item-title",
+                ".button_theme_white",
+                ".stream-intro__items",
+                ".services__icon",
+                ".teaser__service-bg",
+                ".places__card",
+                ".menu2__wrapper",
+                ".footer",
+                ".logo-service__image",
+                ".app-icon",
+                ".services-big__item_icon",
+                ".services-all__icon",
                 "[class*='icon_moon_']"
             ],
             "noinvert": [
                 ".afisha__film-image",
                 ".stream-intro__vod-preview"
+            ],
+            "removebg": [
+                ".stream-intro__items",
+                ".mini-suggest__popup-spacer"
+            ],
+            "rules": [
+                ".body__wrapper > .i-bem {background-color: #fff}",
+                ".stream-intro__items, .block__title * {color: #000 !important}"
             ]
         },
         {

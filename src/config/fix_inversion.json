@@ -69,6 +69,10 @@
             "invert": ".footer-distributed, .navbar-inverse"
         },
         {
+            "url": "calendar.google.com",
+            "invert": "#:4.fc"
+        },
+        {
             "url": "dedication.pl",
             "invert": ".wwzing"
         },

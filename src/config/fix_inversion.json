@@ -158,7 +158,12 @@
         },
         {
             "url": "feedly.com",
-            "invert": ".landing-old .dark",
+            "invert": [
+                ".landing-old .dark",
+                "#feedlyUndoSign",
+                "#feedlySignPart",
+                ".pinContainer"
+            ],
             "rules": ".entry-overlay {background-color: rgba(220,220,220,0.5)}"
         },
         {

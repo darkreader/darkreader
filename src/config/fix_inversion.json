@@ -695,7 +695,7 @@
         {
             "url": "yandex.*",
             "invert": [
-                ".afisha",
+                ".afisha, #wd-_afisha",
                 ".favicon",
                 ".informers7__icon",
                 ".places__content-wrapper",
@@ -714,7 +714,9 @@
                 ".app-icon",
                 ".services-big__item_icon",
                 ".services-all__icon",
-                "[class*='icon_moon_']"
+                "[class*='icon_moon_']",
+                ".weather__icon, .traffic__icon",
+                ".media-grid_theme_white, .dist-popup__image"
             ],
             "noinvert": [
                 ".afisha__film-image",

@@ -73,6 +73,13 @@
             "invert": ".wwzing"
         },
         {
+            "url": "developer.mozilla.org",
+            "invert": [
+                "#nav-footer, .highlight-span, .readOnlyInline, #nav-sec, #toc",
+                ".socialaccount-providers, .toggle-container .current"
+            ]
+        },
+        {
             "url": "deviantart.com",
             "invert": [
                 "#navbar-menu",

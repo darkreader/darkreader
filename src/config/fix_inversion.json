@@ -662,6 +662,7 @@
                 ".button_theme_white, .favicon, .footer",
                 ".logo-service__image, .app-icon",
                 ".services-big__item_icon, .services-all__icon",
+                ".media-grid_theme_white, .dist-popup__image",
                 "[class*='icon_moon_']"
             ],
             "noinvert": [

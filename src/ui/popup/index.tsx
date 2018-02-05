@@ -1,5 +1,6 @@
 import { html, render } from 'malevic';
 import Body from './body';
+import { isAffectedByChromiumIssue750419 } from './utils';
 import { Extension } from '../../background/extension';
 
 interface PopupState {
@@ -32,3 +33,7 @@ extension.addListener(renderBody);
 window.addEventListener('unload', (e) => {
     extension.removeListener(renderBody);
 });
+
+if (isAffectedByChromiumIssue750419()) {
+    document.documentElement.classList.add('chromium-issue-750419');
+}

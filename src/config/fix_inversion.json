@@ -16,7 +16,7 @@
             "[background] *"
         ],
         "removebg": [
-            "iframe:not([title='Disqus'])"
+            "iframe:not([title='Disqus']):not([src*='ihlenndgcmojhcghmfjfneahoeklbjjh'])"
         ],
         "rules": [
             "#disqus_thread > :first-child { background: black !important; }"
@@ -50,6 +50,71 @@
             ]
         },
         {
+            "url": "betterexplained.com",
+            "noinvert": "img.tex"
+        },
+        {
+            "url": [
+                "bit-tech.net",
+                "forums.bit-tech.net"
+            ],
+            "invert": [
+                "div#subNav, div#anotherSubNav, .footerContainer, div.footer, #bitFooter, .nodeIcon",
+                "li.navTab.forums.selected, li.navTab.xengallery.selected, li.navTab.members.selected"
+            ],
+            "removebg": "#blurBackground, .background-image, #headerMover, #loginBar"
+        },
+        {
+            "url": "bytesloader.com",
+            "invert": ".footer-distributed, .navbar-inverse"
+        },
+        {
+            "url": "dedication.pl",
+            "invert": ".wwzing"
+        },
+        {
+            "url": "developer.mozilla.org",
+            "invert": [
+                "#nav-footer, .highlight-span, .readOnlyInline, #nav-sec, #toc",
+                ".socialaccount-providers, .toggle-container .current"
+            ]
+        },
+        {
+            "url": "deviantart.com",
+            "invert": [
+                "#navbar-menu",
+                "#overhead-collect",
+                ".text-wrap",
+                ".thumb > .info",
+                ".mobileMenuWrapper",
+                ".tv150-tag",
+                ".hero",
+                ".hero-thumb",
+                ".hero-thumb > .info",
+                ".loggedOut",
+                ".minibrowse-mobile-paddles-container"
+            ],
+            "noinvert": [
+                ".extra-info .avatar",
+                ".tt-crop > .tinythumb"
+            ]
+        },
+        {
+            "url": "docs.google.com",
+            "invert": ".jfk-palette-colorswatch"
+        },
+        {
+            "url": "docs.microsoft.com",
+            "invert": ".theme-dark"
+        },
+        {
+            "url": "duckduckgo.com",
+            "invert": [
+                "#logo_homepage_link",
+                "span.header__logo.js-logo-ddg"
+            ]
+        },
+        {
             "url": "ebay.*",
             "invert": [
                 "body[style*='background-image: url'] img",
@@ -59,18 +124,80 @@
             "noinvert": "body[style*='background-image: url']"
         },
         {
+            "url": "electronics-tutorials.ws",
+            "removebg": "img"
+        },
+        {
+            "url": "electronjs.org",
+            "invert": [
+                "header",
+                ".jumbotron-home",
+                ".highlight-dark"
+            ]
+        },
+        {
+            "url": "evernote.com",
+            "noinvert": [
+                "iframe"
+            ]
+        },
+        {
+            "url": [
+                "exhentai.org",
+                "e-hentai.org"
+            ],
+            "invert": [
+                "#gd1",
+                ".gdtm > div"
+            ]
+        },
+        {
             "url": "facebook.com",
             "invert": [
                 "._3ixn, ._2teu, .uiStreamStory",
                 ".userContentWrapper canvas, ._4lqu, ._4lqt",
-                "._24ws, ._1z0-"
+                "._24ws, ._1z0-",
+                "._19eb"
             ],
             "noinvert": ".uiStreamStory video",
-            "removebg": "._4d3w .stageWrapper"
+            "removebg": "._4d3w .stageWrapper",
+            "rules": "._2s1x ._2s1y { background: #9BB5E8 !important; color: black !important; border-bottom-color: #92A6CA !important; }"
+        },
+        {
+            "url": "feedly.com",
+            "invert": [
+                ".landing-old .dark",
+                "#feedlyUndoSign",
+                "#feedlySignPart",
+                ".pinContainer"
+            ],
+            "rules": ".entry-overlay {background-color: rgba(220,220,220,0.5)}"
+        },
+        {
+            "url": "feynmanlectures.caltech.edu",
+            "noinvert": "img"
         },
         {
             "url": "gigaom.com",
             "invert": ".bg"
+        },
+        {
+            "url": "github.com",
+            "invert": [
+                ".jumbotron-codelines",
+                ".bg-gray-dark",
+                ".bg-gray-dark .form-group",
+                ".header-logo-invertocat, .notification-indicator",
+                ".label, .label-color"
+            ],
+            "rules": [
+                "header { background-color: #dae1e7 !important; }",
+                ".Header .header-search-wrapper { background-color: rgba(0, 0, 0, 0.125) !important; }",
+                "header, .HeaderNavlink, .Header .header-search-input, .Header .header-search-input::placeholder { color: rgba(0, 0, 0, 0.75) !important; }",
+                ".Header .header-search-scope { color: rgba(0, 0, 0, 0.75) !important; border-right-color: #ccd7e1 !important; }",
+                ".select-menu-item.navigation-focus, .select-menu-item.navigation-focus.selected, .select-menu-item.navigation-focus.select-menu-action, .select-menu-item.navigation-focus .description-inline { color: black !important; background: #93c6ff !important }",
+                ".select-menu-item.navigation-focus>.octicon, .select-menu-item.navigation-focus.selected>.octicon, .select-menu-item.navigation-focus.select-menu-action>.octicon, .select-menu-item.navigation-focus .description-inline>.octicon { color: black !important; }"
+            ]
         },
         {
             "url": [
@@ -78,11 +205,12 @@
                 "google.*.*"
             ],
             "invert": [
-                ".gbii, .gbip, .azp, .aLF-aPX-KP, .irc_bg, .RY3tic, canvas.circle"
+                ".gb_2, .gb_M, .gsri_a, .gbii, .gbip, .azp, .aLF-aPX-KP, .irc_bg, .RY3tic, canvas.circle"
             ],
             "noinvert": [
-                ".irc_mi, .irc_rii, .irc_mut, .amI, .amJ, .adk, .adj, [src*='ic_'], [src*='black']",
-                "input[style*='data:image']"
+                ".irc_mi, .irc_rii, .irc_mut, .act-icon-dark-gray, .amI, .amJ, .adk, .adj, [src*='ic_'], [src*='black']",
+                "input[style*='data:image']",
+                "img[src*='/books/content?']"
             ],
             "rules": [
                 ".pI { background: rgba(255,255,255,.7) !important; }",
@@ -94,13 +222,73 @@
             "invert": "img, iframe, video, embed, .photo"
         },
         {
+            "url": "hysterical-amusement.surge.sh",
+            "invert": [
+                "body",
+                ".instructionsContainer",
+                "#liveOutput"
+            ]
+        },
+        {
             "url": "ign.com",
             "invert": ".video_embed_content-poster, .video_embed_content-poster-play-button",
             "removebg": "#review-promo"
         },
         {
+            "url": "imdb.com",
+            "invert": "#nb20, .vital, .poster, .slate, .slate_fade_top, .slate_fade_bottom"
+        },
+        {
             "url": "io9.com",
             "rules": "html { height: auto !important; }"
+        },
+        {
+            "url": "javarepl.com",
+            "removebg": "body",
+            "invert": ".terminal-content"
+        },
+        {
+            "url": "khanacademy.org",
+            "invert": [
+                ".task-container .modal-backdrop"
+            ]
+        },
+        {
+            "url": "kinopoisk.ru",
+            "invert": [
+                "#GOWrapper, #external_header_wrapper",
+                ".header-fresh-search-partial-component_theme_default",
+                ".header-fresh-partial-component_theme_light",
+                ".footer-v2-partial-component__navigation-wrapper",
+                ".footer-v2-partial-component__bottom-navigation",
+                ".header-fresh-partial-component__dropdown",
+                ".info_title .gradient, .info_title .gradient_director",
+                ".movie-ticket-button, .movie-trailer-button",
+                ".randomMovie .name, .picAndNums, .promo-special",
+                ".flag, .main_info__quote, .feedback_img",
+                ".main_slider_arrow, #top_3banners",
+                ".yearsBox, .bottom_bg, .insert",
+                ".trailer_descr, .arrow, .play",
+                ".kp2-authapi-overlay, .kp2-authapi-paranja",
+                ".app__sticky-header, .search-suggest__content",
+                ".video-snippet__inner:after, .video-snippet__content",
+                ".tabs__tab_selected"
+            ],
+            "noinvert": [
+                ".right-slider p, #top_3banners img, .zod img",
+                ".peopleInfo table img, .date img, .rating img"
+            ],
+            "removebg": [
+                "#content_block, .box_block table table *"
+            ],
+            "rules": [
+                ".discovery-trailers-overlay {background: rgba(255,255,255,0.8) !important}",
+                "#popup_info_wrapper * {color: #bbb !important}"
+            ]
+        },
+        {
+            "url": "libretexts.org",
+            "noinvert": "img"
         },
         {
             "url": "lifehacker.com",
@@ -125,6 +313,19 @@
             "removebg": ".ComposeContent"
         },
         {
+            "url": "mathpages.com",
+            "noinvert": "img"
+        },
+        {
+            "url": [
+                "mathprofi.ru",
+                "mathprofi.net"
+            ],
+            "noinvert": [
+                "p img"
+            ]
+        },
+        {
             "url": "medium.com",
             "noinvert": ".canvas-renderer"
         },
@@ -133,12 +334,104 @@
             "invert": "._4tsk"
         },
         {
+            "url": "mp.weixin.qq.com/wiki",
+            "noinvert": [
+                ".res_iframe"
+            ]
+        },
+        {
+            "url": "mspaintadventures.ru",
+            "invert": [
+                ".row, .row img, .row object",
+                ".mspa_sidebar, .content",
+                ".footer, .copyright"
+            ],
+            "noinvert": [
+                ".nav img"
+            ],
+            "rules": [
+                "body {background-color: #acacac}",
+                ".sidebar {border-color: #acacac}",
+                ".row:nth-of-type(4) {background-color: #535353}"
+            ]
+        },
+        {
+            "url": [
+                "my.mail.ru/vk",
+                "my.mail.ru/mail",
+                "my.mail.ru/music",
+                "my.mail.ru/ok",
+                "my.mail.ru/bk",
+                "my.mail.ru/list",
+                "my.mail.ru/gmail.com"
+            ],
+            "invert": [
+                ".b-head-layer_music",
+                ".b-head__menu__logo",
+                ".b-head__portal-navigation-wrapper",
+                ".b-history-event__videoevent-name",
+                ".b-music__genre__header__info",
+                ".b-music__playlists--tile__item__controls",
+                ".b-music__playlists--tile__item__stats",
+                ".b-music__section__content",
+                ".b-music__section__footer",
+                ".b-music__section__row",
+                ".b-music__top-artists__item__cover",
+                ".b-music__top-artists__item__info",
+                ".b-music__user-header__content",
+                ".b-music__user-header__controls",
+                ".b-music__user-header__title",
+                ".b-popup__fade",
+                ".btn-import",
+                ".filed-images",
+                ".l-music__menu-main",
+                ".l-music__portal-navigation",
+                ".l-music__search-form",
+                ".l-music__sidebar__playlist-playing > .cover",
+                ".playlists-block",
+                ".profile__cover_empty_female",
+                ".profile__cover_empty_man",
+                ".smiles",
+                ".songs-table__row__col__cover",
+                ".ui-button-main"
+            ],
+            "noinvert": [
+                "html",
+                ".b-music__artist-header__content",
+                ".b-music__artist-header__cover",
+                ".b-music__section__cell",
+                ".fixed-menu > .b-music__section__footer",
+                ".l-mm__avatar",
+                ".l-music__player__song__cover",
+                ".playlists-block"
+            ],
+            "removebg": ".b-music__user-header__bg--no-profile-cover",
+            "rules": [
+                ".l-music { background: #111 }"
+            ]
+        },
+        {
+            "url": "na.op.gg",
+            "invert": ".__sprite"
+        },
+        {
             "url": "onliner.by",
             "invert": [
                 ".b-tile-main, .b-teasers-2__teaser, .news-tiles__subtitle",
                 ".b-opinions-main-2__tile, .news-header__top > .news-header__title"
             ],
             "noinvert": ".b-opinions-main-2__tile *"
+        },
+        {
+            "url": "openclassrooms.com",
+            "invert": [
+                "code.ace"
+            ],
+            "noinvert": "[class*=ace] *"
+        },
+        {
+            "url": "outlook.live.com",
+            "invert": "#O365_NavHeader"
         },
         {
             "url": "pandora.com",
@@ -155,6 +448,11 @@
             "invert": "#afreecatv_player"
         },
         {
+            "url": "poeaffix.net",
+            "invert": "#header",
+            "noinvert": "img"
+        },
+        {
             "url": "producthunt.com",
             "invert": ".backgroundImage_1hK9M, .v-image",
             "noinvert": [
@@ -166,8 +464,44 @@
             ]
         },
         {
+            "url": "quora.com",
+            "invert": ".section_photo"
+        },
+        {
+            "url": "reactjs.org",
+            "invert": ".gatsby-highlight"
+        },
+        {
             "url": "reddit.com",
             "invert": "#header-img"
+        },
+        {
+            "url": [
+                "ruby.sketchup.com",
+                "rubydoc.info"
+            ],
+            "invert": [
+                "#navbar"
+            ],
+            "noinvert": [
+                "#navbar a > img",
+                "#nav"
+            ]
+        },
+        {
+            "url": "scotch.io",
+            "invert": [
+                ".language-js, .language-javascript"
+            ]
+        },
+        {
+            "url": "semlar.com",
+            "invert": ".thumbnail, .col-sm-2, .img-rounded, #alert-list, .background-texture",
+            "noinvert": "img"
+        },
+        {
+            "url": "sharepoint.com",
+            "noinvert": "iframe"
         },
         {
             "url": "shop.ubi.com",
@@ -177,7 +511,7 @@
             "url": "slack.com",
             "invert": [
                 ".client_channels_list_container",
-                "figure"
+                "figure, .member_preview_link.member_image"
             ],
             "noinvert": [
                 ".client_channels_list_container *",
@@ -210,6 +544,17 @@
             ],
             "noinvert": [
                 ".tau-app-secondary-pane *, .app-header *"
+            ]
+        },
+        {
+            "url": "tproger.ru",
+            "invert": [
+                ".top-duft-punk",
+                "#colophon"
+            ],
+            "noinvert": [
+                ".text_logo img",
+                ".tmenu_icon"
             ]
         },
         {
@@ -253,7 +598,7 @@
             "noinvert": [
                 "#logo *, #taigachat_toolbar *",
                 ".listItemText h3, .pollBlock .pollResult div",
-                ".pollBlock .pollResult h3, .redactor_MessageEditor"
+                ".pollBlock .pollResult h3"
             ],
             "invert": [
                 "#unityhacks_sidebar, #exposeMask",
@@ -263,9 +608,9 @@
                 ".banner_supporter, .banner_partner, .banner_designer",
                 ".banner_promoter, .banner_honorable, .banner_premium",
                 ".messageHeading, .subHeading, .ToggleTrigger, .prefix",
+                ".PopupOpen, .categoryStrip, .secondaryContent h3, .LTR",
                 ".callToAction, .xenOverlay .section .heading, .xenTooltip",
                 ".redactor_dropdown, .errorOverlay, .sectionHeaders, .button",
-                ".PopupOpen, .categoryStrip, .secondaryContent h3, .activated",
                 "[title='Unread messages']",
                 "footer"
             ]
@@ -273,13 +618,55 @@
         {
             "url": "vk.com",
             "invert": [
-                "#video_player, .mv_playlist, .page_header_cont"
+                "#video_player, .mv_playlist, .page_header_cont, .page_album_title",
+                ".article_snippet__fade, .article_snippet__info, .article_snippet__read_btn",
+                "#layer_bg, #box_layer_bg, #pv_more_acts_tt",
+                ".login_app_devices, .friends_import_icon",
+                ".articleSnippet__inner, .articleSnippet_button",
+                "#z_photoview, .vv_summary, .thumb_map:after",
+                ".input_back_wrap[style*=none] ~ #ts_input",
+                "#ts_cont_wrap, #ts_cont_wrap img",
+                "#top_notify_wrap, #top_notify_wrap .feedback_sticky_icon",
+                "#audio_layer_tt, #audio_layer_tt [style*=background-image]",
+                ".audio_page_player_play .icon, .page_video_play_icon",
+                ".apps_featured_thumb_content, [class^=apps_featured]:before",
+                ".apps_frtt_photo, .apps_frtt_level",
+                ".settings_separated_row_iconed:before",
+                ".owner_photo_bubble_wrap, #top_profile_menu",
+                ".tt_black, .tt_w.tt_black",
+                ".box_title, .box_layer_wrap",
+                "#box_loader, .chat_tab_close",
+                "#notifiers_wrap, .notifier_image_wrap",
+                ".doc_ext, .doc_title"
             ],
             "noinvert": [
-                "#video_player *, .mv_playlist *, .page_header_cont *"
+                "#video_player *, .mv_playlist *, .page_header_cont *",
+                "#z_photoview img, .box_grey .box_title"
             ],
             "removebg": [
-                ".mv_layer_bg"
+                ".mv_layer_bg, .pv_bottom_info, .pv_img_area_wrap, .vv_body, .like_tt"
+            ],
+            "rules": [
+                ".pv_bottom_info *, .like_tt {color: #000 !important}",
+                "#pv_more_acts_tt * {color: #eee !important}",
+                "#top_notify_wrap, #audio_layer_tt {box-shadow: none}",
+                ".chat_onl_inner {background-color: #dae1e8 !important}",
+                ".chat_tab_wrap:hover {background-color: #ccd5de !important}",
+                ".photos_row {border-color: #000 !important; background-color: #000 !important}"
+            ]
+        },
+        {
+            "url": "vocabolario.sns.it",
+            "noinvert": "body[background]",
+            "invert": "img[src]"
+        },
+        {
+            "url": "vuejs.org",
+            "invert": [
+                ".content, pre, h3, p"
+            ],
+            "noinvert": [
+                "img"
             ]
         },
         {
@@ -289,7 +676,11 @@
         },
         {
             "url": "wikipedia.org",
-            "noinvert": ".mwe-math-fallback-image-inline"
+            "invert": ".mwe-popups-discreet > svg",
+            "noinvert": [
+                ".mwe-math-fallback-image-inline",
+                ".mwe-math-fallback-image-display"
+            ]
         },
         {
             "url": "wikiwand.com",
@@ -299,6 +690,45 @@
             "url": "wolfram.com",
             "noinvert": [
                 ".numberedequation, .displayformula"
+            ]
+        },
+        {
+            "url": "yandex.*",
+            "invert": [
+                ".afisha, #wd-_afisha",
+                ".favicon",
+                ".informers7__icon",
+                ".places__content-wrapper",
+                ".schedule__icon",
+                ".stream-intro",
+                ".zen__item-domain",
+                ".zen__item-title",
+                ".button_theme_white",
+                ".stream-intro__items",
+                ".services__icon",
+                ".teaser__service-bg",
+                ".places__card",
+                ".menu2__wrapper",
+                ".footer",
+                ".logo-service__image",
+                ".app-icon",
+                ".services-big__item_icon",
+                ".services-all__icon",
+                "[class*='icon_moon_']",
+                ".weather__icon, .traffic__icon",
+                ".media-grid_theme_white, .dist-popup__image"
+            ],
+            "noinvert": [
+                ".afisha__film-image",
+                ".stream-intro__vod-preview"
+            ],
+            "removebg": [
+                ".stream-intro__items",
+                ".mini-suggest__popup-spacer"
+            ],
+            "rules": [
+                ".body__wrapper > .i-bem {background-color: #fff}",
+                ".stream-intro__items, .block__title * {color: #000 !important}"
             ]
         },
         {

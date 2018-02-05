@@ -34,6 +34,7 @@ Notice that merged changes to these files are automatically delivered to all use
 ]
 ```
 - It is also possible to specify multiple selectors (comma-separated list or an array) and custom CSS rules. If chosen element contains images or other content that becomes wrongly displayed, `noinvert` rule can be used. `removebg` removes background image from element.
+*IMPORTANT: When Dark mode is on, the whole page (root `<html>` element) is inverted by filter. To revert the images, videos etc. `invert` selectors are used, so the inversion will be applied to these elements twice. If inverted elements contain other elements that match the `invert` selectors, then these elements will be inverted 3 or more times. To prevent it `noinvert` selectors are used.*
 ```json
 ...
 "sites": [

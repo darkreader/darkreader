@@ -157,6 +157,16 @@
             "rules": "._2s1x ._2s1y { background: #9BB5E8 !important; color: black !important; border-bottom-color: #92A6CA !important; }"
         },
         {
+            "url": "feedly.com",
+            "invert": [
+                ".landing-old .dark",
+                "#feedlyUndoSign",
+                "#feedlySignPart",
+                ".pinContainer"
+            ],
+            "rules": ".entry-overlay {background-color: rgba(220,220,220,0.5)}"
+        },
+        {
             "url": "feynmanlectures.caltech.edu",
             "noinvert": "img"
         },

@@ -340,6 +340,22 @@
             ]
         },
         {
+            "url": "mspaintadventures.ru",
+            "invert": [
+                ".row, .row img, .row object",
+                ".mspa_sidebar, .content",
+                ".footer, .copyright"
+            ],
+            "noinvert": [
+                ".nav img"
+            ],
+            "rules": [
+                "body {background-color: #acacac}",
+                ".sidebar {border-color: #acacac}",
+                ".row:nth-of-type(4) {background-color: #535353}"
+            ]
+        },
+        {
             "url": [
                 "my.mail.ru/vk",
                 "my.mail.ru/mail",

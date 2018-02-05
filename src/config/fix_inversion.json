@@ -595,31 +595,41 @@
         {
             "url": "vk.com",
             "invert": [
-                "#video_player",
-                ".mv_playlist",
-                ".page_header_cont",
-                ".page_album_title",
-                ".article_snippet__fade",
-                ".article_snippet__info",
-                ".article_snippet__read_btn",
-                "#layer_bg",
-                "#pv_more_acts_tt",
-                ".login_app_devices",
-                "#z_photoview",
-                ".articleSnippet__inner",
-                ".articleSnippet_button",
-                ".vv_summary",
-                ".thumb_map:after"
+                "#video_player, .mv_playlist, .page_header_cont, .page_album_title",
+                ".article_snippet__fade, .article_snippet__info, .article_snippet__read_btn",
+                "#layer_bg, #box_layer_bg, #pv_more_acts_tt",
+                ".login_app_devices, .friends_import_icon",
+                ".articleSnippet__inner, .articleSnippet_button",
+                "#z_photoview, .vv_summary, .thumb_map:after",
+                ".input_back_wrap[style*=none] ~ #ts_input",
+                "#ts_cont_wrap, #ts_cont_wrap img",
+                "#top_notify_wrap, #top_notify_wrap .feedback_sticky_icon",
+                "#audio_layer_tt, #audio_layer_tt [style*=background-image]",
+                ".audio_page_player_play .icon, .page_video_play_icon",
+                ".apps_featured_thumb_content, [class^=apps_featured]:before",
+                ".apps_frtt_photo, .apps_frtt_level",
+                ".settings_separated_row_iconed:before",
+                ".owner_photo_bubble_wrap, #top_profile_menu",
+                ".tt_black, .tt_w.tt_black",
+                ".box_title, .box_layer_wrap",
+                "#box_loader, .chat_tab_close",
+                "#notifiers_wrap, .notifier_image_wrap",
+                ".doc_ext, .doc_title"
             ],
             "noinvert": [
-                "#video_player *, .mv_playlist *, .page_header_cont *, #z_photoview img"
+                "#video_player *, .mv_playlist *, .page_header_cont *",
+                "#z_photoview img, .box_grey .box_title"
             ],
             "removebg": [
                 ".mv_layer_bg, .pv_bottom_info, .pv_img_area_wrap, .vv_body, .like_tt"
             ],
             "rules": [
                 ".pv_bottom_info *, .like_tt {color: #000 !important}",
-                "#pv_more_acts_tt * {color: #eee !important}"
+                "#pv_more_acts_tt * {color: #eee !important}",
+                "#top_notify_wrap, #audio_layer_tt {box-shadow: none}",
+                ".chat_onl_inner {background-color: #dae1e8 !important}",
+                ".chat_tab_wrap:hover {background-color: #ccd5de !important}",
+                ".photos_row {border-color: #000 !important; background-color: #000 !important}"
             ]
         },
         {

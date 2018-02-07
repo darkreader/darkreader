@@ -10,12 +10,12 @@
 
     if ((<any>window).chrome && chrome.extension) {
         // Access extension from the background
-        var background = <typeof DarkReader.Background>(<any>chrome.extension.getBackgroundPage()).DarkReader.Background;
+        const background = <typeof DarkReader.Background>(<any>chrome.extension.getBackgroundPage()).DarkReader.Background;
 
         if (background.extension) {
             popupWindow = new PopupWindow(background.extension);
         } else {
-            var onExtLoaded = (ext: DarkReader.Extension) => {
+            const onExtLoaded = (ext: DarkReader.Extension) => {
                 popupWindow = new PopupWindow(ext);
                 background.onExtensionLoaded.removeHandler(onExtLoaded);
             };

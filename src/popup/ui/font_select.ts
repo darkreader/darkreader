@@ -44,7 +44,7 @@
         }
 
         protected getTemplate() {
-            var t = super.getTemplate();
+            const t = super.getTemplate();
             t.classList.add('FontSelect');
             return t;
         }
@@ -73,7 +73,7 @@
             return !this.fontList.domElement.classList.contains('collapsed');
         }
         private expandList(done?: () => void) {
-            var expand = () => {
+            const expand = () => {
                 this.fontList.domElement.classList.remove('collapsed');
                 window.addEventListener('click', this.outerClickHandler);
                 done && done();
@@ -99,12 +99,13 @@
         }
 
         private scrollToItemByText(text: string) {
-            var onListExpanded = () => {
+            const onListExpanded = () => {
                 text = text.toLowerCase().trim();
-                for (var i = 0; i < this.fonts.length; i++) {
+                let i;
+                for (i = 0; i < this.fonts.length; i++) {
                     if (this.fonts[i].toLowerCase().indexOf(text) === 0) {
                         // Scroll to item
-                        var item = this.fontList.children.filter((c: xp.Label) => c.text === this.fonts[i])[0];
+                        const item = this.fontList.children.filter((c: xp.Label) => c.text === this.fonts[i])[0];
                         if (item) {
                             item.domElement.scrollIntoView(true);
                         }
@@ -130,7 +131,7 @@
                 setTimeout(() => {
                     fonts = fonts.slice(0);
                     console.time('Rendering fonts');
-                    for (var i = 0; i < fonts.length; i++) {
+                    for (let i = 0; i < fonts.length; i++) {
                         ((font) => {
                             this.fontList.append(new xp.Label({
                                 style: 'fontItem',

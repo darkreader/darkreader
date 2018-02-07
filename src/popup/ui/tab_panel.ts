@@ -35,19 +35,19 @@
         }
 
         protected getTemplate() {
-            var t = super.getTemplate();
+            const t = super.getTemplate();
             t.classList.add('TabPanel');
             return t;
         }
 
         addTab(tab: Tab) {
             // Create tab button
-            var button = new xp.Button({
+            const button = new xp.Button({
                 style: 'tabPanelButton',
                 onClick: () => this.switchTab(tab),
                 useParentScope: false,
                 scope: tab,
-                text: '{tabName}'
+                text: '{tabName}',
                 //init: (el: xp.Button) => el.bind('text', 'tabName', tab)
             });
             this.buttonsContainer.append(button);
@@ -61,7 +61,7 @@
         }
 
         removeTab(tab: Tab) {
-            var tabIndex = this.tabs.indexOf(tab);
+            const tabIndex = this.tabs.indexOf(tab);
             if (tabIndex < 0) {
                 throw new Error('Tab panel doesn\'t contain this tab.');
             }
@@ -75,7 +75,7 @@
         }
 
         switchTab(tab: Tab) {
-            var tabIndex = this.tabs.indexOf(tab);
+            const tabIndex = this.tabs.indexOf(tab);
             if (tabIndex < 0) {
                 throw new Error('Tab panel doesn\'t contain this tab.');
             }
@@ -106,7 +106,7 @@
         }
 
         protected getTemplate() {
-            var t = super.getTemplate();
+            const t = super.getTemplate();
             t.classList.add('Tab');
             return t;
         }

@@ -1,4 +1,15 @@
 ﻿module DarkReader {
+    //
+    // ---------- Constants --------------------
+
+    const ICON_PATHS = {
+        active_19: '../img/dr_active_19.png',
+        active_38: '../img/dr_active_38.png',
+        inactive_19: '../img/dr_inactive_19.png',
+        inactive_38: '../img/dr_inactive_38.png'
+    };
+
+    const SAVE_CONFIG_TIMEOUT = 1000;
 
     /**
      * Chrome extension.
@@ -25,7 +36,7 @@
             xp.Model.property(this, 'fonts', []);
 
             // Handle config changes
-            var changeReg = new xp.EventRegistrar();
+            const changeReg = new xp.EventRegistrar();
             this.onPropertyChanged.addHandler((prop) => {
                 if (prop === 'enabled') {
                     this.onAppToggle();
@@ -82,13 +93,13 @@
                 lastFocusedWindow: true
             }, (tabs) => {
                 if (tabs.length === 1) {
-                    var url = tabs[0].url;
-                    var host = url.match(/^(.*?:\/{2,3})?(.+?)(\/|$)/)[2];
-                    var info: TabInfo = {
+                    const url = tabs[0].url;
+                    const host = url.match(/^(.*?:\/{2,3})?(.+?)(\/|$)/)[2];
+                    const info: TabInfo = {
                         url: url,
                         host: host,
                         isChromePage: (url.indexOf('chrome') === 0 || url.indexOf('https://chrome.google.com/webstore') === 0),
-                        isInDarkList: isUrlInList(url, DARK_SITES)
+                        isInDarkList: isUrlInList(url, DARK_SITES),
                     };
                     callback(info);
                 } else {
@@ -108,7 +119,7 @@
         toggleCurrentSite() {
             this.getActiveTabInfo((info) => {
                 if (info.host) {
-                    var index = this.config.siteList.indexOf(info.host);
+                    const index = this.config.siteList.indexOf(info.host);
                     if (index < 0) {
                         this.config.siteList.push(info.host);
                     } else {
@@ -276,7 +287,7 @@
         }
 
         protected getCode_addStyle(url?: string) {
-            var css = this.generator.createCssCode(this.config, url);
+            const css = this.generator.createCssCode(this.config, url);
             return `
 ${DEBUG ? "console.log('Executing DR script (add)...');" : ""}
 //debugger;
@@ -360,18 +371,18 @@ style && style.parentElement.removeChild(style);
          * Loads configuration from Chrome storage.
          */
         protected loadUserSettings() {
-            var defaultFilterConfig = xp.clone(DEFAULT_FILTER_CONFIG);
-            var defaultStore: AppConfigStore = {
+            const defaultFilterConfig = xp.clone(DEFAULT_FILTER_CONFIG);
+            const defaultStore: AppConfigStore = {
                 enabled: true,
-                config: defaultFilterConfig
+                config: defaultFilterConfig,
             };
             chrome.storage.sync.get(defaultStore, (store: AppConfigStore) => {
                 if (!store.config) {
                     store.config = defaultFilterConfig;
                 }
                 if (!Array.isArray(store.config.siteList)) {
-                    var arr = [];
-                    for (var key in store.config.siteList) {
+                    const arr = [];
+                    for (let key in store.config.siteList) {
                         arr[key] = store.config.siteList[key];
                     }
                     store.config.siteList = arr;
@@ -391,9 +402,9 @@ style && style.parentElement.removeChild(style);
                 clearTimeout(this.savedTimeout);
             }
             this.savedTimeout = setTimeout(() => {
-                var store: AppConfigStore = {
+                const store: AppConfigStore = {
                     enabled: this.enabled,
-                    config: this.config
+                    config: this.config,
                 };
                 chrome.storage.sync.set(store, () => {
                     console.log('saved', store);
@@ -422,7 +433,7 @@ style && style.parentElement.removeChild(style);
             }
             chrome.fontSettings.getFontList((res) => {
                 // id or name?
-                var fonts = res.map((r) => r.fontId);
+                const fonts = res.map((r) => r.fontId);
                 onReturned(fonts);
             });
         }
@@ -443,7 +454,7 @@ style && style.parentElement.removeChild(style);
         }
 
         getDevInversionFixesText() {
-            var fixes = this.getSavedDevInversionFixes();
+            const fixes = this.getSavedDevInversionFixes();
             return formatJson(fixes ? JSON.parse(fixes) : copyJson(RAW_INVERSION_FIXES));
         }
 
@@ -454,10 +465,10 @@ style && style.parentElement.removeChild(style);
         }
 
         applyDevInversionFixes(json: string, callback: (err: Error) => void) {
-            var obj;
+            let obj;
             try {
                 obj = JSON.parse(json);
-                var text = formatJson(obj);
+                const text = formatJson(obj);
                 this.saveDevInversionFixes(text);
                 handleInversionFixes(obj);
                 this.onConfigPropChanged();
@@ -468,17 +479,6 @@ style && style.parentElement.removeChild(style);
         }
     }
 
-    //
-    // ---------- Constants --------------------
-
-    var ICON_PATHS = {
-        active_19: '../img/dr_active_19.png',
-        active_38: '../img/dr_active_38.png',
-        inactive_19: '../img/dr_inactive_19.png',
-        inactive_38: '../img/dr_inactive_38.png'
-    };
-
-    var SAVE_CONFIG_TIMEOUT = 1000;
 
 
     //

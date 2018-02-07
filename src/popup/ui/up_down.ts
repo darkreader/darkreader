@@ -130,12 +130,14 @@
         // TODO: Trackbar click...
 
         protected getTemplate() {
-            return xp.Dom.create(`
-                <span class="TrackBar">
-                  <span class="value">&nbsp;</span>
-                  <label></label>
-                </span>
-                `, {
+            return xp.Dom.create({
+                tag: 'span',
+                attrs: { class: 'TrackBar' },
+                children: [
+                    { tag: 'span', attrs: { class: 'value' }, children: ['\u00A0'] },
+                    { tag: 'label' }
+                ]
+            }, {
                     '.value': (el) => this.elementValue = el,
                     'label': (el) => this.elementLabel = el
                 });

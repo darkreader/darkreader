@@ -58,13 +58,42 @@ module DarkReader.Popup {
                     ]),
 
                     new xp.Html({
-                        html: `
-                            <div class="description selectable">
-                                Read about this tool <strong><a href="https://github.com/alexanderby/darkreader#how-to-contribute" target="_blank">here</a></strong>. If a <strong>popular</strong>
-                                website looks incorrect e-mail to
-                                <strong>DarkReaderApp@gmail.com</strong>
-                            </div>
-                        `
+                        html: {
+                            tag: 'div',
+                            attrs: { class: 'description selectable' },
+                            children: [
+                                'Read about this tool ',
+                                {
+                                    tag: 'strong',
+                                    children: [
+                                        {
+                                            tag: 'a',
+                                            attrs: {
+                                                href: 'https://github.com/alexanderby/darkreader#how-to-contribute',
+                                                target: '_blank'
+                                            },
+                                            children: ['here']
+                                        }
+                                    ]
+                                },
+                                '. If a ',
+                                {
+                                    tag: 'strong',
+                                    children: [
+                                        'popular',
+                                    ]
+                                },
+                                '\n',
+                                'website looks incorrect e-mail to',
+                                '\n',
+                                {
+                                    tag: 'strong',
+                                    children: [
+                                        'DarkReaderApp@gmail.com'
+                                    ]
+                                }
+                            ]
+                        }
                     })
                 ])
 

@@ -7,7 +7,13 @@
                 //
                 // ---- Logo ----
 
-                new xp.Html({ html: '<img id="logo" src="img/dark-reader-type.svg" alt="Dark Reader" />', flex: 'none' }),
+                new xp.Html({
+                    html: {
+                        tag: 'img',
+                        attrs: { id: 'logo', src: 'img/dark-reader-type.svg', alt: 'Dark Reader' }
+                    },
+                    flex: 'none'
+                }),
 
                 //
                 // ---- Top section ----
@@ -202,10 +208,17 @@
                 new xp.VBox({ name: 'footer', flex: 'none', itemsIndent: 'none' }, [
                     new xp.Html({
                         flex: 'none',
-                        html: `
-                        <p class="description">Some things should not be inverted?
-                            You can <strong>help and fix it</strong>, here is a tool
-                        `,
+                        html: {
+                            tag: 'p',
+                            attrs: { class: 'description' },
+                            children: [
+                                'Some things should not be inverted?',
+                                '\n',
+                                'You can ',
+                                { tag: 'strong', children: ['help and fix it'] },
+                                ', here is a tool'
+                            ]
+                        },
                         enabled: '{enabled}'
                     }),
                     new xp.Button({
@@ -284,7 +297,21 @@
                 if (info.host) {
                     // HACK: Try to break URLs at dots.
                     btn.text = '*';
-                    (<HTMLElement>btn.domElement.querySelector('.text')).innerHTML = '<wbr>' + info.host.replace(/\./g, '<wbr>.');
+                    const textElement = <HTMLElement>btn.domElement.querySelector('.text');
+                    while (textElement.firstChild) {
+                        textElement.removeChild(textElement.firstChild);
+                    }
+                    const hostParts = info.host.split('.');
+                    hostParts.forEach((part, i) => {
+                        if (i > 0) {
+                            const wbr = document.createElement('wbr');
+                            const dot = document.createTextNode('.');
+                            textElement.appendChild(wbr);
+                            textElement.appendChild(dot);
+                        }
+                        const text = document.createTextNode(part);
+                        textElement.appendChild(text);
+                    });
                 } else {
                     btn.text = 'current site';
                 }

@@ -273,9 +273,8 @@
 
         protected getCode_addStyle(url?: string) {
             var css = this.generator.createCssCode(this.config, url);
-            var code = `
+            var code = `(function () {
 ${DEBUG ? "console.log('Executing DR script (add)...');" : ""}
-//debugger;
 var createDRStyle = function() {
     var css = '${css.replace(/'/g, '\\\'')}';
     var style = document.createElement('style');
@@ -334,16 +333,16 @@ if (document.head) {
         onReady();
     }
 }
-`;
+})()`;
             return code;
         }
 
         protected getCode_removeStyle() {
-            var code = `
+            var code = `(function () {
 ${DEBUG ? "console.log('Executing DR script (remove)...');" : ""}
 var style = document.getElementById('dark-reader-style');
 style && style.parentElement.removeChild(style);
-`;
+})();`;
             return code;
         }
 

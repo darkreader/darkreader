@@ -38,8 +38,7 @@ module.exports = function (grunt) {
             })
             .sub('zip', {
                 src: ['build/**/*.*'],
-                dest: 'build.zip',
-                compression: 'DEFLATE'
+                dest: 'build.zip'
             })
             // Firefox
             .sub('clean', 'build-firefox')
@@ -73,15 +72,19 @@ module.exports = function (grunt) {
                 dest: 'build-firefox/',
                 options: {
                     process: (content) => {
-                        return content.replace(/chrome\.fontSettings/g, 'chrome["font" + "Settings"]');
+                        return content
+                            .replace(/chrome\.fontSettings\.getFontList/g, 'chrome["font" + "Settings"]["get" + "Font" + "List"]')
+                            .replace(/chrome\.fontSettings/g, 'chrome["font" + "Settings"]');
                     }
                 }
             })
-            .sub('zip', {
-                src: ['build-firefox/**/*.*'],
-                dest: 'build-firefox.zip',
-                compression: 'DEFLATE'
-            })
+            // Bug, file size becomes too large
+            // .sub('zip', {
+            //     expand: true,
+            //     cwd: 'build-firefox/',
+            //     src: ['**/*.*'],
+            //     dest: 'build-firefox.zip'
+            // })
             .sub('ext-reload');
 
         //

@@ -471,6 +471,7 @@ style && style.parentElement.removeChild(style);
             && url.indexOf('chrome') !== 0
             && url.indexOf('https://chrome.google.com/webstore') !== 0
             && url.indexOf('about:') !== 0
+            && url.indexOf('view-source:') !== 0
             && url.indexOf('https://addons.mozilla.org') !== 0
     }
 

@@ -277,7 +277,7 @@
 
         protected getCode_addStyle(url?: string) {
             var css = this.generator.createCssCode(this.config, url);
-            var code = `
+            return `
 ${DEBUG ? "console.log('Executing DR script (add)...');" : ""}
 //debugger;
 var createDRStyle = function() {
@@ -339,16 +339,14 @@ if (document.head) {
     }
 }
 `;
-            return code;
         }
 
         protected getCode_removeStyle() {
-            var code = `
+            return `
 ${DEBUG ? "console.log('Executing DR script (remove)...');" : ""}
 var style = document.getElementById('dark-reader-style');
 style && style.parentElement.removeChild(style);
 `;
-            return code;
         }
 
 
@@ -446,8 +444,7 @@ style && style.parentElement.removeChild(style);
 
         getDevInversionFixesText() {
             var fixes = this.getSavedDevInversionFixes();
-            var text = formatJson(fixes ? JSON.parse(fixes) : copyJson(RAW_INVERSION_FIXES));
-            return text;
+            return formatJson(fixes ? JSON.parse(fixes) : copyJson(RAW_INVERSION_FIXES));
         }
 
         resetDevInversionFixes() {

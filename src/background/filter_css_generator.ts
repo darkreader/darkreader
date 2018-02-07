@@ -231,9 +231,7 @@
                 parts.push(removeBg);
             }
 
-            var result = parts.join('\\n');
-
-            return result;
+            return parts.join('\\n');
         }
 
         // Should be used only if 'usefont' is 'true' or 'stroke' > 0

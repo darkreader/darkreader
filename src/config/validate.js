@@ -52,8 +52,7 @@ function readConfigFile(fileName) {
 
 function tryParseJson(name, text) {
     try {
-        var obj = JSON.parse(text);
-        return obj;
+      return JSON.parse(text);
     } catch (err) {
         var message = err.message || '';
         var m = /position (\d+)/.exec(message);

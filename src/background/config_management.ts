@@ -262,8 +262,7 @@
      * @param params Object containing request parameters.
      */
     function readJson<T>(params: JsonRequestParams<T>): Promise<T> {
-        var promise = new Promise((resolve, reject) => {
-
+        return new Promise((resolve, reject) => {
             var request = new XMLHttpRequest();
             request.overrideMimeType("application/json");
             request.open(
@@ -291,7 +290,6 @@
             }
             request.send();
         });
-        return promise;
     }
 
     interface JsonRequestParams<T> {
@@ -389,8 +387,7 @@
         //
         // Result
 
-        var regex = new RegExp(result, 'i');
-        return regex;
+        return new RegExp(result, 'i');
     }
 
     /**

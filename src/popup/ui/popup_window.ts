@@ -275,7 +275,7 @@
             ext.getActiveTabInfo((info) => {
                 // NOTE: Disable button if toggle has no effect.
                 var toggleHasEffect = () => {
-                    return (!info.isChromePage
+                    return (!info.isProtected
                         && !(!ext.config.invertListed
                             && info.isInDarkList));
                 };

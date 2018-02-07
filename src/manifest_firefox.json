@@ -4,5 +4,13 @@
             "id": "addon@darkreader.org",
             "strict_min_version": "54.0"
         }
-    }
+    },
+    "background": {
+        "page": "background/background.html"
+    },
+    "permissions": [
+        "storage",
+        "tabs",
+        "<all_urls>"
+    ]
 }

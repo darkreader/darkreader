@@ -66,6 +66,17 @@ module.exports = function (grunt) {
                     }
                 }
             })
+            .sub('copy', {
+                expand: true,
+                cwd: 'build-firefox/',
+                src: 'background/extension.js',
+                dest: 'build-firefox/',
+                options: {
+                    process: (content) => {
+                        return content.replace(/chrome\.fontSettings/g, 'chrome["font" + "Settings"]');
+                    }
+                }
+            })
             .sub('zip', {
                 src: ['build-firefox/**/*.*'],
                 dest: 'build-firefox.zip',

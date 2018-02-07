@@ -95,7 +95,7 @@ declare var FileSaver: {
      * This constructor must be visible when the script's global object is either a Window object or an object implementing the WorkerUtils interface.
      */
     new(data:Blob): FileSaver;
-}
+};
 
 /**
  * This interface expands on the FileSaver interface to allow for multiple write actions, rather than just saving a single Blob.

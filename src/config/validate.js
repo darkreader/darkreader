@@ -112,7 +112,7 @@ function validateJsonFormat(message, a, b) {
     total++;
     var i = getTextDiffIndex(a, b);
     if (i < 0) {
-        logOk(message)
+        logOk(message);
         passed++;
     } else {
         message += '\n';

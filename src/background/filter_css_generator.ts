@@ -130,7 +130,7 @@
                     value = value * (config.brightness) / 100;
 
                     // Contrast
-                    value = value * (config.contrast) / 100 - (0.5 * config.contrast / 100) + 0.5
+                    value = value * (config.contrast) / 100 - (0.5 * config.contrast / 100) + 0.5;
 
                     // Grayscale?
 

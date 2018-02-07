@@ -227,12 +227,12 @@
         protected tabUpdateListener = (tabId: number, info: chrome.tabs.TabChangeInfo, tab: chrome.tabs.Tab) => {
             console.log(`Tab updated: ${tab.id}, status: ${info.status}`);
             this.addStyleToTab(tab);
-        }
+        };
 
         protected tabReplaceListener = (addedTabId: number, replacedTabId: number) => {
             console.log(`Tab ${replacedTabId} replaced with ${addedTabId}`);
             chrome.tabs.get(addedTabId, (tab) => this.addStyleToTab(tab));
-        }
+        };
 
 
         //----------------------

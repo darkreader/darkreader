@@ -243,6 +243,10 @@
             "invert": "#nb20, .vital, .poster, .slate, .slate_fade_top, .slate_fade_bottom"
         },
         {
+            "url": "immutables.github.io",
+            "invert": ".illustration, .documentation .highlight"
+        },
+        {
             "url": "io9.com",
             "rules": "html { height: auto !important; }"
         },

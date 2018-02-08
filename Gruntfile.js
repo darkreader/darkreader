@@ -37,8 +37,10 @@ module.exports = function (grunt) {
                 expand: true
             })
             .sub('zip', {
-                src: ['build/**/*.*'],
-                dest: 'build.zip'
+                cwd: 'build/',
+                src: ['build/**/*'],
+                dest: 'build.zip',
+                compression: 'DEFLATE'
             })
             // Firefox
             .sub('clean', 'build-firefox')
@@ -78,13 +80,12 @@ module.exports = function (grunt) {
                     }
                 }
             })
-            // Bug, file size becomes too large
-            // .sub('zip', {
-            //     expand: true,
-            //     cwd: 'build-firefox/',
-            //     src: ['**/*.*'],
-            //     dest: 'build-firefox.zip'
-            // })
+            .sub('zip', {
+                cwd: 'build-firefox',
+                src: ['build-firefox/**/*'],
+                dest: 'build-firefox.zip',
+                compression: 'DEFLATE'
+            })
             .sub('ext-reload');
 
         //

@@ -422,9 +422,13 @@
             "url": "onliner.by",
             "invert": [
                 ".b-tile-main, .b-teasers-2__teaser, .news-tiles__subtitle",
-                ".b-opinions-main-2__tile, .news-header__top > .news-header__title"
+                ".b-opinions-main-2__tile, .news-header__top > .news-header__title",
+                ".b-tile-grad"
             ],
-            "noinvert": ".b-opinions-main-2__tile *"
+            "noinvert": [
+                ".b-opinions-main-2__tile *",
+                ".b-teasers-2__teaser-i"
+            ]
         },
         {
             "url": "openclassrooms.com",

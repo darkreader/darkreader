@@ -109,7 +109,7 @@ import { FilterCssGenerator, FilterConfig, FilterMode } from './filter_css_gener
                     const info: TabInfo = {
                         url,
                         host,
-                        canInjectScript: this.canInjectScript(tab),
+                        isProtected: !canInjectScript(url),
                         isInDarkList: isUrlInList(url, DARK_SITES)
                     };
                     callback(info);
@@ -118,7 +118,7 @@ import { FilterCssGenerator, FilterConfig, FilterMode } from './filter_css_gener
                         throw new Error('Unexpected tabs count.');
                     }
                     console.error('Unexpected tabs count.');
-                    callback({ url: '', host: '', canInjectScript: false, isInDarkList: false });
+                    callback({ url: '', host: '', isProtected: false, isInDarkList: false });
                 }
             });
         }
@@ -268,11 +268,7 @@ import { FilterCssGenerator, FilterConfig, FilterMode } from './filter_css_gener
 
         protected canInjectScript(tab: chrome.tabs.Tab) {
             // Prevent throwing errors on specific chrome adresses
-            return (tab
-                && tab.url
-                && tab.url.indexOf('chrome') !== 0
-                && tab.url.indexOf('https://chrome.google.com/webstore') !== 0
-            );
+            return (tab && canInjectScript(tab.url));
         }
 
         /**
@@ -302,9 +298,8 @@ import { FilterCssGenerator, FilterConfig, FilterMode } from './filter_css_gener
 
         protected getCode_addStyle(url?: string) {
             var css = this.generator.createCssCode(this.config, url);
-            var code = `
+            var code = `(function () {
 ${DEBUG ? "console.log('Executing DR script (add)...');" : ""}
-//debugger;
 var createDRStyle = function() {
     var css = '${css.replace(/'/g, '\\\'')}';
     var style = document.createElement('style');
@@ -363,16 +358,16 @@ if (document.head) {
         onReady();
     }
 }
-`;
+})()`;
             return code;
         }
 
         protected getCode_removeStyle() {
-            var code = `
+            var code = `(function () {
 ${DEBUG ? "console.log('Executing DR script (remove)...');" : ""}
 var style = document.getElementById('dark-reader-style');
 style && style.parentElement.removeChild(style);
-`;
+})();`;
             return code;
         }
 
@@ -502,6 +497,15 @@ style && style.parentElement.removeChild(style);
         }
     }
 
+    function canInjectScript(url: string) {
+        return url
+            && url.indexOf('chrome') !== 0
+            && url.indexOf('https://chrome.google.com/webstore') !== 0
+            && url.indexOf('about:') !== 0
+            && url.indexOf('view-source:') !== 0
+            && url.indexOf('https://addons.mozilla.org') !== 0
+    }
+
     //
     // ---------- Constants --------------------
 
@@ -526,6 +530,6 @@ style && style.parentElement.removeChild(style);
     export interface TabInfo {
         url: string;
         host: string;
-        canInjectScript: boolean;
+        isProtected: boolean;
         isInDarkList: boolean;
     }

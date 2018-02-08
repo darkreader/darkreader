@@ -351,16 +351,18 @@
             "url": "mspaintadventures.ru",
             "invert": [
                 ".row, .row img, .row object",
-                ".mspa_sidebar, .content",
-                ".footer, .copyright"
+                ".sidebar, .content, .footer, .copyright",
+                ".row:nth-of-type(1) > .header",
+                ".row:nth-of-type(1) > .header > .banner"
             ],
             "noinvert": [
-                ".nav img"
+                ".nav img, #page > .content",
+                ".row > .row, .content > .content"
             ],
             "rules": [
-                "body {background-color: #acacac}",
-                ".sidebar {border-color: #acacac}",
-                ".row:nth-of-type(4) {background-color: #535353}"
+                "body {background-color: #acacac !important}",
+                ".sidebar {border-color: #acacac !important}",
+                "html, .banner, .row:nth-of-type(2), .row:nth-of-type(4) {background-color: #535353 !important}"
             ]
         },
         {

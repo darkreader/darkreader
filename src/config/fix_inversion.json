@@ -338,6 +338,10 @@
             "invert": "._4tsk"
         },
         {
+            "url": "minhaclaro.claro.com.br",
+            "invert": ".header-black, .header-red-desktop-logada"
+        },
+        {
             "url": "mp.weixin.qq.com/wiki",
             "noinvert": [
                 ".res_iframe"

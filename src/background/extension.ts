@@ -343,7 +343,6 @@ if (document.head) {
     }
 }
 })()`;
-            return code;
         }
 
         protected getCode_removeStyle() {

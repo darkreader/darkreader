@@ -1,6 +1,4 @@
 ﻿module DarkReader {
-    //
-    // ---------- Constants --------------------
 
     const ICON_PATHS = {
         active_19: '../img/dr_active_19.png',
@@ -98,7 +96,7 @@
                     const info: TabInfo = {
                         url: url,
                         host: host,
-                        isChromePage: (url.indexOf('chrome') === 0 || url.indexOf('https://chrome.google.com/webstore') === 0),
+                        isProtected: !canInjectScript(url),
                         isInDarkList: isUrlInList(url, DARK_SITES),
                     };
                     callback(info);
@@ -107,7 +105,7 @@
                         throw new Error('Unexpected tabs count.');
                     }
                     console.error('Unexpected tabs count.');
-                    callback({ url: '', host: '', isChromePage: false, isInDarkList: false });
+                    callback({ url: '', host: '', isProtected: false, isInDarkList: false });
                 }
             });
         }
@@ -254,11 +252,7 @@
 
         protected canInjectScript(tab: chrome.tabs.Tab) {
             // Prevent throwing errors on specific chrome adresses
-            return (tab
-                && tab.url
-                && tab.url.indexOf('chrome') !== 0
-                && tab.url.indexOf('https://chrome.google.com/webstore') !== 0
-            );
+            return (tab && canInjectScript(tab.url));
         }
 
         /**
@@ -288,9 +282,8 @@
 
         protected getCode_addStyle(url?: string) {
             const css = this.generator.createCssCode(this.config, url);
-            return `
+            return `(function () {
 ${DEBUG ? "console.log('Executing DR script (add)...');" : ""}
-//debugger;
 var createDRStyle = function() {
     var css = '${css.replace(/'/g, '\\\'')}';
     var style = document.createElement('style');
@@ -349,15 +342,16 @@ if (document.head) {
         onReady();
     }
 }
-`;
+})()`;
+            return code;
         }
 
         protected getCode_removeStyle() {
-            return `
+            return `(function () {
 ${DEBUG ? "console.log('Executing DR script (remove)...');" : ""}
 var style = document.getElementById('dark-reader-style');
 style && style.parentElement.removeChild(style);
-`;
+})();`;
         }
 
 
@@ -479,7 +473,14 @@ style && style.parentElement.removeChild(style);
         }
     }
 
-
+    function canInjectScript(url: string) {
+        return url
+            && url.indexOf('chrome') !== 0
+            && url.indexOf('https://chrome.google.com/webstore') !== 0
+            && url.indexOf('about:') !== 0
+            && url.indexOf('view-source:') !== 0
+            && url.indexOf('https://addons.mozilla.org') !== 0
+    }
 
     //
     // --------- Interfaces --------------
@@ -496,7 +497,7 @@ style && style.parentElement.removeChild(style);
     export interface TabInfo {
         url: string;
         host: string;
-        isChromePage: boolean;
+        isProtected: boolean;
         isInDarkList: boolean;
     }
 }

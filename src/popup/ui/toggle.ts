@@ -16,12 +16,14 @@
         }
 
         protected getTemplate() {
-            return xp.Dom.create(`
-                <div class="Toggle">
-                  <span class="on">On</span>
-                  <span class="off">Off</span>
-                </div>
-                `, {
+            return xp.Dom.create({
+                tag: 'div',
+                attrs: { class: 'Toggle' },
+                children: [
+                    { tag: 'span', attrs: { class: 'on' }, children: ['On'] },
+                    { tag: 'span', attrs: { class: 'off' }, children: ['Off'] },
+                ]
+            }, {
                     '.on': (el) => this.elementOn = el,
                     '.off': (el) => this.elementOff = el
                 });

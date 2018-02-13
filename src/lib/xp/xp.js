@@ -4,12 +4,45 @@ var xp;
     (function (Dom) {
         /**
          * Creates a HTML element from string content.
-         * @param html HTML markup.
+         * @param declaration HTML declaration object {tag, attrs, children}
          * @param selectorSetter Selector/setter dictionary.
          */
-        function create(html, selectorSetters) {
+        function create(declaration, selectorSetters) {
+            var XHTML_NS = 'http://www.w3.org/1999/xhtml';
+            var SVG_NS = 'http://www.w3.org/2000/svg';
             var temp = document.createElement('div');
-            temp.innerHTML = html;
+            function traverse(parentNode, d) {
+                if (d == null) {
+                    return;
+                }
+                var node;
+                if (typeof d === 'string') {
+                    node = document.createTextNode(d);
+                } else if (d.tag === 'svg') {
+                    node = document.createElementNS(SVG_NS, 'svg');
+                } else if (parentNode.namespaceURI === XHTML_NS) {
+                    node = document.createElement(d.tag);
+                } else {
+                    node = document.createElementNS(parentNode.namespaceURI, d.tag);
+                }
+                if (typeof d === 'object') {
+                    if (d.attrs) {
+                        Object.keys(d.attrs).forEach(function (key) {
+                            var value = d.attrs[key];
+                            if (value != null && value !== false) {
+                                node.setAttribute(key, value === true ? '' : String(value));
+                            }
+                        });
+                    }
+                    if (d.children) {
+                        d.children.forEach(function (c) {
+                            traverse(node, c);
+                        });
+                    }
+                }
+                parentNode.appendChild(node);
+            }
+            traverse(temp, declaration);
             var result = temp.firstElementChild;
             for (var selector in selectorSetters) {
                 var el = select(selector, result);
@@ -2683,10 +2716,23 @@ var xp;
         //----
         Button.prototype.getTemplate = function () {
             var _this = this;
-            return xp.Dom.create("\n                <button class=\"Button\" type=\"button\">\n                    <span class=\"wrapper\">\n                        <span class=\"icon\"></span>\n                        <span class=\"text\"></span>\n                    </span>\n                </button>", {
-                '.icon': function (el) { return _this.iconElement = el; },
-                '.text': function (el) { return _this.textElement = el; }
-            });
+            return xp.Dom.create({
+                tag: 'button',
+                attrs: { class: 'Button', type: 'button' },
+                children: [
+                    {
+                        tag: 'span',
+                        attrs: { class: 'wrapper' },
+                        children: [
+                            { tag: 'span', attrs: { class: 'icon' } },
+                            { tag: 'span', attrs: { class: 'text' } }
+                        ]
+                    }
+                ]
+            }, {
+                    '.icon': function (el) { return _this.iconElement = el; },
+                    '.text': function (el) { return _this.textElement = el; }
+                });
         };
         //-----------
         // PROPERTIES
@@ -2766,10 +2812,27 @@ var xp;
         //----
         CheckBox.prototype.getTemplate = function () {
             var _this = this;
-            return xp.Dom.create("\n                <label class=\"CheckBox\">\n                    <input type=\"checkbox\"/>\n                    <span class=\"check\"></span>\n                    <label class=\"text\"></label>\n                </label>", {
-                'input': function (el) { return _this.checkElement = el; },
-                '.text': function (el) { return _this.textElement = el; }
-            });
+            return xp.Dom.create({
+                tag: 'label',
+                attrs: { class: 'CheckBox' },
+                children: [
+                    {
+                        tag: 'input',
+                        attrs: { type: 'checkbox' },
+                    },
+                    {
+                        tag: 'span',
+                        attrs: { class: 'check' },
+                    },
+                    {
+                        tag: 'label',
+                        attrs: { class: 'text' },
+                    }
+                ]
+            }, {
+                    'input': function (el) { return _this.checkElement = el; },
+                    '.text': function (el) { return _this.textElement = el; }
+                });
         };
         CheckBox.prototype.initEvents = function () {
             var _this = this;
@@ -2862,7 +2925,10 @@ var xp;
         // DOM
         //----
         Label.prototype.getTemplate = function () {
-            return xp.Dom.create('<label class="Label"></label>');
+            return xp.Dom.create({
+                tag: 'label',
+                attrs: { class: 'Label' }
+            });
         };
         //-----------
         // PROPERTIES
@@ -2892,7 +2958,11 @@ var xp;
             _super.apply(this, arguments);
         }
         Placeholder.prototype.getTemplate = function () {
-            return xp.Dom.create('<span class="Placeholder">&nbsp;</span>');
+            return xp.Dom.create({
+                tag: 'span',
+                attrs: { class: 'Placeholder' },
+                children: ['&nbsp;']
+            });
         };
         Placeholder.prototype.setDefaults = function () {
             _super.prototype.setDefaults.call(this);
@@ -2918,10 +2988,27 @@ var xp;
         //----
         RadioButton.prototype.getTemplate = function () {
             var _this = this;
-            return xp.Dom.create("\n                <label class=\"RadioButton\">\n                    <input type=\"radio\"/>\n                    <span class=\"check\"></span>\n                    <label class=\"text\"></label>\n                </label>", {
-                'input': function (el) { return _this.checkElement = el; },
-                '.text': function (el) { return _this.textElement = el; }
-            });
+            return xp.Dom.create({
+                tag: 'label',
+                attrs: { class: 'RadioButton' },
+                children: [
+                    {
+                        tag: 'input',
+                        attrs: { type: 'radio' },
+                    },
+                    {
+                        tag: 'span',
+                        attrs: { class: 'check' },
+                    },
+                    {
+                        tag: 'label',
+                        attrs: { class: 'text' },
+                    }
+                ]
+            }, {
+                    'input': function (el) { return _this.checkElement = el; },
+                    '.text': function (el) { return _this.textElement = el; }
+                });
         };
         //-------
         // EVENTS
@@ -2978,11 +3065,28 @@ var xp;
         //----
         ToggleButton.prototype.getTemplate = function () {
             var _this = this;
-            return xp.Dom.create("\n                <label class=\"ToggleButton\">\n                    <input type=\"radio\"/>\n                    <span class=\"icon\"></span>\n                    <span class=\"text\"></span>\n                </label>", {
-                'input': function (el) { return _this.checkElement = el; },
-                '.icon': function (el) { return _this.iconElement = el; },
-                '.text': function (el) { return _this.textElement = el; }
-            });
+            return xp.Dom.create({
+                tag: 'label',
+                attrs: { class: 'ToggleButton' },
+                children: [
+                    {
+                        tag: 'input',
+                        attrs: { type: 'radio' },
+                    },
+                    {
+                        tag: 'span',
+                        attrs: { class: 'icon' },
+                    },
+                    {
+                        tag: 'label',
+                        attrs: { class: 'text' },
+                    }
+                ]
+            }, {
+                    'input': function (el) { return _this.checkElement = el; },
+                    '.icon': function (el) { return _this.iconElement = el; },
+                    '.text': function (el) { return _this.textElement = el; }
+                });
         };
         //-----------
         // PROPERTIES
@@ -3061,7 +3165,7 @@ var xp;
         // DOM
         //----
         TextBox.prototype.getTemplate = function () {
-            var template = xp.Dom.create('<input class="TextBox" type="text" />');
+            var template = xp.Dom.create({ tag: 'input', attrs: { class: 'TextBox' } });
             //template.attr('tabindex', TabIndex++);
             return template;
         };
@@ -3227,7 +3331,10 @@ var xp;
         // DOM
         //----
         TextArea.prototype.getTemplate = function () {
-            var template = xp.Dom.create('<textarea class="TextArea TextBox" spellcheck="false"></textarea>');
+            var template = xp.Dom.create({
+                tag: 'textarea',
+                attrs: { class: 'TextArea TextBox', spellcheck: 'false' }
+            });
             //template.attr('tabindex', TabIndex++);
             return template;
         };
@@ -3631,7 +3738,7 @@ var xp;
         // DOM
         //----
         HBox.prototype.getTemplate = function () {
-            var template = xp.Dom.create('<div class="HBox"></div>');
+            var template = xp.Dom.create({ tag: 'div', attrs: { class: 'HBox' } });
             return template;
         };
         //protected getContainerElement(): HTMLElement {
@@ -3713,7 +3820,7 @@ var xp;
         // DOM
         //----
         VBox.prototype.getTemplate = function () {
-            var template = xp.Dom.create('<div class="VBox"></div>');
+            var template = xp.Dom.create({ tag: 'div', attrs: { class: 'VBox' } });
             return template;
         };
         //protected getContainerElement(): HTMLElement {
@@ -3797,7 +3904,7 @@ var xp;
         // DOM
         //----
         List.prototype.getTemplate = function () {
-            return xp.Dom.create('<div class="List VBox"></div>');
+            return xp.Dom.create({ tag: 'div', attrs: { class: 'List VBox' } });
         };
         //-----------
         // PROPERTIES
@@ -4051,7 +4158,7 @@ var xp;
         // DOM
         //----
         Modal.prototype.getTemplate = function () {
-            return xp.Dom.create('<div class="Modal VBox"></div>');
+            return xp.Dom.create({ tag: 'div', attrs: { class: 'Modal VBox' } });
         };
         return Modal;
     })(xp.VBox);
@@ -4065,7 +4172,7 @@ var xp;
             _super.apply(this, arguments);
         }
         ModalTint.prototype.getTemplate = function () {
-            return xp.Dom.create('<div class="ModalTint"></div>');
+            return xp.Dom.create({ tag: 'div', attrs: { class: 'ModalTint' } });
         };
         return ModalTint;
     })(xp.Container);
@@ -4122,10 +4229,12 @@ var xp;
                     var button = new xp.Button({
                         text: key,
                         minWidth: '4em',
-                        init: function (el) { return el.onClick.addHandler(function () {
-                            actions[key]();
-                            _this.close();
-                        }); }
+                        init: function (el) {
+                            return el.onClick.addHandler(function () {
+                                actions[key]();
+                                _this.close();
+                            });
+                        }
                     });
                     button.appendTo(hbox);
                 })(key);
@@ -4165,7 +4274,7 @@ var xp;
         // DOM
         //----
         ContextMenu.prototype.getTemplate = function () {
-            return xp.Dom.create('<div class="ContextMenu VBox"></div>');
+            return xp.Dom.create({ tag: 'div', attrs: { class: 'ContextMenu VBox' } });
         };
         ContextMenu.prototype.createMenuItem = function (data) {
             var menuItem = new ContextMenuItem(data, this);
@@ -4256,7 +4365,30 @@ var xp;
         // DOM
         //----
         ContextMenuItem.prototype.getTemplate = function () {
-            var template = xp.Dom.create("\n                <span class=\"ContextMenuItem\" role=\"button\">\n                    <span class=\"wrapper\">\n                        <span class=\"icon\"></span>\n                        <span class=\"text\"></span>\n                        <span class=\"key\"></span>\n                    </span>\n                </button>");
+            var template = xp.Dom.create({
+                tag: 'span',
+                attrs: { class: 'ContextMenuItem', role: 'button' },
+                children: [
+                    {
+                        tag: 'span',
+                        attrs: { class: 'wrapper' },
+                        children: [
+                            {
+                                tag: 'span',
+                                attrs: { class: 'icon' },
+                            },
+                            {
+                                tag: 'span',
+                                attrs: { class: 'text' },
+                            },
+                            {
+                                tag: 'span',
+                                attrs: { class: 'key' },
+                            },
+                        ]
+                    }
+                ]
+            });
             this.iconElement = xp.Dom.select('.icon', template);
             this.textElement = xp.Dom.select('.text', template);
             this.keyElement = xp.Dom.select('.key', template);

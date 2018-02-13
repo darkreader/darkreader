@@ -4,7 +4,7 @@ declare module xp.Dom {
      * @param html HTML markup.
      * @param selectorSetter Selector/setter dictionary.
      */
-    function create(html: string, selectorSetters?: {
+    function create(html: { tag: string; attrs?: any; children?: Array<string | { tag: string; attrs?: any; children?: any }> }, selectorSetters?: {
         [selector: string]: (htmlEl) => void;
     }): HTMLElement;
     /**
@@ -1004,7 +1004,7 @@ declare module xp {
 }
 declare module xp {
     interface HtmlMarkup<T extends Html> extends ElementMarkup<T> {
-        html?: string;
+        html?: { tag: string, attrs?: any, children?: any[] };
         url?: string;
     }
     /**

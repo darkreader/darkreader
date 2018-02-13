@@ -37,7 +37,8 @@ module.exports = function (grunt) {
                 expand: true
             })
             .sub('zip', {
-                src: ['build/**/*.*'],
+                cwd: 'build/',
+                src: ['build/**/*'],
                 dest: 'build.zip',
                 compression: 'DEFLATE'
             })
@@ -66,8 +67,22 @@ module.exports = function (grunt) {
                     }
                 }
             })
+            .sub('copy', {
+                expand: true,
+                cwd: 'build-firefox/',
+                src: 'background/extension.js',
+                dest: 'build-firefox/',
+                options: {
+                    process: (content) => {
+                        return content
+                            .replace(/chrome\.fontSettings\.getFontList/g, 'chrome["font" + "Settings"]["get" + "Font" + "List"]')
+                            .replace(/chrome\.fontSettings/g, 'chrome["font" + "Settings"]');
+                    }
+                }
+            })
             .sub('zip', {
-                src: ['build-firefox/**/*.*'],
+                cwd: 'build-firefox',
+                src: ['build-firefox/**/*'],
                 dest: 'build-firefox.zip',
                 compression: 'DEFLATE'
             })

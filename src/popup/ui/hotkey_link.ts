@@ -6,7 +6,7 @@ module DarkReader.Popup {
      */
     export class HotkeyLink extends xp.Label {
         protected getTemplate() {
-            return xp.Dom.create('<label class="Label shortcut"></label>');
+            return xp.Dom.create({ tag: 'label', attrs: { class: 'Label shortcut' } });
         }
 
         commandName: string;

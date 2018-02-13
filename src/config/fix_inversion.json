@@ -204,6 +204,19 @@
             ]
         },
         {
+            "url": "gitlab.com",
+            "invert": [
+                ".navbar",
+                ".code.dark, .code.dark .notes_holder",
+                ".code.solarized-dark, .code.solarized-dark .notes_holder",
+                ".code.monokai, .code.monokai .notes_holder",
+                "#build-trace"
+            ],
+            "noinvert": [
+                ".ui_light .navbar"
+            ]
+        },
+        {
             "url": [
                 "google.*",
                 "google.*.*"

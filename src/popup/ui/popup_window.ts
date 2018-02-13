@@ -274,13 +274,13 @@
         private initSiteToggleButton(btn: xp.Button, ext: Extension) {
             ext.getActiveTabInfo((info) => {
                 // NOTE: Disable button if toggle has no effect.
-                var toggleHasEffect = () => {
+                const toggleHasEffect = () => {
                     return (!info.isProtected
                         && !(!ext.config.invertListed
                             && info.isInDarkList));
                 };
                 btn.enabled = ext.enabled && toggleHasEffect();
-                var changeReg = new xp.EventRegistrar();
+                const changeReg = new xp.EventRegistrar();
                 changeReg.subscribe(ext.onPropertyChanged, (prop) => {
                     if (prop === 'enabled') {
                         btn.enabled = ext.enabled && toggleHasEffect();

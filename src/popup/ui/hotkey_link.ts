@@ -27,7 +27,7 @@ module DarkReader.Popup {
             // TODO: Edit chrome type definition.
             (<any>chrome.commands).getAll((commands: { description: string; name: string; shortcut: string; }[]) => {
                 if (commands) {
-                    var cmd = commands.filter((c) => c.name === this.commandName)[0];
+                    const cmd = commands.filter((c) => c.name === this.commandName)[0];
                     if (cmd) {
                         this.text = cmd.shortcut ?
                             this.hotkeyTextTemplate.replace(/#HOTKEY/g, cmd.shortcut)

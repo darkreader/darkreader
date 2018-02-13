@@ -17,7 +17,7 @@
         }
 
         protected getTemplate() {
-            var t = super.getTemplate();
+            const t = super.getTemplate();
             t.classList.add('SiteList');
             return t;
         }
@@ -53,14 +53,14 @@
         }
 
         private addTextBox(site: string, index?: number, isExtraTextBox?: boolean) {
-            var textBox = new xp.TextBox({
+            const textBox = new xp.TextBox({
                 text: site,
                 style: 'siteListTextBox',
                 placeholder: 'mail.google.com, google.*/mail etc...',
                 onTextChange: (e) => {
-                    var i = this.children.indexOf(textBox);
-                    var value = e.newText.trim();
-                    var isValueValid = !!value.match(/^([^\.\s]+?\.?)+$/);
+                    const i = this.children.indexOf(textBox);
+                    const value = e.newText.trim();
+                    const isValueValid = !!value.match(/^([^\.\s]+?\.?)+$/);
                     if (isExtraTextBox) {
                         if (isValueValid) {
                             // Add new site
@@ -79,14 +79,14 @@
                             this.sites.splice(i, 1);
                         }
                     }
-                }
+                },
             });
             if (index === void (0)) { index = this.children.length; }
             this.insert(textBox, index);
         }
 
         private removeTextBox(index: number) {
-            var textBox = this.children[index];
+            const textBox = this.children[index];
             textBox.remove();
         }
 

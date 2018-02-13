@@ -41,7 +41,7 @@
             // Increment
             this.buttonUp.onClick.addHandler(() => {
                 if (this.trackBar.value < 1) {
-                    var value = this.trackBar.value + this.step;
+                    let value = this.trackBar.value + this.step;
                     if (value > 1) { value = 1; }
                     if (this.getterConvertor) {
                         value = this.getterConvertor(value);
@@ -52,7 +52,7 @@
             // Decrement
             this.buttonDown.onClick.addHandler(() => {
                 if (this.trackBar.value > 0) {
-                    var value = this.trackBar.value - this.step;
+                    let value = this.trackBar.value - this.step;
                     if (value < 0) { value = 0; }
                     if (this.getterConvertor) {
                         value = this.getterConvertor(value);
@@ -69,7 +69,7 @@
         }
 
         protected getTemplate() {
-            var t = super.getTemplate();
+            const t = super.getTemplate();
             t.classList.add('UpDown');
             return t;
         }

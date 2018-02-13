@@ -35,7 +35,7 @@
             super.defineProperties();
             this.defineProperty('value', {
                 setter: (v) => {
-                    var switchedOn = v === this.valueOn;
+                    const switchedOn = v === this.valueOn;
                     if (switchedOn) {
                         this.elementOn.classList.add('active');
                         this.elementOff.classList.remove('active');

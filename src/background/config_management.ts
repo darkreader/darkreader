@@ -354,8 +354,8 @@
         // SCHEME and SUBDOMAINS
 
         let result = (exactBeginning ?
-                '^(.*?\\:\\/{2,3})?' // Scheme
-                : '^(.*?\\:\\/{2,3})?([^\/]*?\\.)?' // Scheme and subdomains
+            '^(.*?\\:\\/{2,3})?' // Scheme
+            : '^(.*?\\:\\/{2,3})?([^\/]*?\\.)?' // Scheme and subdomains
         );
 
         //

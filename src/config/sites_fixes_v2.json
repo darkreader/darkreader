@@ -46,6 +46,10 @@
             ]
         },
         {
+            "url": "facebook.github.io/react/*",
+            "selectors":".hero, .nav-main, .nav-home"
+        },
+        {
             "url": "gigaom.com",
             "selectors": "{common}, .bg"
         },

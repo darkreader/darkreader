@@ -68,6 +68,22 @@
             "selectors": "img, iframe, video, embed, .photo"
         },
         {
+            "url":[
+                "radio.yandex.ru",
+                "radio.yandex.by",
+                "radio.yandex.kz",
+                "radio.yandex.ua"
+            ],
+            "selectors": ".track .track__icon, .track .track__cover",
+            "rules":[
+                ".nav__shim {background: #fff}",
+                ".track__menu-item, .track__menu-item:hover, .track__menu-item:visited, .track__menu-item:active {color: #000!important }",
+                "body .icon_note-white {background-image: url(data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjIiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiPjxkZWZzPjxlbGxpcHNlIGlkPSJhIiBjeD0iMTUuMDA3IiBjeT0iMTUuNTA2IiByeD0iNC4wMDciIHJ5PSIzLjUwNiIvPjxtYXNrIGlkPSJjIiB4PSIwIiB5PSIwIiB3aWR0aD0iOC4wMTMiIGhlaWdodD0iNy4wMTIiIGZpbGw9IiNmZmYiPjx1c2UgeGxpbms6aHJlZj0iI2EiLz48L21hc2s+PGVsbGlwc2UgaWQ9ImIiIGN4PSI0LjAwNyIgY3k9IjE3LjUwNiIgcng9IjQuMDA3IiByeT0iMy41MDYiLz48bWFzayBpZD0iZCIgeD0iMCIgeT0iMCIgd2lkdGg9IjguMDEzIiBoZWlnaHQ9IjcuMDEyIiBmaWxsPSIjZmZmIj48dXNlIHhsaW5rOmhyZWY9IiNiIi8+PC9tYXNrPjwvZGVmcz48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjx1c2Ugc3Ryb2tlPSIjMDAwIiBtYXNrPSJ1cmwoI2MpIiBzdHJva2Utd2lkdGg9IjQiIHhsaW5rOmhyZWY9IiNhIi8+PHBhdGggZmlsbD0iIzAwMCIgZD0iTTE2IDFsMi0xIDEgMTYtMiAxek01IDMuODgyTDcgM2wxIDE0LjExOEw2IDE4eiIvPjxwYXRoIGZpbGw9IiMwMDAiIGQ9Ik01IDMuMTMxTDE4IDB2MS44NzlMNSA1LjAxek02LjAxOSA4LjA5M2wxMS45ODktMi41NzdWNy40NWwtMTEuOTkgMi41Nzd6Ii8+PHVzZSBzdHJva2U9IiMwMDAiIG1hc2s9InVybCgjZCkiIHN0cm9rZS13aWR0aD0iNCIgeGxpbms6aHJlZj0iI2IiLz48L2c+PC9zdmc+) !important}"
+                "body .icon_share-white { background-image: url(data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTciIGhlaWdodD0iMTciIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiPjxkZWZzPjxwYXRoIGlkPSJhIiBkPSJNMTcgMTB2N0gwVjBoNyIvPjxtYXNrIGlkPSJiIiB4PSIwIiB5PSIwIiB3aWR0aD0iMTciIGhlaWdodD0iMTciIGZpbGw9IiNmZmYiPjx1c2UgeGxpbms6aHJlZj0iI2EiLz48L21hc2s+PC9kZWZzPjxnIGZpbGw9Im5vbmUiIGZpbGwtcnVsZT0iZXZlbm9kZCI+PHVzZSBzdHJva2U9IiMwMDAiIG1hc2s9InVybCgjYikiIHN0cm9rZS13aWR0aD0iNCIgeGxpbms6aHJlZj0iI2EiLz48cGF0aCBmaWxsPSIjMDAwIiBkPSJNMTEgMGg2djJoLTZ6Ii8+PHBhdGggZmlsbD0iIzAwMCIgZD0iTTE3IDB2NmgtMlYweiIvPjxwYXRoIGZpbGw9IiMwMDAiIGQ9Ik0xNyAxLjQxNGwtNy4wNiA3LjA2LTEuNDE0LTEuNDE1TDE1LjU4NiAweiIvPjwvZz48L3N2Zz4=) !important }",
+                "body .icon_share-round-white {	background-image: url(data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTkiIGhlaWdodD0iMTkiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiPjxkZWZzPjxwYXRoIGQ9Ik0xMCAwQzQuMjUzIDAgMCA0LjI1MyAwIDEwYzAgNC43NDcgNC4yNTMgOSAxMCA5IDQuNzQ3IDAgOS00LjI1MyA5LTkiIGlkPSJhIi8+PG1hc2sgaWQ9ImIiIHg9IjAiIHk9IjAiIHdpZHRoPSIxOSIgaGVpZ2h0PSIxOSIgZmlsbD0iI2ZmZiI+PHVzZSB4bGluazpocmVmPSIjYSIvPjwvbWFzaz48L2RlZnM+PGcgZmlsbD0ibm9uZSIgZmlsbC1ydWxlPSJldmVub2RkIj48cGF0aCBmaWxsPSIjMDAwIiBkPSJNMTkgMS40MTRsLTcuMDYgNy4wNi0xLjQxNC0xLjQxNUwxNy41ODYgMHoiLz48dXNlIHN0cm9rZT0iIzAwMCIgbWFzaz0idXJsKCNiKSIgc3Ryb2tlLXdpZHRoPSI0IiB4bGluazpocmVmPSIjYSIvPjxwYXRoIGZpbGw9IiMwMDAiIGQ9Ik0xMyAwaDZ2MmgtNnoiLz48cGF0aCBmaWxsPSIjMDAwIiBkPSJNMTkgMHY2aC0yVjB6Ii8+PC9nPjwvc3ZnPg==) !important}"
+            ]
+        },
+        {
             "url": "ign.com",
             "selectors": "{common}, .video_embed_content-poster, .video_embed_content-poster-play-button",
             "rules": "#review-promo { background-color: white; }"

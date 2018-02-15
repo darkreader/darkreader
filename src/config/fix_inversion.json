@@ -500,7 +500,7 @@
         },
         {
             "url": "reactjs.org",
-            "invert": ".gatsby-highlight"
+            "invert": ".gatsby-highlight, .css-mlkfzr, .css-17t02fm"
         },
         {
             "url": "reddit.com",

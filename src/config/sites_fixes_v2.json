@@ -17,7 +17,7 @@
         },
         {
             "url": "askubuntu.com",
-            "rules":"body { background: #fff !important }"
+            "removebg": "body"
         },
         {
             "url": "basho.com",

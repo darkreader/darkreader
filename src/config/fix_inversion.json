@@ -31,6 +31,10 @@
             "noinvert": "#footer *, #photo-modal *"
         },
         {
+            "url": "askubuntu.com",
+            "removebg": "body"
+        },
+        {
             "url": "atlassian.net",
             "invert": [
                 ".EditPage_withPanels_3Hr, #toolbar, #savebar-container"

@@ -73,6 +73,10 @@
             "invert": "#:4.fc"
         },
         {
+            "url": "dailymail.co.uk",
+            "noinvert": ".masthead #logo"
+        },
+        {
             "url": "dedication.pl",
             "invert": ".wwzing"
         },

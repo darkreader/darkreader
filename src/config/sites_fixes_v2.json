@@ -18,6 +18,10 @@
             "rules": "#footer *, #photo-modal * { -webkit-filter: none !important; }"
         },
         {
+            "url": "askubuntu.com",
+            "removebg": "body"
+        },
+        {
             "url": "basho.com",
             "selectors": [
                 "{common}",

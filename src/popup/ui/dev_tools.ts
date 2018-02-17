@@ -104,7 +104,7 @@ module _DarkReader.Popup {
         }
 
         protected getTemplate() {
-            var t = super.getTemplate();
+            const t = super.getTemplate();
             t.classList.add('DevTools');
             return t;
         }

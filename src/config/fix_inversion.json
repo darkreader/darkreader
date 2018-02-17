@@ -31,6 +31,10 @@
             "noinvert": "#footer *, #photo-modal *"
         },
         {
+            "url": "askubuntu.com",
+            "removebg": "body"
+        },
+        {
             "url": "atlassian.net",
             "invert": [
                 ".EditPage_withPanels_3Hr, #toolbar, #savebar-container"
@@ -71,6 +75,10 @@
         {
             "url": "calendar.google.com",
             "invert": "#:4.fc"
+        },
+        {
+            "url": "dailymail.co.uk",
+            "noinvert": ".masthead #logo"
         },
         {
             "url": "dedication.pl",
@@ -204,6 +212,19 @@
             ]
         },
         {
+            "url": "gitlab.com",
+            "invert": [
+                ".navbar",
+                ".code.dark, .code.dark .notes_holder",
+                ".code.solarized-dark, .code.solarized-dark .notes_holder",
+                ".code.monokai, .code.monokai .notes_holder",
+                "#build-trace"
+            ],
+            "noinvert": [
+                ".ui_light .navbar"
+            ]
+        },
+        {
             "url": [
                 "google.*",
                 "google.*.*"
@@ -241,6 +262,10 @@
         {
             "url": "imdb.com",
             "invert": "#nb20, .vital, .poster, .slate, .slate_fade_top, .slate_fade_bottom"
+        },
+        {
+            "url": "immutables.github.io",
+            "invert": ".illustration, .documentation .highlight"
         },
         {
             "url": "io9.com",
@@ -338,6 +363,10 @@
             "invert": "._4tsk"
         },
         {
+            "url": "minhaclaro.claro.com.br",
+            "invert": ".header-black, .header-red-desktop-logada"
+        },
+        {
             "url": "mp.weixin.qq.com/wiki",
             "noinvert": [
                 ".res_iframe"
@@ -347,16 +376,18 @@
             "url": "mspaintadventures.ru",
             "invert": [
                 ".row, .row img, .row object",
-                ".mspa_sidebar, .content",
-                ".footer, .copyright"
+                ".sidebar, .content, .footer, .copyright",
+                ".row:nth-of-type(1) > .header",
+                ".row:nth-of-type(1) > .header > .banner"
             ],
             "noinvert": [
-                ".nav img"
+                ".nav img, #page > .content",
+                ".row > .row, .content > .content"
             ],
             "rules": [
-                "body {background-color: #acacac}",
-                ".sidebar {border-color: #acacac}",
-                ".row:nth-of-type(4) {background-color: #535353}"
+                "body {background-color: #acacac !important}",
+                ".sidebar {border-color: #acacac !important}",
+                "html, .banner, .row:nth-of-type(2), .row:nth-of-type(4) {background-color: #535353 !important}"
             ]
         },
         {
@@ -422,9 +453,13 @@
             "url": "onliner.by",
             "invert": [
                 ".b-tile-main, .b-teasers-2__teaser, .news-tiles__subtitle",
-                ".b-opinions-main-2__tile, .news-header__top > .news-header__title"
+                ".b-opinions-main-2__tile, .news-header__top > .news-header__title",
+                ".b-tile-grad"
             ],
-            "noinvert": ".b-opinions-main-2__tile *"
+            "noinvert": [
+                ".b-opinions-main-2__tile *",
+                ".b-teasers-2__teaser-i"
+            ]
         },
         {
             "url": "openclassrooms.com",
@@ -473,7 +508,7 @@
         },
         {
             "url": "reactjs.org",
-            "invert": ".gatsby-highlight"
+            "invert": ".gatsby-highlight, .css-mlkfzr, .css-17t02fm"
         },
         {
             "url": "reddit.com",

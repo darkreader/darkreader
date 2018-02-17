@@ -1,6 +1,15 @@
 import { configStore, isUrlInList, DEBUG, formatJson, copyJson, handleInversionFixes } from './config_management'
 import { FilterCssGenerator, FilterConfig, FilterMode } from './filter_css_generator';
 
+    const ICON_PATHS = {
+        active_19: '../img/dr_active_19.png',
+        active_38: '../img/dr_active_38.png',
+        inactive_19: '../img/dr_inactive_19.png',
+        inactive_38: '../img/dr_inactive_38.png'
+    };
+
+    const SAVE_CONFIG_TIMEOUT = 1000;
+
     /**
      * Chrome extension.
      * Extension uses CSS generator to process opened web pages.
@@ -110,7 +119,7 @@ import { FilterCssGenerator, FilterConfig, FilterMode } from './filter_css_gener
                         url,
                         host,
                         isProtected: !canInjectScript(url),
-                        isInDarkList: isUrlInList(url, DARK_SITES)
+                        isInDarkList: isUrlInList(url, DARK_SITES),
                     };
                     callback(info);
                 } else {
@@ -252,12 +261,12 @@ import { FilterCssGenerator, FilterConfig, FilterMode } from './filter_css_gener
         protected tabUpdateListener = (tabId: number, info: chrome.tabs.TabChangeInfo, tab: chrome.tabs.Tab) => {
             console.log(`Tab updated: ${tab.id}, status: ${info.status}`);
             this.addStyleToTab(tab);
-        }
+        };
 
         protected tabReplaceListener = (addedTabId: number, replacedTabId: number) => {
             console.log(`Tab ${replacedTabId} replaced with ${addedTabId}`);
             chrome.tabs.get(addedTabId, (tab) => this.addStyleToTab(tab));
-        }
+        };
 
 
         //----------------------
@@ -297,8 +306,8 @@ import { FilterCssGenerator, FilterConfig, FilterMode } from './filter_css_gener
         }
 
         protected getCode_addStyle(url?: string) {
-            var css = this.generator.createCssCode(this.config, url);
-            var code = `(function () {
+            const css = this.generator.createCssCode(this.config, url);
+            return `(function () {
 ${DEBUG ? "console.log('Executing DR script (add)...');" : ""}
 var createDRStyle = function() {
     var css = '${css.replace(/'/g, '\\\'')}';
@@ -359,16 +368,14 @@ if (document.head) {
     }
 }
 })()`;
-            return code;
         }
 
         protected getCode_removeStyle() {
-            var code = `(function () {
+            return `(function () {
 ${DEBUG ? "console.log('Executing DR script (remove)...');" : ""}
 var style = document.getElementById('dark-reader-style');
 style && style.parentElement.removeChild(style);
 })();`;
-            return code;
         }
 
 
@@ -385,15 +392,15 @@ style && style.parentElement.removeChild(style);
             const defaultFilterConfig = Object.assign({}, configStore.DEFAULT_FILTER_CONFIG);
             var defaultStore: AppConfigStore = {
                 enabled: true,
-                config: defaultFilterConfig
+                config: defaultFilterConfig,
             };
             chrome.storage.sync.get(defaultStore, (store: AppConfigStore) => {
                 if (!store.config) {
                     store.config = defaultFilterConfig;
                 }
                 if (!Array.isArray(store.config.siteList)) {
-                    var arr = [];
-                    for (var key in store.config.siteList) {
+                    const arr = [];
+                    for (let key in store.config.siteList) {
                         arr[key] = store.config.siteList[key];
                     }
                     store.config.siteList = arr;
@@ -417,9 +424,9 @@ style && style.parentElement.removeChild(style);
                 clearTimeout(this.savedTimeout);
             }
             this.savedTimeout = setTimeout(() => {
-                var store: AppConfigStore = {
+                const store: AppConfigStore = {
                     enabled: this.enabled,
-                    config: this.config
+                    config: this.config,
                 };
                 chrome.storage.sync.set(store, () => {
                     console.log('saved', store);
@@ -448,7 +455,7 @@ style && style.parentElement.removeChild(style);
             }
             chrome.fontSettings.getFontList((res) => {
                 // id or name?
-                var fonts = res.map((r) => r.fontId);
+                const fonts = res.map((r) => r.fontId);
                 onReturned(fonts);
             });
         }
@@ -470,9 +477,8 @@ style && style.parentElement.removeChild(style);
 
         getDevInversionFixesText() {
             const { RAW_INVERSION_FIXES } = configStore; 
-            var fixes = this.getSavedDevInversionFixes();
-            var text = formatJson(fixes ? JSON.parse(fixes) : copyJson(RAW_INVERSION_FIXES));
-            return text;
+            const fixes = this.getSavedDevInversionFixes();
+            return formatJson(fixes ? JSON.parse(fixes) : copyJson(RAW_INVERSION_FIXES));
         }
 
         resetDevInversionFixes() {
@@ -483,10 +489,10 @@ style && style.parentElement.removeChild(style);
         }
 
         applyDevInversionFixes(json: string, callback: (err: Error) => void) {
-            var obj;
+            let obj;
             try {
                 obj = JSON.parse(json);
-                var text = formatJson(obj);
+                const text = formatJson(obj);
                 this.saveDevInversionFixes(text);
                 handleInversionFixes(obj);
                 this.onConfigPropChanged();
@@ -505,19 +511,6 @@ style && style.parentElement.removeChild(style);
             && url.indexOf('view-source:') !== 0
             && url.indexOf('https://addons.mozilla.org') !== 0
     }
-
-    //
-    // ---------- Constants --------------------
-
-    var ICON_PATHS = {
-        active_19: '../icons/dr_active_19.png',
-        active_38: '../icons/dr_active_38.png',
-        inactive_19: '../icons/dr_inactive_19.png',
-        inactive_38: '../icons/dr_inactive_38.png'
-    };
-
-    var SAVE_CONFIG_TIMEOUT = 1000;
-
 
     //
     // --------- Interfaces --------------

@@ -13,26 +13,26 @@ export const configStore: {
     //
     //--------------------------------
 
-    var CONFIG_URLs = {
+    const CONFIG_URLs = {
         darkSites: {
             remote: 'https://raw.githubusercontent.com/alexanderby/darkreader/master/src/config/dark_sites.json',
-            local: '../config/dark_sites.json'
+            local: '../config/dark_sites.json',
         },
         inversionFixes: {
             remote: 'https://raw.githubusercontent.com/alexanderby/darkreader/master/src/config/fix_inversion.json',
-            local: '../config/fix_inversion.json'
+            local: '../config/fix_inversion.json',
         },
         defaultFilterConfig: {
-            local: '../config/filter_config.json'
-        }
+            local: '../config/filter_config.json',
+        },
     };
-    var REMOTE_TIMEOUT_MS = 10 * 1000;
-    var RELOAD_INTERVAL_MS = 15 * 60 * 1000;
-    export var DEBUG = [
+    const REMOTE_TIMEOUT_MS = 10 * 1000;
+    const RELOAD_INTERVAL_MS = 15 * 60 * 1000;
+    export const DEBUG = [
         'eimadpbcbfnmbkopoojfekhnkhdbieeh',
         'addon@darkreader.org'
     ].indexOf(chrome.runtime.id) < 0;
-    var DEBUG_LOCAL_CONFIGS = DEBUG;
+    const DEBUG_LOCAL_CONFIGS = DEBUG;
 
     //
     // ----- Load configs ------
@@ -126,7 +126,7 @@ export const configStore: {
             sites = [];
             onerror && onerror('Dark Sites list is not an array.');
         }
-        for (var i = sites.length - 1; i >= 0; i--) {
+        for (let i = sites.length - 1; i >= 0; i--) {
             if (typeof sites[i] !== 'string') {
                 sites.splice(i, 1);
             }
@@ -153,7 +153,7 @@ export const configStore: {
         if (!Array.isArray(fixes.sites)) {
             fixes.sites = [];
         }
-        for (var i = fixes.sites.length - 1; i >= 0; i--) {
+        for (let i = fixes.sites.length - 1; i >= 0; i--) {
             let s = fixes.sites[i];
             if (!isStringOrArray(s.url)) {
                 fixes.sites.splice(i, 1);
@@ -178,7 +178,7 @@ export const configStore: {
     function handleFilterConfig(config: FilterConfig, onerror?: (err: string) => void) {
         const { DEFAULT_FILTER_CONFIG } = configStore;
         if (config !== null && typeof config === 'object') {
-            for (var prop in DEFAULT_FILTER_CONFIG) {
+            for (let prop in DEFAULT_FILTER_CONFIG) {
                 if (typeof config[prop] !== typeof DEFAULT_FILTER_CONFIG[prop]) {
                     onerror && onerror(`Invalid config property "${prop}"`);
                     config[prop] = DEFAULT_FILTER_CONFIG[prop];
@@ -213,13 +213,13 @@ export const configStore: {
      */
     export function getFixesFor(url: string): InversionFix {
         const { INVERSION_FIXES } = configStore;
-        var found: SiteFix;
+        let found: SiteFix;
         if (url) {
             // Search for match with given URL
-            loop: for (var i = 0; i < INVERSION_FIXES.sites.length; i++) {
+            loop: for (let i = 0; i < INVERSION_FIXES.sites.length; i++) {
                 let s = INVERSION_FIXES.sites[i];
                 let urls: string[] = typeof s.url === 'string' ? [<string>s.url] : <string[]>s.url;
-                for (var j = 0; j < urls.length; j++) {
+                for (let j = 0; j < urls.length; j++) {
                     if (isUrlMatched(url, urls[j])) {
                         found = s;
                         break loop;
@@ -256,9 +256,8 @@ export const configStore: {
      * @param params Object containing request parameters.
      */
     function readJson<T>(params: JsonRequestParams<T>): Promise<T> {
-        var promise = new Promise((resolve, reject) => {
-
-            var request = new XMLHttpRequest();
+        return new Promise((resolve, reject) => {
+            const request = new XMLHttpRequest();
             request.overrideMimeType("application/json");
             request.open(
                 'GET',
@@ -268,10 +267,10 @@ export const configStore: {
             request.onload = () => {
                 if (request.status >= 200 && request.status < 300) {
                     // Remove comments
-                    var resultText = request.responseText
+                    const resultText = request.responseText
                         .replace(/(\".*?(\\\".*?)*?\")|(\/\*(.|[\r\n])*?\*\/)|(\/\/.*?[\r\n])/gm, '$1');
 
-                    var json = JSON.parse(resultText);
+                    const json = JSON.parse(resultText);
                     resolve(json);
                 }
                 else {
@@ -285,7 +284,6 @@ export const configStore: {
             }
             request.send();
         });
-        return promise as Promise<T>;
     }
 
     interface JsonRequestParams<T> {
@@ -303,7 +301,7 @@ export const configStore: {
      * @paramlist List to search into.
      */
     export function isUrlInList(url: string, list: string[]) {
-        for (var i = 0; i < list.length; i++) {
+        for (let i = 0; i < list.length; i++) {
             if (isUrlMatched(url, list[i])) {
                 console.log('URL ' + url + ' is in list.');
                 return true;
@@ -318,14 +316,14 @@ export const configStore: {
      * @param urlTemplate URL template ("google.*", "youtube.com" etc).
      */
     function isUrlMatched(url: string, urlTemplate: string): boolean {
-        var regex = createUrlRegex(urlTemplate);
+        const regex = createUrlRegex(urlTemplate);
         return !!url.match(regex);
     }
 
     function createUrlRegex(urlTemplate: string): RegExp {
         urlTemplate = urlTemplate.trim();
-        var exactBeginning = (urlTemplate[0] === '^');
-        var exactEnding = (urlTemplate[urlTemplate.length - 1] === '$');
+        const exactBeginning = (urlTemplate[0] === '^');
+        const exactEnding = (urlTemplate[urlTemplate.length - 1] === '$');
 
         urlTemplate = (urlTemplate
             .replace(/^\^/, '') // Remove ^ at start
@@ -335,11 +333,12 @@ export const configStore: {
             .replace(/\/$/, '') // Remove last slash
         );
 
-        var slashIndex: number;
-        var beforeSlash: string;
+        let slashIndex: number;
+        let beforeSlash: string;
+        let afterSlash: string;
         if ((slashIndex = urlTemplate.indexOf('/')) >= 0) {
             beforeSlash = urlTemplate.substring(0, slashIndex); // google.*
-            var afterSlash = urlTemplate.replace('$', '').substring(slashIndex); // /login/abc
+            afterSlash = urlTemplate.replace('$', '').substring(slashIndex); // /login/abc
         }
         else {
             beforeSlash = urlTemplate.replace('$', '');
@@ -348,7 +347,7 @@ export const configStore: {
         //
         // SCHEME and SUBDOMAINS
 
-        var result = (exactBeginning ?
+        let result = (exactBeginning ?
             '^(.*?\\:\\/{2,3})?' // Scheme
             : '^(.*?\\:\\/{2,3})?([^\/]*?\\.)?' // Scheme and subdomains
         );
@@ -356,9 +355,9 @@ export const configStore: {
         //
         // HOST and PORT
 
-        var hostParts = beforeSlash.split('.');
+        const hostParts = beforeSlash.split('.');
         result += '(';
-        for (var i = 0; i < hostParts.length; i++) {
+        for (let i = 0; i < hostParts.length; i++) {
             if (hostParts[i] === '*') {
                 hostParts[i] = '[^\\.\\/]+?';
             }
@@ -383,26 +382,21 @@ export const configStore: {
         //
         // Result
 
-        var regex = new RegExp(result, 'i');
-        return regex;
+        return new RegExp(result, 'i');
     }
 
     /**
      * URL template sorter.
      */
-    export var urlTemplateSorter = ($a: { url?: string } | string, $b: { url?: string } | string) => {
-        let a: { url?: string };
-        let b: { url?: string };
-        if (typeof $a === 'string')
-            a = { url: <string>$a };
-        if (typeof $b === 'string')
-            b = { url: <string>$b };
-        var slashIndexA = a.url.indexOf('/');
-        var slashIndexB = b.url.indexOf('/');
-        var addressA = a.url.replace('^', '').substring(0, slashIndexA);
-        var addressB = b.url.replace('^', '').substring(0, slashIndexB);
-        var reverseA = addressA.split('.').reverse().join('.').toLowerCase(); // com.google
-        var reverseB = addressB.split('.').reverse().join('.').toLowerCase(); // *.google
+    export const urlTemplateSorter = ($a: { url?: string } | string, $b: { url?: string } | string) => {
+        const a = typeof $a === 'string' ? $a : $a.url;
+        const b = typeof $b === 'string' ? $b : $b.url;
+        const slashIndexA = a.indexOf('/');
+        const slashIndexB = b.indexOf('/');
+        const addressA = a.replace('^', '').substring(0, slashIndexA);
+        const addressB = b.replace('^', '').substring(0, slashIndexB);
+        const reverseA = addressA.split('.').reverse().join('.').toLowerCase(); // com.google
+        const reverseB = addressB.split('.').reverse().join('.').toLowerCase(); // *.google
 
         // Sort by reversed address descending
         if (reverseA > reverseB) {
@@ -413,8 +407,8 @@ export const configStore: {
         }
         else {
             // Then sort by path descending
-            var pathA = a.url.substring(slashIndexA);
-            var pathB = b.url.substring(slashIndexB);
+            const pathA = a.substring(slashIndexA);
+            const pathB = b.substring(slashIndexB);
             return -pathA.localeCompare(pathB);
         }
     };

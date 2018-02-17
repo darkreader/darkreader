@@ -52,8 +52,7 @@ function readConfigFile(fileName) {
 
 function tryParseJson(name, text) {
     try {
-        var obj = JSON.parse(text);
-        return obj;
+      return JSON.parse(text);
     } catch (err) {
         var message = err.message || '';
         var m = /position (\d+)/.exec(message);
@@ -112,7 +111,7 @@ function validateJsonFormat(message, a, b) {
     total++;
     var i = getTextDiffIndex(a, b);
     if (i < 0) {
-        logOk(message)
+        logOk(message);
         passed++;
     } else {
         message += '\n';

@@ -190,6 +190,11 @@
             "noinvert": "img"
         },
         {
+            "url": "gfycat.com",
+            "invert": "body",
+            "noinvert": "video"
+        },
+        {
             "url": "gigaom.com",
             "invert": ".bg"
         },

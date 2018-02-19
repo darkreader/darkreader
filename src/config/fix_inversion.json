@@ -230,6 +230,10 @@
             "noinvert": "img"
         },
         {
+            "url": "globosatplay.globo.com/universal/",
+            "invert": "a, header.rmq-e9c50d2d, div.rmq-26e388b"
+        },
+        {
             "url": [
                 "google.*",
                 "google.*.*"

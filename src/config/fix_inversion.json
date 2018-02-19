@@ -225,6 +225,11 @@
             ]
         },
         {
+            "url": "globosatplay.globo.com/premierefc/ao-vivo",
+            "invert": "h1, div#ao-vivo.palco.pre-evento.pfc",
+            "noinvert": "img"
+        },
+        {
             "url": [
                 "google.*",
                 "google.*.*"

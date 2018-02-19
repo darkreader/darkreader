@@ -364,7 +364,7 @@
         },
         {
             "url": "minhaclaro.claro.com.br",
-            "invert": ".header-black, .header-red-desktop-logada"
+            "invert": ".header-black, .header-red-desktop-logada, input#txt-busca-header-desktop.text-normal.ignore-placeholder-ie"
         },
         {
             "url": "mp.weixin.qq.com/wiki",

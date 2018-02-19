@@ -515,6 +515,10 @@
             "invert": "#header-img"
         },
         {
+            "url": "reddit.com/r/GlobalOffensive",
+            "invert": "div#header, div.side"
+        },
+        {
             "url": [
                 "ruby.sketchup.com",
                 "rubydoc.info"

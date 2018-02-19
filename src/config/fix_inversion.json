@@ -732,6 +732,10 @@
             ]
         },
         {
+            "url": "xda-developers.com",
+            "invert": "div.thumb_meta, i, div#header.header-logged-out.portal-header,div#header.header-logged-in.portal-header, span"
+        },
+        {
             "url": "yandex.*",
             "invert": [
                 ".afisha, #wd-_afisha",

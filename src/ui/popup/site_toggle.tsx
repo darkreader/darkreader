@@ -9,7 +9,7 @@ export default function SiteToggleButton(props: { ext: Extension }) {
         ext.getActiveTabInfo((info) => {
             const toggleHasEffect = (
                 ext.enabled &&
-                info.canInjectScript &&
+                !info.isProtected &&
                 (ext.config.invertListed || !info.isInDarkList)
             );
 

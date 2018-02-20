@@ -1,0 +1,2 @@
+*.* eol=lf
+src/config/*.json eol=crlf

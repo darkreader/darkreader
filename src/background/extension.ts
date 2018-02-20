@@ -2,10 +2,10 @@ import { configStore, isUrlInList, DEBUG, formatJson, copyJson, handleInversionF
 import { FilterCssGenerator, FilterConfig, FilterMode } from './filter_css_generator';
 
     const ICON_PATHS = {
-        active_19: '../img/dr_active_19.png',
-        active_38: '../img/dr_active_38.png',
-        inactive_19: '../img/dr_inactive_19.png',
-        inactive_38: '../img/dr_inactive_38.png'
+        active_19: '../icons/dr_active_19.png',
+        active_38: '../icons/dr_active_38.png',
+        inactive_19: '../icons/dr_inactive_19.png',
+        inactive_38: '../icons/dr_inactive_38.png'
     };
 
     const SAVE_CONFIG_TIMEOUT = 1000;

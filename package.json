@@ -3,9 +3,8 @@
   "version": "3.5.3",
   "description": "Dark theme for every website",
   "scripts": {
-    "debug": "grunt debug --stack",
-    "_debug": "grunt debug && grunt debug-watch",
-    "release": "npm test && grunt release",
+    "debug": "gulp debug",
+    "release": "npm test && gulp release",
     "test": "node src/config/validate.js"
   },
   "private": true,
@@ -18,20 +17,23 @@
   "bugs": {
     "url": "https://github.com/alexanderby/darkreader/issues"
   },
-  "homepage": "https://github.com/alexanderby/darkreader",
+  "homepage": "http://darkreader.org/",
+  "dependencies": {
+    "malevic": "0.9.4"
+  },
   "devDependencies": {
-    "@alexlur/rollup-plugin-typescript": "^1.0.4",
-    "@types/chrome": "0.0.50",
-    "create-grunt-tasks": "^0.8.0",
-    "grunt": "^1.0.1",
-    "grunt-concurrent": "^2.3.1",
-    "grunt-contrib-clean": "^1.1.0",
-    "grunt-contrib-copy": "^1.0.0",
-    "grunt-contrib-less": "^1.4.1",
-    "grunt-contrib-watch": "^1.0.0",
-    "grunt-rollup": "^6.0.0",
-    "grunt-zip": "^0.17.1",
-    "malevic": "^0.8.4",
-    "typescript": "^2.5.3"
+    "@types/chrome": "0.0.59",
+    "fancy-log": "1.3.2",
+    "fs-extra": "5.0.0",
+    "gulp": "3.9.1",
+    "gulp-zip": "4.1.0",
+    "merge-stream": "1.0.1",
+    "rollup": "0.56.2",
+    "rollup-plugin-node-resolve": "3.0.3",
+    "rollup-plugin-typescript": "0.8.1",
+    "rollup-stream": "1.24.1",
+    "run-sequence": "2.2.1",
+    "typescript": "2.7.2",
+    "vinyl-source-stream": "2.0.0"
   }
 }

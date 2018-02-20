@@ -20,7 +20,7 @@ export default function Body(props: BodyProps) {
     return (
         <Col id="body">
 
-            <img id="logo" src="../img/dark-reader-type.svg" alt="Dark Reader" />
+            <img id="logo" src="../assets/img/dark_reader_type.svg" alt="Dark Reader" />
 
             <TopSection ext={props.ext} />
 

@@ -1,10 +1,10 @@
 # Build folder
 #-----------------------------------
-build/*
+build/
+build-firefox/
 build.zip
-build-firefox/*
 build-firefox.zip
-debug/*
+debug/
 
 # Node.js modules
 #-----------------------------------

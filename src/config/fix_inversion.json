@@ -31,6 +31,11 @@
             "noinvert": "#footer *, #photo-modal *"
         },
         {
+            "url": "androidpolice.com",
+            "invert": ".ap-nav-wrapper, .footer, .logo",
+            "noinvert": ".ap-nav-wrapper *, .footer *"
+        },
+        {
             "url": "askubuntu.com",
             "removebg": "body"
         },
@@ -75,6 +80,14 @@
         {
             "url": "calendar.google.com",
             "invert": "#:4.fc"
+        },
+        {
+            "url": "central.bitdefender.com",
+            "invert": "#left_nav, .top_nav, #user_avatar",
+            "noinvert": [
+                ".logo",
+                "#left_nav *, .top_nav *"
+            ]
         },
         {
             "url": "dailymail.co.uk",
@@ -272,6 +285,10 @@
             "rules": "html { height: auto !important; }"
         },
         {
+            "url": "iopscience.iop.org",
+            "noinvert": "img[alt*='Equation']"
+        },
+        {
             "url": "javarepl.com",
             "removebg": "body",
             "invert": ".terminal-content"
@@ -364,7 +381,7 @@
         },
         {
             "url": "minhaclaro.claro.com.br",
-            "invert": ".header-black, .header-red-desktop-logada"
+            "invert": ".header-black, .header-red-desktop-logada, #txt-busca-header-desktop"
         },
         {
             "url": "mp.weixin.qq.com/wiki",
@@ -450,6 +467,10 @@
             "invert": ".__sprite"
         },
         {
+            "url": "nvidia.com",
+            "invert": ".sub-brand-nav, .brandLink"
+        },
+        {
             "url": "onliner.by",
             "invert": [
                 ".b-tile-main, .b-teasers-2__teaser, .news-tiles__subtitle",
@@ -492,6 +513,13 @@
             "noinvert": "img"
         },
         {
+            "url": [
+                "prntscr.com",
+                "prnt.sc"
+            ],
+            "invert": ".header"
+        },
+        {
             "url": "producthunt.com",
             "invert": ".backgroundImage_1hK9M, .v-image",
             "noinvert": [
@@ -512,7 +540,9 @@
         },
         {
             "url": "reddit.com",
-            "invert": "#header-img"
+            "invert": "#header, .side",
+            "noinvert": "#header *, .side *",
+            "rules": "#mail::before { display: none !important; }"
         },
         {
             "url": [
@@ -653,6 +683,14 @@
                 "[title='Unread messages']",
                 "footer"
             ]
+        },
+        {
+            "url": "velocimetro.virtua.com.br",
+            "noinvert": "iframe"
+        },
+        {
+            "url": "virtua.speedtestcustom.com",
+            "noinvert": ".branding"
         },
         {
             "url": "vk.com",

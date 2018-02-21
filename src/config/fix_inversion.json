@@ -82,6 +82,14 @@
             "invert": "#:4.fc"
         },
         {
+            "url": "central.bitdefender.com",
+            "invert": "#left_nav, .top_nav, #user_avatar",
+            "noinvert": [
+                ".logo",
+                "#left_nav *, .top_nav *"
+            ]
+        },
+        {
             "url": "dailymail.co.uk",
             "noinvert": ".masthead #logo"
         },

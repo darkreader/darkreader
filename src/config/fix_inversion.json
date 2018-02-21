@@ -656,11 +656,11 @@
         },
         {
             "url": "velocimetro.virtua.com.br",
-            "invert": "body"
+            "noinvert": "iframe"
         },
         {
             "url": "virtua.speedtestcustom.com",
-            "noinvert": "img"
+            "noinvert": ".branding"
         },
         {
             "url": "vk.com",

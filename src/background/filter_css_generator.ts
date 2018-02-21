@@ -162,7 +162,7 @@
                     parts.push(`html {\\n  background: ${color} !important;\\n}`);
                 }
 
-                if (fix.rules) {
+                if (fix.rules && config.mode === FilterMode.dark) {
                     parts.push('\\n/* Custom rules */');
                     parts.push(fix.rules.join('\\n'));
                 }

@@ -492,7 +492,10 @@
             "noinvert": "img"
         },
         {
-            "url": "prntscr.com",
+            "url": [
+                "prntscr.com",
+                "prnt.sc"
+            ],
             "invert": ".header"
         },
         {

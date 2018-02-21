@@ -539,10 +539,15 @@
             "invert": ".gatsby-highlight, .css-mlkfzr, .css-17t02fm"
         },
         {
-            "url": "reddit.com",
-            "invert": "#header, .side",
-            "noinvert": "#header *, .side *",
+            "url": "reddit.com/r/",
+            "invert": "#header",
+            "noinvert": "#header *",
             "rules": "#mail::before { display: none !important; }"
+        },
+        {
+            "url": "reddit.com/r/GlobalOffensive",
+            "invert": "#header, .side",
+            "noinvert": "#header *, .side *"
         },
         {
             "url": [

@@ -612,6 +612,10 @@
             "rules": "#hlogo a { text-indent: -256em !important; }"
         },
         {
+            "url": "terrytao.wordpress.com",
+            "noinvert": "img"
+        },
+        {
             "url": "tpondemand.com",
             "invert": [
                 ".tau-cover-view__overlay, .tau-app-secondary-pane, .app-header, .uv-popover-content"

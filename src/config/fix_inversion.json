@@ -493,7 +493,7 @@
         },
         {
             "url": "prntscr.com",
-            "invert": "div.header"
+            "invert": ".header"
         },
         {
             "url": "producthunt.com",

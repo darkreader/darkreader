@@ -492,6 +492,13 @@
             "noinvert": "img"
         },
         {
+            "url": [
+                "prntscr.com",
+                "prnt.sc"
+            ],
+            "invert": ".header"
+        },
+        {
             "url": "producthunt.com",
             "invert": ".backgroundImage_1hK9M, .v-image",
             "noinvert": [

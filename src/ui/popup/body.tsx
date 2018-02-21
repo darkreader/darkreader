@@ -5,7 +5,7 @@ import TopSection from './top_section';
 import FilterSettings from './filter_settings';
 import FontSettings from './font_settings';
 import SiteListSettings from './site_list_settings';
-import { Extension } from '../../background/extension';
+import { Extension } from '../../definitions';
 
 withForms();
 

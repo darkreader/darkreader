@@ -1,13 +1,29 @@
 import { html, render } from 'malevic';
 import Body from './body';
-import { isAffectedByChromiumIssue750419 } from './utils';
-import { Extension } from '../../background/extension';
+import createExtensionMock from '../utils/extension_mock';
+import { isAffectedByChromiumIssue750419 } from '../utils/issues';
+import { Extension } from '../../definitions';
 
 interface PopupState {
     activeTab?: string;
 }
 
-const extension = (chrome.extension.getBackgroundPage() as any).DarkReader.Background.extension as Extension;
+// Edge fix
+if (chrome && !chrome.extension && (window as any).browser && (window as any).browser.extension) {
+    chrome.extension = (window as any).browser.extension;
+}
+
+let extension: Extension;
+if (chrome.extension) {
+    const bgPage = chrome.extension.getBackgroundPage() as any;
+    if (bgPage) {
+        extension = bgPage.DarkReader.Background.extension;
+    }
+}
+if (!extension) {
+    extension = createExtensionMock();
+}
+
 let state: PopupState = null;
 
 function renderBody() {

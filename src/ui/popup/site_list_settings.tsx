@@ -1,6 +1,6 @@
 import { html } from 'malevic';
 import { Col, Toggle, TextList, Shortcut } from '../controls'
-import { Extension } from '../../background/extension';
+import { Extension } from '../../definitions';
 
 export default function SiteListSettings({ ext }: { ext: Extension }) {
 

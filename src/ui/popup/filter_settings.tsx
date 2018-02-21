@@ -1,6 +1,6 @@
 import { html } from 'malevic';
 import { Row, Col, Button, Toggle, UpDown } from '../controls';
-import { Extension } from '../../background/extension';
+import { Extension } from '../../definitions';
 
 export default function FilterSettings({ ext }: { ext: Extension }) {
 

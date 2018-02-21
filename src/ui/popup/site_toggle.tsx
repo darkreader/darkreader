@@ -1,6 +1,6 @@
 import { html, render } from 'malevic';
 import { Row, Col, Button, Toggle } from '../controls';
-import { Extension } from '../../background/extension';
+import { Extension } from '../../definitions';
 
 export default function SiteToggleButton(props: { ext: Extension }) {
     const { ext } = props;
@@ -16,13 +16,13 @@ export default function SiteToggleButton(props: { ext: Extension }) {
             node.classList.toggle('disabled', !toggleHasEffect);
 
             if (info.host) {
-                // Note: Try to break URLs at dots.
+                // Break URLs at dots.
                 render(node, (
                     <span>
-                        {info.host.split('.').reduce((elements, part) => {
+                        {info.host.split('.').reduce((elements, part, i) => {
                             return elements.concat(
                                 <wbr />,
-                                <span>{part}</span>
+                                <span>{`${i > 0 ? '.' : ''}${part}`}</span>
                             );
                         }, [])}
                     </span>

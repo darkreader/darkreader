@@ -9,6 +9,10 @@ interface ShortcutLinkProps {
 
 function getChromeShortcut(commandName: string) {
     return new Promise<string>((resolve, reject) => {
+        if (!chrome.commands) {
+            reject('chrome.commands not supported');
+            return;
+        }
         chrome.commands.getAll((commands) => {
             if (commands) {
                 const cmd = commands.filter(({ name }) => name === commandName)[0];

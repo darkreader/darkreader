@@ -1,17 +1,5 @@
 import { isUrlInList, configStore, getFixesFor, InversionFix } from './config_management';
-
-    export interface FilterConfig {
-        mode?: FilterMode;
-        brightness?: number;
-        contrast?: number;
-        grayscale?: number;
-        sepia?: number;
-        useFont?: boolean;
-        fontFamily?: string;
-        textStroke?: number;
-        siteList?: string[];
-        invertListed?: boolean;
-    }
+import { FilterConfig } from '../definitions';
 
     export enum FilterMode {
         light = 0,

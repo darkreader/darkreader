@@ -1,5 +1,6 @@
 import { configStore, isUrlInList, DEBUG, formatJson, copyJson, handleInversionFixes } from './config_management'
-import { FilterCssGenerator, FilterConfig, FilterMode } from './filter_css_generator';
+import { FilterCssGenerator, FilterMode } from './filter_css_generator';
+import { FilterConfig, TabInfo } from '../definitions';
 
     const ICON_PATHS = {
         active_19: '../icons/dr_active_19.png',
@@ -518,11 +519,4 @@ style && style.parentElement.removeChild(style);
     interface AppConfigStore {
         enabled: boolean;
         config: FilterConfig;
-    }
-
-    export interface TabInfo {
-        url: string;
-        host: string;
-        isProtected: boolean;
-        isInDarkList: boolean;
     }

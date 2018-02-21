@@ -277,6 +277,10 @@
             "rules": "html { height: auto !important; }"
         },
         {
+            "url": "iopscience.iop.org",
+            "noinvert": "img[alt*='Equation']"
+        },
+        {
             "url": "javarepl.com",
             "removebg": "body",
             "invert": ".terminal-content"

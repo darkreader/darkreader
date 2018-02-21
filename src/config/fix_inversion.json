@@ -523,7 +523,9 @@
         },
         {
             "url": "reddit.com",
-            "invert": "#header-img"
+            "invert": "#header, .side",
+            "noinvert": "#header *, .side *",
+            "rules": "#mail::before { display: none !important; }"
         },
         {
             "url": [

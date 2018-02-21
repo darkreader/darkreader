@@ -31,6 +31,11 @@
             "noinvert": "#footer *, #photo-modal *"
         },
         {
+            "url": "androidpolice.com",
+            "invert": ".ap-nav-wrapper, .footer, .logo",
+            "noinvert": ".ap-nav-wrapper *, .footer *"
+        },
+        {
             "url": "askubuntu.com",
             "removebg": "body"
         },

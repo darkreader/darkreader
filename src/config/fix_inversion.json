@@ -450,6 +450,10 @@
             "invert": ".__sprite"
         },
         {
+            "url": "nvidia.com",
+            "invert": ".sub-brand-nav, .brandLink"
+        },
+        {
             "url": "onliner.by",
             "invert": [
                 ".b-tile-main, .b-teasers-2__teaser, .news-tiles__subtitle",

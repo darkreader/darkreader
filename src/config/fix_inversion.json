@@ -655,6 +655,14 @@
             ]
         },
         {
+            "url": "velocimetro.virtua.com.br",
+            "noinvert": "iframe"
+        },
+        {
+            "url": "virtua.speedtestcustom.com",
+            "noinvert": ".branding"
+        },
+        {
             "url": "vk.com",
             "invert": [
                 "#video_player, .mv_playlist, .page_header_cont, .page_album_title",

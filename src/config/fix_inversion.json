@@ -451,7 +451,7 @@
         },
         {
             "url": "nvidia.com",
-            "invert": "div.sub-brand-nav, a.brandLink"
+            "invert": ".sub-brand-nav, .brandLink"
         },
         {
             "url": "onliner.by",

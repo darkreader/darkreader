@@ -32,7 +32,8 @@
         },
         {
             "url": "androidpolice.com",
-            "invert": "div.ap-nav-wrapper, div.band.footer, h1.logo"
+            "invert": ".ap-nav-wrapper, .footer, .logo",
+            "noinvert": ".ap-nav-wrapper *, .footer *
         },
         {
             "url": "askubuntu.com",

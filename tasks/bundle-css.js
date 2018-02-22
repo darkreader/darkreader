@@ -1,35 +1,31 @@
-const fs = require('fs-extra');
-const less = require('less');
+const gulpConnect = require('gulp-connect');
+const gulpLess = require('gulp-less');
+const gulpRename = require('gulp-rename');
+const gulpSourcemaps = require('gulp-sourcemaps');
+const mergeStream = require('merge-stream');
 const path = require('path');
 const { getDestDir } = require('./paths');
-const { logError } = require('./utils');
 
 module.exports = function createCSSBundleTasks(gulp) {
-    gulp.task('css-release', async () => await bundleCSS({ production: true }));
-    gulp.task('css-debug', async () => await bundleCSS({ production: false }));
+    gulp.task('css-release', () => bundleCSS({ production: true }));
+    gulp.task('css-debug', () => bundleCSS({ production: false }));
 
-    async function bundleCSS({ production }) {
+    function bundleCSS({ production }) {
         const dir = getDestDir({ production });
         const files = {
             'src/ui/popup/style.less': `${dir}/ui/popup/style.css`,
         };
-        try {
-            const bundles = Object.entries(files).map(([src, dest]) => bundleCSSEntry({ src, dest, production }));
-            await Promise.all(bundles);
-        } catch (err) {
-            logError(err);
-        }
+        const bundles = Object.entries(files).map(([src, dest]) => bundleCSSEntry({ src, dest, production }));
+        return mergeStream(...bundles)
+            .pipe(gulpConnect.reload());
     }
 
-    async function bundleCSSEntry({ src, dest, production }) {
-        const content = await fs.readFile(src, 'utf8');
-        const output = await less.render(
-            content,
-            {
-                filename: path.resolve(src),
-                sourceMap: production ? null : { sourceMapFileInline: true },
-            }
-        );
-        await fs.outputFile(dest, output.css);
+    function bundleCSSEntry({ src, dest, production }) {
+        return gulp.src(src)
+            .pipe(gulpSourcemaps.init())
+            .pipe(gulpLess())
+            .pipe(gulpSourcemaps.write())
+            .pipe(gulpRename(path.basename(dest)))
+            .pipe(gulp.dest(path.dirname(dest)));
     }
 };

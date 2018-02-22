@@ -654,10 +654,14 @@
             "url": "twitch.tv",
             "invert": [
                 "#site_footer, #carousel_background::after, #left_col, .player, .badge",
-                ".social-column, .top-nav"
+                ".social-column, .top-nav",
+                ".anon-front__featured-section",
+                ".side-nav, .footer"
             ],
             "noinvert": [
-                ".player *, .social-column *, .top-nav *"
+                ".player *, .social-column *, .top-nav *",
+                ".anon-front__featured-section *",
+                ".side-nav *, .footer *"
             ],
             "removebg": [
                 "#carousel, .chat-container, .conversations-list-header",

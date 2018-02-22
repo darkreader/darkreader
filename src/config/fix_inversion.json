@@ -466,7 +466,7 @@
             "url": "na.op.gg",
             "invert": ".__sprite"
         },
-         {
+        {
             "url": "nodejs.org",
             "invert": [
                 "#column2",

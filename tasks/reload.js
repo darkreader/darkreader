@@ -17,7 +17,7 @@ module.exports = function createReloadTask(gulp) {
             for (let id in sockets) {
                 sockets[id].destroy();
             }
-            server.close(() => done());
+            server.close();
             clearTimeout(connectionTimeoutId);
         }
 
@@ -31,10 +31,12 @@ module.exports = function createReloadTask(gulp) {
             }
         });
         server.on('error', (e) => {
-            logError(`Server error: ${e.description}`);
+            logError(`Server error: ${e}`);
             closeServer();
         });
 
         server.listen(8890);
+
+        done();
     });
 };

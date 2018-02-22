@@ -467,6 +467,18 @@
             "invert": ".__sprite"
         },
         {
+            "url": "nodejs.org",
+            "invert": [
+                "#column2",
+                "footer",
+                "header"
+            ],
+            "rules": [
+                "div#column2.interior { background: #212121; }",
+                "#column2 ul { background-color: #212121; }"
+            ]
+        },
+        {
             "url": "nvidia.com",
             "invert": ".sub-brand-nav, .brandLink"
         },

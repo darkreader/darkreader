@@ -2,6 +2,7 @@ const rollup = require('rollup');
 const rollupPluginNodeResolve = require('rollup-plugin-node-resolve');
 const rollupPluginTypescript = require('rollup-plugin-typescript');
 const typescript = require('typescript');
+const { logError } = require('./utils');
 
 const { getDestDir } = require('./paths');
 
@@ -15,13 +16,12 @@ module.exports = function createJSBundleTasks(gulp) {
             'src/background/index.ts': `${dir}/background/index.js`,
             'src/ui/popup/index.tsx': `${dir}/ui/popup/index.js`,
         };
-        await Promise.all(
-            Object.keys(files)
-                .map((src) => bundleJSEntry({
-                    src,
-                    dest: files[src],
-                    production,
-                })));
+        try {
+            const bundles = Object.entries(files).map(([src, dest]) => bundleJSEntry({ src, dest, production }));
+            await Promise.all(bundles);
+        } catch (err) {
+            logError(err);
+        }
     }
 
     async function bundleJSEntry({ src, dest, name, production }) {

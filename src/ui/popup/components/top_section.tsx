@@ -1,7 +1,7 @@
 import { html } from 'malevic';
 import SiteToggle from './site_toggle';
-import { Row, Col, Button, Shortcut, Toggle } from '../controls';
-import { Extension } from '../../definitions';
+import { Row, Col, Button, Shortcut, Toggle } from '../../controls';
+import { Extension } from '../../../definitions';
 
 export default function TopSection({ ext }: { ext: Extension }) {
 

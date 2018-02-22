@@ -1,6 +1,7 @@
 const gulp = require('gulp');
 const runSequence = require('run-sequence');
 
+require('./tasks/bundle-css')(gulp);
 require('./tasks/bundle-js')(gulp);
 require('./tasks/clean')(gulp);
 require('./tasks/copy')(gulp);
@@ -12,7 +13,7 @@ require('./tasks/zip')(gulp);
 gulp.task('release', (done) => {
     runSequence(
         'clean',
-        ['js-release', 'copy-release'],
+        ['js-release', 'css-release', 'copy-release'],
         'foxify',
         'reload',
         ['zip', 'zip-firefox'],

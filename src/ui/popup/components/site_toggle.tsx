@@ -1,6 +1,6 @@
 import { html, render } from 'malevic';
-import { Row, Col, Button, Toggle } from '../controls';
-import { Extension } from '../../definitions';
+import { Row, Col, Button, Toggle } from '../../controls';
+import { Extension } from '../../../definitions';
 
 export default function SiteToggleButton(props: { ext: Extension }) {
     const { ext } = props;

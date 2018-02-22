@@ -1,6 +1,6 @@
 import { html } from 'malevic';
-import { Row, Col, CheckBox, UpDown, Select } from '../controls';
-import { Extension } from '../../definitions';
+import { Row, Col, CheckBox, UpDown, Select } from '../../controls';
+import { Extension } from '../../../definitions';
 
 export default function FontSettings({ ext }: { ext: Extension }) {
     return (

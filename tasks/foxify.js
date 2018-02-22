@@ -24,6 +24,6 @@ module.exports = function createFoxifyTask(gulp) {
         let content = await fs.readFile(backgroundJsPath, 'utf8');
         content = replace(content, 'chrome.fontSettings.getFontList', `chrome['font' + 'Settings']['get' + 'Font' + 'List']`);
         content = replace(content, 'chrome.fontSettings', `chrome['font' + 'Settings']`);
-        await fs.writeFile(backgroundJsPath, content);
+        await fs.outputFile(backgroundJsPath, content);
     });
 };

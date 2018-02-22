@@ -27,6 +27,7 @@
     "fs-extra": "5.0.0",
     "gulp": "3.9.1",
     "gulp-zip": "4.1.0",
+    "less": "3.0.1",
     "rollup": "0.56.2",
     "rollup-plugin-node-resolve": "3.0.3",
     "rollup-plugin-typescript": "0.8.1",

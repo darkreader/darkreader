@@ -1,11 +1,11 @@
 import { html } from 'malevic';
 import withForms from 'malevic/forms';
-import { Row, Col, TabPanel, Button, CheckBox } from '../controls';
+import { Row, Col, TabPanel, Button, CheckBox } from '../../controls';
 import TopSection from './top_section';
 import FilterSettings from './filter_settings';
 import FontSettings from './font_settings';
 import SiteListSettings from './site_list_settings';
-import { Extension } from '../../definitions';
+import { Extension } from '../../../definitions';
 
 withForms();
 

@@ -1,5 +1,5 @@
 import { html, render } from 'malevic';
-import Body from './body';
+import Body from './components/body';
 import createExtensionMock from '../utils/extension_mock';
 import { isAffectedByChromiumIssue750419 } from '../utils/issues';
 import { Extension } from '../../definitions';

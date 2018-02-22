@@ -1,0 +1,38 @@
+@import "./theme.less";
+
+html {
+    background-color: @color-back;
+    color: @color-fore;
+    font-family: @font-family;
+    font-size: 75%; // Chrome Extension font size
+}
+
+::selection {
+    background-color: @color-selection-back;
+    color: @color-selection-fore;
+}
+
+::-webkit-scrollbar {
+    background-color: @color-back;
+    width: @size-main + @size-border * 2;
+
+    &-thumb {
+        background-color: @color-control-hover;
+        border-left: @size-border * 2 solid @color-control-back;
+
+        &:hover {
+            background-color: lighten(@color-control-hover, 2%);
+        }
+
+        &:active {
+            background-color: @color-control-active;
+        }
+    }
+}
+
+.chromium-issue-750419 {
+    // Fix missing vertical borders in Chrome for Windows
+    border-left: 2px solid white;
+    border-right: 2px solid white;
+    box-sizing: border-box;
+}

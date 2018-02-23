@@ -551,16 +551,16 @@
             "invert": ".gatsby-highlight, .css-mlkfzr, .css-17t02fm"
         },
         {
-            "url": "reddit.com/r/europe",
-            "invert": "span.flair"
-        },
-        {
             "url": [
                 "reddit.com/r/GlobalOffensive"
             ],
             "invert": "#header, .side",
             "noinvert": "#header *, .side *",
             "rules": "#mail::before { display: none !important; }"
+        },
+        {
+            "url": "reddit.com/r/europe",
+            "invert": ".flair"
         },
         {
             "url": [

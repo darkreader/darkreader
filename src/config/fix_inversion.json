@@ -559,6 +559,10 @@
             "rules": "#mail::before { display: none !important; }"
         },
         {
+            "url": "reddit.com/r/europe",
+            "invert": ".flair"
+        },
+        {
             "url": [
                 "ruby.sketchup.com",
                 "rubydoc.info"

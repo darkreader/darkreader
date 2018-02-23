@@ -1,4 +1,4 @@
-import { html, render } from 'malevic';
+import {html, render} from 'malevic';
 import Row from './row';
 import Col from './col';
 import Button from './button';
@@ -118,6 +118,7 @@ export default function Select(props: SelectProps) {
                 class="select__list"
                 native
                 didmount={saveListDOMNode}
+                didupdate={saveListDOMNode}
             ></Col>
         </Col >
     );

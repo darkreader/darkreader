@@ -1,9 +1,11 @@
-import { FilterMode } from './background/filter_css_generator';
+import {FilterMode} from './background/filter_css_generator';
 
 export interface Extension {
     enabled: boolean;
     config: FilterConfig;
     fonts: string[];
+    enable();
+    disable();
     setConfig(config: FilterConfig);
     addListener(callback: () => void);
     removeListener(callback: () => void);

@@ -1,8 +1,8 @@
-import { html } from 'malevic';
-import { mergeClass } from './utils';
+import {html} from 'malevic';
+import {mergeClass} from './utils';
 
 interface ShortcutLinkProps {
-    class?: string | { [cls: string]: any };
+    class?: string | {[cls: string]: any};
     commandName: string;
     textTemplate: (shortcut: string) => string;
 }
@@ -10,12 +10,12 @@ interface ShortcutLinkProps {
 function getChromeShortcut(commandName: string) {
     return new Promise<string>((resolve, reject) => {
         if (!chrome.commands) {
-            reject('chrome.commands not supported');
+            requestAnimationFrame(() => reject('chrome.commands not supported'));
             return;
         }
         chrome.commands.getAll((commands) => {
             if (commands) {
-                const cmd = commands.filter(({ name }) => name === commandName)[0];
+                const cmd = commands.filter(({name}) => name === commandName)[0];
                 if (cmd) {
                     resolve(cmd.shortcut);
                 } else {
@@ -40,7 +40,6 @@ export default function ShortcutLink(props: ShortcutLinkProps) {
                 node.textContent = text;
             })
             .catch((err) => {
-                console.error(err);
                 node.textContent = err;
             });
     }

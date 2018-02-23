@@ -1,11 +1,11 @@
-import { html } from 'malevic';
+import {html} from 'malevic';
 import withForms from 'malevic/forms';
-import { Row, Col, TabPanel, Button, CheckBox } from '../../controls';
-import TopSection from './top_section';
+import {TabPanel, Button, CheckBox} from '../../controls';
+import TopSection from './top-section';
 import FilterSettings from './filter_settings';
 import FontSettings from './font_settings';
 import SiteListSettings from './site_list_settings';
-import { Extension } from '../../../definitions';
+import {Extension} from '../../../definitions';
 
 withForms();
 
@@ -16,16 +16,15 @@ interface BodyProps {
 }
 
 export default function Body(props: BodyProps) {
-
     return (
-        <Col id="body">
-
-            <img id="logo" src="../assets/images/dark-reader-type.svg" alt="Dark Reader" />
-
-            <TopSection ext={props.ext} />
+        <body class={{'ext-disabled': !props.ext.enabled}}>
+            <header>
+                <img id="logo" src="../assets/images/dark-reader-type.svg" alt="Dark Reader" />
+                <TopSection ext={props.ext} />
+            </header>
 
             <TabPanel
-                activeTab={props.activeTab}
+                activeTab={props.activeTab || 'Filter'}
                 onSwitchTab={props.onSwitchTab}
                 tabs={{
                     'Filter': (
@@ -40,15 +39,15 @@ export default function Body(props: BodyProps) {
                 }}
             />
 
-            <Col id="footer">
-                <p class="description">
-                    <span>Some things should not be inverted?</span>
+            <footer>
+                <p>
+                    Some things should not be inverted?<br />
+                    You can <strong>help and fix it</strong>, here is a tool
                 </p>
-                <Button onClick={() => { }}>
+                <Button onClick={() => {}}>
                     🛠 Open developer tools
                 </Button>
-            </Col>
-
-        </Col>
+            </footer>
+        </body>
     );
 }

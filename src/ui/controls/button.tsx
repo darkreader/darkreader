@@ -1,14 +1,13 @@
-import { html } from 'malevic';
-import { mergeClass, omitAttrs } from './utils';
+import {html} from 'malevic';
+import {mergeClass, omitAttrs} from './utils';
 
-export default function Button(props: Malevic.NodeAttrs, text?: any) {
-    props = props || {};
+export default function Button(props: Malevic.NodeAttrs, ...children) {
     const cls = mergeClass('button', props.class);
     const attrs = omitAttrs(['class'], props);
 
     return (
-        <button class={cls} {...attrs}>
-            {text}
-        </button>
+        <span class={cls} {...attrs}>
+            {...children}
+        </span>
     );
 }

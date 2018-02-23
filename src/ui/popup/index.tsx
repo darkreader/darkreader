@@ -1,8 +1,8 @@
-import { html, render } from 'malevic';
+import {html, sync} from 'malevic';
 import Body from './components/body';
-import createExtensionMock from '../utils/extension_mock';
-import { isAffectedByChromiumIssue750419 } from '../utils/issues';
-import { Extension } from '../../definitions';
+import createExtensionMock from '../utils/extension-mock';
+import {isAffectedByChromiumIssue750419} from '../utils/issues';
+import {Extension} from '../../definitions';
 
 interface PopupState {
     activeTab?: string;
@@ -27,17 +27,17 @@ if (!extension) {
 let state: PopupState = null;
 
 function renderBody() {
-    render(document.body, (
+    sync(document.body, (
         <Body
             ext={extension}
             activeTab={state.activeTab}
-            onSwitchTab={(tab) => setState({ activeTab: tab })}
+            onSwitchTab={(tab) => setState({activeTab: tab})}
         />
     ));
 }
 
 function setState(newState: PopupState) {
-    state = { ...state, ...newState };
+    state = {...state, ...newState};
     renderBody();
 }
 

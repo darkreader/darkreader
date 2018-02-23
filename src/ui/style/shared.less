@@ -1,10 +1,35 @@
 @import "./theme.less";
 
+@font-face {
+    font-family: 'Open Sans';
+    src: url('../assets/fonts/OpenSans-Regular.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Open Sans';
+    src: url('../assets/fonts/OpenSans-SemiBold.ttf') format('truetype');
+    font-weight: bold;
+    font-style: normal;
+}
+
+@import "./controls/index";
+
 html {
     background-color: @color-back;
     color: @color-fore;
     font-family: @font-family;
-    font-size: 75%; // Chrome Extension font size
+    font-size: 100%;
+}
+
+body {
+    font-size: @size-text-normal
+}
+
+input, button {
+    font-family: @font-family;
+    font-size: @size-text-normal
 }
 
 ::selection {
@@ -14,11 +39,11 @@ html {
 
 ::-webkit-scrollbar {
     background-color: @color-back;
-    width: @size-main + @size-border * 2;
+    width: @size-scrollbar-padding + @size-scrollbar-thickness;
 
     &-thumb {
         background-color: @color-control-hover;
-        border-left: @size-border * 2 solid @color-control-back;
+        border-left: @size-scrollbar-padding solid @color-control-back;
 
         &:hover {
             background-color: lighten(@color-control-hover, 2%);

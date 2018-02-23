@@ -1,21 +1,6 @@
-import { html } from 'malevic';
-import Row from './row';
-import Col from './col';
-import Button from './button';
-
-function Tab(props: { isActive: boolean; }, ...children) {
-
-    const tabCls = {
-        'tab': true,
-        'tab--active': props.isActive
-    };
-
-    return (
-        <Col class={tabCls}>
-            {children}
-        </Col>
-    );
-}
+import {html} from 'malevic';
+import Button from '../button';
+import Tab from './Tab';
 
 interface TabPanelProps {
     tabs: {
@@ -36,7 +21,7 @@ export default function TabPanel(props: TabPanelProps) {
         );
     }
 
-    const tabButtons = tabsNames.map((name, i) => {
+    const buttons = tabsNames.map((name, i) => {
         const btnCls = {
             'tab-panel__button': true,
             'tab-panel__button--active': isActiveTab(name, i)
@@ -56,13 +41,13 @@ export default function TabPanel(props: TabPanelProps) {
     ));
 
     return (
-        <Col class="tab-panel">
-            <Row class="tab-panel__buttons">
-                {tabButtons}
-            </Row>
-            <Row class="tab-panel__container">
+        <div class="tab-panel">
+            <div class="tab-panel__buttons">
+                {buttons}
+            </div>
+            <div class="tab-panel__tabs">
                 {tabs}
-            </Row>
-        </Col>
+            </div>
+        </div>
     );
 }

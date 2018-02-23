@@ -1,6 +1,7 @@
-import { Extension, FilterConfig, TabInfo } from '../../definitions';
+import {Extension, FilterConfig, TabInfo} from '../../definitions';
 
 export default function createExtensionMock() {
+    let listener: () => void = null;
     const extension: Extension = {
         enabled: true,
         config: {
@@ -23,11 +24,24 @@ export default function createExtensionMock() {
             'fantasy',
             'system-ui'
         ],
+        enable() {
+            extension.enabled = true;
+            listener();
+        },
+        disable() {
+            extension.enabled = false;
+            listener();
+        },
         setConfig(config) {
             Object.assign(extension.config, config);
+            listener();
         },
-        addListener(callback) { },
-        removeListener(callback) { },
+        addListener(callback) {
+            listener = callback;
+        },
+        removeListener(callback) {
+            listener = null;
+        },
         getActiveTabInfo(callback) {
             callback({
                 url: 'http://darkreader.org/',
@@ -36,7 +50,12 @@ export default function createExtensionMock() {
                 isInDarkList: false,
             });
         },
-        toggleCurrentSite() { },
+        toggleCurrentSite() {
+            extension.config.siteList.length ?
+                extension.config.siteList.splice(0) :
+                extension.config.siteList.push('darkreader.org');
+            listener();
+        },
     };
     return extension;
 }

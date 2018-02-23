@@ -1,0 +1,22 @@
+@import "../theme";
+
+.updown {
+    &__line {
+        display: flex;
+        flex-direction: row;
+
+        > :not(:first-child) {
+            margin-left: @indent-small;
+        }
+    }
+}
+
+.track {
+    align-items: center;
+    border: @size-border solid @color-border;
+    box-sizing: content-box;
+    display: inline-flex;
+    flex: auto;
+    flex-direction: column;
+    height: @size-control-inner;
+}

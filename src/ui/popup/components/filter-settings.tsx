@@ -1,31 +1,33 @@
-import { html } from 'malevic';
-import { Row, Col, Button, Toggle, UpDown } from '../../controls';
-import { Extension } from '../../../definitions';
+import {html} from 'malevic';
+import {Button, Toggle, UpDown} from '../../controls';
+import {Extension} from '../../../definitions';
 
-export default function FilterSettings({ ext }: { ext: Extension }) {
+export default function FilterSettings({ext}: {ext: Extension}) {
 
     const mode = (
-        <Col id="modeToggle" class="control">
-            <Row class="control__line">
+        <div class="mode-toggle">
+            <div class="mode-toggle__line">
                 <Button
-                    class={{ 'button--active': ext.config.mode === 1 }}
-                    onclick={() => ext.setConfig({ mode: 1 })}
+                    class={{'button--active': ext.config.mode === 1}}
+                    onclick={() => ext.setConfig({mode: 1})}
                 >
-                    <span class="icon-dark-mode"></span>
+                    <span class="icon icon--dark-mode"></span>
                 </Button>
                 <Toggle
                     checked={ext.config.mode === 1}
                     labelOn="Dark"
                     labelOff="Light"
+                    onChange={(checked) => ext.setConfig({mode: Number(checked)})}
                 />
                 <Button
-                    class={{ 'button--active': ext.config.mode === 0 }}
-                    onclick={() => ext.setConfig({ mode: 0 })}
+                    class={{'button--active': ext.config.mode === 0}}
+                    onclick={() => ext.setConfig({mode: 0})}
                 >
-                    <span class="icon-light-mode"></span>
+                    <span class="icon icon--light-mode"></span>
                 </Button>
-            </Row>
-        </Col>
+            </div>
+            <span class="mode-toggle__label">Mode</span>
+        </div>
     );
 
     const brightness = (
@@ -36,7 +38,7 @@ export default function FilterSettings({ ext }: { ext: Extension }) {
             step={10}
             default={100}
             name="Brightness"
-            onChange={(value) => ext.setConfig({ brightness: value })}
+            onChange={(value) => ext.setConfig({brightness: value})}
         />
     );
 
@@ -48,7 +50,7 @@ export default function FilterSettings({ ext }: { ext: Extension }) {
             step={10}
             default={100}
             name="Contrast"
-            onChange={(value) => ext.setConfig({ contrast: value })}
+            onChange={(value) => ext.setConfig({contrast: value})}
         />
     );
 
@@ -60,7 +62,7 @@ export default function FilterSettings({ ext }: { ext: Extension }) {
             step={10}
             default={0}
             name="Grayscale"
-            onChange={(value) => ext.setConfig({ grayscale: value })}
+            onChange={(value) => ext.setConfig({grayscale: value})}
         />
     );
 
@@ -72,17 +74,17 @@ export default function FilterSettings({ ext }: { ext: Extension }) {
             step={10}
             default={0}
             name="Sepia"
-            onChange={(value) => ext.setConfig({ sepia: value })}
+            onChange={(value) => ext.setConfig({sepia: value})}
         />
     );
 
     return (
-        <Col>
+        <div class="filter-settings">
             {mode}
             {brightness}
             {contrast}
             {grayscale}
             {sepia}
-        </Col>
+        </div>
     );
 }

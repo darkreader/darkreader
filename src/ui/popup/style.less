@@ -18,6 +18,9 @@ body {
     }
 }
 
+// Top
+//---------------------------------
+
 header {
     flex: none;
     width: 100%;
@@ -68,9 +71,67 @@ header {
     width: 55%;
 }
 
+// Middle
+//---------------------------------
+
 .tab-panel {
     flex: auto;
 }
+
+.filter-settings {
+    align-items: stretch;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+
+    > :not(:first-child) {
+        margin-top: @indent-large;;
+    }
+}
+
+.mode-toggle {
+    align-items: stretch;
+    display: flex;
+    flex-direction: column;
+
+    &__line {
+        display: flex;
+        flex-direction: row;
+
+        > :not(:first-child) {
+            margin-left: @indent-small;
+        }
+    }
+
+    .toggle {
+        flex: auto;
+    }
+
+    &__label {
+        display: inline-block;
+        font-size: @size-text-small;
+        line-height: @size-text-small;
+        text-align: center;
+    }
+}
+
+.icon {
+    background-size: contain;
+    display: inline-block;
+    height: 100%;
+    width: 100%;
+}
+
+.icon--dark-mode {
+    background-image: url(../assets/images/mode-dark-32.svg);
+}
+
+.icon--light-mode {
+    background-image: url(../assets/images/mode-light-32.svg);
+}
+
+// Bottom
+//---------------------------------
 
 footer {
     align-items: stretch;

@@ -59,17 +59,17 @@ export default function UpDown(props: UpDownProps) {
         <div class="updown">
             <div class="updown__line">
                 <Button class={buttonDownCls} onclick={onButtonDownClick} >
-                    <span class="updown__icon-down"></span>
+                    <span class="updown__icon updown__icon-down"></span>
                 </Button>
                 <Track
                     value={trackValue}
                     label={props.name}
                 />
                 <Button class={buttonUpCls} onclick={onButtonUpClick} >
-                    <span class="updown__icon-up"></span>
+                    <span class="updown__icon updown__icon-up"></span>
                 </Button>
             </div>
-            <span class="updown__value">
+            <span class="updown__value-text">
                 {valueText}
             </span>
         </div>

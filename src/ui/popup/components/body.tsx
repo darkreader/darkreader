@@ -2,7 +2,7 @@ import {html} from 'malevic';
 import withForms from 'malevic/forms';
 import {TabPanel, Button, CheckBox} from '../../controls';
 import TopSection from './top-section';
-import FilterSettings from './filter_settings';
+import FilterSettings from './filter-settings';
 import FontSettings from './font_settings';
 import SiteListSettings from './site_list_settings';
 import {Extension} from '../../../definitions';

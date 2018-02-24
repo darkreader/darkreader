@@ -8,7 +8,7 @@ export default function FilterSettings({ext}: {ext: Extension}) {
         <div class="mode-toggle">
             <div class="mode-toggle__line">
                 <Button
-                    class={{'button--active': ext.config.mode === 1}}
+                    class={{'mode-toggle__button--active': ext.config.mode === 1}}
                     onclick={() => ext.setConfig({mode: 1})}
                 >
                     <span class="icon icon--dark-mode"></span>
@@ -20,7 +20,7 @@ export default function FilterSettings({ext}: {ext: Extension}) {
                     onChange={(checked) => ext.setConfig({mode: Number(checked)})}
                 />
                 <Button
-                    class={{'button--active': ext.config.mode === 0}}
+                    class={{'mode-toggle__button--active': ext.config.mode === 0}}
                     onclick={() => ext.setConfig({mode: 0})}
                 >
                     <span class="icon icon--light-mode"></span>

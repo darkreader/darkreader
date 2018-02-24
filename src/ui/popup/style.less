@@ -1,9 +1,13 @@
-@import "../style/theme";
-@import "../style/shared";
+@import "../theme";
+@import "../shared";
 
 html {
     padding: @size-content-padding;
 }
+
+@import "./components/filter-settings/style";
+@import "./components/site-toggle/style";
+@import "./components/top-section/style";
 
 body {
     align-items: stretch;
@@ -17,9 +21,6 @@ body {
         margin-top: @indent-large;
     }
 }
-
-// Top
-//---------------------------------
 
 header {
     flex: none;
@@ -35,111 +36,9 @@ header {
     width: @size-content-width;
 }
 
-.top-controls {
-    display: flex;
-    flex: auto;
-    flex-direction: row;
-    width: 100%;
-
-    &__control {
-        display: flex;
-        flex: auto;
-        flex-direction: column;
-
-        &:not(:first-child) {
-            margin-left: @indent-small;
-        }
-    }
-}
-
-.site-toggle {
-    color: @color-fore;
-    white-space: pre-wrap;
-
-    &--disabled {
-        opacity: 0.5;
-        pointer-events: none;
-    }
-
-    &__url {
-        color: @color-control-fore;
-    }
-}
-
-#site-toggle-container {
-    flex: none;
-    width: 55%;
-}
-
-// Middle
-//---------------------------------
-
 .tab-panel {
     flex: auto;
 }
-
-.filter-settings {
-    align-items: stretch;
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-
-    > :not(:first-child) {
-        margin-top: @indent-large;;
-    }
-}
-
-.mode-toggle {
-    align-items: stretch;
-    display: flex;
-    flex-direction: column;
-
-    &__line {
-        display: flex;
-        flex-direction: row;
-
-        > :not(:first-child) {
-            margin-left: @indent-small;
-        }
-    }
-
-    .toggle {
-        flex: auto;
-    }
-
-    &__label {
-        display: inline-block;
-        font-size: @size-text-small;
-        line-height: @size-text-small;
-        text-align: center;
-    }
-
-    &__button--active {
-        background: @color-control-active;
-
-        &:hover {
-            background: @color-control-active;
-        }
-    }
-}
-
-.icon {
-    background-size: contain;
-    display: inline-block;
-    height: 100%;
-    width: 100%;
-}
-
-.icon--dark-mode {
-    background-image: url(../assets/images/mode-dark-32.svg);
-}
-
-.icon--light-mode {
-    background-image: url(../assets/images/mode-light-32.svg);
-}
-
-// Bottom
-//---------------------------------
 
 footer {
     align-items: stretch;

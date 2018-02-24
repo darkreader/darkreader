@@ -1,0 +1,63 @@
+@import "./theme.less";
+
+@font-face {
+    font-family: 'Open Sans';
+    src: url('../assets/fonts/OpenSans-Regular.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Open Sans';
+    src: url('../assets/fonts/OpenSans-SemiBold.ttf') format('truetype');
+    font-weight: bold;
+    font-style: normal;
+}
+
+@import "./controls/style";
+
+html {
+    background-color: @color-back;
+    color: @color-fore;
+    font-family: @font-family;
+    font-size: 100%;
+}
+
+body {
+    font-size: @size-text-normal
+}
+
+input, button {
+    font-family: @font-family;
+    font-size: @size-text-normal
+}
+
+::selection {
+    background-color: @color-selection-back;
+    color: @color-selection-fore;
+}
+
+::-webkit-scrollbar {
+    background-color: @color-back;
+    width: @size-scrollbar-padding + @size-scrollbar-thickness;
+
+    &-thumb {
+        background-color: @color-control-hover;
+        border-left: @size-scrollbar-padding solid @color-control-back;
+
+        &:hover {
+            background-color: lighten(@color-control-hover, 2%);
+        }
+
+        &:active {
+            background-color: @color-control-active;
+        }
+    }
+}
+
+.chromium-issue-750419 {
+    // Fix missing vertical borders in Chrome for Windows
+    border-left: 2px solid white;
+    border-right: 2px solid white;
+    box-sizing: border-box;
+}

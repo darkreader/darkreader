@@ -502,6 +502,10 @@
             "noinvert": "[class*=ace] *"
         },
         {
+            "url": "otakumode.com",
+            "invert": ".c-slick-image-viewer__main-image img"
+        },
+        {
             "url": "outlook.live.com",
             "invert": "#O365_NavHeader"
         },

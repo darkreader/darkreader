@@ -281,6 +281,7 @@
                 ".fade.show",
                 ".modal-content",
                 ".drawer-container"
+            ]
             "noinvert": [
                 "#app-header .character-sprites",
                 ".seasonal .background .npc"

@@ -260,6 +260,34 @@
             "invert": "img, iframe, video, embed, .photo"
         },
         {
+            "url": "habitica.com",
+            "invert": [
+                "nav.navbar",
+                "#app-header",
+                ".header",
+                ".quest-boss",
+                ".character-sprites",
+                ".item-content",
+                ".drawer-container .item",
+                ".npc_matt",
+                ".npc",
+                ".seasonal .background",
+                ".image",
+                ".habitica-emoji",
+                ".daniel_front",
+                ".world-boss",
+                ".dropdown-menu",
+                ".dropdown-menu .notification",
+                ".fade.show",
+                ".modal-content",
+                ".drawer-container"
+            ],
+            "noinvert": [
+                "#app-header .character-sprites",
+                ".seasonal .background .npc"
+            ]
+        },
+        {
             "url": "hysterical-amusement.surge.sh",
             "invert": [
                 "body",

@@ -278,8 +278,9 @@
                 ".world-boss",
                 ".dropdown-menu",
                 ".dropdown-menu .notification",
+                ".fade.show",
+                ".modal-content",
                 ".drawer-container"
-            ],
             "noinvert": [
                 "#app-header .character-sprites",
                 ".seasonal .background .npc"

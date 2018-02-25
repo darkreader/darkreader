@@ -33,6 +33,13 @@
             ]
         },
         {
+            "url": "www.evernote.com",
+            "selectors": [
+                "{common}",
+                ".en-note"
+            ]
+        },
+        {
             "url": "facebook.com",
             "selectors": [
                 "{common}",

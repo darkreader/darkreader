@@ -1,4 +1,4 @@
-import {html, render} from 'malevic';
+import {html, sync} from 'malevic';
 import Row from '../row';
 import Col from '../col';
 import Button from '../button';
@@ -70,11 +70,12 @@ export default function Select(props: SelectProps) {
         requestAnimationFrame(() => {
             const fragment = document.createDocumentFragment();
             values.forEach((value) => {
-                const div = document.createElement('div');
-                div.classList.add('select__option');
-                div.dataset['value'] = value;
-                render(div, props.options[value]);
-                fragment.appendChild(div);
+                const item = sync(document.createElement('span'), (
+                    <span class="select__option" data-value={value}>
+                        {props.options[value]}
+                    </span>
+                ));
+                fragment.appendChild(item);
             });
             listDOMNode.appendChild(fragment);
 
@@ -100,8 +101,8 @@ export default function Select(props: SelectProps) {
     }
 
     return (
-        <Col class="select">
-            <Row class="select__line">
+        <span class="select">
+            <span class="select__line">
                 <TextBox
                     class="select__textbox"
                     value={props.value}
@@ -111,15 +112,15 @@ export default function Select(props: SelectProps) {
                     class="select__expand"
                     onclick={expandList}
                 >
-                    <span icon="select__expand__icon-down"></span>
+                    <span class="select__expand__icon"></span>
                 </Button>
-            </Row>
-            <Col
+            </span>
+            <span
                 class="select__list"
                 native
                 didmount={saveListDOMNode}
                 didupdate={saveListDOMNode}
-            ></Col>
-        </Col >
+            ></span>
+        </span>
     );
 }

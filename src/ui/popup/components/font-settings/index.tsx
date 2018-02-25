@@ -1,12 +1,12 @@
 import {html} from 'malevic';
-import {Row, Col, CheckBox, UpDown, Select} from '../../../controls';
+import {CheckBox, UpDown, Select} from '../../../controls';
 import {Extension} from '../../../../definitions';
 
 export default function FontSettings({ext}: {ext: Extension}) {
     return (
-        <Col>
-            <Col class="control-container">
-                <Row class="control-container__line font-select-container">
+        <div class="font-settings">
+            <div class="font-settings__font-select-container">
+                <div class="font-settings__font-select-container__line">
                     <CheckBox
                         checked={ext.config.useFont}
                         onchange={(e) => ext.setConfig({useFont: e.target.checked})}
@@ -23,11 +23,11 @@ export default function FontSettings({ext}: {ext: Extension}) {
                             return map;
                         }, {} as {[font: string]: Malevic.NodeDeclaration;})}
                     />
-                </Row>
-                <label class="control-container__description">
+                </div>
+                <label class="font-settings__font-select-container__label">
                     Select a font
                 </label>
-            </Col>
+            </div>
             <UpDown
                 value={ext.config.textStroke}
                 min={0}
@@ -37,6 +37,6 @@ export default function FontSettings({ext}: {ext: Extension}) {
                 name="Text stroke"
                 onChange={(value) => ext.setConfig({textStroke: value})}
             />
-        </Col>
+        </div>
     );
 }

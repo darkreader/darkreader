@@ -25,7 +25,7 @@ export default function ModeToggle({ext}: {ext: Extension}) {
                     <span class="icon icon--light-mode"></span>
                 </Button>
             </div>
-            <span class="mode-toggle__label">Mode</span>
+            <label class="mode-toggle__label">Mode</label>
         </div>
     );
 }

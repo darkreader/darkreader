@@ -6,8 +6,10 @@ export default function Button(props: Malevic.NodeAttrs, ...children) {
     const attrs = omitAttrs(['class'], props);
 
     return (
-        <span class={cls} {...attrs}>
-            {...children}
-        </span>
+        <button class={cls} {...attrs}>
+            <span class="button__wrapper">
+                {...children}
+            </span>
+        </button>
     );
 }

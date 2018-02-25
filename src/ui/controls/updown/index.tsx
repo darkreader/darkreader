@@ -69,9 +69,9 @@ export default function UpDown(props: UpDownProps) {
                     <span class="updown__icon updown__icon-up"></span>
                 </Button>
             </div>
-            <span class="updown__value-text">
+            <label class="updown__value-text">
                 {valueText}
-            </span>
+            </label>
         </div>
     );
 }

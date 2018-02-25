@@ -1,11 +1,16 @@
 @import "../theme";
 @import "../shared";
 
+@popup-content-width: 15rem;
+@popup-content-height: 30rem;
+@popup-content-padding: 1rem;
+
 html {
-    padding: @size-content-padding;
+    padding: @popup-content-padding;
 }
 
 @import "./components/filter-settings/style";
+@import "./components/font-settings/style";
 @import "./components/site-toggle/style";
 @import "./components/top-section/style";
 
@@ -13,9 +18,9 @@ body {
     align-items: stretch;
     display: flex;
     flex-direction: column;
-    height: @size-content-height;
+    height: @popup-content-height;
     margin: 0;
-    width: @size-content-width;
+    width: @popup-content-width;
 
     > :not(:first-child) {
         margin-top: @indent-large;
@@ -33,7 +38,7 @@ header {
 
 #logo {
     display: inline-block;
-    width: @size-content-width;
+    width: @popup-content-width;
 }
 
 .tab-panel {

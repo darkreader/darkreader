@@ -247,7 +247,7 @@
             ],
             "noinvert": [
                 ".irc_mi, .irc_rii, .irc_mut, .act-icon-dark-gray, .amI, .amJ, .adk, .adj, [src*='ic_'], [src*='black']",
-                ".mL, .ajT",
+                ".mL, .ajT, .hB, .hA, .mK, .mI",
                 "input[style*='data:image']",
                 "img[src*='/books/content?']"
             ],

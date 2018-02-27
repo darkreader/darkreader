@@ -189,6 +189,10 @@
             "rules": "._2s1x ._2s1y { background: #9BB5E8 !important; color: black !important; border-bottom-color: #92A6CA !important; }"
         },
         {
+            "url": "farside.ph.utexas.edu",
+            "noinvert": "img"
+        },
+        {
             "url": "feedly.com",
             "invert": [
                 ".landing-old .dark",

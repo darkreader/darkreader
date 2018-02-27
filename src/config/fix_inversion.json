@@ -825,7 +825,7 @@
         {
             "url": "wolfram.com",
             "noinvert": [
-                ".numberedequation, .displayformula"
+                ".numberedequation, .displayformula, .inlineformula"
             ]
         },
         {

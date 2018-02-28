@@ -9,31 +9,31 @@ interface TextListProps {
     onChange: (values: string[]) => void;
 }
 
+const focusedNodes = new WeakSet<Element>();
+
 export default function TextList(props: TextListProps) {
 
     const textDomNodes: HTMLInputElement[] = [];
 
-    function saveTextNodeRef(domNode: HTMLInputElement) {
-        textDomNodes.push(domNode);
-    }
-
     function createTextBox(text: string, index: number) {
-        let update: (domNode: HTMLInputElement) => void;
-        if (props.isFocused && index === props.values.length) {
-            update = (domNode) => {
-                saveTextNodeRef(domNode);
-                domNode.focus();
-            };
-        } else {
-            update = saveTextNodeRef;
+        function onRender(domNode: HTMLInputElement) {
+            textDomNodes.push(domNode);
+            if (props.isFocused && index === props.values.length) {
+                if (!focusedNodes.has(domNode)) {
+                    focusedNodes.add(domNode);
+                    domNode.focus();
+                }
+            } else {
+                focusedNodes.delete(domNode);
+            }
         }
         return (
             <TextBox
                 class={['text-list__textbox', props.class]}
                 value={text}
                 placeholder={props.placeholder}
-                didmount={update}
-                didupdate={update}
+                didmount={onRender}
+                didupdate={onRender}
             />
         );
     }

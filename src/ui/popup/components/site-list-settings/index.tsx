@@ -1,5 +1,5 @@
 import {html} from 'malevic';
-import {Col, Toggle, TextList, Shortcut} from '../../../controls'
+import {Toggle, TextList, Shortcut} from '../../../controls'
 import {Extension} from '../../../../definitions';
 
 interface SiteListSettingsProps {

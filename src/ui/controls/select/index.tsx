@@ -1,7 +1,5 @@
 import {html, sync, getData} from 'malevic';
 import withState from 'malevic/state';
-import Row from '../row';
-import Col from '../col';
 import Button from '../button';
 import TextBox from '../textbox';
 

@@ -61,11 +61,18 @@
     }
 
     &__tab {
-        display: none;
-        width: 100%;
+        display: flex;
+        opacity: 0;
+        overflow: hidden;
+        pointer-events: none;
+        transition: width @time-slow, opacity @time-fast;
+        width: 0;
 
         &--active {
-            display: flex;
+            opacity: 1;
+            pointer-events: all;
+            transition: width @time-slow, opacity @time-slow;
+            width: 100%;
         }
     }
 }

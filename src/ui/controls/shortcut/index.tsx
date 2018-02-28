@@ -52,11 +52,12 @@ export default function ShortcutLink(props: ShortcutLinkProps) {
     }
 
     return (
-        <label
+        <a
             class={cls}
+            href="#"
             native
             didmount={setupText}
             onclick={onClick}
-        ></label>
+        ></a>
     );
 }

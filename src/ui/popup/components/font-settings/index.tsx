@@ -4,7 +4,7 @@ import {Extension} from '../../../../definitions';
 
 export default function FontSettings({ext}: {ext: Extension}) {
     return (
-        <div class="font-settings">
+        <section class="font-settings">
             <div class="font-settings__font-select-container">
                 <div class="font-settings__font-select-container__line">
                     <CheckBox
@@ -37,6 +37,6 @@ export default function FontSettings({ext}: {ext: Extension}) {
                 name="Text stroke"
                 onChange={(value) => ext.setConfig({textStroke: value})}
             />
-        </div>
+        </section>
     );
 }

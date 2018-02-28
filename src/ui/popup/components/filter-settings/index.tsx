@@ -54,12 +54,12 @@ export default function FilterSettings({ext}: {ext: Extension}) {
     );
 
     return (
-        <div class="filter-settings">
+        <section class="filter-settings">
             <ModeToggle ext={ext} />
             {brightness}
             {contrast}
             {grayscale}
             {sepia}
-        </div>
+        </section>
     );
 }

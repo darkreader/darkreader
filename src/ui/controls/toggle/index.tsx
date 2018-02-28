@@ -2,6 +2,7 @@ import {html} from 'malevic';
 
 interface ToggleProps {
     checked: boolean;
+    class?: string;
     labelOn: string;
     labelOff: string;
     onChange: (checked: boolean) => void;
@@ -28,7 +29,7 @@ export default function Toggle(props: ToggleProps) {
     };
 
     return (
-        <span class={cls}>
+        <span class={[cls, props.class]}>
             <span
                 class={clsOn}
                 onclick={onChange ? () => !checked && onChange(true) : null}

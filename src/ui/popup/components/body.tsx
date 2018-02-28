@@ -1,5 +1,6 @@
 import {html} from 'malevic';
 import withForms from 'malevic/forms';
+import withState from 'malevic/state';
 import {TabPanel, Button, CheckBox} from '../../controls';
 import TopSection from './top-section';
 import FilterSettings from './filter-settings';
@@ -11,11 +12,16 @@ withForms();
 
 interface BodyProps {
     ext: Extension;
-    activeTab: string;
-    onSwitchTab: (tabName: string) => void;
+    state: BodyState;
+    setState: (state: BodyState) => void;
 }
 
-export default function Body(props: BodyProps) {
+interface BodyState {
+    activeTab?: string;
+}
+
+function Body(props: BodyProps) {
+    const {state, setState} = props;
     return (
         <body class={{'ext-disabled': !props.ext.enabled}}>
             <header>
@@ -24,8 +30,8 @@ export default function Body(props: BodyProps) {
             </header>
 
             <TabPanel
-                activeTab={props.activeTab || 'Filter'}
-                onSwitchTab={props.onSwitchTab}
+                activeTab={state.activeTab || 'Filter'}
+                onSwitchTab={(tab) => setState({activeTab: tab})}
                 tabs={{
                     'Filter': (
                         <FilterSettings ext={props.ext} />
@@ -34,7 +40,7 @@ export default function Body(props: BodyProps) {
                         <FontSettings ext={props.ext} />
                     ),
                     'Site list': (
-                        <SiteListSettings ext={props.ext} />
+                        <SiteListSettings ext={props.ext} isFocused={state.activeTab === 'Site list'} />
                     )
                 }}
             />
@@ -51,3 +57,5 @@ export default function Body(props: BodyProps) {
         </body>
     );
 }
+
+export default withState(Body);

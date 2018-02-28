@@ -1,0 +1,18 @@
+.text-list {
+    display: flex;
+    flex-direction: column;
+    overflow-x: hidden;
+    overflow-y: auto;
+
+    &__textbox {
+        flex: none;
+
+        &:not(:first-child) {
+            border-top: none;
+        }
+
+        &:not(:last-child) {
+            border-bottom: @size-border-inner solid @color-border;
+        }
+    }
+}

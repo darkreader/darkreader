@@ -27,26 +27,13 @@ if (!extension) {
     extension = createExtensionMock();
 }
 
-let state: PopupState = null;
-
 function renderBody() {
     sync(document.body, (
-        <Body
-            ext={extension}
-            activeTab={state.activeTab}
-            onSwitchTab={(tab) => setState({activeTab: tab})}
-        />
+        <Body ext={extension} />
     ));
 }
 
-function setState(newState: PopupState) {
-    state = {...state, ...newState};
-    renderBody();
-}
-
-setState({
-    activeTab: null
-});
+renderBody();
 
 extension.addListener(renderBody);
 window.addEventListener('unload', (e) => {

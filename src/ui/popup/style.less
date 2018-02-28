@@ -11,9 +11,9 @@ html {
 
 @import "./components/filter-settings/style";
 @import "./components/font-settings/style";
+@import "./components/header/style";
 @import "./components/site-list-settings/style";
 @import "./components/site-toggle/style";
-@import "./components/top-section/style";
 
 body {
     align-items: stretch;
@@ -28,18 +28,8 @@ body {
     }
 }
 
-header {
+.header {
     flex: none;
-    width: 100%;
-
-    > :not(:first-child) {
-        margin-top: @indent-small;
-    }
-}
-
-#logo {
-    display: inline-block;
-    width: @popup-content-width;
 }
 
 .tab-panel {
@@ -64,7 +54,7 @@ footer {
         opacity: 1;
     }
 
-    #site-toggle-container,
+    .header__site-toggle,
     .tab-panel {
         opacity: 0.5;
         pointer-events: none;

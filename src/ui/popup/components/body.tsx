@@ -2,7 +2,7 @@ import {html} from 'malevic';
 import withForms from 'malevic/forms';
 import withState from 'malevic/state';
 import {TabPanel, Button, CheckBox} from '../../controls';
-import TopSection from './top-section';
+import Header from './header';
 import FilterSettings from './filter-settings';
 import FontSettings from './font-settings';
 import SiteListSettings from './site-list-settings';
@@ -24,10 +24,7 @@ function Body(props: BodyProps) {
     const {state, setState} = props;
     return (
         <body class={{'ext-disabled': !props.ext.enabled}}>
-            <header>
-                <img id="logo" src="../assets/images/dark-reader-type.svg" alt="Dark Reader" />
-                <TopSection ext={props.ext} />
-            </header>
+            <Header ext={props.ext} />
 
             <TabPanel
                 activeTab={state.activeTab || 'Filter'}

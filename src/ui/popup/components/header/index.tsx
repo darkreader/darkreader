@@ -18,8 +18,9 @@ export default function TopSection({ext}: {ext: Extension}) {
     }
 
     return (
-        <section class="top-section">
-            <div class="top-section__control" id="site-toggle-container">
+        <header class="header">
+            <img class="header__logo" src="../assets/images/dark-reader-type.svg" alt="Dark Reader" />
+            <div class="header__control header__site-toggle">
                 <SiteToggle
                     ext={ext}
                 />
@@ -38,7 +39,7 @@ export default function TopSection({ext}: {ext: Extension}) {
                         </span>
                     )}
             </div>
-            <div class="top-section__control">
+            <div class="header__control header__app-toggle">
                 <Toggle checked={ext.enabled} labelOn="On" labelOff="Off" onChange={toggleExtension} />
                 <Shortcut
                     commandName="toggle"
@@ -48,6 +49,6 @@ export default function TopSection({ext}: {ext: Extension}) {
                     )}
                 />
             </div>
-        </section>
+        </header>
     );
 }

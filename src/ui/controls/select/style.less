@@ -54,12 +54,22 @@
         border-left: @size-border solid @color-border;
         border-right: @size-border solid @color-border;
         box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
         left: 0;
-        max-height: 16rem;
+        max-height: 0;
+        overflow-x: hidden;
+        overflow-y: auto;
         position: absolute;
         top: ~"calc(100% - @{size-border})";
+        transition: max-height @time-fast;
         width: 100%;
         z-index: 999;
+
+        &--expanded {
+            max-height: 16rem;
+            transition: max-height @time-slow * 2;
+        }
     }
 
     &__option {
@@ -67,6 +77,7 @@
         background-color: @color-control-back;
         cursor: pointer;
         display: flex;
+        flex: none;
         height: @size-control-inner;
         flex-direction: row;
         padding-left: @size-control-inner / 2 - @size-text-normal / 2;

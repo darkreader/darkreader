@@ -1,4 +1,5 @@
-import {html, sync} from 'malevic';
+import {html, sync, getData} from 'malevic';
+import withState from 'malevic/state';
 import Row from '../row';
 import Col from '../col';
 import Button from '../button';
@@ -10,10 +11,16 @@ interface SelectProps {
         [value: string]: Malevic.NodeDeclaration;
     };
     onChange: (value: string) => void;
+    state?: SelectState;
+    setState?: (state: SelectState) => void;
 }
 
-export default function Select(props: SelectProps) {
+interface SelectState {
+    isExpanded?: boolean;
+}
 
+function Select(props: SelectProps) {
+    const {state, setState} = props;
     const values = Object.keys(props.options);
 
     function onTextInput(e: Event) {
@@ -32,60 +39,30 @@ export default function Select(props: SelectProps) {
         });
     }
 
-    let listDOMNode: HTMLElement;
-
-    function saveListDOMNode(node) {
-        listDOMNode = node;
-    }
-
     function scrollToValue(value: string) {
-        listDOMNode
-            .querySelector(`.select__option[data-value="${value}"]`)
-            .scrollIntoView(true);
+        if (valueNodes.has(value)) {
+            valueNodes.get(value).scrollIntoView(true)
+        }
     }
 
     function expandList() {
-        if (listDOMNode.classList.contains('select__list--expanded')) {
+        if (state.isExpanded) {
             return;
         }
 
-        listDOMNode.classList.add('select__list--expanded');
-        if (listDOMNode.childElementCount === 0) {
-            renderOptions();
-        } else {
-            scrollToValue(props.value);
-        }
-
-        function onOuterClick() {
-            window.removeEventListener('click', onOuterClick);
-            collapseList();
-        }
-
-        window.addEventListener('click', onOuterClick);
-    }
-
-    function renderOptions() {
-        listDOMNode.classList.add('select__list--loading');
-
+        scrollToValue(props.value);
+        setState({isExpanded: true});
         requestAnimationFrame(() => {
-            const fragment = document.createDocumentFragment();
-            values.forEach((value) => {
-                const item = sync(document.createElement('span'), (
-                    <span class="select__option" data-value={value}>
-                        {props.options[value]}
-                    </span>
-                ));
-                fragment.appendChild(item);
-            });
-            listDOMNode.appendChild(fragment);
-
-            listDOMNode.classList.remove('select__list--loading');
-            scrollToValue(props.value);
+            function onOuterClick() {
+                window.removeEventListener('click', onOuterClick);
+                collapseList();
+            }
+            window.addEventListener('click', onOuterClick);
         });
     }
 
     function collapseList() {
-        listDOMNode.classList.remove('select__list--expanded');
+        setState({isExpanded: false});
     }
 
     function onSelectOption(e: MouseEvent) {
@@ -93,11 +70,21 @@ export default function Select(props: SelectProps) {
         while (!current.matches('.select__option')) {
             current = current.parentElement;
         }
-        const value = current.dataset['value'];
+        const value = getData(current);
 
         props.onChange(value);
 
         collapseList();
+    }
+
+    const valueNodes = new Map<string, Element>();
+
+    function saveValueNode(value, domNode) {
+        valueNodes.set(value, domNode);
+    }
+
+    function removeValueNode(value) {
+        valueNodes.delete(value);
     }
 
     return (
@@ -116,11 +103,26 @@ export default function Select(props: SelectProps) {
                 </Button>
             </span>
             <span
-                class="select__list"
-                native
-                didmount={saveListDOMNode}
-                didupdate={saveListDOMNode}
-            ></span>
+                class={{
+                    'select__list': true,
+                    'select__list--expanded': state.isExpanded,
+                }}
+                onclick={onSelectOption}
+            >
+                {Object.entries(props.options).map(([value, content]) => (
+                    <span
+                        class="select__option"
+                        data={value}
+                        didmount={(domNode) => saveValueNode(value, domNode)}
+                        didupdate={(domNode) => saveValueNode(value, domNode)}
+                        willunmount={() => removeValueNode(value)}
+                    >
+                        {content}
+                    </span>
+                ))}
+            </span>
         </span>
     );
 }
+
+export default withState(Select);

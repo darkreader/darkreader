@@ -9,6 +9,9 @@ interface PopupState {
 }
 
 // Edge fix
+if (!window.chrome) {
+    window.chrome = {} as any;
+}
 if (chrome && !chrome.extension && (window as any).browser && (window as any).browser.extension) {
     chrome.extension = (window as any).browser.extension;
 }

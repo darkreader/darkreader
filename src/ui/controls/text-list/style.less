@@ -1,3 +1,5 @@
+@import "../../theme";
+
 .text-list {
     display: flex;
     flex-direction: column;
@@ -13,6 +15,14 @@
 
         &:not(:last-child) {
             border-bottom: @size-border-inner solid @color-border;
+        }
+    }
+
+    &::-webkit-scrollbar {
+        width: @size-scrollbar-thickness + @indent-small;
+
+        &-thumb {
+            border-left: @indent-small solid @color-back;
         }
     }
 }

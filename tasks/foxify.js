@@ -1,5 +1,5 @@
 const fs = require('fs-extra');
-const { getDestDir } = require('./paths');
+const {getDestDir} = require('./paths');
 
 function replace(str, find, replace) {
     return str.split(find).join(replace);
@@ -7,8 +7,8 @@ function replace(str, find, replace) {
 
 module.exports = function createFoxifyTask(gulp) {
     gulp.task('foxify', async () => {
-        const buildDir = getDestDir({ production: true });
-        const firefoxDir = getDestDir({ production: true, firefox: true });
+        const buildDir = getDestDir({production: true});
+        const firefoxDir = getDestDir({production: true, firefox: true});
 
         // Copy files
         await fs.copy(buildDir, firefoxDir);
@@ -17,7 +17,7 @@ module.exports = function createFoxifyTask(gulp) {
         const manifest = await fs.readJson('src/manifest.json');
         const patch = await fs.readJson('src/manifest_firefox.json');
         const patched = Object.assign({}, manifest, patch);
-        await fs.writeJson(`${firefoxDir}/manifest.json`, patched, { spaces: 4 });
+        await fs.writeJson(`${firefoxDir}/manifest.json`, patched, {spaces: 4});
 
         // Prevent Firefox warnings for unsupported API
         const backgroundJsPath = `${firefoxDir}/background/index.js`;

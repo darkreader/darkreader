@@ -19,7 +19,7 @@ export default function TopSection({ext}: {ext: Extension}) {
 
     return (
         <header class="header">
-            <img class="header__logo" src="../assets/images/dark-reader-type.svg" alt="Dark Reader" />
+            <img class="header__logo" src="../assets/images/darkreader-type.svg" alt="Dark Reader" />
             <div class="header__control header__site-toggle">
                 <SiteToggle
                     ext={ext}

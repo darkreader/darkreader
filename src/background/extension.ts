@@ -1,4 +1,5 @@
-import { configStore, isUrlInList, DEBUG, formatJson, copyJson, handleInversionFixes } from './config_management'
+import {configStore, isUrlInList, DEBUG, copyJson, handleInversionFixes} from './config_management';
+import {formatJson} from '../config/utils';
 import { FilterCssGenerator, FilterMode } from './filter_css_generator';
 import { FilterConfig, TabInfo } from '../definitions';
 

@@ -1,4 +1,4 @@
-const { getDestDir } = require('./paths');
+const {getDestDir} = require('./paths');
 
 module.exports = function createCopyTasks(gulp) {
     const files = [
@@ -11,12 +11,12 @@ module.exports = function createCopyTasks(gulp) {
     ];
 
     gulp.task('copy-release', () => {
-        gulp.src(files, { base: 'src', cwd: 'src' })
-            .pipe(gulp.dest(getDestDir({ production: true })));
+        gulp.src(files, {base: 'src', cwd: 'src'})
+            .pipe(gulp.dest(getDestDir({production: true})));
     });
 
     gulp.task('copy-debug', () => {
-        gulp.src(files, { base: 'src', cwd: 'src' })
-            .pipe(gulp.dest(getDestDir({ production: false })));
+        gulp.src(files, {base: 'src', cwd: 'src'})
+            .pipe(gulp.dest(getDestDir({production: false})));
     });
 };

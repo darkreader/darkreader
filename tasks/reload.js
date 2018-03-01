@@ -1,5 +1,5 @@
 const http = require('http');
-const { logError, logInfo, logWarn } = require('./utils');
+const {logError, logInfo, logWarn} = require('./utils');
 
 module.exports = function createReloadTask(gulp) {
     gulp.task('reload', (done) => {

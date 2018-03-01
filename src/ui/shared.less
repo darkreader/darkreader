@@ -14,6 +14,13 @@
     font-style: normal;
 }
 
+@font-face {
+    font-family: 'Open Sans';
+    src: url('../assets/fonts/OpenSans-Light.ttf') format('truetype');
+    font-weight: 100;
+    font-style: normal;
+}
+
 @import "./controls/style";
 
 html {
@@ -46,12 +53,16 @@ input, button {
         background-color: @color-control-hover;
 
         &:hover {
-            background-color: lighten(@color-control-hover, 2%);
+            background-color: mix(@color-control-hover, @color-control-active, 50%);
         }
 
         &:active {
             background-color: @color-control-active;
         }
+    }
+
+    &-corner {
+        background-color: @color-back;
     }
 }
 

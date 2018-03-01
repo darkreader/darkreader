@@ -1,6 +1,29 @@
 import {Extension, FilterConfig, TabInfo} from '../../definitions';
 
-export default function createExtensionMock() {
+export function getExtension() {
+    // Edge fix
+    if (!window.chrome) {
+        window.chrome = {} as any;
+    }
+    if (chrome && !chrome.extension && (window as any).browser && (window as any).browser.extension) {
+        chrome.extension = (window as any).browser.extension;
+    }
+
+    let extension: Extension;
+    if (chrome.extension) {
+        const bgPage = chrome.extension.getBackgroundPage() as any;
+        if (bgPage) {
+            extension = bgPage.DarkReader.Background.extension;
+        }
+    }
+    if (!extension) {
+        extension = createExtensionMock();
+    }
+
+    return extension;
+}
+
+export function createExtensionMock() {
     let listener: () => void = null;
     const extension: Extension = {
         enabled: true,
@@ -56,6 +79,9 @@ export default function createExtensionMock() {
                 extension.config.siteList.push('darkreader.org');
             listener();
         },
+        getDevInversionFixesText() {
+            return `${JSON.stringify({common: {invert: 'img, iframe'}, sites: [{url: 'google.*', invert: '.icon'}]}, null, 4)}\n`;
+        }
     };
     return extension;
 }

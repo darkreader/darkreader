@@ -20,6 +20,15 @@ interface BodyState {
     activeTab?: string;
 }
 
+function openDevTools() {
+    chrome.windows.create({
+        type: 'panel',
+        url: 'ui/devtools/index.html',
+        width: 600,
+        height: 600,
+    });
+}
+
 function Body(props: BodyProps) {
     const {state, setState} = props;
     return (
@@ -47,7 +56,7 @@ function Body(props: BodyProps) {
                     Some things should not be inverted?<br />
                     You can <strong>help and fix it</strong>, here is a tool
                 </p>
-                <Button onClick={() => {}}>
+                <Button onclick={openDevTools}>
                     🛠 Open developer tools
                 </Button>
             </footer>

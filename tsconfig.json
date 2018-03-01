@@ -9,6 +9,7 @@
             "es2017",
             "dom"
         ],
+        "allowJs": true,
         "jsx": "react",
         "jsxFactory": "html"
     },

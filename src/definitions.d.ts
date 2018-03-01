@@ -11,6 +11,7 @@ export interface Extension {
     removeListener(callback: () => void);
     getActiveTabInfo(callback: (info: TabInfo) => void);
     toggleCurrentSite();
+    getDevInversionFixesText(): string;
 }
 
 export interface FilterConfig {

@@ -434,10 +434,6 @@ export const configStore: {
         return [];
     }
 
-    export function formatJson(obj) {
-        return JSON.stringify(obj, null, 4) + '\n';
-    }
-
     export function copyJson(obj) {
         return JSON.parse(JSON.stringify(obj));
     }

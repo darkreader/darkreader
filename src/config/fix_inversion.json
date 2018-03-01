@@ -46,6 +46,10 @@
             ]
         },
         {
+            "url": "bart.gov/schedules",
+            "noinvert": "img"
+        },
+        {
             "url": "basho.com",
             "invert": [
                 "#site-navigation, footer, header, .featured-news-wrapper",
@@ -189,6 +193,10 @@
             "rules": "._2s1x ._2s1y { background: #9BB5E8 !important; color: black !important; border-bottom-color: #92A6CA !important; }"
         },
         {
+            "url": "farside.ph.utexas.edu",
+            "noinvert": "img"
+        },
+        {
             "url": "feedly.com",
             "invert": [
                 ".landing-old .dark",
@@ -247,6 +255,7 @@
             ],
             "noinvert": [
                 ".irc_mi, .irc_rii, .irc_mut, .act-icon-dark-gray, .amI, .amJ, .adk, .adj, [src*='ic_'], [src*='black']",
+                ".mL, .ajT, .hB, .hA, .mK, .mI",
                 "input[style*='data:image']",
                 "img[src*='/books/content?']"
             ],
@@ -258,6 +267,34 @@
         {
             "url": "granttree.co.uk",
             "invert": "img, iframe, video, embed, .photo"
+        },
+        {
+            "url": "habitica.com",
+            "invert": [
+                "nav.navbar",
+                "#app-header",
+                ".header",
+                ".quest-boss",
+                ".character-sprites",
+                ".item-content",
+                ".drawer-container .item",
+                ".npc_matt",
+                ".npc",
+                ".seasonal .background",
+                ".image",
+                ".habitica-emoji",
+                ".daniel_front",
+                ".world-boss",
+                ".dropdown-menu",
+                ".dropdown-menu .notification",
+                ".fade.show",
+                ".modal-content",
+                ".drawer-container"
+            ],
+            "noinvert": [
+                "#app-header .character-sprites",
+                ".seasonal .background .npc"
+            ]
         },
         {
             "url": "hysterical-amusement.surge.sh",
@@ -467,6 +504,18 @@
             "invert": ".__sprite"
         },
         {
+            "url": "nodejs.org",
+            "invert": [
+                "#column2",
+                "footer",
+                "header"
+            ],
+            "rules": [
+                "div#column2.interior { background: #212121; }",
+                "#column2 ul { background-color: #212121; }"
+            ]
+        },
+        {
             "url": "nvidia.com",
             "invert": ".sub-brand-nav, .brandLink"
         },
@@ -488,6 +537,10 @@
                 "code.ace"
             ],
             "noinvert": "[class*=ace] *"
+        },
+        {
+            "url": "otakumode.com",
+            "invert": ".c-slick-image-viewer__main-image img"
         },
         {
             "url": "outlook.live.com",
@@ -539,10 +592,16 @@
             "invert": ".gatsby-highlight, .css-mlkfzr, .css-17t02fm"
         },
         {
-            "url": "reddit.com",
+            "url": [
+                "reddit.com/r/GlobalOffensive"
+            ],
             "invert": "#header, .side",
             "noinvert": "#header *, .side *",
             "rules": "#mail::before { display: none !important; }"
+        },
+        {
+            "url": "reddit.com/r/europe",
+            "invert": ".flair"
         },
         {
             "url": [
@@ -607,6 +666,10 @@
             "rules": "#hlogo a { text-indent: -256em !important; }"
         },
         {
+            "url": "terrytao.wordpress.com",
+            "noinvert": "img"
+        },
+        {
             "url": "tpondemand.com",
             "invert": [
                 ".tau-cover-view__overlay, .tau-app-secondary-pane, .app-header, .uv-popover-content"
@@ -636,10 +699,14 @@
             "url": "twitch.tv",
             "invert": [
                 "#site_footer, #carousel_background::after, #left_col, .player, .badge",
-                ".social-column, .top-nav"
+                ".social-column, .top-nav",
+                ".anon-front__featured-section",
+                ".side-nav, .footer"
             ],
             "noinvert": [
-                ".player *, .social-column *, .top-nav *"
+                ".player *, .social-column *, .top-nav *",
+                ".anon-front__featured-section *",
+                ".side-nav *, .footer *"
             ],
             "removebg": [
                 "#carousel, .chat-container, .conversations-list-header",
@@ -766,7 +833,7 @@
         {
             "url": "wolfram.com",
             "noinvert": [
-                ".numberedequation, .displayformula"
+                ".numberedequation, .displayformula, .inlineformula"
             ]
         },
         {

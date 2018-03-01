@@ -15,7 +15,7 @@ module.exports = function createFoxifyTask(gulp) {
 
         // Patch manifest with Firefox values
         const manifest = await fs.readJson('src/manifest.json');
-        const patch = await fs.readJson('src/manifest_firefox.json');
+        const patch = await fs.readJson('src/manifest-firefox.json');
         const patched = Object.assign({}, manifest, patch);
         await fs.writeJson(`${firefoxDir}/manifest.json`, patched, {spaces: 4});
 

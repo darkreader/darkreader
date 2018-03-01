@@ -6,7 +6,7 @@
         }
     },
     "background": {
-        "page": "background/background.html"
+        "page": "background/index.html"
     },
     "permissions": [
         "storage",

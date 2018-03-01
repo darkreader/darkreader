@@ -21,9 +21,10 @@ interface BodyState {
 }
 
 function openDevTools() {
+    const isFirefox = navigator.userAgent.indexOf('Firefox') >= 0;
     chrome.windows.create({
         type: 'panel',
-        url: 'ui/devtools/index.html',
+        url: isFirefox ? '../devtools/index.html' : 'ui/devtools/index.html',
         width: 600,
         height: 600,
     });

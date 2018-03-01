@@ -1,7 +1,7 @@
 ﻿{
     "manifest_version": 2,
     "name": "Dark Reader",
-    "version": "3.5.3",
+    "version": "3.5.4",
     "author": "Alexander Shutov",
     "description": "Dark theme for every website. Care your eyes, use Dark Reader for night and daily browsing.",
     "browser_action": {

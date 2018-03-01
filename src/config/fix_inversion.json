@@ -46,6 +46,10 @@
             ]
         },
         {
+            "url": "bart.gov/schedules",
+            "noinvert": "img"
+        },
+        {
             "url": "basho.com",
             "invert": [
                 "#site-navigation, footer, header, .featured-news-wrapper",

@@ -19,7 +19,7 @@
   },
   "homepage": "http://darkreader.org/",
   "dependencies": {
-    "malevic": "0.11.2"
+    "malevic": "0.11.3"
   },
   "devDependencies": {
     "@types/chrome": "0.0.59",
@@ -36,6 +36,7 @@
     "rollup-plugin-node-resolve": "3.0.3",
     "rollup-plugin-typescript": "0.8.1",
     "run-sequence": "2.2.1",
+    "ts-node": "5.0.0",
     "typescript": "2.7.2"
   }
 }

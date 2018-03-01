@@ -1,4 +1,4 @@
-import { FilterConfig } from './filter_css_generator';
+import {FilterConfig} from '../definitions';
 
 export const configStore: {
     DEFAULT_FILTER_CONFIG?: FilterConfig;

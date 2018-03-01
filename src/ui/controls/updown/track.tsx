@@ -10,7 +10,7 @@ export default function Track(props: TrackProps) {
 
     return (
         <span class="track">
-            <span class="track__value" style={valueStyle}>&nbsp;</span>
+            <span class="track__value" style={valueStyle}></span>
             <label class="track__label">
                 {props.label}
             </label>

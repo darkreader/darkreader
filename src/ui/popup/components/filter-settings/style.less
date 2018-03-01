@@ -1,0 +1,61 @@
+@import "../../../theme";
+
+.filter-settings {
+    align-items: stretch;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+
+    > :not(:first-child) {
+        margin-top: @indent-small;
+    }
+}
+
+.mode-toggle {
+    align-items: stretch;
+    display: flex;
+    flex-direction: column;
+    -moz-user-select: none;
+    user-select: none;
+
+    &__line {
+        display: flex;
+        flex-direction: row;
+
+        > :not(:first-child) {
+            margin-left: @indent-small;
+        }
+    }
+
+    .toggle {
+        flex: auto;
+    }
+
+    &__label {
+        font-size: @size-text-small;
+        text-align: center;
+    }
+
+    &__button--active {
+        background: @color-control-active;
+
+        &:hover {
+            background: @color-control-active;
+        }
+    }
+}
+
+.icon {
+    background-size: contain;
+    display: inline-block;
+    height: 100%;
+    width: 100%;
+}
+
+.icon--dark-mode {
+    background-image: url(../assets/images/mode-dark-32.svg);
+}
+
+.icon--light-mode {
+    background-image: url(../assets/images/mode-light-32.svg);
+}

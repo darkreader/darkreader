@@ -1,0 +1,72 @@
+@import "./theme.less";
+
+@font-face {
+    font-family: 'Open Sans';
+    src: url('../assets/fonts/OpenSans-Regular.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Open Sans';
+    src: url('../assets/fonts/OpenSans-SemiBold.ttf') format('truetype');
+    font-weight: bold;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Open Sans';
+    src: url('../assets/fonts/OpenSans-Light.ttf') format('truetype');
+    font-weight: 100;
+    font-style: normal;
+}
+
+@import "./controls/style";
+
+html {
+    background-color: @color-back;
+    color: @color-fore;
+    font-family: @font-family;
+    font-size: 16px;
+}
+
+body {
+    font-family: @font-family;
+    font-size: @size-text-normal;
+}
+
+input, button {
+    font-family: @font-family;
+    font-size: @size-text-normal;
+}
+
+::-moz-selection {
+    background-color: @color-selection-back;
+    color: @color-selection-fore;
+}
+
+::selection {
+    background-color: @color-selection-back;
+    color: @color-selection-fore;
+}
+
+::-webkit-scrollbar {
+    background-color: @color-back;
+    width: @size-scrollbar-thickness;
+
+    &-thumb {
+        background-color: @color-control-hover;
+
+        &:hover {
+            background-color: mix(@color-control-hover, @color-control-active, 50%);
+        }
+
+        &:active {
+            background-color: @color-control-active;
+        }
+    }
+
+    &-corner {
+        background-color: @color-back;
+    }
+}

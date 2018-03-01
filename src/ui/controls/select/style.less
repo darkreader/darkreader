@@ -1,0 +1,91 @@
+@import "../../theme";
+
+.select {
+    display: inline-flex;
+    flex-direction: column;
+    position: relative;
+
+    &__line {
+        display: inline-flex;
+        flex-direction: row;
+    }
+
+    &__textbox.textbox {
+        border-right: none;
+        flex: auto;
+        width: 100%;
+    }
+
+    &__expand {
+        border-left: none;
+        flex: none;
+
+        &__icon {
+            display: inline-block;
+            height: 100%;
+            position: relative;
+            width: 100%;
+
+            &::before,
+            &::after {
+                background-color: @color-control-fore;
+                content: "";
+                display: inline-block;
+                height: @size-control-inner * 0.125;
+                position: absolute;
+                top: @size-control-inner * 0.5;
+                width: @size-control-inner * 0.375;
+                z-index: 1;
+            }
+
+            &::before {
+                left: @size-control-inner * 0.125;
+                transform: skewY(45deg);
+            }
+
+            &::after {
+                left: @size-control-inner * 0.5;
+                transform: skewY(-45deg);
+            }
+        }
+    }
+
+    &__list {
+        border-bottom: @size-border solid @color-border;
+        border-left: @size-border solid @color-border;
+        border-right: @size-border solid @color-border;
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+        left: 0;
+        max-height: 0;
+        overflow-x: hidden;
+        overflow-y: auto;
+        position: absolute;
+        top: ~"calc(100% - @{size-border})";
+        transition: max-height @time-fast;
+        width: 100%;
+        z-index: 999;
+
+        &--expanded {
+            max-height: 12rem;
+            transition: max-height @time-slow * 2;
+        }
+    }
+
+    &__option {
+        align-items: center;
+        background-color: @color-control-back;
+        cursor: pointer;
+        display: flex;
+        flex: none;
+        height: @size-control-inner;
+        flex-direction: row;
+        padding-left: @size-control-inner / 2 - @size-text-normal / 2;
+
+        &:hover,
+        &:focus {
+            background-color: @color-control-hover;
+        }
+    }
+}

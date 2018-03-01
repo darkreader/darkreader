@@ -1,38 +1,13 @@
-﻿module DarkReader {
-
-    export interface FilterConfig {
-        mode: FilterMode;
-        brightness: number;
-        contrast: number;
-        grayscale: number;
-        sepia: number;
-        useFont: boolean;
-        fontFamily: string;
-        textStroke: number;
-        siteList: string[];
-        invertListed: boolean;
-
-        // OBSOLETE
-        //usefont: boolean;
-        //fontfamily: string;
-        //textstroke: number;
-        //ignorelist: string[];
-    }
-
-    export interface ObsoleteFilterConfig {
-        usefont: boolean;
-        fontfamily: string;
-        textstroke: number;
-        ignorelist: string[];
-    }
+import { isUrlInList, configStore, getFixesFor, InversionFix } from './config_management';
+import { FilterConfig } from '../definitions';
 
     export enum FilterMode {
         light = 0,
         dark = 1
     }
 
-    export var DEFAULT_FILTER_CONFIG: DarkReader.FilterConfig = {
-        mode: DarkReader.FilterMode.dark,
+    export const DEFAULT_FILTER_CONFIG: FilterConfig = {
+        mode: FilterMode.dark,
         brightness: 110,
         contrast: 90,
         grayscale: 20,
@@ -72,6 +47,7 @@
          * @param url Web-site address.
          */
         createCssCode(config: FilterConfig, url: string): string {
+            const { DARK_SITES } = configStore;
             const isUrlInDarkList = isUrlInList(url, DARK_SITES);
             const isUrlInUserList = isUrlInList(url, config.siteList);
 
@@ -274,4 +250,3 @@
         }
         return result;
     }
-}

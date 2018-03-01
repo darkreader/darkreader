@@ -3,8 +3,8 @@
   "version": "3.5.4",
   "description": "Dark theme for every website",
   "scripts": {
-    "debug": "grunt debug && grunt debug-watch",
-    "release": "npm test && grunt release",
+    "debug": "gulp debug",
+    "release": "npm test && gulp release",
     "test": "node src/config/validate.js"
   },
   "private": true,
@@ -12,33 +12,32 @@
     "type": "git",
     "url": "https://github.com/alexanderby/darkreader.git"
   },
-  "keywords": [
-    "dark",
-    "reader",
-    "chrome",
-    "extension",
-    "eye",
-    "care",
-    "invert",
-    "colors",
-    "high",
-    "contrast"
-  ],
   "author": "Alexander Shutov <shutovby@gmail.com> (http://shutov.by/)",
-  "license": "ISC",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/alexanderby/darkreader/issues"
   },
-  "homepage": "https://github.com/alexanderby/darkreader",
+  "homepage": "http://darkreader.org/",
+  "dependencies": {
+    "malevic": "0.11.4"
+  },
   "devDependencies": {
-    "create-grunt-tasks": "^0.8.0",
-    "grunt": "^0.4.5",
-    "grunt-concurrent": "^2.0.0",
-    "grunt-contrib-clean": "^0.6.0",
-    "grunt-contrib-copy": "^0.8.0",
-    "grunt-contrib-less": "^1.0.1",
-    "grunt-contrib-watch": "^0.6.1",
-    "grunt-typescript": "^0.6.2",
-    "grunt-zip": "^0.17.1"
+    "@types/chrome": "0.0.59",
+    "fancy-log": "1.3.2",
+    "fs-extra": "5.0.0",
+    "gulp": "3.9.1",
+    "gulp-connect": "5.5.0",
+    "gulp-less": "3.5.0",
+    "gulp-rename": "1.2.2",
+    "gulp-sourcemaps": "2.6.4",
+    "gulp-zip": "4.1.0",
+    "merge-stream": "1.0.1",
+    "rollup": "0.56.2",
+    "rollup-plugin-commonjs": "8.3.0",
+    "rollup-plugin-node-resolve": "3.0.3",
+    "rollup-plugin-typescript": "0.8.1",
+    "run-sequence": "2.2.1",
+    "ts-node": "5.0.0",
+    "typescript": "2.7.2"
   }
 }

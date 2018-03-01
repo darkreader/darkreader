@@ -1,0 +1,67 @@
+@import "../../theme";
+
+.checkbox {
+    background-color: @color-control-back;
+    border: @size-border solid @color-border;
+    cursor: pointer;
+    display: inline-block;
+    flex: none;
+    height: @size-control-inner;
+    transition: background-color @time-slow;
+    width: @size-control-inner;
+
+    &:hover,
+    &:focus {
+        background-color: @color-control-hover;
+        transition: background-color @time-fast;
+    }
+
+    &__input {
+        display: none;
+    }
+
+    &__checkmark {
+        display: inline-block;
+        height: 100%;
+        position: relative;
+        width: 100%;
+
+        &::before,
+        &::after {
+            background-color: @color-control-fore-inactive;
+            content: "";
+            display: inline-block;
+            height: @size-control-inner * 0.125;
+            left: @size-control-inner * 0.125;
+            position: absolute;
+            top: @size-control-inner * 0.425;
+            transition: all @time-fast;
+            width: @size-control-inner * 0.75;
+        }
+
+        &::before {
+            transform: skewY(45deg);
+        }
+
+        &::after {
+            transform: skewY(-45deg);
+        }
+    }
+
+    &__input:checked + &__checkmark {
+        &::before,
+        &::after {
+            background-color: @color-control-fore;
+        }
+
+        &::before {
+            top: @size-control-inner * 0.55;
+            width: @size-control-inner * 0.25;
+        }
+
+        &::after {
+            left: @size-control-inner * 0.375;
+            width: @size-control-inner * 0.5;
+        }
+    }
+}

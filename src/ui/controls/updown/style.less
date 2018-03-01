@@ -1,0 +1,116 @@
+@import "../../theme";
+
+.updown {
+    align-items: stretch;
+    display: flex;
+    flex-direction: column;
+    -moz-user-select: none;
+    user-select: none;
+
+    &__line {
+        display: flex;
+        flex-direction: row;
+
+        > :not(:first-child) {
+            margin-left: @indent-small;
+        }
+    }
+
+    &__icon {
+        display: inline-block;
+        height: 100%;
+        position: relative;
+        width: 100%;
+
+        &::before,
+        &::after {
+            background-color: @color-control-fore;
+            content: "";
+            display: inline-block;
+            height: @size-control-inner * 0.375;
+            position: absolute;
+            width: @size-control-inner * 0.125;
+        }
+
+        &::before {
+            top: @size-control-inner * 0.125;
+        }
+
+        &::after {
+            top: @size-control-inner * 0.5;
+        }
+    }
+
+    &__icon-up {
+        &::before {
+            left: @size-control-inner * 0.5;
+            transform: skewX(45deg);
+        }
+        &::after {
+            left: @size-control-inner * 0.5;
+            transform: skewX(-45deg);
+        }
+    }
+
+    &__icon-down {
+        &::before {
+            left: @size-control-inner * 0.375;
+            transform: skewX(-45deg);
+        }
+        &::after {
+            left: @size-control-inner * 0.375;
+            transform: skewX(45deg);
+        }
+    }
+
+    &__button--disabled {
+        pointer-events: none;
+    }
+
+    &__button--disabled &__icon {
+        &::before,
+        &::after {
+            background-color: @color-control-fore-inactive;
+        }
+    }
+
+    &__value-text {
+        font-size: @size-text-small;
+        text-align: center;
+        white-space: nowrap;
+    }
+}
+
+.track {
+    align-items: center;
+    background-color: @color-control-back;
+    border: @size-border solid @color-border;
+    box-sizing: content-box;
+    display: inline-flex;
+    flex: auto;
+    flex-direction: row;
+    height: @size-control-inner;
+    justify-content: center;
+    overflow: hidden;
+    position: relative;
+    -moz-user-select: none;
+    user-select: none;
+
+    &__value {
+        background-color: @color-control-active;
+        height: 100%;
+        left: 0;
+        position: absolute;
+        top: 0;
+        transition: width @time-fast;
+    }
+
+    &__label {
+        color: @color-control-fore;
+        display: inline-block;
+        line-height: @size-text-normal;
+        position: relative;
+        white-space: nowrap;
+        z-index: 1;
+    }
+}

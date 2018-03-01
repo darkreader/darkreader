@@ -1,0 +1,29 @@
+@import "../../theme";
+
+.textbox {
+    background-color: @color-input-back;
+    border: @size-border solid @color-border;
+    box-sizing: content-box;
+    color: @color-input-fore;
+    height: @size-control-inner;
+    line-height: @size-control-inner;
+    outline: none;
+    overflow: hidden;
+    padding: 0;
+    text-indent: @size-control-inner / 2 - @size-text-normal / 2;
+    transition: background-color @time-slow;
+
+    &:hover,
+    &:focus {
+        background-color: @color-input-hover;
+        transition: background-color @time-fast;
+    }
+
+    &:focus {
+        color: @color-input-fore-active;
+    }
+
+    &::placeholder {
+        color: @color-input-fore-placeholder;
+    }
+}

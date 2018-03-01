@@ -1,0 +1,48 @@
+@import "../../theme";
+
+.toggle {
+    background-color: @color-control-back;
+    border: @size-border solid @color-border;
+    box-sizing: content-box;
+    color: @color-control-fore;
+    display: inline-flex;
+    height: @size-control-inner;
+    position: relative;
+    -moz-user-select: none;
+    user-select: none;
+
+    &__btn {
+        align-items: center;
+        cursor: pointer;
+        display: inline-flex;
+        justify-content: center;
+        height: 100%;
+        overflow: hidden;
+        position: relative;
+        transition: background-color @time-slow;
+        white-space: nowrap;
+        width: 50%;
+
+        &:hover:not(&--active) {
+            background-color: @color-control-hover;
+        }
+    }
+
+    &::before {
+        background-color: @color-control-active;
+        content: "";
+        display: inline-block;
+        height: 100%;
+        left: 50%;
+        position: absolute;
+        top: 0;
+        transition: left @time-fast;
+        width: 50%;
+    }
+
+    &--checked {
+        &::before {
+            left: 0;
+        }
+    }
+}

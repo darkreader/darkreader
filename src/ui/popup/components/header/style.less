@@ -1,0 +1,30 @@
+@import "../../../theme";
+
+.header {
+    display: grid;
+    grid: 
+        "logo logo"
+        "site-toggle app-toggle"
+        / 5.5fr 4.5fr;
+    grid-gap: @indent-small;
+    width: 100%;
+
+    &__logo {
+        grid-area: logo;
+        width: 100%;
+    }
+
+    &__control {
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+    }
+
+    &__site-toggle {
+        grid-area: site-toggle;
+    }
+
+    &__app-toggle {
+        grid-area: app-toggle;
+    }
+}

@@ -1,4 +1,11 @@
-﻿module DarkReader {
+import {FilterConfig} from '../definitions';
+
+export const configStore: {
+    DEFAULT_FILTER_CONFIG?: FilterConfig;
+    DARK_SITES?: string[];
+    INVERSION_FIXES?: InversionFixes;
+    RAW_INVERSION_FIXES?: any;
+} = {};
 
     //--------------------------------
     //
@@ -21,26 +28,11 @@
     };
     const REMOTE_TIMEOUT_MS = 10 * 1000;
     const RELOAD_INTERVAL_MS = 15 * 60 * 1000;
-    export var DEBUG = [
+    export const DEBUG = [
         'eimadpbcbfnmbkopoojfekhnkhdbieeh',
         'addon@darkreader.org'
     ].indexOf(chrome.runtime.id) < 0;
-    let DEBUG_LOCAL_CONFIGS = DEBUG;
-
-    /**
-     * List of sites with dark theme (which should not be inverted).
-     */
-    export var DARK_SITES: string[];
-
-    /**
-     * Fixes for specific sites (selectors which should not be inverted).
-     */
-    export var INVERSION_FIXES: InversionFixes;
-
-    /**
-     * Raw inversion fixes (for editing purposes).
-     */
-    export var RAW_INVERSION_FIXES: any;
+    const DEBUG_LOCAL_CONFIGS = DEBUG;
 
     //
     // ----- Load configs ------
@@ -82,7 +74,7 @@
                         url: CONFIG_URLs.inversionFixes.local
                     });
                 }).then((res) => {
-                    RAW_INVERSION_FIXES = res;
+                    configStore.RAW_INVERSION_FIXES = res;
                     handleInversionFixes(copyJson(res), onInvalidData);
                 }),
 
@@ -107,7 +99,7 @@
                 readJson<InversionFixes>({
                     url: CONFIG_URLs.inversionFixes.local
                 }).then((res) => {
-                    RAW_INVERSION_FIXES = res;
+                    configStore.RAW_INVERSION_FIXES = res;
                     handleInversionFixes(copyJson(res), onInvalidData);
                 }),
 
@@ -140,7 +132,7 @@
             }
         }
         sites.sort(urlTemplateSorter);
-        DARK_SITES = sites;
+        configStore.DARK_SITES = sites;
     }
     export function handleInversionFixes(fixes: InversionFixes, onerror?: (err: string) => void) {
         // Validate fixes
@@ -181,9 +173,10 @@
             s.rules = fixes.common.rules.concat(s.rules);
         });
 
-        INVERSION_FIXES = fixes;
+        configStore.INVERSION_FIXES = fixes;
     }
     function handleFilterConfig(config: FilterConfig, onerror?: (err: string) => void) {
+        const { DEFAULT_FILTER_CONFIG } = configStore;
         if (config !== null && typeof config === 'object') {
             for (let prop in DEFAULT_FILTER_CONFIG) {
                 if (typeof config[prop] !== typeof DEFAULT_FILTER_CONFIG[prop]) {
@@ -191,7 +184,7 @@
                     config[prop] = DEFAULT_FILTER_CONFIG[prop];
                 }
             }
-            DEFAULT_FILTER_CONFIG = config;
+            configStore.DEFAULT_FILTER_CONFIG = config;
         }
     }
 
@@ -219,6 +212,7 @@
      * @param url Site URL.
      */
     export function getFixesFor(url: string): InversionFix {
+        const { INVERSION_FIXES } = configStore;
         let found: SiteFix;
         if (url) {
             // Search for match with given URL
@@ -394,15 +388,13 @@
     /**
      * URL template sorter.
      */
-    export var urlTemplateSorter = (a: { url?: string }, b: { url?: string }) => {
-        if (typeof a === 'string')
-            a = { url: <string>a };
-        if (typeof b === 'string')
-            b = { url: <string>b };
-        const slashIndexA = a.url.indexOf('/');
-        const slashIndexB = b.url.indexOf('/');
-        const addressA = a.url.replace('^', '').substring(0, slashIndexA);
-        const addressB = b.url.replace('^', '').substring(0, slashIndexB);
+    export const urlTemplateSorter = ($a: { url?: string } | string, $b: { url?: string } | string) => {
+        const a = typeof $a === 'string' ? $a : $a.url;
+        const b = typeof $b === 'string' ? $b : $b.url;
+        const slashIndexA = a.indexOf('/');
+        const slashIndexB = b.indexOf('/');
+        const addressA = a.replace('^', '').substring(0, slashIndexA);
+        const addressB = b.replace('^', '').substring(0, slashIndexB);
         const reverseA = addressA.split('.').reverse().join('.').toLowerCase(); // com.google
         const reverseB = addressB.split('.').reverse().join('.').toLowerCase(); // *.google
 
@@ -415,8 +407,8 @@
         }
         else {
             // Then sort by path descending
-            const pathA = a.url.substring(slashIndexA);
-            const pathB = b.url.substring(slashIndexB);
+            const pathA = a.substring(slashIndexA);
+            const pathB = b.substring(slashIndexB);
             return -pathA.localeCompare(pathB);
         }
     };
@@ -442,11 +434,6 @@
         return [];
     }
 
-    export function formatJson(obj) {
-        return JSON.stringify(obj, null, 4) + '\n';
-    }
-
     export function copyJson(obj) {
         return JSON.parse(JSON.stringify(obj));
     }
-}

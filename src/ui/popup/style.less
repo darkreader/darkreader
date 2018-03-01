@@ -1,0 +1,72 @@
+@import "../theme";
+@import "../shared";
+
+@popup-content-width: 15rem;
+@popup-content-height: 27.5rem;
+@popup-content-padding: 1rem;
+
+html {
+    box-sizing: border-box;
+}
+
+@import "./components/filter-settings/style";
+@import "./components/font-settings/style";
+@import "./components/header/style";
+@import "./components/site-list-settings/style";
+@import "./components/site-toggle/style";
+
+body {
+    align-items: stretch;
+    display: flex;
+    flex-direction: column;
+    height: @popup-content-height;
+    margin: @popup-content-padding;
+    width: @popup-content-width;
+
+    > :not(:first-child) {
+        margin-top: @indent-large;
+    }
+}
+
+.header {
+    flex: none;
+}
+
+.tab-panel {
+    flex: auto;
+}
+
+footer {
+    align-items: stretch;
+    display: flex;
+    flex: none;
+    flex-direction: column;
+    justify-content: center;
+
+    p {
+        margin: 0;
+        text-align: center;
+    }
+}
+
+.ext-disabled {
+    .site-toggle--disabled {
+        opacity: 1;
+    }
+
+    .header__site-toggle,
+    .tab-panel {
+        opacity: 0.5;
+        pointer-events: none;
+    }
+
+    .tab-panel__tab--active {
+        pointer-events: none;
+    }
+}
+
+.chromium-issue-750419 {
+    // Fix missing vertical borders in Chrome for Windows
+    border-left: 2px solid white;
+    border-right: 2px solid white;
+}

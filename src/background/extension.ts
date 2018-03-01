@@ -1,10 +1,13 @@
-﻿module DarkReader {
+import {configStore, isUrlInList, DEBUG, copyJson, handleInversionFixes} from './config_management';
+import {formatJson} from '../config/utils';
+import { FilterCssGenerator, FilterMode } from './filter_css_generator';
+import { FilterConfig, TabInfo } from '../definitions';
 
     const ICON_PATHS = {
-        active_19: '../img/dr_active_19.png',
-        active_38: '../img/dr_active_38.png',
-        inactive_19: '../img/dr_inactive_19.png',
-        inactive_38: '../img/dr_inactive_38.png'
+        active_19: '../icons/dr_active_19.png',
+        active_38: '../icons/dr_active_38.png',
+        inactive_19: '../icons/dr_inactive_19.png',
+        inactive_38: '../icons/dr_inactive_38.png'
     };
 
     const SAVE_CONFIG_TIMEOUT = 1000;
@@ -13,11 +16,12 @@
      * Chrome extension.
      * Extension uses CSS generator to process opened web pages.
      */
-    export class Extension extends xp.Model {
+    export class Extension {
 
         protected generator: FilterCssGenerator;
+
         enabled: boolean;
-        config: ObservableFilterConfig;
+        config: FilterConfig;
         fonts: string[];
 
         /**
@@ -25,27 +29,9 @@
          * @param generator CSS-generator.
          */
         constructor(generator: FilterCssGenerator) {
-            super();
             this.generator = generator;
 
-            // Define properties
-            xp.Model.property(this, 'enabled', false);
-            xp.Model.property(this, 'config', null);
-            xp.Model.property(this, 'fonts', []);
-
-            // Handle config changes
-            const changeReg = new xp.EventRegistrar();
-            this.onPropertyChanged.addHandler((prop) => {
-                if (prop === 'enabled') {
-                    this.onAppToggle();
-                }
-                if (prop === 'config') {
-                    changeReg.unsubscribeAll();
-                    changeReg.subscribe(this.config.onPropertyChanged, this.onConfigPropChanged, this);
-                    changeReg.subscribe(this.config.siteList.onCollectionChanged, this.onConfigPropChanged, this);
-                    this.onConfigPropChanged();
-                }
-            });
+            this.listeners = new Set();
 
             // Default icon
             chrome.browserAction.setIcon({
@@ -62,7 +48,11 @@
             chrome.commands.onCommand.addListener((command) => {
                 if (command === 'toggle') {
                     console.log('Toggle command entered');
-                    this.enabled = !this.enabled;
+                    if (this.enabled) {
+                        this.enable();
+                    } else {
+                        this.disable();
+                    }
                 }
                 if (command === 'addSite') {
                     console.log('Add Site command entered');
@@ -77,8 +67,40 @@
             window.addEventListener('unload', () => {
                 chrome.tabs.query({}, (tabs) => {
                     tabs.forEach(this.removeStyleFromTab, this);
-                })
+                });
             });
+        }
+
+        enable() {
+            this.enabled = true;
+            this.onAppToggle();
+            this.invokeListeners();
+        }
+
+        disable() {
+            this.enabled = false;
+            this.onAppToggle();
+            this.invokeListeners();
+        }
+
+        setConfig(config: FilterConfig) {
+            this.config = Object.assign({}, this.config, config);
+            this.onConfigPropChanged();
+            this.invokeListeners();
+        }
+
+        protected listeners: Set<() => void>;
+
+        addListener(callback: () => void) {
+            this.listeners.add(callback);
+        }
+
+        removeListener(callback: () => void) {
+            this.listeners.delete(callback);
+        }
+
+        protected invokeListeners() {
+            this.listeners.forEach((listener) => listener());
         }
 
         /**
@@ -91,11 +113,13 @@
                 lastFocusedWindow: true
             }, (tabs) => {
                 if (tabs.length === 1) {
-                    const url = tabs[0].url;
+                    const { DARK_SITES } = configStore;
+                    const tab = tabs[0];
+                    const url = tab.url;
                     const host = url.match(/^(.*?:\/{2,3})?(.+?)(\/|$)/)[2];
                     const info: TabInfo = {
-                        url: url,
-                        host: host,
+                        url,
+                        host,
                         isProtected: !canInjectScript(url),
                         isInDarkList: isUrlInList(url, DARK_SITES),
                     };
@@ -117,13 +141,15 @@
         toggleCurrentSite() {
             this.getActiveTabInfo((info) => {
                 if (info.host) {
-                    const index = this.config.siteList.indexOf(info.host);
+                    const siteList = this.config.siteList.slice();
+                    const index = siteList.indexOf(info.host);
                     if (index < 0) {
-                        this.config.siteList.push(info.host);
+                        siteList.push(info.host);
                     } else {
                         // Remove site from list
-                        this.config.siteList.splice(index, 1);
+                        siteList.splice(index, 1);
                     }
+                    this.setConfig(Object.assign({}, this.config, { siteList }));
                 }
             });
         }
@@ -161,8 +187,9 @@
                         setTimeout(() => this.addStyleToTab(tab), 0);
                     });
                 });
-            }
-            else {
+
+            } else {
+
                 //
                 // Switch OFF
 
@@ -364,8 +391,8 @@ style && style.parentElement.removeChild(style);
          * Loads configuration from Chrome storage.
          */
         protected loadUserSettings() {
-            const defaultFilterConfig = xp.clone(DEFAULT_FILTER_CONFIG);
-            const defaultStore: AppConfigStore = {
+            const defaultFilterConfig = Object.assign({}, configStore.DEFAULT_FILTER_CONFIG);
+            var defaultStore: AppConfigStore = {
                 enabled: true,
                 config: defaultFilterConfig,
             };
@@ -380,8 +407,12 @@ style && style.parentElement.removeChild(style);
                     }
                     store.config.siteList = arr;
                 }
-                this.config = <ObservableFilterConfig>xp.observable(store.config);
-                this.enabled = store.enabled;
+                this.setConfig(Object.assign({}, store.config));
+                if (store.enabled) {
+                    this.enable();
+                } else {
+                    this.disable();
+                }
                 console.log('loaded', store);
             });
         }
@@ -447,11 +478,13 @@ style && style.parentElement.removeChild(style);
         }
 
         getDevInversionFixesText() {
+            const { RAW_INVERSION_FIXES } = configStore; 
             const fixes = this.getSavedDevInversionFixes();
             return formatJson(fixes ? JSON.parse(fixes) : copyJson(RAW_INVERSION_FIXES));
         }
 
         resetDevInversionFixes() {
+            const { RAW_INVERSION_FIXES } = configStore; 
             localStorage.removeItem('dev_inversion_fixes');
             handleInversionFixes(copyJson(RAW_INVERSION_FIXES));
             this.onConfigPropChanged();
@@ -488,15 +521,3 @@ style && style.parentElement.removeChild(style);
         enabled: boolean;
         config: FilterConfig;
     }
-
-    export interface ObservableFilterConfig extends FilterConfig, xp.Notifier {
-        siteList: xp.ObservableCollection<string>;
-    }
-
-    export interface TabInfo {
-        url: string;
-        host: string;
-        isProtected: boolean;
-        isInDarkList: boolean;
-    }
-}

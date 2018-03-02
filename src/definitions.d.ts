@@ -27,6 +27,11 @@ export interface FilterConfig {
     invertListed?: boolean;
 }
 
+export interface UserSettings {
+    enabled: boolean;
+    config: FilterConfig;
+}
+
 export interface TabInfo {
     url: string;
     host: string;

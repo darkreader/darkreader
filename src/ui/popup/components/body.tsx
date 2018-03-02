@@ -6,6 +6,7 @@ import Header from './header';
 import FilterSettings from './filter-settings';
 import FontSettings from './font-settings';
 import SiteListSettings from './site-list-settings';
+import {isFirefox} from '../../../background/utils';
 import {Extension} from '../../../definitions';
 
 withForms();
@@ -21,10 +22,9 @@ interface BodyState {
 }
 
 function openDevTools() {
-    const isFirefox = navigator.userAgent.indexOf('Firefox') >= 0;
     chrome.windows.create({
         type: 'panel',
-        url: isFirefox ? '../devtools/index.html' : 'ui/devtools/index.html',
+        url: isFirefox() ? '../devtools/index.html' : 'ui/devtools/index.html',
         width: 600,
         height: 600,
     });

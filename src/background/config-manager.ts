@@ -1,12 +1,6 @@
 import {simpleClone, isUrlInList, isUrlMatched, readJson} from './utils';
 import {FilterConfig, InversionFixes, InversionFix, SiteFix} from '../definitions';
 
-const DEBUG = [
-    'eimadpbcbfnmbkopoojfekhnkhdbieeh',
-    'addon@darkreader.org'
-].indexOf(chrome.runtime.id) < 0;
-const DEBUG_LOCAL_CONFIGS = false;
-
 const CONFIG_URLs = {
     darkSites: {
         remote: 'https://raw.githubusercontent.com/alexanderby/darkreader/master/src/config/dark_sites.json',
@@ -31,6 +25,10 @@ export default class ConfigManager {
     DEBUG?: boolean;
 
     constructor() {
+        this.DEBUG = [
+            'eimadpbcbfnmbkopoojfekhnkhdbieeh',
+            'addon@darkreader.org'
+        ].indexOf(chrome.runtime.id) < 0;
         setInterval(() => this.load(), RELOAD_INTERVAL_MS);
     }
 
@@ -45,7 +43,7 @@ export default class ConfigManager {
 
         const loadDarkSites = async () => {
             let $sites: string[];
-            if (DEBUG_LOCAL_CONFIGS) {
+            if (this.DEBUG) {
                 $sites = await loadLocalDarkSites();
             } else {
                 try {
@@ -63,7 +61,7 @@ export default class ConfigManager {
 
         const loadInversionFixes = async () => {
             let $fixes: InversionFixes;
-            if (DEBUG_LOCAL_CONFIGS) {
+            if (this.DEBUG) {
                 $fixes = await loadLocalInversionFixes();
             } else {
                 try {

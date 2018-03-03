@@ -17,7 +17,7 @@ export default function SiteListSettings({ext, isFocused}: SiteListSettingsProps
         <section class="site-list-settings">
             <Toggle
                 class="site-list-settings__toggle"
-                checked={ext.config.invertListed}
+                checked={ext.filterConfig.invertListed}
                 labelOn="Invert listed only"
                 labelOff="Not invert listed"
                 onChange={(value) => ext.setConfig({invertListed: value})}
@@ -25,7 +25,7 @@ export default function SiteListSettings({ext, isFocused}: SiteListSettingsProps
             <TextList
                 class="site-list-settings__text-list"
                 placeholder="mail.google.com, google.*/mail etc..."
-                values={ext.config.siteList}
+                values={ext.filterConfig.siteList}
                 isFocused={isFocused}
                 onChange={(values) => {
                     if (values.every(isSiteUrlValid)) {

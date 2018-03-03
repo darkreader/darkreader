@@ -1,19 +1,11 @@
 import {simpleClone} from './utils';
 import {FilterConfig, InversionFixes, InversionFix, SiteFix} from '../definitions';
 
-export const configStore: {
-    DEFAULT_FILTER_CONFIG?: FilterConfig;
-    DARK_SITES?: string[];
-    INVERSION_FIXES?: InversionFixes;
-    RAW_INVERSION_FIXES?: any;
-    DEBUG?: boolean;
-} = {};
-
-//--------------------------------
-//
-//      CONFIGURATION LOADING
-//
-//--------------------------------
+const DEBUG = [
+    'eimadpbcbfnmbkopoojfekhnkhdbieeh',
+    'addon@darkreader.org'
+].indexOf(chrome.runtime.id) < 0;
+const DEBUG_LOCAL_CONFIGS = false;
 
 const CONFIG_URLs = {
     darkSites: {
@@ -31,159 +23,134 @@ const CONFIG_URLs = {
 const REMOTE_TIMEOUT_MS = 10 * 1000;
 const RELOAD_INTERVAL_MS = 15 * 60 * 1000;
 
-configStore.DEBUG = [
-    'eimadpbcbfnmbkopoojfekhnkhdbieeh',
-    'addon@darkreader.org'
-].indexOf(chrome.runtime.id) < 0;
-const DEBUG_LOCAL_CONFIGS = false;
+export default class ConfigManager {
+    DEFAULT_FILTER_CONFIG?: FilterConfig;
+    DARK_SITES?: string[];
+    INVERSION_FIXES?: InversionFixes;
+    RAW_INVERSION_FIXES?: any;
+    DEBUG?: boolean;
 
-//
-// ----- Load configs ------
-
-export async function loadConfigs() {
-    async function loadLocalDarkSites() {
-        return await readJson<string[]>({url: CONFIG_URLs.darkSites.local});
+    constructor() {
+        setInterval(() => this.load(), RELOAD_INTERVAL_MS);
     }
 
-    async function loadLocalInversionFixes() {
-        return await readJson<InversionFixes>({url: CONFIG_URLs.inversionFixes.local});
-    }
+    async load() {
+        const loadLocalDarkSites = async () => {
+            return await readJson<string[]>({url: CONFIG_URLs.darkSites.local});
+        };
 
-    async function loadDefaultFilterConfig() {
-        const filter = await readJson<FilterConfig>({url: CONFIG_URLs.defaultFilterConfig.local});
-        handleFilterConfig(filter);
-    }
+        const loadLocalInversionFixes = async () => {
+            return await readJson<InversionFixes>({url: CONFIG_URLs.inversionFixes.local});
+        };
 
-    async function loadDarkSites() {
-        let $sites: string[];
-        if (DEBUG_LOCAL_CONFIGS) {
-            $sites = await loadLocalDarkSites();
-        } else {
-            try {
-                $sites = await readJson<string[]>({
-                    url: CONFIG_URLs.darkSites.remote,
-                    timeout: REMOTE_TIMEOUT_MS
-                });
-            } catch (err) {
-                console.error('Dark Sites remote load error', err);
+        const loadDarkSites = async () => {
+            let $sites: string[];
+            if (DEBUG_LOCAL_CONFIGS) {
                 $sites = await loadLocalDarkSites();
-            }
-        }
-        handleDarkSites($sites)
-    }
-
-    async function loadInversionFixes() {
-        let $fixes: InversionFixes;
-        if (DEBUG_LOCAL_CONFIGS) {
-            $fixes = await loadLocalInversionFixes();
-        } else {
-            try {
-                $fixes = await readJson<InversionFixes>({
-                    url: CONFIG_URLs.inversionFixes.remote,
-                    timeout: REMOTE_TIMEOUT_MS
-                });
-            } catch (err) {
-                console.error('Inversion Fixes remote load error', err);
-                $fixes = await loadLocalInversionFixes();
-            }
-        }
-        configStore.RAW_INVERSION_FIXES = simpleClone($fixes);
-        handleInversionFixes($fixes);
-    }
-
-    await Promise.all([
-        loadDarkSites(),
-        loadInversionFixes(),
-        loadDefaultFilterConfig(),
-    ]).catch((err) => console.error('Fatality', err));
-}
-
-function handleDarkSites(sites: string[]) {
-    configStore.DARK_SITES = (Array.isArray(sites) ? sites : [])
-        .filter((x) => typeof x === 'string')
-        .sort(urlTemplateSorter);
-}
-
-export function handleInversionFixes($fixes: InversionFixes) {
-    const common = {
-        invert: toStringArray($fixes && $fixes.common && $fixes.common.invert),
-        noinvert: toStringArray($fixes && $fixes.common && $fixes.common.noinvert),
-        removebg: toStringArray($fixes && $fixes.common && $fixes.common.removebg),
-        rules: toStringArray($fixes && $fixes.common && $fixes.common.rules),
-    };
-    const sites = ($fixes && Array.isArray($fixes.sites)
-        ? $fixes.sites.filter((s) => isStringOrArray(s.url))
-            .map((s) => {
-                return {
-                    url: s.url,
-                    invert: common.invert.concat(toStringArray(s.invert)),
-                    noinvert: common.noinvert.concat(toStringArray(s.noinvert)),
-                    removebg: common.removebg.concat(toStringArray(s.removebg)),
-                    rules: common.rules.concat(toStringArray(s.rules)),
-                };
-            })
-        : []);
-    configStore.INVERSION_FIXES = {
-        common,
-        sites,
-    };
-}
-
-function handleFilterConfig(config: FilterConfig) {
-    const {DEFAULT_FILTER_CONFIG} = configStore;
-    if (config !== null && typeof config === 'object') {
-        for (let prop in DEFAULT_FILTER_CONFIG) {
-            if (typeof config[prop] !== typeof DEFAULT_FILTER_CONFIG[prop]) {
-                config[prop] = DEFAULT_FILTER_CONFIG[prop];
-            }
-        }
-        configStore.DEFAULT_FILTER_CONFIG = config;
-    }
-}
-
-setInterval(loadConfigs, RELOAD_INTERVAL_MS); // Reload periodically
-
-/**
- * Returns fixes for a given URL.
- * If no matches found, common fixes will be returned.
- * @param url Site URL.
- */
-export function getFixesFor(url: string): InversionFix {
-    const {INVERSION_FIXES} = configStore;
-    let found: SiteFix;
-    if (url) {
-        // Search for match with given URL
-        loop: for (let i = 0; i < INVERSION_FIXES.sites.length; i++) {
-            let s = INVERSION_FIXES.sites[i];
-            let urls: string[] = typeof s.url === 'string' ? [<string>s.url] : <string[]>s.url;
-            for (let j = 0; j < urls.length; j++) {
-                if (isUrlMatched(url, urls[j])) {
-                    found = s;
-                    break loop;
+            } else {
+                try {
+                    $sites = await readJson<string[]>({
+                        url: CONFIG_URLs.darkSites.remote,
+                        timeout: REMOTE_TIMEOUT_MS
+                    });
+                } catch (err) {
+                    console.error('Dark Sites remote load error', err);
+                    $sites = await loadLocalDarkSites();
                 }
             }
+            this.handleDarkSites($sites)
+        };
+
+        const loadInversionFixes = async () => {
+            let $fixes: InversionFixes;
+            if (DEBUG_LOCAL_CONFIGS) {
+                $fixes = await loadLocalInversionFixes();
+            } else {
+                try {
+                    $fixes = await readJson<InversionFixes>({
+                        url: CONFIG_URLs.inversionFixes.remote,
+                        timeout: REMOTE_TIMEOUT_MS
+                    });
+                } catch (err) {
+                    console.error('Inversion Fixes remote load error', err);
+                    $fixes = await loadLocalInversionFixes();
+                }
+            }
+            this.RAW_INVERSION_FIXES = simpleClone($fixes);
+            this.handleInversionFixes($fixes);
+        };
+
+        if (!this.DEFAULT_FILTER_CONFIG) {
+            this.DEFAULT_FILTER_CONFIG = await readJson<FilterConfig>({url: CONFIG_URLs.defaultFilterConfig.local});
         }
-        if (found) {
-            console.log('URL matches ' + found.url);
-        }
+
+        await Promise.all([
+            loadDarkSites(),
+            loadInversionFixes(),
+        ]).catch((err) => console.error('Fatality', err));
     }
-    return (found ?
-        found :
-        {
-            invert: INVERSION_FIXES.common.invert,
-            noinvert: INVERSION_FIXES.common.noinvert,
-            removebg: INVERSION_FIXES.common.removebg,
-            rules: INVERSION_FIXES.common.rules
+
+    handleInversionFixes($fixes: InversionFixes) {
+        const common = {
+            invert: toStringArray($fixes && $fixes.common && $fixes.common.invert),
+            noinvert: toStringArray($fixes && $fixes.common && $fixes.common.noinvert),
+            removebg: toStringArray($fixes && $fixes.common && $fixes.common.removebg),
+            rules: toStringArray($fixes && $fixes.common && $fixes.common.rules),
+        };
+        const sites = ($fixes && Array.isArray($fixes.sites)
+            ? $fixes.sites.filter((s) => isStringOrArray(s.url))
+                .map((s) => {
+                    return {
+                        url: s.url,
+                        invert: common.invert.concat(toStringArray(s.invert)),
+                        noinvert: common.noinvert.concat(toStringArray(s.noinvert)),
+                        removebg: common.removebg.concat(toStringArray(s.removebg)),
+                        rules: common.rules.concat(toStringArray(s.rules)),
+                    };
+                })
+            : [])
+            .reduce((flat, s) => {
+                if (Array.isArray(s.url)) {
+                    s.url.forEach((url) => {
+                        flat.push({...s, ...{url}});
+                    });
+                } else {
+                    flat.push(s);
+                }
+                return flat;
+            }, []);
+        this.INVERSION_FIXES = {
+            common,
+            sites,
+        };
+    }
+
+    private handleDarkSites(sites: string[]) {
+        this.DARK_SITES = (Array.isArray(sites) ? sites : [])
+            .filter((x) => typeof x === 'string');
+    }
+
+    /**
+     * Returns fixes for a given URL.
+     * If no matches found, common fixes will be returned.
+     * @param url Site URL.
+     */
+    getFixesFor(url: string): InversionFix {
+        const {INVERSION_FIXES} = this;
+        let found: SiteFix;
+        if (url) {
+            // Search for match with given URL
+            const matches = INVERSION_FIXES.sites
+                .filter((s) => isUrlMatched(url, s.url as string))
+                .sort((a, b) => b.url.length - a.url.length);
+            if (matches.length > 0) {
+                console.log(`URL matches ${matches[0].url}`);
+                return matches[0];
+            }
         }
-    );
+        return {...INVERSION_FIXES.common};
+    }
 }
-
-
-//------------------
-//
-//     HELPERS
-//
-//------------------
 
 //
 // ---------- Data loading -----------
@@ -198,7 +165,7 @@ function readJson<T>(params: JsonRequestParams<T>): Promise<T> {
         request.overrideMimeType("application/json");
         request.open(
             'GET',
-            params.url + '?nocache=' + new Date().getTime(),
+            `${params.url}?nocache=${Date.now()}`,
             true
         );
         request.onload = () => {
@@ -209,8 +176,7 @@ function readJson<T>(params: JsonRequestParams<T>): Promise<T> {
 
                 const json = JSON.parse(resultText);
                 resolve(json);
-            }
-            else {
+            } else {
                 reject(new Error(request.status + ': ' + request.statusText));
             }
         };
@@ -276,8 +242,7 @@ function createUrlRegex(urlTemplate: string): RegExp {
     if ((slashIndex = urlTemplate.indexOf('/')) >= 0) {
         beforeSlash = urlTemplate.substring(0, slashIndex); // google.*
         afterSlash = urlTemplate.replace('$', '').substring(slashIndex); // /login/abc
-    }
-    else {
+    } else {
         beforeSlash = urlTemplate.replace('$', '');
     }
 
@@ -320,41 +285,6 @@ function createUrlRegex(urlTemplate: string): RegExp {
     // Result
 
     return new RegExp(result, 'i');
-}
-
-/**
- * URL template sorter.
- */
-export const urlTemplateSorter = ($a: {url?: string} | string, $b: {url?: string} | string) => {
-    const a = typeof $a === 'string' ? $a : $a.url;
-    const b = typeof $b === 'string' ? $b : $b.url;
-    const slashIndexA = a.indexOf('/');
-    const slashIndexB = b.indexOf('/');
-    const addressA = a.replace('^', '').substring(0, slashIndexA);
-    const addressB = b.replace('^', '').substring(0, slashIndexB);
-    const reverseA = addressA.split('.').reverse().join('.').toLowerCase(); // com.google
-    const reverseB = addressB.split('.').reverse().join('.').toLowerCase(); // *.google
-
-    // Sort by reversed address descending
-    if (reverseA > reverseB) {
-        return -1;
-    }
-    else if (reverseA < reverseB) {
-        return 1;
-    }
-    else {
-        // Then sort by path descending
-        const pathA = a.substring(slashIndexA);
-        const pathB = b.substring(slashIndexB);
-        return -pathA.localeCompare(pathB);
-    }
-};
-
-function joinLines(lines: string | string[], separator = ''): string {
-    if (typeof lines === 'string') {
-        return lines;
-    }
-    return (<string[]>lines).join(separator + '\\n');
 }
 
 function isStringOrArray(item) {

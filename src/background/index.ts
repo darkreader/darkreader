@@ -1,17 +1,14 @@
 import {Extension} from './extension';
-import {loadConfigs, configStore} from './config-manager';
 
 // Initialize extension
-let extension: Extension;
-loadConfigs().then(() => {
-    extension = new Extension();
+const extension = new Extension();
+extension.start();
 
-    (window as any).DarkReader = (window as any).DarkReader || {};
-    (window as any).DarkReader.Background = (window as any).DarkReader.Background || {};
-    (window as any).DarkReader.Background.extension = extension;
-});
+(window as any).DarkReader = (window as any).DarkReader || {};
+(window as any).DarkReader.Background = (window as any).DarkReader.Background || {};
+(window as any).DarkReader.Background.extension = extension;
 
-if (configStore.DEBUG) {
+if (extension.config.DEBUG) {
     // Reload extension on connection
     const listen = () => {
         const req = new XMLHttpRequest();

@@ -1,4 +1,4 @@
-import {configStore, isUrlInList, handleInversionFixes} from './config-manager';
+import {default as ConfigManager, isUrlInList} from './config-manager';
 import IconManager from './icon-manager';
 import UserStorage from './user-storage';
 import {simpleClone, getFontList, canInjectScript} from './utils';
@@ -9,7 +9,8 @@ import {FilterConfig, TabInfo} from '../definitions';
 export class Extension {
 
     enabled: boolean;
-    config: FilterConfig;
+    config: ConfigManager;
+    filterConfig: FilterConfig;
     fonts: string[];
     icon: IconManager;
     user: UserStorage;
@@ -19,27 +20,7 @@ export class Extension {
         this.listeners = new Set();
 
         this.icon = new IconManager();
-        this.user = new UserStorage();
-
-        Promise.all([
-            fetch('../inject/add-style.js')
-                .then((res) => res.text())
-                .then((text) => this.addStyleScript = text),
-            fetch('../inject/remove-style.js')
-                .then((res) => res.text())
-                .then((text) => this.removeStyleScript = text),
-        ]).then(() => {
-            this.user.loadSettings()
-                .then((settings) => {
-                    if (settings.enabled) {
-                        this.enable();
-                    } else {
-                        this.disable();
-                    }
-                    console.log('loaded', settings);
-                    this.setConfig(settings.config);
-                });
-        })
+        this.config = new ConfigManager();
 
         // Subscribe on keyboard shortcut
         chrome.commands.onCommand.addListener((command) => {
@@ -56,8 +37,47 @@ export class Extension {
                 this.toggleCurrentSite();
             }
         });
+    }
 
-        getFontList().then((fonts) => this.fonts = fonts);
+    async start() {
+        const loadInjections = async () => {
+            const loadAddStyleScript = async () => {
+                const res = await fetch('../inject/add-style.js');
+                const text = await res.text();
+                this.addStyleScript = text;
+            };
+            const loadRemoveStyleScript = async () => {
+                const res = await fetch('../inject/remove-style.js');
+                const text = await res.text();
+                this.removeStyleScript = text;
+            };
+            await Promise.all([
+                loadAddStyleScript(),
+                loadRemoveStyleScript(),
+            ]);
+        };
+
+        const loadFonts = async () => {
+            const fonts = await getFontList();
+            this.fonts = fonts;
+        };
+
+        await Promise.all([
+            loadInjections(),
+            this.config.load(),
+            loadFonts(),
+        ]);
+
+
+        this.user = new UserStorage({defaultFilterConfig: this.config.DEFAULT_FILTER_CONFIG});
+        const settings = await this.user.loadSettings();
+        if (settings.enabled) {
+            this.enable();
+        } else {
+            this.disable();
+        }
+        console.log('loaded', settings);
+        this.setConfig(settings.config);
     }
 
     enable() {
@@ -73,7 +93,7 @@ export class Extension {
     }
 
     setConfig(config: FilterConfig) {
-        this.config = {...this.config, ...config};
+        this.filterConfig = {...this.filterConfig, ...config};
         this.onConfigPropChanged();
         this.invokeListeners();
     }
@@ -102,7 +122,7 @@ export class Extension {
             lastFocusedWindow: true
         }, (tabs) => {
             if (tabs.length === 1) {
-                const {DARK_SITES} = configStore;
+                const {DARK_SITES} = this.config;
                 const tab = tabs[0];
                 const url = tab.url;
                 const host = url.match(/^(.*?:\/{2,3})?(.+?)(\/|$)/)[2];
@@ -114,7 +134,7 @@ export class Extension {
                 };
                 callback(info);
             } else {
-                if (configStore.DEBUG) {
+                if (this.config.DEBUG) {
                     throw new Error('Unexpected tabs count.');
                 }
                 console.error('Unexpected tabs count.');
@@ -130,7 +150,7 @@ export class Extension {
     toggleCurrentSite() {
         this.getActiveTabInfo((info) => {
             if (info.host) {
-                const siteList = this.config.siteList.slice();
+                const siteList = this.filterConfig.siteList.slice();
                 const index = siteList.indexOf(info.host);
                 if (index < 0) {
                     siteList.push(info.host);
@@ -138,7 +158,7 @@ export class Extension {
                     // Remove site from list
                     siteList.splice(index, 1);
                 }
-                this.setConfig(Object.assign({}, this.config, {siteList}));
+                this.setConfig(Object.assign({}, this.filterConfig, {siteList}));
             }
         });
     }
@@ -283,21 +303,37 @@ export class Extension {
     protected removeStyleScript: string;
 
     protected getCode_addStyle(url?: string) {
-        const css = createCSSFilterStylesheet(this.config, url);
+        let css: string;
+        const {DARK_SITES} = this.config;
+        const isUrlInDarkList = isUrlInList(url, DARK_SITES);
+        const isUrlInUserList = isUrlInList(url, this.filterConfig.siteList);
+
+        if (
+            (isUrlInUserList && this.filterConfig.invertListed)
+            || (!isUrlInDarkList
+                && !this.filterConfig.invertListed
+                && !isUrlInUserList)
+        ) {
+            console.log(`Creating CSS for url: ${url}`);
+            css = createCSSFilterStylesheet(this.filterConfig, this.config.getFixesFor(url));
+        } else {
+            console.log(`Site is not inverted: ${url}`);
+            css = '';
+        }
         return this.addStyleScript
-            .replace(/(^\s*)(\/\/\s*?#DEBUG\s*)(.*?$)/igm, configStore.DEBUG ? '$1$3' : '')
+            .replace(/(^\s*)(\/\/\s*?#DEBUG\s*)(.*?$)/igm, this.config.DEBUG ? '$1$3' : '')
             .replace(/\$CSS/g, `'${css.replace(/\'/g, '\\\'')}'`);
     }
 
     protected getCode_removeStyle() {
         return this.removeStyleScript
-            .replace(/(^\s*)(\/\/\s*?#DEBUG\s*)(.*?$)/igm, configStore.DEBUG ? '$1$3' : '');
+            .replace(/(^\s*)(\/\/\s*?#DEBUG\s*)(.*?$)/igm, this.config.DEBUG ? '$1$3' : '');
     }
 
     protected saveUserSettings() {
         this.user.saveSetting({
             enabled: this.enabled,
-            config: this.config,
+            config: this.filterConfig,
         }).then((settings) => console.log('saved', settings));
     }
 
@@ -316,15 +352,15 @@ export class Extension {
     }
 
     getDevInversionFixesText() {
-        const {RAW_INVERSION_FIXES} = configStore;
+        const {RAW_INVERSION_FIXES} = this.config;
         const fixes = this.getSavedDevInversionFixes();
-        return formatJson(fixes ? JSON.parse(fixes) : simpleClone(RAW_INVERSION_FIXES));
+        return formatJson(fixes ? JSON.parse(fixes) : RAW_INVERSION_FIXES);
     }
 
     resetDevInversionFixes() {
-        const {RAW_INVERSION_FIXES} = configStore;
+        const {RAW_INVERSION_FIXES} = this.config;
         localStorage.removeItem('dev_inversion_fixes');
-        handleInversionFixes(simpleClone(RAW_INVERSION_FIXES));
+        this.config.handleInversionFixes(RAW_INVERSION_FIXES);
         this.onConfigPropChanged();
     }
 
@@ -334,7 +370,7 @@ export class Extension {
             obj = JSON.parse(json);
             const text = formatJson(obj);
             this.saveDevInversionFixes(text);
-            handleInversionFixes(obj);
+            this.config.handleInversionFixes(obj);
             this.onConfigPropChanged();
             callback(null);
         } catch (err) {

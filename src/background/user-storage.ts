@@ -1,17 +1,20 @@
-import {configStore} from './config-manager';
-import {UserSettings} from '../definitions';
+import {UserSettings, FilterConfig} from '../definitions';
 
-const DEFAULT_SETTINGS = {
-    enabled: true,
-    config: {...configStore.DEFAULT_FILTER_CONFIG},
-};
 const SAVE_TIMEOUT = 1000;
 
 export default class UserStorage {
+    private defaultSettings: UserSettings;
+
+    constructor(props: {defaultFilterConfig: FilterConfig}) {
+        this.defaultSettings = {
+            enabled: true,
+            config: {...props.defaultFilterConfig}
+        };
+    }
     loadSettings() {
         return new Promise<UserSettings>((resolve) => {
-            chrome.storage.sync.get(DEFAULT_SETTINGS, ($s: UserSettings) => {
-                $s.config = {...DEFAULT_SETTINGS.config, ...$s.config};
+            chrome.storage.sync.get(this.defaultSettings, ($s: UserSettings) => {
+                $s.config = {...this.defaultSettings.config, ...$s.config};
                 if (!Array.isArray($s.config.siteList)) {
                     const arr = [];
                     for (let key in $s.config.siteList) {

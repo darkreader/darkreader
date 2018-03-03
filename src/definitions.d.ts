@@ -2,7 +2,7 @@ import {FilterMode} from './generators/css-filter';
 
 export interface Extension {
     enabled: boolean;
-    config: FilterConfig;
+    filterConfig: FilterConfig;
     fonts: string[];
     enable();
     disable();

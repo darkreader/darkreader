@@ -7,19 +7,19 @@ export default function ModeToggle({ext}: {ext: Extension}) {
         <div class="mode-toggle">
             <div class="mode-toggle__line">
                 <Button
-                    class={{'mode-toggle__button--active': ext.config.mode === 1}}
+                    class={{'mode-toggle__button--active': ext.filterConfig.mode === 1}}
                     onclick={() => ext.setConfig({mode: 1})}
                 >
                     <span class="icon icon--dark-mode"></span>
                 </Button>
                 <Toggle
-                    checked={ext.config.mode === 1}
+                    checked={ext.filterConfig.mode === 1}
                     labelOn="Dark"
                     labelOff="Light"
                     onChange={(checked) => ext.setConfig({mode: checked ? 1 : 0})}
                 />
                 <Button
-                    class={{'mode-toggle__button--active': ext.config.mode === 0}}
+                    class={{'mode-toggle__button--active': ext.filterConfig.mode === 0}}
                     onclick={() => ext.setConfig({mode: 0})}
                 >
                     <span class="icon icon--light-mode"></span>

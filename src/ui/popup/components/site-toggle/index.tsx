@@ -15,7 +15,7 @@ export default function SiteToggleButton({ext}: {ext: Extension}) {
             const toggleHasEffect = (
                 ext.enabled &&
                 !info.isProtected &&
-                (ext.config.invertListed || !info.isInDarkList)
+                (ext.filterConfig.invertListed || !info.isInDarkList)
             );
 
             buttonNode.classList.toggle('site-toggle--disabled', !toggleHasEffect);

@@ -1,4 +1,3 @@
-import {isUrlInList, configStore, getFixesFor} from '../background/config-manager';
 import {multiplyMatrices} from './utils';
 import {FilterConfig, InversionFix} from '../definitions';
 
@@ -7,24 +6,7 @@ export enum FilterMode {
     dark = 1
 }
 
-export default function createCSSFilterStyle(config: FilterConfig, url: string) {
-    const {DARK_SITES} = configStore;
-    const isUrlInDarkList = isUrlInList(url, DARK_SITES);
-    const isUrlInUserList = isUrlInList(url, config.siteList);
-
-    if (!(
-        (isUrlInUserList && config.invertListed)
-        || (!isUrlInDarkList
-            && !config.invertListed
-            && !isUrlInUserList)
-    )) {
-        console.log(`Site is not inverted: ${url}`);
-        return '';
-    }
-
-    console.log(`Creating CSS for url: ${url}`);
-
-    const fix = getFixesFor(url);
+export default function createCSSFilterStyle(config: FilterConfig, fix: InversionFix) {
     const lines: string[] = [];
 
     lines.push('@media screen {');

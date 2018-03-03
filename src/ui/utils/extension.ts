@@ -27,7 +27,7 @@ export function createExtensionMock() {
     let listener: () => void = null;
     const extension: Extension = {
         enabled: true,
-        config: {
+        filterConfig: {
             mode: 1,
             brightness: 110,
             contrast: 90,
@@ -56,7 +56,7 @@ export function createExtensionMock() {
             listener();
         },
         setConfig(config) {
-            Object.assign(extension.config, config);
+            Object.assign(extension.filterConfig, config);
             listener();
         },
         addListener(callback) {
@@ -74,9 +74,9 @@ export function createExtensionMock() {
             });
         },
         toggleCurrentSite() {
-            extension.config.siteList.length ?
-                extension.config.siteList.splice(0) :
-                extension.config.siteList.push('darkreader.org');
+            extension.filterConfig.siteList.length ?
+                extension.filterConfig.siteList.splice(0) :
+                extension.filterConfig.siteList.push('darkreader.org');
             listener();
         },
         getDevInversionFixesText() {

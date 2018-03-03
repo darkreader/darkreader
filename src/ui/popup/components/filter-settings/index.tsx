@@ -7,7 +7,7 @@ export default function FilterSettings({ext}: {ext: Extension}) {
 
     const brightness = (
         <UpDown
-            value={ext.config.brightness}
+            value={ext.filterConfig.brightness}
             min={50}
             max={150}
             step={10}
@@ -19,7 +19,7 @@ export default function FilterSettings({ext}: {ext: Extension}) {
 
     const contrast = (
         <UpDown
-            value={ext.config.contrast}
+            value={ext.filterConfig.contrast}
             min={50}
             max={150}
             step={10}
@@ -31,7 +31,7 @@ export default function FilterSettings({ext}: {ext: Extension}) {
 
     const grayscale = (
         <UpDown
-            value={ext.config.grayscale}
+            value={ext.filterConfig.grayscale}
             min={0}
             max={100}
             step={10}
@@ -43,7 +43,7 @@ export default function FilterSettings({ext}: {ext: Extension}) {
 
     const sepia = (
         <UpDown
-            value={ext.config.sepia}
+            value={ext.filterConfig.sepia}
             min={0}
             max={100}
             step={10}

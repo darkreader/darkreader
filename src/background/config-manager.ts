@@ -1,4 +1,4 @@
-import {simpleClone} from './utils';
+import {simpleClone, isUrlInList, isUrlMatched, readJson} from './utils';
 import {FilterConfig, InversionFixes, InversionFix, SiteFix} from '../definitions';
 
 const DEBUG = [
@@ -125,8 +125,8 @@ export default class ConfigManager {
         };
     }
 
-    private handleDarkSites(sites: string[]) {
-        this.DARK_SITES = (Array.isArray(sites) ? sites : [])
+    private handleDarkSites($sites: string[]) {
+        this.DARK_SITES = (Array.isArray($sites) ? $sites : [])
             .filter((x) => typeof x === 'string');
     }
 
@@ -150,141 +150,6 @@ export default class ConfigManager {
         }
         return {...INVERSION_FIXES.common};
     }
-}
-
-//
-// ---------- Data loading -----------
-
-/**
- * Loads and parses JSON from file to object.
- * @param params Object containing request parameters.
- */
-function readJson<T>(params: JsonRequestParams<T>): Promise<T> {
-    return new Promise((resolve, reject) => {
-        const request = new XMLHttpRequest();
-        request.overrideMimeType("application/json");
-        request.open(
-            'GET',
-            `${params.url}?nocache=${Date.now()}`,
-            true
-        );
-        request.onload = () => {
-            if (request.status >= 200 && request.status < 300) {
-                // Remove comments
-                const resultText = request.responseText
-                    .replace(/(\".*?(\\\".*?)*?\")|(\/\*(.|[\r\n])*?\*\/)|(\/\/.*?[\r\n])/gm, '$1');
-
-                const json = JSON.parse(resultText);
-                resolve(json);
-            } else {
-                reject(new Error(request.status + ': ' + request.statusText));
-            }
-        };
-        request.onerror = (err: ErrorEvent) => reject(err.error);
-        if (params.timeout) {
-            request.timeout = params.timeout;
-            request.ontimeout = () => reject(new Error('Config loading stopped due to timeout.'));
-        }
-        request.send();
-    });
-}
-
-interface JsonRequestParams<T> {
-    url: string;
-    timeout?: number;
-}
-
-
-//
-// ---------- URL template matching ----------------
-
-/**
- * Determines whether URL has a match in URL template list.
- * @param url Site URL.
- * @paramlist List to search into.
- */
-export function isUrlInList(url: string, list: string[]) {
-    for (let i = 0; i < list.length; i++) {
-        if (isUrlMatched(url, list[i])) {
-            console.log('URL ' + url + ' is in list.');
-            return true;
-        }
-    }
-    return false;
-}
-
-/**
- * Determines whether URL matches the template.
- * @param url URL.
- * @param urlTemplate URL template ("google.*", "youtube.com" etc).
- */
-function isUrlMatched(url: string, urlTemplate: string): boolean {
-    const regex = createUrlRegex(urlTemplate);
-    return !!url.match(regex);
-}
-
-function createUrlRegex(urlTemplate: string): RegExp {
-    urlTemplate = urlTemplate.trim();
-    const exactBeginning = (urlTemplate[0] === '^');
-    const exactEnding = (urlTemplate[urlTemplate.length - 1] === '$');
-
-    urlTemplate = (urlTemplate
-        .replace(/^\^/, '') // Remove ^ at start
-        .replace(/\$$/, '') // Remove $ at end
-        .replace(/^.*?\/{2,3}/, '') // Remove scheme
-        .replace(/\?.*$/, '') // Remove query
-        .replace(/\/$/, '') // Remove last slash
-    );
-
-    let slashIndex: number;
-    let beforeSlash: string;
-    let afterSlash: string;
-    if ((slashIndex = urlTemplate.indexOf('/')) >= 0) {
-        beforeSlash = urlTemplate.substring(0, slashIndex); // google.*
-        afterSlash = urlTemplate.replace('$', '').substring(slashIndex); // /login/abc
-    } else {
-        beforeSlash = urlTemplate.replace('$', '');
-    }
-
-    //
-    // SCHEME and SUBDOMAINS
-
-    let result = (exactBeginning ?
-        '^(.*?\\:\\/{2,3})?' // Scheme
-        : '^(.*?\\:\\/{2,3})?([^\/]*?\\.)?' // Scheme and subdomains
-    );
-
-    //
-    // HOST and PORT
-
-    const hostParts = beforeSlash.split('.');
-    result += '(';
-    for (let i = 0; i < hostParts.length; i++) {
-        if (hostParts[i] === '*') {
-            hostParts[i] = '[^\\.\\/]+?';
-        }
-    }
-    result += hostParts.join('\\.');
-    result += ')';
-
-    //
-    // PATH and QUERY
-
-    if (afterSlash) {
-        result += '(';
-        result += afterSlash.replace('/', '\\/');
-        result += ')';
-    }
-
-    result += (exactEnding ?
-        '(\\/?(\\?[^\/]*?)?)$' // All following queries
-        : '(\\/?.*?)$' // All following paths and queries
-    );
-
-    //
-    // Result
-
-    return new RegExp(result, 'i');
 }
 
 function isStringOrArray(item) {

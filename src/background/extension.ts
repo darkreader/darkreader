@@ -1,7 +1,7 @@
-import {default as ConfigManager, isUrlInList} from './config-manager';
+import ConfigManager from './config-manager';
 import IconManager from './icon-manager';
 import UserStorage from './user-storage';
-import {simpleClone, getFontList, canInjectScript} from './utils';
+import {simpleClone, getFontList, canInjectScript, isUrlInList} from './utils';
 import {formatJson} from '../config/utils';
 import createCSSFilterStylesheet from '../generators/css-filter';
 import {FilterConfig, TabInfo} from '../definitions';

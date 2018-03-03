@@ -2,10 +2,6 @@ export function isFirefox() {
     return navigator.userAgent.indexOf('Firefox') >= 0;
 }
 
-export function simpleClone(obj) {
-    return JSON.parse(JSON.stringify(obj));
-}
-
 export function canInjectScript(url: string) {
     if (isFirefox()) {
         return (url
@@ -37,6 +33,18 @@ export function getFontList() {
         chrome.fontSettings.getFontList((list) => {
             const fonts = list.map((f) => f.fontId);
             resolve(fonts);
+        });
+    });
+}
+
+export function getCommands() {
+    return new Promise<chrome.commands.Command[]>((resolve) => {
+        chrome.commands.getAll((commands) => {
+            if (commands) {
+                resolve(commands);
+            } else {
+                resolve([]);
+            }
         });
     });
 }

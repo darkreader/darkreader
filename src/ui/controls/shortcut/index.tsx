@@ -1,29 +1,11 @@
 import {html} from 'malevic';
 import {mergeClass} from '../utils';
+import {getCommands} from '../../../background/utils';
 
 interface ShortcutLinkProps {
     class?: string | {[cls: string]: any};
     commandName: string;
     textTemplate: (shortcut: string) => string;
-}
-
-function getChromeShortcut(commandName: string) {
-    return new Promise<string>((resolve, reject) => {
-        if (!chrome.commands) {
-            requestAnimationFrame(() => reject('chrome.commands not supported'));
-            return;
-        }
-        chrome.commands.getAll((commands) => {
-            if (commands) {
-                const cmd = commands.filter(({name}) => name === commandName)[0];
-                if (cmd) {
-                    resolve(cmd.shortcut);
-                } else {
-                    reject(`Command "${commandName}" not found.`);
-                }
-            }
-        });
-    });
 }
 
 /**
@@ -33,15 +15,11 @@ function getChromeShortcut(commandName: string) {
 export default function ShortcutLink(props: ShortcutLinkProps) {
     const cls = mergeClass('shortcut', props.class);
 
-    function setupText(node: HTMLElement) {
-        getChromeShortcut(props.commandName)
-            .then((shortcut) => {
-                const text = props.textTemplate(shortcut);
-                node.textContent = text;
-            })
-            .catch((err) => {
-                node.textContent = err;
-            });
+    async function setupText(node: HTMLElement) {
+        const commands = await getCommands();
+        const command = commands.find((c) => c.name === props.commandName);
+        const shortcut = command && command.shortcut ? command.shortcut : null;
+        node.textContent = props.textTemplate(shortcut);
     }
 
     function onClick() {

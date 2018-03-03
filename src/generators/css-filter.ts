@@ -1,13 +1,13 @@
-import {isUrlInList, configStore, getFixesFor, InversionFix} from '../background/config_management';
+import {isUrlInList, configStore, getFixesFor} from '../background/config-manager';
 import {multiplyMatrices} from './utils';
-import {FilterConfig} from '../definitions';
+import {FilterConfig, InversionFix} from '../definitions';
 
 export enum FilterMode {
     light = 0,
     dark = 1
 }
 
-export default function createCssCode(config: FilterConfig, url: string) {
+export default function createCSSFilterStyle(config: FilterConfig, url: string) {
     const {DARK_SITES} = configStore;
     const isUrlInDarkList = isUrlInList(url, DARK_SITES);
     const isUrlInUserList = isUrlInList(url, config.siteList);

@@ -1,9 +1,9 @@
 import {Extension} from './extension';
-import {loadConfigs, DEBUG} from './config_management';
+import {loadConfigs, configStore} from './config-manager';
 
 // Initialize extension
 let extension: Extension;
-loadConfigs(() => {
+loadConfigs().then(() => {
     extension = new Extension();
 
     (window as any).DarkReader = (window as any).DarkReader || {};
@@ -11,7 +11,7 @@ loadConfigs(() => {
     (window as any).DarkReader.Background.extension = extension;
 });
 
-if (DEBUG) {
+if (configStore.DEBUG) {
     // Reload extension on connection
     const listen = () => {
         const req = new XMLHttpRequest();

@@ -1,4 +1,4 @@
-import {configStore} from './config_management';
+import {configStore} from './config-manager';
 import {UserSettings} from '../definitions';
 
 const DEFAULT_SETTINGS = {

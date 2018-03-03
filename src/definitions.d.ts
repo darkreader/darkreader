@@ -1,4 +1,4 @@
-import {FilterMode} from './background/filter_css_generator';
+import {FilterMode} from './generators/css-filter';
 
 export interface Extension {
     enabled: boolean;
@@ -37,4 +37,20 @@ export interface TabInfo {
     host: string;
     isProtected: boolean;
     isInDarkList: boolean;
+}
+
+export interface InversionFixes {
+    common: InversionFix;
+    sites: SiteFix[];
+}
+
+export interface InversionFix {
+    invert: string[];
+    noinvert: string[];
+    removebg: string[];
+    rules: string[];
+}
+
+export interface SiteFix extends InversionFix {
+    url: string | string[];
 }

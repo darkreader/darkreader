@@ -1,7 +1,7 @@
-import {configStore, isUrlInList, DEBUG, copyJson, handleInversionFixes} from './config_management';
+import {configStore, isUrlInList, handleInversionFixes} from './config-manager';
 import IconManager from './icon-manager';
 import UserStorage from './user-storage';
-import {getFontList, canInjectScript} from './utils';
+import {simpleClone, getFontList, canInjectScript} from './utils';
 import {formatJson} from '../config/utils';
 import createCSSFilterStylesheet from '../generators/css-filter';
 import {FilterConfig, TabInfo} from '../definitions';
@@ -114,7 +114,7 @@ export class Extension {
                 };
                 callback(info);
             } else {
-                if (DEBUG) {
+                if (configStore.DEBUG) {
                     throw new Error('Unexpected tabs count.');
                 }
                 console.error('Unexpected tabs count.');
@@ -285,13 +285,13 @@ export class Extension {
     protected getCode_addStyle(url?: string) {
         const css = createCSSFilterStylesheet(this.config, url);
         return this.addStyleScript
-            .replace(/(^\s*)(\/\/\s*?#DEBUG\s*)(.*?$)/igm, DEBUG ? '$1$3' : '')
+            .replace(/(^\s*)(\/\/\s*?#DEBUG\s*)(.*?$)/igm, configStore.DEBUG ? '$1$3' : '')
             .replace(/\$CSS/g, `'${css.replace(/\'/g, '\\\'')}'`);
     }
 
     protected getCode_removeStyle() {
         return this.removeStyleScript
-            .replace(/(^\s*)(\/\/\s*?#DEBUG\s*)(.*?$)/igm, DEBUG ? '$1$3' : '');
+            .replace(/(^\s*)(\/\/\s*?#DEBUG\s*)(.*?$)/igm, configStore.DEBUG ? '$1$3' : '');
     }
 
     protected saveUserSettings() {
@@ -318,13 +318,13 @@ export class Extension {
     getDevInversionFixesText() {
         const {RAW_INVERSION_FIXES} = configStore;
         const fixes = this.getSavedDevInversionFixes();
-        return formatJson(fixes ? JSON.parse(fixes) : copyJson(RAW_INVERSION_FIXES));
+        return formatJson(fixes ? JSON.parse(fixes) : simpleClone(RAW_INVERSION_FIXES));
     }
 
     resetDevInversionFixes() {
         const {RAW_INVERSION_FIXES} = configStore;
         localStorage.removeItem('dev_inversion_fixes');
-        handleInversionFixes(copyJson(RAW_INVERSION_FIXES));
+        handleInversionFixes(simpleClone(RAW_INVERSION_FIXES));
         this.onConfigPropChanged();
     }
 

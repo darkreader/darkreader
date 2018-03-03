@@ -1,10 +1,12 @@
-import {FilterConfig} from '../definitions';
+import {simpleClone} from './utils';
+import {FilterConfig, InversionFixes, InversionFix, SiteFix} from '../definitions';
 
 export const configStore: {
     DEFAULT_FILTER_CONFIG?: FilterConfig;
     DARK_SITES?: string[];
     INVERSION_FIXES?: InversionFixes;
     RAW_INVERSION_FIXES?: any;
+    DEBUG?: boolean;
 } = {};
 
 //--------------------------------
@@ -28,159 +30,110 @@ const CONFIG_URLs = {
 };
 const REMOTE_TIMEOUT_MS = 10 * 1000;
 const RELOAD_INTERVAL_MS = 15 * 60 * 1000;
-export const DEBUG = [
+
+configStore.DEBUG = [
     'eimadpbcbfnmbkopoojfekhnkhdbieeh',
     'addon@darkreader.org'
 ].indexOf(chrome.runtime.id) < 0;
-const DEBUG_LOCAL_CONFIGS = DEBUG;
+const DEBUG_LOCAL_CONFIGS = false;
 
 //
 // ----- Load configs ------
 
-export function loadConfigs(done?: () => void) {
-    if (!DEBUG_LOCAL_CONFIGS) {
+export async function loadConfigs() {
+    async function loadLocalDarkSites() {
+        return await readJson<string[]>({url: CONFIG_URLs.darkSites.local});
+    }
 
-        //
-        // Load remote and local as fallback
+    async function loadLocalInversionFixes() {
+        return await readJson<InversionFixes>({url: CONFIG_URLs.inversionFixes.local});
+    }
 
-        Promise.all<any>([
+    async function loadDefaultFilterConfig() {
+        const filter = await readJson<FilterConfig>({url: CONFIG_URLs.defaultFilterConfig.local});
+        handleFilterConfig(filter);
+    }
 
-            //
-            // Load dark sites
-
-            readJson<string[]>({
-                url: CONFIG_URLs.darkSites.remote,
-                timeout: REMOTE_TIMEOUT_MS
-            }).then((res) => {
-                return res;
-            }).catch((err) => {
+    async function loadDarkSites() {
+        let $sites: string[];
+        if (DEBUG_LOCAL_CONFIGS) {
+            $sites = await loadLocalDarkSites();
+        } else {
+            try {
+                $sites = await readJson<string[]>({
+                    url: CONFIG_URLs.darkSites.remote,
+                    timeout: REMOTE_TIMEOUT_MS
+                });
+            } catch (err) {
                 console.error('Dark Sites remote load error', err);
-                return readJson<string[]>({
-                    url: CONFIG_URLs.darkSites.local
+                $sites = await loadLocalDarkSites();
+            }
+        }
+        handleDarkSites($sites)
+    }
+
+    async function loadInversionFixes() {
+        let $fixes: InversionFixes;
+        if (DEBUG_LOCAL_CONFIGS) {
+            $fixes = await loadLocalInversionFixes();
+        } else {
+            try {
+                $fixes = await readJson<InversionFixes>({
+                    url: CONFIG_URLs.inversionFixes.remote,
+                    timeout: REMOTE_TIMEOUT_MS
                 });
-            }).then((res) => handleDarkSites(res, onInvalidData)),
-
-            //
-            // Load inversion fixes
-
-            readJson<InversionFixes>({
-                url: CONFIG_URLs.inversionFixes.remote,
-                timeout: REMOTE_TIMEOUT_MS
-            }).then((res) => {
-                return res;
-            }).catch((err) => {
+            } catch (err) {
                 console.error('Inversion Fixes remote load error', err);
-                return readJson<InversionFixes>({
-                    url: CONFIG_URLs.inversionFixes.local
-                });
-            }).then((res) => {
-                configStore.RAW_INVERSION_FIXES = res;
-                handleInversionFixes(copyJson(res), onInvalidData);
-            }),
-
-            //
-            // Load default filter config
-
-            readJson<FilterConfig>({
-                url: CONFIG_URLs.defaultFilterConfig.local
-            }).then((res) => handleFilterConfig(res, onInvalidData))
-
-        ]).then(() => done && done(),
-            (err) => console.error('Fatality', err));
-    } else {
-        // Load local configs only
-        Promise.all<any>([
-            // Load dark sites
-            readJson<string[]>({
-                url: CONFIG_URLs.darkSites.local
-            }).then((res) => handleDarkSites(res, onInvalidData)),
-
-            // Load sites fixes
-            readJson<InversionFixes>({
-                url: CONFIG_URLs.inversionFixes.local
-            }).then((res) => {
-                configStore.RAW_INVERSION_FIXES = res;
-                handleInversionFixes(copyJson(res), onInvalidData);
-            }),
-
-            // Load default filter config
-            readJson<FilterConfig>({
-                url: CONFIG_URLs.defaultFilterConfig.local
-            }).then((res) => handleFilterConfig(res, onInvalidData))
-
-        ]).then(() => done && done(),
-            (err) => console.error('Fatality', err));
-    }
-
-    // --------- Data handling ----------
-
-    function onInvalidData(desc) {
-        if (DEBUG) throw new Error(desc);
-        console.error('Invalid data: ' + desc);
-    }
-}
-
-function handleDarkSites(sites: string[], onerror?: (err: string) => void) {
-    // Validate sites
-    if (!Array.isArray(sites)) {
-        sites = [];
-        onerror && onerror('Dark Sites list is not an array.');
-    }
-    for (let i = sites.length - 1; i >= 0; i--) {
-        if (typeof sites[i] !== 'string') {
-            sites.splice(i, 1);
+                $fixes = await loadLocalInversionFixes();
+            }
         }
-    }
-    sites.sort(urlTemplateSorter);
-    configStore.DARK_SITES = sites;
-}
-export function handleInversionFixes(fixes: InversionFixes, onerror?: (err: string) => void) {
-    // Validate fixes
-    if (fixes === null || typeof fixes !== 'object') {
-        fixes = {
-            common: <any>{},
-            sites: []
-        };
-        onerror && onerror('Inversion Fix config is not an object.')
-    }
-    if (!fixes.common) {
-        fixes.common = <any>{};
-    }
-    fixes.common.invert = toStringArray(fixes.common.invert);
-    fixes.common.noinvert = toStringArray(fixes.common.noinvert);
-    fixes.common.removebg = toStringArray(fixes.common.removebg);
-    fixes.common.rules = toStringArray(fixes.common.rules);
-    if (!Array.isArray(fixes.sites)) {
-        fixes.sites = [];
-    }
-    for (let i = fixes.sites.length - 1; i >= 0; i--) {
-        let s = fixes.sites[i];
-        if (!isStringOrArray(s.url)) {
-            fixes.sites.splice(i, 1);
-            continue;
-        }
-        s.invert = toStringArray(s.invert);
-        s.noinvert = toStringArray(s.noinvert);
-        s.removebg = toStringArray(s.removebg);
-        s.rules = toStringArray(s.rules);
+        configStore.RAW_INVERSION_FIXES = simpleClone($fixes);
+        handleInversionFixes($fixes);
     }
 
-    // Add common selectors and rules
-    fixes.sites.forEach((s) => {
-        s.invert = fixes.common.invert.concat(s.invert);
-        s.noinvert = fixes.common.noinvert.concat(s.noinvert);
-        s.removebg = fixes.common.removebg.concat(s.removebg);
-        s.rules = fixes.common.rules.concat(s.rules);
-    });
-
-    configStore.INVERSION_FIXES = fixes;
+    await Promise.all([
+        loadDarkSites(),
+        loadInversionFixes(),
+        loadDefaultFilterConfig(),
+    ]).catch((err) => console.error('Fatality', err));
 }
-function handleFilterConfig(config: FilterConfig, onerror?: (err: string) => void) {
+
+function handleDarkSites(sites: string[]) {
+    configStore.DARK_SITES = (Array.isArray(sites) ? sites : [])
+        .filter((x) => typeof x === 'string')
+        .sort(urlTemplateSorter);
+}
+
+export function handleInversionFixes($fixes: InversionFixes) {
+    const common = {
+        invert: toStringArray($fixes && $fixes.common && $fixes.common.invert),
+        noinvert: toStringArray($fixes && $fixes.common && $fixes.common.noinvert),
+        removebg: toStringArray($fixes && $fixes.common && $fixes.common.removebg),
+        rules: toStringArray($fixes && $fixes.common && $fixes.common.rules),
+    };
+    const sites = ($fixes && Array.isArray($fixes.sites)
+        ? $fixes.sites.filter((s) => isStringOrArray(s.url))
+            .map((s) => {
+                return {
+                    url: s.url,
+                    invert: common.invert.concat(toStringArray(s.invert)),
+                    noinvert: common.noinvert.concat(toStringArray(s.noinvert)),
+                    removebg: common.removebg.concat(toStringArray(s.removebg)),
+                    rules: common.rules.concat(toStringArray(s.rules)),
+                };
+            })
+        : []);
+    configStore.INVERSION_FIXES = {
+        common,
+        sites,
+    };
+}
+
+function handleFilterConfig(config: FilterConfig) {
     const {DEFAULT_FILTER_CONFIG} = configStore;
     if (config !== null && typeof config === 'object') {
         for (let prop in DEFAULT_FILTER_CONFIG) {
             if (typeof config[prop] !== typeof DEFAULT_FILTER_CONFIG[prop]) {
-                onerror && onerror(`Invalid config property "${prop}"`);
                 config[prop] = DEFAULT_FILTER_CONFIG[prop];
             }
         }
@@ -189,22 +142,6 @@ function handleFilterConfig(config: FilterConfig, onerror?: (err: string) => voi
 }
 
 setInterval(loadConfigs, RELOAD_INTERVAL_MS); // Reload periodically
-
-export interface InversionFixes {
-    common: InversionFix;
-    sites: SiteFix[];
-}
-
-export interface InversionFix {
-    invert: string[];
-    noinvert: string[];
-    removebg: string[];
-    rules: string[];
-}
-
-export interface SiteFix extends InversionFix {
-    url: string | string[];
-}
 
 /**
  * Returns fixes for a given URL.
@@ -426,14 +363,10 @@ function isStringOrArray(item) {
 
 function toStringArray(value: string | string[]): string[] {
     if (Array.isArray(value)) {
-        return <string[]>value;
+        return value;
     }
-    if (value) {
-        return [<string>value];
+    if (typeof value === 'string' && value) {
+        return [value];
     }
     return [];
-}
-
-export function copyJson(obj) {
-    return JSON.parse(JSON.stringify(obj));
 }

@@ -1,12 +1,10 @@
 import {Extension} from './extension';
-import {FilterCssGenerator} from './filter_css_generator';
 import {loadConfigs, DEBUG} from './config_management';
 
 // Initialize extension
 let extension: Extension;
 loadConfigs(() => {
-    extension = new Extension(
-        new FilterCssGenerator());
+    extension = new Extension();
 
     (window as any).DarkReader = (window as any).DarkReader || {};
     (window as any).DarkReader.Background = (window as any).DarkReader.Background || {};

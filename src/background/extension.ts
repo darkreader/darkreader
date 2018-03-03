@@ -3,16 +3,10 @@ import IconManager from './icon-manager';
 import UserStorage from './user-storage';
 import {getFontList, canInjectScript} from './utils';
 import {formatJson} from '../config/utils';
-import {FilterCssGenerator, FilterMode} from './filter_css_generator';
+import createCSSFilterStylesheet from '../generators/css-filter';
 import {FilterConfig, TabInfo} from '../definitions';
 
-/**
- * Chrome extension.
- * Extension uses CSS generator to process opened web pages.
- */
 export class Extension {
-
-    protected generator: FilterCssGenerator;
 
     enabled: boolean;
     config: FilterConfig;
@@ -20,12 +14,7 @@ export class Extension {
     icon: IconManager;
     user: UserStorage;
 
-    /**
-     * Creates a chrome extensions.
-     * @param generator CSS-generator.
-     */
-    constructor(generator: FilterCssGenerator) {
-        this.generator = generator;
+    constructor() {
 
         this.listeners = new Set();
 
@@ -294,7 +283,7 @@ export class Extension {
     protected removeStyleScript: string;
 
     protected getCode_addStyle(url?: string) {
-        const css = this.generator.createCssCode(this.config, url);
+        const css = createCSSFilterStylesheet(this.config, url);
         return this.addStyleScript
             .replace(/(^\s*)(\/\/\s*?#DEBUG\s*)(.*?$)/igm, DEBUG ? '$1$3' : '')
             .replace(/\$CSS/g, `'${css.replace(/\'/g, '\\\'')}'`);

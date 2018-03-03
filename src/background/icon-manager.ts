@@ -1,0 +1,30 @@
+const ICON_PATHS = {
+    active_19: '../icons/dr_active_19.png',
+    active_38: '../icons/dr_active_38.png',
+    inactive_19: '../icons/dr_inactive_19.png',
+    inactive_38: '../icons/dr_inactive_38.png'
+};
+
+export default class IconManager {
+    constructor() {
+        this.setActive();
+    }
+
+    setActive() {
+        chrome.browserAction.setIcon({
+            path: {
+                '19': ICON_PATHS.active_19,
+                '38': ICON_PATHS.active_38
+            }
+        });
+    }
+
+    setInactive() {
+        chrome.browserAction.setIcon({
+            path: {
+                '19': ICON_PATHS.inactive_19,
+                '38': ICON_PATHS.inactive_38
+            }
+        });
+    }
+}

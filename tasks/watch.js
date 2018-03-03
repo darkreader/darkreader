@@ -8,7 +8,7 @@ module.exports = function createWatchTask(gulp) {
     gulp.task('html-debug-reload', (done) => runSequence('html-debug', 'reload', done));
 
     gulp.task('watch', ['js-debug', 'css-debug', 'html-debug', 'copy-debug'], () => {
-        gulp.watch(['src/**/*.ts', 'src/**/*.tsx'], ['js-debug-reload']);
+        gulp.watch(['src/**/*.ts', 'src/**/*.tsx', 'src/**/*.js'], ['js-debug-reload']);
         gulp.watch(['src/**/*.less'], ['css-debug-reload']);
         gulp.watch(['src/**/*.html'], ['html-debug-reload']);
 

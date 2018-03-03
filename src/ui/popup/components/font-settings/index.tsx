@@ -8,11 +8,11 @@ export default function FontSettings({ext}: {ext: Extension}) {
             <div class="font-settings__font-select-container">
                 <div class="font-settings__font-select-container__line">
                     <CheckBox
-                        checked={ext.config.useFont}
+                        checked={ext.filterConfig.useFont}
                         onchange={(e) => ext.setConfig({useFont: e.target.checked})}
                     />
                     <Select
-                        value={ext.config.fontFamily}
+                        value={ext.filterConfig.fontFamily}
                         onChange={(value) => ext.setConfig({fontFamily: value})}
                         options={ext.fonts.reduce((map, font) => {
                             map[font] = (
@@ -29,7 +29,7 @@ export default function FontSettings({ext}: {ext: Extension}) {
                 </label>
             </div>
             <UpDown
-                value={ext.config.textStroke}
+                value={ext.filterConfig.textStroke}
                 min={0}
                 max={1}
                 step={0.1}

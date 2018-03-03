@@ -1,16 +1,16 @@
 # Build folder
 #-----------------------------------
-build/
-build-firefox/
+build
 build.zip
+build-firefox
 build-firefox.zip
-debug/
+debug
 
 # Node.js modules
 #-----------------------------------
-node_modules/
+node_modules
 
 # IDE and editor configs
 #-----------------------------------
-.idea/
-.vscode/
+.idea
+.vscode

@@ -1,4 +1,4 @@
-import {html, sync, getData} from 'malevic';
+import {html, render, getData} from 'malevic';
 import withState from 'malevic/state';
 import Button from '../button';
 import TextBox from '../textbox';
@@ -15,11 +15,33 @@ interface SelectProps {
 
 interface SelectState {
     isExpanded?: boolean;
+    isLoading?: boolean;
+    wasLoaded?: boolean;
 }
+
+const expandedLists = new WeakSet<Element>();
+const valueNodes = new WeakMap<Element, Map<string, Element>>();
 
 function Select(props: SelectProps) {
     const {state, setState} = props;
     const values = Object.keys(props.options);
+
+    let rootNode: Element;
+
+    function onRender(node) {
+        rootNode = node;
+        if (!valueNodes.has(rootNode)) {
+            valueNodes.set(rootNode, new Map());
+        }
+    }
+
+    function onOuterClick(e: MouseEvent) {
+        const r = rootNode.getBoundingClientRect();
+        if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) {
+            window.removeEventListener('click', onOuterClick);
+            collapseList();
+        }
+    }
 
     function onTextInput(e: Event) {
         const text = (e.target as HTMLInputElement)
@@ -38,23 +60,38 @@ function Select(props: SelectProps) {
     }
 
     function scrollToValue(value: string) {
-        if (valueNodes.has(value)) {
-            valueNodes.get(value).scrollIntoView(true)
+        if (valueNodes.get(rootNode).has(value)) {
+            valueNodes.get(rootNode).get(value).scrollIntoView(true)
+        }
+    }
+
+    function onExpandClick() {
+        if (state.isExpanded) {
+            collapseList();
+        } else {
+            expandList();
         }
     }
 
     function expandList() {
-        if (state.isExpanded) {
-            return;
+        if (state.wasLoaded) {
+            setState({isExpanded: true});
+            scrollToValue(props.value);
+        } else {
+            // Note: Rendering many fonts freezes UI for some time,
+            // so we are showing a "loading" message. An ideal solution
+            // would be a virtual scroll.
+            setState({isLoading: true});
+            rootNode.querySelector('.select__loading').getBoundingClientRect();
+            requestAnimationFrame(() => {
+                setState({wasLoaded: true});
+                requestAnimationFrame(() => {
+                    setState({isLoading: false, isExpanded: true});
+                    scrollToValue(props.value);
+                });
+            });
         }
-
-        scrollToValue(props.value);
-        setState({isExpanded: true});
         requestAnimationFrame(() => {
-            function onOuterClick() {
-                window.removeEventListener('click', onOuterClick);
-                collapseList();
-            }
             window.addEventListener('click', onOuterClick);
         });
     }
@@ -75,18 +112,16 @@ function Select(props: SelectProps) {
         collapseList();
     }
 
-    const valueNodes = new Map<string, Element>();
-
     function saveValueNode(value, domNode) {
-        valueNodes.set(value, domNode);
+        valueNodes.get(rootNode).set(value, domNode);
     }
 
     function removeValueNode(value) {
-        valueNodes.delete(value);
+        valueNodes.get(rootNode).delete(value);
     }
 
     return (
-        <span class="select">
+        <span class="select" didmount={onRender} didupdate={onRender}>
             <span class="select__line">
                 <TextBox
                     class="select__textbox"
@@ -95,7 +130,7 @@ function Select(props: SelectProps) {
                 />
                 <Button
                     class="select__expand"
-                    onclick={expandList}
+                    onclick={onExpandClick}
                 >
                     <span class="select__expand__icon"></span>
                 </Button>
@@ -107,7 +142,7 @@ function Select(props: SelectProps) {
                 }}
                 onclick={onSelectOption}
             >
-                {Object.entries(props.options).map(([value, content]) => (
+                {state.wasLoaded ? Object.entries(props.options).map(([value, content]) => (
                     <span
                         class="select__option"
                         data={value}
@@ -117,8 +152,9 @@ function Select(props: SelectProps) {
                     >
                         {content}
                     </span>
-                ))}
+                )) : null}
             </span>
+            {state.isLoading ? <span class="select__loading">Loading...</span> : null}
         </span>
     );
 }

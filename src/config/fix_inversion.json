@@ -604,6 +604,10 @@
             "invert": ".flair"
         },
         {
+            "url": "reddit.com/r/Paranormal",
+            "invert": "#header, #sr-header-area, #header-bottom-right"
+        },
+        {
             "url": [
                 "ruby.sketchup.com",
                 "rubydoc.info"

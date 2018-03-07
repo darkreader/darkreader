@@ -1,10 +1,24 @@
-import {html, render, NodeDeclaration} from 'malevic';
+import {html, render, plugins, getData, NodeDeclaration} from 'malevic';
 
 interface VirtualScrollProps {
     root: NodeDeclaration;
     items: NodeDeclaration[];
-    focusedItemIndex?: number;
+    scrollToIndex?: number;
 }
+
+type Match = [NodeDeclaration, Element];
+
+plugins.render.matchNodes.add(({d, element}) => {
+    if (!(d.attrs && d.attrs.data === VirtualScroll)) {
+        return null;
+    }
+
+    const elements = Array.from(element.children);
+    const elementsByIndex = elements.reduce((map, el) => map.set(getData(el), el), new Map<number, Element>());
+
+    const declarations: NodeDeclaration[] = (d.children[0] as Function)(element);
+    return declarations.map((c: NodeDeclaration) => [c, elementsByIndex.get(c.attrs.data) || null] as Match);
+});
 
 const elementsHeights = new WeakMap<Element, number>();
 
@@ -14,10 +28,10 @@ export default function VirtualScroll(props: VirtualScrollProps) {
     }
 
     function getContent({scrollToIndex}) {
-        return (domNode: HTMLElement) => {
+        return (root: HTMLElement) => {
             let itemHeight: number;
-            if (elementsHeights.has(domNode)) {
-                itemHeight = elementsHeights.get(domNode);
+            if (elementsHeights.has(root)) {
+                itemHeight = elementsHeights.get(root);
             } else {
                 const tempItem = {
                     ...props.items[0],
@@ -27,47 +41,66 @@ export default function VirtualScroll(props: VirtualScrollProps) {
                         didupdate: null
                     }
                 };
-                const tempNode = render(domNode, tempItem);
+                const tempNode = render(root, tempItem);
                 itemHeight = tempNode.getBoundingClientRect().height;
-                elementsHeights.set(domNode, itemHeight);
+                elementsHeights.set(root, itemHeight);
             }
-            if (scrollToIndex >= 0) {
-                domNode.scrollTop = scrollToIndex * itemHeight;
-            }
-            const indices = props.items.reduce((map, item, i) => map.set(item, i), new Map());
-            const style = getComputedStyle(domNode);
-            const hasHeightTransition = (style.transitionProperty === 'all' && style.transitionDuration !== '0s') || style.transition.indexOf('height') >= 0;
-            const containerHeight = hasHeightTransition ? document.documentElement.clientHeight - domNode.getBoundingClientRect().top : domNode.clientHeight;
 
             return (
                 <div
+                    data={VirtualScroll}
                     style={{
                         'flex': 'none',
                         'height': `${props.items.length * itemHeight}px`,
+                        'overflow': 'hidden',
                         'position': 'relative',
                     }}
                 >
-                    {props.items
-                        .filter((item) => {
-                            const index = indices.get(item);
-                            const isTopBoundVisible = index * itemHeight <= domNode.scrollTop + containerHeight;
-                            const isBottomBoundVisible = (index + 1) * itemHeight > domNode.scrollTop;
-                            return isTopBoundVisible && isBottomBoundVisible;
-                        })
-                        .map((item, i) => {
-                            return {
-                                ...item,
-                                attrs: {
-                                    ...item.attrs,
-                                    style: {
+                    {(wrapper) => {
+                        if (scrollToIndex >= 0) {
+                            root.scrollTop = scrollToIndex * itemHeight;
+                        }
+                        const containerHeight = document.documentElement.clientHeight - root.getBoundingClientRect().top; // Use this height as a fix for animated height
+
+                        // Prevent removing focused element
+                        let focusedIndex = -1;
+                        if (document.activeElement) {
+                            let current = document.activeElement;
+                            while (current && current.parentElement !== wrapper) {
+                                current = current.parentElement;
+                            }
+                            if (current) {
+                                focusedIndex = getData(current);
+                            }
+                        }
+
+                        return props.items
+                            .map((item, index) => {
+                                return {item, index};
+                            })
+                            .filter(({item, index}) => {
+                                const eTop = index * itemHeight;
+                                const eBottom = (index + 1) * itemHeight;
+                                const rTop = root.scrollTop;
+                                const rBottom = root.scrollTop + containerHeight;
+                                const isTopBoundVisible = eTop >= rTop && eTop <= rBottom;
+                                const isBottomBoundVisible = eBottom >= rTop && eBottom <= rBottom;
+                                return isTopBoundVisible || isBottomBoundVisible || focusedIndex === index;
+                            })
+                            .map(({item, index}) => (
+                                <div
+                                    data={index}
+                                    style={{
                                         'left': '0',
                                         'position': 'absolute',
-                                        'top': `${indices.get(item) * itemHeight}px`,
+                                        'top': `${index * itemHeight}px`,
                                         'width': '100%',
-                                    }
-                                }
-                            };
-                        })}
+                                    }}
+                                >
+                                    {item}
+                                </div>
+                            ));
+                    }}
                 </div>
             );
         };
@@ -75,17 +108,30 @@ export default function VirtualScroll(props: VirtualScrollProps) {
 
     let rootNode: Element;
     const saveRootRef = (node) => rootNode = node;
-    const update = () => render(rootNode, getContent({scrollToIndex: -1}) as any);
+    let prevScrollTop: number;
+    const rootDidMount = props.root.attrs && props.root.attrs.didmount;
+    const rootDidUpdate = props.root.attrs && props.root.attrs.didupdate;
 
     return {
         ...props.root,
         attrs: {
             ...props.root.attrs,
-            didmount: saveRootRef,
-            didupdate: saveRootRef,
-            onscroll: update,
-            ontransitionend: update,
+            didmount: (node) => {
+                rootNode = node;
+                rootDidMount && rootDidMount(rootNode);
+            },
+            didupdate: (node) => {
+                rootNode = node;
+                rootDidUpdate && rootDidUpdate(rootNode);
+            },
+            onscroll: (e) => {
+                if (rootNode.scrollTop === prevScrollTop) {
+                    return;
+                }
+                prevScrollTop = rootNode.scrollTop;
+                render(rootNode, getContent({scrollToIndex: -1}) as any);
+            }
         },
-        children: [getContent({scrollToIndex: isNaN(props.focusedItemIndex) ? -1 : props.focusedItemIndex})]
+        children: [getContent({scrollToIndex: isNaN(props.scrollToIndex) ? -1 : props.scrollToIndex})]
     };
 }

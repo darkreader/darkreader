@@ -85,9 +85,11 @@ function Select(props: SelectProps) {
         while (current && !current.matches('.select__option')) {
             current = current.parentElement;
         }
-        const value = getData(current);
 
-        props.onChange(value);
+        if (current) {
+            const value = getData(current);
+            props.onChange(value);
+        }
 
         collapseList();
     }
@@ -134,7 +136,7 @@ function Select(props: SelectProps) {
                         {content}
                     </span>
                 ))}
-                focusedItemIndex={state.focusedIndex}
+                scrollToIndex={state.focusedIndex}
             />
         </span>
     );

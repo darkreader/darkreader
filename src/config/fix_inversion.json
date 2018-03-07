@@ -574,6 +574,10 @@
             "rules": "#mail::before { display: none !important; }"
         },
         {
+            "url": "reddit.com/r/Paranormal",
+            "invert": "#header, #sr-header-area, #header-bottom-right"
+        },
+        {
             "url": "reddit.com/r/europe",
             "invert": ".flair"
         },

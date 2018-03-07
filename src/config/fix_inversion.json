@@ -582,6 +582,10 @@
             "invert": ".flair"
         },
         {
+            "url": "reddit.com/r/firefox",
+            "invert": "#header, #header-bottom-right"
+        },
+        {
             "url": [
                 "ruby.sketchup.com",
                 "rubydoc.info"

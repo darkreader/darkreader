@@ -1,5 +1,6 @@
-import {html} from 'malevic';
+import {html, getData} from 'malevic';
 import TextBox from '../textbox';
+import VirtualScroll from '../virtual-scroll';
 
 interface TextListProps {
     values: string[];
@@ -9,46 +10,65 @@ interface TextListProps {
     onChange: (values: string[]) => void;
 }
 
-const focusedNodes = new WeakSet<Element>();
+const propsStore = new WeakMap<Element, TextListProps>();
 
 export default function TextList(props: TextListProps) {
+    function onTextChange(e) {
+        const index = getData(e.target);
+        const values = props.values.slice();
+        const value = e.target.value.trim();
+        if (values.indexOf(value) >= 0) {
+            return;
+        }
 
-    const textDomNodes: HTMLInputElement[] = [];
+        if (!value) {
+            values.splice(index, 1);
+        } else if (index === values.length) {
+            values.push(value);
+        } else {
+            values.splice(index, 1, value);
+        }
+
+        props.onChange(values);
+    }
 
     function createTextBox(text: string, index: number) {
-        function onRender(domNode: HTMLInputElement) {
-            textDomNodes.push(domNode);
-            if (props.isFocused && index === props.values.length) {
-                if (!focusedNodes.has(domNode)) {
-                    focusedNodes.add(domNode);
-                    domNode.focus();
-                }
-            } else {
-                focusedNodes.delete(domNode);
-            }
-        }
         return (
             <TextBox
-                class={['text-list__textbox', props.class]}
+                class="text-list__textbox"
                 value={text}
+                data={index}
                 placeholder={props.placeholder}
-                didmount={onRender}
-                didupdate={onRender}
             />
         );
     }
 
-    function onTextChange() {
-        const values = Array.from(new Set(textDomNodes
-            .map((node) => node.value)
-            .filter((text) => text.trim())));
-        props.onChange(values);
-    }
+    return (node: HTMLElement) => {
+        let shouldFocus = false;
 
-    return (
-        <div class="text-list" onchange={onTextChange}>
-            {props.values.map(createTextBox)}
-            {createTextBox('', props.values.length)}
-        </div>
-    );
+        const prevProps = propsStore.get(node);
+        propsStore.set(node, props);
+        if (props.isFocused && (
+            !prevProps ||
+            !prevProps.isFocused ||
+            prevProps.values.length < props.values.length
+        )) {
+            shouldFocus = true;
+            requestAnimationFrame(() => {
+                const inputs = node.querySelectorAll('.text-list__textbox');
+                const last = inputs.item(inputs.length - 1) as HTMLInputElement;
+                last.focus();
+            });
+        }
+
+        return (
+            <VirtualScroll
+                root={<div class={['text-list', props.class]} onchange={onTextChange} />}
+                items={props.values
+                    .map(createTextBox)
+                    .concat(createTextBox('', props.values.length))}
+                scrollToIndex={shouldFocus ? props.values.length : -1}
+            />
+        )
+    };
 }

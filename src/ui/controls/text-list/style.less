@@ -1,20 +1,24 @@
 @import "../../theme";
 
 .text-list {
-    display: flex;
-    flex-direction: column;
+    border-top: @size-border solid @color-border;
+    margin-bottom: @size-border - @size-border-inner;
+    min-width: @size-scrollbar-thickness + @indent-small + 2 * @size-border; // Fix scrollTop when animation starts, without this it becomes 0 after focus()
     overflow-x: hidden;
     overflow-y: auto;
 
-    &__textbox {
+    &__textbox.textbox {
+        border-bottom: @size-border-inner solid @color-border;
+        border-left: @size-border solid @color-border;
+        border-right: @size-border solid @color-border;
+        border-top: none;
+        box-sizing: border-box;
         flex: none;
+        height: @size-control-inner + @size-border-inner;
+        width: 100%;
 
-        &:not(:first-child) {
-            border-top: none;
-        }
-
-        &:not(:last-child) {
-            border-bottom: @size-border-inner solid @color-border;
+        &:last-child {
+            border-bottom: @size-border solid @color-border;
         }
     }
 

@@ -51,12 +51,11 @@
     }
 
     &__list {
+        background-color: @color-back;
         border-bottom: @size-border solid @color-border;
         border-left: @size-border solid @color-border;
         border-right: @size-border solid @color-border;
         box-sizing: border-box;
-        display: flex;
-        flex-direction: column;
         left: 0;
         max-height: 0;
         overflow-x: hidden;
@@ -87,15 +86,5 @@
         &:focus {
             background-color: @color-control-hover;
         }
-    }
-
-    &__loading {
-        color: @color-input-fore-placeholder;
-        display: inline-block;
-        height: @size-control-inner;
-        line-height: @size-control-inner;
-        position: absolute;
-        right: @size-control-inner + @size-border;
-        top: @size-border;
     }
 }

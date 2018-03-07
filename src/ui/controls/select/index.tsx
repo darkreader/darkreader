@@ -2,6 +2,7 @@ import {html, render, getData} from 'malevic';
 import withState from 'malevic/state';
 import Button from '../button';
 import TextBox from '../textbox';
+import VirtualScroll from '../virtual-scroll';
 
 interface SelectProps {
     value: string;
@@ -15,11 +16,9 @@ interface SelectProps {
 
 interface SelectState {
     isExpanded?: boolean;
-    isLoading?: boolean;
-    wasLoaded?: boolean;
+    focusedIndex?: number;
 }
 
-const expandedLists = new WeakSet<Element>();
 const valueNodes = new WeakMap<Element, Map<string, Element>>();
 
 function Select(props: SelectProps) {
@@ -60,9 +59,7 @@ function Select(props: SelectProps) {
     }
 
     function scrollToValue(value: string) {
-        if (valueNodes.get(rootNode).has(value)) {
-            valueNodes.get(rootNode).get(value).scrollIntoView(true)
-        }
+        setState({focusedIndex: values.indexOf(value)});
     }
 
     function onExpandClick() {
@@ -74,26 +71,9 @@ function Select(props: SelectProps) {
     }
 
     function expandList() {
-        if (state.wasLoaded) {
-            setState({isExpanded: true});
-            scrollToValue(props.value);
-        } else {
-            // Note: Rendering many fonts freezes UI for some time,
-            // so we are showing a "loading" message. An ideal solution
-            // would be a virtual scroll.
-            setState({isLoading: true});
-            rootNode.querySelector('.select__loading').getBoundingClientRect();
-            requestAnimationFrame(() => {
-                setState({wasLoaded: true});
-                requestAnimationFrame(() => {
-                    setState({isLoading: false, isExpanded: true});
-                    scrollToValue(props.value);
-                });
-            });
-        }
-        requestAnimationFrame(() => {
-            window.addEventListener('click', onOuterClick);
-        });
+        setState({isExpanded: true});
+        scrollToValue(props.value);
+        window.addEventListener('click', onOuterClick);
     }
 
     function collapseList() {
@@ -102,12 +82,14 @@ function Select(props: SelectProps) {
 
     function onSelectOption(e: MouseEvent) {
         let current = e.target as HTMLElement;
-        while (!current.matches('.select__option')) {
+        while (current && !current.matches('.select__option')) {
             current = current.parentElement;
         }
-        const value = getData(current);
 
-        props.onChange(value);
+        if (current) {
+            const value = getData(current);
+            props.onChange(value);
+        }
 
         collapseList();
     }
@@ -135,14 +117,15 @@ function Select(props: SelectProps) {
                     <span class="select__expand__icon"></span>
                 </Button>
             </span>
-            <span
-                class={{
-                    'select__list': true,
-                    'select__list--expanded': state.isExpanded,
-                }}
-                onclick={onSelectOption}
-            >
-                {state.wasLoaded ? Object.entries(props.options).map(([value, content]) => (
+            <VirtualScroll
+                root={<span
+                    class={{
+                        'select__list': true,
+                        'select__list--expanded': state.isExpanded,
+                    }}
+                    onclick={onSelectOption}
+                />}
+                items={Object.entries(props.options).map(([value, content]) => (
                     <span
                         class="select__option"
                         data={value}
@@ -152,9 +135,9 @@ function Select(props: SelectProps) {
                     >
                         {content}
                     </span>
-                )) : null}
-            </span>
-            {state.isLoading ? <span class="select__loading">Loading...</span> : null}
+                ))}
+                scrollToIndex={state.focusedIndex}
+            />
         </span>
     );
 }

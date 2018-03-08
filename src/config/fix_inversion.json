@@ -478,6 +478,13 @@
             "invert": ".__sprite"
         },
         {
+            "url": "neopets.com",
+            "invert": [
+                "#ban",
+                "#header"
+            ]
+        },
+        {
             "url": "nodejs.org",
             "invert": [
                 "#column2",

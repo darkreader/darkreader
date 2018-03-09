@@ -9,6 +9,7 @@ import {FilterConfig, TabInfo} from '../definitions';
 export class Extension {
 
     enabled: boolean;
+    ready: boolean;
     config: ConfigManager;
     filterConfig: FilterConfig;
     fonts: string[];
@@ -18,6 +19,7 @@ export class Extension {
     constructor() {
 
         this.listeners = new Set();
+        this.ready = false;
 
         this.icon = new IconManager();
         this.config = new ConfigManager();
@@ -77,6 +79,7 @@ export class Extension {
             this.disable();
         }
         console.log('loaded', settings);
+        this.ready = true;
         this.setConfig(settings.config);
     }
 

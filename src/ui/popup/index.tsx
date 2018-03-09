@@ -12,6 +12,15 @@ interface PopupState {
 }
 
 function renderBody() {
+    if (!extension.ready) {
+        if (!document.getElementById('not-ready-message')) {
+            document.body.appendChild(sync(
+                document.createElement('div'),
+                <div id="not-ready-message">Loading...</div>
+            ));
+        }
+        return;
+    }
     sync(document.body, (
         <Body ext={extension} />
     ));

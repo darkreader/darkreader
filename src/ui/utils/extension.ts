@@ -27,6 +27,7 @@ export function createExtensionMock() {
     let listener: () => void = null;
     const extension: Extension = {
         enabled: true,
+        ready: true,
         filterConfig: {
             mode: 1,
             brightness: 110,

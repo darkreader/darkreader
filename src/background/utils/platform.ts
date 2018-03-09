@@ -6,6 +6,7 @@ export function canInjectScript(url: string) {
     if (isFirefox()) {
         return (url
             && url.indexOf('about:') !== 0
+            && url.indexOf('moz') !== 0
             && url.indexOf('view-source:') !== 0
             && url.indexOf('https://addons.mozilla.org') !== 0
         );
@@ -39,6 +40,10 @@ export function getFontList() {
 
 export function getCommands() {
     return new Promise<chrome.commands.Command[]>((resolve) => {
+        if (!chrome.commands) {
+            resolve([]);
+            return;
+        }
         chrome.commands.getAll((commands) => {
             if (commands) {
                 resolve(commands);

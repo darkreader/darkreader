@@ -520,6 +520,11 @@
             "noinvert": "[class*=ace] *"
         },
         {
+            "url": "opencollective.com",
+            "invert": ".CollectiveCover, .Footer, .MailChimpInputSection, .PublicFooter",
+            "noinvert": ".CollectiveCover *, .Footer *, .MailChimpInputSection *, .PublicFooter *"
+        },
+        {
             "url": "otakumode.com",
             "invert": ".c-slick-image-viewer__main-image img"
         },

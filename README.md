@@ -80,4 +80,7 @@ For editing the code you can use any text editor or web IDE (like [Visual Studio
 
 Submit a **pull request**, wait for **review**.
 
+## Sponsorship
+[Donate](https://opencollective.com/darkreader)
+
 ## Good luck!

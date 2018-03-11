@@ -1,9 +1,9 @@
-DarkReader for Google Chrome
+Dark Reader for Google Chrome and Mozilla Firefox
 ================
 ![Dark Reader screenshot](promo/screenshots/screenshot_filter.png)
 
 This extension **inverts brightness** of web pages and aims to **reduce eyestrain** while browsing the web.
-[Visit Chrome Web Store](https://chrome.google.com/webstore/detail/dark-reader/eimadpbcbfnmbkopoojfekhnkhdbieeh) for more info.
+Visit [Chrome Web Store](https://chrome.google.com/webstore/detail/dark-reader/eimadpbcbfnmbkopoojfekhnkhdbieeh) and [Firefox Add-ons](https://addons.mozilla.org/en-US/firefox/addon/darkreader/) for more info.
 
 ## How to contribute
 

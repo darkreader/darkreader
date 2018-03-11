@@ -533,6 +533,10 @@
             "invert": "#O365_NavHeader"
         },
         {
+            "url": "pagerduty.com",
+            "removebg": "body"
+        },
+        {
             "url": "pandora.com",
             "invert": "#body, .contentbox, #detailContainer, #mainContent, .slidesBackground, .slidesForeground",
             "rules": [

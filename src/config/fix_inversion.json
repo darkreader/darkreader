@@ -876,10 +876,13 @@
         {
             "url": "youtube.com",
             "invert": [
+                "html[dark=true] #scrim",
                 ".html5-video-player, .has-custom-banner, #theater-background",
                 "#watch-appbar-playlist"
             ],
             "noinvert": [
+                "html[dark=true]",
+                "html[dark=true] *",
                 ".html5-video-player *",
                 ".has-custom-banner *",
                 "#watch-appbar-playlist *"

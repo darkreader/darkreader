@@ -42,7 +42,7 @@
         {
             "url": "atlassian.net",
             "invert": [
-                ".EditPage_withPanels_3Hr, #toolbar, #savebar-container"
+                ".EditPage_withPanels_3Hr, #toolbar, #savebar-container, .editor"
             ]
         },
         {

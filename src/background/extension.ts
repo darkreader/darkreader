@@ -1,11 +1,12 @@
 import ConfigManager from './config-manager';
 import IconManager from './icon-manager';
 import Messenger from './messenger';
+import TabManager from './tab-manager';
 import UserStorage from './user-storage';
 import {simpleClone, getFontList, canInjectScript, isUrlInList, getUrlHost} from './utils';
 import {formatJson} from '../config/utils';
 import createCSSFilterStylesheet from '../generators/css-filter';
-import {FilterConfig, TabInfo, ExtensionData} from '../definitions';
+import {FilterConfig, ExtensionData} from '../definitions';
 
 export class Extension {
 
@@ -16,6 +17,7 @@ export class Extension {
     fonts: string[];
     icon: IconManager;
     messenger: Messenger;
+    tabs: TabManager;
     user: UserStorage;
 
     constructor() {
@@ -25,7 +27,7 @@ export class Extension {
         this.config = new ConfigManager();
         this.messenger = new Messenger({
             collect: () => this.collectData(),
-            getActiveTabInfo: async () => await this.getActiveTabInfo(),
+            getActiveTabInfo: async () => await this.tabs.getActiveTabInfo(),
             enable: () => this.enable(),
             disable: () => this.disable(),
             setConfig: (config) => this.setConfig(config),
@@ -33,8 +35,10 @@ export class Extension {
             applyDevInversionFixes: (json) => this.applyDevInversionFixes(json),
             resetDevInversionFixes: () => this.resetDevInversionFixes(),
         });
+        this.tabs = new TabManager(this.config);
+    }
 
-        // Subscribe on keyboard shortcut
+    private registerCommands() {
         chrome.commands.onCommand.addListener((command) => {
             if (command === 'toggle') {
                 console.log('Toggle command entered');
@@ -55,18 +59,17 @@ export class Extension {
         const loadInjections = async () => {
             const loadAddStyleScript = async () => {
                 const res = await fetch('../inject/add-style.js');
-                const text = await res.text();
-                this.addStyleScript = text;
+                return await res.text();
             };
             const loadRemoveStyleScript = async () => {
                 const res = await fetch('../inject/remove-style.js');
-                const text = await res.text();
-                this.removeStyleScript = text;
+                return await res.text();
             };
-            await Promise.all([
+            const [addStyle, removeStyle] = await Promise.all([
                 loadAddStyleScript(),
                 loadRemoveStyleScript(),
             ]);
+            this.scripts = {addStyle, removeStyle};
         };
 
         const loadFonts = async () => {
@@ -88,6 +91,9 @@ export class Extension {
             this.disable();
         }
         console.log('loaded', settings);
+
+        this.registerCommands();
+
         this.ready = true;
         this.setConfig(settings.config);
     }
@@ -122,23 +128,6 @@ export class Extension {
         this.messenger.reportChanges(info);
     }
 
-    getActiveTabInfo() {
-        return new Promise<TabInfo>((resolve) => {
-            chrome.tabs.query({
-                active: true,
-                lastFocusedWindow: true
-            }, ([tab]) => {
-                const {DARK_SITES} = this.config;
-                const url = tab.url;
-                resolve({
-                    url: tab.url,
-                    isProtected: !canInjectScript(url),
-                    isInDarkList: isUrlInList(url, DARK_SITES),
-                });
-            });
-        });
-    }
-
     toggleSitePattern(pattern: string) {
         const siteList = this.filterConfig.siteList.slice();
         const index = siteList.indexOf(pattern);
@@ -155,7 +144,7 @@ export class Extension {
      * into Sites List (or removes).
      */
     async toggleCurrentSite() {
-        const {url} = await this.getActiveTabInfo();
+        const {url} = await this.tabs.getActiveTabInfo();
         const host = getUrlHost(url);
         this.toggleSitePattern(host);
     }
@@ -168,25 +157,13 @@ export class Extension {
 
     protected onAppToggle() {
         if (this.enabled) {
+
             //
             // Switch ON
 
             this.icon.setActive();
-
-            // Subscribe to tab updates
-            this.addTabListeners();
-
-            // Set style for active tabs
-            chrome.tabs.query({active: true}, (tabs) => {
-                tabs.forEach(this.addStyleToTab, this);
-            });
-
-            // Update style for other tabs
-            chrome.tabs.query({active: false}, (tabs) => {
-                tabs.forEach((tab) => {
-                    setTimeout(() => this.addStyleToTab(tab), 0);
-                });
-            });
+            this.tabs.injectScriptToAll(this.addStyleCodeGenerator);
+            this.tabs.injectOnUpdate(this.addStyleCodeGenerator);
 
         } else {
 
@@ -194,21 +171,8 @@ export class Extension {
             // Switch OFF
 
             this.icon.setInactive();
-
-            // Unsubscribe from tab updates
-            this.removeTabListeners();
-
-            // Remove style from active tabs
-            chrome.tabs.query({active: true}, (tabs) => {
-                tabs.forEach(this.removeStyleFromTab, this);
-            });
-
-            // Remove style from other tabs
-            chrome.tabs.query({active: false}, (tabs) => {
-                tabs.forEach((tab) => {
-                    setTimeout(() => this.removeStyleFromTab(tab), 0);
-                });
-            });
+            this.tabs.stopInjecting(this.addStyleCodeGenerator);
+            this.tabs.injectScriptToAll(this.removeStyleCodeGenerator);
         }
         this.saveUserSettings();
         this.reportChanges();
@@ -216,55 +180,11 @@ export class Extension {
 
     protected onConfigPropChanged() {
         if (this.enabled) {
-            // Update style for active tabs
-            chrome.tabs.query({active: true}, (tabs) => {
-                tabs.forEach(this.addStyleToTab, this);
-            });
-
-            // Update style for other tabs
-            chrome.tabs.query({active: false}, (tabs) => {
-                tabs.forEach((tab) => {
-                    setTimeout(() => this.addStyleToTab(tab), 0);
-                });
-            });
+            this.tabs.injectScriptToAll(this.addStyleCodeGenerator);
         }
         this.saveUserSettings();
         this.reportChanges();
     }
-
-
-    //-------------------------
-    //
-    // Working with chrome tabs
-    //
-    //-------------------------
-
-    protected addTabListeners() {
-        if (!chrome.tabs.onUpdated.hasListener(this.tabUpdateListener)) {
-            chrome.tabs.onUpdated.addListener(this.tabUpdateListener);
-        }
-        // Replace fires instead of update when page loaded from cache
-        // https://bugs.chromium.org/p/chromium/issues/detail?id=109557
-        // https://bugs.chromium.org/p/chromium/issues/detail?id=116379
-        if (!chrome.tabs.onReplaced.hasListener(this.tabReplaceListener)) {
-            chrome.tabs.onReplaced.addListener(this.tabReplaceListener);
-        }
-    }
-
-    protected removeTabListeners() {
-        chrome.tabs.onUpdated.removeListener(this.tabUpdateListener);
-        chrome.tabs.onReplaced.removeListener(this.tabReplaceListener);
-    }
-
-    protected tabUpdateListener = (tabId: number, info: chrome.tabs.TabChangeInfo, tab: chrome.tabs.Tab) => {
-        console.log(`Tab updated: ${tab.id}, status: ${info.status}`);
-        this.addStyleToTab(tab);
-    };
-
-    protected tabReplaceListener = (addedTabId: number, replacedTabId: number) => {
-        console.log(`Tab ${replacedTabId} replaced with ${addedTabId}`);
-        chrome.tabs.get(addedTabId, (tab) => this.addStyleToTab(tab));
-    };
 
 
     //----------------------
@@ -273,35 +193,9 @@ export class Extension {
     //
     //----------------------
 
-    /**
-     * Adds style to tab.
-     */
-    protected addStyleToTab(tab: chrome.tabs.Tab) {
-        if (!canInjectScript(tab.url)) {
-            return;
-        }
-        chrome.tabs.executeScript(tab.id, {
-            code: this.getCode_addStyle(tab.url),
-            runAt: 'document_start'
-        });
-    }
+    private scripts: {addStyle, removeStyle};
 
-    /**
-     * Removes style from tab.
-     */
-    protected removeStyleFromTab(tab: chrome.tabs.Tab) {
-        if (!canInjectScript(tab.url)) {
-            return;
-        }
-        chrome.tabs.executeScript(tab.id, {
-            code: this.getCode_removeStyle()
-        });
-    }
-
-    protected addStyleScript: string;
-    protected removeStyleScript: string;
-
-    protected getCode_addStyle(url?: string) {
+    private addStyleCodeGenerator = (url: string) => {
         let css: string;
         const {DARK_SITES} = this.config;
         const isUrlInDarkList = isUrlInList(url, DARK_SITES);
@@ -319,15 +213,19 @@ export class Extension {
             console.log(`Site is not inverted: ${url}`);
             css = '';
         }
-        return this.addStyleScript
+        return this.scripts.addStyle
             .replace(/(^\s*)(\/\/\s*?#DEBUG\s*)(.*?$)/igm, this.config.DEBUG ? '$1$3' : '')
             .replace(/\$CSS/g, `'${css.replace(/\'/g, '\\\'')}'`);
-    }
+    };
 
-    protected getCode_removeStyle() {
-        return this.removeStyleScript
+    private removeStyleCodeGenerator = () => {
+        return this.scripts.removeStyle
             .replace(/(^\s*)(\/\/\s*?#DEBUG\s*)(.*?$)/igm, this.config.DEBUG ? '$1$3' : '');
-    }
+    };
+
+
+    //-------------------------------------
+    //          User settings
 
     protected saveUserSettings() {
         this.user.saveSetting({

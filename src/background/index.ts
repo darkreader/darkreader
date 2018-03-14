@@ -4,10 +4,6 @@ import {Extension} from './extension';
 const extension = new Extension();
 extension.start();
 
-(window as any).DarkReader = (window as any).DarkReader || {};
-(window as any).DarkReader.Background = (window as any).DarkReader.Background || {};
-(window as any).DarkReader.Background.extension = extension;
-
 if (extension.config.DEBUG) {
     // Reload extension on connection
     const listen = () => {

@@ -1,19 +1,19 @@
 import {html} from 'malevic';
 import SiteToggle from '../site-toggle';
 import {Shortcut, Toggle} from '../../../controls';
-import {Extension} from '../../../../definitions';
+import {ExtWrapper, TabInfo} from '../../../../definitions';
 
 function multiline(...lines) {
     return lines.join('\n');
 }
 
-export default function TopSection({ext}: {ext: Extension}) {
+export default function TopSection({data, actions, tab}: ExtWrapper & {tab: TabInfo}) {
 
     function toggleExtension(enabled) {
         if (enabled) {
-            ext.enable();
+            actions.enable();
         } else {
-            ext.disable();
+            actions.disable();
         }
     }
 
@@ -22,7 +22,9 @@ export default function TopSection({ext}: {ext: Extension}) {
             <img class="header__logo" src="../assets/images/darkreader-type.svg" alt="Dark Reader" />
             <div class="header__control header__site-toggle">
                 <SiteToggle
-                    ext={ext}
+                    data={data}
+                    tab={tab}
+                    actions={actions}
                 />
                 {/* TODO: pass site info */true ? (
                     <Shortcut
@@ -40,7 +42,7 @@ export default function TopSection({ext}: {ext: Extension}) {
                     )}
             </div>
             <div class="header__control header__app-toggle">
-                <Toggle checked={ext.enabled} labelOn="On" labelOff="Off" onChange={toggleExtension} />
+                <Toggle checked={data.enabled} labelOn="On" labelOff="Off" onChange={toggleExtension} />
                 <Shortcut
                     commandName="toggle"
                     textTemplate={(hotkey) => (hotkey

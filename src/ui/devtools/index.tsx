@@ -1,16 +1,18 @@
 import {html, sync} from 'malevic';
 import Body from './components/body';
-import {getExtension} from '../utils/extension';
+import connect from '../connect';
 
-const extension = getExtension();
-
-function renderBody() {
-    sync(document.body, <Body ext={extension} />);
+function renderBody(data, actions) {
+    sync(document.body, <Body data={data} actions={actions} />);
 }
 
-renderBody();
+async function start() {
+    const connector = connect();
+    window.addEventListener('unload', (e) => connector.disconnect());
 
-extension.addListener(renderBody);
-window.addEventListener('unload', (e) => {
-    extension.removeListener(renderBody);
-});
+    const data = await connector.getData();
+    renderBody(data, connector);
+    connector.subscribeToChanges((data) => renderBody(data, connector));
+}
+
+start();

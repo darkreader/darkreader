@@ -1,10 +1,11 @@
 import ConfigManager from './config-manager';
 import IconManager from './icon-manager';
+import Messenger from './messenger';
 import UserStorage from './user-storage';
-import {simpleClone, getFontList, canInjectScript, isUrlInList} from './utils';
+import {simpleClone, getFontList, canInjectScript, isUrlInList, getUrlHost} from './utils';
 import {formatJson} from '../config/utils';
 import createCSSFilterStylesheet from '../generators/css-filter';
-import {FilterConfig, TabInfo} from '../definitions';
+import {FilterConfig, TabInfo, ExtensionData} from '../definitions';
 
 export class Extension {
 
@@ -14,15 +15,24 @@ export class Extension {
     filterConfig: FilterConfig;
     fonts: string[];
     icon: IconManager;
+    messenger: Messenger;
     user: UserStorage;
 
     constructor() {
-
-        this.listeners = new Set();
         this.ready = false;
 
         this.icon = new IconManager();
         this.config = new ConfigManager();
+        this.messenger = new Messenger({
+            collect: () => this.collectData(),
+            getActiveTabInfo: async () => await this.getActiveTabInfo(),
+            enable: () => this.enable(),
+            disable: () => this.disable(),
+            setConfig: (config) => this.setConfig(config),
+            toggleSitePattern: (pattern) => this.toggleSitePattern(pattern),
+            applyDevInversionFixes: (json) => this.applyDevInversionFixes(json),
+            resetDevInversionFixes: () => this.resetDevInversionFixes(),
+        });
 
         // Subscribe on keyboard shortcut
         chrome.commands.onCommand.addListener((command) => {
@@ -70,7 +80,6 @@ export class Extension {
             loadFonts(),
         ]);
 
-
         this.user = new UserStorage({defaultFilterConfig: this.config.DEFAULT_FILTER_CONFIG});
         const settings = await this.user.loadSettings();
         if (settings.enabled) {
@@ -83,87 +92,72 @@ export class Extension {
         this.setConfig(settings.config);
     }
 
+    private collectData(): ExtensionData {
+        return {
+            enabled: this.enabled,
+            filterConfig: this.filterConfig,
+            ready: this.ready,
+            fonts: this.fonts,
+            devInversionFixesText: this.getDevInversionFixesText(),
+        };
+    }
+
     enable() {
         this.enabled = true;
         this.onAppToggle();
-        this.invokeListeners();
     }
 
     disable() {
         this.enabled = false;
         this.onAppToggle();
-        this.invokeListeners();
     }
 
     setConfig(config: FilterConfig) {
         this.filterConfig = {...this.filterConfig, ...config};
         this.onConfigPropChanged();
-        this.invokeListeners();
     }
 
-    protected listeners: Set<() => void>;
-
-    addListener(callback: () => void) {
-        this.listeners.add(callback);
+    private reportChanges() {
+        const info = this.collectData();
+        this.messenger.reportChanges(info);
     }
 
-    removeListener(callback: () => void) {
-        this.listeners.delete(callback);
-    }
-
-    protected invokeListeners() {
-        this.listeners.forEach((listener) => listener());
-    }
-
-    /**
-     * Returns info of active tab
-     * of last focused window.
-     */
-    getActiveTabInfo(callback: (info: TabInfo) => void) {
-        chrome.tabs.query({
-            active: true,
-            lastFocusedWindow: true
-        }, (tabs) => {
-            if (tabs.length === 1) {
+    getActiveTabInfo() {
+        return new Promise<TabInfo>((resolve) => {
+            chrome.tabs.query({
+                active: true,
+                lastFocusedWindow: true
+            }, ([tab]) => {
                 const {DARK_SITES} = this.config;
-                const tab = tabs[0];
                 const url = tab.url;
-                const host = url.match(/^(.*?:\/{2,3})?(.+?)(\/|$)/)[2];
-                const info: TabInfo = {
-                    url,
-                    host,
+                resolve({
+                    url: tab.url,
                     isProtected: !canInjectScript(url),
                     isInDarkList: isUrlInList(url, DARK_SITES),
-                };
-                callback(info);
-            } else {
-                if (this.config.DEBUG) {
-                    throw new Error('Unexpected tabs count.');
-                }
-                console.error('Unexpected tabs count.');
-                callback({url: '', host: '', isProtected: false, isInDarkList: false});
-            }
+                });
+            });
         });
+    }
+
+    toggleSitePattern(pattern: string) {
+        const siteList = this.filterConfig.siteList.slice();
+        const index = siteList.indexOf(pattern);
+        if (index < 0) {
+            siteList.push(pattern);
+        } else {
+            siteList.splice(index, 1);
+        }
+        this.setConfig(Object.assign({}, this.filterConfig, {siteList}));
     }
 
     /**
      * Adds host name of last focused tab
      * into Sites List (or removes).
      */
-    toggleCurrentSite() {
-        this.getActiveTabInfo((info) => {
-            if (info.host) {
-                const siteList = this.filterConfig.siteList.slice();
-                const index = siteList.indexOf(info.host);
-                if (index < 0) {
-                    siteList.push(info.host);
-                } else {
-                    // Remove site from list
-                    siteList.splice(index, 1);
-                }
-                this.setConfig(Object.assign({}, this.filterConfig, {siteList}));
-            }
-        });
+    async toggleCurrentSite() {
+        const {url} = await this.getActiveTabInfo();
+        const host = getUrlHost(url);
+        this.toggleSitePattern(host);
     }
 
 
@@ -217,6 +211,7 @@ export class Extension {
             });
         }
         this.saveUserSettings();
+        this.reportChanges();
     }
 
     protected onConfigPropChanged() {
@@ -234,6 +229,7 @@ export class Extension {
             });
         }
         this.saveUserSettings();
+        this.reportChanges();
     }
 
 
@@ -367,7 +363,7 @@ export class Extension {
         this.onConfigPropChanged();
     }
 
-    applyDevInversionFixes(json: string, callback: (err: Error) => void) {
+    applyDevInversionFixes(json: string) {
         let obj;
         try {
             obj = JSON.parse(json);
@@ -375,9 +371,9 @@ export class Extension {
             this.saveDevInversionFixes(text);
             this.config.handleInversionFixes(obj);
             this.onConfigPropChanged();
-            callback(null);
+            return null;
         } catch (err) {
-            callback(err);
+            return err;
         }
     }
 }

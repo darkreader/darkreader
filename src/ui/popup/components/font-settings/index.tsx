@@ -1,20 +1,20 @@
 import {html} from 'malevic';
 import {CheckBox, UpDown, Select} from '../../../controls';
-import {Extension} from '../../../../definitions';
+import {ExtWrapper} from '../../../../definitions';
 
-export default function FontSettings({ext}: {ext: Extension}) {
+export default function FontSettings({data, actions}: ExtWrapper) {
     return (
         <section class="font-settings">
             <div class="font-settings__font-select-container">
                 <div class="font-settings__font-select-container__line">
                     <CheckBox
-                        checked={ext.filterConfig.useFont}
-                        onchange={(e) => ext.setConfig({useFont: e.target.checked})}
+                        checked={data.filterConfig.useFont}
+                        onchange={(e) => actions.setConfig({useFont: e.target.checked})}
                     />
                     <Select
-                        value={ext.filterConfig.fontFamily}
-                        onChange={(value) => ext.setConfig({fontFamily: value})}
-                        options={ext.fonts.reduce((map, font) => {
+                        value={data.filterConfig.fontFamily}
+                        onChange={(value) => actions.setConfig({fontFamily: value})}
+                        options={data.fonts.reduce((map, font) => {
                             map[font] = (
                                 <div style={{'font-family': font}}>
                                     {font}
@@ -29,13 +29,13 @@ export default function FontSettings({ext}: {ext: Extension}) {
                 </label>
             </div>
             <UpDown
-                value={ext.filterConfig.textStroke}
+                value={data.filterConfig.textStroke}
                 min={0}
                 max={1}
                 step={0.1}
                 default={0}
                 name="Text stroke"
-                onChange={(value) => ext.setConfig({textStroke: value})}
+                onChange={(value) => actions.setConfig({textStroke: value})}
             />
         </section>
     );

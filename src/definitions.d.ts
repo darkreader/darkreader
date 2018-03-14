@@ -1,18 +1,25 @@
 import {FilterMode} from './generators/css-filter';
 
-export interface Extension {
+export interface ExtensionData {
     enabled: boolean;
     ready: boolean;
     filterConfig: FilterConfig;
     fonts: string[];
+    devInversionFixesText: string;
+}
+
+export interface ExtensionActions {
     enable();
     disable();
     setConfig(config: FilterConfig);
-    addListener(callback: () => void);
-    removeListener(callback: () => void);
-    getActiveTabInfo(callback: (info: TabInfo) => void);
-    toggleCurrentSite();
-    getDevInversionFixesText(): string;
+    toggleSitePattern(pattern: string);
+    applyDevInversionFixes(json: string): Promise<void>;
+    resetDevInversionFixes();
+}
+
+export interface ExtWrapper {
+    data: ExtensionData;
+    actions: ExtensionActions;
 }
 
 export interface FilterConfig {
@@ -35,7 +42,6 @@ export interface UserSettings {
 
 export interface TabInfo {
     url: string;
-    host: string;
     isProtected: boolean;
     isInDarkList: boolean;
 }

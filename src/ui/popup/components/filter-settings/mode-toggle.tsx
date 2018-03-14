@@ -1,26 +1,26 @@
 import {html} from 'malevic';
 import {Button, Toggle} from '../../../controls';
-import {Extension} from '../../../../definitions';
+import {ExtWrapper} from '../../../../definitions';
 
-export default function ModeToggle({ext}: {ext: Extension}) {
+export default function ModeToggle({data, actions}: ExtWrapper) {
     return (
         <div class="mode-toggle">
             <div class="mode-toggle__line">
                 <Button
-                    class={{'mode-toggle__button--active': ext.filterConfig.mode === 1}}
-                    onclick={() => ext.setConfig({mode: 1})}
+                    class={{'mode-toggle__button--active': data.filterConfig.mode === 1}}
+                    onclick={() => actions.setConfig({mode: 1})}
                 >
                     <span class="icon icon--dark-mode"></span>
                 </Button>
                 <Toggle
-                    checked={ext.filterConfig.mode === 1}
+                    checked={data.filterConfig.mode === 1}
                     labelOn="Dark"
                     labelOff="Light"
-                    onChange={(checked) => ext.setConfig({mode: checked ? 1 : 0})}
+                    onChange={(checked) => actions.setConfig({mode: checked ? 1 : 0})}
                 />
                 <Button
-                    class={{'mode-toggle__button--active': ext.filterConfig.mode === 0}}
-                    onclick={() => ext.setConfig({mode: 0})}
+                    class={{'mode-toggle__button--active': data.filterConfig.mode === 0}}
+                    onclick={() => actions.setConfig({mode: 0})}
                 >
                     <span class="icon icon--light-mode"></span>
                 </Button>

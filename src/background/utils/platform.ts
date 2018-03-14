@@ -1,3 +1,6 @@
+import {isUrlInList} from './url';
+import {TabInfo} from '../../definitions';
+
 export function isFirefox() {
     return navigator.userAgent.indexOf('Firefox') >= 0;
 }

@@ -7,14 +7,16 @@ import FilterSettings from './filter-settings';
 import FontSettings from './font-settings';
 import SiteListSettings from './site-list-settings';
 import {isFirefox} from '../../../background/utils';
-import {Extension} from '../../../definitions';
+import {ExtensionData, ExtensionActions, TabInfo} from '../../../definitions';
 
 withForms();
 
 interface BodyProps {
-    ext: Extension;
-    state: BodyState;
-    setState: (state: BodyState) => void;
+    data: ExtensionData;
+    tab: TabInfo;
+    actions: ExtensionActions;
+    state?: BodyState;
+    setState?: (state: BodyState) => void;
 }
 
 interface BodyState {
@@ -33,21 +35,21 @@ function openDevTools() {
 function Body(props: BodyProps) {
     const {state, setState} = props;
     return (
-        <body class={{'ext-disabled': !props.ext.enabled}}>
-            <Header ext={props.ext} />
+        <body class={{'ext-disabled': !props.data.enabled}}>
+            <Header data={props.data} tab={props.tab} actions={props.actions} />
 
             <TabPanel
                 activeTab={state.activeTab || 'Filter'}
                 onSwitchTab={(tab) => setState({activeTab: tab})}
                 tabs={{
                     'Filter': (
-                        <FilterSettings ext={props.ext} />
+                        <FilterSettings data={props.data} actions={props.actions} />
                     ),
                     'Font': (
-                        <FontSettings ext={props.ext} />
+                        <FontSettings data={props.data} actions={props.actions} />
                     ),
                     'Site list': (
-                        <SiteListSettings ext={props.ext} isFocused={state.activeTab === 'Site list'} />
+                        <SiteListSettings data={props.data} actions={props.actions} isFocused={state.activeTab === 'Site list'} />
                     )
                 }}
             />

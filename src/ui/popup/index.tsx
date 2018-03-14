@@ -3,7 +3,8 @@ import Body from './components/body';
 import {getExtension} from '../utils/extension';
 import {isAffectedByChromiumIssue750419} from '../utils/issues';
 import {isFirefox} from '../../background/utils';
-import {Extension} from '../../definitions';
+import connect from '../connect';
+import {ExtensionInfo} from '../../definitions';
 
 const extension = getExtension();
 

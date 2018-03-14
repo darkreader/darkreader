@@ -1,18 +1,12 @@
 import {FilterMode} from './generators/css-filter';
 
-export interface Extension {
+export interface ExtensionInfo {
     enabled: boolean;
     ready: boolean;
     filterConfig: FilterConfig;
     fonts: string[];
-    enable();
-    disable();
-    setConfig(config: FilterConfig);
-    addListener(callback: () => void);
-    removeListener(callback: () => void);
-    getActiveTabInfo(callback: (info: TabInfo) => void);
-    toggleCurrentSite();
-    getDevInversionFixesText(): string;
+    activeTab: TabInfo;
+    devInversionFixesText: string;
 }
 
 export interface FilterConfig {

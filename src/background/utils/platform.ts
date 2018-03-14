@@ -1,3 +1,6 @@
+import {isUrlInList} from './url';
+import {TabInfo} from '../../definitions';
+
 export function isFirefox() {
     return navigator.userAgent.indexOf('Firefox') >= 0;
 }
@@ -52,4 +55,16 @@ export function getCommands() {
             }
         });
     });
+}
+
+export function getTabInfo(tab: chrome.tabs.Tab): TabInfo {
+    const {DARK_SITES} = this.config;
+    const url = tab.url;
+    const host = url.match(/^(.*?:\/{2,3})?(.+?)(\/|$)/)[2];
+    return {
+        url,
+        host,
+        isProtected: !canInjectScript(url),
+        isInDarkList: isUrlInList(url, DARK_SITES),
+    };
 }

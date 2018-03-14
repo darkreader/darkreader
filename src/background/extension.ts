@@ -1,28 +1,36 @@
 import ConfigManager from './config-manager';
 import IconManager from './icon-manager';
+import Messenger from './messenger';
 import UserStorage from './user-storage';
 import {simpleClone, getFontList, canInjectScript, isUrlInList} from './utils';
 import {formatJson} from '../config/utils';
 import createCSSFilterStylesheet from '../generators/css-filter';
-import {FilterConfig, TabInfo} from '../definitions';
+import {FilterConfig, TabInfo, ExtensionInfo} from '../definitions';
 
 export class Extension {
 
     enabled: boolean;
     ready: boolean;
     config: ConfigManager;
+    activeTab: TabInfo;
     filterConfig: FilterConfig;
     fonts: string[];
     icon: IconManager;
+    messenger: Messenger;
     user: UserStorage;
 
     constructor() {
-
-        this.listeners = new Set();
         this.ready = false;
 
         this.icon = new IconManager();
         this.config = new ConfigManager();
+        this.messenger = new Messenger({
+            collect: () => this.collectInfo(),
+            enable: () => this.enable(),
+            disable: () => this.disable(),
+            setConfig: (config) => this.setConfig(config),
+            toggleCurrentSite: () => this.toggleCurrentSite(),
+        });
 
         // Subscribe on keyboard shortcut
         chrome.commands.onCommand.addListener((command) => {
@@ -65,6 +73,7 @@ export class Extension {
         };
 
         await Promise.all([
+            this.listenToActiveTabChange(),
             loadInjections(),
             this.config.load(),
             loadFonts(),
@@ -83,67 +92,70 @@ export class Extension {
         this.setConfig(settings.config);
     }
 
+    private collectInfo(): ExtensionInfo {
+        return {
+            enabled: this.enabled,
+            filterConfig: this.filterConfig,
+            activeTab: this.activeTab,
+            ready: this.ready,
+            fonts: this.fonts,
+            devInversionFixesText: null,
+        };
+    }
+
     enable() {
         this.enabled = true;
         this.onAppToggle();
-        this.invokeListeners();
+        this.reportChanges();
     }
 
     disable() {
         this.enabled = false;
         this.onAppToggle();
-        this.invokeListeners();
+        this.reportChanges();
     }
 
     setConfig(config: FilterConfig) {
         this.filterConfig = {...this.filterConfig, ...config};
         this.onConfigPropChanged();
-        this.invokeListeners();
+        this.reportChanges();
     }
 
-    protected listeners: Set<() => void>;
-
-    addListener(callback: () => void) {
-        this.listeners.add(callback);
+    private reportChanges() {
+        const info = this.collectInfo();
+        this.messenger.reportChanges(info);
     }
 
-    removeListener(callback: () => void) {
-        this.listeners.delete(callback);
-    }
-
-    protected invokeListeners() {
-        this.listeners.forEach((listener) => listener());
-    }
-
-    /**
-     * Returns info of active tab
-     * of last focused window.
-     */
-    getActiveTabInfo(callback: (info: TabInfo) => void) {
-        chrome.tabs.query({
-            active: true,
-            lastFocusedWindow: true
-        }, (tabs) => {
-            if (tabs.length === 1) {
-                const {DARK_SITES} = this.config;
-                const tab = tabs[0];
-                const url = tab.url;
-                const host = url.match(/^(.*?:\/{2,3})?(.+?)(\/|$)/)[2];
-                const info: TabInfo = {
-                    url,
-                    host,
-                    isProtected: !canInjectScript(url),
-                    isInDarkList: isUrlInList(url, DARK_SITES),
-                };
-                callback(info);
-            } else {
-                if (this.config.DEBUG) {
-                    throw new Error('Unexpected tabs count.');
-                }
-                console.error('Unexpected tabs count.');
-                callback({url: '', host: '', isProtected: false, isInDarkList: false});
-            }
+    private async listenToActiveTabChange() {
+        const tab = await this.getActiveTab();
+        this.activeTab = this.getTabInfo(tab);
+        chrome.tabs.onActivated.addListener(({tabId}) => {
+            chrome.tabs.get(tabId, (tab) => {
+                const info = this.getTabInfo(tab);
+                this.activeTab = info;
+            });
         });
+    }
+
+    private getActiveTab() {
+        return new Promise<chrome.tabs.Tab>((resolve) => {
+            chrome.tabs.query({
+                active: true,
+                lastFocusedWindow: true
+            }, ([tab]) => resolve(tab));
+        });
+    }
+
+    private getTabInfo(tab: chrome.tabs.Tab): TabInfo {
+        const {DARK_SITES} = this.config;
+        const url = tab.url;
+        const host = url.match(/^(.*?:\/{2,3})?(.+?)(\/|$)/)[2];
+        return {
+            url,
+            host,
+            isProtected: !canInjectScript(url),
+            isInDarkList: isUrlInList(url, DARK_SITES),
+        };
     }
 
     /**
@@ -151,19 +163,16 @@ export class Extension {
      * into Sites List (or removes).
      */
     toggleCurrentSite() {
-        this.getActiveTabInfo((info) => {
-            if (info.host) {
-                const siteList = this.filterConfig.siteList.slice();
-                const index = siteList.indexOf(info.host);
-                if (index < 0) {
-                    siteList.push(info.host);
-                } else {
-                    // Remove site from list
-                    siteList.splice(index, 1);
-                }
-                this.setConfig(Object.assign({}, this.filterConfig, {siteList}));
-            }
-        });
+        const {host} = this.activeTab;
+        const siteList = this.filterConfig.siteList.slice();
+        const index = siteList.indexOf(host);
+        if (index < 0) {
+            siteList.push(host);
+        } else {
+            // Remove site from list
+            siteList.splice(index, 1);
+        }
+        this.setConfig(Object.assign({}, this.filterConfig, {siteList}));
     }
 
 

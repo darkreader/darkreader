@@ -1,4 +1,4 @@
-import {ExtensionData, ExtensionActions, FilterConfig} from '../../definitions';
+import {ExtensionData, ExtensionActions, FilterConfig, TabInfo} from '../../definitions';
 
 export default class Connector implements ExtensionActions {
     private port: chrome.runtime.Port;
@@ -13,18 +13,26 @@ export default class Connector implements ExtensionActions {
         return String(++this.counter);
     }
 
-    getData() {
+    private sendRequest<T>(request, executor: (response, resolve: (data?: T) => void, reject: (error: Error) => void) => void) {
         const id = this.getRequestId();
-        return new Promise<ExtensionData>((resolve) => {
-            const listener = ({id: responseId, data}) => {
+        return new Promise<T>((resolve, reject) => {
+            const listener = ({id: responseId, ...response}) => {
                 if (responseId === id) {
-                    resolve(data);
+                    executor(response, resolve, reject);
                     this.port.onMessage.removeListener(listener);
                 }
             };
             this.port.onMessage.addListener(listener);
-            this.port.postMessage({type: 'getData', id});
+            this.port.postMessage({...request, id});
         });
+    }
+
+    getData() {
+        return this.sendRequest<ExtensionData>({type: 'getData'}, ({data}, resolve) => resolve(data));
+    }
+
+    getActiveTabInfo() {
+        return this.sendRequest<TabInfo>({type: 'getActiveTabInfo'}, ({data}, resolve) => resolve(data));
     }
 
     subscribeToChanges(callback: (data: ExtensionData) => void) {
@@ -49,26 +57,12 @@ export default class Connector implements ExtensionActions {
         this.port.postMessage({type: 'setConfig', data: config});
     }
 
-    toggleCurrentSite() {
-        this.port.postMessage({type: 'toggleCurrentSite'});
+    toggleSitePattern(pattern: string) {
+        this.port.postMessage({type: 'toggleSitePattern', data: pattern});
     }
 
     applyDevInversionFixes(json: string) {
-        const id = this.getRequestId();
-        return new Promise<void>((resolve, reject) => {
-            const listener = ({id: responseId, error}) => {
-                if (responseId === id) {
-                    if (error) {
-                        reject(error);
-                    } else {
-                        resolve();
-                    }
-                    this.port.onMessage.removeListener(listener);
-                }
-            };
-            this.port.onMessage.addListener(listener);
-            this.port.postMessage({type: 'applyDevInversionFixes', data: json, id});
-        });
+        return this.sendRequest<void>({type: 'applyDevInversionFixes', data: json}, ({error}, resolve, reject) => error ? reject(error) : resolve());
     }
 
     resetDevInversionFixes() {

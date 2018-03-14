@@ -2,7 +2,7 @@ import ConfigManager from './config-manager';
 import IconManager from './icon-manager';
 import Messenger from './messenger';
 import UserStorage from './user-storage';
-import {simpleClone, getFontList, canInjectScript, isUrlInList} from './utils';
+import {simpleClone, getFontList, canInjectScript, isUrlInList, getUrlHost} from './utils';
 import {formatJson} from '../config/utils';
 import createCSSFilterStylesheet from '../generators/css-filter';
 import {FilterConfig, TabInfo, ExtensionData} from '../definitions';
@@ -12,7 +12,6 @@ export class Extension {
     enabled: boolean;
     ready: boolean;
     config: ConfigManager;
-    activeTab: TabInfo;
     filterConfig: FilterConfig;
     fonts: string[];
     icon: IconManager;
@@ -26,10 +25,11 @@ export class Extension {
         this.config = new ConfigManager();
         this.messenger = new Messenger({
             collect: () => this.collectData(),
+            getActiveTabInfo: async () => await this.getActiveTabInfo(),
             enable: () => this.enable(),
             disable: () => this.disable(),
             setConfig: (config) => this.setConfig(config),
-            toggleCurrentSite: () => this.toggleCurrentSite(),
+            toggleSitePattern: (pattern) => this.toggleSitePattern(pattern),
             applyDevInversionFixes: (json) => this.applyDevInversionFixes(json),
             resetDevInversionFixes: () => this.resetDevInversionFixes(),
         });
@@ -80,8 +80,6 @@ export class Extension {
             loadFonts(),
         ]);
 
-        await this.listenToActiveTabChange();
-
         this.user = new UserStorage({defaultFilterConfig: this.config.DEFAULT_FILTER_CONFIG});
         const settings = await this.user.loadSettings();
         if (settings.enabled) {
@@ -98,7 +96,6 @@ export class Extension {
         return {
             enabled: this.enabled,
             filterConfig: this.filterConfig,
-            activeTab: this.activeTab,
             ready: this.ready,
             fonts: this.fonts,
             devInversionFixesText: this.getDevInversionFixesText(),
@@ -125,54 +122,42 @@ export class Extension {
         this.messenger.reportChanges(info);
     }
 
-    private async listenToActiveTabChange() {
-        const tab = await this.getActiveTab();
-        this.activeTab = tab ? this.getTabInfo(tab) : null;
-        chrome.tabs.onActivated.addListener(({tabId}) => {
-            chrome.tabs.get(tabId, (tab) => {
-                const info = this.getTabInfo(tab);
-                this.activeTab = info;
-                this.reportChanges();
+    getActiveTabInfo() {
+        return new Promise<TabInfo>((resolve) => {
+            chrome.tabs.query({
+                active: true,
+                lastFocusedWindow: true
+            }, ([tab]) => {
+                const {DARK_SITES} = this.config;
+                const url = tab.url;
+                resolve({
+                    url: tab.url,
+                    isProtected: !canInjectScript(url),
+                    isInDarkList: isUrlInList(url, DARK_SITES),
+                });
             });
         });
     }
 
-    private getActiveTab() {
-        return new Promise<chrome.tabs.Tab>((resolve) => {
-            chrome.tabs.query({
-                active: true,
-                lastFocusedWindow: true
-            }, ([tab]) => resolve(tab));
-        });
-    }
-
-    private getTabInfo(tab: chrome.tabs.Tab): TabInfo {
-        const {DARK_SITES} = this.config;
-        const url = tab.url;
-        const host = url.match(/^(.*?:\/{2,3})?(.+?)(\/|$)/)[2];
-        return {
-            url,
-            host,
-            isProtected: !canInjectScript(url),
-            isInDarkList: isUrlInList(url, DARK_SITES),
-        };
+    toggleSitePattern(pattern: string) {
+        const siteList = this.filterConfig.siteList.slice();
+        const index = siteList.indexOf(pattern);
+        if (index < 0) {
+            siteList.push(pattern);
+        } else {
+            siteList.splice(index, 1);
+        }
+        this.setConfig(Object.assign({}, this.filterConfig, {siteList}));
     }
 
     /**
      * Adds host name of last focused tab
      * into Sites List (or removes).
      */
-    toggleCurrentSite() {
-        const {host} = this.activeTab;
-        const siteList = this.filterConfig.siteList.slice();
-        const index = siteList.indexOf(host);
-        if (index < 0) {
-            siteList.push(host);
-        } else {
-            // Remove site from list
-            siteList.splice(index, 1);
-        }
-        this.setConfig(Object.assign({}, this.filterConfig, {siteList}));
+    async toggleCurrentSite() {
+        const {url} = await this.getActiveTabInfo();
+        const host = getUrlHost(url);
+        this.toggleSitePattern(host);
     }
 
 

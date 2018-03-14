@@ -1,16 +1,19 @@
 import {html, render} from 'malevic';
 import {Button} from '../../../controls';
-import {ExtensionData, ExtensionActions} from '../../../../definitions';
+import {getUrlHost} from '../../../../background/utils';
+import {ExtWrapper, TabInfo} from '../../../../definitions';
 
-export default function SiteToggleButton({data, actions}: {data: ExtensionData, actions: ExtensionActions}) {
+export default function SiteToggleButton({data, tab, actions}: ExtWrapper & {tab: TabInfo}) {
     const toggleHasEffect = (
         data.enabled &&
-        !data.activeTab.isProtected &&
-        (data.filterConfig.invertListed || !data.activeTab.isInDarkList)
+        !tab.isProtected &&
+        (data.filterConfig.invertListed || !tab.isInDarkList)
     );
 
-    const urlText = (data.activeTab.host
-        ? data.activeTab.host
+    const host = getUrlHost(tab.url || '');
+
+    const urlText = (host
+        ? host
             .split('.')
             .reduce((elements, part, i) => elements.concat(
                 <wbr />,
@@ -24,7 +27,7 @@ export default function SiteToggleButton({data, actions}: {data: ExtensionData, 
                 'site-toggle': true,
                 'site-toggle--disabled': !toggleHasEffect
             }}
-            onclick={() => actions.toggleCurrentSite()}
+            onclick={() => actions.toggleSitePattern(host)}
         >
             Toggle <span class="site-toggle__url" >{urlText}</span>
         </Button>

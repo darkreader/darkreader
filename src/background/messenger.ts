@@ -1,11 +1,12 @@
-import {ExtensionData, ExtensionActions, FilterConfig} from '../definitions';
+import {ExtensionData, ExtensionActions, FilterConfig, TabInfo} from '../definitions';
 
 interface ExtensionAdapter {
     collect: () => ExtensionData;
+    getActiveTabInfo: () => Promise<TabInfo>;
     enable: () => void;
     disable: () => void;
     setConfig: (config: FilterConfig) => void;
-    toggleCurrentSite: () => void;
+    toggleSitePattern: (pattern: string) => void;
     applyDevInversionFixes: (json: string) => Error;
     resetDevInversionFixes: () => void;
 }
@@ -16,10 +17,15 @@ export default class Messenger {
     constructor(adapter: ExtensionAdapter) {
         this.reporters = new Set();
         chrome.runtime.onConnect.addListener((port) => {
-            port.onMessage.addListener(({type, id, data}) => {
+            port.onMessage.addListener(async ({type, id, data}) => {
                 switch (type) {
                     case 'getData': {
                         const data = adapter.collect();
+                        port.postMessage({id, data});
+                        break;
+                    }
+                    case 'getActiveTabInfo': {
+                        const data = await adapter.getActiveTabInfo();
                         port.postMessage({id, data});
                         break;
                     }
@@ -41,8 +47,8 @@ export default class Messenger {
                         adapter.setConfig(data);
                         break;
                     }
-                    case 'toggleCurrentSite': {
-                        adapter.toggleCurrentSite();
+                    case 'toggleSitePattern': {
+                        adapter.toggleSitePattern(data);
                         break;
                     }
                     case 'applyDevInversionFixes': {

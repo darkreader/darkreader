@@ -1,13 +1,13 @@
 import {html} from 'malevic';
 import SiteToggle from '../site-toggle';
 import {Shortcut, Toggle} from '../../../controls';
-import {ExtensionData, ExtensionActions} from '../../../../definitions';
+import {ExtWrapper, TabInfo} from '../../../../definitions';
 
 function multiline(...lines) {
     return lines.join('\n');
 }
 
-export default function TopSection({data, actions}: {data: ExtensionData, actions: ExtensionActions}) {
+export default function TopSection({data, actions, tab}: ExtWrapper & {tab: TabInfo}) {
 
     function toggleExtension(enabled) {
         if (enabled) {
@@ -23,6 +23,7 @@ export default function TopSection({data, actions}: {data: ExtensionData, action
             <div class="header__control header__site-toggle">
                 <SiteToggle
                     data={data}
+                    tab={tab}
                     actions={actions}
                 />
                 {/* TODO: pass site info */true ? (

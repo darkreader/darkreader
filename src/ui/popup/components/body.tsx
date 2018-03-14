@@ -7,12 +7,13 @@ import FilterSettings from './filter-settings';
 import FontSettings from './font-settings';
 import SiteListSettings from './site-list-settings';
 import {isFirefox} from '../../../background/utils';
-import {ExtensionData, ExtensionActions} from '../../../definitions';
+import {ExtensionData, ExtensionActions, TabInfo} from '../../../definitions';
 
 withForms();
 
 interface BodyProps {
     data: ExtensionData;
+    tab: TabInfo;
     actions: ExtensionActions;
     state?: BodyState;
     setState?: (state: BodyState) => void;
@@ -35,7 +36,7 @@ function Body(props: BodyProps) {
     const {state, setState} = props;
     return (
         <body class={{'ext-disabled': !props.data.enabled}}>
-            <Header data={props.data} actions={props.actions} />
+            <Header data={props.data} tab={props.tab} actions={props.actions} />
 
             <TabPanel
                 activeTab={state.activeTab || 'Filter'}

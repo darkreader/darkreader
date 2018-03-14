@@ -5,7 +5,6 @@ export interface ExtensionData {
     ready: boolean;
     filterConfig: FilterConfig;
     fonts: string[];
-    activeTab: TabInfo;
     devInversionFixesText: string;
 }
 
@@ -13,8 +12,8 @@ export interface ExtensionActions {
     enable();
     disable();
     setConfig(config: FilterConfig);
-    toggleCurrentSite();
-    applyDevInversionFixes(json:string): Promise<void>;
+    toggleSitePattern(pattern: string);
+    applyDevInversionFixes(json: string): Promise<void>;
     resetDevInversionFixes();
 }
 
@@ -43,7 +42,6 @@ export interface UserSettings {
 
 export interface TabInfo {
     url: string;
-    host: string;
     isProtected: boolean;
     isInDarkList: boolean;
 }

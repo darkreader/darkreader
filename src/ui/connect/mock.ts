@@ -1,4 +1,4 @@
-import {ExtensionData} from '../../definitions';
+import {ExtensionData, TabInfo} from '../../definitions';
 
 export function getMockData(): ExtensionData {
     return {
@@ -24,22 +24,28 @@ export function getMockData(): ExtensionData {
             'fantasy',
             'system-ui'
         ],
-        activeTab: {
-            url: 'http://darkreader.org/',
-            host: 'darkreader.org',
-            isProtected: false,
-            isInDarkList: false,
-        },
         devInversionFixesText: `${JSON.stringify({common: {invert: 'img, iframe'}, sites: [{url: 'google.*', invert: '.icon'}]}, null, 4)}\n`
+    };
+}
+
+export function getMockActiveTabInfo(): TabInfo {
+    return {
+        url: 'http://darkreader.org/',
+        isProtected: false,
+        isInDarkList: false,
     };
 }
 
 export function createConnectorMock() {
     let listener: (data) => void = null;
     const data = getMockData();
+    const tab = getMockActiveTabInfo();
     const connector = {
         getData() {
             return Promise.resolve(data);
+        },
+        getActiveTabInfo() {
+            return Promise.resolve(tab);
         },
         subscribeToChanges(callback) {
             listener = callback;
@@ -56,12 +62,12 @@ export function createConnectorMock() {
             Object.assign(data.filterConfig, config);
             listener(data);
         },
-        toggleCurrentSite() {
-            const index = data.filterConfig.siteList.indexOf(data.activeTab.host);
+        toggleSitePattern(pattern) {
+            const index = data.filterConfig.siteList.indexOf(pattern);
             if (index >= 0) {
-                data.filterConfig.siteList.splice(index, 1);
+                data.filterConfig.siteList.splice(pattern, 1);
             } else {
-                data.filterConfig.siteList.push(data.activeTab.host);
+                data.filterConfig.siteList.push(pattern);
             }
             listener(data);
         },

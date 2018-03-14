@@ -10,7 +10,7 @@ require('ts-node').register({
 const Malevic = require('malevic');
 const DevToolsBody = require('../src/ui/devtools/components/body').default;
 const PopupBody = require('../src/ui/popup/components/body').default;
-const {getMockData} = require('../src/ui/connect/mock');
+const {getMockData, getMockActiveTabInfo} = require('../src/ui/connect/mock');
 
 module.exports = function createBundleHtmlTask(gulp) {
     gulp.task('html-release', async () => await bundleHtml({production: true}));
@@ -34,8 +34,9 @@ module.exports = function createBundleHtmlTask(gulp) {
     async function bundlePopupHtml({dir}) {
         let html = await fs.readFile('src/ui/popup/index.html', 'utf8');
         const data = getMockData();
+        const tab = getMockActiveTabInfo();
         const actions = null;
-        const bodyText = Malevic.renderToString(PopupBody({data, actions}));
+        const bodyText = Malevic.renderToString(PopupBody({data, tab, actions}));
         html = html.replace('BODY', bodyText);
         await fs.outputFile(`${dir}/ui/popup/index.html`, html);
     }

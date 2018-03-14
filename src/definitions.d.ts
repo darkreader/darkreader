@@ -1,12 +1,26 @@
 import {FilterMode} from './generators/css-filter';
 
-export interface ExtensionInfo {
+export interface ExtensionData {
     enabled: boolean;
     ready: boolean;
     filterConfig: FilterConfig;
     fonts: string[];
     activeTab: TabInfo;
     devInversionFixesText: string;
+}
+
+export interface ExtensionActions {
+    enable();
+    disable();
+    setConfig(config: FilterConfig);
+    toggleCurrentSite();
+    applyDevInversionFixes(json:string): Promise<void>;
+    resetDevInversionFixes();
+}
+
+export interface ExtWrapper {
+    data: ExtensionData;
+    actions: ExtensionActions;
 }
 
 export interface FilterConfig {

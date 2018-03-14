@@ -1,6 +1,9 @@
 import Connector from './connector';
-import {ExtensionInfo} from '../../definitions';
+import {createConnectorMock} from './mock';
 
 export default function connect() {
+    if (typeof chrome === 'undefined' || !chrome.runtime) {
+        return createConnectorMock() as Connector;
+    }
     return new Connector();
 }

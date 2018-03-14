@@ -1,5 +1,7 @@
 function getJsonErrorPosition(err) {
-    const message = err.message || '';
+    const message = (err instanceof Error
+        ? err.message
+        : (err || ''));
     const m = /position (\d+)/.exec(message);
     if (m && m[1]) {
         const i = parseInt(m[1]);

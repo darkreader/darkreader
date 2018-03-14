@@ -1,6 +1,6 @@
-import {ExtensionInfo, FilterConfig} from '../../definitions';
+import {ExtensionData, ExtensionActions, FilterConfig} from '../../definitions';
 
-export default class Connector {
+export default class Connector implements ExtensionActions {
     private port: chrome.runtime.Port;
     private counter: number;
 
@@ -13,9 +13,9 @@ export default class Connector {
         return String(++this.counter);
     }
 
-    getInfo() {
+    getData() {
         const id = this.getRequestId();
-        return new Promise<ExtensionInfo>((resolve) => {
+        return new Promise<ExtensionData>((resolve) => {
             const listener = ({id: responseId, data}) => {
                 if (responseId === id) {
                     resolve(data);
@@ -23,11 +23,11 @@ export default class Connector {
                 }
             };
             this.port.onMessage.addListener(listener);
-            this.port.postMessage({type: 'getInfo', id});
+            this.port.postMessage({type: 'getData', id});
         });
     }
 
-    subscribeToChanges(callback: (info: ExtensionInfo) => void) {
+    subscribeToChanges(callback: (data: ExtensionData) => void) {
         const id = this.getRequestId();
         this.port.onMessage.addListener(({id: responseId, data}) => {
             if (responseId === id) {
@@ -53,7 +53,29 @@ export default class Connector {
         this.port.postMessage({type: 'toggleCurrentSite'});
     }
 
-    destroy() {
+    applyDevInversionFixes(json: string) {
+        const id = this.getRequestId();
+        return new Promise<void>((resolve, reject) => {
+            const listener = ({id: responseId, error}) => {
+                if (responseId === id) {
+                    if (error) {
+                        reject(error);
+                    } else {
+                        resolve();
+                    }
+                    this.port.onMessage.removeListener(listener);
+                }
+            };
+            this.port.onMessage.addListener(listener);
+            this.port.postMessage({type: 'applyDevInversionFixes', data: json, id});
+        });
+    }
+
+    resetDevInversionFixes() {
+        this.port.postMessage({type: 'resetDevInversionFixes'});
+    }
+
+    disconnect() {
         this.port.disconnect();
     }
 }

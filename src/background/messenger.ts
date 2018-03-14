@@ -1,22 +1,24 @@
-import {ExtensionInfo, FilterConfig} from '../definitions';
+import {ExtensionData, ExtensionActions, FilterConfig} from '../definitions';
 
 interface ExtensionAdapter {
-    collect: () => ExtensionInfo;
+    collect: () => ExtensionData;
     enable: () => void;
     disable: () => void;
     setConfig: (config: FilterConfig) => void;
     toggleCurrentSite: () => void;
+    applyDevInversionFixes: (json: string) => Error;
+    resetDevInversionFixes: () => void;
 }
 
 export default class Messenger {
-    private reporters: Set<(info: ExtensionInfo) => void>;
+    private reporters: Set<(info: ExtensionData) => void>;
 
     constructor(adapter: ExtensionAdapter) {
         this.reporters = new Set();
         chrome.runtime.onConnect.addListener((port) => {
             port.onMessage.addListener(({type, id, data}) => {
                 switch (type) {
-                    case 'getInfo': {
+                    case 'getData': {
                         const data = adapter.collect();
                         port.postMessage({id, data});
                         break;
@@ -43,12 +45,21 @@ export default class Messenger {
                         adapter.toggleCurrentSite();
                         break;
                     }
+                    case 'applyDevInversionFixes': {
+                        const error = adapter.applyDevInversionFixes(data);
+                        port.postMessage({id, error: error ? error.message : null});
+                        break;
+                    }
+                    case 'resetDevInversionFixes': {
+                        adapter.resetDevInversionFixes();
+                        break;
+                    }
                 }
             });
         });
     }
 
-    reportChanges(info: ExtensionInfo) {
-        this.reporters.forEach((report) => report(info));
+    reportChanges(data: ExtensionData) {
+        this.reporters.forEach((report) => report(data));
     }
 }

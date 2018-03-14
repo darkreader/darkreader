@@ -2,41 +2,46 @@ import {html} from 'malevic';
 import withState from 'malevic/state';
 import {Button} from '../../controls';
 import {getJsonErrorPosition, getTextPositionMessage} from '../../../config/utils';
+import {ExtWrapper} from '../../../definitions';
 
 const devToolsDocsUrl = 'https://github.com/alexanderby/darkreader#how-to-contribute';
 
 const initialTexts = new WeakSet<Element>();
 
-function Body({ext, state, setState}) {
+interface BodyProps extends ExtWrapper {
+    state?;
+    setState?;
+}
+
+function Body({data, actions, state, setState}: BodyProps) {
     let textNode: HTMLTextAreaElement;
 
     function onTextRender(node) {
         textNode = node;
         if (!state.errorText) {
-            textNode.value = ext.getDevInversionFixesText();
+            textNode.value = data.devInversionFixesText;
         }
     }
 
-    function apply() {
+    async function apply() {
         const text = textNode.value;
-        ext.applyDevInversionFixes(text, (err) => {
-            if (err) {
-                const pos = getJsonErrorPosition(err);
-                setState({errorText: getTextPositionMessage(text, pos)});
-                textNode.focus();
-                textNode.selectionStart = text.lastIndexOf('\n', pos) + 1;
-                textNode.selectionEnd = text.indexOf('\n', pos);
-                if (textNode.selectionStart === textNode.selectionEnd) {
-                    textNode.selectionStart = text.lastIndexOf('\n', textNode.selectionStart - 1) + 1;
-                }
-            } else {
-                setState({errorText: null});
+        try {
+            await actions.applyDevInversionFixes(text);
+            setState({errorText: null});
+        } catch (err) {
+            const pos = getJsonErrorPosition(err);
+            setState({errorText: getTextPositionMessage(text, pos)});
+            textNode.focus();
+            textNode.selectionStart = text.lastIndexOf('\n', pos) + 1;
+            textNode.selectionEnd = text.indexOf('\n', pos);
+            if (textNode.selectionStart === textNode.selectionEnd) {
+                textNode.selectionStart = text.lastIndexOf('\n', textNode.selectionStart - 1) + 1;
             }
-        });
+        }
     }
 
     function reset() {
-        ext.resetDevInversionFixes();
+        actions.resetDevInversionFixes();
         setState({errorText: null});
     }
 

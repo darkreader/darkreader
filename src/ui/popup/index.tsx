@@ -1,19 +1,12 @@
 import {html, sync} from 'malevic';
+import connect from '../connect';
 import Body from './components/body';
-import {getExtension} from '../utils/extension';
 import {isAffectedByChromiumIssue750419} from '../utils/issues';
 import {isFirefox} from '../../background/utils';
-import connect from '../connect';
-import {ExtensionInfo} from '../../definitions';
+import {ExtensionData, ExtensionActions} from '../../definitions';
 
-const extension = getExtension();
-
-interface PopupState {
-    activeTab?: string;
-}
-
-function renderBody() {
-    if (!extension.ready) {
+function renderBody(data: ExtensionData, actions: ExtensionActions) {
+    if (!data.ready) {
         if (!document.getElementById('not-ready-message')) {
             document.body.appendChild(sync(
                 document.createElement('div'),
@@ -23,16 +16,20 @@ function renderBody() {
         return;
     }
     sync(document.body, (
-        <Body ext={extension} />
+        <Body data={data} actions={actions} />
     ));
 }
 
-renderBody();
+async function start() {
+    const connector = connect();
+    window.addEventListener('unload', (e) => connector.disconnect());
 
-extension.addListener(renderBody);
-window.addEventListener('unload', (e) => {
-    extension.removeListener(renderBody);
-});
+    const data = await connector.getData();
+    renderBody(data, connector);
+    connector.subscribeToChanges((data) => renderBody(data, connector));
+}
+
+start();
 
 if (isFirefox()) {
     document.documentElement.classList.add('firefox');

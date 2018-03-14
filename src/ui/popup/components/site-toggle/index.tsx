@@ -1,55 +1,32 @@
 import {html, render} from 'malevic';
 import {Button} from '../../../controls';
-import {Extension} from '../../../../definitions';
+import {ExtensionData, ExtensionActions} from '../../../../definitions';
 
-export default function SiteToggleButton({ext}: {ext: Extension}) {
+export default function SiteToggleButton({data, actions}: {data: ExtensionData, actions: ExtensionActions}) {
+    const toggleHasEffect = (
+        data.enabled &&
+        !data.activeTab.isProtected &&
+        (data.filterConfig.invertListed || !data.activeTab.isInDarkList)
+    );
 
-    let buttonNode: HTMLElement;
-
-    function saveButtonNode(node: HTMLElement) {
-        buttonNode = node;
-    }
-
-    function updateUrl(urlNode: HTMLElement) {
-        ext.getActiveTabInfo((info) => {
-            const toggleHasEffect = (
-                ext.enabled &&
-                !info.isProtected &&
-                (ext.filterConfig.invertListed || !info.isInDarkList)
-            );
-
-            buttonNode.classList.toggle('site-toggle--disabled', !toggleHasEffect);
-
-            if (info.host) {
-                render(
-                    urlNode,
-                    // Break URLs at dots.
-                    info.host.split('.').reduce((elements, part, i) => {
-                        return elements.concat(
-                            <wbr />,
-                            `${i > 0 ? '.' : ''}${part}`
-                        );
-                    }, [])
-                );
-            } else {
-                render(urlNode, 'current site');
-            }
-        });
-    }
+    const urlText = (data.activeTab.host
+        ? data.activeTab.host
+            .split('.')
+            .reduce((elements, part, i) => elements.concat(
+                <wbr />,
+                `${i > 0 ? '.' : ''}${part}`
+            ), [])
+        : 'current site');
 
     return (
         <Button
-            class="site-toggle"
-            onclick={() => ext.toggleCurrentSite()}
-            didmount={saveButtonNode}
-            didupdate={saveButtonNode}
+            class={{
+                'site-toggle': true,
+                'site-toggle--disabled': !toggleHasEffect
+            }}
+            onclick={() => actions.toggleCurrentSite()}
         >
-            Toggle <span
-                class="site-toggle__url"
-                native
-                didmount={updateUrl}
-                didupdate={updateUrl}
-            />
+            Toggle <span class="site-toggle__url" >{urlText}</span>
         </Button>
     );
 }

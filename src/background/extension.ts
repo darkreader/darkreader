@@ -5,7 +5,7 @@ import UserStorage from './user-storage';
 import {simpleClone, getFontList, canInjectScript, isUrlInList} from './utils';
 import {formatJson} from '../config/utils';
 import createCSSFilterStylesheet from '../generators/css-filter';
-import {FilterConfig, TabInfo, ExtensionInfo} from '../definitions';
+import {FilterConfig, TabInfo, ExtensionData} from '../definitions';
 
 export class Extension {
 
@@ -25,11 +25,13 @@ export class Extension {
         this.icon = new IconManager();
         this.config = new ConfigManager();
         this.messenger = new Messenger({
-            collect: () => this.collectInfo(),
+            collect: () => this.collectData(),
             enable: () => this.enable(),
             disable: () => this.disable(),
             setConfig: (config) => this.setConfig(config),
             toggleCurrentSite: () => this.toggleCurrentSite(),
+            applyDevInversionFixes: (json) => this.applyDevInversionFixes(json),
+            resetDevInversionFixes: () => this.resetDevInversionFixes(),
         });
 
         // Subscribe on keyboard shortcut
@@ -73,12 +75,12 @@ export class Extension {
         };
 
         await Promise.all([
-            this.listenToActiveTabChange(),
             loadInjections(),
             this.config.load(),
             loadFonts(),
         ]);
 
+        await this.listenToActiveTabChange();
 
         this.user = new UserStorage({defaultFilterConfig: this.config.DEFAULT_FILTER_CONFIG});
         const settings = await this.user.loadSettings();
@@ -92,47 +94,45 @@ export class Extension {
         this.setConfig(settings.config);
     }
 
-    private collectInfo(): ExtensionInfo {
+    private collectData(): ExtensionData {
         return {
             enabled: this.enabled,
             filterConfig: this.filterConfig,
             activeTab: this.activeTab,
             ready: this.ready,
             fonts: this.fonts,
-            devInversionFixesText: null,
+            devInversionFixesText: this.getDevInversionFixesText(),
         };
     }
 
     enable() {
         this.enabled = true;
         this.onAppToggle();
-        this.reportChanges();
     }
 
     disable() {
         this.enabled = false;
         this.onAppToggle();
-        this.reportChanges();
     }
 
     setConfig(config: FilterConfig) {
         this.filterConfig = {...this.filterConfig, ...config};
         this.onConfigPropChanged();
-        this.reportChanges();
     }
 
     private reportChanges() {
-        const info = this.collectInfo();
+        const info = this.collectData();
         this.messenger.reportChanges(info);
     }
 
     private async listenToActiveTabChange() {
         const tab = await this.getActiveTab();
-        this.activeTab = this.getTabInfo(tab);
+        this.activeTab = tab ? this.getTabInfo(tab) : null;
         chrome.tabs.onActivated.addListener(({tabId}) => {
             chrome.tabs.get(tabId, (tab) => {
                 const info = this.getTabInfo(tab);
                 this.activeTab = info;
+                this.reportChanges();
             });
         });
     }
@@ -226,6 +226,7 @@ export class Extension {
             });
         }
         this.saveUserSettings();
+        this.reportChanges();
     }
 
     protected onConfigPropChanged() {
@@ -243,6 +244,7 @@ export class Extension {
             });
         }
         this.saveUserSettings();
+        this.reportChanges();
     }
 
 
@@ -376,7 +378,7 @@ export class Extension {
         this.onConfigPropChanged();
     }
 
-    applyDevInversionFixes(json: string, callback: (err: Error) => void) {
+    applyDevInversionFixes(json: string) {
         let obj;
         try {
             obj = JSON.parse(json);
@@ -384,9 +386,9 @@ export class Extension {
             this.saveDevInversionFixes(text);
             this.config.handleInversionFixes(obj);
             this.onConfigPropChanged();
-            callback(null);
+            return null;
         } catch (err) {
-            callback(err);
+            return err;
         }
     }
 }

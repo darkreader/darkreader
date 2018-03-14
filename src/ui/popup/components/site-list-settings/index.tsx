@@ -1,13 +1,12 @@
 import {html} from 'malevic';
 import {Toggle, TextList, Shortcut} from '../../../controls'
-import {Extension} from '../../../../definitions';
+import {ExtWrapper} from '../../../../definitions';
 
-interface SiteListSettingsProps {
-    ext: Extension;
+interface SiteListSettingsProps extends ExtWrapper {
     isFocused: boolean;
 }
 
-export default function SiteListSettings({ext, isFocused}: SiteListSettingsProps) {
+export default function SiteListSettings({data, actions, isFocused}: SiteListSettingsProps) {
 
     function isSiteUrlValid(value: string) {
         return /^([^\.\s]+?\.?)+$/.test(value);
@@ -17,19 +16,19 @@ export default function SiteListSettings({ext, isFocused}: SiteListSettingsProps
         <section class="site-list-settings">
             <Toggle
                 class="site-list-settings__toggle"
-                checked={ext.filterConfig.invertListed}
+                checked={data.filterConfig.invertListed}
                 labelOn="Invert listed only"
                 labelOff="Not invert listed"
-                onChange={(value) => ext.setConfig({invertListed: value})}
+                onChange={(value) => actions.setConfig({invertListed: value})}
             />
             <TextList
                 class="site-list-settings__text-list"
                 placeholder="mail.google.com, google.*/mail etc..."
-                values={ext.filterConfig.siteList}
+                values={data.filterConfig.siteList}
                 isFocused={isFocused}
                 onChange={(values) => {
                     if (values.every(isSiteUrlValid)) {
-                        ext.setConfig({siteList: values});
+                        actions.setConfig({siteList: values});
                     }
                 }}
             />

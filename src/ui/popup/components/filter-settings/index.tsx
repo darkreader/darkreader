@@ -1,61 +1,61 @@
 import {html} from 'malevic';
 import {UpDown} from '../../../controls';
 import ModeToggle from './mode-toggle';
-import {Extension} from '../../../../definitions';
+import {ExtWrapper} from '../../../../definitions';
 
-export default function FilterSettings({ext}: {ext: Extension}) {
+export default function FilterSettings({data, actions}: ExtWrapper) {
 
     const brightness = (
         <UpDown
-            value={ext.filterConfig.brightness}
+            value={data.filterConfig.brightness}
             min={50}
             max={150}
             step={10}
             default={100}
             name="Brightness"
-            onChange={(value) => ext.setConfig({brightness: value})}
+            onChange={(value) => actions.setConfig({brightness: value})}
         />
     );
 
     const contrast = (
         <UpDown
-            value={ext.filterConfig.contrast}
+            value={data.filterConfig.contrast}
             min={50}
             max={150}
             step={10}
             default={100}
             name="Contrast"
-            onChange={(value) => ext.setConfig({contrast: value})}
+            onChange={(value) => actions.setConfig({contrast: value})}
         />
     );
 
     const grayscale = (
         <UpDown
-            value={ext.filterConfig.grayscale}
+            value={data.filterConfig.grayscale}
             min={0}
             max={100}
             step={10}
             default={0}
             name="Grayscale"
-            onChange={(value) => ext.setConfig({grayscale: value})}
+            onChange={(value) => actions.setConfig({grayscale: value})}
         />
     );
 
     const sepia = (
         <UpDown
-            value={ext.filterConfig.sepia}
+            value={data.filterConfig.sepia}
             min={0}
             max={100}
             step={10}
             default={0}
             name="Sepia"
-            onChange={(value) => ext.setConfig({sepia: value})}
+            onChange={(value) => actions.setConfig({sepia: value})}
         />
     );
 
     return (
         <section class="filter-settings">
-            <ModeToggle ext={ext} />
+            <ModeToggle data={data} actions={actions} />
             {brightness}
             {contrast}
             {grayscale}

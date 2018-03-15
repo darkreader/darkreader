@@ -574,6 +574,19 @@
             ]
         },
         {
+            "url": "python.org",
+            "invert": [
+                "nav ul li > a",
+                "nav .tier-2",
+                "#site-navigation, header, .featured-news-wrapper",
+                ":not(.lang):not(#foot-logo)>img"
+            ],
+            "noinvert": [
+                ":not(.lang):not(#foot-logo)>img",
+                "#content > div > section > div"
+            ]
+        },
+        {
             "url": "quora.com",
             "invert": ".section_photo"
         },

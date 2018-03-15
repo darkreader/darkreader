@@ -892,8 +892,8 @@
                 "html[dark=true] #scrim",
                 ".html5-video-player, .has-custom-banner, #theater-background",
                 "#watch-appbar-playlist",
-                "#header > #background",
-                "#links-holder yt-formatted-string",
+                "html:not([dark=true]) #header > #background",
+                "html:not([dark=true]) #links-holder yt-formatted-string",
                 "ytd-thumbnail-overlay-time-status-renderer",
                 "ytd-thumbnail-overlay-toggle-button-renderer",
                 "paper-toast"

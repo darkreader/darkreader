@@ -3,9 +3,14 @@ Dark Reader for Google Chrome and Mozilla Firefox
 ![Dark Reader screenshot](promo/screenshots/screenshot_filter.png)
 
 This extension **inverts brightness** of web pages and aims to **reduce eyestrain** while browsing the web.
-Visit [Chrome Web Store](https://chrome.google.com/webstore/detail/dark-reader/eimadpbcbfnmbkopoojfekhnkhdbieeh) and [Firefox Add-ons](https://addons.mozilla.org/en-US/firefox/addon/darkreader/) for more info.
+Visit [Chrome Web Store](https://chrome.google.com/webstore/detail/dark-reader/eimadpbcbfnmbkopoojfekhnkhdbieeh)
+and [Firefox Add-ons](https://addons.mozilla.org/en-US/firefox/addon/darkreader/)
+for more info.
 
 ## How to contribute
+
+### Sponsorship
+[Donate](https://opencollective.com/darkreader) via Open Collective.
 
 ### Fixing wrong inversion
 
@@ -15,7 +20,7 @@ If some **parts** of web-pages are **wrongly inverted**, you can specify necessa
 
 Notice that merged changes to these files are automatically delivered to all users **within 15 minutes**.
 
-#### Using Dev Tools
+### Using Dev Tools
 
 - Open **Chrome Dev Tools** (F12).
 - Click on **element picker** (top-left corner).
@@ -58,7 +63,7 @@ Notice that merged changes to these files are automatically delivered to all use
 - Click **Propose file change**.
 - Review your changes. Click **Create pull request**.
 - The Travis CI will run tests reviewing your changes.
-- If you see a **red cross** click **Details** and see what is wrong.
+- If you see a **red cross** click **Details** and see what is wrong and edit existing Pull Request.
 - When you see a **green checkmark** than everything is fine.
 - Dark Reader developer will **review** and merge your changes making them available for all users.
 
@@ -67,10 +72,10 @@ Notice that merged changes to these files are automatically delivered to all use
 If you would like to **add new feature** to Dark Reader or **fix a bug**, **submit an issue** in GitHub (if there is no existing one), **discuss** it with active contributors, wait for **approvement**.
 
 In order to build and debug the extension **install the [nodejs](https://nodejs.org/)**.
-Install development dependencies by running ```npm install``` in project root folder.
-Then execute ```npm run debug```.
+Install development dependencies by running `npm install` in project root folder.
+Then execute `npm run debug`.
 Open the [Chrome's extensions page](https://support.google.com/chrome/answer/187443).
-Enable the **Developer mode**, press **Load unpacked extension** button, navigate to project's ```src/``` folder.
+Enable the **Developer mode**, press **Load unpacked extension** button, navigate to project's `debug/` folder.
 
 After making any code changes the project will be automatically recompiled.
 If the extension **didn't reload** automatically it can be reloaded at [Extensions page](chrome://extensions) by pressing the **Reload (Ctrl+R)** hyperlink.
@@ -79,8 +84,5 @@ For editing the code you can use any text editor or web IDE (like [Visual Studio
 **Preserve code style** (whitespaces etc).
 
 Submit a **pull request**, wait for **review**.
-
-## Sponsorship
-[Donate](https://opencollective.com/darkreader)
 
 ## Good luck!

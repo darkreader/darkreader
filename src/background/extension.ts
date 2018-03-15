@@ -3,10 +3,10 @@ import IconManager from './icon-manager';
 import Messenger from './messenger';
 import TabManager from './tab-manager';
 import UserStorage from './user-storage';
-import {simpleClone, getFontList, canInjectScript, isUrlInList, getUrlHost} from './utils';
+import {simpleClone, getFontList, getCommands, canInjectScript, isUrlInList, getUrlHost} from './utils';
 import {formatJson} from '../config/utils';
 import createCSSFilterStylesheet from '../generators/css-filter';
-import {FilterConfig, ExtensionData} from '../definitions';
+import {FilterConfig, ExtensionData, Shortcuts} from '../definitions';
 
 export class Extension {
 
@@ -17,6 +17,7 @@ export class Extension {
     fonts: string[];
     icon: IconManager;
     messenger: Messenger;
+    shortcuts: Shortcuts;
     tabs: TabManager;
     user: UserStorage;
 
@@ -38,7 +39,7 @@ export class Extension {
         this.tabs = new TabManager(this.config);
     }
 
-    private registerCommands() {
+    private async registerCommands() {
         chrome.commands.onCommand.addListener((command) => {
             if (command === 'toggle') {
                 console.log('Toggle command entered');
@@ -53,6 +54,8 @@ export class Extension {
                 this.toggleCurrentSite();
             }
         });
+        const commands = await getCommands();
+        this.shortcuts = commands.reduce((map, cmd) => Object.assign(map, {[cmd.name]: cmd.shortcut}), {} as Shortcuts);
     }
 
     async start() {
@@ -81,6 +84,7 @@ export class Extension {
             loadInjections(),
             this.config.load(),
             loadFonts(),
+            this.registerCommands(),
         ]);
 
         this.user = new UserStorage({defaultFilterConfig: this.config.DEFAULT_FILTER_CONFIG});
@@ -92,8 +96,6 @@ export class Extension {
         }
         console.log('loaded', settings);
 
-        this.registerCommands();
-
         this.ready = true;
         this.setConfig(settings.config);
     }
@@ -104,6 +106,7 @@ export class Extension {
             filterConfig: this.filterConfig,
             ready: this.ready,
             fonts: this.fonts,
+            shortcuts: this.shortcuts,
             devInversionFixesText: this.getDevInversionFixesText(),
         };
     }

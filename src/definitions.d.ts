@@ -5,6 +5,7 @@ export interface ExtensionData {
     ready: boolean;
     filterConfig: FilterConfig;
     fonts: string[];
+    shortcuts: Shortcuts;
     devInversionFixesText: string;
 }
 
@@ -44,6 +45,10 @@ export interface TabInfo {
     url: string;
     isProtected: boolean;
     isInDarkList: boolean;
+}
+
+export interface Shortcuts {
+    [name: string]: string;
 }
 
 export interface InversionFixes {

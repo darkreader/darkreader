@@ -29,6 +29,7 @@ export default function TopSection({data, actions, tab}: ExtWrapper & {tab: TabI
                 {/* TODO: pass site info */true ? (
                     <Shortcut
                         commandName="addSite"
+                        shortcuts={data.shortcuts}
                         textTemplate={(hotkey) => (hotkey
                             ? multiline('toggle current site', hotkey)
                             : multiline('setup current site', 'toggle hotkey')
@@ -45,6 +46,7 @@ export default function TopSection({data, actions, tab}: ExtWrapper & {tab: TabI
                 <Toggle checked={data.enabled} labelOn="On" labelOff="Off" onChange={toggleExtension} />
                 <Shortcut
                     commandName="toggle"
+                    shortcuts={data.shortcuts}
                     textTemplate={(hotkey) => (hotkey
                         ? multiline('toggle extension', hotkey)
                         : multiline('setup extension', 'toggle hotkey')

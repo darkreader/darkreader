@@ -35,6 +35,7 @@ export default function SiteListSettings({data, actions, isFocused}: SiteListSet
             <Shortcut
                 class="site-list-settings__shortcut"
                 commandName="addSite"
+                shortcuts={data.shortcuts}
                 textTemplate={(hotkey) => (hotkey
                     ? `hotkey for adding site: ${hotkey}`
                     : 'setup a hotkey for adding site'

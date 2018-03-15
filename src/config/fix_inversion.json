@@ -139,8 +139,11 @@
         {
             "url": "duckduckgo.com",
             "invert": [
-                "#logo_homepage_link",
-                "span.header__logo.js-logo-ddg"
+                "html:not(.dark-bg) #logo_homepage_link",
+                "html:not(.dark-bg) span.header__logo.js-logo-ddg"
+            ],
+            "noinvert": [
+                "html.dark-bg, html.dark-bg *"
             ]
         },
         {

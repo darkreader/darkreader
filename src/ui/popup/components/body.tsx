@@ -5,6 +5,7 @@ import {TabPanel, Button, CheckBox} from '../../controls';
 import Header from './header';
 import FilterSettings from './filter-settings';
 import FontSettings from './font-settings';
+import Loader from './loader';
 import SiteListSettings from './site-list-settings';
 import {isFirefox} from '../../../background/utils';
 import {ExtensionData, ExtensionActions, TabInfo} from '../../../definitions';
@@ -34,8 +35,17 @@ function openDevTools() {
 
 function Body(props: BodyProps) {
     const {state, setState} = props;
+    if (!props.data.ready) {
+        return (
+            <body>
+                <Loader />
+            </body>
+        )
+    }
     return (
         <body class={{'ext-disabled': !props.data.enabled}}>
+            <Loader complete />
+
             <Header data={props.data} tab={props.tab} actions={props.actions} />
 
             <TabPanel

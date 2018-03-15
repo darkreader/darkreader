@@ -102,6 +102,11 @@
             "invert": ".wwzing"
         },
         {
+            "url": "deezer.com",
+            "invert": ".page-sidebar",
+            "noinvert": ".player-cover *"
+        },
+        {
             "url": "developer.mozilla.org",
             "invert": [
                 "#nav-footer, .highlight-span, .readOnlyInline, #nav-sec, #toc",

@@ -891,7 +891,12 @@
             "invert": [
                 "html[dark=true] #scrim",
                 ".html5-video-player, .has-custom-banner, #theater-background",
-                "#watch-appbar-playlist"
+                "#watch-appbar-playlist",
+                "#header > #background",
+                "#links-holder yt-formatted-string",
+                "ytd-thumbnail-overlay-time-status-renderer",
+                "ytd-thumbnail-overlay-toggle-button-renderer",
+                "paper-toast"
             ],
             "noinvert": [
                 "html[dark=true]",

@@ -859,6 +859,7 @@
         {
             "url": "yandex.*",
             "invert": [
+                "body.b-page_theme_pure_night",
                 ".afisha, #wd-_afisha",
                 ".favicon",
                 ".informers7__icon",
@@ -883,6 +884,7 @@
                 ".media-grid_theme_white, .dist-popup__image"
             ],
             "noinvert": [
+                "body.b-page_theme_pure_night *",
                 ".afisha__film-image",
                 ".stream-intro__vod-preview"
             ],

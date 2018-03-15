@@ -29,12 +29,13 @@ function tryParseJson(name, text) {
     try {
         return JSON.parse(text);
     } catch (err) {
+        let message = err.message;
         const pos = getJsonErrorPosition(err);
         if (pos >= 0) {
             message += '\n';
-            message += getTextPositionMessage(text, i);
+            message += getTextPositionMessage(text, pos);
         }
-        logError(`Unable to parse ${name}: ${err.message}`);
+        logError(`Unable to parse ${name}: ${message}`);
         process.exit(13);
     }
 }

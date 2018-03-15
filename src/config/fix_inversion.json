@@ -199,10 +199,11 @@
         {
             "url": "feedly.com",
             "invert": [
-                ".landing-old .dark",
+                ".people .photo",
                 "#feedlyUndoSign",
                 "#feedlySignPart",
-                ".pinContainer"
+                ".pinContainer",
+                ".visual-overlay"
             ],
             "rules": ".entry-overlay {background-color: rgba(220,220,220,0.5)}"
         },

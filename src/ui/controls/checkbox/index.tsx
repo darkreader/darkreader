@@ -7,7 +7,12 @@ export default function CheckBox(props: Malevic.NodeAttrs = {}) {
 
     return (
         <label class={cls} {...attrs}>
-            <input class="checkbox__input" type="checkbox" onchange={props.onchange} />
+            <input
+                class="checkbox__input"
+                type="checkbox"
+                checked={props.checked}
+                onchange={props.onchange}
+            />
             <span class="checkbox__checkmark"></span>
         </label>
     );

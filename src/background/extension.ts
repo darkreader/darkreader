@@ -217,13 +217,11 @@ export class Extension {
             css = '';
         }
         return this.scripts.addStyle
-            .replace(/(^\s*)(\/\/\s*?#DEBUG\s*)(.*?$)/igm, this.config.DEBUG ? '$1$3' : '')
             .replace(/\$CSS/g, `'${css.replace(/\'/g, '\\\'')}'`);
     };
 
     private removeStyleCodeGenerator = () => {
-        return this.scripts.removeStyle
-            .replace(/(^\s*)(\/\/\s*?#DEBUG\s*)(.*?$)/igm, this.config.DEBUG ? '$1$3' : '');
+        return this.scripts.removeStyle;
     };
 
 

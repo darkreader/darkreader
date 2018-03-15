@@ -1,7 +1,7 @@
 import {ExtensionData, TabInfo} from '../../definitions';
 
-export function getMockData(): ExtensionData {
-    return {
+export function getMockData(override = {}): ExtensionData {
+    return Object.assign({
         enabled: true,
         ready: true,
         filterConfig: {
@@ -24,8 +24,12 @@ export function getMockData(): ExtensionData {
             'fantasy',
             'system-ui'
         ],
+        shortcuts: {
+            'addSite': 'Alt+Shift+A',
+            'toggle': 'Alt+Shift+D'
+        },
         devInversionFixesText: `${JSON.stringify({common: {invert: 'img, iframe'}, sites: [{url: 'google.*', invert: '.icon'}]}, null, 4)}\n`
-    };
+    }, override);
 }
 
 export function getMockActiveTabInfo(): TabInfo {

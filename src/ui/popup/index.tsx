@@ -6,15 +6,6 @@ import {isFirefox} from '../../background/utils';
 import {ExtensionData, ExtensionActions, TabInfo} from '../../definitions';
 
 function renderBody(data: ExtensionData, tab: TabInfo, actions: ExtensionActions) {
-    if (!data.ready) {
-        if (!document.getElementById('not-ready-message')) {
-            document.body.appendChild(sync(
-                document.createElement('div'),
-                <div id="not-ready-message">Loading...</div>
-            ));
-        }
-        return;
-    }
     sync(document.body, (
         <Body data={data} tab={tab} actions={actions} />
     ));
@@ -34,10 +25,5 @@ async function start() {
 
 start();
 
-if (isFirefox()) {
-    document.documentElement.classList.add('firefox');
-}
-
-if (isAffectedByChromiumIssue750419()) {
-    document.documentElement.classList.add('chromium-issue-750419');
-}
+document.documentElement.classList.toggle('firefox', isFirefox());
+document.documentElement.classList.toggle('chromium-issue-750419', isAffectedByChromiumIssue750419());

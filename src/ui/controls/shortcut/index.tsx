@@ -1,10 +1,12 @@
 import {html} from 'malevic';
 import {mergeClass} from '../utils';
 import {getCommands} from '../../../background/utils';
+import {Shortcuts} from '../../../definitions';
 
 interface ShortcutLinkProps {
     class?: string | {[cls: string]: any};
     commandName: string;
+    shortcuts: Shortcuts;
     textTemplate: (shortcut: string) => string;
 }
 
@@ -14,15 +16,10 @@ interface ShortcutLinkProps {
  */
 export default function ShortcutLink(props: ShortcutLinkProps) {
     const cls = mergeClass('shortcut', props.class);
+    const shortcut = props.shortcuts[props.commandName];
 
-    async function setupText(node: HTMLElement) {
-        const commands = await getCommands();
-        const command = commands.find((c) => c.name === props.commandName);
-        const shortcut = command && command.shortcut ? command.shortcut : null;
-        node.textContent = props.textTemplate(shortcut);
-    }
-
-    function onClick() {
+    function onClick(e: Event) {
+        e.preventDefault();
         chrome.tabs.create({
             url: `chrome://extensions/configureCommands#command-${chrome.runtime.id}-${props.commandName}`,
             active: true
@@ -33,9 +30,7 @@ export default function ShortcutLink(props: ShortcutLinkProps) {
         <a
             class={cls}
             href="#"
-            native
-            didmount={setupText}
             onclick={onClick}
-        ></a>
+        >{props.textTemplate(shortcut)}</a>
     );
 }

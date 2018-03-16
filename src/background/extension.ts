@@ -5,6 +5,7 @@ import TabManager from './tab-manager';
 import UserStorage from './user-storage';
 import {simpleClone, getFontList, getCommands, canInjectScript, isUrlInList, getUrlHost} from './utils';
 import {formatJson} from '../config/utils';
+import ThemeEngines from '../generators/theme-engines';
 import createCSSFilterStylesheet from '../generators/css-filter';
 import createStaticStylesheet from '../generators/static-theme';
 import {FilterConfig, ExtensionData, Shortcuts} from '../definitions';
@@ -52,6 +53,13 @@ export class Extension {
             if (command === 'addSite') {
                 console.log('Add Site command entered');
                 this.toggleCurrentSite();
+            }
+            if (command === 'switchEngine') {
+                console.log('Switch Engine command entered');
+                const engines = Object.values(ThemeEngines);
+                const index = engines.indexOf(this.filterConfig.engine);
+                const next = index === engines.length - 1 ? engines[0] : engines[index + 1];
+                this.setConfig({engine: next});
             }
         });
     }

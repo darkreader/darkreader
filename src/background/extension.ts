@@ -5,8 +5,8 @@ import TabManager from './tab-manager';
 import UserStorage from './user-storage';
 import {simpleClone, getFontList, getCommands, canInjectScript, isUrlInList, getUrlHost} from './utils';
 import {formatJson} from '../config/utils';
-import createStaticStylesheet from '../generators/static';
 import createCSSFilterStylesheet from '../generators/css-filter';
+import createStaticStylesheet from '../generators/static-theme';
 import {FilterConfig, ExtensionData, Shortcuts} from '../definitions';
 
 export class Extension {
@@ -212,8 +212,16 @@ export class Extension {
                 && !isUrlInUserList)
         ) {
             console.log(`Creating CSS for url: ${url}`);
-            css = createStaticStylesheet();
-            // css = createCSSFilterStylesheet(this.filterConfig, this.config.getFixesFor(url));
+            switch (this.filterConfig.engine) {
+                case 'cssFilter':
+                    css = createCSSFilterStylesheet(this.filterConfig, this.config.getFixesFor(url));
+                    break;
+                case 'staticTheme':
+                    css = createStaticStylesheet();
+                    break;
+                default:
+                    throw new Error(`Unknown engine ${this.filterConfig.engine}`);
+            }
         } else {
             console.log(`Site is not inverted: ${url}`);
             css = '';

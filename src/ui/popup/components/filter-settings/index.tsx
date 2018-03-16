@@ -1,5 +1,6 @@
 import {html} from 'malevic';
 import {UpDown} from '../../../controls';
+import EngineSwitch from './engine-switch';
 import ModeToggle from './mode-toggle';
 import {ExtWrapper} from '../../../../definitions';
 
@@ -58,8 +59,9 @@ export default function FilterSettings({data, actions}: ExtWrapper) {
             <ModeToggle data={data} actions={actions} />
             {brightness}
             {contrast}
-            {grayscale}
+            {/*grayscale*/}
             {sepia}
+            <EngineSwitch data={data} actions={actions} />
         </section>
     );
 }

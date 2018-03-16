@@ -34,6 +34,7 @@ export interface FilterConfig {
     textStroke?: number;
     siteList?: string[];
     invertListed?: boolean;
+    engine?: string;
 }
 
 export interface UserSettings {

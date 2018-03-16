@@ -102,6 +102,11 @@
             "invert": ".wwzing"
         },
         {
+            "url": "deezer.com",
+            "invert": ".page-sidebar",
+            "noinvert": ".player-cover *"
+        },
+        {
             "url": "developer.mozilla.org",
             "invert": [
                 "#nav-footer, .highlight-span, .readOnlyInline, #nav-sec, #toc",
@@ -139,8 +144,11 @@
         {
             "url": "duckduckgo.com",
             "invert": [
-                "#logo_homepage_link",
-                "span.header__logo.js-logo-ddg"
+                "html:not(.dark-bg) #logo_homepage_link",
+                "html:not(.dark-bg) span.header__logo.js-logo-ddg"
+            ],
+            "noinvert": [
+                "html.dark-bg, html.dark-bg *"
             ]
         },
         {
@@ -199,10 +207,11 @@
         {
             "url": "feedly.com",
             "invert": [
-                ".landing-old .dark",
+                ".people .photo",
                 "#feedlyUndoSign",
                 "#feedlySignPart",
-                ".pinContainer"
+                ".pinContainer",
+                ".visual-overlay"
             ],
             "rules": ".entry-overlay {background-color: rgba(220,220,220,0.5)}"
         },
@@ -850,6 +859,7 @@
         {
             "url": "yandex.*",
             "invert": [
+                "body.b-page_theme_pure_night",
                 ".afisha, #wd-_afisha",
                 ".favicon",
                 ".informers7__icon",
@@ -874,6 +884,7 @@
                 ".media-grid_theme_white, .dist-popup__image"
             ],
             "noinvert": [
+                "body.b-page_theme_pure_night *",
                 ".afisha__film-image",
                 ".stream-intro__vod-preview"
             ],
@@ -891,7 +902,13 @@
             "invert": [
                 "html[dark=true] #scrim",
                 ".html5-video-player, .has-custom-banner, #theater-background",
-                "#watch-appbar-playlist"
+                "#watch-appbar-playlist",
+                "html:not([dark=true]) #header > #background",
+                "html:not([dark=true]) #links-holder yt-formatted-string",
+                "html:not([dark=true]) #subscribe-button",
+                "ytd-thumbnail-overlay-time-status-renderer",
+                "ytd-thumbnail-overlay-toggle-button-renderer",
+                "paper-toast"
             ],
             "noinvert": [
                 "html[dark=true]",

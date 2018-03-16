@@ -1,7 +1,7 @@
 import {ExtensionData, ExtensionActions, FilterConfig, TabInfo} from '../definitions';
 
 interface ExtensionAdapter {
-    collect: () => ExtensionData;
+    collect: () => Promise<ExtensionData>;
     getActiveTabInfo: () => Promise<TabInfo>;
     enable: () => void;
     disable: () => void;
@@ -20,7 +20,7 @@ export default class Messenger {
             port.onMessage.addListener(async ({type, id, data}) => {
                 switch (type) {
                     case 'getData': {
-                        const data = adapter.collect();
+                        const data = await adapter.collect();
                         port.postMessage({id, data});
                         break;
                     }

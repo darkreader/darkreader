@@ -18,7 +18,6 @@ export class Extension {
     fonts: string[];
     icon: IconManager;
     messenger: Messenger;
-    shortcuts: Shortcuts;
     tabs: TabManager;
     user: UserStorage;
 
@@ -28,7 +27,7 @@ export class Extension {
         this.icon = new IconManager();
         this.config = new ConfigManager();
         this.messenger = new Messenger({
-            collect: () => this.collectData(),
+            collect: async () => await this.collectData(),
             getActiveTabInfo: async () => await this.tabs.getActiveTabInfo(),
             enable: () => this.enable(),
             disable: () => this.disable(),
@@ -40,7 +39,7 @@ export class Extension {
         this.tabs = new TabManager(this.config);
     }
 
-    private async registerCommands() {
+    private registerCommands() {
         chrome.commands.onCommand.addListener((command) => {
             if (command === 'toggle') {
                 console.log('Toggle command entered');
@@ -55,8 +54,11 @@ export class Extension {
                 this.toggleCurrentSite();
             }
         });
+    }
+
+    private async getShortcuts() {
         const commands = await getCommands();
-        this.shortcuts = commands.reduce((map, cmd) => Object.assign(map, {[cmd.name]: cmd.shortcut}), {} as Shortcuts);
+        return commands.reduce((map, cmd) => Object.assign(map, {[cmd.name]: cmd.shortcut}), {} as Shortcuts);
     }
 
     async start() {
@@ -85,7 +87,6 @@ export class Extension {
             loadInjections(),
             this.config.load(),
             loadFonts(),
-            this.registerCommands(),
         ]);
 
         this.user = new UserStorage({defaultFilterConfig: this.config.DEFAULT_FILTER_CONFIG});
@@ -97,17 +98,19 @@ export class Extension {
         }
         console.log('loaded', settings);
 
+        this.registerCommands();
+
         this.ready = true;
         this.setConfig(settings.config);
     }
 
-    private collectData(): ExtensionData {
+    private async collectData(): Promise<ExtensionData> {
         return {
             enabled: this.enabled,
             filterConfig: this.filterConfig,
             ready: this.ready,
             fonts: this.fonts,
-            shortcuts: this.shortcuts,
+            shortcuts: await this.getShortcuts(),
             devInversionFixesText: this.getDevInversionFixesText(),
         };
     }
@@ -127,8 +130,8 @@ export class Extension {
         this.onConfigPropChanged();
     }
 
-    private reportChanges() {
-        const info = this.collectData();
+    private async reportChanges() {
+        const info = await this.collectData();
         this.messenger.reportChanges(info);
     }
 

@@ -15,9 +15,6 @@
             "input",
             "[background] *"
         ],
-        "removebg": [
-            "iframe:not([title='Disqus']):not([src*='ihlenndgcmojhcghmfjfneahoeklbjjh'])"
-        ],
         "rules": [
             "#disqus_thread > :first-child { background: black !important; }"
         ]

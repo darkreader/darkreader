@@ -908,7 +908,9 @@
                 "html:not([dark=true]) #subscribe-button",
                 "ytd-thumbnail-overlay-time-status-renderer",
                 "ytd-thumbnail-overlay-toggle-button-renderer",
-                "paper-toast"
+                "paper-toast",
+                "ytd-masthead[dark]",
+                "html:not([dark=true]) ytd-masthead[dark] #avatar-btn"
             ],
             "noinvert": [
                 "html[dark=true]",

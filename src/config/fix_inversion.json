@@ -624,6 +624,12 @@
             "invert": "#header, #header-bottom-right"
         },
         {
+            "url": "reddit.com/r/(homestuck|Undertale)",
+            "invert": "#header, #header-bottom-right, #sr-header-area, .md h4",
+            "noinvert": "#header-img",
+            "removebg": "body"
+        },
+        {
             "url": [
                 "ruby.sketchup.com",
                 "rubydoc.info"

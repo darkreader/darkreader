@@ -743,7 +743,7 @@
             "url": "twitter.com",
             "invert": ".tcu-textEllipse--multiline, .GalleryTweet .tweet, .Gallery-media",
             "noinvert": ".Gallery-media *",
-            "rules": ".gallery-overlay, #permalink-overlay {background: rgba(255,255,255,0.9)}"
+            "rules": ".gallery-overlay, #permalink-overlay {background: rgba(255,255,255,0.7)}"
         },
         {
             "url": "ubi.com",

@@ -604,6 +604,12 @@
             "invert": ".gatsby-highlight, .css-mlkfzr, .css-17t02fm"
         },
         {
+            "url": "reddit.com/r/(homestuck|Undertale)",
+            "invert": "#header, #header-bottom-right, #sr-header-area, .md h4",
+            "noinvert": "#header-img",
+            "removebg": "body"
+        },
+        {
             "url": [
                 "reddit.com/r/GlobalOffensive"
             ],
@@ -622,12 +628,6 @@
         {
             "url": "reddit.com/r/firefox",
             "invert": "#header, #header-bottom-right"
-        },
-        {
-            "url": "reddit.com/r/(homestuck|Undertale)",
-            "invert": "#header, #header-bottom-right, #sr-header-area, .md h4",
-            "noinvert": "#header-img",
-            "removebg": "body"
         },
         {
             "url": [

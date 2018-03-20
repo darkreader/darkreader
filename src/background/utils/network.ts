@@ -1,16 +1,11 @@
-interface JsonRequestParams<T> {
+interface RequestParams {
     url: string;
     timeout?: number;
 }
 
-/**
- * Loads and parses JSON from file to object.
- * @param params Object containing request parameters.
- */
-export function readJson<T>(params: JsonRequestParams<T>): Promise<T> {
+export function readText(params: RequestParams): Promise<string> {
     return new Promise((resolve, reject) => {
         const request = new XMLHttpRequest();
-        request.overrideMimeType("application/json");
         request.open(
             'GET',
             `${params.url}?nocache=${Date.now()}`,
@@ -18,14 +13,9 @@ export function readJson<T>(params: JsonRequestParams<T>): Promise<T> {
         );
         request.onload = () => {
             if (request.status >= 200 && request.status < 300) {
-                // Remove comments
-                const resultText = request.responseText
-                    .replace(/(\".*?(\\\".*?)*?\")|(\/\*(.|[\r\n])*?\*\/)|(\/\/.*?[\r\n])/gm, '$1');
-
-                const json = JSON.parse(resultText);
-                resolve(json);
+                resolve(request.responseText);
             } else {
-                reject(new Error(request.status + ': ' + request.statusText));
+                reject(new Error(`${request.status}: ${request.statusText}`));
             }
         };
         request.onerror = (err: ErrorEvent) => reject(err.error);
@@ -35,4 +25,16 @@ export function readJson<T>(params: JsonRequestParams<T>): Promise<T> {
         }
         request.send();
     });
+}
+
+/**
+ * Loads and parses JSON from file to object.
+ * @param params Object containing request parameters.
+ */
+export async function readJson<T>(params: RequestParams): Promise<T> {
+    const rawJson = await readText(params);
+    // Remove comments
+    const json = rawJson
+        .replace(/(\".*?(\\\".*?)*?\")|(\/\*(.|[\r\n])*?\*\/)|(\/\/.*?[\r\n])/gm, '$1');
+    return JSON.parse(json);
 }

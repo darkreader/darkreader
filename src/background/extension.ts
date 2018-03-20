@@ -1,18 +1,22 @@
 import ConfigManager from './config-manager';
+import DevTools from './devtools';
 import IconManager from './icon-manager';
 import Messenger from './messenger';
 import TabManager from './tab-manager';
 import UserStorage from './user-storage';
-import {simpleClone, getFontList, getCommands, canInjectScript, isUrlInList, getUrlHost} from './utils';
-import {formatJson} from '../config/utils';
+import {getFontList, getCommands, isUrlInList, getUrlHost} from './utils';
+import ThemeEngines from '../generators/theme-engines';
 import createCSSFilterStylesheet from '../generators/css-filter';
+import createStaticStylesheet from '../generators/static-theme';
 import {FilterConfig, ExtensionData, Shortcuts} from '../definitions';
 
 export class Extension {
 
     enabled: boolean;
     ready: boolean;
+
     config: ConfigManager;
+    devtools: DevTools;
     filterConfig: FilterConfig;
     fonts: string[];
     icon: IconManager;
@@ -25,6 +29,7 @@ export class Extension {
 
         this.icon = new IconManager();
         this.config = new ConfigManager();
+        this.devtools = new DevTools(this.config, () => this.onConfigPropChanged());
         this.messenger = new Messenger({
             collect: async () => await this.collectData(),
             getActiveTabInfo: async () => await this.tabs.getActiveTabInfo(),
@@ -32,8 +37,10 @@ export class Extension {
             disable: () => this.disable(),
             setConfig: (config) => this.setConfig(config),
             toggleSitePattern: (pattern) => this.toggleSitePattern(pattern),
-            applyDevInversionFixes: (json) => this.applyDevInversionFixes(json),
-            resetDevInversionFixes: () => this.resetDevInversionFixes(),
+            applyDevInversionFixes: (json) => this.devtools.applyInversionFixes(json),
+            resetDevInversionFixes: () => this.devtools.resetInversionFixes(),
+            applyDevStaticThemes: (text) => this.devtools.applyStaticThemes(text),
+            resetDevStaticThemes: () => this.devtools.resetStaticThemes(),
         });
         this.tabs = new TabManager(this.config);
     }
@@ -51,6 +58,13 @@ export class Extension {
             if (command === 'addSite') {
                 console.log('Add Site command entered');
                 this.toggleCurrentSite();
+            }
+            if (command === 'switchEngine') {
+                console.log('Switch Engine command entered');
+                const engines = Object.values(ThemeEngines);
+                const index = engines.indexOf(this.filterConfig.engine);
+                const next = index === engines.length - 1 ? engines[0] : engines[index + 1];
+                this.setConfig({engine: next});
             }
         });
     }
@@ -110,7 +124,8 @@ export class Extension {
             ready: this.ready,
             fonts: this.fonts,
             shortcuts: await this.getShortcuts(),
-            devInversionFixesText: this.getDevInversionFixesText(),
+            devInversionFixesText: this.devtools.getInversionFixesText(),
+            devStaticThemesText: this.devtools.getStaticThemesText(),
         };
     }
 
@@ -214,13 +229,22 @@ export class Extension {
                 && !isUrlInUserList)
         ) {
             console.log(`Creating CSS for url: ${url}`);
-            css = createCSSFilterStylesheet(this.filterConfig, this.config.getFixesFor(url));
+            switch (this.filterConfig.engine) {
+                case 'cssFilter':
+                    css = createCSSFilterStylesheet(this.filterConfig, url, this.config.INVERSION_FIXES);
+                    break;
+                case 'staticTheme':
+                    css = createStaticStylesheet(this.filterConfig, url, this.config.STATIC_THEMES);
+                    break;
+                default:
+                    throw new Error(`Unknown engine ${this.filterConfig.engine}`);
+            }
         } else {
             console.log(`Site is not inverted: ${url}`);
             css = '';
         }
         return this.scripts.addStyle
-            .replace(/\$CSS/g, `'${css.replace(/\'/g, '\\\'')}'`);
+            .replace(/\$CSS/g, `'${css.replace(/\'/g, '\\\'').replace(/\n/g, '\\n')}'`);
     };
 
     private removeStyleCodeGenerator = () => {
@@ -236,46 +260,5 @@ export class Extension {
             enabled: this.enabled,
             config: this.filterConfig,
         }).then((settings) => console.log('saved', settings));
-    }
-
-    //-------------------------------------
-    //
-    //          Developer tools
-    //
-    //-------------------------------------
-
-    protected getSavedDevInversionFixes() {
-        return localStorage.getItem('dev_inversion_fixes') || null;
-    }
-
-    protected saveDevInversionFixes(json: string) {
-        localStorage.setItem('dev_inversion_fixes', json);
-    }
-
-    getDevInversionFixesText() {
-        const {RAW_INVERSION_FIXES} = this.config;
-        const fixes = this.getSavedDevInversionFixes();
-        return formatJson(fixes ? JSON.parse(fixes) : RAW_INVERSION_FIXES);
-    }
-
-    resetDevInversionFixes() {
-        const {RAW_INVERSION_FIXES} = this.config;
-        localStorage.removeItem('dev_inversion_fixes');
-        this.config.handleInversionFixes(RAW_INVERSION_FIXES);
-        this.onConfigPropChanged();
-    }
-
-    applyDevInversionFixes(json: string) {
-        let obj;
-        try {
-            obj = JSON.parse(json);
-            const text = formatJson(obj);
-            this.saveDevInversionFixes(text);
-            this.config.handleInversionFixes(obj);
-            this.onConfigPropChanged();
-            return null;
-        } catch (err) {
-            return err;
-        }
     }
 }

@@ -7,6 +7,7 @@ export interface ExtensionData {
     fonts: string[];
     shortcuts: Shortcuts;
     devInversionFixesText: string;
+    devStaticThemesText: string;
 }
 
 export interface ExtensionActions {
@@ -16,6 +17,8 @@ export interface ExtensionActions {
     toggleSitePattern(pattern: string);
     applyDevInversionFixes(json: string): Promise<void>;
     resetDevInversionFixes();
+    applyDevStaticThemes(text: string): Promise<void>;
+    resetDevStaticThemes();
 }
 
 export interface ExtWrapper {
@@ -34,6 +37,7 @@ export interface FilterConfig {
     textStroke?: number;
     siteList?: string[];
     invertListed?: boolean;
+    engine?: string;
 }
 
 export interface UserSettings {
@@ -65,4 +69,34 @@ export interface InversionFix {
 
 export interface SiteFix extends InversionFix {
     url: string | string[];
+}
+
+export interface StaticTheme {
+    url: string[];
+    neutralBackground?: string[];
+    neutralBackgroundActive?: string[];
+    neutralForeground?: string[];
+    neutralForegroundActive?: string[];
+    neutralBorder?: string[];
+    redBackground?: string[];
+    redBackgroundActive?: string[];
+    redForeground?: string[];
+    redForegroundActive?: string[];
+    redBorder?: string[];
+    greenBackground?: string[];
+    greenBackgroundActive?: string[];
+    greenForeground?: string[];
+    greenForegroundActive?: string[];
+    greenBorder?: string[];
+    blueBackground?: string[];
+    blueBackgroundActive?: string[];
+    blueForeground?: string[];
+    blueForegroundActive?: string[];
+    blueBorder?: string[];
+    fadeBackground?: string[];
+    fadeForeground?: string[];
+    transparentBackground?: string[];
+    noImage?: string[];
+    invert?: string[];
+    noCommon?: boolean;
 }

@@ -1,4 +1,4 @@
-import {ExtensionData, ExtensionActions, FilterConfig, TabInfo} from '../definitions';
+import {ExtensionData, FilterConfig, TabInfo} from '../definitions';
 
 interface ExtensionAdapter {
     collect: () => Promise<ExtensionData>;
@@ -9,6 +9,8 @@ interface ExtensionAdapter {
     toggleSitePattern: (pattern: string) => void;
     applyDevInversionFixes: (json: string) => Error;
     resetDevInversionFixes: () => void;
+    applyDevStaticThemes: (text: string) => Error;
+    resetDevStaticThemes: () => void;
 }
 
 export default class Messenger {
@@ -51,6 +53,7 @@ export default class Messenger {
                         adapter.toggleSitePattern(data);
                         break;
                     }
+
                     case 'applyDevInversionFixes': {
                         const error = adapter.applyDevInversionFixes(data);
                         port.postMessage({id, error: error ? error.message : null});
@@ -58,6 +61,15 @@ export default class Messenger {
                     }
                     case 'resetDevInversionFixes': {
                         adapter.resetDevInversionFixes();
+                        break;
+                    }
+                    case 'applyDevStaticThemes': {
+                        const error = adapter.applyDevStaticThemes(data);
+                        port.postMessage({id, error: error ? error.message : null});
+                        break;
+                    }
+                    case 'resetDevStaticThemes': {
+                        adapter.resetDevStaticThemes();
                         break;
                     }
                 }

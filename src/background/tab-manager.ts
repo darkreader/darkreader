@@ -27,7 +27,7 @@ export default class TabManager {
         });
         const {DARK_SITES} = this.config;
         const url = tab.url;
-        return {
+        return <TabInfo>{
             url: tab.url,
             isProtected: !canInjectScript(url),
             isInDarkList: isUrlInList(url, DARK_SITES),

@@ -69,4 +69,14 @@
     .shortcut {
         white-space: nowrap;
     }
+
+    .toggle__btn:last-child::after {
+        color: @color-heading;
+        content: "experiment";
+        font-size: @size-text-small * 0.75;
+        line-height: @size-text-small * 0.75;
+        position: absolute;
+        right: 0;
+        top: 0;
+    }
 }

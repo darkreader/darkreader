@@ -7,6 +7,7 @@ export interface ExtensionData {
     fonts: string[];
     shortcuts: Shortcuts;
     devInversionFixesText: string;
+    devStaticThemesText: string;
 }
 
 export interface ExtensionActions {
@@ -16,6 +17,8 @@ export interface ExtensionActions {
     toggleSitePattern(pattern: string);
     applyDevInversionFixes(json: string): Promise<void>;
     resetDevInversionFixes();
+    applyDevStaticThemes(text: string): Promise<void>;
+    resetDevStaticThemes();
 }
 
 export interface ExtWrapper {

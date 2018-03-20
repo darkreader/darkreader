@@ -2,6 +2,7 @@ import {html} from 'malevic';
 import withState from 'malevic/state';
 import {Button} from '../../controls';
 import {getJsonErrorPosition, getTextPositionMessage} from '../../../config/utils';
+import ThemeEngines from '../../../generators/theme-engines';
 import {ExtWrapper} from '../../../definitions';
 
 const devToolsDocsUrl = 'https://github.com/alexanderby/darkreader#how-to-contribute';
@@ -16,21 +17,38 @@ interface BodyProps extends ExtWrapper {
 function Body({data, actions, state, setState}: BodyProps) {
     let textNode: HTMLTextAreaElement;
 
+    const wrapper = (data.filterConfig.engine === ThemeEngines.staticTheme
+        ? {
+            header: 'Static Theme Editor',
+            fixesText: data.devStaticThemesText,
+            apply: (text) => actions.applyDevStaticThemes(text),
+            reset: () => actions.resetDevStaticThemes(),
+        } : {
+            header: 'Inversion Fix Editor',
+            fixesText: data.devInversionFixesText,
+            apply: (text) => actions.applyDevInversionFixes(text),
+            reset: () => actions.resetDevInversionFixes(),
+        });
+
     function onTextRender(node) {
         textNode = node;
         if (!state.errorText) {
-            textNode.value = data.devInversionFixesText;
+            textNode.value = wrapper.fixesText;
         }
     }
 
     async function apply() {
         const text = textNode.value;
         try {
-            await actions.applyDevInversionFixes(text);
+            await wrapper.apply(text);
             setState({errorText: null});
         } catch (err) {
             const pos = getJsonErrorPosition(err);
-            setState({errorText: getTextPositionMessage(text, pos)});
+            setState({
+                errorText: (pos >= 0
+                    ? getTextPositionMessage(text, pos)
+                    : String(err))
+            });
             textNode.focus();
             textNode.selectionStart = text.lastIndexOf('\n', pos) + 1;
             textNode.selectionEnd = text.indexOf('\n', pos);
@@ -41,7 +59,7 @@ function Body({data, actions, state, setState}: BodyProps) {
     }
 
     function reset() {
-        actions.resetDevInversionFixes();
+        wrapper.reset();
         setState({errorText: null});
     }
 
@@ -51,7 +69,7 @@ function Body({data, actions, state, setState}: BodyProps) {
                 <img id="logo" src="../assets/images/darkreader-type.svg" alt="Dark Reader" />
                 <h1 id="title">Developer Tools</h1>
             </header>
-            <h3 id="sub-title">Inversion Fix Editor</h3>
+            <h3 id="sub-title">{wrapper.header}</h3>
             <textarea
                 id="editor"
                 native

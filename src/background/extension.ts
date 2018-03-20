@@ -1,4 +1,5 @@
 import ConfigManager from './config-manager';
+import DevTools from './devtools';
 import IconManager from './icon-manager';
 import Messenger from './messenger';
 import TabManager from './tab-manager';
@@ -14,7 +15,9 @@ export class Extension {
 
     enabled: boolean;
     ready: boolean;
+
     config: ConfigManager;
+    devtools: DevTools;
     filterConfig: FilterConfig;
     fonts: string[];
     icon: IconManager;
@@ -27,6 +30,7 @@ export class Extension {
 
         this.icon = new IconManager();
         this.config = new ConfigManager();
+        this.devtools = new DevTools(this.config, () => this.onConfigPropChanged());
         this.messenger = new Messenger({
             collect: async () => await this.collectData(),
             getActiveTabInfo: async () => await this.tabs.getActiveTabInfo(),
@@ -34,8 +38,10 @@ export class Extension {
             disable: () => this.disable(),
             setConfig: (config) => this.setConfig(config),
             toggleSitePattern: (pattern) => this.toggleSitePattern(pattern),
-            applyDevInversionFixes: (json) => this.applyDevInversionFixes(json),
-            resetDevInversionFixes: () => this.resetDevInversionFixes(),
+            applyDevInversionFixes: (json) => this.devtools.applyInversionFixes(json),
+            resetDevInversionFixes: () => this.devtools.resetInversionFixes(),
+            applyDevStaticThemes: (text) => this.devtools.applyStaticThemes(text),
+            resetDevStaticThemes: () => this.devtools.resetStaticThemes(),
         });
         this.tabs = new TabManager(this.config);
     }
@@ -119,7 +125,8 @@ export class Extension {
             ready: this.ready,
             fonts: this.fonts,
             shortcuts: await this.getShortcuts(),
-            devInversionFixesText: this.getDevInversionFixesText(),
+            devInversionFixesText: this.devtools.getInversionFixesText(),
+            devStaticThemesText: this.devtools.getStaticThemesText(),
         };
     }
 
@@ -254,46 +261,5 @@ export class Extension {
             enabled: this.enabled,
             config: this.filterConfig,
         }).then((settings) => console.log('saved', settings));
-    }
-
-    //-------------------------------------
-    //
-    //          Developer tools
-    //
-    //-------------------------------------
-
-    protected getSavedDevInversionFixes() {
-        return localStorage.getItem('dev_inversion_fixes') || null;
-    }
-
-    protected saveDevInversionFixes(json: string) {
-        localStorage.setItem('dev_inversion_fixes', json);
-    }
-
-    getDevInversionFixesText() {
-        const {RAW_INVERSION_FIXES} = this.config;
-        const fixes = this.getSavedDevInversionFixes();
-        return formatJson(fixes ? JSON.parse(fixes) : RAW_INVERSION_FIXES);
-    }
-
-    resetDevInversionFixes() {
-        const {RAW_INVERSION_FIXES} = this.config;
-        localStorage.removeItem('dev_inversion_fixes');
-        this.config.handleInversionFixes(RAW_INVERSION_FIXES);
-        this.onConfigPropChanged();
-    }
-
-    applyDevInversionFixes(json: string) {
-        let obj;
-        try {
-            obj = JSON.parse(json);
-            const text = formatJson(obj);
-            this.saveDevInversionFixes(text);
-            this.config.handleInversionFixes(obj);
-            this.onConfigPropChanged();
-            return null;
-        } catch (err) {
-            return err;
-        }
     }
 }

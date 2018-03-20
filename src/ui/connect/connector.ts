@@ -69,6 +69,14 @@ export default class Connector implements ExtensionActions {
         this.port.postMessage({type: 'resetDevInversionFixes'});
     }
 
+    applyDevStaticThemes(text: string) {
+        return this.sendRequest<void>({type: 'applyDevStaticThemes', data: text}, ({error}, resolve, reject) => error ? reject(error) : resolve());
+    }
+
+    resetDevStaticThemes() {
+        this.port.postMessage({type: 'resetDevStaticThemes'});
+    }
+
     disconnect() {
         this.port.disconnect();
     }

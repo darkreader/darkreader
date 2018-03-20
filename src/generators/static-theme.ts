@@ -48,13 +48,15 @@ export default function createStaticStylesheet(config: FilterConfig, url: string
 
     const lines: string[] = [];
 
-    if (!siteTheme.noCommon) {
+    if (!siteTheme || !siteTheme.noCommon) {
         lines.push('/* Common theme */');
         lines.push(...ruleGenerators.map((gen) => gen(commonTheme, theme)));
     }
 
-    lines.push(`/* Theme for ${siteTheme.url.join(' ')} */`);
-    lines.push(...ruleGenerators.map((gen) => gen(siteTheme, theme)));
+    if (siteTheme) {
+        lines.push(`/* Theme for ${siteTheme.url.join(' ')} */`);
+        lines.push(...ruleGenerators.map((gen) => gen(siteTheme, theme)));
+    }
 
     return lines
         .filter((ln) => ln)
@@ -95,6 +97,41 @@ const mx = {
     },
     border: 0.5,
 };
+
+const staticThemeProps = [
+    'noCommon',
+
+    'neutralBackground',
+    'neutralBackgroundActive',
+    'neutralForeground',
+    'neutralForegroundActive',
+    'neutralBorder',
+
+    'redBackground',
+    'redBackgroundActive',
+    'redForeground',
+    'redForegroundActive',
+    'redBorder',
+
+    'greenBackground',
+    'greenBackgroundActive',
+    'greenForeground',
+    'greenForegroundActive',
+    'greenBorder',
+
+    'blueBackground',
+    'blueBackgroundActive',
+    'blueForeground',
+    'blueForegroundActive',
+    'blueBorder',
+
+    'fadeBackground',
+    'fadeForeground',
+    'transparentBackground',
+
+    'noImage',
+    'invert',
+];
 
 const ruleGenerators = [
     createRuleGen((t) => t.neutralBackground, (t) => [`background-color: ${rgb(t.neutralBackground)}`]),
@@ -198,18 +235,66 @@ export function parseUrlSelectorConfig(text: string) {
     return themes;
 }
 
+export function formatUrlSelectorConfig(staticThemes: StaticTheme[]) {
+    const camelCaseToUpperCase = (text: string) => text.replace(/([A-Z])/g, ' $1').toUpperCase().trim();
+
+    const themes = staticThemes.slice().sort((a, b) => (
+        a.url[0]
+            .toLowerCase()
+            .replace(/[^0-9a-z\.]/g, '')
+            .localeCompare(
+                b.url[0]
+                    .toLowerCase()
+                    .replace(/[^0-9a-z\.]/g, '')
+            )
+    ));
+
+    const lines: string[] = [];
+
+    themes.forEach((theme, i) => {
+        lines.push(...theme.url);
+        staticThemeProps.forEach((prop) => {
+            if (
+                (prop === 'noCommon' && theme.noCommon) ||
+                (Array.isArray(theme[prop]) && theme[prop].length > 0)
+            ) {
+                lines.push('');
+                lines.push(camelCaseToUpperCase(prop));
+                if (Array.isArray(theme[prop])) {
+                    lines.push(...theme[prop]);
+                }
+            }
+        });
+        if (i < themes.length - 1) {
+            lines.push('');
+            lines.push(Array.from({length: 32}).fill('=').join(''));
+            lines.push('');
+        }
+    });
+
+    lines.push('');
+    return lines.join('\n');
+}
+
 function getCommonTheme(themes: StaticTheme[]) {
     return themes[0];
 }
 
 function getThemeFor(url: string, themes: StaticTheme[]) {
     const sortedBySpecificity = themes
+        .slice(1)
         .map((theme) => {
             return {
                 specificity: isUrlInList(url, theme.url) ? theme.url[0].length : 0,
                 theme
             };
         })
+        .filter(({specificity}) => specificity > 0)
         .sort((a, b) => b.specificity - a.specificity);
+
+    if (sortedBySpecificity.length === 0) {
+        return null;
+    }
+
     return sortedBySpecificity[0].theme;
 }

@@ -12,7 +12,7 @@ const CONFIG_URLs = {
         remote: 'https://raw.githubusercontent.com/alexanderby/darkreader/master/src/config/fix_inversion.json',
         local: '../config/fix_inversion.json',
     },
-    staticTheme: {
+    staticThemes: {
         remote: 'https://raw.githubusercontent.com/alexanderby/darkreader/master/src/config/static-themes.cfg',
         local: '../config/static-themes.cfg',
     },
@@ -29,7 +29,7 @@ export default class ConfigManager {
     INVERSION_FIXES?: InversionFixes;
     RAW_INVERSION_FIXES?: any;
     STATIC_THEMES?: StaticTheme[];
-    RAW_STATIC_THEME?: string;
+    RAW_STATIC_THEMES?: string;
     DEBUG?: boolean;
 
     constructor() {
@@ -49,8 +49,8 @@ export default class ConfigManager {
             return await readJson<InversionFixes>({url: CONFIG_URLs.inversionFixes.local});
         };
 
-        const loadLocalStaticTheme = async () => {
-            return await readText({url: CONFIG_URLs.staticTheme.local});
+        const loadLocalStaticThemes = async () => {
+            return await readText({url: CONFIG_URLs.staticThemes.local});
         };
 
         const loadDarkSites = async () => {
@@ -90,23 +90,23 @@ export default class ConfigManager {
             this.handleInversionFixes($fixes);
         };
 
-        const loadStaticTheme = async () => {
-            let $theme: string;
+        const loadStaticThemes = async () => {
+            let $themes: string;
             if (this.DEBUG) {
-                $theme = await loadLocalStaticTheme();
+                $themes = await loadLocalStaticThemes();
             } else {
                 try {
-                    $theme = await readText({
-                        url: CONFIG_URLs.staticTheme.remote,
+                    $themes = await readText({
+                        url: CONFIG_URLs.staticThemes.remote,
                         timeout: REMOTE_TIMEOUT_MS
                     });
                 } catch (err) {
                     console.error('Static Theme remote load error', err);
-                    $theme = await loadLocalStaticTheme();
+                    $themes = await loadLocalStaticThemes();
                 }
             }
-            this.RAW_STATIC_THEME = $theme;
-            this.handleStaticThemes($theme);
+            this.RAW_STATIC_THEMES = $themes;
+            this.handleStaticThemes($themes);
         };
 
         if (!this.DEFAULT_FILTER_CONFIG) {
@@ -116,7 +116,7 @@ export default class ConfigManager {
         await Promise.all([
             loadDarkSites(),
             loadInversionFixes(),
-            loadStaticTheme(),
+            loadStaticThemes(),
         ]).catch((err) => console.error('Fatality', err));
     }
 
@@ -129,7 +129,7 @@ export default class ConfigManager {
             .filter((x) => typeof x === 'string');
     }
 
-    handleStaticThemes($theme: string) {
-        this.STATIC_THEMES = parseUrlSelectorConfig($theme);
+    handleStaticThemes($themes: string) {
+        this.STATIC_THEMES = parseUrlSelectorConfig($themes);
     }
 }

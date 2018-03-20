@@ -1,5 +1,7 @@
-import {simpleClone, isUrlInList, isUrlMatched, readJson} from './utils';
-import {FilterConfig, InversionFixes, InversionFix, SiteFix} from '../definitions';
+import {simpleClone, isUrlInList, isUrlMatched, readJson, readText} from './utils';
+import {fillInversionFixesConfig} from '../generators/css-filter';
+import {parseUrlSelectorConfig} from '../generators/static-theme';
+import {FilterConfig, InversionFixes, InversionFix, SiteFix, StaticTheme} from '../definitions';
 
 const CONFIG_URLs = {
     darkSites: {
@@ -9,6 +11,10 @@ const CONFIG_URLs = {
     inversionFixes: {
         remote: 'https://raw.githubusercontent.com/alexanderby/darkreader/master/src/config/fix_inversion.json',
         local: '../config/fix_inversion.json',
+    },
+    staticTheme: {
+        remote: 'https://raw.githubusercontent.com/alexanderby/darkreader/master/src/config/static-themes.cfg',
+        local: '../config/static-themes.cfg',
     },
     defaultFilterConfig: {
         local: '../config/filter_config.json',
@@ -22,6 +28,8 @@ export default class ConfigManager {
     DARK_SITES?: string[];
     INVERSION_FIXES?: InversionFixes;
     RAW_INVERSION_FIXES?: any;
+    STATIC_THEMES?: StaticTheme[];
+    RAW_STATIC_THEME?: string;
     DEBUG?: boolean;
 
     constructor() {
@@ -39,6 +47,10 @@ export default class ConfigManager {
 
         const loadLocalInversionFixes = async () => {
             return await readJson<InversionFixes>({url: CONFIG_URLs.inversionFixes.local});
+        };
+
+        const loadLocalStaticTheme = async () => {
+            return await readText({url: CONFIG_URLs.staticTheme.local});
         };
 
         const loadDarkSites = async () => {
@@ -78,6 +90,25 @@ export default class ConfigManager {
             this.handleInversionFixes($fixes);
         };
 
+        const loadStaticTheme = async () => {
+            let $theme: string;
+            if (this.DEBUG) {
+                $theme = await loadLocalStaticTheme();
+            } else {
+                try {
+                    $theme = await readText({
+                        url: CONFIG_URLs.staticTheme.remote,
+                        timeout: REMOTE_TIMEOUT_MS
+                    });
+                } catch (err) {
+                    console.error('Static Theme remote load error', err);
+                    $theme = await loadLocalStaticTheme();
+                }
+            }
+            this.RAW_STATIC_THEME = $theme;
+            this.handleStaticThemes($theme);
+        };
+
         if (!this.DEFAULT_FILTER_CONFIG) {
             this.DEFAULT_FILTER_CONFIG = await readJson<FilterConfig>({url: CONFIG_URLs.defaultFilterConfig.local});
         }
@@ -85,42 +116,12 @@ export default class ConfigManager {
         await Promise.all([
             loadDarkSites(),
             loadInversionFixes(),
+            loadStaticTheme(),
         ]).catch((err) => console.error('Fatality', err));
     }
 
     handleInversionFixes($fixes: InversionFixes) {
-        const common = {
-            invert: toStringArray($fixes && $fixes.common && $fixes.common.invert),
-            noinvert: toStringArray($fixes && $fixes.common && $fixes.common.noinvert),
-            removebg: toStringArray($fixes && $fixes.common && $fixes.common.removebg),
-            rules: toStringArray($fixes && $fixes.common && $fixes.common.rules),
-        };
-        const sites = ($fixes && Array.isArray($fixes.sites)
-            ? $fixes.sites.filter((s) => isStringOrArray(s.url))
-                .map((s) => {
-                    return {
-                        url: s.url,
-                        invert: common.invert.concat(toStringArray(s.invert)),
-                        noinvert: common.noinvert.concat(toStringArray(s.noinvert)),
-                        removebg: common.removebg.concat(toStringArray(s.removebg)),
-                        rules: common.rules.concat(toStringArray(s.rules)),
-                    };
-                })
-            : [])
-            .reduce((flat, s) => {
-                if (Array.isArray(s.url)) {
-                    s.url.forEach((url) => {
-                        flat.push({...s, ...{url}});
-                    });
-                } else {
-                    flat.push(s);
-                }
-                return flat;
-            }, []);
-        this.INVERSION_FIXES = {
-            common,
-            sites,
-        };
+        this.INVERSION_FIXES = fillInversionFixesConfig($fixes);
     }
 
     private handleDarkSites($sites: string[]) {
@@ -128,38 +129,7 @@ export default class ConfigManager {
             .filter((x) => typeof x === 'string');
     }
 
-    /**
-     * Returns fixes for a given URL.
-     * If no matches found, common fixes will be returned.
-     * @param url Site URL.
-     */
-    getFixesFor(url: string): InversionFix {
-        const {INVERSION_FIXES} = this;
-        let found: SiteFix;
-        if (url) {
-            // Search for match with given URL
-            const matches = INVERSION_FIXES.sites
-                .filter((s) => isUrlMatched(url, s.url as string))
-                .sort((a, b) => b.url.length - a.url.length);
-            if (matches.length > 0) {
-                console.log(`URL matches ${matches[0].url}`);
-                return matches[0];
-            }
-        }
-        return {...INVERSION_FIXES.common};
+    handleStaticThemes($theme: string) {
+        this.STATIC_THEMES = parseUrlSelectorConfig($theme);
     }
-}
-
-function isStringOrArray(item) {
-    return (typeof item === 'string' || Array.isArray(item));
-}
-
-function toStringArray(value: string | string[]): string[] {
-    if (Array.isArray(value)) {
-        return value;
-    }
-    if (typeof value === 'string' && value) {
-        return [value];
-    }
-    return [];
 }

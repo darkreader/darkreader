@@ -225,10 +225,10 @@ export class Extension {
             console.log(`Creating CSS for url: ${url}`);
             switch (this.filterConfig.engine) {
                 case 'cssFilter':
-                    css = createCSSFilterStylesheet(this.filterConfig, this.config.getFixesFor(url));
+                    css = createCSSFilterStylesheet(this.filterConfig, url, this.config.INVERSION_FIXES);
                     break;
                 case 'staticTheme':
-                    css = createStaticStylesheet();
+                    css = createStaticStylesheet(this.filterConfig, url, this.config.STATIC_THEMES);
                     break;
                 default:
                     throw new Error(`Unknown engine ${this.filterConfig.engine}`);
@@ -238,7 +238,7 @@ export class Extension {
             css = '';
         }
         return this.scripts.addStyle
-            .replace(/\$CSS/g, `'${css.replace(/\'/g, '\\\'')}'`);
+            .replace(/\$CSS/g, `'${css.replace(/\'/g, '\\\'').replace(/\n/g, '\\n')}'`);
     };
 
     private removeStyleCodeGenerator = () => {

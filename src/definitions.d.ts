@@ -67,3 +67,33 @@ export interface InversionFix {
 export interface SiteFix extends InversionFix {
     url: string | string[];
 }
+
+export interface StaticTheme {
+    url: string[];
+    neutralBackground?: string[];
+    neutralBackgroundActive?: string[];
+    neutralForeground?: string[];
+    neutralForegroundActive?: string[];
+    neutralBorder?: string[];
+    redBackground?: string[];
+    redBackgroundActive?: string[];
+    redForeground?: string[];
+    redForegroundActive?: string[];
+    redBorder?: string[];
+    greenBackground?: string[];
+    greenBackgroundActive?: string[];
+    greenForeground?: string[];
+    greenForegroundActive?: string[];
+    greenBorder?: string[];
+    blueBackground?: string[];
+    blueBackgroundActive?: string[];
+    blueForeground?: string[];
+    blueForegroundActive?: string[];
+    blueBorder?: string[];
+    fadeBackground?: string[];
+    fadeForeground?: string[];
+    transparentBackground?: string[];
+    noImage?: string[];
+    invert?: string[];
+    noCommon?: boolean;
+}

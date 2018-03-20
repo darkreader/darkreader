@@ -16,7 +16,7 @@ export default function EngineSwitch({data, actions}: ExtWrapper) {
                 commandName="switchEngine"
                 shortcuts={data.shortcuts}
                 textTemplate={(hotkey) => (hotkey
-                    ? `switch theme engine ${hotkey}`
+                    ? `switch theme engine: ${hotkey}`
                     : 'setup theme engine switch hotkey'
                 )}
             />

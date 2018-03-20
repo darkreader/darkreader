@@ -3,6 +3,7 @@ const {getDestDir} = require('./paths');
 module.exports = function createCopyTasks(gulp) {
     const files = [
         'background/index.html',
+        'config/**/*.cfg',
         'config/**/*.json',
         '!config/sites_fixes_v2.json',
         'icons/**/*.*',

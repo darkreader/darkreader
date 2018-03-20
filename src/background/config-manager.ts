@@ -1,7 +1,7 @@
-import {simpleClone, isUrlInList, isUrlMatched, readJson, readText} from './utils';
+import {simpleClone, readJson, readText} from './utils';
 import {fillInversionFixesConfig} from '../generators/css-filter';
 import {parseUrlSelectorConfig} from '../generators/static-theme';
-import {FilterConfig, InversionFixes, InversionFix, SiteFix, StaticTheme} from '../definitions';
+import {FilterConfig, InversionFixes, StaticTheme} from '../definitions';
 
 const CONFIG_URLs = {
     darkSites: {

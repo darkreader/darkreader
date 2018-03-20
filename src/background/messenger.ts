@@ -1,4 +1,4 @@
-import {ExtensionData, ExtensionActions, FilterConfig, TabInfo} from '../definitions';
+import {ExtensionData, FilterConfig, TabInfo} from '../definitions';
 
 interface ExtensionAdapter {
     collect: () => Promise<ExtensionData>;

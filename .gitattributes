@@ -1,7 +1,6 @@
 * text=auto
 
 *.* text eol=lf
-src/config/*.cfg text eol=crlf
 src/config/*.json text eol=crlf
 
 *.png binary

@@ -13,7 +13,8 @@ export default function Toggle(props: ToggleProps) {
 
     const cls = {
         'toggle': true,
-        'toggle--checked': checked
+        'toggle--checked': checked,
+        [props.class]: props.class
     };
 
     const clsOn = {
@@ -29,7 +30,7 @@ export default function Toggle(props: ToggleProps) {
     };
 
     return (
-        <span class={[cls, props.class]}>
+        <span class={cls}>
             <span
                 class={clsOn}
                 onclick={onChange ? () => !checked && onChange(true) : null}

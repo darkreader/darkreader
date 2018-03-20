@@ -29,6 +29,19 @@ const darkTheme: ThemeColors = {
     fadeForeground: [167, 158, 139, 0.5],
 };
 
+const lightTheme: ThemeColors = {
+    neutralBackground: [255, 242, 228],
+    neutralForeground: [0, 0, 0],
+    redBackground: [255, 85, 170],
+    redForeground: [140, 14, 48],
+    greenBackground: [192, 255, 170],
+    greenForeground: [0, 128, 0],
+    blueBackground: [173, 215, 229],
+    blueForeground: [28, 16, 171],
+    fadeBackground: [0, 0, 0, 0.5],
+    fadeForeground: [0, 0, 0, 0.5],
+};
+
 function rgb([r, g, b, a]: number[]) {
     if (typeof a === 'number') {
         return `rgba(${r}, ${g}, ${b}, ${a})`;
@@ -41,9 +54,7 @@ function mix(color1: number[], color2: number[], t: number) {
 }
 
 export default function createStaticStylesheet(config: FilterConfig, url: string, staticThemes: StaticTheme[]) {
-    // TODO: Is there a need in light static theme?
-    // Maybe dark mode should be set automatically
-    const srcTheme = darkTheme;
+    const srcTheme = config.mode === 1 ? darkTheme : lightTheme;
     const theme = Object.entries(srcTheme).reduce((t, [prop, color]) => {
         t[prop] = applyFilterToColor(color, config);
         return t;

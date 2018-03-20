@@ -1,7 +1,9 @@
-import {FilterConfig, StaticTheme} from '../definitions';
 import {isUrlInList} from '../background/utils';
+import {applyFilterToColor} from './utils';
+import {FilterConfig, StaticTheme} from '../definitions';
 
 interface ThemeColors {
+    [prop: string]: number[];
     neutralBackground: number[];
     neutralForeground: number[];
     redBackground: number[];
@@ -41,7 +43,11 @@ function mix(color1: number[], color2: number[], t: number) {
 export default function createStaticStylesheet(config: FilterConfig, url: string, staticThemes: StaticTheme[]) {
     // TODO: Is there a need in light static theme?
     // Maybe dark mode should be set automatically
-    const theme = darkTheme;
+    const srcTheme = darkTheme;
+    const theme = Object.entries(srcTheme).reduce((t, [prop, color]) => {
+        t[prop] = applyFilterToColor(color, config);
+        return t;
+    }, {} as ThemeColors);
 
     const commonTheme = getCommonTheme(staticThemes);
     const siteTheme = getThemeFor(url, staticThemes);

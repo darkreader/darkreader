@@ -8,6 +8,7 @@ import {getFontList, getCommands, isUrlInList, getUrlHost} from './utils';
 import ThemeEngines from '../generators/theme-engines';
 import createCSSFilterStylesheet from '../generators/css-filter';
 import createStaticStylesheet from '../generators/static-theme';
+import {createSVGFilterStylesheet, getSVGFilterMatrixValue, getSVGReverseFilterMatrixValue} from '../generators/svg-filter';
 import {FilterConfig, ExtensionData, Shortcuts} from '../definitions';
 
 export class Extension {
@@ -76,19 +77,16 @@ export class Extension {
 
     async start() {
         const loadInjections = async () => {
-            const loadAddStyleScript = async () => {
-                const res = await fetch('../inject/add-style.js');
+            const readFile = async (path) => {
+                const res = await fetch(path);
                 return await res.text();
             };
-            const loadRemoveStyleScript = async () => {
-                const res = await fetch('../inject/remove-style.js');
-                return await res.text();
-            };
-            const [addStyle, removeStyle] = await Promise.all([
-                loadAddStyleScript(),
-                loadRemoveStyleScript(),
+            const [addStyle, removeStyle, addSVGStyle] = await Promise.all([
+                readFile('../inject/add-style.js'),
+                readFile('../inject/remove-style.js'),
+                readFile('../inject/add-svg-style.js'),
             ]);
-            this.scripts = {addStyle, removeStyle};
+            this.scripts = {addStyle, removeStyle, addSVGStyle};
         };
 
         const loadFonts = async () => {
@@ -214,10 +212,11 @@ export class Extension {
     //
     //----------------------
 
-    private scripts: {addStyle, removeStyle};
+    private scripts: {addStyle, removeStyle, addSVGStyle};
 
     private addStyleCodeGenerator = (url: string) => {
-        let css: string;
+        let script = '';
+        let css = '';
         const {DARK_SITES} = this.config;
         const isUrlInDarkList = isUrlInList(url, DARK_SITES);
         const isUrlInUserList = isUrlInList(url, this.filterConfig.siteList);
@@ -230,20 +229,33 @@ export class Extension {
         ) {
             console.log(`Creating CSS for url: ${url}`);
             switch (this.filterConfig.engine) {
-                case 'cssFilter':
+                case ThemeEngines.cssFilter: {
                     css = createCSSFilterStylesheet(this.filterConfig, url, this.config.INVERSION_FIXES);
+                    script = this.scripts.addStyle;
                     break;
-                case 'staticTheme':
+                }
+                case ThemeEngines.svgFilter: {
+                    css = createSVGFilterStylesheet(this.filterConfig, url, this.config.INVERSION_FIXES);
+                    const svgMatrix = getSVGFilterMatrixValue(this.filterConfig);
+                    const svgReverseMatrix = getSVGReverseFilterMatrixValue();
+                    script = this.scripts.addSVGStyle
+                        .replace(/\$SVG_MATRIX/g, `'${svgMatrix.replace(/\n/g, '\\n')}'`)
+                        .replace(/\$SVG_REVERSE_MATRIX/g, `'${svgReverseMatrix.replace(/\n/g, '\\n')}'`);
+                    break;
+                }
+                case ThemeEngines.staticTheme: {
                     css = createStaticStylesheet(this.filterConfig, url, this.config.STATIC_THEMES);
+                    script = this.scripts.addStyle;
                     break;
-                default:
+                }
+                default: {
                     throw new Error(`Unknown engine ${this.filterConfig.engine}`);
+                }
             }
         } else {
             console.log(`Site is not inverted: ${url}`);
-            css = '';
         }
-        return this.scripts.addStyle
+        return script
             .replace(/\$CSS/g, `'${css.replace(/\'/g, '\\\'').replace(/\n/g, '\\n')}'`);
     };
 

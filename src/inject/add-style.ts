@@ -6,7 +6,7 @@ createNodeAsap({
     selectNode: () => document.getElementById('dark-reader-style'),
     createNode: (target) => {
         const style = document.createElement('style');
-        style.setAttribute('id', 'dark-reader-style');
+        style.id = 'dark-reader-style';
         style.type = 'text/css';
         style.textContent = css;
         target.appendChild(style);

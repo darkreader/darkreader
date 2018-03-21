@@ -4,8 +4,9 @@ import ThemeEngines from '../../../../generators/theme-engines';
 import {ExtWrapper} from '../../../../definitions';
 
 const engineNames = [
-    ['cssFilter', 'Color filter'],
-    ['staticTheme', 'Static theme'],
+    [ThemeEngines.cssFilter, 'Color filter'],
+    [ThemeEngines.svgFilter, 'Filter+'],
+    [ThemeEngines.staticTheme, 'Static theme'],
 ];
 
 export default function EngineSwitch({data, actions}: ExtWrapper) {

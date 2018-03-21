@@ -52,9 +52,9 @@ export default function createCSSFilterStyle(config: FilterConfig, url: string, 
 
     const [r, g, b] = applyFilterToColor([0, 0, 0], config);
     const bgColor = {
-        r: Math.round(255 * r),
-        g: Math.round(255 * g),
-        b: Math.round(255 * b),
+        r: Math.round(r),
+        g: Math.round(g),
+        b: Math.round(b),
         toString() {
             return `rgb(${this.r},${this.g},${this.b})`;
         },

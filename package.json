@@ -5,7 +5,8 @@
   "scripts": {
     "debug": "gulp debug",
     "release": "npm test && gulp release",
-    "test": "node src/config/validate.js"
+    "test": "node src/config/validate.js",
+    "postinstall": "opencollective postinstall"
   },
   "private": true,
   "repository": {
@@ -19,7 +20,8 @@
   },
   "homepage": "http://darkreader.org/",
   "dependencies": {
-    "malevic": "0.11.6"
+    "malevic": "0.11.6",
+    "opencollective": "^1.0.3"
   },
   "devDependencies": {
     "@types/chrome": "0.0.60",
@@ -39,5 +41,10 @@
     "run-sequence": "2.2.1",
     "ts-node": "5.0.0",
     "typescript": "2.7.2"
+  },
+  "collective": {
+    "type": "opencollective",
+    "url": "https://opencollective.com/darkreader",
+    "logo": "https://opencollective.com/darkreader/logo.txt"
   }
 }

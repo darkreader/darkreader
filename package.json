@@ -20,8 +20,7 @@
   },
   "homepage": "http://darkreader.org/",
   "dependencies": {
-    "malevic": "0.11.6",
-    "opencollective": "^1.0.3"
+    "malevic": "0.11.6"
   },
   "devDependencies": {
     "@types/chrome": "0.0.60",
@@ -34,6 +33,7 @@
     "gulp-sourcemaps": "2.6.4",
     "gulp-zip": "4.1.0",
     "merge-stream": "1.0.1",
+    "opencollective": "1.0.3",
     "rollup": "0.56.2",
     "rollup-plugin-commonjs": "8.3.0",
     "rollup-plugin-node-resolve": "3.0.3",

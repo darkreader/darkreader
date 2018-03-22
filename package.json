@@ -5,8 +5,7 @@
   "scripts": {
     "debug": "gulp debug",
     "release": "npm test && gulp release",
-    "test": "node src/config/validate.js",
-    "postinstall": "opencollective postinstall"
+    "test": "node src/config/validate.js"
   },
   "private": true,
   "repository": {
@@ -33,7 +32,6 @@
     "gulp-sourcemaps": "2.6.4",
     "gulp-zip": "4.1.0",
     "merge-stream": "1.0.1",
-    "opencollective": "1.0.3",
     "rollup": "0.56.2",
     "rollup-plugin-commonjs": "8.3.0",
     "rollup-plugin-node-resolve": "3.0.3",

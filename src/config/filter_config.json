@@ -2,7 +2,7 @@
 	"mode": 1,
 	"brightness": 110,
 	"contrast": 90,
-	"grayscale": 0,
+	"grayscale": 20,
 	"sepia": 10,
 	"useFont": false,
 	"fontFamily": "Segoe UI",

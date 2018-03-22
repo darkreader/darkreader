@@ -1,4 +1,5 @@
 import {isUrlInList} from '../background/utils';
+import {createTextRule} from './text-style';
 import {applyFilterToColor} from './utils/matrix';
 import {FilterConfig, StaticTheme} from '../definitions';
 
@@ -73,6 +74,11 @@ export default function createStaticStylesheet(config: FilterConfig, url: string
     if (siteTheme) {
         lines.push(`/* Theme for ${siteTheme.url.join(' ')} */`);
         lines.push(...ruleGenerators.map((gen) => gen(siteTheme, theme)));
+    }
+
+    if (config.useFont || config.textStroke > 0) {
+        lines.push('/* Font */');
+        lines.push(`* ${createTextRule(config)}`);
     }
 
     return lines

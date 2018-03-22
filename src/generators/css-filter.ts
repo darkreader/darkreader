@@ -1,6 +1,7 @@
 import {applyFilterToColor} from './utils/matrix';
+import {createTextRule} from './text-style';
 import {isUrlMatched} from '../background/utils';
-import {FilterConfig, InversionFix, InversionFixes, SiteFix} from '../definitions'
+import {FilterConfig, InversionFix, InversionFixes, SiteFix} from '../definitions';
 
 export enum FilterMode {
     light = 0,
@@ -146,25 +147,6 @@ function createReverseRule(reverseFilterValue: string, fix: InversionFix): strin
         lines.push('  background: white !important;');
         lines.push('}');
     }
-
-    return lines.join('\n');
-}
-
-function createTextRule(config: FilterConfig): string {
-    const lines: string[] = [];
-    lines.push('* {');
-
-    if (config.useFont && config.fontFamily) {
-        // TODO: Validate...
-        lines.push(`  font-family: ${config.fontFamily} !important;`);
-    }
-
-    if (config.textStroke > 0) {
-        lines.push(`  -webkit-text-stroke: ${config.textStroke}px !important;`);
-        lines.push(`  text-stroke: ${config.textStroke}px !important;`);
-    }
-
-    lines.push('}');
 
     return lines.join('\n');
 }

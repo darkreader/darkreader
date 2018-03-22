@@ -12,6 +12,13 @@ createNodeAsap({
         const createMatrixFilter = (id: string, matrix: string) => {
             const filter = document.createElementNS(SVG_NS, 'filter');
             filter.id = id;
+
+            // Fix displaying dynamic content https://bugs.chromium.org/p/chromium/issues/detail?id=647437
+            filter.setAttribute('x', '0');
+            filter.setAttribute('y', '0');
+            filter.setAttribute('width', '99999');
+            filter.setAttribute('height', '99999');
+
             filter.appendChild(createColorMatrix(matrix));
             return filter;
         };

@@ -78,7 +78,7 @@ export class Extension {
     async start() {
         const loadInjections = async () => {
             const readFile = async (path) => {
-                const res = await fetch(path);
+                const res = await fetch(`${path}?nocache=${Date.now()}`);
                 return await res.text();
             };
             const [addStyle, removeStyle, addSVGStyle] = await Promise.all([

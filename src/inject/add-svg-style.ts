@@ -39,6 +39,12 @@ createNodeAsap({
         const existingMatrix = existing.firstChild.firstChild as SVGFEColorMatrixElement;
         if (existingMatrix.getAttribute('values') !== svgMatrix) {
             existingMatrix.setAttribute('values', svgMatrix);
+
+            // Fix not triggering repaint
+            const style = document.getElementById('dark-reader-style');
+            const css = style.textContent;
+            style.textContent = '';
+            style.textContent = css;
         }
     },
     selectTarget: () => document.head,

@@ -1,29 +1,37 @@
-import {applyFilterToColor} from './utils';
-import {isUrlMatched} from '../background/utils'
-import {FilterConfig, InversionFix, InversionFixes, SiteFix} from '../definitions';
+import {applyFilterToColor} from './utils/matrix';
+import {isUrlMatched} from '../background/utils';
+import {FilterConfig, InversionFix, InversionFixes, SiteFix} from '../definitions'
 
 export enum FilterMode {
     light = 0,
     dark = 1
 }
 
-export default function createCSSFilterStyle(config: FilterConfig, url: string, inversionFixes: InversionFixes) {
-    const fix = getFixesFor(url, inversionFixes);
+export default function createCSSFilterStyleheet(config: FilterConfig, url: string, inversionFixes: InversionFixes) {
+    const filterValue = getCSSFilterValue(config);
+    const reverseFilterValue = 'invert(100%) hue-rotate(180deg)';
+    return cssFilterStyleheetTemplate(filterValue, reverseFilterValue, config, url, inversionFixes);
+}
+
+export function cssFilterStyleheetTemplate(filterValue: string, reverseFilterValue: string, config: FilterConfig, url: string, inversionFixes: InversionFixes) {
+    const fix = getInversionFixesFor(url, inversionFixes);
 
     const lines: string[] = [];
 
     lines.push('@media screen {');
 
     // Add leading rule
-    lines.push('');
-    lines.push('/* Leading rule */');
-    lines.push(createLeadingRule(config));
+    if (filterValue) {
+        lines.push('');
+        lines.push('/* Leading rule */');
+        lines.push(createLeadingRule(filterValue));
+    }
 
     if (config.mode === FilterMode.dark) {
-        // Add contrary rule
+        // Add reverse rule
         lines.push('');
-        lines.push('/* Contrary rule */');
-        lines.push(createContraryRule(config, fix));
+        lines.push('/* Reverse rule */');
+        lines.push(createReverseRule(reverseFilterValue, fix));
     }
 
     if (config.useFont || config.textStroke > 0) {
@@ -50,7 +58,7 @@ export default function createCSSFilterStyle(config: FilterConfig, url: string, 
         lines.push('}');
     });
 
-    const [r, g, b] = applyFilterToColor([0, 0, 0], config);
+    const [r, g, b] = applyFilterToColor([255, 255, 255], config);
     const bgColor = {
         r: Math.round(r),
         g: Math.round(g),
@@ -77,7 +85,7 @@ export default function createCSSFilterStyle(config: FilterConfig, url: string, 
     return lines.join('\n');
 }
 
-function createLeadingRule(config: FilterConfig): string {
+function getCSSFilterValue(config: FilterConfig) {
     const filters: string[] = [];
 
     if (config.mode === FilterMode.dark) {
@@ -97,13 +105,17 @@ function createLeadingRule(config: FilterConfig): string {
     }
 
     if (filters.length === 0) {
-        return '';
+        return null;
     }
 
+    return filters.join(' ');
+}
+
+function createLeadingRule(filterValue: string): string {
     return [
         'html {',
-        `  -webkit-filter: ${filters.join(' ')} !important;`,
-        `  filter: ${filters.join(' ')} !important;`,
+        `  -webkit-filter: ${filterValue} !important;`,
+        `  filter: ${filterValue} !important;`,
         '}'
     ].join('\n');
 }
@@ -112,13 +124,13 @@ function joinSelectors(selectors: string[]) {
     return selectors.map((s) => s.replace(/\,$/, '')).join(',\n');
 }
 
-function createContraryRule(config: FilterConfig, fix: InversionFix): string {
+function createReverseRule(reverseFilterValue: string, fix: InversionFix): string {
     const lines: string[] = [];
 
     if (fix.invert.length > 0) {
         lines.push(`${joinSelectors(fix.invert)} {`);
-        lines.push('  -webkit-filter: invert(100%) hue-rotate(180deg) !important;');
-        lines.push('  filter: invert(100%) hue-rotate(180deg) !important;');
+        lines.push(`  -webkit-filter: ${reverseFilterValue} !important;`);
+        lines.push(`  filter: ${reverseFilterValue} !important;`);
         lines.push('}');
     }
 
@@ -163,7 +175,7 @@ function createTextRule(config: FilterConfig): string {
 * @param url Site URL.
 * @param inversionFixes List of inversion fixes.
 */
-function getFixesFor(url: string, inversionFixes: InversionFixes): InversionFix {
+export function getInversionFixesFor(url: string, inversionFixes: InversionFixes): InversionFix {
     let found: SiteFix;
     if (url) {
         // Search for match with given URL

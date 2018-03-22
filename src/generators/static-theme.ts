@@ -1,5 +1,5 @@
 import {isUrlInList} from '../background/utils';
-import {applyFilterToColor} from './utils';
+import {applyFilterToColor} from './utils/matrix';
 import {FilterConfig, StaticTheme} from '../definitions';
 
 interface ThemeColors {
@@ -56,7 +56,7 @@ function mix(color1: number[], color2: number[], t: number) {
 export default function createStaticStylesheet(config: FilterConfig, url: string, staticThemes: StaticTheme[]) {
     const srcTheme = config.mode === 1 ? darkTheme : lightTheme;
     const theme = Object.entries(srcTheme).reduce((t, [prop, color]) => {
-        t[prop] = applyFilterToColor(color, config);
+        t[prop] = applyFilterToColor(color, {...config, mode: 0});
         return t;
     }, {} as ThemeColors);
 

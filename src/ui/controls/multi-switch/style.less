@@ -1,0 +1,41 @@
+@import "../../theme";
+
+.multi-switch {
+    background-color: @color-control-back;
+    border: @size-border solid @color-border;
+    box-sizing: content-box;
+    color: @color-control-fore;
+    display: inline-flex;
+    height: @size-control-inner;
+    position: relative;
+    -moz-user-select: none;
+    user-select: none;
+
+    &__option {
+        align-items: center;
+        cursor: pointer;
+        display: inline-flex;
+        justify-content: center;
+        height: 100%;
+        overflow: hidden;
+        position: relative;
+        transition: background-color @time-slow;
+        white-space: nowrap;
+        width: 50%;
+
+        &:hover:not(&--selected) {
+            background-color: @color-control-hover;
+        }
+    }
+
+    &__highlight {
+        background-color: @color-control-active;
+        display: inline-block;
+        height: 100%;
+        left: 0;
+        position: absolute;
+        top: 0;
+        transition: left @time-fast, width @time-fast;
+        width: 0;
+    }
+}

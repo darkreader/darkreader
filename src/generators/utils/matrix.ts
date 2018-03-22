@@ -1,4 +1,4 @@
-import {FilterConfig} from '../definitions';
+import {FilterConfig} from '../../definitions';
 
 function multiplyMatrices(m1: number[][], m2: number[][]) {
     const result: number[][] = [];
@@ -19,7 +19,7 @@ function clamp(x: number, min: number, max: number) {
     return Math.min(max, Math.max(min, x));
 }
 
-export function applyFilterToColor([r, g, b]: number[], config: FilterConfig) {
+export function createFilterMatrix(config: FilterConfig) {
     let m = Matrix.identity();
     if (config.sepia !== 0) {
         m = multiplyMatrices(m, Matrix.sepia(config.sepia / 100));
@@ -33,16 +33,20 @@ export function applyFilterToColor([r, g, b]: number[], config: FilterConfig) {
     if (config.brightness !== 100) {
         m = multiplyMatrices(m, Matrix.brightness(config.brightness / 100));
     }
-    // if (config.mode === 1) {
-    //     m = multiplyMatrices(m, filterMatrices.invertNHue());
-    // }
+    if (config.mode === 1) {
+        m = multiplyMatrices(m, Matrix.invertNHue());
+    }
+    return m;
+}
 
+export function applyFilterToColor([r, g, b]: number[], config: FilterConfig) {
+    const m = createFilterMatrix(config);
     const rgb = [[r / 255], [g / 255], [b / 255], [1], [1]];
     const result = multiplyMatrices(m, rgb);
     return [0, 1, 2].map((i) => clamp(Math.round(result[i][0] * 255), 0, 255));
 }
 
-const Matrix = {
+export const Matrix = {
 
     identity() {
         return [
@@ -65,23 +69,21 @@ const Matrix = {
     },
 
     brightness(v: number) {
-        const s = v - 1;
         return [
-            [1, 0, 0, 0, s],
-            [0, 1, 0, 0, s],
-            [0, 0, 1, 0, s],
+            [v, 0, 0, 0, 0],
+            [0, v, 0, 0, 0],
+            [0, 0, v, 0, 0],
             [0, 0, 0, 1, 0],
             [0, 0, 0, 0, 1]
         ];
     },
 
     contrast(v: number) {
-        const s = v;
-        const t = (1 - s) / 2;
+        const t = (1 - v) / 2;
         return [
-            [s, 0, 0, 0, t],
-            [0, s, 0, 0, t],
-            [0, 0, s, 0, t],
+            [v, 0, 0, 0, t],
+            [0, v, 0, 0, t],
+            [0, 0, v, 0, t],
             [0, 0, 0, 1, 0],
             [0, 0, 0, 0, 1]
         ];

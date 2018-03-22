@@ -1,16 +1,21 @@
 import {html} from 'malevic';
-import {Toggle, Shortcut} from '../../../controls';
+import {MultiSwitch, Shortcut} from '../../../controls';
 import ThemeEngines from '../../../../generators/theme-engines';
 import {ExtWrapper} from '../../../../definitions';
+
+const engineNames = [
+    [ThemeEngines.cssFilter, 'Color filter'],
+    [ThemeEngines.svgFilter, 'Filter+'],
+    [ThemeEngines.staticTheme, 'Static theme'],
+];
 
 export default function EngineSwitch({data, actions}: ExtWrapper) {
     return (
         <div class="engine-switch">
-            <Toggle
-                checked={data.filterConfig.engine === ThemeEngines.cssFilter}
-                labelOn="Color filter"
-                labelOff="Static theme"
-                onChange={(checked) => actions.setConfig({engine: checked ? ThemeEngines.cssFilter : ThemeEngines.staticTheme})}
+            <MultiSwitch
+                value={engineNames.find(([code, name]) => code === data.filterConfig.engine)[1]}
+                options={engineNames.map(([code, name]) => name)}
+                onChange={(value) => actions.setConfig({engine: engineNames.find(([code, name]) => name === value)[0]})}
             />
             <Shortcut
                 commandName="switchEngine"

@@ -4,10 +4,11 @@ import IconManager from './icon-manager';
 import Messenger from './messenger';
 import TabManager from './tab-manager';
 import UserStorage from './user-storage';
-import {getFontList, getCommands, isUrlInList, getUrlHost} from './utils';
+import {getFontList, getCommands, isUrlInList, getUrlHost, isFirefox} from './utils';
 import ThemeEngines from '../generators/theme-engines';
 import createCSSFilterStylesheet from '../generators/css-filter';
 import createStaticStylesheet from '../generators/static-theme';
+import {createSVGFilterStylesheet, getSVGFilterMatrixValue, getSVGReverseFilterMatrixValue} from '../generators/svg-filter';
 import {FilterConfig, ExtensionData, Shortcuts} from '../definitions';
 
 export class Extension {
@@ -76,19 +77,16 @@ export class Extension {
 
     async start() {
         const loadInjections = async () => {
-            const loadAddStyleScript = async () => {
-                const res = await fetch('../inject/add-style.js');
+            const readFile = async (path) => {
+                const res = await fetch(`${path}?nocache=${Date.now()}`);
                 return await res.text();
             };
-            const loadRemoveStyleScript = async () => {
-                const res = await fetch('../inject/remove-style.js');
-                return await res.text();
-            };
-            const [addStyle, removeStyle] = await Promise.all([
-                loadAddStyleScript(),
-                loadRemoveStyleScript(),
+            const [addStyle, removeStyle, addSVGStyle] = await Promise.all([
+                readFile('../inject/add-style.js'),
+                readFile('../inject/remove-style.js'),
+                readFile('../inject/add-svg-style.js'),
             ]);
-            this.scripts = {addStyle, removeStyle};
+            this.scripts = {addStyle, removeStyle, addSVGStyle};
         };
 
         const loadFonts = async () => {
@@ -214,13 +212,18 @@ export class Extension {
     //
     //----------------------
 
-    private scripts: {addStyle, removeStyle};
+    private scripts: {addStyle, removeStyle, addSVGStyle};
 
     private addStyleCodeGenerator = (url: string) => {
-        let css: string;
+        let script = '';
         const {DARK_SITES} = this.config;
         const isUrlInDarkList = isUrlInList(url, DARK_SITES);
         const isUrlInUserList = isUrlInList(url, this.filterConfig.siteList);
+        const replaceJSGlobalsWithString = (code: string, replacers: {[global: string]: string}) => {
+            return Object.entries(replacers).reduce((str, [g, v]) => {
+                return str.split(g).join(`'${v.replace(/\'/g, '\\\'').replace(/\n/g, '\\n')}'`);
+            }, code);
+        };
 
         if (
             (isUrlInUserList && this.filterConfig.invertListed)
@@ -230,21 +233,41 @@ export class Extension {
         ) {
             console.log(`Creating CSS for url: ${url}`);
             switch (this.filterConfig.engine) {
-                case 'cssFilter':
-                    css = createCSSFilterStylesheet(this.filterConfig, url, this.config.INVERSION_FIXES);
+                case ThemeEngines.cssFilter: {
+                    script = replaceJSGlobalsWithString(this.scripts.addStyle, {
+                        $CSS: createCSSFilterStylesheet(this.filterConfig, url, this.config.INVERSION_FIXES),
+                    });
                     break;
-                case 'staticTheme':
-                    css = createStaticStylesheet(this.filterConfig, url, this.config.STATIC_THEMES);
+                }
+                case ThemeEngines.svgFilter: {
+                    if (isFirefox()) {
+                        script = replaceJSGlobalsWithString(this.scripts.addStyle, {
+                            $CSS: createSVGFilterStylesheet(this.filterConfig, url, this.config.INVERSION_FIXES),
+                        });
+                    } else {
+                        script = replaceJSGlobalsWithString(this.scripts.addSVGStyle, {
+                            $CSS: createSVGFilterStylesheet(this.filterConfig, url, this.config.INVERSION_FIXES),
+                            $SVG_MATRIX: getSVGFilterMatrixValue(this.filterConfig),
+                            $SVG_REVERSE_MATRIX: getSVGReverseFilterMatrixValue(),
+                        });
+                    }
                     break;
-                default:
+                }
+                case ThemeEngines.staticTheme: {
+                    script = replaceJSGlobalsWithString(this.scripts.addStyle, {
+                        $CSS: createStaticStylesheet(this.filterConfig, url, this.config.STATIC_THEMES),
+                    });
+                    break;
+                }
+                default: {
                     throw new Error(`Unknown engine ${this.filterConfig.engine}`);
+                }
             }
         } else {
             console.log(`Site is not inverted: ${url}`);
-            css = '';
+            script = this.scripts.removeStyle;
         }
-        return this.scripts.addStyle
-            .replace(/\$CSS/g, `'${css.replace(/\'/g, '\\\'').replace(/\n/g, '\\n')}'`);
+        return script;
     };
 
     private removeStyleCodeGenerator = () => {

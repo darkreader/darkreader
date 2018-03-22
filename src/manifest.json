@@ -41,9 +41,6 @@
             "description": "Toggle current site"
         },
         "switchEngine": {
-            "suggested_key": {
-                "default": "Alt+Shift+F"
-            },
             "description": "Switch filter engine"
         }
     }

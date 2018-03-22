@@ -847,7 +847,10 @@
         },
         {
             "url": "wikipedia.org",
-            "invert": ".mwe-popups-discreet > svg",
+            "invert": [
+                ".mwe-popups-discreet > svg",
+                ".mw-mmv-overlay"
+            ],
             "noinvert": [
                 ".mwe-math-fallback-image-inline",
                 ".mwe-math-fallback-image-display"

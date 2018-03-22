@@ -12,6 +12,7 @@ createNodeAsap({
         const createMatrixFilter = (id: string, matrix: string) => {
             const filter = document.createElementNS(SVG_NS, 'filter');
             filter.id = id;
+            filter.style.colorInterpolationFilters = 'sRGB';
 
             // Fix displaying dynamic content https://bugs.chromium.org/p/chromium/issues/detail?id=647437
             filter.setAttribute('x', '0');
@@ -30,7 +31,8 @@ createNodeAsap({
         };
         const svg = document.createElementNS(SVG_NS, 'svg');
         svg.id = 'dark-reader-svg';
-        svg.style.display = 'none';
+        svg.style.height = '0';
+        svg.style.width = '0';
         svg.appendChild(createMatrixFilter('dark-reader-filter', svgMatrix));
         svg.appendChild(createMatrixFilter('dark-reader-reverse-filter', svgReverseMatrix));
         target.appendChild(svg);

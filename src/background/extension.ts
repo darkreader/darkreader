@@ -4,7 +4,7 @@ import IconManager from './icon-manager';
 import Messenger from './messenger';
 import TabManager from './tab-manager';
 import UserStorage from './user-storage';
-import {getFontList, getCommands, isUrlInList, getUrlHost} from './utils';
+import {getFontList, getCommands, isUrlInList, getUrlHost, isFirefox} from './utils';
 import ThemeEngines from '../generators/theme-engines';
 import createCSSFilterStylesheet from '../generators/css-filter';
 import createStaticStylesheet from '../generators/static-theme';
@@ -240,11 +240,17 @@ export class Extension {
                     break;
                 }
                 case ThemeEngines.svgFilter: {
-                    script = replaceJSGlobalsWithString(this.scripts.addSVGStyle, {
-                        $CSS: createSVGFilterStylesheet(this.filterConfig, url, this.config.INVERSION_FIXES),
-                        $SVG_MATRIX: getSVGFilterMatrixValue(this.filterConfig),
-                        $SVG_REVERSE_MATRIX: getSVGReverseFilterMatrixValue(),
-                    });
+                    if (isFirefox()) {
+                        script = replaceJSGlobalsWithString(this.scripts.addStyle, {
+                            $CSS: createSVGFilterStylesheet(this.filterConfig, url, this.config.INVERSION_FIXES),
+                        });
+                    } else {
+                        script = replaceJSGlobalsWithString(this.scripts.addSVGStyle, {
+                            $CSS: createSVGFilterStylesheet(this.filterConfig, url, this.config.INVERSION_FIXES),
+                            $SVG_MATRIX: getSVGFilterMatrixValue(this.filterConfig),
+                            $SVG_REVERSE_MATRIX: getSVGReverseFilterMatrixValue(),
+                        });
+                    }
                     break;
                 }
                 case ThemeEngines.staticTheme: {

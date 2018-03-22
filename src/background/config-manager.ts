@@ -1,5 +1,5 @@
 import {simpleClone, readJson, readText} from './utils';
-import {fillInversionFixesConfig} from '../generators/utils/inversion';
+import {fillInversionFixesConfig} from '../generators/css-filter';
 import {parseUrlSelectorConfig} from '../generators/static-theme';
 import {FilterConfig, InversionFixes, StaticTheme} from '../definitions';
 

@@ -33,6 +33,16 @@ function openDevTools() {
     });
 }
 
+const DONATE_URL = 'https://opencollective.com/darkreader';
+
+function donate() {
+    chrome.tabs.create({
+        url: DONATE_URL,
+    });
+}
+
+const donationButtonVsLink = Math.random() > 0.5;
+
 function Body(props: BodyProps) {
     const {state, setState} = props;
     if (!props.data.ready) {
@@ -69,9 +79,15 @@ function Body(props: BodyProps) {
                     Some things should not be inverted?<br />
                     You can <strong>help and fix it</strong>, here is a tool
                 </p>
-                <Button onclick={openDevTools}>
-                    🛠 Open developer tools
-                </Button>
+                <div class="footer-buttons">
+                    {(donationButtonVsLink
+                        ? <a id="donate-link" href={DONATE_URL} target="_blank">Donate</a>
+                        : <Button id="donate" onclick={donate}><strong>$</strong> Donate</Button>
+                    )}
+                    <Button onclick={openDevTools}>
+                        🛠 Open developer tools
+                    </Button>
+                </div>
             </footer>
         </body>
     );

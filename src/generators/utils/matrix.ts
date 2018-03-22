@@ -69,23 +69,21 @@ export const Matrix = {
     },
 
     brightness(v: number) {
-        const s = v - 1;
         return [
-            [1, 0, 0, 0, s],
-            [0, 1, 0, 0, s],
-            [0, 0, 1, 0, s],
+            [v, 0, 0, 0, 0],
+            [0, v, 0, 0, 0],
+            [0, 0, v, 0, 0],
             [0, 0, 0, 1, 0],
             [0, 0, 0, 0, 1]
         ];
     },
 
     contrast(v: number) {
-        const s = v;
-        const t = (1 - s) / 2;
+        const t = (1 - v) / 2;
         return [
-            [s, 0, 0, 0, t],
-            [0, s, 0, 0, t],
-            [0, 0, s, 0, t],
+            [v, 0, 0, 0, t],
+            [0, v, 0, 0, t],
+            [0, 0, v, 0, t],
             [0, 0, 0, 1, 0],
             [0, 0, 0, 0, 1]
         ];

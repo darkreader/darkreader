@@ -1,2 +1,2 @@
-<!-- Love darkreader? Please consider supporting our collective:
+<!-- Love Dark Reader? Please consider supporting the project:
 👉  https://opencollective.com/darkreader/donate -->

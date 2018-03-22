@@ -216,10 +216,14 @@ export class Extension {
 
     private addStyleCodeGenerator = (url: string) => {
         let script = '';
-        let css = '';
         const {DARK_SITES} = this.config;
         const isUrlInDarkList = isUrlInList(url, DARK_SITES);
         const isUrlInUserList = isUrlInList(url, this.filterConfig.siteList);
+        const replaceJSGlobalsWithString = (code: string, replacers: {[global: string]: string}) => {
+            return Object.entries(replacers).reduce((str, [g, v]) => {
+                return str.split(g).join(`'${v.replace(/\'/g, '\\\'').replace(/\n/g, '\\n')}'`);
+            }, code);
+        };
 
         if (
             (isUrlInUserList && this.filterConfig.invertListed)
@@ -230,22 +234,23 @@ export class Extension {
             console.log(`Creating CSS for url: ${url}`);
             switch (this.filterConfig.engine) {
                 case ThemeEngines.cssFilter: {
-                    css = createCSSFilterStylesheet(this.filterConfig, url, this.config.INVERSION_FIXES);
-                    script = this.scripts.addStyle;
+                    script = replaceJSGlobalsWithString(this.scripts.addStyle, {
+                        $CSS: createCSSFilterStylesheet(this.filterConfig, url, this.config.INVERSION_FIXES),
+                    });
                     break;
                 }
                 case ThemeEngines.svgFilter: {
-                    css = createSVGFilterStylesheet(this.filterConfig, url, this.config.INVERSION_FIXES);
-                    const svgMatrix = getSVGFilterMatrixValue(this.filterConfig);
-                    const svgReverseMatrix = getSVGReverseFilterMatrixValue();
-                    script = this.scripts.addSVGStyle
-                        .replace(/\$SVG_MATRIX/g, `'${svgMatrix.replace(/\n/g, '\\n')}'`)
-                        .replace(/\$SVG_REVERSE_MATRIX/g, `'${svgReverseMatrix.replace(/\n/g, '\\n')}'`);
+                    script = replaceJSGlobalsWithString(this.scripts.addSVGStyle, {
+                        $CSS: createSVGFilterStylesheet(this.filterConfig, url, this.config.INVERSION_FIXES),
+                        $SVG_MATRIX: getSVGFilterMatrixValue(this.filterConfig),
+                        $SVG_REVERSE_MATRIX: getSVGReverseFilterMatrixValue(),
+                    });
                     break;
                 }
                 case ThemeEngines.staticTheme: {
-                    css = createStaticStylesheet(this.filterConfig, url, this.config.STATIC_THEMES);
-                    script = this.scripts.addStyle;
+                    script = replaceJSGlobalsWithString(this.scripts.addStyle, {
+                        $CSS: createStaticStylesheet(this.filterConfig, url, this.config.STATIC_THEMES),
+                    });
                     break;
                 }
                 default: {
@@ -254,9 +259,9 @@ export class Extension {
             }
         } else {
             console.log(`Site is not inverted: ${url}`);
+            script = this.scripts.removeStyle;
         }
-        return script
-            .replace(/\$CSS/g, `'${css.replace(/\'/g, '\\\'').replace(/\n/g, '\\n')}'`);
+        return script;
     };
 
     private removeStyleCodeGenerator = () => {

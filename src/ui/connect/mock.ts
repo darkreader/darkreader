@@ -14,6 +14,7 @@ export function getMockData(override = {}): ExtensionData {
             fontFamily: 'Segoe UI',
             textStroke: 0,
             invertListed: false,
+            engine: 'cssFilter',
             siteList: []
         },
         fonts: [
@@ -28,7 +29,8 @@ export function getMockData(override = {}): ExtensionData {
             'addSite': 'Alt+Shift+A',
             'toggle': 'Alt+Shift+D'
         },
-        devInversionFixesText: `${JSON.stringify({common: {invert: 'img, iframe'}, sites: [{url: 'google.*', invert: '.icon'}]}, null, 4)}\n`
+        devInversionFixesText: `${JSON.stringify({common: {invert: 'img, iframe'}, sites: [{url: 'google.*', invert: '.icon'}]}, null, 4)}\n`,
+        devStaticThemesText: '*\n\nNEUTRAL BACKGROUND\nhtml\nbody\n',
     }, override);
 }
 

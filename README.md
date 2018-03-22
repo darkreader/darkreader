@@ -1,8 +1,5 @@
 Dark Reader for Google Chrome and Mozilla Firefox
 ================
-[![Backers on Open Collective](https://opencollective.com/darkreader/backers/badge.svg)](#backers)
-[![Sponsors on Open Collective](https://opencollective.com/darkreader/sponsors/badge.svg)](#sponsors) 
- 
 ![Dark Reader screenshot](promo/screenshots/screenshot_filter.png)
 
 This extension **inverts brightness** of web pages and aims to **reduce eyestrain** while browsing the web.
@@ -96,7 +93,7 @@ This project exists thanks to all the people who contribute
 
 ## Backers
 
-Thank you to all our backers! 🙏
+Thank you to all our backers!
 
 <a href="https://opencollective.com/darkreader#backers" target="_blank"><img src="https://opencollective.com/darkreader/backers.svg?width=890"></a>
 

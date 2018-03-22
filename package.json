@@ -39,10 +39,5 @@
     "run-sequence": "2.2.1",
     "ts-node": "5.0.0",
     "typescript": "2.7.2"
-  },
-  "collective": {
-    "type": "opencollective",
-    "url": "https://opencollective.com/darkreader",
-    "logo": "https://opencollective.com/darkreader/logo.txt"
   }
 }

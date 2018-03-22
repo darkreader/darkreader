@@ -55,36 +55,28 @@ export default class ConfigManager {
 
         const loadDarkSites = async () => {
             let $sites: string[];
-            if (this.DEBUG) {
+            try {
+                $sites = await readJson<string[]>({
+                    url: CONFIG_URLs.darkSites.remote,
+                    timeout: REMOTE_TIMEOUT_MS
+                });
+            } catch (err) {
+                console.error('Dark Sites remote load error', err);
                 $sites = await loadLocalDarkSites();
-            } else {
-                try {
-                    $sites = await readJson<string[]>({
-                        url: CONFIG_URLs.darkSites.remote,
-                        timeout: REMOTE_TIMEOUT_MS
-                    });
-                } catch (err) {
-                    console.error('Dark Sites remote load error', err);
-                    $sites = await loadLocalDarkSites();
-                }
             }
             this.handleDarkSites($sites)
         };
 
         const loadInversionFixes = async () => {
             let $fixes: InversionFixes;
-            if (this.DEBUG) {
+            try {
+                $fixes = await readJson<InversionFixes>({
+                    url: CONFIG_URLs.inversionFixes.remote,
+                    timeout: REMOTE_TIMEOUT_MS
+                });
+            } catch (err) {
+                console.error('Inversion Fixes remote load error', err);
                 $fixes = await loadLocalInversionFixes();
-            } else {
-                try {
-                    $fixes = await readJson<InversionFixes>({
-                        url: CONFIG_URLs.inversionFixes.remote,
-                        timeout: REMOTE_TIMEOUT_MS
-                    });
-                } catch (err) {
-                    console.error('Inversion Fixes remote load error', err);
-                    $fixes = await loadLocalInversionFixes();
-                }
             }
             this.RAW_INVERSION_FIXES = simpleClone($fixes);
             this.handleInversionFixes($fixes);
@@ -92,18 +84,14 @@ export default class ConfigManager {
 
         const loadStaticThemes = async () => {
             let $themes: string;
-            if (this.DEBUG) {
+            try {
+                $themes = await readText({
+                    url: CONFIG_URLs.staticThemes.remote,
+                    timeout: REMOTE_TIMEOUT_MS
+                });
+            } catch (err) {
+                console.error('Static Theme remote load error', err);
                 $themes = await loadLocalStaticThemes();
-            } else {
-                try {
-                    $themes = await readText({
-                        url: CONFIG_URLs.staticThemes.remote,
-                        timeout: REMOTE_TIMEOUT_MS
-                    });
-                } catch (err) {
-                    console.error('Static Theme remote load error', err);
-                    $themes = await loadLocalStaticThemes();
-                }
             }
             this.RAW_STATIC_THEMES = $themes;
             this.handleStaticThemes($themes);

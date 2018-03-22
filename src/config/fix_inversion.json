@@ -234,6 +234,7 @@
             ],
             "rules": [
                 "header { background-color: #dae1e7 !important; }",
+                ".markdown-body img { background-color: transparent !important; }",
                 ".Header .header-search-wrapper { background-color: rgba(0, 0, 0, 0.125) !important; }",
                 "header, .HeaderNavlink, .Header .header-search-input, .Header .header-search-input::placeholder { color: rgba(0, 0, 0, 0.75) !important; }",
                 ".Header .header-search-scope { color: rgba(0, 0, 0, 0.75) !important; border-right-color: #ccd7e1 !important; }",

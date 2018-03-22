@@ -1,7 +1,7 @@
-import {applyFilterToColor, getInversionFixesFor, createFilterMatrix, Matrix} from './utils';
+import {createFilterMatrix, Matrix} from './utils/matrix';
 import {isFirefox} from '../background/utils/platform';
-import {FilterMode, cssFilterStyleheetTemplate} from './css-filter';
-import {FilterConfig, InversionFix, InversionFixes} from '../definitions';
+import {cssFilterStyleheetTemplate} from './css-filter';
+import {FilterConfig, InversionFixes} from '../definitions';
 
 export function createSVGFilterStylesheet(config: FilterConfig, url: string, inversionFixes: InversionFixes) {
     let filterValue: string;

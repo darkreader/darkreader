@@ -1,5 +1,5 @@
 import {isUrlInList} from '../background/utils';
-import {applyFilterToColor} from './utils';
+import {applyFilterToColor} from './utils/matrix';
 import {FilterConfig, StaticTheme} from '../definitions';
 
 interface ThemeColors {

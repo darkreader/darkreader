@@ -2,10 +2,10 @@ import {html} from 'malevic';
 import withForms from 'malevic/forms';
 import withState from 'malevic/state';
 import {TabPanel, Button, CheckBox} from '../../controls';
-import Header from './header';
 import FilterSettings from './filter-settings';
-import FontSettings from './font-settings';
+import Header from './header';
 import Loader from './loader';
+import MoreSettings from './more-settings';
 import SiteListSettings from './site-list-settings';
 import {isFirefox} from '../../../background/utils';
 import {ExtensionData, ExtensionActions, TabInfo} from '../../../definitions';
@@ -55,12 +55,12 @@ function Body(props: BodyProps) {
                     'Filter': (
                         <FilterSettings data={props.data} actions={props.actions} />
                     ),
-                    'Font': (
-                        <FontSettings data={props.data} actions={props.actions} />
-                    ),
                     'Site list': (
                         <SiteListSettings data={props.data} actions={props.actions} isFocused={state.activeTab === 'Site list'} />
-                    )
+                    ),
+                    'More': (
+                        <MoreSettings data={props.data} actions={props.actions} />
+                    ),
                 }}
             />
 

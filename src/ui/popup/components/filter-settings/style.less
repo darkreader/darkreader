@@ -60,24 +60,3 @@
 .icon--light-mode {
     background-image: url(../assets/images/mode-light-32.svg);
 }
-
-.engine-switch {
-    align-items: stretch;
-    display: flex;
-    flex-direction: column;
-
-    .shortcut {
-        white-space: nowrap;
-    }
-
-    .multi-switch__option:nth-child(3)::after,
-    .multi-switch__option:nth-child(4)::after {
-        color: @color-heading;
-        content: "experiment";
-        font-size: @size-text-small * 0.75;
-        line-height: @size-text-small * 0.75;
-        position: absolute;
-        right: 0;
-        top: 0;
-    }
-}

@@ -1,0 +1,23 @@
+@import "../../../theme";
+
+.more-settings {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+
+    &__description {
+        font-size: @size-text-small;
+        line-height: @size-text-small-height;
+        margin: 0;
+        min-width: 100%;
+        overflow: hidden;
+        text-align: center;
+        white-space: pre;
+    }
+
+    &__section {
+        &:not(:first-child) {
+            margin-top: @indent-large;
+        }
+    }
+}

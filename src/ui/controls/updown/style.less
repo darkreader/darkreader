@@ -65,6 +65,12 @@
 
     &__button--disabled {
         pointer-events: none;
+
+        &:hover,
+        &:focus,
+        &:active {
+            background-color: @color-control-back;
+        }
     }
 
     &__button--disabled &__icon {

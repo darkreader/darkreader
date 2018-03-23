@@ -336,7 +336,19 @@
         },
         {
             "url": "imdb.com",
-            "invert": "#nb20, .vital, .poster, .slate, .slate_fade_top, .slate_fade_bottom"
+            "invert": [
+                "#nb20 > div, #navbar-suggestionsearch",
+                ".caption_overlay, .vital, .slate_wrapper > .poster",
+                ".slate, .slate_fade_top, .slate_fade_bottom",
+                ".ab_hero, .ab_hero .ninja_image, .sub_nav, .app-links",
+                "#navMenuPro img, #proAd",
+                "#photo-container, #video-container"
+            ],
+            "noinvert": [
+                "#navMenuPro, #photo-container img",
+                "#video-container img, #video-container video"
+            ],
+            "removebg": "#nb20"
         },
         {
             "url": "immutables.github.io",

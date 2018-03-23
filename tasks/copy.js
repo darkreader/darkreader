@@ -5,7 +5,6 @@ module.exports = function createCopyTasks(gulp) {
         'background/index.html',
         'config/**/*.cfg',
         'config/**/*.json',
-        '!config/sites_fixes_v2.json',
         'icons/**/*.*',
         'ui/assets/**/*.*',
         'manifest.json',

@@ -347,7 +347,8 @@
             "noinvert": [
                 "#navMenuPro, #photo-container img",
                 "#video-container img, #video-container video"
-            ]
+            ],
+            "removebg": "#nb20"
         },
         {
             "url": "immutables.github.io",

@@ -2,7 +2,7 @@ import {readJson, readText} from './utils/network';
 import {simpleClone} from './utils/clone';
 import {fillInversionFixesConfig} from '../generators/css-filter';
 import {parseUrlSelectorConfig} from '../generators/static-theme';
-import {FilterConfig, InversionFixes, StaticTheme} from '../definitions';
+import {InversionFixes, StaticTheme} from '../definitions';
 
 const CONFIG_URLs = {
     darkSites: {
@@ -17,15 +17,11 @@ const CONFIG_URLs = {
         remote: 'https://raw.githubusercontent.com/alexanderby/darkreader/master/src/config/static-themes.cfg',
         local: '../config/static-themes.cfg',
     },
-    defaultFilterConfig: {
-        local: '../config/filter_config.json',
-    },
 };
 const REMOTE_TIMEOUT_MS = 10 * 1000;
 const RELOAD_INTERVAL_MS = 15 * 60 * 1000;
 
 export default class ConfigManager {
-    DEFAULT_FILTER_CONFIG?: FilterConfig;
     DARK_SITES?: string[];
     INVERSION_FIXES?: InversionFixes;
     RAW_INVERSION_FIXES?: any;
@@ -97,10 +93,6 @@ export default class ConfigManager {
             this.RAW_STATIC_THEMES = $themes;
             this.handleStaticThemes($themes);
         };
-
-        if (!this.DEFAULT_FILTER_CONFIG) {
-            this.DEFAULT_FILTER_CONFIG = await readJson<FilterConfig>({url: CONFIG_URLs.defaultFilterConfig.local});
-        }
 
         await Promise.all([
             loadDarkSites(),

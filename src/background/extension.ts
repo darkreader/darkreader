@@ -46,6 +46,7 @@ export class Extension {
             resetDevStaticThemes: () => this.devtools.resetStaticThemes(),
         });
         this.tabs = new TabManager(this.config);
+        this.user = new UserStorage();
     }
 
     private registerCommands() {
@@ -102,7 +103,6 @@ export class Extension {
             loadFonts(),
         ]);
 
-        this.user = new UserStorage({defaultFilterConfig: this.config.DEFAULT_FILTER_CONFIG});
         const settings = await this.user.loadSettings();
         if (settings.enabled) {
             this.enable();

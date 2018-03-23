@@ -1,3 +1,5 @@
+import {isMacOS, isWindows} from '../utils/platform';
+import ThemeEngines from '../generators/theme-engines';
 import {UserSettings, FilterConfig} from '../definitions';
 
 const SAVE_TIMEOUT = 1000;
@@ -5,10 +7,22 @@ const SAVE_TIMEOUT = 1000;
 export default class UserStorage {
     private defaultSettings: UserSettings;
 
-    constructor(props: {defaultFilterConfig: FilterConfig}) {
+    constructor() {
         this.defaultSettings = {
             enabled: true,
-            config: {...props.defaultFilterConfig}
+            config: {
+                mode: 1,
+                brightness: 110,
+                contrast: 90,
+                grayscale: 20,
+                sepia: 10,
+                useFont: false,
+                fontFamily: isMacOS() ? 'Helvetica Neue' : isWindows() ? 'Segoe UI' : 'Open Sans',
+                textStroke: 0,
+                invertListed: false,
+                engine: ThemeEngines.cssFilter,
+                siteList: [],
+            },
         };
     }
     loadSettings() {

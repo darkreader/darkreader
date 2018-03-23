@@ -142,6 +142,21 @@
             "invert": ".theme-dark"
         },
         {
+            "url": "drive.google.com",
+            "invert": [
+                "[aria-label^='Showing viewer'] > [aria-label^='Displaying']",
+                "[aria-label^='Showing viewer'] > [role='toolbar']",
+                "[aria-label^='Showing viewer'] [role='button'][data-tooltip='Previous']",
+                "[aria-label^='Showing viewer'] [role='button'][data-tooltip='Next']",
+                "[aria-label^='Showing viewer'] [aria-label^='Page']",
+                "[aria-label^='Showing viewer'] [aria-label^='Page'] + div",
+                "[aria-label^='No preview available']",
+                "[aria-label^='No preview available'] ~ div",
+                "[aria-label^='There was a problem previewing']",
+                "[aria-label^='There was a problem previewing'] ~ div"
+            ]
+        },
+        {
             "url": "duckduckgo.com",
             "invert": [
                 "html:not(.dark-bg) #logo_homepage_link",

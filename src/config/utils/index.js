@@ -55,9 +55,22 @@ function getTextDiffIndex(a, b) {
     return -1;
 }
 
+function parseArray(text) {
+    return text.replace(/\r/g, '')
+        .split('\n')
+        .map((s) => s.trim())
+        .filter((s) => s);
+}
+
+function formatArray(arr) {
+    return arr.concat('').join('\n');
+}
+
 module.exports = {
     getJsonErrorPosition,
     getTextPositionMessage,
     formatJson,
     getTextDiffIndex,
+    parseArray,
+    formatArray,
 };

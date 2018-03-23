@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const {getJsonErrorPosition, getTextPositionMessage, formatJson, getTextDiffIndex} = require('./utils');
+const {getJsonErrorPosition, getTextPositionMessage, formatJson, getTextDiffIndex, parseArray, formatArray} = require('./utils');
 
 function logOk(text) {
     console.log(`\x1b[32m${text}\x1b[0m`);
@@ -40,9 +40,9 @@ function tryParseJson(name, text) {
     }
 }
 
-const darkSitesText = readConfigFile('dark_sites.json');
+const darkSitesText = readConfigFile('dark-sites.config');
 const fixesText = readConfigFile('fix_inversion.json');
-const darkSites = tryParseJson('Dark Sites', darkSitesText);
+const darkSites = parseArray(darkSitesText);
 const fixes = tryParseJson('Inversion Fixes', fixesText);
 logOk('Dark Reader configs loaded successfully');
 
@@ -83,8 +83,8 @@ validate('Every dark site is a string', darkSites.every(function (s) {
 validate('Dark Sites should not have protocol', darkSites.every(function (u) {
     return (u.indexOf('://') < 0);
 }));
-validate('Dark Sites are sorted alphabetically', JSON.stringify(darkSites) === JSON.stringify(darkSites.slice().sort()));
-validateJsonFormat('Dark Sites list is properly formatted', darkSitesText, formatJson(darkSites));
+validate('Dark Sites are sorted alphabetically', formatArray(darkSites) === formatArray(darkSites.slice().sort()));
+validateJsonFormat('Dark Sites list is properly formatted', darkSitesText, formatArray(darkSites));
 
 logInfo('Validating Inversion Fixes...');
 validate('Inversion Fixes is an object', (typeof fixes === 'object' && !Array.isArray(fixes) && !(fixes instanceof Date)));

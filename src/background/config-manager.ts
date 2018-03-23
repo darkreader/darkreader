@@ -1,5 +1,6 @@
 import {readJson, readText} from './utils/network';
 import {simpleClone} from './utils/clone';
+import {parseArray} from '../config/utils';
 import {fillInversionFixesConfig} from '../generators/css-filter';
 import {parseUrlSelectorConfig} from '../generators/static-theme';
 import {InversionFixes, StaticTheme} from '../definitions';
@@ -57,11 +58,7 @@ export default class ConfigManager {
                 console.error('Dark Sites remote load error', err);
                 $sites = await readText({url: CONFIG_URLs.darkSites.local});
             }
-            const sites = $sites
-                .replace(/\r/g, '')
-                .split('\n')
-                .map((s) => s.trim())
-                .filter((s) => s);
+            const sites = parseArray($sites);
             this.handleDarkSites(sites)
         };
 

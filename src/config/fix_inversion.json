@@ -446,6 +446,10 @@
             ]
         },
         {
+            "url": "mathworld.wolfram.com",
+            "noinvert": "img"
+        },
+        {
             "url": "medium.com",
             "noinvert": ".canvas-renderer"
         },

@@ -7,7 +7,7 @@ import Header from './header';
 import Loader from './loader';
 import MoreSettings from './more-settings';
 import SiteListSettings from './site-list-settings';
-import {isFirefox} from '../../../background/utils';
+import {isFirefox} from '../../../utils/platform';
 import {ExtensionData, ExtensionActions, TabInfo} from '../../../definitions';
 
 withForms();

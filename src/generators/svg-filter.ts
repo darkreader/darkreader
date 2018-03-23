@@ -1,5 +1,5 @@
 import {createFilterMatrix, Matrix} from './utils/matrix';
-import {isFirefox} from '../background/utils/platform';
+import {isFirefox} from '../utils/platform';
 import {cssFilterStyleheetTemplate} from './css-filter';
 import {FilterConfig, InversionFixes} from '../definitions';
 

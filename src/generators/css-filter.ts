@@ -1,6 +1,6 @@
 import {applyFilterToColor} from './utils/matrix';
 import {createTextRule} from './text-style';
-import {isUrlMatched} from '../background/utils';
+import {isUrlMatched} from '../utils/url';
 import {FilterConfig, InversionFix, InversionFixes, SiteFix} from '../definitions';
 
 export enum FilterMode {

@@ -27,7 +27,7 @@ module.exports = function createBundleHtmlTask(gulp) {
         const data = getMockData();
         const actions = null;
         const bodyText = Malevic.renderToString(DevToolsBody({data, actions}));
-        html = html.replace('BODY', bodyText);
+        html = html.replace('$BODY', bodyText);
         await fs.outputFile(`${dir}/ui/devtools/index.html`, html);
     }
 
@@ -37,7 +37,7 @@ module.exports = function createBundleHtmlTask(gulp) {
         const tab = getMockActiveTabInfo();
         const actions = null;
         const bodyText = Malevic.renderToString(PopupBody({data, tab, actions}));
-        html = html.replace('BODY', bodyText);
+        html = html.replace('$BODY', bodyText);
         await fs.outputFile(`${dir}/ui/popup/index.html`, html);
     }
 };

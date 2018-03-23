@@ -1,6 +1,6 @@
 import {html, render} from 'malevic';
 import {Button} from '../../../controls';
-import {getUrlHost} from '../../../../background/utils';
+import {getUrlHost} from '../../../../utils/url';
 import {ExtWrapper, TabInfo} from '../../../../definitions';
 
 export default function SiteToggleButton({data, tab, actions}: ExtWrapper & {tab: TabInfo}) {

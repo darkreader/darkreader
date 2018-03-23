@@ -30,10 +30,5 @@ module.exports = function createFoxifyTask(gulp) {
             content = replace(content, 'chrome.fontSettings', `chrome['font' + 'Settings']`);
             return content;
         });
-
-        // Enable Firefox-specific CSS
-        await editFile(`${firefoxDir}/ui/popup/index.html`, (content) => {
-            return replace(content, '<html>', '<html class="firefox">');
-        });
     });
 };

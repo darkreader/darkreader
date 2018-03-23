@@ -43,7 +43,7 @@ footer {
     margin-top: @indent-large;
 
     p {
-        margin: 0;
+        margin: 0 0 @size-border 0;
         text-align: center;
     }
 }
@@ -117,16 +117,23 @@ footer {
     }
 }
 
-.chromium-issue-750419 {
-    // Fix missing vertical borders in Chrome for Windows
+//
+// Make popup borders the same
+// across platforms and browser versions
+
+body {
+    border: 2px solid white;
+}
+
+.built-in-horizontal-borders {
     body {
-        border-left: 2px solid white;
-        border-right: 2px solid white;
+        border-bottom: none;
+        border-top: none;
     }
 }
 
-.firefox {
+.built-in-borders {
     body {
-        border: 2px solid white;
+        border: none;
     }
 }

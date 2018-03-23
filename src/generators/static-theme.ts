@@ -1,4 +1,4 @@
-import {isUrlInList} from '../background/utils';
+import {isUrlInList} from '../utils/url';
 import {createTextRule} from './text-style';
 import {applyFilterToColor} from './utils/matrix';
 import {FilterConfig, StaticTheme} from '../definitions';

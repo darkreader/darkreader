@@ -1,5 +1,6 @@
 
-import {canInjectScript, isUrlInList} from './utils';
+import {canInjectScript} from './utils/extension-api';
+import {isUrlInList} from '../utils/url';
 import ConfigManager from './config-manager';
 import {TabInfo} from '../definitions';
 

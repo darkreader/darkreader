@@ -1,8 +1,7 @@
 import {html, sync} from 'malevic';
 import connect from '../connect';
 import Body from './components/body';
-import {isAffectedByChromiumIssue750419} from '../utils/issues';
-import {isFirefox} from '../../background/utils';
+import {popupHasBuiltInHorizontalBorders, popupHasBuiltInBorders} from './utils/issues';
 import {ExtensionData, ExtensionActions, TabInfo} from '../../definitions';
 
 function renderBody(data: ExtensionData, tab: TabInfo, actions: ExtensionActions) {
@@ -25,5 +24,5 @@ async function start() {
 
 start();
 
-document.documentElement.classList.toggle('firefox', isFirefox());
-document.documentElement.classList.toggle('chromium-issue-750419', isAffectedByChromiumIssue750419());
+document.documentElement.classList.toggle('built-in-borders', popupHasBuiltInBorders());
+document.documentElement.classList.toggle('built-in-horizontal-borders', popupHasBuiltInHorizontalBorders());

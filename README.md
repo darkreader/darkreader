@@ -14,7 +14,7 @@ for more info.
 
 ### Fixing wrong inversion
 
-If some site is **already dark**, you can **add it to [dark_sites.json](https://github.com/alexanderby/darkreader/blob/master/src/config/dark_sites.json) file** *(please, preserve alphabetical order)*.
+If some site is **already dark**, you can **add it to [dark-sites.config](https://github.com/alexanderby/darkreader/blob/master/src/config/dark-sites.config) file** *(please, preserve alphabetical order)*.
 
 If some **parts** of web-pages are **wrongly inverted**, you can specify necessary **CSS selectors** at **[fix_inversion.json](https://github.com/alexanderby/darkreader/blob/master/src/config/fix_inversion.json) file** *(please, preserve alphabetical order by URL, use short selectors, preserve whitespace indentation and code style)*.
 

@@ -6,8 +6,8 @@ import {InversionFixes, StaticTheme} from '../definitions';
 
 const CONFIG_URLs = {
     darkSites: {
-        remote: 'https://raw.githubusercontent.com/alexanderby/darkreader/master/src/config/dark_sites.json',
-        local: '../config/dark_sites.json',
+        remote: 'https://raw.githubusercontent.com/alexanderby/darkreader/master/src/config/dark-sites.config',
+        local: '../config/dark-sites.config',
     },
     inversionFixes: {
         remote: 'https://raw.githubusercontent.com/alexanderby/darkreader/master/src/config/fix_inversion.json',
@@ -38,10 +38,6 @@ export default class ConfigManager {
     }
 
     async load() {
-        const loadLocalDarkSites = async () => {
-            return await readJson<string[]>({url: CONFIG_URLs.darkSites.local});
-        };
-
         const loadLocalInversionFixes = async () => {
             return await readJson<InversionFixes>({url: CONFIG_URLs.inversionFixes.local});
         };
@@ -51,17 +47,22 @@ export default class ConfigManager {
         };
 
         const loadDarkSites = async () => {
-            let $sites: string[];
+            let $sites: string;
             try {
-                $sites = await readJson<string[]>({
+                $sites = await readText({
                     url: CONFIG_URLs.darkSites.remote,
                     timeout: REMOTE_TIMEOUT_MS
                 });
             } catch (err) {
                 console.error('Dark Sites remote load error', err);
-                $sites = await loadLocalDarkSites();
+                $sites = await readText({url: CONFIG_URLs.darkSites.local});
             }
-            this.handleDarkSites($sites)
+            const sites = $sites
+                .replace(/\r/g, '')
+                .split('\n')
+                .map((s) => s.trim())
+                .filter((s) => s);
+            this.handleDarkSites(sites)
         };
 
         const loadInversionFixes = async () => {

@@ -15,8 +15,8 @@ const CONFIG_URLs = {
         local: '../config/fix_inversion.json',
     },
     staticThemes: {
-        remote: 'https://raw.githubusercontent.com/alexanderby/darkreader/master/src/config/static-themes.cfg',
-        local: '../config/static-themes.cfg',
+        remote: 'https://raw.githubusercontent.com/alexanderby/darkreader/master/src/config/static-themes.config',
+        local: '../config/static-themes.config',
     },
 };
 const REMOTE_TIMEOUT_MS = 10 * 1000;

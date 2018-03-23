@@ -5,42 +5,42 @@ import {FilterConfig, StaticTheme} from '../definitions';
 
 interface ThemeColors {
     [prop: string]: number[];
-    neutralBackground: number[];
-    neutralForeground: number[];
-    redBackground: number[];
-    redForeground: number[];
-    greenBackground: number[];
-    greenForeground: number[];
-    blueBackground: number[];
-    blueForeground: number[];
-    fadeBackground: number[];
-    fadeForeground: number[];
+    neutralBg: number[];
+    neutralText: number[];
+    redBg: number[];
+    redText: number[];
+    greenBg: number[];
+    greenText: number[];
+    blueBg: number[];
+    blueText: number[];
+    fadeBg: number[];
+    fadeText: number[];
 }
 
 const darkTheme: ThemeColors = {
-    neutralBackground: [16, 20, 23],
-    neutralForeground: [167, 158, 139],
-    redBackground: [64, 12, 32],
-    redForeground: [247, 142, 102],
-    greenBackground: [32, 64, 48],
-    greenForeground: [128, 204, 148],
-    blueBackground: [32, 48, 64],
-    blueForeground: [128, 182, 204],
-    fadeBackground: [16, 20, 23, 0.5],
-    fadeForeground: [167, 158, 139, 0.5],
+    neutralBg: [16, 20, 23],
+    neutralText: [167, 158, 139],
+    redBg: [64, 12, 32],
+    redText: [247, 142, 102],
+    greenBg: [32, 64, 48],
+    greenText: [128, 204, 148],
+    blueBg: [32, 48, 64],
+    blueText: [128, 182, 204],
+    fadeBg: [16, 20, 23, 0.5],
+    fadeText: [167, 158, 139, 0.5],
 };
 
 const lightTheme: ThemeColors = {
-    neutralBackground: [255, 242, 228],
-    neutralForeground: [0, 0, 0],
-    redBackground: [255, 85, 170],
-    redForeground: [140, 14, 48],
-    greenBackground: [192, 255, 170],
-    greenForeground: [0, 128, 0],
-    blueBackground: [173, 215, 229],
-    blueForeground: [28, 16, 171],
-    fadeBackground: [0, 0, 0, 0.5],
-    fadeForeground: [0, 0, 0, 0.5],
+    neutralBg: [255, 242, 228],
+    neutralText: [0, 0, 0],
+    redBg: [255, 85, 170],
+    redText: [140, 14, 48],
+    greenBg: [192, 255, 170],
+    greenText: [0, 128, 0],
+    blueBg: [173, 215, 229],
+    blueText: [28, 16, 171],
+    fadeBg: [0, 0, 0, 0.5],
+    fadeText: [0, 0, 0, 0.5],
 };
 
 function rgb([r, g, b, a]: number[]) {
@@ -124,82 +124,82 @@ const mx = {
 const staticThemeProps = [
     'noCommon',
 
-    'neutralBackground',
-    'neutralBackgroundActive',
-    'neutralForeground',
-    'neutralForegroundActive',
+    'neutralBg',
+    'neutralBgActive',
+    'neutralText',
+    'neutralTextActive',
     'neutralBorder',
 
-    'redBackground',
-    'redBackgroundActive',
-    'redForeground',
-    'redForegroundActive',
+    'redBg',
+    'redBgActive',
+    'redText',
+    'redTextActive',
     'redBorder',
 
-    'greenBackground',
-    'greenBackgroundActive',
-    'greenForeground',
-    'greenForegroundActive',
+    'greenBg',
+    'greenBgActive',
+    'greenText',
+    'greenTextActive',
     'greenBorder',
 
-    'blueBackground',
-    'blueBackgroundActive',
-    'blueForeground',
-    'blueForegroundActive',
+    'blueBg',
+    'blueBgActive',
+    'blueText',
+    'blueTextActive',
     'blueBorder',
 
-    'fadeBackground',
-    'fadeForeground',
-    'transparentBackground',
+    'fadeBg',
+    'fadeText',
+    'transparentBg',
 
     'noImage',
     'invert',
 ];
 
 const ruleGenerators = [
-    createRuleGen((t) => t.neutralBackground, (t) => [`background-color: ${rgb(t.neutralBackground)}`]),
-    createRuleGen((t) => t.neutralBackgroundActive, (t) => [`background-color: ${rgb(t.neutralBackground)}`]),
-    createRuleGen((t) => t.neutralBackgroundActive, (t) => [`background-color: ${rgb(mix(t.neutralBackground, [255, 255, 255], mx.bg.hover))}`], (s) => `${s}:hover`),
-    createRuleGen((t) => t.neutralBackgroundActive, (t) => [`background-color: ${rgb(mix(t.neutralBackground, [255, 255, 255], mx.bg.active))}`], (s) => `${s}:active, ${s}:focus`),
-    createRuleGen((t) => t.neutralForeground, (t) => [`color: ${rgb(t.neutralForeground)}`]),
-    createRuleGen((t) => t.neutralForegroundActive, (t) => [`color: ${rgb(t.neutralForeground)}`]),
-    createRuleGen((t) => t.neutralForegroundActive, (t) => [`color: ${rgb(mix(t.neutralForeground, [255, 255, 255], mx.fg.hover))}`], (s) => `${s}:hover`),
-    createRuleGen((t) => t.neutralForegroundActive, (t) => [`color: ${rgb(mix(t.neutralForeground, [255, 255, 255], mx.fg.active))}`], (s) => `${s}:active, ${s}:focus`),
-    createRuleGen((t) => t.neutralBorder, (t) => [`border-color: ${rgb(mix(t.neutralBackground, t.neutralForeground, mx.border))}`]),
+    createRuleGen((t) => t.neutralBg, (t) => [`background-color: ${rgb(t.neutralBg)}`]),
+    createRuleGen((t) => t.neutralBgActive, (t) => [`background-color: ${rgb(t.neutralBg)}`]),
+    createRuleGen((t) => t.neutralBgActive, (t) => [`background-color: ${rgb(mix(t.neutralBg, [255, 255, 255], mx.bg.hover))}`], (s) => `${s}:hover`),
+    createRuleGen((t) => t.neutralBgActive, (t) => [`background-color: ${rgb(mix(t.neutralBg, [255, 255, 255], mx.bg.active))}`], (s) => `${s}:active, ${s}:focus`),
+    createRuleGen((t) => t.neutralText, (t) => [`color: ${rgb(t.neutralText)}`]),
+    createRuleGen((t) => t.neutralTextActive, (t) => [`color: ${rgb(t.neutralText)}`]),
+    createRuleGen((t) => t.neutralTextActive, (t) => [`color: ${rgb(mix(t.neutralText, [255, 255, 255], mx.fg.hover))}`], (s) => `${s}:hover`),
+    createRuleGen((t) => t.neutralTextActive, (t) => [`color: ${rgb(mix(t.neutralText, [255, 255, 255], mx.fg.active))}`], (s) => `${s}:active, ${s}:focus`),
+    createRuleGen((t) => t.neutralBorder, (t) => [`border-color: ${rgb(mix(t.neutralBg, t.neutralText, mx.border))}`]),
 
-    createRuleGen((t) => t.redBackground, (t) => [`background-color: ${rgb(t.redBackground)}`]),
-    createRuleGen((t) => t.redBackgroundActive, (t) => [`background-color: ${rgb(t.redBackground)}`]),
-    createRuleGen((t) => t.redBackgroundActive, (t) => [`background-color: ${rgb(mix(t.redBackground, [255, 0, 64], mx.bg.hover))}`], (s) => `${s}:hover`),
-    createRuleGen((t) => t.redBackgroundActive, (t) => [`background-color: ${rgb(mix(t.redBackground, [255, 0, 64], mx.bg.active))}`], (s) => `${s}:active, ${s}:focus`),
-    createRuleGen((t) => t.redForeground, (t) => [`color: ${rgb(t.redForeground)}`]),
-    createRuleGen((t) => t.redForegroundActive, (t) => [`color: ${rgb(t.redForeground)}`]),
-    createRuleGen((t) => t.redForegroundActive, (t) => [`color: ${rgb(mix(t.redForeground, [255, 255, 0], mx.fg.hover))}`], (s) => `${s}:hover`),
-    createRuleGen((t) => t.redForegroundActive, (t) => [`color: ${rgb(mix(t.redForeground, [255, 255, 0], mx.fg.active))}`], (s) => `${s}:active, ${s}:focus`),
-    createRuleGen((t) => t.redBorder, (t) => [`border-color: ${rgb(mix(t.redBackground, t.redForeground, mx.border))}`]),
+    createRuleGen((t) => t.redBg, (t) => [`background-color: ${rgb(t.redBg)}`]),
+    createRuleGen((t) => t.redBgActive, (t) => [`background-color: ${rgb(t.redBg)}`]),
+    createRuleGen((t) => t.redBgActive, (t) => [`background-color: ${rgb(mix(t.redBg, [255, 0, 64], mx.bg.hover))}`], (s) => `${s}:hover`),
+    createRuleGen((t) => t.redBgActive, (t) => [`background-color: ${rgb(mix(t.redBg, [255, 0, 64], mx.bg.active))}`], (s) => `${s}:active, ${s}:focus`),
+    createRuleGen((t) => t.redText, (t) => [`color: ${rgb(t.redText)}`]),
+    createRuleGen((t) => t.redTextActive, (t) => [`color: ${rgb(t.redText)}`]),
+    createRuleGen((t) => t.redTextActive, (t) => [`color: ${rgb(mix(t.redText, [255, 255, 0], mx.fg.hover))}`], (s) => `${s}:hover`),
+    createRuleGen((t) => t.redTextActive, (t) => [`color: ${rgb(mix(t.redText, [255, 255, 0], mx.fg.active))}`], (s) => `${s}:active, ${s}:focus`),
+    createRuleGen((t) => t.redBorder, (t) => [`border-color: ${rgb(mix(t.redBg, t.redText, mx.border))}`]),
 
-    createRuleGen((t) => t.greenBackground, (t) => [`background-color: ${rgb(t.greenBackground)}`]),
-    createRuleGen((t) => t.greenBackgroundActive, (t) => [`background-color: ${rgb(t.greenBackground)}`]),
-    createRuleGen((t) => t.greenBackgroundActive, (t) => [`background-color: ${rgb(mix(t.greenBackground, [128, 255, 182], mx.bg.hover))}`], (s) => `${s}:hover`),
-    createRuleGen((t) => t.greenBackgroundActive, (t) => [`background-color: ${rgb(mix(t.greenBackground, [128, 255, 182], mx.bg.active))}`], (s) => `${s}:active, ${s}:focus`),
-    createRuleGen((t) => t.greenForeground, (t) => [`color: ${rgb(t.greenForeground)}`]),
-    createRuleGen((t) => t.greenForegroundActive, (t) => [`color: ${rgb(t.greenForeground)}`]),
-    createRuleGen((t) => t.greenForegroundActive, (t) => [`color: ${rgb(mix(t.greenForeground, [182, 255, 224], mx.fg.hover))}`], (s) => `${s}:hover`),
-    createRuleGen((t) => t.greenForegroundActive, (t) => [`color: ${rgb(mix(t.greenForeground, [182, 255, 224], mx.fg.active))}`], (s) => `${s}:active, ${s}:focus`),
-    createRuleGen((t) => t.greenBorder, (t) => [`border-color: ${rgb(mix(t.greenBackground, t.greenForeground, mx.border))}`]),
+    createRuleGen((t) => t.greenBg, (t) => [`background-color: ${rgb(t.greenBg)}`]),
+    createRuleGen((t) => t.greenBgActive, (t) => [`background-color: ${rgb(t.greenBg)}`]),
+    createRuleGen((t) => t.greenBgActive, (t) => [`background-color: ${rgb(mix(t.greenBg, [128, 255, 182], mx.bg.hover))}`], (s) => `${s}:hover`),
+    createRuleGen((t) => t.greenBgActive, (t) => [`background-color: ${rgb(mix(t.greenBg, [128, 255, 182], mx.bg.active))}`], (s) => `${s}:active, ${s}:focus`),
+    createRuleGen((t) => t.greenText, (t) => [`color: ${rgb(t.greenText)}`]),
+    createRuleGen((t) => t.greenTextActive, (t) => [`color: ${rgb(t.greenText)}`]),
+    createRuleGen((t) => t.greenTextActive, (t) => [`color: ${rgb(mix(t.greenText, [182, 255, 224], mx.fg.hover))}`], (s) => `${s}:hover`),
+    createRuleGen((t) => t.greenTextActive, (t) => [`color: ${rgb(mix(t.greenText, [182, 255, 224], mx.fg.active))}`], (s) => `${s}:active, ${s}:focus`),
+    createRuleGen((t) => t.greenBorder, (t) => [`border-color: ${rgb(mix(t.greenBg, t.greenText, mx.border))}`]),
 
-    createRuleGen((t) => t.blueBackground, (t) => [`background-color: ${rgb(t.blueBackground)}`]),
-    createRuleGen((t) => t.blueBackgroundActive, (t) => [`background-color: ${rgb(t.blueBackground)}`]),
-    createRuleGen((t) => t.blueBackgroundActive, (t) => [`background-color: ${rgb(mix(t.blueBackground, [0, 128, 255], mx.bg.hover))}`], (s) => `${s}:hover`),
-    createRuleGen((t) => t.blueBackgroundActive, (t) => [`background-color: ${rgb(mix(t.blueBackground, [0, 128, 255], mx.bg.active))}`], (s) => `${s}:active, ${s}:focus`),
-    createRuleGen((t) => t.blueForeground, (t) => [`color: ${rgb(t.blueForeground)}`]),
-    createRuleGen((t) => t.blueForegroundActive, (t) => [`color: ${rgb(t.blueForeground)}`]),
-    createRuleGen((t) => t.blueForegroundActive, (t) => [`color: ${rgb(mix(t.blueForeground, [182, 224, 255], mx.fg.hover))}`], (s) => `${s}:hover`),
-    createRuleGen((t) => t.blueForegroundActive, (t) => [`color: ${rgb(mix(t.blueForeground, [182, 224, 255], mx.fg.active))}`], (s) => `${s}:active, ${s}:focus`),
-    createRuleGen((t) => t.blueBorder, (t) => [`border-color: ${rgb(mix(t.blueBackground, t.blueForeground, mx.border))}`]),
+    createRuleGen((t) => t.blueBg, (t) => [`background-color: ${rgb(t.blueBg)}`]),
+    createRuleGen((t) => t.blueBgActive, (t) => [`background-color: ${rgb(t.blueBg)}`]),
+    createRuleGen((t) => t.blueBgActive, (t) => [`background-color: ${rgb(mix(t.blueBg, [0, 128, 255], mx.bg.hover))}`], (s) => `${s}:hover`),
+    createRuleGen((t) => t.blueBgActive, (t) => [`background-color: ${rgb(mix(t.blueBg, [0, 128, 255], mx.bg.active))}`], (s) => `${s}:active, ${s}:focus`),
+    createRuleGen((t) => t.blueText, (t) => [`color: ${rgb(t.blueText)}`]),
+    createRuleGen((t) => t.blueTextActive, (t) => [`color: ${rgb(t.blueText)}`]),
+    createRuleGen((t) => t.blueTextActive, (t) => [`color: ${rgb(mix(t.blueText, [182, 224, 255], mx.fg.hover))}`], (s) => `${s}:hover`),
+    createRuleGen((t) => t.blueTextActive, (t) => [`color: ${rgb(mix(t.blueText, [182, 224, 255], mx.fg.active))}`], (s) => `${s}:active, ${s}:focus`),
+    createRuleGen((t) => t.blueBorder, (t) => [`border-color: ${rgb(mix(t.blueBg, t.blueText, mx.border))}`]),
 
-    createRuleGen((t) => t.fadeBackground, (t) => [`background-color: ${rgb(t.fadeBackground)}`]),
-    createRuleGen((t) => t.fadeForeground, (t) => [`color: ${rgb(t.fadeForeground)}`]),
-    createRuleGen((t) => t.transparentBackground, (t) => ['background-color: transparent']),
+    createRuleGen((t) => t.fadeBg, (t) => [`background-color: ${rgb(t.fadeBg)}`]),
+    createRuleGen((t) => t.fadeText, (t) => [`color: ${rgb(t.fadeText)}`]),
+    createRuleGen((t) => t.transparentBg, (t) => ['background-color: transparent']),
     createRuleGen((t) => t.noImage, (t) => ['background-image: none']),
     createRuleGen((t) => t.invert, (t) => ['filter: invert(100%) hue-rotate(180deg)']),
 ];

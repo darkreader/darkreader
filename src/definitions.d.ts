@@ -63,12 +63,12 @@ export interface InversionFixes {
 export interface InversionFix {
     invert: string[];
     noinvert: string[];
-    removebg: string[];
-    rules: string[];
+    whitebg: string[];
+    css: string[];
 }
 
 export interface SiteFix extends InversionFix {
-    url: string | string[];
+    url: string[];
 }
 
 export interface StaticTheme {

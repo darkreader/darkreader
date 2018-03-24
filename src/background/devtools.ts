@@ -1,5 +1,5 @@
 import {formatJson} from '../config/utils'
-import {parseUrlSelectorConfig, formatUrlSelectorConfig} from '../generators/static-theme';
+import {parseStaticThemes, formatStaticThemes} from '../generators/static-theme';
 import ConfigManager from './config-manager';
 
 export default class DevTools {
@@ -56,7 +56,7 @@ export default class DevTools {
     getStaticThemesText() {
         const {RAW_STATIC_THEMES} = this.config;
         const fixes = this.getSavedStaticThemes();
-        return fixes ? formatUrlSelectorConfig(parseUrlSelectorConfig(fixes)) : RAW_STATIC_THEMES;
+        return fixes ? formatStaticThemes(parseStaticThemes(fixes)) : RAW_STATIC_THEMES;
     }
 
     resetStaticThemes() {
@@ -68,7 +68,7 @@ export default class DevTools {
 
     applyStaticThemes(text: string) {
         try {
-            const formatted = formatUrlSelectorConfig(parseUrlSelectorConfig(text));
+            const formatted = formatStaticThemes(parseStaticThemes(text));
             this.config.handleStaticThemes(formatted);
             this.saveStaticThemes(formatted);
             this.onChange();

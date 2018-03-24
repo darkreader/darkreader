@@ -1,6 +1,6 @@
 import {applyFilterToColor} from './utils/matrix';
 import {createTextRule} from './text-style';
-import {isUrlMatched} from '../utils/url';
+import {isUrlMatched, isUrlInList} from '../utils/url';
 import {FilterConfig, InversionFix, InversionFixes, SiteFix} from '../definitions';
 
 export enum FilterMode {
@@ -74,10 +74,10 @@ export function cssFilterStyleheetTemplate(filterValue: string, reverseFilterVal
     lines.push(`  background: ${bgColor} !important;`);
     lines.push('}');
 
-    if (fix.rules && config.mode === FilterMode.dark) {
+    if (fix.css && fix.css.length > 0 && config.mode === FilterMode.dark) {
         lines.push('');
         lines.push('/* Custom rules */');
-        lines.push(fix.rules.join('\n'));
+        lines.push(fix.css.join('\n'));
     }
 
     lines.push('');
@@ -142,8 +142,8 @@ function createReverseRule(reverseFilterValue: string, fix: InversionFix): strin
         lines.push('}');
     }
 
-    if (fix.removebg.length > 0) {
-        lines.push(`${joinSelectors(fix.removebg)} {`);
+    if (fix.whitebg.length > 0) {
+        lines.push(`${joinSelectors(fix.whitebg)} {`);
         lines.push('  background: white !important;');
         lines.push('}');
     }
@@ -162,8 +162,8 @@ export function getInversionFixesFor(url: string, inversionFixes: InversionFixes
     if (url) {
         // Search for match with given URL
         const matches = inversionFixes.sites
-            .filter((s) => isUrlMatched(url, s.url as string))
-            .sort((a, b) => b.url.length - a.url.length);
+            .filter((s) => isUrlInList(url, s.url))
+            .sort((a, b) => b.url[0].length - a.url[0].length);
         if (matches.length > 0) {
             console.log(`URL matches ${matches[0].url}`);
             return matches[0];
@@ -173,34 +173,24 @@ export function getInversionFixesFor(url: string, inversionFixes: InversionFixes
 }
 
 export function fillInversionFixesConfig($fixes: InversionFixes) {
-    const common = {
+    const common: InversionFix = {
         invert: toStringArray($fixes && $fixes.common && $fixes.common.invert),
         noinvert: toStringArray($fixes && $fixes.common && $fixes.common.noinvert),
-        removebg: toStringArray($fixes && $fixes.common && $fixes.common.removebg),
-        rules: toStringArray($fixes && $fixes.common && $fixes.common.rules),
+        whitebg: toStringArray($fixes && $fixes.common && $fixes.common.whitebg),
+        css: toStringArray($fixes && $fixes.common && $fixes.common.css),
     };
-    const sites = ($fixes && Array.isArray($fixes.sites)
+    const sites: SiteFix[] = ($fixes && Array.isArray($fixes.sites)
         ? $fixes.sites.filter((s) => isStringOrArray(s.url))
             .map((s) => {
                 return {
-                    url: s.url,
+                    url: Array.isArray(s.url) ? s.url : [s.url],
                     invert: common.invert.concat(toStringArray(s.invert)),
                     noinvert: common.noinvert.concat(toStringArray(s.noinvert)),
-                    removebg: common.removebg.concat(toStringArray(s.removebg)),
-                    rules: common.rules.concat(toStringArray(s.rules)),
+                    whitebg: common.whitebg.concat(toStringArray(s.whitebg)),
+                    css: common.css.concat(toStringArray(s.css)),
                 };
             })
-        : [])
-        .reduce((flat, s) => {
-            if (Array.isArray(s.url)) {
-                s.url.forEach((url) => {
-                    flat.push({...s, ...{url}});
-                });
-            } else {
-                flat.push(s);
-            }
-            return flat;
-        }, []);
+        : []);
     return {common, sites};
 }
 

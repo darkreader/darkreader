@@ -2,7 +2,7 @@ import {readJson, readText} from './utils/network';
 import {simpleClone} from './utils/clone';
 import {parseArray} from '../config/utils';
 import {fillInversionFixesConfig} from '../generators/css-filter';
-import {parseUrlSelectorConfig} from '../generators/static-theme';
+import {parseStaticThemes} from '../generators/static-theme';
 import {InversionFixes, StaticTheme} from '../definitions';
 
 const CONFIG_URLs = {
@@ -109,6 +109,6 @@ export default class ConfigManager {
     }
 
     handleStaticThemes($themes: string) {
-        this.STATIC_THEMES = parseUrlSelectorConfig($themes);
+        this.STATIC_THEMES = parseStaticThemes($themes);
     }
 }

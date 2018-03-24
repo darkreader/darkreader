@@ -1,9 +1,9 @@
 import {createFilterMatrix, Matrix} from './utils/matrix';
 import {isFirefox} from '../utils/platform';
 import {cssFilterStyleheetTemplate} from './css-filter';
-import {FilterConfig, InversionFixes} from '../definitions';
+import {FilterConfig, InversionFix} from '../definitions';
 
-export function createSVGFilterStylesheet(config: FilterConfig, url: string, inversionFixes: InversionFixes) {
+export function createSVGFilterStylesheet(config: FilterConfig, url: string, inversionFixes: InversionFix[]) {
     let filterValue: string;
     let reverseFilterValue: string;
     if (isFirefox()) {

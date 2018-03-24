@@ -212,7 +212,7 @@ function upperCaseToCamelCase(text: string) {
 }
 
 export function parseStaticThemes($themes: string) {
-    return parseSitesFixesConfig($themes, {
+    return parseSitesFixesConfig<StaticTheme>($themes, {
         commands: staticThemeCommands,
         getCommandPropName: upperCaseToCamelCase,
         parseCommandValue: (command, value) => {
@@ -246,7 +246,7 @@ export function formatStaticThemes(staticThemes: StaticTheme[]) {
         shouldIgnoreProp: (prop, value) => {
             return (
                 (prop === 'noCommon' && !value) ||
-                (Array.isArray(value) && value.length > 0)
+                (!(Array.isArray(value) && value.length > 0))
             );
         }
     });

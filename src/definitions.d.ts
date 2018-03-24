@@ -55,20 +55,12 @@ export interface Shortcuts {
     [name: string]: string;
 }
 
-export interface InversionFixes {
-    common: InversionFix;
-    sites: SiteFix[];
-}
-
 export interface InversionFix {
+    url: string[];
     invert: string[];
     noinvert: string[];
-    whitebg: string[];
-    css: string[];
-}
-
-export interface SiteFix extends InversionFix {
-    url: string[];
+    removebg: string[];
+    css: string;
 }
 
 export interface StaticTheme {

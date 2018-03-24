@@ -23,7 +23,7 @@ export function parseSitesFixesConfig<T extends SiteProps>(text: string, options
             end: number;
         }
 
-        const commandsLocations: CommandLocation[] = [];
+        let commandsLocations: CommandLocation[] = [];
         options.commands.forEach((command) => {
             let end = 0;
             let start: number;
@@ -32,7 +32,9 @@ export function parseSitesFixesConfig<T extends SiteProps>(text: string, options
                 commandsLocations.push({command, start, end});
             }
         });
-        commandsLocations.sort((a, b) => a.start - b.start);
+        commandsLocations = commandsLocations
+            .filter(({start, end}, i) => !commandsLocations.find(({start: otherStart, end: otherEnd}, otherI) => (i !== otherI && start >= otherStart && end <= otherEnd)))
+            .sort((a, b) => a.start - b.start);
 
         if (commandsLocations.length === 0) {
             return;

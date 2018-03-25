@@ -341,7 +341,7 @@
                 ".caption_overlay, .vital, .slate_wrapper > .poster",
                 ".slate, .slate_fade_top, .slate_fade_bottom",
                 ".ab_hero, .ab_hero .ninja_image, .sub_nav, .app-links",
-                "#navMenuPro img, #proAd",
+                "#navMenuPro img, #proAd, .rec_default_image",
                 "#photo-container, #video-container"
             ],
             "noinvert": [

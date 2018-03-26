@@ -358,7 +358,7 @@
             "url": "instagram.com",
             "invert": "._mli86, ._cqw45._2pnef",
             "rules": [
-                "[role='dialog'] {background-color: rgba(255,255,255,0.5)}",
+                "[role='dialog'] {background-color: rgba(255,255,255,0.5) !important}",
                 "._sxolz {background-color: #fff !important}"
             ]
         },

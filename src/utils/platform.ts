@@ -23,6 +23,11 @@ export function isMacOS() {
     return navigator.platform.toLowerCase().indexOf('mac') === 0;
 }
 
+export function isMobile() {
+    const agent = navigator.userAgent.toLowerCase();
+    return agent.indexOf('mobile') >= 0;
+}
+
 export function getChromeVersion() {
     const agent = navigator.userAgent.toLowerCase();
     const m = agent.match(/chrom[e|ium]\/([^ ]+)/);

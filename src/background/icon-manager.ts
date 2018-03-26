@@ -11,6 +11,10 @@ export default class IconManager {
     }
 
     setActive() {
+        if (!chrome.browserAction.setIcon) {
+            // Fix for Firefox Android
+            return;
+        }
         chrome.browserAction.setIcon({
             path: {
                 '19': ICON_PATHS.active_19,
@@ -20,6 +24,10 @@ export default class IconManager {
     }
 
     setInactive() {
+        if (!chrome.browserAction.setIcon) {
+            // Fix for Firefox Android
+            return;
+        }
         chrome.browserAction.setIcon({
             path: {
                 '19': ICON_PATHS.inactive_19,

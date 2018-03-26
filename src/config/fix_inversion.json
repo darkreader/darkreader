@@ -245,7 +245,9 @@
                 ".bg-gray-dark",
                 ".bg-gray-dark .form-group",
                 ".header-logo-invertocat, .notification-indicator",
-                ".label, .label-color"
+                ".label, .label-color",
+                ".tooltipped:not(.notification-indicator):before, .tooltipped:not(.notification-indicator):after",
+                ".HeaderNavlink [data-ga-click*='(Logged out)']"
             ],
             "rules": [
                 "header { background-color: #dae1e7 !important; }",

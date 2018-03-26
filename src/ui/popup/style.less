@@ -20,7 +20,7 @@ body {
     display: flex;
     flex-direction: column;
     height: @popup-content-height;
-    margin: 0;
+    margin: 0 auto;
     padding: @popup-content-padding;
     width: @popup-content-width;
 }
@@ -149,5 +149,38 @@ body {
 .built-in-borders {
     body {
         border: none;
+    }
+}
+
+.mobile {
+    body {
+        border: none;
+        box-sizing: border-box;
+        margin: @popup-content-padding auto;
+        padding: 0;
+    }
+}
+
+@media screen and (min-width: 21.25rem) {
+    .mobile {
+        font-size: 20px;
+    }
+}
+
+@media screen and (min-width: 25.5rem) {
+    .mobile {
+        font-size: 24px;
+    }
+}
+
+@media screen and (min-resolution: 29.75rem) {
+    .mobile {
+        font-size: 28px;
+    }
+}
+
+@media screen and (min-width: 34rem) {
+    .mobile {
+        font-size: 32px;
     }
 }

@@ -1,6 +1,7 @@
 import {html, sync} from 'malevic';
 import connect from '../connect';
 import Body from './components/body';
+import {isMobile} from '../../utils/platform';
 import {popupHasBuiltInHorizontalBorders, popupHasBuiltInBorders} from './utils/issues';
 import {ExtensionData, ExtensionActions, TabInfo} from '../../definitions';
 
@@ -24,5 +25,6 @@ async function start() {
 
 start();
 
+document.documentElement.classList.toggle('mobile', isMobile());
 document.documentElement.classList.toggle('built-in-borders', popupHasBuiltInBorders());
 document.documentElement.classList.toggle('built-in-horizontal-borders', popupHasBuiltInHorizontalBorders());

@@ -41,7 +41,7 @@ export function parseSitesFixesConfig<T extends SiteProps>(text: string, options
         }
 
         const siteFix = {
-            url: parseArray(text.substring(0, commandsLocations[0].start)) as string[]
+            url: parseArray(block.substring(0, commandsLocations[0].start)) as string[],
         } as T;
 
         commandsLocations.forEach(({command, start, end}, i) => {

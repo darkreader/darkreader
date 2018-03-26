@@ -82,7 +82,7 @@ function Body(props: BodyProps) {
                 <div class="footer-buttons">
                     {(donationButtonVsLink
                         ? <a id="donate-link" href={DONATE_URL} target="_blank">Donate</a>
-                        : <Button id="donate" onclick={donate}><strong>$</strong> Donate</Button>
+                        : <Button id="donate" onclick={donate}><span class="icon-coin" /> Donate</Button>
                     )}
                     <Button onclick={openDevTools}>
                         🛠 Open developer tools

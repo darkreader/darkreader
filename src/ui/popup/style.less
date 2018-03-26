@@ -101,6 +101,20 @@ footer {
     }
 }
 
+.icon-coin {
+    background-color: gold;
+    border-radius: 50%;
+    display: inline-block;
+    height: @size-text-normal;
+    position: relative;
+    width: @size-text-normal;
+
+    &::before {
+        color: @color-back;
+        content: "$";
+    }
+}
+
 .ext-disabled {
     .site-toggle--disabled {
         opacity: 1;

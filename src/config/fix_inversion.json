@@ -849,7 +849,8 @@
                 ".box_title, .box_layer_wrap",
                 "#box_loader, .chat_tab_close",
                 "#notifiers_wrap, .notifier_image_wrap",
-                ".doc_ext, .doc_title"
+                ".doc_ext, .doc_title",
+                ".like_tt:after, .audio_row__cover_back"
             ],
             "noinvert": [
                 "#video_player *, .mv_playlist *, .page_header_cont *",

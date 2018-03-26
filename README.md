@@ -14,9 +14,12 @@ for more info.
 
 ### Fixing wrong inversion
 
-If some site is **already dark**, you can **add it to [dark-sites.config](https://github.com/alexanderby/darkreader/blob/master/src/config/dark-sites.config) file** *(please, preserve alphabetical order)*.
+If some site is **already dark**, you can **add it to [dark-sites.config](https://github.com/alexanderby/darkreader/blob/master/src/config/dark-sites.config) file**
+*(please, preserve alphabetical order)*.
 
-If some **parts** of web-pages are **wrongly inverted**, you can specify necessary **CSS selectors** at **[fix_inversion.json](https://github.com/alexanderby/darkreader/blob/master/src/config/fix_inversion.json) file** *(please, preserve alphabetical order by URL, use short selectors, preserve whitespace indentation and code style)*.
+If some **parts** of web-pages are **wrongly inverted**,
+you can specify necessary **CSS selectors** at **[inversion-fixes.config](https://github.com/alexanderby/darkreader/blob/master/src/config/inversion-fixes.config) file**
+*(please, preserve alphabetical order by URL, use short selectors, preserve code style)*.
 
 Notice that merged changes to these files are automatically delivered to all users **within 15 minutes**.
 
@@ -25,40 +28,46 @@ Notice that merged changes to these files are automatically delivered to all use
 - Open **Chrome Dev Tools** (F12).
 - Click on **element picker** (top-left corner).
 - Pick wrongly inverted element.
-- Choose a **[selector](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Selectors)** for that element or all similar elements (e.g. if element has `class="x-icon small"` selector may look like `.x-icon`).
+- Choose a **[selector](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Selectors)** for that element or all similar elements (e.g. if element has `class="icon small"` selector may look like `.icon`).
 - Click **Dark Reader icon**.
 - Click **Open developer tools** (at bottom).
-- Under `sites` section add a block containing URL and selectors to invert.
-```json
-...
-"sites": [
-    {
-        "url": "example.com",
-        "invert": ".x-icon"
-    }
-]
+- Find or add a block containing URL and selectors to invert.
 ```
-- It is also possible to specify multiple selectors (comma-separated list or an array) and custom CSS rules. If chosen element contains images or other content that becomes wrongly displayed, `noinvert` rule can be used. `removebg` removes background image from element.
-*IMPORTANT: When Dark mode is on, the whole page (root `<html>` element) is inverted by filter. To revert the images, videos etc. `invert` selectors are used, so the inversion will be applied to these elements twice. If inverted elements contain other elements that match the `invert` selectors, then these elements will be inverted 3 or more times. To prevent it `noinvert` selectors are used.*
-```json
-...
-"sites": [
-    {
-        "url": "example.com",
-        "invert": [
-            ".x-icon, .x-button",
-            "#player .player-button"
-        ],
-        "noinvert": "#player *",
-        "removebg": ".bg-photo",
-        "rules": ".overlay { background: rgba(255,255,255,0.5); }"
-    }
-]
+================================
+
+example.com
+
+INVERT
+.icon
+
+```
+- It is also possible to specify custom CSS rules. If chosen element contains images or other content that becomes wrongly displayed, `NO INVERT` rule can be used. `REMOVE BG` removes background image from element.
+*IMPORTANT: When Dark mode is on, the whole page (root `<html>` element) is inverted by filter. To revert the images, videos etc. `INVERT` selectors are used, so the inversion will be applied to these elements twice. If inverted elements contain other elements that match the `INVERT` selectors, then these elements will be inverted 3 or more times. To prevent it `NO INVERT` selectors are used.*
+```
+================================
+
+example.com
+
+INVERT
+.icon
+.button
+#player
+
+NO INVERT
+#player *
+
+REMOVE BG
+.bg-photo
+
+CSS
+.overlay {
+    background: rgba(255, 255, 255, 0.5);
+}
 ```
 - Click **Apply**.
-- If the **fix worked** open **[fix_inversion.json](https://github.com/alexanderby/darkreader/blob/master/src/config/fix_inversion.json) file**.
+- If the **fix worked** open **[inversion-fixes.config](https://github.com/alexanderby/darkreader/blob/master/src/config/inversion-fixes.config) file**.
 - Click **edit** (sign-in to GitHub first).
-- **Insert your fix** there. Preserve **alphabetical order** by URL, use 4 spaces for indentation.
+- **Insert your fix** there. Preserve **alphabetical order** by URL.
 - Provide a **short description** of what you have done.
 - Click **Propose file change**.
 - Review your changes. Click **Create pull request**.

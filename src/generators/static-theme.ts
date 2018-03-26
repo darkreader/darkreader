@@ -176,19 +176,27 @@ const staticThemeCommands = [
     'NO COMMON',
 
     'NEUTRAL BG',
+    'NEUTRAL BG ACTIVE',
     'NEUTRAL TEXT',
+    'NEUTRAL TEXT ACTIVE',
     'NEUTRAL BORDER',
 
     'RED BG',
+    'RED BG ACTIVE',
     'RED TEXT',
+    'RED TEXT ACTIVE',
     'RED BORDER',
 
     'GREEN BG',
+    'GREEN BG ACTIVE',
     'GREEN TEXT',
+    'GREEN TEXT ACTIVE',
     'GREEN BORDER',
 
     'BLUE BG',
+    'BLUE BG ACTIVE',
     'BLUE TEXT',
+    'BLUE TEXT ACTIVE',
     'BLUE BORDER',
 
     'FADE BG',
@@ -235,7 +243,7 @@ export function formatStaticThemes(staticThemes: StaticTheme[]) {
     ));
 
     return formatSitesFixesConfig(themes, {
-        props: staticThemeCommands.map(camelCaseToUpperCase),
+        props: staticThemeCommands.map(upperCaseToCamelCase),
         getPropCommandName: camelCaseToUpperCase,
         formatPropValue: (prop, value) => {
             if (prop === 'noCommon') {
@@ -244,10 +252,10 @@ export function formatStaticThemes(staticThemes: StaticTheme[]) {
             return formatArray(value).trim();
         },
         shouldIgnoreProp: (prop, value) => {
-            return (
-                (prop === 'noCommon' && !value) ||
-                (!(Array.isArray(value) && value.length > 0))
-            );
+            if (prop === 'noCommon') {
+                return !value;
+            }
+            return !(Array.isArray(value) && value.length > 0);
         }
     });
 }

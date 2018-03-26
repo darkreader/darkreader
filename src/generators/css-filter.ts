@@ -207,18 +207,18 @@ export function parseInversionFixes(text: string) {
 export function formatInversionFixes(inversionFixes: InversionFix[]) {
     return formatSitesFixesConfig(inversionFixes, {
         props: Object.values(inversionFixesCommands),
-        getPropCommandName: (prop) => Object.entries(inversionFixesCommands).find(([command, p]) => p === prop)[1],
+        getPropCommandName: (prop) => Object.entries(inversionFixesCommands).find(([command, p]) => p === prop)[0],
         formatPropValue: (prop, value) => {
             if (prop === 'css') {
                 return value.trim();
             }
-            return formatArray(value);
+            return formatArray(value).trim();
         },
         shouldIgnoreProp: (prop, value) => {
-            return (
-                (prop === 'css' && !value) ||
-                (!(Array.isArray(value) && value.length > 0))
-            );
+            if (prop === 'css') {
+                return !value;
+            }
+            return !(Array.isArray(value) && value.length > 0);
         }
     })
 }

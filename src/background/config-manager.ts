@@ -1,5 +1,4 @@
-import {readJson, readText} from './utils/network';
-import {simpleClone} from './utils/clone';
+import {readText} from './utils/network';
 import {parseArray} from '../config/utils';
 import {parseInversionFixes} from '../generators/css-filter';
 import {parseStaticThemes} from '../generators/static-theme';

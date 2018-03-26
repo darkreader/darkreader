@@ -61,8 +61,8 @@ export default class Connector implements ExtensionActions {
         this.port.postMessage({type: 'toggleSitePattern', data: pattern});
     }
 
-    applyDevInversionFixes(json: string) {
-        return this.sendRequest<void>({type: 'applyDevInversionFixes', data: json}, ({error}, resolve, reject) => error ? reject(error) : resolve());
+    applyDevInversionFixes(text: string) {
+        return this.sendRequest<void>({type: 'applyDevInversionFixes', data: text}, ({error}, resolve, reject) => error ? reject(error) : resolve());
     }
 
     resetDevInversionFixes() {

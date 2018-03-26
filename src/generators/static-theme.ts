@@ -1,6 +1,9 @@
 import {isUrlInList} from '../utils/url';
 import {createTextRule} from './text-style';
+import {formatSitesFixesConfig} from './utils/format';
 import {applyFilterToColor} from './utils/matrix';
+import {parseSitesFixesConfig} from './utils/parse';
+import {parseArray, formatArray} from '../config/utils';
 import {FilterConfig, StaticTheme} from '../definitions';
 
 interface ThemeColors {
@@ -121,41 +124,6 @@ const mx = {
     border: 0.5,
 };
 
-const staticThemeProps = [
-    'noCommon',
-
-    'neutralBg',
-    'neutralBgActive',
-    'neutralText',
-    'neutralTextActive',
-    'neutralBorder',
-
-    'redBg',
-    'redBgActive',
-    'redText',
-    'redTextActive',
-    'redBorder',
-
-    'greenBg',
-    'greenBgActive',
-    'greenText',
-    'greenTextActive',
-    'greenBorder',
-
-    'blueBg',
-    'blueBgActive',
-    'blueText',
-    'blueTextActive',
-    'blueBorder',
-
-    'fadeBg',
-    'fadeText',
-    'transparentBg',
-
-    'noImage',
-    'invert',
-];
-
 const ruleGenerators = [
     createRuleGen((t) => t.neutralBg, (t) => [`background-color: ${rgb(t.neutralBg)}`]),
     createRuleGen((t) => t.neutralBgActive, (t) => [`background-color: ${rgb(t.neutralBg)}`]),
@@ -204,99 +172,84 @@ const ruleGenerators = [
     createRuleGen((t) => t.invert, (t) => ['filter: invert(100%) hue-rotate(180deg)']),
 ];
 
-export function parseUrlSelectorConfig(text: string) {
-    const themes: StaticTheme[] = [];
+const staticThemeCommands = [
+    'NO COMMON',
 
-    const isPropertyName = (text) => Boolean(text.match(/^[A-Z ]+$/));
+    'NEUTRAL BG',
+    'NEUTRAL TEXT',
+    'NEUTRAL BORDER',
 
-    // Split blocks
-    const blocks = text.replace(/\r/g, '').split(/={2,}/g);
-    blocks.forEach((block) => {
-        // Remove empty lines
-        const lines = block.split('\n').map((l) => l.trim()).filter((l) => l);
+    'RED BG',
+    'RED TEXT',
+    'RED BORDER',
 
-        // Get list of URL patterns
-        let firstCommandIndex = lines.findIndex(isPropertyName);
-        if (firstCommandIndex < 0) {
-            firstCommandIndex = lines.length;
-        }
-        const url = lines.slice(0, firstCommandIndex);
+    'GREEN BG',
+    'GREEN TEXT',
+    'GREEN BORDER',
 
-        // Fill properties selectors
-        let line;
-        let prop;
-        const raw: StaticTheme = {url};
-        lines.slice(url.length).forEach((line) => {
-            if (isPropertyName(line)) {
-                // Convert property name from UPPER CASE to lowerCase
-                prop = line
-                    .split(' ')
-                    .map((word, i) => {
-                        return (i === 0
-                            ? word.toLowerCase()
-                            : (word.charAt(0).toUpperCase() + word.substr(1).toLowerCase())
-                        );
-                    })
-                    .join('');
-                if (prop === 'noCommon') {
-                    raw[prop] = true;
-                } else {
-                    raw[prop] = [];
-                }
-            } else {
-                raw[prop].push(line);
-            }
-        });
-        themes.push(raw);
-    });
+    'BLUE BG',
+    'BLUE TEXT',
+    'BLUE BORDER',
 
-    const common = getCommonTheme(themes);
-    if (!(common && common.url && common.url[0] === '*')) {
-        throw new Error('Common theme is missing');
-    }
+    'FADE BG',
+    'FADE TEXT',
+    'TRANSPARENT BG',
 
-    return themes;
+    'NO IMAGE',
+    'INVERT',
+];
+
+function upperCaseToCamelCase(text: string) {
+    return text
+        .split(' ')
+        .map((word, i) => {
+            return (i === 0
+                ? word.toLowerCase()
+                : (word.charAt(0).toUpperCase() + word.substr(1).toLowerCase())
+            );
+        })
+        .join('');
 }
 
-export function formatUrlSelectorConfig(staticThemes: StaticTheme[]) {
-    const camelCaseToUpperCase = (text: string) => text.replace(/([A-Z])/g, ' $1').toUpperCase().trim();
-
-    const themes = staticThemes.slice().sort((a, b) => (
-        a.url[0]
-            .toLowerCase()
-            .replace(/[^0-9a-z\.]/g, '')
-            .localeCompare(
-                b.url[0]
-                    .toLowerCase()
-                    .replace(/[^0-9a-z\.]/g, '')
-            )
-    ));
-
-    const lines: string[] = [];
-
-    themes.forEach((theme, i) => {
-        lines.push(...theme.url);
-        staticThemeProps.forEach((prop) => {
-            if (
-                (prop === 'noCommon' && theme.noCommon) ||
-                (Array.isArray(theme[prop]) && theme[prop].length > 0)
-            ) {
-                lines.push('');
-                lines.push(camelCaseToUpperCase(prop));
-                if (Array.isArray(theme[prop])) {
-                    lines.push(...theme[prop]);
-                }
+export function parseStaticThemes($themes: string) {
+    return parseSitesFixesConfig<StaticTheme>($themes, {
+        commands: staticThemeCommands,
+        getCommandPropName: upperCaseToCamelCase,
+        parseCommandValue: (command, value) => {
+            if (command === 'NO COMMON') {
+                return true;
             }
-        });
-        if (i < themes.length - 1) {
-            lines.push('');
-            lines.push(Array.from({length: 32}).fill('=').join(''));
-            lines.push('');
+            return parseArray(value);
         }
     });
+}
 
-    lines.push('');
-    return lines.join('\n');
+function camelCaseToUpperCase(text: string) {
+    return text.replace(/([a-z])([A-Z])/g, '$1 $2').toUpperCase();
+}
+
+export function formatStaticThemes(staticThemes: StaticTheme[]) {
+    const themes = staticThemes.slice().sort((a, b) => (
+        a.url[0].toLowerCase()
+            .localeCompare(b.url[0].toLowerCase())
+    ));
+
+    return formatSitesFixesConfig(themes, {
+        props: staticThemeCommands.map(camelCaseToUpperCase),
+        getPropCommandName: camelCaseToUpperCase,
+        formatPropValue: (prop, value) => {
+            if (prop === 'noCommon') {
+                return '';
+            }
+            return formatArray(value).trim();
+        },
+        shouldIgnoreProp: (prop, value) => {
+            return (
+                (prop === 'noCommon' && !value) ||
+                (!(Array.isArray(value) && value.length > 0))
+            );
+        }
+    });
 }
 
 function getCommonTheme(themes: StaticTheme[]) {

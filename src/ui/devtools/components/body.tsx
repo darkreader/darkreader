@@ -1,7 +1,6 @@
 import {html} from 'malevic';
 import withState from 'malevic/state';
 import {Button} from '../../controls';
-import {getJsonErrorPosition, getTextPositionMessage} from '../../../config/utils';
 import ThemeEngines from '../../../generators/theme-engines';
 import {ExtWrapper} from '../../../definitions';
 
@@ -43,18 +42,9 @@ function Body({data, actions, state, setState}: BodyProps) {
             await wrapper.apply(text);
             setState({errorText: null});
         } catch (err) {
-            const pos = getJsonErrorPosition(err);
             setState({
-                errorText: (pos >= 0
-                    ? getTextPositionMessage(text, pos)
-                    : String(err))
+                errorText: String(err),
             });
-            textNode.focus();
-            textNode.selectionStart = text.lastIndexOf('\n', pos) + 1;
-            textNode.selectionEnd = text.indexOf('\n', pos);
-            if (textNode.selectionStart === textNode.selectionEnd) {
-                textNode.selectionStart = text.lastIndexOf('\n', textNode.selectionStart - 1) + 1;
-            }
         }
     }
 

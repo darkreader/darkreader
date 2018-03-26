@@ -26,15 +26,3 @@ export function readText(params: RequestParams): Promise<string> {
         request.send();
     });
 }
-
-/**
- * Loads and parses JSON from file to object.
- * @param params Object containing request parameters.
- */
-export async function readJson<T>(params: RequestParams): Promise<T> {
-    const rawJson = await readText(params);
-    // Remove comments
-    const json = rawJson
-        .replace(/(\".*?(\\\".*?)*?\")|(\/\*(.|[\r\n])*?\*\/)|(\/\/.*?[\r\n])/gm, '$1');
-    return JSON.parse(json);
-}

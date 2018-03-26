@@ -1,5 +1,5 @@
-import {formatJson} from '../config/utils'
-import {parseUrlSelectorConfig, formatUrlSelectorConfig} from '../generators/static-theme';
+import {parseInversionFixes, formatInversionFixes} from '../generators/css-filter';
+import {parseStaticThemes, formatStaticThemes} from '../generators/static-theme';
 import ConfigManager from './config-manager';
 
 export default class DevTools {
@@ -15,14 +15,14 @@ export default class DevTools {
         return localStorage.getItem('dev_inversion_fixes') || null;
     }
 
-    private saveInversionFixes(json: string) {
-        localStorage.setItem('dev_inversion_fixes', json);
+    private saveInversionFixes(text: string) {
+        localStorage.setItem('dev_inversion_fixes', text);
     }
 
     getInversionFixesText() {
         const {RAW_INVERSION_FIXES} = this.config;
         const fixes = this.getSavedInversionFixes();
-        return formatJson(fixes ? JSON.parse(fixes) : RAW_INVERSION_FIXES);
+        return fixes ? formatInversionFixes(parseInversionFixes(fixes)) : RAW_INVERSION_FIXES;
     }
 
     resetInversionFixes() {
@@ -32,12 +32,11 @@ export default class DevTools {
         this.onChange();
     }
 
-    applyInversionFixes(json: string) {
+    applyInversionFixes(text: string) {
         try {
-            const obj = JSON.parse(json);
-            const text = formatJson(obj);
-            this.saveInversionFixes(text);
-            this.config.handleInversionFixes(obj);
+            const formatted = formatInversionFixes(parseInversionFixes(text));
+            this.config.handleInversionFixes(formatted);
+            this.saveInversionFixes(formatted);
             this.onChange();
             return null;
         } catch (err) {
@@ -55,8 +54,8 @@ export default class DevTools {
 
     getStaticThemesText() {
         const {RAW_STATIC_THEMES} = this.config;
-        const fixes = this.getSavedStaticThemes();
-        return fixes ? formatUrlSelectorConfig(parseUrlSelectorConfig(fixes)) : RAW_STATIC_THEMES;
+        const themes = this.getSavedStaticThemes();
+        return themes ? formatStaticThemes(parseStaticThemes(themes)) : RAW_STATIC_THEMES;
     }
 
     resetStaticThemes() {
@@ -68,7 +67,7 @@ export default class DevTools {
 
     applyStaticThemes(text: string) {
         try {
-            const formatted = formatUrlSelectorConfig(parseUrlSelectorConfig(text));
+            const formatted = formatStaticThemes(parseStaticThemes(text));
             this.config.handleStaticThemes(formatted);
             this.saveStaticThemes(formatted);
             this.onChange();

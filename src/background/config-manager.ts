@@ -1,9 +1,8 @@
-import {readJson, readText} from './utils/network';
-import {simpleClone} from './utils/clone';
+import {readText} from './utils/network';
 import {parseArray} from '../config/utils';
-import {fillInversionFixesConfig} from '../generators/css-filter';
-import {parseUrlSelectorConfig} from '../generators/static-theme';
-import {InversionFixes, StaticTheme} from '../definitions';
+import {parseInversionFixes} from '../generators/css-filter';
+import {parseStaticThemes} from '../generators/static-theme';
+import {InversionFix, StaticTheme} from '../definitions';
 
 const CONFIG_URLs = {
     darkSites: {
@@ -11,8 +10,8 @@ const CONFIG_URLs = {
         local: '../config/dark-sites.config',
     },
     inversionFixes: {
-        remote: 'https://raw.githubusercontent.com/alexanderby/darkreader/master/src/config/fix_inversion.json',
-        local: '../config/fix_inversion.json',
+        remote: 'https://raw.githubusercontent.com/alexanderby/darkreader/master/src/config/inversion-fixes.config',
+        local: '../config/inversion-fixes.config',
     },
     staticThemes: {
         remote: 'https://raw.githubusercontent.com/alexanderby/darkreader/master/src/config/static-themes.config',
@@ -24,7 +23,7 @@ const RELOAD_INTERVAL_MS = 15 * 60 * 1000;
 
 export default class ConfigManager {
     DARK_SITES?: string[];
-    INVERSION_FIXES?: InversionFixes;
+    INVERSION_FIXES?: InversionFix[];
     RAW_INVERSION_FIXES?: any;
     STATIC_THEMES?: StaticTheme[];
     RAW_STATIC_THEMES?: string;
@@ -39,14 +38,6 @@ export default class ConfigManager {
     }
 
     async load() {
-        const loadLocalInversionFixes = async () => {
-            return await readJson<InversionFixes>({url: CONFIG_URLs.inversionFixes.local});
-        };
-
-        const loadLocalStaticThemes = async () => {
-            return await readText({url: CONFIG_URLs.staticThemes.local});
-        };
-
         const loadDarkSites = async () => {
             let $sites: string;
             try {
@@ -63,17 +54,17 @@ export default class ConfigManager {
         };
 
         const loadInversionFixes = async () => {
-            let $fixes: InversionFixes;
+            let $fixes: string;
             try {
-                $fixes = await readJson<InversionFixes>({
+                $fixes = await readText({
                     url: CONFIG_URLs.inversionFixes.remote,
                     timeout: REMOTE_TIMEOUT_MS
                 });
             } catch (err) {
                 console.error('Inversion Fixes remote load error', err);
-                $fixes = await loadLocalInversionFixes();
+                $fixes = await readText({url: CONFIG_URLs.inversionFixes.local});
             }
-            this.RAW_INVERSION_FIXES = simpleClone($fixes);
+            this.RAW_INVERSION_FIXES = $fixes;
             this.handleInversionFixes($fixes);
         };
 
@@ -86,7 +77,7 @@ export default class ConfigManager {
                 });
             } catch (err) {
                 console.error('Static Theme remote load error', err);
-                $themes = await loadLocalStaticThemes();
+                $themes = await readText({url: CONFIG_URLs.staticThemes.local});
             }
             this.RAW_STATIC_THEMES = $themes;
             this.handleStaticThemes($themes);
@@ -99,8 +90,8 @@ export default class ConfigManager {
         ]).catch((err) => console.error('Fatality', err));
     }
 
-    handleInversionFixes($fixes: InversionFixes) {
-        this.INVERSION_FIXES = fillInversionFixesConfig($fixes);
+    handleInversionFixes($fixes: string) {
+        this.INVERSION_FIXES = parseInversionFixes($fixes);
     }
 
     private handleDarkSites($sites: string[]) {
@@ -109,6 +100,6 @@ export default class ConfigManager {
     }
 
     handleStaticThemes($themes: string) {
-        this.STATIC_THEMES = parseUrlSelectorConfig($themes);
+        this.STATIC_THEMES = parseStaticThemes($themes);
     }
 }

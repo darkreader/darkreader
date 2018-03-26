@@ -4,7 +4,6 @@ module.exports = function createCopyTasks(gulp) {
     const files = [
         'background/index.html',
         'config/**/*.config',
-        'config/**/*.json',
         'icons/**/*.*',
         'ui/assets/**/*.*',
         'manifest.json',

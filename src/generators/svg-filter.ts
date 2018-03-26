@@ -1,9 +1,9 @@
 import {createFilterMatrix, Matrix} from './utils/matrix';
 import {isFirefox} from '../utils/platform';
 import {cssFilterStyleheetTemplate} from './css-filter';
-import {FilterConfig, InversionFixes} from '../definitions';
+import {FilterConfig, InversionFix} from '../definitions';
 
-export function createSVGFilterStylesheet(config: FilterConfig, url: string, inversionFixes: InversionFixes) {
+export function createSVGFilterStylesheet(config: FilterConfig, url: string, inversionFixes: InversionFix[]) {
     let filterValue: string;
     let reverseFilterValue: string;
     if (isFirefox()) {
@@ -29,11 +29,14 @@ function getEmbeddedSVGFilterValue(matrixValue: string) {
     return `url(data:image/svg+xml;base64,${btoa(svg)}#${id})`;
 }
 
+function toSVGMatrix(matrix: number[][]) {
+    return matrix.slice(0, 4).map(m => m.map(m => m.toFixed(3)).join(' ')).join(' ');
+}
+
 export function getSVGFilterMatrixValue(config: FilterConfig) {
-    const matrix = createFilterMatrix(config);
-    return matrix.slice(0, 4).map(m => m.map(m => m.toFixed(3)).join(' ')).join('\n');
+    return toSVGMatrix(createFilterMatrix(config));
 }
 
 export function getSVGReverseFilterMatrixValue() {
-    return Matrix.invertNHue().slice(0, 4).map(m => m.map(m => m.toFixed(3)).join(' ')).join('\n');
+    return toSVGMatrix(Matrix.invertNHue());
 }

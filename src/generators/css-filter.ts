@@ -1,20 +1,23 @@
+import {formatSitesFixesConfig} from './utils/format';
 import {applyFilterToColor} from './utils/matrix';
+import {parseSitesFixesConfig} from './utils/parse';
+import {parseArray, formatArray} from '../config/utils';
 import {createTextRule} from './text-style';
-import {isUrlMatched} from '../utils/url';
-import {FilterConfig, InversionFix, InversionFixes, SiteFix} from '../definitions';
+import {isUrlMatched, isUrlInList} from '../utils/url';
+import {FilterConfig, InversionFix} from '../definitions';
 
 export enum FilterMode {
     light = 0,
     dark = 1
 }
 
-export default function createCSSFilterStyleheet(config: FilterConfig, url: string, inversionFixes: InversionFixes) {
+export default function createCSSFilterStyleheet(config: FilterConfig, url: string, inversionFixes: InversionFix[]) {
     const filterValue = getCSSFilterValue(config);
     const reverseFilterValue = 'invert(100%) hue-rotate(180deg)';
     return cssFilterStyleheetTemplate(filterValue, reverseFilterValue, config, url, inversionFixes);
 }
 
-export function cssFilterStyleheetTemplate(filterValue: string, reverseFilterValue: string, config: FilterConfig, url: string, inversionFixes: InversionFixes) {
+export function cssFilterStyleheetTemplate(filterValue: string, reverseFilterValue: string, config: FilterConfig, url: string, inversionFixes: InversionFix[]) {
     const fix = getInversionFixesFor(url, inversionFixes);
 
     const lines: string[] = [];
@@ -74,10 +77,10 @@ export function cssFilterStyleheetTemplate(filterValue: string, reverseFilterVal
     lines.push(`  background: ${bgColor} !important;`);
     lines.push('}');
 
-    if (fix.rules && config.mode === FilterMode.dark) {
+    if (fix.css && fix.css.length > 0 && config.mode === FilterMode.dark) {
         lines.push('');
         lines.push('/* Custom rules */');
-        lines.push(fix.rules.join('\n'));
+        lines.push(fix.css);
     }
 
     lines.push('');
@@ -157,63 +160,65 @@ function createReverseRule(reverseFilterValue: string, fix: InversionFix): strin
 * @param url Site URL.
 * @param inversionFixes List of inversion fixes.
 */
-export function getInversionFixesFor(url: string, inversionFixes: InversionFixes): InversionFix {
-    let found: SiteFix;
+export function getInversionFixesFor(url: string, inversionFixes: InversionFix[]): InversionFix {
+    const common = inversionFixes[0];
+
     if (url) {
         // Search for match with given URL
-        const matches = inversionFixes.sites
-            .filter((s) => isUrlMatched(url, s.url as string))
-            .sort((a, b) => b.url.length - a.url.length);
+        const matches = inversionFixes
+            .slice(1)
+            .filter((s) => isUrlInList(url, s.url))
+            .sort((a, b) => b.url[0].length - a.url[0].length);
         if (matches.length > 0) {
-            console.log(`URL matches ${matches[0].url}`);
-            return matches[0];
+            const found = matches[0];
+            console.log(`URL matches ${found.url.join(', ')}`);
+            return {
+                url: found.url,
+                invert: (common.invert || []).concat(found.invert || []),
+                noinvert: (common.noinvert || []).concat(found.noinvert || []),
+                removebg: (common.removebg || []).concat(found.removebg || []),
+                css: [common.css, found.css].filter((s) => s).join('\n'),
+            };
         }
     }
-    return {...inversionFixes.common};
+    return {...common};
 }
 
-export function fillInversionFixesConfig($fixes: InversionFixes) {
-    const common = {
-        invert: toStringArray($fixes && $fixes.common && $fixes.common.invert),
-        noinvert: toStringArray($fixes && $fixes.common && $fixes.common.noinvert),
-        removebg: toStringArray($fixes && $fixes.common && $fixes.common.removebg),
-        rules: toStringArray($fixes && $fixes.common && $fixes.common.rules),
-    };
-    const sites = ($fixes && Array.isArray($fixes.sites)
-        ? $fixes.sites.filter((s) => isStringOrArray(s.url))
-            .map((s) => {
-                return {
-                    url: s.url,
-                    invert: common.invert.concat(toStringArray(s.invert)),
-                    noinvert: common.noinvert.concat(toStringArray(s.noinvert)),
-                    removebg: common.removebg.concat(toStringArray(s.removebg)),
-                    rules: common.rules.concat(toStringArray(s.rules)),
-                };
-            })
-        : [])
-        .reduce((flat, s) => {
-            if (Array.isArray(s.url)) {
-                s.url.forEach((url) => {
-                    flat.push({...s, ...{url}});
-                });
-            } else {
-                flat.push(s);
+const inversionFixesCommands = {
+    'INVERT': 'invert',
+    'NO INVERT': 'noinvert',
+    'REMOVE BG': 'removebg',
+    'CSS': 'css',
+};
+
+export function parseInversionFixes(text: string) {
+    return parseSitesFixesConfig<InversionFix>(text, {
+        commands: Object.keys(inversionFixesCommands),
+        getCommandPropName: (command) => inversionFixesCommands[command],
+        parseCommandValue: (command, value) => {
+            if (command === 'CSS') {
+                return value.trim();
             }
-            return flat;
-        }, []);
-    return {common, sites};
+            return parseArray(value);
+        },
+    });
 }
 
-function toStringArray(value: string | string[]): string[] {
-    if (Array.isArray(value)) {
-        return value;
-    }
-    if (typeof value === 'string' && value) {
-        return [value];
-    }
-    return [];
-}
-
-function isStringOrArray(item) {
-    return (typeof item === 'string' || Array.isArray(item));
+export function formatInversionFixes(inversionFixes: InversionFix[]) {
+    return formatSitesFixesConfig(inversionFixes, {
+        props: Object.values(inversionFixesCommands),
+        getPropCommandName: (prop) => Object.entries(inversionFixesCommands).find(([command, p]) => p === prop)[0],
+        formatPropValue: (prop, value) => {
+            if (prop === 'css') {
+                return value.trim();
+            }
+            return formatArray(value).trim();
+        },
+        shouldIgnoreProp: (prop, value) => {
+            if (prop === 'css') {
+                return !value;
+            }
+            return !(Array.isArray(value) && value.length > 0);
+        }
+    })
 }

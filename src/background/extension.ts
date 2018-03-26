@@ -50,6 +50,10 @@ export class Extension {
     }
 
     private registerCommands() {
+        if (!chrome.commands) {
+            // Fix for Firefox Android
+            return;
+        }
         chrome.commands.onCommand.addListener((command) => {
             if (command === 'toggle') {
                 console.log('Toggle command entered');

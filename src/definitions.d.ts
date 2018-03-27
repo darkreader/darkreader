@@ -6,6 +6,7 @@ export interface ExtensionData {
     filterConfig: FilterConfig;
     fonts: string[];
     shortcuts: Shortcuts;
+    version: string;
     devInversionFixesText: string;
     devStaticThemesText: string;
 }

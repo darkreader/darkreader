@@ -4,7 +4,7 @@ import IconManager from './icon-manager';
 import Messenger from './messenger';
 import TabManager from './tab-manager';
 import UserStorage from './user-storage';
-import {getFontList, getCommands} from './utils/extension-api';
+import {getFontList, getCommands, getVersion} from './utils/extension-api';
 import {isFirefox} from '../utils/platform';
 import {isUrlInList, getUrlHost} from '../utils/url';
 import ThemeEngines from '../generators/theme-engines';
@@ -128,6 +128,7 @@ export class Extension {
             ready: this.ready,
             fonts: this.fonts,
             shortcuts: await this.getShortcuts(),
+            version: getVersion(),
             devInversionFixesText: this.devtools.getInversionFixesText(),
             devStaticThemesText: this.devtools.getStaticThemesText(),
         };

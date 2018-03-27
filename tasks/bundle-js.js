@@ -34,6 +34,7 @@ module.exports = function createJSBundleTasks(gulp) {
             input: src,
             plugins: [
                 rollupPluginTypescript({
+                    ...require('../src/tsconfig.json').compilerOptions,
                     typescript,
                     removeComments: production ? true : false
                 }),

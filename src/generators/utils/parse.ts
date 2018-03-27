@@ -1,4 +1,4 @@
-import {parseArray} from '../../config/utils';
+import {parseArray} from '../../utils/text';
 
 interface SiteProps {
     url: string[];

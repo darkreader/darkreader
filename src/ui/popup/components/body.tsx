@@ -88,7 +88,6 @@ function Body(props: BodyProps) {
                         🛠 Open developer tools
                     </Button>
                 </div>
-                <div class="version-label">{`v${props.data.version}`}</div>
             </footer>
         </body>
     );

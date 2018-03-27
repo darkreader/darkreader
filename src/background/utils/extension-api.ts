@@ -51,7 +51,3 @@ export function getCommands() {
         });
     });
 }
-
-export function getVersion() {
-    return chrome.runtime.getManifest().version;
-}

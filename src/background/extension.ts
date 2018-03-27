@@ -34,8 +34,18 @@ export class Extension {
         this.config = new ConfigManager();
         this.devtools = new DevTools(this.config, () => this.onConfigPropChanged());
         this.messenger = new Messenger({
-            collect: async () => await this.collectData(),
-            getActiveTabInfo: async () => await this.tabs.getActiveTabInfo(),
+            collect: async () => {
+                if (!this.ready) {
+                    await new Promise((resolve) => this.awaiting.push(resolve));
+                }
+                return await this.collectData();
+            },
+            getActiveTabInfo: async () => {
+                if (!this.ready) {
+                    await new Promise((resolve) => this.awaiting.push(resolve));
+                }
+                return await this.tabs.getActiveTabInfo();
+            },
             enable: () => this.enable(),
             disable: () => this.disable(),
             setConfig: (config) => this.setConfig(config),
@@ -47,6 +57,7 @@ export class Extension {
         });
         this.tabs = new TabManager(this.config);
         this.user = new UserStorage();
+        this.awaiting = [];
     }
 
     private registerCommands() {
@@ -119,7 +130,12 @@ export class Extension {
 
         this.ready = true;
         this.setConfig(settings.config);
+
+        this.awaiting.forEach((ready) => ready());
+        this.awaiting = null;
     }
+
+    private awaiting: (() => void)[];
 
     private async collectData(): Promise<ExtensionData> {
         return {

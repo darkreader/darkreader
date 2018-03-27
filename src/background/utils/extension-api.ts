@@ -1,6 +1,4 @@
 import {isFirefox} from '../../utils/platform';
-import {isUrlInList} from '../../utils/url';
-import {TabInfo} from '../../definitions';
 
 export function canInjectScript(url: string) {
     if (isFirefox()) {

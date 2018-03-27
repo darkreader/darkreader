@@ -69,9 +69,9 @@ export class Extension {
             if (command === 'toggle') {
                 console.log('Toggle command entered');
                 if (this.enabled) {
-                    this.enable();
-                } else {
                     this.disable();
+                } else {
+                    this.enable();
                 }
             }
             if (command === 'addSite') {

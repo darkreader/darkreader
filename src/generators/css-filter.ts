@@ -1,7 +1,8 @@
 import {formatSitesFixesConfig} from './utils/format';
 import {applyFilterToColor} from './utils/matrix';
 import {parseSitesFixesConfig} from './utils/parse';
-import {parseArray, formatArray} from '../config/utils';
+import {parseArray, formatArray} from '../utils/text';
+import {compareURLPatterns} from '../utils/url';
 import {createTextRule} from './text-style';
 import {isUrlMatched, isUrlInList} from '../utils/url';
 import {FilterConfig, InversionFix} from '../definitions';
@@ -205,7 +206,9 @@ export function parseInversionFixes(text: string) {
 }
 
 export function formatInversionFixes(inversionFixes: InversionFix[]) {
-    return formatSitesFixesConfig(inversionFixes, {
+    const fixes = inversionFixes.slice().sort((a, b) => compareURLPatterns(a.url[0], b.url[0]));
+
+    return formatSitesFixesConfig(fixes, {
         props: Object.values(inversionFixesCommands),
         getPropCommandName: (prop) => Object.entries(inversionFixesCommands).find(([command, p]) => p === prop)[0],
         formatPropValue: (prop, value) => {

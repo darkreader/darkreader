@@ -1,9 +1,11 @@
 const fs = require('fs-extra');
 const {getDestDir} = require('./paths');
+const tsConfig = require('../src/tsconfig.json');
 require('ts-node').register({
+    ...tsConfig,
     compilerOptions: {
+        ...tsConfig.compilerOptions,
         module: 'commonjs',
-        allowJs: true,
     },
     ignore: []
 });

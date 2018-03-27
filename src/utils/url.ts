@@ -2,6 +2,10 @@ export function getUrlHost(url: string) {
     return url.match(/^(.*?:\/{2,3})?(.+?)(\/|$)/)[2];
 }
 
+export function compareURLPatterns(a: string, b: string) {
+    return a.localeCompare(b);
+}
+
 /**
  * Determines whether URL has a match in URL template list.
  * @param url Site URL.

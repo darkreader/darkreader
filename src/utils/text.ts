@@ -1,24 +1,10 @@
-function getJsonErrorPosition(err) {
-    const message = (err instanceof Error
-        ? err.message
-        : (err || ''));
-    const m = /position (\d+)/.exec(message);
-    if (m && m[1]) {
-        const i = parseInt(m[1]);
-        if (!isNaN(i)) {
-            return i;
-        }
-    }
-    return -1;
-}
-
-function getTextPositionMessage(text, index) {
+export function getTextPositionMessage(text: string, index: number) {
     if (!isFinite(index)) {
-        throw new Error('Wrong char index ' + index);
+        throw new Error(`Wrong char index ${index}`);
     }
     let message = '';
     let line = 0;
-    let prevLn;
+    let prevLn: number;
     let nextLn = 0;
     do {
         line++;
@@ -38,11 +24,7 @@ function getTextPositionMessage(text, index) {
     return message;
 }
 
-function formatJson(obj) {
-    return `${JSON.stringify(obj, null, 4)}\n`;
-}
-
-function getTextDiffIndex(a, b) {
+export function getTextDiffIndex(a: string, b: string) {
     const short = Math.min(a.length, b.length);
     for (let i = 0; i < short; i++) {
         if (a[i] !== b[i]) {
@@ -55,22 +37,13 @@ function getTextDiffIndex(a, b) {
     return -1;
 }
 
-function parseArray(text) {
+export function parseArray(text: string) {
     return text.replace(/\r/g, '')
         .split('\n')
         .map((s) => s.trim())
         .filter((s) => s);
 }
 
-function formatArray(arr) {
+export function formatArray(arr: string[]) {
     return arr.concat('').join('\n');
 }
-
-module.exports = {
-    getJsonErrorPosition,
-    getTextPositionMessage,
-    formatJson,
-    getTextDiffIndex,
-    parseArray,
-    formatArray,
-};

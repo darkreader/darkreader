@@ -3,7 +3,8 @@ import {createTextRule} from './text-style';
 import {formatSitesFixesConfig} from './utils/format';
 import {applyFilterToColor} from './utils/matrix';
 import {parseSitesFixesConfig} from './utils/parse';
-import {parseArray, formatArray} from '../config/utils';
+import {parseArray, formatArray} from '../utils/text';
+import {compareURLPatterns} from '../utils/url';
 import {FilterConfig, StaticTheme} from '../definitions';
 
 interface ThemeColors {
@@ -237,12 +238,9 @@ function camelCaseToUpperCase(text: string) {
 }
 
 export function formatStaticThemes(staticThemes: StaticTheme[]) {
-    const themes = staticThemes.slice().sort((a, b) => (
-        a.url[0].toLowerCase()
-            .localeCompare(b.url[0].toLowerCase())
-    ));
+    const themes = staticThemes.slice().sort((a, b) => compareURLPatterns(a.url[0], b.url[0]));
 
-    return formatSitesFixesConfig(themes, {
+    return formatSitesFixesConfig(staticThemes, {
         props: staticThemeCommands.map(upperCaseToCamelCase),
         getPropCommandName: camelCaseToUpperCase,
         formatPropValue: (prop, value) => {

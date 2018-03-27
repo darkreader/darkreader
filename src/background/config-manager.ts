@@ -1,5 +1,5 @@
 import {readText} from './utils/network';
-import {parseArray} from '../config/utils';
+import {parseArray} from '../utils/text';
 import {parseInversionFixes} from '../generators/css-filter';
 import {parseStaticThemes} from '../generators/static-theme';
 import {InversionFix, StaticTheme} from '../definitions';

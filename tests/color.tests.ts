@@ -1,0 +1,65 @@
+import {parse, hslToRGB} from '../src/utils/color';
+
+test('Color parsing', () => {
+    expect(parse('rgb(255,0,153)')).toEqual({r: 255, g: 0, b: 153, a: 1});
+    expect(parse('rgb(255, 0, 153)')).toEqual({r: 255, g: 0, b: 153, a: 1});
+    expect(parse('rgb(100%,0%,60%)')).toEqual({r: 255, g: 0, b: 153, a: 1});
+    expect(parse('rgb(100%, 0%, 60%)')).toEqual({r: 255, g: 0, b: 153, a: 1});
+    expect(parse('rgb(255 0 153)')).toEqual({r: 255, g: 0, b: 153, a: 1});
+
+    expect(parse('rgb(255, 0, 153, 1)')).toEqual({r: 255, g: 0, b: 153, a: 1});
+    expect(parse('rgb(255, 0, 153, 100%)')).toEqual({r: 255, g: 0, b: 153, a: 1});
+    expect(parse('rgb(255 0 153 / 1)')).toEqual({r: 255, g: 0, b: 153, a: 1});
+    expect(parse('rgb(255 0 153 / 100%)')).toEqual({r: 255, g: 0, b: 153, a: 1});
+    expect(parse('rgb(255, 0, 153.6, 1)')).toEqual({r: 255, g: 0, b: 154, a: 1});
+    expect(parse('rgb(1e2, .5e1, .5e0, +.25e2%)')).toEqual({r: 100, g: 5, b: 1, a: 0.25});
+
+    expect(parse('rgba(51, 170, 51, .1)')).toEqual({r: 51, g: 170, b: 51, a: 0.1});
+    expect(parse('rgba(51, 170, 51, .4)')).toEqual({r: 51, g: 170, b: 51, a: 0.4});
+    expect(parse('rgba(51, 170, 51, .7)')).toEqual({r: 51, g: 170, b: 51, a: 0.7});
+    expect(parse('rgba(51, 170, 51, 1)')).toEqual({r: 51, g: 170, b: 51, a: 1});
+    expect(parse('rgba(51 170 51 / 0.4)')).toEqual({r: 51, g: 170, b: 51, a: 0.4});
+    expect(parse('rgba(51 170 51 / 40%)')).toEqual({r: 51, g: 170, b: 51, a: 0.4});
+    expect(parse('rgba(255, 0, 153.6, 1)')).toEqual({r: 255, g: 0, b: 154, a: 1});
+    expect(parse('rgba(1e2, .5e1, .5e0, +.25e2%)')).toEqual({r: 100, g: 5, b: 1, a: 0.25});
+
+    expect(parse('hsl(270,60%,70%)')).toEqual({r: 179, g: 133, b: 224, a: 1});
+    expect(parse('hsl(270, 60%, 70%)')).toEqual({r: 179, g: 133, b: 224, a: 1});
+    expect(parse('hsl(270 60% 70%)')).toEqual({r: 179, g: 133, b: 224, a: 1});
+    expect(parse('hsl(270deg, 60%, 70%)')).toEqual({r: 179, g: 133, b: 224, a: 1});
+    expect(parse('hsl(4.71239rad, 60%, 70%)')).toEqual({r: 179, g: 133, b: 224, a: 1});
+    expect(parse('hsl(.75turn, 60%, 70%)')).toEqual({r: 179, g: 133, b: 224, a: 1});
+
+    expect(parse('hsl(270, 60%, 50%, .15)')).toEqual({r: 128, g: 51, b: 204, a: 0.15});
+    expect(parse('hsl(270, 60%, 50%, 15%)')).toEqual({r: 128, g: 51, b: 204, a: 0.15});
+    expect(parse('hsl(270 60% 50% / .15)')).toEqual({r: 128, g: 51, b: 204, a: 0.15});
+    expect(parse('hsl(270 60% 50% / 15%)')).toEqual({r: 128, g: 51, b: 204, a: 0.15});
+
+    expect(parse('hsla(240, 100%, 50%, .05)')).toEqual({r: 0, g: 0, b: 255, a: 0.05});
+    expect(parse('hsla(240, 100%, 50%, .4)')).toEqual({r: 0, g: 0, b: 255, a: 0.4});
+    expect(parse('hsla(240, 100%, 50%, .7)')).toEqual({r: 0, g: 0, b: 255, a: 0.7});
+    expect(parse('hsla(240, 100%, 50%, 1)')).toEqual({r: 0, g: 0, b: 255, a: 1});
+    expect(parse('hsla(240 100% 50% / .05)')).toEqual({r: 0, g: 0, b: 255, a: 0.05});
+    expect(parse('hsla(240 100% 50% / 5%)')).toEqual({r: 0, g: 0, b: 255, a: 0.05});
+
+    expect(parse('#f09')).toEqual({r: 255, g: 0, b: 153, a: 1});
+    expect(parse('#F09')).toEqual({r: 255, g: 0, b: 153, a: 1});
+    expect(parse('#ff0099')).toEqual({r: 255, g: 0, b: 153, a: 1});
+    expect(parse('#FF0099')).toEqual({r: 255, g: 0, b: 153, a: 1});
+
+    expect(parse('#3a30')).toEqual({r: 51, g: 170, b: 51, a: 0});
+    expect(parse('#3A3F')).toEqual({r: 51, g: 170, b: 51, a: 1});
+    expect(parse('#33aa3300')).toEqual({r: 51, g: 170, b: 51, a: 0});
+    expect(parse('#33AA3388')).toEqual({r: 51, g: 170, b: 51, a: 136 / 255});
+
+    expect(parse('rebeccapurple')).toEqual({r: 102, g: 51, b: 153, a: 1});
+
+    expect(parse('transparent')).toEqual({r: 0, g: 0, b: 0, a: 0});
+});
+
+test('Color conversion', () => {
+    expect(hslToRGB({h: 180, s: 1, l: 0.5, a: 0.25})).toEqual({r: 0, g: 255, b: 255, a: 0.25});
+    expect(hslToRGB({h: 0, s: 1, l: 0.25, a: 0.5})).toEqual({r: 128, g: 0, b: 0, a: 0.5});
+    expect(hslToRGB({h: 12, s: 0.78, l: 0.61})).toEqual({r: 233, g: 109, b: 78, a: 1});
+    expect(hslToRGB({h: 192, s: 0.57, l: 0.10})).toEqual({r: 11, g: 34, b: 40, a: 1});
+});

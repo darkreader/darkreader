@@ -94,6 +94,10 @@
             ]
         },
         {
+            "url": "codecombat.com",
+            "invert": ".modal-content, .map-background, .game-controls, .level-content, .modal-backdrop"
+        },		
+        {
             "url": "dailymail.co.uk",
             "noinvert": ".masthead #logo"
         },

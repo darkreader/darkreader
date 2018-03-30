@@ -61,6 +61,40 @@ export function rgbToHSL({r: r255, g: g255, b: b255, a = 1}: RGBA): HSLA {
     return {h, s, l, a};
 }
 
+function toFixed(n: number, digits = 0) {
+    const fixed = n.toFixed(digits);
+    if (digits === 0) {
+        return fixed;
+    }
+    const dot = fixed.indexOf('.');
+    if (dot >= 0) {
+        const zerosMatch = fixed.match(/0+$/);
+        if (zerosMatch) {
+            if (zerosMatch.index === dot + 1) {
+                return fixed.substring(0, dot);
+            }
+            return fixed.substring(0, zerosMatch.index);
+        }
+    }
+    return fixed;
+}
+
+export function rgbToString(rgb: RGBA) {
+    const {r, g, b, a} = rgb;
+    if (!isNaN(a) && a < 1) {
+        return `rgba(${toFixed(r)}, ${toFixed(g)}, ${toFixed(b)}, ${toFixed(a, 2)})`;
+    }
+    return `rgb(${toFixed(r)}, ${toFixed(g)}, ${toFixed(b)})`;
+}
+
+export function hslToString(hsl: HSLA) {
+    const {h, s, l, a} = hsl;
+    if (!isNaN(a) && a < 1) {
+        return `hsla(${toFixed(h)}, ${toFixed(s * 100)}%, ${toFixed(l * 100)}%, ${toFixed(a, 2)})`;
+    }
+    return `hsl(${toFixed(h)}, ${toFixed(s * 100)}%, ${toFixed(l * 100)}%)`;
+}
+
 export function parse($color: string): RGBA {
     const c = $color.trim().toLowerCase();
 

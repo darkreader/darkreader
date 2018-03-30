@@ -17,6 +17,7 @@ module.exports = function createJSBundleTasks(gulp) {
             'src/background/index.ts': `${dir}/background/index.js`,
             'src/inject/add-style.ts': `${dir}/inject/add-style.js`,
             'src/inject/add-svg-style.ts': `${dir}/inject/add-svg-style.js`,
+            'src/inject/dynamic-style.ts': `${dir}/inject/dynamic-style.js`,
             'src/inject/remove-style.ts': `${dir}/inject/remove-style.js`,
             'src/ui/devtools/index.tsx': `${dir}/ui/devtools/index.js`,
             'src/ui/popup/index.tsx': `${dir}/ui/popup/index.js`,

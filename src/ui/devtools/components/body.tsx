@@ -22,12 +22,17 @@ function Body({data, actions, state, setState}: BodyProps) {
             fixesText: data.devStaticThemesText,
             apply: (text) => actions.applyDevStaticThemes(text),
             reset: () => actions.resetDevStaticThemes(),
-        } : {
+        } : data.filterConfig.engine === ThemeEngines.cssFilter || data.filterConfig.engine === ThemeEngines.svgFilter ? {
             header: 'Inversion Fix Editor',
             fixesText: data.devInversionFixesText,
             apply: (text) => actions.applyDevInversionFixes(text),
             reset: () => actions.resetDevInversionFixes(),
-        });
+        } : {
+                header: 'Dynamic Theme Editor',
+                fixesText: 'No config is required for Dynamic Theme',
+                apply: (text) => {},
+                reset: () => {},
+            });
 
     function onTextRender(node) {
         textNode = node;

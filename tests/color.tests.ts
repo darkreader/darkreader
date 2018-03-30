@@ -1,4 +1,4 @@
-import {parse, hslToRGB, rgbToHSL, HSLA} from '../src/utils/color';
+import {parse, hslToRGB, rgbToHSL, rgbToString, hslToString, HSLA} from '../src/utils/color';
 
 test('Color parsing', () => {
     expect(parse('rgb(255,0,153)')).toEqual({r: 255, g: 0, b: 153, a: 1});
@@ -55,6 +55,17 @@ test('Color parsing', () => {
     expect(parse('rebeccapurple')).toEqual({r: 102, g: 51, b: 153, a: 1});
 
     expect(parse('transparent')).toEqual({r: 0, g: 0, b: 0, a: 0});
+});
+
+test('Stringify color', () => {
+    expect(rgbToString({r: 255, g: 0, b: 153})).toEqual('rgb(255, 0, 153)');
+    expect(rgbToString({r: 255, g: 0, b: 153, a: 1})).toEqual('rgb(255, 0, 153)');
+    expect(rgbToString({r: 255, g: 0, b: 153, a: 0.25003})).toEqual('rgba(255, 0, 153, 0.25)');
+
+    expect(hslToString({h: 270, s: 0.6, l: 0.7})).toEqual('hsl(270, 60%, 70%)');
+    expect(hslToString({h: 270, s: 0.6, l: 0.7, a: 1})).toEqual('hsl(270, 60%, 70%)');
+    expect(hslToString({h: 270.25, s: 0.5988, l: 0.702, a: 0.33333})).toEqual('hsla(270, 60%, 70%, 0.33)');
+    expect(hslToString({h: 270.25, s: 0.5988, l: 0.702, a: 0.00032})).toEqual('hsla(270, 60%, 70%, 0)');
 });
 
 test('Color conversion', () => {

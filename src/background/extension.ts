@@ -99,12 +99,13 @@ export class Extension {
                 const res = await fetch(`${path}?nocache=${Date.now()}`);
                 return await res.text();
             };
-            const [addStyle, removeStyle, addSVGStyle] = await Promise.all([
+            const [addStyle, addSVGStyle, dynamicStyle, removeStyle] = await Promise.all([
                 readFile('../inject/add-style.js'),
-                readFile('../inject/remove-style.js'),
                 readFile('../inject/add-svg-style.js'),
+                readFile('../inject/dynamic-style.js'),
+                readFile('../inject/remove-style.js'),
             ]);
-            this.scripts = {addStyle, removeStyle, addSVGStyle};
+            this.scripts = {addStyle, addSVGStyle, dynamicStyle, removeStyle};
         };
 
         const loadFonts = async () => {
@@ -234,7 +235,7 @@ export class Extension {
     //
     //----------------------
 
-    private scripts: {addStyle, removeStyle, addSVGStyle};
+    private scripts: {addStyle, addSVGStyle, dynamicStyle, removeStyle};
 
     private addStyleCodeGenerator = (url: string) => {
         let script = '';
@@ -278,6 +279,13 @@ export class Extension {
                 case ThemeEngines.staticTheme: {
                     script = replaceJSGlobalsWithString(this.scripts.addStyle, {
                         $CSS: createStaticStylesheet(this.filterConfig, url, this.config.STATIC_THEMES),
+                    });
+                    break;
+                }
+                case ThemeEngines.dynamicTheme: {
+                    const {siteList, ...filter} = this.filterConfig;
+                    script = replaceJSGlobalsWithString(this.scripts.dynamicStyle, {
+                        $FILTER: JSON.stringify(filter),
                     });
                     break;
                 }

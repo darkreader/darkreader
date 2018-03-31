@@ -59,8 +59,6 @@ function createStyle() {
         }
     });
 
-    const filter = null;
-
     const lines: string[] = [];
     lines.push('html, body, button, input, textarea {');
     lines.push(`    background-color: ${modifyBackgroundColor({r: 255, g: 255, b: 255}, filter)} !important;`)
@@ -200,12 +198,16 @@ interface ModifiableCSSRule {
 
 function getModifiableCSSDeclaration(property: string, value: string): ModifiableCSSDeclaration {
     if (property.indexOf('color') >= 0) {
-        return {property, value: getColorModifier(property, value)};
-    }
-    if (property.indexOf('background') >= 0 && value.indexOf('-gradient') >= 0) {
-        return {property, value: getGradientModifier(property, value)};
-    }
-    if (property === 'background-repeat' && value.indexOf('repeat') >= 0) {
+        const modifier = getColorModifier(property, value);
+        if (modifier) {
+            return {property, value: modifier};
+        }
+    } else if (property.indexOf('background') >= 0 && value.indexOf('-gradient') >= 0) {
+        const modifier = getGradientModifier(property, value);
+        if (modifier) {
+            return {property, value: modifier};
+        }
+    } else if (property.indexOf('background-repeat') >= 0 && value === 'repeat') {
         return {property: 'background-image', value: 'none'};
     }
     return null;

@@ -34,7 +34,6 @@ function createStyle() {
     let style = document.getElementById('dark-reader-style') as HTMLStyleElement;
     if (!style) {
         style = document.createElement('style');
-        style.type = 'text/css';
         style.id = 'dark-reader-style';
         document.head.appendChild(style);
     }

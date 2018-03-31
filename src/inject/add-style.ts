@@ -7,7 +7,6 @@ createNodeAsap({
     createNode: (target) => {
         const style = document.createElement('style');
         style.id = 'dark-reader-style';
-        style.type = 'text/css';
         style.textContent = css;
         target.appendChild(style);
     },

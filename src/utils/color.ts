@@ -50,11 +50,14 @@ export function rgbToHSL({r: r255, g: g255, b: b255, a = 1}: RGBA): HSLA {
         return {h: 0, s: 0, l, a};
     }
 
-    const h = (
+    let h = (
         max === r ? (((g - b) / c) % 6) :
             max === g ? ((b - r) / c + 2) :
                 ((r - g) / c + 4)
     ) * 60;
+    if (h < 0) {
+        h += 360;
+    }
 
     const s = c / (1 - Math.abs(2 * l - 1));
 

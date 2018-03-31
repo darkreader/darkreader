@@ -79,4 +79,5 @@ test('Color conversion', () => {
     expect(round(rgbToHSL({r: 128, g: 0, b: 0, a: 0.5}))).toEqual({h: 0, s: 1, l: 0.25, a: 0.5});
     expect(round(rgbToHSL({r: 233, g: 109, b: 78}))).toEqual({h: 12, s: 0.78, l: 0.61, a: 1});
     expect(round(rgbToHSL({r: 11, g: 34, b: 40}))).toEqual({h: 192, s: 0.57, l: 0.10, a: 1});
+    expect(round(rgbToHSL({r: 161, g: 28, b: 61}))).toEqual({h: 345, s: 0.7, l: 0.37, a: 1});
 });

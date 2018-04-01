@@ -1,4 +1,5 @@
 import {parse, rgbToHSL, hslToRGB, hslToString, RGBA, HSLA} from '../utils/color';
+import {scale} from '../utils/math';
 import {FilterConfig} from '../definitions';
 
 declare const $FILTER: string;
@@ -122,24 +123,41 @@ const unparsableColors = new Set([
     'transparent',
     'initial',
     'currentcolor',
+    '-webkit-focus-ring-color',
 ]);
 
 type CSSValueModifier = (filter: FilterConfig) => string;
 
 function modifyBackgroundColor(rgb: RGBA, filter: FilterConfig) {
     const {h, s, l, a} = rgbToHSL(rgb);
-    const ml = 0.3;
-    const ks = 0.2;
-    const x = s * ks + (ml - ks);
-    return hslToString({h, s: s * 0.75, l: l * x, a});
+
+    const lMin = 0.1;
+    const lMaxS0 = 0.2;
+    const lMaxS1 = 0.4;
+
+    const lMax = scale(s, 0, 1, lMaxS0, lMaxS1);
+    const lx = (l < lMax ?
+        scale(l, 0, lMax, lMin, lMax) :
+        scale(l, lMax, 1, lMax, lMin));
+    const color = {h, s, l: lx, a};
+
+    return hslToString(color);
 }
 
 function modifyForegroundColor(rgb: RGBA, filter: FilterConfig) {
     const {h, s, l, a} = rgbToHSL(rgb);
-    const ml = 0.5;
-    const ks = 0.2;
-    const x = s * ks + (ml - ks);
-    return hslToString({h, s: s * 0.9, l: l * x + (1 - x), a});
+
+    const lMax = 0.9;
+    const lMinS0 = 0.8;
+    const lMinS1 = 0.6;
+
+    const lMin = scale(s, 0, 1, lMinS0, lMinS1);
+    const lx = (l < lMax ?
+        scale(l, 0, lMin, lMax, lMin) :
+        scale(l, lMin, 1, lMin, lMax));
+    const color = {h, s, l: lx, a};
+
+    return hslToString(color);
 }
 
 function modifyBorderColor(rgb: RGBA, filter: FilterConfig) {
@@ -147,7 +165,28 @@ function modifyBorderColor(rgb: RGBA, filter: FilterConfig) {
 }
 
 function modifyGradientColor(rgb: RGBA, filter: FilterConfig) {
-    return modifyBackgroundColor(rgb, filter);
+    const {h, s, l, a} = rgbToHSL(rgb);
+
+    const lMin = 0.1;
+    const lMaxS0 = 0.2;
+    const lMaxS1 = 0.4;
+
+    const lMax = scale(s, 0, 1, lMaxS0, lMaxS1);
+    const lx = scale(l, 0, 1, lMin, lMax);
+    const color = {h, s, l: lx, a};
+
+    return hslToString(color);
+}
+
+const colorParseCache = new Map<string, RGBA>();
+
+function parseColorWithCache($color: string) {
+    if (colorParseCache.has($color)) {
+        return colorParseCache.get($color);
+    }
+    const color = parse($color);
+    colorParseCache.set($color, color);
+    return color;
 }
 
 function getColorModifier(prop: string, value: string): CSSValueModifier {
@@ -155,7 +194,7 @@ function getColorModifier(prop: string, value: string): CSSValueModifier {
         return null;
     }
     try {
-        const rgb = parse(value);
+        const rgb = parseColorWithCache(value);
         if (prop.indexOf('background') >= 0) {
             return (filter) => modifyBackgroundColor(rgb, filter);
         }
@@ -172,7 +211,7 @@ function getColorModifier(prop: string, value: string): CSSValueModifier {
 
 function tryParse($color: string) {
     try {
-        return parse($color);
+        return parseColorWithCache($color);
     } catch (err) {
         return null;
     }

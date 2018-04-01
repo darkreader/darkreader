@@ -8,7 +8,7 @@ function iterate(iterator: (r: CSSPageRule) => void) {
     Array.from(document.styleSheets)
         .filter((s) => {
             const node = s.ownerNode as HTMLStyleElement | HTMLLinkElement;
-            if (node.id === 'dark-reader-style' || loadingStyles.has(node)) {
+            if (node.id === 'dark-reader-style' || loadingStyles.has(node) || loadingURLs.has((node as HTMLLinkElement).href)) {
                 return false;
             }
 
@@ -30,11 +30,14 @@ function iterate(iterator: (r: CSSPageRule) => void) {
 }
 
 const loadingStyles = new WeakSet<Node>();
+const loadingURLs = new Set();
 
 async function replaceCORSStyle(link: HTMLLinkElement) {
-    loadingStyles.add(link);
-    link.disabled = true;
     const url = link.href;
+    loadingStyles.add(link);
+    loadingURLs.add(url);
+
+    link.disabled = true;
     const response = await fetch(url);
     const text = await response.text();
     const style = document.createElement('style');

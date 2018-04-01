@@ -7,18 +7,40 @@ const filter = JSON.parse($FILTER);
 function iterate(iterator: (r: CSSPageRule) => void) {
     Array.from(document.styleSheets)
         .filter((s) => {
+            const node = s.ownerNode as HTMLStyleElement | HTMLLinkElement;
+            if (node.id === 'dark-reader-style' || loadingStyles.has(node)) {
+                return false;
+            }
+
             let hasRules = false;
             try {
                 hasRules = Boolean((s as any).rules);
             } catch (err) {
                 console.warn(err);
+                if (node instanceof HTMLLinkElement) {
+                    replaceCORSStyle(node);
+                }
             }
-            return hasRules && (s.ownerNode as HTMLElement).id !== 'dark-reader-style';
+            return hasRules;
         })
         .forEach((s) => {
             Array.from<CSSPageRule>((s as any).rules)
                 .forEach((r) => iterator(r));
         });
+}
+
+const loadingStyles = new WeakSet<Node>();
+
+async function replaceCORSStyle(link: HTMLLinkElement) {
+    loadingStyles.add(link);
+    link.disabled = true;
+    const url = link.href;
+    const response = await fetch(url);
+    const text = await response.text();
+    const style = document.createElement('style');
+    style.dataset.url = url;
+    style.textContent = text;
+    link.parentElement.insertBefore(style, link.nextElementSibling);
 }
 
 function toCamelCase(spinalCase: string) {
@@ -29,6 +51,8 @@ function toCamelCase(spinalCase: string) {
         return `${p.charAt(0).toUpperCase()}${p.substring(1)}`;
     }).join('');
 }
+
+const cache = new WeakMap<CSSPageRule, ModifiableCSSRule>();
 
 function createStyle() {
     let style = document.getElementById('dark-reader-style') as HTMLStyleElement;
@@ -41,6 +65,14 @@ function createStyle() {
     const rules: ModifiableCSSRule[] = [];
 
     iterate((r) => {
+        if (cache.has(r)) {
+            const rule = cache.get(r);
+            if (rule) {
+                rules.push(rule);
+            }
+            return;
+        }
+
         const declarations: ModifiableCSSDeclaration[] = [];
         const styleDeclaration = (r as any).style as CSSStyleDeclaration;
         styleDeclaration && Array.from(styleDeclaration).forEach((property) => {
@@ -54,9 +86,12 @@ function createStyle() {
                 declarations.push(declaration);
             }
         });
+        let rule: ModifiableCSSRule = null;
         if (declarations.length > 0) {
-            rules.push({selector: r.selectorText, declarations});
+            rule = {selector: r.selectorText, declarations};
+            rules.push(rule);
         }
+        cache.set(r, rule);
     });
 
     const lines: string[] = [];
@@ -220,10 +255,10 @@ function ready() {
             return Array.from(m.addedNodes)
                 .concat(Array.from(m.removedNodes))
                 .some((n: Element) => {
-                    return (
+                    return ((
                         (n instanceof HTMLStyleElement) ||
                         (n instanceof HTMLLinkElement && n.rel === 'stylesheet')
-                    ) && (n.id !== 'dark-reader-style');
+                    ) && (n.id !== 'dark-reader-style'));
                 });
         });
         if (styleMutations.length > 0) {

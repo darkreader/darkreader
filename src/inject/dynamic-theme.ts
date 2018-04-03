@@ -1,57 +1,8 @@
 import {parse, rgbToHSL, hslToRGB, hslToString, RGBA, HSLA} from '../utils/color';
+import {spinalToCamelCase} from '../utils/text';
 import {scale} from '../utils/math';
 import {removeStyle} from './style';
 import {FilterConfig} from '../definitions';
-
-function iterate(iterator: (r: CSSPageRule) => void) {
-    Array.from(document.styleSheets)
-        .filter((s) => {
-            const node = s.ownerNode as HTMLStyleElement | HTMLLinkElement;
-            if (node.id === 'dark-reader-style' || loadingStyles.has(node)) {
-                return false;
-            }
-
-            let hasRules = false;
-            try {
-                hasRules = Boolean((s as any).cssRules);
-            } catch (err) {
-                console.warn(err);
-                if (node instanceof HTMLLinkElement) {
-                    replaceCORSStyle(node);
-                }
-            }
-            return hasRules;
-        })
-        .forEach((s) => {
-            Array.from<CSSPageRule>((s as any).cssRules)
-                .forEach((r) => iterator(r));
-        });
-}
-
-const loadingStyles = new WeakSet<Node>();
-
-async function replaceCORSStyle(link: HTMLLinkElement) {
-    const url = link.href;
-    loadingStyles.add(link);
-
-    link.disabled = true;
-    const response = await fetch(url);
-    const text = await response.text();
-
-    const style = document.createElement('style');
-    style.dataset.url = url;
-    style.textContent = text;
-    link.parentElement.insertBefore(style, link.nextElementSibling);
-}
-
-function toCamelCase(spinalCase: string) {
-    return spinalCase.split('-').filter((s) => s).map((p, i) => {
-        if (i === 0) {
-            return p;
-        }
-        return `${p.charAt(0).toUpperCase()}${p.substring(1)}`;
-    }).join('');
-}
 
 const cache = new WeakMap<CSSPageRule, ModifiableCSSRule>();
 
@@ -65,7 +16,7 @@ function createTheme(filter: FilterConfig) {
 
     const rules: ModifiableCSSRule[] = [];
 
-    iterate((r) => {
+    iterateCSSRules((r) => {
         if (cache.has(r)) {
             const rule = cache.get(r);
             if (rule) {
@@ -77,7 +28,7 @@ function createTheme(filter: FilterConfig) {
         const declarations: ModifiableCSSDeclaration[] = [];
         const styleDeclaration = (r as any).style as CSSStyleDeclaration;
         styleDeclaration && Array.from(styleDeclaration).forEach((property) => {
-            const name = toCamelCase(property);
+            const name = spinalToCamelCase(property);
             const value = styleDeclaration[name];
             if (!value) {
                 return;
@@ -271,7 +222,7 @@ interface ModifiableCSSRule {
 }
 
 function getModifiableCSSDeclaration(property: string, value: string): ModifiableCSSDeclaration {
-    if (property.indexOf('color') >= 0) {
+    if (property.indexOf('color') >= 0 && property !== '-webkit-print-color-adjust') {
         const modifier = getColorModifier(property, value);
         if (modifier) {
             return {property, value: modifier};
@@ -287,6 +238,47 @@ function getModifiableCSSDeclaration(property: string, value: string): Modifiabl
     return null;
 }
 
+function iterateCSSRules(iterator: (r: CSSPageRule) => void) {
+    Array.from(document.styleSheets)
+        .filter((s) => {
+            const node = s.ownerNode as HTMLStyleElement | HTMLLinkElement;
+            if (node.id === 'dark-reader-style' || loadingStyles.has(node)) {
+                return false;
+            }
+
+            let hasRules = false;
+            try {
+                hasRules = Boolean((s as any).cssRules);
+            } catch (err) {
+                console.warn(err);
+                if (node instanceof HTMLLinkElement) {
+                    replaceCORSStyle(node);
+                }
+            }
+            return hasRules;
+        })
+        .forEach((s) => {
+            Array.from<CSSPageRule>((s as any).cssRules)
+                .forEach((r) => iterator(r));
+        });
+}
+
+const loadingStyles = new WeakSet<Node>();
+
+async function replaceCORSStyle(link: HTMLLinkElement) {
+    const url = link.href;
+    loadingStyles.add(link);
+
+    link.disabled = true;
+    const response = await fetch(url);
+    const text = await response.text();
+
+    const style = document.createElement('style');
+    style.dataset.url = url;
+    style.textContent = text;
+    link.parentElement.insertBefore(style, link.nextElementSibling);
+}
+
 let styleChangeObserver: MutationObserver = null;
 const linksSubscriptions = new Map<Element, () => void>();
 
@@ -297,6 +289,9 @@ function watchForLinksLoading(onLoad: () => void) {
     links.forEach((link) => {
         link.addEventListener('load', onLoad);
         linksSubscriptions.set(link, onLoad);
+        if (link.parentElement !== document.head) {
+            document.head.insertBefore(link, document.getElementById('dark-reader-style'));
+        }
     });
 }
 

@@ -48,7 +48,7 @@ export default class UserStorage {
         if (this.timeout) {
             clearInterval(this.timeout);
         }
-        return new Promise((resolve) => {
+        return new Promise<UserSettings>((resolve) => {
             this.timeout = setTimeout(() => {
                 const $s: UserSettings = {
                     enabled: settings.enabled,

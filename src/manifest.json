@@ -1,4 +1,4 @@
-﻿{
+{
     "manifest_version": 2,
     "name": "Dark Reader",
     "version": "4.0.1",
@@ -21,6 +21,17 @@
         "persistent": true,
         "page": "background/index.html"
     },
+    "content_scripts": [
+        {
+            "matches": [
+                "<all_urls>"
+            ],
+            "js": [
+                "inject/index.js"
+            ],
+            "run_at": "document_start"
+        }
+    ],
     "permissions": [
         "fontSettings",
         "storage",

@@ -13,7 +13,7 @@ function iterate(iterator: (r: CSSPageRule) => void) {
 
             let hasRules = false;
             try {
-                hasRules = Boolean((s as any).rules);
+                hasRules = Boolean((s as any).cssRules);
             } catch (err) {
                 console.warn(err);
                 if (node instanceof HTMLLinkElement) {
@@ -23,7 +23,7 @@ function iterate(iterator: (r: CSSPageRule) => void) {
             return hasRules;
         })
         .forEach((s) => {
-            Array.from<CSSPageRule>((s as any).rules)
+            Array.from<CSSPageRule>((s as any).cssRules)
                 .forEach((r) => iterator(r));
         });
 }

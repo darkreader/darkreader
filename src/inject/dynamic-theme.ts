@@ -1,15 +1,13 @@
 import {parse, rgbToHSL, hslToRGB, hslToString, RGBA, HSLA} from '../utils/color';
 import {scale} from '../utils/math';
+import {removeStyle} from './style';
 import {FilterConfig} from '../definitions';
-
-declare const $FILTER: string;
-const filter = JSON.parse($FILTER);
 
 function iterate(iterator: (r: CSSPageRule) => void) {
     Array.from(document.styleSheets)
         .filter((s) => {
             const node = s.ownerNode as HTMLStyleElement | HTMLLinkElement;
-            if (node.id === 'dark-reader-style' || loadingStyles.has(node) || loadingURLs.has((node as HTMLLinkElement).href)) {
+            if (node.id === 'dark-reader-style' || loadingStyles.has(node)) {
                 return false;
             }
 
@@ -31,16 +29,15 @@ function iterate(iterator: (r: CSSPageRule) => void) {
 }
 
 const loadingStyles = new WeakSet<Node>();
-const loadingURLs = new Set();
 
 async function replaceCORSStyle(link: HTMLLinkElement) {
     const url = link.href;
     loadingStyles.add(link);
-    loadingURLs.add(url);
 
     link.disabled = true;
     const response = await fetch(url);
     const text = await response.text();
+
     const style = document.createElement('style');
     style.dataset.url = url;
     style.textContent = text;
@@ -58,7 +55,7 @@ function toCamelCase(spinalCase: string) {
 
 const cache = new WeakMap<CSSPageRule, ModifiableCSSRule>();
 
-function createStyle() {
+function createTheme(filter: FilterConfig) {
     let style = document.getElementById('dark-reader-style') as HTMLStyleElement;
     if (!style) {
         style = document.createElement('style');
@@ -290,10 +287,27 @@ function getModifiableCSSDeclaration(property: string, value: string): Modifiabl
     return null;
 }
 
-function ready() {
-    createStyle();
-    const observer = new MutationObserver((mutation) => {
-        const styleMutations = mutation.filter((m) => {
+let styleChangeObserver: MutationObserver = null;
+const linksSubscriptions = new Map<Element, () => void>();
+
+function watchForLinksLoading(onLoad: () => void) {
+    linksSubscriptions.forEach((listener, link) => link.removeEventListener('load', listener));
+    linksSubscriptions.clear();
+    const links = Array.from(document.querySelectorAll('link[rel="stylesheet"]'));
+    links.forEach((link) => {
+        link.addEventListener('load', onLoad);
+        linksSubscriptions.set(link, onLoad);
+    });
+}
+
+function createThemeAndWatchForUpdates(filter: FilterConfig) {
+    createTheme(filter);
+    watchForLinksLoading(() => createTheme(filter));
+    if (styleChangeObserver) {
+        styleChangeObserver.disconnect();
+    }
+    styleChangeObserver = new MutationObserver((mutations) => {
+        const styleMutations = mutations.filter((m) => {
             return Array.from(m.addedNodes)
                 .concat(Array.from(m.removedNodes))
                 .some((n: Element) => {
@@ -304,20 +318,31 @@ function ready() {
                 });
         });
         if (styleMutations.length > 0) {
-            createStyle();
+            createTheme(filter);
+            watchForLinksLoading(() => createTheme(filter));
         }
     });
-    observer.observe(document.head, {childList: true, attributes: true, characterData: true});
+    styleChangeObserver.observe(document.head, {childList: true});
 }
 
-if (document.head) {
-    ready();
-} else {
-    const observer = new MutationObserver(() => {
-        if (document.head) {
-            observer.disconnect();
-            ready();
-        }
-    });
-    observer.observe(document, {childList: true, subtree: true});
+export function createOrUpdateDynamicTheme(filter: FilterConfig) {
+    if (document.head) {
+        createThemeAndWatchForUpdates(filter);
+    } else {
+        const headObserver = new MutationObserver(() => {
+            if (document.head) {
+                headObserver.disconnect();
+                createThemeAndWatchForUpdates(filter);
+            }
+        });
+        headObserver.observe(document, {childList: true, subtree: true});
+    }
+}
+
+export function removeDynamicTheme() {
+    removeStyle();
+    if (styleChangeObserver) {
+        styleChangeObserver.disconnect();
+        styleChangeObserver = null;
+    }
 }

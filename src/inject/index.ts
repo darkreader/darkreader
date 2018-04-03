@@ -1,5 +1,6 @@
 import {createOrUpdateStyle, removeStyle} from './style';
 import {createOrUpdateSVGFilter, removeSVGFilter} from './svg-filter';
+import {createOrUpdateDynamicTheme, removeDynamicTheme} from './dynamic-theme';
 
 function onMessage({type, data}) {
     switch (type) {
@@ -15,9 +16,15 @@ function onMessage({type, data}) {
             createOrUpdateStyle(css);
             break;
         }
+        case 'add-dynamic-theme': {
+            const filter = data;
+            createOrUpdateDynamicTheme(filter);
+            break;
+        }
         case 'clean-up': {
             removeStyle();
             removeSVGFilter();
+            removeDynamicTheme();
             break;
         }
     }

@@ -33,7 +33,39 @@ export class Extension {
         this.icon = new IconManager();
         this.config = new ConfigManager();
         this.devtools = new DevTools(this.config, () => this.onConfigPropChanged());
-        this.messenger = new Messenger({
+        this.messenger = new Messenger(this.getMessengerAdapter());
+        this.tabs = new TabManager({
+            getConnectionMessage: (url) => this.enabled && this.getTabMessage(url),
+        });
+        this.user = new UserStorage();
+        this.awaiting = [];
+    }
+
+    private awaiting: (() => void)[];
+
+    async start() {
+        await this.config.load();
+        this.fonts = await getFontList();
+
+        const settings = await this.user.loadSettings();
+        if (settings.enabled) {
+            this.enable();
+        } else {
+            this.disable();
+        }
+        console.log('loaded', settings);
+
+        this.registerCommands();
+
+        this.ready = true;
+        this.setConfig(settings.config);
+
+        this.awaiting.forEach((ready) => ready());
+        this.awaiting = null;
+    }
+
+    private getMessengerAdapter() {
+        return {
             collect: async () => {
                 if (!this.ready) {
                     await new Promise((resolve) => this.awaiting.push(resolve));
@@ -44,7 +76,7 @@ export class Extension {
                 if (!this.ready) {
                     await new Promise((resolve) => this.awaiting.push(resolve));
                 }
-                return await this.tabs.getActiveTabInfo();
+                return await this.tabs.getActiveTabInfo(this.config);
             },
             enable: () => this.enable(),
             disable: () => this.disable(),
@@ -54,10 +86,7 @@ export class Extension {
             resetDevInversionFixes: () => this.devtools.resetInversionFixes(),
             applyDevStaticThemes: (text) => this.devtools.applyStaticThemes(text),
             resetDevStaticThemes: () => this.devtools.resetStaticThemes(),
-        });
-        this.tabs = new TabManager(this.config);
-        this.user = new UserStorage();
-        this.awaiting = [];
+        };
     }
 
     private registerCommands() {
@@ -92,50 +121,6 @@ export class Extension {
         const commands = await getCommands();
         return commands.reduce((map, cmd) => Object.assign(map, {[cmd.name]: cmd.shortcut}), {} as Shortcuts);
     }
-
-    async start() {
-        const loadInjections = async () => {
-            const readFile = async (path) => {
-                const res = await fetch(`${path}?nocache=${Date.now()}`);
-                return await res.text();
-            };
-            const [addStyle, removeStyle, addSVGStyle] = await Promise.all([
-                readFile('../inject/add-style.js'),
-                readFile('../inject/remove-style.js'),
-                readFile('../inject/add-svg-style.js'),
-            ]);
-            this.scripts = {addStyle, removeStyle, addSVGStyle};
-        };
-
-        const loadFonts = async () => {
-            const fonts = await getFontList();
-            this.fonts = fonts;
-        };
-
-        await Promise.all([
-            loadInjections(),
-            this.config.load(),
-            loadFonts(),
-        ]);
-
-        const settings = await this.user.loadSettings();
-        if (settings.enabled) {
-            this.enable();
-        } else {
-            this.disable();
-        }
-        console.log('loaded', settings);
-
-        this.registerCommands();
-
-        this.ready = true;
-        this.setConfig(settings.config);
-
-        this.awaiting.forEach((ready) => ready());
-        this.awaiting = null;
-    }
-
-    private awaiting: (() => void)[];
 
     private async collectData(): Promise<ExtensionData> {
         return {
@@ -185,7 +170,7 @@ export class Extension {
      * into Sites List (or removes).
      */
     async toggleCurrentSite() {
-        const {url} = await this.tabs.getActiveTabInfo();
+        const {url} = await this.tabs.getActiveTabInfo(this.config);
         const host = getUrlHost(url);
         this.toggleSitePattern(host);
     }
@@ -198,30 +183,18 @@ export class Extension {
 
     protected onAppToggle() {
         if (this.enabled) {
-
-            //
-            // Switch ON
-
             this.icon.setActive();
-            this.tabs.injectScriptToAll(this.addStyleCodeGenerator);
-            this.tabs.injectOnUpdate(this.addStyleCodeGenerator);
-
         } else {
-
-            //
-            // Switch OFF
-
             this.icon.setInactive();
-            this.tabs.stopInjecting(this.addStyleCodeGenerator);
-            this.tabs.injectScriptToAll(this.removeStyleCodeGenerator);
         }
+        this.tabs.sendMessage(this.getTabMessage);
         this.saveUserSettings();
         this.reportChanges();
     }
 
     protected onConfigPropChanged() {
         if (this.enabled) {
-            this.tabs.injectScriptToAll(this.addStyleCodeGenerator);
+            this.tabs.sendMessage(this.getTabMessage);
         }
         this.saveUserSettings();
         this.reportChanges();
@@ -234,52 +207,44 @@ export class Extension {
     //
     //----------------------
 
-    private scripts: {addStyle, removeStyle, addSVGStyle};
-
-    private addStyleCodeGenerator = (url: string) => {
-        let script = '';
+    private getTabMessage = (url: string) => {
         const {DARK_SITES} = this.config;
         const isUrlInDarkList = isUrlInList(url, DARK_SITES);
         const isUrlInUserList = isUrlInList(url, this.filterConfig.siteList);
-        const replaceJSGlobalsWithString = (code: string, replacers: {[global: string]: string}) => {
-            return Object.entries(replacers).reduce((str, [g, v]) => {
-                return str.split(g).join(`'${v.replace(/\'/g, '\\\'').replace(/\n/g, '\\n')}'`);
-            }, code);
-        };
 
-        if (
-            (isUrlInUserList && this.filterConfig.invertListed)
-            || (!isUrlInDarkList
-                && !this.filterConfig.invertListed
-                && !isUrlInUserList)
-        ) {
+        if (this.enabled && (
+            (isUrlInUserList && this.filterConfig.invertListed) ||
+            (!isUrlInDarkList && !this.filterConfig.invertListed && !isUrlInUserList)
+        )) {
             console.log(`Creating CSS for url: ${url}`);
             switch (this.filterConfig.engine) {
                 case ThemeEngines.cssFilter: {
-                    script = replaceJSGlobalsWithString(this.scripts.addStyle, {
-                        $CSS: createCSSFilterStylesheet(this.filterConfig, url, this.config.INVERSION_FIXES),
-                    });
-                    break;
+                    return {
+                        type: 'add-css-filter',
+                        data: createCSSFilterStylesheet(this.filterConfig, url, this.config.INVERSION_FIXES),
+                    };
                 }
                 case ThemeEngines.svgFilter: {
                     if (isFirefox()) {
-                        script = replaceJSGlobalsWithString(this.scripts.addStyle, {
-                            $CSS: createSVGFilterStylesheet(this.filterConfig, url, this.config.INVERSION_FIXES),
-                        });
-                    } else {
-                        script = replaceJSGlobalsWithString(this.scripts.addSVGStyle, {
-                            $CSS: createSVGFilterStylesheet(this.filterConfig, url, this.config.INVERSION_FIXES),
-                            $SVG_MATRIX: getSVGFilterMatrixValue(this.filterConfig),
-                            $SVG_REVERSE_MATRIX: getSVGReverseFilterMatrixValue(),
-                        });
+                        return {
+                            type: 'add-css-filter',
+                            data: createSVGFilterStylesheet(this.filterConfig, url, this.config.INVERSION_FIXES),
+                        };
                     }
-                    break;
+                    return {
+                        type: 'add-svg-filter',
+                        data: {
+                            css: createSVGFilterStylesheet(this.filterConfig, url, this.config.INVERSION_FIXES),
+                            svgMatrix: getSVGFilterMatrixValue(this.filterConfig),
+                            svgReverseMatrix: getSVGReverseFilterMatrixValue(),
+                        },
+                    };
                 }
                 case ThemeEngines.staticTheme: {
-                    script = replaceJSGlobalsWithString(this.scripts.addStyle, {
-                        $CSS: createStaticStylesheet(this.filterConfig, url, this.config.STATIC_THEMES),
-                    });
-                    break;
+                    return {
+                        type: 'add-static-theme',
+                        data: createStaticStylesheet(this.filterConfig, url, this.config.STATIC_THEMES),
+                    };
                 }
                 default: {
                     throw new Error(`Unknown engine ${this.filterConfig.engine}`);
@@ -287,23 +252,21 @@ export class Extension {
             }
         } else {
             console.log(`Site is not inverted: ${url}`);
-            script = this.scripts.removeStyle;
         }
-        return script;
-    };
-
-    private removeStyleCodeGenerator = () => {
-        return this.scripts.removeStyle;
+        return {
+            type: 'clean-up',
+        };
     };
 
 
     //-------------------------------------
     //          User settings
 
-    protected saveUserSettings() {
-        this.user.saveSetting({
+    private async saveUserSettings() {
+        const saved = await this.user.saveSetting({
             enabled: this.enabled,
             config: this.filterConfig,
-        }).then((settings) => console.log('saved', settings));
+        });
+        console.log('saved', saved);
     }
 }

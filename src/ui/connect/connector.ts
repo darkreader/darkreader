@@ -6,11 +6,11 @@ export default class Connector implements ExtensionActions {
 
     constructor() {
         this.counter = 0;
-        this.port = chrome.runtime.connect();
+        this.port = chrome.runtime.connect({name: 'ui'});
     }
 
     private getRequestId() {
-        return String(++this.counter);
+        return ++this.counter;
     }
 
     private sendRequest<T>(request, executor: (response, resolve: (data?: T) => void, reject: (error: Error) => void) => void) {
@@ -28,11 +28,11 @@ export default class Connector implements ExtensionActions {
     }
 
     getData() {
-        return this.sendRequest<ExtensionData>({type: 'getData'}, ({data}, resolve) => resolve(data));
+        return this.sendRequest<ExtensionData>({type: 'get-data'}, ({data}, resolve) => resolve(data));
     }
 
     getActiveTabInfo() {
-        return this.sendRequest<TabInfo>({type: 'getActiveTabInfo'}, ({data}, resolve) => resolve(data));
+        return this.sendRequest<TabInfo>({type: 'get-active-tab-info'}, ({data}, resolve) => resolve(data));
     }
 
     subscribeToChanges(callback: (data: ExtensionData) => void) {
@@ -42,7 +42,7 @@ export default class Connector implements ExtensionActions {
                 callback(data);
             }
         });
-        this.port.postMessage({type: 'subscribeToChanges', id});
+        this.port.postMessage({type: 'subscribe-to-changes', id});
     }
 
     enable() {
@@ -54,27 +54,27 @@ export default class Connector implements ExtensionActions {
     }
 
     setConfig(config: FilterConfig) {
-        this.port.postMessage({type: 'setConfig', data: config});
+        this.port.postMessage({type: 'set-config', data: config});
     }
 
     toggleSitePattern(pattern: string) {
-        this.port.postMessage({type: 'toggleSitePattern', data: pattern});
+        this.port.postMessage({type: 'toggle-site-pattern', data: pattern});
     }
 
     applyDevInversionFixes(text: string) {
-        return this.sendRequest<void>({type: 'applyDevInversionFixes', data: text}, ({error}, resolve, reject) => error ? reject(error) : resolve());
+        return this.sendRequest<void>({type: 'apply-dev-inversion-fixes', data: text}, ({error}, resolve, reject) => error ? reject(error) : resolve());
     }
 
     resetDevInversionFixes() {
-        this.port.postMessage({type: 'resetDevInversionFixes'});
+        this.port.postMessage({type: 'reset-dev-inversion-fixes'});
     }
 
     applyDevStaticThemes(text: string) {
-        return this.sendRequest<void>({type: 'applyDevStaticThemes', data: text}, ({error}, resolve, reject) => error ? reject(error) : resolve());
+        return this.sendRequest<void>({type: 'apply-dev-static-themes', data: text}, ({error}, resolve, reject) => error ? reject(error) : resolve());
     }
 
     resetDevStaticThemes() {
-        this.port.postMessage({type: 'resetDevStaticThemes'});
+        this.port.postMessage({type: 'reset-dev-static-themes'});
     }
 
     disconnect() {

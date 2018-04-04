@@ -192,7 +192,7 @@ function getMatches(regex: RegExp, input: string, group = 0) {
 
 function getGradientModifier(prop: string, value: string): CSSValueModifier {
     try {
-        const gradientRegex = /[a-z]+-gradient\(([^\(\)]*?(\([^\(^\)]*?\)[^\(\)]*?)*)\)/ig;
+        const gradientRegex = /[\-a-z]+-gradient\(([^\(\)]*?(\([^\(^\)]*?\)[^\(\)]*?)*)\)/ig;
 
         const modifiers = getMatches(gradientRegex, value).map((gradient) => {
             const match = gradient.match(/^(.*-gradient)\((.*)\)$/);

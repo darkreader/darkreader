@@ -109,6 +109,22 @@ function modifyForegroundColor(rgb: RGBA, filter: FilterConfig) {
 }
 
 function modifyBorderColor(rgb: RGBA, filter: FilterConfig) {
+    const {h, s, l, a} = rgbToHSL(rgb);
+
+    const lMinS0 = 0.2;
+    const lMinS1 = 0.3;
+    const lMaxS0 = 0.4;
+    const lMaxS1 = 0.5;
+
+    const lMin = scale(s, 0, 1, lMinS0, lMinS1);
+    const lMax = scale(s, 0, 1, lMaxS0, lMaxS1);
+    const lx = scale(l, 0, 1, lMax, lMin);
+    const color = {h, s, l: lx, a};
+
+    return hslToString(color);
+}
+
+function modifyShadowColor(rgb: RGBA, filter: FilterConfig) {
     return modifyBackgroundColor(rgb, filter);
 }
 
@@ -211,6 +227,30 @@ function getGradientModifier(prop: string, value: string): CSSValueModifier {
     }
 }
 
+function getShadowModifier(prop: string, value: string): CSSValueModifier {
+    try {
+        let index = 0;
+        const colorMatches = getMatches(/(^|\s)([a-z]+\(.+?\)|#[0-9a-f]+|[a-z]+)(.*?(inset|outset)?($|,))/ig, value, 2);
+        const modifiers = colorMatches.map((match, i) => {
+            const prefixIndex = index;
+            const matchIndex = value.indexOf(match, index);
+            const matchEnd = matchIndex + match.length;
+            index = matchEnd;
+            const rgb = tryParse(match);
+            if (!rgb) {
+                return () => value.substring(prefixIndex, matchEnd);
+            }
+            return (filter: FilterConfig) => `${value.substring(prefixIndex, matchIndex)}${modifyShadowColor(rgb, filter)}${i === colorMatches.length - 1 ? value.substring(matchEnd) : ''}`;
+        });
+
+        return (filter) => modifiers.map((modify) => modify(filter)).join('');
+
+    } catch (err) {
+        console.warn(`Unable to parse shadow ${value}`, err);
+        return null;
+    }
+}
+
 interface ModifiableCSSDeclaration {
     property: string;
     value: string | CSSValueModifier;
@@ -229,6 +269,11 @@ function getModifiableCSSDeclaration(property: string, value: string): Modifiabl
         }
     } else if (property.indexOf('background') >= 0 && value.indexOf('-gradient') >= 0) {
         const modifier = getGradientModifier(property, value);
+        if (modifier) {
+            return {property, value: modifier};
+        }
+    } else if (property.indexOf('shadow') >= 0) {
+        const modifier = getShadowModifier(property, value);
         if (modifier) {
             return {property, value: modifier};
         }

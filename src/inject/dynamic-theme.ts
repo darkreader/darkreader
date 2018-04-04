@@ -4,7 +4,7 @@ import {scale} from '../utils/math';
 import {removeStyle} from './style';
 import {FilterConfig} from '../definitions';
 
-const cache = new WeakMap<CSSPageRule, ModifiableCSSRule>();
+const cache = new WeakMap<CSSStyleRule, ModifiableCSSRule>();
 
 function createTheme(filter: FilterConfig) {
     let style = document.getElementById('dark-reader-style') as HTMLStyleElement;
@@ -26,7 +26,7 @@ function createTheme(filter: FilterConfig) {
         }
 
         const declarations: ModifiableCSSDeclaration[] = [];
-        const styleDeclaration = (r as any).style as CSSStyleDeclaration;
+        const styleDeclaration = r.style as CSSStyleDeclaration;
         styleDeclaration && Array.from(styleDeclaration).forEach((property) => {
             const name = spinalToCamelCase(property);
             const value = styleDeclaration[name];
@@ -41,6 +41,9 @@ function createTheme(filter: FilterConfig) {
         let rule: ModifiableCSSRule = null;
         if (declarations.length > 0) {
             rule = {selector: r.selectorText, declarations};
+            if (r.parentRule instanceof CSSMediaRule) {
+                rule.media = (r.parentRule as CSSMediaRule).media.mediaText;
+            }
             rules.push(rule);
         }
         cache.set(r, rule);
@@ -54,12 +57,18 @@ function createTheme(filter: FilterConfig) {
     lines.push('input::placeholder {');
     lines.push(`    color: ${modifyForegroundColor({r: 0, g: 0, b: 0, a: 0.75}, filter)} !important;`);
     lines.push('}');
-    rules.forEach(({selector, declarations}) => {
+    rules.forEach(({selector, declarations, media}) => {
+        if (media) {
+            lines.push(`@media ${media} {`);
+        }
         lines.push(`${selector} {`);
         declarations.forEach(({property, value}) => {
             lines.push(`    ${property}: ${typeof value === 'function' ? value(filter) : value} !important;`);
         });
         lines.push('}');
+        if (media) {
+            lines.push('}')
+        }
     });
 
     style.textContent = lines.join('\n');
@@ -258,6 +267,7 @@ interface ModifiableCSSDeclaration {
 
 interface ModifiableCSSRule {
     selector: string;
+    media?: string;
     declarations: ModifiableCSSDeclaration[];
 }
 
@@ -283,7 +293,7 @@ function getModifiableCSSDeclaration(property: string, value: string): Modifiabl
     return null;
 }
 
-function iterateCSSRules(iterator: (r: CSSPageRule) => void) {
+function iterateCSSRules(iterator: (r: CSSStyleRule) => void) {
     Array.from(document.styleSheets)
         .filter((s) => {
             const node = s.ownerNode as HTMLStyleElement | HTMLLinkElement;
@@ -303,8 +313,14 @@ function iterateCSSRules(iterator: (r: CSSPageRule) => void) {
             return hasRules;
         })
         .forEach((s) => {
-            Array.from<CSSPageRule>((s as any).cssRules)
-                .forEach((r) => iterator(r));
+            Array.from<CSSStyleRule>((s as any).cssRules)
+                .forEach((r) => {
+                    if (r instanceof CSSMediaRule) {
+                        Array.from(r.cssRules).forEach((mr) => iterator(mr as CSSStyleRule));
+                    } else {
+                        iterator(r);
+                    }
+                });
         });
 }
 

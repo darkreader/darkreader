@@ -55,6 +55,10 @@ test('Color parsing', () => {
     expect(parse('rebeccapurple')).toEqual({r: 102, g: 51, b: 153, a: 1});
 
     expect(parse('transparent')).toEqual({r: 0, g: 0, b: 0, a: 0});
+
+    expect(() => parse('sponge')).toThrow('Unable to parse sponge');
+    expect(() => parse('hsl(0, 0%, 0%) rgb(0, 0, 0)')).toThrow('Unable to parse hsl(0, 0%, 0%) rgb(0, 0, 0)');
+    expect(() => parse('#hello')).toThrow('Unable to parse #hello');
 });
 
 test('Stringify color', () => {

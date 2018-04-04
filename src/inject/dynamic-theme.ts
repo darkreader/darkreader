@@ -165,11 +165,11 @@ function tryParse($color: string) {
     }
 }
 
-function getMatches(regex: RegExp, input: string) {
+function getMatches(regex: RegExp, input: string, group = 0) {
     const matches: string[] = [];
     let m: RegExpMatchArray;
     while (m = regex.exec(input)) {
-        matches.push(m[0]);
+        matches.push(m[group]);
     }
     return matches;
 }
@@ -185,7 +185,7 @@ function getGradientModifier(prop: string, value: string): CSSValueModifier {
 
             const partsRegex = /([^\(\),]+(\([^\(\)]*\))?[^\(\),]*),?/g;
 
-            const parts = getMatches(partsRegex, content).map((part) => {
+            const parts = getMatches(partsRegex, content, 1).map((part) => {
                 let rgb = tryParse(part);
                 if (rgb) {
                     return (filter: FilterConfig) => modifyGradientColor(rgb, filter);

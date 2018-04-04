@@ -98,18 +98,22 @@ export function hslToString(hsl: HSLA) {
     return `hsl(${toFixed(h)}, ${toFixed(s * 100)}%, ${toFixed(l * 100)}%)`;
 }
 
+const rgbMatch = /^rgba?\([^\(\)]+\)$/;
+const hslMatch = /^hsla?\([^\(\)]+\)$/;
+const hexMatch = /^#[0-9a-f]+$/i;
+
 export function parse($color: string): RGBA {
     const c = $color.trim().toLowerCase();
 
-    if (c.startsWith('rgb')) {
+    if (c.match(rgbMatch)) {
         return parseRGB(c);
     }
 
-    if (c.startsWith('hsl')) {
+    if (c.match(hslMatch)) {
         return parseHSL(c);
     }
 
-    if (c.startsWith('#')) {
+    if (c.match(hexMatch)) {
         return parseHex(c);
     }
 

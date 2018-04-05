@@ -199,11 +199,32 @@ function getMatches(regex: RegExp, input: string, group = 0) {
     return matches;
 }
 
-function getGradientModifier(prop: string, value: string): CSSValueModifier {
-    try {
-        const gradientRegex = /[\-a-z]+-gradient\(([^\(\)]*?(\([^\(^\)]*?\)[^\(\)]*?)*)\)/ig;
+const gradientRegex = /[\-a-z]+gradient\(([^\(\)]*(\(.*?\)))*[^\(\)]*\)/g;
+const cssURLRegex = /url\((('.+?')|(".+?")|([^\)]*?))\)/g;
 
-        const modifiers = getMatches(gradientRegex, value).map((gradient) => {
+function getBgImageModifier(prop: string, value: string): CSSValueModifier {
+    try {
+
+        const gradients = getMatches(gradientRegex, value);
+        const urls = getMatches(cssURLRegex, value);
+
+        if (urls.length === 0 && gradients.length === 0) {
+            return null;
+        }
+
+        const getIndices = (matches: string[]) => {
+            let index = 0;
+            return matches.map((match) => {
+                const valueIndex = value.indexOf(match, index);
+                index = valueIndex + match.length;
+                return {match, index: valueIndex};
+            });
+        };
+        const matches = getIndices(urls).map((i) => ({type: 'url', ...i}))
+            .concat(getIndices(gradients).map((i) => ({type: 'gradient', ...i})))
+            .sort((a, b) => a.index - b.index);
+
+        const getGradientModifier = (gradient: string) => {
             const match = gradient.match(/^(.*-gradient)\((.*)\)$/);
             const type = match[1];
             const content = match[2];
@@ -226,9 +247,27 @@ function getGradientModifier(prop: string, value: string): CSSValueModifier {
             return (filter: FilterConfig) => {
                 return `${type}(${parts.map((modify) => modify(filter)).join(', ')})`;
             };
+        };
+
+        const getURLModifier = (urlValue: string) => {
+            return (filter: FilterConfig) => urlValue;
+        };
+
+        const modifiers: CSSValueModifier[] = [];
+
+        let index = 0;
+        matches.forEach(({match, type, index: matchStart}, i) => {
+            const prefixStart = index;
+            const matchEnd = matchStart + match.length;
+            index = matchEnd;
+            modifiers.push(() => value.substring(prefixStart, matchStart));
+            modifiers.push(type === 'url' ? getURLModifier(match) : getGradientModifier(match));
+            if (i === matches.length - 1) {
+                modifiers.push(() => value.substring(matchEnd));
+            }
         });
 
-        return (filter) => modifiers.map((modify) => modify(filter)).join(', ');
+        return (filter: FilterConfig) => modifiers.map((modify) => modify(filter)).join('');
 
     } catch (err) {
         console.warn(`Unable to parse gradient ${value}`, err);
@@ -252,7 +291,7 @@ function getShadowModifier(prop: string, value: string): CSSValueModifier {
             return (filter: FilterConfig) => `${value.substring(prefixIndex, matchIndex)}${modifyShadowColor(rgb, filter)}${i === colorMatches.length - 1 ? value.substring(matchEnd) : ''}`;
         });
 
-        return (filter) => modifiers.map((modify) => modify(filter)).join('');
+        return (filter: FilterConfig) => modifiers.map((modify) => modify(filter)).join('');
 
     } catch (err) {
         console.warn(`Unable to parse shadow ${value}`, err);
@@ -277,8 +316,8 @@ function getModifiableCSSDeclaration(property: string, value: string): Modifiabl
         if (modifier) {
             return {property, value: modifier};
         }
-    } else if (property.indexOf('background') >= 0 && value.indexOf('-gradient') >= 0) {
-        const modifier = getGradientModifier(property, value);
+    } else if (property === 'background-image') {
+        const modifier = getBgImageModifier(property, value);
         if (modifier) {
             return {property, value: modifier};
         }
@@ -287,8 +326,6 @@ function getModifiableCSSDeclaration(property: string, value: string): Modifiabl
         if (modifier) {
             return {property, value: modifier};
         }
-    } else if (property.indexOf('background-repeat') >= 0 && value === 'repeat') {
-        return {property: 'background-image', value: 'none'};
     }
     return null;
 }
@@ -326,6 +363,12 @@ function iterateCSSRules(iterator: (r: CSSStyleRule) => void) {
 
 const loadingStyles = new WeakSet<Node>();
 
+function parseURL(url: string) {
+    const a = document.createElement('a');
+    a.href = url;
+    return a;
+}
+
 async function replaceCORSStyle(link: HTMLLinkElement) {
     const url = link.href;
     loadingStyles.add(link);
@@ -334,9 +377,23 @@ async function replaceCORSStyle(link: HTMLLinkElement) {
     const response = await fetch(url);
     const text = await response.text();
 
+    const cssURL = parseURL(url);
+    const cssBasePath = `${cssURL.protocol}//${cssURL.host}${cssURL.pathname.replace(/\/[^\/]+?\.css$/i, '')}`;
+    const cssText = text.replace(cssURLRegex, (match, pathMatch: string) => {
+        const pathValue = pathMatch.replace(/^("|')/, '').replace(/("|')$/, '');
+        if (!pathValue.match(/^.*?\/\//)) {
+            const relativePath = pathValue.replace(/^\//, '');
+            const baseParts = cssBasePath.split('/');
+            const backwards = getMatches(/\.\.\//g, relativePath);
+            const u = parseURL(`${baseParts.slice(0, baseParts.length - backwards.length).join('/')}/${relativePath.replace(/^(\.\.\/)*/, '')}`);
+            return `url("${u.href}")`
+        }
+        return match;
+    });
+
     const style = document.createElement('style');
     style.dataset.url = url;
-    style.textContent = text;
+    style.textContent = cssText;
     link.parentElement.insertBefore(style, link.nextElementSibling);
 }
 

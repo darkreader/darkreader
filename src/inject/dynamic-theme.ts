@@ -380,8 +380,8 @@ async function replaceCORSStyle(link: HTMLLinkElement) {
     const cssURL = parseURL(url);
     const cssBasePath = `${cssURL.protocol}//${cssURL.host}${cssURL.pathname.replace(/\/[^\/]+?\.css$/i, '')}`;
     const cssText = text.replace(cssURLRegex, (match, pathMatch: string) => {
-        const pathValue = pathMatch.replace(/^("|')/, '').replace(/("|')$/, '');
-        if (!pathValue.match(/^.*?\/\//)) {
+        const pathValue = pathMatch.replace(/^"(.*)"$/, '$1').replace(/^'(.*)'$/, '$1');
+        if (!pathValue.match(/^.*?\/\//) && !pathValue.match(/^data\:/)) {
             const relativePath = pathValue.replace(/^\//, '');
             const baseParts = cssBasePath.split('/');
             const backwards = getMatches(/\.\.\//g, relativePath);

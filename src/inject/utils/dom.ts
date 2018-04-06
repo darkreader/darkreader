@@ -7,7 +7,7 @@ interface createNodeAsapParams {
     isTargetMutation: (mutation: MutationRecord) => boolean;
 }
 
-export default function createNodeAsap({
+export function createNodeAsap({
     selectNode,
     createNode,
     updateNode,

@@ -1,4 +1,4 @@
-import createNodeAsap from './utils/create-node-asap';
+import {createNodeAsap} from './utils/dom';
 
 export function createOrUpdateStyle(css: string) {
     createNodeAsap({

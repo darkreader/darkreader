@@ -56,3 +56,12 @@ export function spinalToCamelCase(spinalCase: string) {
         return `${p.charAt(0).toUpperCase()}${p.substring(1)}`;
     }).join('');
 }
+
+export function getMatches(regex: RegExp, input: string, group = 0) {
+    const matches: string[] = [];
+    let m: RegExpMatchArray;
+    while (m = regex.exec(input)) {
+        matches.push(m[group]);
+    }
+    return matches;
+}

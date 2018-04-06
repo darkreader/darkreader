@@ -1,6 +1,6 @@
 import {html} from 'malevic';
 import Button from '../button';
-import Tab from './Tab';
+import Tab from './tab';
 
 interface TabPanelProps {
     tabs: {

@@ -240,7 +240,7 @@ function getBgImageModifier(prop: string, value: string, rule: CSSStyleRule): CS
                     filteredImagesDataURLs.set(url, inverted);
                     return `url("${inverted}")`;
                 } else if (isLight && !isTransparent && filter.mode === 1) {
-                    const dimmed = applyFilterToImage(image, {...filter, brightness: clamp(filter.brightness - 50, 0, 100), mode: 0});
+                    const dimmed = applyFilterToImage(image, {...filter, brightness: clamp(filter.brightness - 80, 0, 100), mode: 0});
                     filteredImagesDataURLs.set(url, dimmed);
                     return `url("${dimmed}")`;
                 } else {

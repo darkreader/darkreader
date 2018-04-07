@@ -112,11 +112,11 @@ export function applyFilterToImage(image: HTMLImageElement, filter: FilterConfig
 export function loadImage(url: string) {
     return new Promise<HTMLImageElement>((resolve, reject) => {
         const image = new Image();
-        image.onload = () => {
+        image.addEventListener('load', () => {
             resolve(image);
-        };
+        });
         let triedBGFetch = false;
-        image.onerror = () => {
+        image.addEventListener('error', () => {
             if (triedBGFetch || url.match(/^data\:/)) {
                 reject(`Unable to load image ${url}`);
             } else {
@@ -128,10 +128,12 @@ export function loadImage(url: string) {
                     } else {
                         const dataURL = URL.createObjectURL(data);
                         image.src = dataURL;
+                        image.addEventListener('load', () => URL.revokeObjectURL(data));
+                        image.addEventListener('error', () => URL.revokeObjectURL(data));
                     }
                 });
             }
-        };
+        });
         image.crossOrigin = 'Anonymous';
         image.src = url;
     });

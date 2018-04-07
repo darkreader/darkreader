@@ -4,6 +4,7 @@ import {removeStyle} from '../style';
 import {FilterConfig} from '../../definitions';
 
 const cache = new WeakMap<CSSStyleRule, ModifiableCSSRule>();
+let asyncCounter = 0;
 
 function createTheme(filter: FilterConfig) {
     let style = document.getElementById('dark-reader-style') as HTMLStyleElement;
@@ -26,7 +27,7 @@ function createTheme(filter: FilterConfig) {
 
         const declarations: ModifiableCSSDeclaration[] = [];
         iterateCSSDeclarations(r, (property, value) => {
-            const declaration = getModifiableCSSDeclaration(property, value);
+            const declaration = getModifiableCSSDeclaration(property, value, r);
             if (declaration) {
                 declarations.push(declaration);
             }
@@ -51,7 +52,21 @@ function createTheme(filter: FilterConfig) {
         }
         lines.push(`${selector} {`);
         declarations.forEach(({property, value}) => {
-            lines.push(`    ${property}: ${typeof value === 'function' ? value(filter) : value} !important;`);
+            if (typeof value === 'function') {
+                const modified = value(filter);
+                if (modified instanceof Promise) {
+                    const n = ++asyncCounter;
+                    lines.push(`    /* #${n} */`);
+                    modified.then((asyncValue) => {
+                        style.textContent = style.textContent
+                            .replace(`/* #${n} */`, `${property}: ${asyncValue} !important;`);
+                    });
+                } else {
+                    lines.push(`    ${property}: ${modified} !important;`);
+                }
+            } else {
+                lines.push(`    ${property}: ${value} !important;`);
+            }
         });
         lines.push('}');
         if (media) {
@@ -69,7 +84,7 @@ const linksSubscriptions = new Map<Element, () => void>();
 function watchForLinksLoading(onLoad: () => void) {
     linksSubscriptions.forEach((listener, link) => link.removeEventListener('load', listener));
     linksSubscriptions.clear();
-    const links = Array.from(document.querySelectorAll('link[rel="stylesheet"]'));
+    const links = Array.from(document.styleSheets).filter((s) => s.ownerNode instanceof HTMLLinkElement).map((s) => s.ownerNode) as HTMLLinkElement[];
     links.forEach((link) => {
         link.addEventListener('load', onLoad);
         linksSubscriptions.set(link, onLoad);

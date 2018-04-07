@@ -1,10 +1,12 @@
 import {parse, rgbToHSL, hslToString, RGBA} from '../../utils/color';
-import {scale} from '../../utils/math';
+import {scale, clamp} from '../../utils/math';
 import {getMatches} from '../../utils/text';
-import {cssURLRegex} from './css-rules';
+import {cssURLRegex, getCSSURLValue, getCSSBaseBath} from './css-rules';
+import {analyzeImage, applyFilterToImage, loadImage} from './image';
+import {getAbsoluteURL} from './url';
 import {FilterConfig} from '../../definitions';
 
-type CSSValueModifier = (filter: FilterConfig) => string;
+type CSSValueModifier = (filter: FilterConfig) => string | Promise<string>;
 
 export interface ModifiableCSSDeclaration {
     property: string;
@@ -17,14 +19,14 @@ export interface ModifiableCSSRule {
     declarations: ModifiableCSSDeclaration[];
 }
 
-export function getModifiableCSSDeclaration(property: string, value: string): ModifiableCSSDeclaration {
+export function getModifiableCSSDeclaration(property: string, value: string, rule: CSSStyleRule): ModifiableCSSDeclaration {
     if (property.indexOf('color') >= 0 && property !== '-webkit-print-color-adjust') {
         const modifier = getColorModifier(property, value);
         if (modifier) {
             return {property, value: modifier};
         }
     } else if (property === 'background-image') {
-        const modifier = getBgImageModifier(property, value);
+        const modifier = getBgImageModifier(property, value, rule);
         if (modifier) {
             return {property, value: modifier};
         }
@@ -163,8 +165,10 @@ function getColorModifier(prop: string, value: string): CSSValueModifier {
 }
 
 const gradientRegex = /[\-a-z]+gradient\(([^\(\)]*(\(.*?\)))*[^\(\)]*\)/g;
+const loadedBgImages = new Map<string, HTMLImageElement>();
+const filteredImagesDataURLs = new Map<string, string>();
 
-function getBgImageModifier(prop: string, value: string): CSSValueModifier {
+function getBgImageModifier(prop: string, value: string, rule: CSSStyleRule): CSSValueModifier {
     try {
 
         const gradients = getMatches(gradientRegex, value);
@@ -212,7 +216,37 @@ function getBgImageModifier(prop: string, value: string): CSSValueModifier {
         };
 
         const getURLModifier = (urlValue: string) => {
-            return (filter: FilterConfig) => urlValue;
+            let url = getCSSURLValue(urlValue);
+            if (rule.parentStyleSheet.href) {
+                const basePath = getCSSBaseBath(rule.parentStyleSheet.href);
+                url = getAbsoluteURL(basePath, url);
+            } else {
+                url = getAbsoluteURL(location.origin, url);
+            }
+
+            if (filteredImagesDataURLs.has(url)) {
+                const dataURL = filteredImagesDataURLs.get(url);
+                return () => `url("${dataURL}")`;
+            }
+            if (loadedBgImages.has(url)) {
+                return () => urlValue;
+            }
+            return async (filter: FilterConfig) => {
+                const image = await loadImage(url);
+                loadedBgImages.set(url, image);
+                const {isDark, isLight, isTransparent} = analyzeImage(image);
+                if (isDark && isTransparent && filter.mode === 1) {
+                    const inverted = applyFilterToImage(image, filter);
+                    filteredImagesDataURLs.set(url, inverted);
+                    return `url("${inverted}")`;
+                } else if (isLight && !isTransparent && filter.mode === 1) {
+                    const dimmed = applyFilterToImage(image, {...filter, brightness: clamp(filter.brightness - 50, 0, 100), mode: 0});
+                    filteredImagesDataURLs.set(url, dimmed);
+                    return `url("${dimmed}")`;
+                } else {
+                    return urlValue;
+                }
+            };
         };
 
         const modifiers: CSSValueModifier[] = [];
@@ -229,7 +263,14 @@ function getBgImageModifier(prop: string, value: string): CSSValueModifier {
             }
         });
 
-        return (filter: FilterConfig) => modifiers.map((modify) => modify(filter)).join('');
+        return (filter: FilterConfig) => {
+            const results = modifiers.map((modify) => modify(filter));
+            if (results.some((r) => r instanceof Promise)) {
+                return Promise.all(results)
+                    .then((asyncResults) => asyncResults.join(''));
+            }
+            return results.join('');
+        }
 
     } catch (err) {
         console.warn(`Unable to parse gradient ${value}`, err);

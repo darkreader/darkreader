@@ -30,6 +30,27 @@ export default class TabManager {
                 }
             }
         });
+
+        chrome.runtime.onMessage.addListener(async ({type, data}, sender, sendResponse) => {
+            if (type === 'fetch') {
+                const url = data;
+                try {
+                    const response = await fetch(url);
+                    const blob = await response.blob();
+                    if (response.status >= 200 && response.status < 300) {
+                        sendResponse({data: blob});
+                    } else {
+                        const msg = `Unable to load ${url} ${response.status} ${response.statusText}`;
+                        console.error(msg);
+                        sendResponse({error: msg});
+                    }
+                } catch (error) {
+                    console.error(`Unable to load ${url} ${error}`);
+                    sendResponse({error});
+                }
+                return true;
+            }
+        });
     }
 
     async sendMessage(getMessage: (url?: string) => any) {

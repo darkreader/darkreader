@@ -1,4 +1,5 @@
-import {getMatches, spinalToCamelCase} from '../../utils/text';
+import {spinalToCamelCase} from '../../utils/text';
+import {parseURL, getAbsoluteURL} from './url';
 
 export function iterateCSSRules(iterator: (r: CSSStyleRule) => void) {
     Array.from(document.styleSheets)
@@ -48,13 +49,16 @@ export function iterateCSSDeclarations(rule: CSSStyleRule, iterator: (propery: s
 
 const loadingStyles = new WeakSet<Node>();
 
-function parseURL(url: string) {
-    const a = document.createElement('a');
-    a.href = url;
-    return a;
+export const cssURLRegex = /url\((('.+?')|(".+?")|([^\)]*?))\)/g;
+
+export function getCSSURLValue(cssURL: string) {
+    return cssURL.replace(/^url\((.*)\)$/, '$1').replace(/^"(.*)"$/, '$1').replace(/^'(.*)'$/, '$1');
 }
 
-export const cssURLRegex = /url\((('.+?')|(".+?")|([^\)]*?))\)/g;
+export function getCSSBaseBath(url: string) {
+    const cssURL = parseURL(url);
+    return `${cssURL.protocol}//${cssURL.host}${cssURL.pathname.replace(/\/[^\/]+?\.css$/i, '')}`;
+}
 
 async function replaceCORSStyle(link: HTMLLinkElement) {
     const url = link.href;
@@ -65,18 +69,10 @@ async function replaceCORSStyle(link: HTMLLinkElement) {
     const text = await response.text();
 
     // Replace relative paths with absolute
-    const cssURL = parseURL(url);
-    const cssBasePath = `${cssURL.protocol}//${cssURL.host}${cssURL.pathname.replace(/\/[^\/]+?\.css$/i, '')}`;
-    const cssText = text.replace(cssURLRegex, (match, pathMatch: string) => {
-        const pathValue = pathMatch.replace(/^"(.*)"$/, '$1').replace(/^'(.*)'$/, '$1');
-        if (!pathValue.match(/^.*?\/\//) && !pathValue.match(/^data\:/)) {
-            const relativePath = pathValue.replace(/^\//, '');
-            const baseParts = cssBasePath.split('/');
-            const backwards = getMatches(/\.\.\//g, relativePath);
-            const u = parseURL(`${baseParts.slice(0, baseParts.length - backwards.length).join('/')}/${relativePath.replace(/^(\.\.\/)*/, '')}`);
-            return `url("${u.href}")`
-        }
-        return match;
+    const cssBasePath = getCSSBaseBath(url);
+    const cssText = text.replace(cssURLRegex, (match) => {
+        const pathValue = getCSSURLValue(match);
+        return `url("${getAbsoluteURL(cssBasePath, pathValue)}")`;
     });
 
     const style = document.createElement('style');

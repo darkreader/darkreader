@@ -13,9 +13,13 @@ export function getAbsoluteURL($base: string, $relative: string) {
         }
         return $relative;
     }
-    const relativePath = $relative.replace(/^\//, '');
-    const baseParts = $base.split('/');
-    const backwards = getMatches(/\.\.\//g, relativePath);
-    const u = parseURL(`${baseParts.slice(0, baseParts.length - backwards.length).join('/')}/${relativePath.replace(/^(\.\.\/)*/, '')}`);
+    const b = parseURL($base);
+    if ($relative.startsWith('/')) {
+        const u = parseURL(`${b.protocol}//${b.host}${$relative}`);
+        return u.href;
+    }
+    const baseParts = b.pathname.split('/');
+    const backwards = getMatches(/\.\.\//g, $relative);
+    const u = parseURL(`${b.protocol}//${b.host}${baseParts.slice(0, baseParts.length - backwards.length).join('/')}/${$relative.replace(/^(\.\.\/)*/, '')}`);
     return u.href;
 }

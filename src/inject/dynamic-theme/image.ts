@@ -3,7 +3,7 @@ import {getAbsoluteURL} from './url';
 import {FilterConfig} from '../../definitions';
 
 export function analyzeImage(image: HTMLImageElement) {
-    const MAX_ANALIZE_PIXELS_COUNT = 64 * 64;
+    const MAX_ANALIZE_PIXELS_COUNT = 32 * 32;
 
     const naturalPixelsCount = image.naturalWidth * image.naturalHeight;
     const k = Math.min(1, Math.sqrt(MAX_ANALIZE_PIXELS_COUNT / naturalPixelsCount));

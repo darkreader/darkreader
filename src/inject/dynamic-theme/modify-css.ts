@@ -65,12 +65,23 @@ function modifyBackgroundColor(rgb: RGBA, filter: FilterConfig) {
     const lMin = 0.1;
     const lMaxS0 = 0.2;
     const lMaxS1 = 0.4;
+    const sNeutralLim = 0.2;
+    const sColored = 0.1;
+    const hColored = 220;
 
     const lMax = scale(s, 0, 1, lMaxS0, lMaxS1);
     const lx = (l < lMax ?
-        scale(l, 0, lMax, lMin, lMax) :
+        l :
         scale(l, lMax, 1, lMax, lMin));
-    const color = {h, s, l: lx, a};
+
+    let hx = h;
+    let sx = s;
+    if (s < sNeutralLim) {
+        sx = sColored;
+        hx = hColored;
+    }
+
+    const color = {h: hx, s: sx, l: lx, a};
 
     return hslToString(color);
 }
@@ -78,15 +89,25 @@ function modifyBackgroundColor(rgb: RGBA, filter: FilterConfig) {
 function modifyForegroundColor(rgb: RGBA, filter: FilterConfig) {
     const {h, s, l, a} = rgbToHSL(rgb);
 
-    const lMax = 0.9;
-    const lMinS0 = 0.8;
+    const lMax = 0.7;
+    const lMinS0 = 0.6;
     const lMinS1 = 0.6;
+    const sNeutralLim = 0.2;
+    const sColored = 0.16;
+    const hColored = 40;
 
     const lMin = scale(s, 0, 1, lMinS0, lMinS1);
     const lx = (l < lMax ?
         scale(l, 0, lMin, lMax, lMin) :
-        scale(l, lMin, 1, lMin, lMax));
-    const color = {h, s, l: lx, a};
+        l);
+    let hx = h;
+    let sx = s;
+    if (s < sNeutralLim) {
+        sx = sColored;
+        hx = hColored;
+    }
+
+    const color = {h: hx, s: sx, l: lx, a};
 
     return hslToString(color);
 }
@@ -236,7 +257,7 @@ function getBgImageModifier(prop: string, value: string, rule: CSSStyleRule): CS
                 loadedBgImages.set(url, image);
                 const {isDark, isLight, isTransparent} = analyzeImage(image);
                 if (isDark && isTransparent && filter.mode === 1) {
-                    const inverted = applyFilterToImage(image, filter);
+                    const inverted = applyFilterToImage(image, {...filter, sepia: clamp(filter.sepia + 80, 0, 100)});
                     filteredImagesDataURLs.set(url, inverted);
                     return `url("${inverted}")`;
                 } else if (isLight && !isTransparent && filter.mode === 1) {

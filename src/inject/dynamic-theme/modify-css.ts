@@ -188,6 +188,7 @@ function getColorModifier(prop: string, value: string): CSSValueModifier {
 const gradientRegex = /[\-a-z]+gradient\(([^\(\)]*(\(.*?\)))*[^\(\)]*\)/g;
 const loadedBgImages = new Map<string, HTMLImageElement>();
 const filteredImagesDataURLs = new Map<string, string>();
+const awaitingForFilters = new Map<string, ((result: string) => void)[]>();
 
 function getBgImageModifier(prop: string, value: string, rule: CSSStyleRule): CSSValueModifier {
     try {
@@ -252,21 +253,30 @@ function getBgImageModifier(prop: string, value: string, rule: CSSStyleRule): CS
             if (loadedBgImages.has(url)) {
                 return () => urlValue;
             }
+            if (awaitingForFilters.has(url)) {
+                return () => new Promise<string>((resolve) => {
+                    awaitingForFilters.get(url).push(resolve);
+                });
+            }
+            awaitingForFilters.set(url, []);
             return async (filter: FilterConfig) => {
                 const image = await loadImage(url);
                 loadedBgImages.set(url, image);
                 const {isDark, isLight, isTransparent} = analyzeImage(image);
+                let result: string;
                 if (isDark && isTransparent && filter.mode === 1) {
                     const inverted = applyFilterToImage(image, {...filter, sepia: clamp(filter.sepia + 80, 0, 100)});
                     filteredImagesDataURLs.set(url, inverted);
-                    return `url("${inverted}")`;
+                    result = `url("${inverted}")`;
                 } else if (isLight && !isTransparent && filter.mode === 1) {
                     const dimmed = applyFilterToImage(image, {...filter, brightness: clamp(filter.brightness - 80, 0, 100), mode: 0});
                     filteredImagesDataURLs.set(url, dimmed);
-                    return `url("${dimmed}")`;
+                    result = `url("${dimmed}")`;
                 } else {
-                    return urlValue;
+                    result = urlValue;
                 }
+                awaitingForFilters.get(url).forEach((resolve) => resolve(result));
+                return result;
             };
         };
 

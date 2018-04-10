@@ -133,17 +133,7 @@ function modifyShadowColor(rgb: RGBA, filter: FilterConfig) {
 }
 
 function modifyGradientColor(rgb: RGBA, filter: FilterConfig) {
-    const {h, s, l, a} = rgbToHSL(rgb);
-
-    const lMin = 0.1;
-    const lMaxS0 = 0.2;
-    const lMaxS1 = 0.4;
-
-    const lMax = scale(s, 0, 1, lMaxS0, lMaxS1);
-    const lx = scale(l, 0, 1, lMin, lMax);
-    const color = {h, s, l: lx, a};
-
-    return hslToString(color);
+    return modifyBackgroundColor(rgb, filter);
 }
 
 const colorParseCache = new Map<string, RGBA>();
@@ -265,11 +255,11 @@ function getBgImageModifier(prop: string, value: string, rule: CSSStyleRule): CS
                 const {isDark, isLight, isTransparent} = analyzeImage(image);
                 let result: string;
                 if (isDark && isTransparent && filter.mode === 1) {
-                    const inverted = applyFilterToImage(image, {...filter, sepia: clamp(filter.sepia + 80, 0, 100)});
+                    const inverted = applyFilterToImage(image, {...filter, sepia: clamp(filter.sepia + 90, 0, 100)});
                     filteredImagesDataURLs.set(url, inverted);
                     result = `url("${inverted}")`;
                 } else if (isLight && !isTransparent && filter.mode === 1) {
-                    const dimmed = applyFilterToImage(image, {...filter, brightness: clamp(filter.brightness - 80, 0, 100), mode: 0});
+                    const dimmed = applyFilterToImage(image, filter);
                     filteredImagesDataURLs.set(url, dimmed);
                     result = `url("${dimmed}")`;
                 } else {

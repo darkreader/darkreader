@@ -1,5 +1,6 @@
 import {createFilterMatrix, applyColorMatrix} from '../../generators/utils/matrix';
 import {getAbsoluteURL} from './url';
+import {scale, clamp} from '../../utils/math';
 import {FilterConfig} from '../../definitions';
 
 export function analyzeImage(image: HTMLImageElement) {
@@ -81,14 +82,6 @@ export function applyFilterToImage(image: HTMLImageElement, filter: FilterConfig
     const imageData = context.getImageData(0, 0, width, height);
     const d = imageData.data;
 
-    const TRANSPARENT_ALPHA_THRESHOLD = 0.25;
-    const GREY_SATURATION_THRESHOLD = 0.25;
-    const DARK_LIGHTNESS_THRESHOLD = 0.5;
-
-    let transparentPixelsCount = 0;
-    let greyPixelsCount = 0;
-    let darkPixelsCount = 0;
-
     let i: number, x: number, y: number;
     let r: number, g: number, b: number, a: number;
     for (y = 0; y < height; y++) {
@@ -106,7 +99,14 @@ export function applyFilterToImage(image: HTMLImageElement, filter: FilterConfig
         }
     }
     context.putImageData(imageData, 0, 0);
-    return canvas.toDataURL();
+
+    const HIGH_QUALITY_PIXELS_COUNT = 256 * 256;
+    const LOW_QUALITY_PIXELS_COUNT = 1920 * 1080;
+
+    const pixelsCount = width * height;
+    return (pixelsCount <= HIGH_QUALITY_PIXELS_COUNT ?
+        canvas.toDataURL('image/png') :
+        canvas.toDataURL('image/jpeg', clamp(scale(pixelsCount, LOW_QUALITY_PIXELS_COUNT, HIGH_QUALITY_PIXELS_COUNT, 0, 1), 0, 1)));
 }
 
 export function loadImage(url: string) {

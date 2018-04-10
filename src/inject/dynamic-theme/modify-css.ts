@@ -89,7 +89,7 @@ function modifyBackgroundColor(rgb: RGBA, filter: FilterConfig) {
 function modifyForegroundColor(rgb: RGBA, filter: FilterConfig) {
     const {h, s, l, a} = rgbToHSL(rgb);
 
-    const lMax = 0.7;
+    const lMax = 0.8;
     const lMinS0 = 0.6;
     const lMinS1 = 0.6;
     const sNeutralLim = 0.2;

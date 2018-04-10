@@ -4,7 +4,6 @@ import {removeStyle} from '../style';
 import {FilterConfig} from '../../definitions';
 
 const cache = new WeakMap<CSSStyleRule, ModifiableCSSRule>();
-let asyncCounter = 0;
 
 function createTheme(filter: FilterConfig) {
     let style = document.getElementById('dark-reader-style') as HTMLStyleElement;
@@ -55,11 +54,17 @@ function createTheme(filter: FilterConfig) {
             if (typeof value === 'function') {
                 const modified = value(filter);
                 if (modified instanceof Promise) {
-                    const n = ++asyncCounter;
-                    lines.push(`    /* #${n} */`);
                     modified.then((asyncValue) => {
-                        style.textContent = style.textContent
-                            .replace(`/* #${n} */`, `${property}: ${asyncValue} !important;`);
+                        const asyncStyle = document.createElement('style');
+                        asyncStyle.classList.add('dark-reader-style--async');
+                        asyncStyle.textContent = [
+                            media && `@media ${media} {`,
+                            `${selector} {`,
+                            `    ${property}: ${asyncValue} !important;`,
+                            '}',
+                            media && '}',
+                        ].filter((x) => x).join('\n');
+                        document.head.appendChild(asyncStyle);
                     });
                 } else {
                     lines.push(`    ${property}: ${modified} !important;`);
@@ -76,6 +81,7 @@ function createTheme(filter: FilterConfig) {
 
     style.textContent = lines.join('\n');
     document.head.insertBefore(style, null);
+    Array.from(document.querySelectorAll('.dark-reader-style--async')).forEach((el) => el.parentElement && el.parentElement.removeChild(el));
 }
 
 let styleChangeObserver: MutationObserver = null;
@@ -108,7 +114,9 @@ function createThemeAndWatchForUpdates(filter: FilterConfig) {
                     return ((
                         (n instanceof HTMLStyleElement) ||
                         (n instanceof HTMLLinkElement && n.rel === 'stylesheet')
-                    ) && (n.id !== 'dark-reader-style'));
+                    ) &&
+                        (n.id !== 'dark-reader-style') &&
+                        !n.classList.contains('dark-reader-style--async'));
                 });
         });
         if (styleMutations.length > 0) {
@@ -135,6 +143,7 @@ export function createOrUpdateDynamicTheme(filter: FilterConfig) {
 
 export function removeDynamicTheme() {
     removeStyle();
+    Array.from(document.querySelectorAll('.dark-reader-style--async')).forEach((el) => el.parentElement && el.parentElement.removeChild(el));
     if (styleChangeObserver) {
         styleChangeObserver.disconnect();
         styleChangeObserver = null;

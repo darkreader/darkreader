@@ -5,7 +5,10 @@ export function iterateCSSRules(iterator: (r: CSSStyleRule) => void) {
     Array.from(document.styleSheets)
         .filter((s) => {
             const node = s.ownerNode as HTMLStyleElement | HTMLLinkElement;
-            if (node.id === 'dark-reader-style' || loadingStyles.has(node)) {
+            if (node.id === 'dark-reader-style' ||
+                loadingStyles.has(node) ||
+                node.classList.contains('dark-reader-style--async')
+            ) {
                 return false;
             }
 

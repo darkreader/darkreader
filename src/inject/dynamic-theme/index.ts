@@ -154,7 +154,7 @@ const linksSubscriptions = new Map<Element, () => void>();
 
 function watchForLinksLoading(onLoad: () => void) {
     stopWatchingForLinksLoading();
-    const links = Array.from(document.styleSheets).filter((s) => s.ownerNode instanceof HTMLLinkElement).map((s) => s.ownerNode) as HTMLLinkElement[];
+    const links = Array.from(document.querySelectorAll('link[rel="stylesheet"]')) as HTMLLinkElement[];
     links.forEach((link) => {
         link.addEventListener('load', onLoad);
         linksSubscriptions.set(link, onLoad);

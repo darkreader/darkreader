@@ -1,4 +1,5 @@
 import {createFilterMatrix, applyColorMatrix} from '../../generators/utils/matrix';
+import state from './state';
 import {getAbsoluteURL} from './url';
 import {scale, clamp} from '../../utils/math';
 import {FilterConfig} from '../../definitions';
@@ -121,6 +122,10 @@ export function loadImage(url: string) {
                 reject(`Unable to load image ${url}`);
             } else {
                 console.warn(`Unable to load image ${url}`);
+                if (!state.watching) {
+                    reject('Image loading cancelled');
+                    return;
+                }
                 triedBGFetch = true;
                 chrome.runtime.sendMessage({type: 'fetch', data: url}, ({data, error}) => {
                     if (error) {

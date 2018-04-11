@@ -3,6 +3,7 @@ import {scale, clamp} from '../../utils/math';
 import {getMatches} from '../../utils/text';
 import {cssURLRegex, getCSSURLValue, getCSSBaseBath} from './css-rules';
 import {analyzeImage, applyFilterToImage, loadImage} from './image';
+import state from './state';
 import {getAbsoluteURL} from './url';
 import {FilterConfig} from '../../definitions';
 
@@ -251,6 +252,9 @@ function getBgImageModifier(prop: string, value: string, rule: CSSStyleRule): CS
             awaitingForFilters.set(url, []);
             return async (filter: FilterConfig) => {
                 const image = await loadImage(url);
+                if (!state.watching) {
+                    return null;
+                }
                 loadedBgImages.set(url, image);
                 const {isDark, isLight, isTransparent} = analyzeImage(image);
                 let result: string;
@@ -288,7 +292,12 @@ function getBgImageModifier(prop: string, value: string, rule: CSSStyleRule): CS
             const results = modifiers.map((modify) => modify(filter));
             if (results.some((r) => r instanceof Promise)) {
                 return Promise.all(results)
-                    .then((asyncResults) => asyncResults.join(''));
+                    .then((asyncResults) => {
+                        if (!state.watching) {
+                            return null;
+                        }
+                        return asyncResults.join('');
+                    });
             }
             return results.join('');
         }
@@ -321,4 +330,10 @@ function getShadowModifier(prop: string, value: string): CSSValueModifier {
         console.warn(`Unable to parse shadow ${value}`, err);
         return null;
     }
+}
+
+export function cleanModificationCache() {
+    loadedBgImages.clear();
+    filteredImagesDataURLs.clear();
+    awaitingForFilters.clear();
 }

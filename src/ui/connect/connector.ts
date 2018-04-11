@@ -1,4 +1,4 @@
-import {ExtensionData, ExtensionActions, FilterConfig, TabInfo} from '../../definitions';
+import {ExtensionData, ExtensionActions, FilterConfig, TabInfo, Message} from '../../definitions';
 
 export default class Connector implements ExtensionActions {
     private port: chrome.runtime.Port;
@@ -13,10 +13,10 @@ export default class Connector implements ExtensionActions {
         return ++this.counter;
     }
 
-    private sendRequest<T>(request, executor: (response, resolve: (data?: T) => void, reject: (error: Error) => void) => void) {
+    private sendRequest<T>(request: Message, executor: (response: Message, resolve: (data?: T) => void, reject: (error: Error) => void) => void) {
         const id = this.getRequestId();
         return new Promise<T>((resolve, reject) => {
-            const listener = ({id: responseId, ...response}) => {
+            const listener = ({id: responseId, ...response}: Message) => {
                 if (responseId === id) {
                     executor(response, resolve, reject);
                     this.port.onMessage.removeListener(listener);
@@ -37,7 +37,7 @@ export default class Connector implements ExtensionActions {
 
     subscribeToChanges(callback: (data: ExtensionData) => void) {
         const id = this.getRequestId();
-        this.port.onMessage.addListener(({id: responseId, data}) => {
+        this.port.onMessage.addListener(({id: responseId, data}: Message) => {
             if (responseId === id) {
                 callback(data);
             }

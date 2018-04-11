@@ -51,6 +51,13 @@ export interface TabInfo {
     isInDarkList: boolean;
 }
 
+export interface Message {
+    type: string;
+    data?: any;
+    id?: any;
+    error?: any;
+}
+
 export interface Shortcuts {
     [name: string]: string;
 }

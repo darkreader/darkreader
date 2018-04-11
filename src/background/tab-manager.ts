@@ -1,7 +1,8 @@
 
 import {isUrlInList} from '../utils/url';
+import {canInjectScript} from '../background/utils/extension-api';
 import ConfigManager from './config-manager';
-import {TabInfo} from '../definitions';
+import {TabInfo, Message} from '../definitions';
 
 function queryTabs(query: chrome.tabs.QueryInfo) {
     return new Promise<chrome.tabs.Tab[]>((resolve) => {
@@ -53,11 +54,21 @@ export default class TabManager {
         });
     }
 
+    async updateContentScript() {
+        (await queryTabs({}))
+            .filter((tab) => canInjectScript(tab.url))
+            .filter((tab) => !this.ports.has(tab.id))
+            .forEach((tab) => chrome.tabs.executeScript(tab.id, {
+                runAt: 'document_start',
+                file: 'inject/index.js',
+            }));
+    }
+
     async sendMessage(getMessage: (url?: string) => any) {
         (await queryTabs({}))
             .filter((tab) => this.ports.has(tab.id))
             .forEach((tab) => {
-                const message = getMessage(tab.url)
+                const message = getMessage(tab.url);
                 const port = this.ports.get(tab.id);
                 if (tab.active) {
                     port.postMessage(message);
@@ -76,7 +87,7 @@ export default class TabManager {
         const url = tab.url;
         return <TabInfo>{
             url,
-            isProtected: !this.ports.has(tab.id),
+            isProtected: !canInjectScript(url),
             isInDarkList: isUrlInList(url, DARK_SITES),
         };
     }

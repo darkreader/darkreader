@@ -1,6 +1,6 @@
 import {createOrUpdateStyle, removeStyle} from './style';
 import {createOrUpdateSVGFilter, removeSVGFilter} from './svg-filter';
-import {createOrUpdateDynamicTheme, removeDynamicTheme} from './dynamic-theme';
+import {createOrUpdateDynamicTheme, removeDynamicTheme, cleanDynamicThemeCache} from './dynamic-theme';
 
 function onMessage({type, data}) {
     switch (type) {
@@ -32,4 +32,7 @@ function onMessage({type, data}) {
 
 const port = chrome.runtime.connect({name: 'tab'});
 port.onMessage.addListener(onMessage);
-port.onDisconnect.addListener(() => console.warn('disconnect'));
+port.onDisconnect.addListener(() => {
+    console.warn('disconnect');
+    cleanDynamicThemeCache();
+});

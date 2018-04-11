@@ -1,5 +1,6 @@
 import {iterateCSSRules, iterateCSSDeclarations} from './css-rules';
-import {getModifiableCSSDeclaration, getModifiedUserAgentStyle, ModifiableCSSDeclaration, ModifiableCSSRule} from './modify-css';
+import {getModifiableCSSDeclaration, getModifiedUserAgentStyle, cleanModificationCache, ModifiableCSSDeclaration, ModifiableCSSRule} from './modify-css';
+import state from './state';
 import {removeStyle} from '../style';
 import {FilterConfig} from '../../definitions';
 
@@ -55,6 +56,9 @@ function createTheme(filter: FilterConfig) {
                 const modified = value(filter);
                 if (modified instanceof Promise) {
                     modified.then((asyncValue) => {
+                        if (!state.watching) {
+                            return;
+                        }
                         const asyncStyle = document.createElement('style');
                         asyncStyle.classList.add('dark-reader-style--async');
                         asyncStyle.textContent = [
@@ -88,8 +92,7 @@ let styleChangeObserver: MutationObserver = null;
 const linksSubscriptions = new Map<Element, () => void>();
 
 function watchForLinksLoading(onLoad: () => void) {
-    linksSubscriptions.forEach((listener, link) => link.removeEventListener('load', listener));
-    linksSubscriptions.clear();
+    stopWatchingForLinksLoading();
     const links = Array.from(document.styleSheets).filter((s) => s.ownerNode instanceof HTMLLinkElement).map((s) => s.ownerNode) as HTMLLinkElement[];
     links.forEach((link) => {
         link.addEventListener('load', onLoad);
@@ -100,8 +103,14 @@ function watchForLinksLoading(onLoad: () => void) {
     });
 }
 
+function stopWatchingForLinksLoading() {
+    linksSubscriptions.forEach((listener, link) => link.removeEventListener('load', listener));
+    linksSubscriptions.clear();
+}
+
 function createThemeAndWatchForUpdates(filter: FilterConfig) {
     createTheme(filter);
+    state.watching = true;
     watchForLinksLoading(() => createTheme(filter));
     if (styleChangeObserver) {
         styleChangeObserver.disconnect();
@@ -121,10 +130,18 @@ function createThemeAndWatchForUpdates(filter: FilterConfig) {
         });
         if (styleMutations.length > 0) {
             createTheme(filter);
-            watchForLinksLoading(() => createTheme(filter));
+            watchForLinksLoading(() => state.watching && createTheme(filter));
         }
     });
     styleChangeObserver.observe(document.head, {childList: true});
+}
+
+function stopWatchingForUpdates() {
+    state.watching = false;
+    if (styleChangeObserver) {
+        styleChangeObserver.disconnect();
+        styleChangeObserver = null;
+    }
 }
 
 export function createOrUpdateDynamicTheme(filter: FilterConfig) {
@@ -144,8 +161,11 @@ export function createOrUpdateDynamicTheme(filter: FilterConfig) {
 export function removeDynamicTheme() {
     removeStyle();
     Array.from(document.querySelectorAll('.dark-reader-style--async')).forEach((el) => el.parentElement && el.parentElement.removeChild(el));
-    if (styleChangeObserver) {
-        styleChangeObserver.disconnect();
-        styleChangeObserver = null;
-    }
+    stopWatchingForUpdates();
+}
+
+export function cleanDynamicThemeCache() {
+    stopWatchingForUpdates();
+    cleanModificationCache();
+    stopWatchingForLinksLoading();
 }

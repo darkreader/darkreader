@@ -265,16 +265,22 @@ function getBgImageModifier(prop: string, value: string, rule: CSSStyleRule): CS
                     return null;
                 }
                 loadedBgImages.set(url, image);
-                const {isDark, isLight, isTransparent} = analyzeImage(image);
+                const {isDark, isLight, isTransparent, isLarge} = analyzeImage(image);
                 let result: string;
                 if (isDark && isTransparent && filter.mode === 1) {
+                    console.warn(`Inverting dark image ${image.src}`);
                     const inverted = applyFilterToImage(image, {...filter, sepia: clamp(filter.sepia + 90, 0, 100)});
                     filteredImagesDataURLs.set(url, inverted);
                     result = `url("${inverted}")`;
                 } else if (isLight && !isTransparent && filter.mode === 1) {
-                    const dimmed = applyFilterToImage(image, filter);
-                    filteredImagesDataURLs.set(url, dimmed);
-                    result = `url("${dimmed}")`;
+                    if (isLarge) {
+                        result = 'none';
+                    } else {
+                        console.warn(`Inverting light image ${image.src}`);
+                        const dimmed = applyFilterToImage(image, filter);
+                        filteredImagesDataURLs.set(url, dimmed);
+                        result = `url("${dimmed}")`;
+                    }
                 } else {
                     result = urlValue;
                 }

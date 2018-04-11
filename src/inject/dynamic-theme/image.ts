@@ -62,11 +62,13 @@ export function analyzeImage(image: HTMLImageElement) {
     const DARK_IMAGE_THRESHOLD = 0.7;
     const LIGHT_IMAGE_THRESHOLD = 0.7;
     const TRANSPARENT_IMAGE_THRESHOLD = 0.1;
+    const LARGE_IMAGE_PIXELS_COUNT = 800 * 600;
 
     return {
         isDark: ((darkPixelsCount / opaquePixelsCount) >= DARK_IMAGE_THRESHOLD),
         isLight: ((lightPixelsCount / opaquePixelsCount) >= LIGHT_IMAGE_THRESHOLD),
         isTransparent: ((transparentPixelsCount / totalPixelsCount) >= TRANSPARENT_IMAGE_THRESHOLD),
+        isLarge: (naturalPixelsCount >= LARGE_IMAGE_PIXELS_COUNT),
     };
 }
 

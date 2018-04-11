@@ -1,42 +1,39 @@
 const http = require('http');
-const {logError, logInfo, logWarn} = require('./utils');
+const {logInfo, logWarn} = require('./utils');
 
 module.exports = function createReloadTask(gulp) {
-    gulp.task('reload', (done) => {
-        const server = http.createServer((req, res) => res.end('reload'));
-        const sockets = {};
-        let connected = false;
-        let socketCount = 0;
+    let shouldReload = false;
+    let connectionTimeoutId = null;
 
-        const connectionTimeoutId = setTimeout(() => {
-            logWarn('Auto-reloader did not connect');
-            closeServer();
-        }, 5000);
-
-        function closeServer() {
-            for (let id in sockets) {
-                sockets[id].destroy();
-            }
-            server.close();
+    const server = http.createServer((req, res) => {
+        if (shouldReload) {
+            shouldReload = false;
+            res.end('reload');
+            logInfo('Auto-reloader connected');
             clearTimeout(connectionTimeoutId);
+        } else {
+            res.end('waiting');
         }
+    });
+    server.listen(8890, () => logInfo('Auto-reloader started'));
 
-        server.on('connection', (socket) => {
-            sockets[socketCount++] = socket;
-            if (!connected) {
-                logInfo('Auto-reloader connected');
-                socket.emit('reload', {});
-                connected = true;
-                closeServer();
-            }
-        });
-        server.on('error', (e) => {
-            logError(`Server error: ${e}`);
-            closeServer();
-        });
+    function waitForConnection() {
+        shouldReload = true;
+        connectionTimeoutId = setTimeout(() => {
+            logWarn('Auto-reloader did not connect');
+            shouldReload = false;
+        }, 5000);
+    }
 
-        server.listen(8890);
+    function closeServer() {
+        server.close(() => logInfo('Auto-reloader exit'));
+    }
 
+    process.on('exit', closeServer);
+    process.on('SIGINT', closeServer);
+
+    gulp.task('reload', (done) => {
+        waitForConnection();
         done();
     });
 };

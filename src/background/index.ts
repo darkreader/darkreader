@@ -10,7 +10,7 @@ if (extension.config.DEBUG) {
         const req = new XMLHttpRequest();
         req.open('GET', 'http://localhost:8890/', true);
         req.onload = () => {
-            if (req.status >= 200 && req.status < 300) {
+            if (req.status >= 200 && req.status < 300 && req.responseText === 'reload') {
                 chrome.runtime.reload();
             } else {
                 setTimeout(listen, 2000);

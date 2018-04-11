@@ -16,7 +16,6 @@ gulp.task('release', (done) => {
         'clean',
         ['js-release', 'css-release', 'html-release', 'copy-release'],
         'foxify',
-        'reload',
         ['zip', 'zip-firefox'],
         done
     );

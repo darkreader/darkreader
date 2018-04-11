@@ -1,5 +1,6 @@
-import {iterateCSSRules, iterateCSSDeclarations} from './css-rules';
-import {getModifiableCSSDeclaration, getModifiedUserAgentStyle, cleanModificationCache, ModifiableCSSDeclaration, ModifiableCSSRule} from './modify-css';
+import {iterateCSSRules, iterateCSSDeclarations, getCSSBaseBath, getCSSURLValue, cssURLRegex, fontFaceRegex} from './css-rules';
+import {getAbsoluteURL} from './url';
+import {getModifiableCSSDeclaration, getModifiedUserAgentStyle, getModifiedFallbackStyle, cleanModificationCache, ModifiableCSSDeclaration, ModifiableCSSRule} from './modify-css';
 import state from './state';
 import {removeStyle} from '../style';
 import {FilterConfig} from '../../definitions';
@@ -16,32 +17,54 @@ function createTheme(filter: FilterConfig) {
 
     const rules: ModifiableCSSRule[] = [];
 
-    iterateCSSRules((r) => {
-        if (cache.has(r)) {
-            const rule = cache.get(r);
-            if (rule) {
+    iterateCSSRules({
+        filter: (s) => {
+            const node = s.ownerNode as HTMLStyleElement | HTMLLinkElement;
+            if (node.id === 'dark-reader-style' ||
+                loadingStyles.has(node) ||
+                node.classList.contains('dark-reader-style')
+            ) {
+                return false;
+            }
+
+            let hasRules = false;
+            try {
+                hasRules = Boolean((s as any).cssRules);
+            } catch (err) {
+                console.warn(err);
+                if (node instanceof HTMLLinkElement) {
+                    replaceCORSStyle(node, filter);
+                }
+            }
+            return hasRules;
+        },
+        iterate: (r) => {
+            if (cache.has(r)) {
+                const rule = cache.get(r);
+                if (rule) {
+                    rules.push(rule);
+                }
+                return;
+            }
+
+            const declarations: ModifiableCSSDeclaration[] = [];
+            iterateCSSDeclarations(r, (property, value) => {
+                const declaration = getModifiableCSSDeclaration(property, value, r);
+                if (declaration) {
+                    declarations.push(declaration);
+                }
+            });
+
+            let rule: ModifiableCSSRule = null;
+            if (declarations.length > 0) {
+                rule = {selector: r.selectorText, declarations};
+                if (r.parentRule instanceof CSSMediaRule) {
+                    rule.media = (r.parentRule as CSSMediaRule).media.mediaText;
+                }
                 rules.push(rule);
             }
-            return;
-        }
-
-        const declarations: ModifiableCSSDeclaration[] = [];
-        iterateCSSDeclarations(r, (property, value) => {
-            const declaration = getModifiableCSSDeclaration(property, value, r);
-            if (declaration) {
-                declarations.push(declaration);
-            }
-        });
-
-        let rule: ModifiableCSSRule = null;
-        if (declarations.length > 0) {
-            rule = {selector: r.selectorText, declarations};
-            if (r.parentRule instanceof CSSMediaRule) {
-                rule.media = (r.parentRule as CSSMediaRule).media.mediaText;
-            }
-            rules.push(rule);
-        }
-        cache.set(r, rule);
+            cache.set(r, rule);
+        },
     });
 
     const lines: string[] = [];
@@ -60,6 +83,7 @@ function createTheme(filter: FilterConfig) {
                             return;
                         }
                         const asyncStyle = document.createElement('style');
+                        asyncStyle.classList.add('dark-reader-style');
                         asyncStyle.classList.add('dark-reader-style--async');
                         asyncStyle.textContent = [
                             media && `@media ${media} {`,
@@ -86,6 +110,43 @@ function createTheme(filter: FilterConfig) {
     style.textContent = lines.join('\n');
     document.head.insertBefore(style, null);
     Array.from(document.querySelectorAll('.dark-reader-style--async')).forEach((el) => el.parentElement && el.parentElement.removeChild(el));
+}
+
+const loadingStyles = new WeakSet<Node>();
+
+async function replaceCORSStyle(link: HTMLLinkElement, filter: FilterConfig) {
+    const url = link.href;
+    loadingStyles.add(link);
+
+    const fallback = document.createElement('style');
+    fallback.classList.add('dark-reader-style');
+    fallback.classList.add('dark-reader-style--fallback');
+    fallback.textContent = getModifiedFallbackStyle(filter);
+    document.head.insertBefore(fallback, link.nextElementSibling);
+
+    const response = await fetch(url);
+    const text = await response.text();
+
+    // Replace relative paths with absolute
+    const cssBasePath = getCSSBaseBath(url);
+    const cssText = text
+        .replace(fontFaceRegex, '')
+        .replace(cssURLRegex, (match) => {
+            const pathValue = getCSSURLValue(match);
+            return `url("${getAbsoluteURL(cssBasePath, pathValue)}")`;
+        })
+        .trim();
+
+    if (!cssText) {
+        return;
+    }
+
+    const style = document.createElement('style');
+    style.dataset.url = url;
+    style.textContent = cssText;
+    link.parentElement.insertBefore(style, link.nextElementSibling);
+
+    fallback.parentElement.removeChild(fallback);
 }
 
 let styleChangeObserver: MutationObserver = null;
@@ -125,7 +186,7 @@ function createThemeAndWatchForUpdates(filter: FilterConfig) {
                         (n instanceof HTMLLinkElement && n.rel === 'stylesheet')
                     ) &&
                         (n.id !== 'dark-reader-style') &&
-                        !n.classList.contains('dark-reader-style--async'));
+                        !n.classList.contains('dark-reader-style'));
                 });
         });
         if (styleMutations.length > 0) {
@@ -133,7 +194,7 @@ function createThemeAndWatchForUpdates(filter: FilterConfig) {
             watchForLinksLoading(() => state.watching && createTheme(filter));
         }
     });
-    styleChangeObserver.observe(document.head, {childList: true});
+    styleChangeObserver.observe(document.head, {childList: true, attributes: true, characterData: true});
 }
 
 function stopWatchingForUpdates() {
@@ -160,7 +221,7 @@ export function createOrUpdateDynamicTheme(filter: FilterConfig) {
 
 export function removeDynamicTheme() {
     removeStyle();
-    Array.from(document.querySelectorAll('.dark-reader-style--async')).forEach((el) => el.parentElement && el.parentElement.removeChild(el));
+    Array.from(document.querySelectorAll('.dark-reader-style')).forEach((el) => el.parentElement && el.parentElement.removeChild(el));
     stopWatchingForUpdates();
 }
 

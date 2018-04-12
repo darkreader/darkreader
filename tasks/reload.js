@@ -4,18 +4,20 @@ const {logInfo, logWarn} = require('./utils');
 module.exports = function createReloadTask(gulp) {
     let shouldReload = false;
     let connectionTimeoutId = null;
+    let server = null;
 
-    const server = http.createServer((req, res) => {
-        if (shouldReload) {
-            shouldReload = false;
-            res.end('reload');
-            logInfo('Auto-reloader connected');
-            clearTimeout(connectionTimeoutId);
-        } else {
-            res.end('waiting');
-        }
-    });
-    server.listen(8890, () => logInfo('Auto-reloader started'));
+    function createServer() {
+        server = server || http.createServer((req, res) => {
+            if (shouldReload) {
+                shouldReload = false;
+                res.end('reload');
+                logInfo('Auto-reloader connected');
+                clearTimeout(connectionTimeoutId);
+            } else {
+                res.end('waiting');
+            }
+        }).listen(8890, () => logInfo('Auto-reloader started'));
+    }
 
     function waitForConnection() {
         shouldReload = true;
@@ -26,13 +28,15 @@ module.exports = function createReloadTask(gulp) {
     }
 
     function closeServer() {
-        server.close(() => logInfo('Auto-reloader exit'));
+        server && server.close(() => logInfo('Auto-reloader exit'));
+        server = null;
     }
 
     process.on('exit', closeServer);
     process.on('SIGINT', closeServer);
 
     gulp.task('reload', (done) => {
+        createServer();
         waitForConnection();
         done();
     });

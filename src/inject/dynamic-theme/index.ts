@@ -1,6 +1,7 @@
 import {iterateCSSRules, iterateCSSDeclarations, getCSSBaseBath, getCSSURLValue, cssURLRegex, fontFaceRegex} from './css-rules';
 import {getAbsoluteURL} from './url';
 import {getModifiableCSSDeclaration, getModifiedUserAgentStyle, getModifiedFallbackStyle, cleanModificationCache, ModifiableCSSDeclaration, ModifiableCSSRule} from './modify-css';
+import {bgFetch} from './network';
 import state from './state';
 import {removeStyle} from '../style';
 import {FilterConfig} from '../../definitions';
@@ -124,8 +125,7 @@ async function replaceCORSStyle(link: HTMLLinkElement, filter: FilterConfig) {
     fallback.textContent = getModifiedFallbackStyle(filter);
     document.head.insertBefore(fallback, link.nextElementSibling);
 
-    const response = await fetch(url);
-    const text = await response.text();
+    const text = await bgFetch({url, responseType: 'text'});
 
     // Replace relative paths with absolute
     const cssBasePath = getCSSBaseBath(url);
@@ -142,7 +142,7 @@ async function replaceCORSStyle(link: HTMLLinkElement, filter: FilterConfig) {
     }
 
     const style = document.createElement('style');
-    style.dataset.url = url;
+    style.dataset.uri = url;
     style.textContent = cssText;
     link.parentElement.insertBefore(style, link.nextElementSibling);
 

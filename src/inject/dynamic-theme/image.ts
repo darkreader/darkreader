@@ -1,4 +1,5 @@
 import {createFilterMatrix, applyColorMatrix} from '../../generators/utils/matrix';
+import {bgFetch} from './network';
 import state from './state';
 import {getAbsoluteURL} from './url';
 import {scale, clamp} from '../../utils/math';
@@ -129,16 +130,14 @@ export function loadImage(url: string) {
                     return;
                 }
                 triedBGFetch = true;
-                chrome.runtime.sendMessage({type: 'fetch', data: url}, ({data, error}) => {
-                    if (error) {
-                        reject(error);
-                    } else {
+                bgFetch({url, responseType: 'blob'})
+                    .then((data) => {
                         const dataURL = URL.createObjectURL(data);
                         image.src = dataURL;
-                        image.addEventListener('load', () => URL.revokeObjectURL(data));
-                        image.addEventListener('error', () => URL.revokeObjectURL(data));
-                    }
-                });
+                        image.addEventListener('load', () => URL.revokeObjectURL(dataURL));
+                        image.addEventListener('error', () => URL.revokeObjectURL(dataURL));
+                    })
+                    .catch((error) => reject(error));
             }
         });
         image.crossOrigin = 'Anonymous';

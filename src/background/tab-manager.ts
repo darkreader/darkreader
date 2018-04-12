@@ -32,23 +32,26 @@ export default class TabManager {
             }
         });
 
-        chrome.runtime.onMessage.addListener(async ({type, data}, sender, sendResponse) => {
+        chrome.runtime.onMessage.addListener(({type, data}, sender, sendResponse) => {
             if (type === 'fetch') {
-                const url = data;
-                try {
-                    const response = await fetch(url);
-                    const blob = await response.blob();
-                    if (response.status >= 200 && response.status < 300) {
-                        sendResponse({data: blob});
-                    } else {
-                        const msg = `Unable to load ${url} ${response.status} ${response.statusText}`;
-                        console.error(msg);
-                        sendResponse({error: msg});
-                    }
-                } catch (error) {
-                    console.error(`Unable to load ${url} ${error}`);
-                    sendResponse({error});
-                }
+                const {url, responseType} = data;
+                fetch(url)
+                    .then(async (response) => {
+                        if (response.status >= 200 && response.status < 300) {
+                            const responseData = responseType === 'blob' ? await response.blob() : await response.text();
+                            sendResponse({data: responseData});
+                        } else {
+                            const msg = `Unable to load ${url} ${response.status} ${response.statusText}`;
+                            console.error(msg);
+                            sendResponse({error: msg});
+                        }
+                    })
+                    .catch((error) => {
+                        console.error(`Unable to load ${url} ${error}`);
+                        sendResponse({error});
+                    });
+
+                // Should return `true` synchronously to make `sendResponse` work in Chrome
                 return true;
             }
         });

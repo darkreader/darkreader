@@ -1,6 +1,7 @@
-import {parse, rgbToHSL, hslToString, RGBA} from '../../utils/color';
+import {parse, rgbToHSL, hslToRGB, rgbToString, rgbToHexString, RGBA, HSLA} from '../../utils/color';
 import {scale, clamp} from '../../utils/math';
 import {getMatches} from '../../utils/text';
+import {applyColorMatrix, createFilterMatrix} from '../../generators/utils/matrix';
 import {cssURLRegex, getCSSURLValue, getCSSBaseBath} from './css-rules';
 import {analyzeImage, applyFilterToImage, loadImage} from './image';
 import state from './state';
@@ -69,73 +70,79 @@ const unparsableColors = new Set([
     '-webkit-focus-ring-color',
 ]);
 
-function modifyBackgroundColor(rgb: RGBA, filter: FilterConfig) {
-    const {h, s, l, a} = rgbToHSL(rgb);
-
-    const lMin = 0.1;
-    const lMaxS0 = 0.2;
-    const lMaxS1 = 0.4;
-    const sNeutralLim = 0.2;
-    const sColored = 0.1;
-    const hColored = 220;
-
-    const lMax = scale(s, 0, 1, lMaxS0, lMaxS1);
-    const lx = (l < lMax ?
-        l :
-        scale(l, lMax, 1, lMax, lMin));
-
-    let hx = h;
-    let sx = s;
-    if (s < sNeutralLim) {
-        sx = sColored;
-        hx = hColored;
+function modifyColor(rgb: RGBA, filter: FilterConfig, modifyHSL: (hsl: HSLA) => HSLA) {
+    const hsl = rgbToHSL(rgb);
+    const modified = modifyHSL(hsl);
+    const {r, g, b, a} = hslToRGB(modified);
+    const [rf, gf, bf] = applyColorMatrix([r, g, b], createFilterMatrix({...filter, mode: 0}));
+    if (a === 1) {
+        return rgbToHexString({r: rf, g: gf, b: bf});
     }
+    return rgbToString({r: rf, g: gf, b: bf, a});
+}
 
-    const color = {h: hx, s: sx, l: lx, a};
+function modifyBackgroundColor(rgb: RGBA, filter: FilterConfig) {
+    return modifyColor(rgb, filter, ({h, s, l, a}) => {
+        const lMin = 0.1;
+        const lMaxS0 = 0.2;
+        const lMaxS1 = 0.4;
+        const sNeutralLim = 0.2;
+        const sColored = 0.1;
+        const hColored = 220;
 
-    return hslToString(color);
+        const lMax = scale(s, 0, 1, lMaxS0, lMaxS1);
+        const lx = (l < lMax ?
+            l :
+            scale(l, lMax, 1, lMax, lMin));
+
+        let hx = h;
+        let sx = s;
+        if (s < sNeutralLim) {
+            sx = sColored;
+            hx = hColored;
+        }
+
+        return {h: hx, s: sx, l: lx, a};
+    });
 }
 
 function modifyForegroundColor(rgb: RGBA, filter: FilterConfig) {
-    const {h, s, l, a} = rgbToHSL(rgb);
+    return modifyColor(rgb, filter, ({h, s, l, a}) => {
+        const lMax = 0.8;
+        const lMinS0 = 0.6;
+        const lMinS1 = 0.6;
+        const sNeutralLim = 0.2;
+        const sColored = 0.16;
+        const hColored = 40;
 
-    const lMax = 0.8;
-    const lMinS0 = 0.6;
-    const lMinS1 = 0.6;
-    const sNeutralLim = 0.2;
-    const sColored = 0.16;
-    const hColored = 40;
+        const lMin = scale(s, 0, 1, lMinS0, lMinS1);
+        const lx = (l < lMax ?
+            scale(l, 0, lMin, lMax, lMin) :
+            l);
+        let hx = h;
+        let sx = s;
+        if (s < sNeutralLim) {
+            sx = sColored;
+            hx = hColored;
+        }
 
-    const lMin = scale(s, 0, 1, lMinS0, lMinS1);
-    const lx = (l < lMax ?
-        scale(l, 0, lMin, lMax, lMin) :
-        l);
-    let hx = h;
-    let sx = s;
-    if (s < sNeutralLim) {
-        sx = sColored;
-        hx = hColored;
-    }
-
-    const color = {h: hx, s: sx, l: lx, a};
-
-    return hslToString(color);
+        return {h: hx, s: sx, l: lx, a};
+    });
 }
 
 function modifyBorderColor(rgb: RGBA, filter: FilterConfig) {
-    const {h, s, l, a} = rgbToHSL(rgb);
+    return modifyColor(rgb, filter, ({h, s, l, a}) => {
+        const lMinS0 = 0.2;
+        const lMinS1 = 0.3;
+        const lMaxS0 = 0.4;
+        const lMaxS1 = 0.5;
 
-    const lMinS0 = 0.2;
-    const lMinS1 = 0.3;
-    const lMaxS0 = 0.4;
-    const lMaxS1 = 0.5;
+        const lMin = scale(s, 0, 1, lMinS0, lMinS1);
+        const lMax = scale(s, 0, 1, lMaxS0, lMaxS1);
+        const lx = scale(l, 0, 1, lMax, lMin);
 
-    const lMin = scale(s, 0, 1, lMinS0, lMinS1);
-    const lMax = scale(s, 0, 1, lMaxS0, lMaxS1);
-    const lx = scale(l, 0, 1, lMax, lMin);
-    const color = {h, s, l: lx, a};
-
-    return hslToString(color);
+        return {h, s, l: lx, a};
+    });
 }
 
 function modifyShadowColor(rgb: RGBA, filter: FilterConfig) {
@@ -149,6 +156,7 @@ function modifyGradientColor(rgb: RGBA, filter: FilterConfig) {
 const colorParseCache = new Map<string, RGBA>();
 
 function parseColorWithCache($color: string) {
+    $color = $color.trim();
     if (colorParseCache.has($color)) {
         return colorParseCache.get($color);
     }

@@ -90,6 +90,12 @@ export function rgbToString(rgb: RGBA) {
     return `rgb(${toFixed(r)}, ${toFixed(g)}, ${toFixed(b)})`;
 }
 
+export function rgbToHexString({r, g, b, a}: RGBA) {
+    return `#${(a != null && a !== 1 ? [r, g, b, Math.round(a * 255)] : [r, g, b]).map((x, i) => {
+        return `${x < 16 ? '0' : ''}${x.toString(16)}`;
+    }).join('')}`;
+}
+
 export function hslToString(hsl: HSLA) {
     const {h, s, l, a} = hsl;
     if (!isNaN(a) && a < 1) {

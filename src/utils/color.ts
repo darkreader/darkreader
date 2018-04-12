@@ -15,7 +15,7 @@ export interface HSLA {
 // https://en.wikipedia.org/wiki/HSL_and_HSV
 export function hslToRGB({h, s, l, a = 1}: HSLA): RGBA {
     if (s === 0) {
-        const [r, b, g] = [, ,].map(() => Math.round(l * 255));
+        const [r, b, g] = [l, l, l].map((x) => Math.round(x * 255));
         return {r, g, b, a};
     }
 
@@ -84,21 +84,21 @@ function toFixed(n: number, digits = 0) {
 
 export function rgbToString(rgb: RGBA) {
     const {r, g, b, a} = rgb;
-    if (!isNaN(a) && a < 1) {
+    if (a != null && a < 1) {
         return `rgba(${toFixed(r)}, ${toFixed(g)}, ${toFixed(b)}, ${toFixed(a, 2)})`;
     }
     return `rgb(${toFixed(r)}, ${toFixed(g)}, ${toFixed(b)})`;
 }
 
 export function rgbToHexString({r, g, b, a}: RGBA) {
-    return `#${(a != null && a !== 1 ? [r, g, b, Math.round(a * 255)] : [r, g, b]).map((x, i) => {
+    return `#${(a != null && a < 1 ? [r, g, b, Math.round(a * 255)] : [r, g, b]).map((x, i) => {
         return `${x < 16 ? '0' : ''}${x.toString(16)}`;
     }).join('')}`;
 }
 
 export function hslToString(hsl: HSLA) {
     const {h, s, l, a} = hsl;
-    if (!isNaN(a) && a < 1) {
+    if (a != null && a < 1) {
         return `hsla(${toFixed(h)}, ${toFixed(s * 100)}%, ${toFixed(l * 100)}%, ${toFixed(a, 2)})`;
     }
     return `hsl(${toFixed(h)}, ${toFixed(s * 100)}%, ${toFixed(l * 100)}%)`;

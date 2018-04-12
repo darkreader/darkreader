@@ -254,7 +254,7 @@ export class Extension {
                     };
                 }
                 case ThemeEngines.dynamicTheme: {
-                    const {siteList, ...filter} = this.filterConfig;
+                    const {siteList, invertListed, engine, ...filter} = this.filterConfig;
                     return {
                         type: 'add-dynamic-theme',
                         data: filter,

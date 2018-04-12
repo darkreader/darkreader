@@ -3,7 +3,7 @@ import {scale, clamp} from '../../utils/math';
 import {getMatches} from '../../utils/text';
 import {applyColorMatrix, createFilterMatrix} from '../../generators/utils/matrix';
 import {cssURLRegex, getCSSURLValue, getCSSBaseBath} from './css-rules';
-import {analyzeImage, applyFilterToImage, loadImage} from './image';
+import {getImageDetails, getFilteredImageDataURL, ImageDetails} from './image';
 import state from './state';
 import {getAbsoluteURL} from './url';
 import {FilterConfig} from '../../definitions';
@@ -226,9 +226,8 @@ function getColorModifier(prop: string, value: string): CSSValueModifier {
 }
 
 const gradientRegex = /[\-a-z]+gradient\(([^\(\)]*(\(.*?\)))*[^\(\)]*\)/g;
-const loadedBgImages = new Map<string, HTMLImageElement>();
-const filteredImagesDataURLs = new Map<string, string>();
-const awaitingForFilters = new Map<string, ((result: string) => void)[]>();
+const imageDetailsCache = new Map<string, ImageDetails>();
+const awaitingForImageLoading = new Map<string, ((value: string) => void)[]>();
 
 function getBgImageModifier(prop: string, value: string, rule: CSSStyleRule): CSSValueModifier {
     try {
@@ -286,47 +285,57 @@ function getBgImageModifier(prop: string, value: string, rule: CSSStyleRule): CS
                 url = getAbsoluteURL(location.origin, url);
             }
 
-            if (filteredImagesDataURLs.has(url)) {
-                const dataURL = filteredImagesDataURLs.get(url);
-                return () => `url("${dataURL}")`;
+            let imageDetails: ImageDetails;
+            if (imageDetailsCache.has(url)) {
+                imageDetails = imageDetailsCache.get(url);
+                return (filter: FilterConfig) => getBgImageValue(imageDetails, filter);
             }
-            if (loadedBgImages.has(url)) {
-                return () => urlValue;
-            }
-            if (awaitingForFilters.has(url)) {
+
+            if (awaitingForImageLoading.has(url)) {
                 return () => new Promise<string>((resolve) => {
-                    awaitingForFilters.get(url).push(resolve);
+                    awaitingForImageLoading.get(url).push(resolve);
                 });
             }
-            awaitingForFilters.set(url, []);
+
+            awaitingForImageLoading.set(url, []);
             return async (filter: FilterConfig) => {
-                const image = await loadImage(url);
+                let imageDetails: ImageDetails;
+                try {
+                    imageDetails = await getImageDetails(url);
+                } catch (err) {
+                    console.warn(err);
+                    awaitingForImageLoading.get(url).forEach((resolve) => resolve(urlValue));
+                    return urlValue;
+                }
                 if (!state.watching) {
                     return null;
                 }
-                loadedBgImages.set(url, image);
-                const {isDark, isLight, isTransparent, isLarge} = analyzeImage(image);
-                let result: string;
-                if (isDark && isTransparent && filter.mode === 1) {
-                    console.warn(`Inverting dark image ${image.src}`);
-                    const inverted = applyFilterToImage(image, {...filter, sepia: clamp(filter.sepia + 90, 0, 100)});
-                    filteredImagesDataURLs.set(url, inverted);
-                    result = `url("${inverted}")`;
-                } else if (isLight && !isTransparent && filter.mode === 1) {
-                    if (isLarge) {
-                        result = 'none';
-                    } else {
-                        console.warn(`Inverting light image ${image.src}`);
-                        const dimmed = applyFilterToImage(image, filter);
-                        filteredImagesDataURLs.set(url, dimmed);
-                        result = `url("${dimmed}")`;
-                    }
-                } else {
-                    result = urlValue;
-                }
-                awaitingForFilters.get(url).forEach((resolve) => resolve(result));
-                return result;
+                imageDetailsCache.set(url, imageDetails);
+                const bgImageValue = getBgImageValue(imageDetails, filter) || urlValue;
+                awaitingForImageLoading.get(url).forEach((resolve) => resolve(bgImageValue));
+                return bgImageValue;
             };
+        };
+
+        const getBgImageValue = (imageDetails: ImageDetails, filter: FilterConfig) => {
+            const {isDark, isLight, isTransparent, isLarge} = imageDetails;
+            let result: string;
+            if (isDark && isTransparent && filter.mode === 1) {
+                console.warn(`Inverting dark image ${imageDetails.src}`);
+                const inverted = getFilteredImageDataURL(imageDetails, {...filter, sepia: clamp(filter.sepia + 90, 0, 100)});
+                result = `url("${inverted}")`;
+            } else if (isLight && !isTransparent && filter.mode === 1) {
+                if (isLarge) {
+                    result = 'none';
+                } else {
+                    console.warn(`Inverting light image ${imageDetails.src}`);
+                    const dimmed = getFilteredImageDataURL(imageDetails, filter);
+                    result = `url("${dimmed}")`;
+                }
+            } else {
+                result = null;
+            }
+            return result;
         };
 
         const modifiers: CSSValueModifier[] = [];
@@ -390,7 +399,6 @@ function getShadowModifier(prop: string, value: string): CSSValueModifier {
 export function cleanModificationCache() {
     colorParseCache.clear();
     colorModificationCache.clear();
-    loadedBgImages.clear();
-    filteredImagesDataURLs.clear();
-    awaitingForFilters.clear();
+    imageDetailsCache.clear();
+    awaitingForImageLoading.clear();
 }

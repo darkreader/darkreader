@@ -80,7 +80,7 @@ function createTheme(filter: FilterConfig) {
                 const modified = value(filter);
                 if (modified instanceof Promise) {
                     modified.then((asyncValue) => {
-                        if (!state.watching) {
+                        if (!state.watching || !asyncValue) {
                             return;
                         }
                         const asyncStyle = document.createElement('style');
@@ -125,7 +125,7 @@ async function replaceCORSStyle(link: HTMLLinkElement, filter: FilterConfig) {
     fallback.textContent = getModifiedFallbackStyle(filter);
     document.head.insertBefore(fallback, link.nextElementSibling);
 
-    const text = await bgFetch({url, responseType: 'text'});
+    const {text} = await bgFetch(url);
 
     // Replace relative paths with absolute
     const cssBasePath = getCSSBaseBath(url);

@@ -32,27 +32,42 @@ export default class TabManager {
             }
         });
 
-        chrome.runtime.onMessage.addListener(({type, data}, sender, sendResponse) => {
+        chrome.runtime.onMessage.addListener(async ({type, data, id}: Message, sender) => {
             if (type === 'fetch') {
-                const {url, responseType} = data;
-                fetch(url)
-                    .then(async (response) => {
-                        if (response.status >= 200 && response.status < 300) {
-                            const responseData = responseType === 'blob' ? await response.blob() : await response.text();
-                            sendResponse({data: responseData});
-                        } else {
-                            const msg = `Unable to load ${url} ${response.status} ${response.statusText}`;
-                            console.error(msg);
-                            sendResponse({error: msg});
-                        }
-                    })
-                    .catch((error) => {
-                        console.error(`Unable to load ${url} ${error}`);
-                        sendResponse({error});
-                    });
+                const url = data;
 
-                // Should return `true` synchronously to make `sendResponse` work in Chrome
-                return true;
+                // Using custom response due to Chrome and Firefox incompatibility
+                // Sometimes fetch error behaves like synchronous and sends `undefined`
+                const sendResponse = (response) => chrome.tabs.sendMessage(sender.tab.id, {type: 'fetch-response', id, ...response});
+
+                try {
+                    const response = await fetch(url);
+                    if (response.ok) {
+                        const clone = response.clone();
+                        const blob = await clone.blob();
+                        const text = await response.text();
+                        const dataURL = await (new Promise((resolve) => {
+                            const reader = new FileReader();
+                            reader.onloadend = () => resolve(reader.result);
+                            reader.readAsDataURL(blob);
+                        }));
+                        sendResponse({
+                            data: {
+                                dataURL,
+                                text,
+                                type: response.headers.get('content-type'),
+                            }
+                        });
+                    } else {
+                        const msg = `Unable to load ${url} ${response.status} ${response.statusText}`;
+                        console.error(msg);
+                        sendResponse({error: msg});
+                    }
+                }
+                catch (error) {
+                    console.error(`Unable to load ${url} ${error}`);
+                    sendResponse({error});
+                }
             }
         });
     }

@@ -1,11 +1,90 @@
-import {createFilterMatrix, applyColorMatrix} from '../../generators/utils/matrix';
+import {getSVGFilterMatrixValue} from '../../generators/svg-filter';
 import {bgFetch} from './network';
 import state from './state';
 import {getAbsoluteURL} from './url';
 import {scale, clamp} from '../../utils/math';
 import {FilterConfig} from '../../definitions';
 
-export function analyzeImage(image: HTMLImageElement) {
+export interface ImageDetails {
+    src: string;
+    dataURL: string;
+    width: number;
+    height: number;
+    isDark: boolean;
+    isLight: boolean;
+    isTransparent: boolean;
+    isLarge: boolean;
+}
+
+export async function getImageDetails(url: string) {
+    const dataURL = await getImageDataURL(url);
+    if (!state.watching) {
+        throw new Error(`Image loading cancelled ${url}`);
+    }
+    const image = await urlToImage(dataURL);
+    const info = analyzeImage(image);
+    return {
+        src: url,
+        dataURL,
+        width: image.naturalWidth,
+        height: image.naturalHeight,
+        ...info,
+    };
+}
+
+async function getImageDataURL(url: string) {
+    let dataURL: string;
+    if (url.startsWith('data:')) {
+        dataURL = url;
+    } else {
+        try {
+            const image = await urlToImage(url);
+            dataURL = imageToDataURL(image);
+        } catch (err) {
+            try {
+                const response = await bgFetch(url);
+                dataURL = response.dataURL;
+            }
+            catch (err) {
+                console.error('Fatality', err);
+            }
+        }
+    }
+    return dataURL;
+}
+
+async function urlToImage(url: string) {
+    return new Promise<HTMLImageElement>((resolve, reject) => {
+        const image = new Image();
+        image.onload = () => resolve(image);
+        image.onerror = () => reject(`Unable to load image ${url}`);
+        image.src = url;
+    });
+}
+
+function imageToDataURL(image: HTMLImageElement, type?: string) {
+    const canvas = document.createElement('canvas');
+    canvas.width = image.naturalWidth;
+    canvas.height = image.naturalHeight;
+    const context = canvas.getContext('2d');
+    context.drawImage(image, 0, 0, image.naturalWidth, image.naturalHeight);
+
+    const HIGH_QUALITY_PIXELS_COUNT = 256 * 256;
+    const LOW_QUALITY_PIXELS_COUNT = 1920 * 1080;
+    const pixelsCount = image.naturalWidth * image.naturalHeight;
+
+    return (type ?
+        canvas.toDataURL(type) :
+        pixelsCount <= HIGH_QUALITY_PIXELS_COUNT ?
+            canvas.toDataURL('image/png') :
+            canvas.toDataURL(
+                'image/jpeg',
+                clamp(scale(pixelsCount, LOW_QUALITY_PIXELS_COUNT, HIGH_QUALITY_PIXELS_COUNT, 0, 1), 0, 1)
+            )
+    );
+}
+
+function analyzeImage(image: HTMLImageElement) {
     const MAX_ANALIZE_PIXELS_COUNT = 32 * 32;
 
     const naturalPixelsCount = image.naturalWidth * image.naturalHeight;
@@ -73,74 +152,19 @@ export function analyzeImage(image: HTMLImageElement) {
     };
 }
 
-export function applyFilterToImage(image: HTMLImageElement, filter: FilterConfig) {
-    const matrix = createFilterMatrix(filter);
-    const width = image.naturalWidth;
-    const height = image.naturalHeight;
-
-    const canvas = document.createElement('canvas');
-    canvas.width = width;
-    canvas.height = height;
-    const context = canvas.getContext('2d');
-    context.drawImage(image, 0, 0, width, height);
-    const imageData = context.getImageData(0, 0, width, height);
-    const d = imageData.data;
-
-    let i: number, x: number, y: number;
-    let r: number, g: number, b: number, a: number;
-    for (y = 0; y < height; y++) {
-        for (x = 0; x < width; x++) {
-            i = 4 * (y * width + x);
-            r = d[i + 0];
-            g = d[i + 1];
-            b = d[i + 2];
-            a = d[i + 3];
-            [r, g, b] = applyColorMatrix([r, g, b], matrix);
-            d[i + 0] = r;
-            d[i + 1] = g;
-            d[i + 2] = b;
-            d[i + 3] = a;
-        }
-    }
-    context.putImageData(imageData, 0, 0);
-
-    const HIGH_QUALITY_PIXELS_COUNT = 256 * 256;
-    const LOW_QUALITY_PIXELS_COUNT = 1920 * 1080;
-
-    const pixelsCount = width * height;
-    return (pixelsCount <= HIGH_QUALITY_PIXELS_COUNT ?
-        canvas.toDataURL('image/png') :
-        canvas.toDataURL('image/jpeg', clamp(scale(pixelsCount, LOW_QUALITY_PIXELS_COUNT, HIGH_QUALITY_PIXELS_COUNT, 0, 1), 0, 1)));
-}
-
-export function loadImage(url: string) {
-    return new Promise<HTMLImageElement>((resolve, reject) => {
-        const image = new Image();
-        image.addEventListener('load', () => {
-            resolve(image);
-        });
-        let triedBGFetch = false;
-        image.addEventListener('error', () => {
-            if (triedBGFetch || url.match(/^data\:/)) {
-                reject(`Unable to load image ${url}`);
-            } else {
-                console.warn(`Unable to load image ${url}`);
-                if (!state.watching) {
-                    reject('Image loading cancelled');
-                    return;
-                }
-                triedBGFetch = true;
-                bgFetch({url, responseType: 'blob'})
-                    .then((data) => {
-                        const dataURL = URL.createObjectURL(data);
-                        image.src = dataURL;
-                        image.addEventListener('load', () => URL.revokeObjectURL(dataURL));
-                        image.addEventListener('error', () => URL.revokeObjectURL(dataURL));
-                    })
-                    .catch((error) => reject(error));
-            }
-        });
-        image.crossOrigin = 'Anonymous';
-        image.src = url;
-    });
+export function getFilteredImageDataURL({dataURL, width, height}: ImageDetails, filter: FilterConfig) {
+    const matrix = getSVGFilterMatrixValue(filter);
+    return [
+        'data:image/svg+xml;base64,',
+        btoa([
+            `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="${width}" height="${height}">`,
+            '<defs>',
+            '<filter id="darkreader-image-filter">',
+            `<feColorMatrix type="matrix" values="${matrix}" />`,
+            '</filter>',
+            '</defs>',
+            `<image width="${width}" height="${height}" filter="url(#darkreader-image-filter)" xlink:href="${dataURL}" />`,
+            '</svg>',
+        ].join(''))
+    ].join('');
 }

@@ -43,12 +43,16 @@ export function getModifiableCSSDeclaration(property: string, value: string, rul
 
 export function getModifiedUserAgentStyle(filter: FilterConfig) {
     const lines: string[] = [];
-    lines.push('html, body, button, input, textarea {');
-    lines.push(`    background-color: ${modifyBackgroundColor({r: 255, g: 255, b: 255}, filter)} !important;`)
+    lines.push('html, body, input, textarea, select, button {');
+    lines.push(`    background-color: ${modifyBackgroundColor({r: 255, g: 255, b: 255}, filter)} !important;`);
+    lines.push(`    border-color: ${modifyBorderColor({r: 76, g: 76, b: 76}, filter)} !important;`);
     lines.push(`    color: ${modifyForegroundColor({r: 0, g: 0, b: 0}, filter)} !important;`);
     lines.push('}');
-    lines.push('input::placeholder {');
-    lines.push(`    color: ${modifyForegroundColor({r: 0, g: 0, b: 0, a: 0.75}, filter)} !important;`);
+    lines.push('table {');
+    lines.push(`    border-color: ${modifyBorderColor({r: 128, g: 128, b: 128}, filter)} !important;`);
+    lines.push('}');
+    lines.push('::placeholder {');
+    lines.push(`    color: ${modifyForegroundColor({r: 169, g: 169, b: 169}, filter)} !important;`);
     lines.push('}');
     return lines.join('\n');
 }

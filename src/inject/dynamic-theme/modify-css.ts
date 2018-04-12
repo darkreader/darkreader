@@ -109,8 +109,8 @@ function modifyBgHSL({h, s, l, a}) {
     const lMin = 0.1;
     const lMaxS0 = 0.2;
     const lMaxS1 = 0.4;
-    const sNeutralLim = 0.2;
-    const sColored = 0.1;
+    const sNeutralLim = 0.16;
+    const sColored = 0.16;
     const hColored = 220;
 
     const lMax = scale(s, 0, 1, lMaxS0, lMaxS1);
@@ -123,6 +123,8 @@ function modifyBgHSL({h, s, l, a}) {
     if (s < sNeutralLim) {
         sx = sColored;
         hx = hColored;
+    } else if (l > lMax) {
+        sx = s * scale(l, lMax, 1, 1, 0.5);
     }
 
     return {h: hx, s: sx, l: lx, a};
@@ -133,7 +135,7 @@ function modifyBackgroundColor(rgb: RGBA, filter: FilterConfig) {
 }
 
 function modifyFgHSL({h, s, l, a}) {
-    const lMax = 0.8;
+    const lMax = 0.9;
     const lMinS0 = 0.6;
     const lMinS1 = 0.6;
     const sNeutralLim = 0.2;

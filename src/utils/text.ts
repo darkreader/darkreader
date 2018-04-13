@@ -48,15 +48,6 @@ export function formatArray(arr: string[]) {
     return arr.concat('').join('\n');
 }
 
-export function spinalToCamelCase(spinalCase: string) {
-    return spinalCase.split('-').filter((s) => s).map((p, i) => {
-        if (i === 0) {
-            return p;
-        }
-        return `${p.charAt(0).toUpperCase()}${p.substring(1)}`;
-    }).join('');
-}
-
 export function getMatches(regex: RegExp, input: string, group = 0) {
     const matches: string[] = [];
     let m: RegExpMatchArray;

@@ -176,6 +176,7 @@ async function replaceCORSStyle(link: HTMLLinkElement, filter: FilterConfig) {
         .trim();
 
     if (!cssText) {
+        fallback.parentElement.removeChild(fallback);
         return;
     }
 

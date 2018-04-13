@@ -15,16 +15,16 @@ function createTheme(filter: FilterConfig) {
         style.id = 'dark-reader-style';
         document.head.appendChild(style);
     }
+    style.classList.add('dark-reader-style');
+    style.classList.add('dark-reader-style--main');
+    style.media = 'screen';
 
     const rules: ModifiableCSSRule[] = [];
 
     iterateCSSRules({
         filter: (s) => {
             const node = s.ownerNode as HTMLStyleElement | HTMLLinkElement;
-            if (node.id === 'dark-reader-style' ||
-                loadingStyles.has(node) ||
-                node.classList.contains('dark-reader-style')
-            ) {
+            if (!shouldAnalyzeStyle(node) || loadingStyles.has(node)) {
                 return false;
             }
 
@@ -84,6 +84,7 @@ function createTheme(filter: FilterConfig) {
                             return;
                         }
                         const asyncStyle = document.createElement('style');
+                        asyncStyle.media = 'screen';
                         asyncStyle.classList.add('dark-reader-style');
                         asyncStyle.classList.add('dark-reader-style--async');
                         asyncStyle.textContent = [
@@ -113,6 +114,18 @@ function createTheme(filter: FilterConfig) {
     Array.from(document.querySelectorAll('.dark-reader-style--async')).forEach((el) => el.parentElement && el.parentElement.removeChild(el));
 }
 
+function shouldAnalyzeStyle(node: Element) {
+    return (
+        (
+            (node instanceof HTMLStyleElement) ||
+            (node instanceof HTMLLinkElement && node.rel === 'stylesheet')
+        ) && (
+            !node.classList.contains('dark-reader-style') ||
+            node.classList.contains('dark-reader-style--cors')
+        )
+    );
+}
+
 const loadingStyles = new WeakSet<Node>();
 
 async function replaceCORSStyle(link: HTMLLinkElement, filter: FilterConfig) {
@@ -122,6 +135,7 @@ async function replaceCORSStyle(link: HTMLLinkElement, filter: FilterConfig) {
     const fallback = document.createElement('style');
     fallback.classList.add('dark-reader-style');
     fallback.classList.add('dark-reader-style--fallback');
+    fallback.media = 'screen';
     fallback.textContent = getModifiedFallbackStyle(filter);
     document.head.insertBefore(fallback, link.nextElementSibling);
 
@@ -148,10 +162,13 @@ async function replaceCORSStyle(link: HTMLLinkElement, filter: FilterConfig) {
         return;
     }
 
-    const style = document.createElement('style');
-    style.dataset.uri = url;
-    style.textContent = cssText;
-    link.parentElement.insertBefore(style, link.nextElementSibling);
+    const cors = document.createElement('style');
+    cors.classList.add('dark-reader-style');
+    cors.classList.add('dark-reader-style--cors');
+    cors.media = 'screen';
+    cors.dataset.uri = url;
+    cors.textContent = cssText;
+    link.parentElement.insertBefore(cors, link.nextElementSibling);
 
     fallback.parentElement.removeChild(fallback);
 }
@@ -187,14 +204,7 @@ function createThemeAndWatchForUpdates(filter: FilterConfig) {
         const styleMutations = mutations.filter((m) => {
             return Array.from(m.addedNodes)
                 .concat(Array.from(m.removedNodes))
-                .some((n: Element) => {
-                    return ((
-                        (n instanceof HTMLStyleElement) ||
-                        (n instanceof HTMLLinkElement && n.rel === 'stylesheet')
-                    ) &&
-                        (n.id !== 'dark-reader-style') &&
-                        !n.classList.contains('dark-reader-style'));
-                });
+                .some((n: Element) => shouldAnalyzeStyle(n));
         });
         if (styleMutations.length > 0) {
             createTheme(filter);

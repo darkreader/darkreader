@@ -37,17 +37,7 @@ async function getImageDataURL(url: string) {
     if (url.startsWith('data:')) {
         dataURL = url;
     } else {
-        try {
-            const image = await urlToImage(url);
-            dataURL = imageToDataURL(image);
-        } catch (err) {
-            try {
-                dataURL = await bgFetch({url, responseType: 'data-url'});
-            }
-            catch (err) {
-                console.error('Fatality', err);
-            }
-        }
+        dataURL = await bgFetch({url, responseType: 'data-url'});
     }
     return dataURL;
 }

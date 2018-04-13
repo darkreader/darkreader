@@ -127,6 +127,10 @@ export function parse($color: string): RGBA {
         return getColorByName(c);
     }
 
+    if (systemColors.has(c)) {
+        return getSystemColor(c);
+    }
+
     if ($color === 'transparent') {
         return {r: 0, g: 0, b: 0, a: 0};
     }
@@ -192,6 +196,16 @@ function parseHex($hex: string) {
 
 function getColorByName($color: string) {
     const n = knownColors.get($color);
+    return {
+        r: (n >> 16) & 255,
+        g: (n >> 8) & 255,
+        b: (n >> 0) & 255,
+        a: 1
+    };
+}
+
+function getSystemColor($color: string) {
+    const n = systemColors.get($color);
     return {
         r: (n >> 16) & 255,
         g: (n >> 8) & 255,
@@ -350,3 +364,35 @@ const knownColors: Map<string, number> = new Map(Object.entries({
     yellow: 0xffff00,
     yellowgreen: 0x9acd32,
 }));
+
+const systemColors: Map<string, number> = new Map(Object.entries({
+    ActiveBorder: 0x3b99fc,
+    ActiveCaption: 0x000000,
+    AppWorkspace: 0xaaaaaa,
+    Background: 0x6363ce,
+    ButtonFace: 0xffffff,
+    ButtonHighlight: 0xe9e9e9,
+    ButtonShadow: 0x9fa09f,
+    ButtonText: 0x000000,
+    CaptionText: 0x000000,
+    GrayText: 0x7f7f7f,
+    Highlight: 0xb2d7ff,
+    HighlightText: 0x000000,
+    InactiveBorder: 0xffffff,
+    InactiveCaption: 0xffffff,
+    InactiveCaptionText: 0x000000,
+    InfoBackground: 0xfbfcc5,
+    InfoText: 0x000000,
+    Menu: 0xf6f6f6,
+    MenuText: 0xffffff,
+    Scrollbar: 0xaaaaaa,
+    ThreeDDarkShadow: 0x000000,
+    ThreeDFace: 0xc0c0c0,
+    ThreeDHighlight: 0xffffff,
+    ThreeDLightShadow: 0xffffff,
+    ThreeDShadow: 0x000000,
+    Window: 0xececec,
+    WindowFrame: 0xaaaaaa,
+    WindowText: 0x000000,
+    '-webkit-focus-ring-color': 0xe59700
+}).map(([key, value]) => [key.toLowerCase(), value] as [string, number]));

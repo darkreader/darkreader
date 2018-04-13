@@ -22,8 +22,7 @@ export function iterateCSSDeclarations(rule: CSSStyleRule, iterator: (propery: s
         return;
     }
     Array.from(declarations).forEach((property) => {
-        const jsProp = spinalToCamelCase(property);
-        const value = declarations[jsProp];
+        const value = declarations.getPropertyValue(property).trim();
         if (!value) {
             return;
         }

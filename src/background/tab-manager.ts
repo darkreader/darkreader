@@ -56,14 +56,10 @@ export default class TabManager {
                             sendResponse({data: text});
                         }
                     } else {
-                        const msg = `Unable to load ${url} ${response.status} ${response.statusText}`;
-                        console.error(msg);
-                        sendResponse({error: msg});
+                        throw new Error(`Unable to load ${url} ${response.status} ${response.statusText}`);
                     }
-                }
-                catch (error) {
-                    console.error(`Unable to load ${url} ${error}`);
-                    sendResponse({error});
+                } catch (err) {
+                    sendResponse({error: err && err.message ? err.message : err});
                 }
             }
         });

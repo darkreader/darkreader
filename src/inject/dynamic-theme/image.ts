@@ -51,28 +51,6 @@ async function urlToImage(url: string) {
     });
 }
 
-function imageToDataURL(image: HTMLImageElement, type?: string) {
-    const canvas = document.createElement('canvas');
-    canvas.width = image.naturalWidth;
-    canvas.height = image.naturalHeight;
-    const context = canvas.getContext('2d');
-    context.drawImage(image, 0, 0, image.naturalWidth, image.naturalHeight);
-
-    const HIGH_QUALITY_PIXELS_COUNT = 256 * 256;
-    const LOW_QUALITY_PIXELS_COUNT = 1920 * 1080;
-    const pixelsCount = image.naturalWidth * image.naturalHeight;
-
-    return (type ?
-        canvas.toDataURL(type) :
-        pixelsCount <= HIGH_QUALITY_PIXELS_COUNT ?
-            canvas.toDataURL('image/png') :
-            canvas.toDataURL(
-                'image/jpeg',
-                clamp(scale(pixelsCount, LOW_QUALITY_PIXELS_COUNT, HIGH_QUALITY_PIXELS_COUNT, 0, 1), 0, 1)
-            )
-    );
-}
-
 function analyzeImage(image: HTMLImageElement) {
     const MAX_ANALIZE_PIXELS_COUNT = 32 * 32;
 

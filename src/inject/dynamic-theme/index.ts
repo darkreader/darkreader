@@ -19,6 +19,13 @@ function createTheme(filter: FilterConfig) {
     style.classList.add('dark-reader-style--main');
     style.media = 'screen';
 
+    document.body && Array.from(document.body.querySelectorAll('link[rel="stylesheet"], style'))
+        .forEach((el) => {
+            if (el.parentElement !== document.head) {
+                document.head.insertBefore(el, style);
+            }
+        });
+
     const variables = new Map<string, string>();
     iterateCSSRules({
         filter: (s) => shouldAnalyzeStyle(s.ownerNode),
@@ -193,9 +200,6 @@ function watchForLinksLoading(filter: FilterConfig) {
     links.forEach((link) => {
         link.addEventListener('load', onLoad);
         linksSubscriptions.set(link, onLoad);
-        if (link.parentElement !== document.head) {
-            document.head.insertBefore(link, document.getElementById('dark-reader-style'));
-        }
         if (!loadingStyles.has(link)) {
             try {
                 const rules = (link.sheet as any).cssRules;
@@ -231,7 +235,7 @@ function createThemeAndWatchForUpdates(filter: FilterConfig) {
         }
     });
     styleChangeObserver.observe(document.head, {childList: true, attributes: true, characterData: true});
-    document.body && styleChangeObserver.observe(document.body, {childList: true, attributes: true, characterData: true});
+    document.body && styleChangeObserver.observe(document.body, {childList: true, subtree: true, attributes: true, characterData: true});
 }
 
 function stopWatchingForUpdates() {

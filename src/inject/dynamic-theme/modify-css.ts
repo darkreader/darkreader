@@ -64,8 +64,8 @@ export function getModifiedUserAgentStyle(filter: FilterConfig) {
 export function getModifiedFallbackStyle(filter: FilterConfig) {
     const lines: string[] = [];
     lines.push('html *, body * {');
-    lines.push(`    background-color: ${modifyBackgroundColor({r: 255, g: 255, b: 255}, filter)};`)
-    lines.push(`    color: ${modifyForegroundColor({r: 0, g: 0, b: 0}, filter)};`);
+    lines.push(`    background-color: ${modifyBackgroundColor({r: 255, g: 255, b: 255}, filter)} !important;`)
+    lines.push(`    color: ${modifyForegroundColor({r: 0, g: 0, b: 0}, filter)} !important;`);
     lines.push('}');
     return lines.join('\n');
 }

@@ -1,14 +1,15 @@
 import {parseURL} from './url';
 
 export function iterateCSSRules(options: {filter: (s: StyleSheet) => boolean, iterate: (r: CSSStyleRule) => void}) {
-    Array.from(document.styleSheets)
-        .filter((s) => {
+    Array.from<HTMLStyleElement | HTMLLinkElement>(document.querySelectorAll('link[rel="stylesheet"], style'))
+        .filter((el) => {
             try {
-                return Boolean((s as any).cssRules);
+                return Boolean((el.sheet as any).cssRules);
             } catch (err) {
                 return false;
             }
         })
+        .map((el) => el.sheet)
         .filter((s) => options.filter(s))
         .forEach((s) => {
             Array.from<CSSStyleRule>((s as any).cssRules)
@@ -64,6 +65,9 @@ export function replaceCSSVariables(value: string, variables: Map<string, string
     });
     if (missing) {
         return null;
+    }
+    if (result.match(varRegex)) {
+        return replaceCSSVariables(result, variables);
     }
     return result;
 }

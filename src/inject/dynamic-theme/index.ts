@@ -212,7 +212,7 @@ function createThemeAndWatchForUpdates(filter: FilterConfig) {
         }
     });
     styleChangeObserver.observe(document.head, {childList: true, attributes: true, characterData: true});
-    styleChangeObserver.observe(document.body, {childList: true, attributes: true, characterData: true});
+    document.body && styleChangeObserver.observe(document.body, {childList: true, attributes: true, characterData: true});
 }
 
 function stopWatchingForUpdates() {

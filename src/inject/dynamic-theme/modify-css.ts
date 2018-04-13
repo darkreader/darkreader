@@ -72,8 +72,13 @@ const unparsableColors = new Set([
     'initial',
     'currentcolor',
     '-webkit-focus-ring-color',
+    'activeborder',
+    'buttonface',
+    'buttonhighlight',
+    'buttontext',
     'highlight',
     'highlighttext',
+    'windowtext',
 ]);
 
 const colorModificationCache = new Map<Function, Map<string, string>>();
@@ -209,7 +214,7 @@ function tryParseColor($color: string) {
 
 function getColorModifier(prop: string, value: string): CSSValueModifier {
     if (unparsableColors.has(value.toLowerCase())) {
-        return null;
+        return () => value;
     }
     try {
         const rgb = parseColorWithCache(value);

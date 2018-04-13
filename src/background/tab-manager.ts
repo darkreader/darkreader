@@ -34,7 +34,7 @@ export default class TabManager {
 
         chrome.runtime.onMessage.addListener(async ({type, data, id}: Message, sender) => {
             if (type === 'fetch') {
-                const url = data;
+                const {url, responseType} = data;
 
                 // Using custom response due to Chrome and Firefox incompatibility
                 // Sometimes fetch error behaves like synchronous and sends `undefined`
@@ -43,21 +43,18 @@ export default class TabManager {
                 try {
                     const response = await fetch(url);
                     if (response.ok) {
-                        const clone = response.clone();
-                        const blob = await clone.blob();
-                        const text = await response.text();
-                        const dataURL = await (new Promise((resolve) => {
-                            const reader = new FileReader();
-                            reader.onloadend = () => resolve(reader.result);
-                            reader.readAsDataURL(blob);
-                        }));
-                        sendResponse({
-                            data: {
-                                dataURL,
-                                text,
-                                type: response.headers.get('content-type'),
-                            }
-                        });
+                        if (responseType === 'data-url') {
+                            const blob = await response.blob();
+                            const dataURL = await (new Promise((resolve) => {
+                                const reader = new FileReader();
+                                reader.onloadend = () => resolve(reader.result);
+                                reader.readAsDataURL(blob);
+                            }));
+                            sendResponse({data: dataURL});
+                        } else {
+                            const text = await response.text();
+                            sendResponse({data: text});
+                        }
                     } else {
                         const msg = `Unable to load ${url} ${response.status} ${response.statusText}`;
                         console.error(msg);

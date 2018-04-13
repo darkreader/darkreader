@@ -1,19 +1,18 @@
-interface FetchResponse {
-    dataURL: string;
-    text: string;
-    type: string;
+interface FetchRequest {
+    url: string;
+    responseType: 'data-url' | 'text';
 }
 
 let counter = 0;
 const resolvers = new Map<number, (data) => void>();
 const rejectors = new Map<number, (error) => void>();
 
-export function bgFetch(url: string) {
-    return new Promise<FetchResponse>((resolve, reject) => {
+export function bgFetch(request: FetchRequest) {
+    return new Promise<string>((resolve, reject) => {
         const id = ++counter;
         resolvers.set(id, resolve);
         rejectors.set(id, reject);
-        chrome.runtime.sendMessage({type: 'fetch', data: url, id});
+        chrome.runtime.sendMessage({type: 'fetch', data: request, id});
     });
 }
 

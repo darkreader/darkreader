@@ -125,7 +125,14 @@ async function replaceCORSStyle(link: HTMLLinkElement, filter: FilterConfig) {
     fallback.textContent = getModifiedFallbackStyle(filter);
     document.head.insertBefore(fallback, link.nextElementSibling);
 
-    const {text} = await bgFetch(url);
+    let text: string;
+    try {
+        text = await bgFetch({url, responseType: 'text'});
+    } catch (err) {
+        console.warn(`Unable to load CSS ${url}`);
+        fallback.parentElement.removeChild(fallback);
+        return;
+    }
 
     // Replace relative paths with absolute
     const cssBasePath = getCSSBaseBath(url);
@@ -195,6 +202,7 @@ function createThemeAndWatchForUpdates(filter: FilterConfig) {
         }
     });
     styleChangeObserver.observe(document.head, {childList: true, attributes: true, characterData: true});
+    styleChangeObserver.observe(document.body, {childList: true, attributes: true, characterData: true});
 }
 
 function stopWatchingForUpdates() {

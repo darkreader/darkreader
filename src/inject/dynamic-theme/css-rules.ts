@@ -4,15 +4,15 @@ export function iterateCSSRules(options: {filter: (s: StyleSheet) => boolean, it
     Array.from<HTMLStyleElement | HTMLLinkElement>(document.querySelectorAll('link[rel="stylesheet"], style'))
         .filter((el) => {
             try {
-                return Boolean((el.sheet as any).cssRules);
+                return Boolean((el.sheet as CSSStyleSheet).cssRules);
             } catch (err) {
                 return false;
             }
         })
-        .map((el) => el.sheet)
+        .map((el) => el.sheet as CSSStyleSheet)
         .filter((s) => options.filter(s))
         .forEach((s) => {
-            Array.from<CSSStyleRule>((s as any).cssRules)
+            Array.from<CSSStyleRule>(s.cssRules as any)
                 .forEach((r) => {
                     if (r instanceof CSSMediaRule) {
                         Array.from(r.cssRules).forEach((mr) => options.iterate(mr as CSSStyleRule));

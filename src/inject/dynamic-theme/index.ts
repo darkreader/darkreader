@@ -58,19 +58,29 @@ function createTheme(filter: FilterConfig) {
                 return;
             }
 
-            const declarations: ModifiableCSSDeclaration[] = [];
-            iterateCSSDeclarations(r, (property, value) => {
-                const withVariables = replaceCSSVariables(value, variables);
-                if (!withVariables) {
-                    console.warn(`Variable not found ${value}`);
-                    return;
+            let temp: HTMLStyleElement = null;
+            let tempRule: CSSStyleRule = null;
+            if (variables.size > 0) {
+                const cssText = replaceCSSVariables(r.cssText, variables);
+                if (cssText) {
+                    temp = document.createElement('style');
+                    temp.classList.add('dark-reader-style');
+                    temp.classList.add('dark-reader-style--temp-var');
+                    temp.textContent = cssText;
+                    document.head.appendChild(temp);
+                    tempRule = (temp.sheet as CSSStyleSheet).cssRules[0] as CSSStyleRule;
                 }
+            }
 
-                const declaration = getModifiableCSSDeclaration(property, withVariables, r);
+            const declarations: ModifiableCSSDeclaration[] = [];
+            iterateCSSDeclarations(tempRule || r, (property, value) => {
+                const declaration = getModifiableCSSDeclaration(property, value, r);
                 if (declaration) {
                     declarations.push(declaration);
                 }
             });
+
+            temp && temp.parentElement.removeChild(temp);
 
             let rule: ModifiableCSSRule = null;
             if (declarations.length > 0) {
@@ -203,7 +213,7 @@ function watchForLinksLoading(filter: FilterConfig) {
         linksSubscriptions.set(link, onLoad);
         if (!loadingStyles.has(link)) {
             try {
-                const rules = (link.sheet as any).cssRules;
+                const rules = (link.sheet as CSSStyleSheet).cssRules;
             } catch (err) {
                 console.warn(err);
                 replaceCORSStyle(link, filter);

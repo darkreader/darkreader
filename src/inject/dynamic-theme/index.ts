@@ -241,10 +241,11 @@ export function removeDynamicTheme() {
     removeStyle();
     Array.from(document.querySelectorAll('.dark-reader-style')).forEach((el) => el.parentElement && el.parentElement.removeChild(el));
     stopWatchingForUpdates();
+    stopWatchingForLinksLoading();
 }
 
 export function cleanDynamicThemeCache() {
-    stopWatchingForUpdates();
     cleanModificationCache();
+    stopWatchingForUpdates();
     stopWatchingForLinksLoading();
 }

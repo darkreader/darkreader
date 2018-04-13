@@ -225,13 +225,6 @@ function getColorModifier(prop: string, value: string): CSSValueModifier {
     } catch (err) {
         console.warn('Color parse error', err);
         return null;
-        // if (prop.indexOf('background') >= 0) {
-        //     return (filter) => modifyBackgroundColor({r: 0, g: 0, b: 0}, filter);
-        // }
-        // if (prop.indexOf('border') >= 0 || prop.indexOf('outline') >= 0) {
-        //     return (filter) => modifyBorderColor({r: 128, g: 128, b: 128}, filter);
-        // }
-        // return (filter) => modifyForegroundColor({r: 255, g: 255, b: 255}, filter);
     }
 }
 

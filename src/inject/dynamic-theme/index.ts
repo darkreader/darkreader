@@ -1,4 +1,4 @@
-import {iterateCSSRules, iterateCSSDeclarations, getCSSBaseBath, getCSSURLValue, cssURLRegex, fontFaceRegex} from './css-rules';
+import {iterateCSSRules, iterateCSSDeclarations, getCSSBaseBath, getCSSURLValue, cssURLRegex, fontFaceRegex, replaceCSSVariables} from './css-rules';
 import {getAbsoluteURL} from './url';
 import {getModifiableCSSDeclaration, getModifiedUserAgentStyle, getModifiedFallbackStyle, cleanModificationCache, ModifiableCSSDeclaration, ModifiableCSSRule} from './modify-css';
 import {bgFetch} from './network';
@@ -19,26 +19,29 @@ function createTheme(filter: FilterConfig) {
     style.classList.add('dark-reader-style--main');
     style.media = 'screen';
 
-    const rules: ModifiableCSSRule[] = [];
-
+    const variables = new Map<string, string>();
     iterateCSSRules({
-        filter: (s) => {
-            const node = s.ownerNode as HTMLStyleElement | HTMLLinkElement;
-            if (!shouldAnalyzeStyle(node) || loadingStyles.has(node)) {
-                return false;
-            }
-
-            let hasRules = false;
-            try {
-                hasRules = Boolean((s as any).cssRules);
-            } catch (err) {
-                console.warn(err);
-                if (node instanceof HTMLLinkElement) {
-                    replaceCORSStyle(node, filter);
+        filter: (s) => shouldAnalyzeStyle(s.ownerNode),
+        iterate: (r) => {
+            iterateCSSDeclarations(r, (property, value) => {
+                if (property.startsWith('--')) {
+                    variables.set(property, value);
                 }
-            }
-            return hasRules;
-        },
+            });
+        }
+    });
+    variables.forEach((value, key) => {
+        const replaced = replaceCSSVariables(value, variables);
+        if (!replaced) {
+            console.warn(`Variable not found ${value}`);
+            return;
+        }
+        variables.set(key, replaced);
+    });
+
+    const rules: ModifiableCSSRule[] = [];
+    iterateCSSRules({
+        filter: (s) => shouldAnalyzeStyle(s.ownerNode),
         iterate: (r) => {
             if (cache.has(r)) {
                 const rule = cache.get(r);
@@ -50,7 +53,13 @@ function createTheme(filter: FilterConfig) {
 
             const declarations: ModifiableCSSDeclaration[] = [];
             iterateCSSDeclarations(r, (property, value) => {
-                const declaration = getModifiableCSSDeclaration(property, value, r);
+                const withVariables = replaceCSSVariables(value, variables);
+                if (!withVariables) {
+                    console.warn(`Variable not found ${value}`);
+                    return;
+                }
+
+                const declaration = getModifiableCSSDeclaration(property, withVariables, r);
                 if (declaration) {
                     declarations.push(declaration);
                 }
@@ -114,7 +123,7 @@ function createTheme(filter: FilterConfig) {
     Array.from(document.querySelectorAll('.dark-reader-style--async')).forEach((el) => el.parentElement && el.parentElement.removeChild(el));
 }
 
-function shouldAnalyzeStyle(node: Element) {
+function shouldAnalyzeStyle(node: Node) {
     return (
         (
             (node instanceof HTMLStyleElement) ||
@@ -176,14 +185,23 @@ async function replaceCORSStyle(link: HTMLLinkElement, filter: FilterConfig) {
 let styleChangeObserver: MutationObserver = null;
 const linksSubscriptions = new Map<Element, () => void>();
 
-function watchForLinksLoading(onLoad: () => void) {
+function watchForLinksLoading(filter: FilterConfig) {
     stopWatchingForLinksLoading();
+    const onLoad = () => state.watching && createTheme(filter);
     const links = Array.from(document.querySelectorAll('link[rel="stylesheet"]')) as HTMLLinkElement[];
     links.forEach((link) => {
         link.addEventListener('load', onLoad);
         linksSubscriptions.set(link, onLoad);
         if (link.parentElement !== document.head) {
             document.head.insertBefore(link, document.getElementById('dark-reader-style'));
+        }
+        if (!loadingStyles.has(link)) {
+            try {
+                const rules = (link.sheet as any).cssRules;
+            } catch (err) {
+                console.warn(err);
+                replaceCORSStyle(link, filter);
+            }
         }
     });
 }
@@ -196,7 +214,7 @@ function stopWatchingForLinksLoading() {
 function createThemeAndWatchForUpdates(filter: FilterConfig) {
     createTheme(filter);
     state.watching = true;
-    watchForLinksLoading(() => createTheme(filter));
+    watchForLinksLoading(filter);
     if (styleChangeObserver) {
         styleChangeObserver.disconnect();
     }
@@ -208,7 +226,7 @@ function createThemeAndWatchForUpdates(filter: FilterConfig) {
         });
         if (styleMutations.length > 0) {
             createTheme(filter);
-            watchForLinksLoading(() => state.watching && createTheme(filter));
+            watchForLinksLoading(filter);
         }
     });
     styleChangeObserver.observe(document.head, {childList: true, attributes: true, characterData: true});
@@ -240,6 +258,7 @@ export function createOrUpdateDynamicTheme(filter: FilterConfig) {
 export function removeDynamicTheme() {
     removeStyle();
     Array.from(document.querySelectorAll('.dark-reader-style')).forEach((el) => el.parentElement && el.parentElement.removeChild(el));
+    Array.from(document.querySelectorAll('link[rel="stylesheet"]')).forEach((el) => loadingStyles.delete(el));
     stopWatchingForUpdates();
     stopWatchingForLinksLoading();
 }

@@ -1,8 +1,14 @@
-import {spinalToCamelCase} from '../../utils/text';
 import {parseURL} from './url';
 
 export function iterateCSSRules(options: {filter: (s: StyleSheet) => boolean, iterate: (r: CSSStyleRule) => void}) {
     Array.from(document.styleSheets)
+        .filter((s) => {
+            try {
+                return Boolean((s as any).cssRules);
+            } catch (err) {
+                return false;
+            }
+        })
         .filter((s) => options.filter(s))
         .forEach((s) => {
             Array.from<CSSStyleRule>((s as any).cssRules)
@@ -40,4 +46,24 @@ export function getCSSURLValue(cssURL: string) {
 export function getCSSBaseBath(url: string) {
     const cssURL = parseURL(url);
     return `${cssURL.protocol}//${cssURL.host}${cssURL.pathname.replace(/\/[^\/]+?\.css$/i, '')}`;
+}
+
+const varRegex = /var\((--[^\s,]+),?\s*([^\(\)]*(\([^\(\)]*\)[^\(\)]*)*\s*)\)/g;
+
+export function replaceCSSVariables(value: string, variables: Map<string, string>) {
+    let missing = false;
+    const result = value.replace(varRegex, (match, name, fallback) => {
+        if (variables.has(name)) {
+            return variables.get(name);
+        } else if (fallback) {
+            return fallback;
+        } else {
+            missing = true;
+        }
+        return match;
+    });
+    if (missing) {
+        return null;
+    }
+    return result;
 }

@@ -22,7 +22,9 @@ export interface ModifiableCSSRule {
 }
 
 export function getModifiableCSSDeclaration(property: string, value: string, rule: CSSStyleRule): ModifiableCSSDeclaration {
-    if (property.indexOf('color') >= 0 && property !== '-webkit-print-color-adjust') {
+    if (property.startsWith('--')) {
+        return null;
+    } else if (property.indexOf('color') >= 0 && property !== '-webkit-print-color-adjust') {
         const modifier = getColorModifier(property, value);
         if (modifier) {
             return {property, value: modifier};

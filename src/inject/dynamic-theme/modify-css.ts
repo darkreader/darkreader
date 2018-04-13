@@ -72,6 +72,8 @@ const unparsableColors = new Set([
     'initial',
     'currentcolor',
     '-webkit-focus-ring-color',
+    'highlight',
+    'highlighttext',
 ]);
 
 const colorModificationCache = new Map<Function, Map<string, string>>();

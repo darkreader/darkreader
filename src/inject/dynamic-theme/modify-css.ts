@@ -13,6 +13,7 @@ type CSSValueModifier = (filter: FilterConfig) => string | Promise<string>;
 export interface ModifiableCSSDeclaration {
     property: string;
     value: string | CSSValueModifier;
+    important: boolean;
 }
 
 export interface ModifiableCSSRule {
@@ -22,22 +23,23 @@ export interface ModifiableCSSRule {
 }
 
 export function getModifiableCSSDeclaration(property: string, value: string, rule: CSSStyleRule): ModifiableCSSDeclaration {
+    const important = Boolean(rule.style.getPropertyPriority(property));
     if (property.startsWith('--')) {
         return null;
     } else if (property.indexOf('color') >= 0 && property !== '-webkit-print-color-adjust') {
         const modifier = getColorModifier(property, value);
         if (modifier) {
-            return {property, value: modifier};
+            return {property, value: modifier, important};
         }
     } else if (property === 'background-image') {
         const modifier = getBgImageModifier(property, value, rule);
         if (modifier) {
-            return {property, value: modifier};
+            return {property, value: modifier, important};
         }
     } else if (property.indexOf('shadow') >= 0) {
         const modifier = getShadowModifier(property, value);
         if (modifier) {
-            return {property, value: modifier};
+            return {property, value: modifier, important};
         }
     }
     return null;
@@ -46,15 +48,15 @@ export function getModifiableCSSDeclaration(property: string, value: string, rul
 export function getModifiedUserAgentStyle(filter: FilterConfig) {
     const lines: string[] = [];
     lines.push('html, body, input, textarea, select, button {');
-    lines.push(`    background-color: ${modifyBackgroundColor({r: 255, g: 255, b: 255}, filter)} !important;`);
-    lines.push(`    border-color: ${modifyBorderColor({r: 76, g: 76, b: 76}, filter)} !important;`);
-    lines.push(`    color: ${modifyForegroundColor({r: 0, g: 0, b: 0}, filter)} !important;`);
+    lines.push(`    background-color: ${modifyBackgroundColor({r: 255, g: 255, b: 255}, filter)};`);
+    lines.push(`    border-color: ${modifyBorderColor({r: 76, g: 76, b: 76}, filter)};`);
+    lines.push(`    color: ${modifyForegroundColor({r: 0, g: 0, b: 0}, filter)};`);
     lines.push('}');
     lines.push('table {');
-    lines.push(`    border-color: ${modifyBorderColor({r: 128, g: 128, b: 128}, filter)} !important;`);
+    lines.push(`    border-color: ${modifyBorderColor({r: 128, g: 128, b: 128}, filter)};`);
     lines.push('}');
     lines.push('::placeholder {');
-    lines.push(`    color: ${modifyForegroundColor({r: 169, g: 169, b: 169}, filter)} !important;`);
+    lines.push(`    color: ${modifyForegroundColor({r: 169, g: 169, b: 169}, filter)};`);
     lines.push('}');
     return lines.join('\n');
 }
@@ -62,8 +64,8 @@ export function getModifiedUserAgentStyle(filter: FilterConfig) {
 export function getModifiedFallbackStyle(filter: FilterConfig) {
     const lines: string[] = [];
     lines.push('html *, body * {');
-    lines.push(`    background-color: ${modifyBackgroundColor({r: 255, g: 255, b: 255}, filter)} !important;`)
-    lines.push(`    color: ${modifyForegroundColor({r: 0, g: 0, b: 0}, filter)} !important;`);
+    lines.push(`    background-color: ${modifyBackgroundColor({r: 255, g: 255, b: 255}, filter)};`)
+    lines.push(`    color: ${modifyForegroundColor({r: 0, g: 0, b: 0}, filter)};`);
     lines.push('}');
     return lines.join('\n');
 }
@@ -223,6 +225,13 @@ function getColorModifier(prop: string, value: string): CSSValueModifier {
     } catch (err) {
         console.warn('Color parse error', err);
         return null;
+        // if (prop.indexOf('background') >= 0) {
+        //     return (filter) => modifyBackgroundColor({r: 0, g: 0, b: 0}, filter);
+        // }
+        // if (prop.indexOf('border') >= 0 || prop.indexOf('outline') >= 0) {
+        //     return (filter) => modifyBorderColor({r: 128, g: 128, b: 128}, filter);
+        // }
+        // return (filter) => modifyForegroundColor({r: 255, g: 255, b: 255}, filter);
     }
 }
 

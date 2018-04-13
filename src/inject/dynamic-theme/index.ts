@@ -84,7 +84,8 @@ function createTheme(filter: FilterConfig) {
             lines.push(`@media ${media} {`);
         }
         lines.push(`${selector} {`);
-        declarations.forEach(({property, value}) => {
+        declarations.forEach(({property, value, important}) => {
+            const importantKeyword = important ? ' !important' : '';
             if (typeof value === 'function') {
                 const modified = value(filter);
                 if (modified instanceof Promise) {
@@ -99,17 +100,17 @@ function createTheme(filter: FilterConfig) {
                         asyncStyle.textContent = [
                             media && `@media ${media} {`,
                             `${selector} {`,
-                            `    ${property}: ${asyncValue} !important;`,
+                            `    ${property}: ${asyncValue}${importantKeyword};`,
                             '}',
                             media && '}',
                         ].filter((x) => x).join('\n');
                         document.head.appendChild(asyncStyle);
                     });
                 } else {
-                    lines.push(`    ${property}: ${modified} !important;`);
+                    lines.push(`    ${property}: ${modified}${importantKeyword};`);
                 }
             } else {
-                lines.push(`    ${property}: ${value} !important;`);
+                lines.push(`    ${property}: ${value}${importantKeyword};`);
             }
         });
         lines.push('}');

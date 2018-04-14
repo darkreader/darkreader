@@ -15,66 +15,72 @@ interface ExtensionAdapter {
 
 export default class Messenger {
     private reporters: Set<(info: ExtensionData) => void>;
+    private adapter: ExtensionAdapter;
 
     constructor(adapter: ExtensionAdapter) {
         this.reporters = new Set();
+        this.adapter = adapter;
         chrome.runtime.onConnect.addListener((port) => {
-            port.onMessage.addListener(async ({type, id, data}) => {
-                switch (type) {
-                    case 'getData': {
-                        const data = await adapter.collect();
-                        port.postMessage({id, data});
-                        break;
-                    }
-                    case 'getActiveTabInfo': {
-                        const data = await adapter.getActiveTabInfo();
-                        port.postMessage({id, data});
-                        break;
-                    }
-                    case 'subscribeToChanges': {
-                        const report = (data) => port.postMessage({id, data});
-                        this.reporters.add(report);
-                        port.onDisconnect.addListener(() => this.reporters.delete(report));
-                        break;
-                    }
-                    case 'enable': {
-                        adapter.enable();
-                        break;
-                    }
-                    case 'disable': {
-                        adapter.disable();
-                        break;
-                    }
-                    case 'setConfig': {
-                        adapter.setConfig(data);
-                        break;
-                    }
-                    case 'toggleSitePattern': {
-                        adapter.toggleSitePattern(data);
-                        break;
-                    }
-
-                    case 'applyDevInversionFixes': {
-                        const error = adapter.applyDevInversionFixes(data);
-                        port.postMessage({id, error: error ? error.message : null});
-                        break;
-                    }
-                    case 'resetDevInversionFixes': {
-                        adapter.resetDevInversionFixes();
-                        break;
-                    }
-                    case 'applyDevStaticThemes': {
-                        const error = adapter.applyDevStaticThemes(data);
-                        port.postMessage({id, error: error ? error.message : null});
-                        break;
-                    }
-                    case 'resetDevStaticThemes': {
-                        adapter.resetDevStaticThemes();
-                        break;
-                    }
-                }
-            });
+            if (port.name === 'ui') {
+                port.onMessage.addListener((message) => this.onUIMessage(port, message));
+            }
         });
+    }
+
+    private async onUIMessage(port: chrome.runtime.Port, {type, id, data}) {
+        switch (type) {
+            case 'get-data': {
+                const data = await this.adapter.collect();
+                port.postMessage({id, data});
+                break;
+            }
+            case 'get-active-tab-info': {
+                const data = await this.adapter.getActiveTabInfo();
+                port.postMessage({id, data});
+                break;
+            }
+            case 'subscribe-to-changes': {
+                const report = (data) => port.postMessage({id, data});
+                this.reporters.add(report);
+                port.onDisconnect.addListener(() => this.reporters.delete(report));
+                break;
+            }
+            case 'enable': {
+                this.adapter.enable();
+                break;
+            }
+            case 'disable': {
+                this.adapter.disable();
+                break;
+            }
+            case 'set-config': {
+                this.adapter.setConfig(data);
+                break;
+            }
+            case 'toggle-site-pattern': {
+                this.adapter.toggleSitePattern(data);
+                break;
+            }
+
+            case 'apply-dev-inversion-fixes': {
+                const error = this.adapter.applyDevInversionFixes(data);
+                port.postMessage({id, error: (error ? error.message : null)});
+                break;
+            }
+            case 'reset-dev-inversion-fixes': {
+                this.adapter.resetDevInversionFixes();
+                break;
+            }
+            case 'apply-dev-static-themes': {
+                const error = this.adapter.applyDevStaticThemes(data);
+                port.postMessage({id, error: error ? error.message : null});
+                break;
+            }
+            case 'reset-dev-static-themes': {
+                this.adapter.resetDevStaticThemes();
+                break;
+            }
+        }
     }
 
     reportChanges(data: ExtensionData) {

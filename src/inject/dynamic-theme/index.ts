@@ -39,10 +39,6 @@ function createTheme(filter: FilterConfig) {
     });
     variables.forEach((value, key) => {
         const replaced = replaceCSSVariables(value, variables);
-        if (!replaced) {
-            console.warn(`Variable not found ${value}`);
-            return;
-        }
         variables.set(key, replaced);
     });
 

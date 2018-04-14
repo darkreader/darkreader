@@ -92,10 +92,6 @@
                 ".logo",
                 "#left_nav *, .top_nav *"
             ]
-        },
-        {
-            "url": "codecombat.com",
-            "invert": ".modal-content, .map-background, .game-controls, .level-content, .modal-backdrop"
         },		
         {
             "url": "dailymail.co.uk",

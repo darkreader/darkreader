@@ -20,7 +20,7 @@ export interface StyleManager {
     destroy(): void;
 }
 
-export default async function manageStyle(element: HTMLLinkElement | HTMLStyleElement): Promise<StyleManager> {
+export default async function manageStyle(element: HTMLLinkElement | HTMLStyleElement, {update}): Promise<StyleManager> {
 
     const prevStyles: HTMLStyleElement[] = [];
     let next: Element = element;
@@ -33,13 +33,23 @@ export default async function manageStyle(element: HTMLLinkElement | HTMLStyleEl
 
     let cancelAsyncOperations = false;
 
+    const observer = new MutationObserver(async (mutations) => {
+        rules = await getRules();
+        update();
+    });
+    const observerOptions: MutationObserverInit = {characterData: true, attributes: true};
+
     let rules: CSSRuleList;
 
     async function getRules() {
         let rules: CSSRuleList = null;
-        if (element.sheet == null && element instanceof HTMLLinkElement) {
-            await linkLoading(element);
-            if (cancelAsyncOperations) {
+        if (element.sheet == null) {
+            if (element instanceof HTMLLinkElement) {
+                await linkLoading(element);
+                if (cancelAsyncOperations) {
+                    return null;
+                }
+            } else {
                 return null;
             }
         }
@@ -246,12 +256,15 @@ export default async function manageStyle(element: HTMLLinkElement | HTMLStyleEl
             syncStyle.classList.add('darkreader');
             syncStyle.classList.add('darkreader--sync');
             syncStyle.media = 'screen';
-            element.parentElement.insertBefore(syncStyle, corsCopy ? corsCopy.nextSibling : element.nextSibling);
         }
+        element.parentElement.insertBefore(syncStyle, corsCopy ? corsCopy.nextSibling : element.nextSibling);
         syncStyle.textContent = lines.join('\n');
+
+        observer.observe(element, observerOptions);
     }
 
     function pause() {
+        observer.disconnect();
         cancelAsyncOperations = true;
     }
 
@@ -263,6 +276,7 @@ export default async function manageStyle(element: HTMLLinkElement | HTMLStyleEl
     }
 
     rules = await getRules();
+    observer.observe(element, observerOptions);
 
     return {
         details,

@@ -34,17 +34,25 @@ async function createManager(element: HTMLLinkElement | HTMLStyleElement) {
         return;
     }
     pendingCreation.add(element);
-    const manager = await manageStyle(element);
+
+    function update() {
+        const details = manager.details();
+        updateVariables(details.variables);
+        throttledRender();
+    }
+
+    const manager = await manageStyle(element, {update});
     if (!pendingCreation.has(element)) {
         manager.destroy();
         return;
     }
     styleManagers.set(element, manager);
-    const details = manager.details();
-    details.variables.forEach((value, key) => variables.set(key, replaceCSSVariables(value, variables)));
-    variables.forEach((value, key) => variables.set(key, replaceCSSVariables(value, variables)));
+    update();
+}
 
-    throttledRender();
+function updateVariables(newVars: Map<string, string>) {
+    newVars.forEach((value, key) => variables.set(key, value));
+    variables.forEach((value, key) => variables.set(key, replaceCSSVariables(value, variables)));
 }
 
 function removeManager(element: HTMLLinkElement | HTMLStyleElement) {
@@ -77,7 +85,7 @@ function throttledRender() {
     }
 }
 
-function shouldManageStyle(element: HTMLLinkElement | HTMLStyleElement) {
+function shouldManageStyle(element: Node) {
     return (
         (
             (element instanceof HTMLStyleElement) ||
@@ -98,11 +106,14 @@ function createThemeAndWatchForUpdates() {
         addedStyles.forEach((el) => createManager(el));
         const removedStyles = mutations.reduce((nodes, m) => nodes.concat(Array.from(m.removedNodes).filter(shouldManageStyle)), []);
         removedStyles.forEach((el) => removeManager(el));
-        if (addedStyles.length + removedStyles.length > 0) {
+        if (
+            (addedStyles.length + removedStyles.length > 0) ||
+            mutations.some((m) => m.target && shouldManageStyle(m.target))
+        ) {
             throttledRender();
         }
     });
-    styleChangeObserver.observe(document.head, {childList: true, subtree: true});
+    styleChangeObserver.observe(document.documentElement, {childList: true, subtree: true});
 }
 
 function stopWatchingForUpdates() {

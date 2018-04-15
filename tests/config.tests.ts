@@ -3,6 +3,7 @@ import {resolve as resolvePath} from 'path';
 import {compareURLPatterns} from '../src/utils/url';
 import {parseArray, formatArray} from '../src/utils/text';
 import {parseInversionFixes, formatInversionFixes} from '../src/generators/css-filter';
+import {parseDynamicThemeFixes, formatDynamicThemeFixes} from '../src/generators/dynamic-theme';
 import {parseStaticThemes, formatStaticThemes} from '../src/generators/static-theme';
 
 function readConfig(fileName) {
@@ -36,6 +37,23 @@ test('Dark Sites list', async () => {
 
     // sites are properly formatted
     expect(file).toEqual(formatArray(sites));
+});
+
+test('Dynamic Theme Fixes config', async () => {
+    const file = await readConfig('dynamic-theme-fixes.config');
+    const fixes = parseDynamicThemeFixes(file);
+
+    // each fix has valid URL
+    expect(fixes.every(({url}) => url.every(isURLPatternValid))).toBe(true);
+
+    // fixes are sorted alphabetically
+    expect(fixes.map(({url}) => url[0])).toEqual(fixes.map(({url}) => url[0]).sort(compareURLPatterns));
+
+    // selectors should have no comma
+    expect(fixes.every(({invert, inline}) => (invert || []).concat(inline || []).every((s) => s.indexOf(',') < 0))).toBe(true);
+
+    // fixes are properly formatted
+    expect(file).toEqual(formatDynamicThemeFixes(fixes));
 });
 
 test('Inversion Fixes config', async () => {

@@ -6,6 +6,7 @@ export interface ExtensionData {
     filterConfig: FilterConfig;
     fonts: string[];
     shortcuts: Shortcuts;
+    devDynamicThemeFixesText: string;
     devInversionFixesText: string;
     devStaticThemesText: string;
 }
@@ -15,7 +16,9 @@ export interface ExtensionActions {
     disable();
     setConfig(config: FilterConfig);
     toggleSitePattern(pattern: string);
-    applyDevInversionFixes(json: string): Promise<void>;
+    applyDevDynamicThemeFixes(text: string): Promise<void>;
+    resetDevDynamicThemeFixes();
+    applyDevInversionFixes(text: string): Promise<void>;
     resetDevInversionFixes();
     applyDevStaticThemes(text: string): Promise<void>;
     resetDevStaticThemes();
@@ -60,6 +63,12 @@ export interface Message {
 
 export interface Shortcuts {
     [name: string]: string;
+}
+
+export interface DynamicThemeFix {
+    url: string[];
+    inline?: string[];
+    invert?: string[];
 }
 
 export interface InversionFix {

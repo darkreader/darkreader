@@ -29,6 +29,7 @@ export function getMockData(override = {}): ExtensionData {
             'addSite': 'Alt+Shift+A',
             'toggle': 'Alt+Shift+D'
         },
+        devDynamicThemeFixesText: ['accounts.google.com', '', 'INVERT', 'svg', ''].join('\n'),
         devInversionFixesText: ['*', '', 'INVERT', 'img', 'iframe', ''].join('\n'),
         devStaticThemesText: ['*', '', 'NEUTRAL BG', 'html', 'body', ''].join('\n'),
     }, override);

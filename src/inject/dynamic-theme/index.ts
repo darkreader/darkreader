@@ -2,12 +2,14 @@ import {replaceCSSVariables} from './css-rules';
 import {getModifiedUserAgentStyle, cleanModificationCache} from './modify-css';
 import manageStyle, {StyleManager} from './style-manager';
 import {removeNode} from '../utils/dom';
+import {getCSSFilterValue} from '../../generators/css-filter';
 import {createTextStyle} from '../../generators/text-style';
-import {FilterConfig} from '../../definitions';
+import {FilterConfig, DynamicThemeFix} from '../../definitions';
 
 const styleManagers = new Map<HTMLLinkElement | HTMLStyleElement, StyleManager>();
 const variables = new Map<string, string>();
 let filter: FilterConfig = null;
+let fixes: DynamicThemeFix = null;
 
 function createOrUpdateStyle(className: string) {
     let style = document.head.querySelector(`.${className}`) as HTMLStyleElement;
@@ -31,6 +33,18 @@ function createTheme() {
         textStyle.textContent = createTextStyle(filter);
     } else {
         textStyle.textContent = '';
+    }
+
+    const invertStyle = createOrUpdateStyle('darkreader--invert');
+    document.head.insertBefore(invertStyle, textStyle.nextSibling);
+    if (fixes && Array.isArray(fixes.invert) && fixes.invert.length > 0) {
+        invertStyle.textContent = [
+            `${fixes.invert.join(', ')} {`,
+            `    filter: ${getCSSFilterValue(filter)} !important;`,
+            '}',
+        ].join('\n');
+    } else {
+        invertStyle.textContent = '';
     }
 
     Array.from<HTMLLinkElement | HTMLStyleElement>(document.querySelectorAll('link[rel="stylesheet"], style'))
@@ -141,8 +155,9 @@ function stopWatchingForUpdates() {
     window.removeEventListener('load', throttledRender);
 }
 
-export function createOrUpdateDynamicTheme(filterConfig: FilterConfig) {
+export function createOrUpdateDynamicTheme(filterConfig: FilterConfig, dynamicThemeFixes?: DynamicThemeFix) {
     filter = filterConfig;
+    fixes = dynamicThemeFixes;
     if (document.head) {
         createThemeAndWatchForUpdates();
     } else {
@@ -160,6 +175,7 @@ export function removeDynamicTheme() {
     cleanDynamicThemeCache();
     removeNode(document.head.querySelector('.darkreader--user-agent'));
     removeNode(document.head.querySelector('.darkreader--text'));
+    removeNode(document.head.querySelector('.darkreader--invert'));
     Array.from(styleManagers.keys()).forEach((el) => removeManager(el));
     Array.from(document.querySelectorAll('.darkreader')).forEach(removeNode);
 }

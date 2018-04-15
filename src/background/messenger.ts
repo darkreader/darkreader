@@ -7,6 +7,8 @@ interface ExtensionAdapter {
     disable: () => void;
     setConfig: (config: FilterConfig) => void;
     toggleSitePattern: (pattern: string) => void;
+    applyDevDynamicThemeFixes: (json: string) => Error;
+    resetDevDynamicThemeFixes: () => void;
     applyDevInversionFixes: (json: string) => Error;
     resetDevInversionFixes: () => void;
     applyDevStaticThemes: (text: string) => Error;
@@ -62,6 +64,15 @@ export default class Messenger {
                 break;
             }
 
+            case 'apply-dev-dynamic-theme-fixes': {
+                const error = this.adapter.applyDevDynamicThemeFixes(data);
+                port.postMessage({id, error: (error ? error.message : null)});
+                break;
+            }
+            case 'reset-dev-dynamic-theme-fixes': {
+                this.adapter.resetDevDynamicThemeFixes();
+                break;
+            }
             case 'apply-dev-inversion-fixes': {
                 const error = this.adapter.applyDevInversionFixes(data);
                 port.postMessage({id, error: (error ? error.message : null)});

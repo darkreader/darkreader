@@ -12,7 +12,7 @@ export default class UserStorage {
             enabled: true,
             config: {
                 mode: 1,
-                brightness: 110,
+                brightness: 100,
                 contrast: 90,
                 grayscale: 20,
                 sepia: 10,

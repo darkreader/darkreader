@@ -29,13 +29,9 @@ function Body({data, actions, state, setState}: BodyProps) {
             reset: () => actions.resetDevInversionFixes(),
         } : {
                 header: 'Dynamic Theme Editor',
-                fixesText: [
-                    'No config is required for Dynamic Theme',
-                    'If some website has problems with Dynamic Theme',
-                    'send it\'s address to darkreaderapp@gmail.com',
-                ].join('\n'),
-                apply: (text) => {},
-                reset: () => {},
+                fixesText: data.devDynamicThemeFixesText,
+                apply: (text) => actions.applyDevDynamicThemeFixes(text),
+                reset: () => actions.resetDevDynamicThemeFixes(),
             });
 
     function onTextRender(node) {

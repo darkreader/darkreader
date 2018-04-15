@@ -10,6 +10,7 @@ import {isFirefox} from '../utils/platform';
 import {isUrlInList, getUrlHost} from '../utils/url';
 import ThemeEngines from '../generators/theme-engines';
 import createCSSFilterStylesheet from '../generators/css-filter';
+import {getDynamicThemeFixesFor} from '../generators/dynamic-theme';
 import createStaticStylesheet from '../generators/static-theme';
 import {createSVGFilterStylesheet, getSVGFilterMatrixValue, getSVGReverseFilterMatrixValue} from '../generators/svg-filter';
 import {FilterConfig, ExtensionData, Shortcuts} from '../definitions';
@@ -84,7 +85,9 @@ export class Extension {
             disable: () => this.disable(),
             setConfig: (config) => this.setConfig(config),
             toggleSitePattern: (pattern) => this.toggleSitePattern(pattern),
-            applyDevInversionFixes: (json) => this.devtools.applyInversionFixes(json),
+            applyDevDynamicThemeFixes: (text) => this.devtools.applyDynamicThemeFixes(text),
+            resetDevDynamicThemeFixes: () => this.devtools.resetDynamicThemeFixes(),
+            applyDevInversionFixes: (text) => this.devtools.applyInversionFixes(text),
             resetDevInversionFixes: () => this.devtools.resetInversionFixes(),
             applyDevStaticThemes: (text) => this.devtools.applyStaticThemes(text),
             resetDevStaticThemes: () => this.devtools.resetStaticThemes(),
@@ -131,6 +134,7 @@ export class Extension {
             ready: this.ready,
             fonts: this.fonts,
             shortcuts: await this.getShortcuts(),
+            devDynamicThemeFixesText: this.devtools.getDynamicThemeFixesText(),
             devInversionFixesText: this.devtools.getInversionFixesText(),
             devStaticThemesText: this.devtools.getStaticThemesText(),
         };
@@ -259,9 +263,10 @@ export class Extension {
                 }
                 case ThemeEngines.dynamicTheme: {
                     const {siteList, invertListed, engine, ...filter} = this.filterConfig;
+                    const fixes = getDynamicThemeFixesFor(url, this.config.DYNAMIC_THEME_FIXES);
                     return {
                         type: 'add-dynamic-theme',
-                        data: filter,
+                        data: {filter, fixes},
                     };
                 }
                 default: {

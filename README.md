@@ -18,7 +18,11 @@ If some site is **already dark**, you can **add it to [dark-sites.config](https:
 *(please, preserve alphabetical order)*.
 
 If some **parts** of web-pages are **wrongly inverted**,
-you can specify necessary **CSS selectors** at **[inversion-fixes.config](https://github.com/alexanderby/darkreader/blob/master/src/config/inversion-fixes.config) file**
+you can specify necessary **CSS selectors** at
+**[dynamic-theme-fixes.config](https://github.com/alexanderby/darkreader/blob/master/src/config/dynamic-theme-fixes.config) file**
+(for Dynamic Theme mode)
+or **[inversion-fixes.config](https://github.com/alexanderby/darkreader/blob/master/src/config/inversion-fixes.config) file**
+(for Filter and Filter+ modes)
 *(please, preserve alphabetical order by URL, use short selectors, preserve code style)*.
 
 Notice that merged changes to these files are automatically delivered to all users **within 15 minutes**.
@@ -41,7 +45,7 @@ INVERT
 .icon
 
 ```
-- It is also possible to specify custom CSS rules. If chosen element contains images or other content that becomes wrongly displayed, `NO INVERT` rule can be used. `REMOVE BG` removes background image from element.
+- **For Filter and Filter+ configs** it is also possible to specify custom CSS rules. If chosen element contains images or other content that becomes wrongly displayed, `NO INVERT` rule can be used. `REMOVE BG` removes background image from element.
 *IMPORTANT: When Dark mode is on, the whole page (root `<html>` element) is inverted by filter. To revert the images, videos etc. `INVERT` selectors are used, so the inversion will be applied to these elements twice. If inverted elements contain other elements that match the `INVERT` selectors, then these elements will be inverted 3 or more times. To prevent it `NO INVERT` selectors are used.*
 ```
 ================================
@@ -65,7 +69,9 @@ CSS
 }
 ```
 - Click **Apply**.
-- If the **fix worked** open **[inversion-fixes.config](https://github.com/alexanderby/darkreader/blob/master/src/config/inversion-fixes.config) file**.
+- If the **fix worked** open
+**[dynamic-theme-fixes.config](https://github.com/alexanderby/darkreader/blob/master/src/config/dynamic-theme-fixes.config) file**
+or **[inversion-fixes.config](https://github.com/alexanderby/darkreader/blob/master/src/config/inversion-fixes.config) file**.
 - Click **edit** (sign-in to GitHub first).
 - **Insert your fix** there. Preserve **alphabetical order** by URL.
 - Provide a **short description** of what you have done.

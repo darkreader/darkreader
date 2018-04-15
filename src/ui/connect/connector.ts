@@ -61,6 +61,14 @@ export default class Connector implements ExtensionActions {
         this.port.postMessage({type: 'toggle-site-pattern', data: pattern});
     }
 
+    applyDevDynamicThemeFixes(text: string) {
+        return this.sendRequest<void>({type: 'apply-dev-dynamic-theme-fixes', data: text}, ({error}, resolve, reject) => error ? reject(error) : resolve());
+    }
+
+    resetDevDynamicThemeFixes() {
+        this.port.postMessage({type: 'reset-dev-dynamic-theme-fixes'});
+    }
+
     applyDevInversionFixes(text: string) {
         return this.sendRequest<void>({type: 'apply-dev-inversion-fixes', data: text}, ({error}, resolve, reject) => error ? reject(error) : resolve());
     }

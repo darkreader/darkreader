@@ -2,9 +2,8 @@ import {formatSitesFixesConfig} from './utils/format';
 import {applyColorMatrix, createFilterMatrix} from './utils/matrix';
 import {parseSitesFixesConfig} from './utils/parse';
 import {parseArray, formatArray} from '../utils/text';
-import {compareURLPatterns} from '../utils/url';
+import {compareURLPatterns, isUrlInList} from '../utils/url';
 import {createTextStyle} from './text-style';
-import {isUrlInList} from '../utils/url';
 import {FilterConfig, InversionFix} from '../definitions';
 
 export enum FilterMode {
@@ -90,7 +89,7 @@ export function cssFilterStyleheetTemplate(filterValue: string, reverseFilterVal
     return lines.join('\n');
 }
 
-function getCSSFilterValue(config: FilterConfig) {
+export function getCSSFilterValue(config: FilterConfig) {
     const filters: string[] = [];
 
     if (config.mode === FilterMode.dark) {
@@ -223,5 +222,5 @@ export function formatInversionFixes(inversionFixes: InversionFix[]) {
             }
             return !(Array.isArray(value) && value.length > 0);
         }
-    })
+    });
 }

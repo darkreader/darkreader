@@ -1,4 +1,5 @@
 import {parseInversionFixes, formatInversionFixes} from '../generators/css-filter';
+import {parseDynamicThemeFixes, formatDynamicThemeFixes} from '../generators/dynamic-theme';
 import {parseStaticThemes, formatStaticThemes} from '../generators/static-theme';
 import ConfigManager from './config-manager';
 
@@ -9,6 +10,39 @@ export default class DevTools {
     constructor(config: ConfigManager, onChange: () => void) {
         this.config = config;
         this.onChange = onChange;
+    }
+
+    private getSavedDynamicThemeFixes() {
+        return localStorage.getItem('dev_dynamic_theme_fixes') || null;
+    }
+
+    private saveDynamicThemeFixes(text: string) {
+        localStorage.setItem('dev_dynamic_theme_fixes', text);
+    }
+
+    getDynamicThemeFixesText() {
+        const {RAW_DYNAMIC_THEME_FIXES} = this.config;
+        const fixes = this.getSavedDynamicThemeFixes();
+        return fixes ? formatDynamicThemeFixes(parseDynamicThemeFixes(fixes)) : RAW_DYNAMIC_THEME_FIXES;
+    }
+
+    resetDynamicThemeFixes() {
+        const {RAW_DYNAMIC_THEME_FIXES} = this.config;
+        localStorage.removeItem('dev_dynamic_theme_fixes');
+        this.config.handleInversionFixes(RAW_DYNAMIC_THEME_FIXES);
+        this.onChange();
+    }
+
+    applyDynamicThemeFixes(text: string) {
+        try {
+            const formatted = formatDynamicThemeFixes(parseDynamicThemeFixes(text));
+            this.config.handleDynamicThemeFixes(formatted);
+            this.saveDynamicThemeFixes(formatted);
+            this.onChange();
+            return null;
+        } catch (err) {
+            return err;
+        }
     }
 
     private getSavedInversionFixes() {

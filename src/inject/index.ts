@@ -19,9 +19,9 @@ function onMessage({type, data}) {
             break;
         }
         case 'add-dynamic-theme': {
-            const filter = data;
+            const {filter, fixes} = data;
             removeStyle();
-            createOrUpdateDynamicTheme(filter);
+            createOrUpdateDynamicTheme(filter, fixes);
             break;
         }
         case 'clean-up': {

@@ -71,7 +71,7 @@ export default class TabManager {
             .filter((tab) => !this.ports.has(tab.id))
             .forEach((tab) => chrome.tabs.executeScript(tab.id, {
                 runAt: 'document_start',
-                file: 'inject/index.js',
+                file: '/inject/index.js',
             }));
     }
 

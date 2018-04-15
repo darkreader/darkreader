@@ -2,36 +2,35 @@ import {replaceCSSVariables} from './css-rules';
 import {getModifiedUserAgentStyle, cleanModificationCache} from './modify-css';
 import manageStyle, {StyleManager} from './style-manager';
 import {removeNode} from '../utils/dom';
+import {createTextStyle} from '../../generators/text-style';
 import {FilterConfig} from '../../definitions';
 
 const styleManagers = new Map<HTMLLinkElement | HTMLStyleElement, StyleManager>();
 const variables = new Map<string, string>();
 let filter: FilterConfig = null;
 
-function createTheme() {
-    let userAgentStyle = document.head.querySelector('.darkreader--user-agent') as HTMLStyleElement;
-    if (!userAgentStyle) {
-        userAgentStyle = document.createElement('style');
-        userAgentStyle.classList.add('darkreader');
-        userAgentStyle.classList.add('darkreader--user-agent');
-        userAgentStyle.media = 'screen';
+function createOrUpdateStyle(className: string) {
+    let style = document.head.querySelector(`.${className}`) as HTMLStyleElement;
+    if (!style) {
+        style = document.createElement('style');
+        style.classList.add('darkreader');
+        style.classList.add(className);
+        style.media = 'screen';
     }
+    return style;
+}
+
+function createTheme() {
+    const userAgentStyle = createOrUpdateStyle('darkreader--user-agent');
     document.head.insertBefore(userAgentStyle, document.head.firstChild);
     userAgentStyle.textContent = getModifiedUserAgentStyle(filter);
 
-    if (document.readyState !== 'complete') {
-        const cachedCSS = localStorage.getItem('darkreader-cached-dynamic-theme-css');
-        if (cachedCSS) {
-            let cachedStyle = document.head.querySelector('.darkreader--cache') as HTMLStyleElement;
-            if (!cachedStyle) {
-                cachedStyle = document.createElement('style');
-                cachedStyle.classList.add('darkreader');
-                cachedStyle.classList.add('darkreader--cache');
-                cachedStyle.media = 'screen';
-            }
-            document.head.appendChild(cachedStyle);
-            cachedStyle.textContent = cachedCSS;
-        }
+    const textStyle = createOrUpdateStyle('darkreader--text');
+    document.head.insertBefore(textStyle, userAgentStyle.nextSibling);
+    if (filter.useFont || filter.textStroke > 0) {
+        textStyle.textContent = createTextStyle(filter);
+    } else {
+        textStyle.textContent = '';
     }
 
     Array.from<HTMLLinkElement | HTMLStyleElement>(document.querySelectorAll('link[rel="stylesheet"], style'))
@@ -113,17 +112,6 @@ function shouldManageStyle(element: Node) {
 
 let styleChangeObserver: MutationObserver = null;
 
-function onLoad() {
-    requestAnimationFrame(() => {
-        throttledRender();
-        setTimeout(() => {
-            removeNode(document.head.querySelector('.darkreader--cache'));
-            const theme = Array.from(document.querySelectorAll('.darkreader:not(.darkreader--cors)')).map((s) => s.textContent).join('\n');
-            theme && localStorage.setItem('darkreader-cached-dynamic-theme-css', theme);
-        }, 2000);
-    });
-}
-
 function createThemeAndWatchForUpdates() {
     createTheme();
     styleChangeObserver = new MutationObserver((mutations) => {
@@ -136,15 +124,11 @@ function createThemeAndWatchForUpdates() {
             mutations.some((m) => m.target && shouldManageStyle(m.target))
         ) {
             throttledRender();
-            const cachedStyle = document.head.querySelector('.darkreader--cache');
-            if (cachedStyle) {
-                document.head.appendChild(cachedStyle);
-            }
         }
     });
     styleChangeObserver.observe(document.documentElement, {childList: true, subtree: true, characterData: true});
     document.addEventListener('load', throttledRender);
-    window.addEventListener('load', onLoad);
+    window.addEventListener('load', throttledRender);
 }
 
 function stopWatchingForUpdates() {
@@ -154,7 +138,7 @@ function stopWatchingForUpdates() {
         styleChangeObserver = null;
     }
     document.removeEventListener('load', throttledRender);
-    window.removeEventListener('load', onLoad);
+    window.removeEventListener('load', throttledRender);
 }
 
 export function createOrUpdateDynamicTheme(filterConfig: FilterConfig) {
@@ -175,7 +159,7 @@ export function createOrUpdateDynamicTheme(filterConfig: FilterConfig) {
 export function removeDynamicTheme() {
     cleanDynamicThemeCache();
     removeNode(document.head.querySelector('.darkreader--user-agent'));
-    removeNode(document.head.querySelector('.darkreader--cache'));
+    removeNode(document.head.querySelector('.darkreader--text'));
     Array.from(styleManagers.keys()).forEach((el) => removeManager(el));
 }
 

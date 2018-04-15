@@ -1,5 +1,5 @@
 import {isUrlInList} from '../utils/url';
-import {createTextRule} from './text-style';
+import {createTextStyle} from './text-style';
 import {formatSitesFixesConfig} from './utils/format';
 import {applyColorMatrix, createFilterMatrix} from './utils/matrix';
 import {parseSitesFixesConfig} from './utils/parse';
@@ -82,7 +82,7 @@ export default function createStaticStylesheet(config: FilterConfig, url: string
 
     if (config.useFont || config.textStroke > 0) {
         lines.push('/* Font */');
-        lines.push(`* ${createTextRule(config)}`);
+        lines.push(createTextStyle(config));
     }
 
     return lines

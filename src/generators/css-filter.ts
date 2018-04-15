@@ -3,7 +3,7 @@ import {applyColorMatrix, createFilterMatrix} from './utils/matrix';
 import {parseSitesFixesConfig} from './utils/parse';
 import {parseArray, formatArray} from '../utils/text';
 import {compareURLPatterns} from '../utils/url';
-import {createTextRule} from './text-style';
+import {createTextStyle} from './text-style';
 import {isUrlInList} from '../utils/url';
 import {FilterConfig, InversionFix} from '../definitions';
 
@@ -43,7 +43,7 @@ export function cssFilterStyleheetTemplate(filterValue: string, reverseFilterVal
         // Add text rule
         lines.push('');
         lines.push('/* Font */');
-        lines.push(`* ${createTextRule(config)}`);
+        lines.push(createTextStyle(config));
     }
 
     // Fix bad font hinting after inversion

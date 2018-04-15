@@ -1,6 +1,6 @@
 import {FilterConfig} from '../definitions'
 
-export function createTextRule(config: FilterConfig): string {
+export function createTextStyle(config: FilterConfig): string {
     const lines: string[] = [];
     lines.push('* {');
 

@@ -92,7 +92,7 @@
                 ".logo",
                 "#left_nav *, .top_nav *"
             ]
-        },		
+        },
         {
             "url": "dailymail.co.uk",
             "noinvert": ".masthead #logo"

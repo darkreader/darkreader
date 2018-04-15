@@ -4,6 +4,7 @@ import IconManager from './icon-manager';
 import Messenger from './messenger';
 import TabManager from './tab-manager';
 import UserStorage from './user-storage';
+import {setWindowTheme, resetWindowTheme} from './window-theme';
 import {getFontList, getCommands} from './utils/extension-api';
 import {isFirefox} from '../utils/platform';
 import {isUrlInList, getUrlHost} from '../utils/url';
@@ -137,16 +138,19 @@ export class Extension {
 
     enable() {
         this.enabled = true;
+        this.filterConfig && setWindowTheme(this.filterConfig);
         this.onAppToggle();
     }
 
     disable() {
         this.enabled = false;
+        resetWindowTheme();
         this.onAppToggle();
     }
 
     setConfig(config: FilterConfig) {
         this.filterConfig = {...this.filterConfig, ...config};
+        this.enabled && setWindowTheme(this.filterConfig);
         this.onConfigPropChanged();
     }
 

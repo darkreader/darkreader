@@ -1,4 +1,3 @@
-
 import {isUrlInList} from '../utils/url';
 import {canInjectScript} from '../background/utils/extension-api';
 import ConfigManager from './config-manager';

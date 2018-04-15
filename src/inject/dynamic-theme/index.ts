@@ -6,11 +6,10 @@ import {FilterConfig} from '../../definitions';
 
 const styleManagers = new Map<HTMLLinkElement | HTMLStyleElement, StyleManager>();
 const variables = new Map<string, string>();
-let userAgentStyle: HTMLStyleElement = null;
 let filter: FilterConfig = null;
 
 function createTheme() {
-    userAgentStyle = document.head.querySelector('.darkreader--user-agent');
+    let userAgentStyle = document.head.querySelector('.darkreader--user-agent') as HTMLStyleElement;
     if (!userAgentStyle) {
         userAgentStyle = document.createElement('style');
         userAgentStyle.classList.add('darkreader');
@@ -19,6 +18,21 @@ function createTheme() {
     }
     document.head.insertBefore(userAgentStyle, document.head.firstChild);
     userAgentStyle.textContent = getModifiedUserAgentStyle(filter);
+
+    if (document.readyState !== 'complete') {
+        const cachedCSS = localStorage.getItem('darkreader-cached-dynamic-theme-css');
+        if (cachedCSS) {
+            let cachedStyle = document.head.querySelector('.darkreader--cache') as HTMLStyleElement;
+            if (!cachedStyle) {
+                cachedStyle = document.createElement('style');
+                cachedStyle.classList.add('darkreader');
+                cachedStyle.classList.add('darkreader--cache');
+                cachedStyle.media = 'screen';
+            }
+            document.head.appendChild(cachedStyle);
+            cachedStyle.textContent = cachedCSS;
+        }
+    }
 
     Array.from<HTMLLinkElement | HTMLStyleElement>(document.querySelectorAll('link[rel="stylesheet"], style'))
         .filter((style) => !styleManagers.has(style) && shouldManageStyle(style))
@@ -99,6 +113,17 @@ function shouldManageStyle(element: Node) {
 
 let styleChangeObserver: MutationObserver = null;
 
+function onLoad() {
+    requestAnimationFrame(() => {
+        throttledRender();
+        setTimeout(() => {
+            removeNode(document.head.querySelector('.darkreader--cache'));
+            const theme = Array.from(document.querySelectorAll('.darkreader:not(.darkreader--cors)')).map((s) => s.textContent).join('\n');
+            theme && localStorage.setItem('darkreader-cached-dynamic-theme-css', theme);
+        }, 2000);
+    });
+}
+
 function createThemeAndWatchForUpdates() {
     createTheme();
     styleChangeObserver = new MutationObserver((mutations) => {
@@ -111,11 +136,15 @@ function createThemeAndWatchForUpdates() {
             mutations.some((m) => m.target && shouldManageStyle(m.target))
         ) {
             throttledRender();
+            const cachedStyle = document.head.querySelector('.darkreader--cache');
+            if (cachedStyle) {
+                document.head.appendChild(cachedStyle);
+            }
         }
     });
     styleChangeObserver.observe(document.documentElement, {childList: true, subtree: true, characterData: true});
     document.addEventListener('load', throttledRender);
-    window.addEventListener('load', throttledRender);
+    window.addEventListener('load', onLoad);
 }
 
 function stopWatchingForUpdates() {
@@ -125,7 +154,7 @@ function stopWatchingForUpdates() {
         styleChangeObserver = null;
     }
     document.removeEventListener('load', throttledRender);
-    window.removeEventListener('load', throttledRender);
+    window.removeEventListener('load', onLoad);
 }
 
 export function createOrUpdateDynamicTheme(filterConfig: FilterConfig) {
@@ -145,7 +174,8 @@ export function createOrUpdateDynamicTheme(filterConfig: FilterConfig) {
 
 export function removeDynamicTheme() {
     cleanDynamicThemeCache();
-    removeNode(userAgentStyle);
+    removeNode(document.head.querySelector('.darkreader--user-agent'));
+    removeNode(document.head.querySelector('.darkreader--cache'));
     Array.from(styleManagers.keys()).forEach((el) => removeManager(el));
 }
 

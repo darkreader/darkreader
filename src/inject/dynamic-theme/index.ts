@@ -161,6 +161,7 @@ export function removeDynamicTheme() {
     removeNode(document.head.querySelector('.darkreader--user-agent'));
     removeNode(document.head.querySelector('.darkreader--text'));
     Array.from(styleManagers.keys()).forEach((el) => removeManager(el));
+    Array.from(document.querySelectorAll('.darkreader')).forEach(removeNode);
 }
 
 export function cleanDynamicThemeCache() {

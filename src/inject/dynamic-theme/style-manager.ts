@@ -33,6 +33,10 @@ export default async function manageStyle(element: HTMLLinkElement | HTMLStyleEl
 
     let cancelAsyncOperations = false;
 
+    function isCancelled() {
+        return cancelAsyncOperations;
+    }
+
     const observer = new MutationObserver(async (mutations) => {
         rules = await getRules();
         update();
@@ -40,10 +44,6 @@ export default async function manageStyle(element: HTMLLinkElement | HTMLStyleEl
     const observerOptions: MutationObserverInit = {characterData: true, attributes: true};
 
     let rules: CSSRuleList;
-
-    function isCancelled() {
-        return cancelAsyncOperations;
-    }
 
     async function getRules() {
         let rules: CSSRuleList = null;
@@ -197,6 +197,9 @@ export default async function manageStyle(element: HTMLLinkElement | HTMLStyleEl
             if (!frameId) {
                 frameId = requestAnimationFrame(() => {
                     frameId = null;
+                    if (cancelAsyncOperations) {
+                        return;
+                    }
                     const mediaGroups = queue.reduce((groups, d) => {
                         const media = d.media || '';
                         if (!groups[media]) {

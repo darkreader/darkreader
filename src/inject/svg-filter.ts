@@ -1,4 +1,4 @@
-import createNodeAsap from './utils/create-node-asap';
+import {createNodeAsap, removeNode} from './utils/dom';
 
 export function createOrUpdateSVGFilter(svgMatrix: string, svgReverseMatrix: string) {
     createNodeAsap({
@@ -56,6 +56,5 @@ export function createOrUpdateSVGFilter(svgMatrix: string, svgReverseMatrix: str
 }
 
 export function removeSVGFilter() {
-    const svg = document.getElementById('dark-reader-svg');
-    svg && svg.parentElement.removeChild(svg);
+    removeNode(document.getElementById('dark-reader-svg'));
 }

@@ -11,9 +11,10 @@ export default function MoreSettings({data, actions}: ExtWrapper) {
             </div>
             <div class="more-settings__section">
                 <p class="more-settings__description">
-                    Try out experimental theme engines<br />
-                    <strong>Filter+</strong> preserves colors saturation<br />
-                    <strong>Static theme</strong> generates a simple fast theme
+                    Try out <strong>experimental</strong> theme engines:<br />
+                    <strong>Filter+</strong> preserves colors saturation, uses GPU<br />
+                    <strong>Static theme</strong> generates a simple fast theme<br />
+                    <strong>Dynamic theme</strong> analyzes colors and images
                 </p>
                 <EngineSwitch data={data} actions={actions} />
             </div>

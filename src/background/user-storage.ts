@@ -1,4 +1,4 @@
-import {isMacOS, isWindows, isMobile} from '../utils/platform';
+import {isMacOS, isWindows, isMobile, isFirefox} from '../utils/platform';
 import ThemeEngines from '../generators/theme-engines';
 import {UserSettings, FilterConfig} from '../definitions';
 
@@ -20,7 +20,7 @@ export default class UserStorage {
                 fontFamily: isMacOS() ? 'Helvetica Neue' : isWindows() ? 'Segoe UI' : 'Open Sans',
                 textStroke: 0,
                 invertListed: false,
-                engine: isMobile() ? ThemeEngines.staticTheme : ThemeEngines.cssFilter,
+                engine: isMobile() || isFirefox() ? ThemeEngines.dynamicTheme : ThemeEngines.svgFilter,
                 siteList: [],
             },
         };

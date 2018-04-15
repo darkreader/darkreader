@@ -1,4 +1,4 @@
-import createNodeAsap from './utils/create-node-asap';
+import {createNodeAsap, removeNode} from './utils/dom';
 
 export function createOrUpdateStyle(css: string) {
     createNodeAsap({
@@ -26,6 +26,5 @@ export function createOrUpdateStyle(css: string) {
 }
 
 export function removeStyle() {
-    const style = document.getElementById('dark-reader-style');
-    style && style.parentElement.removeChild(style);
+    removeNode(document.getElementById('dark-reader-style'));
 }

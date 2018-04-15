@@ -1,4 +1,4 @@
-import {ExtensionData, FilterConfig, TabInfo} from '../definitions';
+import {ExtensionData, FilterConfig, TabInfo, Message} from '../definitions';
 
 interface ExtensionAdapter {
     collect: () => Promise<ExtensionData>;
@@ -27,7 +27,7 @@ export default class Messenger {
         });
     }
 
-    private async onUIMessage(port: chrome.runtime.Port, {type, id, data}) {
+    private async onUIMessage(port: chrome.runtime.Port, {type, id, data}: Message) {
         switch (type) {
             case 'get-data': {
                 const data = await this.adapter.collect();

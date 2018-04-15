@@ -1,10 +1,10 @@
 import {formatSitesFixesConfig} from './utils/format';
-import {applyFilterToColor} from './utils/matrix';
+import {applyColorMatrix, createFilterMatrix} from './utils/matrix';
 import {parseSitesFixesConfig} from './utils/parse';
 import {parseArray, formatArray} from '../utils/text';
 import {compareURLPatterns} from '../utils/url';
-import {createTextRule} from './text-style';
-import {isUrlMatched, isUrlInList} from '../utils/url';
+import {createTextStyle} from './text-style';
+import {isUrlInList} from '../utils/url';
 import {FilterConfig, InversionFix} from '../definitions';
 
 export enum FilterMode {
@@ -43,7 +43,7 @@ export function cssFilterStyleheetTemplate(filterValue: string, reverseFilterVal
         // Add text rule
         lines.push('');
         lines.push('/* Font */');
-        lines.push(`* ${createTextRule(config)}`);
+        lines.push(createTextStyle(config));
     }
 
     // Fix bad font hinting after inversion
@@ -63,7 +63,7 @@ export function cssFilterStyleheetTemplate(filterValue: string, reverseFilterVal
         lines.push('}');
     });
 
-    const [r, g, b] = applyFilterToColor([255, 255, 255], config);
+    const [r, g, b] = applyColorMatrix([255, 255, 255], createFilterMatrix(config));
     const bgColor = {
         r: Math.round(r),
         g: Math.round(g),

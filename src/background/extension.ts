@@ -35,7 +35,7 @@ export class Extension {
         this.devtools = new DevTools(this.config, () => this.onConfigPropChanged());
         this.messenger = new Messenger(this.getMessengerAdapter());
         this.tabs = new TabManager({
-            getConnectionMessage: (url) => this.enabled && this.getTabMessage(url),
+            getConnectionMessage: (url) => this.ready && this.enabled && this.getTabMessage(url),
         });
         this.user = new UserStorage();
         this.awaiting = [];
@@ -53,12 +53,13 @@ export class Extension {
         } else {
             this.disable();
         }
+        this.setConfig(settings.config);
         console.log('loaded', settings);
 
         this.registerCommands();
 
         this.ready = true;
-        this.setConfig(settings.config);
+        this.tabs.updateContentScript();
 
         this.awaiting.forEach((ready) => ready());
         this.awaiting = null;
@@ -187,12 +188,18 @@ export class Extension {
         } else {
             this.icon.setInactive();
         }
+        if (!this.ready) {
+            return;
+        }
         this.tabs.sendMessage(this.getTabMessage);
         this.saveUserSettings();
         this.reportChanges();
     }
 
     protected onConfigPropChanged() {
+        if (!this.ready) {
+            return;
+        }
         if (this.enabled) {
             this.tabs.sendMessage(this.getTabMessage);
         }
@@ -244,6 +251,13 @@ export class Extension {
                     return {
                         type: 'add-static-theme',
                         data: createStaticStylesheet(this.filterConfig, url, this.config.STATIC_THEMES),
+                    };
+                }
+                case ThemeEngines.dynamicTheme: {
+                    const {siteList, invertListed, engine, ...filter} = this.filterConfig;
+                    return {
+                        type: 'add-dynamic-theme',
+                        data: filter,
                     };
                 }
                 default: {

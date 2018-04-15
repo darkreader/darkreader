@@ -1,7 +1,7 @@
 import {isUrlInList} from '../utils/url';
-import {createTextRule} from './text-style';
+import {createTextStyle} from './text-style';
 import {formatSitesFixesConfig} from './utils/format';
-import {applyFilterToColor} from './utils/matrix';
+import {applyColorMatrix, createFilterMatrix} from './utils/matrix';
 import {parseSitesFixesConfig} from './utils/parse';
 import {parseArray, formatArray} from '../utils/text';
 import {compareURLPatterns} from '../utils/url';
@@ -61,7 +61,7 @@ function mix(color1: number[], color2: number[], t: number) {
 export default function createStaticStylesheet(config: FilterConfig, url: string, staticThemes: StaticTheme[]) {
     const srcTheme = config.mode === 1 ? darkTheme : lightTheme;
     const theme = Object.entries(srcTheme).reduce((t, [prop, color]) => {
-        t[prop] = applyFilterToColor(color, {...config, mode: 0});
+        t[prop] = applyColorMatrix(color, createFilterMatrix({...config, mode: 0}));
         return t;
     }, {} as ThemeColors);
 
@@ -82,7 +82,7 @@ export default function createStaticStylesheet(config: FilterConfig, url: string
 
     if (config.useFont || config.textStroke > 0) {
         lines.push('/* Font */');
-        lines.push(`* ${createTextRule(config)}`);
+        lines.push(createTextStyle(config));
     }
 
     return lines

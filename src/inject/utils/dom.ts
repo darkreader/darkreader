@@ -7,7 +7,7 @@ interface createNodeAsapParams {
     isTargetMutation: (mutation: MutationRecord) => boolean;
 }
 
-export default function createNodeAsap({
+export function createNodeAsap({
     selectNode,
     createNode,
     updateNode,
@@ -55,4 +55,8 @@ export default function createNodeAsap({
             observer.observe(document, {childList: true, subtree: true});
         }
     }
+}
+
+export function removeNode(node: Node) {
+    node && node.parentElement && node.parentElement.removeChild(node);
 }

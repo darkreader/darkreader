@@ -1,23 +1,5 @@
+import {clamp, multiplyMatrices} from '../../utils/math';
 import {FilterConfig} from '../../definitions';
-
-function multiplyMatrices(m1: number[][], m2: number[][]) {
-    const result: number[][] = [];
-    for (let i = 0; i < m1.length; i++) {
-        result[i] = [];
-        for (let j = 0; j < m2[0].length; j++) {
-            let sum = 0;
-            for (let k = 0; k < m1[0].length; k++) {
-                sum += m1[i][k] * m2[k][j];
-            }
-            result[i][j] = sum;
-        }
-    }
-    return result;
-}
-
-function clamp(x: number, min: number, max: number) {
-    return Math.min(max, Math.max(min, x));
-}
 
 export function createFilterMatrix(config: FilterConfig) {
     let m = Matrix.identity();
@@ -39,10 +21,9 @@ export function createFilterMatrix(config: FilterConfig) {
     return m;
 }
 
-export function applyFilterToColor([r, g, b]: number[], config: FilterConfig) {
-    const m = createFilterMatrix(config);
+export function applyColorMatrix([r, g, b]: number[], matrix: number[][]) {
     const rgb = [[r / 255], [g / 255], [b / 255], [1], [1]];
-    const result = multiplyMatrices(m, rgb);
+    const result = multiplyMatrices(matrix, rgb);
     return [0, 1, 2].map((i) => clamp(Math.round(result[i][0] * 255), 0, 255));
 }
 

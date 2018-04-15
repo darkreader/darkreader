@@ -100,9 +100,13 @@ export default async function manageStyle(element: HTMLLinkElement | HTMLStyleEl
     const rulesModCache = new Map<string, ModifiableCSSRule>();
     let prevFilterKey: string = null;
 
-    function render(filter: FilterConfig, variables: Map<string, string>) {
+    async function render(filter: FilterConfig, variables: Map<string, string>) {
         if (!rules) {
-            return null;
+            // Observer fails to trigger change?
+            rules = await getRules();
+            if (!rules) {
+                return null;
+            }
         }
         cancelAsyncOperations = false;
         let rulesChanged = (rulesModCache.size === 0);

@@ -41,6 +41,10 @@ export default async function manageStyle(element: HTMLLinkElement | HTMLStyleEl
 
     let rules: CSSRuleList;
 
+    function isCancelled() {
+        return cancelAsyncOperations;
+    }
+
     async function getRules() {
         let rules: CSSRuleList = null;
         if (element.sheet == null) {
@@ -62,7 +66,7 @@ export default async function manageStyle(element: HTMLLinkElement | HTMLStyleEl
             if (corsCopy) {
                 rules = corsCopy.sheet.cssRules;
             } else {
-                corsCopy = await createCORSCopy(link, () => cancelAsyncOperations);
+                corsCopy = await createCORSCopy(link, isCancelled);
                 if (corsCopy) {
                     rules = corsCopy.sheet.cssRules;
                 }
@@ -145,7 +149,7 @@ export default async function manageStyle(element: HTMLLinkElement | HTMLStyleEl
 
             const modDecs: ModifiableCSSDeclaration[] = [];
             iterateCSSDeclarations(varsRule || rule, (property, value) => {
-                const mod = getModifiableCSSDeclaration(property, value, rule);
+                const mod = getModifiableCSSDeclaration(property, value, rule, isCancelled);
                 if (mod) {
                     modDecs.push(mod);
                 }

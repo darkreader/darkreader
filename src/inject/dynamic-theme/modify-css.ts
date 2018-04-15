@@ -21,7 +21,7 @@ export interface ModifiableCSSRule {
     declarations: ModifiableCSSDeclaration[];
 }
 
-export function getModifiableCSSDeclaration(property: string, value: string, rule: CSSStyleRule): ModifiableCSSDeclaration {
+export function getModifiableCSSDeclaration(property: string, value: string, rule: CSSStyleRule, isCancelled: () => boolean): ModifiableCSSDeclaration {
     const important = Boolean(rule.style.getPropertyPriority(property));
     if (property.startsWith('--')) {
         return null;
@@ -31,7 +31,7 @@ export function getModifiableCSSDeclaration(property: string, value: string, rul
             return {property, value: modifier, important};
         }
     } else if (property === 'background-image') {
-        const modifier = getBgImageModifier(property, value, rule);
+        const modifier = getBgImageModifier(property, value, rule, isCancelled);
         if (modifier) {
             return {property, value: modifier, important};
         }
@@ -259,7 +259,7 @@ const gradientRegex = /[\-a-z]+gradient\(([^\(\)]*(\(.*?\)))*[^\(\)]*\)/g;
 const imageDetailsCache = new Map<string, ImageDetails>();
 const awaitingForImageLoading = new Map<string, ((value: string) => void)[]>();
 
-function getBgImageModifier(prop: string, value: string, rule: CSSStyleRule): CSSValueModifier {
+function getBgImageModifier(prop: string, value: string, rule: CSSStyleRule, isCancelled: () => boolean): CSSValueModifier {
     try {
 
         const gradients = getMatches(gradientRegex, value);
@@ -329,6 +329,9 @@ function getBgImageModifier(prop: string, value: string, rule: CSSStyleRule): CS
                 } else {
                     try {
                         imageDetails = await getImageDetails(url);
+                        if (isCancelled()) {
+                            return null;
+                        }
                     } catch (err) {
                         console.warn(err);
                         awaitingForImageLoading.get(url).forEach((resolve) => resolve(urlValue));

@@ -51,12 +51,21 @@ export function getModifiedUserAgentStyle(filter: FilterConfig) {
     lines.push(`    border-color: ${modifyBorderColor({r: 76, g: 76, b: 76}, filter)};`);
     lines.push(`    color: ${modifyForegroundColor({r: 0, g: 0, b: 0}, filter)};`);
     lines.push('}');
+    lines.push('a {');
+    lines.push(`    color: ${modifyBorderColor({r: 0, g: 64, b: 255}, filter)};`);
+    lines.push('}');
     lines.push('table {');
     lines.push(`    border-color: ${modifyBorderColor({r: 128, g: 128, b: 128}, filter)};`);
     lines.push('}');
     lines.push('::placeholder {');
     lines.push(`    color: ${modifyForegroundColor({r: 169, g: 169, b: 169}, filter)};`);
     lines.push('}');
+    ['::selection', '::-moz-selection'].forEach((selection) => {
+        lines.push(`${selection} {`);
+        lines.push(`    background-color: ${modifyBackgroundColor({r: 0, g: 96, b: 212}, filter)};`);
+        lines.push(`    color: ${modifyForegroundColor({r: 255, g: 255, b: 255}, filter)};`);
+        lines.push('}');
+    });
     return lines.join('\n');
 }
 
@@ -209,7 +218,7 @@ function getBgImageModifier(prop: string, value: string, rule: CSSStyleRule, isC
         const getBgImageValue = (imageDetails: ImageDetails, filter: FilterConfig) => {
             const {isDark, isLight, isTransparent, isLarge} = imageDetails;
             let result: string;
-            if (isDark && isTransparent && filter.mode === 1) {
+            if (isDark && isTransparent && filter.mode === 1 && !isLarge) {
                 // console.info(`Inverting dark image ${imageDetails.src}`);
                 const inverted = getFilteredImageDataURL(imageDetails, {...filter, sepia: clamp(filter.sepia + 90, 0, 100)});
                 result = `url("${inverted}")`;

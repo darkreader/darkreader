@@ -40,18 +40,22 @@ function modifyColorWithCache(rgb: RGBA, filter: FilterConfig, modifyHSL: (hsl: 
 
 function modifyLightModeHSL({h, s, l, a}) {
     const lMin = 0;
-    const lMax = 0.95;
+    const lMid = 0.4;
+    const lMax = 0.9;
     const sNeutralLim = 0.16;
     const sColored = 0.16;
-    const hColored = 40;
+    const hColoredL0 = 220;
+    const hColoredL1 = 40;
 
     const lx = scale(l, 0, 1, lMin, lMax);
 
     let hx = h;
     let sx = s;
     if (s < sNeutralLim) {
-        sx = sColored;
-        hx = hColored;
+        sx = (l < lMid ?
+            scale(l, 0, lMid, sColored, 0) :
+            scale(l, lMid, 1, 0, sColored));
+        hx = (l < lMid ? hColoredL0 : hColoredL1);
     }
 
     return {h: hx, s: sx, l: lx, a};

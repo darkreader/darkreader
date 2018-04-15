@@ -15,6 +15,11 @@ const themeColorTypes = {
     button_background_hover: 'text',
     icons: 'text',
     icons_attention: 'text',
+    popup: 'bg',
+    popup_border: 'bg',
+    popup_highlight: 'bg',
+    popup_highlight_text: 'text',
+    popup_text: 'text',
     tab_line: 'bg',
     tab_loading: 'bg',
     tab_selected: 'bg',
@@ -35,16 +40,23 @@ const themeColorTypes = {
 
 const $colors = {
     accentcolor: '#eeeeee',
+    popup: '#cccccc',
+    popup_text: 'black',
     textcolor: 'black',
     tab_line: '#9a451d',
     tab_loading: '#23aeff',
-    toolbar: 'gray',
+    toolbar: '#707070',
     toolbar_field: 'lightgray',
     toolbar_field_text: 'black',
-}
+};
+
+const $lightThemeColors = {
+    accentcolor: '#222222',
+    textcolor: 'white',
+};
 
 export function setWindowTheme(filter: FilterConfig, $accent?: string) {
-    const colors = Object.entries($colors).reduce((obj, [key, value]) => {
+    const colors = Object.entries({...$colors, ...(filter.mode === 0 ? $lightThemeColors : {})}).reduce((obj, [key, value]) => {
         const type = themeColorTypes[key];
         const modify: ((rgb: RGBA, filter: FilterConfig) => string) = {
             'bg': modifyBackgroundColor,

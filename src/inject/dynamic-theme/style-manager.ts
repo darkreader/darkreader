@@ -41,7 +41,7 @@ export default async function manageStyle(element: HTMLLinkElement | HTMLStyleEl
         rules = await getRules();
         update();
     });
-    const observerOptions: MutationObserverInit = {characterData: true, attributes: true};
+    const observerOptions: MutationObserverInit = {attributes: true, childList: true};
 
     let rules: CSSRuleList;
 
@@ -282,8 +282,8 @@ export default async function manageStyle(element: HTMLLinkElement | HTMLStyleEl
         asyncStyles.forEach(removeNode);
     }
 
-    rules = await getRules();
     observer.observe(element, observerOptions);
+    rules = await getRules();
 
     return {
         details,

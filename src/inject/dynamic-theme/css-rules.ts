@@ -14,7 +14,7 @@ export function iterateCSSRules(rules: CSSRuleList, iterate: (rule: CSSStyleRule
 }
 
 export function iterateCSSDeclarations(rule: CSSStyleRule, iterate: (propery: string, value: string) => void) {
-    Array.from(rule.style).forEach((property) => {
+    rule.style && Array.from(rule.style).forEach((property) => {
         const value = rule.style.getPropertyValue(property).trim();
         if (!value) {
             return;

@@ -1,4 +1,5 @@
 import {replaceCSSVariables} from './css-rules';
+import {getInlineStyleOverride} from './inline-style';
 import {getModifiedUserAgentStyle, cleanModificationCache} from './modify-css';
 import manageStyle, {StyleManager} from './style-manager';
 import {removeNode} from '../utils/dom';
@@ -45,6 +46,15 @@ function createTheme() {
         ].join('\n');
     } else {
         invertStyle.textContent = '';
+    }
+
+    const inlineStyle = createOrUpdateStyle('darkreader--inline');
+    document.head.insertBefore(inlineStyle, invertStyle.nextSibling);
+    if (fixes && Array.isArray(fixes.inline) && fixes.inline.length > 0) {
+        const elements = Array.from<HTMLElement>(document.querySelectorAll(fixes.inline.join(', ')));
+        inlineStyle.textContent = getInlineStyleOverride(elements, filter);
+    } else {
+        inlineStyle.textContent = '';
     }
 
     Array.from<HTMLLinkElement | HTMLStyleElement>(document.querySelectorAll('link[rel="stylesheet"], style'))
@@ -176,6 +186,7 @@ export function removeDynamicTheme() {
     removeNode(document.head.querySelector('.darkreader--user-agent'));
     removeNode(document.head.querySelector('.darkreader--text'));
     removeNode(document.head.querySelector('.darkreader--invert'));
+    removeNode(document.head.querySelector('.darkreader--inline'));
     Array.from(styleManagers.keys()).forEach((el) => removeManager(el));
     Array.from(document.querySelectorAll('.darkreader')).forEach(removeNode);
 }

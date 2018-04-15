@@ -78,7 +78,7 @@ export default async function manageStyle(element: HTMLLinkElement | HTMLStyleEl
     function getVariables() {
         const variables = new Map<string, string>();
         rules && iterateCSSRules(rules, (rule) => {
-            iterateCSSDeclarations(rule, (property, value) => {
+            rule.style && iterateCSSDeclarations(rule.style, (property, value) => {
                 if (property.startsWith('--')) {
                     variables.set(property, value);
                 }
@@ -152,7 +152,8 @@ export default async function manageStyle(element: HTMLLinkElement | HTMLStyleEl
             }
 
             const modDecs: ModifiableCSSDeclaration[] = [];
-            iterateCSSDeclarations(varsRule || rule, (property, value) => {
+            const targetRule = varsRule || rule;
+            targetRule && iterateCSSDeclarations(targetRule.style, (property, value) => {
                 const mod = getModifiableCSSDeclaration(property, value, rule, isCancelled);
                 if (mod) {
                     modDecs.push(mod);

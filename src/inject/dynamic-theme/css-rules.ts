@@ -58,7 +58,7 @@ export function replaceCSSVariables(value: string, variables: Map<string, string
         } else if (fallback) {
             return fallback;
         } else {
-            console.warn(`Variable ${name} not found`);
+            // console.warn(`Variable ${name} not found`);
             missing = true;
         }
         return match;

@@ -36,6 +36,6 @@ function onMessage({type, data}) {
 const port = chrome.runtime.connect({name: 'tab'});
 port.onMessage.addListener(onMessage);
 port.onDisconnect.addListener(() => {
-    console.warn('disconnect');
+    // console.warn('disconnect');
     cleanDynamicThemeCache();
 });

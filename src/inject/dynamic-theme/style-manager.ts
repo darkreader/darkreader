@@ -319,9 +319,16 @@ async function createCORSCopy(link: HTMLLinkElement, isCancelled: () => boolean)
         return prevCors;
     }
 
-    const response = await bgFetch({url, responseType: 'text'});
-    if (isCancelled()) {
-        return null;
+    let response: string;
+    const cache = localStorage.getItem(`darkreader-css-link-cache:${url}`);
+    if (cache) {
+        response = cache;
+    } else {
+        response = await bgFetch({url, responseType: 'text'});
+        response && localStorage.setItem(`darkreader-css-link-cache:${url}`, response);
+        if (isCancelled()) {
+            return null;
+        }
     }
 
     let cssText = response;

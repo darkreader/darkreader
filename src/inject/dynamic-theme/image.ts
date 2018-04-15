@@ -33,7 +33,13 @@ async function getImageDataURL(url: string) {
     if (url.startsWith('data:')) {
         dataURL = url;
     } else {
-        dataURL = await bgFetch({url, responseType: 'data-url'});
+        const cache = localStorage.getItem(`darkreader-image-cache:${url}`);
+        if (cache) {
+            dataURL = cache;
+        } else {
+            dataURL = await bgFetch({url, responseType: 'data-url'});
+            localStorage.setItem(`darkreader-image-cache:${url}`, dataURL);
+        }
     }
     return dataURL;
 }

@@ -4,7 +4,6 @@ import {getMatches} from '../../utils/text';
 import {applyColorMatrix, createFilterMatrix} from '../../generators/utils/matrix';
 import {cssURLRegex, getCSSURLValue, getCSSBaseBath} from './css-rules';
 import {getImageDetails, getFilteredImageDataURL, ImageDetails} from './image';
-import state from './state';
 import {getAbsoluteURL} from './url';
 import {FilterConfig} from '../../definitions';
 
@@ -288,12 +287,6 @@ function getBgImageModifier(prop: string, value: string, rule: CSSStyleRule): CS
                 url = getAbsoluteURL(location.origin, url);
             }
 
-            let imageDetails: ImageDetails;
-            if (imageDetailsCache.has(url)) {
-                imageDetails = imageDetailsCache.get(url);
-                return (filter: FilterConfig) => getBgImageValue(imageDetails, filter);
-            }
-
             if (awaitingForImageLoading.has(url)) {
                 return () => new Promise<string>((resolve) => {
                     awaitingForImageLoading.get(url).push(resolve);
@@ -303,17 +296,18 @@ function getBgImageModifier(prop: string, value: string, rule: CSSStyleRule): CS
             awaitingForImageLoading.set(url, []);
             return async (filter: FilterConfig) => {
                 let imageDetails: ImageDetails;
-                try {
-                    imageDetails = await getImageDetails(url);
-                } catch (err) {
-                    console.warn(err);
-                    awaitingForImageLoading.get(url).forEach((resolve) => resolve(urlValue));
-                    return urlValue;
+                if (imageDetailsCache.has(url)) {
+                    imageDetails = imageDetailsCache.get(url);
+                } else {
+                    try {
+                        imageDetails = await getImageDetails(url);
+                    } catch (err) {
+                        console.warn(err);
+                        awaitingForImageLoading.get(url).forEach((resolve) => resolve(urlValue));
+                        return urlValue;
+                    }
+                    imageDetailsCache.set(url, imageDetails);
                 }
-                if (!state.watching) {
-                    return null;
-                }
-                imageDetailsCache.set(url, imageDetails);
                 const bgImageValue = getBgImageValue(imageDetails, filter) || urlValue;
                 awaitingForImageLoading.get(url).forEach((resolve) => resolve(bgImageValue));
                 return bgImageValue;
@@ -360,9 +354,6 @@ function getBgImageModifier(prop: string, value: string, rule: CSSStyleRule): CS
             if (results.some((r) => r instanceof Promise)) {
                 return Promise.all(results)
                     .then((asyncResults) => {
-                        if (!state.watching) {
-                            return null;
-                        }
                         return asyncResults.join('');
                     });
             }

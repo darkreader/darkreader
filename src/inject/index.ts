@@ -20,6 +20,7 @@ function onMessage({type, data}) {
         }
         case 'add-dynamic-theme': {
             const filter = data;
+            removeStyle();
             createOrUpdateDynamicTheme(filter);
             break;
         }

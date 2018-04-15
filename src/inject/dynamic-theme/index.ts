@@ -1,266 +1,127 @@
-import {iterateCSSRules, iterateCSSDeclarations, getCSSBaseBath, getCSSURLValue, cssURLRegex, fontFaceRegex, replaceCSSVariables} from './css-rules';
-import {getAbsoluteURL} from './url';
-import {getModifiableCSSDeclaration, getModifiedUserAgentStyle, getModifiedFallbackStyle, cleanModificationCache, ModifiableCSSDeclaration, ModifiableCSSRule} from './modify-css';
-import {bgFetch} from './network';
-import state from './state';
-import {removeStyle} from '../style';
+import {replaceCSSVariables} from './css-rules';
+import {getModifiedUserAgentStyle, cleanModificationCache} from './modify-css';
+import manageStyle, {StyleManager} from './style-manager';
+import {removeNode} from '../utils/dom';
 import {FilterConfig} from '../../definitions';
 
-const cache = new WeakMap<CSSStyleRule, ModifiableCSSRule>();
+const styleManagers = new Map<HTMLLinkElement | HTMLStyleElement, StyleManager>();
+const variables = new Map<string, string>();
+let userAgentStyle: HTMLStyleElement = null;
+let filter: FilterConfig = null;
 
-function createTheme(filter: FilterConfig) {
-    let style = document.getElementById('dark-reader-style') as HTMLStyleElement;
-    if (!style) {
-        style = document.createElement('style');
-        style.id = 'dark-reader-style';
-        document.head.appendChild(style);
+function createTheme() {
+    userAgentStyle = document.head.querySelector('.darkreader--user-agent');
+    if (!userAgentStyle) {
+        userAgentStyle = document.createElement('style');
+        userAgentStyle.classList.add('darkreader');
+        userAgentStyle.classList.add('darkreader--user-agent');
+        userAgentStyle.media = 'screen';
     }
-    style.classList.add('dark-reader-style');
-    style.classList.add('dark-reader-style--main');
-    style.media = 'screen';
+    document.head.insertBefore(userAgentStyle, document.head.firstChild);
+    userAgentStyle.textContent = getModifiedUserAgentStyle(filter);
 
-    document.body && Array.from(document.body.querySelectorAll('link[rel="stylesheet"], style'))
-        .forEach((el) => {
-            if (el.parentElement !== document.head) {
-                document.head.insertBefore(el, style);
-            }
-        });
+    Array.from<HTMLLinkElement | HTMLStyleElement>(document.querySelectorAll('link[rel="stylesheet"], style'))
+        .filter((style) => !styleManagers.has(style) && shouldManageStyle(style))
+        .forEach((style) => createManager(style));
 
-    const variables = new Map<string, string>();
-    iterateCSSRules({
-        filter: (s) => shouldAnalyzeStyle(s.ownerNode),
-        iterate: (r) => {
-            iterateCSSDeclarations(r, (property, value) => {
-                if (property.startsWith('--')) {
-                    variables.set(property, value);
-                }
-            });
-        }
-    });
-    variables.forEach((value, key) => {
-        const replaced = replaceCSSVariables(value, variables);
-        variables.set(key, replaced);
-    });
-
-    const rules: ModifiableCSSRule[] = [];
-    iterateCSSRules({
-        filter: (s) => shouldAnalyzeStyle(s.ownerNode),
-        iterate: (r) => {
-            if (cache.has(r)) {
-                const rule = cache.get(r);
-                if (rule) {
-                    rules.push(rule);
-                }
-                return;
-            }
-
-            let temp: HTMLStyleElement = null;
-            let tempRule: CSSStyleRule = null;
-            if (variables.size > 0) {
-                const cssText = replaceCSSVariables(r.cssText, variables);
-                if (cssText) {
-                    temp = document.createElement('style');
-                    temp.classList.add('dark-reader-style');
-                    temp.classList.add('dark-reader-style--temp-var');
-                    temp.textContent = cssText;
-                    document.head.appendChild(temp);
-                    tempRule = (temp.sheet as CSSStyleSheet).cssRules[0] as CSSStyleRule;
-                }
-            }
-
-            const declarations: ModifiableCSSDeclaration[] = [];
-            iterateCSSDeclarations(tempRule || r, (property, value) => {
-                const declaration = getModifiableCSSDeclaration(property, value, r);
-                if (declaration) {
-                    declarations.push(declaration);
-                }
-            });
-
-            temp && temp.parentElement.removeChild(temp);
-
-            let rule: ModifiableCSSRule = null;
-            if (declarations.length > 0) {
-                rule = {selector: r.selectorText, declarations};
-                if (r.parentRule instanceof CSSMediaRule) {
-                    rule.media = (r.parentRule as CSSMediaRule).media.mediaText;
-                }
-                rules.push(rule);
-            }
-            cache.set(r, rule);
-        },
-    });
-
-    const lines: string[] = [];
-    lines.push(getModifiedUserAgentStyle(filter));
-    rules.forEach(({selector, declarations, media}) => {
-        if (media) {
-            lines.push(`@media ${media} {`);
-        }
-        lines.push(`${selector} {`);
-        declarations.forEach(({property, value, important}) => {
-            const importantKeyword = important ? ' !important' : '';
-            if (typeof value === 'function') {
-                const modified = value(filter);
-                if (modified instanceof Promise) {
-                    modified.then((asyncValue) => {
-                        if (!state.watching || !asyncValue) {
-                            return;
-                        }
-                        const asyncStyle = document.createElement('style');
-                        asyncStyle.media = 'screen';
-                        asyncStyle.classList.add('dark-reader-style');
-                        asyncStyle.classList.add('dark-reader-style--async');
-                        asyncStyle.textContent = [
-                            media && `@media ${media} {`,
-                            `${selector} {`,
-                            `    ${property}: ${asyncValue}${importantKeyword};`,
-                            '}',
-                            media && '}',
-                        ].filter((x) => x).join('\n');
-                        document.head.appendChild(asyncStyle);
-                    });
-                } else {
-                    lines.push(`    ${property}: ${modified}${importantKeyword};`);
-                }
-            } else {
-                lines.push(`    ${property}: ${value}${importantKeyword};`);
-            }
-        });
-        lines.push('}');
-        if (media) {
-            lines.push('}')
-        }
-    });
-
-    style.textContent = lines.join('\n');
-    document.head.insertBefore(style, null);
-    Array.from(document.querySelectorAll('.dark-reader-style--async')).forEach((el) => el.parentElement && el.parentElement.removeChild(el));
+    throttledRender();
 }
 
-function shouldAnalyzeStyle(node: Node) {
+const pendingCreation = new Set<HTMLLinkElement | HTMLStyleElement>();
+
+async function createManager(element: HTMLLinkElement | HTMLStyleElement) {
+    if (styleManagers.has(element) || pendingCreation.has(element)) {
+        return;
+    }
+    pendingCreation.add(element);
+    const manager = await manageStyle(element);
+    if (!pendingCreation.has(element)) {
+        manager.destroy();
+        return;
+    }
+    styleManagers.set(element, manager);
+    const details = manager.details();
+    details.variables.forEach((value, key) => variables.set(key, replaceCSSVariables(value, variables)));
+    variables.forEach((value, key) => variables.set(key, replaceCSSVariables(value, variables)));
+
+    throttledRender();
+}
+
+function removeManager(element: HTMLLinkElement | HTMLStyleElement) {
+    const manager = styleManagers.get(element);
+    if (manager) {
+        manager.destroy();
+        styleManagers.delete(element);
+    }
+}
+
+let pendingRendering = false;
+let requestedFrameId: number = null;
+
+function render() {
+    styleManagers.forEach((manager) => manager.render(filter, variables));
+}
+
+function throttledRender() {
+    if (requestedFrameId) {
+        pendingRendering = true;
+    } else {
+        render();
+        requestedFrameId = requestAnimationFrame(() => {
+            requestedFrameId = null;
+            if (pendingRendering) {
+                render();
+                pendingRendering = false;
+            }
+        });
+    }
+}
+
+function shouldManageStyle(element: HTMLLinkElement | HTMLStyleElement) {
     return (
         (
-            (node instanceof HTMLStyleElement) ||
-            (node instanceof HTMLLinkElement && node.rel === 'stylesheet')
+            (element instanceof HTMLStyleElement) ||
+            (element instanceof HTMLLinkElement && element.rel === 'stylesheet')
         ) && (
-            !node.classList.contains('dark-reader-style') ||
-            node.classList.contains('dark-reader-style--cors')
+            !element.classList.contains('darkreader') ||
+            element.classList.contains('darkreader--cors')
         )
     );
 }
 
-const loadingStyles = new WeakSet<Node>();
-
-async function replaceCORSStyle(link: HTMLLinkElement, filter: FilterConfig) {
-    const url = link.href;
-    loadingStyles.add(link);
-
-    const fallback = document.createElement('style');
-    fallback.classList.add('dark-reader-style');
-    fallback.classList.add('dark-reader-style--fallback');
-    fallback.media = 'screen';
-    fallback.textContent = getModifiedFallbackStyle(filter);
-    document.head.insertBefore(fallback, link.nextElementSibling);
-
-    let text: string;
-    try {
-        text = await bgFetch({url, responseType: 'text'});
-    } catch (err) {
-        console.warn(`Unable to load CSS ${url}`);
-        fallback.parentElement.removeChild(fallback);
-        return;
-    }
-
-    // Replace relative paths with absolute
-    const cssBasePath = getCSSBaseBath(url);
-    const cssText = text
-        .replace(fontFaceRegex, '')
-        .replace(cssURLRegex, (match) => {
-            const pathValue = getCSSURLValue(match);
-            return `url("${getAbsoluteURL(cssBasePath, pathValue)}")`;
-        })
-        .trim();
-
-    if (!cssText) {
-        fallback.parentElement.removeChild(fallback);
-        return;
-    }
-
-    const cors = document.createElement('style');
-    cors.classList.add('dark-reader-style');
-    cors.classList.add('dark-reader-style--cors');
-    cors.media = 'screen';
-    cors.dataset.uri = url;
-    cors.textContent = cssText;
-    link.parentElement.insertBefore(cors, link.nextElementSibling);
-
-    fallback.parentElement.removeChild(fallback);
-}
-
 let styleChangeObserver: MutationObserver = null;
-const linksSubscriptions = new Map<Element, () => void>();
 
-function watchForLinksLoading(filter: FilterConfig) {
-    stopWatchingForLinksLoading();
-    const onLoad = () => state.watching && createTheme(filter);
-    const links = Array.from(document.querySelectorAll('link[rel="stylesheet"]')) as HTMLLinkElement[];
-    links.forEach((link) => {
-        link.addEventListener('load', onLoad);
-        linksSubscriptions.set(link, onLoad);
-        if (!loadingStyles.has(link)) {
-            try {
-                const rules = (link.sheet as CSSStyleSheet).cssRules;
-            } catch (err) {
-                console.warn(err);
-                replaceCORSStyle(link, filter);
-            }
-        }
-    });
-}
-
-function stopWatchingForLinksLoading() {
-    linksSubscriptions.forEach((listener, link) => link.removeEventListener('load', listener));
-    linksSubscriptions.clear();
-}
-
-function createThemeAndWatchForUpdates(filter: FilterConfig) {
-    createTheme(filter);
-    state.watching = true;
-    watchForLinksLoading(filter);
-    if (styleChangeObserver) {
-        styleChangeObserver.disconnect();
-    }
+function createThemeAndWatchForUpdates() {
+    createTheme();
     styleChangeObserver = new MutationObserver((mutations) => {
-        const styleMutations = mutations.filter((m) => {
-            return Array.from(m.addedNodes)
-                .concat(Array.from(m.removedNodes))
-                .some((n: Element) => shouldAnalyzeStyle(n));
-        });
-        if (styleMutations.length > 0) {
-            createTheme(filter);
-            watchForLinksLoading(filter);
+        const addedStyles = mutations.reduce((nodes, m) => nodes.concat(Array.from(m.addedNodes).filter(shouldManageStyle)), []);
+        addedStyles.forEach((el) => createManager(el));
+        const removedStyles = mutations.reduce((nodes, m) => nodes.concat(Array.from(m.removedNodes).filter(shouldManageStyle)), []);
+        removedStyles.forEach((el) => removeManager(el));
+        if (addedStyles.length + removedStyles.length > 0) {
+            throttledRender();
         }
     });
-    styleChangeObserver.observe(document.head, {childList: true, attributes: true, characterData: true});
-    document.body && styleChangeObserver.observe(document.body, {childList: true, subtree: true, attributes: true, characterData: true});
+    styleChangeObserver.observe(document.head, {childList: true, subtree: true});
 }
 
 function stopWatchingForUpdates() {
-    state.watching = false;
+    styleManagers.forEach((manager) => manager.pause());
     if (styleChangeObserver) {
         styleChangeObserver.disconnect();
         styleChangeObserver = null;
     }
 }
 
-export function createOrUpdateDynamicTheme(filter: FilterConfig) {
+export function createOrUpdateDynamicTheme(filterConfig: FilterConfig) {
+    filter = filterConfig;
     if (document.head) {
-        createThemeAndWatchForUpdates(filter);
+        createThemeAndWatchForUpdates();
     } else {
         const headObserver = new MutationObserver(() => {
             if (document.head) {
                 headObserver.disconnect();
-                createThemeAndWatchForUpdates(filter);
+                createThemeAndWatchForUpdates();
             }
         });
         headObserver.observe(document, {childList: true, subtree: true});
@@ -268,15 +129,17 @@ export function createOrUpdateDynamicTheme(filter: FilterConfig) {
 }
 
 export function removeDynamicTheme() {
-    removeStyle();
-    Array.from(document.querySelectorAll('.dark-reader-style')).forEach((el) => el.parentElement && el.parentElement.removeChild(el));
-    Array.from(document.querySelectorAll('link[rel="stylesheet"]')).forEach((el) => loadingStyles.delete(el));
+    cancelAnimationFrame(requestedFrameId);
+    pendingRendering = false;
+    requestedFrameId = null;
+    pendingCreation.clear();
+    removeNode(userAgentStyle);
     stopWatchingForUpdates();
-    stopWatchingForLinksLoading();
+    Array.from(styleManagers.keys()).forEach((el) => removeManager(el));
+    cleanModificationCache();
 }
 
 export function cleanDynamicThemeCache() {
-    cleanModificationCache();
     stopWatchingForUpdates();
-    stopWatchingForLinksLoading();
+    cleanModificationCache();
 }

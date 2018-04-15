@@ -1,6 +1,5 @@
 import {getSVGFilterMatrixValue} from '../../generators/svg-filter';
 import {bgFetch} from './network';
-import state from './state';
 import {getAbsoluteURL} from './url';
 import {scale, clamp} from '../../utils/math';
 import {FilterConfig} from '../../definitions';
@@ -18,9 +17,6 @@ export interface ImageDetails {
 
 export async function getImageDetails(url: string) {
     const dataURL = await getImageDataURL(url);
-    if (!state.watching) {
-        throw new Error(`Image loading cancelled ${url}`);
-    }
     const image = await urlToImage(dataURL);
     const info = analyzeImage(image);
     return {

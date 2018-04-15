@@ -23,9 +23,9 @@ chrome.runtime.onMessage.addListener(({type, data, error, id}) => {
         resolvers.delete(id);
         rejectors.delete(id);
         if (error) {
-            reject(error);
+            reject && reject(error);
         } else {
-            resolve(data);
+            resolve && resolve(data);
         }
     }
 });

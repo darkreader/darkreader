@@ -1,44 +1,29 @@
-import {parseURL} from './url';
+import {parseURL, getAbsoluteURL} from './url';
 
-export function iterateCSSRules(options: {filter: (s: StyleSheet) => boolean, iterate: (r: CSSStyleRule) => void}) {
-    Array.from<HTMLStyleElement | HTMLLinkElement>(document.querySelectorAll('link[rel="stylesheet"], style'))
-        .filter((el) => {
-            try {
-                return Boolean((el.sheet as CSSStyleSheet).cssRules);
-            } catch (err) {
-                return false;
+export function iterateCSSRules(rules: CSSRuleList, iterate: (rule: CSSStyleRule) => void) {
+    Array.from<CSSRule>(rules as any)
+        .forEach((rule) => {
+            if (rule instanceof CSSMediaRule) {
+                Array.from(rule.cssRules).forEach((mediaRule) => iterate(mediaRule as CSSStyleRule));
+            } else if (rule instanceof CSSStyleRule) {
+                iterate(rule);
+            } else {
+                // console.warn(`CSSRule type not supported`, rule);
             }
-        })
-        .map((el) => el.sheet as CSSStyleSheet)
-        .filter((s) => options.filter(s))
-        .forEach((s) => {
-            Array.from<CSSStyleRule>(s.cssRules as any)
-                .forEach((r) => {
-                    if (r instanceof CSSMediaRule) {
-                        Array.from(r.cssRules).forEach((mr) => options.iterate(mr as CSSStyleRule));
-                    } else {
-                        options.iterate(r);
-                    }
-                });
         });
 }
 
-export function iterateCSSDeclarations(rule: CSSStyleRule, iterator: (propery: string, value: string) => void) {
-    const declarations = rule.style;
-    if (!declarations) {
-        return;
-    }
-    Array.from(declarations).forEach((property) => {
-        const value = declarations.getPropertyValue(property).trim();
+export function iterateCSSDeclarations(rule: CSSStyleRule, iterate: (propery: string, value: string) => void) {
+    Array.from(rule.style).forEach((property) => {
+        const value = rule.style.getPropertyValue(property).trim();
         if (!value) {
             return;
         }
-        iterator(property, value);
+        iterate(property, value);
     });
 }
 
 export const cssURLRegex = /url\((('.+?')|(".+?")|([^\)]*?))\)/g;
-export const fontFaceRegex = /@font-face\s*{[^}]*}/g;
 
 export function getCSSURLValue(cssURL: string) {
     return cssURL.replace(/^url\((.*)\)$/, '$1').replace(/^"(.*)"$/, '$1').replace(/^'(.*)'$/, '$1');
@@ -47,6 +32,20 @@ export function getCSSURLValue(cssURL: string) {
 export function getCSSBaseBath(url: string) {
     const cssURL = parseURL(url);
     return `${cssURL.protocol}//${cssURL.host}${cssURL.pathname.replace(/\/[^\/]+?\.css$/i, '')}`;
+}
+
+export function replaceCSSRelativeURLsWithAbsolute($css: string, cssURL: string) {
+    const cssBasePath = getCSSBaseBath(cssURL);
+    return $css.replace(cssURLRegex, (match) => {
+        const pathValue = getCSSURLValue(match);
+        return `url("${getAbsoluteURL(cssBasePath, pathValue)}")`;
+    });
+}
+
+const fontFaceRegex = /@font-face\s*{[^}]*}/g;
+
+export function replaceCSSFontFace($css: string) {
+    return $css.replace(fontFaceRegex, '');
 }
 
 const varRegex = /var\((--[^\s,]+),?\s*([^\(\)]*(\([^\(\)]*\)[^\(\)]*)*\s*)\)/g;

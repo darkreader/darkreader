@@ -113,7 +113,9 @@ function createThemeAndWatchForUpdates() {
             throttledRender();
         }
     });
-    styleChangeObserver.observe(document.documentElement, {childList: true, subtree: true});
+    styleChangeObserver.observe(document.documentElement, {childList: true, subtree: true, characterData: true});
+    document.addEventListener('load', throttledRender);
+    window.addEventListener('load', throttledRender);
 }
 
 function stopWatchingForUpdates() {
@@ -122,6 +124,8 @@ function stopWatchingForUpdates() {
         styleChangeObserver.disconnect();
         styleChangeObserver = null;
     }
+    document.removeEventListener('load', throttledRender);
+    window.removeEventListener('load', throttledRender);
 }
 
 export function createOrUpdateDynamicTheme(filterConfig: FilterConfig) {
@@ -140,17 +144,16 @@ export function createOrUpdateDynamicTheme(filterConfig: FilterConfig) {
 }
 
 export function removeDynamicTheme() {
+    cleanDynamicThemeCache();
+    removeNode(userAgentStyle);
+    Array.from(styleManagers.keys()).forEach((el) => removeManager(el));
+}
+
+export function cleanDynamicThemeCache() {
     cancelAnimationFrame(requestedFrameId);
     pendingRendering = false;
     requestedFrameId = null;
     pendingCreation.clear();
-    removeNode(userAgentStyle);
-    stopWatchingForUpdates();
-    Array.from(styleManagers.keys()).forEach((el) => removeManager(el));
-    cleanModificationCache();
-}
-
-export function cleanDynamicThemeCache() {
     stopWatchingForUpdates();
     cleanModificationCache();
 }

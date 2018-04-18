@@ -39,24 +39,19 @@ const themeColorTypes = {
 }
 
 const $colors = {
-    accentcolor: '#eeeeee',
+    accentcolor: '#111111',
     popup: '#cccccc',
     popup_text: 'black',
-    textcolor: 'black',
     tab_line: '#9a451d',
     tab_loading: '#23aeff',
+    textcolor: 'white',
     toolbar: '#707070',
     toolbar_field: 'lightgray',
     toolbar_field_text: 'black',
 };
 
-const $lightThemeColors = {
-    accentcolor: '#222222',
-    textcolor: 'white',
-};
-
 export function setWindowTheme(filter: FilterConfig, $accent?: string) {
-    const colors = Object.entries({...$colors, ...(filter.mode === 0 ? $lightThemeColors : {})}).reduce((obj, [key, value]) => {
+    const colors = Object.entries($colors).reduce((obj, [key, value]) => {
         const type = themeColorTypes[key];
         const modify: ((rgb: RGBA, filter: FilterConfig) => string) = {
             'bg': modifyBackgroundColor,
@@ -75,6 +70,7 @@ export function setWindowTheme(filter: FilterConfig, $accent?: string) {
 
 export function resetWindowTheme() {
     if (typeof browser !== 'undefined' && browser.theme && browser.theme.update) {
-        browser.theme.reset();
+        // It resets browser theme to entire
+        // browser.theme.reset();
     }
 }

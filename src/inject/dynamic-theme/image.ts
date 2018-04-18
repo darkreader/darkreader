@@ -33,7 +33,19 @@ async function getImageDataURL(url: string) {
     if (url.startsWith('data:')) {
         dataURL = url;
     } else {
-        dataURL = await bgFetch({url, responseType: 'data-url'});
+        const cache = sessionStorage.getItem(`darkreader-cache:${url}`);
+        if (cache) {
+            dataURL = cache;
+        } else {
+            dataURL = await bgFetch({url, responseType: 'data-url'});
+            if (dataURL.length < 2 * 256 * 1024) {
+                try {
+                    sessionStorage.setItem(`darkreader-cache:${url}`, dataURL);
+                } catch (err) {
+                    // console.warn(err);
+                }
+            }
+        }
     }
     return dataURL;
 }

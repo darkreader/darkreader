@@ -153,7 +153,7 @@ export default async function manageStyle(element: HTMLLinkElement | HTMLStyleEl
 
             const modDecs: ModifiableCSSDeclaration[] = [];
             const targetRule = varsRule || rule;
-            targetRule && iterateCSSDeclarations(targetRule.style, (property, value) => {
+            targetRule && targetRule.style && iterateCSSDeclarations(targetRule.style, (property, value) => {
                 const mod = getModifiableCSSDeclaration(property, value, rule, isCancelled);
                 if (mod) {
                     modDecs.push(mod);

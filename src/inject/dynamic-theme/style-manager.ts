@@ -324,17 +324,7 @@ async function createCORSCopy(link: HTMLLinkElement, isCancelled: () => boolean)
         return prevCors;
     }
 
-    let response: string;
-    const cache = localStorage.getItem(`darkreader-css-link-cache:${url}`);
-    if (cache) {
-        response = cache;
-    } else {
-        response = await bgFetch({url, responseType: 'text'});
-        response && localStorage.setItem(`darkreader-css-link-cache:${url}`, response);
-        if (isCancelled()) {
-            return null;
-        }
-    }
+    const response = await bgFetch({url, responseType: 'text'});
 
     let cssText = response;
     cssText = replaceCSSFontFace(cssText);

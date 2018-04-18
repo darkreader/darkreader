@@ -42,7 +42,7 @@ const $colors = {
     accentcolor: '#111111',
     popup: '#cccccc',
     popup_text: 'black',
-    tab_line: '#9a451d',
+    tab_line: '#23aeff',
     tab_loading: '#23aeff',
     textcolor: 'white',
     toolbar: '#707070',

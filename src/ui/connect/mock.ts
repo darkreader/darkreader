@@ -69,6 +69,10 @@ export function createConnectorMock() {
             Object.assign(data.filterConfig, config);
             listener(data);
         },
+        setShortcut(command, shortcut) {
+            Object.assign(data.shortcuts, {[command]: shortcut});
+            listener(data);
+        },
         toggleSitePattern(pattern) {
             const index = data.filterConfig.siteList.indexOf(pattern);
             if (index >= 0) {

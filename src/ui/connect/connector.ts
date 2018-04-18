@@ -53,6 +53,10 @@ export default class Connector implements ExtensionActions {
         this.port.postMessage({type: 'disable'});
     }
 
+    setShortcut(command: string, shortcut: string) {
+        this.port.postMessage({type: 'set-shortcut', data: {command, shortcut}});
+    }
+
     setConfig(config: FilterConfig) {
         this.port.postMessage({type: 'set-config', data: config});
     }

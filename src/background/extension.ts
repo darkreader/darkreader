@@ -5,7 +5,7 @@ import Messenger from './messenger';
 import TabManager from './tab-manager';
 import UserStorage from './user-storage';
 import {setWindowTheme, resetWindowTheme} from './window-theme';
-import {getFontList, getCommands} from './utils/extension-api';
+import {getFontList, getCommands, setShortcut} from './utils/extension-api';
 import {isFirefox} from '../utils/platform';
 import {isUrlInList, getUrlHost} from '../utils/url';
 import ThemeEngines from '../generators/theme-engines';
@@ -84,6 +84,7 @@ export class Extension {
             enable: () => this.enable(),
             disable: () => this.disable(),
             setConfig: (config) => this.setConfig(config),
+            setShortcut: ({command, shortcut}) => this.setShortcut(command, shortcut),
             toggleSitePattern: (pattern) => this.toggleSitePattern(pattern),
             applyDevDynamicThemeFixes: (text) => this.devtools.applyDynamicThemeFixes(text),
             resetDevDynamicThemeFixes: () => this.devtools.resetDynamicThemeFixes(),
@@ -125,6 +126,10 @@ export class Extension {
     private async getShortcuts() {
         const commands = await getCommands();
         return commands.reduce((map, cmd) => Object.assign(map, {[cmd.name]: cmd.shortcut}), {} as Shortcuts);
+    }
+
+    setShortcut(command: string, shortcut: string) {
+        setShortcut(command, shortcut);
     }
 
     private async collectData(): Promise<ExtensionData> {

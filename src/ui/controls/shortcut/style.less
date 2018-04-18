@@ -15,4 +15,12 @@
     &:focus {
         text-decoration: underline;
     }
+
+    &:hover::before {
+        content: "✎";
+        direction: rtl;
+        display: inline-block;
+        line-height: @size-text-small-height;
+        width: 0;
+    }
 }

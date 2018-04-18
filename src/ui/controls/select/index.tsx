@@ -58,6 +58,16 @@ function Select(props: SelectProps) {
         });
     }
 
+    function onKeyPress(e: KeyboardEvent) {
+        const input = e.target as HTMLInputElement;
+        if (e.key === 'Enter') {
+            const value = input.value;
+            input.blur();
+            collapseList();
+            props.onChange(value);
+        }
+    }
+
     function scrollToValue(value: string) {
         setState({focusedIndex: values.indexOf(value)});
     }
@@ -109,6 +119,7 @@ function Select(props: SelectProps) {
                     class="select__textbox"
                     value={props.value}
                     oninput={onTextInput}
+                    onkeypress={onKeyPress}
                 />
                 <Button
                     class="select__expand"
@@ -122,6 +133,7 @@ function Select(props: SelectProps) {
                     class={{
                         'select__list': true,
                         'select__list--expanded': state.isExpanded,
+                        'select__list--short': Object.keys(props.options).length <= 7,
                     }}
                     onclick={onSelectOption}
                 />}

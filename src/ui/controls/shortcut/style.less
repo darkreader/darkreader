@@ -10,9 +10,31 @@
     outline: none;
     text-align: center;
     text-decoration: none;
+    white-space: pre;
 
     &:hover,
     &:focus {
         text-decoration: underline;
+    }
+
+    &--edit {
+        color: @color-input-fore-active;
+    }
+
+    &::before {
+        content: "✎";
+        direction: rtl;
+        display: inline-block;
+        line-height: @size-text-small-height;
+        visibility: hidden;
+        width: 0;
+    }
+
+    &:hover,
+    &:focus,
+    &--edit {
+        &::before {
+            visibility: visible;
+        }
     }
 }

@@ -25,6 +25,7 @@ export default function EngineSwitch({data, actions}: ExtWrapper) {
                     ? `switch theme engine: ${hotkey}`
                     : 'setup theme engine switch hotkey'
                 )}
+                onSetShortcut={(shortcut) => actions.setShortcut('switchEngine', shortcut)}
             />
         </div>
     );

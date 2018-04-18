@@ -6,6 +6,7 @@ interface ExtensionAdapter {
     enable: () => void;
     disable: () => void;
     setConfig: (config: FilterConfig) => void;
+    setShortcut: ({command, shortcut}) => void;
     toggleSitePattern: (pattern: string) => void;
     applyDevDynamicThemeFixes: (json: string) => Error;
     resetDevDynamicThemeFixes: () => void;
@@ -57,6 +58,10 @@ export default class Messenger {
             }
             case 'set-config': {
                 this.adapter.setConfig(data);
+                break;
+            }
+            case 'set-shortcut': {
+                this.adapter.setShortcut(data);
                 break;
             }
             case 'toggle-site-pattern': {

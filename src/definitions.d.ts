@@ -15,6 +15,7 @@ export interface ExtensionActions {
     enable();
     disable();
     setConfig(config: FilterConfig);
+    setShortcut(command: string, shortcut: string);
     toggleSitePattern(pattern: string);
     applyDevDynamicThemeFixes(text: string): Promise<void>;
     resetDevDynamicThemeFixes();

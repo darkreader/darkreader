@@ -34,6 +34,7 @@ export default function TopSection({data, actions, tab}: ExtWrapper & {tab: TabI
                             ? multiline('toggle current site', hotkey)
                             : multiline('setup current site', 'toggle hotkey')
                         )}
+                        onSetShortcut={(shortcut) => actions.setShortcut('addSite', shortcut)}
                     />
                 ) : (
                         <span id="blocked-by-browser-text">
@@ -51,6 +52,7 @@ export default function TopSection({data, actions, tab}: ExtWrapper & {tab: TabI
                         ? multiline('toggle extension', hotkey)
                         : multiline('setup extension', 'toggle hotkey')
                     )}
+                    onSetShortcut={(shortcut) => actions.setShortcut('toggle', shortcut)}
                 />
             </div>
         </header>

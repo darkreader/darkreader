@@ -40,6 +40,7 @@ export default function SiteListSettings({data, actions, isFocused}: SiteListSet
                     ? `hotkey for adding site: ${hotkey}`
                     : 'setup a hotkey for adding site'
                 )}
+                onSetShortcut={(shortcut) => actions.setShortcut('addSite', shortcut)}
             />
         </section>
     );

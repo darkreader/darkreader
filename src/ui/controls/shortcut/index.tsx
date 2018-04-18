@@ -1,6 +1,6 @@
 import {html} from 'malevic';
 import {mergeClass} from '../utils';
-import {getCommands} from '../../../background/utils';
+import {isFirefox, isMobile} from '../../../utils/platform';
 import {Shortcuts} from '../../../definitions';
 
 interface ShortcutLinkProps {
@@ -8,6 +8,7 @@ interface ShortcutLinkProps {
     commandName: string;
     shortcuts: Shortcuts;
     textTemplate: (shortcut: string) => string;
+    onSetShortcut: (shortvut: string) => void;
 }
 
 /**
@@ -18,8 +19,60 @@ export default function ShortcutLink(props: ShortcutLinkProps) {
     const cls = mergeClass('shortcut', props.class);
     const shortcut = props.shortcuts[props.commandName];
 
+    function startEnteringShortcut(node: HTMLAnchorElement) {
+        const initialText = node.textContent;
+        node.textContent = 'type a shortcut';
+
+        function onKeyDown(e: KeyboardEvent) {
+            e.preventDefault();
+            const ctrl = e.ctrlKey;
+            const alt = e.altKey;
+            const command = e.metaKey;
+            const shift = e.shiftKey;
+
+            let key: string = null;
+            if (e.code.startsWith('Key')) {
+                key = e.code.substring(3);
+            } else if (e.code.startsWith('Digit')) {
+                key = e.code.substring(5);
+            }
+
+            const shortcut = `${ctrl ? 'Ctrl+' : alt ? 'Alt+' : command ? 'Command+' : ''}${shift ? 'Shift+' : ''}${key ? key : ''}`;
+            node.textContent = shortcut;
+
+            if ((ctrl || alt || command || shift) && key) {
+                removeListeners();
+                props.onSetShortcut(shortcut);
+                node.blur();
+                setTimeout(() => {
+                    node.classList.remove('shortcut--edit');
+                    node.textContent = props.textTemplate(shortcut);
+                }, 500);
+            }
+        }
+
+        function onBlur() {
+            removeListeners();
+            node.classList.remove('shortcut--edit');
+            node.textContent = initialText;
+        }
+
+        function removeListeners() {
+            window.removeEventListener('keydown', onKeyDown, true);
+            window.removeEventListener('blur', onBlur, true);
+        }
+
+        window.addEventListener('keydown', onKeyDown, true);
+        window.addEventListener('blur', onBlur, true);
+        node.classList.add('shortcut--edit');
+    }
+
     function onClick(e: Event) {
         e.preventDefault();
+        if (isFirefox()) {
+            startEnteringShortcut(e.target as HTMLAnchorElement);
+            return;
+        }
         chrome.tabs.create({
             url: `chrome://extensions/configureCommands#command-${chrome.runtime.id}-${props.commandName}`,
             active: true

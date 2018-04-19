@@ -183,10 +183,12 @@ export function createOrUpdateDynamicTheme(filterConfig: FilterConfig, dynamicTh
 
 export function removeDynamicTheme() {
     cleanDynamicThemeCache();
-    removeNode(document.head.querySelector('.darkreader--user-agent'));
-    removeNode(document.head.querySelector('.darkreader--text'));
-    removeNode(document.head.querySelector('.darkreader--invert'));
-    removeNode(document.head.querySelector('.darkreader--inline'));
+    if (document.head) {
+        removeNode(document.head.querySelector('.darkreader--user-agent'));
+        removeNode(document.head.querySelector('.darkreader--text'));
+        removeNode(document.head.querySelector('.darkreader--invert'));
+        removeNode(document.head.querySelector('.darkreader--inline'));
+    }
     Array.from(styleManagers.keys()).forEach((el) => removeManager(el));
     Array.from(document.querySelectorAll('.darkreader')).forEach(removeNode);
 }

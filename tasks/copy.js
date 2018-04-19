@@ -6,6 +6,7 @@ module.exports = function createCopyTasks(gulp) {
         'config/**/*.config',
         'icons/**/*.*',
         'ui/assets/**/*.*',
+        'ui/popup/compatibility.js',
         'manifest.json',
     ];
 

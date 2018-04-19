@@ -2,6 +2,7 @@ import {iterateCSSRules, iterateCSSDeclarations, replaceCSSRelativeURLsWithAbsol
 import {getModifiableCSSDeclaration, getModifiedFallbackStyle, ModifiableCSSDeclaration, ModifiableCSSRule} from './modify-css';
 import {bgFetch} from './network';
 import {removeNode} from '../utils/dom';
+import {logWarn} from '../utils/log';
 import {FilterConfig} from '../../definitions';
 
 declare global {
@@ -334,7 +335,7 @@ async function createCORSCopy(link: HTMLLinkElement, isCancelled: () => boolean)
             try {
                 sessionStorage.setItem(`darkreader-cache:${url}`, response);
             } catch (err) {
-                // console.warn(err);
+                logWarn(err);
             }
         }
     }

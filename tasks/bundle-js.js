@@ -1,6 +1,7 @@
 const rollup = require('rollup');
 const rollupPluginCommonjs = require('rollup-plugin-commonjs');
 const rollupPluginNodeResolve = require('rollup-plugin-node-resolve');
+const rollupPluginReplace = require('rollup-plugin-replace');
 const rollupPluginTypescript = require('rollup-plugin-typescript');
 const typescript = require('typescript');
 const {logError} = require('./utils');
@@ -38,6 +39,9 @@ module.exports = function createJSBundleTasks(gulp) {
                 }),
                 rollupPluginNodeResolve(),
                 rollupPluginCommonjs(),
+                rollupPluginReplace({
+                    '__DEBUG__': production ? 'false' : 'true',
+                }),
             ].filter((x) => x)
         });
         await bundle.write({

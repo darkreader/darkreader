@@ -22,5 +22,5 @@ gulp.task('release', (done) => {
 });
 
 gulp.task('debug', (done) => {
-    runSequence('watch', 'reload', done);
+    runSequence('watch', 'foxify-debug', 'reload', done);
 });

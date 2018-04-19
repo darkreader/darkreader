@@ -13,7 +13,7 @@ module.exports = function createZipTasks(gulp) {
 
     gulp.task('zip-firefox', () => {
         gulp.src(`${firefoxDir}/**/*.*`, {base: firefoxDir})
-            .pipe(gulpZip('build-firefox.zip'))
+            .pipe(gulpZip('build-firefox.xpi'))
             .pipe(gulp.dest('./'));
     });
 };

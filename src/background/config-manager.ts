@@ -34,13 +34,8 @@ export default class ConfigManager {
     RAW_INVERSION_FIXES?: string;
     STATIC_THEMES?: StaticTheme[];
     RAW_STATIC_THEMES?: string;
-    DEBUG?: boolean;
 
     constructor() {
-        this.DEBUG = [
-            'eimadpbcbfnmbkopoojfekhnkhdbieeh',
-            'addon@darkreader.org'
-        ].indexOf(chrome.runtime.id) < 0;
         setInterval(() => this.load(), RELOAD_INTERVAL_MS);
     }
 

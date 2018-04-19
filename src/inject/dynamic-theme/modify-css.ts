@@ -5,6 +5,7 @@ import {modifyBackgroundColor, modifyBorderColor, modifyForegroundColor, modifyG
 import {cssURLRegex, getCSSURLValue, getCSSBaseBath} from './css-rules';
 import {getImageDetails, getFilteredImageDataURL, ImageDetails} from './image';
 import {getAbsoluteURL} from './url';
+import {logWarn, logInfo} from '../utils/log';
 import {FilterConfig} from '../../definitions';
 
 type CSSValueModifier = (filter: FilterConfig) => string | Promise<string>;
@@ -120,7 +121,7 @@ function getColorModifier(prop: string, value: string): CSSValueModifier {
         return (filter) => modifyForegroundColor(rgb, filter);
 
     } catch (err) {
-        // console.warn('Color parse error', err);
+        logWarn('Color parse error', err);
         return null;
     }
 }
@@ -203,7 +204,7 @@ function getBgImageModifier(prop: string, value: string, rule: CSSStyleRule, isC
                             return null;
                         }
                     } catch (err) {
-                        // console.warn(err);
+                        logWarn(err);
                         awaitingForImageLoading.get(url).forEach((resolve) => resolve(urlValue));
                         return urlValue;
                     }
@@ -219,14 +220,14 @@ function getBgImageModifier(prop: string, value: string, rule: CSSStyleRule, isC
             const {isDark, isLight, isTransparent, isLarge} = imageDetails;
             let result: string;
             if (isDark && isTransparent && filter.mode === 1 && !isLarge) {
-                // console.info(`Inverting dark image ${imageDetails.src}`);
+                logInfo(`Inverting dark image ${imageDetails.src}`);
                 const inverted = getFilteredImageDataURL(imageDetails, {...filter, sepia: clamp(filter.sepia + 90, 0, 100)});
                 result = `url("${inverted}")`;
             } else if (isLight && !isTransparent && filter.mode === 1) {
                 if (isLarge) {
                     result = 'none';
                 } else {
-                    // console.info(`Inverting light image ${imageDetails.src}`);
+                    logInfo(`Inverting light image ${imageDetails.src}`);
                     const dimmed = getFilteredImageDataURL(imageDetails, filter);
                     result = `url("${dimmed}")`;
                 }
@@ -262,7 +263,7 @@ function getBgImageModifier(prop: string, value: string, rule: CSSStyleRule, isC
         }
 
     } catch (err) {
-        // console.warn(`Unable to parse gradient ${value}`, err);
+        logWarn(`Unable to parse gradient ${value}`, err);
         return null;
     }
 }
@@ -286,7 +287,7 @@ function getShadowModifier(prop: string, value: string): CSSValueModifier {
         return (filter: FilterConfig) => modifiers.map((modify) => modify(filter)).join('');
 
     } catch (err) {
-        // console.warn(`Unable to parse shadow ${value}`, err);
+        logWarn(`Unable to parse shadow ${value}`, err);
         return null;
     }
 }

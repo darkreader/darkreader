@@ -3,6 +3,7 @@ import {bgFetch} from './network';
 import {getAbsoluteURL} from './url';
 import {scale, clamp} from '../../utils/math';
 import {FilterConfig} from '../../definitions';
+import {logWarn} from '../utils/log';
 
 export interface ImageDetails {
     src: string;
@@ -42,7 +43,7 @@ async function getImageDataURL(url: string) {
                 try {
                     sessionStorage.setItem(`darkreader-cache:${url}`, dataURL);
                 } catch (err) {
-                    // console.warn(err);
+                    logWarn(err);
                 }
             }
         }

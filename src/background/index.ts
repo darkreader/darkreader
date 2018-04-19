@@ -4,7 +4,10 @@ import {Extension} from './extension';
 const extension = new Extension();
 extension.start();
 
-if (extension.config.DEBUG) {
+declare const __DEBUG__: boolean;
+const DEBUG = __DEBUG__;
+
+if (DEBUG) {
     // Reload extension on connection
     const listen = () => {
         const req = new XMLHttpRequest();

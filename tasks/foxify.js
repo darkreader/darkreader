@@ -11,10 +11,8 @@ async function editFile(path, edit) {
 }
 
 module.exports = function createFoxifyTask(gulp) {
-    gulp.task('foxify', async () => {
-        const buildDir = getDestDir({production: true});
-        const firefoxDir = getDestDir({production: true, firefox: true});
 
+    async function foxify(buildDir, firefoxDir) {
         // Copy files
         await fs.copy(buildDir, firefoxDir);
 
@@ -30,5 +28,8 @@ module.exports = function createFoxifyTask(gulp) {
             content = replace(content, 'chrome.fontSettings', `chrome['font' + 'Settings']`);
             return content;
         });
-    });
+    }
+
+    gulp.task('foxify', async () => await foxify(getDestDir({production: true}), getDestDir({production: true, firefox: true})));
+    gulp.task('foxify-debug', async () => await foxify(getDestDir({production: false}), getDestDir({production: false, firefox: true})));
 };

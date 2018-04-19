@@ -9,10 +9,10 @@ module.exports = function createReloadTask(gulp) {
     function createServer() {
         server = server || http.createServer((req, res) => {
             if (shouldReload) {
-                shouldReload = false;
                 res.end('reload');
                 logInfo('Auto-reloader connected');
                 clearTimeout(connectionTimeoutId);
+                setTimeout(() => shouldReload = false, 1000);
             } else {
                 res.end('waiting');
             }

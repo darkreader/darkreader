@@ -1,4 +1,5 @@
 import {parseURL, getAbsoluteURL} from './url';
+import {logWarn} from '../utils/log';
 
 export function iterateCSSRules(rules: CSSRuleList, iterate: (rule: CSSStyleRule) => void) {
     Array.from<CSSRule>(rules as any)
@@ -8,7 +9,7 @@ export function iterateCSSRules(rules: CSSRuleList, iterate: (rule: CSSStyleRule
             } else if (rule instanceof CSSStyleRule) {
                 iterate(rule);
             } else {
-                // console.warn(`CSSRule type not supported`, rule);
+                logWarn(`CSSRule type not supported`, rule);
             }
         });
 }
@@ -58,7 +59,7 @@ export function replaceCSSVariables(value: string, variables: Map<string, string
         } else if (fallback) {
             return fallback;
         } else {
-            // console.warn(`Variable ${name} not found`);
+            logWarn(`Variable ${name} not found`);
             missing = true;
         }
         return match;

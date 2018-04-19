@@ -5,7 +5,7 @@ debug
 build.zip
 build-firefox
 debug-firefox
-build-firefox.zip
+build-firefox.xpi
 
 # Node.js modules
 #-----------------------------------

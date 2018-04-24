@@ -26,7 +26,15 @@ export default function TopSection({data, actions, tab}: ExtWrapper & {tab: TabI
                     tab={tab}
                     actions={actions}
                 />
-                {/* TODO: pass site info */true ? (
+                {tab.isProtected ? (
+                    <span class="header__site-toggle__unable-text">
+                        {multiline('This page is protected', 'by browser')}
+                    </span>
+                ) : tab.isInDarkList ? (
+                    <span class="header__site-toggle__unable-text">
+                        {multiline('This site is in global', 'Dark List')}
+                    </span>
+                ) : (
                     <Shortcut
                         commandName="addSite"
                         shortcuts={data.shortcuts}
@@ -36,12 +44,7 @@ export default function TopSection({data, actions, tab}: ExtWrapper & {tab: TabI
                         )}
                         onSetShortcut={(shortcut) => actions.setShortcut('addSite', shortcut)}
                     />
-                ) : (
-                        <span id="blocked-by-browser-text">
-                            This site is blocked
-                            by browser
-                        </span>
-                    )}
+                )}
             </div>
             <div class="header__control header__app-toggle">
                 <Toggle checked={data.enabled} labelOn="On" labelOff="Off" onChange={toggleExtension} />

@@ -217,9 +217,9 @@ function getBgImageModifier(prop: string, value: string, rule: CSSStyleRule, isC
         };
 
         const getBgImageValue = (imageDetails: ImageDetails, filter: FilterConfig) => {
-            const {isDark, isLight, isTransparent, isLarge} = imageDetails;
+            const {isDark, isLight, isTransparent, isLarge, width} = imageDetails;
             let result: string;
-            if (isDark && isTransparent && filter.mode === 1 && !isLarge) {
+            if (isDark && isTransparent && filter.mode === 1 && !isLarge && width > 2) {
                 logInfo(`Inverting dark image ${imageDetails.src}`);
                 const inverted = getFilteredImageDataURL(imageDetails, {...filter, sepia: clamp(filter.sepia + 90, 0, 100)});
                 result = `url("${inverted}")`;

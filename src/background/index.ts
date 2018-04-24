@@ -4,6 +4,14 @@ import {Extension} from './extension';
 const extension = new Extension();
 extension.start();
 
+const darkreader4ReleaseNotesShown = localStorage.getItem('darkreader-4-release-notes-shown');
+if (!darkreader4ReleaseNotesShown) {
+    localStorage.setItem('darkreader-4-release-notes-shown', 'yes');
+    chrome.tabs.create({
+        url: 'http://darkreader.org/blog/dynamic-theme/',
+    });
+}
+
 declare const __DEBUG__: boolean;
 const DEBUG = __DEBUG__;
 

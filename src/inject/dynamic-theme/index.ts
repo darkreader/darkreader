@@ -130,7 +130,8 @@ function shouldManageStyle(element: Node) {
         ) && (
             !element.classList.contains('darkreader') ||
             element.classList.contains('darkreader--cors')
-        )
+        ) &&
+        element.media !== 'print'
     );
 }
 

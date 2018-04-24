@@ -19,7 +19,14 @@ export default function ShortcutLink(props: ShortcutLinkProps) {
     const cls = mergeClass('shortcut', props.class);
     const shortcut = props.shortcuts[props.commandName];
 
+    let enteringShortcutInProgress = false;
+
     function startEnteringShortcut(node: HTMLAnchorElement) {
+        if (enteringShortcutInProgress) {
+            return;
+        }
+        enteringShortcutInProgress = true;
+
         const initialText = node.textContent;
         node.textContent = 'type a shortcut';
 
@@ -45,6 +52,7 @@ export default function ShortcutLink(props: ShortcutLinkProps) {
                 props.onSetShortcut(shortcut);
                 node.blur();
                 setTimeout(() => {
+                    enteringShortcutInProgress = false;
                     node.classList.remove('shortcut--edit');
                     node.textContent = props.textTemplate(shortcut);
                 }, 500);
@@ -55,6 +63,7 @@ export default function ShortcutLink(props: ShortcutLinkProps) {
             removeListeners();
             node.classList.remove('shortcut--edit');
             node.textContent = initialText;
+            enteringShortcutInProgress = false;
         }
 
         function removeListeners() {

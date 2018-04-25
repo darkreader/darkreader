@@ -65,11 +65,15 @@ export default async function manageStyle(element: HTMLLinkElement | HTMLStyleEl
             // so need to load CSS text and insert it into style element
             const link = element as HTMLLinkElement;
             if (corsCopy) {
+                corsCopy.disabled = false;
                 rules = corsCopy.sheet.cssRules;
+                corsCopy.disabled = true;
             } else {
                 corsCopy = await createCORSCopy(link, isCancelled);
                 if (corsCopy) {
+                    corsCopy.disabled = false;
                     rules = corsCopy.sheet.cssRules;
+                    corsCopy.disabled = true;
                 }
             }
         }

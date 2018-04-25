@@ -57,7 +57,7 @@ function createTheme() {
         inlineStyle.textContent = '';
     }
 
-    Array.from<HTMLLinkElement | HTMLStyleElement>(document.querySelectorAll('link[rel="stylesheet"], style'))
+    Array.from<HTMLLinkElement | HTMLStyleElement>(document.querySelectorAll('link[rel="stylesheet" i], style'))
         .filter((style) => !styleManagers.has(style) && shouldManageStyle(style))
         .forEach((style) => createManager(style));
 
@@ -126,7 +126,7 @@ function shouldManageStyle(element: Node) {
     return (
         (
             (element instanceof HTMLStyleElement) ||
-            (element instanceof HTMLLinkElement && element.rel === 'stylesheet')
+            (element instanceof HTMLLinkElement && element.rel && element.rel.toLowerCase() === 'stylesheet')
         ) && (
             !element.classList.contains('darkreader') ||
             element.classList.contains('darkreader--cors')

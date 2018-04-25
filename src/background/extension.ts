@@ -46,6 +46,8 @@ export class Extension {
     private awaiting: (() => void)[];
 
     async start() {
+        this.checkForReleaseNotes();
+
         await this.config.load();
         this.fonts = await getFontList();
 
@@ -67,6 +69,32 @@ export class Extension {
         this.awaiting = null;
     }
 
+    private popupOpeningListener: () => void = null;
+
+    private checkForReleaseNotes() {
+        const releaseNotesId = 'darkreader-4-release-notes-shown';
+        const releaseNotesShown = localStorage.getItem(releaseNotesId);
+        if (!releaseNotesShown) {
+            const showReleaseNotes = () => {
+                localStorage.setItem(releaseNotesId, 'yes');
+                this.tabs.openURL('http://darkreader.org/blog/dynamic-theme/');
+            };
+            chrome.runtime.onInstalled.addListener(({reason}) => {
+                if (reason === 'install') {
+                    showReleaseNotes();
+                } else {
+                    this.icon.notifyAboutReleaseNotes();
+                    this.popupOpeningListener = () => {
+                        this.popupOpeningListener = null;
+                        this.icon.stopNotifyingAboutReleaseNodes();
+                        showReleaseNotes();
+                        chrome.runtime.sendMessage({type: 'popup-close'});
+                    };
+                }
+            });
+        }
+    }
+
     private getMessengerAdapter() {
         return {
             collect: async () => {
@@ -86,6 +114,7 @@ export class Extension {
             setConfig: (config) => this.setConfig(config),
             setShortcut: ({command, shortcut}) => this.setShortcut(command, shortcut),
             toggleSitePattern: (pattern) => this.toggleSitePattern(pattern),
+            onPopupOpen: () => this.popupOpeningListener && this.popupOpeningListener(),
             applyDevDynamicThemeFixes: (text) => this.devtools.applyDynamicThemeFixes(text),
             resetDevDynamicThemeFixes: () => this.devtools.resetDynamicThemeFixes(),
             applyDevInversionFixes: (text) => this.devtools.applyInversionFixes(text),

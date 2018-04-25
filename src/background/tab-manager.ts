@@ -101,4 +101,8 @@ export default class TabManager {
             isInDarkList: isUrlInList(url, DARK_SITES),
         };
     }
+
+    openURL(url: string) {
+        chrome.tabs.create({url});
+    }
 }

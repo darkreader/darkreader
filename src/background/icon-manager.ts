@@ -35,4 +35,19 @@ export default class IconManager {
             }
         });
     }
+
+    notifyAboutReleaseNotes() {
+        chrome.browserAction.setBadgeBackgroundColor({
+            color: '#3fa55d',
+        });
+        chrome.browserAction.setBadgeText({
+            text: 'UPD'
+        });
+    }
+
+    stopNotifyingAboutReleaseNodes() {
+        chrome.browserAction.setBadgeText({
+            text: ''
+        });
+    }
 }

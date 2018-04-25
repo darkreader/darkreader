@@ -4,14 +4,6 @@ import {Extension} from './extension';
 const extension = new Extension();
 extension.start();
 
-const darkreader4ReleaseNotesShown = localStorage.getItem('darkreader-4-release-notes-shown');
-if (!darkreader4ReleaseNotesShown) {
-    localStorage.setItem('darkreader-4-release-notes-shown', 'yes');
-    chrome.tabs.create({
-        url: 'http://darkreader.org/blog/dynamic-theme/',
-    });
-}
-
 declare const __DEBUG__: boolean;
 const DEBUG = __DEBUG__;
 
@@ -20,6 +12,7 @@ if (DEBUG) {
     const listen = () => {
         const req = new XMLHttpRequest();
         req.open('GET', 'http://localhost:8890/', true);
+        req.overrideMimeType('text/plain');
         req.onload = () => {
             if (req.status >= 200 && req.status < 300 && req.responseText === 'reload') {
                 chrome.runtime.reload();

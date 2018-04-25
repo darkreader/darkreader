@@ -7,6 +7,11 @@ export default class Connector implements ExtensionActions {
     constructor() {
         this.counter = 0;
         this.port = chrome.runtime.connect({name: 'ui'});
+        chrome.runtime.onMessage.addListener(({type}) => {
+            if (type === 'popup-close') {
+                window.close();
+            }
+        });
     }
 
     private getRequestId() {

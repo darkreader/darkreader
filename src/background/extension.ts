@@ -6,7 +6,7 @@ import TabManager from './tab-manager';
 import UserStorage from './user-storage';
 import {setWindowTheme, resetWindowTheme} from './window-theme';
 import {getFontList, getCommands, setShortcut} from './utils/extension-api';
-import {isFirefox} from '../utils/platform';
+import {isFirefox, isMobile} from '../utils/platform';
 import {isUrlInList, getUrlHost} from '../utils/url';
 import ThemeEngines from '../generators/theme-engines';
 import createCSSFilterStylesheet from '../generators/css-filter';
@@ -83,6 +83,9 @@ export class Extension {
                 if (reason === 'install') {
                     showReleaseNotes();
                 } else {
+                    if (isMobile()) {
+                        return;
+                    }
                     this.icon.notifyAboutReleaseNotes();
                     this.popupOpeningListener = () => {
                         this.popupOpeningListener = null;

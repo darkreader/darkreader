@@ -35,14 +35,6 @@ function openDevTools() {
 
 const DONATE_URL = 'https://opencollective.com/darkreader';
 
-function donate() {
-    chrome.tabs.create({
-        url: DONATE_URL,
-    });
-}
-
-const donationButtonVsLink = Math.random() > 0.5;
-
 function Body(props: BodyProps) {
     const {state, setState} = props;
     if (!props.data.ready) {
@@ -80,10 +72,9 @@ function Body(props: BodyProps) {
                     You can <strong>help and fix it</strong>, here is a tool
                 </p>
                 <div class="footer-buttons">
-                    {(donationButtonVsLink
-                        ? <a id="donate-link" href={DONATE_URL} target="_blank">Donate</a>
-                        : <Button id="donate" onclick={donate}><span class="icon-coin" /> Donate</Button>
-                    )}
+                    <a class="donate-link" href={DONATE_URL} target="_blank">
+                        <span class="donate-link__text">Donate</span>
+                    </a>
                     <Button onclick={openDevTools}>
                         🛠 Open developer tools
                     </Button>

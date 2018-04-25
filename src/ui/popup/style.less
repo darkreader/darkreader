@@ -63,41 +63,27 @@ footer {
     }
 }
 
-@color-donate: @color-fore;
-
-#donate {
-    border-color: @color-donate;
-
-    &:hover {
-        background-color: mix(@color-donate, @color-back, 25%);
-    }
-
-    &:active {
-        background-color: mix(@color-donate, @color-back, 75%);
-    }
-
-    strong {
-        font-weight: bold;
-    }
-}
-
-#donate-link {
+.donate-link {
     align-items: center;
-    color: @color-donate;
+    background-color: @color-control-active;
+    color: @color-control-fore;
     cursor: pointer;
     display: inline-flex;
     flex: none;
-    font-size: @size-control-inner * 2 / 3;
     font-weight: bold;
     justify-content: center;
-    line-height: @size-control-inner;
     margin: 0;
-    padding: 0;
+    padding: 0 @indent-small;
     text-decoration: none;
-    transform: skewX(-10deg);
 
     &:hover {
-        text-decoration: underline;
+        box-shadow: 0 0 @indent-small @color-control-active;
+    }
+
+    &__text {
+        font-size: @size-control-inner * 2 / 3;
+        line-height: @size-control-inner;
+        transform: skewX(-10deg);
     }
 }
 

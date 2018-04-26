@@ -1,13 +1,14 @@
 import {html} from 'malevic';
 import {MultiSwitch, Shortcut} from '../../../controls';
 import ThemeEngines from '../../../../generators/theme-engines';
+import {getLocalMessage} from '../../../../utils/locales';
 import {ExtWrapper} from '../../../../definitions';
 
 const engineNames = [
-    [ThemeEngines.cssFilter, 'Filter'],
-    [ThemeEngines.svgFilter, 'Filter+'],
-    [ThemeEngines.staticTheme, 'Static'],
-    [ThemeEngines.dynamicTheme, 'Dynamic'],
+    [ThemeEngines.cssFilter, getLocalMessage('engine_filter')],
+    [ThemeEngines.svgFilter, getLocalMessage('engine_filter_plus')],
+    [ThemeEngines.staticTheme, getLocalMessage('engine_static')],
+    [ThemeEngines.dynamicTheme, getLocalMessage('engine_dynamic')],
 ];
 
 export default function EngineSwitch({data, actions}: ExtWrapper) {
@@ -22,8 +23,8 @@ export default function EngineSwitch({data, actions}: ExtWrapper) {
                 commandName="switchEngine"
                 shortcuts={data.shortcuts}
                 textTemplate={(hotkey) => (hotkey
-                    ? `switch theme engine: ${hotkey}`
-                    : 'setup theme engine switch hotkey'
+                    ? `${getLocalMessage('switch_theme_engine')}: ${hotkey}`
+                    : getLocalMessage('setup_hotkey_switch_theme_engine')
                 )}
                 onSetShortcut={(shortcut) => actions.setShortcut('switchEngine', shortcut)}
             />

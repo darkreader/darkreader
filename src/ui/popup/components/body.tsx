@@ -8,6 +8,8 @@ import Loader from './loader';
 import MoreSettings from './more-settings';
 import SiteListSettings from './site-list-settings';
 import {isFirefox} from '../../../utils/platform';
+import {getLocalMessage} from '../../../utils/locales';
+import {compileMarkdown} from '../utils/markdown';
 import {ExtensionData, ExtensionActions, TabInfo} from '../../../definitions';
 
 withForms();
@@ -64,19 +66,23 @@ function Body(props: BodyProps) {
                         <MoreSettings data={props.data} actions={props.actions} />
                     ),
                 }}
+                tabLabels={{
+                    'Filter': getLocalMessage('filter'),
+                    'Site list': getLocalMessage('site_list'),
+                    'More': getLocalMessage('more'),
+                }}
             />
 
             <footer>
                 <p>
-                    Some things should not be inverted?<br />
-                    You can <strong>help and fix it</strong>, here is a tool
+                    {compileMarkdown(getLocalMessage('help_fix_inversion'))}
                 </p>
                 <div class="footer-buttons">
                     <a class="donate-link" href={DONATE_URL} target="_blank">
-                        <span class="donate-link__text">Donate</span>
+                        <span class="donate-link__text">{getLocalMessage('donate')}</span>
                     </a>
                     <Button onclick={openDevTools}>
-                        🛠 Open developer tools
+                        🛠 {getLocalMessage('open_dev_tools')}
                     </Button>
                 </div>
             </footer>

@@ -1,5 +1,23 @@
 const fs = require('fs-extra');
 const {getDestDir} = require('./paths');
+
+const enLocale = fs.readFileSync('src/_locales/en.config', {encoding: 'utf8'}).replace(/^#.*?$/gm, '');
+global.chrome = global.chrome || {};
+global.chrome.i18n = global.chrome.i18n || {};
+global.chrome.i18n.getMessage = global.chrome.i18n.getMessage || ((name) => {
+    const index = enLocale.indexOf(`@${name}`);
+    if (index < 0) {
+        throw new Error(`Message @${name} not found`);
+    }
+    const start = index + name.length + 1;
+    let end = enLocale.indexOf('@', start);
+    if (end < 0) {
+        end = enLocale.length;
+    }
+    const message = enLocale.substring(start, end).trim();
+    return message;
+});
+
 const tsConfig = require('../src/tsconfig.json');
 require('ts-node').register({
     ...tsConfig,

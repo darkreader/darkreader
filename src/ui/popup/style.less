@@ -45,6 +45,7 @@ footer {
     p {
         margin: 0 0 @size-border 0;
         text-align: center;
+        white-space: pre;
     }
 }
 
@@ -70,18 +71,17 @@ footer {
     cursor: pointer;
     display: inline-flex;
     flex: none;
-    font-weight: bold;
     justify-content: center;
     margin: 0;
     padding: 0 @indent-small;
     text-decoration: none;
 
     &:hover {
-        box-shadow: 0 0 @indent-small @color-control-active;
+        box-shadow: 0 0 @indent-large @color-control-active;
     }
 
     &__text {
-        font-size: @size-control-inner * 2 / 3;
+        font-weight: bold;
         line-height: @size-control-inner;
         transform: skewX(-10deg);
     }

@@ -1,5 +1,6 @@
 import {html} from 'malevic';
 import {CheckBox, UpDown, Select} from '../../../controls';
+import {getLocalMessage} from '../../../../utils/locales';
 import {ExtWrapper} from '../../../../definitions';
 
 export default function FontSettings({data, actions}: ExtWrapper) {
@@ -25,7 +26,7 @@ export default function FontSettings({data, actions}: ExtWrapper) {
                     />
                 </div>
                 <label class="font-settings__font-select-container__label">
-                    Select a font
+                    {getLocalMessage('select_font')}
                 </label>
             </div>
             <UpDown
@@ -34,7 +35,7 @@ export default function FontSettings({data, actions}: ExtWrapper) {
                 max={1}
                 step={0.1}
                 default={0}
-                name="Text stroke"
+                name={getLocalMessage('text_stroke')}
                 onChange={(value) => actions.setConfig({textStroke: value})}
             />
         </section>

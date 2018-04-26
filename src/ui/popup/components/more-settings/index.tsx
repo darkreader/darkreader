@@ -1,6 +1,8 @@
 import {html} from 'malevic';
 import EngineSwitch from '../engine-switch';
 import FontSettings from '../font-settings';
+import {compileMarkdown} from '../../utils/markdown';
+import {getLocalMessage} from '../../../../utils/locales';
 import {ExtWrapper} from '../../../../definitions';
 
 export default function MoreSettings({data, actions}: ExtWrapper) {
@@ -11,10 +13,7 @@ export default function MoreSettings({data, actions}: ExtWrapper) {
             </div>
             <div class="more-settings__section">
                 <p class="more-settings__description">
-                    Try out <strong>experimental</strong> theme engines:<br />
-                    <strong>Filter+</strong> preserves colors saturation, uses GPU<br />
-                    <strong>Static theme</strong> generates a simple fast theme<br />
-                    <strong>Dynamic theme</strong> analyzes colors and images
+                    {compileMarkdown(getLocalMessage('try_experimental_theme_engines'))}
                 </p>
                 <EngineSwitch data={data} actions={actions} />
             </div>

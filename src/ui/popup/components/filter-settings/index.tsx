@@ -1,6 +1,7 @@
 import {html} from 'malevic';
 import {UpDown} from '../../../controls';
 import ModeToggle from './mode-toggle';
+import {getLocalMessage} from '../../../../utils/locales';
 import {ExtWrapper} from '../../../../definitions';
 
 export default function FilterSettings({data, actions}: ExtWrapper) {
@@ -12,7 +13,7 @@ export default function FilterSettings({data, actions}: ExtWrapper) {
             max={150}
             step={10}
             default={100}
-            name="Brightness"
+            name={getLocalMessage('brightness')}
             onChange={(value) => actions.setConfig({brightness: value})}
         />
     );
@@ -24,7 +25,7 @@ export default function FilterSettings({data, actions}: ExtWrapper) {
             max={150}
             step={10}
             default={100}
-            name="Contrast"
+            name={getLocalMessage('contrast')}
             onChange={(value) => actions.setConfig({contrast: value})}
         />
     );
@@ -36,7 +37,7 @@ export default function FilterSettings({data, actions}: ExtWrapper) {
             max={100}
             step={10}
             default={0}
-            name="Grayscale"
+            name={getLocalMessage('grayscale')}
             onChange={(value) => actions.setConfig({grayscale: value})}
         />
     );
@@ -48,7 +49,7 @@ export default function FilterSettings({data, actions}: ExtWrapper) {
             max={100}
             step={10}
             default={0}
-            name="Sepia"
+            name={getLocalMessage('sepia')}
             onChange={(value) => actions.setConfig({sepia: value})}
         />
     );

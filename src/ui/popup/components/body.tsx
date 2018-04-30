@@ -6,6 +6,7 @@ import FilterSettings from './filter-settings';
 import Header from './header';
 import Loader from './loader';
 import MoreSettings from './more-settings';
+import {News, NewsButton} from './news';
 import SiteListSettings from './site-list-settings';
 import {isFirefox} from '../../../utils/platform';
 import {ExtensionData, ExtensionActions, TabInfo} from '../../../definitions';
@@ -22,6 +23,7 @@ interface BodyProps {
 
 interface BodyState {
     activeTab?: string;
+    newsOpen?: boolean;
 }
 
 function openDevTools() {
@@ -34,6 +36,9 @@ function openDevTools() {
 }
 
 const DONATE_URL = 'https://opencollective.com/darkreader';
+const PRIVACY_URL = 'http://darkreader.org/privacy/';
+const TWITTER_URL = 'https://twitter.com/darkreaderapp';
+const GITHUB_URL = 'https://github.com/darkreader/darkreader';
 
 function Body(props: BodyProps) {
     const {state, setState} = props;
@@ -44,44 +49,54 @@ function Body(props: BodyProps) {
             </body>
         )
     }
+
+    function toggleNews() {
+        setState({newsOpen: !state.newsOpen});
+    }
+
     return (
         <body class={{'ext-disabled': !props.data.enabled}}>
             <Loader complete />
 
             <Header data={props.data} tab={props.tab} actions={props.actions} />
 
-            <TabPanel
-                activeTab={state.activeTab || 'Filter'}
-                onSwitchTab={(tab) => setState({activeTab: tab})}
-                tabs={{
-                    'Filter': (
-                        <FilterSettings data={props.data} actions={props.actions} />
-                    ),
-                    'Site list': (
-                        <SiteListSettings data={props.data} actions={props.actions} isFocused={state.activeTab === 'Site list'} />
-                    ),
-                    'More': (
-                        <MoreSettings data={props.data} actions={props.actions} />
-                    ),
-                }}
-            />
+            <main>
+                <TabPanel
+                    activeTab={state.activeTab || 'Filter'}
+                    onSwitchTab={(tab) => setState({activeTab: tab})}
+                    tabs={{
+                        'Filter': (
+                            <FilterSettings data={props.data} actions={props.actions} />
+                        ),
+                        'Site list': (
+                            <SiteListSettings data={props.data} actions={props.actions} isFocused={state.activeTab === 'Site list'} />
+                        ),
+                        'More': (
+                            <MoreSettings data={props.data} actions={props.actions} />
+                        ),
+                    }}
+                />
+            </main>
 
             <footer>
-                <p>
-                    Some things should not be inverted?<br />
-                    You can <strong>help and fix it</strong>, here is a tool
-                </p>
+                <div class="footer-links">
+                    <a class="footer-links__link" href={PRIVACY_URL} target="_blank">Privacy</a>
+                    <a class="footer-links__link" href={TWITTER_URL} target="_blank">Twitter</a>
+                    <a class="footer-links__link" href={GITHUB_URL} target="_blank">GitHub</a>
+                </div>
                 <div class="footer-buttons">
                     <a class="donate-link" href={DONATE_URL} target="_blank">
                         <span class="donate-link__text">Donate</span>
                     </a>
-                    <Button onclick={openDevTools}>
-                        🛠 Open developer tools
+                    <NewsButton active={state.newsOpen} count={2} onClick={toggleNews} />
+                    <Button onclick={openDevTools} class="dev-tools-button">
+                        🛠 Dev tools
                     </Button>
                 </div>
             </footer>
-        </body>
+            <News expanded={state.newsOpen} onClose={toggleNews} />
+        </body >
     );
 }
 
-export default withState(Body);
+export default withState(Body, {newsOpen: true});

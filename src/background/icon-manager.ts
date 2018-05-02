@@ -45,7 +45,7 @@ export default class IconManager {
         });
     }
 
-    stopNotifyingAboutReleaseNodes() {
+    stopNotifyingAboutReleaseNotes() {
         chrome.browserAction.setBadgeText({
             text: ''
         });

@@ -43,7 +43,7 @@ export class Extension {
             if (unread.length > 0) {
                 this.icon.notifyAboutReleaseNotes(unread.length);
             } else {
-                this.icon.stopNotifyingAboutReleaseNodes();
+                this.icon.stopNotifyingAboutReleaseNotes();
             }
         });
         this.tabs = new TabManager({

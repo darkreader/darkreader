@@ -111,7 +111,7 @@ function Body(props: BodyProps) {
                 onNewsOpen={onNewsOpen}
                 onClose={toggleNews}
             />
-        </body >
+        </body>
     );
 }
 

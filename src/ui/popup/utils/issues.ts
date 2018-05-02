@@ -1,4 +1,4 @@
-import {getChromeVersion, compareChromeVersions, isWindows, isMacOS, isVivaldi, isOpera, isYaBrowser} from '../../../utils/platform';
+import {getChromeVersion, compareChromeVersions, isWindows, isMacOS, isVivaldi, isOpera, isYaBrowser, isFirefox} from '../../../utils/platform';
 
 export function popupHasBuiltInBorders() {
     const chromeVersion = getChromeVersion();
@@ -23,4 +23,19 @@ export function popupHasBuiltInHorizontalBorders() {
             (isMacOS() && compareChromeVersions(chromeVersion, '67.0.3373.0') >= 0)
         )
     );
+}
+
+export function fixNotClosingPopupOnNavigation() {
+    document.addEventListener('click', (e) => {
+        if (e.defaultPrevented || e.button === 2) {
+            return;
+        }
+        let target = e.target as HTMLElement;
+        while (target && !(target instanceof HTMLAnchorElement)) {
+            target = target.parentElement;
+        }
+        if (target && target.hasAttribute('href')) {
+            requestAnimationFrame(() => window.close());
+        }
+    });
 }

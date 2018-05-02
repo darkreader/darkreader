@@ -7,6 +7,7 @@ interface ExtensionAdapter {
     disable: () => void;
     setConfig: (config: FilterConfig) => void;
     setShortcut: ({command, shortcut}) => void;
+    markNewsAsRead: (ids: string[]) => void;
     toggleSitePattern: (pattern: string) => void;
     onPopupOpen: () => void;
     applyDevDynamicThemeFixes: (json: string) => Error;
@@ -68,6 +69,10 @@ export default class Messenger {
             }
             case 'toggle-site-pattern': {
                 this.adapter.toggleSitePattern(data);
+                break;
+            }
+            case 'mark-news-as-read': {
+                this.adapter.markNewsAsRead(data);
                 break;
             }
 

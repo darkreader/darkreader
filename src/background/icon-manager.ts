@@ -36,12 +36,12 @@ export default class IconManager {
         });
     }
 
-    notifyAboutReleaseNotes() {
+    notifyAboutReleaseNotes(count: number) {
         chrome.browserAction.setBadgeBackgroundColor({
-            color: '#3fa55d',
+            color: '#e96c4c',
         });
         chrome.browserAction.setBadgeText({
-            text: 'UPD'
+            text: String(count)
         });
     }
 

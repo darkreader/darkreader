@@ -4,6 +4,14 @@ import {Extension} from './extension';
 const extension = new Extension();
 extension.start();
 
+chrome.runtime.onInstalled.addListener(({reason}) => {
+    if (reason === 'install') {
+        // TODO: Show help page.
+        chrome.tabs.create({url: 'http://darkreader.org/blog/dynamic-theme/'});
+        extension.news.markAsRead('dynamic-theme');
+    }
+});
+
 declare const __DEBUG__: boolean;
 const DEBUG = __DEBUG__;
 

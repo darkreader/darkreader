@@ -1,21 +1,18 @@
 import {html} from 'malevic';
 import {Button} from '../../../controls';
+import {News} from '../../../../definitions';
 
 interface NewsProps {
+    news: News[];
     expanded: boolean;
+    onNewsOpen: (news: News) => void;
     onClose: () => void;
 }
-
-const news = [
-    {date: new Date(2018, 4, 27), name: 'Nasdaq market paralyzed by Dark Reader donation popup', read: false, id: 'news-section', url: '#'},
-    {date: new Date(2018, 4, 23), name: 'Introducing Dynamic Theme mode', read: true, id: 'dynamic-theme', url: 'http://darkreader.org/blog/dynamic-theme/'},
-];
 
 const BLOG_URL = 'http://darkreader.org/blog/';
 const NEWS_COUNT = 2;
 
-export function News({expanded, onClose}: NewsProps) {
-
+export function News({news, expanded, onNewsOpen, onClose}: NewsProps) {
     return (
         <div class={{'news': true, 'news--expanded': expanded}}>
             <div class="news__header">
@@ -25,14 +22,14 @@ export function News({expanded, onClose}: NewsProps) {
             <div class="news__list">
                 {news.slice(0, NEWS_COUNT).map((event) => {
                     const locale = chrome && chrome.i18n ? chrome.i18n.getUILanguage() : 'en-US';
-                    const formattedDate = event.date.toLocaleDateString(locale, {month: 'short', day: 'numeric'});
+                    const formattedDate = new Date(event.date).toLocaleDateString(locale, {month: 'short', day: 'numeric'});
                     return (
-                        <div class={{'news__event': true, 'news__event--read': event.read}}>
-                            <a class="news__event__link" href={event.url} target="_blank">
+                        <div class={{'news__event': true, 'news__event--unread': !event.read}}>
+                            <a class="news__event__link" onclick={() => onNewsOpen(event)} href={event.url} target="_blank">
                                 <span class="news__event__date">
                                     {formattedDate}
                                 </span>
-                                {event.name}
+                                {event.headline}
                             </a>
                         </div>
                     );

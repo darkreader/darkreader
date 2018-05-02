@@ -9,7 +9,7 @@ import MoreSettings from './more-settings';
 import {News, NewsButton} from './news';
 import SiteListSettings from './site-list-settings';
 import {isFirefox} from '../../../utils/platform';
-import {ExtensionData, ExtensionActions, TabInfo} from '../../../definitions';
+import {ExtensionData, ExtensionActions, TabInfo, News as NewsObject} from '../../../definitions';
 
 withForms();
 
@@ -50,8 +50,19 @@ function Body(props: BodyProps) {
         )
     }
 
+    const unreadNews = props.data.news.filter(({read}) => !read);
+
     function toggleNews() {
+        if (state.newsOpen && unreadNews.length > 0) {
+            props.actions.markNewsAsRead(unreadNews.map(({id}) => id));
+        }
         setState({newsOpen: !state.newsOpen});
+    }
+
+    function onNewsOpen(news: NewsObject) {
+        if (!news.read) {
+            props.actions.markNewsAsRead([news.id]);
+        }
     }
 
     return (
@@ -88,15 +99,20 @@ function Body(props: BodyProps) {
                     <a class="donate-link" href={DONATE_URL} target="_blank">
                         <span class="donate-link__text">Donate</span>
                     </a>
-                    <NewsButton active={state.newsOpen} count={2} onClick={toggleNews} />
+                    <NewsButton active={state.newsOpen} count={unreadNews.length} onClick={toggleNews} />
                     <Button onclick={openDevTools} class="dev-tools-button">
                         🛠 Dev tools
                     </Button>
                 </div>
             </footer>
-            <News expanded={state.newsOpen} onClose={toggleNews} />
+            <News
+                news={props.data.news}
+                expanded={state.newsOpen}
+                onNewsOpen={onNewsOpen}
+                onClose={toggleNews}
+            />
         </body >
     );
 }
 
-export default withState(Body, {newsOpen: true});
+export default withState(Body);

@@ -71,23 +71,21 @@ function Body(props: BodyProps) {
 
             <Header data={props.data} tab={props.tab} actions={props.actions} />
 
-            <main>
-                <TabPanel
-                    activeTab={state.activeTab || 'Filter'}
-                    onSwitchTab={(tab) => setState({activeTab: tab})}
-                    tabs={{
-                        'Filter': (
-                            <FilterSettings data={props.data} actions={props.actions} />
-                        ),
-                        'Site list': (
-                            <SiteListSettings data={props.data} actions={props.actions} isFocused={state.activeTab === 'Site list'} />
-                        ),
-                        'More': (
-                            <MoreSettings data={props.data} actions={props.actions} />
-                        ),
-                    }}
-                />
-            </main>
+            <TabPanel
+                activeTab={state.activeTab || 'Filter'}
+                onSwitchTab={(tab) => setState({activeTab: tab})}
+                tabs={{
+                    'Filter': (
+                        <FilterSettings data={props.data} actions={props.actions} />
+                    ),
+                    'Site list': (
+                        <SiteListSettings data={props.data} actions={props.actions} isFocused={state.activeTab === 'Site list'} />
+                    ),
+                    'More': (
+                        <MoreSettings data={props.data} actions={props.actions} />
+                    ),
+                }}
+            />
 
             <footer>
                 <div class="footer-links">

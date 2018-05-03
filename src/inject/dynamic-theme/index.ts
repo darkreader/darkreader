@@ -141,17 +141,24 @@ function createThemeAndWatchForUpdates() {
     createTheme();
     styleChangeObserver = new MutationObserver((mutations) => {
         const addedStyles = mutations.reduce((nodes, m) => nodes.concat(Array.from(m.addedNodes).filter(shouldManageStyle)), []);
-        addedStyles.forEach((el) => createManager(el));
         const removedStyles = mutations.reduce((nodes, m) => nodes.concat(Array.from(m.removedNodes).filter(shouldManageStyle)), []);
+        const changedStyles = mutations
+            .filter(({target}) => target && shouldManageStyle(target))
+            .reduce((styles, {target}) => {
+                styles.push(target as HTMLStyleElement | HTMLLinkElement);
+                return styles;
+            }, [] as (HTMLStyleElement | HTMLLinkElement)[]);
+
+        Array.from(new Set(changedStyles.concat(addedStyles)))
+            .filter((el) => !styleManagers.has(el))
+            .forEach((el) => createManager(el));
         removedStyles.forEach((el) => removeManager(el));
-        if (
-            (addedStyles.length + removedStyles.length > 0) ||
-            mutations.some((m) => m.target && shouldManageStyle(m.target))
-        ) {
+
+        if (addedStyles.length + removedStyles.length + changedStyles.length > 0) {
             throttledRender();
         }
     });
-    styleChangeObserver.observe(document.documentElement, {childList: true, subtree: true, characterData: true});
+    styleChangeObserver.observe(document.documentElement, {childList: true, subtree: true, attributes: true, attributeFilter: ['rel']});
     document.addEventListener('load', throttledRender);
     window.addEventListener('load', throttledRender);
 }

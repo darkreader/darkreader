@@ -106,12 +106,9 @@ export default async function manageStyle(element: HTMLLinkElement | HTMLStyleEl
     let prevFilterKey: string = null;
 
     async function render(filter: FilterConfig, variables: Map<string, string>) {
+        rules = await getRules();
         if (!rules) {
-            // Observer fails to trigger change?
-            rules = await getRules();
-            if (!rules) {
-                return null;
-            }
+            return null;
         }
         cancelAsyncOperations = false;
         let rulesChanged = (rulesModCache.size === 0);
@@ -278,11 +275,42 @@ export default async function manageStyle(element: HTMLLinkElement | HTMLStyleEl
         syncStyle.textContent = lines.join('\n');
 
         observer.observe(element, observerOptions);
+
+        if (element instanceof HTMLStyleElement && element.hasAttribute('data-styled-components')) {
+            if (element.sheet && element.sheet.cssRules) {
+                styledComponentsRulesCount = element.sheet.cssRules.length;
+            }
+            cancelAnimationFrame(styledComponentsCheckFrameId);
+            styledComponentsChecksCount = 0;
+            const checkForUpdate = async () => {
+                if (element.sheet && element.sheet.cssRules &&
+                    element.sheet.cssRules.length !== styledComponentsRulesCount
+                ) {
+                    logWarn('CSS Rules count changed', element);
+                    cancelAnimationFrame(styledComponentsCheckFrameId);
+                    rules = await getRules();
+                    update();
+                    return;
+                }
+                styledComponentsChecksCount++;
+                if (styledComponentsChecksCount === 1000) {
+                    cancelAnimationFrame(styledComponentsCheckFrameId);
+                    return;
+                }
+                styledComponentsCheckFrameId = requestAnimationFrame(checkForUpdate);
+            };
+            checkForUpdate();
+        }
     }
+
+    let styledComponentsRulesCount: number = null;
+    let styledComponentsChecksCount: number = null;
+    let styledComponentsCheckFrameId: number = null;
 
     function pause() {
         observer.disconnect();
         cancelAsyncOperations = true;
+        cancelAnimationFrame(styledComponentsCheckFrameId);
     }
 
     function destroy() {

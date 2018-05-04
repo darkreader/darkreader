@@ -93,7 +93,7 @@ function getInlineStyleOverride(element: HTMLElement, filter: FilterConfig) {
         // Temporaty ignore background images
         // due to possible performance issues
         // and complexity of handling async requests
-        if (property === 'background-image') {
+        if (property === 'background-image' && value.indexOf('url') >= 0) {
             return;
         }
         const mod = getModifiableCSSDeclaration(property, value, null, null);

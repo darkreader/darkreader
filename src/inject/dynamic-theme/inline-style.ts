@@ -4,6 +4,7 @@ import {FilterConfig} from '../../definitions';
 
 const STORE = 'darkreaderInlineId';
 const STORE_ATTR = 'data-darkreader-inline-id';
+const INLINE_STYLE_SELECTOR = '[style], [bgcolor]';
 
 let elementsCounter = 0;
 const inlineStyleElementsIds = new WeakMap<Node, string>();
@@ -11,7 +12,7 @@ const inlineStyleOverrides = new Map<Node, string>();
 let observer: MutationObserver = null;
 
 export function getInlineStylesOverrides(filter: FilterConfig) {
-    const elements = Array.from(document.querySelectorAll('[style]'));
+    const elements = Array.from(document.querySelectorAll(INLINE_STYLE_SELECTOR));
     elements.forEach((el) => elementDidUpdate(el as HTMLElement, filter));
     return Array.from(inlineStyleOverrides.values()).filter((x) => x);
 }
@@ -38,8 +39,8 @@ export function watchForInlineStyles(filter: FilterConfig, update: (styles: stri
         inlineStyleOverrides.forEach((value, key) => prevValues.set(key, value));
         let didStyleChange = false;
         mutations.forEach((m) => {
-            const createdInlineStyles = expand(Array.from(m.addedNodes), '[style]');
-            const removedInlineStyles = expand(Array.from(m.removedNodes), '[style]');
+            const createdInlineStyles = expand(Array.from(m.addedNodes), INLINE_STYLE_SELECTOR);
+            const removedInlineStyles = expand(Array.from(m.removedNodes), INLINE_STYLE_SELECTOR);
             if (createdInlineStyles.length > 0) {
                 didStyleChange = true;
                 createdInlineStyles.forEach((el) => elementDidUpdate(el as HTMLElement, filter));
@@ -49,7 +50,7 @@ export function watchForInlineStyles(filter: FilterConfig, update: (styles: stri
                 Array.from(m.removedNodes).forEach(elementDidUnmount);
             }
             if (m.type === 'attributes') {
-                if (m.attributeName === 'style') {
+                if (m.attributeName === 'style' || m.attributeName === 'bgcolor') {
                     didStyleChange = true;
                     elementDidUpdate(m.target as HTMLElement, filter);
                 }
@@ -64,7 +65,7 @@ export function watchForInlineStyles(filter: FilterConfig, update: (styles: stri
             }
         }
     });
-    observer.observe(document, {childList: true, subtree: true, attributes: true, attributeFilter: ['style', STORE_ATTR]});
+    observer.observe(document, {childList: true, subtree: true, attributes: true, attributeFilter: ['style', 'bgcolor', STORE_ATTR]});
 }
 
 export function stopWatchingForInlineStyles() {
@@ -89,6 +90,16 @@ function elementDidUnmount(element: HTMLElement) {
 
 function getInlineStyleOverride(element: HTMLElement, filter: FilterConfig) {
     const modDecs: ModifiableCSSDeclaration[] = [];
+    if (element.hasAttribute('bgcolor')) {
+        let value = element.getAttribute('bgcolor');
+        if (value.match(/^[0-9a-f]{3}$/i) || value.match(/^[0-9a-f]{6}$/i)) {
+            value = `#${value}`;
+        }
+        const mod = getModifiableCSSDeclaration('background-color', value, null, null);
+        if (mod) {
+            modDecs.push(mod);
+        }
+    }
     element.style && iterateCSSDeclarations(element.style, (property, value) => {
         // Temporaty ignore background images
         // due to possible performance issues

@@ -21,6 +21,8 @@ export interface StyleManager {
     destroy(): void;
 }
 
+export const STYLE_SELECTOR = 'link[rel="stylesheet" i], style';
+
 export function shouldManageStyle(element: Node) {
     return (
         (

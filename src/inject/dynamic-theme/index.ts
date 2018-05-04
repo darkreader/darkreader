@@ -1,7 +1,7 @@
 import {replaceCSSVariables} from './css-rules';
 import {getInlineStylesOverrides, watchForInlineStyles, stopWatchingForInlineStyles} from './inline-style';
 import {getModifiedUserAgentStyle, cleanModificationCache} from './modify-css';
-import {manageStyle, shouldManageStyle, StyleManager} from './style-manager';
+import {manageStyle, shouldManageStyle, STYLE_SELECTOR, StyleManager} from './style-manager';
 import {watchForStyleChanges, stopWatchingForStyleChanges} from './watch';
 import {removeNode} from '../utils/dom';
 import {throttle} from '../utils/throttle';
@@ -53,7 +53,7 @@ function createTheme() {
     const inlineStyle = createOrUpdateStyle('darkreader--inline');
     document.head.insertBefore(inlineStyle, invertStyle.nextSibling);
 
-    Array.from<HTMLLinkElement | HTMLStyleElement>(document.querySelectorAll('link[rel="stylesheet" i], style'))
+    Array.from<HTMLLinkElement | HTMLStyleElement>(document.querySelectorAll(STYLE_SELECTOR))
         .filter((style) => !styleManagers.has(style) && shouldManageStyle(style))
         .forEach((style) => createManager(style));
 

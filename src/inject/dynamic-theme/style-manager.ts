@@ -21,7 +21,20 @@ export interface StyleManager {
     destroy(): void;
 }
 
-export default async function manageStyle(element: HTMLLinkElement | HTMLStyleElement, {update}): Promise<StyleManager> {
+export function shouldManageStyle(element: Node) {
+    return (
+        (
+            (element instanceof HTMLStyleElement) ||
+            (element instanceof HTMLLinkElement && element.rel && element.rel.toLowerCase() === 'stylesheet')
+        ) && (
+            !element.classList.contains('darkreader') ||
+            element.classList.contains('darkreader--cors')
+        ) &&
+        element.media !== 'print'
+    );
+}
+
+export async function manageStyle(element: HTMLLinkElement | HTMLStyleElement, {update}): Promise<StyleManager> {
 
     const prevStyles: HTMLStyleElement[] = [];
     let next: Element = element;

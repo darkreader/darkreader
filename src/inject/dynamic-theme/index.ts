@@ -1,7 +1,8 @@
 import {replaceCSSVariables} from './css-rules';
 import {getInlineStyleOverride} from './inline-style';
 import {getModifiedUserAgentStyle, cleanModificationCache} from './modify-css';
-import manageStyle, {StyleManager} from './style-manager';
+import {manageStyle, shouldManageStyle, StyleManager} from './style-manager';
+import {watchForStyleChanges, stopWatchingForStyleChanges} from './watch';
 import {removeNode} from '../utils/dom';
 import {getCSSFilterValue} from '../../generators/css-filter';
 import {createTextStyle} from '../../generators/text-style';
@@ -122,53 +123,23 @@ function throttledRender() {
     }
 }
 
-function shouldManageStyle(element: Node) {
-    return (
-        (
-            (element instanceof HTMLStyleElement) ||
-            (element instanceof HTMLLinkElement && element.rel && element.rel.toLowerCase() === 'stylesheet')
-        ) && (
-            !element.classList.contains('darkreader') ||
-            element.classList.contains('darkreader--cors')
-        ) &&
-        element.media !== 'print'
-    );
-}
-
-let styleChangeObserver: MutationObserver = null;
-
 function createThemeAndWatchForUpdates() {
     createTheme();
-    styleChangeObserver = new MutationObserver((mutations) => {
-        const addedStyles = mutations.reduce((nodes, m) => nodes.concat(Array.from(m.addedNodes).filter(shouldManageStyle)), []);
-        const removedStyles = mutations.reduce((nodes, m) => nodes.concat(Array.from(m.removedNodes).filter(shouldManageStyle)), []);
-        const changedStyles = mutations
-            .filter(({target}) => target && shouldManageStyle(target))
-            .reduce((styles, {target}) => {
-                styles.push(target as HTMLStyleElement | HTMLLinkElement);
-                return styles;
-            }, [] as (HTMLStyleElement | HTMLLinkElement)[]);
 
-        Array.from(new Set(changedStyles.concat(addedStyles)))
-            .filter((el) => !styleManagers.has(el))
-            .forEach((el) => createManager(el));
-        removedStyles.forEach((el) => removeManager(el));
-
-        if (addedStyles.length + removedStyles.length + changedStyles.length > 0) {
-            throttledRender();
-        }
+    watchForStyleChanges(({created, updated, removed}) => {
+        Array.from(new Set(created.concat(updated)))
+            .filter((style) => !styleManagers.has(style))
+            .forEach((style) => createManager(style));
+        removed.forEach((style) => removeManager(style));
     });
-    styleChangeObserver.observe(document.documentElement, {childList: true, subtree: true, attributes: true, attributeFilter: ['rel']});
+
     document.addEventListener('load', throttledRender);
     window.addEventListener('load', throttledRender);
 }
 
 function stopWatchingForUpdates() {
     styleManagers.forEach((manager) => manager.pause());
-    if (styleChangeObserver) {
-        styleChangeObserver.disconnect();
-        styleChangeObserver = null;
-    }
+    stopWatchingForStyleChanges();
     document.removeEventListener('load', throttledRender);
     window.removeEventListener('load', throttledRender);
 }

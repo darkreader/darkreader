@@ -70,7 +70,6 @@ export interface Shortcuts {
 
 export interface DynamicThemeFix {
     url: string[];
-    inline?: string[];
     invert?: string[];
 }
 

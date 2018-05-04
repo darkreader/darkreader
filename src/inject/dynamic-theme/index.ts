@@ -1,9 +1,10 @@
 import {replaceCSSVariables} from './css-rules';
-import {getInlineStyleOverride} from './inline-style';
+import {getInlineStylesOverrides, watchForInlineStyles, stopWatchingForInlineStyles} from './inline-style';
 import {getModifiedUserAgentStyle, cleanModificationCache} from './modify-css';
 import {manageStyle, shouldManageStyle, StyleManager} from './style-manager';
 import {watchForStyleChanges, stopWatchingForStyleChanges} from './watch';
 import {removeNode} from '../utils/dom';
+import {throttle} from '../utils/throttle';
 import {getCSSFilterValue} from '../../generators/css-filter';
 import {createTextStyle} from '../../generators/text-style';
 import {FilterConfig, DynamicThemeFix} from '../../definitions';
@@ -51,18 +52,13 @@ function createTheme() {
 
     const inlineStyle = createOrUpdateStyle('darkreader--inline');
     document.head.insertBefore(inlineStyle, invertStyle.nextSibling);
-    if (fixes && Array.isArray(fixes.inline) && fixes.inline.length > 0) {
-        const elements = Array.from<HTMLElement>(document.querySelectorAll(fixes.inline.join(', ')));
-        inlineStyle.textContent = getInlineStyleOverride(elements, filter);
-    } else {
-        inlineStyle.textContent = '';
-    }
 
     Array.from<HTMLLinkElement | HTMLStyleElement>(document.querySelectorAll('link[rel="stylesheet" i], style'))
         .filter((style) => !styleManagers.has(style) && shouldManageStyle(style))
         .forEach((style) => createManager(style));
 
     throttledRender();
+    throttledInlineRender(getInlineStylesOverrides(filter));
 }
 
 const pendingCreation = new Set<HTMLLinkElement | HTMLStyleElement>();
@@ -101,27 +97,13 @@ function removeManager(element: HTMLLinkElement | HTMLStyleElement) {
     }
 }
 
-let pendingRendering = false;
-let requestedFrameId: number = null;
-
-function render() {
+const throttledRender = throttle(function render() {
     styleManagers.forEach((manager) => manager.render(filter, variables));
-}
+});
 
-function throttledRender() {
-    if (requestedFrameId) {
-        pendingRendering = true;
-    } else {
-        render();
-        requestedFrameId = requestAnimationFrame(() => {
-            requestedFrameId = null;
-            if (pendingRendering) {
-                render();
-                pendingRendering = false;
-            }
-        });
-    }
-}
+const throttledInlineRender = throttle(function inlineRender(styles: string[]) {
+    document.querySelector('.darkreader--inline').textContent = styles.join('\n');
+});
 
 function createThemeAndWatchForUpdates() {
     createTheme();
@@ -131,6 +113,10 @@ function createThemeAndWatchForUpdates() {
             .filter((style) => !styleManagers.has(style))
             .forEach((style) => createManager(style));
         removed.forEach((style) => removeManager(style));
+        throttledRender();
+    });
+    watchForInlineStyles(filter, (styles) => {
+        throttledInlineRender(styles);
     });
 
     document.addEventListener('load', throttledRender);
@@ -140,6 +126,7 @@ function createThemeAndWatchForUpdates() {
 function stopWatchingForUpdates() {
     styleManagers.forEach((manager) => manager.pause());
     stopWatchingForStyleChanges();
+    stopWatchingForInlineStyles();
     document.removeEventListener('load', throttledRender);
     window.removeEventListener('load', throttledRender);
 }
@@ -173,9 +160,8 @@ export function removeDynamicTheme() {
 }
 
 export function cleanDynamicThemeCache() {
-    cancelAnimationFrame(requestedFrameId);
-    pendingRendering = false;
-    requestedFrameId = null;
+    throttledRender.cancel();
+    throttledInlineRender.cancel();
     pendingCreation.clear();
     stopWatchingForUpdates();
     cleanModificationCache();

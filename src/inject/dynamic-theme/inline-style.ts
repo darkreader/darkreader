@@ -2,8 +2,11 @@ import {iterateCSSDeclarations} from './css-rules';
 import {getModifiableCSSDeclaration, ModifiableCSSDeclaration} from './modify-css';
 import {FilterConfig} from '../../definitions';
 
+const STORE = 'darkreaderInlineId';
+const STORE_ATTR = 'data-darkreader-inline-id';
+
 let elementsCounter = 0;
-const inlineStyleElementsIds = new WeakMap<Node, number>();
+const inlineStyleElementsIds = new WeakMap<Node, string>();
 const inlineStyleOverrides = new Map<Node, string>();
 let observer: MutationObserver = null;
 
@@ -36,7 +39,7 @@ export function watchForInlineStyles(filter: FilterConfig, update: (styles: stri
         let didStyleChange = false;
         mutations.forEach((m) => {
             const createdInlineStyles = expand(Array.from(m.addedNodes), '[style]');
-            const removedInlineStyles = expand(Array.from(m.removedNodes), '[style]');;
+            const removedInlineStyles = expand(Array.from(m.removedNodes), '[style]');
             if (createdInlineStyles.length > 0) {
                 didStyleChange = true;
                 createdInlineStyles.forEach((el) => elementDidUpdate(el as HTMLElement, filter));
@@ -45,9 +48,14 @@ export function watchForInlineStyles(filter: FilterConfig, update: (styles: stri
                 didStyleChange = true;
                 Array.from(m.removedNodes).forEach(elementDidUnmount);
             }
-            if (m.target && m.target instanceof Element && m.target.hasAttribute('style')) {
-                didStyleChange = true;
-                elementDidUpdate(m.target as HTMLElement, filter);
+            if (m.type === 'attributes') {
+                if (m.attributeName === 'style') {
+                    didStyleChange = true;
+                    elementDidUpdate(m.target as HTMLElement, filter);
+                }
+                if (m.attributeName === STORE_ATTR && !(m.target as HTMLElement).dataset[STORE]) {
+                    (m.target as HTMLElement).dataset[STORE] = inlineStyleElementsIds.get(m.target);
+                }
             }
         });
         if (didStyleChange) {
@@ -56,7 +64,7 @@ export function watchForInlineStyles(filter: FilterConfig, update: (styles: stri
             }
         }
     });
-    observer.observe(document.documentElement, {childList: true, subtree: true, attributes: true, attributeFilter: ['style']});
+    observer.observe(document, {childList: true, subtree: true, attributes: true, attributeFilter: ['style', STORE_ATTR]});
 }
 
 export function stopWatchingForInlineStyles() {
@@ -68,7 +76,7 @@ export function stopWatchingForInlineStyles() {
 
 function elementDidUpdate(element: HTMLElement, filter: FilterConfig) {
     if (!inlineStyleOverrides.has(element)) {
-        const id = ++elementsCounter;
+        const id = (++elementsCounter).toString(16);
         inlineStyleElementsIds.set(element, id);
     }
     const override = getInlineStyleOverride(element, filter);
@@ -95,9 +103,9 @@ function getInlineStyleOverride(element: HTMLElement, filter: FilterConfig) {
     });
 
     if (modDecs.length > 0) {
-        const id = inlineStyleElementsIds.get(element).toString(16);
-        element.dataset.darkreaderInlineId = id;
-        const selector = `[data-darkreader-inline-id="${id}"]`;
+        const id = inlineStyleElementsIds.get(element);
+        element.dataset[STORE] = id;
+        const selector = `[${STORE_ATTR}="${id}"]`;
         const lines: string[] = [];
         lines.push(`${selector} {`);
         modDecs.forEach(({property, value}) => {

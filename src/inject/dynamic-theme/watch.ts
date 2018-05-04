@@ -1,7 +1,7 @@
 import {shouldManageStyle, STYLE_SELECTOR} from './style-manager';
 
 
-let styleChangeObserver: MutationObserver = null;
+let observer: MutationObserver = null;
 
 interface ChangedStyles {
     created: (HTMLStyleElement | HTMLLinkElement)[];
@@ -23,15 +23,15 @@ function getAllManageableStyles(nodes: ArrayLike<Node>) {
 }
 
 export function watchForStyleChanges(update: (styles: ChangedStyles) => void) {
-    if (styleChangeObserver) {
-        styleChangeObserver.disconnect();
+    if (observer) {
+        observer.disconnect();
     }
 
-    styleChangeObserver = new MutationObserver((mutations) => {
+    observer = new MutationObserver((mutations) => {
         const createdStyles = mutations.reduce((nodes, m) => nodes.concat(getAllManageableStyles(m.addedNodes)), []);
         const removedStyles = mutations.reduce((nodes, m) => nodes.concat(getAllManageableStyles(m.removedNodes)), []);
         const updatedStyles = mutations
-            .filter(({target}) => target && shouldManageStyle(target))
+            .filter(({target, type}) => type === 'attributes' && shouldManageStyle(target))
             .reduce((styles, {target}) => {
                 styles.push(target as HTMLStyleElement | HTMLLinkElement);
                 return styles;
@@ -45,12 +45,12 @@ export function watchForStyleChanges(update: (styles: ChangedStyles) => void) {
             });
         }
     });
-    styleChangeObserver.observe(document.documentElement, {childList: true, subtree: true, attributes: true, attributeFilter: ['rel']});
+    observer.observe(document.documentElement, {childList: true, subtree: true, attributes: true, attributeFilter: ['rel']});
 }
 
 export function stopWatchingForStyleChanges() {
-    if (styleChangeObserver) {
-        styleChangeObserver.disconnect();
-        styleChangeObserver = null;
+    if (observer) {
+        observer.disconnect();
+        observer = null;
     }
 }

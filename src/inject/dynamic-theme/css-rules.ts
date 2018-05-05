@@ -8,6 +8,12 @@ export function iterateCSSRules(rules: CSSRuleList, iterate: (rule: CSSStyleRule
                 Array.from(rule.cssRules).forEach((mediaRule) => iterate(mediaRule as CSSStyleRule));
             } else if (rule instanceof CSSStyleRule) {
                 iterate(rule);
+            } else if (rule instanceof CSSImportRule) {
+                try {
+                    Array.from(rule.styleSheet.cssRules).forEach((importedRule) => iterate(importedRule as CSSStyleRule));
+                } catch (err) {
+                    logWarn(err);
+                }
             } else {
                 logWarn(`CSSRule type not supported`, rule);
             }

@@ -8,7 +8,7 @@ import UserStorage from './user-storage';
 import {setWindowTheme, resetWindowTheme} from './window-theme';
 import {getFontList, getCommands, setShortcut} from './utils/extension-api';
 import {isFirefox, isMobile} from '../utils/platform';
-import {isUrlInList, getUrlHost} from '../utils/url';
+import {isURLInList, getURLHost} from '../utils/url';
 import ThemeEngines from '../generators/theme-engines';
 import createCSSFilterStylesheet from '../generators/css-filter';
 import {getDynamicThemeFixesFor} from '../generators/dynamic-theme';
@@ -47,13 +47,13 @@ export class Extension {
             }
         });
         this.tabs = new TabManager({
-            getConnectionMessage: (url) => {
+            getConnectionMessage: (url, frameURL) => {
                 if (this.ready) {
-                    return this.enabled && this.getTabMessage(url);
+                    return this.enabled && this.getTabMessage(url, frameURL);
                 } else {
                     return new Promise((resolve) => {
                         this.awaiting.push(() => {
-                            resolve(this.enabled && this.getTabMessage(url));
+                            resolve(this.enabled && this.getTabMessage(url, frameURL));
                         });
                     });
                 }
@@ -212,7 +212,7 @@ export class Extension {
      */
     async toggleCurrentSite() {
         const {url} = await this.tabs.getActiveTabInfo(this.config);
-        const host = getUrlHost(url);
+        const host = getURLHost(url);
         this.toggleSitePattern(host);
     }
 
@@ -254,10 +254,10 @@ export class Extension {
     //
     //----------------------
 
-    private getTabMessage = (url: string) => {
+    private getTabMessage = (url: string, frameURL: string) => {
         const {DARK_SITES} = this.config;
-        const isUrlInDarkList = isUrlInList(url, DARK_SITES);
-        const isUrlInUserList = isUrlInList(url, this.filterConfig.siteList);
+        const isUrlInDarkList = isURLInList(url, DARK_SITES);
+        const isUrlInUserList = isURLInList(url, this.filterConfig.siteList);
 
         if (this.enabled && (
             (isUrlInUserList && this.filterConfig.invertListed) ||
@@ -268,20 +268,20 @@ export class Extension {
                 case ThemeEngines.cssFilter: {
                     return {
                         type: 'add-css-filter',
-                        data: createCSSFilterStylesheet(this.filterConfig, url, this.config.INVERSION_FIXES),
+                        data: createCSSFilterStylesheet(this.filterConfig, url, frameURL, this.config.INVERSION_FIXES),
                     };
                 }
                 case ThemeEngines.svgFilter: {
                     if (isFirefox()) {
                         return {
                             type: 'add-css-filter',
-                            data: createSVGFilterStylesheet(this.filterConfig, url, this.config.INVERSION_FIXES),
+                            data: createSVGFilterStylesheet(this.filterConfig, url, frameURL, this.config.INVERSION_FIXES),
                         };
                     }
                     return {
                         type: 'add-svg-filter',
                         data: {
-                            css: createSVGFilterStylesheet(this.filterConfig, url, this.config.INVERSION_FIXES),
+                            css: createSVGFilterStylesheet(this.filterConfig, url, frameURL, this.config.INVERSION_FIXES),
                             svgMatrix: getSVGFilterMatrixValue(this.filterConfig),
                             svgReverseMatrix: getSVGReverseFilterMatrixValue(),
                         },
@@ -290,12 +290,12 @@ export class Extension {
                 case ThemeEngines.staticTheme: {
                     return {
                         type: 'add-static-theme',
-                        data: createStaticStylesheet(this.filterConfig, url, this.config.STATIC_THEMES),
+                        data: createStaticStylesheet(this.filterConfig, url, frameURL, this.config.STATIC_THEMES),
                     };
                 }
                 case ThemeEngines.dynamicTheme: {
                     const {siteList, invertListed, engine, ...filter} = this.filterConfig;
-                    const fixes = getDynamicThemeFixesFor(url, this.config.DYNAMIC_THEME_FIXES);
+                    const fixes = getDynamicThemeFixesFor(url, frameURL, this.config.DYNAMIC_THEME_FIXES);
                     return {
                         type: 'add-dynamic-theme',
                         data: {filter, fixes},

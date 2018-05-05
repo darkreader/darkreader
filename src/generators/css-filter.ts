@@ -2,7 +2,7 @@ import {formatSitesFixesConfig} from './utils/format';
 import {applyColorMatrix, createFilterMatrix} from './utils/matrix';
 import {parseSitesFixesConfig} from './utils/parse';
 import {parseArray, formatArray} from '../utils/text';
-import {compareURLPatterns, isUrlInList} from '../utils/url';
+import {compareURLPatterns, isURLInList} from '../utils/url';
 import {createTextStyle} from './text-style';
 import {FilterConfig, InversionFix} from '../definitions';
 
@@ -11,21 +11,21 @@ export enum FilterMode {
     dark = 1
 }
 
-export default function createCSSFilterStyleheet(config: FilterConfig, url: string, inversionFixes: InversionFix[]) {
+export default function createCSSFilterStyleheet(config: FilterConfig, url: string, frameURL: string, inversionFixes: InversionFix[]) {
     const filterValue = getCSSFilterValue(config);
     const reverseFilterValue = 'invert(100%) hue-rotate(180deg)';
-    return cssFilterStyleheetTemplate(filterValue, reverseFilterValue, config, url, inversionFixes);
+    return cssFilterStyleheetTemplate(filterValue, reverseFilterValue, config, url, frameURL, inversionFixes);
 }
 
-export function cssFilterStyleheetTemplate(filterValue: string, reverseFilterValue: string, config: FilterConfig, url: string, inversionFixes: InversionFix[]) {
-    const fix = getInversionFixesFor(url, inversionFixes);
+export function cssFilterStyleheetTemplate(filterValue: string, reverseFilterValue: string, config: FilterConfig, url: string, frameURL: string, inversionFixes: InversionFix[]) {
+    const fix = getInversionFixesFor(frameURL || url, inversionFixes);
 
     const lines: string[] = [];
 
     lines.push('@media screen {');
 
     // Add leading rule
-    if (filterValue) {
+    if (filterValue && !frameURL) {
         lines.push('');
         lines.push('/* Leading rule */');
         lines.push(createLeadingRule(filterValue));
@@ -62,20 +62,22 @@ export function cssFilterStyleheetTemplate(filterValue: string, reverseFilterVal
         lines.push('}');
     });
 
-    const [r, g, b] = applyColorMatrix([255, 255, 255], createFilterMatrix(config));
-    const bgColor = {
-        r: Math.round(r),
-        g: Math.round(g),
-        b: Math.round(b),
-        toString() {
-            return `rgb(${this.r},${this.g},${this.b})`;
-        },
-    };
-    lines.push('');
-    lines.push('/* Page background */');
-    lines.push('html {');
-    lines.push(`  background: ${bgColor} !important;`);
-    lines.push('}');
+    if (!frameURL) {
+        const [r, g, b] = applyColorMatrix([255, 255, 255], createFilterMatrix(config));
+        const bgColor = {
+            r: Math.round(r),
+            g: Math.round(g),
+            b: Math.round(b),
+            toString() {
+                return `rgb(${this.r},${this.g},${this.b})`;
+            },
+        };
+        lines.push('');
+        lines.push('/* Page background */');
+        lines.push('html {');
+        lines.push(`  background: ${bgColor} !important;`);
+        lines.push('}');
+    }
 
     if (fix.css && fix.css.length > 0 && config.mode === FilterMode.dark) {
         lines.push('');
@@ -161,27 +163,33 @@ function createReverseRule(reverseFilterValue: string, fix: InversionFix): strin
 * @param inversionFixes List of inversion fixes.
 */
 export function getInversionFixesFor(url: string, inversionFixes: InversionFix[]): InversionFix {
-    const common = inversionFixes[0];
+    const common = {
+        url: inversionFixes[0].url,
+        invert: inversionFixes[0].invert || [],
+        noinvert: inversionFixes[0].noinvert || [],
+        removebg: inversionFixes[0].removebg || [],
+        css: inversionFixes[0].css || '',
+    };
 
     if (url) {
         // Search for match with given URL
         const matches = inversionFixes
             .slice(1)
-            .filter((s) => isUrlInList(url, s.url))
+            .filter((s) => isURLInList(url, s.url))
             .sort((a, b) => b.url[0].length - a.url[0].length);
         if (matches.length > 0) {
             const found = matches[0];
             console.log(`URL matches ${found.url.join(', ')}`);
             return {
                 url: found.url,
-                invert: (common.invert || []).concat(found.invert || []),
-                noinvert: (common.noinvert || []).concat(found.noinvert || []),
-                removebg: (common.removebg || []).concat(found.removebg || []),
+                invert: common.invert.concat(found.invert || []),
+                noinvert: common.noinvert.concat(found.noinvert || []),
+                removebg: common.removebg.concat(found.removebg || []),
                 css: [common.css, found.css].filter((s) => s).join('\n'),
             };
         }
     }
-    return {...common};
+    return common;
 }
 
 const inversionFixesCommands = {

@@ -1,4 +1,4 @@
-export function getUrlHost(url: string) {
+export function getURLHost(url: string) {
     return url.match(/^(.*?:\/{2,3})?(.+?)(\/|$)/)[2];
 }
 
@@ -11,9 +11,9 @@ export function compareURLPatterns(a: string, b: string) {
  * @param url Site URL.
  * @paramlist List to search into.
  */
-export function isUrlInList(url: string, list: string[]) {
+export function isURLInList(url: string, list: string[]) {
     for (let i = 0; i < list.length; i++) {
-        if (isUrlMatched(url, list[i])) {
+        if (isURLMatched(url, list[i])) {
             console.log(`URL ${url} is in list`);
             return true;
         }
@@ -26,7 +26,7 @@ export function isUrlInList(url: string, list: string[]) {
  * @param url URL.
  * @param urlTemplate URL template ("google.*", "youtube.com" etc).
  */
-export function isUrlMatched(url: string, urlTemplate: string): boolean {
+export function isURLMatched(url: string, urlTemplate: string): boolean {
     const regex = createUrlRegex(urlTemplate);
     return Boolean(url.match(regex));
 }

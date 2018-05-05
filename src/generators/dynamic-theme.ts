@@ -1,7 +1,7 @@
 import {formatSitesFixesConfig} from './utils/format';
 import {parseSitesFixesConfig} from './utils/parse';
 import {parseArray, formatArray} from '../utils/text';
-import {compareURLPatterns, isUrlInList} from '../utils/url';
+import {compareURLPatterns, isURLInList} from '../utils/url';
 import {DynamicThemeFix} from '../definitions';
 
 const dynamicThemeFixesCommands = {
@@ -27,11 +27,11 @@ export function formatDynamicThemeFixes(dynamicThemeFixes: DynamicThemeFix[]) {
     });
 }
 
-export function getDynamicThemeFixesFor(url: string, fixes: DynamicThemeFix[]) {
+export function getDynamicThemeFixesFor(url: string, frameURL: string, fixes: DynamicThemeFix[]) {
     const sortedBySpecificity = fixes
         .map((theme) => {
             return {
-                specificity: isUrlInList(url, theme.url) ? theme.url[0].length : 0,
+                specificity: isURLInList(frameURL || url, theme.url) ? theme.url[0].length : 0,
                 theme
             };
         })

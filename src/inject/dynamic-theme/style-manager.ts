@@ -1,8 +1,9 @@
-import {iterateCSSRules, iterateCSSDeclarations, replaceCSSRelativeURLsWithAbsolute, replaceCSSFontFace, replaceCSSVariables} from './css-rules';
+import {iterateCSSRules, iterateCSSDeclarations, replaceCSSRelativeURLsWithAbsolute, replaceCSSFontFace, replaceCSSVariables, getCSSURLValue, cssImportRegex} from './css-rules';
 import {getModifiableCSSDeclaration, getModifiedFallbackStyle, ModifiableCSSDeclaration, ModifiableCSSRule} from './modify-css';
 import {bgFetch} from './network';
 import {removeNode} from '../utils/dom';
 import {logWarn} from '../utils/log';
+import {getMatches} from '../../utils/text';
 import {FilterConfig} from '../../definitions';
 
 declare global {
@@ -365,13 +366,7 @@ function linkLoading(link: HTMLLinkElement) {
     });
 }
 
-async function createCORSCopy(link: HTMLLinkElement, isCancelled: () => boolean) {
-    const url = link.href;
-    const prevCors = Array.from<HTMLStyleElement>(link.parentElement.querySelectorAll('.darkreader--cors')).find((el) => el.dataset.uri === url);
-    if (prevCors) {
-        return prevCors;
-    }
-
+async function loadCSSText(url: string) {
     let response: string;
     let cache: string;
     try {
@@ -395,8 +390,27 @@ async function createCORSCopy(link: HTMLLinkElement, isCancelled: () => boolean)
     let cssText = response;
     cssText = replaceCSSFontFace(cssText);
     cssText = replaceCSSRelativeURLsWithAbsolute(cssText, url);
+
+    const importMatches = getMatches(cssImportRegex, cssText);
+    for (let match of importMatches) {
+        const importURL = getCSSURLValue(match.substring(8).replace(/;$/, ''));
+        const importedCSS = await loadCSSText(importURL);
+        cssText = cssText.split(match).join(importedCSS);
+    }
+
     cssText = cssText.trim();
 
+    return cssText;
+}
+
+async function createCORSCopy(link: HTMLLinkElement, isCancelled: () => boolean) {
+    const url = link.href;
+    const prevCors = Array.from<HTMLStyleElement>(link.parentElement.querySelectorAll('.darkreader--cors')).find((el) => el.dataset.uri === url);
+    if (prevCors) {
+        return prevCors;
+    }
+
+    const cssText = await loadCSSText(url);
     if (!cssText) {
         return null;
     }

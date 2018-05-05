@@ -47,20 +47,6 @@ INVERT
 ```
 - *WARNING:* For **Dynamic Theme mode** use `INVERT` only for dark images, that are invisible on dark backgrounds (icons, diagrams, charts, `<img>` and `<svg>` elements).
 Image analysis will be improved in future and this rule should become unnecessary.
-- **Dynamic Theme config** has also `INLINE` rule,
-which instructs theme generator to handle inline styles (`style=""` attribute)
-for specified elements. It is not decided yet if all inline styles should be analyzed or not,
-e.g. for GitHub issue labels it is important to leave colors untouched.
-```
-================================
-
-example.com
-
-INLINE
-.label
-.label > .text
-
-```
 - **For Filter and Filter+ config** it is also possible to specify custom CSS rules. If chosen element contains images or other content that becomes wrongly displayed, `NO INVERT` rule can be used. `REMOVE BG` removes background image from element.
 *IMPORTANT: When Dark mode is on, the whole page (root `<html>` element) is inverted by filter. To revert the images, videos etc. `INVERT` selectors are used, so the inversion will be applied to these elements twice. If inverted elements contain other elements that match the `INVERT` selectors, then these elements will be inverted 3 or more times. To prevent it `NO INVERT` selectors are used.*
 ```

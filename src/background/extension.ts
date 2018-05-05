@@ -2,6 +2,7 @@ import ConfigManager from './config-manager';
 import DevTools from './devtools';
 import IconManager from './icon-manager';
 import Messenger from './messenger';
+import Newsmaker from './newsmaker';
 import TabManager from './tab-manager';
 import UserStorage from './user-storage';
 import {setWindowTheme, resetWindowTheme} from './window-theme';
@@ -26,6 +27,7 @@ export class Extension {
     fonts: string[];
     icon: IconManager;
     messenger: Messenger;
+    news: Newsmaker;
     tabs: TabManager;
     user: UserStorage;
 
@@ -36,8 +38,26 @@ export class Extension {
         this.config = new ConfigManager();
         this.devtools = new DevTools(this.config, () => this.onConfigPropChanged());
         this.messenger = new Messenger(this.getMessengerAdapter());
+        this.news = new Newsmaker((news) => {
+            const unread = news.filter(({read}) => !read);
+            if (unread.length > 0) {
+                this.icon.notifyAboutReleaseNotes(unread.length);
+            } else {
+                this.icon.stopNotifyingAboutReleaseNotes();
+            }
+        });
         this.tabs = new TabManager({
-            getConnectionMessage: (url) => this.ready && this.enabled && this.getTabMessage(url),
+            getConnectionMessage: (url) => {
+                if (this.ready) {
+                    return this.enabled && this.getTabMessage(url);
+                } else {
+                    return new Promise((resolve) => {
+                        this.awaiting.push(() => {
+                            resolve(this.enabled && this.getTabMessage(url));
+                        });
+                    });
+                }
+            }
         });
         this.user = new UserStorage();
         this.awaiting = [];
@@ -46,9 +66,7 @@ export class Extension {
     private awaiting: (() => void)[];
 
     async start() {
-        this.checkForReleaseNotes();
-
-        await this.config.load();
+        await this.config.load({local: true});
         this.fonts = await getFontList();
 
         const settings = await this.user.loadSettings();
@@ -67,36 +85,11 @@ export class Extension {
 
         this.awaiting.forEach((ready) => ready());
         this.awaiting = null;
+
+        this.config.load({local: false});
     }
 
     private popupOpeningListener: () => void = null;
-
-    private checkForReleaseNotes() {
-        const releaseNotesId = 'darkreader-4-release-notes-shown';
-        const releaseNotesShown = localStorage.getItem(releaseNotesId);
-        if (!releaseNotesShown) {
-            const showReleaseNotes = () => {
-                localStorage.setItem(releaseNotesId, 'yes');
-                this.tabs.openURL('http://darkreader.org/blog/dynamic-theme/');
-            };
-            chrome.runtime.onInstalled.addListener(({reason}) => {
-                if (reason === 'install') {
-                    showReleaseNotes();
-                } else {
-                    if (isMobile()) {
-                        return;
-                    }
-                    this.icon.notifyAboutReleaseNotes();
-                    this.popupOpeningListener = () => {
-                        this.popupOpeningListener = null;
-                        this.icon.stopNotifyingAboutReleaseNodes();
-                        showReleaseNotes();
-                        chrome.runtime.sendMessage({type: 'popup-close'});
-                    };
-                }
-            });
-        }
-    }
 
     private getMessengerAdapter() {
         return {
@@ -117,6 +110,7 @@ export class Extension {
             setConfig: (config) => this.setConfig(config),
             setShortcut: ({command, shortcut}) => this.setShortcut(command, shortcut),
             toggleSitePattern: (pattern) => this.toggleSitePattern(pattern),
+            markNewsAsRead: (ids) => this.news.markAsRead(...ids),
             onPopupOpen: () => this.popupOpeningListener && this.popupOpeningListener(),
             applyDevDynamicThemeFixes: (text) => this.devtools.applyDynamicThemeFixes(text),
             resetDevDynamicThemeFixes: () => this.devtools.resetDynamicThemeFixes(),
@@ -170,6 +164,7 @@ export class Extension {
             filterConfig: this.filterConfig,
             ready: this.ready,
             fonts: this.fonts,
+            news: this.news.latest,
             shortcuts: await this.getShortcuts(),
             devDynamicThemeFixesText: this.devtools.getDynamicThemeFixesText(),
             devInversionFixesText: this.devtools.getInversionFixesText(),

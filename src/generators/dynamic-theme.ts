@@ -5,7 +5,6 @@ import {compareURLPatterns, isUrlInList} from '../utils/url';
 import {DynamicThemeFix} from '../definitions';
 
 const dynamicThemeFixesCommands = {
-    'INLINE': 'inline',
     'INVERT': 'invert',
 };
 

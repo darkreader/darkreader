@@ -1,8 +1,10 @@
 import {replaceCSSVariables} from './css-rules';
-import {getInlineStyleOverride} from './inline-style';
+import {getInlineStylesOverrides, watchForInlineStyles, stopWatchingForInlineStyles} from './inline-style';
 import {getModifiedUserAgentStyle, cleanModificationCache} from './modify-css';
-import manageStyle, {StyleManager} from './style-manager';
+import {manageStyle, shouldManageStyle, STYLE_SELECTOR, StyleManager} from './style-manager';
+import {watchForStyleChanges, stopWatchingForStyleChanges} from './watch';
 import {removeNode} from '../utils/dom';
+import {throttle} from '../utils/throttle';
 import {getCSSFilterValue} from '../../generators/css-filter';
 import {createTextStyle} from '../../generators/text-style';
 import {FilterConfig, DynamicThemeFix} from '../../definitions';
@@ -50,18 +52,13 @@ function createTheme() {
 
     const inlineStyle = createOrUpdateStyle('darkreader--inline');
     document.head.insertBefore(inlineStyle, invertStyle.nextSibling);
-    if (fixes && Array.isArray(fixes.inline) && fixes.inline.length > 0) {
-        const elements = Array.from<HTMLElement>(document.querySelectorAll(fixes.inline.join(', ')));
-        inlineStyle.textContent = getInlineStyleOverride(elements, filter);
-    } else {
-        inlineStyle.textContent = '';
-    }
 
-    Array.from<HTMLLinkElement | HTMLStyleElement>(document.querySelectorAll('link[rel="stylesheet" i], style'))
+    Array.from<HTMLLinkElement | HTMLStyleElement>(document.querySelectorAll(STYLE_SELECTOR))
         .filter((style) => !styleManagers.has(style) && shouldManageStyle(style))
         .forEach((style) => createManager(style));
 
     throttledRender();
+    throttledInlineRender(getInlineStylesOverrides(filter));
 }
 
 const pendingCreation = new Set<HTMLLinkElement | HTMLStyleElement>();
@@ -100,68 +97,36 @@ function removeManager(element: HTMLLinkElement | HTMLStyleElement) {
     }
 }
 
-let pendingRendering = false;
-let requestedFrameId: number = null;
-
-function render() {
+const throttledRender = throttle(function render() {
     styleManagers.forEach((manager) => manager.render(filter, variables));
-}
+});
 
-function throttledRender() {
-    if (requestedFrameId) {
-        pendingRendering = true;
-    } else {
-        render();
-        requestedFrameId = requestAnimationFrame(() => {
-            requestedFrameId = null;
-            if (pendingRendering) {
-                render();
-                pendingRendering = false;
-            }
-        });
-    }
-}
-
-function shouldManageStyle(element: Node) {
-    return (
-        (
-            (element instanceof HTMLStyleElement) ||
-            (element instanceof HTMLLinkElement && element.rel && element.rel.toLowerCase() === 'stylesheet')
-        ) && (
-            !element.classList.contains('darkreader') ||
-            element.classList.contains('darkreader--cors')
-        ) &&
-        element.media !== 'print'
-    );
-}
-
-let styleChangeObserver: MutationObserver = null;
+const throttledInlineRender = throttle(function inlineRender(styles: string[]) {
+    document.querySelector('.darkreader--inline').textContent = styles.join('\n');
+});
 
 function createThemeAndWatchForUpdates() {
     createTheme();
-    styleChangeObserver = new MutationObserver((mutations) => {
-        const addedStyles = mutations.reduce((nodes, m) => nodes.concat(Array.from(m.addedNodes).filter(shouldManageStyle)), []);
-        addedStyles.forEach((el) => createManager(el));
-        const removedStyles = mutations.reduce((nodes, m) => nodes.concat(Array.from(m.removedNodes).filter(shouldManageStyle)), []);
-        removedStyles.forEach((el) => removeManager(el));
-        if (
-            (addedStyles.length + removedStyles.length > 0) ||
-            mutations.some((m) => m.target && shouldManageStyle(m.target))
-        ) {
-            throttledRender();
-        }
+
+    watchForStyleChanges(({created, updated, removed}) => {
+        Array.from(new Set(created.concat(updated)))
+            .filter((style) => !styleManagers.has(style))
+            .forEach((style) => createManager(style));
+        removed.forEach((style) => removeManager(style));
+        throttledRender();
     });
-    styleChangeObserver.observe(document.documentElement, {childList: true, subtree: true, characterData: true});
+    watchForInlineStyles(filter, (styles) => {
+        throttledInlineRender(styles);
+    });
+
     document.addEventListener('load', throttledRender);
     window.addEventListener('load', throttledRender);
 }
 
 function stopWatchingForUpdates() {
     styleManagers.forEach((manager) => manager.pause());
-    if (styleChangeObserver) {
-        styleChangeObserver.disconnect();
-        styleChangeObserver = null;
-    }
+    stopWatchingForStyleChanges();
+    stopWatchingForInlineStyles();
     document.removeEventListener('load', throttledRender);
     window.removeEventListener('load', throttledRender);
 }
@@ -195,9 +160,8 @@ export function removeDynamicTheme() {
 }
 
 export function cleanDynamicThemeCache() {
-    cancelAnimationFrame(requestedFrameId);
-    pendingRendering = false;
-    requestedFrameId = null;
+    throttledRender.cancel();
+    throttledInlineRender.cancel();
     pendingCreation.clear();
     stopWatchingForUpdates();
     cleanModificationCache();

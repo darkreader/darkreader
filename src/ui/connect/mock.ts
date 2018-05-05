@@ -25,13 +25,14 @@ export function getMockData(override = {}): ExtensionData {
             'fantasy',
             'system-ui'
         ],
+        news: [],
         shortcuts: {
             'addSite': 'Alt+Shift+A',
             'toggle': 'Alt+Shift+D'
         },
-        devDynamicThemeFixesText: ['accounts.google.com', '', 'INVERT', 'svg', ''].join('\n'),
-        devInversionFixesText: ['*', '', 'INVERT', 'img', 'iframe', ''].join('\n'),
-        devStaticThemesText: ['*', '', 'NEUTRAL BG', 'html', 'body', ''].join('\n'),
+        devDynamicThemeFixesText: '',
+        devInversionFixesText: '',
+        devStaticThemesText: '',
     }, override);
 }
 
@@ -81,6 +82,9 @@ export function createConnectorMock() {
                 data.filterConfig.siteList.push(pattern);
             }
             listener(data);
+        },
+        markNewsAsRead(ids) {
+            //
         },
         disconnect() {
             //

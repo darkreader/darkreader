@@ -4,6 +4,18 @@ import {Extension} from './extension';
 const extension = new Extension();
 extension.start();
 
+chrome.runtime.onInstalled.addListener(({reason}) => {
+    if (reason === 'install') {
+        // TODO: Show help page.
+        chrome.tabs.create({url: 'http://darkreader.org/blog/dynamic-theme/'});
+        extension.news.markAsRead('dynamic-theme');
+    }
+    if (Boolean(localStorage.getItem('darkreader-4-release-notes-shown'))) {
+        extension.news.markAsRead('dynamic-theme')
+            .then(() => localStorage.removeItem('darkreader-4-release-notes-shown'));
+    }
+});
+
 declare const __DEBUG__: boolean;
 const DEBUG = __DEBUG__;
 

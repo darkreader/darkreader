@@ -25,7 +25,9 @@ export default class TabManager {
                 port.onDisconnect.addListener(() => this.ports.delete(tabId));
 
                 const message = getConnectionMessage(port.sender.tab.url);
-                if (message) {
+                if (message instanceof Promise) {
+                    message.then((asyncMessage) => asyncMessage && port.postMessage(asyncMessage));
+                } else if (message) {
                     port.postMessage(message);
                 }
             }
@@ -100,9 +102,5 @@ export default class TabManager {
             isProtected: !canInjectScript(url),
             isInDarkList: isUrlInList(url, DARK_SITES),
         };
-    }
-
-    openURL(url: string) {
-        chrome.tabs.create({url});
     }
 }

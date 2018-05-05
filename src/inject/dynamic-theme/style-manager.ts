@@ -373,7 +373,12 @@ async function createCORSCopy(link: HTMLLinkElement, isCancelled: () => boolean)
     }
 
     let response: string;
-    const cache = sessionStorage.getItem(`darkreader-cache:${url}`);
+    let cache: string;
+    try {
+        cache = sessionStorage.getItem(`darkreader-cache:${url}`);
+    } catch (err) {
+        logWarn(err);
+    }
     if (cache) {
         response = cache;
     } else {

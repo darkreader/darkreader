@@ -10,6 +10,10 @@ chrome.runtime.onInstalled.addListener(({reason}) => {
         chrome.tabs.create({url: 'http://darkreader.org/blog/dynamic-theme/'});
         extension.news.markAsRead('dynamic-theme');
     }
+    if (Boolean(localStorage.getItem('darkreader-4-release-notes-shown'))) {
+        extension.news.markAsRead('dynamic-theme')
+            .then(() => localStorage.removeItem('darkreader-4-release-notes-shown'));
+    }
 });
 
 declare const __DEBUG__: boolean;

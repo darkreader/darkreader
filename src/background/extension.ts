@@ -47,7 +47,17 @@ export class Extension {
             }
         });
         this.tabs = new TabManager({
-            getConnectionMessage: (url) => this.ready && this.enabled && this.getTabMessage(url),
+            getConnectionMessage: (url) => {
+                if (this.ready) {
+                    return this.enabled && this.getTabMessage(url);
+                } else {
+                    return new Promise((resolve) => {
+                        this.awaiting.push(() => {
+                            resolve(this.enabled && this.getTabMessage(url));
+                        });
+                    });
+                }
+            }
         });
         this.user = new UserStorage();
         this.awaiting = [];
@@ -56,7 +66,7 @@ export class Extension {
     private awaiting: (() => void)[];
 
     async start() {
-        await this.config.load();
+        await this.config.load({local: true});
         this.fonts = await getFontList();
 
         const settings = await this.user.loadSettings();
@@ -75,6 +85,8 @@ export class Extension {
 
         this.awaiting.forEach((ready) => ready());
         this.awaiting = null;
+
+        this.config.load({local: false});
     }
 
     private popupOpeningListener: () => void = null;

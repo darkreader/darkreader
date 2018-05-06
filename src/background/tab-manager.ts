@@ -1,4 +1,4 @@
-import {isUrlInList} from '../utils/url';
+import {isURLInList} from '../utils/url';
 import {canInjectScript} from '../background/utils/extension-api';
 import ConfigManager from './config-manager';
 import {TabInfo, Message} from '../definitions';
@@ -10,21 +10,40 @@ function queryTabs(query: chrome.tabs.QueryInfo) {
 }
 
 interface TabManagerOptions {
-    getConnectionMessage: (url?: string) => any;
+    getConnectionMessage: (url: string, frameUrl: string) => any;
+}
+
+interface PortInfo {
+    url: string;
+    port: chrome.runtime.Port;
 }
 
 export default class TabManager {
-    private ports: Map<number, chrome.runtime.Port>;
+    private ports: Map<number, Map<number, PortInfo>>;
 
     constructor({getConnectionMessage}: TabManagerOptions) {
         this.ports = new Map();
         chrome.runtime.onConnect.addListener((port) => {
             if (port.name === 'tab') {
                 const tabId = port.sender.tab.id;
-                this.ports.set(tabId, port);
-                port.onDisconnect.addListener(() => this.ports.delete(tabId));
+                const frameId = port.sender.frameId;
+                const url = port.sender.url;
+                let framesPorts: Map<number, PortInfo>;
+                if (this.ports.has(tabId)) {
+                    framesPorts = this.ports.get(tabId);
+                } else {
+                    framesPorts = new Map();
+                    this.ports.set(tabId, framesPorts);
+                }
+                framesPorts.set(frameId, {url, port});
+                port.onDisconnect.addListener(() => {
+                    framesPorts.delete(frameId);
+                    if (framesPorts.size === 0) {
+                        this.ports.delete(tabId);
+                    }
+                });
 
-                const message = getConnectionMessage(port.sender.tab.url);
+                const message = getConnectionMessage(port.sender.tab.url, frameId === 0 ? null : url);
                 if (message instanceof Promise) {
                     message.then((asyncMessage) => asyncMessage && port.postMessage(asyncMessage));
                 } else if (message) {
@@ -73,20 +92,23 @@ export default class TabManager {
             .forEach((tab) => chrome.tabs.executeScript(tab.id, {
                 runAt: 'document_start',
                 file: '/inject/index.js',
+                allFrames: true,
             }));
     }
 
-    async sendMessage(getMessage: (url?: string) => any) {
+    async sendMessage(getMessage: (url: string, frameUrl: string) => any) {
         (await queryTabs({}))
             .filter((tab) => this.ports.has(tab.id))
             .forEach((tab) => {
-                const message = getMessage(tab.url);
-                const port = this.ports.get(tab.id);
-                if (tab.active) {
-                    port.postMessage(message);
-                } else {
-                    setTimeout(() => port.postMessage(message));
-                }
+                const framesPorts = this.ports.get(tab.id);
+                framesPorts.forEach(({url, port}, frameId) => {
+                    const message = getMessage(tab.url, frameId === 0 ? null : url);
+                    if (tab.active) {
+                        port.postMessage(message);
+                    } else {
+                        setTimeout(() => port.postMessage(message));
+                    }
+                });
             });
     }
 
@@ -100,7 +122,7 @@ export default class TabManager {
         return <TabInfo>{
             url,
             isProtected: !canInjectScript(url),
-            isInDarkList: isUrlInList(url, DARK_SITES),
+            isInDarkList: isURLInList(url, DARK_SITES),
         };
     }
 }

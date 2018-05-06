@@ -1,6 +1,6 @@
 import {html, render} from 'malevic';
 import {Button} from '../../../controls';
-import {getUrlHost} from '../../../../utils/url';
+import {getURLHost} from '../../../../utils/url';
 import {ExtWrapper, TabInfo} from '../../../../definitions';
 
 export default function SiteToggleButton({data, tab, actions}: ExtWrapper & {tab: TabInfo}) {
@@ -10,7 +10,7 @@ export default function SiteToggleButton({data, tab, actions}: ExtWrapper & {tab
         (data.filterConfig.invertListed || !tab.isInDarkList)
     );
 
-    const host = getUrlHost(tab.url || '');
+    const host = getURLHost(tab.url || '');
 
     const urlText = (host
         ? host

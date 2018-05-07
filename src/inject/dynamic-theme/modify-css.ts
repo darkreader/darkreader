@@ -85,6 +85,9 @@ export function getModifiedUserAgentStyle(filter: FilterConfig) {
     lines.push('::-webkit-scrollbar-thumb:active {');;
     lines.push(`    background-color: ${modifyBackgroundColor({r: 96, g: 96, b: 96}, filter)};`);
     lines.push('}');
+    lines.push('::-webkit-scrollbar-corner {');
+    lines.push(`    background-color: ${modifyBackgroundColor({r: 255, g: 255, b: 255}, filter)};`);
+    lines.push('}');
     return lines.join('\n');
 }
 

@@ -63,7 +63,7 @@ function modifyLightModeHSL({h, s, l, a}) {
 
 function modifyBgHSL({h, s, l, a}) {
     const lMin = 0.1;
-    const lMaxS0 = 0.2;
+    const lMaxS0 = 0.25;
     const lMaxS1 = 0.4;
     const sNeutralLimL0 = 0.36;
     const sNeutralLimL1 = 0.12;

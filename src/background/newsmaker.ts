@@ -23,7 +23,7 @@ export default class Newsmaker {
 
     async getNews() {
         try {
-            const response = await fetch(`https://raw.githubusercontent.com/darkreader/darkreader.org/master/src/blog/posts.json?nocache=${Date.now()}`);
+            const response = await fetch(`https://raw.githubusercontent.com/darkreader/darkreader.org/master/src/blog/posts.json?nocache=${Date.now()}`, {cache: 'no-cache'});
             const $news = await response.json();
             return new Promise<News[]>((resolve) => {
                 chrome.storage.sync.get({readNews: []}, ({readNews}) => {

@@ -61,7 +61,7 @@ export default class TabManager {
                 const sendResponse = (response) => chrome.tabs.sendMessage(sender.tab.id, {type: 'fetch-response', id, ...response});
 
                 try {
-                    const response = await fetch(url);
+                    const response = await fetch(url, {cache: 'force-cache'});
                     if (response.ok) {
                         if (responseType === 'data-url') {
                             const blob = await response.blob();

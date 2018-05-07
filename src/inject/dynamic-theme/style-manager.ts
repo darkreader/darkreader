@@ -208,48 +208,11 @@ export async function manageStyle(element: HTMLLinkElement | HTMLStyleElement, {
             media: string;
             selector: string;
             property: string;
-            value: string;
             importantKeyword: string;
+            promise: Promise<string>;
         }
 
         const queue: AsyncQueueDeclaration[] = [];
-        let frameId = null;
-
-        function addToQueue(d: AsyncQueueDeclaration) {
-            queue.push(d);
-            if (!frameId) {
-                frameId = requestAnimationFrame(() => {
-                    frameId = null;
-                    if (cancelAsyncOperations) {
-                        return;
-                    }
-                    const mediaGroups = queue.reduce((groups, d) => {
-                        const media = d.media || '';
-                        if (!groups[media]) {
-                            groups[media] = [];
-                        }
-                        groups[media].push(d);
-                        return groups;
-                    }, {} as {[media: string]: AsyncQueueDeclaration[]})
-                    const asyncStyle = document.createElement('style');
-                    asyncStyle.classList.add('darkreader');
-                    asyncStyle.classList.add('darkreader--async');
-                    asyncStyle.media = 'screen';
-                    asyncStyle.textContent = Object.entries(mediaGroups).map(([media, decs]) => [
-                        media && `@media ${media} {`,
-                        decs.map(({selector, property, value, importantKeyword}) => [
-                            `${selector} {`,
-                            `    ${property}: ${value}${importantKeyword};`,
-                            '}',
-                        ].join('\n')).join('\n'),
-                        media && '}',
-                    ].filter((ln) => ln)).join('\n');
-                    const insertTarget = asyncStyles.length > 0 ? asyncStyles[asyncStyles.length - 1].nextSibling : syncStyle.nextSibling;
-                    element.parentElement.insertBefore(asyncStyle, insertTarget);
-                    asyncStyles.push(asyncStyle);
-                });
-            }
-        }
 
         const lines: string[] = [];
         modRules.filter((r) => r).forEach(({selector, declarations, media}) => {
@@ -262,12 +225,7 @@ export async function manageStyle(element: HTMLLinkElement | HTMLStyleElement, {
                 if (typeof value === 'function') {
                     const modified = value(filter);
                     if (modified instanceof Promise) {
-                        modified.then((asyncValue) => {
-                            if (cancelAsyncOperations || !asyncValue) {
-                                return;
-                            }
-                            addToQueue({media, selector, property, value: asyncValue, importantKeyword});
-                        });
+                        queue.push({media, selector, property, importantKeyword, promise: modified});
                     } else {
                         lines.push(`    ${property}: ${modified}${importantKeyword};`);
                     }
@@ -289,6 +247,37 @@ export async function manageStyle(element: HTMLLinkElement | HTMLStyleElement, {
         }
         element.parentElement.insertBefore(syncStyle, corsCopy ? corsCopy.nextSibling : element.nextSibling);
         syncStyle.textContent = lines.join('\n');
+
+        queue.forEach(({promise}) => promise.catch((err) => {
+            logWarn(err);
+            return null;
+        }));
+        queue.length > 0 && Promise.all(queue.map(({promise}) => promise))
+            .then((values) => {
+                if (cancelAsyncOperations || values.filter((v) => v).length === 0) {
+                    return;
+                }
+                const asyncStyle = document.createElement('style');
+                asyncStyle.classList.add('darkreader');
+                asyncStyle.classList.add('darkreader--async');
+                asyncStyle.media = 'screen';
+                asyncStyle.textContent = queue.map(({selector, property, media, importantKeyword}, i) => {
+                    const value = values[i];
+                    if (!value) {
+                        return null;
+                    }
+                    return [
+                        media && `@media ${media} {`,
+                        `${selector} {`,
+                        `    ${property}: ${value}${importantKeyword};`,
+                        '}',
+                        media && '}',
+                    ].filter((ln) => ln).join('\n');
+                }).filter((ln) => ln).join('\n');
+                const insertTarget = asyncStyles.length > 0 ? asyncStyles[asyncStyles.length - 1].nextSibling : syncStyle.nextSibling;
+                element.parentElement.insertBefore(asyncStyle, insertTarget);
+                asyncStyles.push(asyncStyle);
+            });
 
         observer.observe(element, observerOptions);
 

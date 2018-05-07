@@ -274,26 +274,29 @@ export class Extension {
             (isUrlInUserList && this.filterConfig.invertListed) ||
             (!isUrlInDarkList && !this.filterConfig.invertListed && !isUrlInUserList)
         )) {
+            const custom = this.filterConfig.custom.find(({url: urlList}) => isURLInList(url, urlList));
+            const filterConfig = custom ? custom.config : this.filterConfig;
+
             console.log(`Creating CSS for url: ${url}`);
-            switch (this.filterConfig.engine) {
+            switch (filterConfig.engine) {
                 case ThemeEngines.cssFilter: {
                     return {
                         type: 'add-css-filter',
-                        data: createCSSFilterStylesheet(this.filterConfig, url, frameURL, this.config.INVERSION_FIXES),
+                        data: createCSSFilterStylesheet(filterConfig, url, frameURL, this.config.INVERSION_FIXES),
                     };
                 }
                 case ThemeEngines.svgFilter: {
                     if (isFirefox()) {
                         return {
                             type: 'add-css-filter',
-                            data: createSVGFilterStylesheet(this.filterConfig, url, frameURL, this.config.INVERSION_FIXES),
+                            data: createSVGFilterStylesheet(filterConfig, url, frameURL, this.config.INVERSION_FIXES),
                         };
                     }
                     return {
                         type: 'add-svg-filter',
                         data: {
-                            css: createSVGFilterStylesheet(this.filterConfig, url, frameURL, this.config.INVERSION_FIXES),
-                            svgMatrix: getSVGFilterMatrixValue(this.filterConfig),
+                            css: createSVGFilterStylesheet(filterConfig, url, frameURL, this.config.INVERSION_FIXES),
+                            svgMatrix: getSVGFilterMatrixValue(filterConfig),
                             svgReverseMatrix: getSVGReverseFilterMatrixValue(),
                         },
                     };
@@ -301,11 +304,11 @@ export class Extension {
                 case ThemeEngines.staticTheme: {
                     return {
                         type: 'add-static-theme',
-                        data: createStaticStylesheet(this.filterConfig, url, frameURL, this.config.STATIC_THEMES),
+                        data: createStaticStylesheet(filterConfig, url, frameURL, this.config.STATIC_THEMES),
                     };
                 }
                 case ThemeEngines.dynamicTheme: {
-                    const {siteList, invertListed, engine, ...filter} = this.filterConfig;
+                    const {siteList, invertListed, engine, ...filter} = filterConfig;
                     const fixes = getDynamicThemeFixesFor(url, frameURL, this.config.DYNAMIC_THEME_FIXES);
                     return {
                         type: 'add-dynamic-theme',
@@ -313,7 +316,7 @@ export class Extension {
                     };
                 }
                 default: {
-                    throw new Error(`Unknown engine ${this.filterConfig.engine}`);
+                    throw new Error(`Unknown engine ${filterConfig.engine}`);
                 }
             }
         } else {

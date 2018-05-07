@@ -14,7 +14,7 @@ export default class UserStorage {
                 mode: 1,
                 brightness: 100,
                 contrast: 90,
-                grayscale: 20,
+                grayscale: 0,
                 sepia: 10,
                 useFont: false,
                 fontFamily: isMacOS() ? 'Helvetica Neue' : isWindows() ? 'Segoe UI' : 'Open Sans',
@@ -22,6 +22,8 @@ export default class UserStorage {
                 invertListed: false,
                 engine: isMobile() || isFirefox() ? ThemeEngines.dynamicTheme : ThemeEngines.svgFilter,
                 siteList: [],
+                custom: [],
+                changeBrowserTheme: false,
             },
         };
     }

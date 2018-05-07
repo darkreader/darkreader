@@ -1,20 +1,26 @@
 import {html} from 'malevic';
 import {CheckBox, UpDown, Select} from '../../../controls';
-import {ExtWrapper} from '../../../../definitions';
+import {FilterConfig} from '../../../../definitions';
 
-export default function FontSettings({data, actions}: ExtWrapper) {
+interface FontSettingsProps {
+    config: FilterConfig;
+    fonts: string[];
+    onChange: (config: FilterConfig) => void;
+}
+
+export default function FontSettings({config, fonts, onChange}: FontSettingsProps) {
     return (
         <section class="font-settings">
             <div class="font-settings__font-select-container">
                 <div class="font-settings__font-select-container__line">
                     <CheckBox
-                        checked={data.filterConfig.useFont}
-                        onchange={(e) => actions.setConfig({useFont: e.target.checked})}
+                        checked={config.useFont}
+                        onchange={(e) => onChange({useFont: e.target.checked})}
                     />
                     <Select
-                        value={data.filterConfig.fontFamily}
-                        onChange={(value) => actions.setConfig({fontFamily: value})}
-                        options={data.fonts.reduce((map, font) => {
+                        value={config.fontFamily}
+                        onChange={(value) => onChange({fontFamily: value})}
+                        options={fonts.reduce((map, font) => {
                             map[font] = (
                                 <div style={{'font-family': font}}>
                                     {font}
@@ -29,13 +35,13 @@ export default function FontSettings({data, actions}: ExtWrapper) {
                 </label>
             </div>
             <UpDown
-                value={data.filterConfig.textStroke}
+                value={config.textStroke}
                 min={0}
                 max={1}
                 step={0.1}
                 default={0}
                 name="Text stroke"
-                onChange={(value) => actions.setConfig({textStroke: value})}
+                onChange={(value) => onChange({textStroke: value})}
             />
         </section>
     );

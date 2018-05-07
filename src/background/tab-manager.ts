@@ -103,7 +103,7 @@ export default class TabManager {
                 const framesPorts = this.ports.get(tab.id);
                 framesPorts.forEach(({url, port}, frameId) => {
                     const message = getMessage(tab.url, frameId === 0 ? null : url);
-                    if (tab.active) {
+                    if (tab.active && frameId === 0) {
                         port.postMessage(message);
                     } else {
                         setTimeout(() => port.postMessage(message));

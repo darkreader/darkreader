@@ -44,7 +44,13 @@ export interface FilterConfig {
     siteList?: string[];
     invertListed?: boolean;
     engine?: string;
+    custom?: CustomSiteConfig[];
     changeBrowserTheme?: boolean;
+}
+
+export interface CustomSiteConfig {
+    url: string[];
+    config: FilterConfig;
 }
 
 export interface UserSettings {

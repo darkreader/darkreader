@@ -14,7 +14,6 @@ export function compareURLPatterns(a: string, b: string) {
 export function isURLInList(url: string, list: string[]) {
     for (let i = 0; i < list.length; i++) {
         if (isURLMatched(url, list[i])) {
-            console.log(`URL ${url} is in list`);
             return true;
         }
     }

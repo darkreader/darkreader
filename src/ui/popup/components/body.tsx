@@ -76,13 +76,13 @@ function Body(props: BodyProps) {
                 onSwitchTab={(tab) => setState({activeTab: tab})}
                 tabs={{
                     'Filter': (
-                        <FilterSettings data={props.data} actions={props.actions} />
+                        <FilterSettings data={props.data} actions={props.actions} tab={props.tab} />
                     ),
                     'Site list': (
                         <SiteListSettings data={props.data} actions={props.actions} isFocused={state.activeTab === 'Site list'} />
                     ),
                     'More': (
-                        <MoreSettings data={props.data} actions={props.actions} />
+                        <MoreSettings data={props.data} actions={props.actions} tab={props.tab} />
                     ),
                 }}
             />

@@ -65,20 +65,23 @@ function modifyBgHSL({h, s, l, a}) {
     const lMin = 0.1;
     const lMaxS0 = 0.2;
     const lMaxS1 = 0.4;
-    const sNeutralLim = 0.16;
+    const sNeutralLimL0 = 0.36;
+    const sNeutralLimL1 = 0.12;
     const sColored = 0.16;
-    const hColored = 220;
+    const hColoredL0 = 235;
+    const hColoredL1 = 205;
 
     const lMax = scale(s, 0, 1, lMaxS0, lMaxS1);
     const lx = (l < lMax ?
         l :
         scale(l, lMax, 1, lMax, lMin));
 
+    const sNeutralLim = scale(clamp(lx, lMin, lMax), lMin, lMax, sNeutralLimL0, sNeutralLimL1);
     let hx = h;
     let sx = s;
     if (s < sNeutralLim) {
         sx = sColored;
-        hx = hColored;
+        hx = scale(clamp(lx, lMin, lMax), lMin, lMax, hColoredL0, hColoredL1);
     } else if (l > lMax) {
         sx = s * scale(l, lMax, 1, 1, 0.5);
     }
@@ -95,11 +98,13 @@ export function modifyBackgroundColor(rgb: RGBA, filter: FilterConfig) {
 
 function modifyFgHSL({h, s, l, a}) {
     const lMax = 0.9;
-    const lMinS0 = 0.6;
+    const lMinS0 = 0.7;
     const lMinS1 = 0.6;
-    const sNeutralLim = 0.2;
-    const sColored = 0.16;
-    const hColored = 40;
+    const sNeutralLimL0 = 0.12;
+    const sNeutralLimL1 = 0.24;
+    const sColored = 0.24;
+    const hColoredL0 = 35;
+    const hColoredL1 = 45;
 
     const lMin = scale(s, 0, 1, lMinS0, lMinS1);
     const lx = (l < lMax ?
@@ -107,9 +112,10 @@ function modifyFgHSL({h, s, l, a}) {
         l);
     let hx = h;
     let sx = s;
+    const sNeutralLim = scale(clamp(lx, lMin, lMax), lMin, lMax, sNeutralLimL0, sNeutralLimL1);
     if (s < sNeutralLim) {
         sx = sColored;
-        hx = hColored;
+        hx = scale(clamp(lx, lMin, lMax), lMin, lMax, hColoredL0, hColoredL1);
     }
 
     return {h: hx, s: sx, l: lx, a};

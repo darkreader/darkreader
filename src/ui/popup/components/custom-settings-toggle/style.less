@@ -8,12 +8,11 @@
     &:active,
     &--checked:hover {
         background-color: @color-control-active;
-        color: mix(@color-fore, @color-control-fore, 50%);
+        color: mix(@color-fore, @color-control-fore, 80%);
         transition: background-color @time-fast, color @time-fast;
     }
 
-    &__url,
-    &--checked &__url {
+    &__url {
         color: @color-control-fore;
         -moz-user-select: none;
         user-select: none;

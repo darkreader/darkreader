@@ -21,7 +21,8 @@ export default function CustomSettingsToggle({data, tab, actions}: ExtWrapper & 
         <Button
             class={{
                 'custom-settings-toggle': true,
-                'custom-settings-toggle--checked': isCustom
+                'custom-settings-toggle--checked': isCustom,
+                'custom-settings-toggle--disabled': tab.isProtected || (tab.isInDarkList && !data.filterConfig.invertListed),
             }}
             onclick={(e) => {
                 if (isCustom) {

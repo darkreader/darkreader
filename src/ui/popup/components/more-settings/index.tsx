@@ -50,9 +50,19 @@ export default function MoreSettings({data, actions, tab}: ExtWrapper & {tab: Ta
             ) : (
                     <div class="more-settings__section">
                         <CustomSettingsToggle data={data} tab={tab} actions={actions} />
-                        <p class="more-settings__description">
-                            Apply settings to current website only
-                        </p>
+                        {tab.isProtected ? (
+                            <p class="more-settings__description more-settings__description--warning">
+                                This page is protected by browser
+                            </p>
+                        ) : tab.isInDarkList ? (
+                            <p class="more-settings__description more-settings__description--warning">
+                                This site is in global Dark List
+                            </p>
+                        ) : (
+                            <p class="more-settings__description">
+                                Apply settings to current website only
+                            </p>
+                        )}
                     </div>
                 )}
         </section>

@@ -12,6 +12,11 @@
         transition: background-color @time-fast, color @time-fast;
     }
 
+    &--disabled {
+        opacity: 0.5;
+        pointer-events: none;
+    }
+
     &__url {
         color: @color-control-fore;
         -moz-user-select: none;

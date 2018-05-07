@@ -1,7 +1,9 @@
 import {html} from 'malevic';
 import EngineSwitch from '../engine-switch';
 import FontSettings from '../font-settings';
+import {Toggle} from '../../../controls';
 import {ExtWrapper} from '../../../../definitions';
+import {isFirefox} from '../../../../utils/platform';
 
 export default function MoreSettings({data, actions}: ExtWrapper) {
     return (
@@ -18,6 +20,19 @@ export default function MoreSettings({data, actions}: ExtWrapper) {
                 </p>
                 <EngineSwitch data={data} actions={actions} />
             </div>
+            {isFirefox() ? (
+                <div class="more-settings__section">
+                    <Toggle
+                        checked={data.filterConfig.changeBrowserTheme}
+                        labelOn="Browser theme"
+                        labelOff="Default"
+                        onChange={(checked) => actions.setConfig({changeBrowserTheme: checked})}
+                    />
+                    <p class="more-settings__description">
+                        Change browser theme
+                    </p>
+                </div>
+            ) : null}
         </section>
     );
 }

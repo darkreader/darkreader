@@ -50,6 +50,9 @@ export default function MoreSettings({data, actions, tab}: ExtWrapper & {tab: Ta
             ) : (
                     <div class="more-settings__section">
                         <CustomSettingsToggle data={data} tab={tab} actions={actions} />
+                        <p class="more-settings__description">
+                            Apply settings to current website only
+                        </p>
                     </div>
                 )}
         </section>

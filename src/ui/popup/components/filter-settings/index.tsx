@@ -1,65 +1,81 @@
 import {html} from 'malevic';
-import {UpDown} from '../../../controls';
+import {UpDown, Button} from '../../../controls';
+import CustomSettingsToggle from '../custom-settings-toggle';
+import EngineSwitch from '../engine-switch';
 import ModeToggle from './mode-toggle';
-import {ExtWrapper} from '../../../../definitions';
+import {isURLInList} from '../../../../utils/url';
+import {ExtWrapper, TabInfo, FilterConfig} from '../../../../definitions';
 
-export default function FilterSettings({data, actions}: ExtWrapper) {
+export default function FilterSettings({data, actions, tab}: ExtWrapper & {tab: TabInfo}) {
+
+    const custom = data.filterConfig.custom.find(({url}) => isURLInList(tab.url, url));
+    const filterConfig = custom ? custom.config : data.filterConfig;
+
+    function setConfig(config: FilterConfig) {
+        if (custom) {
+            custom.config = {...custom.config, ...config};
+            actions.setConfig({custom: data.filterConfig.custom});
+        } else {
+            actions.setConfig(config)
+        }
+    }
 
     const brightness = (
         <UpDown
-            value={data.filterConfig.brightness}
+            value={filterConfig.brightness}
             min={50}
             max={150}
             step={10}
             default={100}
             name="Brightness"
-            onChange={(value) => actions.setConfig({brightness: value})}
+            onChange={(value) => setConfig({brightness: value})}
         />
     );
 
     const contrast = (
         <UpDown
-            value={data.filterConfig.contrast}
+            value={filterConfig.contrast}
             min={50}
             max={150}
             step={10}
             default={100}
             name="Contrast"
-            onChange={(value) => actions.setConfig({contrast: value})}
+            onChange={(value) => setConfig({contrast: value})}
         />
     );
 
     const grayscale = (
         <UpDown
-            value={data.filterConfig.grayscale}
+            value={filterConfig.grayscale}
             min={0}
             max={100}
             step={10}
             default={0}
             name="Grayscale"
-            onChange={(value) => actions.setConfig({grayscale: value})}
+            onChange={(value) => setConfig({grayscale: value})}
         />
     );
 
     const sepia = (
         <UpDown
-            value={data.filterConfig.sepia}
+            value={filterConfig.sepia}
             min={0}
             max={100}
             step={10}
             default={0}
             name="Sepia"
-            onChange={(value) => actions.setConfig({sepia: value})}
+            onChange={(value) => setConfig({sepia: value})}
         />
     );
 
     return (
         <section class="filter-settings">
-            <ModeToggle data={data} actions={actions} />
+            <ModeToggle mode={filterConfig.mode} onChange={(mode) => setConfig({mode})} />
             {brightness}
             {contrast}
-            {grayscale}
             {sepia}
+            {grayscale}
+            <CustomSettingsToggle data={data} tab={tab} actions={actions} />
         </section>
     );
 }

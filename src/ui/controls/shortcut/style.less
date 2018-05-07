@@ -1,7 +1,6 @@
 @import "../../theme";
 
 .shortcut {
-    background-color: @color-back;
     color: @color-fore;
     cursor: pointer;
     display: inline-block;
@@ -12,8 +11,7 @@
     text-decoration: none;
     white-space: pre;
 
-    &:hover,
-    &:focus {
+    &:hover {
         text-decoration: underline;
     }
 
@@ -31,7 +29,6 @@
     }
 
     &:hover,
-    &:focus,
     &--edit {
         &::before {
             visibility: visible;

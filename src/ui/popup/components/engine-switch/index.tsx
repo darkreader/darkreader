@@ -1,7 +1,7 @@
 import {html} from 'malevic';
 import {MultiSwitch, Shortcut} from '../../../controls';
 import ThemeEngines from '../../../../generators/theme-engines';
-import {ExtWrapper} from '../../../../definitions';
+import {ExtensionData} from '../../../../definitions';
 
 const engineNames = [
     [ThemeEngines.cssFilter, 'Filter'],
@@ -10,23 +10,20 @@ const engineNames = [
     [ThemeEngines.dynamicTheme, 'Dynamic'],
 ];
 
-export default function EngineSwitch({data, actions}: ExtWrapper) {
+interface EngineSwitchProps {
+    engine: string;
+    onChange: (engine: string) => void;
+}
+
+export default function EngineSwitch({engine, onChange}: EngineSwitchProps) {
     return (
         <div class="engine-switch">
             <MultiSwitch
-                value={engineNames.find(([code, name]) => code === data.filterConfig.engine)[1]}
+                value={engineNames.find(([code, name]) => code === engine)[1]}
                 options={engineNames.map(([code, name]) => name)}
-                onChange={(value) => actions.setConfig({engine: engineNames.find(([code, name]) => name === value)[0]})}
+                onChange={(value) => onChange(engineNames.find(([code, name]) => name === value)[0])}
             />
-            <Shortcut
-                commandName="switchEngine"
-                shortcuts={data.shortcuts}
-                textTemplate={(hotkey) => (hotkey
-                    ? `switch theme engine: ${hotkey}`
-                    : 'setup theme engine switch hotkey'
-                )}
-                onSetShortcut={(shortcut) => actions.setShortcut('switchEngine', shortcut)}
-            />
+            <label class="engine-switch__description">Theme generation mode</label>
         </div>
     );
 }

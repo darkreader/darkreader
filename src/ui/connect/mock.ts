@@ -15,7 +15,8 @@ export function getMockData(override = {}): ExtensionData {
             textStroke: 0,
             invertListed: false,
             engine: 'cssFilter',
-            siteList: []
+            siteList: [],
+            custom: [],
         },
         fonts: [
             'serif',

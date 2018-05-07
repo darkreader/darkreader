@@ -5,6 +5,7 @@ import {manageStyle, shouldManageStyle, STYLE_SELECTOR, StyleManager} from './st
 import {watchForStyleChanges, stopWatchingForStyleChanges} from './watch';
 import {removeNode} from '../utils/dom';
 import {throttle} from '../utils/throttle';
+import {clamp} from '../../utils/math';
 import {getCSSFilterValue} from '../../generators/css-filter';
 import {createTextStyle} from '../../generators/text-style';
 import {FilterConfig, DynamicThemeFix} from '../../definitions';
@@ -43,7 +44,11 @@ function createTheme() {
     if (fixes && Array.isArray(fixes.invert) && fixes.invert.length > 0) {
         invertStyle.textContent = [
             `${fixes.invert.join(', ')} {`,
-            `    filter: ${getCSSFilterValue(filter)} !important;`,
+            `    filter: ${getCSSFilterValue({
+                ...filter,
+                contrast: filter.mode === 0 ? filter.contrast : clamp(filter.contrast - 10, 0, 100),
+                sepia: filter.mode === 0 ? filter.sepia : clamp(filter.sepia + 10, 0, 100),
+            })} !important;`,
             '}',
         ].join('\n');
     } else {

@@ -2,25 +2,30 @@ import {html} from 'malevic';
 import {Button, Toggle} from '../../../controls';
 import {ExtWrapper} from '../../../../definitions';
 
-export default function ModeToggle({data, actions}: ExtWrapper) {
+interface ModeToggleProps {
+    mode: number;
+    onChange: (mode: number) => void;
+}
+
+export default function ModeToggle({mode, onChange}: ModeToggleProps) {
     return (
         <div class="mode-toggle">
             <div class="mode-toggle__line">
                 <Button
-                    class={{'mode-toggle__button--active': data.filterConfig.mode === 1}}
-                    onclick={() => actions.setConfig({mode: 1})}
+                    class={{'mode-toggle__button--active': mode === 1}}
+                    onclick={() => onChange(1)}
                 >
                     <span class="icon icon--dark-mode"></span>
                 </Button>
                 <Toggle
-                    checked={data.filterConfig.mode === 1}
+                    checked={mode === 1}
                     labelOn="Dark"
                     labelOff="Light"
-                    onChange={(checked) => actions.setConfig({mode: checked ? 1 : 0})}
+                    onChange={(checked) => onChange(checked ? 1 : 0)}
                 />
                 <Button
-                    class={{'mode-toggle__button--active': data.filterConfig.mode === 0}}
-                    onclick={() => actions.setConfig({mode: 0})}
+                    class={{'mode-toggle__button--active': mode === 0}}
+                    onclick={() => onChange(0)}
                 >
                     <span class="icon icon--light-mode"></span>
                 </Button>

@@ -77,6 +77,12 @@ export function getModifiedUserAgentStyle(filter: FilterConfig) {
         lines.push(`    color: ${modifyForegroundColor({r: 255, g: 255, b: 255}, filter)};`);
         lines.push('}');
     });
+    lines.push('input:-webkit-autofill,');
+    lines.push('textarea:-webkit-autofill,');
+    lines.push('select:-webkit-autofill {');
+    lines.push(`    background-color: ${modifyBackgroundColor({r: 250, g: 255, b: 189}, filter)} !important;`);
+    lines.push(`    color: ${modifyForegroundColor({r: 0, g: 0, b: 0}, filter)} !important;`);
+    lines.push('}');
     if (!isMacOS()) {
         lines.push('::-webkit-scrollbar {');
         lines.push(`    background-color: ${modifyBackgroundColor({r: 241, g: 241, b: 241}, filter)};`);

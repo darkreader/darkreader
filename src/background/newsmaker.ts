@@ -1,7 +1,7 @@
 import {News} from '../definitions';
 
 export default class Newsmaker {
-    static UPDATE_INTERVAL = 3 * 60 * 60 * 1000;
+    static UPDATE_INTERVAL = 1 * 60 * 60 * 1000;
 
     latest: News[];
     onUpdate: (news: News[]) => void;

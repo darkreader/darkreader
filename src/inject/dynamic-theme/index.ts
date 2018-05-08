@@ -47,7 +47,6 @@ function createTheme() {
             `    filter: ${getCSSFilterValue({
                 ...filter,
                 contrast: filter.mode === 0 ? filter.contrast : clamp(filter.contrast - 10, 0, 100),
-                sepia: filter.mode === 0 ? filter.sepia : clamp(filter.sepia + 10, 0, 100),
             })} !important;`,
             '}',
         ].join('\n');

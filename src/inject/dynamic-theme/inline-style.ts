@@ -4,7 +4,7 @@ import {FilterConfig} from '../../definitions';
 
 const STORE = 'darkreaderInlineId';
 const STORE_ATTR = 'data-darkreader-inline-id';
-const INLINE_STYLE_SELECTOR = '[style], [bgcolor], [fill], [stroke]';
+const INLINE_STYLE_SELECTOR = '[style], [bgcolor], [color], [fill], [stroke]';
 
 let elementsCounter = 0;
 const inlineStyleElementsIds = new WeakMap<Node, string>();
@@ -50,7 +50,7 @@ export function watchForInlineStyles(filter: FilterConfig, update: (styles: stri
                 Array.from(m.removedNodes).forEach(elementDidUnmount);
             }
             if (m.type === 'attributes') {
-                if (m.attributeName === 'style' || m.attributeName === 'bgcolor' || m.attributeName === 'fill' || m.attributeName === 'stroke') {
+                if (m.attributeName === 'style' || m.attributeName === 'bgcolor' || m.attributeName === 'color' || m.attributeName === 'fill' || m.attributeName === 'stroke') {
                     didStyleChange = true;
                     elementDidUpdate(m.target as HTMLElement, filter);
                 }
@@ -65,7 +65,7 @@ export function watchForInlineStyles(filter: FilterConfig, update: (styles: stri
             }
         }
     });
-    observer.observe(document, {childList: true, subtree: true, attributes: true, attributeFilter: ['style', 'bgcolor', STORE_ATTR]});
+    observer.observe(document, {childList: true, subtree: true, attributes: true, attributeFilter: ['style', STORE_ATTR]});
 }
 
 export function stopWatchingForInlineStyles() {
@@ -96,6 +96,16 @@ function getInlineStyleOverride(element: HTMLElement, filter: FilterConfig) {
             value = `#${value}`;
         }
         const mod = getModifiableCSSDeclaration('background-color', value, null, null);
+        if (mod) {
+            modDecs.push(mod);
+        }
+    }
+    if (element.hasAttribute('color')) {
+        let value = element.getAttribute('color');
+        if (value.match(/^[0-9a-f]{3}$/i) || value.match(/^[0-9a-f]{6}$/i)) {
+            value = `#${value}`;
+        }
+        const mod = getModifiableCSSDeclaration('color', value, null, null);
         if (mod) {
             modDecs.push(mod);
         }

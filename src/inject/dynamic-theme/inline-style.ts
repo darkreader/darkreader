@@ -116,7 +116,7 @@ function getInlineStyleOverride(element: HTMLElement, filter: FilterConfig) {
     }
     if (element.hasAttribute('stroke')) {
         let value = element.getAttribute('stroke');
-        const mod = getModifiableCSSDeclaration(element instanceof SVGLineElement ? 'border-color' : 'color', value, null, null);
+        const mod = getModifiableCSSDeclaration(element instanceof SVGLineElement || element instanceof SVGTextElement ? 'border-color' : 'color', value, null, null);
         if (mod) {
             mod.property = 'stroke';
             modDecs.push(mod);

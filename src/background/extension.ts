@@ -192,10 +192,17 @@ export class Extension {
         const prevConfig = {...this.filterConfig};
         this.filterConfig = {...prevConfig, ...config};
         if (this.enabled) {
-            if (this.filterConfig.changeBrowserTheme && !prevConfig.changeBrowserTheme) {
-                setWindowTheme(this.filterConfig);
-            } else if (!this.filterConfig.changeBrowserTheme && prevConfig.changeBrowserTheme) {
+            if (!this.filterConfig.changeBrowserTheme && prevConfig.changeBrowserTheme) {
                 resetWindowTheme();
+            } else if (this.filterConfig.changeBrowserTheme && (
+                !prevConfig.changeBrowserTheme ||
+                (this.filterConfig.mode !== prevConfig.mode) ||
+                (this.filterConfig.brightness !== prevConfig.brightness) ||
+                (this.filterConfig.contrast !== prevConfig.contrast) ||
+                (this.filterConfig.sepia !== prevConfig.sepia) ||
+                (this.filterConfig.grayscale !== prevConfig.grayscale)
+            )) {
+                setWindowTheme(this.filterConfig);
             }
         }
         this.onConfigPropChanged();

@@ -59,9 +59,10 @@ function Body(props: BodyProps) {
         setState({newsOpen: !state.newsOpen});
     }
 
-    function onNewsOpen(news: NewsObject) {
-        if (!news.read) {
-            props.actions.markNewsAsRead([news.id]);
+    function onNewsOpen(...news: NewsObject[]) {
+        const unread = news.filter(({read}) => !read);
+        if (unread.length > 0) {
+            props.actions.markNewsAsRead(unread.map(({id}) => id));
         }
     }
 

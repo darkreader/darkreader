@@ -5,7 +5,7 @@ import {News} from '../../../../definitions';
 interface NewsProps {
     news: News[];
     expanded: boolean;
-    onNewsOpen: (news: News) => void;
+    onNewsOpen: (...news: News[]) => void;
     onClose: () => void;
 }
 
@@ -36,7 +36,15 @@ export function News({news, expanded, onNewsOpen, onClose}: NewsProps) {
                 })}
                 {(news.length <= NEWS_COUNT
                     ? null
-                    : <a class="news__read-more" href={BLOG_URL} target="_blank">Read more</a>
+                    : <a
+                        class={{
+                            'news__read-more': true,
+                            'news__read-more--unread': news.slice(NEWS_COUNT).find(({read}) => !read),
+                        }}
+                        href={BLOG_URL}
+                        target="_blank"
+                        onclick={() => onNewsOpen(...news)}
+                    >Read more</a>
                 )}
             </div>
         </div>

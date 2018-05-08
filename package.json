@@ -1,6 +1,6 @@
 {
   "name": "darkreader",
-  "version": "4.3.3",
+  "version": "4.4.0",
   "description": "Dark theme for every website",
   "scripts": {
     "debug": "gulp debug",

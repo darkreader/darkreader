@@ -4,7 +4,7 @@ import {FilterConfig} from '../../definitions';
 
 const STORE = 'darkreaderInlineId';
 const STORE_ATTR = 'data-darkreader-inline-id';
-const INLINE_STYLE_SELECTOR = '[style], [bgcolor]';
+const INLINE_STYLE_SELECTOR = '[style], [bgcolor], [fill], [stroke]';
 
 let elementsCounter = 0;
 const inlineStyleElementsIds = new WeakMap<Node, string>();
@@ -50,7 +50,7 @@ export function watchForInlineStyles(filter: FilterConfig, update: (styles: stri
                 Array.from(m.removedNodes).forEach(elementDidUnmount);
             }
             if (m.type === 'attributes') {
-                if (m.attributeName === 'style' || m.attributeName === 'bgcolor') {
+                if (m.attributeName === 'style' || m.attributeName === 'bgcolor' || m.attributeName === 'fill' || m.attributeName === 'stroke') {
                     didStyleChange = true;
                     elementDidUpdate(m.target as HTMLElement, filter);
                 }
@@ -100,6 +100,28 @@ function getInlineStyleOverride(element: HTMLElement, filter: FilterConfig) {
             modDecs.push(mod);
         }
     }
+    if (element.hasAttribute('fill') && element instanceof SVGElement) {
+        const SMALL_SVG_LIMIT = 32;
+        let value = element.getAttribute('fill');
+        let isBg = false;
+        if (!(element instanceof SVGTextElement)) {
+            const {width, height} = element.getBoundingClientRect();
+            isBg = (width > SMALL_SVG_LIMIT || height > SMALL_SVG_LIMIT);
+        }
+        const mod = getModifiableCSSDeclaration(isBg ? 'background-color' : 'color', value, null, null);
+        if (mod) {
+            mod.property = 'fill';
+            modDecs.push(mod);
+        }
+    }
+    if (element.hasAttribute('stroke')) {
+        let value = element.getAttribute('stroke');
+        const mod = getModifiableCSSDeclaration(element instanceof SVGLineElement ? 'border-color' : 'color', value, null, null);
+        if (mod) {
+            mod.property = 'stroke';
+            modDecs.push(mod);
+        }
+    }
     element.style && iterateCSSDeclarations(element.style, (property, value) => {
         // Temporaty ignore background images
         // due to possible performance issues
@@ -112,6 +134,13 @@ function getInlineStyleOverride(element: HTMLElement, filter: FilterConfig) {
             modDecs.push(mod);
         }
     });
+    if (element.style && element instanceof SVGTextElement && element.style.fill) {
+        const mod = getModifiableCSSDeclaration('color', element.style.getPropertyValue('fill'), null, null);
+        if (mod) {
+            mod.property = 'fill'
+            modDecs.push(mod);
+        }
+    }
 
     if (modDecs.length > 0) {
         const id = inlineStyleElementsIds.get(element);

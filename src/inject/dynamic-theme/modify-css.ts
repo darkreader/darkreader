@@ -27,7 +27,11 @@ export function getModifiableCSSDeclaration(property: string, value: string, rul
     const important = Boolean(rule && rule.style && rule.style.getPropertyPriority(property));
     if (property.startsWith('--')) {
         return null;
-    } else if (property.indexOf('color') >= 0 && property !== '-webkit-print-color-adjust') {
+    } else if (
+        (property.indexOf('color') >= 0 && property !== '-webkit-print-color-adjust') ||
+        property === 'fill' ||
+        property === 'stroke'
+    ) {
         const modifier = getColorModifier(property, value);
         if (modifier) {
             return {property, value: modifier, important};

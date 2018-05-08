@@ -63,7 +63,7 @@ export function getModifiedUserAgentStyle(filter: FilterConfig) {
     lines.push(`    color: ${modifyForegroundColor({r: 0, g: 0, b: 0}, filter)};`);
     lines.push('}');
     lines.push('a {');
-    lines.push(`    color: ${modifyBorderColor({r: 0, g: 64, b: 255}, filter)};`);
+    lines.push(`    color: ${modifyForegroundColor({r: 0, g: 64, b: 255}, filter)};`);
     lines.push('}');
     lines.push('table {');
     lines.push(`    border-color: ${modifyBorderColor({r: 128, g: 128, b: 128}, filter)};`);

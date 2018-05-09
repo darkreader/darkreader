@@ -6,9 +6,7 @@ extension.start();
 
 chrome.runtime.onInstalled.addListener(({reason}) => {
     if (reason === 'install') {
-        // TODO: Show help page.
-        chrome.tabs.create({url: 'http://darkreader.org/blog/dynamic-theme/'});
-        extension.news.markAsRead('dynamic-theme');
+        chrome.tabs.create({url: 'http://darkreader.org/help/'});
     }
     if (Boolean(localStorage.getItem('darkreader-4-release-notes-shown'))) {
         extension.news.markAsRead('dynamic-theme')

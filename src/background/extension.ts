@@ -317,9 +317,10 @@ export class Extension {
                 case ThemeEngines.dynamicTheme: {
                     const {siteList, invertListed, engine, ...filter} = filterConfig;
                     const fixes = getDynamicThemeFixesFor(url, frameURL, this.config.DYNAMIC_THEME_FIXES);
+                    const isIFrame = frameURL != null;
                     return {
                         type: 'add-dynamic-theme',
-                        data: {filter, fixes},
+                        data: {filter, fixes, isIFrame},
                     };
                 }
                 default: {

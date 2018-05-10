@@ -50,14 +50,14 @@ export function getModifiableCSSDeclaration(property: string, value: string, rul
     return null;
 }
 
-export function getModifiedUserAgentStyle(filter: FilterConfig) {
+export function getModifiedUserAgentStyle(filter: FilterConfig, isIFrame: boolean) {
     const lines: string[] = [];
-    if (filter.mode === 1) {
+    if (filter.mode === 1 && !isIFrame) {
         lines.push('html {');
         lines.push(`    background-color: ${modifyBackgroundColor({r: 255, g: 255, b: 255}, filter)} !important;`);
         lines.push('}');
     }
-    lines.push('html, body, input, textarea, select, button {');
+    lines.push(`${isIFrame ? '' : 'html, body, '}input, textarea, select, button {`);
     lines.push(`    background-color: ${modifyBackgroundColor({r: 255, g: 255, b: 255}, filter)};`);
     lines.push(`    border-color: ${modifyBorderColor({r: 76, g: 76, b: 76}, filter)};`);
     lines.push(`    color: ${modifyForegroundColor({r: 0, g: 0, b: 0}, filter)};`);
@@ -262,7 +262,7 @@ function getBgImageModifier(prop: string, value: string, rule: CSSStyleRule, isC
                     result = 'none';
                 } else {
                     logInfo(`Inverting light image ${imageDetails.src}`);
-                    const dimmed = getFilteredImageDataURL(imageDetails, filter);
+                    const dimmed = getFilteredImageDataURL(imageDetails, {...filter, mode: 0, brightness: clamp(filter.brightness - 80, 20, 100), sepia: clamp(filter.sepia + 90, 0, 100)});
                     result = `url("${dimmed}")`;
                 }
             } else {

@@ -14,6 +14,7 @@ const styleManagers = new Map<HTMLLinkElement | HTMLStyleElement, StyleManager>(
 const variables = new Map<string, string>();
 let filter: FilterConfig = null;
 let fixes: DynamicThemeFix = null;
+let isIFrame: boolean = null;
 
 function createOrUpdateStyle(className: string) {
     let style = document.head.querySelector(`.${className}`) as HTMLStyleElement;
@@ -29,7 +30,7 @@ function createOrUpdateStyle(className: string) {
 function createTheme() {
     const userAgentStyle = createOrUpdateStyle('darkreader--user-agent');
     document.head.insertBefore(userAgentStyle, document.head.firstChild);
-    userAgentStyle.textContent = getModifiedUserAgentStyle(filter);
+    userAgentStyle.textContent = getModifiedUserAgentStyle(filter, isIFrame);
 
     const textStyle = createOrUpdateStyle('darkreader--text');
     document.head.insertBefore(textStyle, userAgentStyle.nextSibling);
@@ -135,9 +136,10 @@ function stopWatchingForUpdates() {
     window.removeEventListener('load', throttledRender);
 }
 
-export function createOrUpdateDynamicTheme(filterConfig: FilterConfig, dynamicThemeFixes?: DynamicThemeFix) {
+export function createOrUpdateDynamicTheme(filterConfig: FilterConfig, dynamicThemeFixes: DynamicThemeFix, iframe: boolean) {
     filter = filterConfig;
     fixes = dynamicThemeFixes;
+    isIFrame = iframe;
     if (document.head) {
         createThemeAndWatchForUpdates();
     } else {

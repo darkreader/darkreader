@@ -69,7 +69,7 @@ function modifyBgHSL({h, s, l, a}) {
     const sNeutralLimL1 = 0.12;
     const sColored = 0.16;
     const hColoredL0 = 235;
-    const hColoredL1 = 205;
+    const hColoredL1 = 215;
 
     const lMax = scale(s, 0, 1, lMaxS0, lMaxS1);
     const lx = (l < lMax ?

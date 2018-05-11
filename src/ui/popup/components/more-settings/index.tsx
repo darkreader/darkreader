@@ -51,15 +51,15 @@ export default function MoreSettings({data, actions, tab}: ExtWrapper & {tab: Ta
                         <CustomSettingsToggle data={data} tab={tab} actions={actions} />
                         {tab.isProtected ? (
                             <p class="more-settings__description more-settings__description--warning">
-                                This page is protected by browser
+                                {getLocalMessage('page_protected').replace('\n', ' ')}
                             </p>
                         ) : tab.isInDarkList ? (
                             <p class="more-settings__description more-settings__description--warning">
-                                This site is in global Dark List
+                                {getLocalMessage('page_in_dark_list').replace('\n', ' ')}
                             </p>
                         ) : (
                             <p class="more-settings__description">
-                                Apply settings to current website only
+                                {getLocalMessage('apply_to_description')}
                             </p>
                         )}
                     </div>

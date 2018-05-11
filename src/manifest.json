@@ -54,7 +54,7 @@
             "description": "__MSG_toggle_current_site__"
         },
         "switchEngine": {
-            "description": "Switch filter engine"
+            "description": "__MSG_theme_generation_mode__"
         }
     }
 }

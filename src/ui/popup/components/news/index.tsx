@@ -1,5 +1,6 @@
 import {html} from 'malevic';
 import {Button} from '../../../controls';
+import {getLocalMessage} from '../../../../utils/locales';
 import {News} from '../../../../definitions';
 
 interface NewsProps {
@@ -16,7 +17,7 @@ export function News({news, expanded, onNewsOpen, onClose}: NewsProps) {
     return (
         <div class={{'news': true, 'news--expanded': expanded}}>
             <div class="news__header">
-                <span class="news__header__text">News</span>
+                <span class="news__header__text">{getLocalMessage('news')}</span>
                 <span class="news__close" role="button" onclick={onClose}>✕</span>
             </div>
             <div class="news__list">
@@ -44,7 +45,7 @@ export function News({news, expanded, onNewsOpen, onClose}: NewsProps) {
                         href={BLOG_URL}
                         target="_blank"
                         onclick={() => onNewsOpen(...news)}
-                    >Read more</a>
+                    >{getLocalMessage('read_more')}</a>
                 )}
             </div>
         </div>
@@ -68,7 +69,7 @@ export function NewsButton({active, count, onClick}: NewsButtonProps) {
                 onClick();
             }}
         >
-            News
+            {getLocalMessage('news')}
         </Button>
     );
 }

@@ -1,6 +1,7 @@
 import {html, render} from 'malevic';
 import {Button} from '../../../controls';
 import {getURLHost, isURLInList} from '../../../../utils/url';
+import {getLocalMessage} from '../../../../utils/locales';
 import {ExtWrapper, TabInfo} from '../../../../definitions';
 
 export default function CustomSettingsToggle({data, tab, actions}: ExtWrapper & {tab: TabInfo}) {
@@ -39,7 +40,9 @@ export default function CustomSettingsToggle({data, tab, actions}: ExtWrapper & 
                 }
             }}
         >
-            Apply to <span class="custom-settings-toggle__url" >{urlText}</span>
+            <span class="custom-settings-toggle__wrapper">
+                {getLocalMessage('apply_to')} <span class="custom-settings-toggle__url" >{urlText}</span>
+            </span>
         </Button>
     );
 }

@@ -2,12 +2,13 @@ import ConfigManager from './config-manager';
 import DevTools from './devtools';
 import IconManager from './icon-manager';
 import Messenger from './messenger';
+import Newsmaker from './newsmaker';
 import TabManager from './tab-manager';
 import UserStorage from './user-storage';
 import {setWindowTheme, resetWindowTheme} from './window-theme';
 import {getFontList, getCommands, setShortcut} from './utils/extension-api';
 import {isFirefox, isMobile} from '../utils/platform';
-import {isUrlInList, getUrlHost} from '../utils/url';
+import {isURLInList, getURLHost} from '../utils/url';
 import ThemeEngines from '../generators/theme-engines';
 import createCSSFilterStylesheet from '../generators/css-filter';
 import {getDynamicThemeFixesFor} from '../generators/dynamic-theme';
@@ -26,6 +27,7 @@ export class Extension {
     fonts: string[];
     icon: IconManager;
     messenger: Messenger;
+    news: Newsmaker;
     tabs: TabManager;
     user: UserStorage;
 
@@ -36,8 +38,26 @@ export class Extension {
         this.config = new ConfigManager();
         this.devtools = new DevTools(this.config, () => this.onConfigPropChanged());
         this.messenger = new Messenger(this.getMessengerAdapter());
+        this.news = new Newsmaker((news) => {
+            const unread = news.filter(({read}) => !read);
+            if (unread.length > 0) {
+                this.icon.notifyAboutReleaseNotes(unread.length);
+            } else {
+                this.icon.stopNotifyingAboutReleaseNotes();
+            }
+        });
         this.tabs = new TabManager({
-            getConnectionMessage: (url) => this.ready && this.enabled && this.getTabMessage(url),
+            getConnectionMessage: (url, frameURL) => {
+                if (this.ready) {
+                    return this.enabled && this.getTabMessage(url, frameURL);
+                } else {
+                    return new Promise((resolve) => {
+                        this.awaiting.push(() => {
+                            resolve(this.enabled && this.getTabMessage(url, frameURL));
+                        });
+                    });
+                }
+            }
         });
         this.user = new UserStorage();
         this.awaiting = [];
@@ -46,9 +66,7 @@ export class Extension {
     private awaiting: (() => void)[];
 
     async start() {
-        this.checkForReleaseNotes();
-
-        await this.config.load();
+        await this.config.load({local: true});
         this.fonts = await getFontList();
 
         const settings = await this.user.loadSettings();
@@ -67,36 +85,11 @@ export class Extension {
 
         this.awaiting.forEach((ready) => ready());
         this.awaiting = null;
+
+        this.config.load({local: false});
     }
 
     private popupOpeningListener: () => void = null;
-
-    private checkForReleaseNotes() {
-        const releaseNotesId = 'darkreader-4-release-notes-shown';
-        const releaseNotesShown = localStorage.getItem(releaseNotesId);
-        if (!releaseNotesShown) {
-            const showReleaseNotes = () => {
-                localStorage.setItem(releaseNotesId, 'yes');
-                this.tabs.openURL('http://darkreader.org/blog/dynamic-theme/');
-            };
-            chrome.runtime.onInstalled.addListener(({reason}) => {
-                if (reason === 'install') {
-                    showReleaseNotes();
-                } else {
-                    if (isMobile()) {
-                        return;
-                    }
-                    this.icon.notifyAboutReleaseNotes();
-                    this.popupOpeningListener = () => {
-                        this.popupOpeningListener = null;
-                        this.icon.stopNotifyingAboutReleaseNodes();
-                        showReleaseNotes();
-                        chrome.runtime.sendMessage({type: 'popup-close'});
-                    };
-                }
-            });
-        }
-    }
 
     private getMessengerAdapter() {
         return {
@@ -117,6 +110,7 @@ export class Extension {
             setConfig: (config) => this.setConfig(config),
             setShortcut: ({command, shortcut}) => this.setShortcut(command, shortcut),
             toggleSitePattern: (pattern) => this.toggleSitePattern(pattern),
+            markNewsAsRead: (ids) => this.news.markAsRead(...ids),
             onPopupOpen: () => this.popupOpeningListener && this.popupOpeningListener(),
             applyDevDynamicThemeFixes: (text) => this.devtools.applyDynamicThemeFixes(text),
             resetDevDynamicThemeFixes: () => this.devtools.resetDynamicThemeFixes(),
@@ -170,6 +164,7 @@ export class Extension {
             filterConfig: this.filterConfig,
             ready: this.ready,
             fonts: this.fonts,
+            news: this.news.latest,
             shortcuts: await this.getShortcuts(),
             devDynamicThemeFixesText: this.devtools.getDynamicThemeFixesText(),
             devInversionFixesText: this.devtools.getInversionFixesText(),
@@ -179,19 +174,37 @@ export class Extension {
 
     enable() {
         this.enabled = true;
-        this.filterConfig && setWindowTheme(this.filterConfig);
+        if (this.filterConfig && this.filterConfig.changeBrowserTheme) {
+            setWindowTheme(this.filterConfig);
+        }
         this.onAppToggle();
     }
 
     disable() {
         this.enabled = false;
-        resetWindowTheme();
+        if (this.filterConfig && this.filterConfig.changeBrowserTheme) {
+            resetWindowTheme();
+        }
         this.onAppToggle();
     }
 
     setConfig(config: FilterConfig) {
-        this.filterConfig = {...this.filterConfig, ...config};
-        this.enabled && setWindowTheme(this.filterConfig);
+        const prevConfig = {...this.filterConfig};
+        this.filterConfig = {...prevConfig, ...config};
+        if (this.enabled) {
+            if (!this.filterConfig.changeBrowserTheme && prevConfig.changeBrowserTheme) {
+                resetWindowTheme();
+            } else if (this.filterConfig.changeBrowserTheme && (
+                !prevConfig.changeBrowserTheme ||
+                (this.filterConfig.mode !== prevConfig.mode) ||
+                (this.filterConfig.brightness !== prevConfig.brightness) ||
+                (this.filterConfig.contrast !== prevConfig.contrast) ||
+                (this.filterConfig.sepia !== prevConfig.sepia) ||
+                (this.filterConfig.grayscale !== prevConfig.grayscale)
+            )) {
+                setWindowTheme(this.filterConfig);
+            }
+        }
         this.onConfigPropChanged();
     }
 
@@ -217,7 +230,7 @@ export class Extension {
      */
     async toggleCurrentSite() {
         const {url} = await this.tabs.getActiveTabInfo(this.config);
-        const host = getUrlHost(url);
+        const host = getURLHost(url);
         this.toggleSitePattern(host);
     }
 
@@ -259,35 +272,38 @@ export class Extension {
     //
     //----------------------
 
-    private getTabMessage = (url: string) => {
+    private getTabMessage = (url: string, frameURL: string) => {
         const {DARK_SITES} = this.config;
-        const isUrlInDarkList = isUrlInList(url, DARK_SITES);
-        const isUrlInUserList = isUrlInList(url, this.filterConfig.siteList);
+        const isUrlInDarkList = isURLInList(url, DARK_SITES);
+        const isUrlInUserList = isURLInList(url, this.filterConfig.siteList);
 
         if (this.enabled && (
             (isUrlInUserList && this.filterConfig.invertListed) ||
             (!isUrlInDarkList && !this.filterConfig.invertListed && !isUrlInUserList)
         )) {
+            const custom = this.filterConfig.custom.find(({url: urlList}) => isURLInList(url, urlList));
+            const filterConfig = custom ? custom.config : this.filterConfig;
+
             console.log(`Creating CSS for url: ${url}`);
-            switch (this.filterConfig.engine) {
+            switch (filterConfig.engine) {
                 case ThemeEngines.cssFilter: {
                     return {
                         type: 'add-css-filter',
-                        data: createCSSFilterStylesheet(this.filterConfig, url, this.config.INVERSION_FIXES),
+                        data: createCSSFilterStylesheet(filterConfig, url, frameURL, this.config.INVERSION_FIXES),
                     };
                 }
                 case ThemeEngines.svgFilter: {
                     if (isFirefox()) {
                         return {
                             type: 'add-css-filter',
-                            data: createSVGFilterStylesheet(this.filterConfig, url, this.config.INVERSION_FIXES),
+                            data: createSVGFilterStylesheet(filterConfig, url, frameURL, this.config.INVERSION_FIXES),
                         };
                     }
                     return {
                         type: 'add-svg-filter',
                         data: {
-                            css: createSVGFilterStylesheet(this.filterConfig, url, this.config.INVERSION_FIXES),
-                            svgMatrix: getSVGFilterMatrixValue(this.filterConfig),
+                            css: createSVGFilterStylesheet(filterConfig, url, frameURL, this.config.INVERSION_FIXES),
+                            svgMatrix: getSVGFilterMatrixValue(filterConfig),
                             svgReverseMatrix: getSVGReverseFilterMatrixValue(),
                         },
                     };
@@ -295,19 +311,20 @@ export class Extension {
                 case ThemeEngines.staticTheme: {
                     return {
                         type: 'add-static-theme',
-                        data: createStaticStylesheet(this.filterConfig, url, this.config.STATIC_THEMES),
+                        data: createStaticStylesheet(filterConfig, url, frameURL, this.config.STATIC_THEMES),
                     };
                 }
                 case ThemeEngines.dynamicTheme: {
-                    const {siteList, invertListed, engine, ...filter} = this.filterConfig;
-                    const fixes = getDynamicThemeFixesFor(url, this.config.DYNAMIC_THEME_FIXES);
+                    const {siteList, invertListed, engine, ...filter} = filterConfig;
+                    const fixes = getDynamicThemeFixesFor(url, frameURL, this.config.DYNAMIC_THEME_FIXES);
+                    const isIFrame = frameURL != null;
                     return {
                         type: 'add-dynamic-theme',
-                        data: {filter, fixes},
+                        data: {filter, fixes, isIFrame},
                     };
                 }
                 default: {
-                    throw new Error(`Unknown engine ${this.filterConfig.engine}`);
+                    throw new Error(`Unknown engine ${filterConfig.engine}`);
                 }
             }
         } else {

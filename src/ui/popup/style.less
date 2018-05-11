@@ -2,15 +2,17 @@
 @import "../shared";
 
 @popup-content-width: 15rem;
-@popup-content-height: 28.75rem;
+@popup-content-height: 30rem;
 @popup-content-padding: 1rem;
 
+@import "./components/custom-settings-toggle/style";
 @import "./components/engine-switch/style";
 @import "./components/filter-settings/style";
 @import "./components/font-settings/style";
 @import "./components/header/style";
 @import "./components/loader/style";
 @import "./components/more-settings/style";
+@import "./components/news/style";
 @import "./components/site-list-settings/style";
 @import "./components/site-toggle/style";
 
@@ -22,6 +24,7 @@ body {
     height: @popup-content-height;
     margin: 0 auto;
     padding: @popup-content-padding;
+    position: relative;
     width: @popup-content-width;
 }
 
@@ -49,7 +52,31 @@ footer {
     }
 }
 
+.footer-links {
+    align-items: stretch;
+    display: flex;
+    flex: none;
+    justify-content: center;
+    margin-bottom: @indent-small;
+
+    &__link {
+        color: @color-fore;
+        line-height: @size-text-normal-height;
+        text-align: center;
+        text-decoration: none;
+
+        &:hover {
+            text-decoration: underline;
+        }
+    }
+
+    > :not(:first-child) {
+        margin-left: @indent-small;
+    }
+}
+
 .footer-buttons {
+    align-items: stretch;
     display: flex;
     flex-direction: row;
     justify-content: stretch;
@@ -70,11 +97,10 @@ footer {
     color: @color-control-fore;
     cursor: pointer;
     display: inline-flex;
-    flex: none;
     justify-content: center;
     margin: 0;
-    padding: 0 @indent-small;
     text-decoration: none;
+    transition: all @time-fast;
 
     &:hover {
         box-shadow: 0 0 @indent-large @color-control-active;
@@ -84,20 +110,6 @@ footer {
         font-weight: bold;
         line-height: @size-control-inner;
         transform: skewX(-10deg);
-    }
-}
-
-.icon-coin {
-    background-color: gold;
-    border-radius: 50%;
-    display: inline-block;
-    height: @size-text-normal;
-    position: relative;
-    width: @size-text-normal;
-
-    &::before {
-        color: @color-back;
-        content: "$";
     }
 }
 

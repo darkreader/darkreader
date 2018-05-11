@@ -1,5 +1,6 @@
 import {parse, RGBA} from '../../utils/color';
 import {clamp} from '../../utils/math';
+import {isMacOS} from '../../utils/platform';
 import {getMatches} from '../../utils/text';
 import {modifyBackgroundColor, modifyBorderColor, modifyForegroundColor, modifyGradientColor, modifyShadowColor, clearColorModificationCache} from '../../generators/modify-colors'
 import {cssURLRegex, getCSSURLValue, getCSSBaseBath} from './css-rules';
@@ -26,7 +27,11 @@ export function getModifiableCSSDeclaration(property: string, value: string, rul
     const important = Boolean(rule && rule.style && rule.style.getPropertyPriority(property));
     if (property.startsWith('--')) {
         return null;
-    } else if (property.indexOf('color') >= 0 && property !== '-webkit-print-color-adjust') {
+    } else if (
+        (property.indexOf('color') >= 0 && property !== '-webkit-print-color-adjust') ||
+        property === 'fill' ||
+        property === 'stroke'
+    ) {
         const modifier = getColorModifier(property, value);
         if (modifier) {
             return {property, value: modifier, important};
@@ -45,20 +50,20 @@ export function getModifiableCSSDeclaration(property: string, value: string, rul
     return null;
 }
 
-export function getModifiedUserAgentStyle(filter: FilterConfig) {
+export function getModifiedUserAgentStyle(filter: FilterConfig, isIFrame: boolean) {
     const lines: string[] = [];
-    if (filter.mode === 1) {
+    if (filter.mode === 1 && !isIFrame) {
         lines.push('html {');
         lines.push(`    background-color: ${modifyBackgroundColor({r: 255, g: 255, b: 255}, filter)} !important;`);
         lines.push('}');
     }
-    lines.push('html, body, input, textarea, select, button {');
+    lines.push(`${isIFrame ? '' : 'html, body, '}input, textarea, select, button {`);
     lines.push(`    background-color: ${modifyBackgroundColor({r: 255, g: 255, b: 255}, filter)};`);
     lines.push(`    border-color: ${modifyBorderColor({r: 76, g: 76, b: 76}, filter)};`);
     lines.push(`    color: ${modifyForegroundColor({r: 0, g: 0, b: 0}, filter)};`);
     lines.push('}');
     lines.push('a {');
-    lines.push(`    color: ${modifyBorderColor({r: 0, g: 64, b: 255}, filter)};`);
+    lines.push(`    color: ${modifyForegroundColor({r: 0, g: 64, b: 255}, filter)};`);
     lines.push('}');
     lines.push('table {');
     lines.push(`    border-color: ${modifyBorderColor({r: 128, g: 128, b: 128}, filter)};`);
@@ -72,6 +77,30 @@ export function getModifiedUserAgentStyle(filter: FilterConfig) {
         lines.push(`    color: ${modifyForegroundColor({r: 255, g: 255, b: 255}, filter)};`);
         lines.push('}');
     });
+    lines.push('input:-webkit-autofill,');
+    lines.push('textarea:-webkit-autofill,');
+    lines.push('select:-webkit-autofill {');
+    lines.push(`    background-color: ${modifyBackgroundColor({r: 250, g: 255, b: 189}, filter)} !important;`);
+    lines.push(`    color: ${modifyForegroundColor({r: 0, g: 0, b: 0}, filter)} !important;`);
+    lines.push('}');
+    if (!isMacOS()) {
+        lines.push('::-webkit-scrollbar {');
+        lines.push(`    background-color: ${modifyBackgroundColor({r: 241, g: 241, b: 241}, filter)};`);
+        lines.push(`    color: ${modifyForegroundColor({r: 96, g: 96, b: 96}, filter)};`);
+        lines.push('}');
+        lines.push('::-webkit-scrollbar-thumb {');
+        lines.push(`    background-color: ${modifyBackgroundColor({r: 193, g: 193, b: 193}, filter)};`);
+        lines.push('}');
+        lines.push('::-webkit-scrollbar-thumb:hover {');
+        lines.push(`    background-color: ${modifyBackgroundColor({r: 166, g: 166, b: 166}, filter)};`);
+        lines.push('}');
+        lines.push('::-webkit-scrollbar-thumb:active {');;
+        lines.push(`    background-color: ${modifyBackgroundColor({r: 96, g: 96, b: 96}, filter)};`);
+        lines.push('}');
+        lines.push('::-webkit-scrollbar-corner {');
+        lines.push(`    background-color: ${modifyBackgroundColor({r: 255, g: 255, b: 255}, filter)};`);
+        lines.push('}');
+    }
     return lines.join('\n');
 }
 
@@ -233,7 +262,7 @@ function getBgImageModifier(prop: string, value: string, rule: CSSStyleRule, isC
                     result = 'none';
                 } else {
                     logInfo(`Inverting light image ${imageDetails.src}`);
-                    const dimmed = getFilteredImageDataURL(imageDetails, filter);
+                    const dimmed = getFilteredImageDataURL(imageDetails, {...filter, mode: 0, brightness: clamp(filter.brightness - 80, 20, 100), sepia: clamp(filter.sepia + 90, 0, 100)});
                     result = `url("${dimmed}")`;
                 }
             } else {

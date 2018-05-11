@@ -1,8 +1,9 @@
-import {iterateCSSRules, iterateCSSDeclarations, replaceCSSRelativeURLsWithAbsolute, replaceCSSFontFace, replaceCSSVariables} from './css-rules';
+import {iterateCSSRules, iterateCSSDeclarations, replaceCSSRelativeURLsWithAbsolute, replaceCSSFontFace, replaceCSSVariables, getCSSURLValue, cssImportRegex} from './css-rules';
 import {getModifiableCSSDeclaration, getModifiedFallbackStyle, ModifiableCSSDeclaration, ModifiableCSSRule} from './modify-css';
 import {bgFetch} from './network';
 import {removeNode} from '../utils/dom';
 import {logWarn} from '../utils/log';
+import {getMatches} from '../../utils/text';
 import {FilterConfig} from '../../definitions';
 
 declare global {
@@ -21,7 +22,22 @@ export interface StyleManager {
     destroy(): void;
 }
 
-export default async function manageStyle(element: HTMLLinkElement | HTMLStyleElement, {update}): Promise<StyleManager> {
+export const STYLE_SELECTOR = 'link[rel="stylesheet" i], style';
+
+export function shouldManageStyle(element: Node) {
+    return (
+        (
+            (element instanceof HTMLStyleElement) ||
+            (element instanceof HTMLLinkElement && element.rel && element.rel.toLowerCase() === 'stylesheet')
+        ) && (
+            !element.classList.contains('darkreader') ||
+            element.classList.contains('darkreader--cors')
+        ) &&
+        element.media !== 'print'
+    );
+}
+
+export async function manageStyle(element: HTMLLinkElement | HTMLStyleElement, {update}): Promise<StyleManager> {
 
     const prevStyles: HTMLStyleElement[] = [];
     let next: Element = element;
@@ -106,12 +122,9 @@ export default async function manageStyle(element: HTMLLinkElement | HTMLStyleEl
     let prevFilterKey: string = null;
 
     async function render(filter: FilterConfig, variables: Map<string, string>) {
+        rules = await getRules();
         if (!rules) {
-            // Observer fails to trigger change?
-            rules = await getRules();
-            if (!rules) {
-                return null;
-            }
+            return null;
         }
         cancelAsyncOperations = false;
         let rulesChanged = (rulesModCache.size === 0);
@@ -195,48 +208,11 @@ export default async function manageStyle(element: HTMLLinkElement | HTMLStyleEl
             media: string;
             selector: string;
             property: string;
-            value: string;
             importantKeyword: string;
+            promise: Promise<string>;
         }
 
         const queue: AsyncQueueDeclaration[] = [];
-        let frameId = null;
-
-        function addToQueue(d: AsyncQueueDeclaration) {
-            queue.push(d);
-            if (!frameId) {
-                frameId = requestAnimationFrame(() => {
-                    frameId = null;
-                    if (cancelAsyncOperations) {
-                        return;
-                    }
-                    const mediaGroups = queue.reduce((groups, d) => {
-                        const media = d.media || '';
-                        if (!groups[media]) {
-                            groups[media] = [];
-                        }
-                        groups[media].push(d);
-                        return groups;
-                    }, {} as {[media: string]: AsyncQueueDeclaration[]})
-                    const asyncStyle = document.createElement('style');
-                    asyncStyle.classList.add('darkreader');
-                    asyncStyle.classList.add('darkreader--async');
-                    asyncStyle.media = 'screen';
-                    asyncStyle.textContent = Object.entries(mediaGroups).map(([media, decs]) => [
-                        media && `@media ${media} {`,
-                        decs.map(({selector, property, value, importantKeyword}) => [
-                            `${selector} {`,
-                            `    ${property}: ${value}${importantKeyword};`,
-                            '}',
-                        ].join('\n')).join('\n'),
-                        media && '}',
-                    ].filter((ln) => ln)).join('\n');
-                    const insertTarget = asyncStyles.length > 0 ? asyncStyles[asyncStyles.length - 1].nextSibling : syncStyle.nextSibling;
-                    element.parentElement.insertBefore(asyncStyle, insertTarget);
-                    asyncStyles.push(asyncStyle);
-                });
-            }
-        }
 
         const lines: string[] = [];
         modRules.filter((r) => r).forEach(({selector, declarations, media}) => {
@@ -249,12 +225,7 @@ export default async function manageStyle(element: HTMLLinkElement | HTMLStyleEl
                 if (typeof value === 'function') {
                     const modified = value(filter);
                     if (modified instanceof Promise) {
-                        modified.then((asyncValue) => {
-                            if (cancelAsyncOperations || !asyncValue) {
-                                return;
-                            }
-                            addToQueue({media, selector, property, value: asyncValue, importantKeyword});
-                        });
+                        queue.push({media, selector, property, importantKeyword, promise: modified});
                     } else {
                         lines.push(`    ${property}: ${modified}${importantKeyword};`);
                     }
@@ -277,12 +248,74 @@ export default async function manageStyle(element: HTMLLinkElement | HTMLStyleEl
         element.parentElement.insertBefore(syncStyle, corsCopy ? corsCopy.nextSibling : element.nextSibling);
         syncStyle.textContent = lines.join('\n');
 
+        queue.forEach(({promise}) => promise.catch((err) => {
+            logWarn(err);
+            return null;
+        }));
+        queue.length > 0 && Promise.all(queue.map(({promise}) => promise))
+            .then((values) => {
+                if (cancelAsyncOperations || values.filter((v) => v).length === 0) {
+                    return;
+                }
+                const asyncStyle = document.createElement('style');
+                asyncStyle.classList.add('darkreader');
+                asyncStyle.classList.add('darkreader--async');
+                asyncStyle.media = 'screen';
+                asyncStyle.textContent = queue.map(({selector, property, media, importantKeyword}, i) => {
+                    const value = values[i];
+                    if (!value) {
+                        return null;
+                    }
+                    return [
+                        media && `@media ${media} {`,
+                        `${selector} {`,
+                        `    ${property}: ${value}${importantKeyword};`,
+                        '}',
+                        media && '}',
+                    ].filter((ln) => ln).join('\n');
+                }).filter((ln) => ln).join('\n');
+                const insertTarget = asyncStyles.length > 0 ? asyncStyles[asyncStyles.length - 1].nextSibling : syncStyle.nextSibling;
+                element.parentElement.insertBefore(asyncStyle, insertTarget);
+                asyncStyles.push(asyncStyle);
+            });
+
         observer.observe(element, observerOptions);
+
+        if (element instanceof HTMLStyleElement && element.hasAttribute('data-styled-components')) {
+            if (element.sheet && element.sheet.cssRules) {
+                styledComponentsRulesCount = element.sheet.cssRules.length;
+            }
+            cancelAnimationFrame(styledComponentsCheckFrameId);
+            styledComponentsChecksCount = 0;
+            const checkForUpdate = async () => {
+                if (element.sheet && element.sheet.cssRules &&
+                    element.sheet.cssRules.length !== styledComponentsRulesCount
+                ) {
+                    logWarn('CSS Rules count changed', element);
+                    cancelAnimationFrame(styledComponentsCheckFrameId);
+                    rules = await getRules();
+                    update();
+                    return;
+                }
+                styledComponentsChecksCount++;
+                if (styledComponentsChecksCount === 1000) {
+                    cancelAnimationFrame(styledComponentsCheckFrameId);
+                    return;
+                }
+                styledComponentsCheckFrameId = requestAnimationFrame(checkForUpdate);
+            };
+            checkForUpdate();
+        }
     }
+
+    let styledComponentsRulesCount: number = null;
+    let styledComponentsChecksCount: number = null;
+    let styledComponentsCheckFrameId: number = null;
 
     function pause() {
         observer.disconnect();
         cancelAsyncOperations = true;
+        cancelAnimationFrame(styledComponentsCheckFrameId);
     }
 
     function destroy() {
@@ -322,15 +355,14 @@ function linkLoading(link: HTMLLinkElement) {
     });
 }
 
-async function createCORSCopy(link: HTMLLinkElement, isCancelled: () => boolean) {
-    const url = link.href;
-    const prevCors = Array.from<HTMLStyleElement>(link.parentElement.querySelectorAll('.darkreader--cors')).find((el) => el.dataset.uri === url);
-    if (prevCors) {
-        return prevCors;
-    }
-
+async function loadCSSText(url: string) {
     let response: string;
-    const cache = sessionStorage.getItem(`darkreader-cache:${url}`);
+    let cache: string;
+    try {
+        cache = sessionStorage.getItem(`darkreader-cache:${url}`);
+    } catch (err) {
+        logWarn(err);
+    }
     if (cache) {
         response = cache;
     } else {
@@ -347,8 +379,27 @@ async function createCORSCopy(link: HTMLLinkElement, isCancelled: () => boolean)
     let cssText = response;
     cssText = replaceCSSFontFace(cssText);
     cssText = replaceCSSRelativeURLsWithAbsolute(cssText, url);
+
+    const importMatches = getMatches(cssImportRegex, cssText);
+    for (let match of importMatches) {
+        const importURL = getCSSURLValue(match.substring(8).replace(/;$/, ''));
+        const importedCSS = await loadCSSText(importURL);
+        cssText = cssText.split(match).join(importedCSS);
+    }
+
     cssText = cssText.trim();
 
+    return cssText;
+}
+
+async function createCORSCopy(link: HTMLLinkElement, isCancelled: () => boolean) {
+    const url = link.href;
+    const prevCors = Array.from<HTMLStyleElement>(link.parentElement.querySelectorAll('.darkreader--cors')).find((el) => el.dataset.uri === url);
+    if (prevCors) {
+        return prevCors;
+    }
+
+    const cssText = await loadCSSText(url);
     if (!cssText) {
         return null;
     }

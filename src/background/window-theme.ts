@@ -69,8 +69,9 @@ export function setWindowTheme(filter: FilterConfig, $accent?: string) {
 }
 
 export function resetWindowTheme() {
-    if (typeof browser !== 'undefined' && browser.theme && browser.theme.update) {
-        // It resets browser theme to entire
-        // browser.theme.reset();
+    if (typeof browser !== 'undefined' && browser.theme && browser.theme.reset) {
+        // BUG: resets browser theme to entire
+        // https://bugzilla.mozilla.org/show_bug.cgi?id=1415267
+        browser.theme.reset();
     }
 }

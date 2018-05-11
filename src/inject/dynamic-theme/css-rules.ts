@@ -8,6 +8,12 @@ export function iterateCSSRules(rules: CSSRuleList, iterate: (rule: CSSStyleRule
                 Array.from(rule.cssRules).forEach((mediaRule) => iterate(mediaRule as CSSStyleRule));
             } else if (rule instanceof CSSStyleRule) {
                 iterate(rule);
+            } else if (rule instanceof CSSImportRule) {
+                try {
+                    Array.from(rule.styleSheet.cssRules).forEach((importedRule) => iterate(importedRule as CSSStyleRule));
+                } catch (err) {
+                    logWarn(err);
+                }
             } else {
                 logWarn(`CSSRule type not supported`, rule);
             }
@@ -25,6 +31,7 @@ export function iterateCSSDeclarations(style: CSSStyleDeclaration, iterate: (pro
 }
 
 export const cssURLRegex = /url\((('.+?')|(".+?")|([^\)]*?))\)/g;
+export const cssImportRegex = /@import url\((('.+?')|(".+?")|([^\)]*?))\);?/g;
 
 export function getCSSURLValue(cssURL: string) {
     return cssURL.replace(/^url\((.*)\)$/, '$1').replace(/^"(.*)"$/, '$1').replace(/^'(.*)'$/, '$1');

@@ -50,7 +50,7 @@ test('Dynamic Theme Fixes config', async () => {
     expect(fixes.map(({url}) => url[0])).toEqual(fixes.map(({url}) => url[0]).sort(compareURLPatterns));
 
     // selectors should have no comma
-    expect(fixes.every(({invert, inline}) => (invert || []).concat(inline || []).every((s) => s.indexOf(',') < 0))).toBe(true);
+    expect(fixes.every(({invert}) => (invert || []).every((s) => s.indexOf(',') < 0))).toBe(true);
 
     // fixes are properly formatted
     expect(file).toEqual(formatDynamicThemeFixes(fixes));

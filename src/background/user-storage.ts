@@ -1,4 +1,4 @@
-import {isMacOS, isWindows, isMobile, isFirefox} from '../utils/platform';
+import {isMacOS, isWindows} from '../utils/platform';
 import ThemeEngines from '../generators/theme-engines';
 import {UserSettings, FilterConfig} from '../definitions';
 
@@ -14,14 +14,16 @@ export default class UserStorage {
                 mode: 1,
                 brightness: 100,
                 contrast: 90,
-                grayscale: 20,
+                grayscale: 0,
                 sepia: 10,
                 useFont: false,
                 fontFamily: isMacOS() ? 'Helvetica Neue' : isWindows() ? 'Segoe UI' : 'Open Sans',
                 textStroke: 0,
                 invertListed: false,
-                engine: isMobile() || isFirefox() ? ThemeEngines.dynamicTheme : ThemeEngines.svgFilter,
+                engine: ThemeEngines.dynamicTheme,
                 siteList: [],
+                custom: [],
+                changeBrowserTheme: false,
             },
         };
     }

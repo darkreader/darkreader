@@ -20,9 +20,9 @@ function onMessage({type, data}) {
             break;
         }
         case 'add-dynamic-theme': {
-            const {filter, fixes} = data;
+            const {filter, fixes, isIFrame} = data;
             removeStyle();
-            createOrUpdateDynamicTheme(filter, fixes);
+            createOrUpdateDynamicTheme(filter, fixes, isIFrame);
             break;
         }
         case 'clean-up': {

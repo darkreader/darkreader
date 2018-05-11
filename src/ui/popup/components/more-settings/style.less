@@ -13,9 +13,17 @@
         overflow: hidden;
         text-align: center;
         white-space: pre;
+
+        &--warning {
+            color: @color-heading;
+        }
     }
 
     &__section {
+        align-items: stretch;
+        display: flex;
+        flex-direction: column;
+
         &:not(:first-child) {
             margin-top: @indent-large;
         }

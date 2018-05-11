@@ -1,4 +1,4 @@
-import {isUrlInList} from '../utils/url';
+import {isURLInList} from '../utils/url';
 import {createTextStyle} from './text-style';
 import {formatSitesFixesConfig} from './utils/format';
 import {applyColorMatrix, createFilterMatrix} from './utils/matrix';
@@ -58,7 +58,7 @@ function mix(color1: number[], color2: number[], t: number) {
     return color1.map((c, i) => Math.round(c * (1 - t) + color2[i] * t));
 }
 
-export default function createStaticStylesheet(config: FilterConfig, url: string, staticThemes: StaticTheme[]) {
+export default function createStaticStylesheet(config: FilterConfig, url: string, frameURL: string, staticThemes: StaticTheme[]) {
     const srcTheme = config.mode === 1 ? darkTheme : lightTheme;
     const theme = Object.entries(srcTheme).reduce((t, [prop, color]) => {
         t[prop] = applyColorMatrix(color, createFilterMatrix({...config, mode: 0}));
@@ -66,7 +66,7 @@ export default function createStaticStylesheet(config: FilterConfig, url: string
     }, {} as ThemeColors);
 
     const commonTheme = getCommonTheme(staticThemes);
-    const siteTheme = getThemeFor(url, staticThemes);
+    const siteTheme = getThemeFor(frameURL || url, staticThemes);
 
     const lines: string[] = [];
 
@@ -267,7 +267,7 @@ function getThemeFor(url: string, themes: StaticTheme[]) {
         .slice(1)
         .map((theme) => {
             return {
-                specificity: isUrlInList(url, theme.url) ? theme.url[0].length : 0,
+                specificity: isURLInList(url, theme.url) ? theme.url[0].length : 0,
                 theme
             };
         })

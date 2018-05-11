@@ -1,7 +1,7 @@
 {
     "manifest_version": 2,
     "name": "Dark Reader",
-    "version": "4.2.8",
+    "version": "4.4.5",
     "author": "Alexander Shutov",
     "description": "__MSG_extension_description__",
     "default_locale": "en",
@@ -30,7 +30,8 @@
             "js": [
                 "inject/index.js"
             ],
-            "run_at": "document_start"
+            "run_at": "document_start",
+            "all_frames": true
         }
     ],
     "permissions": [

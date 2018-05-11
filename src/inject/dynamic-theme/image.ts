@@ -34,7 +34,12 @@ async function getImageDataURL(url: string) {
     if (url.startsWith('data:')) {
         dataURL = url;
     } else {
-        const cache = sessionStorage.getItem(`darkreader-cache:${url}`);
+        let cache: string;
+        try {
+            cache = sessionStorage.getItem(`darkreader-cache:${url}`);
+        } catch (err) {
+            logWarn(err);
+        }
         if (cache) {
             dataURL = cache;
         } else {

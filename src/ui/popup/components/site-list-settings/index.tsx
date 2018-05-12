@@ -24,7 +24,7 @@ export default function SiteListSettings({data, actions, isFocused}: SiteListSet
             />
             <TextList
                 class="site-list-settings__text-list"
-                placeholder="example.com/path"
+                placeholder="google.com/maps"
                 values={data.filterConfig.siteList}
                 isFocused={isFocused}
                 onChange={(values) => {

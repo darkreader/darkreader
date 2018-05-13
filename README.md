@@ -12,6 +12,10 @@ for more info.
 ### Sponsorship
 [Donate](https://opencollective.com/darkreader) via Open Collective.
 
+### Translation
+Improve or suggest a translation [here](https://github.com/darkreader/darkreader/tree/master/src/_locales).
+See the list of supported [language codes](https://developer.chrome.com/webstore/i18n#localeTable).
+
 ### Fixing wrong inversion
 
 If some site is **already dark**, you can **add it to [dark-sites.config](https://github.com/alexanderby/darkreader/blob/master/src/config/dark-sites.config) file**

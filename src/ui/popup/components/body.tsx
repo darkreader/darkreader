@@ -9,6 +9,8 @@ import MoreSettings from './more-settings';
 import {News, NewsButton} from './news';
 import SiteListSettings from './site-list-settings';
 import {isFirefox} from '../../../utils/platform';
+import {getLocalMessage} from '../../../utils/locales';
+import {compileMarkdown} from '../utils/markdown';
 import {ExtensionData, ExtensionActions, TabInfo, News as NewsObject} from '../../../definitions';
 
 withForms();
@@ -87,22 +89,27 @@ function Body(props: BodyProps) {
                         <MoreSettings data={props.data} actions={props.actions} tab={props.tab} />
                     ),
                 }}
+                tabLabels={{
+                    'Filter': getLocalMessage('filter'),
+                    'Site list': getLocalMessage('site_list'),
+                    'More': getLocalMessage('more'),
+                }}
             />
 
             <footer>
                 <div class="footer-links">
-                    <a class="footer-links__link" href={PRIVACY_URL} target="_blank">Privacy</a>
+                    <a class="footer-links__link" href={PRIVACY_URL} target="_blank">{getLocalMessage('privacy')}</a>
                     <a class="footer-links__link" href={TWITTER_URL} target="_blank">Twitter</a>
                     <a class="footer-links__link" href={GITHUB_URL} target="_blank">GitHub</a>
-                    <a class="footer-links__link" href={HELP_URL} target="_blank">Help</a>
+                    <a class="footer-links__link" href={HELP_URL} target="_blank">{getLocalMessage('help')}</a>
                 </div>
                 <div class="footer-buttons">
                     <a class="donate-link" href={DONATE_URL} target="_blank">
-                        <span class="donate-link__text">Donate</span>
+                        <span class="donate-link__text">{getLocalMessage('donate')}</span>
                     </a>
                     <NewsButton active={state.newsOpen} count={unreadNews.length} onClick={toggleNews} />
                     <Button onclick={openDevTools} class="dev-tools-button">
-                        🛠 Dev tools
+                        🛠 {getLocalMessage('open_dev_tools')}
                     </Button>
                 </div>
             </footer>

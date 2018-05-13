@@ -5,6 +5,8 @@ import FontSettings from '../font-settings';
 import {Toggle, UpDown} from '../../../controls';
 import {isFirefox} from '../../../../utils/platform';
 import {isURLInList} from '../../../../utils/url';
+import {compileMarkdown} from '../../utils/markdown';
+import {getLocalMessage} from '../../../../utils/locales';
 import {ExtWrapper, FilterConfig, TabInfo} from '../../../../definitions';
 
 export default function MoreSettings({data, actions, tab}: ExtWrapper & {tab: TabInfo}) {
@@ -28,10 +30,7 @@ export default function MoreSettings({data, actions, tab}: ExtWrapper & {tab: Ta
             </div>
             <div class="more-settings__section">
                 <p class="more-settings__description">
-                    Try out <strong>experimental</strong> theme engines:<br />
-                    <strong>Filter+</strong> preserves colors saturation, uses GPU<br />
-                    <strong>Static theme</strong> generates a simple fast theme<br />
-                    <strong>Dynamic theme</strong> analyzes colors and images
+                    {compileMarkdown(getLocalMessage('try_experimental_theme_engines'))}
                 </p>
                 <EngineSwitch engine={filterConfig.engine} onChange={(engine) => setConfig({engine})} />
             </div>
@@ -52,15 +51,15 @@ export default function MoreSettings({data, actions, tab}: ExtWrapper & {tab: Ta
                         <CustomSettingsToggle data={data} tab={tab} actions={actions} />
                         {tab.isProtected ? (
                             <p class="more-settings__description more-settings__description--warning">
-                                This page is protected by browser
+                                {getLocalMessage('page_protected').replace('\n', ' ')}
                             </p>
                         ) : tab.isInDarkList ? (
                             <p class="more-settings__description more-settings__description--warning">
-                                This site is in global Dark List
+                                {getLocalMessage('page_in_dark_list').replace('\n', ' ')}
                             </p>
                         ) : (
                             <p class="more-settings__description">
-                                Apply settings to current website only
+                                {getLocalMessage('apply_to_description')}
                             </p>
                         )}
                     </div>

@@ -1,4 +1,5 @@
 import {html} from 'malevic';
+import {getLocalMessage} from '../../../../utils/locales';
 import withState from 'malevic/state';
 
 interface LoaderProps {
@@ -21,7 +22,7 @@ function Loader({complete = false, state, setState}: LoaderProps) {
             }}
             ontransitionend={() => setState({finished: true})}
         >
-            <label class="loader__message">Loading, please wait</label>
+            <label class="loader__message">{getLocalMessage('loading_please_wait')}</label>
         </div>
     );
 }

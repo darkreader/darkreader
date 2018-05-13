@@ -3,6 +3,7 @@ import {UpDown, Button} from '../../../controls';
 import CustomSettingsToggle from '../custom-settings-toggle';
 import EngineSwitch from '../engine-switch';
 import ModeToggle from './mode-toggle';
+import {getLocalMessage} from '../../../../utils/locales';
 import {isURLInList} from '../../../../utils/url';
 import {ExtWrapper, TabInfo, FilterConfig} from '../../../../definitions';
 
@@ -27,7 +28,7 @@ export default function FilterSettings({data, actions, tab}: ExtWrapper & {tab: 
             max={150}
             step={10}
             default={100}
-            name="Brightness"
+            name={getLocalMessage('brightness')}
             onChange={(value) => setConfig({brightness: value})}
         />
     );
@@ -39,7 +40,7 @@ export default function FilterSettings({data, actions, tab}: ExtWrapper & {tab: 
             max={150}
             step={10}
             default={100}
-            name="Contrast"
+            name={getLocalMessage('contrast')}
             onChange={(value) => setConfig({contrast: value})}
         />
     );
@@ -51,7 +52,7 @@ export default function FilterSettings({data, actions, tab}: ExtWrapper & {tab: 
             max={100}
             step={10}
             default={0}
-            name="Grayscale"
+            name={getLocalMessage('grayscale')}
             onChange={(value) => setConfig({grayscale: value})}
         />
     );
@@ -63,7 +64,7 @@ export default function FilterSettings({data, actions, tab}: ExtWrapper & {tab: 
             max={100}
             step={10}
             default={0}
-            name="Sepia"
+            name={getLocalMessage('sepia')}
             onChange={(value) => setConfig({sepia: value})}
         />
     );

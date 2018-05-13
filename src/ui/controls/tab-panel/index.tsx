@@ -6,6 +6,9 @@ interface TabPanelProps {
     tabs: {
         [name: string]: Malevic.NodeDeclaration;
     };
+    tabLabels: {
+        [name: string]: string;
+    },
     activeTab: string;
     onSwitchTab: (name: string) => void;
 }
@@ -30,7 +33,7 @@ export default function TabPanel(props: TabPanelProps) {
             <Button
                 class={btnCls}
                 onclick={() => props.onSwitchTab(name)}
-            >{name}</Button>
+            >{props.tabLabels[name]}</Button>
         );
     });
 

@@ -1,6 +1,7 @@
 import {html, render} from 'malevic';
 import {Button} from '../../../controls';
 import {getURLHost} from '../../../../utils/url';
+import {getLocalMessage} from '../../../../utils/locales';
 import {ExtWrapper, TabInfo} from '../../../../definitions';
 
 export default function SiteToggleButton({data, tab, actions}: ExtWrapper & {tab: TabInfo}) {
@@ -29,7 +30,7 @@ export default function SiteToggleButton({data, tab, actions}: ExtWrapper & {tab
             }}
             onclick={() => actions.toggleSitePattern(host)}
         >
-            Toggle <span class="site-toggle__url" >{urlText}</span>
+            {getLocalMessage('toggle')} <span class="site-toggle__url" >{urlText}</span>
         </Button>
     );
 }

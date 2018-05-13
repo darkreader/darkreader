@@ -1,5 +1,6 @@
 import {html} from 'malevic';
 import {CheckBox, UpDown, Select} from '../../../controls';
+import {getLocalMessage} from '../../../../utils/locales';
 import {FilterConfig} from '../../../../definitions';
 
 interface FontSettingsProps {
@@ -31,7 +32,7 @@ export default function FontSettings({config, fonts, onChange}: FontSettingsProp
                     />
                 </div>
                 <label class="font-settings__font-select-container__label">
-                    Select a font
+                    {getLocalMessage('select_font')}
                 </label>
             </div>
             <UpDown
@@ -40,7 +41,7 @@ export default function FontSettings({config, fonts, onChange}: FontSettingsProp
                 max={1}
                 step={0.1}
                 default={0}
-                name="Text stroke"
+                name={getLocalMessage('text_stroke')}
                 onChange={(value) => onChange({textStroke: value})}
             />
         </section>

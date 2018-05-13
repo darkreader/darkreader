@@ -1,6 +1,7 @@
 import {html} from 'malevic';
 import SiteToggle from '../site-toggle';
 import {Shortcut, Toggle} from '../../../controls';
+import {getLocalMessage} from '../../../../utils/locales';
 import {ExtWrapper, TabInfo} from '../../../../definitions';
 
 function multiline(...lines) {
@@ -28,32 +29,32 @@ export default function TopSection({data, actions, tab}: ExtWrapper & {tab: TabI
                 />
                 {tab.isProtected ? (
                     <span class="header__site-toggle__unable-text">
-                        {multiline('This page is protected', 'by browser')}
+                        {getLocalMessage('page_protected')}
                     </span>
                 ) : tab.isInDarkList ? (
                     <span class="header__site-toggle__unable-text">
-                        {multiline('This site is in global', 'Dark List')}
+                        {getLocalMessage('page_in_dark_list')}
                     </span>
                 ) : (
                     <Shortcut
                         commandName="addSite"
                         shortcuts={data.shortcuts}
                         textTemplate={(hotkey) => (hotkey
-                            ? multiline('toggle current site', hotkey)
-                            : multiline('setup current site', 'toggle hotkey')
+                            ? multiline(getLocalMessage('toggle_current_site'), hotkey)
+                            : getLocalMessage('setup_hotkey_toggle_site')
                         )}
                         onSetShortcut={(shortcut) => actions.setShortcut('addSite', shortcut)}
                     />
                 )}
             </div>
             <div class="header__control header__app-toggle">
-                <Toggle checked={data.enabled} labelOn="On" labelOff="Off" onChange={toggleExtension} />
+                <Toggle checked={data.enabled} labelOn={getLocalMessage('on')} labelOff={getLocalMessage('off')} onChange={toggleExtension} />
                 <Shortcut
                     commandName="toggle"
                     shortcuts={data.shortcuts}
                     textTemplate={(hotkey) => (hotkey
-                        ? multiline('toggle extension', hotkey)
-                        : multiline('setup extension', 'toggle hotkey')
+                        ? multiline(getLocalMessage('toggle_extension'), hotkey)
+                        : getLocalMessage('setup_hotkey_toggle_extension')
                     )}
                     onSetShortcut={(shortcut) => actions.setShortcut('toggle', shortcut)}
                 />

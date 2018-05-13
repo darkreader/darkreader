@@ -1,6 +1,7 @@
 import {html} from 'malevic';
 import Button from '../button';
 import Track from './track';
+import {getLocalMessage} from '../../../utils/locales';
 
 interface UpDownProps {
     value: number;
@@ -49,7 +50,7 @@ export default function UpDown(props: UpDownProps) {
 
     const trackValue = (props.value - props.min) / (props.max - props.min);
     const valueText = (props.value === props.default
-        ? 'off'
+        ? getLocalMessage('off').toLocaleLowerCase()
         : props.value > props.default
             ? `+${normalize(props.value - props.default)}`
             : `-${normalize(props.default - props.value)}`

@@ -1,5 +1,6 @@
 import {html} from 'malevic';
 import {Button, Toggle} from '../../../controls';
+import {getLocalMessage} from '../../../../utils/locales';
 import {ExtWrapper} from '../../../../definitions';
 
 interface ModeToggleProps {
@@ -19,8 +20,8 @@ export default function ModeToggle({mode, onChange}: ModeToggleProps) {
                 </Button>
                 <Toggle
                     checked={mode === 1}
-                    labelOn="Dark"
-                    labelOff="Light"
+                    labelOn={getLocalMessage('dark')}
+                    labelOff={getLocalMessage('light')}
                     onChange={(checked) => onChange(checked ? 1 : 0)}
                 />
                 <Button
@@ -30,7 +31,7 @@ export default function ModeToggle({mode, onChange}: ModeToggleProps) {
                     <span class="icon icon--light-mode"></span>
                 </Button>
             </div>
-            <label class="mode-toggle__label">Mode</label>
+            <label class="mode-toggle__label">{getLocalMessage('mode')}</label>
         </div>
     );
 }

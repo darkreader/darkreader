@@ -1,5 +1,6 @@
 import {html} from 'malevic';
 import {Toggle, TextList, Shortcut} from '../../../controls'
+import {getLocalMessage} from '../../../../utils/locales';
 import {ExtWrapper} from '../../../../definitions';
 
 interface SiteListSettingsProps extends ExtWrapper {
@@ -17,13 +18,13 @@ export default function SiteListSettings({data, actions, isFocused}: SiteListSet
             <Toggle
                 class="site-list-settings__toggle"
                 checked={data.filterConfig.invertListed}
-                labelOn="Invert listed only"
-                labelOff="Not invert listed"
+                labelOn={getLocalMessage('invert_listed_only')}
+                labelOff={getLocalMessage('not_invert_listed')}
                 onChange={(value) => actions.setConfig({invertListed: value})}
             />
             <TextList
                 class="site-list-settings__text-list"
-                placeholder="mail.google.com, google.*/mail etc..."
+                placeholder="google.com/maps"
                 values={data.filterConfig.siteList}
                 isFocused={isFocused}
                 onChange={(values) => {
@@ -37,8 +38,8 @@ export default function SiteListSettings({data, actions, isFocused}: SiteListSet
                 commandName="addSite"
                 shortcuts={data.shortcuts}
                 textTemplate={(hotkey) => (hotkey
-                    ? `hotkey for adding site: ${hotkey}`
-                    : 'setup a hotkey for adding site'
+                    ? `${getLocalMessage('add_site_to_list')}: ${hotkey}`
+                    : getLocalMessage('setup_add_site_hotkey')
                 )}
                 onSetShortcut={(shortcut) => actions.setShortcut('addSite', shortcut)}
             />

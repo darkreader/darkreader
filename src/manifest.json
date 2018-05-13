@@ -3,7 +3,8 @@
     "name": "Dark Reader",
     "version": "4.4.5",
     "author": "Alexander Shutov",
-    "description": "Dark theme for every website. Care your eyes, use Dark Reader for night and daily browsing.",
+    "description": "__MSG_extension_description__",
+    "default_locale": "en",
     "browser_action": {
         "default_title": "Dark Reader",
         "default_icon": {
@@ -44,16 +45,16 @@
             "suggested_key": {
                 "default": "Alt+Shift+D"
             },
-            "description": "Toggle On/Off"
+            "description": "__MSG_toggle_extension__"
         },
         "addSite": {
             "suggested_key": {
                 "default": "Alt+Shift+A"
             },
-            "description": "Toggle current site"
+            "description": "__MSG_toggle_current_site__"
         },
         "switchEngine": {
-            "description": "Switch filter engine"
+            "description": "__MSG_theme_generation_mode__"
         }
     }
 }

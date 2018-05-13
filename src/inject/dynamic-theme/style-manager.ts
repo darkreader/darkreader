@@ -37,7 +37,7 @@ export function shouldManageStyle(element: Node) {
     );
 }
 
-export async function manageStyle(element: HTMLLinkElement | HTMLStyleElement, {update}): Promise<StyleManager> {
+export async function manageStyle(element: HTMLLinkElement | HTMLStyleElement, {update, loadingStart, loadingEnd}): Promise<StyleManager> {
 
     const prevStyles: HTMLStyleElement[] = [];
     let next: Element = element;
@@ -85,7 +85,13 @@ export async function manageStyle(element: HTMLLinkElement | HTMLStyleElement, {
                 rules = corsCopy.sheet.cssRules;
                 corsCopy.disabled = true;
             } else {
-                corsCopy = await createCORSCopy(link, isCancelled);
+                loadingStart();
+                try {
+                    corsCopy = await createCORSCopy(link, isCancelled);
+                } catch (err) {
+                    logWarn(err);
+                }
+                loadingEnd();
                 if (corsCopy) {
                     corsCopy.disabled = false;
                     rules = corsCopy.sheet.cssRules;

@@ -1,6 +1,6 @@
 import {replaceCSSVariables} from './css-rules';
 import {getInlineStylesOverrides, watchForInlineStyles, stopWatchingForInlineStyles} from './inline-style';
-import {getModifiedUserAgentStyle, cleanModificationCache} from './modify-css';
+import {getModifiedUserAgentStyle, getModifiedFallbackStyle, cleanModificationCache} from './modify-css';
 import {manageStyle, shouldManageStyle, STYLE_SELECTOR, StyleManager} from './style-manager';
 import {watchForStyleChanges, stopWatchingForStyleChanges} from './watch';
 import {removeNode} from '../utils/dom';
@@ -32,8 +32,11 @@ function createTheme() {
     document.head.insertBefore(userAgentStyle, document.head.firstChild);
     userAgentStyle.textContent = getModifiedUserAgentStyle(filter, isIFrame);
 
+    const fallbackStyle = createOrUpdateStyle('darkreader--fallback');
+    document.head.insertBefore(fallbackStyle, userAgentStyle.nextSibling);
+
     const textStyle = createOrUpdateStyle('darkreader--text');
-    document.head.insertBefore(textStyle, userAgentStyle.nextSibling);
+    document.head.insertBefore(textStyle, fallbackStyle.nextSibling);
     if (filter.useFont || filter.textStroke > 0) {
         textStyle.textContent = createTextStyle(filter);
     } else {
@@ -68,6 +71,9 @@ function createTheme() {
 
 const pendingCreation = new Set<HTMLLinkElement | HTMLStyleElement>();
 
+let loadingStylesCounter = 0;
+let loadingStyles = new Set();
+
 async function createManager(element: HTMLLinkElement | HTMLStyleElement) {
     if (styleManagers.has(element) || pendingCreation.has(element)) {
         return;
@@ -80,7 +86,23 @@ async function createManager(element: HTMLLinkElement | HTMLStyleElement) {
         throttledRender();
     }
 
-    const manager = await manageStyle(element, {update});
+    let loadingStyleId = ++loadingStylesCounter;
+
+    function loadingStart() {
+        if (!isPageLoaded) {
+            document.head.querySelector('.darkreader--fallback').textContent = getModifiedFallbackStyle(filter);
+            loadingStyles.add(loadingStyleId);
+        }
+    }
+
+    function loadingEnd() {
+        loadingStyles.delete(loadingStyleId);
+        if (loadingStyles.size === 0 && isPageLoaded) {
+            document.head.querySelector('.darkreader--fallback').textContent = '';
+        }
+    }
+
+    const manager = await manageStyle(element, {update, loadingStart, loadingEnd});
     if (!pendingCreation.has(element)) {
         manager.destroy();
         return;
@@ -110,6 +132,16 @@ const throttledInlineRender = throttle(function inlineRender(styles: string[]) {
     document.querySelector('.darkreader--inline').textContent = styles.join('\n');
 });
 
+let isPageLoaded = document.readyState === 'complete';
+
+function onPageLoad() {
+    isPageLoaded = true;
+    if (loadingStyles.size === 0) {
+        document.head.querySelector('.darkreader--fallback').textContent = '';
+    }
+    throttledRender();
+}
+
 function createThemeAndWatchForUpdates() {
     createTheme();
 
@@ -124,7 +156,7 @@ function createThemeAndWatchForUpdates() {
         throttledInlineRender(styles);
     });
 
-    document.addEventListener('load', throttledRender);
+    document.addEventListener('DOMContentLoaded', onPageLoad);
     window.addEventListener('load', throttledRender);
 }
 
@@ -132,7 +164,7 @@ function stopWatchingForUpdates() {
     styleManagers.forEach((manager) => manager.pause());
     stopWatchingForStyleChanges();
     stopWatchingForInlineStyles();
-    document.removeEventListener('load', throttledRender);
+    document.removeEventListener('DOMContentLoaded', onPageLoad);
     window.removeEventListener('load', throttledRender);
 }
 
@@ -157,6 +189,7 @@ export function removeDynamicTheme() {
     cleanDynamicThemeCache();
     if (document.head) {
         removeNode(document.head.querySelector('.darkreader--user-agent'));
+        removeNode(document.head.querySelector('.darkreader--fallback'));
         removeNode(document.head.querySelector('.darkreader--text'));
         removeNode(document.head.querySelector('.darkreader--invert'));
         removeNode(document.head.querySelector('.darkreader--inline'));

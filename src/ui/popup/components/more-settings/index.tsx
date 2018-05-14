@@ -38,12 +38,12 @@ export default function MoreSettings({data, actions, tab}: ExtWrapper & {tab: Ta
                 <div class="more-settings__section">
                     <Toggle
                         checked={data.filterConfig.changeBrowserTheme}
-                        labelOn="Browser theme"
-                        labelOff="Default"
+                        labelOn={getLocalMessage('custom_browser_theme_on')}
+                        labelOff={getLocalMessage('custom_browser_theme_off')}
                         onChange={(checked) => actions.setConfig({changeBrowserTheme: checked})}
                     />
                     <p class="more-settings__description">
-                        Change browser theme
+                        {getLocalMessage('change_browser_theme')}
                     </p>
                 </div>
             ) : (

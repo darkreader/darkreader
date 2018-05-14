@@ -9,6 +9,7 @@ import MoreSettings from './more-settings';
 import {News, NewsButton} from './news';
 import SiteListSettings from './site-list-settings';
 import {isFirefox} from '../../../utils/platform';
+import {DONATE_URL, GITHUB_URL, PRIVACY_URL, TWITTER_URL, getHelpURL} from '../../../utils/links';
 import {getLocalMessage} from '../../../utils/locales';
 import {compileMarkdown} from '../utils/markdown';
 import {ExtensionData, ExtensionActions, TabInfo, News as NewsObject} from '../../../definitions';
@@ -36,12 +37,6 @@ function openDevTools() {
         height: 600,
     });
 }
-
-const DONATE_URL = 'https://opencollective.com/darkreader';
-const PRIVACY_URL = 'http://darkreader.org/privacy/';
-const TWITTER_URL = 'https://twitter.com/darkreaderapp';
-const GITHUB_URL = 'https://github.com/darkreader/darkreader';
-const HELP_URL = 'http://darkreader.org/help/';
 
 function Body(props: BodyProps) {
     const {state, setState} = props;
@@ -101,7 +96,7 @@ function Body(props: BodyProps) {
                     <a class="footer-links__link" href={PRIVACY_URL} target="_blank">{getLocalMessage('privacy')}</a>
                     <a class="footer-links__link" href={TWITTER_URL} target="_blank">Twitter</a>
                     <a class="footer-links__link" href={GITHUB_URL} target="_blank">GitHub</a>
-                    <a class="footer-links__link" href={HELP_URL} target="_blank">{getLocalMessage('help')}</a>
+                    <a class="footer-links__link" href={getHelpURL()} target="_blank">{getLocalMessage('help')}</a>
                 </div>
                 <div class="footer-buttons">
                     <a class="donate-link" href={DONATE_URL} target="_blank">

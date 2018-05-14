@@ -1,4 +1,5 @@
 import {Extension} from './extension';
+import {getHelpURL} from '../utils/links';
 
 // Initialize extension
 const extension = new Extension();
@@ -6,7 +7,7 @@ extension.start();
 
 chrome.runtime.onInstalled.addListener(({reason}) => {
     if (reason === 'install') {
-        chrome.tabs.create({url: 'http://darkreader.org/help/'});
+        chrome.tabs.create({url: getHelpURL()});
     }
     if (Boolean(localStorage.getItem('darkreader-4-release-notes-shown'))) {
         extension.news.markAsRead('dynamic-theme')

@@ -17,6 +17,7 @@ global.chrome.i18n.getMessage = global.chrome.i18n.getMessage || ((name) => {
     const message = enLocale.substring(start, end).trim();
     return message;
 });
+global.chrome.i18n.getUILanguage = global.chrome.i18n.getUILanguage || (() => 'en-US');
 
 const tsConfig = require('../src/tsconfig.json');
 require('ts-node').register({

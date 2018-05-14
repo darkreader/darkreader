@@ -1,3 +1,4 @@
+import {getBlogPostURL} from '../utils/links';
 import {News} from '../definitions';
 
 export default class Newsmaker {
@@ -28,7 +29,7 @@ export default class Newsmaker {
             return new Promise<News[]>((resolve) => {
                 chrome.storage.sync.get({readNews: []}, ({readNews}) => {
                     const news = $news.map(({id, date, headline}) => {
-                        const url = `http://darkreader.org/blog/${id}/`;
+                        const url = getBlogPostURL(id);
                         const read = this.isRead(id, readNews);
                         return {id, date, headline, url, read};
                     });

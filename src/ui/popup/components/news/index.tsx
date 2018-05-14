@@ -1,6 +1,7 @@
 import {html} from 'malevic';
 import {Button} from '../../../controls';
-import {getLocalMessage} from '../../../../utils/locales';
+import {BLOG_URL} from '../../../../utils/links';
+import {getLocalMessage, getUILanguage} from '../../../../utils/locales';
 import {News} from '../../../../definitions';
 
 interface NewsProps {
@@ -10,7 +11,7 @@ interface NewsProps {
     onClose: () => void;
 }
 
-const BLOG_URL = 'http://darkreader.org/blog/';
+
 const NEWS_COUNT = 2;
 
 export function News({news, expanded, onNewsOpen, onClose}: NewsProps) {
@@ -22,7 +23,7 @@ export function News({news, expanded, onNewsOpen, onClose}: NewsProps) {
             </div>
             <div class="news__list">
                 {news.slice(0, NEWS_COUNT).map((event) => {
-                    const locale = chrome && chrome.i18n ? chrome.i18n.getUILanguage() : 'en-US';
+                    const locale = getUILanguage();
                     const formattedDate = new Date(event.date).toLocaleDateString(locale, {month: 'short', day: 'numeric'});
                     return (
                         <div class={{'news__event': true, 'news__event--unread': !event.read}}>

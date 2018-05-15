@@ -1,5 +1,5 @@
 import {replaceCSSVariables} from './css-rules';
-import {getInlineStylesOverrides, watchForInlineStyles, stopWatchingForInlineStyles} from './inline-style';
+import {overrideInlineStyles, getInlineOverrideStyle, watchForInlineStyles, stopWatchingForInlineStyles} from './inline-style';
 import {getModifiedUserAgentStyle, getModifiedFallbackStyle, cleanModificationCache} from './modify-css';
 import {manageStyle, shouldManageStyle, STYLE_SELECTOR, StyleManager} from './style-manager';
 import {watchForStyleChanges, stopWatchingForStyleChanges} from './watch';
@@ -60,13 +60,14 @@ function createTheme() {
 
     const inlineStyle = createOrUpdateStyle('darkreader--inline');
     document.head.insertBefore(inlineStyle, invertStyle.nextSibling);
+    inlineStyle.textContent = getInlineOverrideStyle();
 
     Array.from<HTMLLinkElement | HTMLStyleElement>(document.querySelectorAll(STYLE_SELECTOR))
         .filter((style) => !styleManagers.has(style) && shouldManageStyle(style))
         .forEach((style) => createManager(style));
 
     throttledRender();
-    throttledInlineRender(getInlineStylesOverrides(filter));
+    overrideInlineStyles(filter);
 }
 
 const pendingCreation = new Set<HTMLLinkElement | HTMLStyleElement>();
@@ -128,10 +129,6 @@ const throttledRender = throttle(function render() {
     styleManagers.forEach((manager) => manager.render(filter, variables));
 });
 
-const throttledInlineRender = throttle(function inlineRender(styles: string[]) {
-    document.querySelector('.darkreader--inline').textContent = styles.join('\n');
-});
-
 let isPageLoaded = document.readyState === 'complete';
 
 function onPageLoad() {
@@ -152,9 +149,7 @@ function createThemeAndWatchForUpdates() {
         removed.forEach((style) => removeManager(style));
         throttledRender();
     });
-    watchForInlineStyles(filter, (styles) => {
-        throttledInlineRender(styles);
-    });
+    watchForInlineStyles(filter);
 
     document.addEventListener('DOMContentLoaded', onPageLoad);
     window.addEventListener('load', throttledRender);
@@ -200,7 +195,6 @@ export function removeDynamicTheme() {
 
 export function cleanDynamicThemeCache() {
     throttledRender.cancel();
-    throttledInlineRender.cancel();
     pendingCreation.clear();
     stopWatchingForUpdates();
     cleanModificationCache();

@@ -118,6 +118,7 @@ const unparsableColors = new Set([
     'transparent',
     'initial',
     'currentcolor',
+    'none',
 ]);
 
 const colorParseCache = new Map<string, RGBA>();

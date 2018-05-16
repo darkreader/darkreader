@@ -41,7 +41,7 @@ export default function CustomSettingsToggle({data, tab, actions}: ExtWrapper & 
             }}
         >
             <span class="custom-settings-toggle__wrapper">
-                {getLocalMessage('apply_to')} <span class="custom-settings-toggle__url" >{urlText}</span>
+                {getLocalMessage('only_for')} <span class="custom-settings-toggle__url" >{urlText}</span>
             </span>
         </Button>
     );

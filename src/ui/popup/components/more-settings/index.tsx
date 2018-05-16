@@ -59,7 +59,7 @@ export default function MoreSettings({data, actions, tab}: ExtWrapper & {tab: Ta
                             </p>
                         ) : (
                             <p class="more-settings__description">
-                                {getLocalMessage('apply_to_description')}
+                                {getLocalMessage('only_for_description')}
                             </p>
                         )}
                     </div>

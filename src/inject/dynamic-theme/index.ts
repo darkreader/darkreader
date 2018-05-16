@@ -81,7 +81,12 @@ async function createManager(element: HTMLLinkElement | HTMLStyleElement) {
     }
     pendingCreation.add(element);
 
+    let manager: StyleManager = null;
+
     function update() {
+        if (!manager) {
+            return;
+        }
         const details = manager.details();
         updateVariables(details.variables);
         throttledRender();
@@ -103,7 +108,7 @@ async function createManager(element: HTMLLinkElement | HTMLStyleElement) {
         }
     }
 
-    const manager = await manageStyle(element, {update, loadingStart, loadingEnd});
+    manager = await manageStyle(element, {update, loadingStart, loadingEnd});
     if (!pendingCreation.has(element)) {
         manager.destroy();
         return;

@@ -227,6 +227,8 @@ function getBgImageModifier(prop: string, value: string, rule: CSSStyleRule, isC
                 });
             }
 
+            const absoluteValue = `url("${url}")`;
+
             awaitingForImageLoading.set(url, []);
             return async (filter: FilterConfig) => {
                 let imageDetails: ImageDetails;
@@ -240,12 +242,12 @@ function getBgImageModifier(prop: string, value: string, rule: CSSStyleRule, isC
                         }
                     } catch (err) {
                         logWarn(err);
-                        awaitingForImageLoading.get(url).forEach((resolve) => resolve(urlValue));
-                        return urlValue;
+                        awaitingForImageLoading.get(url).forEach((resolve) => resolve(absoluteValue));
+                        return absoluteValue;
                     }
                     imageDetailsCache.set(url, imageDetails);
                 }
-                const bgImageValue = getBgImageValue(imageDetails, filter) || urlValue;
+                const bgImageValue = getBgImageValue(imageDetails, filter) || absoluteValue;
                 awaitingForImageLoading.get(url).forEach((resolve) => resolve(bgImageValue));
                 return bgImageValue;
             };

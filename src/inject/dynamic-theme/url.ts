@@ -18,8 +18,11 @@ export function getAbsoluteURL($base: string, $relative: string) {
         const u = parseURL(`${b.protocol}//${b.host}${$relative}`);
         return u.href;
     }
-    const baseParts = b.pathname.split('/');
-    const backwards = getMatches(/\.\.\//g, $relative);
-    const u = parseURL(`${b.protocol}//${b.host}${baseParts.slice(0, baseParts.length - backwards.length).join('/')}/${$relative.replace(/^(\.\.\/)*/, '')}`);
+    const pathParts = b.pathname.split('/').concat($relative.split('/')).filter((p) => p);
+    let backwardIndex: number
+    while ((backwardIndex = pathParts.indexOf('..')) > 0) {
+        pathParts.splice(backwardIndex - 1, 2);
+    }
+    const u = parseURL(`${b.protocol}//${b.host}/${pathParts.join('/')}`);
     return u.href;
 }

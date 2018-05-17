@@ -135,17 +135,21 @@ function analyzeImage(image: HTMLImageElement) {
 
 export function getFilteredImageDataURL({dataURL, width, height}: ImageDetails, filter: FilterConfig) {
     const matrix = getSVGFilterMatrixValue(filter);
-    return [
-        'data:image/svg+xml;base64,',
-        btoa([
-            `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="${width}" height="${height}">`,
-            '<defs>',
-            '<filter id="darkreader-image-filter">',
-            `<feColorMatrix type="matrix" values="${matrix}" />`,
-            '</filter>',
-            '</defs>',
-            `<image width="${width}" height="${height}" filter="url(#darkreader-image-filter)" xlink:href="${dataURL}" />`,
-            '</svg>',
-        ].join(''))
+    const base64 = [
+        `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="${width}" height="${height}">`,
+        '<defs>',
+        '<filter id="darkreader-image-filter">',
+        `<feColorMatrix type="matrix" values="${matrix}" />`,
+        '</filter>',
+        '</defs>',
+        `<image width="${width}" height="${height}" filter="url(#darkreader-image-filter)" xlink:href="${dataURL}" />`,
+        '</svg>',
     ].join('');
+    const bytes = new Uint8Array(base64.length);
+    for (let i = 0; i < base64.length; i++) {
+        bytes[i] = base64.charCodeAt(i);
+    }
+    const blob = new Blob([bytes], {type: 'image/svg+xml'});
+    const objectURL = URL.createObjectURL(blob);
+    return objectURL;
 }

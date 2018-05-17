@@ -264,7 +264,7 @@ function getBgImageModifier(prop: string, value: string, rule: CSSStyleRule, isC
                 if (isLarge) {
                     result = 'none';
                 } else {
-                    logInfo(`Inverting light image ${imageDetails.src}`);
+                    logInfo(`Dimming light image ${imageDetails.src}`);
                     const dimmed = getFilteredImageDataURL(imageDetails, {...filter, mode: 0, brightness: clamp(filter.brightness - 80, 20, 100), sepia: clamp(filter.sepia + 90, 0, 100)});
                     result = `url("${dimmed}")`;
                 }

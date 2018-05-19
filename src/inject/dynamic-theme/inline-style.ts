@@ -151,9 +151,13 @@ export function watchForInlineStyles(filter: FilterConfig) {
 }
 
 const elementsChangeKeys = new WeakMap<Element, string>();
+const filterProps = ['brightness', 'contrast', 'grayscale', 'sepia', 'mode'];
 
-function getElementChangeKey(el: Element) {
-    return INLINE_STYLE_ATTRS.map((attr) => `${attr}="${el.getAttribute(attr)}"`).join(' ');
+function getElementChangeKey(el: Element, filter: FilterConfig) {
+    return INLINE_STYLE_ATTRS
+        .map((attr) => `${attr}="${el.getAttribute(attr)}"`)
+        .concat(filterProps.map((prop) => `${prop}="${filter[prop]}"`))
+        .join(' ');
 }
 
 export function stopWatchingForInlineStyles() {
@@ -164,7 +168,7 @@ export function stopWatchingForInlineStyles() {
 }
 
 function elementDidUpdate(element: HTMLElement, filter: FilterConfig) {
-    if (elementsChangeKeys.get(element) === getElementChangeKey(element)) {
+    if (elementsChangeKeys.get(element) === getElementChangeKey(element, filter)) {
         return;
     }
     overrideInlineStyle(element, filter);
@@ -239,5 +243,5 @@ function overrideInlineStyle(element: HTMLElement, filter: FilterConfig) {
         store.delete(element);
         element.removeAttribute(dataAttr);
     });
-    elementsChangeKeys.set(element, getElementChangeKey(element));
+    elementsChangeKeys.set(element, getElementChangeKey(element, filter));
 }

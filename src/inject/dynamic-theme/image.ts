@@ -85,7 +85,7 @@ function analyzeImage(image: HTMLImageElement) {
 
     const TRANSPARENT_ALPHA_THRESHOLD = 0.05;
     const DARK_LIGHTNESS_THRESHOLD = 0.4;
-    const LIGHT_LIGHTNESS_THRESHOLD = 0.6;
+    const LIGHT_LIGHTNESS_THRESHOLD = 0.7;
 
     let transparentPixelsCount = 0;
     let darkPixelsCount = 0;

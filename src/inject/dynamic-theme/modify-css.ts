@@ -163,7 +163,7 @@ function getColorModifier(prop: string, value: string): CSSValueModifier {
 
 const gradientRegex = /[\-a-z]+gradient\(([^\(\)]*(\(.*?\)))*[^\(\)]*\)/g;
 const imageDetailsCache = new Map<string, ImageDetails>();
-const awaitingForImageLoading = new Map<string, ((value: string) => void)[]>();
+const awaitingForImageLoading = new Map<string, ((imageDetails: ImageDetails) => void)[]>();
 
 function getBgImageModifier(prop: string, value: string, rule: CSSStyleRule, isCancelled: () => boolean): CSSValueModifier {
     try {
@@ -221,34 +221,40 @@ function getBgImageModifier(prop: string, value: string, rule: CSSStyleRule, isC
                 url = getAbsoluteURL(location.origin, url);
             }
 
-            if (awaitingForImageLoading.has(url)) {
-                return () => new Promise<string>((resolve) => {
-                    awaitingForImageLoading.get(url).push(resolve);
-                });
-            }
-
             const absoluteValue = `url("${url}")`;
 
-            awaitingForImageLoading.set(url, []);
             return async (filter: FilterConfig) => {
                 let imageDetails: ImageDetails;
                 if (imageDetailsCache.has(url)) {
                     imageDetails = imageDetailsCache.get(url);
                 } else {
                     try {
-                        imageDetails = await getImageDetails(url);
+                        if (awaitingForImageLoading.has(url)) {
+                            const awaiters = awaitingForImageLoading.get(url);
+                            imageDetails = await new Promise<ImageDetails>((resolve) => awaiters.push(resolve));
+                            if (!imageDetails) {
+                                return null;
+                            }
+                        } else {
+                            awaitingForImageLoading.set(url, []);
+                            imageDetails = await getImageDetails(url);
+                            imageDetailsCache.set(url, imageDetails);
+                            awaitingForImageLoading.get(url).forEach((resolve) => resolve(imageDetails));
+                            awaitingForImageLoading.delete(url);
+                        }
                         if (isCancelled()) {
                             return null;
                         }
                     } catch (err) {
                         logWarn(err);
-                        awaitingForImageLoading.get(url).forEach((resolve) => resolve(absoluteValue));
+                        if (awaitingForImageLoading.has(url)) {
+                            awaitingForImageLoading.get(url).forEach((resolve) => resolve(null));
+                            awaitingForImageLoading.delete(url);
+                        }
                         return absoluteValue;
                     }
-                    imageDetailsCache.set(url, imageDetails);
                 }
                 const bgImageValue = getBgImageValue(imageDetails, filter) || absoluteValue;
-                awaitingForImageLoading.get(url).forEach((resolve) => resolve(bgImageValue));
                 return bgImageValue;
             };
         };
@@ -258,14 +264,14 @@ function getBgImageModifier(prop: string, value: string, rule: CSSStyleRule, isC
             let result: string;
             if (isDark && isTransparent && filter.mode === 1 && !isLarge && width > 2) {
                 logInfo(`Inverting dark image ${imageDetails.src}`);
-                const inverted = getFilteredImageDataURL(imageDetails, {...filter, sepia: clamp(filter.sepia + 90, 0, 100)});
+                const inverted = getFilteredImageDataURL(imageDetails, {...filter, sepia: clamp(filter.sepia + 10, 0, 100)});
                 result = `url("${inverted}")`;
             } else if (isLight && !isTransparent && filter.mode === 1) {
                 if (isLarge) {
                     result = 'none';
                 } else {
                     logInfo(`Dimming light image ${imageDetails.src}`);
-                    const dimmed = getFilteredImageDataURL(imageDetails, {...filter, mode: 0, brightness: clamp(filter.brightness - 80, 20, 100), sepia: clamp(filter.sepia + 90, 0, 100)});
+                    const dimmed = getFilteredImageDataURL(imageDetails, filter);
                     result = `url("${dimmed}")`;
                 }
             } else {

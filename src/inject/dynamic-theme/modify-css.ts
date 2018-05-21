@@ -274,6 +274,10 @@ function getBgImageModifier(prop: string, value: string, rule: CSSStyleRule, isC
                     const dimmed = getFilteredImageDataURL(imageDetails, filter);
                     result = `url("${dimmed}")`;
                 }
+            } else if (filter.mode === 0 && isLight && !isLarge) {
+                logInfo(`Applying filter to image ${imageDetails.src}`);
+                const filtered = getFilteredImageDataURL(imageDetails, {...filter, brightness: clamp(filter.brightness - 10, 5, 200), sepia: clamp(filter.sepia + 10, 0, 100)});
+                result = `url("${filtered}")`;
             } else {
                 result = null;
             }

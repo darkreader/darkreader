@@ -8,7 +8,7 @@ import UserStorage from './user-storage';
 import {setWindowTheme, resetWindowTheme} from './window-theme';
 import {getFontList, getCommands, setShortcut} from './utils/extension-api';
 import {isFirefox, isMobile} from '../utils/platform';
-import {isURLInList, getURLHost} from '../utils/url';
+import {isURLInList, getURLHost, isURLMatched} from '../utils/url';
 import ThemeEngines from '../generators/theme-engines';
 import createCSSFilterStylesheet from '../generators/css-filter';
 import {getDynamicThemeFixesFor} from '../generators/dynamic-theme';
@@ -190,7 +190,20 @@ export class Extension {
 
     setConfig(config: FilterConfig) {
         const prevConfig = {...this.filterConfig};
-        this.filterConfig = {...prevConfig, ...config};
+        let siteList: string[] = prevConfig.siteList;
+        if (config.siteList) {
+            siteList = config.siteList.filter((pattern) => {
+                let isOK = false;
+                try {
+                    isURLMatched('https://google.com/', pattern);
+                    isOK = true;
+                } catch (err) {
+                    console.warn(`Pattern "${pattern}" excluded`);
+                }
+                return isOK && pattern !== '/';
+            });
+        }
+        this.filterConfig = {...prevConfig, ...config, siteList};
         if (this.enabled) {
             if (!this.filterConfig.changeBrowserTheme && prevConfig.changeBrowserTheme) {
                 resetWindowTheme();

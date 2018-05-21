@@ -52,7 +52,7 @@ export function getModifiableCSSDeclaration(property: string, value: string, rul
 
 export function getModifiedUserAgentStyle(filter: FilterConfig, isIFrame: boolean) {
     const lines: string[] = [];
-    if (filter.mode === 1 && !isIFrame) {
+    if (!isIFrame) {
         lines.push('html {');
         lines.push(`    background-color: ${modifyBackgroundColor({r: 255, g: 255, b: 255}, filter)} !important;`);
         lines.push('}');

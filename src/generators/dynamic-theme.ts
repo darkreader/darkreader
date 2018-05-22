@@ -11,7 +11,7 @@ const dynamicThemeFixesCommands = {
 export function parseDynamicThemeFixes(text: string) {
     return parseSitesFixesConfig<DynamicThemeFix>(text, {
         commands: Object.keys(dynamicThemeFixesCommands),
-        getCommandPropName: (command) => dynamicThemeFixesCommands[command],
+        getCommandPropName: (command) => dynamicThemeFixesCommands[command] || null,
         parseCommandValue: (command, value) => parseArray(value),
     });
 }

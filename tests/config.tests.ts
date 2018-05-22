@@ -54,6 +54,24 @@ test('Dynamic Theme Fixes config', async () => {
 
     // fixes are properly formatted
     expect(file).toEqual(formatDynamicThemeFixes(fixes));
+
+    // should parse empty config
+    expect(parseDynamicThemeFixes('')).toEqual([]);
+
+    // should skip unsupported commands
+    expect(parseDynamicThemeFixes([
+        'inbox.google.com',
+        'mail.google.com',
+        'INVERT', 'a', 'b',
+        'UNSUPPORTED', 'c', 'd',
+        '========',
+        'twitter.com',
+        'UNSUPPORTED', 'a', 'b',
+        'INVERT', 'c', 'd',
+    ].join('\r\n'))).toEqual([
+        {url: ['inbox.google.com', 'mail.google.com'], invert: ['a', 'b']},
+        {url: ['twitter.com'], invert: ['c', 'd']},
+    ])
 });
 
 test('Inversion Fixes config', async () => {

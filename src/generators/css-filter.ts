@@ -202,7 +202,7 @@ const inversionFixesCommands = {
 export function parseInversionFixes(text: string) {
     return parseSitesFixesConfig<InversionFix>(text, {
         commands: Object.keys(inversionFixesCommands),
-        getCommandPropName: (command) => inversionFixesCommands[command],
+        getCommandPropName: (command) => inversionFixesCommands[command] || null,
         parseCommandValue: (command, value) => {
             if (command === 'CSS') {
                 return value.trim();

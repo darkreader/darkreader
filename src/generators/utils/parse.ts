@@ -13,41 +13,31 @@ interface SitesFixesParserOptions {
 export function parseSitesFixesConfig<T extends SiteProps>(text: string, options: SitesFixesParserOptions) {
     const sites: T[] = [];
 
-    // Split blocks
-    const blocks = text.replace(/\r/g, '').split(/={2,}/g);
+    const blocks = text.replace(/\r/g, '').split(/^\s*={2,}\s*$/gm);
     blocks.forEach((block) => {
-
-        interface CommandLocation {
-            command: string;
-            start: number;
-            end: number;
-        }
-
-        let commandsLocations: CommandLocation[] = [];
-        options.commands.forEach((command) => {
-            let end = 0;
-            let start: number;
-            while ((start = block.indexOf(command, end)) >= 0) {
-                end = start + command.length;
-                commandsLocations.push({command, start, end});
+        const lines = block.split('\n');
+        const commandIndices: number[] = [];
+        lines.forEach((ln, i) => {
+            if (ln.match(/^\s*[A-Z]+(\s[A-Z]+)*\s*$/)) {
+                commandIndices.push(i);
             }
         });
-        commandsLocations = commandsLocations
-            .filter(({start, end}, i) => !commandsLocations.find(({start: otherStart, end: otherEnd}, otherI) => (i !== otherI && start >= otherStart && end <= otherEnd)))
-            .sort((a, b) => a.start - b.start);
 
-        if (commandsLocations.length === 0) {
+        if (commandIndices.length === 0) {
             return;
         }
 
         const siteFix = {
-            url: parseArray(block.substring(0, commandsLocations[0].start)) as string[],
+            url: parseArray(lines.slice(0, commandIndices[0]).join('\n')) as string[],
         } as T;
 
-        commandsLocations.forEach(({command, start, end}, i) => {
-            const valueEnd = i < commandsLocations.length - 1 ? commandsLocations[i + 1].start : block.length;
-            const valueText = block.substring(end, valueEnd);
+        commandIndices.forEach((commandIndex, i) => {
+            const command = lines[commandIndex].trim();
+            const valueText = lines.slice(commandIndex + 1, i === commandIndices.length - 1 ? lines.length : commandIndices[i + 1]).join('\n');
             const prop = options.getCommandPropName(command);
+            if (!prop) {
+                return;
+            }
             const value = options.parseCommandValue(command, valueText);
             siteFix[prop] = value;
         });

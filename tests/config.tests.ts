@@ -1,7 +1,7 @@
 import {readFile} from 'fs';
 import {resolve as resolvePath} from 'path';
 import {compareURLPatterns} from '../src/utils/url';
-import {parseArray, formatArray} from '../src/utils/text';
+import {parseArray, formatArray, getTextDiffIndex, getTextPositionMessage} from '../src/utils/text';
 import {parseInversionFixes, formatInversionFixes} from '../src/generators/css-filter';
 import {parseDynamicThemeFixes, formatDynamicThemeFixes} from '../src/generators/dynamic-theme';
 import {parseStaticThemes, formatStaticThemes} from '../src/generators/static-theme';
@@ -22,6 +22,15 @@ function isURLPatternValid(url: string) {
     return url.length > 0 && url.indexOf('://') < 0;
 }
 
+function throwIfDifferent(input: string, expected: string, message: string) {
+    return () => {
+        const diffIndex = getTextDiffIndex(input, expected);
+        if (diffIndex >= 0) {
+            throw new Error(`${message}\n${getTextPositionMessage(input, diffIndex)}`);
+        }
+    };
+}
+
 test('Dark Sites list', async () => {
     const file = await readConfig('dark-sites.config');
     const sites = parseArray(file);
@@ -36,7 +45,7 @@ test('Dark Sites list', async () => {
     expect(sites).toEqual(sites.slice().sort(compareURLPatterns));
 
     // sites are properly formatted
-    expect(file).toEqual(formatArray(sites));
+    expect(throwIfDifferent(file, formatArray(sites), 'Dark Sites list format error')).not.toThrow();
 });
 
 test('Dynamic Theme Fixes config', async () => {
@@ -53,7 +62,7 @@ test('Dynamic Theme Fixes config', async () => {
     expect(fixes.every(({invert}) => (invert || []).every((s) => s.indexOf(',') < 0))).toBe(true);
 
     // fixes are properly formatted
-    expect(file).toEqual(formatDynamicThemeFixes(fixes));
+    expect(throwIfDifferent(file, formatDynamicThemeFixes(fixes), 'Dynamic fixes format error')).not.toThrow();
 
     // should parse empty config
     expect(parseDynamicThemeFixes('')).toEqual([]);
@@ -91,7 +100,7 @@ test('Inversion Fixes config', async () => {
     expect(fixes.every(({invert, noinvert, removebg}) => (invert || []).concat(noinvert || []).concat(removebg || []).every((s) => s.indexOf(',') < 0))).toBe(true);
 
     // fixes are properly formatted
-    expect(file).toEqual(formatInversionFixes(fixes));
+    expect(throwIfDifferent(file, formatInversionFixes(fixes), 'Inversion fixes format error')).not.toThrow();
 });
 
 test('Static Themes config', async () => {
@@ -114,5 +123,5 @@ test('Static Themes config', async () => {
             .every((s) => s.indexOf(',') < 0)))).toBe(true);
 
     // fixes are properly formatted
-    expect(file).toEqual(formatStaticThemes(themes));
+    expect(throwIfDifferent(file, formatStaticThemes(themes), 'Static theme format error')).not.toThrow();
 });

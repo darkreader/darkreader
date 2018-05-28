@@ -4,8 +4,10 @@ import {logWarn} from '../utils/log';
 export function iterateCSSRules(rules: CSSRuleList, iterate: (rule: CSSStyleRule) => void) {
     Array.from<CSSRule>(rules as any)
         .forEach((rule) => {
-            if (rule instanceof CSSMediaRule && Array.from(rule.media).includes('screen')) {
-                iterateCSSRules(rule.cssRules, iterate);
+            if (rule instanceof CSSMediaRule) {
+                if (Array.from(rule.media).includes('screen')) {
+                    iterateCSSRules(rule.cssRules, iterate);
+                }
             } else if (rule instanceof CSSStyleRule) {
                 iterate(rule);
             } else if (rule instanceof CSSImportRule) {

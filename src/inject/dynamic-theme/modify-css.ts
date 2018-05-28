@@ -161,7 +161,7 @@ function getColorModifier(prop: string, value: string): CSSValueModifier {
     }
 }
 
-const gradientRegex = /[\-a-z]+gradient\(([^\(\)]*(\(.*?\)))*[^\(\)]*\)/g;
+const gradientRegex = /[\-a-z]+gradient\(([^\(\)]*(\(([^\(\)]*(\(.*?\)))*[^\(\)]*\)))*[^\(\)]*\)/g;
 const imageDetailsCache = new Map<string, ImageDetails>();
 const awaitingForImageLoading = new Map<string, ((imageDetails: ImageDetails) => void)[]>();
 
@@ -192,18 +192,31 @@ function getBgImageModifier(prop: string, value: string, rule: CSSStyleRule, isC
             const type = match[1];
             const content = match[2];
 
-            const partsRegex = /([^\(\),]+(\([^\(\)]*\))?[^\(\),]*),?/g;
+            const partsRegex = /([^\(\),]+(\([^\(\)]*(\([^\(\)]*\)*[^\(\)]*)?\))?[^\(\),]*),?/g;
+            const colorStopRegex = /^(from|color-stop|to)\(([^\(\)]*?,\s*)?(.*?)\)$/;
 
             const parts = getMatches(partsRegex, content, 1).map((part) => {
+                part = part.trim();
+
                 let rgb = tryParseColor(part);
                 if (rgb) {
                     return (filter: FilterConfig) => modifyGradientColor(rgb, filter);
                 }
+
                 const space = part.lastIndexOf(' ');
                 rgb = tryParseColor(part.substring(0, space));
                 if (rgb) {
                     return (filter: FilterConfig) => `${modifyGradientColor(rgb, filter)} ${part.substring(space + 1)}`;
                 }
+
+                const colorStopMatch = part.match(colorStopRegex);
+                if (colorStopMatch) {
+                    rgb = tryParseColor(colorStopMatch[3]);
+                    if (rgb) {
+                        return (filter: FilterConfig) => `${colorStopMatch[1]}(${colorStopMatch[2] ? `${colorStopMatch[2]}, ` : ''}${modifyGradientColor(rgb, filter)})`;
+                    }
+                }
+
                 return () => part;
             });
 

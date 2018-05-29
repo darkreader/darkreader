@@ -130,7 +130,6 @@ export async function manageStyle(element: HTMLLinkElement | HTMLStyleElement, {
     let prevFilterKey: string = null;
 
     async function render(filter: FilterConfig, variables: Map<string, string>) {
-        renderId++;
         rules = await getRules();
         if (!rules) {
             return null;
@@ -209,6 +208,8 @@ export async function manageStyle(element: HTMLLinkElement | HTMLStyleElement, {
         if (!rulesChanged && !filterChanged) {
             return;
         }
+
+        renderId++;
 
         asyncStyles.forEach(removeNode);
         asyncStyles.splice(0);

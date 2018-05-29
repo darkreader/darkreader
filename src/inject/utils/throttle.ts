@@ -1,4 +1,9 @@
-export function throttle<T extends Function>(callback: T) {
+const FPS_60 = 1000 / 60;
+
+export function throttle<T extends Function>(callback: T, timeout?: number) {
+    const requestFrame = timeout == null || timeout <= FPS_60 ? requestAnimationFrame : (fn) => setTimeout(fn, timeout);
+    const cancelFrame = timeout == null || timeout <= FPS_60 ? cancelAnimationFrame : clearTimeout;
+
     let pending = false;
     let frameId: number = null;
     let lastArgs: any[];
@@ -9,7 +14,7 @@ export function throttle<T extends Function>(callback: T) {
             pending = true;
         } else {
             callback(...lastArgs);
-            frameId = requestAnimationFrame(() => {
+            frameId = requestFrame(() => {
                 frameId = null;
                 if (pending) {
                     callback(...lastArgs);
@@ -20,7 +25,7 @@ export function throttle<T extends Function>(callback: T) {
     }) as any;
 
     const cancel = () => {
-        cancelAnimationFrame(frameId);
+        cancelFrame(frameId);
         pending = false;
         frameId = null;
     };

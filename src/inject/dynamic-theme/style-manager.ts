@@ -2,6 +2,7 @@ import {iterateCSSRules, iterateCSSDeclarations, replaceCSSRelativeURLsWithAbsol
 import {getModifiableCSSDeclaration, getModifiedFallbackStyle, ModifiableCSSDeclaration, ModifiableCSSRule} from './modify-css';
 import {bgFetch} from './network';
 import {removeNode} from '../utils/dom';
+import {throttle} from '../utils/throttle';
 import {logWarn} from '../utils/log';
 import {getMatches} from '../../utils/text';
 import {FilterConfig} from '../../definitions';
@@ -46,7 +47,7 @@ export async function manageStyle(element: HTMLLinkElement | HTMLStyleElement, {
     }
     let corsCopy: HTMLStyleElement = prevStyles.find((el) => el.matches('.darkreader--cors')) || null;
     let syncStyle: HTMLStyleElement = prevStyles.find((el) => el.matches('.darkreader--sync')) || null;
-    const asyncStyles: HTMLStyleElement[] = prevStyles.filter((el) => el.matches('.darkreader--async'));
+    const asyncStyles: HTMLStyleElement[] = prevStyles.filter((el) => el.matches('.darkreader--async')); // Still need to remove async style used by prev version
 
     let cancelAsyncOperations = false;
 
@@ -123,11 +124,13 @@ export async function manageStyle(element: HTMLLinkElement | HTMLStyleElement, {
         return ['mode', 'brightness', 'contrast', 'grayscale', 'sepia'].map((p) => `${p}:${filter[p]}`).join(';');
     }
 
+    let renderId = 0;
     const rulesTextCache = new Map<string, string>();
     const rulesModCache = new Map<string, ModifiableCSSRule>();
     let prevFilterKey: string = null;
 
     async function render(filter: FilterConfig, variables: Map<string, string>) {
+        renderId++;
         rules = await getRules();
         if (!rules) {
             return null;
@@ -210,80 +213,94 @@ export async function manageStyle(element: HTMLLinkElement | HTMLStyleElement, {
         asyncStyles.forEach(removeNode);
         asyncStyles.splice(0);
 
-        interface AsyncQueueDeclaration {
+        interface ReadyDeclaration {
             media: string;
             selector: string;
             property: string;
-            importantKeyword: string;
-            promise: Promise<string>;
+            value: string;
+            important: boolean;
         }
 
-        const queue: AsyncQueueDeclaration[] = [];
+        const readyDeclarations: ReadyDeclaration[] = [];
 
-        const lines: string[] = [];
-        modRules.filter((r) => r).forEach(({selector, declarations, media}) => {
-            if (media) {
-                lines.push(`@media ${media} {`);
+        function buildStyleSheet() {
+            const groups: ReadyDeclaration[][] = [];
+            readyDeclarations.filter((d) => d).forEach((decl) => {
+                let group: ReadyDeclaration[];
+                const prev = groups.length > 0 ? groups[groups.length - 1] : null;
+                if (prev && prev[0].selector === decl.selector && prev[0].media === decl.media) {
+                    group = prev;
+                } else {
+                    group = [];
+                    groups.push(group);
+                }
+                group.push(decl);
+            });
+
+            const lines: string[] = [];
+            groups.forEach((group) => {
+                const {media, selector} = group[0];
+                if (media) {
+                    lines.push(`@media ${media} {`);
+                }
+                lines.push(`${selector} {`);
+                group.forEach(({property, value, important}) => {
+                    lines.push(`    ${property}: ${value}${important ? ' !important' : ''};`);
+                });
+                lines.push('}');
+                if (media) {
+                    lines.push('}')
+                }
+            });
+
+            if (!syncStyle) {
+                syncStyle = document.createElement('style');
+                syncStyle.classList.add('darkreader');
+                syncStyle.classList.add('darkreader--sync');
+                syncStyle.media = 'screen';
             }
-            lines.push(`${selector} {`);
+            element.parentElement.insertBefore(syncStyle, corsCopy ? corsCopy.nextSibling : element.nextSibling);
+            syncStyle.textContent = lines.join('\n');
+        }
+
+        const RULES_PER_MS = 100;
+        const REQUESTED_RESOURCES = 1 / 4;
+        const declarationsCount = modRules.filter((r) => r).reduce((total, {declarations}) => total + declarations.length, 0);
+        const timeout = declarationsCount / RULES_PER_MS / REQUESTED_RESOURCES;
+
+        const throttledBuildStyleSheet = throttle((currentRenderId: number) => {
+            if (cancelAsyncOperations || renderId !== currentRenderId) {
+                return;
+            }
+            buildStyleSheet();
+        }, timeout);
+
+        modRules.filter((r) => r).forEach(({selector, declarations, media}) => {
             declarations.forEach(({property, value, important}) => {
-                const importantKeyword = important ? ' !important' : '';
                 if (typeof value === 'function') {
                     const modified = value(filter);
                     if (modified instanceof Promise) {
-                        queue.push({media, selector, property, importantKeyword, promise: modified});
+                        const index = readyDeclarations.length;
+                        readyDeclarations.push(null);
+                        const promise = modified;
+                        const currentRenderId = renderId;
+                        promise.then((asyncValue) => {
+                            if (!asyncValue || cancelAsyncOperations || currentRenderId !== renderId) {
+                                return;
+                            }
+                            readyDeclarations[index] = {media, selector, property, value: asyncValue, important};
+                            throttledBuildStyleSheet(currentRenderId);
+                        });
                     } else {
-                        lines.push(`    ${property}: ${modified}${importantKeyword};`);
+                        readyDeclarations.push({media, selector, property, value: modified, important});
                     }
                 } else {
-                    lines.push(`    ${property}: ${value}${importantKeyword};`);
+                    readyDeclarations.push({media, selector, property, value, important});
                 }
             });
-            lines.push('}');
-            if (media) {
-                lines.push('}')
-            }
         });
 
-        if (!syncStyle) {
-            syncStyle = document.createElement('style');
-            syncStyle.classList.add('darkreader');
-            syncStyle.classList.add('darkreader--sync');
-            syncStyle.media = 'screen';
-        }
-        element.parentElement.insertBefore(syncStyle, corsCopy ? corsCopy.nextSibling : element.nextSibling);
-        syncStyle.textContent = lines.join('\n');
-
-        queue.forEach(({promise}) => promise.catch((err) => {
-            logWarn(err);
-            return null;
-        }));
-        queue.length > 0 && Promise.all(queue.map(({promise}) => promise))
-            .then((values) => {
-                if (cancelAsyncOperations || values.filter((v) => v).length === 0) {
-                    return;
-                }
-                const asyncStyle = document.createElement('style');
-                asyncStyle.classList.add('darkreader');
-                asyncStyle.classList.add('darkreader--async');
-                asyncStyle.media = 'screen';
-                asyncStyle.textContent = queue.map(({selector, property, media, importantKeyword}, i) => {
-                    const value = values[i];
-                    if (!value) {
-                        return null;
-                    }
-                    return [
-                        media && `@media ${media} {`,
-                        `${selector} {`,
-                        `    ${property}: ${value}${importantKeyword};`,
-                        '}',
-                        media && '}',
-                    ].filter((ln) => ln).join('\n');
-                }).filter((ln) => ln).join('\n');
-                const insertTarget = asyncStyles.length > 0 ? asyncStyles[asyncStyles.length - 1].nextSibling : syncStyle.nextSibling;
-                element.parentElement.insertBefore(asyncStyle, insertTarget);
-                asyncStyles.push(asyncStyle);
-            });
+        throttledBuildStyleSheet(renderId);
 
         observer.observe(element, observerOptions);
 

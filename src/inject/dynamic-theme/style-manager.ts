@@ -23,13 +23,13 @@ export interface StyleManager {
     destroy(): void;
 }
 
-export const STYLE_SELECTOR = 'link[rel="stylesheet" i], style';
+export const STYLE_SELECTOR = 'link[rel*="stylesheet" i], style';
 
 export function shouldManageStyle(element: Node) {
     return (
         (
             (element instanceof HTMLStyleElement) ||
-            (element instanceof HTMLLinkElement && element.rel && element.rel.toLowerCase() === 'stylesheet')
+            (element instanceof HTMLLinkElement && element.rel && element.rel.toLowerCase().includes('stylesheet'))
         ) && (
             !element.classList.contains('darkreader') ||
             element.classList.contains('darkreader--cors')

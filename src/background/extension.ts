@@ -39,8 +39,9 @@ export class Extension {
         this.devtools = new DevTools(this.config, () => this.onConfigPropChanged());
         this.messenger = new Messenger(this.getMessengerAdapter());
         this.news = new Newsmaker((news) => {
+            const shouldNotify = false; // TODO: Suggest an option for that.
             const unread = news.filter(({read}) => !read);
-            if (unread.length > 0) {
+            if (unread.length > 0 && shouldNotify) {
                 this.icon.notifyAboutReleaseNotes(unread.length);
             } else {
                 this.icon.stopNotifyingAboutReleaseNotes();

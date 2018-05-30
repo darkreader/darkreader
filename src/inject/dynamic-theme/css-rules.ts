@@ -5,12 +5,15 @@ export function iterateCSSRules(rules: CSSRuleList, iterate: (rule: CSSStyleRule
     Array.from<CSSRule>(rules as any)
         .forEach((rule) => {
             if (rule instanceof CSSMediaRule) {
-                Array.from(rule.cssRules).forEach((mediaRule) => iterate(mediaRule as CSSStyleRule));
+                const media = Array.from(rule.media);
+                if (media.includes('screen') || media.includes('all') || !(media.includes('print') || media.includes('speech'))) {
+                    iterateCSSRules(rule.cssRules, iterate);
+                }
             } else if (rule instanceof CSSStyleRule) {
                 iterate(rule);
             } else if (rule instanceof CSSImportRule) {
                 try {
-                    Array.from(rule.styleSheet.cssRules).forEach((importedRule) => iterate(importedRule as CSSStyleRule));
+                    iterateCSSRules(rule.styleSheet.cssRules, iterate);
                 } catch (err) {
                     logWarn(err);
                 }
@@ -31,7 +34,7 @@ export function iterateCSSDeclarations(style: CSSStyleDeclaration, iterate: (pro
 }
 
 export const cssURLRegex = /url\((('.+?')|(".+?")|([^\)]*?))\)/g;
-export const cssImportRegex = /@import url\((('.+?')|(".+?")|([^\)]*?))\);?/g;
+export const cssImportRegex = /@import (url\()?(('.+?')|(".+?")|([^\)]*?))\)?;?/g;
 
 export function getCSSURLValue(cssURL: string) {
     return cssURL.replace(/^url\((.*)\)$/, '$1').replace(/^"(.*)"$/, '$1').replace(/^'(.*)'$/, '$1');

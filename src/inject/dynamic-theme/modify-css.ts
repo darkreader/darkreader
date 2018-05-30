@@ -59,6 +59,8 @@ export function getModifiedUserAgentStyle(filter: FilterConfig, isIFrame: boolea
     }
     lines.push(`${isIFrame ? '' : 'html, body, '}input, textarea, select, button {`);
     lines.push(`    background-color: ${modifyBackgroundColor({r: 255, g: 255, b: 255}, filter)};`);
+    lines.push('}');
+    lines.push('html, body, input, textarea, select, button {');
     lines.push(`    border-color: ${modifyBorderColor({r: 76, g: 76, b: 76}, filter)};`);
     lines.push(`    color: ${modifyForegroundColor({r: 0, g: 0, b: 0}, filter)};`);
     lines.push('}');

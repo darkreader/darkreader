@@ -1,4 +1,4 @@
-import {iterateCSSRules, iterateCSSDeclarations, replaceCSSRelativeURLsWithAbsolute, replaceCSSFontFace, replaceCSSVariables, getCSSURLValue, cssImportRegex} from './css-rules';
+import {iterateCSSRules, iterateCSSDeclarations, replaceCSSRelativeURLsWithAbsolute, replaceCSSFontFace, replaceCSSVariables, getCSSURLValue, cssImportRegex, getCSSBaseBath} from './css-rules';
 import {getModifiableCSSDeclaration, getModifiedFallbackStyle, ModifiableCSSDeclaration, ModifiableCSSRule} from './modify-css';
 import {bgFetch} from './network';
 import {removeNode} from '../utils/dom';
@@ -6,6 +6,7 @@ import {throttle} from '../utils/throttle';
 import {logWarn} from '../utils/log';
 import {getMatches} from '../../utils/text';
 import {FilterConfig} from '../../definitions';
+import {getAbsoluteURL} from './url';
 
 declare global {
     interface HTMLStyleElement {
@@ -75,12 +76,26 @@ export async function manageStyle(element: HTMLLinkElement | HTMLStyleElement, {
                 return null;
             }
         }
-        try {
-            rules = element.sheet.cssRules;
-        } catch (err) {
+
+        let corsURL: string;
+        if (element instanceof HTMLLinkElement) {
+            try {
+                rules = element.sheet.cssRules;
+            } catch (err) {
+                corsURL = element.href;
+            }
+        } else {
+            const cssText = element.textContent.trim();
+            if (cssText.match(cssImportRegex)) {
+                corsURL = getCSSImportURL(element.textContent.trim());
+            } else {
+                rules = element.sheet.cssRules;
+            }
+        }
+
+        if (corsURL) {
             // Sometimes cross-origin stylesheets are protected from direct access
             // so need to load CSS text and insert it into style element
-            const link = element as HTMLLinkElement;
             if (corsCopy) {
                 corsCopy.disabled = false;
                 rules = corsCopy.sheet.cssRules;
@@ -88,7 +103,7 @@ export async function manageStyle(element: HTMLLinkElement | HTMLStyleElement, {
             } else {
                 loadingStart();
                 try {
-                    corsCopy = await createCORSCopy(link, isCancelled);
+                    corsCopy = await createCORSCopy(element, corsURL, isCancelled);
                 } catch (err) {
                     logWarn(err);
                 }
@@ -165,7 +180,7 @@ export async function manageStyle(element: HTMLLinkElement | HTMLStyleElement, {
                     vars.classList.add('darkreader--vars');
                     vars.media = 'screen';
                     vars.textContent = cssTextWithVariables;
-                    element.parentElement.insertBefore(vars, element.nextSibling);
+                    element.parentNode.insertBefore(vars, element.nextSibling);
                     varsRule = (vars.sheet as CSSStyleSheet).cssRules[0] as CSSStyleRule;
                 }
             }
@@ -260,7 +275,7 @@ export async function manageStyle(element: HTMLLinkElement | HTMLStyleElement, {
                 syncStyle.classList.add('darkreader--sync');
                 syncStyle.media = 'screen';
             }
-            element.parentElement.insertBefore(syncStyle, corsCopy ? corsCopy.nextSibling : element.nextSibling);
+            element.parentNode.insertBefore(syncStyle, corsCopy ? corsCopy.nextSibling : element.nextSibling);
             syncStyle.textContent = lines.join('\n');
         }
 
@@ -379,6 +394,10 @@ function linkLoading(link: HTMLLinkElement) {
     });
 }
 
+function getCSSImportURL(importDeclaration: string) {
+    return getCSSURLValue(importDeclaration.substring(8).replace(/;$/, ''));
+}
+
 async function loadCSSText(url: string) {
     let response: string;
     let cache: string;
@@ -404,10 +423,18 @@ async function loadCSSText(url: string) {
     cssText = replaceCSSFontFace(cssText);
     cssText = replaceCSSRelativeURLsWithAbsolute(cssText, url);
 
+    const basePath = getCSSBaseBath(url);
     const importMatches = getMatches(cssImportRegex, cssText);
     for (let match of importMatches) {
-        const importURL = getCSSURLValue(match.substring(8).replace(/;$/, ''));
-        const importedCSS = await loadCSSText(importURL);
+        const importURL = getCSSImportURL(match);
+        const absoluteURL = getAbsoluteURL(basePath, importURL);
+        let importedCSS: string;
+        try {
+            importedCSS = await loadCSSText(absoluteURL);
+        } catch (err) {
+            logWarn(err);
+            importedCSS = '';
+        }
         cssText = cssText.split(match).join(importedCSS);
     }
 
@@ -416,9 +443,8 @@ async function loadCSSText(url: string) {
     return cssText;
 }
 
-async function createCORSCopy(link: HTMLLinkElement, isCancelled: () => boolean) {
-    const url = link.href;
-    const prevCors = Array.from<HTMLStyleElement>(link.parentElement.querySelectorAll('.darkreader--cors')).find((el) => el.dataset.uri === url);
+async function createCORSCopy(srcElement: HTMLLinkElement | HTMLStyleElement, url: string, isCancelled: () => boolean) {
+    const prevCors = Array.from<HTMLStyleElement>((srcElement.parentNode as HTMLElement | ShadowRoot).querySelectorAll('.darkreader--cors')).find((el) => el.dataset.uri === url);
     if (prevCors) {
         return prevCors;
     }
@@ -434,7 +460,7 @@ async function createCORSCopy(link: HTMLLinkElement, isCancelled: () => boolean)
     cors.media = 'screen';
     cors.dataset.uri = url;
     cors.textContent = cssText;
-    link.parentElement.insertBefore(cors, link.nextSibling);
+    srcElement.parentNode.insertBefore(cors, srcElement.nextSibling);
 
     return cors;
 }

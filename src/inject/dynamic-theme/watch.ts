@@ -22,12 +22,27 @@ function getAllManageableStyles(nodes: ArrayLike<Node>) {
     return results;
 }
 
+function iterateShadowNodes(nodes: ArrayLike<Node>, iterator: (node: Element) => void) {
+    Array.from(nodes).forEach((node) => {
+        if (node instanceof Element) {
+            if (node.shadowRoot) {
+                iterator(node);
+            }
+            iterateShadowNodes(node.childNodes, iterator);
+        }
+    });
+}
+
+const shadowObservers = new Set<MutationObserver>();
+
 export function watchForStyleChanges(update: (styles: ChangedStyles) => void) {
     if (observer) {
         observer.disconnect();
+        shadowObservers.forEach((o) => o.disconnect());
+        shadowObservers.clear();
     }
 
-    observer = new MutationObserver((mutations) => {
+    function handleMutations(mutations: MutationRecord[]) {
         const createdStyles = mutations.reduce((nodes, m) => nodes.concat(getAllManageableStyles(m.addedNodes)), []);
         const removedStyles = mutations.reduce((nodes, m) => nodes.concat(getAllManageableStyles(m.removedNodes)), []);
         const updatedStyles = mutations
@@ -44,13 +59,27 @@ export function watchForStyleChanges(update: (styles: ChangedStyles) => void) {
                 removed: removedStyles,
             });
         }
-    });
-    observer.observe(document.documentElement, {childList: true, subtree: true, attributes: true, attributeFilter: ['rel']});
+
+        iterateShadowNodes(mutations.reduce((nodes, m) => nodes.concat(Array.from(m.addedNodes)), []), subscribeForShadowRootChanges);
+    }
+
+    function subscribeForShadowRootChanges(node: Element) {
+        const shadowObserver = new MutationObserver(handleMutations);
+        shadowObserver.observe(node.shadowRoot, mutationObserverOptions);
+        shadowObservers.add(shadowObserver);
+    }
+
+    const mutationObserverOptions = {childList: true, subtree: true, attributes: true, attributeFilter: ['rel']};
+    observer = new MutationObserver(handleMutations);
+    observer.observe(document.documentElement, mutationObserverOptions);
+    iterateShadowNodes(document.documentElement.children, subscribeForShadowRootChanges);
 }
 
 export function stopWatchingForStyleChanges() {
     if (observer) {
         observer.disconnect();
         observer = null;
+        shadowObservers.forEach((o) => o.disconnect());
+        shadowObservers.clear();
     }
 }

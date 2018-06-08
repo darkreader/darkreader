@@ -58,5 +58,5 @@ export function createNodeAsap({
 }
 
 export function removeNode(node: Node) {
-    node && node.parentElement && node.parentElement.removeChild(node);
+    node && node.parentNode && node.parentNode.removeChild(node);
 }

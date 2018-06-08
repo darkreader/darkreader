@@ -62,12 +62,15 @@ function createTheme() {
     document.head.insertBefore(inlineStyle, invertStyle.nextSibling);
     inlineStyle.textContent = getInlineOverrideStyle();
 
+    createManagers();
+    throttledRender();
+    overrideInlineStyles(filter);
+}
+
+function createManagers() {
     Array.from<HTMLLinkElement | HTMLStyleElement>(document.querySelectorAll(STYLE_SELECTOR))
         .filter((style) => !styleManagers.has(style) && shouldManageStyle(style))
         .forEach((style) => createManager(style));
-
-    throttledRender();
-    overrideInlineStyles(filter);
 }
 
 const pendingCreation = new Set<HTMLLinkElement | HTMLStyleElement>();
@@ -141,6 +144,7 @@ function onPageLoad() {
     if (loadingStyles.size === 0) {
         document.head.querySelector('.darkreader--fallback').textContent = '';
     }
+    createManagers();
     throttledRender();
 }
 

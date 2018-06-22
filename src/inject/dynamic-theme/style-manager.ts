@@ -5,6 +5,7 @@ import {removeNode} from '../utils/dom';
 import {throttle} from '../utils/throttle';
 import {logWarn} from '../utils/log';
 import {getMatches} from '../../utils/text';
+import {isFirefox} from '../../utils/platform';
 import {FilterConfig} from '../../definitions';
 import {getAbsoluteURL} from './url';
 
@@ -24,7 +25,9 @@ export interface StyleManager {
     destroy(): void;
 }
 
-export const STYLE_SELECTOR = 'html /deep/ link[rel*="stylesheet" i], html /deep/ style';
+export const STYLE_SELECTOR = isFirefox()
+    ? 'html link[rel*="stylesheet" i], html style'
+    : 'html /deep/ link[rel*="stylesheet" i], html /deep/ style';
 
 export function shouldManageStyle(element: Node) {
     return (

@@ -98,7 +98,7 @@ async function createManager(element: HTMLLinkElement | HTMLStyleElement) {
     let loadingStyleId = ++loadingStylesCounter;
 
     function loadingStart() {
-        if (!isPageLoaded) {
+        if (!isPageLoaded()) {
             document.head.querySelector('.darkreader--fallback').textContent = getModifiedFallbackStyle(filter);
             loadingStyles.add(loadingStyleId);
         }
@@ -106,7 +106,7 @@ async function createManager(element: HTMLLinkElement | HTMLStyleElement) {
 
     function loadingEnd() {
         loadingStyles.delete(loadingStyleId);
-        if (loadingStyles.size === 0 && isPageLoaded) {
+        if (loadingStyles.size === 0 && isPageLoaded()) {
             document.head.querySelector('.darkreader--fallback').textContent = '';
         }
     }
@@ -137,10 +137,11 @@ const throttledRender = throttle(function render() {
     styleManagers.forEach((manager) => manager.render(filter, variables));
 });
 
-let isPageLoaded = document.readyState === 'complete';
+function isPageLoaded() {
+    return document.readyState === 'complete';
+}
 
 function onPageLoad() {
-    isPageLoaded = true;
     if (loadingStyles.size === 0) {
         document.head.querySelector('.darkreader--fallback').textContent = '';
     }

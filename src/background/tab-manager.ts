@@ -93,6 +93,7 @@ export default class TabManager {
                 runAt: 'document_start',
                 file: '/inject/index.js',
                 allFrames: true,
+                matchAboutBlank: true,
             }));
     }
 

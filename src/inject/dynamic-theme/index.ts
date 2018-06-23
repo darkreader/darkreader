@@ -34,6 +34,7 @@ function createTheme() {
 
     const fallbackStyle = createOrUpdateStyle('darkreader--fallback');
     document.head.insertBefore(fallbackStyle, userAgentStyle.nextSibling);
+    document.head.querySelector('.darkreader--fallback').textContent = '';
 
     const textStyle = createOrUpdateStyle('darkreader--text');
     document.head.insertBefore(textStyle, fallbackStyle.nextSibling);
@@ -138,10 +139,13 @@ const throttledRender = throttle(function render() {
 });
 
 function isPageLoaded() {
-    return document.readyState === 'complete';
+    return document.readyState === 'complete' || document.readyState === 'interactive';
 }
 
-function onPageLoad() {
+function onReadyStateChange() {
+    if (!isPageLoaded()) {
+        return;
+    }
     if (loadingStyles.size === 0) {
         document.head.querySelector('.darkreader--fallback').textContent = '';
     }
@@ -161,7 +165,7 @@ function createThemeAndWatchForUpdates() {
     });
     watchForInlineStyles(filter);
 
-    document.addEventListener('DOMContentLoaded', onPageLoad);
+    document.addEventListener('readystatechange', onReadyStateChange);
     window.addEventListener('load', throttledRender);
 }
 
@@ -169,7 +173,7 @@ function stopWatchingForUpdates() {
     styleManagers.forEach((manager) => manager.pause());
     stopWatchingForStyleChanges();
     stopWatchingForInlineStyles();
-    document.removeEventListener('DOMContentLoaded', onPageLoad);
+    document.removeEventListener('readystatechange', onReadyStateChange);
     window.removeEventListener('load', throttledRender);
 }
 

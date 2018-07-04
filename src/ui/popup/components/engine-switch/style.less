@@ -4,11 +4,35 @@
     align-items: stretch;
     display: flex;
     flex-direction: column;
+    position: relative;
 
     &__description {
         font-size: @size-text-small;
         line-height: @size-text-small-height;
         text-align: center;
         white-space: nowrap;
+    }
+
+    &__css-edit-button {
+        background-color: @color-heading;
+        border-radius: @size-text-small-height / 2;
+        color: @color-control-fore;
+        cursor: pointer;
+        font-size: @size-text-small;
+        line-height: @size-text-small-height;
+        min-width: @size-text-small-height;
+        position: absolute;
+        right: 25%;
+        text-align: center;
+        top: -@size-text-small-height / 4;
+
+        &::before {
+            content: "✎";
+            line-height: @size-text-small-height;
+        }
+
+        &:hover {
+            box-shadow: 0 0 @indent-large @color-control-fore;
+        }
     }
 }

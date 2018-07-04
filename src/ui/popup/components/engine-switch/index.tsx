@@ -2,6 +2,7 @@ import {html} from 'malevic';
 import {MultiSwitch, Shortcut} from '../../../controls';
 import ThemeEngines from '../../../../generators/theme-engines';
 import {getLocalMessage} from '../../../../utils/locales';
+import {isFirefox} from '../../../../utils/platform';
 import {ExtensionData} from '../../../../definitions';
 
 const engineNames = [
@@ -16,6 +17,15 @@ interface EngineSwitchProps {
     onChange: (engine: string) => void;
 }
 
+function openCSSEditor() {
+    chrome.windows.create({
+        type: 'panel',
+        url: isFirefox() ? '../stylesheet-editor/index.html' : 'ui/stylesheet-editor/index.html',
+        width: 600,
+        height: 600,
+    });
+}
+
 export default function EngineSwitch({engine, onChange}: EngineSwitchProps) {
     return (
         <div class="engine-switch">
@@ -24,6 +34,7 @@ export default function EngineSwitch({engine, onChange}: EngineSwitchProps) {
                 options={engineNames.map(([code, name]) => name)}
                 onChange={(value) => onChange(engineNames.find(([code, name]) => name === value)[0])}
             />
+            <span class="engine-switch__css-edit-button" onclick={openCSSEditor}></span>
             <label class="engine-switch__description">{getLocalMessage('theme_generation_mode')}</label>
         </div>
     );

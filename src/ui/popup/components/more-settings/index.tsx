@@ -29,10 +29,26 @@ export default function MoreSettings({data, actions, tab}: ExtWrapper & {tab: Ta
                 <FontSettings config={filterConfig} fonts={data.fonts} onChange={setConfig} />
             </div>
             <div class="more-settings__section">
-                <p class="more-settings__description">
+                {isFirefox() ? null : <p class="more-settings__description">
                     {compileMarkdown(getLocalMessage('try_experimental_theme_engines'))}
-                </p>
+                </p>}
                 <EngineSwitch engine={filterConfig.engine} onChange={(engine) => setConfig({engine})} />
+            </div>
+            <div class="more-settings__section">
+                <CustomSettingsToggle data={data} tab={tab} actions={actions} />
+                {tab.isProtected ? (
+                    <p class="more-settings__description more-settings__description--warning">
+                        {getLocalMessage('page_protected').replace('\n', ' ')}
+                    </p>
+                ) : tab.isInDarkList ? (
+                    <p class="more-settings__description more-settings__description--warning">
+                        {getLocalMessage('page_in_dark_list').replace('\n', ' ')}
+                    </p>
+                ) : (
+                    <p class="more-settings__description">
+                        {getLocalMessage('only_for_description')}
+                    </p>
+                )}
             </div>
             {isFirefox() ? (
                 <div class="more-settings__section">
@@ -46,24 +62,7 @@ export default function MoreSettings({data, actions, tab}: ExtWrapper & {tab: Ta
                         {getLocalMessage('change_browser_theme')}
                     </p>
                 </div>
-            ) : (
-                    <div class="more-settings__section">
-                        <CustomSettingsToggle data={data} tab={tab} actions={actions} />
-                        {tab.isProtected ? (
-                            <p class="more-settings__description more-settings__description--warning">
-                                {getLocalMessage('page_protected').replace('\n', ' ')}
-                            </p>
-                        ) : tab.isInDarkList ? (
-                            <p class="more-settings__description more-settings__description--warning">
-                                {getLocalMessage('page_in_dark_list').replace('\n', ' ')}
-                            </p>
-                        ) : (
-                            <p class="more-settings__description">
-                                {getLocalMessage('only_for_description')}
-                            </p>
-                        )}
-                    </div>
-                )}
+            ) : null}
         </section>
     );
 }

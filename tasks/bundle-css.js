@@ -16,6 +16,7 @@ module.exports = function createCSSBundleTasks(gulp) {
         const files = {
             'src/ui/devtools/style.less': `${dir}/ui/devtools/style.css`,
             'src/ui/popup/style.less': `${dir}/ui/popup/style.css`,
+            'src/ui/stylesheet-editor/style.less': `${dir}/ui/stylesheet-editor/style.css`,
         };
         const bundles = Object.entries(files).map(([src, dest]) => bundleCSSEntry({src, dest, production}));
         return mergeStream(...bundles)

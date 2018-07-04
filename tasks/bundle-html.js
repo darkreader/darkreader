@@ -31,6 +31,7 @@ require('ts-node').register({
 const Malevic = require('malevic');
 const DevToolsBody = require('../src/ui/devtools/components/body').default;
 const PopupBody = require('../src/ui/popup/components/body').default;
+const CSSEditorBody = require('../src/ui/stylesheet-editor/components/body').default;
 const {getMockData, getMockActiveTabInfo} = require('../src/ui/connect/mock');
 
 module.exports = function createBundleHtmlTask(gulp) {
@@ -41,6 +42,7 @@ module.exports = function createBundleHtmlTask(gulp) {
         const dir = getDestDir({production});
         await bundleDevToolsHtml({dir});
         await bundlePopupHtml({dir});
+        await bundleCSSEditorHtml({dir});
     }
 
     async function bundleDevToolsHtml({dir}) {
@@ -60,5 +62,15 @@ module.exports = function createBundleHtmlTask(gulp) {
         const bodyText = Malevic.renderToString(PopupBody({data, tab, actions}));
         html = html.replace('$BODY', bodyText);
         await fs.outputFile(`${dir}/ui/popup/index.html`, html);
+    }
+
+    async function bundleCSSEditorHtml({dir}) {
+        let html = await fs.readFile('src/ui/stylesheet-editor/index.html', 'utf8');
+        const data = getMockData();
+        const tab = getMockActiveTabInfo();
+        const actions = null;
+        const bodyText = Malevic.renderToString(CSSEditorBody({data, tab, actions}));
+        html = html.replace('$BODY', bodyText);
+        await fs.outputFile(`${dir}/ui/stylesheet-editor/index.html`, html);
     }
 };

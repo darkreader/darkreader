@@ -1,4 +1,4 @@
-import {isURLInList} from '../utils/url';
+import {isURLInList, getURLHost} from '../utils/url';
 import {canInjectScript} from '../background/utils/extension-api';
 import ConfigManager from './config-manager';
 import {TabInfo, Message} from '../definitions';
@@ -114,10 +114,15 @@ export default class TabManager {
     }
 
     async getActiveTabInfo(config: ConfigManager) {
-        const tab = (await queryTabs({
+        let tab = (await queryTabs({
             active: true,
             lastFocusedWindow: true
         }))[0];
+        const isExtensionPage = (url: string) => url.startsWith('chrome-extension:') || url.startsWith('moz-extension:');
+        if (isExtensionPage(tab.url)) {
+            const tabs = (await queryTabs({active: true}));
+            tab = tabs.find((t) => !isExtensionPage(t.url));
+        }
         const {DARK_SITES} = config;
         const url = tab.url;
         return <TabInfo>{

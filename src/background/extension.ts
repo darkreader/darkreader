@@ -325,7 +325,9 @@ export class Extension {
                 case ThemeEngines.staticTheme: {
                     return {
                         type: 'add-static-theme',
-                        data: createStaticStylesheet(filterConfig, url, frameURL, this.config.STATIC_THEMES),
+                        data: filterConfig.stylesheet && filterConfig.stylesheet.trim() ?
+                            filterConfig.stylesheet :
+                            createStaticStylesheet(filterConfig, url, frameURL, this.config.STATIC_THEMES),
                     };
                 }
                 case ThemeEngines.dynamicTheme: {

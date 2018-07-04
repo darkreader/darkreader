@@ -21,6 +21,7 @@ export default class UserStorage {
                 textStroke: 0,
                 invertListed: false,
                 engine: ThemeEngines.dynamicTheme,
+                stylesheet: '',
                 siteList: [],
                 custom: [],
                 changeBrowserTheme: false,
@@ -33,7 +34,7 @@ export default class UserStorage {
                 $s.config = {...this.defaultSettings.config, ...$s.config};
                 if (!Array.isArray($s.config.siteList)) {
                     const arr = [];
-                    for (let key in $s.config.siteList) {
+                    for (let key in $s.config.siteList as any) {
                         arr[key] = $s.config.siteList[key];
                     }
                     $s.config.siteList = arr;

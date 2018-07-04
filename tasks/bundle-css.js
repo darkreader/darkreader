@@ -24,14 +24,17 @@ module.exports = function createCSSBundleTasks(gulp) {
     }
 
     function bundleCSSEntry({src, dest, production}) {
-        return gulp.src(src)
+        let stream = gulp.src(src)
             .pipe(gulpSourcemaps.init())
             .pipe(gulpLess())
             .on('error', function (err) {
                 logError(err);
                 this.emit('end');
-            })
-            .pipe(gulpSourcemaps.write())
+            });
+        if (!production) {
+            stream = stream.pipe(gulpSourcemaps.write());
+        }
+        return stream
             .pipe(gulpRename(path.basename(dest)))
             .pipe(gulp.dest(path.dirname(dest)));
     }

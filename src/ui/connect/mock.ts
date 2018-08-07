@@ -39,7 +39,7 @@ export function getMockData(override = {}): ExtensionData {
 
 export function getMockActiveTabInfo(): TabInfo {
     return {
-        url: 'http://darkreader.org/',
+        url: 'https://darkreader.org/',
         isProtected: false,
         isInDarkList: false,
     };

@@ -18,7 +18,7 @@ export function readText(params: RequestParams): Promise<string> {
                 reject(new Error(`${request.status}: ${request.statusText}`));
             }
         };
-        request.onerror = (err: ErrorEvent) => reject(err.error);
+        request.onerror = () => reject(new Error(`${request.status}: ${request.statusText}`));
         if (params.timeout) {
             request.timeout = params.timeout;
             request.ontimeout = () => reject(new Error('Config loading stopped due to timeout'));

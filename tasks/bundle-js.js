@@ -1,8 +1,10 @@
+const fs = require('fs');
+const os = require('os');
 const rollup = require('rollup');
 const rollupPluginCommonjs = require('rollup-plugin-commonjs');
 const rollupPluginNodeResolve = require('rollup-plugin-node-resolve');
 const rollupPluginReplace = require('rollup-plugin-replace');
-const rollupPluginTypescript = require('rollup-plugin-typescript');
+const rollupPluginTypescript = require('rollup-plugin-typescript2');
 const typescript = require('typescript');
 const {logError} = require('./utils');
 
@@ -33,13 +35,19 @@ module.exports = function createJSBundleTasks(gulp) {
         const bundle = await rollup.rollup({
             input: src,
             plugins: [
-                rollupPluginTypescript({
-                    ...require('../src/tsconfig.json').compilerOptions,
-                    typescript,
-                    removeComments: production ? true : false
-                }),
                 rollupPluginNodeResolve(),
                 rollupPluginCommonjs(),
+                rollupPluginTypescript({
+                    typescript,
+                    tsconfig: 'src/tsconfig.json',
+                    tsconfigOverride: {
+                        compilerOptions: {
+                            removeComments: production ? true : false,
+                        },
+                    },
+                    clean: production ? true : false,
+                    cacheRoot: production ? null : `${fs.realpathSync(os.tmpdir())}/darkreader_typescript_cache`,
+                }),
                 rollupPluginReplace({
                     '__DEBUG__': production ? 'false' : 'true',
                 }),

@@ -8,7 +8,7 @@ export const PRIVACY_URL = 'https://darkreader.org/privacy/';
 export const TWITTER_URL = 'https://twitter.com/darkreaderapp';
 
 export function getHelpURL() {
-    const helpLocales = ['be', 'de', 'en', 'ru'];
+    const helpLocales = ['be', 'cs', 'de', 'en', 'ru'];
     const locale = getUILanguage();
     const matchLocale = helpLocales.find((hl) => hl === locale) || helpLocales.find((hl) => locale.startsWith(hl)) || 'en';
     return `https://darkreader.org/help/${matchLocale}/`;

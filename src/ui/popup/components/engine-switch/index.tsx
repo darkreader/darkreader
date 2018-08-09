@@ -1,9 +1,8 @@
 import {html} from 'malevic';
-import {MultiSwitch, Shortcut} from '../../../controls';
+import {MultiSwitch} from '../../../controls';
 import ThemeEngines from '../../../../generators/theme-engines';
 import {getLocalMessage} from '../../../../utils/locales';
 import {isFirefox} from '../../../../utils/platform';
-import {ExtensionData} from '../../../../definitions';
 
 const engineNames = [
     [ThemeEngines.cssFilter, getLocalMessage('engine_filter')],
@@ -34,7 +33,13 @@ export default function EngineSwitch({engine, onChange}: EngineSwitchProps) {
                 options={engineNames.map(([code, name]) => name)}
                 onChange={(value) => onChange(engineNames.find(([code, name]) => name === value)[0])}
             />
-            <span class="engine-switch__css-edit-button" onclick={openCSSEditor}></span>
+            <span
+                class={{
+                    'engine-switch__css-edit-button': true,
+                    'engine-switch__css-edit-button_active': engine === ThemeEngines.staticTheme,
+                }}
+                onclick={openCSSEditor}
+            ></span>
             <label class="engine-switch__description">{getLocalMessage('theme_generation_mode')}</label>
         </div>
     );

@@ -14,16 +14,13 @@ import createCSSFilterStylesheet from '../generators/css-filter';
 import {getDynamicThemeFixesFor} from '../generators/dynamic-theme';
 import createStaticStylesheet from '../generators/static-theme';
 import {createSVGFilterStylesheet, getSVGFilterMatrixValue, getSVGReverseFilterMatrixValue} from '../generators/svg-filter';
-import {FilterConfig, ExtensionData, Shortcuts} from '../definitions';
+import {FilterConfig, ExtensionData, Shortcuts, UserSettings} from '../definitions';
 
 export class Extension {
-
-    enabled: boolean;
     ready: boolean;
 
     config: ConfigManager;
     devtools: DevTools;
-    filterConfig: FilterConfig;
     fonts: string[];
     icon: IconManager;
     messenger: Messenger;
@@ -36,7 +33,7 @@ export class Extension {
 
         this.icon = new IconManager();
         this.config = new ConfigManager();
-        this.devtools = new DevTools(this.config, () => this.onConfigPropChanged());
+        this.devtools = new DevTools(this.config, () => this.onSettingsChanged());
         this.messenger = new Messenger(this.getMessengerAdapter());
         this.news = new Newsmaker((news) => {
             const shouldNotify = false; // TODO: Suggest an option for that.
@@ -50,11 +47,11 @@ export class Extension {
         this.tabs = new TabManager({
             getConnectionMessage: (url, frameURL) => {
                 if (this.ready) {
-                    return this.enabled && this.getTabMessage(url, frameURL);
+                    return this.isEnabled() && this.getTabMessage(url, frameURL);
                 } else {
                     return new Promise((resolve) => {
                         this.awaiting.push(() => {
-                            resolve(this.enabled && this.getTabMessage(url, frameURL));
+                            resolve(this.isEnabled() && this.getTabMessage(url, frameURL));
                         });
                     });
                 }
@@ -64,20 +61,43 @@ export class Extension {
         this.awaiting = [];
     }
 
+    isEnabled() {
+        if (this.user.settings.enabled === 'auto') {
+            const now = new Date();
+            const t0 = this.user.settings.activationTime.split(':').map((x) => parseInt(x));
+            const t1 = this.user.settings.deactivationTime.split(':').map((x) => parseInt(x));
+            const t = [now.getHours(), now.getMinutes()];
+
+            function compare(a: number[], b: number[]) {
+                if (a[0] === b[0] && a[1] === b[1]) {
+                    return 0;
+                }
+                if (a[0] < b[0] || (a[0] === b[0] && a[1] < b[1])) {
+                    return 1;
+                }
+                return -1;
+            }
+
+            if (compare(t0, t1) < 0) {
+                t1[0] += 24;
+            }
+
+            return compare(t0, t) >= 0 && compare(t, t1) > 0;
+        }
+
+        return this.user.settings.enabled;
+    }
+
     private awaiting: (() => void)[];
 
     async start() {
         await this.config.load({local: true});
         this.fonts = await getFontList();
 
-        const settings = await this.user.loadSettings();
-        if (settings.enabled) {
-            this.enable();
-        } else {
-            this.disable();
-        }
-        this.setConfig(settings.config);
-        console.log('loaded', settings);
+        await this.user.loadSettings();
+        this.onAppToggle();
+        this.changeSettings(this.user.settings);
+        console.log('loaded', this.user.settings);
 
         this.registerCommands();
 
@@ -106,9 +126,8 @@ export class Extension {
                 }
                 return await this.tabs.getActiveTabInfo(this.config);
             },
-            enable: () => this.enable(),
-            disable: () => this.disable(),
-            setConfig: (config) => this.setConfig(config),
+            changeSettings: (settings) => this.changeSettings(settings),
+            setAppearance: (appearance) => this.setAppearance(appearance),
             setShortcut: ({command, shortcut}) => this.setShortcut(command, shortcut),
             toggleSitePattern: (pattern) => this.toggleSitePattern(pattern),
             markNewsAsRead: (ids) => this.news.markAsRead(...ids),
@@ -130,11 +149,7 @@ export class Extension {
         chrome.commands.onCommand.addListener((command) => {
             if (command === 'toggle') {
                 console.log('Toggle command entered');
-                if (this.enabled) {
-                    this.disable();
-                } else {
-                    this.enable();
-                }
+                this.changeSettings({enabled: !this.isEnabled()});
             }
             if (command === 'addSite') {
                 console.log('Add Site command entered');
@@ -143,9 +158,9 @@ export class Extension {
             if (command === 'switchEngine') {
                 console.log('Switch Engine command entered');
                 const engines = Object.values(ThemeEngines);
-                const index = engines.indexOf(this.filterConfig.engine);
+                const index = engines.indexOf(this.user.settings.appearance.engine);
                 const next = index === engines.length - 1 ? engines[0] : engines[index + 1];
-                this.setConfig({engine: next});
+                this.setAppearance({engine: next});
             }
         });
     }
@@ -161,9 +176,9 @@ export class Extension {
 
     private async collectData(): Promise<ExtensionData> {
         return {
-            enabled: this.enabled,
-            filterConfig: this.filterConfig,
-            ready: this.ready,
+            isEnabled: this.isEnabled(),
+            isReady: this.ready,
+            settings: this.user.settings,
             fonts: this.fonts,
             news: this.news.latest,
             shortcuts: await this.getShortcuts(),
@@ -173,53 +188,34 @@ export class Extension {
         };
     }
 
-    enable() {
-        this.enabled = true;
-        if (this.filterConfig && this.filterConfig.changeBrowserTheme) {
-            setWindowTheme(this.filterConfig);
-        }
-        this.onAppToggle();
-    }
+    changeSettings($settings: Partial<UserSettings>) {
+        const prev = {...this.user.settings};
 
-    disable() {
-        this.enabled = false;
-        if (this.filterConfig && this.filterConfig.changeBrowserTheme) {
-            resetWindowTheme();
-        }
-        this.onAppToggle();
-    }
+        this.user.set($settings);
 
-    setConfig(config: FilterConfig) {
-        const prevConfig = {...this.filterConfig};
-        let siteList: string[] = prevConfig.siteList;
-        if (config.siteList) {
-            siteList = config.siteList.filter((pattern) => {
-                let isOK = false;
-                try {
-                    isURLMatched('https://google.com/', pattern);
-                    isOK = true;
-                } catch (err) {
-                    console.warn(`Pattern "${pattern}" excluded`);
-                }
-                return isOK && pattern !== '/';
-            });
+        if (prev.enabled !== this.user.settings.enabled) {
+            this.onAppToggle();
         }
-        this.filterConfig = {...prevConfig, ...config, siteList};
-        if (this.enabled) {
-            if (!this.filterConfig.changeBrowserTheme && prevConfig.changeBrowserTheme) {
+
+        if (this.isEnabled() && $settings.changeBrowserTheme != null && prev.changeBrowserTheme !== $settings.changeBrowserTheme) {
+            if ($settings.changeBrowserTheme) {
+                setWindowTheme(this.user.settings.appearance);
+            } else {
                 resetWindowTheme();
-            } else if (this.filterConfig.changeBrowserTheme && (
-                !prevConfig.changeBrowserTheme ||
-                (this.filterConfig.mode !== prevConfig.mode) ||
-                (this.filterConfig.brightness !== prevConfig.brightness) ||
-                (this.filterConfig.contrast !== prevConfig.contrast) ||
-                (this.filterConfig.sepia !== prevConfig.sepia) ||
-                (this.filterConfig.grayscale !== prevConfig.grayscale)
-            )) {
-                setWindowTheme(this.filterConfig);
             }
         }
-        this.onConfigPropChanged();
+
+        this.onSettingsChanged();
+    }
+
+    setAppearance($appearance: Partial<FilterConfig>) {
+        this.user.set({appearance: {...this.user.settings.appearance, ...$appearance}});
+
+        if (this.isEnabled() && this.user.settings.changeBrowserTheme) {
+            setWindowTheme(this.user.settings.appearance);
+        }
+
+        this.onSettingsChanged();
     }
 
     private async reportChanges() {
@@ -228,14 +224,14 @@ export class Extension {
     }
 
     toggleSitePattern(pattern: string) {
-        const siteList = this.filterConfig.siteList.slice();
+        const siteList = this.user.settings.siteList.slice();
         const index = siteList.indexOf(pattern);
         if (index < 0) {
             siteList.push(pattern);
         } else {
             siteList.splice(index, 1);
         }
-        this.setConfig(Object.assign({}, this.filterConfig, {siteList}));
+        this.changeSettings({siteList});
     }
 
     /**
@@ -254,25 +250,25 @@ export class Extension {
     //       Handle config changes
     //
 
-    protected onAppToggle() {
-        if (this.enabled) {
+    private onAppToggle() {
+        if (this.isEnabled()) {
             this.icon.setActive();
+            if (this.user.settings.changeBrowserTheme) {
+                setWindowTheme(this.user.settings.appearance);
+            }
         } else {
             this.icon.setInactive();
+            if (this.user.settings.changeBrowserTheme) {
+                resetWindowTheme();
+            }
         }
-        if (!this.ready) {
-            return;
-        }
-        this.tabs.sendMessage(this.getTabMessage);
-        this.saveUserSettings();
-        this.reportChanges();
     }
 
-    protected onConfigPropChanged() {
+    private onSettingsChanged() {
         if (!this.ready) {
             return;
         }
-        if (this.enabled) {
+        if (this.isEnabled()) {
             this.tabs.sendMessage(this.getTabMessage);
         }
         this.saveUserSettings();
@@ -288,15 +284,15 @@ export class Extension {
 
     private getTabMessage = (url: string, frameURL: string) => {
         const {DARK_SITES} = this.config;
-        const isUrlInDarkList = isURLInList(url, DARK_SITES);
-        const isUrlInUserList = isURLInList(url, this.filterConfig.siteList);
+        const isURLInDarkList = isURLInList(url, DARK_SITES);
+        const isURLInUserList = isURLInList(url, this.user.settings.siteList);
 
-        if (this.enabled && (
-            (isUrlInUserList && this.filterConfig.invertListed) ||
-            (!isUrlInDarkList && !this.filterConfig.invertListed && !isUrlInUserList)
+        if (this.isEnabled() && (
+            (isURLInUserList && !this.user.settings.applyToListedOnly) ||
+            (!isURLInDarkList && this.user.settings.applyToListedOnly && !isURLInUserList)
         )) {
-            const custom = this.filterConfig.custom.find(({url: urlList}) => isURLInList(url, urlList));
-            const filterConfig = custom ? custom.config : this.filterConfig;
+            const custom = this.user.settings.customAppearance.find(({url: urlList}) => isURLInList(url, urlList));
+            const filterConfig = custom ? custom.appearance : this.user.settings.appearance;
 
             console.log(`Creating CSS for url: ${url}`);
             switch (filterConfig.engine) {
@@ -331,7 +327,7 @@ export class Extension {
                     };
                 }
                 case ThemeEngines.dynamicTheme: {
-                    const {siteList, invertListed, engine, ...filter} = filterConfig;
+                    const {engine, ...filter} = filterConfig;
                     const fixes = getDynamicThemeFixesFor(url, frameURL, this.config.DYNAMIC_THEME_FIXES);
                     const isIFrame = frameURL != null;
                     return {
@@ -356,10 +352,7 @@ export class Extension {
     //          User settings
 
     private async saveUserSettings() {
-        const saved = await this.user.saveSetting({
-            enabled: this.enabled,
-            config: this.filterConfig,
-        });
-        console.log('saved', saved);
+        await this.user.saveSettings();
+        console.log('saved', this.user.settings);
     }
 }

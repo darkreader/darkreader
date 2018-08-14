@@ -6,7 +6,7 @@ import {FilterConfig} from '../../../../definitions';
 interface FontSettingsProps {
     config: FilterConfig;
     fonts: string[];
-    onChange: (config: FilterConfig) => void;
+    onChange: (config: Partial<FilterConfig>) => void;
 }
 
 export default function FontSettings({config, fonts, onChange}: FontSettingsProps) {

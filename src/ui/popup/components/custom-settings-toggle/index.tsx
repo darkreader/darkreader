@@ -1,4 +1,4 @@
-import {html, render} from 'malevic';
+import {html} from 'malevic';
 import {Button} from '../../../controls';
 import {getURLHost, isURLInList} from '../../../../utils/url';
 import {getLocalMessage} from '../../../../utils/locales';
@@ -7,7 +7,7 @@ import {ExtWrapper, TabInfo} from '../../../../definitions';
 export default function CustomSettingsToggle({data, tab, actions}: ExtWrapper & {tab: TabInfo}) {
     const host = getURLHost(tab.url || '');
 
-    const isCustom = data.filterConfig.custom.some(({url}) => isURLInList(tab.url, url));
+    const isCustom = data.settings.customAppearance.some(({url}) => isURLInList(tab.url, url));
 
     const urlText = (host
         ? host
@@ -23,19 +23,18 @@ export default function CustomSettingsToggle({data, tab, actions}: ExtWrapper & 
             class={{
                 'custom-settings-toggle': true,
                 'custom-settings-toggle--checked': isCustom,
-                'custom-settings-toggle--disabled': tab.isProtected || (tab.isInDarkList && !data.filterConfig.invertListed),
+                'custom-settings-toggle--disabled': tab.isProtected || (tab.isInDarkList && data.settings.applyToListedOnly),
             }}
             onclick={(e) => {
                 if (isCustom) {
-                    const filtered = data.filterConfig.custom.filter(({url}) => !isURLInList(tab.url, url));
-                    actions.setConfig({custom: filtered});
+                    const filtered = data.settings.customAppearance.filter(({url}) => !isURLInList(tab.url, url));
+                    actions.changeSettings({customAppearance: filtered});
                 } else {
-                    const {mode, brightness, contrast, grayscale, sepia, useFont, fontFamily, textStroke, engine} = data.filterConfig;
-                    const extended = data.filterConfig.custom.concat({
+                    const extended = data.settings.customAppearance.concat({
                         url: [host],
-                        config: {mode, brightness, contrast, grayscale, sepia, useFont, fontFamily, textStroke, engine},
+                        appearance: {...data.settings.appearance},
                     });
-                    actions.setConfig({custom: extended});
+                    actions.changeSettings({customAppearance: extended});
                     (e.currentTarget as HTMLElement).classList.add('custom-settings-toggle--checked'); // Speed-up reaction
                 }
             }}

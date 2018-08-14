@@ -146,6 +146,7 @@ export default class UserStorage {
                 changeBrowserTheme: s.config.changeBrowserTheme,
             };
             chrome.storage.sync.remove('config');
+            chrome.storage.sync.set(settings);
             return settings;
         } catch (err) {
             console.error('Settings migration error:', err, 'Loaded settings:', settings_4_6_2);

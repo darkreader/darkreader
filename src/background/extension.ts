@@ -268,9 +268,8 @@ export class Extension {
         if (!this.ready) {
             return;
         }
-        if (this.isEnabled()) {
-            this.tabs.sendMessage(this.getTabMessage);
-        }
+
+        this.tabs.sendMessage(this.getTabMessage);
         this.saveUserSettings();
         this.reportChanges();
     }

@@ -127,7 +127,7 @@ export class Extension {
                 return await this.tabs.getActiveTabInfo(this.config);
             },
             changeSettings: (settings) => this.changeSettings(settings),
-            setAppearance: (appearance) => this.setAppearance(appearance),
+            setTheme: (theme) => this.setTheme(theme),
             setShortcut: ({command, shortcut}) => this.setShortcut(command, shortcut),
             toggleSitePattern: (pattern) => this.toggleSitePattern(pattern),
             markNewsAsRead: (ids) => this.news.markAsRead(...ids),
@@ -158,9 +158,9 @@ export class Extension {
             if (command === 'switchEngine') {
                 console.log('Switch Engine command entered');
                 const engines = Object.values(ThemeEngines);
-                const index = engines.indexOf(this.user.settings.appearance.engine);
+                const index = engines.indexOf(this.user.settings.theme.engine);
                 const next = index === engines.length - 1 ? engines[0] : engines[index + 1];
-                this.setAppearance({engine: next});
+                this.setTheme({engine: next});
             }
         });
     }
@@ -199,7 +199,7 @@ export class Extension {
 
         if (this.isEnabled() && $settings.changeBrowserTheme != null && prev.changeBrowserTheme !== $settings.changeBrowserTheme) {
             if ($settings.changeBrowserTheme) {
-                setWindowTheme(this.user.settings.appearance);
+                setWindowTheme(this.user.settings.theme);
             } else {
                 resetWindowTheme();
             }
@@ -208,11 +208,11 @@ export class Extension {
         this.onSettingsChanged();
     }
 
-    setAppearance($appearance: Partial<FilterConfig>) {
-        this.user.set({appearance: {...this.user.settings.appearance, ...$appearance}});
+    setTheme($theme: Partial<FilterConfig>) {
+        this.user.set({theme: {...this.user.settings.theme, ...$theme}});
 
         if (this.isEnabled() && this.user.settings.changeBrowserTheme) {
-            setWindowTheme(this.user.settings.appearance);
+            setWindowTheme(this.user.settings.theme);
         }
 
         this.onSettingsChanged();
@@ -254,7 +254,7 @@ export class Extension {
         if (this.isEnabled()) {
             this.icon.setActive();
             if (this.user.settings.changeBrowserTheme) {
-                setWindowTheme(this.user.settings.appearance);
+                setWindowTheme(this.user.settings.theme);
             }
         } else {
             this.icon.setInactive();
@@ -291,8 +291,8 @@ export class Extension {
             (isURLInUserList && this.user.settings.applyToListedOnly) ||
             (!isURLInDarkList && !this.user.settings.applyToListedOnly && !isURLInUserList)
         )) {
-            const custom = this.user.settings.customAppearance.find(({url: urlList}) => isURLInList(url, urlList));
-            const filterConfig = custom ? custom.appearance : this.user.settings.appearance;
+            const custom = this.user.settings.customThemes.find(({url: urlList}) => isURLInList(url, urlList));
+            const filterConfig = custom ? custom.theme : this.user.settings.theme;
 
             console.log(`Creating CSS for url: ${url}`);
             switch (filterConfig.engine) {

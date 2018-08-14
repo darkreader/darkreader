@@ -7,7 +7,7 @@ import {ExtWrapper, TabInfo} from '../../../../definitions';
 export default function CustomSettingsToggle({data, tab, actions}: ExtWrapper & {tab: TabInfo}) {
     const host = getURLHost(tab.url || '');
 
-    const isCustom = data.settings.customAppearance.some(({url}) => isURLInList(tab.url, url));
+    const isCustom = data.settings.customThemes.some(({url}) => isURLInList(tab.url, url));
 
     const urlText = (host
         ? host
@@ -27,14 +27,14 @@ export default function CustomSettingsToggle({data, tab, actions}: ExtWrapper & 
             }}
             onclick={(e) => {
                 if (isCustom) {
-                    const filtered = data.settings.customAppearance.filter(({url}) => !isURLInList(tab.url, url));
-                    actions.changeSettings({customAppearance: filtered});
+                    const filtered = data.settings.customThemes.filter(({url}) => !isURLInList(tab.url, url));
+                    actions.changeSettings({customThemes: filtered});
                 } else {
-                    const extended = data.settings.customAppearance.concat({
+                    const extended = data.settings.customThemes.concat({
                         url: [host],
-                        appearance: {...data.settings.appearance},
+                        theme: {...data.settings.theme},
                     });
-                    actions.changeSettings({customAppearance: extended});
+                    actions.changeSettings({customThemes: extended});
                     (e.currentTarget as HTMLElement).classList.add('custom-settings-toggle--checked'); // Speed-up reaction
                 }
             }}

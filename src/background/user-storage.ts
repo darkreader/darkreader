@@ -11,7 +11,7 @@ export default class UserStorage {
     constructor() {
         this.defaultSettings = {
             enabled: true,
-            appearance: {
+            theme: {
                 mode: 1,
                 brightness: 100,
                 contrast: 90,
@@ -23,7 +23,7 @@ export default class UserStorage {
                 engine: ThemeEngines.dynamicTheme,
                 stylesheet: '',
             },
-            customAppearance: [],
+            customThemes: [],
             siteList: [],
             applyToListedOnly: false,
             changeBrowserTheme: false,
@@ -44,7 +44,7 @@ export default class UserStorage {
         return new Promise<UserSettings>((resolve) => {
             chrome.storage.local.get(this.defaultSettings, (local: UserSettings) => {
                 if (!local.syncSettings) {
-                    local.appearance = {...this.defaultSettings.appearance, ...local.appearance};
+                    local.theme = {...this.defaultSettings.theme, ...local.theme};
                     resolve(local);
                     return;
                 }
@@ -57,7 +57,7 @@ export default class UserStorage {
                     } else {
                         sync = this.migrateSettings_4_6_2($sync) as UserSettings;
                     }
-                    sync.appearance = {...this.defaultSettings.appearance, ...sync.appearance};
+                    sync.theme = {...this.defaultSettings.theme, ...sync.theme};
                     resolve(sync);
                 });
             });
@@ -113,7 +113,7 @@ export default class UserStorage {
     }
 
     private migrateSettings_4_6_2(settings_4_6_2: any) {
-        function migrateAppearance(filterConfig_4_6_2: any) {
+        function migrateTheme(filterConfig_4_6_2: any) {
             const f = filterConfig_4_6_2;
             return {
                 mode: f.mode,
@@ -134,11 +134,11 @@ export default class UserStorage {
             const settings: UserSettings = {
                 enabled: s.enabled,
                 ...this.defaultSettings,
-                appearance: migrateAppearance(s.config),
-                customAppearance: s.config.custom ? s.config.custom.map((c) => {
+                theme: migrateTheme(s.config),
+                customThemes: s.config.custom ? s.config.custom.map((c) => {
                     return {
                         url: c.url,
-                        appearance: migrateAppearance(c.config),
+                        theme: migrateTheme(c.config),
                     };
                 }) : [],
                 siteList: s.config.siteList,

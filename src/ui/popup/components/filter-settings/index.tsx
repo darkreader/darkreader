@@ -8,15 +8,15 @@ import {ExtWrapper, TabInfo, FilterConfig} from '../../../../definitions';
 
 export default function FilterSettings({data, actions, tab}: ExtWrapper & {tab: TabInfo}) {
 
-    const custom = data.settings.customAppearance.find(({url}) => isURLInList(tab.url, url));
-    const filterConfig = custom ? custom.appearance : data.settings.appearance;
+    const custom = data.settings.customThemes.find(({url}) => isURLInList(tab.url, url));
+    const filterConfig = custom ? custom.theme : data.settings.theme;
 
     function setConfig(config: Partial<FilterConfig>) {
         if (custom) {
-            custom.appearance = {...custom.appearance, ...config};
-            actions.changeSettings({customAppearance: data.settings.customAppearance});
+            custom.theme = {...custom.theme, ...config};
+            actions.changeSettings({customThemes: data.settings.customThemes});
         } else {
-            actions.setAppearance(config)
+            actions.setTheme(config)
         }
     }
 

@@ -14,7 +14,7 @@ export interface ExtensionData {
 
 export interface ExtensionActions {
     changeSettings(settings: Partial<UserSettings>);
-    setAppearance(appearance: Partial<FilterConfig>);
+    setTheme(theme: Partial<FilterConfig>);
     setShortcut(command: string, shortcut: string);
     toggleSitePattern(pattern: string);
     markNewsAsRead(ids: string[]);
@@ -46,13 +46,13 @@ export interface FilterConfig {
 
 export interface CustomSiteConfig {
     url: string[];
-    appearance: FilterConfig;
+    theme: FilterConfig;
 }
 
 export interface UserSettings {
     enabled: boolean | 'auto';
-    appearance: FilterConfig;
-    customAppearance: CustomSiteConfig[];
+    theme: FilterConfig;
+    customThemes: CustomSiteConfig[];
     siteList: string[];
     applyToListedOnly: boolean;
     changeBrowserTheme: boolean;

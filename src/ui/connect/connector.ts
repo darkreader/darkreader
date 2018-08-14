@@ -61,8 +61,8 @@ export default class Connector implements ExtensionActions {
         this.port.postMessage({type: 'change-settings', data: settings});
     }
 
-    setAppearance(appearance: Partial<FilterConfig>) {
-        this.port.postMessage({type: 'set-appearance', data: appearance});
+    setTheme(theme: Partial<FilterConfig>) {
+        this.port.postMessage({type: 'set-theme', data: theme});
     }
 
     toggleSitePattern(pattern: string) {

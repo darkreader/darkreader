@@ -4,7 +4,7 @@ interface ExtensionAdapter {
     collect: () => Promise<ExtensionData>;
     getActiveTabInfo: () => Promise<TabInfo>;
     changeSettings: (settings: Partial<UserSettings>) => void;
-    setAppearance: (appearance: Partial<FilterConfig>) => void;
+    setTheme: (theme: Partial<FilterConfig>) => void;
     setShortcut: ({command, shortcut}) => void;
     markNewsAsRead: (ids: string[]) => void;
     toggleSitePattern: (pattern: string) => void;
@@ -54,8 +54,8 @@ export default class Messenger {
                 this.adapter.changeSettings(data);
                 break;
             }
-            case 'set-appearance': {
-                this.adapter.setAppearance(data);
+            case 'set-theme': {
+                this.adapter.setTheme(data);
                 break;
             }
             case 'set-shortcut': {

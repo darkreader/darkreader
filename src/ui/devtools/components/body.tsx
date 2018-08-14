@@ -13,13 +13,13 @@ interface BodyProps extends ExtWrapper {
 function Body({data, actions, state, setState}: BodyProps) {
     let textNode: HTMLTextAreaElement;
 
-    const wrapper = (data.settings.appearance.engine === ThemeEngines.staticTheme
+    const wrapper = (data.settings.theme.engine === ThemeEngines.staticTheme
         ? {
             header: 'Static Theme Editor',
             fixesText: data.devStaticThemesText,
             apply: (text) => actions.applyDevStaticThemes(text),
             reset: () => actions.resetDevStaticThemes(),
-        } : data.settings.appearance.engine === ThemeEngines.cssFilter || data.settings.appearance.engine === ThemeEngines.svgFilter ? {
+        } : data.settings.theme.engine === ThemeEngines.cssFilter || data.settings.theme.engine === ThemeEngines.svgFilter ? {
             header: 'Inversion Fix Editor',
             fixesText: data.devInversionFixesText,
             apply: (text) => actions.applyDevInversionFixes(text),

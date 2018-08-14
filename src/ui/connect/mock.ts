@@ -6,7 +6,7 @@ export function getMockData(override = {}): ExtensionData {
         isReady: true,
         settings: {
             enabled: true,
-            appearance: {
+            theme: {
                 mode: 1,
                 brightness: 110,
                 contrast: 90,
@@ -18,7 +18,7 @@ export function getMockData(override = {}): ExtensionData {
                 engine: 'cssFilter',
                 stylesheet: '',
             },
-            customAppearance: [],
+            customThemes: [],
             siteList: [],
             applyToListedOnly: false,
             changeBrowserTheme: false,
@@ -71,8 +71,8 @@ export function createConnectorMock() {
             Object.assign(data.settings, settings);
             listener(data);
         },
-        setAppearance(appearance) {
-            Object.assign(data.settings.appearance, appearance);
+        setTheme(theme) {
+            Object.assign(data.settings.theme, theme);
             listener(data);
         },
         setShortcut(command, shortcut) {

@@ -20,7 +20,7 @@ export function getMockData(override = {}): ExtensionData {
             },
             customAppearance: [],
             siteList: [],
-            applyToListedOnly: true,
+            applyToListedOnly: false,
             changeBrowserTheme: false,
             activationTime: '18:00',
             deactivationTime: '9:00',

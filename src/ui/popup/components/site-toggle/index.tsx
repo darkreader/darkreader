@@ -8,7 +8,7 @@ export default function SiteToggleButton({data, tab, actions}: ExtWrapper & {tab
     const toggleHasEffect = (
         data.isEnabled &&
         !tab.isProtected &&
-        (!data.settings.applyToListedOnly || !tab.isInDarkList)
+        (data.settings.applyToListedOnly || !tab.isInDarkList)
     );
 
     const host = getURLHost(tab.url || '');

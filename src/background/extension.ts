@@ -288,8 +288,8 @@ export class Extension {
         const isURLInUserList = isURLInList(url, this.user.settings.siteList);
 
         if (this.isEnabled() && (
-            (isURLInUserList && !this.user.settings.applyToListedOnly) ||
-            (!isURLInDarkList && this.user.settings.applyToListedOnly && !isURLInUserList)
+            (isURLInUserList && this.user.settings.applyToListedOnly) ||
+            (!isURLInDarkList && !this.user.settings.applyToListedOnly && !isURLInUserList)
         )) {
             const custom = this.user.settings.customAppearance.find(({url: urlList}) => isURLInList(url, urlList));
             const filterConfig = custom ? custom.appearance : this.user.settings.appearance;

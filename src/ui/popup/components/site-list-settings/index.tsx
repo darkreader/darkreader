@@ -17,10 +17,10 @@ export default function SiteListSettings({data, actions, isFocused}: SiteListSet
         <section class="site-list-settings">
             <Toggle
                 class="site-list-settings__toggle"
-                checked={!data.settings.applyToListedOnly}
+                checked={data.settings.applyToListedOnly}
                 labelOn={getLocalMessage('invert_listed_only')}
                 labelOff={getLocalMessage('not_invert_listed')}
-                onChange={(value) => actions.changeSettings({applyToListedOnly: !value})}
+                onChange={(value) => actions.changeSettings({applyToListedOnly: value})}
             />
             <TextList
                 class="site-list-settings__text-list"

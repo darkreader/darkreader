@@ -1,11 +1,10 @@
-import {ExtensionData, FilterConfig, TabInfo, Message} from '../definitions';
+import {ExtensionData, FilterConfig, TabInfo, Message, UserSettings} from '../definitions';
 
 interface ExtensionAdapter {
     collect: () => Promise<ExtensionData>;
     getActiveTabInfo: () => Promise<TabInfo>;
-    enable: () => void;
-    disable: () => void;
-    setConfig: (config: FilterConfig) => void;
+    changeSettings: (settings: Partial<UserSettings>) => void;
+    setTheme: (theme: Partial<FilterConfig>) => void;
     setShortcut: ({command, shortcut}) => void;
     markNewsAsRead: (ids: string[]) => void;
     toggleSitePattern: (pattern: string) => void;
@@ -51,16 +50,12 @@ export default class Messenger {
                 port.onDisconnect.addListener(() => this.reporters.delete(report));
                 break;
             }
-            case 'enable': {
-                this.adapter.enable();
+            case 'change-settings': {
+                this.adapter.changeSettings(data);
                 break;
             }
-            case 'disable': {
-                this.adapter.disable();
-                break;
-            }
-            case 'set-config': {
-                this.adapter.setConfig(data);
+            case 'set-theme': {
+                this.adapter.setTheme(data);
                 break;
             }
             case 'set-shortcut': {

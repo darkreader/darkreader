@@ -6,9 +6,9 @@ import {ExtWrapper, TabInfo} from '../../../../definitions';
 
 export default function SiteToggleButton({data, tab, actions}: ExtWrapper & {tab: TabInfo}) {
     const toggleHasEffect = (
-        data.enabled &&
+        data.isEnabled &&
         !tab.isProtected &&
-        (data.filterConfig.invertListed || !tab.isInDarkList)
+        (data.settings.applyToListedOnly || !tab.isInDarkList)
     );
 
     const host = getURLHost(tab.url || '');

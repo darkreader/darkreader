@@ -2,7 +2,7 @@ import {html} from 'malevic';
 import CustomSettingsToggle from '../custom-settings-toggle';
 import EngineSwitch from '../engine-switch';
 import FontSettings from '../font-settings';
-import {Toggle, UpDown} from '../../../controls';
+import {Toggle} from '../../../controls';
 import {isFirefox} from '../../../../utils/platform';
 import {isURLInList} from '../../../../utils/url';
 import {compileMarkdown} from '../../utils/markdown';
@@ -11,15 +11,15 @@ import {ExtWrapper, FilterConfig, TabInfo} from '../../../../definitions';
 
 export default function MoreSettings({data, actions, tab}: ExtWrapper & {tab: TabInfo}) {
 
-    const custom = data.filterConfig.custom.find(({url}) => isURLInList(tab.url, url));
-    const filterConfig = custom ? custom.config : data.filterConfig;
+    const custom = data.settings.customThemes.find(({url}) => isURLInList(tab.url, url));
+    const filterConfig = custom ? custom.theme : data.settings.theme;
 
-    function setConfig(config: FilterConfig) {
+    function setConfig(config: Partial<FilterConfig>) {
         if (custom) {
-            custom.config = {...custom.config, ...config};
-            actions.setConfig({custom: data.filterConfig.custom});
+            custom.theme = {...custom.theme, ...config};
+            actions.changeSettings({customThemes: data.settings.customThemes});
         } else {
-            actions.setConfig(config)
+            actions.setTheme(config)
         }
     }
 
@@ -45,18 +45,18 @@ export default function MoreSettings({data, actions, tab}: ExtWrapper & {tab: Ta
                         {getLocalMessage('page_in_dark_list').replace('\n', ' ')}
                     </p>
                 ) : (
-                    <p class="more-settings__description">
-                        {getLocalMessage('only_for_description')}
-                    </p>
-                )}
+                            <p class="more-settings__description">
+                                {getLocalMessage('only_for_description')}
+                            </p>
+                        )}
             </div>
             {isFirefox() ? (
                 <div class="more-settings__section">
                     <Toggle
-                        checked={data.filterConfig.changeBrowserTheme}
+                        checked={data.settings.changeBrowserTheme}
                         labelOn={getLocalMessage('custom_browser_theme_on')}
                         labelOff={getLocalMessage('custom_browser_theme_off')}
-                        onChange={(checked) => actions.setConfig({changeBrowserTheme: checked})}
+                        onChange={(checked) => actions.changeSettings({changeBrowserTheme: checked})}
                     />
                     <p class="more-settings__description">
                         {getLocalMessage('change_browser_theme')}

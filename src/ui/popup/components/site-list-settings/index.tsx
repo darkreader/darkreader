@@ -17,19 +17,19 @@ export default function SiteListSettings({data, actions, isFocused}: SiteListSet
         <section class="site-list-settings">
             <Toggle
                 class="site-list-settings__toggle"
-                checked={data.filterConfig.invertListed}
+                checked={data.settings.applyToListedOnly}
                 labelOn={getLocalMessage('invert_listed_only')}
                 labelOff={getLocalMessage('not_invert_listed')}
-                onChange={(value) => actions.setConfig({invertListed: value})}
+                onChange={(value) => actions.changeSettings({applyToListedOnly: value})}
             />
             <TextList
                 class="site-list-settings__text-list"
                 placeholder="google.com/maps"
-                values={data.filterConfig.siteList}
+                values={data.settings.siteList}
                 isFocused={isFocused}
                 onChange={(values) => {
                     if (values.every(isSiteUrlValid)) {
-                        actions.setConfig({siteList: values});
+                        actions.changeSettings({siteList: values});
                     }
                 }}
             />

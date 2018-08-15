@@ -1,9 +1,9 @@
 import {FilterMode} from './generators/css-filter';
 
 export interface ExtensionData {
-    enabled: boolean;
-    ready: boolean;
-    filterConfig: FilterConfig;
+    isEnabled: boolean;
+    isReady: boolean;
+    settings: UserSettings;
     fonts: string[];
     news: News[];
     shortcuts: Shortcuts;
@@ -13,9 +13,8 @@ export interface ExtensionData {
 }
 
 export interface ExtensionActions {
-    enable();
-    disable();
-    setConfig(config: FilterConfig);
+    changeSettings(settings: Partial<UserSettings>);
+    setTheme(theme: Partial<FilterConfig>);
     setShortcut(command: string, shortcut: string);
     toggleSitePattern(pattern: string);
     markNewsAsRead(ids: string[]);
@@ -33,30 +32,34 @@ export interface ExtWrapper {
 }
 
 export interface FilterConfig {
-    mode?: FilterMode;
-    brightness?: number;
-    contrast?: number;
-    grayscale?: number;
-    sepia?: number;
-    useFont?: boolean;
-    fontFamily?: string;
-    textStroke?: number;
-    siteList?: string[];
-    invertListed?: boolean;
-    engine?: string;
-    stylesheet?: string;
-    custom?: CustomSiteConfig[];
-    changeBrowserTheme?: boolean;
+    mode: FilterMode;
+    brightness: number;
+    contrast: number;
+    grayscale: number;
+    sepia: number;
+    useFont: boolean;
+    fontFamily: string;
+    textStroke: number;
+    engine: string;
+    stylesheet: string;
 }
 
 export interface CustomSiteConfig {
     url: string[];
-    config: FilterConfig;
+    theme: FilterConfig;
 }
 
 export interface UserSettings {
-    enabled: boolean;
-    config: FilterConfig;
+    enabled: boolean | 'auto';
+    theme: FilterConfig;
+    customThemes: CustomSiteConfig[];
+    siteList: string[];
+    applyToListedOnly: boolean;
+    changeBrowserTheme: boolean;
+    activationTime: string;
+    deactivationTime: string;
+    notifyOfNews: boolean;
+    syncSettings: boolean;
 }
 
 export interface TabInfo {

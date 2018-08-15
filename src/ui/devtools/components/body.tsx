@@ -5,8 +5,6 @@ import ThemeEngines from '../../../generators/theme-engines';
 import {DEVTOOLS_DOCS_URL} from '../../../utils/links';
 import {ExtWrapper} from '../../../definitions';
 
-const initialTexts = new WeakSet<Element>();
-
 interface BodyProps extends ExtWrapper {
     state?;
     setState?;
@@ -15,13 +13,13 @@ interface BodyProps extends ExtWrapper {
 function Body({data, actions, state, setState}: BodyProps) {
     let textNode: HTMLTextAreaElement;
 
-    const wrapper = (data.filterConfig.engine === ThemeEngines.staticTheme
+    const wrapper = (data.settings.theme.engine === ThemeEngines.staticTheme
         ? {
             header: 'Static Theme Editor',
             fixesText: data.devStaticThemesText,
             apply: (text) => actions.applyDevStaticThemes(text),
             reset: () => actions.resetDevStaticThemes(),
-        } : data.filterConfig.engine === ThemeEngines.cssFilter || data.filterConfig.engine === ThemeEngines.svgFilter ? {
+        } : data.settings.theme.engine === ThemeEngines.cssFilter || data.settings.theme.engine === ThemeEngines.svgFilter ? {
             header: 'Inversion Fix Editor',
             fixesText: data.devInversionFixesText,
             apply: (text) => actions.applyDevInversionFixes(text),

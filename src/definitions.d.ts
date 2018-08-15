@@ -58,6 +58,7 @@ export interface UserSettings {
     changeBrowserTheme: boolean;
     activationTime: string;
     deactivationTime: string;
+    notifyOfNews: boolean;
     syncSettings: boolean;
 }
 

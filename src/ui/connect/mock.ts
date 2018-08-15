@@ -1,4 +1,4 @@
-import {ExtensionData, TabInfo} from '../../definitions';
+import {ExtensionData, TabInfo, UserSettings} from '../../definitions';
 
 export function getMockData(override = {}): ExtensionData {
     return Object.assign({
@@ -24,8 +24,9 @@ export function getMockData(override = {}): ExtensionData {
             changeBrowserTheme: false,
             activationTime: '18:00',
             deactivationTime: '9:00',
+            notifyOfNews: false,
             syncSettings: true,
-        },
+        } as UserSettings,
         fonts: [
             'serif',
             'sans-serif',

@@ -29,6 +29,7 @@ export default class UserStorage {
             changeBrowserTheme: false,
             activationTime: '18:00',
             deactivationTime: '9:00',
+            notifyOfNews: false,
             syncSettings: true,
         };
         this.settings = null;

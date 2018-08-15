@@ -7,8 +7,9 @@ import TabManager from './tab-manager';
 import UserStorage from './user-storage';
 import {setWindowTheme, resetWindowTheme} from './window-theme';
 import {getFontList, getCommands, setShortcut} from './utils/extension-api';
-import {isFirefox, isMobile} from '../utils/platform';
-import {isURLInList, getURLHost, isURLMatched} from '../utils/url';
+import {isFirefox} from '../utils/platform';
+import {isInTimeInterval} from '../utils/time';
+import {isURLInList, getURLHost} from '../utils/url';
 import ThemeEngines from '../generators/theme-engines';
 import createCSSFilterStylesheet from '../generators/css-filter';
 import {getDynamicThemeFixesFor} from '../generators/dynamic-theme';
@@ -64,27 +65,8 @@ export class Extension {
     isEnabled() {
         if (this.user.settings.enabled === 'auto') {
             const now = new Date();
-            const t0 = this.user.settings.activationTime.split(':').map((x) => parseInt(x));
-            const t1 = this.user.settings.deactivationTime.split(':').map((x) => parseInt(x));
-            const t = [now.getHours(), now.getMinutes()];
-
-            function compare(a: number[], b: number[]) {
-                if (a[0] === b[0] && a[1] === b[1]) {
-                    return 0;
-                }
-                if (a[0] < b[0] || (a[0] === b[0] && a[1] < b[1])) {
-                    return 1;
-                }
-                return -1;
-            }
-
-            if (compare(t0, t1) < 0) {
-                t1[0] += 24;
-            }
-
-            return compare(t0, t) >= 0 && compare(t, t1) > 0;
+            return isInTimeInterval(now, this.user.settings.activationTime, this.user.settings.deactivationTime);
         }
-
         return this.user.settings.enabled;
     }
 

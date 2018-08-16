@@ -11,11 +11,7 @@ function multiline(...lines) {
 export default function TopSection({data, actions, tab}: ExtWrapper & {tab: TabInfo}) {
 
     function toggleExtension(enabled) {
-        if (enabled) {
-            actions.enable();
-        } else {
-            actions.disable();
-        }
+        actions.changeSettings({enabled});
     }
 
     return (
@@ -48,7 +44,7 @@ export default function TopSection({data, actions, tab}: ExtWrapper & {tab: TabI
                 )}
             </div>
             <div class="header__control header__app-toggle">
-                <Toggle checked={data.enabled} labelOn={getLocalMessage('on')} labelOff={getLocalMessage('off')} onChange={toggleExtension} />
+                <Toggle checked={data.isEnabled} labelOn={getLocalMessage('on')} labelOff={getLocalMessage('off')} onChange={toggleExtension} />
                 <Shortcut
                     commandName="toggle"
                     shortcuts={data.shortcuts}

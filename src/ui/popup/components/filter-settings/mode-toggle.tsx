@@ -1,7 +1,6 @@
 import {html} from 'malevic';
 import {Button, Toggle} from '../../../controls';
 import {getLocalMessage} from '../../../../utils/locales';
-import {ExtWrapper} from '../../../../definitions';
 
 interface ModeToggleProps {
     mode: number;

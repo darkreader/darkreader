@@ -1,23 +1,32 @@
-import {ExtensionData, TabInfo} from '../../definitions';
+import {ExtensionData, TabInfo, UserSettings} from '../../definitions';
 
 export function getMockData(override = {}): ExtensionData {
     return Object.assign({
-        enabled: true,
-        ready: true,
-        filterConfig: {
-            mode: 1,
-            brightness: 110,
-            contrast: 90,
-            grayscale: 20,
-            sepia: 10,
-            useFont: false,
-            fontFamily: 'Segoe UI',
-            textStroke: 0,
-            invertListed: false,
-            engine: 'cssFilter',
+        isEnabled: true,
+        isReady: true,
+        settings: {
+            enabled: true,
+            theme: {
+                mode: 1,
+                brightness: 110,
+                contrast: 90,
+                grayscale: 20,
+                sepia: 10,
+                useFont: false,
+                fontFamily: 'Segoe UI',
+                textStroke: 0,
+                engine: 'cssFilter',
+                stylesheet: '',
+            },
+            customThemes: [],
             siteList: [],
-            custom: [],
-        },
+            applyToListedOnly: false,
+            changeBrowserTheme: false,
+            activationTime: '18:00',
+            deactivationTime: '9:00',
+            notifyOfNews: false,
+            syncSettings: true,
+        } as UserSettings,
         fonts: [
             'serif',
             'sans-serif',
@@ -59,16 +68,12 @@ export function createConnectorMock() {
         subscribeToChanges(callback) {
             listener = callback;
         },
-        enable() {
-            data.enabled = true;
+        changeSettings(settings) {
+            Object.assign(data.settings, settings);
             listener(data);
         },
-        disable() {
-            data.enabled = false;
-            listener(data);
-        },
-        setConfig(config) {
-            Object.assign(data.filterConfig, config);
+        setTheme(theme) {
+            Object.assign(data.settings.theme, theme);
             listener(data);
         },
         setShortcut(command, shortcut) {
@@ -76,11 +81,11 @@ export function createConnectorMock() {
             listener(data);
         },
         toggleSitePattern(pattern) {
-            const index = data.filterConfig.siteList.indexOf(pattern);
+            const index = data.settings.siteList.indexOf(pattern);
             if (index >= 0) {
-                data.filterConfig.siteList.splice(pattern, 1);
+                data.settings.siteList.splice(pattern, 1);
             } else {
-                data.filterConfig.siteList.push(pattern);
+                data.settings.siteList.push(pattern);
             }
             listener(data);
         },

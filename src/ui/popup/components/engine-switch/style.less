@@ -18,6 +18,7 @@
         border-radius: @size-text-small-height / 2;
         color: @color-control-fore;
         cursor: pointer;
+        display: none;
         font-size: @size-text-small;
         line-height: @size-text-small-height;
         min-width: @size-text-small-height;
@@ -25,6 +26,10 @@
         right: 25%;
         text-align: center;
         top: -@size-text-small-height / 4;
+
+        &_active {
+            display: inline-block;
+        }
 
         &::before {
             content: "✎";

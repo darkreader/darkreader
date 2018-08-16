@@ -1,7 +1,7 @@
 import {html} from 'malevic';
 import withForms from 'malevic/forms';
 import withState from 'malevic/state';
-import {TabPanel, Button, CheckBox} from '../../controls';
+import {TabPanel, Button} from '../../controls';
 import FilterSettings from './filter-settings';
 import Header from './header';
 import Loader from './loader';
@@ -11,7 +11,6 @@ import SiteListSettings from './site-list-settings';
 import {isFirefox} from '../../../utils/platform';
 import {DONATE_URL, GITHUB_URL, PRIVACY_URL, TWITTER_URL, getHelpURL} from '../../../utils/links';
 import {getLocalMessage} from '../../../utils/locales';
-import {compileMarkdown} from '../utils/markdown';
 import {ExtensionData, ExtensionActions, TabInfo, News as NewsObject} from '../../../definitions';
 
 withForms();
@@ -40,7 +39,7 @@ function openDevTools() {
 
 function Body(props: BodyProps) {
     const {state, setState} = props;
-    if (!props.data.ready) {
+    if (!props.data.isReady) {
         return (
             <body>
                 <Loader />
@@ -65,7 +64,7 @@ function Body(props: BodyProps) {
     }
 
     return (
-        <body class={{'ext-disabled': !props.data.enabled}}>
+        <body class={{'ext-disabled': !props.data.isEnabled}}>
             <Loader complete />
 
             <Header data={props.data} tab={props.tab} actions={props.actions} />

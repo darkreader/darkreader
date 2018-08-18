@@ -56,7 +56,7 @@ module.exports = function createBundleHtmlTask(gulp) {
 
     async function bundlePopupHtml({dir}) {
         let html = await fs.readFile('src/ui/popup/index.html', 'utf8');
-        const data = getMockData({ready: false});
+        const data = getMockData({isReady: false});
         const tab = getMockActiveTabInfo();
         const actions = null;
         const bodyText = Malevic.renderToString(PopupBody({data, tab, actions}));

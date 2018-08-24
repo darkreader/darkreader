@@ -21,3 +21,27 @@ export function isInTimeInterval(date: Date, time0: string, time1: string) {
     }
     return compareTime(t0, t) >= 0 && compareTime(t, t1) > 0;
 }
+
+interface Duration {
+    days?: number;
+    hours?: number;
+    minutes?: number;
+    seconds?: number;
+}
+
+export function getDuration(time: Duration) {
+    let duration = 0;
+    if (time.seconds) {
+        duration += time.seconds * 1000;
+    }
+    if (time.minutes) {
+        duration += time.minutes * 60 * 1000;
+    }
+    if (time.hours) {
+        duration += time.hours * 60 * 60 * 1000;
+    }
+    if (time.days) {
+        duration += time.days * 24 * 60 * 60 * 1000;
+    }
+    return duration;
+}

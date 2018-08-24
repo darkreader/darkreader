@@ -1,5 +1,6 @@
 import {readText} from './utils/network';
 import {parseArray} from '../utils/text';
+import {getDuration} from '../utils/time';
 import {parseInversionFixes} from '../generators/css-filter';
 import {parseDynamicThemeFixes} from '../generators/dynamic-theme';
 import {parseStaticThemes} from '../generators/static-theme';
@@ -23,8 +24,8 @@ const CONFIG_URLs = {
         local: '../config/static-themes.config',
     },
 };
-const REMOTE_TIMEOUT_MS = 10 * 1000;
-const RELOAD_INTERVAL_MS = 15 * 60 * 1000;
+const REMOTE_TIMEOUT_MS = getDuration({seconds: 10});
+const RELOAD_INTERVAL_MS = getDuration({minutes: 15});
 
 export default class ConfigManager {
     DARK_SITES?: string[];

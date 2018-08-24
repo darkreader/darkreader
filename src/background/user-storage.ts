@@ -133,8 +133,8 @@ export default class UserStorage {
         try {
             const s = settings_4_6_2;
             const settings: UserSettings = {
-                enabled: s.enabled,
                 ...this.defaultSettings,
+                enabled: s.enabled,
                 theme: migrateTheme(s.config),
                 customThemes: s.config.custom ? s.config.custom.map((c) => {
                     return {

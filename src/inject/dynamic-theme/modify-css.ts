@@ -228,11 +228,12 @@ function getBgImageModifier(prop: string, value: string, rule: CSSStyleRule, isC
 
         const getURLModifier = (urlValue: string) => {
             let url = getCSSURLValue(urlValue);
-            if (rule.parentStyleSheet.href) {
+            if (rule.parentStyleSheet.ownerNode && rule.parentStyleSheet.ownerNode.baseURI) {
+                url = getAbsoluteURL(rule.parentStyleSheet.ownerNode.baseURI, url);
+            } else if (rule.parentStyleSheet.href) {
+                // TODO: Not sure if this is still useful, maybe should traverse and use baseURI of a parent.
                 const basePath = getCSSBaseBath(rule.parentStyleSheet.href);
                 url = getAbsoluteURL(basePath, url);
-            } else if (rule.parentStyleSheet.ownerNode && rule.parentStyleSheet.ownerNode.baseURI) {
-                url = getAbsoluteURL(rule.parentStyleSheet.ownerNode.baseURI, url);
             } else {
                 url = getAbsoluteURL(location.origin, url);
             }

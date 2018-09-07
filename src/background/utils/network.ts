@@ -6,6 +6,7 @@ interface RequestParams {
 export function readText(params: RequestParams): Promise<string> {
     return new Promise((resolve, reject) => {
         const request = new XMLHttpRequest();
+        request.overrideMimeType('text/plain');
         request.open(
             'GET',
             `${params.url}?nocache=${Date.now()}`,

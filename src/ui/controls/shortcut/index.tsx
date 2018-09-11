@@ -28,7 +28,7 @@ export default function ShortcutLink(props: ShortcutLinkProps) {
         enteringShortcutInProgress = true;
 
         const initialText = node.textContent;
-        node.textContent = 'type a shortcut';
+        node.textContent = '...⌨';
 
         function onKeyDown(e: KeyboardEvent) {
             e.preventDefault();

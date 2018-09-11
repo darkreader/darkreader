@@ -9,10 +9,6 @@ chrome.runtime.onInstalled.addListener(({reason}) => {
     if (reason === 'install') {
         chrome.tabs.create({url: getHelpURL()});
     }
-    if (Boolean(localStorage.getItem('darkreader-4-release-notes-shown'))) {
-        extension.news.markAsRead('dynamic-theme')
-            .then(() => localStorage.removeItem('darkreader-4-release-notes-shown'));
-    }
 });
 
 declare const __DEBUG__: boolean;

@@ -15,7 +15,7 @@ import createCSSFilterStylesheet from '../generators/css-filter';
 import {getDynamicThemeFixesFor} from '../generators/dynamic-theme';
 import createStaticStylesheet from '../generators/static-theme';
 import {createSVGFilterStylesheet, getSVGFilterMatrixValue, getSVGReverseFilterMatrixValue} from '../generators/svg-filter';
-import {FilterConfig, ExtensionData, Shortcuts, UserSettings} from '../definitions';
+import {ExtensionData, FilterConfig, News, Shortcuts, UserSettings} from '../definitions';
 
 export class Extension {
     ready: boolean;
@@ -36,26 +36,9 @@ export class Extension {
         this.config = new ConfigManager();
         this.devtools = new DevTools(this.config, () => this.onSettingsChanged());
         this.messenger = new Messenger(this.getMessengerAdapter());
-        this.news = new Newsmaker((news) => {
-            const unread = news.filter(({read}) => !read);
-            if (unread.length > 0 && this.user.settings.notifyOfNews) {
-                this.icon.notifyAboutReleaseNotes(unread.length);
-            } else {
-                this.icon.stopNotifyingAboutReleaseNotes();
-            }
-        });
+        this.news = new Newsmaker((news) => this.onNewsUpdate(news));
         this.tabs = new TabManager({
-            getConnectionMessage: (url, frameURL) => {
-                if (this.ready) {
-                    return this.isEnabled() && this.getTabMessage(url, frameURL);
-                } else {
-                    return new Promise((resolve) => {
-                        this.awaiting.push(() => {
-                            resolve(this.isEnabled() && this.getTabMessage(url, frameURL));
-                        });
-                    });
-                }
-            }
+            getConnectionMessage: (url, frameURL) => this.getConnectionMessage(url, frameURL),
         });
         this.user = new UserStorage();
         this.awaiting = [];
@@ -89,6 +72,7 @@ export class Extension {
         this.awaiting = null;
 
         this.config.load({local: false});
+        this.news.subscribe();
     }
 
     private popupOpeningListener: () => void = null;
@@ -167,6 +151,27 @@ export class Extension {
             devInversionFixesText: this.devtools.getInversionFixesText(),
             devStaticThemesText: this.devtools.getStaticThemesText(),
         };
+    }
+
+    private onNewsUpdate(news: News[]) {
+        const unread = news.filter(({read}) => !read);
+        if (unread.length > 0 && this.user.settings.notifyOfNews) {
+            this.icon.notifyAboutReleaseNotes(unread.length);
+        } else {
+            this.icon.stopNotifyingAboutReleaseNotes();
+        }
+    }
+
+    private getConnectionMessage(url, frameURL) {
+        if (this.ready) {
+            return this.isEnabled() && this.getTabMessage(url, frameURL);
+        } else {
+            return new Promise((resolve) => {
+                this.awaiting.push(() => {
+                    resolve(this.isEnabled() && this.getTabMessage(url, frameURL));
+                });
+            });
+        }
     }
 
     changeSettings($settings: Partial<UserSettings>) {

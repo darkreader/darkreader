@@ -11,11 +11,14 @@ export default class Newsmaker {
     constructor(onUpdate: (news: News[]) => void) {
         this.latest = [];
         this.onUpdate = onUpdate;
+    }
+
+    subscribe() {
         this.updateNews();
         setInterval(() => this.updateNews(), Newsmaker.UPDATE_INTERVAL);
     }
 
-    async updateNews() {
+    private async updateNews() {
         const news = await this.getNews();
         if (news) {
             this.latest = news;
@@ -23,7 +26,7 @@ export default class Newsmaker {
         }
     }
 
-    async getNews() {
+    private async getNews() {
         try {
             const response = await fetch(`https://raw.githubusercontent.com/darkreader/darkreader.org/master/src/blog/posts.json?nocache=${Date.now()}`, {cache: 'no-cache'});
             const $news = await response.json();
@@ -76,6 +79,6 @@ export default class Newsmaker {
     }
 
     isRead(id: string, readNews: string[]) {
-        return readNews.indexOf(id) >= 0 || (id === 'dynamic-theme' && Boolean(localStorage.getItem('darkreader-4-release-notes-shown')));
+        return readNews.includes(id);
     }
 }

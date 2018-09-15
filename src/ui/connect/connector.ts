@@ -1,4 +1,4 @@
-import {ExtensionData, ExtensionActions, FilterConfig, TabInfo, Message} from '../../definitions';
+import {ExtensionData, ExtensionActions, FilterConfig, TabInfo, Message, UserSettings} from '../../definitions';
 
 export default class Connector implements ExtensionActions {
     private port: chrome.runtime.Port;
@@ -57,8 +57,12 @@ export default class Connector implements ExtensionActions {
         this.port.postMessage({type: 'set-shortcut', data: {command, shortcut}});
     }
 
-    setConfig(config: FilterConfig) {
-        this.port.postMessage({type: 'set-config', data: config});
+    changeSettings(settings: Partial<UserSettings>) {
+        this.port.postMessage({type: 'change-settings', data: settings});
+    }
+
+    setTheme(theme: Partial<FilterConfig>) {
+        this.port.postMessage({type: 'set-theme', data: theme});
     }
 
     toggleSitePattern(pattern: string) {

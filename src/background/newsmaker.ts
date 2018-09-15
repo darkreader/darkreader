@@ -1,8 +1,9 @@
 import {getBlogPostURL} from '../utils/links';
+import {getDuration} from '../utils/time';
 import {News} from '../definitions';
 
 export default class Newsmaker {
-    static UPDATE_INTERVAL = 1 * 60 * 60 * 1000;
+    static UPDATE_INTERVAL = getDuration({hours: 1});
 
     latest: News[];
     onUpdate: (news: News[]) => void;
@@ -10,11 +11,14 @@ export default class Newsmaker {
     constructor(onUpdate: (news: News[]) => void) {
         this.latest = [];
         this.onUpdate = onUpdate;
+    }
+
+    subscribe() {
         this.updateNews();
         setInterval(() => this.updateNews(), Newsmaker.UPDATE_INTERVAL);
     }
 
-    async updateNews() {
+    private async updateNews() {
         const news = await this.getNews();
         if (news) {
             this.latest = news;
@@ -22,17 +26,24 @@ export default class Newsmaker {
         }
     }
 
-    async getNews() {
+    private async getNews() {
         try {
             const response = await fetch(`https://raw.githubusercontent.com/darkreader/darkreader.org/master/src/blog/posts.json?nocache=${Date.now()}`, {cache: 'no-cache'});
             const $news = await response.json();
-            return new Promise<News[]>((resolve) => {
+            return new Promise<News[]>((resolve, reject) => {
                 chrome.storage.sync.get({readNews: []}, ({readNews}) => {
-                    const news = $news.map(({id, date, headline}) => {
+                    const news: News[] = $news.map(({id, date, headline}) => {
                         const url = getBlogPostURL(id);
                         const read = this.isRead(id, readNews);
                         return {id, date, headline, url, read};
                     });
+                    for (let i = 0; i < news.length; i++) {
+                        const date = new Date(news[i].date);
+                        if (isNaN(date.getTime())) {
+                            reject(new Error(`Unable to parse date ${date}`));
+                            return;
+                        }
+                    }
                     resolve(news);
                 });
             });
@@ -68,6 +79,6 @@ export default class Newsmaker {
     }
 
     isRead(id: string, readNews: string[]) {
-        return readNews.indexOf(id) >= 0 || (id === 'dynamic-theme' && Boolean(localStorage.getItem('darkreader-4-release-notes-shown')));
+        return readNews.includes(id);
     }
 }

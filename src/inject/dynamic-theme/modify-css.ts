@@ -231,6 +231,8 @@ function getBgImageModifier(prop: string, value: string, rule: CSSStyleRule, isC
             if (rule.parentStyleSheet.href) {
                 const basePath = getCSSBaseBath(rule.parentStyleSheet.href);
                 url = getAbsoluteURL(basePath, url);
+            } else if (rule.parentStyleSheet.ownerNode && rule.parentStyleSheet.ownerNode.baseURI) {
+                url = getAbsoluteURL(rule.parentStyleSheet.ownerNode.baseURI, url);
             } else {
                 url = getAbsoluteURL(location.origin, url);
             }

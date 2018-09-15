@@ -10,7 +10,7 @@ interface BodyProps extends ExtWrapper {
 export default function Body({data, tab, actions}: BodyProps) {
 
     const host = getURLHost(tab.url);
-    const custom = data.filterConfig.custom.find(({url}) => isURLInList(tab.url, url));
+    const custom = data.settings.customThemes.find(({url}) => isURLInList(tab.url, url));
 
     let textNode: HTMLTextAreaElement;
 
@@ -23,7 +23,7 @@ export default function Body({data, tab, actions}: BodyProps) {
 
     function onTextRender(node) {
         textNode = node;
-        textNode.value = (custom ? custom.config.stylesheet : data.filterConfig.stylesheet) || '';
+        textNode.value = (custom ? custom.theme.stylesheet : data.settings.theme.stylesheet) || '';
         if (document.activeElement !== textNode) {
             textNode.focus();
         }
@@ -31,10 +31,10 @@ export default function Body({data, tab, actions}: BodyProps) {
 
     function applyStyleSheet(css: string) {
         if (custom) {
-            custom.config = {...custom.config, ...{stylesheet: css}};
-            actions.setConfig({custom: data.filterConfig.custom});
+            custom.theme = {...custom.theme, ...{stylesheet: css}};
+            actions.changeSettings({customThemes: data.settings.customThemes});
         } else {
-            actions.setConfig({stylesheet: css});
+            actions.setTheme({stylesheet: css});
         }
     }
 

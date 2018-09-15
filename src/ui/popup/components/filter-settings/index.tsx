@@ -1,7 +1,6 @@
 import {html} from 'malevic';
-import {UpDown, Button} from '../../../controls';
+import {UpDown} from '../../../controls';
 import CustomSettingsToggle from '../custom-settings-toggle';
-import EngineSwitch from '../engine-switch';
 import ModeToggle from './mode-toggle';
 import {getLocalMessage} from '../../../../utils/locales';
 import {isURLInList} from '../../../../utils/url';
@@ -9,15 +8,15 @@ import {ExtWrapper, TabInfo, FilterConfig} from '../../../../definitions';
 
 export default function FilterSettings({data, actions, tab}: ExtWrapper & {tab: TabInfo}) {
 
-    const custom = data.filterConfig.custom.find(({url}) => isURLInList(tab.url, url));
-    const filterConfig = custom ? custom.config : data.filterConfig;
+    const custom = data.settings.customThemes.find(({url}) => isURLInList(tab.url, url));
+    const filterConfig = custom ? custom.theme : data.settings.theme;
 
-    function setConfig(config: FilterConfig) {
+    function setConfig(config: Partial<FilterConfig>) {
         if (custom) {
-            custom.config = {...custom.config, ...config};
-            actions.setConfig({custom: data.filterConfig.custom});
+            custom.theme = {...custom.theme, ...config};
+            actions.changeSettings({customThemes: data.settings.customThemes});
         } else {
-            actions.setConfig(config)
+            actions.setTheme(config)
         }
     }
 

@@ -99,6 +99,7 @@ footer {
     display: inline-flex;
     justify-content: center;
     margin: 0;
+    position: relative;
     text-decoration: none;
     transition: all @time-fast;
 
@@ -110,6 +111,22 @@ footer {
         font-weight: bold;
         line-height: @size-control-inner;
         transform: skewX(-10deg);
+    }
+
+    &::after {
+        background-image: url(../assets/images/ladybug-32.svg);
+        background-size: contain;
+        content: "";
+        display: inline-block;
+        height: @size-control-inner / 2;
+        left: 0;
+        position: absolute;
+        top: -@size-border - @size-control-inner / 2;
+        width: @size-control-inner;
+    }
+
+    &:hover::after {
+        filter: drop-shadow(0 0 @size-border @color-heading);
     }
 }
 

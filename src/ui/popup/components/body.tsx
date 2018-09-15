@@ -1,7 +1,7 @@
 import {html} from 'malevic';
 import withForms from 'malevic/forms';
 import withState from 'malevic/state';
-import {TabPanel, Button, CheckBox} from '../../controls';
+import {TabPanel, Button} from '../../controls';
 import FilterSettings from './filter-settings';
 import Header from './header';
 import Loader from './loader';
@@ -9,9 +9,9 @@ import MoreSettings from './more-settings';
 import {News, NewsButton} from './news';
 import SiteListSettings from './site-list-settings';
 import {isFirefox} from '../../../utils/platform';
+import {getDuration} from '../../../utils/time';
 import {DONATE_URL, GITHUB_URL, PRIVACY_URL, TWITTER_URL, getHelpURL} from '../../../utils/links';
 import {getLocalMessage} from '../../../utils/locales';
-import {compileMarkdown} from '../utils/markdown';
 import {ExtensionData, ExtensionActions, TabInfo, News as NewsObject} from '../../../definitions';
 
 withForms();
@@ -40,7 +40,7 @@ function openDevTools() {
 
 function Body(props: BodyProps) {
     const {state, setState} = props;
-    if (!props.data.ready) {
+    if (!props.data.isReady) {
         return (
             <body>
                 <Loader />
@@ -64,8 +64,18 @@ function Body(props: BodyProps) {
         }
     }
 
+    let displayedNewsCount = unreadNews.length;
+    if (unreadNews.length > 0 && !props.data.settings.notifyOfNews) {
+        const latest = new Date(unreadNews[0].date);
+        const today = new Date();
+        const newsWereLongTimeAgo = latest.getTime() < today.getTime() - getDuration({days: 14});
+        if (newsWereLongTimeAgo) {
+            displayedNewsCount = 0;
+        }
+    }
+
     return (
-        <body class={{'ext-disabled': !props.data.enabled}}>
+        <body class={{'ext-disabled': !props.data.isEnabled}}>
             <Loader complete />
 
             <Header data={props.data} tab={props.tab} actions={props.actions} />
@@ -102,7 +112,7 @@ function Body(props: BodyProps) {
                     <a class="donate-link" href={DONATE_URL} target="_blank">
                         <span class="donate-link__text">{getLocalMessage('donate')}</span>
                     </a>
-                    <NewsButton active={state.newsOpen} count={unreadNews.length} onClick={toggleNews} />
+                    <NewsButton active={state.newsOpen} count={displayedNewsCount} onClick={toggleNews} />
                     <Button onclick={openDevTools} class="dev-tools-button">
                         🛠 {getLocalMessage('open_dev_tools')}
                     </Button>

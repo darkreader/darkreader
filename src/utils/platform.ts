@@ -47,3 +47,12 @@ export function compareChromeVersions($a: string, $b: string) {
     }
     return 0;
 }
+
+export function isDeepSelectorSupported() {
+    try {
+        document.querySelector('x /deep/ x');
+        return true;
+    } catch (err) {
+        return false;
+    }
+}

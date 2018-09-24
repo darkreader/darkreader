@@ -84,6 +84,9 @@ export async function manageStyle(element: HTMLLinkElement | HTMLStyleElement, {
         if (element instanceof HTMLLinkElement) {
             try {
                 rules = element.sheet.cssRules;
+                if (rules == null) {
+                    corsURL = element.href;
+                }
             } catch (err) {
                 corsURL = element.href;
             }
@@ -401,7 +404,7 @@ function getCSSImportURL(importDeclaration: string) {
     return getCSSURLValue(importDeclaration.substring(8).replace(/;$/, ''));
 }
 
-async function loadCSSText(url: string) {
+async function loadWithCache(url: string) {
     let response: string;
     let cache: string;
     try {
@@ -420,6 +423,16 @@ async function loadCSSText(url: string) {
                 logWarn(err);
             }
         }
+    }
+    return response;
+}
+
+async function loadCSSText(url: string) {
+    let response: string;
+    if (url.startsWith('data:')) {
+        response = await (await fetch(url)).text();
+    } else {
+        response = await loadWithCache(url);
     }
 
     let cssText = response;

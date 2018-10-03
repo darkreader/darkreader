@@ -11,11 +11,11 @@ interface ToggleProps {
 export default function Toggle(props: ToggleProps) {
     const {checked, onChange} = props;
 
-    const cls = {
-        'toggle': true,
-        'toggle--checked': checked,
-        [props.class]: props.class
-    };
+    const cls = [
+        'toggle',
+        checked ? 'toggle--checked' : null,
+        [props.class],
+    ];
 
     const clsOn = {
         'toggle__btn': true,

@@ -1,11 +1,13 @@
 @import "../../theme";
 
 .checkbox {
+    align-items: stretch;
     background-color: @color-control-back;
     border: @size-border solid @color-border;
     cursor: pointer;
-    display: inline-block;
+    display: inline-flex;
     flex: none;
+    flex-direction: row;
     height: @size-control-inner;
     transition: background-color @time-slow;
     width: @size-control-inner;
@@ -23,7 +25,7 @@
         display: inline-block;
         height: 100%;
         position: relative;
-        width: 100%;
+        width: @size-control-inner;
 
         &::before,
         &::after {

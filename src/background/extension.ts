@@ -45,10 +45,11 @@ export class Extension {
     }
 
     isEnabled() {
-        if (this.user.settings.enabled === 'auto') {
-            const now = new Date();
-            return isInTimeInterval(now, this.user.settings.activationTime, this.user.settings.deactivationTime);
-        }
+        // TODO: There should be a separate property for time settings.
+        // if (this.user.settings.enabled === 'auto') {
+        //     const now = new Date();
+        //     return isInTimeInterval(now, this.user.settings.activationTime, this.user.settings.deactivationTime);
+        // }
         return this.user.settings.enabled;
     }
 

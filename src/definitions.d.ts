@@ -50,7 +50,7 @@ export interface CustomSiteConfig {
 }
 
 export interface UserSettings {
-    enabled: boolean | 'auto';
+    enabled: boolean;
     theme: FilterConfig;
     customThemes: CustomSiteConfig[];
     siteList: string[];

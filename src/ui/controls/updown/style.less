@@ -99,8 +99,18 @@
     justify-content: center;
     overflow: hidden;
     position: relative;
+    transition: background-color @time-slow;
     -moz-user-select: none;
     user-select: none;
+
+    &:hover {
+        background-color: @color-control-hover;
+        transition: background-color @time-fast;
+    }
+
+    &--clickable {
+        cursor: pointer;
+    }
 
     &__value {
         background-color: @color-control-active;
@@ -115,6 +125,7 @@
         color: @color-control-fore;
         display: inline-block;
         line-height: @size-text-normal;
+        pointer-events: none;
         position: relative;
         white-space: nowrap;
         z-index: 1;

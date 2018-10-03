@@ -48,6 +48,10 @@ export default function UpDown(props: UpDownProps) {
         props.onChange(clamp(normalize(props.value + props.step)));
     }
 
+    function onTrackValueChange(trackValue: number) {
+        props.onChange(clamp(normalize(trackValue * (props.max - props.min) + props.min)));
+    }
+
     const trackValue = (props.value - props.min) / (props.max - props.min);
     const valueText = (props.value === props.default
         ? getLocalMessage('off').toLocaleLowerCase()
@@ -65,6 +69,7 @@ export default function UpDown(props: UpDownProps) {
                 <Track
                     value={trackValue}
                     label={props.name}
+                    onChange={onTrackValueChange}
                 />
                 <Button class={buttonUpCls} onclick={onButtonUpClick} >
                     <span class="updown__icon updown__icon-up"></span>

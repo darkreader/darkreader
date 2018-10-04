@@ -14,9 +14,9 @@ export default class UserStorage {
             theme: {
                 mode: 1,
                 brightness: 100,
-                contrast: 90,
+                contrast: 100,
                 grayscale: 0,
-                sepia: 10,
+                sepia: 0,
                 useFont: false,
                 fontFamily: isMacOS() ? 'Helvetica Neue' : isWindows() ? 'Segoe UI' : 'Open Sans',
                 textStroke: 0,

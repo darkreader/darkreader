@@ -9,7 +9,7 @@ export function clearColorModificationCache() {
     colorModificationCache.clear();
 }
 
-function modifyColorWithCache(rgb: RGBA, filter: FilterConfig, modifyHSL: (hsl: HSLA) => HSLA) {
+function modifyColorWithCache(rgb: RGBA, filter: FilterConfig, modifyHSL: (hsl: HSLA) => (HSLA & {isNeutral: boolean})) {
     let fnCache: Map<string, string>;
     if (colorModificationCache.has(modifyHSL)) {
         fnCache = colorModificationCache.get(modifyHSL);
@@ -28,7 +28,8 @@ function modifyColorWithCache(rgb: RGBA, filter: FilterConfig, modifyHSL: (hsl: 
     const hsl = rgbToHSL(rgb);
     const modified = modifyHSL(hsl);
     const {r, g, b, a} = hslToRGB(modified);
-    const [rf, gf, bf] = applyColorMatrix([r, g, b], createFilterMatrix({...filter, mode: 0}));
+    const matrix = createFilterMatrix({...filter, ...(modified.isNeutral ? {} : {sepia: filter.sepia / 3, grayscale: filter.grayscale / 3}), mode: 0})
+    const [rf, gf, bf] = applyColorMatrix([r, g, b], matrix);
 
     const color = (a === 1 ?
         rgbToHexString({r: rf, g: gf, b: bf}) :
@@ -42,7 +43,7 @@ function modifyLightModeHSL({h, s, l, a}) {
     const lMin = 0;
     const lMid = 0.4;
     const lMax = 0.9;
-    const sNeutralLim = 0.16;
+    const sNeutralLim = 0.36;
     const sColored = 0.16;
     const hColoredL0 = 220;
     const hColoredL1 = 40;
@@ -51,14 +52,15 @@ function modifyLightModeHSL({h, s, l, a}) {
 
     let hx = h;
     let sx = s;
-    if (s < sNeutralLim) {
+    const isNeutral = s < sNeutralLim;
+    if (isNeutral) {
         sx = (l < lMid ?
             scale(l, 0, lMid, sColored, 0) :
             scale(l, lMid, 1, 0, sColored));
         hx = (l < lMid ? hColoredL0 : hColoredL1);
     }
 
-    return {h: hx, s: sx, l: lx, a};
+    return {h: hx, s: sx, l: lx, a, isNeutral};
 }
 
 function modifyBgHSL({h, s, l, a}) {
@@ -67,8 +69,9 @@ function modifyBgHSL({h, s, l, a}) {
     const lMaxS1 = 0.4;
     const sNeutralLimL0 = 0.24;
     const sNeutralLimL1 = 0.12;
-    const sColored = 0.16;
-    const hColoredL0 = 235;
+    const sColoredL0 = 0.08;
+    const sColoredL1 = 0.24;
+    const hColoredL0 = 225;
     const hColoredL1 = 215;
 
     const lMax = scale(s, 0, 1, lMaxS0, lMaxS1);
@@ -79,14 +82,15 @@ function modifyBgHSL({h, s, l, a}) {
             scale(l, 0.5, 1, lMax, lMin));
 
     const sNeutralLim = scale(clamp(lx, lMin, lMax), lMin, lMax, sNeutralLimL0, sNeutralLimL1);
+    const isNeutral = s < sNeutralLim;
     let hx = h;
     let sx = s;
-    if (s < sNeutralLim) {
-        sx = sColored;
+    if (isNeutral) {
+        sx = scale(clamp(lx, lMin, lMax), lMin, lMax, sColoredL0, sColoredL1);
         hx = scale(clamp(lx, lMin, lMax), lMin, lMax, hColoredL0, hColoredL1);
     }
 
-    return {h: hx, s: sx, l: lx, a};
+    return {h: hx, s: sx, l: lx, a, isNeutral};
 }
 
 export function modifyBackgroundColor(rgb: RGBA, filter: FilterConfig) {
@@ -102,7 +106,7 @@ function modifyFgHSL({h, s, l, a}) {
     const lMinS1 = 0.6;
     const sNeutralLimL0 = 0.12;
     const sNeutralLimL1 = 0.36;
-    const sColored = 0.24;
+    const sColored = 0.08;
     const hColoredL0 = 35;
     const hColoredL1 = 45;
 
@@ -115,12 +119,13 @@ function modifyFgHSL({h, s, l, a}) {
     let hx = h;
     let sx = s;
     const sNeutralLim = scale(clamp(lx, lMin, lMax), lMin, lMax, sNeutralLimL0, sNeutralLimL1);
-    if (s < sNeutralLim) {
+    const isNeutral = s < sNeutralLim;
+    if (isNeutral) {
         sx = sColored;
         hx = scale(clamp(lx, lMin, lMax), lMin, lMax, hColoredL0, hColoredL1);
     }
 
-    return {h: hx, s: sx, l: lx, a};
+    return {h: hx, s: sx, l: lx, a, isNeutral};
 }
 
 export function modifyForegroundColor(rgb: RGBA, filter: FilterConfig) {
@@ -140,7 +145,7 @@ function modifyBorderHSL({h, s, l, a}) {
     const lMax = scale(s, 0, 1, lMaxS0, lMaxS1);
     const lx = scale(l, 0, 1, lMax, lMin);
 
-    return {h, s, l: lx, a};
+    return {h, s, l: lx, a, isNeutral: true};
 }
 
 export function modifyBorderColor(rgb: RGBA, filter: FilterConfig) {

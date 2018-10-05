@@ -109,8 +109,14 @@ function modifyFgHSL({h, s, l, a}) {
     const sColored = 0.08;
     const hColoredL0 = 35;
     const hColoredL1 = 45;
+    const hBlue0 = 205;
+    const hBlue1 = 245;
+    const hBlueMax = 220;
+    const lBlueMin = 0.7;
 
-    const lMin = scale(s, 0, 1, lMinS0, lMinS1);
+    const isBlue = h > hBlue0 && h <= hBlue1;
+
+    const lMin = scale(s, 0, 1, isBlue ? scale(h, hBlue0, hBlue1, lMinS0, lBlueMin) : lMinS0, lMinS1);
     const lx = (l < 0.5 ?
         scale(l, 0, 0.5, lMax, lMin) :
         l < lMin ?
@@ -118,6 +124,9 @@ function modifyFgHSL({h, s, l, a}) {
             l);
     let hx = h;
     let sx = s;
+    if (isBlue) {
+        hx = scale(hx, hBlue0, hBlue1, hBlue0, hBlueMax);
+    }
     const sNeutralLim = scale(clamp(lx, lMin, lMax), lMin, lMax, sNeutralLimL0, sNeutralLimL1);
     const isNeutral = s < sNeutralLim;
     if (isNeutral) {

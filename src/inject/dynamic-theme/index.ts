@@ -28,13 +28,13 @@ function createOrUpdateStyle(className: string) {
 }
 
 function createTheme() {
-    const userAgentStyle = createOrUpdateStyle('darkreader--user-agent');
-    document.head.insertBefore(userAgentStyle, document.head.firstChild);
-    userAgentStyle.textContent = getModifiedUserAgentStyle(filter, isIFrame);
-
     const fallbackStyle = createOrUpdateStyle('darkreader--fallback');
-    document.head.insertBefore(fallbackStyle, userAgentStyle.nextSibling);
-    document.head.querySelector('.darkreader--fallback').textContent = '';
+    document.head.insertBefore(fallbackStyle, document.head.firstChild);
+    fallbackStyle.textContent = getModifiedFallbackStyle(filter);
+
+    const userAgentStyle = createOrUpdateStyle('darkreader--user-agent');
+    document.head.insertBefore(userAgentStyle, fallbackStyle.nextSibling);
+    userAgentStyle.textContent = getModifiedUserAgentStyle(filter, isIFrame);
 
     const textStyle = createOrUpdateStyle('darkreader--text');
     document.head.insertBefore(textStyle, fallbackStyle.nextSibling);
@@ -66,6 +66,10 @@ function createTheme() {
     createManagers();
     throttledRender();
     overrideInlineStyles(filter);
+
+    if (loadingStyles.size === 0) {
+        fallbackStyle.textContent = '';
+    }
 }
 
 function createManagers() {
@@ -100,7 +104,6 @@ async function createManager(element: HTMLLinkElement | HTMLStyleElement) {
 
     function loadingStart() {
         if (!isPageLoaded()) {
-            document.head.querySelector('.darkreader--fallback').textContent = getModifiedFallbackStyle(filter);
             loadingStyles.add(loadingStyleId);
         }
     }

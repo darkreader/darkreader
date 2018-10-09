@@ -179,7 +179,6 @@ export function getInversionFixesFor(url: string, inversionFixes: InversionFix[]
             .sort((a, b) => b.url[0].length - a.url[0].length);
         if (matches.length > 0) {
             const found = matches[0];
-            console.log(`URL matches ${found.url.join(', ')}`);
             return {
                 url: found.url,
                 invert: common.invert.concat(found.invert || []),

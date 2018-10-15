@@ -10,12 +10,12 @@
   "private": true,
   "repository": {
     "type": "git",
-    "url": "https://github.com/agatt1/Illumify"
+    "url": "https://github.com/alexanderby/darkreader.git"
   },
   "author": "Alexander Shutov <shutovby@gmail.com> (http://shutov.by/)",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/agatt1/Illumify/issues"
+    "url": "https://github.com/alexanderby/darkreader/issues"
   },
   "homepage": "https://darkreader.org/",
   "dependencies": {

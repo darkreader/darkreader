@@ -1,12 +1,12 @@
 {
     "manifest_version": 2,
-    "name": "Dark Reader",
-    "version": "4.6.8",
-    "author": "Alexander Shutov",
+    "name": "Illumify",
+    "version": "1.0.1",
+    "author": "MU Senior Design",
     "description": "__MSG_extension_description__",
     "default_locale": "en",
     "browser_action": {
-        "default_title": "Dark Reader",
+        "default_title": "Illumify",
         "default_icon": {
             "38": "icons/dr_active_38.png",
             "19": "icons/dr_active_19.png"

@@ -16,7 +16,7 @@ export default function TopSection({data, actions, tab}: ExtWrapper & {tab: TabI
 
     return (
         <header class="header">
-            <img class="header__logo" src="../assets/images/darkreader-type.svg" alt="Dark Reader" />
+            <img class="header__logo" src="../assets/images/darkreader-type.svg" alt="Illumify" />
             <div class="header__control header__site-toggle">
                 <SiteToggle
                     data={data}

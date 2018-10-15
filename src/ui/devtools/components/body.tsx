@@ -58,7 +58,7 @@ function Body({data, actions, state, setState}: BodyProps) {
     return (
         <body>
             <header>
-                <img id="logo" src="../assets/images/darkreader-type.svg" alt="Dark Reader" />
+                <img id="logo" src="../assets/images/darkreader-type.svg" alt="Illumify" />
                 <h1 id="title">Developer Tools</h1>
             </header>
             <h3 id="sub-title">{wrapper.header}</h3>

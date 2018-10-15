@@ -50,7 +50,7 @@ export default function Body({data, tab, actions}: BodyProps) {
     return (
         <body>
             <header>
-                <img id="logo" src="../assets/images/darkreader-type.svg" alt="Dark Reader" />
+                <img id="logo" src="../assets/images/darkreader-type.svg" alt="Illumify" />
                 <h1 id="title">CSS Editor</h1>
             </header>
             <h3 id="sub-title">{custom ? host : 'All websites'}</h3>

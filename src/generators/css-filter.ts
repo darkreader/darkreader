@@ -38,7 +38,7 @@ export function cssFilterStyleheetTemplate(filterValue: string, reverseFilterVal
         lines.push(createReverseRule(reverseFilterValue, fix));
     }
 
-    if (config.useFont || config.textStroke > 0) {
+    if (config.useFont || config.textStroke > 0 || config.textScale != 100) {
         // Add text rule
         lines.push('');
         lines.push('/* Font */');

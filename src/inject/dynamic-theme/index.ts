@@ -1,14 +1,14 @@
-import {replaceCSSVariables} from './css-rules';
-import {overrideInlineStyles, getInlineOverrideStyle, watchForInlineStyles, stopWatchingForInlineStyles} from './inline-style';
-import {getModifiedUserAgentStyle, getModifiedFallbackStyle, cleanModificationCache} from './modify-css';
-import {manageStyle, shouldManageStyle, STYLE_SELECTOR, StyleManager} from './style-manager';
-import {watchForStyleChanges, stopWatchingForStyleChanges} from './watch';
-import {removeNode} from '../utils/dom';
-import {throttle} from '../utils/throttle';
-import {clamp} from '../../utils/math';
-import {getCSSFilterValue} from '../../generators/css-filter';
-import {createTextStyle} from '../../generators/text-style';
-import {FilterConfig, DynamicThemeFix} from '../../definitions';
+import { replaceCSSVariables } from './css-rules';
+import { overrideInlineStyles, getInlineOverrideStyle, watchForInlineStyles, stopWatchingForInlineStyles } from './inline-style';
+import { getModifiedUserAgentStyle, getModifiedFallbackStyle, cleanModificationCache } from './modify-css';
+import { manageStyle, shouldManageStyle, STYLE_SELECTOR, StyleManager } from './style-manager';
+import { watchForStyleChanges, stopWatchingForStyleChanges } from './watch';
+import { removeNode } from '../utils/dom';
+import { throttle } from '../utils/throttle';
+import { clamp } from '../../utils/math';
+import { getCSSFilterValue } from '../../generators/css-filter';
+import { createTextStyle } from '../../generators/text-style';
+import { FilterConfig, DynamicThemeFix } from '../../definitions';
 
 const styleManagers = new Map<HTMLLinkElement | HTMLStyleElement, StyleManager>();
 const variables = new Map<string, string>();
@@ -38,7 +38,7 @@ function createTheme() {
 
     const textStyle = createOrUpdateStyle('darkreader--text');
     document.head.insertBefore(textStyle, fallbackStyle.nextSibling);
-    if (filter.useFont || filter.textStroke > 0) {
+    if (filter.useFont || filter.textStroke > 0 || filter.textScale != 100) {
         textStyle.textContent = createTextStyle(filter);
     } else {
         textStyle.textContent = '';
@@ -112,7 +112,7 @@ async function createManager(element: HTMLLinkElement | HTMLStyleElement) {
         }
     }
 
-    manager = await manageStyle(element, {update, loadingStart, loadingEnd});
+    manager = await manageStyle(element, { update, loadingStart, loadingEnd });
     if (!pendingCreation.has(element)) {
         manager.destroy();
         return;
@@ -156,7 +156,7 @@ function onReadyStateChange() {
 function createThemeAndWatchForUpdates() {
     createTheme();
 
-    watchForStyleChanges(({created, updated, removed}) => {
+    watchForStyleChanges(({ created, updated, removed }) => {
         Array.from(new Set(created.concat(updated)))
             .filter((style) => !styleManagers.has(style))
             .forEach((style) => createManager(style));
@@ -190,7 +190,7 @@ export function createOrUpdateDynamicTheme(filterConfig: FilterConfig, dynamicTh
                 createThemeAndWatchForUpdates();
             }
         });
-        headObserver.observe(document, {childList: true, subtree: true});
+        headObserver.observe(document, { childList: true, subtree: true });
     }
 }
 

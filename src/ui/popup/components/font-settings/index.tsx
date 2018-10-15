@@ -44,6 +44,15 @@ export default function FontSettings({config, fonts, onChange}: FontSettingsProp
                 name={getLocalMessage('text_stroke')}
                 onChange={(value) => onChange({textStroke: value})}
             />
+            <UpDown
+                value={config.textScale}
+                min={85}
+                max={115}
+                step={1}
+                default={100}
+                name={getLocalMessage('text_scale')}
+                onChange={(value) => onChange({textScale: value})}
+            />
         </section>
     );
 }

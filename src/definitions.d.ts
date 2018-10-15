@@ -40,6 +40,7 @@ export interface FilterConfig {
     useFont: boolean;
     fontFamily: string;
     textStroke: number;
+    textScale: number;
     engine: string;
     stylesheet: string;
 }

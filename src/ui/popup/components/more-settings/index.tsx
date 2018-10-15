@@ -29,9 +29,6 @@ export default function MoreSettings({data, actions, tab}: ExtWrapper & {tab: Ta
                 <FontSettings config={filterConfig} fonts={data.fonts} onChange={setConfig} />
             </div>
             <div class="more-settings__section">
-                {isFirefox() ? null : <p class="more-settings__description">
-                    {compileMarkdown(getLocalMessage('try_experimental_theme_engines'))}
-                </p>}
                 <EngineSwitch engine={filterConfig.engine} onChange={(engine) => setConfig({engine})} />
             </div>
             <div class="more-settings__section">

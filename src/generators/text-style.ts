@@ -14,6 +14,10 @@ export function createTextStyle(config: FilterConfig): string {
         lines.push(`  text-stroke: ${config.textStroke}px !important;`);
     }
 
+    if (config.textScale != 100) {
+        lines.push(`  font-size: ${config.textScale}%;`);
+    }
+
     lines.push('}');
 
     return lines.join('\n');

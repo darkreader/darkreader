@@ -10,7 +10,7 @@ import {News, NewsButton} from './news';
 import SiteListSettings from './site-list-settings';
 import {isFirefox} from '../../../utils/platform';
 import {getDuration} from '../../../utils/time';
-import {DONATE_URL, GITHUB_URL, PRIVACY_URL, TWITTER_URL, getHelpURL} from '../../../utils/links';
+import {DONATE_URL, GITHUB_URL, PRIVACY_URL, getHelpURL} from '../../../utils/links';
 import {getLocalMessage} from '../../../utils/locales';
 import {ExtensionData, ExtensionActions, TabInfo, News as NewsObject} from '../../../definitions';
 
@@ -108,18 +108,8 @@ function Body(props: BodyProps) {
             <footer>
                 <div class="footer-links">
                     <a class="footer-links__link" href={PRIVACY_URL} target="_blank">{getLocalMessage('privacy')}</a>
-                    <a class="footer-links__link" href={TWITTER_URL} target="_blank">Twitter</a>
                     <a class="footer-links__link" href={GITHUB_URL} target="_blank">GitHub</a>
                     <a class="footer-links__link" href={getHelpURL()} target="_blank">{getLocalMessage('help')}</a>
-                </div>
-                <div class="footer-buttons">
-                    <a class="donate-link" href={DONATE_URL} target="_blank">
-                        <span class="donate-link__text">{getLocalMessage('donate')}</span>
-                    </a>
-                    <NewsButton active={state.newsOpen} count={displayedNewsCount} onClick={toggleNews} />
-                    <Button onclick={openDevTools} class="dev-tools-button">
-                        🛠 {getLocalMessage('open_dev_tools')}
-                    </Button>
                 </div>
             </footer>
             <News

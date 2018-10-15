@@ -2,7 +2,7 @@ import {getUILanguage} from './locales';
 
 export const BLOG_URL = 'https://darkreader.org/blog/';
 export const DEVTOOLS_DOCS_URL = 'https://github.com/alexanderby/darkreader#how-to-contribute';
-export const GITHUB_URL = 'https://github.com/agatt1/Illumify/';
+export const GITHUB_URL = 'https://github.com/agatt1/Illumify';
 export const PRIVACY_URL = 'https://darkreader.org/privacy/';
 
 export function getHelpURL() {

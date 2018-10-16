@@ -10,7 +10,7 @@ import {News, NewsButton} from './news';
 import SiteListSettings from './site-list-settings';
 import {isFirefox} from '../../../utils/platform';
 import {getDuration} from '../../../utils/time';
-import {DONATE_URL, GITHUB_URL, PRIVACY_URL, getHelpURL} from '../../../utils/links';
+import {GITHUB_URL, PRIVACY_URL, getHelpURL} from '../../../utils/links';
 import {getLocalMessage} from '../../../utils/locales';
 import {ExtensionData, ExtensionActions, TabInfo, News as NewsObject} from '../../../definitions';
 
@@ -98,7 +98,7 @@ function Body(props: BodyProps) {
                     ),
                 }}
                 tabLabels={{
-                    'CBMode': getLocalMessage('cbmode'),
+                    'CBMode': getLocalMessage('filter'),
                     'Filter': getLocalMessage('filter'),
                     'Site list': getLocalMessage('site_list'),
                     'More': getLocalMessage('more'),

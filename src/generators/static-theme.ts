@@ -80,7 +80,7 @@ export default function createStaticStylesheet(config: FilterConfig, url: string
         lines.push(...ruleGenerators.map((gen) => gen(siteTheme, theme)));
     }
 
-    if (config.useFont || config.textStroke > 0) {
+    if (config.useFont || config.textStroke > 0 || config.textScale != 100) {
         lines.push('/* Font */');
         lines.push(createTextStyle(config));
     }

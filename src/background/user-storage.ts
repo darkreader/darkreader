@@ -20,6 +20,7 @@ export default class UserStorage {
                 useFont: false,
                 fontFamily: isMacOS() ? 'Helvetica Neue' : isWindows() ? 'Segoe UI' : 'Open Sans',
                 textStroke: 0,
+                textScale: 100,
                 engine: ThemeEngines.dynamicTheme,
                 stylesheet: '',
             },
@@ -135,6 +136,7 @@ export default class UserStorage {
                 useFont: f.useFont,
                 fontFamily: f.fontFamily,
                 textStroke: f.textStroke,
+                textScale: f.textScale,
                 engine: f.engine,
                 stylesheet: f.stylesheet,
             };

@@ -98,7 +98,7 @@ function Body(props: BodyProps) {
                     ),
                 }}
                 tabLabels={{
-                    'CBMode': getLocalMessage('filter'),
+                    'CBMode': getLocalMessage('cbmode'),
                     'Filter': getLocalMessage('filter'),
                     'Site list': getLocalMessage('site_list'),
                     'More': getLocalMessage('more'),

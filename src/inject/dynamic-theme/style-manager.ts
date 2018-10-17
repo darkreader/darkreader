@@ -103,9 +103,7 @@ export async function manageStyle(element: HTMLLinkElement | HTMLStyleElement, {
             // Sometimes cross-origin stylesheets are protected from direct access
             // so need to load CSS text and insert it into style element
             if (corsCopy) {
-                corsCopy.disabled = false;
                 rules = corsCopy.sheet.cssRules;
-                corsCopy.disabled = true;
             } else {
                 loadingStart();
                 try {
@@ -115,9 +113,7 @@ export async function manageStyle(element: HTMLLinkElement | HTMLStyleElement, {
                 }
                 loadingEnd();
                 if (corsCopy) {
-                    corsCopy.disabled = false;
                     rules = corsCopy.sheet.cssRules;
-                    corsCopy.disabled = true;
                 }
             }
         }
@@ -477,6 +473,7 @@ async function createCORSCopy(srcElement: HTMLLinkElement | HTMLStyleElement, ur
     cors.dataset.uri = url;
     cors.textContent = cssText;
     srcElement.parentNode.insertBefore(cors, srcElement.nextSibling);
+    cors.sheet.disabled = true;
 
     return cors;
 }

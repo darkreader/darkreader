@@ -64,8 +64,8 @@ function createTheme() {
     document.head.insertBefore(inlineStyle, invertStyle.nextSibling);
     inlineStyle.textContent = getInlineOverrideStyle();
 
+    throttledRenderAllStyles();
     createManagers();
-    throttledRender();
     overrideInlineStyles(filter);
 
     if (loadingStyles.size === 0) {
@@ -83,7 +83,10 @@ function createManagers() {
 const pendingCreation = new Set<HTMLLinkElement | HTMLStyleElement>();
 
 let loadingStylesCounter = 0;
-let loadingStyles = new Set();
+const loadingStyles = new Set();
+
+type StyleRenderer = (() => void) & {cancel: () => void};
+const styleRenderers = new WeakMap<StyleManager, StyleRenderer>();
 
 async function createManager(element: HTMLLinkElement | HTMLStyleElement) {
     if (styleManagers.has(element) || pendingCreation.has(element)) {
@@ -99,7 +102,11 @@ async function createManager(element: HTMLLinkElement | HTMLStyleElement) {
         }
         const details = manager.details();
         updateVariables(details.variables);
-        throttledRender();
+        if (variables.size === 0) {
+            throttledRenderStyle();
+        } else {
+            throttledRenderAllStyles();
+        }
     }
 
     let loadingStyleId = ++loadingStylesCounter;
@@ -124,6 +131,10 @@ async function createManager(element: HTMLLinkElement | HTMLStyleElement) {
         return;
     }
     styleManagers.set(element, manager);
+
+    const throttledRenderStyle = throttle(() => manager.render(filter, variables));
+    styleRenderers.set(manager, throttledRenderStyle);
+
     update();
 }
 
@@ -140,9 +151,16 @@ function removeManager(element: HTMLLinkElement | HTMLStyleElement) {
     }
 }
 
-const throttledRender = throttle(function render() {
+const throttledRenderAllStyles = throttle(() => {
     styleManagers.forEach((manager) => manager.render(filter, variables));
 });
+const cancelRendering = function () {
+    styleManagers.forEach((manager) => {
+        const renderStyle = styleRenderers.get(manager);
+        renderStyle.cancel();
+    });
+    throttledRenderAllStyles.cancel();
+};
 
 function isPageLoaded() {
     return document.readyState === 'complete' || document.readyState === 'interactive';
@@ -157,7 +175,6 @@ function onReadyStateChange() {
         possibleComplete && possibleComplete();
     }
     createManagers();
-    throttledRender();
 }
 
 function createThemeAndWatchForUpdates() {
@@ -168,12 +185,10 @@ function createThemeAndWatchForUpdates() {
             .filter((style) => !styleManagers.has(style))
             .forEach((style) => createManager(style));
         removed.forEach((style) => removeManager(style));
-        throttledRender();
     });
     watchForInlineStyles(filter);
 
     document.addEventListener('readystatechange', onReadyStateChange);
-    window.addEventListener('load', throttledRender);
 }
 
 function stopWatchingForUpdates() {
@@ -181,7 +196,6 @@ function stopWatchingForUpdates() {
     stopWatchingForStyleChanges();
     stopWatchingForInlineStyles();
     document.removeEventListener('readystatechange', onReadyStateChange);
-    window.removeEventListener('load', throttledRender);
 }
 
 export function createOrUpdateDynamicTheme(filterConfig: FilterConfig, dynamicThemeFixes: DynamicThemeFix, iframe: boolean, possibleCompletionHandler?: () => void) {
@@ -216,7 +230,7 @@ export function removeDynamicTheme() {
 }
 
 export function cleanDynamicThemeCache() {
-    throttledRender.cancel();
+    cancelRendering();
     pendingCreation.clear();
     stopWatchingForUpdates();
     cleanModificationCache();

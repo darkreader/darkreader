@@ -34,10 +34,8 @@ export function shouldManageStyle(element: Node) {
         (
             (element instanceof HTMLStyleElement) ||
             (element instanceof HTMLLinkElement && element.rel && element.rel.toLowerCase().includes('stylesheet'))
-        ) && (
-            !element.classList.contains('darkreader') ||
-            element.classList.contains('darkreader--cors')
         ) &&
+        !element.classList.contains('darkreader') &&
         element.media !== 'print'
     );
 }

@@ -322,41 +322,50 @@ export async function manageStyle(element: HTMLLinkElement | HTMLStyleElement, {
 
         observer.observe(element, observerOptions);
 
-        if (element instanceof HTMLStyleElement && element.hasAttribute('data-styled-components')) {
-            if (element.sheet && element.sheet.cssRules) {
-                styledComponentsRulesCount = element.sheet.cssRules.length;
-            }
-            cancelAnimationFrame(styledComponentsCheckFrameId);
-            styledComponentsChecksCount = 0;
-            const checkForUpdate = async () => {
-                if (element.sheet && element.sheet.cssRules &&
-                    element.sheet.cssRules.length !== styledComponentsRulesCount
-                ) {
-                    logWarn('CSS Rules count changed', element);
-                    cancelAnimationFrame(styledComponentsCheckFrameId);
-                    rules = await getRules();
-                    update();
-                    return;
-                }
-                styledComponentsChecksCount++;
-                if (styledComponentsChecksCount === 1000) {
-                    cancelAnimationFrame(styledComponentsCheckFrameId);
-                    return;
-                }
-                styledComponentsCheckFrameId = requestAnimationFrame(checkForUpdate);
-            };
-            checkForUpdate();
+        if (isStyledComponent()) {
+            subscribeToSheetChanges();
         }
     }
 
+    function isStyledComponent() {
+        return (
+            element instanceof HTMLStyleElement && (
+                element.hasAttribute('data-styled-components') ||
+                element.hasAttribute('data-styled')
+            )
+        );
+    }
+
     let styledComponentsRulesCount: number = null;
-    let styledComponentsChecksCount: number = null;
     let styledComponentsCheckFrameId: number = null;
+
+    function subscribeToSheetChanges() {
+        if (element.sheet && element.sheet.cssRules) {
+            styledComponentsRulesCount = element.sheet.cssRules.length;
+        }
+        cancelAnimationFrame(styledComponentsCheckFrameId);
+        const checkForUpdate = async () => {
+            if (element.sheet && element.sheet.cssRules &&
+                element.sheet.cssRules.length !== styledComponentsRulesCount
+            ) {
+                logWarn('CSS Rules count changed', element);
+                styledComponentsRulesCount = element.sheet.cssRules.length;
+                rules = await getRules();
+                update();
+            }
+            styledComponentsCheckFrameId = requestAnimationFrame(checkForUpdate);
+        };
+        checkForUpdate();
+    }
+
+    function unsubscribeFromSheetChanges() {
+        cancelAnimationFrame(styledComponentsCheckFrameId);
+    }
 
     function pause() {
         observer.disconnect();
         cancelAsyncOperations = true;
-        cancelAnimationFrame(styledComponentsCheckFrameId);
+        unsubscribeFromSheetChanges();
     }
 
     function destroy() {

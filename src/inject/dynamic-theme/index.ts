@@ -64,8 +64,21 @@ function createTheme() {
     document.head.insertBefore(inlineStyle, invertStyle.nextSibling);
     inlineStyle.textContent = getInlineOverrideStyle();
 
-    throttledRenderAllStyles();
-    createManagers();
+    cancelRendering();
+    const newManagers = Array.from<HTMLLinkElement | HTMLStyleElement>(document.querySelectorAll(STYLE_SELECTOR))
+        .filter((style) => !styleManagers.has(style) && shouldManageStyle(style))
+        .map((style) => createManager(style));
+    const newVariables = newManagers
+        .map((manager) => manager.details())
+        .filter((details) => details && details.variables.size > 0)
+        .map(({variables}) => variables);
+    if (newVariables.length === 0) {
+        const managers = Array.from(styleManagers.values());
+        managers.forEach((manager) => throttledRenderStyle(manager));
+    } else {
+        newVariables.forEach((variables) => updateVariables(variables));
+        throttledRenderAllStyles();
+    }
     overrideInlineStyles(filter);
 
     if (loadingStyles.size === 0) {
@@ -74,39 +87,15 @@ function createTheme() {
     }
 }
 
-function createManagers() {
-    Array.from<HTMLLinkElement | HTMLStyleElement>(document.querySelectorAll(STYLE_SELECTOR))
-        .filter((style) => !styleManagers.has(style) && shouldManageStyle(style))
-        .forEach((style) => createManager(style));
-}
-
-const pendingCreation = new Set<HTMLLinkElement | HTMLStyleElement>();
-
 let loadingStylesCounter = 0;
 const loadingStyles = new Set();
 
 type StyleRenderer = (() => void) & {cancel: () => void};
 const styleRenderers = new WeakMap<StyleManager, StyleRenderer>();
 
-async function createManager(element: HTMLLinkElement | HTMLStyleElement) {
-    if (styleManagers.has(element) || pendingCreation.has(element)) {
+function createManager(element: HTMLLinkElement | HTMLStyleElement) {
+    if (styleManagers.has(element)) {
         return;
-    }
-    pendingCreation.add(element);
-
-    let manager: StyleManager = null;
-
-    function update() {
-        if (!manager) {
-            return;
-        }
-        const details = manager.details();
-        updateVariables(details.variables);
-        if (variables.size === 0) {
-            throttledRenderStyle();
-        } else {
-            throttledRenderAllStyles();
-        }
     }
 
     let loadingStyleId = ++loadingStylesCounter;
@@ -125,20 +114,32 @@ async function createManager(element: HTMLLinkElement | HTMLStyleElement) {
         }
     }
 
-    manager = await manageStyle(element, {update, loadingStart, loadingEnd});
-    if (!pendingCreation.has(element)) {
-        manager.destroy();
-        return;
+    function update() {
+        const details = manager.details();
+        if (!details) {
+            return;
+        }
+        if (details.variables.size === 0) {
+            throttledRenderStyle();
+        } else {
+            updateVariables(details.variables);
+            throttledRenderAllStyles();
+        }
     }
+
+    const manager = manageStyle(element, {update, loadingStart, loadingEnd});
     styleManagers.set(element, manager);
 
     const throttledRenderStyle = throttle(() => manager.render(filter, variables));
     styleRenderers.set(manager, throttledRenderStyle);
 
-    update();
+    return manager;
 }
 
 function updateVariables(newVars: Map<string, string>) {
+    if (newVars.size === 0) {
+        return;
+    }
     newVars.forEach((value, key) => variables.set(key, value));
     variables.forEach((value, key) => variables.set(key, replaceCSSVariables(value, variables)));
 }
@@ -149,6 +150,11 @@ function removeManager(element: HTMLLinkElement | HTMLStyleElement) {
         manager.destroy();
         styleManagers.delete(element);
     }
+}
+
+function throttledRenderStyle(manager: StyleManager) {
+    const render = styleRenderers.get(manager);
+    render();
 }
 
 const throttledRenderAllStyles = throttle(() => {
@@ -174,17 +180,26 @@ function onReadyStateChange() {
         document.head.querySelector('.darkreader--fallback').textContent = '';
         possibleComplete && possibleComplete();
     }
-    createManagers();
 }
 
 function createThemeAndWatchForUpdates() {
     createTheme();
 
     watchForStyleChanges(({created, updated, removed}) => {
-        Array.from(new Set(created.concat(updated)))
-            .filter((style) => !styleManagers.has(style))
-            .forEach((style) => createManager(style));
         removed.forEach((style) => removeManager(style));
+        const newManagers = Array.from(new Set(created.concat(updated)))
+            .filter((style) => !styleManagers.has(style))
+            .map((style) => createManager(style));
+        const newVariables = newManagers
+            .map((manager) => manager.details())
+            .filter((details) => details && details.variables.size > 0)
+            .map(({variables}) => variables);
+        if (newVariables.length === 0) {
+            newManagers.forEach((manager) => throttledRenderStyle(manager));
+        } else {
+            newVariables.forEach((variables) => updateVariables(variables));
+            throttledRenderAllStyles();
+        }
     });
     watchForInlineStyles(filter);
 
@@ -231,7 +246,6 @@ export function removeDynamicTheme() {
 
 export function cleanDynamicThemeCache() {
     cancelRendering();
-    pendingCreation.clear();
     stopWatchingForUpdates();
     cleanModificationCache();
 }

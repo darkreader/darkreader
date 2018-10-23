@@ -40,7 +40,7 @@ export function shouldManageStyle(element: Node) {
     );
 }
 
-export async function manageStyle(element: HTMLLinkElement | HTMLStyleElement, {update, loadingStart, loadingEnd}): Promise<StyleManager> {
+export function manageStyle(element: HTMLLinkElement | HTMLStyleElement, {update, loadingStart, loadingEnd}): StyleManager {
 
     const prevStyles: HTMLStyleElement[] = [];
     let next: Element = element;
@@ -57,32 +57,49 @@ export async function manageStyle(element: HTMLLinkElement | HTMLStyleElement, {
     }
 
     const observer = new MutationObserver(async (mutations) => {
-        rules = await getRules();
         update();
     });
     const observerOptions: MutationObserverInit = {attributes: true, childList: true};
 
-    let rules: CSSRuleList;
-
-    async function getRules() {
-        let rules: CSSRuleList = null;
+    function getRulesSync(): CSSRuleList {
+        if (corsCopy) {
+            return corsCopy.sheet.cssRules;
+        }
         if (element.sheet == null) {
-            if (element instanceof HTMLLinkElement) {
-                await linkLoading(element);
-                if (cancelAsyncOperations) {
-                    return null;
-                }
-            } else {
+            return null;
+        }
+        if (element instanceof HTMLLinkElement) {
+            try {
+                return element.sheet.cssRules;
+            } catch (err) {
+                logWarn(err);
                 return null;
             }
+        }
+        if (element.textContent.trim().match(cssImportRegex)) {
+            return null;
+        }
+        return element.sheet.cssRules;
+    }
+
+    let isLoadingRules = false;
+
+    async function getRulesAsync(): Promise<CSSRuleList> {
+        if (isLoadingRules) {
+            return null;
         }
 
         let corsURL: string;
         if (element instanceof HTMLLinkElement) {
+            if (element.sheet == null) {
+                await linkLoading(element);
+                if (cancelAsyncOperations) {
+                    return null;
+                }
+            }
             try {
-                rules = element.sheet.cssRules;
-                if (rules == null) {
-                    corsURL = element.href;
+                if (element.sheet.cssRules != null) {
+                    return element.sheet.cssRules;
                 }
             } catch (err) {
                 corsURL = element.href;
@@ -90,34 +107,31 @@ export async function manageStyle(element: HTMLLinkElement | HTMLStyleElement, {
         } else {
             const cssText = element.textContent.trim();
             if (cssText.match(cssImportRegex)) {
-                corsURL = getCSSImportURL(element.textContent.trim());
-            } else {
-                rules = element.sheet.cssRules;
+                corsURL = getCSSImportURL(cssText);
             }
         }
 
         if (corsURL) {
             // Sometimes cross-origin stylesheets are protected from direct access
             // so need to load CSS text and insert it into style element
+            isLoadingRules = true;
+            loadingStart();
+            try {
+                corsCopy = await createCORSCopy(element, corsURL, isCancelled);
+            } catch (err) {
+                logWarn(err);
+            }
+            isLoadingRules = false;
+            loadingEnd();
             if (corsCopy) {
-                rules = corsCopy.sheet.cssRules;
-            } else {
-                loadingStart();
-                try {
-                    corsCopy = await createCORSCopy(element, corsURL, isCancelled);
-                } catch (err) {
-                    logWarn(err);
-                }
-                loadingEnd();
-                if (corsCopy) {
-                    rules = corsCopy.sheet.cssRules;
-                }
+                return corsCopy.sheet.cssRules;
             }
         }
-        return rules;
+
+        return null;
     }
 
-    function getVariables() {
+    function getVariables(rules: CSSRuleList) {
         const variables = new Map<string, string>();
         rules && iterateCSSRules(rules, (rule) => {
             rule.style && iterateCSSDeclarations(rule.style, (property, value) => {
@@ -130,7 +144,16 @@ export async function manageStyle(element: HTMLLinkElement | HTMLStyleElement, {
     }
 
     function details() {
-        const variables = getVariables();
+        const rules = getRulesSync();
+        if (!rules) {
+            getRulesAsync().then((results) => {
+                if (results) {
+                    update();
+                }
+            });
+            return null;
+        }
+        const variables = getVariables(rules);
         return {variables};
     }
 
@@ -143,11 +166,12 @@ export async function manageStyle(element: HTMLLinkElement | HTMLStyleElement, {
     const rulesModCache = new Map<string, ModifiableCSSRule>();
     let prevFilterKey: string = null;
 
-    async function render(filter: FilterConfig, variables: Map<string, string>) {
-        rules = await getRules();
+    function render(filter: FilterConfig, variables: Map<string, string>) {
+        const rules = getRulesSync();
         if (!rules) {
-            return null;
+            return;
         }
+
         cancelAsyncOperations = false;
         let rulesChanged = (rulesModCache.size === 0);
         const notFoundCacheKeys = new Set(rulesModCache.keys());
@@ -344,7 +368,6 @@ export async function manageStyle(element: HTMLLinkElement | HTMLStyleElement, {
             ) {
                 logWarn('CSS Rules count changed', element);
                 styledComponentsRulesCount = element.sheet.cssRules.length;
-                rules = await getRules();
                 update();
             }
             styledComponentsCheckFrameId = requestAnimationFrame(checkForUpdate);
@@ -369,7 +392,6 @@ export async function manageStyle(element: HTMLLinkElement | HTMLStyleElement, {
     }
 
     observer.observe(element, observerOptions);
-    rules = await getRules();
 
     return {
         details,
@@ -464,7 +486,7 @@ async function createCORSCopy(srcElement: HTMLLinkElement | HTMLStyleElement, ur
     }
 
     const cssText = await loadCSSText(url);
-    if (!cssText) {
+    if (!cssText || isCancelled()) {
         return null;
     }
 

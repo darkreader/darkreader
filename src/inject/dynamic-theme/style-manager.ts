@@ -1,5 +1,5 @@
 import {iterateCSSRules, iterateCSSDeclarations, replaceCSSRelativeURLsWithAbsolute, replaceCSSFontFace, replaceCSSVariables, getCSSURLValue, cssImportRegex, getCSSBaseBath} from './css-rules';
-import {getModifiableCSSDeclaration, getModifiedFallbackStyle, ModifiableCSSDeclaration, ModifiableCSSRule} from './modify-css';
+import {getModifiableCSSDeclaration, ModifiableCSSDeclaration, ModifiableCSSRule} from './modify-css';
 import {bgFetch} from './network';
 import {removeNode} from '../utils/dom';
 import {throttle} from '../utils/throttle';
@@ -49,7 +49,6 @@ export async function manageStyle(element: HTMLLinkElement | HTMLStyleElement, {
     }
     let corsCopy: HTMLStyleElement = prevStyles.find((el) => el.matches('.darkreader--cors')) || null;
     let syncStyle: HTMLStyleElement = prevStyles.find((el) => el.matches('.darkreader--sync')) || null;
-    const asyncStyles: HTMLStyleElement[] = prevStyles.filter((el) => el.matches('.darkreader--async')); // Still need to remove async style used by prev version
 
     let cancelAsyncOperations = false;
 
@@ -226,9 +225,6 @@ export async function manageStyle(element: HTMLLinkElement | HTMLStyleElement, {
 
         renderId++;
 
-        asyncStyles.forEach(removeNode);
-        asyncStyles.splice(0);
-
         interface ReadyDeclaration {
             media: string;
             selector: string;
@@ -370,7 +366,6 @@ export async function manageStyle(element: HTMLLinkElement | HTMLStyleElement, {
         pause();
         removeNode(corsCopy);
         removeNode(syncStyle);
-        asyncStyles.forEach(removeNode);
     }
 
     observer.observe(element, observerOptions);

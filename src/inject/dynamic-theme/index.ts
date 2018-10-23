@@ -176,6 +176,7 @@ function onReadyStateChange() {
     if (!isPageLoaded()) {
         return;
     }
+    document.removeEventListener('readystatechange', onReadyStateChange);
     if (loadingStyles.size === 0) {
         document.head.querySelector('.darkreader--fallback').textContent = '';
         possibleComplete && possibleComplete();

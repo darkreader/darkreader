@@ -83,16 +83,20 @@ export function manageStyle(element: HTMLLinkElement | HTMLStyleElement, {update
     }
 
     let isLoadingRules = false;
+    let wasLoadingError = false;
 
     async function getRulesAsync(): Promise<CSSRuleList> {
-        if (isLoadingRules) {
-            return null;
-        }
-
         let corsURL: string;
+
         if (element instanceof HTMLLinkElement) {
             if (element.sheet == null) {
-                await linkLoading(element);
+                try {
+                    await linkLoading(element);
+                } catch (err) {
+                    logWarn(err);
+                    wasLoadingError = true;
+                    return null;
+                }
                 if (cancelAsyncOperations) {
                     return null;
                 }
@@ -114,15 +118,11 @@ export function manageStyle(element: HTMLLinkElement | HTMLStyleElement, {update
         if (corsURL) {
             // Sometimes cross-origin stylesheets are protected from direct access
             // so need to load CSS text and insert it into style element
-            isLoadingRules = true;
-            loadingStart();
             try {
                 corsCopy = await createCORSCopy(element, corsURL, isCancelled);
             } catch (err) {
                 logWarn(err);
             }
-            isLoadingRules = false;
-            loadingEnd();
             if (corsCopy) {
                 return corsCopy.sheet.cssRules;
             }
@@ -146,10 +146,21 @@ export function manageStyle(element: HTMLLinkElement | HTMLStyleElement, {update
     function details() {
         const rules = getRulesSync();
         if (!rules) {
+            if (isLoadingRules || wasLoadingError) {
+                return null;
+            }
+            isLoadingRules = true;
+            loadingStart();
             getRulesAsync().then((results) => {
+                isLoadingRules = false;
+                loadingEnd();
                 if (results) {
                     update();
                 }
+            }).catch((err) => {
+                logWarn(err);
+                isLoadingRules = false;
+                loadingEnd();
             });
             return null;
         }

@@ -103,6 +103,11 @@ function createManager(element: HTMLLinkElement | HTMLStyleElement) {
     function loadingStart() {
         if (!isPageLoaded()) {
             loadingStyles.add(loadingStyleId);
+
+            const fallbackStyle = document.querySelector('.darkreader--fallback');
+            if (!fallbackStyle.textContent) {
+                fallbackStyle.textContent = getModifiedFallbackStyle(filter);
+            }
         }
     }
 

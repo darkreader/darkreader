@@ -63,6 +63,14 @@ function createTheme() {
     document.head.insertBefore(inlineStyle, invertStyle.nextSibling);
     inlineStyle.textContent = getInlineOverrideStyle();
 
+    const overrideStyle = createOrUpdateStyle('darkreader--override');
+    document.head.appendChild(overrideStyle);
+    // TODO: Move CSS fixes to config.
+    overrideStyle.textContent = {
+        'www.ebay.com': 'html, body { background-image: none !important; }',
+        'www.youtube.com': filter.mode === 1 ? '#textarea { color: white !important; }' : '',
+    }[location.host] || '';
+
     cancelRendering();
     const newManagers = Array.from<HTMLLinkElement | HTMLStyleElement>(document.querySelectorAll(STYLE_SELECTOR))
         .filter((style) => !styleManagers.has(style) && shouldManageStyle(style))
@@ -238,12 +246,13 @@ export function createOrUpdateDynamicTheme(filterConfig: FilterConfig, dynamicTh
 
 export function removeDynamicTheme() {
     cleanDynamicThemeCache();
+    removeNode(document.querySelector('.darkreader--fallback'));
     if (document.head) {
         removeNode(document.head.querySelector('.darkreader--user-agent'));
-        removeNode(document.head.querySelector('.darkreader--fallback'));
         removeNode(document.head.querySelector('.darkreader--text'));
         removeNode(document.head.querySelector('.darkreader--invert'));
         removeNode(document.head.querySelector('.darkreader--inline'));
+        removeNode(document.head.querySelector('.darkreader--override'));
     }
     Array.from(styleManagers.keys()).forEach((el) => removeManager(el));
     Array.from(document.querySelectorAll('.darkreader')).forEach(removeNode);

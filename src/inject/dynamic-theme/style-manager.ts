@@ -106,8 +106,9 @@ export function manageStyle(element: HTMLLinkElement | HTMLStyleElement, {update
                     return element.sheet.cssRules;
                 }
             } catch (err) {
-                corsURL = element.href;
+                logWarn(err);
             }
+            corsURL = element.href;
         } else {
             const cssText = element.textContent.trim();
             if (cssText.match(cssImportRegex)) {

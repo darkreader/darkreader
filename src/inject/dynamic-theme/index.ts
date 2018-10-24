@@ -15,7 +15,6 @@ const variables = new Map<string, string>();
 let filter: FilterConfig = null;
 let fixes: DynamicThemeFix = null;
 let isIFrame: boolean = null;
-let possibleComplete: () => void = null;
 
 function createOrUpdateStyle(className: string) {
     let style = document.head.querySelector(`.${className}`) as HTMLStyleElement;
@@ -83,7 +82,6 @@ function createTheme() {
 
     if (loadingStyles.size === 0) {
         fallbackStyle.textContent = '';
-        possibleComplete && possibleComplete();
     }
 }
 
@@ -115,7 +113,6 @@ function createManager(element: HTMLLinkElement | HTMLStyleElement) {
         loadingStyles.delete(loadingStyleId);
         if (loadingStyles.size === 0 && isPageLoaded()) {
             document.head.querySelector('.darkreader--fallback').textContent = '';
-            possibleComplete && possibleComplete();
         }
     }
 
@@ -184,7 +181,6 @@ function onReadyStateChange() {
     document.removeEventListener('readystatechange', onReadyStateChange);
     if (loadingStyles.size === 0) {
         document.head.querySelector('.darkreader--fallback').textContent = '';
-        possibleComplete && possibleComplete();
     }
 }
 
@@ -219,11 +215,10 @@ function stopWatchingForUpdates() {
     document.removeEventListener('readystatechange', onReadyStateChange);
 }
 
-export function createOrUpdateDynamicTheme(filterConfig: FilterConfig, dynamicThemeFixes: DynamicThemeFix, iframe: boolean, possibleCompletionHandler?: () => void) {
+export function createOrUpdateDynamicTheme(filterConfig: FilterConfig, dynamicThemeFixes: DynamicThemeFix, iframe: boolean) {
     filter = filterConfig;
     fixes = dynamicThemeFixes;
     isIFrame = iframe;
-    possibleComplete = possibleCompletionHandler;
     if (document.head) {
         createThemeAndWatchForUpdates();
     } else {

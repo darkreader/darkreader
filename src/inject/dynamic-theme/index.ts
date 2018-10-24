@@ -222,6 +222,10 @@ export function createOrUpdateDynamicTheme(filterConfig: FilterConfig, dynamicTh
     if (document.head) {
         createThemeAndWatchForUpdates();
     } else {
+        const fallbackStyle = createOrUpdateStyle('darkreader--fallback');
+        document.documentElement.appendChild(fallbackStyle);
+        fallbackStyle.textContent = getModifiedFallbackStyle(filter);
+
         const headObserver = new MutationObserver(() => {
             if (document.head) {
                 headObserver.disconnect();

@@ -1,8 +1,8 @@
 import {html, ChildDeclaration} from 'malevic';
 
 interface ToggleProps {
-    checked: boolean;
     class?: string;
+    checked: boolean;
     labelOn: ChildDeclaration;
     labelOff: ChildDeclaration;
     onChange: (checked: boolean) => void;
@@ -14,7 +14,7 @@ export default function Toggle(props: ToggleProps) {
     const cls = [
         'toggle',
         checked ? 'toggle--checked' : null,
-        [props.class],
+        props.class,
     ];
 
     const clsOn = {

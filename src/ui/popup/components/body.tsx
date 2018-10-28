@@ -6,6 +6,7 @@ import FilterSettings from './filter-settings';
 import Header from './header';
 import Loader from './loader';
 import MoreSettings from './more-settings';
+import CBMode from './cb-mode';
 import {News, NewsButton} from './news';
 import SiteListSettings from './site-list-settings';
 import {isFirefox} from '../../../utils/platform';
@@ -85,7 +86,7 @@ function Body(props: BodyProps) {
                 onSwitchTab={(tab) => setState({activeTab: tab})}
                 tabs={{
                     'CBMode': (
-                        <MoreSettings data={props.data} actions={props.actions} tab = {props.tab} />
+                        <CBMode data={props.data} actions={props.actions} tab = {props.tab} />
                     ),
                     'Filter': (
                         <FilterSettings data={props.data} actions={props.actions} tab={props.tab} />

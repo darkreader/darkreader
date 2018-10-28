@@ -1,5 +1,5 @@
 import {iterateCSSRules, iterateCSSDeclarations, replaceCSSRelativeURLsWithAbsolute, replaceCSSFontFace, replaceCSSVariables, getCSSURLValue, cssImportRegex, getCSSBaseBath} from './css-rules';
-import {getModifiableCSSDeclaration, getModifiedFallbackStyle, ModifiableCSSDeclaration, ModifiableCSSRule} from './modify-css';
+import {getModifiableCSSDeclaration, ModifiableCSSDeclaration, ModifiableCSSRule} from './modify-css';
 import {bgFetch} from './network';
 import {removeNode} from '../utils/dom';
 import {throttle} from '../utils/throttle';
@@ -34,15 +34,13 @@ export function shouldManageStyle(element: Node) {
         (
             (element instanceof HTMLStyleElement) ||
             (element instanceof HTMLLinkElement && element.rel && element.rel.toLowerCase().includes('stylesheet'))
-        ) && (
-            !element.classList.contains('darkreader') ||
-            element.classList.contains('darkreader--cors')
         ) &&
+        !element.classList.contains('darkreader') &&
         element.media !== 'print'
     );
 }
 
-export async function manageStyle(element: HTMLLinkElement | HTMLStyleElement, {update, loadingStart, loadingEnd}): Promise<StyleManager> {
+export function manageStyle(element: HTMLLinkElement | HTMLStyleElement, {update, loadingStart, loadingEnd}): StyleManager {
 
     const prevStyles: HTMLStyleElement[] = [];
     let next: Element = element;
@@ -51,7 +49,6 @@ export async function manageStyle(element: HTMLLinkElement | HTMLStyleElement, {
     }
     let corsCopy: HTMLStyleElement = prevStyles.find((el) => el.matches('.darkreader--cors')) || null;
     let syncStyle: HTMLStyleElement = prevStyles.find((el) => el.matches('.darkreader--sync')) || null;
-    const asyncStyles: HTMLStyleElement[] = prevStyles.filter((el) => el.matches('.darkreader--async')); // Still need to remove async style used by prev version
 
     let cancelAsyncOperations = false;
 
@@ -60,71 +57,82 @@ export async function manageStyle(element: HTMLLinkElement | HTMLStyleElement, {
     }
 
     const observer = new MutationObserver(async (mutations) => {
-        rules = await getRules();
         update();
     });
     const observerOptions: MutationObserverInit = {attributes: true, childList: true};
 
-    let rules: CSSRuleList;
-
-    async function getRules() {
-        let rules: CSSRuleList = null;
+    function getRulesSync(): CSSRuleList {
+        if (corsCopy) {
+            return corsCopy.sheet.cssRules;
+        }
         if (element.sheet == null) {
-            if (element instanceof HTMLLinkElement) {
-                await linkLoading(element);
-                if (cancelAsyncOperations) {
-                    return null;
-                }
-            } else {
+            return null;
+        }
+        if (element instanceof HTMLLinkElement) {
+            try {
+                return element.sheet.cssRules;
+            } catch (err) {
+                logWarn(err);
                 return null;
             }
         }
+        if (element.textContent.trim().match(cssImportRegex)) {
+            return null;
+        }
+        return element.sheet.cssRules;
+    }
 
+    let isLoadingRules = false;
+    let wasLoadingError = false;
+
+    async function getRulesAsync(): Promise<CSSRuleList> {
         let corsURL: string;
+
         if (element instanceof HTMLLinkElement) {
+            if (element.sheet == null) {
+                try {
+                    await linkLoading(element);
+                } catch (err) {
+                    logWarn(err);
+                    wasLoadingError = true;
+                    return null;
+                }
+                if (cancelAsyncOperations) {
+                    return null;
+                }
+            }
             try {
-                rules = element.sheet.cssRules;
-                if (rules == null) {
-                    corsURL = element.href;
+                if (element.sheet.cssRules != null) {
+                    return element.sheet.cssRules;
                 }
             } catch (err) {
-                corsURL = element.href;
+                logWarn(err);
             }
+            corsURL = element.href;
         } else {
             const cssText = element.textContent.trim();
             if (cssText.match(cssImportRegex)) {
-                corsURL = getCSSImportURL(element.textContent.trim());
-            } else {
-                rules = element.sheet.cssRules;
+                corsURL = getCSSImportURL(cssText);
             }
         }
 
         if (corsURL) {
             // Sometimes cross-origin stylesheets are protected from direct access
             // so need to load CSS text and insert it into style element
+            try {
+                corsCopy = await createCORSCopy(element, corsURL, isCancelled);
+            } catch (err) {
+                logWarn(err);
+            }
             if (corsCopy) {
-                corsCopy.disabled = false;
-                rules = corsCopy.sheet.cssRules;
-                corsCopy.disabled = true;
-            } else {
-                loadingStart();
-                try {
-                    corsCopy = await createCORSCopy(element, corsURL, isCancelled);
-                } catch (err) {
-                    logWarn(err);
-                }
-                loadingEnd();
-                if (corsCopy) {
-                    corsCopy.disabled = false;
-                    rules = corsCopy.sheet.cssRules;
-                    corsCopy.disabled = true;
-                }
+                return corsCopy.sheet.cssRules;
             }
         }
-        return rules;
+
+        return null;
     }
 
-    function getVariables() {
+    function getVariables(rules: CSSRuleList) {
         const variables = new Map<string, string>();
         rules && iterateCSSRules(rules, (rule) => {
             rule.style && iterateCSSDeclarations(rule.style, (property, value) => {
@@ -137,7 +145,27 @@ export async function manageStyle(element: HTMLLinkElement | HTMLStyleElement, {
     }
 
     function details() {
-        const variables = getVariables();
+        const rules = getRulesSync();
+        if (!rules) {
+            if (isLoadingRules || wasLoadingError) {
+                return null;
+            }
+            isLoadingRules = true;
+            loadingStart();
+            getRulesAsync().then((results) => {
+                isLoadingRules = false;
+                loadingEnd();
+                if (results) {
+                    update();
+                }
+            }).catch((err) => {
+                logWarn(err);
+                isLoadingRules = false;
+                loadingEnd();
+            });
+            return null;
+        }
+        const variables = getVariables(rules);
         return {variables};
     }
 
@@ -150,11 +178,12 @@ export async function manageStyle(element: HTMLLinkElement | HTMLStyleElement, {
     const rulesModCache = new Map<string, ModifiableCSSRule>();
     let prevFilterKey: string = null;
 
-    async function render(filter: FilterConfig, variables: Map<string, string>) {
-        rules = await getRules();
+    function render(filter: FilterConfig, variables: Map<string, string>) {
+        const rules = getRulesSync();
         if (!rules) {
-            return null;
+            return;
         }
+
         cancelAsyncOperations = false;
         let rulesChanged = (rulesModCache.size === 0);
         const notFoundCacheKeys = new Set(rulesModCache.keys());
@@ -231,9 +260,6 @@ export async function manageStyle(element: HTMLLinkElement | HTMLStyleElement, {
         }
 
         renderId++;
-
-        asyncStyles.forEach(removeNode);
-        asyncStyles.splice(0);
 
         interface ReadyDeclaration {
             media: string;
@@ -326,52 +352,58 @@ export async function manageStyle(element: HTMLLinkElement | HTMLStyleElement, {
 
         observer.observe(element, observerOptions);
 
-        if (element instanceof HTMLStyleElement && element.hasAttribute('data-styled-components')) {
-            if (element.sheet && element.sheet.cssRules) {
-                styledComponentsRulesCount = element.sheet.cssRules.length;
-            }
-            cancelAnimationFrame(styledComponentsCheckFrameId);
-            styledComponentsChecksCount = 0;
-            const checkForUpdate = async () => {
-                if (element.sheet && element.sheet.cssRules &&
-                    element.sheet.cssRules.length !== styledComponentsRulesCount
-                ) {
-                    logWarn('CSS Rules count changed', element);
-                    cancelAnimationFrame(styledComponentsCheckFrameId);
-                    rules = await getRules();
-                    update();
-                    return;
-                }
-                styledComponentsChecksCount++;
-                if (styledComponentsChecksCount === 1000) {
-                    cancelAnimationFrame(styledComponentsCheckFrameId);
-                    return;
-                }
-                styledComponentsCheckFrameId = requestAnimationFrame(checkForUpdate);
-            };
-            checkForUpdate();
+        if (isStyledComponent()) {
+            subscribeToSheetChanges();
         }
     }
 
+    function isStyledComponent() {
+        return (
+            element instanceof HTMLStyleElement && (
+                element.hasAttribute('data-styled-components') ||
+                element.hasAttribute('data-styled')
+            )
+        );
+    }
+
     let styledComponentsRulesCount: number = null;
-    let styledComponentsChecksCount: number = null;
     let styledComponentsCheckFrameId: number = null;
+
+    function subscribeToSheetChanges() {
+        if (element.sheet && element.sheet.cssRules) {
+            styledComponentsRulesCount = element.sheet.cssRules.length;
+        }
+        cancelAnimationFrame(styledComponentsCheckFrameId);
+        const checkForUpdate = async () => {
+            if (element.sheet && element.sheet.cssRules &&
+                element.sheet.cssRules.length !== styledComponentsRulesCount
+            ) {
+                logWarn('CSS Rules count changed', element);
+                styledComponentsRulesCount = element.sheet.cssRules.length;
+                update();
+            }
+            styledComponentsCheckFrameId = requestAnimationFrame(checkForUpdate);
+        };
+        checkForUpdate();
+    }
+
+    function unsubscribeFromSheetChanges() {
+        cancelAnimationFrame(styledComponentsCheckFrameId);
+    }
 
     function pause() {
         observer.disconnect();
         cancelAsyncOperations = true;
-        cancelAnimationFrame(styledComponentsCheckFrameId);
+        unsubscribeFromSheetChanges();
     }
 
     function destroy() {
         pause();
         removeNode(corsCopy);
         removeNode(syncStyle);
-        asyncStyles.forEach(removeNode);
     }
 
     observer.observe(element, observerOptions);
-    rules = await getRules();
 
     return {
         details,
@@ -466,7 +498,7 @@ async function createCORSCopy(srcElement: HTMLLinkElement | HTMLStyleElement, ur
     }
 
     const cssText = await loadCSSText(url);
-    if (!cssText) {
+    if (!cssText || isCancelled()) {
         return null;
     }
 
@@ -477,6 +509,7 @@ async function createCORSCopy(srcElement: HTMLLinkElement | HTMLStyleElement, ur
     cors.dataset.uri = url;
     cors.textContent = cssText;
     srcElement.parentNode.insertBefore(cors, srcElement.nextSibling);
+    cors.sheet.disabled = true;
 
     return cors;
 }

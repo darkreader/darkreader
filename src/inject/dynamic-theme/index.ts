@@ -15,7 +15,6 @@ const variables = new Map<string, string>();
 let filter: FilterConfig = null;
 let fixes: DynamicThemeFix = null;
 let isIFrame: boolean = null;
-let possibleComplete: () => void = null;
 
 function createOrUpdateStyle(className: string) {
     let style = document.head.querySelector(`.${className}`) as HTMLStyleElement;
@@ -64,42 +63,45 @@ function createTheme() {
     document.head.insertBefore(inlineStyle, invertStyle.nextSibling);
     inlineStyle.textContent = getInlineOverrideStyle();
 
-    createManagers();
-    throttledRender();
+    const overrideStyle = createOrUpdateStyle('darkreader--override');
+    document.head.appendChild(overrideStyle);
+    // TODO: Move CSS fixes to config.
+    overrideStyle.textContent = {
+        'www.ebay.com': 'html, body { background-image: none !important; }',
+        'www.youtube.com': filter.mode === 1 ? '#textarea { color: white !important; }' : '',
+    }[location.host] || '';
+
+    cancelRendering();
+    const newManagers = Array.from<HTMLLinkElement | HTMLStyleElement>(document.querySelectorAll(STYLE_SELECTOR))
+        .filter((style) => !styleManagers.has(style) && shouldManageStyle(style))
+        .map((style) => createManager(style));
+    const newVariables = newManagers
+        .map((manager) => manager.details())
+        .filter((details) => details && details.variables.size > 0)
+        .map(({variables}) => variables);
+    if (newVariables.length === 0) {
+        const managers = Array.from(styleManagers.values());
+        managers.forEach((manager) => throttledRenderStyle(manager));
+    } else {
+        newVariables.forEach((variables) => updateVariables(variables));
+        throttledRenderAllStyles();
+    }
     overrideInlineStyles(filter);
 
     if (loadingStyles.size === 0) {
         fallbackStyle.textContent = '';
-        possibleComplete && possibleComplete();
     }
 }
-
-function createManagers() {
-    Array.from<HTMLLinkElement | HTMLStyleElement>(document.querySelectorAll(STYLE_SELECTOR))
-        .filter((style) => !styleManagers.has(style) && shouldManageStyle(style))
-        .forEach((style) => createManager(style));
-}
-
-const pendingCreation = new Set<HTMLLinkElement | HTMLStyleElement>();
 
 let loadingStylesCounter = 0;
-let loadingStyles = new Set();
+const loadingStyles = new Set();
 
-async function createManager(element: HTMLLinkElement | HTMLStyleElement) {
-    if (styleManagers.has(element) || pendingCreation.has(element)) {
+type StyleRenderer = (() => void) & {cancel: () => void};
+const styleRenderers = new WeakMap<StyleManager, StyleRenderer>();
+
+function createManager(element: HTMLLinkElement | HTMLStyleElement) {
+    if (styleManagers.has(element)) {
         return;
-    }
-    pendingCreation.add(element);
-
-    let manager: StyleManager = null;
-
-    function update() {
-        if (!manager) {
-            return;
-        }
-        const details = manager.details();
-        updateVariables(details.variables);
-        throttledRender();
     }
 
     let loadingStyleId = ++loadingStylesCounter;
@@ -107,6 +109,11 @@ async function createManager(element: HTMLLinkElement | HTMLStyleElement) {
     function loadingStart() {
         if (!isPageLoaded()) {
             loadingStyles.add(loadingStyleId);
+
+            const fallbackStyle = document.querySelector('.darkreader--fallback');
+            if (!fallbackStyle.textContent) {
+                fallbackStyle.textContent = getModifiedFallbackStyle(filter);
+            }
         }
     }
 
@@ -114,20 +121,35 @@ async function createManager(element: HTMLLinkElement | HTMLStyleElement) {
         loadingStyles.delete(loadingStyleId);
         if (loadingStyles.size === 0 && isPageLoaded()) {
             document.head.querySelector('.darkreader--fallback').textContent = '';
-            possibleComplete && possibleComplete();
         }
     }
 
-    manager = await manageStyle(element, {update, loadingStart, loadingEnd});
-    if (!pendingCreation.has(element)) {
-        manager.destroy();
-        return;
+    function update() {
+        const details = manager.details();
+        if (!details) {
+            return;
+        }
+        if (details.variables.size === 0) {
+            throttledRenderStyle();
+        } else {
+            updateVariables(details.variables);
+            throttledRenderAllStyles();
+        }
     }
+
+    const manager = manageStyle(element, {update, loadingStart, loadingEnd});
     styleManagers.set(element, manager);
-    update();
+
+    const throttledRenderStyle = throttle(() => manager.render(filter, variables));
+    styleRenderers.set(manager, throttledRenderStyle);
+
+    return manager;
 }
 
 function updateVariables(newVars: Map<string, string>) {
+    if (newVars.size === 0) {
+        return;
+    }
     newVars.forEach((value, key) => variables.set(key, value));
     variables.forEach((value, key) => variables.set(key, replaceCSSVariables(value, variables)));
 }
@@ -140,9 +162,21 @@ function removeManager(element: HTMLLinkElement | HTMLStyleElement) {
     }
 }
 
-const throttledRender = throttle(function render() {
+function throttledRenderStyle(manager: StyleManager) {
+    const render = styleRenderers.get(manager);
+    render();
+}
+
+const throttledRenderAllStyles = throttle(() => {
     styleManagers.forEach((manager) => manager.render(filter, variables));
 });
+const cancelRendering = function () {
+    styleManagers.forEach((manager) => {
+        const renderStyle = styleRenderers.get(manager);
+        renderStyle.cancel();
+    });
+    throttledRenderAllStyles.cancel();
+};
 
 function isPageLoaded() {
     return document.readyState === 'complete' || document.readyState === 'interactive';
@@ -152,28 +186,34 @@ function onReadyStateChange() {
     if (!isPageLoaded()) {
         return;
     }
+    document.removeEventListener('readystatechange', onReadyStateChange);
     if (loadingStyles.size === 0) {
         document.head.querySelector('.darkreader--fallback').textContent = '';
-        possibleComplete && possibleComplete();
     }
-    createManagers();
-    throttledRender();
 }
 
 function createThemeAndWatchForUpdates() {
     createTheme();
 
     watchForStyleChanges(({created, updated, removed}) => {
-        Array.from(new Set(created.concat(updated)))
-            .filter((style) => !styleManagers.has(style))
-            .forEach((style) => createManager(style));
         removed.forEach((style) => removeManager(style));
-        throttledRender();
+        const newManagers = Array.from(new Set(created.concat(updated)))
+            .filter((style) => !styleManagers.has(style))
+            .map((style) => createManager(style));
+        const newVariables = newManagers
+            .map((manager) => manager.details())
+            .filter((details) => details && details.variables.size > 0)
+            .map(({variables}) => variables);
+        if (newVariables.length === 0) {
+            newManagers.forEach((manager) => throttledRenderStyle(manager));
+        } else {
+            newVariables.forEach((variables) => updateVariables(variables));
+            throttledRenderAllStyles();
+        }
     });
     watchForInlineStyles(filter);
 
     document.addEventListener('readystatechange', onReadyStateChange);
-    window.addEventListener('load', throttledRender);
 }
 
 function stopWatchingForUpdates() {
@@ -181,17 +221,19 @@ function stopWatchingForUpdates() {
     stopWatchingForStyleChanges();
     stopWatchingForInlineStyles();
     document.removeEventListener('readystatechange', onReadyStateChange);
-    window.removeEventListener('load', throttledRender);
 }
 
-export function createOrUpdateDynamicTheme(filterConfig: FilterConfig, dynamicThemeFixes: DynamicThemeFix, iframe: boolean, possibleCompletionHandler?: () => void) {
+export function createOrUpdateDynamicTheme(filterConfig: FilterConfig, dynamicThemeFixes: DynamicThemeFix, iframe: boolean) {
     filter = filterConfig;
     fixes = dynamicThemeFixes;
     isIFrame = iframe;
-    possibleComplete = possibleCompletionHandler;
     if (document.head) {
         createThemeAndWatchForUpdates();
     } else {
+        const fallbackStyle = createOrUpdateStyle('darkreader--fallback');
+        document.documentElement.appendChild(fallbackStyle);
+        fallbackStyle.textContent = getModifiedFallbackStyle(filter);
+
         const headObserver = new MutationObserver(() => {
             if (document.head) {
                 headObserver.disconnect();
@@ -204,20 +246,20 @@ export function createOrUpdateDynamicTheme(filterConfig: FilterConfig, dynamicTh
 
 export function removeDynamicTheme() {
     cleanDynamicThemeCache();
+    removeNode(document.querySelector('.darkreader--fallback'));
     if (document.head) {
         removeNode(document.head.querySelector('.darkreader--user-agent'));
-        removeNode(document.head.querySelector('.darkreader--fallback'));
         removeNode(document.head.querySelector('.darkreader--text'));
         removeNode(document.head.querySelector('.darkreader--invert'));
         removeNode(document.head.querySelector('.darkreader--inline'));
+        removeNode(document.head.querySelector('.darkreader--override'));
     }
     Array.from(styleManagers.keys()).forEach((el) => removeManager(el));
     Array.from(document.querySelectorAll('.darkreader')).forEach(removeNode);
 }
 
 export function cleanDynamicThemeCache() {
-    throttledRender.cancel();
-    pendingCreation.clear();
+    cancelRendering();
     stopWatchingForUpdates();
     cleanModificationCache();
 }

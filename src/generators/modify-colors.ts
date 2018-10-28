@@ -9,7 +9,7 @@ export function clearColorModificationCache() {
     colorModificationCache.clear();
 }
 
-function modifyColorWithCache(rgb: RGBA, filter: FilterConfig, modifyHSL: (hsl: HSLA) => (HSLA & {isNeutral: boolean})) {
+function modifyColorWithCache(rgb: RGBA, filter: FilterConfig, modifyHSL: (hsl: HSLA) => HSLA) {
     let fnCache: Map<string, string>;
     if (colorModificationCache.has(modifyHSL)) {
         fnCache = colorModificationCache.get(modifyHSL);
@@ -28,7 +28,7 @@ function modifyColorWithCache(rgb: RGBA, filter: FilterConfig, modifyHSL: (hsl: 
     const hsl = rgbToHSL(rgb);
     const modified = modifyHSL(hsl);
     const {r, g, b, a} = hslToRGB(modified);
-    const matrix = createFilterMatrix({...filter, ...(modified.isNeutral ? {} : {sepia: filter.sepia / 3, grayscale: filter.grayscale / 3}), mode: 0})
+    const matrix = createFilterMatrix({...filter, mode: 0})
     const [rf, gf, bf] = applyColorMatrix([r, g, b], matrix);
 
     const color = (a === 1 ?
@@ -60,7 +60,7 @@ function modifyLightModeHSL({h, s, l, a}) {
         hx = (l < lMid ? hColoredL0 : hColoredL1);
     }
 
-    return {h: hx, s: sx, l: lx, a, isNeutral};
+    return {h: hx, s: sx, l: lx, a};
 }
 
 function modifyBgHSL({h, s, l, a}) {
@@ -90,7 +90,7 @@ function modifyBgHSL({h, s, l, a}) {
         hx = scale(clamp(lx, lMin, lMax), lMin, lMax, hColoredL0, hColoredL1);
     }
 
-    return {h: hx, s: sx, l: lx, a, isNeutral};
+    return {h: hx, s: sx, l: lx, a};
 }
 
 export function modifyBackgroundColor(rgb: RGBA, filter: FilterConfig) {
@@ -134,7 +134,7 @@ function modifyFgHSL({h, s, l, a}) {
         hx = scale(clamp(lx, lMin, lMax), lMin, lMax, hColoredL0, hColoredL1);
     }
 
-    return {h: hx, s: sx, l: lx, a, isNeutral};
+    return {h: hx, s: sx, l: lx, a};
 }
 
 export function modifyForegroundColor(rgb: RGBA, filter: FilterConfig) {
@@ -154,7 +154,7 @@ function modifyBorderHSL({h, s, l, a}) {
     const lMax = scale(s, 0, 1, lMaxS0, lMaxS1);
     const lx = scale(l, 0, 1, lMax, lMin);
 
-    return {h, s, l: lx, a, isNeutral: true};
+    return {h, s, l: lx, a};
 }
 
 export function modifyBorderColor(rgb: RGBA, filter: FilterConfig) {

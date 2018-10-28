@@ -92,17 +92,29 @@ or **[inversion-fixes.config](https://github.com/alexanderby/darkreader/blob/mas
 
 If you would like to **add new feature** to Dark Reader or **fix a bug**, **submit an issue** in GitHub (if there is no existing one), **discuss** it with active contributors, wait for **approvement**.
 
-In order to build and debug the extension **install the [nodejs](https://nodejs.org/)**.
+In order to build and debug the extension **install the [Node.js](https://nodejs.org/)** LTS.
 Install development dependencies by running `npm install` in project root folder.
 Then execute `npm run debug`.
-Open the [Chrome's extensions page](https://support.google.com/chrome/answer/187443).
-Enable the **Developer mode**, press **Load unpacked extension** button, navigate to project's `debug/` folder.
+
+#### Chrome
+Open the `chrome://extensions` page.
+Disable the official Dark Reader version.
+Enable the **Developer mode**.
+Click **Load unpacked extension** button, navigate to project's `debug/` folder.
+
+#### Firefox
+Open `about:addons` page.
+Disable the official Dark Reader version.
+Open `about:debugging#addons` page.
+Click **Load Temporary Add-on** button, open `debug-firefox/manifest.json` file.
 
 After making any code changes the project will be automatically recompiled.
-If the extension **didn't reload** automatically it can be reloaded at [Extensions page](chrome://extensions) by pressing the **Reload (Ctrl+R)** hyperlink.
+If the extension **didn't reload** automatically it can be reloaded manually on the extensions page.
 
 For editing the code you can use any text editor or web IDE (like [Visual Studio Code](https://code.visualstudio.com), [Atom](https://atom.io/), [WebStorm](https://www.jetbrains.com/webstorm/)).
 **Preserve code style** (whitespaces etc).
+
+Run tests by executing `npm test`.
 
 Submit a **pull request**, wait for **review**.
 

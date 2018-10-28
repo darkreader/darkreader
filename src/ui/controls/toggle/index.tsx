@@ -14,7 +14,7 @@ export default function Toggle(props: ToggleProps) {
     const cls = [
         'toggle',
         checked ? 'toggle--checked' : null,
-        [props.class],
+        props.class,
     ];
 
     const clsOn = {

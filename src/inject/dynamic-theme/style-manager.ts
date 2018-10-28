@@ -86,18 +86,19 @@ export function manageStyle(element: HTMLLinkElement | HTMLStyleElement, {update
     let wasLoadingError = false;
 
     async function getRulesAsync(): Promise<CSSRuleList> {
-        let corsURL: string;
+        let cssText: string;
+        let cssBasePath: string;
 
         if (element instanceof HTMLLinkElement) {
             if (element.sheet == null) {
                 try {
                     await linkLoading(element);
+                    if (cancelAsyncOperations) {
+                        return null;
+                    }
                 } catch (err) {
                     logWarn(err);
                     wasLoadingError = true;
-                    return null;
-                }
-                if (cancelAsyncOperations) {
                     return null;
                 }
             }
@@ -108,19 +109,22 @@ export function manageStyle(element: HTMLLinkElement | HTMLStyleElement, {update
             } catch (err) {
                 logWarn(err);
             }
-            corsURL = element.href;
-        } else {
-            const cssText = element.textContent.trim();
-            if (cssText.match(cssImportRegex)) {
-                corsURL = getCSSImportURL(cssText);
+            cssText = await loadWithCache(element.href);
+            cssBasePath = getCSSBaseBath(element.href);
+            if (cancelAsyncOperations) {
+                return null;
             }
+        } else {
+            cssText = element.textContent.trim();
+            cssBasePath = getCSSBaseBath(location.href);
         }
 
-        if (corsURL) {
+        if (cssText) {
             // Sometimes cross-origin stylesheets are protected from direct access
             // so need to load CSS text and insert it into style element
             try {
-                corsCopy = await createCORSCopy(element, corsURL, isCancelled);
+                const fullCSSText = await replaceCSSImports(cssText, cssBasePath);
+                corsCopy = createCORSCopy(element, fullCSSText);
             } catch (err) {
                 logWarn(err);
             }
@@ -437,6 +441,10 @@ function getCSSImportURL(importDeclaration: string) {
 }
 
 async function loadWithCache(url: string) {
+    if (url.startsWith('data:')) {
+        return await (await fetch(url)).text();
+    }
+
     let response: string;
     let cache: string;
     try {
@@ -459,26 +467,18 @@ async function loadWithCache(url: string) {
     return response;
 }
 
-async function loadCSSText(url: string) {
-    let response: string;
-    if (url.startsWith('data:')) {
-        response = await (await fetch(url)).text();
-    } else {
-        response = await loadWithCache(url);
-    }
-
-    let cssText = response;
+async function replaceCSSImports(cssText: string, basePath: string) {
     cssText = replaceCSSFontFace(cssText);
-    cssText = replaceCSSRelativeURLsWithAbsolute(cssText, url);
+    cssText = replaceCSSRelativeURLsWithAbsolute(cssText, basePath);
 
-    const basePath = getCSSBaseBath(url);
     const importMatches = getMatches(cssImportRegex, cssText);
     for (let match of importMatches) {
         const importURL = getCSSImportURL(match);
         const absoluteURL = getAbsoluteURL(basePath, importURL);
         let importedCSS: string;
         try {
-            importedCSS = await loadCSSText(absoluteURL);
+            importedCSS = await loadWithCache(absoluteURL);
+            importedCSS = await replaceCSSImports(importedCSS, getCSSBaseBath(absoluteURL));
         } catch (err) {
             logWarn(err);
             importedCSS = '';
@@ -491,14 +491,8 @@ async function loadCSSText(url: string) {
     return cssText;
 }
 
-async function createCORSCopy(srcElement: HTMLLinkElement | HTMLStyleElement, url: string, isCancelled: () => boolean) {
-    const prevCors = Array.from<HTMLStyleElement>((srcElement.parentNode as HTMLElement | ShadowRoot).querySelectorAll('.darkreader--cors')).find((el) => el.dataset.uri === url);
-    if (prevCors) {
-        return prevCors;
-    }
-
-    const cssText = await loadCSSText(url);
-    if (!cssText || isCancelled()) {
+function createCORSCopy(srcElement: HTMLLinkElement | HTMLStyleElement, cssText: string) {
+    if (!cssText) {
         return null;
     }
 
@@ -506,7 +500,6 @@ async function createCORSCopy(srcElement: HTMLLinkElement | HTMLStyleElement, ur
     cors.classList.add('darkreader');
     cors.classList.add('darkreader--cors');
     cors.media = 'screen';
-    cors.dataset.uri = url;
     cors.textContent = cssText;
     srcElement.parentNode.insertBefore(cors, srcElement.nextSibling);
     cors.sheet.disabled = true;

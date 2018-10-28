@@ -45,8 +45,7 @@ export function getCSSBaseBath(url: string) {
     return `${cssURL.protocol}//${cssURL.host}${cssURL.pathname.replace(/\?.*$/, '').replace(/(\/)([^\/]+)$/i, '$1')}`;
 }
 
-export function replaceCSSRelativeURLsWithAbsolute($css: string, cssURL: string) {
-    const cssBasePath = getCSSBaseBath(cssURL);
+export function replaceCSSRelativeURLsWithAbsolute($css: string, cssBasePath: string) {
     return $css.replace(cssURLRegex, (match) => {
         const pathValue = getCSSURLValue(match);
         return `url("${getAbsoluteURL(cssBasePath, pathValue)}")`;

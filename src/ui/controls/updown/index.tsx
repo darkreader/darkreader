@@ -1,6 +1,6 @@
 import {html} from 'malevic';
 import Button from '../button';
-import Track from './track';
+import Slider from '../slider';
 import {getLocalMessage} from '../../../utils/locales';
 
 interface UpDownProps {
@@ -44,11 +44,14 @@ export default function UpDown(props: UpDownProps) {
         props.onChange(clamp(normalize(props.value - props.step)));
     }
 
+    function onSliderChange(sliderValue: number) {
+        props.onChange(clamp(normalize(sliderValue)));
+    }
+
     function onButtonUpClick() {
         props.onChange(clamp(normalize(props.value + props.step)));
     }
 
-    const trackValue = (props.value - props.min) / (props.max - props.min);
     const valueText = (props.value === props.default
         ? getLocalMessage('off').toLocaleLowerCase()
         : props.value > props.default
@@ -62,9 +65,13 @@ export default function UpDown(props: UpDownProps) {
                 <Button class={buttonDownCls} onclick={onButtonDownClick} >
                     <span class="updown__icon updown__icon-down"></span>
                 </Button>
-                <Track
-                    value={trackValue}
+                <Slider
+                    min={props.min}
+                    max={props.max}
+                    step={props.step}
+                    value={props.value}
                     label={props.name}
+                    onchange={onSliderChange}
                 />
                 <Button class={buttonUpCls} onclick={onButtonUpClick} >
                     <span class="updown__icon updown__icon-up"></span>

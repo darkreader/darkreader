@@ -1,0 +1,47 @@
+@import "../../theme";
+
+.slidecontainer {
+    width: 100%; /* Width of the outside container */
+    position: relative;
+    text-align: center;
+}
+
+/* The slider itself */
+.slider-square {
+    -webkit-appearance: none;  /* Override default CSS styles */
+    appearance: none;
+    width: 100%; /* Full-width */
+    height: 25px; /* Specified height */
+    background-color: @color-control-back;
+    outline: none; /* Remove outline */
+    opacity: 0.7; /* Set transparency (for mouse-over effects on hover) */
+    -webkit-transition: .2s; /* 0.2 seconds transition on hover */
+    transition: opacity .2s;
+
+    &__label {
+        /* Position the slider label in the center of the slider */
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+
+        /* Allow the user to click on the slider through the label */
+        user-select: none;
+        pointer-events: none;
+    }
+}
+
+/* Mouse-over effects */
+.slider-square:hover {
+    opacity: 1; /* Fully shown on mouse-over */
+}
+
+/* The slider handle */ 
+.slider-square::-webkit-slider-thumb {
+    -webkit-appearance: none; /* Override default look */
+    appearance: none;
+    width: 25px; /* Set a specific slider handle width */
+    height: 25px; /* Slider handle height */
+    background-color: @color-control-active;
+    cursor: pointer; /* Cursor on hover */
+}

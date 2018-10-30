@@ -105,6 +105,7 @@ function createTheme() {
         throttledRenderAllStyles();
     }
     overrideInlineStyles(filter);
+    newManagers.forEach((manager) => manager.watch());
 
     if (loadingStyles.size === 0) {
         fallbackStyle.textContent = '';
@@ -228,6 +229,7 @@ function createThemeAndWatchForUpdates() {
             newVariables.forEach((variables) => updateVariables(variables));
             throttledRenderAllStyles();
         }
+        newManagers.forEach((manager) => manager.watch());
     });
     watchForInlineStyles(filter);
 

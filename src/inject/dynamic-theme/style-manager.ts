@@ -23,6 +23,7 @@ export interface StyleManager {
     render(filter: FilterConfig, variables: Map<string, string>): void;
     pause(): void;
     destroy(): void;
+    watch(): void;
 }
 
 export const STYLE_SELECTOR = isDeepSelectorSupported()
@@ -59,7 +60,7 @@ export function manageStyle(element: HTMLLinkElement | HTMLStyleElement, {update
         return cancelAsyncOperations;
     }
 
-    const observer = new MutationObserver(async (mutations) => {
+    const observer = new MutationObserver((mutations) => {
         update();
     });
     const observerOptions: MutationObserverInit = {attributes: true, childList: true, characterData: true};
@@ -365,12 +366,6 @@ export function manageStyle(element: HTMLLinkElement | HTMLStyleElement, {update
         });
 
         throttledBuildStyleSheet(renderId);
-
-        observer.observe(element, observerOptions);
-
-        if (element instanceof HTMLStyleElement) {
-            subscribeToSheetChanges();
-        }
     }
 
     let rulesCount: number = null;
@@ -411,13 +406,19 @@ export function manageStyle(element: HTMLLinkElement | HTMLStyleElement, {update
         removeNode(syncStyle);
     }
 
-    observer.observe(element, observerOptions);
+    function watch() {
+        observer.observe(element, observerOptions);
+        if (element instanceof HTMLStyleElement) {
+            subscribeToSheetChanges();
+        }
+    }
 
     return {
         details,
         render,
         pause,
         destroy,
+        watch,
     };
 }
 

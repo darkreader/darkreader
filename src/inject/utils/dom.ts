@@ -68,28 +68,29 @@ export function watchForNodePosition<T extends Node>(node: T) {
     let attempts = 1000;
     const prevSibling = node.previousSibling;
     const parent = node.parentElement;
-    const restore = throttle(() => parent.insertBefore(node, prevSibling ? prevSibling.nextSibling : parent.firstChild));
+    const restore = throttle(() => {
+        attempts--;
+        if (attempts === 0) {
+            logWarn('Node position watcher stopped: attempts count exceeded', node, prevSibling, parent);
+            stop();
+            return;
+        }
+        if ((prevSibling && prevSibling.parentElement !== parent)) {
+            logWarn('Unable to restore node position: sibling was removed', node, prevSibling, parent);
+            stop();
+            return;
+        }
+        logWarn('Node was removed, restoring it\'s position', node, prevSibling, parent);
+        parent.insertBefore(node, prevSibling ? prevSibling.nextSibling : parent.firstChild);
+    });
     const observer = new MutationObserver((mutations) => {
-        if (mutations.some((m) => m.removedNodes && Array.from(m.removedNodes).some((n) => n === node))) {
-            attempts--;
-            if (attempts === 0) {
-                logWarn('Node position watcher stopped: attempts count exceeded', node, prevSibling, parent);
-                observer.disconnect();
-                return;
-            }
-            if ((prevSibling && prevSibling.parentElement !== parent)) {
-                logWarn('Unable to restore node position: sibling was removed', node, prevSibling, parent);
-                observer.disconnect();
-                return;
-            }
-            logWarn('Node was removed, restoring it\'s position', node, prevSibling, parent);
+        if (!node.parentElement) {
             restore();
         }
     });
     observer.observe(parent, {childList: true});
-    return {
-        stop() {
-            observer.disconnect();
-        },
+    const stop = () => {
+        observer.disconnect();
     };
+    return {stop};
 }

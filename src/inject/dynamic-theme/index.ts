@@ -3,7 +3,7 @@ import {overrideInlineStyles, getInlineOverrideStyle, watchForInlineStyles, stop
 import {getModifiedUserAgentStyle, getModifiedFallbackStyle, cleanModificationCache} from './modify-css';
 import {manageStyle, shouldManageStyle, STYLE_SELECTOR, StyleManager} from './style-manager';
 import {watchForStyleChanges, stopWatchingForStyleChanges} from './watch';
-import {removeNode} from '../utils/dom';
+import {removeNode, watchForNodePosition} from '../utils/dom';
 import {throttle} from '../utils/throttle';
 import {clamp} from '../../utils/math';
 import {getCSSFilterValue} from '../../generators/css-filter';
@@ -27,14 +27,28 @@ function createOrUpdateStyle(className: string) {
     return style;
 }
 
+const stylePositionWatchers = new Map<string, ReturnType<typeof watchForNodePosition>>();
+
+function setupStylePositionWatcher(node: Node, alias: string) {
+    stylePositionWatchers.has(alias) && stylePositionWatchers.get(alias).stop();
+    stylePositionWatchers.set(alias, watchForNodePosition(node));
+}
+
+function stopStylePositionWatchers() {
+    Array.from(stylePositionWatchers.values()).forEach((watcher) => watcher.stop());
+    stylePositionWatchers.clear();
+}
+
 function createTheme() {
     const fallbackStyle = createOrUpdateStyle('darkreader--fallback');
     document.head.insertBefore(fallbackStyle, document.head.firstChild);
     fallbackStyle.textContent = getModifiedFallbackStyle(filter);
+    setupStylePositionWatcher(fallbackStyle, 'fallback');
 
     const userAgentStyle = createOrUpdateStyle('darkreader--user-agent');
     document.head.insertBefore(userAgentStyle, fallbackStyle.nextSibling);
     userAgentStyle.textContent = getModifiedUserAgentStyle(filter, isIFrame);
+    setupStylePositionWatcher(userAgentStyle, 'user-agent');
 
     const textStyle = createOrUpdateStyle('darkreader--text');
     document.head.insertBefore(textStyle, fallbackStyle.nextSibling);
@@ -43,6 +57,7 @@ function createTheme() {
     } else {
         textStyle.textContent = '';
     }
+    setupStylePositionWatcher(textStyle, 'text');
 
     const invertStyle = createOrUpdateStyle('darkreader--invert');
     document.head.insertBefore(invertStyle, textStyle.nextSibling);
@@ -58,10 +73,12 @@ function createTheme() {
     } else {
         invertStyle.textContent = '';
     }
+    setupStylePositionWatcher(invertStyle, 'invert');
 
     const inlineStyle = createOrUpdateStyle('darkreader--inline');
     document.head.insertBefore(inlineStyle, invertStyle.nextSibling);
     inlineStyle.textContent = getInlineOverrideStyle();
+    setupStylePositionWatcher(inlineStyle, 'inline');
 
     const overrideStyle = createOrUpdateStyle('darkreader--override');
     document.head.appendChild(overrideStyle);
@@ -70,6 +87,7 @@ function createTheme() {
         'www.ebay.com': 'html, body { background-image: none !important; }',
         'www.youtube.com': filter.mode === 1 ? '#textarea { color: white !important; }' : '',
     }[location.host] || '';
+    setupStylePositionWatcher(overrideStyle, 'override');
 
     cancelRendering();
     const newManagers = Array.from<HTMLLinkElement | HTMLStyleElement>(document.querySelectorAll(STYLE_SELECTOR))
@@ -218,6 +236,7 @@ function createThemeAndWatchForUpdates() {
 
 function stopWatchingForUpdates() {
     styleManagers.forEach((manager) => manager.pause());
+    stopStylePositionWatchers();
     stopWatchingForStyleChanges();
     stopWatchingForInlineStyles();
     document.removeEventListener('readystatechange', onReadyStateChange);

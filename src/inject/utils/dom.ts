@@ -1,3 +1,6 @@
+import {logWarn} from './log';
+import {throttle} from './throttle';
+
 interface createNodeAsapParams {
     selectNode: () => HTMLElement;
     createNode: (target: HTMLElement) => void;
@@ -59,4 +62,34 @@ export function createNodeAsap({
 
 export function removeNode(node: Node) {
     node && node.parentNode && node.parentNode.removeChild(node);
+}
+
+export function watchForNodePosition<T extends Node>(node: T) {
+    let attempts = 1000;
+    const prevSibling = node.previousSibling;
+    const parent = node.parentElement;
+    const restore = throttle(() => parent.insertBefore(node, prevSibling ? prevSibling.nextSibling : parent.firstChild));
+    const observer = new MutationObserver((mutations) => {
+        if (mutations.some((m) => m.removedNodes && Array.from(m.removedNodes).some((n) => n === node))) {
+            attempts--;
+            if (attempts === 0) {
+                logWarn('Node position watcher stopped: attempts count exceeded', node, prevSibling, parent);
+                observer.disconnect();
+                return;
+            }
+            if ((prevSibling && prevSibling.parentElement !== parent)) {
+                logWarn('Unable to restore node position: sibling was removed', node, prevSibling, parent);
+                observer.disconnect();
+                return;
+            }
+            logWarn('Node was removed, restoring it\'s position', node, prevSibling, parent);
+            restore();
+        }
+    });
+    observer.observe(parent, {childList: true});
+    return {
+        stop() {
+            observer.disconnect();
+        },
+    };
 }

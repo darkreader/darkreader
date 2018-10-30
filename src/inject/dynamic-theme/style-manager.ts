@@ -1,7 +1,7 @@
 import {iterateCSSRules, iterateCSSDeclarations, replaceCSSRelativeURLsWithAbsolute, replaceCSSFontFace, replaceCSSVariables, getCSSURLValue, cssImportRegex, getCSSBaseBath} from './css-rules';
 import {getModifiableCSSDeclaration, ModifiableCSSDeclaration, ModifiableCSSRule} from './modify-css';
 import {bgFetch} from './network';
-import {removeNode} from '../utils/dom';
+import {removeNode, watchForNodePosition} from '../utils/dom';
 import {throttle} from '../utils/throttle';
 import {logWarn} from '../utils/log';
 import {isDeepSelectorSupported} from '../../utils/platform';
@@ -49,6 +49,9 @@ export function manageStyle(element: HTMLLinkElement | HTMLStyleElement, {update
     }
     let corsCopy: HTMLStyleElement = prevStyles.find((el) => el.matches('.darkreader--cors')) || null;
     let syncStyle: HTMLStyleElement = prevStyles.find((el) => el.matches('.darkreader--sync')) || null;
+
+    let corsCopyPositionWatcher: ReturnType<typeof watchForNodePosition> = null;
+    let syncStylePositionWatcher: ReturnType<typeof watchForNodePosition> = null;
 
     let cancelAsyncOperations = false;
 
@@ -131,6 +134,7 @@ export function manageStyle(element: HTMLLinkElement | HTMLStyleElement, {update
             try {
                 const fullCSSText = await replaceCSSImports(cssText, cssBasePath);
                 corsCopy = createCORSCopy(element, fullCSSText);
+                corsCopyPositionWatcher = watchForNodePosition(corsCopy);
             } catch (err) {
                 logWarn(err);
             }
@@ -317,8 +321,10 @@ export function manageStyle(element: HTMLLinkElement | HTMLStyleElement, {update
                 syncStyle.classList.add('darkreader--sync');
                 syncStyle.media = 'screen';
             }
+            syncStylePositionWatcher && syncStylePositionWatcher.stop();
             element.parentNode.insertBefore(syncStyle, corsCopy ? corsCopy.nextSibling : element.nextSibling);
             syncStyle.textContent = lines.join('\n');
+            syncStylePositionWatcher = watchForNodePosition(syncStyle);
         }
 
         const RULES_PER_MS = 100;
@@ -393,6 +399,8 @@ export function manageStyle(element: HTMLLinkElement | HTMLStyleElement, {update
 
     function pause() {
         observer.disconnect();
+        corsCopyPositionWatcher && corsCopyPositionWatcher.stop();
+        syncStylePositionWatcher && syncStylePositionWatcher.stop();
         cancelAsyncOperations = true;
         unsubscribeFromSheetChanges();
     }

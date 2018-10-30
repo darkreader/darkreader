@@ -59,7 +59,11 @@ export function manageStyle(element: HTMLLinkElement | HTMLStyleElement, {update
     const observer = new MutationObserver(async (mutations) => {
         update();
     });
-    const observerOptions: MutationObserverInit = {attributes: true, childList: true};
+    const observerOptions: MutationObserverInit = {attributes: true, childList: true, characterData: true};
+
+    function containsCSSImport() {
+        return element instanceof HTMLStyleElement && element.textContent.trim().match(cssImportRegex);
+    }
 
     function getRulesSync(): CSSRuleList {
         if (corsCopy) {
@@ -76,7 +80,7 @@ export function manageStyle(element: HTMLLinkElement | HTMLStyleElement, {update
                 return null;
             }
         }
-        if (element.textContent.trim().match(cssImportRegex)) {
+        if (containsCSSImport()) {
             return null;
         }
         return element.sheet.cssRules;
@@ -114,9 +118,11 @@ export function manageStyle(element: HTMLLinkElement | HTMLStyleElement, {update
             if (cancelAsyncOperations) {
                 return null;
             }
-        } else {
+        } else if (containsCSSImport()) {
             cssText = element.textContent.trim();
             cssBasePath = getCSSBaseBath(location.href);
+        } else {
+            return null;
         }
 
         if (cssText) {
@@ -356,43 +362,33 @@ export function manageStyle(element: HTMLLinkElement | HTMLStyleElement, {update
 
         observer.observe(element, observerOptions);
 
-        if (isStyledComponent()) {
+        if (element instanceof HTMLStyleElement) {
             subscribeToSheetChanges();
         }
     }
 
-    function isStyledComponent() {
-        return (
-            element instanceof HTMLStyleElement && (
-                element.hasAttribute('data-styled-components') ||
-                element.hasAttribute('data-styled')
-            )
-        );
-    }
-
-    let styledComponentsRulesCount: number = null;
-    let styledComponentsCheckFrameId: number = null;
+    let rulesCount: number = null;
+    let rulesCheckFrameId: number = null;
 
     function subscribeToSheetChanges() {
         if (element.sheet && element.sheet.cssRules) {
-            styledComponentsRulesCount = element.sheet.cssRules.length;
+            rulesCount = element.sheet.cssRules.length;
         }
-        cancelAnimationFrame(styledComponentsCheckFrameId);
-        const checkForUpdate = async () => {
+        unsubscribeFromSheetChanges();
+        const checkForUpdate = () => {
             if (element.sheet && element.sheet.cssRules &&
-                element.sheet.cssRules.length !== styledComponentsRulesCount
+                element.sheet.cssRules.length !== rulesCount
             ) {
-                logWarn('CSS Rules count changed', element);
-                styledComponentsRulesCount = element.sheet.cssRules.length;
+                rulesCount = element.sheet.cssRules.length;
                 update();
             }
-            styledComponentsCheckFrameId = requestAnimationFrame(checkForUpdate);
+            rulesCheckFrameId = requestAnimationFrame(checkForUpdate);
         };
         checkForUpdate();
     }
 
     function unsubscribeFromSheetChanges() {
-        cancelAnimationFrame(styledComponentsCheckFrameId);
+        cancelAnimationFrame(rulesCheckFrameId);
     }
 
     function pause() {

@@ -6,6 +6,7 @@ import FilterSettings from './filter-settings';
 import Header from './header';
 import Loader from './loader';
 import MoreSettings from './more-settings';
+import CBMode from './cb-mode';
 import {News, NewsButton} from './news';
 import SiteListSettings from './site-list-settings';
 import {isFirefox} from '../../../utils/platform';

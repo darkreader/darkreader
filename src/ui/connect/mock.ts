@@ -16,6 +16,8 @@ export function getMockData(override = {}): ExtensionData {
                 fontFamily: 'Segoe UI',
                 textStroke: 0,
                 textScale: 100,
+                unclickedColor: '0000FF',
+                clickedColor: '551A8B',
                 engine: 'cssFilter',
                 stylesheet: '',
             },

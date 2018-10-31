@@ -32,3 +32,38 @@ export function throttle<T extends Function>(callback: T, timeout?: number) {
 
     return Object.assign(throttled, {cancel});
 }
+
+export function createThrottledTasksQueue(tasks: (() => void)[], callback?: () => void) {
+    const FRAME_DURATION = 1000 / 60;
+    let isRunning = false;
+    tasks = tasks.slice();
+
+    function runSyncChunk() {
+        let syncDuration = 0;
+        while (tasks.length && isRunning) {
+            const task = tasks.shift();
+            const startTime = performance.now();
+            task();
+            const endTime = performance.now();
+            syncDuration += (endTime - startTime);
+            if (syncDuration >= FRAME_DURATION) {
+                requestAnimationFrame(() => runSyncChunk());
+                break;
+            }
+        }
+        if (tasks.length === 0) {
+            callback && callback();
+        }
+    }
+
+    return {
+        run() {
+            isRunning = true;
+            runSyncChunk();
+        },
+        stop() {
+            isRunning = false;
+            tasks.splice(0);
+        },
+    };
+}

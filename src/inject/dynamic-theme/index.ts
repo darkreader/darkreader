@@ -4,7 +4,7 @@ import {getModifiedUserAgentStyle, getModifiedFallbackStyle, cleanModificationCa
 import {manageStyle, shouldManageStyle, STYLE_SELECTOR, StyleManager} from './style-manager';
 import {watchForStyleChanges, stopWatchingForStyleChanges} from './watch';
 import {removeNode, watchForNodePosition} from '../utils/dom';
-import {throttle} from '../utils/throttle';
+import {throttle, createThrottledTasksQueue} from '../utils/throttle';
 import {clamp} from '../../utils/math';
 import {getCSSFilterValue} from '../../generators/css-filter';
 import {createTextStyle} from '../../generators/text-style';
@@ -105,17 +105,27 @@ function createDynamicStyleOverrides() {
         .map(({variables}) => variables);
     if (newVariables.length === 0) {
         const managers = Array.from(styleManagers.values());
-        managers.forEach((manager) => throttledRenderStyle(manager));
+        const throttledQueue = createThrottledTasksQueue(
+            managers.map((manager) => () => throttledRenderStyle(manager)),
+            () => {
+                throttledQueues.delete(throttledQueue);
+                if (loadingStyles.size === 0) {
+                    cleanFallbackStyle();
+                }
+            },
+        );
+        throttledQueues.add(throttledQueue);
+        throttledQueue.run();
     } else {
         newVariables.forEach((variables) => updateVariables(variables));
-        throttledRenderAllStyles();
+        throttledRenderAllStyles(() => {
+            if (loadingStyles.size === 0) {
+                cleanFallbackStyle();
+            }
+        });
     }
-    overrideInlineStyles(filter);
     newManagers.forEach((manager) => manager.watch());
-
-    if (loadingStyles.size === 0) {
-        cleanFallbackStyle();
-    }
+    overrideInlineStyles(filter);
 }
 
 let loadingStylesCounter = 0;
@@ -187,15 +197,27 @@ function removeManager(element: HTMLLinkElement | HTMLStyleElement) {
     }
 }
 
+const throttledQueues = new Set<ReturnType<typeof createThrottledTasksQueue>>();
+
 function throttledRenderStyle(manager: StyleManager) {
     const render = styleRenderers.get(manager);
     render();
 }
 
-const throttledRenderAllStyles = throttle(() => {
-    styleManagers.forEach((manager) => manager.render(filter, variables));
+const throttledRenderAllStyles = throttle((callback?: () => void) => {
+    const throttledQueue = createThrottledTasksQueue(
+        Array.from(styleManagers.values()).map((manager) => () => manager.render(filter, variables)),
+        () => {
+            throttledQueues.delete(throttledQueue);
+            callback && callback();
+        },
+    );
+    throttledQueues.add(throttledQueue);
+    throttledQueue.run();
 });
 const cancelRendering = function () {
+    throttledQueues.forEach((queue) => queue.stop());
+    throttledQueues.clear();
     styleManagers.forEach((manager) => {
         const renderStyle = styleRenderers.get(manager);
         renderStyle.cancel();
@@ -262,7 +284,12 @@ function watchForUpdates() {
             .filter((details) => details && details.variables.size > 0)
             .map(({variables}) => variables);
         if (newVariables.length === 0) {
-            newManagers.forEach((manager) => throttledRenderStyle(manager));
+            const throttledQueue = createThrottledTasksQueue(
+                newManagers.map((manager) => () => throttledRenderStyle(manager)),
+                () => throttledQueues.delete(throttledQueue),
+            );
+            throttledQueues.add(throttledQueue);
+            throttledQueue.run();
         } else {
             newVariables.forEach((variables) => updateVariables(variables));
             throttledRenderAllStyles();

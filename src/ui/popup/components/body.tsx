@@ -14,6 +14,7 @@ import {getDuration} from '../../../utils/time';
 import {GITHUB_URL, PRIVACY_URL, getHelpURL} from '../../../utils/links';
 import {getLocalMessage} from '../../../utils/locales';
 import {ExtensionData, ExtensionActions, TabInfo, News as NewsObject} from '../../../definitions';
+import CBModeSettings from './cbmode-settings';
 
 withForms();
 
@@ -86,7 +87,7 @@ function Body(props: BodyProps) {
                 onSwitchTab={(tab) => setState({activeTab: tab})}
                 tabs={{
                     'CBMode': (
-                        <CBMode data={props.data} actions={props.actions} tab = {props.tab} />
+                        <CBModeSettings data={props.data} actions={props.actions} tab = {props.tab} />
                     ),
                     'Filter': (
                         <FilterSettings data={props.data} actions={props.actions} tab={props.tab} />
@@ -94,14 +95,14 @@ function Body(props: BodyProps) {
                     'More': (
                         <MoreSettings data={props.data} actions={props.actions} tab={props.tab} />
                     ),
-                    'Site list': (
+                    /*'Site list': (
                         <SiteListSettings data={props.data} actions={props.actions} isFocused={state.activeTab === 'Site list'} />
-                    ),
+                    ),*/
                 }}
                 tabLabels={{
                     'CBMode': getLocalMessage('cbmode'),
                     'Filter': getLocalMessage('filter'),
-                    'Site list': getLocalMessage('site_list'),
+                    //'Site list': getLocalMessage('site_list'),
                     'More': getLocalMessage('more'),
                 }}
             />

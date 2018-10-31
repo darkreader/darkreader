@@ -41,6 +41,8 @@ export interface FilterConfig {
     fontFamily: string;
     textStroke: number;
     textScale: number;
+    unclickedColor: string;
+    clickedColor: string;
     engine: string;
     stylesheet: string;
 }

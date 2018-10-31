@@ -86,37 +86,3 @@
         white-space: nowrap;
     }
 }
-
-.track {
-    align-items: center;
-    background-color: @color-control-back;
-    border: @size-border solid @color-border;
-    box-sizing: content-box;
-    display: inline-flex;
-    flex: auto;
-    flex-direction: row;
-    height: @size-control-inner;
-    justify-content: center;
-    overflow: hidden;
-    position: relative;
-    -moz-user-select: none;
-    user-select: none;
-
-    &__value {
-        background-color: @color-control-active;
-        height: 100%;
-        left: 0;
-        position: absolute;
-        top: 0;
-        transition: width @time-fast;
-    }
-
-    &__label {
-        color: @color-control-fore;
-        display: inline-block;
-        line-height: @size-text-normal;
-        position: relative;
-        white-space: nowrap;
-        z-index: 1;
-    }
-}

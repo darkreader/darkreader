@@ -1,0 +1,36 @@
+@import "../../../theme";
+
+.font-settings {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+
+    &__font-select-container {
+        display: flex;
+        flex-direction: column;
+
+        &__line {
+            display: flex;
+            flex-direction: row;
+
+            > :not(:first-child) {
+                margin-left: @indent-small;
+            }
+
+            .select {
+                flex: auto;
+            }
+        }
+
+        &__label {
+            font-size: @size-text-small;
+            line-height: @size-text-small-height;
+            text-align: center;
+            white-space: nowrap;
+        }
+    }
+
+    > :not(:first-child) {
+        margin-top: @indent-small;
+    }
+}

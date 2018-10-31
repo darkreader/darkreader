@@ -21,6 +21,8 @@ export default class UserStorage {
                 fontFamily: isMacOS() ? 'Helvetica Neue' : isWindows() ? 'Segoe UI' : 'Open Sans',
                 textStroke: 0,
                 textScale: 100,
+                unclickedColor: '0000EE',
+                clickedColor: '551A8B',
                 engine: ThemeEngines.dynamicTheme,
                 stylesheet: '',
             },
@@ -137,6 +139,8 @@ export default class UserStorage {
                 fontFamily: f.fontFamily,
                 textStroke: f.textStroke,
                 textScale: f.textScale,
+                unclickedColor: f.unclickedColor,
+                clickedColor: f.clickedColor,
                 engine: f.engine,
                 stylesheet: f.stylesheet,
             };

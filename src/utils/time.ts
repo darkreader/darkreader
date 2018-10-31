@@ -45,3 +45,11 @@ export function getDuration(time: Duration) {
     }
     return duration;
 }
+
+export function isHalloween() {
+    const today = new Date();
+    return (
+        (today.getDate() === 31 && today.getMonth() === 9) ||
+        (today.getDate() === 1 && today.getMonth() === 10)
+    );
+}

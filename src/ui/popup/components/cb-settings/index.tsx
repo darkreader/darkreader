@@ -33,7 +33,7 @@ export default function CBSettings({config, fonts, onChange}: FontSettingsProps)
                     
                 </div>
                 <label class="font-settings__font-select-container__label">
-                    {getLocalMessage('select_font')}
+                    {getLocalMessage('select_type_of_cb')}
                 </label>
             </div>
             <UpDown
@@ -45,6 +45,10 @@ export default function CBSettings({config, fonts, onChange}: FontSettingsProps)
                 name={getLocalMessage('sensitivity')}
                 onChange={(value) => onChange({textStroke: value})}
             />
+            <CheckBox
+                        checked={config.useFont}
+                        onchange={(e) => onChange({useFont: e.target.checked})}
+                    />
             
         </section>
     );

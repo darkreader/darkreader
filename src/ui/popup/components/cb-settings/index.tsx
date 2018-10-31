@@ -12,6 +12,8 @@ interface FontSettingsProps {
     onChange: (config: Partial<FilterConfig>) => void;
 }
 
+
+
 const myObj = [{"id":"Red/Green","text":"Red/Green"},{"id":"Yellow/Blue","text":"Yellow/Blue"}, {"id":"Mono","text":"Mono"}];
 
 const selectedIds = myObj.map(({ id }) => id);
@@ -33,7 +35,7 @@ export default function CBSettings({config, fonts, onChange}: FontSettingsProps)
                     
                 </div>
                 <label class="font-settings__font-select-container__label">
-                    {getLocalMessage('select_font')}
+                    {getLocalMessage('select_type_of_cb')}
                 </label>
             </div>
             <UpDown
@@ -45,6 +47,15 @@ export default function CBSettings({config, fonts, onChange}: FontSettingsProps)
                 name={getLocalMessage('sensitivity')}
                 onChange={(value) => onChange({textStroke: value})}
             />
+            
+            <Toggle
+                //class="site-list-settings__toggle"
+                checked={true}
+                labelOn={getLocalMessage('enable_color_hover')}
+                labelOff={getLocalMessage('disable_color_hover')}
+                onChange={(value) => 0}
+            />
+
             
         </section>
     );

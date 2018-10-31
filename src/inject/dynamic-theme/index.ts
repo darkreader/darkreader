@@ -39,7 +39,7 @@ function stopStylePositionWatchers() {
     stylePositionWatchers.clear();
 }
 
-function createTheme() {
+function createStaticStyleOverrides() {
     const fallbackStyle = createOrUpdateStyle('darkreader--fallback');
     document.head.insertBefore(fallbackStyle, document.head.firstChild);
     fallbackStyle.textContent = getModifiedFallbackStyle(filter);
@@ -88,7 +88,13 @@ function createTheme() {
         'www.youtube.com': filter.mode === 1 ? '#textarea { color: white !important; }' : '',
     }[location.host] || '';
     setupStylePositionWatcher(overrideStyle, 'override');
+}
 
+function cleanFallbackStyle() {
+    document.head.querySelector('.darkreader--fallback').textContent = '';
+}
+
+function createDynamicStyleOverrides() {
     cancelRendering();
     const newManagers = Array.from<HTMLLinkElement | HTMLStyleElement>(document.querySelectorAll(STYLE_SELECTOR))
         .filter((style) => !styleManagers.has(style) && shouldManageStyle(style))
@@ -108,7 +114,7 @@ function createTheme() {
     newManagers.forEach((manager) => manager.watch());
 
     if (loadingStyles.size === 0) {
-        fallbackStyle.textContent = '';
+        cleanFallbackStyle();
     }
 }
 
@@ -139,7 +145,7 @@ function createManager(element: HTMLLinkElement | HTMLStyleElement) {
     function loadingEnd() {
         loadingStyles.delete(loadingStyleId);
         if (loadingStyles.size === 0 && isPageLoaded()) {
-            document.head.querySelector('.darkreader--fallback').textContent = '';
+            cleanFallbackStyle();
         }
     }
 
@@ -207,13 +213,45 @@ function onReadyStateChange() {
     }
     document.removeEventListener('readystatechange', onReadyStateChange);
     if (loadingStyles.size === 0) {
-        document.head.querySelector('.darkreader--fallback').textContent = '';
+        cleanFallbackStyle();
     }
 }
 
-function createThemeAndWatchForUpdates() {
-    createTheme();
+let documentVisibilityListener: () => void = null;
 
+function watchForDocumentVisibility(callback: () => void) {
+    const alreadyWatching = Boolean(documentVisibilityListener);
+    documentVisibilityListener = () => {
+        if (!document.hidden) {
+            stopWatchingForDocumentVisibility();
+            callback();
+        }
+    };
+    if (!alreadyWatching) {
+        document.addEventListener('visibilitychange', documentVisibilityListener);
+    }
+}
+
+function stopWatchingForDocumentVisibility() {
+    document.removeEventListener('visibilitychange', documentVisibilityListener);
+    documentVisibilityListener = null;
+}
+
+function createThemeAndWatchForUpdates() {
+    createStaticStyleOverrides();
+
+    if (document.hidden) {
+        watchForDocumentVisibility(() => {
+            createDynamicStyleOverrides();
+            watchForUpdates();
+        });
+    } else {
+        createDynamicStyleOverrides();
+        watchForUpdates();
+    }
+}
+
+function watchForUpdates() {
     watchForStyleChanges(({created, updated, removed}) => {
         removed.forEach((style) => removeManager(style));
         const newManagers = Array.from(new Set(created.concat(updated)))
@@ -280,6 +318,7 @@ export function removeDynamicTheme() {
 }
 
 export function cleanDynamicThemeCache() {
+    stopWatchingForDocumentVisibility();
     cancelRendering();
     stopWatchingForUpdates();
     cleanModificationCache();

@@ -45,6 +45,7 @@ export interface FilterConfig {
     clickedColor: string;
     engine: string;
     stylesheet: string;
+    dummy_val: number;
 }
 
 export interface CustomSiteConfig {

@@ -6,6 +6,7 @@ import {watchForStyleChanges, stopWatchingForStyleChanges} from './watch';
 import {removeNode, watchForNodePosition} from '../utils/dom';
 import {throttle, createThrottledTasksQueue} from '../utils/throttle';
 import {clamp} from '../../utils/math';
+import {isFirefox} from '../../utils/platform';
 import {getCSSFilterValue} from '../../generators/css-filter';
 import {createTextStyle} from '../../generators/text-style';
 import {FilterConfig, DynamicThemeFix} from '../../definitions';
@@ -316,9 +317,11 @@ export function createOrUpdateDynamicTheme(filterConfig: FilterConfig, dynamicTh
     if (document.head) {
         createThemeAndWatchForUpdates();
     } else {
-        const fallbackStyle = createOrUpdateStyle('darkreader--fallback');
-        document.documentElement.appendChild(fallbackStyle);
-        fallbackStyle.textContent = getModifiedFallbackStyle(filter);
+        if (!isFirefox()) {
+            const fallbackStyle = createOrUpdateStyle('darkreader--fallback');
+            document.documentElement.appendChild(fallbackStyle);
+            fallbackStyle.textContent = getModifiedFallbackStyle(filter);
+        }
 
         const headObserver = new MutationObserver(() => {
             if (document.head) {

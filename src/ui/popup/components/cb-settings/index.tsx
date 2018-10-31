@@ -25,7 +25,7 @@ export default function CBSettings({config, fonts, onChange}: FontSettingsProps)
                 <div class="font-settings__font-select-container__line">
                     <CheckBox
                         checked={config.useFont}
-                        onchange={(e) => onChange({useFont: e.target.checked})}
+                        //onchange={(e) => onChange({useFont: e.target.checked})}
                     />
                     <Select
                         value={"Red/Green"}
@@ -39,13 +39,14 @@ export default function CBSettings({config, fonts, onChange}: FontSettingsProps)
                 </label>
             </div>
             <UpDown
-                value={config.textStroke}
+                value={config.dummy_val}
                 min={0}
                 max={1}
                 step={0.1}
                 default={0}
                 name={getLocalMessage('sensitivity')}
-                onChange={(value) => onChange({textStroke: value})}
+                onChange={(value) => onChange({dummy_val: value})}
+                //onChange={(value) =>0}
             />
             
             <Toggle

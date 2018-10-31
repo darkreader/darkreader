@@ -25,6 +25,7 @@ export default class UserStorage {
                 clickedColor: '551A8B',
                 engine: ThemeEngines.dynamicTheme,
                 stylesheet: '',
+                dummy_val: 0,
             },
             customThemes: [],
             siteList: [],
@@ -143,6 +144,7 @@ export default class UserStorage {
                 clickedColor: f.clickedColor,
                 engine: f.engine,
                 stylesheet: f.stylesheet,
+                dummy_val: f.dummy_val,
             };
         }
 

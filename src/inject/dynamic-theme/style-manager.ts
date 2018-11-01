@@ -87,7 +87,7 @@ export function manageStyle(element: HTMLLinkElement | HTMLStyleElement, {update
         if (containsCSSImport()) {
             return null;
         }
-        return element.sheet.cssRules;
+        return safeGetSheetRules();
     }
 
     let isLoadingRules = false;
@@ -371,13 +371,24 @@ export function manageStyle(element: HTMLLinkElement | HTMLStyleElement, {update
     let rulesCount: number = null;
     let rulesCheckFrameId: number = null;
 
+    // Seems like Firefox bug: silent exception is produced
+    // without any notice, when accessing <style> CSS rules
+    function safeGetSheetRules() {
+        try {
+            return element.sheet.cssRules;
+        } catch (err) {
+            logWarn(err);
+            return null;
+        }
+    }
+
     function subscribeToSheetChanges() {
-        if (element.sheet && element.sheet.cssRules) {
+        if (element.sheet && safeGetSheetRules()) {
             rulesCount = element.sheet.cssRules.length;
         }
         unsubscribeFromSheetChanges();
         const checkForUpdate = () => {
-            if (element.sheet && element.sheet.cssRules &&
+            if (element.sheet && safeGetSheetRules() &&
                 element.sheet.cssRules.length !== rulesCount
             ) {
                 rulesCount = element.sheet.cssRules.length;

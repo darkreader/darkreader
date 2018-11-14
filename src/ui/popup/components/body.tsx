@@ -95,14 +95,14 @@ function Body(props: BodyProps) {
                     'More': (
                         <MoreSettings data={props.data} actions={props.actions} tab={props.tab} />
                     ),
-                    /*'Site list': (
+                    'Site list': (
                         <SiteListSettings data={props.data} actions={props.actions} isFocused={state.activeTab === 'Site list'} />
-                    ),*/
+                    ),
                 }}
                 tabLabels={{
                     'CBMode': getLocalMessage('cbmode'),
                     'Filter': getLocalMessage('filter'),
-                    //'Site list': getLocalMessage('site_list'),
+                    'Site list': getLocalMessage('site_list'),
                     'More': getLocalMessage('more'),
                 }}
             />

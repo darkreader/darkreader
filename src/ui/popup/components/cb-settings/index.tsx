@@ -1,5 +1,5 @@
 import {html} from 'malevic';
-import {CheckBox, UpDown, Toggle, Select} from '../../../controls';
+import {CheckBox, UpDown, Toggle, Select, CustToggle} from '../../../controls';
 import {getLocalMessage} from '../../../../utils/locales';
 import {FilterConfig} from '../../../../definitions';
 
@@ -49,12 +49,13 @@ export default function CBSettings({config, fonts, onChange}: FontSettingsProps)
                 //onChange={(value) =>0}
             />
             
-            <Toggle
+            <CustToggle
                 //class="site-list-settings__toggle"
                 checked={true}
                 labelOn={getLocalMessage('enable_color_hover')}
                 labelOff={getLocalMessage('disable_color_hover')}
                 onChange={(value) => 0}
+                //onChange = {printName}
             />
 
             

@@ -8,6 +8,7 @@ import TextBox from './textbox';
 import TextList from './text-list';
 import Toggle from './toggle';
 import UpDown from './updown';
+import CustToggle from './cust-toggle';
 
 export {
     Button,
@@ -20,4 +21,5 @@ export {
     TextList,
     Toggle,
     UpDown,
+    CustToggle,
 };

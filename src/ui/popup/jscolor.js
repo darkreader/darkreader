@@ -1848,7 +1848,6 @@ jsc.jscolor.installByClassName = function (className) {
 
 jsc.register();
 
-
 return jsc.jscolor;
 
 

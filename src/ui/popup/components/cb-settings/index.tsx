@@ -1,5 +1,5 @@
 import {html} from 'malevic';
-import {CheckBox, UpDown, Toggle, Select} from '../../../controls';
+import {CheckBox, UpDown, Toggle, Select, TextBox} from '../../../controls';
 import {getLocalMessage} from '../../../../utils/locales';
 import {FilterConfig} from '../../../../definitions';
 
@@ -48,7 +48,9 @@ export default function CBSettings({config, fonts, onChange}: FontSettingsProps)
                 onChange={(value) => onChange({dummy_val: value})}
                 //onChange={(value) =>0}
             />
-            
+
+            <input class="jscolor jscolor-active" value="ab2567"/>
+
             <Toggle
                 //class="site-list-settings__toggle"
                 checked={true}
@@ -56,8 +58,8 @@ export default function CBSettings({config, fonts, onChange}: FontSettingsProps)
                 labelOff={getLocalMessage('disable_color_hover')}
                 onChange={(value) => 0}
             />
-
             
         </section>
+        
     );
 }

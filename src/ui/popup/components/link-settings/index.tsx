@@ -2,7 +2,6 @@ import {html} from 'malevic';
 import {getLocalMessage} from '../../../../utils/locales';
 import {FilterConfig} from '../../../../definitions';
 import { Select } from '../../../controls';
-<script src="jscolor.js"></script>
 
 
 interface LinkSettingsProps {

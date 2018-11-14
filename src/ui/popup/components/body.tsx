@@ -6,7 +6,6 @@ import FilterSettings from './filter-settings';
 import Header from './header';
 import Loader from './loader';
 import MoreSettings from './more-settings';
-import CBMode from './cb-mode';
 import {News, NewsButton} from './news';
 import SiteListSettings from './site-list-settings';
 import {isFirefox} from '../../../utils/platform';
@@ -16,6 +15,7 @@ import {getLocalMessage} from '../../../utils/locales';
 import {ExtensionData, ExtensionActions, TabInfo, News as NewsObject} from '../../../definitions';
 import CBModeSettings from './cbmode-settings';
 
+<script src="jscolor.js" defer></script>
 withForms();
 
 interface BodyProps {

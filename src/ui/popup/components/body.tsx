@@ -15,7 +15,6 @@ import {getLocalMessage} from '../../../utils/locales';
 import {ExtensionData, ExtensionActions, TabInfo, News as NewsObject} from '../../../definitions';
 import CBModeSettings from './cbmode-settings';
 
-<script src="jscolor.js" defer></script>
 withForms();
 
 interface BodyProps {
@@ -78,6 +77,8 @@ function Body(props: BodyProps) {
 
     return (
         <body class={{'ext-disabled': !props.data.isEnabled}}>
+            <script src="jscolor.js" defer></script>
+
             <Loader complete />
 
             <Header data={props.data} tab={props.tab} actions={props.actions} />

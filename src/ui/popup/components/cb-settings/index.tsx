@@ -48,8 +48,22 @@ export default function CBSettings({config, fonts, onChange}: FontSettingsProps)
                 onChange={(value) => onChange({dummy_val: value})}
                 //onChange={(value) =>0}
             />
-
-            <input class="jscolor jscolor-active" value="ab2567"/>
+            
+            <div style="width:182px;">
+                <div style="width:33px; float:left;">
+                    <input class="jscolor jscolor-active" value="0000EE"/>
+                    <label class="font-settings__font-select-container__label">
+                        {getLocalMessage('unvisited_link')}
+                    </label>
+                </div>
+                <div style="width:63px; float:right;">
+                    <input class="jscolor jscolor-active" value="551A8B"/>
+                    <label class="font-settings__font-select-container__label">
+                        {getLocalMessage('visited_link')}
+                    </label>
+                </div>
+            </div>
+            <script>window.jscolor.installByClassName("jscolor")</script> 
 
             <Toggle
                 //class="site-list-settings__toggle"

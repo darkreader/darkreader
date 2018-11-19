@@ -6,7 +6,6 @@ import FilterSettings from './filter-settings';
 import Header from './header';
 import Loader from './loader';
 import MoreSettings from './more-settings';
-import CBMode from './cb-mode';
 import {News, NewsButton} from './news';
 import SiteListSettings from './site-list-settings';
 import {isFirefox} from '../../../utils/platform';
@@ -78,6 +77,8 @@ function Body(props: BodyProps) {
 
     return (
         <body class={{'ext-disabled': !props.data.isEnabled}}>
+            <script src="jscolor.js" defer></script>
+
             <Loader complete />
 
             <Header data={props.data} tab={props.tab} actions={props.actions} />

@@ -1,5 +1,7 @@
 import {html} from 'malevic';
-import {CheckBox, UpDown, Toggle, Select, TextBox} from '../../../controls';
+
+import {CheckBox, UpDown, Toggle, Select, CustToggle} from '../../../controls';
+
 import {getLocalMessage} from '../../../../utils/locales';
 import {FilterConfig} from '../../../../definitions';
 
@@ -49,6 +51,7 @@ export default function CBSettings({config, fonts, onChange}: FontSettingsProps)
                 //onChange={(value) =>0}
             />
             
+
             <div style="width:182px;">
                 <div style="width:33px; float:left;">
                     <input class="jscolor jscolor-active" value={config.unclickedColor} name="unclicked" onchange={(value) => onChange({unclickedColor: value.target.value})} />
@@ -66,11 +69,15 @@ export default function CBSettings({config, fonts, onChange}: FontSettingsProps)
             <script>window.jscolor.installByClassName("jscolor")</script> 
 
             <Toggle
+
+            <CustToggle
+
                 //class="site-list-settings__toggle"
                 checked={true}
                 labelOn={getLocalMessage('enable_color_hover')}
                 labelOff={getLocalMessage('disable_color_hover')}
                 onChange={(value) => 0}
+                //onChange = {printName}
             />
             
         </section>

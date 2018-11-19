@@ -14,7 +14,7 @@ export default function Slider(props: SliderProps) {
         <div class="slidecontainer">
             <input type="range" class="slider-square" 
                 min={props.min} max={props.max} step={props.step} value={props.value} 
-                oninput={(e) => props.onchange(parseInt(e.target.value))} 
+                oninput={(e) => props.onchange(parseFloat(e.target.value))}
             />
             <div class="slider-square__label">
                 {props.label}

@@ -51,13 +51,13 @@ export default function CBSettings({config, fonts, onChange}: FontSettingsProps)
             
             <div style="width:182px;">
                 <div style="width:33px; float:left;">
-                    <input class="jscolor jscolor-active" value="0000EE"/>
+                    <input class="jscolor jscolor-active" value={config.unclickedColor} name="unclicked" onchange={(value) => onChange({unclickedColor: value.target.value})} />
                     <label class="font-settings__font-select-container__label">
                         {getLocalMessage('unvisited_link')}
                     </label>
                 </div>
                 <div style="width:63px; float:right;">
-                    <input class="jscolor jscolor-active" value="551A8B"/>
+                    <input class="jscolor jscolor-active" value={config.clickedColor} name="clicked" onchange={(value) => onChange({clickedColor: value.target.value})}/>
                     <label class="font-settings__font-select-container__label">
                         {getLocalMessage('visited_link')}
                     </label>

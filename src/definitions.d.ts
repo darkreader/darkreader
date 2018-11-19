@@ -1,4 +1,5 @@
 import {FilterMode} from './generators/css-filter';
+import { RGBA } from 'utils/color';
 
 export interface ExtensionData {
     isEnabled: boolean;

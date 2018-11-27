@@ -1,4 +1,3 @@
-const gulpConnect = require('gulp-connect');
 const gulpLess = require('gulp-less');
 const gulpRename = require('gulp-rename');
 const gulpSourcemaps = require('gulp-sourcemaps');
@@ -19,8 +18,7 @@ module.exports = function createCSSBundleTasks(gulp) {
             'src/ui/stylesheet-editor/style.less': `${dir}/ui/stylesheet-editor/style.css`,
         };
         const bundles = Object.entries(files).map(([src, dest]) => bundleCSSEntry({src, dest, production}));
-        return mergeStream(...bundles)
-            .pipe(gulpConnect.reload());
+        return mergeStream(...bundles);
     }
 
     function bundleCSSEntry({src, dest, production}) {

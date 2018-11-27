@@ -1,6 +1,4 @@
-const gulpConnect = require('gulp-connect');
 const runSequence = require('run-sequence');
-const {getDestDir} = require('./paths');
 
 module.exports = function createWatchTask(gulp) {
     gulp.task('js-debug-reload', (done) => runSequence(['js-debug', 'html-debug'], 'foxify-debug', 'reload', done));
@@ -15,12 +13,5 @@ module.exports = function createWatchTask(gulp) {
         gulp.watch(['src/**/*.html'], ['html-debug-reload']);
         gulp.watch(['src/config/**/*.config', 'src/*.json'], ['config-debug-reload']);
         gulp.watch(['src/_locales/**/*.config'], ['locales-debug-reload']);
-
-        gulpConnect.server({
-            host: '0.0.0.0',
-            port: 2014,
-            root: `./${getDestDir({production: false})}/ui/`,
-            livereload: true,
-        });
     });
 };

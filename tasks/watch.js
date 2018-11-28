@@ -1,17 +1,75 @@
-const runSequence = require('run-sequence');
+const chokidar = require('chokidar');
+const bundleCSS = require('./bundle-css');
+const bundleHtml = require('./bundle-html');
+const bundleJS = require('./bundle-js');
+const bundleLocales = require('./bundle-locales');
+const copy = require('./copy');
+const foxify = require('./foxify');
+const reload = require('./reload');
+const {runTasks, log} = require('./utils');
 
-module.exports = function createWatchTask(gulp) {
-    gulp.task('js-debug-reload', (done) => runSequence(['js-debug', 'html-debug'], 'foxify-debug', 'reload', done));
-    gulp.task('css-debug-reload', (done) => runSequence('css-debug', 'reload', done));
-    gulp.task('html-debug-reload', (done) => runSequence('html-debug', 'reload', done));
-    gulp.task('config-debug-reload', (done) => runSequence('copy-debug', 'foxify-debug', 'reload', done));
-    gulp.task('locales-debug-reload', (done) => runSequence('locales-debug', 'reload', done));
+const DEBOUNCE = 200;
 
-    gulp.task('watch', ['js-debug', 'css-debug', 'html-debug', 'copy-debug', 'locales-debug'], () => {
-        gulp.watch(['src/**/*.ts', 'src/**/*.tsx', 'src/**/*.js'], ['js-debug-reload']);
-        gulp.watch(['src/**/*.less'], ['css-debug-reload']);
-        gulp.watch(['src/**/*.html'], ['html-debug-reload']);
-        gulp.watch(['src/config/**/*.config', 'src/*.json'], ['config-debug-reload']);
-        gulp.watch(['src/_locales/**/*.config'], ['locales-debug-reload']);
-    });
-};
+const watchers = [
+    [['src/**/*.ts', 'src/**/*.tsx', 'src/**/*.js'], [
+        bundleJS,
+        foxify,
+        bundleHtml,
+    ]],
+    [['src/**/*.less'], [
+        bundleCSS,
+    ]],
+    [['src/**/*.html'], [
+        bundleHtml,
+    ]],
+    [['src/_locales/**/*.config'], [
+        bundleLocales,
+    ]],
+    [['src/config/**/*.config', 'src/*.json', 'src/ui/assets/**/*.*'], [
+        copy,
+        foxify,
+    ]],
+];
+
+function watch(options) {
+    function observe(files, tasks) {
+        const queue = new Set();
+        let timeoutId = null;
+
+        function onChange(path) {
+            queue.add(path);
+            if (!timeoutId) {
+                timeoutId = setTimeout(async () => {
+                    timeoutId = null;
+                    try {
+                        log.ok(`Files changed:${Array.from(queue).sort().map((path) => `\n${path}`)}`);
+                        queue.clear();
+                        await runTasks(tasks, options);
+                        if (timeoutId) {
+                            return;
+                        }
+                        reload();
+                    } catch (err) {
+                        log.error(err);
+                    }
+                }, DEBOUNCE);
+            }
+        }
+
+        const watcher = chokidar.watch(files, {ignoreInitial: true})
+            .on('add', onChange)
+            .on('change', onChange)
+            .on('unlink', onChange);
+
+        function closeWatcher() {
+            watcher.close();
+        }
+
+        process.on('exit', closeWatcher);
+        process.on('SIGINT', closeWatcher);
+    }
+
+    watchers.forEach(([paths, tasks]) => observe(paths, tasks));
+}
+
+module.exports = watch;

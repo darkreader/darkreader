@@ -3,7 +3,7 @@ import withForms from 'malevic/forms';
 import withState from 'malevic/state';
 import {TabPanel, Button} from '../../controls';
 import FilterSettings from './filter-settings';
-import Header from './header';
+import {Header, MoreToggleSettings} from './header';
 import Loader from './loader';
 import MoreSettings from './more-settings';
 import {News, NewsButton} from './news';
@@ -27,6 +27,7 @@ interface BodyProps {
 interface BodyState {
     activeTab?: string;
     newsOpen?: boolean;
+    moreToggleSettingsOpen?: boolean;
 }
 
 function openDevTools() {
@@ -74,11 +75,20 @@ function Body(props: BodyProps) {
         }
     }
 
+    function toggleMoreToggleSettings() {
+        setState({moreToggleSettingsOpen: !state.moreToggleSettingsOpen});
+    }
+
     return (
         <body class={{'ext-disabled': !props.data.isEnabled}}>
             <Loader complete />
 
-            <Header data={props.data} tab={props.tab} actions={props.actions} />
+            <Header
+                data={props.data}
+                tab={props.tab}
+                actions={props.actions}
+                onMoreToggleSettingsClick={toggleMoreToggleSettings}
+            />
 
             <TabPanel
                 activeTab={state.activeTab || 'Filter'}
@@ -123,6 +133,12 @@ function Body(props: BodyProps) {
                 expanded={state.newsOpen}
                 onNewsOpen={onNewsOpen}
                 onClose={toggleNews}
+            />
+            <MoreToggleSettings
+                data={props.data}
+                actions={props.actions}
+                isExpanded={state.moreToggleSettingsOpen}
+                onClose={toggleMoreToggleSettings}
             />
         </body>
     );

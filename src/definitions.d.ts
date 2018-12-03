@@ -56,10 +56,15 @@ export interface UserSettings {
     siteList: string[];
     applyToListedOnly: boolean;
     changeBrowserTheme: boolean;
-    activationTime: string;
-    deactivationTime: string;
     notifyOfNews: boolean;
     syncSettings: boolean;
+    automation: string;
+    time: TimeSettings;
+}
+
+export interface TimeSettings {
+    activation: string;
+    deactivation: string;
 }
 
 export interface TabInfo {

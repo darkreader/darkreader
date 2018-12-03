@@ -44,6 +44,11 @@ export default class UserStorage {
         this.settings = await this.loadSettingsFromStorage();
     }
 
+    cleanup() {
+        chrome.storage.local.remove(['activationTime', 'deactivationTime']);
+        chrome.storage.sync.remove(['activationTime', 'deactivationTime']);
+    }
+
     private loadSettingsFromStorage() {
         return new Promise<UserSettings>((resolve) => {
             chrome.storage.local.get(this.defaultSettings, (local: UserSettings) => {

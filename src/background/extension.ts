@@ -74,6 +74,7 @@ export class Extension {
 
         this.config.load({local: false});
         this.news.subscribe();
+        this.user.cleanup();
     }
 
     private popupOpeningListener: () => void = null;

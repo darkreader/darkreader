@@ -10,7 +10,7 @@ interface TimePickerProps {
 
 const is12H = (new Date()).toLocaleTimeString(getUILanguage()).endsWith('M');
 
-function fixTime($time: string) {
+function parseTime($time: string) {
     const parts = $time.split(':').slice(0, 2);
     const lowercased = $time.trim().toLowerCase();
     const isAM = lowercased.endsWith('am') || lowercased.endsWith('a.m.');
@@ -32,6 +32,12 @@ function fixTime($time: string) {
         minutes = 0;
     }
 
+    return [hours, minutes];
+}
+
+function toLocaleTime($time: string) {
+    const [hours, minutes] = parseTime($time);
+
     const mm = `${minutes < 10 ? '0' : ''}${minutes}`;
 
     if (is12H) {
@@ -40,28 +46,34 @@ function fixTime($time: string) {
             hours > 12 ?
                 (hours - 12) :
                 hours);
-        return `${h}${mm}${hours < 12 ? 'AM' : 'PM'}`;
+        return `${h}:${mm}${hours < 12 ? 'AM' : 'PM'}`;
     }
 
     return `${hours}:${mm}`;
 }
 
+function to24HTime($time: string) {
+    const [hours, minutes] = parseTime($time);
+    const mm = `${minutes < 10 ? '0' : ''}${minutes}`;
+    return `${hours}:${mm}`;
+}
+
 export default function TimeRangePicker(props: TimePickerProps) {
     function onStartTimeChange($startTime: string) {
-        props.onChange([fixTime($startTime), props.endTime])
+        props.onChange([to24HTime($startTime), props.endTime])
     }
 
     function onEndTimeChange($endTime: string) {
-        props.onChange([props.startTime, fixTime($endTime)])
+        props.onChange([props.startTime, to24HTime($endTime)])
     }
 
     return (
         <span class="time-range-picker">
             <TextBox
                 class="time-range-picker__input time-range-picker__input--start"
-                placeholder="18:00"
-                didmount={(node: HTMLInputElement) => node.value = props.startTime}
-                didupdate={(node: HTMLInputElement) => node.value = props.startTime}
+                placeholder={toLocaleTime('18:00')}
+                didmount={(node: HTMLInputElement) => node.value = toLocaleTime(props.startTime)}
+                didupdate={(node: HTMLInputElement) => node.value = toLocaleTime(props.startTime)}
                 onchange={(e) => onStartTimeChange((e.target as HTMLInputElement).value)}
                 onkeypress={(e) => {
                     if (e.key === 'Enter') {
@@ -74,9 +86,9 @@ export default function TimeRangePicker(props: TimePickerProps) {
             />
             <TextBox
                 class="time-range-picker__input time-range-picker__input--end"
-                placeholder="9:00"
-                didmount={(node: HTMLInputElement) => node.value = props.endTime}
-                didupdate={(node: HTMLInputElement) => node.value = props.endTime}
+                placeholder={toLocaleTime('9:00')}
+                didmount={(node: HTMLInputElement) => node.value = toLocaleTime(props.endTime)}
+                didupdate={(node: HTMLInputElement) => node.value = toLocaleTime(props.endTime)}
                 onchange={(e) => onEndTimeChange((e.target as HTMLInputElement).value)}
                 onkeypress={(e) => {
                     if (e.key === 'Enter') {

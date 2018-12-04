@@ -17,7 +17,7 @@ export function isInTimeInterval(date: Date, time0: string, time1: string) {
     const t1 = parseTime(time1);
     const t = [date.getHours(), date.getMinutes()];
     if (compareTime(t0, t1) < 0) {
-        t1[0] += 24;
+        t0[0] -= 24;
     }
     return compareTime(t0, t) >= 0 && compareTime(t, t1) > 0;
 }

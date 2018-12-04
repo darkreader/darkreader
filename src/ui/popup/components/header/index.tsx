@@ -115,7 +115,7 @@ export function MoreToggleSettings({data, actions, isExpanded, onClose}: ExtWrap
             }}
         >
             <div class="header__app-toggle__more-settings__top">
-                <span class="header__app-toggle__more-settings__top__text">{getLocalMessage('time_settings') || 'Time settings'}</span>
+                <span class="header__app-toggle__more-settings__top__text">{getLocalMessage('time_settings')}</span>
                 <span class="header__app-toggle__more-settings__top__close" role="button" onclick={onClose}>✕</span>
             </div>
             <div class="header__app-toggle__more-settings__content">
@@ -131,7 +131,7 @@ export function MoreToggleSettings({data, actions, isExpanded, onClose}: ExtWrap
                     />
                 </div>
                 <p class="header__app-toggle__more-settings__description">
-                    {getLocalMessage('set_active_hours') || 'Set active hours'}
+                    {getLocalMessage('set_active_hours')}
                 </p>
             </div>
         </div>

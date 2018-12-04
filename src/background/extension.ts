@@ -118,7 +118,10 @@ export class Extension {
         chrome.commands.onCommand.addListener((command) => {
             if (command === 'toggle') {
                 console.log('Toggle command entered');
-                this.changeSettings({enabled: !this.isEnabled()});
+                this.changeSettings({
+                    enabled: !this.isEnabled(),
+                    automation: '',
+                });
             }
             if (command === 'addSite') {
                 console.log('Add Site command entered');

@@ -1,3 +1,5 @@
+import {UserSettings} from '../definitions';
+
 export function getURLHost(url: string) {
     return url.match(/^(.*?:\/{2,3})?(.+?)(\/|$)/)[2];
 }
@@ -92,4 +94,16 @@ function createUrlRegex(urlTemplate: string): RegExp {
     // Result
 
     return new RegExp(result, 'i');
+}
+
+export function isURLEnabled(url: string, userSettings: UserSettings, {isProtected, isInDarkList}) {
+    const isURLInUserList = isURLInList(url, userSettings.siteList);
+    const isForcedEnable = isURLInUserList && userSettings.applyToListedOnly;
+    const isForcedDisable = isURLInUserList && !userSettings.applyToListedOnly;
+    return (
+        !isProtected && (
+            isForcedEnable ||
+            (!isInDarkList && !isForcedDisable)
+        )
+    );
 }

@@ -1,7 +1,6 @@
-import {html, render} from 'malevic';
+import {html} from 'malevic';
 import {Button} from '../../../controls';
-import {getURLHost} from '../../../../utils/url';
-import {getLocalMessage} from '../../../../utils/locales';
+import {getURLHost, isURLEnabled} from '../../../../utils/url';
 import {ExtWrapper, TabInfo} from '../../../../definitions';
 
 export default function SiteToggleButton({data, tab, actions}: ExtWrapper & {tab: TabInfo}) {
@@ -10,7 +9,7 @@ export default function SiteToggleButton({data, tab, actions}: ExtWrapper & {tab
         !tab.isProtected &&
         (data.settings.applyToListedOnly || !tab.isInDarkList)
     );
-
+    const isSiteEnabled = isURLEnabled(tab.url, data.settings, tab);
     const host = getURLHost(tab.url || '');
 
     const urlText = (host
@@ -26,11 +25,12 @@ export default function SiteToggleButton({data, tab, actions}: ExtWrapper & {tab
         <Button
             class={{
                 'site-toggle': true,
+                'site-toggle--active': isSiteEnabled,
                 'site-toggle--disabled': !toggleHasEffect
             }}
             onclick={() => actions.toggleSitePattern(host)}
         >
-            {getLocalMessage('toggle')} <span class="site-toggle__url" >{urlText}</span>
+            <span class="site-toggle__url" ><span class="site-toggle__mark"></span> {urlText}</span>
         </Button>
     );
 }

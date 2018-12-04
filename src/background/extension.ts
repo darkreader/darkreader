@@ -6,16 +6,16 @@ import Newsmaker from './newsmaker';
 import TabManager from './tab-manager';
 import UserStorage from './user-storage';
 import {setWindowTheme, resetWindowTheme} from './window-theme';
-import {getFontList, getCommands, setShortcut} from './utils/extension-api';
+import {getFontList, getCommands, setShortcut, canInjectScript} from './utils/extension-api';
 import {isFirefox} from '../utils/platform';
 import {isInTimeInterval, getDuration} from '../utils/time';
-import {isURLInList, getURLHost} from '../utils/url';
+import {isURLInList, getURLHost, isURLEnabled} from '../utils/url';
 import ThemeEngines from '../generators/theme-engines';
 import createCSSFilterStylesheet from '../generators/css-filter';
 import {getDynamicThemeFixesFor} from '../generators/dynamic-theme';
 import createStaticStylesheet from '../generators/static-theme';
 import {createSVGFilterStylesheet, getSVGFilterMatrixValue, getSVGReverseFilterMatrixValue} from '../generators/svg-filter';
-import {ExtensionData, FilterConfig, News, Shortcuts, UserSettings} from '../definitions';
+import {ExtensionData, FilterConfig, News, Shortcuts, UserSettings, TabInfo} from '../definitions';
 
 const AUTO_TIME_CHECK_INTERVAL_MS = getDuration({seconds: 10});
 
@@ -93,7 +93,8 @@ export class Extension {
                 if (!this.ready) {
                     await new Promise((resolve) => this.awaiting.push(resolve));
                 }
-                return await this.tabs.getActiveTabInfo(this.config);
+                const url = await this.tabs.getActiveTabURL();
+                return await this.getURLInfo(url);
             },
             changeSettings: (settings) => this.changeSettings(settings),
             setTheme: (theme) => this.setTheme(theme),
@@ -254,7 +255,7 @@ export class Extension {
      * into Sites List (or removes).
      */
     async toggleCurrentSite() {
-        const {url} = await this.tabs.getActiveTabInfo(this.config);
+        const url = await this.tabs.getActiveTabURL();
         const host = getURLHost(url);
         this.toggleSitePattern(host);
     }
@@ -297,15 +298,20 @@ export class Extension {
     //
     //----------------------
 
-    private getTabMessage = (url: string, frameURL: string) => {
+    private getURLInfo(url: string): TabInfo {
         const {DARK_SITES} = this.config;
-        const isURLInDarkList = isURLInList(url, DARK_SITES);
-        const isURLInUserList = isURLInList(url, this.user.settings.siteList);
+        const isInDarkList = isURLInList(url, DARK_SITES);
+        const isProtected = !canInjectScript(url);
+        return {
+            url,
+            isInDarkList,
+            isProtected,
+        };
+    }
 
-        if (this.isEnabled() && (
-            (isURLInUserList && this.user.settings.applyToListedOnly) ||
-            (!isURLInDarkList && !this.user.settings.applyToListedOnly && !isURLInUserList)
-        )) {
+    private getTabMessage = (url: string, frameURL: string) => {
+        const urlInfo = this.getURLInfo(url);
+        if (this.isEnabled() && isURLEnabled(url, this.user.settings, urlInfo)) {
             const custom = this.user.settings.customThemes.find(({url: urlList}) => isURLInList(url, urlList));
             const filterConfig = custom ? custom.theme : this.user.settings.theme;
 

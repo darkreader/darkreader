@@ -1,7 +1,5 @@
-import {isURLInList, getURLHost} from '../utils/url';
 import {canInjectScript} from '../background/utils/extension-api';
-import ConfigManager from './config-manager';
-import {TabInfo, Message} from '../definitions';
+import {Message} from '../definitions';
 
 function queryTabs(query: chrome.tabs.QueryInfo) {
     return new Promise<chrome.tabs.Tab[]>((resolve) => {
@@ -113,7 +111,7 @@ export default class TabManager {
             });
     }
 
-    async getActiveTabInfo(config: ConfigManager) {
+    async getActiveTabURL() {
         let tab = (await queryTabs({
             active: true,
             lastFocusedWindow: true
@@ -123,12 +121,6 @@ export default class TabManager {
             const tabs = (await queryTabs({active: true}));
             tab = tabs.find((t) => !isExtensionPage(t.url));
         }
-        const {DARK_SITES} = config;
-        const url = tab.url;
-        return <TabInfo>{
-            url,
-            isProtected: !canInjectScript(url),
-            isInDarkList: isURLInList(url, DARK_SITES),
-        };
+        return tab.url;
     }
 }

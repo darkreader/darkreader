@@ -22,10 +22,13 @@ export function getMockData(override = {}): ExtensionData {
             siteList: [],
             applyToListedOnly: false,
             changeBrowserTheme: false,
-            activationTime: '18:00',
-            deactivationTime: '9:00',
             notifyOfNews: false,
             syncSettings: true,
+            automation: '',
+            time: {
+                activation: '18:00',
+                deactivation: '9:00',
+            },
         } as UserSettings,
         fonts: [
             'serif',

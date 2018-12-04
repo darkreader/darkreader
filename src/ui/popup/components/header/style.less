@@ -17,7 +17,6 @@
     &__control {
         display: flex;
         flex-direction: column;
-        overflow: hidden;
     }
 
     &__site-toggle {
@@ -35,5 +34,176 @@
 
     &__app-toggle {
         grid-area: app-toggle;
+        position: relative;
+
+        &__more-button {
+            background-color: @color-control-back;
+            color: @color-input-fore;
+            cursor: pointer;
+            display: inline-block;
+            height: @size-control-inner + 2 * @size-border;
+            left: 100%;
+            opacity: 0;
+            position: absolute;
+            top: 0;
+            transition: opacity @time-slow, background-color @time-slow, color @time-slow;
+            width: @size-control-inner / 2;
+
+            &:hover {
+                background-color: @color-control-hover;
+                color: @color-input-fore-active;
+            }
+
+            &::before {
+                content: "⋮";
+                display: inline-block;
+                font-size: @size-text-large;
+                font-weight: bold;
+                height: 100%;
+                line-height: @size-control-inner;
+                text-align: center;
+                width: 100%;
+            }
+        }
+
+        &:hover &__more-button {
+            opacity: 1;
+            transition: opacity @time-slow @time-slow * 2, background-color @time-slow, color @time-slow;
+
+            &:hover {
+                transition: opacity @time-slow, background-color @time-slow, color @time-slow;
+            }
+        }
+
+        &__time {
+            background-color: @color-heading;
+            background-image: url('data:image/svg+xml;utf-8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path fill="none" stroke="white" stroke-width="2" d="M8,2 L8,8 L13,10" /></svg>');
+            background-size: 100%;
+            border-radius: 50%;
+            color: @color-control-fore;
+            cursor: pointer;
+            display: none;
+            height: @size-text-small-height;
+            pointer-events: none;
+            position: absolute;
+            right: -@size-text-small-height / 4;
+            top: -@size-text-small-height / 4;
+            transition: opacity @time-slow @time-slow;
+            width: @size-text-small-height;
+
+            &--active {
+                display: inline-block;
+            }
+        }
+
+        &__more-settings {
+            background-color: fadeout(@color-back, 10%);
+            border-bottom: @size-border solid @color-border;
+            border-top: @size-border solid @color-border;
+            display: flex;
+            flex-direction: column;
+            height: @size-control-inner
+                + @indent-large
+                + 2 * @size-border + @size-control-inner
+                + @size-text-small-height
+                + @indent-large;
+            left: 0;
+            position: absolute;
+            top: @popup-content-padding + @size-control-inner * 2 + @size-border + @indent-small;
+            transition: all @time-slow;
+            z-index: 2;
+
+            &:not(&--expanded) {
+                border-bottom-width: 0;
+                border-top-width: 0;
+                height: 0;
+                opacity: 0;
+                pointer-events: none;
+            }
+            
+            &:not(&--expanded) &__content {
+                padding-bottom: 0;
+                padding-top: 0;
+            }
+
+            &:not(&--expanded) &::after {
+                height: 0;
+            }
+
+            &__top {
+                align-items: flex-end;
+                color: @color-heading;
+                display: flex;
+                flex: auto;
+                font-size: @size-text-large;
+                height: @size-control-inner;
+                justify-content: space-between;
+                overflow: hidden;
+                padding-left: @popup-content-padding;
+
+                &__text {
+                    line-height: @size-text-large-height;
+                }
+
+                &__close {
+                    color: @color-heading;
+                    cursor: pointer;
+                    display: inline-block;
+                    font-size: @size-control-inner * 3 / 4;
+                    height: @size-control-inner;
+                    line-height: @size-control-inner;
+                    text-align: center;
+                    user-select: none;
+                    width: @size-control-inner;
+
+                    &:hover {
+                        background-color: fade(@color-control-active, 25%);
+                    }
+                }
+            }
+
+            &__content {
+                flex: auto;
+                overflow: hidden;
+                padding: @indent-large @popup-content-padding;
+                transition: padding @time-slow;
+            }
+
+            &__line {
+                display: flex;
+                flex-direction: row;
+
+                .checkbox {
+                    border-right: none;
+                    flex: none;
+                }
+
+                .time-range-picker .time-range-picker__input--start {
+                    border-left: @size-border-inner solid @color-border;
+                }
+            }
+
+            &__description {
+                font-size: @size-text-small;
+                line-height: @size-text-small-height;
+                margin: 0;
+                text-align: center;
+                white-space: nowrap;
+            }
+
+            &::after {
+                background-image: linear-gradient(to bottom, fadeout(@color-back, 10%), fadeout(@color-back, 100%));
+                content: "";
+                display: block;
+                height: @size-control-inner;
+                left: 0;
+                margin-top: @size-border;
+                pointer-events: none;
+                position: absolute;
+                top: 100%;
+                transition: height @time-slow;
+                width: 100%;
+            }
+        }
     }
 }

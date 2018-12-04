@@ -1,5 +1,7 @@
 import {html} from 'malevic';
 import SiteToggle from '../site-toggle';
+import getTimeIcon from './time-icon';
+import MoreToggleSettings from './more-toggle-settings';
 import {Shortcut, Toggle} from '../../../controls';
 import {getLocalMessage} from '../../../../utils/locales';
 import {ExtWrapper, TabInfo} from '../../../../definitions';
@@ -8,10 +10,18 @@ function multiline(...lines) {
     return lines.join('\n');
 }
 
-export default function TopSection({data, actions, tab}: ExtWrapper & {tab: TabInfo}) {
+type HeaderProps = ExtWrapper & {
+    tab: TabInfo;
+    onMoreToggleSettingsClick: () => void;
+};
+
+function Header({data, actions, tab, onMoreToggleSettingsClick}: HeaderProps) {
 
     function toggleExtension(enabled) {
-        actions.changeSettings({enabled});
+        actions.changeSettings({
+            enabled,
+            automation: '',
+        });
     }
 
     return (
@@ -54,7 +64,25 @@ export default function TopSection({data, actions, tab}: ExtWrapper & {tab: TabI
                     )}
                     onSetShortcut={(shortcut) => actions.setShortcut('toggle', shortcut)}
                 />
+                <span
+                    class="header__app-toggle__more-button"
+                    onclick={onMoreToggleSettingsClick}
+                ></span>
+                <span
+                    class={{
+                        'header__app-toggle__time': true,
+                        'header__app-toggle__time--active': data.settings.automation === 'time',
+                    }}
+                    style={data.settings.automation === 'time' ? {
+                        'background-image': getTimeIcon(),
+                    } : null}
+                ></span>
             </div>
         </header>
     );
 }
+
+export {
+    Header,
+    MoreToggleSettings, // TODO: Implement portals to place elements into <body>.
+};

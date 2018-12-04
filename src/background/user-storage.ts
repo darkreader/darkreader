@@ -27,10 +27,13 @@ export default class UserStorage {
             siteList: [],
             applyToListedOnly: false,
             changeBrowserTheme: false,
-            activationTime: '18:00',
-            deactivationTime: '9:00',
             notifyOfNews: false,
             syncSettings: true,
+            automation: '',
+            time: {
+                activation: '18:00',
+                deactivation: '9:00',
+            },
         };
         this.settings = null;
     }
@@ -41,11 +44,17 @@ export default class UserStorage {
         this.settings = await this.loadSettingsFromStorage();
     }
 
+    cleanup() {
+        chrome.storage.local.remove(['activationTime', 'deactivationTime']);
+        chrome.storage.sync.remove(['activationTime', 'deactivationTime']);
+    }
+
     private loadSettingsFromStorage() {
         return new Promise<UserSettings>((resolve) => {
             chrome.storage.local.get(this.defaultSettings, (local: UserSettings) => {
                 if (!local.syncSettings) {
                     local.theme = {...this.defaultSettings.theme, ...local.theme};
+                    local.time = {...this.defaultSettings.time, ...local.time};
                     resolve(local);
                     return;
                 }
@@ -59,6 +68,7 @@ export default class UserStorage {
                         sync = this.migrateSettings_4_6_2($sync) as UserSettings;
                     }
                     sync.theme = {...this.defaultSettings.theme, ...sync.theme};
+                    sync.time = {...this.defaultSettings.time, ...sync.time};
                     resolve(sync);
                 });
             });

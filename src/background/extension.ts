@@ -8,7 +8,7 @@ import UserStorage from './user-storage';
 import {setWindowTheme, resetWindowTheme} from './window-theme';
 import {getFontList, getCommands, setShortcut} from './utils/extension-api';
 import {isFirefox} from '../utils/platform';
-import {isInTimeInterval} from '../utils/time';
+import {isInTimeInterval, getDuration} from '../utils/time';
 import {isURLInList, getURLHost} from '../utils/url';
 import ThemeEngines from '../generators/theme-engines';
 import createCSSFilterStylesheet from '../generators/css-filter';
@@ -16,6 +16,8 @@ import {getDynamicThemeFixesFor} from '../generators/dynamic-theme';
 import createStaticStylesheet from '../generators/static-theme';
 import {createSVGFilterStylesheet, getSVGFilterMatrixValue, getSVGReverseFilterMatrixValue} from '../generators/svg-filter';
 import {ExtensionData, FilterConfig, News, Shortcuts, UserSettings} from '../definitions';
+
+const AUTO_TIME_CHECK_INTERVAL_MS = getDuration({seconds: 10});
 
 export class Extension {
     ready: boolean;
@@ -45,11 +47,10 @@ export class Extension {
     }
 
     isEnabled() {
-        // TODO: There should be a separate property for time settings.
-        // if (this.user.settings.enabled === 'auto') {
-        //     const now = new Date();
-        //     return isInTimeInterval(now, this.user.settings.activationTime, this.user.settings.deactivationTime);
-        // }
+        if (this.user.settings.automation === 'time') {
+            const now = new Date();
+            return isInTimeInterval(now, this.user.settings.time.activation, this.user.settings.time.deactivation);
+        }
         return this.user.settings.enabled;
     }
 
@@ -72,8 +73,10 @@ export class Extension {
         this.awaiting.forEach((ready) => ready());
         this.awaiting = null;
 
+        this.startAutoTimeCheck();
         this.config.load({local: false});
         this.news.subscribe();
+        this.user.cleanup();
     }
 
     private popupOpeningListener: () => void = null;
@@ -115,7 +118,10 @@ export class Extension {
         chrome.commands.onCommand.addListener((command) => {
             if (command === 'toggle') {
                 console.log('Toggle command entered');
-                this.changeSettings({enabled: !this.isEnabled()});
+                this.changeSettings({
+                    enabled: !this.isEnabled(),
+                    automation: '',
+                });
             }
             if (command === 'addSite') {
                 console.log('Add Site command entered');
@@ -175,12 +181,34 @@ export class Extension {
         }
     }
 
+    private wasEnabledOnLastCheck: boolean;
+
+    private startAutoTimeCheck() {
+        setInterval(() => {
+            if (!this.ready || this.user.settings.automation !== 'time') {
+                return;
+            }
+            const isEnabled = this.isEnabled();
+            if (this.wasEnabledOnLastCheck !== isEnabled) {
+                this.wasEnabledOnLastCheck = isEnabled;
+                this.onAppToggle();
+                this.tabs.sendMessage(this.getTabMessage);
+                this.reportChanges();
+            }
+        }, AUTO_TIME_CHECK_INTERVAL_MS);
+    }
+
     changeSettings($settings: Partial<UserSettings>) {
         const prev = {...this.user.settings};
 
         this.user.set($settings);
 
-        if (prev.enabled !== this.user.settings.enabled) {
+        if (
+            (prev.enabled !== this.user.settings.enabled) ||
+            (prev.automation !== this.user.settings.automation) ||
+            (prev.time.activation !== this.user.settings.time.activation) ||
+            (prev.time.deactivation !== this.user.settings.time.deactivation)
+        ) {
             this.onAppToggle();
         }
 
@@ -256,6 +284,7 @@ export class Extension {
             return;
         }
 
+        this.wasEnabledOnLastCheck = this.isEnabled();
         this.tabs.sendMessage(this.getTabMessage);
         this.saveUserSettings();
         this.reportChanges();

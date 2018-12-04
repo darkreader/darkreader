@@ -1,4 +1,29 @@
-function parseTime(time: string) {
+export function parseTime($time: string) {
+    const parts = $time.split(':').slice(0, 2);
+    const lowercased = $time.trim().toLowerCase();
+    const isAM = lowercased.endsWith('am') || lowercased.endsWith('a.m.');
+    const isPM = lowercased.endsWith('pm') || lowercased.endsWith('p.m.');
+
+    let hours = parts.length > 0 ? parseInt(parts[0]) : 0;
+    if (isNaN(hours) || hours > 23) {
+        hours = 0;
+    }
+    if (isAM && hours === 12) {
+        hours = 0;
+    }
+    if (isPM && hours < 12) {
+        hours += 12;
+    }
+
+    let minutes = parts.length > 1 ? parseInt(parts[1]) : 0;
+    if (isNaN(minutes) || minutes > 59) {
+        minutes = 0;
+    }
+
+    return [hours, minutes];
+}
+
+function parse24HTime(time: string) {
     return time.split(':').map((x) => parseInt(x));
 }
 
@@ -13,11 +38,11 @@ function compareTime(a: number[], b: number[]) {
 }
 
 export function isInTimeInterval(date: Date, time0: string, time1: string) {
-    const t0 = parseTime(time0);
-    const t1 = parseTime(time1);
+    const t0 = parse24HTime(time0);
+    const t1 = parse24HTime(time1);
     const t = [date.getHours(), date.getMinutes()];
     if (compareTime(t0, t1) < 0) {
-        t1[0] += 24;
+        t0[0] -= 24;
     }
     return compareTime(t0, t) >= 0 && compareTime(t, t1) > 0;
 }

@@ -1,4 +1,5 @@
 import {html} from 'malevic';
+import CheckmarkIcon from './checkmark-icon';
 import {Button} from '../../../controls';
 import {getURLHost, isURLEnabled} from '../../../../utils/url';
 import {ExtWrapper, TabInfo} from '../../../../definitions';
@@ -30,7 +31,9 @@ export default function SiteToggleButton({data, tab, actions}: ExtWrapper & {tab
             }}
             onclick={() => actions.toggleSitePattern(host)}
         >
-            <span class="site-toggle__url" ><span class="site-toggle__mark"></span> {urlText}</span>
+            <span class="site-toggle__mark"><CheckmarkIcon isEnabled={isSiteEnabled} /></span>
+            {' '}
+            <span class="site-toggle__url" >{urlText}</span>
         </Button>
     );
 }

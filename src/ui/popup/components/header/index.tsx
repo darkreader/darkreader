@@ -1,7 +1,7 @@
 import {html} from 'malevic';
 import SiteToggle from '../site-toggle';
-import getTimeIcon from './time-icon';
 import MoreToggleSettings from './more-toggle-settings';
+import WatchIcon from './watch-icon';
 import {Shortcut, Toggle} from '../../../controls';
 import {getLocalMessage} from '../../../../utils/locales';
 import {ExtWrapper, TabInfo} from '../../../../definitions';
@@ -23,6 +23,9 @@ function Header({data, actions, tab, onMoreToggleSettingsClick}: HeaderProps) {
             automation: '',
         });
     }
+
+    const isTimeAutomation = data.settings.automation === 'time';
+    const now = new Date();
 
     return (
         <header class="header">
@@ -71,12 +74,13 @@ function Header({data, actions, tab, onMoreToggleSettingsClick}: HeaderProps) {
                 <span
                     class={{
                         'header__app-toggle__time': true,
-                        'header__app-toggle__time--active': data.settings.automation === 'time',
+                        'header__app-toggle__time--active': isTimeAutomation,
                     }}
-                    style={data.settings.automation === 'time' ? {
-                        'background-image': getTimeIcon(),
-                    } : null}
-                ></span>
+                >
+                    {(isTimeAutomation
+                        ? <WatchIcon hours={now.getHours()} minutes={now.getMinutes()} />
+                        : null)}
+                </span>
             </div>
         </header>
     );

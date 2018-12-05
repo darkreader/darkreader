@@ -1,7 +1,7 @@
 @import "../../../theme";
 
 .site-toggle {
-    color: @color-fore;
+    color: @color-input-fore;
     white-space: normal;
 
     &--disabled {
@@ -9,24 +9,16 @@
         pointer-events: none;
     }
 
-    &__url {
-        color: @color-input-fore;
-    }
-
     &__mark {
-        background-image: url('data:image/svg+xml;utf-8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 8 8"><path fill="@{color-input-fore}" stroke="none" d="M2,2 L6,6 L6,7 L2,3 Z M2,6 L6,2 L6,3 L2,7 Z" /></svg>');
-        background-size: 100%;
-        display: inline-block;
-        height: @size-text-normal;
-        vertical-align: middle;
-        width: @size-text-normal;
+        svg {
+            fill: currentColor;
+            height: @size-text-normal;
+            vertical-align: bottom;
+            width: @size-text-normal;
+        }
     }
 
-    &--active &__mark {
-        background-image: url('data:image/svg+xml;utf-8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 8 8"><path fill="@{color-input-fore-active}" stroke="none" d="M1,4 L3,6 L7,2 L7,3 L3,7 L1,5 Z" /></svg>');
-    }
-
-    &--active &__url {
+    &--active {
         color: @color-input-fore-active;
     }
 }

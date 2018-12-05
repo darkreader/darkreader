@@ -1,8 +1,5 @@
 import {getSVGFilterMatrixValue} from '../../generators/svg-filter';
 import {bgFetch} from './network';
-import {getAbsoluteURL} from './url';
-import {scale, clamp} from '../../utils/math';
-import {isFirefox} from '../../utils/platform';
 import {logWarn} from '../utils/log';
 import {FilterConfig} from '../../definitions';
 
@@ -146,9 +143,6 @@ export function getFilteredImageDataURL({dataURL, width, height}: ImageDetails, 
         `<image width="${width}" height="${height}" filter="url(#darkreader-image-filter)" xlink:href="${dataURL}" />`,
         '</svg>',
     ].join('');
-    if (isFirefox()) {
-        return `data:image/svg+xml;base64,${btoa(svg)}`;
-    }
     const bytes = new Uint8Array(svg.length);
     for (let i = 0; i < svg.length; i++) {
         bytes[i] = svg.charCodeAt(i);

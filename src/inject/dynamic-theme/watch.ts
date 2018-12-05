@@ -60,7 +60,13 @@ export function watchForStyleChanges(update: (styles: ChangedStyles) => void) {
             });
         }
 
-        iterateShadowNodes(mutations.reduce((nodes, m) => nodes.concat(Array.from(m.addedNodes)), []), subscribeForShadowRootChanges);
+        const allAddedNodes = [];
+        mutations.forEach((m) => {
+            m.addedNodes.forEach((n) => {
+                allAddedNodes.push(n);
+            });
+        });
+        iterateShadowNodes(allAddedNodes, subscribeForShadowRootChanges);
     }
 
     function subscribeForShadowRootChanges(node: Element) {

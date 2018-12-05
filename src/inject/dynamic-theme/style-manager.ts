@@ -282,38 +282,43 @@ export function manageStyle(element: HTMLLinkElement | HTMLStyleElement, {update
             property: string;
             value: string;
             important: boolean;
+            asyncKey?: number;
+        }
+
+        function getCSSRuleText(declarations: ReadyDeclaration[]) {
+            const {selector} = declarations[0];
+            const readyItems = declarations.filter(({value}) => value != null);
+            const cssRuleText = `${selector} { ${readyItems.map(({property, value, important}) => `${property}: ${value}${important ? ' !important' : ''};`).join(' ')} }`;
+            return cssRuleText;
         }
 
         const readyDeclarations: ReadyDeclaration[] = [];
+        const asyncDeclarations = new Map<number, {declarations: ReadyDeclaration[], target: (CSSStyleSheet | CSSGroupingRule), index: number}>();
+        const asyncQueue = new Set<number>();
+        let asyncDeclarationCounter = 0;
+        let firstRun = true;
 
         function buildStyleSheet() {
-            const groups: ReadyDeclaration[][] = [];
-            readyDeclarations.filter((d) => d).forEach((decl) => {
-                let group: ReadyDeclaration[];
-                const prev = groups.length > 0 ? groups[groups.length - 1] : null;
-                if (prev && prev[0].selector === decl.selector && prev[0].media === decl.media) {
-                    group = prev;
+            const groups: ReadyDeclaration[][][] = [];
+            readyDeclarations.forEach((decl, i) => {
+                let mediaGroup: ReadyDeclaration[][];
+                let selectorGroup: ReadyDeclaration[];
+                const prev = i === 0 ? null : readyDeclarations[i - 1];
+                const isSameMedia = prev && prev.media === decl.media;
+                const isSameMediaAndSelector = prev && isSameMedia && prev.selector === decl.selector;
+                if (isSameMedia) {
+                    mediaGroup = groups[groups.length - 1];
                 } else {
-                    group = [];
-                    groups.push(group);
+                    mediaGroup = [];
+                    groups.push(mediaGroup);
                 }
-                group.push(decl);
-            });
-
-            const lines: string[] = [];
-            groups.forEach((group) => {
-                const {media, selector} = group[0];
-                if (media) {
-                    lines.push(`@media ${media} {`);
+                if (isSameMediaAndSelector) {
+                    selectorGroup = mediaGroup[mediaGroup.length - 1];
+                } else {
+                    selectorGroup = [];
+                    mediaGroup.push(selectorGroup);
                 }
-                lines.push(`${selector} {`);
-                group.forEach(({property, value, important}) => {
-                    lines.push(`    ${property}: ${value}${important ? ' !important' : ''};`);
-                });
-                lines.push('}');
-                if (media) {
-                    lines.push('}')
-                }
+                selectorGroup.push(decl);
             });
 
             if (!syncStyle) {
@@ -324,8 +329,65 @@ export function manageStyle(element: HTMLLinkElement | HTMLStyleElement, {update
             }
             syncStylePositionWatcher && syncStylePositionWatcher.stop();
             element.parentNode.insertBefore(syncStyle, corsCopy ? corsCopy.nextSibling : element.nextSibling);
-            syncStyle.textContent = lines.join('\n');
+
+            const sheet = syncStyle.sheet;
+
+            if (firstRun) {
+                firstRun = false;
+                for (let i = sheet.cssRules.length - 1; i >= 0; i--) {
+                    sheet.deleteRule(i);
+                }
+            }
+
+            groups.forEach((mediaGroup) => {
+                const {media} = mediaGroup[0][0];
+                let target: CSSStyleSheet | CSSGroupingRule;
+                if (media) {
+                    sheet.insertRule(`@media ${media} {}`, sheet.cssRules.length);
+                    target = sheet.cssRules[sheet.cssRules.length - 1] as CSSMediaRule;
+                } else {
+                    target = sheet;
+                }
+                mediaGroup.forEach((selectorGroup) => {
+                    const asyncItems = selectorGroup.filter(({value}) => value == null);
+                    if (asyncItems.length > 0) {
+                        asyncItems.forEach(({asyncKey}) => asyncDeclarations.set(asyncKey, {declarations: selectorGroup, target, index: target.cssRules.length}));
+                    }
+                    const cssRuleText = getCSSRuleText(selectorGroup);
+                    target.insertRule(cssRuleText, target.cssRules.length);
+                });
+            });
+
             syncStylePositionWatcher = watchForNodePosition(syncStyle);
+        }
+
+        function onAsyncDeclarationReady(key: number) {
+            asyncQueue.add(key);
+            rebuildAsyncRules();
+        }
+
+        function rebuildAsyncRules() {
+            const items = Array.from(asyncQueue).map((key) => asyncDeclarations.get(key));
+            const foundItems = new Map<any, Set<number>>();
+            const uniqItems = items.filter(({target, index}) => {
+                if (foundItems.has(target)) {
+                    if (foundItems.get(target).has(index)) {
+                        return false;
+                    } else {
+                        foundItems.get(target).add(index);
+                    }
+                } else {
+                    foundItems.set(target, new Set());
+                }
+                return true;
+            });
+            uniqItems.forEach(({declarations, target, index}) => {
+                const cssRuleText = getCSSRuleText(declarations);
+                target.deleteRule(index);
+                target.insertRule(cssRuleText, index);
+            });
+            Array.from(asyncQueue).forEach((key) => asyncDeclarations.delete(key));
+            asyncQueue.clear();
         }
 
         const RULES_PER_MS = 100;
@@ -346,15 +408,16 @@ export function manageStyle(element: HTMLLinkElement | HTMLStyleElement, {update
                     const modified = value(filter);
                     if (modified instanceof Promise) {
                         const index = readyDeclarations.length;
-                        readyDeclarations.push(null);
+                        const asyncKey = asyncDeclarationCounter++;
+                        readyDeclarations.push({media, selector, property, value: null, important, asyncKey});
                         const promise = modified;
                         const currentRenderId = renderId;
                         promise.then((asyncValue) => {
                             if (!asyncValue || cancelAsyncOperations || currentRenderId !== renderId) {
                                 return;
                             }
-                            readyDeclarations[index] = {media, selector, property, value: asyncValue, important};
-                            throttledBuildStyleSheet(currentRenderId);
+                            readyDeclarations[index].value = asyncValue;
+                            onAsyncDeclarationReady(asyncKey);
                         });
                     } else {
                         readyDeclarations.push({media, selector, property, value: modified, important});

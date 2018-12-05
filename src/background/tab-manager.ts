@@ -116,10 +116,11 @@ export default class TabManager {
             active: true,
             lastFocusedWindow: true
         }))[0];
+        // When Dark Reader's Dev Tools are open, query can return extension's page instead of expected page
         const isExtensionPage = (url: string) => url.startsWith('chrome-extension:') || url.startsWith('moz-extension:');
         if (isExtensionPage(tab.url)) {
             const tabs = (await queryTabs({active: true}));
-            tab = tabs.find((t) => !isExtensionPage(t.url));
+            tab = tabs.find((t) => !isExtensionPage(t.url)) || tab;
         }
         return tab.url;
     }

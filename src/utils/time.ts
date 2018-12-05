@@ -32,19 +32,19 @@ function compareTime(a: number[], b: number[]) {
         return 0;
     }
     if (a[0] < b[0] || (a[0] === b[0] && a[1] < b[1])) {
-        return 1;
+        return -1;
     }
-    return -1;
+    return 1;
 }
 
 export function isInTimeInterval(date: Date, time0: string, time1: string) {
-    const t0 = parse24HTime(time0);
-    const t1 = parse24HTime(time1);
+    const a = parse24HTime(time0);
+    const b = parse24HTime(time1);
     const t = [date.getHours(), date.getMinutes()];
-    if (compareTime(t0, t1) < 0) {
-        t0[0] -= 24;
+    if (compareTime(a, b) > 0) {
+        return compareTime(a, t) <= 0 || compareTime(t, b) < 0;
     }
-    return compareTime(t0, t) >= 0 && compareTime(t, t1) > 0;
+    return compareTime(a, t) <= 0 && compareTime(t, b) < 0;
 }
 
 interface Duration {

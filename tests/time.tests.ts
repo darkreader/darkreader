@@ -2,10 +2,15 @@ import {isInTimeInterval, parseTime, getDuration} from '../src/utils/time';
 
 test('Time interval', () => {
     expect(isInTimeInterval(new Date(2018, 11, 4, 10), '9:00', '12:00')).toBe(true);
+    expect(isInTimeInterval(new Date(2018, 11, 4, 10), '10:00', '10:00')).toBe(false);
+    expect(isInTimeInterval(new Date(2018, 11, 4, 12), '10:00', '10:00')).toBe(false);
+    expect(isInTimeInterval(new Date(2018, 11, 4, 8), '10:00', '10:00')).toBe(false);
     expect(isInTimeInterval(new Date(2018, 11, 4, 10), '9:00', '10:00')).toBe(false);
+    expect(isInTimeInterval(new Date(2018, 11, 4, 9, 2), '9:01', '10:00')).toBe(true);
     expect(isInTimeInterval(new Date(2018, 11, 4, 10), '9:00', '10:01')).toBe(true);
     expect(isInTimeInterval(new Date(2018, 11, 4, 10), '18:00', '12:00')).toBe(true);
     expect(isInTimeInterval(new Date(2018, 11, 4, 10), '18:00', '9:00')).toBe(false);
+    expect(isInTimeInterval(new Date(2018, 11, 4, 22), '18:00', '9:00')).toBe(true);
 });
 
 test('Time parse', () => {

@@ -1,6 +1,6 @@
 {
   "name": "darkreader",
-  "version": "4.7.0",
+  "version": "4.7.1",
   "description": "Dark theme for every website",
   "scripts": {
     "debug": "node tasks/debug.js",

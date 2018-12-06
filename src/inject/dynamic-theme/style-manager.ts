@@ -361,9 +361,9 @@ export function manageStyle(element: HTMLLinkElement | HTMLStyleElement, {update
             syncStylePositionWatcher = watchForNodePosition(syncStyle);
         }
 
-        function onAsyncDeclarationReady(key: number) {
+        function onAsyncDeclarationReady(key: number, currentRenderId: number) {
             asyncQueue.add(key);
-            rebuildAsyncRules();
+            throttledRebuildAsyncRules(currentRenderId);
         }
 
         function rebuildAsyncRules() {
@@ -390,17 +390,12 @@ export function manageStyle(element: HTMLLinkElement | HTMLStyleElement, {update
             asyncQueue.clear();
         }
 
-        const RULES_PER_MS = 100;
-        const REQUESTED_RESOURCES = 1 / 4;
-        const declarationsCount = modRules.filter((r) => r).reduce((total, {declarations}) => total + declarations.length, 0);
-        const timeout = declarationsCount / RULES_PER_MS / REQUESTED_RESOURCES;
-
-        const throttledBuildStyleSheet = throttle((currentRenderId: number) => {
+        const throttledRebuildAsyncRules = throttle((currentRenderId: number) => {
             if (cancelAsyncOperations || renderId !== currentRenderId) {
                 return;
             }
-            buildStyleSheet();
-        }, timeout);
+            rebuildAsyncRules();
+        });
 
         modRules.filter((r) => r).forEach(({selector, declarations, media}) => {
             declarations.forEach(({property, value, important}) => {
@@ -417,7 +412,7 @@ export function manageStyle(element: HTMLLinkElement | HTMLStyleElement, {update
                                 return;
                             }
                             readyDeclarations[index].value = asyncValue;
-                            onAsyncDeclarationReady(asyncKey);
+                            onAsyncDeclarationReady(asyncKey, currentRenderId);
                         });
                     } else {
                         readyDeclarations.push({media, selector, property, value: modified, important});
@@ -428,7 +423,7 @@ export function manageStyle(element: HTMLLinkElement | HTMLStyleElement, {update
             });
         });
 
-        throttledBuildStyleSheet(renderId);
+        buildStyleSheet();
     }
 
     let rulesCount: number = null;

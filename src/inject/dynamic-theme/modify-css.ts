@@ -2,7 +2,7 @@ import {parse, RGBA} from '../../utils/color';
 import {clamp} from '../../utils/math';
 import {isMacOS} from '../../utils/platform';
 import {getMatches} from '../../utils/text';
-import {modifyBackgroundColor, modifyBorderColor, modifyForegroundColor, modifyGradientColor, modifyShadowColor, clearColorModificationCache} from '../../generators/modify-colors'
+import {modifyBackgroundColor, modifyBorderColor, modifyForegroundColor, modifyGradientColor, modifyShadowColor, clearColorModificationCache} from '../../generators/modify-colors';
 import {cssURLRegex, getCSSURLValue, getCSSBaseBath} from './css-rules';
 import {getImageDetails, getFilteredImageDataURL, ImageDetails} from './image';
 import {getAbsoluteURL} from './url';
@@ -114,6 +114,37 @@ export function getModifiedFallbackStyle(filter: FilterConfig) {
     lines.push(`    color: ${modifyForegroundColor({r: 0, g: 0, b: 0}, filter)} !important;`);
     lines.push('}');
     return lines.join('\n');
+}
+
+// TODO: Move CSS fixes to config.
+const commonOverride = (theme: FilterConfig) => {
+    return [
+        `.jfk-bubble { background-color: ${modifyBackgroundColor({r: 255, g: 255, b: 255}, theme)} !important; }`,
+    ].join('\n');
+};
+const websiteOverride: {[host: string]: (string | ((theme: FilterConfig) => string))} = {
+    'arstechnica.com': (theme) => theme.mode === 1 ? [
+        '.listing, .video-thumbnail { background-blend-mode: initial !important; }',
+        '.article-single figure img { mix-blend-mode: initial !important; }',
+    ].join('\n') : '',
+    'www.ebay.co.uk': 'html, body { background-image: none !important; }',
+    'www.ebay.com': 'html, body { background-image: none !important; }',
+    'www.ebay.de': 'html, body { background-image: none !important; }',
+    'www.youtube.com': (theme) => `#textarea { color: ${modifyForegroundColor({r: 0, g: 0, b: 0}, theme)} !important; }`,
+};
+
+export function getSiteOverride(host: string, theme: FilterConfig) {
+    const common = commonOverride(theme);
+    let special = '';
+    if (websiteOverride.hasOwnProperty(host)) {
+        const override = websiteOverride[host];
+        if (typeof override === 'function') {
+            special = override(theme);
+        } else {
+            special = override;
+        }
+    }
+    return `${common}${special ? `\n${special}` : ''}`;
 }
 
 const unparsableColors = new Set([

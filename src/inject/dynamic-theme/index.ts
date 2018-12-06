@@ -1,6 +1,6 @@
 import {replaceCSSVariables} from './css-rules';
 import {overrideInlineStyles, getInlineOverrideStyle, watchForInlineStyles, stopWatchingForInlineStyles} from './inline-style';
-import {getModifiedUserAgentStyle, getModifiedFallbackStyle, cleanModificationCache} from './modify-css';
+import {getModifiedUserAgentStyle, getModifiedFallbackStyle, getSiteOverride, cleanModificationCache} from './modify-css';
 import {manageStyle, shouldManageStyle, STYLE_SELECTOR, StyleManager} from './style-manager';
 import {watchForStyleChanges, stopWatchingForStyleChanges} from './watch';
 import {removeNode, watchForNodePosition} from '../utils/dom';
@@ -85,11 +85,7 @@ function createStaticStyleOverrides() {
 
     const overrideStyle = createOrUpdateStyle('darkreader--override');
     document.head.appendChild(overrideStyle);
-    // TODO: Move CSS fixes to config.
-    overrideStyle.textContent = {
-        'www.ebay.com': 'html, body { background-image: none !important; }',
-        'www.youtube.com': filter.mode === 1 ? '#textarea { color: white !important; }' : '',
-    }[location.host] || '';
+    overrideStyle.textContent = getSiteOverride(location.host, filter);
     setupStylePositionWatcher(overrideStyle, 'override');
 }
 

@@ -97,13 +97,12 @@ function createUrlRegex(urlTemplate: string): RegExp {
 }
 
 export function isURLEnabled(url: string, userSettings: UserSettings, {isProtected, isInDarkList}) {
+    if (isProtected) {
+        return false;
+    }
     const isURLInUserList = isURLInList(url, userSettings.siteList);
-    const isForcedEnable = isURLInUserList && userSettings.applyToListedOnly;
-    const isForcedDisable = isURLInUserList && !userSettings.applyToListedOnly;
-    return (
-        !isProtected && (
-            isForcedEnable ||
-            (!isInDarkList && !isForcedDisable)
-        )
-    );
+    if (userSettings.applyToListedOnly) {
+        return isURLInUserList;
+    }
+    return (!isInDarkList && !isURLInUserList);
 }

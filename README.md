@@ -122,7 +122,7 @@ Submit a **pull request**, wait for **review**.
 
 This project exists thanks to all the people who contribute
 
-<a href="graphs/contributors"><img src="https://opencollective.com/darkreader/contributors.svg?width=890&button=false" /></a>
+<a href="../../graphs/contributors"><img src="https://opencollective.com/darkreader/contributors.svg?width=890&button=false" /></a>
 
 ## Backers
 

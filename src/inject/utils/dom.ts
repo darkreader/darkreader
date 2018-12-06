@@ -68,6 +68,11 @@ export function watchForNodePosition<T extends Node>(node: T) {
     let attempts = 1000;
     const prevSibling = node.previousSibling;
     const parent = node.parentElement;
+    if (!parent) {
+        // BUG: fails for shadow root.
+        logWarn('Unable to watch for node position: parent element not found', node, prevSibling);
+        return {stop: () => {}};
+    }
     const restore = throttle(() => {
         attempts--;
         if (attempts === 0) {

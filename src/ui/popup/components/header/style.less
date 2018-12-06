@@ -21,7 +21,7 @@
 
     &__site-toggle {
         grid-area: site-toggle;
-        overflow: hidden;
+        min-width: 0;
 
         &__unable-text {
             color: @color-heading;
@@ -35,6 +35,7 @@
 
     &__app-toggle {
         grid-area: app-toggle;
+        min-width: 0;
         position: relative;
 
         &__more-button {
@@ -204,5 +205,9 @@
                 width: 100%;
             }
         }
+    }
+
+    .shortcut {
+        overflow: hidden;
     }
 }

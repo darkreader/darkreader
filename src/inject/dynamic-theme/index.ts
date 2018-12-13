@@ -43,9 +43,7 @@ function stopStylePositionWatchers() {
 function createStaticStyleOverrides() {
     const fallbackStyle = createOrUpdateStyle('darkreader--fallback');
     document.head.insertBefore(fallbackStyle, document.head.firstChild);
-    if (!hasSomeDarkTheme()) {
-        fallbackStyle.textContent = getModifiedFallbackStyle(filter);
-    }
+    fallbackStyle.textContent = getModifiedFallbackStyle(filter);
     setupStylePositionWatcher(fallbackStyle, 'fallback');
 
     const userAgentStyle = createOrUpdateStyle('darkreader--user-agent');
@@ -93,11 +91,6 @@ function cleanFallbackStyle() {
     document.head.querySelector('.darkreader--fallback').textContent = '';
 }
 
-function hasSomeDarkTheme() {
-    const userAgent = document.querySelector('.darkreader--user-agent');
-    return Boolean(userAgent && userAgent.textContent);
-}
-
 function createDynamicStyleOverrides() {
     cancelRendering();
     const newManagers = Array.from<HTMLLinkElement | HTMLStyleElement>(document.querySelectorAll(STYLE_SELECTOR))
@@ -138,10 +131,8 @@ function createManager(element: HTMLLinkElement | HTMLStyleElement) {
         if (!isPageLoaded()) {
             loadingStyles.add(loadingStyleId);
 
-            if (!hasSomeDarkTheme()) {
-                const fallbackStyle = document.querySelector('.darkreader--fallback');
-                fallbackStyle.textContent = getModifiedFallbackStyle(filter);
-            }
+            const fallbackStyle = document.querySelector('.darkreader--fallback');
+            fallbackStyle.textContent = getModifiedFallbackStyle(filter);
         }
     }
 

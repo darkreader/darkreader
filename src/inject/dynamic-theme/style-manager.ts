@@ -2,7 +2,6 @@ import {iterateCSSRules, iterateCSSDeclarations, replaceCSSRelativeURLsWithAbsol
 import {getModifiableCSSDeclaration, ModifiableCSSDeclaration, ModifiableCSSRule} from './modify-css';
 import {bgFetch} from './network';
 import {removeNode, watchForNodePosition} from '../utils/dom';
-import {throttle} from '../utils/throttle';
 import {logWarn} from '../utils/log';
 import {isDeepSelectorSupported} from '../../utils/platform';
 import {getMatches} from '../../utils/text';
@@ -294,7 +293,6 @@ export function manageStyle(element: HTMLLinkElement | HTMLStyleElement, {update
 
         const readyDeclarations: ReadyDeclaration[] = [];
         const asyncDeclarations = new Map<number, {declarations: ReadyDeclaration[], target: (CSSStyleSheet | CSSGroupingRule), index: number}>();
-        const asyncQueue = new Set<number>();
         let asyncDeclarationCounter = 0;
         let firstRun = true;
 
@@ -361,41 +359,13 @@ export function manageStyle(element: HTMLLinkElement | HTMLStyleElement, {update
             syncStylePositionWatcher = watchForNodePosition(syncStyle);
         }
 
-        function onAsyncDeclarationReady(key: number, currentRenderId: number) {
-            asyncQueue.add(key);
-            throttledRebuildAsyncRules(currentRenderId);
+        function rebuildAsyncRule(key: number) {
+            const {declarations, target, index} = asyncDeclarations.get(key);
+            const cssRuleText = getCSSRuleText(declarations);
+            target.deleteRule(index);
+            target.insertRule(cssRuleText, index);
+            asyncDeclarations.delete(key);
         }
-
-        function rebuildAsyncRules() {
-            const items = Array.from(asyncQueue).map((key) => asyncDeclarations.get(key));
-            const foundItems = new Map<any, Set<number>>();
-            const uniqItems = items.filter(({target, index}) => {
-                if (foundItems.has(target)) {
-                    if (foundItems.get(target).has(index)) {
-                        return false;
-                    } else {
-                        foundItems.get(target).add(index);
-                    }
-                } else {
-                    foundItems.set(target, new Set());
-                }
-                return true;
-            });
-            uniqItems.forEach(({declarations, target, index}) => {
-                const cssRuleText = getCSSRuleText(declarations);
-                target.deleteRule(index);
-                target.insertRule(cssRuleText, index);
-            });
-            Array.from(asyncQueue).forEach((key) => asyncDeclarations.delete(key));
-            asyncQueue.clear();
-        }
-
-        const throttledRebuildAsyncRules = throttle((currentRenderId: number) => {
-            if (cancelAsyncOperations || renderId !== currentRenderId) {
-                return;
-            }
-            rebuildAsyncRules();
-        });
 
         modRules.filter((r) => r).forEach(({selector, declarations, media}) => {
             declarations.forEach(({property, value, important}) => {
@@ -412,7 +382,7 @@ export function manageStyle(element: HTMLLinkElement | HTMLStyleElement, {update
                                 return;
                             }
                             readyDeclarations[index].value = asyncValue;
-                            onAsyncDeclarationReady(asyncKey, currentRenderId);
+                            rebuildAsyncRule(asyncKey);
                         });
                     } else {
                         readyDeclarations.push({media, selector, property, value: modified, important});

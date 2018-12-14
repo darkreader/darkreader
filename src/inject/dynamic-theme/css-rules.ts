@@ -52,6 +52,12 @@ export function replaceCSSRelativeURLsWithAbsolute($css: string, cssBasePath: st
     });
 }
 
+const cssCommentsRegex = /\/\*[\s\S]*?\*\//g;
+
+export function removeCSSComments($css: string) {
+    return $css.replace(cssCommentsRegex, '');
+}
+
 const fontFaceRegex = /@font-face\s*{[^}]*}/g;
 
 export function replaceCSSFontFace($css: string) {

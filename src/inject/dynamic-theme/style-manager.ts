@@ -294,7 +294,6 @@ export function manageStyle(element: HTMLLinkElement | HTMLStyleElement, {update
         const readyDeclarations: ReadyDeclaration[] = [];
         const asyncDeclarations = new Map<number, {declarations: ReadyDeclaration[], target: (CSSStyleSheet | CSSGroupingRule), index: number}>();
         let asyncDeclarationCounter = 0;
-        let firstRun = true;
 
         function buildStyleSheet() {
             const groups: ReadyDeclaration[][][] = [];
@@ -329,12 +328,8 @@ export function manageStyle(element: HTMLLinkElement | HTMLStyleElement, {update
             element.parentNode.insertBefore(syncStyle, corsCopy ? corsCopy.nextSibling : element.nextSibling);
 
             const sheet = syncStyle.sheet;
-
-            if (firstRun) {
-                firstRun = false;
-                for (let i = sheet.cssRules.length - 1; i >= 0; i--) {
-                    sheet.deleteRule(i);
-                }
+            for (let i = sheet.cssRules.length - 1; i >= 0; i--) {
+                sheet.deleteRule(i);
             }
 
             groups.forEach((mediaGroup) => {

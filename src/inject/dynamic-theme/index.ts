@@ -132,7 +132,9 @@ function createManager(element: HTMLLinkElement | HTMLStyleElement) {
             loadingStyles.add(loadingStyleId);
 
             const fallbackStyle = document.querySelector('.darkreader--fallback');
-            fallbackStyle.textContent = getModifiedFallbackStyle(filter);
+            if (!fallbackStyle.textContent) {
+                fallbackStyle.textContent = getModifiedFallbackStyle(filter);
+            }
         }
     }
 

@@ -43,7 +43,7 @@ export function watchForStyleChanges(update: (styles: ChangedStyles) => void) {
     }
 
     function handleMutations(mutations: MutationRecord[]) {
-        const createdStyles = mutations.reduce((nodes, m) => nodes.concat(getAllManageableStyles(m.addedNodes)), []);
+        const createdStylesSet = new Set(mutations.reduce((nodes, m) => nodes.concat(getAllManageableStyles(m.addedNodes)), []));
         const removedStyles = mutations.reduce((nodes, m) => nodes.concat(getAllManageableStyles(m.removedNodes)), []);
         const updatedStyles = mutations
             .filter(({target, type}) => type === 'attributes' && shouldManageStyle(target))
@@ -51,6 +51,14 @@ export function watchForStyleChanges(update: (styles: ChangedStyles) => void) {
                 styles.push(target as HTMLStyleElement | HTMLLinkElement);
                 return styles;
             }, [] as (HTMLStyleElement | HTMLLinkElement)[]);
+
+        for (let i = removedStyles.length - 1; i >= 0; i--) {
+            if (createdStylesSet.has(removedStyles[i])) {
+                createdStylesSet.delete(removedStyles[i]);
+                removedStyles.splice(i, 1);
+            }
+        }
+        const createdStyles = Array.from(createdStylesSet);
 
         if (createdStyles.length + removedStyles.length + updatedStyles.length > 0) {
             update({

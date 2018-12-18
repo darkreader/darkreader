@@ -94,9 +94,12 @@ export function watchForNodePosition<T extends Node>(node: T, onRestore?: () => 
             restore();
         }
     });
-    observer.observe(parent, {childList: true});
+    const run = () => {
+        observer.observe(parent, {childList: true});
+    };
     const stop = () => {
         observer.disconnect();
     };
-    return {stop};
+    run();
+    return {run, stop};
 }

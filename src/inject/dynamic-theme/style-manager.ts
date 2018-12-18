@@ -134,7 +134,9 @@ export function manageStyle(element: HTMLLinkElement | HTMLStyleElement, {update
             try {
                 const fullCSSText = await replaceCSSImports(cssText, cssBasePath);
                 corsCopy = createCORSCopy(element, fullCSSText);
-                corsCopyPositionWatcher = watchForNodePosition(corsCopy);
+                if (corsCopy) {
+                    corsCopyPositionWatcher = watchForNodePosition(corsCopy);
+                }
             } catch (err) {
                 logWarn(err);
             }
@@ -351,7 +353,11 @@ export function manageStyle(element: HTMLLinkElement | HTMLStyleElement, {update
                 });
             });
 
-            syncStylePositionWatcher = syncStylePositionWatcher || watchForNodePosition(syncStyle, buildStyleSheet);
+            if (syncStylePositionWatcher) {
+                syncStylePositionWatcher.run();
+            } else {
+                syncStylePositionWatcher = watchForNodePosition(syncStyle, buildStyleSheet);
+            }
         }
 
         function rebuildAsyncRule(key: number) {

@@ -1,5 +1,6 @@
 import {logWarn} from './log';
 import {throttle} from './throttle';
+import {getDuration} from '../../utils/time';
 
 interface createNodeAsapParams {
     selectNode: () => HTMLElement;
@@ -65,7 +66,8 @@ export function removeNode(node: Node) {
 }
 
 export function watchForNodePosition<T extends Node>(node: T, onRestore?: () => void) {
-    let attempts = 1000;
+    const MAX_ATTEMPTS_COUNT = 10;
+    const ATTEMPTS_INTERVAL = getDuration({seconds: 10});
     const prevSibling = node.previousSibling;
     const parent = node.parentElement;
     if (!parent) {
@@ -73,12 +75,21 @@ export function watchForNodePosition<T extends Node>(node: T, onRestore?: () => 
         logWarn('Unable to watch for node position: parent element not found', node, prevSibling);
         return {stop: () => {}};
     }
+    let attempts = 0;
+    let start: number = null;
     const restore = throttle(() => {
-        attempts--;
-        if (attempts === 0) {
-            logWarn('Node position watcher stopped: attempts count exceeded', node, prevSibling, parent);
-            stop();
-            return;
+        attempts++;
+        const now = Date.now();
+        if (start == null) {
+            start = now;
+        } else if (attempts >= MAX_ATTEMPTS_COUNT) {
+            if (now - start < ATTEMPTS_INTERVAL) {
+                logWarn('Node position watcher stopped: some script conflicts with Dark Reader and can cause high CPU usage', node, prevSibling);
+                stop();
+                return;
+            }
+            start = now;
+            attempts = 1;
         }
         if ((prevSibling && prevSibling.parentElement !== parent)) {
             logWarn('Unable to restore node position: sibling was removed', node, prevSibling, parent);

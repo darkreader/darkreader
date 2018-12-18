@@ -238,7 +238,11 @@ function createThemeAndWatchForUpdates() {
 
 function watchForUpdates() {
     watchForStyleChanges(({created, updated, removed}) => {
-        removed.forEach((style) => removeManager(style));
+        const createdStyles = new Set(created);
+        const movedStyles = new Set(removed.filter((style) => createdStyles.has(style)));
+        removed
+            .filter((style) => !movedStyles.has(style))
+            .forEach((style) => removeManager(style));
         const newManagers = Array.from(new Set(created.concat(updated)))
             .filter((style) => !styleManagers.has(style))
             .map((style) => createManager(style));

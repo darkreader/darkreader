@@ -351,7 +351,7 @@ export function manageStyle(element: HTMLLinkElement | HTMLStyleElement, {update
                 });
             });
 
-            syncStylePositionWatcher = watchForNodePosition(syncStyle);
+            syncStylePositionWatcher = syncStylePositionWatcher || watchForNodePosition(syncStyle, buildStyleSheet);
         }
 
         function rebuildAsyncRule(key: number) {

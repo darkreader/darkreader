@@ -64,7 +64,7 @@ export function removeNode(node: Node) {
     node && node.parentNode && node.parentNode.removeChild(node);
 }
 
-export function watchForNodePosition<T extends Node>(node: T) {
+export function watchForNodePosition<T extends Node>(node: T, onRestore?: () => void) {
     let attempts = 1000;
     const prevSibling = node.previousSibling;
     const parent = node.parentElement;
@@ -87,6 +87,7 @@ export function watchForNodePosition<T extends Node>(node: T) {
         }
         logWarn('Node was removed, restoring it\'s position', node, prevSibling, parent);
         parent.insertBefore(node, prevSibling ? prevSibling.nextSibling : parent.firstChild);
+        onRestore && onRestore();
     });
     const observer = new MutationObserver((mutations) => {
         if (!node.parentElement) {

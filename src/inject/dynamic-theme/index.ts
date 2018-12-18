@@ -182,7 +182,7 @@ function removeManager(element: HTMLLinkElement | HTMLStyleElement) {
 
 const throttledRenderAllStyles = throttle((callback?: () => void) => {
     styleManagers.forEach((manager) => manager.render(filter, variables));
-    callback();
+    callback && callback();
 });
 const cancelRendering = function () {
     throttledRenderAllStyles.cancel();

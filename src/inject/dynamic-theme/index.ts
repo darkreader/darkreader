@@ -43,7 +43,7 @@ function stopStylePositionWatchers() {
 function createStaticStyleOverrides() {
     const fallbackStyle = createOrUpdateStyle('darkreader--fallback');
     document.head.insertBefore(fallbackStyle, document.head.firstChild);
-    fallbackStyle.textContent = getModifiedFallbackStyle(filter);
+    fallbackStyle.textContent = getModifiedFallbackStyle(filter, {strict: true});
     setupStylePositionWatcher(fallbackStyle, 'fallback');
 
     const userAgentStyle = createOrUpdateStyle('darkreader--user-agent');
@@ -133,7 +133,7 @@ function createManager(element: HTMLLinkElement | HTMLStyleElement) {
 
             const fallbackStyle = document.querySelector('.darkreader--fallback');
             if (!fallbackStyle.textContent) {
-                fallbackStyle.textContent = getModifiedFallbackStyle(filter);
+                fallbackStyle.textContent = getModifiedFallbackStyle(filter, {strict: false});
             }
         }
     }
@@ -281,7 +281,7 @@ export function createOrUpdateDynamicTheme(filterConfig: FilterConfig, dynamicTh
         if (!isFirefox()) {
             const fallbackStyle = createOrUpdateStyle('darkreader--fallback');
             document.documentElement.appendChild(fallbackStyle);
-            fallbackStyle.textContent = getModifiedFallbackStyle(filter);
+            fallbackStyle.textContent = getModifiedFallbackStyle(filter, {strict: true});
         }
 
         const headObserver = new MutationObserver(() => {

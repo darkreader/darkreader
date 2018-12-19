@@ -106,9 +106,9 @@ export function getModifiedUserAgentStyle(filter: FilterConfig, isIFrame: boolea
     return lines.join('\n');
 }
 
-export function getModifiedFallbackStyle(filter: FilterConfig) {
+export function getModifiedFallbackStyle(filter: FilterConfig, {strict}) {
     const lines: string[] = [];
-    lines.push('html, body, body > * {');
+    lines.push(`html, body, ${strict ? 'body *' : 'body > *'} {`);
     lines.push(`    background-color: ${modifyBackgroundColor({r: 255, g: 255, b: 255}, filter)} !important;`);
     lines.push(`    border-color: ${modifyBorderColor({r: 64, g: 64, b: 64}, filter)} !important;`);
     lines.push(`    color: ${modifyForegroundColor({r: 0, g: 0, b: 0}, filter)} !important;`);

@@ -1,11 +1,11 @@
 import {getSVGFilterMatrixValue} from '../../generators/svg-filter';
 import {bgFetch} from './network';
-import {logWarn} from '../utils/log';
+import {parseURL} from './url';
 import {FilterConfig} from '../../definitions';
 
 export interface ImageDetails {
     src: string;
-    dataURL: string;
+    resolvedURL: string;
     width: number;
     height: number;
     isDark: boolean;
@@ -15,12 +15,19 @@ export interface ImageDetails {
 }
 
 export async function getImageDetails(url: string) {
-    const dataURL = await getImageDataURL(url);
-    const image = await urlToImage(dataURL);
+    let resolvedURL: string;
+    if (url.startsWith('data:')) {
+        resolvedURL = url;
+    } else if (location.host === parseURL(url).host) {
+        resolvedURL = url
+    } else {
+        resolvedURL = await getImageDataURL(url);
+    }
+    const image = await urlToImage(resolvedURL);
     const info = analyzeImage(image);
     return {
         src: url,
-        dataURL,
+        resolvedURL,
         width: image.naturalWidth,
         height: image.naturalHeight,
         ...info,
@@ -28,9 +35,6 @@ export async function getImageDetails(url: string) {
 }
 
 async function getImageDataURL(url: string) {
-    if (url.startsWith('data:')) {
-        return url;
-    }
     return await bgFetch({url, responseType: 'data-url'});
 }
 
@@ -111,7 +115,7 @@ function analyzeImage(image: HTMLImageElement) {
     };
 }
 
-export function getFilteredImageDataURL({dataURL, width, height}: ImageDetails, filter: FilterConfig) {
+export function getFilteredImageDataURL({resolvedURL, width, height}: ImageDetails, filter: FilterConfig) {
     const matrix = getSVGFilterMatrixValue(filter);
     const svg = [
         `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="${width}" height="${height}">`,
@@ -120,7 +124,7 @@ export function getFilteredImageDataURL({dataURL, width, height}: ImageDetails, 
         `<feColorMatrix type="matrix" values="${matrix}" />`,
         '</filter>',
         '</defs>',
-        `<image width="${width}" height="${height}" filter="url(#darkreader-image-filter)" xlink:href="${dataURL}" />`,
+        `<image width="${width}" height="${height}" filter="url(#darkreader-image-filter)" xlink:href="${resolvedURL}" />`,
         '</svg>',
     ].join('');
     const bytes = new Uint8Array(svg.length);

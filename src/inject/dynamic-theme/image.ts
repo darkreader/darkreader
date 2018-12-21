@@ -4,7 +4,7 @@ import {FilterConfig} from '../../definitions';
 
 export interface ImageDetails {
     src: string;
-    resolvedURL: string;
+    dataURL: string;
     width: number;
     height: number;
     isDark: boolean;
@@ -112,7 +112,7 @@ function analyzeImage(image: HTMLImageElement) {
     };
 }
 
-export function getFilteredImageDataURL({resolvedURL, width, height}: ImageDetails, filter: FilterConfig) {
+export function getFilteredImageDataURL({dataURL, width, height}: ImageDetails, filter: FilterConfig) {
     const matrix = getSVGFilterMatrixValue(filter);
     const svg = [
         `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="${width}" height="${height}">`,
@@ -121,7 +121,7 @@ export function getFilteredImageDataURL({resolvedURL, width, height}: ImageDetai
         `<feColorMatrix type="matrix" values="${matrix}" />`,
         '</filter>',
         '</defs>',
-        `<image width="${width}" height="${height}" filter="url(#darkreader-image-filter)" xlink:href="${resolvedURL}" />`,
+        `<image width="${width}" height="${height}" filter="url(#darkreader-image-filter)" xlink:href="${dataURL}" />`,
         '</svg>',
     ].join('');
     const bytes = new Uint8Array(svg.length);

@@ -28,30 +28,10 @@ export async function getImageDetails(url: string) {
 }
 
 async function getImageDataURL(url: string) {
-    let dataURL: string;
     if (url.startsWith('data:')) {
-        dataURL = url;
-    } else {
-        let cache: string;
-        try {
-            cache = sessionStorage.getItem(`darkreader-cache:${url}`);
-        } catch (err) {
-            logWarn(err);
-        }
-        if (cache) {
-            dataURL = cache;
-        } else {
-            dataURL = await bgFetch({url, responseType: 'data-url'});
-            if (dataURL.length < 2 * 256 * 1024) {
-                try {
-                    sessionStorage.setItem(`darkreader-cache:${url}`, dataURL);
-                } catch (err) {
-                    logWarn(err);
-                }
-            }
-        }
+        return url;
     }
-    return dataURL;
+    return await bgFetch({url, responseType: 'data-url'});
 }
 
 async function urlToImage(url: string) {

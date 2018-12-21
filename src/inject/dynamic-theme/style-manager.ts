@@ -116,7 +116,7 @@ export function manageStyle(element: HTMLLinkElement | HTMLStyleElement, {update
             } catch (err) {
                 logWarn(err);
             }
-            cssText = await loadWithCache(element.href);
+            cssText = await loadText(element.href);
             cssBasePath = getCSSBaseBath(element.href);
             if (cancelAsyncOperations) {
                 return null;
@@ -485,31 +485,11 @@ function getCSSImportURL(importDeclaration: string) {
     return getCSSURLValue(importDeclaration.substring(8).replace(/;$/, ''));
 }
 
-async function loadWithCache(url: string) {
+async function loadText(url: string) {
     if (url.startsWith('data:')) {
         return await (await fetch(url)).text();
     }
-
-    let response: string;
-    let cache: string;
-    try {
-        cache = sessionStorage.getItem(`darkreader-cache:${url}`);
-    } catch (err) {
-        logWarn(err);
-    }
-    if (cache) {
-        response = cache;
-    } else {
-        response = await bgFetch({url, responseType: 'text'});
-        if (response.length < 2 * 1024 * 1024) {
-            try {
-                sessionStorage.setItem(`darkreader-cache:${url}`, response);
-            } catch (err) {
-                logWarn(err);
-            }
-        }
-    }
-    return response;
+    return await bgFetch({url, responseType: 'text'});
 }
 
 async function replaceCSSImports(cssText: string, basePath: string) {
@@ -523,7 +503,7 @@ async function replaceCSSImports(cssText: string, basePath: string) {
         const absoluteURL = getAbsoluteURL(basePath, importURL);
         let importedCSS: string;
         try {
-            importedCSS = await loadWithCache(absoluteURL);
+            importedCSS = await loadText(absoluteURL);
             importedCSS = await replaceCSSImports(importedCSS, getCSSBaseBath(absoluteURL));
         } catch (err) {
             logWarn(err);

@@ -1,4 +1,5 @@
 import {canInjectScript} from '../background/utils/extension-api';
+import {LimitedCacheStorage} from './utils/network';
 import {Message} from '../definitions';
 
 function queryTabs(query: chrome.tabs.QueryInfo) {
@@ -50,6 +51,9 @@ export default class TabManager {
             }
         });
 
+        const dataURLCache = new LimitedCacheStorage();
+        const textCache = new LimitedCacheStorage();
+
         chrome.runtime.onMessage.addListener(async ({type, data, id}: Message, sender) => {
             if (type === 'fetch') {
                 const {url, responseType} = data;
@@ -58,20 +62,32 @@ export default class TabManager {
                 // Sometimes fetch error behaves like synchronous and sends `undefined`
                 const sendResponse = (response) => chrome.tabs.sendMessage(sender.tab.id, {type: 'fetch-response', id, ...response});
 
+                if (responseType === 'data-url' && dataURLCache.has(url)) {
+                    sendResponse({data: dataURLCache.get(url)});
+                    return;
+                }
+
+                if (responseType === 'text' && textCache.has(url)) {
+                    sendResponse({data: textCache.get(url)});
+                    return;
+                }
+
                 try {
                     const response = await fetch(url, {cache: 'force-cache'});
                     if (response.ok) {
                         if (responseType === 'data-url') {
                             const blob = await response.blob();
-                            const dataURL = await (new Promise((resolve) => {
+                            const dataURL = await (new Promise<string>((resolve) => {
                                 const reader = new FileReader();
-                                reader.onloadend = () => resolve(reader.result);
+                                reader.onloadend = () => resolve(reader.result as string);
                                 reader.readAsDataURL(blob);
                             }));
                             sendResponse({data: dataURL});
+                            dataURLCache.set(url, dataURL);
                         } else {
                             const text = await response.text();
                             sendResponse({data: text});
+                            textCache.set(url, text);
                         }
                     } else {
                         throw new Error(`Unable to load ${url} ${response.status} ${response.statusText}`);

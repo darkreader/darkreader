@@ -56,3 +56,7 @@ export function getMatches(regex: RegExp, input: string, group = 0) {
     }
     return matches;
 }
+
+export function getStringSize(value: string) {
+    return value.length * 2;
+}

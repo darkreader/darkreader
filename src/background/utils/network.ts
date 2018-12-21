@@ -1,3 +1,6 @@
+import {getStringSize} from '../../utils/text';
+import {getDuration} from '../../utils/time';
+
 interface RequestParams {
     url: string;
     timeout?: number;
@@ -26,4 +29,70 @@ export function readText(params: RequestParams): Promise<string> {
         }
         request.send();
     });
+}
+
+interface CacheRecord {
+    expires: number;
+    size: number;
+    url: string;
+    value: string;
+}
+
+export class LimitedCacheStorage {
+    static QUOTA_BYTES = ((navigator as any).deviceMemory || 4) * 16 * 1024 * 1024;
+    static TTL = getDuration({minutes: 10});
+
+    private bytesInUse = 0;
+    private records = new Map<string, CacheRecord>();
+
+    constructor() {
+        setInterval(() => this.removeExpiredRecords(), getDuration({minutes: 1}));
+    }
+
+    has(url: string) {
+        return this.records.has(url);
+    }
+
+    get(url: string) {
+        if (this.records.has(url)) {
+            const record = this.records.get(url);
+            record.expires = Date.now() + LimitedCacheStorage.TTL;
+            this.records.delete(url);
+            this.records.set(url, record);
+            return record.value;
+        }
+        return null;
+    }
+
+    set(url: string, value: string) {
+        const size = getStringSize(value);
+        if (size > LimitedCacheStorage.QUOTA_BYTES) {
+            return;
+        }
+
+        for (let [url, record] of this.records) {
+            if (this.bytesInUse + size > LimitedCacheStorage.QUOTA_BYTES) {
+                this.records.delete(url);
+                this.bytesInUse -= record.size;
+            } else {
+                break;
+            }
+        }
+
+        const expires = Date.now() + LimitedCacheStorage.TTL;
+        this.records.set(url, {url, value, size, expires});
+        this.bytesInUse += size;
+    }
+
+    private removeExpiredRecords() {
+        const now = Date.now();
+        for (let [url, record] of this.records) {
+            if (record.expires < now) {
+                this.records.delete(url);
+                this.bytesInUse -= record.size;
+            } else {
+                break;
+            }
+        }
+    }
 }

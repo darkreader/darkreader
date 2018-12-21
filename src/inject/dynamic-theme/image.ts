@@ -1,6 +1,5 @@
 import {getSVGFilterMatrixValue} from '../../generators/svg-filter';
 import {bgFetch} from './network';
-import {parseURL} from './url';
 import {FilterConfig} from '../../definitions';
 
 export interface ImageDetails {
@@ -15,19 +14,17 @@ export interface ImageDetails {
 }
 
 export async function getImageDetails(url: string) {
-    let resolvedURL: string;
+    let dataURL: string;
     if (url.startsWith('data:')) {
-        resolvedURL = url;
-    } else if (location.host === parseURL(url).host) {
-        resolvedURL = url
+        dataURL = url;
     } else {
-        resolvedURL = await getImageDataURL(url);
+        dataURL = await getImageDataURL(url);
     }
-    const image = await urlToImage(resolvedURL);
+    const image = await urlToImage(dataURL);
     const info = analyzeImage(image);
     return {
         src: url,
-        resolvedURL,
+        dataURL,
         width: image.naturalWidth,
         height: image.naturalHeight,
         ...info,

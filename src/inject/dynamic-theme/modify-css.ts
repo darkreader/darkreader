@@ -102,6 +102,9 @@ export function getModifiedUserAgentStyle(filter: FilterConfig, isIFrame: boolea
         lines.push('::-webkit-scrollbar-corner {');
         lines.push(`    background-color: ${modifyBackgroundColor({r: 255, g: 255, b: 255}, filter)};`);
         lines.push('}');
+        lines.push('* {');
+        lines.push(`    scrollbar-color: ${modifyBackgroundColor({r: 193, g: 193, b: 193}, filter)} ${modifyBackgroundColor({r: 241, g: 241, b: 241}, filter)};`);
+        lines.push('}');
     }
     return lines.join('\n');
 }

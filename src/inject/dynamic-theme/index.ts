@@ -88,7 +88,10 @@ function createStaticStyleOverrides() {
 }
 
 function cleanFallbackStyle() {
-    document.head.querySelector('.darkreader--fallback').textContent = '';
+    const fallback = document.head.querySelector('.darkreader--fallback');
+    if (fallback) {
+        fallback.textContent = '';
+    }
 }
 
 function createDynamicStyleOverrides() {

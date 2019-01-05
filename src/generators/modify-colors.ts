@@ -28,7 +28,7 @@ function modifyColorWithCache(rgb: RGBA, filter: FilterConfig, modifyHSL: (hsl: 
     const hsl = rgbToHSL(rgb);
     const modified = modifyHSL(hsl);
     const {r, g, b, a} = hslToRGB(modified);
-    const matrix = createFilterMatrix({...filter, mode: 0})
+    const matrix = createFilterMatrix(filter)
     const [rf, gf, bf] = applyColorMatrix([r, g, b], matrix);
 
     const color = (a === 1 ?
@@ -37,6 +37,14 @@ function modifyColorWithCache(rgb: RGBA, filter: FilterConfig, modifyHSL: (hsl: 
 
     fnCache.set(id, color);
     return color;
+}
+
+function noopHSL(hsl: HSLA) {
+    return hsl;
+}
+
+export function modifyColor(rgb: RGBA, theme: FilterConfig) {
+    return modifyColorWithCache(rgb, theme, noopHSL);
 }
 
 function modifyLightModeHSL({h, s, l, a}) {
@@ -97,7 +105,7 @@ export function modifyBackgroundColor(rgb: RGBA, filter: FilterConfig) {
     if (filter.mode === 0) {
         return modifyColorWithCache(rgb, filter, modifyLightModeHSL);
     }
-    return modifyColorWithCache(rgb, filter, modifyBgHSL);
+    return modifyColorWithCache(rgb, {...filter, mode: 0}, modifyBgHSL);
 }
 
 function modifyFgHSL({h, s, l, a}) {
@@ -141,7 +149,7 @@ export function modifyForegroundColor(rgb: RGBA, filter: FilterConfig) {
     if (filter.mode === 0) {
         return modifyColorWithCache(rgb, filter, modifyLightModeHSL);
     }
-    return modifyColorWithCache(rgb, filter, modifyFgHSL);
+    return modifyColorWithCache(rgb, {...filter, mode: 0}, modifyFgHSL);
 }
 
 function modifyBorderHSL({h, s, l, a}) {
@@ -161,7 +169,7 @@ export function modifyBorderColor(rgb: RGBA, filter: FilterConfig) {
     if (filter.mode === 0) {
         return modifyColorWithCache(rgb, filter, modifyLightModeHSL);
     }
-    return modifyColorWithCache(rgb, filter, modifyBorderHSL);
+    return modifyColorWithCache(rgb, {...filter, mode: 0}, modifyBorderHSL);
 }
 
 export function modifyShadowColor(rgb: RGBA, filter: FilterConfig) {

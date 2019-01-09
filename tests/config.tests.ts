@@ -52,6 +52,9 @@ test('Dynamic Theme Fixes config', async () => {
     const file = await readConfig('dynamic-theme-fixes.config');
     const fixes = parseDynamicThemeFixes(file);
 
+    // there is a common fix
+    expect(fixes[0].url[0]).toEqual('*');
+
     // each fix has valid URL
     expect(fixes.every(({url}) => url.every(isURLPatternValid))).toBe(true);
 
@@ -72,13 +75,14 @@ test('Dynamic Theme Fixes config', async () => {
         'inbox.google.com',
         'mail.google.com',
         'INVERT', 'a', 'b',
+        'CSS', '.x { color: white !important; }',
         'UNSUPPORTED', 'c', 'd',
         '========',
         'twitter.com',
         'UNSUPPORTED', 'a', 'b',
         'INVERT', 'c', 'd',
     ].join('\r\n'))).toEqual([
-        {url: ['inbox.google.com', 'mail.google.com'], invert: ['a', 'b']},
+        {url: ['inbox.google.com', 'mail.google.com'], invert: ['a', 'b'], css: '.x { color: white !important; }'},
         {url: ['twitter.com'], invert: ['c', 'd']},
     ])
 });

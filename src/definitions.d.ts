@@ -86,7 +86,8 @@ export interface Shortcuts {
 
 export interface DynamicThemeFix {
     url: string[];
-    invert?: string[];
+    invert: string[];
+    css: string;
 }
 
 export interface InversionFix {

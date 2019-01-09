@@ -1,13 +1,15 @@
 import {replaceCSSVariables} from './css-rules';
 import {overrideInlineStyles, getInlineOverrideStyle, watchForInlineStyles, stopWatchingForInlineStyles} from './inline-style';
-import {getModifiedUserAgentStyle, getModifiedFallbackStyle, getSiteOverride, cleanModificationCache} from './modify-css';
+import {getModifiedUserAgentStyle, getModifiedFallbackStyle, cleanModificationCache, parseColorWithCache} from './modify-css';
 import {manageStyle, shouldManageStyle, STYLE_SELECTOR, StyleManager} from './style-manager';
 import {watchForStyleChanges, stopWatchingForStyleChanges} from './watch';
 import {removeNode, watchForNodePosition} from '../utils/dom';
+import {logWarn} from '../utils/log';
 import {throttle} from '../utils/throttle';
 import {clamp} from '../../utils/math';
 import {isFirefox} from '../../utils/platform';
 import {getCSSFilterValue} from '../../generators/css-filter';
+import {modifyColor} from '../../generators/modify-colors';
 import {createTextStyle} from '../../generators/text-style';
 import {FilterConfig, DynamicThemeFix} from '../../definitions';
 
@@ -83,8 +85,20 @@ function createStaticStyleOverrides() {
 
     const overrideStyle = createOrUpdateStyle('darkreader--override');
     document.head.appendChild(overrideStyle);
-    overrideStyle.textContent = getSiteOverride(location.host, filter);
+    overrideStyle.textContent = fixes && fixes.css ? replaceCSSTemplates(fixes.css) : '';
     setupStylePositionWatcher(overrideStyle, 'override');
+}
+
+function replaceCSSTemplates($cssText: string) {
+    return $cssText.replace(/\${(.+?)}/g, (m0, $color) => {
+        try {
+            const color = parseColorWithCache($color);
+            return modifyColor(color, filter);
+        } catch (err) {
+            logWarn(err);
+            return $color;
+        }
+    });
 }
 
 function cleanFallbackStyle() {

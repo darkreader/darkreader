@@ -119,37 +119,6 @@ export function getModifiedFallbackStyle(filter: FilterConfig, {strict}) {
     return lines.join('\n');
 }
 
-// TODO: Move CSS fixes to config.
-const commonOverride = (theme: FilterConfig) => {
-    return [
-        `.jfk-bubble { background-color: ${modifyBackgroundColor({r: 255, g: 255, b: 255}, theme)} !important; }`,
-    ].join('\n');
-};
-const websiteOverride: {[host: string]: (string | ((theme: FilterConfig) => string))} = {
-    'arstechnica.com': (theme) => theme.mode === 1 ? [
-        '.listing, .video-thumbnail { background-blend-mode: initial !important; }',
-        '.article-single figure img { mix-blend-mode: initial !important; }',
-    ].join('\n') : '',
-    'www.ebay.co.uk': 'html, body { background-image: none !important; }',
-    'www.ebay.com': 'html, body { background-image: none !important; }',
-    'www.ebay.de': 'html, body { background-image: none !important; }',
-    'www.youtube.com': (theme) => `#textarea { color: ${modifyForegroundColor({r: 0, g: 0, b: 0}, theme)} !important; }`,
-};
-
-export function getSiteOverride(host: string, theme: FilterConfig) {
-    const common = commonOverride(theme);
-    let special = '';
-    if (websiteOverride.hasOwnProperty(host)) {
-        const override = websiteOverride[host];
-        if (typeof override === 'function') {
-            special = override(theme);
-        } else {
-            special = override;
-        }
-    }
-    return `${common}${special ? `\n${special}` : ''}`;
-}
-
 const unparsableColors = new Set([
     'inherit',
     'transparent',
@@ -160,7 +129,7 @@ const unparsableColors = new Set([
 
 const colorParseCache = new Map<string, RGBA>();
 
-function parseColorWithCache($color: string) {
+export function parseColorWithCache($color: string) {
     $color = $color.trim();
     if (colorParseCache.has($color)) {
         return colorParseCache.get($color);

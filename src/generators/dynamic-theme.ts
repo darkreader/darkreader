@@ -6,13 +6,19 @@ import {DynamicThemeFix} from '../definitions';
 
 const dynamicThemeFixesCommands = {
     'INVERT': 'invert',
+    'CSS': 'css',
 };
 
 export function parseDynamicThemeFixes(text: string) {
     return parseSitesFixesConfig<DynamicThemeFix>(text, {
         commands: Object.keys(dynamicThemeFixesCommands),
         getCommandPropName: (command) => dynamicThemeFixesCommands[command] || null,
-        parseCommandValue: (command, value) => parseArray(value),
+        parseCommandValue: (command, value) => {
+            if (command === 'CSS') {
+                return value.trim();
+            }
+            return parseArray(value);
+        },
     });
 }
 
@@ -22,13 +28,34 @@ export function formatDynamicThemeFixes(dynamicThemeFixes: DynamicThemeFix[]) {
     return formatSitesFixesConfig(fixes, {
         props: Object.values(dynamicThemeFixesCommands),
         getPropCommandName: (prop) => Object.entries(dynamicThemeFixesCommands).find(([command, p]) => p === prop)[0],
-        formatPropValue: (prop, value) => formatArray(value).trim(),
-        shouldIgnoreProp: (prop, value) => !(Array.isArray(value) && value.length > 0),
+        formatPropValue: (prop, value) => {
+            if (prop === 'css') {
+                return value.trim();
+            }
+            return formatArray(value).trim();
+        },
+        shouldIgnoreProp: (prop, value) => {
+            if (prop === 'css') {
+                return !value;
+            }
+            return !(Array.isArray(value) && value.length > 0);
+        },
     });
 }
 
 export function getDynamicThemeFixesFor(url: string, frameURL: string, fixes: DynamicThemeFix[]) {
+    if (fixes.length === 0 || fixes[0].url[0] !== '*') {
+        return null;
+    }
+
+    const common = {
+        url: fixes[0].url,
+        invert: fixes[0].invert || [],
+        css: fixes[0].css || [],
+    };
+
     const sortedBySpecificity = fixes
+        .slice(1)
         .map((theme) => {
             return {
                 specificity: isURLInList(frameURL || url, theme.url) ? theme.url[0].length : 0,
@@ -39,8 +66,14 @@ export function getDynamicThemeFixesFor(url: string, frameURL: string, fixes: Dy
         .sort((a, b) => b.specificity - a.specificity);
 
     if (sortedBySpecificity.length === 0) {
-        return null;
+        return common;
     }
 
-    return sortedBySpecificity[0].theme;
+    const match = sortedBySpecificity[0].theme;
+
+    return {
+        url: match.url,
+        invert: common.invert.concat(match.invert || []),
+        css: [common.css, match.css].filter((s) => s).join('\n'),
+    };
 }

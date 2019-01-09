@@ -1,5 +1,4 @@
-Dark Reader for Google Chrome and Mozilla Firefox
-================
+# Dark Reader for Google Chrome and Mozilla Firefox
 ![Dark Reader screenshot](https://lh3.googleusercontent.com/tTJIIIAqfJWymqPM9LAmivl11kWmF-XXLABues4OwfjOED_ntsJZdLY0VTG0XFCW0W_wYSll7Q=w640-h400-e365)
 
 This extension **inverts brightness** of web pages and aims to **reduce eyestrain** while browsing the web.
@@ -29,9 +28,14 @@ or **[inversion-fixes.config](https://github.com/alexanderby/darkreader/blob/mas
 (for Filter and Filter+ modes)
 *(please, preserve alphabetical order by URL, use short selectors, preserve code style)*.
 
-Notice that merged changes to these files are automatically delivered to all users **within 15 minutes**.
+Please note, that merged changes to these files are automatically delivered to all users **within 15 minutes**.
 
 ### Using Dev Tools
+
+Dev Tools should be used to **fix minor issues** on a web page
+*(like dark icon on dark background, removing bright background, adding white background to transparent image etc.)*.
+If page looks partially dark and bright in **Dynamic mode**, it should be considered as a bug.
+For **Filter mode** it is a common practice to invert already dark page parts.
 
 - Open **Chrome Dev Tools** (F12).
 - Click on **element picker** (top-left corner).
@@ -41,6 +45,7 @@ Notice that merged changes to these files are automatically delivered to all use
 - Click **Open developer tools** (at bottom).
 - Find or add a block containing URL and selectors to invert.
 ```
+dynamic-theme-fixes.config
 ================================
 
 example.com
@@ -48,12 +53,24 @@ example.com
 INVERT
 .icon
 
+CSS
+.wrong-element-colors {
+    background-color: ${white} !important;
+    color: ${black} !important;
+}
+
 ```
-- *WARNING:* For **Dynamic Theme mode** use `INVERT` only for dark images, that are invisible on dark backgrounds (icons, diagrams, charts, `<img>` and `<svg>` elements).
-Image analysis will be improved in future and this rule should become unnecessary.
-- **For Filter and Filter+ config** it is also possible to specify custom CSS rules. If chosen element contains images or other content that becomes wrongly displayed, `NO INVERT` rule can be used. `REMOVE BG` removes background image from element.
-*IMPORTANT: When Dark mode is on, the whole page (root `<html>` element) is inverted by filter. To revert the images, videos etc. `INVERT` selectors are used, so the inversion will be applied to these elements twice. If inverted elements contain other elements that match the `INVERT` selectors, then these elements will be inverted 3 or more times. To prevent it `NO INVERT` selectors are used.*
+- `INVERT` rule inverts specified elements.
+For **Dynamic mode** use `INVERT` only for dark images, that are invisible on dark backgrounds (icons, diagrams, charts, `<img>` and `<svg>` elements).
+- `CSS` rule adds custom CSS to a web page.
+`!important` keyword should be specified for each CSS property to prevent overrides by other stylesheets.
+**Dynamic mode** supports `${COLOR}` template, where `COLOR` is a color value before the inversion (`white` will become `black` in dark mode).
+- **Special notice for Filter and Filter+ config**.
+It works by inverting the whole web page and reverting necessary parts (images, videos etc.) back, listed in `INVERT` section.
+If inverted element contains images or other content that becomes wrongly displayed, `NO INVERT` rule can be used.
+`REMOVE BG` removes background image from element and forces black background.
 ```
+inversion-fixes.config
 ================================
 
 example.com
@@ -117,6 +134,15 @@ For editing the code you can use any text editor or web IDE (like [Visual Studio
 Run tests by executing `npm test`.
 
 Submit a **pull request**, wait for **review**.
+
+## Building for use
+You can install the extension from a file.
+Install [Node.js LTS](https://nodejs.org/en/). Download the source code (or checkout from git).
+Open terminal in root folder and run:
+- `npm install`
+- `npm run release`
+
+This will generate `build.zip` for use in Chromium browsers and `build-firefox.xpi` for use in Firefox.
 
 ## Contributors
 

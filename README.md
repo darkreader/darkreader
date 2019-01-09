@@ -32,7 +32,10 @@ Please note, that merged changes to these files are automatically delivered to a
 
 ### Using Dev Tools
 
-Dev Tools should be used to **fix minor issues** on a web page *(like dark icon on dark background, removing bright background etc.)*. Other issues should be considered as bugs (especially for **Dynamic mode**).
+Dev Tools should be used to **fix minor issues** on a web page
+*(like dark icon on dark background, removing bright background, adding white background to transparent image etc.)*.
+If page looks partially dark and bright in **Dynamic mode**, it should be considered as a bug.
+For **Filter mode** it is a common practice to invert already dark page parts.
 
 - Open **Chrome Dev Tools** (F12).
 - Click on **element picker** (top-left corner).
@@ -60,7 +63,7 @@ CSS
 - `INVERT` rule inverts specified elements.
 For **Dynamic mode** use `INVERT` only for dark images, that are invisible on dark backgrounds (icons, diagrams, charts, `<img>` and `<svg>` elements).
 - `CSS` rule adds custom CSS to a web page.
-`!important` keyword should be specified for each CSS property to prevent overflows by other stylesheets.
+`!important` keyword should be specified for each CSS property to prevent overrides by other stylesheets.
 **Dynamic mode** supports `${COLOR}` template, where `COLOR` is a color value before the inversion (`white` will become `black` in dark mode).
 - **Special notice for Filter and Filter+ config**.
 It works by inverting the whole web page and reverting necessary parts (images, videos etc.) back, listed in `INVERT` section.

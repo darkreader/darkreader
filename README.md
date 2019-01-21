@@ -17,7 +17,7 @@ See the list of supported [language codes](https://developer.chrome.com/webstore
 
 ### Fixing wrong inversion
 
-If some site is **already dark**, you can **add it to [dark-sites.config](https://github.com/alexanderby/darkreader/blob/master/src/config/dark-sites.config) file**
+If some website is **already dark** (has all pages dark by default), you can **add it to [dark-sites.config](https://github.com/alexanderby/darkreader/blob/master/src/config/dark-sites.config) file**
 *(please, preserve alphabetical order)*.
 
 If some **parts** of web-pages are **wrongly inverted**,

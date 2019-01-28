@@ -17,7 +17,8 @@ import createStaticStylesheet from '../generators/static-theme';
 import {createSVGFilterStylesheet, getSVGFilterMatrixValue, getSVGReverseFilterMatrixValue} from '../generators/svg-filter';
 import {ExtensionData, FilterConfig, News, Shortcuts, UserSettings, TabInfo} from '../definitions';
 
-const AUTO_TIME_CHECK_INTERVAL_MS = getDuration({seconds: 10});
+const AUTO_TIME_CHECK_INTERVAL = getDuration({seconds: 10});
+const CONFIG_SYNC_INTERVAL = getDuration({minutes: 15});
 
 export class Extension {
     ready: boolean;
@@ -74,7 +75,7 @@ export class Extension {
         this.awaiting = null;
 
         this.startAutoTimeCheck();
-        this.config.load({local: false});
+        this.startConfigSync();
         this.news.subscribe();
         this.user.cleanup();
     }
@@ -182,6 +183,13 @@ export class Extension {
         }
     }
 
+    private startConfigSync() {
+        this.config.load({local: false});
+        setInterval(() => {
+            this.config.load({local: false});
+        }, CONFIG_SYNC_INTERVAL);
+    }
+
     private wasEnabledOnLastCheck: boolean;
 
     private startAutoTimeCheck() {
@@ -196,7 +204,7 @@ export class Extension {
                 this.tabs.sendMessage(this.getTabMessage);
                 this.reportChanges();
             }
-        }, AUTO_TIME_CHECK_INTERVAL_MS);
+        }, AUTO_TIME_CHECK_INTERVAL);
     }
 
     changeSettings($settings: Partial<UserSettings>) {

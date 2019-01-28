@@ -9,6 +9,9 @@ export default class DevTools {
 
     constructor(config: ConfigManager, onChange: () => void) {
         this.config = config;
+        this.config.overrides.dynamicThemeFixes = this.getSavedDynamicThemeFixes() || null;
+        this.config.overrides.inversionFixes = this.getSavedInversionFixes() || null;
+        this.config.overrides.staticThemes = this.getSavedStaticThemes() || null;
         this.onChange = onChange;
     }
 
@@ -21,22 +24,23 @@ export default class DevTools {
     }
 
     getDynamicThemeFixesText() {
-        const {RAW_DYNAMIC_THEME_FIXES} = this.config;
-        const fixes = this.getSavedDynamicThemeFixes();
-        return fixes ? formatDynamicThemeFixes(parseDynamicThemeFixes(fixes)) : RAW_DYNAMIC_THEME_FIXES;
+        const $fixes = this.getSavedDynamicThemeFixes();
+        const fixes = $fixes ? parseDynamicThemeFixes($fixes) : this.config.DYNAMIC_THEME_FIXES;
+        return formatDynamicThemeFixes(fixes);
     }
 
     resetDynamicThemeFixes() {
-        const {RAW_DYNAMIC_THEME_FIXES} = this.config;
         localStorage.removeItem('dev_dynamic_theme_fixes');
-        this.config.handleInversionFixes(RAW_DYNAMIC_THEME_FIXES);
+        this.config.overrides.dynamicThemeFixes = null;
+        this.config.handleDynamicThemeFixes();
         this.onChange();
     }
 
     applyDynamicThemeFixes(text: string) {
         try {
             const formatted = formatDynamicThemeFixes(parseDynamicThemeFixes(text));
-            this.config.handleDynamicThemeFixes(formatted);
+            this.config.overrides.dynamicThemeFixes = formatted;
+            this.config.handleDynamicThemeFixes();
             this.saveDynamicThemeFixes(formatted);
             this.onChange();
             return null;
@@ -54,22 +58,23 @@ export default class DevTools {
     }
 
     getInversionFixesText() {
-        const {RAW_INVERSION_FIXES} = this.config;
-        const fixes = this.getSavedInversionFixes();
-        return fixes ? formatInversionFixes(parseInversionFixes(fixes)) : RAW_INVERSION_FIXES;
+        const $fixes = this.getSavedInversionFixes();
+        const fixes = $fixes ? parseInversionFixes($fixes) : this.config.INVERSION_FIXES;
+        return formatInversionFixes(fixes);
     }
 
     resetInversionFixes() {
-        const {RAW_INVERSION_FIXES} = this.config;
         localStorage.removeItem('dev_inversion_fixes');
-        this.config.handleInversionFixes(RAW_INVERSION_FIXES);
+        this.config.overrides.inversionFixes = null;
+        this.config.handleInversionFixes();
         this.onChange();
     }
 
     applyInversionFixes(text: string) {
         try {
             const formatted = formatInversionFixes(parseInversionFixes(text));
-            this.config.handleInversionFixes(formatted);
+            this.config.overrides.inversionFixes = formatted;
+            this.config.handleInversionFixes();
             this.saveInversionFixes(formatted);
             this.onChange();
             return null;
@@ -87,22 +92,23 @@ export default class DevTools {
     }
 
     getStaticThemesText() {
-        const {RAW_STATIC_THEMES} = this.config;
-        const themes = this.getSavedStaticThemes();
-        return themes ? formatStaticThemes(parseStaticThemes(themes)) : RAW_STATIC_THEMES;
+        const $themes = this.getSavedStaticThemes();
+        const themes = $themes ? parseStaticThemes($themes) : this.config.STATIC_THEMES;
+        return formatStaticThemes(themes);
     }
 
     resetStaticThemes() {
-        const {RAW_STATIC_THEMES} = this.config;
         localStorage.removeItem('dev_static_themes');
-        this.config.handleStaticThemes(RAW_STATIC_THEMES);
+        this.config.overrides.staticThemes = null;
+        this.config.handleStaticThemes();
         this.onChange();
     }
 
     applyStaticThemes(text: string) {
         try {
             const formatted = formatStaticThemes(parseStaticThemes(text));
-            this.config.handleStaticThemes(formatted);
+            this.config.overrides.staticThemes = formatted;
+            this.config.handleStaticThemes();
             this.saveStaticThemes(formatted);
             this.onChange();
             return null;

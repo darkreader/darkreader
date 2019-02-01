@@ -25,124 +25,130 @@ const CONFIG_URLs = {
     },
 };
 const REMOTE_TIMEOUT_MS = getDuration({seconds: 10});
-const RELOAD_INTERVAL_MS = getDuration({minutes: 15});
 
 export default class ConfigManager {
     DARK_SITES?: string[];
     DYNAMIC_THEME_FIXES?: DynamicThemeFix[];
-    RAW_DYNAMIC_THEME_FIXES?: string;
     INVERSION_FIXES?: InversionFix[];
-    RAW_INVERSION_FIXES?: string;
     STATIC_THEMES?: StaticTheme[];
-    RAW_STATIC_THEMES?: string;
 
-    constructor() {
-        setInterval(() => this.load(), RELOAD_INTERVAL_MS);
+    raw = {
+        darkSites: null,
+        dynamicThemeFixes: null,
+        inversionFixes: null,
+        staticThemes: null,
+    };
+
+    overrides = {
+        darkSites: null,
+        dynamicThemeFixes: null,
+        inversionFixes: null,
+        staticThemes: null,
+    };
+
+    private async loadConfig({
+        name,
+        local,
+        localURL,
+        remoteURL,
+        success,
+    }) {
+        let $config: string;
+        const loadLocal = async () => await readText({url: localURL});
+        if (local) {
+            $config = await loadLocal();
+        } else {
+            try {
+                $config = await readText({
+                    url: remoteURL,
+                    timeout: REMOTE_TIMEOUT_MS
+                });
+            } catch (err) {
+                console.error(`${name} remote load error`, err);
+                $config = await loadLocal();
+            }
+        }
+        success($config);
     }
 
-    async load({local} = {local: false}) {
-        const loadDarkSites = async () => {
-            let $sites: string;
-            const loadLocal = async () => $sites = await readText({url: CONFIG_URLs.darkSites.local});
-            if (local) {
-                await loadLocal();
-            } else {
-                try {
-                    $sites = await readText({
-                        url: CONFIG_URLs.darkSites.remote,
-                        timeout: REMOTE_TIMEOUT_MS
-                    });
-                } catch (err) {
-                    console.error('Dark Sites remote load error', err);
-                    await loadLocal();
-                }
-            }
-            const sites = parseArray($sites);
-            this.handleDarkSites(sites)
-        };
+    private async loadDarkSites({local}) {
+        await this.loadConfig({
+            name: 'Dark Sites',
+            local,
+            localURL: CONFIG_URLs.darkSites.local,
+            remoteURL: CONFIG_URLs.darkSites.remote,
+            success: ($sites) => {
+                this.raw.darkSites = $sites;
+                this.handleDarkSites();
+            },
+        });
+    }
 
-        const loadDynamicThemeFixes = async () => {
-            let $fixes: string;
-            const loadLocal = async () => $fixes = await readText({url: CONFIG_URLs.dynamicThemeFixes.local});
-            if (local) {
-                await loadLocal();
-            } else {
-                try {
-                    $fixes = await readText({
-                        url: CONFIG_URLs.dynamicThemeFixes.remote,
-                        timeout: REMOTE_TIMEOUT_MS
-                    });
-                } catch (err) {
-                    console.error('Dynamic Theme Fixes remote load error', err);
-                    await loadLocal();
-                }
-            }
-            this.RAW_DYNAMIC_THEME_FIXES = $fixes;
-            this.handleDynamicThemeFixes($fixes);
-        };
+    private async loadDynamicThemeFixes({local}) {
+        await this.loadConfig({
+            name: 'Dynamic Theme Fixes',
+            local,
+            localURL: CONFIG_URLs.dynamicThemeFixes.local,
+            remoteURL: CONFIG_URLs.dynamicThemeFixes.remote,
+            success: ($fixes) => {
+                this.raw.dynamicThemeFixes = $fixes;
+                this.handleDynamicThemeFixes();
+            },
+        });
+    }
 
-        const loadInversionFixes = async () => {
-            let $fixes: string;
-            const loadLocal = async () => $fixes = await readText({url: CONFIG_URLs.inversionFixes.local});
-            if (local) {
-                await loadLocal();
-            } else {
-                try {
-                    $fixes = await readText({
-                        url: CONFIG_URLs.inversionFixes.remote,
-                        timeout: REMOTE_TIMEOUT_MS
-                    });
-                } catch (err) {
-                    console.error('Inversion Fixes remote load error', err);
-                    $fixes = await readText({url: CONFIG_URLs.inversionFixes.local});
-                }
-            }
-            this.RAW_INVERSION_FIXES = $fixes;
-            this.handleInversionFixes($fixes);
-        };
+    private async loadInversionFixes({local}) {
+        await this.loadConfig({
+            name: 'Inversion Fixes',
+            local,
+            localURL: CONFIG_URLs.inversionFixes.local,
+            remoteURL: CONFIG_URLs.inversionFixes.remote,
+            success: ($fixes) => {
+                this.raw.inversionFixes = $fixes;
+                this.handleInversionFixes();
+            },
+        });
+    }
 
-        const loadStaticThemes = async () => {
-            let $themes: string;
-            const loadLocal = async () => $themes = await readText({url: CONFIG_URLs.staticThemes.local});
-            if (local) {
-                await loadLocal();
-            } else {
-                try {
-                    $themes = await readText({
-                        url: CONFIG_URLs.staticThemes.remote,
-                        timeout: REMOTE_TIMEOUT_MS
-                    });
-                } catch (err) {
-                    console.error('Static Theme remote load error', err);
-                    await loadLocal();
-                }
-            }
-            this.RAW_STATIC_THEMES = $themes;
-            this.handleStaticThemes($themes);
-        };
+    private async loadStaticThemes({local}) {
+        await this.loadConfig({
+            name: 'Static Themes',
+            local,
+            localURL: CONFIG_URLs.staticThemes.local,
+            remoteURL: CONFIG_URLs.staticThemes.remote,
+            success: ($themes) => {
+                this.raw.staticThemes = $themes;
+                this.handleStaticThemes();
+            },
+        });
+    }
 
+    async load(config: {local: boolean}) {
         await Promise.all([
-            loadDarkSites(),
-            loadDynamicThemeFixes(),
-            loadInversionFixes(),
-            loadStaticThemes(),
+            this.loadDarkSites(config),
+            this.loadDynamicThemeFixes(config),
+            this.loadInversionFixes(config),
+            this.loadStaticThemes(config),
         ]).catch((err) => console.error('Fatality', err));
     }
 
-    handleDynamicThemeFixes($fixes: string) {
+    private handleDarkSites() {
+        const $sites = this.overrides.darkSites || this.raw.darkSites;
+        this.DARK_SITES = parseArray($sites);
+    }
+
+    handleDynamicThemeFixes() {
+        const $fixes = this.overrides.dynamicThemeFixes || this.raw.dynamicThemeFixes;
         this.DYNAMIC_THEME_FIXES = parseDynamicThemeFixes($fixes);
     }
 
-    handleInversionFixes($fixes: string) {
+    handleInversionFixes() {
+        const $fixes = this.overrides.inversionFixes || this.raw.inversionFixes;
         this.INVERSION_FIXES = parseInversionFixes($fixes);
     }
 
-    private handleDarkSites($sites: string[]) {
-        this.DARK_SITES = (Array.isArray($sites) ? $sites : [])
-            .filter((x) => typeof x === 'string');
-    }
-
-    handleStaticThemes($themes: string) {
+    handleStaticThemes() {
+        const $themes = this.overrides.staticThemes || this.raw.staticThemes;
         this.STATIC_THEMES = parseStaticThemes($themes);
     }
 }

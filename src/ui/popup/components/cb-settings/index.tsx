@@ -68,8 +68,6 @@ export default function CBSettings({config, fonts, onChange}: FontSettingsProps)
             </div>
             <script>window.jscolor.installByClassName("jscolor")</script> 
 
-            <Toggle
-
             <CustToggle
 
                 //class="site-list-settings__toggle"

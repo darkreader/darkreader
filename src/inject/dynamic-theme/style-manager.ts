@@ -209,7 +209,7 @@ export function manageStyle(element: HTMLLinkElement | HTMLStyleElement, {update
             // to properly handle composite properties (e.g. background -> background-color)
             let vars: HTMLStyleElement = null;
             let varsRule: CSSStyleRule = null;
-            if (variables.size > 0) {
+            if (variables.size > 0 || cssText.includes('var(')) {
                 const cssTextWithVariables = replaceCSSVariables(cssText, variables);
                 if (rulesTextCache.get(cssText) !== cssTextWithVariables) {
                     rulesTextCache.set(cssText, cssTextWithVariables);

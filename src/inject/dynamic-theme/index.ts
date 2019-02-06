@@ -1,5 +1,5 @@
-import {replaceCSSVariables} from './css-rules';
-import {overrideInlineStyles, getInlineOverrideStyle, watchForInlineStyles, stopWatchingForInlineStyles} from './inline-style';
+import {replaceCSSVariables, getElementCSSVariables} from './css-rules';
+import {overrideInlineStyle, getInlineOverrideStyle, watchForInlineStyles, stopWatchingForInlineStyles, INLINE_STYLE_SELECTOR} from './inline-style';
 import {getModifiedUserAgentStyle, getModifiedFallbackStyle, cleanModificationCache, parseColorWithCache} from './modify-css';
 import {manageStyle, shouldManageStyle, STYLE_SELECTOR, StyleManager} from './style-manager';
 import {watchForStyleChanges, stopWatchingForStyleChanges} from './watch';
@@ -110,6 +110,9 @@ function cleanFallbackStyle() {
 
 function createDynamicStyleOverrides() {
     cancelRendering();
+
+    updateVariables(getElementCSSVariables(document.documentElement));
+
     const newManagers = Array.from<HTMLLinkElement | HTMLStyleElement>(document.querySelectorAll(STYLE_SELECTOR))
         .filter((style) => !styleManagers.has(style) && shouldManageStyle(style))
         .map((style) => createManager(style));
@@ -131,7 +134,9 @@ function createDynamicStyleOverrides() {
         });
     }
     newManagers.forEach((manager) => manager.watch());
-    overrideInlineStyles(filter);
+
+    const inlineStyleElements = Array.from(document.querySelectorAll(INLINE_STYLE_SELECTOR));
+    inlineStyleElements.forEach((el) => overrideInlineStyle(el as HTMLElement, filter));
 }
 
 let loadingStylesCounter = 0;
@@ -275,7 +280,17 @@ function watchForUpdates() {
         }
         newManagers.forEach((manager) => manager.watch());
     });
-    watchForInlineStyles(filter);
+
+    watchForInlineStyles((element) => {
+        overrideInlineStyle(element, filter);
+        if (element === document.documentElement) {
+            const rootVariables = getElementCSSVariables(document.documentElement);
+            if (rootVariables.size > 0) {
+                updateVariables(rootVariables);
+                throttledRenderAllStyles();
+            }
+        }
+    });
 
     document.addEventListener('readystatechange', onReadyStateChange);
 }

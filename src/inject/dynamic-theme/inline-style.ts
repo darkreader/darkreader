@@ -1,5 +1,5 @@
 import {iterateCSSDeclarations} from './css-rules';
-import {getModifiableCSSDeclaration, ModifiableCSSDeclaration} from './modify-css';
+import {getModifiableCSSDeclaration} from './modify-css';
 import {FilterConfig} from '../../definitions';
 
 interface Overrides {
@@ -89,7 +89,7 @@ const overrides: Overrides = {
 const overridesList = Object.values(overrides);
 
 const INLINE_STYLE_ATTRS = ['style', 'fill', 'stroke', 'bgcolor', 'color'];
-const INLINE_STYLE_SELECTOR = INLINE_STYLE_ATTRS.map((attr) => `[${attr}]`).join(', ');
+export const INLINE_STYLE_SELECTOR = INLINE_STYLE_ATTRS.map((attr) => `[${attr}]`).join(', ');
 
 export function getInlineOverrideStyle() {
     return overridesList.map(({dataAttr, customProp, cssProp}) => {
@@ -101,13 +101,7 @@ export function getInlineOverrideStyle() {
     }).join('\n');
 }
 
-const inlineStyleElements = new WeakSet<Node>();
 let observer: MutationObserver = null;
-
-export function overrideInlineStyles(filter: FilterConfig) {
-    const elements = Array.from(document.querySelectorAll(INLINE_STYLE_SELECTOR));
-    elements.forEach((el) => elementDidUpdate(el as HTMLElement, filter));
-}
 
 function expand(nodes: Node[], selector: string) {
     const results: Node[] = [];
@@ -122,7 +116,7 @@ function expand(nodes: Node[], selector: string) {
     return results;
 }
 
-export function watchForInlineStyles(filter: FilterConfig) {
+export function watchForInlineStyles(elementStyleDidChange: (element: HTMLElement) => void) {
     if (observer) {
         observer.disconnect();
     }
@@ -130,11 +124,11 @@ export function watchForInlineStyles(filter: FilterConfig) {
         mutations.forEach((m) => {
             const createdInlineStyles = expand(Array.from(m.addedNodes), INLINE_STYLE_SELECTOR);
             if (createdInlineStyles.length > 0) {
-                createdInlineStyles.forEach((el) => elementDidUpdate(el as HTMLElement, filter));
+                createdInlineStyles.forEach((el: HTMLElement) => elementStyleDidChange(el));
             }
             if (m.type === 'attributes') {
-                if (INLINE_STYLE_ATTRS.indexOf(m.attributeName) >= 0) {
-                    elementDidUpdate(m.target as HTMLElement, filter);
+                if (INLINE_STYLE_ATTRS.includes(m.attributeName)) {
+                    elementStyleDidChange(m.target as HTMLElement);
                 }
                 overridesList
                     .filter(({store, dataAttr}) => store.has(m.target) && !(m.target as HTMLElement).hasAttribute(dataAttr))
@@ -150,16 +144,6 @@ export function watchForInlineStyles(filter: FilterConfig) {
     });
 }
 
-const elementsChangeKeys = new WeakMap<Element, string>();
-const filterProps = ['brightness', 'contrast', 'grayscale', 'sepia', 'mode'];
-
-function getElementChangeKey(el: Element, filter: FilterConfig) {
-    return INLINE_STYLE_ATTRS
-        .map((attr) => `${attr}="${el.getAttribute(attr)}"`)
-        .concat(filterProps.map((prop) => `${prop}="${filter[prop]}"`))
-        .join(' ');
-}
-
 export function stopWatchingForInlineStyles() {
     if (observer) {
         observer.disconnect();
@@ -167,19 +151,26 @@ export function stopWatchingForInlineStyles() {
     }
 }
 
-function elementDidUpdate(element: HTMLElement, filter: FilterConfig) {
-    if (elementsChangeKeys.get(element) === getElementChangeKey(element, filter)) {
-        return;
-    }
-    overrideInlineStyle(element, filter);
+const inlineStyleCache = new WeakMap<HTMLElement, string>();
+const filterProps = ['brightness', 'contrast', 'grayscale', 'sepia', 'mode'];
+
+function getInlineStyleCacheKey(el: HTMLElement, theme: FilterConfig) {
+    return INLINE_STYLE_ATTRS
+        .map((attr) => `${attr}="${el.getAttribute(attr)}"`)
+        .concat(filterProps.map((prop) => `${prop}="${theme[prop]}"`))
+        .join(' ');
 }
 
-function overrideInlineStyle(element: HTMLElement, filter: FilterConfig) {
+export function overrideInlineStyle(element: HTMLElement, theme: FilterConfig) {
+    const cacheKey = getInlineStyleCacheKey(element, theme);
+    if (cacheKey === inlineStyleCache.get(element)) {
+        return;
+    }
 
     const unsetProps = new Set(Object.keys(overrides));
 
     function setCustomProp(targetCSSProp: string, modifierCSSProp: string, cssVal: string) {
-        const {customProp, dataAttr, store} = overrides[targetCSSProp];
+        const {customProp, dataAttr} = overrides[targetCSSProp];
 
         const mod = getModifiableCSSDeclaration(modifierCSSProp, cssVal, null, null);
         if (!mod) {
@@ -187,7 +178,7 @@ function overrideInlineStyle(element: HTMLElement, filter: FilterConfig) {
         }
         let value = mod.value;
         if (typeof value === 'function') {
-            value = value(filter) as string;
+            value = value(theme) as string;
         }
         element.style.setProperty(customProp, value as string);
         if (!element.hasAttribute(dataAttr)) {
@@ -238,10 +229,11 @@ function overrideInlineStyle(element: HTMLElement, filter: FilterConfig) {
     if (element.style && element instanceof SVGTextElement && element.style.fill) {
         setCustomProp('fill', 'color', element.style.getPropertyValue('fill'));
     }
+
     Array.from(unsetProps).forEach((cssProp) => {
         const {store, dataAttr} = overrides[cssProp];
         store.delete(element);
         element.removeAttribute(dataAttr);
     });
-    elementsChangeKeys.set(element, getElementChangeKey(element, filter));
+    inlineStyleCache.set(element, getInlineStyleCacheKey(element, theme));
 }

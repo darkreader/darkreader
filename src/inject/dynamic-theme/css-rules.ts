@@ -2,7 +2,7 @@ import {parseURL, getAbsoluteURL} from './url';
 import {logWarn} from '../utils/log';
 
 export function iterateCSSRules(rules: CSSRuleList, iterate: (rule: CSSStyleRule) => void) {
-    Array.from<CSSRule>(rules as any)
+    Array.from(rules)
         .forEach((rule) => {
             if (rule instanceof CSSMediaRule) {
                 const media = Array.from(rule.media);
@@ -31,6 +31,32 @@ export function iterateCSSDeclarations(style: CSSStyleDeclaration, iterate: (pro
         }
         iterate(property, value);
     });
+}
+
+function isCSSVariable(property: string) {
+    return property.startsWith('--') && !property.startsWith('--darkreader');
+}
+
+export function getCSSVariables(rules: CSSRuleList) {
+    const variables = new Map<string, string>();
+    rules && iterateCSSRules(rules, (rule) => {
+        rule.style && iterateCSSDeclarations(rule.style, (property, value) => {
+            if (isCSSVariable(property)) {
+                variables.set(property, value);
+            }
+        });
+    });
+    return variables;
+}
+
+export function getElementCSSVariables(element: HTMLElement) {
+    const variables = new Map<string, string>();
+    iterateCSSDeclarations(element.style, (property, value) => {
+        if (isCSSVariable(property)) {
+            variables.set(property, value);
+        }
+    });
+    return variables;
 }
 
 export const cssURLRegex = /url\((('.+?')|(".+?")|([^\)]*?))\)/g;

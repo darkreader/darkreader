@@ -141,7 +141,7 @@ export default class UserStorage {
                 fontFamily: f.fontFamily,
                 textStroke: f.textStroke,
                 textScale: f.textScale,
-                linkcolor: f.linkColor,
+                linkColor: f.linkColor,
                 unclickedColor: f.unclickedColor,
                 clickedColor: f.clickedColor,
                 engine: f.engine,

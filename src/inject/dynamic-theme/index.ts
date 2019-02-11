@@ -38,7 +38,7 @@ function createTheme() {
 
     const textStyle = createOrUpdateStyle('darkreader--text');
     document.head.insertBefore(textStyle, fallbackStyle.nextSibling);
-    if (filter.useFont || filter.textStroke > 0 || filter.textScale != 100 || filter.clickedColor != "551A8B" || filter.unclickedColor != "0000EE") {
+    if (filter.useFont || filter.textStroke > 0 || filter.textScale != 100 || filter.linkColor) {
         textStyle.textContent = createTextStyle(filter);
     } else {
         textStyle.textContent = '';

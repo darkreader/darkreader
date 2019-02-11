@@ -20,13 +20,14 @@ export function createTextStyle(config: FilterConfig): string {
 
     lines.push('}');
 
-    lines.push('a:link{');
-    lines.push(`  color: #${config.unclickedColor};`);
-    lines.push('}');
-    lines.push('a:visited{');
-    lines.push(`  color: #${config.clickedColor};`);
-    lines.push('}');
-
+    if(config.linkColor){
+        lines.push('a:link{');
+        lines.push(`  color: #${config.unclickedColor};`);
+        lines.push('}');
+        lines.push('a:visited{');
+        lines.push(`  color: #${config.clickedColor};`);
+        lines.push('}');
+    }
 
     return lines.join('\n');
 }

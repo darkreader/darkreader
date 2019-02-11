@@ -38,7 +38,7 @@ export function cssFilterStyleheetTemplate(filterValue: string, reverseFilterVal
         lines.push(createReverseRule(reverseFilterValue, fix));
     }
 
-    if (config.useFont || config.textStroke > 0 || config.textScale != 100 || config.clickedColor != "551A8B" || config.unclickedColor != "0000EE") {
+    if (config.useFont || config.textStroke > 0 || config.textScale != 100 || config.linkColor) {
         // Add text rule
         lines.push('');
         lines.push('/* Font */');

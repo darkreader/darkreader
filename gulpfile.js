@@ -16,12 +16,11 @@ gulp.task('release', (done) => {
     runSequence(
         'clean',
         ['js-release', 'css-release', 'html-release', 'copy-release', 'locales-release'],
-        'foxify',
-        ['zip', 'zip-firefox'],
+        ['zip'],
         done
     );
 });
 
 gulp.task('debug', (done) => {
-    runSequence('watch', 'foxify-debug', 'reload', done);
+    runSequence('watch', 'reload', done);
 });

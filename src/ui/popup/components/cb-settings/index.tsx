@@ -1,6 +1,6 @@
 import {html} from 'malevic';
 
-import {CheckBox, UpDown, Toggle, Select, CustToggle} from '../../../controls';
+import {CheckBox, UpDown, Toggle, Select, CustToggle, Button} from '../../../controls';
 
 import {getLocalMessage} from '../../../../utils/locales';
 import {FilterConfig} from '../../../../definitions';
@@ -52,15 +52,19 @@ export default function CBSettings({config, fonts, onChange}: FontSettingsProps)
             />
             
 
-            <div style="width:182px;">
-                <div style="width:33px; float:left;">
-                    <input class="jscolor jscolor-active" value={config.unclickedColor} name="unclicked" onchange={(value) => onChange({unclickedColor: value.target.value})} />
+            <div style="display:flex; justify-content:center; width:100%; text-align:center;">
+                <div>
+                    <input class="jscolor jscolor-active" style="width:80px" value={config.unclickedColor} name="unclicked" onchange={(value) => onChange({unclickedColor: value.target.value})} />
                     <label class="font-settings__font-select-container__label">
                         {getLocalMessage('unvisited_link')}
                     </label>
                 </div>
-                <div style="width:63px; float:right;">
-                    <input class="jscolor jscolor-active" value={config.clickedColor} name="clicked" onchange={(value) => onChange({clickedColor: value.target.value})}/>
+                <CheckBox
+                    checked={config.linkColor}
+                    onchange={(e) => onChange({linkColor: e.target.checked})}
+                />
+                <div>
+                    <input class="jscolor jscolor-active" style="width:80px" value={config.clickedColor} name="clicked" onchange={(value) => onChange({clickedColor: value.target.value})}/>
                     <label class="font-settings__font-select-container__label">
                         {getLocalMessage('visited_link')}
                     </label>

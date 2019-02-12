@@ -80,7 +80,7 @@ export default function createStaticStylesheet(config: FilterConfig, url: string
         lines.push(...ruleGenerators.map((gen) => gen(siteTheme, theme)));
     }
 
-    if (config.useFont || config.textStroke > 0 || config.textScale != 100 || config.clickedColor != "551A8B" || config.unclickedColor != "0000EE") {
+    if (config.useFont || config.textStroke > 0 || config.textScale != 100 || config.linkColor) {
         lines.push('/* Font */');
         lines.push(createTextStyle(config));
     }

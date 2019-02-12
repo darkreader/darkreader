@@ -53,16 +53,16 @@ export default function CBSettings({config, fonts, onChange}: FontSettingsProps)
             
 
             <div style="display:flex; justify-content:center; width:100%; text-align:center;">
-                 <CheckBox
-                    checked={config.linkColor}
-                    onchange={(e) => onChange({linkColor: e.target.checked})}
-                />
                 <div>
                     <input class="jscolor jscolor-active" style="width:80px" value={config.unclickedColor} name="unclicked" onchange={(value) => onChange({unclickedColor: value.target.value})} />
                     <label class="font-settings__font-select-container__label">
                         {getLocalMessage('unvisited_link')}
                     </label>
                 </div>
+                <CheckBox
+                    checked={config.linkColor}
+                    onchange={(e) => onChange({linkColor: e.target.checked})}
+                />
                 <div>
                     <input class="jscolor jscolor-active" style="width:80px" value={config.clickedColor} name="clicked" onchange={(value) => onChange({clickedColor: value.target.value})}/>
                     <label class="font-settings__font-select-container__label">

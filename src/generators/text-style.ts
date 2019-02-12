@@ -20,6 +20,7 @@ export function createTextStyle(config: FilterConfig): string {
 
     lines.push('}');
 
+
     if(config.linkColor){
         lines.push('a:link{');
         lines.push(`  color: #${config.unclickedColor};`);

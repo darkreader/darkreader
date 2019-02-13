@@ -52,7 +52,7 @@ export default function CBSettings({config, fonts, onChange}: FontSettingsProps)
             />
             
 
-            <div style="display:flex; justify-content:center; width:100%; text-align:center;">
+            <div style="display:flex; justify-content:center; width:97%; text-align:center;">
                 <div>
                     <input class="jscolor jscolor-active" style="width:80px" value={config.unclickedColor} name="unclicked" onchange={(value) => onChange({unclickedColor: value.target.value})} />
                     <label class="font-settings__font-select-container__label">

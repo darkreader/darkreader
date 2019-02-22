@@ -278,10 +278,13 @@ export function manageStyle(element: HTMLLinkElement | HTMLStyleElement, {update
             asyncKey?: number;
         }
 
-        function getCSSRuleText(declarations: ReadyDeclaration[]) {
+        function setRule(target: CSSStyleSheet | CSSGroupingRule, index: number, declarations: ReadyDeclaration[]) {
             const {selector} = declarations[0];
-            const cssRuleText = `${selector} { ${declarations.map(({property, value, important, sourceValue}) => `${property}: ${value == null ? sourceValue : value}${important ? ' !important' : ''};`).join(' ')} }`;
-            return cssRuleText;
+            target.insertRule(`${selector} {}`, index);
+            const style = (target.cssRules.item(index) as CSSStyleRule).style;
+            declarations.forEach(({property, value, important, sourceValue}) => {
+                style.setProperty(property, value == null ? sourceValue : value, important ? 'important' : '');
+            });
         }
 
         const readyDeclarations: ReadyDeclaration[] = [];
@@ -339,8 +342,7 @@ export function manageStyle(element: HTMLLinkElement | HTMLStyleElement, {update
                     if (asyncItems.length > 0) {
                         asyncItems.forEach(({asyncKey}) => asyncDeclarations.set(asyncKey, {declarations: selectorGroup, target, index: target.cssRules.length}));
                     }
-                    const cssRuleText = getCSSRuleText(selectorGroup);
-                    target.insertRule(cssRuleText, target.cssRules.length);
+                    setRule(target, target.cssRules.length, selectorGroup);
                 });
             });
 
@@ -353,9 +355,8 @@ export function manageStyle(element: HTMLLinkElement | HTMLStyleElement, {update
 
         function rebuildAsyncRule(key: number) {
             const {declarations, target, index} = asyncDeclarations.get(key);
-            const cssRuleText = getCSSRuleText(declarations);
             target.deleteRule(index);
-            target.insertRule(cssRuleText, index);
+            setRule(target, index, declarations);
             asyncDeclarations.delete(key);
         }
 

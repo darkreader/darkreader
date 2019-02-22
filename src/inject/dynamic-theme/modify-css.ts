@@ -15,6 +15,7 @@ export interface ModifiableCSSDeclaration {
     property: string;
     value: string | CSSValueModifier;
     important: boolean;
+    sourceValue: string;
 }
 
 export interface ModifiableCSSRule {
@@ -25,6 +26,7 @@ export interface ModifiableCSSRule {
 
 export function getModifiableCSSDeclaration(property: string, value: string, rule: CSSStyleRule, isCancelled: () => boolean): ModifiableCSSDeclaration {
     const important = Boolean(rule && rule.style && rule.style.getPropertyPriority(property));
+    const sourceValue = value;
     if (property.startsWith('--')) {
         return null;
     } else if (
@@ -34,17 +36,17 @@ export function getModifiableCSSDeclaration(property: string, value: string, rul
     ) {
         const modifier = getColorModifier(property, value);
         if (modifier) {
-            return {property, value: modifier, important};
+            return {property, value: modifier, important, sourceValue};
         }
     } else if (property === 'background-image') {
         const modifier = getBgImageModifier(property, value, rule, isCancelled);
         if (modifier) {
-            return {property, value: modifier, important};
+            return {property, value: modifier, important, sourceValue};
         }
     } else if (property.indexOf('shadow') >= 0) {
         const modifier = getShadowModifier(property, value);
         if (modifier) {
-            return {property, value: modifier, important};
+            return {property, value: modifier, important, sourceValue};
         }
     }
     return null;

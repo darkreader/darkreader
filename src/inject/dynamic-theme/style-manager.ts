@@ -271,13 +271,13 @@ export function manageStyle(element: HTMLLinkElement | HTMLStyleElement, {update
             property: string;
             value: string;
             important: boolean;
+            sourceValue: string;
             asyncKey?: number;
         }
 
         function getCSSRuleText(declarations: ReadyDeclaration[]) {
             const {selector} = declarations[0];
-            const readyItems = declarations.filter(({value}) => value != null);
-            const cssRuleText = `${selector} { ${readyItems.map(({property, value, important}) => `${property}: ${value}${important ? ' !important' : ''};`).join(' ')} }`;
+            const cssRuleText = `${selector} { ${declarations.map(({property, value, important, sourceValue}) => `${property}: ${value == null ? sourceValue : value}${important ? ' !important' : ''};`).join(' ')} }`;
             return cssRuleText;
         }
 
@@ -357,13 +357,13 @@ export function manageStyle(element: HTMLLinkElement | HTMLStyleElement, {update
         }
 
         modRules.filter((r) => r).forEach(({selector, declarations, media}) => {
-            declarations.forEach(({property, value, important}) => {
+            declarations.forEach(({property, value, important, sourceValue}) => {
                 if (typeof value === 'function') {
                     const modified = value(filter);
                     if (modified instanceof Promise) {
                         const index = readyDeclarations.length;
                         const asyncKey = asyncDeclarationCounter++;
-                        readyDeclarations.push({media, selector, property, value: null, important, asyncKey});
+                        readyDeclarations.push({media, selector, property, value: null, important, asyncKey, sourceValue});
                         const promise = modified;
                         const currentRenderId = renderId;
                         promise.then((asyncValue) => {
@@ -374,10 +374,10 @@ export function manageStyle(element: HTMLLinkElement | HTMLStyleElement, {update
                             rebuildAsyncRule(asyncKey);
                         });
                     } else {
-                        readyDeclarations.push({media, selector, property, value: modified, important});
+                        readyDeclarations.push({media, selector, property, value: modified, important, sourceValue});
                     }
                 } else {
-                    readyDeclarations.push({media, selector, property, value, important});
+                    readyDeclarations.push({media, selector, property, value, important, sourceValue});
                 }
             });
         });

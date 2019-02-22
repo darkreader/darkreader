@@ -3,6 +3,7 @@ import {getModifiableCSSDeclaration, ModifiableCSSDeclaration, ModifiableCSSRule
 import {bgFetch} from './network';
 import {removeNode, watchForNodePosition} from '../utils/dom';
 import {logWarn} from '../utils/log';
+import {createAsyncTasksQueue} from '../utils/throttle';
 import {isDeepSelectorSupported} from '../../utils/platform';
 import {getMatches} from '../../utils/text';
 import {FilterConfig} from '../../definitions';
@@ -39,6 +40,8 @@ export function shouldManageStyle(element: Node) {
         element.media !== 'print'
     );
 }
+
+const asyncQueue = createAsyncTasksQueue();
 
 export function manageStyle(element: HTMLLinkElement | HTMLStyleElement, {update, loadingStart, loadingEnd}): StyleManager {
 
@@ -371,7 +374,12 @@ export function manageStyle(element: HTMLLinkElement | HTMLStyleElement, {update
                                 return;
                             }
                             readyDeclarations[index].value = asyncValue;
-                            rebuildAsyncRule(asyncKey);
+                            asyncQueue.add(() => {
+                                if (cancelAsyncOperations || currentRenderId !== renderId) {
+                                    return;
+                                }
+                                rebuildAsyncRule(asyncKey);
+                            });
                         });
                     } else {
                         readyDeclarations.push({media, selector, property, value: modified, important, sourceValue});

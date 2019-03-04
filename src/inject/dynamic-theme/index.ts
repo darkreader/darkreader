@@ -225,6 +225,7 @@ function onReadyStateChange() {
 }
 
 let documentVisibilityListener: () => void = null;
+let didDocumentShowUp = !document.hidden;
 
 function watchForDocumentVisibility(callback: () => void) {
     const alreadyWatching = Boolean(documentVisibilityListener);
@@ -247,14 +248,20 @@ function stopWatchingForDocumentVisibility() {
 function createThemeAndWatchForUpdates() {
     createStaticStyleOverrides();
 
-    if (document.hidden) {
-        watchForDocumentVisibility(() => {
-            createDynamicStyleOverrides();
-            watchForUpdates();
-        });
-    } else {
+    function runDynamicStyle() {
         createDynamicStyleOverrides();
         watchForUpdates();
+    }
+
+    if (document.hidden) {
+        watchForDocumentVisibility(
+            didDocumentShowUp ?
+                runDynamicStyle :
+                () => setTimeout(runDynamicStyle, 100)
+        );
+        didDocumentShowUp = true;
+    } else {
+        runDynamicStyle();
     }
 }
 

@@ -1,4 +1,4 @@
-import {html, sync} from 'malevic';
+import {m, sync} from 'malevic';
 import connect from '../connect';
 import Body from './components/body';
 import {isMobile, isFirefox} from '../../utils/platform';

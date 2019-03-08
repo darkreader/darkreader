@@ -1,4 +1,4 @@
-import {html} from 'malevic';
+import {m} from 'malevic';
 
 interface MultiSwitchProps {
     class?: string;

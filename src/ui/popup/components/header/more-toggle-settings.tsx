@@ -1,4 +1,4 @@
-import {html} from 'malevic';
+import {m} from 'malevic';
 import {CheckBox, TimeRangePicker} from '../../../controls';
 import {getLocalMessage} from '../../../../utils/locales';
 import {ExtWrapper} from '../../../../definitions';

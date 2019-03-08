@@ -1,4 +1,4 @@
-import {html} from 'malevic';
+import {m} from 'malevic';
 import {CheckBox, UpDown, Select} from '../../../controls';
 import {getLocalMessage} from '../../../../utils/locales';
 import {FilterConfig} from '../../../../definitions';
@@ -28,7 +28,7 @@ export default function FontSettings({config, fonts, onChange}: FontSettingsProp
                                 </div>
                             );
                             return map;
-                        }, {} as {[font: string]: Malevic.NodeDeclaration;})}
+                        }, {} as {[font: string]: Malevic.Declaration;})}
                     />
                 </div>
                 <label class="font-settings__font-select-container__label">

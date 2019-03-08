@@ -1,6 +1,6 @@
-import {html} from 'malevic';
+import {m} from 'malevic';
 import withForms from 'malevic/forms';
-import withState from 'malevic/state';
+import withState, {useState} from 'malevic/state';
 import {TabPanel, Button} from '../../controls';
 import FilterSettings from './filter-settings';
 import {Header, MoreToggleSettings} from './header';
@@ -20,14 +20,12 @@ interface BodyProps {
     data: ExtensionData;
     tab: TabInfo;
     actions: ExtensionActions;
-    state?: BodyState;
-    setState?: (state: BodyState) => void;
 }
 
 interface BodyState {
-    activeTab?: string;
-    newsOpen?: boolean;
-    moreToggleSettingsOpen?: boolean;
+    activeTab: string;
+    newsOpen: boolean;
+    moreToggleSettingsOpen: boolean;
 }
 
 function openDevTools() {
@@ -40,11 +38,15 @@ function openDevTools() {
 }
 
 function Body(props: BodyProps) {
-    const {state, setState} = props;
+    const {state, setState} = useState<BodyState>({
+        activeTab: 'Filter',
+        newsOpen: false,
+        moreToggleSettingsOpen: false,
+    });
     if (!props.data.isReady) {
         return (
             <body>
-                <Loader />
+                <Loader complete={false} />
             </body>
         )
     }
@@ -91,7 +93,7 @@ function Body(props: BodyProps) {
             />
 
             <TabPanel
-                activeTab={state.activeTab || 'Filter'}
+                activeTab={state.activeTab}
                 onSwitchTab={(tab) => setState({activeTab: tab})}
                 tabs={{
                     'Filter': (

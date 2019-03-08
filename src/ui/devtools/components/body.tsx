@@ -1,16 +1,15 @@
-import {html} from 'malevic';
-import withState from 'malevic/state';
+import {m} from 'malevic';
+import withState, {useState} from 'malevic/state';
 import {Button} from '../../controls';
 import ThemeEngines from '../../../generators/theme-engines';
 import {DEVTOOLS_DOCS_URL} from '../../../utils/links';
 import {ExtWrapper} from '../../../definitions';
 
 interface BodyProps extends ExtWrapper {
-    state?;
-    setState?;
 }
 
-function Body({data, actions, state, setState}: BodyProps) {
+function Body({data, actions}: BodyProps) {
+    const {state, setState} = useState({errorText: null as string})
     let textNode: HTMLTextAreaElement;
 
     const wrapper = (data.settings.theme.engine === ThemeEngines.staticTheme
@@ -82,4 +81,4 @@ function Body({data, actions, state, setState}: BodyProps) {
     );
 }
 
-export default withState(Body, {errorText: null});
+export default withState(Body);

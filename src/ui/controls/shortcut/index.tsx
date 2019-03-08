@@ -1,6 +1,6 @@
-import {html} from 'malevic';
+import {m} from 'malevic';
 import {mergeClass} from '../utils';
-import {isFirefox, isMobile} from '../../../utils/platform';
+import {isFirefox} from '../../../utils/platform';
 import {Shortcuts} from '../../../definitions';
 
 interface ShortcutLinkProps {

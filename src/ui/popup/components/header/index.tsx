@@ -1,4 +1,4 @@
-import {html} from 'malevic';
+import {m} from 'malevic';
 import SiteToggle from '../site-toggle';
 import MoreToggleSettings from './more-toggle-settings';
 import WatchIcon from './watch-icon';

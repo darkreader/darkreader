@@ -1,5 +1,5 @@
-import {html, render, getData} from 'malevic';
-import withState from 'malevic/state';
+import {m, getData} from 'malevic';
+import withState, {useState} from 'malevic/state';
 import Button from '../button';
 import TextBox from '../textbox';
 import VirtualScroll from '../virtual-scroll';
@@ -7,22 +7,20 @@ import VirtualScroll from '../virtual-scroll';
 interface SelectProps {
     value: string;
     options: {
-        [value: string]: Malevic.NodeDeclaration;
+        [value: string]: Malevic.Declaration;
     };
     onChange: (value: string) => void;
-    state?: SelectState;
-    setState?: (state: SelectState) => void;
 }
 
 interface SelectState {
-    isExpanded?: boolean;
-    focusedIndex?: number;
+    isExpanded: boolean;
+    focusedIndex: number;
 }
 
 const valueNodes = new WeakMap<Element, Map<string, Element>>();
 
 function Select(props: SelectProps) {
-    const {state, setState} = props;
+    const {state, setState} = useState<SelectState>({isExpanded: false, focusedIndex: null});
     const values = Object.keys(props.options);
 
     let rootNode: Element;

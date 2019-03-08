@@ -1,18 +1,17 @@
-import {html} from 'malevic';
+import {m} from 'malevic';
 import {getLocalMessage} from '../../../../utils/locales';
-import withState from 'malevic/state';
+import withState, {useState} from 'malevic/state';
 
 interface LoaderProps {
     complete: boolean;
-    state?: LoaderState;
-    setState?: (state: LoaderState) => void;
 }
 
 interface LoaderState {
-    finished?: boolean;
+    finished: boolean;
 }
 
-function Loader({complete = false, state, setState}: LoaderProps) {
+function Loader({complete = false}: LoaderProps) {
+    const {state, setState} = useState<LoaderState>({finished: false});
     return (
         <div
             class={{

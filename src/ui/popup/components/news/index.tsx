@@ -1,4 +1,4 @@
-import {html} from 'malevic';
+import {m} from 'malevic';
 import {Button} from '../../../controls';
 import {BLOG_URL} from '../../../../utils/links';
 import {getLocalMessage, getUILanguage} from '../../../../utils/locales';

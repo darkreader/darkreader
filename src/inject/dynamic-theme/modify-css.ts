@@ -294,6 +294,10 @@ function getBgImageModifier(prop: string, value: string, rule: CSSStyleRule, isC
                 logInfo(`Applying filter to image ${imageDetails.src}`);
                 const filtered = getFilteredImageDataURL(imageDetails, {...filter, brightness: clamp(filter.brightness - 10, 5, 200), sepia: clamp(filter.sepia + 10, 0, 100)});
                 result = `url("${filtered}")`;
+            } else if (filter.useColorCorrection) {
+                logInfo(`Applying color filter to image ${imageDetails.src}`);
+                const filtered = getFilteredImageDataURL(imageDetails, filter);
+                result = `url("${filtered}")`;
             } else {
                 result = null;
             }

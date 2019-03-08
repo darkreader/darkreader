@@ -18,6 +18,13 @@ export function createFilterMatrix(config: FilterConfig) {
     if (config.mode === 1) {
         m = multiplyMatrices(m, Matrix.invertNHue());
     }
+    if (config.useColorCorrection) {
+        if (config.colorblindnessType == 0) {
+            m = multiplyMatrices(Matrix.fullCorrectionDeuteranopia(), m);
+        } else if (config.colorblindnessType == 1) {
+            m = multiplyMatrices(Matrix.fullCorrectionProtanopia(), m);
+        }
+    }
     return m;
 }
 
@@ -89,4 +96,85 @@ export const Matrix = {
             [0, 0, 0, 0, 1]
         ];
     },
+
+    rgb2lms() {
+        return [
+            [17.8824, 43.5161, 4.11935],
+            [3.45565, 27.1554, 3.86714],
+            [0.0299566, 0.184309, 1.46709]
+        ]
+    },
+
+    lms2rgb() {
+        return [
+            [0.0809444479, -0.130504409, 0.116721066],
+            [-0.010248533515, 0.054019326636, -0.1136147082],
+            [-0.000365296938, -0.00412161469, 0.693511405]
+        ]
+    },
+
+    simulateDuteranopia() {
+        return [
+            [1, 0, 0],
+            [0.49421, 0, 1.24827],
+            [0, 0, 1]
+        ]
+    },
+
+    simulateProtanopia() {
+        return [
+            [0, 2.02344, -2.52581],
+            [0, 1, 0],
+            [0, 0, 1]
+        ]
+    },
+
+    errorCorrectionDuteranopia() {
+        return [
+            [1, 0.7, 0],
+            [0, 0, 0],
+            [0, 0.7, 1]
+        ]
+    },
+
+    fullCorrectionDeuteranopia() {
+        return [
+            [1.5023294041595, -0.50231420683723, 0, 0, 0],
+            [0, 1, 0, 0, 0],
+            [-0.18259012117263, 0.18258459563274, 1, 0, 0],
+            [0, 0, 0, 1, 0],
+            [0, 0, 0, 0, 1]
+        ]
+    },
+
+    fullCorrectionProtanopia() {
+        return [
+            [1, 0, 0, 0, 0],
+            [0.50894941008343, 0.49105389057512, 0, 0, 0],
+            [0.61732665235893, -0.61732264809677, 1, 0, 0],
+        ]
+    }
 };
+
+
+function lmsDaltonize(rgb: number[]) {
+    const rgbColumn = rgb.map((x) => [x / 255]);
+
+    // 1, 2, 3. simulate colorblindness
+    const lmsColumn = multiplyMatrices(Matrix.rgb2lms(), rgbColumn);
+    const lmsSimulatedColumn = multiplyMatrices(Matrix.simulateDuteranopia(), lmsColumn);
+    const rgbSimulatedColumn = multiplyMatrices(Matrix.lms2rgb(), lmsSimulatedColumn);
+
+    // 4. find error caused by colorblindness
+    const errorColumn = [0, 1, 2].map((i) => [rgbColumn[i][0] - rgbSimulatedColumn[i][0]]);
+
+    // 5. find correction for error
+    const correctionColumn = multiplyMatrices(Matrix.errorCorrectionDuteranopia(), errorColumn);
+
+    // 6. apply correction
+    const result = [0, 1, 2]
+        .map((i) => rgbColumn[i][0] + correctionColumn[i][0])
+        .map((x) => clamp(Math.round(x * 255), 0, 255));
+
+    return result;
+}

@@ -18,7 +18,7 @@ function modifyColorWithCache(rgb: RGBA, filter: FilterConfig, modifyHSL: (hsl: 
         colorModificationCache.set(modifyHSL, fnCache);
     }
     const id = Object.entries(rgb)
-        .concat(Object.entries(filter).filter(([key]) => ['mode', 'brightness', 'contrast', 'grayscale', 'sepia'].indexOf(key) >= 0))
+        .concat(Object.entries(filter).filter(([key]) => ['mode', 'brightness', 'contrast', 'grayscale', 'sepia', 'useColorCorrection', 'colorblindnessType', 'colorCorrectionType'].indexOf(key) >= 0))
         .map(([key, value]) => `${key}:${value}`)
         .join(';');
     if (fnCache.has(id)) {

@@ -139,7 +139,7 @@ export async function manageStyle(element: HTMLLinkElement | HTMLStyleElement, {
     }
 
     function getFilterKey(filter: FilterConfig) {
-        return ['mode', 'brightness', 'contrast', 'grayscale', 'sepia'].map((p) => `${p}:${filter[p]}`).join(';');
+        return ['mode', 'brightness', 'contrast', 'grayscale', 'sepia', 'useColorCorrection', 'colorblindnessType', 'colorCorrectionType'].map((p) => `${p}:${filter[p]}`).join(';');
     }
 
     let renderId = 0;
@@ -148,6 +148,7 @@ export async function manageStyle(element: HTMLLinkElement | HTMLStyleElement, {
     let prevFilterKey: string = null;
 
     async function render(filter: FilterConfig, variables: Map<string, string>) {
+        console.log("render");
         rules = await getRules();
         if (!rules) {
             return null;
@@ -157,6 +158,8 @@ export async function manageStyle(element: HTMLLinkElement | HTMLStyleElement, {
         const notFoundCacheKeys = new Set(rulesModCache.keys());
         const filterKey = getFilterKey(filter);
         let filterChanged = (filterKey !== prevFilterKey);
+        console.log("filter changed");
+        console.log(filterChanged);
 
         const modRules: ModifiableCSSRule[] = [];
         iterateCSSRules(rules, (rule) => {

@@ -12,7 +12,7 @@ import {ExtWrapper, FilterConfig, TabInfo} from '../../../../definitions';
 interface SiteListSettingsProps extends ExtWrapper {
     isFocused: boolean;
 }
-export default function CBSettings({data, actions, tab}: ExtWrapper & {tab: TabInfo}) {
+export default function MoreSettings({data, actions, tab}: ExtWrapper & {tab: TabInfo}) {
 //export default function MoreSettings({data, actions, tab}: ExtWrapper & {tab: TabInfo} & {data, actions, isFocused: SiteListSettingsProps}) {
 
     const custom = data.settings.customThemes.find(({url}) => isURLInList(tab.url, url));

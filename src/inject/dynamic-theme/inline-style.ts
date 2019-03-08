@@ -151,7 +151,7 @@ export function watchForInlineStyles(filter: FilterConfig) {
 }
 
 const elementsChangeKeys = new WeakMap<Element, string>();
-const filterProps = ['brightness', 'contrast', 'grayscale', 'sepia', 'mode'];
+const filterProps = ['brightness', 'contrast', 'grayscale', 'sepia', 'mode', 'useColorCorrection', 'colorblindnessType', 'colorCorrectionType'];
 
 function getElementChangeKey(el: Element, filter: FilterConfig) {
     return INLINE_STYLE_ATTRS
@@ -168,6 +168,7 @@ export function stopWatchingForInlineStyles() {
 }
 
 function elementDidUpdate(element: HTMLElement, filter: FilterConfig) {
+    console.log("elementDidUpdate");
     if (elementsChangeKeys.get(element) === getElementChangeKey(element, filter)) {
         return;
     }

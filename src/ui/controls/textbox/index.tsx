@@ -1,4 +1,4 @@
-import {html} from 'malevic';
+import {m} from 'malevic';
 import {mergeClass, omitAttrs} from '../utils';
 
 export default function TextBox(props: Malevic.NodeAttrs = {}, text?: string) {

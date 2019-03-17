@@ -15,7 +15,7 @@
         "allowJs": true,
         "noEmit": true,
         "jsx": "react",
-        "jsxFactory": "html"
+        "jsxFactory": "m"
     },
     "exclude": [
         "node_modules"

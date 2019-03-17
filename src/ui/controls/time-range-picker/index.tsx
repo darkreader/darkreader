@@ -1,4 +1,4 @@
-import {html} from 'malevic';
+import {m} from 'malevic';
 import TextBox from '../textbox';
 import {getUILanguage} from '../../../utils/locales';
 import {parseTime} from '../../../utils/time';

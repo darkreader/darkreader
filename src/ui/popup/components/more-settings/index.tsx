@@ -1,4 +1,4 @@
-import {html} from 'malevic';
+import {m} from 'malevic';
 import CustomSettingsToggle from '../custom-settings-toggle';
 import EngineSwitch from '../engine-switch';
 import FontSettings from '../font-settings';
@@ -45,10 +45,10 @@ export default function MoreSettings({data, actions, tab}: ExtWrapper & {tab: Ta
                         {getLocalMessage('page_in_dark_list').replace('\n', ' ')}
                     </p>
                 ) : (
-                            <p class="more-settings__description">
-                                {getLocalMessage('only_for_description')}
-                            </p>
-                        )}
+                    <p class="more-settings__description">
+                        {getLocalMessage('only_for_description')}
+                    </p>
+                )}
             </div>
             {isFirefox() ? (
                 <div class="more-settings__section">

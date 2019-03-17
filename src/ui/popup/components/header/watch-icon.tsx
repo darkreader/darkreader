@@ -1,4 +1,4 @@
-import {html} from 'malevic';
+import {m} from 'malevic';
 
 export default function WatchIcon({hours, minutes}) {
     const cx = 8;

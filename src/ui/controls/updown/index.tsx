@@ -1,4 +1,4 @@
-import {html} from 'malevic';
+import {m} from 'malevic';
 import Button from '../button';
 import Track from './track';
 import {getLocalMessage} from '../../../utils/locales';

@@ -1,4 +1,4 @@
-import {html, getData} from 'malevic';
+import {m, getData, getDOMNode} from 'malevic';
 import TextBox from '../textbox';
 import VirtualScroll from '../virtual-scroll';
 
@@ -43,32 +43,50 @@ export default function TextList(props: TextListProps) {
         );
     }
 
-    return (node: HTMLElement) => {
-        let shouldFocus = false;
+    let shouldFocus = false;
 
-        const prevProps = propsStore.get(node);
+    const node = getDOMNode() as Element;
+    const prevProps = node ? propsStore.get(node) : null;
+    if (node) {
         propsStore.set(node, props);
-        if (props.isFocused && (
-            !prevProps ||
-            !prevProps.isFocused ||
-            prevProps.values.length < props.values.length
-        )) {
-            shouldFocus = true;
-            requestAnimationFrame(() => {
-                const inputs = node.querySelectorAll('.text-list__textbox');
-                const last = inputs.item(inputs.length - 1) as HTMLInputElement;
-                last.focus();
-            });
-        }
+    }
+    if (node && props.isFocused && (
+        !prevProps ||
+        !prevProps.isFocused ||
+        prevProps.values.length < props.values.length
+    )) {
+        focusLastNode(node);
+    }
 
-        return (
-            <VirtualScroll
-                root={<div class={['text-list', props.class]} onchange={onTextChange} />}
-                items={props.values
-                    .map(createTextBox)
-                    .concat(createTextBox('', props.values.length))}
-                scrollToIndex={shouldFocus ? props.values.length : -1}
-            />
-        )
-    };
+    function didMount(node: Element) {
+        propsStore.set(node, props);
+        if (props.isFocused) {
+            focusLastNode(node);
+        }
+    }
+
+    function focusLastNode(node: Element) {
+        shouldFocus = true;
+        requestAnimationFrame(() => {
+            const inputs = node.querySelectorAll('.text-list__textbox');
+            const last = inputs.item(inputs.length - 1) as HTMLInputElement;
+            last.focus();
+        });
+    }
+
+    return (
+        <VirtualScroll
+            root={(
+                <div
+                    class={['text-list', props.class]}
+                    onchange={onTextChange}
+                    didmount={didMount}
+                />
+            )}
+            items={props.values
+                .map(createTextBox)
+                .concat(createTextBox('', props.values.length))}
+            scrollToIndex={shouldFocus ? props.values.length : -1}
+        />
+    );
 }

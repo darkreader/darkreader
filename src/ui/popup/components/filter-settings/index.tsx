@@ -1,4 +1,4 @@
-import {html} from 'malevic';
+import {m} from 'malevic';
 import {UpDown} from '../../../controls';
 import CustomSettingsToggle from '../custom-settings-toggle';
 import ModeToggle from './mode-toggle';

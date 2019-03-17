@@ -1,4 +1,4 @@
-import {html} from 'malevic';
+import {m} from 'malevic';
 import {Button, Toggle} from '../../../controls';
 import {getLocalMessage} from '../../../../utils/locales';
 

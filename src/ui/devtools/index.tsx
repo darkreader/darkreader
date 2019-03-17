@@ -1,4 +1,4 @@
-import {html, sync} from 'malevic';
+import {m, sync} from 'malevic';
 import Body from './components/body';
 import connect from '../connect';
 

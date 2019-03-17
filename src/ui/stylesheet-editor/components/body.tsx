@@ -1,4 +1,4 @@
-import {html} from 'malevic';
+import {m} from 'malevic';
 import {Button} from '../../controls';
 import {getURLHost, isURLInList} from '../../../utils/url';
 import {ExtWrapper, TabInfo} from '../../../definitions';

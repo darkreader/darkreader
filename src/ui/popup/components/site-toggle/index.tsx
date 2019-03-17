@@ -1,4 +1,4 @@
-import {html} from 'malevic';
+import {m} from 'malevic';
 import CheckmarkIcon from './checkmark-icon';
 import {Button} from '../../../controls';
 import {getURLHost, isURLEnabled} from '../../../../utils/url';

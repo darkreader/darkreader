@@ -1,4 +1,4 @@
-import {html} from 'malevic';
+import {m} from 'malevic';
 import {mergeClass, omitAttrs} from '../utils';
 
 export default function Button(props: Malevic.NodeAttrs = {}, ...children) {

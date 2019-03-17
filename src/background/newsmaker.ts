@@ -3,7 +3,7 @@ import {getDuration} from '../utils/time';
 import {News} from '../definitions';
 
 export default class Newsmaker {
-    static UPDATE_INTERVAL = getDuration({hours: 1});
+    static UPDATE_INTERVAL = getDuration({hours: 4});
 
     latest: News[];
     onUpdate: (news: News[]) => void;
@@ -28,7 +28,7 @@ export default class Newsmaker {
 
     private async getNews() {
         try {
-            const response = await fetch(`https://raw.githubusercontent.com/darkreader/darkreader.org/master/src/blog/posts.json?nocache=${Date.now()}`, {cache: 'no-cache'});
+            const response = await fetch(`https://darkreader.github.io/blog/posts.json?date=${(new Date()).toISOString().substring(0, 10)}`, {cache: 'no-cache'});
             const $news = await response.json();
             return new Promise<News[]>((resolve, reject) => {
                 chrome.storage.sync.get({readNews: []}, ({readNews}) => {

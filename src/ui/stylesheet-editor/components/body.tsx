@@ -16,8 +16,8 @@ export default function Body({data, tab, actions}: BodyProps) {
 
     const placeholderText = [
         '* {',
-        '    background-color: #234 !important',
-        '    color: #cba !important',
+        '    background-color: #234 !important;',
+        '    color: #cba !important;',
         '}',
     ].join('\n');
 

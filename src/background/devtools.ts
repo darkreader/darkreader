@@ -3,11 +3,62 @@ import {parseDynamicThemeFixes, formatDynamicThemeFixes} from '../generators/dyn
 import {parseStaticThemes, formatStaticThemes} from '../generators/static-theme';
 import ConfigManager from './config-manager';
 
+interface DevToolsStorage {
+    get(key: string): string;
+    set(key: string, value: string): void;
+    remove(key: string): void;
+}
+
+class LocalStorageWrapper implements DevToolsStorage {
+    get(key: string) {
+        try {
+            return localStorage.getItem(key);
+        } catch (err) {
+            console.error(err);
+            return null;
+        }
+    }
+    set(key: string, value: string) {
+        try {
+            localStorage.setItem(key, value);
+        } catch (err) {
+            console.error(err);
+            return;
+        }
+    }
+    remove(key: string) {
+        try {
+            localStorage.removeItem(key);
+        } catch (err) {
+            console.error(err);
+            return;
+        }
+    }
+}
+
+class TempStorage implements DevToolsStorage {
+    map = new Map<string, string>();
+
+    get(key: string) {
+        return this.map.get(key);
+    }
+    set(key: string, value: string) {
+        this.map.set(key, value);
+    }
+    remove(key: string) {
+        this.map.delete(key);
+    }
+}
+
 export default class DevTools {
     private config: ConfigManager;
     private onChange: () => void;
+    private store: DevToolsStorage;
 
     constructor(config: ConfigManager, onChange: () => void) {
+        this.store = (typeof localStorage !== 'undefined' && localStorage != null ?
+            new LocalStorageWrapper() :
+            new TempStorage());
         this.config = config;
         this.config.overrides.dynamicThemeFixes = this.getSavedDynamicThemeFixes() || null;
         this.config.overrides.inversionFixes = this.getSavedInversionFixes() || null;
@@ -16,11 +67,11 @@ export default class DevTools {
     }
 
     private getSavedDynamicThemeFixes() {
-        return localStorage.getItem('dev_dynamic_theme_fixes') || null;
+        return this.store.get('dev_dynamic_theme_fixes') || null;
     }
 
     private saveDynamicThemeFixes(text: string) {
-        localStorage.setItem('dev_dynamic_theme_fixes', text);
+        this.store.set('dev_dynamic_theme_fixes', text);
     }
 
     getDynamicThemeFixesText() {
@@ -30,7 +81,7 @@ export default class DevTools {
     }
 
     resetDynamicThemeFixes() {
-        localStorage.removeItem('dev_dynamic_theme_fixes');
+        this.store.remove('dev_dynamic_theme_fixes');
         this.config.overrides.dynamicThemeFixes = null;
         this.config.handleDynamicThemeFixes();
         this.onChange();
@@ -50,11 +101,11 @@ export default class DevTools {
     }
 
     private getSavedInversionFixes() {
-        return localStorage.getItem('dev_inversion_fixes') || null;
+        return this.store.get('dev_inversion_fixes') || null;
     }
 
     private saveInversionFixes(text: string) {
-        localStorage.setItem('dev_inversion_fixes', text);
+        this.store.set('dev_inversion_fixes', text);
     }
 
     getInversionFixesText() {
@@ -64,7 +115,7 @@ export default class DevTools {
     }
 
     resetInversionFixes() {
-        localStorage.removeItem('dev_inversion_fixes');
+        this.store.remove('dev_inversion_fixes');
         this.config.overrides.inversionFixes = null;
         this.config.handleInversionFixes();
         this.onChange();
@@ -84,11 +135,11 @@ export default class DevTools {
     }
 
     private getSavedStaticThemes() {
-        return localStorage.getItem('dev_static_themes') || null;
+        return this.store.get('dev_static_themes') || null;
     }
 
     private saveStaticThemes(text: string) {
-        localStorage.setItem('dev_static_themes', text);
+        this.store.set('dev_static_themes', text);
     }
 
     getStaticThemesText() {
@@ -98,7 +149,7 @@ export default class DevTools {
     }
 
     resetStaticThemes() {
-        localStorage.removeItem('dev_static_themes');
+        this.store.remove('dev_static_themes');
         this.config.overrides.staticThemes = null;
         this.config.handleStaticThemes();
         this.onChange();

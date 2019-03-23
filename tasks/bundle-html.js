@@ -26,7 +26,9 @@ require('ts-node').register({
         ...tsConfig.compilerOptions,
         module: 'commonjs',
     },
-    ignore: []
+    ignore: [
+        '/node_modules\/(?!malevic).*/',
+    ]
 });
 const Malevic = require('malevic');
 const DevToolsBody = require('../src/ui/devtools/components/body').default;

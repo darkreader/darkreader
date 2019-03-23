@@ -7,8 +7,17 @@ export const GITHUB_URL = 'https://github.com/darkreader/darkreader';
 export const PRIVACY_URL = 'https://darkreader.org/privacy/';
 export const TWITTER_URL = 'https://twitter.com/darkreaderapp';
 
+const helpLocales = [
+    'be',
+    'cs',
+    'de',
+    'en',
+    'fr',
+    'it',
+    'ru',
+];
+
 export function getHelpURL() {
-    const helpLocales = ['be', 'cs', 'de', 'en', 'it', 'ru'];
     const locale = getUILanguage();
     const matchLocale = helpLocales.find((hl) => hl === locale) || helpLocales.find((hl) => locale.startsWith(hl)) || 'en';
     return `https://darkreader.org/help/${matchLocale}/`;

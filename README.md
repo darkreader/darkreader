@@ -28,7 +28,8 @@ or **[inversion-fixes.config](https://github.com/alexanderby/darkreader/blob/mas
 (for Filter and Filter+ modes)
 *(please, preserve alphabetical order by URL, use short selectors, preserve code style)*.
 
-Please note, that merged changes to these files are automatically delivered to all users **within 15 minutes**.
+~~Please note, that merged changes to these files are automatically delivered to all users **within 15 minutes**.~~
+Config syncing was disabled, cause GitHub team doesn't allow using GitHub as a CDN. Storing these files and making requests to other resources will be expensive and look suspicious.
 
 ### Using Dev Tools
 
@@ -92,6 +93,7 @@ CSS
 }
 ```
 - Click **Apply**.
+- Check how it looks both in **Light** and **Dark** mode.
 - If the **fix worked** open
 **[dynamic-theme-fixes.config](https://github.com/alexanderby/darkreader/blob/master/src/config/dynamic-theme-fixes.config) file**
 or **[inversion-fixes.config](https://github.com/alexanderby/darkreader/blob/master/src/config/inversion-fixes.config) file**.

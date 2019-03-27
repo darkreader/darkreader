@@ -26,13 +26,14 @@ export default function UpDown(props: UpDownProps) {
     };
 
     function normalize(x: number) {
-        const exp = Math.ceil(Math.log10(props.step));
-        if (exp >= 1) {
+        const s = Math.round(x / props.step) * props.step;
+        const exp = Math.floor(Math.log10(props.step));
+        if (exp >= 0) {
             const m = Math.pow(10, exp);
-            return Math.round(x / m) * m;
+            return Math.round(s / m) * m;
         } else {
             const m = Math.pow(10, -exp);
-            return Math.round(x * m) / m;
+            return Math.round(s * m) / m;
         }
     }
 

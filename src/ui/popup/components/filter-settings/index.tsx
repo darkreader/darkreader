@@ -25,7 +25,7 @@ export default function FilterSettings({data, actions, tab}: ExtWrapper & {tab: 
             value={filterConfig.brightness}
             min={50}
             max={150}
-            step={10}
+            step={5}
             default={100}
             name={getLocalMessage('brightness')}
             onChange={(value) => setConfig({brightness: value})}
@@ -37,7 +37,7 @@ export default function FilterSettings({data, actions, tab}: ExtWrapper & {tab: 
             value={filterConfig.contrast}
             min={50}
             max={150}
-            step={10}
+            step={5}
             default={100}
             name={getLocalMessage('contrast')}
             onChange={(value) => setConfig({contrast: value})}
@@ -49,7 +49,7 @@ export default function FilterSettings({data, actions, tab}: ExtWrapper & {tab: 
             value={filterConfig.grayscale}
             min={0}
             max={100}
-            step={10}
+            step={5}
             default={0}
             name={getLocalMessage('grayscale')}
             onChange={(value) => setConfig({grayscale: value})}
@@ -61,7 +61,7 @@ export default function FilterSettings({data, actions, tab}: ExtWrapper & {tab: 
             value={filterConfig.sepia}
             min={0}
             max={100}
-            step={10}
+            step={5}
             default={0}
             name={getLocalMessage('sepia')}
             onChange={(value) => setConfig({sepia: value})}

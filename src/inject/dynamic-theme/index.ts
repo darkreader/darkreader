@@ -20,7 +20,7 @@ let fixes: DynamicThemeFix = null;
 let isIFrame: boolean = null;
 
 function createOrUpdateStyle(className: string) {
-    let style = document.head.querySelector(`.${className}`) as HTMLStyleElement;
+    let style = (document.head || document).querySelector(`.${className}`) as HTMLStyleElement;
     if (!style) {
         style = document.createElement('style');
         style.classList.add('darkreader');

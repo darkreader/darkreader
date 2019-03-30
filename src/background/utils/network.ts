@@ -1,3 +1,4 @@
+import {loadAsDataURL, loadAsText} from '../../utils/network';
 import {getStringSize} from '../../utils/text';
 import {getDuration} from '../../utils/time';
 
@@ -34,7 +35,7 @@ interface CacheRecord {
     value: string;
 }
 
-export class LimitedCacheStorage {
+class LimitedCacheStorage {
     static QUOTA_BYTES = ((navigator as any).deviceMemory || 4) * 16 * 1024 * 1024;
     static TTL = getDuration({minutes: 10});
 
@@ -91,4 +92,35 @@ export class LimitedCacheStorage {
             }
         }
     }
+}
+
+interface FetchRequestParameters {
+    url: string;
+    responseType: 'data-url' | 'text';
+}
+
+export function createFileLoader() {
+    const caches = {
+        'data-url': new LimitedCacheStorage(),
+        'text': new LimitedCacheStorage(),
+    };
+
+    const loaders = {
+        'data-url': loadAsDataURL,
+        'text': loadAsText,
+    };
+
+    async function get({url, responseType}: FetchRequestParameters) {
+        const cache = caches[responseType];
+        const load = loaders[responseType];
+        if (cache.has(url)) {
+            return cache.get(url);
+        }
+
+        const data = await load(url);
+        cache.set(url, data);
+        return data;
+    }
+
+    return {get};
 }

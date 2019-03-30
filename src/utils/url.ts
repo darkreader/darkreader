@@ -1,7 +1,7 @@
 import {UserSettings} from '../definitions';
 
 export function getURLHost(url: string) {
-    return url.match(/^(.*?:\/{2,3})?(.+?)(\/|$)/)[2];
+    return url.match(/^(.*?\/{2,3})?(.+?)(\/|$)/)[2];
 }
 
 export function compareURLPatterns(a: string, b: string) {

@@ -1,5 +1,7 @@
 import {getSVGFilterMatrixValue} from '../../generators/svg-filter';
 import {bgFetch} from './network';
+import {getURLHost} from '../../utils/url';
+import {loadAsDataURL} from '../../utils/network';
 import {FilterConfig} from '../../definitions';
 
 export interface ImageDetails {
@@ -32,6 +34,9 @@ export async function getImageDetails(url: string) {
 }
 
 async function getImageDataURL(url: string) {
+    if (getURLHost(url) === location.host) {
+        return await loadAsDataURL(url);
+    }
     return await bgFetch({url, responseType: 'data-url'});
 }
 

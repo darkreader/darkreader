@@ -52,15 +52,17 @@ function modifyLightModeHSL({h, s, l, a}) {
     const lMid = 0.4;
     const lMax = 0.9;
     const sNeutralLim = 0.36;
+    const lNeutralDark = 0.2;
+    const lNeutralLight = 0.8;
     const sColored = 0.16;
-    const hColoredL0 = 220;
+    const hColoredL0 = 205;
     const hColoredL1 = 40;
 
     const lx = scale(l, 0, 1, lMin, lMax);
 
     let hx = h;
     let sx = s;
-    const isNeutral = s < sNeutralLim;
+    const isNeutral = l < lNeutralDark || l > lNeutralLight || s < sNeutralLim;
     if (isNeutral) {
         sx = (l < lMid ?
             scale(l, 0, lMid, sColored, 0) :
@@ -75,8 +77,8 @@ function modifyBgHSL({h, s, l, a}) {
     const lMin = 0.1;
     const lMaxS0 = 0.25;
     const lMaxS1 = 0.4;
-    const sNeutralLimL0 = 0.24;
-    const sNeutralLimL1 = 0.12;
+    const sNeutralLim = 0.12;
+    const lNeutralLight = 0.8;
     const sColored = 0.10;
     const hColored = 205;
 
@@ -87,8 +89,7 @@ function modifyBgHSL({h, s, l, a}) {
             lMax :
             scale(l, 0.5, 1, lMax, lMin));
 
-    const sNeutralLim = scale(clamp(lx, lMin, lMax), lMin, lMax, sNeutralLimL0, sNeutralLimL1);
-    const isNeutral = s < sNeutralLim;
+    const isNeutral = l >= lNeutralLight || s < sNeutralLim;
     let hx = h;
     let sx = s;
     if (isNeutral) {
@@ -110,8 +111,8 @@ function modifyFgHSL({h, s, l, a}) {
     const lMax = 0.9;
     const lMinS0 = 0.7;
     const lMinS1 = 0.6;
-    const sNeutralLimL0 = 0.12;
-    const sNeutralLimL1 = 0.36;
+    const sNeutralLim = 0.24;
+    const lNeutralDark = 0.2;
     const sColored = 0.10;
     const hColored = 40;
     const hBlue0 = 205;
@@ -132,8 +133,7 @@ function modifyFgHSL({h, s, l, a}) {
     if (isBlue) {
         hx = scale(hx, hBlue0, hBlue1, hBlue0, hBlueMax);
     }
-    const sNeutralLim = scale(clamp(lx, lMin, lMax), lMin, lMax, sNeutralLimL0, sNeutralLimL1);
-    const isNeutral = s < sNeutralLim;
+    const isNeutral = l < lNeutralDark || s < sNeutralLim;
     if (isNeutral) {
         sx = sColored;
         hx = hColored;

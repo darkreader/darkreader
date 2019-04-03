@@ -49,18 +49,5 @@ test('Locales', async () => {
         })
     }
 
-    // Line count is the same
-    expect(locales.every((loc) => loc.split('\n').length === enLines.length)).toBe(true);
-
-    // Locale ends with new line
-    expect(locales.every((loc) => loc.endsWith('\n')));
-
-    // Line spaces are the same
-    expect(compareLinesToEnLocale((en, loc) => !en === !loc)).toBe(true);
-
-    // Message codes are on the same positions
-    expect(compareLinesToEnLocale((en, loc) => !en.startsWith('@') || (en.startsWith('@') && en === loc))).toBe(true);
-
-    // No extra whitespace
-    expect(compareLinesToEnLocale((en, loc) => loc.trim() === loc)).toBe(true);
+    
 });

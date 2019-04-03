@@ -3,9 +3,6 @@
 build
 debug
 build.zip
-build-firefox
-debug-firefox
-build-firefox.xpi
 
 # Node.js modules
 #-----------------------------------
@@ -15,3 +12,11 @@ node_modules
 #-----------------------------------
 .idea
 .vscode
+
+# Mac Junk
+#___________________________________
+echo ".DS_Store" >> ~/.gitignore_global
+echo "._.DS_Store" >> ~/.gitignore_global
+echo "**/.DS_Store" >> ~/.gitignore_global
+echo "**/._.DS_Store" >> ~/.gitignore_global
+git config --global core.excludesfile ~/.gitignore_global

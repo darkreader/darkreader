@@ -1,7 +1,6 @@
 import {html, sync} from 'malevic';
 import connect from '../connect';
 import Body from './components/body';
-import {isMobile, isFirefox} from '../../utils/platform';
 import {popupHasBuiltInHorizontalBorders, popupHasBuiltInBorders, fixNotClosingPopupOnNavigation} from './utils/issues';
 import {ExtensionData, ExtensionActions, TabInfo} from '../../definitions';
 
@@ -25,10 +24,5 @@ async function start() {
 
 start();
 
-document.documentElement.classList.toggle('mobile', isMobile());
 document.documentElement.classList.toggle('built-in-borders', popupHasBuiltInBorders());
 document.documentElement.classList.toggle('built-in-horizontal-borders', popupHasBuiltInHorizontalBorders());
-
-if (isFirefox()) {
-    fixNotClosingPopupOnNavigation();
-}

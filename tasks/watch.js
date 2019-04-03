@@ -3,10 +3,10 @@ const runSequence = require('run-sequence');
 const {getDestDir} = require('./paths');
 
 module.exports = function createWatchTask(gulp) {
-    gulp.task('js-debug-reload', (done) => runSequence(['js-debug', 'html-debug'], 'foxify-debug', 'reload', done));
+    gulp.task('js-debug-reload', (done) => runSequence(['js-debug', 'html-debug'], 'reload', done));
     gulp.task('css-debug-reload', (done) => runSequence('css-debug', 'reload', done));
     gulp.task('html-debug-reload', (done) => runSequence('html-debug', 'reload', done));
-    gulp.task('config-debug-reload', (done) => runSequence('copy-debug', 'foxify-debug', 'reload', done));
+    gulp.task('config-debug-reload', (done) => runSequence('copy-debug', 'reload', done));
     gulp.task('locales-debug-reload', (done) => runSequence('locales-debug', 'reload', done));
 
     gulp.task('watch', ['js-debug', 'css-debug', 'html-debug', 'copy-debug', 'locales-debug'], () => {

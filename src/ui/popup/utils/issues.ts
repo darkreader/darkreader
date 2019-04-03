@@ -1,4 +1,4 @@
-import {getChromeVersion, compareChromeVersions, isWindows, isMacOS, isVivaldi, isOpera, isYaBrowser, isFirefox} from '../../../utils/platform';
+import {getChromeVersion, compareChromeVersions, isWindows, isMacOS, isVivaldi, isOpera, isYaBrowser} from '../../../utils/platform';
 
 export function popupHasBuiltInBorders() {
     const chromeVersion = getChromeVersion();

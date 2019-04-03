@@ -1,19 +1,15 @@
 import {createFilterMatrix, Matrix} from './utils/matrix';
-import {isFirefox} from '../utils/platform';
 import {cssFilterStyleheetTemplate} from './css-filter';
 import {FilterConfig, InversionFix} from '../definitions';
 
 export function createSVGFilterStylesheet(config: FilterConfig, url: string, frameURL: string, inversionFixes: InversionFix[]) {
     let filterValue: string;
     let reverseFilterValue: string;
-    if (isFirefox()) {
-        filterValue = getEmbeddedSVGFilterValue(getSVGFilterMatrixValue(config));
-        reverseFilterValue = getEmbeddedSVGFilterValue(getSVGReverseFilterMatrixValue());
-    } else {
-        // Chrome fails with "Unsafe attempt to load URL ... Domains, protocols and ports must match.
-        filterValue = 'url(#dark-reader-filter)';
-        reverseFilterValue = 'url(#dark-reader-reverse-filter)';
-    }
+    
+    // Chrome fails with "Unsafe attempt to load URL ... Domains, protocols and ports must match.
+    filterValue = 'url(#dark-reader-filter)';
+    reverseFilterValue = 'url(#dark-reader-reverse-filter)';
+    
     return cssFilterStyleheetTemplate(filterValue, reverseFilterValue, config, url, frameURL, inversionFixes);
 }
 

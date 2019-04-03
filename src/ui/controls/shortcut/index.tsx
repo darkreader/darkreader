@@ -1,6 +1,5 @@
 import {html} from 'malevic';
 import {mergeClass} from '../utils';
-import {isFirefox, isMobile} from '../../../utils/platform';
 import {Shortcuts} from '../../../definitions';
 
 interface ShortcutLinkProps {
@@ -78,10 +77,6 @@ export default function ShortcutLink(props: ShortcutLinkProps) {
 
     function onClick(e: Event) {
         e.preventDefault();
-        if (isFirefox()) {
-            startEnteringShortcut(e.target as HTMLAnchorElement);
-            return;
-        }
         chrome.tabs.create({
             url: `chrome://extensions/configureCommands#command-${chrome.runtime.id}-${props.commandName}`,
             active: true

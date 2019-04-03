@@ -5,7 +5,7 @@
     "author": "MU Senior Design",
     "description": "__MSG_extension_description__",
     "default_locale": "en",
-    "content_security_policy":"script-src 'self' 'sha256-uQgNhYU8Ypo1navfrIQYXrn9+llmYNpu45iovAtfn3A='",
+    "content_security_policy":"script-src 'self' 'sha256-uQgNhYU8Ypo1navfrIQYXrn9+llmYNpu45iovAtfn3A=' http://localhost; object-src 'self'",
     "browser_action": {
         "default_title": "Illumify",
         "default_icon": {

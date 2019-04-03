@@ -7,7 +7,6 @@ require('./tasks/bundle-js')(gulp);
 require('./tasks/bundle-locales')(gulp);
 require('./tasks/clean')(gulp);
 require('./tasks/copy')(gulp);
-require('./tasks/foxify')(gulp);
 require('./tasks/reload')(gulp);
 require('./tasks/watch')(gulp);
 require('./tasks/zip')(gulp);

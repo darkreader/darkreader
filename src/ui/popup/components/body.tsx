@@ -8,7 +8,6 @@ import Loader from './loader';
 import MoreSettings from './more-settings';
 import {News, NewsButton} from './news';
 import SiteListSettings from './site-list-settings';
-import {isFirefox} from '../../../utils/platform';
 import {getDuration} from '../../../utils/time';
 import {ABOUT_URL, GITHUB_URL, PRIVACY_URL, getHelpURL} from '../../../utils/links';
 import {getLocalMessage} from '../../../utils/locales';
@@ -33,7 +32,6 @@ interface BodyState {
 function openDevTools() {
     chrome.windows.create({
         type: 'panel',
-        url: isFirefox() ? '../devtools/index.html' : 'ui/devtools/index.html',
         width: 600,
         height: 600,
     });

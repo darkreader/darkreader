@@ -7,7 +7,6 @@ import TabManager from './tab-manager';
 import UserStorage from './user-storage';
 import {setWindowTheme, resetWindowTheme} from './window-theme';
 import {getFontList, getCommands, setShortcut} from './utils/extension-api';
-import {isFirefox} from '../utils/platform';
 import {isInTimeInterval} from '../utils/time';
 import {isURLInList, getURLHost} from '../utils/url';
 import ThemeEngines from '../generators/theme-engines';
@@ -107,10 +106,6 @@ export class Extension {
     }
 
     private registerCommands() {
-        if (!chrome.commands) {
-            // Fix for Firefox Android
-            return;
-        }
         chrome.commands.onCommand.addListener((command) => {
             if (command === 'toggle') {
                 console.log('Toggle command entered');
@@ -288,12 +283,6 @@ export class Extension {
                     };
                 }
                 case ThemeEngines.svgFilter: {
-                    if (isFirefox()) {
-                        return {
-                            type: 'add-css-filter',
-                            data: createSVGFilterStylesheet(filterConfig, url, frameURL, this.config.INVERSION_FIXES),
-                        };
-                    }
                     return {
                         type: 'add-svg-filter',
                         data: {

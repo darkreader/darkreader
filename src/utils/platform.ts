@@ -1,6 +1,3 @@
-export function isFirefox() {
-    return navigator.userAgent.indexOf('Firefox') >= 0;
-}
 
 export function isVivaldi() {
     return navigator.userAgent.toLowerCase().indexOf('vivaldi') >= 0;

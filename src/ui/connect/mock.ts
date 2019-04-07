@@ -19,6 +19,7 @@ export function getMockData(override = {}): ExtensionData {
                 textScale: 100,
                 useColorCorrection: false,
                 colorblindnessType: ColorblindnessType.deuteranopia,
+                colorblindnessSensitivity: 0.5,
                 colorCorrectionType: ColorCorrectionType.lmsDaltonization,
                 unclickedColor: '0000FF',
                 clickedColor: '551A8B',

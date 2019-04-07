@@ -277,29 +277,42 @@ function getBgImageModifier(prop: string, value: string, rule: CSSStyleRule, isC
 
         const getBgImageValue = (imageDetails: ImageDetails, filter: FilterConfig) => {
             const {isDark, isLight, isTransparent, isLarge, width} = imageDetails;
-            let result: string;
-            if (isDark && isTransparent && filter.mode === 1 && !isLarge && width > 2) {
-                logInfo(`Inverting dark image ${imageDetails.src}`);
-                const inverted = getFilteredImageDataURL(imageDetails, {...filter, sepia: clamp(filter.sepia + 10, 0, 100)});
-                result = `url("${inverted}")`;
-            } else if (isLight && !isTransparent && filter.mode === 1) {
-                if (isLarge) {
-                    result = 'none';
+            let result: string = null;
+
+            if (!isLarge && width > 2) {
+
+                // Apply some last-minute decisions/rules to the filter before we filter an image...
+                // (for example, we only *actually* filter images that are important, to reduce lag)
+
+                var filterWithRulesApplied = {...filter};
+                var doFilter = false;
+
+                if (filter.mode === 1 // if in dark mode...
+                    && (
+                        (isDark && isTransparent) // invert really dark images be lighter
+                        || (isLight && !isTransparent) // invert really light images be darker
+                    )) {
+                    filterWithRulesApplied.mode === 1;
+                    doFilter = true;
                 } else {
-                    logInfo(`Dimming light image ${imageDetails.src}`);
-                    const dimmed = getFilteredImageDataURL(imageDetails, filter);
-                    result = `url("${dimmed}")`;
+                    filterWithRulesApplied.mode === 0; // otherwise, don't invert images
                 }
-            } else if (filter.mode === 0 && isLight && !isLarge) {
-                logInfo(`Applying filter to image ${imageDetails.src}`);
-                const filtered = getFilteredImageDataURL(imageDetails, {...filter, brightness: clamp(filter.brightness - 10, 5, 200), sepia: clamp(filter.sepia + 10, 0, 100)});
-                result = `url("${filtered}")`;
-            } else if (filter.useColorCorrection) {
-                logInfo(`Applying color filter to image ${imageDetails.src}`);
-                const filtered = getFilteredImageDataURL(imageDetails, filter);
-                result = `url("${filtered}")`;
-            } else {
-                result = null;
+
+                if (filter.mode === 0 && isLight) {
+                    // apply a default light-mode filter to all images
+                    filterWithRulesApplied = {...filterWithRulesApplied, brightness: clamp(filter.brightness - 10, 5, 200), sepia: clamp(filter.sepia + 10, 0, 100)}
+                    doFilter = true;
+                }
+
+                if (filter.useColorCorrection) {
+                    // always filter when using color correction
+                    doFilter = true;
+                }
+
+                if (doFilter) {
+                    const filtered = getFilteredImageDataURL(imageDetails, filter);
+                    result = `url("${filtered}")`;
+                }
             }
             return result;
         };

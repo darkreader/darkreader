@@ -20,9 +20,11 @@ export function createFilterMatrix(config: FilterConfig) {
     }
     if (config.useColorCorrection) {
         if (config.colorblindnessType == 0) {
-            m = multiplyMatrices(Matrix.fullCorrectionDeuteranopia(), m);
+            m = multiplyMatrices(Matrix.fullCorrectionDeuteranopia(config.colorblindnessSensitivity), m);
         } else if (config.colorblindnessType == 1) {
-            m = multiplyMatrices(Matrix.fullCorrectionProtanopia(), m);
+            m = multiplyMatrices(Matrix.fullCorrectionProtanopia(config.colorblindnessSensitivity), m);
+        } else if (config.colorblindnessType == 2) {
+            m = multiplyMatrices(Matrix.fullCorrectionTritanopia(config.colorblindnessSensitivity), m);
         }
     }
     return m;
@@ -137,21 +139,33 @@ export const Matrix = {
         ]
     },
 
-    fullCorrectionDeuteranopia() {
+    fullCorrectionDeuteranopia(strength: number) {
         return [
-            [1.5023294041595, -0.50231420683723, 0, 0, 0],
+            [1 + 0.5023294041595 * strength, -0.50231420683723 * strength, 0, 0, 0],
             [0, 1, 0, 0, 0],
-            [-0.18259012117263, 0.18258459563274, 1, 0, 0],
+            [-0.18259012117263 * strength, 0.18258459563274 * strength, 1, 0, 0],
             [0, 0, 0, 1, 0],
             [0, 0, 0, 0, 1]
         ]
     },
 
-    fullCorrectionProtanopia() {
+    fullCorrectionProtanopia(strength: number) {
         return [
             [1, 0, 0, 0, 0],
-            [0.50894941008343, 0.49105389057512, 0, 0, 0],
-            [0.61732665235893, -0.61732264809677, 1, 0, 0],
+            [0.50894941008343 * strength, 1 + (0.49105389057512 - 1) * strength, 0, 0, 0],
+            [0.61732665235893 * strength, -0.61732264809677 * strength, 1, 0, 0],
+            [0, 0, 0, 1, 0],
+            [0, 0, 0, 0, 1]
+        ]
+    },
+
+    fullCorrectionTritanopia(strength: number) {
+        return [
+            [1 + 2.6143476462267 * strength, -2.6143824108141 * strength, 0, 0, 0],
+            [1.6143497395451 * strength, 1 + -1.6143712037127 * strength, 0, 0, 0],
+            [0, 0, 1, 0, 0],
+            [0, 0, 0, 1, 0],
+            [0, 0, 0, 0, 1]
         ]
     }
 };

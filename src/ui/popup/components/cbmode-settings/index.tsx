@@ -24,8 +24,8 @@ export default function CBModeSettings({data, actions, tab}: ExtWrapper & {tab: 
     }
 
     return (
-        <section class="more-settings">
-            <div class="more-settings__section">
+        <section class="cbmode-settings">
+            <div class="cbmode-settings__section">
                 <CBSettings config={filterConfig} fonts={data.fonts} onChange={setConfig} />
             </div>
             

@@ -139,7 +139,7 @@ export async function manageStyle(element: HTMLLinkElement | HTMLStyleElement, {
     }
 
     function getFilterKey(filter: FilterConfig) {
-        return ['mode', 'brightness', 'contrast', 'grayscale', 'sepia', 'useColorCorrection', 'colorblindnessType', 'colorCorrectionType'].map((p) => `${p}:${filter[p]}`).join(';');
+        return ['mode', 'brightness', 'contrast', 'grayscale', 'sepia', 'useColorCorrection', 'colorblindnessType', 'colorblindnessSensitivity', 'colorCorrectionType'].map((p) => `${p}:${filter[p]}`).join(';');
     }
 
     let renderId = 0;

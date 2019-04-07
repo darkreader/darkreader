@@ -44,6 +44,7 @@ export interface FilterConfig {
     textScale: number;
     useColorCorrection: boolean;
     colorblindnessType: ColorblindnessType;
+    colorblindnessSensitivity: number;
     colorCorrectionType: ColorCorrectionType;
     linkColor: boolean;
     unclickedColor: string;

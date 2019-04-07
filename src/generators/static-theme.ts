@@ -64,7 +64,6 @@ export default function createStaticStylesheet(config: FilterConfig, url: string
         t[prop] = applyColorMatrix(color, createFilterMatrix({...config, mode: 0}));
         return t;
     }, {} as ThemeColors);
-
     const commonTheme = getCommonTheme(staticThemes);
     const siteTheme = getThemeFor(frameURL || url, staticThemes);
 

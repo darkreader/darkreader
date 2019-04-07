@@ -1,6 +1,7 @@
 {
     "extends": "../src/tsconfig",
     "compilerOptions": {
+        "allowJs":true,
         "module": "commonjs",
         "types": [
             "jest",

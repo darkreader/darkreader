@@ -75,7 +75,6 @@ export default function FilterSettings({data, actions, tab}: ExtWrapper & {tab: 
             {contrast}
             {sepia}
             {grayscale}
-            <CustomSettingsToggle data={data} tab={tab} actions={actions} />
         </section>
     );
 }

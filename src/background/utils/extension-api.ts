@@ -1,4 +1,4 @@
-import {isFirefox} from '../../utils/platform';
+import {isFirefox, isEdge} from '../../utils/platform';
 
 declare const browser: {
     commands: {
@@ -9,15 +9,22 @@ declare const browser: {
 export function canInjectScript(url: string) {
     if (isFirefox()) {
         return (url
-            && url.indexOf('about:') !== 0
-            && url.indexOf('moz') !== 0
-            && url.indexOf('view-source:') !== 0
-            && url.indexOf('https://addons.mozilla.org') !== 0
+            && !url.startsWith('about:')
+            && !url.startsWith('moz')
+            && !url.startsWith('view-source:')
+            && !url.startsWith('https://addons.mozilla.org')
+        );
+    }
+    if (isEdge()) {
+        return (url
+            && !url.startsWith('chrome')
+            && !url.startsWith('edge')
+            && !url.startsWith('https://chrome.google.com/webstore')
         );
     }
     return (url
-        && url.indexOf('chrome') !== 0
-        && url.indexOf('https://chrome.google.com/webstore') !== 0
+        && !url.startsWith('chrome')
+        && !url.startsWith('https://chrome.google.com/webstore')
     );
 }
 

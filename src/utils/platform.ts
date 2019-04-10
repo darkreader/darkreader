@@ -1,31 +1,35 @@
 export function isFirefox() {
-    return navigator.userAgent.indexOf('Firefox') >= 0;
+    return navigator.userAgent.includes('Firefox');
 }
 
 export function isVivaldi() {
-    return navigator.userAgent.toLowerCase().indexOf('vivaldi') >= 0;
+    return navigator.userAgent.toLowerCase().includes('vivaldi');
 }
 
 export function isYaBrowser() {
-    return navigator.userAgent.toLowerCase().indexOf('yabrowser') >= 0;
+    return navigator.userAgent.toLowerCase().includes('yabrowser');
 }
 
 export function isOpera() {
     const agent = navigator.userAgent.toLowerCase();
-    return agent.indexOf('opr') >= 0 || agent.indexOf('opera') >= 0;
+    return agent.includes('opr') || agent.includes('opera');
+}
+
+export function isEdge() {
+    return navigator.userAgent.includes('Edg');
 }
 
 export function isWindows() {
-    return navigator.platform.toLowerCase().indexOf('win') === 0;
+    return navigator.platform.toLowerCase().startsWith('win');
 }
 
 export function isMacOS() {
-    return navigator.platform.toLowerCase().indexOf('mac') === 0;
+    return navigator.platform.toLowerCase().startsWith('mac');
 }
 
 export function isMobile() {
     const agent = navigator.userAgent.toLowerCase();
-    return agent.indexOf('mobile') >= 0;
+    return agent.includes('mobile');
 }
 
 export function getChromeVersion() {

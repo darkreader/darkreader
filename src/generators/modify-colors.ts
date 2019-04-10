@@ -79,8 +79,10 @@ function modifyBgHSL({h, s, l, a}) {
     const lMaxS1 = 0.4;
     const sNeutralLim = 0.12;
     const lNeutralLight = 0.8;
-    const sColored = 0.10;
+    const sColored = 0.05;
     const hColored = 205;
+    const hBlue0 = 200;
+    const hBlue1 = 280;
 
     const lMax = scale(s, 0, 1, lMaxS0, lMaxS1);
     const lx = (l < lMax ?
@@ -89,7 +91,7 @@ function modifyBgHSL({h, s, l, a}) {
             lMax :
             scale(l, 0.5, 1, lMax, lMin));
 
-    const isNeutral = l >= lNeutralLight || s < sNeutralLim;
+    const isNeutral = (l >= lNeutralLight && h > hBlue0 && h < hBlue1) || s < sNeutralLim;
     let hx = h;
     let sx = s;
     if (isNeutral) {

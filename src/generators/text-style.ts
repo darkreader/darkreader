@@ -22,6 +22,7 @@ export function createTextStyle(config: FilterConfig): string {
 
 
     if(config.linkColor){
+        console.log(`link color changed to ${config.unclickedColor} and visit changed to ${config.clickedColor}`);
         lines.push('a:link{');
         lines.push(`  color: #${config.unclickedColor};`);
         lines.push('}');

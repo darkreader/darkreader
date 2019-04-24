@@ -217,33 +217,44 @@ export function hoverFunVer2(){
                         var r1 = rgbArray[0];
                         var b1 = rgbArray[1];
                         var g1 = rgbArray[2];
-                        var red = [255, 0, 255];
-                        var green = [0, 255, 0];
-                        var blue = [0, 0, 255];
-                        var pink = [255, 192, 203];
-                        var light_green = [144, 238, 144];
-                        var orange = [255, 165, 0];
-                        var yellow = [255, 255, 0];
-                        var brown = [165, 42, 42];
-                        var light_blue = [173, 216, 230];
-                        var purple = [128, 0, 128];
-                        var white = [255, 255, 255];
-                        var gray = [128, 128, 128];
-                        var black = [0, 0, 0];
-                        colorArray.push(red);
-                        colorArray.push(green);
-                        colorArray.push(blue);
-                        colorArray.push(pink);
-                        colorArray.push(light_green);
-                        colorArray.push(orange);
-                        colorArray.push(yellow);
-                        colorArray.push(brown);
-                        colorArray.push(light_blue);
-                        colorArray.push(purple);
-                        colorArray.push(white);
-                        colorArray.push(gray);
-                        colorArray.push(black);
-                        //console.log(colorArray[0][1]);
+
+                        //Pink Colors
+                        colorArray.push([255, 0, 0]);       //red
+                        colorArray.push([0, 255, 0]);       //green
+                        colorArray.push([0, 0, 255]);       //blue
+                        colorArray.push([255, 192, 203]);   //pink
+                        colorArray.push([144, 238, 144]);   //light green
+                        colorArray.push([255, 165, 0]);     //orange
+                        colorArray.push([255, 255, 0]);     //yellow
+                        colorArray.push([165, 42, 42]);     //brown
+                        colorArray.push([173, 216, 230]);   //light blue
+                        colorArray.push([128, 0, 128]);     //purple
+                        colorArray.push([255, 255, 255]);   //white
+                        colorArray.push([128, 128, 128]);   //gray
+                        colorArray.push([0, 0, 0]);         //black
+                        colorArray.push([255, 182, 193]);   //light pink
+                        colorArray.push([255, 105, 180]);   //hot pink
+                        colorArray.push([255, 20, 147]);    //deep pink
+                        colorArray.push([219, 112, 147]);   //pale violet red
+                        colorArray.push([199, 21, 133]);    //medium violet red
+                        colorArray.push([139, 0, 0]);       //dark red
+                        colorArray.push([255, 160, 122]);   //light salmon
+                        colorArray.push([255, 128, 114]);   //salmon
+                        colorArray.push([240,248,255]);     //alice blue
+                        colorArray.push([250,235,215]);     //antique white
+                        colorArray.push([0,255,255]);       //aqua
+                        colorArray.push([127,255,212]);     //aquamarine
+                        colorArray.push([240,255,255]);     //azure
+                        colorArray.push([245,245,220]);     //beige
+                        colorArray.push([255,228,196]);     //bisque
+                        colorArray.push([255,235,205]);     //blanched almond
+                        colorArray.push([138,43,226]);      //blue violet
+                        colorArray.push([222,184,135]);     //burly wood
+                        colorArray.push([255,127,80]);      //coral
+                        colorArray.push([255,140,0]);       //dark orange
+                        colorArray.push([255,255,224]);     //light yellow
+                        colorArray.push([255,215,0]);       //gold
+                        colorArray.push([128,0,0]);         //maro
 
                         for(i = 0; i < colorArray.length; i++){
                             
@@ -256,48 +267,118 @@ export function hoverFunVer2(){
                             }
                              
                         }
-
+                      
+                                //NAMED COLOR                       //ACTUAL COLOR
                         switch (rgbArrayMinIndex) {
                             case 0:
-                                rgb_final_color = "red";
+                                rgb_final_color = "red";            //red
                                 break;
                             case 1:
-                                rgb_final_color = "green";
+                                rgb_final_color = "green";          //green
                                 break;
                             case 2:
-                                rgb_final_color = "blue";
+                                rgb_final_color = "blue";           //blue
                                 break;
                             case 3:
-                                rgb_final_color = "pink";
+                                rgb_final_color = "pink";           //pink
                                 break;
                             case 4:
-                                rgb_final_color = "light green";
+                                rgb_final_color = "light green";    //light green
                                 break;
                             case 5:
-                                rgb_final_color = "orange";
+                                rgb_final_color = "orange";         //orange
                                 break;
                             case 6:
-                                rgb_final_color = "yellow";
+                                rgb_final_color = "yellow";         //yellow
                                 break;
                             case 7:
-                                rgb_final_color = "brown";
+                                rgb_final_color = "brown";          //brown
                                 break;
                             case 8:
-                                rgb_final_color = "light blue";
+                                rgb_final_color = "light blue";     //light blue
                                 break;
                             case 9:
-                                rgb_final_color = "purple";
+                                rgb_final_color = "purple";         //purple
                                 break;
                             case 10:
-                                rgb_final_color = "white";
+                                rgb_final_color = "white";          //white
                                 break;
                             case 11:
-                                rgb_final_color = "gray";
+                                rgb_final_color = "gray";           //gray
                                 break;
                             case 12:
-                                rgb_final_color = "black";
+                                rgb_final_color = "black";          //black
                                 break;
-                        
+                            case 13:
+                                rgb_final_color = "light pink";     //light pink
+                                break;
+                            case 14:
+                                rgb_final_color = "pink";           //hot pink
+                                break;
+                            case 15:
+                                rgb_final_color = "dark pink";      //deep pink
+                                break;
+                            case 16:
+                                rgb_final_color = "light pink";     //pale violet red
+                                break;
+                            case 17:
+                                rgb_final_color = "dark pink";      //medium violet red
+                                break;
+                            case 18:
+                                rgb_final_color = "dark red"        //dark red
+                                break;
+                            case 19:
+                                rgb_final_color = "pink"            //light salmon POTENTIAL PROBLEM
+                                break;
+                            case 20:
+                                rgb_final_color = "pink"            //salmon
+                                break;
+                            case 21:
+                                rgb_final_color = "light blue"      //alice blue
+                                break;
+                            case 22:
+                                rgb_final_color = "white"           //antique white
+                                break;
+                            case 23:
+                                rgb_final_color = "light blue"      //aqua
+                                break;
+                            case 24:
+                                rgb_final_color = "light blue"      //aquamarine
+                                break;
+                            case 25:
+                                rgb_final_color = "white"           //azure
+                                break;
+                            case 26:
+                                rgb_final_color = "white"           //beige
+                                break;
+                            case 27:
+                                rgb_final_color = "light brown"     //bisque
+                                break;
+                            case 28:
+                                rgb_final_color = "light brown"     //blanched almond POTENTIAL PROBLEM
+                                break;
+                            case 29:
+                                rgb_final_color = "purple"           //blue violet
+                                break;
+                            case 30:
+                                rgb_final_color = "light brown"      //burly wood
+                                break;
+                            case 31:
+                                rgb_final_color = "light orange"    //coral
+                                break;
+                            case 32:
+                                rgb_final_color = "dark orange"     //dark orange
+                                break;
+                            case 33:
+                                rgb_final_color = "light yellow"    //light yellow
+                                break;
+                            case 34:
+                                rgb_final_color = "dark yellow"     //gold
+                                break;
+                            case 35:
+                                rgb_final_color = "dark brown"      //maroon
+                                break;
+
                             default:
                                 break;
                         }
@@ -324,7 +405,9 @@ export function hoverFunVer2(){
                                 //var final_color = rgbToColor(rgbArray);
                                 //console.log(rgbArray);
                                 console.log(hsvArray[0], hsvArray[1], hsvArray[2]);
-                                //console.log(final_color);
+                                console.log(rgbArray[0], rgbArray[1], rgbArray[2]);
+                                console.log(final_color);
+
                                 //html stuff
                                 ColorHoverThing.textContent = final_color;
                                 //console.log(hsvArray[0]);    

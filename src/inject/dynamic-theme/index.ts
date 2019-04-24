@@ -1,5 +1,6 @@
 import {replaceCSSVariables, getElementCSSVariables} from './css-rules';
 import {overrideInlineStyle, getInlineOverrideStyle, watchForInlineStyles, stopWatchingForInlineStyles, INLINE_STYLE_SELECTOR} from './inline-style';
+import {changeMetaThemeColorWhenAvailable, restoreMetaThemeColor} from './meta-theme-color';
 import {getModifiedUserAgentStyle, getModifiedFallbackStyle, cleanModificationCache, parseColorWithCache} from './modify-css';
 import {manageStyle, shouldManageStyle, STYLE_SELECTOR, StyleManager} from './style-manager';
 import {watchForStyleChanges, stopWatchingForStyleChanges} from './watch';
@@ -259,6 +260,8 @@ function createThemeAndWatchForUpdates() {
     } else {
         runDynamicStyle();
     }
+
+    changeMetaThemeColorWhenAvailable(filter);
 }
 
 function watchForUpdates() {
@@ -333,6 +336,7 @@ export function removeDynamicTheme() {
     cleanDynamicThemeCache();
     removeNode(document.querySelector('.darkreader--fallback'));
     if (document.head) {
+        restoreMetaThemeColor();
         removeNode(document.head.querySelector('.darkreader--user-agent'));
         removeNode(document.head.querySelector('.darkreader--text'));
         removeNode(document.head.querySelector('.darkreader--invert'));

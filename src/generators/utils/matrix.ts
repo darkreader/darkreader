@@ -18,7 +18,7 @@ export function createFilterMatrix(config: FilterConfig) {
     if (config.mode === 1) {
         m = multiplyMatrices(m, Matrix.invertNHue());
     }
-    if (config.useColorCorrection) {
+    if (config.useColorCorrection && config.colorblindnessSensitivity > 0) {
         if (config.colorblindnessType == 0) {
             m = multiplyMatrices(Matrix.fullCorrectionDeuteranopia(config.colorblindnessSensitivity), m);
         } else if (config.colorblindnessType == 1) {

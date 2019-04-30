@@ -292,10 +292,10 @@ function getBgImageModifier(prop: string, value: string, rule: CSSStyleRule, isC
                         (isDark && isTransparent) // invert really dark images be lighter
                         || (isLight && !isTransparent) // invert really light images be darker
                     )) {
-                    filterWithRulesApplied.mode === 1;
+                    filterWithRulesApplied.mode = 1;
                     doFilter = true;
                 } else {
-                    filterWithRulesApplied.mode === 0; // otherwise, don't invert images
+                    filterWithRulesApplied.mode = 0; // otherwise, don't invert images
                 }
 
                 if (filter.mode === 0 && isLight) {
@@ -304,13 +304,16 @@ function getBgImageModifier(prop: string, value: string, rule: CSSStyleRule, isC
                     doFilter = true;
                 }
 
-                if (filter.useColorCorrection) {
+                if (filter.useColorCorrection && filter.colorblindnessSensitivity > 0) {
                     // always filter when using color correction
                     doFilter = true;
                 }
 
-                if (doFilter) {
-                    const filtered = getFilteredImageDataURL(imageDetails, filter);
+                // in our current stage of development, we don't care much about the lag reduction of this feature.
+                var forceDoFilter = true;
+
+                if (doFilter || forceDoFilter) {
+                    const filtered = getFilteredImageDataURL(imageDetails, filterWithRulesApplied);
                     result = `url("${filtered}")`;
                 }
             }

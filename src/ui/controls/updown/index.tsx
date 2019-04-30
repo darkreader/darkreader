@@ -44,6 +44,10 @@ export default function UpDown(props: UpDownProps) {
         props.onChange(clamp(normalize(props.value - props.step)));
     }
 
+    function processInput(x: number) {
+        return clamp(normalize(x));
+    }
+
     function onSliderChange(sliderValue: number) {
         props.onChange(clamp(normalize(sliderValue)));
     }
@@ -52,12 +56,16 @@ export default function UpDown(props: UpDownProps) {
         props.onChange(clamp(normalize(props.value + props.step)));
     }
 
-    const valueText = (props.value === props.default
-        ? getLocalMessage('off').toLocaleLowerCase()
-        : props.value > props.default
-            ? `+${normalize(props.value - props.default)}`
-            : `-${normalize(props.default - props.value)}`
-    );
+    function getValueText(sliderValue: number) {
+        return (sliderValue === props.default
+            ? getLocalMessage('off').toLocaleLowerCase()
+            : sliderValue > props.default
+                ? `+${normalize(sliderValue - props.default)}`
+                : `-${normalize(props.default - sliderValue)}`
+        )
+    }
+
+    const valueText = getValueText(props.value);
 
     return (
         <div class="updown">
@@ -71,13 +79,17 @@ export default function UpDown(props: UpDownProps) {
                     step={props.step}
                     value={props.value}
                     label={props.name}
-                    onchange={onSliderChange}
+                    oninput={(slider, sliderValue) => {
+                        const updownLabel = slider.parentElement.parentElement.querySelector("#updown-label");
+                        updownLabel.textContent = getValueText(sliderValue);
+                    }}
+                    onchange={(slider, sliderValue) => onSliderChange(sliderValue)}
                 />
                 <Button class={buttonUpCls} onclick={onButtonUpClick} >
                     <span class="updown__icon updown__icon-up"></span>
                 </Button>
             </div>
-            <label class="updown__value-text">
+            <label class="updown__value-text" id='updown-label'>
                 {valueText}
             </label>
         </div>

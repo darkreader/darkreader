@@ -64,11 +64,11 @@
         top: ~"calc(100% - @{size-border})";
         transition: max-height @time-fast;
         width: 100%;
-        z-index: 999;
 
         &--expanded {
             max-height: 12rem;
             transition: max-height @time-slow * 2;
+            z-index: 999;
         }
 
         &--short {

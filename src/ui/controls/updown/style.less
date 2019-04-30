@@ -12,7 +12,10 @@
         flex-direction: row;
 
         > :not(:first-child) {
-            margin-left: @indent-small;
+            margin-left: @indent-small / 2;
+        }
+        > :not(:last-child) {
+            margin-right: @indent-small / 2;
         }
     }
 
@@ -43,11 +46,11 @@
 
     &__icon-up {
         &::before {
-            left: @size-control-inner * 0.5;
+            left: @size-control-inner * 0.475;
             transform: skewX(45deg);
         }
         &::after {
-            left: @size-control-inner * 0.5;
+            left: @size-control-inner * 0.475;
             transform: skewX(-45deg);
         }
     }

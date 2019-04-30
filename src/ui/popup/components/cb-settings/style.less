@@ -8,10 +8,12 @@
     &__cb-select-container {
         display: flex;
         flex-direction: column;
+        align-items: stretch;
 
         &__line {
             display: flex;
             flex-direction: row;
+            justify-content: stretch;
 
             > :not(:first-child) {
                 margin-left: @indent-small;
@@ -28,9 +30,15 @@
             text-align: center;
             white-space: nowrap;
         }
+        
+        &__stack {
+            > :not(:first-child) {
+                margin-top: @indent-small / 2;
+            }
+        }
     }
 
     > :not(:first-child) {
-        margin-top: @indent-small;
+        margin-top: @indent-large * 1.5;
     }
 }

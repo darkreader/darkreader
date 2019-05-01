@@ -389,7 +389,7 @@ export function hoverFunVer2(){
                     var ColorHoverThing = document.createElement('div');
                     ColorHoverThing.textContent = "Color";
                     ColorHoverThing.id = "hoverColorDiv"
-                    ColorHoverThing.setAttribute("style", "position: absolute; left: 500px; top: 30px; font-size: 50px; color: red");
+                    ColorHoverThing.setAttribute("style", "position: fixed; left: 200px; top: 30px; font-size: 30px; color: black; z-index: 99; background-color: white; border: 2px solid black");
                     var root = document.documentElement;
                     root.prepend(ColorHoverThing);
                     
@@ -421,15 +421,11 @@ export function hoverFunVer2(){
                     document.addEventListener("mousemove", mouseMoveFun);
 
                     
-                    var removeFunction = function(e){
-                        window.removeEventListener("scroll", removeFunction);
-                        document.removeEventListener("mousemove", mouseMoveFun);
-                        ColorHoverThing.remove();
-                        
+                    var scrollFunction = function(e){
                         chrome.extension.sendMessage({'message': "User has scrolled"})
                         console.log("message sent");
                     }
-                    window.addEventListener("scroll", removeFunction);
+                    window.addEventListener("scroll", scrollFunction);
 
                    
         

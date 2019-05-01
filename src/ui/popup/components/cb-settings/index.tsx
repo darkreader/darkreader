@@ -134,24 +134,13 @@ export default function CBSettings({config, fonts, onChange}: CbSettingsProps) {
             <script>window.jscolor.installByClassName("jscolor")</script> 
 
             <div class="cb-settings__cb-select-container cb-settings__cb-select-container__stack">
-                <CustToggle
-
-                    //class="site-list-settings__toggle"
-                    checked={true}
-                    labelOn={getLocalMessage('disable_color_hover')}
-                    labelOff={getLocalMessage('enable_color_hover')}
-                    onChange={() => enableHoverFun()}
-                    
-                />
-
-
                 <Button
                     onclick={() => hoverFunVer2()}
                 >
-                    HOVER
+                    BETA HOVER
                 </Button>
+                
             </div>
-
 
         </section>
         

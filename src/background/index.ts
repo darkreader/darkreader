@@ -11,6 +11,24 @@ chrome.runtime.onInstalled.addListener(({reason}) => {
     }
 });
 
+// Set up hover function event listener
+chrome.runtime.onMessage.addListener(
+    function(request, sender, sendResponse){
+        if(request.message == "Capture visible tab") {
+            chrome.tabs.getSelected(request.windowId, function(currentTab) {
+                if (currentTab.id == request.tabId) {
+                    chrome.tabs.captureVisibleTab(request.windowId, {format: "png"}, function(dataUrl) {
+                        sendResponse({message: "Captured visible tab", dataUrl: dataUrl});
+                    });
+                } else {
+                    sendResponse({message: "Did not capture visible tab"});
+                }
+            });
+            return true;
+        }
+    }
+);
+
 declare const __DEBUG__: boolean;
 const DEBUG = __DEBUG__;
 

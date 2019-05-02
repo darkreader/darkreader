@@ -2,7 +2,7 @@ import {html} from 'malevic';
 import {CheckBox, UpDown, Toggle, Select, CustToggle, Button} from '../../../controls';
 import {getLocalMessage} from '../../../../utils/locales';
 import {FilterConfig} from '../../../../definitions';
-import {hoverFunVer1, enableHoverFun, hoverFunVer2, hoverFunVer3} from '../cb-settings/hoverFunctions'
+import {hoverFunVer2} from '../cb-settings/hoverFunctions'
 import {ColorblindnessType, ColorCorrectionType} from '../../../../generators/css-filter'
 
 

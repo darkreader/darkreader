@@ -83,89 +83,7 @@ export function hoverFunVer2(){
                     function getViewportDimensions() {
                         return {width: window.innerWidth, height: window.innerHeight};
                     }
-                    //convert rgb values to hsv values
-                    function rgbtoHSV(rgbArray){
-                        //rgb values need to be in float (0 - 1) instead of (0 - 255)
-                        var red = rgbArray[0] / 255.0;
-                        var green = rgbArray[1] / 255.0;
-                        var blue = rgbArray[2] / 255.0;
-                        
-                        var res = [];
-                        var k = 0.0;
-                        var temp;
-                        
-                        if(green < blue){
-                            temp = green;
-                            green = blue;
-                            blue = temp;
-                            k = -1.0;
-                        }
-                        if(red < green){
-                            temp = red;
-                            red = green;
-                            green = temp;
-                            k = -2.0 / 6.0 - k;
-                        }
-                        var chroma = red;
-                        if(green < blue){
-                            chroma -= green;
-                        }
-                        else{
-                            chroma -= blue;
-                        }
-                        res[0] = round((Math.abs(k + (green - blue) / (6.0 * chroma + 1e-20)) * 360), 0);
-                        res[1] = round(chroma / (red + 1e-20), 2);
-                        res[2] = round(red, 2);
-                        return res; 
-                    }
-                    function HSVtoColor(hsvArray){
-                        hue = hsvArray[0];
-                        sat = hsvArray[1];
-                        val = hsvArray[2];
-                        
-                        //Begin Error checking
-                        if(hue < 0 || hue > 360){
-                            console.log("Hue value: " + hue + " Hue is not between 0 and 360");
-                        }
-                        //Begin HSV testing
-                        //TODO: Add black, white, gray, orange
-                        var color;
-                        if(val < 0.2){
-                            color = "black";
-                        }
-                        else if((sat < 0.2) && (val < 0.85)){
-                            color = "grey";
-                        }
-                        else if((sat < 0.15) && (val > 0.85)){
-                            color = "white";
-                        }
-                        else if((hue >= 0) && (hue < 30)){
-                            color = "red";
-                        }
-                        else if((hue >= 30) && (hue < 60)){
-                            color = "orange";
-                        }
-                        else if((hue >= 60) && (hue < 110)){
-                            color = "yellow";
-                        }
-                        else if((hue >= 110) && (hue < 180)){
-                            color = "green";
-                        }
-                        else if((hue >= 180) && (hue < 240)){
-                            color = "cyan";
-                        }
-                        else if((hue >= 240) && (hue < 300)){
-                            color = "blue";
-                        }
-                        else if((hue >= 300) && (hue < 360)){
-                            color = "magenta";
-                        }
-                        else{
-                            color = "unknown?"
-                        }
-                        return color;
-                    }
-
+                    
                     function rgbToColor(rgbArray){
                         var colorArray = [];
                         var rgbArrayMinIndex = 0;
@@ -373,8 +291,7 @@ export function hoverFunVer2(){
                                     y: Math.round(mouseCoords.y * (canvas.height / viewport.height))
                                 };
                                 var rgbArray = getPixelXY(canvas.image_data, adjustedMouseCoords.x, adjustedMouseCoords.y);
-                                var hsvArray = rgbtoHSV(rgbArray);
-                                var final_color = HSVtoColor(hsvArray);
+                                var final_color = rgbToColor(rgbArray);
     
                                 indicatorText.textContent = final_color;
                             }

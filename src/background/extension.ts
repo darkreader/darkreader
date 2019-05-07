@@ -299,13 +299,15 @@ export class Extension {
     //----------------------
 
     private getURLInfo(url: string): TabInfo {
-        const {DARK_SITES} = this.config;
+        const {DARK_SITES, UNSUPPORTED_SITES} = this.config;
         const isInDarkList = isURLInList(url, DARK_SITES);
+        const isSupported = !isURLInList(url, UNSUPPORTED_SITES);
         const isProtected = !canInjectScript(url);
         return {
             url,
             isInDarkList,
-            isProtected,
+            isProtected: isProtected,
+            isSupported,
         };
     }
 

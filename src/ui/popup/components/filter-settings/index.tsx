@@ -70,7 +70,7 @@ export default function FilterSettings({data, actions, tab}: ExtWrapper & {tab: 
 
     return (
         <section class="filter-settings">
-            <ModeToggle mode={filterConfig.mode} onChange={(mode) => setConfig({mode})} />
+            {/* <ModeToggle mode={filterConfig.mode} onChange={(mode) => setConfig({mode})} /> */}
             {brightness}
             {contrast}
             {sepia}

@@ -96,8 +96,11 @@ function createUrlRegex(urlTemplate: string): RegExp {
     return new RegExp(result, 'i');
 }
 
-export function isURLEnabled(url: string, userSettings: UserSettings, {isProtected, isInDarkList}) {
+export function isURLEnabled(url: string, userSettings: UserSettings, {isProtected, isInDarkList, isSupported}) {
     if (isProtected) {
+        return false;
+    }
+    if (!isSupported) {
         return false;
     }
     const isURLInUserList = isURLInList(url, userSettings.siteList);

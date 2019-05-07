@@ -30,7 +30,7 @@ function Header({data, actions, tab, onMoreToggleSettingsClick}: HeaderProps) {
     return (
         <header class="header">
             <img class="header__logo" src="../assets/images/darkreader-type.svg" alt="Dark Reader" />
-            <div class="header__control header__site-toggle">
+            {/* <div class="header__control header__site-toggle">
                 <SiteToggle
                     data={data}
                     tab={tab}
@@ -55,7 +55,7 @@ function Header({data, actions, tab, onMoreToggleSettingsClick}: HeaderProps) {
                         onSetShortcut={(shortcut) => actions.setShortcut('addSite', shortcut)}
                     />
                 )}
-            </div>
+            </div> */}
             <div class="header__control header__app-toggle">
                 <Toggle checked={data.isEnabled} labelOn={getLocalMessage('on')} labelOff={getLocalMessage('off')} onChange={toggleExtension} />
                 <Shortcut

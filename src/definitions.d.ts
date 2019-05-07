@@ -71,6 +71,7 @@ export interface TabInfo {
     url: string;
     isProtected: boolean;
     isInDarkList: boolean;
+    isSupported: boolean;
 }
 
 export interface Message {

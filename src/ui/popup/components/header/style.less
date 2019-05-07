@@ -1,17 +1,13 @@
 @import "../../../theme";
 
 .header {
-    display: grid;
-    grid: 
-        "logo logo"
-        "site-toggle app-toggle"
-        / 5.5fr 4.5fr;
-    grid-gap: @indent-small;
-    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 
     &__logo {
-        grid-area: logo;
-        width: 100%;
+        width: 186px;
+        height: 35px;
     }
 
     &__control {

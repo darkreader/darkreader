@@ -11,6 +11,10 @@ const CONFIG_URLs = {
         remote: 'https://raw.githubusercontent.com/darkreader/darkreader/master/src/config/dark-sites.config',
         local: '../config/dark-sites.config',
     },
+    unsupportedSites: {
+        remote: 'https://raw.githubusercontent.com/praveen001/darkreader/master/src/config/unsupported-sites.config',
+        local: '../config/unsupported-sites.config',
+    },
     dynamicThemeFixes: {
         remote: 'https://raw.githubusercontent.com/darkreader/darkreader/master/src/config/dynamic-theme-fixes.config',
         local: '../config/dynamic-theme-fixes.config',
@@ -28,12 +32,14 @@ const REMOTE_TIMEOUT_MS = getDuration({seconds: 10});
 
 export default class ConfigManager {
     DARK_SITES?: string[];
+    UNSUPPORTED_SITES?: string[];
     DYNAMIC_THEME_FIXES?: DynamicThemeFix[];
     INVERSION_FIXES?: InversionFix[];
     STATIC_THEMES?: StaticTheme[];
 
     raw = {
         darkSites: null,
+        unsupportedSites: null,
         dynamicThemeFixes: null,
         inversionFixes: null,
         staticThemes: null,
@@ -41,6 +47,7 @@ export default class ConfigManager {
 
     overrides = {
         darkSites: null,
+        unsupportedSites: null,
         dynamicThemeFixes: null,
         inversionFixes: null,
         staticThemes: null,
@@ -80,6 +87,19 @@ export default class ConfigManager {
             success: ($sites) => {
                 this.raw.darkSites = $sites;
                 this.handleDarkSites();
+            },
+        });
+    }
+
+    private async loadUnsupportedSites({local}) {
+        await this.loadConfig({
+            name: 'Unsupported Sites',
+            local,
+            localURL: CONFIG_URLs.unsupportedSites.local,
+            remoteURL: CONFIG_URLs.unsupportedSites.remote,
+            success: ($sites) => {
+                this.raw.unsupportedSites = $sites;
+                this.handleUnsupportedSites();
             },
         });
     }
@@ -129,12 +149,18 @@ export default class ConfigManager {
             this.loadDynamicThemeFixes(config),
             this.loadInversionFixes(config),
             this.loadStaticThemes(config),
+            this.loadUnsupportedSites(config),
         ]).catch((err) => console.error('Fatality', err));
     }
 
     private handleDarkSites() {
         const $sites = this.overrides.darkSites || this.raw.darkSites;
         this.DARK_SITES = parseArray($sites);
+    }
+
+    private handleUnsupportedSites() {
+        const $sites = this.overrides.unsupportedSites || this.raw.unsupportedSites;
+        this.UNSUPPORTED_SITES = parseArray($sites);
     }
 
     handleDynamicThemeFixes() {

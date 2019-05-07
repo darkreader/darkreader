@@ -136,6 +136,12 @@ export class Extension {
                 this.setTheme({engine: next});
             }
         });
+
+        chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+            if (changeInfo.url) {
+                this.onSettingsChanged();
+            }
+        });
     }
 
     private async getShortcuts() {

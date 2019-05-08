@@ -305,9 +305,9 @@ export class Extension {
     //----------------------
 
     private getURLInfo(url: string): TabInfo {
-        const {DARK_SITES, UNSUPPORTED_SITES} = this.config;
+        const {DARK_SITES, SUPPORTED_SITES, UNSUPPORTED_SITES} = this.config;
         const isInDarkList = isURLInList(url, DARK_SITES);
-        const isSupported = !isURLInList(url, UNSUPPORTED_SITES);
+        const isSupported = isURLInList(url, SUPPORTED_SITES) && !isURLInList(url, UNSUPPORTED_SITES);
         const isProtected = !canInjectScript(url);
         return {
             url,

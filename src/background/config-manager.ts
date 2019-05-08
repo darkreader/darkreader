@@ -8,23 +8,27 @@ import {InversionFix, StaticTheme, DynamicThemeFix} from '../definitions';
 
 const CONFIG_URLs = {
     darkSites: {
-        remote: 'https://raw.githubusercontent.com/darkreader/darkreader/master/src/config/dark-sites.config',
+        remote: 'https://raw.githubusercontent.com/praveen001/darkreader/master/src/config/dark-sites.config',
         local: '../config/dark-sites.config',
     },
     unsupportedSites: {
         remote: 'https://raw.githubusercontent.com/praveen001/darkreader/master/src/config/unsupported-sites.config',
         local: '../config/unsupported-sites.config',
     },
+    supportedSites: {
+        remote: 'https://raw.githubusercontent.com/praveen001/darkreader/master/src/config/supported-sites.config',
+        local: '../config/supported-sites.config',
+    },
     dynamicThemeFixes: {
-        remote: 'https://raw.githubusercontent.com/darkreader/darkreader/master/src/config/dynamic-theme-fixes.config',
+        remote: 'https://raw.githubusercontent.com/praveen001/darkreader/master/src/config/dynamic-theme-fixes.config',
         local: '../config/dynamic-theme-fixes.config',
     },
     inversionFixes: {
-        remote: 'https://raw.githubusercontent.com/darkreader/darkreader/master/src/config/inversion-fixes.config',
+        remote: 'https://raw.githubusercontent.com/praveen001/darkreader/master/src/config/inversion-fixes.config',
         local: '../config/inversion-fixes.config',
     },
     staticThemes: {
-        remote: 'https://raw.githubusercontent.com/darkreader/darkreader/master/src/config/static-themes.config',
+        remote: 'https://raw.githubusercontent.com/praveen001/darkreader/master/src/config/static-themes.config',
         local: '../config/static-themes.config',
     },
 };
@@ -33,6 +37,7 @@ const REMOTE_TIMEOUT_MS = getDuration({seconds: 10});
 export default class ConfigManager {
     DARK_SITES?: string[];
     UNSUPPORTED_SITES?: string[];
+    SUPPORTED_SITES?: string[];
     DYNAMIC_THEME_FIXES?: DynamicThemeFix[];
     INVERSION_FIXES?: InversionFix[];
     STATIC_THEMES?: StaticTheme[];
@@ -40,6 +45,7 @@ export default class ConfigManager {
     raw = {
         darkSites: null,
         unsupportedSites: null,
+        supportedSites: null,
         dynamicThemeFixes: null,
         inversionFixes: null,
         staticThemes: null,
@@ -48,6 +54,7 @@ export default class ConfigManager {
     overrides = {
         darkSites: null,
         unsupportedSites: null,
+        supportedSites: null,
         dynamicThemeFixes: null,
         inversionFixes: null,
         staticThemes: null,
@@ -104,6 +111,19 @@ export default class ConfigManager {
         });
     }
 
+    private async loadSupportedSites({local}) {
+        await this.loadConfig({
+            name: 'Supported Sites',
+            local,
+            localURL: CONFIG_URLs.supportedSites.local,
+            remoteURL: CONFIG_URLs.supportedSites.remote,
+            success: ($sites) => {
+                this.raw.supportedSites = $sites;
+                this.handleSupportedSites();
+            },
+        });
+    }
+
     private async loadDynamicThemeFixes({local}) {
         await this.loadConfig({
             name: 'Dynamic Theme Fixes',
@@ -150,6 +170,7 @@ export default class ConfigManager {
             this.loadInversionFixes(config),
             this.loadStaticThemes(config),
             this.loadUnsupportedSites(config),
+            this.loadSupportedSites(config),
         ]).catch((err) => console.error('Fatality', err));
     }
 
@@ -161,6 +182,11 @@ export default class ConfigManager {
     private handleUnsupportedSites() {
         const $sites = this.overrides.unsupportedSites || this.raw.unsupportedSites;
         this.UNSUPPORTED_SITES = parseArray($sites);
+    }
+
+    private handleSupportedSites() {
+        const $sites = this.overrides.supportedSites || this.raw.supportedSites;
+        this.SUPPORTED_SITES = parseArray($sites);
     }
 
     handleDynamicThemeFixes() {

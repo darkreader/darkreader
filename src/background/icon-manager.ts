@@ -1,12 +1,12 @@
 import {isHalloween} from '../utils/time';
 
 const ICON_PATHS = {
-    active_19: '../icons/dr_active_19.png',
-    active_38: '../icons/dr_active_38.png',
-    inactive_19: '../icons/dr_inactive_19.png',
-    inactive_38: '../icons/dr_inactive_38.png',
-    pumpkin_19: '../icons/pumpkin_19.png',
-    pumpkin_38: '../icons/pumpkin_38.png',
+    active_19: '../icons/amagi_icon.png',
+    active_38: '../icons/amagi_icon.png',
+    inactive_19: '../icons/amagi_icon.png',
+    inactive_38: '../icons/amagi_icon.png',
+    pumpkin_19: '../icons/amagi_icon.png',
+    pumpkin_38: '../icons/amagi_icon.png',
 };
 
 export default class IconManager {

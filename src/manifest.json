@@ -1,22 +1,22 @@
 {
     "manifest_version": 2,
-    "name": "Dark Reader",
+    "name": "Amagi Cloudport Dark Theme",
     "version": "4.7.12",
     "author": "Alexander Shutov",
     "description": "__MSG_extension_description__",
     "default_locale": "en",
     "browser_action": {
-        "default_title": "Dark Reader",
+        "default_title": "Amagi Cloudport Dark Theme",
         "default_icon": {
-            "38": "icons/dr_active_38.png",
-            "19": "icons/dr_active_19.png"
+            "38": "icons/amagi_icon.png",
+            "19": "icons/amagi_icon.png"
         },
         "default_popup": "ui/popup/index.html"
     },
     "icons": {
-        "16": "icons/dr_16.png",
-        "48": "icons/dr_48.png",
-        "128": "icons/dr_128.png"
+        "16": "icons/amagi_icon.png",
+        "48": "icons/amagi_icon.png",
+        "128": "icons/amagi_icon.png"
     },
     "background": {
         "persistent": true,

@@ -7,7 +7,7 @@ extension.start();
 
 chrome.runtime.onInstalled.addListener(({reason}) => {
     if (reason === 'install') {
-        chrome.tabs.create({url: getHelpURL()});
+        // chrome.tabs.create({url: getHelpURL()});
     }
 });
 

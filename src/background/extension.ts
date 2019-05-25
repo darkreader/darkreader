@@ -16,6 +16,7 @@ import {getDynamicThemeFixesFor} from '../generators/dynamic-theme';
 import createStaticStylesheet from '../generators/static-theme';
 import {createSVGFilterStylesheet, getSVGFilterMatrixValue, getSVGReverseFilterMatrixValue} from '../generators/svg-filter';
 import {ExtensionData, FilterConfig, News, Shortcuts, UserSettings, TabInfo} from '../definitions';
+import {handleManual} from '../inject/prop';
 
 const AUTO_TIME_CHECK_INTERVAL = getDuration({seconds: 10});
 const CONFIG_SYNC_INTERVAL = getDuration({days: 1});
@@ -94,7 +95,9 @@ export class Extension {
                     await new Promise((resolve) => this.awaiting.push(resolve));
                 }
                 const url = await this.tabs.getActiveTabURL();
-                return await this.getURLInfo(url);
+                const info = await this.getURLInfo(url)
+                handleManual(!info.isProtected && info.isInDarkList)
+                return info;
             },
             changeSettings: (settings) => this.changeSettings(settings),
             setTheme: (theme) => this.setTheme(theme),
@@ -311,6 +314,7 @@ export class Extension {
 
     private getTabMessage = (url: string, frameURL: string) => {
         const urlInfo = this.getURLInfo(url);
+        handleManual(!urlInfo.isProtected && urlInfo.isInDarkList)
         if (this.isEnabled() && isURLEnabled(url, this.user.settings, urlInfo)) {
             const custom = this.user.settings.customThemes.find(({url: urlList}) => isURLInList(url, urlList));
             const filterConfig = custom ? custom.theme : this.user.settings.theme;

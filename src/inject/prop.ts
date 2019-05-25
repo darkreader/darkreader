@@ -20,7 +20,7 @@ export function handleProp(type: string, data: Object) {
     user = {
         mode: codeToName[type],
         enabled: type !== 'clean-up',
-        options: JSON.stringify(data)
+        options: data
     }
 
     // Initialise property

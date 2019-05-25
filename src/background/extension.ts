@@ -96,7 +96,6 @@ export class Extension {
                 }
                 const url = await this.tabs.getActiveTabURL();
                 const info = await this.getURLInfo(url)
-                handleManual(!info.isProtected && info.isInDarkList)
                 return info;
             },
             changeSettings: (settings) => this.changeSettings(settings),
@@ -314,7 +313,6 @@ export class Extension {
 
     private getTabMessage = (url: string, frameURL: string) => {
         const urlInfo = this.getURLInfo(url);
-        handleManual(!urlInfo.isProtected && urlInfo.isInDarkList)
         if (this.isEnabled() && isURLEnabled(url, this.user.settings, urlInfo)) {
             const custom = this.user.settings.customThemes.find(({url: urlList}) => isURLInList(url, urlList));
             const filterConfig = custom ? custom.theme : this.user.settings.theme;

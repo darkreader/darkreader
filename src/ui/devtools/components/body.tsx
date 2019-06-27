@@ -73,7 +73,7 @@ function Body({data, actions}: BodyProps) {
                 <Button onclick={apply}>Apply</Button>
             </div>
             <p id="description">
-                Read about this tool <strong><a href={DEVTOOLS_DOCS_URL} target="_blank">here</a></strong>.
+                Read about this tool <strong><a href={DEVTOOLS_DOCS_URL} target="_blank" rel="noopener noreferrer">here</a></strong>.
                 If a <strong>popular</strong> website looks incorrect
                 e-mail to <strong>DarkReaderApp@gmail.com</strong>
             </p>

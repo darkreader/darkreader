@@ -1,5 +1,5 @@
 import {m} from 'malevic';
-import withState, {useState} from 'malevic/state';
+import {withState, useState} from 'malevic/state';
 import {Button} from '../../controls';
 import ThemeEngines from '../../../generators/theme-engines';
 import {DEVTOOLS_DOCS_URL} from '../../../utils/links';
@@ -63,9 +63,8 @@ function Body({data, actions}: BodyProps) {
             <h3 id="sub-title">{wrapper.header}</h3>
             <textarea
                 id="editor"
-                native
-                didmount={onTextRender}
-                didupdate={onTextRender}
+                attached={onTextRender}
+                updated={onTextRender}
             />
             <label id="error-text">{state.errorText}</label>
             <div id="buttons">

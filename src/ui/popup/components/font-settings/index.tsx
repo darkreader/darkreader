@@ -28,7 +28,7 @@ export default function FontSettings({config, fonts, onChange}: FontSettingsProp
                                 </div>
                             );
                             return map;
-                        }, {} as {[font: string]: Malevic.Declaration;})}
+                        }, {} as {[font: string]: Malevic.Spec;})}
                     />
                 </div>
                 <label class="font-settings__font-select-container__label">

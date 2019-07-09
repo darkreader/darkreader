@@ -1,5 +1,6 @@
-import {m, getData} from 'malevic';
-import withState, {useState} from 'malevic/state';
+import {m} from 'malevic';
+import {getContext} from 'malevic/dom';
+import {withState, useState} from 'malevic/state';
 import Button from '../button';
 import TextBox from '../textbox';
 import VirtualScroll from '../virtual-scroll';
@@ -7,7 +8,7 @@ import VirtualScroll from '../virtual-scroll';
 interface SelectProps {
     value: string;
     options: {
-        [value: string]: Malevic.Declaration;
+        [value: string]: Malevic.Child;
     };
     onChange: (value: string) => void;
 }
@@ -17,23 +18,20 @@ interface SelectState {
     focusedIndex: number;
 }
 
-const valueNodes = new WeakMap<Element, Map<string, Element>>();
-
 function Select(props: SelectProps) {
     const {state, setState} = useState<SelectState>({isExpanded: false, focusedIndex: null});
     const values = Object.keys(props.options);
 
-    let rootNode: Element;
+    const {store} = getContext();
+    const valueNodes: Map<string, Element> = store.valueNodes || (store.valueNodes = new Map());
+    const nodesValues: WeakMap<Element, string> = store.nodesValues || (store.nodesValues = new WeakMap());
 
     function onRender(node) {
-        rootNode = node;
-        if (!valueNodes.has(rootNode)) {
-            valueNodes.set(rootNode, new Map());
-        }
+        store.rootNode = node;
     }
 
     function onOuterClick(e: MouseEvent) {
-        const r = rootNode.getBoundingClientRect();
+        const r = (store.rootNode as Element).getBoundingClientRect();
         if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) {
             window.removeEventListener('click', onOuterClick);
             collapseList();
@@ -90,28 +88,31 @@ function Select(props: SelectProps) {
 
     function onSelectOption(e: MouseEvent) {
         let current = e.target as HTMLElement;
-        while (current && !current.matches('.select__option')) {
+        while (current && !nodesValues.has(current)) {
             current = current.parentElement;
         }
 
         if (current) {
-            const value = getData(current);
+            const value = nodesValues.get(current);
             props.onChange(value);
         }
 
         collapseList();
     }
 
-    function saveValueNode(value, domNode) {
-        valueNodes.get(rootNode).set(value, domNode);
+    function saveValueNode(value: string, domNode: Element) {
+        valueNodes.set(value, domNode);
+        nodesValues.set(domNode, value);
     }
 
     function removeValueNode(value) {
-        valueNodes.get(rootNode).delete(value);
+        const el = valueNodes.get(value);
+        valueNodes.delete(value);
+        nodesValues.delete(el);
     }
 
     return (
-        <span class="select" didmount={onRender} didupdate={onRender}>
+        <span class="select" attached={onRender} updated={onRender}>
             <span class="select__line">
                 <TextBox
                     class="select__textbox"
@@ -139,9 +140,9 @@ function Select(props: SelectProps) {
                     <span
                         class="select__option"
                         data={value}
-                        didmount={(domNode) => saveValueNode(value, domNode)}
-                        didupdate={(domNode) => saveValueNode(value, domNode)}
-                        willunmount={() => removeValueNode(value)}
+                        attached={(domNode) => saveValueNode(value, domNode)}
+                        updated={(domNode) => saveValueNode(value, domNode)}
+                        detached={() => removeValueNode(value)}
                     >
                         {content}
                     </span>

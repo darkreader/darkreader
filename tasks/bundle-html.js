@@ -30,7 +30,15 @@ require('ts-node').register({
         '/node_modules\/(?!malevic).*/',
     ]
 });
-const Malevic = require('malevic');
+require('tsconfig-paths').register({
+    baseUrl: './',
+    paths: {
+        'malevic/*': ['node_modules/malevic/umd/*'],
+        'malevic': ['node_modules/malevic/umd/index'],
+    }
+});
+const Malevic = require('malevic/umd/index');
+const MalevicString = require('malevic/umd/string');
 const DevToolsBody = require('../src/ui/devtools/components/body').default;
 const PopupBody = require('../src/ui/popup/components/body').default;
 const CSSEditorBody = require('../src/ui/stylesheet-editor/components/body').default;
@@ -41,7 +49,7 @@ async function bundlePopupHtml({dir}) {
     const data = getMockData({isReady: false});
     const tab = getMockActiveTabInfo();
     const actions = null;
-    const bodyText = Malevic.renderToString(PopupBody({data, tab, actions}));
+    const bodyText = MalevicString.stringify(Malevic.m(PopupBody, {data, tab, actions}));
     html = html.replace('$BODY', bodyText);
     await fs.outputFile(`${dir}/ui/popup/index.html`, html);
 }
@@ -50,7 +58,7 @@ async function bundleDevToolsHtml({dir}) {
     let html = await fs.readFile('src/ui/devtools/index.html', 'utf8');
     const data = getMockData();
     const actions = null;
-    const bodyText = Malevic.renderToString(DevToolsBody({data, actions}));
+    const bodyText = MalevicString.stringify(Malevic.m(DevToolsBody, {data, actions}));
     html = html.replace('$BODY', bodyText);
     await fs.outputFile(`${dir}/ui/devtools/index.html`, html);
 }
@@ -60,7 +68,7 @@ async function bundleCSSEditorHtml({dir}) {
     const data = getMockData();
     const tab = getMockActiveTabInfo();
     const actions = null;
-    const bodyText = Malevic.renderToString(CSSEditorBody({data, tab, actions}));
+    const bodyText = MalevicString.stringify(Malevic.m(CSSEditorBody, {data, tab, actions}));
     html = html.replace('$BODY', bodyText);
     await fs.outputFile(`${dir}/ui/stylesheet-editor/index.html`, html);
 }

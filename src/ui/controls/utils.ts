@@ -1,4 +1,4 @@
-import {classes} from 'malevic';
+import {classes} from '../utils';
 
 function toArray<T>(x: T | T[]) {
     return Array.isArray(x) ? x : [x];

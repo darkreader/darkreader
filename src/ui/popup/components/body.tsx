@@ -115,13 +115,13 @@ function Body(props: BodyProps) {
 
             <footer>
                 <div class="footer-links">
-                    <a class="footer-links__link" href={PRIVACY_URL} target="_blank">{getLocalMessage('privacy')}</a>
-                    <a class="footer-links__link" href={TWITTER_URL} target="_blank">Twitter</a>
-                    <a class="footer-links__link" href={GITHUB_URL} target="_blank">GitHub</a>
-                    <a class="footer-links__link" href={getHelpURL()} target="_blank">{getLocalMessage('help')}</a>
+                    <a class="footer-links__link" href={PRIVACY_URL} target="_blank" rel="noopener noreferrer">{getLocalMessage('privacy')}</a>
+                    <a class="footer-links__link" href={TWITTER_URL} target="_blank" rel="noopener noreferrer">Twitter</a>
+                    <a class="footer-links__link" href={GITHUB_URL} target="_blank" rel="noopener noreferrer">GitHub</a>
+                    <a class="footer-links__link" href={getHelpURL()} target="_blank" rel="noopener noreferrer">{getLocalMessage('help')}</a>
                 </div>
                 <div class="footer-buttons">
-                    <a class="donate-link" href={DONATE_URL} target="_blank">
+                    <a class="donate-link" href={DONATE_URL} target="_blank" rel="noopener noreferrer">
                         <span class="donate-link__text">{getLocalMessage('donate')}</span>
                     </a>
                     <NewsButton active={state.newsOpen} count={displayedNewsCount} onClick={toggleNews} />

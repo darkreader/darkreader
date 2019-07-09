@@ -34,7 +34,7 @@ export function News({news, expanded, onNewsOpen, onClose}: NewsProps) {
                     }
                     return (
                         <div class={{'news__event': true, 'news__event--unread': !event.read}}>
-                            <a class="news__event__link" onclick={() => onNewsOpen(event)} href={event.url} target="_blank">
+                            <a class="news__event__link" onclick={() => onNewsOpen(event)} href={event.url} target="_blank" rel="noopener noreferrer">
                                 <span class="news__event__date">
                                     {formattedDate}
                                 </span>
@@ -53,6 +53,7 @@ export function News({news, expanded, onNewsOpen, onClose}: NewsProps) {
                         href={BLOG_URL}
                         target="_blank"
                         onclick={() => onNewsOpen(...news)}
+                        rel="noopener noreferrer"
                     >{getLocalMessage('read_more')}</a>
                 )}
             </div>

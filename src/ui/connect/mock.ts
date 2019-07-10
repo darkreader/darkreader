@@ -92,8 +92,11 @@ export function createConnectorMock() {
             }
             listener(data);
         },
-        markNewsAsRead() {
-            //
+        markNewsAsRead(ids: string[]) {
+            data.news
+                .filter(({id}) => ids.includes(id))
+                .forEach((news) => news.read = true);
+            listener(data);
         },
         disconnect() {
             //

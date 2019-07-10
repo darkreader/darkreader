@@ -2,10 +2,10 @@ module.exports.rules = {
     'jsx-uses-m-pragma': {
         create(context) {
             const pragma = 'm';
-            const handleOpeningElement = () => context.markVariableAsUsed(pragma);
+            const usePragma = () => context.markVariableAsUsed(pragma);
             return {
-                JSXOpeningElement: handleOpeningElement,
-                JSXOpeningFragment: handleOpeningElement
+                JSXOpeningElement: usePragma,
+                JSXOpeningFragment: usePragma,
             };
         },
     },
@@ -13,8 +13,8 @@ module.exports.rules = {
         create(context) {
             return {
                 JSXOpeningElement(node) {
-                    if (node.name.name) {
-                        const variable = node.name.name;
+                    const variable = node.name.name;
+                    if (variable) {
                         context.markVariableAsUsed(variable);
                     }
                 },

@@ -3,7 +3,7 @@
   "version": "4.7.13",
   "description": "Dark theme for every website",
   "scripts": {
-    "code-style": "eslint 'src/**/*.ts' 'src/**/*.tsx' 'tasks/**/*.js' 'tests/**/*.ts'",
+    "code-style": "eslint --fix 'src/**/*.ts' 'src/**/*.tsx' 'tasks/**/*.js' 'tests/**/*.ts'",
     "debug": "node tasks/debug.js",
     "release": "npm test && node tasks/release.js",
     "test": "jest --config=tests/jest.config.js"

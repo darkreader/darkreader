@@ -287,8 +287,14 @@ export function manageStyle(element: HTMLLinkElement | HTMLStyleElement, {update
             });
         }
 
+        interface AsyncRule {
+            declarations: ReadyDeclaration[];
+            target: (CSSStyleSheet | CSSGroupingRule);
+            index: number;
+        }
+
         const readyDeclarations: ReadyDeclaration[] = [];
-        const asyncDeclarations = new Map<number, {declarations: ReadyDeclaration[]; target: (CSSStyleSheet | CSSGroupingRule); index: number}>();
+        const asyncDeclarations = new Map<number, AsyncRule>();
         let asyncDeclarationCounter = 0;
 
         function buildStyleSheet() {

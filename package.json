@@ -35,6 +35,7 @@
     "globby": "10.0.1",
     "jest": "24.8.0",
     "less": "3.9.0",
+    "prettier": "1.18.2",
     "rollup": "1.16.7",
     "rollup-plugin-commonjs": "10.0.1",
     "rollup-plugin-node-resolve": "5.2.0",

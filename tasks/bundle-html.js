@@ -44,7 +44,7 @@ const PopupBody = require('../src/ui/popup/components/body').default;
 const CSSEditorBody = require('../src/ui/stylesheet-editor/components/body').default;
 const {getMockData, getMockActiveTabInfo} = require('../src/ui/connect/mock');
 
-async function bundlePopupHtml({dir}) {
+async function bundlePopupHTML({dir}) {
     let html = await fs.readFile('src/ui/popup/index.html', 'utf8');
     const data = getMockData({isReady: false});
     const tab = getMockActiveTabInfo();
@@ -54,7 +54,7 @@ async function bundlePopupHtml({dir}) {
     await fs.outputFile(`${dir}/ui/popup/index.html`, html);
 }
 
-async function bundleDevToolsHtml({dir}) {
+async function bundleDevToolsHTML({dir}) {
     let html = await fs.readFile('src/ui/devtools/index.html', 'utf8');
     const data = getMockData();
     const actions = null;
@@ -63,7 +63,7 @@ async function bundleDevToolsHtml({dir}) {
     await fs.outputFile(`${dir}/ui/devtools/index.html`, html);
 }
 
-async function bundleCSSEditorHtml({dir}) {
+async function bundleCSSEditorHTML({dir}) {
     let html = await fs.readFile('src/ui/stylesheet-editor/index.html', 'utf8');
     const data = getMockData();
     const tab = getMockActiveTabInfo();
@@ -73,11 +73,11 @@ async function bundleCSSEditorHtml({dir}) {
     await fs.outputFile(`${dir}/ui/stylesheet-editor/index.html`, html);
 }
 
-async function bundleHtml({production}) {
+async function bundleHTML({production}) {
     const dir = getDestDir({production});
-    await bundlePopupHtml({dir});
-    await bundleDevToolsHtml({dir});
-    await bundleCSSEditorHtml({dir});
+    await bundlePopupHTML({dir});
+    await bundleDevToolsHTML({dir});
+    await bundleCSSEditorHTML({dir});
 }
 
-module.exports = bundleHtml;
+module.exports = bundleHTML;

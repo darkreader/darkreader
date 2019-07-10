@@ -12,7 +12,7 @@ function getLessFiles({production}) {
     };
 }
 
-async function bundleCSSEntry({src, dest, production}) {
+async function bundleCSSEntry({src, dest}) {
     const srcDir = path.join(process.cwd(), path.dirname(src));
     const input = await fs.readFile(src, {encoding: 'utf8'});
     const output = await less.render(input, {paths: [srcDir]});
@@ -23,7 +23,7 @@ async function bundleCSSEntry({src, dest, production}) {
 async function bundleCSS({production}) {
     const files = getLessFiles({production});
     for (let [src, dest] of Object.entries(files)) {
-        await bundleCSSEntry({src, dest, production});
+        await bundleCSSEntry({src, dest});
     }
 }
 

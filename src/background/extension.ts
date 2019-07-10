@@ -18,7 +18,6 @@ import {createSVGFilterStylesheet, getSVGFilterMatrixValue, getSVGReverseFilterM
 import {ExtensionData, FilterConfig, News, Shortcuts, UserSettings, TabInfo} from '../definitions';
 
 const AUTO_TIME_CHECK_INTERVAL = getDuration({seconds: 10});
-const CONFIG_SYNC_INTERVAL = getDuration({days: 1});
 
 export class Extension {
     ready: boolean;
@@ -348,7 +347,8 @@ export class Extension {
                     };
                 }
                 case ThemeEngines.dynamicTheme: {
-                    const {engine, ...filter} = filterConfig;
+                    const filter = {...filterConfig};
+                    delete filter.engine;
                     const fixes = getDynamicThemeFixesFor(url, frameURL, this.config.DYNAMIC_THEME_FIXES);
                     const isIFrame = frameURL != null;
                     return {

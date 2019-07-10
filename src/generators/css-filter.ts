@@ -216,7 +216,7 @@ export function formatInversionFixes(inversionFixes: InversionFix[]) {
 
     return formatSitesFixesConfig(fixes, {
         props: Object.values(inversionFixesCommands),
-        getPropCommandName: (prop) => Object.entries(inversionFixesCommands).find(([command, p]) => p === prop)[0],
+        getPropCommandName: (prop) => Object.entries(inversionFixesCommands).find(([, p]) => p === prop)[0],
         formatPropValue: (prop, value) => {
             if (prop === 'css') {
                 return value.trim();

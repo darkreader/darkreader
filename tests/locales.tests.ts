@@ -1,6 +1,5 @@
 import {readFile as fsReadFile, readdir as fsReadDir} from 'fs';
 import {resolve as resolvePath} from 'path';
-import {resolve} from 'dns';
 
 function readDir(dir) {
     return new Promise<string[]>((resolve, reject) => {

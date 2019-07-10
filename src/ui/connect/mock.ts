@@ -92,7 +92,7 @@ export function createConnectorMock() {
             }
             listener(data);
         },
-        markNewsAsRead(ids) {
+        markNewsAsRead() {
             //
         },
         disconnect() {

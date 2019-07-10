@@ -3,7 +3,7 @@ import {isFirefox, isEdge} from '../../utils/platform';
 declare const browser: {
     commands: {
         update({name, shortcut}): void;
-    }
+    };
 };
 
 export function canInjectScript(url: string) {

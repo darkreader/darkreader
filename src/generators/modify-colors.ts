@@ -1,5 +1,5 @@
 import {rgbToHSL, hslToRGB, rgbToString, rgbToHexString, RGBA, HSLA} from '../utils/color';
-import {scale, clamp} from '../utils/math';
+import {scale} from '../utils/math';
 import {applyColorMatrix, createFilterMatrix} from './utils/matrix';
 import {FilterConfig} from '../definitions';
 

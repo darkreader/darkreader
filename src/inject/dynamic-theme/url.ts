@@ -1,5 +1,3 @@
-import {getMatches} from '../../utils/text';
-
 export function parseURL(url: string) {
     const a = document.createElement('a');
     a.href = url;

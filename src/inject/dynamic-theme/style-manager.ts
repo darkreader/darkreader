@@ -62,7 +62,7 @@ export function manageStyle(element: HTMLLinkElement | HTMLStyleElement, {update
         return cancelAsyncOperations;
     }
 
-    const observer = new MutationObserver((mutations) => {
+    const observer = new MutationObserver(() => {
         update();
     });
     const observerOptions: MutationObserverInit = {attributes: true, childList: true, characterData: true};
@@ -288,7 +288,7 @@ export function manageStyle(element: HTMLLinkElement | HTMLStyleElement, {update
         }
 
         const readyDeclarations: ReadyDeclaration[] = [];
-        const asyncDeclarations = new Map<number, {declarations: ReadyDeclaration[], target: (CSSStyleSheet | CSSGroupingRule), index: number}>();
+        const asyncDeclarations = new Map<number, {declarations: ReadyDeclaration[]; target: (CSSStyleSheet | CSSGroupingRule); index: number}>();
         let asyncDeclarationCounter = 0;
 
         function buildStyleSheet() {

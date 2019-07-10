@@ -1,4 +1,4 @@
-export function classes(...args: Array<string | {[cls: string]: boolean}>) {
+export function classes(...args: (string | {[cls: string]: boolean})[]) {
     const classes = [];
     args.filter((c) => Boolean(c)).forEach((c) => {
         if (typeof c === 'string') {

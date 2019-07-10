@@ -91,7 +91,7 @@ export function rgbToString(rgb: RGBA) {
 }
 
 export function rgbToHexString({r, g, b, a}: RGBA) {
-    return `#${(a != null && a < 1 ? [r, g, b, Math.round(a * 255)] : [r, g, b]).map((x, i) => {
+    return `#${(a != null && a < 1 ? [r, g, b, Math.round(a * 255)] : [r, g, b]).map((x) => {
         return `${x < 16 ? '0' : ''}${x.toString(16)}`;
     }).join('')}`;
 }

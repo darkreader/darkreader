@@ -1,4 +1,4 @@
-import {parse, rgbToHexString, RGBA} from '../utils/color';
+import {parse, RGBA} from '../utils/color';
 import {modifyBackgroundColor, modifyForegroundColor, modifyBorderColor} from '../generators/modify-colors';
 import {FilterConfig} from '../definitions';
 
@@ -50,7 +50,7 @@ const $colors = {
     toolbar_field_text: 'black',
 };
 
-export function setWindowTheme(filter: FilterConfig, $accent?: string) {
+export function setWindowTheme(filter: FilterConfig) {
     const colors = Object.entries($colors).reduce((obj, [key, value]) => {
         const type = themeColorTypes[key];
         const modify: ((rgb: RGBA, filter: FilterConfig) => string) = {

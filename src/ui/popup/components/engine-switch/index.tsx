@@ -29,9 +29,9 @@ export default function EngineSwitch({engine, onChange}: EngineSwitchProps) {
     return (
         <div class="engine-switch">
             <MultiSwitch
-                value={engineNames.find(([code, name]) => code === engine)[1]}
-                options={engineNames.map(([code, name]) => name)}
-                onChange={(value) => onChange(engineNames.find(([code, name]) => name === value)[0])}
+                value={engineNames.find(([code]) => code === engine)[1]}
+                options={engineNames.map(([, name]) => name)}
+                onChange={(value) => onChange(engineNames.find(([, name]) => name === value)[0])}
             />
             <span
                 class={{

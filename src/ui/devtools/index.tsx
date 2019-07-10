@@ -9,7 +9,7 @@ function renderBody(data, actions) {
 
 async function start() {
     const connector = connect();
-    window.addEventListener('unload', (e) => connector.disconnect());
+    window.addEventListener('unload', () => connector.disconnect());
 
     const data = await connector.getData();
     renderBody(data, connector);

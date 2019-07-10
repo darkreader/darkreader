@@ -8,7 +8,7 @@ interface TabPanelProps {
     };
     tabLabels: {
         [name: string]: string;
-    },
+    };
     activeTab: string;
     onSwitchTab: (name: string) => void;
 }

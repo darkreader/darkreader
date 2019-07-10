@@ -14,7 +14,7 @@ function renderBody(data: ExtensionData, tab: TabInfo, actions: ExtensionActions
 
 async function start() {
     const connector = connect();
-    window.addEventListener('unload', (e) => connector.disconnect());
+    window.addEventListener('unload', () => connector.disconnect());
 
     const [data, tab] = await Promise.all([
         connector.getData(),

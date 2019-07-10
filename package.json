@@ -3,7 +3,7 @@
   "version": "4.7.13",
   "description": "Dark theme for every website",
   "scripts": {
-    "code-style": "eslint 'src/**/*.ts' 'tasks/**/*.js' 'tests/**/*.ts'",
+    "code-style": "eslint 'src/**/*.ts' 'src/**/*.tsx' 'tasks/**/*.js' 'tests/**/*.ts'",
     "debug": "node tasks/debug.js",
     "release": "npm test && node tasks/release.js",
     "test": "jest --config=tests/jest.config.js"
@@ -30,6 +30,7 @@
     "@typescript-eslint/parser": "1.11.0",
     "chokidar": "3.0.2",
     "eslint": "6.0.1",
+    "eslint-plugin-local": "1.0.0",
     "fs-extra": "8.1.0",
     "globby": "10.0.1",
     "jest": "24.8.0",

@@ -5,8 +5,7 @@ import ThemeEngines from '../../../generators/theme-engines';
 import {DEVTOOLS_DOCS_URL} from '../../../utils/links';
 import {ExtWrapper} from '../../../definitions';
 
-interface BodyProps extends ExtWrapper {
-}
+type BodyProps = ExtWrapper;
 
 function Body({data, actions}: BodyProps) {
     const {state, setState} = useState({errorText: null as string})
@@ -24,11 +23,11 @@ function Body({data, actions}: BodyProps) {
             apply: (text) => actions.applyDevInversionFixes(text),
             reset: () => actions.resetDevInversionFixes(),
         } : {
-                header: 'Dynamic Theme Editor',
-                fixesText: data.devDynamicThemeFixesText,
-                apply: (text) => actions.applyDevDynamicThemeFixes(text),
-                reset: () => actions.resetDevDynamicThemeFixes(),
-            });
+            header: 'Dynamic Theme Editor',
+            fixesText: data.devDynamicThemeFixesText,
+            apply: (text) => actions.applyDevDynamicThemeFixes(text),
+            reset: () => actions.resetDevDynamicThemeFixes(),
+        });
 
     function onTextRender(node) {
         textNode = node;

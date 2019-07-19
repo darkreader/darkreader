@@ -8,6 +8,7 @@ import Loader from './loader';
 import MoreSettings from './more-settings';
 import {News, NewsButton} from './news';
 import SiteListSettings from './site-list-settings';
+import ThemeEngines from '../../../generators/theme-engines';
 import {isFirefox} from '../../../utils/platform';
 import {getDuration} from '../../../utils/time';
 import {DONATE_URL, GITHUB_URL, PRIVACY_URL, TWITTER_URL, getHelpURL} from '../../../utils/links';
@@ -76,6 +77,14 @@ function Body(props: BodyProps) {
         }
     }
 
+    const globalThemeEngine = props.data.settings.theme.engine;
+    const devtoolsData = props.data.devtools;
+    const hasCustomFixes = (
+        (globalThemeEngine === ThemeEngines.dynamicTheme && devtoolsData.hasCustomDynamicFixes) ||
+        ([ThemeEngines.cssFilter, ThemeEngines.svgFilter].includes(globalThemeEngine) && devtoolsData.hasCustomFilterFixes) ||
+        (globalThemeEngine === ThemeEngines.staticTheme && devtoolsData.hasCustomStaticFixes)
+    );
+
     function toggleMoreToggleSettings() {
         setState({moreToggleSettingsOpen: !state.moreToggleSettingsOpen});
     }
@@ -124,7 +133,13 @@ function Body(props: BodyProps) {
                         <span class="donate-link__text">{getLocalMessage('donate')}</span>
                     </a>
                     <NewsButton active={state.newsOpen} count={displayedNewsCount} onClick={toggleNews} />
-                    <Button onclick={openDevTools} class="dev-tools-button">
+                    <Button
+                        onclick={openDevTools}
+                        class={{
+                            'dev-tools-button': true,
+                            'dev-tools-button--has-custom-fixes': hasCustomFixes,
+                        }}
+                    >
                         🛠 {getLocalMessage('open_dev_tools')}
                     </Button>
                 </div>

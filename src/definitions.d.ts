@@ -7,9 +7,14 @@ export interface ExtensionData {
     fonts: string[];
     news: News[];
     shortcuts: Shortcuts;
-    devDynamicThemeFixesText: string;
-    devInversionFixesText: string;
-    devStaticThemesText: string;
+    devtools: {
+        dynamicFixesText: string;
+        filterFixesText: string;
+        staticThemesText: string;
+        hasCustomDynamicFixes: boolean;
+        hasCustomFilterFixes: boolean;
+        hasCustomStaticFixes: boolean;
+    };
 }
 
 export interface ExtensionActions {

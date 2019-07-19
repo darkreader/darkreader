@@ -154,9 +154,14 @@ export class Extension {
             fonts: this.fonts,
             news: this.news.latest,
             shortcuts: await this.getShortcuts(),
-            devDynamicThemeFixesText: this.devtools.getDynamicThemeFixesText(),
-            devInversionFixesText: this.devtools.getInversionFixesText(),
-            devStaticThemesText: this.devtools.getStaticThemesText(),
+            devtools: {
+                dynamicFixesText: this.devtools.getDynamicThemeFixesText(),
+                filterFixesText: this.devtools.getInversionFixesText(),
+                staticThemesText: this.devtools.getStaticThemesText(),
+                hasCustomDynamicFixes: this.devtools.hasCustomDynamicThemeFixes(),
+                hasCustomFilterFixes: this.devtools.hasCustomFilterFixes(),
+                hasCustomStaticFixes: this.devtools.hasCustomStaticFixes(),
+            },
         };
     }
 

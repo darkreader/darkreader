@@ -7,6 +7,7 @@ interface DevToolsStorage {
     get(key: string): string;
     set(key: string, value: string): void;
     remove(key: string): void;
+    has(key: string): boolean;
 }
 
 class LocalStorageWrapper implements DevToolsStorage {
@@ -34,6 +35,14 @@ class LocalStorageWrapper implements DevToolsStorage {
             return;
         }
     }
+    has(key: string) {
+        try {
+            return localStorage.getItem(key) != null;
+        } catch (err) {
+            console.error(err);
+            return false;
+        }
+    }
 }
 
 class TempStorage implements DevToolsStorage {
@@ -47,6 +56,9 @@ class TempStorage implements DevToolsStorage {
     }
     remove(key: string) {
         this.map.delete(key);
+    }
+    has(key: string) {
+        return this.map.has(key);
     }
 }
 
@@ -66,12 +78,20 @@ export default class DevTools {
         this.onChange = onChange;
     }
 
+    private static KEY_DYNAMIC = 'dev_dynamic_theme_fixes';
+    private static KEY_FILTER = 'dev_inversion_fixes';
+    private static KEY_STATIC = 'dev_static_themes';
+
     private getSavedDynamicThemeFixes() {
-        return this.store.get('dev_dynamic_theme_fixes') || null;
+        return this.store.get(DevTools.KEY_DYNAMIC) || null;
     }
 
     private saveDynamicThemeFixes(text: string) {
-        this.store.set('dev_dynamic_theme_fixes', text);
+        this.store.set(DevTools.KEY_DYNAMIC, text);
+    }
+
+    hasCustomDynamicThemeFixes() {
+        return this.store.has(DevTools.KEY_DYNAMIC);
     }
 
     getDynamicThemeFixesText() {
@@ -81,7 +101,7 @@ export default class DevTools {
     }
 
     resetDynamicThemeFixes() {
-        this.store.remove('dev_dynamic_theme_fixes');
+        this.store.remove(DevTools.KEY_DYNAMIC);
         this.config.overrides.dynamicThemeFixes = null;
         this.config.handleDynamicThemeFixes();
         this.onChange();
@@ -101,11 +121,15 @@ export default class DevTools {
     }
 
     private getSavedInversionFixes() {
-        return this.store.get('dev_inversion_fixes') || null;
+        return this.store.get(DevTools.KEY_FILTER) || null;
     }
 
     private saveInversionFixes(text: string) {
-        this.store.set('dev_inversion_fixes', text);
+        this.store.set(DevTools.KEY_FILTER, text);
+    }
+
+    hasCustomFilterFixes() {
+        return this.store.has(DevTools.KEY_FILTER);
     }
 
     getInversionFixesText() {
@@ -115,7 +139,7 @@ export default class DevTools {
     }
 
     resetInversionFixes() {
-        this.store.remove('dev_inversion_fixes');
+        this.store.remove(DevTools.KEY_FILTER);
         this.config.overrides.inversionFixes = null;
         this.config.handleInversionFixes();
         this.onChange();
@@ -135,11 +159,15 @@ export default class DevTools {
     }
 
     private getSavedStaticThemes() {
-        return this.store.get('dev_static_themes') || null;
+        return this.store.get(DevTools.KEY_STATIC) || null;
     }
 
     private saveStaticThemes(text: string) {
-        this.store.set('dev_static_themes', text);
+        this.store.set(DevTools.KEY_STATIC, text);
+    }
+
+    hasCustomStaticFixes() {
+        return this.store.has(DevTools.KEY_STATIC);
     }
 
     getStaticThemesText() {
@@ -149,7 +177,7 @@ export default class DevTools {
     }
 
     resetStaticThemes() {
-        this.store.remove('dev_static_themes');
+        this.store.remove(DevTools.KEY_STATIC);
         this.config.overrides.staticThemes = null;
         this.config.handleStaticThemes();
         this.onChange();

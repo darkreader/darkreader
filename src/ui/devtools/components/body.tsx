@@ -14,17 +14,17 @@ function Body({data, actions}: BodyProps) {
     const wrapper = (data.settings.theme.engine === ThemeEngines.staticTheme
         ? {
             header: 'Static Theme Editor',
-            fixesText: data.devStaticThemesText,
+            fixesText: data.devtools.staticThemesText,
             apply: (text) => actions.applyDevStaticThemes(text),
             reset: () => actions.resetDevStaticThemes(),
         } : data.settings.theme.engine === ThemeEngines.cssFilter || data.settings.theme.engine === ThemeEngines.svgFilter ? {
             header: 'Inversion Fix Editor',
-            fixesText: data.devInversionFixesText,
+            fixesText: data.devtools.filterFixesText,
             apply: (text) => actions.applyDevInversionFixes(text),
             reset: () => actions.resetDevInversionFixes(),
         } : {
             header: 'Dynamic Theme Editor',
-            fixesText: data.devDynamicThemeFixesText,
+            fixesText: data.devtools.dynamicFixesText,
             apply: (text) => actions.applyDevDynamicThemeFixes(text),
             reset: () => actions.resetDevDynamicThemeFixes(),
         });

@@ -43,9 +43,14 @@ export function getMockData(override = {}): ExtensionData {
             'addSite': 'Alt+Shift+A',
             'toggle': 'Alt+Shift+D'
         },
-        devDynamicThemeFixesText: '',
-        devInversionFixesText: '',
-        devStaticThemesText: '',
+        devtools: {
+            dynamicFixesText: '',
+            filterFixesText: '',
+            staticThemesText: '',
+            hasCustomDynamicFixes: false,
+            hasCustomFilterFixes: false,
+            hasCustomStaticFixes: false,
+        },
     }, override);
 }
 

@@ -1,6 +1,6 @@
 {
   "name": "darkreader",
-  "version": "4.7.13",
+  "version": "4.7.14",
   "description": "Dark theme for every website",
   "scripts": {
     "code-style": "eslint --fix 'src/**/*.ts' 'src/**/*.tsx' 'tasks/**/*.js' 'tests/**/*.ts'",
@@ -13,7 +13,7 @@
     "type": "git",
     "url": "https://github.com/alexanderby/darkreader.git"
   },
-  "author": "Alexander Shutov <shutovby@gmail.com> (http://shutov.by/)",
+  "author": "Aliaksandr Shutau <darkreaderapp@gmail.com> (https://darkreader.org/)",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/alexanderby/darkreader/issues"

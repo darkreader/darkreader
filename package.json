@@ -20,7 +20,7 @@
   },
   "homepage": "https://darkreader.org/",
   "dependencies": {
-    "malevic": "0.16.2"
+    "malevic": "0.16.3"
   },
   "devDependencies": {
     "@types/chrome": "0.0.86",

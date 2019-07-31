@@ -3,12 +3,14 @@
   "version": "4.7.14",
   "description": "Dark theme for every website",
   "scripts": {
-    "code-style": "eslint --fix 'src/**/*.ts' 'src/**/*.tsx' 'tasks/**/*.js' 'tests/**/*.ts'",
+    "api": "node -e \"require('./tasks/bundle-api')()\"",
+    "code-style": "eslint --fix 'src/**/*.ts' 'src/**/*.tsx' 'tasks/**/*.js' 'tests/**/*.ts' 'index.d.ts'",
     "debug": "node tasks/debug.js",
+    "prepublishOnly": "npm test && npm run api",
     "release": "npm test && node tasks/release.js",
     "test": "jest --config=tests/jest.config.js"
   },
-  "private": true,
+  "main": "darkreader.js",
   "repository": {
     "type": "git",
     "url": "https://github.com/alexanderby/darkreader.git"

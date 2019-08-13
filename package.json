@@ -1,6 +1,6 @@
 {
   "name": "darkreader",
-  "version": "4.7.14",
+  "version": "4.7.15",
   "description": "Dark theme for every website",
   "scripts": {
     "api": "node -e \"require('./tasks/bundle-api')()\"",
@@ -15,7 +15,7 @@
     "type": "git",
     "url": "https://github.com/alexanderby/darkreader.git"
   },
-  "author": "Aliaksandr Shutau <darkreaderapp@gmail.com> (https://darkreader.org/)",
+  "author": "Alexander Shutau <darkreaderapp@gmail.com> (https://darkreader.org/)",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/alexanderby/darkreader/issues"

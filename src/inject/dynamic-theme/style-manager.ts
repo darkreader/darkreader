@@ -492,7 +492,7 @@ async function loadText(url: string) {
     if (url.startsWith('data:')) {
         return await (await fetch(url)).text();
     }
-    return await bgFetch({url, responseType: 'text'});
+    return await bgFetch({url, responseType: 'text', mimeType: 'text/css'});
 }
 
 async function replaceCSSImports(cssText: string, basePath: string) {

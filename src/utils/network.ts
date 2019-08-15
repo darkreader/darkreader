@@ -4,7 +4,6 @@ async function getOKResponse(url: string, mimeType?: string) {
         {
             cache: 'force-cache',
             credentials: 'omit',
-            ...(mimeType ? {'Content-Type': mimeType} : {}),
         },
     );
 

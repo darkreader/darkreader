@@ -47,7 +47,6 @@ export class Extension {
     }
 
     isEnabled() {
-        console.log("is enabled function call");
         if (this.user.settings.automation === 'time') {
             const now = new Date();
             return isInTimeInterval(now, this.user.settings.time.activation, this.user.settings.time.deactivation);

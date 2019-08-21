@@ -197,9 +197,6 @@ export function isNightTime(date: Date, latitude: number, longitude: number) {
     const sunsetTime = time.sunsetTime;
     const currentTime = date.getHours() * 3600 + date.getMinutes() * 60 + date.getSeconds();
 
-    console.log("current time: " + daytimeToStr(currentTime));
-    console.log("sunrise time: " + daytimeToStr(sunriseTime));
-    console.log("sunset time: " + daytimeToStr(sunsetTime));
     if (sunsetTime > sunriseTime) {
         return (currentTime > sunsetTime) || (currentTime < sunriseTime);
     } else {

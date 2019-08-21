@@ -65,11 +65,17 @@ export interface UserSettings {
     syncSettings: boolean;
     automation: string;
     time: TimeSettings;
+    location: LocationSettings;
 }
 
 export interface TimeSettings {
     activation: string;
     deactivation: string;
+}
+
+export interface LocationSettings {
+    latitude: number;
+    longitude: number;
 }
 
 export interface TabInfo {

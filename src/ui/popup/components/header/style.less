@@ -45,7 +45,7 @@
             display: inline-block;
             height: @size-control-inner + 2 * @size-border;
             left: 100%;
-            opacity: 0;
+            opacity: 0.5;
             position: absolute;
             top: 0;
             transition: opacity @time-slow, background-color @time-slow, color @time-slow;
@@ -106,6 +106,9 @@
                 + @indent-large
                 + 2 * @size-border + @size-control-inner
                 + @size-text-small-height
+                + @indent-large
+                + 2 * @size-border + @size-control-inner
+                + @size-text-small-height * 2
                 + @indent-large;
             left: 0;
             position: absolute;
@@ -186,9 +189,16 @@
             &__description {
                 font-size: @size-text-small;
                 line-height: @size-text-small-height;
-                margin: 0;
+                margin: 0 0 @size-control-description 0;
                 text-align: center;
                 white-space: nowrap;
+            }
+
+            &__sunset-description {
+                font-size: @size-text-small;
+                line-height: @size-text-small-height;
+                margin: 0;
+                text-align: center;
             }
 
             &::after {

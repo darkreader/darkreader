@@ -8,7 +8,7 @@ import UserStorage from './user-storage';
 import {setWindowTheme, resetWindowTheme} from './window-theme';
 import {getFontList, getCommands, setShortcut, canInjectScript} from './utils/extension-api';
 import {isFirefox} from '../utils/platform';
-import {isInTimeInterval, getDuration} from '../utils/time';
+import {isInTimeInterval, getDuration, isNightTime} from '../utils/time';
 import {isURLInList, getURLHost, isURLEnabled} from '../utils/url';
 import ThemeEngines from '../generators/theme-engines';
 import createCSSFilterStylesheet from '../generators/css-filter';
@@ -47,10 +47,20 @@ export class Extension {
     }
 
     isEnabled() {
+        console.log("is enabled function call");
         if (this.user.settings.automation === 'time') {
             const now = new Date();
             return isInTimeInterval(now, this.user.settings.time.activation, this.user.settings.time.deactivation);
+        } else if (this.user.settings.automation === 'sunset') {
+            const latitude = this.user.settings.location.latitude;
+            const longitude = this.user.settings.location.longitude;
+
+            if (latitude !== undefined && longitude !== undefined) {
+                const now = new Date();
+                return isNightTime(now, latitude, longitude);
+            }
         }
+
         return this.user.settings.enabled;
     }
 
@@ -190,7 +200,7 @@ export class Extension {
 
     private startAutoTimeCheck() {
         setInterval(() => {
-            if (!this.ready || this.user.settings.automation !== 'time') {
+            if (!this.ready || this.user.settings.automation === '') {
                 return;
             }
             const isEnabled = this.isEnabled();
@@ -212,7 +222,9 @@ export class Extension {
             (prev.enabled !== this.user.settings.enabled) ||
             (prev.automation !== this.user.settings.automation) ||
             (prev.time.activation !== this.user.settings.time.activation) ||
-            (prev.time.deactivation !== this.user.settings.time.deactivation)
+            (prev.time.deactivation !== this.user.settings.time.deactivation) ||
+            (prev.location.latitude !== this.user.settings.location.latitude) ||
+            (prev.location.longitude !== this.user.settings.location.longitude)
         ) {
             this.onAppToggle();
         }

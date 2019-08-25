@@ -10,6 +10,7 @@ function queryTabs(query: chrome.tabs.QueryInfo) {
 
 interface TabManagerOptions {
     getConnectionMessage: (url: string, frameUrl: string) => any;
+    onColorSchemeQueryChange: VoidFunction;
 }
 
 interface PortInfo {
@@ -20,7 +21,7 @@ interface PortInfo {
 export default class TabManager {
     private ports: Map<number, Map<number, PortInfo>>;
 
-    constructor({getConnectionMessage}: TabManagerOptions) {
+    constructor({getConnectionMessage, onColorSchemeQueryChange}: TabManagerOptions) {
         this.ports = new Map();
         chrome.runtime.onConnect.addListener((port) => {
             if (port.name === 'tab') {
@@ -48,6 +49,12 @@ export default class TabManager {
                 } else if (message) {
                     port.postMessage(message);
                 }
+
+                port.onMessage.addListener(({ type }: Message) => {
+                    if (type === 'color-theme-media-query-change') {
+                        onColorSchemeQueryChange();
+                    }
+                });
             }
         });
 

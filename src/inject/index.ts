@@ -1,7 +1,8 @@
 import {createOrUpdateStyle, removeStyle} from './style';
 import {createOrUpdateSVGFilter, removeSVGFilter} from './svg-filter';
 import {createOrUpdateDynamicTheme, removeDynamicTheme, cleanDynamicThemeCache} from './dynamic-theme';
-import {logWarn} from './utils/log';
+import {logInfo, logWarn} from './utils/log';
+import {watchForMediaQueryChange} from './utils/watch-color-theme';
 
 function onMessage({type, data}) {
     switch (type) {
@@ -40,3 +41,8 @@ port.onDisconnect.addListener(() => {
     logWarn('disconnect');
     cleanDynamicThemeCache();
 });
+
+port.onDisconnect.addListener(watchForMediaQueryChange(() => {
+    logInfo('Media query was changed');
+    port.postMessage({ type: 'color-theme-media-query-change', data: null });
+}));

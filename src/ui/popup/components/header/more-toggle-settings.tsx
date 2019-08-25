@@ -1,5 +1,5 @@
 import {m} from 'malevic';
-import {CheckBox, TimeRangePicker} from '../../../controls';
+import {CheckBox, TimeRangePicker, TextBox} from '../../../controls';
 import {getLocalMessage} from '../../../../utils/locales';
 import {ExtWrapper} from '../../../../definitions';
 
@@ -35,6 +35,16 @@ export default function MoreToggleSettings({data, actions, isExpanded, onClose}:
                 <p class="header__app-toggle__more-settings__description">
                     {getLocalMessage('set_active_hours')}
                 </p>
+                <div class="header__app-toggle__more-settings__line">
+                    <CheckBox
+                        checked={data.settings.automation === 'system'}
+                        onchange={(e) => actions.changeSettings({automation: e.target.checked ? 'system' : ''})}
+                    />
+                    <TextBox
+                        readonly
+                        value={getLocalMessage('system_dark_theme')}
+                    />
+                </div>
             </div>
         </div>
     );

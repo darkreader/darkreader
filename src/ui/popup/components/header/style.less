@@ -2,7 +2,7 @@
 
 .header {
     display: grid;
-    grid: 
+    grid:
         "logo logo"
         "site-toggle app-toggle"
         / 5.5fr 4.5fr;
@@ -45,7 +45,7 @@
             display: inline-block;
             height: @size-control-inner + 2 * @size-border;
             left: 100%;
-            opacity: 0;
+            opacity: 0.7;
             position: absolute;
             top: 0;
             transition: opacity @time-slow, background-color @time-slow, color @time-slow;
@@ -102,7 +102,7 @@
             border-top: @size-border solid @color-border;
             display: flex;
             flex-direction: column;
-            height: @size-control-inner
+            height: 2 * @size-control-inner
                 + @indent-large
                 + 2 * @size-border + @size-control-inner
                 + @size-text-small-height
@@ -120,7 +120,7 @@
                 opacity: 0;
                 pointer-events: none;
             }
-            
+
             &:not(&--expanded) &__content {
                 padding-bottom: 0;
                 padding-top: 0;

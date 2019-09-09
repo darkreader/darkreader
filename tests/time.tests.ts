@@ -1,4 +1,4 @@
-import {isInTimeInterval, parseTime, getDuration} from '../src/utils/time';
+import {isInTimeInterval, isNightAtLocation, parseTime, getDuration} from '../src/utils/time';
 
 test('Time interval', () => {
     expect(isInTimeInterval(new Date(2018, 11, 4, 10), '9:00', '12:00')).toBe(true);
@@ -31,4 +31,14 @@ test('Duration', () => {
         hours: 8,
         days: 3
     })).toEqual(289488000);
+});
+
+test('Sunrize/sunset', () => {
+    expect(isNightAtLocation(new Date(2019, 9, 9, 0, 0), 52, 31)).toBe(true);
+    expect(isNightAtLocation(new Date(2019, 9, 9, 6, 0), 52, 31)).toBe(true);
+    expect(isNightAtLocation(new Date(2019, 9, 9, 8, 0), 52, 31)).toBe(false);
+    expect(isNightAtLocation(new Date(2019, 9, 9, 12, 0), 52, 31)).toBe(false);
+    expect(isNightAtLocation(new Date(2019, 9, 9, 18, 0), 52, 31)).toBe(false);
+    expect(isNightAtLocation(new Date(2019, 9, 9, 20, 0), 52, 31)).toBe(true);
+    expect(isNightAtLocation(new Date(2019, 9, 9, 23, 59), 52, 31)).toBe(true);
 });

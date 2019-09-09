@@ -18,24 +18,26 @@ export default function MoreToggleSettings({data, actions, isExpanded, onClose}:
         'longitude': {
             min: -180,
             max: 180,
-        }
-    }
+        },
+    };
 
     function getLocationString(location: number) {
-        if (location === undefined) {
+        if (location == null) {
             return '';
         }
 
-        return location.toString() + '°';
+        return `${location}°`;
     }
 
     function locationChanged(inputElement: HTMLInputElement, newValue: string, type: string) {
         if (newValue.trim() === '') {
             inputElement.value = '';
-            locationSettings[type] = undefined;
 
             actions.changeSettings({
-                location: locationSettings
+                location: {
+                    ...locationSettings,
+                    [type]: null,
+                },
             });
 
             return;
@@ -56,10 +58,12 @@ export default function MoreToggleSettings({data, actions, isExpanded, onClose}:
         }
 
         inputElement.value = getLocationString(num);
-        locationSettings[type] = num;
 
         actions.changeSettings({
-            location: locationSettings
+            location: {
+                ...locationSettings,
+                [type]: num,
+            },
         });
     }
 
@@ -91,8 +95,8 @@ export default function MoreToggleSettings({data, actions, isExpanded, onClose}:
                 </p>
                 <div class="header__app-toggle__more-settings__line">
                     <CheckBox
-                        checked={data.settings.automation === 'sunset'}
-                        onchange={(e) => actions.changeSettings({automation: e.target.checked ? 'sunset' : ''})}
+                        checked={data.settings.automation === 'location'}
+                        onchange={(e) => actions.changeSettings({automation: e.target.checked ? 'location' : ''})}
                     />
                     <input
                         class="textbox time-range-picker__input time-range-picker__input--start"

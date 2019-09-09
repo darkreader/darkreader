@@ -30,9 +30,9 @@ export function getMockData(override = {}): ExtensionData {
                 deactivation: '9:00',
             },
             location: {
-                latitude: undefined,
-                longitude: undefined,
-            }
+                latitude: 52.4237178,
+                longitude: 31.021786,
+            },
         } as UserSettings,
         fonts: [
             'serif',

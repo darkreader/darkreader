@@ -71,16 +71,10 @@ export function getDuration(time: Duration) {
     return duration;
 }
 
-function daytimeToStr(time: number)
-{
-    const h = (time / 3600) | 0;
-    const m = ((time % 3600) / 60) | 0;
-    const s = (time % 60) | 0;
-    return h + ":" + m + ":" + s;
-}
-
 function getSunsetSunriseTime(date: Date, latitude: number, longitude: number) {
-    const dayOfYear = Math.floor((Number(date) - Number(new Date(date.getUTCFullYear(), 0, 0))) / (1000 * 60 * 60 * 24));
+    const jan1 = new Date(date.getUTCFullYear(), 0, 0);
+    const oneDay = getDuration({days: 1});
+    const dayOfYear = Math.floor((Number(date) - Number(jan1)) / oneDay);
 
     const zenith = 90.83333333333333;
     const D2R = Math.PI / 180;
@@ -157,11 +151,11 @@ function getSunsetSunriseTime(date: Date, latitude: number, longitude: number) {
         // convert UT value to local time zone of latitude/longitude
         const localT = UT - date.getTimezoneOffset() / 60;
 
-        // convert to seconds
+        // convert to milliseconds
         return {
             alwaysDay: false,
             alwaysNight: false,
-            time: localT * 3600,
+            time: localT * getDuration({hours: 1}),
         };
     }
 
@@ -184,7 +178,7 @@ function getSunsetSunriseTime(date: Date, latitude: number, longitude: number) {
     };
 }
 
-export function isNightTime(date: Date, latitude: number, longitude: number) {
+export function isNightAtLocation(date: Date, latitude: number, longitude: number) {
     const time = getSunsetSunriseTime(date, latitude, longitude);
 
     if (time.alwaysDay) {
@@ -195,7 +189,11 @@ export function isNightTime(date: Date, latitude: number, longitude: number) {
 
     const sunriseTime = time.sunriseTime;
     const sunsetTime = time.sunsetTime;
-    const currentTime = date.getHours() * 3600 + date.getMinutes() * 60 + date.getSeconds();
+    const currentTime = (
+        date.getHours() * getDuration({hours: 1}) +
+        date.getMinutes() * getDuration({minutes: 1}) +
+        date.getSeconds() * getDuration({seconds: 1})
+    );
 
     if (sunsetTime > sunriseTime) {
         return (currentTime > sunsetTime) || (currentTime < sunriseTime);

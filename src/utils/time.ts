@@ -71,15 +71,14 @@ export function getDuration(time: Duration) {
     return duration;
 }
 
-function getSunsetSunriseTime(
+function getSunsetSunriseUTCTime(
     date: Date,
     latitude: number,
     longitude: number,
-    timeZoneOffset: number,
 ) {
-    const jan1 = new Date(date.getUTCFullYear(), 0, 0);
+    const dec31 = new Date(date.getUTCFullYear(), 0, 0);
     const oneDay = getDuration({days: 1});
-    const dayOfYear = Math.floor((Number(date) - Number(jan1)) / oneDay);
+    const dayOfYear = Math.floor((Number(date) - Number(dec31)) / oneDay);
 
     const zenith = 90.83333333333333;
     const D2R = Math.PI / 180;
@@ -153,14 +152,11 @@ function getSunsetSunriseTime(
             UT = UT + 24;
         }
 
-        // convert UT value to local time zone of latitude/longitude
-        const localT = UT - timeZoneOffset / 60;
-
         // convert to milliseconds
         return {
             alwaysDay: false,
             alwaysNight: false,
-            time: localT * getDuration({hours: 1}),
+            time: UT * getDuration({hours: 1}),
         };
     }
 
@@ -187,9 +183,8 @@ export function isNightAtLocation(
     date: Date,
     latitude: number,
     longitude: number,
-    timeZoneOffset = date.getTimezoneOffset()
 ) {
-    const time = getSunsetSunriseTime(date, latitude, longitude, timeZoneOffset);
+    const time = getSunsetSunriseUTCTime(date, latitude, longitude);
 
     if (time.alwaysDay) {
         return false;
@@ -200,9 +195,9 @@ export function isNightAtLocation(
     const sunriseTime = time.sunriseTime;
     const sunsetTime = time.sunsetTime;
     const currentTime = (
-        date.getHours() * getDuration({hours: 1}) +
-        (date.getMinutes() + date.getTimezoneOffset() - timeZoneOffset) * getDuration({minutes: 1}) +
-        date.getSeconds() * getDuration({seconds: 1})
+        date.getUTCHours() * getDuration({hours: 1}) +
+        date.getUTCMinutes() * getDuration({minutes: 1}) +
+        date.getUTCSeconds() * getDuration({seconds: 1})
     );
 
     if (sunsetTime > sunriseTime) {

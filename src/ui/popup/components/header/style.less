@@ -45,7 +45,7 @@
             display: inline-block;
             height: @size-control-inner + 2 * @size-border;
             left: 100%;
-            opacity: 0;
+            opacity: 0.5;
             position: absolute;
             top: 0;
             transition: opacity @time-slow, background-color @time-slow, color @time-slow;
@@ -106,12 +106,15 @@
                 + @indent-large
                 + 2 * @size-border + @size-control-inner
                 + @size-text-small-height
+                + @indent-large
+                + 2 * @size-border + @size-control-inner
+                + @size-text-small-height * 2
                 + @indent-large;
             left: 0;
             position: absolute;
             top: @popup-content-padding + @size-control-inner * 2 + @size-border + @indent-small;
             transition: all @time-slow;
-            z-index: 2;
+            z-index: 999;
 
             &:not(&--expanded) {
                 border-bottom-width: 0;
@@ -186,9 +189,16 @@
             &__description {
                 font-size: @size-text-small;
                 line-height: @size-text-small-height;
-                margin: 0;
+                margin: 0 0 @size-control-description 0;
                 text-align: center;
                 white-space: nowrap;
+            }
+
+            &__sunset-description {
+                font-size: @size-text-small;
+                line-height: @size-text-small-height;
+                margin: 0;
+                text-align: center;
             }
 
             &::after {
@@ -203,6 +213,24 @@
                 top: 100%;
                 transition: height @time-slow;
                 width: 100%;
+            }
+
+            &__location {
+                &__latitude,
+                &__longitude {
+                    flex: auto;
+                    text-align: center;
+                    text-indent: 0;
+                    width: 100%;
+                }
+
+                &__latitude {
+                    border-right: none;
+                }
+
+                &__longitude {
+                    border-left: @size-border-inner solid @color-border;
+                }
             }
         }
     }

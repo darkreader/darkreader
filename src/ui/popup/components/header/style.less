@@ -214,6 +214,24 @@
                 transition: height @time-slow;
                 width: 100%;
             }
+
+            &__location {
+                &__latitude,
+                &__longitude {
+                    flex: auto;
+                    text-align: center;
+                    text-indent: 0;
+                    width: 100%;
+                }
+
+                &__latitude {
+                    border-right: none;
+                }
+
+                &__longitude {
+                    border-left: @size-border-inner solid @color-border;
+                }
+            }
         }
     }
 

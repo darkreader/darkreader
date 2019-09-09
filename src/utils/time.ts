@@ -71,7 +71,12 @@ export function getDuration(time: Duration) {
     return duration;
 }
 
-function getSunsetSunriseTime(date: Date, latitude: number, longitude: number) {
+function getSunsetSunriseTime(
+    date: Date,
+    latitude: number,
+    longitude: number,
+    timeZoneOffset: number,
+) {
     const jan1 = new Date(date.getUTCFullYear(), 0, 0);
     const oneDay = getDuration({days: 1});
     const dayOfYear = Math.floor((Number(date) - Number(jan1)) / oneDay);
@@ -149,7 +154,7 @@ function getSunsetSunriseTime(date: Date, latitude: number, longitude: number) {
         }
 
         // convert UT value to local time zone of latitude/longitude
-        const localT = UT - date.getTimezoneOffset() / 60;
+        const localT = UT - timeZoneOffset / 60;
 
         // convert to milliseconds
         return {
@@ -178,8 +183,13 @@ function getSunsetSunriseTime(date: Date, latitude: number, longitude: number) {
     };
 }
 
-export function isNightAtLocation(date: Date, latitude: number, longitude: number) {
-    const time = getSunsetSunriseTime(date, latitude, longitude);
+export function isNightAtLocation(
+    date: Date,
+    latitude: number,
+    longitude: number,
+    timeZoneOffset = date.getTimezoneOffset()
+) {
+    const time = getSunsetSunriseTime(date, latitude, longitude, timeZoneOffset);
 
     if (time.alwaysDay) {
         return false;
@@ -191,7 +201,7 @@ export function isNightAtLocation(date: Date, latitude: number, longitude: numbe
     const sunsetTime = time.sunsetTime;
     const currentTime = (
         date.getHours() * getDuration({hours: 1}) +
-        date.getMinutes() * getDuration({minutes: 1}) +
+        (date.getMinutes() + date.getTimezoneOffset() - timeZoneOffset) * getDuration({minutes: 1}) +
         date.getSeconds() * getDuration({seconds: 1})
     );
 

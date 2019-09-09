@@ -34,11 +34,12 @@ test('Duration', () => {
 });
 
 test('Sunrize/sunset', () => {
-    expect(isNightAtLocation(new Date(2019, 9, 9, 0, 0), 52, 31)).toBe(true);
-    expect(isNightAtLocation(new Date(2019, 9, 9, 6, 0), 52, 31)).toBe(true);
-    expect(isNightAtLocation(new Date(2019, 9, 9, 8, 0), 52, 31)).toBe(false);
-    expect(isNightAtLocation(new Date(2019, 9, 9, 12, 0), 52, 31)).toBe(false);
-    expect(isNightAtLocation(new Date(2019, 9, 9, 18, 0), 52, 31)).toBe(false);
-    expect(isNightAtLocation(new Date(2019, 9, 9, 20, 0), 52, 31)).toBe(true);
-    expect(isNightAtLocation(new Date(2019, 9, 9, 23, 59), 52, 31)).toBe(true);
+    const utcDate = (y, m, d, hh, mm) => new Date(Date.UTC(y, m, d, hh, mm));
+    expect(isNightAtLocation(utcDate(2019, 8, 9, 0, 0), 52, 0, 0)).toBe(true);
+    expect(isNightAtLocation(utcDate(2019, 8, 9, 5, 0), 52, 0, 0)).toBe(true);
+    expect(isNightAtLocation(utcDate(2019, 8, 9, 7, 0), 52, 0, 0)).toBe(false);
+    expect(isNightAtLocation(utcDate(2019, 8, 9, 12, 0), 52, 0, 0)).toBe(false);
+    expect(isNightAtLocation(utcDate(2019, 8, 9, 18, 0), 52, 0, 0)).toBe(false);
+    expect(isNightAtLocation(utcDate(2019, 8, 9, 20, 0), 52, 0, 0)).toBe(true);
+    expect(isNightAtLocation(utcDate(2019, 8, 9, 23, 59), 52, 0, 0)).toBe(true);
 });

@@ -1,5 +1,5 @@
 import {m} from 'malevic';
-import {Toggle, TextList, Shortcut} from '../../../controls'
+import {Toggle, TextList, Shortcut} from '../../../controls';
 import {getLocalMessage} from '../../../../utils/locales';
 import {ExtWrapper} from '../../../../definitions';
 

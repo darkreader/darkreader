@@ -45,7 +45,7 @@ test('Locales', async () => {
                 }
             }
             return true;
-        })
+        });
     }
 
     // Line count is the same

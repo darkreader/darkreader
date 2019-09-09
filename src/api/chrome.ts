@@ -16,7 +16,7 @@ if (window.chrome.runtime.sendMessage) {
         nativeSendMessage.apply(window.chrome.runtime, args);
     };
 } else {
-    window.chrome.runtime.sendMessage = throwCORSError
+    window.chrome.runtime.sendMessage = throwCORSError;
 }
 if (!window.chrome.runtime.onMessage) {
     window.chrome.runtime.onMessage = {

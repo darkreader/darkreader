@@ -28,7 +28,7 @@ function modifyColorWithCache(rgb: RGBA, filter: FilterConfig, modifyHSL: (hsl: 
     const hsl = rgbToHSL(rgb);
     const modified = modifyHSL(hsl);
     const {r, g, b, a} = hslToRGB(modified);
-    const matrix = createFilterMatrix(filter)
+    const matrix = createFilterMatrix(filter);
     const [rf, gf, bf] = applyColorMatrix([r, g, b], matrix);
 
     const color = (a === 1 ?

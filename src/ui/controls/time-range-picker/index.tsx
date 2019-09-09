@@ -36,19 +36,19 @@ function to24HTime($time: string) {
 
 export default function TimeRangePicker(props: TimePickerProps) {
     function onStartTimeChange($startTime: string) {
-        props.onChange([to24HTime($startTime), props.endTime])
+        props.onChange([to24HTime($startTime), props.endTime]);
     }
 
     function onEndTimeChange($endTime: string) {
-        props.onChange([props.startTime, to24HTime($endTime)])
+        props.onChange([props.startTime, to24HTime($endTime)]);
     }
 
     function setStartTime(node: HTMLInputElement) {
-        node.value = toLocaleTime(props.startTime)
+        node.value = toLocaleTime(props.startTime);
     }
 
     function setEndTime(node: HTMLInputElement) {
-        node.value = toLocaleTime(props.endTime)
+        node.value = toLocaleTime(props.endTime);
     }
 
     return (

@@ -3,6 +3,7 @@ import SiteToggle from '../site-toggle';
 import MoreToggleSettings from './more-toggle-settings';
 import WatchIcon from './watch-icon';
 import SunMoonIcon from './sun-moon-icon';
+import SystemIcon from './system-icon';
 import {Shortcut, Toggle} from '../../../controls';
 import {getLocalMessage} from '../../../../utils/locales';
 import {ExtWrapper, TabInfo} from '../../../../definitions';
@@ -84,7 +85,7 @@ function Header({data, actions, tab, onMoreToggleSettingsClick}: HeaderProps) {
                         ? <WatchIcon hours={now.getHours()} minutes={now.getMinutes()} />
                         : (isLocationAutomation
                             ? (<SunMoonIcon date={now} latitude={data.settings.location.latitude} longitude={data.settings.location.longitude} />)
-                            : null))}
+                            : <SystemIcon />))}
                 </span>
             </div>
         </header>

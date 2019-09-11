@@ -44,5 +44,5 @@ port.onDisconnect.addListener(() => {
 
 port.onDisconnect.addListener(watchForMediaQueryChange(() => {
     logInfo('Media query was changed');
-    port.postMessage({ type: 'color-theme-media-query-change', data: null });
+    port.postMessage({type: 'color-theme-media-query-change', data: null});
 }));

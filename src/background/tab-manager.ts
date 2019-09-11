@@ -50,7 +50,7 @@ export default class TabManager {
                     port.postMessage(message);
                 }
 
-                port.onMessage.addListener(({ type }: Message) => {
+                port.onMessage.addListener(({type}: Message) => {
                     if (type === 'color-theme-media-query-change') {
                         onColorSchemeQueryChange();
                     }

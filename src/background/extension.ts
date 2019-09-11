@@ -16,7 +16,7 @@ import {getDynamicThemeFixesFor} from '../generators/dynamic-theme';
 import createStaticStylesheet from '../generators/static-theme';
 import {createSVGFilterStylesheet, getSVGFilterMatrixValue, getSVGReverseFilterMatrixValue} from '../generators/svg-filter';
 import {ExtensionData, FilterConfig, News, Shortcuts, UserSettings, TabInfo} from '../definitions';
-import {isDarkTheme} from '../utils/mediaQuery';
+import {isSystemDarkModeEnabled} from '../utils/media-query';
 
 const AUTO_TIME_CHECK_INTERVAL = getDuration({seconds: 10});
 
@@ -49,12 +49,12 @@ export class Extension {
     }
 
     isEnabled() {
-        const { automation } = this.user.settings;
+        const {automation} = this.user.settings;
         if (automation === 'time') {
             const now = new Date();
             return isInTimeInterval(now, this.user.settings.time.activation, this.user.settings.time.deactivation);
         } else if (automation === 'system') {
-            return isDarkTheme() === true;
+            return isSystemDarkModeEnabled();
         }
         return this.user.settings.enabled;
     }

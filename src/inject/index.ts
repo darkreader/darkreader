@@ -2,7 +2,7 @@ import {createOrUpdateStyle, removeStyle} from './style';
 import {createOrUpdateSVGFilter, removeSVGFilter} from './svg-filter';
 import {createOrUpdateDynamicTheme, removeDynamicTheme, cleanDynamicThemeCache} from './dynamic-theme';
 import {logInfo, logWarn} from './utils/log';
-import {watchForMediaQueryChange} from './utils/watch-color-theme';
+import {watchForColorSchemeChange} from './utils/watch-color-scheme';
 
 function onMessage({type, data}) {
     switch (type) {
@@ -35,14 +35,15 @@ function onMessage({type, data}) {
     }
 }
 
+const colorSchemeWatcher = watchForColorSchemeChange(() => {
+    logInfo('Media query was changed');
+    port.postMessage({type: 'color-scheme-change', data: null});
+});
+
 const port = chrome.runtime.connect({name: 'tab'});
 port.onMessage.addListener(onMessage);
 port.onDisconnect.addListener(() => {
     logWarn('disconnect');
     cleanDynamicThemeCache();
+    colorSchemeWatcher.disconnect();
 });
-
-port.onDisconnect.addListener(watchForMediaQueryChange(() => {
-    logInfo('Media query was changed');
-    port.postMessage({type: 'color-theme-media-query-change', data: null});
-}));

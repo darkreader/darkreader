@@ -42,7 +42,7 @@ export class Extension {
         this.news = new Newsmaker((news) => this.onNewsUpdate(news));
         this.tabs = new TabManager({
             getConnectionMessage: (url, frameURL) => this.getConnectionMessage(url, frameURL),
-            onColorSchemeQueryChange: this.handleColorSchemeQueryChange,
+            onColorSchemeChange: this.onColorSchemeChange,
         });
         this.user = new UserStorage();
         this.awaiting = [];
@@ -202,12 +202,12 @@ export class Extension {
         }, AUTO_TIME_CHECK_INTERVAL);
     }
 
-    private handleColorSchemeQueryChange = () => {
+    private onColorSchemeChange = () => {
         if (this.user.settings.automation !== 'system') {
             return;
         }
         this.handleAutoCheck();
-    }
+    };
 
     private handleAutoCheck = () => {
         if (!this.ready) {
@@ -220,7 +220,7 @@ export class Extension {
             this.tabs.sendMessage(this.getTabMessage);
             this.reportChanges();
         }
-    }
+    };
 
     changeSettings($settings: Partial<UserSettings>) {
         const prev = {...this.user.settings};

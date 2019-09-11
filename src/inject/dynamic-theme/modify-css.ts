@@ -329,7 +329,7 @@ function getBgImageModifier(prop: string, value: string, rule: CSSStyleRule, isC
                     });
             }
             return results.join('');
-        }
+        };
 
     } catch (err) {
         logWarn(`Unable to parse gradient ${value}`, err);

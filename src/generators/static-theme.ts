@@ -100,7 +100,7 @@ function createRuleGen(getSelectors: (siteTheme: StaticTheme) => string[], gener
         selectors.forEach((s, i) => {
             let ln = modifySelector(s);
             if (i < selectors.length - 1) {
-                ln += ','
+                ln += ',';
             } else {
                 ln += ' {';
             }

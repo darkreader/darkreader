@@ -86,7 +86,7 @@ test('Color conversion', () => {
     expect(hslToRGB({h: 192, s: 0.57, l: 0.10})).toEqual({r: 11, g: 34, b: 40, a: 1});
     expect(hslToRGB({h: 0, s: 0, l: 0.5})).toEqual({r: 128, g: 128, b: 128, a: 1});
 
-    const round = (color: HSLA) => Object.entries(color).reduce((c, [k, v]) => (c[k] = k === 'h' ? Math.round(v) : Math.round(v * 100) / 100, c), {} as HSLA)
+    const round = (color: HSLA) => Object.entries(color).reduce((c, [k, v]) => (c[k] = k === 'h' ? Math.round(v) : Math.round(v * 100) / 100, c), {} as HSLA);
     expect(round(rgbToHSL({r: 0, g: 255, b: 255, a: 0.25}))).toEqual({h: 180, s: 1, l: 0.5, a: 0.25});
     expect(round(rgbToHSL({r: 128, g: 0, b: 0, a: 0.5}))).toEqual({h: 0, s: 1, l: 0.25, a: 0.5});
     expect(round(rgbToHSL({r: 233, g: 109, b: 78}))).toEqual({h: 12, s: 0.78, l: 0.61, a: 1});

@@ -2,11 +2,12 @@ import {m} from 'malevic';
 import SiteToggle from '../site-toggle';
 import MoreToggleSettings from './more-toggle-settings';
 import WatchIcon from './watch-icon';
+import SunMoonIcon from './sun-moon-icon';
 import {Shortcut, Toggle} from '../../../controls';
 import {getLocalMessage} from '../../../../utils/locales';
 import {ExtWrapper, TabInfo} from '../../../../definitions';
 
-function multiline(...lines) {
+function multiline(...lines: string[]) {
     return lines.join('\n');
 }
 
@@ -24,7 +25,9 @@ function Header({data, actions, tab, onMoreToggleSettingsClick}: HeaderProps) {
         });
     }
 
+    const isAutomation = Boolean(data.settings.automation);
     const isTimeAutomation = data.settings.automation === 'time';
+    const isLocationAutomation = data.settings.automation === 'location';
     const now = new Date();
 
     return (
@@ -74,12 +77,14 @@ function Header({data, actions, tab, onMoreToggleSettingsClick}: HeaderProps) {
                 <span
                     class={{
                         'header__app-toggle__time': true,
-                        'header__app-toggle__time--active': isTimeAutomation,
+                        'header__app-toggle__time--active': isAutomation,
                     }}
                 >
                     {(isTimeAutomation
                         ? <WatchIcon hours={now.getHours()} minutes={now.getMinutes()} />
-                        : null)}
+                        : (isLocationAutomation
+                            ? (<SunMoonIcon date={now} latitude={data.settings.location.latitude} longitude={data.settings.location.longitude} />)
+                            : null))}
                 </span>
             </div>
         </header>

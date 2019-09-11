@@ -34,6 +34,10 @@ export default class UserStorage {
                 activation: '18:00',
                 deactivation: '9:00',
             },
+            location: {
+                latitude: null,
+                longitude: null,
+            }
         };
         this.settings = null;
     }

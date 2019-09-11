@@ -36,7 +36,7 @@ const themeColorTypes = {
     toolbar_text: 'text',
     toolbar_top_separator: 'border',
     toolbar_vertical_separator: 'border',
-}
+};
 
 const $colors = {
     accentcolor: '#111111',

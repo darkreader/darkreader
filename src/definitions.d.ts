@@ -63,13 +63,19 @@ export interface UserSettings {
     changeBrowserTheme: boolean;
     notifyOfNews: boolean;
     syncSettings: boolean;
-    automation: '' | 'time' | 'system';
+    automation: '' | 'time' | 'system' | 'location';
     time: TimeSettings;
+    location: LocationSettings;
 }
 
 export interface TimeSettings {
     activation: string;
     deactivation: string;
+}
+
+export interface LocationSettings {
+    latitude: number;
+    longitude: number;
 }
 
 export interface TabInfo {

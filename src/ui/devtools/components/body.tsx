@@ -8,7 +8,7 @@ import {ExtWrapper} from '../../../definitions';
 type BodyProps = ExtWrapper;
 
 function Body({data, actions}: BodyProps) {
-    const {state, setState} = useState({errorText: null as string})
+    const {state, setState} = useState({errorText: null as string});
     let textNode: HTMLTextAreaElement;
 
     const wrapper = (data.settings.theme.engine === ThemeEngines.staticTheme

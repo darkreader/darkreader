@@ -19,7 +19,7 @@ export default function MoreSettings({data, actions, tab}: ExtWrapper & {tab: Ta
             custom.theme = {...custom.theme, ...config};
             actions.changeSettings({customThemes: data.settings.customThemes});
         } else {
-            actions.setTheme(config)
+            actions.setTheme(config);
         }
     }
 

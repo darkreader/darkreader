@@ -9,6 +9,7 @@ module.exports = {
         'no-multi-spaces': 'error',
         'no-trailing-spaces': 'error',
         'no-whitespace-before-property': 'error',
+        'semi': ['error', 'always'],
         'space-before-function-paren': ['error', {
             anonymous: 'always',
             named: 'never',

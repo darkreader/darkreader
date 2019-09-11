@@ -48,7 +48,7 @@ function Body(props: BodyProps) {
             <body>
                 <Loader complete={false} />
             </body>
-        )
+        );
     }
 
     const unreadNews = props.data.news.filter(({read}) => !read);

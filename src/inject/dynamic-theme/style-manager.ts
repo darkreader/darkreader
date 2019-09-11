@@ -470,7 +470,7 @@ function linkLoading(link: HTMLLinkElement) {
         const cleanUp = () => {
             link.removeEventListener('load', onLoad);
             link.removeEventListener('error', onError);
-        }
+        };
         const onLoad = () => {
             cleanUp();
             resolve();

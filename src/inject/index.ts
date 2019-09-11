@@ -37,7 +37,7 @@ function onMessage({type, data}) {
 
 const colorSchemeWatcher = watchForColorSchemeChange(() => {
     logInfo('Media query was changed');
-    port.postMessage({type: 'color-scheme-change', data: null});
+    chrome.runtime.sendMessage({type: 'color-scheme-change', data: null});
 });
 
 const port = chrome.runtime.connect({name: 'tab'});

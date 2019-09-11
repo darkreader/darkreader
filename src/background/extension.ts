@@ -16,6 +16,7 @@ import {getDynamicThemeFixesFor} from '../generators/dynamic-theme';
 import createStaticStylesheet from '../generators/static-theme';
 import {createSVGFilterStylesheet, getSVGFilterMatrixValue, getSVGReverseFilterMatrixValue} from '../generators/svg-filter';
 import {ExtensionData, FilterConfig, News, Shortcuts, UserSettings, TabInfo} from '../definitions';
+import {isSystemDarkModeEnabled} from '../utils/media-query';
 
 const AUTO_TIME_CHECK_INTERVAL = getDuration({seconds: 10});
 
@@ -41,16 +42,20 @@ export class Extension {
         this.news = new Newsmaker((news) => this.onNewsUpdate(news));
         this.tabs = new TabManager({
             getConnectionMessage: (url, frameURL) => this.getConnectionMessage(url, frameURL),
+            onColorSchemeChange: this.onColorSchemeChange,
         });
         this.user = new UserStorage();
         this.awaiting = [];
     }
 
     isEnabled() {
-        if (this.user.settings.automation === 'time') {
+        const {automation} = this.user.settings;
+        if (automation === 'time') {
             const now = new Date();
             return isInTimeInterval(now, this.user.settings.time.activation, this.user.settings.time.deactivation);
-        } else if (this.user.settings.automation === 'location') {
+        } else if (automation === 'system') {
+            return isSystemDarkModeEnabled();
+        } else if (automation === 'location') {
             const latitude = this.user.settings.location.latitude;
             const longitude = this.user.settings.location.longitude;
 
@@ -202,15 +207,29 @@ export class Extension {
             if (!this.ready || this.user.settings.automation === '') {
                 return;
             }
-            const isEnabled = this.isEnabled();
-            if (this.wasEnabledOnLastCheck !== isEnabled) {
-                this.wasEnabledOnLastCheck = isEnabled;
-                this.onAppToggle();
-                this.tabs.sendMessage(this.getTabMessage);
-                this.reportChanges();
-            }
+            this.handleAutoCheck();
         }, AUTO_TIME_CHECK_INTERVAL);
     }
+
+    private onColorSchemeChange = () => {
+        if (this.user.settings.automation !== 'system') {
+            return;
+        }
+        this.handleAutoCheck();
+    };
+
+    private handleAutoCheck = () => {
+        if (!this.ready) {
+            return;
+        }
+        const isEnabled = this.isEnabled();
+        if (this.wasEnabledOnLastCheck !== isEnabled) {
+            this.wasEnabledOnLastCheck = isEnabled;
+            this.onAppToggle();
+            this.tabs.sendMessage(this.getTabMessage);
+            this.reportChanges();
+        }
+    };
 
     changeSettings($settings: Partial<UserSettings>) {
         const prev = {...this.user.settings};

@@ -1,8 +1,10 @@
 @import "../../../theme";
 
+@more-settings-line-height: 2 * @size-border + @size-control-inner + @size-text-small-height;  
+
 .header {
     display: grid;
-    grid: 
+    grid:
         "logo logo"
         "site-toggle app-toggle"
         / 5.5fr 4.5fr;
@@ -45,7 +47,7 @@
             display: inline-block;
             height: @size-control-inner + 2 * @size-border;
             left: 100%;
-            opacity: 0.5;
+            opacity: 0.7;
             position: absolute;
             top: 0;
             transition: opacity @time-slow, background-color @time-slow, color @time-slow;
@@ -102,18 +104,20 @@
             border-top: @size-border solid @color-border;
             display: flex;
             flex-direction: column;
-            height: @size-control-inner
+            height:
+                @size-control-inner
                 + @indent-large
-                + 2 * @size-border + @size-control-inner
-                + @size-text-small-height
-                + @indent-large
-                + 2 * @size-border + @size-control-inner
-                + @size-text-small-height * 2
+                + @more-settings-line-height
+                + @indent-small
+                + @more-settings-line-height
+                + @indent-small
+                + @more-settings-line-height
                 + @indent-large;
             left: 0;
             position: absolute;
             top: @popup-content-padding + @size-control-inner * 2 + @size-border + @indent-small;
             transition: all @time-slow;
+            width: 100%;
             z-index: 999;
 
             &:not(&--expanded) {
@@ -123,7 +127,7 @@
                 opacity: 0;
                 pointer-events: none;
             }
-            
+
             &:not(&--expanded) &__content {
                 padding-bottom: 0;
                 padding-top: 0;
@@ -189,16 +193,17 @@
             &__description {
                 font-size: @size-text-small;
                 line-height: @size-text-small-height;
-                margin: 0 0 @size-control-description 0;
+                margin: 0;
                 text-align: center;
                 white-space: nowrap;
             }
 
-            &__sunset-description {
+            &__location-description {
                 font-size: @size-text-small;
                 line-height: @size-text-small-height;
                 margin: 0;
                 text-align: center;
+                white-space: nowrap;
             }
 
             &::after {
@@ -216,6 +221,8 @@
             }
 
             &__location {
+                margin-top: @indent-small;
+
                 &__latitude,
                 &__longitude {
                     flex: auto;
@@ -225,11 +232,36 @@
                 }
 
                 &__latitude {
+                    border-left: @size-border-inner solid @color-border;
                     border-right: none;
                 }
 
                 &__longitude {
                     border-left: @size-border-inner solid @color-border;
+                }
+            }
+
+            &__system-dark-mode {
+                display: flex;
+                flex-direction: row;
+                margin-top: @indent-small;
+    
+                &__checkbox {
+                    flex: none;
+                }
+    
+                &__button {
+                    border-left-width: @size-border-inner;
+                    flex: auto;
+    
+                    &:not(&--active) {
+                        color: @color-input-fore;
+                    }
+                }
+    
+                &:hover &__button,
+                &:hover &__checkbox {
+                    background-color: @color-control-hover;
                 }
             }
         }

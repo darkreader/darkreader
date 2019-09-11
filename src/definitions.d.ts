@@ -63,7 +63,7 @@ export interface UserSettings {
     changeBrowserTheme: boolean;
     notifyOfNews: boolean;
     syncSettings: boolean;
-    automation: string;
+    automation: '' | 'time' | 'system' | 'location';
     time: TimeSettings;
     location: LocationSettings;
 }

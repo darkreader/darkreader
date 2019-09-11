@@ -1,5 +1,5 @@
 import {m} from 'malevic';
-import {CheckBox, TextBox, TimeRangePicker} from '../../../controls';
+import {Button, CheckBox, TextBox, TimeRangePicker} from '../../../controls';
 import {getLocalMessage} from '../../../../utils/locales';
 import {ExtWrapper} from '../../../../definitions';
 
@@ -9,6 +9,7 @@ type MoreToggleSettingsProps = ExtWrapper & {
 };
 
 export default function MoreToggleSettings({data, actions, isExpanded, onClose}: MoreToggleSettingsProps) {
+    const isSystemAutomation = data.settings.automation === 'system';
     const locationSettings = data.settings.location;
     const values = {
         'latitude': {
@@ -75,7 +76,7 @@ export default function MoreToggleSettings({data, actions, isExpanded, onClose}:
             }}
         >
             <div class="header__app-toggle__more-settings__top">
-                <span class="header__app-toggle__more-settings__top__text">{getLocalMessage('time_settings')}</span>
+                <span class="header__app-toggle__more-settings__top__text">{getLocalMessage('automation')}</span>
                 <span class="header__app-toggle__more-settings__top__close" role="button" onclick={onClose}>✕</span>
             </div>
             <div class="header__app-toggle__more-settings__content">
@@ -93,7 +94,7 @@ export default function MoreToggleSettings({data, actions, isExpanded, onClose}:
                 <p class="header__app-toggle__more-settings__description">
                     {getLocalMessage('set_active_hours')}
                 </p>
-                <div class="header__app-toggle__more-settings__line">
+                <div class="header__app-toggle__more-settings__line header__app-toggle__more-settings__location">
                     <CheckBox
                         checked={data.settings.automation === 'location'}
                         onchange={(e) => actions.changeSettings({automation: e.target.checked ? 'location' : ''})}
@@ -121,8 +122,29 @@ export default function MoreToggleSettings({data, actions, isExpanded, onClose}:
                         }}
                     />
                 </div>
-                <p class="header__app-toggle__more-settings__sunset-description">
+                <p class="header__app-toggle__more-settings__location-description">
                     {getLocalMessage('set_location')}
+                </p>
+                <div class={[
+                    'header__app-toggle__more-settings__line',
+                    'header__app-toggle__more-settings__system-dark-mode',
+                ]}
+                >
+                    <CheckBox
+                        class="header__app-toggle__more-settings__system-dark-mode__checkbox"
+                        checked={isSystemAutomation}
+                        onchange={(e) => actions.changeSettings({automation: e.target.checked ? 'system' : ''})}
+                    />
+                    <Button
+                        class={{
+                            'header__app-toggle__more-settings__system-dark-mode__button': true,
+                            'header__app-toggle__more-settings__system-dark-mode__button--active': isSystemAutomation,
+                        }}
+                        onclick={() => actions.changeSettings({automation: isSystemAutomation ? '' : 'system'})}
+                    >{getLocalMessage('system_dark_mode')}</Button>
+                </div>
+                <p class="header__app-toggle__more-settings__description">
+                    {getLocalMessage('system_dark_mode_description')}
                 </p>
             </div>
         </div>

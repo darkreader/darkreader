@@ -1,5 +1,5 @@
 import {m} from 'malevic';
-import {CheckBox, TimeRangePicker, TextBox} from '../../../controls';
+import {CheckBox, TimeRangePicker, Button} from '../../../controls';
 import {getLocalMessage} from '../../../../utils/locales';
 import {ExtWrapper} from '../../../../definitions';
 
@@ -9,6 +9,7 @@ type MoreToggleSettingsProps = ExtWrapper & {
 };
 
 export default function MoreToggleSettings({data, actions, isExpanded, onClose}: MoreToggleSettingsProps) {
+    const isSystemAutomation = data.settings.automation === 'system';
     return (
         <div
             class={{
@@ -35,16 +36,27 @@ export default function MoreToggleSettings({data, actions, isExpanded, onClose}:
                 <p class="header__app-toggle__more-settings__description">
                     {getLocalMessage('set_active_hours')}
                 </p>
-                <div class="header__app-toggle__more-settings__line">
+                <div class={[
+                    'header__app-toggle__more-settings__line',
+                    'header__app-toggle__more-settings__system-dark-mode',
+                ]}
+                >
                     <CheckBox
-                        checked={data.settings.automation === 'system'}
+                        class="header__app-toggle__more-settings__system-dark-mode__checkbox"
+                        checked={isSystemAutomation}
                         onchange={(e) => actions.changeSettings({automation: e.target.checked ? 'system' : ''})}
                     />
-                    <TextBox
-                        readonly
-                        value={getLocalMessage('system_dark_theme')}
-                    />
+                    <Button
+                        class={{
+                            'header__app-toggle__more-settings__system-dark-mode__button': true,
+                            'header__app-toggle__more-settings__system-dark-mode__button--active': isSystemAutomation,
+                        }}
+                        onclick={() => actions.changeSettings({automation: isSystemAutomation ? '' : 'system'})}
+                    >{getLocalMessage('system_dark_theme')}</Button>
                 </div>
+                <p class="header__app-toggle__more-settings__description">
+                    {getLocalMessage('system_dark_theme')}
+                </p>
             </div>
         </div>
     );

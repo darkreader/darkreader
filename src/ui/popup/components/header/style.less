@@ -1,5 +1,7 @@
 @import "../../../theme";
 
+@more-settings-line-height: 2 * @size-border + @size-control-inner + @size-text-small-height;  
+
 .header {
     display: grid;
     grid:
@@ -102,10 +104,12 @@
             border-top: @size-border solid @color-border;
             display: flex;
             flex-direction: column;
-            height: 2 * @size-control-inner
+            height:
+                @size-control-inner
                 + @indent-large
-                + 2 * @size-border + @size-control-inner
-                + @size-text-small-height
+                + @more-settings-line-height
+                + @indent-small
+                + @more-settings-line-height
                 + @indent-large;
             left: 0;
             position: absolute;
@@ -203,6 +207,30 @@
                 top: 100%;
                 transition: height @time-slow;
                 width: 100%;
+            }
+
+            &__system-dark-mode {
+                display: flex;
+                flex-direction: row;
+                margin-top: @indent-small;
+
+                &__checkbox {
+                    flex: none;
+                }
+
+                &__button {
+                    border-left-width: @size-border-inner;
+                    flex: auto;
+
+                    &:not(&--active) {
+                        color: @color-input-fore;
+                    }
+                }
+
+                &:hover &__button,
+                &:hover &__checkbox {
+                    background-color: @color-control-hover;
+                }
             }
         }
     }

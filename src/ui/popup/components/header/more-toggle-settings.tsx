@@ -18,7 +18,7 @@ export default function MoreToggleSettings({data, actions, isExpanded, onClose}:
             }}
         >
             <div class="header__app-toggle__more-settings__top">
-                <span class="header__app-toggle__more-settings__top__text">{getLocalMessage('time_settings')}</span>
+                <span class="header__app-toggle__more-settings__top__text">{getLocalMessage('automation')}</span>
                 <span class="header__app-toggle__more-settings__top__close" role="button" onclick={onClose}>✕</span>
             </div>
             <div class="header__app-toggle__more-settings__content">
@@ -52,10 +52,10 @@ export default function MoreToggleSettings({data, actions, isExpanded, onClose}:
                             'header__app-toggle__more-settings__system-dark-mode__button--active': isSystemAutomation,
                         }}
                         onclick={() => actions.changeSettings({automation: isSystemAutomation ? '' : 'system'})}
-                    >{getLocalMessage('system_dark_theme')}</Button>
+                    >{getLocalMessage('system_dark_mode')}</Button>
                 </div>
                 <p class="header__app-toggle__more-settings__description">
-                    {getLocalMessage('system_dark_theme')}
+                    {getLocalMessage('system_dark_mode_description')}
                 </p>
             </div>
         </div>

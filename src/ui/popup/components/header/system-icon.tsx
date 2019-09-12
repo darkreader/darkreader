@@ -6,7 +6,7 @@ export default function SystemIcon() {
             <path
                 fill="white"
                 stroke="none"
-                d="M3,3 h10 v7 h-3 v2 h1 v1 h-6 v-1 h1 v-2 h-3 z M4,4 v5 h8 v-5 z"
+                d="M3,3 h10 v7 h-3 v2 h1 v1 h-6 v-1 h1 v-2 h-3 z M4.5,4.5 v4 h7 v-4 z"
             />
         </svg>
     );

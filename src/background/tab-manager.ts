@@ -10,7 +10,7 @@ function queryTabs(query: chrome.tabs.QueryInfo) {
 
 interface TabManagerOptions {
     getConnectionMessage: (url: string, frameUrl: string) => any;
-    onColorSchemeChange: () => void;
+    onColorSchemeChange: ({isDark}) => void;
 }
 
 interface PortInfo {
@@ -70,7 +70,7 @@ export default class TabManager {
             }
 
             if (type === 'color-scheme-change') {
-                onColorSchemeChange();
+                onColorSchemeChange(data);
             }
         });
     }

@@ -54,6 +54,12 @@ export class Extension {
             const now = new Date();
             return isInTimeInterval(now, this.user.settings.time.activation, this.user.settings.time.deactivation);
         } else if (automation === 'system') {
+            if (isFirefox()) {
+                // BUG: Firefox background page always matches initial color scheme.
+                return this.wasLastColorSchemeDark == null
+                    ? isSystemDarkModeEnabled()
+                    : this.wasLastColorSchemeDark;
+            }
             return isSystemDarkModeEnabled();
         } else if (automation === 'location') {
             const latitude = this.user.settings.location.latitude;
@@ -211,7 +217,10 @@ export class Extension {
         }, AUTO_TIME_CHECK_INTERVAL);
     }
 
-    private onColorSchemeChange = () => {
+    private wasLastColorSchemeDark = null;
+
+    private onColorSchemeChange = ({isDark}) => {
+        this.wasLastColorSchemeDark = isDark;
         if (this.user.settings.automation !== 'system') {
             return;
         }

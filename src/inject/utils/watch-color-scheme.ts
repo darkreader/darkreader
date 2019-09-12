@@ -1,9 +1,10 @@
-export function watchForColorSchemeChange(callback: () => void) {
-    const mediaQueryList = window.matchMedia('(prefers-color-scheme: dark)');
-    mediaQueryList.addListener(callback);
+export function watchForColorSchemeChange(callback: ({isDark}) => void) {
+    const query = window.matchMedia('(prefers-color-scheme: dark)');
+    const onChange = () => callback({isDark: query.matches});
+    query.addListener(onChange);
     return {
         disconnect() {
-            mediaQueryList.removeListener(callback);
+            query.removeListener(onChange);
         },
     };
 }

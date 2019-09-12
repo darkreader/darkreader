@@ -35,9 +35,10 @@ function onMessage({type, data}) {
     }
 }
 
-const colorSchemeWatcher = watchForColorSchemeChange(() => {
+// TODO: Use background page color scheme watcher when browser bugs fixed.
+const colorSchemeWatcher = watchForColorSchemeChange(({isDark}) => {
     logInfo('Media query was changed');
-    chrome.runtime.sendMessage({type: 'color-scheme-change', data: null});
+    chrome.runtime.sendMessage({type: 'color-scheme-change', data: {isDark}});
 });
 
 const port = chrome.runtime.connect({name: 'tab'});

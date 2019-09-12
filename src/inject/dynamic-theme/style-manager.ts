@@ -195,11 +195,11 @@ export function manageStyle(element: HTMLLinkElement | HTMLStyleElement, {update
         let rulesChanged = (rulesModCache.size === 0);
         const notFoundCacheKeys = new Set(rulesModCache.keys());
         const filterKey = getFilterKey(filter);
-        let filterChanged = (filterKey !== prevFilterKey);
+        const filterChanged = (filterKey !== prevFilterKey);
 
         const modRules: ModifiableCSSRule[] = [];
         iterateCSSRules(rules, (rule) => {
-            let cssText = rule.cssText;
+            const cssText = rule.cssText;
             let textDiffersFromPrev = false;
 
             notFoundCacheKeys.delete(cssText);
@@ -501,7 +501,7 @@ async function replaceCSSImports(cssText: string, basePath: string) {
     cssText = replaceCSSRelativeURLsWithAbsolute(cssText, basePath);
 
     const importMatches = getMatches(cssImportRegex, cssText);
-    for (let match of importMatches) {
+    for (const match of importMatches) {
         const importURL = getCSSImportURL(match);
         const absoluteURL = getAbsoluteURL(basePath, importURL);
         let importedCSS: string;

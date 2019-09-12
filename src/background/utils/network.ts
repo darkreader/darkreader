@@ -67,7 +67,7 @@ class LimitedCacheStorage {
             return;
         }
 
-        for (let [url, record] of this.records) {
+        for (const [url, record] of this.records) {
             if (this.bytesInUse + size > LimitedCacheStorage.QUOTA_BYTES) {
                 this.records.delete(url);
                 this.bytesInUse -= record.size;
@@ -83,7 +83,7 @@ class LimitedCacheStorage {
 
     private removeExpiredRecords() {
         const now = Date.now();
-        for (let [url, record] of this.records) {
+        for (const [url, record] of this.records) {
             if (record.expires < now) {
                 this.records.delete(url);
                 this.bytesInUse -= record.size;

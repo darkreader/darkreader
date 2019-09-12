@@ -22,7 +22,7 @@ async function bundleCSSEntry({src, dest}) {
 
 async function bundleCSS({production}) {
     const files = getLessFiles({production});
-    for (let [src, dest] of Object.entries(files)) {
+    for (const [src, dest] of Object.entries(files)) {
         await bundleCSSEntry({src, dest});
     }
 }

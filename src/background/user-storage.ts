@@ -114,7 +114,7 @@ export default class UserStorage {
         if ($settings.siteList) {
             if (!Array.isArray($settings.siteList)) {
                 const list = [];
-                for (let key in ($settings.siteList as any)) {
+                for (const key in ($settings.siteList as any)) {
                     const index = Number(key);
                     if (!isNaN(index)) {
                         list[index] = $settings.siteList[key];

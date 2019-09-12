@@ -5,7 +5,7 @@ async function bundleLocales({production}) {
     const destDir = getDestDir({production});
     const localesSrcDir = 'src/_locales';
     const list = await fs.readdir(localesSrcDir);
-    for (let name of list) {
+    for (const name of list) {
         if (!name.endsWith('.config')) {
             continue;
         }

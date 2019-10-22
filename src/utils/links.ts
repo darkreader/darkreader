@@ -16,6 +16,8 @@ const helpLocales = [
     'fr',
     'it',
     'ru',
+    'zh-CN',
+    'zh-TW',
 ];
 
 export function getHelpURL() {

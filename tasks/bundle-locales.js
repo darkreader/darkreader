@@ -28,7 +28,7 @@ async function bundleLocales({production}) {
             };
         }
 
-        const locale = name.substring(0, name.length - 7);
+        const locale = name.substring(0, name.length - 7).replace('-', '_');
         await fs.outputFile(`${destDir}/_locales/${locale}/messages.json`, `${JSON.stringify(messages, null, 4)}\n`);
     }
 }

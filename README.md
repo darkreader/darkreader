@@ -104,7 +104,7 @@ or **[inversion-fixes.config](https://github.com/alexanderby/darkreader/blob/mas
 - Review your changes. Click **Create pull request**.
 - The Travis CI will run tests reviewing your changes.
 - If you see a **red cross** click **Details** and see what is wrong and edit existing Pull Request.
-- When you see a **green checkmark** than everything is fine.
+- When you see a **green checkmark** then everything is fine.
 - Dark Reader developer will **review** and merge your changes making them available for all users.
 
 ### Adding new features or fixing bugs

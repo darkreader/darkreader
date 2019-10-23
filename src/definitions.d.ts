@@ -21,7 +21,7 @@ export interface ExtensionActions {
     changeSettings(settings: Partial<UserSettings>);
     setTheme(theme: Partial<FilterConfig>);
     setShortcut(command: string, shortcut: string);
-    toggleSitePattern(pattern: string);
+    toggleURL(url: string);
     markNewsAsRead(ids: string[]);
     applyDevDynamicThemeFixes(text: string): Promise<void>;
     resetDevDynamicThemeFixes();
@@ -59,6 +59,7 @@ export interface UserSettings {
     theme: FilterConfig;
     customThemes: CustomSiteConfig[];
     siteList: string[];
+    siteListEnabled: string[];
     applyToListedOnly: boolean;
     changeBrowserTheme: boolean;
     notifyOfNews: boolean;

@@ -1,7 +1,7 @@
 import ConfigManager from './config-manager';
 import DevTools from './devtools';
 import IconManager from './icon-manager';
-import Messenger from './messenger';
+import Messenger, {ExtensionAdapter} from './messenger';
 import Newsmaker from './newsmaker';
 import TabManager from './tab-manager';
 import UserStorage from './user-storage';
@@ -100,7 +100,7 @@ export class Extension {
 
     private popupOpeningListener: () => void = null;
 
-    private getMessengerAdapter() {
+    private getMessengerAdapter(): ExtensionAdapter {
         return {
             collect: async () => {
                 if (!this.ready) {
@@ -118,7 +118,7 @@ export class Extension {
             changeSettings: (settings) => this.changeSettings(settings),
             setTheme: (theme) => this.setTheme(theme),
             setShortcut: ({command, shortcut}) => this.setShortcut(command, shortcut),
-            toggleSitePattern: (pattern) => this.toggleSitePattern(pattern),
+            toggleURL: (url) => this.toggleURL(url),
             markNewsAsRead: (ids) => this.news.markAsRead(...ids),
             onPopupOpen: () => this.popupOpeningListener && this.popupOpeningListener(),
             applyDevDynamicThemeFixes: (text) => this.devtools.applyDynamicThemeFixes(text),
@@ -282,15 +282,23 @@ export class Extension {
         this.messenger.reportChanges(info);
     }
 
-    toggleSitePattern(pattern: string) {
-        const siteList = this.user.settings.siteList.slice();
+    toggleURL(url: string) {
+        const isInDarkList = isURLInList(url, this.config.DARK_SITES);
+        const siteList = isInDarkList ?
+            this.user.settings.siteListEnabled.slice() :
+            this.user.settings.siteList.slice();
+        const pattern = getURLHost(url);
         const index = siteList.indexOf(pattern);
         if (index < 0) {
             siteList.push(pattern);
         } else {
             siteList.splice(index, 1);
         }
-        this.changeSettings({siteList});
+        if (isInDarkList) {
+            this.changeSettings({siteListEnabled: siteList});
+        } else {
+            this.changeSettings({siteList});
+        }
     }
 
     /**
@@ -299,8 +307,7 @@ export class Extension {
      */
     async toggleCurrentSite() {
         const url = await this.tabs.getActiveTabURL();
-        const host = getURLHost(url);
-        this.toggleSitePattern(host);
+        this.toggleURL(url);
     }
 
 

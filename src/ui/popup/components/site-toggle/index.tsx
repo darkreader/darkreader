@@ -7,8 +7,7 @@ import {ExtWrapper, TabInfo} from '../../../../definitions';
 export default function SiteToggleButton({data, tab, actions}: ExtWrapper & {tab: TabInfo}) {
     const toggleHasEffect = (
         data.isEnabled &&
-        !tab.isProtected &&
-        (data.settings.applyToListedOnly || !tab.isInDarkList)
+        !tab.isProtected
     );
     const isSiteEnabled = isURLEnabled(tab.url, data.settings, tab);
     const host = getURLHost(tab.url || '');
@@ -29,7 +28,7 @@ export default function SiteToggleButton({data, tab, actions}: ExtWrapper & {tab
                 'site-toggle--active': isSiteEnabled,
                 'site-toggle--disabled': !toggleHasEffect
             }}
-            onclick={() => actions.toggleSitePattern(host)}
+            onclick={() => actions.toggleURL(tab.url)}
         >
             <span class="site-toggle__mark"><CheckmarkIcon isEnabled={isSiteEnabled} /></span>
             {' '}

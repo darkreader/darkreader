@@ -25,6 +25,7 @@ export default class UserStorage {
             },
             customThemes: [],
             siteList: [],
+            siteListEnabled: [],
             applyToListedOnly: false,
             changeBrowserTheme: false,
             notifyOfNews: false,

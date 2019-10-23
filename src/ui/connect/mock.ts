@@ -1,3 +1,4 @@
+import {getURLHost} from '../../utils/url';
 import {ExtensionData, TabInfo, UserSettings} from '../../definitions';
 
 export function getMockData(override = {}): ExtensionData {
@@ -20,6 +21,7 @@ export function getMockData(override = {}): ExtensionData {
             },
             customThemes: [],
             siteList: [],
+            siteListEnabled: [],
             applyToListedOnly: false,
             changeBrowserTheme: false,
             notifyOfNews: false,
@@ -92,10 +94,11 @@ export function createConnectorMock() {
             Object.assign(data.shortcuts, {[command]: shortcut});
             listener(data);
         },
-        toggleSitePattern(pattern) {
+        toggleURL(url) {
+            const pattern = getURLHost(url);
             const index = data.settings.siteList.indexOf(pattern);
             if (index >= 0) {
-                data.settings.siteList.splice(pattern, 1);
+                data.settings.siteList.splice(index, 1, pattern);
             } else {
                 data.settings.siteList.push(pattern);
             }

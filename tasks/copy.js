@@ -16,7 +16,7 @@ async function copy({production}) {
     const files = await globby(paths);
     const destDir = getDestDir({production});
 
-    for (let file of files) {
+    for (const file of files) {
         if (!file.startsWith(`${baseDir}/`)) {
             throw new Error(`Unable to handle path "${file}"`);
         }

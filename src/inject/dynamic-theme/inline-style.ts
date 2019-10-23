@@ -203,7 +203,7 @@ export function overrideInlineStyle(element: HTMLElement, theme: FilterConfig) {
     }
     if (element.hasAttribute('fill') && element instanceof SVGElement) {
         const SMALL_SVG_LIMIT = 32;
-        let value = element.getAttribute('fill');
+        const value = element.getAttribute('fill');
         let isBg = false;
         if (!(element instanceof SVGTextElement)) {
             const {width, height} = element.getBoundingClientRect();
@@ -212,7 +212,7 @@ export function overrideInlineStyle(element: HTMLElement, theme: FilterConfig) {
         setCustomProp('fill', isBg ? 'background-color' : 'color', value);
     }
     if (element.hasAttribute('stroke')) {
-        let value = element.getAttribute('stroke');
+        const value = element.getAttribute('stroke');
         setCustomProp('stroke', element instanceof SVGLineElement || element instanceof SVGTextElement ? 'border-color' : 'color', value);
     }
     element.style && iterateCSSDeclarations(element.style, (property, value) => {

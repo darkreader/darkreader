@@ -7,16 +7,21 @@ export interface ExtensionData {
     fonts: string[];
     news: News[];
     shortcuts: Shortcuts;
-    devDynamicThemeFixesText: string;
-    devInversionFixesText: string;
-    devStaticThemesText: string;
+    devtools: {
+        dynamicFixesText: string;
+        filterFixesText: string;
+        staticThemesText: string;
+        hasCustomDynamicFixes: boolean;
+        hasCustomFilterFixes: boolean;
+        hasCustomStaticFixes: boolean;
+    };
 }
 
 export interface ExtensionActions {
     changeSettings(settings: Partial<UserSettings>);
     setTheme(theme: Partial<FilterConfig>);
     setShortcut(command: string, shortcut: string);
-    toggleSitePattern(pattern: string);
+    toggleURL(url: string);
     markNewsAsRead(ids: string[]);
     applyDevDynamicThemeFixes(text: string): Promise<void>;
     resetDevDynamicThemeFixes();
@@ -54,17 +59,24 @@ export interface UserSettings {
     theme: FilterConfig;
     customThemes: CustomSiteConfig[];
     siteList: string[];
+    siteListEnabled: string[];
     applyToListedOnly: boolean;
     changeBrowserTheme: boolean;
     notifyOfNews: boolean;
     syncSettings: boolean;
-    automation: string;
+    automation: '' | 'time' | 'system' | 'location';
     time: TimeSettings;
+    location: LocationSettings;
 }
 
 export interface TimeSettings {
     activation: string;
     deactivation: string;
+}
+
+export interface LocationSettings {
+    latitude: number;
+    longitude: number;
 }
 
 export interface TabInfo {

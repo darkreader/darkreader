@@ -1,6 +1,5 @@
 import {readFile as fsReadFile, readdir as fsReadDir} from 'fs';
 import {resolve as resolvePath} from 'path';
-import {resolve} from 'dns';
 
 function readDir(dir) {
     return new Promise<string[]>((resolve, reject) => {
@@ -31,7 +30,7 @@ test('Locales', async () => {
     const enLocale = await readLocale('en.config');
     const enLines = enLocale.split('\n');
     const locales: string[] = [];
-    for (let file of files) {
+    for (const file of files) {
         const locale = await readLocale(file);
         locales.push(locale);
     }
@@ -46,7 +45,7 @@ test('Locales', async () => {
                 }
             }
             return true;
-        })
+        });
     }
 
     // Line count is the same

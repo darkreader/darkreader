@@ -1,13 +1,13 @@
 import {ExtensionData, FilterConfig, TabInfo, Message, UserSettings} from '../definitions';
 
-interface ExtensionAdapter {
+export interface ExtensionAdapter {
     collect: () => Promise<ExtensionData>;
     getActiveTabInfo: () => Promise<TabInfo>;
     changeSettings: (settings: Partial<UserSettings>) => void;
     setTheme: (theme: Partial<FilterConfig>) => void;
     setShortcut: ({command, shortcut}) => void;
     markNewsAsRead: (ids: string[]) => void;
-    toggleSitePattern: (pattern: string) => void;
+    toggleURL: (pattern: string) => void;
     onPopupOpen: () => void;
     applyDevDynamicThemeFixes: (json: string) => Error;
     resetDevDynamicThemeFixes: () => void;
@@ -62,8 +62,8 @@ export default class Messenger {
                 this.adapter.setShortcut(data);
                 break;
             }
-            case 'toggle-site-pattern': {
-                this.adapter.toggleSitePattern(data);
+            case 'toggle-url': {
+                this.adapter.toggleURL(data);
                 break;
             }
             case 'mark-news-as-read': {

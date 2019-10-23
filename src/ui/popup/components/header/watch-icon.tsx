@@ -14,7 +14,8 @@ export default function WatchIcon({hours, minutes}) {
 
     return (
         <svg viewBox="0 0 16 16">
-            <path fill="none" stroke="white" stroke-width="2" d={`M${hx},${hy} L${cx},${cy} L${mx},${my}`} />
+            <line stroke="white" stroke-width="2" x1={cx} y1={cy} x2={hx} y2={hy} />
+            <line stroke="white" stroke-width="1.5" x1={cx} y1={cy} x2={mx} y2={my} />
         </svg>
     );
 }

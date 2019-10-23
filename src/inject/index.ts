@@ -1,7 +1,8 @@
 import {createOrUpdateStyle, removeStyle} from './style';
 import {createOrUpdateSVGFilter, removeSVGFilter} from './svg-filter';
 import {createOrUpdateDynamicTheme, removeDynamicTheme, cleanDynamicThemeCache} from './dynamic-theme';
-import {logWarn} from './utils/log';
+import {logInfo, logWarn} from './utils/log';
+import {watchForColorSchemeChange} from './utils/watch-color-scheme';
 
 function onMessage({type, data}) {
     switch (type) {
@@ -34,9 +35,16 @@ function onMessage({type, data}) {
     }
 }
 
+// TODO: Use background page color scheme watcher when browser bugs fixed.
+const colorSchemeWatcher = watchForColorSchemeChange(({isDark}) => {
+    logInfo('Media query was changed');
+    chrome.runtime.sendMessage({type: 'color-scheme-change', data: {isDark}});
+});
+
 const port = chrome.runtime.connect({name: 'tab'});
 port.onMessage.addListener(onMessage);
 port.onDisconnect.addListener(() => {
     logWarn('disconnect');
     cleanDynamicThemeCache();
+    colorSchemeWatcher.disconnect();
 });

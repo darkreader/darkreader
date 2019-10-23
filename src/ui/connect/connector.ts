@@ -65,8 +65,8 @@ export default class Connector implements ExtensionActions {
         this.port.postMessage({type: 'set-theme', data: theme});
     }
 
-    toggleSitePattern(pattern: string) {
-        this.port.postMessage({type: 'toggle-site-pattern', data: pattern});
+    toggleURL(url: string) {
+        this.port.postMessage({type: 'toggle-url', data: url});
     }
 
     markNewsAsRead(ids: string[]) {

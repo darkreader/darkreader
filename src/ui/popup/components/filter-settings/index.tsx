@@ -16,7 +16,7 @@ export default function FilterSettings({data, actions, tab}: ExtWrapper & {tab: 
             custom.theme = {...custom.theme, ...config};
             actions.changeSettings({customThemes: data.settings.customThemes});
         } else {
-            actions.setTheme(config)
+            actions.setTheme(config);
         }
     }
 

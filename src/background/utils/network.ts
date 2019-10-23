@@ -67,7 +67,7 @@ class LimitedCacheStorage {
             return;
         }
 
-        for (let [url, record] of this.records) {
+        for (const [url, record] of this.records) {
             if (this.bytesInUse + size > LimitedCacheStorage.QUOTA_BYTES) {
                 this.records.delete(url);
                 this.bytesInUse -= record.size;
@@ -83,7 +83,7 @@ class LimitedCacheStorage {
 
     private removeExpiredRecords() {
         const now = Date.now();
-        for (let [url, record] of this.records) {
+        for (const [url, record] of this.records) {
             if (record.expires < now) {
                 this.records.delete(url);
                 this.bytesInUse -= record.size;
@@ -97,6 +97,7 @@ class LimitedCacheStorage {
 interface FetchRequestParameters {
     url: string;
     responseType: 'data-url' | 'text';
+    mimeType?: string;
 }
 
 export function createFileLoader() {
@@ -110,14 +111,14 @@ export function createFileLoader() {
         'text': loadAsText,
     };
 
-    async function get({url, responseType}: FetchRequestParameters) {
+    async function get({url, responseType, mimeType}: FetchRequestParameters) {
         const cache = caches[responseType];
         const load = loaders[responseType];
         if (cache.has(url)) {
             return cache.get(url);
         }
 
-        const data = await load(url);
+        const data = await load(url, mimeType);
         cache.set(url, data);
         return data;
     }

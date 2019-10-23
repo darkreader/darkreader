@@ -12,7 +12,7 @@ interface ShortcutLinkProps {
 }
 
 /**
- * Displays a shortcut and navigates 
+ * Displays a shortcut and navigates
  * to Chrome Commands page on click.
  */
 export default function ShortcutLink(props: ShortcutLinkProps) {

@@ -1,5 +1,5 @@
 import {rgbToHSL, hslToRGB, rgbToString, rgbToHexString, RGBA, HSLA} from '../utils/color';
-import {scale, clamp} from '../utils/math';
+import {scale} from '../utils/math';
 import {applyColorMatrix, createFilterMatrix} from './utils/matrix';
 import {FilterConfig} from '../definitions';
 
@@ -28,7 +28,7 @@ function modifyColorWithCache(rgb: RGBA, filter: FilterConfig, modifyHSL: (hsl: 
     const hsl = rgbToHSL(rgb);
     const modified = modifyHSL(hsl);
     const {r, g, b, a} = hslToRGB(modified);
-    const matrix = createFilterMatrix(filter)
+    const matrix = createFilterMatrix(filter);
     const [rf, gf, bf] = applyColorMatrix([r, g, b], matrix);
 
     const color = (a === 1 ?

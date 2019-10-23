@@ -1,8 +1,9 @@
 const bundleCSS = require('./bundle-css');
-const bundleHtml = require('./bundle-html');
+const bundleHTML = require('./bundle-html');
 const bundleJS = require('./bundle-js');
 const bundleLocales = require('./bundle-locales');
 const clean = require('./clean');
+const codeStyle = require('./code-style');
 const copy = require('./copy');
 const foxify = require('./foxify');
 const {runTasks, log} = require('./utils');
@@ -15,9 +16,10 @@ async function release() {
             clean,
             bundleJS,
             bundleCSS,
-            bundleHtml,
+            bundleHTML,
             bundleLocales,
             copy,
+            codeStyle,
             foxify,
             zip,
         ], {production: true});

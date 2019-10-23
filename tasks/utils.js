@@ -1,5 +1,5 @@
 async function runTasks(tasks, options) {
-    for (let task of tasks) {
+    for (const task of tasks) {
         const name = task.name;
         try {
             const start = Date.now();

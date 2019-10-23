@@ -1,4 +1,4 @@
-import {FilterConfig} from '../definitions'
+import {FilterConfig} from '../definitions';
 
 export function createTextStyle(config: FilterConfig): string {
     const lines: string[] = [];

@@ -1,4 +1,5 @@
-import {m, sync} from 'malevic';
+import {m} from 'malevic';
+import {sync} from 'malevic/dom';
 import connect from '../connect';
 import Body from './components/body';
 import {isMobile, isFirefox} from '../../utils/platform';
@@ -13,7 +14,7 @@ function renderBody(data: ExtensionData, tab: TabInfo, actions: ExtensionActions
 
 async function start() {
     const connector = connect();
-    window.addEventListener('unload', (e) => connector.disconnect());
+    window.addEventListener('unload', () => connector.disconnect());
 
     const [data, tab] = await Promise.all([
         connector.getData(),

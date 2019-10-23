@@ -1,34 +1,33 @@
 import {m} from 'malevic';
-import withState, {useState} from 'malevic/state';
+import {withState, useState} from 'malevic/state';
 import {Button} from '../../controls';
 import ThemeEngines from '../../../generators/theme-engines';
 import {DEVTOOLS_DOCS_URL} from '../../../utils/links';
 import {ExtWrapper} from '../../../definitions';
 
-interface BodyProps extends ExtWrapper {
-}
+type BodyProps = ExtWrapper;
 
 function Body({data, actions}: BodyProps) {
-    const {state, setState} = useState({errorText: null as string})
+    const {state, setState} = useState({errorText: null as string});
     let textNode: HTMLTextAreaElement;
 
     const wrapper = (data.settings.theme.engine === ThemeEngines.staticTheme
         ? {
             header: 'Static Theme Editor',
-            fixesText: data.devStaticThemesText,
+            fixesText: data.devtools.staticThemesText,
             apply: (text) => actions.applyDevStaticThemes(text),
             reset: () => actions.resetDevStaticThemes(),
         } : data.settings.theme.engine === ThemeEngines.cssFilter || data.settings.theme.engine === ThemeEngines.svgFilter ? {
             header: 'Inversion Fix Editor',
-            fixesText: data.devInversionFixesText,
+            fixesText: data.devtools.filterFixesText,
             apply: (text) => actions.applyDevInversionFixes(text),
             reset: () => actions.resetDevInversionFixes(),
         } : {
-                header: 'Dynamic Theme Editor',
-                fixesText: data.devDynamicThemeFixesText,
-                apply: (text) => actions.applyDevDynamicThemeFixes(text),
-                reset: () => actions.resetDevDynamicThemeFixes(),
-            });
+            header: 'Dynamic Theme Editor',
+            fixesText: data.devtools.dynamicFixesText,
+            apply: (text) => actions.applyDevDynamicThemeFixes(text),
+            reset: () => actions.resetDevDynamicThemeFixes(),
+        });
 
     function onTextRender(node) {
         textNode = node;
@@ -63,9 +62,8 @@ function Body({data, actions}: BodyProps) {
             <h3 id="sub-title">{wrapper.header}</h3>
             <textarea
                 id="editor"
-                native
-                didmount={onTextRender}
-                didupdate={onTextRender}
+                attached={onTextRender}
+                updated={onTextRender}
             />
             <label id="error-text">{state.errorText}</label>
             <div id="buttons">
@@ -73,7 +71,7 @@ function Body({data, actions}: BodyProps) {
                 <Button onclick={apply}>Apply</Button>
             </div>
             <p id="description">
-                Read about this tool <strong><a href={DEVTOOLS_DOCS_URL} target="_blank">here</a></strong>.
+                Read about this tool <strong><a href={DEVTOOLS_DOCS_URL} target="_blank" rel="noopener noreferrer">here</a></strong>.
                 If a <strong>popular</strong> website looks incorrect
                 e-mail to <strong>DarkReaderApp@gmail.com</strong>
             </p>

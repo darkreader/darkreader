@@ -1,4 +1,4 @@
-import {parse, rgbToHexString, RGBA} from '../utils/color';
+import {parse, RGBA} from '../utils/color';
 import {modifyBackgroundColor, modifyForegroundColor, modifyBorderColor} from '../generators/modify-colors';
 import {FilterConfig} from '../definitions';
 
@@ -13,6 +13,7 @@ const themeColorTypes = {
     accentcolor: 'bg',
     button_background_active: 'text',
     button_background_hover: 'text',
+    frame: 'bg',
     icons: 'text',
     icons_attention: 'text',
     popup: 'bg',
@@ -20,6 +21,7 @@ const themeColorTypes = {
     popup_highlight: 'bg',
     popup_highlight_text: 'text',
     popup_text: 'text',
+    tab_background_text: 'text',
     tab_line: 'bg',
     tab_loading: 'bg',
     tab_selected: 'bg',
@@ -30,27 +32,33 @@ const themeColorTypes = {
     toolbar_field_border: 'border',
     toolbar_field_border_focus: 'border',
     toolbar_field_focus: 'bg',
+    toolbar_field_separator: 'border',
     toolbar_field_text: 'text',
     toolbar_field_text_focus: 'text',
-    toolbar_field_separator: 'border',
     toolbar_text: 'text',
     toolbar_top_separator: 'border',
     toolbar_vertical_separator: 'border',
-}
+};
 
 const $colors = {
+    // 'accentcolor' is the deprecated predecessor of 'frame'.
+    // https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json/theme#colors
     accentcolor: '#111111',
+    frame: '#111111',
     popup: '#cccccc',
     popup_text: 'black',
+    tab_background_text: 'white',
     tab_line: '#23aeff',
     tab_loading: '#23aeff',
+    // 'textcolor' is the predecessor of 'tab_background_text'.
+    // https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json/theme#colors
     textcolor: 'white',
     toolbar: '#707070',
     toolbar_field: 'lightgray',
     toolbar_field_text: 'black',
 };
 
-export function setWindowTheme(filter: FilterConfig, $accent?: string) {
+export function setWindowTheme(filter: FilterConfig) {
     const colors = Object.entries($colors).reduce((obj, [key, value]) => {
         const type = themeColorTypes[key];
         const modify: ((rgb: RGBA, filter: FilterConfig) => string) = {

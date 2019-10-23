@@ -100,7 +100,7 @@ function createRuleGen(getSelectors: (siteTheme: StaticTheme) => string[], gener
         selectors.forEach((s, i) => {
             let ln = modifySelector(s);
             if (i < selectors.length - 1) {
-                ln += ','
+                ln += ',';
             } else {
                 ln += ' {';
             }
@@ -168,9 +168,9 @@ const ruleGenerators = [
 
     createRuleGen((t) => t.fadeBg, (t) => [`background-color: ${rgb(t.fadeBg)}`]),
     createRuleGen((t) => t.fadeText, (t) => [`color: ${rgb(t.fadeText)}`]),
-    createRuleGen((t) => t.transparentBg, (t) => ['background-color: transparent']),
-    createRuleGen((t) => t.noImage, (t) => ['background-image: none']),
-    createRuleGen((t) => t.invert, (t) => ['filter: invert(100%) hue-rotate(180deg)']),
+    createRuleGen((t) => t.transparentBg, () => ['background-color: transparent']),
+    createRuleGen((t) => t.noImage, () => ['background-image: none']),
+    createRuleGen((t) => t.invert, () => ['filter: invert(100%) hue-rotate(180deg)']),
 ];
 
 const staticThemeCommands = [
@@ -240,7 +240,7 @@ function camelCaseToUpperCase(text: string) {
 export function formatStaticThemes(staticThemes: StaticTheme[]) {
     const themes = staticThemes.slice().sort((a, b) => compareURLPatterns(a.url[0], b.url[0]));
 
-    return formatSitesFixesConfig(staticThemes, {
+    return formatSitesFixesConfig(themes, {
         props: staticThemeCommands.map(upperCaseToCamelCase),
         getPropCommandName: camelCaseToUpperCase,
         formatPropValue: (prop, value) => {

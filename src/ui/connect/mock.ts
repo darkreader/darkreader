@@ -1,3 +1,4 @@
+import {getURLHost} from '../../utils/url';
 import {ExtensionData, TabInfo, UserSettings} from '../../definitions';
 
 export function getMockData(override = {}): ExtensionData {
@@ -20,6 +21,7 @@ export function getMockData(override = {}): ExtensionData {
             },
             customThemes: [],
             siteList: [],
+            siteListEnabled: [],
             applyToListedOnly: false,
             changeBrowserTheme: false,
             notifyOfNews: false,
@@ -28,6 +30,10 @@ export function getMockData(override = {}): ExtensionData {
             time: {
                 activation: '18:00',
                 deactivation: '9:00',
+            },
+            location: {
+                latitude: 52.4237178,
+                longitude: 31.021786,
             },
         } as UserSettings,
         fonts: [
@@ -43,9 +49,14 @@ export function getMockData(override = {}): ExtensionData {
             'addSite': 'Alt+Shift+A',
             'toggle': 'Alt+Shift+D'
         },
-        devDynamicThemeFixesText: '',
-        devInversionFixesText: '',
-        devStaticThemesText: '',
+        devtools: {
+            dynamicFixesText: '',
+            filterFixesText: '',
+            staticThemesText: '',
+            hasCustomDynamicFixes: false,
+            hasCustomFilterFixes: false,
+            hasCustomStaticFixes: false,
+        },
     }, override);
 }
 
@@ -83,17 +94,21 @@ export function createConnectorMock() {
             Object.assign(data.shortcuts, {[command]: shortcut});
             listener(data);
         },
-        toggleSitePattern(pattern) {
+        toggleURL(url) {
+            const pattern = getURLHost(url);
             const index = data.settings.siteList.indexOf(pattern);
             if (index >= 0) {
-                data.settings.siteList.splice(pattern, 1);
+                data.settings.siteList.splice(index, 1, pattern);
             } else {
                 data.settings.siteList.push(pattern);
             }
             listener(data);
         },
-        markNewsAsRead(ids) {
-            //
+        markNewsAsRead(ids: string[]) {
+            data.news
+                .filter(({id}) => ids.includes(id))
+                .forEach((news) => news.read = true);
+            listener(data);
         },
         disconnect() {
             //

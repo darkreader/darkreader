@@ -1,4 +1,5 @@
-import {m, getData, getDOMNode} from 'malevic';
+import {m} from 'malevic';
+import {getContext} from 'malevic/dom';
 import TextBox from '../textbox';
 import VirtualScroll from '../virtual-scroll';
 
@@ -10,11 +11,12 @@ interface TextListProps {
     onChange: (values: string[]) => void;
 }
 
-const propsStore = new WeakMap<Element, TextListProps>();
-
 export default function TextList(props: TextListProps) {
+    const context = getContext();
+    context.store.indices = context.store.indices || new WeakMap();
+
     function onTextChange(e) {
-        const index = getData(e.target);
+        const index = context.store.indices.get(e.target);
         const values = props.values.slice();
         const value = e.target.value.trim();
         if (values.indexOf(value) >= 0) {
@@ -33,11 +35,13 @@ export default function TextList(props: TextListProps) {
     }
 
     function createTextBox(text: string, index: number) {
+        const saveIndex = (node: Element) => context.store.indices.set(node, index);
         return (
             <TextBox
                 class="text-list__textbox"
                 value={text}
-                data={index}
+                attached={saveIndex}
+                updated={saveIndex}
                 placeholder={props.placeholder}
             />
         );
@@ -45,27 +49,25 @@ export default function TextList(props: TextListProps) {
 
     let shouldFocus = false;
 
-    const node = getDOMNode() as Element;
-    const prevProps = node ? propsStore.get(node) : null;
-    if (node) {
-        propsStore.set(node, props);
-    }
+    const node = context.node;
+    const prevProps = context.prev ? context.prev.props as TextListProps : null;
     if (node && props.isFocused && (
         !prevProps ||
         !prevProps.isFocused ||
         prevProps.values.length < props.values.length
     )) {
-        focusLastNode(node);
+        focusLastNode();
     }
 
     function didMount(node: Element) {
-        propsStore.set(node, props);
+        context.store.node = node;
         if (props.isFocused) {
-            focusLastNode(node);
+            focusLastNode();
         }
     }
 
-    function focusLastNode(node: Element) {
+    function focusLastNode() {
+        const node = context.store.node as Element;
         shouldFocus = true;
         requestAnimationFrame(() => {
             const inputs = node.querySelectorAll('.text-list__textbox');
@@ -80,7 +82,7 @@ export default function TextList(props: TextListProps) {
                 <div
                     class={['text-list', props.class]}
                     onchange={onTextChange}
-                    didmount={didMount}
+                    attached={didMount}
                 />
             )}
             items={props.values

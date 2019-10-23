@@ -84,7 +84,7 @@ test('Dynamic Theme Fixes config', async () => {
     ].join('\r\n'))).toEqual([
         {url: ['inbox.google.com', 'mail.google.com'], invert: ['a', 'b'], css: '.x { color: white !important; }'},
         {url: ['twitter.com'], invert: ['c', 'd']},
-    ])
+    ]);
 });
 
 test('Inversion Fixes config', async () => {

@@ -12,9 +12,12 @@ const helpLocales = [
     'cs',
     'de',
     'en',
+    'es',
     'fr',
     'it',
     'ru',
+    'zh-CN',
+    'zh-TW',
 ];
 
 export function getHelpURL() {

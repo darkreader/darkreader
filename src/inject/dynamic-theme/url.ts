@@ -1,5 +1,3 @@
-import {getMatches} from '../../utils/text';
-
 export function parseURL(url: string) {
     const a = document.createElement('a');
     a.href = url;
@@ -19,7 +17,7 @@ export function getAbsoluteURL($base: string, $relative: string) {
         return u.href;
     }
     const pathParts = b.pathname.split('/').concat($relative.split('/')).filter((p) => p);
-    let backwardIndex: number
+    let backwardIndex: number;
     while ((backwardIndex = pathParts.indexOf('..')) > 0) {
         pathParts.splice(backwardIndex - 1, 2);
     }

@@ -169,7 +169,7 @@ function getColorModifier(prop: string, value: string): string | CSSValueModifie
     }
 }
 
-const gradientRegex = /[\-a-z]+gradient\(([^\(\)]*(\(([^\(\)]*(\(.*?\)))*[^\(\)]*\)))*[^\(\)]*\)/g;
+const gradientRegex = /[\-a-z]+gradient\(([^\(\)]*(\(([^\(\)]*(\(.*?\)))*[^\(\)]*\))){0,15}[^\(\)]*\)/g;
 const imageDetailsCache = new Map<string, ImageDetails>();
 const awaitingForImageLoading = new Map<string, ((imageDetails: ImageDetails) => void)[]>();
 
@@ -329,7 +329,7 @@ function getBgImageModifier(prop: string, value: string, rule: CSSStyleRule, isC
                     });
             }
             return results.join('');
-        }
+        };
 
     } catch (err) {
         logWarn(`Unable to parse gradient ${value}`, err);

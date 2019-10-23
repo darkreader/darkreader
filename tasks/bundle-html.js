@@ -30,46 +30,54 @@ require('ts-node').register({
         '/node_modules\/(?!malevic).*/',
     ]
 });
-const Malevic = require('malevic');
+require('tsconfig-paths').register({
+    baseUrl: './',
+    paths: {
+        'malevic/*': ['node_modules/malevic/umd/*'],
+        'malevic': ['node_modules/malevic/umd/index'],
+    }
+});
+const Malevic = require('malevic/umd/index');
+const MalevicString = require('malevic/umd/string');
 const DevToolsBody = require('../src/ui/devtools/components/body').default;
 const PopupBody = require('../src/ui/popup/components/body').default;
 const CSSEditorBody = require('../src/ui/stylesheet-editor/components/body').default;
 const {getMockData, getMockActiveTabInfo} = require('../src/ui/connect/mock');
 
-async function bundlePopupHtml({dir}) {
+async function bundlePopupHTML({dir}) {
     let html = await fs.readFile('src/ui/popup/index.html', 'utf8');
     const data = getMockData({isReady: false});
     const tab = getMockActiveTabInfo();
     const actions = null;
-    const bodyText = Malevic.renderToString(PopupBody({data, tab, actions}));
+    const bodyText = MalevicString.stringify(Malevic.m(PopupBody, {data, tab, actions}));
     html = html.replace('$BODY', bodyText);
     await fs.outputFile(`${dir}/ui/popup/index.html`, html);
 }
 
-async function bundleDevToolsHtml({dir}) {
+async function bundleDevToolsHTML({dir}) {
     let html = await fs.readFile('src/ui/devtools/index.html', 'utf8');
     const data = getMockData();
     const actions = null;
-    const bodyText = Malevic.renderToString(DevToolsBody({data, actions}));
+    const bodyText = MalevicString.stringify(Malevic.m(DevToolsBody, {data, actions}));
     html = html.replace('$BODY', bodyText);
     await fs.outputFile(`${dir}/ui/devtools/index.html`, html);
 }
 
-async function bundleCSSEditorHtml({dir}) {
+async function bundleCSSEditorHTML({dir}) {
     let html = await fs.readFile('src/ui/stylesheet-editor/index.html', 'utf8');
     const data = getMockData();
     const tab = getMockActiveTabInfo();
     const actions = null;
-    const bodyText = Malevic.renderToString(CSSEditorBody({data, tab, actions}));
+    const bodyText = MalevicString.stringify(Malevic.m(CSSEditorBody, {data, tab, actions}));
     html = html.replace('$BODY', bodyText);
     await fs.outputFile(`${dir}/ui/stylesheet-editor/index.html`, html);
 }
 
-async function bundleHtml({production}) {
+async function bundleHTML({production}) {
     const dir = getDestDir({production});
-    await bundlePopupHtml({dir});
-    await bundleDevToolsHtml({dir});
-    await bundleCSSEditorHtml({dir});
+    await bundlePopupHTML({dir});
+    await bundleDevToolsHTML({dir});
+    await bundleCSSEditorHTML({dir});
 }
 
-module.exports = bundleHtml;
+module.exports = bundleHTML;

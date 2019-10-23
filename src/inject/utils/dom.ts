@@ -2,7 +2,7 @@ import {logWarn} from './log';
 import {throttle} from './throttle';
 import {getDuration} from '../../utils/time';
 
-interface createNodeAsapParams {
+interface CreateNodeAsapParams {
     selectNode: () => HTMLElement;
     createNode: (target: HTMLElement) => void;
     updateNode: (existing: HTMLElement) => void;
@@ -18,7 +18,7 @@ export function createNodeAsap({
     selectTarget,
     createTarget,
     isTargetMutation,
-}: createNodeAsapParams) {
+}: CreateNodeAsapParams) {
     const target = selectTarget();
     if (target) {
         const prev = selectNode();
@@ -100,7 +100,7 @@ export function watchForNodePosition<T extends Node>(node: T, onRestore?: () => 
         parent.insertBefore(node, prevSibling ? prevSibling.nextSibling : parent.firstChild);
         onRestore && onRestore();
     });
-    const observer = new MutationObserver((mutations) => {
+    const observer = new MutationObserver(() => {
         if (!node.parentElement) {
             restore();
         }

@@ -4,11 +4,11 @@ import Tab from './tab';
 
 interface TabPanelProps {
     tabs: {
-        [name: string]: Malevic.Declaration;
+        [name: string]: Malevic.Child;
     };
     tabLabels: {
         [name: string]: string;
-    },
+    };
     activeTab: string;
     onSwitchTab: (name: string) => void;
 }

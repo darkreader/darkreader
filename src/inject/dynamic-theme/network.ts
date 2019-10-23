@@ -1,6 +1,7 @@
 interface FetchRequest {
     url: string;
     responseType: 'data-url' | 'text';
+    mimeType?: string;
 }
 
 let counter = 0;

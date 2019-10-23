@@ -1,6 +1,6 @@
 import {m} from 'malevic';
-import withForms from 'malevic/forms';
-import withState, {useState} from 'malevic/state';
+import {withForms} from 'malevic/forms';
+import {withState, useState} from 'malevic/state';
 import {TabPanel, Button} from '../../controls';
 import FilterSettings from './filter-settings';
 import {Header, MoreToggleSettings} from './header';
@@ -8,13 +8,13 @@ import Loader from './loader';
 import MoreSettings from './more-settings';
 import {News, NewsButton} from './news';
 import SiteListSettings from './site-list-settings';
+import ThemeEngines from '../../../generators/theme-engines';
 import {isFirefox} from '../../../utils/platform';
 import {getDuration} from '../../../utils/time';
 import {DONATE_URL, GITHUB_URL, PRIVACY_URL, TWITTER_URL, getHelpURL} from '../../../utils/links';
 import {getLocalMessage} from '../../../utils/locales';
+import {compose} from '../../utils';
 import {ExtensionData, ExtensionActions, TabInfo, News as NewsObject} from '../../../definitions';
-
-withForms();
 
 interface BodyProps {
     data: ExtensionData;
@@ -48,7 +48,7 @@ function Body(props: BodyProps) {
             <body>
                 <Loader complete={false} />
             </body>
-        )
+        );
     }
 
     const unreadNews = props.data.news.filter(({read}) => !read);
@@ -76,6 +76,14 @@ function Body(props: BodyProps) {
             displayedNewsCount = 0;
         }
     }
+
+    const globalThemeEngine = props.data.settings.theme.engine;
+    const devtoolsData = props.data.devtools;
+    const hasCustomFixes = (
+        (globalThemeEngine === ThemeEngines.dynamicTheme && devtoolsData.hasCustomDynamicFixes) ||
+        ([ThemeEngines.cssFilter, ThemeEngines.svgFilter].includes(globalThemeEngine) && devtoolsData.hasCustomFilterFixes) ||
+        (globalThemeEngine === ThemeEngines.staticTheme && devtoolsData.hasCustomStaticFixes)
+    );
 
     function toggleMoreToggleSettings() {
         setState({moreToggleSettingsOpen: !state.moreToggleSettingsOpen});
@@ -115,17 +123,23 @@ function Body(props: BodyProps) {
 
             <footer>
                 <div class="footer-links">
-                    <a class="footer-links__link" href={PRIVACY_URL} target="_blank">{getLocalMessage('privacy')}</a>
-                    <a class="footer-links__link" href={TWITTER_URL} target="_blank">Twitter</a>
-                    <a class="footer-links__link" href={GITHUB_URL} target="_blank">GitHub</a>
-                    <a class="footer-links__link" href={getHelpURL()} target="_blank">{getLocalMessage('help')}</a>
+                    <a class="footer-links__link" href={PRIVACY_URL} target="_blank" rel="noopener noreferrer">{getLocalMessage('privacy')}</a>
+                    <a class="footer-links__link" href={TWITTER_URL} target="_blank" rel="noopener noreferrer">Twitter</a>
+                    <a class="footer-links__link" href={GITHUB_URL} target="_blank" rel="noopener noreferrer">GitHub</a>
+                    <a class="footer-links__link" href={getHelpURL()} target="_blank" rel="noopener noreferrer">{getLocalMessage('help')}</a>
                 </div>
                 <div class="footer-buttons">
-                    <a class="donate-link" href={DONATE_URL} target="_blank">
+                    <a class="donate-link" href={DONATE_URL} target="_blank" rel="noopener noreferrer">
                         <span class="donate-link__text">{getLocalMessage('donate')}</span>
                     </a>
                     <NewsButton active={state.newsOpen} count={displayedNewsCount} onClick={toggleNews} />
-                    <Button onclick={openDevTools} class="dev-tools-button">
+                    <Button
+                        onclick={openDevTools}
+                        class={{
+                            'dev-tools-button': true,
+                            'dev-tools-button--has-custom-fixes': hasCustomFixes,
+                        }}
+                    >
                         🛠 {getLocalMessage('open_dev_tools')}
                     </Button>
                 </div>
@@ -146,4 +160,4 @@ function Body(props: BodyProps) {
     );
 }
 
-export default withState(Body);
+export default compose(Body, withState, withForms);

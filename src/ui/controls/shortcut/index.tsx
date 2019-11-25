@@ -18,18 +18,7 @@ interface ShortcutLinkProps {
 export default function ShortcutLink(props: ShortcutLinkProps) {
     const cls = mergeClass('shortcut', props.class);
     const shortcut = props.shortcuts[props.commandName];
-    const shortcutClass = document.getElementsByClassName("shortcut");
-    const toggleCurrent = document.getElementsByClassName("shortcut").item(0);
-    const toggleExtension = document.getElementsByClassName("shortcut").item(1);
-
-    if (shortcutClass.length == 3) {
-        if (toggleCurrent.innerHTML.lastIndexOf("Toggle") > 5) {
-            toggleCurrent.innerHTML = toggleCurrent.innerHTML.slice(0,toggleCurrent.innerHTML.indexOf("Toggle",1));
-        }
-        if (toggleExtension.innerHTML.lastIndexOf("Toggle") > 5) {
-            toggleExtension.innerHTML = toggleExtension.innerHTML.slice(0,toggleExtension.innerHTML.indexOf("Toggle",1));
-        }
-    }
+    const shortcutMessage = props.textTemplate(shortcut);
 
     let enteringShortcutInProgress = false;
 
@@ -100,11 +89,16 @@ export default function ShortcutLink(props: ShortcutLinkProps) {
         });
     }
 
+    function onUpdate(props) {
+        props.textContent = shortcutMessage;
+    }
+
     return (
         <a
             class={cls}
             href="#"
             onclick={onClick}
+            updated={onUpdate}
         >{props.textTemplate(shortcut)}</a>
     );
 }

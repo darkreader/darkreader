@@ -89,8 +89,8 @@ export default function ShortcutLink(props: ShortcutLinkProps) {
         });
     }
 
-    function onUpdate(props) {
-        props.textContent = shortcutMessage;
+    function onRender(node) {
+        node.textContent = shortcutMessage;
     }
 
     return (
@@ -98,7 +98,7 @@ export default function ShortcutLink(props: ShortcutLinkProps) {
             class={cls}
             href="#"
             onclick={onClick}
-            updated={onUpdate}
-        >{props.textTemplate(shortcut)}</a>
+            attached={onRender}
+        ></a>
     );
 }

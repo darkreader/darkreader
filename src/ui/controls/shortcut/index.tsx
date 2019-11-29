@@ -89,7 +89,7 @@ export default function ShortcutLink(props: ShortcutLinkProps) {
         });
     }
 
-    function onRender(node) {
+    function onRender(node: HTMLAnchorElement) {
         node.textContent = shortcutMessage;
     }
 

@@ -18,6 +18,7 @@ interface ShortcutLinkProps {
 export default function ShortcutLink(props: ShortcutLinkProps) {
     const cls = mergeClass('shortcut', props.class);
     const shortcut = props.shortcuts[props.commandName];
+    const shortcutMessage = props.textTemplate(shortcut);
 
     let enteringShortcutInProgress = false;
 
@@ -88,11 +89,16 @@ export default function ShortcutLink(props: ShortcutLinkProps) {
         });
     }
 
+    function onRender(node: HTMLAnchorElement) {
+        node.textContent = shortcutMessage;
+    }
+
     return (
         <a
             class={cls}
             href="#"
             onclick={onClick}
-        >{props.textTemplate(shortcut)}</a>
+            attached={onRender}
+        ></a>
     );
 }

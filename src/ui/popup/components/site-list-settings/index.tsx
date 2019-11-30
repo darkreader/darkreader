@@ -18,8 +18,6 @@ export default function SiteListSettings({data, actions, isFocused}: SiteListSet
         .sort((a, b) => {
             var textA = parseURL(a);
             var textB = parseURL(b);
-            console.log(textA);
-            console.log(textB);
             return mode ? textA.localeCompare(textB) : textB.localeCompare(textA)});
         actions.changeSettings({siteList: data.settings.siteList});
     }

@@ -12,7 +12,24 @@ export default function SiteListSettings({data, actions, isFocused}: SiteListSet
     function isSiteUrlValid(value: string) {
         return /^([^\.\s]+?\.?)+$/.test(value);
     }
+    
+    function sortList(sitelist : string[], mode : boolean) {
+        sitelist = sitelist
+        .sort((a, b) => {
+            var textA = parseURL(a);
+            var textB = parseURL(b);
+            console.log(textA);
+            console.log(textB);
+            return mode ? textA.localeCompare(textB) : textB.localeCompare(textA)});
+        actions.changeSettings({siteList: data.settings.siteList});
+    }
 
+    function parseURL(text : string) {
+        return (text
+        .toLowerCase() // Make string lowercase
+        .replace(/^(https?):\/\//,'') // Remove http/https
+        .replace(/\www./g,'')); // Remove www.
+    }
     return (
         <section class="site-list-settings">
             <Toggle
@@ -42,6 +59,15 @@ export default function SiteListSettings({data, actions, isFocused}: SiteListSet
                     : getLocalMessage('setup_add_site_hotkey')
                 )}
                 onSetShortcut={(shortcut) => actions.setShortcut('addSite', shortcut)}
+            />
+            <Toggle
+                checked={data.settings.filterListed}
+                labelOn={"Ascending"}
+                labelOff={"Descending"}
+                onChange={(value) => {
+                    sortList(data.settings.siteList,value);
+                    actions.changeSettings({filterListed: value}) 
+                }}
             />
         </section>
     );

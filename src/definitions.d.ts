@@ -61,6 +61,7 @@ export interface UserSettings {
     siteList: string[];
     siteListEnabled: string[];
     applyToListedOnly: boolean;
+    filterListed: boolean;
     changeBrowserTheme: boolean;
     notifyOfNews: boolean;
     syncSettings: boolean;

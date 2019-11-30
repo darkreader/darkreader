@@ -23,6 +23,7 @@ export function getMockData(override = {}): ExtensionData {
             siteList: [],
             siteListEnabled: [],
             applyToListedOnly: false,
+            filterListed: false,
             changeBrowserTheme: false,
             notifyOfNews: false,
             syncSettings: true,

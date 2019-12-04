@@ -29,13 +29,13 @@ or **[inversion-fixes.config](https://github.com/alexanderby/darkreader/blob/mas
 *(please, preserve alphabetical order by URL, use short selectors, preserve code style)*.
 
 ~~Please note, that merged changes to these files are automatically delivered to all users **within 15 minutes**.~~
-Config syncing was disabled, cause GitHub team doesn't allow using GitHub as a CDN. Storing these files and making requests to other resources will be expensive and look suspicious.
+Config syncing was disabled, cause the GitHub team doesn't allow using GitHub as a CDN. Storing these files and making requests to other resources will be expensive and look suspicious.
 
 ### Using Dev Tools
 
 Dev Tools should be used to **fix minor issues** on a web page
-*(like dark icon on dark background, removing bright background, adding white background to transparent image etc.)*.
-If page looks partially dark and bright in **Dynamic mode**, it should be considered as a bug.
+*(like dark icon on a dark background, removing bright background, adding a white background to transparent image, etc.)*.
+If the page looks partially dark and bright in **Dynamic mode**, it should be considered as a bug.
 For **Filter mode** it is a common practice to invert already dark page parts.
 
 - Open **Chrome Dev Tools** (F12).
@@ -67,7 +67,7 @@ For **Dynamic mode** use `INVERT` only for dark images, that are invisible on da
 `!important` keyword should be specified for each CSS property to prevent overrides by other stylesheets.
 **Dynamic mode** supports `${COLOR}` template, where `COLOR` is a color value before the inversion (`white` will become `black` in dark mode).
 - **Special notice for Filter and Filter+ config**.
-It works by inverting the whole web page and reverting necessary parts (images, videos etc.) back, listed in `INVERT` section.
+It works by inverting the whole web page and reverting necessary parts (images, videos, etc.), listed in the `INVERT` section.
 If inverted element contains images or other content that becomes wrongly displayed, `NO INVERT` rule can be used.
 `REMOVE BG` removes background image from element and forces black background.
 ```
@@ -103,7 +103,7 @@ or **[inversion-fixes.config](https://github.com/alexanderby/darkreader/blob/mas
 - Click **Propose file change**.
 - Review your changes. Click **Create pull request**.
 - The Travis CI will run tests reviewing your changes.
-- If you see a **red cross** click **Details** and see what is wrong and edit existing Pull Request.
+- If you see a **red cross** click **Details** and see what is wrong and edit the existing Pull Request.
 - When you see a **green checkmark** then everything is fine.
 - Dark Reader developer will **review** and merge your changes making them available for all users.
 
@@ -111,15 +111,15 @@ or **[inversion-fixes.config](https://github.com/alexanderby/darkreader/blob/mas
 
 If you would like to **add new feature** to Dark Reader or **fix a bug**, **submit an issue** in GitHub (if there is no existing one), **discuss** it with active contributors, wait for **approvement**.
 
-In order to build and debug the extension **install the [Node.js](https://nodejs.org/)** LTS.
-Install development dependencies by running `npm install` in project root folder.
+To build and debug the extension **install the [Node.js](https://nodejs.org/)** LTS.
+Install development dependencies by running `npm install` in the project root folder.
 Then execute `npm run debug`.
 
 #### Chrome
 Open the `chrome://extensions` page.
 Disable the official Dark Reader version.
 Enable the **Developer mode**.
-Click **Load unpacked extension** button, navigate to project's `debug/` folder.
+Click **Load unpacked extension** button, navigate to the project's `debug/` folder.
 
 #### Firefox
 Open `about:addons` page.
@@ -133,13 +133,13 @@ If the extension **didn't reload** automatically it can be reloaded manually on 
 For editing the code you can use any text editor or web IDE (like [Visual Studio Code](https://code.visualstudio.com), [Atom](https://atom.io/), [WebStorm](https://www.jetbrains.com/webstorm/)).
 **Preserve code style** (whitespaces etc).
 
-Run tests by executing `npm test`.
+Run tests by executing the `npm test`.
 
 Submit a **pull request**, wait for **review**.
 
 ## Building for use
 You can install the extension from a file.
-Install [Node.js LTS](https://nodejs.org/en/). Download the source code (or checkout from git).
+Install [Node.js LTS](https://nodejs.org/en/). Download the source code (or check out from git).
 Open terminal in root folder and run:
 - `npm install`
 - `npm run release`

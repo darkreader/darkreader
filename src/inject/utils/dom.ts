@@ -73,7 +73,7 @@ export function watchForNodePosition<T extends Node>(node: T, onRestore?: () => 
     if (!parent) {
         // BUG: fails for shadow root.
         logWarn('Unable to watch for node position: parent element not found', node, prevSibling);
-        return {stop: () => {}};
+        return {stop: Function.prototype};
     }
     let attempts = 0;
     let start: number = null;

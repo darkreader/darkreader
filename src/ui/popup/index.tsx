@@ -33,3 +33,19 @@ document.documentElement.classList.toggle('built-in-horizontal-borders', popupHa
 if (isFirefox()) {
     fixNotClosingPopupOnNavigation();
 }
+
+declare const __DEBUG__: boolean;
+const DEBUG = __DEBUG__;
+if (DEBUG) {
+    chrome.runtime.onMessage.addListener(({type, data}) => {
+        if (type === 'popup-stylesheet-update') {
+            let style = document.getElementById('popup-stylesheet-update');
+            if (!style) {
+                style = document.createElement('style');
+                document.head.appendChild(style);
+            }
+            (document.querySelector('link[rel="stylesheet"]') as HTMLLinkElement).disabled = true;
+            style.textContent = data;
+        }
+    });
+}

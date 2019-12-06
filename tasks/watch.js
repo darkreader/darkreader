@@ -42,13 +42,14 @@ function watch(options) {
                 timeoutId = setTimeout(async () => {
                     timeoutId = null;
                     try {
-                        log.ok(`Files changed:${Array.from(queue).sort().map((path) => `\n${path}`)}`);
+                        const files = Array.from(queue).sort();
+                        log.ok(`Files changed:${files.map((path) => `\n${path}`)}`);
                         queue.clear();
                         await runTasks(tasks, options);
                         if (timeoutId) {
                             return;
                         }
-                        reload();
+                        reload({files});
                     } catch (err) {
                         log.error(err);
                     }

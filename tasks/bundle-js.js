@@ -7,6 +7,7 @@ const rollupPluginReplace = require('rollup-plugin-replace');
 const rollupPluginTypescript = require('rollup-plugin-typescript2');
 const typescript = require('typescript');
 const {getDestDir} = require('./paths');
+const {PORT} = require('./reload');
 
 function getJSFiles({production}) {
     const dir = getDestDir({production});
@@ -38,6 +39,7 @@ async function bundleJSEntry({src, dest, production}) {
             }),
             rollupPluginReplace({
                 '__DEBUG__': production ? 'false' : 'true',
+                '__PORT__': production ? '-1' : String(PORT),
             }),
         ].filter((x) => x)
     });

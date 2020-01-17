@@ -28,15 +28,8 @@ function createServer() {
             times.set(ws, Date.now());
             ws.on('message', async (data) => {
                 const message = JSON.parse(data);
-
                 if (message.type === 'reloading') {
                     log.ok('Extension reloading...');
-                }
-
-                if (message.type === 'get-popup-stylesheet') {
-                    const dir = getDestDir({production: false, isFirefox: message.isFirefox});
-                    const content = await fs.readFile(`${dir}/ui/popup/style.css`, {encoding: 'utf8'});
-                    send(ws, {type: 'popup-stylesheet', content});
                 }
             });
             ws.on('close', () => sockets.delete(ws));

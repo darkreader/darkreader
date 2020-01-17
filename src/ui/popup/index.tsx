@@ -39,13 +39,15 @@ const DEBUG = __DEBUG__;
 if (DEBUG) {
     chrome.runtime.onMessage.addListener(({type, data}) => {
         if (type === 'popup-stylesheet-update') {
-            let style = document.getElementById('popup-stylesheet-update');
-            if (!style) {
-                style = document.createElement('style');
-                document.head.appendChild(style);
-            }
-            (document.querySelector('link[rel="stylesheet"]') as HTMLLinkElement).disabled = true;
-            style.textContent = data;
+            document.querySelectorAll('link[rel="stylesheet"]').forEach((link: HTMLLinkElement) => {
+                const url = link.href;
+                link.disabled = true;
+                const newLink = document.createElement('link');
+                newLink.rel = 'stylesheet';
+                newLink.href = url.replace(/\?.*$/, `?nocache=${Date.now()}`);
+                link.parentElement.insertBefore(newLink, link);
+                link.remove();
+            });
         }
     });
 }

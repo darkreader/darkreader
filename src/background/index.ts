@@ -28,14 +28,10 @@ if (DEBUG) {
                 send({type: 'reloading'});
                 const cssOnly = message.files.every((file) => file.endsWith('.less'));
                 if (cssOnly) {
-                    send({type: 'get-popup-stylesheet', isFirefox: isFirefox()});
+                    chrome.runtime.sendMessage({type: 'popup-stylesheet-update'});
                 } else {
                     chrome.runtime.reload();
                 }
-            }
-
-            if (message.type === 'popup-stylesheet') {
-                chrome.runtime.sendMessage({type: 'popup-stylesheet-update', data: message.content});
             }
         };
         socket.onclose = () => setTimeout(listen, 1000);

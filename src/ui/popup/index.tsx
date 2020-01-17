@@ -37,7 +37,7 @@ if (isFirefox()) {
 declare const __DEBUG__: boolean;
 const DEBUG = __DEBUG__;
 if (DEBUG) {
-    chrome.runtime.onMessage.addListener(({type, data}) => {
+    chrome.runtime.onMessage.addListener(({type}) => {
         if (type === 'popup-stylesheet-update') {
             document.querySelectorAll('link[rel="stylesheet"]').forEach((link: HTMLLinkElement) => {
                 const url = link.href;
@@ -48,6 +48,10 @@ if (DEBUG) {
                 link.parentElement.insertBefore(newLink, link);
                 link.remove();
             });
+        }
+
+        if (type === 'popup-script-update') {
+            location.reload();
         }
     });
 }

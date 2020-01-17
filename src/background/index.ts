@@ -26,9 +26,16 @@ if (DEBUG) {
 
             if (message.type === 'reload') {
                 send({type: 'reloading'});
-                const cssOnly = message.files.every((file) => file.endsWith('.less'));
+                const cssOnly = message.files.every((file: string) => file.endsWith('.less'));
+                const popupJSOnly = message.files.every((file: string) => (
+                    file.includes('ui/popup/') && (
+                        file.endsWith('.ts') ||
+                        file.endsWith('.tsx')
+                    )));
                 if (cssOnly) {
                     chrome.runtime.sendMessage({type: 'popup-stylesheet-update'});
+                } else if (popupJSOnly) {
+                    chrome.runtime.sendMessage({type: 'popup-script-update'});
                 } else {
                     chrome.runtime.reload();
                 }

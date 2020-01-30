@@ -1,7 +1,7 @@
 import {iterateCSSRules, iterateCSSDeclarations, getCSSVariables, replaceCSSRelativeURLsWithAbsolute, removeCSSComments, replaceCSSFontFace, replaceCSSVariables, getCSSURLValue, cssImportRegex, getCSSBaseBath} from './css-rules';
 import {getModifiableCSSDeclaration, ModifiableCSSDeclaration, ModifiableCSSRule} from './modify-css';
 import {bgFetch} from './network';
-import {removeNode, watchForNodePosition} from '../utils/dom';
+import {removeNode} from '../utils/dom';
 import {logWarn} from '../utils/log';
 import {createAsyncTasksQueue} from '../utils/throttle';
 import {isDeepSelectorSupported} from '../../utils/platform';
@@ -24,6 +24,7 @@ export interface StyleManager {
     pause(): void;
     destroy(): void;
     watch(): void;
+    restore(): void;
 }
 
 export const STYLE_SELECTOR = isDeepSelectorSupported()
@@ -52,9 +53,6 @@ export function manageStyle(element: HTMLLinkElement | HTMLStyleElement, {update
     }
     let corsCopy: HTMLStyleElement = prevStyles.find((el) => el.matches('.darkreader--cors')) || null;
     let syncStyle: HTMLStyleElement = prevStyles.find((el) => el.matches('.darkreader--sync')) || null;
-
-    let corsCopyPositionWatcher: ReturnType<typeof watchForNodePosition> = null;
-    let syncStylePositionWatcher: ReturnType<typeof watchForNodePosition> = null;
 
     let cancelAsyncOperations = false;
 
@@ -90,6 +88,19 @@ export function manageStyle(element: HTMLLinkElement | HTMLStyleElement, {update
             return null;
         }
         return safeGetSheetRules();
+    }
+
+    function insertStyle() {
+        if (corsCopy) {
+            if (element.nextSibling !== corsCopy) {
+                element.parentElement.insertBefore(corsCopy, element.nextSibling);
+            }
+            if (corsCopy.nextSibling !== syncStyle) {
+                element.parentElement.insertBefore(syncStyle, corsCopy.nextSibling);
+            }
+        } else if (element.nextSibling !== syncStyle) {
+            element.parentElement.insertBefore(syncStyle, element.nextSibling);
+        }
     }
 
     let isLoadingRules = false;
@@ -137,9 +148,6 @@ export function manageStyle(element: HTMLLinkElement | HTMLStyleElement, {update
             try {
                 const fullCSSText = await replaceCSSImports(cssText, cssBasePath);
                 corsCopy = createCORSCopy(element, fullCSSText);
-                if (corsCopy) {
-                    corsCopyPositionWatcher = watchForNodePosition(corsCopy);
-                }
             } catch (err) {
                 logWarn(err);
             }
@@ -184,6 +192,7 @@ export function manageStyle(element: HTMLLinkElement | HTMLStyleElement, {update
     const rulesTextCache = new Map<string, string>();
     const rulesModCache = new Map<string, ModifiableCSSRule>();
     let prevFilterKey: string = null;
+    let forceRestore = false;
 
     function render(filter: FilterConfig, variables: Map<string, string>) {
         const rules = getRulesSync();
@@ -262,11 +271,12 @@ export function manageStyle(element: HTMLLinkElement | HTMLStyleElement, {update
         });
         prevFilterKey = filterKey;
 
-        if (!rulesChanged && !filterChanged) {
+        if (!forceRestore && !rulesChanged && !filterChanged) {
             return;
         }
 
         renderId++;
+        forceRestore = false;
 
         interface ReadyDeclaration {
             media: string;
@@ -326,8 +336,8 @@ export function manageStyle(element: HTMLLinkElement | HTMLStyleElement, {update
                 syncStyle.classList.add('darkreader--sync');
                 syncStyle.media = 'screen';
             }
-            syncStylePositionWatcher && syncStylePositionWatcher.stop();
-            element.parentNode.insertBefore(syncStyle, corsCopy ? corsCopy.nextSibling : element.nextSibling);
+
+            insertStyle();
 
             const sheet = syncStyle.sheet;
             for (let i = sheet.cssRules.length - 1; i >= 0; i--) {
@@ -351,12 +361,6 @@ export function manageStyle(element: HTMLLinkElement | HTMLStyleElement, {update
                     setRule(target, target.cssRules.length, selectorGroup);
                 });
             });
-
-            if (syncStylePositionWatcher) {
-                syncStylePositionWatcher.run();
-            } else {
-                syncStylePositionWatcher = watchForNodePosition(syncStyle, buildStyleSheet);
-            }
         }
 
         function rebuildAsyncRule(key: number) {
@@ -437,8 +441,6 @@ export function manageStyle(element: HTMLLinkElement | HTMLStyleElement, {update
 
     function pause() {
         observer.disconnect();
-        corsCopyPositionWatcher && corsCopyPositionWatcher.stop();
-        syncStylePositionWatcher && syncStylePositionWatcher.stop();
         cancelAsyncOperations = true;
         unsubscribeFromSheetChanges();
     }
@@ -456,12 +458,31 @@ export function manageStyle(element: HTMLLinkElement | HTMLStyleElement, {update
         }
     }
 
+    const maxMoveCount = 10;
+    let moveCount = 0;
+
+    function restore() {
+        moveCount++;
+        if (moveCount > maxMoveCount) {
+            logWarn('Style sheet was moved multiple times', element);
+            return;
+        }
+
+        const shouldRestore = syncStyle.sheet == null;
+        insertStyle();
+        if (shouldRestore) {
+            forceRestore = true;
+            update();
+        }
+    }
+
     return {
         details,
         render,
         pause,
         destroy,
         watch,
+        restore,
     };
 }
 

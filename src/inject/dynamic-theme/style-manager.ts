@@ -16,6 +16,9 @@ declare global {
     interface HTMLLinkElement {
         sheet: CSSStyleSheet;
     }
+    interface SVGStyleElement {
+        sheet: CSSStyleSheet;
+    }
 }
 
 export interface StyleManager {
@@ -35,6 +38,7 @@ export function shouldManageStyle(element: Node) {
     return (
         (
             (element instanceof HTMLStyleElement) ||
+            (element instanceof SVGStyleElement) ||
             (element instanceof HTMLLinkElement && element.rel && element.rel.toLowerCase().includes('stylesheet'))
         ) &&
         !element.classList.contains('darkreader') &&
@@ -52,7 +56,7 @@ export function manageStyle(element: HTMLLinkElement | HTMLStyleElement, {update
         prevStyles.push(next as HTMLStyleElement);
     }
     let corsCopy: HTMLStyleElement = prevStyles.find((el) => el.matches('.darkreader--cors')) || null;
-    let syncStyle: HTMLStyleElement = prevStyles.find((el) => el.matches('.darkreader--sync')) || null;
+    let syncStyle: HTMLStyleElement | SVGStyleElement = prevStyles.find((el) => el.matches('.darkreader--sync')) || null;
 
     let cancelAsyncOperations = false;
 
@@ -101,6 +105,15 @@ export function manageStyle(element: HTMLLinkElement | HTMLStyleElement, {update
         } else if (element.nextSibling !== syncStyle) {
             element.parentElement.insertBefore(syncStyle, element.nextSibling);
         }
+    }
+
+    function createSyncStyle() {
+        syncStyle = element instanceof SVGStyleElement ?
+            document.createElementNS('http://www.w3.org/2000/svg', 'style') :
+            document.createElement('style');
+        syncStyle.classList.add('darkreader');
+        syncStyle.classList.add('darkreader--sync');
+        syncStyle.media = 'screen';
     }
 
     let isLoadingRules = false;
@@ -331,10 +344,7 @@ export function manageStyle(element: HTMLLinkElement | HTMLStyleElement, {update
             });
 
             if (!syncStyle) {
-                syncStyle = document.createElement('style');
-                syncStyle.classList.add('darkreader');
-                syncStyle.classList.add('darkreader--sync');
-                syncStyle.media = 'screen';
+                createSyncStyle();
             }
 
             insertStyle();

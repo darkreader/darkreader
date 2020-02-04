@@ -1,6 +1,4 @@
-const fs = require('fs-extra');
 const WebSocket = require('ws');
-const {getDestDir} = require('./paths');
 const {log} = require('./utils');
 
 const PORT = 8890;

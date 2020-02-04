@@ -1,5 +1,4 @@
 import {Extension} from './extension';
-import {isFirefox} from '../utils/platform';
 import {getHelpURL} from '../utils/links';
 
 // Initialize extension

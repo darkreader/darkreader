@@ -1,7 +1,7 @@
 import {iterateCSSRules, iterateCSSDeclarations, getCSSVariables, replaceCSSRelativeURLsWithAbsolute, removeCSSComments, replaceCSSFontFace, replaceCSSVariables, getCSSURLValue, cssImportRegex, getCSSBaseBath} from './css-rules';
 import {getModifiableCSSDeclaration, ModifiableCSSDeclaration, ModifiableCSSRule} from './modify-css';
 import {bgFetch} from './network';
-import {removeNode} from '../utils/dom';
+import {watchForNodePosition, removeNode} from '../utils/dom';
 import {logWarn} from '../utils/log';
 import {createAsyncTasksQueue} from '../utils/throttle';
 import {isDeepSelectorSupported} from '../../utils/platform';
@@ -57,6 +57,9 @@ export function manageStyle(element: HTMLLinkElement | HTMLStyleElement, {update
     }
     let corsCopy: HTMLStyleElement = prevStyles.find((el) => el.matches('.darkreader--cors')) || null;
     let syncStyle: HTMLStyleElement | SVGStyleElement = prevStyles.find((el) => el.matches('.darkreader--sync')) || null;
+
+    let corsCopyPositionWatcher: ReturnType<typeof watchForNodePosition> = null;
+    let syncStylePositionWatcher: ReturnType<typeof watchForNodePosition> = null;
 
     let cancelAsyncOperations = false;
 
@@ -165,6 +168,7 @@ export function manageStyle(element: HTMLLinkElement | HTMLStyleElement, {update
                 logWarn(err);
             }
             if (corsCopy) {
+                corsCopyPositionWatcher = watchForNodePosition(corsCopy);
                 return corsCopy.sheet.cssRules;
             }
         }
@@ -347,6 +351,7 @@ export function manageStyle(element: HTMLLinkElement | HTMLStyleElement, {update
                 createSyncStyle();
             }
 
+            syncStylePositionWatcher && syncStylePositionWatcher.stop();
             insertStyle();
 
             const sheet = syncStyle.sheet;
@@ -371,6 +376,12 @@ export function manageStyle(element: HTMLLinkElement | HTMLStyleElement, {update
                     setRule(target, target.cssRules.length, selectorGroup);
                 });
             });
+
+            if (syncStylePositionWatcher) {
+                syncStylePositionWatcher.run();
+            } else {
+                syncStylePositionWatcher = watchForNodePosition(syncStyle, buildStyleSheet);
+            }
         }
 
         function rebuildAsyncRule(key: number) {
@@ -452,6 +463,8 @@ export function manageStyle(element: HTMLLinkElement | HTMLStyleElement, {update
     function pause() {
         observer.disconnect();
         cancelAsyncOperations = true;
+        corsCopyPositionWatcher && corsCopyPositionWatcher.stop();
+        syncStylePositionWatcher && syncStylePositionWatcher.stop();
         unsubscribeFromSheetChanges();
     }
 
@@ -478,6 +491,7 @@ export function manageStyle(element: HTMLLinkElement | HTMLStyleElement, {update
             return;
         }
 
+        logWarn('Restore style', syncStyle, element);
         const shouldRestore = syncStyle.sheet == null;
         insertStyle();
         if (shouldRestore) {

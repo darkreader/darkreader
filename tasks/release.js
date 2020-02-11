@@ -5,8 +5,8 @@ const bundleLocales = require('./bundle-locales');
 const clean = require('./clean');
 const codeStyle = require('./code-style');
 const copy = require('./copy');
-const foxify = require('./foxify');
-const {runTasks, log} = require('./utils');
+const {runTasks} = require('./task');
+const {log} = require('./utils');
 const zip = require('./zip');
 
 async function release() {
@@ -20,7 +20,6 @@ async function release() {
             bundleLocales,
             copy,
             codeStyle,
-            foxify,
             zip,
         ], {production: true});
         log.ok('MISSION PASSED! RESPECT +');

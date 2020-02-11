@@ -22,21 +22,21 @@ if (DEBUG) {
         const send = (message: any) => socket.send(JSON.stringify(message));
         socket.onmessage = (e) => {
             const message = JSON.parse(e.data);
-
-            if (message.type === 'reload') {
+            if (message.type.startsWith('reload:')) {
                 send({type: 'reloading'});
-                const cssOnly = message.files.every((file: string) => file.endsWith('.less'));
-                const popupJSOnly = message.files.every((file: string) => (
-                    file.includes('ui/popup/') && (
-                        file.endsWith('.ts') ||
-                        file.endsWith('.tsx')
-                    )));
-                if (cssOnly) {
-                    chrome.runtime.sendMessage({type: 'popup-stylesheet-update'});
-                } else if (popupJSOnly) {
-                    chrome.runtime.sendMessage({type: 'popup-script-update'});
-                } else {
+            }
+            switch (message.type) {
+                case 'reload:css': {
+                    chrome.runtime.sendMessage({type: 'css-update'});
+                    break;
+                }
+                case 'reload:ui': {
+                    chrome.runtime.sendMessage({type: 'ui-update'});
+                    break;
+                }
+                case 'reload:full': {
                     chrome.runtime.reload();
+                    break;
                 }
             }
         };

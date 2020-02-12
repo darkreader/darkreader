@@ -28,9 +28,6 @@ require('ts-node').register({
         ...tsConfig.compilerOptions,
         module: 'commonjs',
     },
-    ignore: [
-        '/node_modules\/(?!malevic).*/',
-    ]
 });
 require('tsconfig-paths').register({
     baseUrl: './',

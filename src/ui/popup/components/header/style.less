@@ -12,8 +12,17 @@
     width: 100%;
 
     &__logo {
+        background-image: url('../assets/images/darkreader-type.svg');
+        background-size: 100%;
         grid-area: logo;
-        width: 100%;
+        height: @popup-content-width / 10;
+        outline: none;
+        text-indent: -999rem;
+        width: @popup-content-width;
+
+        &:hover {
+            filter: brightness(1.05);
+        }
     }
 
     &__control {

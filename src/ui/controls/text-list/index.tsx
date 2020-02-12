@@ -40,8 +40,7 @@ export default function TextList(props: TextListProps) {
             <TextBox
                 class="text-list__textbox"
                 value={text}
-                attached={saveIndex}
-                updated={saveIndex}
+                onrender={saveIndex}
                 placeholder={props.placeholder}
             />
         );
@@ -82,7 +81,7 @@ export default function TextList(props: TextListProps) {
                 <div
                     class={['text-list', props.class]}
                     onchange={onTextChange}
-                    attached={didMount}
+                    oncreate={didMount}
                 />
             )}
             items={props.values

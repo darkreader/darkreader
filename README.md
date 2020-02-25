@@ -109,7 +109,7 @@ or **[inversion-fixes.config](https://github.com/alexanderby/darkreader/blob/mas
 
 ### Adding new features or fixing bugs
 
-If you would like to **add new feature** to Dark Reader or **fix a bug**, **submit an issue** in GitHub (if there is no existing one), **discuss** it with active contributors, wait for **approvement**.
+If you would like to **add new feature** to Dark Reader or **fix a bug**, **submit an issue** in GitHub (if there is no existing one), **discuss** it with active contributors, wait for **approval**.
 
 To build and debug the extension **install the [Node.js](https://nodejs.org/)** LTS.
 Install development dependencies by running `npm install` in the project root folder.

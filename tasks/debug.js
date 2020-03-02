@@ -4,29 +4,29 @@ const bundleJS = require('./bundle-js');
 const bundleLocales = require('./bundle-locales');
 const clean = require('./clean');
 const copy = require('./copy');
-const foxify = require('./foxify');
 const reload = require('./reload');
-const {runTasks, log} = require('./utils');
-const watch = require('./watch');
+const {runTasks} = require('./task');
+const {log} = require('./utils');
 
 const options = {
     production: false,
 };
 
+const debugTasks = [
+    clean,
+    bundleJS,
+    bundleCSS,
+    bundleHtml,
+    bundleLocales,
+    copy,
+];
+
 async function debug() {
     log.ok('DEBUG');
     try {
-        await runTasks([
-            clean,
-            bundleJS,
-            bundleCSS,
-            bundleHtml,
-            bundleLocales,
-            copy,
-            foxify,
-            reload,
-        ], options);
-        watch(options);
+        await runTasks(debugTasks, options);
+        debugTasks.forEach((task) => task.watch());
+        reload({type: reload.FULL});
         log.ok('Watching...');
     } catch (err) {
         log.error('Debugging cancelled');

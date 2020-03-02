@@ -2,6 +2,8 @@ const fs = require('fs-extra');
 const less = require('less');
 const path = require('path');
 const {getDestDir} = require('./paths');
+const reload = require('./reload');
+const {createTask} = require('./task');
 
 function getLessFiles({production}) {
     const dir = getDestDir({production});
@@ -25,6 +27,21 @@ async function bundleCSS({production}) {
     for (const [src, dest] of Object.entries(files)) {
         await bundleCSSEntry({src, dest});
     }
+    const dir = getDestDir({production});
+    const firefoxDir = getDestDir({production, firefox: true});
+    for (const dest of Object.values(files)) {
+        const ffDest = `${firefoxDir}/${dest.replace(dir.length + 1)}`;
+        await fs.copy(dest, ffDest);
+    }
 }
 
-module.exports = bundleCSS;
+module.exports = createTask(
+    'bundle-css',
+    bundleCSS,
+).addWatcher(
+    ['src/**/*.less'],
+    async () => {
+        await bundleCSS({production: false});
+        reload({type: reload.CSS});
+    },
+);

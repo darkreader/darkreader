@@ -150,7 +150,11 @@ This will generate `build.zip` for use in Chromium browsers and `build-firefox.x
 
 You can use Dark Reader to enable dark mode on your website.
 Install the package from NPM (`npm install darkreader`)
-or download from CDN like `https://unpkg.com/darkreader`.
+or include the script via a CDN such as:
+
+- [https://unpkg.com/](https://unpkg.com/) | [https://unpkg.com/darkreader/](https://unpkg.com/darkreader/) | [Direct link](https://unpkg.com/darkreader)
+- [https://www.jsdelivr.com/](https://www.jsdelivr.com/) | [https://www.jsdelivr.com/package/npm/darkreader](https://www.jsdelivr.com/package/npm/darkreader) | [Direct link](https://cdn.jsdelivr.net/npm/darkreader/darkreader.min.js)
+
 Then use the following API
 ```javascript
 DarkReader.enable({

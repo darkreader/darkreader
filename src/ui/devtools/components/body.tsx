@@ -62,8 +62,7 @@ function Body({data, actions}: BodyProps) {
             <h3 id="sub-title">{wrapper.header}</h3>
             <textarea
                 id="editor"
-                attached={onTextRender}
-                updated={onTextRender}
+                onrender={onTextRender}
             />
             <label id="error-text">{state.errorText}</label>
             <div id="buttons">

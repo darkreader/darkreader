@@ -38,7 +38,7 @@ declare const __DEBUG__: boolean;
 const DEBUG = __DEBUG__;
 if (DEBUG) {
     chrome.runtime.onMessage.addListener(({type}) => {
-        if (type === 'popup-stylesheet-update') {
+        if (type === 'css-update') {
             document.querySelectorAll('link[rel="stylesheet"]').forEach((link: HTMLLinkElement) => {
                 const url = link.href;
                 link.disabled = true;
@@ -50,7 +50,7 @@ if (DEBUG) {
             });
         }
 
-        if (type === 'popup-script-update') {
+        if (type === 'ui-update') {
             location.reload();
         }
     });

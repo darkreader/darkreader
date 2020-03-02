@@ -13,8 +13,7 @@ export default function CheckBox(props: Malevic.NodeAttrs, ...children) {
                 type="checkbox"
                 checked={props.checked}
                 onchange={props.onchange}
-                attached={check}
-                updated={check}
+                onrender={check}
             />
             <span class="checkbox__checkmark"></span>
             <span class="checkbox__content">{children}</span>

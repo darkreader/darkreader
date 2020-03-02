@@ -1,28 +1,64 @@
 const fs = require('fs-extra');
 const globby = require('globby');
 const {getDestDir} = require('./paths');
+const reload = require('./reload');
+const {createTask} = require('./task');
 
-const baseDir = 'src';
-const paths = [
+const srcDir = 'src';
+const cwdPaths = [
     'background/index.html',
     'config/**/*.config',
     'icons/**/*.*',
     'ui/assets/**/*.*',
     'ui/popup/compatibility.js',
     'manifest.json',
-].map((path) => `${baseDir}/${path}`);
+];
+const paths = cwdPaths.map((path) => `${srcDir}/${path}`);
 
-async function copy({production}) {
-    const files = await globby(paths);
-    const destDir = getDestDir({production});
+function getCwdPath(/** @type {string} */srcPath) {
+    return srcPath.substring(srcDir.length + 1);
+}
 
-    for (const file of files) {
-        if (!file.startsWith(`${baseDir}/`)) {
-            throw new Error(`Unable to handle path "${file}"`);
-        }
-        const dest = `${destDir}/${file.substring(baseDir.length + 1)}`;
-        await fs.copy(file, dest);
+async function patchFirefoxManifest({production}) {
+    const manifest = await fs.readJson(`${srcDir}/manifest.json`);
+    const patch = await fs.readJson(`${srcDir}/manifest-firefox.json`);
+    const patched = {...manifest, ...patch};
+    const firefoxDir = getDestDir({production, firefox: true});
+    await fs.writeJson(`${firefoxDir}/manifest.json`, patched, {spaces: 4});
+}
+
+async function copyFile(path, {production, firefox}) {
+    const cwdPath = getCwdPath(path);
+    const destDir = getDestDir({production, firefox});
+    if (firefox && cwdPath === 'manifest.json') {
+        await patchFirefoxManifest({production});
+    } else {
+        const src = `${srcDir}/${cwdPath}`;
+        const dest = `${destDir}/${cwdPath}`;
+        await fs.copy(src, dest);
     }
 }
 
-module.exports = copy;
+async function copy({production}) {
+    const files = await globby(paths);
+    for (const file of files) {
+        await copyFile(file, {production, firefox: false});
+        await copyFile(file, {production, firefox: true});
+    }
+}
+
+module.exports = createTask(
+    'copy',
+    copy,
+).addWatcher(
+    paths,
+    async (changedFiles) => {
+        for (const file of changedFiles) {
+            if (await fs.exists(file)) {
+                await copyFile(file, {production: false, firefox: false});
+                await copyFile(file, {production: false, firefox: true});
+            }
+        }
+        reload({type: reload.FULL});
+    },
+);

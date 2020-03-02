@@ -1,6 +1,4 @@
-const fs = require('fs-extra');
 const WebSocket = require('ws');
-const {getDestDir} = require('./paths');
 const {log} = require('./utils');
 
 const PORT = 8890;
@@ -76,7 +74,11 @@ function send(ws, message) {
     ws.send(JSON.stringify(message));
 }
 
-async function reload({files = []} = {}) {
+/**
+ * @param {Object} options
+ * @param {string} options.type
+ */
+async function reload({type}) {
     if (!server) {
         server = await createServer();
     }
@@ -89,8 +91,11 @@ async function reload({files = []} = {}) {
             const created = times.get(ws);
             return created < now;
         })
-        .forEach((ws) => send(ws, {type: 'reload', files}));
+        .forEach((ws) => send(ws, {type}));
 }
 
 module.exports = reload;
 module.exports.PORT = PORT;
+module.exports.CSS = 'reload:css';
+module.exports.FULL = 'reload:full';
+module.exports.UI = 'reload:ui';

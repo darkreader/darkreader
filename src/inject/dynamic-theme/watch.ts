@@ -43,20 +43,26 @@ export function watchForStyleChanges(update: (styles: ChangedStyles) => void) {
     }
 
     function handleMutations(mutations: MutationRecord[]) {
-        const createdStyles = mutations.reduce((nodes, m) => nodes.concat(getAllManageableStyles(m.addedNodes)), []);
-        const removedStyles = mutations.reduce((nodes, m) => nodes.concat(getAllManageableStyles(m.removedNodes)), []);
+        const createdStyles = mutations.reduce((nodes, m) => {
+            getAllManageableStyles(m.addedNodes).forEach((n) => nodes.add(n));
+            return nodes;
+        }, new Set<HTMLLinkElement | HTMLStyleElement>());
+        const removedStyles = mutations.reduce((nodes, m) => {
+            getAllManageableStyles(m.removedNodes).forEach((n) => nodes.add(n));
+            return nodes;
+        }, new Set<HTMLLinkElement | HTMLStyleElement>());
         const updatedStyles = mutations
             .filter(({target, type}) => type === 'attributes' && shouldManageStyle(target))
             .reduce((styles, {target}) => {
-                styles.push(target as HTMLStyleElement | HTMLLinkElement);
+                styles.add(target as HTMLLinkElement | HTMLStyleElement);
                 return styles;
-            }, [] as (HTMLStyleElement | HTMLLinkElement)[]);
+            }, new Set<HTMLLinkElement | HTMLStyleElement>());
 
-        if (createdStyles.length + removedStyles.length + updatedStyles.length > 0) {
+        if (createdStyles.size + removedStyles.size + updatedStyles.size > 0) {
             update({
-                created: createdStyles,
-                updated: updatedStyles,
-                removed: removedStyles,
+                created: Array.from(createdStyles),
+                updated: Array.from(updatedStyles),
+                removed: Array.from(removedStyles),
             });
         }
 

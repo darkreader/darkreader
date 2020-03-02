@@ -33,7 +33,9 @@ function Header({data, actions, tab, onMoreToggleSettingsClick}: HeaderProps) {
 
     return (
         <header class="header">
-            <img class="header__logo" src="../assets/images/darkreader-type.svg" alt="Dark Reader" />
+            <a class="header__logo" href="https://darkreader.org/" target="_blank" rel="noopener noreferrer">
+                Dark Reader
+            </a>
             <div class="header__control header__site-toggle">
                 <SiteToggle
                     data={data}

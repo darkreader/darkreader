@@ -2,6 +2,7 @@ const fs = require('fs');
 const globby = require('globby');
 const yazl = require('yazl');
 const {getDestDir} = require('./paths');
+const {createTask} = require('./task');
 
 function archiveFiles({files, dest, cwd}) {
     return new Promise((resolve) => {
@@ -25,4 +26,7 @@ async function zip({production}) {
     await archiveDirectory({dir: firefoxDir, dest: 'build-firefox.xpi'});
 }
 
-module.exports = zip;
+module.exports = createTask(
+    'zip',
+    zip,
+);

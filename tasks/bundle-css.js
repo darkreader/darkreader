@@ -30,7 +30,7 @@ async function bundleCSS({production}) {
     const dir = getDestDir({production});
     const firefoxDir = getDestDir({production, firefox: true});
     for (const dest of Object.values(files)) {
-        const ffDest = `${firefoxDir}/${dest.replace(dir.length + 1)}`;
+        const ffDest = `${firefoxDir}/${dest.substring(dir.length + 1)}`;
         await fs.copy(dest, ffDest);
     }
 }

@@ -38,9 +38,10 @@ function openDevTools() {
 }
 
 function Body(props: BodyProps) {
+    const latestNews = props.data.news.length > 0 ? props.data.news[0] : null;
     const {state, setState} = useState<BodyState>({
         activeTab: 'Filter',
-        newsOpen: false,
+        newsOpen: latestNews && latestNews.important && !latestNews.read,
         moreToggleSettingsOpen: false,
     });
     if (!props.data.isReady) {

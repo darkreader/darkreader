@@ -186,12 +186,19 @@ export class Extension {
     }
 
     private onNewsUpdate(news: News[]) {
+        const latestNews = news.length > 0 && news[0];
+        if (latestNews && latestNews.important && !latestNews.read) {
+            this.icon.showImportantBadge();
+            return;
+        }
+
         const unread = news.filter(({read}) => !read);
         if (unread.length > 0 && this.user.settings.notifyOfNews) {
-            this.icon.notifyAboutReleaseNotes(unread.length);
-        } else {
-            this.icon.stopNotifyingAboutReleaseNotes();
+            this.icon.showUnreadReleaseNotesBadge(unread.length);
+            return;
         }
+
+        this.icon.hideBadge();
     }
 
     private getConnectionMessage(url, frameURL) {

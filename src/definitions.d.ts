@@ -145,5 +145,6 @@ export interface News {
     date: string;
     url: string;
     headline: string;
+    important: boolean;
     read?: boolean;
 }

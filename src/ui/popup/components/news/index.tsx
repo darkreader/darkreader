@@ -33,7 +33,13 @@ export function News({news, expanded, onNewsOpen, onClose}: NewsProps) {
                         formattedDate = date.toISOString().substring(0, 10);
                     }
                     return (
-                        <div class={{'news__event': true, 'news__event--unread': !event.read}}>
+                        <div
+                            class={{
+                                'news__event': true,
+                                'news__event--unread': !event.read,
+                                'news__event--important': event.important,
+                            }}
+                        >
                             <a class="news__event__link" onclick={() => onNewsOpen(event)} href={event.url} target="_blank" rel="noopener noreferrer">
                                 <span class="news__event__date">
                                     {formattedDate}

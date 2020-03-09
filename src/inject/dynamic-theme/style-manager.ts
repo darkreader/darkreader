@@ -31,15 +31,20 @@ export interface StyleManager {
 }
 
 export const STYLE_SELECTOR = isDeepSelectorSupported()
-    ? 'html /deep/ link[rel*="stylesheet" i], html /deep/ style'
-    : 'html link[rel*="stylesheet" i], html style';
+    ? 'html /deep/ link[rel*="stylesheet" i]:not([disabled]), html /deep/ style'
+    : 'html link[rel*="stylesheet" i]:not([disabled]), html style';
 
 export function shouldManageStyle(element: Node) {
     return (
         (
             (element instanceof HTMLStyleElement) ||
             (element instanceof SVGStyleElement) ||
-            (element instanceof HTMLLinkElement && element.rel && element.rel.toLowerCase().includes('stylesheet'))
+            (
+                element instanceof HTMLLinkElement &&
+                element.rel &&
+                element.rel.toLowerCase().includes('stylesheet') &&
+                !element.disabled
+            )
         ) &&
         !element.classList.contains('darkreader') &&
         element.media !== 'print'

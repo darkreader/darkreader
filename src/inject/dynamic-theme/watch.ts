@@ -81,7 +81,7 @@ export function watchForStyleChanges(update: (styles: ChangedStyles) => void) {
         shadowObservers.add(shadowObserver);
     }
 
-    const mutationObserverOptions = {childList: true, subtree: true, attributes: true, attributeFilter: ['rel']};
+    const mutationObserverOptions = {childList: true, subtree: true, attributes: true, attributeFilter: ['rel', 'disabled']};
     observer = new MutationObserver(handleMutations);
     observer.observe(document.documentElement, mutationObserverOptions);
     iterateShadowNodes(document.documentElement.children, subscribeForShadowRootChanges);

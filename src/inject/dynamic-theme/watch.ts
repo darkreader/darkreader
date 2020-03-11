@@ -1,5 +1,5 @@
+import {iterateShadowNodes} from '../utils/dom';
 import {shouldManageStyle, STYLE_SELECTOR} from './style-manager';
-
 
 let observer: MutationObserver = null;
 
@@ -21,17 +21,6 @@ function getAllManageableStyles(nodes: Iterable<Node> | ArrayLike<Node>) {
         }
     });
     return results;
-}
-
-function iterateShadowNodes(nodes: ArrayLike<Node>, iterator: (node: Element) => void) {
-    Array.from(nodes).forEach((node) => {
-        if (node instanceof Element) {
-            if (node.shadowRoot) {
-                iterator(node);
-            }
-            iterateShadowNodes(node.childNodes, iterator);
-        }
-    });
 }
 
 const shadowObservers = new Set<MutationObserver>();
@@ -89,13 +78,11 @@ export function watchForStyleChanges(update: (styles: ChangedStyles) => void) {
             });
         }
 
-        const allAddedNodes = [];
         additions.forEach((n) => {
             if (n.isConnected) {
-                allAddedNodes.push(n);
+                iterateShadowNodes(n, subscribeForShadowRootChanges);
             }
         });
-        iterateShadowNodes(allAddedNodes, subscribeForShadowRootChanges);
     }
 
     function subscribeForShadowRootChanges(node: Element) {
@@ -107,7 +94,7 @@ export function watchForStyleChanges(update: (styles: ChangedStyles) => void) {
     const mutationObserverOptions = {childList: true, subtree: true, attributes: true, attributeFilter: ['rel', 'disabled']};
     observer = new MutationObserver(handleMutations);
     observer.observe(document.documentElement, mutationObserverOptions);
-    iterateShadowNodes(document.documentElement.children, subscribeForShadowRootChanges);
+    iterateShadowNodes(document.documentElement, subscribeForShadowRootChanges);
 }
 
 export function stopWatchingForStyleChanges() {

@@ -265,18 +265,14 @@ function createThemeAndWatchForUpdates() {
 }
 
 function watchForUpdates() {
-    watchForStyleChanges(({created, updated, removed}) => {
-        const createdStyles = new Set(created);
-        const movedStyles = new Set(
-            removed
-                .filter((style) => createdStyles.has(style))
-                .concat(created.filter((style) => styleManagers.has(style)))
-        );
-        removed
-            .filter((style) => !movedStyles.has(style))
-            .forEach((style) => removeManager(style));
-        const newManagers = Array.from(new Set(created.concat(updated)))
-            .filter((style) => !styleManagers.has(style))
+    watchForStyleChanges(({created, updated, removed, moved}) => {
+        const stylesToRemove = removed;
+        const stylesToManage = created.concat(updated).concat(moved)
+            .filter((style) => !styleManagers.has(style));
+        const stylesToRestore = moved
+            .filter((style) => styleManagers.has(style));
+        stylesToRemove.forEach((style) => removeManager(style));
+        const newManagers = stylesToManage
             .map((style) => createManager(style));
         const newVariables = newManagers
             .map((manager) => manager.details())
@@ -289,7 +285,7 @@ function watchForUpdates() {
             throttledRenderAllStyles();
         }
         newManagers.forEach((manager) => manager.watch());
-        movedStyles.forEach((style) => styleManagers.get(style).restore());
+        stylesToRestore.forEach((style) => styleManagers.get(style).restore());
     });
 
     watchForInlineStyles((element) => {

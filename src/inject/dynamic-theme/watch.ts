@@ -7,9 +7,10 @@ interface ChangedStyles {
     created: (HTMLStyleElement | HTMLLinkElement)[];
     updated: (HTMLStyleElement | HTMLLinkElement)[];
     removed: (HTMLStyleElement | HTMLLinkElement)[];
+    moved: (HTMLStyleElement | HTMLLinkElement)[];
 }
 
-function getAllManageableStyles(nodes: ArrayLike<Node>) {
+function getAllManageableStyles(nodes: Iterable<Node> | ArrayLike<Node>) {
     const results: (HTMLLinkElement | HTMLStyleElement)[] = [];
     Array.from(nodes).forEach((node) => {
         if (node instanceof Element) {
@@ -43,34 +44,56 @@ export function watchForStyleChanges(update: (styles: ChangedStyles) => void) {
     }
 
     function handleMutations(mutations: MutationRecord[]) {
-        const createdStyles = mutations.reduce((nodes, m) => {
-            getAllManageableStyles(m.addedNodes).forEach((n) => nodes.add(n));
-            return nodes;
-        }, new Set<HTMLLinkElement | HTMLStyleElement>());
-        const removedStyles = mutations.reduce((nodes, m) => {
-            getAllManageableStyles(m.removedNodes).forEach((n) => nodes.add(n));
-            return nodes;
-        }, new Set<HTMLLinkElement | HTMLStyleElement>());
-        const updatedStyles = mutations
-            .filter(({target, type}) => type === 'attributes' && shouldManageStyle(target))
-            .reduce((styles, {target}) => {
-                styles.add(target as HTMLLinkElement | HTMLStyleElement);
-                return styles;
-            }, new Set<HTMLLinkElement | HTMLStyleElement>());
+        const createdStyles = new Set<HTMLLinkElement | HTMLStyleElement>();
+        const updatedStyles = new Set<HTMLLinkElement | HTMLStyleElement>();
+        const removedStyles = new Set<HTMLLinkElement | HTMLStyleElement>();
+        const movedStyles = new Set<HTMLLinkElement | HTMLStyleElement>();
+
+        const additions = new Set<Node>();
+        const deletions = new Set<Node>();
+        const styleUpdates = new Set<HTMLLinkElement | HTMLStyleElement>();
+        mutations.forEach((m) => {
+            m.addedNodes.forEach((n) => additions.add(n));
+            m.removedNodes.forEach((n) => deletions.add(n));
+            if (m.type === 'attributes' && shouldManageStyle(m.target)) {
+                styleUpdates.add(m.target as HTMLLinkElement | HTMLStyleElement);
+            }
+        });
+        const styleAdditions = getAllManageableStyles(Array.from(additions));
+        const styleDeletions = getAllManageableStyles(Array.from(deletions));
+
+        styleDeletions.forEach((style) => {
+            if (style.isConnected) {
+                movedStyles.add(style);
+            } else {
+                removedStyles.add(style);
+            }
+        });
+        styleUpdates.forEach((style) => {
+            if (!removedStyles.has(style)) {
+                updatedStyles.add(style);
+            }
+        });
+        styleAdditions.forEach((style) => {
+            if (!(removedStyles.has(style) || movedStyles.has(style) || updatedStyles.has(style))) {
+                createdStyles.add(style);
+            }
+        });
 
         if (createdStyles.size + removedStyles.size + updatedStyles.size > 0) {
             update({
                 created: Array.from(createdStyles),
                 updated: Array.from(updatedStyles),
                 removed: Array.from(removedStyles),
+                moved: Array.from(movedStyles),
             });
         }
 
         const allAddedNodes = [];
-        mutations.forEach((m) => {
-            m.addedNodes.forEach((n) => {
+        additions.forEach((n) => {
+            if (n.isConnected) {
                 allAddedNodes.push(n);
-            });
+            }
         });
         iterateShadowNodes(allAddedNodes, subscribeForShadowRootChanges);
     }

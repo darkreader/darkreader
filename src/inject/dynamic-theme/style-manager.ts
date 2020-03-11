@@ -430,13 +430,16 @@ export function manageStyle(element: HTMLLinkElement | HTMLStyleElement, {update
         buildStyleSheet();
     }
 
-    let rulesCount: number = null;
+    let rulesChangeKey: number = null;
     let rulesCheckFrameId: number = null;
 
     // Seems like Firefox bug: silent exception is produced
     // without any notice, when accessing <style> CSS rules
     function safeGetSheetRules() {
         try {
+            if (element.sheet == null) {
+                return null;
+            }
             return element.sheet.cssRules;
         } catch (err) {
             logWarn(err);
@@ -444,16 +447,24 @@ export function manageStyle(element: HTMLLinkElement | HTMLStyleElement, {update
         }
     }
 
-    function subscribeToSheetChanges() {
-        if (element.sheet && safeGetSheetRules()) {
-            rulesCount = element.sheet.cssRules.length;
+    function updateRulesChangeKey() {
+        const rules = safeGetSheetRules();
+        if (rules) {
+            rulesChangeKey = rules.length;
         }
+    }
+
+    function didRulesKeyChange() {
+        const rules = safeGetSheetRules();
+        return rules && rules.length !== rulesChangeKey;
+    }
+
+    function subscribeToSheetChanges() {
+        updateRulesChangeKey();
         unsubscribeFromSheetChanges();
         const checkForUpdate = () => {
-            if (element.sheet && safeGetSheetRules() &&
-                element.sheet.cssRules.length !== rulesCount
-            ) {
-                rulesCount = element.sheet.cssRules.length;
+            if (didRulesKeyChange()) {
+                updateRulesChangeKey();
                 update();
             }
             rulesCheckFrameId = requestAnimationFrame(checkForUpdate);
@@ -490,6 +501,10 @@ export function manageStyle(element: HTMLLinkElement | HTMLStyleElement, {update
     let moveCount = 0;
 
     function restore() {
+        if (!syncStyle) {
+            return;
+        }
+
         moveCount++;
         if (moveCount > maxMoveCount) {
             logWarn('Style sheet was moved multiple times', element);

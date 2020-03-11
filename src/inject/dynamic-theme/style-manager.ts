@@ -512,10 +512,11 @@ export function manageStyle(element: HTMLLinkElement | HTMLStyleElement, {update
         }
 
         logWarn('Restore style', syncStyle, element);
-        const shouldRestore = syncStyle.sheet == null;
+        const shouldRestore = syncStyle.sheet == null || syncStyle.sheet.cssRules.length > 0;
         insertStyle();
         if (shouldRestore) {
             forceRestore = true;
+            updateRulesChangeKey();
             update();
         }
     }

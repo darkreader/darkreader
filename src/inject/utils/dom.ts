@@ -101,8 +101,9 @@ export function watchForNodePosition<T extends Node>(node: T, onRestore?: () => 
         onRestore && onRestore();
     });
     const observer = new MutationObserver(() => {
-        if (!node.parentElement) {
+        if (!node.parentElement || node.previousSibling !== prevSibling) {
             restore();
+            observer.takeRecords();
         }
     });
     const run = () => {

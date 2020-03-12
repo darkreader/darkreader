@@ -3,14 +3,32 @@ declare namespace DarkReader {
      * Enables dark mode for current web page.
      * @param theme Theme options.
      * @param fixes Fixes for the generated theme.
-     * @param isIFrame This flag should be enabled if the dark mode was enabled on a parent web page (where the current page is an IFrame).
      */
-    function enable(theme: Partial<Theme>, fixes?: DynamicThemeFix, isIFrame?: boolean): void;
+    function enable(theme: Partial<Theme>, fixes?: DynamicThemeFix): void;
 
     /**
      * Disables dark mode for current web page.
      */
     function disable(): void;
+
+    /**
+     * Enables dark mode when system color scheme is dark.
+     * @param theme Theme options.
+     * @param fixes Fixes for the generated theme.
+     */
+    function auto(theme: Partial<Theme> | false, fixes?: DynamicThemeFix): void;
+
+    /**
+     * Stops watching for system color scheme.
+     * @param isEnabled Boolean `false` value.
+     */
+    function auto(isEnabled: false): void;
+
+    /**
+     * Sets a function for making CORS requests.
+     * @param fetch A fetch function.
+     */
+    function setFetchMethod(fetch: (url: string) => Promise<Response>): void;
 
     /**
      * Theme options.

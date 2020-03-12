@@ -4,7 +4,7 @@ import {bgFetch} from './network';
 import {watchForNodePosition, removeNode} from '../utils/dom';
 import {logWarn} from '../utils/log';
 import {createAsyncTasksQueue} from '../utils/throttle';
-import {isDeepSelectorSupported} from '../../utils/platform';
+import {isDeepSelectorSupported, isHostSelectorSupported} from '../../utils/platform';
 import {getMatches} from '../../utils/text';
 import {FilterConfig} from '../../definitions';
 import {getAbsoluteURL} from './url';
@@ -30,9 +30,23 @@ export interface StyleManager {
     restore(): void;
 }
 
-export const STYLE_SELECTOR = isDeepSelectorSupported()
-    ? 'html /deep/ link[rel*="stylesheet" i]:not([disabled]), html /deep/ style'
-    : 'html link[rel*="stylesheet" i]:not([disabled]), html style';
+export const STYLE_SELECTOR = (() => {
+    let selectors = [
+        'html /deep/ link[rel*="stylesheet" i]:not([disabled])',
+        'html /deep/ style',
+        ':host /deep/ link[rel*="stylesheet" i]:not([disabled])',
+        ':host /deep/ style',
+        ':host link[rel*="stylesheet" i]:not([disabled])',
+        ':host style',
+    ];
+    if (!isDeepSelectorSupported()) {
+        selectors = selectors.map((s) => s.replace('/deep/ ', ''));
+    }
+    if (!isHostSelectorSupported()) {
+        selectors = selectors.filter((s) => s.startsWith(':host'));
+    }
+    return selectors.join(', ');
+})();
 
 export function shouldManageStyle(element: Node) {
     return (
@@ -105,13 +119,13 @@ export function manageStyle(element: HTMLLinkElement | HTMLStyleElement, {update
     function insertStyle() {
         if (corsCopy) {
             if (element.nextSibling !== corsCopy) {
-                element.parentElement.insertBefore(corsCopy, element.nextSibling);
+                element.parentNode.insertBefore(corsCopy, element.nextSibling);
             }
             if (corsCopy.nextSibling !== syncStyle) {
-                element.parentElement.insertBefore(syncStyle, corsCopy.nextSibling);
+                element.parentNode.insertBefore(syncStyle, corsCopy.nextSibling);
             }
         } else if (element.nextSibling !== syncStyle) {
-            element.parentElement.insertBefore(syncStyle, element.nextSibling);
+            element.parentNode.insertBefore(syncStyle, element.nextSibling);
         }
     }
 

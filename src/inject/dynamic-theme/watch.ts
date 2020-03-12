@@ -1,5 +1,6 @@
+import {iterateShadowNodes} from '../utils/dom';
+import {isDefinedSelectorSupported} from '../../utils/platform';
 import {shouldManageStyle, STYLE_SELECTOR} from './style-manager';
-
 
 let observer: MutationObserver = null;
 
@@ -17,30 +18,88 @@ function getAllManageableStyles(nodes: Iterable<Node> | ArrayLike<Node>) {
             if (shouldManageStyle(node)) {
                 results.push(node as HTMLLinkElement | HTMLStyleElement);
             }
-            results.push(...Array.from<HTMLLinkElement | HTMLStyleElement>(node.querySelectorAll(STYLE_SELECTOR)).filter(shouldManageStyle));
+        }
+        if (node instanceof Element || node instanceof ShadowRoot) {
+            results.push(
+                ...Array.from<HTMLLinkElement | HTMLStyleElement>(
+                    node.querySelectorAll(STYLE_SELECTOR)
+                ).filter(shouldManageStyle)
+            );
         }
     });
     return results;
 }
 
-function iterateShadowNodes(nodes: ArrayLike<Node>, iterator: (node: Element) => void) {
-    Array.from(nodes).forEach((node) => {
-        if (node instanceof Element) {
-            if (node.shadowRoot) {
-                iterator(node);
+const undefinedGroups = new Map<string, Set<Element>>();
+let elementsDefinitionCallback: (elements: Element[]) => void;
+
+function collectUndefinedElements(root: ParentNode) {
+    if (!isDefinedSelectorSupported()) {
+        return;
+    }
+    root.querySelectorAll(':not(:defined)')
+        .forEach((el) => {
+            const tag = el.tagName.toLowerCase();
+            if (!undefinedGroups.has(tag)) {
+                undefinedGroups.set(tag, new Set());
+                customElementsWhenDefined(tag).then(() => {
+                    if (elementsDefinitionCallback) {
+                        const elements = undefinedGroups.get(tag);
+                        undefinedGroups.delete(tag);
+                        elementsDefinitionCallback(Array.from(elements));
+                    }
+                });
             }
-            iterateShadowNodes(node.childNodes, iterator);
+            undefinedGroups.get(tag).add(el);
+        });
+}
+
+function customElementsWhenDefined(tag: string) {
+    return new Promise((resolve) => {
+        // `customElements.whenDefined` is not available in extensions
+        // https://bugs.chromium.org/p/chromium/issues/detail?id=390807
+        if (window.customElements && typeof window.customElements.whenDefined === 'function') {
+            customElements.whenDefined(tag).then(resolve);
+        } else {
+            const checkIfDefined = () => {
+                const elements = undefinedGroups.get(tag);
+                if (elements && elements.size > 0) {
+                    if (elements.values().next().value.matches(':defined')) {
+                        resolve();
+                    } else {
+                        requestAnimationFrame(checkIfDefined);
+                    }
+                }
+            };
+            requestAnimationFrame(checkIfDefined);
         }
     });
 }
 
+function watchWhenCustomElementsDefined(callback: (elements: Element[]) => void) {
+    elementsDefinitionCallback = callback;
+}
+
+function unsubscribeFromDefineCustomElements() {
+    elementsDefinitionCallback = null;
+    undefinedGroups.clear();
+}
+
 const shadowObservers = new Set<MutationObserver>();
+let nodesShadowObservers = new WeakMap<Node, MutationObserver>();
+
+function unsubscribeFromShadowRootChanges() {
+    shadowObservers.forEach((o) => o.disconnect());
+    shadowObservers.clear();
+    nodesShadowObservers = new WeakMap();
+}
 
 export function watchForStyleChanges(update: (styles: ChangedStyles) => void) {
     if (observer) {
         observer.disconnect();
         shadowObservers.forEach((o) => o.disconnect());
         shadowObservers.clear();
+        nodesShadowObservers = new WeakMap();
     }
 
     function handleMutations(mutations: MutationRecord[]) {
@@ -59,8 +118,24 @@ export function watchForStyleChanges(update: (styles: ChangedStyles) => void) {
                 styleUpdates.add(m.target as HTMLLinkElement | HTMLStyleElement);
             }
         });
-        const styleAdditions = getAllManageableStyles(Array.from(additions));
-        const styleDeletions = getAllManageableStyles(Array.from(deletions));
+        const styleAdditions = getAllManageableStyles(additions);
+        const styleDeletions = getAllManageableStyles(deletions);
+        additions.forEach((n) => {
+            iterateShadowNodes(n, (host) => {
+                const shadowStyles = getAllManageableStyles(host.shadowRoot.children);
+                if (shadowStyles.length > 0) {
+                    styleAdditions.push(...shadowStyles);
+                }
+            });
+        });
+        deletions.forEach((n) => {
+            iterateShadowNodes(n, (host) => {
+                const shadowStyles = getAllManageableStyles(host.shadowRoot.children);
+                if (shadowStyles.length > 0) {
+                    styleDeletions.push(...shadowStyles);
+                }
+            });
+        });
 
         styleDeletions.forEach((style) => {
             if (style.isConnected) {
@@ -89,32 +164,44 @@ export function watchForStyleChanges(update: (styles: ChangedStyles) => void) {
             });
         }
 
-        const allAddedNodes = [];
         additions.forEach((n) => {
             if (n.isConnected) {
-                allAddedNodes.push(n);
+                iterateShadowNodes(n, subscribeForShadowRootChanges);
+                if (n instanceof Element) {
+                    collectUndefinedElements(n);
+                }
             }
         });
-        iterateShadowNodes(allAddedNodes, subscribeForShadowRootChanges);
     }
 
     function subscribeForShadowRootChanges(node: Element) {
+        if (nodesShadowObservers.has(node)) {
+            return;
+        }
         const shadowObserver = new MutationObserver(handleMutations);
         shadowObserver.observe(node.shadowRoot, mutationObserverOptions);
         shadowObservers.add(shadowObserver);
+        nodesShadowObservers.set(node, shadowObserver);
     }
 
     const mutationObserverOptions = {childList: true, subtree: true, attributes: true, attributeFilter: ['rel', 'disabled']};
     observer = new MutationObserver(handleMutations);
     observer.observe(document.documentElement, mutationObserverOptions);
-    iterateShadowNodes(document.documentElement.children, subscribeForShadowRootChanges);
+    iterateShadowNodes(document.documentElement, subscribeForShadowRootChanges);
+
+    watchWhenCustomElementsDefined((hosts) => {
+        const newStyles = getAllManageableStyles(hosts.map((h) => h.shadowRoot));
+        update({created: newStyles, updated: [], removed: [], moved: []});
+        hosts.forEach((h) => subscribeForShadowRootChanges(h));
+    });
+    collectUndefinedElements(document);
 }
 
 export function stopWatchingForStyleChanges() {
     if (observer) {
         observer.disconnect();
         observer = null;
-        shadowObservers.forEach((o) => o.disconnect());
-        shadowObservers.clear();
+        unsubscribeFromShadowRootChanges();
+        unsubscribeFromDefineCustomElements();
     }
 }

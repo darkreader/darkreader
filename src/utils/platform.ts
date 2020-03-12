@@ -60,3 +60,21 @@ export function isDeepSelectorSupported() {
         return false;
     }
 }
+
+export function isHostSelectorSupported() {
+    try {
+        document.querySelector(':host x');
+        return true;
+    } catch (err) {
+        return false;
+    }
+}
+
+export function isDefinedSelectorSupported() {
+    try {
+        document.querySelector(':defined');
+        return true;
+    } catch (err) {
+        return false;
+    }
+}

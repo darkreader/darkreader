@@ -1,3 +1,4 @@
+import {iterateShadowNodes} from '../utils/dom';
 import {iterateCSSDeclarations} from './css-rules';
 import {getModifiableCSSDeclaration} from './modify-css';
 import {FilterConfig} from '../../definitions';
@@ -101,8 +102,6 @@ export function getInlineOverrideStyle() {
     }).join('\n');
 }
 
-let observer: MutationObserver = null;
-
 function expand(nodes: Node[], selector: string) {
     const results: Node[] = [];
     nodes.forEach((n) => {
@@ -116,11 +115,27 @@ function expand(nodes: Node[], selector: string) {
     return results;
 }
 
-export function watchForInlineStyles(elementStyleDidChange: (element: HTMLElement) => void) {
-    if (observer) {
-        observer.disconnect();
+const observers = new Map<Node, MutationObserver>();
+
+export function watchForInlineStyles(
+    elementStyleDidChange: (element: HTMLElement) => void,
+    shadowRootDiscovered: (root: ShadowRoot) => void,
+) {
+    deepWatchForInlineStyles(document.documentElement, elementStyleDidChange, shadowRootDiscovered);
+    iterateShadowNodes(document.documentElement, (node) => {
+        deepWatchForInlineStyles(node.shadowRoot, elementStyleDidChange, shadowRootDiscovered);
+    });
+}
+
+export function deepWatchForInlineStyles(
+    root: Node,
+    elementStyleDidChange: (element: HTMLElement) => void,
+    shadowRootDiscovered: (root: ShadowRoot) => void,
+) {
+    if (observers.has(root)) {
+        observers.get(root).disconnect();
     }
-    observer = new MutationObserver((mutations) => {
+    const observer = new MutationObserver((mutations) => {
         mutations.forEach((m) => {
             const createdInlineStyles = expand(Array.from(m.addedNodes), INLINE_STYLE_SELECTOR);
             if (createdInlineStyles.length > 0) {
@@ -135,20 +150,29 @@ export function watchForInlineStyles(elementStyleDidChange: (element: HTMLElemen
                     .forEach(({dataAttr}) => (m.target as HTMLElement).setAttribute(dataAttr, ''));
             }
         });
+        mutations.forEach((m) => {
+            m.addedNodes.forEach((added) => {
+                if (added.isConnected) {
+                    iterateShadowNodes(added, (n) => {
+                        shadowRootDiscovered(n.shadowRoot);
+                        deepWatchForInlineStyles(n.shadowRoot, elementStyleDidChange, shadowRootDiscovered);
+                    });
+                }
+            });
+        });
     });
-    observer.observe(document, {
+    observer.observe(root, {
         childList: true,
         subtree: true,
         attributes: true,
         attributeFilter: INLINE_STYLE_ATTRS.concat(overridesList.map(({dataAttr}) => dataAttr)),
     });
+    observers.set(root, observer);
 }
 
 export function stopWatchingForInlineStyles() {
-    if (observer) {
-        observer.disconnect();
-        observer = null;
-    }
+    observers.forEach((o) => o.disconnect());
+    observers.clear();
 }
 
 const inlineStyleCache = new WeakMap<HTMLElement, string>();

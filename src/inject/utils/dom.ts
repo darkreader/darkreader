@@ -69,7 +69,7 @@ export function watchForNodePosition<T extends Node>(node: T, onRestore?: () => 
     const MAX_ATTEMPTS_COUNT = 10;
     const ATTEMPTS_INTERVAL = getDuration({seconds: 10});
     const prevSibling = node.previousSibling;
-    const parent = node.parentElement;
+    const parent = node.parentNode;
     if (!parent) {
         // BUG: fails for shadow root.
         logWarn('Unable to watch for node position: parent element not found', node, prevSibling);
@@ -91,7 +91,7 @@ export function watchForNodePosition<T extends Node>(node: T, onRestore?: () => 
             start = now;
             attempts = 1;
         }
-        if ((prevSibling && prevSibling.parentElement !== parent)) {
+        if (prevSibling && prevSibling.parentNode !== parent) {
             logWarn('Unable to restore node position: sibling was removed', node, prevSibling, parent);
             stop();
             return;
@@ -101,7 +101,7 @@ export function watchForNodePosition<T extends Node>(node: T, onRestore?: () => 
         onRestore && onRestore();
     });
     const observer = new MutationObserver(() => {
-        if (!node.parentElement || node.previousSibling !== prevSibling) {
+        if (!node.parentNode || node.previousSibling !== prevSibling) {
             restore();
             observer.takeRecords();
         }
@@ -114,4 +114,25 @@ export function watchForNodePosition<T extends Node>(node: T, onRestore?: () => 
     };
     run();
     return {run, stop};
+}
+
+export function iterateShadowNodes(root: Node, iterator: (node: Element) => void) {
+    const walker = document.createTreeWalker(
+        root,
+        NodeFilter.SHOW_ELEMENT,
+        {
+            acceptNode(node) {
+                return (node as Element).shadowRoot == null ? NodeFilter.FILTER_SKIP : NodeFilter.FILTER_ACCEPT;
+            }
+        },
+        false,
+    );
+    for (
+        let node = ((root as Element).shadowRoot ? walker.currentNode : walker.nextNode()) as Element;
+        node != null;
+        node = walker.nextNode() as Element
+    ) {
+        iterator(node);
+        iterateShadowNodes(node.shadowRoot, iterator);
+    }
 }

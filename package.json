@@ -1,6 +1,6 @@
 {
   "name": "darkreader",
-  "version": "4.8.10",
+  "version": "4.9.0",
   "description": "Dark theme for every website",
   "scripts": {
     "api": "node -e \"require('./tasks/bundle-api')()\"",

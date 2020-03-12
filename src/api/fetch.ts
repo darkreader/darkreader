@@ -1,5 +1,5 @@
 const throwCORSError = async (url: string) => {
-    throw new Error(
+    return Promise.reject(new Error(
         [
             'Embedded Dark Reader cannot access a cross-origin resource',
             url,
@@ -8,7 +8,7 @@ const throwCORSError = async (url: string) => {
             'See if using `DarkReader.setFetchMethod(window.fetch)`',
             'before `DarkReader.enable()` works.'
         ].join(' '),
-    );
+    ));
 };
 
 type Fetcher = (url: string) => Promise<Response>;

@@ -28,8 +28,8 @@
     "@types/chrome": "0.0.99",
     "@types/jest": "25.1.4",
     "@types/node": "13.9.0",
-    "@typescript-eslint/eslint-plugin": "2.22.0",
-    "@typescript-eslint/parser": "2.22.0",
+    "@typescript-eslint/eslint-plugin": "2.23.0",
+    "@typescript-eslint/parser": "2.23.0",
     "chokidar": "3.3.1",
     "eslint": "6.8.0",
     "eslint-plugin-local": "1.0.0",
@@ -38,7 +38,7 @@
     "jest": "25.1.0",
     "less": "3.11.1",
     "prettier": "1.19.1",
-    "rollup": "2.0.2",
+    "rollup": "2.0.5",
     "rollup-plugin-commonjs": "10.1.0",
     "rollup-plugin-node-resolve": "5.2.0",
     "rollup-plugin-replace": "2.2.0",
@@ -48,6 +48,6 @@
     "tsconfig-paths": "3.9.0",
     "typescript": "3.8.3",
     "yazl": "2.5.1",
-    "ws": "7.2.2"
+    "ws": "7.2.3"
   }
 }

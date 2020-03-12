@@ -61,17 +61,17 @@ function customElementsWhenDefined(tag: string) {
         if (window.customElements && typeof window.customElements.whenDefined === 'function') {
             customElements.whenDefined(tag).then(resolve);
         } else {
-            const intervalId = setInterval(() => {
+            const checkIfDefined = () => {
                 const elements = undefinedGroups.get(tag);
                 if (elements && elements.size > 0) {
                     if (elements.values().next().value.matches(':defined')) {
-                        clearInterval(intervalId);
                         resolve();
+                    } else {
+                        requestAnimationFrame(checkIfDefined);
                     }
-                } else {
-                    clearInterval(intervalId);
                 }
-            }, 500);
+            };
+            requestAnimationFrame(checkIfDefined);
         }
     });
 }

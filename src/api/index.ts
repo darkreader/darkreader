@@ -1,4 +1,5 @@
 import './chrome';
+import {setFetchMethod as setFetch} from './fetch';
 import {FilterConfig as Theme, DynamicThemeFix} from '../definitions';
 import ThemeEngines from '../generators/theme-engines';
 import {createOrUpdateDynamicTheme, removeDynamicTheme} from '../inject/dynamic-theme';
@@ -29,3 +30,5 @@ export function enable(themeOptions: Partial<Theme>, fixes: DynamicThemeFix = nu
 export function disable() {
     removeDynamicTheme();
 }
+
+export const setFetchMethod = setFetch;

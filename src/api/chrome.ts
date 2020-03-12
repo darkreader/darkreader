@@ -1,25 +1,58 @@
+import {readResponseAsDataURL} from '../utils/network';
+import {callFetchMethod} from './fetch';
+
 if (!window.chrome) {
     window.chrome = {} as any;
 }
-if (!window.chrome.runtime) {
-    window.chrome.runtime = {} as any;
+if (!chrome.runtime) {
+    chrome.runtime = {} as any;
 }
-const throwCORSError = () => {
-    throw new Error('Access to some of your resources was blocked by cross-origin policy');
-};
-if (window.chrome.runtime.sendMessage) {
-    const nativeSendMessage = window.chrome.runtime.sendMessage;
-    window.chrome.runtime.sendMessage = (...args) => {
-        if (args[0] && args[0].type === 'fetch') {
-            throwCORSError();
+
+const messageListeners = new Set<(...args) => void>();
+
+async function sendMessage(...args) {
+    if (args[0] && args[0].type === 'fetch') {
+        const {id} = args[0];
+        try {
+            const {url, responseType} = args[0].data;
+            const response = await callFetchMethod(url);
+            let text: string;
+            if (responseType === 'data-url') {
+                text = await readResponseAsDataURL(response);
+            } else {
+                text = await response.text();
+            }
+            messageListeners.forEach((cb) => cb({type: 'fetch-response', data: text, error: null, id}));
+        } catch (error) {
+            console.error(error);
+            messageListeners.forEach((cb) => cb({type: 'fetch-response', data: null, error, id}));
         }
-        nativeSendMessage.apply(window.chrome.runtime, args);
+    }
+}
+
+function addMessageListener(callback) {
+    messageListeners.add(callback);
+}
+
+if (typeof chrome.runtime.sendMessage === 'function') {
+    const nativeSendMessage = chrome.runtime.sendMessage;
+    chrome.runtime.sendMessage = (...args) => {
+        sendMessage(...args);
+        nativeSendMessage.apply(chrome.runtime, args);
     };
 } else {
-    window.chrome.runtime.sendMessage = throwCORSError;
+    chrome.runtime.sendMessage = sendMessage;
 }
-if (!window.chrome.runtime.onMessage) {
-    window.chrome.runtime.onMessage = {
-        addListener: Function.prototype,
-    } as any;
+
+if (!chrome.runtime.onMessage) {
+    chrome.runtime.onMessage = {} as any;
+}
+if (typeof chrome.runtime.onMessage.addListener === 'function') {
+    const nativeAddListener = chrome.runtime.onMessage.addListener;
+    chrome.runtime.onMessage.addListener = (...args) => {
+        addMessageListener(...args);
+        nativeAddListener.apply(chrome.runtime.onMessage, args);
+    };
+} else {
+    chrome.runtime.onMessage.addListener = addMessageListener;
 }

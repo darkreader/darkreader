@@ -20,6 +20,10 @@ async function getOKResponse(url: string, mimeType?: string) {
 
 export async function loadAsDataURL(url: string, mimeType?: string) {
     const response = await getOKResponse(url, mimeType);
+    return await readResponseAsDataURL(response);
+}
+
+export async function readResponseAsDataURL(response: Response) {
     const blob = await response.blob();
     const dataURL = await (new Promise<string>((resolve) => {
         const reader = new FileReader();
@@ -31,6 +35,5 @@ export async function loadAsDataURL(url: string, mimeType?: string) {
 
 export async function loadAsText(url: string, mimeType?: string) {
     const response = await getOKResponse(url, mimeType);
-    const text = await response.text();
-    return text;
+    return await response.text();
 }

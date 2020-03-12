@@ -164,12 +164,23 @@ DarkReader.enable({
 });
 
 DarkReader.disable();
+
+// Enable when system color scheme is dark
+DarkReader.auto({
+    brightness: 100,
+    contrast: 90,
+    sepia: 10
+});
+
+// Stop watching for system color scheme
+DarkReader.auto(false);
 ```
 ... or if you are using ES modules
 ```javascript
 import {
     enable as enableDarkMode,
     disable as disableDarkMode,
+    auto as followSystemColorScheme,
 } from 'darkreader';
 
 enableDarkMode({
@@ -179,6 +190,8 @@ enableDarkMode({
 });
 
 disableDarkMode();
+
+followSystemColorScheme();
 ```
 
 ## Contributors

@@ -1,4 +1,5 @@
 import {iterateShadowNodes} from '../utils/dom';
+import {isDefinedSelectorSupported} from '../../utils/platform';
 import {shouldManageStyle, STYLE_SELECTOR} from './style-manager';
 
 let observer: MutationObserver = null;
@@ -17,14 +18,81 @@ function getAllManageableStyles(nodes: Iterable<Node> | ArrayLike<Node>) {
             if (shouldManageStyle(node)) {
                 results.push(node as HTMLLinkElement | HTMLStyleElement);
             }
-            results.push(...Array.from<HTMLLinkElement | HTMLStyleElement>(node.querySelectorAll(STYLE_SELECTOR)).filter(shouldManageStyle));
+        }
+        if (node instanceof Element || node instanceof ShadowRoot) {
+            results.push(
+                ...Array.from<HTMLLinkElement | HTMLStyleElement>(
+                    node.querySelectorAll(STYLE_SELECTOR)
+                ).filter(shouldManageStyle)
+            );
         }
     });
     return results;
 }
 
+const undefinedGroups = new Map<string, Set<Element>>();
+let elementsDefinitionCallback: (elements: Element[]) => void;
+
+function collectUndefinedElements(root: ParentNode) {
+    if (!isDefinedSelectorSupported()) {
+        return;
+    }
+    root.querySelectorAll(':not(:defined)')
+        .forEach((el) => {
+            const tag = el.tagName.toLowerCase();
+            if (!undefinedGroups.has(tag)) {
+                undefinedGroups.set(tag, new Set());
+                customElementsWhenDefined(tag).then(() => {
+                    if (elementsDefinitionCallback) {
+                        const elements = undefinedGroups.get(tag);
+                        undefinedGroups.delete(tag);
+                        elementsDefinitionCallback(Array.from(elements));
+                    }
+                });
+            }
+            undefinedGroups.get(tag).add(el);
+        });
+}
+
+function customElementsWhenDefined(tag: string) {
+    return new Promise((resolve) => {
+        // `customElements.whenDefined` is not available in extensions
+        // https://bugs.chromium.org/p/chromium/issues/detail?id=390807
+        if (window.customElements && typeof window.customElements.whenDefined === 'function') {
+            customElements.whenDefined(tag).then(resolve);
+        } else {
+            const intervalId = setInterval(() => {
+                const elements = undefinedGroups.get(tag);
+                if (elements && elements.size > 0) {
+                    if (elements.values().next().value.matches(':defined')) {
+                        clearInterval(intervalId);
+                        resolve();
+                    }
+                } else {
+                    clearInterval(intervalId);
+                }
+            }, 500);
+        }
+    });
+}
+
+function watchWhenCustomElementsDefined(callback: (elements: Element[]) => void) {
+    elementsDefinitionCallback = callback;
+}
+
+function unsubscribeFromDefineCustomElements() {
+    elementsDefinitionCallback = null;
+    undefinedGroups.clear();
+}
+
 const shadowObservers = new Set<MutationObserver>();
 let nodesShadowObservers = new WeakMap<Node, MutationObserver>();
+
+function unsubscribeFromShadowRootChanges() {
+    shadowObservers.forEach((o) => o.disconnect());
+    shadowObservers.clear();
+    nodesShadowObservers = new WeakMap();
+}
 
 export function watchForStyleChanges(update: (styles: ChangedStyles) => void) {
     if (observer) {
@@ -99,6 +167,9 @@ export function watchForStyleChanges(update: (styles: ChangedStyles) => void) {
         additions.forEach((n) => {
             if (n.isConnected) {
                 iterateShadowNodes(n, subscribeForShadowRootChanges);
+                if (n instanceof Element) {
+                    collectUndefinedElements(n);
+                }
             }
         });
     }
@@ -117,14 +188,20 @@ export function watchForStyleChanges(update: (styles: ChangedStyles) => void) {
     observer = new MutationObserver(handleMutations);
     observer.observe(document.documentElement, mutationObserverOptions);
     iterateShadowNodes(document.documentElement, subscribeForShadowRootChanges);
+
+    watchWhenCustomElementsDefined((hosts) => {
+        const newStyles = getAllManageableStyles(hosts.map((h) => h.shadowRoot));
+        update({created: newStyles, updated: [], removed: [], moved: []});
+        hosts.forEach((h) => subscribeForShadowRootChanges(h));
+    });
+    collectUndefinedElements(document);
 }
 
 export function stopWatchingForStyleChanges() {
     if (observer) {
         observer.disconnect();
         observer = null;
-        shadowObservers.forEach((o) => o.disconnect());
-        shadowObservers.clear();
-        nodesShadowObservers = new WeakMap();
+        unsubscribeFromShadowRootChanges();
+        unsubscribeFromDefineCustomElements();
     }
 }

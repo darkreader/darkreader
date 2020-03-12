@@ -69,3 +69,12 @@ export function isHostSelectorSupported() {
         return false;
     }
 }
+
+export function isDefinedSelectorSupported() {
+    try {
+        document.querySelector(':defined');
+        return true;
+    } catch (err) {
+        return false;
+    }
+}

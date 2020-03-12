@@ -1,3 +1,5 @@
+import {isFirefox} from './platform';
+
 async function getOKResponse(url: string, mimeType?: string) {
     const response = await fetch(
         url,
@@ -6,6 +8,11 @@ async function getOKResponse(url: string, mimeType?: string) {
             credentials: 'omit',
         },
     );
+
+    // Firefox bug, content type is "application/x-unknown-content-type"
+    if (isFirefox() && mimeType === 'text/css' && url.startsWith('moz-extension://') && url.endsWith('.css')) {
+        return response;
+    }
 
     if (mimeType && !response.headers.get('Content-Type').startsWith(mimeType)) {
         throw new Error(`Mime type mismatch when loading ${url}`);

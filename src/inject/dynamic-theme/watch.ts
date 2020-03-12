@@ -24,12 +24,14 @@ function getAllManageableStyles(nodes: Iterable<Node> | ArrayLike<Node>) {
 }
 
 const shadowObservers = new Set<MutationObserver>();
+let nodesShadowObservers = new WeakMap<Node, MutationObserver>();
 
 export function watchForStyleChanges(update: (styles: ChangedStyles) => void) {
     if (observer) {
         observer.disconnect();
         shadowObservers.forEach((o) => o.disconnect());
         shadowObservers.clear();
+        nodesShadowObservers = new WeakMap();
     }
 
     function handleMutations(mutations: MutationRecord[]) {
@@ -48,8 +50,24 @@ export function watchForStyleChanges(update: (styles: ChangedStyles) => void) {
                 styleUpdates.add(m.target as HTMLLinkElement | HTMLStyleElement);
             }
         });
-        const styleAdditions = getAllManageableStyles(Array.from(additions));
-        const styleDeletions = getAllManageableStyles(Array.from(deletions));
+        const styleAdditions = getAllManageableStyles(additions);
+        const styleDeletions = getAllManageableStyles(deletions);
+        additions.forEach((n) => {
+            iterateShadowNodes(n, (host) => {
+                const shadowStyles = getAllManageableStyles(host.shadowRoot.children);
+                if (shadowStyles.length > 0) {
+                    styleAdditions.push(...shadowStyles);
+                }
+            });
+        });
+        deletions.forEach((n) => {
+            iterateShadowNodes(n, (host) => {
+                const shadowStyles = getAllManageableStyles(host.shadowRoot.children);
+                if (shadowStyles.length > 0) {
+                    styleDeletions.push(...shadowStyles);
+                }
+            });
+        });
 
         styleDeletions.forEach((style) => {
             if (style.isConnected) {
@@ -86,9 +104,13 @@ export function watchForStyleChanges(update: (styles: ChangedStyles) => void) {
     }
 
     function subscribeForShadowRootChanges(node: Element) {
+        if (nodesShadowObservers.has(node)) {
+            return;
+        }
         const shadowObserver = new MutationObserver(handleMutations);
         shadowObserver.observe(node.shadowRoot, mutationObserverOptions);
         shadowObservers.add(shadowObserver);
+        nodesShadowObservers.set(node, shadowObserver);
     }
 
     const mutationObserverOptions = {childList: true, subtree: true, attributes: true, attributeFilter: ['rel', 'disabled']};
@@ -103,5 +125,6 @@ export function stopWatchingForStyleChanges() {
         observer = null;
         shadowObservers.forEach((o) => o.disconnect());
         shadowObservers.clear();
+        nodesShadowObservers = new WeakMap();
     }
 }

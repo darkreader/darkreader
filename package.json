@@ -21,6 +21,10 @@
     "url": "https://github.com/alexanderby/darkreader/issues"
   },
   "homepage": "https://darkreader.org/",
+  "funding": {
+    "type": "opencollective",
+    "url": "https://opencollective.com/darkreader"
+  },
   "dependencies": {
     "malevic": "0.18.0"
   },

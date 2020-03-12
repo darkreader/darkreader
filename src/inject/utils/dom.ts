@@ -65,7 +65,13 @@ export function removeNode(node: Node) {
     node && node.parentNode && node.parentNode.removeChild(node);
 }
 
-export function watchForNodePosition<T extends Node>(node: T, onRestore?: () => void) {
+export function watchForNodePosition<T extends Node>(
+    node: T, {
+        onRestore = Function.prototype,
+        watchParent = true,
+        watchSibling = false,
+    }
+) {
     const MAX_ATTEMPTS_COUNT = 10;
     const ATTEMPTS_INTERVAL = getDuration({seconds: 10});
     const prevSibling = node.previousSibling;
@@ -101,7 +107,10 @@ export function watchForNodePosition<T extends Node>(node: T, onRestore?: () => 
         onRestore && onRestore();
     });
     const observer = new MutationObserver(() => {
-        if (!node.parentNode || node.previousSibling !== prevSibling) {
+        if (
+            (watchParent && !node.parentNode) ||
+            (watchSibling && node.previousSibling !== prevSibling)
+        ) {
             restore();
             observer.takeRecords();
         }

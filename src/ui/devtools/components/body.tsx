@@ -52,6 +52,10 @@ function Body({data, actions}: BodyProps) {
         wrapper.reset();
         setState({errorText: null});
     }
+    
+    function close() {
+        window.close();   
+    }
 
     return (
         <body>
@@ -68,6 +72,7 @@ function Body({data, actions}: BodyProps) {
             <div id="buttons">
                 <Button onclick={reset}>Reset</Button>
                 <Button onclick={apply}>Apply</Button>
+                <Button onclick={close}>Close</Button>
             </div>
             <p id="description">
                 Read about this tool <strong><a href={DEVTOOLS_DOCS_URL} target="_blank" rel="noopener noreferrer">here</a></strong>.

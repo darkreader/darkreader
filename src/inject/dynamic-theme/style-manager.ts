@@ -43,7 +43,7 @@ export const STYLE_SELECTOR = (() => {
         selectors = selectors.map((s) => s.replace('/deep/ ', ''));
     }
     if (!isHostSelectorSupported()) {
-        selectors = selectors.filter((s) => s.startsWith(':host'));
+        selectors = selectors.filter((s) => !s.startsWith(':host'));
     }
     return selectors.join(', ');
 })();

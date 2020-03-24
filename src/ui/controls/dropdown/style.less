@@ -25,6 +25,14 @@
         text-align: center;
         position: absolute;
         width: 100%;
+
+        &__text {
+            display: inline-block;
+            max-width: calc(100% - 2.5rem);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
     }
 
     &__list {
@@ -43,6 +51,12 @@
             line-height: @dropdown-item-height;
             text-align: center;
             width: 100%;
+
+            &--selected {
+                overflow: hidden;
+                visibility: hidden;
+                white-space: nowrap;
+            }
         }
     }
 

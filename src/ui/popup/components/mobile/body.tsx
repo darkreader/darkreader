@@ -4,7 +4,7 @@ import SiteToggle from '../site-toggle';
 import ThemeEngines from '../../../../generators/theme-engines';
 import {DONATE_URL} from '../../../../utils/links';
 import {getLocalMessage} from '../../../../utils/locales';
-import {isURLEnabled, isURLInList} from '../../../../utils/url';
+import {isURLEnabled, isURLInList, getURLHost} from '../../../../utils/url';
 import {ExtensionData, ExtensionActions, TabInfo, FilterConfig} from '../../../../definitions';
 
 type Theme = FilterConfig;
@@ -124,7 +124,7 @@ function SwitchGroup(props: MobileBodyProps) {
     }
 
     return (
-        <section class="m-section">
+        <Array>
             <AppSwitch
                 isOn={props.data.settings.enabled === true && !props.data.settings.automation}
                 isOff={props.data.settings.enabled === false && !props.data.settings.automation}
@@ -134,7 +134,7 @@ function SwitchGroup(props: MobileBodyProps) {
             <SiteToggleGroup
                 {...props}
             />
-        </section>
+        </Array>
     );
 }
 
@@ -236,10 +236,12 @@ function ThemeControls(props: {theme: Theme; onChange: (theme: Partial<Theme>) =
                 value={theme.contrast}
                 onChange={(v) => onChange({contrast: v})}
             />
+            {/*
             <Sepia
                 value={theme.sepia}
                 onChange={(v) => onChange({sepia: v})}
             />
+            */}
             <Scheme
                 isDark={theme.mode === 1}
                 onChange={(isDark) => onChange({mode: isDark ? 1 : 0})}
@@ -249,6 +251,78 @@ function ThemeControls(props: {theme: Theme; onChange: (theme: Partial<Theme>) =
                 onChange={(mode) => onChange({engine: mode})}
             />
         </section>
+    );
+}
+
+function ThemeGroup(props: MobileBodyProps) {
+    const host = getURLHost(props.tab.url || '');
+    const custom = props.data.settings.customThemes.find(
+        ({url}) => isURLInList(props.tab.url, url)
+    );
+    const theme = custom ?
+        custom.theme :
+        props.data.settings.theme;
+
+    function setTheme(config: Partial<Theme>) {
+        if (custom) {
+            custom.theme = {...custom.theme, ...config};
+            props.actions.changeSettings({
+                customThemes: props.data.settings.customThemes,
+            });
+        } else {
+            props.actions.setTheme(config);
+        }
+    }
+
+    const defaultPresetName = 'Default theme';
+    const customPresetName = `Custom for ${host}`;
+
+    function onPresetChange(name: string) {
+        const filteredCustomThemes = props.data.settings.customThemes.filter(({url}) => !isURLInList(props.tab.url, url));
+        if (name === defaultPresetName) {
+            props.actions.changeSettings({customThemes: filteredCustomThemes});
+        } else if (name === customPresetName) {
+            const extended = filteredCustomThemes.concat({
+                url: [host],
+                theme: {...props.data.settings.theme},
+            });
+            props.actions.changeSettings({customThemes: extended});
+        }
+    }
+
+    return (
+        <div class="m-theme-group">
+            <div class="m-theme-group__presets-wrapper">
+                <DropDown
+                    selected={custom ? customPresetName : defaultPresetName}
+                    values={[
+                        defaultPresetName,
+                        customPresetName,
+                    ]}
+                    onChange={onPresetChange}
+                />
+            </div>
+            <div class="m-theme-group__controls-wrapper">
+                <ThemeControls
+                    theme={theme}
+                    onChange={setTheme}
+                />
+            </div>
+            <label class="m-theme-group__description">
+                Configure theme
+            </label>
+        </div>
+    );
+}
+
+function SettingsNavButton() {
+    return (
+        <Button class="m-settings-button">
+            <span class="m-settings-button__content">
+                <span class="m-settings-button__icon" />
+                <span class="m-settings-button__text">Settings</span>
+            </span>
+        </Button>
     );
 }
 
@@ -268,24 +342,6 @@ function DonateGroup() {
 }
 
 export default function MobileBody(props: MobileBodyProps) {
-    const custom = props.data.settings.customThemes.find(
-        ({url}) => isURLInList(props.tab.url, url)
-    );
-    const theme = custom ?
-        custom.theme :
-        props.data.settings.theme;
-
-    function setTheme(config: Partial<Theme>) {
-        if (custom) {
-            custom.theme = {...custom.theme, ...config};
-            props.actions.changeSettings({
-                customThemes: props.data.settings.customThemes,
-            });
-        } else {
-            props.actions.setTheme(config);
-        }
-    }
-
     function preventContextMenu() {
         window.addEventListener('contextmenu', (e) => e.preventDefault());
     }
@@ -295,18 +351,14 @@ export default function MobileBody(props: MobileBodyProps) {
             <section class="m-section">
                 <Logo />
             </section>
-            <SwitchGroup {...props} />
-            <ThemeControls
-                theme={theme}
-                onChange={setTheme}
-            />
             <section class="m-section">
-                <Button class="m-settings-button">
-                    <span class="m-settings-button__content">
-                        <span class="m-settings-button__icon" />
-                        <span class="m-settings-button__text">Settings</span>
-                    </span>
-                </Button>
+                <SwitchGroup {...props} />
+            </section>
+            <section class="m-section">
+                <ThemeGroup {...props} />
+            </section>
+            <section class="m-section">
+                <SettingsNavButton />
             </section>
             <section class="m-section">
                 <DonateGroup />

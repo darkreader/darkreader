@@ -65,6 +65,44 @@
         }
     }
 
+    .m-theme-group {
+        &__presets-wrapper {
+            background-color: @color-control-active;
+            border: @size-border solid @color-border;
+            height: @size-control-inner;
+
+            .dropdown {
+                &__selected {
+                    border-radius: unset;
+                    height: @size-control-inner;
+                    line-height: @size-control-inner;
+                    margin-top: 0;
+                }
+
+                &__list {
+                    border-radius: unset;
+                }
+            }
+        }
+
+        &__controls-wrapper {
+            border-bottom: @size-border solid @color-border;
+            border-left: @size-border solid @color-border;
+            border-right: @size-border solid @color-border;
+            padding: @indent-small;
+        }
+
+        &__description {
+            display: inline-block;
+            font-size: @size-text-small;
+            line-height: @size-text-small-height;
+            text-align: center;
+            -moz-user-select: none;
+            user-select: none;
+            width: 100%;
+        }
+    }
+
     .m-settings-button {
         background-image: @icon-right;
         background-position: center right 0.25rem;

@@ -87,7 +87,9 @@ export default function DropDown(props: DropDownProps) {
                 oncreate={saveSelectedNode}
                 onclick={onSelectedClick}
             >
-                {props.selected}
+                <span class="dropdown__selected__text">
+                    {props.selected}
+                </span>
             </span>
         </span >
     );

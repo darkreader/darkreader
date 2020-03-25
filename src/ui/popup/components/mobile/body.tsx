@@ -173,23 +173,6 @@ function Contrast(props: {value: number; onChange: (v: number) => void}) {
     );
 }
 
-/*
-function Sepia(props: {value: number; onChange: (v: number) => void}) {
-    return (
-        <ThemeControl label={getLocalMessage('sepia')}>
-            <Slider
-                value={props.value}
-                min={0}
-                max={100}
-                step={1}
-                formatValue={formatPercent}
-                onChange={props.onChange}
-            />
-        </ThemeControl>
-    );
-}
-*/
-
 function Scheme(props: {isDark: boolean; onChange: (dark: boolean) => void}) {
     const valDark = getLocalMessage('Dark');
     const valLight = getLocalMessage('Light');
@@ -239,12 +222,6 @@ function ThemeControls(props: {theme: Theme; onChange: (theme: Partial<Theme>) =
                 value={theme.contrast}
                 onChange={(v) => onChange({contrast: v})}
             />
-            {/*
-            <Sepia
-                value={theme.sepia}
-                onChange={(v) => onChange({sepia: v})}
-            />
-            */}
             <Scheme
                 isDark={theme.mode === 1}
                 onChange={(isDark) => onChange({mode: isDark ? 1 : 0})}
@@ -351,17 +328,6 @@ function CheckButton(props: {checked: boolean; label: string; description: strin
             <CheckBox class="m-check-button__checkbox" checked={props.checked}>
                 {props.label}
             </CheckBox>
-            {/* <label class="m-check-button__control">
-                <input
-                    class="m-check-button__input"
-                    type="checkbox"
-                    onchange={(e) => props.onChange(e.target.checked)}
-                />
-                <span class="m-check-button__checkmark" />
-                <span class="m-check-button__label">
-                    {props.label}
-                </span>
-            </label> */}
             <label class="m-check-button__description">
                 {props.description}
             </label>

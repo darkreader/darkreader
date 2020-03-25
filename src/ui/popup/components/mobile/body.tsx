@@ -1,5 +1,6 @@
 import {m} from 'malevic';
-import {Button, DropDown, MultiSwitch, Slider} from '../../../controls';
+import {getContext} from 'malevic/dom';
+import {Button, CheckBox, DropDown, MultiSwitch, Slider} from '../../../controls';
 import SiteToggle from '../site-toggle';
 import ThemeEngines from '../../../../generators/theme-engines';
 import {DONATE_URL} from '../../../../utils/links';
@@ -172,6 +173,7 @@ function Contrast(props: {value: number; onChange: (v: number) => void}) {
     );
 }
 
+/*
 function Sepia(props: {value: number; onChange: (v: number) => void}) {
     return (
         <ThemeControl label={getLocalMessage('sepia')}>
@@ -186,6 +188,7 @@ function Sepia(props: {value: number; onChange: (v: number) => void}) {
         </ThemeControl>
     );
 }
+*/
 
 function Scheme(props: {isDark: boolean; onChange: (dark: boolean) => void}) {
     const valDark = getLocalMessage('Dark');
@@ -315,14 +318,122 @@ function ThemeGroup(props: MobileBodyProps) {
     );
 }
 
-function SettingsNavButton() {
+function SettingsNavButton(props: {onClick: () => void}) {
     return (
-        <Button class="m-settings-button">
+        <Button class="m-settings-button" onclick={props.onClick}>
             <span class="m-settings-button__content">
                 <span class="m-settings-button__icon" />
                 <span class="m-settings-button__text">Settings</span>
             </span>
         </Button>
+    );
+}
+
+function MainPage(props: MobileBodyProps & {onSettingsNavClick: () => void}) {
+    return (
+        <Array>
+            <section class="m-section">
+                <SwitchGroup {...props} />
+            </section>
+            <section class="m-section">
+                <ThemeGroup {...props} />
+            </section>
+            <section class="m-section">
+                <SettingsNavButton onClick={props.onSettingsNavClick} />
+            </section>
+        </Array>
+    );
+}
+
+function CheckButton(props: {checked: boolean; label: string; description: string; onChange: (checked: boolean) => void}) {
+    return (
+        <span class="m-check-button">
+            <CheckBox class="m-check-button__checkbox" checked={props.checked}>
+                {props.label}
+            </CheckBox>
+            {/* <label class="m-check-button__control">
+                <input
+                    class="m-check-button__input"
+                    type="checkbox"
+                    onchange={(e) => props.onChange(e.target.checked)}
+                />
+                <span class="m-check-button__checkmark" />
+                <span class="m-check-button__label">
+                    {props.label}
+                </span>
+            </label> */}
+            <label class="m-check-button__description">
+                {props.description}
+            </label>
+        </span>
+    );
+}
+
+function BackButton(props: {onClick: () => void}) {
+    return (
+        <Button class="m-back-button" onclick={props.onClick}>
+            Back
+        </Button>
+    );
+}
+
+function SettingsPage(props: MobileBodyProps & {onBackClick: () => void}) {
+    function onEnabledByDefaultChange(checked: boolean) {
+        props.actions.changeSettings({applyToListedOnly: !checked})
+    }
+
+    return (
+        <Array>
+            <section class="m-section">
+                <CheckButton
+                    checked={!props.data.settings.applyToListedOnly}
+                    label="Enable by default"
+                    description={props.data.settings.applyToListedOnly ?
+                        'Disabled on all websites by default' :
+                        'Enabled on all websites by default'}
+                    onChange={onEnabledByDefaultChange}
+                />
+            </section>
+            <section class="m-section">
+                <BackButton onClick={props.onBackClick} />
+            </section>
+        </Array>
+    );
+}
+
+function Paginator(props: MobileBodyProps) {
+    const context = getContext();
+    const store = context.store as {
+        activePage: 'main' | 'settings';
+    };
+
+    function onSettingsNavClick() {
+        store.activePage = 'settings';
+        context.refresh();
+    }
+
+    function onSettingsBackClick() {
+        store.activePage = 'main';
+        context.refresh();
+    }
+
+    return (
+        <div class="m-paginator">
+            <div class="m-paginator__main-page">
+                <MainPage
+                    {...props}
+                    onSettingsNavClick={onSettingsNavClick}
+                />
+            </div>
+            <div
+                class={{
+                    'm-paginator__settings-page': true,
+                    'm-paginator__settings-page--active': store.activePage === 'settings',
+                }}
+            >
+                <SettingsPage {...props} onBackClick={onSettingsBackClick} />
+            </div>
+        </div>
     );
 }
 
@@ -352,13 +463,7 @@ export default function MobileBody(props: MobileBodyProps) {
                 <Logo />
             </section>
             <section class="m-section">
-                <SwitchGroup {...props} />
-            </section>
-            <section class="m-section">
-                <ThemeGroup {...props} />
-            </section>
-            <section class="m-section">
-                <SettingsNavButton />
+                <Paginator {...props} />
             </section>
             <section class="m-section">
                 <DonateGroup />

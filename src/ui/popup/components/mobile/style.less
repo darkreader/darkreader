@@ -133,6 +133,64 @@
         }
     }
 
+    .m-check-button {
+        .checkbox {
+            width: calc(100% - 2 * @size-border);
+
+            &__checkmark {
+                background-color: @color-control-active;
+            }
+
+            &__content {
+                align-items: center;
+                display: flex;
+                flex: auto;
+                height: @size-control-inner;
+                justify-content: center;
+            }
+
+            &__input:checked ~ * {
+                color: @color-control-fore;
+            }
+        }
+
+        &__description {
+            display: inline-block;
+            font-size: @size-text-small;
+            line-height: @size-text-small-height;
+            text-align: center;
+            -moz-user-select: none;
+            user-select: none;
+            width: 100%;
+        }
+    }
+
+    .m-back-button {
+        background-image: @icon-left;
+        background-position: center left 0.25rem;
+        background-repeat: no-repeat;
+        background-size: 1rem;
+        width: calc(100% - 2 * @size-border);
+    }
+
+    .m-paginator {
+        position: relative;
+
+        &__settings-page {
+            background-color: @color-back;
+            display: none;
+            height: 100%;
+            left: 0;
+            position: absolute;
+            top: 0;
+            width: 100%;
+
+            &--active {
+                display: initial;
+            }
+        }
+    }
+
     .m-donate-button {
         align-items: center;
         background-color: @color-control-active;

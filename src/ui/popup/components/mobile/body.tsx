@@ -325,7 +325,11 @@ function MainPage(props: MobileBodyProps & {onSettingsNavClick: () => void}) {
 function CheckButton(props: {checked: boolean; label: string; description: string; onChange: (checked: boolean) => void}) {
     return (
         <span class="m-check-button">
-            <CheckBox class="m-check-button__checkbox" checked={props.checked}>
+            <CheckBox
+                class="m-check-button__checkbox"
+                checked={props.checked}
+                onchange={(e: {target: HTMLInputElement}) => props.onChange(e.target.checked)}
+            >
                 {props.label}
             </CheckBox>
             <label class="m-check-button__description">

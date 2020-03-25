@@ -101,6 +101,7 @@ async function bundleJS(/** @type {JSEntry} */entry, {production}) {
                 tsconfigOverride: {
                     compilerOptions: {
                         removeComments: production ? true : false,
+                        sourceMap: production ? false : true,
                     },
                 },
                 clean: production ? true : false,

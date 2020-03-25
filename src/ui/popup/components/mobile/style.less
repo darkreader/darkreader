@@ -147,6 +147,8 @@
                 flex: auto;
                 height: @size-control-inner;
                 justify-content: center;
+                -moz-user-select: none;
+                user-select: none;
             }
 
             &__input:checked ~ * {
@@ -162,6 +164,28 @@
             -moz-user-select: none;
             user-select: none;
             width: 100%;
+        }
+    }
+
+    .m-help-button {
+        align-items: center;
+        background-image: @icon-right;
+        background-position: center right 0.25rem;
+        background-repeat: no-repeat;
+        background-size: 1rem;
+        border: @size-border solid @color-border;
+        display: inline-flex;
+        justify-content: center;
+        height: @size-control-inner;
+        width: calc(100% - 2 * @size-border);
+
+        &__text {
+            color: @color-control-fore;
+            display: inline-block;
+            line-height: @size-control-inner;
+            height: @size-control-inner;
+            -moz-user-select: none;
+            user-select: none;
         }
     }
 
@@ -212,6 +236,7 @@
         }
     }
 
+    .m-help-description,
     .m-donate-description {
         display: inline-block;
         font-size: @size-text-small;

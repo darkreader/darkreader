@@ -3,7 +3,7 @@ import {getContext} from 'malevic/dom';
 import {Button, CheckBox, DropDown, MultiSwitch, Slider} from '../../../controls';
 import SiteToggle from '../site-toggle';
 import ThemeEngines from '../../../../generators/theme-engines';
-import {DONATE_URL} from '../../../../utils/links';
+import {DONATE_URL, getHelpURL} from '../../../../utils/links';
 import {getLocalMessage} from '../../../../utils/locales';
 import {isURLEnabled, isURLInList, getURLHost} from '../../../../utils/url';
 import {ExtensionData, ExtensionActions, TabInfo, FilterConfig} from '../../../../definitions';
@@ -335,6 +335,21 @@ function CheckButton(props: {checked: boolean; label: string; description: strin
     );
 }
 
+function HelpGroup() {
+    return (
+        <div class="m-help-group">
+            <a class="m-help-button" href={getHelpURL()} target="_blank" rel="noopener noreferrer">
+                <span class="m-help-button__text">
+                    {getLocalMessage('help')}
+                </span>
+            </a>
+            <label class="m-help-description">
+                Read the manual
+            </label>
+        </div>
+    );
+}
+
 function BackButton(props: {onClick: () => void}) {
     return (
         <Button class="m-back-button" onclick={props.onClick}>
@@ -359,6 +374,7 @@ function SettingsPage(props: MobileBodyProps & {onBackClick: () => void}) {
                         'Enabled on all websites by default'}
                     onChange={onEnabledByDefaultChange}
                 />
+                <HelpGroup />
             </section>
             <section class="m-section">
                 <BackButton onClick={props.onBackClick} />

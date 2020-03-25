@@ -54,7 +54,7 @@ function Body(props: BodyProps) {
     }
 
     if (isMobile()) {
-        return <MobileBody {...props} />
+        return <MobileBody {...props} />;
     }
 
     const unreadNews = props.data.news.filter(({read}) => !read);

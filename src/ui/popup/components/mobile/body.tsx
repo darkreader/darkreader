@@ -37,7 +37,7 @@ function SimpleControl(props: {class?: string}, control: Malevic.Spec, descripti
                 {description}
             </label>
         </div>
-    )
+    );
 }
 
 function ThemeControl(props: {class?: string; label: string}, control: Malevic.Spec) {
@@ -364,7 +364,7 @@ function BackButton(props: {onClick: () => void}) {
 
 function SettingsPage(props: MobileBodyProps & {onBackClick: () => void}) {
     function onEnabledByDefaultChange(checked: boolean) {
-        props.actions.changeSettings({applyToListedOnly: !checked})
+        props.actions.changeSettings({applyToListedOnly: !checked});
     }
 
     return (

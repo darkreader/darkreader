@@ -186,6 +186,22 @@
             height: @size-control-inner;
             -moz-user-select: none;
             user-select: none;
+
+            &::before {
+                border: @size-border-inner solid @color-control-fore;
+                border-radius: 50%;
+                color: @color-control-fore;
+                content: "?";
+                display: inline-block;
+                font-weight: bold;
+                height: 0.875rem;
+                left: 0;
+                line-height: 0.875rem;
+                margin-right: 0.25rem;
+                text-align: center;
+                top: 0;
+                width: 0.875rem;
+            }
         }
     }
 

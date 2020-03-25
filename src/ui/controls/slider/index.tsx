@@ -35,9 +35,12 @@ export default function Slider(props: SliderProps) {
     const store = context.store as {
         isActive: boolean;
         activeValue: number;
+        activeProps: SliderProps;
         trackNode: HTMLElement;
         thumbNode: HTMLElement;
     };
+
+    store.activeProps = props;
 
     function onRootCreate(rootNode: HTMLElement) {
         rootNode.addEventListener('touchstart', onPointerDown, {passive: true});
@@ -102,10 +105,11 @@ export default function Slider(props: SliderProps) {
         })();
 
         function getEventValue(e: MouseEvent | TouchEvent) {
+            const {min, max} = store.activeProps;
             const clientX = getClientX(e);
             const rect = getTrackNode().getBoundingClientRect();
-            const scaled = scale(clientX + dx, rect.left, rect.right, props.min, props.max);
-            const clamped = clamp(scaled, props.min, props.max);
+            const scaled = scale(clientX + dx, rect.left, rect.right, min, max);
+            const clamped = clamp(scaled, min, max);
             return clamped;
         }
 
@@ -121,7 +125,9 @@ export default function Slider(props: SliderProps) {
             store.isActive = false;
             context.refresh();
             store.activeValue = null;
-            props.onChange(stickToStep(value, props.step));
+
+            const {onChange, step} = store.activeProps;
+            onChange(stickToStep(value, step));
         }
 
         function onKeyPress(e: KeyboardEvent) {

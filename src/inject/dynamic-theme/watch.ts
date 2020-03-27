@@ -179,9 +179,11 @@ export function watchForStyleChanges(update: (styles: ChangedStyles) => void) {
             return;
         }
         const shadowObserver = new MutationObserver(handleMutations);
-        shadowObserver.observe(node.shadowRoot, mutationObserverOptions);
-        shadowObservers.add(shadowObserver);
-        nodesShadowObservers.set(node, shadowObserver);
+        if (shadowObserver.takeRecords().length != 0) { // Don't handle empty Shadowobservers
+            shadowObserver.observe(node.shadowRoot, mutationObserverOptions);
+            shadowObservers.add(shadowObserver);
+            nodesShadowObservers.set(node, shadowObserver);
+        }
     }
 
     const mutationObserverOptions = {childList: true, subtree: true, attributes: true, attributeFilter: ['rel', 'disabled']};

@@ -175,15 +175,13 @@ export function watchForStyleChanges(update: (styles: ChangedStyles) => void) {
     }
 
     function subscribeForShadowRootChanges(node: Element) {
-        if (nodesShadowObservers.has(node)) {
+        if (nodesShadowObservers.has(node) || node.shadowRoot != null) {
             return;
         }
         const shadowObserver = new MutationObserver(handleMutations);
-        if (shadowObserver.takeRecords().length != 0) { // Don't handle empty Shadowobservers
-            shadowObserver.observe(node.shadowRoot, mutationObserverOptions);
-            shadowObservers.add(shadowObserver);
-            nodesShadowObservers.set(node, shadowObserver);
-        }
+        shadowObserver.observe(node.shadowRoot, mutationObserverOptions);
+        shadowObservers.add(shadowObserver);
+        nodesShadowObservers.set(node, shadowObserver);
     }
 
     const mutationObserverOptions = {childList: true, subtree: true, attributes: true, attributeFilter: ['rel', 'disabled']};

@@ -27,6 +27,7 @@ async function start() {
 start();
 
 document.documentElement.classList.toggle('mobile', isMobile());
+document.documentElement.classList.toggle('firefox', isFirefox());
 document.documentElement.classList.toggle('built-in-borders', popupHasBuiltInBorders());
 document.documentElement.classList.toggle('built-in-horizontal-borders', popupHasBuiltInHorizontalBorders());
 

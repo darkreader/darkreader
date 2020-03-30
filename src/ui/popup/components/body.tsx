@@ -5,11 +5,12 @@ import {TabPanel, Button} from '../../controls';
 import FilterSettings from './filter-settings';
 import {Header, MoreToggleSettings} from './header';
 import Loader from './loader';
+import MobileBody from './mobile/body';
 import MoreSettings from './more-settings';
 import {News, NewsButton} from './news';
 import SiteListSettings from './site-list-settings';
 import ThemeEngines from '../../../generators/theme-engines';
-import {isFirefox} from '../../../utils/platform';
+import {isFirefox, isMobile} from '../../../utils/platform';
 import {getDuration} from '../../../utils/time';
 import {DONATE_URL, GITHUB_URL, PRIVACY_URL, TWITTER_URL, getHelpURL} from '../../../utils/links';
 import {getLocalMessage} from '../../../utils/locales';
@@ -50,6 +51,10 @@ function Body(props: BodyProps) {
                 <Loader complete={false} />
             </body>
         );
+    }
+
+    if (isMobile()) {
+        return <MobileBody {...props} />;
     }
 
     const unreadNews = props.data.news.filter(({read}) => !read);

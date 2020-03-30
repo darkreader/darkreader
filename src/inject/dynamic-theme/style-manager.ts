@@ -61,7 +61,8 @@ export function shouldManageStyle(element: Node) {
             )
         ) &&
         !element.classList.contains('darkreader') &&
-        element.media !== 'print'
+        element.media !== 'print' &&
+        !element.classList.contains('stylus')
     );
 }
 

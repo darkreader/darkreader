@@ -5,6 +5,9 @@ module.exports = {
     rules: {
         'array-bracket-spacing': ['error', 'never'],
         'block-spacing': ['error', 'always'],
+        'indent': ['error', 4, {
+            'SwitchCase': 1,
+        }],
         'object-curly-spacing': ['error', 'never'],
         'no-multi-spaces': 'error',
         'no-trailing-spaces': 'error',

@@ -175,7 +175,7 @@ export function watchForStyleChanges(update: (styles: ChangedStyles) => void) {
     }
 
     function subscribeForShadowRootChanges(node: Element) {
-        if (nodesShadowObservers.has(node)) {
+        if (nodesShadowObservers.has(node) || node.shadowRoot == null) {
             return;
         }
         const shadowObserver = new MutationObserver(handleMutations);

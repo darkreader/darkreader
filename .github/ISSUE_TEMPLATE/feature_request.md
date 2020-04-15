@@ -2,7 +2,7 @@
 name: Feature request
 about: Suggest a new Feature for Darkreader
 title: "[Feature Request]"
-labels: Enchantment
+labels: enhancement
 assignees: ''
 
 ---

@@ -149,12 +149,12 @@ This will generate `build.zip` for use in Chromium browsers and `build-firefox.x
 ## Using for a website
 
 You can use Dark Reader to enable dark mode on your website.
-Install the package from NPM (`npm install darkreader`)
-or you can create an up to date script(If the CDN is outdated) by [building](https://github.com/darkreader/darkreader#building-for-use) and than use the command (`npm run api`)
-or include the script via a CDN such as:
+- Install the package from NPM (`npm install darkreader`)
+- You can create an local script(If the CDN is outdated) by [building](https://github.com/darkreader/darkreader#building-for-use) and than use the command (`npm run api`) **NOT RECOMMENDED | WON'T AUTOUPDATE**
+- or include the script via a CDN such as:
 
-- [https://unpkg.com/](https://unpkg.com/) | [https://unpkg.com/darkreader/](https://unpkg.com/darkreader/) | [Direct link](https://unpkg.com/darkreader)
-- [https://www.jsdelivr.com/](https://www.jsdelivr.com/) | [https://www.jsdelivr.com/package/npm/darkreader](https://www.jsdelivr.com/package/npm/darkreader) | [Direct link](https://cdn.jsdelivr.net/npm/darkreader/darkreader.min.js)
+- - [https://unpkg.com/](https://unpkg.com/) | [https://unpkg.com/darkreader/](https://unpkg.com/darkreader/) | [Direct link](https://unpkg.com/darkreader)
+- - [https://www.jsdelivr.com/](https://www.jsdelivr.com/) | [https://www.jsdelivr.com/package/npm/darkreader](https://www.jsdelivr.com/package/npm/darkreader) | [Direct link](https://cdn.jsdelivr.net/npm/darkreader/darkreader.min.js)
 
 Then use the following API
 ```javascript

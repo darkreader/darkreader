@@ -8,7 +8,7 @@ assignees: ''
 ---
 <!--
 Thank you for taking the time to suggest a feature request.
-Please make sure their aren't existing issues's about this kind of feature.
+Please make sure there is no existing issue about this kind of feature.
 -->
 
 **Is your feature request related to a problem? Please describe.**

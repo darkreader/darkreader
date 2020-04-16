@@ -13,11 +13,9 @@ Give the link to the website
 **How to Reproduce**
 Steps to reproduce the behavior:
 An example for this is
-```
-1. Go to x site
-2. Hover over x button
-3. See that isn't chaning colors
-```
+> 1. Go to x site
+> 2. Hover over x button
+> 3. See that isn't chaning colors
 
 **Expected behavior**
 A clear and concise description of what you expected to happen.

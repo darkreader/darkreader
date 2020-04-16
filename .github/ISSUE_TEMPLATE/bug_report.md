@@ -9,7 +9,7 @@ assignees: ''
 
 <!--
 Thank you for taking the time to report a bug.
-Please make sure their aren't existing issue's about this kind of bug.
+Please make sure there is no existing issue about this kind of bug.
 -->
 
 **Describe the bug**

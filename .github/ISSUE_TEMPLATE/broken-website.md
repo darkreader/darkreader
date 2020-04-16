@@ -15,7 +15,7 @@ Steps to reproduce the behavior:
 An example for this is
 > 1. Go to x site
 > 2. Hover over x button
-> 3. See that isn't chaning colors
+> 3. See that when hovering it isn't changing colors
 
 **Expected behavior**
 A clear and concise description of what you expected to happen.

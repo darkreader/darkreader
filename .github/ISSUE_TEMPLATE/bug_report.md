@@ -7,6 +7,11 @@ assignees: ''
 
 ---
 
+<!--
+Thank you for taking the time to report a bug.
+Please make sure their aren't existing issue's about this kind of bug.
+-->
+
 **Describe the bug**
 A clear and concise description of what the bug is.
 

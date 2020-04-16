@@ -7,6 +7,11 @@ assignees: ''
 
 ---
 
+<!--
+Thank you for taking the time to report a broken website.
+Please make sure their aren't existing issie about this broken website.
+-->
+
 **Website**
 Give the link to the website
 

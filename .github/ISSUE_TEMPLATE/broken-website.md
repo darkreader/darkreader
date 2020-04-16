@@ -9,7 +9,7 @@ assignees: ''
 
 <!--
 Thank you for taking the time to report a broken website.
-Please make sure their aren't existing issie about this broken website.
+Please make sure their aren't existing issue's about this broken website.
 -->
 
 **Website**

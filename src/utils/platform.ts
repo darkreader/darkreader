@@ -1,3 +1,7 @@
+export function isChrome() {
+    return navigator.userAgent.includes('Chrome');
+}
+
 export function isFirefox() {
     return navigator.userAgent.includes('Firefox');
 }

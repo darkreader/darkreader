@@ -5,10 +5,20 @@ import {parseArray, formatArray} from '../utils/text';
 import {compareURLPatterns, isURLInList} from '../utils/url';
 import {createTextStyle} from './text-style';
 import {FilterConfig, InversionFix} from '../definitions';
+import { compareChromeVersions, getChromeVersion, isChrome } from '../utils/platform';
 
 export enum FilterMode {
     light = 0,
     dark = 1
+}
+
+export function hasRootIssue() {
+    const chromeVersion = getChromeVersion();
+    return Boolean(
+        chromeVersion &&
+        isChrome() &&
+        compareChromeVersions(chromeVersion, "81.0.4035.0") >= 0
+    )
 }
 
 export default function createCSSFilterStyleheet(config: FilterConfig, url: string, frameURL: string, inversionFixes: InversionFix[]) {
@@ -63,7 +73,10 @@ export function cssFilterStyleheetTemplate(filterValue: string, reverseFilterVal
     });
 
     if (!frameURL) {
-        const [r, g, b] = applyColorMatrix([255, 255, 255], createFilterMatrix(config));
+        let [r, g, b] = applyColorMatrix([255, 255, 255], createFilterMatrix(config));
+        if (hasRootIssue()) {
+            [r, g, b] = applyColorMatrix([0, 0, 0], createFilterMatrix(config));
+        }
         const bgColor = {
             r: Math.round(r),
             g: Math.round(g),

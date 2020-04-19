@@ -8,6 +8,42 @@ export function compareURLPatterns(a: string, b: string) {
     return a.localeCompare(b);
 }
 
+export function shouldBeReverse(url: string, list: string[], index: number) {
+    var listurl = list[index];
+    if (listurl.startsWith('!')) {
+        var regex =  /(?:http[s]*\:\/\/)*(.*?)\.(?=[^\/]*\..{2,5})/i
+        listurl = listurl.replace(/^\!/, '');
+        url = (url
+            .replace(/^\^/, '') // Remove ^ at start
+            .replace(/^\!/, '') // Remove ! at start
+            .replace(/\$$/, '') // Remove $ at end
+            .replace(/^.*?\/{2,3}/, '') // Remove scheme
+            .replace(/\?.*$/, '') // Remove query
+            .replace(/\/$/, '') // Remove last slash
+        );
+        if (listurl.startsWith("*")) {
+            if (url.startsWith('www')) {
+                return true;
+            }
+            if (url.match(regex)) {
+                return false;
+            }else {
+                return true;
+            }
+        }
+        if (listurl.match(regex)) {
+            if (regex.exec(listurl)[0] == regex.exec(url)[0]) {
+                return true;
+            }else {
+                return false;
+            }
+        }else {
+            return true;
+        }
+    }
+    return false;
+}
+
 /**
  * Determines whether URL has a match in URL template list.
  * @param url Site URL.
@@ -16,6 +52,9 @@ export function compareURLPatterns(a: string, b: string) {
 export function isURLInList(url: string, list: string[]) {
     for (let i = 0; i < list.length; i++) {
         if (isURLMatched(url, list[i])) {
+            if (shouldBeReverse(url, list, i)) { //Checks if the original url in the config has negative !
+                return false;
+            }
             return true;
         }
     }
@@ -39,6 +78,7 @@ function createUrlRegex(urlTemplate: string): RegExp {
 
     urlTemplate = (urlTemplate
         .replace(/^\^/, '') // Remove ^ at start
+        .replace(/^\!/, '') // Remove ! at start
         .replace(/\$$/, '') // Remove $ at end
         .replace(/^.*?\/{2,3}/, '') // Remove scheme
         .replace(/\?.*$/, '') // Remove query

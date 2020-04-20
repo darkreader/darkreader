@@ -5,7 +5,7 @@ import {parseArray, formatArray} from '../utils/text';
 import {compareURLPatterns, isURLInList} from '../utils/url';
 import {createTextStyle} from './text-style';
 import {FilterConfig, InversionFix} from '../definitions';
-import { compareChromeVersions, getChromeVersion, isChrome } from '../utils/platform';
+import {compareChromeVersions, getChromeVersion, isChrome} from '../utils/platform';
 
 export enum FilterMode {
     light = 0,

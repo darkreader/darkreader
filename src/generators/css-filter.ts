@@ -76,9 +76,13 @@ export function cssFilterStyleheetTemplate(filterValue: string, reverseFilterVal
     });
 
     if (!frameURL) {
-        let [r, g, b] = applyColorMatrix([255, 255, 255], createFilterMatrix(config));
+        let r: number;
+        let g: number;
+        let b: number;
         if (hasChromiumIssue501582()) {
-            [r, g, b] = applyColorMatrix([0, 0, 0], createFilterMatrix(config));
+            [r,g,b] = applyColorMatrix([0, 0, 0], createFilterMatrix(config));
+        }else {
+            [r,g,b] = applyColorMatrix([255, 255, 255], createFilterMatrix(config));
         }
         const bgColor = {
             r: Math.round(r),

@@ -12,16 +12,15 @@ export enum FilterMode {
     dark = 1
 }
 /**
-* Bug report: https://bugs.chromium.org/p/chromium/issues/detail?id=501582
+* Bug report:  https://bugs.chromium.org/p/chromium/issues/detail?id=501582
 * Patch: https://chromium-review.googlesource.com/c/chromium/src/+/1979258
 */
-export function hasChromiumIssue501582() { 
+export function hasChromiumIssue501582() {
     const chromeVersion = getChromeVersion();
-    if (!chromeVersion) return;
     return Boolean(
         isChromiumBased() &&
         compareChromeVersions(chromeVersion, "81.0.4035.0") >= 0
-    )
+    );
 }
 
 export default function createCSSFilterStyleheet(config: FilterConfig, url: string, frameURL: string, inversionFixes: InversionFix[]) {
@@ -79,7 +78,9 @@ export function cssFilterStyleheetTemplate(filterValue: string, reverseFilterVal
         let r: number;
         let g: number;
         let b: number;
-        if (hasChromiumIssue501582()) {
+        if (getChromeVersion() == null){
+            [r,g,b] = applyColorMatrix([255, 255, 255], createFilterMatrix(config));
+        }else if (hasChromiumIssue501582()) {
             [r,g,b] = applyColorMatrix([0, 0, 0], createFilterMatrix(config));
         }else {
             [r,g,b] = applyColorMatrix([255, 255, 255], createFilterMatrix(config));

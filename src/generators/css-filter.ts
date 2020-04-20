@@ -76,8 +76,8 @@ export function cssFilterStyleheetTemplate(filterValue: string, reverseFilterVal
     });
 
     if (!frameURL) {
-        const [a, b, c] = hasChromiumIssue501582() ? [0, 0, 0] : [255, 255, 255];
-        const [r, g, b] = applyColorMatrix([a, b, c], createFilterMatrix(config));
+        const [x, y, z] = hasChromiumIssue501582() ? [0, 0, 0] : [255, 255, 255];
+        const [r, g, b] = applyColorMatrix([x, y, z], createFilterMatrix(config));
         const bgColor = {
             r: Math.round(r),
             g: Math.round(g),

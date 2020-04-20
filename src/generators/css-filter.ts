@@ -12,7 +12,7 @@ export enum FilterMode {
     dark = 1
 }
 
-export function hasRootIssue() {
+export function hasNewBehaviorRootElements() { // https://chromium-review.googlesource.com/c/chromium/src/+/1979258 & https://bugs.chromium.org/p/chromium/issues/detail?id=501582
     const chromeVersion = getChromeVersion();
     return Boolean(
         chromeVersion &&
@@ -74,7 +74,7 @@ export function cssFilterStyleheetTemplate(filterValue: string, reverseFilterVal
 
     if (!frameURL) {
         let [r, g, b] = applyColorMatrix([255, 255, 255], createFilterMatrix(config));
-        if (hasRootIssue()) {
+        if (hasNewBehaviorRootElements()) {
             [r, g, b] = applyColorMatrix([0, 0, 0], createFilterMatrix(config));
         }
         const bgColor = {

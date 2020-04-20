@@ -5,7 +5,7 @@ import {parseArray, formatArray} from '../utils/text';
 import {compareURLPatterns, isURLInList} from '../utils/url';
 import {createTextStyle} from './text-style';
 import {FilterConfig, InversionFix} from '../definitions';
-import {compareChromeVersions, getChromeVersion, isChrome} from '../utils/platform';
+import {compareChromeVersions, getChromeVersion, isChromiumBased} from '../utils/platform';
 
 export enum FilterMode {
     light = 0,
@@ -16,7 +16,7 @@ export function hasNewBehaviorRootElements() { // https://chromium-review.google
     const chromeVersion = getChromeVersion();
     return Boolean(
         chromeVersion &&
-        isChrome() &&
+        isChromiumBased() &&
         compareChromeVersions(chromeVersion, "81.0.4035.0") >= 0
     )
 }

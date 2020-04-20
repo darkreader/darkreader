@@ -80,11 +80,11 @@ export function cssFilterStyleheetTemplate(filterValue: string, reverseFilterVal
         let g: number;
         let b: number;
         if (getChromeVersion() == null){
-            [r,g,b] = applyColorMatrix([255, 255, 255], createFilterMatrix(config));
+            [r, g, b] = applyColorMatrix([255, 255, 255], createFilterMatrix(config));
         }else if (hasChromiumIssue501582()) {
-            [r,g,b] = applyColorMatrix([0, 0, 0], createFilterMatrix(config));
+            [r, g, b] = applyColorMatrix([0, 0, 0], createFilterMatrix(config));
         }else {
-            [r,g,b] = applyColorMatrix([255, 255, 255], createFilterMatrix(config));
+            [r, g, b] = applyColorMatrix([255, 255, 255], createFilterMatrix(config));
         }
         const bgColor = {
             r: Math.round(r),

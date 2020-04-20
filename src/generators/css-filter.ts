@@ -13,8 +13,8 @@ export enum FilterMode {
 }
 
 /**
-* Bug report: https://bugs.chromium.org/p/chromium/issues/detail?id=501582
-* Patch: https://chromium-review.googlesource.com/c/chromium/src/+/1979258
+ * Bug report: https://bugs.chromium.org/p/chromium/issues/detail?id=501582
+ * Patch: https://chromium-review.googlesource.com/c/chromium/src/+/1979258
 */
 export function hasChromiumIssue501582() {
     const chromeVersion = getChromeVersion();
@@ -76,7 +76,7 @@ export function cssFilterStyleheetTemplate(filterValue: string, reverseFilterVal
     });
 
     if (!frameURL) {
-        let [r, g, b] = hasChromiumIssue501582() ? [0, 0, 0] : [255, 255, 255];
+        const [r, g, b] = hasChromiumIssue501582() ? [0, 0, 0] : [255, 255, 255];
         const bgColor = {
             r: Math.round(r),
             g: Math.round(g),

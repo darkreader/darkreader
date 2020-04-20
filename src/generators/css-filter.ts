@@ -17,8 +17,8 @@ export enum FilterMode {
 */
 export function hasChromiumIssue501582() { 
     const chromeVersion = getChromeVersion();
+    if (!chromeVersion) return;
     return Boolean(
-        chromeVersion &&
         isChromiumBased() &&
         compareChromeVersions(chromeVersion, "81.0.4035.0") >= 0
     )

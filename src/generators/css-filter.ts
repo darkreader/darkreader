@@ -11,6 +11,7 @@ export enum FilterMode {
     light = 0,
     dark = 1
 }
+
 /**
 * Bug report: https://bugs.chromium.org/p/chromium/issues/detail?id=501582
 * Patch: https://chromium-review.googlesource.com/c/chromium/src/+/1979258

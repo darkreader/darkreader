@@ -13,14 +13,16 @@ export enum FilterMode {
 }
 
 /**
+ * This checks if the current chromium version has the patch in it.
+ * As of Chromium v81.0.4035.0 this has been the situation
+ *
  * Bug report: https://bugs.chromium.org/p/chromium/issues/detail?id=501582
  * Patch: https://chromium-review.googlesource.com/c/chromium/src/+/1979258
  */
-export function hasChromiumIssue501582(config: FilterConfig) {
+export function hasChromiumIssue501582() {
     const chromeVersion = getChromeVersion();
     return Boolean(
         isChromiumBased() &&
-        config.mode === FilterMode.dark &&
         compareChromeVersions(chromeVersion, "81.0.4035.0") >= 0
     );
 }
@@ -78,7 +80,7 @@ export function cssFilterStyleheetTemplate(filterValue: string, reverseFilterVal
 
     if (!frameURL) {
         // If user has the chrome issue the colors should be the other way around as of the rootcolors will affect the whole background color of the page
-        const rootColors = hasChromiumIssue501582(config) ? [0, 0, 0] : [255, 255, 255];
+        const rootColors = hasChromiumIssue501582() && config.mode === FilterMode.light ? [0, 0, 0] : [255, 255, 255];
         const [r, g, b] = applyColorMatrix(rootColors, createFilterMatrix(config));
         const bgColor = {
             r: Math.round(r),

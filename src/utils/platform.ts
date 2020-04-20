@@ -1,3 +1,7 @@
+export function isChromiumBased() {
+    return navigator.userAgent.toLowerCase().includes('chrome') || navigator.userAgent.toLowerCase().includes('chromium');
+}
+
 export function isFirefox() {
     return navigator.userAgent.includes('Firefox');
 }

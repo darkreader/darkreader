@@ -5,10 +5,26 @@ import {parseArray, formatArray} from '../utils/text';
 import {compareURLPatterns, isURLInList} from '../utils/url';
 import {createTextStyle} from './text-style';
 import {FilterConfig, InversionFix} from '../definitions';
+import {compareChromeVersions, getChromeVersion, isChromiumBased} from '../utils/platform';
 
 export enum FilterMode {
     light = 0,
     dark = 1
+}
+
+/**
+ * This checks if the current chromium version has the patch in it.
+ * As of Chromium v81.0.4035.0 this has been the situation
+ *
+ * Bug report: https://bugs.chromium.org/p/chromium/issues/detail?id=501582
+ * Patch: https://chromium-review.googlesource.com/c/chromium/src/+/1979258
+ */
+export function hasChromiumIssue501582() {
+    const chromeVersion = getChromeVersion();
+    return Boolean(
+        isChromiumBased() &&
+        compareChromeVersions(chromeVersion, "81.0.4035.0") >= 0
+    );
 }
 
 export default function createCSSFilterStyleheet(config: FilterConfig, url: string, frameURL: string, inversionFixes: InversionFix[]) {
@@ -63,7 +79,9 @@ export function cssFilterStyleheetTemplate(filterValue: string, reverseFilterVal
     });
 
     if (!frameURL) {
-        const [r, g, b] = applyColorMatrix([255, 255, 255], createFilterMatrix(config));
+        // If user has the chrome issue the colors should be the other way around as of the rootcolors will affect the whole background color of the page
+        const rootColors = hasChromiumIssue501582() && config.mode === FilterMode.dark ? [0, 0, 0] : [255, 255, 255];
+        const [r, g, b] = applyColorMatrix(rootColors, createFilterMatrix(config));
         const bgColor = {
             r: Math.round(r),
             g: Math.round(g),

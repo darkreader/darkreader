@@ -1,4 +1,7 @@
 {
+    "types": [
+        "chrome"
+    ],
     "compilerOptions": {
         "target": "esnext",
         "baseUrl": ".",
@@ -8,9 +11,6 @@
             "es2015",
             "es2017",
             "dom"
-        ],
-        "types": [
-            "chrome"
         ],
         "allowJs": true,
         "noEmit": true,

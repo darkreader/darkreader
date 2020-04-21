@@ -98,7 +98,7 @@ export interface Shortcuts {
 
 export interface DynamicThemeFix {
     url: string[];
-    ignore: string[];
+    ignoreInlineStyle: string[];
     invert: string[];
     css: string;
 }

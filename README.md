@@ -1,4 +1,6 @@
 # Dark Reader for Google Chrome and Mozilla Firefox
+[![Build Status](https://travis-ci.org/darkreader/darkreader.svg?branch=master)](https://travis-ci.org/darkreader/darkreader)
+
 ![Dark Reader screenshot](https://lh3.googleusercontent.com/tTJIIIAqfJWymqPM9LAmivl11kWmF-XXLABues4OwfjOED_ntsJZdLY0VTG0XFCW0W_wYSll7Q=w640-h400-e365)
 
 This extension **inverts brightness** of web pages and aims to **reduce eyestrain** while browsing the web.

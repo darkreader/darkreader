@@ -220,13 +220,15 @@ export function overrideInlineStyle(element: HTMLElement, theme: FilterConfig, i
         unsetProps.delete(targetCSSProp);
     }
 
-    if (shouldIgnoreInlineStyle(element, ignoreSelectors)) {
-        unsetProps.forEach((cssProp) => {
-            const {store, dataAttr} = overrides[cssProp];
-            store.delete(element);
-            element.removeAttribute(dataAttr);
-        });
-        return;
+    if (ignoreSelectors.length > 0) {
+        if (shouldIgnoreInlineStyle(element, ignoreSelectors)) {
+            unsetProps.forEach((cssProp) => {
+                const {store, dataAttr} = overrides[cssProp];
+                store.delete(element);
+                element.removeAttribute(dataAttr);
+            });
+            return;
+        }
     }
 
     if (element.hasAttribute('bgcolor')) {

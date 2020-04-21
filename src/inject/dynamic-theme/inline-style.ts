@@ -185,8 +185,8 @@ function getInlineStyleCacheKey(el: HTMLElement, theme: FilterConfig) {
         .join(' ');
 }
 
-function shouldIgnoreInlineStyle (ignore: string[], element: HTMLElement) {
-    for (const ingnoredSelector of ignore) {
+function shouldIgnoreInlineStyle (element: HTMLElement, selectors: string[]) {
+    for (const ingnoredSelector of selectors) {
         if (element.matches(ingnoredSelector)) {
             return true;
         }
@@ -194,7 +194,7 @@ function shouldIgnoreInlineStyle (ignore: string[], element: HTMLElement) {
     return false;
 }
 
-export function overrideInlineStyle(element: HTMLElement, theme: FilterConfig, ignore: string[]) {
+export function overrideInlineStyle(element: HTMLElement, theme: FilterConfig, ignoreSelectors: string[]) {
     const cacheKey = getInlineStyleCacheKey(element, theme);
     if (cacheKey === inlineStyleCache.get(element)) {
         return;
@@ -220,7 +220,7 @@ export function overrideInlineStyle(element: HTMLElement, theme: FilterConfig, i
         unsetProps.delete(targetCSSProp);
     }
 
-    if (shouldIgnoreInlineStyle(ignore, element)) {
+    if (shouldIgnoreInlineStyle(element, ignoreSelectors)) {
         return;
     }
 

@@ -5,6 +5,7 @@ import {compareURLPatterns, isURLInList} from '../utils/url';
 import {DynamicThemeFix} from '../definitions';
 
 const dynamicThemeFixesCommands = {
+    'IGNORE': 'ignore',
     'INVERT': 'invert',
     'CSS': 'css',
 };
@@ -50,6 +51,7 @@ export function getDynamicThemeFixesFor(url: string, frameURL: string, fixes: Dy
 
     const common = {
         url: fixes[0].url,
+        ignore: fixes[0].ignore || [],
         invert: fixes[0].invert || [],
         css: fixes[0].css || [],
     };
@@ -73,6 +75,7 @@ export function getDynamicThemeFixesFor(url: string, frameURL: string, fixes: Dy
 
     return {
         url: match.url,
+        ignore: common.ignore.concat(match.ignore || []),
         invert: common.invert.concat(match.invert || []),
         css: [common.css, match.css].filter((s) => s).join('\n'),
     };

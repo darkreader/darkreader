@@ -185,7 +185,24 @@ function getInlineStyleCacheKey(el: HTMLElement, theme: FilterConfig) {
         .join(' ');
 }
 
-export function overrideInlineStyle(element: HTMLElement, theme: FilterConfig) {
+function ignoreClass(ignore: string[], classes: DOMTokenList) {
+    if (ignore.length <= classes.length) { //Optimize by looping trough the smallest list
+        ignore.forEach(ignores => {
+            if (classes.contains(ignores)) {
+                return true;
+            }    
+        });
+    }else {
+        classes.forEach(classes => {
+            if (ignore.includes(classes)) {
+                return true;
+            }
+        })
+    }
+    return false;
+}
+
+export function overrideInlineStyle(element: HTMLElement, theme: FilterConfig, ignore: string[]) {
     const cacheKey = getInlineStyleCacheKey(element, theme);
     if (cacheKey === inlineStyleCache.get(element)) {
         return;
@@ -209,6 +226,10 @@ export function overrideInlineStyle(element: HTMLElement, theme: FilterConfig) {
             element.setAttribute(dataAttr, '');
         }
         unsetProps.delete(targetCSSProp);
+    }
+
+    if (ignoreClass(ignore, element.classList)) {
+        return;
     }
 
     if (element.hasAttribute('bgcolor')) {

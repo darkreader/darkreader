@@ -5,7 +5,7 @@ import {compareURLPatterns, isURLInList} from '../utils/url';
 import {DynamicThemeFix} from '../definitions';
 
 const dynamicThemeFixesCommands = {
-    'IGNORE INLINE STYLE': 'ignore inline style',
+    'IGNORE INLINE STYLE': 'ignoreInlineStyle',
     'INVERT': 'invert',
     'CSS': 'css',
 };
@@ -75,7 +75,7 @@ export function getDynamicThemeFixesFor(url: string, frameURL: string, fixes: Dy
 
     return {
         url: match.url,
-        ignore: common.ignoreInlineStyle.concat(match.ignoreInlineStyle || []),
+        ignoreInlineStyle: common.ignoreInlineStyle.concat(match.ignoreInlineStyle || []),
         invert: common.invert.concat(match.invert || []),
         css: [common.css, match.css].filter((s) => s).join('\n'),
     };

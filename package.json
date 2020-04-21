@@ -8,7 +8,8 @@
     "debug": "node tasks/debug.js",
     "prepublishOnly": "npm test && npm run api",
     "release": "npm test && node tasks/release.js",
-    "test": "jest --config=tests/jest.config.js"
+    "test": "jest --config=tests/jest.config.js",
+    "test:inject": "jest --config=tests/inject/jest.config.js"
   },
   "main": "darkreader.js",
   "repository": {

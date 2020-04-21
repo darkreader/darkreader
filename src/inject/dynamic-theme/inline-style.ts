@@ -185,12 +185,12 @@ function getInlineStyleCacheKey(el: HTMLElement, theme: FilterConfig) {
         .join(' ');
 }
 
-function ignoreInlineStyle (ignore: string[], element: HTMLElement) {
-    let i: number;
-    for (i = 0; i < ignore.length; i++) {
-        if (element.matches(ignore[i])) {
+function shouldIgnoreInlineStyle (ignore: string[], element: HTMLElement) {
+    for (const ingnoredSelector of ignore) {
+        if (element.matches(ingnoredSelector)) {
             return true;
-    }}
+        }
+    }
     return false;
 }
 
@@ -220,7 +220,7 @@ export function overrideInlineStyle(element: HTMLElement, theme: FilterConfig, i
         unsetProps.delete(targetCSSProp);
     }
 
-    if (ignoreInlineStyle(ignore, element)) {
+    if (shouldIgnoreInlineStyle(ignore, element)) {
         return;
     }
 

@@ -58,6 +58,7 @@ function Body({data, actions}: BodyProps) {
     function toggleDesign() {
         actions.changeSettings({previewNewDesign: !data.settings.previewNewDesign});
         data.settings.previewNewDesign ? previewButtonText = "Old design" : previewButtonText = "New design";
+        document.documentElement.classList.toggle('preview', true);
     }
 
     return (

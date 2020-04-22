@@ -59,6 +59,8 @@ function Body(props: BodyProps) {
         document.documentElement.classList.toggle('built-in-borders', popupHasBuiltInBorders());
         document.documentElement.classList.toggle('built-in-horizontal-borders', popupHasBuiltInHorizontalBorders());
         return <MobileBody {...props} />;
+    }else {
+        document.documentElement.classList.remove("preview");
     }
     if (isMobile()) {        
         return <MobileBody {...props} />;

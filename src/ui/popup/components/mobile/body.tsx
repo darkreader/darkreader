@@ -362,10 +362,26 @@ function BackButton(props: {onClick: () => void}) {
     );
 }
 
+function openDevTools() {
+    chrome.windows.create({
+        type: 'panel',
+        url: 'ui/devtools/index.html',
+        width: 600,
+        height: 600,
+    });
+}
+
 function SettingsPage(props: MobileBodyProps & {onBackClick: () => void}) {
     function onEnabledByDefaultChange(checked: boolean) {
         props.actions.changeSettings({applyToListedOnly: !checked});
     }
+    const globalThemeEngine = props.data.settings.theme.engine;
+    const devtoolsData = props.data.devtools;
+    const hasCustomFixes = (
+        (globalThemeEngine === ThemeEngines.dynamicTheme && devtoolsData.hasCustomDynamicFixes) ||
+        ([ThemeEngines.cssFilter, ThemeEngines.svgFilter].includes(globalThemeEngine) && devtoolsData.hasCustomFilterFixes) ||
+        (globalThemeEngine === ThemeEngines.staticTheme && devtoolsData.hasCustomStaticFixes)
+    );
 
     return (
         <Array>
@@ -382,6 +398,17 @@ function SettingsPage(props: MobileBodyProps & {onBackClick: () => void}) {
             </section>
             <section class="m-section">
                 <BackButton onClick={props.onBackClick} />
+            </section>
+            <section class="m-section">
+                <Button
+                    onclick={openDevTools}
+                    class={{
+                        'dev-tools-button': true,
+                        'dev-tools-button--has-custom-fixes': hasCustomFixes,
+                    }}
+                >
+                    🛠 {getLocalMessage('open_dev_tools')}
+                </Button>
             </section>
         </Array>
     );

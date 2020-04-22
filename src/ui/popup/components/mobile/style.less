@@ -266,6 +266,27 @@
     }
 }
 
+.dev-tools-button {
+    overflow: visible;
+    position: relative;
+
+    &--has-custom-fixes {
+        &::after {
+            background-color: @color-heading;
+            border-radius: @size-text-small-height / 2;
+            color: @color-control-fore;
+            content: "!";
+            font-size: @size-text-small;
+            line-height: @size-text-small-height;
+            min-width: @size-text-small-height;
+            position: absolute;
+            right: -@size-text-small-height / 3;
+            top: -@size-text-small-height / 3;
+            z-index: 3;
+        }
+    }
+}
+
 .mobile.firefox {
     * {
         font-family: Inter, Open Sans, Segoe UI, Helvetica Neue, Ubuntu, sans-serif;

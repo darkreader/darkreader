@@ -355,6 +355,33 @@ function HelpGroup() {
     );
 }
 
+function DevToolsGroup(props: MobileBodyProps) {
+    const globalThemeEngine = props.data.settings.theme.engine;
+    const devtoolsData = props.data.devtools;
+    const hasCustomFixes = (
+        (globalThemeEngine === ThemeEngines.dynamicTheme && devtoolsData.hasCustomDynamicFixes) ||
+        ([ThemeEngines.cssFilter, ThemeEngines.svgFilter].includes(globalThemeEngine) && devtoolsData.hasCustomFilterFixes) ||
+        (globalThemeEngine === ThemeEngines.staticTheme && devtoolsData.hasCustomStaticFixes)
+    );
+
+    return (
+        <div class="m-devtools-group">
+            <Button
+                onclick={openDevTools}
+                class={{
+                    'dev-tools-button': true,
+                    'dev-tools-button--has-custom-fixes': hasCustomFixes,
+                }}
+            >
+                🛠 {getLocalMessage('open_dev_tools')}
+            </Button>
+            <label class="m-devtools-description">
+                Make a fix for a website
+            </label>
+        </div>
+    );
+}
+
 function BackButton(props: {onClick: () => void}) {
     return (
         <Button class="m-back-button" onclick={props.onClick}>
@@ -376,13 +403,6 @@ function SettingsPage(props: MobileBodyProps & {onBackClick: () => void}) {
     function onEnabledByDefaultChange(checked: boolean) {
         props.actions.changeSettings({applyToListedOnly: !checked});
     }
-    const globalThemeEngine = props.data.settings.theme.engine;
-    const devtoolsData = props.data.devtools;
-    const hasCustomFixes = (
-        (globalThemeEngine === ThemeEngines.dynamicTheme && devtoolsData.hasCustomDynamicFixes) ||
-        ([ThemeEngines.cssFilter, ThemeEngines.svgFilter].includes(globalThemeEngine) && devtoolsData.hasCustomFilterFixes) ||
-        (globalThemeEngine === ThemeEngines.staticTheme && devtoolsData.hasCustomStaticFixes)
-    );
 
     return (
         <Array>
@@ -395,18 +415,8 @@ function SettingsPage(props: MobileBodyProps & {onBackClick: () => void}) {
                         'Enabled on all websites by default'}
                     onChange={onEnabledByDefaultChange}
                 />
+                <DevToolsGroup {...props} />
                 <HelpGroup />
-            </section>
-            <section class="m-section">
-                <Button
-                    onclick={openDevTools}
-                    class={{
-                        'dev-tools-button': true,
-                        'dev-tools-button--has-custom-fixes': hasCustomFixes,
-                    }}
-                >
-                    🛠 {getLocalMessage('open_dev_tools')}
-                </Button>
             </section>
             <section class="m-section">
                 <BackButton onClick={props.onBackClick} />

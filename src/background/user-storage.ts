@@ -39,7 +39,7 @@ export default class UserStorage {
                 latitude: null,
                 longitude: null,
             },
-            previewNewDesign: false
+            previewNewDesign: false,
         };
         this.settings = null;
     }

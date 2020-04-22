@@ -11,7 +11,7 @@ function Body({data, actions}: BodyProps) {
     const {state, setState} = useState({errorText: null as string});
     let textNode: HTMLTextAreaElement;
     let previewButtonText: string;
-    data.settings.previewNewDesign ? previewButtonText = "Switch to old design" : previewButtonText = "Preview new design";
+    data.settings.previewNewDesign ? previewButtonText = "Old design" : previewButtonText = "New design";
 
     const wrapper = (data.settings.theme.engine === ThemeEngines.staticTheme
         ? {
@@ -57,7 +57,7 @@ function Body({data, actions}: BodyProps) {
 
     function toggleDesign() {
         actions.changeSettings({previewNewDesign: !data.settings.previewNewDesign});
-        data.settings.previewNewDesign ? previewButtonText = "Switch to old design" : previewButtonText = "Preview new design";
+        data.settings.previewNewDesign ? previewButtonText = "Old design" : previewButtonText = "New design";
     }
 
     return (

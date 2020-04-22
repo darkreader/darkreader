@@ -397,7 +397,7 @@ function SettingsPage(props: MobileBodyProps & {onBackClick: () => void}) {
                 />
                 <HelpGroup />
             </section>
-            <section>
+            <section class="m-section">
                 <Button
                     onclick={openDevTools}
                     class={{

@@ -7,6 +7,7 @@ import {DONATE_URL, getHelpURL} from '../../../../utils/links';
 import {getLocalMessage} from '../../../../utils/locales';
 import {isURLEnabled, isURLInList, getURLHost} from '../../../../utils/url';
 import {ExtensionData, ExtensionActions, TabInfo, FilterConfig} from '../../../../definitions';
+import {isMobile} from '../../../../utils/platform';
 
 type Theme = FilterConfig;
 
@@ -397,9 +398,6 @@ function SettingsPage(props: MobileBodyProps & {onBackClick: () => void}) {
                 <HelpGroup />
             </section>
             <section class="m-section">
-                <BackButton onClick={props.onBackClick} />
-            </section>
-            <section class="m-section">
                 <Button
                     onclick={openDevTools}
                     class={{
@@ -409,6 +407,9 @@ function SettingsPage(props: MobileBodyProps & {onBackClick: () => void}) {
                 >
                     🛠 {getLocalMessage('open_dev_tools')}
                 </Button>
+            </section>
+            <section class="m-section">
+                <BackButton onClick={props.onBackClick} />
             </section>
         </Array>
     );
@@ -467,7 +468,9 @@ function DonateGroup() {
 
 export default function MobileBody(props: MobileBodyProps) {
     function preventContextMenu() {
-        window.addEventListener('contextmenu', (e) => e.preventDefault());
+        if (isMobile()) {
+            window.addEventListener('contextmenu', (e) => e.preventDefault());
+        }
     }
 
     return (

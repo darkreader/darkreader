@@ -53,7 +53,11 @@ function Body(props: BodyProps) {
         );
     }
 
-    if (isMobile() || props.data.settings.previewNewDesign) {
+    if (props.data.settings.previewNewDesign) {
+        document.documentElement.classList.toggle('mobile', true);
+        return <MobileBody {...props} />;
+    }
+    if (isMobile()) {        
         return <MobileBody {...props} />;
     }
 

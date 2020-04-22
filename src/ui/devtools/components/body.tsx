@@ -10,6 +10,8 @@ type BodyProps = ExtWrapper;
 function Body({data, actions}: BodyProps) {
     const {state, setState} = useState({errorText: null as string});
     let textNode: HTMLTextAreaElement;
+    let previewButtonText: string;
+    data.settings.previewNewDesign ? previewButtonText = "Switch to old design" : previewButtonText = "Preview new design";
 
     const wrapper = (data.settings.theme.engine === ThemeEngines.staticTheme
         ? {
@@ -55,6 +57,7 @@ function Body({data, actions}: BodyProps) {
 
     function toggleDesign() {
         actions.changeSettings({previewNewDesign: !data.settings.previewNewDesign});
+        data.settings.previewNewDesign ? previewButtonText = "Switch to old design" : previewButtonText = "Preview new design";
     }
 
     return (
@@ -72,7 +75,7 @@ function Body({data, actions}: BodyProps) {
             <div id="buttons">
                 <Button onclick={reset}>Reset</Button>
                 <Button onclick={apply}>Apply</Button>
-                data.settings.previewNewDesign ? <Button onclick={toggleDesign}>Switch to old design</Button> : <Button onclick={toggleDesign}>Preview new design</Button>
+                <Button onclick={toggleDesign}>{previewButtonText}</Button>
             </div>
             <p id="description">
                 Read about this tool <strong><a href={DEVTOOLS_DOCS_URL} target="_blank" rel="noopener noreferrer">here</a></strong>.

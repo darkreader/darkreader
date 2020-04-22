@@ -16,7 +16,7 @@ import {DONATE_URL, GITHUB_URL, PRIVACY_URL, TWITTER_URL, getHelpURL} from '../.
 import {getLocalMessage} from '../../../utils/locales';
 import {compose} from '../../utils';
 import {ExtensionData, ExtensionActions, TabInfo, News as NewsObject} from '../../../definitions';
-import {popupHasBuiltInBorders, popupHasBuiltInHorizontalBorders}  from '../utils/issues';
+import {popupHasBuiltInBorders, popupHasBuiltInHorizontalBorders} from '../utils/issues';
 
 interface BodyProps {
     data: ExtensionData;
@@ -59,10 +59,10 @@ function Body(props: BodyProps) {
         document.documentElement.classList.toggle('built-in-borders', popupHasBuiltInBorders());
         document.documentElement.classList.toggle('built-in-horizontal-borders', popupHasBuiltInHorizontalBorders());
         return <MobileBody {...props} />;
-    }else {
-        document.documentElement.classList.remove("preview");
+    } else {
+        document.documentElement.classList.remove('preview');
     }
-    if (isMobile()) {        
+    if (isMobile()) {
         return <MobileBody {...props} />;
     }
 

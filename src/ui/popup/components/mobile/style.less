@@ -465,7 +465,8 @@
         width: calc(100% - 2 * @size-border);
 
         &:hover {
-            background-color: fade(@color-control-active, 25%);
+            background-color: @color-control-hover;
+            transition: background-color @time-fast;
         }
         
         &__text {

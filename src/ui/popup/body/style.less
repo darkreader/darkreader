@@ -22,6 +22,10 @@
         }
     }
 
+    .pages-section {
+        height: 20.5rem;
+    }
+
     .m-logo {
         background-image: url('../assets/images/darkreader-type.svg');
         background-position: center;
@@ -216,32 +220,6 @@
         }
     }
 
-    .m-back-button {
-        background-image: @icon-left;
-        background-position: center left 0.25rem;
-        background-repeat: no-repeat;
-        background-size: 1rem;
-        width: calc(100% - 2 * @size-border);
-    }
-
-    .m-paginator {
-        position: relative;
-
-        &__settings-page {
-            background-color: @color-back;
-            display: none;
-            height: 100%;
-            left: 0;
-            position: absolute;
-            top: 0;
-            width: 100%;
-
-            &--active {
-                display: initial;
-            }
-        }
-    }
-
     .m-donate-button {
         align-items: center;
         background-color: @color-control-active;
@@ -297,6 +275,13 @@
             z-index: 3;
         }
     }
+}
+
+.mobile,
+.preview {
+    @import "../control-group/style.less";
+    @import "../check-button/style.less";
+    @import "../page-viewer/style.less";
 }
 
 .mobile.firefox {

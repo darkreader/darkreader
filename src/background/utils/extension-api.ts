@@ -20,6 +20,7 @@ export function canInjectScript(url: string) {
             && !url.startsWith('chrome')
             && !url.startsWith('edge')
             && !url.startsWith('https://chrome.google.com/webstore')
+            && !url.startsWith('https://microsoftedge.microsoft.com/addons')
         );
     }
     return (url

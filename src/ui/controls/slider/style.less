@@ -70,6 +70,7 @@
     &__thumb {
         background-color: @slider-thumb-color;
         border-radius: 50%;
+        cursor: pointer;
         display: inline-block;
         height: @slider-thumb-size;
         margin-left: -@slider-thumb-size / 2;
@@ -79,12 +80,12 @@
 
         &__value {
             color: @color-control-fore;
+            cursor: default;
             left: calc(100% + @size-text-normal / 2);
             line-height: @slider-thumb-size;
             position: absolute;
             -moz-user-select: none;
             user-select: none;
-            cursor: default;
 
             &--flip {
                 left: initial;
@@ -103,11 +104,5 @@
         &__value {
             line-height: @slider-thumb-active-size;
         }
-    }
-}
-
-.preview .slider {
-    &__thumb {
-        cursor: pointer;
     }
 }

@@ -45,26 +45,25 @@ function stopStylePositionWatchers() {
 
 function createStaticStyleOverrides() {
     const fallbackStyle = createOrUpdateStyle('darkreader--fallback');
-    document.head.insertBefore(fallbackStyle, document.head.firstChild);
     fallbackStyle.textContent = getModifiedFallbackStyle(filter, {strict: true});
+    document.head.insertBefore(fallbackStyle, document.head.firstChild);
     setupStylePositionWatcher(fallbackStyle, 'fallback');
 
     const userAgentStyle = createOrUpdateStyle('darkreader--user-agent');
-    document.head.insertBefore(userAgentStyle, fallbackStyle.nextSibling);
     userAgentStyle.textContent = getModifiedUserAgentStyle(filter, isIFrame);
+    document.head.insertBefore(userAgentStyle, fallbackStyle.nextSibling);
     setupStylePositionWatcher(userAgentStyle, 'user-agent');
 
     const textStyle = createOrUpdateStyle('darkreader--text');
-    document.head.insertBefore(textStyle, fallbackStyle.nextSibling);
     if (filter.useFont || filter.textStroke > 0) {
         textStyle.textContent = createTextStyle(filter);
     } else {
         textStyle.textContent = '';
     }
+    document.head.insertBefore(textStyle, fallbackStyle.nextSibling);
     setupStylePositionWatcher(textStyle, 'text');
 
     const invertStyle = createOrUpdateStyle('darkreader--invert');
-    document.head.insertBefore(invertStyle, textStyle.nextSibling);
     if (fixes && Array.isArray(fixes.invert) && fixes.invert.length > 0) {
         invertStyle.textContent = [
             `${fixes.invert.join(', ')} {`,
@@ -77,16 +76,17 @@ function createStaticStyleOverrides() {
     } else {
         invertStyle.textContent = '';
     }
+    document.head.insertBefore(invertStyle, textStyle.nextSibling);
     setupStylePositionWatcher(invertStyle, 'invert');
 
     const inlineStyle = createOrUpdateStyle('darkreader--inline');
-    document.head.insertBefore(inlineStyle, invertStyle.nextSibling);
     inlineStyle.textContent = getInlineOverrideStyle();
+    document.head.insertBefore(inlineStyle, invertStyle.nextSibling);
     setupStylePositionWatcher(inlineStyle, 'inline');
 
     const overrideStyle = createOrUpdateStyle('darkreader--override');
-    document.head.appendChild(overrideStyle);
     overrideStyle.textContent = fixes && fixes.css ? replaceCSSTemplates(fixes.css) : '';
+    document.head.appendChild(overrideStyle);
     setupStylePositionWatcher(overrideStyle, 'override');
 }
 
@@ -94,8 +94,8 @@ const shadowRootsWithOverrides = new Set<ShadowRoot>();
 
 function createShadowStaticStyleOverrides(root: ShadowRoot) {
     const inlineStyle = createOrUpdateStyle('darkreader--inline', root);
-    root.insertBefore(inlineStyle, root.firstChild);
     inlineStyle.textContent = getInlineOverrideStyle();
+    root.insertBefore(inlineStyle, root.firstChild);
     shadowRootsWithOverrides.add(root);
 }
 

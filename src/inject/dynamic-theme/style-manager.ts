@@ -117,7 +117,19 @@ export function manageStyle(element: HTMLLinkElement | HTMLStyleElement, {update
         return safeGetSheetRules();
     }
 
+    function fixFirefoxCSPIssue() {
+        // Some websites get CSP warning,
+        // when `textContent` is not set
+        if (corsCopy && !corsCopy.textContent) {
+            corsCopy.textContent = '';
+        }
+        if (!syncStyle.textContent) {
+            syncStyle.textContent = '';
+        }
+    }
+
     function insertStyle() {
+        fixFirefoxCSPIssue();
         if (corsCopy) {
             if (element.nextSibling !== corsCopy) {
                 element.parentNode.insertBefore(corsCopy, element.nextSibling);

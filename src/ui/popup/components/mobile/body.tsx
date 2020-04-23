@@ -7,6 +7,7 @@ import {DONATE_URL, getHelpURL} from '../../../../utils/links';
 import {getLocalMessage} from '../../../../utils/locales';
 import {isURLEnabled, isURLInList, getURLHost} from '../../../../utils/url';
 import {ExtensionData, ExtensionActions, TabInfo, FilterConfig} from '../../../../definitions';
+import {isMobile} from '../../../../utils/platform';
 
 type Theme = FilterConfig;
 
@@ -354,12 +355,48 @@ function HelpGroup() {
     );
 }
 
+function DevToolsGroup(props: MobileBodyProps) {
+    const globalThemeEngine = props.data.settings.theme.engine;
+    const devtoolsData = props.data.devtools;
+    const hasCustomFixes = (
+        (globalThemeEngine === ThemeEngines.dynamicTheme && devtoolsData.hasCustomDynamicFixes) ||
+        ([ThemeEngines.cssFilter, ThemeEngines.svgFilter].includes(globalThemeEngine) && devtoolsData.hasCustomFilterFixes) ||
+        (globalThemeEngine === ThemeEngines.staticTheme && devtoolsData.hasCustomStaticFixes)
+    );
+
+    return (
+        <div class="m-devtools-group">
+            <Button
+                onclick={openDevTools}
+                class={{
+                    'dev-tools-button': true,
+                    'dev-tools-button--has-custom-fixes': hasCustomFixes,
+                }}
+            >
+                🛠 {getLocalMessage('open_dev_tools')}
+            </Button>
+            <label class="m-devtools-description">
+                Make a fix for a website
+            </label>
+        </div>
+    );
+}
+
 function BackButton(props: {onClick: () => void}) {
     return (
         <Button class="m-back-button" onclick={props.onClick}>
             Back
         </Button>
     );
+}
+
+function openDevTools() {
+    chrome.windows.create({
+        type: 'panel',
+        url: 'ui/devtools/index.html',
+        width: 600,
+        height: 600,
+    });
 }
 
 function SettingsPage(props: MobileBodyProps & {onBackClick: () => void}) {
@@ -378,6 +415,7 @@ function SettingsPage(props: MobileBodyProps & {onBackClick: () => void}) {
                         'Enabled on all websites by default'}
                     onChange={onEnabledByDefaultChange}
                 />
+                <DevToolsGroup {...props} />
                 <HelpGroup />
             </section>
             <section class="m-section">
@@ -440,7 +478,9 @@ function DonateGroup() {
 
 export default function MobileBody(props: MobileBodyProps) {
     function preventContextMenu() {
-        window.addEventListener('contextmenu', (e) => e.preventDefault());
+        if (isMobile()) {
+            window.addEventListener('contextmenu', (e) => e.preventDefault());
+        }
     }
 
     return (

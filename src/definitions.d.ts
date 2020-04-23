@@ -67,6 +67,7 @@ export interface UserSettings {
     automation: '' | 'time' | 'system' | 'location';
     time: TimeSettings;
     location: LocationSettings;
+    previewNewDesign: boolean;
 }
 
 export interface TimeSettings {

@@ -23,7 +23,7 @@ export function hasChromiumIssue501582() {
     const chromeVersion = getChromeVersion();
     return Boolean(
         isChromiumBased() &&
-        compareChromeVersions(chromeVersion, "81.0.4035.0") >= 0
+        compareChromeVersions(chromeVersion, '81.0.4035.0') >= 0
     );
 }
 

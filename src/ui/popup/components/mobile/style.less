@@ -6,7 +6,10 @@
         margin: @popup-content-padding auto;
         padding: 0;
     }
+}
 
+.mobile,
+.preview {
     .m-section {
         width: 100%;
 
@@ -134,6 +137,8 @@
     }
 
     .m-check-button {
+        display: inline-block;
+
         .checkbox {
             width: calc(100% - 2 * @size-border);
 
@@ -179,6 +184,11 @@
         height: @size-control-inner;
         text-decoration: none;
         width: calc(100% - 2 * @size-border);
+
+        &:hover {
+            background-color: @color-control-hover;
+            transition: background-color @time-fast;
+        }
 
         &__text {
             color: @color-control-fore;
@@ -254,6 +264,7 @@
         }
     }
 
+    .m-devtools-description,
     .m-help-description,
     .m-donate-description {
         display: inline-block;
@@ -263,6 +274,28 @@
         -moz-user-select: none;
         user-select: none;
         width: 100%;
+    }
+}
+
+.preview .dev-tools-button {
+    overflow: visible;
+    position: relative;
+    width: calc(100% - 2 * 0.125rem);
+
+    &--has-custom-fixes {
+        &::after {
+            background-color: @color-heading;
+            border-radius: @size-text-small-height / 2;
+            color: @color-control-fore;
+            content: "!";
+            font-size: @size-text-small;
+            line-height: @size-text-small-height;
+            min-width: @size-text-small-height;
+            position: absolute;
+            right: -@size-text-small-height / 3;
+            top: -@size-text-small-height / 3;
+            z-index: 3;
+        }
     }
 }
 

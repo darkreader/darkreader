@@ -49,6 +49,8 @@ export interface FilterConfig {
     stylesheet: string;
 }
 
+export type Theme = FilterConfig;
+
 export interface CustomSiteConfig {
     url: string[];
     theme: FilterConfig;

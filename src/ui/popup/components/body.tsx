@@ -5,7 +5,7 @@ import {TabPanel, Button} from '../../controls';
 import FilterSettings from './filter-settings';
 import {Header, MoreToggleSettings} from './header';
 import Loader from './loader';
-import MobileBody from './mobile/body';
+import NewBody from '../body';
 import MoreSettings from './more-settings';
 import {News, NewsButton} from './news';
 import SiteListSettings from './site-list-settings';
@@ -16,7 +16,6 @@ import {DONATE_URL, GITHUB_URL, PRIVACY_URL, TWITTER_URL, getHelpURL} from '../.
 import {getLocalMessage} from '../../../utils/locales';
 import {compose} from '../../utils';
 import {ExtensionData, ExtensionActions, TabInfo, News as NewsObject} from '../../../definitions';
-import {popupHasBuiltInBorders, popupHasBuiltInHorizontalBorders} from '../utils/issues';
 
 interface BodyProps {
     data: ExtensionData;
@@ -54,16 +53,8 @@ function Body(props: BodyProps) {
         );
     }
 
-    if (props.data.settings.previewNewDesign) {
-        document.documentElement.classList.toggle('preview', true);
-        document.documentElement.classList.toggle('built-in-borders', popupHasBuiltInBorders());
-        document.documentElement.classList.toggle('built-in-horizontal-borders', popupHasBuiltInHorizontalBorders());
-        return <MobileBody {...props} />;
-    } else {
-        document.documentElement.classList.remove('preview');
-    }
-    if (isMobile()) {
-        return <MobileBody {...props} />;
+    if (isMobile() || props.data.settings.previewNewDesign) {
+        return <NewBody {...props} />;
     }
 
     const unreadNews = props.data.news.filter(({read}) => !read);

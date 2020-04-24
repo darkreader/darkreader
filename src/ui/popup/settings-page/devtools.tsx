@@ -6,7 +6,7 @@ import ControlGroup from '../control-group';
 import {ViewProps} from '../types';
 
 
-function getDevToolsWindow() {
+function getExistingDevToolsWindow () {
     return new Promise<chrome.windows.Window>((resolve => {
         chrome.windows.getAll({
             populate: true,
@@ -19,23 +19,21 @@ function getDevToolsWindow() {
                 }
             }
             resolve(null);
-        }
-        );
-
+        });
     }));
 }
 
 async function openDevTools() {
-    const open = await getDevToolsWindow();
-    if (open == null) {
+    const devToolsWindow = await getExistingDevToolsWindow();
+    if (devToolsWindow) {
+        chrome.windows.update(devToolsWindow.id, {'focused': true});
+    } else {
         chrome.windows.create({
             type: 'popup',
             url: 'ui/devtools/index.html',
             width: 600,
             height: 600,
         });
-    } else {
-        chrome.windows.update((await getDevToolsWindow()).id, {'focused': true});
     }
 }
 

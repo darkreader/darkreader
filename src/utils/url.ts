@@ -101,7 +101,7 @@ function isPDF(url: string) {
         if (url.includes('?')) {
             url = url.substring(0, url.lastIndexOf('?'));
         }
-        if (url.includes('*')) {
+        if (url.includes('#')) {
             url = url.substring(0, url.lastIndexOf('#'));
         }
         if (url.endsWith('.pdf')) {

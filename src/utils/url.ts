@@ -96,7 +96,7 @@ function createUrlRegex(urlTemplate: string): RegExp {
     return new RegExp(result, 'i');
 }
 
-export function isPDF(url: string) {
+export function enableForPDF(url: string) {
     if (url.includes('.pdf')) {
         if (url.includes('?')) {
             url = url.substring(0, url.lastIndexOf('?'));
@@ -106,13 +106,13 @@ export function isPDF(url: string) {
         }
         if (url.endsWith('.pdf')) {
             for (let i = url.length; 0 < i; i--) {
-                if (url[i] == '=') {
+                if (url[i] === '=') {
                     return false;
-                } else if (url[i] == '/') {
+                } else if (url[i] === '/') {
                     return true;
                 }
             }
-        }else {
+        } else {
             return false;
         }
     }
@@ -120,7 +120,7 @@ export function isPDF(url: string) {
 }
 
 export function isURLEnabled(url: string, userSettings: UserSettings, {isProtected, isInDarkList}) {
-    if (isPDF(url) && userSettings.invertPDF) {
+    if (enableForPDF(url) && userSettings.invertPDF) {
         return true;
     }
     if (isProtected) {

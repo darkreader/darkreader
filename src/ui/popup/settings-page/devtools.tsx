@@ -6,7 +6,7 @@ import ControlGroup from '../control-group';
 import {ViewProps} from '../types';
 
 
-function getExistingDevToolsWindow () {
+function getExistingDevToolsWindow() {
     return new Promise<chrome.windows.Window>((resolve => {
         chrome.windows.getAll({
             populate: true,

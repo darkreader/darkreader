@@ -89,22 +89,22 @@ test('URL is enabled', () => {
     )).toBe(true);
     expect(isURLEnabled(
         'https://www.google.com/file.pdf',
-        {enableForPDF: true, siteList: ['darkreader.org'], siteListEnabled: [], applyToListedOnly: true} as UserSettings,
+        {disableForPDF: true, siteList: ['darkreader.org'], siteListEnabled: [], applyToListedOnly: true} as UserSettings,
         {isProtected: false, isInDarkList: false},
     )).toBe(true);
     expect(isURLEnabled(
         'https://www.google.com/file.pdf/resource',
-        {enableForPDF: true, siteList: ['darkreader.org'], siteListEnabled: [], applyToListedOnly: true} as UserSettings,
+        {disableForPDF: true, siteList: ['darkreader.org'], siteListEnabled: [], applyToListedOnly: true} as UserSettings,
         {isProtected: false, isInDarkList: false},
     )).toBe(false);
     expect(isURLEnabled(
         'https://www.google.com/file.pdf/resource',
-        {enableForPDF: true, siteList: ['darkreader.org'], siteListEnabled: [], applyToListedOnly: false} as UserSettings,
+        {disableForPDF: true, siteList: ['darkreader.org'], siteListEnabled: [], applyToListedOnly: false} as UserSettings,
         {isProtected: false, isInDarkList: false},
     )).toBe(true);
     expect(isURLEnabled(
         'https://www.google.com/very/good/hidden/folder/pdf#file.pdf',
-        {enableForPDF: true, siteList: ['https://www.google.com/very/good/hidden/folder/pdf#file.pdf'], siteListEnabled: [], applyToListedOnly: false} as UserSettings,
+        {disableForPDF: true, siteList: ['https://www.google.com/very/good/hidden/folder/pdf#file.pdf'], siteListEnabled: [], applyToListedOnly: false} as UserSettings,
         {isProtected: false, isInDarkList: false},
     )).toBe(false);
 

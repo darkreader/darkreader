@@ -70,6 +70,7 @@ export interface UserSettings {
     time: TimeSettings;
     location: LocationSettings;
     previewNewDesign: boolean;
+    invertPDF: boolean;
 }
 
 export interface TimeSettings {

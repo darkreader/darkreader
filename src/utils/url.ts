@@ -96,7 +96,31 @@ function createUrlRegex(urlTemplate: string): RegExp {
     return new RegExp(result, 'i');
 }
 
+function isPDF(url: string) {
+    if (url.includes('.pdf')) {
+        if (url.includes('?'))  {
+            url = url.substring(0, url.lastIndexOf('?'))
+        }
+        if (url.includes('*')) {   
+            url = url.substring(0, url.lastIndexOf('#'))
+        }
+        if (url.endsWith('.pdf')) {
+            for (let i = url.length; 0 < i; i--) {
+                if (url[i] == "=") {
+                    return false;
+                } else if ( url[i] == '/') {
+                    return true;
+                }
+            }
+        }
+    }
+    return false;
+}
+
 export function isURLEnabled(url: string, userSettings: UserSettings, {isProtected, isInDarkList}) {
+    if (isPDF(url)) {
+        return false;
+    }
     if (isProtected) {
         return false;
     }

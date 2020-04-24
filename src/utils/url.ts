@@ -118,7 +118,7 @@ function isPDF(url: string) {
 }
 
 export function isURLEnabled(url: string, userSettings: UserSettings, {isProtected, isInDarkList}) {
-    if (isPDF(url)) {
+    if (isPDF(url) && userSettings.invertPDF) {
         return false;
     }
     if (isProtected) {

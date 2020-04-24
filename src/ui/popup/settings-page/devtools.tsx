@@ -5,14 +5,55 @@ import {Button} from '../../controls';
 import ControlGroup from '../control-group';
 import {ViewProps} from '../types';
 
-function openDevTools() {
-    // TODO: Switch to already opened window.
-    chrome.windows.create({
-        type: 'panel',
-        url: 'ui/devtools/index.html',
-        width: 600,
-        height: 600,
-    });
+
+function getExistingDevToolsWindowId() {
+    return new Promise<number>((resolve => {
+        chrome.windows.getAll({
+            populate: true,
+            windowTypes: ['popup']
+        }, (w) => {
+            for (const window of w) {
+                if (window.tabs[0].url.endsWith('ui/devtools/index.html')) {
+                    resolve(window.id);
+                    return;
+                }
+            }
+            resolve(-1);
+        }
+        );
+    }));
+}
+
+function isDevToolsOpen() {
+    return new Promise((resolve => {
+        chrome.windows.getAll({
+            populate: true,
+            windowTypes: ['popup']
+        }, (w) => {
+            for (const window of w) {
+                if (window.tabs[0].url.endsWith('ui/devtools/index.html')) {
+                    resolve(true);
+                    return;
+                }
+            }
+            resolve(false);
+        }
+        ); }));
+}
+
+
+async function openDevTools() {
+    const open = await isDevToolsOpen();
+    if (!open) {
+        chrome.windows.create({
+            type: 'popup',
+            url: 'ui/devtools/index.html',
+            width: 600,
+            height: 600,
+        });
+    } else {
+        chrome.windows.update(await getExistingDevToolsWindowId(), {'focused': true});
+    }
 }
 
 export default function DevToolsGroup(props: ViewProps) {

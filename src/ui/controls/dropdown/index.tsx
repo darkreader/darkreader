@@ -2,6 +2,7 @@ import {m} from 'malevic';
 import {getContext} from 'malevic/dom';
 
 interface DropDownProps {
+    class?: string;
     selected: string;
     values: string[];
     onChange: (value: string) => void;
@@ -54,6 +55,7 @@ export default function DropDown(props: DropDownProps) {
                 class={{
                     'dropdown__list__item': true,
                     'dropdown__list__item--selected': value === props.selected,
+                    [props.class]: props.class != null,
                 }}
                 onclick={() => {
                     store.isOpen = false;
@@ -71,6 +73,7 @@ export default function DropDown(props: DropDownProps) {
             class={{
                 'dropdown': true,
                 'dropdown--open': store.isOpen,
+                [props.class]: Boolean(props.class),
             }}
         >
             <span

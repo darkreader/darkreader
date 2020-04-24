@@ -23,7 +23,7 @@
     }
 
     .pages-section {
-        height: 20.5rem;
+        height: 22.5rem;
     }
 
     .m-logo {
@@ -37,77 +37,6 @@
         outline: none;
         text-indent: -999rem;
         width: @popup-content-width;
-    }
-
-    .m-simple-control {
-        align-items: stretch;
-        display: flex;
-        flex-direction: column;
-        width: 100%;
-
-        &__description {
-            font-size: @size-text-small;
-            line-height: @size-text-small-height;
-            text-align: center;
-            -moz-user-select: none;
-            user-select: none;
-        }
-    }
-
-    .m-theme-control {
-        align-items: center;
-        display: flex;
-        flex-direction: row;
-        justify-content: center;
-        min-height: @size-control-inner;
-        width: 100%;
-
-        &__label {
-            font-size: @size-text-normal;
-            line-height: @size-text-normal;
-            text-align: left;
-            -moz-user-select: none;
-            user-select: none;
-            width: 50%;
-        }
-    }
-
-    .m-theme-group {
-        &__presets-wrapper {
-            background-color: @color-control-active;
-            border: @size-border solid @color-border;
-            height: @size-control-inner;
-
-            .dropdown {
-                &__selected {
-                    border-radius: unset;
-                    height: @size-control-inner;
-                    line-height: @size-control-inner;
-                    margin-top: 0;
-                }
-
-                &__list {
-                    border-radius: unset;
-                }
-            }
-        }
-
-        &__controls-wrapper {
-            border-bottom: @size-border solid @color-border;
-            border-left: @size-border solid @color-border;
-            border-right: @size-border solid @color-border;
-            padding: @indent-small;
-        }
-
-        &__description {
-            display: inline-block;
-            font-size: @size-text-small;
-            line-height: @size-text-small-height;
-            text-align: center;
-            -moz-user-select: none;
-            user-select: none;
-            width: 100%;
-        }
     }
 
     .m-settings-button {
@@ -137,42 +66,6 @@
             height: 1rem;
             line-height: 1rem;
             margin-left: 0.25rem;
-        }
-    }
-
-    .m-check-button {
-        display: inline-block;
-
-        .checkbox {
-            width: calc(100% - 2 * @size-border);
-
-            &__checkmark {
-                background-color: @color-control-active;
-            }
-
-            &__content {
-                align-items: center;
-                display: flex;
-                flex: auto;
-                height: @size-control-inner;
-                justify-content: center;
-                -moz-user-select: none;
-                user-select: none;
-            }
-
-            &__input:checked ~ * {
-                color: @color-control-fore;
-            }
-        }
-
-        &__description {
-            display: inline-block;
-            font-size: @size-text-small;
-            line-height: @size-text-small-height;
-            text-align: center;
-            -moz-user-select: none;
-            user-select: none;
-            width: 100%;
         }
     }
 
@@ -242,8 +135,6 @@
         }
     }
 
-    .m-devtools-description,
-    .m-help-description,
     .m-donate-description {
         display: inline-block;
         font-size: @size-text-small;
@@ -281,7 +172,11 @@
 .preview {
     @import "../control-group/style.less";
     @import "../check-button/style.less";
+    @import "../main-page/style.less";
     @import "../page-viewer/style.less";
+    @import "../theme/controls/theme-control.less";
+    @import "../theme/page/style.less";
+    @import "../theme/preset-picker/style.less";
 }
 
 .mobile.firefox {

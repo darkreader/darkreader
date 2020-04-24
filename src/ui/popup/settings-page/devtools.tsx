@@ -6,45 +6,28 @@ import ControlGroup from '../control-group';
 import {ViewProps} from '../types';
 
 
-function getExistingDevToolsWindowId() {
-    return new Promise<number>((resolve => {
+function getDevToolsWindow() {
+    return new Promise<chrome.windows.Window>((resolve => {
         chrome.windows.getAll({
             populate: true,
             windowTypes: ['popup']
         }, (w) => {
             for (const window of w) {
                 if (window.tabs[0].url.endsWith('ui/devtools/index.html')) {
-                    resolve(window.id);
+                    resolve(window);
                     return;
                 }
             }
-            resolve(-1);
+            resolve(null);
         }
         );
-    }));
-}
 
-function isDevToolsOpen() {
-    return new Promise((resolve => {
-        chrome.windows.getAll({
-            populate: true,
-            windowTypes: ['popup']
-        }, (w) => {
-            for (const window of w) {
-                if (window.tabs[0].url.endsWith('ui/devtools/index.html')) {
-                    resolve(true);
-                    return;
-                }
-            }
-            resolve(false);
-        }
-        ); }));
+    }))
 }
-
 
 async function openDevTools() {
-    const open = await isDevToolsOpen();
-    if (!open) {
+    const open = await getDevToolsWindow();
+    if (open == null) {
         chrome.windows.create({
             type: 'popup',
             url: 'ui/devtools/index.html',
@@ -52,7 +35,7 @@ async function openDevTools() {
             height: 600,
         });
     } else {
-        chrome.windows.update(await getExistingDevToolsWindowId(), {'focused': true});
+        chrome.windows.update((await getDevToolsWindow()).id, {'focused': true});
     }
 }
 

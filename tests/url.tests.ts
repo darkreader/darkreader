@@ -1,4 +1,4 @@
-import {isURLEnabled} from '../src/utils/url';
+import {isURLEnabled, isPDF} from '../src/utils/url';
 import {UserSettings} from '../src/definitions';
 
 test('URL is enabled', () => {
@@ -87,35 +87,20 @@ test('URL is enabled', () => {
         {siteList: ['darkreader.org'], siteListEnabled: [], applyToListedOnly: true} as UserSettings,
         {isProtected: false, isInDarkList: true},
     )).toBe(true);
-    expect(isURLEnabled(
-        'https://www.google.com/file.pdf',
-        {invertPDF: true, siteList: [], siteListEnabled: [], applyToListedOnly: false} as UserSettings,
-        {isProtected: false, isInDarkList: false},
+    expect(isPDF(
+        'https://www.google.com/file.pdf'
     )).toBe(true)
-    expect(isURLEnabled(
-        'https://www.google.com/file.pdf?id=2 ',
-        {invertPDF: true, siteList: [], siteListEnabled: [], applyToListedOnly: false} as UserSettings,
-        {isProtected: false, isInDarkList: false},
+    expect(isPDF(
+        'https://www.google.com/file.pdf?id=2'
     )).toBe(true)
-    expect(isURLEnabled(
-        'https://www.google.com/file.pdf/resource',
-        {invertPDF: true, siteList: [], siteListEnabled: [], applyToListedOnly: false} as UserSettings,
-        {isProtected: false, isInDarkList: false},
+    expect(isPDF(
+        'https://www.google.com/file.pdf/resource'
     )).toBe(false)
-    expect(isURLEnabled(
-        'https://www.google.com/resource?file=file.pdf',
-        {invertPDF: true, siteList: [], siteListEnabled: [], applyToListedOnly: false} as UserSettings,
-        {isProtected: false, isInDarkList: false},
+    expect(isPDF(
+        'https://www.google.com/resource?file=file.pdf'
     )).toBe(false)
-    expect(isURLEnabled(
-        'https://www.google.com/very/good/hidden/folder/pdf#file.pdf',
-        {invertPDF: true, siteList: [], siteListEnabled: [], applyToListedOnly: false} as UserSettings,
-        {isProtected: false, isInDarkList: false},
-    )).toBe(false)
-    expect(isURLEnabled(
-        'https://www.google.com/file.pdf',
-        {invertPDF: false, siteList: [], siteListEnabled: [], applyToListedOnly: false} as UserSettings,
-        {isProtected: false, isInDarkList: false},
+    expect(isPDF(
+        'https://www.google.com/very/good/hidden/folder/pdf#file.pdf'
     )).toBe(false)
 
     // Temporary Dark Sites list fix

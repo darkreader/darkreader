@@ -7,7 +7,7 @@ import {ViewProps} from '../types';
 
 
 function getExistingDevToolsWindow() {
-    return new Promise<chrome.windows.Window>((resolve => {
+    return new Promise<chrome.windows.Window>((resolve) => {
         chrome.windows.getAll({
             populate: true,
             windowTypes: ['popup']
@@ -20,7 +20,7 @@ function getExistingDevToolsWindow() {
             }
             resolve(null);
         });
-    }));
+    });
 }
 
 async function openDevTools() {

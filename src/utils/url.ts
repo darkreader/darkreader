@@ -123,6 +123,9 @@ export function isURLEnabled(url: string, userSettings: UserSettings, {isProtect
     if (isPDF(url) && userSettings.enableForPDF) {
         return true;
     }
+    if (isPDF(url) && !userSettings.enableForPDF) {
+        return false;
+    }
     if (isProtected) {
         return false;
     }

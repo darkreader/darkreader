@@ -1,14 +1,15 @@
 import {m} from 'malevic';
 import {ViewProps} from '../types';
-import ReverseCheckButton from '../reverse-check-button';
+import CheckButton from '../check-button';
 
 export default function InvertPDF(props: ViewProps) {
+
     function onInvertPDFChange(checked: boolean) {
         props.actions.changeSettings({invertPDF: !checked});
     }
 
     return (
-        <ReverseCheckButton
+        <CheckButton
             checked={!props.data.settings.invertPDF}
             label="Inverting PDF"
             description={props.data.settings.invertPDF ?

@@ -1,0 +1,25 @@
+@import "../../../theme.less";
+
+.theme-page {
+    .theme-preset-picker.dropdown {
+        border-radius: unset;
+        height: @size-control-inner + 2 * @size-border;
+    }
+
+    .theme-preset-picker {
+        .dropdown {
+            &__selected {
+                border-radius: unset;
+                height: @size-control-inner + 2 * @size-border;
+                line-height: @size-control-inner + 2 * @size-border;
+            }
+        
+            &__list {
+                &__item {
+                    height: @size-control-inner + 2 * @size-border;
+                    line-height: @size-control-inner + 2 * @size-border;
+                }
+            }
+        }
+    }
+}

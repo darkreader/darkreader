@@ -67,12 +67,12 @@ test('URL is enabled', () => {
         {siteList: ['chrome.google.com'], siteListEnabled: [], applyToListedOnly: true} as UserSettings,
         {isProtected: true, isInDarkList: false},
     )).toBe(false);
-        expect(isURLEnabled(
+    expect(isURLEnabled(
         'https://microsoftedge.microsoft.com/addons',
         {siteList: ['microsoftedge.microsoft.com'], siteListEnabled: [], applyToListedOnly: false} as UserSettings,
         {isProtected: true, isInDarkList: false},
     )).toBe(false);
-        expect(isURLEnabled(
+    expect(isURLEnabled(
         'https://microsoftedge.microsoft.com/addons',
         {siteList: ['microsoftedge.microsoft.com'], siteListEnabled: [], applyToListedOnly: true} as UserSettings,
         {isProtected: true, isInDarkList: false},

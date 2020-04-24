@@ -112,14 +112,16 @@ function isPDF(url: string) {
                     return true;
                 }
             }
+        }else {
+            return false;
         }
     }
     return false;
 }
 
 export function isURLEnabled(url: string, userSettings: UserSettings, {isProtected, isInDarkList}) {
-    if (isPDF(url) && !userSettings.invertPDF) {
-        return false;
+    if (isPDF(url) && userSettings.invertPDF) {
+        return true;
     }
 
     if (isProtected) {

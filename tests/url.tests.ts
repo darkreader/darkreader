@@ -108,8 +108,6 @@ test('URL is enabled', () => {
         {isProtected: false, isInDarkList: false},
     )).toBe(false);
 
-
-
     // Test for PDF enabling
     expect(isPDF(
         'https://www.google.com/file.pdf'

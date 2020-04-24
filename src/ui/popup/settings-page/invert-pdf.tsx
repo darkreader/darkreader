@@ -5,7 +5,7 @@ import CheckButton from '../check-button';
 export default function InvertPDF(props: ViewProps) {
 
     function onInvertPDFChange(checked: boolean) {
-        props.actions.changeSettings({enableForPDF: !checked});
+        props.actions.changeSettings({enableForPDF: checked});
     }
 
     return (

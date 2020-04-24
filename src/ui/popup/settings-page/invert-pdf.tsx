@@ -4,7 +4,7 @@ import {ViewProps} from '../types';
 
 export default function InvertPDF(props: ViewProps) {
     function onInvertPDFChange(checked: boolean) {
-        props.actions.changeSettings({applyToListedOnly: !checked});
+        props.actions.changeSettings({invertPDF: !checked});
     }
 
     return (

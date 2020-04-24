@@ -98,17 +98,17 @@ function createUrlRegex(urlTemplate: string): RegExp {
 
 function isPDF(url: string) {
     if (url.includes('.pdf')) {
-        if (url.includes('?'))  {
-            url = url.substring(0, url.lastIndexOf('?'))
+        if (url.includes('?')) {
+            url = url.substring(0, url.lastIndexOf('?'));
         }
-        if (url.includes('*')) {   
-            url = url.substring(0, url.lastIndexOf('#'))
+        if (url.includes('*')) {
+            url = url.substring(0, url.lastIndexOf('#'));
         }
         if (url.endsWith('.pdf')) {
             for (let i = url.length; 0 < i; i--) {
-                if (url[i] == "=") {
+                if (url[i] == '=') {
                     return false;
-                } else if ( url[i] == '/') {
+                } else if (url[i] == '/') {
                     return true;
                 }
             }
@@ -118,9 +118,10 @@ function isPDF(url: string) {
 }
 
 export function isURLEnabled(url: string, userSettings: UserSettings, {isProtected, isInDarkList}) {
-    if (isPDF(url) && userSettings.invertPDF) {
+    if (isPDF(url) && !userSettings.invertPDF) {
         return false;
     }
+
     if (isProtected) {
         return false;
     }

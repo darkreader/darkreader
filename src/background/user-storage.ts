@@ -40,6 +40,7 @@ export default class UserStorage {
                 longitude: null,
             },
             previewNewDesign: false,
+            enableForPDF: true,
         };
         this.settings = null;
     }

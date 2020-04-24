@@ -5,14 +5,36 @@ import {Button} from '../../controls';
 import ControlGroup from '../control-group';
 import {ViewProps} from '../types';
 
-function openDevTools() {
-    // TODO: Switch to already opened window.
-    chrome.windows.create({
-        type: 'panel',
-        url: 'ui/devtools/index.html',
-        width: 600,
-        height: 600,
+
+function getExistingDevToolsWindow() {
+    return new Promise<chrome.windows.Window>((resolve) => {
+        chrome.windows.getAll({
+            populate: true,
+            windowTypes: ['popup']
+        }, (w) => {
+            for (const window of w) {
+                if (window.tabs[0].url.endsWith('ui/devtools/index.html')) {
+                    resolve(window);
+                    return;
+                }
+            }
+            resolve(null);
+        });
     });
+}
+
+async function openDevTools() {
+    const devToolsWindow = await getExistingDevToolsWindow();
+    if (devToolsWindow) {
+        chrome.windows.update(devToolsWindow.id, {'focused': true});
+    } else {
+        chrome.windows.create({
+            type: 'popup',
+            url: 'ui/devtools/index.html',
+            width: 600,
+            height: 600,
+        });
+    }
 }
 
 export default function DevToolsGroup(props: ViewProps) {

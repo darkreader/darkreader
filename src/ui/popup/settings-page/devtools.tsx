@@ -22,7 +22,7 @@ function getDevToolsWindow() {
         }
         );
 
-    }))
+    }));
 }
 
 async function openDevTools() {

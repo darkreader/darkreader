@@ -1,7 +1,7 @@
 import {m} from 'malevic';
-import ThemeEngines from '../../../generators/theme-engines';
-import {getLocalMessage} from '../../../utils/locales';
-import {DropDown} from '../../controls';
+import ThemeEngines from '../../../../generators/theme-engines';
+import {getLocalMessage} from '../../../../utils/locales';
+import {DropDown} from '../../../controls';
 import ThemeControl from './theme-control';
 
 export default function Mode(props: {mode: string; onChange: (mode: string) => void}) {

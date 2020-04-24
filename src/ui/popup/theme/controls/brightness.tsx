@@ -1,12 +1,12 @@
 import {m} from 'malevic';
-import {getLocalMessage} from '../../../utils/locales';
-import {Slider} from '../../controls';
+import {getLocalMessage} from '../../../../utils/locales';
+import {Slider} from '../../../controls';
 import {formatPercent} from './format';
 import ThemeControl from './theme-control';
 
-export default function Contrast(props: {value: number; onChange: (v: number) => void}) {
+export default function Brightness(props: {value: number; onChange: (v: number) => void}) {
     return (
-        <ThemeControl label={getLocalMessage('contrast')}>
+        <ThemeControl label={getLocalMessage('brightness')}>
             <Slider
                 value={props.value}
                 min={50}

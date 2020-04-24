@@ -1,8 +1,9 @@
 import {m} from 'malevic';
 import {Theme} from '../../../definitions';
-import {isURLInList, getURLHost} from '../../../utils/url';
-import {DropDown} from '../../controls';
-import {Brightness, Contrast, Scheme, Mode} from '../theme-controls';
+import {isURLInList} from '../../../utils/url';
+import {Brightness, Contrast, Scheme, Mode} from '../theme/controls';
+import ThemePresetPicker from '../theme/preset-picker';
+import {getCurrentThemePreset} from '../theme/utils';
 import {ViewProps} from '../types';
 
 function ThemeControls(props: {theme: Theme; onChange: (theme: Partial<Theme>) => void}) {
@@ -30,57 +31,17 @@ function ThemeControls(props: {theme: Theme; onChange: (theme: Partial<Theme>) =
 }
 
 export default function ThemeGroup(props: ViewProps) {
-    const host = getURLHost(props.tab.url || '');
-    const custom = props.data.settings.customThemes.find(
-        ({url}) => isURLInList(props.tab.url, url)
-    );
-    const theme = custom ?
-        custom.theme :
-        props.data.settings.theme;
-
-    function setTheme(config: Partial<Theme>) {
-        if (custom) {
-            custom.theme = {...custom.theme, ...config};
-            props.actions.changeSettings({
-                customThemes: props.data.settings.customThemes,
-            });
-        } else {
-            props.actions.setTheme(config);
-        }
-    }
-
-    const defaultPresetName = 'Default theme';
-    const customPresetName = `Custom for ${host}`;
-
-    function onPresetChange(name: string) {
-        const filteredCustomThemes = props.data.settings.customThemes.filter(({url}) => !isURLInList(props.tab.url, url));
-        if (name === defaultPresetName) {
-            props.actions.changeSettings({customThemes: filteredCustomThemes});
-        } else if (name === customPresetName) {
-            const extended = filteredCustomThemes.concat({
-                url: [host],
-                theme: {...props.data.settings.theme},
-            });
-            props.actions.changeSettings({customThemes: extended});
-        }
-    }
+    const preset = getCurrentThemePreset(props);
 
     return (
         <div class="m-theme-group">
             <div class="m-theme-group__presets-wrapper">
-                <DropDown
-                    selected={custom ? customPresetName : defaultPresetName}
-                    values={[
-                        defaultPresetName,
-                        customPresetName,
-                    ]}
-                    onChange={onPresetChange}
-                />
+                <ThemePresetPicker {...props} />
             </div>
             <div class="m-theme-group__controls-wrapper">
                 <ThemeControls
-                    theme={theme}
-                    onChange={setTheme}
+                    theme={preset.theme}
+                    onChange={preset.change}
                 />
             </div>
             <label class="m-theme-group__description">

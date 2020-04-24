@@ -1,6 +1,6 @@
 import {m} from 'malevic';
 import {Theme} from '../../../definitions';
-import {isURLInList} from '../../../utils/url';
+import {Button} from '../../controls';
 import {Brightness, Contrast, Scheme, Mode} from '../theme/controls';
 import ThemePresetPicker from '../theme/preset-picker';
 import {getCurrentThemePreset} from '../theme/utils';
@@ -30,21 +30,24 @@ function ThemeControls(props: {theme: Theme; onChange: (theme: Partial<Theme>) =
     );
 }
 
-export default function ThemeGroup(props: ViewProps) {
+export default function ThemeGroup(props: ViewProps & {onThemeNavClick: () => void}) {
     const preset = getCurrentThemePreset(props);
 
     return (
-        <div class="m-theme-group">
-            <div class="m-theme-group__presets-wrapper">
+        <div class="theme-group">
+            <div class="theme-group__presets-wrapper">
                 <ThemePresetPicker {...props} />
             </div>
-            <div class="m-theme-group__controls-wrapper">
+            <div class="theme-group__controls-wrapper">
                 <ThemeControls
                     theme={preset.theme}
                     onChange={preset.change}
                 />
+                <Button class="theme-group__more-button" onclick={props.onThemeNavClick}>
+                    See all options
+                </Button>
             </div>
-            <label class="m-theme-group__description">
+            <label class="theme-group__description">
                 Configure theme
             </label>
         </div>

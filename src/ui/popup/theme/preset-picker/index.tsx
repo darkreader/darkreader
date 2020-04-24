@@ -26,7 +26,7 @@ export default function PresetPicker(props: ViewProps) {
     }
     return (
         <DropDown
-            class="preset-picker"
+            class="theme-preset-picker"
             selected={custom ? customPresetName : defaultPresetName}
             values={[
                 defaultPresetName,

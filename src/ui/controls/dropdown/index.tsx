@@ -73,6 +73,7 @@ export default function DropDown(props: DropDownProps) {
             class={{
                 'dropdown': true,
                 'dropdown--open': store.isOpen,
+                [props.class]: Boolean(props.class),
             }}
         >
             <span

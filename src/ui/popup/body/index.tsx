@@ -6,6 +6,7 @@ import {isMobile} from '../../../utils/platform';
 import MainPage from '../main-page';
 import {Page, PageViewer} from '../page-viewer';
 import SettingsPage from '../settings-page';
+import ThemePage from '../theme/page';
 import {ViewProps} from '../types';
 
 function Logo() {
@@ -24,10 +25,15 @@ function Logo() {
 function Pages(props: ViewProps) {
     const context = getContext();
     const store = context.store as {
-        activePage: 'main' | 'settings';
+        activePage: 'main' | 'theme' | 'settings';
     };
     if (store.activePage == null) {
         store.activePage = 'main';
+    }
+
+    function onThemeNavClick() {
+        store.activePage = 'theme';
+        context.refresh();
     }
 
     function onSettingsNavClick() {
@@ -35,7 +41,7 @@ function Pages(props: ViewProps) {
         context.refresh();
     }
 
-    function onSettingsBackClick() {
+    function onBackClick() {
         store.activePage = 'main';
         context.refresh();
     }
@@ -43,16 +49,20 @@ function Pages(props: ViewProps) {
     return (
         <PageViewer
             activePage={store.activePage}
-            onBackButtonClick={onSettingsBackClick}
+            onBackButtonClick={onBackClick}
         >
             <Page id="main">
                 <MainPage
                     {...props}
+                    onThemeNavClick={onThemeNavClick}
                     onSettingsNavClick={onSettingsNavClick}
                 />
             </Page>
+            <Page id="theme">
+                <ThemePage {...props} />
+            </Page>
             <Page id="settings">
-                <SettingsPage {...props} onBackClick={onSettingsBackClick} />
+                <SettingsPage {...props} />
             </Page>
         </PageViewer>
     );

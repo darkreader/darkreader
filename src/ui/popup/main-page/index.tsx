@@ -25,7 +25,12 @@ function SettingsNavButton(props: {onClick: () => void}) {
     );
 }
 
-export default function MainPage(props: ViewProps & {onSettingsNavClick: () => void}) {
+type MainPageProps = ViewProps & {
+    onThemeNavClick: () => void;
+    onSettingsNavClick: () => void;
+};
+
+export default function MainPage(props: MainPageProps) {
     return (
         <Array>
             <section class="m-section">

@@ -120,10 +120,10 @@ export function isPDF(url: string) {
 }
 
 export function isURLEnabled(url: string, userSettings: UserSettings, {isProtected, isInDarkList}) {
-    if (isPDF(url) && userSettings.disableForPDF) {
+    if (isPDF(url) && userSettings.enableForPDF) {
         return true;
     }
-    if (isPDF(url) && !userSettings.disableForPDF) {
+    if (isPDF(url) && !userSettings.enableForPDF) {
         return false;
     }
     if (isProtected) {

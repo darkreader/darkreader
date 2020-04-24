@@ -70,7 +70,7 @@ export interface UserSettings {
     time: TimeSettings;
     location: LocationSettings;
     previewNewDesign: boolean;
-    disableForPDF: boolean;
+    enableForPDF: boolean;
 }
 
 export interface TimeSettings {

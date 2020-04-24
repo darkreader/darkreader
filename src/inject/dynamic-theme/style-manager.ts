@@ -117,19 +117,7 @@ export function manageStyle(element: HTMLLinkElement | HTMLStyleElement, {update
         return safeGetSheetRules();
     }
 
-    function fixFirefoxCSPIssue() {
-        // Some websites get CSP warning,
-        // when `textContent` is not set
-        if (corsCopy && !corsCopy.textContent) {
-            corsCopy.textContent = '';
-        }
-        if (!syncStyle.textContent) {
-            syncStyle.textContent = '';
-        }
-    }
-
     function insertStyle() {
-        fixFirefoxCSPIssue();
         if (corsCopy) {
             if (element.nextSibling !== corsCopy) {
                 element.parentNode.insertBefore(corsCopy, element.nextSibling);
@@ -385,6 +373,15 @@ export function manageStyle(element: HTMLLinkElement | HTMLStyleElement, {update
 
             syncStylePositionWatcher && syncStylePositionWatcher.stop();
             insertStyle();
+
+            // Firefox issue: Some websites get CSP warning,
+            // when `textContent` is not set (e.g. pypi.org).
+            // But for other websites (e.g. facebook.com)
+            // some images disappear when `textContent`
+            // is initially set to an empty string.
+            if (syncStyle.sheet == null) {
+                syncStyle.textContent = '';
+            }
 
             const sheet = syncStyle.sheet;
             for (let i = sheet.cssRules.length - 1; i >= 0; i--) {

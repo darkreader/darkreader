@@ -96,7 +96,7 @@ function createUrlRegex(urlTemplate: string): RegExp {
     return new RegExp(result, 'i');
 }
 
-export function enableForPDF(url: string) {
+export function isPDF(url: string) {
     if (url.includes('.pdf')) {
         if (url.includes('?')) {
             url = url.substring(0, url.lastIndexOf('?'));
@@ -120,7 +120,7 @@ export function enableForPDF(url: string) {
 }
 
 export function isURLEnabled(url: string, userSettings: UserSettings, {isProtected, isInDarkList}) {
-    if (enableForPDF(url) && userSettings.invertPDF) {
+    if (isPDF(url) && userSettings.invertPDF) {
         return true;
     }
     if (isProtected) {

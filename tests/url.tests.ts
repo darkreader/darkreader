@@ -1,4 +1,4 @@
-import {isURLEnabled, enableForPDF} from '../src/utils/url';
+import {isURLEnabled, isPDF} from '../src/utils/url';
 import {UserSettings} from '../src/definitions';
 
 test('URL is enabled', () => {
@@ -111,19 +111,19 @@ test('URL is enabled', () => {
 
 
     // Test for PDF enabling
-    expect(enableForPDF(
+    expect(isPDF(
         'https://www.google.com/file.pdf'
     )).toBe(true);
-    expect(enableForPDF(
+    expect(isPDF(
         'https://www.google.com/file.pdf?id=2'
     )).toBe(true);
-    expect(enableForPDF(
+    expect(isPDF(
         'https://www.google.com/file.pdf/resource'
     )).toBe(false);
-    expect(enableForPDF(
+    expect(isPDF(
         'https://www.google.com/resource?file=file.pdf'
     )).toBe(false);
-    expect(enableForPDF(
+    expect(isPDF(
         'https://www.google.com/very/good/hidden/folder/pdf#file.pdf'
     )).toBe(false);
 

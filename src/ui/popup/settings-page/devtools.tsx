@@ -30,7 +30,7 @@ async function openDevTools() {
     } else {
         chrome.windows.create({
             type: 'popup',
-            url: 'ui/devtools/index.html',
+            url: isFirefox() ? '../devtools/index.html' : 'ui/devtools/index.html',
             width: 600,
             height: 600,
         });

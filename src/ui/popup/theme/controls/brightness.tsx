@@ -8,7 +8,7 @@ export default function Brightness(props: {value: number; onChange: (v: number) 
     return (
         <ThemeControl 
         label={getLocalMessage('brightness')}
-        reset={props.resetFunction}>>
+        reset={props.resetFunction}>
             <Slider
                 value={props.value}
                 min={50}

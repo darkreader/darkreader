@@ -13,7 +13,7 @@ export default function Mode(props: {mode: string; onChange: (mode: string) => v
     return (
         <ThemeControl 
         label="Mode"
-        reset={props.resetFunction}>>
+        reset={props.resetFunction}>
             <DropDown
                 selected={modes.find((m) => m[0] === props.mode)[1]}
                 values={modes.map((m) => m[1])}

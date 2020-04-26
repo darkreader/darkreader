@@ -8,7 +8,7 @@ export default function Grayscale(props: {value: number; onChange: (v: number) =
     return (
         <ThemeControl 
         label={getLocalMessage('grayscale')}
-        reset={props.resetFunction}>>
+        reset={props.resetFunction}>
             <Slider
                 value={props.value}
                 min={0}

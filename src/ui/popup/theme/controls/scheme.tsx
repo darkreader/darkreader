@@ -9,7 +9,7 @@ export default function Scheme(props: {isDark: boolean; onChange: (dark: boolean
     return (
         <ThemeControl 
         label="Scheme"
-        reset={props.resetFunction}>>
+        reset={props.resetFunction}>
             <DropDown
                 selected={props.isDark ? valDark : valLight}
                 values={[

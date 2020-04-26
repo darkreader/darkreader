@@ -1,11 +1,14 @@
 .theme-control {
-    align-items: center;
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
     min-height: @size-control-inner;
     width: 100%;
 
+    &__div {
+        align-items: center;
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        margin-top: 0.3rem;
+    }
     &__label {
         font-size: @size-text-normal;
         line-height: @size-text-normal;
@@ -14,4 +17,10 @@
         user-select: none;
         width: 50%;
     }
+}
+
+.reset-button {
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
 }

@@ -4,9 +4,11 @@ import {Slider} from '../../../controls';
 import {formatPercent} from './format';
 import ThemeControl from './theme-control';
 
-export default function Contrast(props: {value: number; onChange: (v: number) => void}) {
+export default function Contrast(props: {value: number; onChange: (v: number) => void, resetFunction: () => void}) {
     return (
-        <ThemeControl label={getLocalMessage('contrast')}>
+        <ThemeControl 
+        label={getLocalMessage('contrast')}
+        reset={props.resetFunction}>>
             <Slider
                 value={props.value}
                 min={50}

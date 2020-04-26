@@ -4,14 +4,16 @@ import {getLocalMessage} from '../../../../utils/locales';
 import {DropDown} from '../../../controls';
 import ThemeControl from './theme-control';
 
-export default function Mode(props: {mode: string; onChange: (mode: string) => void}) {
+export default function Mode(props: {mode: string; onChange: (mode: string) => void, resetFunction: () => void}) {
     const modes = [
         [ThemeEngines.dynamicTheme, getLocalMessage('engine_dynamic')],
         [ThemeEngines.cssFilter, getLocalMessage('engine_filter')],
         [ThemeEngines.staticTheme, getLocalMessage('engine_static')],
     ];
     return (
-        <ThemeControl label="Mode">
+        <ThemeControl 
+        label="Mode"
+        reset={props.resetFunction}>>
             <DropDown
                 selected={modes.find((m) => m[0] === props.mode)[1]}
                 values={modes.map((m) => m[1])}

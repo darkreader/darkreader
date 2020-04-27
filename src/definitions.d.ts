@@ -71,6 +71,7 @@ export interface UserSettings {
     location: LocationSettings;
     previewNewDesign: boolean;
     enableForPDF: boolean;
+    scrollbarTheming: boolean;
 }
 
 export interface TimeSettings {

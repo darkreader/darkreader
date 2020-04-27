@@ -41,6 +41,7 @@ export default class UserStorage {
             },
             previewNewDesign: false,
             enableForPDF: true,
+            scrollbarTheming: true,
         };
         this.settings = null;
     }

@@ -1,22 +1,10 @@
 import './chrome';
 import {setFetchMethod as setFetch} from './fetch';
-import {FilterConfig as Theme, DynamicThemeFix as DynamicFix, UserSettings} from '../definitions';
+import {FilterConfig as Theme, DynamicThemeFix, UserSettings} from '../definitions';
 import ThemeEngines from '../generators/theme-engines';
 import {createOrUpdateDynamicTheme, removeDynamicTheme} from '../inject/dynamic-theme';
 import {isMacOS, isWindows} from '../utils/platform';
 
-const defaultTheme: Theme = {
-    mode: 1,
-    brightness: 100,
-    contrast: 100,
-    grayscale: 0,
-    sepia: 0,
-    useFont: false,
-    fontFamily: '',
-    textStroke: 0,
-    engine: ThemeEngines.dynamicTheme,
-    stylesheet: '',
-};
 const defaultSettings: UserSettings = {
     enabled: true,
     theme: {
@@ -52,7 +40,19 @@ const defaultSettings: UserSettings = {
     scrollbarTheming: true,
 };
 
-const darkScheme = matchMedia('(prefers-color-scheme: dark)');
+const defaultTheme: Theme = {
+    mode: 1,
+    brightness: 100,
+    contrast: 100,
+    grayscale: 0,
+    sepia: 0,
+    useFont: false,
+    fontFamily: '',
+    textStroke: 0,
+    engine: ThemeEngines.dynamicTheme,
+    stylesheet: '',
+};
+
 const isIFrame = (() => {
     try {
         return window.self !== window.top;
@@ -62,11 +62,8 @@ const isIFrame = (() => {
     }
 })();
 
-export function enable(themeOptions: Partial<Theme> = {}, userSettings: UserSettings = defaultSettings, fixes: DynamicFix = null) {
+export function enable(themeOptions: Partial<Theme> = {}, userSettings: UserSettings = defaultSettings , fixes: DynamicThemeFix = null) {
     const theme = {...defaultTheme, ...themeOptions};
-    if (document.querySelector('.darkreader')) {
-        return;
-    }
 
     if (theme.engine !== ThemeEngines.dynamicTheme) {
         throw new Error('Theme engine is not supported');
@@ -79,16 +76,23 @@ export function disable() {
     removeDynamicTheme();
 }
 
+const darkScheme = matchMedia('(prefers-color-scheme: dark)');
+let store = {
+    themeOptions: null as Partial<Theme>,
+    fixes: null as DynamicThemeFix,
+};
+
 function handleColorScheme() {
     if (darkScheme.matches) {
-        enable();
+        enable(store.themeOptions, defaultSettings, store.fixes);
     } else {
         disable();
     }
 }
 
-export function auto(themeOptions: Partial<Theme> | false = {}) {
+export function auto(themeOptions: Partial<Theme> | false = {}, fixes: DynamicThemeFix = null) {
     if (themeOptions) {
+        store = {themeOptions, fixes};
         handleColorScheme();
         darkScheme.addListener(handleColorScheme);
     } else {

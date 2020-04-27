@@ -10,7 +10,7 @@ export default function Reset_Button(props: ViewProps) {
     return (
         <ControlGroup>
             <ControlGroup.Control>
-                <Button
+                <Button class="reset-button"
                     onclick={reset}
                 >
                     Reset

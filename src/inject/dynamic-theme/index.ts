@@ -12,7 +12,7 @@ import {isFirefox} from '../../utils/platform';
 import {getCSSFilterValue} from '../../generators/css-filter';
 import {modifyColor} from '../../generators/modify-colors';
 import {createTextStyle} from '../../generators/text-style';
-import {FilterConfig, DynamicThemeFix} from '../../definitions';
+import {FilterConfig, DynamicThemeFix, UserSettings} from '../../definitions';
 
 const styleManagers = new Map<HTMLLinkElement | HTMLStyleElement, StyleManager>();
 const variables = new Map<string, string>();
@@ -43,14 +43,14 @@ function stopStylePositionWatchers() {
     stylePositionWatchers.clear();
 }
 
-function createStaticStyleOverrides() {
+function createStaticStyleOverrides(userSettings: UserSettings) {
     const fallbackStyle = createOrUpdateStyle('darkreader--fallback');
     fallbackStyle.textContent = getModifiedFallbackStyle(filter, {strict: true});
     document.head.insertBefore(fallbackStyle, document.head.firstChild);
     setupStylePositionWatcher(fallbackStyle, 'fallback');
 
     const userAgentStyle = createOrUpdateStyle('darkreader--user-agent');
-    userAgentStyle.textContent = getModifiedUserAgentStyle(filter, isIFrame);
+    userAgentStyle.textContent = getModifiedUserAgentStyle(filter, userSettings, isIFrame);
     document.head.insertBefore(userAgentStyle, fallbackStyle.nextSibling);
     setupStylePositionWatcher(userAgentStyle, 'user-agent');
 
@@ -271,8 +271,8 @@ function stopWatchingForDocumentVisibility() {
     documentVisibilityListener = null;
 }
 
-function createThemeAndWatchForUpdates() {
-    createStaticStyleOverrides();
+function createThemeAndWatchForUpdates(userSettings: UserSettings) {
+    createStaticStyleOverrides(userSettings);
 
     function runDynamicStyle() {
         createDynamicStyleOverrides();
@@ -340,12 +340,12 @@ function stopWatchingForUpdates() {
     document.removeEventListener('readystatechange', onReadyStateChange);
 }
 
-export function createOrUpdateDynamicTheme(filterConfig: FilterConfig, dynamicThemeFixes: DynamicThemeFix, iframe: boolean) {
+export function createOrUpdateDynamicTheme(filterConfig: FilterConfig, dynamicThemeFixes: DynamicThemeFix, userSettings: UserSettings, iframe: boolean) {
     filter = filterConfig;
     fixes = dynamicThemeFixes;
     isIFrame = iframe;
     if (document.head) {
-        createThemeAndWatchForUpdates();
+        createThemeAndWatchForUpdates(userSettings);
     } else {
         if (!isFirefox()) {
             const fallbackStyle = createOrUpdateStyle('darkreader--fallback');
@@ -356,7 +356,7 @@ export function createOrUpdateDynamicTheme(filterConfig: FilterConfig, dynamicTh
         const headObserver = new MutationObserver(() => {
             if (document.head) {
                 headObserver.disconnect();
-                createThemeAndWatchForUpdates();
+                createThemeAndWatchForUpdates(userSettings);
             }
         });
         headObserver.observe(document, {childList: true, subtree: true});

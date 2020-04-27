@@ -21,9 +21,9 @@ function onMessage({type, data}) {
             break;
         }
         case 'add-dynamic-theme': {
-            const {filter, fixes, isIFrame} = data;
+            const {filter, fixes, userSettings, isIFrame} = data;
             removeStyle();
-            createOrUpdateDynamicTheme(filter, fixes, isIFrame);
+            createOrUpdateDynamicTheme(filter, fixes, userSettings, isIFrame);
             break;
         }
         case 'clean-up': {

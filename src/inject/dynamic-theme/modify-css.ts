@@ -7,7 +7,7 @@ import {cssURLRegex, getCSSURLValue, getCSSBaseBath} from './css-rules';
 import {getImageDetails, getFilteredImageDataURL, ImageDetails} from './image';
 import {getAbsoluteURL} from './url';
 import {logWarn, logInfo} from '../utils/log';
-import {FilterConfig} from '../../definitions';
+import {FilterConfig, UserSettings} from '../../definitions';
 
 type CSSValueModifier = (filter: FilterConfig) => string | Promise<string>;
 
@@ -52,7 +52,7 @@ export function getModifiableCSSDeclaration(property: string, value: string, rul
     return null;
 }
 
-export function getModifiedUserAgentStyle(filter: FilterConfig, isIFrame: boolean) {
+export function getModifiedUserAgentStyle(filter: FilterConfig, userSettings: UserSettings, isIFrame: boolean) {
     const lines: string[] = [];
     if (!isIFrame) {
         lines.push('html {');
@@ -87,7 +87,7 @@ export function getModifiedUserAgentStyle(filter: FilterConfig, isIFrame: boolea
     lines.push(`    background-color: ${modifyBackgroundColor({r: 250, g: 255, b: 189}, filter)} !important;`);
     lines.push(`    color: ${modifyForegroundColor({r: 0, g: 0, b: 0}, filter)} !important;`);
     lines.push('}');
-    if (!isMacOS()) {
+    if (!isMacOS() && userSettings.scrollbarTheming) {
         lines.push('::-webkit-scrollbar {');
         lines.push(`    background-color: ${modifyBackgroundColor({r: 241, g: 241, b: 241}, filter)};`);
         lines.push(`    color: ${modifyForegroundColor({r: 96, g: 96, b: 96}, filter)};`);

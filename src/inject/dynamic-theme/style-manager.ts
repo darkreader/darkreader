@@ -374,6 +374,15 @@ export function manageStyle(element: HTMLLinkElement | HTMLStyleElement, {update
             syncStylePositionWatcher && syncStylePositionWatcher.stop();
             insertStyle();
 
+            // Firefox issue: Some websites get CSP warning,
+            // when `textContent` is not set (e.g. pypi.org).
+            // But for other websites (e.g. facebook.com)
+            // some images disappear when `textContent`
+            // is initially set to an empty string.
+            if (syncStyle.sheet == null) {
+                syncStyle.textContent = '';
+            }
+
             const sheet = syncStyle.sheet;
             for (let i = sheet.cssRules.length - 1; i >= 0; i--) {
                 sheet.deleteRule(i);

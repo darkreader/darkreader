@@ -185,7 +185,16 @@ function getInlineStyleCacheKey(el: HTMLElement, theme: FilterConfig) {
         .join(' ');
 }
 
-export function overrideInlineStyle(element: HTMLElement, theme: FilterConfig) {
+function shouldIgnoreInlineStyle (element: HTMLElement, selectors: string[]) {
+    for (const ingnoredSelector of selectors) {
+        if (element.matches(ingnoredSelector)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+export function overrideInlineStyle(element: HTMLElement, theme: FilterConfig, ignoreSelectors: string[]) {
     const cacheKey = getInlineStyleCacheKey(element, theme);
     if (cacheKey === inlineStyleCache.get(element)) {
         return;
@@ -209,6 +218,17 @@ export function overrideInlineStyle(element: HTMLElement, theme: FilterConfig) {
             element.setAttribute(dataAttr, '');
         }
         unsetProps.delete(targetCSSProp);
+    }
+
+    if (ignoreSelectors.length > 0) {
+        if (shouldIgnoreInlineStyle(element, ignoreSelectors)) {
+            unsetProps.forEach((cssProp) => {
+                const {store, dataAttr} = overrides[cssProp];
+                store.delete(element);
+                element.removeAttribute(dataAttr);
+            });
+            return;
+        }
     }
 
     if (element.hasAttribute('bgcolor')) {

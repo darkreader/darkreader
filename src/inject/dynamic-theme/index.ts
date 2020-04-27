@@ -161,7 +161,7 @@ function createDynamicStyleOverrides() {
             inlineStyleElements.push(...Array.from(elements as NodeListOf<HTMLLinkElement | HTMLStyleElement>));
         }
     });
-    inlineStyleElements.forEach((el) => overrideInlineStyle(el as HTMLElement, filter));
+    inlineStyleElements.forEach((el) => overrideInlineStyle(el as HTMLElement, filter, fixes.ignoreInlineStyle));
 }
 
 let loadingStylesCounter = 0;
@@ -313,7 +313,7 @@ function watchForUpdates() {
     });
 
     watchForInlineStyles((element) => {
-        overrideInlineStyle(element, filter);
+        overrideInlineStyle(element, filter, fixes.ignoreInlineStyle);
         if (element === document.documentElement) {
             const rootVariables = getElementCSSVariables(document.documentElement);
             if (rootVariables.size > 0) {
@@ -325,7 +325,7 @@ function watchForUpdates() {
         const inlineStyleElements = root.querySelectorAll(INLINE_STYLE_SELECTOR);
         if (inlineStyleElements.length > 0) {
             createShadowStaticStyleOverrides(root);
-            inlineStyleElements.forEach((el) => overrideInlineStyle(el as HTMLElement, filter));
+            inlineStyleElements.forEach((el) => overrideInlineStyle(el as HTMLElement, filter, fixes.ignoreInlineStyle));
         }
     });
 

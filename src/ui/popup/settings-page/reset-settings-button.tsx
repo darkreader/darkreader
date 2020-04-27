@@ -1,14 +1,13 @@
 import {m} from 'malevic';
-import {Button} from '../../../controls';
-import ControlGroup from '../../control-group';
-import {ViewProps} from '../../types';
-import UserStorage from '../../../../background/user-storage';
+import {Button} from '../../controls';
+import ControlGroup from '../control-group';
+import {ViewProps} from '../types';
+import UserStorage from '../../../background/user-storage';
 
 export default function Reset_Button(props: ViewProps) {
     function reset() {
         const defaultconfig = new UserStorage();
-        props.actions.setTheme(defaultconfig.getDefaultSettings().theme);
-        props.actions.changeSettings({customThemes: [] });
+        props.actions.changeSettings(defaultconfig.getDefaultSettings());
     }
     return (
         <ControlGroup>
@@ -20,7 +19,7 @@ export default function Reset_Button(props: ViewProps) {
                 </Button>
             </ControlGroup.Control>
             <ControlGroup.Description>
-                Reset all theme values
+                Reset all settings to default
             </ControlGroup.Description>
         </ControlGroup>
     );

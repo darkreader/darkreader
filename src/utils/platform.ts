@@ -1,3 +1,7 @@
+export function isChromiumBased() {
+    return navigator.userAgent.toLowerCase().includes('chrome') || navigator.userAgent.toLowerCase().includes('chromium');
+}
+
 export function isFirefox() {
     return navigator.userAgent.includes('Firefox');
 }
@@ -55,6 +59,24 @@ export function compareChromeVersions($a: string, $b: string) {
 export function isDeepSelectorSupported() {
     try {
         document.querySelector('x /deep/ x');
+        return true;
+    } catch (err) {
+        return false;
+    }
+}
+
+export function isHostSelectorSupported() {
+    try {
+        document.querySelector(':host x');
+        return true;
+    } catch (err) {
+        return false;
+    }
+}
+
+export function isDefinedSelectorSupported() {
+    try {
+        document.querySelector(':defined');
         return true;
     } catch (err) {
         return false;

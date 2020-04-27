@@ -38,7 +38,9 @@ export default class UserStorage {
             location: {
                 latitude: null,
                 longitude: null,
-            }
+            },
+            previewNewDesign: false,
+            enableForPDF: true,
         };
         this.settings = null;
     }

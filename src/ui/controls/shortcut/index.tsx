@@ -98,7 +98,7 @@ export default function ShortcutLink(props: ShortcutLinkProps) {
             class={cls}
             href="#"
             onclick={onClick}
-            attached={onRender}
+            oncreate={onRender}
         ></a>
     );
 }

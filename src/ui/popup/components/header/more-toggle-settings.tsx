@@ -103,7 +103,7 @@ export default function MoreToggleSettings({data, actions, isExpanded, onClose}:
                         class="header__app-toggle__more-settings__location__latitude"
                         placeholder={getLocalMessage('latitude')}
                         onchange={(e) => locationChanged(e.target, e.target.value, 'latitude')}
-                        attached={(node: HTMLInputElement) => node.value = getLocationString(locationSettings.latitude)}
+                        oncreate={(node: HTMLInputElement) => node.value = getLocationString(locationSettings.latitude)}
                         onkeypress={(e) => {
                             if (e.key === 'Enter') {
                                 (e.target as HTMLInputElement).blur();
@@ -114,7 +114,7 @@ export default function MoreToggleSettings({data, actions, isExpanded, onClose}:
                         class="header__app-toggle__more-settings__location__longitude"
                         placeholder={getLocalMessage('longitude')}
                         onchange={(e) => locationChanged(e.target, e.target.value, 'longitude')}
-                        attached={(node: HTMLInputElement) => node.value = getLocationString(locationSettings.longitude)}
+                        oncreate={(node: HTMLInputElement) => node.value = getLocationString(locationSettings.longitude)}
                         onkeypress={(e) => {
                             if (e.key === 'Enter') {
                                 (e.target as HTMLInputElement).blur();

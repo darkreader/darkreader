@@ -49,6 +49,8 @@ export interface FilterConfig {
     stylesheet: string;
 }
 
+export type Theme = FilterConfig;
+
 export interface CustomSiteConfig {
     url: string[];
     theme: FilterConfig;
@@ -67,6 +69,8 @@ export interface UserSettings {
     automation: '' | 'time' | 'system' | 'location';
     time: TimeSettings;
     location: LocationSettings;
+    previewNewDesign: boolean;
+    enableForPDF: boolean;
 }
 
 export interface TimeSettings {
@@ -98,6 +102,7 @@ export interface Shortcuts {
 
 export interface DynamicThemeFix {
     url: string[];
+    ignoreInlineStyle: string[];
     invert: string[];
     css: string;
 }
@@ -145,5 +150,6 @@ export interface News {
     date: string;
     url: string;
     headline: string;
+    important: boolean;
     read?: boolean;
 }

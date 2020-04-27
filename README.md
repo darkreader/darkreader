@@ -1,4 +1,6 @@
 # Dark Reader for Google Chrome and Mozilla Firefox
+[![Build Status](https://travis-ci.org/darkreader/darkreader.svg?branch=master)](https://travis-ci.org/darkreader/darkreader)
+
 ![Dark Reader screenshot](https://lh3.googleusercontent.com/tTJIIIAqfJWymqPM9LAmivl11kWmF-XXLABues4OwfjOED_ntsJZdLY0VTG0XFCW0W_wYSll7Q=w640-h400-e365)
 
 This extension **inverts brightness** of web pages and aims to **reduce eyestrain** while browsing the web.
@@ -109,7 +111,7 @@ or **[inversion-fixes.config](https://github.com/alexanderby/darkreader/blob/mas
 
 ### Adding new features or fixing bugs
 
-If you would like to **add new feature** to Dark Reader or **fix a bug**, **submit an issue** in GitHub (if there is no existing one), **discuss** it with active contributors, wait for **approvement**.
+If you would like to **add new feature** to Dark Reader or **fix a bug**, **submit an issue** in GitHub (if there is no existing one), **discuss** it with active contributors, wait for **approval**.
 
 To build and debug the extension **install the [Node.js](https://nodejs.org/)** LTS.
 Install development dependencies by running `npm install` in the project root folder.
@@ -149,8 +151,10 @@ This will generate `build.zip` for use in Chromium browsers and `build-firefox.x
 ## Using for a website
 
 You can use Dark Reader to enable dark mode on your website.
-Install the package from NPM (`npm install darkreader`)
-or download from CDN like `https://unpkg.com/darkreader`.
+- Install the package from NPM (`npm install darkreader`)
+- or build from the source code (`npm run api`)
+- or include the script via a CDN such as [unpkg](https://unpkg.com/darkreader/) or [jsDelivr](https://www.jsdelivr.com/package/npm/darkreader)
+
 Then use the following API
 ```javascript
 DarkReader.enable({
@@ -160,12 +164,23 @@ DarkReader.enable({
 });
 
 DarkReader.disable();
+
+// Enable when system color scheme is dark
+DarkReader.auto({
+    brightness: 100,
+    contrast: 90,
+    sepia: 10
+});
+
+// Stop watching for system color scheme
+DarkReader.auto(false);
 ```
 ... or if you are using ES modules
 ```javascript
 import {
     enable as enableDarkMode,
     disable as disableDarkMode,
+    auto as followSystemColorScheme,
 } from 'darkreader';
 
 enableDarkMode({
@@ -175,6 +190,8 @@ enableDarkMode({
 });
 
 disableDarkMode();
+
+followSystemColorScheme();
 ```
 
 ## Contributors

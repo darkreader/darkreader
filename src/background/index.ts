@@ -1,5 +1,4 @@
 import {Extension} from './extension';
-import {isFirefox} from '../utils/platform';
 import {getHelpURL} from '../utils/links';
 
 // Initialize extension
@@ -23,19 +22,22 @@ if (DEBUG) {
         const send = (message: any) => socket.send(JSON.stringify(message));
         socket.onmessage = (e) => {
             const message = JSON.parse(e.data);
-
-            if (message.type === 'reload') {
+            if (message.type.startsWith('reload:')) {
                 send({type: 'reloading'});
-                const cssOnly = message.files.every((file) => file.endsWith('.less'));
-                if (cssOnly) {
-                    send({type: 'get-popup-stylesheet', isFirefox: isFirefox()});
-                } else {
-                    chrome.runtime.reload();
-                }
             }
-
-            if (message.type === 'popup-stylesheet') {
-                chrome.runtime.sendMessage({type: 'popup-stylesheet-update', data: message.content});
+            switch (message.type) {
+                case 'reload:css': {
+                    chrome.runtime.sendMessage({type: 'css-update'});
+                    break;
+                }
+                case 'reload:ui': {
+                    chrome.runtime.sendMessage({type: 'ui-update'});
+                    break;
+                }
+                case 'reload:full': {
+                    chrome.runtime.reload();
+                    break;
+                }
             }
         };
         socket.onclose = () => setTimeout(listen, 1000);

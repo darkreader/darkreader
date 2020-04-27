@@ -27,6 +27,7 @@ async function start() {
 start();
 
 document.documentElement.classList.toggle('mobile', isMobile());
+document.documentElement.classList.toggle('firefox', isFirefox());
 document.documentElement.classList.toggle('built-in-borders', popupHasBuiltInBorders());
 document.documentElement.classList.toggle('built-in-horizontal-borders', popupHasBuiltInHorizontalBorders());
 
@@ -37,15 +38,21 @@ if (isFirefox()) {
 declare const __DEBUG__: boolean;
 const DEBUG = __DEBUG__;
 if (DEBUG) {
-    chrome.runtime.onMessage.addListener(({type, data}) => {
-        if (type === 'popup-stylesheet-update') {
-            let style = document.getElementById('popup-stylesheet-update');
-            if (!style) {
-                style = document.createElement('style');
-                document.head.appendChild(style);
-            }
-            (document.querySelector('link[rel="stylesheet"]') as HTMLLinkElement).disabled = true;
-            style.textContent = data;
+    chrome.runtime.onMessage.addListener(({type}) => {
+        if (type === 'css-update') {
+            document.querySelectorAll('link[rel="stylesheet"]').forEach((link: HTMLLinkElement) => {
+                const url = link.href;
+                link.disabled = true;
+                const newLink = document.createElement('link');
+                newLink.rel = 'stylesheet';
+                newLink.href = url.replace(/\?.*$/, `?nocache=${Date.now()}`);
+                link.parentElement.insertBefore(newLink, link);
+                link.remove();
+            });
+        }
+
+        if (type === 'ui-update') {
+            location.reload();
         }
     });
 }

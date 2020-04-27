@@ -1,6 +1,4 @@
-const fs = require('fs-extra');
 const WebSocket = require('ws');
-const {getDestDir} = require('./paths');
 const {log} = require('./utils');
 
 const PORT = 8890;
@@ -28,15 +26,8 @@ function createServer() {
             times.set(ws, Date.now());
             ws.on('message', async (data) => {
                 const message = JSON.parse(data);
-
                 if (message.type === 'reloading') {
                     log.ok('Extension reloading...');
-                }
-
-                if (message.type === 'get-popup-stylesheet') {
-                    const dir = getDestDir({production: false, isFirefox: message.isFirefox});
-                    const content = await fs.readFile(`${dir}/ui/popup/style.css`, {encoding: 'utf8'});
-                    send(ws, {type: 'popup-stylesheet', content});
                 }
             });
             ws.on('close', () => sockets.delete(ws));
@@ -83,7 +74,11 @@ function send(ws, message) {
     ws.send(JSON.stringify(message));
 }
 
-async function reload({files = []} = {}) {
+/**
+ * @param {Object} options
+ * @param {string} options.type
+ */
+async function reload({type}) {
     if (!server) {
         server = await createServer();
     }
@@ -96,8 +91,11 @@ async function reload({files = []} = {}) {
             const created = times.get(ws);
             return created < now;
         })
-        .forEach((ws) => send(ws, {type: 'reload', files}));
+        .forEach((ws) => send(ws, {type}));
 }
 
 module.exports = reload;
 module.exports.PORT = PORT;
+module.exports.CSS = 'reload:css';
+module.exports.FULL = 'reload:full';
+module.exports.UI = 'reload:ui';

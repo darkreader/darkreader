@@ -58,8 +58,7 @@ export default function Body({data, tab, actions}: BodyProps) {
                 id="editor"
                 native
                 placeholder={placeholderText}
-                attached={onTextRender}
-                updated={onTextRender}
+                onrender={onTextRender}
             />
             <div id="buttons">
                 <Button onclick={reset}>Reset</Button>

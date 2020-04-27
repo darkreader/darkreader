@@ -4,7 +4,7 @@ import {getLocalMessage} from '../../../utils/locales';
 import {Button} from '../../controls';
 import ControlGroup from '../control-group';
 import {ViewProps} from '../types';
-
+import {isFirefox} from '../../../utils/platform';
 
 function getExistingDevToolsWindow() {
     return new Promise<chrome.windows.Window>((resolve) => {

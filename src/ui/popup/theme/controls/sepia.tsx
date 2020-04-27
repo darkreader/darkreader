@@ -4,11 +4,9 @@ import {Slider} from '../../../controls';
 import {formatPercent} from './format';
 import ThemeControl from './theme-control';
 
-export default function Sepia(props: {value: number; onChange: (v: number) => void, resetFunction: () => void}) {
+export default function Sepia(props: {value: number; onChange: (v: number) => void}) {
     return (
-        <ThemeControl 
-            label={getLocalMessage('sepia')}
-            reset={props.resetFunction}>
+        <ThemeControl label={getLocalMessage('sepia')}>
             <Slider
                 value={props.value}
                 min={0}

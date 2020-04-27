@@ -4,11 +4,9 @@ import {Slider} from '../../../controls';
 import {formatPercent} from './format';
 import ThemeControl from './theme-control';
 
-export default function Grayscale(props: {value: number; onChange: (v: number) => void, resetFunction: () => void}) {
+export default function Grayscale(props: {value: number; onChange: (v: number) => void}) {
     return (
-        <ThemeControl 
-        label={getLocalMessage('grayscale')}
-        reset={props.resetFunction}>
+        <ThemeControl label={getLocalMessage('grayscale')}>
             <Slider
                 value={props.value}
                 min={0}

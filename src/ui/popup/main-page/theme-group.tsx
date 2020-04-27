@@ -3,7 +3,6 @@ import {Theme} from '../../../definitions';
 import {Button} from '../../controls';
 import {Brightness, Contrast, Scheme, Mode} from '../theme/controls';
 import ThemePresetPicker from '../theme/preset-picker';
-import ThemeEngines from '../../../generators/theme-engines'
 import {getCurrentThemePreset} from '../theme/utils';
 import {ViewProps} from '../types';
 
@@ -13,22 +12,18 @@ function ThemeControls(props: {theme: Theme; onChange: (theme: Partial<Theme>) =
         <section class="m-section m-theme-controls">
             <Brightness
                 value={theme.brightness}
-                resetFunction={() => onChange({brightness: 100})}
                 onChange={(v) => onChange({brightness: v})}
             />
             <Contrast
                 value={theme.contrast}
-                resetFunction={() => onChange({contrast: 100})}
                 onChange={(v) => onChange({contrast: v})}
             />
             <Scheme
                 isDark={theme.mode === 1}
-                resetFunction={() => onChange({mode: 1})}
                 onChange={(isDark) => onChange({mode: isDark ? 1 : 0})}
             />
             <Mode
                 mode={theme.engine}
-                resetFunction={() => onChange({engine: ThemeEngines.dynamicTheme})}
                 onChange={(mode) => onChange({engine: mode})}
             />
         </section>

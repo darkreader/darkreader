@@ -52,8 +52,8 @@ export default function Color_DropDown(props: DropDownProps) {
     }
 
     function changeColor(value: string) {
-        if (document.querySelector('.color-dropdown__list__item--selected #' + value) != null) {
-            const element = document.getElementById(value);
+        if (document.querySelector('.color-dropdown__selected__text #custom-color').innerHTML = value) {
+            const element = document.getElementById("custom_color");
             element.toggleAttribute('contentEditable', true);
             element.focus();
             element.onblur = function () {
@@ -75,7 +75,6 @@ export default function Color_DropDown(props: DropDownProps) {
                     <span
                         class={{
                             'color-dropdown__list__item': true,
-                            'color-dropdown__list__item--selected' : value === props.selected,
                             [props.class]: props.class != null,
                         }}
                         onclick={() => {
@@ -126,20 +125,21 @@ export default function Color_DropDown(props: DropDownProps) {
                     .map(createListItem)}
             </span>
             <span
-                class="color-dropdown__selected"
+                class={props.selected.startsWith('#') ? "color-dropdown__selected__two" : 'color-dropdown__selected'}
                 oncreate={saveSelectedNode}
                 onclick={onSelectedClick}
             >
                 {props.selected.startsWith('#') ?
                     <div style="display: inline-flex">
-                        <div class="color-div" style={'background-color: ' + props.selected}/>
+                        <div class="color-div__2" style={'background-color: ' + props.selected}/>
                         <span
-                            class={'color-dropdown__selected__text #' + props.selected}
+                            class='color-dropdown__selected__text'
+                            id='custom_color'
                             ondblclick={() => changeColor(props.selected)}>
                             {props.selected}
                         </span>
                     </div> :
-                    <span class={'color-dropdown__selected__text #' + props.selected}>
+                    <span class='color-dropdown__selected__text'>
                         {props.selected}
                     </span>
                 }

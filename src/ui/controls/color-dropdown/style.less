@@ -26,6 +26,23 @@
         width: 100%;
         text-align: center;
 
+        &__two {
+            background-color: @color-control-active;
+            background-image: @icon-down;
+            background-position: center right 0.25rem;
+            background-repeat: no-repeat;
+            background-size: 1rem;
+            border-radius: @dropdown-item-height / 2;
+            color: @color-control-fore;
+            display: inline-block;
+            height: @dropdown-item-height;
+            line-height: @dropdown-item-height;
+            margin-top: (@dropdown-height - @dropdown-item-height) / 2;
+            position: absolute;
+            width: 100%;
+            text-align: unset;
+        }
+
         &__text {
             display: inline-block;
             max-width: calc(100% - 2.5rem);
@@ -97,4 +114,15 @@
     margin-top: 4px;
     border: 3px solid white;
     border-radius: 50%;
+
+    &__2 {
+        display: inline-flex;
+        width: 14px;
+        height: 14px;
+        margin-top: unset;
+        margin-left: 1rem;
+        margin-right: 2.5rem;
+        border: 3px solid white;
+        border-radius: 50%;
+    }
 }

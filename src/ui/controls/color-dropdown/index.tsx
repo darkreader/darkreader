@@ -50,16 +50,16 @@ export default function Color_DropDown(props: DropDownProps) {
             window.addEventListener('mousedown', onOuterClick, false);
         }
     }
-    
+
     function changeColor(value: string) {
         if (document.querySelector('.color-dropdown__list__item--selected #' + value) != null) {
-            const element = document.getElementById(value)
-            element.toggleAttribute('contentEditable', true)
+            const element = document.getElementById(value);
+            element.toggleAttribute('contentEditable', true);
             element.focus();
             element.onblur = function () {
-                element.toggleAttribute('contentEditable', false)
-                props.onColorChange(element.innerText)
-            }
+                element.toggleAttribute('contentEditable', false);
+                props.onColorChange(element.innerText);
+            };
         } else {
             store.isOpen = false;
             context.refresh();
@@ -78,10 +78,6 @@ export default function Color_DropDown(props: DropDownProps) {
                             'color-dropdown__list__item--selected' : value === props.selected,
                             [props.class]: props.class != null,
                         }}
-                        id={{
-                            value: true,
-                        }}
-                        ondblclick={() => changeColor(value)}
                         onclick={() => {
                             store.isOpen = false;
                             context.refresh();
@@ -134,9 +130,19 @@ export default function Color_DropDown(props: DropDownProps) {
                 oncreate={saveSelectedNode}
                 onclick={onSelectedClick}
             >
-                <span class="color-dropdown__selected__text">
-                    {props.selected}
-                </span>
+                {props.selected.startsWith('#') ?
+                    <div style="display: inline-flex">
+                        <div class="color-div" style={'background-color: ' + props.selected}/>
+                        <span
+                            class={'color-dropdown__selected__text #' + props.selected}
+                            ondblclick={() => changeColor(props.selected)}>
+                            {props.selected}
+                        </span>
+                    </div> :
+                    <span class={'color-dropdown__selected__text #' + props.selected}>
+                        {props.selected}
+                    </span>
+                }
             </span>
         </span >
     );

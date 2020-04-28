@@ -178,6 +178,7 @@ export class Extension {
                 dynamicFixesText: this.devtools.getDynamicThemeFixesText(),
                 filterFixesText: this.devtools.getInversionFixesText(),
                 staticThemesText: this.devtools.getStaticThemesText(),
+                doNotAskAgain: this.devtools.getDoNotAskAgain(),
                 hasCustomDynamicFixes: this.devtools.hasCustomDynamicThemeFixes(),
                 hasCustomFilterFixes: this.devtools.hasCustomFilterFixes(),
                 hasCustomStaticFixes: this.devtools.hasCustomStaticFixes(),

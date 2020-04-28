@@ -11,6 +11,7 @@ export interface ExtensionData {
         dynamicFixesText: string;
         filterFixesText: string;
         staticThemesText: string;
+        doNotAskAgain: string;
         hasCustomDynamicFixes: boolean;
         hasCustomFilterFixes: boolean;
         hasCustomStaticFixes: boolean;

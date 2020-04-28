@@ -4,6 +4,7 @@ import {Button} from '../../controls';
 import ThemeEngines from '../../../generators/theme-engines';
 import {DEVTOOLS_DOCS_URL} from '../../../utils/links';
 import {ExtWrapper} from '../../../definitions';
+import { Reset_Div } from './reset';
 
 type BodyProps = ExtWrapper;
 
@@ -50,8 +51,12 @@ function Body({data, actions}: BodyProps) {
     }
 
     function reset() {
-        wrapper.reset();
-        setState({errorText: null});
+        if (data.devtools.doNotAskAgain == "true") {
+            wrapper.reset();
+            setState({errorText: null});
+        } else {
+            document.body.classList.add('reset');
+        }
     }
 
     function toggleDesign() {
@@ -60,6 +65,7 @@ function Body({data, actions}: BodyProps) {
 
     return (
         <body>
+            <Reset_Div {...data}/>
             <header>
                 <img id="logo" src="../assets/images/darkreader-type.svg" alt="Dark Reader" />
                 <h1 id="title">Developer Tools</h1>

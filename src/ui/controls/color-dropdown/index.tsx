@@ -6,6 +6,7 @@ interface DropDownProps {
     selected: string;
     hexColor: string;
     onChange: (value: string) => void;
+    onColorChange: (value: string) => void;
 }
 
 export default function Color_DropDown(props: DropDownProps) {
@@ -15,7 +16,7 @@ export default function Color_DropDown(props: DropDownProps) {
         listNode: HTMLElement;
         selectedNode: HTMLElement;
     };
-    const values = ['auto', props.hexColor];
+    const values = ['Auto', props.hexColor];
 
     function saveListNode(el: HTMLElement) {
         store.listNode = el;
@@ -49,18 +50,38 @@ export default function Color_DropDown(props: DropDownProps) {
             window.addEventListener('mousedown', onOuterClick, false);
         }
     }
+    
+    function changeColor(value: string) {
+        if (document.querySelector('.color-dropdown__list__item--selected #' + value) != null) {
+            const element = document.getElementById(value)
+            element.toggleAttribute('contentEditable', true)
+            element.focus();
+            element.onblur = function () {
+                element.toggleAttribute('contentEditable', false)
+                props.onColorChange(element.innerText)
+            }
+        } else {
+            store.isOpen = false;
+            context.refresh();
+            props.onChange(value);
+        }
+    }
 
     function createListItem(value: string) {
         if (value.startsWith('#')) {
             return (
-                <div style="width: 100%; height:100%">
+                <div style="display: inline-flex">
                     <div class="color-div" style={'background-color: ' + value}/>
                     <span
                         class={{
                             'color-dropdown__list__item': true,
-                            'color-dropdown__list__item--selected': value === props.selected,
+                            'color-dropdown__list__item--selected' : value === props.selected,
                             [props.class]: props.class != null,
                         }}
+                        id={{
+                            value: true,
+                        }}
+                        ondblclick={() => changeColor(value)}
                         onclick={() => {
                             store.isOpen = false;
                             context.refresh();

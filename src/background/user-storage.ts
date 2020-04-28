@@ -42,7 +42,7 @@ export default class UserStorage {
             previewNewDesign: false,
             enableForPDF: true,
             scrollbarTheming: true,
-            scrollbarSelected: 'auto',
+            scrollbarSelected: 'Auto',
             scrollbarColor: '#2a2c2e',
         };
         this.settings = null;

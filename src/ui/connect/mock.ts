@@ -53,6 +53,7 @@ export function getMockData(override = {}): ExtensionData {
             dynamicFixesText: '',
             filterFixesText: '',
             staticThemesText: '',
+            doNotAskAgain: 'false',
             hasCustomDynamicFixes: false,
             hasCustomFilterFixes: false,
             hasCustomStaticFixes: false,

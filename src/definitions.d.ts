@@ -72,6 +72,8 @@ export interface UserSettings {
     previewNewDesign: boolean;
     enableForPDF: boolean;
     scrollbarTheming: boolean;
+    scrollbarSelected: string;
+    scrollbarColor: string;
 }
 
 export interface TimeSettings {

@@ -185,7 +185,7 @@ function getInlineStyleCacheKey(el: HTMLElement, theme: FilterConfig) {
         .join(' ');
 }
 
-function shouldIgnoreInlineStyle (element: HTMLElement, selectors: string[]) {
+function shouldIgnoreInlineStyle(element: HTMLElement, selectors: string[]) {
     for (const ingnoredSelector of selectors) {
         if (element.matches(ingnoredSelector)) {
             return true;

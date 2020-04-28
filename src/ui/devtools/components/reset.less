@@ -4,13 +4,14 @@
     display: inline-block;
     position: fixed;
     z-index:10000;
-    width: 300px;
-    height: 100px;
+    width: 350px;
+    height: 115px;
     top: 300px;
     background-color: @color-control-back;
     border: @size-border solid @color-border;
     box-sizing: content-box;
     vertical-align: middle;
+
     &__button {
         background-color: @color-control-back;
         border: @size-border solid @color-border;
@@ -50,4 +51,38 @@
 }
 .reset-div {
     display:none;
+}
+.check-button {
+    .checkbox {
+        width: 50%;
+        margin-left: 5.5rem;
+
+        &__checkmark {
+            background-color: @color-control-active;
+        }
+
+        &__content {
+            align-items: center;
+            display: flex;
+            flex: auto;
+            height: @size-control-inner;
+            justify-content: center;
+            -moz-user-select: none;
+            user-select: none;
+        }
+
+        &__input:checked ~ * {
+            color: @color-control-fore;
+        }
+    }
+
+    &__description {
+        display: inline-block;
+        font-size: @size-text-small;
+        line-height: @size-text-small-height;
+        text-align: center;
+        -moz-user-select: none;
+        user-select: none;
+        width: 100%;
+    }
 }

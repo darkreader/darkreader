@@ -89,7 +89,10 @@ function Body({data, actions}: BodyProps) {
                 If a <strong>popular</strong> website looks incorrect
                 e-mail to <strong>DarkReaderApp@gmail.com</strong>
             </p>
-            <Reset_Div {...data}/>
+            <Reset_Div 
+            ExtActions={actions}
+            resetFunction={reset}
+            />
         </body>
     );
 }

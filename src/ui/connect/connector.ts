@@ -97,6 +97,10 @@ export default class Connector implements ExtensionActions {
         this.port.postMessage({type: 'reset-dev-static-themes'});
     }
 
+    setDoNotAskAgain(text: string) {
+        return this.sendRequest<void>({type: 'set-do-not-ask-again', data: text}, ({error}, resolve, reject) => error ? reject(error) : resolve());
+    }
+
     disconnect() {
         this.port.disconnect();
     }

@@ -127,6 +127,7 @@ export class Extension {
             resetDevInversionFixes: () => this.devtools.resetInversionFixes(),
             applyDevStaticThemes: (text) => this.devtools.applyStaticThemes(text),
             resetDevStaticThemes: () => this.devtools.resetStaticThemes(),
+            setDoNotAskAgain: (text) => this.devtools.setDoNotAskAgain(text),
         };
     }
 

@@ -30,6 +30,8 @@ export interface ExtensionActions {
     resetDevInversionFixes();
     applyDevStaticThemes(text: string): Promise<void>;
     resetDevStaticThemes();
+    setDoNotAskAgain(text: string): Promise<void>;
+
 }
 
 export interface ExtWrapper {

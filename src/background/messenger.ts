@@ -15,6 +15,7 @@ export interface ExtensionAdapter {
     resetDevInversionFixes: () => void;
     applyDevStaticThemes: (text: string) => Error;
     resetDevStaticThemes: () => void;
+    setDoNotAskAgain: (text: string) => void;
 }
 
 export default class Messenger {
@@ -96,6 +97,11 @@ export default class Messenger {
             }
             case 'reset-dev-static-themes': {
                 this.adapter.resetDevStaticThemes();
+                break;
+            }
+            case 'set-do-not-ask-again': {
+                this.adapter.setDoNotAskAgain(data);
+                port.postMessage({id, error: null});
                 break;
             }
         }

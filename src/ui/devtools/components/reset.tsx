@@ -1,15 +1,30 @@
 import {m} from 'malevic';
-import {ExtensionData} from '../../../definitions';
+import {ExtensionActions} from '../../../definitions';
 import {Button} from '../../../ui/controls';
+import CheckButton from '../../../ui/popup/check-button';
 
-export function Reset_Div(data: ExtensionData) {
+export function Reset_Div(props: {ExtActions: ExtensionActions; resetFunction: () => void}) {
+
+    let doNotAskToggle = false;
+
     function cancel() {
         document.body.classList.remove('reset');
+    }
+    function toggleDoNotAsk() {
+        doNotAskToggle = !doNotAskToggle;
+    }
+    function reset() {
+        if (doNotAskToggle) {
+            props.ExtActions.setDoNotAskAgain('true')
+        }
+        props.resetFunction();
     }
     return (
         <div class="reset-div">
             <div class="reset-div__wrapper">
-                <Button class="reset-div__button">
+                <Button 
+                class="reset-div__button"
+                onclick={reset}>
                     Reset
                 </Button>
                 <Button 
@@ -19,9 +34,13 @@ export function Reset_Div(data: ExtensionData) {
                 </Button>
             </div>
             <div class="reset-div__wrapper">
-                <input type="checkbox" id="DoNotAskAgain"/>
-                <label for="DoNotAskAgain">Do not ask again to comfirm resetting CSS.</label>
-                </div>
+            <CheckButton
+                checked={doNotAskToggle}
+                label='Do not ask again.'
+                description='Do not ask the next time to comfirm you want to reset.'
+                onChange={toggleDoNotAsk}
+            />
+            </div>
         </div>
     );
 }

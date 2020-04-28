@@ -26,6 +26,14 @@ header {
     justify-content: center;
     margin-top: @indent-large;
 }
+.reset header,
+.reset h3,
+.reset #editor,
+.reset #buttons,
+.reset #description {
+    filter: blur(1px);
+    pointer-events:none;
+}
 
 #logo {
     display: inline-block;

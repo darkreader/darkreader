@@ -1,5 +1,6 @@
 import {m} from 'malevic';
 import {ExtensionData} from '../../../definitions';
+import {Button} from '../../../ui/controls';
 
 export function Reset_Div(data: ExtensionData) {
     function cancel() {
@@ -8,12 +9,14 @@ export function Reset_Div(data: ExtensionData) {
     return (
         <div class="reset-div">
             <div class="reset-div__wrapper">
-                <button class="reset-div__button">
+                <Button class="reset-div__button">
                     Reset
-                </button>
-                <button class="reset-div__button" onClick={cancel}>
-                    Cancel
-                </button>
+                </Button>
+                <Button 
+                    class="reset-div__button"
+                    onclick={cancel}>
+                        Cancel
+                </Button>
             </div>
             <div class="reset-div__wrapper">
                 <input type="checkbox" id="DoNotAskAgain"/>

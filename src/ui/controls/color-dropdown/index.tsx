@@ -27,6 +27,9 @@ export default function Color_DropDown(props: DropDownProps) {
     }
 
     function onSelectedClick() {
+        if (store.selectedNode.children[0].children[1].hasAttribute('contentEditable')) {
+            return;
+        }
         store.isOpen = !store.isOpen;
         context.refresh();
 
@@ -51,27 +54,25 @@ export default function Color_DropDown(props: DropDownProps) {
         }
     }
 
-    function changeColor(value: string) {
-        if (document.querySelector('.color-dropdown__selected__text #custom-color').innerHTML = value) {
-            const element = document.getElementById("custom_color");
-            element.toggleAttribute('contentEditable', true);
-            element.focus();
-            element.onblur = function () {
-                element.toggleAttribute('contentEditable', false);
-                props.onColorChange(element.innerText);
-            };
-        } else {
-            store.isOpen = false;
-            context.refresh();
-            props.onChange(value);
+    function changeColor() {
+        const element = document.getElementById("custom_color");
+        element.toggleAttribute('contentEditable', true);
+        element.focus();
+        element.onchange = function () {
+            const element = document.getElementById('color-div')[0];
+            element.style = 'background-color: ' + element.innerText;
         }
+        element.onblur = function () {
+            element.toggleAttribute('contentEditable', false);
+            props.onColorChange(element.innerText);
+        };
     }
 
     function createListItem(value: string) {
         if (value.startsWith('#')) {
             return (
                 <div style="display: inline-flex">
-                    <div class="color-div" style={'background-color: ' + value}/>
+                    <div class="color-div" id="color-div" style={'background-color: ' + value}/>
                     <span
                         class={{
                             'color-dropdown__list__item': true,
@@ -135,7 +136,7 @@ export default function Color_DropDown(props: DropDownProps) {
                         <span
                             class='color-dropdown__selected__text'
                             id='custom_color'
-                            ondblclick={() => changeColor(props.selected)}>
+                            onclick={() => changeColor()}>
                             {props.selected}
                         </span>
                     </div> :

@@ -37,7 +37,7 @@ export default function ThemePage(props: ViewProps) {
                 selected={props.data.settings.scrollbarSelected}
                 hexColor={props.data.settings.scrollbarColor}
                 onChange={(v) => props.actions.changeSettings({scrollbarSelected: v})}
-                onColorChange={(v) => props.actions.changeSettings({scrollbarColor: v})}
+                onColorChange={(v) => props.actions.changeSettings({scrollbarColor: v, scrollbarSelected: v})}
 
 
             />

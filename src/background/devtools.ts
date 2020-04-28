@@ -81,7 +81,7 @@ export default class DevTools {
     private static KEY_DYNAMIC = 'dev_dynamic_theme_fixes';
     private static KEY_FILTER = 'dev_inversion_fixes';
     private static KEY_STATIC = 'dev_static_themes';
-    private static KEY_DONTASK = "dev_do_not_ask_again";
+    private static KEY_DONTASK = 'dev_do_not_ask_again';
 
     private getSavedDynamicThemeFixes() {
         return this.store.get(DevTools.KEY_DYNAMIC) || null;

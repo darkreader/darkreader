@@ -4,7 +4,7 @@ import {Button} from '../../controls';
 import ThemeEngines from '../../../generators/theme-engines';
 import {DEVTOOLS_DOCS_URL} from '../../../utils/links';
 import {ExtWrapper} from '../../../definitions';
-import { Reset_Div } from './reset';
+import {Reset_Div} from './reset';
 
 type BodyProps = ExtWrapper;
 
@@ -51,7 +51,7 @@ function Body({data, actions}: BodyProps) {
     }
 
     function reset() {
-        if (data.devtools.doNotAskAgain == "true") {
+        if (data.devtools.doNotAskAgain == 'true' || document.body.classList.contains('reset')) {
             wrapper.reset();
             setState({errorText: null});
         } else {
@@ -89,9 +89,8 @@ function Body({data, actions}: BodyProps) {
                 If a <strong>popular</strong> website looks incorrect
                 e-mail to <strong>DarkReaderApp@gmail.com</strong>
             </p>
-            <Reset_Div 
-            ExtActions={actions}
-            resetFunction={reset}
+            <Reset_Div
+                ExtActions={actions}
             />
         </body>
     );

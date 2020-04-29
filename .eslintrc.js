@@ -28,6 +28,7 @@ module.exports = {
             allowTemplateLiterals: true,
             avoidEscape: true,
         }],
+        'eol-last': ["error", "always"],
         '@typescript-eslint/camelcase': 'off',
         '@typescript-eslint/explicit-function-return-type': 'off',
         '@typescript-eslint/explicit-member-accessibility': 'off',

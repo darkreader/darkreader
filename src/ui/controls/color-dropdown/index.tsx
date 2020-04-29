@@ -69,8 +69,8 @@ export default function Color_DropDown(props: DropDownProps) {
             }
         };
         element.onblur = function () {
+            const temp = element.innerText;
             if (isNaN(Number('0x' + element.innerText.replace('#','')))) {
-                const temp = element.innerText;
                 element.setAttribute('style', 'color: red');
                 element.innerText = 'Not valid hexcolor';
                 setTimeout(function () {
@@ -81,6 +81,9 @@ export default function Color_DropDown(props: DropDownProps) {
             } else {
                 element.toggleAttribute('contentEditable', false);
                 props.onColorChange(element.innerText);
+                setTimeout(function () { // Handy hack to fix something stupids in the renderBody function of the compiler
+                    element.innerText = '';
+                });
             }
         };
     }

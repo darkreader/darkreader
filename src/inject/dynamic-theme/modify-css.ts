@@ -1,4 +1,4 @@
-import {parse, RGBA} from '../../utils/color';
+import {parse, RGBA, rgbToHSL, hslToRGB, rgbToString} from '../../utils/color';
 import {clamp} from '../../utils/math';
 import {isMacOS} from '../../utils/platform';
 import {getMatches} from '../../utils/text';
@@ -92,14 +92,36 @@ export function getModifiedUserAgentStyle(filter: FilterConfig, userSettings: Us
         lines.push(`    background-color: ${modifyBackgroundColor({r: 241, g: 241, b: 241}, filter)};`);
         lines.push(`    color: ${modifyForegroundColor({r: 96, g: 96, b: 96}, filter)};`);
         lines.push('}');
-        lines.push('::-webkit-scrollbar-thumb {');
-        lines.push(`    background-color: ${modifyBackgroundColor({r: 193, g: 193, b: 193}, filter)};`);
+        if (userSettings.scrollbarSelected === "Auto") {
+            lines.push('::-webkit-scrollbar-thumb {');
+            lines.push(`    background-color: ${modifyBackgroundColor({r: 193, g: 193, b: 193}, filter)};`);
+            lines.push('}');
+            lines.push('::-webkit-scrollbar-thumb:hover {');
+            lines.push(`    background-color: ${modifyBackgroundColor({r: 166, g: 166, b: 166}, filter)};`);
+            lines.push('}');
+            lines.push('::-webkit-scrollbar-thumb:active {');;
+            lines.push(`    background-color: ${modifyBackgroundColor({r: 96, g: 96, b: 96}, filter)};`);
+            lines.push('}');
+        } else {
+            const RGB = parse(userSettings.scrollbarColor);
+            const HSL = rgbToHSL(RGB);
+            const hover = hslToRGB({...HSL, l: clamp(HSL.l + 0.1, 0, 1)});
+            const active = hslToRGB({...HSL, l: clamp(HSL.l - 0.1, 0, 1)});
+            lines.push('::-webkit-scrollbar-thumb {');
+            lines.push(`    background-color: ${rgbToString(RGB)};`);
+            lines.push('}');
+            lines.push('::-webkit-scrollbar-thumb:hover {');
+            lines.push(`    background-color: ${rgbToString(hover)};`);
+            lines.push('}');
+            lines.push('::-webkit-scrollbar-thumb:active {');;
+            lines.push(`    background-color: ${rgbToString(active)};`);
+            lines.push('}');
+        }
+        lines.push('::-webkit-scrollbar-corner {');
+        lines.push(`    background-color: ${modifyBackgroundColor({r: 255, g: 255, b: 255}, filter)};`);
         lines.push('}');
-        lines.push('::-webkit-scrollbar-thumb:hover {');
-        lines.push(`    background-color: ${modifyBackgroundColor({r: 166, g: 166, b: 166}, filter)};`);
-        lines.push('}');
-        lines.push('::-webkit-scrollbar-thumb:active {');;
-        lines.push(`    background-color: ${modifyBackgroundColor({r: 96, g: 96, b: 96}, filter)};`);
+        lines.push('* {');
+        lines.push(`    scrollbar-color: ${modifyBackgroundColor({r: 193, g: 193, b: 193}, filter)} ${modifyBackgroundColor({r: 241, g: 241, b: 241}, filter)};`);
         lines.push('}');
         lines.push('::-webkit-scrollbar-corner {');
         lines.push(`    background-color: ${modifyBackgroundColor({r: 255, g: 255, b: 255}, filter)};`);

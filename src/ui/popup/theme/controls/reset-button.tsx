@@ -7,7 +7,6 @@ import {DEFAULT_SETTINGS} from '../../../../background/user-storage';
 export default function ResetButton(props: ViewProps) {
     function reset() {
         props.actions.setTheme(DEFAULT_SETTINGS.theme);
-        props.actions.changeSettings({customThemes: []});
     }
 
     return (

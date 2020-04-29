@@ -2,13 +2,13 @@ import {m} from 'malevic';
 import {Button} from '../../controls';
 import ControlGroup from '../control-group';
 import {ViewProps} from '../types';
-import UserStorage from '../../../background/user-storage';
+import {DEFAULT_SETTINGS} from '../../../background/user-storage';
 
 export default function ResetButton(props: ViewProps) {
     function reset() {
-        const defaultconfig = new UserStorage();
-        props.actions.changeSettings(defaultconfig.getDefaultSettings());
+        props.actions.changeSettings(DEFAULT_SETTINGS);
     }
+
     return (
         <ControlGroup>
             <ControlGroup.Control>

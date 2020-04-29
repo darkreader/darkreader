@@ -7,7 +7,6 @@ export default function ThemeControl(props: {label: Malevic.Child}, control: Mal
                 {props.label}
             </label>
             {control}
-
         </span>
     );
 }

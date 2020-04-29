@@ -79,11 +79,6 @@ export default class UserStorage {
         this.settings = null;
     }
 
-    getDefaultSettings() {
-        return this.defaultSettings;
-    }
-
-
     settings: Readonly<UserSettings>;
 
     async loadSettings() {

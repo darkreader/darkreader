@@ -5,6 +5,40 @@ import {UserSettings} from '../definitions';
 
 const SAVE_TIMEOUT = 1000;
 
+export const DEFAULT_SETTINGS: UserSettings = {
+    enabled: true,
+    theme: {
+        mode: 1,
+        brightness: 100,
+        contrast: 100,
+        grayscale: 0,
+        sepia: 0,
+        useFont: false,
+        fontFamily: isMacOS() ? 'Helvetica Neue' : isWindows() ? 'Segoe UI' : 'Open Sans',
+        textStroke: 0,
+        engine: ThemeEngines.dynamicTheme,
+        stylesheet: '',
+    },
+    customThemes: [],
+    siteList: [],
+    siteListEnabled: [],
+    applyToListedOnly: false,
+    changeBrowserTheme: false,
+    notifyOfNews: false,
+    syncSettings: true,
+    automation: '',
+    time: {
+        activation: '18:00',
+        deactivation: '9:00',
+    },
+    location: {
+        latitude: null,
+        longitude: null,
+    },
+    previewNewDesign: false,
+    enableForPDF: true,
+};
+
 export default class UserStorage {
     private defaultSettings: UserSettings;
 

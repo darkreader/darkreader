@@ -3,13 +3,15 @@ import {ViewProps} from '../../types';
 import {Brightness, Contrast, Grayscale, Mode, Scheme, Sepia} from '../controls';
 import ThemePresetPicker from '../preset-picker';
 import {getCurrentThemePreset} from '../utils';
+import ResetButton from '../controls/reset-button';
 
 export default function ThemePage(props: ViewProps) {
     const {theme, change} = getCurrentThemePreset(props);
 
     return (
         <section class="m-section theme-page">
-            <ThemePresetPicker {...props} /><Brightness
+            <ThemePresetPicker {...props} />
+            <Brightness
                 value={theme.brightness}
                 onChange={(v) => change({brightness: v})}
             />
@@ -33,6 +35,7 @@ export default function ThemePage(props: ViewProps) {
                 mode={theme.engine}
                 onChange={(mode) => change({engine: mode})}
             />
+            <ResetButton {...props}/>
         </section>
     );
 }

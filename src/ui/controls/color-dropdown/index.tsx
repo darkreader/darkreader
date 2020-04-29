@@ -69,11 +69,13 @@ export default function Color_DropDown(props: DropDownProps) {
             }
         };
         element.onblur = function () {
-            if (!element.innerText.startsWith('#')) {
+            if (!/^#([0-9A-F]{3}){1,2}$/.test(element.innerText)) {
                 const temp = element.innerText;
+                element.setAttribute('style', 'background-color: red');
                 element.innerText = 'Not valid hexcolor';
                 setTimeout(function () {
                     element.innerText = temp;
+                    element.removeAttribute('style');
                     element.focus();
                 }, 1500);
             } else {

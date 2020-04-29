@@ -69,9 +69,9 @@ export default function Color_DropDown(props: DropDownProps) {
             }
         };
         element.onblur = function () {
-            if (!/^#([0-9A-F]{3}){1,2}$/.test(element.innerText)) {
+            if (!isNaN(Number(element.innerText))) {
                 const temp = element.innerText;
-                element.setAttribute('style', 'background-color: red');
+                element.setAttribute('style', 'color: red');
                 element.innerText = 'Not valid hexcolor';
                 setTimeout(function () {
                     element.innerText = temp;

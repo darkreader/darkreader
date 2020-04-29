@@ -27,8 +27,10 @@ export default function Color_DropDown(props: DropDownProps) {
     }
 
     function onSelectedClick() {
-        if (store.selectedNode.children[0].children[1].hasAttribute('contentEditable')) {
-            return;
+        if (store.selectedNode.children[0].children[1] != null) {
+            if (store.selectedNode.children[0].children[1].hasAttribute('contentEditable')) {
+                return;
+            }
         }
         store.isOpen = !store.isOpen;
         context.refresh();
@@ -55,16 +57,29 @@ export default function Color_DropDown(props: DropDownProps) {
     }
 
     function changeColor() {
-        const element = document.getElementById("custom_color");
+        const element = document.getElementById('custom_color');
         element.toggleAttribute('contentEditable', true);
         element.focus();
-        element.onchange = function () {
-            const element = document.getElementById('color-div')[0];
-            element.style = 'background-color: ' + element.innerText;
-        }
+        element.oninput = function () {
+            if (!element.innerText.startsWith('#')) {
+                element.innerText = '#' + element.innerText;
+            } else {
+                const element = document.getElementById('color-div__2');
+                element.setAttribute('style', 'background-color: ' + element.nextElementSibling.innerHTML);
+            }
+        };
         element.onblur = function () {
-            element.toggleAttribute('contentEditable', false);
-            props.onColorChange(element.innerText);
+            if (!element.innerText.startsWith('#')) {
+                const temp = element.innerText;
+                element.innerText = 'Not valid hexcolor';
+                setTimeout(function () {
+                    element.innerText = temp;
+                    element.focus();
+                }, 1500);
+            } else {
+                element.toggleAttribute('contentEditable', false);
+                props.onColorChange(element.innerText);
+            }
         };
     }
 
@@ -126,13 +141,13 @@ export default function Color_DropDown(props: DropDownProps) {
                     .map(createListItem)}
             </span>
             <span
-                class={props.selected.startsWith('#') ? "color-dropdown__selected__two" : 'color-dropdown__selected'}
+                class={props.selected.startsWith('#') ? 'color-dropdown__selected__two' : 'color-dropdown__selected'}
                 oncreate={saveSelectedNode}
                 onclick={onSelectedClick}
             >
                 {props.selected.startsWith('#') ?
                     <div style="display: inline-flex">
-                        <div class="color-div__2" style={'background-color: ' + props.selected}/>
+                        <div class="color-div__2" id="color-div__2" style={'background-color: ' + props.selected}/>
                         <span
                             class='color-dropdown__selected__text'
                             id='custom_color'

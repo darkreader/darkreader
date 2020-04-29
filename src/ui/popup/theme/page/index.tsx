@@ -3,7 +3,7 @@ import {ViewProps} from '../../types';
 import {Brightness, Contrast, Grayscale, Mode, Scheme, Sepia} from '../controls';
 import ThemePresetPicker from '../preset-picker';
 import {getCurrentThemePreset} from '../utils';
-import Reset_Button from '../controls/reset-button';
+import ResetButton from '../controls/reset-button';
 
 export default function ThemePage(props: ViewProps) {
     const {theme, change} = getCurrentThemePreset(props);
@@ -18,7 +18,7 @@ export default function ThemePage(props: ViewProps) {
             <Contrast
                 value={theme.contrast}
                 onChange={(v) => change({contrast: v})}
-           />
+            />
             <Sepia
                 value={theme.sepia}
                 onChange={(v) => change({sepia: v})}
@@ -35,7 +35,7 @@ export default function ThemePage(props: ViewProps) {
                 mode={theme.engine}
                 onChange={(mode) => change({engine: mode})}
             />
-            <Reset_Button {...props}/>
+            <ResetButton {...props}/>
         </section>
     );
 }

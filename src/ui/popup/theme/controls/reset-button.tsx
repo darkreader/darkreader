@@ -4,11 +4,11 @@ import ControlGroup from '../../control-group';
 import {ViewProps} from '../../types';
 import UserStorage from '../../../../background/user-storage';
 
-export default function Reset_Button(props: ViewProps) {
+export default function ResetButton(props: ViewProps) {
     function reset() {
         const defaultconfig = new UserStorage();
         props.actions.setTheme(defaultconfig.getDefaultSettings().theme);
-        props.actions.changeSettings({customThemes: [] });
+        props.actions.changeSettings({customThemes: []});
     }
     return (
         <ControlGroup>

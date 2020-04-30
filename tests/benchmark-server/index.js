@@ -42,7 +42,7 @@ function CSS(query) {
     const realquery = query.split('=');
     const generated = realquery[1];
     let result = '';
-    result = `.GeneratedLinkElement ${generated} { background-color: black }`;
+    result = `.GeneratedLinkElement${generated} { background-color: black }`;
     return result;
 }
 

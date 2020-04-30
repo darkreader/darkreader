@@ -9,7 +9,7 @@ interface DropDownProps {
     onColorChange: (value: string) => void;
 }
 
-export default function Color_DropDown(props: DropDownProps) {
+export default function ColorDropDown(props: DropDownProps) {
     const context = getContext();
     const store = context.store as {
         isOpen: boolean;

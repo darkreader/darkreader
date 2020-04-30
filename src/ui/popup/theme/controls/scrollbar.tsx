@@ -1,11 +1,11 @@
 import {m} from 'malevic';
 import ThemeControl from './theme-control';
-import {Color_DropDown} from '../../../controls';
+import {ColorDropDown} from '../../../controls';
 
 export default function Scrollbar(props: {selected: string; hexColor: string; onChange: (option: string) => void; onColorChange: (option: string) => void}) {
     return (
         <ThemeControl label="Scrollbar">
-            <Color_DropDown
+            <ColorDropDown
                 hexColor={props.hexColor}
                 selected={props.selected}
                 onChange={(v) => props.onChange(v)}

@@ -1,7 +1,7 @@
 import Button from './button';
 import CheckBox from './checkbox';
 import DropDown from './dropdown';
-import Color_DropDown from './color-dropdown';
+import ColorDropDown from './color-dropdown';
 import MultiSwitch from './multi-switch';
 import Select from './select';
 import Shortcut from './shortcut';
@@ -17,7 +17,7 @@ export {
     Button,
     CheckBox,
     DropDown,
-    Color_DropDown,
+    ColorDropDown,
     MultiSwitch,
     Select,
     Shortcut,

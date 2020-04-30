@@ -93,10 +93,12 @@ function rule(amount) {
     if (amount === 0) {
         return result;
     }
+    result = result + '\t\t\t<style>'
     for (let x = 1; x <= amount; x++) {
-        result = result + `\t\t\t<style id="GeneratedStyle${x}">.GeneratedElement${x} { background-color: red }</style>\n`;
+        result = result + `.GeneratedElement${x} { background-color: red }\n`;
         element = element + `\t\t<p class="GeneratedElement${x}">This is an GeneratedElement ${x}</p>\n`;
     }
+    result = result + '</style>\n'
     return [result, element];
 }
 

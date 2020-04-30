@@ -37,7 +37,7 @@ function CSS(query) {
     const realquery = query.split("=");
     const generated = realquery[1];
     let result = '';
-    result = '.GeneratedLinkElement'+generated+' {\n\t\tbackground-color: black\n}\n'
+    result = '.GeneratedLinkElement'+generated+' { background-color: black }'
     return result;
 }
 
@@ -53,8 +53,8 @@ function link(amount) {
         return result;
     }
     for (var x = 1; x <= amount; x++) {
-        result = result + '<link rel="stylesheet" type="text/css" href="style.css?generated='+x+'">'
-        element = element + '<p class="GeneratedLinkElement'+x+'">This is an GeneratedLinkElement '+x+' </p>\n'
+        result = result + '\t\t\t<link rel="stylesheet" type="text/css" href="style.css?generated='+x+'">\n'
+        element = element + '\t\t<p class="GeneratedLinkElement'+x+'">This is an GeneratedLinkElement '+x+' </p>\n'
     }
     return result + '|' + element;
 }
@@ -70,7 +70,7 @@ function style(amount) {
         return result;
     }
     for (var x = 1; x <= amount; x++) {
-        result = result + '<p style="background-color: green">This is an inline style element '+x+'</p>';
+        result = result + '\t\t<p style="background-color: green">This is an inline style element '+x+'</p>\n';
     }
     return result;
 }
@@ -87,8 +87,8 @@ function rule(amount) {
         return result;
     }
     for (var x = 1; x <= amount; x++) {
-        result = result + '<style id="GeneratedStyle'+x+'">\n\t.GeneratedElement'+x+' {\n\t\tbackground-color: red\n}\n</style>\n'
-        element = element + '<p class="GeneratedElement'+x+'">This is an GeneratedElement '+x+' </p>\n'
+        result = result + '\t\t\t<style id="GeneratedStyle'+x+'">.GeneratedElement'+x+' { background-color: red } </style>\n'
+        element = element + '\t\t<p class="GeneratedElement'+x+'">This is an GeneratedElement '+x+' </p>\n'
     }
     return result + '|' + element;
 }

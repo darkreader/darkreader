@@ -39,7 +39,7 @@ module.exports = {
     },
     overrides: [
         {
-            files: ['tasks/**/*.js'],
+            files: ['tasks/**/*.js', 'tests/**/*.js'],
             rules: {
                 '@typescript-eslint/no-var-requires': 'off',
             },

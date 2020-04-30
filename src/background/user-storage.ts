@@ -37,6 +37,9 @@ export const DEFAULT_SETTINGS: UserSettings = {
     },
     previewNewDesign: false,
     enableForPDF: true,
+    scrollbarTheming: true,
+    scrollbarSelected: 'Auto',
+    scrollbarColor: '#2a2c2e',
 };
 
 export default class UserStorage {

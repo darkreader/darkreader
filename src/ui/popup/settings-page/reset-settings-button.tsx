@@ -12,7 +12,7 @@ export default function ResetButton(props: ViewProps) {
     return (
         <ControlGroup>
             <ControlGroup.Control>
-                <Button 
+                <Button
                     class="reset-button"
                     onclick={reset}
                     style='width: 100%'

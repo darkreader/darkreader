@@ -6,6 +6,12 @@ const port = 1357;
 const server = http.createServer((request, response) => {
     const parsedurl = url.parse(request.url);
     const query = parsedurl.query
+    if (query == null) {
+        response.writeHead(404, { "Content-Type": "text/plain" });
+        response.write("404 Not Found\n");
+        response.end();
+        return;
+    }
     const type = query.includes('links') ? 'index' : query.startsWith('generated') ? 'css' : '404'
     if (type === '404') {
         response.writeHead(404, { "Content-Type": "text/plain" });
@@ -14,9 +20,13 @@ const server = http.createServer((request, response) => {
         return;
     }
     if (type === 'index') {
-        html(query);
+        response.writeHead(200, { "Content-Type": "text/html" });
+        response.write(html(query).join('\n'));
+        response.end();
     } else {
-        CSS(query);
+        response.writeHead(200, { "Content-Type": "text/css" });
+        response.write(CSS(query));
+        response.end();
     }
 
 }).listen(port, function () {
@@ -24,23 +34,91 @@ const server = http.createServer((request, response) => {
 });
 
 function CSS(query) {
-
+    const realquery = query.split("=");
+    const generated = realquery[1];
+    let result = '';
+    result = '.GeneratedLinkElement'+generated+' {\n\t\tbackground-color: black\n}\n'
+    return result;
 }
+
+/**
+ * Generate a link to 'external css'
+ * 
+ * @param {number} amount
+ */
 function link(amount) {
-    let result;
+    let result = '';
+    let element = '';
     if (amount === 0) {
         return result;
     }
-    for (var x = 0; x <= amount; x++) {
-        result = result + '<link rel="stylesheet" type="text/css" href="style.css?generated='+x.toString()+'">\n'
+    for (var x = 1; x <= amount; x++) {
+        result = result + '<link rel="stylesheet" type="text/css" href="style.css?generated='+x+'">'
+        element = element + '<p class="GeneratedLinkElement'+x+'">This is an GeneratedLinkElement '+x+' </p>\n'
+    }
+    return result + '|' + element;
+}
+
+/**
+ * Generate inline style elements
+ * 
+ * @param {number} amount
+ */
+function style(amount) {
+    let result = '';;
+    if (amount === 0) {
+        return result;
+    }
+    for (var x = 1; x <= amount; x++) {
+        result = result + '<p style="background-color: green">This is an inline style element '+x+'</p>';
     }
     return result;
 }
 
+/**
+ * Generate a style
+ * 
+ * @param {number} amount
+ */
+function rule(amount) {
+    let result = '';
+    let element = '';
+    if (amount === 0) {
+        return result;
+    }
+    for (var x = 1; x <= amount; x++) {
+        result = result + '<style id="GeneratedStyle'+x+'">\n\t.GeneratedElement'+x+' {\n\t\tbackground-color: red\n}\n</style>\n'
+        element = element + '<p class="GeneratedElement'+x+'">This is an GeneratedElement '+x+' </p>\n'
+    }
+    return result + '|' + element;
+}
+
+/**
+ * @param {string} query
+ */
 function html(query) {
     const realquery = query.split("=").join("&").split('&');
     const links = realquery[realquery.indexOf('links') + 1];
     const styles = realquery[realquery.indexOf('styles') + 1];
     const rules = realquery[realquery.indexOf('rules') + 1];
-    link(links);
+    const linkHTML = link(parseInt(links));
+    const styleHTML = style(parseInt(styles));
+    const ruleHTML = rule(parseInt(rules));
+    let HTML = [];
+    HTML.push(
+        '<html>',
+        '   <head>',
+        '       <title>Benchmark Server</title>',
+        ruleHTML.split('|')[0],
+        linkHTML.split('|')[0],
+        '   </head>',
+        '   <body>',
+        styleHTML,
+        linkHTML.split('|')[1],
+        ruleHTML.split('|')[1],
+        '   </body>',
+        '</html>',
+    )
+    return HTML;
+
 }

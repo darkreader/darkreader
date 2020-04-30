@@ -54,7 +54,7 @@ function link(amount) {
     }
     for (var x = 1; x <= amount; x++) {
         result = result + '\t\t\t<link rel="stylesheet" type="text/css" href="style.css?generated='+x+'">\n'
-        element = element + '\t\t<p class="GeneratedLinkElement'+x+'">This is an GeneratedLinkElement '+x+' </p>\n'
+        element = element + '\t\t<p class="GeneratedLinkElement'+x+'">This is an GeneratedLinkElement '+x+'</p>\n'
     }
     return result + '|' + element;
 }
@@ -87,8 +87,8 @@ function rule(amount) {
         return result;
     }
     for (var x = 1; x <= amount; x++) {
-        result = result + '\t\t\t<style id="GeneratedStyle'+x+'">.GeneratedElement'+x+' { background-color: red } </style>\n'
-        element = element + '\t\t<p class="GeneratedElement'+x+'">This is an GeneratedElement '+x+' </p>\n'
+        result = result + '\t\t\t<style id="GeneratedStyle'+x+'">.GeneratedElement'+x+' { background-color: red }</style>\n'
+        element = element + '\t\t<p class="GeneratedElement'+x+'">This is an GeneratedElement '+x+'</p>\n'
     }
     return result + '|' + element;
 }

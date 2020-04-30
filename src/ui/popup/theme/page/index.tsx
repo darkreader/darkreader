@@ -37,7 +37,7 @@ export default function ThemePage(props: ViewProps) {
             />
             <Scrollbar
                 selected={props.data.settings.theme.scrollbarColor}
-                hexColor={props.data.settings.theme.scrollbarColor == '' ? '#2a2c2e' : props.data.settings.theme.scrollbarColor}
+                hexColor={props.data.settings.theme.scrollbarColor == '' ? 'Disabled' : props.data.settings.theme.scrollbarColor == 'auto' ? '#2a2c2e' : props.data.settings.theme.scrollbarColor}
                 onChange={(v) => props.actions.setTheme({scrollbarColor: v})}
                 onColorChange={(v) => props.actions.setTheme({scrollbarColor: v})}
             />

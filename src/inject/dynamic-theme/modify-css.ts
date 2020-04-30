@@ -7,7 +7,7 @@ import {cssURLRegex, getCSSURLValue, getCSSBaseBath} from './css-rules';
 import {getImageDetails, getFilteredImageDataURL, ImageDetails} from './image';
 import {getAbsoluteURL} from './url';
 import {logWarn, logInfo} from '../utils/log';
-import {FilterConfig, UserSettings} from '../../definitions';
+import {FilterConfig} from '../../definitions';
 
 type CSSValueModifier = (filter: FilterConfig) => string | Promise<string>;
 
@@ -52,7 +52,7 @@ export function getModifiableCSSDeclaration(property: string, value: string, rul
     return null;
 }
 
-export function getModifiedUserAgentStyle(filter: FilterConfig, userSettings: UserSettings, isIFrame: boolean) {
+export function getModifiedUserAgentStyle(filter: FilterConfig, isIFrame: boolean) {
     const lines: string[] = [];
     if (!isIFrame) {
         lines.push('html {');
@@ -87,12 +87,12 @@ export function getModifiedUserAgentStyle(filter: FilterConfig, userSettings: Us
     lines.push(`    background-color: ${modifyBackgroundColor({r: 250, g: 255, b: 189}, filter)} !important;`);
     lines.push(`    color: ${modifyForegroundColor({r: 0, g: 0, b: 0}, filter)} !important;`);
     lines.push('}');
-    if (!isMacOS() && userSettings.theme.scrollbarColor) {
+    if (!isMacOS() && filter.scrollbarColor) {
         lines.push('::-webkit-scrollbar {');
         lines.push(`    background-color: ${modifyBackgroundColor({r: 241, g: 241, b: 241}, filter)};`);
         lines.push(`    color: ${modifyForegroundColor({r: 96, g: 96, b: 96}, filter)};`);
         lines.push('}');
-        if (userSettings.theme.scrollbarColor === "auto") {
+        if (filter.scrollbarColor === "auto") {
             lines.push('::-webkit-scrollbar-thumb {');
             lines.push(`    background-color: ${modifyBackgroundColor({r: 193, g: 193, b: 193}, filter)};`);
             lines.push('}');
@@ -103,7 +103,7 @@ export function getModifiedUserAgentStyle(filter: FilterConfig, userSettings: Us
             lines.push(`    background-color: ${modifyBackgroundColor({r: 96, g: 96, b: 96}, filter)};`);
             lines.push('}');
         } else {
-            const rgb = parse(userSettings.theme.scrollbarColor);
+            const rgb = parse(filter.scrollbarColor);
             const hsl = rgbToHSL(rgb);
             const hover = hslToRGB({...hsl, l: clamp(hsl.l + 0.1, 0, 1)});
             const active = hslToRGB({...hsl, l: clamp(hsl.l - 0.1, 0, 1)});

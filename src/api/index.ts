@@ -1,44 +1,8 @@
 import './chrome';
 import {setFetchMethod as setFetch} from './fetch';
-import {FilterConfig as Theme, DynamicThemeFix, UserSettings} from '../definitions';
+import {FilterConfig as Theme, DynamicThemeFix} from '../definitions';
 import ThemeEngines from '../generators/theme-engines';
 import {createOrUpdateDynamicTheme, removeDynamicTheme} from '../inject/dynamic-theme';
-import {isMacOS, isWindows} from '../utils/platform';
-
-const defaultSettings: UserSettings = {
-    enabled: true,
-    theme: {
-        mode: 1,
-        brightness: 100,
-        contrast: 100,
-        grayscale: 0,
-        sepia: 0,
-        useFont: false,
-        fontFamily: isMacOS() ? 'Helvetica Neue' : isWindows() ? 'Segoe UI' : 'Open Sans',
-        textStroke: 0,
-        engine: ThemeEngines.dynamicTheme,
-        stylesheet: '',
-        scrollbarColor: 'auto',
-    },
-    customThemes: [],
-    siteList: [],
-    siteListEnabled: [],
-    applyToListedOnly: false,
-    changeBrowserTheme: false,
-    notifyOfNews: false,
-    syncSettings: true,
-    automation: '',
-    time: {
-        activation: '18:00',
-        deactivation: '9:00',
-    },
-    location: {
-        latitude: null,
-        longitude: null,
-    },
-    previewNewDesign: false,
-    enableForPDF: true,
-};
 
 const defaultTheme: Theme = {
     mode: 1,
@@ -63,14 +27,14 @@ const isIFrame = (() => {
     }
 })();
 
-export function enable(themeOptions: Partial<Theme> = {}, userSettings: UserSettings = defaultSettings , fixes: DynamicThemeFix = null) {
+export function enable(themeOptions: Partial<Theme> = {}, fixes: DynamicThemeFix = null) {
     const theme = {...defaultTheme, ...themeOptions};
 
     if (theme.engine !== ThemeEngines.dynamicTheme) {
         throw new Error('Theme engine is not supported');
     }
 
-    createOrUpdateDynamicTheme(theme, fixes, userSettings, isIFrame);
+    createOrUpdateDynamicTheme(theme, fixes, isIFrame);
 }
 
 export function disable() {
@@ -85,7 +49,7 @@ let store = {
 
 function handleColorScheme() {
     if (darkScheme.matches) {
-        enable(store.themeOptions, defaultSettings, store.fixes);
+        enable(store.themeOptions, store.fixes);
     } else {
         disable();
     }

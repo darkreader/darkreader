@@ -4,14 +4,14 @@ import CheckButton from '../check-button';
 
 export default function ScrollbarTheming(props: ViewProps) {
     function onScrollbarTheming(checked: boolean) {
-        props.actions.setTheme({scrollbarColor: checked ? '' : 'auto'});
+        props.actions.setTheme({scrollbarColor: checked ? 'disabled' : 'auto'});
     }
 
     return (
         <CheckButton
-            checked={props.data.settings.theme.scrollbarColor != ''}
+            checked={props.data.settings.theme.scrollbarColor !== 'disabled'}
             label='Enable scrollbar theming'
-            description={props.data.settings.theme.scrollbarColor != '' ?
+            description={props.data.settings.theme.scrollbarColor !== 'disabled' ?
                 'Enabled scrollbar theming' :
                 'Disabled scrollbar theming'}
             onChange={onScrollbarTheming}

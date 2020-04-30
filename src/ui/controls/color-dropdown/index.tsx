@@ -16,7 +16,8 @@ export default function ColorDropDown(props: DropDownProps) {
         listNode: HTMLElement;
         selectedNode: HTMLElement;
     };
-    const values = ['Auto', props.hexColor];
+    const values = props.hexColor === 'Disabled' ? ['Disabled'] : ['auto', props.hexColor]; 
+    
 
     function saveListNode(el: HTMLElement) {
         store.listNode = el;

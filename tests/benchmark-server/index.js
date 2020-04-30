@@ -40,9 +40,11 @@ http.createServer((request, response) => {
  */
 function CSS(query) {
     const realquery = query.split('=');
-    const generated = realquery[1];
+    const generated = parseInt(realquery[1]);
     let result = '';
-    result = `.GeneratedLinkElement${generated} { background-color: black }`;
+    for (let x = 1; x <= generated; x++) {
+        result = result + `.GeneratedLinkElement${x} { background-color: black }\n`;
+    }
     return result;
 }
 
@@ -57,8 +59,8 @@ function link(amount) {
     if (amount === 0) {
         return result;
     }
+    result = `\t\t\t<link rel="stylesheet" type="text/css" href="style.css?generated=${amount}">\n`;
     for (let x = 1; x <= amount; x++) {
-        result = result + `\t\t\t<link rel="stylesheet" type="text/css" href="style.css?generated=${x}">\n`;
         element = element + `\t\t<p class="GeneratedLinkElement${x}">This is an GeneratedLinkElement ${x}</p>\n`;
     }
     return [result, element];

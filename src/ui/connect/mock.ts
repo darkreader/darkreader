@@ -18,7 +18,6 @@ export function getMockData(override = {}): ExtensionData {
                 textStroke: 0,
                 engine: 'cssFilter',
                 stylesheet: '',
-                scrollbarColor: 'auto',
             },
             customThemes: [],
             siteList: [],

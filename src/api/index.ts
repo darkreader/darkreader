@@ -18,6 +18,7 @@ const defaultSettings: UserSettings = {
         textStroke: 0,
         engine: ThemeEngines.dynamicTheme,
         stylesheet: '',
+        scrollbarColor: 'auto',
     },
     customThemes: [],
     siteList: [],
@@ -37,7 +38,6 @@ const defaultSettings: UserSettings = {
     },
     previewNewDesign: false,
     enableForPDF: true,
-    scrollbarTheming: true,
 };
 
 const defaultTheme: Theme = {
@@ -51,6 +51,7 @@ const defaultTheme: Theme = {
     textStroke: 0,
     engine: ThemeEngines.dynamicTheme,
     stylesheet: '',
+    scrollbarColor: 'auto',
 };
 
 const isIFrame = (() => {

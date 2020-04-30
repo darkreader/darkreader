@@ -18,6 +18,7 @@ export const DEFAULT_SETTINGS: UserSettings = {
         textStroke: 0,
         engine: ThemeEngines.dynamicTheme,
         stylesheet: '',
+        scrollbarColor: 'auto',
     },
     customThemes: [],
     siteList: [],
@@ -37,9 +38,6 @@ export const DEFAULT_SETTINGS: UserSettings = {
     },
     previewNewDesign: false,
     enableForPDF: true,
-    scrollbarTheming: true,
-    scrollbarSelected: 'Auto',
-    scrollbarColor: '#2a2c2e',
 };
 
 export default class UserStorage {
@@ -59,6 +57,7 @@ export default class UserStorage {
                 textStroke: 0,
                 engine: ThemeEngines.dynamicTheme,
                 stylesheet: '',
+                scrollbarColor: 'auto',
             },
             customThemes: [],
             siteList: [],
@@ -78,9 +77,6 @@ export default class UserStorage {
             },
             previewNewDesign: false,
             enableForPDF: true,
-            scrollbarTheming: true,
-            scrollbarSelected: 'Auto',
-            scrollbarColor: '#2a2c2e',
         };
         this.settings = null;
     }
@@ -194,6 +190,7 @@ export default class UserStorage {
                 textStroke: f.textStroke,
                 engine: f.engine,
                 stylesheet: f.stylesheet,
+                scrollbarColor: f.scrollbarColor,
             };
         }
 

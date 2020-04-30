@@ -36,10 +36,10 @@ export default function ThemePage(props: ViewProps) {
                 onChange={(mode) => change({engine: mode})}
             />
             <Scrollbar
-                selected={props.data.settings.scrollbarSelected}
-                hexColor={props.data.settings.scrollbarColor}
-                onChange={(v) => props.actions.changeSettings({scrollbarSelected: v})}
-                onColorChange={(v) => props.actions.changeSettings({scrollbarColor: v, scrollbarSelected: v})}
+                selected={props.data.settings.theme.scrollbarColor}
+                hexColor={props.data.settings.theme.scrollbarColor == '' ? '#2a2c2e' : props.data.settings.theme.scrollbarColor}
+                onChange={(v) => props.actions.setTheme({scrollbarColor: v})}
+                onColorChange={(v) => props.actions.setTheme({scrollbarColor: v})}
             />
             <ResetButton {...props}/>
         </section>

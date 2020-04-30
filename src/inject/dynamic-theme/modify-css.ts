@@ -87,12 +87,12 @@ export function getModifiedUserAgentStyle(filter: FilterConfig, userSettings: Us
     lines.push(`    background-color: ${modifyBackgroundColor({r: 250, g: 255, b: 189}, filter)} !important;`);
     lines.push(`    color: ${modifyForegroundColor({r: 0, g: 0, b: 0}, filter)} !important;`);
     lines.push('}');
-    if (!isMacOS() && userSettings.scrollbarTheming) {
+    if (!isMacOS() && userSettings.theme.scrollbarColor) {
         lines.push('::-webkit-scrollbar {');
         lines.push(`    background-color: ${modifyBackgroundColor({r: 241, g: 241, b: 241}, filter)};`);
         lines.push(`    color: ${modifyForegroundColor({r: 96, g: 96, b: 96}, filter)};`);
         lines.push('}');
-        if (userSettings.scrollbarSelected === "Auto") {
+        if (userSettings.theme.scrollbarColor === "auto") {
             lines.push('::-webkit-scrollbar-thumb {');
             lines.push(`    background-color: ${modifyBackgroundColor({r: 193, g: 193, b: 193}, filter)};`);
             lines.push('}');
@@ -103,12 +103,12 @@ export function getModifiedUserAgentStyle(filter: FilterConfig, userSettings: Us
             lines.push(`    background-color: ${modifyBackgroundColor({r: 96, g: 96, b: 96}, filter)};`);
             lines.push('}');
         } else {
-            const RGB = parse(userSettings.scrollbarColor);
-            const HSL = rgbToHSL(RGB);
-            const hover = hslToRGB({...HSL, l: clamp(HSL.l + 0.1, 0, 1)});
-            const active = hslToRGB({...HSL, l: clamp(HSL.l - 0.1, 0, 1)});
+            const rgb = parse(userSettings.theme.scrollbarColor);
+            const hsl = rgbToHSL(rgb);
+            const hover = hslToRGB({...hsl, l: clamp(hsl.l + 0.1, 0, 1)});
+            const active = hslToRGB({...hsl, l: clamp(hsl.l - 0.1, 0, 1)});
             lines.push('::-webkit-scrollbar-thumb {');
-            lines.push(`    background-color: ${rgbToString(RGB)};`);
+            lines.push(`    background-color: ${rgbToString(rgb)};`);
             lines.push('}');
             lines.push('::-webkit-scrollbar-thumb:hover {');
             lines.push(`    background-color: ${rgbToString(hover)};`);

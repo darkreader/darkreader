@@ -47,6 +47,7 @@ export interface FilterConfig {
     textStroke: number;
     engine: string;
     stylesheet: string;
+    scrollbarColor: string;
 }
 
 export type Theme = FilterConfig;
@@ -71,9 +72,6 @@ export interface UserSettings {
     location: LocationSettings;
     previewNewDesign: boolean;
     enableForPDF: boolean;
-    scrollbarTheming: boolean;
-    scrollbarSelected: string;
-    scrollbarColor: string;
 }
 
 export interface TimeSettings {

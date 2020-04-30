@@ -92,7 +92,7 @@ export default function ColorDropDown(props: DropDownProps) {
         if (value.startsWith('#')) {
             return (
                 <div style="display: inline-flex">
-                    <div class="color-div" id="color-div" style={'background-color: ' + value}/>
+                    <div class="color-dropdown__color-div" id="color-div" style={'background-color: ' + value}/>
                     <span
                         class={{
                             'color-dropdown__list__item': true,
@@ -152,7 +152,7 @@ export default function ColorDropDown(props: DropDownProps) {
             >
                 {props.selected.startsWith('#') ?
                     <div style="display: inline-flex">
-                        <div class="color-div__2" id="color-div__2" style={'background-color: ' + props.selected}/>
+                        <div class="color-dropdown__color-div__2" id="color-div__2" style={'background-color: ' + props.selected}/>
                         <span
                             class='color-dropdown__selected__text'
                             id='custom_color'

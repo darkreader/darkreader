@@ -12,7 +12,7 @@ http.createServer((request, response) => {
         response.end();
         return;
     }
-    const type = query.includes('links') ? 'index' : query.startsWith('generated') ? 'css' : '404';
+    const type = query.includes('links') || query.includes('rules') || query.includes('styles')  ? 'index' : query.startsWith('generated') ? 'css' : '404';
     if (type === '404') {
         response.writeHead(404, {'Content-Type': 'text/plain'});
         response.write('404 Not Found\n');
@@ -24,9 +24,11 @@ http.createServer((request, response) => {
         response.write(getHTML(query).join('\n'));
         response.end();
     } else {
-        response.writeHead(200, {'Content-Type': 'text/css'});
-        response.write(CSS(query));
-        response.end();
+        setTimeout(()=>{
+            response.writeHead(200, {'Content-Type': 'text/css'});
+            response.write(CSS(query));
+            response.end();
+        }, 5000);
     }
 
 }).listen(port, function () {

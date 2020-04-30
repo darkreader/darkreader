@@ -26,9 +26,21 @@ const server = http.createServer((request, response) => {
 function CSS(query) {
 
 }
+function link(amount) {
+    let result;
+    if (amount === 0) {
+        return result;
+    }
+    for (var x = 0; x <= amount; x++) {
+        result = result + '<link rel="stylesheet" type="text/css" href="style.css?generated='+x.toString()+'">\n'
+    }
+    return result;
+}
+
 function html(query) {
     const realquery = query.split("=").join("&").split('&');
     const links = realquery[realquery.indexOf('links') + 1];
     const styles = realquery[realquery.indexOf('styles') + 1];
     const rules = realquery[realquery.indexOf('rules') + 1];
+    link(links);
 }

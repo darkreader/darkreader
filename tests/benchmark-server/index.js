@@ -24,11 +24,18 @@ http.createServer((request, response) => {
         response.write(getHTML(query).join('\n'));
         response.end();
     } else {
-        setTimeout(()=>{
-            response.writeHead(200, {'Content-Type': 'text/css'});
-            response.write(CSS(query));
-            response.end();
-        }, 5000);
+        response.writeHead(200, {'Content-Type': 'text/css'});
+        const parts = CSS(query).split('\n');
+        const write = () => {
+            const chunk = parts.unshift();
+            if (chunk) {
+              response.write(chunk);
+              setTimeout(write, 10);
+            } else {
+              response.end();
+            }
+          };
+        write();
     }
 
 }).listen(port, function () {

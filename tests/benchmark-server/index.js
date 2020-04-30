@@ -25,7 +25,7 @@ http.createServer((request, response) => {
         response.end();
     } else {
         response.writeHead(200, {'Content-Type': 'text/css'});
-        const parts = CSS(query).split('\n');
+        const parts = chunkString(CSS(query), 100);
         const write = () => {
             const chunk = parts.unshift();
             if (chunk) {
@@ -41,6 +41,14 @@ http.createServer((request, response) => {
 }).listen(port, function () {
     console.log(`The benchmark server has been opened on port ${port}`);
 });
+
+/**
+ * @param {string} str
+ * @param {string | number} length
+ */
+function chunkString(str, length) {
+    return str.match(new RegExp('.{1,' + length + '}', 'g'));
+  }
 
 /**
  * Returns an generated CSS style

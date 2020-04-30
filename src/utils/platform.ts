@@ -24,10 +24,16 @@ export function isEdge() {
 }
 
 export function isWindows() {
+    if (typeof navigator === 'undefined') {
+        return null;
+    }
     return navigator.platform.toLowerCase().startsWith('win');
 }
 
 export function isMacOS() {
+    if (typeof navigator === 'undefined') {
+        return null;
+    }
     return navigator.platform.toLowerCase().startsWith('mac');
 }
 

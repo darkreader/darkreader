@@ -4,6 +4,7 @@
   "description": "Dark theme for every website",
   "scripts": {
     "api": "node -e \"require('./tasks/bundle-api')()\"",
+    "build": "node tasks/release.js",
     "code-style": "eslint --fix \"src/**/*.ts\" \"src/**/*.tsx\" \"tasks/**/*.js\" \"tests/**/*.ts\" \"index.d.ts\"",
     "debug": "node tasks/debug.js",
     "prepublishOnly": "npm test && npm run api",

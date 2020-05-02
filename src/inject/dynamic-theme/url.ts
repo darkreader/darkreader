@@ -12,14 +12,14 @@ function backwards($base: string, $relative: string) {
     while ((backwardIndex = pathParts.indexOf('..')) > 0) {
         pathParts.splice(backwardIndex - 1, 2);
     }
-    return pathParts
+    return pathParts;
 }
 
 export function getAbsoluteURL($base: string, $relative: string) {
     if ($relative.match(/^.*?\/\//) || $relative.match(/^data\:/)) {
         if ($relative.startsWith('//')) {
             if ($relative.includes('..')) {
-               return `${location.protocol}${backwards($base, $relative).join('/')}`;
+                return `${location.protocol}${backwards($base, $relative).join('/')}`;
             }
             return `${location.protocol}${$relative}`;
         }

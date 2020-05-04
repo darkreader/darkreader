@@ -5,17 +5,24 @@ import {getURLHost, isURLEnabled, isPDF} from '../../../../utils/url';
 import {ExtWrapper, TabInfo} from '../../../../definitions';
 
 export default function SiteToggleButton({data, tab, actions}: ExtWrapper & {tab: TabInfo}) {
+
+    function click() {
+        if (pdf) {
+            actions.changeSettings({enableForPDF: !data.settings.enableForPDF});
+        } else {
+            actions.toggleURL(tab.url);
+        }
+    }
     const toggleHasEffect = (
         data.isEnabled &&
         !tab.isProtected
     );
-    const PDF = isPDF(tab.url);
+    const pdf = isPDF(tab.url);
     const isSiteEnabled = isURLEnabled(tab.url, data.settings, tab);
     const host = getURLHost(tab.url || '');
 
     const urlText = (host
         ? host
-        
             .split('.')
             .reduce((elements, part, i) => elements.concat(
                 <wbr />,
@@ -27,10 +34,10 @@ export default function SiteToggleButton({data, tab, actions}: ExtWrapper & {tab
         <Button
             class={{
                 'site-toggle': true,
-                'site-toggle--active': isSiteEnabled || PDF,
+                'site-toggle--active': pdf ? data.settings.enableForPDF : isSiteEnabled,
                 'site-toggle--disabled': !toggleHasEffect
             }}
-            onclick={() => PDF ? actions.changeSettings({enableForPDF: !data.settings.enableForPDF}) : actions.toggleURL(tab.url)}
+            onclick={click}
         >
             <span class="site-toggle__mark"><CheckmarkIcon isEnabled={isSiteEnabled} /></span>
             {' '}

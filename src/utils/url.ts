@@ -120,16 +120,20 @@ export function isPDF(url: string) {
 }
 
 export function isURLEnabled(url: string, userSettings: UserSettings, {isProtected, isInDarkList}) {
-    if (isPDF(url) && userSettings.enableForPDF) {
+    if (isProtected) {
+        return false;
+    }
+    const PDF = isPDF(url) && userSettings.enableForPDF;
+    const isURLInUserList = isURLInList(url, userSettings.siteList);
+    if (PDF && isURLInUserList) {
+        return false;
+    }
+    if (PDF && !isURLInUserList) {
         return true;
     }
     if (isPDF(url) && !userSettings.enableForPDF) {
         return false;
     }
-    if (isProtected) {
-        return false;
-    }
-    const isURLInUserList = isURLInList(url, userSettings.siteList);
     if (userSettings.applyToListedOnly) {
         return isURLInUserList;
     }

@@ -37,7 +37,7 @@ export default function SiteToggleButton({data, tab, actions}: ExtWrapper & {tab
                 'site-toggle--active': pdf ? data.settings.enableForPDF : isSiteEnabled,
                 'site-toggle--disabled': !toggleHasEffect
             }}
-            onclick={onSiteToggleClick()}
+            onclick={onSiteToggleClick}
         >
             <span class="site-toggle__mark"><CheckmarkIcon isEnabled={isSiteEnabled} /></span>
             {' '}

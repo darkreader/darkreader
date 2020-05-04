@@ -66,6 +66,20 @@ function Body({data, actions}: BodyProps) {
     function toggleDesign() {
         actions.changeSettings({previewNewDesign: !data.settings.previewNewDesign});
     }
+    
+    function tabHandler(event: KeyboardEvent & { target: HTMLTextAreaElement; currentTarget: HTMLTextAreaElement; }) {
+        if(event.keyCode===9){
+            const target = event.target;
+            var v=target.value,s=target.selectionStart,e=target.selectionEnd;
+            target.value=v.substring(0, s)+'    '+v.substring(e);
+            target.selectionStart=target.selectionEnd=s+4;
+            // Tab is for some reason also switching focus...
+            target.onblur = function() {
+                target.focus();
+                target.onblur = undefined;
+            }
+        }
+    }
 
     return (
         <body>
@@ -76,6 +90,7 @@ function Body({data, actions}: BodyProps) {
             <h3 id="sub-title">{wrapper.header}</h3>
             <textarea
                 id="editor"
+                onkeydown={(event) => tabHandler(event)}
                 onrender={onTextRender}
             />
             <label id="error-text">{state.errorText}</label>

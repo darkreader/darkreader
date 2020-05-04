@@ -20,7 +20,7 @@ export default class Newsmaker {
 
     private async updateNews() {
         const news = await this.getNews();
-        if (news) {
+        if (Array.isArray(news)) {
             this.latest = news;
             this.onUpdate(this.latest);
         }
@@ -32,10 +32,10 @@ export default class Newsmaker {
             const $news = await response.json();
             return new Promise<News[]>((resolve, reject) => {
                 chrome.storage.sync.get({readNews: []}, ({readNews}) => {
-                    const news: News[] = $news.map(({id, date, headline}) => {
+                    const news: News[] = $news.map(({id, date, headline, important}) => {
                         const url = getBlogPostURL(id);
                         const read = this.isRead(id, readNews);
-                        return {id, date, headline, url, read};
+                        return {id, date, headline, url, important, read};
                     });
                     for (let i = 0; i < news.length; i++) {
                         const date = new Date(news[i].date);
@@ -65,9 +65,9 @@ export default class Newsmaker {
                     }
                 });
                 if (changed) {
-                    this.latest = this.latest.map(({id, date, url, headline}) => {
+                    this.latest = this.latest.map(({id, date, url, headline, important}) => {
                         const read = this.isRead(id, results);
-                        return {id, date, url, headline, read};
+                        return {id, date, url, headline, important, read};
                     });
                     this.onUpdate(this.latest);
                     chrome.storage.sync.set({readNews: results}, () => resolve());

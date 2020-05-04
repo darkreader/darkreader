@@ -5,11 +5,12 @@ import {TabPanel, Button} from '../../controls';
 import FilterSettings from './filter-settings';
 import {Header, MoreToggleSettings} from './header';
 import Loader from './loader';
+import NewBody from '../body';
 import MoreSettings from './more-settings';
 import {News, NewsButton} from './news';
 import SiteListSettings from './site-list-settings';
 import ThemeEngines from '../../../generators/theme-engines';
-import {isFirefox} from '../../../utils/platform';
+import {isFirefox, isMobile} from '../../../utils/platform';
 import {getDuration} from '../../../utils/time';
 import {DONATE_URL, GITHUB_URL, PRIVACY_URL, TWITTER_URL, getHelpURL} from '../../../utils/links';
 import {getLocalMessage} from '../../../utils/locales';
@@ -38,9 +39,10 @@ function openDevTools() {
 }
 
 function Body(props: BodyProps) {
+    const latestNews = props.data.news.length > 0 ? props.data.news[0] : null;
     const {state, setState} = useState<BodyState>({
         activeTab: 'Filter',
-        newsOpen: false,
+        newsOpen: latestNews && latestNews.important && !latestNews.read,
         moreToggleSettingsOpen: false,
     });
     if (!props.data.isReady) {
@@ -49,6 +51,10 @@ function Body(props: BodyProps) {
                 <Loader complete={false} />
             </body>
         );
+    }
+
+    if (isMobile() || props.data.settings.previewNewDesign) {
+        return <NewBody {...props} />;
     }
 
     const unreadNews = props.data.news.filter(({read}) => !read);

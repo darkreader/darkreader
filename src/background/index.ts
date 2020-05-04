@@ -12,23 +12,35 @@ chrome.runtime.onInstalled.addListener(({reason}) => {
 });
 
 declare const __DEBUG__: boolean;
+declare const __PORT__: number;
 const DEBUG = __DEBUG__;
 
 if (DEBUG) {
-    // Reload extension on connection
+    const PORT = __PORT__;
     const listen = () => {
-        const req = new XMLHttpRequest();
-        req.open('GET', 'http://localhost:8890/', true);
-        req.overrideMimeType('text/plain');
-        req.onload = () => {
-            if (req.status >= 200 && req.status < 300 && req.responseText === 'reload') {
-                chrome.runtime.reload();
-            } else {
-                setTimeout(listen, 2000);
+        const socket = new WebSocket(`ws://localhost:${PORT}`);
+        const send = (message: any) => socket.send(JSON.stringify(message));
+        socket.onmessage = (e) => {
+            const message = JSON.parse(e.data);
+            if (message.type.startsWith('reload:')) {
+                send({type: 'reloading'});
+            }
+            switch (message.type) {
+                case 'reload:css': {
+                    chrome.runtime.sendMessage({type: 'css-update'});
+                    break;
+                }
+                case 'reload:ui': {
+                    chrome.runtime.sendMessage({type: 'ui-update'});
+                    break;
+                }
+                case 'reload:full': {
+                    chrome.runtime.reload();
+                    break;
+                }
             }
         };
-        req.onerror = () => setTimeout(listen, 2000);
-        req.send();
+        socket.onclose = () => setTimeout(listen, 1000);
     };
-    setTimeout(listen, 2000);
+    listen();
 }

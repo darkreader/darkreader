@@ -5,6 +5,13 @@ module.exports = {
     rules: {
         'array-bracket-spacing': ['error', 'never'],
         'block-spacing': ['error', 'always'],
+        'indent': ['error', 4, {
+            'SwitchCase': 1,
+        }],
+        'keyword-spacing': ['error', {
+            after: true,
+            before: true,
+        }],
         'object-curly-spacing': ['error', 'never'],
         'no-multi-spaces': 'error',
         'no-trailing-spaces': 'error',
@@ -12,11 +19,16 @@ module.exports = {
         'semi': ['error', 'always'],
         'space-before-function-paren': ['error', {
             anonymous: 'always',
-            named: 'never',
             asyncArrow: 'always',
+            named: 'never',
         }],
         'space-in-parens': ['error', 'never'],
         'spaced-comment': ['error', 'always', {exceptions: ['-']}],
+        'quotes': ['error', 'single', {
+            allowTemplateLiterals: true,
+            avoidEscape: true,
+        }],
+        'eol-last': ["error", "always"],
         '@typescript-eslint/camelcase': 'off',
         '@typescript-eslint/explicit-function-return-type': 'off',
         '@typescript-eslint/explicit-member-accessibility': 'off',

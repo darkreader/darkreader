@@ -2,6 +2,7 @@ const fs = require('fs-extra');
 const globby = require('globby');
 const prettier = require('prettier');
 const {getDestDir} = require('./paths');
+const {createTask} = require('./task');
 const {log} = require('./utils');
 
 const options = {
@@ -33,4 +34,7 @@ async function codeStyle({production}) {
     }
 }
 
-module.exports = codeStyle;
+module.exports = createTask(
+    'code-style',
+    codeStyle,
+);

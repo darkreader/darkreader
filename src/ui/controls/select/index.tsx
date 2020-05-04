@@ -112,7 +112,7 @@ function Select(props: SelectProps) {
     }
 
     return (
-        <span class="select" attached={onRender} updated={onRender}>
+        <span class="select" onrender={onRender}>
             <span class="select__line">
                 <TextBox
                     class="select__textbox"
@@ -140,9 +140,8 @@ function Select(props: SelectProps) {
                     <span
                         class="select__option"
                         data={value}
-                        attached={(domNode) => saveValueNode(value, domNode)}
-                        updated={(domNode) => saveValueNode(value, domNode)}
-                        detached={() => removeValueNode(value)}
+                        onrender={(domNode) => saveValueNode(value, domNode)}
+                        onremove={() => removeValueNode(value)}
                     >
                         {content}
                     </span>

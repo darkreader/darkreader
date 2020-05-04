@@ -6,7 +6,7 @@ import {ExtWrapper, TabInfo} from '../../../../definitions';
 
 export default function SiteToggleButton({data, tab, actions}: ExtWrapper & {tab: TabInfo}) {
 
-    function click() {
+    function onSiteToggleClick() {
         if (pdf) {
             actions.changeSettings({enableForPDF: !data.settings.enableForPDF});
         } else {
@@ -37,7 +37,7 @@ export default function SiteToggleButton({data, tab, actions}: ExtWrapper & {tab
                 'site-toggle--active': pdf ? data.settings.enableForPDF : isSiteEnabled,
                 'site-toggle--disabled': !toggleHasEffect
             }}
-            onclick={click}
+            onclick={onSiteToggleClick()}
         >
             <span class="site-toggle__mark"><CheckmarkIcon isEnabled={isSiteEnabled} /></span>
             {' '}

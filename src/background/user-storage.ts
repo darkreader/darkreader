@@ -57,7 +57,7 @@ export default class UserStorage {
                 textStroke: 0,
                 engine: ThemeEngines.dynamicTheme,
                 stylesheet: '',
-                scrollbarColor: 'auto',
+                scrollbarColor: isMacOS() ? '' : 'auto',
             },
             customThemes: [],
             siteList: [],

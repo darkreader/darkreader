@@ -1,6 +1,5 @@
-import {parse, RGBA, rgbToHSL, hslToRGB, rgbToString, hslToString} from '../../utils/color';
+import {parse, RGBA, rgbToHSL, hslToString} from '../../utils/color';
 import {clamp} from '../../utils/math';
-import {isMacOS} from '../../utils/platform';
 import {getMatches} from '../../utils/text';
 import {modifyBackgroundColor, modifyBorderColor, modifyForegroundColor, modifyGradientColor, modifyShadowColor, clearColorModificationCache} from '../../generators/modify-colors';
 import {cssURLRegex, getCSSURLValue, getCSSBaseBath} from './css-rules';
@@ -87,8 +86,7 @@ export function getModifiedUserAgentStyle(filter: FilterConfig, isIFrame: boolea
     lines.push(`    background-color: ${modifyBackgroundColor({r: 250, g: 255, b: 189}, filter)} !important;`);
     lines.push(`    color: ${modifyForegroundColor({r: 0, g: 0, b: 0}, filter)} !important;`);
     lines.push('}');
-    if (!isMacOS() && filter.scrollbarColor) {
-        // TODO: macOS users can turn on scrollbar in system preferences.
+    if (filter.scrollbarColor) {
         lines.push(getModifiedScrollbarStyle(filter));
     }
     return lines.join('\n');

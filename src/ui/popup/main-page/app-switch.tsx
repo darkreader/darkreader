@@ -7,6 +7,8 @@ import {ViewProps} from '../types';
 export default function AppSwitch(props: ViewProps) {
     const isOn = props.data.settings.enabled === true && !props.data.settings.automation;
     const isOff = props.data.settings.enabled === false && !props.data.settings.automation;
+    const isTime = props.data.settings.automation === 'time';
+    const isLocation = props.data.settings.automation === 'location';
 
     // TODO: Replace messages with some IDs.
     const values = [
@@ -39,8 +41,11 @@ export default function AppSwitch(props: ViewProps) {
         'Extension is enabled' :
         isOff ?
             'Extension is disabled' :
-            // TODO: More messages (location, time etc).
-            'Switches according to system dark mode';
+            isTime ?
+                'Switches according to specific time' :
+                isLocation ?
+                'Switched according to location' :
+                    'Switches according to system dark mode';
 
     return (
         <ControlGroup class="app-switch">

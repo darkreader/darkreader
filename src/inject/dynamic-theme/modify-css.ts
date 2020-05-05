@@ -92,7 +92,7 @@ export function getModifiedUserAgentStyle(filter: FilterConfig, isIFrame: boolea
         lines.push(`    background-color: ${modifyBackgroundColor({r: 241, g: 241, b: 241}, filter)};`);
         lines.push(`    color: ${modifyForegroundColor({r: 96, g: 96, b: 96}, filter)};`);
         lines.push('}');
-        if (filter.scrollbarColor === "auto") {
+        if (filter.scrollbarColor === 'auto') {
             lines.push('::-webkit-scrollbar-thumb {');
             lines.push(`    background-color: ${modifyBackgroundColor({r: 193, g: 193, b: 193}, filter)};`);
             lines.push('}');

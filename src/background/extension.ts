@@ -408,11 +408,10 @@ export class Extension {
                     const filter = {...filterConfig};
                     delete filter.engine;
                     const fixes = getDynamicThemeFixesFor(url, frameURL, this.config.DYNAMIC_THEME_FIXES);
-                    const userSettings = this.user.settings;
                     const isIFrame = frameURL != null;
                     return {
                         type: 'add-dynamic-theme',
-                        data: {filter, fixes, userSettings, isIFrame},
+                        data: {filter, fixes, isIFrame},
                     };
                 }
                 default: {

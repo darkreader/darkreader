@@ -10,7 +10,7 @@ interface ScrollbarEditorProps {
     onReset: () => void;
 }
 
-export default function Scrollbarditor(props: ScrollbarEditorProps) {
+export default function ScrollbarEditor(props: ScrollbarEditorProps) {
     return (
         <ThemeControl label="Scrollbar">
             <ColorDropDown

@@ -4,6 +4,7 @@ import Grayscale from './grayscale';
 import Mode from './mode';
 import Scheme from './scheme';
 import Sepia from './sepia';
+import Scrollbar from './scrollbar';
 
 export {
     Brightness,
@@ -12,4 +13,5 @@ export {
     Mode,
     Scheme,
     Sepia,
+    Scrollbar,
 };

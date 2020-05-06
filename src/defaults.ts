@@ -13,6 +13,7 @@ export const DEFAULT_THEME: Theme = {
     textStroke: 0,
     engine: ThemeEngines.dynamicTheme,
     stylesheet: '',
+    scrollbarColor: isMacOS() ? '' : 'auto',
 };
 
 export const DEFAULT_SETTINGS: UserSettings = {

@@ -1,13 +1,13 @@
 import {getURLHost} from '../../utils/url';
-import {ExtensionData, TabInfo, UserSettings} from '../../definitions';
+import {ExtensionData, TabInfo, Theme, UserSettings} from '../../definitions';
 
-export function getMockData(override = {}): ExtensionData {
-    return Object.assign({
+export function getMockData(override = {} as Partial<ExtensionData>): ExtensionData {
+    return Object.assign(<ExtensionData>{
         isEnabled: true,
         isReady: true,
-        settings: {
+        settings: <UserSettings>{
             enabled: true,
-            theme: {
+            theme: <Theme>{
                 mode: 1,
                 brightness: 110,
                 contrast: 90,
@@ -18,12 +18,14 @@ export function getMockData(override = {}): ExtensionData {
                 textStroke: 0,
                 engine: 'cssFilter',
                 stylesheet: '',
+                scrollbarColor: 'auto',
             },
             customThemes: [],
             siteList: [],
             siteListEnabled: [],
             applyToListedOnly: false,
             changeBrowserTheme: false,
+            enableForPDF: true,
             notifyOfNews: false,
             syncSettings: true,
             automation: '',
@@ -35,7 +37,7 @@ export function getMockData(override = {}): ExtensionData {
                 latitude: 52.4237178,
                 longitude: 31.021786,
             },
-        } as UserSettings,
+        },
         fonts: [
             'serif',
             'sans-serif',

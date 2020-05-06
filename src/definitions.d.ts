@@ -47,6 +47,7 @@ export interface FilterConfig {
     textStroke: number;
     engine: string;
     stylesheet: string;
+    scrollbarColor: '' | 'auto' | string;
 }
 
 export type Theme = FilterConfig;

@@ -1,0 +1,54 @@
+@import "../../theme.less";
+
+@colorpicker-input-height: 1.5rem;
+@colorpicker-input-height-inactive: 1.25rem;
+@colorpicker-icon-size: 1rem;
+
+.color-picker {
+    display: inline-block;
+    height: @colorpicker-input-height;
+    position: relative;
+
+    &__input {
+        background-color: @color-control-active;
+        border: none;
+        border-radius: @colorpicker-input-height / 2;
+        box-sizing: border-box;
+        color: @color-control-fore;
+        height: @colorpicker-input-height-inactive;
+        margin-top: (@colorpicker-input-height - @colorpicker-input-height-inactive) / 2;
+        text-align: center;
+        width: 100%;
+
+        &:focus {
+            border: @size-border solid @color-border;
+            height: @colorpicker-input-height;
+            margin-top: 0;
+        }
+    }
+
+    &__preview {
+        border-radius: 50%;
+        display: inline-block;
+        height: @colorpicker-icon-size;
+        left: (@colorpicker-input-height - @colorpicker-icon-size) / 2;
+        position: absolute;
+        top: (@colorpicker-input-height - @colorpicker-icon-size) / 2;
+        width: @colorpicker-icon-size;
+    }
+
+    &__reset {
+        background-image: @icon-reset;
+        background-position: 0 0;
+        background-repeat: no-repeat;
+        background-size: @colorpicker-icon-size;
+        border-radius: 50%;
+        cursor: pointer;
+        display: inline-block;
+        height: @colorpicker-icon-size;
+        position: absolute;
+        right: 0.25rem;
+        top: (@colorpicker-input-height - @colorpicker-icon-size) / 2;
+        width: @colorpicker-icon-size;
+    }
+}

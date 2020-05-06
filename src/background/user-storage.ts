@@ -118,6 +118,7 @@ export default class UserStorage {
                 textStroke: f.textStroke,
                 engine: f.engine,
                 stylesheet: f.stylesheet,
+                scrollbarColor: f.scrollbarColor,
             };
         }
 

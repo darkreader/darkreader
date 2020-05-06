@@ -74,30 +74,6 @@ export class Extension {
         return this.user.settings.enabled;
     }
 
-    shouldToggle() {
-        const {automation} = this.user.settings;
-        if (automation === 'time') {
-            const now = new Date();
-            return isInTimeInterval(now, this.user.settings.time.activation, this.user.settings.time.deactivation);
-        } else if (automation === 'system') {
-            if (isFirefox()) {
-                // BUG: Firefox background page always matches initial color scheme.
-                return this.wasLastColorSchemeDark == null
-                    ? isSystemDarkModeEnabled()
-                    : this.wasLastColorSchemeDark;
-            }
-            return isSystemDarkModeEnabled();
-        } else if (automation === 'location') {
-            const latitude = this.user.settings.location.latitude;
-            const longitude = this.user.settings.location.longitude;
-
-            if (latitude != null && longitude != null) {
-                const now = new Date();
-                return isNightAtLocation(now, latitude, longitude);
-            }
-        }
-    }
-
     private awaiting: (() => void)[];
 
     async start() {

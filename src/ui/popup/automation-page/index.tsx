@@ -140,22 +140,12 @@ export default function AutomationPage(props: ViewProps) {
                 {getLocalMessage('system_dark_mode_description')}
             </p>
             <div class='automation-page__line'>
-                <Button
-                    class={{'mode-toggle__button--active': shouldEnableDisable === true}}
-                    onclick={() => changeShouldEnableDisable(false)}
-                >
-                </Button>
                 <Toggle
                     checked={shouldEnableDisable === true}
-                    labelOn={'Label On'}
-                    labelOff={'Label Off'}
+                    labelOn={'Toggle Enable/Disable state'}
+                    labelOff={'Toggle Dark/Light mode'}
                     onChange={() => changeShouldEnableDisable(shouldEnableDisable ? false : true)}
                 />
-                <Button
-                    class={{'automation-page__button--active': shouldEnableDisable === false}}
-                    onclick={() => changeShouldEnableDisable(true)}
-                >
-                </Button>
             </div>
             <label class="automation-page__label">{getLocalMessage('mode')}</label>
         </div>

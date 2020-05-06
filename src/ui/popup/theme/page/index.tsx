@@ -1,5 +1,5 @@
 import {m} from 'malevic';
-import {DEFAULT_SETTINGS} from '../../../../background/user-storage';
+import {DEFAULT_SETTINGS} from '../../../../defaults';
 import {ViewProps} from '../../types';
 import {Brightness, Contrast, Grayscale, Mode, Scheme, Sepia, Scrollbar} from '../controls';
 import ThemePresetPicker from '../preset-picker';

@@ -18,7 +18,7 @@ export const DEFAULT_SETTINGS: UserSettings = {
         textStroke: 0,
         engine: ThemeEngines.dynamicTheme,
         stylesheet: '',
-        scrollbarColor: 'auto',
+        scrollbarColor: isMacOS() ? '' : 'auto',
     },
     customThemes: [],
     siteList: [],

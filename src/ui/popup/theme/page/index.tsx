@@ -1,4 +1,5 @@
 import {m} from 'malevic';
+import {DEFAULT_SETTINGS} from '../../../../background/user-storage';
 import {ViewProps} from '../../types';
 import {Brightness, Contrast, Grayscale, Mode, Scheme, Sepia, Scrollbar} from '../controls';
 import ThemePresetPicker from '../preset-picker';
@@ -36,12 +37,11 @@ export default function ThemePage(props: ViewProps) {
                 onChange={(mode) => change({engine: mode})}
             />
             <Scrollbar
-                selected={props.data.settings.theme.scrollbarColor}
-                hexColor={props.data.settings.theme.scrollbarColor == '' ? 'Disabled' : props.data.settings.theme.scrollbarColor == 'auto' ? '#2a2c2e' : props.data.settings.theme.scrollbarColor}
+                value={theme.scrollbarColor}
                 onChange={(v) => props.actions.setTheme({scrollbarColor: v})}
-                onColorChange={(v) => props.actions.setTheme({scrollbarColor: v})}
+                onReset={() => props.actions.setTheme({scrollbarColor: DEFAULT_SETTINGS.theme.scrollbarColor})}
             />
-            <ResetButton {...props}/>
+            <ResetButton {...props} />
         </section>
     );
 }

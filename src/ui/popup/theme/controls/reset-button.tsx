@@ -1,8 +1,8 @@
 import {m} from 'malevic';
+import {DEFAULT_SETTINGS} from '../../../../defaults';
 import {Button} from '../../../controls';
 import ControlGroup from '../../control-group';
 import {ViewProps} from '../../types';
-import {DEFAULT_SETTINGS} from '../../../../background/user-storage';
 
 export default function ResetButton(props: ViewProps) {
     function reset() {

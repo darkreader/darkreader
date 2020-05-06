@@ -1,81 +1,11 @@
-import {isMacOS, isWindows} from '../utils/platform';
-import ThemeEngines from '../generators/theme-engines';
+import {DEFAULT_SETTINGS} from '../defaults';
 import {isURLMatched} from '../utils/url';
 import {UserSettings} from '../definitions';
 
 const SAVE_TIMEOUT = 1000;
 
-export const DEFAULT_SETTINGS: UserSettings = {
-    enabled: true,
-    theme: {
-        mode: 1,
-        brightness: 100,
-        contrast: 100,
-        grayscale: 0,
-        sepia: 0,
-        useFont: false,
-        fontFamily: isMacOS() ? 'Helvetica Neue' : isWindows() ? 'Segoe UI' : 'Open Sans',
-        textStroke: 0,
-        engine: ThemeEngines.dynamicTheme,
-        stylesheet: '',
-    },
-    customThemes: [],
-    siteList: [],
-    siteListEnabled: [],
-    applyToListedOnly: false,
-    changeBrowserTheme: false,
-    notifyOfNews: false,
-    syncSettings: true,
-    automation: '',
-    time: {
-        activation: '18:00',
-        deactivation: '9:00',
-    },
-    location: {
-        latitude: null,
-        longitude: null,
-    },
-    previewNewDesign: false,
-    enableForPDF: true,
-};
-
 export default class UserStorage {
-    private defaultSettings: UserSettings;
-
     constructor() {
-        this.defaultSettings = {
-            enabled: true,
-            theme: {
-                mode: 1,
-                brightness: 100,
-                contrast: 100,
-                grayscale: 0,
-                sepia: 0,
-                useFont: false,
-                fontFamily: isMacOS() ? 'Helvetica Neue' : isWindows() ? 'Segoe UI' : 'Open Sans',
-                textStroke: 0,
-                engine: ThemeEngines.dynamicTheme,
-                stylesheet: '',
-            },
-            customThemes: [],
-            siteList: [],
-            siteListEnabled: [],
-            applyToListedOnly: false,
-            changeBrowserTheme: false,
-            notifyOfNews: false,
-            syncSettings: true,
-            automation: '',
-            time: {
-                activation: '18:00',
-                deactivation: '9:00',
-            },
-            location: {
-                latitude: null,
-                longitude: null,
-            },
-            previewNewDesign: false,
-            enableForPDF: true,
-        };
         this.settings = null;
     }
 
@@ -92,15 +22,15 @@ export default class UserStorage {
 
     private loadSettingsFromStorage() {
         return new Promise<UserSettings>((resolve) => {
-            chrome.storage.local.get(this.defaultSettings, (local: UserSettings) => {
+            chrome.storage.local.get(DEFAULT_SETTINGS, (local: UserSettings) => {
                 if (!local.syncSettings) {
-                    local.theme = {...this.defaultSettings.theme, ...local.theme};
-                    local.time = {...this.defaultSettings.time, ...local.time};
+                    local.theme = {...DEFAULT_SETTINGS.theme, ...local.theme};
+                    local.time = {...DEFAULT_SETTINGS.time, ...local.time};
                     resolve(local);
                     return;
                 }
 
-                chrome.storage.sync.get({...this.defaultSettings, config: 'empty'}, ($sync: UserSettings & {config: any}) => {
+                chrome.storage.sync.get({...DEFAULT_SETTINGS, config: 'empty'}, ($sync: UserSettings & {config: any}) => {
                     let sync: UserSettings;
                     if ($sync.config === 'empty') {
                         delete $sync.config;
@@ -108,8 +38,8 @@ export default class UserStorage {
                     } else {
                         sync = this.migrateSettings_4_6_2($sync) as UserSettings;
                     }
-                    sync.theme = {...this.defaultSettings.theme, ...sync.theme};
-                    sync.time = {...this.defaultSettings.time, ...sync.time};
+                    sync.theme = {...DEFAULT_SETTINGS.theme, ...sync.theme};
+                    sync.time = {...DEFAULT_SETTINGS.time, ...sync.time};
                     resolve(sync);
                 });
             });
@@ -194,7 +124,7 @@ export default class UserStorage {
         try {
             const s = settings_4_6_2;
             const settings: UserSettings = {
-                ...this.defaultSettings,
+                ...DEFAULT_SETTINGS,
                 enabled: s.enabled,
                 theme: migrateTheme(s.config),
                 customThemes: s.config.custom ? s.config.custom.map((c) => {
@@ -212,7 +142,7 @@ export default class UserStorage {
             return settings;
         } catch (err) {
             console.error('Settings migration error:', err, 'Loaded settings:', settings_4_6_2);
-            return this.defaultSettings;
+            return DEFAULT_SETTINGS;
         }
     }
 }

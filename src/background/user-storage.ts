@@ -37,7 +37,6 @@ export const DEFAULT_SETTINGS: UserSettings = {
     },
     previewNewDesign: false,
     enableForPDF: true,
-    shouldEnableDisable: false,
 };
 
 export default class UserStorage {
@@ -76,7 +75,6 @@ export default class UserStorage {
             },
             previewNewDesign: false,
             enableForPDF: true,
-            shouldEnableDisable: false,
         };
         this.settings = null;
     }

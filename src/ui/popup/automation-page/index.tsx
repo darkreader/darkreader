@@ -6,7 +6,6 @@ import {CheckBox, TimeRangePicker, TextBox, Button, Toggle} from '../../controls
 export default function AutomationPage(props: ViewProps) {
     const isSystemAutomation = props.data.settings.automation === 'system';
     const locationSettings = props.data.settings.location;
-    const shouldEnableDisable = props.data.settings.shouldEnableDisable
     const values = {
         'latitude': {
             min: -90,
@@ -62,10 +61,6 @@ export default function AutomationPage(props: ViewProps) {
                 [type]: num,
             },
         });
-    }
-
-    function changeShouldEnableDisable(value: boolean) {
-        props.actions.changeSettings({shouldEnableDisable: value});
     }
 
     return (
@@ -139,15 +134,6 @@ export default function AutomationPage(props: ViewProps) {
             <p class="automation-page__description">
                 {getLocalMessage('system_dark_mode_description')}
             </p>
-            <div class='automation-page__line'>
-                <Toggle
-                    checked={shouldEnableDisable === true}
-                    labelOn={'Toggle Enable/Disable state'}
-                    labelOff={'Toggle Dark/Light mode'}
-                    onChange={() => changeShouldEnableDisable(shouldEnableDisable ? false : true)}
-                />
-            </div>
-            <label class="automation-page__label">{getLocalMessage('mode')}</label>
         </div>
     );
 }

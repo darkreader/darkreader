@@ -42,7 +42,7 @@ export default function AppSwitch(props: ViewProps) {
         isOff ?
             'Extension is disabled' :
             isTime ?
-                'Switches according to specific time' :
+                'Switches according to specified time' :
                 isLocation ?
                 'Switched according to location' :
                     'Switches according to system dark mode';

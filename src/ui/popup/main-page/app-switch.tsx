@@ -44,7 +44,7 @@ export default function AppSwitch(props: ViewProps) {
             isTime ?
                 'Switches according to specified time' :
                 isLocation ?
-                'Switched according to location' :
+                    'Switched according to location' :
                     'Switches according to system dark mode';
 
     return (

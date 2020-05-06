@@ -1,7 +1,7 @@
 import {ViewProps} from '../types';
 import {m} from 'malevic';
 import {getLocalMessage} from '../../../utils/locales';
-import {CheckBox, TimeRangePicker, TextBox, Button, Toggle} from '../../controls';
+import {CheckBox, TimeRangePicker, TextBox, Button} from '../../controls';
 
 export default function AutomationPage(props: ViewProps) {
     const isSystemAutomation = props.data.settings.automation === 'system';

@@ -103,8 +103,8 @@ function getModifiedScrollbarStyle(theme: Theme) {
     if (theme.scrollbarColor === 'auto') {
         colorTrack = modifyBackgroundColor({r: 241, g: 241, b: 241}, theme);
         colorIcons = modifyForegroundColor({r: 96, g: 96, b: 96}, theme);
-        colorThumb = modifyBackgroundColor({r: 193, g: 193, b: 193}, theme);
-        colorThumbHover = modifyBackgroundColor({r: 166, g: 166, b: 166}, theme);
+        colorThumb = modifyBackgroundColor({r: 176, g: 176, b: 176}, theme);
+        colorThumbHover = modifyBackgroundColor({r: 144, g: 144, b: 144}, theme);
         colorThumbActive = modifyBackgroundColor({r: 96, g: 96, b: 96}, theme);
         colorCorner = modifyBackgroundColor({r: 255, g: 255, b: 255}, theme);
     } else {
@@ -113,11 +113,11 @@ function getModifiedScrollbarStyle(theme: Theme) {
         const isLight = hsl.l > 0.5;
         const lighten = (lighter: number) => ({...hsl, l: clamp(hsl.l + lighter, 0, 1)});
         const darken = (darker: number) => ({...hsl, l: clamp(hsl.l - darker, 0, 1)});
-        colorTrack = hslToString(darken(0.7));
-        colorIcons = hslToString(isLight ? darken(0.7) : lighten(0.7));
+        colorTrack = hslToString(darken(0.4));
+        colorIcons = hslToString(isLight ? darken(0.4) : lighten(0.4));
         colorThumb = hslToString(hsl);
         colorThumbHover = hslToString(lighten(0.1));
-        colorThumbActive = hslToString(lighten(0.3));
+        colorThumbActive = hslToString(lighten(0.2));
     }
     lines.push('::-webkit-scrollbar {');
     lines.push(`    background-color: ${colorTrack};`);

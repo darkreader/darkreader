@@ -2,12 +2,12 @@ import {getURLHost} from '../../utils/url';
 import {ExtensionData, TabInfo, Theme, UserSettings} from '../../definitions';
 
 export function getMockData(override = {} as Partial<ExtensionData>): ExtensionData {
-    return Object.assign(<ExtensionData>{
+    return Object.assign({
         isEnabled: true,
         isReady: true,
-        settings: <UserSettings>{
+        settings: {
             enabled: true,
-            theme: <Theme>{
+            theme: {
                 mode: 1,
                 brightness: 110,
                 contrast: 90,
@@ -19,7 +19,7 @@ export function getMockData(override = {} as Partial<ExtensionData>): ExtensionD
                 engine: 'cssFilter',
                 stylesheet: '',
                 scrollbarColor: 'auto',
-            },
+            } as Theme,
             customThemes: [],
             siteList: [],
             siteListEnabled: [],
@@ -37,7 +37,7 @@ export function getMockData(override = {} as Partial<ExtensionData>): ExtensionD
                 latitude: 52.4237178,
                 longitude: 31.021786,
             },
-        },
+        } as UserSettings,
         fonts: [
             'serif',
             'sans-serif',
@@ -59,7 +59,7 @@ export function getMockData(override = {} as Partial<ExtensionData>): ExtensionD
             hasCustomFilterFixes: false,
             hasCustomStaticFixes: false,
         },
-    }, override);
+    } as ExtensionData, override);
 }
 
 export function getMockActiveTabInfo(): TabInfo {

@@ -1,10 +1,10 @@
 import {m} from 'malevic';
 import {DEFAULT_SETTINGS} from '../../../../defaults';
-import {Button} from '../../../controls';
+import {ResetButton} from '../../../controls';
 import ControlGroup from '../../control-group';
 import {ViewProps} from '../../types';
 
-export default function ResetButton(props: ViewProps) {
+export default function ResetButtonGroup(props: ViewProps) {
     function reset() {
         props.actions.setTheme(DEFAULT_SETTINGS.theme);
     }
@@ -12,16 +12,12 @@ export default function ResetButton(props: ViewProps) {
     return (
         <ControlGroup>
             <ControlGroup.Control>
-                <Button
-                    class="reset-button"
-                    onclick={reset}
-                    style="width: 100%"
-                >
-                    Reset
-                </Button>
+                <ResetButton onClick={reset}>
+                    Reset to defaults
+                </ResetButton>
             </ControlGroup.Control>
             <ControlGroup.Description>
-                Reset all theme values
+                Restore current theme values to defaults
             </ControlGroup.Description>
         </ControlGroup>
     );

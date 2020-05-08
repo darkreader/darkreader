@@ -6,13 +6,12 @@ import DropDown from '../dropdown';
 interface ColorDropDownProps {
     class?: string;
     value: string;
+    colorSuggestion: string;
     hasDefaultOption: boolean;
     hasAutoOption: boolean;
     onChange: (value: string) => void;
     onReset: () => void;
 }
-
-const SCROLLBAR_COLOR_SUGGESTION = '#959799';
 
 export default function ColorDropDown(props: ColorDropDownProps) {
     const context = getContext();
@@ -44,7 +43,7 @@ export default function ColorDropDown(props: ColorDropDownProps) {
         const result = {
             [labels.DEFAULT]: '',
             [labels.AUTO]: 'auto',
-            [labels.CUSTOM]: SCROLLBAR_COLOR_SUGGESTION,
+            [labels.CUSTOM]: props.colorSuggestion,
         }[value];
         props.onChange(result);
     }

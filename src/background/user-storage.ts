@@ -119,6 +119,7 @@ export default class UserStorage {
                 engine: f.engine,
                 stylesheet: f.stylesheet,
                 scrollbarColor: f.scrollbarColor,
+                selectionColor: f.selectionColor,
             };
         }
 

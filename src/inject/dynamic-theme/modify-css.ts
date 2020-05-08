@@ -74,12 +74,6 @@ export function getModifiedUserAgentStyle(filter: FilterConfig, isIFrame: boolea
     lines.push('::placeholder {');
     lines.push(`    color: ${modifyForegroundColor({r: 169, g: 169, b: 169}, filter)};`);
     lines.push('}');
-    ['::selection', '::-moz-selection'].forEach((selection) => {
-        lines.push(`${selection} {`);
-        lines.push(`    background-color: ${modifyBackgroundColor({r: 0, g: 96, b: 212}, filter)};`);
-        lines.push(`    color: ${modifyForegroundColor({r: 255, g: 255, b: 255}, filter)};`);
-        lines.push('}');
-    });
     lines.push('input:-webkit-autofill,');
     lines.push('textarea:-webkit-autofill,');
     lines.push('select:-webkit-autofill {');
@@ -89,6 +83,35 @@ export function getModifiedUserAgentStyle(filter: FilterConfig, isIFrame: boolea
     if (filter.scrollbarColor) {
         lines.push(getModifiedScrollbarStyle(filter));
     }
+    if (filter.selectionColor) {
+        lines.push(getModifiedSelectionStyle(filter));
+    }
+    return lines.join('\n');
+}
+
+function getModifiedSelectionStyle(theme: Theme) {
+    const lines: string[] = [];
+    let backgroundColorSelection: string;
+    let foregroundColorSelection: string;
+    if (theme.selectionColor === 'auto') {
+        backgroundColorSelection = modifyBackgroundColor({r: 0, g: 96, b: 212}, theme);
+        foregroundColorSelection = modifyForegroundColor({r: 255, g: 255, b: 255}, theme);
+    } else {
+        const rgb = parse(theme.selectionColor);
+        const hsl = rgbToHSL(rgb);
+        backgroundColorSelection = theme.selectionColor;
+        if (hsl.l < 0.5) {
+            foregroundColorSelection = '#FFF';
+        } else {
+            foregroundColorSelection = '#000';
+        }
+    }
+    ['::selection', '::-moz-selection'].forEach((selection) => {
+        lines.push(`${selection} {`);
+        lines.push(`    background-color: ${backgroundColorSelection} !important;`);
+        lines.push(`    color: ${foregroundColorSelection} !important;`);
+        lines.push('}');
+    });
     return lines.join('\n');
 }
 

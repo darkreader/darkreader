@@ -10,11 +10,12 @@ interface SelectionEditorProps {
     onReset: () => void;
 }
 
-export default function SelectionEditor(props: SelectionEditorProps) {
+export default function SelectionColorEditor(props: SelectionEditorProps) {
     return (
         <ThemeControl label="Selection">
             <ColorDropDown
                 value={props.value}
+                colorSuggestion={'#005ccc'}
                 onChange={props.onChange}
                 onReset={props.onReset}
                 hasAutoOption

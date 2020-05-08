@@ -15,6 +15,7 @@ export default function ScrollbarEditor(props: ScrollbarEditorProps) {
         <ThemeControl label="Scrollbar">
             <ColorDropDown
                 value={props.value}
+                colorSuggestion={'#959799'}
                 onChange={props.onChange}
                 onReset={props.onReset}
                 hasAutoOption

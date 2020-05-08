@@ -1,7 +1,7 @@
 import {getURLHost} from '../../utils/url';
-import {ExtensionData, TabInfo, UserSettings} from '../../definitions';
+import {ExtensionData, TabInfo, Theme, UserSettings} from '../../definitions';
 
-export function getMockData(override = {}): ExtensionData {
+export function getMockData(override = {} as Partial<ExtensionData>): ExtensionData {
     return Object.assign({
         isEnabled: true,
         isReady: true,
@@ -18,12 +18,14 @@ export function getMockData(override = {}): ExtensionData {
                 textStroke: 0,
                 engine: 'cssFilter',
                 stylesheet: '',
-            },
+                scrollbarColor: 'auto',
+            } as Theme,
             customThemes: [],
             siteList: [],
             siteListEnabled: [],
             applyToListedOnly: false,
             changeBrowserTheme: false,
+            enableForPDF: true,
             notifyOfNews: false,
             syncSettings: true,
             automation: '',
@@ -57,7 +59,7 @@ export function getMockData(override = {}): ExtensionData {
             hasCustomFilterFixes: false,
             hasCustomStaticFixes: false,
         },
-    }, override);
+    } as ExtensionData, override);
 }
 
 export function getMockActiveTabInfo(): TabInfo {

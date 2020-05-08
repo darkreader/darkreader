@@ -1,9 +1,9 @@
 import {m} from 'malevic';
 import SiteToggle from '../site-toggle';
 import MoreToggleSettings from './more-toggle-settings';
-import WatchIcon from './watch-icon';
-import SunMoonIcon from './sun-moon-icon';
-import SystemIcon from './system-icon';
+import WatchIcon from '../../main-page/watch-icon';
+import SunMoonIcon from '../../main-page/sun-moon-icon';
+import SystemIcon from '../../main-page/system-icon';
 import {Shortcut, Toggle} from '../../../controls';
 import {getLocalMessage} from '../../../../utils/locales';
 import {ExtWrapper, TabInfo} from '../../../../definitions';

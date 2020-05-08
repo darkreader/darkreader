@@ -1,21 +1,9 @@
 import './chrome';
 import {setFetchMethod as setFetch} from './fetch';
-import {FilterConfig as Theme, DynamicThemeFix} from '../definitions';
+import {DEFAULT_THEME} from '../defaults';
+import {Theme, DynamicThemeFix} from '../definitions';
 import ThemeEngines from '../generators/theme-engines';
 import {createOrUpdateDynamicTheme, removeDynamicTheme} from '../inject/dynamic-theme';
-
-const defaultTheme: Theme = {
-    mode: 1,
-    brightness: 100,
-    contrast: 100,
-    grayscale: 0,
-    sepia: 0,
-    useFont: false,
-    fontFamily: '',
-    textStroke: 0,
-    engine: ThemeEngines.dynamicTheme,
-    stylesheet: '',
-};
 
 const isIFrame = (() => {
     try {
@@ -27,7 +15,7 @@ const isIFrame = (() => {
 })();
 
 export function enable(themeOptions: Partial<Theme> = {}, fixes: DynamicThemeFix = null) {
-    const theme = {...defaultTheme, ...themeOptions};
+    const theme = {...DEFAULT_THEME, ...themeOptions};
 
     if (theme.engine !== ThemeEngines.dynamicTheme) {
         throw new Error('Theme engine is not supported');

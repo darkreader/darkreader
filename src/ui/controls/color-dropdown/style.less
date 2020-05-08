@@ -1,0 +1,25 @@
+@color-dropdown-height: 1.5rem;
+@color-dropdown-item-height: 1.25rem;
+@color-dropdown-item-active-height: 1.5rem;
+
+.color-dropdown {
+    height: @color-dropdown-height;
+    position: relative;
+    width: 100%;
+
+    &__options {
+        width: 100%;
+    }
+
+    &__picker {
+        height: 100%;
+        position: absolute;
+        right: 0;
+        top: 0;
+        width: 100%;
+
+        &--hidden {
+            display: none;
+        }
+    }
+}

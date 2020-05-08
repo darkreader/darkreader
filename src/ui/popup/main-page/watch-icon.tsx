@@ -2,7 +2,7 @@ import {m} from 'malevic';
 
 export default function WatchIcon({hours, minutes}) {
     const cx = 8;
-    const cy = 9;
+    const cy = 8.5;
     const lenHour = 3;
     const lenMinute = 4;
     const clockR = 5.5;

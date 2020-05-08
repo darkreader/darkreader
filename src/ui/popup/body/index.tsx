@@ -3,12 +3,12 @@ import {getContext} from 'malevic/dom';
 import {DONATE_URL} from '../../../utils/links';
 import {getLocalMessage} from '../../../utils/locales';
 import {isMobile} from '../../../utils/platform';
+import AutomationPage from '../automation-page';
 import MainPage from '../main-page';
 import {Page, PageViewer} from '../page-viewer';
 import SettingsPage from '../settings-page';
 import ThemePage from '../theme/page';
 import {ViewProps} from '../types';
-import AutomationPage from '../automation-page';
 
 function Logo() {
     return (

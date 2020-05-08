@@ -36,7 +36,7 @@ export function fixNotClosingPopupOnNavigation() {
             target = target.parentElement;
         }
         if (target && target.hasAttribute('href')) {
-            chrome.tabs.create({ url: target.getAttribute('href') });
+            chrome.tabs.create({url: target.getAttribute('href')});
             e.preventDefault();
             window.close();
         }

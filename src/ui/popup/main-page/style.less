@@ -4,6 +4,34 @@
     &__control {
         width: calc(100% - @size-border * 2);
     }
+
+    &__time {
+        background-color: @color-heading;
+        border-radius: 50%;
+        color: @color-control-fore;
+        cursor: pointer;
+        display: none;
+        height: @size-text-small-height;
+        pointer-events: none;
+        position: absolute;
+        right: calc(33% + @size-border / 3);
+        top: -@size-text-small-height / 4;
+        transition: opacity @time-slow @time-slow;
+        width: @size-text-small-height;
+
+        &--active {
+            display: inline-block;
+        }
+    }
+}
+
+.settings-button-icon {
+    background-image: @icon-settings;
+    background-size: cover;
+    display: inline-block;
+    height: 1rem;
+    margin-right: 0.125rem;
+    width: 1rem;
 }
 
 .site-toggle-group {

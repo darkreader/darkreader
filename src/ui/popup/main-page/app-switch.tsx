@@ -3,10 +3,17 @@ import {getLocalMessage} from '../../../utils/locales';
 import {MultiSwitch} from '../../controls';
 import ControlGroup from '../control-group';
 import {ViewProps} from '../types';
+import WatchIcon from './watch-icon';
+import SunMoonIcon from './sun-moon-icon';
+import SystemIcon from './system-icon';
 
 export default function AppSwitch(props: ViewProps) {
     const isOn = props.data.settings.enabled === true && !props.data.settings.automation;
     const isOff = props.data.settings.enabled === false && !props.data.settings.automation;
+    const isAutomation = Boolean(props.data.settings.automation);
+    const isTimeAutomation = props.data.settings.automation === 'time';
+    const isLocationAutomation = props.data.settings.automation === 'location';
+    const now = new Date();
 
     // TODO: Replace messages with some IDs.
     const values = [
@@ -39,8 +46,11 @@ export default function AppSwitch(props: ViewProps) {
         'Extension is enabled' :
         isOff ?
             'Extension is disabled' :
-            // TODO: More messages (location, time etc).
-            'Switches according to system dark mode';
+            isTimeAutomation ?
+                'Switches according to specified time' :
+                isLocationAutomation ?
+                    'Switched according to location' :
+                    'Switches according to system dark mode';
 
     return (
         <ControlGroup class="app-switch">
@@ -50,7 +60,20 @@ export default function AppSwitch(props: ViewProps) {
                     options={values}
                     value={value}
                     onChange={onSwitchChange}
-                />
+                >
+                    <span
+                        class={{
+                            'app-switch__time': true,
+                            'app-switch__time--active': isAutomation,
+                        }}
+                    >
+                        {(isTimeAutomation
+                            ? <WatchIcon hours={now.getHours()} minutes={now.getMinutes()} />
+                            : (isLocationAutomation
+                                ? (<SunMoonIcon date={now} latitude={props.data.settings.location.latitude} longitude={props.data.settings.location.longitude} />)
+                                : <SystemIcon />))}
+                    </span>
+                </MultiSwitch>
             </ControlGroup.Control>
             <ControlGroup.Description>
                 {description}

@@ -3,6 +3,7 @@ import {getContext} from 'malevic/dom';
 import {DONATE_URL} from '../../../utils/links';
 import {getLocalMessage} from '../../../utils/locales';
 import {isMobile} from '../../../utils/platform';
+import AutomationPage from '../automation-page';
 import MainPage from '../main-page';
 import {Page, PageViewer} from '../page-viewer';
 import SettingsPage from '../settings-page';
@@ -25,7 +26,7 @@ function Logo() {
 function Pages(props: ViewProps) {
     const context = getContext();
     const store = context.store as {
-        activePage: 'main' | 'theme' | 'settings';
+        activePage: 'main' | 'theme' | 'settings' | 'automation';
     };
     if (store.activePage == null) {
         store.activePage = 'main';
@@ -41,8 +42,17 @@ function Pages(props: ViewProps) {
         context.refresh();
     }
 
+    function onAutomationNavClick() {
+        store.activePage = 'automation';
+        context.refresh();
+    }
+
     function onBackClick() {
-        store.activePage = 'main';
+        if (store.activePage === 'automation') {
+            store.activePage = 'settings';
+        } else {
+            store.activePage = 'main';
+        }
         context.refresh();
     }
 
@@ -62,7 +72,13 @@ function Pages(props: ViewProps) {
                 <ThemePage {...props} />
             </Page>
             <Page id="settings">
-                <SettingsPage {...props} />
+                <SettingsPage
+                    {...props}
+                    onAutomationNavClick={onAutomationNavClick}
+                />
+            </Page>
+            <Page id="automation">
+                <AutomationPage {...props} />
             </Page>
         </PageViewer>
     );

@@ -1,6 +1,6 @@
 import {m} from 'malevic';
 import TextBox from '../textbox';
-import { parse } from 'utils/color';
+import {parse} from '../../../utils/color';
 
 interface ColorPickerProps {
     class?: any;

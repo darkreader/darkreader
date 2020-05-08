@@ -48,6 +48,7 @@ export interface FilterConfig {
     engine: string;
     stylesheet: string;
     scrollbarColor: '' | 'auto' | string;
+    selectionColor: '' | 'auto' | string;
 }
 
 export type Theme = FilterConfig;

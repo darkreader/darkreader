@@ -2,20 +2,20 @@ import {m} from 'malevic';
 import ThemeControl from './theme-control';
 import {ColorDropDown} from '../../../controls';
 
-type ScrollbarColorValue = '' | 'auto' | string;
+type SelectionColorValue = '' | 'auto' | string;
 
-interface ScrollbarEditorProps {
-    value: ScrollbarColorValue;
-    onChange: (value: ScrollbarColorValue) => void;
+interface SelectionEditorProps {
+    value: SelectionColorValue;
+    onChange: (value: SelectionColorValue) => void;
     onReset: () => void;
 }
 
-export default function ScrollbarEditor(props: ScrollbarEditorProps) {
+export default function SelectionColorEditor(props: SelectionEditorProps) {
     return (
-        <ThemeControl label="Scrollbar">
+        <ThemeControl label="Selection">
             <ColorDropDown
                 value={props.value}
-                colorSuggestion={'#959799'}
+                colorSuggestion={'#005ccc'}
                 onChange={props.onChange}
                 onReset={props.onReset}
                 hasAutoOption

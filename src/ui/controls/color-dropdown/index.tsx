@@ -2,17 +2,17 @@ import {m} from 'malevic';
 import {getContext} from 'malevic/dom';
 import ColorPicker from '../color-picker';
 import DropDown from '../dropdown';
+import {parse} from '../../../utils/color';
 
 interface ColorDropDownProps {
     class?: string;
     value: string;
+    colorSuggestion: string;
     hasDefaultOption: boolean;
     hasAutoOption: boolean;
     onChange: (value: string) => void;
     onReset: () => void;
 }
-
-const SCROLLBAR_COLOR_SUGGESTION = '#959799';
 
 export default function ColorDropDown(props: ColorDropDownProps) {
     const context = getContext();
@@ -44,12 +44,19 @@ export default function ColorDropDown(props: ColorDropDownProps) {
         const result = {
             [labels.DEFAULT]: '',
             [labels.AUTO]: 'auto',
-            [labels.CUSTOM]: SCROLLBAR_COLOR_SUGGESTION,
+            [labels.CUSTOM]: props.colorSuggestion,
         }[value];
         props.onChange(result);
     }
 
-    const isPickerVisible = props.value.startsWith('#');
+    let isPickerVisible: boolean;
+
+    try { 
+        parse(props.value);
+        isPickerVisible = true;
+    } catch {
+        isPickerVisible = false;
+    }
 
     return (
         <span

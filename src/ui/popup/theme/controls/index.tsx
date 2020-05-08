@@ -5,6 +5,7 @@ import Mode from './mode';
 import Scheme from './scheme';
 import Sepia from './sepia';
 import Scrollbar from './scrollbar';
+import SelectionColorEditor from './selection';
 
 export {
     Brightness,
@@ -14,4 +15,5 @@ export {
     Scheme,
     Sepia,
     Scrollbar,
+    SelectionColorEditor,
 };

@@ -1,5 +1,6 @@
 import {m} from 'malevic';
 import TextBox from '../textbox';
+import {parse} from '../../../utils/color';
 
 interface ColorPickerProps {
     class?: any;
@@ -9,10 +10,14 @@ interface ColorPickerProps {
 }
 
 const DEFAULT_COLOR = '#000000';
-const hex6ColorMatch = /^#[0-9a-f]{6}$/i;
 
 function isValidColor(color: string) {
-    return color && hex6ColorMatch.test(color);
+    try { 
+        parse(color);
+        return true;
+    } catch {
+        return false;
+    }
 }
 
 // TODO: Add a HSB color picker.

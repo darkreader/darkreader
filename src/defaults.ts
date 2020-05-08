@@ -14,6 +14,7 @@ export const DEFAULT_THEME: Theme = {
     engine: ThemeEngines.dynamicTheme,
     stylesheet: '',
     scrollbarColor: isMacOS() ? '' : 'auto',
+    selectionColor: 'auto',
 };
 
 export const DEFAULT_SETTINGS: UserSettings = {

@@ -61,18 +61,18 @@ export default function AppSwitch(props: ViewProps) {
                     value={value}
                     onChange={onSwitchChange}
                 >
-                <span
-                    class={{
-                        'app-switch__time': true,
-                        'app-switch__time--active': isAutomation,
-                    }}
-                >
-                    {(isTimeAutomation
-                        ? <WatchIcon hours={now.getHours()} minutes={now.getMinutes()} />
-                        : (isLocationAutomation
-                            ? (<SunMoonIcon date={now} latitude={props.data.settings.location.latitude} longitude={props.data.settings.location.longitude} />)
-                            : <SystemIcon />))}
-                </span>
+                    <span
+                        class={{
+                            'app-switch__time': true,
+                            'app-switch__time--active': isAutomation,
+                        }}
+                    >
+                        {(isTimeAutomation
+                            ? <WatchIcon hours={now.getHours()} minutes={now.getMinutes()} />
+                            : (isLocationAutomation
+                                ? (<SunMoonIcon date={now} latitude={props.data.settings.location.latitude} longitude={props.data.settings.location.longitude} />)
+                                : <SystemIcon />))}
+                    </span>
                 </MultiSwitch>
             </ControlGroup.Control>
             <ControlGroup.Description>

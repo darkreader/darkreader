@@ -39,36 +39,6 @@
         width: @popup-content-width;
     }
 
-    .m-settings-button {
-        background-image: @icon-right;
-        background-position: center right 0.25rem;
-        background-repeat: no-repeat;
-        background-size: 1rem;
-        width: calc(100% - 2 * @size-border);
-
-        &__content {
-            align-items: center;
-            display: inline-flex;
-            flex-direction: row;
-            justify-content: center;
-        }
-
-        &__icon {
-            background-image: @icon-settings;
-            background-size: cover;
-            display: inline-block;
-            height: 1rem;
-            width: 1rem;
-        }
-
-        &__text {
-            display: inline-block;
-            height: 1rem;
-            line-height: 1rem;
-            margin-left: 0.25rem;
-        }
-    }
-
     .m-help-button {
         align-items: center;
         background-image: @icon-right;
@@ -174,6 +144,8 @@
     @import "../check-button/style.less";
     @import "../main-page/style.less";
     @import "../page-viewer/style.less";
+    @import "../settings-page/style.less";
+    @import "../automation-page/style.less";
     @import "../theme/controls/theme-control.less";
     @import "../theme/page/style.less";
     @import "../theme/preset-picker/style.less";

@@ -7,7 +7,7 @@ interface MultiSwitchProps {
     onChange: (value: string) => void;
 }
 
-export default function MultiSwitch(props: MultiSwitchProps) {
+export default function MultiSwitch(props: MultiSwitchProps, ...children) {
     return (
         <span class={['multi-switch', props.class]}>
             <span
@@ -28,6 +28,7 @@ export default function MultiSwitch(props: MultiSwitchProps) {
                     {option}
                 </span>
             ))}
+            {...children}
         </span>
     );
 }

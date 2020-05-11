@@ -18,19 +18,50 @@ export interface ImageDetails {
 const FaviconSelector = "link[rel='icon'], link[rel='shortcut icon']";
 
 function invertImage(image: HTMLImageElement) {
+    const MAX_ANALIZE_PIXELS_COUNT = 32 * 32;
+
+    const naturalPixelsCount = image.naturalWidth * image.naturalHeight;
+    const k = Math.min(1, Math.sqrt(MAX_ANALIZE_PIXELS_COUNT / naturalPixelsCount));
+    const width = Math.max(1, Math.round(image.naturalWidth * k));
+    const height = Math.max(1, Math.round(image.naturalHeight * k));
+    
     const canvas = document.createElement('canvas');
-    canvas.width = image.width;
-    canvas.height = image.height;
+    canvas.width = width;
+    canvas.height = height;
     const ctx = canvas.getContext('2d');
+    ctx.imageSmoothingEnabled = false;
     ctx.drawImage(image, 0, 0);
     const imgData = ctx.getImageData(0, 0, image.width, image.height);
     const data = imgData.data;
 
-    for (let i = 0, len = data.length; i < len; i += 4) {
-        data[i] = 255 - data[i];
-        data[i+1] = 255 - data[i+1];
-        data[i+2] = 255 - data[i+2];
- 	}
+    const DARK_LIGHTNESS_THRESHOLD = 0.4;
+    const TRANSPARENT_ALPHA_THRESHOLD = 0.05;
+
+    let i: number, x: number, y: number;
+    let r: number, g: number, b: number, a: number;
+    let l: number, min: number, max: number;
+    for (y = 0; y < height; y++) {
+        for (x = 0; x < width; x++) {
+            i = 4 * (y * width + x);
+            r = data[i + 0] / 255;
+            g = data[i + 1] / 255;
+            b = data[i + 2] / 255;
+            a = data[i + 3] / 255;
+
+            if (a < TRANSPARENT_ALPHA_THRESHOLD) {
+                continue;
+            } else  {
+                min = Math.min(r, g, b);
+                max = Math.max(r, g, b);
+                l = (max + min) / 2;
+                if (l < DARK_LIGHTNESS_THRESHOLD) {
+                    data[i + 0] = 255 - data[i];
+                    data[i + 1] = 255 - data[i+1];
+                    data[i + 2] = 255 - data[i+2];
+                }
+            }
+        }
+    }
 
  	ctx.putImageData(imgData, 0, 0);
  	return canvas.toDataURL();
@@ -38,10 +69,12 @@ function invertImage(image: HTMLImageElement) {
 
 export async function checkFavicon() {
     const favicon = document.querySelector(FaviconSelector) as HTMLLinkElement;
+    if (favicon.href.endsWith(',')) { //Invalid data: 
+        return;
+    }
     if (favicon) {
-        const orignalImage = await urlToImage(favicon.href);
-        const info = analyzeImage(orignalImage);
-        if (info.isDark) {
+        const info = await getImageDetails(favicon.href)
+        if (info.isDark && !info.isTransparent) {
 	        const image = new Image();
 	        image.crossOrigin = 'anonymous';
 	        image.onload = function () {
@@ -59,7 +92,7 @@ export async function getImageDetails(url: string) {
     } else {
         dataURL = await getImageDataURL(url);
     }
-    if (dataURL === 'data:') { //Image URL's that redirect to non image.
+    if (dataURL === 'data:') { //Image URL's that redirect to non image causes to return data:.
         return null;
     }
     const image = await urlToImage(dataURL);
@@ -88,6 +121,7 @@ async function urlToImage(url: string) {
         image.src = url;
     });
 }
+
 
 function analyzeImage(image: HTMLImageElement) {
     const MAX_ANALIZE_PIXELS_COUNT = 32 * 32;

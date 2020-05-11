@@ -24,7 +24,7 @@ function invertImage(image: HTMLImageElement) {
     const k = Math.min(1, Math.sqrt(MAX_ANALIZE_PIXELS_COUNT / naturalPixelsCount));
     const width = Math.max(1, Math.round(image.naturalWidth * k));
     const height = Math.max(1, Math.round(image.naturalHeight * k));
-    
+
     const canvas = document.createElement('canvas');
     canvas.width = width;
     canvas.height = height;
@@ -50,7 +50,7 @@ function invertImage(image: HTMLImageElement) {
 
             if (a < TRANSPARENT_ALPHA_THRESHOLD) {
                 continue;
-            } else  {
+            } else {
                 min = Math.min(r, g, b);
                 max = Math.max(r, g, b);
                 l = (max + min) / 2;
@@ -70,7 +70,7 @@ function invertImage(image: HTMLImageElement) {
 export async function checkFavicon() {
     const favicon = document.querySelector(FaviconSelector) as HTMLLinkElement;
     if (favicon) {
-        const info = await getImageDetails(favicon.href)
+        const info = await getImageDetails(favicon.href);
         if (info.isDark) {
 	        const image = new Image();
 	        image.crossOrigin = 'anonymous';
@@ -89,7 +89,7 @@ export async function getImageDetails(url: string) {
     } else {
         dataURL = await getImageDataURL(url);
     }
-    if (dataURL === 'data:') { //Image URL's that redirect to non image causes to return data:.
+    if (dataURL === 'data:') { // Image URL's that redirect to non image causes to return data:.
         return null;
     }
     const image = await urlToImage(dataURL);

@@ -30,11 +30,25 @@ function Body({data, actions}: BodyProps) {
             reset: () => actions.resetDevDynamicThemeFixes(),
         });
 
-    function onTextRender(node) {
+    function onTextRender(node: HTMLTextAreaElement) {
         textNode = node;
         if (!state.errorText) {
             textNode.value = wrapper.fixesText;
         }
+        node.addEventListener('keydown', (e) => {
+            if (e.key === 'Tab') {
+                e.preventDefault();
+                const start = node.selectionStart;
+                const end = node.selectionEnd;
+                const before = node.value.substring(0, start);
+                const after = node.value.substring(end);
+                node.focus();
+                setTimeout(function() {
+                    node.value = `${before}\t${after}`;
+                    node.setSelectionRange(start + 1, start + 1);
+                }, 0);
+            }
+        });
     }
 
     async function apply() {

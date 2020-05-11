@@ -41,7 +41,7 @@ export default function ThemePage(props: ViewProps) {
                 onChange={(v) => props.actions.setTheme({scrollbarColor: v})}
                 onReset={() => props.actions.setTheme({scrollbarColor: DEFAULT_SETTINGS.theme.scrollbarColor})}
             />
-            <SelectionColorEditor 
+            <SelectionColorEditor
                 value={theme.selectionColor}
                 onChange={(v) => props.actions.setTheme({selectionColor: v})}
                 onReset={() => props.actions.setTheme({selectionColor: DEFAULT_SETTINGS.theme.selectionColor})}

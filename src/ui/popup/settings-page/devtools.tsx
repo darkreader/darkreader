@@ -1,7 +1,7 @@
 import {m} from 'malevic';
 import ThemeEngines from '../../../generators/theme-engines';
 import {getLocalMessage} from '../../../utils/locales';
-import {Button} from '../../controls';
+import {NavButton} from '../../controls';
 import ControlGroup from '../control-group';
 import {ViewProps} from '../types';
 import {isFirefox} from '../../../utils/platform';
@@ -49,15 +49,15 @@ export default function DevToolsGroup(props: ViewProps) {
     return (
         <ControlGroup>
             <ControlGroup.Control>
-                <Button
-                    onclick={openDevTools}
+                <NavButton
+                    onClick={openDevTools}
                     class={{
                         'dev-tools-button': true,
                         'dev-tools-button--has-custom-fixes': hasCustomFixes,
                     }}
                 >
                     🛠 {getLocalMessage('open_dev_tools')}
-                </Button>
+                </NavButton>
             </ControlGroup.Control>
             <ControlGroup.Description>
                 Make a fix for a website

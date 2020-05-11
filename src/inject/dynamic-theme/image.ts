@@ -69,10 +69,10 @@ function invertImage(image: HTMLImageElement) {
 
 export async function checkFavicon() {
     const favicon = document.querySelector(FaviconSelector) as HTMLLinkElement;
-    if (favicon.href.endsWith(',')) { //Invalid data: 
-        return;
-    }
     if (favicon) {
+        if (favicon.href.endsWith(',')) { //Invalid data: 
+            return;
+        }
         const info = await getImageDetails(favicon.href)
         if (info.isDark && !info.isTransparent) {
 	        const image = new Image();

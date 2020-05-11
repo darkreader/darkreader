@@ -37,7 +37,7 @@ export function getModifiableCSSDeclaration(property: string, value: string, rul
         if (modifier) {
             return {property, value: modifier, important, sourceValue};
         }
-    } else if (property === 'background-image') {
+    } else if (property === 'background-image' || property === 'list-style-image') {
         const modifier = getBgImageModifier(property, value, rule, isCancelled);
         if (modifier) {
             return {property, value: modifier, important, sourceValue};

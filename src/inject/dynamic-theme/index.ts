@@ -13,6 +13,7 @@ import {getCSSFilterValue} from '../../generators/css-filter';
 import {modifyColor} from '../../generators/modify-colors';
 import {createTextStyle} from '../../generators/text-style';
 import {FilterConfig, DynamicThemeFix} from '../../definitions';
+import {checkFavicon} from './image';
 
 const styleManagers = new Map<HTMLLinkElement | HTMLStyleElement, StyleManager>();
 const variables = new Map<string, string>();
@@ -162,6 +163,8 @@ function createDynamicStyleOverrides() {
         }
     });
     inlineStyleElements.forEach((el) => overrideInlineStyle(el as HTMLElement, filter, fixes.ignoreInlineStyle));
+
+    checkFavicon();
 }
 
 let loadingStylesCounter = 0;

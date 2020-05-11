@@ -314,6 +314,9 @@ function getBgImageModifier(prop: string, value: string, rule: CSSStyleRule, isC
                         } else {
                             awaitingForImageLoading.set(url, []);
                             imageDetails = await getImageDetails(url);
+                            if (!imageDetails) {
+                                return null;
+                            }
                             imageDetailsCache.set(url, imageDetails);
                             awaitingForImageLoading.get(url).forEach((resolve) => resolve(imageDetails));
                             awaitingForImageLoading.delete(url);

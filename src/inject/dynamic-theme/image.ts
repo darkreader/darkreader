@@ -15,12 +15,52 @@ export interface ImageDetails {
     isLarge: boolean;
 }
 
+const FaviconSelector = "link[rel='icon'], link[rel='shortcut icon']";
+
+function invertImage(image: HTMLImageElement) {
+    const canvas = document.createElement('canvas');
+    canvas.width = image.width;
+    canvas.height = image.height;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(image, 0, 0);
+    const imgData = ctx.getImageData(0, 0, image.width, image.height);
+    const data = imgData.data;
+
+    for (let i = 0, len = data.length; i < len; i += 4) {
+        data[i] = 255 - data[i];
+        data[i+1] = 255 - data[i+1];
+        data[i+2] = 255 - data[i+2];
+ 	}
+
+ 	ctx.putImageData(imgData, 0, 0);
+ 	return canvas.toDataURL();
+}
+
+export async function checkFavicon() {
+    const favicon = document.querySelector(FaviconSelector) as HTMLLinkElement;
+    if (favicon) {
+        const orignalImage = await urlToImage(favicon.href);
+        const info = analyzeImage(orignalImage);
+        if (info.isDark) {
+	        const image = new Image();
+	        image.crossOrigin = 'anonymous';
+	        image.onload = function () {
+	 	        favicon.href = invertImage(image);
+	        };
+            image.src = favicon.href;
+        }
+    }
+}
+
 export async function getImageDetails(url: string) {
     let dataURL: string;
     if (url.startsWith('data:')) {
         dataURL = url;
     } else {
         dataURL = await getImageDataURL(url);
+    }
+    if (dataURL === 'data:') { //Image URL's that redirect to non image.
+        return null;
     }
     const image = await urlToImage(dataURL);
     const info = analyzeImage(image);

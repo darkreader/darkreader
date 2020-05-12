@@ -17,21 +17,21 @@ export interface ImageDetails {
 
 const FaviconSelector = "link[rel='icon'], link[rel='shortcut icon']";
 
-function invertImage(image: HTMLImageElement) {
+function invertFavicon(favicon: HTMLImageElement) {
     const MAX_ANALIZE_PIXELS_COUNT = 32 * 32;
 
-    const naturalPixelsCount = image.naturalWidth * image.naturalHeight;
+    const naturalPixelsCount = favicon.naturalWidth * favicon.naturalHeight;
     const k = Math.min(1, Math.sqrt(MAX_ANALIZE_PIXELS_COUNT / naturalPixelsCount));
-    const width = Math.max(1, Math.round(image.naturalWidth * k));
-    const height = Math.max(1, Math.round(image.naturalHeight * k));
+    const width = Math.max(1, Math.round(favicon.naturalWidth * k));
+    const height = Math.max(1, Math.round(favicon.naturalHeight * k));
 
     const canvas = document.createElement('canvas');
     canvas.width = width;
     canvas.height = height;
     const ctx = canvas.getContext('2d');
     ctx.imageSmoothingEnabled = false;
-    ctx.drawImage(image, 0, 0);
-    const imgData = ctx.getImageData(0, 0, image.width, image.height);
+    ctx.drawImage(favicon, 0, 0);
+    const imgData = ctx.getImageData(0, 0, favicon.width, favicon.height);
     const data = imgData.data;
 
     const DARK_LIGHTNESS_THRESHOLD = 0.4;
@@ -73,7 +73,7 @@ export async function checkFavicon() {
 	        const image = new Image();
 	        image.crossOrigin = 'anonymous';
 	        image.onload = function () {
-	 	        favicon.href = invertImage(image);
+	 	        favicon.href = invertFavicon(image);
 	        };
             image.src = favicon.href;
         }

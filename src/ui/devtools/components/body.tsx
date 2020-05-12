@@ -43,7 +43,7 @@ function Body({data, actions}: BodyProps) {
                 const before = node.value.substring(0, start);
                 const after = node.value.substring(end);
                 node.focus();
-                node.value = `${before}\t${after}`;
+                node.value = `${before}  ${after}`;
                 node.setSelectionRange(start + 1, start + 1);
             }
         });

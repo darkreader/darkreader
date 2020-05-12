@@ -53,9 +53,9 @@ function invertImage(image: HTMLImageElement) {
             } else {
                 l = (0.299*r + 0.587*g + 0.114*b)
                 if (l < DARK_LIGHTNESS_THRESHOLD) {
-                    data[i + 0] = 255 - data[i];
-                    data[i + 1] = 255 - data[i+1];
-                    data[i + 2] = 255 - data[i+2];
+                    data[i + 0] = 255 - data[i + 0];
+                    data[i + 1] = 255 - data[i + 1];
+                    data[i + 2] = 255 - data[i + 2];
                 }
             }
         }

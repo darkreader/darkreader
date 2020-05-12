@@ -8,6 +8,7 @@ export default function Mode(props: {mode: string; onChange: (mode: string) => v
     const modes = [
         [ThemeEngines.dynamicTheme, getLocalMessage('engine_dynamic')],
         [ThemeEngines.cssFilter, getLocalMessage('engine_filter')],
+        [ThemeEngines.svgFilter, getLocalMessage('engine_filter_plus')],
         [ThemeEngines.staticTheme, getLocalMessage('engine_static')],
     ];
     return (

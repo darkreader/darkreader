@@ -48,7 +48,24 @@ async function urlToImage(url: string) {
         image.src = url;
     });
 }
+function getImageDataFaster(x: number, y: number, x2: number, y2: number, width: number, height: number, data: Uint32Array) {
+	let cachedArray = new Uint32Array(x2*y2), i=0;
 
+    const hy = y2+y;
+    const wx = x2+x;
+	for (let vertical = y; vertical < hy; vertical++) {
+		for (let horizantal = x; horizantal < wx; horizantal++) {
+			const O = ((vertical*width) + horizantal); 
+			if (horizantal < 0 || horizantal >= width || vertical < 0 || vertical >= height) {
+				cachedArray[i++] = 0;
+			} else {
+				cachedArray[i++] = data[O];
+			}
+		}
+	}
+
+	return cachedArray;
+};
 function analyzeImage(image: HTMLImageElement) {
     const MAX_ANALIZE_PIXELS_COUNT = 32 * 32;
 
@@ -63,8 +80,7 @@ function analyzeImage(image: HTMLImageElement) {
     const context = canvas.getContext('2d');
     context.imageSmoothingEnabled = false;
     context.drawImage(image, 0, 0, width, height);
-    const imageData = context.getImageData(0, 0, width, height);
-    const d = imageData.data;
+    const cachedImage = new Uint32Array(context.getImageData(0,0,width,height).data.buffer)
 
     const TRANSPARENT_ALPHA_THRESHOLD = 0.05;
     const DARK_LIGHTNESS_THRESHOLD = 0.4;
@@ -79,6 +95,7 @@ function analyzeImage(image: HTMLImageElement) {
     let l: number, min: number, max: number;
     for (y = 0; y < height; y++) {
         for (x = 0; x < width; x++) {
+            const d = getImageDataFaster(0, 0, x, y, width, height, cachedImage);
             i = 4 * (y * width + x);
             r = d[i + 0] / 255;
             g = d[i + 1] / 255;

@@ -51,9 +51,7 @@ function invertImage(image: HTMLImageElement) {
             if (a < TRANSPARENT_ALPHA_THRESHOLD) {
                 continue;
             } else {
-                min = Math.min(r, g, b);
-                max = Math.max(r, g, b);
-                l = (max + min) / 2;
+                l = (0.299*r + 0.587*g + 0.114*b)
                 if (l < DARK_LIGHTNESS_THRESHOLD) {
                     data[i + 0] = 255 - data[i];
                     data[i + 1] = 255 - data[i+1];

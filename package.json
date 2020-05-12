@@ -28,7 +28,7 @@
     "url": "https://opencollective.com/darkreader"
   },
   "dependencies": {
-    "malevic": "0.18.2"
+    "malevic": "0.18.3"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "11.1.0",

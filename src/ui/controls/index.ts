@@ -5,6 +5,7 @@ import ColorPicker from './color-picker';
 import DropDown from './dropdown';
 import MultiSwitch from './multi-switch';
 import NavButton from './nav-button';
+import Overlay from './overlay';
 import ResetButton from './reset-button';
 import Select from './select';
 import Shortcut from './shortcut';
@@ -24,6 +25,7 @@ export {
     DropDown,
     MultiSwitch,
     NavButton,
+    Overlay,
     ResetButton,
     Select,
     Shortcut,

@@ -12,7 +12,7 @@ interface ColorPickerProps {
 const DEFAULT_COLOR = '#000000';
 
 function isValidColor(color: string) {
-    try { 
+    try {
         parse(color);
         return true;
     } catch {

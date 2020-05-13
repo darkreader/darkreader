@@ -137,6 +137,11 @@ test('URL is enabled', () => {
         {isProtected: false, isInDarkList: false},
     )).toEqual(false)
     expect(isURLEnabled(
+        '[::1]:17',
+        {siteList: ['[::1]'], siteListEnabled: [], applyToListedOnly: true} as UserSettings,
+        {isProtected: false, isInDarkList: false},
+    )).toEqual(false)
+    expect(isURLEnabled(
         '[2001:4860:4860::8888]',
         {siteList: ['[2001:4860:4860::8888]'], siteListEnabled: [], applyToListedOnly: true} as UserSettings,
         {isProtected: false, isInDarkList: false},

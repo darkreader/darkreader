@@ -93,6 +93,7 @@ export default class UserStorage {
                 let isOK = false;
                 try {
                     isURLMatched('https://google.com/', pattern);
+                    isURLMatched('[::1]:1337', pattern);
                     isOK = true;
                 } catch (err) {
                     console.warn(`Pattern "${pattern}" excluded`);

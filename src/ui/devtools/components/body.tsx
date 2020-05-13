@@ -3,6 +3,7 @@ import {withState, useState} from 'malevic/state';
 import {Button} from '../../controls';
 import ThemeEngines from '../../../generators/theme-engines';
 import {DEVTOOLS_DOCS_URL} from '../../../utils/links';
+import {isFirefox} from '../../../utils/platform';
 import {ExtWrapper} from '../../../definitions';
 
 type BodyProps = ExtWrapper;
@@ -30,11 +31,30 @@ function Body({data, actions}: BodyProps) {
             reset: () => actions.resetDevDynamicThemeFixes(),
         });
 
-    function onTextRender(node) {
+    function onTextRender(node: HTMLTextAreaElement) {
         textNode = node;
         if (!state.errorText) {
             textNode.value = wrapper.fixesText;
         }
+        node.addEventListener('keydown', (e) => {
+            if (e.key === 'Tab') {
+                e.preventDefault();
+                const indent = ' '.repeat(4);
+                if (isFirefox()) {
+                    // https://bugzilla.mozilla.org/show_bug.cgi?id=1220696
+                    const start = node.selectionStart;
+                    const end = node.selectionEnd;
+                    const before = node.value.substring(0, start);
+                    const after = node.value.substring(end);
+                    node.focus();
+                    node.value = `${before}${indent}${after}`;
+                    const cursorPos = start + indent.length;
+                    node.setSelectionRange(cursorPos, cursorPos);
+                } else {
+                    document.execCommand('insertText', false, indent);
+                }
+            }
+        });
     }
 
     async function apply() {

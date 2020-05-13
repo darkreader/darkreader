@@ -61,7 +61,7 @@ function validate(ip: string) {
     );
     let ip = decompress(ipv6.substr(0, ipv6.indexOf(']') + 1));
     let ip2 = decompress(orignalIp2.substr(0, orignalIp2.indexOf(']') + 1));
-    ip = '[' + ip + ipv6.substr(ipv6.indexOf(']'))
-    ip2 = '[' + ip2 + orignalIp2.substr(orignalIp2.indexOf(']'))
+    ip = '[' + ip + ipv6.substr(ipv6.indexOf(']')).toLowerCase()
+    ip2 = '[' + ip2 + orignalIp2.substr(orignalIp2.indexOf(']')).toLowerCase();
     return ip === ip2;
 }

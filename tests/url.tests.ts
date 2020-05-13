@@ -125,6 +125,23 @@ test('URL is enabled', () => {
         'https://www.google.com/very/good/hidden/folder/pdf#file.pdf'
     )).toBe(false);
 
+    // IPV6 Testing
+    expect(isURLEnabled(
+        '[::1]:1337',
+        {siteList: ['google.com'], siteListEnabled: [], applyToListedOnly: false} as UserSettings,
+        {isProtected: false, isInDarkList: false},
+    )).toBe(true);
+    expect(isURLEnabled(
+        '[::1]:8080',
+        {siteList: ['[::1]:8080'], siteListEnabled: [], applyToListedOnly: false} as UserSettings,
+        {isProtected: false, isInDarkList: false},
+    )).toEqual(false)
+    expect(isURLEnabled(
+        '[::1]:8080',
+        {siteList: ['[0000:0000:0000:0000:0000:0000:0000:0001]:8080'], siteListEnabled: [], applyToListedOnly: false} as UserSettings,
+        {isProtected: false, isInDarkList: false},
+    )).toEqual(false)
+
     // Temporary Dark Sites list fix
     expect(isURLEnabled(
         'https://darkreader.org/',

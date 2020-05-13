@@ -12,7 +12,7 @@ http.createServer((request, response) => {
         response.end();
         return;
     }
-    const type = query.includes('links') || query.includes('rules') || query.includes('styles')  ? 'index' : query.startsWith('generated') ? 'css' : '404';
+    const type = query.includes('links') || query.includes('rules') || query.includes('styles') ? 'index' : query.startsWith('generated') ? 'css' : '404';
     if (type === '404') {
         response.writeHead(404, {'Content-Type': 'text/plain'});
         response.write('404 Not Found\n');
@@ -29,12 +29,12 @@ http.createServer((request, response) => {
         const write = () => {
             const chunk = parts.unshift();
             if (chunk) {
-              response.write(chunk);
-              setTimeout(write, 10);
+                response.write(chunk);
+                setTimeout(write, 10);
             } else {
-              response.end();
+                response.end();
             }
-          };
+        };
         write();
     }
 
@@ -48,7 +48,7 @@ http.createServer((request, response) => {
  */
 function chunkString(str, length) {
     return str.match(new RegExp('.{1,' + length + '}', 'g'));
-  }
+}
 
 /**
  * Returns an generated CSS style
@@ -110,12 +110,12 @@ function rule(amount) {
     if (amount === 0) {
         return result;
     }
-    result = result + '\t\t\t<style>'
+    result = result + '\t\t\t<style>';
     for (let x = 1; x <= amount; x++) {
         result = result + `.GeneratedElement${x} { background-color: red }\n`;
         element = element + `\t\t<p class="GeneratedElement${x}">This is an GeneratedElement ${x}</p>\n`;
     }
-    result = result + '</style>\n'
+    result = result + '</style>\n';
     return [result, element];
 }
 

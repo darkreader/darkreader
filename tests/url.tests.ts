@@ -125,6 +125,48 @@ test('URL is enabled', () => {
         'https://www.google.com/very/good/hidden/folder/pdf#file.pdf'
     )).toBe(false);
 
+    // IPV6 Testing
+    expect(isURLEnabled(
+        '[::1]:1337',
+        {siteList: ['google.com'], siteListEnabled: [], applyToListedOnly: false} as UserSettings,
+        {isProtected: false, isInDarkList: false},
+    )).toBe(true);
+    expect(isURLEnabled(
+        '[::1]:8080',
+        {siteList: ['[::1]:8080'], siteListEnabled: [], applyToListedOnly: false} as UserSettings,
+        {isProtected: false, isInDarkList: false},
+    )).toEqual(false);
+    expect(isURLEnabled(
+        '[::1]:8080',
+        {siteList: ['[::1]:8081'], siteListEnabled: [], applyToListedOnly: true} as UserSettings,
+        {isProtected: false, isInDarkList: false},
+    )).toEqual(false);
+    expect(isURLEnabled(
+        '[::1]:8080',
+        {siteList: ['[::1]:8081'], siteListEnabled: [], applyToListedOnly: false} as UserSettings,
+        {isProtected: false, isInDarkList: false},
+    )).toEqual(true);
+    expect(isURLEnabled(
+        '[::1]:17',
+        {siteList: ['[::1]'], siteListEnabled: [], applyToListedOnly: true} as UserSettings,
+        {isProtected: false, isInDarkList: false},
+    )).toEqual(false);
+    expect(isURLEnabled(
+        '[2001:4860:4860::8888]',
+        {siteList: ['[2001:4860:4860::8888]'], siteListEnabled: [], applyToListedOnly: true} as UserSettings,
+        {isProtected: false, isInDarkList: false},
+    )).toEqual(true);
+    expect(isURLEnabled(
+        '[2001:4860:4860::8844]',
+        {siteList: ['[2001:4860:4860::8844]'], siteListEnabled: [], applyToListedOnly: true} as UserSettings,
+        {isProtected: false, isInDarkList: true},
+    )).toEqual(true);
+    expect(isURLEnabled(
+        '[2001:4860:4860::8844]',
+        {siteList: [], siteListEnabled: [], applyToListedOnly: true} as UserSettings,
+        {isProtected: false, isInDarkList: true},
+    )).toEqual(false);
+
     // Temporary Dark Sites list fix
     expect(isURLEnabled(
         'https://darkreader.org/',

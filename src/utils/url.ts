@@ -1,5 +1,5 @@
 import {UserSettings} from '../definitions';
-import { matchIPV6 } from './ipv6';
+import {compareIPV6} from './ipv6';
 
 export function getURLHost(url: string) {
     return url.match(/^(.*?\/{2,3})?(.+?)(\/|$)/)[2];
@@ -29,11 +29,11 @@ export function isURLInList(url: string, list: string[]) {
  * @param urlTemplate URL template ("google.*", "youtube.com" etc).
  */
 export function isURLMatched(url: string, urlTemplate: string): boolean {
-    if (url.indexOf('[') === -1 || urlTemplate.indexOf('[') === -1) {
+    if (url.includes('[') || urlTemplate.includes('[')) {
         const regex = createUrlRegex(urlTemplate);
         return Boolean(url.match(regex));
-    } else { //ipv6
-        return matchIPV6(url, urlTemplate);
+    } else {
+        return compareIPV6(url, urlTemplate);
     }
 }
 

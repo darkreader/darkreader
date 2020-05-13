@@ -1,5 +1,5 @@
 import {UserSettings} from '../definitions';
-import {compareIPV6} from './ipv6';
+import {CompareIPV6} from './ipv6';
 
 export function getURLHost(url: string) {
     return url.match(/^(.*?\/{2,3})?(.+?)(\/|$)/)[2];
@@ -24,34 +24,20 @@ export function isURLInList(url: string, list: string[]) {
 }
 
 /**
- * A fast way to check if IPV6 comparing is needed
- * @param ip1 First IP to check if it's IPV6 
- * @param ip2 First IP to check if it's IPV6
- */
-function isIPV6(ip1: string, ip2: string) {
-    if (!ip1.includes('[') && !ip2.includes('[')) {
-        return false;
-    }
-    let isFirstIPV6 = ip1.includes('[')
-    let isSecondIPV6 = ip2.includes('[')
-    if (isFirstIPV6 && isSecondIPV6) {
-        return true;
-    } else {
-        return false;
-    }
-}
-
-/**
  * Determines whether URL matches the template.
  * @param url URL.
  * @param urlTemplate URL template ("google.*", "youtube.com" etc).
  */
 export function isURLMatched(url: string, urlTemplate: string): boolean {
-    if (isIPV6(url, urlTemplate)) {
-        return compareIPV6(url, urlTemplate);
-    } else {
+    const isFirstIPV6 = url.includes('[');
+    const isSecondIPV6 = urlTemplate.includes('[');
+    if (isFirstIPV6 && isSecondIPV6) {
+        return CompareIPV6(url, urlTemplate);
+    } else if(!isFirstIPV6 && ! isSecondIPV6){
         const regex = createUrlRegex(urlTemplate);
         return Boolean(url.match(regex));
+    } else {
+        return false;
     }
 }
 

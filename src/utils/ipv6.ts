@@ -3,7 +3,7 @@
  * @param FirstIp First IP to compare with
  * @param SecondIp Second IP to compare with
  */
-export function compareIPV6(FirstIp: string, SecondIp: string) {
+export function CompareIPV6(FirstIp: string, SecondIp: string) {
     FirstIp = (FirstIp
         .replace(/^\^/, '') // Remove ^ at start
         .replace(/\$$/, '') // Remove $ at end

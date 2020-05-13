@@ -3,6 +3,7 @@ import {getContext} from 'malevic/dom';
 import {DONATE_URL} from '../../../utils/links';
 import {getLocalMessage} from '../../../utils/locales';
 import {isMobile} from '../../../utils/platform';
+import {Overlay} from '../../controls';
 import AutomationPage from '../automation-page';
 import MainPage from '../main-page';
 import {Page, PageViewer} from '../page-viewer';
@@ -122,6 +123,7 @@ export default function MobileBody(props: ViewProps) {
             <section class="m-section">
                 <DonateGroup />
             </section>
+            <Overlay />
         </body>
     );
 }

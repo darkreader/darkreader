@@ -1,10 +1,15 @@
 import {getContext, render} from 'malevic/dom';
 import {isStringifying} from 'malevic/string';
 
+const DEFAULT_OVERLAY_KEY = Symbol();
 const overlayNodes = new Map<any, HTMLElement>();
 const clickListeners = new WeakMap<HTMLElement, () => void>();
 
 function getOverlayDOMNode(key: any) {
+    if (key == null) {
+        key = DEFAULT_OVERLAY_KEY;
+    }
+
     if (!overlayNodes.has(key)) {
         const node = document.createElement('div');
         node.classList.add('overlay');
@@ -20,7 +25,7 @@ function getOverlayDOMNode(key: any) {
 }
 
 interface OverlayProps {
-    key: any;
+    key?: any;
 }
 
 function Overlay(props: OverlayProps) {
@@ -31,7 +36,7 @@ function Overlay(props: OverlayProps) {
 }
 
 interface OverlayPortalProps {
-    key: any;
+    key?: any;
     onOuterClick?: () => void;
 }
 

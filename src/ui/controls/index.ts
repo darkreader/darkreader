@@ -3,6 +3,7 @@ import CheckBox from './checkbox';
 import ColorDropDown from './color-dropdown';
 import ColorPicker from './color-picker';
 import DropDown from './dropdown';
+import MessageBox from './message-box';
 import MultiSwitch from './multi-switch';
 import NavButton from './nav-button';
 import Overlay from './overlay';
@@ -23,6 +24,7 @@ export {
     ColorDropDown,
     ColorPicker,
     DropDown,
+    MessageBox,
     MultiSwitch,
     NavButton,
     Overlay,

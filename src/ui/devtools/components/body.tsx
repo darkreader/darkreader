@@ -38,13 +38,7 @@ function Body({data, actions}: BodyProps) {
         node.addEventListener('keydown', (e) => {
             if (e.key === 'Tab') {
                 e.preventDefault();
-                const start = node.selectionStart;
-                const end = node.selectionEnd;
-                const before = node.value.substring(0, start);
-                const after = node.value.substring(end);
-                node.focus();
-                node.value = `${before}    ${after}`;
-                node.setSelectionRange(start + 4, start + 4);
+                document.execCommand('insertText', false, '    ');
             }
         });
     }

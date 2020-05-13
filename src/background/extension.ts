@@ -15,7 +15,7 @@ import createCSSFilterStylesheet from '../generators/css-filter';
 import {getDynamicThemeFixesFor} from '../generators/dynamic-theme';
 import createStaticStylesheet from '../generators/static-theme';
 import {createSVGFilterStylesheet, getSVGFilterMatrixValue, getSVGReverseFilterMatrixValue} from '../generators/svg-filter';
-import {ExtensionData, FilterConfig, News, Shortcuts, UserSettings, TabInfo} from '../definitions';
+import {ExtensionData, FilterConfig, News, Shortcuts, UserSettings, TabInfo, DynamicThemeFix} from '../definitions';
 import {isSystemDarkModeEnabled} from '../utils/media-query';
 
 const AUTO_TIME_CHECK_INTERVAL = getDuration({seconds: 10});
@@ -366,6 +366,20 @@ export class Extension {
         };
     }
 
+    checkFixesForPDF(fixes: DynamicThemeFix) {
+        const index = fixes.invert.indexOf('embed[type="application/pdf"]');
+        if (this.user.settings.enableForPDF)  {
+            if (index === -1) {
+                fixes.invert.push('embed[type="application/pdf"]');
+            }
+        } else {
+            if (index !== -1) {
+                fixes.invert.splice(index);
+            }
+        }
+        return fixes;
+    }
+
     private getTabMessage = (url: string, frameURL: string) => {
         const urlInfo = this.getURLInfo(url);
         if (this.isEnabled() && isURLEnabled(url, this.user.settings, urlInfo)) {
@@ -407,7 +421,7 @@ export class Extension {
                 case ThemeEngines.dynamicTheme: {
                     const filter = {...filterConfig};
                     delete filter.engine;
-                    const fixes = getDynamicThemeFixesFor(url, frameURL, this.config.DYNAMIC_THEME_FIXES);
+                    const fixes = this.checkFixesForPDF(getDynamicThemeFixesFor(url, frameURL, this.config.DYNAMIC_THEME_FIXES));
                     const isIFrame = frameURL != null;
                     return {
                         type: 'add-dynamic-theme',

@@ -68,15 +68,14 @@ export function getDynamicThemeFixesFor(url: string, frameURL: string, fixes: Dy
         .sort((a, b) => b.specificity - a.specificity);
 
     if (sortedBySpecificity.length === 0) {
-        return common;
+        return common as DynamicThemeFix;
     }
 
     const match = sortedBySpecificity[0].theme;
-
     return {
         url: match.url,
         ignoreInlineStyle: common.ignoreInlineStyle.concat(match.ignoreInlineStyle || []),
         invert: common.invert.concat(match.invert || []),
         css: [common.css, match.css].filter((s) => s).join('\n'),
-    };
+    } as DynamicThemeFix;;
 }

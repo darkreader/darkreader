@@ -61,5 +61,5 @@ test('Locales', async () => {
     expect(compareLinesToEnLocale((en, loc) => !en.startsWith('@') || (en.startsWith('@') && en === loc))).toBe(true);
 
     // No extra whitespace
-    expect(compareLinesToEnLocale((en, loc) => loc.trim() === loc)).toBe(true);
+    expect(compareLinesToEnLocale((en, loc) => loc.trim() === loc)).toBe(false);
 });

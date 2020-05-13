@@ -28,7 +28,6 @@ export function isURLInList(url: string, list: string[]) {
  * @param ip1 First IP to check if it's IPV6 
  * @param ip2 First IP to check if it's IPV6
  */
-
 function isIPV6(ip1: string, ip2: string) {
     if (!ip1.includes('[') && !ip2.includes('[')) {
         return false;

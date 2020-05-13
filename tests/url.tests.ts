@@ -135,37 +135,37 @@ test('URL is enabled', () => {
         '[::1]:8080',
         {siteList: ['[::1]:8080'], siteListEnabled: [], applyToListedOnly: false} as UserSettings,
         {isProtected: false, isInDarkList: false},
-    )).toEqual(false)
+    )).toEqual(false);
     expect(isURLEnabled(
         '[::1]:8080',
         {siteList: ['[::1]:8081'], siteListEnabled: [], applyToListedOnly: true} as UserSettings,
         {isProtected: false, isInDarkList: false},
-    )).toEqual(false)
+    )).toEqual(false);
     expect(isURLEnabled(
         '[::1]:8080',
         {siteList: ['[::1]:8081'], siteListEnabled: [], applyToListedOnly: false} as UserSettings,
         {isProtected: false, isInDarkList: false},
-    )).toEqual(true)
+    )).toEqual(true);
     expect(isURLEnabled(
         '[::1]:17',
         {siteList: ['[::1]'], siteListEnabled: [], applyToListedOnly: true} as UserSettings,
         {isProtected: false, isInDarkList: false},
-    )).toEqual(false)
+    )).toEqual(false);
     expect(isURLEnabled(
         '[2001:4860:4860::8888]',
         {siteList: ['[2001:4860:4860::8888]'], siteListEnabled: [], applyToListedOnly: true} as UserSettings,
         {isProtected: false, isInDarkList: false},
-    )).toEqual(true)
+    )).toEqual(true);
     expect(isURLEnabled(
         '[2001:4860:4860::8844]',
         {siteList: ['[2001:4860:4860::8844]'], siteListEnabled: [], applyToListedOnly: true} as UserSettings,
         {isProtected: false, isInDarkList: true},
-    )).toEqual(true)
+    )).toEqual(true);
     expect(isURLEnabled(
         '[2001:4860:4860::8844]',
         {siteList: [], siteListEnabled: [], applyToListedOnly: true} as UserSettings,
         {isProtected: false, isInDarkList: true},
-    )).toEqual(false)
+    )).toEqual(false);
 
     // Temporary Dark Sites list fix
     expect(isURLEnabled(

@@ -1,27 +1,46 @@
 import {m} from 'malevic';
-import {Button} from '../../controls';
+import {getContext} from 'malevic/dom';
+import {DEFAULT_SETTINGS} from '../../../defaults';
+import {MessageBox, ResetButton} from '../../controls';
 import ControlGroup from '../control-group';
 import {ViewProps} from '../types';
-import {DEFAULT_SETTINGS} from '../../../background/user-storage';
 
-export default function ResetButton(props: ViewProps) {
+export default function ResetButtonGroup(props: ViewProps) {
+    const context = getContext();
+
+    function showDialog() {
+        context.store.isDialogVisible = true;
+        context.refresh();
+    }
+
+    function hideDialog() {
+        context.store.isDialogVisible = false;
+        context.refresh();
+    }
+
     function reset() {
+        context.store.isDialogVisible = false;
         props.actions.changeSettings(DEFAULT_SETTINGS);
     }
+
+    const dialog = context.store.isDialogVisible ? (
+        <MessageBox
+            caption="Are you sure you want to remove all your settings? You cannot restore them later"
+            onOK={reset}
+            onCancel={hideDialog}
+        />
+    ) : null;
 
     return (
         <ControlGroup>
             <ControlGroup.Control>
-                <Button
-                    class="reset-button"
-                    onclick={reset}
-                    style='width: 100%'
-                >
-                    Reset
-                </Button>
+                <ResetButton onClick={showDialog}>
+                    Reset settings
+                    {dialog}
+                </ResetButton>
             </ControlGroup.Control>
             <ControlGroup.Description>
-                Reset all settings to default
+                Restore settings to defaults
             </ControlGroup.Description>
         </ControlGroup>
     );

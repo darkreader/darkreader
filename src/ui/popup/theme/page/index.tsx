@@ -1,6 +1,7 @@
 import {m} from 'malevic';
+import {DEFAULT_SETTINGS} from '../../../../defaults';
 import {ViewProps} from '../../types';
-import {Brightness, Contrast, Grayscale, Mode, Scheme, Sepia} from '../controls';
+import {Brightness, Contrast, Grayscale, Mode, Scheme, Sepia, Scrollbar, SelectionColorEditor} from '../controls';
 import ThemePresetPicker from '../preset-picker';
 import {getCurrentThemePreset} from '../utils';
 import ResetButton from '../controls/reset-button';
@@ -35,7 +36,17 @@ export default function ThemePage(props: ViewProps) {
                 mode={theme.engine}
                 onChange={(mode) => change({engine: mode})}
             />
-            <ResetButton {...props}/>
+            <Scrollbar
+                value={theme.scrollbarColor}
+                onChange={(v) => props.actions.setTheme({scrollbarColor: v})}
+                onReset={() => props.actions.setTheme({scrollbarColor: DEFAULT_SETTINGS.theme.scrollbarColor})}
+            />
+            <SelectionColorEditor
+                value={theme.selectionColor}
+                onChange={(v) => props.actions.setTheme({selectionColor: v})}
+                onReset={() => props.actions.setTheme({selectionColor: DEFAULT_SETTINGS.theme.selectionColor})}
+            />
+            <ResetButton {...props} />
         </section>
     );
 }

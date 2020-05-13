@@ -1,5 +1,5 @@
 import {m} from 'malevic';
-import {Button} from '../../controls';
+import {NavButton} from '../../controls';
 import {ViewProps} from '../types';
 import AppSwitch from './app-switch';
 import SiteToggleGroup from './site-toggle';
@@ -16,12 +16,10 @@ function SwitchGroup(props: ViewProps) {
 
 function SettingsNavButton(props: {onClick: () => void}) {
     return (
-        <Button class="m-settings-button" onclick={props.onClick}>
-            <span class="m-settings-button__content">
-                <span class="m-settings-button__icon" />
-                <span class="m-settings-button__text">Settings</span>
-            </span>
-        </Button>
+        <NavButton onClick={props.onClick}>
+            <span class="settings-button-icon" />
+            Settings
+        </NavButton>
     );
 }
 

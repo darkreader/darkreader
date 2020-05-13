@@ -137,9 +137,19 @@ test('URL is enabled', () => {
         {isProtected: false, isInDarkList: false},
     )).toEqual(false)
     expect(isURLEnabled(
-        '[::1]:8080',
-        {siteList: ['[0000:0000:0000:0000:0000:0000:0000:0001]:8080'], siteListEnabled: [], applyToListedOnly: false} as UserSettings,
+        '[2001:4860:4860::8888]',
+        {siteList: ['[2001:4860:4860::8888]'], siteListEnabled: [], applyToListedOnly: true} as UserSettings,
         {isProtected: false, isInDarkList: false},
+    )).toEqual(true)
+    expect(isURLEnabled(
+        '[2001:4860:4860::8844]',
+        {siteList: ['[2001:4860:4860::8844]'], siteListEnabled: [], applyToListedOnly: true} as UserSettings,
+        {isProtected: false, isInDarkList: true},
+    )).toEqual(true)
+    expect(isURLEnabled(
+        '[2001:4860:4860::8844]',
+        {siteList: [], siteListEnabled: [], applyToListedOnly: true} as UserSettings,
+        {isProtected: false, isInDarkList: true},
     )).toEqual(false)
 
     // Temporary Dark Sites list fix

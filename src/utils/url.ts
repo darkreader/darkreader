@@ -29,7 +29,7 @@ export function isURLInList(url: string, list: string[]) {
  * @param urlTemplate URL template ("google.*", "youtube.com" etc).
  */
 export function isURLMatched(url: string, urlTemplate: string): boolean {
-    if (url.includes('[') || urlTemplate.includes('[')) {
+    if (!(url.includes('[')) || !(urlTemplate.includes('['))) {
         const regex = createUrlRegex(urlTemplate);
         return Boolean(url.match(regex));
     } else {

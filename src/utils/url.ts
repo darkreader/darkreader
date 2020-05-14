@@ -1,5 +1,5 @@
 import {UserSettings} from '../definitions';
-import {compareIPV6} from './ipv6';
+import {isMatch} from './matching';
 
 export function getURLHost(url: string) {
     return url.match(/^(.*?\/{2,3})?(.+?)(\/|$)/)[2];
@@ -15,12 +15,7 @@ export function compareURLPatterns(a: string, b: string) {
  * @paramlist List to search into.
  */
 export function isURLInList(url: string, list: string[]) {
-    for (let i = 0; i < list.length; i++) {
-        if (isURLMatched(url, list[i])) {
-            return true;
-        }
-    }
-    return false;
+    return isMatch(url, list);
 }
 
 /**
@@ -29,16 +24,7 @@ export function isURLInList(url: string, list: string[]) {
  * @param urlTemplate URL template ("google.*", "youtube.com" etc).
  */
 export function isURLMatched(url: string, urlTemplate: string): boolean {
-    const isFirstIPV6 = url.includes('[');
-    const isSecondIPV6 = urlTemplate.includes('[');
-    if (isFirstIPV6 && isSecondIPV6) {
-        return compareIPV6(url, urlTemplate);
-    } else if (!isFirstIPV6 && ! isSecondIPV6){
-        const regex = createUrlRegex(urlTemplate);
-        return Boolean(url.match(regex));
-    } else {
-        return false;
-    }
+    return isMatch(url, [urlTemplate]);
 }
 
 function createUrlRegex(urlTemplate: string): RegExp {

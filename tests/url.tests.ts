@@ -150,7 +150,7 @@ test('URL is enabled', () => {
         '[::1]:17',
         {siteList: ['[::1]'], siteListEnabled: [], applyToListedOnly: true} as UserSettings,
         {isProtected: false, isInDarkList: false},
-    )).toEqual(false);
+    )).toEqual(true);
     expect(isURLEnabled(
         '[2001:4860:4860::8888]',
         {siteList: ['[2001:4860:4860::8888]'], siteListEnabled: [], applyToListedOnly: true} as UserSettings,
@@ -166,6 +166,38 @@ test('URL is enabled', () => {
         {siteList: [], siteListEnabled: [], applyToListedOnly: true} as UserSettings,
         {isProtected: false, isInDarkList: true},
     )).toEqual(false);
+
+    // Reverse Pattern
+    expect(isURLEnabled(
+        'https://blog.discordapp.com/',
+        {siteList: ['discordapp.com', '!blog.discordapp.com'], siteListEnabled: [''], applyToListedOnly: false} as UserSettings,
+        {isProtected: false, isInDarkList: false},
+    )).toBe(true);
+    expect(isURLEnabled(
+        'https://www.google.com/',
+        {siteList: ['!*.google.com', 'www.google.com'], siteListEnabled: [''], applyToListedOnly: false} as UserSettings,
+        {isProtected: false, isInDarkList: false},
+    )).toBe(true);
+    expect(isURLEnabled(
+        'https://mail.google.com/',
+        {siteList: ['!*.google.com', 'google.com'], siteListEnabled: [''], applyToListedOnly: false} as UserSettings,
+        {isProtected: false, isInDarkList: false},
+    )).toBe(true);
+    expect(isURLEnabled(
+        'https://mail.google.com/',
+        {siteList: ['!mail.google.com', 'www.google.com'], siteListEnabled: [''], applyToListedOnly: false} as UserSettings,
+        {isProtected: false, isInDarkList: false},
+    )).toBe(true);
+    expect(isURLEnabled(
+        'https://www.google.com/',
+        {siteList: ['!mail.google.com', 'google.com'], siteListEnabled: [''], applyToListedOnly: false} as UserSettings,
+        {isProtected: false, isInDarkList: false},
+    )).toBe(false);
+    expect(isURLEnabled(
+        'https://mail.google.com/',
+        {siteList: ['!mail.google.com', 'google.com'], siteListEnabled: [''], applyToListedOnly: true} as UserSettings,
+        {isProtected: false, isInDarkList: false},
+    )).toBe(false);
 
     // Temporary Dark Sites list fix
     expect(isURLEnabled(

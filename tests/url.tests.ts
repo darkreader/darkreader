@@ -175,7 +175,7 @@ test('URL is enabled', () => {
     )).toBe(true);
     expect(isURLEnabled(
         'https://www.google.com/',
-        {siteList: ['!*.google.com', 'www.google.com'], siteListEnabled: [''], applyToListedOnly: false} as UserSettings,
+        {siteList: ['!*.google.com', 'google.com'], siteListEnabled: [''], applyToListedOnly: false} as UserSettings,
         {isProtected: false, isInDarkList: false},
     )).toBe(true);
     expect(isURLEnabled(
@@ -185,7 +185,7 @@ test('URL is enabled', () => {
     )).toBe(true);
     expect(isURLEnabled(
         'https://mail.google.com/',
-        {siteList: ['!mail.google.com', 'www.google.com'], siteListEnabled: [''], applyToListedOnly: false} as UserSettings,
+        {siteList: ['!mail.google.com', 'google.com'], siteListEnabled: [''], applyToListedOnly: false} as UserSettings,
         {isProtected: false, isInDarkList: false},
     )).toBe(true);
     expect(isURLEnabled(
@@ -196,6 +196,16 @@ test('URL is enabled', () => {
     expect(isURLEnabled(
         'https://mail.google.com/',
         {siteList: ['!mail.google.com', 'google.com'], siteListEnabled: [''], applyToListedOnly: true} as UserSettings,
+        {isProtected: false, isInDarkList: false},
+    )).toBe(false);
+    expect(isURLEnabled(
+        'https://mail.google.com/',
+        {siteList: ['google.com', '!mail.google.com', 'mail.google.com/compose'], siteListEnabled: [''], applyToListedOnly: false} as UserSettings,
+        {isProtected: false, isInDarkList: false},
+    )).toBe(true);
+    expect(isURLEnabled(
+        'https://mail.google.com/compose/',
+        {siteList: ['google.com', '!mail.google.com', 'mail.google.com/compose'], siteListEnabled: [''], applyToListedOnly: false} as UserSettings,
         {isProtected: false, isInDarkList: false},
     )).toBe(false);
 

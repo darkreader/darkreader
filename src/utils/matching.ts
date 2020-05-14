@@ -33,11 +33,12 @@ export function isMatch(input: string, patterns: any[]) {
     .replace(/\?.*$/, '')
     .replace(/\/$/, '')
     );
-    const sortedArray = Array.from(new Set(patterns)) // Sorted arrays so paths will come last and so we can check to be sure :)
-//    console.log(sortedArray);
-    let endresult: string = ' ';
-	for (let x = 0, len = sortedArray.length; x < len; x++) {
-        const pattern: string = (sortedArray[x].replace(/^\^/, '')
+    patterns = patterns.sort(function(a, b){
+        return a.length - b.length;
+      });
+    let endresult = false;
+	for (let x = 0, len = patterns.length; x < len; x++) {
+        const pattern: string = (patterns[x].replace(/^\^/, '')
         .replace(/\$$/, '')
         .replace(/^.*?\/{2,3}/, '')
         .replace(/\?.*$/, '')
@@ -45,24 +46,15 @@ export function isMatch(input: string, patterns: any[]) {
         );
         const regObject: MatchInterface = makeRegexp(pattern);
         const regexp: RegExp = regObject.regexp;
-        const matches: boolean = regexp.test(input);
-//        console.log(`${input} ${pattern} ${matches} ${regObject.negated}`);
-        if (matches && regObject.negated) {
-            endresult = endresult + '0';
+        const matched = regexp.test(input);
+        if (!matched) {
+            continue;
         }
-        if (matches && !regObject.negated) {
-            endresult = endresult +'1';
-        }
-    }
-    console.log(`${input} ${endresult}`)
-    if (endresult === ' ') {
-        return false
-    } else {
-        console.log(`${input} ${endresult} ${endresult.includes('0')}`)
-        if (endresult.includes('0')) {
-            return false;
+        if (regObject.negated) {
+            endresult = false;
         } else {
-            return true;
+            endresult = true;
         }
     }
-};
+    return endresult;
+}

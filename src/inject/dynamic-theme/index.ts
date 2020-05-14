@@ -4,6 +4,7 @@ import {changeMetaThemeColorWhenAvailable, restoreMetaThemeColor} from './meta-t
 import {getModifiedUserAgentStyle, getModifiedFallbackStyle, cleanModificationCache, parseColorWithCache} from './modify-css';
 import {manageStyle, shouldManageStyle, STYLE_SELECTOR, StyleManager} from './style-manager';
 import {watchForStyleChanges, stopWatchingForStyleChanges} from './watch';
+import {push} from '../../utils/array';
 import {removeNode, watchForNodePosition, iterateShadowNodes} from '../utils/dom';
 import {logWarn} from '../utils/log';
 import {throttle} from '../utils/throttle';
@@ -127,7 +128,7 @@ function createDynamicStyleOverrides() {
     iterateShadowNodes(document.documentElement, (node) => {
         const shadowStyles = node.shadowRoot.querySelectorAll(STYLE_SELECTOR);
         if (shadowStyles.length > 0) {
-            allStyles.push(...Array.from(shadowStyles as NodeListOf<HTMLLinkElement | HTMLStyleElement>));
+            push(allStyles, shadowStyles);
         }
     });
 
@@ -158,7 +159,7 @@ function createDynamicStyleOverrides() {
         const elements = node.shadowRoot.querySelectorAll(INLINE_STYLE_SELECTOR);
         if (elements.length > 0) {
             createShadowStaticStyleOverrides(node.shadowRoot);
-            inlineStyleElements.push(...Array.from(elements as NodeListOf<HTMLLinkElement | HTMLStyleElement>));
+            push(inlineStyleElements, elements);
         }
     });
     inlineStyleElements.forEach((el) => overrideInlineStyle(el as HTMLElement, filter, fixes.ignoreInlineStyle));

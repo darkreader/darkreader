@@ -1,3 +1,5 @@
+import {push} from '../../utils/array';
+
 interface SiteFix {
     url: string[];
     [prop: string]: any;
@@ -14,7 +16,7 @@ export function formatSitesFixesConfig(fixes: SiteFix[], options: SitesFixesForm
     const lines: string[] = [];
 
     fixes.forEach((fix, i) => {
-        lines.push(...fix.url);
+        push(lines, fix.url);
         options.props.forEach((prop) => {
             const command = options.getPropCommandName(prop);
             const value = fix[prop];
@@ -30,7 +32,7 @@ export function formatSitesFixesConfig(fixes: SiteFix[], options: SitesFixesForm
         });
         if (i < fixes.length - 1) {
             lines.push('');
-            lines.push(Array.from({length: 32}).fill('=').join(''));
+            lines.push('='.repeat(32));
             lines.push('');
         }
     });

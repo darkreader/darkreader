@@ -1,3 +1,4 @@
+import {forEach, push} from '../../utils/array';
 import {iterateShadowNodes} from '../utils/dom';
 import {iterateCSSDeclarations} from './css-rules';
 import {getModifiableCSSDeclaration} from './modify-css';
@@ -102,14 +103,14 @@ export function getInlineOverrideStyle() {
     }).join('\n');
 }
 
-function expand(nodes: Node[], selector: string) {
+function expand(nodes: ArrayLike<Node>, selector: string) {
     const results: Node[] = [];
-    nodes.forEach((n) => {
+    forEach(nodes, (n) => {
         if (n instanceof Element) {
             if (n.matches(selector)) {
                 results.push(n);
             }
-            results.push(...Array.from(n.querySelectorAll(selector)));
+            push(results, n.querySelectorAll(selector));
         }
     });
     return results;
@@ -186,7 +187,8 @@ function getInlineStyleCacheKey(el: HTMLElement, theme: FilterConfig) {
 }
 
 function shouldIgnoreInlineStyle(element: HTMLElement, selectors: string[]) {
-    for (const ingnoredSelector of selectors) {
+    for (let i = 0; i < selectors.length; i++) {
+        const ingnoredSelector = selectors[i];
         if (element.matches(ingnoredSelector)) {
             return true;
         }

@@ -21,3 +21,14 @@ export function forEach<T>(items: Iterable<T> | ArrayLike<T>, iterator: (item: T
 export function push<T>(array: Array<T>, addition: Iterable<T> | ArrayLike<T>) {
     forEach(addition, (a) => array.push(a));
 }
+
+// NOTE: Using `Array.from()` is 2x (FF) — 5x (Chrome) slower for ArrayLike (not for Iterable)
+// https://jsben.ch/FJ1mO
+// https://jsben.ch/ZmViL
+export function toArray<T>(items: ArrayLike<T>) {
+    const results = [] as Array<T>;
+    for (let i = 0; i < items.length; i++) {
+        results.push(items[i]);
+    }
+    return results;
+}

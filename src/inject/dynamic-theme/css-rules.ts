@@ -1,30 +1,30 @@
+import {forEach} from '../../utils/array';
 import {parseURL, getAbsoluteURL} from './url';
 import {logWarn} from '../utils/log';
 
 export function iterateCSSRules(rules: CSSRuleList, iterate: (rule: CSSStyleRule) => void) {
-    Array.from(rules)
-        .forEach((rule) => {
-            if (rule instanceof CSSMediaRule) {
-                const media = Array.from(rule.media);
-                if (media.includes('screen') || media.includes('all') || !(media.includes('print') || media.includes('speech'))) {
-                    iterateCSSRules(rule.cssRules, iterate);
-                }
-            } else if (rule instanceof CSSStyleRule) {
-                iterate(rule);
-            } else if (rule instanceof CSSImportRule) {
-                try {
-                    iterateCSSRules(rule.styleSheet.cssRules, iterate);
-                } catch (err) {
-                    logWarn(err);
-                }
-            } else {
-                logWarn(`CSSRule type not supported`, rule);
+    forEach(rules, (rule) => {
+        if (rule instanceof CSSMediaRule) {
+            const media = Array.from(rule.media);
+            if (media.includes('screen') || media.includes('all') || !(media.includes('print') || media.includes('speech'))) {
+                iterateCSSRules(rule.cssRules, iterate);
             }
-        });
+        } else if (rule instanceof CSSStyleRule) {
+            iterate(rule);
+        } else if (rule instanceof CSSImportRule) {
+            try {
+                iterateCSSRules(rule.styleSheet.cssRules, iterate);
+            } catch (err) {
+                logWarn(err);
+            }
+        } else {
+            logWarn(`CSSRule type not supported`, rule);
+        }
+    });
 }
 
 export function iterateCSSDeclarations(style: CSSStyleDeclaration, iterate: (property: string, value: string) => void) {
-    Array.from(style).forEach((property) => {
+    forEach(style, (property) => {
         const value = style.getPropertyValue(property).trim();
         if (!value) {
             return;

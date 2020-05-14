@@ -1,3 +1,4 @@
+import {forEach, push} from '../../utils/array';
 import {iterateShadowNodes} from '../utils/dom';
 import {iterateCSSDeclarations} from './css-rules';
 import {getModifiableCSSDeclaration} from './modify-css';
@@ -102,14 +103,14 @@ export function getInlineOverrideStyle() {
     }).join('\n');
 }
 
-function expand(nodes: Node[], selector: string) {
+function expand(nodes: ArrayLike<Node>, selector: string) {
     const results: Node[] = [];
-    nodes.forEach((n) => {
+    forEach(nodes, (n) => {
         if (n instanceof Element) {
             if (n.matches(selector)) {
                 results.push(n);
             }
-            results.push(...Array.from(n.querySelectorAll(selector)));
+            push(results, n.querySelectorAll(selector));
         }
     });
     return results;
@@ -137,7 +138,7 @@ export function deepWatchForInlineStyles(
     }
     const observer = new MutationObserver((mutations) => {
         mutations.forEach((m) => {
-            const createdInlineStyles = expand(Array.from(m.addedNodes), INLINE_STYLE_SELECTOR);
+            const createdInlineStyles = expand(m.addedNodes, INLINE_STYLE_SELECTOR);
             if (createdInlineStyles.length > 0) {
                 createdInlineStyles.forEach((el: HTMLElement) => elementStyleDidChange(el));
             }
@@ -186,7 +187,8 @@ function getInlineStyleCacheKey(el: HTMLElement, theme: FilterConfig) {
 }
 
 function shouldIgnoreInlineStyle(element: HTMLElement, selectors: string[]) {
-    for (const ingnoredSelector of selectors) {
+    for (let i = 0; i < selectors.length; i++) {
+        const ingnoredSelector = selectors[i];
         if (element.matches(ingnoredSelector)) {
             return true;
         }
@@ -274,7 +276,7 @@ export function overrideInlineStyle(element: HTMLElement, theme: FilterConfig, i
         setCustomProp('fill', 'color', element.style.getPropertyValue('fill'));
     }
 
-    Array.from(unsetProps).forEach((cssProp) => {
+    forEach(unsetProps, (cssProp) => {
         const {store, dataAttr} = overrides[cssProp];
         store.delete(element);
         element.removeAttribute(dataAttr);

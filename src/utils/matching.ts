@@ -23,39 +23,6 @@ function makeRegexp(pattern: string) {
 	regexpCache.set(cacheKey, regObject);
 	return regObject;
 }
-
-
-export default function match(inputs, patterns) {
-	if (!(Array.isArray(inputs) && Array.isArray(patterns))) {
-		throw new TypeError(`Expected two arrays, got ${typeof inputs} ${typeof patterns}`);
-	}
-
-	if (patterns.length === 0) {
-		return inputs;
-	}
-
-	const isFirstPatternNegated = patterns[0][0] === '!';
-
-	patterns = patterns.map(pattern => makeRegexp(pattern));
-    console.log(patterns);
-	const result = [];
-
-	for (const input of inputs) {
-		let matches = isFirstPatternNegated;
-		for (const pattern of patterns) {
-            console.log(`${pattern} ${pattern.test(input)} ${input}`)
-			if (pattern.test(input)) {
-				matches = !pattern.negated;
-			}
-		}
-
-		if (matches) {
-			result.push(input);
-		}
-	}
-
-	return result;
-};
 export function isMatch(input: string, patterns: any[]) {
     if (input == '' || patterns.length === 0) {
         return false;

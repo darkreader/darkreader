@@ -13,6 +13,16 @@ function makeRegexp(pattern: string) {
     if (negated) {
         pattern = pattern.substr(1);
     }
+    if (pattern[0] === '/') {
+        const flag = pattern.substr(pattern.lastIndexOf('/') + 1);
+        pattern = pattern.substr(1).substr(0, pattern.lastIndexOf('/') -1);
+        const regexp = new RegExp(pattern, flag)
+        const regObject: MatchInterface = {
+            regexp,
+            negated,
+        };
+        return regObject;
+    }
     pattern = pattern.replace(/[|\\{}()[\]^$+*?.]/g, '\\$&').replace(/-/g, '\\x2d').replace(/\\\*/g, '[\\s\\S]*');
     const regexp = new RegExp(`${pattern}`, 'i');
     const regObject: MatchInterface = {
@@ -22,17 +32,26 @@ function makeRegexp(pattern: string) {
     regexpCache.set(pattern, regObject);
     return regObject;
 }
+
 export function isMatch(input: string, pattern: string) {
     if (input === '' || pattern === '') {
         return false;
     }
-    input = (input.replace(/^\^/, '')
+    if (pattern[0] === '/') {
+        const flag = pattern.substr(pattern.lastIndexOf('/') + 1);
+        pattern = pattern.substr(1).substr(0, pattern.lastIndexOf('/') -1);
+        return (new RegExp(pattern, flag)).test(input);
+    }
+    input = (input
+        .toString()
+        .replace(/^\^/, '')
         .replace(/\$$/, '')
         .replace(/^.*?\/{2,3}/, '')
         .replace(/\?.*$/, '')
         .replace(/\/$/, '')
     );
     const strippedPattern: string = (pattern
+        .toString()
         .replace(/^\^/, '')
         .replace(/\$$/, '')
         .replace(/^.*?\/{2,3}/, '')

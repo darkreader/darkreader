@@ -196,6 +196,14 @@ test('URL is enabled', () => {
     expect(isURLInList('https://mail.google.com/compose/', ['google.com', '!mail.google.com', 'mail.google.com/compose'])).toBe(true);
     expect(isURLInList('https://mail.google.com/', ['google.com', '!mail.google.com', 'mail.google.com/compose'])).toBe(false);
 
+    
+    // Test Custom Regex
+    expect(isURLMatched('https://discordapp.com', '/^(https:\/\/)(?!blog|support)([a-z0-9.]+)(.com)$/i')).toBe(true);
+    expect(isURLMatched('https://support.discordapp.com', '/^(https:\/\/)(?!blog|support)([a-z0-9.]+)(.com)$/i')).toBe(false);
+    expect(isURLMatched('https://blog.discordapp.com', '/^(https:\/\/)(?!blog|support)([a-z0-9.]+)(.com)$/i')).toBe(false);
+    expect(isURLMatched('https://www.discordapp.com', '/^(https:\/\/)(?!blog|support)([a-z0-9.]+)(.com)$/i')).toBe(true);
+    expect(isURLInList('https://blog.discordapp.com', ['/^(https:\/\/)(?!blog|support)([a-z0-9.]+)(.com)$/i', 'blog.discordapp.com'])).toBe(true);
+    expect(isURLInList('https://support.discordapp.com', ['/^(https:\/\/)(?!blog|support)([a-z0-9.]+)(.com)$/i', 'blog.discordapp.com'])).toBe(false);
 
     // Temporary Dark Sites list fix
     expect(isURLEnabled(

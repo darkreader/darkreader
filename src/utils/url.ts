@@ -1,5 +1,5 @@
 import {UserSettings} from '../definitions';
-import {isMatch} from './matching';
+import {isMatch, isInPattern} from './matching';
 
 export function getURLHost(url: string) {
     return url.match(/^(.*?\/{2,3})?(.+?)(\/|$)/)[2];
@@ -15,7 +15,7 @@ export function compareURLPatterns(a: string, b: string) {
  * @paramlist List to search into.
  */
 export function isURLInList(url: string, list: string[]) {
-    return isMatch(url, list);
+    return isInPattern(url, list);
 }
 
 /**
@@ -24,7 +24,7 @@ export function isURLInList(url: string, list: string[]) {
  * @param urlTemplate URL template ("google.*", "youtube.com" etc).
  */
 export function isURLMatched(url: string, urlTemplate: string): boolean {
-    return isMatch(url, [urlTemplate]);
+    return isMatch(url, urlTemplate);
 }
 
 export function isPDF(url: string) {

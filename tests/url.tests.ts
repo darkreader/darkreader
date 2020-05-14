@@ -1,7 +1,8 @@
-import {isURLEnabled, isPDF} from '../src/utils/url';
+import {isURLEnabled, isPDF, isURLMatched, isURLInList} from '../src/utils/url';
 import {UserSettings} from '../src/definitions';
 
 test('URL is enabled', () => {
+
     // Not invert listed
     expect(isURLEnabled(
         'https://mail.google.com/mail/u/0/',
@@ -167,47 +168,34 @@ test('URL is enabled', () => {
         {isProtected: false, isInDarkList: true},
     )).toEqual(false);
 
-    // Reverse Pattern
-    expect(isURLEnabled(
-        'https://blog.discordapp.com/',
-        {siteList: ['discordapp.com', '!blog.discordapp.com'], siteListEnabled: [''], applyToListedOnly: false} as UserSettings,
-        {isProtected: false, isInDarkList: false},
-    )).toBe(true);
-    expect(isURLEnabled(
-        'https://www.google.com/',
-        {siteList: ['!*.google.com', 'google.com'], siteListEnabled: [''], applyToListedOnly: false} as UserSettings,
-        {isProtected: false, isInDarkList: false},
-    )).toBe(true);
-    expect(isURLEnabled(
-        'https://mail.google.com/',
-        {siteList: ['!*.google.com', 'google.com'], siteListEnabled: [''], applyToListedOnly: false} as UserSettings,
-        {isProtected: false, isInDarkList: false},
-    )).toBe(true);
-    expect(isURLEnabled(
-        'https://mail.google.com/',
-        {siteList: ['!mail.google.com', 'google.com'], siteListEnabled: [''], applyToListedOnly: false} as UserSettings,
-        {isProtected: false, isInDarkList: false},
-    )).toBe(true);
-    expect(isURLEnabled(
-        'https://www.google.com/',
-        {siteList: ['!mail.google.com', 'google.com'], siteListEnabled: [''], applyToListedOnly: false} as UserSettings,
-        {isProtected: false, isInDarkList: false},
-    )).toBe(false);
-    expect(isURLEnabled(
-        'https://mail.google.com/',
-        {siteList: ['!mail.google.com', 'google.com'], siteListEnabled: [''], applyToListedOnly: true} as UserSettings,
-        {isProtected: false, isInDarkList: false},
-    )).toBe(false);
-    expect(isURLEnabled(
-        'https://mail.google.com/',
-        {siteList: ['google.com', '!mail.google.com', 'mail.google.com/compose'], siteListEnabled: [''], applyToListedOnly: false} as UserSettings,
-        {isProtected: false, isInDarkList: false},
-    )).toBe(true);
-    expect(isURLEnabled(
-        'https://mail.google.com/compose/',
-        {siteList: ['google.com', '!mail.google.com', 'mail.google.com/compose'], siteListEnabled: [''], applyToListedOnly: false} as UserSettings,
-        {isProtected: false, isInDarkList: false},
-    )).toBe(false);
+    // Test wildcards usage
+    expect(isURLMatched('https://www.google.com/', 'google.*')).toBe(true);
+    expect(isURLMatched('https://www.googla.com/', 'google.*')).toBe(false);
+    expect(isURLMatched('https://mail.google.com/compose', 'mail.google.*')).toBe(true);
+    expect(isURLMatched('https://www.google.com/compose', 'mail.google.*')).toBe(false);
+    expect(isURLMatched('https://mail.google.com/compose/new', 'mail.google.*/new')).toBe(true);
+    expect(isURLMatched('https://mail.google.com/compose/sented', 'mail.google.*/new')).toBe(false);
+
+
+    // Test Negative patterns
+    expect(isURLMatched('https://www.discordapp.com/', '!blog.discordapp.com')).toBe(true);
+    expect(isURLMatched('https://blog.discordapp.com/', '!blog.discordapp.com')).toBe(false);
+    expect(isURLMatched('https://www.discordapp.com/', '!blog.*.com')).toBe(true);
+    expect(isURLMatched('https://blog.example.com/', '!blog.*.com')).toBe(false);
+
+
+    // Test with list's
+    expect(isURLInList('https://www.google.com', ['google.com', 'example.org'])).toBe(true);
+    expect(isURLInList('https://www.google.org', ['google.com', 'example.org'])).toBe(false);
+    expect(isURLInList('https://mail.google.com/mail/u/0/', ['example.org', 'google.*/mail/*/0'])).toBe(true);
+    expect(isURLInList('https://mail.google.com/mail/u/1/', ['example.org', 'google.*/mail/*/0'])).toBe(false);
+    expect(isURLInList('https://www.discordapp.com', ['discordapp.com', '!blog.discordapp.com'])).toBe(true);
+    expect(isURLInList('https://blog.discordapp.com', ['discordapp.com', '!blog.discordapp.com'])).toBe(false);
+    expect(isURLInList('https://support.discordapp.com', ['discordapp.com', '!blog.discordapp.com'])).toBe(true);
+    expect(isURLInList('https://support.discordapp.com', ['discordapp.com', '!support.discordapp.com'])).toBe(false);
+    expect(isURLInList('https://mail.google.com/compose/', ['google.com', '!mail.google.com', 'mail.google.com/compose'])).toBe(true);
+    expect(isURLInList('https://mail.google.com/', ['google.com', '!mail.google.com', 'mail.google.com/compose'])).toBe(false);
+
 
     // Temporary Dark Sites list fix
     expect(isURLEnabled(

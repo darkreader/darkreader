@@ -6,9 +6,8 @@ interface MatchInterface {
 }
 
 function makeRegexp(pattern: string) {
-    const cacheKey = pattern;
-    if (regexpCache.has(cacheKey)) {
-        return regexpCache.get(cacheKey);
+    if (regexpCache.has(pattern)) {
+        return regexpCache.get(pattern);
     }
     const negated = pattern[0] === '!';
     if (negated) {
@@ -20,10 +19,46 @@ function makeRegexp(pattern: string) {
         regexp,
         negated,
     };
-    regexpCache.set(cacheKey, regObject);
+    regexpCache.set(pattern, regObject);
     return regObject;
 }
-export function isMatch(input: string, patterns: any[]) {
+export function isMatch(input: string, pattern: string) {
+    if (input === '' || pattern === '') {
+        return false;
+    }
+    input = (input.replace(/^\^/, '')
+        .replace(/\$$/, '')
+        .replace(/^.*?\/{2,3}/, '')
+        .replace(/\?.*$/, '')
+        .replace(/\/$/, '')
+    );
+    const strippedPattern: string = (pattern
+        .replace(/^\^/, '')
+        .replace(/\$$/, '')
+        .replace(/^.*?\/{2,3}/, '')
+        .replace(/\?.*$/, '')
+        .replace(/\/$/, '')
+        .replace(/\$www./, '')
+    );
+    const regObject: MatchInterface = makeRegexp(strippedPattern);
+    const regexp: RegExp = regObject.regexp;
+    const matched = regexp.test(input);
+    if (!matched) {
+        if (regObject.negated) {
+            return true;
+        } else {
+            return false;
+        }
+    } else {
+        if (regObject.negated) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+}
+
+export function isInPattern(input: string, patterns: any[]) {
     if (input == '' || patterns.length === 0) {
         return false;
     }

@@ -114,12 +114,36 @@ export function watchForStyleChanges(update: (styles: ChangedStyles) => void) {
         const deletions = new Set<Node>();
         const styleUpdates = new Set<HTMLLinkElement | HTMLStyleElement>();
         mutations.forEach((m) => {
-            m.addedNodes.forEach((n) => additions.add(n));
-            m.removedNodes.forEach((n) => deletions.add(n));
+            m.addedNodes.forEach((n) => {
+                if (n instanceof Element) {
+                    additions.add(n);
+                }
+            });
+            m.removedNodes.forEach((n) => {
+                if (n instanceof Element) {
+                    deletions.add(n);
+                }
+            });
             if (m.type === 'attributes' && shouldManageStyle(m.target)) {
                 styleUpdates.add(m.target as HTMLLinkElement | HTMLStyleElement);
             }
         });
+
+        const duplicateAdditions = [] as Node[];
+        const duplicateDeletions = [] as Node[];
+        additions.forEach((node) => {
+            if (additions.has(node.parentElement)) {
+                duplicateAdditions.push(node);
+            }
+        });
+        deletions.forEach((node) => {
+            if (deletions.has(node.parentElement)) {
+                duplicateDeletions.push(node);
+            }
+        });
+        duplicateAdditions.forEach((node) => additions.delete(node));
+        duplicateDeletions.forEach((node) => deletions.delete(node));
+
         const styleAdditions = getAllManageableStyles(additions);
         const styleDeletions = getAllManageableStyles(deletions);
         additions.forEach((n) => {

@@ -21,7 +21,7 @@ async function bundleAPI() {
                 tsconfigOverride: {
                     compilerOptions: {
                         removeComments: true,
-                        target: 'es5',
+                        target: 'ES6',
                     },
                 },
                 clean: true,

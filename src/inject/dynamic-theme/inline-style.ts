@@ -222,7 +222,7 @@ export function overrideInlineStyle(element: HTMLElement, theme: FilterConfig, i
         unsetProps.delete(targetCSSProp);
     }
 
-    if (ignoreSelectors.length > 0) {
+    if (ignoreSelectors && ignoreSelectors.length > 0) {
         if (shouldIgnoreInlineStyle(element, ignoreSelectors)) {
             unsetProps.forEach((cssProp) => {
                 const {store, dataAttr} = overrides[cssProp];

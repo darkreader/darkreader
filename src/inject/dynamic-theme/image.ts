@@ -4,6 +4,7 @@ import {getURLHost} from '../../utils/url';
 import {loadAsDataURL} from '../../utils/network';
 import {FilterConfig} from '../../definitions';
 
+
 export interface ImageDetails {
     src: string;
     dataURL: string;
@@ -49,7 +50,12 @@ async function urlToImage(url: string) {
     });
 }
 
+const ImageCache = new Map();
+
 function analyzeImage(image: HTMLImageElement) {
+    if (ImageCache.has(image.src)) {
+        return ImageCache.get(image.src);
+    }
     const MAX_ANALIZE_PIXELS_COUNT = 32 * 32;
 
     const naturalPixelsCount = image.naturalWidth * image.naturalHeight;
@@ -108,13 +114,14 @@ function analyzeImage(image: HTMLImageElement) {
     const LIGHT_IMAGE_THRESHOLD = 0.7;
     const TRANSPARENT_IMAGE_THRESHOLD = 0.1;
     const LARGE_IMAGE_PIXELS_COUNT = 800 * 600;
-
-    return {
+    const returnObject = {
         isDark: ((darkPixelsCount / opaquePixelsCount) >= DARK_IMAGE_THRESHOLD),
         isLight: ((lightPixelsCount / opaquePixelsCount) >= LIGHT_IMAGE_THRESHOLD),
         isTransparent: ((transparentPixelsCount / totalPixelsCount) >= TRANSPARENT_IMAGE_THRESHOLD),
         isLarge: (naturalPixelsCount >= LARGE_IMAGE_PIXELS_COUNT),
     };
+    ImageCache.set(image.src, returnObject);
+    return returnObject;
 }
 
 export function getFilteredImageDataURL({dataURL, width, height}: ImageDetails, filter: FilterConfig) {

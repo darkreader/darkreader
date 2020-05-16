@@ -55,7 +55,7 @@ export function getDynamicThemeFixesFor(url: string, frameURL: string, fixes: Dy
         ignoreInlineStyle: fixes[0].ignoreInlineStyle || [],
         invert: fixes[0].invert || [],
         css: fixes[0].css || [],
-        mobileCSS: fixes[0].mobileCSS || [],
+        mobileCSS: fixes[0].mobileCSS || '',
     };
 
     const sortedBySpecificity = fixes
@@ -80,6 +80,6 @@ export function getDynamicThemeFixesFor(url: string, frameURL: string, fixes: Dy
         ignoreInlineStyle: common.ignoreInlineStyle.concat(match.ignoreInlineStyle || []),
         invert: common.invert.concat(match.invert || []),
         css: [common.css, match.css].filter((s) => s).join('\n'),
-        mobileCSS: [common.css, match.mobileCSS].filter((s) => s).join('\n'),
+        mobileCSS: [common.mobileCSS, match.mobileCSS].filter((s) => s).join('\n'),
     };
 }

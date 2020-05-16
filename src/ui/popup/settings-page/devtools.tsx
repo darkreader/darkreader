@@ -7,14 +7,27 @@ import {ViewProps} from '../types';
 import {isFirefox} from '../../../utils/platform';
 
 function getExistingDevToolsWindow() {
-    return new Promise<chrome.windows.Window>((resolve) => {
-        chrome.windows.getAll({
-            populate: true,
-            windowTypes: ['popup']
-        }, (w) => {
-            for (const window of w) {
-                if (window.tabs[0].url.endsWith('ui/devtools/index.html')) {
-                    resolve(window);
+    if (!isMobile()) {
+        return new Promise<chrome.windows.Window>((resolve) => {
+            chrome.windows.getAll({
+                populate: true,
+                windowTypes: ['popup']
+            }, (w) => {
+                for (const window of w) {
+                    if (window.tabs[0].url.endsWith('ui/devtools/index.html')) {
+                        resolve(window);
+                        return;
+                    }
+                }
+                resolve(null);
+            });
+        });
+    }
+    return new Promise<chrome.tabs.Tab>((resolve) => {
+        chrome.tabs.query({}, (t) => {
+            for (const tab of t) {
+                if (tab.url.endsWith('ui/devtools/index.html')) {
+                    resolve(tab);
                     return;
                 }
             }
@@ -25,15 +38,25 @@ function getExistingDevToolsWindow() {
 
 async function openDevTools() {
     const devToolsWindow = await getExistingDevToolsWindow();
-    if (devToolsWindow) {
-        chrome.windows.update(devToolsWindow.id, {'focused': true});
+    if (!isMobile()) {
+        if (devToolsWindow) {
+            chrome.windows.update(devToolsWindow.id, {'focused': true});
+        } else {
+            chrome.windows.create({
+                type: 'popup',
+                url: isFirefox() ? '../devtools/index.html' : 'ui/devtools/index.html',
+                width: 600,
+                height: 600,
+            });
+        }
     } else {
-        chrome.windows.create({
-            type: 'popup',
-            url: isFirefox() ? '../devtools/index.html' : 'ui/devtools/index.html',
-            width: 600,
-            height: 600,
-        });
+        if (devToolsWindow) {
+            chrome.tabs.update(devToolsWindow.id, {'active': true});
+        } else {
+            chrome.tabs.create({
+                url: '../devtools/index.html'
+            })
+        }
     }
 }
 

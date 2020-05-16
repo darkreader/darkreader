@@ -5,7 +5,7 @@
   "scripts": {
     "api": "node -e \"require('./tasks/bundle-api')()\"",
     "benchmark-server": "node tests/benchmark-server/index.js",
-    "build": "node tasks/release.js",
+    "build": "node tasks/build.js",
     "code-style": "eslint --fix \"src/**/*.ts\" \"src/**/*.tsx\" \"tasks/**/*.js\" \"tests/**/*.ts\" \"tests/**/*.js\" \"index.d.ts\"",
     "debug": "node tasks/debug.js",
     "prepublishOnly": "npm test && npm run api",

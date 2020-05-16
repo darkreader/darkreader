@@ -107,6 +107,7 @@ export interface DynamicThemeFix {
     ignoreInlineStyle: string[];
     invert: string[];
     css: string;
+    mobileCSS: string;
 }
 
 export interface InversionFix {

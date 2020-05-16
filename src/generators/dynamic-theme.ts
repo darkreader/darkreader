@@ -8,6 +8,7 @@ const dynamicThemeFixesCommands = {
     'IGNORE INLINE STYLE': 'ignoreInlineStyle',
     'INVERT': 'invert',
     'CSS': 'css',
+    'MOBILE CSS': 'mobileCSS',
 };
 
 export function parseDynamicThemeFixes(text: string) {
@@ -15,7 +16,7 @@ export function parseDynamicThemeFixes(text: string) {
         commands: Object.keys(dynamicThemeFixesCommands),
         getCommandPropName: (command) => dynamicThemeFixesCommands[command] || null,
         parseCommandValue: (command, value) => {
-            if (command === 'CSS') {
+            if (command === 'CSS' || command === 'MOBILE CSS') {
                 return value.trim();
             }
             return parseArray(value);
@@ -30,13 +31,13 @@ export function formatDynamicThemeFixes(dynamicThemeFixes: DynamicThemeFix[]) {
         props: Object.values(dynamicThemeFixesCommands),
         getPropCommandName: (prop) => Object.entries(dynamicThemeFixesCommands).find(([, p]) => p === prop)[0],
         formatPropValue: (prop, value) => {
-            if (prop === 'css') {
+            if (prop === 'css' || prop === 'mobileCSS') {
                 return value.trim();
             }
             return formatArray(value).trim();
         },
         shouldIgnoreProp: (prop, value) => {
-            if (prop === 'css') {
+            if (prop === 'css' || prop === 'mobileCSS') {
                 return !value;
             }
             return !(Array.isArray(value) && value.length > 0);
@@ -54,6 +55,7 @@ export function getDynamicThemeFixesFor(url: string, frameURL: string, fixes: Dy
         ignoreInlineStyle: fixes[0].ignoreInlineStyle || [],
         invert: fixes[0].invert || [],
         css: fixes[0].css || [],
+        mobileCSS: fixes[0].mobileCSS || [],
     };
 
     const sortedBySpecificity = fixes
@@ -78,5 +80,6 @@ export function getDynamicThemeFixesFor(url: string, frameURL: string, fixes: Dy
         ignoreInlineStyle: common.ignoreInlineStyle.concat(match.ignoreInlineStyle || []),
         invert: common.invert.concat(match.invert || []),
         css: [common.css, match.css].filter((s) => s).join('\n'),
+        mobileCSS: [common.css, match.mobileCSS].filter((s) => s).join('\n'),
     };
 }

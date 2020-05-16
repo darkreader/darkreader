@@ -9,7 +9,7 @@ import {removeNode, watchForNodePosition, iterateShadowNodes} from '../utils/dom
 import {logWarn} from '../utils/log';
 import {throttle} from '../utils/throttle';
 import {clamp} from '../../utils/math';
-import {isFirefox} from '../../utils/platform';
+import {isFirefox, isMobile} from '../../utils/platform';
 import {getCSSFilterValue} from '../../generators/css-filter';
 import {modifyColor} from '../../generators/modify-colors';
 import {createTextStyle} from '../../generators/text-style';
@@ -86,7 +86,11 @@ function createStaticStyleOverrides() {
     setupStylePositionWatcher(inlineStyle, 'inline');
 
     const overrideStyle = createOrUpdateStyle('darkreader--override');
-    overrideStyle.textContent = fixes && fixes.css ? replaceCSSTemplates(fixes.css) : '';
+    if (isMobile() && fixes.mobileCSS) {
+        overrideStyle.textContent = fixes && replaceCSSTemplates(fixes.mobileCSS);
+    } else {
+        overrideStyle.textContent = fixes && fixes.css ? replaceCSSTemplates(fixes.css) : '';
+    }
     document.head.appendChild(overrideStyle);
     setupStylePositionWatcher(overrideStyle, 'override');
 }

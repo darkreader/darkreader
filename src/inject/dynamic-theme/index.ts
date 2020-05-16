@@ -86,8 +86,8 @@ function createStaticStyleOverrides() {
     setupStylePositionWatcher(inlineStyle, 'inline');
 
     const overrideStyle = createOrUpdateStyle('darkreader--override');
-    if (isMobile() && fixes.mobileCSS) {
-        overrideStyle.textContent = fixes && replaceCSSTemplates(fixes.mobileCSS);
+    if (isMobile()) {
+        overrideStyle.textContent = fixes && fixes.mobileCSS ? replaceCSSTemplates(fixes.mobileCSS) : '';
     } else {
         overrideStyle.textContent = fixes && fixes.css ? replaceCSSTemplates(fixes.css) : '';
     }

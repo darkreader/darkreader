@@ -39,7 +39,7 @@ function invertFavicon(favicon: HTMLImageElement) {
 
     let i: number, x: number, y: number;
     let r: number, g: number, b: number, a: number;
-    let l: number, min: number, max: number;
+    let p: number;
     for (y = 0; y < height; y++) {
         for (x = 0; x < width; x++) {
             i = 4 * (y * width + x);
@@ -51,8 +51,10 @@ function invertFavicon(favicon: HTMLImageElement) {
             if (a < TRANSPARENT_ALPHA_THRESHOLD) {
                 continue;
             } else {
-                l = (0.299*r + 0.587*g + 0.114*b)
-                if (l < DARK_LIGHTNESS_THRESHOLD) {
+                // Use HSP to determine the `pixel Lightness`
+                // http://alienryderflex.com/hsp.html & https://stackoverflow.com/a/24213274/13569411
+                p = Math.sqrt(0.299 * r^2 + 0.587 * g^2 + 0.114 * b^2)
+                if (p < DARK_LIGHTNESS_THRESHOLD) {
                     data[i + 0] = 255 - data[i + 0];
                     data[i + 1] = 255 - data[i + 1];
                     data[i + 2] = 255 - data[i + 2];

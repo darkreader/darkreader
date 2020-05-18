@@ -1,36 +1,18 @@
 import {iterateShadowNodes} from '../utils/dom';
-import {forEach, push} from '../../utils/array';
+import {push} from '../../utils/array';
 import {isDefinedSelectorSupported} from '../../utils/platform';
-import {shouldManageStyle, STYLE_SELECTOR} from './style-manager';
+import {shouldManageStyle, getManageableStyles, StyleElement} from './style-manager';
+
+const HUGE_MUTATIONS_COUNT = 1000;
 
 const observers = [] as MutationObserver[];
 let observedRoots: WeakSet<Node>;
 
 interface ChangedStyles {
-    created: (HTMLStyleElement | HTMLLinkElement)[];
-    updated: (HTMLStyleElement | HTMLLinkElement)[];
-    removed: (HTMLStyleElement | HTMLLinkElement)[];
-    moved: (HTMLStyleElement | HTMLLinkElement)[];
-}
-
-function getAllManageableStyles(nodes: Iterable<Node> | ArrayLike<Node>) {
-    const results: (HTMLLinkElement | HTMLStyleElement)[] = [];
-    forEach(nodes, (node) => {
-        if (node instanceof Element) {
-            if (shouldManageStyle(node)) {
-                results.push(node as HTMLLinkElement | HTMLStyleElement);
-            }
-        }
-        if (node instanceof Element || node instanceof ShadowRoot) {
-            node.querySelectorAll(STYLE_SELECTOR)
-                .forEach((style: HTMLLinkElement | HTMLStyleElement) => {
-                    if (shouldManageStyle(style)) {
-                        results.push(style);
-                    }
-                });
-        }
-    });
-    return results;
+    created: StyleElement[];
+    updated: StyleElement[];
+    removed: StyleElement[];
+    moved: StyleElement[];
 }
 
 const undefinedGroups = new Map<string, Set<Element>>();
@@ -88,28 +70,30 @@ function unsubscribeFromDefineCustomElements() {
     undefinedGroups.clear();
 }
 
-export function watchForStyleChanges(update: (styles: ChangedStyles) => void) {
+export function watchForStyleChanges(currentStyles: StyleElement[], update: (styles: ChangedStyles) => void) {
     resetObservers();
 
-    function handleTreeMutations(mutations: MutationRecord[]) {
-        const createdStyles = new Set<HTMLLinkElement | HTMLStyleElement>();
-        const removedStyles = new Set<HTMLLinkElement | HTMLStyleElement>();
-        const movedStyles = new Set<HTMLLinkElement | HTMLStyleElement>();
-
+    function getNodesOperations(mutations: MutationRecord[]) {
         const additions = new Set<Element>();
         const deletions = new Set<Element>();
+        const moves = new Set<Element>();
         mutations.forEach((m) => {
             m.addedNodes.forEach((n) => {
-                if (n instanceof Element) {
+                if (n instanceof Element && n.isConnected) {
                     additions.add(n);
                 }
             });
             m.removedNodes.forEach((n) => {
                 if (n instanceof Element) {
-                    deletions.add(n);
+                    if (n.isConnected) {
+                        moves.add(n);
+                    } else {
+                        deletions.add(n);
+                    }
                 }
             });
         });
+        moves.forEach((n) => additions.delete(n));
 
         const duplicateAdditions = [] as Element[];
         const duplicateDeletions = [] as Element[];
@@ -126,37 +110,41 @@ export function watchForStyleChanges(update: (styles: ChangedStyles) => void) {
         duplicateAdditions.forEach((node) => additions.delete(node));
         duplicateDeletions.forEach((node) => deletions.delete(node));
 
-        const styleAdditions = getAllManageableStyles(additions);
-        const styleDeletions = getAllManageableStyles(deletions);
-        additions.forEach((n) => {
-            iterateShadowNodes(n, (host) => {
-                const shadowStyles = getAllManageableStyles(host.shadowRoot.children);
-                if (shadowStyles.length > 0) {
-                    push(styleAdditions, shadowStyles);
-                }
-            });
-        });
-        deletions.forEach((n) => {
-            iterateShadowNodes(n, (host) => {
-                const shadowStyles = getAllManageableStyles(host.shadowRoot.children);
-                if (shadowStyles.length > 0) {
-                    push(styleDeletions, shadowStyles);
-                }
-            });
-        });
+        return {additions, moves, deletions};
+    }
 
-        styleDeletions.forEach((style) => {
-            if (style.isConnected) {
-                movedStyles.add(style);
-            } else {
-                removedStyles.add(style);
-            }
-        });
-        styleAdditions.forEach((style) => {
-            if (!(removedStyles.has(style) || movedStyles.has(style))) {
-                createdStyles.add(style);
-            }
-        });
+    const prevStyles = new Set<StyleElement>(currentStyles);
+    const prevStyleSiblings = new WeakMap<Element, Element>();
+    const nextStyleSiblings = new WeakMap<Element, Element>();
+
+    function saveStylePosition(style: StyleElement) {
+        prevStyleSiblings.set(style, style.previousElementSibling);
+        nextStyleSiblings.set(style, style.nextElementSibling);
+    }
+
+    function forgetStylePosition(style: StyleElement) {
+        prevStyleSiblings.delete(style);
+        nextStyleSiblings.delete(style);
+    }
+
+    function didStylePositionChange(style: StyleElement) {
+        return (
+            style.previousElementSibling !== prevStyleSiblings.get(style) ||
+            style.nextElementSibling !== nextStyleSiblings.get(style)
+        );
+    }
+
+    currentStyles.forEach(saveStylePosition);
+
+    function handleStyleOperations(operations: {createdStyles: Set<StyleElement>; movedStyles: Set<StyleElement>; removedStyles: Set<StyleElement>}) {
+        const {createdStyles, removedStyles, movedStyles} = operations;
+
+        createdStyles.forEach((s) => saveStylePosition(s));
+        movedStyles.forEach((s) => saveStylePosition(s));
+        removedStyles.forEach((s) => forgetStylePosition(s));
+
+        createdStyles.forEach((s) => prevStyles.add(s));
+        removedStyles.forEach((s) => prevStyles.delete(s));
 
         if (createdStyles.size + removedStyles.size + movedStyles.size > 0) {
             update({
@@ -166,6 +154,20 @@ export function watchForStyleChanges(update: (styles: ChangedStyles) => void) {
                 updated: [],
             });
         }
+    }
+
+    function handleMinorTreeMutations(mutations: MutationRecord[]) {
+        const createdStyles = new Set<StyleElement>();
+        const removedStyles = new Set<StyleElement>();
+        const movedStyles = new Set<StyleElement>();
+
+        const {additions, moves, deletions} = getNodesOperations(mutations);
+
+        additions.forEach((node) => getManageableStyles(node).forEach((style) => createdStyles.add(style)));
+        deletions.forEach((node) => getManageableStyles(node).forEach((style) => removedStyles.add(style)));
+        moves.forEach((node) => getManageableStyles(node).forEach((style) => movedStyles.add(style)));
+
+        handleStyleOperations({createdStyles, removedStyles, movedStyles});
 
         additions.forEach((n) => {
             if (n.isConnected) {
@@ -175,11 +177,48 @@ export function watchForStyleChanges(update: (styles: ChangedStyles) => void) {
         });
     }
 
+    function handleHugeTreeMutations(root: Document | ShadowRoot) {
+        const styles = new Set(getManageableStyles(root));
+
+        const createdStyles = new Set<StyleElement>();
+        const removedStyles = new Set<StyleElement>();
+        const movedStyles = new Set<StyleElement>();
+        styles.forEach((s) => {
+            if (!prevStyles.has(s)) {
+                createdStyles.add(s);
+            }
+        });
+        prevStyles.forEach((s) => {
+            if (!styles.has(s)) {
+                removedStyles.add(s);
+            }
+        });
+        styles.forEach((s) => {
+            if (!createdStyles.has(s) && !removedStyles.has(s) && didStylePositionChange(s)) {
+                movedStyles.add(s);
+            }
+        });
+
+        handleStyleOperations({createdStyles, removedStyles, movedStyles});
+
+        iterateShadowNodes(document, subscribeForShadowRootChanges);
+        collectUndefinedElements(document);
+    }
+
+    function handleTreeMutations(root: Document | ShadowRoot, mutations: MutationRecord[]) {
+        const addedNodesCount = mutations.reduce((sum, m) => sum + m.addedNodes.length, 0);
+        if (addedNodesCount > HUGE_MUTATIONS_COUNT) {
+            handleHugeTreeMutations(root);
+        } else {
+            handleMinorTreeMutations(mutations);
+        }
+    }
+
     function handleAttributeMutations(mutations: MutationRecord[]) {
-        const updatedStyles = new Set<HTMLLinkElement | HTMLStyleElement>();
+        const updatedStyles = new Set<StyleElement>();
         mutations.forEach((m) => {
             if (shouldManageStyle(m.target) && m.target.isConnected) {
-                updatedStyles.add(m.target as HTMLLinkElement | HTMLStyleElement);
+                updatedStyles.add(m.target as StyleElement);
             }
         });
         if (updatedStyles.size > 0) {
@@ -193,7 +232,7 @@ export function watchForStyleChanges(update: (styles: ChangedStyles) => void) {
     }
 
     function observe(root: Document | ShadowRoot) {
-        const treeObserver = new MutationObserver(handleTreeMutations);
+        const treeObserver = new MutationObserver((mutations) => handleTreeMutations(root, mutations));
         const attrObserver = new MutationObserver(handleAttributeMutations);
         treeObserver.observe(root, {childList: true, subtree: true});
         attrObserver.observe(root, {attributes: true, attributeFilter: ['rel', 'disabled'], subtree: true});
@@ -202,7 +241,7 @@ export function watchForStyleChanges(update: (styles: ChangedStyles) => void) {
     }
 
     function subscribeForShadowRootChanges(node: Element) {
-        if (observedRoots.has(node.shadowRoot) || node.shadowRoot == null) {
+        if (node.shadowRoot == null || observedRoots.has(node.shadowRoot)) {
             return;
         }
         observe(node.shadowRoot);
@@ -212,7 +251,8 @@ export function watchForStyleChanges(update: (styles: ChangedStyles) => void) {
     iterateShadowNodes(document.documentElement, subscribeForShadowRootChanges);
 
     watchWhenCustomElementsDefined((hosts) => {
-        const newStyles = getAllManageableStyles(hosts.map((h) => h.shadowRoot));
+        const newStyles: StyleElement[] = [];
+        hosts.forEach((host) => push(newStyles, getManageableStyles(host.shadowRoot)));
         update({created: newStyles, updated: [], removed: [], moved: []});
         hosts.forEach((h) => subscribeForShadowRootChanges(h));
     });

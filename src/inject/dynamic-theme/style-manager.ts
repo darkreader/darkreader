@@ -1,7 +1,7 @@
 import {iterateCSSRules, iterateCSSDeclarations, getCSSVariables, replaceCSSRelativeURLsWithAbsolute, removeCSSComments, replaceCSSFontFace, replaceCSSVariables, getCSSURLValue, cssImportRegex, getCSSBaseBath} from './css-rules';
 import {getModifiableCSSDeclaration, ModifiableCSSDeclaration, ModifiableCSSRule} from './modify-css';
 import {bgFetch} from './network';
-import {watchForNodePosition, removeNode} from '../utils/dom';
+import {watchForNodePosition, removeNode, iterateShadowNodes} from '../utils/dom';
 import {logWarn} from '../utils/log';
 import {createAsyncTasksQueue} from '../utils/throttle';
 import {isDeepSelectorSupported, isHostSelectorSupported} from '../../utils/platform';
@@ -21,6 +21,8 @@ declare global {
     }
 }
 
+export type StyleElement = HTMLLinkElement | HTMLStyleElement;
+
 export interface StyleManager {
     details(): {variables: Map<string, string>};
     render(filter: FilterConfig, variables: Map<string, string>): void;
@@ -36,8 +38,6 @@ export const STYLE_SELECTOR = (() => {
         'html /deep/ style',
         ':host /deep/ link[rel*="stylesheet" i]:not([disabled])',
         ':host /deep/ style',
-        ':host link[rel*="stylesheet" i]:not([disabled])',
-        ':host style',
     ];
     if (!isDeepSelectorSupported()) {
         selectors = selectors.map((s) => s.replace('/deep/ ', ''));
@@ -66,10 +66,21 @@ export function shouldManageStyle(element: Node) {
     );
 }
 
+export function getManageableStyles(node: Node, results = [] as StyleElement[]) {
+    if (shouldManageStyle(node)) {
+        results.push(node as StyleElement);
+    } else if (node instanceof Element || node instanceof ShadowRoot || node === document) {
+        (node as Element)
+            .querySelectorAll(STYLE_SELECTOR)
+            .forEach((style: StyleElement) => getManageableStyles(style, results));
+        iterateShadowNodes(node, (host) => getManageableStyles(host.shadowRoot, results));
+    }
+    return results;
+}
+
 const asyncQueue = createAsyncTasksQueue();
 
-export function manageStyle(element: HTMLLinkElement | HTMLStyleElement, {update, loadingStart, loadingEnd}): StyleManager {
-
+export function manageStyle(element: StyleElement, {update, loadingStart, loadingEnd}): StyleManager {
     const prevStyles: HTMLStyleElement[] = [];
     let next: Element = element;
     while ((next = next.nextElementSibling) && next.matches('.darkreader')) {
@@ -610,7 +621,7 @@ async function replaceCSSImports(cssText: string, basePath: string) {
     return cssText;
 }
 
-function createCORSCopy(srcElement: HTMLLinkElement | HTMLStyleElement, cssText: string) {
+function createCORSCopy(srcElement: StyleElement, cssText: string) {
     if (!cssText) {
         return null;
     }

@@ -251,8 +251,8 @@ export function watchForStyleChanges(currentStyles: StyleElement[], update: (sty
 
         handleStyleOperations({createdStyles, removedStyles, movedStyles});
 
-        iterateShadowNodes(document, subscribeForShadowRootChanges);
-        collectUndefinedElements(document);
+        iterateShadowNodes(root, subscribeForShadowRootChanges);
+        collectUndefinedElements(root);
     }
 
     function handleTreeMutations(root: Document | ShadowRoot, mutations: MutationRecord[]) {

@@ -4,7 +4,6 @@ import {bgFetch} from './network';
 import {watchForNodePosition, removeNode, iterateShadowNodes} from '../utils/dom';
 import {logWarn} from '../utils/log';
 import {createAsyncTasksQueue} from '../utils/throttle';
-import {isDeepSelectorSupported, isHostSelectorSupported} from '../../utils/platform';
 import {getMatches} from '../../utils/text';
 import {FilterConfig} from '../../definitions';
 import {getAbsoluteURL} from './url';
@@ -32,21 +31,7 @@ export interface StyleManager {
     restore(): void;
 }
 
-export const STYLE_SELECTOR = (() => {
-    let selectors = [
-        'html /deep/ link[rel*="stylesheet" i]:not([disabled])',
-        'html /deep/ style',
-        ':host /deep/ link[rel*="stylesheet" i]:not([disabled])',
-        ':host /deep/ style',
-    ];
-    if (!isDeepSelectorSupported()) {
-        selectors = selectors.map((s) => s.replace('/deep/ ', ''));
-    }
-    if (!isHostSelectorSupported()) {
-        selectors = selectors.filter((s) => !s.startsWith(':host'));
-    }
-    return selectors.join(', ');
-})();
+export const STYLE_SELECTOR = 'style, link[rel*="stylesheet" i]:not([disabled])';
 
 export function shouldManageStyle(element: Node) {
     return (

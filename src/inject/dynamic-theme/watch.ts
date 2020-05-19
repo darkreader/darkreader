@@ -170,10 +170,8 @@ export function watchForStyleChanges(currentStyles: StyleElement[], update: (sty
         handleStyleOperations({createdStyles, removedStyles, movedStyles});
 
         additions.forEach((n) => {
-            if (n.isConnected) {
-                iterateShadowNodes(n, subscribeForShadowRootChanges);
-                collectUndefinedElements(n);
-            }
+            iterateShadowNodes(n, subscribeForShadowRootChanges);
+            collectUndefinedElements(n);
         });
     }
 

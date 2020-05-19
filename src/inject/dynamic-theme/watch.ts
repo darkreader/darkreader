@@ -1,11 +1,9 @@
-import {iterateShadowNodes} from '../utils/dom';
 import {push} from '../../utils/array';
 import {isDefinedSelectorSupported} from '../../utils/platform';
+import {iterateShadowNodes, createOptimizedTreeObserver, ElementsTreeOperations} from '../utils/dom';
 import {shouldManageStyle, getManageableStyles, StyleElement} from './style-manager';
 
-const HUGE_MUTATIONS_COUNT = 1000;
-
-const observers = [] as MutationObserver[];
+const observers = [] as {disconnect(): void}[];
 let observedRoots: WeakSet<Node>;
 
 interface ChangedStyles {
@@ -70,89 +68,8 @@ function unsubscribeFromDefineCustomElements() {
     undefinedGroups.clear();
 }
 
-function isHugeMutation(mutations: MutationRecord[]) {
-    if (mutations.length > HUGE_MUTATIONS_COUNT) {
-        return true;
-    }
-
-    let addedNodesCount = 0;
-    for (let i = 0; i < mutations.length; i++) {
-        addedNodesCount += mutations[i].addedNodes.length;
-        if (addedNodesCount > HUGE_MUTATIONS_COUNT) {
-            return true;
-        }
-    }
-
-    return false;
-}
-
-function isDOMReady() {
-    return document.readyState === 'complete' || document.readyState === 'interactive';
-}
-
-const readyStateListeners = new Set<() => void>();
-
-function subscribeToReadyStateChange(listener: () => void) {
-    readyStateListeners.add(listener);
-}
-
-function clearReadyStateListeners() {
-    readyStateListeners.clear();
-}
-
-if (!isDOMReady()) {
-    const readyStateListener = () => {
-        if (isDOMReady()) {
-            document.removeEventListener('readystatechange', readyStateListener);
-            readyStateListeners.forEach((listener) => listener());
-            clearReadyStateListeners();
-        }
-    };
-    document.addEventListener('readystatechange', readyStateListener);
-}
-
 export function watchForStyleChanges(currentStyles: StyleElement[], update: (styles: ChangedStyles) => void) {
     stopWatchingForStyleChanges();
-
-    function getNodesOperations(mutations: MutationRecord[]) {
-        const additions = new Set<Element>();
-        const deletions = new Set<Element>();
-        const moves = new Set<Element>();
-        mutations.forEach((m) => {
-            m.addedNodes.forEach((n) => {
-                if (n instanceof Element && n.isConnected) {
-                    additions.add(n);
-                }
-            });
-            m.removedNodes.forEach((n) => {
-                if (n instanceof Element) {
-                    if (n.isConnected) {
-                        moves.add(n);
-                    } else {
-                        deletions.add(n);
-                    }
-                }
-            });
-        });
-        moves.forEach((n) => additions.delete(n));
-
-        const duplicateAdditions = [] as Element[];
-        const duplicateDeletions = [] as Element[];
-        additions.forEach((node) => {
-            if (additions.has(node.parentElement)) {
-                duplicateAdditions.push(node);
-            }
-        });
-        deletions.forEach((node) => {
-            if (deletions.has(node.parentElement)) {
-                duplicateDeletions.push(node);
-            }
-        });
-        duplicateAdditions.forEach((node) => additions.delete(node));
-        duplicateDeletions.forEach((node) => deletions.delete(node));
-
-        return {additions, moves, deletions};
-    }
 
     const prevStyles = new Set<StyleElement>(currentStyles);
     const prevStyleSiblings = new WeakMap<Element, Element>();
@@ -197,12 +114,10 @@ export function watchForStyleChanges(currentStyles: StyleElement[], update: (sty
         }
     }
 
-    function handleMinorTreeMutations(mutations: MutationRecord[]) {
+    function handleMinorTreeMutations({additions, moves, deletions}: ElementsTreeOperations) {
         const createdStyles = new Set<StyleElement>();
         const removedStyles = new Set<StyleElement>();
         const movedStyles = new Set<StyleElement>();
-
-        const {additions, moves, deletions} = getNodesOperations(mutations);
 
         additions.forEach((node) => getManageableStyles(node).forEach((style) => createdStyles.add(style)));
         deletions.forEach((node) => getManageableStyles(node).forEach((style) => removedStyles.add(style)));
@@ -216,18 +131,7 @@ export function watchForStyleChanges(currentStyles: StyleElement[], update: (sty
         });
     }
 
-    let hadHugeMutationsBefore = false;
-    let subscribedForReadyState = false;
-
     function handleHugeTreeMutations(root: Document | ShadowRoot) {
-        if (hadHugeMutationsBefore && !isDOMReady()) {
-            if (!subscribedForReadyState) {
-                subscribeToReadyStateChange(() => handleHugeTreeMutations(root));
-                subscribedForReadyState = true;
-            }
-            return;
-        }
-
         const styles = new Set(getManageableStyles(root));
 
         const createdStyles = new Set<StyleElement>();
@@ -255,15 +159,6 @@ export function watchForStyleChanges(currentStyles: StyleElement[], update: (sty
         collectUndefinedElements(root);
     }
 
-    function handleTreeMutations(root: Document | ShadowRoot, mutations: MutationRecord[]) {
-        if (isHugeMutation(mutations)) {
-            handleHugeTreeMutations(root);
-            hadHugeMutationsBefore = true;
-        } else {
-            handleMinorTreeMutations(mutations);
-        }
-    }
-
     function handleAttributeMutations(mutations: MutationRecord[]) {
         const updatedStyles = new Set<StyleElement>();
         mutations.forEach((m) => {
@@ -282,9 +177,11 @@ export function watchForStyleChanges(currentStyles: StyleElement[], update: (sty
     }
 
     function observe(root: Document | ShadowRoot) {
-        const treeObserver = new MutationObserver((mutations) => handleTreeMutations(root, mutations));
+        const treeObserver = createOptimizedTreeObserver(root, {
+            onMinorMutations: handleMinorTreeMutations,
+            onHugeMutations: handleHugeTreeMutations,
+        });
         const attrObserver = new MutationObserver(handleAttributeMutations);
-        treeObserver.observe(root, {childList: true, subtree: true});
         attrObserver.observe(root, {attributes: true, attributeFilter: ['rel', 'disabled'], subtree: true});
         observers.push(treeObserver, attrObserver);
         observedRoots.add(root);
@@ -317,6 +214,5 @@ function resetObservers() {
 
 export function stopWatchingForStyleChanges() {
     resetObservers();
-    clearReadyStateListeners();
     unsubscribeFromDefineCustomElements();
 }

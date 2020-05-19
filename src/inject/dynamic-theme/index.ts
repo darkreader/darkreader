@@ -5,7 +5,7 @@ import {getModifiedUserAgentStyle, getModifiedFallbackStyle, cleanModificationCa
 import {manageStyle, getManageableStyles, StyleElement, StyleManager} from './style-manager';
 import {watchForStyleChanges, stopWatchingForStyleChanges} from './watch';
 import {forEach, push, toArray} from '../../utils/array';
-import {removeNode, watchForNodePosition, iterateShadowNodes} from '../utils/dom';
+import {removeNode, watchForNodePosition, iterateShadowNodes, isDOMReady, addDOMReadyListener, removeDOMReadyListener} from '../utils/dom';
 import {logWarn} from '../utils/log';
 import {throttle} from '../utils/throttle';
 import {clamp} from '../../utils/math';
@@ -170,7 +170,7 @@ function createManager(element: StyleElement) {
     const loadingStyleId = ++loadingStylesCounter;
 
     function loadingStart() {
-        if (!isPageLoaded() || !didDocumentShowUp) {
+        if (!isDOMReady() || !didDocumentShowUp) {
             loadingStyles.add(loadingStyleId);
 
             const fallbackStyle = document.querySelector('.darkreader--fallback');
@@ -182,7 +182,7 @@ function createManager(element: StyleElement) {
 
     function loadingEnd() {
         loadingStyles.delete(loadingStyleId);
-        if (loadingStyles.size === 0 && isPageLoaded()) {
+        if (loadingStyles.size === 0 && isDOMReady()) {
             cleanFallbackStyle();
         }
     }
@@ -230,15 +230,7 @@ const cancelRendering = function () {
     throttledRenderAllStyles.cancel();
 };
 
-function isPageLoaded() {
-    return document.readyState === 'complete' || document.readyState === 'interactive';
-}
-
-function onReadyStateChange() {
-    if (!isPageLoaded()) {
-        return;
-    }
-    document.removeEventListener('readystatechange', onReadyStateChange);
+function onDOMReady() {
     if (loadingStyles.size === 0) {
         cleanFallbackStyle();
     }
@@ -325,7 +317,7 @@ function watchForUpdates() {
         }
     });
 
-    document.addEventListener('readystatechange', onReadyStateChange);
+    addDOMReadyListener(onDOMReady);
 }
 
 function stopWatchingForUpdates() {
@@ -333,7 +325,7 @@ function stopWatchingForUpdates() {
     stopStylePositionWatchers();
     stopWatchingForStyleChanges();
     stopWatchingForInlineStyles();
-    document.removeEventListener('readystatechange', onReadyStateChange);
+    removeDOMReadyListener(onDOMReady);
 }
 
 export function createOrUpdateDynamicTheme(filterConfig: FilterConfig, dynamicThemeFixes: DynamicThemeFix, iframe: boolean) {

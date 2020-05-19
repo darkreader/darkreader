@@ -86,8 +86,33 @@ function isHugeMutation(mutations: MutationRecord[]) {
     return false;
 }
 
+function isDOMReady() {
+    return document.readyState === 'complete' || document.readyState === 'interactive';
+}
+
+const readyStateListeners = new Set<() => void>();
+
+function subscribeToReadyStateChange(listener: () => void) {
+    readyStateListeners.add(listener);
+}
+
+function clearReadyStateListeners() {
+    readyStateListeners.clear();
+}
+
+if (!isDOMReady()) {
+    const readyStateListener = () => {
+        if (isDOMReady()) {
+            document.removeEventListener('readystatechange', readyStateListener);
+            readyStateListeners.forEach((listener) => listener());
+            clearReadyStateListeners();
+        }
+    };
+    document.addEventListener('readystatechange', readyStateListener);
+}
+
 export function watchForStyleChanges(currentStyles: StyleElement[], update: (styles: ChangedStyles) => void) {
-    resetObservers();
+    stopWatchingForStyleChanges();
 
     function getNodesOperations(mutations: MutationRecord[]) {
         const additions = new Set<Element>();
@@ -191,7 +216,18 @@ export function watchForStyleChanges(currentStyles: StyleElement[], update: (sty
         });
     }
 
+    let hadHugeMutationsBefore = false;
+    let subscribedForReadyState = false;
+
     function handleHugeTreeMutations(root: Document | ShadowRoot) {
+        if (hadHugeMutationsBefore && !isDOMReady()) {
+            if (!subscribedForReadyState) {
+                subscribeToReadyStateChange(() => handleHugeTreeMutations(root));
+                subscribedForReadyState = true;
+            }
+            return;
+        }
+
         const styles = new Set(getManageableStyles(root));
 
         const createdStyles = new Set<StyleElement>();
@@ -222,6 +258,7 @@ export function watchForStyleChanges(currentStyles: StyleElement[], update: (sty
     function handleTreeMutations(root: Document | ShadowRoot, mutations: MutationRecord[]) {
         if (isHugeMutation(mutations)) {
             handleHugeTreeMutations(root);
+            hadHugeMutationsBefore = true;
         } else {
             handleMinorTreeMutations(mutations);
         }
@@ -280,5 +317,6 @@ function resetObservers() {
 
 export function stopWatchingForStyleChanges() {
     resetObservers();
+    clearReadyStateListeners();
     unsubscribeFromDefineCustomElements();
 }

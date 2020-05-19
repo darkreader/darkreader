@@ -145,3 +145,153 @@ export function iterateShadowNodes(root: Node, iterator: (node: Element) => void
         iterateShadowNodes(node.shadowRoot, iterator);
     }
 }
+
+export function isDOMReady() {
+    return document.readyState === 'complete' || document.readyState === 'interactive';
+}
+
+const readyStateListeners = new Set<() => void>();
+
+export function addDOMReadyListener(listener: () => void) {
+    readyStateListeners.add(listener);
+}
+
+export function removeDOMReadyListener(listener: () => void) {
+    readyStateListeners.delete(listener);
+}
+
+if (!isDOMReady()) {
+    const onReadyStateChange = () => {
+        if (isDOMReady()) {
+            document.removeEventListener('readystatechange', onReadyStateChange);
+            readyStateListeners.forEach((listener) => listener());
+            readyStateListeners.clear();
+        }
+    };
+    document.addEventListener('readystatechange', onReadyStateChange);
+}
+
+const HUGE_MUTATIONS_COUNT = 1000;
+
+function isHugeMutation(mutations: MutationRecord[]) {
+    if (mutations.length > HUGE_MUTATIONS_COUNT) {
+        return true;
+    }
+
+    let addedNodesCount = 0;
+    for (let i = 0; i < mutations.length; i++) {
+        addedNodesCount += mutations[i].addedNodes.length;
+        if (addedNodesCount > HUGE_MUTATIONS_COUNT) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+export interface ElementsTreeOperations {
+    additions: Set<Element>;
+    moves: Set<Element>;
+    deletions: Set<Element>;
+}
+
+function getElementsTreeOperations(mutations: MutationRecord[]): ElementsTreeOperations {
+    const additions = new Set<Element>();
+    const deletions = new Set<Element>();
+    const moves = new Set<Element>();
+    mutations.forEach((m) => {
+        m.addedNodes.forEach((n) => {
+            if (n instanceof Element && n.isConnected) {
+                additions.add(n);
+            }
+        });
+        m.removedNodes.forEach((n) => {
+            if (n instanceof Element) {
+                if (n.isConnected) {
+                    moves.add(n);
+                } else {
+                    deletions.add(n);
+                }
+            }
+        });
+    });
+    moves.forEach((n) => additions.delete(n));
+
+    const duplicateAdditions = [] as Element[];
+    const duplicateDeletions = [] as Element[];
+    additions.forEach((node) => {
+        if (additions.has(node.parentElement)) {
+            duplicateAdditions.push(node);
+        }
+    });
+    deletions.forEach((node) => {
+        if (deletions.has(node.parentElement)) {
+            duplicateDeletions.push(node);
+        }
+    });
+    duplicateAdditions.forEach((node) => additions.delete(node));
+    duplicateDeletions.forEach((node) => deletions.delete(node));
+
+    return {additions, moves, deletions};
+}
+
+interface OptimizedTreeObserverCallbacks {
+    onMinorMutations: (operations: ElementsTreeOperations) => void;
+    onHugeMutations: (root: Document | ShadowRoot) => void;
+}
+
+const optimizedTreeObservers = new Map<Node, MutationObserver>();
+const optimizedTreeCallbacks = new WeakMap<MutationObserver, Set<OptimizedTreeObserverCallbacks>>();
+
+// TODO: Use a single function to observe all shadow roots.
+export function createOptimizedTreeObserver(root: Document | ShadowRoot, callbacks: OptimizedTreeObserverCallbacks) {
+    let observer: MutationObserver;
+    let observerCallbacks: Set<OptimizedTreeObserverCallbacks>;
+    let domReadyListener: () => void;
+
+    if (optimizedTreeObservers.has(root)) {
+        observer = optimizedTreeObservers.get(root);
+        observerCallbacks = optimizedTreeCallbacks.get(observer);
+    } else {
+        let hadHugeMutationsBefore = false;
+        let subscribedForReadyState = false;
+
+        observer = new MutationObserver((mutations: MutationRecord[]) => {
+            if (isHugeMutation(mutations)) {
+                if (!hadHugeMutationsBefore || isDOMReady()) {
+                    observerCallbacks.forEach(({onHugeMutations}) => onHugeMutations(root));
+                } else {
+                    if (!subscribedForReadyState) {
+                        domReadyListener = () => observerCallbacks.forEach(({onHugeMutations}) => onHugeMutations(root));
+                        addDOMReadyListener(domReadyListener);
+                        subscribedForReadyState = true;
+                    }
+                }
+                hadHugeMutationsBefore = true;
+            } else {
+                const elementsOperations = getElementsTreeOperations(mutations);
+                observerCallbacks.forEach(({onMinorMutations}) => onMinorMutations(elementsOperations));
+            }
+        });
+        observer.observe(root, {childList: true, subtree: true});
+        optimizedTreeObservers.set(root, observer);
+        observerCallbacks = new Set();
+        optimizedTreeCallbacks.set(observer, observerCallbacks);
+    }
+
+    observerCallbacks.add(callbacks);
+
+    return {
+        disconnect() {
+            observerCallbacks.delete(callbacks);
+            if (domReadyListener) {
+                removeDOMReadyListener(domReadyListener);
+            }
+            if (observerCallbacks.size === 0) {
+                observer.disconnect();
+                optimizedTreeCallbacks.delete(observer);
+                optimizedTreeObservers.delete(root);
+            }
+        },
+    };
+}

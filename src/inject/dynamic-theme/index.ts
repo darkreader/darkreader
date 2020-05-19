@@ -2,10 +2,10 @@ import {replaceCSSVariables, getElementCSSVariables} from './css-rules';
 import {overrideInlineStyle, getInlineOverrideStyle, watchForInlineStyles, stopWatchingForInlineStyles, INLINE_STYLE_SELECTOR} from './inline-style';
 import {changeMetaThemeColorWhenAvailable, restoreMetaThemeColor} from './meta-theme-color';
 import {getModifiedUserAgentStyle, getModifiedFallbackStyle, cleanModificationCache, parseColorWithCache} from './modify-css';
-import {manageStyle, shouldManageStyle, STYLE_SELECTOR, StyleManager} from './style-manager';
+import {manageStyle, getManageableStyles, StyleElement, StyleManager} from './style-manager';
 import {watchForStyleChanges, stopWatchingForStyleChanges} from './watch';
 import {forEach, push, toArray} from '../../utils/array';
-import {removeNode, watchForNodePosition, iterateShadowNodes} from '../utils/dom';
+import {removeNode, watchForNodePosition, iterateShadowNodes, isDOMReady, addDOMReadyListener, removeDOMReadyListener} from '../utils/dom';
 import {logWarn} from '../utils/log';
 import {throttle} from '../utils/throttle';
 import {clamp} from '../../utils/math';
@@ -15,7 +15,7 @@ import {modifyColor} from '../../generators/modify-colors';
 import {createTextStyle} from '../../generators/text-style';
 import {FilterConfig, DynamicThemeFix} from '../../definitions';
 
-const styleManagers = new Map<HTMLLinkElement | HTMLStyleElement, StyleManager>();
+const styleManagers = new Map<StyleElement, StyleManager>();
 const variables = new Map<string, string>();
 let filter: FilterConfig = null;
 let fixes: DynamicThemeFix = null;
@@ -124,16 +124,10 @@ function createDynamicStyleOverrides() {
 
     updateVariables(getElementCSSVariables(document.documentElement));
 
-    const allStyles = toArray(document.querySelectorAll(STYLE_SELECTOR)) as (HTMLLinkElement | HTMLStyleElement)[];
-    iterateShadowNodes(document.documentElement, (node) => {
-        const shadowStyles = node.shadowRoot.querySelectorAll(STYLE_SELECTOR);
-        if (shadowStyles.length > 0) {
-            push(allStyles, shadowStyles);
-        }
-    });
+    const allStyles = getManageableStyles(document);
 
-    const newManagers = toArray<HTMLLinkElement | HTMLStyleElement>(allStyles)
-        .filter((style) => !styleManagers.has(style) && shouldManageStyle(style))
+    const newManagers = allStyles
+        .filter((style) => !styleManagers.has(style))
         .map((style) => createManager(style));
     const newVariables = newManagers
         .map((manager) => manager.details())
@@ -168,7 +162,7 @@ function createDynamicStyleOverrides() {
 let loadingStylesCounter = 0;
 const loadingStyles = new Set();
 
-function createManager(element: HTMLLinkElement | HTMLStyleElement) {
+function createManager(element: StyleElement) {
     if (styleManagers.has(element)) {
         return;
     }
@@ -176,7 +170,7 @@ function createManager(element: HTMLLinkElement | HTMLStyleElement) {
     const loadingStyleId = ++loadingStylesCounter;
 
     function loadingStart() {
-        if (!isPageLoaded() || !didDocumentShowUp) {
+        if (!isDOMReady() || !didDocumentShowUp) {
             loadingStyles.add(loadingStyleId);
 
             const fallbackStyle = document.querySelector('.darkreader--fallback');
@@ -188,7 +182,7 @@ function createManager(element: HTMLLinkElement | HTMLStyleElement) {
 
     function loadingEnd() {
         loadingStyles.delete(loadingStyleId);
-        if (loadingStyles.size === 0 && isPageLoaded()) {
+        if (loadingStyles.size === 0 && isDOMReady()) {
             cleanFallbackStyle();
         }
     }
@@ -220,7 +214,7 @@ function updateVariables(newVars: Map<string, string>) {
     variables.forEach((value, key) => variables.set(key, replaceCSSVariables(value, variables)));
 }
 
-function removeManager(element: HTMLLinkElement | HTMLStyleElement) {
+function removeManager(element: StyleElement) {
     const manager = styleManagers.get(element);
     if (manager) {
         manager.destroy();
@@ -236,15 +230,7 @@ const cancelRendering = function () {
     throttledRenderAllStyles.cancel();
 };
 
-function isPageLoaded() {
-    return document.readyState === 'complete' || document.readyState === 'interactive';
-}
-
-function onReadyStateChange() {
-    if (!isPageLoaded()) {
-        return;
-    }
-    document.removeEventListener('readystatechange', onReadyStateChange);
+function onDOMReady() {
     if (loadingStyles.size === 0) {
         cleanFallbackStyle();
     }
@@ -290,7 +276,8 @@ function createThemeAndWatchForUpdates() {
 }
 
 function watchForUpdates() {
-    watchForStyleChanges(({created, updated, removed, moved}) => {
+    const managedStyles = Array.from(styleManagers.keys());
+    watchForStyleChanges(managedStyles, ({created, updated, removed, moved}) => {
         const stylesToRemove = removed;
         const stylesToManage = created.concat(updated).concat(moved)
             .filter((style) => !styleManagers.has(style));
@@ -330,7 +317,7 @@ function watchForUpdates() {
         }
     });
 
-    document.addEventListener('readystatechange', onReadyStateChange);
+    addDOMReadyListener(onDOMReady);
 }
 
 function stopWatchingForUpdates() {
@@ -338,7 +325,7 @@ function stopWatchingForUpdates() {
     stopStylePositionWatchers();
     stopWatchingForStyleChanges();
     stopWatchingForInlineStyles();
-    document.removeEventListener('readystatechange', onReadyStateChange);
+    removeDOMReadyListener(onDOMReady);
 }
 
 export function createOrUpdateDynamicTheme(filterConfig: FilterConfig, dynamicThemeFixes: DynamicThemeFix, iframe: boolean) {

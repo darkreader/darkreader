@@ -70,6 +70,22 @@ function unsubscribeFromDefineCustomElements() {
     undefinedGroups.clear();
 }
 
+function isHugeMutation(mutations: MutationRecord[]) {
+    if (mutations.length > HUGE_MUTATIONS_COUNT) {
+        return true;
+    }
+
+    let addedNodesCount = 0;
+    for (let i = 0; i < mutations.length; i++) {
+        addedNodesCount += mutations[i].addedNodes.length;
+        if (addedNodesCount > HUGE_MUTATIONS_COUNT) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 export function watchForStyleChanges(currentStyles: StyleElement[], update: (styles: ChangedStyles) => void) {
     resetObservers();
 
@@ -204,8 +220,7 @@ export function watchForStyleChanges(currentStyles: StyleElement[], update: (sty
     }
 
     function handleTreeMutations(root: Document | ShadowRoot, mutations: MutationRecord[]) {
-        const addedNodesCount = mutations.reduce((sum, m) => sum + m.addedNodes.length, 0);
-        if (addedNodesCount > HUGE_MUTATIONS_COUNT) {
+        if (isHugeMutation(mutations)) {
             handleHugeTreeMutations(root);
         } else {
             handleMinorTreeMutations(mutations);

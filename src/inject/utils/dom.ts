@@ -243,6 +243,7 @@ interface OptimizedTreeObserverCallbacks {
 const optimizedTreeObservers = new Map<Node, MutationObserver>();
 const optimizedTreeCallbacks = new WeakMap<MutationObserver, Set<OptimizedTreeObserverCallbacks>>();
 
+// TODO: Use a single function to observe all shadow roots.
 export function createOptimizedTreeObserver(root: Document | ShadowRoot, callbacks: OptimizedTreeObserverCallbacks) {
     let observer: MutationObserver;
     let observerCallbacks: Set<OptimizedTreeObserverCallbacks>;

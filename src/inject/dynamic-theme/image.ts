@@ -76,7 +76,7 @@ function analyzeImage(image: HTMLImageElement) {
 
     let i: number, x: number, y: number;
     let r: number, g: number, b: number, a: number;
-    let p: number;
+    let l: number;
     for (y = 0; y < height; y++) {
         for (x = 0; x < width; x++) {
             i = 4 * (y * width + x);
@@ -90,11 +90,11 @@ function analyzeImage(image: HTMLImageElement) {
             } else {
                 // Use sRGB to determine the `pixel Lightness`
                 // https://en.wikipedia.org/wiki/Relative_luminance
-                p = (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255
-                if (p < DARK_LIGHTNESS_THRESHOLD) {
+                l = (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
+                if (l < DARK_LIGHTNESS_THRESHOLD) {
                     darkPixelsCount++;
                 }
-                if (p > LIGHT_LIGHTNESS_THRESHOLD) {
+                if (l > LIGHT_LIGHTNESS_THRESHOLD) {
                     lightPixelsCount++;
                 }
             }

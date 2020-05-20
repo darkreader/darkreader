@@ -8,7 +8,7 @@ interface ShortcutLinkProps {
     commandName: string;
     shortcuts: Shortcuts;
     textTemplate: (shortcut: string) => string;
-    onSetShortcut: (shortvut: string) => void;
+    onSetShortcut: (shortcut: string) => void;
 }
 
 /**

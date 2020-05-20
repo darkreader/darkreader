@@ -75,7 +75,7 @@ export function watchForNodePosition<T extends Node>(
     const MAX_ATTEMPTS_COUNT = 10;
     const ATTEMPTS_INTERVAL = getDuration({seconds: 10});
     const prevSibling = node.previousSibling;
-    const parent = node.parentNode;
+    let parent = node.parentNode;
     if (!parent) {
         // BUG: fails for shadow root.
         logWarn('Unable to watch for node position: parent element not found', node, prevSibling);
@@ -99,12 +99,11 @@ export function watchForNodePosition<T extends Node>(
         }
         if (prevSibling && prevSibling.parentNode === null) {
             stop();
+            return;
         }
         if (prevSibling.parentNode !== parent) {
-            logWarn(`Style was moved to another parent, changing node's position`, node, prevSibling, parent);
-            prevSibling.parentNode.insertBefore(node, prevSibling.nextSibling);
-            onRestore && onRestore();
-            return;
+            logWarn(`Style was moved to another parent`, node, prevSibling, parent);
+            parent = prevSibling.parentNode;
         }
         logWarn('Node was removed, restoring it\'s position', node, prevSibling, parent);
         parent.insertBefore(node, prevSibling ? prevSibling.nextSibling : parent.firstChild);

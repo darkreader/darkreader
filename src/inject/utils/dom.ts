@@ -97,10 +97,10 @@ export function watchForNodePosition<T extends Node>(
             start = now;
             attempts = 1;
         }
-        if (prevSibling.parentNode === null) {
+        if (prevSibling && prevSibling.parentNode === null) {
             stop();
         }
-        if (prevSibling && prevSibling.parentNode !== parent) {
+        if (prevSibling.parentNode !== parent) {
             logWarn(`Style was moved to another parent, changing node's position`, node, prevSibling, parent);
             prevSibling.parentNode.insertBefore(node, prevSibling.nextSibling);
             onRestore && onRestore();

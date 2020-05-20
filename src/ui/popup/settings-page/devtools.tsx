@@ -6,7 +6,7 @@ import ControlGroup from '../control-group';
 import {ViewProps} from '../types';
 import {isFirefox, isMobile} from '../../../utils/platform';
 
-function getExistingDevToolsObject(): Promise<chrome.windows.Window> |  Promise<chrome.tabs.Tab> {
+function getExistingDevToolsObject(): Promise<chrome.windows.Window> | Promise<chrome.tabs.Tab> {
     if (isMobile()) {
         return new Promise<chrome.tabs.Tab>((resolve) => {
             chrome.tabs.query({}, (t) => {
@@ -41,10 +41,12 @@ async function openDevTools() {
     if (isMobile()) {
         if (devToolsObject) {
             chrome.tabs.update(devToolsObject.id, {'active': true});
+            window.close();
         } else {
             chrome.tabs.create({
                 url: '../devtools/index.html',
-            })
+            });
+            window.close();
         }
     } else {
         if (devToolsObject) {

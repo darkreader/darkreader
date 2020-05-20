@@ -53,6 +53,9 @@ dynamic-theme-fixes.config
 
 example.com
 
+IGNORE INLINE STYLE
+.color-picker
+
 INVERT
 .icon
 
@@ -63,6 +66,7 @@ CSS
 }
 
 ```
+- `IGNORE INLINE STYLE` rule will not add any inline styles into matched selector's. (e.g. --darkreader-inline-bgcolor)
 - `INVERT` rule inverts specified elements.
 For **Dynamic mode** use `INVERT` only for dark images, that are invisible on dark backgrounds (icons, diagrams, charts, `<img>` and `<svg>` elements).
 - `CSS` rule adds custom CSS to a web page.

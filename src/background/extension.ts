@@ -366,20 +366,6 @@ export class Extension {
         };
     }
 
-    checkFixesForPDF(fixes: DynamicThemeFix) {
-        const index = fixes.invert.indexOf('embed[type="application/pdf"]');
-        if (this.user.settings.enableForPDF)  {
-            if (index === -1) {
-                fixes.invert.push('embed[type="application/pdf"]');
-            }
-        } else {
-            if (index !== -1) {
-                fixes.invert.splice(index);
-            }
-        }
-        return fixes;
-    }
-
     private getTabMessage = (url: string, frameURL: string) => {
         const urlInfo = this.getURLInfo(url);
         if (this.isEnabled() && isURLEnabled(url, this.user.settings, urlInfo)) {
@@ -421,7 +407,7 @@ export class Extension {
                 case ThemeEngines.dynamicTheme: {
                     const filter = {...filterConfig};
                     delete filter.engine;
-                    const fixes = this.checkFixesForPDF(getDynamicThemeFixesFor(url, frameURL, this.config.DYNAMIC_THEME_FIXES));
+                    const fixes = getDynamicThemeFixesFor(url, frameURL, this.config.DYNAMIC_THEME_FIXES, this.user.settings.enableForPDF);
                     const isIFrame = frameURL != null;
                     return {
                         type: 'add-dynamic-theme',

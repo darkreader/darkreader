@@ -44,11 +44,26 @@ export function formatDynamicThemeFixes(dynamicThemeFixes: DynamicThemeFix[]) {
     });
 }
 
-export function getDynamicThemeFixesFor(url: string, frameURL: string, fixes: DynamicThemeFix[]) {
+function shouldIgnorePDF(shouldIgnore: boolean, fixes: DynamicThemeFix) {
+        const index = fixes.invert.indexOf('embed[type="application/pdf"]');
+        if (shouldIgnore)  {
+            if (index === -1) {
+                fixes.invert.push('embed[type="application/pdf"]');
+            }
+        } else {
+            if (index !== -1) {
+                fixes.invert.splice(index);
+            }
+        }
+        return fixes;
+}
+
+export function getDynamicThemeFixesFor(url: string, frameURL: string, fixes: DynamicThemeFix[], shouldIgnore: boolean) {
     if (fixes.length === 0 || fixes[0].url[0] !== '*') {
         return null;
     }
 
+    fixes[0] = shouldIgnorePDF(shouldIgnore, fixes[0]);
     const common = {
         url: fixes[0].url,
         ignoreInlineStyle: fixes[0].ignoreInlineStyle || [],

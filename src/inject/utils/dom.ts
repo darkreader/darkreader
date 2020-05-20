@@ -97,8 +97,11 @@ export function watchForNodePosition<T extends Node>(
             start = now;
             attempts = 1;
         }
-        if (prevSibling && (prevSibling.parentNode !== parent && prevSibling.parentNode !== null)) {
-            logWarn('Style was moved to another parent, moving node\'s position', node, prevSibling, parent);
+        if (prevSibling.parentNode === null) {
+            stop();
+        }
+        if (prevSibling && prevSibling.parentNode !== parent) {
+            logWarn(`Style was moved to another parent, changing node's position`, node, prevSibling, parent);
             prevSibling.parentNode.insertBefore(node, prevSibling.nextSibling);
             onRestore && onRestore();
             return;
@@ -109,7 +112,7 @@ export function watchForNodePosition<T extends Node>(
     });
     const observer = new MutationObserver(() => {
         if (
-            (watchParent && !node.parentNode) ||
+            (watchParent && (!node.parentNode || prevSibling.parentNode !== parent)) ||
             (watchSibling && node.previousSibling !== prevSibling)
         ) {
             restore();

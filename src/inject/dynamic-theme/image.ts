@@ -89,6 +89,7 @@ function analyzeImage(image: HTMLImageElement) {
                 transparentPixelsCount++;
             } else {
                 // Use sRGB to determine the `pixel Lightness`
+                // https://en.wikipedia.org/wiki/Relative_luminance
                 p = (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255
                 if (p < DARK_LIGHTNESS_THRESHOLD) {
                     darkPixelsCount++;

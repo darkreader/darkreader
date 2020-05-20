@@ -4,6 +4,7 @@ import {bgFetch} from './network';
 import {watchForNodePosition, removeNode, iterateShadowNodes} from '../utils/dom';
 import {logWarn} from '../utils/log';
 import {createAsyncTasksQueue} from '../utils/throttle';
+import {forEach} from '../../utils/array';
 import {getMatches} from '../../utils/text';
 import {FilterConfig} from '../../definitions';
 import {getAbsoluteURL} from './url';
@@ -55,9 +56,10 @@ export function getManageableStyles(node: Node, results = [] as StyleElement[]) 
     if (shouldManageStyle(node)) {
         results.push(node as StyleElement);
     } else if (node instanceof Element || node instanceof ShadowRoot || node === document) {
-        (node as Element)
-            .querySelectorAll(STYLE_SELECTOR)
-            .forEach((style: StyleElement) => getManageableStyles(style, results));
+        forEach(
+            (node as Element).querySelectorAll(STYLE_SELECTOR),
+            (style: StyleElement) => getManageableStyles(style, results)
+        );
         iterateShadowNodes(node, (host) => getManageableStyles(host.shadowRoot, results));
     }
     return results;

@@ -313,7 +313,7 @@ function watchForUpdates() {
         const inlineStyleElements = root.querySelectorAll(INLINE_STYLE_SELECTOR);
         if (inlineStyleElements.length > 0) {
             createShadowStaticStyleOverrides(root);
-            inlineStyleElements.forEach((el) => overrideInlineStyle(el as HTMLElement, filter, fixes.ignoreInlineStyle));
+            forEach(inlineStyleElements, (el) => overrideInlineStyle(el as HTMLElement, filter, fixes.ignoreInlineStyle));
         }
     });
 
@@ -367,7 +367,7 @@ export function removeDynamicTheme() {
     });
     shadowRootsWithOverrides.clear();
     forEach(styleManagers.keys(), (el) => removeManager(el));
-    document.querySelectorAll('.darkreader').forEach(removeNode);
+    forEach(document.querySelectorAll('.darkreader'), removeNode);
 }
 
 export function cleanDynamicThemeCache() {

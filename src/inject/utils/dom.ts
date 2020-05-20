@@ -1,5 +1,6 @@
 import {logWarn} from './log';
 import {throttle} from './throttle';
+import {forEach} from '../../utils/array';
 import {getDuration} from '../../utils/time';
 
 interface CreateNodeAsapParams {
@@ -200,12 +201,12 @@ function getElementsTreeOperations(mutations: MutationRecord[]): ElementsTreeOpe
     const deletions = new Set<Element>();
     const moves = new Set<Element>();
     mutations.forEach((m) => {
-        m.addedNodes.forEach((n) => {
+        forEach(m.addedNodes, (n) => {
             if (n instanceof Element && n.isConnected) {
                 additions.add(n);
             }
         });
-        m.removedNodes.forEach((n) => {
+        forEach(m.removedNodes, (n) => {
             if (n instanceof Element) {
                 if (n.isConnected) {
                     moves.add(n);

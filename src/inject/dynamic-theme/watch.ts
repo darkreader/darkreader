@@ -1,4 +1,4 @@
-import {push} from '../../utils/array';
+import {forEach, push} from '../../utils/array';
 import {isDefinedSelectorSupported} from '../../utils/platform';
 import {iterateShadowNodes, createOptimizedTreeObserver, ElementsTreeOperations} from '../utils/dom';
 import {shouldManageStyle, getManageableStyles, StyleElement} from './style-manager';
@@ -20,8 +20,8 @@ function collectUndefinedElements(root: ParentNode) {
     if (!isDefinedSelectorSupported()) {
         return;
     }
-    root.querySelectorAll(':not(:defined)')
-        .forEach((el) => {
+    forEach(root.querySelectorAll(':not(:defined)'),
+        (el) => {
             const tag = el.tagName.toLowerCase();
             if (!undefinedGroups.has(tag)) {
                 undefinedGroups.set(tag, new Set());

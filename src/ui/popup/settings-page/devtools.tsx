@@ -4,18 +4,15 @@ import {getLocalMessage} from '../../../utils/locales';
 import {NavButton} from '../../controls';
 import ControlGroup from '../control-group';
 import {ViewProps} from '../types';
-import {isFirefox} from '../../../utils/platform';
+import {isFirefox, isMobile} from '../../../utils/platform';
 
-function getExistingDevToolsWindow() {
-    if (!isMobile()) {
-        return new Promise<chrome.windows.Window>((resolve) => {
-            chrome.windows.getAll({
-                populate: true,
-                windowTypes: ['popup']
-            }, (w) => {
-                for (const window of w) {
-                    if (window.tabs[0].url.endsWith('ui/devtools/index.html')) {
-                        resolve(window);
+function getExistingDevToolsObject(): Promise<chrome.windows.Window> |  Promise<chrome.tabs.Tab> {
+    if (isMobile()) {
+        return new Promise<chrome.tabs.Tab>((resolve) => {
+            chrome.tabs.query({}, (t) => {
+                for (const tab of t) {
+                    if (tab.url.endsWith('ui/devtools/index.html')) {
+                        resolve(tab);
                         return;
                     }
                 }
@@ -23,11 +20,14 @@ function getExistingDevToolsWindow() {
             });
         });
     }
-    return new Promise<chrome.tabs.Tab>((resolve) => {
-        chrome.tabs.query({}, (t) => {
-            for (const tab of t) {
-                if (tab.url.endsWith('ui/devtools/index.html')) {
-                    resolve(tab);
+    return new Promise<chrome.windows.Window>((resolve) => {
+        chrome.windows.getAll({
+            populate: true,
+            windowTypes: ['popup']
+        }, (w) => {
+            for (const window of w) {
+                if (window.tabs[0].url.endsWith('ui/devtools/index.html')) {
+                    resolve(window);
                     return;
                 }
             }
@@ -37,10 +37,18 @@ function getExistingDevToolsWindow() {
 }
 
 async function openDevTools() {
-    const devToolsWindow = await getExistingDevToolsWindow();
-    if (!isMobile()) {
-        if (devToolsWindow) {
-            chrome.windows.update(devToolsWindow.id, {'focused': true});
+    const devToolsObject = await getExistingDevToolsObject();
+    if (isMobile()) {
+        if (devToolsObject) {
+            chrome.tabs.update(devToolsObject.id, {'active': true});
+        } else {
+            chrome.tabs.create({
+                url: '../devtools/index.html',
+            })
+        }
+    } else {
+        if (devToolsObject) {
+            chrome.windows.update(devToolsObject.id, {'focused': true});
         } else {
             chrome.windows.create({
                 type: 'popup',
@@ -48,14 +56,6 @@ async function openDevTools() {
                 width: 600,
                 height: 600,
             });
-        }
-    } else {
-        if (devToolsWindow) {
-            chrome.tabs.update(devToolsWindow.id, {'active': true});
-        } else {
-            chrome.tabs.create({
-                url: '../devtools/index.html'
-            })
         }
     }
 }

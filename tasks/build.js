@@ -1,3 +1,4 @@
+//@ts-check
 const bundleCSS = require('./bundle-css');
 const bundleHTML = require('./bundle-html');
 const bundleJS = require('./bundle-js');
@@ -5,11 +6,15 @@ const bundleLocales = require('./bundle-locales');
 const clean = require('./clean');
 const codeStyle = require('./code-style');
 const copy = require('./copy');
+const reload = require('./reload');
 const {runTasks} = require('./task');
 const {log} = require('./utils');
 const zip = require('./zip');
 
-async function release() {
+/**
+ * @param {boolean} prod Pass option production true or false.
+ */
+async function release(prod) {
     log.ok('RELEASE');
     try {
         await runTasks([
@@ -21,7 +26,7 @@ async function release() {
             copy,
             codeStyle,
             zip,
-        ], {production: true});
+        ], {production: prod});
         log.ok('MISSION PASSED! RESPECT +');
     } catch (err) {
         log.error(`MISSION FAILED!`);
@@ -29,4 +34,40 @@ async function release() {
     }
 }
 
-release();
+const debugTasks = [
+    clean,
+    bundleJS,
+    bundleCSS,
+    bundleHTML,
+    bundleLocales,
+    copy,
+];
+
+async function debug() {
+    log.ok('DEBUG');
+    try {
+        await runTasks(debugTasks, {production: false});
+        debugTasks.forEach((task) => task.watch());
+        reload({type: reload.FULL});
+        log.ok('Watching...');
+    } catch (err) {
+        log.error(`MISSION FAILED!`);
+        process.exit(13);
+    }
+}
+
+async function run() {
+    const args = process.argv.slice(2);
+    if (args.includes('--release')) {
+        await release(true);
+    }
+    if (args.includes('--build')) {
+        await release(false);
+    }
+    if (args.includes('--debug')) {
+        await debug();
+    }
+
+}
+
+run();

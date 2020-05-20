@@ -2,7 +2,8 @@ import {FilterConfig} from '../definitions';
 
 export function createTextStyle(config: FilterConfig): string {
     const lines: string[] = [];
-    lines.push('* {');
+    // Don't target pre elements as they are preformatted element's e.g. code blocks
+    lines.push('*:not(pre) {');
 
     if (config.useFont && config.fontFamily) {
         // TODO: Validate...

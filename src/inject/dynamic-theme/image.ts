@@ -88,9 +88,8 @@ function analyzeImage(image: HTMLImageElement) {
             if (a < TRANSPARENT_ALPHA_THRESHOLD) {
                 transparentPixelsCount++;
             } else {
-                // Use HSP to determine the `pixel Lightness`
-                // http://alienryderflex.com/hsp.html & https://stackoverflow.com/a/24213274/13569411
-                p = Math.sqrt(0.299 * r^2 + 0.587 * g^2 + 0.114 * b^2)
+                // Use sRGB to determine the `pixel Lightness`
+                p = (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255
                 if (p < DARK_LIGHTNESS_THRESHOLD) {
                     darkPixelsCount++;
                 }

@@ -97,7 +97,7 @@ export function watchForNodePosition<T extends Node>(
             start = now;
             attempts = 1;
         }
-        if (prevSibling && prevSibling.parentNode === null) {
+        if (!prevSibling && prevSibling.parentNode === null) {
             stop();
             return;
         }

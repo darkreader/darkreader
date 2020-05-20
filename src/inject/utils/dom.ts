@@ -98,9 +98,7 @@ export function watchForNodePosition<T extends Node>(
             attempts = 1;
         }
         if (prevSibling && (prevSibling.parentNode !== parent && prevSibling.parentNode !== null)) {
-            // Moving to another location with not same parents anymore, but still exist.
-            // https://github.com/darkreader/darkreader/issues/2065
-            logWarn('Style was moved to another location with not the same parentNode, moving node\'s position', node, prevSibling, parent);
+            logWarn('Style was moved to another parent, moving node\'s position', node, prevSibling, parent);
             prevSibling.parentNode.insertBefore(node, prevSibling.nextSibling);
             onRestore && onRestore();
             return;

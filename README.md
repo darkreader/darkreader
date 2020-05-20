@@ -53,9 +53,6 @@ dynamic-theme-fixes.config
 
 example.com
 
-IGNORE INLINE STYLE
-.color-picker
-
 INVERT
 .icon
 
@@ -64,6 +61,9 @@ CSS
     background-color: ${white} !important;
     color: ${black} !important;
 }
+
+IGNORE INLINE STYLE
+.color-picker
 
 ```
 - `INVERT` rule inverts specified elements.

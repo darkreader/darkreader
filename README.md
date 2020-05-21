@@ -62,12 +62,16 @@ CSS
     color: ${black} !important;
 }
 
+IGNORE INLINE STYLE
+.color-picker
+
 ```
 - `INVERT` rule inverts specified elements.
 For **Dynamic mode** use `INVERT` only for dark images, that are invisible on dark backgrounds (icons, diagrams, charts, `<img>` and `<svg>` elements).
 - `CSS` rule adds custom CSS to a web page.
 `!important` keyword should be specified for each CSS property to prevent overrides by other stylesheets.
 **Dynamic mode** supports `${COLOR}` template, where `COLOR` is a color value before the inversion (`white` will become `black` in dark mode).
+- `IGNORE INLINE STYLE` rule will not analyze the inline style of matched selector's. (e.g. --darkreader-inline-bgcolor or <p style='color: red'>This will not be analyzed by dark reader if it has an matched selector</p>)
 - **Special notice for Filter and Filter+ config**.
 It works by inverting the whole web page and reverting necessary parts (images, videos, etc.), listed in the `INVERT` section.
 If inverted element contains images or other content that becomes wrongly displayed, `NO INVERT` rule can be used.

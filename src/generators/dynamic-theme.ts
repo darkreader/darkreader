@@ -5,9 +5,9 @@ import {compareURLPatterns, isURLInList} from '../utils/url';
 import {DynamicThemeFix} from '../definitions';
 
 const dynamicThemeFixesCommands = {
-    'IGNORE INLINE STYLE': 'ignoreInlineStyle',
     'INVERT': 'invert',
     'CSS': 'css',
+    'IGNORE INLINE STYLE': 'ignoreInlineStyle',
 };
 
 export function parseDynamicThemeFixes(text: string) {
@@ -51,9 +51,9 @@ export function getDynamicThemeFixesFor(url: string, frameURL: string, fixes: Dy
 
     const common = {
         url: fixes[0].url,
-        ignoreInlineStyle: fixes[0].ignoreInlineStyle || [],
         invert: fixes[0].invert || [],
         css: fixes[0].css || [],
+        ignoreInlineStyle: fixes[0].ignoreInlineStyle || [],
     };
 
     const sortedBySpecificity = fixes
@@ -75,8 +75,8 @@ export function getDynamicThemeFixesFor(url: string, frameURL: string, fixes: Dy
 
     return {
         url: match.url,
-        ignoreInlineStyle: common.ignoreInlineStyle.concat(match.ignoreInlineStyle || []),
         invert: common.invert.concat(match.invert || []),
         css: [common.css, match.css].filter((s) => s).join('\n'),
+        ignoreInlineStyle: common.ignoreInlineStyle.concat(match.ignoreInlineStyle || []),
     };
 }

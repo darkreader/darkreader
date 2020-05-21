@@ -66,7 +66,7 @@ async function run() {
     if (args.includes('--release')) {
         await release();
     }
-    if (args.includes('--build')) {
+    if (args.includes('--debug')) {
         await debug({watch: args.includes('--watch')});
     }
     if (args.includes('--api')) {

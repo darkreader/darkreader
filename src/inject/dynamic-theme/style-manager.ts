@@ -150,7 +150,7 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
                     await linkLoading(element);
                 } catch (err) {
                     // NOTE: Some @import resources can fail,
-                    // bug the style sheet can still be valid.
+                    // but the style sheet can still be valid.
                     // There's no way to get the actual error.
                     logWarn(err);
                     wasLoadingError = true;

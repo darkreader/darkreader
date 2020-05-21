@@ -7,19 +7,10 @@ const bundleLocales = require('./bundle-locales');
 const clean = require('./clean');
 const copy = require('./copy');
 const reload = require('./reload');
+const codeStyle = require('./code-style');
+const zip = require('./zip');
 const {runTasks} = require('./task');
 const {log} = require('./utils');
-
-async function release() {
-    log.ok('RELEASE');
-    try {
-        await runTasks(standardTask, {production: true});
-        log.ok('MISSION PASSED! RESPECT +');
-    } catch (err) {
-        log.error(`MISSION FAILED!`);
-        process.exit(13);
-    }
-}
 
 const standardTask = [
     clean,
@@ -29,6 +20,17 @@ const standardTask = [
     bundleLocales,
     copy,
 ];
+
+async function release() {
+    log.ok('RELEASE');
+    try {
+        await runTasks([...standardTask, codeStyle, zip], {production: true});
+        log.ok('MISSION PASSED! RESPECT +');
+    } catch (err) {
+        log.error(`MISSION FAILED!`);
+        process.exit(13);
+    }
+}
 
 async function debug({watch}) {
     log.ok('DEBUG');
@@ -65,10 +67,7 @@ async function run() {
         await release();
     }
     if (args.includes('--build')) {
-        await debug({watch: false});
-    }
-    if (args.includes('--debug')) {
-        await debug({watch: true});
+        await debug({watch: args.includes('--watch')});
     }
     if (args.includes('--api')) {
         await api();

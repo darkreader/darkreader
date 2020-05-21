@@ -153,3 +153,52 @@ header {
         margin-bottom: @indent-small;
     }
 }
+
+.mobile {
+
+    #logo {
+        width: 30rem;
+        height: 3rem;
+    }
+
+    #title {
+        font-size: 3.5rem;
+        line-height: 2.75rem;
+        height: @size-control-inner * 2;
+    }
+
+    #sub-title {
+        font-size: 2.5rem;
+    }
+
+    #editor {
+        font-size: 2rem;
+    }
+
+    #buttons {
+
+        margin-top: @indent-small * 2;
+
+        > :not(:first-child) {
+            margin-left: @indent-small * 30;
+        }
+
+        .button {
+            font-size: 2rem;
+            height: 4rem;
+            max-width: 14rem;
+        }
+
+        .preview-design-button {
+            display: none;
+        }
+    }
+
+    #description {
+        font-size: 1.25rem;
+    }
+
+    ::-webkit-scrollbar {
+        width: 1.5rem;
+    }
+}

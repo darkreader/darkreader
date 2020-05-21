@@ -13,6 +13,7 @@
             "chrome"
         ],
         "allowJs": true,
+        "downlevelIteration": true,
         "noEmit": true,
         "jsx": "react",
         "jsxFactory": "m"

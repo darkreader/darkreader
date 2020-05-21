@@ -148,12 +148,14 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
             if (element.sheet == null) {
                 try {
                     await linkLoading(element);
-                    if (cancelAsyncOperations) {
-                        return null;
-                    }
                 } catch (err) {
+                    // NOTE: Some @import resources can fail,
+                    // but the style sheet can still be valid.
+                    // There's no way to get the actual error.
                     logWarn(err);
                     wasLoadingError = true;
+                }
+                if (cancelAsyncOperations) {
                     return null;
                 }
             }

@@ -66,20 +66,19 @@ export function removeNode(node: Node) {
 }
 
 export function watchForNodePosition<T extends Node>(
-    node: T, {
-        onRestore = Function.prototype,
-        watchParent = true,
-        watchSibling = false,
-    }
+    node: T,
+    mode: 'parent' | 'prev-sibling',
+    onRestore = Function.prototype,
 ) {
     const MAX_ATTEMPTS_COUNT = 10;
     const ATTEMPTS_INTERVAL = getDuration({seconds: 10});
-    const prevSibling = node.previousSibling;
+    let prevSibling = node.previousSibling;
     let parent = node.parentNode;
     if (!parent) {
-        // BUG: fails for shadow root.
-        logWarn('Unable to watch for node position: parent element not found', node, prevSibling);
-        return {stop: Function.prototype};
+        throw new Error('Unable to watch for node position: parent element not found');
+    }
+    if (mode === 'prev-sibling' && !prevSibling) {
+        throw new Error('Unable to watch for node position: there is no previous sibling');
     }
     let attempts = 0;
     let start: number = null;
@@ -97,25 +96,37 @@ export function watchForNodePosition<T extends Node>(
             start = now;
             attempts = 1;
         }
-        if (!prevSibling || prevSibling.parentNode === null) {
-            stop();
-            return;
+
+        if (mode === 'parent') {
+            if (prevSibling && prevSibling.parentNode !== parent) {
+                prevSibling = null;
+                logWarn('Sibling was removed', node, prevSibling);
+            }
         }
-        if (prevSibling.parentNode !== parent) {
-            logWarn(`Style was moved to another parent`, node, prevSibling, parent);
-            parent = prevSibling.parentNode;
+
+        if (mode === 'prev-sibling') {
+            if (prevSibling.parentNode == null) {
+                logWarn('Unable to restore node position: sibling was removed', node, prevSibling, parent);
+                stop();
+                return;
+            }
+            if (prevSibling.parentNode !== parent) {
+                logWarn('Style was moved to another parent', node, prevSibling, parent);
+                updateParent(prevSibling.parentNode);
+            }
         }
-        logWarn('Node was removed, restoring it\'s position', node, prevSibling, parent);
+
+        logWarn('Restoring node position', node, prevSibling, parent);
         parent.insertBefore(node, prevSibling ? prevSibling.nextSibling : parent.firstChild);
+        observer.takeRecords();
         onRestore && onRestore();
     });
     const observer = new MutationObserver(() => {
         if (
-            (watchParent && (!node.parentNode || (prevSibling && prevSibling.parentNode !== parent))) ||
-            (watchSibling && node.previousSibling !== prevSibling)
+            (mode === 'parent' && node.parentNode !== parent) ||
+            (mode === 'prev-sibling' && node.previousSibling !== prevSibling)
         ) {
             restore();
-            observer.takeRecords();
         }
     });
     const run = () => {
@@ -123,6 +134,12 @@ export function watchForNodePosition<T extends Node>(
     };
     const stop = () => {
         observer.disconnect();
+        restore.cancel();
+    };
+    const updateParent = (parentNode: Node & ParentNode) => {
+        parent = parentNode;
+        stop();
+        run();
     };
     run();
     return {run, stop};

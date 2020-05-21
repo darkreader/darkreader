@@ -188,7 +188,7 @@ export function manageStyle(element: HTMLLinkElement | HTMLStyleElement, {update
                 logWarn(err);
             }
             if (corsCopy) {
-                corsCopyPositionWatcher = watchForNodePosition(corsCopy, {watchParent: true, watchSibling: true});
+                corsCopyPositionWatcher = watchForNodePosition(corsCopy, 'prev-sibling');
                 return corsCopy.sheet.cssRules;
             }
         }
@@ -409,7 +409,7 @@ export function manageStyle(element: HTMLLinkElement | HTMLStyleElement, {update
             if (syncStylePositionWatcher) {
                 syncStylePositionWatcher.run();
             } else {
-                syncStylePositionWatcher = watchForNodePosition(syncStyle, {onRestore: buildStyleSheet, watchSibling: true, watchParent: true});
+                syncStylePositionWatcher = watchForNodePosition(syncStyle, 'prev-sibling', buildStyleSheet);
             }
         }
 

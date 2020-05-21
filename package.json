@@ -3,13 +3,13 @@
   "version": "4.9.8",
   "description": "Dark theme for every website",
   "scripts": {
-    "api": "node -e \"require('./tasks/bundle-api')()\"",
+    "api": "node tasks/build.js --api",
     "benchmark-server": "node tests/benchmark-server/index.js",
-    "build": "node tasks/release.js",
     "code-style": "eslint --fix \"src/**/*.ts\" \"src/**/*.tsx\" \"tasks/**/*.js\" \"tests/**/*.ts\" \"tests/**/*.js\" \"index.d.ts\"",
-    "debug": "node tasks/debug.js",
+    "debug": "node tasks/build.js --debug",
+    "debug-watch": "node tasks/build.js --debug --watch",
     "prepublishOnly": "npm test && npm run api",
-    "release": "npm test && node tasks/release.js",
+    "release": "npm test && node tasks/build.js --release",
     "test": "jest --config=tests/jest.config.js",
     "test:inject": "jest --config=tests/inject/jest.config.js"
   },

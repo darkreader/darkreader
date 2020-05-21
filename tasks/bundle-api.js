@@ -5,8 +5,11 @@ const rollupPluginReplace = require('@rollup/plugin-replace');
 const rollupPluginTypescript = require('rollup-plugin-typescript2');
 const typescript = require('typescript');
 const packageJSON = require('../package.json');
+const fs = require('fs-extra');
+const os = require('os');
+const {createTask} = require('./task');
 
-async function bundleAPI() {
+async function bundleAPI({production}) {
     const src = 'src/api/index.ts';
     const dest = 'darkreader.js';
 
@@ -21,11 +24,11 @@ async function bundleAPI() {
                 tsconfigOverride: {
                     compilerOptions: {
                         removeComments: true,
-                        target: 'es5',
+                        target: 'ES6',
                     },
                 },
                 clean: true,
-                cacheRoot: null,
+                cacheRoot: production ? null : `${fs.realpathSync(os.tmpdir())}/darkreader_api_typescript_cache`,
             }),
             rollupPluginReplace({
                 '__DEBUG__': 'false',
@@ -42,4 +45,7 @@ async function bundleAPI() {
     });
 }
 
-module.exports = bundleAPI;
+module.exports = createTask(
+    'bundle-api',
+    bundleAPI,
+)

@@ -1,4 +1,5 @@
 //@ts-check
+const bundleAPI = require('./bundle-api');
 const bundleCSS = require('./bundle-css');
 const bundleHTML = require('./bundle-html');
 const bundleJS = require('./bundle-js');
@@ -56,8 +57,20 @@ async function debug() {
     }
 }
 
+async function api() {
+    log.ok('API');
+    try {
+        await runTasks([bundleAPI], {production: true});
+        log.ok('MISSION PASSED! RESPECT +');
+    } catch (err) {
+        log.error(`MISSION FAILED!`);
+        process.exit(13);
+    }
+}
+
 async function run() {
     const args = process.argv.slice(2);
+
     if (args.includes('--release')) {
         await release(true);
     }
@@ -66,6 +79,9 @@ async function run() {
     }
     if (args.includes('--debug')) {
         await debug();
+    }
+    if (args.includes('--api')) {
+        await api();
     }
 
 }

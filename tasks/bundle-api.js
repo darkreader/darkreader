@@ -24,7 +24,7 @@ async function bundleAPI({production}) {
                 tsconfigOverride: {
                     compilerOptions: {
                         removeComments: true,
-                        target: 'ES6',
+                        target: 'es5',
                     },
                 },
                 clean: true,
@@ -48,4 +48,4 @@ async function bundleAPI({production}) {
 module.exports = createTask(
     'bundle-api',
     bundleAPI,
-)
+);

@@ -1,33 +1,19 @@
-//@ts-check
+// @ts-check
 const bundleAPI = require('./bundle-api');
 const bundleCSS = require('./bundle-css');
 const bundleHTML = require('./bundle-html');
 const bundleJS = require('./bundle-js');
 const bundleLocales = require('./bundle-locales');
 const clean = require('./clean');
-const codeStyle = require('./code-style');
 const copy = require('./copy');
 const reload = require('./reload');
 const {runTasks} = require('./task');
 const {log} = require('./utils');
-const zip = require('./zip');
 
-/**
- * @param {boolean} prod Pass option production true or false.
- */
-async function release(prod) {
+async function release() {
     log.ok('RELEASE');
     try {
-        await runTasks([
-            clean,
-            bundleJS,
-            bundleCSS,
-            bundleHTML,
-            bundleLocales,
-            copy,
-            codeStyle,
-            zip,
-        ], {production: prod});
+        await runTasks(standardTask, {production: true});
         log.ok('MISSION PASSED! RESPECT +');
     } catch (err) {
         log.error(`MISSION FAILED!`);
@@ -35,7 +21,7 @@ async function release(prod) {
     }
 }
 
-const debugTasks = [
+const standardTask = [
     clean,
     bundleJS,
     bundleCSS,
@@ -44,13 +30,17 @@ const debugTasks = [
     copy,
 ];
 
-async function debug() {
+async function debug({watch}) {
     log.ok('DEBUG');
     try {
-        await runTasks(debugTasks, {production: false});
-        debugTasks.forEach((task) => task.watch());
-        reload({type: reload.FULL});
-        log.ok('Watching...');
+        await runTasks(standardTask, {production: false});
+        if (watch) {
+            standardTask.forEach((task) => task.watch());
+            reload({type: reload.FULL});
+            log.ok('Watching...');
+        } else {
+            log.ok('MISSION PASSED! RESPECT +');
+        }
     } catch (err) {
         log.error(`MISSION FAILED!`);
         process.exit(13);
@@ -72,13 +62,13 @@ async function run() {
     const args = process.argv.slice(2);
 
     if (args.includes('--release')) {
-        await release(true);
+        await release();
     }
     if (args.includes('--build')) {
-        await release(false);
+        await debug({watch: false});
     }
     if (args.includes('--debug')) {
-        await debug();
+        await debug({watch: true});
     }
     if (args.includes('--api')) {
         await api();

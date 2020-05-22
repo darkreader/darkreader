@@ -152,7 +152,7 @@ function getModifiedScrollbarStyle(theme: Theme) {
     lines.push('::-webkit-scrollbar-thumb:hover {');
     lines.push(`    background-color: ${colorThumbHover};`);
     lines.push('}');
-    lines.push('::-webkit-scrollbar-thumb:active {');;
+    lines.push('::-webkit-scrollbar-thumb:active {');
     lines.push(`    background-color: ${colorThumbActive};`);
     lines.push('}');
     lines.push('::-webkit-scrollbar-corner {');

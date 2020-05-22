@@ -3,7 +3,11 @@ import {scale} from '../utils/math';
 import {applyColorMatrix, createFilterMatrix} from './utils/matrix';
 import {FilterConfig} from '../definitions';
 
-const colorModificationCache = new Map<Function, Map<string, string>>();
+interface ColorFunction {
+    (hsl: HSLA): HSLA;
+}
+
+const colorModificationCache = new Map<ColorFunction, Map<string, string>>();
 
 export function clearColorModificationCache() {
     colorModificationCache.clear();

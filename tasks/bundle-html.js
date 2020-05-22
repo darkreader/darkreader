@@ -72,21 +72,21 @@ const pages = [
     },
 ];
 
-async function bundleHTMLPage({cwdPath, rootComponent, props}, {production}) {
+async function bundleHTMLPage({cwdPath, rootComponent, props}, {debug}) {
     let html = await fs.readFile(`src/${cwdPath}`, 'utf8');
     const bodyText = MalevicString.stringify(Malevic.m(rootComponent, props));
     html = html.replace('$BODY', bodyText);
 
     const getPath = (dir) => `${dir}/${cwdPath}`;
-    const outPath = getPath(getDestDir({production}));
-    const firefoxPath = getPath(getDestDir({production, firefox: true}));
+    const outPath = getPath(getDestDir({debug}));
+    const firefoxPath = getPath(getDestDir({debug, firefox: true}));
     await fs.outputFile(outPath, html);
     await fs.copy(outPath, firefoxPath);
 }
 
-async function bundleHTML({production}) {
+async function bundleHTML({debug}) {
     for (const page of pages) {
-        await bundleHTMLPage(page, {production});
+        await bundleHTMLPage(page, {debug});
     }
 }
 
@@ -98,7 +98,7 @@ async function rebuildHTML(changedFiles) {
     await Promise.all(
         pages
             .filter((page) => changedFiles.some((changed) => changed === getSrcPath(page.cwdPath)))
-            .map((page) => bundleHTMLPage(page, {production: false}))
+            .map((page) => bundleHTMLPage(page, {debug: true}))
     );
 }
 

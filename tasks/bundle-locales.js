@@ -3,7 +3,7 @@ const {getDestDir} = require('./paths');
 const reload = require('./reload');
 const {createTask} = require('./task');
 
-async function bundleLocale(/** @type {string} */filePath, {production}) {
+async function bundleLocale(/** @type {string} */filePath, {debug}) {
     let file = await fs.readFile(filePath, 'utf8');
     file = file.replace(/^#.*?$/gm, '');
 
@@ -27,20 +27,20 @@ async function bundleLocale(/** @type {string} */filePath, {production}) {
     const locale = fileName.substring(0, fileName.lastIndexOf('.')).replace('-', '_');
     const json = `${JSON.stringify(messages, null, 4)}\n`;
     const getOutputPath = (dir) => `${dir}/_locales/${locale}/messages.json`;
-    const chromeDir = getDestDir({production});
-    const firefoxDir = getDestDir({production, firefox: true});
+    const chromeDir = getDestDir({debug});
+    const firefoxDir = getDestDir({debug, firefox: true});
     await fs.outputFile(getOutputPath(chromeDir), json);
     await fs.outputFile(getOutputPath(firefoxDir), json);
 }
 
-async function bundleLocales({production}) {
+async function bundleLocales({debug}) {
     const localesSrcDir = 'src/_locales';
     const list = await fs.readdir(localesSrcDir);
     for (const name of list) {
         if (!name.endsWith('.config')) {
             continue;
         }
-        await bundleLocale(`${localesSrcDir}/${name}`, {production});
+        await bundleLocale(`${localesSrcDir}/${name}`, {debug});
     }
 }
 
@@ -51,7 +51,7 @@ module.exports = createTask(
     ['src/_locales/**/*.config'],
     async (changedFiles) => {
         for (const file of changedFiles) {
-            await bundleLocale(file, {production: false});
+            await bundleLocale(file, {debug: true});
         }
         reload({type: reload.FULL});
     },

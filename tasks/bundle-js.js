@@ -11,9 +11,9 @@ const reload = require('./reload');
 const {PORT} = reload;
 const {createTask} = require('./task');
 
-async function copyToFF({cwdPath, production}) {
-    const destPath = `${getDestDir({production})}/${cwdPath}`;
-    const ffDestPath = `${getDestDir({production, firefox: true})}/${cwdPath}`;
+async function copyToFF({cwdPath, debug}) {
+    const destPath = `${getDestDir({debug})}/${cwdPath}`;
+    const ffDestPath = `${getDestDir({debug, firefox: true})}/${cwdPath}`;
     await fs.copy(destPath, ffDestPath);
 }
 
@@ -32,7 +32,7 @@ function patchFirefoxJS(/** @type {string} */code) {
  * @property {string} src
  * @property {string} dest
  * @property {string} reloadType
- * @property {({production}) => Promise<void>} postBuild
+ * @property {({debug}) => Promise<void>} postBuild
  * @property {string[]} watchFiles
  */
 
@@ -42,9 +42,9 @@ const jsEntries = [
         src: 'src/background/index.ts',
         dest: 'background/index.js',
         reloadType: reload.FULL,
-        async postBuild({production}) {
-            const destPath = `${getDestDir({production})}/${this.dest}`;
-            const ffDestPath = `${getDestDir({production, firefox: true})}/${this.dest}`;
+        async postBuild({debug}) {
+            const destPath = `${getDestDir({debug})}/${this.dest}`;
+            const ffDestPath = `${getDestDir({debug, firefox: true})}/${this.dest}`;
             const code = await fs.readFile(destPath, 'utf8');
             await fs.outputFile(ffDestPath, patchFirefoxJS(code));
         },
@@ -54,8 +54,8 @@ const jsEntries = [
         src: 'src/inject/index.ts',
         dest: 'inject/index.js',
         reloadType: reload.FULL,
-        async postBuild({production}) {
-            await copyToFF({cwdPath: this.dest, production});
+        async postBuild({debug}) {
+            await copyToFF({cwdPath: this.dest, debug});
         },
         watchFiles: null,
     },
@@ -63,8 +63,8 @@ const jsEntries = [
         src: 'src/ui/devtools/index.tsx',
         dest: 'ui/devtools/index.js',
         reloadType: reload.UI,
-        async postBuild({production}) {
-            await copyToFF({cwdPath: this.dest, production});
+        async postBuild({debug}) {
+            await copyToFF({cwdPath: this.dest, debug});
         },
         watchFiles: null,
     },
@@ -72,8 +72,8 @@ const jsEntries = [
         src: 'src/ui/popup/index.tsx',
         dest: 'ui/popup/index.js',
         reloadType: reload.UI,
-        async postBuild({production}) {
-            await copyToFF({cwdPath: this.dest, production});
+        async postBuild({debug}) {
+            await copyToFF({cwdPath: this.dest, debug});
         },
         watchFiles: null,
     },
@@ -81,14 +81,14 @@ const jsEntries = [
         src: 'src/ui/stylesheet-editor/index.tsx',
         dest: 'ui/stylesheet-editor/index.js',
         reloadType: reload.UI,
-        async postBuild({production}) {
-            await copyToFF({cwdPath: this.dest, production});
+        async postBuild({debug}) {
+            await copyToFF({cwdPath: this.dest, debug});
         },
         watchFiles: null,
     },
 ];
 
-async function bundleJS(/** @type {JSEntry} */entry, {production}) {
+async function bundleJS(/** @type {JSEntry} */entry, {debug, watch}) {
     const {src, dest} = entry;
     const bundle = await rollup.rollup({
         input: src,
@@ -100,27 +100,28 @@ async function bundleJS(/** @type {JSEntry} */entry, {production}) {
                 tsconfig: 'src/tsconfig.json',
                 tsconfigOverride: {
                     compilerOptions: {
-                        removeComments: production ? true : false,
-                        sourceMap: production ? false : true,
+                        removeComments: debug ? false : true,
+                        sourceMap: debug ? true : false,
                     },
                 },
-                clean: production ? true : false,
-                cacheRoot: production ? null : `${fs.realpathSync(os.tmpdir())}/darkreader_typescript_cache`,
+                clean: debug ? false: true,
+                cacheRoot: debug ? `${fs.realpathSync(os.tmpdir())}/darkreader_typescript_cache` : null,
             }),
             rollupPluginReplace({
-                '__DEBUG__': production ? 'false' : 'true',
-                '__PORT__': production ? '-1' : String(PORT),
+                '__DEBUG__': debug ? 'true' : 'false',
+                '__PORT__': watch ? String(PORT) : '-1',
+                '__WATCH__': watch ? 'true' : 'false',
             }),
         ].filter((x) => x)
     });
     entry.watchFiles = bundle.watchFiles;
     await bundle.write({
-        file: `${getDestDir({production})}/${dest}`,
+        file: `${getDestDir({debug})}/${dest}`,
         strict: true,
         format: 'iife',
-        sourcemap: production ? false : 'inline',
+        sourcemap: debug ? 'inline' : false,
     });
-    await entry.postBuild({production});
+    await entry.postBuild({debug});
 }
 
 function getWatchFiles() {
@@ -136,8 +137,8 @@ let watchFiles;
 
 module.exports = createTask(
     'bundle-js',
-    async ({production}) => await Promise.all(
-        jsEntries.map((entry) => bundleJS(entry, {production}))
+    async ({debug, watch}) => await Promise.all(
+        jsEntries.map((entry) => bundleJS(entry, {debug, watch}))
     ),
 ).addWatcher(
     () => {
@@ -151,7 +152,7 @@ module.exports = createTask(
             });
         });
         await Promise.all(
-            entries.map((e) => bundleJS(e, {production: false}))
+            entries.map((e) => bundleJS(e, {debug: true, watch: true}))
         );
 
         const newWatchFiles = getWatchFiles();

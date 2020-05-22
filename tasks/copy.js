@@ -19,19 +19,19 @@ function getCwdPath(/** @type {string} */srcPath) {
     return srcPath.substring(srcDir.length + 1);
 }
 
-async function patchFirefoxManifest({production}) {
+async function patchFirefoxManifest({debug}) {
     const manifest = await fs.readJson(`${srcDir}/manifest.json`);
     const patch = await fs.readJson(`${srcDir}/manifest-firefox.json`);
     const patched = {...manifest, ...patch};
-    const firefoxDir = getDestDir({production, firefox: true});
+    const firefoxDir = getDestDir({debug, firefox: true});
     await fs.writeJson(`${firefoxDir}/manifest.json`, patched, {spaces: 4});
 }
 
-async function copyFile(path, {production, firefox}) {
+async function copyFile(path, {debug, firefox}) {
     const cwdPath = getCwdPath(path);
-    const destDir = getDestDir({production, firefox});
+    const destDir = getDestDir({debug, firefox});
     if (firefox && cwdPath === 'manifest.json') {
-        await patchFirefoxManifest({production});
+        await patchFirefoxManifest({debug});
     } else {
         const src = `${srcDir}/${cwdPath}`;
         const dest = `${destDir}/${cwdPath}`;
@@ -39,11 +39,11 @@ async function copyFile(path, {production, firefox}) {
     }
 }
 
-async function copy({production}) {
+async function copy({debug}) {
     const files = await globby(paths);
     for (const file of files) {
-        await copyFile(file, {production, firefox: false});
-        await copyFile(file, {production, firefox: true});
+        await copyFile(file, {debug, firefox: false});
+        await copyFile(file, {debug, firefox: true});
     }
 }
 
@@ -55,8 +55,8 @@ module.exports = createTask(
     async (changedFiles) => {
         for (const file of changedFiles) {
             if (await fs.exists(file)) {
-                await copyFile(file, {production: false, firefox: false});
-                await copyFile(file, {production: false, firefox: true});
+                await copyFile(file, {debug: true, firefox: false});
+                await copyFile(file, {debug: true, firefox: true});
             }
         }
         reload({type: reload.FULL});

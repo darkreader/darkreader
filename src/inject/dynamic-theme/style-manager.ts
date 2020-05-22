@@ -98,17 +98,6 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
         if (corsCopy) {
             return corsCopy.sheet.cssRules;
         }
-        if (element.sheet == null) {
-            return null;
-        }
-        if (element instanceof HTMLLinkElement) {
-            try {
-                return element.sheet.cssRules;
-            } catch (err) {
-                logWarn(err);
-                return null;
-            }
-        }
         if (containsCSSImport()) {
             return null;
         }
@@ -145,7 +134,14 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
         let cssBasePath: string;
 
         if (element instanceof HTMLLinkElement) {
-            if (element.sheet == null) {
+            let [cssRules, accessError] = getRulesAndError();
+            if (accessError) {
+                // NOTE: In Firefox, when link is loading,
+                // sheet is not null, but cssRules error is thrown
+                logWarn(accessError);
+            }
+
+            if (cssRules == null || accessError) {
                 try {
                     await linkLoading(element);
                 } catch (err) {
@@ -159,13 +155,18 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
                     return null;
                 }
             }
-            try {
-                if (element.sheet.cssRules != null) {
-                    return element.sheet.cssRules;
-                }
-            } catch (err) {
-                logWarn(err);
+
+            [cssRules, accessError] = getRulesAndError();
+            if (accessError) {
+                // CORS error, cssRules are not accessible
+                // for cross-origin resources
+                logWarn(accessError);
             }
+
+            if (cssRules != null) {
+                return cssRules;
+            }
+
             cssText = await loadText(element.href);
             cssBasePath = getCSSBaseBath(element.href);
             if (cancelAsyncOperations) {
@@ -457,18 +458,26 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
     let rulesChangeKey: number = null;
     let rulesCheckFrameId: number = null;
 
+    function getRulesAndError(): [CSSRuleList, Error] {
+        try {
+            if (element.sheet == null) {
+                return [null, null];
+            }
+            return [element.sheet.cssRules, null];
+        } catch (err) {
+            return [null, err];
+        }
+    }
+
     // Seems like Firefox bug: silent exception is produced
     // without any notice, when accessing <style> CSS rules
     function safeGetSheetRules() {
-        try {
-            if (element.sheet == null) {
-                return null;
-            }
-            return element.sheet.cssRules;
-        } catch (err) {
+        const [cssRules, err] = getRulesAndError();
+        if (err) {
             logWarn(err);
             return null;
         }
+        return cssRules;
     }
 
     function updateRulesChangeKey() {

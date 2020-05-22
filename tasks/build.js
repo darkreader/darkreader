@@ -24,7 +24,7 @@ const standardTask = [
 async function release() {
     log.ok('RELEASE');
     try {
-        await runTasks([...standardTask, codeStyle, zip], {production: true});
+        await runTasks([...standardTask, codeStyle, zip], {production: true, debug: false});
         log.ok('MISSION PASSED! RESPECT +');
     } catch (err) {
         log.error(`MISSION FAILED!`);
@@ -35,7 +35,7 @@ async function release() {
 async function debug({watch}) {
     log.ok('DEBUG');
     try {
-        await runTasks(standardTask, {production: !watch});
+        await runTasks(standardTask, {production: false, debug: watch});
         if (watch) {
             standardTask.forEach((task) => task.watch());
             reload({type: reload.FULL});
@@ -52,7 +52,7 @@ async function debug({watch}) {
 async function api() {
     log.ok('API');
     try {
-        await runTasks([bundleAPI], {production: true});
+        await runTasks([bundleAPI], {production: true, debug: false});
         log.ok('MISSION PASSED! RESPECT +');
     } catch (err) {
         log.error(`MISSION FAILED!`);

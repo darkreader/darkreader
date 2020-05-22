@@ -407,7 +407,7 @@ export class Extension {
                 case ThemeEngines.dynamicTheme: {
                     const filter = {...filterConfig};
                     delete filter.engine;
-                    const fixes = getDynamicThemeFixesFor(url, frameURL, this.config.DYNAMIC_THEME_FIXES);
+                    const fixes = getDynamicThemeFixesFor(url, frameURL, this.config.DYNAMIC_THEME_FIXES, this.user.settings.enableForPDF);
                     const isIFrame = frameURL != null;
                     return {
                         type: 'add-dynamic-theme',

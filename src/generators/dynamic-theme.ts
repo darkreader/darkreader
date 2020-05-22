@@ -44,7 +44,7 @@ export function formatDynamicThemeFixes(dynamicThemeFixes: DynamicThemeFix[]) {
     });
 }
 
-export function getDynamicThemeFixesFor(url: string, frameURL: string, fixes: DynamicThemeFix[]) {
+export function getDynamicThemeFixesFor(url: string, frameURL: string, fixes: DynamicThemeFix[], enabledForPDF: boolean) {
     if (fixes.length === 0 || fixes[0].url[0] !== '*') {
         return null;
     }
@@ -55,7 +55,9 @@ export function getDynamicThemeFixesFor(url: string, frameURL: string, fixes: Dy
         css: fixes[0].css || [],
         ignoreInlineStyle: fixes[0].ignoreInlineStyle || [],
     };
-
+    if (enabledForPDF) { 
+        common.invert = common.invert.concat('embed[type="application/pdf"]'); 
+    }
     const sortedBySpecificity = fixes
         .slice(1)
         .map((theme) => {

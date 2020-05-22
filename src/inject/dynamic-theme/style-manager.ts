@@ -134,14 +134,12 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
         let cssBasePath: string;
 
         if (element instanceof HTMLLinkElement) {
-            let [cssRules, accessError] = getRulesAndError();
+            let [cssRules, accessError] = getRulesOrError();
             if (accessError) {
-                // NOTE: In Firefox, when link is loading,
-                // sheet is not null, but cssRules error is thrown
                 logWarn(accessError);
             }
 
-            if (cssRules == null || accessError) {
+            if ((cssRules && !accessError) || isStillLoadingError(accessError)) {
                 try {
                     await linkLoading(element);
                 } catch (err) {
@@ -154,13 +152,13 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
                 if (cancelAsyncOperations) {
                     return null;
                 }
-            }
 
-            [cssRules, accessError] = getRulesAndError();
-            if (accessError) {
-                // CORS error, cssRules are not accessible
-                // for cross-origin resources
-                logWarn(accessError);
+                [cssRules, accessError] = getRulesOrError();
+                if (accessError) {
+                    // CORS error, cssRules are not accessible
+                    // for cross-origin resources
+                    logWarn(accessError);
+                }
             }
 
             if (cssRules != null) {
@@ -458,7 +456,7 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
     let rulesChangeKey: number = null;
     let rulesCheckFrameId: number = null;
 
-    function getRulesAndError(): [CSSRuleList, Error] {
+    function getRulesOrError(): [CSSRuleList, Error] {
         try {
             if (element.sheet == null) {
                 return [null, null];
@@ -469,10 +467,17 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
         }
     }
 
+    // NOTE: In Firefox, when link is loading,
+    // `sheet` property is not null,
+    // but `cssRules` access error is thrown
+    function isStillLoadingError(error: Error) {
+        return error && error.message && error.message.includes('loading');
+    }
+
     // Seems like Firefox bug: silent exception is produced
     // without any notice, when accessing <style> CSS rules
     function safeGetSheetRules() {
-        const [cssRules, err] = getRulesAndError();
+        const [cssRules, err] = getRulesOrError();
         if (err) {
             logWarn(err);
             return null;

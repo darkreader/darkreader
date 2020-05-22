@@ -90,7 +90,7 @@ function analyzeImage(image: HTMLImageElement) {
             } else {
                 // Use sRGB to determine the `pixel Lightness`
                 // https://en.wikipedia.org/wiki/Relative_luminance
-                l = (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
+                l = 0.2126 * r + 0.7152 * g + 0.0722 * b;
                 if (l < DARK_LIGHTNESS_THRESHOLD) {
                     darkPixelsCount++;
                 }

@@ -9,7 +9,7 @@ const fs = require('fs-extra');
 const os = require('os');
 const {createTask} = require('./task');
 
-async function bundleAPI({production}) {
+async function bundleAPI({debug}) {
     const src = 'src/api/index.ts';
     const dest = 'darkreader.js';
 
@@ -28,7 +28,7 @@ async function bundleAPI({production}) {
                     },
                 },
                 clean: true,
-                cacheRoot: production ? null : `${fs.realpathSync(os.tmpdir())}/darkreader_api_typescript_cache`,
+                cacheRoot: debug ? `${fs.realpathSync(os.tmpdir())}/darkreader_api_typescript_cache` : null,
             }),
             rollupPluginReplace({
                 '__DEBUG__': 'false',

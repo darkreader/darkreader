@@ -18,9 +18,9 @@ async function archiveDirectory({dir, dest}) {
     await archiveFiles({files, dest, cwd: dir});
 }
 
-async function zip({production}) {
-    const dir = getDestDir({production});
-    const firefoxDir = getDestDir({production, firefox: true});
+async function zip({debug}) {
+    const dir = getDestDir({debug});
+    const firefoxDir = getDestDir({debug, firefox: true});
 
     await archiveDirectory({dir, dest: 'build.zip'});
     await archiveDirectory({dir: firefoxDir, dest: 'build-firefox.xpi'});

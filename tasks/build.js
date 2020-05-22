@@ -35,7 +35,7 @@ async function release() {
 async function debug({watch}) {
     log.ok('DEBUG');
     try {
-        await runTasks(standardTask, {production: false});
+        await runTasks(standardTask, {production: watch});
         if (watch) {
             standardTask.forEach((task) => task.watch());
             reload({type: reload.FULL});

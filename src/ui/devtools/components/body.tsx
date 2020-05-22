@@ -80,8 +80,18 @@ function Body({data, actions}: BodyProps) {
         actions.changeSettings({previewNewDesign: !data.settings.previewNewDesign});
     }
 
+    function fullScreen() {
+        document.body.addEventListener('click',(e) => {
+            if (isMobile()) {
+                document.body.requestFullscreen();
+            }
+        });
+    }
+
     return (
-        <body>
+        <body
+            onrender={fullScreen}
+            >
             <header>
                 <img id="logo" src="../assets/images/darkreader-type.svg" alt="Dark Reader" />
                 <h1 id="title">Developer Tools</h1>

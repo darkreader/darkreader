@@ -41,7 +41,7 @@ module.exports = createTask(
 ).addWatcher(
     ['src/**/*.less'],
     async () => {
-        await bundleCSS({debug: false});
+        await bundleCSS({debug: true});
         reload({type: reload.CSS});
     },
 );

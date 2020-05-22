@@ -51,7 +51,7 @@ module.exports = createTask(
     ['src/_locales/**/*.config'],
     async (changedFiles) => {
         for (const file of changedFiles) {
-            await bundleLocale(file, {debug: false});
+            await bundleLocale(file, {debug: true});
         }
         reload({type: reload.FULL});
     },

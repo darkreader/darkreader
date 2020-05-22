@@ -98,7 +98,7 @@ async function rebuildHTML(changedFiles) {
     await Promise.all(
         pages
             .filter((page) => changedFiles.some((changed) => changed === getSrcPath(page.cwdPath)))
-            .map((page) => bundleHTMLPage(page, {debug: false}))
+            .map((page) => bundleHTMLPage(page, {debug: true}))
     );
 }
 

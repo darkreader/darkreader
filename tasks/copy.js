@@ -55,8 +55,8 @@ module.exports = createTask(
     async (changedFiles) => {
         for (const file of changedFiles) {
             if (await fs.exists(file)) {
-                await copyFile(file, {debug: false, firefox: false});
-                await copyFile(file, {debug: false, firefox: true});
+                await copyFile(file, {debug: true, firefox: false});
+                await copyFile(file, {debug: true, firefox: true});
             }
         }
         reload({type: reload.FULL});

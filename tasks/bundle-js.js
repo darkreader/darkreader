@@ -108,8 +108,9 @@ async function bundleJS(/** @type {JSEntry} */entry, {debug, watch}) {
                 cacheRoot: debug ? `${fs.realpathSync(os.tmpdir())}/darkreader_typescript_cache` : null,
             }),
             rollupPluginReplace({
-                '__DEBUG__': watch ? 'true' : 'false',
+                '__DEBUG__': debug ? 'true' : 'false',
                 '__PORT__': watch ? String(PORT) : '-1',
+                '__WATCH__': watch ? 'true' : 'false',
             }),
         ].filter((x) => x)
     });

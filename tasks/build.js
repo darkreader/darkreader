@@ -24,7 +24,7 @@ const standardTask = [
 async function release() {
     log.ok('RELEASE');
     try {
-        await runTasks([...standardTask, codeStyle, zip], {debug: false});
+        await runTasks([...standardTask, codeStyle, zip], {debug: false, watch: false});
         log.ok('MISSION PASSED! RESPECT +');
     } catch (err) {
         log.error(`MISSION FAILED!`);
@@ -52,7 +52,7 @@ async function debug({watch}) {
 async function api() {
     log.ok('API');
     try {
-        await runTasks([bundleAPI], {debug: false});
+        await runTasks([bundleAPI], {debug: false, watch: false});
         log.ok('MISSION PASSED! RESPECT +');
     } catch (err) {
         log.error(`MISSION FAILED!`);

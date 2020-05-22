@@ -1,10 +1,10 @@
-declare const __WATCH__: boolean;
-const WATCH = __WATCH__;
+declare const __DEBUG__: boolean;
+const DEBUG = __DEBUG__;
 
 export function logInfo(...args) {
-    WATCH && console.info(...args);
+    DEBUG && console.info(...args);
 }
 
 export function logWarn(...args) {
-    WATCH && console.warn(...args);
+    DEBUG && console.warn(...args);
 }

@@ -11,11 +11,11 @@ chrome.runtime.onInstalled.addListener(({reason}) => {
     }
 });
 
-declare const __WATCH__: boolean;
+declare const __DEBUG__: boolean;
 declare const __PORT__: number;
-const WATCH = __WATCH__;
+const DEBUG = __DEBUG__;
 
-if (WATCH) {
+if (DEBUG) {
     const PORT = __PORT__;
     const listen = () => {
         const socket = new WebSocket(`ws://localhost:${PORT}`);

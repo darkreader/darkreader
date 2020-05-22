@@ -88,7 +88,7 @@ const jsEntries = [
     },
 ];
 
-async function bundleJS(/** @type {JSEntry} */entry, {production, debug}) {
+async function bundleJS(/** @type {JSEntry} */entry, {production}) {
     const {src, dest} = entry;
     const bundle = await rollup.rollup({
         input: src,
@@ -108,8 +108,8 @@ async function bundleJS(/** @type {JSEntry} */entry, {production, debug}) {
                 cacheRoot: production ? null : `${fs.realpathSync(os.tmpdir())}/darkreader_typescript_cache`,
             }),
             rollupPluginReplace({
-                '__DEBUG__': debug ? 'true' : 'false',
-                '__PORT__': debug ? String(PORT) : '-1',
+                '__DEBUG__': production ? 'false' : 'true',
+                '__PORT__': production ? '-1' : String(PORT),
             }),
         ].filter((x) => x)
     });
@@ -136,8 +136,8 @@ let watchFiles;
 
 module.exports = createTask(
     'bundle-js',
-    async ({production, debug}) => await Promise.all(
-        jsEntries.map((entry) => bundleJS(entry, {production, debug}))
+    async ({production}) => await Promise.all(
+        jsEntries.map((entry) => bundleJS(entry, {production}))
     ),
 ).addWatcher(
     () => {
@@ -151,7 +151,7 @@ module.exports = createTask(
             });
         });
         await Promise.all(
-            entries.map((e) => bundleJS(e, {production: false, debug: true}))
+            entries.map((e) => bundleJS(e, {production: false}))
         );
 
         const newWatchFiles = getWatchFiles();

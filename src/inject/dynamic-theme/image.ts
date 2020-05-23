@@ -56,11 +56,7 @@ let context: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D;
 function createCanvas() {
     const maxWidth = MAX_ANALIZE_PIXELS_COUNT;
     const maxHeight = MAX_ANALIZE_PIXELS_COUNT;
-    if (typeof OffscreenCanvas === 'function') {
-        canvas = new OffscreenCanvas(maxWidth, maxHeight);
-    } else {
-        canvas = document.createElement('canvas');
-    }
+    canvas = document.createElement('canvas');
     canvas.width = maxWidth;
     canvas.height = maxHeight;
     context = canvas.getContext('2d');

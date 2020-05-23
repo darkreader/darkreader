@@ -134,6 +134,8 @@ function analyzeImage(image: HTMLImageElement) {
     };
 }
 
+const objectURLs = new Set<string>();
+
 export function getFilteredImageDataURL({dataURL, width, height}: ImageDetails, filter: FilterConfig) {
     const matrix = getSVGFilterMatrixValue(filter);
     const svg = [
@@ -152,9 +154,12 @@ export function getFilteredImageDataURL({dataURL, width, height}: ImageDetails, 
     }
     const blob = new Blob([bytes], {type: 'image/svg+xml'});
     const objectURL = URL.createObjectURL(blob);
+    objectURLs.add(objectURL);
     return objectURL;
 }
 
 export function cleanImageProcessingCache() {
     removeCanvas();
+    objectURLs.forEach((u) => URL.revokeObjectURL(u));
+    objectURLs.clear();
 }

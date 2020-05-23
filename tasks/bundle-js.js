@@ -2,7 +2,7 @@ const fs = require('fs-extra');
 const os = require('os');
 const rollup = require('rollup');
 const rollupPluginCommonjs = require('@rollup/plugin-commonjs');
-const rollupPluginNodeResolve = require('@rollup/plugin-node-resolve');
+const rollupPluginNodeResolve = require('@rollup/plugin-node-resolve').default;
 const rollupPluginReplace = require('@rollup/plugin-replace');
 const rollupPluginTypescript = require('rollup-plugin-typescript2');
 const typescript = require('typescript');
@@ -104,7 +104,7 @@ async function bundleJS(/** @type {JSEntry} */entry, {debug, watch}) {
                         sourceMap: debug ? true : false,
                     },
                 },
-                clean: debug ? false: true,
+                clean: debug ? false : true,
                 cacheRoot: debug ? `${fs.realpathSync(os.tmpdir())}/darkreader_typescript_cache` : null,
             }),
             rollupPluginReplace({

@@ -340,6 +340,7 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
                 declarations.forEach(({property, value, important, sourceValue, keyText}) => {
                     text += `${keyText} {${property}: ${value == null ? sourceValue : value} ${important ? 'important' : ''}}`
                 });
+                text += '}';
                 target.insertRule(`${text}`, index);
             } else {
                 target.insertRule(`${selector} {}`, index);

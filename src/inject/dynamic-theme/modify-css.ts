@@ -15,6 +15,7 @@ export interface ModifiableCSSDeclaration {
     value: string | CSSValueModifier;
     important: boolean;
     sourceValue: string;
+    keyText: string;
 }
 
 export interface ModifiableCSSRule {
@@ -23,9 +24,10 @@ export interface ModifiableCSSRule {
     declarations: ModifiableCSSDeclaration[];
 }
 
-export function getModifiableCSSDeclaration(property: string, value: string, rule: CSSStyleRule, isCancelled: () => boolean): ModifiableCSSDeclaration {
+export function getModifiableCSSDeclaration(property: string, value: string, rule: CSSStyleRule | CSSKeyframeRule, isCancelled: () => boolean): ModifiableCSSDeclaration {
     const important = Boolean(rule && rule.style && rule.style.getPropertyPriority(property));
     const sourceValue = value;
+    const keyText = rule instanceof CSSKeyframeRule ? rule.keyText : '';
     if (property.startsWith('--')) {
         return null;
     } else if (
@@ -35,17 +37,17 @@ export function getModifiableCSSDeclaration(property: string, value: string, rul
     ) {
         const modifier = getColorModifier(property, value);
         if (modifier) {
-            return {property, value: modifier, important, sourceValue};
+            return {property, value: modifier, important, sourceValue, keyText};
         }
     } else if (property === 'background-image' || property === 'list-style-image') {
         const modifier = getBgImageModifier(property, value, rule, isCancelled);
         if (modifier) {
-            return {property, value: modifier, important, sourceValue};
+            return {property, value: modifier, important, sourceValue, keyText};
         }
     } else if (property.indexOf('shadow') >= 0) {
         const modifier = getShadowModifier(property, value);
         if (modifier) {
-            return {property, value: modifier, important, sourceValue};
+            return {property, value: modifier, important, sourceValue, keyText};
         }
     }
     return null;
@@ -227,7 +229,7 @@ const gradientRegex = /[\-a-z]+gradient\(([^\(\)]*(\(([^\(\)]*(\(.*?\)))*[^\(\)]
 const imageDetailsCache = new Map<string, ImageDetails>();
 const awaitingForImageLoading = new Map<string, ((imageDetails: ImageDetails) => void)[]>();
 
-function getBgImageModifier(prop: string, value: string, rule: CSSStyleRule, isCancelled: () => boolean): string | CSSValueModifier {
+function getBgImageModifier(prop: string, value: string, rule: CSSStyleRule | CSSKeyframeRule, isCancelled: () => boolean): string | CSSValueModifier {
     try {
         const gradients = getMatches(gradientRegex, value);
         const urls = getMatches(cssURLRegex, value);

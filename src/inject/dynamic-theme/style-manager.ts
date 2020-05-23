@@ -290,11 +290,19 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
 
             let modRule: ModifiableCSSRule = null;
             if (modDecs.length > 0) {
-                modRule = {selector: rule.selectorText, declarations: modDecs};
-                if (rule.parentRule instanceof CSSMediaRule) {
-                    modRule.media = (rule.parentRule as CSSMediaRule).media.mediaText;
+                if (rule instanceof CSSStyleRule) {
+                    modRule = {selector: rule.selectorText, declarations: modDecs};
+                    if (rule.parentRule instanceof CSSMediaRule) {
+                        modRule.media = (rule.parentRule as CSSMediaRule).media.mediaText;
+                    }
+                    modRules.push(modRule);
+                } else if (rule instanceof CSSKeyframeRule) {
+                    modRule = {selector: `@keyframes ${(rule.parentRule as CSSKeyframesRule).name}`, declarations: modDecs};
+                    if (rule.parentRule instanceof CSSMediaRule) {
+                        modRule.media = (rule.parentRule as CSSMediaRule).media.mediaText;
+                    }
+                    modRules.push(modRule);
                 }
-                modRules.push(modRule);
             }
             rulesModCache.set(cssText, modRule);
 
@@ -322,15 +330,24 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
             important: boolean;
             sourceValue: string;
             asyncKey?: number;
+            keyText?: string;
         }
 
         function setRule(target: CSSStyleSheet | CSSGroupingRule, index: number, declarations: ReadyDeclaration[]) {
             const {selector} = declarations[0];
-            target.insertRule(`${selector} {}`, index);
-            const style = (target.cssRules.item(index) as CSSStyleRule).style;
-            declarations.forEach(({property, value, important, sourceValue}) => {
-                style.setProperty(property, value == null ? sourceValue : value, important ? 'important' : '');
-            });
+            if (selector.startsWith('@keyframes')) {
+                let text = `${selector} {`;
+                declarations.forEach(({property, value, important, sourceValue, keyText}) => {
+                    text += `${keyText} {${property}: ${value == null ? sourceValue : value} ${important ? 'important' : ''}}`
+                });
+                target.insertRule(`${text}`, index);
+            } else {
+                target.insertRule(`${selector} {}`, index);
+                const style = (target.cssRules.item(index) as CSSStyleRule).style;
+                declarations.forEach(({property, value, important, sourceValue}) => {
+                    style.setProperty(property, value == null ? sourceValue : value, important ? 'important' : '');
+                });
+            }
         }
 
         interface AsyncRule {
@@ -420,13 +437,13 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
         }
 
         modRules.filter((r) => r).forEach(({selector, declarations, media}) => {
-            declarations.forEach(({property, value, important, sourceValue}) => {
+            declarations.forEach(({property, value, important, sourceValue, keyText}) => {
                 if (typeof value === 'function') {
                     const modified = value(filter);
                     if (modified instanceof Promise) {
                         const index = readyDeclarations.length;
                         const asyncKey = asyncDeclarationCounter++;
-                        readyDeclarations.push({media, selector, property, value: null, important, asyncKey, sourceValue});
+                        readyDeclarations.push({media, selector, property, value: null, important, asyncKey, sourceValue, keyText});
                         const promise = modified;
                         const currentRenderId = renderId;
                         promise.then((asyncValue) => {
@@ -442,10 +459,10 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
                             });
                         });
                     } else {
-                        readyDeclarations.push({media, selector, property, value: modified, important, sourceValue});
+                        readyDeclarations.push({media, selector, property, value: modified, important, sourceValue, keyText});
                     }
                 } else {
-                    readyDeclarations.push({media, selector, property, value, important, sourceValue});
+                    readyDeclarations.push({media, selector, property, value, important, sourceValue, keyText});
                 }
             });
         });

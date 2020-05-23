@@ -3,7 +3,7 @@ import {clamp} from '../../utils/math';
 import {getMatches} from '../../utils/text';
 import {modifyBackgroundColor, modifyBorderColor, modifyForegroundColor, modifyGradientColor, modifyShadowColor, clearColorModificationCache} from '../../generators/modify-colors';
 import {cssURLRegex, getCSSURLValue, getCSSBaseBath} from './css-rules';
-import {getImageDetails, getFilteredImageDataURL, ImageDetails} from './image';
+import {getImageDetails, getFilteredImageDataURL, ImageDetails, cleanImageProcessingCache} from './image';
 import {getAbsoluteURL} from './url';
 import {logWarn, logInfo} from '../utils/log';
 import {FilterConfig, Theme} from '../../definitions';
@@ -419,5 +419,6 @@ export function cleanModificationCache() {
     colorParseCache.clear();
     clearColorModificationCache();
     imageDetailsCache.clear();
+    cleanImageProcessingCache();
     awaitingForImageLoading.clear();
 }

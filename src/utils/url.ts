@@ -133,10 +133,7 @@ export function isURLEnabled(url: string, userSettings: UserSettings, {isProtect
         return false;
     }
     if (isPDF(url) && userSettings.enableForPDF) {
-        return true;
-    }
-    if (isPDF(url) && !userSettings.enableForPDF) {
-        return false;
+        return userSettings.enableForPDF;
     }
     const isURLInUserList = isURLInList(url, userSettings.siteList);
     if (userSettings.applyToListedOnly) {

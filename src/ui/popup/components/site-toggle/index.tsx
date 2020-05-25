@@ -41,7 +41,7 @@ export default function SiteToggleButton({data, tab, actions}: ExtWrapper & {tab
         >
             <span class="site-toggle__mark"><CheckmarkIcon isEnabled={isSiteEnabled} /></span>
             {' '}
-            <span class="site-toggle__url" >{urlText}</span>
+            <span class="site-toggle__url" >{pdf ? 'PDF' : urlText}</span>
         </Button>
     );
 }

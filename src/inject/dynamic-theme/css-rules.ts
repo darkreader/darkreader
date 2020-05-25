@@ -90,7 +90,7 @@ export function replaceCSSFontFace($css: string) {
     return $css.replace(fontFaceRegex, '');
 }
 
-const varRegex = /var\((--[^\s,]+),?\s*([^\(\)]*(\([^\(\)]*\)[^\(\)]*)*\s*)\)/g;
+const varRegex = /var\((--[^\s,\(\)]+),?\s*([^\(\)]*(\([^\(\)]*\)[^\(\)]*)*\s*)\)/g;
 
 export function replaceCSSVariables(value: string, variables: Map<string, string>) {
     let missing = false;

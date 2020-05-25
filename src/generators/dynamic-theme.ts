@@ -55,8 +55,8 @@ export function getDynamicThemeFixesFor(url: string, frameURL: string, fixes: Dy
         css: fixes[0].css || [],
         ignoreInlineStyle: fixes[0].ignoreInlineStyle || [],
     };
-    if (enabledForPDF) { 
-        common.invert = common.invert.concat('embed[type="application/pdf"]'); 
+    if (enabledForPDF) {
+        common.invert = common.invert.concat('embed[type="application/pdf"]');
     }
     const sortedBySpecificity = fixes
         .slice(1)

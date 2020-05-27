@@ -1,35 +1,36 @@
 import {m} from 'malevic';
 import {ViewProps} from '../types';
 import ControlGroup from '../control-group';
-import {Input} from '../../controls';
 import {UserSettings} from '../../../definitions';
+import {Button} from '../../controls';
+import {openFile} from '../../utils';
 
 export default function ImportButton(props: ViewProps) {
     function importSettings() {
-        if (this.files.length > 0) {
-            const reader = new FileReader();
-            //TODO add reader.error
-            reader.onload = function(e) { 
-                try {
-                    const content: UserSettings = JSON.parse(e.target.result as string);
-                    props.actions.changeSettings({...content});
-                } catch {
-                    //Make error failing parsing
-                    ;;
-                }
-            }
-            reader.readAsText(this.files[0]);
-        }
+        openFile({extensions: ['json']}, function (result: string) {
+            try {
+                const content: UserSettings = JSON.parse(result);
+                props.actions.changeSettings({...content});
+            } catch {
+                // TODO make error
 
+            }
+        });
     }
 
     return (
         <ControlGroup>
             <ControlGroup.Control>
-                <Input onchange={importSettings} class="File-Input">
+                <Button 
+                    onclick={importSettings}
+                    class="settings-button"
+                >
                     Import Settings
-                </Input>
+                </Button>
             </ControlGroup.Control>
+            <ControlGroup.Description>
+                Import settings from a JSON file
+            </ControlGroup.Description>
         </ControlGroup>
     );
 }

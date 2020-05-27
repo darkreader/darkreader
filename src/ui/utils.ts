@@ -32,3 +32,10 @@ export function openFile(options: {extensions: string[]}, callback: (content: st
     document.body.appendChild(input);
     input.click();
 }
+
+export function saveFile(name: string, content: string) {
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([content]));
+    a.download = name;
+    a.click();
+}

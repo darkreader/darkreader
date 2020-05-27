@@ -1,21 +1,26 @@
 import {m} from 'malevic';
 import {ViewProps} from '../types';
 import {Button} from '../../controls';
+import {saveFile} from '../../utils';
+import ControlGroup from '../control-group';
 
 export default function ExportButton(props: ViewProps) {
     function exportSettings() {
-        const data = JSON.stringify(props.data.settings);
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(new Blob([data], {type: 'text/json'}));
-        a.download = 'DarkReader_Settings.json';
-        a.click();
+        saveFile('Dark-Reader-Settings.json', JSON.stringify(props.data.settings));
     }
-
     return (
-        <Button
-            onclick={exportSettings}
-        >
-            Export Settings
-        </Button>
+        <ControlGroup>
+            <ControlGroup.Control>
+                <Button 
+                    onclick={exportSettings}
+                    class="settings-button"
+                >
+                    Export Settings
+                </Button>
+            </ControlGroup.Control>
+            <ControlGroup.Description>
+                Export settings to a JSON file
+            </ControlGroup.Description>
+        </ControlGroup>
     );
 }

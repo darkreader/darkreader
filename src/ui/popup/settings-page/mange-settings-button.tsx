@@ -11,7 +11,7 @@ export default function ManageSettingsButton(props: {onClick: () => void}) {
                 </NavButton>
             </ControlGroup.Control>
             <ControlGroup.Description>
-                Manage your current settings.
+                Reset, export or import settings
             </ControlGroup.Description>
         </ControlGroup>
     );

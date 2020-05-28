@@ -15,13 +15,16 @@ export default function ImportButton(props: ViewProps) {
             const value: string = source[key];
             const array1: boolean = Array.isArray(value)
             const array2: boolean = Array.isArray(compare[key])
+            if (value == null || compare[key] == null) {
+                return;
+            }
             if (array1 || array2) {
                 if (array1 && array2) {
                     result[key] = value;
                 }
-            } else if (value != null && compare[key] != null && typeof value === 'object') {
+            } else if (typeof value === 'object') {
                 result[key] = getValidatedObject(value, compare[key]);
-            } else if (value != null && compare[key] != null && typeof value === typeof compare[key]) {
+            } else if (typeof value === typeof compare[key]) {
                 result[key] = value;
             }
         });

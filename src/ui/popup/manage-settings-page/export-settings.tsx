@@ -11,7 +11,7 @@ export default function ExportButton(props: ViewProps) {
     return (
         <ControlGroup>
             <ControlGroup.Control>
-                <Button 
+                <Button
                     onclick={exportSettings}
                     class="settings-button"
                 >

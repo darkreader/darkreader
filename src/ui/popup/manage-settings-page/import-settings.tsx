@@ -13,7 +13,6 @@ export default function ImportButton(props: ViewProps) {
                 props.actions.changeSettings({...content});
             } catch {
                 // TODO make error
-
             }
         });
     }
@@ -29,7 +28,7 @@ export default function ImportButton(props: ViewProps) {
                 </Button>
             </ControlGroup.Control>
             <ControlGroup.Description>
-                Import settings from a JSON file
+                Open settings from a JSON file
             </ControlGroup.Description>
         </ControlGroup>
     );

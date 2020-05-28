@@ -19,7 +19,7 @@ export default function ExportButton(props: ViewProps) {
                 </Button>
             </ControlGroup.Control>
             <ControlGroup.Description>
-                Export settings to a JSON file
+                Save settings to a JSON file
             </ControlGroup.Description>
         </ControlGroup>
     );

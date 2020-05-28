@@ -5,16 +5,23 @@ import {UserSettings} from '../../../definitions';
 import {Button} from '../../controls';
 import {openFile} from '../../utils';
 import {DEFAULT_SETTINGS} from '../../../defaults';
+import {forEach} from '../../../utils/array';
 
 export default function ImportButton(props: ViewProps) {
 
     function getValidatedObject(source: any, compare: any) {
         const result = {};
-        Object.keys(source).forEach( (key) => {
+        forEach(Object.keys(source), (key) => {
             const value: string = source[key];
-            if (value != null && typeof value === 'object' && !Array.isArray(value)) {
+            const array1: boolean = Array.isArray(value)
+            const array2: boolean = Array.isArray(compare[key])
+            if (array1 || array2) {
+                if (array1 && array2) {
+                    result[key] = value;
+                }
+            } else if (value != null && compare[key] != null && typeof value === 'object') {
                 result[key] = getValidatedObject(value, compare[key]);
-            } else if (compare[key] != null && (Array.isArray(value) && Array.isArray(compare[key])) && typeof value === typeof compare[key]) {
+            } else if (value != null && compare[key] != null && typeof value === typeof compare[key]) {
                 result[key] = value;
             }
         });

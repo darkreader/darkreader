@@ -8,47 +8,28 @@ import {DEFAULT_SETTINGS} from '../../../defaults';
 
 export default function ImportButton(props: ViewProps) {
 
-    function flatten(source: any) {
+    function getValidatedObject(source: any, compare: any) {
         const result = {};
-        (function flat(obj, stack) {
-            Object.keys(obj).forEach(function (k) {
-                const s = stack.concat([k]);
-                const v = obj[k];
-                if (v !== null && typeof v === 'object' && !Array.isArray(v)) {
-                    flat(v, s);
-                } else {
-                    result[s.join('.')] = v;
-                }
-            });
-        })(source, []);
+        Object.keys(source).forEach( (key) => {
+            const value: string = source[key];
+            if (value != null && typeof value === 'object' && !Array.isArray(value)) {
+                result[key] = getValidatedObject(value, compare[key]);
+            } else if (compare[key] != null && (Array.isArray(value) && Array.isArray(compare[key])) && typeof value === typeof compare[key]) {
+                result[key] = value;
+            }
+        });
         return result;
     }
-
-    function validate(source: any, compareObject: any) {
-        const result = {};
-        (function flat(obj, stack) {
-            Object.keys(obj).forEach(function (k) {
-                const s = stack.concat([k]);
-                const v = obj[k];
-                if (v !== null && typeof v === 'object' && !Array.isArray(v)) {
-                    flat(v, s);
-                } else {
-                    if (compareObject[s.join('.')] !== null && compareObject[s.join('.')] !== undefined) {
-                        result[k] = v;
-                    }
-                }
-            });
-        })(source, []);
-        return result;
-    }
+    
     function importSettings() {
-        openFile({extensions: ['json']}, function (result: string) {
+        openFile({extensions: ['json']}, (result: string) => {
             try {
                 const content: UserSettings = JSON.parse(result);
-                const result2 = validate(content, flatten(DEFAULT_SETTINGS));
+                const result2 = getValidatedObject(content, DEFAULT_SETTINGS);
                 props.actions.changeSettings({...result2});
             } catch (err) {
-                console.log(err);
+                //TODO Make overlay Error
+                console.error(err);
             }
         });
     }

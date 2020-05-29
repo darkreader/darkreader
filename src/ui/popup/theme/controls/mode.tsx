@@ -3,8 +3,19 @@ import ThemeEngines from '../../../../generators/theme-engines';
 import {getLocalMessage} from '../../../../utils/locales';
 import {DropDown} from '../../../controls';
 import ThemeControl from './theme-control';
+import {isFirefox} from '../../../../utils/platform';
 
 export default function Mode(props: {mode: string; onChange: (mode: string) => void}) {
+
+    function openCSSEditor() {
+        chrome.windows.create({
+            type: 'panel',
+            url: isFirefox() ? '../stylesheet-editor/index.html' : 'ui/stylesheet-editor/index.html',
+            width: 600,
+            height: 600,
+        });
+    }
+
     const modes = [
         [ThemeEngines.dynamicTheme, getLocalMessage('engine_dynamic')],
         [ThemeEngines.cssFilter, getLocalMessage('engine_filter')],
@@ -21,6 +32,13 @@ export default function Mode(props: {mode: string; onChange: (mode: string) => v
                     props.onChange(mode);
                 }}
             />
+            <span
+                class={{
+                    'static-edit-button_hidden': props.mode !== ThemeEngines.staticTheme,
+                    'static-edit-button': props.mode === ThemeEngines.staticTheme,
+                }}
+                onclick={openCSSEditor}
+            ></span>
         </ThemeControl>
     );
 }

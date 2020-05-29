@@ -1,0 +1,27 @@
+@import "../../../theme";
+
+.static-edit-button {
+    background-color: @color-heading;
+    border-radius: @size-text-small-height / 2;
+    color: @color-control-fore;
+    cursor: pointer;
+    font-size: @size-text-small;
+    line-height: @size-text-small-height;
+    left: 35%;
+    min-width: @size-text-small-height;
+    position: absolute;
+    text-align: center;
+
+    &_hidden {
+        display: none;
+    }
+
+    &::before {
+        content: "✎";
+        line-height: @size-text-small-height;
+    }
+
+    &:hover {
+        box-shadow: 0 0 @indent-large @color-control-fore;
+    }
+}

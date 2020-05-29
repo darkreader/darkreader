@@ -8,18 +8,18 @@ import {DEFAULT_SETTINGS} from '../../../defaults';
 
 export default function ImportButton(props: ViewProps) {
 
-    function getValidatedObject<T>(source: any, compare: T): Partial<T>  {
+    function getValidatedObject<T>(source: any, compare: T): Partial<T> {
         const result = {};
-        if (source == null || typeof source !== 'object' || Array.isArray(source)) { 
-            return null; 
+        if (source == null || typeof source !== 'object' || Array.isArray(source)) {
+            return null;
         }
-        Object.keys(source).forEach( (key) => {
+        Object.keys(source).forEach((key) => {
             const value = source[key];
             if (value == null || compare[key] == null) {
                 return;
             }
-            const array1 = Array.isArray(value)
-            const array2 = Array.isArray(compare[key])
+            const array1 = Array.isArray(value);
+            const array2 = Array.isArray(compare[key]);
             if (array1 || array2) {
                 if (array1 && array2) {
                     result[key] = value;
@@ -32,7 +32,7 @@ export default function ImportButton(props: ViewProps) {
         });
         return result;
     }
-    
+
     function importSettings() {
         openFile({extensions: ['json']}, (result: string) => {
             try {
@@ -40,7 +40,7 @@ export default function ImportButton(props: ViewProps) {
                 const result2 = getValidatedObject(content, DEFAULT_SETTINGS);
                 props.actions.changeSettings({...result2});
             } catch (err) {
-                //TODO Make overlay Error
+                // TODO Make overlay Error
                 console.error(err);
             }
         });

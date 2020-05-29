@@ -24,21 +24,23 @@ export default function Mode(props: {mode: string; onChange: (mode: string) => v
     ];
     return (
         <ThemeControl label="Mode">
-            <DropDown
-                selected={modes.find((m) => m[0] === props.mode)[1]}
-                values={modes.map((m) => m[1])}
-                onChange={(v) => {
-                    const mode = modes.find((m) => m[1] === v)[0];
-                    props.onChange(mode);
-                }}
-            />
-            <span
-                class={{
-                    'static-edit-button_hidden': props.mode !== ThemeEngines.staticTheme,
-                    'static-edit-button': props.mode === ThemeEngines.staticTheme,
-                }}
-                onclick={openCSSEditor}
-            ></span>
+            <div class="mode-control-container">
+                <DropDown
+                    selected={modes.find((m) => m[0] === props.mode)[1]}
+                    values={modes.map((m) => m[1])}
+                    onChange={(v) => {
+                        const mode = modes.find((m) => m[1] === v)[0];
+                        props.onChange(mode);
+                    }}
+                />
+                <span
+                    class={{
+                        'static-edit-button': true,
+                        'static-edit-button_hidden': props.mode !== ThemeEngines.staticTheme,
+                    }}
+                    onclick={openCSSEditor}
+                />
+            </div>
         </ThemeControl>
     );
 }

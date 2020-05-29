@@ -7,10 +7,11 @@
     cursor: pointer;
     font-size: @size-text-small;
     line-height: @size-text-small-height;
-    left: 35%;
+    left: 0.25rem;
     min-width: @size-text-small-height;
     position: absolute;
     text-align: center;
+    top: 0.25rem
 
     &_hidden {
         display: none;
@@ -24,4 +25,9 @@
     &:hover {
         box-shadow: 0 0 @indent-large @color-control-fore;
     }
+}
+
+.mode-control-container {
+    position: relative;
+    width: 100%
 }

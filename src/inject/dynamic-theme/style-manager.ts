@@ -19,6 +19,12 @@ declare global {
     interface SVGStyleElement {
         sheet: CSSStyleSheet;
     }
+    interface Document {
+        adoptedStyleSheets: ArrayLike<CSSStyleSheet>;
+    }
+    interface ShadowRoot {
+        adoptedStyleSheets: ArrayLike<CSSStyleSheet>;
+    }
 }
 
 export type StyleElement = HTMLLinkElement | HTMLStyleElement;

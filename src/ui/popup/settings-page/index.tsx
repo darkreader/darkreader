@@ -6,10 +6,11 @@ import DevToolsGroup from './devtools';
 import EnabledByDefaultGroup from './enabled-by-default';
 import HelpGroup from './help';
 import InvertPDF from './invert-pdf';
-import ResetButton from './reset-settings-button';
+import ManageSettingsButton from './mange-settings-button';
 
 type SettingsPageProps = ViewProps & {
     onAutomationNavClick: () => void;
+    onManageSettingsClick: () => void;
 };
 
 export default function SettingsPage(props: SettingsPageProps) {
@@ -19,7 +20,7 @@ export default function SettingsPage(props: SettingsPageProps) {
             {isFirefox() ? null : <InvertPDF {...props} />}
             <DevToolsGroup {...props} />
             <AutomationButton onClick={props.onAutomationNavClick} />
-            <ResetButton {...props} />
+            <ManageSettingsButton onClick={props.onManageSettingsClick} />
             <HelpGroup />
         </section>
     );

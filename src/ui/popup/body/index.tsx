@@ -10,6 +10,7 @@ import {Page, PageViewer} from '../page-viewer';
 import SettingsPage from '../settings-page';
 import ThemePage from '../theme/page';
 import {ViewProps} from '../types';
+import ManageSettingsPage from '../manage-settings-page';
 
 function Logo() {
     return (
@@ -27,7 +28,7 @@ function Logo() {
 function Pages(props: ViewProps) {
     const context = getContext();
     const store = context.store as {
-        activePage: 'main' | 'theme' | 'settings' | 'automation';
+        activePage: 'main' | 'theme' | 'settings' | 'automation' | 'manage-settings';
     };
     if (store.activePage == null) {
         store.activePage = 'main';
@@ -48,8 +49,13 @@ function Pages(props: ViewProps) {
         context.refresh();
     }
 
+    function onManageSettingsClick() {
+        store.activePage = 'manage-settings';
+        context.refresh();
+    }
+
     function onBackClick() {
-        if (store.activePage === 'automation') {
+        if (store.activePage === 'automation' || store.activePage === 'manage-settings') {
             store.activePage = 'settings';
         } else {
             store.activePage = 'main';
@@ -76,11 +82,16 @@ function Pages(props: ViewProps) {
                 <SettingsPage
                     {...props}
                     onAutomationNavClick={onAutomationNavClick}
+                    onManageSettingsClick={onManageSettingsClick}
                 />
             </Page>
             <Page id="automation">
                 <AutomationPage {...props} />
             </Page>
+            <Page id="manage-settings">
+                <ManageSettingsPage {...props} />
+            </Page>
+
         </PageViewer>
     );
 }

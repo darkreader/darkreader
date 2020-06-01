@@ -15,7 +15,7 @@ function isValidColor(color: string) {
     try {
         parse(color);
         return true;
-    } catch {
+    } catch (err) {
         return false;
     }
 }

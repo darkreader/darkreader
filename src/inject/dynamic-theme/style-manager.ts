@@ -290,10 +290,8 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
 
             let modRule: ModifiableCSSRule = null;
             if (modDecs.length > 0) {
-                modRule = {selector: rule.selectorText, declarations: modDecs};
-                if (rule.parentRule instanceof CSSMediaRule) {
-                    modRule.media = (rule.parentRule as CSSMediaRule).media.mediaText;
-                }
+                const parentRule = rule.parentRule;
+                modRule = {selector: rule.selectorText, declarations: modDecs, parentRule};
                 modRules.push(modRule);
             }
             rulesModCache.set(cssText, modRule);
@@ -314,9 +312,17 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
         renderId++;
         forceRestore = false;
 
-        interface ReadyDeclaration {
-            media: string;
+        interface ReadyGroup {
+            rule: any;
+            rules: (ReadyGroup | ReadyStyleRule)[];
+        }
+
+        interface ReadyStyleRule {
             selector: string;
+            declarations: ReadyDeclaration[];
+        }
+
+        interface ReadyDeclaration {
             property: string;
             value: string;
             important: boolean;
@@ -324,8 +330,8 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
             asyncKey?: number;
         }
 
-        function setRule(target: CSSStyleSheet | CSSGroupingRule, index: number, declarations: ReadyDeclaration[]) {
-            const {selector} = declarations[0];
+        function setRule(target: CSSStyleSheet | CSSGroupingRule, index: number, rule: ReadyStyleRule) {
+            const {selector, declarations} = rule;
             target.insertRule(`${selector} {}`, index);
             const style = (target.cssRules.item(index) as CSSStyleRule).style;
             declarations.forEach(({property, value, important, sourceValue}) => {
@@ -334,37 +340,40 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
         }
 
         interface AsyncRule {
-            declarations: ReadyDeclaration[];
+            rule: ReadyStyleRule;
             target: (CSSStyleSheet | CSSGroupingRule);
             index: number;
         }
 
-        const readyDeclarations: ReadyDeclaration[] = [];
         const asyncDeclarations = new Map<number, AsyncRule>();
         let asyncDeclarationCounter = 0;
 
         function buildStyleSheet() {
-            const groups: ReadyDeclaration[][][] = [];
-            readyDeclarations.forEach((decl, i) => {
-                let mediaGroup: ReadyDeclaration[][];
-                let selectorGroup: ReadyDeclaration[];
-                const prev = i === 0 ? null : readyDeclarations[i - 1];
-                const isSameMedia = prev && prev.media === decl.media;
-                const isSameMediaAndSelector = prev && isSameMedia && prev.selector === decl.selector;
-                if (isSameMedia) {
-                    mediaGroup = groups[groups.length - 1];
-                } else {
-                    mediaGroup = [];
-                    groups.push(mediaGroup);
+            function createTarget(group: ReadyGroup, parent: CSSStyleSheet | CSSGroupingRule): CSSStyleSheet | CSSGroupingRule {
+                const {rule} = group;
+                if (rule instanceof CSSMediaRule) {
+                    const {media} = rule;
+                    const index = parent.cssRules.length;
+                    parent.insertRule(`@media ${media} {}`, index);
+                    return parent.cssRules[index] as CSSMediaRule;
                 }
-                if (isSameMediaAndSelector) {
-                    selectorGroup = mediaGroup[mediaGroup.length - 1];
-                } else {
-                    selectorGroup = [];
-                    mediaGroup.push(selectorGroup);
-                }
-                selectorGroup.push(decl);
-            });
+                return parent;
+            }
+
+            function iterateReadyRules(
+                group: ReadyGroup,
+                target: CSSStyleSheet | CSSGroupingRule,
+                styleIterator: (s: ReadyStyleRule, t: CSSStyleSheet | CSSGroupingRule) => void,
+            ) {
+                group.rules.forEach((r) => {
+                    if (r.hasOwnProperty('rule')) {
+                        const t = createTarget(group, target);
+                        iterateReadyRules(r as ReadyGroup, t, styleIterator);
+                    } else {
+                        styleIterator(r as ReadyStyleRule, target);
+                    }
+                });
+            }
 
             if (!syncStyle) {
                 createSyncStyle();
@@ -387,22 +396,12 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
                 sheet.deleteRule(i);
             }
 
-            groups.forEach((mediaGroup) => {
-                const {media} = mediaGroup[0][0];
-                let target: CSSStyleSheet | CSSGroupingRule;
-                if (media) {
-                    sheet.insertRule(`@media ${media} {}`, sheet.cssRules.length);
-                    target = sheet.cssRules[sheet.cssRules.length - 1] as CSSMediaRule;
-                } else {
-                    target = sheet;
-                }
-                mediaGroup.forEach((selectorGroup) => {
-                    const asyncItems = selectorGroup.filter(({value}) => value == null);
-                    if (asyncItems.length > 0) {
-                        asyncItems.forEach(({asyncKey}) => asyncDeclarations.set(asyncKey, {declarations: selectorGroup, target, index: target.cssRules.length}));
-                    }
-                    setRule(target, target.cssRules.length, selectorGroup);
-                });
+            iterateReadyRules(rootReadyGroup, sheet, (rule, target) => {
+                const index = target.cssRules.length;
+                rule.declarations
+                    .filter(({value}) => value == null)
+                    .forEach(({asyncKey}) => asyncDeclarations.set(asyncKey, {rule, target, index}));
+                setRule(target, index, rule);
             });
 
             if (syncStylePositionWatcher) {
@@ -413,27 +412,47 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
         }
 
         function rebuildAsyncRule(key: number) {
-            const {declarations, target, index} = asyncDeclarations.get(key);
+            const {rule, target, index} = asyncDeclarations.get(key);
             target.deleteRule(index);
-            setRule(target, index, declarations);
+            setRule(target, index, rule);
             asyncDeclarations.delete(key);
         }
 
-        modRules.filter((r) => r).forEach(({selector, declarations, media}) => {
+        const rootReadyGroup: ReadyGroup = {rule: null, rules: []};
+        const parentGroupRefs = new WeakMap<CSSRule, ReadyGroup>();
+
+        modRules.filter((r) => r).forEach(({selector, declarations, parentRule}) => {
+            let group: ReadyGroup;
+            if (parentRule == null) {
+                group = rootReadyGroup;
+            } else if (parentGroupRefs.has(parentRule)) {
+                group = parentGroupRefs.get(parentRule);
+            } else {
+                group = {rule: parentRule, rules: []};
+                parentGroupRefs.set(parentRule, group);
+                const grandParent = (parentRule as CSSRule).parentRule;
+                const parentGroup = grandParent ? parentGroupRefs.get(grandParent) : rootReadyGroup;
+                parentGroup.rules.push(group);
+            }
+
+            const readyStyleRule: ReadyStyleRule = {selector, declarations: []};
+            const readyDeclarations = readyStyleRule.declarations;
+            group.rules.push(readyStyleRule);
+
             declarations.forEach(({property, value, important, sourceValue}) => {
                 if (typeof value === 'function') {
                     const modified = value(filter);
                     if (modified instanceof Promise) {
-                        const index = readyDeclarations.length;
                         const asyncKey = asyncDeclarationCounter++;
-                        readyDeclarations.push({media, selector, property, value: null, important, asyncKey, sourceValue});
+                        const asyncDeclaration: ReadyDeclaration = {property, value: null, important, asyncKey, sourceValue};
+                        readyDeclarations.push(asyncDeclaration);
                         const promise = modified;
                         const currentRenderId = renderId;
                         promise.then((asyncValue) => {
                             if (!asyncValue || cancelAsyncOperations || currentRenderId !== renderId) {
                                 return;
                             }
-                            readyDeclarations[index].value = asyncValue;
+                            asyncDeclaration.value = asyncValue;
                             asyncQueue.add(() => {
                                 if (cancelAsyncOperations || currentRenderId !== renderId) {
                                     return;
@@ -442,10 +461,10 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
                             });
                         });
                     } else {
-                        readyDeclarations.push({media, selector, property, value: modified, important, sourceValue});
+                        readyDeclarations.push({property, value: modified, important, sourceValue});
                     }
                 } else {
-                    readyDeclarations.push({media, selector, property, value, important, sourceValue});
+                    readyDeclarations.push({property, value, important, sourceValue});
                 }
             });
         });

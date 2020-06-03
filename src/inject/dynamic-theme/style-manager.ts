@@ -1,12 +1,11 @@
-import {iterateCSSRules, iterateCSSDeclarations, getCSSVariables, replaceCSSRelativeURLsWithAbsolute, removeCSSComments, replaceCSSFontFace, replaceCSSVariables, getCSSURLValue, cssImportRegex, getCSSBaseBath} from './css-rules';
-import {getModifiableCSSDeclaration, ModifiableCSSDeclaration, ModifiableCSSRule} from './modify-css';
+import {getCSSVariables, replaceCSSRelativeURLsWithAbsolute, removeCSSComments, replaceCSSFontFace, getCSSURLValue, cssImportRegex, getCSSBaseBath} from './css-rules';
 import {bgFetch} from './network';
 import {watchForNodePosition, removeNode, iterateShadowNodes} from '../utils/dom';
 import {logWarn} from '../utils/log';
-import {createAsyncTasksQueue} from '../utils/throttle';
 import {forEach} from '../../utils/array';
 import {getMatches} from '../../utils/text';
-import {FilterConfig} from '../../definitions';
+import {Theme} from '../../definitions';
+import {createStyleSheetModifier} from './stylesheet-modifier';
 import {getAbsoluteURL} from './url';
 
 declare global {
@@ -25,7 +24,7 @@ export type StyleElement = HTMLLinkElement | HTMLStyleElement;
 
 export interface StyleManager {
     details(): {variables: Map<string, string>};
-    render(filter: FilterConfig, variables: Map<string, string>): void;
+    render(theme: Theme, variables: Map<string, string>): void;
     pause(): void;
     destroy(): void;
     watch(): void;
@@ -65,8 +64,6 @@ export function getManageableStyles(node: Node, results = [] as StyleElement[]) 
     return results;
 }
 
-const asyncQueue = createAsyncTasksQueue();
-
 export function manageStyle(element: StyleElement, {update, loadingStart, loadingEnd}): StyleManager {
     const prevStyles: HTMLStyleElement[] = [];
     let next: Element = element;
@@ -81,9 +78,7 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
 
     let cancelAsyncOperations = false;
 
-    function isCancelled() {
-        return cancelAsyncOperations;
-    }
+    const sheetModifier = createStyleSheetModifier();
 
     const observer = new MutationObserver(() => {
         update();
@@ -220,152 +215,17 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
         return {variables};
     }
 
-    function getFilterKey(filter: FilterConfig) {
-        return ['mode', 'brightness', 'contrast', 'grayscale', 'sepia'].map((p) => `${p}:${filter[p]}`).join(';');
-    }
+    let forceRenderStyle = false;
 
-    let renderId = 0;
-    const rulesTextCache = new Map<string, string>();
-    const rulesModCache = new Map<string, ModifiableCSSRule>();
-    let prevFilterKey: string = null;
-    let forceRestore = false;
-
-    function render(filter: FilterConfig, variables: Map<string, string>) {
+    function render(theme: Theme, variables: Map<string, string>) {
         const rules = getRulesSync();
         if (!rules) {
             return;
         }
 
         cancelAsyncOperations = false;
-        let rulesChanged = (rulesModCache.size === 0);
-        const notFoundCacheKeys = new Set(rulesModCache.keys());
-        const filterKey = getFilterKey(filter);
-        const filterChanged = (filterKey !== prevFilterKey);
 
-        const modRules: ModifiableCSSRule[] = [];
-        iterateCSSRules(rules, (rule) => {
-            const cssText = rule.cssText;
-            let textDiffersFromPrev = false;
-
-            notFoundCacheKeys.delete(cssText);
-            if (!rulesTextCache.has(cssText)) {
-                rulesTextCache.set(cssText, cssText);
-                textDiffersFromPrev = true;
-            }
-
-            // Put CSS text with inserted CSS variables into separate <style> element
-            // to properly handle composite properties (e.g. background -> background-color)
-            let vars: HTMLStyleElement = null;
-            let varsRule: CSSStyleRule = null;
-            if (variables.size > 0 || cssText.includes('var(')) {
-                const cssTextWithVariables = replaceCSSVariables(cssText, variables);
-                if (rulesTextCache.get(cssText) !== cssTextWithVariables) {
-                    rulesTextCache.set(cssText, cssTextWithVariables);
-                    textDiffersFromPrev = true;
-                    vars = document.createElement('style');
-                    vars.classList.add('darkreader');
-                    vars.classList.add('darkreader--vars');
-                    vars.media = 'screen';
-                    vars.textContent = cssTextWithVariables;
-                    element.parentNode.insertBefore(vars, element.nextSibling);
-                    varsRule = (vars.sheet as CSSStyleSheet).cssRules[0] as CSSStyleRule;
-                }
-            }
-
-            if (textDiffersFromPrev) {
-                rulesChanged = true;
-            } else {
-                modRules.push(rulesModCache.get(cssText));
-                return;
-            }
-
-            const modDecs: ModifiableCSSDeclaration[] = [];
-            const targetRule = varsRule || rule;
-            targetRule && targetRule.style && iterateCSSDeclarations(targetRule.style, (property, value) => {
-                const mod = getModifiableCSSDeclaration(property, value, rule, isCancelled);
-                if (mod) {
-                    modDecs.push(mod);
-                }
-            });
-
-            let modRule: ModifiableCSSRule = null;
-            if (modDecs.length > 0) {
-                modRule = {selector: rule.selectorText, declarations: modDecs};
-                if (rule.parentRule instanceof CSSMediaRule) {
-                    modRule.media = (rule.parentRule as CSSMediaRule).media.mediaText;
-                }
-                modRules.push(modRule);
-            }
-            rulesModCache.set(cssText, modRule);
-
-            removeNode(vars);
-        });
-
-        notFoundCacheKeys.forEach((key) => {
-            rulesTextCache.delete(key);
-            rulesModCache.delete(key);
-        });
-        prevFilterKey = filterKey;
-
-        if (!forceRestore && !rulesChanged && !filterChanged) {
-            return;
-        }
-
-        renderId++;
-        forceRestore = false;
-
-        interface ReadyDeclaration {
-            media: string;
-            selector: string;
-            property: string;
-            value: string;
-            important: boolean;
-            sourceValue: string;
-            asyncKey?: number;
-        }
-
-        function setRule(target: CSSStyleSheet | CSSGroupingRule, index: number, declarations: ReadyDeclaration[]) {
-            const {selector} = declarations[0];
-            target.insertRule(`${selector} {}`, index);
-            const style = (target.cssRules.item(index) as CSSStyleRule).style;
-            declarations.forEach(({property, value, important, sourceValue}) => {
-                style.setProperty(property, value == null ? sourceValue : value, important ? 'important' : '');
-            });
-        }
-
-        interface AsyncRule {
-            declarations: ReadyDeclaration[];
-            target: (CSSStyleSheet | CSSGroupingRule);
-            index: number;
-        }
-
-        const readyDeclarations: ReadyDeclaration[] = [];
-        const asyncDeclarations = new Map<number, AsyncRule>();
-        let asyncDeclarationCounter = 0;
-
-        function buildStyleSheet() {
-            const groups: ReadyDeclaration[][][] = [];
-            readyDeclarations.forEach((decl, i) => {
-                let mediaGroup: ReadyDeclaration[][];
-                let selectorGroup: ReadyDeclaration[];
-                const prev = i === 0 ? null : readyDeclarations[i - 1];
-                const isSameMedia = prev && prev.media === decl.media;
-                const isSameMediaAndSelector = prev && isSameMedia && prev.selector === decl.selector;
-                if (isSameMedia) {
-                    mediaGroup = groups[groups.length - 1];
-                } else {
-                    mediaGroup = [];
-                    groups.push(mediaGroup);
-                }
-                if (isSameMediaAndSelector) {
-                    selectorGroup = mediaGroup[mediaGroup.length - 1];
-                } else {
-                    selectorGroup = [];
-                    mediaGroup.push(selectorGroup);
-                }
-                selectorGroup.push(decl);
-            });
-
+        function prepareOverridesSheet() {
             if (!syncStyle) {
                 createSyncStyle();
             }
@@ -387,74 +247,28 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
                 sheet.deleteRule(i);
             }
 
-            groups.forEach((mediaGroup) => {
-                const {media} = mediaGroup[0][0];
-                let target: CSSStyleSheet | CSSGroupingRule;
-                if (media) {
-                    sheet.insertRule(`@media ${media} {}`, sheet.cssRules.length);
-                    target = sheet.cssRules[sheet.cssRules.length - 1] as CSSMediaRule;
-                } else {
-                    target = sheet;
-                }
-                mediaGroup.forEach((selectorGroup) => {
-                    const asyncItems = selectorGroup.filter(({value}) => value == null);
-                    if (asyncItems.length > 0) {
-                        asyncItems.forEach(({asyncKey}) => asyncDeclarations.set(asyncKey, {declarations: selectorGroup, target, index: target.cssRules.length}));
-                    }
-                    setRule(target, target.cssRules.length, selectorGroup);
-                });
-            });
-
             if (syncStylePositionWatcher) {
                 syncStylePositionWatcher.run();
             } else {
-                syncStylePositionWatcher = watchForNodePosition(syncStyle, 'prev-sibling', buildStyleSheet);
+                syncStylePositionWatcher = watchForNodePosition(syncStyle, 'prev-sibling', buildOverrides);
             }
+
+            return syncStyle.sheet;
         }
 
-        function rebuildAsyncRule(key: number) {
-            const {declarations, target, index} = asyncDeclarations.get(key);
-            target.deleteRule(index);
-            setRule(target, index, declarations);
-            asyncDeclarations.delete(key);
-        }
-
-        modRules.filter((r) => r).forEach(({selector, declarations, media}) => {
-            declarations.forEach(({property, value, important, sourceValue}) => {
-                if (typeof value === 'function') {
-                    const modified = value(filter);
-                    if (modified instanceof Promise) {
-                        const index = readyDeclarations.length;
-                        const asyncKey = asyncDeclarationCounter++;
-                        readyDeclarations.push({media, selector, property, value: null, important, asyncKey, sourceValue});
-                        const promise = modified;
-                        const currentRenderId = renderId;
-                        promise.then((asyncValue) => {
-                            if (!asyncValue || cancelAsyncOperations || currentRenderId !== renderId) {
-                                return;
-                            }
-                            readyDeclarations[index].value = asyncValue;
-                            asyncQueue.add(() => {
-                                if (cancelAsyncOperations || currentRenderId !== renderId) {
-                                    return;
-                                }
-                                rebuildAsyncRule(asyncKey);
-                            });
-                        });
-                    } else {
-                        readyDeclarations.push({media, selector, property, value: modified, important, sourceValue});
-                    }
-                } else {
-                    readyDeclarations.push({media, selector, property, value, important, sourceValue});
-                }
+        function buildOverrides() {
+            sheetModifier.modifySheet({
+                prepareSheet: prepareOverridesSheet,
+                sourceCSSRules: rules,
+                theme,
+                variables,
+                force: forceRenderStyle,
+                isAsyncCancelled: () => cancelAsyncOperations,
             });
-        });
+        }
 
-        buildStyleSheet();
+        buildOverrides();
     }
-
-    let rulesChangeKey: number = null;
-    let rulesCheckFrameId: number = null;
 
     function getRulesOrError(): [CSSRuleList, Error] {
         try {
@@ -484,6 +298,9 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
         }
         return cssRules;
     }
+
+    let rulesChangeKey: number = null;
+    let rulesCheckFrameId: number = null;
 
     function updateRulesChangeKey() {
         const rules = safeGetSheetRules();
@@ -550,10 +367,10 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
         }
 
         logWarn('Restore style', syncStyle, element);
-        const shouldRestore = syncStyle.sheet == null || syncStyle.sheet.cssRules.length > 0;
+        const shouldForceRender = syncStyle.sheet == null || syncStyle.sheet.cssRules.length > 0;
         insertStyle();
-        if (shouldRestore) {
-            forceRestore = true;
+        if (shouldForceRender) {
+            forceRenderStyle = true;
             updateRulesChangeKey();
             update();
         }

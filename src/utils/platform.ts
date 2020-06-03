@@ -70,3 +70,12 @@ export function isDefinedSelectorSupported() {
         return false;
     }
 }
+
+export function isCSSStyleSheetConstructorSupported() {
+    try {
+        new CSSStyleSheet();
+        return true;
+    } catch (err) {
+        return false;
+    }
+}

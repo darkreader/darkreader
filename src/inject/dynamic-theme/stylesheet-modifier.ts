@@ -118,11 +118,13 @@ export function createStyleSheetModifier() {
         renderId++;
 
         interface ReadyGroup {
+            isGroup: true;
             rule: any;
             rules: (ReadyGroup | ReadyStyleRule)[];
         }
 
         interface ReadyStyleRule {
+            isGroup: false;
             selector: string;
             declarations: ReadyDeclaration[];
         }
@@ -153,7 +155,7 @@ export function createStyleSheetModifier() {
         const asyncDeclarations = new Map<number, AsyncRule>();
         let asyncDeclarationCounter = 0;
 
-        const rootReadyGroup: ReadyGroup = {rule: null, rules: []};
+        const rootReadyGroup: ReadyGroup = {rule: null, rules: [], isGroup: true};
         const parentGroupRefs = new WeakMap<CSSRule, ReadyGroup>();
 
         modRules.filter((r) => r).forEach(({selector, declarations, parentRule}) => {
@@ -163,14 +165,14 @@ export function createStyleSheetModifier() {
             } else if (parentGroupRefs.has(parentRule)) {
                 group = parentGroupRefs.get(parentRule);
             } else {
-                group = {rule: parentRule, rules: []};
+                group = {rule: parentRule, rules: [], isGroup: true};
                 parentGroupRefs.set(parentRule, group);
                 const grandParent = (parentRule as CSSRule).parentRule;
                 const parentGroup = grandParent ? parentGroupRefs.get(grandParent) : rootReadyGroup;
                 parentGroup.rules.push(group);
             }
 
-            const readyStyleRule: ReadyStyleRule = {selector, declarations: []};
+            const readyStyleRule: ReadyStyleRule = {selector, declarations: [], isGroup: false};
             const readyDeclarations = readyStyleRule.declarations;
             group.rules.push(readyStyleRule);
 
@@ -224,9 +226,9 @@ export function createStyleSheetModifier() {
                 styleIterator: (s: ReadyStyleRule, t: CSSStyleSheet | CSSGroupingRule) => void,
             ) {
                 group.rules.forEach((r) => {
-                    if (r.hasOwnProperty('rule')) {
-                        const t = createTarget(group, target);
-                        iterateReadyRules(r as ReadyGroup, t, styleIterator);
+                    if (r.isGroup) {
+                        const t = createTarget(r, target);
+                        iterateReadyRules(r, t, styleIterator);
                     } else {
                         styleIterator(r as ReadyStyleRule, target);
                     }

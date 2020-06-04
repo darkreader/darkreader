@@ -7,7 +7,7 @@ export default function ManageSettingsButton(props: {onClick: () => void}) {
         <ControlGroup>
             <ControlGroup.Control>
                 <NavButton onClick={props.onClick}>
-                    Manage Settings
+                    Manage settings
                 </NavButton>
             </ControlGroup.Control>
             <ControlGroup.Description>

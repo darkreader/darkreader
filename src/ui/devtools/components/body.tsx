@@ -4,22 +4,25 @@ import {Button} from '../../controls';
 import ThemeEngines from '../../../generators/theme-engines';
 import {DEVTOOLS_DOCS_URL} from '../../../utils/links';
 import {isFirefox} from '../../../utils/platform';
-import {ExtWrapper} from '../../../definitions';
+import {ExtWrapper, TabInfo} from '../../../definitions';
+import {isURLInList} from '../../../utils/url';
 
 type BodyProps = ExtWrapper;
 
-function Body({data, actions}: BodyProps) {
+function Body({data, tab, actions}: BodyProps & {tab: TabInfo}) {
     const {state, setState} = useState({errorText: null as string});
     let textNode: HTMLTextAreaElement;
     const previewButtonText = data.settings.previewNewDesign ? 'Switch to old design' : 'Preview new design';
-
-    const wrapper = (data.settings.theme.engine === ThemeEngines.staticTheme
+    const custom = data.settings.customThemes.find(({url: urlList}) => isURLInList(tab.url, urlList));
+    const filterConfig = custom ? custom.theme : data.settings.theme;
+    
+    const wrapper = (filterConfig.engine === ThemeEngines.staticTheme
         ? {
             header: 'Static Theme Editor',
             fixesText: data.devtools.staticThemesText,
             apply: (text) => actions.applyDevStaticThemes(text),
             reset: () => actions.resetDevStaticThemes(),
-        } : data.settings.theme.engine === ThemeEngines.cssFilter || data.settings.theme.engine === ThemeEngines.svgFilter ? {
+        } : filterConfig.engine === ThemeEngines.cssFilter || filterConfig.engine === ThemeEngines.svgFilter ? {
             header: 'Inversion Fix Editor',
             fixesText: data.devtools.filterFixesText,
             apply: (text) => actions.applyDevInversionFixes(text),

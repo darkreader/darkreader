@@ -2,6 +2,9 @@ import {forEach, push} from '../../utils/array';
 import {isDefinedSelectorSupported} from '../../utils/platform';
 import {iterateShadowNodes, createOptimizedTreeObserver, ElementsTreeOperations} from '../utils/dom';
 import {shouldManageStyle, getManageableStyles, StyleElement} from './style-manager';
+import {Theme} from '../../definitions';
+import {createAdoptedStyleSheetOverride} from './adopted-style-manger';
+import {DEFAULT_THEME} from '../../defaults';
 
 const observers = [] as {disconnect(): void}[];
 let observedRoots: WeakSet<Node>;
@@ -188,10 +191,16 @@ export function watchForStyleChanges(currentStyles: StyleElement[], update: (sty
     }
 
     function subscribeForShadowRootChanges(node: Element) {
-        if (node.shadowRoot == null || observedRoots.has(node.shadowRoot)) {
+        const shadowroot = node.shadowRoot;
+        if (shadowroot == null || observedRoots.has(shadowroot)) {
             return;
         }
-        observe(node.shadowRoot);
+        observe(shadowroot);
+        if (shadowroot.adoptedStyleSheets.length > 0) {
+            forEach(shadowroot.adoptedStyleSheets, (sheet) => {
+                createAdoptedStyleSheetOverride(sheet, DEFAULT_THEME);
+            });
+        }
     }
 
     observe(document);

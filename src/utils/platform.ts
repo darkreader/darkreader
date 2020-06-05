@@ -71,4 +71,4 @@ export function isDefinedSelectorSupported() {
     }
 }
 
-export const IS_SHADOW_DOM_SUPPORTED = typeof navigator !== 'undefined' && typeof ShadowRoot !== 'function';
+export const IS_SHADOW_DOM_SUPPORTED = typeof ShadowRoot !== 'function';

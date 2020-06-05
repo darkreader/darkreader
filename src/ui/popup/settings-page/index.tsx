@@ -4,7 +4,6 @@ import {ViewProps} from '../types';
 import AutomationButton from './automation-button';
 import DevToolsGroup from './devtools';
 import EnabledByDefaultGroup from './enabled-by-default';
-import HelpGroup from './help';
 import InvertPDF from './invert-pdf';
 import ManageSettingsButton from './mange-settings-button';
 
@@ -21,7 +20,6 @@ export default function SettingsPage(props: SettingsPageProps) {
             <DevToolsGroup {...props} />
             <AutomationButton onClick={props.onAutomationNavClick} />
             <ManageSettingsButton onClick={props.onManageSettingsClick} />
-            <HelpGroup />
         </section>
     );
 }

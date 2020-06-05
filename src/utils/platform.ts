@@ -71,6 +71,8 @@ export function isDefinedSelectorSupported() {
     }
 }
 
+export const IS_SHADOW_DOM_SUPPORTED = typeof ShadowRoot !== 'function';
+
 export function isCSSStyleSheetConstructorSupported() {
     try {
         new CSSStyleSheet();

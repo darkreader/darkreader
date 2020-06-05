@@ -124,7 +124,7 @@ function createDynamicStyleOverrides() {
 
     updateVariables(getElementCSSVariables(document.documentElement));
 
-    const allStyles = getManageableStyles(document);
+    const allStyles = getManageableStyles(document.documentElement);
 
     const newManagers = allStyles
         .filter((style) => !styleManagers.has(style))

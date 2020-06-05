@@ -19,7 +19,7 @@ export interface ModifiableCSSDeclaration {
 
 export interface ModifiableCSSRule {
     selector: string;
-    media?: string;
+    parentRule: any;
     declarations: ModifiableCSSDeclaration[];
 }
 

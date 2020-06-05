@@ -36,7 +36,7 @@ export default function Mode(props: {mode: string; onChange: (mode: string) => v
                 <span
                     class={{
                         'static-edit-button': true,
-                        'static-edit-button_hidden': props.mode !== ThemeEngines.staticTheme,
+                        'static-edit-button--hidden': props.mode !== ThemeEngines.staticTheme,
                     }}
                     onclick={openCSSEditor}
                 />

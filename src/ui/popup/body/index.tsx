@@ -111,7 +111,7 @@ function DonateGroup() {
     );
 }
 
-export default function MobileBody(props: ViewProps) {
+export default function Body(props: ViewProps) {
     const context = getContext();
     context.onCreate(() => {
         document.documentElement.classList.add('preview');

@@ -54,7 +54,7 @@ export default function ColorDropDown(props: ColorDropDownProps) {
     try {
         parse(props.value);
         isPickerVisible = true;
-    } catch {
+    } catch (err) {
         isPickerVisible = false;
     }
 

@@ -70,3 +70,14 @@ export function isDefinedSelectorSupported() {
         return false;
     }
 }
+
+export const IS_SHADOW_DOM_SUPPORTED = typeof ShadowRoot !== 'function';
+
+export function isCSSStyleSheetConstructorSupported() {
+    try {
+        new CSSStyleSheet();
+        return true;
+    } catch (err) {
+        return false;
+    }
+}

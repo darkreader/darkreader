@@ -3,6 +3,7 @@ import {iterateShadowNodes, createOptimizedTreeObserver} from '../utils/dom';
 import {iterateCSSDeclarations} from './css-rules';
 import {getModifiableCSSDeclaration} from './modify-css';
 import {FilterConfig} from '../../definitions';
+import {IS_SHADOW_DOM_SUPPORTED} from '../../utils/platform';
 
 interface Overrides {
     [cssProp: string]: {
@@ -108,7 +109,7 @@ function getInlineStyleElements(root: Node) {
     if (root instanceof Element && root.matches(INLINE_STYLE_SELECTOR)) {
         results.push(root);
     }
-    if (root instanceof Element || root instanceof ShadowRoot || root instanceof Document) {
+    if (root instanceof Element || (IS_SHADOW_DOM_SUPPORTED && root instanceof ShadowRoot) || root instanceof Document) {
         push(results, root.querySelectorAll(INLINE_STYLE_SELECTOR));
     }
     return results;

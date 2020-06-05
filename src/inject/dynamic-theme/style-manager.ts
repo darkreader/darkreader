@@ -8,6 +8,7 @@ import {forEach} from '../../utils/array';
 import {getMatches} from '../../utils/text';
 import {FilterConfig} from '../../definitions';
 import {getAbsoluteURL} from './url';
+import {IS_SHADOW_DOM_SUPPORTED} from '../../utils/platform';
 
 declare global {
     interface HTMLStyleElement {
@@ -55,7 +56,7 @@ export function shouldManageStyle(element: Node) {
 export function getManageableStyles(node: Node, results = [] as StyleElement[]) {
     if (shouldManageStyle(node)) {
         results.push(node as StyleElement);
-    } else if (node instanceof Element || node instanceof ShadowRoot || node === document) {
+    } else if (node instanceof Element || (IS_SHADOW_DOM_SUPPORTED && node instanceof ShadowRoot) || node === document) {
         forEach(
             (node as Element).querySelectorAll(STYLE_SELECTOR),
             (style: StyleElement) => getManageableStyles(style, results)

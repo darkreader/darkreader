@@ -32,7 +32,7 @@ A clear and concise description of what actual to happen.
 If applicable, add screenshots to help explain your problem.
 
 <!--
-Please add by `Browser:` your current browser AND version. 
+Please add by `Browser:` also your version of the browser. 
 If you don't know how to get your browser/darkreader version please search it up online.
 -->
 **System Information:**

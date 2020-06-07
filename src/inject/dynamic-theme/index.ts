@@ -1,7 +1,7 @@
 import {replaceCSSVariables, getElementCSSVariables} from './css-rules';
 import {overrideInlineStyle, getInlineOverrideStyle, watchForInlineStyles, stopWatchingForInlineStyles, INLINE_STYLE_SELECTOR} from './inline-style';
 import {changeMetaThemeColorWhenAvailable, restoreMetaThemeColor} from './meta-theme-color';
-import {getModifiedUserAgentStyle, getModifiedFallbackStyle, cleanModificationCache, parseColorWithCache} from './modify-css';
+import {getModifiedUserAgentStyle, getModifiedFallbackStyle, cleanModificationCache, parseColorWithCache, getSelectionColor} from './modify-css';
 import {manageStyle, getManageableStyles, StyleElement, StyleManager} from './style-manager';
 import {watchForStyleChanges, stopWatchingForStyleChanges} from './watch';
 import {forEach, push, toArray} from '../../utils/array';
@@ -101,7 +101,8 @@ function createShadowStaticStyleOverrides(root: ShadowRoot) {
 }
 
 function replaceCSSTemplates($cssText: string) {
-    return $cssText.replace(/\${(.+?)}/g, (m0, $color) => {
+    let newCSS = $cssText;
+    newCSS = newCSS.replace(/\${(.+?)}/g, ($color) => {
         try {
             const color = parseColorWithCache($color);
             return modifyColor(color, filter);
@@ -110,6 +111,18 @@ function replaceCSSTemplates($cssText: string) {
             return $color;
         }
     });
+    //Expose Dark Reader settings to be used as `variable` in CSS fixes.
+    const selectionColors = getSelectionColor(filter);
+    newCSS = newCSS.replace(/\&{(.+?)}/g, ($setting) => {
+        if ($setting === '&{selectionBackground}') {
+            return selectionColors[0];
+        } else if ($setting === '&{selectionForeground}') {
+            return selectionColors[1];
+        } else {
+            return $setting;
+        }
+    });
+    return newCSS;
 }
 
 function cleanFallbackStyle() {

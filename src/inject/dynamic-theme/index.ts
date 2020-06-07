@@ -14,10 +14,9 @@ import {getCSSFilterValue} from '../../generators/css-filter';
 import {modifyColor} from '../../generators/modify-colors';
 import {createTextStyle} from '../../generators/text-style';
 import {FilterConfig, DynamicThemeFix} from '../../definitions';
-import {createAdoptedStyleSheetOverride} from './adopted-style-manger';
+import {createAdoptedStyleSheetOverride, variables} from './adopted-style-manger';
 
 const styleManagers = new Map<StyleElement, StyleManager>();
-export const variables = new Map<string, string>();
 let filter: FilterConfig = null;
 let fixes: DynamicThemeFix = null;
 let isIFrame: boolean = null;
@@ -317,6 +316,11 @@ function watchForUpdates() {
             }
         }
     }, (root) => {
+        if (root.adoptedStyleSheets.length > 0) {
+            forEach(root.adoptedStyleSheets, (sheet) => {
+                createAdoptedStyleSheetOverride(sheet, filter);
+            });
+        }
         const inlineStyleElements = root.querySelectorAll(INLINE_STYLE_SELECTOR);
         if (inlineStyleElements.length > 0) {
             createShadowStaticStyleOverrides(root);

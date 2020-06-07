@@ -1,11 +1,13 @@
 import {Theme} from '../../definitions';
-import {getCSSVariables} from './css-rules';
 import {createStyleSheetModifier} from './stylesheet-modifier';
 
 const adoptedSheetOverride = new WeakMap<CSSStyleSheet, CSSStyleSheet>();
+export const variables = new Map<string, string>();
 
-export function createAdoptedStyleSheetOverride(sheet: CSSStyleSheet, theme: Theme): CSSStyleSheet {
+export function createAdoptedStyleSheetOverride(sheet: CSSStyleSheet, theme: Theme): void {
     if (adoptedSheetOverride.has(sheet)) {
+        const exisiting = document.adoptedStyleSheets as any;
+        document.adoptedStyleSheets = [...exisiting, adoptedSheetOverride.get(sheet)];
         return;
     }
     const rules = sheet.rules;
@@ -17,7 +19,6 @@ export function createAdoptedStyleSheetOverride(sheet: CSSStyleSheet, theme: The
         adoptedSheetOverride.set(sheet, override);
         return override;
     }
-    const variables = getCSSVariables(sheet.cssRules);
     const sheetModifier = createStyleSheetModifier();
     sheetModifier.modifySheet({
         prepareSheet: prepareOverridesSheet,

@@ -19,8 +19,8 @@ A clear and concise description of what the bug is.
 **Steps to reproduce**
 
 - Go to '...'
-- Click on '....'
-- Scroll down to '....'
+- Click on '...'
+- Scroll down to '...'
 
 **Expected behavior**
 

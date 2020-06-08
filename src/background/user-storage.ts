@@ -1,4 +1,4 @@
-import {DEFAULT_SETTINGS} from '../defaults';
+import {DEFAULT_SETTINGS, DEFAULT_THEME} from '../defaults';
 import {isURLMatched} from '../utils/url';
 import {UserSettings} from '../definitions';
 
@@ -109,6 +109,7 @@ export default class UserStorage {
         function migrateTheme(filterConfig_4_6_2: any) {
             const f = filterConfig_4_6_2;
             return {
+                ...DEFAULT_THEME,
                 mode: f.mode,
                 brightness: f.brightness,
                 contrast: f.contrast,
@@ -119,8 +120,6 @@ export default class UserStorage {
                 textStroke: f.textStroke,
                 engine: f.engine,
                 stylesheet: f.stylesheet,
-                scrollbarColor: f.scrollbarColor,
-                selectionColor: f.selectionColor,
             };
         }
 

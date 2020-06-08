@@ -13,6 +13,8 @@ export const DEFAULT_THEME: Theme = {
     textStroke: 0,
     engine: ThemeEngines.dynamicTheme,
     stylesheet: '',
+    backgroundColor: 'auto',
+    textColor: 'auto',
     scrollbarColor: isMacOS() ? '' : 'auto',
     selectionColor: 'auto',
 };

@@ -11,6 +11,8 @@ function getThemeKey(theme: Theme) {
         'contrast',
         'grayscale',
         'sepia',
+        'backgroundColor',
+        'textColor',
     ].map((p) => `${p}:${theme[p]}`).join(';');
 }
 

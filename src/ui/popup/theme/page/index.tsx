@@ -2,7 +2,7 @@ import {m} from 'malevic';
 import {DEFAULT_SETTINGS} from '../../../../defaults';
 import {Theme} from '../../../../definitions';
 import {ViewProps} from '../../types';
-import {Brightness, Contrast, Grayscale, Mode, ResetButton, Scheme, Scrollbar, SelectionColorEditor, Sepia} from '../controls';
+import {BackgroundColor, Brightness, Contrast, Grayscale, Mode, ResetButton, Scheme, Scrollbar, SelectionColorEditor, Sepia, TextColor} from '../controls';
 import ThemePresetPicker from '../preset-picker';
 import {getCurrentThemePreset} from '../utils';
 import Collapsible from './collapsible-panel';
@@ -46,6 +46,16 @@ function MainGroup({theme, change}: ThemeGroupProps) {
 function ColorsGroup({theme, change}: ThemeGroupProps) {
     return (
         <Array>
+            <BackgroundColor
+                value={theme.backgroundColor}
+                onChange={(v) => change({backgroundColor: v})}
+                onReset={() => change({backgroundColor: DEFAULT_SETTINGS.theme.backgroundColor})}
+            />
+            <TextColor
+                value={theme.textColor}
+                onChange={(v) => change({textColor: v})}
+                onReset={() => change({textColor: DEFAULT_SETTINGS.theme.textColor})}
+            />
             <Scrollbar
                 value={theme.scrollbarColor}
                 onChange={(v) => change({scrollbarColor: v})}

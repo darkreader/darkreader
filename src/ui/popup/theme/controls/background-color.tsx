@@ -6,6 +6,7 @@ type BgColorValue = 'auto' | string;
 
 interface BgColorEditorProps {
     value: BgColorValue;
+    defaultColor: string;
     onChange: (value: BgColorValue) => void;
     onReset: () => void;
 }
@@ -15,7 +16,7 @@ export default function BackgroundColorEditor(props: BgColorEditorProps) {
         <ThemeControl label="Background">
             <ColorDropDown
                 value={props.value}
-                colorSuggestion="#181a1b"
+                colorSuggestion={props.defaultColor}
                 onChange={props.onChange}
                 onReset={props.onReset}
                 hasAutoOption

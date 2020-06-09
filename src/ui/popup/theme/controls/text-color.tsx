@@ -6,6 +6,7 @@ type TextColorValue = 'auto' | string;
 
 interface TextColorEditorProps {
     value: TextColorValue;
+    defaultColor: string;
     onChange: (value: TextColorValue) => void;
     onReset: () => void;
 }
@@ -15,7 +16,7 @@ export default function TextColorEditor(props: TextColorEditorProps) {
         <ThemeControl label="Text">
             <ColorDropDown
                 value={props.value}
-                colorSuggestion="#e8e6e3"
+                colorSuggestion={props.defaultColor}
                 onChange={props.onChange}
                 onReset={props.onReset}
                 hasAutoOption

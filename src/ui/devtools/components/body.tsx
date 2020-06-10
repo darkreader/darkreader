@@ -3,7 +3,7 @@ import {withState, useState} from 'malevic/state';
 import {Button} from '../../controls';
 import ThemeEngines from '../../../generators/theme-engines';
 import {DEVTOOLS_DOCS_URL} from '../../../utils/links';
-import {isFirefox, isMobile} from '../../../utils/platform';
+import {isFirefox} from '../../../utils/platform';
 import {ExtWrapper} from '../../../definitions';
 
 type BodyProps = ExtWrapper;
@@ -12,9 +12,7 @@ function Body({data, actions}: BodyProps) {
     const {state, setState} = useState({errorText: null as string});
     let textNode: HTMLTextAreaElement;
     const previewButtonText = data.settings.previewNewDesign ? 'Switch to old design' : 'Preview new design';
-    if (isMobile()) {
-        document.body.classList.toggle('mobile', true);
-    }
+
     const wrapper = (data.settings.theme.engine === ThemeEngines.staticTheme
         ? {
             header: 'Static Theme Editor',
@@ -80,18 +78,8 @@ function Body({data, actions}: BodyProps) {
         actions.changeSettings({previewNewDesign: !data.settings.previewNewDesign});
     }
 
-    function fullScreen() {
-        document.body.addEventListener('click',(e) => {
-            if (isMobile()) {
-                document.body.requestFullscreen();
-            }
-        });
-    }
-
     return (
-        <body
-            onrender={fullScreen}
-            >
+        <body>
             <header>
                 <img id="logo" src="../assets/images/darkreader-type.svg" alt="Dark Reader" />
                 <h1 id="title">Developer Tools</h1>

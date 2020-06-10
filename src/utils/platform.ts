@@ -38,6 +38,9 @@ export function isMacOS() {
 }
 
 export function isMobile() {
+    if (typeof navigator === 'undefined') {
+        return null;
+    }
     const agent = navigator.userAgent.toLowerCase();
     return agent.includes('mobile');
 }

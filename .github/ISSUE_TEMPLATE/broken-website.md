@@ -31,15 +31,15 @@ A clear and concise description of what happened.
 **Screenshots**
 If applicable, add screenshots to help explain your problem.
 
-**System info:**
- - OS: [e.g. Windows, MacOS, Linux]
- - Browser: [e.g. chrome, safari]
- - Darkreader Version: [e.g. 4.9.9]
- 
 <!--
 Please add a version of the browser you are using. 
 If you don't know how to get your browser/darkreader version please search it up online.
 -->
 
+**System info:**
+ - OS: [e.g. Windows, MacOS, Linux]
+ - Browser: [e.g. chrome, safari]
+ - Darkreader Version: [e.g. 4.9.9]
+ 
 **Additional context**
 Add any other context about the problem here.

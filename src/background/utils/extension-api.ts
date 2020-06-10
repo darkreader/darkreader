@@ -1,4 +1,4 @@
-import {isFirefox, isEdge} from '../../utils/platform';
+import {isFirefox, isEdge, isLinux} from '../../utils/platform';
 import {isPDF} from '../../utils/url';
 
 declare const browser: {
@@ -28,6 +28,7 @@ export function canInjectScript(url: string) {
     return (url
         && !url.startsWith('chrome')
         && !url.startsWith('https://chrome.google.com/webstore')
+        && (!isLinux() && !url.startsWith('https://extensions.gnome.org'))
     );
 }
 

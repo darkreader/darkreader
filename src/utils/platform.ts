@@ -37,6 +37,13 @@ export function isMacOS() {
     return navigator.platform.toLowerCase().startsWith('mac');
 }
 
+export function isLinux() {
+    if (typeof navigator === 'undefined') {
+        return null;
+    }
+    return navigator.platform.toLowerCase().startsWith('linux');
+}
+
 export function isMobile() {
     if (typeof navigator === 'undefined') {
         return null;

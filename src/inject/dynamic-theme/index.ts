@@ -14,8 +14,9 @@ import {getCSSFilterValue} from '../../generators/css-filter';
 import {modifyColor} from '../../generators/modify-colors';
 import {createTextStyle} from '../../generators/text-style';
 import {FilterConfig, DynamicThemeFix} from '../../definitions';
-import {createAdoptedStyleSheetOverride, variables} from './adopted-style-manger';
+import {createAdoptedStyleSheetOverride} from './adopted-style-manger';
 
+export const variables = new Map<string, string>();
 const styleManagers = new Map<StyleElement, StyleManager>();
 let filter: FilterConfig = null;
 let fixes: DynamicThemeFix = null;
@@ -158,10 +159,9 @@ function createDynamicStyleOverrides() {
     });
     const ignoredSelectors = fixes && Array.isArray(fixes.ignoreInlineStyle) ? fixes.ignoreInlineStyle : [];
     inlineStyleElements.forEach((el) => overrideInlineStyle(el as HTMLElement, filter, ignoredSelectors));
-    
-    forEach(document.adoptedStyleSheets, (sheet) => {
-        createAdoptedStyleSheetOverride(sheet, filter);
-    });
+    if (document.adoptedStyleSheets.length > 0) {
+        createAdoptedStyleSheetOverride(document, filter, variables);
+    }
 }
 
 let loadingStylesCounter = 0;
@@ -317,9 +317,7 @@ function watchForUpdates() {
         }
     }, (root) => {
         if (root.adoptedStyleSheets.length > 0) {
-            forEach(root.adoptedStyleSheets, (sheet) => {
-                createAdoptedStyleSheetOverride(sheet, filter);
-            });
+            createAdoptedStyleSheetOverride(root, filter, variables);
         }
         const inlineStyleElements = root.querySelectorAll(INLINE_STYLE_SELECTOR);
         if (inlineStyleElements.length > 0) {

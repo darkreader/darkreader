@@ -4,14 +4,20 @@ import {createAsyncTasksQueue} from '../utils/throttle';
 import {iterateCSSRules, iterateCSSDeclarations, replaceCSSVariables} from './css-rules';
 import {getModifiableCSSDeclaration, ModifiableCSSDeclaration, ModifiableCSSRule} from './modify-css';
 
+const themeCacheKeys: (keyof Theme)[] = [
+    'mode',
+    'brightness',
+    'contrast',
+    'grayscale',
+    'sepia',
+    'darkSchemeBackgroundColor',
+    'darkSchemeTextColor',
+    'lightSchemeBackgroundColor',
+    'lightSchemeTextColor',
+];
+
 function getThemeKey(theme: Theme) {
-    return [
-        'mode',
-        'brightness',
-        'contrast',
-        'grayscale',
-        'sepia',
-    ].map((p) => `${p}:${theme[p]}`).join(';');
+    return themeCacheKeys.map((p) => `${p}:${theme[p]}`).join(';');
 }
 
 function getTempCSSStyleSheet(): {sheet: CSSStyleSheet; remove: () => void} {

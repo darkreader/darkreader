@@ -8,8 +8,8 @@ interface ColorDropDownProps {
     class?: string;
     value: string;
     colorSuggestion: string;
-    hasDefaultOption: boolean;
-    hasAutoOption: boolean;
+    hasDefaultOption?: boolean;
+    hasAutoOption?: boolean;
     onChange: (value: string) => void;
     onReset: () => void;
 }

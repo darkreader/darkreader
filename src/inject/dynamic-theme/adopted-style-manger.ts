@@ -4,7 +4,7 @@ import {forEach} from '../../utils/array';
 
 const adoptedSheetOverride = new WeakMap<CSSStyleSheet, CSSStyleSheet>();
 
-export function createAdoptedStyleSheetOverride(node: Document | ShadowRoot, theme: Theme, variables): void {
+export function createAdoptedStyleSheetOverride(node: Document | ShadowRoot, theme: Theme, variables: Map<string, string>): void {
     forEach(node.adoptedStyleSheets, (sheet) => {
 
         if (adoptedSheetOverride.has(sheet)) {

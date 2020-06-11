@@ -1,4 +1,4 @@
-import {replaceCSSVariables, getElementCSSVariables} from './css-rules';
+import {replaceCSSVariables, getElementCSSVariables, getCSSVariables} from './css-rules';
 import {overrideInlineStyle, getInlineOverrideStyle, watchForInlineStyles, stopWatchingForInlineStyles, INLINE_STYLE_SELECTOR} from './inline-style';
 import {changeMetaThemeColorWhenAvailable, restoreMetaThemeColor} from './meta-theme-color';
 import {getModifiedUserAgentStyle, getModifiedFallbackStyle, cleanModificationCache, parseColorWithCache} from './modify-css';
@@ -159,9 +159,7 @@ function createDynamicStyleOverrides() {
     });
     const ignoredSelectors = fixes && Array.isArray(fixes.ignoreInlineStyle) ? fixes.ignoreInlineStyle : [];
     inlineStyleElements.forEach((el) => overrideInlineStyle(el as HTMLElement, filter, ignoredSelectors));
-    if (document.adoptedStyleSheets.length > 0) {
-        createAdoptedStyleSheetOverride(document, filter, variables);
-    }
+    handleAdoptedStyleSheets(document);
 }
 
 let loadingStylesCounter = 0;
@@ -280,6 +278,12 @@ function createThemeAndWatchForUpdates() {
     changeMetaThemeColorWhenAvailable(filter);
 }
 
+function handleAdoptedStyleSheets(node: ShadowRoot | Document) {
+    if (node.adoptedStyleSheets.length > 0) {
+        createAdoptedStyleSheetOverride(node, filter, variables);
+    }
+}
+
 function watchForUpdates() {
     const managedStyles = Array.from(styleManagers.keys());
     watchForStyleChanges(managedStyles, ({created, updated, removed, moved}) => {
@@ -303,6 +307,13 @@ function watchForUpdates() {
         }
         newManagers.forEach((manager) => manager.watch());
         stylesToRestore.forEach((style) => styleManagers.get(style).restore());
+    }, (shadowroot) => {
+        const shadowRootVariable = new Map<string, string>();
+        forEach(shadowroot.adoptedStyleSheets, (stylesheet) => {
+            getCSSVariables(stylesheet.cssRules).forEach((value, key) => shadowRootVariable.set(key, value));
+        });
+        updateVariables(shadowRootVariable);
+        handleAdoptedStyleSheets(shadowroot);
     });
 
     const ignoredSelectors = fixes && Array.isArray(fixes.ignoreInlineStyle) ? fixes.ignoreInlineStyle : [];
@@ -316,9 +327,6 @@ function watchForUpdates() {
             }
         }
     }, (root) => {
-        if (root.adoptedStyleSheets.length > 0) {
-            createAdoptedStyleSheetOverride(root, filter, variables);
-        }
         const inlineStyleElements = root.querySelectorAll(INLINE_STYLE_SELECTOR);
         if (inlineStyleElements.length > 0) {
             createShadowStaticStyleOverrides(root);

@@ -68,7 +68,7 @@ function unsubscribeFromDefineCustomElements() {
     undefinedGroups.clear();
 }
 
-export function watchForStyleChanges(currentStyles: StyleElement[], update: (styles: ChangedStyles) => void) {
+export function watchForStyleChanges(currentStyles: StyleElement[], update: (styles: ChangedStyles) => void, shadowRootDiscovered: (root: ShadowRoot) => void) {
     stopWatchingForStyleChanges();
 
     const prevStyles = new Set<StyleElement>(currentStyles);
@@ -193,6 +193,7 @@ export function watchForStyleChanges(currentStyles: StyleElement[], update: (sty
             return;
         }
         observe(shadowroot);
+        shadowRootDiscovered(shadowroot);
     }
 
     observe(document);

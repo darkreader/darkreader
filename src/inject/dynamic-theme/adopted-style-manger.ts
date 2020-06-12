@@ -7,10 +7,11 @@ const adoptedSheetOverride = new WeakMap<CSSStyleSheet, CSSStyleSheet>();
 export function createAdoptedStyleSheetOverride(node: Document | ShadowRoot, theme: Theme, variables: Map<string, string>): void {
     let index = 0;
     forEach(node.adoptedStyleSheets, (sheet) => {
-        const currentIndex = index;
+        const currentIndex = index+1;
         if (adoptedSheetOverride.has(sheet)) {
-            const exisiting = node.adoptedStyleSheets as any;
-            node.adoptedStyleSheets = [...exisiting, adoptedSheetOverride.get(sheet)];
+            const newFrozenArray = [...node.adoptedStyleSheets as any]
+            newFrozenArray.splice(currentIndex, 0, adoptedSheetOverride.get(sheet));
+            node.adoptedStyleSheets = newFrozenArray;
             index++;
             return;
         }
@@ -18,8 +19,9 @@ export function createAdoptedStyleSheetOverride(node: Document | ShadowRoot, the
         const override = new CSSStyleSheet();
 
         function prepareOverridesSheet() {
-            const exisiting = node.adoptedStyleSheets as any;
-            node.adoptedStyleSheets = [...exisiting, override];
+            const newFrozenArray = [...node.adoptedStyleSheets as any]
+            newFrozenArray.splice(currentIndex, 0, override);
+            node.adoptedStyleSheets = newFrozenArray
             adoptedSheetOverride.set(sheet, override);
             return override;
         }

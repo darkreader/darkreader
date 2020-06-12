@@ -3,26 +3,33 @@ import {createStyleSheetModifier} from './stylesheet-modifier';
 import {forEach} from '../../utils/array';
 
 const adoptedSheetOverride = new WeakMap<CSSStyleSheet, CSSStyleSheet>();
+const overrides = [];
+
+function insertOverride(sheet: Array<CSSStyleSheet>, override: CSSStyleSheet, original: CSSStyleSheet) {
+    const index = sheet.indexOf(original);
+    if (sheet.includes(override)) {
+        sheet.splice(sheet.indexOf(override), 1);
+    }
+    sheet.splice(index + 1, 0, override);
+    return sheet;
+}
 
 export function createAdoptedStyleSheetOverride(node: Document | ShadowRoot, theme: Theme, variables: Map<string, string>): void {
-    let index = 0;
     forEach(node.adoptedStyleSheets, (sheet) => {
-        const currentIndex = index+1;
+        if (overrides.includes(sheet)) {
+            return;
+        }
         if (adoptedSheetOverride.has(sheet)) {
-            const newFrozenArray = [...node.adoptedStyleSheets as any]
-            newFrozenArray.splice(currentIndex, 0, adoptedSheetOverride.get(sheet));
-            node.adoptedStyleSheets = newFrozenArray;
-            index++;
+            node.adoptedStyleSheets = insertOverride([...node.adoptedStyleSheets as any], adoptedSheetOverride.get(sheet), sheet);
             return;
         }
         const rules = sheet.rules;
         const override = new CSSStyleSheet();
 
         function prepareOverridesSheet() {
-            const newFrozenArray = [...node.adoptedStyleSheets as any]
-            newFrozenArray.splice(currentIndex, 0, override);
-            node.adoptedStyleSheets = newFrozenArray
+            node.adoptedStyleSheets = insertOverride([...node.adoptedStyleSheets as any], override, sheet);
             adoptedSheetOverride.set(sheet, override);
+            overrides.push(override);
             return override;
         }
 
@@ -35,6 +42,5 @@ export function createAdoptedStyleSheetOverride(node: Document | ShadowRoot, the
             force: false,
             isAsyncCancelled: () => false,
         });
-        index++;
-    })
+    });
 }

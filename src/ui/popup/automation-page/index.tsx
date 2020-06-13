@@ -65,10 +65,6 @@ export default function AutomationPage(props: ViewProps) {
         });
     }
 
-    function changeBehaviour(selected: "OnOff" | "Scheme") {
-        props.actions.changeSettings({automationBehaviour: selected});
-    }
-
     return (
         <div
             class={'automation-page'}
@@ -141,7 +137,7 @@ export default function AutomationPage(props: ViewProps) {
                 {getLocalMessage('system_dark_mode_description')}
             </p>
             <DropDown 
-                onChange={(selected: "OnOff" | "Scheme") => changeBehaviour(selected)}
+                onChange={(selected: any) => props.actions.changeSettings({automationBehaviour: selected})}
                 selected={props.data.settings.automationBehaviour}
                 values={behaviourValues}
             />

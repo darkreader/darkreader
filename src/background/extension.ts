@@ -79,10 +79,12 @@ export class Extension {
             } else {
                 if (value) {
                     //Dark
-                    this.setTheme({mode: 1});
+                    this.user.set({theme: {...this.user.settings.theme, ...{mode: 1}}});
+                    return this.user.settings.enabled;
                 } else {
                     //Light
-                    this.setTheme({mode: 0});
+                    this.user.set({theme: {...this.user.settings.theme, ...{mode: 0}}});
+                    return this.user.settings.enabled;
                 }
             }
         } else {

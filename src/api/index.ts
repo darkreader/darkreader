@@ -18,9 +18,11 @@ export function enable(themeOptions: Partial<Theme> = {}, fixes: DynamicThemeFix
     const theme = {...DEFAULT_THEME, ...themeOptions};
 
     if (theme.engine !== ThemeEngines.dynamicTheme) {
-        throw new Error('Theme engine is not supported');
+        throw new Error('Theme engine is not supported.');
     }
-
+    if (document.head.firstElementChild.className === 'darkreader darkreader--fallback') {
+        throw new Error('Dark Reader extension supported.');
+    }
     createOrUpdateDynamicTheme(theme, fixes, isIFrame);
 }
 

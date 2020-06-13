@@ -114,6 +114,10 @@ export function isPDF(url: string) {
             url = url.substring(0, url.lastIndexOf('#'));
         }
         if (url.endsWith('.pdf')) {
+            // Wikipedia PDF's
+            if (url.includes('File:')) {
+                return false;
+            }
             for (let i = url.length; 0 < i; i--) {
                 if (url[i] === '=') {
                     return false;

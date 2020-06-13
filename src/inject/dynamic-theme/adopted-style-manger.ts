@@ -3,7 +3,7 @@ import {createStyleSheetModifier} from './stylesheet-modifier';
 import {forEach} from '../../utils/array';
 
 let adoptedSheetOverride = new WeakMap<CSSStyleSheet, CSSStyleSheet>();
-let nodes = [] as Array<ShadowRoot | Document>
+let nodes = [] as Array<ShadowRoot | Document>;
 let overrides = new WeakSet<CSSStyleSheet>();
 
 export function removeAdoptedStyleSheets() {
@@ -23,7 +23,7 @@ export function removeAdoptedStyleSheets() {
 }
 function cleanAdoptedStyleSheets() {
     adoptedSheetOverride = new WeakMap<CSSStyleSheet, CSSStyleSheet>();
-    nodes = []
+    nodes = [];
     overrides = new WeakSet<CSSStyleSheet>();
 }
 

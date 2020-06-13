@@ -20,10 +20,10 @@ declare global {
         sheet: CSSStyleSheet;
     }
     interface Document {
-        adoptedStyleSheets: ArrayLike<CSSStyleSheet>;
+        adoptedStyleSheets: Array<CSSStyleSheet>;
     }
     interface ShadowRoot {
-        adoptedStyleSheets: ArrayLike<CSSStyleSheet>;
+        adoptedStyleSheets: Array<CSSStyleSheet>;
     }
 }
 

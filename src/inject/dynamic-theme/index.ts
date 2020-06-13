@@ -14,7 +14,7 @@ import {getCSSFilterValue} from '../../generators/css-filter';
 import {modifyColor} from '../../generators/modify-colors';
 import {createTextStyle} from '../../generators/text-style';
 import {FilterConfig, DynamicThemeFix} from '../../definitions';
-import {createAdoptedStyleSheetOverride} from './adopted-style-manger';
+import {createAdoptedStyleSheetOverride, removeAdoptedStyleSheets} from './adopted-style-manger';
 
 export const variables = new Map<string, string>();
 const styleManagers = new Map<StyleElement, StyleManager>();
@@ -385,6 +385,7 @@ export function removeDynamicTheme() {
     shadowRootsWithOverrides.clear();
     forEach(styleManagers.keys(), (el) => removeManager(el));
     forEach(document.querySelectorAll('.darkreader'), removeNode);
+    removeAdoptedStyleSheets();
 }
 
 export function cleanDynamicThemeCache() {

@@ -2,35 +2,60 @@ import {Theme} from '../../definitions';
 import {createStyleSheetModifier} from './stylesheet-modifier';
 import {forEach} from '../../utils/array';
 
-const adoptedSheetOverride = new WeakMap<CSSStyleSheet, CSSStyleSheet>();
-const overrides = [];
+let adoptedSheetOverride = new WeakMap<CSSStyleSheet, CSSStyleSheet>();
+let nodes = Array<ShadowRoot | Document>();
+let overrides = new WeakSet<CSSStyleSheet>();
 
-function insertOverride(sheet: Array<CSSStyleSheet>, override: CSSStyleSheet, original: CSSStyleSheet) {
-    const index = sheet.indexOf(original);
-    if (sheet.includes(override)) {
-        sheet.splice(sheet.indexOf(override), 1);
-    }
-    sheet.splice(index + 1, 0, override);
-    return sheet;
+export function removeAdoptedStyleSheets() {
+    forEach(nodes, (node) => {
+        forEach(node.adoptedStyleSheets, (adoptedStyleSheet) => {
+            if (overrides.has(adoptedStyleSheet)) {
+                const newSheets = [...node.adoptedStyleSheets];
+                const existingIndex = newSheets.indexOf(adoptedSheetOverride.get(adoptedStyleSheet));
+                if (existingIndex >= 0) {
+                    newSheets.splice(existingIndex, 1);
+                }
+                node.adoptedStyleSheets = newSheets;
+            }
+        });
+    });
+    cleanAdoptedStyleSheets();
+}
+function cleanAdoptedStyleSheets() {
+    adoptedSheetOverride = new WeakMap<CSSStyleSheet, CSSStyleSheet>();
+    nodes = new Array<ShadowRoot | Document>();
+    overrides = new WeakSet<CSSStyleSheet>();
 }
 
 export function createAdoptedStyleSheetOverride(node: Document | ShadowRoot, theme: Theme, variables: Map<string, string>): void {
+    nodes.push(node);
     forEach(node.adoptedStyleSheets, (sheet) => {
-        if (overrides.includes(sheet)) {
+        if (overrides.has(sheet)) {
             return;
         }
         if (adoptedSheetOverride.has(sheet)) {
-            node.adoptedStyleSheets = insertOverride([...node.adoptedStyleSheets as any], adoptedSheetOverride.get(sheet), sheet);
+            injectSheet(sheet, adoptedSheetOverride.get(sheet));
             return;
         }
         const rules = sheet.rules;
         const override = new CSSStyleSheet();
 
         function prepareOverridesSheet() {
-            node.adoptedStyleSheets = insertOverride([...node.adoptedStyleSheets as any], override, sheet);
+            injectSheet(sheet, override);
             adoptedSheetOverride.set(sheet, override);
-            overrides.push(override);
+            overrides.add(override);
             return override;
+        }
+
+        function injectSheet(sheet: CSSStyleSheet, override: CSSStyleSheet) {
+            const newSheets = [...node.adoptedStyleSheets];
+            const existingIndex = newSheets.indexOf(override);
+            if (existingIndex >= 0) {
+                newSheets.splice(existingIndex, 1);
+            }
+            const sheetIndex = newSheets.indexOf(sheet);
+            newSheets.splice(sheetIndex+1, 0, override);
+            node.adoptedStyleSheets = newSheets;
         }
 
         const sheetModifier = createStyleSheetModifier();

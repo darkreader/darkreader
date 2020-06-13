@@ -14,6 +14,7 @@ const helpLocales = [
     'en',
     'es',
     'fr',
+    'nl',
     'it',
     'pt',
     'ru',

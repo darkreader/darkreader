@@ -3,7 +3,8 @@ const watch = require('./watch');
 
 /**
  * @typedef TaskOptions
- * @property {boolean} production
+ * @property {boolean} debug
+ * @property {boolean} watch
  */
 
 class Task {

@@ -1,4 +1,6 @@
 # Dark Reader for Google Chrome and Mozilla Firefox
+[![Build Status](https://travis-ci.org/darkreader/darkreader.svg?branch=master)](https://travis-ci.org/darkreader/darkreader)
+
 ![Dark Reader screenshot](https://lh3.googleusercontent.com/tTJIIIAqfJWymqPM9LAmivl11kWmF-XXLABues4OwfjOED_ntsJZdLY0VTG0XFCW0W_wYSll7Q=w640-h400-e365)
 
 This extension **inverts brightness** of web pages and aims to **reduce eyestrain** while browsing the web.
@@ -60,12 +62,16 @@ CSS
     color: ${black} !important;
 }
 
+IGNORE INLINE STYLE
+.color-picker
+
 ```
 - `INVERT` rule inverts specified elements.
 For **Dynamic mode** use `INVERT` only for dark images, that are invisible on dark backgrounds (icons, diagrams, charts, `<img>` and `<svg>` elements).
 - `CSS` rule adds custom CSS to a web page.
 `!important` keyword should be specified for each CSS property to prevent overrides by other stylesheets.
 **Dynamic mode** supports `${COLOR}` template, where `COLOR` is a color value before the inversion (`white` will become `black` in dark mode).
+- `IGNORE INLINE STYLE` rule will not analyze the inline style of matched selector's. (e.g. --darkreader-inline-bgcolor or <p style='color: red'>This will not be analyzed by dark reader if it has an matched selector</p>)
 - **Special notice for Filter and Filter+ config**.
 It works by inverting the whole web page and reverting necessary parts (images, videos, etc.), listed in the `INVERT` section.
 If inverted element contains images or other content that becomes wrongly displayed, `NO INVERT` rule can be used.
@@ -149,11 +155,9 @@ This will generate `build.zip` for use in Chromium browsers and `build-firefox.x
 ## Using for a website
 
 You can use Dark Reader to enable dark mode on your website.
-Install the package from NPM (`npm install darkreader`)
-or include the script via a CDN such as:
-
-- [https://unpkg.com/](https://unpkg.com/) | [https://unpkg.com/darkreader/](https://unpkg.com/darkreader/) | [Direct link](https://unpkg.com/darkreader)
-- [https://www.jsdelivr.com/](https://www.jsdelivr.com/) | [https://www.jsdelivr.com/package/npm/darkreader](https://www.jsdelivr.com/package/npm/darkreader) | [Direct link](https://cdn.jsdelivr.net/npm/darkreader/darkreader.min.js)
+- Install the package from NPM (`npm install darkreader`)
+- or build from the source code (`npm run api`)
+- or include the script via a CDN such as [unpkg](https://unpkg.com/darkreader/) or [jsDelivr](https://www.jsdelivr.com/package/npm/darkreader)
 
 Then use the following API
 ```javascript

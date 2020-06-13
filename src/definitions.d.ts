@@ -47,7 +47,15 @@ export interface FilterConfig {
     textStroke: number;
     engine: string;
     stylesheet: string;
+    darkSchemeBackgroundColor: 'auto' | string;
+    darkSchemeTextColor: 'auto' | string;
+    lightSchemeBackgroundColor: 'auto' | string;
+    lightSchemeTextColor: 'auto' | string;
+    scrollbarColor: '' | 'auto' | string;
+    selectionColor: '' | 'auto' | string;
 }
+
+export type Theme = FilterConfig;
 
 export interface CustomSiteConfig {
     url: string[];
@@ -67,6 +75,8 @@ export interface UserSettings {
     automation: '' | 'time' | 'system' | 'location';
     time: TimeSettings;
     location: LocationSettings;
+    previewNewDesign: boolean;
+    enableForPDF: boolean;
 }
 
 export interface TimeSettings {
@@ -98,6 +108,7 @@ export interface Shortcuts {
 
 export interface DynamicThemeFix {
     url: string[];
+    ignoreInlineStyle: string[];
     invert: string[];
     css: string;
 }

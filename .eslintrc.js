@@ -8,6 +8,10 @@ module.exports = {
         'indent': ['error', 4, {
             'SwitchCase': 1,
         }],
+        'keyword-spacing': ['error', {
+            after: true,
+            before: true,
+        }],
         'object-curly-spacing': ['error', 'never'],
         'no-multi-spaces': 'error',
         'no-trailing-spaces': 'error',
@@ -15,11 +19,16 @@ module.exports = {
         'semi': ['error', 'always'],
         'space-before-function-paren': ['error', {
             anonymous: 'always',
-            named: 'never',
             asyncArrow: 'always',
+            named: 'never',
         }],
         'space-in-parens': ['error', 'never'],
         'spaced-comment': ['error', 'always', {exceptions: ['-']}],
+        'quotes': ['error', 'single', {
+            allowTemplateLiterals: true,
+            avoidEscape: true,
+        }],
+        'eol-last': ["error", "always"],
         '@typescript-eslint/camelcase': 'off',
         '@typescript-eslint/explicit-function-return-type': 'off',
         '@typescript-eslint/explicit-member-accessibility': 'off',
@@ -27,10 +36,11 @@ module.exports = {
         '@typescript-eslint/no-explicit-any': 'off',
         '@typescript-eslint/no-object-literal-type-assertion': 'off',
         '@typescript-eslint/no-use-before-define': 'off',
+        '@typescript-eslint/explicit-module-boundary-types': 'off',
     },
     overrides: [
         {
-            files: ['tasks/**/*.js'],
+            files: ['tasks/**/*.js', 'tests/**/*.js'],
             rules: {
                 '@typescript-eslint/no-var-requires': 'off',
             },

@@ -5,7 +5,7 @@ import {TabPanel, Button} from '../../controls';
 import FilterSettings from './filter-settings';
 import {Header, MoreToggleSettings} from './header';
 import Loader from './loader';
-import MobileBody from './mobile/body';
+import NewBody from '../body';
 import MoreSettings from './more-settings';
 import {News, NewsButton} from './news';
 import SiteListSettings from './site-list-settings';
@@ -53,8 +53,8 @@ function Body(props: BodyProps) {
         );
     }
 
-    if (isMobile()) {
-        return <MobileBody {...props} />;
+    if (isMobile() || props.data.settings.previewNewDesign) {
+        return <NewBody {...props} />;
     }
 
     const unreadNews = props.data.news.filter(({read}) => !read);

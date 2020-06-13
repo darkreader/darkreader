@@ -1,13 +1,12 @@
-import {parse, RGBA} from '../../utils/color';
+import {parse, RGBA, rgbToHSL, hslToString} from '../../utils/color';
 import {clamp} from '../../utils/math';
-import {isMacOS} from '../../utils/platform';
 import {getMatches} from '../../utils/text';
 import {modifyBackgroundColor, modifyBorderColor, modifyForegroundColor, modifyGradientColor, modifyShadowColor, clearColorModificationCache} from '../../generators/modify-colors';
 import {cssURLRegex, getCSSURLValue, getCSSBaseBath} from './css-rules';
-import {getImageDetails, getFilteredImageDataURL, ImageDetails} from './image';
+import {getImageDetails, getFilteredImageDataURL, ImageDetails, cleanImageProcessingCache} from './image';
 import {getAbsoluteURL} from './url';
 import {logWarn, logInfo} from '../utils/log';
-import {FilterConfig} from '../../definitions';
+import {FilterConfig, Theme} from '../../definitions';
 
 type CSSValueModifier = (filter: FilterConfig) => string | Promise<string>;
 
@@ -20,7 +19,7 @@ export interface ModifiableCSSDeclaration {
 
 export interface ModifiableCSSRule {
     selector: string;
-    media?: string;
+    parentRule: any;
     declarations: ModifiableCSSDeclaration[];
 }
 
@@ -38,7 +37,7 @@ export function getModifiableCSSDeclaration(property: string, value: string, rul
         if (modifier) {
             return {property, value: modifier, important, sourceValue};
         }
-    } else if (property === 'background-image') {
+    } else if (property === 'background-image' || property === 'list-style-image') {
         const modifier = getBgImageModifier(property, value, rule, isCancelled);
         if (modifier) {
             return {property, value: modifier, important, sourceValue};
@@ -75,45 +74,99 @@ export function getModifiedUserAgentStyle(filter: FilterConfig, isIFrame: boolea
     lines.push('::placeholder {');
     lines.push(`    color: ${modifyForegroundColor({r: 169, g: 169, b: 169}, filter)};`);
     lines.push('}');
-    ['::selection', '::-moz-selection'].forEach((selection) => {
-        lines.push(`${selection} {`);
-        lines.push(`    background-color: ${modifyBackgroundColor({r: 0, g: 96, b: 212}, filter)};`);
-        lines.push(`    color: ${modifyForegroundColor({r: 255, g: 255, b: 255}, filter)};`);
-        lines.push('}');
-    });
     lines.push('input:-webkit-autofill,');
     lines.push('textarea:-webkit-autofill,');
     lines.push('select:-webkit-autofill {');
     lines.push(`    background-color: ${modifyBackgroundColor({r: 250, g: 255, b: 189}, filter)} !important;`);
     lines.push(`    color: ${modifyForegroundColor({r: 0, g: 0, b: 0}, filter)} !important;`);
     lines.push('}');
-    if (!isMacOS()) {
-        lines.push('::-webkit-scrollbar {');
-        lines.push(`    background-color: ${modifyBackgroundColor({r: 241, g: 241, b: 241}, filter)};`);
-        lines.push(`    color: ${modifyForegroundColor({r: 96, g: 96, b: 96}, filter)};`);
-        lines.push('}');
-        lines.push('::-webkit-scrollbar-thumb {');
-        lines.push(`    background-color: ${modifyBackgroundColor({r: 193, g: 193, b: 193}, filter)};`);
-        lines.push('}');
-        lines.push('::-webkit-scrollbar-thumb:hover {');
-        lines.push(`    background-color: ${modifyBackgroundColor({r: 166, g: 166, b: 166}, filter)};`);
-        lines.push('}');
-        lines.push('::-webkit-scrollbar-thumb:active {');;
-        lines.push(`    background-color: ${modifyBackgroundColor({r: 96, g: 96, b: 96}, filter)};`);
-        lines.push('}');
-        lines.push('::-webkit-scrollbar-corner {');
-        lines.push(`    background-color: ${modifyBackgroundColor({r: 255, g: 255, b: 255}, filter)};`);
-        lines.push('}');
-        lines.push('* {');
-        lines.push(`    scrollbar-color: ${modifyBackgroundColor({r: 193, g: 193, b: 193}, filter)} ${modifyBackgroundColor({r: 241, g: 241, b: 241}, filter)};`);
-        lines.push('}');
+    if (filter.scrollbarColor) {
+        lines.push(getModifiedScrollbarStyle(filter));
     }
+    if (filter.selectionColor) {
+        lines.push(getModifiedSelectionStyle(filter));
+    }
+    return lines.join('\n');
+}
+
+function getModifiedSelectionStyle(theme: Theme) {
+    const lines: string[] = [];
+    let backgroundColorSelection: string;
+    let foregroundColorSelection: string;
+    if (theme.selectionColor === 'auto') {
+        backgroundColorSelection = modifyBackgroundColor({r: 0, g: 96, b: 212}, theme);
+        foregroundColorSelection = modifyForegroundColor({r: 255, g: 255, b: 255}, theme);
+    } else {
+        const rgb = parse(theme.selectionColor);
+        const hsl = rgbToHSL(rgb);
+        backgroundColorSelection = theme.selectionColor;
+        if (hsl.l < 0.5) {
+            foregroundColorSelection = '#FFF';
+        } else {
+            foregroundColorSelection = '#000';
+        }
+    }
+    ['::selection', '::-moz-selection'].forEach((selection) => {
+        lines.push(`${selection} {`);
+        lines.push(`    background-color: ${backgroundColorSelection} !important;`);
+        lines.push(`    color: ${foregroundColorSelection} !important;`);
+        lines.push('}');
+    });
+    return lines.join('\n');
+}
+
+function getModifiedScrollbarStyle(theme: Theme) {
+    const lines: string[] = [];
+    let colorTrack: string;
+    let colorIcons: string;
+    let colorThumb: string;
+    let colorThumbHover: string;
+    let colorThumbActive: string;
+    let colorCorner: string;
+    if (theme.scrollbarColor === 'auto') {
+        colorTrack = modifyBackgroundColor({r: 241, g: 241, b: 241}, theme);
+        colorIcons = modifyForegroundColor({r: 96, g: 96, b: 96}, theme);
+        colorThumb = modifyBackgroundColor({r: 176, g: 176, b: 176}, theme);
+        colorThumbHover = modifyBackgroundColor({r: 144, g: 144, b: 144}, theme);
+        colorThumbActive = modifyBackgroundColor({r: 96, g: 96, b: 96}, theme);
+        colorCorner = modifyBackgroundColor({r: 255, g: 255, b: 255}, theme);
+    } else {
+        const rgb = parse(theme.scrollbarColor);
+        const hsl = rgbToHSL(rgb);
+        const isLight = hsl.l > 0.5;
+        const lighten = (lighter: number) => ({...hsl, l: clamp(hsl.l + lighter, 0, 1)});
+        const darken = (darker: number) => ({...hsl, l: clamp(hsl.l - darker, 0, 1)});
+        colorTrack = hslToString(darken(0.4));
+        colorIcons = hslToString(isLight ? darken(0.4) : lighten(0.4));
+        colorThumb = hslToString(hsl);
+        colorThumbHover = hslToString(lighten(0.1));
+        colorThumbActive = hslToString(lighten(0.2));
+    }
+    lines.push('::-webkit-scrollbar {');
+    lines.push(`    background-color: ${colorTrack};`);
+    lines.push(`    color: ${colorIcons};`);
+    lines.push('}');
+    lines.push('::-webkit-scrollbar-thumb {');
+    lines.push(`    background-color: ${colorThumb};`);
+    lines.push('}');
+    lines.push('::-webkit-scrollbar-thumb:hover {');
+    lines.push(`    background-color: ${colorThumbHover};`);
+    lines.push('}');
+    lines.push('::-webkit-scrollbar-thumb:active {');
+    lines.push(`    background-color: ${colorThumbActive};`);
+    lines.push('}');
+    lines.push('::-webkit-scrollbar-corner {');
+    lines.push(`    background-color: ${colorCorner};`);
+    lines.push('}');
+    lines.push('* {');
+    lines.push(`    scrollbar-color: ${colorTrack} ${colorThumb};`);
+    lines.push('}');
     return lines.join('\n');
 }
 
 export function getModifiedFallbackStyle(filter: FilterConfig, {strict}) {
     const lines: string[] = [];
-    lines.push(`html, body, ${strict ? 'body *' : 'body > *'} {`);
+    lines.push(`html, body, ${strict ? 'body :not(iframe)' : 'body > :not(iframe)'} {`);
     lines.push(`    background-color: ${modifyBackgroundColor({r: 255, g: 255, b: 255}, filter)} !important;`);
     lines.push(`    border-color: ${modifyBorderColor({r: 64, g: 64, b: 64}, filter)} !important;`);
     lines.push(`    color: ${modifyForegroundColor({r: 0, g: 0, b: 0}, filter)} !important;`);
@@ -127,6 +180,7 @@ const unparsableColors = new Set([
     'initial',
     'currentcolor',
     'none',
+    'unset',
 ]);
 
 const colorParseCache = new Map<string, RGBA>();
@@ -365,5 +419,6 @@ export function cleanModificationCache() {
     colorParseCache.clear();
     clearColorModificationCache();
     imageDetailsCache.clear();
+    cleanImageProcessingCache();
     awaitingForImageLoading.clear();
 }

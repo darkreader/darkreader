@@ -2,9 +2,10 @@ import {replaceCSSVariables, getElementCSSVariables} from './css-rules';
 import {overrideInlineStyle, getInlineOverrideStyle, watchForInlineStyles, stopWatchingForInlineStyles, INLINE_STYLE_SELECTOR} from './inline-style';
 import {changeMetaThemeColorWhenAvailable, restoreMetaThemeColor} from './meta-theme-color';
 import {getModifiedUserAgentStyle, getModifiedFallbackStyle, cleanModificationCache, parseColorWithCache} from './modify-css';
-import {manageStyle, shouldManageStyle, STYLE_SELECTOR, StyleManager} from './style-manager';
+import {manageStyle, getManageableStyles, StyleElement, StyleManager} from './style-manager';
 import {watchForStyleChanges, stopWatchingForStyleChanges} from './watch';
-import {removeNode, watchForNodePosition, iterateShadowNodes} from '../utils/dom';
+import {forEach, push, toArray} from '../../utils/array';
+import {removeNode, watchForNodePosition, iterateShadowNodes, isDOMReady, addDOMReadyListener, removeDOMReadyListener} from '../utils/dom';
 import {logWarn} from '../utils/log';
 import {throttle} from '../utils/throttle';
 import {clamp} from '../../utils/math';
@@ -14,7 +15,7 @@ import {modifyColor} from '../../generators/modify-colors';
 import {createTextStyle} from '../../generators/text-style';
 import {FilterConfig, DynamicThemeFix} from '../../definitions';
 
-const styleManagers = new Map<HTMLLinkElement | HTMLStyleElement, StyleManager>();
+const styleManagers = new Map<StyleElement, StyleManager>();
 const variables = new Map<string, string>();
 let filter: FilterConfig = null;
 let fixes: DynamicThemeFix = null;
@@ -35,36 +36,35 @@ const stylePositionWatchers = new Map<string, ReturnType<typeof watchForNodePosi
 
 function setupStylePositionWatcher(node: Node, alias: string) {
     stylePositionWatchers.has(alias) && stylePositionWatchers.get(alias).stop();
-    stylePositionWatchers.set(alias, watchForNodePosition(node, {watchParent: true, watchSibling: false}));
+    stylePositionWatchers.set(alias, watchForNodePosition(node, 'parent'));
 }
 
 function stopStylePositionWatchers() {
-    Array.from(stylePositionWatchers.values()).forEach((watcher) => watcher.stop());
+    forEach(stylePositionWatchers.values(), (watcher) => watcher.stop());
     stylePositionWatchers.clear();
 }
 
 function createStaticStyleOverrides() {
     const fallbackStyle = createOrUpdateStyle('darkreader--fallback');
-    document.head.insertBefore(fallbackStyle, document.head.firstChild);
     fallbackStyle.textContent = getModifiedFallbackStyle(filter, {strict: true});
+    document.head.insertBefore(fallbackStyle, document.head.firstChild);
     setupStylePositionWatcher(fallbackStyle, 'fallback');
 
     const userAgentStyle = createOrUpdateStyle('darkreader--user-agent');
-    document.head.insertBefore(userAgentStyle, fallbackStyle.nextSibling);
     userAgentStyle.textContent = getModifiedUserAgentStyle(filter, isIFrame);
+    document.head.insertBefore(userAgentStyle, fallbackStyle.nextSibling);
     setupStylePositionWatcher(userAgentStyle, 'user-agent');
 
     const textStyle = createOrUpdateStyle('darkreader--text');
-    document.head.insertBefore(textStyle, fallbackStyle.nextSibling);
     if (filter.useFont || filter.textStroke > 0) {
         textStyle.textContent = createTextStyle(filter);
     } else {
         textStyle.textContent = '';
     }
+    document.head.insertBefore(textStyle, fallbackStyle.nextSibling);
     setupStylePositionWatcher(textStyle, 'text');
 
     const invertStyle = createOrUpdateStyle('darkreader--invert');
-    document.head.insertBefore(invertStyle, textStyle.nextSibling);
     if (fixes && Array.isArray(fixes.invert) && fixes.invert.length > 0) {
         invertStyle.textContent = [
             `${fixes.invert.join(', ')} {`,
@@ -77,16 +77,17 @@ function createStaticStyleOverrides() {
     } else {
         invertStyle.textContent = '';
     }
+    document.head.insertBefore(invertStyle, textStyle.nextSibling);
     setupStylePositionWatcher(invertStyle, 'invert');
 
     const inlineStyle = createOrUpdateStyle('darkreader--inline');
-    document.head.insertBefore(inlineStyle, invertStyle.nextSibling);
     inlineStyle.textContent = getInlineOverrideStyle();
+    document.head.insertBefore(inlineStyle, invertStyle.nextSibling);
     setupStylePositionWatcher(inlineStyle, 'inline');
 
     const overrideStyle = createOrUpdateStyle('darkreader--override');
-    document.head.appendChild(overrideStyle);
     overrideStyle.textContent = fixes && fixes.css ? replaceCSSTemplates(fixes.css) : '';
+    document.head.appendChild(overrideStyle);
     setupStylePositionWatcher(overrideStyle, 'override');
 }
 
@@ -94,8 +95,8 @@ const shadowRootsWithOverrides = new Set<ShadowRoot>();
 
 function createShadowStaticStyleOverrides(root: ShadowRoot) {
     const inlineStyle = createOrUpdateStyle('darkreader--inline', root);
-    root.insertBefore(inlineStyle, root.firstChild);
     inlineStyle.textContent = getInlineOverrideStyle();
+    root.insertBefore(inlineStyle, root.firstChild);
     shadowRootsWithOverrides.add(root);
 }
 
@@ -123,16 +124,10 @@ function createDynamicStyleOverrides() {
 
     updateVariables(getElementCSSVariables(document.documentElement));
 
-    const allStyles = Array.from(document.querySelectorAll(STYLE_SELECTOR)) as (HTMLLinkElement | HTMLStyleElement)[];
-    iterateShadowNodes(document.documentElement, (node) => {
-        const shadowStyles = node.shadowRoot.querySelectorAll(STYLE_SELECTOR);
-        if (shadowStyles.length > 0) {
-            allStyles.push(...Array.from(shadowStyles as NodeListOf<HTMLLinkElement | HTMLStyleElement>));
-        }
-    });
+    const allStyles = getManageableStyles(document);
 
-    const newManagers = Array.from<HTMLLinkElement | HTMLStyleElement>(allStyles)
-        .filter((style) => !styleManagers.has(style) && shouldManageStyle(style))
+    const newManagers = allStyles
+        .filter((style) => !styleManagers.has(style))
         .map((style) => createManager(style));
     const newVariables = newManagers
         .map((manager) => manager.details())
@@ -153,21 +148,22 @@ function createDynamicStyleOverrides() {
     }
     newManagers.forEach((manager) => manager.watch());
 
-    const inlineStyleElements = Array.from(document.querySelectorAll(INLINE_STYLE_SELECTOR));
+    const inlineStyleElements = toArray(document.querySelectorAll(INLINE_STYLE_SELECTOR));
     iterateShadowNodes(document.documentElement, (node) => {
         const elements = node.shadowRoot.querySelectorAll(INLINE_STYLE_SELECTOR);
         if (elements.length > 0) {
             createShadowStaticStyleOverrides(node.shadowRoot);
-            inlineStyleElements.push(...Array.from(elements as NodeListOf<HTMLLinkElement | HTMLStyleElement>));
+            push(inlineStyleElements, elements);
         }
     });
-    inlineStyleElements.forEach((el) => overrideInlineStyle(el as HTMLElement, filter));
+    const ignoredSelectors = fixes && Array.isArray(fixes.ignoreInlineStyle) ? fixes.ignoreInlineStyle : [];
+    inlineStyleElements.forEach((el) => overrideInlineStyle(el as HTMLElement, filter, ignoredSelectors));
 }
 
 let loadingStylesCounter = 0;
 const loadingStyles = new Set();
 
-function createManager(element: HTMLLinkElement | HTMLStyleElement) {
+function createManager(element: StyleElement) {
     if (styleManagers.has(element)) {
         return;
     }
@@ -175,7 +171,7 @@ function createManager(element: HTMLLinkElement | HTMLStyleElement) {
     const loadingStyleId = ++loadingStylesCounter;
 
     function loadingStart() {
-        if (!isPageLoaded() || !didDocumentShowUp) {
+        if (!isDOMReady() || !didDocumentShowUp) {
             loadingStyles.add(loadingStyleId);
 
             const fallbackStyle = document.querySelector('.darkreader--fallback');
@@ -187,7 +183,7 @@ function createManager(element: HTMLLinkElement | HTMLStyleElement) {
 
     function loadingEnd() {
         loadingStyles.delete(loadingStyleId);
-        if (loadingStyles.size === 0 && isPageLoaded()) {
+        if (loadingStyles.size === 0 && isDOMReady()) {
             cleanFallbackStyle();
         }
     }
@@ -219,7 +215,7 @@ function updateVariables(newVars: Map<string, string>) {
     variables.forEach((value, key) => variables.set(key, replaceCSSVariables(value, variables)));
 }
 
-function removeManager(element: HTMLLinkElement | HTMLStyleElement) {
+function removeManager(element: StyleElement) {
     const manager = styleManagers.get(element);
     if (manager) {
         manager.destroy();
@@ -235,15 +231,7 @@ const cancelRendering = function () {
     throttledRenderAllStyles.cancel();
 };
 
-function isPageLoaded() {
-    return document.readyState === 'complete' || document.readyState === 'interactive';
-}
-
-function onReadyStateChange() {
-    if (!isPageLoaded()) {
-        return;
-    }
-    document.removeEventListener('readystatechange', onReadyStateChange);
+function onDOMReady() {
     if (loadingStyles.size === 0) {
         cleanFallbackStyle();
     }
@@ -289,7 +277,8 @@ function createThemeAndWatchForUpdates() {
 }
 
 function watchForUpdates() {
-    watchForStyleChanges(({created, updated, removed, moved}) => {
+    const managedStyles = Array.from(styleManagers.keys());
+    watchForStyleChanges(managedStyles, ({created, updated, removed, moved}) => {
         const stylesToRemove = removed;
         const stylesToManage = created.concat(updated).concat(moved)
             .filter((style) => !styleManagers.has(style));
@@ -312,8 +301,9 @@ function watchForUpdates() {
         stylesToRestore.forEach((style) => styleManagers.get(style).restore());
     });
 
+    const ignoredSelectors = fixes && Array.isArray(fixes.ignoreInlineStyle) ? fixes.ignoreInlineStyle : [];
     watchForInlineStyles((element) => {
-        overrideInlineStyle(element, filter);
+        overrideInlineStyle(element, filter, ignoredSelectors);
         if (element === document.documentElement) {
             const rootVariables = getElementCSSVariables(document.documentElement);
             if (rootVariables.size > 0) {
@@ -325,11 +315,11 @@ function watchForUpdates() {
         const inlineStyleElements = root.querySelectorAll(INLINE_STYLE_SELECTOR);
         if (inlineStyleElements.length > 0) {
             createShadowStaticStyleOverrides(root);
-            inlineStyleElements.forEach((el) => overrideInlineStyle(el as HTMLElement, filter));
+            forEach(inlineStyleElements, (el) => overrideInlineStyle(el as HTMLElement, filter, ignoredSelectors));
         }
     });
 
-    document.addEventListener('readystatechange', onReadyStateChange);
+    addDOMReadyListener(onDOMReady);
 }
 
 function stopWatchingForUpdates() {
@@ -337,7 +327,7 @@ function stopWatchingForUpdates() {
     stopStylePositionWatchers();
     stopWatchingForStyleChanges();
     stopWatchingForInlineStyles();
-    document.removeEventListener('readystatechange', onReadyStateChange);
+    removeDOMReadyListener(onDOMReady);
 }
 
 export function createOrUpdateDynamicTheme(filterConfig: FilterConfig, dynamicThemeFixes: DynamicThemeFix, iframe: boolean) {
@@ -378,8 +368,8 @@ export function removeDynamicTheme() {
         removeNode(root.querySelector('.darkreader--inline'));
     });
     shadowRootsWithOverrides.clear();
-    Array.from(styleManagers.keys()).forEach((el) => removeManager(el));
-    Array.from(document.querySelectorAll('.darkreader')).forEach(removeNode);
+    forEach(styleManagers.keys(), (el) => removeManager(el));
+    forEach(document.querySelectorAll('.darkreader'), removeNode);
 }
 
 export function cleanDynamicThemeCache() {

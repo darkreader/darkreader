@@ -1,0 +1,49 @@
+@import "../../../theme";
+
+@collapsible-panel-button-size: 1.25rem;
+
+.collapsible-panel {
+    &__group {
+        &__expand-button {
+            align-items: center;
+            background-color: @color-control-active;
+            background-image: @icon-plus;
+            background-position: center left 0.375rem;
+            background-repeat: no-repeat;
+            background-size: 0.5rem;
+            border-radius: @collapsible-panel-button-size / 2;
+            color: @color-control-fore;
+            cursor: pointer;
+            display: none;
+            height: @collapsible-panel-button-size;
+            justify-content: center;
+            line-height: @collapsible-panel-button-size;
+            text-align: center;
+            width: 100%;
+        }
+
+        &--collapsed {
+            .collapsible-panel__group__expand-button {
+                display: inline-flex;
+            }
+    
+            .collapsible-panel__group__content {
+                display: none;
+            }
+        }
+
+        &--collapse-top {
+            .collapsible-panel__group__expand-button {
+                margin-bottom: @indent-small + 0.125rem;
+                margin-top: 0.125rem;
+            }
+        }
+
+        &--collapse-bottom {
+            .collapsible-panel__group__expand-button {
+                margin-bottom: 0.125rem;
+                margin-top: @indent-small + 0.125rem;
+            }
+        }
+    }
+}

@@ -7,6 +7,7 @@ import {DynamicThemeFix} from '../definitions';
 const dynamicThemeFixesCommands = {
     'INVERT': 'invert',
     'CSS': 'css',
+    'IGNORE INLINE STYLE': 'ignoreInlineStyle',
 };
 
 export function parseDynamicThemeFixes(text: string) {
@@ -43,7 +44,7 @@ export function formatDynamicThemeFixes(dynamicThemeFixes: DynamicThemeFix[]) {
     });
 }
 
-export function getDynamicThemeFixesFor(url: string, frameURL: string, fixes: DynamicThemeFix[]) {
+export function getDynamicThemeFixesFor(url: string, frameURL: string, fixes: DynamicThemeFix[], enabledForPDF: boolean) {
     if (fixes.length === 0 || fixes[0].url[0] !== '*') {
         return null;
     }
@@ -52,8 +53,11 @@ export function getDynamicThemeFixesFor(url: string, frameURL: string, fixes: Dy
         url: fixes[0].url,
         invert: fixes[0].invert || [],
         css: fixes[0].css || [],
+        ignoreInlineStyle: fixes[0].ignoreInlineStyle || [],
     };
-
+    if (enabledForPDF) {
+        common.invert = common.invert.concat('embed[type="application/pdf"]');
+    }
     const sortedBySpecificity = fixes
         .slice(1)
         .map((theme) => {
@@ -75,5 +79,6 @@ export function getDynamicThemeFixesFor(url: string, frameURL: string, fixes: Dy
         url: match.url,
         invert: common.invert.concat(match.invert || []),
         css: [common.css, match.css].filter((s) => s).join('\n'),
+        ignoreInlineStyle: common.ignoreInlineStyle.concat(match.ignoreInlineStyle || []),
     };
 }

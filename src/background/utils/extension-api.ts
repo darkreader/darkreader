@@ -1,4 +1,5 @@
 import {isFirefox, isEdge} from '../../utils/platform';
+import {isPDF} from '../../utils/url';
 
 declare const browser: {
     commands: {
@@ -13,6 +14,7 @@ export function canInjectScript(url: string) {
             && !url.startsWith('moz')
             && !url.startsWith('view-source:')
             && !url.startsWith('https://addons.mozilla.org')
+            && !isPDF(url)
         );
     }
     if (isEdge()) {
@@ -20,6 +22,7 @@ export function canInjectScript(url: string) {
             && !url.startsWith('chrome')
             && !url.startsWith('edge')
             && !url.startsWith('https://chrome.google.com/webstore')
+            && !url.startsWith('https://microsoftedge.microsoft.com/addons')
         );
     }
     return (url

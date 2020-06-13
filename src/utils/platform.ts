@@ -1,3 +1,7 @@
+export function isChromiumBased() {
+    return navigator.userAgent.toLowerCase().includes('chrome') || navigator.userAgent.toLowerCase().includes('chromium');
+}
+
 export function isFirefox() {
     return navigator.userAgent.includes('Firefox');
 }
@@ -20,14 +24,23 @@ export function isEdge() {
 }
 
 export function isWindows() {
+    if (typeof navigator === 'undefined') {
+        return null;
+    }
     return navigator.platform.toLowerCase().startsWith('win');
 }
 
 export function isMacOS() {
+    if (typeof navigator === 'undefined') {
+        return null;
+    }
     return navigator.platform.toLowerCase().startsWith('mac');
 }
 
 export function isMobile() {
+    if (typeof navigator === 'undefined') {
+        return null;
+    }
     const agent = navigator.userAgent.toLowerCase();
     return agent.includes('mobile');
 }
@@ -52,27 +65,20 @@ export function compareChromeVersions($a: string, $b: string) {
     return 0;
 }
 
-export function isDeepSelectorSupported() {
-    try {
-        document.querySelector('x /deep/ x');
-        return true;
-    } catch (err) {
-        return false;
-    }
-}
-
-export function isHostSelectorSupported() {
-    try {
-        document.querySelector(':host x');
-        return true;
-    } catch (err) {
-        return false;
-    }
-}
-
 export function isDefinedSelectorSupported() {
     try {
         document.querySelector(':defined');
+        return true;
+    } catch (err) {
+        return false;
+    }
+}
+
+export const IS_SHADOW_DOM_SUPPORTED = typeof ShadowRoot === 'function';
+
+export function isCSSStyleSheetConstructorSupported() {
+    try {
+        new CSSStyleSheet();
         return true;
     } catch (err) {
         return false;

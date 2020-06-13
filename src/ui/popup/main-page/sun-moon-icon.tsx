@@ -1,5 +1,5 @@
 import {m} from 'malevic';
-import {isNightAtLocation} from '../../../../utils/time';
+import {isNightAtLocation} from '../../../utils/time';
 
 export default function SunMoonIcon({date, latitude, longitude}) {
     if (latitude == null || longitude == null) {

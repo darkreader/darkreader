@@ -175,10 +175,22 @@ body {
     border: 2px solid white;
 }
 
+.overlay {
+    height: calc(100% - 4px);
+    left: 2px;
+    top: 2px;
+    width: calc(100% - 4px);
+}
+
 .built-in-horizontal-borders {
     body {
         border-bottom: none;
         border-top: none;
+    }
+
+    .overlay {
+        height: 100%;
+        top: 0;
     }
 }
 
@@ -186,6 +198,13 @@ body {
     body {
         border: none;
     }
+
+    .overlay {
+        height: 100%;
+        left: 0;
+        top: 0;
+        width: 100%;
+    }
 }
 
-@import "./components/mobile/style";
+@import "./body/style";

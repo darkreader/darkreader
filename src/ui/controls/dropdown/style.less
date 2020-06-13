@@ -51,6 +51,11 @@
             line-height: @dropdown-item-height;
             text-align: center;
             width: 100%;
+            
+            &:hover {
+                background-color: @color-control-hover;
+                transition: background-color @time-fast;
+            }
 
             &--selected {
                 overflow: hidden;
@@ -79,4 +84,8 @@
         margin-top: (@dropdown-height - @dropdown-item-active-height) / 2;
         z-index: 2;
     }
+}
+
+.preview .dropdown {
+    cursor: pointer;
 }

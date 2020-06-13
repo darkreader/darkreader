@@ -73,6 +73,7 @@ export interface UserSettings {
     notifyOfNews: boolean;
     syncSettings: boolean;
     automation: '' | 'time' | 'system' | 'location';
+    automationBehaviour: 'OnOff' | 'Scheme';
     time: TimeSettings;
     location: LocationSettings;
     previewNewDesign: boolean;

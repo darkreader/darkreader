@@ -29,6 +29,8 @@ export function getMockData(override = {} as Partial<ExtensionData>): ExtensionD
             notifyOfNews: false,
             syncSettings: true,
             automation: '',
+            automationBehaviour: 'OnOff',
+            previewNewDesign: false,
             time: {
                 activation: '18:00',
                 deactivation: '9:00',

@@ -17,6 +17,7 @@ import createStaticStylesheet from '../generators/static-theme';
 import {createSVGFilterStylesheet, getSVGFilterMatrixValue, getSVGReverseFilterMatrixValue} from '../generators/svg-filter';
 import {ExtensionData, FilterConfig, News, Shortcuts, UserSettings, TabInfo} from '../definitions';
 import {isSystemDarkModeEnabled} from '../utils/media-query';
+import Scheme from '../ui/popup/theme/controls/scheme';
 
 const AUTO_TIME_CHECK_INTERVAL = getDuration({seconds: 10});
 
@@ -49,29 +50,44 @@ export class Extension {
     }
 
     isEnabled() {
-        const {automation} = this.user.settings;
-        if (automation === 'time') {
-            const now = new Date();
-            return isInTimeInterval(now, this.user.settings.time.activation, this.user.settings.time.deactivation);
-        } else if (automation === 'system') {
-            if (isFirefox()) {
-                // BUG: Firefox background page always matches initial color scheme.
-                return this.wasLastColorSchemeDark == null
-                    ? isSystemDarkModeEnabled()
-                    : this.wasLastColorSchemeDark;
-            }
-            return isSystemDarkModeEnabled();
-        } else if (automation === 'location') {
-            const latitude = this.user.settings.location.latitude;
-            const longitude = this.user.settings.location.longitude;
-
-            if (latitude != null && longitude != null) {
+        const {automation, automationBehaviour} = this.user.settings;
+        let value: boolean;
+        if (automation !== '') {
+            if (automation === 'time') {
                 const now = new Date();
-                return isNightAtLocation(now, latitude, longitude);
-            }
-        }
+                value = isInTimeInterval(now, this.user.settings.time.activation, this.user.settings.time.deactivation);
+            } else if (automation === 'system') {
+                if (isFirefox()) {
+                    // BUG: Firefox background page always matches initial color scheme.
+                    value = this.wasLastColorSchemeDark == null
+                        ? isSystemDarkModeEnabled()
+                        : this.wasLastColorSchemeDark;
+                } else {
+                    value = isSystemDarkModeEnabled();
+                }
+            } else if (automation === 'location') {
+                const latitude = this.user.settings.location.latitude;
+                const longitude = this.user.settings.location.longitude;
 
-        return this.user.settings.enabled;
+                if (latitude != null && longitude != null) {
+                    const now = new Date();
+                    value = isNightAtLocation(now, latitude, longitude);
+                }
+            }
+            if (automationBehaviour == 'OnOff') {
+                return value;
+            } else {
+                if (value) {
+                    //Dark
+                    this.setTheme({mode: 1});
+                } else {
+                    //Light
+                    this.setTheme({mode: 0});
+                }
+            }
+        } else {
+            return this.user.settings.enabled;
+        }
     }
 
     private awaiting: (() => void)[];
@@ -255,6 +271,7 @@ export class Extension {
         if (
             (prev.enabled !== this.user.settings.enabled) ||
             (prev.automation !== this.user.settings.automation) ||
+            (prev.automationBehaviour !== this.user.settings.automationBehaviour) ||
             (prev.time.activation !== this.user.settings.time.activation) ||
             (prev.time.deactivation !== this.user.settings.time.deactivation) ||
             (prev.location.latitude !== this.user.settings.location.latitude) ||

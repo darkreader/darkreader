@@ -1,6 +1,6 @@
 import {m} from 'malevic';
 import {getLocalMessage} from '../../../utils/locales';
-import {CheckBox, TimeRangePicker, TextBox, Button, MultiSwitch} from '../../controls';
+import {CheckBox, TimeRangePicker, TextBox, Button} from '../../controls';
 import {ViewProps} from '../types';
 import DropDown from '../../controls/dropdown/index';
 
@@ -136,7 +136,7 @@ export default function AutomationPage(props: ViewProps) {
             <p class="automation-page__description">
                 {getLocalMessage('system_dark_mode_description')}
             </p>
-            <DropDown 
+            <DropDown
                 onChange={(selected: any) => props.actions.changeSettings({automationBehaviour: selected})}
                 selected={props.data.settings.automationBehaviour}
                 values={behaviourValues}

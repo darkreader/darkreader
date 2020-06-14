@@ -17,7 +17,6 @@ import createStaticStylesheet from '../generators/static-theme';
 import {createSVGFilterStylesheet, getSVGFilterMatrixValue, getSVGReverseFilterMatrixValue} from '../generators/svg-filter';
 import {ExtensionData, FilterConfig, News, Shortcuts, UserSettings, TabInfo} from '../definitions';
 import {isSystemDarkModeEnabled} from '../utils/media-query';
-import Scheme from '../ui/popup/theme/controls/scheme';
 
 const AUTO_TIME_CHECK_INTERVAL = getDuration({seconds: 10});
 
@@ -78,11 +77,11 @@ export class Extension {
                 return value;
             } else {
                 if (value) {
-                    //Dark
+                    // Dark
                     this.user.set({theme: {...this.user.settings.theme, ...{mode: 1}}});
                     return this.user.settings.enabled;
                 } else {
-                    //Light
+                    // Light
                     this.user.set({theme: {...this.user.settings.theme, ...{mode: 0}}});
                     return this.user.settings.enabled;
                 }

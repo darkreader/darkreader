@@ -113,7 +113,7 @@ export class Extension {
                     await new Promise((resolve) => this.awaiting.push(resolve));
                 }
                 const url = await this.tabs.getActiveTabURL();
-                return await this.getURLInfo(url);
+                return this.getURLInfo(url);
             },
             changeSettings: (settings) => this.changeSettings(settings),
             setTheme: (theme) => this.setTheme(theme),

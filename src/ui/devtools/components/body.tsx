@@ -15,7 +15,7 @@ function Body({data, tab, actions}: BodyProps) {
     const previewButtonText = data.settings.previewNewDesign ? 'Switch to old design' : 'Preview new design';
     const custom = data.settings.customThemes.find(({url: urlList}) => isURLInList(tab.url, urlList));
     const theme = custom ? custom.theme : data.settings.theme;
-    
+
     const wrapper = (theme.engine === ThemeEngines.staticTheme
         ? {
             header: 'Static Theme Editor',

@@ -188,12 +188,12 @@ export function watchForStyleChanges(currentStyles: StyleElement[], update: (sty
     }
 
     function subscribeForShadowRootChanges(node: Element) {
-        const shadowroot = node.shadowRoot;
-        if (shadowroot == null || observedRoots.has(shadowroot)) {
+        const {shadowRoot} = node;
+        if (shadowRoot == null || observedRoots.has(shadowRoot)) {
             return;
         }
-        observe(shadowroot);
-        shadowRootDiscovered(shadowroot);
+        observe(shadowRoot);
+        shadowRootDiscovered(shadowRoot);
     }
 
     observe(document);
@@ -203,7 +203,11 @@ export function watchForStyleChanges(currentStyles: StyleElement[], update: (sty
         const newStyles: StyleElement[] = [];
         hosts.forEach((host) => push(newStyles, getManageableStyles(host.shadowRoot)));
         update({created: newStyles, updated: [], removed: [], moved: []});
-        hosts.forEach((h) => subscribeForShadowRootChanges(h));
+        hosts.forEach((h) => {
+            const {shadowRoot} = h;
+            iterateShadowNodes(shadowRoot, subscribeForShadowRootChanges);
+            collectUndefinedElements(shadowRoot);
+        });
     });
     collectUndefinedElements(document);
 }

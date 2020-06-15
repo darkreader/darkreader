@@ -67,7 +67,7 @@ export function getManageableStyles(node: Node, results = [] as StyleElement[]) 
             (style: StyleElement) => getManageableStyles(style, results)
         );
         if (!(node instanceof HTMLStyleElement) && !(node instanceof HTMLDocument) && !((node as HTMLStyleElement).className.includes('darkreader'))) {
-            iterateShadowNodes(node, (host) => getManageableStyles(host.shadowRoot, results));   
+            iterateShadowNodes(node, (host) => getManageableStyles(host.shadowRoot, results));
         }
     }
     return results;

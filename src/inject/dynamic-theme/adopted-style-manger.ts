@@ -54,7 +54,7 @@ export function createAdoptedStyleSheetOverride(node: Document | ShadowRoot, the
                 newSheets.splice(existingIndex, 1);
             }
             const sheetIndex = newSheets.indexOf(sheet);
-            newSheets.splice(sheetIndex+1, 0, override);
+            newSheets.splice(sheetIndex + 1, 0, override);
             node.adoptedStyleSheets = newSheets;
         }
 

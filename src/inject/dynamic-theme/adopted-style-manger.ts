@@ -27,45 +27,67 @@ function cleanAdoptedStyleSheets() {
     overrides = new WeakSet<CSSStyleSheet>();
 }
 
-export function createAdoptedStyleSheetOverride(node: Document | ShadowRoot, theme: Theme, variables: Map<string, string>): void {
+export interface AdoptedStyleSheetManager {
+    render(theme: Theme, variables: Map<string, string>): void;
+}
+
+export function createAdoptedStyleSheetOverride(node: Document | ShadowRoot): AdoptedStyleSheetManager {
+
     nodes.push(node);
-    forEach(node.adoptedStyleSheets, (sheet) => {
-        if (overrides.has(sheet)) {
-            return;
-        }
-        if (adoptedSheetOverride.has(sheet)) {
-            injectSheet(sheet, adoptedSheetOverride.get(sheet));
-            return;
-        }
-        const rules = sheet.rules;
-        const override = new CSSStyleSheet();
 
-        function prepareOverridesSheet() {
-            injectSheet(sheet, override);
-            adoptedSheetOverride.set(sheet, override);
-            overrides.add(override);
-            return override;
+    function injectSheet(sheet: CSSStyleSheet, override: CSSStyleSheet) {
+        const newSheets = [...node.adoptedStyleSheets];
+        const existingIndex = newSheets.indexOf(override);
+        if (existingIndex >= 0) {
+            newSheets.splice(existingIndex, 1);
         }
+        const sheetIndex = newSheets.indexOf(sheet);
+        newSheets.splice(sheetIndex + 1, 0, override);
+        node.adoptedStyleSheets = newSheets;
+    }
 
-        function injectSheet(sheet: CSSStyleSheet, override: CSSStyleSheet) {
+    function destroy(adoptedStyleSheet: CSSStyleSheet) {
+        if (overrides.has(adoptedStyleSheet)) {
             const newSheets = [...node.adoptedStyleSheets];
-            const existingIndex = newSheets.indexOf(override);
+            const existingIndex = newSheets.indexOf(adoptedSheetOverride.get(adoptedStyleSheet));
             if (existingIndex >= 0) {
                 newSheets.splice(existingIndex, 1);
             }
-            const sheetIndex = newSheets.indexOf(sheet);
-            newSheets.splice(sheetIndex + 1, 0, override);
             node.adoptedStyleSheets = newSheets;
+            adoptedSheetOverride.delete(adoptedStyleSheet);
+            overrides.delete(adoptedStyleSheet);
         }
+    }
 
-        const sheetModifier = createStyleSheetModifier();
-        sheetModifier.modifySheet({
-            prepareSheet: prepareOverridesSheet,
-            sourceCSSRules: rules,
-            theme,
-            variables,
-            force: false,
-            isAsyncCancelled: () => false,
+    function render(theme: Theme, variables: Map<string, string>) {
+
+        forEach(node.adoptedStyleSheets, (sheet) => {
+            if (overrides.has(sheet)) {
+                return;
+            }
+            destroy(sheet);
+            const rules = sheet.rules;
+            const override = new CSSStyleSheet();
+
+            function prepareOverridesSheet() {
+                injectSheet(sheet, override);
+                adoptedSheetOverride.set(sheet, override);
+                overrides.add(override);
+                return override;
+            }
+
+            const sheetModifier = createStyleSheetModifier();
+            sheetModifier.modifySheet({
+                prepareSheet: prepareOverridesSheet,
+                sourceCSSRules: rules,
+                theme,
+                variables,
+                force: false,
+                isAsyncCancelled: () => false,
+            });
         });
-    });
+    }
+    return {
+        render
+    };
 }

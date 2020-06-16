@@ -14,10 +14,12 @@ import {getCSSFilterValue} from '../../generators/css-filter';
 import {modifyColor} from '../../generators/modify-colors';
 import {createTextStyle} from '../../generators/text-style';
 import {FilterConfig, DynamicThemeFix} from '../../definitions';
-import {createAdoptedStyleSheetOverride, removeAdoptedStyleSheets} from './adopted-style-manger';
+import {createAdoptedStyleSheetOverride, removeAdoptedStyleSheets, AdoptedStyleSheetManager} from './adopted-style-manger';
+import {render} from 'malevic/dom';
 
 export const variables = new Map<string, string>();
 const styleManagers = new Map<StyleElement, StyleManager>();
+const adoptedStyleSheetManger = [] as Array<AdoptedStyleSheetManager>;
 let filter: FilterConfig = null;
 let fixes: DynamicThemeFix = null;
 let isIFrame: boolean = null;
@@ -227,8 +229,10 @@ function removeManager(element: StyleElement) {
 
 const throttledRenderAllStyles = throttle((callback?: () => void) => {
     styleManagers.forEach((manager) => manager.render(filter, variables));
+    adoptedStyleSheetManger.forEach((manager) => manager.render(filter, variables));
     callback && callback();
 });
+
 const cancelRendering = function () {
     throttledRenderAllStyles.cancel();
 };
@@ -280,7 +284,9 @@ function createThemeAndWatchForUpdates() {
 
 function handleAdoptedStyleSheets(node: ShadowRoot | Document) {
     if (node.adoptedStyleSheets.length > 0) {
-        createAdoptedStyleSheetOverride(node, filter, variables);
+        const newManger = createAdoptedStyleSheetOverride(node);
+        adoptedStyleSheetManger.push(newManger);
+        newManger.render(filter, variables);
     }
 }
 

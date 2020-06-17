@@ -1,16 +1,20 @@
 export const DARK_COLOR_SCHEME = [
-    'None',
+    'Normal_Dark',
     'Solarized_Dark',
 ];
 export const LIGHT_COLOR_SCHEME = [
-    'None',
+    'Normal_Light',
     'Solarized_Light',
 ];
 
 export const COLOR_SCHEMES = {
-    None: {
-        background: '',
-        text: '',
+    Normal_Dark: {
+        background: '#181a1b',
+        text: '#e8e6e3',
+    },
+    Normal_Light: {
+        background: '#dcdad7',
+        text: '#181a1b',
     },
     Solarized_Dark: {
         background: '#002b36',

@@ -1,5 +1,5 @@
 import {m} from 'malevic';
-import {DEFAULT_SETTINGS, DEFAULT_COLORS} from '../../../../defaults';
+import {DEFAULT_SETTINGS} from '../../../../defaults';
 import {Theme} from '../../../../definitions';
 import {ViewProps} from '../../types';
 import {BackgroundColor, Brightness, Contrast, Grayscale, Mode, ResetButton, Scheme, Scrollbar, SelectionColorEditor, Sepia, TextColor} from '../controls';
@@ -50,8 +50,8 @@ function ColorsGroup({theme, change}: ThemeGroupProps) {
     const bgProp: keyof Theme = isDarkScheme ? 'darkSchemeBackgroundColor' : 'lightSchemeBackgroundColor';
     const fgProp: keyof Theme = isDarkScheme ? 'darkSchemeTextColor' : 'lightSchemeTextColor';
     const csProp: keyof Theme = isDarkScheme ? 'darkColorScheme' : 'lightColorScheme';
-    const defaultSchemeColors = isDarkScheme ? DEFAULT_COLORS.darkScheme : DEFAULT_COLORS.lightScheme;
-    const colorSchemeValues: string[] = isDarkScheme ? DARK_COLOR_SCHEME.sort((a, b) => a.localeCompare(b)) : LIGHT_COLOR_SCHEME.sort((a, b) => a.localeCompare(b));
+    const defaultSchemeColors = isDarkScheme ? COLOR_SCHEMES.Normal_Dark: COLOR_SCHEMES.Normal_Light;
+    const colorSchemeValues: string[] = (isDarkScheme ? DARK_COLOR_SCHEME : LIGHT_COLOR_SCHEME).sort((a, b) => a.localeCompare(b)) ;
     const currentColorScheme = isDarkScheme ? theme.darkColorScheme : theme.lightColorScheme;
 
     function onColorSchemeChange(newColor: string) {

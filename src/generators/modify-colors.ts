@@ -1,8 +1,8 @@
-import {DEFAULT_COLORS} from '../defaults';
 import {FilterConfig, Theme} from '../definitions';
 import {parse, rgbToHSL, hslToRGB, rgbToString, rgbToHexString, RGBA, HSLA} from '../utils/color';
 import {scale} from '../utils/math';
 import {applyColorMatrix, createFilterMatrix} from './utils/matrix';
+import {COLOR_SCHEMES} from '../colorScheme';
 
 interface ColorFunction {
     (hsl: HSLA): HSLA;
@@ -11,14 +11,14 @@ interface ColorFunction {
 function getBgPole(theme: Theme) {
     const isDarkScheme = theme.mode === 1;
     const prop: keyof Theme = isDarkScheme ? 'darkSchemeBackgroundColor' : 'lightSchemeBackgroundColor';
-    const def = (isDarkScheme ? DEFAULT_COLORS.darkScheme : DEFAULT_COLORS.lightScheme).background;
+    const def = (isDarkScheme ? COLOR_SCHEMES.Normal_Dark : COLOR_SCHEMES.Normal_Light).background;
     return theme[prop] === 'auto' ? def : theme[prop];
 }
 
 function getFgPole(theme: Theme) {
     const isDarkScheme = theme.mode === 1;
     const prop: keyof Theme = isDarkScheme ? 'darkSchemeTextColor' : 'lightSchemeTextColor';
-    const def = (isDarkScheme ? DEFAULT_COLORS.darkScheme : DEFAULT_COLORS.lightScheme).text;
+    const def = (isDarkScheme ? COLOR_SCHEMES.Normal_Dark : COLOR_SCHEMES.Normal_Light).text;
     return theme[prop] === 'auto' ? def : theme[prop];
 }
 

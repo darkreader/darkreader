@@ -45,14 +45,3 @@ export const DEFAULT_SETTINGS: UserSettings = {
     previewNewDesign: false,
     enableForPDF: true,
 };
-
-export const DEFAULT_COLORS = {
-    darkScheme: {
-        background: '#181a1b',
-        text: '#e8e6e3',
-    },
-    lightScheme: {
-        background: '#dcdad7',
-        text: '#181a1b',
-    },
-};

@@ -19,6 +19,8 @@ export const DEFAULT_THEME: Theme = {
     lightSchemeTextColor: 'auto',
     scrollbarColor: isMacOS() ? '' : 'auto',
     selectionColor: 'auto',
+    lightColorScheme: 'none',
+    darkColorScheme: 'none',
 };
 
 export const DEFAULT_SETTINGS: UserSettings = {
@@ -54,3 +56,5 @@ export const DEFAULT_COLORS = {
         text: '#181a1b',
     },
 };
+
+

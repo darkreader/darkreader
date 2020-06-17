@@ -6,6 +6,9 @@ import {BackgroundColor, Brightness, Contrast, Grayscale, Mode, ResetButton, Sch
 import ThemePresetPicker from '../preset-picker';
 import {getCurrentThemePreset} from '../utils';
 import Collapsible from './collapsible-panel';
+import {COLOR_SCHEMES, DARK_COLOR_SCHEME, LIGHT_COLOR_SCHEME} from '../../../../colorScheme';
+import DropDown from '../../../controls/dropdown/index';
+import ColorSchemeDropDown from '../controls/color-scheme';
 
 interface ThemeGroupProps {
     theme: Theme;
@@ -48,6 +51,19 @@ function ColorsGroup({theme, change}: ThemeGroupProps) {
     const bgProp: keyof Theme = isDarkScheme ? 'darkSchemeBackgroundColor' : 'lightSchemeBackgroundColor';
     const fgProp: keyof Theme = isDarkScheme ? 'darkSchemeTextColor' : 'lightSchemeTextColor';
     const defaultSchemeColors = isDarkScheme ? DEFAULT_COLORS.darkScheme : DEFAULT_COLORS.lightScheme;
+    const colorSchemeValues: string[] = isDarkScheme ? DARK_COLOR_SCHEME.sort((a, b) => a.localeCompare(b)) : LIGHT_COLOR_SCHEME.sort((a, b) => a.localeCompare(b));
+    const currentColorScheme = isDarkScheme ? theme.darkColorScheme : theme.lightColorScheme;
+    
+    function onColorSchemeChange(newColor: string) {
+        if (isDarkScheme) {
+            change({darkColorScheme: newColor});
+        } else {
+            change({lightColorScheme: newColor});
+        }
+        change({[bgProp]: COLOR_SCHEMES[newColor].background});
+        change({[fgProp]: COLOR_SCHEMES[newColor].text});
+    }
+
     return (
         <Array>
             <BackgroundColor
@@ -71,6 +87,11 @@ function ColorsGroup({theme, change}: ThemeGroupProps) {
                 value={theme.selectionColor}
                 onChange={(v) => change({selectionColor: v})}
                 onReset={() => change({selectionColor: DEFAULT_SETTINGS.theme.selectionColor})}
+            />
+            <ColorSchemeDropDown
+                selected={currentColorScheme}
+                values={colorSchemeValues}
+                onChange={(v) => onColorSchemeChange(v)}
             />
         </Array>
     );

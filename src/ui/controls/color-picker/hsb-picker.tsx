@@ -1,7 +1,7 @@
 import {m} from 'malevic';
 import {getContext} from 'malevic/dom';
-import {rgbToHSL, parse, hslToString, RGBA} from '../../../utils/color';
-import {scale} from '../../../utils/math';
+import {rgbToHSL, parse, hslToString, rgbToHexString, RGBA} from '../../../utils/color';
+import {clamp, scale} from '../../../utils/math';
 
 interface HSBPickerProps {
     color: string;
@@ -81,8 +81,12 @@ function renderSB(hue: number, canvas: HTMLCanvasElement) {
 
 export default function HSBPicker(props: HSBPickerProps) {
     const context = getContext();
+    const store = context.store as {color: string, onChange: (color: string) => void};
+    store.onChange = props.onChange;
 
-    const rgb = parse(props.color);
+    const color = store.color || props.color;
+
+    const rgb = parse(color);
     const hsb = rgbToHSB(rgb);
 
     function onSBCanvasRender(canvas: HTMLCanvasElement) {
@@ -98,24 +102,81 @@ export default function HSBPicker(props: HSBPickerProps) {
         renderHue(canvas);
     }
 
+    function onSBPointerDown(e: MouseEvent) {
+        const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+
+        function getEventColor(e: MouseEvent) {
+            const sat = clamp((e.clientX - rect.left) / rect.width, 0, 1);
+            const br = clamp(1 - (e.clientY - rect.top) / rect.height, 0, 1);
+            const color = hsbToRGB(hsb.h, sat, br);
+            return rgbToHexString(color);
+        }
+
+        function onPointerMove(e: MouseEvent) {
+            store.color = getEventColor(e);
+            context.refresh();
+        }
+
+        function onPointerUp(e: MouseEvent) {
+            window.removeEventListener('mousemove', onPointerMove);
+            window.removeEventListener('mouseup', onPointerUp);
+            store.color = null;
+            props.onChange(getEventColor(e));
+        }
+
+        store.color = getEventColor(e);
+        context.refresh();
+
+        window.addEventListener('mousemove', onPointerMove);
+        window.addEventListener('mouseup', onPointerUp);
+    }
+
+    function onHuePointerDown(e: MouseEvent) {
+        const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+
+        function getEventColor(e: MouseEvent) {
+            const hue = clamp((e.clientY - rect.top) / rect.height, 0, 1) * 360;
+            const color = hsbToRGB(hue, hsb.s, hsb.b);
+            return rgbToHexString(color);
+        }
+
+        function onPointerMove(e: MouseEvent) {
+            store.color = getEventColor(e);
+            context.refresh();
+        }
+
+        function onPointerUp(e: MouseEvent) {
+            window.removeEventListener('mousemove', onPointerMove);
+            window.removeEventListener('mouseup', onPointerUp);
+            store.color = null;
+            props.onChange(getEventColor(e));
+        }
+
+        store.color = getEventColor(e);
+        context.refresh();
+
+        window.addEventListener('mousemove', onPointerMove);
+        window.addEventListener('mouseup', onPointerUp);
+    }
+
     const hueCursorStyle = {
         'background-color': hslToString({h: hsb.h, s: 1, l: 0.5, a: 1}),
         'left': '0%',
         'top': `${hsb.h / 360 * 100}%`,
     };
     const sbCursorStyle = {
-        'background-color': props.color,
+        'background-color': color,
         'left': `${hsb.s * 100}%`,
         'top': `${(1 - hsb.b) * 100}%`,
     };
 
     return (
         <span class="hsb-picker">
-            <span class="hsb-picker__sb-container">
+            <span class="hsb-picker__sb-container" onmousedown={onSBPointerDown}>
                 <canvas class="hsb-picker__sb-canvas" onrender={onSBCanvasRender} />
                 <span class="hsb-picker__sb-cursor" style={sbCursorStyle}></span>
             </span>
-            <span class="hsb-picker__hue-container">
+            <span class="hsb-picker__hue-container" onmousedown={onHuePointerDown}>
                 <canvas class="hsb-picker__hue-canvas" oncreate={onHueCanvasCreate} />
                 <span class="hsb-picker__hue-cursor" style={hueCursorStyle}></span>
             </span>

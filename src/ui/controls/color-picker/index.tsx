@@ -24,7 +24,7 @@ function isValidColor(color: string) {
 
 export default function ColorPicker(props: ColorPickerProps) {
     const context = getContext();
-    const store = context.store as {isHSBVisible: boolean};
+    const store = context.store as {isFocused: boolean};
 
     const previewColor = isValidColor(props.color) ? props.color : FALLBACK_COLOR;
 
@@ -37,9 +37,12 @@ export default function ColorPicker(props: ColorPickerProps) {
         }
     }
 
-    function onTextBoxClick() {
-        store.isHSBVisible = true;
-        context.refresh();
+    function onOuterClick(e: MouseEvent) {
+        if (!e.composedPath().some((el) => el === context.node)) {
+            window.removeEventListener('mousedown', onOuterClick);
+            store.isFocused = false;
+            context.refresh();
+        }
     }
 
     const textBoxLine = (
@@ -52,10 +55,15 @@ export default function ColorPicker(props: ColorPickerProps) {
                     const input = e.target as HTMLInputElement;
                     if (e.key === 'Enter') {
                         input.blur();
+                        store.isFocused = false;
                         onColorChange(input.value);
                     }
                 }}
-                onclick={onTextBoxClick}
+                onfocus={() => {
+                    store.isFocused = true;
+                    context.refresh();
+                    window.addEventListener('mousedown', onOuterClick);
+                }}
             />
             <span
                 class="color-picker__preview"
@@ -79,11 +87,11 @@ export default function ColorPicker(props: ColorPickerProps) {
     );
 
     return (
-        <label class={['color-picker', props.class]}>
+        <span class={['color-picker', store.isFocused && 'color-picker--focused', props.class]}>
             <span class="color-picker__wrapper">
                 {textBoxLine}
                 {hsbLine}
             </span>
-        </label>
+        </span>
     );
 }

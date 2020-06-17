@@ -49,16 +49,13 @@ function ColorsGroup({theme, change}: ThemeGroupProps) {
     const isDarkScheme = theme.mode === 1;
     const bgProp: keyof Theme = isDarkScheme ? 'darkSchemeBackgroundColor' : 'lightSchemeBackgroundColor';
     const fgProp: keyof Theme = isDarkScheme ? 'darkSchemeTextColor' : 'lightSchemeTextColor';
+    const csProp: keyof Theme = isDarkScheme ? 'darkColorScheme' : 'lightColorScheme';
     const defaultSchemeColors = isDarkScheme ? DEFAULT_COLORS.darkScheme : DEFAULT_COLORS.lightScheme;
     const colorSchemeValues: string[] = isDarkScheme ? DARK_COLOR_SCHEME.sort((a, b) => a.localeCompare(b)) : LIGHT_COLOR_SCHEME.sort((a, b) => a.localeCompare(b));
     const currentColorScheme = isDarkScheme ? theme.darkColorScheme : theme.lightColorScheme;
 
     function onColorSchemeChange(newColor: string) {
-        if (isDarkScheme) {
-            change({darkColorScheme: newColor});
-        } else {
-            change({lightColorScheme: newColor});
-        }
+        change({[csProp]: newColor});
         change({[bgProp]: COLOR_SCHEMES[newColor].background});
         change({[fgProp]: COLOR_SCHEMES[newColor].text});
     }

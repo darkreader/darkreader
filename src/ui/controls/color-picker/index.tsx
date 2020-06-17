@@ -1,6 +1,8 @@
 import {m} from 'malevic';
-import TextBox from '../textbox';
+import {getContext} from 'malevic/dom';
 import {parse} from '../../../utils/color';
+import TextBox from '../textbox';
+import HSBPicker from './hsb-picker';
 
 interface ColorPickerProps {
     class?: any;
@@ -9,7 +11,7 @@ interface ColorPickerProps {
     onReset: () => void;
 }
 
-const DEFAULT_COLOR = '#000000';
+const FALLBACK_COLOR = '#000000';
 
 function isValidColor(color: string) {
     try {
@@ -20,9 +22,11 @@ function isValidColor(color: string) {
     }
 }
 
-// TODO: Add a HSB color picker.
 export default function ColorPicker(props: ColorPickerProps) {
-    const previewColor = isValidColor(props.color) ? props.color : DEFAULT_COLOR;
+    const context = getContext();
+    const store = context.store as {isHSBVisible: boolean};
+
+    const previewColor = isValidColor(props.color) ? props.color : FALLBACK_COLOR;
 
     function onColorChange(rawValue: string) {
         const value = rawValue.trim();
@@ -33,8 +37,13 @@ export default function ColorPicker(props: ColorPickerProps) {
         }
     }
 
-    return (
-        <span class={['color-picker', props.class]}>
+    function onTextBoxClick() {
+        store.isHSBVisible = true;
+        context.refresh();
+    }
+
+    const textBoxLine = (
+        <span class="color-picker__textbox-line">
             <TextBox
                 class="color-picker__input"
                 value={previewColor}
@@ -46,6 +55,7 @@ export default function ColorPicker(props: ColorPickerProps) {
                         onColorChange(input.value);
                     }
                 }}
+                onclick={onTextBoxClick}
             />
             <span
                 class="color-picker__preview"
@@ -57,5 +67,23 @@ export default function ColorPicker(props: ColorPickerProps) {
                 onclick={props.onReset}
             ></span>
         </span>
+    );
+
+    const hsbLine = (
+        <span class="color-picker__hsb-line">
+            <HSBPicker
+                color={previewColor}
+                onChange={onColorChange}
+            />
+        </span>
+    );
+
+    return (
+        <label class={['color-picker', props.class]}>
+            <span class="color-picker__wrapper">
+                {textBoxLine}
+                {hsbLine}
+            </span>
+        </label>
     );
 }

@@ -7,7 +7,6 @@ import ThemePresetPicker from '../preset-picker';
 import {getCurrentThemePreset} from '../utils';
 import Collapsible from './collapsible-panel';
 import {COLOR_SCHEMES, DARK_COLOR_SCHEME, LIGHT_COLOR_SCHEME} from '../../../../colorScheme';
-import DropDown from '../../../controls/dropdown/index';
 import ColorSchemeDropDown from '../controls/color-scheme';
 
 interface ThemeGroupProps {
@@ -53,7 +52,7 @@ function ColorsGroup({theme, change}: ThemeGroupProps) {
     const defaultSchemeColors = isDarkScheme ? DEFAULT_COLORS.darkScheme : DEFAULT_COLORS.lightScheme;
     const colorSchemeValues: string[] = isDarkScheme ? DARK_COLOR_SCHEME.sort((a, b) => a.localeCompare(b)) : LIGHT_COLOR_SCHEME.sort((a, b) => a.localeCompare(b));
     const currentColorScheme = isDarkScheme ? theme.darkColorScheme : theme.lightColorScheme;
-    
+
     function onColorSchemeChange(newColor: string) {
         if (isDarkScheme) {
             change({darkColorScheme: newColor});

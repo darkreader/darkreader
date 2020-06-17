@@ -5,7 +5,7 @@ export const DARK_COLOR_SCHEME = [
 export const LIGHT_COLOR_SCHEME = [
     'None',
     'Solarized_Light',
-]
+];
 
 export const COLOR_SCHEMES = {
     None: {

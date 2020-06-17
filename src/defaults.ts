@@ -56,5 +56,3 @@ export const DEFAULT_COLORS = {
         text: '#181a1b',
     },
 };
-
-

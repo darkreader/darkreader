@@ -15,11 +15,11 @@ import {modifyColor} from '../../generators/modify-colors';
 import {createTextStyle} from '../../generators/text-style';
 import {FilterConfig, DynamicThemeFix} from '../../definitions';
 import {createAdoptedStyleSheetOverride, removeAdoptedStyleSheets, AdoptedStyleSheetManager} from './adopted-style-manger';
-import {render} from 'malevic/dom';
 
-export const variables = new Map<string, string>();
+const variables = new Map<string, string>();
+const shadowVariables = new Map<string, string>();
 const styleManagers = new Map<StyleElement, StyleManager>();
-const adoptedStyleSheetManger = [] as Array<AdoptedStyleSheetManager>;
+const adoptedStyleManagers = [] as Array<AdoptedStyleSheetManager>;
 let filter: FilterConfig = null;
 let fixes: DynamicThemeFix = null;
 let isIFrame: boolean = null;
@@ -215,8 +215,21 @@ function updateVariables(newVars: Map<string, string>) {
     if (newVars.size === 0) {
         return;
     }
-    newVars.forEach((value, key) => variables.set(key, value));
-    variables.forEach((value, key) => variables.set(key, replaceCSSVariables(value, variables)));
+    newVars.forEach((value, key) => {
+        variables.set(key, value);
+    });
+    variables.forEach((value, key) => {
+        variables.set(key, replaceCSSVariables(value, variables));
+        shadowVariables.set(key, replaceCSSVariables(value, variables));
+    });
+}
+
+function updateShadowVariables(newVars: Map<string, string>) {
+    if (newVars.size === 0) {
+        return;
+    }
+    shadowVariables.forEach((value, key) => shadowVariables.set(key, value));
+    shadowVariables.forEach((value, key) => shadowVariables.set(key, replaceCSSVariables(value, shadowVariables)));
 }
 
 function removeManager(element: StyleElement) {
@@ -229,7 +242,7 @@ function removeManager(element: StyleElement) {
 
 const throttledRenderAllStyles = throttle((callback?: () => void) => {
     styleManagers.forEach((manager) => manager.render(filter, variables));
-    adoptedStyleSheetManger.forEach((manager) => manager.render(filter, variables));
+    adoptedStyleManagers.forEach((manager) => manager.render(filter, shadowVariables));
     callback && callback();
 });
 
@@ -285,7 +298,7 @@ function createThemeAndWatchForUpdates() {
 function handleAdoptedStyleSheets(node: ShadowRoot | Document) {
     if (node.adoptedStyleSheets.length > 0) {
         const newManger = createAdoptedStyleSheetOverride(node);
-        adoptedStyleSheetManger.push(newManger);
+        adoptedStyleManagers.push(newManger);
         newManger.render(filter, variables);
     }
 }
@@ -313,13 +326,13 @@ function watchForUpdates() {
         }
         newManagers.forEach((manager) => manager.watch());
         stylesToRestore.forEach((style) => styleManagers.get(style).restore());
-    }, (shadowroot) => {
+    }, (ShadowRoot) => {
         const shadowRootVariable = new Map<string, string>();
-        forEach(shadowroot.adoptedStyleSheets, (stylesheet) => {
+        forEach(ShadowRoot.adoptedStyleSheets, (stylesheet) => {
             getCSSVariables(stylesheet.cssRules).forEach((value, key) => shadowRootVariable.set(key, value));
         });
-        updateVariables(shadowRootVariable);
-        handleAdoptedStyleSheets(shadowroot);
+        updateShadowVariables(shadowRootVariable);
+        handleAdoptedStyleSheets(ShadowRoot);
     });
 
     const ignoredSelectors = fixes && Array.isArray(fixes.ignoreInlineStyle) ? fixes.ignoreInlineStyle : [];

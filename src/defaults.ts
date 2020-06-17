@@ -19,8 +19,8 @@ export const DEFAULT_THEME: Theme = {
     lightSchemeTextColor: 'auto',
     scrollbarColor: isMacOS() ? '' : 'auto',
     selectionColor: 'auto',
-    lightColorScheme: 'None',
-    darkColorScheme: 'None',
+    lightColorScheme: 'Normal_Light',
+    darkColorScheme: 'Normal_Dark',
 };
 
 export const DEFAULT_SETTINGS: UserSettings = {

@@ -30,11 +30,12 @@ function focusColorPicker(node: Node) {
 function ColorPicker(props: ColorPickerProps) {
     const context = getContext();
     context.onRender((node) => colorPickerFocuses.set(node, focus));
-    const store = context.store as {isFocused: boolean, textBoxNode: HTMLInputElement};
+    const store = context.store as {isFocused: boolean; textBoxNode: HTMLInputElement; previewNode: HTMLElement};
 
     const isColorValid = isValidColor(props.color);
 
     function onColorPreview(previewColor: string) {
+        store.previewNode.style.backgroundColor = previewColor;
         store.textBoxNode.value = previewColor
         store.textBoxNode.blur();
     }
@@ -103,8 +104,11 @@ function ColorPicker(props: ColorPickerProps) {
     const previewElement = (
         <span
             class="color-picker__preview"
-            style={{'background-color': isColorValid ? props.color : 'transparent'}}
             onclick={toggleFocus}
+            onrender={(el: HTMLElement) => {
+                store.previewNode = el;
+                el.style.backgroundColor = isColorValid ? props.color : 'transparent';
+            }}
         ></span>
     );
 

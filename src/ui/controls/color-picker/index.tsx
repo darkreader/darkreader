@@ -36,7 +36,7 @@ function ColorPicker(props: ColorPickerProps) {
 
     function onColorPreview(previewColor: string) {
         store.previewNode.style.backgroundColor = previewColor;
-        store.textBoxNode.value = previewColor
+        store.textBoxNode.value = previewColor;
         store.textBoxNode.blur();
     }
 
@@ -86,7 +86,7 @@ function ColorPicker(props: ColorPickerProps) {
             class="color-picker__input"
             onrender={(el) => {
                 store.textBoxNode = el as HTMLInputElement;
-                store.textBoxNode.value = isColorValid ? props.color : ''
+                store.textBoxNode.value = isColorValid ? props.color : '';
             }}
             onchange={(e) => onColorChange(e.target.value)}
             onkeypress={(e) => {

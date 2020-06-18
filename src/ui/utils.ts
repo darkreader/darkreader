@@ -40,7 +40,9 @@ export function saveFile(name: string, content: string) {
     a.click();
 }
 
-export function throttle<F extends (...args: any[]) => void>(callback: F): F {
+type AnyVoidFunction = (...args: any[]) => void;
+
+export function throttle<F extends AnyVoidFunction>(callback: F): F {
     let frameId = null;
     return ((...args: any[]) => {
         if (!frameId) {

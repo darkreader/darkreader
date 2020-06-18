@@ -19,6 +19,8 @@ interface HSBPickerProps {
 interface HSBPickerState {
     activeHSB: HSB;
     activeChangeHandler: (color: string) => void;
+    hueTouchStartHandler: (e: TouchEvent) => void;
+    sbTouchStartHandler: (e: TouchEvent) => void;
 }
 
 function rgbToHSB({r, g, b}: RGBA) {
@@ -176,7 +178,13 @@ export default function HSBPicker(props: HSBPickerProps) {
             <span
                 class="hsb-picker__sb-container"
                 onmousedown={onSBPointerDown}
-                ontouchstart={onSBPointerDown}
+                onupdate={(el: HTMLElement) => {
+                    if (store.sbTouchStartHandler) {
+                        el.removeEventListener('touchstart', store.sbTouchStartHandler);
+                    }
+                    el.addEventListener('touchstart', onSBPointerDown, {passive: true});
+                    store.sbTouchStartHandler = onSBPointerDown;
+                }}
             >
                 <canvas class="hsb-picker__sb-canvas" onrender={onSBCanvasRender} />
                 <span class="hsb-picker__sb-cursor" style={sbCursorStyle}></span>
@@ -184,7 +192,13 @@ export default function HSBPicker(props: HSBPickerProps) {
             <span
                 class="hsb-picker__hue-container"
                 onmousedown={onHuePointerDown}
-                ontouchstart={onHuePointerDown}
+                onupdate={(el: HTMLElement) => {
+                    if (store.hueTouchStartHandler) {
+                        el.removeEventListener('touchstart', store.hueTouchStartHandler);
+                    }
+                    el.addEventListener('touchstart', onHuePointerDown, {passive: true});
+                    store.hueTouchStartHandler = onHuePointerDown;
+                }}
             >
                 <canvas class="hsb-picker__hue-canvas" oncreate={onHueCanvasCreate} />
                 <span class="hsb-picker__hue-cursor" style={hueCursorStyle}></span>

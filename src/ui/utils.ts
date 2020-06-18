@@ -109,8 +109,8 @@ function onSwipeStart(
         window.removeEventListener(pointerUpEvent, onPointerUp);
     }
 
-    window.addEventListener(pointerMoveEvent, onPointerMove);
-    window.addEventListener(pointerUpEvent, onPointerUp);
+    window.addEventListener(pointerMoveEvent, onPointerMove, {passive: true});
+    window.addEventListener(pointerUpEvent, onPointerUp, {passive: true});
 }
 
 export function createSwipeHandler(startHandler: StartSwipeHandler) {

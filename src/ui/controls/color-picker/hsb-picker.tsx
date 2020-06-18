@@ -155,11 +155,19 @@ export default function HSBPicker(props: HSBPickerProps) {
 
     return (
         <span class="hsb-picker">
-            <span class="hsb-picker__sb-container" onmousedown={onSBPointerDown}>
+            <span
+                class="hsb-picker__sb-container"
+                onmousedown={onSBPointerDown}
+                ontouchstart={onSBPointerDown}
+            >
                 <canvas class="hsb-picker__sb-canvas" onrender={onSBCanvasRender} />
                 <span class="hsb-picker__sb-cursor" style={sbCursorStyle}></span>
             </span>
-            <span class="hsb-picker__hue-container" onmousedown={onHuePointerDown}>
+            <span
+                class="hsb-picker__hue-container"
+                onmousedown={onHuePointerDown}
+                ontouchstart={onHuePointerDown}
+            >
                 <canvas class="hsb-picker__hue-canvas" oncreate={onHueCanvasCreate} />
                 <span class="hsb-picker__hue-cursor" style={hueCursorStyle}></span>
             </span>

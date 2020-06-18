@@ -39,3 +39,80 @@ export function saveFile(name: string, content: string) {
     a.download = name;
     a.click();
 }
+
+type AnyVoidFunction = (...args: any[]) => void;
+
+export function throttle<F extends AnyVoidFunction>(callback: F): F {
+    let frameId = null;
+    return ((...args: any[]) => {
+        if (!frameId) {
+            callback(...args);
+            frameId = requestAnimationFrame(() => (frameId = null));
+        }
+    }) as F;
+}
+
+interface SwipeEventObject {
+    clientX: number;
+    clientY: number;
+}
+
+type SwipeEventHandler<T = void> = (e: SwipeEventObject, nativeEvent: MouseEvent | TouchEvent) => T;
+type StartSwipeHandler = SwipeEventHandler<{move: SwipeEventHandler; up: SwipeEventHandler}>;
+
+function onSwipeStart(
+    startEventObj: MouseEvent | TouchEvent,
+    startHandler: StartSwipeHandler,
+) {
+    const isTouchEvent =
+        typeof TouchEvent !== 'undefined' &&
+        startEventObj instanceof TouchEvent;
+    const touchId = isTouchEvent
+        ? (startEventObj as TouchEvent).changedTouches[0].identifier
+        : null;
+    const pointerMoveEvent = isTouchEvent ? 'touchmove' : 'mousemove';
+    const pointerUpEvent = isTouchEvent ? 'touchend' : 'mouseup';
+
+    if (!isTouchEvent) {
+        startEventObj.preventDefault();
+    }
+
+    function getSwipeEventObject(e: MouseEvent | TouchEvent) {
+        const {clientX, clientY} = isTouchEvent
+            ? getTouch(e as TouchEvent)
+            : e as MouseEvent;
+        return {clientX, clientY};
+    }
+
+    const startSE = getSwipeEventObject(startEventObj);
+    const {move: moveHandler, up: upHandler} = startHandler(startSE, startEventObj);
+
+    function getTouch(e: TouchEvent) {
+        return Array.from(e.changedTouches).find(
+            ({identifier: id}) => id === touchId,
+        );
+    }
+
+    const onPointerMove = throttle((e) => {
+        const se = getSwipeEventObject(e);
+        moveHandler(se, e);
+    });
+
+    function onPointerUp(e) {
+        unsubscribe();
+        const se = getSwipeEventObject(e);
+        upHandler(se, e);
+    }
+
+    function unsubscribe() {
+        window.removeEventListener(pointerMoveEvent, onPointerMove);
+        window.removeEventListener(pointerUpEvent, onPointerUp);
+    }
+
+    window.addEventListener(pointerMoveEvent, onPointerMove, {passive: true});
+    window.addEventListener(pointerUpEvent, onPointerUp, {passive: true});
+}
+
+export function createSwipeHandler(startHandler: StartSwipeHandler) {
+    return (e: MouseEvent | TouchEvent) => onSwipeStart(e, startHandler);
+}

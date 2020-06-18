@@ -58,6 +58,20 @@ export default function ColorDropDown(props: ColorDropDownProps) {
         isPickerVisible = false;
     }
 
+    const prevValue = context.prev ? context.prev.props.value : null;
+    const shouldFocusOnPicker = (
+        (props.value !== '' && props.value !== 'auto') &&
+        prevValue != null &&
+        (prevValue === '' || prevValue === 'auto')
+    );
+
+    function onRootRender(root: Element) {
+        if (shouldFocusOnPicker) {
+            const pickerNode = root.querySelector('.color-dropdown__picker');
+            ColorPicker.focus(pickerNode);
+        }
+    }
+
     return (
         <span
             class={{
@@ -65,6 +79,7 @@ export default function ColorDropDown(props: ColorDropDownProps) {
                 'color-dropdown--open': store.isOpen,
                 [props.class]: Boolean(props.class),
             }}
+            onrender={onRootRender}
         >
             <DropDown class="color-dropdown__options"
                 values={dropDownValues}

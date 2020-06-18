@@ -1,13 +1,31 @@
 @import "../../theme.less";
+@import "./hsb-picker";
 
-@colorpicker-input-height: 1.5rem;
-@colorpicker-input-height-inactive: 1.25rem;
+@colorpicker-control-height: 1.5rem;
+@colorpicker-input-height: 1.25rem;
 @colorpicker-icon-size: 1rem;
 
 .color-picker {
-    display: inline-block;
-    height: @colorpicker-input-height;
+    height: @colorpicker-control-height;
     position: relative;
+
+    &__wrapper {
+        background-color: @color-back;
+        border-radius: @colorpicker-control-height / 2;
+        display: inline-flex;
+        flex-direction: column;
+        left: 0;
+        overflow: hidden;
+        position: absolute;
+        top: 0;
+        width: 100%;
+    }
+
+    &--focused &__wrapper {
+        border: @size-border solid @color-border;
+        box-sizing: border-box;
+        z-index: 1;
+    }
 
     &__input {
         background-color: @color-control-active;
@@ -15,26 +33,30 @@
         border-radius: @colorpicker-input-height / 2;
         box-sizing: border-box;
         color: @color-control-fore;
-        height: @colorpicker-input-height-inactive;
-        margin-top: (@colorpicker-input-height - @colorpicker-input-height-inactive) / 2;
+        height: @colorpicker-input-height;
+        margin-top: @size-border;
         text-align: center;
         width: 100%;
+    }
 
-        &:focus {
-            border: @size-border solid @color-border;
-            height: @colorpicker-input-height;
-            margin-top: 0;
-        }
+    &--focused &__input {
+        margin-top: 0;
     }
 
     &__preview {
         border-radius: 50%;
+        cursor: pointer;
         display: inline-block;
         height: @colorpicker-icon-size;
-        left: (@colorpicker-input-height - @colorpicker-icon-size) / 2;
+        left: (@colorpicker-control-height - @colorpicker-icon-size) / 2;
         position: absolute;
-        top: (@colorpicker-input-height - @colorpicker-icon-size) / 2;
+        top: (@colorpicker-control-height - @colorpicker-icon-size) / 2;
         width: @colorpicker-icon-size;
+    }
+
+    &--focused &__preview {
+        left: (@colorpicker-control-height - @colorpicker-icon-size) / 2 - @size-border;
+        top: (@colorpicker-control-height - @colorpicker-icon-size) / 2 - @size-border;
     }
 
     &__reset {
@@ -47,8 +69,27 @@
         display: inline-block;
         height: @colorpicker-icon-size;
         position: absolute;
-        right: 0.25rem;
-        top: (@colorpicker-input-height - @colorpicker-icon-size) / 2;
+        right: (@colorpicker-control-height - @colorpicker-icon-size) / 2;
+        top: (@colorpicker-control-height - @colorpicker-icon-size) / 2;
         width: @colorpicker-icon-size;
+    }
+
+    &--focused &__reset {
+        right: (@colorpicker-control-height - @colorpicker-icon-size) / 2 - @size-border;
+        top: (@colorpicker-control-height - @colorpicker-icon-size) / 2 - @size-border;
+    }
+
+    &__textbox-line {
+        width: 100%;
+    }
+
+    &__hsb-line {
+        display: none;
+        width: 100%;
+    }
+
+    &--focused &__hsb-line {
+        border-color: @color-border;
+        display: block;
     }
 }

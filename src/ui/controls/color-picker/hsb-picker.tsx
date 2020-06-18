@@ -4,9 +4,21 @@ import {rgbToHSL, parse, hslToString, rgbToHexString, RGBA} from '../../../utils
 import {clamp, scale} from '../../../utils/math';
 import {createSwipeHandler} from '../../utils';
 
+interface HSB {
+    h: number;
+    s: number;
+    b: number;
+}
+
 interface HSBPickerProps {
     color: string;
     onChange: (color: string) => void;
+    onColorPreview: (color: string) => void;
+}
+
+interface HSBPickerState {
+    activeHSB: HSB;
+    activeChangeHandler: (color: string) => void;
 }
 
 function rgbToHSB({r, g, b}: RGBA) {
@@ -19,7 +31,7 @@ function rgbToHSB({r, g, b}: RGBA) {
     };
 }
 
-function hsbToRGB(hue: number, sat: number, br: number): RGBA {
+function hsbToRGB({h: hue, s: sat, b: br}: HSB): RGBA {
     let c: [number, number, number];
     if (hue < 60) {
         c = [1, hue / 60, 0];
@@ -44,6 +56,11 @@ function hsbToRGB(hue: number, sat: number, br: number): RGBA {
     return {r, g, b, a: 1};
 }
 
+function hsbToString(hsb: HSB) {
+    const rgb = hsbToRGB(hsb);
+    return rgbToHexString(rgb);
+}
+
 function render(canvas: HTMLCanvasElement, getPixel: (x, y) => Uint8ClampedArray) {
     const {width, height} = canvas;
     const context = canvas.getContext('2d');
@@ -63,9 +80,9 @@ function render(canvas: HTMLCanvasElement, getPixel: (x, y) => Uint8ClampedArray
 
 function renderHue(canvas: HTMLCanvasElement) {
     const {height} = canvas;
-    render(canvas, (x, y) => {
+    render(canvas, (_, y) => {
         const hue = scale(y, 0, height, 0, 360);
-        const {r, g, b, a} = hsbToRGB(hue, 1, 1);
+        const {r, g, b} = hsbToRGB({h: hue, s: 1, b: 1});
         return new Uint8ClampedArray([r, g, b, 255]);
     });
 }
@@ -75,23 +92,24 @@ function renderSB(hue: number, canvas: HTMLCanvasElement) {
     render(canvas, (x, y) => {
         const sat = scale(x, 0, width - 1, 0, 1);
         const br = scale(y, 0, height - 1, 1, 0);
-        const {r, g, b} = hsbToRGB(hue, sat, br);
+        const {r, g, b} = hsbToRGB({h: hue, s: sat, b: br});
         return new Uint8ClampedArray([r, g, b, 255]);
     });
 }
 
 export default function HSBPicker(props: HSBPickerProps) {
     const context = getContext();
-    const store = context.store as {color: string, onChange: (color: string) => void};
-    store.onChange = props.onChange;
+    const store = context.store as HSBPickerState;
+    store.activeChangeHandler = props.onChange;
 
-    const color = store.color || props.color;
-
-    const rgb = parse(color);
-    const hsb = rgbToHSB(rgb);
+    let {activeHSB} = store;
+    if (!activeHSB) {
+        const rgb = parse(props.color);
+        activeHSB = rgbToHSB(rgb);
+    }
 
     function onSBCanvasRender(canvas: HTMLCanvasElement) {
-        const hue = hsb.h;
+        const hue = activeHSB.h;
         const prevHue = context.prev && rgbToHSB(parse(context.prev.props.color)).h;
         if (hue === prevHue) {
             return;
@@ -103,23 +121,25 @@ export default function HSBPicker(props: HSBPickerProps) {
         renderHue(canvas);
     }
 
-    function createHSBSwipeHandler(getEventColor: (e: {clientX: number; clientY: number; rect: ClientRect}) => string) {
+    function createHSBSwipeHandler(getEventHSB: (e: {clientX: number; clientY: number; rect: ClientRect}) => HSB) {
         return createSwipeHandler((startEvt, startNativeEvt) => {
             type SwipeEvent = typeof startEvt;
 
             const rect = (startNativeEvt.currentTarget as HTMLElement).getBoundingClientRect();
 
             function onPointerMove(e: SwipeEvent) {
-                store.color = getEventColor({...e, rect});
+                store.activeHSB = getEventHSB({...e, rect});
+                props.onColorPreview(hsbToString(store.activeHSB));
                 context.refresh();
             }
 
             function onPointerUp(e: SwipeEvent) {
-                store.color = null;
-                props.onChange(getEventColor({...e, rect}));
+                store.activeHSB = null;
+                const hsb = getEventHSB({...e, rect});
+                props.onChange(hsbToString(hsb));
             }
 
-            store.color = getEventColor({...startEvt, rect});
+            store.activeHSB = getEventHSB({...startEvt, rect});
             context.refresh();
 
             return {
@@ -132,25 +152,23 @@ export default function HSBPicker(props: HSBPickerProps) {
     const onSBPointerDown = createHSBSwipeHandler(({clientX, clientY, rect}) => {
         const sat = clamp((clientX - rect.left) / rect.width, 0, 1);
         const br = clamp(1 - (clientY - rect.top) / rect.height, 0, 1);
-        const color = hsbToRGB(hsb.h, sat, br);
-        return rgbToHexString(color);
+        return {...activeHSB, s: sat, b: br};
     });
 
-    const onHuePointerDown = createHSBSwipeHandler(({clientX, clientY, rect}) => {
+    const onHuePointerDown = createHSBSwipeHandler(({clientY, rect}) => {
         const hue = clamp((clientY - rect.top) / rect.height, 0, 1) * 360;
-        const color = hsbToRGB(hue, hsb.s, hsb.b);
-        return rgbToHexString(color);
+        return {...activeHSB, h: hue};
     });
 
     const hueCursorStyle = {
-        'background-color': hslToString({h: hsb.h, s: 1, l: 0.5, a: 1}),
+        'background-color': hslToString({h: activeHSB.h, s: 1, l: 0.5, a: 1}),
         'left': '0%',
-        'top': `${hsb.h / 360 * 100}%`,
+        'top': `${activeHSB.h / 360 * 100}%`,
     };
     const sbCursorStyle = {
-        'background-color': color,
-        'left': `${hsb.s * 100}%`,
-        'top': `${(1 - hsb.b) * 100}%`,
+        'background-color': rgbToHexString(hsbToRGB(activeHSB)),
+        'left': `${activeHSB.s * 100}%`,
+        'top': `${(1 - activeHSB.b) * 100}%`,
     };
 
     return (

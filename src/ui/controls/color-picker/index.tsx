@@ -20,8 +20,16 @@ function isValidColor(color: string) {
     }
 }
 
-export default function ColorPicker(props: ColorPickerProps) {
+const colorPickerFocuses = new WeakMap<Node, () => void>();
+
+function focusColorPicker(node: Node) {
+    const focus = colorPickerFocuses.get(node);
+    focus();
+}
+
+function ColorPicker(props: ColorPickerProps) {
     const context = getContext();
+    context.onRender((node) => colorPickerFocuses.set(node, focus));
     const store = context.store as {isFocused: boolean, textBoxNode: HTMLInputElement};
 
     const isColorValid = isValidColor(props.color);
@@ -135,3 +143,5 @@ export default function ColorPicker(props: ColorPickerProps) {
         </span>
     );
 }
+
+export default Object.assign(ColorPicker, {focus: focusColorPicker});

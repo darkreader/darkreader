@@ -104,15 +104,21 @@ export default function HSBPicker(props: HSBPickerProps) {
     const store = context.store as HSBPickerState;
     store.activeChangeHandler = props.onChange;
 
-    let {activeHSB} = store;
-    if (!activeHSB) {
+    const prevColor = context.prev && context.prev.props.color;
+    const prevActiveColor = store.activeHSB ? hsbToString(store.activeHSB) : null;
+    const didColorChange = props.color !== prevColor && props.color !== prevActiveColor;
+    let activeHSB: HSB;
+    if (didColorChange) {
         const rgb = parse(props.color);
         activeHSB = rgbToHSB(rgb);
+        store.activeHSB = activeHSB;
+    } else {
+        activeHSB = store.activeHSB;
     }
 
     function onSBCanvasRender(canvas: HTMLCanvasElement) {
         const hue = activeHSB.h;
-        const prevHue = context.prev && rgbToHSB(parse(context.prev.props.color)).h;
+        const prevHue = prevColor && rgbToHSB(parse(prevColor)).h;
         if (hue === prevHue) {
             return;
         }
@@ -136,8 +142,8 @@ export default function HSBPicker(props: HSBPickerProps) {
             }
 
             function onPointerUp(e: SwipeEvent) {
-                store.activeHSB = null;
                 const hsb = getEventHSB({...e, rect});
+                store.activeHSB = hsb;
                 props.onChange(hsbToString(hsb));
             }
 

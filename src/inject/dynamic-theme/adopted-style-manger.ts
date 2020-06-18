@@ -1,30 +1,12 @@
 import {Theme} from '../../definitions';
 import {createStyleSheetModifier} from './stylesheet-modifier';
-import {forEach} from '../../utils/array';
+import {getCSSVariables} from './css-rules';
 
 let adoptedStyleOverrides = new WeakMap<CSSStyleSheet, CSSStyleSheet>();
-let adoptedStyleOwners = [] as Array<ShadowRoot | Document>;
 let overrideList = new WeakSet<CSSStyleSheet>();
 
-export function removeAdoptedStyleSheets() {
-    forEach(adoptedStyleOwners, (node) => {
-        forEach(node.adoptedStyleSheets, (adoptedStyleSheet) => {
-            if (overrideList.has(adoptedStyleSheet)) {
-                const newSheets = [...node.adoptedStyleSheets];
-                const existingIndex = newSheets.indexOf(adoptedStyleOverrides.get(adoptedStyleSheet));
-                if (existingIndex >= 0) {
-                    newSheets.splice(existingIndex, 1);
-                }
-                node.adoptedStyleSheets = newSheets;
-            }
-        });
-    });
-    cleanAdoptedStyleSheets();
-}
-function cleanAdoptedStyleSheets() {
-    
+export function cleanAdoptedStyleSheets() {
     adoptedStyleOverrides = new WeakMap<CSSStyleSheet, CSSStyleSheet>();
-    adoptedStyleOwners = [];
     overrideList = new WeakSet<CSSStyleSheet>();
 }
 
@@ -34,8 +16,6 @@ export interface AdoptedStyleSheetManager {
 }
 
 export function createAdoptedStyleSheetOverride(node: Document | ShadowRoot): AdoptedStyleSheetManager {
-
-    adoptedStyleOwners.push(node);
 
     function injectSheet(sheet: CSSStyleSheet, override: CSSStyleSheet) {
         const newSheets = [...node.adoptedStyleSheets];
@@ -53,7 +33,7 @@ export function createAdoptedStyleSheetOverride(node: Document | ShadowRoot): Ad
 
     function destroy() {
         const newSheets = [...node.adoptedStyleSheets];
-        node.adoptedStyleSheets.forEach( (adoptedStyleSheet) => {
+        node.adoptedStyleSheets.forEach((adoptedStyleSheet) => {
             if (overrideList.has(adoptedStyleSheet)) {
                 const existingIndex = newSheets.indexOf(adoptedStyleOverrides.get(adoptedStyleSheet));
                 if (existingIndex >= 0) {
@@ -67,7 +47,7 @@ export function createAdoptedStyleSheetOverride(node: Document | ShadowRoot): Ad
     }
 
     function render(theme: Theme, variables: Map<string, string>) {
-        node.adoptedStyleSheets.forEach( (sheet) => {
+        node.adoptedStyleSheets.forEach((sheet) => {
             if (overrideList.has(sheet)) {
                 return;
             }
@@ -83,6 +63,8 @@ export function createAdoptedStyleSheetOverride(node: Document | ShadowRoot): Ad
                 overrideList.add(override);
                 return override;
             }
+            const shadowVariables = variables;
+            getCSSVariables(sheet.cssRules).forEach((value, key) => shadowVariables.set(key, value));
 
             const sheetModifier = createStyleSheetModifier();
             sheetModifier.modifySheet({

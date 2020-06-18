@@ -1,4 +1,4 @@
-import {replaceCSSVariables, getElementCSSVariables, getCSSVariables} from './css-rules';
+import {replaceCSSVariables, getElementCSSVariables} from './css-rules';
 import {overrideInlineStyle, getInlineOverrideStyle, watchForInlineStyles, stopWatchingForInlineStyles, INLINE_STYLE_SELECTOR} from './inline-style';
 import {changeMetaThemeColorWhenAvailable, restoreMetaThemeColor} from './meta-theme-color';
 import {getModifiedUserAgentStyle, getModifiedFallbackStyle, cleanModificationCache, parseColorWithCache} from './modify-css';
@@ -14,10 +14,9 @@ import {getCSSFilterValue} from '../../generators/css-filter';
 import {modifyColor} from '../../generators/modify-colors';
 import {createTextStyle} from '../../generators/text-style';
 import {FilterConfig, DynamicThemeFix} from '../../definitions';
-import {createAdoptedStyleSheetOverride, removeAdoptedStyleSheets, AdoptedStyleSheetManager} from './adopted-style-manger';
+import {createAdoptedStyleSheetOverride, AdoptedStyleSheetManager, cleanAdoptedStyleSheets} from './adopted-style-manger';
 
 const variables = new Map<string, string>();
-const shadowVariables = new Map<string, string>();
 const styleManagers = new Map<StyleElement, StyleManager>();
 const adoptedStyleManagers = [] as Array<AdoptedStyleSheetManager>;
 let filter: FilterConfig = null;
@@ -220,17 +219,9 @@ function updateVariables(newVars: Map<string, string>) {
     });
     variables.forEach((value, key) => {
         variables.set(key, replaceCSSVariables(value, variables));
-        shadowVariables.set(key, replaceCSSVariables(value, variables));
     });
 }
 
-function updateShadowVariables(newVars: Map<string, string>) {
-    if (newVars.size === 0) {
-        return;
-    }
-    shadowVariables.forEach((value, key) => shadowVariables.set(key, value));
-    shadowVariables.forEach((value, key) => shadowVariables.set(key, replaceCSSVariables(value, shadowVariables)));
-}
 
 function removeManager(element: StyleElement) {
     const manager = styleManagers.get(element);
@@ -240,9 +231,17 @@ function removeManager(element: StyleElement) {
     }
 }
 
+function removeAdoptedStyleManager(adoptedSheet: AdoptedStyleSheetManager) {
+    const adoptedManager = adoptedStyleManagers.includes(adoptedSheet);
+    if (adoptedManager) {
+        adoptedSheet.destroy();
+        adoptedStyleManagers.splice(0);
+    }
+}
+
 const throttledRenderAllStyles = throttle((callback?: () => void) => {
     styleManagers.forEach((manager) => manager.render(filter, variables));
-    adoptedStyleManagers.forEach((manager) => manager.render(filter, shadowVariables));
+    adoptedStyleManagers.forEach((manager) => manager.render(filter, variables));
     callback && callback();
 });
 
@@ -326,13 +325,8 @@ function watchForUpdates() {
         }
         newManagers.forEach((manager) => manager.watch());
         stylesToRestore.forEach((style) => styleManagers.get(style).restore());
-    }, (ShadowRoot) => {
-        const shadowRootVariable = new Map<string, string>();
-        forEach(ShadowRoot.adoptedStyleSheets, (stylesheet) => {
-            getCSSVariables(stylesheet.cssRules).forEach((value, key) => shadowRootVariable.set(key, value));
-        });
-        updateShadowVariables(shadowRootVariable);
-        handleAdoptedStyleSheets(ShadowRoot);
+    }, (shadowRoot) => {
+        handleAdoptedStyleSheets(shadowRoot);
     });
 
     const ignoredSelectors = fixes && Array.isArray(fixes.ignoreInlineStyle) ? fixes.ignoreInlineStyle : [];
@@ -404,7 +398,9 @@ export function removeDynamicTheme() {
     shadowRootsWithOverrides.clear();
     forEach(styleManagers.keys(), (el) => removeManager(el));
     forEach(document.querySelectorAll('.darkreader'), removeNode);
-    removeAdoptedStyleSheets();
+
+    forEach(adoptedStyleManagers, (manager) => removeAdoptedStyleManager(manager));
+    cleanAdoptedStyleSheets();
 }
 
 export function cleanDynamicThemeCache() {

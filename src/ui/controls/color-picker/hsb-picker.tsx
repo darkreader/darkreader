@@ -2,6 +2,7 @@ import {m} from 'malevic';
 import {getContext} from 'malevic/dom';
 import {rgbToHSL, parse, hslToString, rgbToHexString, RGBA} from '../../../utils/color';
 import {clamp, scale} from '../../../utils/math';
+import {createSwipeHandler} from '../../utils';
 
 interface HSBPickerProps {
     color: string;
@@ -102,62 +103,44 @@ export default function HSBPicker(props: HSBPickerProps) {
         renderHue(canvas);
     }
 
-    function onSBPointerDown(e: MouseEvent) {
-        const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+    function createHSBSwipeHandler(getEventColor: (e: {clientX: number; clientY: number; rect: ClientRect}) => string) {
+        return createSwipeHandler((startEvt, startNativeEvt) => {
+            type SwipeEvent = typeof startEvt;
 
-        function getEventColor(e: MouseEvent) {
-            const sat = clamp((e.clientX - rect.left) / rect.width, 0, 1);
-            const br = clamp(1 - (e.clientY - rect.top) / rect.height, 0, 1);
-            const color = hsbToRGB(hsb.h, sat, br);
-            return rgbToHexString(color);
-        }
+            const rect = (startNativeEvt.currentTarget as HTMLElement).getBoundingClientRect();
 
-        function onPointerMove(e: MouseEvent) {
-            store.color = getEventColor(e);
+            function onPointerMove(e: SwipeEvent) {
+                store.color = getEventColor({...e, rect});
+                context.refresh();
+            }
+
+            function onPointerUp(e: SwipeEvent) {
+                store.color = null;
+                props.onChange(getEventColor({...e, rect}));
+            }
+
+            store.color = getEventColor({...startEvt, rect});
             context.refresh();
-        }
 
-        function onPointerUp(e: MouseEvent) {
-            window.removeEventListener('mousemove', onPointerMove);
-            window.removeEventListener('mouseup', onPointerUp);
-            store.color = null;
-            props.onChange(getEventColor(e));
-        }
-
-        store.color = getEventColor(e);
-        context.refresh();
-
-        window.addEventListener('mousemove', onPointerMove);
-        window.addEventListener('mouseup', onPointerUp);
+            return {
+                move: onPointerMove,
+                up: onPointerUp,
+            };
+        });
     }
 
-    function onHuePointerDown(e: MouseEvent) {
-        const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+    const onSBPointerDown = createHSBSwipeHandler(({clientX, clientY, rect}) => {
+        const sat = clamp((clientX - rect.left) / rect.width, 0, 1);
+        const br = clamp(1 - (clientY - rect.top) / rect.height, 0, 1);
+        const color = hsbToRGB(hsb.h, sat, br);
+        return rgbToHexString(color);
+    });
 
-        function getEventColor(e: MouseEvent) {
-            const hue = clamp((e.clientY - rect.top) / rect.height, 0, 1) * 360;
-            const color = hsbToRGB(hue, hsb.s, hsb.b);
-            return rgbToHexString(color);
-        }
-
-        function onPointerMove(e: MouseEvent) {
-            store.color = getEventColor(e);
-            context.refresh();
-        }
-
-        function onPointerUp(e: MouseEvent) {
-            window.removeEventListener('mousemove', onPointerMove);
-            window.removeEventListener('mouseup', onPointerUp);
-            store.color = null;
-            props.onChange(getEventColor(e));
-        }
-
-        store.color = getEventColor(e);
-        context.refresh();
-
-        window.addEventListener('mousemove', onPointerMove);
-        window.addEventListener('mouseup', onPointerUp);
-    }
+    const onHuePointerDown = createHSBSwipeHandler(({clientX, clientY, rect}) => {
+        const hue = clamp((clientY - rect.top) / rect.height, 0, 1) * 360;
+        const color = hsbToRGB(hue, hsb.s, hsb.b);
+        return rgbToHexString(color);
+    });
 
     const hueCursorStyle = {
         'background-color': hslToString({h: hsb.h, s: 1, l: 0.5, a: 1}),

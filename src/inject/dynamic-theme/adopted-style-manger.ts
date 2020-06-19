@@ -2,8 +2,8 @@ import {Theme} from '../../definitions';
 import {createStyleSheetModifier} from './stylesheet-modifier';
 import {getCSSVariables} from './css-rules';
 
-let adoptedStyleOverrides = new WeakMap<CSSStyleSheet, CSSStyleSheet>();
-let overrideList = new WeakSet<CSSStyleSheet>();
+const adoptedStyleOverrides = new WeakMap<CSSStyleSheet, CSSStyleSheet>();
+const overrideList = new WeakSet<CSSStyleSheet>();
 
 export interface AdoptedStyleSheetManager {
     render(theme: Theme, variables: Map<string, string>): void;

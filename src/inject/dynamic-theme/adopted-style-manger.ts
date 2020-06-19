@@ -5,11 +5,6 @@ import {getCSSVariables} from './css-rules';
 let adoptedStyleOverrides = new WeakMap<CSSStyleSheet, CSSStyleSheet>();
 let overrideList = new WeakSet<CSSStyleSheet>();
 
-export function cleanAdoptedStyleSheets() {
-    adoptedStyleOverrides = new WeakMap<CSSStyleSheet, CSSStyleSheet>();
-    overrideList = new WeakSet<CSSStyleSheet>();
-}
-
 export interface AdoptedStyleSheetManager {
     render(theme: Theme, variables: Map<string, string>): void;
     destroy(): void;
@@ -46,7 +41,7 @@ export function createAdoptedStyleSheetOverride(node: Document | ShadowRoot): Ad
         node.adoptedStyleSheets = newSheets;
     }
 
-    function render(theme: Theme, variables: Map<string, string>) {
+    function render(theme: Theme, globalVariables: Map<string, string>) {
         node.adoptedStyleSheets.forEach((sheet) => {
             if (overrideList.has(sheet)) {
                 return;
@@ -63,7 +58,7 @@ export function createAdoptedStyleSheetOverride(node: Document | ShadowRoot): Ad
                 overrideList.add(override);
                 return override;
             }
-            const shadowVariables = variables;
+            const variables: Map<string, string> = new Map(globalVariables);
             getCSSVariables(sheet.cssRules).forEach((value, key) => shadowVariables.set(key, value));
 
             const sheetModifier = createStyleSheetModifier();

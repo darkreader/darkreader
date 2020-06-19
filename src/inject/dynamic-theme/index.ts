@@ -14,7 +14,7 @@ import {getCSSFilterValue} from '../../generators/css-filter';
 import {modifyColor} from '../../generators/modify-colors';
 import {createTextStyle} from '../../generators/text-style';
 import {FilterConfig, DynamicThemeFix} from '../../definitions';
-import {createAdoptedStyleSheetOverride, AdoptedStyleSheetManager, cleanAdoptedStyleSheets} from './adopted-style-manger';
+import {createAdoptedStyleSheetOverride, AdoptedStyleSheetManager} from './adopted-style-manger';
 
 const variables = new Map<string, string>();
 const styleManagers = new Map<StyleElement, StyleManager>();
@@ -222,20 +222,11 @@ function updateVariables(newVars: Map<string, string>) {
     });
 }
 
-
 function removeManager(element: StyleElement) {
     const manager = styleManagers.get(element);
     if (manager) {
         manager.destroy();
         styleManagers.delete(element);
-    }
-}
-
-function removeAdoptedStyleManager(adoptedSheet: AdoptedStyleSheetManager) {
-    const adoptedManager = adoptedStyleManagers.includes(adoptedSheet);
-    if (adoptedManager) {
-        adoptedSheet.destroy();
-        adoptedStyleManagers.splice(0);
     }
 }
 
@@ -399,8 +390,7 @@ export function removeDynamicTheme() {
     forEach(styleManagers.keys(), (el) => removeManager(el));
     forEach(document.querySelectorAll('.darkreader'), removeNode);
 
-    forEach(adoptedStyleManagers, (manager) => removeAdoptedStyleManager(manager));
-    cleanAdoptedStyleSheets();
+    adoptedStyleManagers.forEach((manager) => manager.destroy());
 }
 
 export function cleanDynamicThemeCache() {

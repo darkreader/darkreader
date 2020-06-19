@@ -20,11 +20,11 @@ export default function PresetPicker(props: ViewProps) {
         ({url}) => isURLInList(host, url)
     )) {
         selected = customPresetName;
-        if (props.data.settings.customThemes.find(
-            ({url}) => isURLInList(specificHost, url)
-        )) {
-            selected = specificPresetName;
-        }
+    }
+    if (props.data.settings.customThemes.find(
+        ({url}) => isURLInList(specificHost, url)
+    )) {
+        selected = specificPresetName;
     }
 
     const presetNameValues = customPresetName === specificPresetName ? [defaultPresetName, customPresetName] : [defaultPresetName, customPresetName, specificPresetName];

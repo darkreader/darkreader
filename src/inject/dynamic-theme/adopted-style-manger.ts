@@ -61,7 +61,7 @@ export function createAdoptedStyleSheetOverride(node: Document | ShadowRoot): Ad
                 overrideList.add(override);
                 return override;
             }
-            const variables: Map<string, string> = new Map(globalVariables);
+            const variables: Map<string, string> = globalVariables;
             getCSSVariables(sheet.cssRules).forEach((value, key) => variables.set(key, value));
 
             const sheetModifier = createStyleSheetModifier();

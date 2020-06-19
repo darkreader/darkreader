@@ -392,8 +392,8 @@ export function removeDynamicTheme() {
 
     adoptedStyleManagers.forEach((manager) => {
         manager.destroy();
-        adoptedStyleManagers.splice(0);
     });
+    adoptedStyleManagers.splice(0);
 }
 
 export function cleanDynamicThemeCache() {

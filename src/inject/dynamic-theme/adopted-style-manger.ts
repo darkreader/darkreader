@@ -12,6 +12,8 @@ export interface AdoptedStyleSheetManager {
 
 export function createAdoptedStyleSheetOverride(node: Document | ShadowRoot): AdoptedStyleSheetManager {
 
+    let cancelAsyncOperations = false
+
     function injectSheet(sheet: CSSStyleSheet, override: CSSStyleSheet) {
         const newSheets = [...node.adoptedStyleSheets];
         const sheetIndex = newSheets.indexOf(sheet);
@@ -27,10 +29,11 @@ export function createAdoptedStyleSheetOverride(node: Document | ShadowRoot): Ad
     }
 
     function destroy() {
+        cancelAsyncOperations = true
         const newSheets = [...node.adoptedStyleSheets];
         node.adoptedStyleSheets.forEach((adoptedStyleSheet) => {
             if (overrideList.has(adoptedStyleSheet)) {
-                const existingIndex = newSheets.indexOf(adoptedStyleOverrides.get(adoptedStyleSheet));
+                const existingIndex = newSheets.indexOf(adoptedStyleSheet);
                 if (existingIndex >= 0) {
                     newSheets.splice(existingIndex, 1);
                 }
@@ -68,7 +71,7 @@ export function createAdoptedStyleSheetOverride(node: Document | ShadowRoot): Ad
                 theme,
                 variables,
                 force: false,
-                isAsyncCancelled: () => false,
+                isAsyncCancelled: () => cancelAsyncOperations,
             });
         });
     }

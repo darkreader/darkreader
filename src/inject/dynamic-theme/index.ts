@@ -390,7 +390,10 @@ export function removeDynamicTheme() {
     forEach(styleManagers.keys(), (el) => removeManager(el));
     forEach(document.querySelectorAll('.darkreader'), removeNode);
 
-    adoptedStyleManagers.forEach((manager) => manager.destroy());
+    adoptedStyleManagers.forEach((manager) => {
+        manager.destroy();
+        adoptedStyleManagers.splice(0);
+    });
 }
 
 export function cleanDynamicThemeCache() {

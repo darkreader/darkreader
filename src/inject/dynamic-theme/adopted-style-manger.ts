@@ -12,7 +12,7 @@ export interface AdoptedStyleSheetManager {
 
 export function createAdoptedStyleSheetOverride(node: Document | ShadowRoot): AdoptedStyleSheetManager {
 
-    let cancelAsyncOperations = false
+    let cancelAsyncOperations = false;
 
     function injectSheet(sheet: CSSStyleSheet, override: CSSStyleSheet) {
         const newSheets = [...node.adoptedStyleSheets];
@@ -29,7 +29,7 @@ export function createAdoptedStyleSheetOverride(node: Document | ShadowRoot): Ad
     }
 
     function destroy() {
-        cancelAsyncOperations = true
+        cancelAsyncOperations = true;
         const newSheets = [...node.adoptedStyleSheets];
         node.adoptedStyleSheets.forEach((adoptedStyleSheet) => {
             if (overrideList.has(adoptedStyleSheet)) {
@@ -61,6 +61,8 @@ export function createAdoptedStyleSheetOverride(node: Document | ShadowRoot): Ad
                 overrideList.add(override);
                 return override;
             }
+
+            // TODO: Make each adoptedStyleSheet variable good for the respective `shadow-root scope`.
             const variables: Map<string, string> = globalVariables;
             getCSSVariables(sheet.cssRules).forEach((value, key) => variables.set(key, value));
 

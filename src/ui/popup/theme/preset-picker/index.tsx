@@ -5,12 +5,29 @@ import {ViewProps} from '../../types';
 
 export default function PresetPicker(props: ViewProps) {
     const host = getURLHost(props.tab.url || '');
-    const custom = props.data.settings.customThemes.find(
-        ({url}) => isURLInList(props.tab.url, url)
+    const specificHost = (props.tab.url
+        .replace(/^.*?\/{2,3}/, '')
+        .replace(/\?.*$/, '')
+        .replace(/\/$/, '')
     );
 
     const defaultPresetName = 'Default theme';
     const customPresetName = `Custom for ${host}`;
+    const specificPresetName = `Custom for ${specificHost}`;
+
+    let selected = defaultPresetName;
+    if (props.data.settings.customThemes.find(
+        ({url}) => isURLInList(host, url)
+    )) {
+        selected = customPresetName;
+        if (props.data.settings.customThemes.find(
+            ({url}) => isURLInList(specificHost, url)
+        )) {
+            selected = specificPresetName;
+        }
+    }
+
+    const presetNameValues = customPresetName === specificPresetName ? [defaultPresetName, customPresetName] : [defaultPresetName, customPresetName, specificPresetName];
 
     function onPresetChange(name: string) {
         const filteredCustomThemes = props.data.settings.customThemes.filter(({url}) => !isURLInList(props.tab.url, url));
@@ -22,16 +39,19 @@ export default function PresetPicker(props: ViewProps) {
                 theme: {...props.data.settings.theme},
             });
             props.actions.changeSettings({customThemes: extended});
+        } else if (name === specificPresetName) {
+            const extended = filteredCustomThemes.concat({
+                url: [specificHost],
+                theme: {...props.data.settings.theme},
+            });
+            props.actions.changeSettings({customThemes: extended});
         }
     }
     return (
         <DropDown
             class="theme-preset-picker"
-            selected={custom ? customPresetName : defaultPresetName}
-            values={[
-                defaultPresetName,
-                customPresetName,
-            ]}
+            selected={selected}
+            values={presetNameValues}
             onChange={onPresetChange}
         />
     );

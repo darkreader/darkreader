@@ -68,7 +68,7 @@ function unsubscribeFromDefineCustomElements() {
     undefinedGroups.clear();
 }
 
-export function watchForStyleChanges(currentStyles: StyleElement[], update: (styles: ChangedStyles) => void) {
+export function watchForStyleChanges(currentStyles: StyleElement[], update: (styles: ChangedStyles) => void, shadowRootDiscovered: (root: ShadowRoot) => void) {
     stopWatchingForStyleChanges();
 
     const prevStyles = new Set<StyleElement>(currentStyles);
@@ -188,10 +188,12 @@ export function watchForStyleChanges(currentStyles: StyleElement[], update: (sty
     }
 
     function subscribeForShadowRootChanges(node: Element) {
-        if (node.shadowRoot == null || observedRoots.has(node.shadowRoot)) {
+        const {shadowRoot} = node;
+        if (shadowRoot == null || observedRoots.has(shadowRoot)) {
             return;
         }
-        observe(node.shadowRoot);
+        observe(shadowRoot);
+        shadowRootDiscovered(shadowRoot);
     }
 
     observe(document);
@@ -201,7 +203,12 @@ export function watchForStyleChanges(currentStyles: StyleElement[], update: (sty
         const newStyles: StyleElement[] = [];
         hosts.forEach((host) => push(newStyles, getManageableStyles(host.shadowRoot)));
         update({created: newStyles, updated: [], removed: [], moved: []});
-        hosts.forEach((h) => subscribeForShadowRootChanges(h));
+        hosts.forEach((host) => {
+            const {shadowRoot} = host;
+            subscribeForShadowRootChanges(host);
+            iterateShadowNodes(shadowRoot, subscribeForShadowRootChanges);
+            collectUndefinedElements(shadowRoot);
+        });
     });
     collectUndefinedElements(document);
 }

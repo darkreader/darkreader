@@ -1,5 +1,5 @@
 import {m} from 'malevic';
-import {DEFAULT_SETTINGS, DEFAULT_COLORS} from '../../../../defaults';
+import {DEFAULT_SETTINGS, DEFAULT_THEME, DEFAULT_COLORS} from '../../../../defaults';
 import {Theme} from '../../../../definitions';
 import {ViewProps} from '../../types';
 import {BackgroundColor, Brightness, Contrast, Grayscale, Mode, ResetButton, Scheme, Scrollbar, SelectionColorEditor, Sepia, TextColor} from '../controls';
@@ -48,18 +48,20 @@ function ColorsGroup({theme, change}: ThemeGroupProps) {
     const bgProp: keyof Theme = isDarkScheme ? 'darkSchemeBackgroundColor' : 'lightSchemeBackgroundColor';
     const fgProp: keyof Theme = isDarkScheme ? 'darkSchemeTextColor' : 'lightSchemeTextColor';
     const defaultSchemeColors = isDarkScheme ? DEFAULT_COLORS.darkScheme : DEFAULT_COLORS.lightScheme;
+    const defaultMatrixValues: Partial<Theme> = {brightness: DEFAULT_THEME.brightness, contrast: DEFAULT_THEME.contrast, sepia: DEFAULT_THEME.sepia, grayscale: DEFAULT_THEME.grayscale};
+
     return (
         <Array>
             <BackgroundColor
                 value={theme[bgProp]}
                 defaultColor={defaultSchemeColors.background}
-                onChange={(v) => change({[bgProp]: v})}
+                onChange={(v) => change({[bgProp]: v, ...defaultMatrixValues})}
                 onReset={() => change({[bgProp]: DEFAULT_SETTINGS.theme[bgProp]})}
             />
             <TextColor
                 value={theme[fgProp]}
                 defaultColor={defaultSchemeColors.text}
-                onChange={(v) => change({[fgProp]: v})}
+                onChange={(v) => change({[fgProp]: v, ...defaultMatrixValues})}
                 onReset={() => change({[fgProp]: DEFAULT_SETTINGS.theme[fgProp]})}
             />
             <Scrollbar

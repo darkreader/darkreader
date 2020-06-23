@@ -120,7 +120,7 @@ function modifyBgHSL({h, s, l, a}: HSLA, pole: HSLA) {
     const isBlue = h > 200 && h < 280;
     const isNeutral = s < 0.12 || (l > 0.8 && isBlue);
     if (isDark) {
-        const lx = scale(l, 0, 0.5, pole.l, MAX_BG_LIGHTNESS);
+        const lx = scale(l, 0, 0.5, 0, MAX_BG_LIGHTNESS);
         if (isNeutral) {
             const hx = pole.h;
             const sx = pole.s;

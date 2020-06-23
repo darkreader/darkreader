@@ -8,6 +8,7 @@ interface ColorPickerProps {
     class?: any;
     color: string;
     onChange: (color: string) => void;
+    canReset: boolean;
     onReset: () => void;
 }
 
@@ -88,13 +89,13 @@ function ColorPicker(props: ColorPickerProps) {
                 store.textBoxNode = el as HTMLInputElement;
                 store.textBoxNode.value = isColorValid ? props.color : '';
             }}
-            onchange={(e) => onColorChange(e.target.value)}
             onkeypress={(e) => {
                 const input = e.target as HTMLInputElement;
                 if (e.key === 'Enter') {
-                    input.blur();
+                    const {value} = input;
+                    onColorChange(value);
                     blur();
-                    onColorChange(input.value);
+                    onColorPreview(value);
                 }
             }}
             onfocus={focus}
@@ -112,13 +113,16 @@ function ColorPicker(props: ColorPickerProps) {
         ></span>
     );
 
-    const resetButton = (
+    const resetButton = props.canReset ? (
         <span
             role="button"
             class="color-picker__reset"
-            onclick={props.onReset}
+            onclick={() => {
+                props.onReset();
+                blur();
+            }}
         ></span>
-    );
+    ) : null;
 
     const textBoxLine = (
         <span class="color-picker__textbox-line">

@@ -8,6 +8,7 @@ interface ColorPickerProps {
     class?: any;
     color: string;
     onChange: (color: string) => void;
+    canReset: boolean;
     onReset: () => void;
 }
 
@@ -112,13 +113,13 @@ function ColorPicker(props: ColorPickerProps) {
         ></span>
     );
 
-    const resetButton = (
+    const resetButton = props.canReset ? (
         <span
             role="button"
             class="color-picker__reset"
             onclick={props.onReset}
         ></span>
-    );
+    ) : null;
 
     const textBoxLine = (
         <span class="color-picker__textbox-line">

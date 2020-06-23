@@ -7,6 +7,7 @@ type BgColorValue = 'auto' | string;
 interface BgColorEditorProps {
     value: BgColorValue;
     onChange: (value: BgColorValue) => void;
+    canReset: boolean;
     onReset: () => void;
 }
 
@@ -16,6 +17,7 @@ export default function BackgroundColorEditor(props: BgColorEditorProps) {
             <ColorPicker
                 color={props.value}
                 onChange={props.onChange}
+                canReset={props.canReset}
                 onReset={props.onReset}
             />
         </ThemeControl>

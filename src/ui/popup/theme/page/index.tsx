@@ -55,11 +55,13 @@ function ColorsGroup({theme, change}: ThemeGroupProps) {
             <BackgroundColor
                 value={theme[bgProp] === 'auto' ? defaultSchemeColors.background : theme[bgProp]}
                 onChange={(v) => change({[bgProp]: v, ...defaultMatrixValues})}
+                canReset={theme[bgProp] !== defaultSchemeColors.background}
                 onReset={() => change({[bgProp]: DEFAULT_SETTINGS.theme[bgProp]})}
             />
             <TextColor
                 value={theme[fgProp] === 'auto' ? defaultSchemeColors.text : theme[fgProp]}
                 onChange={(v) => change({[fgProp]: v, ...defaultMatrixValues})}
+                canReset={theme[fgProp] !== defaultSchemeColors.text}
                 onReset={() => change({[fgProp]: DEFAULT_SETTINGS.theme[fgProp]})}
             />
             <Scrollbar

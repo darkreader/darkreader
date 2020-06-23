@@ -47,10 +47,10 @@ export interface FilterConfig {
     textStroke: number;
     engine: string;
     stylesheet: string;
-    darkSchemeBackgroundColor: 'auto' | string;
-    darkSchemeTextColor: 'auto' | string;
-    lightSchemeBackgroundColor: 'auto' | string;
-    lightSchemeTextColor: 'auto' | string;
+    darkSchemeBackgroundColor: string;
+    darkSchemeTextColor: string;
+    lightSchemeBackgroundColor: string;
+    lightSchemeTextColor: string;
     scrollbarColor: '' | 'auto' | string;
     selectionColor: '' | 'auto' | string;
 }

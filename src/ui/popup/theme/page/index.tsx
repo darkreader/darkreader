@@ -53,14 +53,12 @@ function ColorsGroup({theme, change}: ThemeGroupProps) {
     return (
         <Array>
             <BackgroundColor
-                value={theme[bgProp]}
-                defaultColor={defaultSchemeColors.background}
+                value={theme[bgProp] === 'auto' ? defaultSchemeColors.background : theme[bgProp]}
                 onChange={(v) => change({[bgProp]: v, ...defaultMatrixValues})}
                 onReset={() => change({[bgProp]: DEFAULT_SETTINGS.theme[bgProp]})}
             />
             <TextColor
-                value={theme[fgProp]}
-                defaultColor={defaultSchemeColors.text}
+                value={theme[fgProp] === 'auto' ? defaultSchemeColors.text : theme[fgProp]}
                 onChange={(v) => change({[fgProp]: v, ...defaultMatrixValues})}
                 onReset={() => change({[fgProp]: DEFAULT_SETTINGS.theme[fgProp]})}
             />

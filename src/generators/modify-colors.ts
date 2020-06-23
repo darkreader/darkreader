@@ -11,15 +11,13 @@ interface ColorFunction {
 function getBgPole(theme: Theme) {
     const isDarkScheme = theme.mode === 1;
     const prop: keyof Theme = isDarkScheme ? 'darkSchemeBackgroundColor' : 'lightSchemeBackgroundColor';
-    const def = (isDarkScheme ? DEFAULT_COLORS.darkScheme : DEFAULT_COLORS.lightScheme).background;
-    return theme[prop] === 'auto' ? def : theme[prop];
+    return theme[prop];
 }
 
 function getFgPole(theme: Theme) {
     const isDarkScheme = theme.mode === 1;
     const prop: keyof Theme = isDarkScheme ? 'darkSchemeTextColor' : 'lightSchemeTextColor';
-    const def = (isDarkScheme ? DEFAULT_COLORS.darkScheme : DEFAULT_COLORS.lightScheme).text;
-    return theme[prop] === 'auto' ? def : theme[prop];
+    return theme[prop];
 }
 
 const colorModificationCache = new Map<ColorFunction, Map<string, string>>();

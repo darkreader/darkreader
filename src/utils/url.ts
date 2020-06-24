@@ -31,7 +31,7 @@ export function isURLInList(url: string, list: string[]) {
 export function isURLMatched(url: string, urlTemplate: string): boolean {
     const isFirstIPV6 = url.includes('[');
     const isSecondIPV6 = urlTemplate.includes('[');
-    if (isFirstIPV6 && isSecondIPV6) {
+    if (isFirstIPV6 && isSecondIPV6 && !(url.indexOf('?') < url.indexOf('['))) {
         return compareIPV6(url, urlTemplate);
     } else if (!isFirstIPV6 && ! isSecondIPV6){
         const regex = createUrlRegex(urlTemplate);

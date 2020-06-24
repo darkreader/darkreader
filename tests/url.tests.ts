@@ -167,6 +167,13 @@ test('URL is enabled', () => {
         {isProtected: false, isInDarkList: true},
     )).toEqual(false);
 
+    // Because some people who don't know about XSS still don't encode their URL's and have vulnerable [] in them sigh
+    expect(isURLEnabled(
+        'https://google.co.uk?foo=[bar]',
+        {siteList: [], siteListEnabled: [], applyToListedOnly: false} as UserSettings,
+        {isProtected: false, isInDarkList: false},
+    )).toEqual(false);
+
     // Temporary Dark Sites list fix
     expect(isURLEnabled(
         'https://darkreader.org/',

@@ -1,4 +1,3 @@
-import {DEFAULT_COLORS} from '../defaults';
 import {FilterConfig, Theme} from '../definitions';
 import {parse, rgbToHSL, hslToRGB, rgbToString, rgbToHexString, RGBA, HSLA} from '../utils/color';
 import {scale} from '../utils/math';
@@ -160,7 +159,7 @@ export function modifyBackgroundColor(rgb: RGBA, theme: Theme) {
 const MIN_FG_LIGHTNESS = 0.55;
 
 function modifyBlueFgHue(hue: number) {
-    return scale(hue, 205, 245, 205, 220)
+    return scale(hue, 205, 245, 205, 220);
 }
 
 function modifyFgHSL({h, s, l, a}: HSLA, pole: HSLA) {

@@ -171,7 +171,7 @@ test('URL is enabled', () => {
     // IPV6 Comparision is === but a normal URL comparision is more `lossless` this will test if the used method was `lossless` and confirm it was not used trough IPV6 Comparsion.
     expect(isURLEnabled(
         'google.co.uk/order.php?bar=[foo]',
-        {siteList: ["google.co.uk"], siteListEnabled: [], applyToListedOnly: true} as UserSettings,
+        {siteList: ['google.co.uk'], siteListEnabled: [], applyToListedOnly: true} as UserSettings,
         {isProtected: false, isInDarkList: false},
     )).toEqual(true);
 

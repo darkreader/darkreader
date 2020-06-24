@@ -11,7 +11,7 @@ interface MessageBoxProps {
 
 export default function MessageBox(props: MessageBoxProps) {
     return (
-        <Overlay.Portal key={props.portalKey} onOuterClick={props.onCancel}>
+        <Overlay key={props.portalKey} onOuterClick={props.onCancel}>
             <div class="message-box">
                 <label class="message-box__caption">
                     {props.caption}
@@ -25,6 +25,6 @@ export default function MessageBox(props: MessageBoxProps) {
                     </Button>
                 </div>
             </div>
-        </Overlay.Portal>
+        </Overlay>
     );
 }

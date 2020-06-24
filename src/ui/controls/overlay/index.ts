@@ -61,4 +61,4 @@ function Portal(props: OverlayPortalProps, ...content: Malevic.Child[]) {
     return context.leave();
 }
 
-export default Object.assign(Overlay, {Portal});
+export default Object.assign(Overlay, Portal);

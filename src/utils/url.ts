@@ -106,6 +106,7 @@ function createUrlRegex(urlTemplate: string): RegExp {
 }
 
 export function isPDF(url: string) {
+    url = url.replace(/^.*?\/{2,3}/, '') // Remove scheme
     if (url.includes('.pdf')) {
         if (url.includes('?')) {
             url = url.substring(0, url.lastIndexOf('?'));

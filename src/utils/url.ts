@@ -23,26 +23,29 @@ export function isURLInList(url: string, list: string[]) {
     return false;
 }
 
+function isIPV6(url: string) {
+    if (url.includes('?')) {
+        if (url.indexOf('?') < url.indexOf('[')) {
+            return false;
+        }
+    } else if (url.includes('[')) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
 /**
  * Determines whether URL matches the template.
  * @param url URL.
  * @param urlTemplate URL template ("google.*", "youtube.com" etc).
  */
 export function isURLMatched(url: string, urlTemplate: string): boolean {
-    const isFirstIPV6 = url.includes('[');
-    const isSecondIPV6 = urlTemplate.includes('[');
-    if (url.includes('?')) {
-        if (url.indexOf('?') < url.indexOf('[')) {
-            const regex = createUrlRegex(urlTemplate);
-            return Boolean(url.match(regex));
-        }
-    } else if (isFirstIPV6 && isSecondIPV6) {
+    if (isIPV6(url) && isIPV6(urlTemplate)) {
         return compareIPV6(url, urlTemplate);
-    } else if (!isFirstIPV6 && !isSecondIPV6){
+    } else {
         const regex = createUrlRegex(urlTemplate);
         return Boolean(url.match(regex));
-    } else {
-        return false;
     }
 }
 

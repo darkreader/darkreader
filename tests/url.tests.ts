@@ -167,7 +167,7 @@ test('URL is enabled', () => {
         {isProtected: false, isInDarkList: true},
     )).toEqual(false);
 
-    // Because some people who don't know about XSS still don't encode their URL's and have vulnerable [] in them sigh.
+    // In some URL'S unescaped [] can be appear
     // IPV6 Comparision is === but a normal URL comparision is more `lossless` this will test if the used method was `lossless` and confirm it was not used trough IPV6 Comparsion.
     expect(isURLEnabled(
         'google.co.uk/order.php?bar=[foo]',

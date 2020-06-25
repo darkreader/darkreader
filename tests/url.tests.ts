@@ -167,8 +167,7 @@ test('URL is enabled', () => {
         {isProtected: false, isInDarkList: true},
     )).toEqual(false);
 
-    // In some URL'S unescaped [] can be appear
-    // IPV6 Comparision is === but a normal URL comparision is more `lossless` this will test if the used method was `lossless` and confirm it was not used trough IPV6 Comparsion.
+    // This will test if the used method was trough regex and confirm it was not used trough IPV6 Comparsion.
     expect(isURLEnabled(
         'google.co.uk/order.php?bar=[foo]',
         {siteList: ['google.co.uk'], siteListEnabled: [], applyToListedOnly: true} as UserSettings,

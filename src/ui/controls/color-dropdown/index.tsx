@@ -93,6 +93,7 @@ export default function ColorDropDown(props: ColorDropDownProps) {
                 }}
                 color={props.value}
                 onChange={props.onChange}
+                canReset={true}
                 onReset={props.onReset}
             />
         </span>

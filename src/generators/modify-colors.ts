@@ -92,7 +92,13 @@ function modifyLightSchemeColor(rgb: RGBA, theme: Theme) {
 
 function modifyLightModeHSL({h, s, l, a}, poleFg: HSLA, poleBg: HSLA) {
     const isDark = l < 0.5;
-    const isNeutral = l < 0.2 || l > 0.8 || s < 0.36;
+    let isNeutral: boolean;
+    if (isDark) {
+        isNeutral = l < 0.2 || s < 0.12;
+    } else {
+        const isBlue = h > 200 && h < 280;
+        isNeutral = s < 0.24 || (l > 0.8 && isBlue);
+    }
 
     let hx = h;
     let sx = l;
@@ -160,7 +166,7 @@ export function modifyBackgroundColor(rgb: RGBA, theme: Theme) {
 const MIN_FG_LIGHTNESS = 0.55;
 
 function modifyBlueFgHue(hue: number) {
-    return scale(hue, 205, 245, 205, 220)
+    return scale(hue, 205, 245, 205, 220);
 }
 
 function modifyFgHSL({h, s, l, a}: HSLA, pole: HSLA) {

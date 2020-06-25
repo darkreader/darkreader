@@ -1,4 +1,3 @@
-import {DEFAULT_COLORS} from '../defaults';
 import {FilterConfig, Theme} from '../definitions';
 import {parse, rgbToHSL, hslToRGB, rgbToString, rgbToHexString, RGBA, HSLA} from '../utils/color';
 import {scale} from '../utils/math';

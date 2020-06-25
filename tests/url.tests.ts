@@ -1,4 +1,4 @@
-import {isURLEnabled, isPDF} from '../src/utils/url';
+import {isURLEnabled, isURLMatched, isPDF} from '../src/utils/url';
 import {UserSettings} from '../src/definitions';
 
 test('URL is enabled', () => {
@@ -165,6 +165,24 @@ test('URL is enabled', () => {
         '[2001:4860:4860::8844]',
         {siteList: [], siteListEnabled: [], applyToListedOnly: true} as UserSettings,
         {isProtected: false, isInDarkList: true},
+    )).toEqual(false);
+
+    // Some URLs can have unescaped [] in query
+    expect(isURLMatched(
+        'google.co.uk/order.php?bar=[foo]',
+        'google.co.uk',
+    )).toEqual(true);
+    expect(isURLMatched(
+        '[2001:4860:4860::8844]/order.php?bar=foo',
+        '[2001:4860:4860::8844]',
+    )).toEqual(true);
+    expect(isURLMatched(
+        '[2001:4860:4860::8844]/order.php?bar=[foo]',
+        '[2001:4860:4860::8844]',
+    )).toEqual(true);
+    expect(isURLMatched(
+        'google.co.uk/order.php?bar=[foo]',
+        '[2001:4860:4860::8844]',
     )).toEqual(false);
 
     // Temporary Dark Sites list fix

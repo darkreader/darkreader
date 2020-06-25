@@ -286,10 +286,12 @@ function createThemeAndWatchForUpdates() {
 }
 
 function handleAdoptedStyleSheets(node: ShadowRoot | Document) {
-    if (node.adoptedStyleSheets.length > 0) {
-        const newManger = createAdoptedStyleSheetOverride(node);
-        adoptedStyleManagers.push(newManger);
-        newManger.render(filter, variables);
+    if (Array.isArray(node.adoptedStyleSheets)) {
+        if (node.adoptedStyleSheets.length > 0) {
+            const newManger = createAdoptedStyleSheetOverride(node);
+            adoptedStyleManagers.push(newManger);
+            newManger.render(filter, variables);
+        }
     }
 }
 

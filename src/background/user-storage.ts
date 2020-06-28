@@ -27,7 +27,7 @@ export default class UserStorage {
                     local.theme = {...DEFAULT_SETTINGS.theme, ...local.theme};
                     local.time = {...DEFAULT_SETTINGS.time, ...local.time};
                     local.customThemes.forEach((site) => {
-                        site.theme = {...DEFAULT_SETTINGS.theme, ...local.theme};
+                        site.theme = {...DEFAULT_SETTINGS.theme, ...site.theme};
                     });
                     resolve(local);
                     return;
@@ -44,7 +44,7 @@ export default class UserStorage {
                     sync.theme = {...DEFAULT_SETTINGS.theme, ...sync.theme};
                     sync.time = {...DEFAULT_SETTINGS.time, ...sync.time};
                     sync.customThemes.forEach((site) => {
-                        site.theme = {...DEFAULT_SETTINGS.theme, ...sync.theme};
+                        site.theme = {...DEFAULT_SETTINGS.theme, ...site.theme};
                     });
                     resolve(sync);
                 });

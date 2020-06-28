@@ -26,6 +26,9 @@ export default class UserStorage {
                 if (!local.syncSettings) {
                     local.theme = {...DEFAULT_SETTINGS.theme, ...local.theme};
                     local.time = {...DEFAULT_SETTINGS.time, ...local.time};
+                    local.customThemes.forEach((site) => {
+                        site.theme = {...DEFAULT_SETTINGS.theme, ...local.theme};
+                    });
                     resolve(local);
                     return;
                 }

@@ -205,6 +205,9 @@ export function watchForStyleChanges(currentStyles: StyleElement[], update: (sty
         update({created: newStyles, updated: [], removed: [], moved: []});
         hosts.forEach((host) => {
             const {shadowRoot} = host;
+            if (shadowRoot == null) {
+                return;
+            }
             subscribeForShadowRootChanges(host);
             iterateShadowNodes(shadowRoot, subscribeForShadowRootChanges);
             collectUndefinedElements(shadowRoot);

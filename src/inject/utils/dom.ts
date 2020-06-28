@@ -148,6 +148,9 @@ export function watchForNodePosition<T extends Node>(
 }
 
 export function iterateShadowNodes(root: Node, iterator: (node: Element) => void) {
+    if (root == null) {
+        return;
+    }
     const walker = document.createTreeWalker(
         root,
         NodeFilter.SHOW_ELEMENT,

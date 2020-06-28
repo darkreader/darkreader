@@ -22,14 +22,7 @@ export default class UserStorage {
 
     private loadSettingsFromStorage() {
         return new Promise<UserSettings>((resolve) => {
-            chrome.storage.local.get(DEFAULT_SETTINGS, (local: UserSettings) => {
-                if (!local.syncSettings) {
-                    local.theme = {...DEFAULT_SETTINGS.theme, ...local.theme};
-                    local.time = {...DEFAULT_SETTINGS.time, ...local.time};
-                    resolve(local);
-                    return;
-                }
-
+            if (this.settings.syncSettings) {
                 chrome.storage.sync.get({...DEFAULT_SETTINGS, config: 'empty'}, ($sync: UserSettings & {config: any}) => {
                     let sync: UserSettings;
                     if ($sync.config === 'empty') {
@@ -42,9 +35,17 @@ export default class UserStorage {
                     sync.time = {...DEFAULT_SETTINGS.time, ...sync.time};
                     resolve(sync);
                 });
-            });
+            } else {
+                chrome.storage.local.get(DEFAULT_SETTINGS, (local: UserSettings) => {
+                    local.theme = {...DEFAULT_SETTINGS.theme, ...local.theme};
+                    local.time = {...DEFAULT_SETTINGS.time, ...local.time};
+                    resolve(local);
+                    return;
+                });
+            }
         });
     }
+
 
     async saveSettings() {
         const saved = await this.saveSettingsIntoStorage(this.settings);

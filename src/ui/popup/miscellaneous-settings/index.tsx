@@ -5,12 +5,7 @@ import EnabledByDefaultGroup from './enabled-by-default';
 import InvertPDF from './invert-pdf';
 import SyncSettings from './Sync-settings';
 
-type SettingsPageProps = ViewProps & {
-    onAutomationNavClick: () => void;
-    onManageSettingsClick: () => void;
-};
-
-export default function SettingsPage(props: SettingsPageProps) {
+export default function MiscellaneousSettingsPage(props: ViewProps) {
     return (
         <section class="m-section">
             <EnabledByDefaultGroup {...props} />

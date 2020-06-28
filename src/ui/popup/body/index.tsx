@@ -11,6 +11,7 @@ import SettingsPage from '../settings-page';
 import ThemePage from '../theme/page';
 import {ViewProps} from '../types';
 import ManageSettingsPage from '../manage-settings-page';
+import MiscellaneousSettingsPage from '../miscellaneous-settings';
 
 function Logo() {
     return (
@@ -97,6 +98,9 @@ function Pages(props: ViewProps) {
             </Page>
             <Page id="manage-settings">
                 <ManageSettingsPage {...props} />
+            </Page>
+            <Page id="miscellaneous-settings">
+                <MiscellaneousSettingsPage {...props} />
             </Page>
 
         </PageViewer>

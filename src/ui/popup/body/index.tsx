@@ -28,7 +28,7 @@ function Logo() {
 function Pages(props: ViewProps) {
     const context = getContext();
     const store = context.store as {
-        activePage: 'main' | 'theme' | 'settings' | 'automation' | 'manage-settings';
+        activePage: 'main' | 'theme' | 'settings' | 'automation' | 'manage-settings' | 'miscellaneous-settings';
     };
     if (store.activePage == null) {
         store.activePage = 'main';
@@ -54,8 +54,14 @@ function Pages(props: ViewProps) {
         context.refresh();
     }
 
+    function onMiscellaneousClick() {
+        store.activePage = 'miscellaneous-settings';
+        context.refresh();
+    }
+
     function onBackClick() {
-        if (store.activePage === 'automation' || store.activePage === 'manage-settings') {
+        const activePage = store.activePage;
+        if (activePage === 'automation' || activePage === 'manage-settings' || activePage === 'miscellaneous-settings') {
             store.activePage = 'settings';
         } else {
             store.activePage = 'main';
@@ -83,6 +89,7 @@ function Pages(props: ViewProps) {
                     {...props}
                     onAutomationNavClick={onAutomationNavClick}
                     onManageSettingsClick={onManageSettingsClick}
+                    onMiscellaneousNavClick={onMiscellaneousClick}
                 />
             </Page>
             <Page id="automation">

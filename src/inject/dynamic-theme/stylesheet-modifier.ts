@@ -162,22 +162,28 @@ export function createStyleSheetModifier() {
         let asyncDeclarationCounter = 0;
 
         const rootReadyGroup: ReadyGroup = {rule: null, rules: [], isGroup: true};
-        const parentGroupRefs = new WeakMap<CSSRule, ReadyGroup>();
+        const groupRefs = new WeakMap<CSSRule, ReadyGroup>();
 
-        modRules.filter((r) => r).forEach(({selector, declarations, parentRule}) => {
-            let group: ReadyGroup;
-            if (parentRule == null) {
-                group = rootReadyGroup;
-            } else if (parentGroupRefs.has(parentRule)) {
-                group = parentGroupRefs.get(parentRule);
-            } else {
-                group = {rule: parentRule, rules: [], isGroup: true};
-                parentGroupRefs.set(parentRule, group);
-                const grandParent = (parentRule as CSSRule).parentRule;
-                const parentGroup = grandParent ? parentGroupRefs.get(grandParent) : rootReadyGroup;
-                parentGroup.rules.push(group);
+        function getGroup(rule: CSSRule): ReadyGroup {
+            if (rule == null) {
+                return rootReadyGroup;
             }
 
+            if (groupRefs.has(rule)) {
+                return groupRefs.get(rule);
+            }
+
+            const group: ReadyGroup = {rule, rules: [], isGroup: true};
+            groupRefs.set(rule, group);
+
+            const parentGroup = getGroup(rule.parentRule);
+            parentGroup.rules.push(group);
+
+            return group;
+        }
+
+        modRules.filter((r) => r).forEach(({selector, declarations, parentRule}) => {
+            const group = getGroup(parentRule);
             const readyStyleRule: ReadyStyleRule = {selector, declarations: [], isGroup: false};
             const readyDeclarations = readyStyleRule.declarations;
             group.rules.push(readyStyleRule);

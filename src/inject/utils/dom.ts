@@ -84,7 +84,7 @@ export function watchForNodePosition<T extends Node>(
     }
     let attempts = 0;
     let start: number = null;
-    let timeoutID: number = null;
+    let timeoutId: number = null;
     const restore = throttle(() => {
         attempts++;
         const now = Date.now();
@@ -93,7 +93,7 @@ export function watchForNodePosition<T extends Node>(
         } else if (attempts >= MAX_ATTEMPTS_COUNT) {
             if (now - start < ATTEMPTS_INTERVAL) {
                 logWarn(`Node position watcher paused: retry in ${RETRY_TIMEOUT}ms`, node, prevSibling);
-                timeoutID = setTimeout(() => {
+                timeoutId = setTimeout(() => {
                     start = null;
                     attempts = 0;
                     restore();

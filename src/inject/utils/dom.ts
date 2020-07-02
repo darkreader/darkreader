@@ -91,12 +91,15 @@ export function watchForNodePosition<T extends Node>(
         } else if (attempts >= MAX_ATTEMPTS_COUNT) {
             if (now - start < ATTEMPTS_INTERVAL) {
                 logWarn('Node position watcher stopped: some script conflicts with Dark Reader and can cause high CPU usage', node, prevSibling);
-                stop();
+                setTimeout(() => {
+                    start = now;
+                    attempts = 1;
+                    restore();
+                }, 2000);
                 return;
             }
             start = now;
-            attempts = 1;
-        }
+            attem
 
         if (mode === 'parent') {
             if (prevSibling && prevSibling.parentNode !== parent) {

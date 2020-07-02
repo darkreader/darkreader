@@ -72,7 +72,7 @@ export function watchForNodePosition<T extends Node>(
     onRestore = Function.prototype,
 ) {
     const MAX_ATTEMPTS_COUNT = 10;
-    const RETRY_TIMEOUT = 2000;
+    const RETRY_TIMEOUT = getDuration({seconds: 2});
     const ATTEMPTS_INTERVAL = getDuration({seconds: 10});
     const prevSibling = node.previousSibling;
     let parent = node.parentNode;
@@ -141,7 +141,7 @@ export function watchForNodePosition<T extends Node>(
         observer.observe(parent, {childList: true});
     };
     const stop = () => {
-        clearTimeout(timeoutID);
+        clearTimeout(timeoutId);
         observer.disconnect();
         restore.cancel();
     };

@@ -6,6 +6,7 @@
     "api": "node tasks/build.js --api",
     "benchmark-server": "node tests/benchmark-server/index.js",
     "code-style": "eslint --fix \"src/**/*.ts\" \"src/**/*.tsx\" \"tasks/**/*.js\" \"tests/**/*.ts\" \"tests/**/*.js\" \"index.d.ts\"",
+    "coverage": "jest --coverage",
     "debug": "node tasks/build.js --debug",
     "debug-watch": "node tasks/build.js --debug --watch",
     "prepublishOnly": "npm test && npm run api",
@@ -29,7 +30,7 @@
     "url": "https://opencollective.com/darkreader"
   },
   "dependencies": {
-    "malevic": "0.18.4"
+    "malevic": "0.18.5"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "13.0.0",
@@ -49,7 +50,7 @@
     "jest": "26.1.0",
     "less": "3.11.3",
     "prettier": "2.0.5",
-    "rollup": "2.18.1",
+    "rollup": "2.18.2",
     "rollup-plugin-typescript2": "0.27.1",
     "ts-jest": "26.1.1",
     "ts-node": "8.10.2",

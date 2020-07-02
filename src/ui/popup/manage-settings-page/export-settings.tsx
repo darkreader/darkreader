@@ -5,8 +5,14 @@ import {saveFile} from '../../utils';
 import ControlGroup from '../control-group';
 
 export default function ExportButton(props: ViewProps) {
-    function exportSettings() {
-        saveFile('Dark-Reader-Settings.json', JSON.stringify(props.data.settings, null, 4));
+    async function exportSettings() {
+        const contents = JSON.stringify(props.data.settings, null, 4);
+        saveFile('Dark-Reader-Settings.json', contents);
+        try { //Chrome v66 & Firefox v63
+            await navigator.clipboard.writeText(contents);
+        } catch (err) {
+            console.log(err);
+        }
     }
     return (
         <ControlGroup>
@@ -19,7 +25,7 @@ export default function ExportButton(props: ViewProps) {
                 </Button>
             </ControlGroup.Control>
             <ControlGroup.Description>
-                Save settings to a JSON file
+                Save settings to a JSON file/Clipboard
             </ControlGroup.Description>
         </ControlGroup>
     );

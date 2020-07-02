@@ -72,6 +72,7 @@ export function watchForNodePosition<T extends Node>(
     onRestore = Function.prototype,
 ) {
     const MAX_ATTEMPTS_COUNT = 10;
+    const RETRY_TIMEOUT = 2000;
     const ATTEMPTS_INTERVAL = getDuration({seconds: 10});
     const prevSibling = node.previousSibling;
     let parent = node.parentNode;
@@ -83,6 +84,7 @@ export function watchForNodePosition<T extends Node>(
     }
     let attempts = 0;
     let start: number = null;
+    let timeoutID: number = null;
     const restore = throttle(() => {
         attempts++;
         const now = Date.now();
@@ -90,16 +92,17 @@ export function watchForNodePosition<T extends Node>(
             start = now;
         } else if (attempts >= MAX_ATTEMPTS_COUNT) {
             if (now - start < ATTEMPTS_INTERVAL) {
-                logWarn('Node position watcher stopped: some script conflicts with Dark Reader and can cause high CPU usage', node, prevSibling);
-                setTimeout(() => {
-                    start = now;
-                    attempts = 1;
+                logWarn(`Node position watcher paused: retry in ${RETRY_TIMEOUT}ms`, node, prevSibling);
+                timeoutID = setTimeout(() => {
+                    start = null;
+                    attempts = 0;
                     restore();
-                }, 2000);
+                }, RETRY_TIMEOUT);
                 return;
             }
             start = now;
-            attem
+            attempts = 1;
+        }
 
         if (mode === 'parent') {
             if (prevSibling && prevSibling.parentNode !== parent) {
@@ -138,6 +141,7 @@ export function watchForNodePosition<T extends Node>(
         observer.observe(parent, {childList: true});
     };
     const stop = () => {
+        clearTimeout(timeoutID);
         observer.disconnect();
         restore.cancel();
     };

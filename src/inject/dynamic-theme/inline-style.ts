@@ -1,5 +1,5 @@
 import {forEach, push} from '../../utils/array';
-import {iterateShadowNodes, createOptimizedTreeObserver} from '../utils/dom';
+import {iterateShadowHosts, createOptimizedTreeObserver} from '../utils/dom';
 import {iterateCSSDeclarations} from './css-rules';
 import {getModifiableCSSDeclaration} from './modify-css';
 import {FilterConfig} from '../../definitions';
@@ -123,8 +123,8 @@ export function watchForInlineStyles(
     shadowRootDiscovered: (root: ShadowRoot) => void,
 ) {
     deepWatchForInlineStyles(document, elementStyleDidChange, shadowRootDiscovered);
-    iterateShadowNodes(document.documentElement, (node) => {
-        deepWatchForInlineStyles(node.shadowRoot, elementStyleDidChange, shadowRootDiscovered);
+    iterateShadowHosts(document.documentElement, (host) => {
+        deepWatchForInlineStyles(host.shadowRoot, elementStyleDidChange, shadowRootDiscovered);
     });
 }
 
@@ -148,7 +148,7 @@ function deepWatchForInlineStyles(
             discoveredNodes.add(el);
             elementStyleDidChange(el);
         });
-        iterateShadowNodes(node, (n) => {
+        iterateShadowHosts(node, (n) => {
             if (discoveredNodes.has(node)) {
                 return;
             }

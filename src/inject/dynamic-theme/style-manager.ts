@@ -1,6 +1,6 @@
 import {getCSSVariables, replaceCSSRelativeURLsWithAbsolute, removeCSSComments, replaceCSSFontFace, getCSSURLValue, cssImportRegex, getCSSBaseBath} from './css-rules';
 import {bgFetch} from './network';
-import {watchForNodePosition, removeNode, iterateShadowNodes} from '../utils/dom';
+import {watchForNodePosition, removeNode, iterateShadowHosts} from '../utils/dom';
 import {logWarn} from '../utils/log';
 import {forEach} from '../../utils/array';
 import {getMatches} from '../../utils/text';
@@ -58,15 +58,17 @@ export function shouldManageStyle(element: Node) {
     );
 }
 
-export function getManageableStyles(node: Node, results = [] as StyleElement[]) {
+export function getManageableStyles(node: Node, results = [] as StyleElement[], deep = true) {
     if (shouldManageStyle(node)) {
         results.push(node as StyleElement);
     } else if (node instanceof Element || (IS_SHADOW_DOM_SUPPORTED && node instanceof ShadowRoot) || node === document) {
         forEach(
             (node as Element).querySelectorAll(STYLE_SELECTOR),
-            (style: StyleElement) => getManageableStyles(style, results)
+            (style: StyleElement) => getManageableStyles(style, results, false),
         );
-        iterateShadowNodes(node, (host) => getManageableStyles(host.shadowRoot, results));
+        if (deep) {
+            iterateShadowHosts(node, (host) => getManageableStyles(host.shadowRoot, results, false));
+        }
     }
     return results;
 }

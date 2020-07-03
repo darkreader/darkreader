@@ -5,7 +5,7 @@ import {getModifiedUserAgentStyle, getModifiedFallbackStyle, cleanModificationCa
 import {manageStyle, getManageableStyles, StyleElement, StyleManager} from './style-manager';
 import {watchForStyleChanges, stopWatchingForStyleChanges} from './watch';
 import {forEach, push, toArray} from '../../utils/array';
-import {removeNode, watchForNodePosition, iterateShadowNodes, isDOMReady, addDOMReadyListener, removeDOMReadyListener} from '../utils/dom';
+import {removeNode, watchForNodePosition, iterateShadowHosts, isDOMReady, addDOMReadyListener, removeDOMReadyListener} from '../utils/dom';
 import {logWarn} from '../utils/log';
 import {throttle} from '../utils/throttle';
 import {clamp} from '../../utils/math';
@@ -151,10 +151,10 @@ function createDynamicStyleOverrides() {
     newManagers.forEach((manager) => manager.watch());
 
     const inlineStyleElements = toArray(document.querySelectorAll(INLINE_STYLE_SELECTOR));
-    iterateShadowNodes(document.documentElement, (node) => {
-        const elements = node.shadowRoot.querySelectorAll(INLINE_STYLE_SELECTOR);
+    iterateShadowHosts(document.documentElement, (host) => {
+        const elements = host.shadowRoot.querySelectorAll(INLINE_STYLE_SELECTOR);
         if (elements.length > 0) {
-            createShadowStaticStyleOverrides(node.shadowRoot);
+            createShadowStaticStyleOverrides(host.shadowRoot);
             push(inlineStyleElements, elements);
         }
     });
@@ -167,10 +167,6 @@ let loadingStylesCounter = 0;
 const loadingStyles = new Set();
 
 function createManager(element: StyleElement) {
-    if (styleManagers.has(element)) {
-        return;
-    }
-
     const loadingStyleId = ++loadingStylesCounter;
 
     function loadingStart() {

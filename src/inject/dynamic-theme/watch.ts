@@ -1,6 +1,6 @@
 import {forEach, push} from '../../utils/array';
 import {isDefinedSelectorSupported} from '../../utils/platform';
-import {iterateShadowNodes, createOptimizedTreeObserver, ElementsTreeOperations} from '../utils/dom';
+import {iterateShadowHosts, createOptimizedTreeObserver, ElementsTreeOperations} from '../utils/dom';
 import {shouldManageStyle, getManageableStyles, StyleElement} from './style-manager';
 
 const observers = [] as {disconnect(): void}[];
@@ -126,7 +126,7 @@ export function watchForStyleChanges(currentStyles: StyleElement[], update: (sty
         handleStyleOperations({createdStyles, removedStyles, movedStyles});
 
         additions.forEach((n) => {
-            iterateShadowNodes(n, subscribeForShadowRootChanges);
+            iterateShadowHosts(n, subscribeForShadowRootChanges);
             collectUndefinedElements(n);
         });
     }
@@ -155,7 +155,7 @@ export function watchForStyleChanges(currentStyles: StyleElement[], update: (sty
 
         handleStyleOperations({createdStyles, removedStyles, movedStyles});
 
-        iterateShadowNodes(root, subscribeForShadowRootChanges);
+        iterateShadowHosts(root, subscribeForShadowRootChanges);
         collectUndefinedElements(root);
     }
 
@@ -197,7 +197,7 @@ export function watchForStyleChanges(currentStyles: StyleElement[], update: (sty
     }
 
     observe(document);
-    iterateShadowNodes(document.documentElement, subscribeForShadowRootChanges);
+    iterateShadowHosts(document.documentElement, subscribeForShadowRootChanges);
 
     watchWhenCustomElementsDefined((hosts) => {
         const newStyles: StyleElement[] = [];
@@ -209,7 +209,7 @@ export function watchForStyleChanges(currentStyles: StyleElement[], update: (sty
                 return;
             }
             subscribeForShadowRootChanges(host);
-            iterateShadowNodes(shadowRoot, subscribeForShadowRootChanges);
+            iterateShadowHosts(shadowRoot, subscribeForShadowRootChanges);
             collectUndefinedElements(shadowRoot);
         });
     });

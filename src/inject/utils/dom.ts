@@ -145,13 +145,16 @@ export function watchForNodePosition<T extends Node>(
         observer.disconnect();
         restore.cancel();
     };
+    const skip = () => {
+        observer.takeRecords();
+    };
     const updateParent = (parentNode: Node & ParentNode) => {
         parent = parentNode;
         stop();
         run();
     };
     run();
-    return {run, stop};
+    return {run, stop, skip};
 }
 
 export function iterateShadowNodes(root: Node, iterator: (node: Element) => void) {

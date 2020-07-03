@@ -1,6 +1,6 @@
 import {getCSSVariables, replaceCSSRelativeURLsWithAbsolute, removeCSSComments, replaceCSSFontFace, getCSSURLValue, cssImportRegex, getCSSBaseBath} from './css-rules';
 import {bgFetch} from './network';
-import {watchForNodePosition, removeNode, iterateShadowNodes} from '../utils/dom';
+import {watchForNodePosition, removeNode, iterateShadowHosts} from '../utils/dom';
 import {logWarn} from '../utils/log';
 import {forEach} from '../../utils/array';
 import {getMatches} from '../../utils/text';
@@ -66,7 +66,7 @@ export function getManageableStyles(node: Node, results = [] as StyleElement[]) 
             (node as Element).querySelectorAll(STYLE_SELECTOR),
             (style: StyleElement) => getManageableStyles(style, results)
         );
-        iterateShadowNodes(node, (host) => getManageableStyles(host.shadowRoot, results));
+        iterateShadowHosts(node, (host) => getManageableStyles(host.shadowRoot, results));
     }
     return results;
 }

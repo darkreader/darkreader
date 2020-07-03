@@ -1,5 +1,5 @@
 import {Extension} from './extension';
-import {getHelpURL} from '../utils/links';
+import {getHelpURL, UNINSTALL_URL} from '../utils/links';
 
 // Initialize extension
 const extension = new Extension();
@@ -10,6 +10,8 @@ chrome.runtime.onInstalled.addListener(({reason}) => {
         chrome.tabs.create({url: getHelpURL()});
     }
 });
+
+chrome.runtime.setUninstallURL(UNINSTALL_URL);
 
 declare const __WATCH__: boolean;
 declare const __PORT__: number;

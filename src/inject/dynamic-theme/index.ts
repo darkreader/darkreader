@@ -167,10 +167,6 @@ let loadingStylesCounter = 0;
 const loadingStyles = new Set();
 
 function createManager(element: StyleElement) {
-    if (styleManagers.has(element)) {
-        return;
-    }
-
     const loadingStyleId = ++loadingStylesCounter;
 
     function loadingStart() {

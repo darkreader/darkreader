@@ -257,19 +257,24 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
             if (syncStylePositionWatcher) {
                 syncStylePositionWatcher.run();
             } else {
-                syncStylePositionWatcher = watchForNodePosition(syncStyle, 'prev-sibling', buildOverrides);
+                syncStylePositionWatcher = watchForNodePosition(syncStyle, 'prev-sibling', () => {
+                    forceRenderStyle = true;
+                    buildOverrides();
+                });
             }
 
             return syncStyle.sheet;
         }
 
         function buildOverrides() {
+            const force = forceRenderStyle;
+            forceRenderStyle = false;
             sheetModifier.modifySheet({
                 prepareSheet: prepareOverridesSheet,
                 sourceCSSRules: rules,
                 theme,
                 variables,
-                force: forceRenderStyle,
+                force,
                 isAsyncCancelled: () => cancelAsyncOperations,
             });
         }
@@ -376,6 +381,8 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
         logWarn('Restore style', syncStyle, element);
         const shouldForceRender = syncStyle.sheet == null || syncStyle.sheet.cssRules.length > 0;
         insertStyle();
+        corsCopyPositionWatcher.skip();
+        syncStylePositionWatcher.skip();
         if (shouldForceRender) {
             forceRenderStyle = true;
             updateRulesChangeKey();

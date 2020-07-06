@@ -383,8 +383,8 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
         logWarn('Restore style', syncStyle, element);
         const shouldForceRender = syncStyle.sheet == null || syncStyle.sheet.cssRules.length > 0;
         insertStyle();
-        corsCopyPositionWatcher.skip();
-        syncStylePositionWatcher.skip();
+        corsCopyPositionWatcher && corsCopyPositionWatcher.skip();
+        syncStylePositionWatcher && syncStylePositionWatcher.skip();
         if (shouldForceRender) {
             forceRenderStyle = true;
             updateRulesChangeKey();

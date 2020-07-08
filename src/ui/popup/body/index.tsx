@@ -11,7 +11,6 @@ import SettingsPage from '../settings-page';
 import ThemePage from '../theme/page';
 import {ViewProps} from '../types';
 import ManageSettingsPage from '../manage-settings-page';
-import MiscellaneousSettingsPage from '../miscellaneous-settings';
 
 function Logo() {
     return (
@@ -29,7 +28,7 @@ function Logo() {
 function Pages(props: ViewProps) {
     const context = getContext();
     const store = context.store as {
-        activePage: 'main' | 'theme' | 'settings' | 'automation' | 'manage-settings' | 'miscellaneous-settings';
+        activePage: 'main' | 'theme' | 'settings' | 'automation' | 'manage-settings';
     };
     if (store.activePage == null) {
         store.activePage = 'main';
@@ -55,14 +54,9 @@ function Pages(props: ViewProps) {
         context.refresh();
     }
 
-    function onMiscellaneousClick() {
-        store.activePage = 'miscellaneous-settings';
-        context.refresh();
-    }
-
     function onBackClick() {
         const activePage = store.activePage;
-        if (activePage === 'automation' || activePage === 'manage-settings' || activePage === 'miscellaneous-settings') {
+        if (activePage === 'automation' || activePage === 'manage-settings') {
             store.activePage = 'settings';
         } else {
             store.activePage = 'main';
@@ -90,7 +84,6 @@ function Pages(props: ViewProps) {
                     {...props}
                     onAutomationNavClick={onAutomationNavClick}
                     onManageSettingsClick={onManageSettingsClick}
-                    onMiscellaneousNavClick={onMiscellaneousClick}
                 />
             </Page>
             <Page id="automation">
@@ -98,9 +91,6 @@ function Pages(props: ViewProps) {
             </Page>
             <Page id="manage-settings">
                 <ManageSettingsPage {...props} />
-            </Page>
-            <Page id="miscellaneous-settings">
-                <MiscellaneousSettingsPage {...props} />
             </Page>
 
         </PageViewer>

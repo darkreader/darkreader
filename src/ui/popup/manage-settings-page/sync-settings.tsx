@@ -10,10 +10,10 @@ export default function SyncSettings(props: ViewProps) {
     return (
         <CheckButton
             checked={props.data.settings.syncSettings}
-            label="Enable syncing settings"
+            label="Enable settings sync"
             description={props.data.settings.syncSettings ?
-                'Enabled to sync settings' :
-                'Disabled to sync settings'}
+                'Synchronized across devices' :
+                'Not synchronized across devices'}
             onChange={onSyncSettingsChange}
         />
     );

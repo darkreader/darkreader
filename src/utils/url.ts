@@ -113,7 +113,7 @@ export function isPDF(url: string) {
         if (url.includes('#')) {
             url = url.substring(0, url.lastIndexOf('#'));
         }
-        if (url.match(/(wikipedia|wikimedia).org/i) && url.match(/(wikipedia|wikimedia)\.org\/.*\/[a-z]\:*.+\.pdf/i)) {
+        if (url.match(/(wikipedia|wikimedia).org/i) && url.match(/(wikipedia|wikimedia)\.org\/.*\/[a-z]+\:[^\:\/]+\.pdf/i)) {
             return false;
         }
         if (url.endsWith('.pdf')) {

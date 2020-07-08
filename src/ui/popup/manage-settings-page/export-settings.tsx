@@ -5,7 +5,7 @@ import {saveFile} from '../../utils';
 import ControlGroup from '../control-group';
 
 export default function ExportButton(props: ViewProps) {
-    async function exportSettings() {
+    function exportSettings() {
         saveFile('Dark-Reader-Settings.json', JSON.stringify(props.data.settings, null, 4));
     }
     return (

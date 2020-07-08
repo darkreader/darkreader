@@ -125,7 +125,7 @@ test('URL is enabled', () => {
         'https://www.google.com/very/good/hidden/folder/pdf#file.pdf'
     )).toBe(false);
     expect(isPDF(
-        'https://en.wikipedia.org/wiki/File:ExtIPA_chart_(2015).pdf'
+        'https://fi.wikipedia.org/wiki/Tiedosto:ExtIPA_chart_(2015).pdf?uselang=en'
     )).toBe(false);
 
     // IPV6 Testing

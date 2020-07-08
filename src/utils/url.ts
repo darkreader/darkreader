@@ -106,7 +106,6 @@ function createUrlRegex(urlTemplate: string): RegExp {
 }
 
 export function isPDF(url: string) {
-    url = url.replace(/^.*?\/{2,3}/, '') // Remove scheme
     if (url.includes('.pdf')) {
         if (url.includes('?')) {
             url = url.substring(0, url.lastIndexOf('?'));
@@ -114,9 +113,10 @@ export function isPDF(url: string) {
         if (url.includes('#')) {
             url = url.substring(0, url.lastIndexOf('#'));
         }
-        //Wikipedia's PDF'S
-        if (url.includes(':')) {
-            url = url.substring(0, url.lastIndexOf(':'));
+        if (url.match(/wikipedia.org/i)) {
+            if (url.match(/wikipedia.org\/.*\/[a-z]\:*.+\.pdf/i)) {
+                return false;
+            }
         }
         if (url.endsWith('.pdf')) {
             for (let i = url.length; 0 < i; i--) {

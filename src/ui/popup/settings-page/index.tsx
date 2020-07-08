@@ -10,7 +10,6 @@ import InvertPDF from './invert-pdf';
 type SettingsPageProps = ViewProps & {
     onAutomationNavClick: () => void;
     onManageSettingsClick: () => void;
-    onMiscellaneousNavClick: () => void;
 };
 
 export default function SettingsPage(props: SettingsPageProps) {

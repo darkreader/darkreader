@@ -72,6 +72,13 @@ export default class TabManager {
             if (type === 'color-scheme-change') {
                 onColorSchemeChange(data);
             }
+            if (type === 'save-file') {
+                const {content, name} = data;
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(new Blob([content]));
+                a.download = name;
+                a.click();
+            }
         });
     }
 

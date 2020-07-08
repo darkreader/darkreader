@@ -3,7 +3,9 @@ import {ViewProps} from '../types';
 import AutomationButton from './automation-button';
 import DevToolsGroup from './devtools';
 import ManageSettingsButton from './mange-settings-button';
-import MiscellaneousButton from './miscellaneous-button';
+import {isFirefox} from '../../../utils/platform';
+import EnabledByDefaultGroup from './enabled-by-default';
+import InvertPDF from './invert-pdf';
 
 type SettingsPageProps = ViewProps & {
     onAutomationNavClick: () => void;
@@ -14,7 +16,8 @@ type SettingsPageProps = ViewProps & {
 export default function SettingsPage(props: SettingsPageProps) {
     return (
         <section class="m-section">
-            <MiscellaneousButton onClick={props.onMiscellaneousNavClick}/>
+            <EnabledByDefaultGroup {...props} />
+            {isFirefox() ? null : <InvertPDF {...props} />}
             <DevToolsGroup {...props} />
             <AutomationButton onClick={props.onAutomationNavClick} />
             <ManageSettingsButton onClick={props.onManageSettingsClick} />

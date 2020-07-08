@@ -127,6 +127,12 @@ test('URL is enabled', () => {
     expect(isPDF(
         'https://fi.wikipedia.org/wiki/Tiedosto:ExtIPA_chart_(2015).pdf?uselang=en'
     )).toBe(false);
+    expect(isPDF(
+        'https://commons.wikimedia.org/wiki/File:ExtIPA_chart_(2015).pdf'
+    )).toBe(false);
+    expect(isPDF(
+        'https://upload.wikimedia.org/wikipedia/commons/5/56/ExtIPA_chart_(2015).pdf'
+    )).toBe(true);  
 
     // IPV6 Testing
     expect(isURLEnabled(

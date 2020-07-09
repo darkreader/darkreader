@@ -263,7 +263,7 @@ export class Extension {
             this.onAppToggle();
         }
         if (prev.syncSettings !== this.user.settings.syncSettings) {
-            this.saveUserSettings(true);
+            this.user.saveSyncSetting(this.user.settings.syncSettings);
         }
         if (this.isEnabled() && $settings.changeBrowserTheme != null && prev.changeBrowserTheme !== $settings.changeBrowserTheme) {
             if ($settings.changeBrowserTheme) {
@@ -346,7 +346,7 @@ export class Extension {
 
         this.wasEnabledOnLastCheck = this.isEnabled();
         this.tabs.sendMessage(this.getTabMessage);
-        this.saveUserSettings(false);
+        this.saveUserSettings();
         this.reportChanges();
     }
 
@@ -432,8 +432,8 @@ export class Extension {
     //-------------------------------------
     //          User settings
 
-    private async saveUserSettings(force: boolean) {
-        await this.user.saveSettings(force);
+    private async saveUserSettings() {
+        await this.user.saveSettings();
         console.log('saved', this.user.settings);
     }
 }

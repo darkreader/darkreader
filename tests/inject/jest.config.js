@@ -21,6 +21,7 @@ module.exports = {
     globals: {
         'ts-jest': {
             tsConfig: './tests/inject/tsconfig.json'
-        }
+        },
+        __DEBUG__: false,
     }
 };

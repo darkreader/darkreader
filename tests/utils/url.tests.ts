@@ -1,5 +1,5 @@
-import {isURLEnabled, isURLMatched, isPDF} from '../src/utils/url';
-import {UserSettings} from '../src/definitions';
+import {isURLEnabled, isURLMatched, isPDF} from '../../src/utils/url';
+import {UserSettings} from '../../src/definitions';
 
 test('URL is enabled', () => {
     // Not invert listed
@@ -132,7 +132,7 @@ test('URL is enabled', () => {
     )).toBe(false);
     expect(isPDF(
         'https://upload.wikimedia.org/wikipedia/commons/5/56/ExtIPA_chart_(2015).pdf'
-    )).toBe(true);  
+    )).toBe(true);
 
     // IPV6 Testing
     expect(isURLEnabled(

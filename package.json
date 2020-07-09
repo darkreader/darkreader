@@ -10,8 +10,11 @@
     "debug-watch": "node tasks/build.js --debug --watch",
     "prepublishOnly": "npm test && npm run api",
     "release": "npm test && node tasks/build.js --release",
-    "test": "jest --config=tests/jest.config.js",
-    "test:inject": "jest --config=tests/inject/jest.config.js"
+    "test": "npm run test:config",
+    "test:config": "jest --config=tests/jest.config.js",
+    "test:config:debug": "node --inspect-brk ./node_modules/jest/bin/jest --config=tests/jest.config.js --runInBand --no-cache --watch",
+    "test:inject": "jest --config=tests/inject/jest.config.js",
+    "test:inject:debug": "node --inspect-brk ./node_modules/jest/bin/jest --config=tests/inject/jest.config.js --runInBand --no-cache --watch"
   },
   "main": "darkreader.js",
   "repository": {

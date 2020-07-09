@@ -432,8 +432,8 @@ export class Extension {
     //-------------------------------------
     //          User settings
 
-    private async saveUserSettings(forcedSync: boolean) {
-        await this.user.saveSettings(forcedSync);
+    private async saveUserSettings(force: boolean) {
+        await this.user.saveSettings(force);
         console.log('saved', this.user.settings);
     }
 }

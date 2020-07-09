@@ -52,19 +52,19 @@ export default class UserStorage {
         });
     }
 
-    async saveSettings(forcedSync: boolean) {
-        const saved = await this.saveSettingsIntoStorage(this.settings, forcedSync);
+    async saveSettings(force: boolean) {
+        const saved = await this.saveSettingsIntoStorage(this.settings, force);
         this.settings = saved;
     }
 
-    private saveSettingsIntoStorage(settings: UserSettings, forcedSync: boolean) {
+    private saveSettingsIntoStorage(settings: UserSettings, force: boolean) {
         if (this.timeout) {
             clearInterval(this.timeout);
         }
         return new Promise<UserSettings>((resolve) => {
             this.timeout = setTimeout(() => {
                 this.timeout = null;
-                if (settings.syncSettings || forcedSync) {
+                if (settings.syncSettings || force) {
                     chrome.storage.sync.set(settings, () => {
                         if (chrome.runtime.lastError) {
                             console.warn('Settings synchronization was disabled due to error:', chrome.runtime.lastError);
@@ -74,7 +74,7 @@ export default class UserStorage {
                             resolve(settings);
                         }
                     });
-                } else {
+                } else if (force || !settings.syncSettings) {
                     chrome.storage.local.set(settings, () => resolve(settings));
                 }
             }, SAVE_TIMEOUT);

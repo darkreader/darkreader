@@ -10,11 +10,13 @@
     "debug-watch": "node tasks/build.js --debug --watch",
     "prepublishOnly": "npm test && npm run api",
     "release": "npm test && node tasks/build.js --release",
-    "test": "npm run test:config",
-    "test:config": "jest --config=tests/jest.config.js",
-    "test:config:debug": "node --inspect-brk ./node_modules/jest/bin/jest --config=tests/jest.config.js --runInBand --no-cache --watch",
+    "test": "npm run test:config && npm run test:inject && npm run test:utils",
+    "test:config": "jest --config=tests/config/jest.config.js",
+    "test:config:debug": "node --inspect-brk ./node_modules/jest/bin/jest --config=tests/config/jest.config.js --runInBand --no-cache --watch",
     "test:inject": "jest --config=tests/inject/jest.config.js",
-    "test:inject:debug": "node --inspect-brk ./node_modules/jest/bin/jest --config=tests/inject/jest.config.js --runInBand --no-cache --watch"
+    "test:inject:debug": "node --inspect-brk ./node_modules/jest/bin/jest --config=tests/inject/jest.config.js --runInBand --no-cache --watch",
+    "test:utils": "jest --config=tests/utils/jest.config.js",
+    "test:utils:debug": "node --inspect-brk ./node_modules/jest/bin/jest --config=tests/utils/jest.config.js --runInBand --no-cache --watch"
   },
   "main": "darkreader.js",
   "repository": {

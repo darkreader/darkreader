@@ -23,7 +23,7 @@ export interface ModifiableCSSRule {
     declarations: ModifiableCSSDeclaration[];
 }
 
-export function getModifiableCSSDeclaration(property: string, value: string, rule: CSSStyleRule, isCancelled: () => boolean): ModifiableCSSDeclaration {
+export function getModifiableCSSDeclaration(property: string, value: string, rule: CSSStyleRule, ignoreImageSelectors: string[], isCancelled: () => boolean): ModifiableCSSDeclaration {
     const important = Boolean(rule && rule.style && rule.style.getPropertyPriority(property));
     const sourceValue = value;
     if (property.startsWith('--')) {
@@ -38,7 +38,7 @@ export function getModifiableCSSDeclaration(property: string, value: string, rul
             return {property, value: modifier, important, sourceValue};
         }
     } else if (property === 'background-image' || property === 'list-style-image') {
-        const modifier = getBgImageModifier(property, value, rule, isCancelled);
+        const modifier = getBgImageModifier(value, rule, ignoreImageSelectors, isCancelled);
         if (modifier) {
             return {property, value: modifier, important, sourceValue};
         }
@@ -227,7 +227,17 @@ const gradientRegex = /[\-a-z]+gradient\(([^\(\)]*(\(([^\(\)]*(\(.*?\)))*[^\(\)]
 const imageDetailsCache = new Map<string, ImageDetails>();
 const awaitingForImageLoading = new Map<string, ((imageDetails: ImageDetails) => void)[]>();
 
-function getBgImageModifier(prop: string, value: string, rule: CSSStyleRule, isCancelled: () => boolean): string | CSSValueModifier {
+function shouldIgnoreImage(element: CSSStyleRule, selectors: string[]) {
+    for (let i = 0; i < selectors.length; i++) {
+        const ingnoredSelector = selectors[i];
+        if (element.matches(ingnoredSelector)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+function getBgImageModifier(value: string, rule: CSSStyleRule, ignoreImageSelectors: string[], isCancelled: () => boolean): string | CSSValueModifier {
     try {
         const gradients = getMatches(gradientRegex, value);
         const urls = getMatches(cssURLRegex, value);
@@ -305,6 +315,7 @@ function getBgImageModifier(prop: string, value: string, rule: CSSStyleRule, isC
                     imageDetails = imageDetailsCache.get(url);
                 } else {
                     try {
+                        if (shouldIgnoreImage(rule, ignoreImageSelectors))
                         if (awaitingForImageLoading.has(url)) {
                             const awaiters = awaitingForImageLoading.get(url);
                             imageDetails = await new Promise<ImageDetails>((resolve) => awaiters.push(resolve));

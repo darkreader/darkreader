@@ -62,7 +62,7 @@ test('Dynamic Theme Fixes config', async () => {
     expect(fixes.map(({url}) => url[0])).toEqual(fixes.map(({url}) => url[0]).sort(compareURLPatterns));
 
     // selectors should have no comma
-    expect(fixes.every(({invert, ignoreInlineStyle}) => (invert || []).concat(ignoreInlineStyle || []).every((s) => s.indexOf(',') < 0))).toBe(true);
+    expect(fixes.every(({invert, ignoreInlineStyle, ignoreImageAnalyse}) => (invert || []).concat(ignoreInlineStyle || []).concat(ignoreImageAnalyse || []).every((s) => s.indexOf(',') < 0))).toBe(true);
 
     // fixes are properly formatted
     expect(throwIfDifferent(file, formatDynamicThemeFixes(fixes), 'Dynamic fixes format error')).not.toThrow();
@@ -84,10 +84,14 @@ test('Dynamic Theme Fixes config', async () => {
         '========',
         'wikipedia.org',
         'IGNORE INLINE STYLE', 'a', 'b',
+        '========',
+        'duckduckgo.com',
+        'IGORE IMAGE ANALYSE', 'img[alt="Logo"]', 'canvas',
     ].join('\r\n'))).toEqual([
         {url: ['inbox.google.com', 'mail.google.com'], invert: ['a', 'b'], css: '.x { color: white !important; }'},
         {url: ['twitter.com'], invert: ['c', 'd']},
         {url: ['wikipedia.org'], ignoreInlineStyle: ['a', 'b']},
+        {url: ['duckduckgo.com'], ignoreImageAnalyse: ['img[alt="Logo"]', 'canvas']},
     ]);
 });
 

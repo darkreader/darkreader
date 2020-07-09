@@ -318,9 +318,10 @@ function watchForUpdates() {
         handleAdoptedStyleSheets(shadowRoot);
     });
 
-    const ignoredSelectors = fixes && Array.isArray(fixes.ignoreInlineStyle) ? fixes.ignoreInlineStyle : [];
+    const ignoredInlineSelectors = fixes && Array.isArray(fixes.ignoreInlineStyle) ? fixes.ignoreInlineStyle : [];
+    const ignoredImageSelectors = fixes && Array.isArray(fixes.ignoreImageAnalyse) ? fixes.ignoreImageAnalyse : [];
     watchForInlineStyles((element) => {
-        overrideInlineStyle(element, filter, ignoredSelectors);
+        overrideInlineStyle(element, filter, ignoredInlineSelectors, ignoredImageSelectors);
         if (element === document.documentElement) {
             const rootVariables = getElementCSSVariables(document.documentElement);
             if (rootVariables.size > 0) {
@@ -332,7 +333,7 @@ function watchForUpdates() {
         const inlineStyleElements = root.querySelectorAll(INLINE_STYLE_SELECTOR);
         if (inlineStyleElements.length > 0) {
             createShadowStaticStyleOverrides(root);
-            forEach(inlineStyleElements, (el) => overrideInlineStyle(el as HTMLElement, filter, ignoredSelectors));
+            forEach(inlineStyleElements, (el) => overrideInlineStyle(el as HTMLElement, filter, ignoredInlineSelectors, ignoredImageSelectors));
         }
     });
 

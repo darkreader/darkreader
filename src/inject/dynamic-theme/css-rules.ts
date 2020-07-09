@@ -98,9 +98,8 @@ export function replaceCSSVariables(
     stack = new Set<string>(),
 ) {
     let missing = false;
-    const foundVars = new Set<string>();
+    const unresolvable = new Set<string>();
     const result = value.replace(varRegex, (match, name, fallback) => {
-        foundVars.add(name);
         if (stack.has(name)) {
             logWarn(`Circular reference to variable ${name}`);
             if (fallback) {
@@ -110,7 +109,11 @@ export function replaceCSSVariables(
             return match;
         }
         if (variables.has(name)) {
-            return variables.get(name);
+            const value = variables.get(name);
+            if (value.match(varRegex)) {
+                unresolvable.add(name);
+            }
+            return value;
         } else if (fallback) {
             return fallback;
         } else {
@@ -123,7 +126,7 @@ export function replaceCSSVariables(
         return result;
     }
     if (result.match(varRegex)) {
-        foundVars.forEach((v) => stack.add(v));
+        unresolvable.forEach((v) => stack.add(v));
         return replaceCSSVariables(result, variables, stack);
     }
     return result;

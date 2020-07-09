@@ -87,4 +87,11 @@ test('Replace CSS variables', () => {
             new Map([['--text', 'var(--alert)'], ['--alert', 'var(--text)']]),
         )
     ).toBe('body { color: var(--text); } h1 { color: var(--text); }');
+
+    expect(
+        replaceCSSVariables(
+            'body { color: var(--text); } h1 { color: var(--alert); }',
+            new Map([['--text', 'var(--alert)'], ['--alert', 'red']]),
+        )
+    ).toBe('body { color: red; } h1 { color: red; }');
 });

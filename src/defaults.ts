@@ -22,7 +22,7 @@ export const DEFAULT_THEME: Theme = {
     useFont: false,
     fontFamily: isMacOS() ? 'Helvetica Neue' : isWindows() ? 'Segoe UI' : 'Open Sans',
     useFontSize: false,
-    fontSize: 16,
+    fontSize: 0,
     textStroke: 0,
     engine: ThemeEngines.dynamicTheme,
     stylesheet: '',

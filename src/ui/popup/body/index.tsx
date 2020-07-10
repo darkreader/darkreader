@@ -55,7 +55,8 @@ function Pages(props: ViewProps) {
     }
 
     function onBackClick() {
-        if (store.activePage === 'automation' || store.activePage === 'manage-settings') {
+        const activePage = store.activePage;
+        if (activePage === 'automation' || activePage === 'manage-settings') {
             store.activePage = 'settings';
         } else {
             store.activePage = 'main';

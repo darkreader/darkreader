@@ -57,6 +57,15 @@ export default class UserStorage {
         this.settings = saved;
     }
 
+    saveSyncSetting(sync: boolean) {
+        chrome.storage.sync.set({syncSettings: sync}, () => {
+            if (chrome.runtime.lastError) {
+                console.warn('Settings synchronization was disabled due to error:', chrome.runtime.lastError);
+            }
+        });
+        chrome.storage.local.set({syncSettings: sync});
+    }
+
     private saveSettingsIntoStorage(settings: UserSettings) {
         if (this.timeout) {
             clearInterval(this.timeout);

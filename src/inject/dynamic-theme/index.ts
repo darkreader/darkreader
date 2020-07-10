@@ -334,7 +334,7 @@ function stopWatchingForUpdates() {
 
 function createDarkReaderInstanceMarker() {
     const metaElement: HTMLMetaElement = document.createElement('meta');
-    metaElement.name = "darkreader";
+    metaElement.name = 'darkreader';
     metaElement.content = UUID;
     document.head.appendChild(metaElement);
 }

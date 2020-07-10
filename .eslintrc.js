@@ -23,6 +23,7 @@ module.exports = {
             named: 'never',
         }],
         'space-in-parens': ['error', 'never'],
+        'space-infix-ops': 'error',
         'spaced-comment': ['error', 'always', {exceptions: ['-']}],
         'quotes': ['error', 'single', {
             allowTemplateLiterals: true,

@@ -38,8 +38,10 @@ export function isMacOS() {
 }
 
 export function isMobile() {
-    const agent = navigator.userAgent.toLowerCase();
-    return agent.includes('mobile');
+    if (typeof navigator === 'undefined') {
+        return null;
+    }
+    return navigator.userAgent.toLowerCase().includes('mobile');
 }
 
 export function getChromeVersion() {

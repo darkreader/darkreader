@@ -1,8 +1,8 @@
 import {m} from 'malevic';
-import {DEFAULT_SETTINGS} from '../../../../defaults';
+import {DEFAULT_SETTINGS, DEFAULT_THEME, DEFAULT_COLORS} from '../../../../defaults';
 import {Theme} from '../../../../definitions';
 import {ViewProps} from '../../types';
-import {Brightness, Contrast, Grayscale, Mode, ResetButton, Scheme, Scrollbar, SelectionColorEditor, Sepia} from '../controls';
+import {BackgroundColor, Brightness, Contrast, Grayscale, Mode, ResetButton, Scheme, Scrollbar, SelectionColorEditor, Sepia, TextColor} from '../controls';
 import ThemePresetPicker from '../preset-picker';
 import {getCurrentThemePreset} from '../utils';
 import Collapsible from './collapsible-panel';
@@ -44,8 +44,26 @@ function MainGroup({theme, change}: ThemeGroupProps) {
 }
 
 function ColorsGroup({theme, change}: ThemeGroupProps) {
+    const isDarkScheme = theme.mode === 1;
+    const bgProp: keyof Theme = isDarkScheme ? 'darkSchemeBackgroundColor' : 'lightSchemeBackgroundColor';
+    const fgProp: keyof Theme = isDarkScheme ? 'darkSchemeTextColor' : 'lightSchemeTextColor';
+    const defaultSchemeColors = isDarkScheme ? DEFAULT_COLORS.darkScheme : DEFAULT_COLORS.lightScheme;
+    const defaultMatrixValues: Partial<Theme> = {brightness: DEFAULT_THEME.brightness, contrast: DEFAULT_THEME.contrast, sepia: DEFAULT_THEME.sepia, grayscale: DEFAULT_THEME.grayscale};
+
     return (
         <Array>
+            <BackgroundColor
+                value={theme[bgProp] === 'auto' ? defaultSchemeColors.background : theme[bgProp]}
+                onChange={(v) => change({[bgProp]: v, ...defaultMatrixValues})}
+                canReset={theme[bgProp] !== defaultSchemeColors.background}
+                onReset={() => change({[bgProp]: DEFAULT_SETTINGS.theme[bgProp]})}
+            />
+            <TextColor
+                value={theme[fgProp] === 'auto' ? defaultSchemeColors.text : theme[fgProp]}
+                onChange={(v) => change({[fgProp]: v, ...defaultMatrixValues})}
+                canReset={theme[fgProp] !== defaultSchemeColors.text}
+                onReset={() => change({[fgProp]: DEFAULT_SETTINGS.theme[fgProp]})}
+            />
             <Scrollbar
                 value={theme.scrollbarColor}
                 onChange={(v) => change({scrollbarColor: v})}

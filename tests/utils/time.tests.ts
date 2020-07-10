@@ -1,4 +1,4 @@
-import {isInTimeInterval, isNightAtLocation, parseTime, getDuration} from '../src/utils/time';
+import {isInTimeInterval, isNightAtLocation, parseTime, getDuration} from '../../src/utils/time';
 
 test('Time interval', () => {
     expect(isInTimeInterval(new Date(2018, 11, 4, 10), '9:00', '12:00')).toBe(true);

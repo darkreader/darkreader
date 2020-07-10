@@ -14,9 +14,11 @@ import {getCSSFilterValue} from '../../generators/css-filter';
 import {modifyColor} from '../../generators/modify-colors';
 import {createTextStyle} from '../../generators/text-style';
 import {FilterConfig, DynamicThemeFix} from '../../definitions';
+import {generateUUID} from './uuid';
 
 const styleManagers = new Map<StyleElement, StyleManager>();
 const variables = new Map<string, string>();
+const UUID = generateUUID();
 let filter: FilterConfig = null;
 let fixes: DynamicThemeFix = null;
 let isIFrame: boolean = null;
@@ -329,12 +331,30 @@ function stopWatchingForUpdates() {
     stopWatchingForInlineStyles();
     removeDOMReadyListener(onDOMReady);
 }
+function checkMeta() {
+    const meta: HTMLMetaElement = document.querySelector('meta[name="darkreader"]');
+    if (meta) {
+        if (meta.content !== UUID) {
+            return true;
+        }
+        return false;
+    } else {
+        const metaElement: HTMLMetaElement = document.createElement('meta');
+        metaElement.name = "darkreader";
+        metaElement.content = UUID;
+        document.head.appendChild(metaElement);
+        return false;
+    }
+}
 
 export function createOrUpdateDynamicTheme(filterConfig: FilterConfig, dynamicThemeFixes: DynamicThemeFix, iframe: boolean) {
     filter = filterConfig;
     fixes = dynamicThemeFixes;
     isIFrame = iframe;
     if (document.head) {
+        if (checkMeta()) {
+            return;
+        }
         createThemeAndWatchForUpdates();
     } else {
         if (!isFirefox()) {
@@ -346,6 +366,10 @@ export function createOrUpdateDynamicTheme(filterConfig: FilterConfig, dynamicTh
         const headObserver = new MutationObserver(() => {
             if (document.head) {
                 headObserver.disconnect();
+                if (checkMeta()) {
+                    removeDynamicTheme();
+                    return;
+                }
                 createThemeAndWatchForUpdates();
             }
         });

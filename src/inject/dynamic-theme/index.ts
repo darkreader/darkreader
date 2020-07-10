@@ -91,13 +91,20 @@ function createStaticStyleOverrides() {
     overrideStyle.textContent = fixes && fixes.css ? replaceCSSTemplates(fixes.css) : '';
     document.head.appendChild(overrideStyle);
     setupStylePositionWatcher(overrideStyle, 'override');
-    
-    const variableStyle = createOrUpdateStyle('darkreader--override');
+
+    const variableStyle = createOrUpdateStyle('darkreader--variable');
     const selectionColors = getSelectionColor(filter);
+    const {darkSchemeBackgroundColor, darkSchemeTextColor, lightSchemeBackgroundColor, lightSchemeTextColor} = filter;
     variableStyle.textContent = [
         `:root {`,
-        `   --darkreader-neutral-bg: ${}`
-    ].join('/n')
+        `   --darkreader-neutral-bg: ${filter.mode === 0 ? lightSchemeBackgroundColor : darkSchemeBackgroundColor};`,
+        `   --darkreader-neutral-text: ${filter.mode === 0 ? lightSchemeTextColor : darkSchemeTextColor};`,
+        `   --darkreader-selection-bg: ${selectionColors.backgroundColorSelection};`,
+        `   --darkreader-selection-fg: ${selectionColors.foregroundColorSelection};`,
+        `}`
+    ].join('/n');
+    document.head.insertBefore(variableStyle, inlineStyle.nextSibling);
+    setupStylePositionWatcher(variableStyle, 'variable');
 }
 
 const shadowRootsWithOverrides = new Set<ShadowRoot>();

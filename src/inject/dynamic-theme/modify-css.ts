@@ -105,13 +105,13 @@ export function getSelectionColor(theme: Theme) {
             foregroundColorSelection = '#000';
         }
     }
-    return [backgroundColorSelection, foregroundColorSelection];
+    return {backgroundColorSelection, foregroundColorSelection};
 }
 function getModifiedSelectionStyle(theme: Theme) {
     const lines: string[] = [];
     const modifiedSelectionColor = getSelectionColor(theme);
-    let backgroundColorSelection = modifiedSelectionColor[0];
-    let foregroundColorSelection = modifiedSelectionColor[1];
+    const backgroundColorSelection = modifiedSelectionColor.backgroundColorSelection;
+    const foregroundColorSelection = modifiedSelectionColor.foregroundColorSelection;
     ['::selection', '::-moz-selection'].forEach((selection) => {
         lines.push(`${selection} {`);
         lines.push(`    background-color: ${backgroundColorSelection} !important;`);

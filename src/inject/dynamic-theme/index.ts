@@ -58,7 +58,7 @@ function createStaticStyleOverrides() {
     setupStylePositionWatcher(userAgentStyle, 'user-agent');
 
     const textStyle = createOrUpdateStyle('darkreader--text');
-    if (filter.useFont || filter.textStroke > 0) {
+    if (filter.useFont || filter.textStroke > 0 || filter.useFontSize) {
         textStyle.textContent = createTextStyle(filter);
     } else {
         textStyle.textContent = '';

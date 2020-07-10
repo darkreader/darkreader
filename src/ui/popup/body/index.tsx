@@ -11,6 +11,7 @@ import SettingsPage from '../settings-page';
 import ThemePage from '../theme/page';
 import {ViewProps} from '../types';
 import ManageSettingsPage from '../manage-settings-page';
+import FontPage from '../font-page';
 
 function Logo() {
     return (
@@ -28,7 +29,7 @@ function Logo() {
 function Pages(props: ViewProps) {
     const context = getContext();
     const store = context.store as {
-        activePage: 'main' | 'theme' | 'settings' | 'automation' | 'manage-settings';
+        activePage: 'main' | 'theme' | 'settings' | 'automation' | 'manage-settings' | 'font-settings';
     };
     if (store.activePage == null) {
         store.activePage = 'main';
@@ -54,9 +55,14 @@ function Pages(props: ViewProps) {
         context.refresh();
     }
 
+    function onFontSettingsClick() {
+        store.activePage = 'font-settings';
+        context.refresh();
+    }
+
     function onBackClick() {
         const activePage = store.activePage;
-        if (activePage === 'automation' || activePage === 'manage-settings') {
+        if (activePage === 'automation' || activePage === 'manage-settings' || activePage === 'font-settings') {
             store.activePage = 'settings';
         } else {
             store.activePage = 'main';
@@ -84,6 +90,7 @@ function Pages(props: ViewProps) {
                     {...props}
                     onAutomationNavClick={onAutomationNavClick}
                     onManageSettingsClick={onManageSettingsClick}
+                    onFontSettingsClick={onFontSettingsClick}
                 />
             </Page>
             <Page id="automation">
@@ -92,6 +99,10 @@ function Pages(props: ViewProps) {
             <Page id="manage-settings">
                 <ManageSettingsPage {...props} />
             </Page>
+            <Page id="font-settings">
+                <FontPage {...props} />
+            </Page>
+
 
         </PageViewer>
     );

@@ -21,6 +21,8 @@ export const DEFAULT_THEME: Theme = {
     sepia: 0,
     useFont: false,
     fontFamily: isMacOS() ? 'Helvetica Neue' : isWindows() ? 'Segoe UI' : 'Open Sans',
+    useFontSize: false,
+    fontSize: 16,
     textStroke: 0,
     engine: ThemeEngines.dynamicTheme,
     stylesheet: '',

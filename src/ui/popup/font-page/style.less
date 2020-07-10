@@ -1,0 +1,15 @@
+.font-settings {
+    &__line {
+        display: flex;
+        flex-direction: row;
+
+        > :not(:first-child) {
+            margin-left: @indent-small;
+        }
+
+        .select, .updown {
+            flex: auto;
+        }
+
+    }
+}

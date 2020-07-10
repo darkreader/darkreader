@@ -91,10 +91,10 @@ function createStaticStyleOverrides() {
     setupStylePositionWatcher(overrideStyle, 'override');
     
     const variableStyle = createOrUpdateStyle('darkreader--override');
-    const {}
+    const selectionColors = getSelectionColor(filter);
     variableStyle.textContent = [
         `:root {`,
-        `   --darkreader-neutral-bg: ${} `
+        `   --darkreader-neutral-bg: ${}`
     ].join('/n')
 }
 

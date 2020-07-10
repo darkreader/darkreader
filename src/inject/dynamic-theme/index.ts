@@ -331,7 +331,15 @@ function stopWatchingForUpdates() {
     stopWatchingForInlineStyles();
     removeDOMReadyListener(onDOMReady);
 }
-function checkMeta() {
+
+function createDarkReaderInstanceMarker() {
+    const metaElement: HTMLMetaElement = document.createElement('meta');
+    metaElement.name = "darkreader";
+    metaElement.content = UUID;
+    document.head.appendChild(metaElement);
+}
+
+function isAnotherDarkReaderInstanceActive() {
     const meta: HTMLMetaElement = document.querySelector('meta[name="darkreader"]');
     if (meta) {
         if (meta.content !== UUID) {
@@ -339,10 +347,7 @@ function checkMeta() {
         }
         return false;
     } else {
-        const metaElement: HTMLMetaElement = document.createElement('meta');
-        metaElement.name = "darkreader";
-        metaElement.content = UUID;
-        document.head.appendChild(metaElement);
+        createDarkReaderInstanceMarker();
         return false;
     }
 }
@@ -352,7 +357,7 @@ export function createOrUpdateDynamicTheme(filterConfig: FilterConfig, dynamicTh
     fixes = dynamicThemeFixes;
     isIFrame = iframe;
     if (document.head) {
-        if (checkMeta()) {
+        if (isAnotherDarkReaderInstanceActive()) {
             return;
         }
         createThemeAndWatchForUpdates();
@@ -366,7 +371,7 @@ export function createOrUpdateDynamicTheme(filterConfig: FilterConfig, dynamicTh
         const headObserver = new MutationObserver(() => {
             if (document.head) {
                 headObserver.disconnect();
-                if (checkMeta()) {
+                if (isAnotherDarkReaderInstanceActive()) {
                     removeDynamicTheme();
                     return;
                 }
@@ -387,6 +392,7 @@ export function removeDynamicTheme() {
         removeNode(document.head.querySelector('.darkreader--invert'));
         removeNode(document.head.querySelector('.darkreader--inline'));
         removeNode(document.head.querySelector('.darkreader--override'));
+        removeNode(document.head.querySelector('meta[name="darkreader"]'));
     }
     shadowRootsWithOverrides.forEach((root) => {
         removeNode(root.querySelector('.darkreader--inline'));

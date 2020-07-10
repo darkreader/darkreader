@@ -102,7 +102,7 @@ function createStaticStyleOverrides() {
         `   --darkreader-selection-bg: ${selectionColors.backgroundColorSelection};`,
         `   --darkreader-selection-fg: ${selectionColors.foregroundColorSelection};`,
         `}`
-    ].join('/n');
+    ].join('\n');
     document.head.insertBefore(variableStyle, inlineStyle.nextSibling);
     setupStylePositionWatcher(variableStyle, 'variable');
 }

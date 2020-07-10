@@ -89,6 +89,13 @@ function createStaticStyleOverrides() {
     overrideStyle.textContent = fixes && fixes.css ? replaceCSSTemplates(fixes.css) : '';
     document.head.appendChild(overrideStyle);
     setupStylePositionWatcher(overrideStyle, 'override');
+    
+    const variableStyle = createOrUpdateStyle('darkreader--override');
+    const {}
+    variableStyle.textContent = [
+        `:root {`,
+        `   --darkreader-neutral-bg: ${} `
+    ].join('/n')
 }
 
 const shadowRootsWithOverrides = new Set<ShadowRoot>();

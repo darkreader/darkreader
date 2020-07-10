@@ -101,8 +101,7 @@ function createShadowStaticStyleOverrides(root: ShadowRoot) {
 }
 
 function replaceCSSTemplates($cssText: string) {
-    let newCSS = $cssText;
-    newCSS = newCSS.replace(/\${(.+?)}/g, ($color) => {
+    return $cssText.replace(/\${(.+?)}/g, (m0, $color) => {
         try {
             const color = parseColorWithCache($color);
             return modifyColor(color, filter);
@@ -111,18 +110,6 @@ function replaceCSSTemplates($cssText: string) {
             return $color;
         }
     });
-    //Expose Dark Reader settings to be used as `variable` in CSS fixes.
-    const selectionColors = getSelectionColor(filter);
-    newCSS = newCSS.replace(/\&{(.+?)}/g, ($setting) => {
-        if ($setting === '&{selectionBackground}') {
-            return selectionColors[0];
-        } else if ($setting === '&{selectionForeground}') {
-            return selectionColors[1];
-        } else {
-            return $setting;
-        }
-    });
-    return newCSS;
 }
 
 function cleanFallbackStyle() {

@@ -2,7 +2,7 @@ import {m} from 'malevic';
 import {NavButton} from '../../controls';
 import ControlGroup from '../control-group';
 import WatchIcon from '../main-page/watch-icon';
-import { getLocalMessage } from 'utils/locales';
+import {getLocalMessage} from '../../../utils/locales';
 
 export default function AutomationButton(props: {onClick: () => void}) {
     const now = new Date();

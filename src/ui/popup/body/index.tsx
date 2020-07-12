@@ -106,7 +106,7 @@ function DonateGroup() {
                 </span>
             </a>
             <label class="m-donate-description">
-                This project is sponsored by you
+                {getLocalMessage('sponsor')}
             </label>
         </div>
     );

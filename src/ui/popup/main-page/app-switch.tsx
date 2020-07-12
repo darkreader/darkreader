@@ -18,7 +18,7 @@ export default function AppSwitch(props: ViewProps) {
     // TODO: Replace messages with some IDs.
     const values = [
         getLocalMessage('on'),
-        'Auto',
+        getLocalMessage('auto'),
         getLocalMessage('off'),
     ];
     const value = isOn ? values[0] : isOff ? values[2] : values[1];
@@ -43,14 +43,14 @@ export default function AppSwitch(props: ViewProps) {
     }
 
     const description = isOn ?
-        'Extension is enabled' :
+        getLocalMessage('extension_is_enabled') :
         isOff ?
-            'Extension is disabled' :
+            getLocalMessage('extension_is_disabled') :
             isTimeAutomation ?
-                'Switches according to specified time' :
+                getLocalMessage('switch_according_to_time') :
                 isLocationAutomation ?
-                    'Switched according to location' :
-                    'Switches according to system dark mode';
+                    getLocalMessage('switch_according_to_location') :
+                    getLocalMessage('switch_according_to_system');
 
     return (
         <ControlGroup class="app-switch">

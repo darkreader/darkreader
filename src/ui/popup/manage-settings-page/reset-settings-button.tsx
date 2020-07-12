@@ -4,6 +4,7 @@ import {DEFAULT_SETTINGS} from '../../../defaults';
 import {MessageBox, ResetButton} from '../../controls';
 import ControlGroup from '../control-group';
 import {ViewProps} from '../types';
+import {getLocalMessage} from '../../../utils/locales';
 
 export default function ResetButtonGroup(props: ViewProps) {
     const context = getContext();
@@ -25,7 +26,7 @@ export default function ResetButtonGroup(props: ViewProps) {
 
     const dialog = context.store.isDialogVisible ? (
         <MessageBox
-            caption="Are you sure you want to remove all your settings? You cannot restore them later"
+            caption={getLocalMessage('reset_warning')}
             onOK={reset}
             onCancel={hideDialog}
         />
@@ -35,12 +36,12 @@ export default function ResetButtonGroup(props: ViewProps) {
         <ControlGroup>
             <ControlGroup.Control>
                 <ResetButton onClick={showDialog}>
-                    Reset settings
+                    {getLocalMessage('reset_settings')}
                     {dialog}
                 </ResetButton>
             </ControlGroup.Control>
             <ControlGroup.Description>
-                Restore settings to defaults
+                {getLocalMessage('restore_to_default')}
             </ControlGroup.Description>
         </ControlGroup>
     );

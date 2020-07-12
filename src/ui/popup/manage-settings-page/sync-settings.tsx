@@ -1,6 +1,7 @@
 import {m} from 'malevic';
 import {ViewProps} from '../types';
 import CheckButton from '../check-button';
+import {getLocalMessage} from '../../../utils/locales';
 
 export default function SyncSettings(props: ViewProps) {
     function onSyncSettingsChange(checked: boolean) {
@@ -10,10 +11,10 @@ export default function SyncSettings(props: ViewProps) {
     return (
         <CheckButton
             checked={props.data.settings.syncSettings}
-            label="Enable settings sync"
+            label={getLocalMessage('enable_sync')}
             description={props.data.settings.syncSettings ?
-                'Synchronized across devices' :
-                'Not synchronized across devices'}
+                getLocalMessage('synchronized') :
+                getLocalMessage('not_synchronized')}
             onChange={onSyncSettingsChange}
         />
     );

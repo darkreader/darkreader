@@ -2,6 +2,7 @@ import {m} from 'malevic';
 import {isURLInList, getURLHost} from '../../../../utils/url';
 import {DropDown} from '../../../controls';
 import {ViewProps} from '../../types';
+import {getLocalMessage} from '../../../../utils/locales';
 
 export default function PresetPicker(props: ViewProps) {
     const host = getURLHost(props.tab.url || '');
@@ -9,8 +10,8 @@ export default function PresetPicker(props: ViewProps) {
         ({url}) => isURLInList(props.tab.url, url)
     );
 
-    const defaultPresetName = 'Default theme';
-    const customPresetName = `Custom for ${host}`;
+    const defaultPresetName = getLocalMessage('default_theme');
+    const customPresetName = `${getLocalMessage('only_for')} ${host}`;
 
     function onPresetChange(name: string) {
         const filteredCustomThemes = props.data.settings.customThemes.filter(({url}) => !isURLInList(props.tab.url, url));

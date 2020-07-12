@@ -3,6 +3,7 @@ import {DEFAULT_SETTINGS} from '../../../../defaults';
 import {ResetButton} from '../../../controls';
 import ControlGroup from '../../control-group';
 import {ViewProps} from '../../types';
+import {getLocalMessage} from '../../../../utils/locales';
 
 export default function ResetButtonGroup(props: ViewProps) {
     function reset() {
@@ -13,11 +14,11 @@ export default function ResetButtonGroup(props: ViewProps) {
         <ControlGroup>
             <ControlGroup.Control>
                 <ResetButton onClick={reset}>
-                    Reset to defaults
+                    {getLocalMessage('restore_to_default')}
                 </ResetButton>
             </ControlGroup.Control>
             <ControlGroup.Description>
-                Restore current theme values to defaults
+                {getLocalMessage('restore_current_theme')}
             </ControlGroup.Description>
         </ControlGroup>
     );

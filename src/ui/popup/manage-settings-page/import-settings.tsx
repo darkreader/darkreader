@@ -5,6 +5,7 @@ import {UserSettings} from '../../../definitions';
 import {Button} from '../../controls';
 import {openFile} from '../../utils';
 import {DEFAULT_SETTINGS} from '../../../defaults';
+import {getLocalMessage} from '../../../utils/locales';
 
 export default function ImportButton(props: ViewProps) {
 
@@ -53,11 +54,11 @@ export default function ImportButton(props: ViewProps) {
                     onclick={importSettings}
                     class="settings-button"
                 >
-                    Import Settings
+                    {getLocalMessage('import_settings')}
                 </Button>
             </ControlGroup.Control>
             <ControlGroup.Description>
-                Open settings from a JSON file
+                {getLocalMessage('open_from_json')}
             </ControlGroup.Description>
         </ControlGroup>
     );

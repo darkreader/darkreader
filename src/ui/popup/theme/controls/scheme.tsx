@@ -7,7 +7,7 @@ export default function Scheme(props: {isDark: boolean; onChange: (dark: boolean
     const valDark = getLocalMessage('dark');
     const valLight = getLocalMessage('light');
     return (
-        <ThemeControl label="Scheme">
+        <ThemeControl label={getLocalMessage('scheme')}>
             <DropDown
                 selected={props.isDark ? valDark : valLight}
                 values={[

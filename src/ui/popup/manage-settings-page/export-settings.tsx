@@ -3,6 +3,7 @@ import {ViewProps} from '../types';
 import {Button} from '../../controls';
 import {saveFile} from '../../utils';
 import ControlGroup from '../control-group';
+import {getLocalMessage} from '../../../utils/locales';
 
 export default function ExportButton(props: ViewProps) {
     function exportSettings() {
@@ -15,11 +16,11 @@ export default function ExportButton(props: ViewProps) {
                     onclick={exportSettings}
                     class="settings-button"
                 >
-                    Export Settings
+                    {getLocalMessage('export_settings')}
                 </Button>
             </ControlGroup.Control>
             <ControlGroup.Description>
-                Save settings to a JSON file
+            {getLocalMessage('save_to_json')}
             </ControlGroup.Description>
         </ControlGroup>
     );

@@ -1,6 +1,7 @@
 import {m} from 'malevic';
 import ThemeControl from './theme-control';
 import {ColorDropDown} from '../../../controls';
+import {getLocalMessage} from '../../../../utils/locales';
 
 type ScrollbarColorValue = '' | 'auto' | string;
 
@@ -12,7 +13,7 @@ interface ScrollbarEditorProps {
 
 export default function ScrollbarEditor(props: ScrollbarEditorProps) {
     return (
-        <ThemeControl label="Scrollbar">
+        <ThemeControl label={getLocalMessage('scrollbar')}>
             <ColorDropDown
                 value={props.value}
                 colorSuggestion={'#959799'}

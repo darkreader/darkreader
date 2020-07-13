@@ -5,7 +5,7 @@ import {getModifiedUserAgentStyle, getModifiedFallbackStyle, cleanModificationCa
 import {manageStyle, getManageableStyles, StyleElement, StyleManager} from './style-manager';
 import {watchForStyleChanges, stopWatchingForStyleChanges} from './watch';
 import {forEach, push, toArray} from '../../utils/array';
-import {removeNode, watchForNodePosition, iterateShadowNodes, isDOMReady, addDOMReadyListener, removeDOMReadyListener} from '../utils/dom';
+import {removeNode, watchForNodePosition, iterateShadowHosts, isDOMReady, addDOMReadyListener, removeDOMReadyListener} from '../utils/dom';
 import {logWarn} from '../utils/log';
 import {throttle} from '../utils/throttle';
 import {clamp} from '../../utils/math';
@@ -14,9 +14,11 @@ import {getCSSFilterValue} from '../../generators/css-filter';
 import {modifyColor} from '../../generators/modify-colors';
 import {createTextStyle} from '../../generators/text-style';
 import {FilterConfig, DynamicThemeFix} from '../../definitions';
+import {createAdoptedStyleSheetOverride, AdoptedStyleSheetManager} from './adopted-style-manger';
 
-const styleManagers = new Map<StyleElement, StyleManager>();
 const variables = new Map<string, string>();
+const styleManagers = new Map<StyleElement, StyleManager>();
+const adoptedStyleManagers = [] as Array<AdoptedStyleSheetManager>;
 let filter: FilterConfig = null;
 let fixes: DynamicThemeFix = null;
 let isIFrame: boolean = null;
@@ -149,25 +151,22 @@ function createDynamicStyleOverrides() {
     newManagers.forEach((manager) => manager.watch());
 
     const inlineStyleElements = toArray(document.querySelectorAll(INLINE_STYLE_SELECTOR));
-    iterateShadowNodes(document.documentElement, (node) => {
-        const elements = node.shadowRoot.querySelectorAll(INLINE_STYLE_SELECTOR);
+    iterateShadowHosts(document.documentElement, (host) => {
+        const elements = host.shadowRoot.querySelectorAll(INLINE_STYLE_SELECTOR);
         if (elements.length > 0) {
-            createShadowStaticStyleOverrides(node.shadowRoot);
+            createShadowStaticStyleOverrides(host.shadowRoot);
             push(inlineStyleElements, elements);
         }
     });
     const ignoredSelectors = fixes && Array.isArray(fixes.ignoreInlineStyle) ? fixes.ignoreInlineStyle : [];
     inlineStyleElements.forEach((el) => overrideInlineStyle(el as HTMLElement, filter, ignoredSelectors));
+    handleAdoptedStyleSheets(document);
 }
 
 let loadingStylesCounter = 0;
 const loadingStyles = new Set();
 
 function createManager(element: StyleElement) {
-    if (styleManagers.has(element)) {
-        return;
-    }
-
     const loadingStyleId = ++loadingStylesCounter;
 
     function loadingStart() {
@@ -211,8 +210,12 @@ function updateVariables(newVars: Map<string, string>) {
     if (newVars.size === 0) {
         return;
     }
-    newVars.forEach((value, key) => variables.set(key, value));
-    variables.forEach((value, key) => variables.set(key, replaceCSSVariables(value, variables)));
+    newVars.forEach((value, key) => {
+        variables.set(key, value);
+    });
+    variables.forEach((value, key) => {
+        variables.set(key, replaceCSSVariables(value, variables));
+    });
 }
 
 function removeManager(element: StyleElement) {
@@ -225,8 +228,10 @@ function removeManager(element: StyleElement) {
 
 const throttledRenderAllStyles = throttle((callback?: () => void) => {
     styleManagers.forEach((manager) => manager.render(filter, variables));
+    adoptedStyleManagers.forEach((manager) => manager.render(filter, variables));
     callback && callback();
 });
+
 const cancelRendering = function () {
     throttledRenderAllStyles.cancel();
 };
@@ -276,6 +281,16 @@ function createThemeAndWatchForUpdates() {
     changeMetaThemeColorWhenAvailable(filter);
 }
 
+function handleAdoptedStyleSheets(node: ShadowRoot | Document) {
+    if (Array.isArray(node.adoptedStyleSheets)) {
+        if (node.adoptedStyleSheets.length > 0) {
+            const newManger = createAdoptedStyleSheetOverride(node);
+            adoptedStyleManagers.push(newManger);
+            newManger.render(filter, variables);
+        }
+    }
+}
+
 function watchForUpdates() {
     const managedStyles = Array.from(styleManagers.keys());
     watchForStyleChanges(managedStyles, ({created, updated, removed, moved}) => {
@@ -299,6 +314,8 @@ function watchForUpdates() {
         }
         newManagers.forEach((manager) => manager.watch());
         stylesToRestore.forEach((style) => styleManagers.get(style).restore());
+    }, (shadowRoot) => {
+        handleAdoptedStyleSheets(shadowRoot);
     });
 
     const ignoredSelectors = fixes && Array.isArray(fixes.ignoreInlineStyle) ? fixes.ignoreInlineStyle : [];
@@ -370,6 +387,11 @@ export function removeDynamicTheme() {
     shadowRootsWithOverrides.clear();
     forEach(styleManagers.keys(), (el) => removeManager(el));
     forEach(document.querySelectorAll('.darkreader'), removeNode);
+
+    adoptedStyleManagers.forEach((manager) => {
+        manager.destroy();
+    });
+    adoptedStyleManagers.splice(0);
 }
 
 export function cleanDynamicThemeCache() {

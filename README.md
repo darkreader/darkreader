@@ -1,5 +1,4 @@
 # Dark Reader for Google Chrome and Mozilla Firefox
-[![Build Status](https://travis-ci.org/darkreader/darkreader.svg?branch=master)](https://travis-ci.org/darkreader/darkreader)
 
 ![Dark Reader screenshot](https://lh3.googleusercontent.com/tTJIIIAqfJWymqPM9LAmivl11kWmF-XXLABues4OwfjOED_ntsJZdLY0VTG0XFCW0W_wYSll7Q=w640-h400-e365)
 
@@ -108,6 +107,7 @@ CSS
     background: rgba(255, 255, 255, 0.5);
 }
 ```
+
 **Fixes for Filter and Filter+ modes**.
 - Filter and Filter+ work by inverting the whole web page and reverting necessary parts (images, videos, etc.), listed in the `INVERT` section.
 - If an inverted element contains images or other content that becomes wrongly displayed, `NO INVERT` rule can be used.

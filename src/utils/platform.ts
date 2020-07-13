@@ -41,8 +41,7 @@ export function isMobile() {
     if (typeof navigator === 'undefined') {
         return null;
     }
-    const agent = navigator.userAgent.toLowerCase();
-    return agent.includes('mobile');
+    return navigator.userAgent.toLowerCase().includes('mobile');
 }
 
 export function getChromeVersion() {

@@ -33,7 +33,7 @@ export function iterateCSSDeclarations(style: CSSStyleDeclaration, iterate: (pro
     });
 }
 
-function isCSSVariable(property: string) {
+export function isCSSVariable(property: string) {
     return property.startsWith('--') && !property.startsWith('--darkreader');
 }
 
@@ -90,7 +90,7 @@ export function replaceCSSFontFace($css: string) {
     return $css.replace(fontFaceRegex, '');
 }
 
-const varRegex = /var\((--[^\s,\(\)]+),?\s*([^\(\)]*(\([^\(\)]*\)[^\(\)]*)*\s*)\)/g;
+export const varRegex = /var\((--[^\s,\(\)]+),?\s*([^\(\)]*(\([^\(\)]*\)[^\(\)]*)*\s*)\)/g;
 
 export function replaceCSSVariables(
     value: string,

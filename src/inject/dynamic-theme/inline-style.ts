@@ -1,6 +1,6 @@
 import {forEach, push} from '../../utils/array';
 import {iterateShadowHosts, createOptimizedTreeObserver} from '../utils/dom';
-import {iterateCSSDeclarations} from './css-rules';
+import {iterateCSSDeclarations, getCSSVariables, isCSSVariable, replaceCSSVariables, varRegex} from './css-rules';
 import {getModifiableCSSDeclaration} from './modify-css';
 import {FilterConfig} from '../../definitions';
 import {IS_SHADOW_DOM_SUPPORTED} from '../../utils/platform';
@@ -213,6 +213,23 @@ function shouldIgnoreInlineStyle(element: HTMLElement, selectors: string[]) {
     return false;
 }
 
+function getInlineCSSVariables(style: CSSStyleDeclaration) {
+    const variables = new Map<string, string>();
+    style && iterateCSSDeclarations(style, (property, value) => {
+        if (isCSSVariable(property)) {
+            variables.set(property, value);
+        }
+    });
+    return variables;
+}
+
+function replaceValuesVariable(value: string, variables: Map<string, string>) {
+    if (value.match(varRegex)) {
+        value = replaceCSSVariables(value, variables);
+    }
+    return value;
+}
+
 export function overrideInlineStyle(element: HTMLElement, theme: FilterConfig, ignoreSelectors: string[]) {
     const cacheKey = getInlineStyleCacheKey(element, theme);
     if (cacheKey === inlineStyleCache.get(element)) {
@@ -250,8 +267,11 @@ export function overrideInlineStyle(element: HTMLElement, theme: FilterConfig, i
         }
     }
 
+    const variables = getInlineCSSVariables(element.style);
+
     if (element.hasAttribute('bgcolor')) {
         let value = element.getAttribute('bgcolor');
+        value = replaceValuesVariable(value, variables);
         if (value.match(/^[0-9a-f]{3}$/i) || value.match(/^[0-9a-f]{6}$/i)) {
             value = `#${value}`;
         }
@@ -259,6 +279,7 @@ export function overrideInlineStyle(element: HTMLElement, theme: FilterConfig, i
     }
     if (element.hasAttribute('color')) {
         let value = element.getAttribute('color');
+        value = replaceValuesVariable(value, variables);
         if (value.match(/^[0-9a-f]{3}$/i) || value.match(/^[0-9a-f]{6}$/i)) {
             value = `#${value}`;
         }
@@ -266,7 +287,8 @@ export function overrideInlineStyle(element: HTMLElement, theme: FilterConfig, i
     }
     if (element.hasAttribute('fill') && element instanceof SVGElement) {
         const SMALL_SVG_LIMIT = 32;
-        const value = element.getAttribute('fill');
+        let value = element.getAttribute('fill');
+        value = replaceValuesVariable(value, variables);
         let isBg = false;
         if (!(element instanceof SVGTextElement)) {
             const {width, height} = element.getBoundingClientRect();
@@ -275,7 +297,8 @@ export function overrideInlineStyle(element: HTMLElement, theme: FilterConfig, i
         setCustomProp('fill', isBg ? 'background-color' : 'color', value);
     }
     if (element.hasAttribute('stroke')) {
-        const value = element.getAttribute('stroke');
+        let value = element.getAttribute('stroke');
+        value = replaceValuesVariable(value, variables);
         setCustomProp('stroke', element instanceof SVGLineElement || element instanceof SVGTextElement ? 'border-color' : 'color', value);
     }
     element.style && iterateCSSDeclarations(element.style, (property, value) => {
@@ -286,6 +309,7 @@ export function overrideInlineStyle(element: HTMLElement, theme: FilterConfig, i
             return;
         }
         if (overrides.hasOwnProperty(property)) {
+            value = replaceValuesVariable(value, variables);
             setCustomProp(property, property, value);
         }
     });

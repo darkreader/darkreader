@@ -114,7 +114,7 @@ function DonateGroup() {
 
 function VersionGroup() {
     return (
-        <label class="m-darkreader-version">Dark Reader version {chrome.runtime.getManifest().version}</label>
+        <label class="m-darkreader-version">Dark Reader Version {chrome.runtime.getManifest().version}</label>
     );
 }
 

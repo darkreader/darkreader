@@ -112,6 +112,12 @@ function DonateGroup() {
     );
 }
 
+function VersionGroup() {
+    return (
+        <label class="m-darkreader-version">Dark Reader version {chrome.runtime.getManifest().version}</label>
+    );
+}
+
 export default function Body(props: ViewProps) {
     const context = getContext();
     context.onCreate(() => {
@@ -134,6 +140,9 @@ export default function Body(props: ViewProps) {
             </section>
             <section class="m-section">
                 <DonateGroup />
+            </section>
+            <section class="m-section version-section">
+                <VersionGroup />
             </section>
             <Overlay />
         </body>

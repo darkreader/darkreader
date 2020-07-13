@@ -2,50 +2,64 @@
 
 ![Dark Reader screenshot](https://lh3.googleusercontent.com/tTJIIIAqfJWymqPM9LAmivl11kWmF-XXLABues4OwfjOED_ntsJZdLY0VTG0XFCW0W_wYSll7Q=w640-h400-e365)
 
-This extension **inverts brightness** of web pages and aims to **reduce eyestrain** while browsing the web.
+This extension **inverts brightness** of web pages and aims to **reduce eyestrain** while you browse the web.  
 Visit [Chrome Web Store](https://chrome.google.com/webstore/detail/dark-reader/eimadpbcbfnmbkopoojfekhnkhdbieeh)
 and [Firefox Add-ons](https://addons.mozilla.org/en-US/firefox/addon/darkreader/)
 for more info.
 
 ## How to contribute
 
-### Sponsorship
+### Sponsor!
 [Donate](https://opencollective.com/darkreader) via Open Collective.
 
-### Translation
-Improve or suggest a translation [here](https://github.com/darkreader/darkreader/tree/master/src/_locales).
-See the list of supported [language codes](https://developer.chrome.com/webstore/i18n#localeTable).
+### Translate!
+[Improve or suggest](https://github.com/darkreader/darkreader/tree/master/src/_locales) a translation.
+See the list of [language codes](https://developer.chrome.com/webstore/i18n#localeTable) that we can support.
 
-### Fixing wrong inversion
+### Fix a wrong inversion!
 
-If some website is **already dark** (has all pages dark by default), you can **add it to [dark-sites.config](https://github.com/alexanderby/darkreader/blob/master/src/config/dark-sites.config) file**
+If a website is **already dark** (has all pages dark by default), you can **add it to the [dark-sites.config](https://github.com/alexanderby/darkreader/blob/master/src/config/dark-sites.config) file**
 *(please, preserve alphabetical order)*.
 
-If some **parts** of web-pages are **wrongly inverted**,
-you can specify necessary **CSS selectors** at
-**[dynamic-theme-fixes.config](https://github.com/alexanderby/darkreader/blob/master/src/config/dynamic-theme-fixes.config) file**
+If some **parts** of a web page are **wrongly inverted**,
+you can fix this by specifying appropriate [**CSS selectors**](https://developer.mozilla.org/docs/Web/CSS/CSS_Selectors) in
+**[dynamic-theme-fixes.config](https://github.com/alexanderby/darkreader/blob/master/src/config/dynamic-theme-fixes.config)**
 (for Dynamic Theme mode)
-or **[inversion-fixes.config](https://github.com/alexanderby/darkreader/blob/master/src/config/inversion-fixes.config) file**
+or **[inversion-fixes.config](https://github.com/alexanderby/darkreader/blob/master/src/config/inversion-fixes.config)**
 (for Filter and Filter+ modes)
-*(please, preserve alphabetical order by URL, use short selectors, preserve code style)*.
+*(please, preserve alphabetical order by URL, use short selectors, and preserve code style)*.
 
-~~Please note, that merged changes to these files are automatically delivered to all users **within 15 minutes**.~~
-Config syncing was disabled, cause the GitHub team doesn't allow using GitHub as a CDN. Storing these files and making requests to other resources will be expensive and look suspicious.
+Automatically syncing the above files to every Dark Reader user was disabled because the GitHub team doesn't allow using GitHub as a CDN. Storing these files and making requests to other resources would be expensive and look suspicious. As such, changes are included with each new Dark Reader release.
 
-### Using Dev Tools
+### Use Dev Tools!
 
-Dev Tools should be used to **fix minor issues** on a web page
-*(like dark icon on a dark background, removing bright background, adding a white background to transparent image, etc.)*.
-If the page looks partially dark and bright in **Dynamic mode**, it should be considered as a bug.
-For **Filter mode** it is a common practice to invert already dark page parts.
+Dev Tools is designed to **fix minor issues** on a web page
+*(like dark icon on dark background, removing bright background, adding white background to transparent image, etc.)*.
+If the page looks partially dark and bright in **Dynamic mode**, we consider it a bug.
+For **Filter mode**, it is a common practice to invert already dark page parts.
 
-- Open **Chrome Dev Tools** (F12).
-- Click on **element picker** (top-left corner).
+- Open **Chrome Dev Tools** (F12) in Chrome or "Inspector" (Ctrl+Shift+C) in Firefox.
+- Click on **element picker** (top-left corner). It is enabled automatically in Firefox.
 - Pick wrongly inverted element.
-- Choose a **[selector](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Selectors)** for that element or all similar elements (e.g. if element has `class="icon small"` selector may look like `.icon`).
+- Choose a **[selector](https://developer.mozilla.org/docs/Web/CSS/CSS_Selectors)** for that element or all similar elements (e.g. if element has `class="icon small"`, selector may look like `.icon`).
 - Click **Dark Reader icon**.
-- Click **Open developer tools** (at bottom).
-- Find or add a block containing URL and selectors to invert.
+- Click **Open developer tools** (at bottom of Dark Reader popup).
+- Edit or add a block containing the URL and selectors to invert.
+- Click **Apply**.
+- Check how it looks both in **Light** and **Dark** mode.
+- If the **fix works** open
+**[dynamic-theme-fixes.config](https://github.com/alexanderby/darkreader/blob/master/src/config/dynamic-theme-fixes.config) file**
+or **[inversion-fixes.config](https://github.com/alexanderby/darkreader/blob/master/src/config/inversion-fixes.config) file**.
+- Click **Edit** (login to GitHub first).
+- **Insert your fix** there. Preserve **alphabetic order** by URL.
+- Provide a **short description** of what you have done.
+- Click **Propose file change**.
+- Review your changes. Click **Create pull request**.
+- The Travis CI will run tests reviewing your changes.
+- If you see a **red cross** click **Details** to see what is wrong and edit the existing Pull Request.
+- When you see a **green checkmark** then everything is fine.
+- Dark Reader developer will **review** and merge your changes, making them available to all users.
+
 ```
 dynamic-theme-fixes.config
 ================================
@@ -63,18 +77,14 @@ CSS
 
 IGNORE INLINE STYLE
 .color-picker
-
 ```
 - `INVERT` rule inverts specified elements.
-For **Dynamic mode** use `INVERT` only for dark images, that are invisible on dark backgrounds (icons, diagrams, charts, `<img>` and `<svg>` elements).
+For **Dynamic mode** use `INVERT` only for dark images that are invisible on dark backgrounds (icons, diagrams, charts, `<img>` and `<svg>` elements).
 - `CSS` rule adds custom CSS to a web page.
 `!important` keyword should be specified for each CSS property to prevent overrides by other stylesheets.
 **Dynamic mode** supports `${COLOR}` template, where `COLOR` is a color value before the inversion (`white` will become `black` in dark mode).
-- `IGNORE INLINE STYLE` rule will not analyze the inline style of matched selector's. (e.g. --darkreader-inline-bgcolor or <p style='color: red'>This will not be analyzed by dark reader if it has an matched selector</p>)
-- **Special notice for Filter and Filter+ config**.
-It works by inverting the whole web page and reverting necessary parts (images, videos, etc.), listed in the `INVERT` section.
-If inverted element contains images or other content that becomes wrongly displayed, `NO INVERT` rule can be used.
-`REMOVE BG` removes background image from element and forces black background.
+- `IGNORE INLINE STYLE` rule will not analyze the inline style of matched selectors. (e.g. `--darkreader-inline-bgcolor` or `<p style='color: red'>This will not be analyzed by Dark Reader if it has a matched selector</p>`)
+
 ```
 inversion-fixes.config
 ================================
@@ -97,63 +107,57 @@ CSS
     background: rgba(255, 255, 255, 0.5);
 }
 ```
-- Click **Apply**.
-- Check how it looks both in **Light** and **Dark** mode.
-- If the **fix worked** open
-**[dynamic-theme-fixes.config](https://github.com/alexanderby/darkreader/blob/master/src/config/dynamic-theme-fixes.config) file**
-or **[inversion-fixes.config](https://github.com/alexanderby/darkreader/blob/master/src/config/inversion-fixes.config) file**.
-- Click **edit** (sign-in to GitHub first).
-- **Insert your fix** there. Preserve **alphabetical order** by URL.
-- Provide a **short description** of what you have done.
-- Click **Propose file change**.
-- Review your changes. Click **Create pull request**.
-- GitHub will run tests reviewing your changes.
-- If you see a **red cross** click **Details** and see what is wrong and edit the existing Pull Request.
-- When you see a **green checkmark** then everything is fine.
-- Dark Reader developer will **review** and merge your changes making them available for all users.
 
-### Adding new features or fixing bugs
+**Fixes for Filter and Filter+ modes**.
+- Filter and Filter+ work by inverting the whole web page and reverting necessary parts (images, videos, etc.), listed in the `INVERT` section.
+- If an inverted element contains images or other content that becomes wrongly displayed, `NO INVERT` rule can be used.
+- `REMOVE BG` removes the background image from an element and forces a black background.
 
-If you would like to **add new feature** to Dark Reader or **fix a bug**, **submit an issue** in GitHub (if there is no existing one), **discuss** it with active contributors, wait for **approval**.
+### Add new features or fix bugs!
 
-To build and debug the extension **install the [Node.js](https://nodejs.org/)** LTS.
-Install development dependencies by running `npm install` in the project root folder.
+If you would like to **add new feature** to Dark Reader or **fix a bug**, **submit an issue** in GitHub (if there is no existing one), **discuss** it with active contributors, and wait for **approval**.
+
+To build and debug the extension **install the [Node.js](https://nodejs.org/)** LTS.  
+Install development dependencies by running `npm install` in the project root folder.  
 Then execute `npm run debug`.
 
 #### Chrome
-Open the `chrome://extensions` page.
-Disable the official Dark Reader version.
-Enable the **Developer mode**.
-Click **Load unpacked extension** button, navigate to the project's `debug/` folder.
+- Open the `chrome://extensions` page.
+- Disable the official Dark Reader version.
+- Enable the **Developer mode**.
+- Click **Load unpacked extension** button
+- Navigate to the project's `debug/` folder.
 
 #### Firefox
-Open `about:addons` page.
-Disable the official Dark Reader version.
-Open `about:debugging#addons` page.
-Click **Load Temporary Add-on** button, open `debug-firefox/manifest.json` file.
+- Open the `about:addons` page.
+- Disable the official Dark Reader version.
+- Open `about:debugging#addons` page.
+- Click **Load Temporary Add-on** button
+- Open the `debug-firefox/manifest.json` file.
 
-After making any code changes the project will be automatically recompiled.
-If the extension **didn't reload** automatically it can be reloaded manually on the extensions page.
+After making any code changes, the project will be automatically recompiled.  
+If the extension **does not reload** automatically, it can be reloaded manually on the extensions page.
 
-For editing the code you can use any text editor or web IDE (like [Visual Studio Code](https://code.visualstudio.com), [Atom](https://atom.io/), [WebStorm](https://www.jetbrains.com/webstorm/)).
-**Preserve code style** (whitespaces etc).
+For editing the code you can use any text editor or web IDE (like [Visual Studio Code](https://code.visualstudio.com), [Atom](https://atom.io/), or [WebStorm](https://www.jetbrains.com/webstorm/)).
 
-Run tests by executing the `npm test`.
+**Please preserve code style** (whitespaces etc).
 
-Submit a **pull request**, wait for **review**.
+Run tests by executing `npm test`.
+
+Submit a **pull request**, and wait for **review**.
 
 ## Building for use
-You can install the extension from a file.
-Install [Node.js LTS](https://nodejs.org/en/). Download the source code (or check out from git).
-Open terminal in root folder and run:
-- `npm install`
-- `npm run release`
+You can install the extension from a file.  
+Install [Node.js LTS](https://nodejs.org/en/). Download the source code (or check out from git).  
+Open terminal in root folder and run:  
+- `npm install`  
+- `npm run release`  
 
 This will generate `build.zip` for use in Chromium browsers and `build-firefox.xpi` for use in Firefox.
 
 ## Using for a website
 
-You can use Dark Reader to enable dark mode on your website.
+You can use Dark Reader to enable dark mode on your website!
 - Install the package from NPM (`npm install darkreader`)
 - or build from the source code (`npm run api`)
 - or include the script via a CDN such as [unpkg](https://unpkg.com/darkreader/) or [jsDelivr](https://www.jsdelivr.com/package/npm/darkreader)
@@ -199,19 +203,19 @@ followSystemColorScheme();
 
 ## Contributors
 
-This project exists thanks to all the people who contribute
+This project exists thanks to all the people who contribute!
 
 <a href="../../graphs/contributors"><img src="https://opencollective.com/darkreader/contributors.svg?width=890&button=false" /></a>
 
 ## Backers
 
-Thank you to all our backers!
+Thank you to all our generous backers!
 
 <a href="https://opencollective.com/darkreader#backers" target="_blank"><img src="https://opencollective.com/darkreader/backers.svg?width=890"></a>
 
 ## Sponsors
 
-Support this project by [becoming a sponsor](https://opencollective.com/darkreader#sponsor)
+Support this project by [becoming a sponsor](https://opencollective.com/darkreader#sponsor). Thank you to our wonderful sponsors!
 
 <a href="https://opencollective.com/darkreader/sponsor/0/website" target="_blank"><img src="https://opencollective.com/darkreader/sponsor/0/avatar.svg"></a>
 <a href="https://opencollective.com/darkreader/sponsor/1/website" target="_blank"><img src="https://opencollective.com/darkreader/sponsor/1/avatar.svg"></a>

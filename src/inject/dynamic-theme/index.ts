@@ -14,11 +14,11 @@ import {getCSSFilterValue} from '../../generators/css-filter';
 import {modifyColor} from '../../generators/modify-colors';
 import {createTextStyle} from '../../generators/text-style';
 import {FilterConfig, DynamicThemeFix} from '../../definitions';
-import {generateUUID} from './uuid';
+import {generateUID} from './uuid';
 
 const styleManagers = new Map<StyleElement, StyleManager>();
 const variables = new Map<string, string>();
-const UUID = generateUUID();
+const UUID = generateUID();
 let filter: FilterConfig = null;
 let fixes: DynamicThemeFix = null;
 let isIFrame: boolean = null;

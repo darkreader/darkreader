@@ -1,5 +1,5 @@
-import {isURLEnabled, isPDF} from '../src/utils/url';
-import {UserSettings} from '../src/definitions';
+import {isURLEnabled, isURLMatched, isPDF} from '../../src/utils/url';
+import {UserSettings} from '../../src/definitions';
 
 test('URL is enabled', () => {
     // Not invert listed
@@ -124,6 +124,15 @@ test('URL is enabled', () => {
     expect(isPDF(
         'https://www.google.com/very/good/hidden/folder/pdf#file.pdf'
     )).toBe(false);
+    expect(isPDF(
+        'https://fi.wikipedia.org/wiki/Tiedosto:ExtIPA_chart_(2015).pdf?uselang=en'
+    )).toBe(false);
+    expect(isPDF(
+        'https://commons.wikimedia.org/wiki/File:ExtIPA_chart_(2015).pdf'
+    )).toBe(false);
+    expect(isPDF(
+        'https://upload.wikimedia.org/wikipedia/commons/5/56/ExtIPA_chart_(2015).pdf'
+    )).toBe(true);
 
     // IPV6 Testing
     expect(isURLEnabled(
@@ -165,6 +174,24 @@ test('URL is enabled', () => {
         '[2001:4860:4860::8844]',
         {siteList: [], siteListEnabled: [], applyToListedOnly: true} as UserSettings,
         {isProtected: false, isInDarkList: true},
+    )).toEqual(false);
+
+    // Some URLs can have unescaped [] in query
+    expect(isURLMatched(
+        'google.co.uk/order.php?bar=[foo]',
+        'google.co.uk',
+    )).toEqual(true);
+    expect(isURLMatched(
+        '[2001:4860:4860::8844]/order.php?bar=foo',
+        '[2001:4860:4860::8844]',
+    )).toEqual(true);
+    expect(isURLMatched(
+        '[2001:4860:4860::8844]/order.php?bar=[foo]',
+        '[2001:4860:4860::8844]',
+    )).toEqual(true);
+    expect(isURLMatched(
+        'google.co.uk/order.php?bar=[foo]',
+        '[2001:4860:4860::8844]',
     )).toEqual(false);
 
     // Temporary Dark Sites list fix

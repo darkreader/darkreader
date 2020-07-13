@@ -1,4 +1,4 @@
-import {parse, hslToRGB, rgbToHSL, rgbToString, rgbToHexString, hslToString, HSLA} from '../src/utils/color';
+import {parse, hslToRGB, rgbToHSL, rgbToString, rgbToHexString, hslToString, HSLA} from '../../src/utils/color';
 
 test('Color parsing', () => {
     expect(parse('rgb(255,0,153)')).toEqual({r: 255, g: 0, b: 153, a: 1});

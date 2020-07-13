@@ -113,7 +113,7 @@ export class Extension {
                     await new Promise((resolve) => this.awaiting.push(resolve));
                 }
                 const url = await this.tabs.getActiveTabURL();
-                return await this.getURLInfo(url);
+                return this.getURLInfo(url);
             },
             changeSettings: (settings) => this.changeSettings(settings),
             setTheme: (theme) => this.setTheme(theme),
@@ -262,7 +262,9 @@ export class Extension {
         ) {
             this.onAppToggle();
         }
-
+        if (prev.syncSettings !== this.user.settings.syncSettings) {
+            this.user.saveSyncSetting(this.user.settings.syncSettings);
+        }
         if (this.isEnabled() && $settings.changeBrowserTheme != null && prev.changeBrowserTheme !== $settings.changeBrowserTheme) {
             if ($settings.changeBrowserTheme) {
                 setWindowTheme(this.user.settings.theme);

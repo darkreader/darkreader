@@ -1,5 +1,4 @@
 # Dark Reader for Google Chrome and Mozilla Firefox
-[![Build Status](https://travis-ci.org/darkreader/darkreader.svg?branch=master)](https://travis-ci.org/darkreader/darkreader)
 
 ![Dark Reader screenshot](https://lh3.googleusercontent.com/tTJIIIAqfJWymqPM9LAmivl11kWmF-XXLABues4OwfjOED_ntsJZdLY0VTG0XFCW0W_wYSll7Q=w640-h400-e365)
 
@@ -108,7 +107,7 @@ or **[inversion-fixes.config](https://github.com/alexanderby/darkreader/blob/mas
 - Provide a **short description** of what you have done.
 - Click **Propose file change**.
 - Review your changes. Click **Create pull request**.
-- The Travis CI will run tests reviewing your changes.
+- GitHub will run tests reviewing your changes.
 - If you see a **red cross** click **Details** and see what is wrong and edit the existing Pull Request.
 - When you see a **green checkmark** then everything is fine.
 - Dark Reader developer will **review** and merge your changes making them available for all users.

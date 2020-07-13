@@ -1,10 +1,10 @@
 module.exports = {
     verbose: true,
-    testEnvironment: 'jsdom',
+    testEnvironment: 'node',
     transform: {
         '^.+\\.ts(x?)$': 'ts-jest'
     },
-    testRegex: 'tests/inject/.*\\.tests\\.ts(x?)$',
+    testRegex: 'tests/utils/.*\\.tests\\.ts(x?)$',
     moduleFileExtensions: [
         'ts',
         'tsx',
@@ -20,8 +20,7 @@ module.exports = {
     ],
     globals: {
         'ts-jest': {
-            tsConfig: './tests/inject/tsconfig.json'
-        },
-        __DEBUG__: false,
+            tsConfig: './tests/utils/tsconfig.json'
+        }
     }
 };

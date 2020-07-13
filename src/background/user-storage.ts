@@ -26,6 +26,9 @@ export default class UserStorage {
                 if (!local.syncSettings) {
                     local.theme = {...DEFAULT_SETTINGS.theme, ...local.theme};
                     local.time = {...DEFAULT_SETTINGS.time, ...local.time};
+                    local.customThemes.forEach((site) => {
+                        site.theme = {...DEFAULT_SETTINGS.theme, ...site.theme};
+                    });
                     resolve(local);
                     return;
                 }
@@ -40,6 +43,9 @@ export default class UserStorage {
                     }
                     sync.theme = {...DEFAULT_SETTINGS.theme, ...sync.theme};
                     sync.time = {...DEFAULT_SETTINGS.time, ...sync.time};
+                    sync.customThemes.forEach((site) => {
+                        site.theme = {...DEFAULT_SETTINGS.theme, ...site.theme};
+                    });
                     resolve(sync);
                 });
             });
@@ -49,6 +55,15 @@ export default class UserStorage {
     async saveSettings() {
         const saved = await this.saveSettingsIntoStorage(this.settings);
         this.settings = saved;
+    }
+
+    saveSyncSetting(sync: boolean) {
+        chrome.storage.sync.set({syncSettings: sync}, () => {
+            if (chrome.runtime.lastError) {
+                console.warn('Settings synchronization was disabled due to error:', chrome.runtime.lastError);
+            }
+        });
+        chrome.storage.local.set({syncSettings: sync});
     }
 
     private saveSettingsIntoStorage(settings: UserSettings) {

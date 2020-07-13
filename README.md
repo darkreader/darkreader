@@ -63,7 +63,7 @@ or **[inversion-fixes.config](https://github.com/alexanderby/darkreader/blob/mas
 
 ```
 dynamic-theme-fixes.config
-==========================
+================================
 
 example.com
 
@@ -88,7 +88,7 @@ For **Dynamic mode** use `INVERT` only for dark images that are invisible on dar
 
 ```
 inversion-fixes.config
-======================
+================================
 
 example.com
 

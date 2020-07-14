@@ -85,6 +85,36 @@ For **Dynamic mode** use `INVERT` only for dark images that are invisible on dar
 **Dynamic mode** supports `${COLOR}` template, where `COLOR` is a color value before the inversion (`white` will become `black` in dark mode).
 - `IGNORE INLINE STYLE` rule will not analyze the inline style of matched selectors. (e.g. `--darkreader-inline-bgcolor` or `<p style='color: red'>This will not be analyzed by Dark Reader if it has a matched selector</p>`)
 
+**Dynamic variables**
+
+When making a fix for background or text colors,
+instead of using hardcoded colors (like `#fff`, `#000`, `black` or `white`),
+please use CSS variables that are generated based on user settings:
+
+```
+dynamic-theme-fixes.config
+================================
+example.com
+
+CSS
+.logo {
+    background-color: var(--darkreader-neutral-background);
+}
+.footer > p {
+    color: var(--darkreader-neutral-text);
+}
+
+```
+
+Here is a full list of available CSS variables:
+
+- `--darkreader-neutral-background` should be mostly used for elements that have a wrong background color (usually bright backgrounds that should be dark).
+- `--darkreader-neutral-text` should be used for elements with a wrong text color (usually dark texts that should be light).
+- `--darkreader-selection-background` corresponds to user's Selection Background Color setting.
+- `--darkreader-selection-text` corresponds to user's Selection Text Color setting.
+
+**Fixes for Filter and Filter+ modes**.
+
 ```
 inversion-fixes.config
 ================================
@@ -108,7 +138,6 @@ CSS
 }
 ```
 
-**Fixes for Filter and Filter+ modes**.
 - Filter and Filter+ work by inverting the whole web page and reverting necessary parts (images, videos, etc.), listed in the `INVERT` section.
 - If an inverted element contains images or other content that becomes wrongly displayed, `NO INVERT` rule can be used.
 - `REMOVE BG` removes the background image from an element and forces a black background.

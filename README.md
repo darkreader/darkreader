@@ -85,6 +85,42 @@ For **Dynamic mode** use `INVERT` only for dark images that are invisible on dar
 **Dynamic mode** supports `${COLOR}` template, where `COLOR` is a color value before the inversion (`white` will become `black` in dark mode).
 - `IGNORE INLINE STYLE` rule will not analyze the inline style of matched selectors. (e.g. `--darkreader-inline-bgcolor` or `<p style='color: red'>This will not be analyzed by Dark Reader if it has a matched selector</p>`)
 
+**Dynamic variables**
+
+Dark Reader also exposed a variant of variables to had been generated based of User Settings.
+A example of how the variables could be used.
+
+```
+dynamic-theme-fixes.config
+================================
+example.com
+
+CSS
+.CodeMirror-selected {
+    color: var(--darkreader-selection-foreground);
+    background-color: var(--darkreader-selection-background);
+}
+.logo {
+    background-color: var(--darkreader-neutral-background);
+}
+.footer > p {
+    color: var(--darkreader-neutral-text);
+}
+svg.logo {
+    
+}
+
+```
+
+A brief explaination what all those variables mean:
+
+- `--darkreader-selection-foreground`: This is directly the value that had been set into the Selection setting and should be used as the foreground of selection.
+- `--darkreader-selection-background`: This will be generated based of the foreground color and should be consider to make the foreground color read-able/visible.
+- `--darkreader-neutral-background`: This is directly the value that had been set into the Background setting and will be mostly used for elements that have a wrong background-color.
+- `--darkreader-neutral-text`: This is directly the value that had been set into the Text setting and will be mostly used for elements that have a non read-able/visible color.
+
+**Fixes for Filter and Filter+ modes**.
+
 ```
 inversion-fixes.config
 ================================
@@ -108,7 +144,6 @@ CSS
 }
 ```
 
-**Fixes for Filter and Filter+ modes**.
 - Filter and Filter+ work by inverting the whole web page and reverting necessary parts (images, videos, etc.), listed in the `INVERT` section.
 - If an inverted element contains images or other content that becomes wrongly displayed, `NO INVERT` rule can be used.
 - `REMOVE BG` removes the background image from an element and forces a black background.

@@ -87,8 +87,8 @@ For **Dynamic mode** use `INVERT` only for dark images that are invisible on dar
 
 **Dynamic variables**
 
-Dark Reader also exposed a variant of variables to had been generated based of User Settings.
-A example of how the variables could be used.
+Dark Reader also exposed a variant of variables to had been generated based on User Settings.
+An example of how the variables could be used:
 
 ```
 dynamic-theme-fixes.config
@@ -112,12 +112,12 @@ svg.logo {
 
 ```
 
-A brief explaination what all those variables mean:
+A brief explanation of what all those variables mean:
 
 - `--darkreader-selection-foreground`: This is directly the value that had been set into the Selection setting and should be used as the foreground of selection.
-- `--darkreader-selection-background`: This will be generated based of the foreground color and should be consider to make the foreground color read-able/visible.
+- `--darkreader-selection-background`: This will be generated based on the foreground color and should be considered to make the foreground color read-able/visible.
 - `--darkreader-neutral-background`: This is directly the value that had been set into the Background setting and will be mostly used for elements that have a wrong background-color.
-- `--darkreader-neutral-text`: This is directly the value that had been set into the Text setting and will be mostly used for elements that have a non read-able/visible color.
+- `--darkreader-neutral-text`: This is directly the value that had been set into the Text setting and will be mostly used for elements that have a non-read-able/visible color.
 
 **Fixes for Filter and Filter+ modes**.
 

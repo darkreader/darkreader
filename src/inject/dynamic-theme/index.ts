@@ -14,11 +14,11 @@ import {getCSSFilterValue} from '../../generators/css-filter';
 import {modifyColor} from '../../generators/modify-colors';
 import {createTextStyle} from '../../generators/text-style';
 import {FilterConfig, DynamicThemeFix} from '../../definitions';
-import {generateUID} from './uuid';
+import {generateInstanceId} from './uuid';
 import {createAdoptedStyleSheetOverride, AdoptedStyleSheetManager} from './adopted-style-manger';
 
 const variables = new Map<string, string>();
-const UUID = generateUID();
+const INSTANCE_ID = generateInstanceId();
 const styleManagers = new Map<StyleElement, StyleManager>();
 const adoptedStyleManagers = [] as Array<AdoptedStyleSheetManager>;
 let filter: FilterConfig = null;
@@ -352,14 +352,14 @@ function stopWatchingForUpdates() {
 function createDarkReaderInstanceMarker() {
     const metaElement: HTMLMetaElement = document.createElement('meta');
     metaElement.name = 'darkreader';
-    metaElement.content = UUID;
+    metaElement.content = INSTANCE_ID;
     document.head.appendChild(metaElement);
 }
 
 function isAnotherDarkReaderInstanceActive() {
     const meta: HTMLMetaElement = document.querySelector('meta[name="darkreader"]');
     if (meta) {
-        if (meta.content !== UUID) {
+        if (meta.content !== INSTANCE_ID) {
             return true;
         }
         return false;

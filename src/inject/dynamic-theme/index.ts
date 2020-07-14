@@ -14,9 +14,11 @@ import {getCSSFilterValue} from '../../generators/css-filter';
 import {modifyColor} from '../../generators/modify-colors';
 import {createTextStyle} from '../../generators/text-style';
 import {FilterConfig, DynamicThemeFix} from '../../definitions';
+import {generateInstanceId} from './uuid';
 import {createAdoptedStyleSheetOverride, AdoptedStyleSheetManager} from './adopted-style-manger';
 
 const variables = new Map<string, string>();
+const INSTANCE_ID = generateInstanceId();
 const styleManagers = new Map<StyleElement, StyleManager>();
 const adoptedStyleManagers = [] as Array<AdoptedStyleSheetManager>;
 let filter: FilterConfig = null;
@@ -361,11 +363,34 @@ function stopWatchingForUpdates() {
     removeDOMReadyListener(onDOMReady);
 }
 
+function createDarkReaderInstanceMarker() {
+    const metaElement: HTMLMetaElement = document.createElement('meta');
+    metaElement.name = 'darkreader';
+    metaElement.content = INSTANCE_ID;
+    document.head.appendChild(metaElement);
+}
+
+function isAnotherDarkReaderInstanceActive() {
+    const meta: HTMLMetaElement = document.querySelector('meta[name="darkreader"]');
+    if (meta) {
+        if (meta.content !== INSTANCE_ID) {
+            return true;
+        }
+        return false;
+    } else {
+        createDarkReaderInstanceMarker();
+        return false;
+    }
+}
+
 export function createOrUpdateDynamicTheme(filterConfig: FilterConfig, dynamicThemeFixes: DynamicThemeFix, iframe: boolean) {
     filter = filterConfig;
     fixes = dynamicThemeFixes;
     isIFrame = iframe;
     if (document.head) {
+        if (isAnotherDarkReaderInstanceActive()) {
+            return;
+        }
         createThemeAndWatchForUpdates();
     } else {
         if (!isFirefox()) {
@@ -377,6 +402,10 @@ export function createOrUpdateDynamicTheme(filterConfig: FilterConfig, dynamicTh
         const headObserver = new MutationObserver(() => {
             if (document.head) {
                 headObserver.disconnect();
+                if (isAnotherDarkReaderInstanceActive()) {
+                    removeDynamicTheme();
+                    return;
+                }
                 createThemeAndWatchForUpdates();
             }
         });
@@ -394,6 +423,7 @@ export function removeDynamicTheme() {
         removeNode(document.head.querySelector('.darkreader--invert'));
         removeNode(document.head.querySelector('.darkreader--inline'));
         removeNode(document.head.querySelector('.darkreader--override'));
+        removeNode(document.head.querySelector('meta[name="darkreader"]'));
     }
     shadowRootsWithOverrides.forEach((root) => {
         removeNode(root.querySelector('.darkreader--inline'));

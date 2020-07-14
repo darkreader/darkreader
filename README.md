@@ -87,8 +87,9 @@ For **Dynamic mode** use `INVERT` only for dark images that are invisible on dar
 
 **Dynamic variables**
 
-Dark Reader also exposed a variant of variables to had been generated based on User Settings.
-An example of how the variables could be used:
+When making a fix for background or text colors,
+instead of using hardcoded colors (like `#fff`, `#000`, `black` or `white`),
+please use CSS variables that are generated based on user settings:
 
 ```
 dynamic-theme-fixes.config
@@ -96,28 +97,21 @@ dynamic-theme-fixes.config
 example.com
 
 CSS
-.CodeMirror-selected {
-    color: var(--darkreader-selection-foreground);
-    background-color: var(--darkreader-selection-background);
-}
 .logo {
     background-color: var(--darkreader-neutral-background);
 }
 .footer > p {
     color: var(--darkreader-neutral-text);
 }
-svg.logo {
-    
-}
 
 ```
 
-A brief explanation of what all those variables mean:
+Here is a full list of available CSS variables:
 
-- `--darkreader-selection-foreground`: This is directly the value that had been set into the Selection setting and should be used as the foreground of selection.
-- `--darkreader-selection-background`: This will be generated based on the foreground color and should be considered to make the foreground color read-able/visible.
-- `--darkreader-neutral-background`: This is directly the value that had been set into the Background setting and will be mostly used for elements that have a wrong background-color.
-- `--darkreader-neutral-text`: This is directly the value that had been set into the Text setting and will be mostly used for elements that have a non-read-able/visible color.
+- `--darkreader-neutral-background` should be mostly used for elements that have a wrong background color (usually bright backgrounds that should be dark).
+- `--darkreader-neutral-text` should be used for elements with a wrong text color (usually dark texts that should be light).
+- `--darkreader-selection-background` corresponds to user's Selection Background Color setting.
+- `--darkreader-selection-text` corresponds to user's Selection Text Color setting.
 
 **Fixes for Filter and Filter+ modes**.
 

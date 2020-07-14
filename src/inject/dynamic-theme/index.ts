@@ -1,7 +1,7 @@
 import {replaceCSSVariables, getElementCSSVariables} from './css-rules';
 import {overrideInlineStyle, getInlineOverrideStyle, watchForInlineStyles, stopWatchingForInlineStyles, INLINE_STYLE_SELECTOR} from './inline-style';
 import {changeMetaThemeColorWhenAvailable, restoreMetaThemeColor} from './meta-theme-color';
-import {getModifiedUserAgentStyle, getModifiedFallbackStyle, cleanModificationCache, parseColorWithCache} from './modify-css';
+import {getModifiedUserAgentStyle, getModifiedFallbackStyle, cleanModificationCache, parseColorWithCache, getSelectionColor} from './modify-css';
 import {manageStyle, getManageableStyles, StyleElement, StyleManager} from './style-manager';
 import {watchForStyleChanges, stopWatchingForStyleChanges} from './watch';
 import {forEach, push, toArray} from '../../utils/array';
@@ -91,6 +91,20 @@ function createStaticStyleOverrides() {
     overrideStyle.textContent = fixes && fixes.css ? replaceCSSTemplates(fixes.css) : '';
     document.head.appendChild(overrideStyle);
     setupStylePositionWatcher(overrideStyle, 'override');
+
+    const variableStyle = createOrUpdateStyle('darkreader--variables');
+    const selectionColors = getSelectionColor(filter);
+    const {darkSchemeBackgroundColor, darkSchemeTextColor, lightSchemeBackgroundColor, lightSchemeTextColor} = filter;
+    variableStyle.textContent = [
+        `:root {`,
+        `   --darkreader-neutral-background: ${filter.mode === 0 ? lightSchemeBackgroundColor : darkSchemeBackgroundColor};`,
+        `   --darkreader-neutral-text: ${filter.mode === 0 ? lightSchemeTextColor : darkSchemeTextColor};`,
+        `   --darkreader-selection-background: ${selectionColors.backgroundColorSelection};`,
+        `   --darkreader-selection-text: ${selectionColors.foregroundColorSelection};`,
+        `}`
+    ].join('\n');
+    document.head.insertBefore(variableStyle, inlineStyle.nextSibling);
+    setupStylePositionWatcher(variableStyle, 'variables');
 }
 
 const shadowRootsWithOverrides = new Set<ShadowRoot>();

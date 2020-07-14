@@ -89,8 +89,7 @@ export function getModifiedUserAgentStyle(filter: FilterConfig, isIFrame: boolea
     return lines.join('\n');
 }
 
-function getModifiedSelectionStyle(theme: Theme) {
-    const lines: string[] = [];
+export function getSelectionColor(theme: Theme) {
     let backgroundColorSelection: string;
     let foregroundColorSelection: string;
     if (theme.selectionColor === 'auto') {
@@ -106,6 +105,13 @@ function getModifiedSelectionStyle(theme: Theme) {
             foregroundColorSelection = '#000';
         }
     }
+    return {backgroundColorSelection, foregroundColorSelection};
+}
+function getModifiedSelectionStyle(theme: Theme) {
+    const lines: string[] = [];
+    const modifiedSelectionColor = getSelectionColor(theme);
+    const backgroundColorSelection = modifiedSelectionColor.backgroundColorSelection;
+    const foregroundColorSelection = modifiedSelectionColor.foregroundColorSelection;
     ['::selection', '::-moz-selection'].forEach((selection) => {
         lines.push(`${selection} {`);
         lines.push(`    background-color: ${backgroundColorSelection} !important;`);

@@ -74,22 +74,22 @@ declare namespace DarkReader {
          */
         textStroke: number;
         /**
-         * Background color to use while dark mode.
+         * Background color to use for dark mode.
          * Default #181a1b
          */
         darkSchemeBackgroundColor: string;
         /**
-         * Text color to use while dark mode.
+         * Text color to use for dark mode.
          * Default #e8e6e3
          */
         darkSchemeTextColor: string;
         /**
-         * Background color to use while light mode.
+         * Background color to use for light mode.
          * Default #dcdad7
          */
         lightSchemeBackgroundColor: string;
         /**
-         * Text color to use while light mode.
+         * Text color to use for light mode.
          * Default #181a1b
          */
         lightSchemeTextColor: string;

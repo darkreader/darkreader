@@ -9,14 +9,16 @@ export default function PresetPicker(props: ViewProps) {
         ({url}) => isURLInList(props.tab.url, url)
     );
 
-    const defaultPresetName = 'Default theme';
-    const customPresetName = `Custom for ${host}`;
+    const dropdownOptions = [
+        {id: 'default', label: 'Default theme'},
+        {id: 'custom', label: `Custom for ${host}`},
+    ];
 
-    function onPresetChange(name: string) {
+    function onPresetChange(id: string) {
         const filteredCustomThemes = props.data.settings.customThemes.filter(({url}) => !isURLInList(props.tab.url, url));
-        if (name === defaultPresetName) {
+        if (id === 'default') {
             props.actions.changeSettings({customThemes: filteredCustomThemes});
-        } else if (name === customPresetName) {
+        } else if (id === 'custom') {
             const extended = filteredCustomThemes.concat({
                 url: [host],
                 theme: {...props.data.settings.theme},
@@ -27,11 +29,8 @@ export default function PresetPicker(props: ViewProps) {
     return (
         <DropDown
             class="theme-preset-picker"
-            selected={custom ? customPresetName : defaultPresetName}
-            values={[
-                defaultPresetName,
-                customPresetName,
-            ]}
+            selected={custom ? 'custom' : 'default'}
+            options={dropdownOptions}
             onChange={onPresetChange}
         />
     );

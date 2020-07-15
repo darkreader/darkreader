@@ -36,7 +36,7 @@ export interface ExtWrapper {
     actions: ExtensionActions;
 }
 
-export interface FilterConfig {
+export interface Theme {
     mode: FilterMode;
     brightness: number;
     contrast: number;
@@ -55,16 +55,24 @@ export interface FilterConfig {
     selectionColor: '' | 'auto' | string;
 }
 
-export type Theme = FilterConfig;
+export type FilterConfig = Theme;
 
 export interface CustomSiteConfig {
     url: string[];
     theme: FilterConfig;
 }
 
+export interface ThemePreset {
+    id: string;
+    name: string;
+    urls: string[];
+    theme: Theme;
+}
+
 export interface UserSettings {
     enabled: boolean;
     theme: FilterConfig;
+    presets: ThemePreset[];
     customThemes: CustomSiteConfig[];
     siteList: string[];
     siteListEnabled: string[];

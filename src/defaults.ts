@@ -35,6 +35,7 @@ export const DEFAULT_THEME: Theme = {
 export const DEFAULT_SETTINGS: UserSettings = {
     enabled: true,
     theme: DEFAULT_THEME,
+    presets: [],
     customThemes: [],
     siteList: [],
     siteListEnabled: [],

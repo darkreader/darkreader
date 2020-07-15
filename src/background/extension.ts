@@ -372,28 +372,29 @@ export class Extension {
         const urlInfo = this.getURLInfo(url);
         if (this.isEnabled() && isURLEnabled(url, this.user.settings, urlInfo)) {
             const custom = this.user.settings.customThemes.find(({url: urlList}) => isURLInList(url, urlList));
-            const filterConfig = custom ? custom.theme : this.user.settings.theme;
+            const preset = custom ? null : this.user.settings.presets.find(({urls}) => isURLInList(url, urls));
+            const theme = custom ? custom.theme : preset ? preset.theme : this.user.settings.theme;
 
             console.log(`Creating CSS for url: ${url}`);
-            switch (filterConfig.engine) {
+            switch (theme.engine) {
                 case ThemeEngines.cssFilter: {
                     return {
                         type: 'add-css-filter',
-                        data: createCSSFilterStylesheet(filterConfig, url, frameURL, this.config.INVERSION_FIXES),
+                        data: createCSSFilterStylesheet(theme, url, frameURL, this.config.INVERSION_FIXES),
                     };
                 }
                 case ThemeEngines.svgFilter: {
                     if (isFirefox()) {
                         return {
                             type: 'add-css-filter',
-                            data: createSVGFilterStylesheet(filterConfig, url, frameURL, this.config.INVERSION_FIXES),
+                            data: createSVGFilterStylesheet(theme, url, frameURL, this.config.INVERSION_FIXES),
                         };
                     }
                     return {
                         type: 'add-svg-filter',
                         data: {
-                            css: createSVGFilterStylesheet(filterConfig, url, frameURL, this.config.INVERSION_FIXES),
-                            svgMatrix: getSVGFilterMatrixValue(filterConfig),
+                            css: createSVGFilterStylesheet(theme, url, frameURL, this.config.INVERSION_FIXES),
+                            svgMatrix: getSVGFilterMatrixValue(theme),
                             svgReverseMatrix: getSVGReverseFilterMatrixValue(),
                         },
                     };
@@ -401,13 +402,13 @@ export class Extension {
                 case ThemeEngines.staticTheme: {
                     return {
                         type: 'add-static-theme',
-                        data: filterConfig.stylesheet && filterConfig.stylesheet.trim() ?
-                            filterConfig.stylesheet :
-                            createStaticStylesheet(filterConfig, url, frameURL, this.config.STATIC_THEMES),
+                        data: theme.stylesheet && theme.stylesheet.trim() ?
+                            theme.stylesheet :
+                            createStaticStylesheet(theme, url, frameURL, this.config.STATIC_THEMES),
                     };
                 }
                 case ThemeEngines.dynamicTheme: {
-                    const filter = {...filterConfig};
+                    const filter = {...theme};
                     delete filter.engine;
                     const fixes = getDynamicThemeFixesFor(url, frameURL, this.config.DYNAMIC_THEME_FIXES, this.user.settings.enableForPDF);
                     const isIFrame = frameURL != null;
@@ -417,7 +418,7 @@ export class Extension {
                     };
                 }
                 default: {
-                    throw new Error(`Unknown engine ${filterConfig.engine}`);
+                    throw new Error(`Unknown engine ${theme.engine}`);
                 }
             }
         } else {

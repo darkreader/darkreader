@@ -36,6 +36,7 @@ export interface StyleManager {
     destroy(): void;
     watch(): void;
     restore(): void;
+    modifiedRuleList(): CSSStyleSheet;
 }
 
 export const STYLE_SELECTOR = 'style, link[rel*="stylesheet" i]:not([disabled])';
@@ -224,6 +225,10 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
         return {variables};
     }
 
+    function modifiedRuleList(): CSSStyleSheet {
+        return syncStyle.sheet;
+    }
+
     let forceRenderStyle = false;
 
     function render(theme: Theme, variables: Map<string, string>) {
@@ -399,6 +404,7 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
         destroy,
         watch,
         restore,
+        modifiedRuleList,
     };
 }
 

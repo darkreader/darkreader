@@ -79,6 +79,22 @@ export default class TabManager {
                 a.download = name;
                 a.click();
             }
+            if (type === 'export-css-proxy') {
+                const tabs = await queryTabs({});
+                tabs.filter((tab) => this.ports.has(tab.id))
+                    .filter(async (tab) => tab.url === await this.getActiveTabURL())
+                    .forEach((tab) => {
+                        const framesPorts = this.ports.get(tab.id);
+                        framesPorts.forEach(({port}, frameId) => {
+                            const message = {type: 'export-css'};
+                            if (tab.active && frameId === 0) {
+                                port.postMessage(message);
+                            } else {
+                                setTimeout(() => port.postMessage(message));
+                            }
+                        });
+                    });
+            }
         });
     }
 

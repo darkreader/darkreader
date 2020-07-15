@@ -112,9 +112,14 @@ function DonateGroup() {
     );
 }
 
-function VersionGroup() {
+let appVersion: string;
+
+function AppVersion() {
+    if (!appVersion) {
+        appVersion = chrome.runtime.getManifest().version;
+    }
     return (
-        <label class="m-darkreader-version">Dark Reader Version {chrome.runtime.getManifest().version}</label>
+        <label class="darkreader-version">Version 5 Preview ({appVersion})</label>
     );
 }
 
@@ -141,9 +146,7 @@ export default function Body(props: ViewProps) {
             <section class="m-section">
                 <DonateGroup />
             </section>
-            <section class="m-section version-section">
-                <VersionGroup />
-            </section>
+            <AppVersion />
             <Overlay />
         </body>
     );

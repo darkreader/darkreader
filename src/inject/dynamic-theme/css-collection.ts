@@ -1,11 +1,7 @@
 import {styleManagers} from './index';
 import {forEach} from '../../utils/array';
 
-function beautify(text: any[] | string) {
-    if (Array.isArray(text)) {
-        text = text.join('\n')
-    }
-
+function beautify(text: string) {
     const CSS = (text
         .replace(/\{/g,'{%--%') // {
         .replace(/\}/g,'%--%}%--%') // }
@@ -84,7 +80,7 @@ export function exportCSSText() {
 
     if (modifiedCSS.length != 0) {
         css.push('/* Modified CSS */');
-        css.push(beautify(modifiedCSS));
+        css.push(beautify(modifiedCSS.join('\n')));
         css.push('');
     }
 

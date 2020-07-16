@@ -111,7 +111,7 @@ export interface DynamicThemeFix {
     invert: string[];
     css: string;
     ignoreInlineStyle: string[];
-    ignoreImageAnalyse: string[];
+    ignoreImageAnalyze: string[];
 }
 
 export interface InversionFix {

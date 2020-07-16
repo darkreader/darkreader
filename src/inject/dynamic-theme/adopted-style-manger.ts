@@ -6,7 +6,7 @@ const adoptedStyleOverrides = new WeakMap<CSSStyleSheet, CSSStyleSheet>();
 const overrideList = new WeakSet<CSSStyleSheet>();
 
 export interface AdoptedStyleSheetManager {
-    render(theme: Theme, variables: Map<string, string>): void;
+    render(theme: Theme, variables: Map<string, string>, ignoreImageAnalyze: string[]): void;
     destroy(): void;
 }
 
@@ -44,7 +44,7 @@ export function createAdoptedStyleSheetOverride(node: Document | ShadowRoot): Ad
         node.adoptedStyleSheets = newSheets;
     }
 
-    function render(theme: Theme, globalVariables: Map<string, string>) {
+    function render(theme: Theme, globalVariables: Map<string, string>, ignoreImageAnalyze: string[]) {
         node.adoptedStyleSheets.forEach((sheet) => {
             if (overrideList.has(sheet)) {
                 return;
@@ -72,6 +72,7 @@ export function createAdoptedStyleSheetOverride(node: Document | ShadowRoot): Ad
                 sourceCSSRules: rules,
                 theme,
                 variables,
+                ignoreImageAnalyze,
                 force: false,
                 isAsyncCancelled: () => cancelAsyncOperations,
             });

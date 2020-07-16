@@ -228,9 +228,12 @@ const imageDetailsCache = new Map<string, ImageDetails>();
 const awaitingForImageLoading = new Map<string, ((imageDetails: ImageDetails) => void)[]>();
 
 function shouldIgnoreImage(element: CSSStyleRule, selectors: string[]) {
+    if (!element) {
+        return false;
+    }
     for (let i = 0; i < selectors.length; i++) {
         const ingnoredSelector = selectors[i];
-        if (element.matches(ingnoredSelector)) {
+        if (element.selectorText.match(ingnoredSelector)) {
             return true;
         }
     }
@@ -315,7 +318,9 @@ function getBgImageModifier(value: string, rule: CSSStyleRule, ignoreImageSelect
                     imageDetails = imageDetailsCache.get(url);
                 } else {
                     try {
-                        if (shouldIgnoreImage(rule, ignoreImageSelectors))
+                        if (shouldIgnoreImage(rule, ignoreImageSelectors)) {
+                            return null;
+                        }
                         if (awaitingForImageLoading.has(url)) {
                             const awaiters = awaitingForImageLoading.get(url);
                             imageDetails = await new Promise<ImageDetails>((resolve) => awaiters.push(resolve));

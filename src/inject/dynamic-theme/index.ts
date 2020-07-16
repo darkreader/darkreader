@@ -121,6 +121,10 @@ function cleanFallbackStyle() {
     }
 }
 
+function getIgnoreImageAnalyze() {
+    return fixes && Array.isArray(fixes.ignoreImageAnalyze) ? fixes.ignoreImageAnalyze : [];
+}
+
 function createDynamicStyleOverrides() {
     cancelRendering();
 
@@ -136,7 +140,7 @@ function createDynamicStyleOverrides() {
         .filter((details) => details && details.variables.size > 0)
         .map(({variables}) => variables);
     if (newVariables.length === 0) {
-        styleManagers.forEach((manager) => manager.render(filter, variables));
+        styleManagers.forEach((manager) => manager.render(filter, variables, getIgnoreImageAnalyze()));
         if (loadingStyles.size === 0) {
             cleanFallbackStyle();
         }
@@ -158,8 +162,8 @@ function createDynamicStyleOverrides() {
             push(inlineStyleElements, elements);
         }
     });
-    const ignoredSelectors = fixes && Array.isArray(fixes.ignoreInlineStyle) ? fixes.ignoreInlineStyle : [];
-    inlineStyleElements.forEach((el) => overrideInlineStyle(el as HTMLElement, filter, ignoredSelectors));
+    const ignoredInlineSelectors = fixes && Array.isArray(fixes.ignoreInlineStyle) ? fixes.ignoreInlineStyle : [];
+    inlineStyleElements.forEach((el) => overrideInlineStyle(el as HTMLElement, filter, getIgnoreImageAnalyze(), ignoredInlineSelectors));
     handleAdoptedStyleSheets(document);
 }
 
@@ -193,7 +197,7 @@ function createManager(element: StyleElement) {
             return;
         }
         if (details.variables.size === 0) {
-            manager.render(filter, variables);
+            manager.render(filter, variables, getIgnoreImageAnalyze());
         } else {
             updateVariables(details.variables);
             throttledRenderAllStyles();
@@ -227,8 +231,8 @@ function removeManager(element: StyleElement) {
 }
 
 const throttledRenderAllStyles = throttle((callback?: () => void) => {
-    styleManagers.forEach((manager) => manager.render(filter, variables));
-    adoptedStyleManagers.forEach((manager) => manager.render(filter, variables));
+    styleManagers.forEach((manager) => manager.render(filter, variables, getIgnoreImageAnalyze()));
+    adoptedStyleManagers.forEach((manager) => manager.render(filter, variables, getIgnoreImageAnalyze()));
     callback && callback();
 });
 
@@ -285,8 +289,9 @@ function handleAdoptedStyleSheets(node: ShadowRoot | Document) {
     if (Array.isArray(node.adoptedStyleSheets)) {
         if (node.adoptedStyleSheets.length > 0) {
             const newManger = createAdoptedStyleSheetOverride(node);
+
             adoptedStyleManagers.push(newManger);
-            newManger.render(filter, variables);
+            newManger.render(filter, variables, getIgnoreImageAnalyze());
         }
     }
 }
@@ -307,7 +312,7 @@ function watchForUpdates() {
             .filter((details) => details && details.variables.size > 0)
             .map(({variables}) => variables);
         if (newVariables.length === 0) {
-            newManagers.forEach((manager) => manager.render(filter, variables));
+            newManagers.forEach((manager) => manager.render(filter, variables, getIgnoreImageAnalyze()));
         } else {
             newVariables.forEach((variables) => updateVariables(variables));
             throttledRenderAllStyles();
@@ -319,9 +324,8 @@ function watchForUpdates() {
     });
 
     const ignoredInlineSelectors = fixes && Array.isArray(fixes.ignoreInlineStyle) ? fixes.ignoreInlineStyle : [];
-    const ignoredImageSelectors = fixes && Array.isArray(fixes.ignoreImageAnalyse) ? fixes.ignoreImageAnalyse : [];
     watchForInlineStyles((element) => {
-        overrideInlineStyle(element, filter, ignoredInlineSelectors, ignoredImageSelectors);
+        overrideInlineStyle(element, filter, ignoredInlineSelectors, getIgnoreImageAnalyze());
         if (element === document.documentElement) {
             const rootVariables = getElementCSSVariables(document.documentElement);
             if (rootVariables.size > 0) {
@@ -333,7 +337,7 @@ function watchForUpdates() {
         const inlineStyleElements = root.querySelectorAll(INLINE_STYLE_SELECTOR);
         if (inlineStyleElements.length > 0) {
             createShadowStaticStyleOverrides(root);
-            forEach(inlineStyleElements, (el) => overrideInlineStyle(el as HTMLElement, filter, ignoredInlineSelectors, ignoredImageSelectors));
+            forEach(inlineStyleElements, (el) => overrideInlineStyle(el as HTMLElement, filter, getIgnoreImageAnalyze(), ignoredInlineSelectors));
         }
     });
 

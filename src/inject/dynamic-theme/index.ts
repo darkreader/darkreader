@@ -19,7 +19,7 @@ import {createAdoptedStyleSheetOverride, AdoptedStyleSheetManager} from './adopt
 
 const variables = new Map<string, string>();
 const INSTANCE_ID = generateInstanceId();
-export const styleManagers = new Map<StyleElement, StyleManager>();
+const styleManagers = new Map<StyleElement, StyleManager>();
 const adoptedStyleManagers = [] as Array<AdoptedStyleSheetManager>;
 let filter: FilterConfig = null;
 let fixes: DynamicThemeFix = null;

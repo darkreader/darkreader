@@ -1,4 +1,4 @@
-import {styleManagers} from './index';
+import {StyleElement} from './style-manager';
 import {forEach} from '../../utils/array';
 
 function beautify(text: string) {
@@ -6,7 +6,7 @@ function beautify(text: string) {
         .replace(/\{/g,'{%--%') // {
         .replace(/\}/g,'%--%}%--%') // }
         .replace(/\;/g,';%--%') // ;
-        .replace(/%--%\s{0,}%--%/g,'%--%') // Remove %--% Without any characters between to next %--%
+        .replace(/%--%\s{0,}%--%/g,'%--%') // Remove %--% Without any characters between to the next %--%
         .split('%--%'));
     let deep = 0;
     const formatted = [];
@@ -16,9 +16,9 @@ function beautify(text: string) {
         const line = CSS[x] + '\n';
         if (line.match(/\{/)) { // {
             formatted.push(shift.repeat(deep++) + line);
-        } else if (line.match(/\}/)) {
+        } else if (line.match(/\}/)) { // }
             formatted.push(shift.repeat(--deep) + line);
-        } else {
+        } else { // CSS line
             formatted.push(shift.repeat(deep) + line);
         }
     }
@@ -28,54 +28,27 @@ function beautify(text: string) {
 export function exportCSSText() {
     const css = [];
 
-    const fallbackStyle = document.head.querySelector('.darkreader--fallback');
-    const userAgentStyle = document.head.querySelector('.darkreader--user-agent');
-    const textStyle = document.head.querySelector('.darkreader--text');
-    const invertStyle = document.head.querySelector('.darkreader--invert');
-    const overrideStyle = document.head.querySelector('.darkreader--override');
-    const variableStyle = document.head.querySelector('.darkreader--variables');
-
-    if (fallbackStyle && fallbackStyle.textContent) {
-        css.push('/* Fallback Style */');
-        css.push(beautify(fallbackStyle.textContent));
-        css.push('');
+    function addStaticCSS(selector: string, comment: string) {
+        const staticStyle = document.head.querySelector(selector);
+        if (staticStyle && staticStyle.textContent) {
+            css.push(`/* ${comment} */`);
+            css.push(beautify(staticStyle.textContent));
+            css.push('');
+        }
     }
 
-    if (userAgentStyle && userAgentStyle.textContent) {
-        css.push('/* User-Agent Style */');
-        css.push(beautify(userAgentStyle.textContent));
-        css.push('');
-    }
+    addStaticCSS('.darkreader--fallback', 'Fallback Style');
+    addStaticCSS('.darkreader--user-agent', 'User-Agent Style');
+    addStaticCSS('.darkreader--text', 'Text Style');
+    addStaticCSS('.darkreader--invert', 'Invert Style');
+    addStaticCSS('.darkreader--override', 'Override Style');
+    addStaticCSS('.darkreader--variables', 'Variables Style');
 
-    if (textStyle && textStyle.textContent) {
-        css.push('/* Text Style */');
-        css.push(beautify(textStyle.textContent));
-        css.push('');
-    }
-
-    if (invertStyle && invertStyle.textContent) {
-        css.push('/* Invert Style */');
-        css.push(beautify(invertStyle.textContent));
-        css.push('');
-    }
-
-    if (overrideStyle && overrideStyle.textContent) {
-        css.push('/* Override Style */');
-        css.push(beautify(overrideStyle.textContent));
-        css.push('');
-    }
-
-    if (variableStyle && variableStyle.textContent) {
-        css.push('/* Variables Style */');
-        css.push(beautify(variableStyle.textContent));
-        css.push('');
-    }
     const modifiedCSS = [];
-    styleManagers.forEach((manager) => {
-        forEach(manager.modifiedRuleList().cssRules, (rule) => {
-            modifiedCSS.push(`${rule.cssText}`);
+    document.querySelectorAll('.darkreader--sync').forEach((element) => {
+        forEach((element as StyleElement).sheet.cssRules, (rule) => {
+            rule && rule.cssText && modifiedCSS.push(rule.cssText);
         });
-
     });
 
     if (modifiedCSS.length != 0) {

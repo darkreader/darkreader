@@ -5,16 +5,15 @@ import {saveFile} from '../../utils';
 import ControlGroup from '../control-group';
 
 export default function ExportTheme(props: ViewProps) {
-    chrome.runtime.onMessage.addListener(({type, data}) => {
-        if (data == null) {
-            return;
-        }
+    const listener = ({type, data}) => {
         if (type === 'export-css-response') {
             saveFile('Dark-Reader-Settings.css', data);
+            chrome.runtime.onMessage.removeListener(listener);
         }
-    });
+    };
 
     function exportCSS() {
+        chrome.runtime.onMessage.addListener(listener);
         chrome.runtime.sendMessage({type: 'export-css-proxy', data: {url: props.tab.url}});
     }
     return (

@@ -81,17 +81,15 @@ export default class TabManager {
             }
             if (type === 'export-css-proxy') {
                 const tabs = await queryTabs({});
-                const activeURL = await this.getActiveTabURL();
+                const activeTab = await this.getActiveTab();
                 tabs.filter((tab) => this.ports.has(tab.id))
-                    .filter((tab) => tab.url === activeURL)
+                    .filter((tab) => tab === activeTab)
                     .forEach((tab) => {
                         const framesPorts = this.ports.get(tab.id);
                         framesPorts.forEach(({port}, frameId) => {
                             const message = {type: 'export-css'};
-                            if (tab.active && frameId === 0) {
+                            if (frameId === 0) {
                                 port.postMessage(message);
-                            } else {
-                                setTimeout(() => port.postMessage(message));
                             }
                         });
                     });
@@ -128,6 +126,9 @@ export default class TabManager {
     }
 
     async getActiveTabURL() {
+        return (await this.getActiveTab()).url;
+    }
+    async getActiveTab() {
         let tab = (await queryTabs({
             active: true,
             lastFocusedWindow: true
@@ -138,6 +139,6 @@ export default class TabManager {
             const tabs = (await queryTabs({active: true}));
             tab = tabs.find((t) => !isExtensionPage(t.url)) || tab;
         }
-        return tab.url;
+        return tab;
     }
 }

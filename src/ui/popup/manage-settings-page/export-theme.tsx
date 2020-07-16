@@ -5,7 +5,7 @@ import {saveFile} from '../../utils';
 import ControlGroup from '../control-group';
 import {getURLHost} from '../../../utils/url';
 
-export default function ExportTheme(props: ViewProps) {
+export default function ExportTheme() {
     const listener = ({type, data}, sender: chrome.runtime.MessageSender) => {
         if (type === 'export-css-response') {
             const url = getURLHost(sender.tab.url).replace(/[^a-z0-1\-]/g, '-');

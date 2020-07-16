@@ -21,7 +21,7 @@ export default function ManageSettingsPage(props: ViewProps) {
             <SyncSettings {...props} />
             <ImportButton {...props} />
             <ExportButton {...props} />
-            {engine === themeEngines.dynamicTheme ? <ExportTheme {...props}/> : null}
+            {engine === themeEngines.dynamicTheme ? <ExportTheme /> : null}
             <ResetButtonGroup {...props} />
         </section>
     );

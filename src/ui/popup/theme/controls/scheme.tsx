@@ -9,8 +9,8 @@ export default function Scheme(props: {isDark: boolean; onChange: (dark: boolean
             <DropDown
                 selected={props.isDark}
                 options={[
-                    {id: true, label: getLocalMessage('dark')},
-                    {id: false, label: getLocalMessage('light')},
+                    {id: true, content: getLocalMessage('dark')},
+                    {id: false, content: getLocalMessage('light')},
                 ]}
                 onChange={props.onChange}
             />

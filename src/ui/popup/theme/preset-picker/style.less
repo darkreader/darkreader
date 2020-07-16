@@ -1,3 +1,7 @@
+@import "../../../theme";
+
+@theme-preset-picker-button-size: 1.5rem;
+
 .theme-preset-picker {
     .dropdown {
         &__selected {
@@ -8,6 +12,35 @@
         }
         &__list {
             border-radius: unset;
+        }
+    }
+
+    &__preset {
+        display: inline-block;
+        position: relative;
+        width: 100%;
+
+        &__remove-button {
+            border-radius: 50%;
+            cursor: pointer;
+            display: inline-block;
+            height: @theme-preset-picker-button-size;
+            position: absolute;
+            right: 0;
+            top: 0;
+            width: @theme-preset-picker-button-size;
+
+            &::after {
+                content: "\2715";
+                display: inline-block;
+                line-height: @theme-preset-picker-button-size;
+                text-align: center;
+            }
+
+            &:hover {
+                background-color: @color-control-active;
+                color: @color-control-fore;
+            }
         }
     }
 }

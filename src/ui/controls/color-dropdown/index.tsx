@@ -29,9 +29,9 @@ export default function ColorDropDown(props: ColorDropDownProps) {
     };
 
     const dropDownOptions = [
-        props.hasDefaultOption ? {id: 'default', label: labels.DEFAULT} : null,
-        props.hasAutoOption ? {id: 'auto', label: labels.AUTO} : null,
-        {id: 'custom', label: labels.CUSTOM},
+        props.hasDefaultOption ? {id: 'default', content: labels.DEFAULT} : null,
+        props.hasAutoOption ? {id: 'auto', content: labels.AUTO} : null,
+        {id: 'custom', content: labels.CUSTOM},
     ].filter((v) => v);
 
     const selectedDropDownValue = (

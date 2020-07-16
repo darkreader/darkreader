@@ -1,8 +1,47 @@
 import {m} from 'malevic';
+import {getContext} from 'malevic/dom';
+import {ThemePreset} from '../../../../definitions';
 import {isURLInList, isURLMatched, getURLHost} from '../../../../utils/url';
-import {DropDown} from '../../../controls';
+import {DropDown, MessageBox} from '../../../controls';
 import {ViewProps} from '../../types';
 import {createUID} from '../../../../utils/uid';
+
+function PresetItem(props: ViewProps & {preset: ThemePreset}) {
+    const context = getContext();
+    const store = context.store as {isConfirmationVisible: boolean};
+
+    function onRemoveClick(e: MouseEvent) {
+        e.stopPropagation();
+        store.isConfirmationVisible = true;
+        context.refresh();
+    }
+
+    function onConfirmRemoveClick() {
+        const filtered = props.data.settings.presets.filter((p) => p.id !== props.preset.id);
+        props.actions.changeSettings({presets: filtered});
+    }
+
+    function onCancelRemoveClick() {
+        store.isConfirmationVisible = false;
+        context.refresh();
+    }
+
+    const confirmation = store.isConfirmationVisible ? (
+        <MessageBox
+            caption={`Are you sure you want to remove ${props.preset.name}?`}
+            onOK={onConfirmRemoveClick}
+            onCancel={onCancelRemoveClick}
+        />
+    ) : null;
+
+    return (
+        <span class="theme-preset-picker__preset">
+            <span class="theme-preset-picker__preset__name">{props.preset.name}</span>
+            <span class="theme-preset-picker__preset__remove-button" onclick={onRemoveClick}></span>
+            {confirmation}
+        </span>
+    );
+}
 
 export default function PresetPicker(props: ViewProps) {
     const host = getURLHost(props.tab.url || '');
@@ -13,14 +52,28 @@ export default function PresetPicker(props: ViewProps) {
         ({url}) => isURLInList(props.tab.url, url)
     );
 
+    const selectedPresetId = custom ? 'custom' : preset ? preset.id : 'default';
+
+    const defaultOption = {id: 'default', content: 'Default theme'};
+    const addNewPresetOption = props.data.settings.presets.length === 0 ?
+        {id: 'add-preset', content: '+ Create new theme'} :
+        null;
+    const userPresetsOptions = props.data.settings.presets.map((preset) => {
+        if (preset.id === selectedPresetId) {
+            return {id: preset.id, content: preset.name};
+        }
+        return {
+            id: preset.id,
+            content: <PresetItem {...props} preset={preset} />
+        };
+    });
+    const customSitePresetOption = {id: 'custom', content: `Custom for ${host}`};
+
     const dropdownOptions = [
-        {id: 'default', label: 'Default theme'},
-        props.data.settings.presets.length === 0 ?
-            {id: 'add-preset', label: '+ Create new theme'} : null,
-        ...props.data.settings.presets.map((preset) => {
-            return {id: preset.id, label: preset.name};
-        }),
-        {id: 'custom', label: `Custom for ${host}`},
+        defaultOption,
+        addNewPresetOption,
+        ...userPresetsOptions,
+        customSitePresetOption,
     ].filter(Boolean);
 
     function onPresetChange(id: string) {
@@ -76,7 +129,7 @@ export default function PresetPicker(props: ViewProps) {
     return (
         <DropDown
             class="theme-preset-picker"
-            selected={custom ? 'custom' : preset ? preset.id : 'default'}
+            selected={selectedPresetId}
             options={dropdownOptions}
             onChange={onPresetChange}
         />

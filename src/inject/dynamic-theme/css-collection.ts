@@ -5,7 +5,7 @@ function beautify(text: string) {
         .replace(/(.*?){ }/g, '') // Removing Empty CSS Rules
         .replace(/\{/g,'{%--%') // {
         .replace(/\}/g,'%--%}%--%') // }
-        .replace(/\;(?![^\(]*\))/g,';%--%') // ; and do not target between " "
+        .replace(/\;(?![^\(]*\))/g,';%--%') // ; and do not target between ()
         .replace(/%--%\s{0,}%--%/g,'%--%') // Remove %--% Without any characters between to the next %--%
         .split('%--%'));
     let deep = 0;

@@ -262,7 +262,9 @@ export class Extension {
         ) {
             this.onAppToggle();
         }
-
+        if (prev.syncSettings !== this.user.settings.syncSettings) {
+            this.user.saveSyncSetting(this.user.settings.syncSettings);
+        }
         if (this.isEnabled() && $settings.changeBrowserTheme != null && prev.changeBrowserTheme !== $settings.changeBrowserTheme) {
             if ($settings.changeBrowserTheme) {
                 setWindowTheme(this.user.settings.theme);

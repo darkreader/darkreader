@@ -1,11 +1,11 @@
 import {m} from 'malevic';
-import {isFirefox} from '../../../utils/platform';
 import {ViewProps} from '../types';
 import AutomationButton from './automation-button';
 import DevToolsGroup from './devtools';
+import ManageSettingsButton from './mange-settings-button';
+import {isFirefox} from '../../../utils/platform';
 import EnabledByDefaultGroup from './enabled-by-default';
 import InvertPDF from './invert-pdf';
-import ManageSettingsButton from './mange-settings-button';
 
 type SettingsPageProps = ViewProps & {
     onAutomationNavClick: () => void;

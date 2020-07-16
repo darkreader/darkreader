@@ -1,7 +1,7 @@
 import {replaceCSSVariables, getElementCSSVariables} from './css-rules';
 import {overrideInlineStyle, getInlineOverrideStyle, watchForInlineStyles, stopWatchingForInlineStyles, INLINE_STYLE_SELECTOR} from './inline-style';
 import {changeMetaThemeColorWhenAvailable, restoreMetaThemeColor} from './meta-theme-color';
-import {getModifiedUserAgentStyle, getModifiedFallbackStyle, cleanModificationCache, parseColorWithCache} from './modify-css';
+import {getModifiedUserAgentStyle, getModifiedFallbackStyle, cleanModificationCache, parseColorWithCache, getSelectionColor} from './modify-css';
 import {manageStyle, getManageableStyles, StyleElement, StyleManager} from './style-manager';
 import {watchForStyleChanges, stopWatchingForStyleChanges} from './watch';
 import {forEach, push, toArray} from '../../utils/array';
@@ -14,9 +14,11 @@ import {getCSSFilterValue} from '../../generators/css-filter';
 import {modifyColor} from '../../generators/modify-colors';
 import {createTextStyle} from '../../generators/text-style';
 import {FilterConfig, DynamicThemeFix} from '../../definitions';
+import {generateInstanceId} from './uuid';
 import {createAdoptedStyleSheetOverride, AdoptedStyleSheetManager} from './adopted-style-manger';
 
 const variables = new Map<string, string>();
+const INSTANCE_ID = generateInstanceId();
 const styleManagers = new Map<StyleElement, StyleManager>();
 const adoptedStyleManagers = [] as Array<AdoptedStyleSheetManager>;
 let filter: FilterConfig = null;
@@ -91,6 +93,20 @@ function createStaticStyleOverrides() {
     overrideStyle.textContent = fixes && fixes.css ? replaceCSSTemplates(fixes.css) : '';
     document.head.appendChild(overrideStyle);
     setupStylePositionWatcher(overrideStyle, 'override');
+
+    const variableStyle = createOrUpdateStyle('darkreader--variables');
+    const selectionColors = getSelectionColor(filter);
+    const {darkSchemeBackgroundColor, darkSchemeTextColor, lightSchemeBackgroundColor, lightSchemeTextColor} = filter;
+    variableStyle.textContent = [
+        `:root {`,
+        `   --darkreader-neutral-background: ${filter.mode === 0 ? lightSchemeBackgroundColor : darkSchemeBackgroundColor};`,
+        `   --darkreader-neutral-text: ${filter.mode === 0 ? lightSchemeTextColor : darkSchemeTextColor};`,
+        `   --darkreader-selection-background: ${selectionColors.backgroundColorSelection};`,
+        `   --darkreader-selection-text: ${selectionColors.foregroundColorSelection};`,
+        `}`
+    ].join('\n');
+    document.head.insertBefore(variableStyle, inlineStyle.nextSibling);
+    setupStylePositionWatcher(variableStyle, 'variables');
 }
 
 const shadowRootsWithOverrides = new Set<ShadowRoot>();
@@ -352,11 +368,34 @@ function stopWatchingForUpdates() {
     removeDOMReadyListener(onDOMReady);
 }
 
+function createDarkReaderInstanceMarker() {
+    const metaElement: HTMLMetaElement = document.createElement('meta');
+    metaElement.name = 'darkreader';
+    metaElement.content = INSTANCE_ID;
+    document.head.appendChild(metaElement);
+}
+
+function isAnotherDarkReaderInstanceActive() {
+    const meta: HTMLMetaElement = document.querySelector('meta[name="darkreader"]');
+    if (meta) {
+        if (meta.content !== INSTANCE_ID) {
+            return true;
+        }
+        return false;
+    } else {
+        createDarkReaderInstanceMarker();
+        return false;
+    }
+}
+
 export function createOrUpdateDynamicTheme(filterConfig: FilterConfig, dynamicThemeFixes: DynamicThemeFix, iframe: boolean) {
     filter = filterConfig;
     fixes = dynamicThemeFixes;
     isIFrame = iframe;
     if (document.head) {
+        if (isAnotherDarkReaderInstanceActive()) {
+            return;
+        }
         createThemeAndWatchForUpdates();
     } else {
         if (!isFirefox()) {
@@ -368,6 +407,10 @@ export function createOrUpdateDynamicTheme(filterConfig: FilterConfig, dynamicTh
         const headObserver = new MutationObserver(() => {
             if (document.head) {
                 headObserver.disconnect();
+                if (isAnotherDarkReaderInstanceActive()) {
+                    removeDynamicTheme();
+                    return;
+                }
                 createThemeAndWatchForUpdates();
             }
         });
@@ -385,6 +428,7 @@ export function removeDynamicTheme() {
         removeNode(document.head.querySelector('.darkreader--invert'));
         removeNode(document.head.querySelector('.darkreader--inline'));
         removeNode(document.head.querySelector('.darkreader--override'));
+        removeNode(document.head.querySelector('meta[name="darkreader"]'));
     }
     shadowRootsWithOverrides.forEach((root) => {
         removeNode(root.querySelector('.darkreader--inline'));

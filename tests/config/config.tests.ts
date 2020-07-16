@@ -1,14 +1,14 @@
 import {readFile} from 'fs';
 import {resolve as resolvePath} from 'path';
-import {compareURLPatterns} from '../src/utils/url';
-import {parseArray, formatArray, getTextDiffIndex, getTextPositionMessage} from '../src/utils/text';
-import {parseInversionFixes, formatInversionFixes} from '../src/generators/css-filter';
-import {parseDynamicThemeFixes, formatDynamicThemeFixes} from '../src/generators/dynamic-theme';
-import {parseStaticThemes, formatStaticThemes} from '../src/generators/static-theme';
+import {compareURLPatterns} from '../../src/utils/url';
+import {parseArray, formatArray, getTextDiffIndex, getTextPositionMessage} from '../../src/utils/text';
+import {parseInversionFixes, formatInversionFixes} from '../../src/generators/css-filter';
+import {parseDynamicThemeFixes, formatDynamicThemeFixes} from '../../src/generators/dynamic-theme';
+import {parseStaticThemes, formatStaticThemes} from '../../src/generators/static-theme';
 
 function readConfig(fileName) {
     return new Promise<string>((resolve, reject) => {
-        readFile(resolvePath(__dirname, '../src/config/', fileName), {encoding: 'utf-8'}, (err, data) => {
+        readFile(resolvePath(__dirname, '../../src/config/', fileName), {encoding: 'utf-8'}, (err, data) => {
             if (err) {
                 reject(err);
                 return;

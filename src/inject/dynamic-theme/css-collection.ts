@@ -5,7 +5,7 @@ function getShift(deep: number) {
         return '';
     }
     if (deep === 1) {
-        return ' '.repeat(3).repeat(deep)
+        return ' '.repeat(3).repeat(deep);
     }
     if (deep > 1) {
         return ' '.repeat(4).repeat(deep).substr(1);

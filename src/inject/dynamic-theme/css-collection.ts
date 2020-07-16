@@ -14,7 +14,19 @@ function getShift(deep: number, isEndBracket: boolean) {
     }
 }
 
-async function formatCSS(text: string) {
+const blobRegex = /url\(\"(blob\:.*?)\"\)/g;
+
+async function replaceBlobToData(text: string) {
+    const promises = [];
+    getMatches(blobRegex, text, 1).forEach((url) => {
+        const promise = loadAsDataURL(url);
+        promises.push(promise);
+    });
+    const data = await Promise.all(promises);
+    return text.replace(blobRegex, () => `url("${data.shift()}")`);
+}
+
+async function beautify(text: string) {
     const CSS = (text
         .replace(/(.*?){ }/g, '') // Removing Empty CSS Rules
         .replace(/\s\s+/g, ' ') // Replacing multiple spaces to one
@@ -37,15 +49,7 @@ async function formatCSS(text: string) {
         }
     }
 
-    // Replace all blob with data
-    const promises = [];
-    const endresult = formatted.join('');
-    getMatches(/url\(\"(blob\:.*?)\"\)/g, endresult, 1).forEach((blob) => {
-        const promise = loadAsDataURL(blob);
-        promises.push(promise);
-    });
-    const data = await Promise.all(promises);
-    return endresult.replace(/url\(\"(blob\:.*?)\"\)/g, () => `url("${data.shift()}")`);
+    return replaceBlobToData(formatted.join(''));
 
 }
 
@@ -77,7 +81,7 @@ export async function collectCSS() {
 
     if (modifiedCSS.length != 0) {
         css.push('/* Modified CSS */');
-        css.push(await formatCSS(modifiedCSS.join('\n')));
+        css.push(await beautify(modifiedCSS.join('\n')));
         css.push('');
     }
 

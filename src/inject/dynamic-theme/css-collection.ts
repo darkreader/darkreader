@@ -50,7 +50,6 @@ async function beautify(text: string) {
     }
 
     return replaceBlobToData(formatted.join(''));
-
 }
 
 export async function collectCSS() {

@@ -17,7 +17,7 @@ jobs:
         node-version: 12.x
     - run: npm install
     - run: npm test
-
+    - run: ls -R
     - uses: actions/upload-artifact@v2
       with:
         name: Build Files

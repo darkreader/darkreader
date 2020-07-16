@@ -79,7 +79,7 @@ export default class TabManager {
                 a.download = name;
                 a.click();
             }
-            if (type === 'export-css-proxy') {
+            if (type === 'request-export-css') {
                 const activeTab = await this.getActiveTab();
                 this.ports
                     .get(activeTab.id)

@@ -1,4 +1,3 @@
-import {StyleElement} from './style-manager';
 import {forEach} from '../../utils/array';
 
 function beautify(text: string) {
@@ -25,7 +24,7 @@ function beautify(text: string) {
     return formatted.join('');
 }
 
-export function exportCSSText() {
+export function collectCSS() {
     const css = [];
 
     function addStaticCSS(selector: string, comment: string) {
@@ -45,8 +44,8 @@ export function exportCSSText() {
     addStaticCSS('.darkreader--variables', 'Variables Style');
 
     const modifiedCSS = [];
-    document.querySelectorAll('.darkreader--sync').forEach((element) => {
-        forEach((element as StyleElement).sheet.cssRules, (rule) => {
+    document.querySelectorAll('.darkreader--sync').forEach((element: HTMLStyleElement) => {
+        forEach(element.sheet.cssRules, (rule) => {
             rule && rule.cssText && modifiedCSS.push(rule.cssText);
         });
     });
@@ -57,6 +56,5 @@ export function exportCSSText() {
         css.push('');
     }
 
-    chrome.runtime.sendMessage({type: 'export-css-response', data: css.join('\n')});
-
+    return css.join('\n');
 }

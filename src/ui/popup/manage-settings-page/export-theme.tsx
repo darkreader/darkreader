@@ -3,18 +3,20 @@ import {ViewProps} from '../types';
 import {Button} from '../../controls';
 import {saveFile} from '../../utils';
 import ControlGroup from '../control-group';
+import {getURLHost} from '../../../utils/url';
 
 export default function ExportTheme(props: ViewProps) {
-    const listener = ({type, data}) => {
+    const listener = ({type, data}, sender: chrome.runtime.MessageSender) => {
         if (type === 'export-css-response') {
-            saveFile('Dark-Reader-Settings.css', data);
+            const url = getURLHost(sender.tab.url).replace(/[^a-z0-1\-]/g, '-');
+            saveFile(`DarkReader-${url}.css`, data);
             chrome.runtime.onMessage.removeListener(listener);
         }
     };
 
     function exportCSS() {
         chrome.runtime.onMessage.addListener(listener);
-        chrome.runtime.sendMessage({type: 'export-css-proxy', data: {url: props.tab.url}});
+        chrome.runtime.sendMessage({type: 'request-export-css'});
     }
     return (
         <ControlGroup>
@@ -27,7 +29,7 @@ export default function ExportTheme(props: ViewProps) {
                 </Button>
             </ControlGroup.Control>
             <ControlGroup.Description>
-                Save generated CSS to a CSS file.
+                Save generated CSS to a file
             </ControlGroup.Description>
         </ControlGroup>
     );

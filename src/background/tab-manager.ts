@@ -80,19 +80,11 @@ export default class TabManager {
                 a.click();
             }
             if (type === 'export-css-proxy') {
-                const tabs = await queryTabs({});
                 const activeTab = await this.getActiveTab();
-                tabs.filter((tab) => this.ports.has(tab.id))
-                    .filter((tab) => tab === activeTab)
-                    .forEach((tab) => {
-                        const framesPorts = this.ports.get(tab.id);
-                        framesPorts.forEach(({port}, frameId) => {
-                            const message = {type: 'export-css'};
-                            if (frameId === 0) {
-                                port.postMessage(message);
-                            }
-                        });
-                    });
+                this.ports
+                    .get(activeTab.id)
+                    .get(0).port
+                    .postMessage({type: 'export-css'});
             }
         });
     }

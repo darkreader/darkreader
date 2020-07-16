@@ -22,5 +22,4 @@ jobs:
       with:
         name: Build Files
         path: |
-          build.zip
-          build-firefox.xpi
+          **/

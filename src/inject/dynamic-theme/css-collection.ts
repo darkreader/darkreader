@@ -32,7 +32,7 @@ export function exportCSSText() {
         const staticStyle = document.head.querySelector(selector);
         if (staticStyle && staticStyle.textContent) {
             css.push(`/* ${comment} */`);
-            css.push(beautify(staticStyle.textContent));
+            css.push(staticStyle.textContent);
             css.push('');
         }
     }

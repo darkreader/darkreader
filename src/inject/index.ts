@@ -28,8 +28,7 @@ function onMessage({type, data}) {
             break;
         }
         case 'export-css': {
-            const collectedCSS = collectCSS();
-            chrome.runtime.sendMessage({type: 'export-css-response', data: collectedCSS});
+            collectCSS().then((collectedCSS) => chrome.runtime.sendMessage({type: 'export-css-response', data: collectedCSS}));
             break;
         }
         case 'clean-up': {

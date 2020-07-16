@@ -4,7 +4,7 @@ function beautify(text: string) {
     const CSS = (text
         .replace(/\{/g,'{%--%') // {
         .replace(/\}/g,'%--%}%--%') // }
-        .replace(/\;/g,';%--%') // ;
+        .replace(/\;(?![^"]*")/g,';%--%') // ; and do not target between " "
         .replace(/%--%\s{0,}%--%/g,'%--%') // Remove %--% Without any characters between to the next %--%
         .split('%--%'));
     let deep = 0;

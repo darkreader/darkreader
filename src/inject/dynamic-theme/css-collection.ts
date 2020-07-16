@@ -1,5 +1,6 @@
 import {styleManagers} from './index';
 import {forEach} from '../../utils/array';
+import {overridesList} from './inline-style';
 
 function beautify(text: string) {
 
@@ -26,11 +27,10 @@ function beautify(text: string) {
     return formatted;
 }
 
-// WIP
-function getUniqueSelector(element: HTMLElement) {
+function getUniqueSelector(element: Node) {
     let currentElement = element;
     let path: string;
-    while (currentElement !== document.body) {
+    while (!(currentElement.nodeName.toLowerCase() === 'html')) {
         let name = currentElement.nodeName;
         if (!name) {
             break;
@@ -38,30 +38,23 @@ function getUniqueSelector(element: HTMLElement) {
         name = name.toLowerCase();
 
         const parent = currentElement.parentElement;
-
+        let index: number;
         const sameTagSiblings = [];
-        forEach(parent.childNodes, (node) => {
-            if (node.nodeName === name) {
+        for (let x = 0, len = parent.children.length; x < len; x++) {
+            const node = parent.children[x];
+            if (node.nodeName.toLowerCase() === name) {
                 sameTagSiblings.push(node);
             }
-        });
-
-        if (sameTagSiblings.length > 1) {
-            const allSiblings = Array.from(parent.children)
-                .map((element, index) => ({element, index}))
-                .filter(({element}) => element.nodeName === name);
-            let index: number;
-            allSiblings.find((tagsibling) => {
-                if (tagsibling.element === currentElement) {
-                    index = tagsibling.index;
-                }
-            });
-            if (index > 1) {
-                name += `:nth-child(${index})`;
+            if (node === currentElement) {
+                index = x;
             }
         }
 
-        path = name + (path ? '>' + path : '');
+        if (sameTagSiblings.length > 1) {
+            name += `:nth-child(${index})`;
+        }
+
+        path = name + (path ? ' > ' + path : '');
         currentElement = parent;
     }
 
@@ -129,6 +122,20 @@ export function exportCSSText() {
         css.push('');
     }
 
+    const inlineCSS = [];
+    overridesList.forEach((override) => {
+        override.fullList.forEach((item) => {
+            if (override.store.has(item)) {
+                inlineCSS.push(`${getUniqueSelector(item)} { ${override.cssProp}: ${override.store.get(item)} }`);
+            }
+        });
+    });
+    if (inlineCSS.length != 0) {
+        const beautifiedCSS = beautify(inlineCSS.join('\n'));
+        css.push('/* Inline CSS */');
+        css.push(beautifiedCSS.join(''));
+        css.push('');
+    }
 
     const modifiedCSS = [];
     styleManagers.forEach((manager) => {

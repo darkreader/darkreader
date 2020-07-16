@@ -8,7 +8,7 @@ function getShift(deep: number) {
         return ' '.repeat(3).repeat(deep);
     }
     if (deep > 1) {
-        return ' '.repeat(4).repeat(deep).substr(1);
+        return ' '.repeat(4).repeat(deep).substr(1); // All property's have by default already 1x ' '
     }
 }
 

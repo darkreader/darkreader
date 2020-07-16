@@ -81,8 +81,9 @@ export default class TabManager {
             }
             if (type === 'export-css-proxy') {
                 const tabs = await queryTabs({});
+                const activeURL = await this.getActiveTabURL();
                 tabs.filter((tab) => this.ports.has(tab.id))
-                    .filter(async (tab) => tab.url === await this.getActiveTabURL())
+                    .filter((tab) => tab.url === activeURL)
                     .forEach((tab) => {
                         const framesPorts = this.ports.get(tab.id);
                         framesPorts.forEach(({port}, frameId) => {

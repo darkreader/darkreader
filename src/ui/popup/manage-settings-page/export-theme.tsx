@@ -9,7 +9,7 @@ export default function ExportTheme(props: ViewProps) {
         if (data == null) {
             return;
         }
-        if (type === 'export-css-response2') {
+        if (type === 'export-css-response') {
             saveFile('Dark-Reader-Settings.css', data);
         }
     });

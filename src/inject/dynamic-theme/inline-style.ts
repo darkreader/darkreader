@@ -10,8 +10,7 @@ interface Overrides {
         customProp: string;
         cssProp: string;
         dataAttr: string;
-        store: WeakMap<Node, string>;
-        fullList: Array<Node>;
+        store: WeakSet<Node>;
     };
 }
 
@@ -20,89 +19,77 @@ const overrides: Overrides = {
         customProp: '--darkreader-inline-bgcolor',
         cssProp: 'background-color',
         dataAttr: 'data-darkreader-inline-bgcolor',
-        store: new WeakMap<Node, string>(),
-        fullList: [],
+        store: new WeakSet(),
     },
     'background-image': {
         customProp: '--darkreader-inline-bgimage',
         cssProp: 'background-image',
         dataAttr: 'data-darkreader-inline-bgimage',
-        store: new WeakMap<Node, string>(),
-        fullList: [],
+        store: new WeakSet(),
     },
     'border-color': {
         customProp: '--darkreader-inline-border',
         cssProp: 'border-color',
         dataAttr: 'data-darkreader-inline-border',
-        store: new WeakMap<Node, string>(),
-        fullList: [],
+        store: new WeakSet(),
     },
     'border-bottom-color': {
         customProp: '--darkreader-inline-border-bottom',
         cssProp: 'border-bottom-color',
         dataAttr: 'data-darkreader-inline-border-bottom',
-        store: new WeakMap<Node, string>(),
-        fullList: [],
+        store: new WeakSet(),
     },
     'border-left-color': {
         customProp: '--darkreader-inline-border-left',
         cssProp: 'border-left-color',
         dataAttr: 'data-darkreader-inline-border-left',
-        store: new WeakMap<Node, string>(),
-        fullList: [],
+        store: new WeakSet(),
     },
     'border-right-color': {
         customProp: '--darkreader-inline-border-right',
         cssProp: 'border-right-color',
         dataAttr: 'data-darkreader-inline-border-right',
-        store: new WeakMap<Node, string>(),
-        fullList: [],
+        store: new WeakSet(),
     },
     'border-top-color': {
         customProp: '--darkreader-inline-border-top',
         cssProp: 'border-top-color',
         dataAttr: 'data-darkreader-inline-border-top',
-        store: new WeakMap<Node, string>(),
-        fullList: [],
+        store: new WeakSet(),
     },
     'box-shadow': {
         customProp: '--darkreader-inline-boxshadow',
         cssProp: 'box-shadow',
         dataAttr: 'data-darkreader-inline-boxshadow',
-        store: new WeakMap<Node, string>(),
-        fullList: [],
+        store: new WeakSet(),
     },
     'color': {
         customProp: '--darkreader-inline-color',
         cssProp: 'color',
         dataAttr: 'data-darkreader-inline-color',
-        store: new WeakMap<Node, string>(),
-        fullList: [],
+        store: new WeakSet(),
     },
     'fill': {
         customProp: '--darkreader-inline-fill',
         cssProp: 'fill',
         dataAttr: 'data-darkreader-inline-fill',
-        store: new WeakMap<Node, string>(),
-        fullList: [],
+        store: new WeakSet(),
     },
     'stroke': {
         customProp: '--darkreader-inline-stroke',
         cssProp: 'stroke',
         dataAttr: 'data-darkreader-inline-stroke',
-        store: new WeakMap<Node, string>(),
-        fullList: [],
+        store: new WeakSet(),
     },
     'outline-color': {
         customProp: '--darkreader-inline-outline',
         cssProp: 'outline-color',
         dataAttr: 'data-darkreader-inline-outline',
-        store: new WeakMap<Node, string>(),
-        fullList: [],
+        store: new WeakSet(),
     },
 };
 
-export const overridesList = Object.values(overrides);
+const overridesList = Object.values(overrides);
 
 const INLINE_STYLE_ATTRS = ['style', 'fill', 'stroke', 'bgcolor', 'color'];
 export const INLINE_STYLE_SELECTOR = INLINE_STYLE_ATTRS.map((attr) => `[${attr}]`).join(', ');
@@ -235,7 +222,7 @@ export function overrideInlineStyle(element: HTMLElement, theme: FilterConfig, i
     const unsetProps = new Set(Object.keys(overrides));
 
     function setCustomProp(targetCSSProp: string, modifierCSSProp: string, cssVal: string) {
-        const {customProp, dataAttr, store, fullList} = overrides[targetCSSProp];
+        const {customProp, dataAttr} = overrides[targetCSSProp];
 
         const mod = getModifiableCSSDeclaration(modifierCSSProp, cssVal, null, null);
         if (!mod) {
@@ -249,20 +236,14 @@ export function overrideInlineStyle(element: HTMLElement, theme: FilterConfig, i
         if (!element.hasAttribute(dataAttr)) {
             element.setAttribute(dataAttr, '');
         }
-        fullList.push(element);
-        store.set(element, value as string);
         unsetProps.delete(targetCSSProp);
     }
 
     if (ignoreSelectors.length > 0) {
         if (shouldIgnoreInlineStyle(element, ignoreSelectors)) {
             unsetProps.forEach((cssProp) => {
-                const {store, dataAttr, fullList} = overrides[cssProp];
+                const {store, dataAttr} = overrides[cssProp];
                 store.delete(element);
-                const index = fullList.indexOf(element);
-                if (index > -1) {
-                    fullList.splice(index, 1);
-                }
                 element.removeAttribute(dataAttr);
             });
             return;
@@ -313,12 +294,8 @@ export function overrideInlineStyle(element: HTMLElement, theme: FilterConfig, i
     }
 
     forEach(unsetProps, (cssProp) => {
-        const {store, dataAttr, fullList} = overrides[cssProp];
+        const {store, dataAttr} = overrides[cssProp];
         store.delete(element);
-        const index = fullList.indexOf(element);
-        if (index > -1) {
-            fullList.splice(index, 1);
-        }
         element.removeAttribute(dataAttr);
     });
     inlineStyleCache.set(element, getInlineStyleCacheKey(element, theme));

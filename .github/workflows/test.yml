@@ -17,3 +17,10 @@ jobs:
         node-version: 12.x
     - run: npm install
     - run: npm test
+
+    - uses: actions/upload-artifact@v2
+      with:
+        name: Build Files
+        path: |
+          build.zip
+          build-firefox.xpi

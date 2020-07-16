@@ -1,25 +1,37 @@
 import {forEach} from '../../utils/array';
 
+function getShift(deep: number) {
+    if (deep === 0) {
+        return '';
+    }
+    if (deep === 1) {
+        return ' '.repeat(3).repeat(deep)
+    }
+    if (deep > 1) {
+        return ' '.repeat(4).repeat(deep).substr(1);
+    }
+}
+
 function beautify(text: string) {
     const CSS = (text
         .replace(/(.*?){ }/g, '') // Removing Empty CSS Rules
+        .replace(/\s\s+/g, ' ') // Replacing multiple spaces to one
         .replace(/\{/g,'{%--%') // {
         .replace(/\}/g,'%--%}%--%') // }
-        .replace(/\;(?![^\(]*\))/g,';%--%') // ; and do not target between ()
-        .replace(/%--%\s{0,}%--%/g,'%--%') // Remove %--% Without any characters between to the next %--%
+        .replace(/\;(?![^\(]*\))/g,';%--%') // ; and do not target between () mostly for url()
+        .replace(/%--%\s{0,}%--%/g,'%--%') // Remove %--% Without any characters between it to the next %--%
         .split('%--%'));
     let deep = 0;
     const formatted = [];
-    const shift = '   ';
 
     for (let x = 0, len = CSS.length; x < len; x++) {
         const line = CSS[x] + '\n';
         if (line.match(/\{/)) { // {
-            formatted.push(shift.repeat(deep++) + line);
+            formatted.push(getShift(deep++) + line);
         } else if (line.match(/\}/)) { // }
-            formatted.push(shift.repeat(--deep) + line);
+            formatted.push(getShift(--deep) + line);
         } else { // CSS line
-            formatted.push(shift.repeat(deep) + line);
+            formatted.push(getShift(deep) + line);
         }
     }
     return formatted.join('');

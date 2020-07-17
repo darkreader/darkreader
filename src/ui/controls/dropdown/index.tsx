@@ -18,6 +18,14 @@ export default function DropDown<T>(props: DropDownProps<T>) {
         selectedNode: HTMLElement;
     };
 
+    if (context.prev) {
+        const currOptions = props.options.map((o) => o.id);
+        const prevOptions = (context.prev.props.options as DropDownOption<T>[]).map((o) => o.id);
+        if (currOptions.length !== prevOptions.length || currOptions.some((o, i) => o !== prevOptions[i])) {
+            store.isOpen = false;
+        }
+    }
+
     function saveListNode(el: HTMLElement) {
         store.listNode = el;
     }

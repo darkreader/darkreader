@@ -77,14 +77,14 @@ export function formatCSS(text: string) {
     }
 
     const groups = [
-        '/\/\*[\s\S]*?\*\//', // Comment
-        '/\[.*\]/', // Braces
-        '/\(.*\)/', // Brackets
-        '/\".*?\"/', // single line
-        '/\s{2,}/', // multiple spaces
-        '/\s*\{\s*/', // Opening bracket
-        '/\s*\}\s*/', // end bracket
-        '/;\s*/' // Normal line
+        '\/\*[\s\S]*?\*\/', // Comment
+        '\[.*\]', // Braces
+        '\(.*\)', // Brackets
+        '".*?"', // single line
+        '\s{2,}', // multiple spaces
+        '\s*\{\s*', // Opening bracket
+        '\s*\}\s*', // end bracket
+        ';\s*' // Normal line
     ];
 
     const depth = 0;

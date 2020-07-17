@@ -1,5 +1,6 @@
 @import "../../../theme";
 
+@theme-preset-height: 1.5rem;
 @theme-preset-picker-button-size: 1.5rem;
 
 .theme-preset-picker {
@@ -7,16 +8,20 @@
         &__selected {
             border-radius: unset;
             height: @size-control-inner;
-            line-height: @size-control-inner;
             margin-top: 0;
         }
+
         &__list {
             border-radius: unset;
+            box-shadow: 0 0 0 @size-border @color-border, 0 0 0.25rem 0.0625rem + @size-border black;
         }
     }
 
     &__preset {
-        display: inline-block;
+        align-items: center;
+        display: inline-flex;
+        justify-content: center;
+        min-height: @theme-preset-height;
         position: relative;
         width: 100%;
 

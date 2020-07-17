@@ -17,10 +17,10 @@ export default function Mode(props: {mode: string; onChange: (mode: string) => v
     }
 
     const modes = [
-        {id: ThemeEngines.dynamicTheme, label: getLocalMessage('engine_dynamic')},
-        {id: ThemeEngines.cssFilter, label: getLocalMessage('engine_filter')},
-        {id: ThemeEngines.svgFilter, label: getLocalMessage('engine_filter_plus')},
-        {id: ThemeEngines.staticTheme, label: getLocalMessage('engine_static')},
+        {id: ThemeEngines.dynamicTheme, content: getLocalMessage('engine_dynamic')},
+        {id: ThemeEngines.cssFilter, content: getLocalMessage('engine_filter')},
+        {id: ThemeEngines.svgFilter, content: getLocalMessage('engine_filter_plus')},
+        {id: ThemeEngines.staticTheme, content: getLocalMessage('engine_static')},
     ];
     return (
         <ThemeControl label="Mode">

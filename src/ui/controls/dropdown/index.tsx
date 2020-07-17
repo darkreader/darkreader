@@ -1,7 +1,7 @@
 import {m} from 'malevic';
 import {getContext} from 'malevic/dom';
 
-type DropDownOption<T> = {id: T; label: string};
+type DropDownOption<T> = {id: T; content: Malevic.Child};
 
 interface DropDownProps<T> {
     class?: string;
@@ -17,6 +17,14 @@ export default function DropDown<T>(props: DropDownProps<T>) {
         listNode: HTMLElement;
         selectedNode: HTMLElement;
     };
+
+    if (context.prev) {
+        const currOptions = props.options.map((o) => o.id);
+        const prevOptions = (context.prev.props.options as DropDownOption<T>[]).map((o) => o.id);
+        if (currOptions.length !== prevOptions.length || currOptions.some((o, i) => o !== prevOptions[i])) {
+            store.isOpen = false;
+        }
+    }
 
     function saveListNode(el: HTMLElement) {
         store.listNode = el;
@@ -65,12 +73,12 @@ export default function DropDown<T>(props: DropDownProps<T>) {
                     props.onChange(value.id);
                 }}
             >
-                {value.label}
+                {value.content}
             </span>
         );
     }
 
-    const selectedLabel = props.options.find((value) => value.id === props.selected).label;
+    const selectedContent = props.options.find((value) => value.id === props.selected).content;
 
     return (
         <span
@@ -95,7 +103,7 @@ export default function DropDown<T>(props: DropDownProps<T>) {
                 onclick={onSelectedClick}
             >
                 <span class="dropdown__selected__text">
-                    {selectedLabel}
+                    {selectedContent}
                 </span>
             </span>
         </span >

@@ -14,11 +14,11 @@ import {getCSSFilterValue} from '../../generators/css-filter';
 import {modifyColor} from '../../generators/modify-colors';
 import {createTextStyle} from '../../generators/text-style';
 import {FilterConfig, DynamicThemeFix} from '../../definitions';
-import {generateInstanceId} from './uuid';
+import {generateUID} from '../../utils/uid';
 import {createAdoptedStyleSheetOverride, AdoptedStyleSheetManager} from './adopted-style-manger';
 
 const variables = new Map<string, string>();
-const INSTANCE_ID = generateInstanceId();
+const INSTANCE_ID = generateUID();
 const styleManagers = new Map<StyleElement, StyleManager>();
 const adoptedStyleManagers = [] as Array<AdoptedStyleSheetManager>;
 let filter: FilterConfig = null;

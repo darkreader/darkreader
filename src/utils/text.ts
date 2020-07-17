@@ -71,58 +71,28 @@ export function formatCSS(text: string) {
         return ' '.repeat(4 * depth);
     }
 
-    const groups = [
-        '\/\*[\s\S]*?\*\/', // Comment
-        '\[.*\]', // Braces
-        '\(.*\)', // Brackets
-        '".*?"', // single line
-        '\s{2,}', // multiple spaces
-        '\s*\{\s*', // Opening bracket
-        '\s*\}\s*', // end bracket
-        ';\s*' // Normal line
-    ];
+    const CSS = (text
+        .replace(/((.*?)\{(\s+)\})|((.*?)\{\})/g, '') // Removing Empty CSS Rules
+        .replace(/\s\s+/g, ' ') // Replacing multiple spaces to one
+        .replace(/\{/g,'{%--%') // {
+        .replace(/\}/g,'%--%}%--%') // }
+        .replace(/\;(?![^\(]*\)|[^\"]*\")/g,';%--%') // ; and do not target between () mostly for url()
+        .replace(/\,(?![^\(]*\)|[^\"]*\")/g,',%--%')
+        .replace(/%--%\s{0,}%--%/g,'%--%') // Remove %--% Without any characters between it to the next %--%
+        .split('%--%'));
+    let deep = 0;
+    const formatted = [];
 
-    let depth = 0;
-    return text.replace(new RegExp(groups.map(group => `(${group})`).join('|'), 'g'), (match, comment, brace, bracket, single, multi, open, close, normal) => {
-        if (multi) {
-            return ' ';
+    for (let x = 0, len = CSS.length; x < len; x++) {
+        const line = CSS[x] + '\n';
+        if (line.match(/\{/)) { // {
+            formatted.push(getShift(deep++) + line.replace(/^\s+/, ''));
+        } else if (line.match(/\}/)) { // }
+            formatted.push(getShift(--deep) + line.replace(/^\s+/, ''));
+        } else { // CSS line
+            formatted.push(getShift(deep) + line.replace(/^\s+/, ''));
         }
-        if (comment || brace || bracket || single) {
-            return match;
-        }
-        if (open) {
-            return getShift(depth++) + open.replace(/^\s+/, '') + '\n';
-        }
-        if (close) {
-            return getShift(--depth) + close.replace(/^\s+/, '') + '\n';
-        }
-        if (normal) {
-            return getShift(depth) + normal.replace(/^\s+/, '') + '\n';
-        }
-    });
+    }
 
-    // const CSS = (text
-    //     .replace(/(.*?){ }/g, '') // Removing Empty CSS Rules
-    //     .replace(/\s\s+/g, ' ') // Replacing multiple spaces to one
-    //     .replace(/\{/g,'{%--%') // {
-    //     .replace(/\}/g,'%--%}%--%') // }
-    //     .replace(/\;(?![^\(]*\)|[^\"]*\")/g,';%--%') // ; and do not target between () mostly for url()
-    //     .replace(/\,(?![^\(]*\)|[^\"]*\")/g,',%--%')
-    //     .replace(/%--%\s{0,}%--%/g,'%--%') // Remove %--% Without any characters between it to the next %--%
-    //     .split('%--%'));
-    // let deep = 0;
-    // const formatted = [];
-
-    // for (let x = 0, len = CSS.length; x < len; x++) {
-    //     const line = CSS[x] + '\n';
-    //     if (line.match(/\{/)) { // {
-    //         formatted.push(getShift(deep++, false) + line.replace(/^\s+/, ''));
-    //     } else if (line.match(/\}/)) { // }
-    //         formatted.push(getShift(--deep, true) + line.replace(/^\s+/, ''));
-    //     } else { // CSS line
-    //         formatted.push(getShift(deep, false) + line.replace(/^\s+/, ''));
-    //     }
-    // }
-
-    // return formatted.join('').trim();
+    return formatted.join('').trim();
 }

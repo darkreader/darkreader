@@ -60,3 +60,43 @@ export function getMatches(regex: RegExp, input: string, group = 0) {
 export function getStringSize(value: string) {
     return value.length * 2;
 }
+
+
+export function formatCSS(text: string) {
+    
+    function getShift(deep: number, isEndBracket: boolean) {
+        if (deep === 0) {
+            return '';
+        }
+        if (deep === 1) {
+            return isEndBracket ? ' '.repeat(4) : ' '.repeat(3);
+        }
+        if (deep > 1) {
+            return isEndBracket ? ' '.repeat(4).repeat(deep) : ' '.repeat(4).repeat(deep).substr(1); // All property's have by default already 1x ' '
+        }
+    }
+
+    const CSS = (text
+        .replace(/(.*?){ }/g, '') // Removing Empty CSS Rules
+        .replace(/\s\s+/g, ' ') // Replacing multiple spaces to one
+        .replace(/\{/g,'{%--%') // {
+        .replace(/\}/g,'%--%}%--%') // }
+        .replace(/\;(?![^\(]*\))/g,';%--%') // ; and do not target between () mostly for url()
+        .replace(/%--%\s{0,}%--%/g,'%--%') // Remove %--% Without any characters between it to the next %--%
+        .split('%--%'));
+    let deep = 0;
+    const formatted = [];
+
+    for (let x = 0, len = CSS.length; x < len; x++) {
+        const line = CSS[x] + '\n';
+        if (line.match(/\{/)) { // {
+            formatted.push(getShift(deep++, false) + line);
+        } else if (line.match(/\}/)) { // }
+            formatted.push(getShift(--deep, true) + line);
+        } else { // CSS line
+            formatted.push(getShift(deep, false) + line);
+        }
+    }
+
+    return formatted.join('');
+}

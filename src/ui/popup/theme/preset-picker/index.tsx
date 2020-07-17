@@ -4,7 +4,7 @@ import {ThemePreset} from '../../../../definitions';
 import {isURLInList, isURLMatched, getURLHost} from '../../../../utils/url';
 import {DropDown, MessageBox} from '../../../controls';
 import {ViewProps} from '../../types';
-import {createUID} from '../../../../utils/uid';
+import {generateUID} from '../../../../utils/uid';
 
 function PresetItem(props: ViewProps & {preset: ThemePreset}) {
     const context = getContext();
@@ -43,6 +43,8 @@ function PresetItem(props: ViewProps & {preset: ThemePreset}) {
     );
 }
 
+const MAX_ALLOWED_PRESETS = 3;
+
 export default function PresetPicker(props: ViewProps) {
     const host = getURLHost(props.tab.url || '');
     const preset = props.data.settings.presets.find(
@@ -55,8 +57,8 @@ export default function PresetPicker(props: ViewProps) {
     const selectedPresetId = custom ? 'custom' : preset ? preset.id : 'default';
 
     const defaultOption = {id: 'default', content: 'Default theme'};
-    const addNewPresetOption = props.data.settings.presets.length === 0 ?
-        {id: 'add-preset', content: '+ Create new theme'} :
+    const addNewPresetOption = props.data.settings.presets.length < MAX_ALLOWED_PRESETS ?
+        {id: 'add-preset', content: '\uff0b Create new theme'} :
         null;
     const userPresetsOptions = props.data.settings.presets.map((preset) => {
         if (preset.id === selectedPresetId) {
@@ -67,12 +69,15 @@ export default function PresetPicker(props: ViewProps) {
             content: <PresetItem {...props} preset={preset} />
         };
     });
-    const customSitePresetOption = {id: 'custom', content: `Custom for ${host}`};
+    const customSitePresetOption = {
+        id: 'custom',
+        content: `${selectedPresetId === 'custom' ? '\u2605' : '\u2606'} Custom for ${host}`,
+    };
 
     const dropdownOptions = [
         defaultOption,
-        addNewPresetOption,
         ...userPresetsOptions,
+        addNewPresetOption,
         customSitePresetOption,
     ].filter(Boolean);
 
@@ -99,9 +104,17 @@ export default function PresetPicker(props: ViewProps) {
                 presets: filteredPresets,
             });
         } else if (id === 'add-preset') {
+            let newPresetName: string;
+            for (let i = 0; i <= props.data.settings.presets.length; i++) {
+                newPresetName = `Theme ${i + 1}`;
+                if (props.data.settings.presets.every((p) => p.name !== newPresetName)) {
+                    break;
+                }
+            }
+
             const extended = filteredPresets.concat({
-                id: `preset-${createUID()}`,
-                name: `Theme ${props.data.settings.presets.length + 1}`,
+                id: `preset-${generateUID()}`,
+                name: newPresetName,
                 urls: [host],
                 theme: {...props.data.settings.theme},
             });
@@ -126,6 +139,7 @@ export default function PresetPicker(props: ViewProps) {
             });
         }
     }
+
     return (
         <DropDown
             class="theme-preset-picker"

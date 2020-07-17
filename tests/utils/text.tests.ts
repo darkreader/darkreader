@@ -70,4 +70,11 @@ test('CSS formatting', () => {
             '    filter: invert(1);',
             '}',
         ].join('\n'));
+
+    expect(formatCSS('img[src*="a,b;c"] {\n    filter: invert(1); \n}'))
+        .toEqual([
+            'img[src*="a,b;c"] {',
+            '    filter: invert(1);',
+            '}',
+        ].join('\n'));
 });

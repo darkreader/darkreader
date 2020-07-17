@@ -63,40 +63,71 @@ export function getStringSize(value: string) {
 
 
 export function formatCSS(text: string) {
-    
-    function getShift(deep: number, isEndBracket: boolean) {
+
+    function getShift(deep: number) {
         if (deep === 0) {
             return '';
         }
         if (deep === 1) {
-            return isEndBracket ? ' '.repeat(4) : ' '.repeat(3);
+            return ' '.repeat(4);
         }
         if (deep > 1) {
-            return isEndBracket ? ' '.repeat(4).repeat(deep) : ' '.repeat(4).repeat(deep).substr(1); // All property's have by default already 1x ' '
+            return ' '.repeat(4).repeat(deep);
         }
     }
 
-    const CSS = (text
-        .replace(/(.*?){ }/g, '') // Removing Empty CSS Rules
-        .replace(/\s\s+/g, ' ') // Replacing multiple spaces to one
-        .replace(/\{/g,'{%--%') // {
-        .replace(/\}/g,'%--%}%--%') // }
-        .replace(/\;(?![^\(]*\))/g,';%--%') // ; and do not target between () mostly for url()
-        .replace(/%--%\s{0,}%--%/g,'%--%') // Remove %--% Without any characters between it to the next %--%
-        .split('%--%'));
-    let deep = 0;
-    const formatted = [];
+    const groups = [
+        '/\/\*[\s\S]*?\*\//', // Comment
+        '/\[.*\]/', // Braces
+        '/\(.*\)/', // Brackets
+        '/\".*?\"/', // single line
+        '/\s{2,}/', // multiple spaces
+        '/\s*\{\s*/', // Opening bracket
+        '/\s*\}\s*/', // end bracket
+        '/;\s*/' // Normal line
+    ];
 
-    for (let x = 0, len = CSS.length; x < len; x++) {
-        const line = CSS[x] + '\n';
-        if (line.match(/\{/)) { // {
-            formatted.push(getShift(deep++, false) + line);
-        } else if (line.match(/\}/)) { // }
-            formatted.push(getShift(--deep, true) + line);
-        } else { // CSS line
-            formatted.push(getShift(deep, false) + line);
+    const depth = 0;
+    return text.replace(new RegExp(groups.map(group => `(${group})`).join('|'), 'g'), (match, comment, brace, bracket, single, multi, open, end, normal) => {
+        if (multi) {
+            return ' ';
         }
-    }
+        if (comment || brace || bracket || single) {
+            return match;
+        }
+        if (open) {
+            return getShift(depth) + open.replace(/^\s+/, '') + '\n';
+        }
+        if (end) {
+            return getShift(depth) + end.replace(/^\s+/, '') + '\n';
+        }
+        if (normal) {
+            return getShift(depth) + normal.replace(/^\s+/, '') + '\n';
+        }
+    });
 
-    return formatted.join('');
+    // const CSS = (text
+    //     .replace(/(.*?){ }/g, '') // Removing Empty CSS Rules
+    //     .replace(/\s\s+/g, ' ') // Replacing multiple spaces to one
+    //     .replace(/\{/g,'{%--%') // {
+    //     .replace(/\}/g,'%--%}%--%') // }
+    //     .replace(/\;(?![^\(]*\)|[^\"]*\")/g,';%--%') // ; and do not target between () mostly for url()
+    //     .replace(/\,(?![^\(]*\)|[^\"]*\")/g,',%--%')
+    //     .replace(/%--%\s{0,}%--%/g,'%--%') // Remove %--% Without any characters between it to the next %--%
+    //     .split('%--%'));
+    // let deep = 0;
+    // const formatted = [];
+
+    // for (let x = 0, len = CSS.length; x < len; x++) {
+    //     const line = CSS[x] + '\n';
+    //     if (line.match(/\{/)) { // {
+    //         formatted.push(getShift(deep++, false) + line.replace(/^\s+/, ''));
+    //     } else if (line.match(/\}/)) { // }
+    //         formatted.push(getShift(--deep, true) + line.replace(/^\s+/, ''));
+    //     } else { // CSS line
+    //         formatted.push(getShift(deep, false) + line.replace(/^\s+/, ''));
+    //     }
+    // }
+
+    // return formatted.join('').trim();
 }

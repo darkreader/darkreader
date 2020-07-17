@@ -77,4 +77,25 @@ test('CSS formatting', () => {
             '    filter: invert(1);',
             '}',
         ].join('\n'));
+
+    expect(formatCSS('div { } span { color: red; } button { }'))
+        .toEqual([
+            'span {',
+            '    color: red;',
+            '}',
+        ].join('\n'));
+
+    expect(formatCSS('@media all { div { } span { color: red; } } @media all { div { } } @media all { button { color: green; } }'))
+        .toEqual([
+            '@media all {',
+            '    span {',
+            '        color: red;',
+            '    }',
+            '}',
+            '@media all {',
+            '    button {',
+            '        color: green;',
+            '    }',
+            '}',
+        ].join('\n'));
 });

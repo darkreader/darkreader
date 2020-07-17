@@ -64,16 +64,11 @@ export function getStringSize(value: string) {
 
 export function formatCSS(text: string) {
 
-    function getShift(deep: number) {
-        if (deep === 0) {
+    function getShift(depth: number) {
+        if (depth === 0) {
             return '';
         }
-        if (deep === 1) {
-            return ' '.repeat(4);
-        }
-        if (deep > 1) {
-            return ' '.repeat(4).repeat(deep);
-        }
+        return ' '.repeat(4 * depth); 
     }
 
     const groups = [
@@ -87,8 +82,8 @@ export function formatCSS(text: string) {
         ';\s*' // Normal line
     ];
 
-    const depth = 0;
-    return text.replace(new RegExp(groups.map(group => `(${group})`).join('|'), 'g'), (match, comment, brace, bracket, single, multi, open, end, normal) => {
+    let depth = 0;
+    return text.replace(new RegExp(groups.map(group => `(${group})`).join('|'), 'g'), (match, comment, brace, bracket, single, multi, open, close, normal) => {
         if (multi) {
             return ' ';
         }
@@ -96,10 +91,10 @@ export function formatCSS(text: string) {
             return match;
         }
         if (open) {
-            return getShift(depth) + open.replace(/^\s+/, '') + '\n';
+            return getShift(depth++) + open.replace(/^\s+/, '') + '\n';
         }
-        if (end) {
-            return getShift(depth) + end.replace(/^\s+/, '') + '\n';
+        if (close) {
+            return getShift(--depth) + close.replace(/^\s+/, '') + '\n';
         }
         if (normal) {
             return getShift(depth) + normal.replace(/^\s+/, '') + '\n';

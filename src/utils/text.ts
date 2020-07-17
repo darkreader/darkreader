@@ -68,7 +68,7 @@ export function formatCSS(text: string) {
         if (depth === 0) {
             return '';
         }
-        return ' '.repeat(4 * depth); 
+        return ' '.repeat(4 * depth);
     }
 
     const groups = [

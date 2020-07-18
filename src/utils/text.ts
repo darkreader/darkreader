@@ -64,36 +64,42 @@ export function getStringSize(value: string) {
 
 export function formatCSS(text: string) {
 
-    function getShift(depth: number) {
+    function trimLeft(text: string) {
+        return text.replace(/^\s+/, '');
+    }
+
+    function getIndent(depth: number) {
         if (depth === 0) {
             return '';
         }
         return ' '.repeat(4 * depth);
     }
+
     const emptyRuleRegexp = /[^{}]+{\s*}/g;
     while (emptyRuleRegexp.test(text)) {
         text = text.replace(emptyRuleRegexp, '');
     }
-    const CSS = (text
+
+    const css = (text
         .replace(/\s{2,}/g, ' ') // Replacing multiple spaces to one
         .replace(/\{/g,'{%--%') // {
         .replace(/\}/g,'%--%}%--%') // }
-        .replace(/\;(?![^\(]*\)|[^\"]*\")/g,';%--%') // ; and do not target between () mostly for url()
-        .replace(/\,(?![^\(]*\)|[^\"]*\")/g,',%--%')
+        .replace(/\;(?![^(\(|\")]*(\)|\"))/g,';%--%') // ; and do not target between () and ""
+        .replace(/\,(?![^(\(|\")]*(\)|\"))/g,',%--%') // , and do not target between () and ""
         .replace(/%--%\s*%--%/g,'%--%') // Remove %--% Without any characters between it to the next %--%
         .split('%--%'));
 
     let depth = 0;
     const formatted = [];
 
-    for (let x = 0, len = CSS.length; x < len; x++) {
-        const line = CSS[x] + '\n';
+    for (let x = 0, len = css.length; x < len; x++) {
+        const line = css[x] + '\n';
         if (line.match(/\{/)) { // {
-            formatted.push(getShift(depth++) + line.replace(/^\s+/, ''));
+            formatted.push(getIndent(depth++) + trimLeft(line));
         } else if (line.match(/\}/)) { // }
-            formatted.push(getShift(--depth) + line.replace(/^\s+/, ''));
+            formatted.push(getIndent(--depth) + trimLeft(line));
         } else { // CSS line
-            formatted.push(getShift(depth) + line.replace(/^\s+/, ''));
+            formatted.push(getIndent(depth) + trimLeft(line));
         }
     }
 

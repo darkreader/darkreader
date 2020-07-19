@@ -61,7 +61,6 @@ export function getStringSize(value: string) {
     return value.length * 2;
 }
 
-
 export function formatCSS(text: string) {
 
     function trimLeft(text: string) {
@@ -82,12 +81,12 @@ export function formatCSS(text: string) {
 
     const css = (text
         .replace(/\s{2,}/g, ' ') // Replacing multiple spaces to one
-        .replace(/\{/g,'{%--%') // {
-        .replace(/\}/g,'%--%}%--%') // }
-        .replace(/\;(?![^(\(|\")]*(\)|\"))/g,';%--%') // ; and do not target between () and ""
-        .replace(/\,(?![^(\(|\")]*(\)|\"))/g,',%--%') // , and do not target between () and ""
-        .replace(/%--%\s*%--%/g,'%--%') // Remove %--% Without any characters between it to the next %--%
-        .split('%--%'));
+        .replace(/\{/g,'{\n') // {
+        .replace(/\}/g,'\n}\n') // }
+        .replace(/\;(?![^(\(|\")]*(\)|\"))/g,';\n') // ; and do not target between () and ""
+        .replace(/\,(?![^(\(|\")]*(\)|\"))/g,',\n') // , and do not target between () and ""
+        .replace(/\n\s*\n/g,'\n') // Remove \n Without any characters between it to the next \n
+        .split('\n'));
 
     let depth = 0;
     const formatted = [];

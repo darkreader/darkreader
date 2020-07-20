@@ -31,7 +31,7 @@ export type StyleElement = HTMLLinkElement | HTMLStyleElement;
 
 export interface StyleManager {
     details(): {variables: Map<string, string>};
-    render(theme: Theme, variables: Map<string, string>): void;
+    render(theme: Theme, variables: Map<string, string>, ignoreImageAnalysis: string[]): void;
     pause(): void;
     destroy(): void;
     watch(): void;
@@ -226,7 +226,7 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
 
     let forceRenderStyle = false;
 
-    function render(theme: Theme, variables: Map<string, string>) {
+    function render(theme: Theme, variables: Map<string, string>, ignoreImageAnalysis: string[]) {
         const rules = getRulesSync();
         if (!rules) {
             return;
@@ -276,6 +276,7 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
                 sourceCSSRules: rules,
                 theme,
                 variables,
+                ignoreImageAnalysis,
                 force,
                 isAsyncCancelled: () => cancelAsyncOperations,
             });

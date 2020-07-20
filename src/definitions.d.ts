@@ -116,9 +116,10 @@ export interface Shortcuts {
 
 export interface DynamicThemeFix {
     url: string[];
-    ignoreInlineStyle: string[];
     invert: string[];
     css: string;
+    ignoreInlineStyle: string[];
+    ignoreImageAnalysis: string[];
 }
 
 export interface InversionFix {

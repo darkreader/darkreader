@@ -121,6 +121,7 @@ export class Extension {
             toggleURL: (url) => this.toggleURL(url),
             markNewsAsRead: (ids) => this.news.markAsRead(...ids),
             onPopupOpen: () => this.popupOpeningListener && this.popupOpeningListener(),
+            loadConfig: async (local) => await this.loadConfig(local),
             applyDevDynamicThemeFixes: (text) => this.devtools.applyDynamicThemeFixes(text),
             resetDevDynamicThemeFixes: () => this.devtools.resetDynamicThemeFixes(),
             applyDevInversionFixes: (text) => this.devtools.applyInversionFixes(text),
@@ -183,6 +184,10 @@ export class Extension {
                 hasCustomStaticFixes: this.devtools.hasCustomStaticFixes(),
             },
         };
+    }
+
+    async loadConfig(loadLocal: boolean) {
+        await this.config.load({local: loadLocal});
     }
 
     private onNewsUpdate(news: News[]) {

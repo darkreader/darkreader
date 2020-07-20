@@ -7,6 +7,7 @@ import SyncSettings from './sync-settings';
 import ExportTheme from './export-theme';
 import {isURLInList} from '../../../utils/url';
 import themeEngines from '../../../generators/theme-engines';
+import SyncConfigButton from './sync-config';
 
 export default function ManageSettingsPage(props: ViewProps) {
     const custom = props.data.settings.customThemes.find(
@@ -19,6 +20,7 @@ export default function ManageSettingsPage(props: ViewProps) {
     return (
         <section class="m-section">
             <SyncSettings {...props} />
+            <SyncConfigButton {...props} />
             <ImportButton {...props} />
             <ExportButton {...props} />
             {engine === themeEngines.dynamicTheme ? <ExportTheme /> : null}

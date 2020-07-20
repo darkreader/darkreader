@@ -1,11 +1,10 @@
-import {StaticTheme} from './../definitions.d';
 import {readText} from './utils/network';
 import {parseArray} from '../utils/text';
 import {getDuration} from '../utils/time';
 import {parseInversionFixes} from '../generators/css-filter';
 import {parseDynamicThemeFixes} from '../generators/dynamic-theme';
 import {parseStaticThemes} from '../generators/static-theme';
-import {InversionFix, StaticTheme, DynamicThemeFix} from '../definitions';
+import {InversionFix, DynamicThemeFix, StaticTheme} from '../definitions';
 
 const CONFIG_URLs = {
     darkSites: {

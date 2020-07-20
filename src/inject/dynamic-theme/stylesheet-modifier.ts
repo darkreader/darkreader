@@ -44,7 +44,7 @@ export function createStyleSheetModifier() {
         sourceCSSRules: CSSRuleList;
         theme: Theme;
         variables: Map<string, string>;
-        ignoreImageAnalyze: string[]
+        ignoreImageAnalysis: string[]
         force: boolean;
         prepareSheet: () => CSSStyleSheet;
         isAsyncCancelled: () => boolean;
@@ -52,7 +52,7 @@ export function createStyleSheetModifier() {
 
     function modifySheet(options: ModifySheetOptions): void {
         const rules = options.sourceCSSRules;
-        const {theme, variables, ignoreImageAnalyze, force, prepareSheet, isAsyncCancelled} = options;
+        const {theme, variables, ignoreImageAnalysis, force, prepareSheet, isAsyncCancelled} = options;
 
         let rulesChanged = (rulesModCache.size === 0);
         const notFoundCacheKeys = new Set(rulesModCache.keys());
@@ -95,7 +95,7 @@ export function createStyleSheetModifier() {
             const modDecs: ModifiableCSSDeclaration[] = [];
             const targetRule = varsRule || rule;
             targetRule && targetRule.style && iterateCSSDeclarations(targetRule.style, (property, value) => {
-                const mod = getModifiableCSSDeclaration(property, value, rule, ignoreImageAnalyze, isAsyncCancelled);
+                const mod = getModifiableCSSDeclaration(property, value, rule, ignoreImageAnalysis, isAsyncCancelled);
                 if (mod) {
                     modDecs.push(mod);
                 }

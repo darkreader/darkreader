@@ -86,7 +86,7 @@ test('Dynamic Theme Fixes config', async () => {
         'IGNORE INLINE STYLE', 'a', 'b',
         '========',
         'duckduckgo.com',
-        'IGNORE IMAGE ANALYZE', 'img[alt="Logo"]', 'canvas',
+        'IGNORE IMAGE ANALYSIS', 'img[alt="Logo"]', 'canvas',
     ].join('\r\n'))).toEqual([
         {url: ['inbox.google.com', 'mail.google.com'], invert: ['a', 'b'], css: '.x { color: white !important; }'},
         {url: ['twitter.com'], invert: ['c', 'd']},

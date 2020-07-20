@@ -79,6 +79,13 @@ export default class TabManager {
                 a.download = name;
                 a.click();
             }
+            if (type === 'request-export-css') {
+                const activeTab = await this.getActiveTab();
+                this.ports
+                    .get(activeTab.id)
+                    .get(0).port
+                    .postMessage({type: 'export-css'});
+            }
         });
     }
 
@@ -111,6 +118,9 @@ export default class TabManager {
     }
 
     async getActiveTabURL() {
+        return (await this.getActiveTab()).url;
+    }
+    async getActiveTab() {
         let tab = (await queryTabs({
             active: true,
             lastFocusedWindow: true
@@ -121,6 +131,6 @@ export default class TabManager {
             const tabs = (await queryTabs({active: true}));
             tab = tabs.find((t) => !isExtensionPage(t.url)) || tab;
         }
-        return tab.url;
+        return tab;
     }
 }

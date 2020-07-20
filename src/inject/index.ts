@@ -3,6 +3,7 @@ import {createOrUpdateSVGFilter, removeSVGFilter} from './svg-filter';
 import {createOrUpdateDynamicTheme, removeDynamicTheme, cleanDynamicThemeCache} from './dynamic-theme';
 import {logInfo, logWarn} from './utils/log';
 import {watchForColorSchemeChange} from './utils/watch-color-scheme';
+import {collectCSS} from './dynamic-theme/css-collection';
 
 function onMessage({type, data}) {
     switch (type) {
@@ -24,6 +25,10 @@ function onMessage({type, data}) {
             const {filter, fixes, isIFrame} = data;
             removeStyle();
             createOrUpdateDynamicTheme(filter, fixes, isIFrame);
+            break;
+        }
+        case 'export-css': {
+            collectCSS().then((collectedCSS) => chrome.runtime.sendMessage({type: 'export-css-response', data: collectedCSS}));
             break;
         }
         case 'clean-up': {

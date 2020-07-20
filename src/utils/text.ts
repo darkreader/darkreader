@@ -81,11 +81,11 @@ export function formatCSS(text: string) {
 
     const css = (text
         .replace(/\s{2,}/g, ' ') // Replacing multiple spaces to one
-        .replace(/\{/g,'{\n') // {
-        .replace(/\}/g,'\n}\n') // }
-        .replace(/\;(?![^(\(|\")]*(\)|\"))/g,';\n') // ; and do not target between () and ""
-        .replace(/\,(?![^(\(|\")]*(\)|\"))/g,',\n') // , and do not target between () and ""
-        .replace(/\n\s*\n/g,'\n') // Remove \n Without any characters between it to the next \n
+        .replace(/\{/g, '{\n') // {
+        .replace(/\}/g, '\n}\n') // }
+        .replace(/\;(?![^(\(|\")]*(\)|\"))/g, ';\n') // ; and do not target between () and ""
+        .replace(/\,(?![^(\(|\")]*(\)|\"))/g, ',\n') // , and do not target between () and ""
+        .replace(/\n\s*\n/g, '\n') // Remove \n Without any characters between it to the next \n
         .split('\n'));
 
     let depth = 0;

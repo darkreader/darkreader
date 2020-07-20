@@ -5,6 +5,10 @@ module.exports = {
     rules: {
         'array-bracket-spacing': ['error', 'never'],
         'block-spacing': ['error', 'always'],
+        'comma-spacing': ['error', {
+            before: false,
+            after: true,
+        }],
         'indent': ['error', 4, {
             'SwitchCase': 1,
         }],

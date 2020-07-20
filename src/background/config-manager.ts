@@ -1,3 +1,4 @@
+import {StaticTheme} from './../definitions.d';
 import {readText} from './utils/network';
 import {parseArray} from '../utils/text';
 import {getDuration} from '../utils/time';
@@ -77,9 +78,13 @@ export default class ConfigManager {
             local,
             localURL: CONFIG_URLs.darkSites.local,
             remoteURL: CONFIG_URLs.darkSites.remote,
-            success: ($sites) => {
+            success: ($sites: string) => {
                 this.raw.darkSites = $sites;
-                this.handleDarkSites();
+                if (local) {
+                    this.handleDarkSites();
+                } else {
+                    this.DARK_SITES = parseArray($sites);
+                }
             },
         });
     }
@@ -90,9 +95,13 @@ export default class ConfigManager {
             local,
             localURL: CONFIG_URLs.dynamicThemeFixes.local,
             remoteURL: CONFIG_URLs.dynamicThemeFixes.remote,
-            success: ($fixes) => {
+            success: ($fixes: string) => {
                 this.raw.dynamicThemeFixes = $fixes;
-                this.handleDynamicThemeFixes();
+                if (local) {
+                    this.handleDynamicThemeFixes();
+                } else {
+                    this.DYNAMIC_THEME_FIXES = parseDynamicThemeFixes($fixes);
+                }
             },
         });
     }
@@ -103,9 +112,13 @@ export default class ConfigManager {
             local,
             localURL: CONFIG_URLs.inversionFixes.local,
             remoteURL: CONFIG_URLs.inversionFixes.remote,
-            success: ($fixes) => {
+            success: ($fixes: string) => {
                 this.raw.inversionFixes = $fixes;
-                this.handleInversionFixes();
+                if (local) {
+                    this.handleInversionFixes();
+                } else {
+                    this.INVERSION_FIXES = parseInversionFixes($fixes);
+                }
             },
         });
     }
@@ -116,9 +129,13 @@ export default class ConfigManager {
             local,
             localURL: CONFIG_URLs.staticThemes.local,
             remoteURL: CONFIG_URLs.staticThemes.remote,
-            success: ($themes) => {
+            success: ($themes: string) => {
                 this.raw.staticThemes = $themes;
-                this.handleStaticThemes();
+                if (local) {
+                    this.handleStaticThemes();
+                } else {
+                    this.STATIC_THEMES = parseStaticThemes($themes);
+                }
             },
         });
     }

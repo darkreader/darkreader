@@ -87,7 +87,7 @@ For **Dynamic mode** use `INVERT` only for dark images that are invisible on dar
 `!important` keyword should be specified for each CSS property to prevent overrides by other stylesheets.
 **Dynamic mode** supports `${COLOR}` template, where `COLOR` is a color value before the inversion (`white` will become `black` in dark mode).
 - `IGNORE INLINE STYLE` rule will not analyze the inline style of matched selectors. (e.g. `--darkreader-inline-bgcolor` or `<p style='color: red'>This will not be analyzed by Dark Reader if it has a matched selector</p>`)
-- `IGNORE IMAGE ANALYSIS` rule will not analyze background-image's of matched selectors.
+- `IGNORE IMAGE ANALYSIS` rule will not any images of matched selectors.
 
 **Dynamic variables**
 

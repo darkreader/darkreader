@@ -8,6 +8,11 @@
         &__checkmark {
             background-color: @color-control-active;
             border-radius: @size-control-inner / 2;
+
+            &::before,
+            &::after {
+                display: none;
+            }
         }
 
         &__content {
@@ -22,6 +27,13 @@
 
         &__input:checked ~ * {
             color: @color-control-fore;
+        }
+
+        &__input:checked ~ .checkbox__checkmark {
+            background-image: @icon-check;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-size: 1rem;
         }
     }
 

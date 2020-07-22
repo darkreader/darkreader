@@ -186,8 +186,8 @@ export class Extension {
         };
     }
 
-    async loadConfig(loadLocal: boolean) {
-        await this.config.load({local: loadLocal});
+    async loadConfig(options: {local: boolean}) {
+        await this.config.load({local: options.local});
     }
 
     private onNewsUpdate(news: News[]) {

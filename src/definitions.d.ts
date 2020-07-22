@@ -23,7 +23,7 @@ export interface ExtensionActions {
     setShortcut(command: string, shortcut: string);
     toggleURL(url: string);
     markNewsAsRead(ids: string[]);
-    loadConfig(local: boolean);
+    loadConfig(options: {local: boolean});
     applyDevDynamicThemeFixes(text: string): Promise<void>;
     resetDevDynamicThemeFixes();
     applyDevInversionFixes(text: string): Promise<void>;

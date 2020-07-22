@@ -4,7 +4,7 @@ import {getDuration} from '../utils/time';
 import {parseInversionFixes} from '../generators/css-filter';
 import {parseDynamicThemeFixes} from '../generators/dynamic-theme';
 import {parseStaticThemes} from '../generators/static-theme';
-import {InversionFix, DynamicThemeFix, StaticTheme} from '../definitions';
+import {InversionFix, StaticTheme, DynamicThemeFix} from '../definitions';
 
 const CONFIG_URLs = {
     darkSites: {
@@ -79,11 +79,7 @@ export default class ConfigManager {
             remoteURL: CONFIG_URLs.darkSites.remote,
             success: ($sites: string) => {
                 this.raw.darkSites = $sites;
-                if (local) {
-                    this.handleDarkSites();
-                } else {
-                    this.DARK_SITES = parseArray($sites);
-                }
+                this.handleDarkSites();
             },
         });
     }
@@ -96,11 +92,7 @@ export default class ConfigManager {
             remoteURL: CONFIG_URLs.dynamicThemeFixes.remote,
             success: ($fixes: string) => {
                 this.raw.dynamicThemeFixes = $fixes;
-                if (local) {
-                    this.handleDynamicThemeFixes();
-                } else {
-                    this.DYNAMIC_THEME_FIXES = parseDynamicThemeFixes($fixes);
-                }
+                this.handleDynamicThemeFixes();
             },
         });
     }
@@ -113,11 +105,7 @@ export default class ConfigManager {
             remoteURL: CONFIG_URLs.inversionFixes.remote,
             success: ($fixes: string) => {
                 this.raw.inversionFixes = $fixes;
-                if (local) {
-                    this.handleInversionFixes();
-                } else {
-                    this.INVERSION_FIXES = parseInversionFixes($fixes);
-                }
+                this.handleInversionFixes();
             },
         });
     }
@@ -130,11 +118,7 @@ export default class ConfigManager {
             remoteURL: CONFIG_URLs.staticThemes.remote,
             success: ($themes: string) => {
                 this.raw.staticThemes = $themes;
-                if (local) {
-                    this.handleStaticThemes();
-                } else {
-                    this.STATIC_THEMES = parseStaticThemes($themes);
-                }
+                this.handleStaticThemes();
             },
         });
     }

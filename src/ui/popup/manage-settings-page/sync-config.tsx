@@ -1,25 +1,20 @@
 import {m} from 'malevic';
 import {ViewProps} from '../types';
-import {Button} from '../../controls';
-import ControlGroup from '../control-group';
+import CheckButton from '../check-button';
 
+let synced = false;
 export default function SyncConfigButton(props: ViewProps) {
     function syncConfig() {
-        props.actions.loadConfig(false);
+        if (!synced) {
+            synced = true;
+            props.actions.loadConfig({local: false});
+        }
     }
     return (
-        <ControlGroup>
-            <ControlGroup.Control>
-                <Button
-                    onclick={syncConfig}
-                    class="settings-button"
-                >
-                    Sync config
-                </Button>
-            </ControlGroup.Control>
-            <ControlGroup.Description>
-                Sync to the latest config
-            </ControlGroup.Description>
-        </ControlGroup>
+        <CheckButton
+            checked={synced}
+            label='Sync config'
+            description='Sync to the latest config'
+            onChange={syncConfig} />
     );
 }

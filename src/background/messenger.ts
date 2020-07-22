@@ -9,7 +9,7 @@ export interface ExtensionAdapter {
     markNewsAsRead: (ids: string[]) => void;
     toggleURL: (pattern: string) => void;
     onPopupOpen: () => void;
-    loadConfig: (local: boolean) => Promise<void>;
+    loadConfig: (options: {local: boolean}) => Promise<void>;
     applyDevDynamicThemeFixes: (json: string) => Error;
     resetDevDynamicThemeFixes: () => void;
     applyDevInversionFixes: (json: string) => Error;

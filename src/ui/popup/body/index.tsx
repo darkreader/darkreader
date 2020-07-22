@@ -8,6 +8,7 @@ import AutomationPage from '../automation-page';
 import MainPage from '../main-page';
 import {Page, PageViewer} from '../page-viewer';
 import SettingsPage from '../settings-page';
+import SiteListPage from '../site-list-page';
 import ThemePage from '../theme/page';
 import {ViewProps} from '../types';
 import ManageSettingsPage from '../manage-settings-page';

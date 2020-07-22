@@ -8,6 +8,7 @@ import AutomationPage from '../automation-page';
 import MainPage from '../main-page';
 import {Page, PageViewer} from '../page-viewer';
 import SettingsPage from '../settings-page';
+import SiteListPage from '../site-list-page';
 import ThemePage from '../theme/page';
 import {ViewProps} from '../types';
 import ManageSettingsPage from '../manage-settings-page';
@@ -25,10 +26,19 @@ function Logo() {
     );
 }
 
+type PageId = (
+    'main'
+    | 'theme'
+    | 'settings'
+    | 'site-list'
+    | 'automation'
+    | 'manage-settings'
+);
+
 function Pages(props: ViewProps) {
     const context = getContext();
     const store = context.store as {
-        activePage: 'main' | 'theme' | 'settings' | 'automation' | 'manage-settings';
+        activePage: PageId;
     };
     if (store.activePage == null) {
         store.activePage = 'main';
@@ -54,9 +64,15 @@ function Pages(props: ViewProps) {
         context.refresh();
     }
 
+    function onSiteListNavClick() {
+        store.activePage = 'site-list';
+        context.refresh();
+    }
+
     function onBackClick() {
         const activePage = store.activePage;
-        if (activePage === 'automation' || activePage === 'manage-settings') {
+        const settingsPageSubpages = ['automation', 'manage-settings', 'site-list'] as PageId[];
+        if (settingsPageSubpages.includes(activePage)) {
             store.activePage = 'settings';
         } else {
             store.activePage = 'main';
@@ -84,6 +100,12 @@ function Pages(props: ViewProps) {
                     {...props}
                     onAutomationNavClick={onAutomationNavClick}
                     onManageSettingsClick={onManageSettingsClick}
+                    onSiteListNavClick={onSiteListNavClick}
+                />
+            </Page>
+            <Page id="site-list">
+                <SiteListPage
+                    {...props}
                 />
             </Page>
             <Page id="automation">

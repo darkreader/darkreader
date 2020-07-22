@@ -77,13 +77,18 @@ CSS
 
 IGNORE INLINE STYLE
 .color-picker
+
+IGNORE IMAGE ANALYSIS
+.logo
 ```
 - `INVERT` rule inverts specified elements.
 For **Dynamic mode** use `INVERT` only for dark images that are invisible on dark backgrounds (icons, diagrams, charts, `<img>` and `<svg>` elements).
 - `CSS` rule adds custom CSS to a web page.
 `!important` keyword should be specified for each CSS property to prevent overrides by other stylesheets.
 **Dynamic mode** supports `${COLOR}` template, where `COLOR` is a color value before the inversion (`white` will become `black` in dark mode).
-- `IGNORE INLINE STYLE` rule will not analyze the inline style of matched selectors. (e.g. `--darkreader-inline-bgcolor` or `<p style='color: red'>This will not be analyzed by Dark Reader if it has a matched selector</p>`)
+- `IGNORE INLINE STYLE` rule will prevent inline style analysis of matched elements
+(e.g. for `<p style="color: red">` element's `style` attribute will not be changed).
+- `IGNORE IMAGE ANALYSIS` rule will prevent background images from being analyzed for matched selectors.
 
 **Dynamic variables**
 

@@ -13,8 +13,8 @@ export default function SyncConfigButton(props: ViewProps) {
     return (
         <CheckButton
             checked={synced}
-            label='Sync config'
-            description='Sync to the latest config'
+            label='Synchronize sites fixes'
+            description='Load the latest sites fixes from a remote server'
             onChange={syncConfig} />
     );
 }

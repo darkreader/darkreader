@@ -78,7 +78,7 @@ function Pages(props: ViewProps) {
 
     function onBackClick() {
         const activePage = store.activePage;
-        const settingsPageSubpages = ['automation', 'manage-settings', 'site-list'] as PageId[];
+        const settingsPageSubpages = ['automation', 'manage-settings', 'site-list', 'font-settings'] as PageId[];
         if (settingsPageSubpages.includes(activePage)) {
             store.activePage = 'settings';
         } else {

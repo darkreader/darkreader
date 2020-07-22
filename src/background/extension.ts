@@ -77,7 +77,9 @@ export class Extension {
     private awaiting: (() => void)[];
 
     async start() {
-        await this.config.load({local: true});
+        if (this.user.settings.syncSitesFixes) { 
+            await this.config.load({local: false});
+        }
         this.fonts = await getFontList();
 
         await this.user.loadSettings();

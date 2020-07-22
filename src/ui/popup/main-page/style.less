@@ -11,6 +11,16 @@
         }
     }
 
+    &__description {
+        &--on {
+            color: @color-ok-fore;
+        }
+
+        &--off {
+            color: @color-heading;
+        }
+    }
+
     &__time {
         background-color: @color-heading;
         border-radius: 50%;
@@ -44,6 +54,16 @@
     .site-toggle {
         border-radius: @size-control-inner / 2 + @size-border;
         width: calc(100% - @size-border * 2);
+    }
+
+    &__description {
+        &--on {
+            color: @color-ok-fore;
+        }
+
+        &--off {
+            color: @color-heading;
+        }
     }
 }
 

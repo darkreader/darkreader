@@ -3,18 +3,23 @@
 
 .theme-page {
     .theme-preset-picker.dropdown {
-        border-radius: unset;
+        border-radius: @size-control-inner / 2 + @size-border;
         height: @size-control-inner + 2 * @size-border;
     }
 
     .theme-preset-picker {
         .dropdown {
             &__selected {
-                border-radius: unset;
+                border-radius: @size-control-inner / 2 + @size-border;
                 height: @size-control-inner + 2 * @size-border;
             }
         
             &__list {
+                border: @size-border solid @color-border;
+                border-radius: @size-control-inner / 2 + @size-border;
+                box-shadow: 0 0 0.25rem 0.0625rem black;
+                box-sizing: border-box;
+
                 &__item {
                     min-height: @size-control-inner + 2 * @size-border;
                 }

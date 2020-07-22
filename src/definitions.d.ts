@@ -44,8 +44,6 @@ export interface FilterConfig {
     sepia: number;
     useFont: boolean;
     fontFamily: string;
-    useFontSize: boolean;
-    fontSize: number;
     textStroke: number;
     engine: string;
     stylesheet: string;

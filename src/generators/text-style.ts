@@ -10,10 +10,6 @@ export function createTextStyle(config: FilterConfig): string {
         lines.push(`    font-family: ${config.fontFamily} !important;`);
     }
 
-    if (config.useFontSize) {
-        lines.push(`    font-size: ${config.fontSize}px !important;`);
-    }
-
     if (config.textStroke > 0) {
         lines.push(`    -webkit-text-stroke: ${config.textStroke}px !important;`);
         lines.push(`    text-stroke: ${config.textStroke}px !important;`);

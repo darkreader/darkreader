@@ -13,12 +13,6 @@ export default function FontPage(props: ViewProps) {
     function onTextStrokeChange(textstroke: any) {
         props.actions.setTheme({textStroke: textstroke});
     }
-    function onUseFontSizeChange(usefontsize: any) {
-        props.actions.setTheme({useFontSize: usefontsize});
-    }
-    function onFontSizeChange(fontsize: any) {
-        props.actions.setTheme({fontSize: fontsize});
-    }
 
     return (
         <section class="m-section">
@@ -49,21 +43,6 @@ export default function FontPage(props: ViewProps) {
                 name={getLocalMessage('text_stroke')}
                 onChange={(value) => onTextStrokeChange(value)}
             />
-            <div class="font-settings__line">
-                <CheckBox
-                    checked={props.data.settings.theme.useFontSize}
-                    onchange={(e: any) => onUseFontSizeChange(e.target.checked)}
-                />
-                <UpDown
-                    value={props.data.settings.theme.fontSize}
-                    min={0}
-                    max={128}
-                    step={1}
-                    default={0}
-                    name={'Font Size'}
-                    onChange={(value) => onFontSizeChange(value)}
-                />
-            </div>
         </section>
     );
 }

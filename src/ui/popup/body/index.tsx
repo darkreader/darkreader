@@ -26,10 +26,20 @@ function Logo() {
     );
 }
 
+type PageId = (
+    'main'
+    | 'theme'
+    | 'settings'
+    | 'site-list'
+    | 'automation'
+    | 'font-settings'
+    | 'manage-settings'
+);
+
 function Pages(props: ViewProps) {
     const context = getContext();
     const store = context.store as {
-        activePage: 'main' | 'theme' | 'settings' | 'automation' | 'manage-settings' | 'font-settings';
+        activePage: PageId;
     };
     if (store.activePage == null) {
         store.activePage = 'main';
@@ -55,6 +65,11 @@ function Pages(props: ViewProps) {
         context.refresh();
     }
 
+    function onSiteListNavClick() {
+        store.activePage = 'site-list';
+        context.refresh();
+    }
+
     function onFontSettingsClick() {
         store.activePage = 'font-settings';
         context.refresh();
@@ -62,7 +77,8 @@ function Pages(props: ViewProps) {
 
     function onBackClick() {
         const activePage = store.activePage;
-        if (activePage === 'automation' || activePage === 'manage-settings' || activePage === 'font-settings') {
+        const settingsPageSubpages = ['automation', 'manage-settings', 'site-list'] as PageId[];
+        if (settingsPageSubpages.includes(activePage)) {
             store.activePage = 'settings';
         } else {
             store.activePage = 'main';
@@ -91,6 +107,12 @@ function Pages(props: ViewProps) {
                     onAutomationNavClick={onAutomationNavClick}
                     onManageSettingsClick={onManageSettingsClick}
                     onFontSettingsClick={onFontSettingsClick}
+                    onSiteListNavClick={onSiteListNavClick}
+                />
+            </Page>
+            <Page id="site-list">
+                <SiteListPage
+                    {...props}
                 />
             </Page>
             <Page id="automation">
@@ -123,6 +145,17 @@ function DonateGroup() {
     );
 }
 
+let appVersion: string;
+
+function AppVersion() {
+    if (!appVersion) {
+        appVersion = chrome.runtime.getManifest().version;
+    }
+    return (
+        <label class="darkreader-version">Version 5 Preview ({appVersion})</label>
+    );
+}
+
 export default function Body(props: ViewProps) {
     const context = getContext();
     context.onCreate(() => {
@@ -146,6 +179,7 @@ export default function Body(props: ViewProps) {
             <section class="m-section">
                 <DonateGroup />
             </section>
+            <AppVersion />
             <Overlay />
         </body>
     );

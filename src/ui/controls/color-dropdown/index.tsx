@@ -28,23 +28,23 @@ export default function ColorDropDown(props: ColorDropDownProps) {
         CUSTOM: 'Custom',
     };
 
-    const dropDownValues = [
-        props.hasDefaultOption ? labels.DEFAULT : null,
-        props.hasAutoOption ? labels.AUTO : null,
-        labels.CUSTOM,
+    const dropDownOptions = [
+        props.hasDefaultOption ? {id: 'default', content: labels.DEFAULT} : null,
+        props.hasAutoOption ? {id: 'auto', content: labels.AUTO} : null,
+        {id: 'custom', content: labels.CUSTOM},
     ].filter((v) => v);
 
     const selectedDropDownValue = (
-        props.value === '' ? labels.DEFAULT :
-            props.value === 'auto' ? labels.AUTO :
-                labels.CUSTOM
+        props.value === '' ? 'default' :
+            props.value === 'auto' ? 'auto' :
+                'custom'
     );
 
     function onDropDownChange(value: string) {
         const result = {
-            [labels.DEFAULT]: '',
-            [labels.AUTO]: 'auto',
-            [labels.CUSTOM]: props.colorSuggestion,
+            default: '',
+            auto: 'auto',
+            custom: props.colorSuggestion,
         }[value];
         props.onChange(result);
     }
@@ -82,7 +82,7 @@ export default function ColorDropDown(props: ColorDropDownProps) {
             onrender={onRootRender}
         >
             <DropDown class="color-dropdown__options"
-                values={dropDownValues}
+                options={dropDownOptions}
                 selected={selectedDropDownValue}
                 onChange={onDropDownChange}
             />

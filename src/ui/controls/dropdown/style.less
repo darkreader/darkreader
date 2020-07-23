@@ -39,10 +39,14 @@
 
     &__list {
         background-color: @color-control-back;
+        border: @size-border solid @color-border;
+        border-top: none;
         border-radius: @dropdown-item-height / 2;
         box-shadow: 0 0 0.25rem black;
+        box-sizing: border-box;
         display: none;
         margin-top: (@dropdown-height - @dropdown-item-height) / 2;
+        overflow: hidden;
         position: absolute;
         width: 100%;
 

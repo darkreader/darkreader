@@ -87,7 +87,7 @@ export function watchForNodePosition<T extends Node>(
     let timeoutId: number = null;
     const restore = throttle(() => {
         if (timeoutId) {
-            return;   
+            return;
         }
         attempts++;
         const now = Date.now();

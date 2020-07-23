@@ -1,6 +1,7 @@
 import BackgroundColor from './background-color';
 import Brightness from './brightness';
 import Contrast from './contrast';
+import FontPicker from './font-picker';
 import Grayscale from './grayscale';
 import Mode from './mode';
 import ResetButton from './reset-button';
@@ -9,11 +10,14 @@ import Scrollbar from './scrollbar';
 import SelectionColorEditor from './selection';
 import Sepia from './sepia';
 import TextColor from './text-color';
+import TextStroke from './text-stroke';
+import UseFont from './use-font';
 
 export {
     BackgroundColor,
     Brightness,
     Contrast,
+    FontPicker,
     Grayscale,
     Mode,
     ResetButton,
@@ -22,4 +26,6 @@ export {
     SelectionColorEditor,
     Sepia,
     TextColor,
+    TextStroke,
+    UseFont,
 };

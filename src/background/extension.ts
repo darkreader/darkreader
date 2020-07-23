@@ -371,6 +371,7 @@ export class Extension {
     private getTabMessage = (url: string, frameURL: string) => {
         const urlInfo = this.getURLInfo(url);
         if (this.isEnabled() && isURLEnabled(url, this.user.settings, urlInfo)) {
+            this.icon.setActive();
             const custom = this.user.settings.customThemes.find(({url: urlList}) => isURLInList(url, urlList));
             const preset = custom ? null : this.user.settings.presets.find(({urls}) => isURLInList(url, urls));
             const theme = custom ? custom.theme : preset ? preset.theme : this.user.settings.theme;
@@ -422,6 +423,7 @@ export class Extension {
                 }
             }
         } else {
+            this.icon.setInactive();
             console.log(`Site is not inverted: ${url}`);
         }
         return {

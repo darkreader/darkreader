@@ -77,12 +77,13 @@ export class Extension {
     private awaiting: (() => void)[];
 
     async start() {
-        if (this.user.settings.syncSitesFixes) { 
-            await this.config.load({local: false});
-        }
+        await this.config.load({local: true});
         this.fonts = await getFontList();
 
         await this.user.loadSettings();
+        if (this.user.settings.syncSitesFixes) { 
+            await this.config.load({local: false});
+        }
         this.onAppToggle();
         this.changeSettings(this.user.settings);
         console.log('loaded', this.user.settings);

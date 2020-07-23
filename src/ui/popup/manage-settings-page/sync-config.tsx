@@ -3,11 +3,9 @@ import {ViewProps} from '../types';
 import CheckButton from '../check-button';
 
 export default function SyncConfigButton(props: ViewProps) {
-    function syncConfig() {
-        if (!props.data.settings.syncSitesFixes) {
-            props.actions.changeSettings({syncSitesFixes: true})
-            props.actions.loadConfig({local: false});
-        }
+    function syncConfig(syncSitesFixes: boolean) {
+        props.actions.changeSettings({syncSitesFixes}); 
+        props.actions.loadConfig({local: !syncSitesFixes});
     }
     return (
         <CheckButton

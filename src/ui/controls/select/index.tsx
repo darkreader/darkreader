@@ -6,7 +6,7 @@ import TextBox from '../textbox';
 import VirtualScroll from '../virtual-scroll';
 
 interface SelectProps {
-    class?: string;
+    class?: any;
     value: string;
     options: {
         [value: string]: Malevic.Child;
@@ -114,7 +114,11 @@ function Select(props: SelectProps) {
 
     return (
         <span
-            class={['select', props.class]}
+            class={[
+                'select',
+                state.isExpanded && 'select--expanded',
+                props.class,
+            ]}
             onrender={onRender}
         >
             <span class="select__line">

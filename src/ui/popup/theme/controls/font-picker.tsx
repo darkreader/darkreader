@@ -11,9 +11,12 @@ interface FontPickerProps {
 
 export default function FontPicker(props: FontPickerProps) {
     return (
-        <ThemeControl label="Font">
+        <ThemeControl label="Font name">
             <Select
-                class={props.theme.useFont ? null : 'font-picker--disabled'}
+                class={{
+                    'font-picker': true,
+                    'font-picker--disabled': !props.theme.useFont,
+                }}
                 value={props.theme.fontFamily}
                 onChange={props.onChange}
                 options={props.fonts.reduce((map, font) => {

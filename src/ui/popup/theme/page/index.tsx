@@ -2,7 +2,7 @@ import {m} from 'malevic';
 import {DEFAULT_SETTINGS, DEFAULT_THEME, DEFAULT_COLORS} from '../../../../defaults';
 import {Theme} from '../../../../definitions';
 import {ViewProps} from '../../types';
-import {BackgroundColor, Brightness, Contrast, Grayscale, Mode, ResetButton, Scheme, Scrollbar, SelectionColorEditor, Sepia, TextColor} from '../controls';
+import {BackgroundColor, Brightness, Contrast, FontPicker, Grayscale, Mode, ResetButton, Scheme, Scrollbar, SelectionColorEditor, Sepia, TextColor, TextStroke, UseFont} from '../controls';
 import ThemePresetPicker from '../preset-picker';
 import {getCurrentThemePreset} from '../utils';
 import Collapsible from './collapsible-panel';
@@ -78,6 +78,30 @@ function ColorsGroup({theme, change}: ThemeGroupProps) {
     );
 }
 
+interface FontGroupsProps extends ThemeGroupProps {
+    fonts: string[];
+}
+
+function FontGroup({theme, fonts, change}: FontGroupsProps) {
+    return (
+        <Array>
+            <UseFont
+                value={theme.useFont}
+                onChange={(useFont) => change({useFont})}
+            />
+            <FontPicker
+                theme={theme}
+                fonts={fonts}
+                onChange={(fontFamily) => change({fontFamily})}
+            />
+            <TextStroke
+                value={theme.textStroke}
+                onChange={(textStroke) => change({textStroke})}
+            />
+        </Array>
+    );
+}
+
 export default function ThemePage(props: ViewProps) {
     const {theme, change} = getCurrentThemePreset(props);
 
@@ -90,6 +114,9 @@ export default function ThemePage(props: ViewProps) {
                 </Collapsible.Group>
                 <Collapsible.Group id="colors" label="Colors">
                     <ColorsGroup theme={theme} change={change} />
+                </Collapsible.Group>
+                <Collapsible.Group id="font" label="Font, text stroke">
+                    <FontGroup theme={theme} fonts={props.data.fonts} change={change} />
                 </Collapsible.Group>
             </Collapsible>
             <ResetButton {...props} />

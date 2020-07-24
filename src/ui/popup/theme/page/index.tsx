@@ -82,22 +82,21 @@ interface FontGroupsProps extends ThemeGroupProps {
     fonts: string[];
 }
 
-function Fontgroup({theme, fonts, change}: FontGroupsProps) {
-
+function FontGroup({theme, fonts, change}: FontGroupsProps) {
     return (
         <Array>
+            <UseFont
+                value={theme.useFont}
+                onChange={(useFont) => change({useFont})}
+            />
             <FontPicker
                 theme={theme}
                 fonts={fonts}
-                onChange={change}
+                onChange={(fontFamily) => change({fontFamily})}
             />
             <TextStroke
-                onChange={change}
                 value={theme.textStroke}
-            />
-            <UseFont
-                onChange={change}
-                value={theme.useFont}
+                onChange={(textStroke) => change({textStroke})}
             />
         </Array>
     );
@@ -116,8 +115,8 @@ export default function ThemePage(props: ViewProps) {
                 <Collapsible.Group id="colors" label="Colors">
                     <ColorsGroup theme={theme} change={change} />
                 </Collapsible.Group>
-                <Collapsible.Group id="Font" label="Font, text stroke">
-                    <Fontgroup theme={theme} fonts={props.data.fonts} change={change} />
+                <Collapsible.Group id="font" label="Font, text stroke">
+                    <FontGroup theme={theme} fonts={props.data.fonts} change={change} />
                 </Collapsible.Group>
             </Collapsible>
             <ResetButton {...props} />

@@ -2,10 +2,10 @@ import {m} from 'malevic';
 import {DropDown} from '../../../controls';
 import ThemeControl from './theme-control';
 
-export default function UseFont(props: {value: boolean; onChange: (v: any) => void}) {
-    const options = [{id: true, content: 'Use'}, {id: false, content: "Don't Use"}];
+export default function UseFont(props: {value: boolean; onChange: (boolean: any) => void}) {
+    const options = [{id: true, content: 'Yes'}, {id: false, content: 'No'}];
     return (
-        <ThemeControl label='Use Font'>
+        <ThemeControl label="Change font">
             <DropDown
                 options={options}
                 onChange={props.onChange}

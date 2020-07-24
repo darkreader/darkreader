@@ -1,16 +1,19 @@
 import {m} from 'malevic';
-import {CheckBox, Select} from '../../../controls';
+import {Select} from '../../../controls';
 import ThemeControl from './theme-control';
 import {Theme} from '../../../../definitions';
 
-export default function FontPicker(props: {theme: Theme; fonts: string[]; onChange: (v: any) => void}) {
+interface FontPickerProps {
+    theme: Theme;
+    fonts: string[];
+    onChange: (font: string) => void;
+}
+
+export default function FontPicker(props: FontPickerProps) {
     return (
-        <ThemeControl label='Font Picker'>
-            <CheckBox
-                checked={props.theme.useFont}
-                onchange={props.onChange}
-            />
+        <ThemeControl label="Font">
             <Select
+                class={props.theme.useFont ? null : 'font-picker--disabled'}
                 value={props.theme.fontFamily}
                 onChange={props.onChange}
                 options={props.fonts.reduce((map, font) => {

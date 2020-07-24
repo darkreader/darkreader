@@ -10,7 +10,7 @@ export default function InvertPDF(props: ViewProps) {
     return (
         <CheckButton
             checked={props.data.settings.enableForPDF}
-            label='Enable for PDF files'
+            label="Enable for PDF files"
             description={props.data.settings.enableForPDF ?
                 'Enabled for PDF documents' :
                 'Disabled for PDF documents'}

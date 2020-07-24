@@ -14,8 +14,29 @@ async function replaceBlobs(text: string) {
     return text.replace(blobRegex, () => `url("${data.shift()}")`);
 }
 
+const banner = `/*
+                        _______
+                       /       \\
+                      .==.    .==.
+                     ((  ))==((  ))
+                    / "=="    "=="\\
+                   /____|| || ||___\\
+       ________     ____    ________  ___    ___
+       |  ___  \\   /    \\   |  ___  \\ |  |  /  /
+       |  |  \\  \\ /  /\\  \\  |  |  \\  \\|  |_/  /
+       |  |   )  /  /__\\  \\ |  |__/  /|  ___  \\
+       |  |__/  /  ______  \\|  ____  \\|  |  \\  \\
+_______|_______/__/ ____ \\__\\__|___\\__\\__|___\\__\\____
+|  ___  \\ |  ____/ /    \\   |  ___  \\ |  ____|  ___  \\
+|  |  \\  \\|  |___ /  /\\  \\  |  |  \\  \\|  |___|  |  \\  \\
+|  |__/  /|  ____/  /__\\  \\ |  |   )  |  ____|  |__/  /
+|  ____  \\|  |__/  ______  \\|  |__/  /|  |___|  ____  \\
+|__|   \\__\\____/__/      \\__\\_______/ |______|__|   \\__\\
+                https://darkreader.org
+*/`;
+
 export async function collectCSS() {
-    const css = [];
+    const css = [banner];
 
     function addStaticCSS(selector: string, comment: string) {
         const staticStyle = document.head.querySelector(selector);

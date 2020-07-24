@@ -43,6 +43,7 @@ export const DEFAULT_SETTINGS: UserSettings = {
     changeBrowserTheme: false,
     notifyOfNews: false,
     syncSettings: true,
+    syncSitesFixes: false,
     automation: '',
     time: {
         activation: '18:00',

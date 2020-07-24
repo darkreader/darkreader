@@ -81,6 +81,9 @@ export class Extension {
         this.fonts = await getFontList();
 
         await this.user.loadSettings();
+        if (this.user.settings.syncSitesFixes) { 
+            await this.config.load({local: false});
+        }
         this.onAppToggle();
         this.changeSettings(this.user.settings);
         console.log('loaded', this.user.settings);
@@ -121,6 +124,7 @@ export class Extension {
             toggleURL: (url) => this.toggleURL(url),
             markNewsAsRead: (ids) => this.news.markAsRead(...ids),
             onPopupOpen: () => this.popupOpeningListener && this.popupOpeningListener(),
+            loadConfig: async (options) => await this.config.load(options),
             applyDevDynamicThemeFixes: (text) => this.devtools.applyDynamicThemeFixes(text),
             resetDevDynamicThemeFixes: () => this.devtools.resetDynamicThemeFixes(),
             applyDevInversionFixes: (text) => this.devtools.applyInversionFixes(text),

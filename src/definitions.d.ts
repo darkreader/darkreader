@@ -23,6 +23,7 @@ export interface ExtensionActions {
     setShortcut(command: string, shortcut: string);
     toggleURL(url: string);
     markNewsAsRead(ids: string[]);
+    loadConfig(options: {local: boolean});
     applyDevDynamicThemeFixes(text: string): Promise<void>;
     resetDevDynamicThemeFixes();
     applyDevInversionFixes(text: string): Promise<void>;
@@ -80,6 +81,7 @@ export interface UserSettings {
     changeBrowserTheme: boolean;
     notifyOfNews: boolean;
     syncSettings: boolean;
+    syncSitesFixes: boolean;
     automation: '' | 'time' | 'system' | 'location';
     time: TimeSettings;
     location: LocationSettings;

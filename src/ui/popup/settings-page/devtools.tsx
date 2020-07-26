@@ -85,7 +85,7 @@ export default function DevToolsGroup(props: ViewProps) {
                 </NavButton>
             </ControlGroup.Control>
             <ControlGroup.Description>
-                Make a fix for a website
+                {getLocalMessage('make_a_fix_for_a_website')}
             </ControlGroup.Description>
         </ControlGroup>
     );

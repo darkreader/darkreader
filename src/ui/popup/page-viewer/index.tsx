@@ -1,5 +1,6 @@
 import {m} from 'malevic';
 import {Button} from '../../controls';
+import {getLocalMessage} from '../../../utils/locales';
 
 interface PageProps {
     id: string;
@@ -16,7 +17,7 @@ export function Page(props: PageProps, content: Malevic.Spec) {
             </div>
             {props.first ? null : (
                 <Button class="page__back-button" onclick={props.onBackButtonClick}>
-                    Back
+                    {getLocalMessage('back')}
                 </Button>
             )}
         </div>

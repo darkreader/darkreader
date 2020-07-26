@@ -2,6 +2,7 @@ import {m} from 'malevic';
 import {NavButton} from '../../controls';
 import ControlGroup from '../control-group';
 import WatchIcon from '../main-page/watch-icon';
+import {getLocalMessage} from '../../../utils/locales';
 
 export default function AutomationButton(props: {onClick: () => void}) {
     const now = new Date();
@@ -12,11 +13,11 @@ export default function AutomationButton(props: {onClick: () => void}) {
                     <span class="automation-button-icon">
                         <WatchIcon hours={now.getHours()} minutes={now.getMinutes()} />
                     </span>
-                    Automation
+                    {getLocalMessage('automation')}
                 </NavButton>
             </ControlGroup.Control>
             <ControlGroup.Description>
-                Configure when app is enabled
+                {getLocalMessage('configure_when_app_is_enabled')}
             </ControlGroup.Description>
         </ControlGroup>
     );

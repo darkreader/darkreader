@@ -5,6 +5,7 @@ import {Brightness, Contrast, Scheme, Mode} from '../theme/controls';
 import ThemePresetPicker from '../theme/preset-picker';
 import {getCurrentThemePreset} from '../theme/utils';
 import {ViewProps} from '../types';
+import {getLocalMessage} from '../../../utils/locales';
 
 function ThemeControls(props: {theme: Theme; onChange: (theme: Partial<Theme>) => void}) {
     const {theme, onChange} = props;
@@ -44,11 +45,11 @@ export default function ThemeGroup(props: ViewProps & {onThemeNavClick: () => vo
                     onChange={preset.change}
                 />
                 <Button class="theme-group__more-button" onclick={props.onThemeNavClick}>
-                    See all options
+                    {getLocalMessage('see_all_options')}
                 </Button>
             </div>
             <label class="theme-group__description">
-                Configure theme
+                {getLocalMessage('configure_theme')}
             </label>
         </div>
     );

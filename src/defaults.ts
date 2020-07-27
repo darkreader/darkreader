@@ -30,6 +30,7 @@ export const DEFAULT_THEME: Theme = {
     lightSchemeTextColor: DEFAULT_COLORS.lightScheme.text,
     scrollbarColor: isMacOS() ? '' : 'auto',
     selectionColor: 'auto',
+    styleStandardElements: true,
 };
 
 export const DEFAULT_SETTINGS: UserSettings = {
@@ -55,5 +56,4 @@ export const DEFAULT_SETTINGS: UserSettings = {
     },
     previewNewDesign: false,
     enableForPDF: true,
-    styleStandardElements: true,
 };

@@ -1,17 +1,18 @@
 import {m} from 'malevic';
 import {ViewProps} from '../types';
 import CheckButton from '../check-button';
+import {getCurrentThemePreset} from '../theme/utils';
 
 export default function StyleStandardElements(props: ViewProps) {
+    const {change, theme} = getCurrentThemePreset(props);
     function onStyleStandardElements(checked: boolean) {
-        props.actions.changeSettings({styleStandardElements: checked});
+        change({styleStandardElements: checked});
     }
-
     return (
         <CheckButton
-            checked={props.data.settings.styleStandardElements}
+            checked={theme.styleStandardElements}
             label="Enable to style standard elements"
-            description={props.data.settings.styleStandardElements ?
+            description={theme.styleStandardElements ?
                 'Enabled to style standard elements' :
                 'Disabled to style standard elements'}
             onChange={onStyleStandardElements}

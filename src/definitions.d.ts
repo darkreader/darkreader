@@ -54,6 +54,7 @@ export interface Theme {
     lightSchemeTextColor: string;
     scrollbarColor: '' | 'auto' | string;
     selectionColor: '' | 'auto' | string;
+    styleStandardElements: boolean;
 }
 
 export type FilterConfig = Theme;
@@ -87,7 +88,6 @@ export interface UserSettings {
     location: LocationSettings;
     previewNewDesign: boolean;
     enableForPDF: boolean;
-    styleStandardElements: boolean;
 }
 
 export interface TimeSettings {

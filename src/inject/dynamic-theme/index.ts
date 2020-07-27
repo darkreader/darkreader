@@ -55,7 +55,7 @@ function createStaticStyleOverrides() {
     setupStylePositionWatcher(fallbackStyle, 'fallback');
 
     const userAgentStyle = createOrUpdateStyle('darkreader--user-agent');
-    userAgentStyle.textContent = getModifiedUserAgentStyle(filter, isIFrame);
+    userAgentStyle.textContent = getModifiedUserAgentStyle(filter, isIFrame, filter.styleStandardElements);
     document.head.insertBefore(userAgentStyle, fallbackStyle.nextSibling);
     setupStylePositionWatcher(userAgentStyle, 'user-agent');
 

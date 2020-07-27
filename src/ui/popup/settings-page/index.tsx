@@ -7,6 +7,7 @@ import SiteListButton from './site-list-button';
 import {isFirefox} from '../../../utils/platform';
 import EnabledByDefaultGroup from './enabled-by-default';
 import InvertPDF from './invert-pdf';
+import StyleStandardElements from './style-elements';
 
 type SettingsPageProps = ViewProps & {
     onAutomationNavClick: () => void;
@@ -19,6 +20,7 @@ export default function SettingsPage(props: SettingsPageProps) {
         <section class="m-section">
             <EnabledByDefaultGroup {...props} />
             {isFirefox() ? null : <InvertPDF {...props} />}
+            <StyleStandardElements {...props} />
             <SiteListButton onClick={props.onSiteListNavClick} />
             <DevToolsGroup {...props} />
             <AutomationButton onClick={props.onAutomationNavClick} />

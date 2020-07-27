@@ -14,10 +14,10 @@ h3:not([style*="color:"]),
 h4:not([style*="color:"]),
 h5:not([style*="color:"]),
 h6:not([style*="color:"]) {
-    color: var(--dr-red-text) !important;
+    color: var(--dr-red-lighter-text) !important;
 }
 cite:not([style*="color:"]) {
-    color: var(--dr-green-text) !important;
+    color: var(--dr-green-lighter-text) !important;
 }
 input:not([style*="background-color:"]),
 textarea:not([style*="background-color:"]),
@@ -35,13 +35,13 @@ input:not([style*="background-color:"]):active, input:not([style*="background-co
 textarea:not([style*="background-color:"]):active, textarea:not([style*="background-color:"]):focus,
 button:not([style*="background-color:"]):active, button:not([style*="background-color:"]):focus,
 [role="button"]:active, [role="button"]:focus {
-    background-color: var(--dr-blue-bg) !important;
+    background-color: var(--dr-blue-darker-bg) !important;
 }
 a:not([style*="color:"]) {
     color: var(--dr-blue-text) !important;
 }
 a:not([style*="color:"]):hover {
-    color: var(--dr-green-text) !important;
+    color: var(--dr-blue-lighter-text) !important;
 }
 a:not([style*="color:"]):active, a:not([style*="color:"]):focus {
     color: var(--dr-cyan-text) !important;

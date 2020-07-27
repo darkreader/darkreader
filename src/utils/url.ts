@@ -2,7 +2,7 @@ import {UserSettings} from '../definitions';
 import {isIPV6, compareIPV6} from './ipv6';
 
 export function getURLHost(url: string) {
-    return url.match(/^(.*?\/{2,3})?(.+?)(\/|$)/)[2];
+    return new URL(url).host;
 }
 
 export function compareURLPatterns(a: string, b: string) {

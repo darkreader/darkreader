@@ -2,6 +2,7 @@ export const DARK_COLOR_SCHEME = [
     'Normal_Dark',
     'Solarized_Dark',
     'Nord_Dark',
+    'Dracula',
 ];
 export const LIGHT_COLOR_SCHEME = [
     'Normal_Light',
@@ -34,4 +35,7 @@ export const COLOR_SCHEMES = {
         background: '#eceff4',
         text: '#3b4252',
     },
+    Dracula: {
+        background: '#282b36',
+        text: '#e8e6e3',
 };

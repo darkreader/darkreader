@@ -1,0 +1,24 @@
+:root {
+    --dr-neutral-bg: rgb(29, 32, 33);
+    --dr-neutral-text: rgb(218, 221, 221);
+    --dr-darker-bg: rgb(24, 26, 27);
+    --dr-darker-text: rgb(206, 202, 195);
+    --dr-lighter-bg: rgb(31, 34, 35);
+    --dr-lighter-text: rgb(232, 232, 232);
+    --dr-yellow-bg: rgb(204, 204, 0);
+    --dr-yellow-text: rgb(255, 255, 26);
+    --dr-orange-bg: rgb(204, 132, 0);
+    --dr-orange-text: rgb(255, 174, 26);
+    --dr-red-bg: rgb(204, 0, 0);
+    --dr-red-text: rgb(255, 26, 26);
+    --dr-mageneta-bg: rgb(204, 0, 204);
+    --dr-magenta-text: rgb(255, 26, 255);
+    --dr-violet-bg: rgb(120, 16, 120);
+    --dr-violet-text: rgb(237, 123, 237);
+    --dr-blue-bg: rgb(0, 0, 204);
+    --dr-blue-text: rgb(51, 125, 255);
+    --dr-cyan-bg: rgb(0, 204, 204);
+    --dr-cyan-text: rgb(26, 255, 255);
+    --dr-green-bg: rgb(0, 102, 0);
+    --dr-green-text: rgb(114, 255, 114);
+}

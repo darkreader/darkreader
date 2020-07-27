@@ -1,0 +1,48 @@
+html,
+body,
+:not([style*="background-color:"]) {
+    background-color: var(--dr-neutral-bg) !important;
+}
+html,
+body,
+:not([style*="color:"]) {
+    color: var(--dr-neutral-text) !important;
+}
+h1:not([style*="color:"]),
+h2:not([style*="color:"]),
+h3:not([style*="color:"]),
+h4:not([style*="color:"]),
+h5:not([style*="color:"]),
+h6:not([style*="color:"]) {
+    color: var(--dr-red-text) !important;
+}
+cite:not([style*="color:"]) {
+    color: var(--dr-green-text) !important;
+}
+input:not([style*="background-color:"]),
+textarea:not([style*="background-color:"]),
+button:not([style*="background-color:"]),
+[role="button"] {
+    background-color: var(--dr-darker-bg) !important;
+}
+input:not([style*="background-color:"]):hover,
+textarea:not([style*="background-color:"]):hover,
+button:not([style*="background-color:"]):hover,
+[role="button"]:hover {
+    background-color: var(--dr-lighter-bg)  !important;
+}
+input:not([style*="background-color:"]):active, input:not([style*="background-color:"]):focus,
+textarea:not([style*="background-color:"]):active, textarea:not([style*="background-color:"]):focus,
+button:not([style*="background-color:"]):active, button:not([style*="background-color:"]):focus,
+[role="button"]:active, [role="button"]:focus {
+    background-color: var(--dr-blue-bg) !important;
+}
+a:not([style*="color:"]) {
+    color: var(--dr-blue-text) !important;
+}
+a:not([style*="color:"]):hover {
+    color: var(--dr-green-text) !important;
+}
+a:not([style*="color:"]):active, a:not([style*="color:"]):focus {
+    color: var(--dr-cyan-text) !important;
+}

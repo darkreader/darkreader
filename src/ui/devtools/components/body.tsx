@@ -5,7 +5,7 @@ import ThemeEngines from '../../../generators/theme-engines';
 import {DEVTOOLS_DOCS_URL} from '../../../utils/links';
 import {isFirefox} from '../../../utils/platform';
 import {ExtWrapper, TabInfo} from '../../../definitions';
-import {isURLInList} from '../../../utils/url';
+import {getCurrentThemePreset} from '../../popup/theme/utils';
 
 type BodyProps = ExtWrapper & {tab: TabInfo};
 
@@ -13,8 +13,7 @@ function Body({data, tab, actions}: BodyProps) {
     const {state, setState} = useState({errorText: null as string});
     let textNode: HTMLTextAreaElement;
     const previewButtonText = data.settings.previewNewDesign ? 'Switch to old design' : 'Preview new design';
-    const custom = data.settings.customThemes.find(({url: urlList}) => isURLInList(tab.url, urlList));
-    const theme = custom ? custom.theme : data.settings.theme;
+    const {theme} = getCurrentThemePreset({data, tab, actions});
 
     const wrapper = (theme.engine === ThemeEngines.staticTheme
         ? {

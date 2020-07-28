@@ -7,6 +7,7 @@ export function getMockData(override = {} as Partial<ExtensionData>): ExtensionD
         isReady: true,
         settings: {
             enabled: true,
+            presets: [],
             theme: {
                 mode: 1,
                 brightness: 110,

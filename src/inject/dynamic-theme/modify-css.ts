@@ -58,40 +58,28 @@ export function getModifiedUserAgentStyle(theme: Theme, isIFrame: boolean, style
         lines.push(`    background-color: ${modifyBackgroundColor({r: 255, g: 255, b: 255}, theme)} !important;`);
         lines.push('}');
     }
-    if (styleStandardElements) {
-        lines.push(`${isIFrame ? '' : 'html, body, '}input, textarea, select, button {`);
-        lines.push(`    background-color: ${modifyBackgroundColor({r: 255, g: 255, b: 255}, theme)};`);
-        lines.push('}');
-        lines.push('html, body, input, textarea, select, button {');
-        lines.push(`    border-color: ${modifyBorderColor({r: 76, g: 76, b: 76}, theme)};`);
-        lines.push(`    color: ${modifyForegroundColor({r: 0, g: 0, b: 0}, theme)};`);
-        lines.push('}');
-        lines.push('a {');
-        lines.push(`    color: ${modifyForegroundColor({r: 0, g: 64, b: 255}, theme)};`);
-        lines.push('}');
-        lines.push('table {');
-        lines.push(`    border-color: ${modifyBorderColor({r: 128, g: 128, b: 128}, theme)};`);
-        lines.push('}');
-        lines.push('::placeholder {');
-        lines.push(`    color: ${modifyForegroundColor({r: 169, g: 169, b: 169}, theme)};`);
-        lines.push('}');
-        lines.push('input:-webkit-autofill,');
-        lines.push('textarea:-webkit-autofill,');
-        lines.push('select:-webkit-autofill {');
-        lines.push(`    background-color: ${modifyBackgroundColor({r: 250, g: 255, b: 189}, theme)} !important;`);
-        lines.push(`    color: ${modifyForegroundColor({r: 0, g: 0, b: 0}, theme)} !important;`);
-        lines.push('}');
-    } else {
-        if (!isIFrame) {
-            lines.push(`html, body {`);
-            lines.push(`    background-color: ${modifyBackgroundColor({r: 255, g: 255, b: 255}, theme)};`);
-            lines.push('}');
-        }
-        lines.push('html, body {');
-        lines.push(`    border-color: ${modifyBorderColor({r: 76, g: 76, b: 76}, theme)};`);
-        lines.push(`    color: ${modifyForegroundColor({r: 0, g: 0, b: 0}, theme)};`);
-        lines.push('}');
-    }
+    lines.push(`${isIFrame ? '' : 'html, body, '}${styleStandardElements ? '' : 'input, textarea, select, button'} {`);
+    lines.push(`    background-color: ${modifyBackgroundColor({r: 255, g: 255, b: 255}, theme)};`);
+    lines.push('}');
+    lines.push('html, body, input, textarea, select, button {');
+    lines.push(`    border-color: ${modifyBorderColor({r: 76, g: 76, b: 76}, theme)};`);
+    lines.push(`    color: ${modifyForegroundColor({r: 0, g: 0, b: 0}, theme)};`);
+    lines.push('}');
+    lines.push('a {');
+    lines.push(`    color: ${modifyForegroundColor({r: 0, g: 64, b: 255}, theme)};`);
+    lines.push('}');
+    lines.push('table {');
+    lines.push(`    border-color: ${modifyBorderColor({r: 128, g: 128, b: 128}, theme)};`);
+    lines.push('}');
+    lines.push('::placeholder {');
+    lines.push(`    color: ${modifyForegroundColor({r: 169, g: 169, b: 169}, theme)};`);
+    lines.push('}');
+    lines.push('input:-webkit-autofill,');
+    lines.push('textarea:-webkit-autofill,');
+    lines.push('select:-webkit-autofill {');
+    lines.push(`    background-color: ${modifyBackgroundColor({r: 250, g: 255, b: 189}, theme)} !important;`);
+    lines.push(`    color: ${modifyForegroundColor({r: 0, g: 0, b: 0}, theme)} !important;`);
+    lines.push('}');
     if (theme.scrollbarColor) {
         lines.push(getModifiedScrollbarStyle(theme));
     }

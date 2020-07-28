@@ -1,4 +1,4 @@
-import {getURLHost} from '../../utils/url';
+import {getURLHostOrProtocol} from '../../utils/url';
 import {ExtensionData, TabInfo, Theme, UserSettings} from '../../definitions';
 
 export function getMockData(override = {} as Partial<ExtensionData>): ExtensionData {
@@ -97,7 +97,7 @@ export function createConnectorMock() {
             listener(data);
         },
         toggleURL(url) {
-            const pattern = getURLHost(url);
+            const pattern = getURLHostOrProtocol(url);
             const index = data.settings.siteList.indexOf(pattern);
             if (index >= 0) {
                 data.settings.siteList.splice(index, 1, pattern);

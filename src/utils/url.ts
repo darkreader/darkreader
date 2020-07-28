@@ -1,8 +1,13 @@
 import {UserSettings} from '../definitions';
 import {isIPV6, compareIPV6} from './ipv6';
 
-export function getURLHost(url: string) {
-    return url.match(/^(.*?\/{2,3})?(.+?)(\/|$)/)[2];
+export function getURLHostOrProtocol($url: string) {
+    const url = new URL($url);
+    if (url.host) {
+        return url.host;
+    } else {
+        return url.protocol;
+    }
 }
 
 export function compareURLPatterns(a: string, b: string) {

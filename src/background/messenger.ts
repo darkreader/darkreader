@@ -14,8 +14,8 @@ export interface ExtensionAdapter {
     resetDevDynamicThemeFixes: () => void;
     applyDevInversionFixes: (json: string) => Error;
     resetDevInversionFixes: () => void;
-    applyDevStaticThemes: (text: string) => Error;
-    resetDevStaticThemes: () => void;
+    applyDevStaticTheme: (text: string, url: string) => Error;
+    resetDevStaticTheme: (url: string) => void;
 }
 
 export default class Messenger {

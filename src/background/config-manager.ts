@@ -3,7 +3,6 @@ import {parseArray} from '../utils/text';
 import {getDuration} from '../utils/time';
 import {parseInversionFixes} from '../generators/css-filter';
 import {parseDynamicThemeFixes} from '../generators/dynamic-theme';
-import {parseStaticThemes} from '../generators/static-theme';
 import {InversionFix, StaticTheme, DynamicThemeFix} from '../definitions';
 
 const CONFIG_URLs = {
@@ -18,10 +17,6 @@ const CONFIG_URLs = {
     inversionFixes: {
         remote: 'https://raw.githubusercontent.com/darkreader/darkreader/master/src/config/inversion-fixes.config',
         local: '../config/inversion-fixes.config',
-    },
-    staticThemes: {
-        remote: 'https://raw.githubusercontent.com/darkreader/darkreader/master/src/config/static-themes.config',
-        local: '../config/static-themes.config',
     },
 };
 const REMOTE_TIMEOUT_MS = getDuration({seconds: 10});
@@ -110,25 +105,11 @@ export default class ConfigManager {
         });
     }
 
-    private async loadStaticThemes({local}) {
-        await this.loadConfig({
-            name: 'Static Themes',
-            local,
-            localURL: CONFIG_URLs.staticThemes.local,
-            remoteURL: CONFIG_URLs.staticThemes.remote,
-            success: ($themes: string) => {
-                this.raw.staticThemes = $themes;
-                this.handleStaticThemes();
-            },
-        });
-    }
-
     async load(config: {local: boolean}) {
         await Promise.all([
             this.loadDarkSites(config),
             this.loadDynamicThemeFixes(config),
             this.loadInversionFixes(config),
-            this.loadStaticThemes(config),
         ]).catch((err) => console.error('Fatality', err));
     }
 
@@ -147,8 +128,9 @@ export default class ConfigManager {
         this.INVERSION_FIXES = parseInversionFixes($fixes);
     }
 
-    handleStaticThemes() {
-        const $themes = this.overrides.staticThemes || this.raw.staticThemes;
-        this.STATIC_THEMES = parseStaticThemes($themes);
+    handleStaticTheme() {
+        const $fixes = this.overrides.staticThemes || this.raw.staticThemes;
+        this.STATIC_THEMES = parseInversionFixes($fixes);
     }
+
 }

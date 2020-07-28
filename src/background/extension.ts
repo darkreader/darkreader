@@ -129,8 +129,8 @@ export class Extension {
             resetDevDynamicThemeFixes: () => this.devtools.resetDynamicThemeFixes(),
             applyDevInversionFixes: (text) => this.devtools.applyInversionFixes(text),
             resetDevInversionFixes: () => this.devtools.resetInversionFixes(),
-            applyDevStaticThemes: (text) => this.devtools.applyStaticThemes(text),
-            resetDevStaticThemes: () => this.devtools.resetStaticThemes(),
+            applyDevStaticTheme: (text, url) => this.devtools.applyStaticTheme(text, url),
+            resetDevStaticTheme: (url) => this.devtools.resetStaticTheme(url),
         };
     }
 
@@ -404,11 +404,12 @@ export class Extension {
                     };
                 }
                 case ThemeEngines.staticTheme: {
+                    const style = theme.stylesheet && theme.stylesheet.trim() ?
+                        theme.stylesheet :
+                        createStaticStylesheet(getURLHost(url), getURLHost(frameURL)),
                     return {
                         type: 'add-static-theme',
-                        data: theme.stylesheet && theme.stylesheet.trim() ?
-                            theme.stylesheet :
-                            createStaticStylesheet(theme, url, frameURL, this.config.STATIC_THEMES),
+                        data: {style, theme}
                     };
                 }
                 case ThemeEngines.dynamicTheme: {

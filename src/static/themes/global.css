@@ -46,3 +46,7 @@ a:not([style*="color:"]):hover {
 a:not([style*="color:"]):active, a:not([style*="color:"]):focus {
     color: var(--dr-cyan-text) !important;
 }
+
+* {
+    color: red !important;
+}

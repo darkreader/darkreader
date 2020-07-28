@@ -1,6 +1,6 @@
 import {parseInversionFixes, formatInversionFixes} from '../generators/css-filter';
 import {parseDynamicThemeFixes, formatDynamicThemeFixes} from '../generators/dynamic-theme';
-import {parseStaticThemes, formatStaticThemes} from '../generators/static-theme';
+import createStaticStylesheet, {parseStaticThemes, formatStaticThemes} from '../generators/static-theme';
 import ConfigManager from './config-manager';
 
 interface DevToolsStorage {
@@ -74,13 +74,12 @@ export default class DevTools {
         this.config = config;
         this.config.overrides.dynamicThemeFixes = this.getSavedDynamicThemeFixes() || null;
         this.config.overrides.inversionFixes = this.getSavedInversionFixes() || null;
-        this.config.overrides.staticThemes = this.getSavedStaticThemes() || null;
         this.onChange = onChange;
     }
 
     private static KEY_DYNAMIC = 'dev_dynamic_theme_fixes';
     private static KEY_FILTER = 'dev_inversion_fixes';
-    private static KEY_STATIC = 'dev_static_themes';
+    private static KEY_STATIC = 'dev_static_theme';
 
     private getSavedDynamicThemeFixes() {
         return this.store.get(DevTools.KEY_DYNAMIC) || null;
@@ -158,37 +157,32 @@ export default class DevTools {
         }
     }
 
-    private getSavedStaticThemes() {
-        return this.store.get(DevTools.KEY_STATIC) || null;
+    private getSavedStaticTheme(url: string) {
+        return this.store.get(`${DevTools.KEY_STATIC}_${url}`) || null;
     }
 
-    private saveStaticThemes(text: string) {
-        this.store.set(DevTools.KEY_STATIC, text);
+    private saveStaticTheme(text: string, url: string) {
+        this.store.set(`${DevTools.KEY_STATIC}_${url}`, text);
     }
 
-    hasCustomStaticFixes() {
-        return this.store.has(DevTools.KEY_STATIC);
+    hasCustomStaticFixes(url: string) {
+        return this.store.has(`${DevTools.KEY_STATIC}_${url}`);
     }
 
-    getStaticThemesText() {
-        const $themes = this.getSavedStaticThemes();
-        const themes = $themes ? parseStaticThemes($themes) : this.config.STATIC_THEMES;
-        return formatStaticThemes(themes);
+    getStaticThemesText(url) {
+        return createStaticStylesheet(url);
     }
 
     resetStaticThemes() {
         this.store.remove(DevTools.KEY_STATIC);
-        this.config.overrides.staticThemes = null;
-        this.config.handleStaticThemes();
         this.onChange();
     }
 
-    applyStaticThemes(text: string) {
+    applyStaticTheme(text: string, url: string) {
         try {
-            const formatted = formatStaticThemes(parseStaticThemes(text));
             this.config.overrides.staticThemes = formatted;
             this.config.handleStaticThemes();
-            this.saveStaticThemes(formatted);
+            this.saveStaticTheme(text, url);
             this.onChange();
             return null;
         } catch (err) {

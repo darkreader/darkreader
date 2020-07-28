@@ -4,14 +4,20 @@ import {createOrUpdateDynamicTheme, removeDynamicTheme, cleanDynamicThemeCache} 
 import {logInfo, logWarn} from './utils/log';
 import {watchForColorSchemeChange} from './utils/watch-color-scheme';
 import {collectCSS} from './dynamic-theme/css-collection';
+import {createOrUpdateStaticTheme} from './static';
 
 function onMessage({type, data}) {
     switch (type) {
-        case 'add-css-filter':
-        case 'add-static-theme': {
+        case 'add-css-filter': {
             const css = data;
             removeDynamicTheme();
             createOrUpdateStyle(css);
+            break;
+        }
+        case 'add-static-theme': {
+            const {css, theme} = data;
+            removeDynamicTheme();
+            createOrUpdateStaticTheme(css, theme);
             break;
         }
         case 'add-svg-filter': {

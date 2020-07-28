@@ -10,10 +10,8 @@ export interface ExtensionData {
     devtools: {
         dynamicFixesText: string;
         filterFixesText: string;
-        staticThemesText: string;
         hasCustomDynamicFixes: boolean;
         hasCustomFilterFixes: boolean;
-        hasCustomStaticFixes: boolean;
     };
 }
 
@@ -28,8 +26,8 @@ export interface ExtensionActions {
     resetDevDynamicThemeFixes();
     applyDevInversionFixes(text: string): Promise<void>;
     resetDevInversionFixes();
-    applyDevStaticThemes(text: string): Promise<void>;
-    resetDevStaticThemes();
+    applyDevStaticTheme(text: string, url: string): Promise<void>;
+    resetDevStaticTheme(url: string);
 }
 
 export interface ExtWrapper {
@@ -134,32 +132,7 @@ export interface InversionFix {
 
 export interface StaticTheme {
     url: string[];
-    neutralBg?: string[];
-    neutralBgActive?: string[];
-    neutralText?: string[];
-    neutralTextActive?: string[];
-    neutralBorder?: string[];
-    redBg?: string[];
-    redBgActive?: string[];
-    redText?: string[];
-    redTextActive?: string[];
-    redBorder?: string[];
-    greenBg?: string[];
-    greenBgActive?: string[];
-    greenText?: string[];
-    greenTextActive?: string[];
-    greenBorder?: string[];
-    blueBg?: string[];
-    blueBgActive?: string[];
-    blueText?: string[];
-    blueTextActive?: string[];
-    blueBorder?: string[];
-    fadeBg?: string[];
-    fadeText?: string[];
-    transparentBg?: string[];
-    noImage?: string[];
-    invert?: string[];
-    noCommon?: boolean;
+    css: string;
 }
 
 export interface News {

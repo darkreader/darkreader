@@ -1,8 +1,13 @@
 import {UserSettings} from '../definitions';
 import {isIPV6, compareIPV6} from './ipv6';
 
-export function getURLHost(url: string) {
-    return url.match(/^(.*?\/{2,3})?(.+?)(\/|$)/)[2];
+export function getURLHostOrProtocol($url: string) {
+    const url = new URL($url);
+    if (url.host) {
+        return url.host;
+    } else {
+        return url.protocol;
+    }
 }
 
 export function compareURLPatterns(a: string, b: string) {
@@ -112,6 +117,9 @@ export function isPDF(url: string) {
         }
         if (url.includes('#')) {
             url = url.substring(0, url.lastIndexOf('#'));
+        }
+        if (url.match(/(wikipedia|wikimedia).org/i) && url.match(/(wikipedia|wikimedia)\.org\/.*\/[a-z]+\:[^\:\/]+\.pdf/i)) {
+            return false;
         }
         if (url.endsWith('.pdf')) {
             for (let i = url.length; 0 < i; i--) {

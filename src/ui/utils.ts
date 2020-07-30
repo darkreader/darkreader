@@ -1,3 +1,5 @@
+import {isFirefox} from '../utils/platform';
+
 export function classes(...args: (string | {[cls: string]: boolean})[]) {
     const classes = [];
     args.filter((c) => Boolean(c)).forEach((c) => {
@@ -34,10 +36,14 @@ export function openFile(options: {extensions: string[]}, callback: (content: st
 }
 
 export function saveFile(name: string, content: string) {
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(new Blob([content]));
-    a.download = name;
-    a.click();
+    if (isFirefox()) {
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(new Blob([content]));
+        a.download = name;
+        a.click();
+    } else {
+        chrome.runtime.sendMessage({type: 'save-file', data: {name, content}});
+    }
 }
 
 type AnyVoidFunction = (...args: any[]) => void;

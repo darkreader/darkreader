@@ -18,9 +18,8 @@ export function enable(themeOptions: Partial<Theme> = {}, fixes: DynamicThemeFix
     const theme = {...DEFAULT_THEME, ...themeOptions};
 
     if (theme.engine !== ThemeEngines.dynamicTheme) {
-        throw new Error('Theme engine is not supported');
+        throw new Error('Theme engine is not supported.');
     }
-
     createOrUpdateDynamicTheme(theme, fixes, isIFrame);
 }
 

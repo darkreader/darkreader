@@ -1,5 +1,5 @@
-import {isURLEnabled, isURLMatched, isPDF} from '../src/utils/url';
-import {UserSettings} from '../src/definitions';
+import {isURLEnabled, isURLMatched, isPDF, getURLHostOrProtocol} from '../../src/utils/url';
+import {UserSettings} from '../../src/definitions';
 
 test('URL is enabled', () => {
     // Not invert listed
@@ -124,6 +124,15 @@ test('URL is enabled', () => {
     expect(isPDF(
         'https://www.google.com/very/good/hidden/folder/pdf#file.pdf'
     )).toBe(false);
+    expect(isPDF(
+        'https://fi.wikipedia.org/wiki/Tiedosto:ExtIPA_chart_(2015).pdf?uselang=en'
+    )).toBe(false);
+    expect(isPDF(
+        'https://commons.wikimedia.org/wiki/File:ExtIPA_chart_(2015).pdf'
+    )).toBe(false);
+    expect(isPDF(
+        'https://upload.wikimedia.org/wikipedia/commons/5/56/ExtIPA_chart_(2015).pdf'
+    )).toBe(true);
 
     // IPV6 Testing
     expect(isURLEnabled(
@@ -201,4 +210,14 @@ test('URL is enabled', () => {
         {siteList: [], siteListEnabled: ['darkreader.org'], applyToListedOnly: false} as UserSettings,
         {isProtected: false, isInDarkList: false},
     )).toBe(true);
+});
+
+test('Get URL host or protocol', () => {
+    expect(getURLHostOrProtocol('https://www.google.com')).toBe('www.google.com');
+    expect(getURLHostOrProtocol('https://www.google.com/maps')).toBe('www.google.com');
+    expect(getURLHostOrProtocol('http://localhost:8080')).toBe('localhost:8080');
+    expect(getURLHostOrProtocol('about:blank')).toBe('about:');
+    expect(getURLHostOrProtocol('http://user:pass@www.example.org')).toBe('www.example.org');
+    expect(getURLHostOrProtocol('data:text/html,<html>Hello</html>')).toBe('data:');
+    expect(getURLHostOrProtocol('file:///Users/index.html')).toBe('file:');
 });

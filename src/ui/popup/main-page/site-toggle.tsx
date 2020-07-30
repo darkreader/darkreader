@@ -6,13 +6,23 @@ import {ViewProps} from '../types';
 
 export default function SiteToggleGroup(props: ViewProps) {
     const isPageEnabled = isURLEnabled(props.tab.url, props.data.settings, props.tab);
-    const description = isPDF(props.tab.url) ?
+    const descriptionText = isPDF(props.tab.url) ?
         isPageEnabled ?
             'Enabled for PDF files' :
             'Disabled for PDF files' :
         isPageEnabled ?
             'Enabled for current website' :
             'Disabled for current website';
+    const description = (
+        <span
+            class={{
+                'site-toggle-group__description': true,
+                'site-toggle-group__description--on': isPageEnabled,
+                'site-toggle-group__description--off': !isPageEnabled,
+            }}
+        >{descriptionText}</span>
+    );
+
     return (
         <ControlGroup class="site-toggle-group">
             <ControlGroup.Control class="site-toggle-group__control">

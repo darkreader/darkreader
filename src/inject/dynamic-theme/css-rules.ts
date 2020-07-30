@@ -68,7 +68,7 @@ export function getCSSURLValue(cssURL: string) {
 
 export function getCSSBaseBath(url: string) {
     const cssURL = parseURL(url);
-    return `${cssURL.protocol}//${cssURL.host}${cssURL.pathname.replace(/\?.*$/, '').replace(/(\/)([^\/]+)$/i, '$1')}`;
+    return `${cssURL.origin}${cssURL.pathname.replace(/\?.*$/, '').replace(/(\/)([^\/]+)$/i, '$1')}`;
 }
 
 export function replaceCSSRelativeURLsWithAbsolute($css: string, cssBasePath: string) {
@@ -92,11 +92,28 @@ export function replaceCSSFontFace($css: string) {
 
 const varRegex = /var\((--[^\s,\(\)]+),?\s*([^\(\)]*(\([^\(\)]*\)[^\(\)]*)*\s*)\)/g;
 
-export function replaceCSSVariables(value: string, variables: Map<string, string>) {
+export function replaceCSSVariables(
+    value: string,
+    variables: Map<string, string>,
+    stack = new Set<string>(),
+) {
     let missing = false;
+    const unresolvable = new Set<string>();
     const result = value.replace(varRegex, (match, name, fallback) => {
+        if (stack.has(name)) {
+            logWarn(`Circular reference to variable ${name}`);
+            if (fallback) {
+                return fallback;
+            }
+            missing = true;
+            return match;
+        }
         if (variables.has(name)) {
-            return variables.get(name);
+            const value = variables.get(name);
+            if (value.match(varRegex)) {
+                unresolvable.add(name);
+            }
+            return value;
         } else if (fallback) {
             return fallback;
         } else {
@@ -109,7 +126,8 @@ export function replaceCSSVariables(value: string, variables: Map<string, string
         return result;
     }
     if (result.match(varRegex)) {
-        return replaceCSSVariables(result, variables);
+        unresolvable.forEach((v) => stack.add(v));
+        return replaceCSSVariables(result, variables, stack);
     }
     return result;
 }

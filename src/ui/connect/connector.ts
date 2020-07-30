@@ -73,6 +73,10 @@ export default class Connector implements ExtensionActions {
         this.port.postMessage({type: 'mark-news-as-read', data: ids});
     }
 
+    loadConfig(options: {local: boolean}) {
+        this.port.postMessage({type: 'load-config', data: options});
+    }
+
     applyDevDynamicThemeFixes(text: string) {
         return this.sendRequest<void>({type: 'apply-dev-dynamic-theme-fixes', data: text}, ({error}, resolve, reject) => error ? reject(error) : resolve());
     }

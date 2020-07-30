@@ -23,6 +23,7 @@ export interface ExtensionActions {
     setShortcut(command: string, shortcut: string);
     toggleURL(url: string);
     markNewsAsRead(ids: string[]);
+    loadConfig(options: {local: boolean});
     applyDevDynamicThemeFixes(text: string): Promise<void>;
     resetDevDynamicThemeFixes();
     applyDevInversionFixes(text: string): Promise<void>;
@@ -36,7 +37,7 @@ export interface ExtWrapper {
     actions: ExtensionActions;
 }
 
-export interface FilterConfig {
+export interface Theme {
     mode: FilterMode;
     brightness: number;
     contrast: number;
@@ -55,16 +56,24 @@ export interface FilterConfig {
     selectionColor: '' | 'auto' | string;
 }
 
-export type Theme = FilterConfig;
+export type FilterConfig = Theme;
 
 export interface CustomSiteConfig {
     url: string[];
     theme: FilterConfig;
 }
 
+export interface ThemePreset {
+    id: string;
+    name: string;
+    urls: string[];
+    theme: Theme;
+}
+
 export interface UserSettings {
     enabled: boolean;
     theme: FilterConfig;
+    presets: ThemePreset[];
     customThemes: CustomSiteConfig[];
     siteList: string[];
     siteListEnabled: string[];
@@ -72,6 +81,7 @@ export interface UserSettings {
     changeBrowserTheme: boolean;
     notifyOfNews: boolean;
     syncSettings: boolean;
+    syncSitesFixes: boolean;
     automation: '' | 'time' | 'system' | 'location';
     time: TimeSettings;
     location: LocationSettings;
@@ -108,9 +118,10 @@ export interface Shortcuts {
 
 export interface DynamicThemeFix {
     url: string[];
-    ignoreInlineStyle: string[];
     invert: string[];
     css: string;
+    ignoreInlineStyle: string[];
+    ignoreImageAnalysis: string[];
 }
 
 export interface InversionFix {

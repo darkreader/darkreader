@@ -46,6 +46,7 @@
         background-repeat: no-repeat;
         background-size: 1rem;
         border: @size-border solid @color-border;
+        border-radius: @size-control-inner / 2 + @size-border;
         display: inline-flex;
         justify-content: center;
         height: @size-control-inner;
@@ -92,6 +93,7 @@
     .m-donate-button {
         align-items: center;
         background-color: @color-control-active;
+        border-radius: @size-control-inner / 2 + @size-border;
         display: inline-flex;
         justify-content: center;
         height: @size-control-inner + 2 * @size-border;
@@ -111,7 +113,8 @@
         }
     }
 
-    .m-donate-description {
+    .m-donate-description,
+    .darkreader-version {
         display: inline-block;
         font-size: @size-text-small;
         line-height: @size-text-small-height;
@@ -119,6 +122,13 @@
         -moz-user-select: none;
         user-select: none;
         width: 100%;
+    }
+
+    .darkreader-version {
+        bottom: 0;
+        margin-bottom: 0.125rem;
+        position: absolute;
+        right: 0;
     }
 }
 
@@ -151,8 +161,9 @@
     @import "../main-page/style.less";
     @import "../page-viewer/style.less";
     @import "../settings-page/style.less";
-    @import "../manage-settings-page/style.less";
     @import "../automation-page/style.less";
+    @import "../manage-settings-page/style.less";
+    @import "../site-list-page/style.less";
     @import "../theme/controls/theme-control.less";
     @import "../theme/controls/mode.less";
     @import "../theme/page/style.less";

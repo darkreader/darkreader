@@ -9,6 +9,7 @@ export interface ExtensionAdapter {
     markNewsAsRead: (ids: string[]) => void;
     toggleURL: (pattern: string) => void;
     onPopupOpen: () => void;
+    loadConfig: (options: {local: boolean}) => Promise<void>;
     applyDevDynamicThemeFixes: (json: string) => Error;
     resetDevDynamicThemeFixes: () => void;
     applyDevInversionFixes: (json: string) => Error;
@@ -70,7 +71,9 @@ export default class Messenger {
                 this.adapter.markNewsAsRead(data);
                 break;
             }
-
+            case 'load-config': {
+                await this.adapter.loadConfig(data);
+            }
             case 'apply-dev-dynamic-theme-fixes': {
                 const error = this.adapter.applyDevDynamicThemeFixes(data);
                 port.postMessage({id, error: (error ? error.message : null)});

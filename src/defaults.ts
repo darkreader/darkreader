@@ -35,6 +35,7 @@ export const DEFAULT_THEME: Theme = {
 export const DEFAULT_SETTINGS: UserSettings = {
     enabled: true,
     theme: DEFAULT_THEME,
+    presets: [],
     customThemes: [],
     siteList: [],
     siteListEnabled: [],
@@ -42,6 +43,7 @@ export const DEFAULT_SETTINGS: UserSettings = {
     changeBrowserTheme: false,
     notifyOfNews: false,
     syncSettings: true,
+    syncSitesFixes: false,
     automation: '',
     time: {
         activation: '18:00',

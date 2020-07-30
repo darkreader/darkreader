@@ -43,6 +43,9 @@ export default class UserStorage {
                     }
                     sync.theme = {...DEFAULT_SETTINGS.theme, ...sync.theme};
                     sync.time = {...DEFAULT_SETTINGS.time, ...sync.time};
+                    sync.presets.forEach((preset) => {
+                        preset.theme = {...DEFAULT_SETTINGS.theme, ...preset.theme};
+                    });
                     sync.customThemes.forEach((site) => {
                         site.theme = {...DEFAULT_SETTINGS.theme, ...site.theme};
                     });
@@ -55,6 +58,15 @@ export default class UserStorage {
     async saveSettings() {
         const saved = await this.saveSettingsIntoStorage(this.settings);
         this.settings = saved;
+    }
+
+    saveSyncSetting(sync: boolean) {
+        chrome.storage.sync.set({syncSettings: sync}, () => {
+            if (chrome.runtime.lastError) {
+                console.warn('Settings synchronization was disabled due to error:', chrome.runtime.lastError);
+            }
+        });
+        chrome.storage.local.set({syncSettings: sync});
     }
 
     private saveSettingsIntoStorage(settings: UserSettings) {

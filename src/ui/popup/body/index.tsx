@@ -148,7 +148,6 @@ function AppVersion() {
 export default function Body(props: ViewProps) {
     const context = getContext();
     context.onCreate(() => {
-        document.documentElement.classList.add('preview');
         if (isMobile()) {
             window.addEventListener('contextmenu', (e) => e.preventDefault());
         }

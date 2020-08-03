@@ -3,17 +3,64 @@ import ThemeEngines from '../../../../generators/theme-engines';
 import {getLocalMessage} from '../../../../utils/locales';
 import {DropDown} from '../../../controls';
 import ThemeControl from './theme-control';
-import {isFirefox} from '../../../../utils/platform';
+import {isFirefox, isMobile} from '../../../../utils/platform';
 
 export default function Mode(props: {mode: string; onChange: (mode: string) => void}) {
 
-    function openCSSEditor() {
-        chrome.windows.create({
-            type: 'panel',
-            url: isFirefox() ? '../stylesheet-editor/index.html' : 'ui/stylesheet-editor/index.html',
-            width: 600,
-            height: 600,
+    function getCSSEditorObject(): Promise<chrome.windows.Window> | Promise<chrome.tabs.Tab> {
+        if (isMobile()) {
+            return new Promise<chrome.tabs.Tab>((resolve) => {
+                chrome.tabs.query({}, (t) => {
+                    for (const tab of t) {
+                        if (tab.url.endsWith('ui/stylesheet-editor/index.html')) {
+                            resolve(tab);
+                            return;
+                        }
+                    }
+                    resolve(null);
+                });
+            });
+        }
+        return new Promise<chrome.windows.Window>((resolve) => {
+            chrome.windows.getAll({
+                populate: true,
+                windowTypes: ['popup']
+            }, (w) => {
+                for (const window of w) {
+                    if (window.tabs[0].url.endsWith('ui/stylesheet-editor/index.html')) {
+                        resolve(window);
+                        return;
+                    }
+                }
+                resolve(null);
+            });
         });
+    }
+    
+    async function openCSSEditor() {
+        const cssEditorObject = await getCSSEditorObject();
+        if (isMobile()) {
+            if (cssEditorObject) {
+                chrome.tabs.update(cssEditorObject.id, {'active': true});
+                window.close();
+            } else {
+                chrome.tabs.create({
+                    url: '../stylesheet-editor/index.html',
+                });
+                window.close();
+            }
+        } else {
+            if (cssEditorObject) {
+                chrome.windows.update(cssEditorObject.id, {'focused': true});
+            } else {
+                chrome.windows.create({
+                    type: 'popup',
+                    url: isFirefox() ? '../stylesheet-editor/index.html' : 'ui/stylesheet-editor/index.html',
+                    width: 600,
+                    height: 600,
+                });
+            }
+        }
     }
 
     const modes = [

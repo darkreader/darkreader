@@ -35,6 +35,11 @@ export default class UserStorage {
 
                 chrome.storage.sync.get({...DEFAULT_SETTINGS, config: 'empty'}, ($sync: UserSettings & {config: any}) => {
                     let sync: UserSettings;
+                    if (!$sync) {
+                        this.saveSyncSetting(false);
+                        resolve(this.loadSettingsFromStorage());
+                        return;
+                    }
                     if ($sync.config === 'empty') {
                         delete $sync.config;
                         sync = $sync;

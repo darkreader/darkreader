@@ -17,6 +17,7 @@ export default function SiteListPage(props: ViewProps) {
                 siteList={props.data.settings.siteList}
                 onChange={onSiteListChange}
             />
+            <label class="site-list-page__description">Enter website name and press Enter</label>
         </div>
     );
 }

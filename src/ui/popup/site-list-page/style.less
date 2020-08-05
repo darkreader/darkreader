@@ -5,6 +5,14 @@
     display: flex;
     flex-direction: column;
     justify-content: stretch;
+
+    &__description {
+        font-size: @size-text-small;
+        line-height: @size-text-small-height;
+        margin: 0;
+        text-align: center;
+        white-space: nowrap;
+    }
 }
 
 .site-list {
@@ -13,9 +21,10 @@
     border-radius: @size-border;
     display: flex;
     flex-direction: column;
-    height: 21rem;
     justify-content: flex-start;
-    width: 100%;
+    max-height: 20rem;
+    overflow: hidden;
+    width: calc(100% - 2 * @size-border);
 
     &__v-scroll-root {
         overflow-x: hidden;
@@ -23,10 +32,6 @@
 
         &::-webkit-scrollbar {
             width: @size-scrollbar-thickness;
-
-            &-thumb {
-                border-radius: @size-scrollbar-thickness / 2;
-            }
         }
     }
 
@@ -36,7 +41,7 @@
         width: 100%;
 
         &:focus {
-            box-shadow: 0 0 0.25rem black;
+            box-shadow: 0 0 0 @size-border @color-border;
             z-index: 1;
         }
     }

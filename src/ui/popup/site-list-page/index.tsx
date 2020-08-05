@@ -16,8 +16,8 @@ export default function SiteListPage(props: ViewProps) {
             <SiteList
                 siteList={props.data.settings.siteList}
                 onChange={onSiteListChange}
-                autoFocus
             />
+            <label class="site-list-page__description">Enter website name and press Enter</label>
         </div>
     );
 }

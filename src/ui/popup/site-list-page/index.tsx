@@ -16,7 +16,6 @@ export default function SiteListPage(props: ViewProps) {
             <SiteList
                 siteList={props.data.settings.siteList}
                 onChange={onSiteListChange}
-                autoFocus
             />
         </div>
     );

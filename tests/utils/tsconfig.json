@@ -6,7 +6,8 @@
         "types": [
             "jest",
             "node",
-            "chrome"
+            "chrome",
+            "malevic"
         ]
     }
 }

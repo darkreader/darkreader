@@ -15,6 +15,10 @@ export default function VirtualScroll(props: VirtualScrollProps) {
     const {store} = getContext();
 
     function renderContent(root: Element, scrollToIndex: number) {
+        if (root.clientWidth === 0) {
+            return;
+        }
+
         if (store.itemHeight == null) {
             const tempItem = {
                 ...props.items[0],

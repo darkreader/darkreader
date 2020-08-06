@@ -51,17 +51,17 @@ export function getModifiableCSSDeclaration(property: string, value: string, rul
     return null;
 }
 
-export function getModifiedUserAgentStyle(theme: Theme, isIFrame: boolean, styleStandardElements: boolean) {
+export function getModifiedUserAgentStyle(theme: Theme, isIFrame: boolean, styleSystemControls: boolean) {
     const lines: string[] = [];
     if (!isIFrame) {
         lines.push('html {');
         lines.push(`    background-color: ${modifyBackgroundColor({r: 255, g: 255, b: 255}, theme)} !important;`);
         lines.push('}');
     }
-    lines.push(`${isIFrame ? '' : 'html, body, '}${styleStandardElements ? '' : 'input, textarea, select, button'} {`);
+    lines.push(`${isIFrame ? '' : 'html, body, '}${styleSystemControls ? 'input, textarea, select, button' : ''} {`);
     lines.push(`    background-color: ${modifyBackgroundColor({r: 255, g: 255, b: 255}, theme)};`);
     lines.push('}');
-    lines.push('html, body, input, textarea, select, button {');
+    lines.push(`html, body, ${styleSystemControls ? 'input, textarea, select, button' : ''} {`);
     lines.push(`    border-color: ${modifyBorderColor({r: 76, g: 76, b: 76}, theme)};`);
     lines.push(`    color: ${modifyForegroundColor({r: 0, g: 0, b: 0}, theme)};`);
     lines.push('}');

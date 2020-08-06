@@ -1,6 +1,7 @@
 import {UserSettings} from '../definitions';
 import {isIPV6, compareIPV6} from './ipv6';
 import {isMobile, isFirefox} from './platform';
+import {getExtensionPageObject} from '../ui/utils';
 
 export function getURLHostOrProtocol($url: string) {
     const url = new URL($url);
@@ -155,36 +156,6 @@ export function isURLEnabled(url: string, userSettings: UserSettings, {isProtect
         return true;
     }
     return (!isInDarkList && !isURLInUserList);
-}
-
-function getExtensionPageObject(path: string): Promise<chrome.windows.Window> | Promise<chrome.tabs.Tab> {
-    if (isMobile()) {
-        return new Promise<chrome.tabs.Tab>((resolve) => {
-            chrome.tabs.query({}, (t) => {
-                for (const tab of t) {
-                    if (tab.url.endsWith(path)) {
-                        resolve(tab);
-                        return;
-                    }
-                }
-                resolve(null);
-            });
-        });
-    }
-    return new Promise<chrome.windows.Window>((resolve) => {
-        chrome.windows.getAll({
-            populate: true,
-            windowTypes: ['popup']
-        }, (w) => {
-            for (const window of w) {
-                if (window.tabs[0].url.endsWith(path)) {
-                    resolve(window);
-                    return;
-                }
-            }
-            resolve(null);
-        });
-    });
 }
 
 export async function openExtensionPage(path: string) {

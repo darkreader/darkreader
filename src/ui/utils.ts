@@ -1,4 +1,4 @@
-import {isFirefox} from '../utils/platform';
+import {isFirefox, isMobile} from '../utils/platform';
 
 export function classes(...args: (string | {[cls: string]: boolean})[]) {
     const classes = [];
@@ -121,4 +121,34 @@ function onSwipeStart(
 
 export function createSwipeHandler(startHandler: StartSwipeHandler) {
     return (e: MouseEvent | TouchEvent) => onSwipeStart(e, startHandler);
+}
+
+export function getExtensionPageObject(path: string): Promise<chrome.windows.Window> | Promise<chrome.tabs.Tab> {
+    if (isMobile()) {
+        return new Promise<chrome.tabs.Tab>((resolve) => {
+            chrome.tabs.query({}, (t) => {
+                for (const tab of t) {
+                    if (tab.url.endsWith(path)) {
+                        resolve(tab);
+                        return;
+                    }
+                }
+                resolve(null);
+            });
+        });
+    }
+    return new Promise<chrome.windows.Window>((resolve) => {
+        chrome.windows.getAll({
+            populate: true,
+            windowTypes: ['popup']
+        }, (w) => {
+            for (const window of w) {
+                if (window.tabs[0].url.endsWith(path)) {
+                    resolve(window);
+                    return;
+                }
+            }
+            resolve(null);
+        });
+    });
 }

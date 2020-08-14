@@ -81,7 +81,7 @@ export class Extension {
         this.fonts = await getFontList();
 
         await this.user.loadSettings();
-        if (this.user.settings.syncSitesFixes) { 
+        if (this.user.settings.syncSitesFixes) {
             await this.config.load({local: false});
         }
         this.onAppToggle();

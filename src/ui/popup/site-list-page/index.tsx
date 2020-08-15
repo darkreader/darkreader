@@ -1,10 +1,14 @@
 import {m} from 'malevic';
 import {ViewProps} from '../types';
 import SiteList from './site-list';
+import CheckButton from '../check-button';
 
 export default function SiteListPage(props: ViewProps) {
     function onSiteListChange(sites: string[]) {
         props.actions.changeSettings({siteList: sites});
+    }
+    function onDisableProtectedCheck(value: boolean) {
+        props.actions.changeSettings({disableProtectedCheck: value});
     }
 
     const label = props.data.settings.applyToListedOnly ?
@@ -18,6 +22,14 @@ export default function SiteListPage(props: ViewProps) {
                 onChange={onSiteListChange}
             />
             <label class="site-list-page__description">Enter website name and press Enter</label>
+            <CheckButton
+                checked={props.data.settings.disableProtectedCheck}
+                onChange={onDisableProtectedCheck}
+                label={'Disable protected check'}
+                description={props.data.settings.disableProtectedCheck ?
+                    'Disabled to check if a site is protected' :
+                    'Enabled to check if a site is protected'}
+            />
         </div>
     );
 }

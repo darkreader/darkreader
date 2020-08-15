@@ -91,7 +91,7 @@ export class Extension {
         this.registerCommands();
 
         this.ready = true;
-        this.tabs.updateContentScript();
+        this.tabs.updateContentScript(this.user.settings.disableProtectedCheck);
 
         this.awaiting.forEach((ready) => ready());
         this.awaiting = null;
@@ -364,7 +364,7 @@ export class Extension {
     private getURLInfo(url: string): TabInfo {
         const {DARK_SITES} = this.config;
         const isInDarkList = isURLInList(url, DARK_SITES);
-        const isProtected = !canInjectScript(url);
+        const isProtected = this.user.settings.disableProtectedCheck ? false : !canInjectScript(url);
         return {
             url,
             isInDarkList,

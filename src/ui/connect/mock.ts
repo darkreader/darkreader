@@ -27,6 +27,7 @@ export function getMockData(override = {} as Partial<ExtensionData>): ExtensionD
             applyToListedOnly: false,
             changeBrowserTheme: false,
             enableForPDF: true,
+            disableProtectedCheck: false,
             notifyOfNews: false,
             syncSettings: true,
             automation: '',

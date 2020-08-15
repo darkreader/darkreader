@@ -23,6 +23,7 @@ export default class UserStorage {
     private loadSettingsFromStorage() {
         return new Promise<UserSettings>((resolve) => {
             chrome.storage.local.get(DEFAULT_SETTINGS, (local: UserSettings) => {
+                local.syncSettings = local.syncSettings || DEFAULT_SETTINGS.syncSettings;
                 if (!local.syncSettings) {
                     local.theme = {...DEFAULT_SETTINGS.theme, ...local.theme};
                     local.time = {...DEFAULT_SETTINGS.time, ...local.time};

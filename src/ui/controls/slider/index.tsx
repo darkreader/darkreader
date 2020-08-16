@@ -168,11 +168,25 @@ export default function Slider(props: SliderProps) {
         stickToStep(getValue(), props.step)
     );
 
+    function onWheel(event: WheelEvent) {
+        event.preventDefault();
+        let value = getValue();
+        // TODO: Add support for props.step
+        value += event.deltaY * -0.05;
+        const {onChange} = store.activeProps;
+        const finalValue = clamp(value, props.min, props.max);
+        onChange(finalValue);
+        store.activeValue = finalValue;
+        context.refresh();
+        return;
+    }
+
     return (
         <span
             class={{'slider': true, 'slider--active': store.isActive}}
             oncreate={onRootCreate}
             onmousedown={onPointerDown}
+            onwheel={onWheel}
         >
             <span
                 class="slider__track"

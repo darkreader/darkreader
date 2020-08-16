@@ -93,8 +93,8 @@ export function getSelectionColor(theme: Theme) {
     let backgroundColorSelection: string;
     let foregroundColorSelection: string;
     if (theme.selectionColor === 'auto') {
-        backgroundColorSelection = modifyBackgroundColor({r: 0, g: 96, b: 212}, theme);
-        foregroundColorSelection = modifyForegroundColor({r: 255, g: 255, b: 255}, theme);
+        backgroundColorSelection = modifyBackgroundColor({r: 0, g: 96, b: 212}, {...theme, grayscale: 0});
+        foregroundColorSelection = modifyForegroundColor({r: 255, g: 255, b: 255}, {...theme, grayscale: 0});
     } else {
         const rgb = parse(theme.selectionColor);
         const hsl = rgbToHSL(rgb);

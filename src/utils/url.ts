@@ -176,7 +176,7 @@ export async function openExtensionPage(path: string) {
         } else {
             chrome.windows.create({
                 type: 'popup',
-                url: isFirefox() || isMobile() ? `../${path}` : `ui/${path}`,
+                url: isFirefox() ? `../${path}` : `ui/${path}`,
                 width: 600,
                 height: 600,
             });

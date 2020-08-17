@@ -13,9 +13,6 @@ export default function HelpGroup() {
                     </span>
                 </a>
             </ControlGroup.Control>
-            <ControlGroup.Description>
-                Read the manual
-            </ControlGroup.Description>
         </ControlGroup>
     );
 }

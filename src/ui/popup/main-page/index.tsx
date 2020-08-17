@@ -2,6 +2,7 @@ import {m} from 'malevic';
 import {NavButton} from '../../controls';
 import {ViewProps} from '../types';
 import AppSwitch from './app-switch';
+import HelpGroup from './help';
 import SiteToggleGroup from './site-toggle';
 import ThemeGroup from './theme-group';
 
@@ -39,6 +40,7 @@ export default function MainPage(props: MainPageProps) {
             </section>
             <section class="m-section">
                 <SettingsNavButton onClick={props.onSettingsNavClick} />
+                <HelpGroup />
             </section>
         </Array>
     );

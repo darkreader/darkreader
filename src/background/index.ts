@@ -1,5 +1,5 @@
 import {Extension} from './extension';
-import {getHelpURL} from '../utils/links';
+import {getHelpURL, UNINSTALL_URL} from '../utils/links';
 
 // Initialize extension
 const extension = new Extension();
@@ -11,11 +11,13 @@ chrome.runtime.onInstalled.addListener(({reason}) => {
     }
 });
 
-declare const __DEBUG__: boolean;
-declare const __PORT__: number;
-const DEBUG = __DEBUG__;
+chrome.runtime.setUninstallURL(UNINSTALL_URL);
 
-if (DEBUG) {
+declare const __WATCH__: boolean;
+declare const __PORT__: number;
+const WATCH = __WATCH__;
+
+if (WATCH) {
     const PORT = __PORT__;
     const listen = () => {
         const socket = new WebSocket(`ws://localhost:${PORT}`);

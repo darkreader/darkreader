@@ -6,7 +6,7 @@ function isArrayLike<T>(items: Iterable<T> | ArrayLike<T>): items is ArrayLike<T
 // https://jsben.ch/kidOp
 export function forEach<T>(items: Iterable<T> | ArrayLike<T>, iterator: (item: T) => void) {
     if (isArrayLike(items)) {
-        for (let i = 0; i < items.length; i++) {
+        for (let i = 0, len = items.length; i < len; i++) {
             iterator(items[i]);
         }
     } else {
@@ -27,7 +27,7 @@ export function push<T>(array: Array<T>, addition: Iterable<T> | ArrayLike<T>) {
 // https://jsben.ch/ZmViL
 export function toArray<T>(items: ArrayLike<T>) {
     const results = [] as Array<T>;
-    for (let i = 0; i < items.length; i++) {
+    for (let i = 0, len = items.length; i < len; i++) {
         results.push(items[i]);
     }
     return results;

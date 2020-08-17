@@ -15,7 +15,7 @@ function readDir(dir) {
 
 function readLocale(name) {
     return new Promise<string>((resolve, reject) => {
-        fsReadFile(resolvePath(__dirname, '../src/_locales/', name), {encoding: 'utf-8'}, (err, data) => {
+        fsReadFile(resolvePath(__dirname, '../../src/_locales/', name), {encoding: 'utf-8'}, (err, data) => {
             if (err) {
                 reject(err);
                 return;
@@ -26,7 +26,7 @@ function readLocale(name) {
 }
 
 test('Locales', async () => {
-    const files = await readDir('../src/_locales');
+    const files = await readDir('../../src/_locales');
     const enLocale = await readLocale('en.config');
     const enLines = enLocale.split('\n');
     const locales: string[] = [];

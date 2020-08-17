@@ -1,0 +1,34 @@
+@import "../../../theme";
+
+.static-edit-button {
+    background-color: @color-heading;
+    border-radius: @size-text-small-height / 2;
+    color: @color-control-fore;
+    cursor: pointer;
+    font-size: @size-text-small;
+    line-height: @size-text-small-height;
+    left: 0.25rem;
+    min-width: @size-text-small-height;
+    position: absolute;
+    text-align: center;
+    top: 0.25rem;
+
+    &--hidden {
+        display: none;
+    }
+
+    &::before {
+        content: "\270E";
+        line-height: @size-text-small-height;
+    }
+
+    &:hover {
+        box-shadow: 0 0 @indent-large @color-control-fore;
+    }
+}
+
+.mode-control-container {
+    height: @size-control-inner;
+    position: relative;
+    width: 100%
+}

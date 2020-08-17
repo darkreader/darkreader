@@ -8,8 +8,10 @@ import AutomationPage from '../automation-page';
 import MainPage from '../main-page';
 import {Page, PageViewer} from '../page-viewer';
 import SettingsPage from '../settings-page';
+import SiteListPage from '../site-list-page';
 import ThemePage from '../theme/page';
 import {ViewProps} from '../types';
+import ManageSettingsPage from '../manage-settings-page';
 
 function Logo() {
     return (
@@ -24,10 +26,19 @@ function Logo() {
     );
 }
 
+type PageId = (
+    'main'
+    | 'theme'
+    | 'settings'
+    | 'site-list'
+    | 'automation'
+    | 'manage-settings'
+);
+
 function Pages(props: ViewProps) {
     const context = getContext();
     const store = context.store as {
-        activePage: 'main' | 'theme' | 'settings' | 'automation';
+        activePage: PageId;
     };
     if (store.activePage == null) {
         store.activePage = 'main';
@@ -48,8 +59,20 @@ function Pages(props: ViewProps) {
         context.refresh();
     }
 
+    function onManageSettingsClick() {
+        store.activePage = 'manage-settings';
+        context.refresh();
+    }
+
+    function onSiteListNavClick() {
+        store.activePage = 'site-list';
+        context.refresh();
+    }
+
     function onBackClick() {
-        if (store.activePage === 'automation') {
+        const activePage = store.activePage;
+        const settingsPageSubpages = ['automation', 'manage-settings', 'site-list'] as PageId[];
+        if (settingsPageSubpages.includes(activePage)) {
             store.activePage = 'settings';
         } else {
             store.activePage = 'main';
@@ -76,11 +99,22 @@ function Pages(props: ViewProps) {
                 <SettingsPage
                     {...props}
                     onAutomationNavClick={onAutomationNavClick}
+                    onManageSettingsClick={onManageSettingsClick}
+                    onSiteListNavClick={onSiteListNavClick}
+                />
+            </Page>
+            <Page id="site-list">
+                <SiteListPage
+                    {...props}
                 />
             </Page>
             <Page id="automation">
                 <AutomationPage {...props} />
             </Page>
+            <Page id="manage-settings">
+                <ManageSettingsPage {...props} />
+            </Page>
+
         </PageViewer>
     );
 }
@@ -100,10 +134,20 @@ function DonateGroup() {
     );
 }
 
-export default function MobileBody(props: ViewProps) {
+let appVersion: string;
+
+function AppVersion() {
+    if (!appVersion) {
+        appVersion = chrome.runtime.getManifest().version;
+    }
+    return (
+        <label class="darkreader-version">Version 5 Preview ({appVersion})</label>
+    );
+}
+
+export default function Body(props: ViewProps) {
     const context = getContext();
     context.onCreate(() => {
-        document.documentElement.classList.add('preview');
         if (isMobile()) {
             window.addEventListener('contextmenu', (e) => e.preventDefault());
         }
@@ -123,6 +167,7 @@ export default function MobileBody(props: ViewProps) {
             <section class="m-section">
                 <DonateGroup />
             </section>
+            <AppVersion />
             <Overlay />
         </body>
     );

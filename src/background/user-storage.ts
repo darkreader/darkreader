@@ -1,4 +1,4 @@
-import {DEFAULT_SETTINGS} from '../defaults';
+import {DEFAULT_SETTINGS, DEFAULT_THEME} from '../defaults';
 import {isURLMatched} from '../utils/url';
 import {UserSettings} from '../definitions';
 
@@ -23,15 +23,24 @@ export default class UserStorage {
     private loadSettingsFromStorage() {
         return new Promise<UserSettings>((resolve) => {
             chrome.storage.local.get(DEFAULT_SETTINGS, (local: UserSettings) => {
+                local.syncSettings = local.syncSettings || DEFAULT_SETTINGS.syncSettings;
                 if (!local.syncSettings) {
                     local.theme = {...DEFAULT_SETTINGS.theme, ...local.theme};
                     local.time = {...DEFAULT_SETTINGS.time, ...local.time};
+                    local.customThemes.forEach((site) => {
+                        site.theme = {...DEFAULT_SETTINGS.theme, ...site.theme};
+                    });
                     resolve(local);
                     return;
                 }
 
                 chrome.storage.sync.get({...DEFAULT_SETTINGS, config: 'empty'}, ($sync: UserSettings & {config: any}) => {
                     let sync: UserSettings;
+                    if (!$sync) {
+                        this.saveSyncSetting(false);
+                        resolve(this.loadSettingsFromStorage());
+                        return;
+                    }
                     if ($sync.config === 'empty') {
                         delete $sync.config;
                         sync = $sync;
@@ -40,6 +49,12 @@ export default class UserStorage {
                     }
                     sync.theme = {...DEFAULT_SETTINGS.theme, ...sync.theme};
                     sync.time = {...DEFAULT_SETTINGS.time, ...sync.time};
+                    sync.presets.forEach((preset) => {
+                        preset.theme = {...DEFAULT_SETTINGS.theme, ...preset.theme};
+                    });
+                    sync.customThemes.forEach((site) => {
+                        site.theme = {...DEFAULT_SETTINGS.theme, ...site.theme};
+                    });
                     resolve(sync);
                 });
             });
@@ -49,6 +64,15 @@ export default class UserStorage {
     async saveSettings() {
         const saved = await this.saveSettingsIntoStorage(this.settings);
         this.settings = saved;
+    }
+
+    saveSyncSetting(sync: boolean) {
+        chrome.storage.sync.set({syncSettings: sync}, () => {
+            if (chrome.runtime.lastError) {
+                console.warn('Settings synchronization was disabled due to error:', chrome.runtime.lastError);
+            }
+        });
+        chrome.storage.local.set({syncSettings: sync});
     }
 
     private saveSettingsIntoStorage(settings: UserSettings) {
@@ -109,6 +133,7 @@ export default class UserStorage {
         function migrateTheme(filterConfig_4_6_2: any) {
             const f = filterConfig_4_6_2;
             return {
+                ...DEFAULT_THEME,
                 mode: f.mode,
                 brightness: f.brightness,
                 contrast: f.contrast,
@@ -119,8 +144,6 @@ export default class UserStorage {
                 textStroke: f.textStroke,
                 engine: f.engine,
                 stylesheet: f.stylesheet,
-                scrollbarColor: f.scrollbarColor,
-                selectionColor: f.selectionColor,
             };
         }
 

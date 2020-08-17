@@ -89,7 +89,7 @@ function link(amount) {
  * @param {number} amount
  */
 function style(amount) {
-    let result = '';;
+    let result = '';
     if (amount === 0) {
         return result;
     }

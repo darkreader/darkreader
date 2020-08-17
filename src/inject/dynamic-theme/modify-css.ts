@@ -3,7 +3,7 @@ import {clamp} from '../../utils/math';
 import {getMatches} from '../../utils/text';
 import {modifyBackgroundColor, modifyBorderColor, modifyForegroundColor, modifyGradientColor, modifyShadowColor, clearColorModificationCache} from '../../generators/modify-colors';
 import {cssURLRegex, getCSSURLValue, getCSSBaseBath} from './css-rules';
-import {getImageDetails, getFilteredImageDataURL, ImageDetails} from './image';
+import {getImageDetails, getFilteredImageDataURL, ImageDetails, cleanImageProcessingCache} from './image';
 import {getAbsoluteURL} from './url';
 import {logWarn, logInfo} from '../utils/log';
 import {FilterConfig, Theme} from '../../definitions';
@@ -19,11 +19,11 @@ export interface ModifiableCSSDeclaration {
 
 export interface ModifiableCSSRule {
     selector: string;
-    media?: string;
+    parentRule: any;
     declarations: ModifiableCSSDeclaration[];
 }
 
-export function getModifiableCSSDeclaration(property: string, value: string, rule: CSSStyleRule, isCancelled: () => boolean): ModifiableCSSDeclaration {
+export function getModifiableCSSDeclaration(property: string, value: string, rule: CSSStyleRule, ignoreImageSelectors: string[], isCancelled: () => boolean): ModifiableCSSDeclaration {
     const important = Boolean(rule && rule.style && rule.style.getPropertyPriority(property));
     const sourceValue = value;
     if (property.startsWith('--')) {
@@ -38,7 +38,7 @@ export function getModifiableCSSDeclaration(property: string, value: string, rul
             return {property, value: modifier, important, sourceValue};
         }
     } else if (property === 'background-image' || property === 'list-style-image') {
-        const modifier = getBgImageModifier(property, value, rule, isCancelled);
+        const modifier = getBgImageModifier(value, rule, ignoreImageSelectors, isCancelled);
         if (modifier) {
             return {property, value: modifier, important, sourceValue};
         }
@@ -89,8 +89,7 @@ export function getModifiedUserAgentStyle(filter: FilterConfig, isIFrame: boolea
     return lines.join('\n');
 }
 
-function getModifiedSelectionStyle(theme: Theme) {
-    const lines: string[] = [];
+export function getSelectionColor(theme: Theme) {
     let backgroundColorSelection: string;
     let foregroundColorSelection: string;
     if (theme.selectionColor === 'auto') {
@@ -106,6 +105,13 @@ function getModifiedSelectionStyle(theme: Theme) {
             foregroundColorSelection = '#000';
         }
     }
+    return {backgroundColorSelection, foregroundColorSelection};
+}
+function getModifiedSelectionStyle(theme: Theme) {
+    const lines: string[] = [];
+    const modifiedSelectionColor = getSelectionColor(theme);
+    const backgroundColorSelection = modifiedSelectionColor.backgroundColorSelection;
+    const foregroundColorSelection = modifiedSelectionColor.foregroundColorSelection;
     ['::selection', '::-moz-selection'].forEach((selection) => {
         lines.push(`${selection} {`);
         lines.push(`    background-color: ${backgroundColorSelection} !important;`);
@@ -152,7 +158,7 @@ function getModifiedScrollbarStyle(theme: Theme) {
     lines.push('::-webkit-scrollbar-thumb:hover {');
     lines.push(`    background-color: ${colorThumbHover};`);
     lines.push('}');
-    lines.push('::-webkit-scrollbar-thumb:active {');;
+    lines.push('::-webkit-scrollbar-thumb:active {');
     lines.push(`    background-color: ${colorThumbActive};`);
     lines.push('}');
     lines.push('::-webkit-scrollbar-corner {');
@@ -166,7 +172,7 @@ function getModifiedScrollbarStyle(theme: Theme) {
 
 export function getModifiedFallbackStyle(filter: FilterConfig, {strict}) {
     const lines: string[] = [];
-    lines.push(`html, body, ${strict ? 'body *' : 'body > *'} {`);
+    lines.push(`html, body, ${strict ? 'body :not(iframe)' : 'body > :not(iframe)'} {`);
     lines.push(`    background-color: ${modifyBackgroundColor({r: 255, g: 255, b: 255}, filter)} !important;`);
     lines.push(`    border-color: ${modifyBorderColor({r: 64, g: 64, b: 64}, filter)} !important;`);
     lines.push(`    color: ${modifyForegroundColor({r: 0, g: 0, b: 0}, filter)} !important;`);
@@ -227,7 +233,20 @@ const gradientRegex = /[\-a-z]+gradient\(([^\(\)]*(\(([^\(\)]*(\(.*?\)))*[^\(\)]
 const imageDetailsCache = new Map<string, ImageDetails>();
 const awaitingForImageLoading = new Map<string, ((imageDetails: ImageDetails) => void)[]>();
 
-function getBgImageModifier(prop: string, value: string, rule: CSSStyleRule, isCancelled: () => boolean): string | CSSValueModifier {
+function shouldIgnoreImage(element: CSSStyleRule, selectors: string[]) {
+    if (!element) {
+        return false;
+    }
+    for (let i = 0; i < selectors.length; i++) {
+        const ingnoredSelector = selectors[i];
+        if (element.selectorText.match(ingnoredSelector)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+function getBgImageModifier(value: string, rule: CSSStyleRule, ignoreImageSelectors: string[], isCancelled: () => boolean): string | CSSValueModifier {
     try {
         const gradients = getMatches(gradientRegex, value);
         const urls = getMatches(cssURLRegex, value);
@@ -305,6 +324,9 @@ function getBgImageModifier(prop: string, value: string, rule: CSSStyleRule, isC
                     imageDetails = imageDetailsCache.get(url);
                 } else {
                     try {
+                        if (shouldIgnoreImage(rule, ignoreImageSelectors)) {
+                            return null;
+                        }
                         if (awaitingForImageLoading.has(url)) {
                             const awaiters = awaitingForImageLoading.get(url);
                             imageDetails = await new Promise<ImageDetails>((resolve) => awaiters.push(resolve));
@@ -419,5 +441,6 @@ export function cleanModificationCache() {
     colorParseCache.clear();
     clearColorModificationCache();
     imageDetailsCache.clear();
+    cleanImageProcessingCache();
     awaitingForImageLoading.clear();
 }

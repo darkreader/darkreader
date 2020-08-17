@@ -42,7 +42,7 @@ export default function AppSwitch(props: ViewProps) {
         }
     }
 
-    const description = isOn ?
+    const descriptionText = isOn ?
         'Extension is enabled' :
         isOff ?
             'Extension is disabled' :
@@ -51,6 +51,17 @@ export default function AppSwitch(props: ViewProps) {
                 isLocationAutomation ?
                     'Switched according to location' :
                     'Switches according to system dark mode';
+    const description = (
+        <span
+            class={{
+                'app-switch__description': true,
+                'app-switch__description--on': props.data.isEnabled,
+                'app-switch__description--off': !props.data.isEnabled,
+            }}
+        >
+            {descriptionText}
+        </span>
+    );
 
     return (
         <ControlGroup class="app-switch">

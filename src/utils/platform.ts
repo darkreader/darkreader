@@ -38,8 +38,10 @@ export function isMacOS() {
 }
 
 export function isMobile() {
-    const agent = navigator.userAgent.toLowerCase();
-    return agent.includes('mobile');
+    if (typeof navigator === 'undefined') {
+        return null;
+    }
+    return navigator.userAgent.toLowerCase().includes('mobile');
 }
 
 export function getChromeVersion() {
@@ -62,27 +64,20 @@ export function compareChromeVersions($a: string, $b: string) {
     return 0;
 }
 
-export function isDeepSelectorSupported() {
-    try {
-        document.querySelector('x /deep/ x');
-        return true;
-    } catch (err) {
-        return false;
-    }
-}
-
-export function isHostSelectorSupported() {
-    try {
-        document.querySelector(':host x');
-        return true;
-    } catch (err) {
-        return false;
-    }
-}
-
 export function isDefinedSelectorSupported() {
     try {
         document.querySelector(':defined');
+        return true;
+    } catch (err) {
+        return false;
+    }
+}
+
+export const IS_SHADOW_DOM_SUPPORTED = typeof ShadowRoot === 'function';
+
+export function isCSSStyleSheetConstructorSupported() {
+    try {
+        new CSSStyleSheet();
         return true;
     } catch (err) {
         return false;

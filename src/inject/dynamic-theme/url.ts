@@ -1,41 +1,24 @@
-export function parseURL(url: string) {
+function fixBaseURL($url: string) {
     const a = document.createElement('a');
-    a.href = url;
-    return a;
+    a.href = $url;
+    return a.href;
 }
 
-function backwards($base: string, $relative: string) {
-    const b = parseURL($base);
-    let pathParts = b.pathname.split('/');
-    pathParts = pathParts.concat(...$relative.split('/')).filter((p) => p);
-    let backwardIndex: number;
-    while ((backwardIndex = pathParts.indexOf('..')) > 0) {
-        pathParts.splice(backwardIndex - 1, 2);
+export function parseURL($url: string, $base: string = null) {
+    if ($base) {
+        $base = fixBaseURL($base);
+        return new URL($url, $base);
     }
-    return pathParts;
+    $url = fixBaseURL($url);
+    return new URL($url);
 }
 
 export function getAbsoluteURL($base: string, $relative: string) {
-    if ($relative.match(/^.*?\/\//) || $relative.match(/^data\:/)) {
-        if ($relative.startsWith('//')) {
-            if ($relative.includes('..')) {
-                return `${location.protocol}${backwards($base, $relative).join('/')}`;
-            }
-            return `${location.protocol}${$relative}`;
-        }
+    if ($relative.match(/^data\:/)) {
         return $relative;
     }
+
     const b = parseURL($base);
-    if ($relative.startsWith('/')) {
-        const u = parseURL(`${b.protocol}//${b.host}${$relative}`);
-        return u.href;
-    }
-    let pathParts = b.pathname.split('/');
-    const lastPathPart = pathParts[pathParts.length - 1];
-    if (lastPathPart.match(/\.[a-z]+$/i)) {
-        pathParts.pop();
-    }
-    pathParts = backwards($base, $relative);
-    const u = parseURL(`${b.protocol}//${b.host}/${pathParts.join('/')}`);
-    return u.href;
+    const a = parseURL($relative, b.href);
+    return a.href;
 }

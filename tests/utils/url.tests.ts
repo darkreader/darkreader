@@ -1,5 +1,5 @@
-import {isURLEnabled, isPDF, isURLMatched, isURLInList} from '../src/utils/url';
-import {UserSettings} from '../src/definitions';
+import {isURLEnabled, isPDF, isURLMatched, isURLInList, getURLHostOrProtocol, } from '../../src/utils/url';
+import {UserSettings} from '../../src/definitions';
 
 test('URL is enabled', () => {
 
@@ -125,6 +125,15 @@ test('URL is enabled', () => {
     expect(isPDF(
         'https://www.google.com/very/good/hidden/folder/pdf#file.pdf'
     )).toBe(false);
+    expect(isPDF(
+        'https://fi.wikipedia.org/wiki/Tiedosto:ExtIPA_chart_(2015).pdf?uselang=en'
+    )).toBe(false);
+    expect(isPDF(
+        'https://commons.wikimedia.org/wiki/File:ExtIPA_chart_(2015).pdf'
+    )).toBe(false);
+    expect(isPDF(
+        'https://upload.wikimedia.org/wikipedia/commons/5/56/ExtIPA_chart_(2015).pdf'
+    )).toBe(true);
 
     // IPV6 Testing
     expect(isURLEnabled(
@@ -178,9 +187,9 @@ test('URL is enabled', () => {
 
 
     // Test Negative patterns
-    expect(isURLMatched('https://www.discordapp.com/', '!blog.discordapp.com')).toBe(true);
-    expect(isURLMatched('https://blog.discordapp.com/', '!blog.discordapp.com')).toBe(false);
-    expect(isURLMatched('https://www.discordapp.com/', '!blog.*.com')).toBe(true);
+    expect(isURLMatched('https://www.discord.com/', '!blog.discord.com')).toBe(true);
+    expect(isURLMatched('https://blog.discord.com/', '!blog.discord.com')).toBe(false);
+    expect(isURLMatched('https://www.discord.com/', '!blog.*.com')).toBe(true);
     expect(isURLMatched('https://blog.example.com/', '!blog.*.com')).toBe(false);
 
 
@@ -189,21 +198,28 @@ test('URL is enabled', () => {
     expect(isURLInList('https://www.google.org', ['google.com', 'example.org'])).toBe(false);
     expect(isURLInList('https://mail.google.com/mail/u/0/', ['example.org', 'google.*/mail/*/0'])).toBe(true);
     expect(isURLInList('https://mail.google.com/mail/u/1/', ['example.org', 'google.*/mail/*/0'])).toBe(false);
-    expect(isURLInList('https://www.discordapp.com', ['discordapp.com', '!blog.discordapp.com'])).toBe(true);
-    expect(isURLInList('https://blog.discordapp.com', ['discordapp.com', '!blog.discordapp.com'])).toBe(false);
-    expect(isURLInList('https://support.discordapp.com', ['discordapp.com', '!blog.discordapp.com'])).toBe(true);
-    expect(isURLInList('https://support.discordapp.com', ['discordapp.com', '!support.discordapp.com'])).toBe(false);
+    expect(isURLInList('https://www.discord.com', ['discord.com', '!blog.discord.com'])).toBe(true);
+    expect(isURLInList('https://blog.discord.com', ['discord.com', '!blog.discord.com'])).toBe(false);
+    expect(isURLInList('https://support.discord.com', ['discord.com', '!blog.discord.com'])).toBe(true);
+    expect(isURLInList('https://support.discord.com', ['discord.com', '!support.discord.com'])).toBe(false);
     expect(isURLInList('https://mail.google.com/compose/', ['google.com', '!mail.google.com', 'mail.google.com/compose'])).toBe(true);
     expect(isURLInList('https://mail.google.com/', ['google.com', '!mail.google.com', 'mail.google.com/compose'])).toBe(false);
 
     
     // Test Custom Regex
-    expect(isURLMatched('https://discordapp.com', '/^(https:\/\/)(?!blog|support)([a-z0-9.]+)(.com)$/i')).toBe(true);
-    expect(isURLMatched('https://support.discordapp.com', '/^(https:\/\/)(?!blog|support)([a-z0-9.]+)(.com)$/i')).toBe(false);
-    expect(isURLMatched('https://blog.discordapp.com', '/^(https:\/\/)(?!blog|support)([a-z0-9.]+)(.com)$/i')).toBe(false);
-    expect(isURLMatched('https://www.discordapp.com', '/^(https:\/\/)(?!blog|support)([a-z0-9.]+)(.com)$/i')).toBe(true);
-    expect(isURLInList('https://blog.discordapp.com', ['/^(https:\/\/)(?!blog|support)([a-z0-9.]+)(.com)$/i', 'blog.discordapp.com'])).toBe(true);
-    expect(isURLInList('https://support.discordapp.com', ['/^(https:\/\/)(?!blog|support)([a-z0-9.]+)(.com)$/i', 'blog.discordapp.com'])).toBe(false);
+    expect(isURLMatched('https://discord.com', '/^(https:\/\/)(?!blog|support)([a-z0-9.]+)(.com)$/i')).toBe(true);
+    expect(isURLMatched('https://support.discord.com', '/^(https:\/\/)(?!blog|support)([a-z0-9.]+)(.com)$/i')).toBe(false);
+    expect(isURLMatched('https://blog.discord.com', '/^(https:\/\/)(?!blog|support)([a-z0-9.]+)(.com)$/i')).toBe(false);
+    expect(isURLMatched('https://www.discord.com', '/^(https:\/\/)(?!blog|support)([a-z0-9.]+)(.com)$/i')).toBe(true);
+    expect(isURLInList('https://blog.discord.com', ['/^(https:\/\/)(?!blog|support)([a-z0-9.]+)(.com)$/i', 'blog.discord.com'])).toBe(true);
+    expect(isURLInList('https://support.discord.com', ['/^(https:\/\/)(?!blog|support)([a-z0-9.]+)(.com)$/i', 'blog.discord.com'])).toBe(false);
+
+    // Test subdomain
+    expect(isURLMatched('https://discord.com', 'discord.com')).toBe(true);
+    expect(isURLMatched('https://support.discord.com', 'discord.com')).toBe(true);
+    expect(isURLInList('https://blog.discord.com', ['!blog.discord.com'])).toBe(false);
+    expect(isURLInList('https://blog.discord.com', ['!blog.discord.com', 'discord.com'])).toBe(false);
+    expect(isURLInList('https://discord.com', ['!blog.discord.com', 'discord.com'])).toBe(true);
 
     // Temporary Dark Sites list fix
     expect(isURLEnabled(
@@ -221,4 +237,14 @@ test('URL is enabled', () => {
         {siteList: [], siteListEnabled: ['darkreader.org'], applyToListedOnly: false} as UserSettings,
         {isProtected: false, isInDarkList: false},
     )).toBe(true);
+});
+
+test('Get URL host or protocol', () => {
+    expect(getURLHostOrProtocol('https://www.google.com')).toBe('www.google.com');
+    expect(getURLHostOrProtocol('https://www.google.com/maps')).toBe('www.google.com');
+    expect(getURLHostOrProtocol('http://localhost:8080')).toBe('localhost:8080');
+    expect(getURLHostOrProtocol('about:blank')).toBe('about:');
+    expect(getURLHostOrProtocol('http://user:pass@www.example.org')).toBe('www.example.org');
+    expect(getURLHostOrProtocol('data:text/html,<html>Hello</html>')).toBe('data:');
+    expect(getURLHostOrProtocol('file:///Users/index.html')).toBe('file:');
 });

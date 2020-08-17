@@ -300,7 +300,13 @@ export class Extension {
         const siteList = isInDarkList ?
             this.user.settings.siteListEnabled.slice() :
             this.user.settings.siteList.slice();
-        const pattern = getURLHostOrProtocol(url);
+        let pattern = getURLHostOrProtocol(url);
+        
+        const maindomain = pattern.substr(pattern.indexOf('.') + 1);
+        if (siteList.indexOf(maindomain) > -1) {
+            pattern = `!${pattern}`;
+        }
+
         const index = siteList.indexOf(pattern);
         if (index < 0) {
             siteList.push(pattern);

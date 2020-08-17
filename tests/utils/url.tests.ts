@@ -1,4 +1,4 @@
-import {isURLEnabled, isPDF, isURLMatched, isURLInList, getURLHostOrProtocol, } from '../../src/utils/url';
+import {isURLEnabled, isPDF, isURLMatched, isURLInList, getURLHostOrProtocol} from '../../src/utils/url';
 import {UserSettings} from '../../src/definitions';
 
 test('URL is enabled', () => {
@@ -205,7 +205,7 @@ test('URL is enabled', () => {
     expect(isURLInList('https://mail.google.com/compose/', ['google.com', '!mail.google.com', 'mail.google.com/compose'])).toBe(true);
     expect(isURLInList('https://mail.google.com/', ['google.com', '!mail.google.com', 'mail.google.com/compose'])).toBe(false);
 
-    
+
     // Test Custom Regex
     expect(isURLMatched('https://discord.com', '/^(https:\/\/)(?!blog|support)([a-z0-9.]+)(.com)$/i')).toBe(true);
     expect(isURLMatched('https://support.discord.com', '/^(https:\/\/)(?!blog|support)([a-z0-9.]+)(.com)$/i')).toBe(false);

@@ -15,8 +15,8 @@ function makeRegexp(pattern: string) {
     }
     if (pattern[0] === '/') {
         const flag = pattern.substr(pattern.lastIndexOf('/') + 1);
-        pattern = pattern.substr(1).substr(0, pattern.lastIndexOf('/') -1);
-        const regexp = new RegExp(pattern, flag)
+        pattern = pattern.substr(1).substr(0, pattern.lastIndexOf('/') - 1);
+        const regexp = new RegExp(pattern, flag);
         const regObject: MatchInterface = {
             regexp,
             negated,
@@ -39,7 +39,7 @@ export function isMatch(input: string, pattern: string) {
     }
     if (pattern[0] === '/') {
         const flag = pattern.substr(pattern.lastIndexOf('/') + 1);
-        pattern = pattern.substr(1).substr(0, pattern.lastIndexOf('/') -1);
+        pattern = pattern.substr(1).substr(0, pattern.lastIndexOf('/') - 1);
         return (new RegExp(pattern, flag)).test(input);
     }
     input = (input

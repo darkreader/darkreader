@@ -178,7 +178,6 @@ export default function Slider(props: SliderProps) {
         onChange(finalValue);
         store.activeValue = finalValue;
         context.refresh();
-        return;
     }
 
     return (

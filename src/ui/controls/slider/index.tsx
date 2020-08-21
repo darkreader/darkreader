@@ -1,5 +1,6 @@
 import {m} from 'malevic';
 import {getContext} from 'malevic/dom';
+import {throttle} from '../../../inject/utils/throttle';
 
 interface SliderProps {
     value: number;
@@ -39,6 +40,7 @@ export default function Slider(props: SliderProps) {
         trackNode: HTMLElement;
         thumbNode: HTMLElement;
     };
+    let scrollTimer: number = null;
 
     store.activeProps = props;
 
@@ -169,14 +171,19 @@ export default function Slider(props: SliderProps) {
     );
 
     function onWheel(event: WheelEvent) {
+        clearTimeout(scrollTimer);
+        scrollTimer = setTimeout(() => {
+            const {onChange} = store.activeProps;
+            onChange(store.activeValue);
+        }, 600);
+
         event.preventDefault();
         let value = getValue();
-        const {onChange} = store.activeProps;
         value += event.deltaY * (props.max - props.min) * -0.001;
-        const finalValue = stickToStep(clamp(value, props.min, props.max), props.step);
-        onChange(finalValue);
-        store.activeValue = finalValue;
-        context.refresh();
+        store.activeValue = stickToStep(clamp(value, props.min, props.max), props.step);
+        throttle(() => {
+            context.refresh();
+        })
     }
 
     return (

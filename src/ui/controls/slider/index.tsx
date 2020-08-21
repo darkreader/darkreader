@@ -39,8 +39,9 @@ export default function Slider(props: SliderProps) {
         activeProps: SliderProps;
         trackNode: HTMLElement;
         thumbNode: HTMLElement;
+        wheelTimeoutId: number;
+        wheelDelta: number;
     };
-    let scrollTimer: number = null;
 
     store.activeProps = props;
 
@@ -170,20 +171,29 @@ export default function Slider(props: SliderProps) {
         stickToStep(getValue(), props.step)
     );
 
-    function onWheel(event: WheelEvent) {
-        clearTimeout(scrollTimer);
-        scrollTimer = setTimeout(() => {
+    const refreshOnWheel = throttle(() => {
+        let value = getValue();
+        value += store.wheelDelta * (props.max - props.min) * -0.001;
+        store.wheelDelta = null;
+        store.activeValue = stickToStep(clamp(value, props.min, props.max), props.step);
+        store.wheelTimeoutId = setTimeout(() => {
             const {onChange} = store.activeProps;
             onChange(store.activeValue);
-        }, 600);
+            store.isActive = false;
+            store.activeValue = null;
+        }, 400);
+        context.refresh();
+    });
 
+    function onWheel(event: WheelEvent) {
+        if (store.wheelDelta == null) {
+            store.wheelDelta = 0;
+        }
+        store.isActive = true;
+        clearTimeout(store.wheelTimeoutId);
         event.preventDefault();
-        let value = getValue();
-        value += event.deltaY * (props.max - props.min) * -0.001;
-        store.activeValue = stickToStep(clamp(value, props.min, props.max), props.step);
-        throttle(() => {
-            context.refresh();
-        })
+        store.wheelDelta += event.deltaY;
+        refreshOnWheel();
     }
 
     return (

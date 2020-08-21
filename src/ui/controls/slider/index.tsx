@@ -171,10 +171,9 @@ export default function Slider(props: SliderProps) {
     function onWheel(event: WheelEvent) {
         event.preventDefault();
         let value = getValue();
-        // TODO: Add support for props.step
-        value += event.deltaY * -0.05;
         const {onChange} = store.activeProps;
-        const finalValue = clamp(value, props.min, props.max);
+        value += event.deltaY * (props.max - props.min) * -0.001;
+        const finalValue = stickToStep(clamp(value, props.min, props.max), props.step);
         onChange(finalValue);
         store.activeValue = finalValue;
         context.refresh();

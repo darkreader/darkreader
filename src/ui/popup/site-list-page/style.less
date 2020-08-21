@@ -5,60 +5,44 @@
     display: flex;
     flex-direction: column;
     justify-content: stretch;
+
+    &__description {
+        font-size: @size-text-small;
+        line-height: @size-text-small-height;
+        margin: 0;
+        text-align: center;
+        white-space: nowrap;
+    }
 }
 
 .site-list {
     align-items: stretch;
+    border: @size-border solid @color-border;
+    border-radius: @size-border;
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    width: 100%;
+    justify-content: flex-start;
+    max-height: 20rem;
+    overflow: hidden;
+    width: calc(100% - 2 * @size-border);
 
-    &__editor {
-        background-color: @color-back;
-        border: @size-border solid @color-border;
-        border-radius: 2 * @size-border;
-        box-sizing: border-box;
-        color: @color-input-fore;
-        flex: auto;
-        height: 19rem;
-        outline: none;
-        padding: @indent-small;
-        resize: none;
+    &__v-scroll-root {
+        overflow-x: hidden;
+        overflow-y: auto;
 
-        &::placeholder {
-            color: @color-input-fore-placeholder;
+        &::-webkit-scrollbar {
+            width: @size-scrollbar-thickness;
         }
     }
 
-    &__buttons {
-        display: flex;
-        flex-direction: row;
-        margin-top: @indent-small;
-    }
+    &__textbox {
+        border: none;
+        position: relative;
+        width: 100%;
 
-    &__button {
-        border-radius: @size-control-inner / 2 + @size-border;
-        flex: auto;
-    }
-
-    &__button-apply {
-        margin-left: @indent-small;
-
-        &__content {
-            align-items: center;
-            display: inline-flex;
-            justify-content: center;
-        }
-
-        &__icon {
-            background-image: @icon-check;
-            background-position: center;
-            background-repeat: no-repeat;
-            background-size: 0.75rem;
-            display: inline-block;
-            height: 1rem;
-            width: 1rem;
+        &:focus {
+            box-shadow: 0 0 0 @size-border @color-border;
+            z-index: 1;
         }
     }
 }

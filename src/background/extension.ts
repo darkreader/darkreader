@@ -9,7 +9,7 @@ import {setWindowTheme, resetWindowTheme} from './window-theme';
 import {getFontList, getCommands, setShortcut, canInjectScript} from './utils/extension-api';
 import {isFirefox} from '../utils/platform';
 import {isInTimeInterval, getDuration, isNightAtLocation} from '../utils/time';
-import {isURLInList, getURLHost, isURLEnabled} from '../utils/url';
+import {isURLInList, getURLHostOrProtocol, isURLEnabled} from '../utils/url';
 import ThemeEngines from '../generators/theme-engines';
 import createCSSFilterStylesheet from '../generators/css-filter';
 import {getDynamicThemeFixesFor} from '../generators/dynamic-theme';
@@ -81,7 +81,7 @@ export class Extension {
         this.fonts = await getFontList();
 
         await this.user.loadSettings();
-        if (this.user.settings.syncSitesFixes) { 
+        if (this.user.settings.syncSitesFixes) {
             await this.config.load({local: false});
         }
         this.onAppToggle();
@@ -300,7 +300,7 @@ export class Extension {
         const siteList = isInDarkList ?
             this.user.settings.siteListEnabled.slice() :
             this.user.settings.siteList.slice();
-        const pattern = getURLHost(url);
+        const pattern = getURLHostOrProtocol(url);
         const index = siteList.indexOf(pattern);
         if (index < 0) {
             siteList.push(pattern);

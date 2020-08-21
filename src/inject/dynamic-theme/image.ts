@@ -1,6 +1,6 @@
 import {getSVGFilterMatrixValue} from '../../generators/svg-filter';
 import {bgFetch} from './network';
-import {getURLHost} from '../../utils/url';
+import {getURLHostOrProtocol} from '../../utils/url';
 import {loadAsDataURL} from '../../utils/network';
 import {FilterConfig} from '../../definitions';
 
@@ -34,7 +34,7 @@ export async function getImageDetails(url: string) {
 }
 
 async function getImageDataURL(url: string) {
-    if (getURLHost(url) === location.host) {
+    if (getURLHostOrProtocol(url) === (location.host || location.protocol)) {
         return await loadAsDataURL(url);
     }
     return await bgFetch({url, responseType: 'data-url'});

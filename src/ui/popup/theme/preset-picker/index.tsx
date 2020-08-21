@@ -1,7 +1,7 @@
 import {m} from 'malevic';
 import {getContext} from 'malevic/dom';
 import {ThemePreset} from '../../../../definitions';
-import {isURLInList, isURLMatched, getURLHost} from '../../../../utils/url';
+import {isURLInList, isURLMatched, getURLHostOrProtocol} from '../../../../utils/url';
 import {DropDown, MessageBox} from '../../../controls';
 import {ViewProps} from '../../types';
 import {generateUID} from '../../../../utils/uid';
@@ -46,7 +46,7 @@ function PresetItem(props: ViewProps & {preset: ThemePreset}) {
 const MAX_ALLOWED_PRESETS = 3;
 
 export default function PresetPicker(props: ViewProps) {
-    const host = getURLHost(props.tab.url || '');
+    const host = getURLHostOrProtocol(props.tab.url);
     const preset = props.data.settings.presets.find(
         ({urls}) => isURLInList(props.tab.url, urls)
     );

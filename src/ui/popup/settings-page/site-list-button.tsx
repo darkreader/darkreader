@@ -7,6 +7,7 @@ export default function SiteListButton(props: {onClick: () => void}) {
         <ControlGroup>
             <ControlGroup.Control>
                 <NavButton onClick={props.onClick}>
+                    <span class="site-list-button-icon"></span>
                     Site list
                 </NavButton>
             </ControlGroup.Control>

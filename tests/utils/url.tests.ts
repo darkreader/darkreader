@@ -59,17 +59,17 @@ test('URL is enabled', () => {
     // Special URLs
     expect(isURLEnabled(
         'https://chrome.google.com/webstore',
-        {siteList: ['chrome.google.com'], siteListEnabled: [], applyToListedOnly: false} as UserSettings,
+        {siteList: ['chrome.google.com'], siteListEnabled: [], applyToListedOnly: false, enableForProtectedPages: false} as UserSettings,
         {isProtected: true, isInDarkList: false},
     )).toBe(false);
     expect(isURLEnabled(
         'https://chrome.google.com/webstore',
-        {siteList: ['chrome.google.com'], siteListEnabled: [], applyToListedOnly: true} as UserSettings,
+        {siteList: ['chrome.google.com'], siteListEnabled: [], applyToListedOnly: true, enableForProtectedPages: false} as UserSettings,
         {isProtected: true, isInDarkList: false},
     )).toBe(false);
     expect(isURLEnabled(
         'https://chrome.google.com/webstore',
-        {siteList: [], siteListEnabled: [], applyToListedOnly: false, enableForProtectedPages: false} as UserSettings,
+        {siteList: [], siteListEnabled: [], applyToListedOnly: false, enableForProtectedPages: true} as UserSettings,
         {isProtected: true, isInDarkList: false},
     )).toBe(true);
     expect(isURLEnabled(
@@ -79,12 +79,12 @@ test('URL is enabled', () => {
     )).toBe(false);
     expect(isURLEnabled(
         'https://microsoftedge.microsoft.com/addons',
-        {siteList: ['microsoftedge.microsoft.com'], siteListEnabled: [], applyToListedOnly: false} as UserSettings,
+        {siteList: ['microsoftedge.microsoft.com'], siteListEnabled: [], applyToListedOnly: false, enableForProtectedPages: false} as UserSettings,
         {isProtected: true, isInDarkList: false},
     )).toBe(false);
     expect(isURLEnabled(
         'https://microsoftedge.microsoft.com/addons',
-        {siteList: ['microsoftedge.microsoft.com'], siteListEnabled: [], applyToListedOnly: true} as UserSettings,
+        {siteList: ['microsoftedge.microsoft.com'], siteListEnabled: [], applyToListedOnly: true, enableForProtectedPages: false} as UserSettings,
         {isProtected: true, isInDarkList: false},
     )).toBe(false);
     expect(isURLEnabled(

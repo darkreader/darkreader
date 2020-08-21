@@ -15,13 +15,8 @@ function Body({data, tab, actions}: BodyProps) {
     const previewButtonText = data.settings.previewNewDesign ? 'Switch to old design' : 'Preview new design';
     const {theme} = getCurrentThemePreset({data, tab, actions});
 
-    const wrapper = (theme.engine === ThemeEngines.staticTheme
+    const wrapper = (theme.engine === ThemeEngines.cssFilter || theme.engine === ThemeEngines.svgFilter 
         ? {
-            header: 'Static Theme Editor',
-            fixesText: data.devtools.staticThemesText,
-            apply: (text) => actions.applyDevStaticThemes(text),
-            reset: () => actions.resetDevStaticThemes(),
-        } : theme.engine === ThemeEngines.cssFilter || theme.engine === ThemeEngines.svgFilter ? {
             header: 'Inversion Fix Editor',
             fixesText: data.devtools.filterFixesText,
             apply: (text) => actions.applyDevInversionFixes(text),

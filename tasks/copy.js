@@ -12,6 +12,7 @@ const cwdPaths = [
     'ui/assets/**/*.*',
     'ui/popup/compatibility.js',
     'manifest.json',
+    'static/**/*.css'
 ];
 const paths = cwdPaths.map((path) => `${srcDir}/${path}`);
 

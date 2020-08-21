@@ -130,7 +130,6 @@ export class Extension {
             applyDevInversionFixes: (text) => this.devtools.applyInversionFixes(text),
             resetDevInversionFixes: () => this.devtools.resetInversionFixes(),
             applyDevStaticTheme: (text, url) => this.devtools.applyStaticTheme(text, url),
-            resetDevStaticTheme: (url) => this.devtools.resetStaticTheme(url),
         };
     }
 
@@ -181,10 +180,8 @@ export class Extension {
             devtools: {
                 dynamicFixesText: this.devtools.getDynamicThemeFixesText(),
                 filterFixesText: this.devtools.getInversionFixesText(),
-                staticThemesText: this.devtools.getStaticThemesText(),
                 hasCustomDynamicFixes: this.devtools.hasCustomDynamicThemeFixes(),
                 hasCustomFilterFixes: this.devtools.hasCustomFilterFixes(),
-                hasCustomStaticFixes: this.devtools.hasCustomStaticFixes(),
             },
         };
     }
@@ -372,7 +369,7 @@ export class Extension {
         };
     }
 
-    private getTabMessage = (url: string, frameURL: string) => {
+    private getTabMessage = async (url: string, frameURL: string) => {
         const urlInfo = this.getURLInfo(url);
         if (this.isEnabled() && isURLEnabled(url, this.user.settings, urlInfo)) {
             const custom = this.user.settings.customThemes.find(({url: urlList}) => isURLInList(url, urlList));
@@ -406,7 +403,7 @@ export class Extension {
                 case ThemeEngines.staticTheme: {
                     const style = theme.stylesheet && theme.stylesheet.trim() ?
                         theme.stylesheet :
-                        createStaticStylesheet(getURLHost(url), getURLHost(frameURL)),
+                        await createStaticStylesheet(getURLHostOrProtocol(url))
                     return {
                         type: 'add-static-theme',
                         data: {style, theme}

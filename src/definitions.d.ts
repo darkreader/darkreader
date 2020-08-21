@@ -27,7 +27,6 @@ export interface ExtensionActions {
     applyDevInversionFixes(text: string): Promise<void>;
     resetDevInversionFixes();
     applyDevStaticTheme(text: string, url: string): Promise<void>;
-    resetDevStaticTheme(url: string);
 }
 
 export interface ExtWrapper {

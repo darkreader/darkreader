@@ -1,6 +1,6 @@
 import {parseInversionFixes, formatInversionFixes} from '../generators/css-filter';
 import {parseDynamicThemeFixes, formatDynamicThemeFixes} from '../generators/dynamic-theme';
-import createStaticStylesheet, {parseStaticThemes, formatStaticThemes} from '../generators/static-theme';
+import createStaticStylesheet from '../generators/static-theme';
 import ConfigManager from './config-manager';
 
 interface DevToolsStorage {
@@ -180,8 +180,7 @@ export default class DevTools {
 
     applyStaticTheme(text: string, url: string) {
         try {
-            this.config.overrides.staticThemes = formatted;
-            this.config.handleStaticThemes();
+            this.config.overrides.staticThemes = text;
             this.saveStaticTheme(text, url);
             this.onChange();
             return null;

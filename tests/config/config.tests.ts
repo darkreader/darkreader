@@ -4,7 +4,6 @@ import {compareURLPatterns} from '../../src/utils/url';
 import {parseArray, formatArray, getTextDiffIndex, getTextPositionMessage} from '../../src/utils/text';
 import {parseInversionFixes, formatInversionFixes} from '../../src/generators/css-filter';
 import {parseDynamicThemeFixes, formatDynamicThemeFixes} from '../../src/generators/dynamic-theme';
-import {parseStaticThemes, formatStaticThemes} from '../../src/generators/static-theme';
 
 function readConfig(fileName) {
     return new Promise<string>((resolve, reject) => {
@@ -113,27 +112,4 @@ test('Inversion Fixes config', async () => {
 
     // fixes are properly formatted
     expect(throwIfDifferent(file, formatInversionFixes(fixes), 'Inversion fixes format error')).not.toThrow();
-});
-
-test('Static Themes config', async () => {
-    const file = await readConfig('static-themes.config');
-    const themes = parseStaticThemes(file);
-
-    // there is a common theme
-    expect(themes[0].url[0]).toEqual('*');
-
-    // each theme has valid URL
-    expect(themes.every(({url}) => url.every(isURLPatternValid))).toBe(true);
-
-    // themes are sorted alphabetically
-    expect(themes.map(({url}) => url[0])).toEqual(themes.map(({url}) => url[0]).sort(compareURLPatterns));
-
-    // selectors should have no comma
-    expect(themes.every((t) => Object.keys(t)
-        .filter((prop) => ['url', 'noCommon'].indexOf(prop) < 0)
-        .every((prop) => t[prop]
-            .every((s) => s.indexOf(',') < 0)))).toBe(true);
-
-    // fixes are properly formatted
-    expect(throwIfDifferent(file, formatStaticThemes(themes), 'Static theme format error')).not.toThrow();
 });

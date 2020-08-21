@@ -1,10 +1,10 @@
 import {readText} from '../background/utils/network';
 
-export default function createStaticStylesheet(url: string) {
+export default async function createStaticStylesheet(url: string) {
     let commonTheme: string;
     let siteTheme: string;
-    getCommonTheme().then((text) => commonTheme = text);
-    getThemeFor(url).then((text) => siteTheme = text);
+    await getCommonTheme().then((text) => commonTheme = text);
+    await getThemeFor(url).then((text) => siteTheme = text);
 
     if (siteTheme != null) {
         return siteTheme;

@@ -15,9 +15,9 @@ function onMessage({type, data}) {
             break;
         }
         case 'add-static-theme': {
-            const {css, theme} = data;
+            const {style, theme} = data;
             removeDynamicTheme();
-            createOrUpdateStaticTheme(css, theme);
+            createOrUpdateStaticTheme(style, theme);
             break;
         }
         case 'add-svg-filter': {

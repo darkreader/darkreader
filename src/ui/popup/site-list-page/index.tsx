@@ -25,10 +25,10 @@ export default function SiteListPage(props: ViewProps) {
             <CheckButton
                 checked={props.data.settings.enableForProtectedPages}
                 onChange={onEnableForProtectedPages}
-                label={'Enable protected check'}
+                label={'Enable on protected pages'}
                 description={props.data.settings.enableForProtectedPages ?
-                    'Enabled to check if a site is protected' :
-                    'Disabled to check if a site is protected'}
+                    'Will try running on protected pages (browser settings etc)' :
+                    'Will not try running on protected pages (browser settings etc)'}
             />
         </div>
     );

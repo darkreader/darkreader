@@ -87,7 +87,7 @@ export interface UserSettings {
     location: LocationSettings;
     previewNewDesign: boolean;
     enableForPDF: boolean;
-    disableProtectedCheck: boolean;
+    enableForProtectedPages: boolean;
 }
 
 export interface TimeSettings {

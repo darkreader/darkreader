@@ -55,5 +55,5 @@ export const DEFAULT_SETTINGS: UserSettings = {
     },
     previewNewDesign: false,
     enableForPDF: true,
-    disableProtectedCheck: false,
+    enableForProtectedPages: true,
 };

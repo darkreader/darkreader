@@ -69,12 +69,12 @@ test('URL is enabled', () => {
     )).toBe(false);
     expect(isURLEnabled(
         'https://chrome.google.com/webstore',
-        {siteList: [], siteListEnabled: [], applyToListedOnly: false, disableProtectedCheck: true} as UserSettings,
+        {siteList: [], siteListEnabled: [], applyToListedOnly: false, enableForProtectedPages: false} as UserSettings,
         {isProtected: true, isInDarkList: false},
     )).toBe(true);
     expect(isURLEnabled(
         'https://chrome.google.com/webstore',
-        {siteList: ['chrome.google.com'], siteListEnabled: [], applyToListedOnly: false, disableProtectedCheck: true} as UserSettings,
+        {siteList: ['chrome.google.com'], siteListEnabled: [], applyToListedOnly: false, enableForProtectedPages: false} as UserSettings,
         {isProtected: true, isInDarkList: false},
     )).toBe(false);
     expect(isURLEnabled(

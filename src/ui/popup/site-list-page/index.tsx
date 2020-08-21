@@ -7,8 +7,8 @@ export default function SiteListPage(props: ViewProps) {
     function onSiteListChange(sites: string[]) {
         props.actions.changeSettings({siteList: sites});
     }
-    function onDisableProtectedCheck(value: boolean) {
-        props.actions.changeSettings({disableProtectedCheck: value});
+    function onEnableForProtectedPages(value: boolean) {
+        props.actions.changeSettings({enableForProtectedPages: value});
     }
 
     const label = props.data.settings.applyToListedOnly ?
@@ -23,12 +23,12 @@ export default function SiteListPage(props: ViewProps) {
             />
             <label class="site-list-page__description">Enter website name and press Enter</label>
             <CheckButton
-                checked={props.data.settings.disableProtectedCheck}
-                onChange={onDisableProtectedCheck}
-                label={'Disable protected check'}
-                description={props.data.settings.disableProtectedCheck ?
-                    'Disabled to check if a site is protected' :
-                    'Enabled to check if a site is protected'}
+                checked={props.data.settings.enableForProtectedPages}
+                onChange={onEnableForProtectedPages}
+                label={'Enable protected check'}
+                description={props.data.settings.enableForProtectedPages ?
+                    'Enabled to check if a site is protected' :
+                    'Disabled to check if a site is protected'}
             />
         </div>
     );

@@ -13,7 +13,7 @@ import {isURLInList, getURLHostOrProtocol, isURLEnabled} from '../utils/url';
 import ThemeEngines from '../generators/theme-engines';
 import createCSSFilterStylesheet from '../generators/css-filter';
 import {getDynamicThemeFixesFor} from '../generators/dynamic-theme';
-import createStaticStylesheet from '../generators/static-theme';
+import createStaticStyleSheet from '../generators/static-theme';
 import {createSVGFilterStylesheet, getSVGFilterMatrixValue, getSVGReverseFilterMatrixValue} from '../generators/svg-filter';
 import {ExtensionData, FilterConfig, News, Shortcuts, UserSettings, TabInfo} from '../definitions';
 import {isSystemDarkModeEnabled} from '../utils/media-query';
@@ -129,7 +129,6 @@ export class Extension {
             resetDevDynamicThemeFixes: () => this.devtools.resetDynamicThemeFixes(),
             applyDevInversionFixes: (text) => this.devtools.applyInversionFixes(text),
             resetDevInversionFixes: () => this.devtools.resetInversionFixes(),
-            applyDevStaticTheme: (text, url) => this.devtools.applyStaticTheme(text, url),
         };
     }
 
@@ -369,7 +368,7 @@ export class Extension {
         };
     }
 
-    private getTabMessage = async (url: string, frameURL: string) => {
+    private getTabMessage = (url: string, frameURL: string) => {
         const urlInfo = this.getURLInfo(url);
         if (this.isEnabled() && isURLEnabled(url, this.user.settings, urlInfo)) {
             const custom = this.user.settings.customThemes.find(({url: urlList}) => isURLInList(url, urlList));
@@ -403,7 +402,7 @@ export class Extension {
                 case ThemeEngines.staticTheme: {
                     const style = theme.stylesheet && theme.stylesheet.trim() ?
                         theme.stylesheet :
-                        await createStaticStylesheet(getURLHostOrProtocol(url))
+                        createStaticStyleSheet(theme, url, this.config.STATIC_THEMES);
                     return {
                         type: 'add-static-theme',
                         data: {style, theme}

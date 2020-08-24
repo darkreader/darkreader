@@ -5,20 +5,23 @@ import {parseInversionFixes} from '../generators/css-filter';
 import {parseDynamicThemeFixes} from '../generators/dynamic-theme';
 import {InversionFix, StaticTheme, DynamicThemeFix} from '../definitions';
 
-const CONFIG_URLs = {
-    darkSites: {
-        remote: 'https://raw.githubusercontent.com/darkreader/darkreader/master/src/config/dark-sites.config',
-        local: '../config/dark-sites.config',
-    },
-    dynamicThemeFixes: {
-        remote: 'https://raw.githubusercontent.com/darkreader/darkreader/master/src/config/dynamic-theme-fixes.config',
-        local: '../config/dynamic-theme-fixes.config',
-    },
-    inversionFixes: {
-        remote: 'https://raw.githubusercontent.com/darkreader/darkreader/master/src/config/inversion-fixes.config',
-        local: '../config/inversion-fixes.config',
-    },
+const remoteConfigDir = 'https://raw.githubusercontent.com/darkreader/darkreader/master/src/config/';
+const localConfigDir = '../config/';
+
+const remoteStaticThemesDir = 'https://raw.githubusercontent.com/darkreader/darkreader/master/src/static-themes/';
+const localStaticThemesDir = '../static-themes/';
+
+const configFiles = {
+    darkSites: 'dark-sites.config',
+    dynamicThemeFixes: 'dynamic-theme-fixes.config',
+    inversionFixes: 'inversion-fixes.config',
 };
+
+const staticThemesFiles = [
+    {url: ['*'], file: 'global.css'},
+    {url: ['www.google.*', 'www.google.*.*'], file: 'google.css'},
+];
+
 const REMOTE_TIMEOUT_MS = getDuration({seconds: 10});
 
 export default class ConfigManager {
@@ -70,8 +73,8 @@ export default class ConfigManager {
         await this.loadConfig({
             name: 'Dark Sites',
             local,
-            localURL: CONFIG_URLs.darkSites.local,
-            remoteURL: CONFIG_URLs.darkSites.remote,
+            localURL: `${localConfigDir}${configFiles.darkSites}`,
+            remoteURL: `${remoteConfigDir}${configFiles.darkSites}`,
             success: ($sites: string) => {
                 this.raw.darkSites = $sites;
                 this.handleDarkSites();
@@ -83,8 +86,8 @@ export default class ConfigManager {
         await this.loadConfig({
             name: 'Dynamic Theme Fixes',
             local,
-            localURL: CONFIG_URLs.dynamicThemeFixes.local,
-            remoteURL: CONFIG_URLs.dynamicThemeFixes.remote,
+            localURL: `${localConfigDir}${configFiles.dynamicThemeFixes}`,
+            remoteURL: `${remoteConfigDir}${configFiles.dynamicThemeFixes}`,
             success: ($fixes: string) => {
                 this.raw.dynamicThemeFixes = $fixes;
                 this.handleDynamicThemeFixes();
@@ -96,8 +99,8 @@ export default class ConfigManager {
         await this.loadConfig({
             name: 'Inversion Fixes',
             local,
-            localURL: CONFIG_URLs.inversionFixes.local,
-            remoteURL: CONFIG_URLs.inversionFixes.remote,
+            localURL: `${localConfigDir}${configFiles.inversionFixes}`,
+            remoteURL: `${remoteConfigDir}${configFiles.inversionFixes}`,
             success: ($fixes: string) => {
                 this.raw.inversionFixes = $fixes;
                 this.handleInversionFixes();
@@ -105,11 +108,27 @@ export default class ConfigManager {
         });
     }
 
+    private async loadStaticThemes({local}) {
+        this.STATIC_THEMES = Array.from({length: staticThemesFiles.length});
+        await Promise.all(staticThemesFiles.map(({url, file}, index) => {
+            return this.loadConfig({
+                name: `Static Theme for ${url.join(', ')}`,
+                local,
+                localURL: `${localStaticThemesDir}${file}`,
+                remoteURL: `${remoteStaticThemesDir}${file}`,
+                success: (css: string) => {
+                    this.STATIC_THEMES[index] = {url, css};
+                },
+            });
+        }));
+    }
+
     async load(config: {local: boolean}) {
         await Promise.all([
             this.loadDarkSites(config),
             this.loadDynamicThemeFixes(config),
             this.loadInversionFixes(config),
+            this.loadStaticThemes(config),
         ]).catch((err) => console.error('Fatality', err));
     }
 
@@ -127,10 +146,4 @@ export default class ConfigManager {
         const $fixes = this.overrides.inversionFixes || this.raw.inversionFixes;
         this.INVERSION_FIXES = parseInversionFixes($fixes);
     }
-
-    handleStaticTheme() {
-        const $fixes = this.overrides.staticThemes || this.raw.staticThemes;
-        this.STATIC_THEMES = parseInversionFixes($fixes);
-    }
-
 }

@@ -1,6 +1,5 @@
 import {parseInversionFixes, formatInversionFixes} from '../generators/css-filter';
 import {parseDynamicThemeFixes, formatDynamicThemeFixes} from '../generators/dynamic-theme';
-import createStaticStylesheet from '../generators/static-theme';
 import ConfigManager from './config-manager';
 
 interface DevToolsStorage {
@@ -79,7 +78,6 @@ export default class DevTools {
 
     private static KEY_DYNAMIC = 'dev_dynamic_theme_fixes';
     private static KEY_FILTER = 'dev_inversion_fixes';
-    private static KEY_STATIC = 'dev_static_theme';
 
     private getSavedDynamicThemeFixes() {
         return this.store.get(DevTools.KEY_DYNAMIC) || null;
@@ -150,38 +148,6 @@ export default class DevTools {
             this.config.overrides.inversionFixes = formatted;
             this.config.handleInversionFixes();
             this.saveInversionFixes(formatted);
-            this.onChange();
-            return null;
-        } catch (err) {
-            return err;
-        }
-    }
-
-    private getSavedStaticTheme(url: string) {
-        return this.store.get(`${DevTools.KEY_STATIC}_${url}`) || null;
-    }
-
-    private saveStaticTheme(text: string, url: string) {
-        this.store.set(`${DevTools.KEY_STATIC}_${url}`, text);
-    }
-
-    hasCustomStaticFixes(url: string) {
-        return this.store.has(`${DevTools.KEY_STATIC}_${url}`);
-    }
-
-    getStaticThemesText(url) {
-        return createStaticStylesheet(url);
-    }
-
-    resetStaticThemes() {
-        this.store.remove(DevTools.KEY_STATIC);
-        this.onChange();
-    }
-
-    applyStaticTheme(text: string, url: string) {
-        try {
-            this.config.overrides.staticThemes = text;
-            this.saveStaticTheme(text, url);
             this.onChange();
             return null;
         } catch (err) {

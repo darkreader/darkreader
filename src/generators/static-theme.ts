@@ -1,27 +1,25 @@
 import {readText} from '../background/utils/network';
+import {StaticTheme, Theme} from '../definitions';
+import {isURLInList} from '../utils/url';
 
-export default async function createStaticStylesheet(url: string) {
-    let commonTheme: string;
-    let siteTheme: string;
-    await getCommonTheme().then((text) => commonTheme = text);
-    await getThemeFor(url).then((text) => siteTheme = text);
-
-    if (siteTheme != null) {
-        return siteTheme;
-    } else {
-        return commonTheme;
-    }
+function getVariables(theme: Theme) {
+    const bgColor = theme.mode === 1 ? theme.darkSchemeBackgroundColor : theme.lightSchemeBackgroundColor;
+    const textColor = theme.mode === 1 ? theme.darkSchemeTextColor : theme.lightSchemeTextColor;
+    return {
+        '--dr-neutral-bg': bgColor,
+        '--dr-neutral-text': textColor,
+    };
 }
 
-async function getCommonTheme() {
-    return await readText({url: '../static/themes/global.css'});
-}
+const indent = '    ';
 
-async function getThemeFor(url: string) {
-    try {
-        return await readText({url: `../static/themes/${url}.css`});
-    } catch (err) {
-        return null;
-    }
-    
+export default function createStaticStyleSheet(theme: Theme, url: string, themes: StaticTheme[]) {
+    const {css} = (themes.slice(1).find((t) => isURLInList(url, t.url)) || themes[0]);
+    const variables = getVariables(theme);
+    return [
+        ':root {',
+        ...Object.entries(variables).map(([key, value]) => `${indent}${key}: ${value};`),
+        '}',
+        css,
+    ].join('\n');
 }

@@ -1,6 +1,7 @@
 import {m} from 'malevic';
 import {getContext} from 'malevic/dom';
 import {throttle} from '../../../inject/utils/throttle';
+import {scale, clamp} from '../../../utils/math';
 
 interface SliderProps {
     value: number;
@@ -9,14 +10,6 @@ interface SliderProps {
     step: number;
     formatValue: (value: number) => string;
     onChange: (value: number) => void;
-}
-
-function clamp(x: number, min: number, max: number) {
-    return Math.min(max, Math.max(min, x));
-}
-
-function scale(x: number, inLow: number, inHigh: number, outLow: number, outHigh: number) {
-    return (x - inLow) / (inHigh - inLow) * (outHigh - outLow) + outLow;
 }
 
 function stickToStep(x: number, step: number) {
@@ -40,7 +33,7 @@ export default function Slider(props: SliderProps) {
         trackNode: HTMLElement;
         thumbNode: HTMLElement;
         wheelTimeoutId: number;
-        wheelDelta: number;
+        wheelValue: number;
     };
 
     store.activeProps = props;
@@ -171,28 +164,31 @@ export default function Slider(props: SliderProps) {
         stickToStep(getValue(), props.step)
     );
 
+    function scaleWheelDelta(delta: number) {
+        return scale(delta, 0, -1000, 0, props.max - props.min);
+    }
+
     const refreshOnWheel = throttle(() => {
-        let value = getValue();
-        value += store.wheelDelta * (props.max - props.min) * -0.001;
-        store.wheelDelta = null;
-        store.activeValue = stickToStep(clamp(value, props.min, props.max), props.step);
+        store.activeValue = stickToStep(store.wheelValue, props.step);
         store.wheelTimeoutId = setTimeout(() => {
             const {onChange} = store.activeProps;
             onChange(store.activeValue);
             store.isActive = false;
             store.activeValue = null;
+            store.wheelValue = null;
         }, 400);
         context.refresh();
     });
 
     function onWheel(event: WheelEvent) {
-        if (store.wheelDelta == null) {
-            store.wheelDelta = 0;
+        if (store.wheelValue == null) {
+            store.wheelValue = getValue();
         }
         store.isActive = true;
         clearTimeout(store.wheelTimeoutId);
         event.preventDefault();
-        store.wheelDelta += event.deltaY;
+        const accumulatedValue = store.wheelValue + scaleWheelDelta(event.deltaY);
+        store.wheelValue = clamp(accumulatedValue, props.min, props.max);
         refreshOnWheel();
     }
 

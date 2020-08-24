@@ -278,4 +278,5 @@ function getThemeFor(url: string, themes: StaticTheme[]) {
         return null;
     }
 
+    return sortedBySpecificity[0].theme;
 }

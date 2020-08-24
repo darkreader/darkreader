@@ -89,9 +89,9 @@ export default class TabManager {
         });
     }
 
-    async updateContentScript() {
+    async updateContentScript(options: {runOnProtectedPages: boolean}) {
         (await queryTabs({}))
-            .filter((tab) => canInjectScript(tab.url))
+            .filter((tab) => options.runOnProtectedPages || canInjectScript(tab.url))
             .filter((tab) => !this.ports.has(tab.id))
             .forEach((tab) => !tab.discarded && chrome.tabs.executeScript(tab.id, {
                 runAt: 'document_start',

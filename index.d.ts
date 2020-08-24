@@ -126,6 +126,16 @@ declare namespace DarkReader {
          * ```
          */
         css: string;
+        /**
+         * List of CSS selectors where it's inline style should not be analyzed
+         * Mostly used for color pickers
+         */
+        ignoreInlineStyle: string[];
+        /**
+         * List of CSS selectors where it's image should not be analyzed
+         * Mostly used for wrongly inverted background-images
+         */
+        ignoreImageAnalysis: string[];
     }
 }
 

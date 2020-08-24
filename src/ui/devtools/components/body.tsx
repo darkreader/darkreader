@@ -15,11 +15,7 @@ function Body({data, tab, actions}: BodyProps) {
     const previewButtonText = data.settings.previewNewDesign ? 'Switch to old design' : 'Preview new design';
     const {theme} = getCurrentThemePreset({data, tab, actions});
 
-<<<<<<< Updated upstream
-    const wrapper = (theme.engine === ThemeEngines.staticTheme
-=======
     const wrapper = (theme.engine === ThemeEngines.cssFilter || theme.engine === ThemeEngines.svgFilter
->>>>>>> Stashed changes
         ? {
             header: 'Static Theme Editor',
             fixesText: data.devtools.staticThemesText,

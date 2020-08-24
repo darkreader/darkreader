@@ -278,8 +278,4 @@ function getThemeFor(url: string, themes: StaticTheme[]) {
         return null;
     }
 
-<<<<<<< Updated upstream
-    return sortedBySpecificity[0].theme;
-=======
->>>>>>> Stashed changes
 }

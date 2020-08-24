@@ -2,7 +2,7 @@ import {m} from 'malevic';
 import {DEFAULT_SETTINGS, DEFAULT_THEME, DEFAULT_COLORS} from '../../../../defaults';
 import {Theme} from '../../../../definitions';
 import {ViewProps} from '../../types';
-import {BackgroundColor, Brightness, Contrast, FontPicker, Grayscale, Mode, ResetButton, Scheme, Scrollbar, SelectionColorEditor, Sepia, TextColor, TextStroke, UseFont, StyleStandardElements} from '../controls';
+import {BackgroundColor, Brightness, Contrast, FontPicker, Grayscale, Mode, ResetButton, Scheme, Scrollbar, SelectionColorEditor, Sepia, TextColor, TextStroke, UseFont, StyleSystemControls} from '../controls';
 import ThemePresetPicker from '../preset-picker';
 import {getCurrentThemePreset} from '../utils';
 import Collapsible from './collapsible-panel';
@@ -98,9 +98,9 @@ function FontGroup({theme, fonts, change}: FontGroupsProps) {
                 value={theme.textStroke}
                 onChange={(textStroke) => change({textStroke})}
             />
-            <StyleStandardElements
-                value={theme.styleStandardElements}
-                onChange={(styleStandardElements) => change({styleStandardElements})}
+            <StyleSystemControls
+                value={theme.styleSystemControls}
+                onChange={(styleSystemControls) => change({styleSystemControls})}
             />
         </Array>
     );

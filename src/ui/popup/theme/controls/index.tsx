@@ -9,7 +9,7 @@ import Scheme from './scheme';
 import Scrollbar from './scrollbar';
 import SelectionColorEditor from './selection';
 import Sepia from './sepia';
-import StyleStandardElements from './style-standard-elements';
+import StyleSystemControls from './style-system-controls';
 import TextColor from './text-color';
 import TextStroke from './text-stroke';
 import UseFont from './use-font';
@@ -26,7 +26,7 @@ export {
     Scrollbar,
     SelectionColorEditor,
     Sepia,
-    StyleStandardElements,
+    StyleSystemControls,
     TextColor,
     TextStroke,
     UseFont,

@@ -30,7 +30,7 @@ export const DEFAULT_THEME: Theme = {
     lightSchemeTextColor: DEFAULT_COLORS.lightScheme.text,
     scrollbarColor: isMacOS() ? '' : 'auto',
     selectionColor: 'auto',
-    styleStandardElements: true,
+    styleSystemControls: true,
 };
 
 export const DEFAULT_SETTINGS: UserSettings = {

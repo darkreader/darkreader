@@ -88,6 +88,7 @@ export interface UserSettings {
     previewNewDesign: boolean;
     enableForPDF: boolean;
     enableForProtectedPages: boolean;
+    enableExternalConnections: boolean;
 }
 
 export interface TimeSettings {
@@ -170,4 +171,9 @@ export interface News {
     headline: string;
     important: boolean;
     read?: boolean;
+}
+
+export interface ExternalRequest {
+    type: string;
+    data: any;
 }

@@ -8,6 +8,7 @@ import ExportTheme from './export-theme';
 import {isURLInList} from '../../../utils/url';
 import themeEngines from '../../../generators/theme-engines';
 import SyncConfigButton from './sync-config';
+import EnableExternalConnections from './external-connections';
 
 export default function ManageSettingsPage(props: ViewProps) {
     const custom = props.data.settings.customThemes.find(
@@ -21,6 +22,7 @@ export default function ManageSettingsPage(props: ViewProps) {
         <section class="m-section">
             <SyncSettings {...props} />
             <SyncConfigButton {...props} />
+            <EnableExternalConnections {...props} />
             <ImportButton {...props} />
             <ExportButton {...props} />
             {engine === themeEngines.dynamicTheme ? <ExportTheme /> : null}

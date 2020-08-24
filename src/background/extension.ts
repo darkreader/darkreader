@@ -15,8 +15,11 @@ import createCSSFilterStylesheet from '../generators/css-filter';
 import {getDynamicThemeFixesFor} from '../generators/dynamic-theme';
 import createStaticStylesheet from '../generators/static-theme';
 import {createSVGFilterStylesheet, getSVGFilterMatrixValue, getSVGReverseFilterMatrixValue} from '../generators/svg-filter';
-import {ExtensionData, FilterConfig, News, Shortcuts, UserSettings, TabInfo} from '../definitions';
+import {ExtensionData, FilterConfig, News, Shortcuts, UserSettings, TabInfo, ExternalRequest} from '../definitions';
 import {isSystemDarkModeEnabled} from '../utils/media-query';
+import {logInfo, logWarn} from '../inject/utils/log';
+import {DEFAULT_SETTINGS, DEFAULT_THEME} from '../defaults';
+import {getValidatedObject} from '../utils/object';
 
 const AUTO_TIME_CHECK_INTERVAL = getDuration({seconds: 10});
 
@@ -89,6 +92,7 @@ export class Extension {
         console.log('loaded', this.user.settings);
 
         this.registerCommands();
+        this.registerExternalConnections();
 
         this.ready = true;
         this.tabs.updateContentScript({runOnProtectedPages: this.user.settings.enableForProtectedPages});
@@ -157,6 +161,68 @@ export class Extension {
                 const index = engines.indexOf(this.user.settings.theme.engine);
                 const next = index === engines.length - 1 ? engines[0] : engines[index + 1];
                 this.setTheme({engine: next});
+            }
+        });
+    }
+
+    externalRequestsHandler(incomingData: ExternalRequest) {
+        const {type, data} = incomingData;
+        if (type === 'toggle') {
+            logInfo('An external connection toggled dark reader.');
+            this.changeSettings({
+                enabled: !this.isEnabled(),
+                automation: '',
+            });
+        }
+        if (type === 'toggleCurrentSite') {
+            logInfo('An external connection toggled the current site.');
+            this.toggleCurrentSite();
+        }
+        if (type === 'addSite') {
+            if (!data) {
+                logWarn('No data detected for addSite.');
+                return;
+            }
+            logInfo(`An external connection toggled ${data}`);
+            this.toggleURL(data);
+        }
+        if (type === 'changeSettings') {
+            if (!data) {
+                logWarn('No data detected for changeSettings.');
+                return;
+            }
+            logInfo('An external connection made changes to the settings.');
+            const validatedData = getValidatedObject(data, DEFAULT_SETTINGS);
+            this.changeSettings(validatedData);
+            logInfo('Saved', this.user.settings);
+        }
+        if (type === 'requestSettings') {
+            if (!data) {
+                logWarn('No data detected for requestSettings.');
+                return;
+            }
+            logInfo('An external connection requested current settings.');
+            chrome.runtime.sendMessage(data, {type: 'requestSettings-response', data: this.user.settings});
+        }
+        if (type === 'setTheme') {
+            if (!data) {
+                logWarn('No data detected for setTheme.');
+                return;
+            }
+            logInfo('An external connection made changes to current theme.');
+            const validatedData = getValidatedObject(data, DEFAULT_THEME);
+            this.setTheme(validatedData);
+            logInfo('Saved', this.user.settings.theme);
+        }
+    }
+
+    private registerExternalConnections() {
+        chrome.runtime.onConnectExternal.addListener((port) => {
+            if (this.user.settings.enableExternalConnections) {
+                logInfo(`Port ${port.sender.origin} has been connected to dark reader.`);
+                port.onMessage.addListener((incomingData) => this.externalRequestsHandler(incomingData));
+            } else {
+                logWarn('A external connection tried to make contact, but the Enable External Connections setting is not enabled and there by blocked.');
             }
         });
     }

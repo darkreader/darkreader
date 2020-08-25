@@ -15,7 +15,7 @@ function Body({data, tab, actions}: BodyProps) {
     const previewButtonText = data.settings.previewNewDesign ? 'Switch to old design' : 'Preview new design';
     const {theme} = getCurrentThemePreset({data, tab, actions});
 
-    const wrapper = (theme.engine === ThemeEngines.cssFilter || theme.engine === ThemeEngines.svgFilter 
+    const wrapper = (theme.engine === ThemeEngines.cssFilter || theme.engine === ThemeEngines.svgFilter
         ? {
             header: 'Inversion Fix Editor',
             fixesText: data.devtools.filterFixesText,

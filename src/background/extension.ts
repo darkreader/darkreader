@@ -11,12 +11,12 @@ import {isFirefox} from '../utils/platform';
 import {isInTimeInterval, getDuration, isNightAtLocation} from '../utils/time';
 import {isURLInList, getURLHostOrProtocol, isURLEnabled} from '../utils/url';
 import ThemeEngines from '../generators/theme-engines';
-import createCSSFilterStylesheet from '../generators/css-filter';
+import createCSSFilterStyleSheet from '../generators/css-filter';
 import {getDynamicThemeFixesFor} from '../generators/dynamic-theme';
 import {createSVGFilterStylesheet, getSVGFilterMatrixValue, getSVGReverseFilterMatrixValue} from '../generators/svg-filter';
 import {ExtensionData, FilterConfig, News, Shortcuts, UserSettings, TabInfo} from '../definitions';
 import {isSystemDarkModeEnabled} from '../utils/media-query';
-import getStaticStyleSheet from '../generators/static-theme';
+import createStaticStyleSheet from '../generators/static-theme';
 
 const AUTO_TIME_CHECK_INTERVAL = getDuration({seconds: 10});
 
@@ -380,7 +380,7 @@ export class Extension {
                 case ThemeEngines.cssFilter: {
                     return {
                         type: 'add-css-filter',
-                        data: createCSSFilterStylesheet(theme, url, frameURL, this.config.INVERSION_FIXES),
+                        data: createCSSFilterStyleSheet(theme, url, frameURL, this.config.INVERSION_FIXES),
                     };
                 }
                 case ThemeEngines.svgFilter: {
@@ -400,12 +400,12 @@ export class Extension {
                     };
                 }
                 case ThemeEngines.staticTheme: {
-                    const style = theme.stylesheet && theme.stylesheet.trim() ?
+                    const css = theme.stylesheet && theme.stylesheet.trim() ?
                         theme.stylesheet :
-                        getStaticStyleSheet(url, this.config.STATIC_THEMES);
+                        createStaticStyleSheet(theme, url, this.config.STATIC_THEMES);
                     return {
                         type: 'add-static-theme',
-                        data: {style, theme}
+                        data: css,
                     };
                 }
                 case ThemeEngines.dynamicTheme: {

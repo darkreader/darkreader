@@ -4,7 +4,6 @@ import {createOrUpdateDynamicTheme, removeDynamicTheme, cleanDynamicThemeCache} 
 import {logInfo, logWarn} from './utils/log';
 import {watchForColorSchemeChange} from './utils/watch-color-scheme';
 import {collectCSS} from './dynamic-theme/css-collection';
-import {createOrUpdateStaticTheme} from './static';
 
 function onMessage({type, data}) {
     switch (type) {
@@ -15,9 +14,9 @@ function onMessage({type, data}) {
             break;
         }
         case 'add-static-theme': {
-            const {style, theme} = data;
+            const css = data;
             removeDynamicTheme();
-            createOrUpdateStaticTheme(style, theme);
+            createOrUpdateStyle(css);
             break;
         }
         case 'add-svg-filter': {

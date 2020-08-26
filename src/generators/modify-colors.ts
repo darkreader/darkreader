@@ -89,7 +89,7 @@ function modifyLightSchemeColor(rgb: RGBA, theme: Theme) {
     return modifyColorWithCache(rgb, theme, modifyLightModeHSL, poleFg, poleBg);
 }
 
-function modifyLightModeHSL({h, s, l, a}, poleFg: HSLA, poleBg: HSLA) {
+function modifyLightModeHSL({h, s, l, a}: HSLA, poleFg: HSLA, poleBg: HSLA) {
     const isDark = l < 0.5;
     let isNeutral: boolean;
     if (isDark) {
@@ -114,6 +114,17 @@ function modifyLightModeHSL({h, s, l, a}, poleFg: HSLA, poleBg: HSLA) {
     const lx = scale(l, 0, 1, poleFg.l, poleBg.l);
 
     return {h: hx, s: sx, l: lx, a};
+}
+
+export function modifyUntypedColor(rgb: RGBA, theme: Theme) {
+    const isDarkScheme = theme.mode === 1;
+    const lightPole = isDarkScheme ? theme.darkSchemeTextColor : theme.lightSchemeBackgroundColor;
+    const darkPole = isDarkScheme ? theme.darkSchemeBackgroundColor : theme.lightSchemeTextColor;
+    return modifyColorWithCache(rgb, {...theme, mode: 0}, modifyUntypedHSL, darkPole, lightPole);
+}
+
+function modifyUntypedHSL(source: HSLA, darkPole: HSLA, lightPole: HSLA) {
+    return modifyLightModeHSL(source, darkPole, lightPole);
 }
 
 const MAX_BG_LIGHTNESS = 0.4;

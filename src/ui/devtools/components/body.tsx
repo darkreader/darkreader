@@ -15,18 +15,22 @@ function Body({data, tab, actions}: BodyProps) {
     const previewButtonText = data.settings.previewNewDesign ? 'Switch to old design' : 'Preview new design';
     const {theme} = getCurrentThemePreset({data, tab, actions});
 
-    const wrapper = (theme.engine === ThemeEngines.cssFilter || theme.engine === ThemeEngines.svgFilter
-        ? {
-            header: 'Inversion Fix Editor',
-            fixesText: data.devtools.filterFixesText,
-            apply: (text) => actions.applyDevInversionFixes(text),
-            reset: () => actions.resetDevInversionFixes(),
-        } : {
-            header: 'Dynamic Theme Editor',
-            fixesText: data.devtools.dynamicFixesText,
-            apply: (text) => actions.applyDevDynamicThemeFixes(text),
-            reset: () => actions.resetDevDynamicThemeFixes(),
-        });
+    const wrapper = (theme.engine === ThemeEngines.staticTheme ? {
+        header: 'Static Theme Editor',
+        fixesText: 'Not supported yet',
+        apply: Function.prototype,
+        reset: Function.prototype,
+    } : theme.engine === ThemeEngines.cssFilter || theme.engine === ThemeEngines.svgFilter ? {
+        header: 'Inversion Fix Editor',
+        fixesText: data.devtools.filterFixesText,
+        apply: (text) => actions.applyDevInversionFixes(text),
+        reset: () => actions.resetDevInversionFixes(),
+    } : {
+        header: 'Dynamic Theme Editor',
+        fixesText: data.devtools.dynamicFixesText,
+        apply: (text) => actions.applyDevDynamicThemeFixes(text),
+        reset: () => actions.resetDevDynamicThemeFixes(),
+    });
 
     function onTextRender(node: HTMLTextAreaElement) {
         textNode = node;

@@ -6,17 +6,16 @@ with minimal impact possible.
 
 ## Supported Versions
 
-Use this section to tell people about which versions of your project are
-currently being supported with security updates.
+Latest version is supported.
 
-| Version | Supported          |
-| ------- | ------------------ |
-| 5.1.x   | :white_check_mark: |
-| 5.0.x   | :x:                |
-| 4.9.x   | :white_check_mark: |
-| < 4.9   | :x:                |
+| Version   | Supported          |
+| --------- | ------------------ |
+| 4.9.16    | :white_check_mark: |
+| < 4.9.16  | :x:                |
 
 ## Reporting a Vulnerability
 
 In case there is a vulnerability left behind, immediately notify
-to <darkreaderapp@gmail.com>.
+to <darkreaderapp@gmail.com>; unless you can fix it yourself,
+in which case open a pull request on 
+<https://github.com/darkreader/darkrader/pulls>.

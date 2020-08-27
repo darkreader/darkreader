@@ -1,6 +1,7 @@
 import {StaticTheme, Theme} from '../definitions';
 import {isURLInList} from '../utils/url';
 import {hslToRGB, RGBA} from '../utils/color';
+import {getCSSFilterValue} from './css-filter';
 import {modifyBackgroundColor, modifyForegroundColor, modifyBorderColor, modifyUntypedColor} from './modify-colors';
 
 const sourceColors: {[type: string]: {[name: string]: RGBA}} = {
@@ -84,6 +85,8 @@ function getModifiedVariables(theme: Theme) {
             variables[varName] = value;
         });
     });
+
+    variables['--dr-filter'] = getCSSFilterValue(theme);
 
     return variables;
 }

@@ -1,5 +1,9 @@
 # Security Policy
 
+DarkReader is known to have no intentional security vulnerabilities.
+If reported, vulnerabilites will be fixed in the shortest time possible,
+with minimal impact possible.
+
 ## Supported Versions
 
 Use this section to tell people about which versions of your project are
@@ -13,3 +17,6 @@ currently being supported with security updates.
 | < 4.9   | :x:                |
 
 ## Reporting a Vulnerability
+
+In case there is a vulnerability left behind, immediately notify
+to <darkreaderapp@gmail.com>.

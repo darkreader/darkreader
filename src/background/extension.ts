@@ -16,7 +16,7 @@ import {getDynamicThemeFixesFor} from '../generators/dynamic-theme';
 import {createSVGFilterStylesheet, getSVGFilterMatrixValue, getSVGReverseFilterMatrixValue} from '../generators/svg-filter';
 import {ExtensionData, FilterConfig, News, Shortcuts, UserSettings, TabInfo} from '../definitions';
 import {isSystemDarkModeEnabled} from '../utils/media-query';
-import createStaticStyleSheet from '../generators/static-theme';
+import {createStaticStyleSheet, addCSSVariablesToStyleSheet} from '../generators/static-theme';
 
 const AUTO_TIME_CHECK_INTERVAL = getDuration({seconds: 10});
 
@@ -401,7 +401,7 @@ export class Extension {
                 }
                 case ThemeEngines.staticTheme: {
                     const css = theme.stylesheet && theme.stylesheet.trim() ?
-                        theme.stylesheet :
+                        addCSSVariablesToStyleSheet(theme, theme.stylesheet) :
                         createStaticStyleSheet(theme, url, this.config.STATIC_THEMES);
                     return {
                         type: 'add-static-theme',

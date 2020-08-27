@@ -88,13 +88,20 @@ function getModifiedVariables(theme: Theme) {
     return variables;
 }
 
-export default function createStaticStyleSheet(theme: Theme, url: string, themes: StaticTheme[]) {
-    const {css} = (themes.slice(1).find((t) => isURLInList(url, t.url)) || themes[0]);
+function getVariablesCSS(theme: Theme) {
     const variables = getModifiedVariables(theme);
     return [
         ':root {',
         ...Object.entries(variables).map(([key, value]) => `    ${key}: ${value};`),
         '}',
-        css,
     ].join('\n');
+}
+
+export function addCSSVariablesToStyleSheet(theme: Theme, css: string) {
+    return `${getVariablesCSS(theme)}\n${css}`;
+}
+
+export function createStaticStyleSheet(theme: Theme, url: string, themes: StaticTheme[]) {
+    const {css} = (themes.slice(1).find((t) => isURLInList(url, t.url)) || themes[0]);
+    return addCSSVariablesToStyleSheet(theme, css);
 }

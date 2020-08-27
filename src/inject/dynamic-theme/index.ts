@@ -49,14 +49,9 @@ function stopStylePositionWatchers() {
 }
 
 function createStaticStyleOverrides() {
-    const fallbackStyle = createOrUpdateStyle('darkreader--fallback');
-    fallbackStyle.textContent = getModifiedFallbackStyle(filter, {strict: true});
-    document.head.insertBefore(fallbackStyle, document.head.firstChild);
-    setupStylePositionWatcher(fallbackStyle, 'fallback');
-
     const userAgentStyle = createOrUpdateStyle('darkreader--user-agent');
     userAgentStyle.textContent = getModifiedUserAgentStyle(filter, isIFrame);
-    document.head.insertBefore(userAgentStyle, fallbackStyle.nextSibling);
+    document.head.insertBefore(userAgentStyle, document.head.firstChild);
     setupStylePositionWatcher(userAgentStyle, 'user-agent');
 
     const textStyle = createOrUpdateStyle('darkreader--text');
@@ -65,7 +60,7 @@ function createStaticStyleOverrides() {
     } else {
         textStyle.textContent = '';
     }
-    document.head.insertBefore(textStyle, fallbackStyle.nextSibling);
+    document.head.insertBefore(textStyle, userAgentStyle.nextSibling);
     setupStylePositionWatcher(textStyle, 'text');
 
     const invertStyle = createOrUpdateStyle('darkreader--invert');
@@ -131,7 +126,7 @@ function replaceCSSTemplates($cssText: string) {
 }
 
 function cleanFallbackStyle() {
-    const fallback = document.head.querySelector('.darkreader--fallback');
+    const fallback = document.querySelector('.darkreader--fallback');
     if (fallback) {
         fallback.textContent = '';
     }

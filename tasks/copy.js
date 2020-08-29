@@ -3,6 +3,7 @@ const globby = require('globby');
 const {getDestDir} = require('./paths');
 const reload = require('./reload');
 const {createTask} = require('./task');
+const {compress} = require('./compress');
 
 const srcDir = 'src';
 const cwdPaths = [
@@ -27,11 +28,24 @@ async function patchFirefoxManifest({debug}) {
     await fs.writeJson(`${firefoxDir}/manifest.json`, patched, {spaces: 4});
 }
 
+async function compressConfigFile(source, destination) {
+    const rawData = await fs.readFile(`${srcDir}/${source}`);
+    const compressedData = compress(rawData);
+    try {
+        await fs.access(`${destination}/config`);
+    } catch (error) {
+        await fs.mkdir(`${destination}/config`)
+    }
+    await fs.writeFile(`${destination}/${source}`, compressedData, {flag: 'w'});
+}
+
 async function copyFile(path, {debug, firefox}) {
     const cwdPath = getCwdPath(path);
     const destDir = getDestDir({debug, firefox});
     if (firefox && cwdPath === 'manifest.json') {
         await patchFirefoxManifest({debug});
+    } else if (!debug && cwdPath.endsWith('.config')) {
+        await compressConfigFile(cwdPath, destDir, {debug, firefox});
     } else {
         const src = `${srcDir}/${cwdPath}`;
         const dest = `${destDir}/${cwdPath}`;
@@ -54,7 +68,7 @@ module.exports = createTask(
     paths,
     async (changedFiles) => {
         for (const file of changedFiles) {
-            if (await fs.exists(file)) {
+            if (fs.exists(file)) {
                 await copyFile(file, {debug: true, firefox: false});
                 await copyFile(file, {debug: true, firefox: true});
             }

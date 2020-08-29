@@ -5,6 +5,7 @@ module.exports = {
     /**
      * @param {string} string
      */
+
     function (string) {
         const dict = {};
         const data = (string + '').split('');
@@ -16,8 +17,7 @@ module.exports = {
             currChar = data[i];
             if (dict[phrase + currChar] != null) {
                 phrase += currChar;
-            }
-            else {
+            } else {
                 out.push(phrase.length > 1 ? dict[phrase] : phrase.charCodeAt(0));
                 dict[phrase + currChar] = code;
                 code++;

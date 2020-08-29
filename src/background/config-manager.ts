@@ -46,6 +46,30 @@ export default class ConfigManager {
         staticThemes: null,
     };
 
+    private decompresser(compressed: string) {
+        const dict = {};
+        const data = compressed.split('');
+        let currChar = data[0];
+        let oldPhrase = currChar;
+        const out = [currChar];
+        let code = 256;
+        let phrase: string;
+        for (let i = 1, len = data.length; i < len; i++) {
+            const currCode = data[i].charCodeAt(0);
+            if (currCode < 256) {
+                phrase = data[i];
+            }
+            else {
+                phrase = dict[currCode] ? dict[currCode] : (oldPhrase + currChar);
+            }
+            out.push(phrase);
+            currChar = phrase.charAt(0);
+            dict[code] = oldPhrase + currChar;
+            code++;
+            oldPhrase = phrase;
+        }
+        return out.join('');
+    }
     private async loadConfig({
         name,
         local,
@@ -54,7 +78,7 @@ export default class ConfigManager {
         success,
     }) {
         let $config: string;
-        const loadLocal = async () => await readText({url: localURL});
+        const loadLocal = async () => this.decompresser(await readText({url: localURL}));
         if (local) {
             $config = await loadLocal();
         } else {

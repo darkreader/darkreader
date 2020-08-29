@@ -34,7 +34,7 @@ async function compressConfigFile(source, destination) {
     try {
         await fs.access(`${destination}/config`);
     } catch (error) {
-        await fs.mkdir(`${destination}/config`)
+        await fs.mkdir(`${destination}/config`);
     }
     await fs.writeFile(`${destination}/${source}`, compressedData, {flag: 'w'});
 }
@@ -44,7 +44,7 @@ async function copyFile(path, {debug, firefox}) {
     const destDir = getDestDir({debug, firefox});
     if (firefox && cwdPath === 'manifest.json') {
         await patchFirefoxManifest({debug});
-    } else if (!debug && cwdPath.endsWith('.config')) {
+    } else if (cwdPath.endsWith('.config')) {
         await compressConfigFile(cwdPath, destDir, {debug, firefox});
     } else {
         const src = `${srcDir}/${cwdPath}`;

@@ -55,6 +55,15 @@ export default function SiteList(props: SiteListProps) {
         props.onChange(values);
     }
 
+    function removeValue(event: MouseEvent) {
+        const previousSibling = ((event.target as HTMLInputElement).previousSibling as HTMLInputElement);
+        const index = store.indices.get(previousSibling);
+        const values = props.siteList.slice();
+        values.splice(index, 1);
+        store.shouldFocusAtIndex = index;
+        props.onChange(values);
+    }
+
     function createTextBox(text: string, index: number) {
         const onRender = (node: HTMLInputElement) => {
             store.indices.set(node, index);
@@ -64,12 +73,19 @@ export default function SiteList(props: SiteListProps) {
             }
         };
         return (
-            <TextBox
-                class="site-list__textbox"
-                value={text}
-                onrender={onRender}
-                placeholder="google.com/maps"
-            />
+            <Array>
+                <TextBox
+                    class="site-list__textbox"
+                    value={text}
+                    onrender={onRender}
+                    placeholder="google.com/maps"
+                />
+                <i 
+                    class="check-icon" 
+                    aria-hidden="true"
+                    onclick={removeValue}
+                />
+            </Array>
         );
     }
 

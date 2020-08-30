@@ -1,6 +1,6 @@
 # Security Policy
 
-DarkReader is known to have no intentional security vulnerabilities.
+Dark Reader is known to have no intentional security vulnerabilities.
 If reported, vulnerabilites will be fixed in the shortest time possible,
 with minimal impact possible.
 
@@ -19,3 +19,7 @@ In case there is a vulnerability left behind, immediately notify
 to <darkreaderapp@gmail.com>; unless you can fix it yourself,
 in which case open a pull request on 
 <https://github.com/darkreader/darkrader/pulls>.
+
+Alexander Shutau, owner
+"Gusted" William Zijl, maintainer
+Erkin Alp Güney, security policy author

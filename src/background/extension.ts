@@ -168,7 +168,7 @@ export class Extension {
     externalRequestsHandler(incomingData: ExternalRequest, origin: string) {
         const {type, data} = incomingData;
         if (type === 'toggle') {
-            logInfo(`Port: ${origin},  toggled dark reader.`);
+            logInfo(`Port: ${origin}, toggled dark reader.`);
             this.changeSettings({
                 enabled: !this.isEnabled(),
                 automation: '',

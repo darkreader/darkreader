@@ -165,17 +165,17 @@ export class Extension {
         });
     }
 
-    externalRequestsHandler(incomingData: ExternalRequest) {
+    externalRequestsHandler(incomingData: ExternalRequest, origin: string) {
         const {type, data} = incomingData;
         if (type === 'toggle') {
-            logInfo('An external connection toggled dark reader.');
+            logInfo(`Port: ${origin},  toggled dark reader.`);
             this.changeSettings({
                 enabled: !this.isEnabled(),
                 automation: '',
             });
         }
         if (type === 'toggleCurrentSite') {
-            logInfo('An external connection toggled the current site.');
+            logInfo(`Port: ${origin}, toggled the current site.`);
             this.toggleCurrentSite();
         }
         if (type === 'addSite') {
@@ -183,7 +183,7 @@ export class Extension {
                 logWarn('No data detected for addSite.');
                 return;
             }
-            logInfo(`An external connection toggled ${data}`);
+            logInfo(`Port: ${origin}, toggled ${data}`);
             this.toggleURL(data);
         }
         if (type === 'changeSettings') {
@@ -191,7 +191,7 @@ export class Extension {
                 logWarn('No data detected for changeSettings.');
                 return;
             }
-            logInfo('An external connection made changes to the settings.');
+            logInfo(`Port: ${origin}, made changes to the settings.`);
             const validatedData = getValidatedObject(data, DEFAULT_SETTINGS);
             this.changeSettings(validatedData);
             logInfo('Saved', this.user.settings);
@@ -201,7 +201,7 @@ export class Extension {
                 logWarn('No data detected for requestSettings.');
                 return;
             }
-            logInfo('An external connection requested current settings.');
+            logInfo(`Port: ${origin}, requested current settings.`);
             chrome.runtime.sendMessage(data, {type: 'requestSettings-response', data: this.user.settings});
         }
         if (type === 'setTheme') {
@@ -209,7 +209,7 @@ export class Extension {
                 logWarn('No data detected for setTheme.');
                 return;
             }
-            logInfo('An external connection made changes to current theme.');
+            logInfo(`Port: ${origin}, made changes to the settings.`);
             const validatedData = getValidatedObject(data, DEFAULT_THEME);
             this.setTheme(validatedData);
             logInfo('Saved', this.user.settings.theme);
@@ -220,9 +220,9 @@ export class Extension {
         chrome.runtime.onConnectExternal.addListener((port) => {
             if (this.user.settings.enableExternalConnections) {
                 logInfo(`Port ${port.sender.origin} has been connected to dark reader.`);
-                port.onMessage.addListener((incomingData) => this.externalRequestsHandler(incomingData));
+                port.onMessage.addListener((incomingData) => this.externalRequestsHandler(incomingData, port.sender.origin));
             } else {
-                logWarn('A external connection tried to make contact, but the Enable External Connections setting is not enabled and there by blocked.');
+                logWarn(`Port: ${port.sender.origin}, tried to make contact, but the Enable External Connections setting is not enabled and there by blocked.`);
             }
         });
     }

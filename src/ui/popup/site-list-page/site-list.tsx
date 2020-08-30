@@ -58,10 +58,9 @@ export default function SiteList(props: SiteListProps) {
     function removeValue(event: MouseEvent) {
         const previousSibling = ((event.target as HTMLInputElement).previousSibling as HTMLInputElement);
         const index = store.indices.get(previousSibling);
-        const values = props.siteList.slice();
-        values.splice(index, 1);
+        const newValue = props.siteList.slice().splice(index, 1);
         store.shouldFocusAtIndex = index;
-        props.onChange(values);
+        props.onChange(newValue);
     }
 
     function createTextBox(text: string, index: number) {
@@ -80,8 +79,8 @@ export default function SiteList(props: SiteListProps) {
                     onrender={onRender}
                     placeholder="google.com/maps"
                 />
-                <i 
-                    class="check-icon" 
+                <div
+                    class="check-icon"
                     aria-hidden="true"
                     onclick={removeValue}
                 />

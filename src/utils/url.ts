@@ -137,7 +137,7 @@ export function isPDF(url: string) {
 }
 
 export function isURLEnabled(url: string, userSettings: UserSettings, {isProtected, isInDarkList}) {
-    if (isProtected && userSettings.enableForProtectedPages) {
+    if (isProtected && !userSettings.enableForProtectedPages) {
         return false;
     }
     if (isPDF(url) && userSettings.enableForPDF) {

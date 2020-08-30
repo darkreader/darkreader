@@ -1,6 +1,6 @@
 import {forEach} from '../../utils/array';
 import {parseURL, getAbsoluteURL} from './url';
-import {logWarn} from '../utils/log';
+import {logWarn, logInfo} from '../utils/log';
 
 export function iterateCSSRules(rules: CSSRuleList, iterate: (rule: CSSStyleRule) => void) {
     forEach(rules, (rule) => {
@@ -15,7 +15,18 @@ export function iterateCSSRules(rules: CSSRuleList, iterate: (rule: CSSStyleRule
             try {
                 iterateCSSRules(rule.styleSheet.cssRules, iterate);
             } catch (err) {
-                logWarn(err);
+                if (err.message === "Cannot read property 'cssRules' of null") {
+                    logInfo('An possible attempt on a unloaded CSSImportRule has been made.');
+                        (rule.parentStyleSheet.ownerNode as HTMLLinkElement).onload = () => {
+                        try {
+                            iterateCSSRules(rule.styleSheet.cssRules, iterate);
+                        } catch (err) {
+                            logWarn(err);
+                        }
+                    };
+                } else {
+                    logWarn(err);
+                }
             }
         } else {
             logWarn(`CSSRule type not supported`, rule);

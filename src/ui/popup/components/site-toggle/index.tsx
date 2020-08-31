@@ -14,8 +14,8 @@ export default function SiteToggleButton({data, tab, actions}: ExtWrapper & {tab
         }
     }
     const toggleHasEffect = (
-        data.isEnabled &&
-        data.settings.enableForProtectedPages ? true : !tab.isProtected
+        data.settings.enableForProtectedPages || 
+        !tab.isProtected
     );
     const pdf = isPDF(tab.url);
     const isSiteEnabled = isURLEnabled(tab.url, data.settings, tab);

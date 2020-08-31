@@ -46,15 +46,33 @@
             z-index: 1;
         }
     }
-}
 
-.check-icon {
-    background-image: @icon-cross;
-    background-repeat: no-repeat;
-    cursor: pointer;
-    height: 75%;
-    left: 17.5em;
-    position: absolute;
-    top: 2px;
-    width: 10%;
+    &__item {
+        position: relative;
+
+        &__remove {
+            background-color: transparent;
+            background-image: @icon-close-inactive;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-size: 0.75rem;
+            border-radius: 50%;
+            cursor: pointer;
+            display: none;
+            height: 1.25rem;
+            position: absolute;
+            right: 0.125rem;
+            top: 0.125rem;
+            width: 1.25rem;
+
+            &:hover {
+                background-color: @color-control-active;
+                background-image: @icon-close;
+            }
+        }
+
+        &:hover .site-list__item__remove {
+            display: inline-block;
+        }
+    }
 }

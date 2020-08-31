@@ -72,19 +72,19 @@ export default function SiteList(props: SiteListProps) {
             }
         };
         return (
-            <Array>
+            <div class="site-list__item">
                 <TextBox
                     class="site-list__textbox"
                     value={text}
                     onrender={onRender}
                     placeholder="google.com/maps"
                 />
-                <div
-                    class="check-icon"
-                    aria-hidden="true"
+                <span
+                    class="site-list__item__remove"
+                    role="button"
                     onclick={removeValue}
                 />
-            </Array>
+            </div>
         );
     }
 

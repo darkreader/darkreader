@@ -1,6 +1,8 @@
+@icon-escaped-color: escape(@color-control-fore-inactive);
 @icon-check: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 8 8"><path fill="white" d="M0,4 l2,2 l5,-5 v1.5 l-5,5 l-2,-2 z"/></svg>');
-@icon-cross-escaped-color: escape(@color-control-fore-inactive);
-@icon-cross: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 8 8"><path fill="@{icon-cross-escaped-color}" d="M1,0.5 l6,6 v1.5 l-6,-6 Z M1,6.5 l6,-6 v1.5 l-6,6 z"/></svg>');
+@icon-close: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 8 8"><path fill="none" stroke="white" stroke-width="1" d="M1,1 l6,6 M1,7 l6,-6"/></svg>');
+@icon-close-inactive: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 8 8"><path fill="none" stroke="@{icon-escaped-color}" stroke-width="1" d="M1,1 l6,6 M1,7 l6,-6"/></svg>');
+@icon-cross: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 8 8"><path fill="@{icon-escaped-color}" d="M1,0.5 l6,6 v1.5 l-6,-6 Z M1,6.5 l6,-6 v1.5 l-6,6 z"/></svg>');
 @icon-down: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 8 8"><path fill="white" d="M1,2 l3,3 l3,-3 v1.5 l-3,3 l-3,-3 z"/></svg>');
 @icon-left: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 8 8"><path fill="white" d="M6,1 h-1.5 l-3,3 l3,3 h1.5 l-3,-3 z"/></svg>');
 @icon-list: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 8 8"><path fill="white" d="M0,0 h1 v1 h-1 z m2,0 h6 v1 h-6 z m-2,3.25 h1 v1 h-1 z m2,0 h6 v1 h-6 z m-2,3.25 h1 v1 h-1 z m2,0 h6 v1 h-6 z"/></svg>');

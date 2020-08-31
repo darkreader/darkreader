@@ -15,8 +15,9 @@ import createCSSFilterStylesheet from '../generators/css-filter';
 import {getDynamicThemeFixesFor} from '../generators/dynamic-theme';
 import createStaticStylesheet from '../generators/static-theme';
 import {createSVGFilterStylesheet, getSVGFilterMatrixValue, getSVGReverseFilterMatrixValue} from '../generators/svg-filter';
-import {ExtensionData, FilterConfig, News, Shortcuts, UserSettings, TabInfo} from '../definitions';
+import {ExtensionData, FilterConfig, News, Shortcuts, UserSettings, TabInfo, Message} from '../definitions';
 import {isSystemDarkModeEnabled} from '../utils/media-query';
+import { getCurrentThemePreset } from 'ui/popup/theme/utils';
 
 const AUTO_TIME_CHECK_INTERVAL = getDuration({seconds: 10});
 
@@ -89,6 +90,7 @@ export class Extension {
         console.log('loaded', this.user.settings);
 
         this.registerCommands();
+        this.requestState();
 
         this.ready = true;
         this.tabs.updateContentScript({runOnProtectedPages: this.user.settings.enableForProtectedPages});
@@ -157,6 +159,14 @@ export class Extension {
                 const index = engines.indexOf(this.user.settings.theme.engine);
                 const next = index === engines.length - 1 ? engines[0] : engines[index + 1];
                 this.setTheme({engine: next});
+            }
+        });
+    }
+
+    private requestState() {
+        chrome.runtime.onMessage.addListener(async ({type}: Message, sender) => {
+            if (type === 'request-state') {
+                chrome.tabs.sendMessage(sender.tab.id, {type: 'state-response', data: this.user.settings.enabled});
             }
         });
     }

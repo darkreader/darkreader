@@ -19,7 +19,7 @@ import {ExtensionData, FilterConfig, News, Shortcuts, UserSettings, TabInfo, Ext
 import {isSystemDarkModeEnabled} from '../utils/media-query';
 import {logInfo, logWarn} from '../inject/utils/log';
 import {DEFAULT_SETTINGS, DEFAULT_THEME} from '../defaults';
-import {getValidatedObject} from '../utils/object';
+import {getValidatedObject, getPreviousObject} from '../utils/object';
 
 const AUTO_TIME_CHECK_INTERVAL = getDuration({seconds: 10});
 
@@ -165,14 +165,30 @@ export class Extension {
         });
     }
 
+    private copyShadowCopy(setting: Partial<UserSettings>, origin: string) {
+        let shadowCopy = this.user.settings.shadowCopy.find(({id}) => id === origin);
+        let index: number;
+        if (!shadowCopy) {
+            index = this.user.settings.shadowCopy.push({id: origin, copy: {} as UserSettings}) - 1;
+            shadowCopy = this.user.settings.shadowCopy[index];
+
+        } else {
+            index = this.user.settings.shadowCopy.indexOf(shadowCopy);
+        }
+        shadowCopy.copy = {...shadowCopy.copy, ...setting};
+        this.user.settings.shadowCopy[index] = shadowCopy;
+        this.changeSettings({shadowCopy: this.user.settings.shadowCopy});
+    }
+
     externalRequestsHandler(incomingData: ExternalRequest, origin: string) {
         const {type, data} = incomingData;
         if (type === 'toggle') {
             logInfo(`Port: ${origin}, toggled dark reader.`);
-            this.changeSettings({
+            const newSettings: Partial<UserSettings> = {
                 enabled: !this.isEnabled(),
                 automation: '',
-            });
+            };
+            this.changeSettings(newSettings);
         }
         if (type === 'toggleCurrentSite') {
             logInfo(`Port: ${origin}, toggled the current site.`);
@@ -193,6 +209,7 @@ export class Extension {
             }
             logInfo(`Port: ${origin}, made changes to the settings.`);
             const validatedData = getValidatedObject(data, DEFAULT_SETTINGS);
+            this.copyShadowCopy(validatedData, origin);
             this.changeSettings(validatedData);
             logInfo('Saved', this.user.settings);
         }
@@ -211,8 +228,22 @@ export class Extension {
             }
             logInfo(`Port: ${origin}, made changes to the settings.`);
             const validatedData = getValidatedObject(data, DEFAULT_THEME);
+            this.copyShadowCopy({theme: validatedData} as UserSettings, origin);
             this.setTheme(validatedData);
             logInfo('Saved', this.user.settings.theme);
+        }
+        if (type === 'resetSettings') {
+            const shadowCopy = this.user.settings.shadowCopy.find(({id}) => id === origin);
+            if (!shadowCopy) {
+                logWarn('No data detected to reset settings.');
+                return;
+            }
+            // TODO: Previous implementation so it will not compare against DEFAULT_SETTINGS what most users don't have probably.
+            const previousSettings = getPreviousObject(shadowCopy.copy, DEFAULT_SETTINGS);
+            const index = this.user.settings.shadowCopy.indexOf(shadowCopy);
+            this.user.settings.shadowCopy.splice(index, 1);
+            this.changeSettings({...previousSettings, ...this.user.settings.shadowCopy});
+            logInfo('Resseted', this.user.settings);
         }
     }
 

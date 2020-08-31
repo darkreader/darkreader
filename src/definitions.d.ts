@@ -70,6 +70,11 @@ export interface ThemePreset {
     theme: Theme;
 }
 
+export interface ShadowCopy {
+    id: string;
+    copy: Partial<UserSettings>;
+}
+
 export interface UserSettings {
     enabled: boolean;
     theme: FilterConfig;
@@ -89,6 +94,7 @@ export interface UserSettings {
     enableForPDF: boolean;
     enableForProtectedPages: boolean;
     enableExternalConnections: boolean;
+    shadowCopy: ShadowCopy[];
 }
 
 export interface TimeSettings {

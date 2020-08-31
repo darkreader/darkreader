@@ -57,4 +57,5 @@ export const DEFAULT_SETTINGS: UserSettings = {
     enableForPDF: true,
     enableForProtectedPages: false,
     enableExternalConnections: false,
+    shadowCopy: [],
 };

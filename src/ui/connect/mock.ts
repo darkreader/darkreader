@@ -20,6 +20,7 @@ export function getMockData(override = {} as Partial<ExtensionData>): ExtensionD
                 engine: 'cssFilter',
                 stylesheet: '',
                 scrollbarColor: 'auto',
+                styleSystemControls: true,
             } as Theme,
             customThemes: [],
             siteList: [],

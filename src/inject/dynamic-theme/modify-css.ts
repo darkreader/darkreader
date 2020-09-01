@@ -51,40 +51,40 @@ export function getModifiableCSSDeclaration(property: string, value: string, rul
     return null;
 }
 
-export function getModifiedUserAgentStyle(filter: FilterConfig, isIFrame: boolean) {
+export function getModifiedUserAgentStyle(theme: Theme, isIFrame: boolean, styleSystemControls: boolean) {
     const lines: string[] = [];
     if (!isIFrame) {
         lines.push('html {');
-        lines.push(`    background-color: ${modifyBackgroundColor({r: 255, g: 255, b: 255}, filter)} !important;`);
+        lines.push(`    background-color: ${modifyBackgroundColor({r: 255, g: 255, b: 255}, theme)} !important;`);
         lines.push('}');
     }
-    lines.push(`${isIFrame ? '' : 'html, body, '}input, textarea, select, button {`);
-    lines.push(`    background-color: ${modifyBackgroundColor({r: 255, g: 255, b: 255}, filter)};`);
+    lines.push(`${isIFrame ? '' : 'html, body, '}${styleSystemControls ? 'input, textarea, select, button' : ''} {`);
+    lines.push(`    background-color: ${modifyBackgroundColor({r: 255, g: 255, b: 255}, theme)};`);
     lines.push('}');
-    lines.push('html, body, input, textarea, select, button {');
-    lines.push(`    border-color: ${modifyBorderColor({r: 76, g: 76, b: 76}, filter)};`);
-    lines.push(`    color: ${modifyForegroundColor({r: 0, g: 0, b: 0}, filter)};`);
+    lines.push(`html, body, ${styleSystemControls ? 'input, textarea, select, button' : ''} {`);
+    lines.push(`    border-color: ${modifyBorderColor({r: 76, g: 76, b: 76}, theme)};`);
+    lines.push(`    color: ${modifyForegroundColor({r: 0, g: 0, b: 0}, theme)};`);
     lines.push('}');
     lines.push('a {');
-    lines.push(`    color: ${modifyForegroundColor({r: 0, g: 64, b: 255}, filter)};`);
+    lines.push(`    color: ${modifyForegroundColor({r: 0, g: 64, b: 255}, theme)};`);
     lines.push('}');
     lines.push('table {');
-    lines.push(`    border-color: ${modifyBorderColor({r: 128, g: 128, b: 128}, filter)};`);
+    lines.push(`    border-color: ${modifyBorderColor({r: 128, g: 128, b: 128}, theme)};`);
     lines.push('}');
     lines.push('::placeholder {');
-    lines.push(`    color: ${modifyForegroundColor({r: 169, g: 169, b: 169}, filter)};`);
+    lines.push(`    color: ${modifyForegroundColor({r: 169, g: 169, b: 169}, theme)};`);
     lines.push('}');
     lines.push('input:-webkit-autofill,');
     lines.push('textarea:-webkit-autofill,');
     lines.push('select:-webkit-autofill {');
-    lines.push(`    background-color: ${modifyBackgroundColor({r: 250, g: 255, b: 189}, filter)} !important;`);
-    lines.push(`    color: ${modifyForegroundColor({r: 0, g: 0, b: 0}, filter)} !important;`);
+    lines.push(`    background-color: ${modifyBackgroundColor({r: 250, g: 255, b: 189}, theme)} !important;`);
+    lines.push(`    color: ${modifyForegroundColor({r: 0, g: 0, b: 0}, theme)} !important;`);
     lines.push('}');
-    if (filter.scrollbarColor) {
-        lines.push(getModifiedScrollbarStyle(filter));
+    if (theme.scrollbarColor) {
+        lines.push(getModifiedScrollbarStyle(theme));
     }
-    if (filter.selectionColor) {
-        lines.push(getModifiedSelectionStyle(filter));
+    if (theme.selectionColor) {
+        lines.push(getModifiedSelectionStyle(theme));
     }
     return lines.join('\n');
 }
@@ -107,6 +107,7 @@ export function getSelectionColor(theme: Theme) {
     }
     return {backgroundColorSelection, foregroundColorSelection};
 }
+
 function getModifiedSelectionStyle(theme: Theme) {
     const lines: string[] = [];
     const modifiedSelectionColor = getSelectionColor(theme);

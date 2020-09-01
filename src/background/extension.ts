@@ -364,7 +364,7 @@ export class Extension {
     private getURLInfo(url: string): TabInfo {
         const {DARK_SITES} = this.config;
         const isInDarkList = isURLInList(url, DARK_SITES);
-        const isProtected = !(this.user.settings.enableForProtectedPages || canInjectScript(url));
+        const isProtected = !canInjectScript(url);
         return {
             url,
             isInDarkList,

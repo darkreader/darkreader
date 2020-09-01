@@ -66,12 +66,12 @@ test('URL is enabled', () => {
         'https://chrome.google.com/webstore',
         {siteList: ['chrome.google.com'], siteListEnabled: [], applyToListedOnly: true, enableForProtectedPages: true} as UserSettings,
         {isProtected: true, isInDarkList: false},
-    )).toBe(false);
+    )).toBe(true);
     expect(isURLEnabled(
         'https://chrome.google.com/webstore',
         {siteList: [], siteListEnabled: [], applyToListedOnly: false, enableForProtectedPages: false} as UserSettings,
         {isProtected: true, isInDarkList: false},
-    )).toBe(true);
+    )).toBe(false);
     expect(isURLEnabled(
         'https://chrome.google.com/webstore',
         {siteList: ['chrome.google.com'], siteListEnabled: [], applyToListedOnly: false, enableForProtectedPages: true} as UserSettings,
@@ -86,7 +86,7 @@ test('URL is enabled', () => {
         'https://microsoftedge.microsoft.com/addons',
         {siteList: ['microsoftedge.microsoft.com'], siteListEnabled: [], applyToListedOnly: true, enableForProtectedPages: true} as UserSettings,
         {isProtected: true, isInDarkList: false},
-    )).toBe(false);
+    )).toBe(true);
     expect(isURLEnabled(
         'https://duckduckgo.com',
         {siteList: [], siteListEnabled: [], applyToListedOnly: false, enableForProtectedPages: true} as UserSettings,

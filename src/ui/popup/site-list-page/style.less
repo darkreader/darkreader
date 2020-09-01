@@ -1,4 +1,5 @@
 @import "../../theme.less";
+@import "../../icons.less";
 
 .site-list-page {
     align-items: center;
@@ -43,6 +44,35 @@
         &:focus {
             box-shadow: 0 0 0 @size-border @color-border;
             z-index: 1;
+        }
+    }
+
+    &__item {
+        position: relative;
+
+        &__remove {
+            background-color: transparent;
+            background-image: @icon-close-inactive;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-size: 0.75rem;
+            border-radius: 50%;
+            cursor: pointer;
+            display: none;
+            height: 1.25rem;
+            position: absolute;
+            right: 0.125rem;
+            top: 0.125rem;
+            width: 1.25rem;
+
+            &:hover {
+                background-color: @color-control-active;
+                background-image: @icon-close;
+            }
+        }
+
+        &:hover .site-list__item__remove {
+            display: inline-block;
         }
     }
 }

@@ -21,5 +21,7 @@ in which case open a pull request on
 <https://github.com/darkreader/darkreader/pulls>.
 
 Alexander Shutau, owner
+
 "Gusted" William Zijl, maintainer
+
 Erkin Alp Güney, security policy author

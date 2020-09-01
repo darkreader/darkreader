@@ -28,6 +28,7 @@
                 "<all_urls>"
             ],
             "js": [
+                "inject/fallback.js",
                 "inject/index.js"
             ],
             "run_at": "document_start",

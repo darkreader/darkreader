@@ -39,7 +39,7 @@ export async function collectCSS() {
     const css = [banner];
 
     function addStaticCSS(selector: string, comment: string) {
-        const staticStyle = document.head.querySelector(selector);
+        const staticStyle = document.querySelector(selector);
         if (staticStyle && staticStyle.textContent) {
             css.push(`/* ${comment} */`);
             css.push(staticStyle.textContent);

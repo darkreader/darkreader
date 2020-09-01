@@ -65,7 +65,7 @@ test('Dynamic Theme Fixes config', async () => {
     expect(fixes.every(({invert, ignoreInlineStyle, ignoreImageAnalysis}) => (invert || []).concat(ignoreInlineStyle || []).concat(ignoreImageAnalysis || []).every((s) => s.indexOf(',') < 0))).toBe(true);
 
     // fixes are properly formatted
-    expect(throwIfDifferent(file, formatDynamicThemeFixes(fixes), 'Dynamic fixes format error')).not.toThrow();
+    expect(throwIfDifferent(file, formatDynamicThemeFixes(fixes, {shouldFormatCSS: false}), 'Dynamic fixes format error')).not.toThrow();
 
     // should parse empty config
     expect(parseDynamicThemeFixes('')).toEqual([]);
@@ -112,7 +112,7 @@ test('Inversion Fixes config', async () => {
     expect(fixes.every(({invert, noinvert, removebg}) => (invert || []).concat(noinvert || []).concat(removebg || []).every((s) => s.indexOf(',') < 0))).toBe(true);
 
     // fixes are properly formatted
-    expect(throwIfDifferent(file, formatInversionFixes(fixes), 'Inversion fixes format error')).not.toThrow();
+    expect(throwIfDifferent(file, formatInversionFixes(fixes, {shouldFormatCSS: false}), 'Inversion fixes format error')).not.toThrow();
 });
 
 test('Static Themes config', async () => {

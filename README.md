@@ -47,7 +47,8 @@ For **Filter mode**, it is a common practice to invert already dark page parts.
 - Edit or add a block containing the URL and selectors to invert.
 - Click **Apply**.
 - Check how it looks both in **Light** and **Dark** mode.
-- If the **fix works** open
+- If the **fix works**, click **Format** to format your fix into the right CSS format.
+- Continue by opening
 **[dynamic-theme-fixes.config](https://github.com/alexanderby/darkreader/blob/master/src/config/dynamic-theme-fixes.config) file**
 or **[inversion-fixes.config](https://github.com/alexanderby/darkreader/blob/master/src/config/inversion-fixes.config) file**.
 - Click **Edit** (login to GitHub first).

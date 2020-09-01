@@ -1,7 +1,7 @@
 import {formatSitesFixesConfig} from './utils/format';
 import {applyColorMatrix, createFilterMatrix} from './utils/matrix';
 import {parseSitesFixesConfig} from './utils/parse';
-import {parseArray, formatArray} from '../utils/text';
+import {parseArray, formatArray, formatCSS} from '../utils/text';
 import {compareURLPatterns, isURLInList} from '../utils/url';
 import {createTextStyle} from './text-style';
 import {FilterConfig, InversionFix} from '../definitions';
@@ -229,7 +229,7 @@ export function parseInversionFixes(text: string) {
     });
 }
 
-export function formatInversionFixes(inversionFixes: InversionFix[]) {
+export function formatInversionFixes(inversionFixes: InversionFix[], {shouldFormatCSS}) {
     const fixes = inversionFixes.slice().sort((a, b) => compareURLPatterns(a.url[0], b.url[0]));
 
     return formatSitesFixesConfig(fixes, {
@@ -237,7 +237,11 @@ export function formatInversionFixes(inversionFixes: InversionFix[]) {
         getPropCommandName: (prop) => Object.entries(inversionFixesCommands).find(([, p]) => p === prop)[0],
         formatPropValue: (prop, value) => {
             if (prop === 'css') {
-                return value.trim();
+                if (shouldFormatCSS) {
+                    return (formatCSS(value));
+                } else {
+                    return value.trim();
+                }
             }
             return formatArray(value).trim();
         },

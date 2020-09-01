@@ -6,6 +6,9 @@ import {DEVTOOLS_DOCS_URL} from '../../../utils/links';
 import {isFirefox} from '../../../utils/platform';
 import {ExtWrapper, TabInfo} from '../../../definitions';
 import {getCurrentThemePreset} from '../../popup/theme/utils';
+import {parseDynamicThemeFixes, formatDynamicThemeFixes} from '../../../generators/dynamic-theme';
+import themeEngines from '../../../generators/theme-engines';
+import {parseInversionFixes, formatInversionFixes} from '../../../generators/css-filter';
 
 type BodyProps = ExtWrapper & {tab: TabInfo};
 
@@ -80,6 +83,18 @@ function Body({data, tab, actions}: BodyProps) {
         actions.changeSettings({previewNewDesign: !data.settings.previewNewDesign});
     }
 
+    function format() {
+        if (theme.engine === themeEngines.dynamicTheme) {
+            const parsed = parseDynamicThemeFixes(textNode.value);
+            const formatted = formatDynamicThemeFixes(parsed, {shouldFormatCSS: true});
+            textNode.value = formatted;
+        } else {
+            const parsed = parseInversionFixes(textNode.value);
+            const formatted = formatInversionFixes(parsed, {shouldFormatCSS: true});
+            textNode.value = formatted;
+        }
+    }
+
     return (
         <body>
             <header>
@@ -93,6 +108,10 @@ function Body({data, tab, actions}: BodyProps) {
             />
             <label id="error-text">{state.errorText}</label>
             <div id="buttons">
+                {theme.engine === themeEngines.staticTheme ?
+                    null :
+                    <Button onclick={format}>Format</Button>
+                }
                 <Button onclick={reset}>Reset</Button>
                 <Button onclick={apply}>Apply</Button>
                 <Button class="preview-design-button" onclick={toggleDesign}>{previewButtonText}</Button>

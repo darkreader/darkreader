@@ -97,7 +97,7 @@ export default class DevTools {
     getDynamicThemeFixesText() {
         const $fixes = this.getSavedDynamicThemeFixes();
         const fixes = $fixes ? parseDynamicThemeFixes($fixes) : this.config.DYNAMIC_THEME_FIXES;
-        return formatDynamicThemeFixes(fixes);
+        return formatDynamicThemeFixes(fixes, {shouldFormatCSS: false});
     }
 
     resetDynamicThemeFixes() {
@@ -109,7 +109,7 @@ export default class DevTools {
 
     applyDynamicThemeFixes(text: string) {
         try {
-            const formatted = formatDynamicThemeFixes(parseDynamicThemeFixes(text));
+            const formatted = formatDynamicThemeFixes(parseDynamicThemeFixes(text), {shouldFormatCSS: false});
             this.config.overrides.dynamicThemeFixes = formatted;
             this.config.handleDynamicThemeFixes();
             this.saveDynamicThemeFixes(formatted);
@@ -135,7 +135,7 @@ export default class DevTools {
     getInversionFixesText() {
         const $fixes = this.getSavedInversionFixes();
         const fixes = $fixes ? parseInversionFixes($fixes) : this.config.INVERSION_FIXES;
-        return formatInversionFixes(fixes);
+        return formatInversionFixes(fixes, {shouldFormatCSS: false});
     }
 
     resetInversionFixes() {
@@ -147,7 +147,7 @@ export default class DevTools {
 
     applyInversionFixes(text: string) {
         try {
-            const formatted = formatInversionFixes(parseInversionFixes(text));
+            const formatted = formatInversionFixes(parseInversionFixes(text), {shouldFormatCSS: false});
             this.config.overrides.inversionFixes = formatted;
             this.config.handleInversionFixes();
             this.saveInversionFixes(formatted);

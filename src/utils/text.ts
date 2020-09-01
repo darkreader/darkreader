@@ -61,6 +61,25 @@ export function getStringSize(value: string) {
     return value.length * 2;
 }
 
+let tempObject = {};
+
+function replaceTempCSSTemplates($cssText: string) {
+    let index = 0;
+    return $cssText.replace(/\${(.+?)}/g, (m0, $color) => {
+        const tempValue = `tempValue${index++}`;
+        tempObject[tempValue] = $color;
+        return tempValue;
+    });
+}
+
+function revertTempCSSTemplates($cssText: string) {
+    Object.keys(tempObject).forEach((key) => {
+        $cssText = $cssText.replace(key, '${' + tempObject[key] + '}');
+    });
+    tempObject = {};
+    return $cssText;
+}
+
 export function formatCSS(text: string) {
 
     function trimLeft(text: string) {
@@ -79,14 +98,15 @@ export function formatCSS(text: string) {
         text = text.replace(emptyRuleRegexp, '');
     }
 
-    const css = (text
+    const replacedTemplate = replaceTempCSSTemplates(text);
+    const css = (replacedTemplate
         .replace(/\s{2,}/g, ' ') // Replacing multiple spaces to one
         .replace(/\{/g, '{\n') // {
         .replace(/\}/g, '\n}\n') // }
         .replace(/\;(?![^(\(|\")]*(\)|\"))/g, ';\n') // ; and do not target between () and ""
         .replace(/\,(?![^(\(|\")]*(\)|\"))/g, ',\n') // , and do not target between () and ""
         .replace(/\n\s*\n/g, '\n') // Remove \n Without any characters between it to the next \n
-        .split('\n'));
+    ).split('\n');
 
     let depth = 0;
     const formatted = [];
@@ -102,5 +122,7 @@ export function formatCSS(text: string) {
         }
     }
 
-    return formatted.join('').trim();
+    const revertedCSS = revertTempCSSTemplates(formatted.join(''));
+
+    return revertedCSS.trim();
 }

@@ -1,6 +1,6 @@
 import {formatSitesFixesConfig} from './utils/format';
 import {parseSitesFixesConfig} from './utils/parse';
-import {parseArray, formatArray} from '../utils/text';
+import {parseArray, formatArray, formatCSS} from '../utils/text';
 import {compareURLPatterns, isURLInList} from '../utils/url';
 import {DynamicThemeFix} from '../definitions';
 
@@ -24,7 +24,7 @@ export function parseDynamicThemeFixes(text: string) {
     });
 }
 
-export function formatDynamicThemeFixes(dynamicThemeFixes: DynamicThemeFix[]) {
+export function formatDynamicThemeFixes(dynamicThemeFixes: DynamicThemeFix[], {shouldFormatCSS}) {
     const fixes = dynamicThemeFixes.slice().sort((a, b) => compareURLPatterns(a.url[0], b.url[0]));
 
     return formatSitesFixesConfig(fixes, {
@@ -32,7 +32,11 @@ export function formatDynamicThemeFixes(dynamicThemeFixes: DynamicThemeFix[]) {
         getPropCommandName: (prop) => Object.entries(dynamicThemeFixesCommands).find(([, p]) => p === prop)[0],
         formatPropValue: (prop, value) => {
             if (prop === 'css') {
-                return value.trim();
+                if (shouldFormatCSS) {
+                    return (formatCSS(value));
+                } else {
+                    return value.trim();
+                }
             }
             return formatArray(value).trim();
         },

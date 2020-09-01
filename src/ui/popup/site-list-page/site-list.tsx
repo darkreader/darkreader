@@ -58,9 +58,10 @@ export default function SiteList(props: SiteListProps) {
     function removeValue(event: MouseEvent) {
         const previousSibling = ((event.target as HTMLInputElement).previousSibling as HTMLInputElement);
         const index = store.indices.get(previousSibling);
-        const newValue = props.siteList.slice().splice(index, 1);
+        const filtered = props.siteList.slice();
+        filtered.splice(index, 1);
         store.shouldFocusAtIndex = index;
-        props.onChange(newValue);
+        props.onChange(filtered);
     }
 
     function createTextBox(text: string, index: number) {

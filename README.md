@@ -42,7 +42,7 @@ For **Filter mode**, it is a common practice to invert already dark page parts.
 - Click on **element picker** (top-left corner). It is enabled automatically in Firefox.
 - Pick wrongly inverted element.
 - Choose a **[selector](https://developer.mozilla.org/docs/Web/CSS/CSS_Selectors)** for that element or all similar elements (e.g. if element has `class="icon small"`, selector may look like `.icon`).
-- Click **Dark Reader icon**.
+- Click **Dark Reader icon** (a blue monster with a bleeding eye in the dark mode, a CGI-drawn face in the light mode).
 - Click **Open developer tools** (at bottom of Dark Reader popup).
 - Edit or add a block containing the URL and selectors to invert.
 - Click **Apply**.

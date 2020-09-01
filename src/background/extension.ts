@@ -17,7 +17,6 @@ import createStaticStylesheet from '../generators/static-theme';
 import {createSVGFilterStylesheet, getSVGFilterMatrixValue, getSVGReverseFilterMatrixValue} from '../generators/svg-filter';
 import {ExtensionData, FilterConfig, News, Shortcuts, UserSettings, TabInfo, Message} from '../definitions';
 import {isSystemDarkModeEnabled} from '../utils/media-query';
-import { getCurrentThemePreset } from 'ui/popup/theme/utils';
 
 const AUTO_TIME_CHECK_INTERVAL = getDuration({seconds: 10});
 
@@ -90,7 +89,6 @@ export class Extension {
         console.log('loaded', this.user.settings);
 
         this.registerCommands();
-        this.requestState();
 
         this.ready = true;
         this.tabs.updateContentScript({runOnProtectedPages: this.user.settings.enableForProtectedPages});
@@ -163,14 +161,6 @@ export class Extension {
         });
     }
 
-    private requestState() {
-        chrome.runtime.onMessage.addListener(async ({type}: Message, sender) => {
-            if (type === 'request-state') {
-                chrome.tabs.sendMessage(sender.tab.id, {type: 'state-response', data: this.user.settings.enabled});
-            }
-        });
-    }
-
     private async getShortcuts() {
         const commands = await getCommands();
         return commands.reduce((map, cmd) => Object.assign(map, {[cmd.name]: cmd.shortcut}), {} as Shortcuts);
@@ -217,11 +207,11 @@ export class Extension {
 
     private getConnectionMessage(url, frameURL) {
         if (this.ready) {
-            return this.isEnabled() && this.getTabMessage(url, frameURL);
+            return this.getTabMessage(url, frameURL);
         } else {
             return new Promise((resolve) => {
                 this.awaiting.push(() => {
-                    resolve(this.isEnabled() && this.getTabMessage(url, frameURL));
+                    resolve(this.getTabMessage(url, frameURL));
                 });
             });
         }
@@ -435,9 +425,9 @@ export class Extension {
                     throw new Error(`Unknown engine ${theme.engine}`);
                 }
             }
-        } else {
-            console.log(`Site is not inverted: ${url}`);
         }
+
+        console.log(`Site is not inverted: ${url}`);
         return {
             type: 'clean-up',
         };

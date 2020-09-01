@@ -5,13 +5,4 @@ if (matchMedia('(prefers-color-scheme: dark)').matches) {
     fallbackStyle.classList.add('darkreader');
     fallbackStyle.classList.add('darkreader--fallback');
     fallbackStyle.media = 'screen';
-    chrome.runtime.sendMessage({type: 'request-state'});
 }
-
-chrome.runtime.onMessage.addListener(({type, data}) => {
-    if (type === 'state-response') {
-        if (!data) {
-            fallbackStyle && fallbackStyle.parentNode && fallbackStyle.parentNode.removeChild(fallbackStyle);
-        }
-    }
-});

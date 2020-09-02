@@ -101,6 +101,7 @@ export function watchForNodePosition<T extends Node>(
                     attempts = 0;
                     timeoutId = null;
                     restore();
+                    skip()
                 }, RETRY_TIMEOUT);
                 return;
             }
@@ -133,7 +134,12 @@ export function watchForNodePosition<T extends Node>(
         observer.takeRecords();
         onRestore && onRestore();
     });
-    const observer = new MutationObserver(() => {
+    const observer = new MutationObserver((mutation) => {
+        if (
+            mutation[0].removedNodes[0] instanceof HTMLStyleElement && mutation[0].removedNodes[0].classList.contains('darkreader') &&
+            mutation[1].addedNodes[0] instanceof HTMLStyleElement && mutation[1].addedNodes[0].classList.contains('darkreader')) {
+            return;
+        }
         if (
             (mode === 'parent' && node.parentNode !== parent) ||
             (mode === 'prev-sibling' && node.previousSibling !== prevSibling)

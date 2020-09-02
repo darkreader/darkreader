@@ -101,7 +101,6 @@ export function watchForNodePosition<T extends Node>(
                     attempts = 0;
                     timeoutId = null;
                     restore();
-                    skip()
                 }, RETRY_TIMEOUT);
                 return;
             }

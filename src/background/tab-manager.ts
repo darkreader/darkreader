@@ -25,9 +25,22 @@ export default class TabManager {
         this.ports = new Map();
         chrome.runtime.onConnect.addListener((port) => {
             if (port.name === 'tab') {
-                const tabId = port.sender.tab.id;
-                const frameId = port.sender.frameId;
-                const url = port.sender.url;
+
+                let tabId;
+                let frameId;
+                let url;
+                let tabURL;
+                if (port.sender.tab == undefined) {
+                    tabId = port.sender.tab;
+                    frameId = 0;
+                    url = port.sender.url;
+                    tabURL = port.sender.url;
+                } else {
+                    tabId = port.sender.tab.id;
+                    frameId = port.sender.frameId;
+                    url = port.sender.url;
+                    tabURL = port.sender.tab.url;
+                }
                 let framesPorts: Map<number, PortInfo>;
                 if (this.ports.has(tabId)) {
                     framesPorts = this.ports.get(tabId);
@@ -43,7 +56,7 @@ export default class TabManager {
                     }
                 });
 
-                const message = getConnectionMessage(port.sender.tab.url, frameId === 0 ? null : url);
+                const message = getConnectionMessage(tabURL, frameId === 0 ? null : url);
                 if (message instanceof Promise) {
                     message.then((asyncMessage) => asyncMessage && port.postMessage(asyncMessage));
                 } else if (message) {
@@ -60,7 +73,7 @@ export default class TabManager {
 
                 // Using custom response due to Chrome and Firefox incompatibility
                 // Sometimes fetch error behaves like synchronous and sends `undefined`
-                const sendResponse = (response) => chrome.tabs.sendMessage(sender.tab.id, {type: 'fetch-response', id, ...response});
+                const sendResponse = (response) => chrome.tabs.sendMessage(sender.tab == undefined ? sender.id as any : sender.tab.id, {type: 'fetch-response', id, ...response});
                 try {
                     const response = await fileLoader.get({url, responseType, mimeType});
                     sendResponse({data: response});

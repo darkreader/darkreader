@@ -31,6 +31,7 @@ function onMessage({type, data}) {
             collectCSS().then((collectedCSS) => chrome.runtime.sendMessage({type: 'export-css-response', data: collectedCSS}));
             break;
         }
+        case 'unsupported-sender':
         case 'clean-up': {
             removeStyle();
             removeSVGFilter();

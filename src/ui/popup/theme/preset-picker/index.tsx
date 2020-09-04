@@ -56,7 +56,7 @@ export default function PresetPicker(props: ViewProps) {
 
     const selectedPresetId = custom ? 'custom' : preset ? preset.id : 'default';
 
-    const defaultOption = {id: 'default', content: 'Default theme'};
+    const defaultOption = {id: 'default', content: 'Theme for all websites'};
     const addNewPresetOption = props.data.settings.presets.length < MAX_ALLOWED_PRESETS ?
         {id: 'add-preset', content: '\uff0b Create new theme'} :
         null;
@@ -71,7 +71,7 @@ export default function PresetPicker(props: ViewProps) {
     });
     const customSitePresetOption = {
         id: 'custom',
-        content: `${selectedPresetId === 'custom' ? '\u2605' : '\u2606'} Custom for ${host}`,
+        content: `${selectedPresetId === 'custom' ? '\u2605' : '\u2606'} Theme for ${host}`,
     };
 
     const dropdownOptions = [

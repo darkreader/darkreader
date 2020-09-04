@@ -1,6 +1,6 @@
 {
   "name": "darkreader",
-  "version": "4.9.17",
+  "version": "4.9.18",
   "description": "Dark theme for every website",
   "scripts": {
     "api": "node tasks/build.js --api",

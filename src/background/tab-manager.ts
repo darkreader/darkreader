@@ -8,14 +8,14 @@ function queryTabs(query: chrome.tabs.QueryInfo) {
     });
 }
 
-interface GetConnectionMessageProps {
+interface ConnectionMessageOptions {
     url: string;
     frameURL: string;
     unsupportedSender?: boolean;
 }
 
 interface TabManagerOptions {
-    getConnectionMessage: (options: GetConnectionMessageProps) => any;
+    getConnectionMessage: (options: ConnectionMessageOptions) => any;
     onColorSchemeChange: ({isDark}) => void;
 }
 
@@ -31,7 +31,7 @@ export default class TabManager {
         this.ports = new Map();
         chrome.runtime.onConnect.addListener((port) => {
             if (port.name === 'tab') {
-                const reply = (options: GetConnectionMessageProps) => {
+                const reply = (options: ConnectionMessageOptions) => {
                     const message = getConnectionMessage(options);
                     if (message instanceof Promise) {
                         message.then((asyncMessage) => asyncMessage && port.postMessage(asyncMessage));
@@ -83,7 +83,7 @@ export default class TabManager {
 
                 // Using custom response due to Chrome and Firefox incompatibility
                 // Sometimes fetch error behaves like synchronous and sends `undefined`
-                const sendResponse = (response) => chrome.tabs.sendMessage(sender.tab == undefined ? sender.id as any : sender.tab.id, {type: 'fetch-response', id, ...response});
+                const sendResponse = (response) => chrome.tabs.sendMessage(sender.tab.id, {type: 'fetch-response', id, ...response});
                 try {
                     const response = await fileLoader.get({url, responseType, mimeType});
                     sendResponse({data: response});

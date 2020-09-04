@@ -41,7 +41,12 @@ export class Extension {
         this.messenger = new Messenger(this.getMessengerAdapter());
         this.news = new Newsmaker((news) => this.onNewsUpdate(news));
         this.tabs = new TabManager({
-            getConnectionMessage: (url, frameURL) => this.getConnectionMessage(url, frameURL),
+            getConnectionMessage: ({url, frameURL, unsupportedSender}) => {
+                if (unsupportedSender) {
+                    return this.getUnsupportedSenderMessage();
+                }
+                return this.getConnectionMessage(url, frameURL);
+            },
             onColorSchemeChange: this.onColorSchemeChange,
         });
         this.user = new UserStorage();
@@ -215,6 +220,10 @@ export class Extension {
                 });
             });
         }
+    }
+
+    private getUnsupportedSenderMessage() {
+        return {type: 'unsupported-sender'};
     }
 
     private wasEnabledOnLastCheck: boolean;

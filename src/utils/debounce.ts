@@ -5,6 +5,7 @@ export function debounce<F extends (...args: any[]) => any>(delay: number, fn: F
             clearTimeout(timeoutId);
         }
         timeoutId = setTimeout(() => {
+            timeoutId = null;
             fn(...args);
         }, delay);
     }) as any;

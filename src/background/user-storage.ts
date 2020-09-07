@@ -41,6 +41,7 @@ export default class UserStorage {
         const $sync = await readSyncStorage(DEFAULT_SETTINGS);
         if (!$sync) {
             console.warn('Sync settings are missing');
+            local.syncSettings = false;
             this.set({syncSettings: false});
             this.saveSyncSetting(false);
             return local;

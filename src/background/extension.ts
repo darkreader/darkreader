@@ -103,7 +103,6 @@ export class Extension {
 
         this.startAutoTimeCheck();
         this.news.subscribe();
-        this.user.cleanup();
     }
 
     private popupOpeningListener: () => void = null;

@@ -140,7 +140,7 @@ export function isURLEnabled(url: string, userSettings: UserSettings, {isProtect
     if (isProtected && !userSettings.enableForProtectedPages) {
         return false;
     }
-    if (isPDF(url) && userSettings.enableForPDF) {
+    if (isPDF(url)) {
         return userSettings.enableForPDF;
     }
     const isURLInUserList = isURLInList(url, userSettings.siteList);

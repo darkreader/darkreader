@@ -17,17 +17,24 @@ export default class UserStorage {
         this.settings = await this.loadSettingsFromStorage();
     }
 
+    private fillDefaults(settings: UserSettings) {
+        settings.theme = {...DEFAULT_THEME, ...settings.theme};
+        settings.time = {...DEFAULT_SETTINGS.time, ...settings.time};
+        settings.presets.forEach((preset) => {
+            preset.theme = {...DEFAULT_THEME, ...preset.theme};
+        });
+        settings.customThemes.forEach((site) => {
+            site.theme = {...DEFAULT_THEME, ...site.theme};
+        });
+    }
+
     private async loadSettingsFromStorage() {
         const local = await readLocalStorage(DEFAULT_SETTINGS);
         if (local.syncSettings == null) {
             local.syncSettings = DEFAULT_SETTINGS.syncSettings;
         }
         if (!local.syncSettings) {
-            local.theme = {...DEFAULT_THEME, ...local.theme};
-            local.time = {...DEFAULT_SETTINGS.time, ...local.time};
-            local.customThemes.forEach((site) => {
-                site.theme = {...DEFAULT_THEME, ...site.theme};
-            });
+            this.fillDefaults(local);
             return local;
         }
 
@@ -40,14 +47,7 @@ export default class UserStorage {
         }
 
         const sync = await readSyncStorage(DEFAULT_SETTINGS);
-        sync.theme = {...DEFAULT_THEME, ...sync.theme};
-        sync.time = {...DEFAULT_SETTINGS.time, ...sync.time};
-        sync.presets.forEach((preset) => {
-            preset.theme = {...DEFAULT_THEME, ...preset.theme};
-        });
-        sync.customThemes.forEach((site) => {
-            site.theme = {...DEFAULT_THEME, ...site.theme};
-        });
+        this.fillDefaults(sync);
         return sync;
     }
 

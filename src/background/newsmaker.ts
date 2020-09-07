@@ -1,6 +1,7 @@
 import {getBlogPostURL} from '../utils/links';
 import {getDuration} from '../utils/time';
 import {News} from '../definitions';
+import {readSyncStorage, readLocalStorage, writeSyncStorage, writeLocalStorage} from './utils/extension-api';
 
 export default class Newsmaker {
     static UPDATE_INTERVAL = getDuration({hours: 4});
@@ -26,56 +27,58 @@ export default class Newsmaker {
         }
     }
 
+    private async getReadNews(): Promise<string[]> {
+        let sync = await readSyncStorage({readNews: []});
+        let local = await readLocalStorage({readNews: []});
+        return Array.from(new Set([
+            ...sync ? sync.readNews : [],
+            ...local ? local.readNews : [],
+        ]));
+    }
+
     private async getNews() {
         try {
             const response = await fetch(`https://darkreader.github.io/blog/posts.json?date=${(new Date()).toISOString().substring(0, 10)}`, {cache: 'no-cache'});
             const $news = await response.json();
-            return new Promise<News[]>((resolve, reject) => {
-                chrome.storage.sync.get({readNews: []}, ({readNews}) => {
-                    const news: News[] = $news.map(({id, date, headline, important}) => {
-                        const url = getBlogPostURL(id);
-                        const read = this.isRead(id, readNews);
-                        return {id, date, headline, url, important, read};
-                    });
-                    for (let i = 0; i < news.length; i++) {
-                        const date = new Date(news[i].date);
-                        if (isNaN(date.getTime())) {
-                            reject(new Error(`Unable to parse date ${date}`));
-                            return;
-                        }
-                    }
-                    resolve(news);
-                });
+            const readNews = await this.getReadNews();
+            const news: News[] = $news.map(({id, date, headline, important}) => {
+                const url = getBlogPostURL(id);
+                const read = this.isRead(id, readNews);
+                return {id, date, headline, url, important, read};
             });
+            for (let i = 0; i < news.length; i++) {
+                const date = new Date(news[i].date);
+                if (isNaN(date.getTime())) {
+                    throw new Error(`Unable to parse date ${date}`);
+                }
+            }
+            return news;
         } catch (err) {
             console.error(err);
             return null;
         }
     }
 
-    markAsRead(...ids: string[]) {
-        return new Promise((resolve) => {
-            chrome.storage.sync.get({readNews: []}, ({readNews}) => {
-                const results = readNews.slice();
-                let changed = false;
-                ids.forEach((id) => {
-                    if (readNews.indexOf(id) < 0) {
-                        results.push(id);
-                        changed = true;
-                    }
-                });
-                if (changed) {
-                    this.latest = this.latest.map(({id, date, url, headline, important}) => {
-                        const read = this.isRead(id, results);
-                        return {id, date, url, headline, important, read};
-                    });
-                    this.onUpdate(this.latest);
-                    chrome.storage.sync.set({readNews: results}, () => resolve());
-                } else {
-                    resolve();
-                }
-            });
+    async markAsRead(...ids: string[]) {
+        const readNews = await this.getReadNews();
+        const results = readNews.slice();
+        let changed = false;
+        ids.forEach((id) => {
+            if (readNews.indexOf(id) < 0) {
+                results.push(id);
+                changed = true;
+            }
         });
+        if (changed) {
+            this.latest = this.latest.map(({id, date, url, headline, important}) => {
+                const read = this.isRead(id, results);
+                return {id, date, url, headline, important, read};
+            });
+            this.onUpdate(this.latest);
+            const obj = {readNews: results};
+            await writeLocalStorage(obj);
+            await writeSyncStorage(obj);
+        }
     }
 
     isRead(id: string, readNews: string[]) {

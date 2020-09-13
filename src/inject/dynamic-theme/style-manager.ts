@@ -186,6 +186,7 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
             // so need to load CSS text and insert it into style element
             try {
                 const fullCSSText = await replaceCSSImports(cssText, cssBasePath);
+                alreadyReplaced.clear();
                 corsCopy = createCORSCopy(element, fullCSSText);
             } catch (err) {
                 logWarn(err);
@@ -433,6 +434,8 @@ async function loadText(url: string) {
     return await bgFetch({url, responseType: 'text', mimeType: 'text/css'});
 }
 
+export const alreadyReplaced = new Map<string, string>();
+
 async function replaceCSSImports(cssText: string, basePath: string) {
     cssText = removeCSSComments(cssText);
     cssText = replaceCSSFontFace(cssText);
@@ -443,12 +446,17 @@ async function replaceCSSImports(cssText: string, basePath: string) {
         const importURL = getCSSImportURL(match);
         const absoluteURL = getAbsoluteURL(basePath, importURL);
         let importedCSS: string;
-        try {
-            importedCSS = await loadText(absoluteURL);
-            importedCSS = await replaceCSSImports(importedCSS, getCSSBaseBath(absoluteURL));
-        } catch (err) {
-            logWarn(err);
-            importedCSS = '';
+        if (alreadyReplaced.has(absoluteURL)) {
+            importedCSS = alreadyReplaced.get(absoluteURL);
+        } else {
+            try {
+                importedCSS = await loadText(absoluteURL);
+                alreadyReplaced.set(absoluteURL, importedCSS);
+                importedCSS = await replaceCSSImports(importedCSS, getCSSBaseBath(absoluteURL));
+            } catch (err) {
+                logWarn(err);
+                importedCSS = '';
+            }
         }
         cssText = cssText.split(match).join(importedCSS);
     }

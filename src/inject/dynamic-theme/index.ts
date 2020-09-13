@@ -2,7 +2,7 @@ import {replaceCSSVariables, getElementCSSVariables} from './css-rules';
 import {overrideInlineStyle, getInlineOverrideStyle, watchForInlineStyles, stopWatchingForInlineStyles, INLINE_STYLE_SELECTOR} from './inline-style';
 import {changeMetaThemeColorWhenAvailable, restoreMetaThemeColor} from './meta-theme-color';
 import {getModifiedUserAgentStyle, getModifiedFallbackStyle, cleanModificationCache, parseColorWithCache, getSelectionColor} from './modify-css';
-import {manageStyle, getManageableStyles, StyleElement, StyleManager} from './style-manager';
+import {manageStyle, getManageableStyles, StyleElement, StyleManager, alreadyReplaced} from './style-manager';
 import {watchForStyleChanges, stopWatchingForStyleChanges} from './watch';
 import {forEach, push, toArray} from '../../utils/array';
 import {removeNode, watchForNodePosition, iterateShadowHosts, isDOMReady, addDOMReadyListener, removeDOMReadyListener} from '../utils/dom';
@@ -448,4 +448,5 @@ export function cleanDynamicThemeCache() {
     cancelRendering();
     stopWatchingForUpdates();
     cleanModificationCache();
+    alreadyReplaced.clear();
 }

@@ -28,8 +28,8 @@ export default class Newsmaker {
     }
 
     private async getReadNews(): Promise<string[]> {
-        let sync = await readSyncStorage({readNews: []});
-        let local = await readLocalStorage({readNews: []});
+        const sync = await readSyncStorage({readNews: []});
+        const local = await readLocalStorage({readNews: []});
         return Array.from(new Set([
             ...sync ? sync.readNews : [],
             ...local ? local.readNews : [],

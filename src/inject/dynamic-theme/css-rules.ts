@@ -17,6 +17,8 @@ export function iterateCSSRules(rules: CSSRuleList, iterate: (rule: CSSStyleRule
             } catch (err) {
                 logWarn(err);
             }
+        } else if (rule instanceof CSSSupportsRule) {
+            iterateCSSRules(rule.cssRules, iterate);
         } else {
             logWarn(`CSSRule type not supported`, rule);
         }

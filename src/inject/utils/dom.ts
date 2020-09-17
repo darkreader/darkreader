@@ -173,7 +173,6 @@ export function iterateShadowHosts(root: Node, iterator: (host: Element) => void
                 return (node as Element).shadowRoot == null ? NodeFilter.FILTER_SKIP : NodeFilter.FILTER_ACCEPT;
             }
         },
-        false,
     );
     for (
         let node = ((root as Element).shadowRoot ? walker.currentNode : walker.nextNode()) as Element;

@@ -115,6 +115,9 @@ function createShadowStaticStyleOverrides(root: ShadowRoot) {
     const inlineStyle = createOrUpdateStyle('darkreader--inline', root);
     inlineStyle.textContent = getInlineOverrideStyle();
     root.insertBefore(inlineStyle, root.firstChild);
+    const overrideStyle = createOrUpdateStyle('darkreader--override', root);
+    overrideStyle.textContent = fixes && fixes.css ? replaceCSSTemplates(fixes.css) : '';
+    root.insertBefore(overrideStyle, inlineStyle.nextSibling);
     shadowRootsWithOverrides.add(root);
 }
 
@@ -336,6 +339,7 @@ function watchForUpdates() {
         newManagers.forEach((manager) => manager.watch());
         stylesToRestore.forEach((style) => styleManagers.get(style).restore());
     }, (shadowRoot) => {
+        createShadowStaticStyleOverrides(shadowRoot);
         handleAdoptedStyleSheets(shadowRoot);
     });
 
@@ -432,6 +436,7 @@ export function removeDynamicTheme() {
     }
     shadowRootsWithOverrides.forEach((root) => {
         removeNode(root.querySelector('.darkreader--inline'));
+        removeNode(root.querySelector('.darkreader--override'));
     });
     shadowRootsWithOverrides.clear();
     forEach(styleManagers.keys(), (el) => removeManager(el));

@@ -53,11 +53,7 @@ export function shouldManageStyle(element: Node) {
             )
         ) &&
         !element.classList.contains('darkreader') &&
-        (
-            element.media !== 'print' ||
-            // Some stylesheets uses 'lazy loading' and has on initial a `print` media.
-            element.getAttribute('onload').toLowerCase().includes('this.media=')
-        ) &&
+        element.media !== 'print' &&
         !element.classList.contains('stylus')
     );
 }

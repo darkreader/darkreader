@@ -18,7 +18,9 @@ export function iterateCSSRules(rules: CSSRuleList, iterate: (rule: CSSStyleRule
                 logWarn(err);
             }
         } else if (rule instanceof CSSSupportsRule) {
-            iterateCSSRules(rule.cssRules, iterate);
+            if (CSS.supports(rule.conditionText)) {
+                iterateCSSRules(rule.cssRules, iterate);
+            }
         } else {
             logWarn(`CSSRule type not supported`, rule);
         }

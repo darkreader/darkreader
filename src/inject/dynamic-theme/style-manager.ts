@@ -186,7 +186,6 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
             // so need to load CSS text and insert it into style element
             try {
                 const fullCSSText = await replaceCSSImports(cssText, cssBasePath);
-                alreadyReplaced.clear();
                 corsCopy = createCORSCopy(element, fullCSSText);
             } catch (err) {
                 logWarn(err);
@@ -434,9 +433,7 @@ async function loadText(url: string) {
     return await bgFetch({url, responseType: 'text', mimeType: 'text/css'});
 }
 
-export const alreadyReplaced = new Map<string, string>();
-
-async function replaceCSSImports(cssText: string, basePath: string) {
+async function replaceCSSImports(cssText: string, basePath: string, cache: Map<string, string> = new Map<string, string>()) {
     cssText = removeCSSComments(cssText);
     cssText = replaceCSSFontFace(cssText);
     cssText = replaceCSSRelativeURLsWithAbsolute(cssText, basePath);
@@ -446,13 +443,13 @@ async function replaceCSSImports(cssText: string, basePath: string) {
         const importURL = getCSSImportURL(match);
         const absoluteURL = getAbsoluteURL(basePath, importURL);
         let importedCSS: string;
-        if (alreadyReplaced.has(absoluteURL)) {
-            importedCSS = alreadyReplaced.get(absoluteURL);
+        if (cache.has(absoluteURL)) {
+            importedCSS = cache.get(absoluteURL);
         } else {
             try {
                 importedCSS = await loadText(absoluteURL);
-                alreadyReplaced.set(absoluteURL, importedCSS);
-                importedCSS = await replaceCSSImports(importedCSS, getCSSBaseBath(absoluteURL));
+                cache.set(absoluteURL, importedCSS);
+                importedCSS = await replaceCSSImports(importedCSS, getCSSBaseBath(absoluteURL), cache);
             } catch (err) {
                 logWarn(err);
                 importedCSS = '';

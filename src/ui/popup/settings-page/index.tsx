@@ -6,7 +6,7 @@ import ManageSettingsButton from './mange-settings-button';
 import SiteListButton from './site-list-button';
 import EnabledByDefaultGroup from './enabled-by-default';
 import {isFirefox} from '../../../utils/platform';
-import ChangeBrowserTheme from './enable-browser-theme';
+import ChangeBrowserTheme from './change-browser-theme';
 
 
 type SettingsPageProps = ViewProps & {

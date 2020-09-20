@@ -152,27 +152,29 @@ export class Extension {
             preset ?
                 preset.theme :
                 this.user.settings.theme;
-
-        function setTheme(config: Partial<FilterConfig>) {
-            if (custom) {
-                custom.theme = {...custom.theme, ...config};
-                this.changeSettings({
-                    customThemes: this.user.settings.customThemes,
-                });
-            } else if (preset) {
-                preset.theme = {...preset.theme, ...config};
-                this.changeSettings({
-                    presets: this.user.settings.presets,
-                });
-            } else {
-                this.setTheme(config);
-            }
-        }
-
         return {
-            theme,
-            change: setTheme,
+            custom: custom,
+            preset: preset,
+            theme: theme,
         };
+
+    }
+
+    changeCurrentTheme(currentTabURL: string, config: Partial<FilterConfig>) {
+        const {custom, preset} = this.getCurrentTheme(currentTabURL);
+        if (custom) {
+            custom.theme = {...custom.theme, ...config};
+            this.changeSettings({
+                customThemes: this.user.settings.customThemes,
+            });
+        } else if (preset) {
+            preset.theme = {...preset.theme, ...config};
+            this.changeSettings({
+                presets: this.user.settings.presets,
+            });
+        } else {
+            this.setTheme(config);
+        }
     }
 
     private registerCommands() {
@@ -181,7 +183,8 @@ export class Extension {
             return;
         }
         chrome.commands.onCommand.addListener(async (command) => {
-            const {theme, change} = this.getCurrentTheme(await this.tabs.getActiveTabURL());
+            const activeTabURL = await this.tabs.getActiveTabURL();
+            const theme = this.getCurrentTheme(activeTabURL);
             if (command === 'toggle') {
                 logInfo('Toggle command entered.');
                 this.changeSettings({
@@ -198,12 +201,12 @@ export class Extension {
                 const engines = Object.values(ThemeEngines);
                 const index = engines.indexOf(theme.engine);
                 const next = index === engines.length - 1 ? engines[0] : engines[index + 1];
-                change({engine: next});
+                this.changeCurrentTheme(activeTabURL, {engine: next});
             }
             if (command === 'switchScheme') {
                 logInfo('Switch scheme command entered.');
                 const newMode = theme.mode === FilterMode.dark ? FilterMode.light : FilterMode.dark;
-                change({mode: newMode});
+                this.changeCurrentTheme(activeTabURL, {mode: newMode});
             }
         });
     }

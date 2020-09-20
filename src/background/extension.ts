@@ -15,7 +15,7 @@ import createCSSFilterStylesheet from '../generators/css-filter';
 import {getDynamicThemeFixesFor} from '../generators/dynamic-theme';
 import createStaticStylesheet from '../generators/static-theme';
 import {createSVGFilterStylesheet, getSVGFilterMatrixValue, getSVGReverseFilterMatrixValue} from '../generators/svg-filter';
-import {ExtensionData, FilterConfig, News, Shortcuts, UserSettings, TabInfo} from '../definitions';
+import {ExtensionData, FilterConfig, News, Shortcuts, UserSettings, TabInfo, Theme} from '../definitions';
 import {isSystemDarkModeEnabled} from '../utils/media-query';
 import {FilterMode} from '../generators/css-filter';
 import {logInfo} from '../inject/utils/log';
@@ -160,7 +160,7 @@ export class Extension {
 
     }
 
-    changeCurrentTheme(currentTabURL: string, config: Partial<FilterConfig>) {
+    changeCurrentTheme(currentTabURL: string, config: Partial<Theme>) {
         const {custom, preset} = this.getCurrentTheme(currentTabURL);
         if (custom) {
             custom.theme = {...custom.theme, ...config};
@@ -184,7 +184,7 @@ export class Extension {
         }
         chrome.commands.onCommand.addListener(async (command) => {
             const activeTabURL = await this.tabs.getActiveTabURL();
-            const theme = this.getCurrentTheme(activeTabURL);
+            const {theme} = this.getCurrentTheme(activeTabURL);
             if (command === 'toggle') {
                 logInfo('Toggle command entered.');
                 this.changeSettings({

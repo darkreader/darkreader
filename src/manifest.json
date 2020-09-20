@@ -57,6 +57,9 @@
         },
         "switchEngine": {
             "description": "__MSG_theme_generation_mode__"
+        },
+        "switchScheme": {
+            "description": "Switch between schemes."
         }
     }
 }

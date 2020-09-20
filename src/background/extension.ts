@@ -17,6 +17,8 @@ import createStaticStylesheet from '../generators/static-theme';
 import {createSVGFilterStylesheet, getSVGFilterMatrixValue, getSVGReverseFilterMatrixValue} from '../generators/svg-filter';
 import {ExtensionData, FilterConfig, News, Shortcuts, UserSettings, TabInfo} from '../definitions';
 import {isSystemDarkModeEnabled} from '../utils/media-query';
+import {FilterMode} from '../generators/css-filter';
+import {logInfo} from '../inject/utils/log';
 
 const AUTO_TIME_CHECK_INTERVAL = getDuration({seconds: 10});
 
@@ -138,29 +140,70 @@ export class Extension {
         };
     }
 
+    getCurrentTheme(currentTabURL: string) {
+        const custom = this.user.settings.customThemes.find(
+            ({url}) => isURLInList(currentTabURL, url)
+        );
+        const preset = custom ? null : this.user.settings.presets.find(
+            ({urls}) => isURLInList(currentTabURL, urls)
+        );
+        const theme = custom ?
+            custom.theme :
+            preset ?
+                preset.theme :
+                this.user.settings.theme;
+
+        function setTheme(config: Partial<FilterConfig>) {
+            if (custom) {
+                custom.theme = {...custom.theme, ...config};
+                this.changeSettings({
+                    customThemes: this.user.settings.customThemes,
+                });
+            } else if (preset) {
+                preset.theme = {...preset.theme, ...config};
+                this.changeSettings({
+                    presets: this.user.settings.presets,
+                });
+            } else {
+                this.setTheme(config);
+            }
+        }
+
+        return {
+            theme,
+            change: setTheme,
+        };
+    }
+
     private registerCommands() {
         if (!chrome.commands) {
             // Fix for Firefox Android
             return;
         }
-        chrome.commands.onCommand.addListener((command) => {
+        chrome.commands.onCommand.addListener(async (command) => {
+            const {theme, change} = this.getCurrentTheme(await this.tabs.getActiveTabURL());
             if (command === 'toggle') {
-                console.log('Toggle command entered');
+                logInfo('Toggle command entered.');
                 this.changeSettings({
                     enabled: !this.isEnabled(),
                     automation: '',
                 });
             }
             if (command === 'addSite') {
-                console.log('Add Site command entered');
+                logInfo('Add Site command entered.');
                 this.toggleCurrentSite();
             }
             if (command === 'switchEngine') {
-                console.log('Switch Engine command entered');
+                logInfo('Switch Engine command entered.');
                 const engines = Object.values(ThemeEngines);
-                const index = engines.indexOf(this.user.settings.theme.engine);
+                const index = engines.indexOf(theme.engine);
                 const next = index === engines.length - 1 ? engines[0] : engines[index + 1];
-                this.setTheme({engine: next});
+                change({engine: next});
+            }
+            if (command === 'switchScheme') {
+                logInfo('Switch scheme command entered.');
+                const newMode = theme.mode === FilterMode.dark ? FilterMode.light : FilterMode.dark;
+                change({mode: newMode});
             }
         });
     }

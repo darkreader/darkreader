@@ -433,7 +433,7 @@ async function loadText(url: string) {
     return await bgFetch({url, responseType: 'text', mimeType: 'text/css'});
 }
 
-async function replaceCSSImports(cssText: string, basePath: string) {
+async function replaceCSSImports(cssText: string, basePath: string, cache = new Map<string, string>()) {
     cssText = removeCSSComments(cssText);
     cssText = replaceCSSFontFace(cssText);
     cssText = replaceCSSRelativeURLsWithAbsolute(cssText, basePath);
@@ -443,12 +443,17 @@ async function replaceCSSImports(cssText: string, basePath: string) {
         const importURL = getCSSImportURL(match);
         const absoluteURL = getAbsoluteURL(basePath, importURL);
         let importedCSS: string;
-        try {
-            importedCSS = await loadText(absoluteURL);
-            importedCSS = await replaceCSSImports(importedCSS, getCSSBaseBath(absoluteURL));
-        } catch (err) {
-            logWarn(err);
-            importedCSS = '';
+        if (cache.has(absoluteURL)) {
+            importedCSS = cache.get(absoluteURL);
+        } else {
+            try {
+                importedCSS = await loadText(absoluteURL);
+                cache.set(absoluteURL, importedCSS);
+                importedCSS = await replaceCSSImports(importedCSS, getCSSBaseBath(absoluteURL), cache);
+            } catch (err) {
+                logWarn(err);
+                importedCSS = '';
+            }
         }
         cssText = cssText.split(match).join(importedCSS);
     }

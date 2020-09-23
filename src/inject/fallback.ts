@@ -1,4 +1,4 @@
-import {createNodeAsap, removeNode} from "./utils/dom";
+import {createNodeAsap} from './utils/dom';
 
 if (
     matchMedia('(prefers-color-scheme: dark)').matches &&

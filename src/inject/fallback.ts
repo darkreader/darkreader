@@ -1,19 +1,21 @@
 import {createNodeAsap} from './utils/dom';
 
+const fallBackCSS = 'html, body, body :not(iframe) { background-color: #181a1b !important; border-color: #776e62 !important; color: #e8e6e3 !important; }';
+
 if (
     matchMedia('(prefers-color-scheme: dark)').matches &&
-    !document.querySelector('.darkreader--fallback')
+    !document.querySelector('.darkreader--fallback') &&
+    document.documentElement instanceof HTMLHtmlElement
 ) {
-    const fallBackCSS = 'html, body, body :not(iframe) { background-color: #181a1b !important; border-color: #776e62 !important; color: #e8e6e3 !important; }';
-    createOrUpdateFallback(fallBackCSS);
+    createOrUpdateFallback();
 }
 
-function createOrUpdateFallback(css: string) {
+function createOrUpdateFallback() {
     createNodeAsap({
         selectNode: () => document.querySelector('.darkreader--fallback'),
         createNode: (target) => {
             const fallbackStyle = document.createElement('style');
-            fallbackStyle.textContent = css;
+            fallbackStyle.textContent = fallBackCSS;
             target.appendChild(fallbackStyle);
             fallbackStyle.classList.add('darkreader');
             fallbackStyle.classList.add('darkreader--fallback');

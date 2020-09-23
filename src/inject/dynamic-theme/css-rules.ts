@@ -1,9 +1,10 @@
 import {forEach} from '../../utils/array';
 import {parseURL, getAbsoluteURL} from './url';
 import {logWarn, logInfo} from '../utils/log';
+import {linkLoading} from '../utils/dom';
 
 export function iterateCSSRules(rules: CSSRuleList, iterate: (rule: CSSStyleRule) => void) {
-    forEach(rules, (rule) => {
+    forEach(rules, async (rule) => {
         if (rule instanceof CSSMediaRule) {
             const media = Array.from(rule.media);
             if (media.includes('screen') || media.includes('all') || !(media.includes('print') || media.includes('speech'))) {
@@ -17,13 +18,8 @@ export function iterateCSSRules(rules: CSSRuleList, iterate: (rule: CSSStyleRule
             } catch (err) {
                 if (err.message === "Cannot read property 'cssRules' of null") {
                     logInfo('An possible attempt on a unloaded CSSImportRule has been made.');
-                        (rule.parentStyleSheet.ownerNode as HTMLLinkElement).onload = () => {
-                        try {
-                            iterateCSSRules(rule.styleSheet.cssRules, iterate);
-                        } catch (err) {
-                            logWarn(err);
-                        }
-                    };
+                    await linkLoading(rule.parentStyleSheet.ownerNode as HTMLLinkElement);
+                    iterateCSSRules(rule.styleSheet.cssRules, iterate);
                 } else {
                     logWarn(err);
                 }

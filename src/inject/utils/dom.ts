@@ -334,3 +334,22 @@ export function createOptimizedTreeObserver(root: Document | ShadowRoot, callbac
         },
     };
 }
+
+export function linkLoading(link: HTMLLinkElement) {
+    return new Promise<void>((resolve, reject) => {
+        const cleanUp = () => {
+            link.removeEventListener('load', onLoad);
+            link.removeEventListener('error', onError);
+        };
+        const onLoad = () => {
+            cleanUp();
+            resolve();
+        };
+        const onError = () => {
+            cleanUp();
+            reject(`Link loading failed ${link.href}`);
+        };
+        link.addEventListener('load', onLoad);
+        link.addEventListener('error', onError);
+    });
+}

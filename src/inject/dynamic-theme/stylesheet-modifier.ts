@@ -149,7 +149,10 @@ export function createStyleSheetModifier() {
             target.insertRule(`${selector} {}`, index);
             const style = (target.cssRules.item(index) as CSSStyleRule).style;
             declarations.forEach(({property, value, important, sourceValue}) => {
-                style.setProperty(property, value == null ? sourceValue : value, important ? 'important' : '');
+                // if null then rebuildAsyncRule set new value
+                if (value !== null) {
+                    style.setProperty(property, value, important ? 'important' : '');
+                }
             });
         }
 

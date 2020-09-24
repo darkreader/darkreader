@@ -73,17 +73,17 @@ export function getManageableStyles(node: Node, results = [] as StyleElement[], 
     return results;
 }
 
-let counter = 0;
+const syncStyleSet = new WeakSet<HTMLStyleElement | SVGStyleElement>();
+const corsStyleSet = new WeakSet<HTMLStyleElement>();
 
 export function manageStyle(element: StyleElement, {update, loadingStart, loadingEnd}): StyleManager {
-    const count = counter++;
     const prevStyles: HTMLStyleElement[] = [];
     let next: Element = element;
     while ((next = next.nextElementSibling) && next.matches('.darkreader')) {
         prevStyles.push(next as HTMLStyleElement);
     }
-    let corsCopy: HTMLStyleElement = prevStyles.find((el) => el.matches('.darkreader--cors') && el.getAttribute('darkreader--count') === `${count}`) || null;
-    let syncStyle: HTMLStyleElement | SVGStyleElement = prevStyles.find((el) => el.matches('.darkreader--sync') && el.getAttribute('darkreader--count') === `${count}`) || null;
+    let corsCopy: HTMLStyleElement = prevStyles.find((el) => el.matches('.darkreader--cors') && !corsStyleSet.has(el)) || null;
+    let syncStyle: HTMLStyleElement | SVGStyleElement = prevStyles.find((el) => el.matches('.darkreader--sync') && !syncStyleSet.has(el)) || null;
 
     let corsCopyPositionWatcher: ReturnType<typeof watchForNodePosition> = null;
     let syncStylePositionWatcher: ReturnType<typeof watchForNodePosition> = null;
@@ -130,8 +130,8 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
             document.createElement('style');
         syncStyle.classList.add('darkreader');
         syncStyle.classList.add('darkreader--sync');
-        syncStyle.setAttribute('darkreader--count', `${count}`);
         syncStyle.media = 'screen';
+        syncStyleSet.add(syncStyle);
     }
 
     let isLoadingRules = false;
@@ -190,7 +190,7 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
             // so need to load CSS text and insert it into style element
             try {
                 const fullCSSText = await replaceCSSImports(cssText, cssBasePath);
-                corsCopy = createCORSCopy(element, fullCSSText, count);
+                corsCopy = createCORSCopy(element, fullCSSText);
             } catch (err) {
                 logWarn(err);
             }
@@ -467,7 +467,7 @@ async function replaceCSSImports(cssText: string, basePath: string, cache = new 
     return cssText;
 }
 
-function createCORSCopy(srcElement: StyleElement, cssText: string, count: number) {
+function createCORSCopy(srcElement: StyleElement, cssText: string) {
     if (!cssText) {
         return null;
     }
@@ -475,11 +475,10 @@ function createCORSCopy(srcElement: StyleElement, cssText: string, count: number
     const cors = document.createElement('style');
     cors.classList.add('darkreader');
     cors.classList.add('darkreader--cors');
-    cors.setAttribute('darkreader--count', `${count}`);
     cors.media = 'screen';
     cors.textContent = cssText;
     srcElement.parentNode.insertBefore(cors, srcElement.nextSibling);
     cors.sheet.disabled = true;
-
+    corsStyleSet.add(cors);
     return cors;
 }

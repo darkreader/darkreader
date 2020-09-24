@@ -239,8 +239,11 @@ function shouldIgnoreImage(element: CSSStyleRule, selectors: string[]) {
         return false;
     }
     for (let i = 0; i < selectors.length; i++) {
-        const ingnoredSelector = selectors[i];
-        if (element.selectorText.match(ingnoredSelector)) {
+        const ignoredSelector = selectors[i];
+        if (
+            ignoredSelector === '*' ||
+            element.selectorText.split(/,\s*/g).some((s) => s === ignoredSelector)
+        ) {
             return true;
         }
     }

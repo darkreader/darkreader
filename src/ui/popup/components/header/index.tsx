@@ -19,16 +19,19 @@ type HeaderProps = ExtWrapper & {
 
 function Header({data, actions, tab, onMoreToggleSettingsClick}: HeaderProps) {
 
-    function toggleExtension(enabled) {
+    function toggleExtension(enabled: boolean) {
         actions.changeSettings({
             enabled,
-            automation: '',
+            automation: {
+                enabled: false,
+                mode: data.settings.automation.mode,
+            },
         });
     }
 
-    const isAutomation = Boolean(data.settings.automation);
-    const isTimeAutomation = data.settings.automation === 'time';
-    const isLocationAutomation = data.settings.automation === 'location';
+    const isAutomation = Boolean(data.settings.automation.enabled);
+    const isTimeAutomation = data.settings.automation.mode === 'time';
+    const isLocationAutomation = data.settings.automation.mode === 'location';
     const now = new Date();
 
     return (

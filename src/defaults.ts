@@ -45,7 +45,10 @@ export const DEFAULT_SETTINGS: UserSettings = {
     notifyOfNews: false,
     syncSettings: true,
     syncSitesFixes: false,
-    automation: '',
+    automation: {
+        enabled: false,
+        mode: '',
+    },
     time: {
         activation: '18:00',
         deactivation: '9:00',

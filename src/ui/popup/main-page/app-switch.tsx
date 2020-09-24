@@ -8,11 +8,11 @@ import SunMoonIcon from './sun-moon-icon';
 import SystemIcon from './system-icon';
 
 export default function AppSwitch(props: ViewProps) {
-    const isOn = props.data.settings.enabled === true && !props.data.settings.automation;
-    const isOff = props.data.settings.enabled === false && !props.data.settings.automation;
-    const isAutomation = Boolean(props.data.settings.automation);
-    const isTimeAutomation = props.data.settings.automation === 'time';
-    const isLocationAutomation = props.data.settings.automation === 'location';
+    const isOn = props.data.settings.enabled === true && !props.data.settings.automation.enabled;
+    const isOff = props.data.settings.enabled === false && !props.data.settings.automation.enabled;
+    const isAutomation = Boolean(props.data.settings.automation.enabled);
+    const isTimeAutomation = props.data.settings.automation.mode === 'time';
+    const isLocationAutomation = props.data.settings.automation.mode === 'location';
     const now = new Date();
 
     // TODO: Replace messages with some IDs.
@@ -28,16 +28,25 @@ export default function AppSwitch(props: ViewProps) {
         if (index === 0) {
             props.actions.changeSettings({
                 enabled: true,
-                automation: '',
+                automation: {
+                    enabled: false,
+                    mode: props.data.settings.automation.mode
+                },
             });
         } else if (index === 2) {
             props.actions.changeSettings({
                 enabled: false,
-                automation: '',
+                automation: {
+                    enabled: false,
+                    mode: props.data.settings.automation.mode
+                },
             });
         } else if (index === 1) {
             props.actions.changeSettings({
-                automation: 'system',
+                automation: {
+                    enabled: true,
+                    mode: props.data.settings.automation.mode
+                },
             });
         }
     }

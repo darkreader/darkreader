@@ -9,7 +9,7 @@ type MoreToggleSettingsProps = ExtWrapper & {
 };
 
 export default function MoreToggleSettings({data, actions, isExpanded, onClose}: MoreToggleSettingsProps) {
-    const isSystemAutomation = data.settings.automation === 'system';
+    const isSystemAutomation = data.settings.automation.mode === 'system';
     const locationSettings = data.settings.location;
     const values = {
         'latitude': {
@@ -82,8 +82,8 @@ export default function MoreToggleSettings({data, actions, isExpanded, onClose}:
             <div class="header__app-toggle__more-settings__content">
                 <div class="header__app-toggle__more-settings__line">
                     <CheckBox
-                        checked={data.settings.automation === 'time'}
-                        onchange={(e) => actions.changeSettings({automation: e.target.checked ? 'time' : ''})}
+                        checked={data.settings.automation.mode === 'time'}
+                        onchange={(e) => actions.changeSettings({automation: {enabled: e.target.checked ? true : false, mode: e.target.checked ? 'time' : ''}})}
                     />
                     <TimeRangePicker
                         startTime={data.settings.time.activation}
@@ -96,8 +96,8 @@ export default function MoreToggleSettings({data, actions, isExpanded, onClose}:
                 </p>
                 <div class="header__app-toggle__more-settings__line header__app-toggle__more-settings__location">
                     <CheckBox
-                        checked={data.settings.automation === 'location'}
-                        onchange={(e) => actions.changeSettings({automation: e.target.checked ? 'location' : ''})}
+                        checked={data.settings.automation.mode === 'location'}
+                        onchange={(e) => actions.changeSettings({automation: {enabled: e.target.checked ? true : false, mode: e.target.checked ? 'location' : ''}})}
                     />
                     <TextBox
                         class="header__app-toggle__more-settings__location__latitude"
@@ -133,14 +133,14 @@ export default function MoreToggleSettings({data, actions, isExpanded, onClose}:
                     <CheckBox
                         class="header__app-toggle__more-settings__system-dark-mode__checkbox"
                         checked={isSystemAutomation}
-                        onchange={(e) => actions.changeSettings({automation: e.target.checked ? 'system' : ''})}
+                        onchange={(e) => actions.changeSettings({automation: {enabled: e.target.checked ? true : false, mode: e.target.checked ? 'system' : ''}})}
                     />
                     <Button
                         class={{
                             'header__app-toggle__more-settings__system-dark-mode__button': true,
                             'header__app-toggle__more-settings__system-dark-mode__button--active': isSystemAutomation,
                         }}
-                        onclick={() => actions.changeSettings({automation: isSystemAutomation ? '' : 'system'})}
+                        onclick={() => actions.changeSettings({automation: {enabled: isSystemAutomation ? true : false, mode: isSystemAutomation ? 'system' : ''}})}
                     >{getLocalMessage('system_dark_mode')}</Button>
                 </div>
                 <p class="header__app-toggle__more-settings__description">

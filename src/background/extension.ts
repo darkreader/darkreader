@@ -54,29 +54,33 @@ export class Extension {
     }
 
     isEnabled() {
-        const {automation} = this.user.settings;
-        if (automation === 'time') {
-            const now = new Date();
-            return isInTimeInterval(now, this.user.settings.time.activation, this.user.settings.time.deactivation);
-        } else if (automation === 'system') {
-            if (isFirefox()) {
-                // BUG: Firefox background page always matches initial color scheme.
-                return this.wasLastColorSchemeDark == null
-                    ? isSystemDarkModeEnabled()
-                    : this.wasLastColorSchemeDark;
-            }
-            return isSystemDarkModeEnabled();
-        } else if (automation === 'location') {
-            const latitude = this.user.settings.location.latitude;
-            const longitude = this.user.settings.location.longitude;
+        const {enabled, mode} = this.user.settings.automation;
+        if (enabled) {
+            switch (mode) {
+                case 'time':
+                    const now = new Date();
+                    return isInTimeInterval(now, this.user.settings.time.activation, this.user.settings.time.deactivation);
+                case 'system':
+                    if (isFirefox()) {
+                        // BUG: Firefox background page always matches initial color scheme.
+                        return this.wasLastColorSchemeDark == null
+                            ? isSystemDarkModeEnabled()
+                            : this.wasLastColorSchemeDark;
+                    }
+                    return isSystemDarkModeEnabled();
+                case 'location':
+                    const latitude = this.user.settings.location.latitude;
+                    const longitude = this.user.settings.location.longitude;
 
-            if (latitude != null && longitude != null) {
-                const now = new Date();
-                return isNightAtLocation(now, latitude, longitude);
+                    if (latitude != null && longitude != null) {
+                        const now = new Date();
+                        return isNightAtLocation(now, latitude, longitude);
+                    }
             }
+        } else {
+            return this.user.settings.enabled;
         }
 
-        return this.user.settings.enabled;
     }
 
     private awaiting: (() => void)[];
@@ -148,7 +152,10 @@ export class Extension {
                 console.log('Toggle command entered');
                 this.changeSettings({
                     enabled: !this.isEnabled(),
-                    automation: '',
+                    automation: {
+                        enabled: false,
+                        mode: this.user.settings.automation.mode
+                    },
                 });
             }
             if (command === 'addSite') {
@@ -229,7 +236,7 @@ export class Extension {
 
     private startAutoTimeCheck() {
         setInterval(() => {
-            if (!this.ready || this.user.settings.automation === '') {
+            if (!this.ready || !this.user.settings.automation.enabled) {
                 return;
             }
             this.handleAutoCheck();
@@ -240,7 +247,7 @@ export class Extension {
 
     private onColorSchemeChange = ({isDark}) => {
         this.wasLastColorSchemeDark = isDark;
-        if (this.user.settings.automation !== 'system') {
+        if (this.user.settings.automation.mode !== 'system') {
             return;
         }
         this.handleAutoCheck();
@@ -266,7 +273,8 @@ export class Extension {
 
         if (
             (prev.enabled !== this.user.settings.enabled) ||
-            (prev.automation !== this.user.settings.automation) ||
+            (prev.automation.enabled !== this.user.settings.automation.enabled) ||
+            (prev.automation.mode !== this.user.settings.automation.mode) ||
             (prev.time.activation !== this.user.settings.time.activation) ||
             (prev.time.deactivation !== this.user.settings.time.deactivation) ||
             (prev.location.latitude !== this.user.settings.location.latitude) ||

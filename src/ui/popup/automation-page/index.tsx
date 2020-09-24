@@ -4,7 +4,7 @@ import {CheckBox, TimeRangePicker, TextBox, Button} from '../../controls';
 import {ViewProps} from '../types';
 
 export default function AutomationPage(props: ViewProps) {
-    const isSystemAutomation = props.data.settings.automation === 'system';
+    const isSystemAutomation = props.data.settings.automation.mode === 'system';
     const locationSettings = props.data.settings.location;
     const values = {
         'latitude': {
@@ -69,8 +69,8 @@ export default function AutomationPage(props: ViewProps) {
         >
             <div class="automation-page__line">
                 <CheckBox
-                    checked={props.data.settings.automation === 'time'}
-                    onchange={(e: { target: { checked: any } }) => props.actions.changeSettings({automation: e.target.checked ? 'time' : ''})}
+                    checked={props.data.settings.automation.mode === 'time'}
+                    onchange={(e: { target: { checked: any } }) => props.actions.changeSettings({automation: {enabled: e.target.checked ? true : false, mode: e.target.checked ? 'time' : ''}})}
                 />
                 <TimeRangePicker
                     startTime={props.data.settings.time.activation}
@@ -83,8 +83,8 @@ export default function AutomationPage(props: ViewProps) {
             </p>
             <div class="automation-page__line automation-page__location">
                 <CheckBox
-                    checked={props.data.settings.automation === 'location'}
-                    onchange={(e: { target: { checked: any } }) => props.actions.changeSettings({automation: e.target.checked ? 'location' : ''})}
+                    checked={props.data.settings.automation.mode === 'location'}
+                    onchange={(e: { target: { checked: any } }) => props.actions.changeSettings({automation: {enabled: e.target.checked ? true : false, mode: e.target.checked ? 'location' : ''}})}
                 />
                 <TextBox
                     class="automation-page__location__latitude"
@@ -120,14 +120,14 @@ export default function AutomationPage(props: ViewProps) {
                 <CheckBox
                     class="automation-page__system-dark-mode__checkbox"
                     checked={isSystemAutomation}
-                    onchange={(e: { target: { checked: any } }) => props.actions.changeSettings({automation: e.target.checked ? 'system' : ''})}
+                    onchange={(e: { target: { checked: any } }) => props.actions.changeSettings({automation: {enabled: e.target.checked ? true : false, mode: e.target.checked ? 'system' : ''}})}
                 />
                 <Button
                     class={{
                         'automation-page__system-dark-mode__button': true,
                         'automation-page__system-dark-mode__button--active': isSystemAutomation,
                     }}
-                    onclick={() => props.actions.changeSettings({automation: isSystemAutomation ? '' : 'system'})}
+                    onclick={() => props.actions.changeSettings({automation: {enabled: isSystemAutomation ? true : false, mode: isSystemAutomation ? 'system' : ''}})}
                 >{getLocalMessage('system_dark_mode')}
                 </Button>
             </div>

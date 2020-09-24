@@ -143,7 +143,8 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
                 logWarn(accessError);
             }
 
-            if (!(cssRules || accessError) || isStillLoadingError(accessError)) {
+            const isSheetEmpty = !(cssRules || accessError);
+            if (isSheetEmpty || isStillLoadingError(accessError)) {
                 try {
                     await linkLoading(element);
                 } catch (err) {

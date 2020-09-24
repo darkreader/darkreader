@@ -3,7 +3,7 @@ import {parseURL, getAbsoluteURL} from './url';
 import {logWarn} from '../utils/log';
 
 export function iterateCSSRules(rules: CSSRuleList, iterate: (rule: CSSStyleRule) => void) {
-    forEach(rules, async (rule) => {
+    forEach(rules, (rule) => {
         if (rule instanceof CSSMediaRule) {
             const media = Array.from(rule.media);
             if (media.includes('screen') || media.includes('all') || !(media.includes('print') || media.includes('speech'))) {

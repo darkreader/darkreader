@@ -1,6 +1,6 @@
 import {getCSSVariables, replaceCSSRelativeURLsWithAbsolute, removeCSSComments, replaceCSSFontFace, getCSSURLValue, cssImportRegex, getCSSBaseBath} from './css-rules';
 import {bgFetch} from './network';
-import {watchForNodePosition, removeNode, iterateShadowHosts, linkLoading} from '../utils/dom';
+import {watchForNodePosition, removeNode, iterateShadowHosts} from '../utils/dom';
 import {logWarn} from '../utils/log';
 import {forEach} from '../../utils/array';
 import {getMatches} from '../../utils/text';
@@ -143,7 +143,7 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
                 logWarn(accessError);
             }
 
-            if ((cssRules && !accessError) || isStillLoadingError(accessError)) {
+            if (!(cssRules || accessError) || isStillLoadingError(accessError)) {
                 try {
                     await linkLoading(element);
                 } catch (err) {
@@ -401,6 +401,25 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
         watch,
         restore,
     };
+}
+
+function linkLoading(link: HTMLLinkElement) {
+    return new Promise<void>((resolve, reject) => {
+        const cleanUp = () => {
+            link.removeEventListener('load', onLoad);
+            link.removeEventListener('error', onError);
+        };
+        const onLoad = () => {
+            cleanUp();
+            resolve();
+        };
+        const onError = () => {
+            cleanUp();
+            reject(`Link loading failed ${link.href}`);
+        };
+        link.addEventListener('load', onLoad);
+        link.addEventListener('error', onError);
+    });
 }
 
 function getCSSImportURL(importDeclaration: string) {

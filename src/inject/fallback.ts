@@ -1,33 +1,26 @@
-import {createNodeAsap} from './utils/dom';
-
-const fallBackCSS = 'html, body, body :not(iframe) { background-color: #181a1b !important; border-color: #776e62 !important; color: #e8e6e3 !important; }';
-
 if (
+    document.documentElement instanceof HTMLHtmlElement &&
     matchMedia('(prefers-color-scheme: dark)').matches &&
-    !document.querySelector('.darkreader--fallback') &&
-    document.documentElement instanceof HTMLHtmlElement
+    !document.querySelector('.darkreader--fallback')
 ) {
-    createOrUpdateFallback();
-}
+    const css = 'html, body, body :not(iframe) { background-color: #181a1b !important; border-color: #776e62 !important; color: #e8e6e3 !important; }';
+    const fallback = document.createElement('style');
+    fallback.classList.add('darkreader');
+    fallback.classList.add('darkreader--fallback');
+    fallback.media = 'screen';
+    fallback.textContent = css;
 
-function createOrUpdateFallback() {
-    createNodeAsap({
-        selectNode: () => document.querySelector('.darkreader--fallback'),
-        createNode: (target) => {
-            const fallbackStyle = document.createElement('style');
-            fallbackStyle.textContent = fallBackCSS;
-            target.appendChild(fallbackStyle);
-            fallbackStyle.classList.add('darkreader');
-            fallbackStyle.classList.add('darkreader--fallback');
-            fallbackStyle.media = 'screen';
-        },
-        updateNode: () => Function.prototype,
-        selectTarget: () => document.head,
-        createTarget: () => {
-            const head = document.createElement('head');
-            document.documentElement.insertBefore(head, document.documentElement.firstElementChild);
-            return head;
-        },
-        isTargetMutation: (mutation) => mutation.target.nodeName.toLowerCase() === 'head',
-    });
+    if (document.head) {
+        document.head.append(fallback);
+    } else {
+        const root = document.documentElement;
+        root.append(fallback);
+        const observer = new MutationObserver(() => {
+            if (document.head) {
+                observer.disconnect();
+                document.head.append(fallback);
+            }
+        });
+        observer.observe(root, {childList: true});
+    }
 }

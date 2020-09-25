@@ -234,13 +234,17 @@ const gradientRegex = /[\-a-z]+gradient\(([^\(\)]*(\(([^\(\)]*(\(.*?\)))*[^\(\)]
 const imageDetailsCache = new Map<string, ImageDetails>();
 const awaitingForImageLoading = new Map<string, ((imageDetails: ImageDetails) => void)[]>();
 
-function shouldIgnoreImage(element: CSSStyleRule, selectors: string[]) {
-    if (!element) {
+function shouldIgnoreImage(rule: CSSStyleRule, selectors: string[]) {
+    if (!rule || selectors.length === 0) {
         return false;
     }
+    if (selectors.some((s) => s === '*')) {
+        return true;
+    }
+    const ruleSelectors = rule.selectorText.split(/,\s*/g);
     for (let i = 0; i < selectors.length; i++) {
-        const ingnoredSelector = selectors[i];
-        if (element.selectorText.match(ingnoredSelector)) {
+        const ignoredSelector = selectors[i];
+        if (ruleSelectors.some((s) => s === ignoredSelector)) {
             return true;
         }
     }

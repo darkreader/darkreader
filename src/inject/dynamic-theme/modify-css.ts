@@ -235,7 +235,7 @@ const imageDetailsCache = new Map<string, ImageDetails>();
 const awaitingForImageLoading = new Map<string, ((imageDetails: ImageDetails) => void)[]>();
 
 function shouldIgnoreImage(rule: CSSStyleRule, selectors: string[]) {
-    if (!rule) {
+    if (!rule || selectors.length === 0) {
         return false;
     }
     if (selectors.some((s) => s === '*')) {

@@ -18,7 +18,7 @@ if (
         const observer = new MutationObserver(() => {
             if (document.head) {
                 observer.disconnect();
-                if (fallback.parentNode === document.documentElement) {
+                if (fallback.isConnected) {
                     document.head.append(fallback);
                 }
             }

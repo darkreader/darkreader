@@ -1,7 +1,7 @@
 import {formatSitesFixesConfig} from './utils/format';
 import {parseSitesFixesConfig} from './utils/parse';
 import {parseArray, formatArray} from '../utils/text';
-import {compareURLPatterns, isURLInList} from '../utils/url';
+import {compareURLPatterns, isURLInList, isPDF} from '../utils/url';
 import {DynamicThemeFix} from '../definitions';
 
 const dynamicThemeFixesCommands = {
@@ -64,7 +64,7 @@ export function getDynamicThemeFixesFor(url: string, frameURL: string, fixes: Dy
         .slice(1)
         .map((theme) => {
             return {
-                specificity: isURLInList(frameURL || url, theme.url) ? theme.url[0].length : 0,
+                specificity: (isURLInList(frameURL || url, theme.url) || (isPDF(frameURL || url) && enabledForPDF && theme.url.includes('isPDF'))) ? theme.url[0].length : 0,
                 theme
             };
         })

@@ -31,6 +31,13 @@ or **[inversion-fixes.config](https://github.com/alexanderby/darkreader/blob/mas
 
 Automatically syncing the above files to every Dark Reader user was disabled because the GitHub team doesn't allow using GitHub as a CDN. Storing these files and making requests to other resources would be expensive and look suspicious. As such, changes are included with each new Dark Reader release.
 
+The URL patterns work like Regular Expressions with a few improvements specifically for URLs. Here are some examples:
+* `*.google.com`
+* `amazing.com`
+* `new.example.com/*`
+
+In Dynamic Mode, you can match PDF files with the `isPDF` pattern.
+
 ### Use Dev Tools!
 
 Dev Tools is designed to **fix minor issues** on a web page
@@ -184,8 +191,8 @@ Submit a **pull request**, and wait for **review**.
 You can install the extension from a file.  
 Install [Node.js LTS](https://nodejs.org/en/). Download the source code (or check out from git).  
 Open terminal in root folder and run:  
-- `npm install`  
-- `npm run release`  
+- `npm install`
+- `npm run release`
 
 This will generate `build.zip` for use in Chromium browsers and `build-firefox.xpi` for use in Firefox.
 

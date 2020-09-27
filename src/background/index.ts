@@ -13,6 +13,12 @@ chrome.runtime.onInstalled.addListener(({reason}) => {
 
 chrome.runtime.setUninstallURL(UNINSTALL_URL);
 
+const welcome = `  /''''\\
+ (0)==(0)
+/__||||__\\
+Welcome to Dark Reader!`;
+console.log(welcome);
+
 declare const __WATCH__: boolean;
 declare const __PORT__: number;
 const WATCH = __WATCH__;

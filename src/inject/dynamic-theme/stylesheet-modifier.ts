@@ -28,6 +28,7 @@ function getTempCSSStyleSheet(): {sheet: CSSStyleSheet; remove: () => void} {
     style.classList.add('darkreader');
     style.classList.add('darkreader--temp');
     style.media = 'screen';
+    style.textContent = '';
     (document.head || document).append(style);
     return {sheet: style.sheet, remove: () => style.remove()};
 }

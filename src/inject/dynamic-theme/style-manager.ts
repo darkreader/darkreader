@@ -244,7 +244,6 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
             }
 
             syncStylePositionWatcher && syncStylePositionWatcher.stop();
-            insertStyle();
 
             // Firefox issue: Some websites get CSP warning,
             // when `textContent` is not set (e.g. pypi.org).
@@ -254,6 +253,8 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
             if (syncStyle.sheet == null) {
                 syncStyle.textContent = '';
             }
+
+            insertStyle();
 
             const sheet = syncStyle.sheet;
             for (let i = sheet.cssRules.length - 1; i >= 0; i--) {

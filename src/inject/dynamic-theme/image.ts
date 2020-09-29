@@ -3,7 +3,7 @@ import {bgFetch} from './network';
 import {getURLHostOrProtocol} from '../../utils/url';
 import {loadAsDataURL} from '../../utils/network';
 import {FilterConfig} from '../../definitions';
-import {logInfo, logWarn} from '../utils/log';
+import {logWarn} from '../utils/log';
 
 export interface ImageDetails {
     src: string;

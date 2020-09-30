@@ -50,6 +50,7 @@ export function getDynamicThemeFixesFor(url: string, frameURL: string, fixes: Dy
         return null;
     }
 
+    let urlSpecified:string = frameURL || url;
     const common = {
         url: fixes[0].url,
         invert: fixes[0].invert || [],
@@ -57,14 +58,14 @@ export function getDynamicThemeFixesFor(url: string, frameURL: string, fixes: Dy
         ignoreInlineStyle: fixes[0].ignoreInlineStyle || [],
         ignoreImageAnalysis: fixes[0].ignoreImageAnalysis || [],
     };
-    if (enabledForPDF) {
+    if (enabledForPDF && isPDF(urlSpecified)) {
         common.invert = common.invert.concat('embed[type="application/pdf"]');
     }
     const sortedBySpecificity = fixes
         .slice(1)
         .map((theme) => {
             return {
-                specificity: (isURLInList(frameURL || url, theme.url) || (isPDF(frameURL || url) && enabledForPDF && theme.url.includes('isPDF'))) ? theme.url[0].length : 0,
+                specificity: isURLInList(urlSpecified, theme.url) ? theme.url[0].length : 0,
                 theme
             };
         })

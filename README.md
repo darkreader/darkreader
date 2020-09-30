@@ -31,13 +31,6 @@ or **[inversion-fixes.config](https://github.com/alexanderby/darkreader/blob/mas
 
 Automatically syncing the above files to every Dark Reader user was disabled because the GitHub team doesn't allow using GitHub as a CDN. Storing these files and making requests to other resources would be expensive and look suspicious. As such, changes are included with each new Dark Reader release.
 
-The URL patterns work like Regular Expressions with a few improvements specifically for URLs. Here are some examples:
-* `*.google.com`
-* `amazing.com`
-* `new.example.com/*`
-
-In Dynamic Mode, you can match PDF files with the `isPDF` pattern.
-
 ### Use Dev Tools!
 
 Dev Tools is designed to **fix minor issues** on a web page

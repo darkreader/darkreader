@@ -20,6 +20,7 @@ See the list of [language codes](https://developer.chrome.com/webstore/i18n#loca
 
 If a website is **already dark** (has all pages dark by default), you can **add it to the [dark-sites.config](https://github.com/alexanderby/darkreader/blob/master/src/config/dark-sites.config) file**
 *(please, preserve alphabetical order)*.
+If sometimes a website is not properly visible in dark reader then you can turn off dark reader when you are using that website.
 
 If some **parts** of a web page are **wrongly inverted**,
 you can fix this by specifying appropriate [**CSS selectors**](https://developer.mozilla.org/docs/Web/CSS/CSS_Selectors) in

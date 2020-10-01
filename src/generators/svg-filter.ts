@@ -1,6 +1,6 @@
 import {createFilterMatrix, Matrix} from './utils/matrix';
 import {isFirefox} from '../utils/platform';
-import {cssFilterStyleheetTemplate} from './css-filter';
+import {cssFilterStyleSheetTemplate} from './css-filter';
 import {FilterConfig, InversionFix} from '../definitions';
 
 export function createSVGFilterStylesheet(config: FilterConfig, url: string, frameURL: string, inversionFixes: InversionFix[]) {
@@ -14,7 +14,7 @@ export function createSVGFilterStylesheet(config: FilterConfig, url: string, fra
         filterValue = 'url(#dark-reader-filter)';
         reverseFilterValue = 'url(#dark-reader-reverse-filter)';
     }
-    return cssFilterStyleheetTemplate(filterValue, reverseFilterValue, config, url, frameURL, inversionFixes);
+    return cssFilterStyleSheetTemplate(filterValue, reverseFilterValue, config, url, frameURL, inversionFixes);
 }
 
 function getEmbeddedSVGFilterValue(matrixValue: string) {

@@ -19,13 +19,16 @@ describe('Loading test page', () => {
 
     beforeAll(async () => {
         page = await browser.newPage();
+        page.on('pageerror', (err) => {
+            throw err;
+        });
         await page.coverage.startJSCoverage();
     }, timeout);
 
     afterAll(async () => {
         const coverage = await page.coverage.stopJSCoverage();
         await page.close();
-        console.log('Code coverage', coverage.filter(Boolean)[0]);
+        console.log('Code coverage', coverage.map((c) => c.ranges.map(({start, end}) => c.text.substring(start, end))));
     });
 
     it('should load without errors', async () => {
@@ -36,7 +39,7 @@ describe('Loading test page', () => {
                 '<head>',
                 '    <title>Test page</title>',
                 '    <link rel="stylesheet" href="style.css"/>',
-                '    <script src="script.js"></script>',
+                '    <script src="script.js" defer></script>',
                 '</head>',
                 '<body>',
                 '    <h1>Hello, <strong>World</strong>!</h1>',
@@ -46,17 +49,14 @@ describe('Loading test page', () => {
             ),
             '/script.js': multiline(
                 'if (true || false) {',
-                '    console.log("Hi!");',
+                '    document.querySelector("h1 strong").style.color = "red";',
                 '} else {',
-                '    console.log("Bye!");',
+                '    throw new Error("Impossible");',
                 '}',
             ),
             '/style.css': multiline(
                 'body {',
                 '    background-color: gray;',
-                '}',
-                'h1 strong {',
-                '    color: red;',
                 '}',
             ),
         });

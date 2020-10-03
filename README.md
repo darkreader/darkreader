@@ -1,9 +1,9 @@
-# Dark Reader for Google Chrome and Mozilla Firefox
+# Dark Reader for Google Chrome, Microsoft Edge and Mozilla Firefox
 
 ![Dark Reader screenshot](https://i.imgur.com/DyBlYwU.png)
 
 This extension **inverts brightness** of web pages and aims to **reduce eyestrain** while you browse the web.  
-Visit [Chrome Web Store](https://chrome.google.com/webstore/detail/dark-reader/eimadpbcbfnmbkopoojfekhnkhdbieeh)
+Visit [Edge Addons](https://microsoftedge.microsoft.com/addons/detail/dark-reader/ifoakfbpdcdoeenechcleahebpibofpc), [Chrome Web Store](https://chrome.google.com/webstore/detail/dark-reader/eimadpbcbfnmbkopoojfekhnkhdbieeh)
 and [Firefox Add-ons](https://addons.mozilla.org/en-US/firefox/addon/darkreader/)
 for more info.
 
@@ -155,7 +155,7 @@ To build and debug the extension **install the [Node.js](https://nodejs.org/)** 
 Install development dependencies by running `npm install` in the project root folder.  
 Then execute `npm run debug`.
 
-#### Chrome
+#### Chrome and Edge
 - Open the `chrome://extensions` page.
 - Disable the official Dark Reader version.
 - Enable the **Developer mode**.

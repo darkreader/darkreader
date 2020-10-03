@@ -1,5 +1,6 @@
 // @ts-check
 const {exec} = require('child_process');
+const path = require('path');
 
 /**
  * @returns {Promise<string>}
@@ -22,6 +23,9 @@ async function getChromePath() {
     });
 }
 
+const chromeExtensionDebugDir = path.join(__dirname, '../../debug');
+
 module.exports = {
     getChromePath,
+    chromeExtensionDebugDir,
 };

@@ -1,7 +1,7 @@
 // @ts-check
 const JestNodeEnvironment = require('jest-environment-node');
 const puppeteer = require('puppeteer-core');
-const {getChromePath} = require('./paths');
+const {getChromePath, chromeExtensionDebugDir} = require('./paths');
 const server = require('./server');
 
 class PuppeteerEnvironment extends JestNodeEnvironment {
@@ -9,7 +9,15 @@ class PuppeteerEnvironment extends JestNodeEnvironment {
         await super.setup();
 
         const chromePath = await getChromePath();
-        this.browser = await puppeteer.launch({executablePath: chromePath});
+        this.browser = await puppeteer.launch({
+            executablePath: chromePath,
+            headless: false,
+            args: [
+                `--disable-extensions-except=${chromeExtensionDebugDir}`,
+                `--load-extension=${chromeExtensionDebugDir}`,
+                '--show-component-extension-options',
+            ],
+        });
         this.global.__BROWSER__ = this.browser;
 
         await server.start();

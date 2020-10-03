@@ -1,4 +1,5 @@
 import {Browser, Page} from 'puppeteer-core';
+import {generateHTMLCoverageReport} from './coverage';
 
 const timeout = 5000;
 const serverURL = 'http://localhost:8891'
@@ -26,7 +27,14 @@ describe('Loading test page', () => {
     afterAll(async () => {
         const coverage = await page.coverage.stopJSCoverage();
         await page.close();
-        console.log('Code coverage', coverage.map((c) => c.ranges.map(({start, end}) => c.text.substring(start, end))));
+        coverage
+            .filter(({url}) => url.startsWith('chrome-extension://'))
+            .forEach((c) => generateHTMLCoverageReport(
+                './tests/browser/reports/',
+                c.url.replace(/^chrome-extension:\/\/.*?\//, ''),
+                c.text,
+                c.ranges,
+            ));
     });
 
     it('should load without errors', async () => {
@@ -60,9 +68,8 @@ describe('Loading test page', () => {
         });
 
         await expect(page.evaluate(() => document.title)).resolves.toBe('Test page');
-        await expect(page.evaluate(() => getComputedStyle(document.body).backgroundColor)).resolves.toBe('rgb(128, 128, 128)');
+        await expect(page.evaluate(() => getComputedStyle(document.body).backgroundColor)).resolves.toBe('rgb(96, 104, 108)');
         await expect(page.evaluate(() => document.querySelector('h1').textContent)).resolves.toBe('Hello, World!');
-        await expect(page.evaluate(() => getComputedStyle(document.querySelector('h1 strong')).color)).resolves.toBe('rgb(255, 0, 0)');
+        await expect(page.evaluate(() => getComputedStyle(document.querySelector('h1 strong')).color)).resolves.toBe('rgb(255, 26, 26)');
     });
-},
-);
+});

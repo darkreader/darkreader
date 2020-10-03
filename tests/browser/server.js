@@ -74,8 +74,6 @@ function close() {
         server.close((err) => {
             if (err) {
                 console.error(err);
-            } else {
-                console.log('Test server closed');
             }
             resolve();
         });

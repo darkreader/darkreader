@@ -12,6 +12,10 @@ darkreader.js
 #-----------------------------------
 node_modules/
 
+# Code coverage reports
+#-----------------------------------
+tests/browser/reports/
+
 # IDE and editor configs
 #-----------------------------------
 .idea/

@@ -27,7 +27,6 @@ const mimeTypes = new Map(
  * @param {import('http').ServerResponse} res
  */
 function handleRequest(req, res) {
-    console.log('server request', req.url);
     const parsedURL = url.parse(req.url);
     const pathName = parsedURL.pathname;
 

@@ -9,19 +9,17 @@ function multiline(...lines) {
 
 describe('Loading test page', () => {
     const browser: Browser = (global as any).__BROWSER__;
-    const server = (global as any).__SERVER__;
+    const setServerPaths = (global as any).__SET_SERVER_PATHS__;
     let page: Page;
 
     const loadTestPage = async (paths) => {
-        server.setPaths(paths);
+        setServerPaths(paths);
         await page.goto(serverURL);
     };
 
     beforeAll(async () => {
         page = await browser.newPage();
-        page.on('pageerror', (err) => {
-            throw err;
-        });
+        page.on('pageerror', (err) => process.emit('uncaughtException', err));
         await page.coverage.startJSCoverage();
     }, timeout);
 
@@ -61,10 +59,10 @@ describe('Loading test page', () => {
             ),
         });
 
-        expect(page.evaluate(() => document.title)).resolves.toBe('Test page');
-        expect(page.evaluate(() => getComputedStyle(document.body).backgroundColor)).resolves.toBe('rgb(128, 128, 128)');
-        expect(page.evaluate(() => document.querySelector('h1').textContent)).resolves.toBe('Hello, World!');
-        expect(page.evaluate(() => getComputedStyle(document.querySelector('h1 strong')).color)).resolves.toBe('rgb(255, 0, 0)');
+        await expect(page.evaluate(() => document.title)).resolves.toBe('Test page');
+        await expect(page.evaluate(() => getComputedStyle(document.body).backgroundColor)).resolves.toBe('rgb(128, 128, 128)');
+        await expect(page.evaluate(() => document.querySelector('h1').textContent)).resolves.toBe('Hello, World!');
+        await expect(page.evaluate(() => getComputedStyle(document.querySelector('h1 strong')).color)).resolves.toBe('rgb(255, 0, 0)');
     });
 },
 );

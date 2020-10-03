@@ -5,10 +5,6 @@ const {getChromePath} = require('./paths');
 const server = require('./server');
 
 class PuppeteerEnvironment extends JestNodeEnvironment {
-    constructor(config) {
-        super(config);
-    }
-
     async setup() {
         await super.setup();
 

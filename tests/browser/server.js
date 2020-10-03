@@ -52,10 +52,7 @@ function start() {
     return new Promise((resolve) => {
         server = http
             .createServer(handleRequest)
-            .listen(PORT, () => {
-                console.log('Test server listening on port', PORT);
-                resolve();
-            });
+            .listen(PORT, () => resolve());
     });
 }
 

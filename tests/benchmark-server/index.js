@@ -25,29 +25,16 @@ http.createServer((request, response) => {
         response.end();
     } else {
         response.writeHead(200, {'Content-Type': 'text/css'});
-        const parts = chunkString(CSS(query), 100);
-        const write = () => {
-            const chunk = parts.unshift();
-            if (chunk) {
-                response.write(chunk);
-                setTimeout(write, 10);
-            } else {
-                response.end();
-            }
-        };
-        write();
+        response.write(CSS(query));
+        response.end();
     }
 
-}).listen(port, function () {
+}).listen(port, () => {
     console.log(`The benchmark server has been opened on port ${port}`);
 });
 
-/**
- * @param {string} str
- * @param {string | number} length
- */
-function chunkString(str, length) {
-    return str.match(new RegExp('.{1,' + length + '}', 'g'));
+function randomColor() {
+    return ('#' + (Math.random() * 0xFFFFFF << 0).toString(16));
 }
 
 /**
@@ -60,7 +47,7 @@ function CSS(query) {
     const generated = parseInt(realquery[1]);
     let result = '';
     for (let x = 1; x <= generated; x++) {
-        result = result + `.GeneratedLinkElement${x} { background-color: black }\n`;
+        result = result + `.GeneratedLinkElement${x} { background-color: ${randomColor()} }\n`;
     }
     return result;
 }
@@ -94,7 +81,7 @@ function style(amount) {
         return result;
     }
     for (let x = 1; x <= amount; x++) {
-        result = result + `\t\t<p style="background-color: green">This is an inline style element ${x}</p>\n`;
+        result = result + `\t\t<p style="background-color: ${randomColor()}">This is an inline style element ${x}</p>\n`;
     }
     return result;
 }
@@ -112,7 +99,7 @@ function rule(amount) {
     }
     result = result + '\t\t\t<style>';
     for (let x = 1; x <= amount; x++) {
-        result = result + `.GeneratedElement${x} { background-color: red }\n`;
+        result = result + `.GeneratedElement${x} { background-color: ${randomColor()} }\n`;
         element = element + `\t\t<p class="GeneratedElement${x}">This is an GeneratedElement ${x}</p>\n`;
     }
     result = result + '</style>\n';

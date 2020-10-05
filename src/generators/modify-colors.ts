@@ -194,7 +194,7 @@ function modifyFgHSL({h, s, l, a}: HSLA, pole: HSLA) {
     }
 
     let hx = h;
-    let lx = l;
+    let lx: number;
     if (isBlue) {
         hx = modifyBlueFgHue(h);
         lx = scale(l, 0, 0.5, pole.l, Math.min(1, MIN_FG_LIGHTNESS + 0.05));

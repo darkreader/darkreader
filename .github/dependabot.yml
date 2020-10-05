@@ -9,3 +9,4 @@ updates:
       - "dependencies"
     reviewers:
       - "Gusted"
+    open-pull-requests-limit: 10

@@ -1,7 +1,7 @@
 // @ts-check
 const JestNodeEnvironment = require('jest-environment-node');
 const puppeteer = require('puppeteer-core');
-const {generateHTMLCoverageReport} = require('./coverage');
+const {generateHTMLCoverageReports} = require('./coverage');
 const {getChromePath, chromeExtensionDebugDir} = require('./paths');
 const server = require('./server');
 
@@ -45,14 +45,7 @@ class PuppeteerEnvironment extends JestNodeEnvironment {
         await super.teardown();
 
         const coverage = await this.page.coverage.stopJSCoverage();
-        coverage
-            .filter(({url}) => url.startsWith('chrome-extension://'))
-            .forEach((c) => generateHTMLCoverageReport(
-                './tests/browser/reports/',
-                c.url.replace(/^chrome-extension:\/\/.*?\//, ''),
-                c.text,
-                c.ranges,
-            ));
+        await generateHTMLCoverageReports('./tests/browser/reports/', coverage);
 
         this.browser.close();
         await server.close();

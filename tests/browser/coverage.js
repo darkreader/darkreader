@@ -70,16 +70,29 @@ function escapeHTML(/** @type {string} */html) {
         .replace(/'/g, '&#039;');
 }
 
+/** @typedef {{name: string; length: number; coverage: number; parts: {text: string; covered: boolean}[]}} FileCoverageInfo */
+
 /**
- * @param {string} dir
  * @param {string} name
  * @param {string} code
  * @param {{start: number; end: number}[]} ranges
- * @returns {Promise<void>}
+ * @returns {FileCoverageInfo}
  */
-async function generateHTMLCoverageReport(dir, name, code, ranges) {
+function getCoverageInfo(name, code, ranges) {
     code = code.substring(0, code.indexOf('//# sourceMappingURL='));
     const parts = splitCode(code, ranges);
+    const length = code.length;
+    const coverage = parts.filter((p) => p.covered).reduce((sum, p) => sum + p.text.length, 0) / length;
+    return {name, length, coverage, parts};
+}
+
+/**
+ * @param {string} dir
+ * @param {FileCoverageInfo} info
+ * @returns {Promise<void>}
+ */
+async function generateHTMLCoverageReport(dir, info) {
+    const {name, coverage, parts} = info;
 
     /** @type {string[]} */
     const lines = [];
@@ -96,8 +109,7 @@ async function generateHTMLCoverageReport(dir, name, code, ranges) {
     lines.push('</head>');
     lines.push('<body>');
     lines.push(`  <h1>${title}</h1>`);
-    const coveredRatio = parts.filter((p) => p.covered).reduce((sum, p) => sum + p.text.length, 0) / code.length;
-    lines.push(`  <h3>Covered ${(coveredRatio * 100).toFixed(0)}%</h3>`);
+    lines.push(`  <h3>Covered ${(coverage * 100).toFixed(0)}%</h3>`);
     lines.push(`  <code>${parts.map((p) => `<span${p.covered ? '' : ' class="uncovered"'}>${escapeHTML(p.text)}</span>`).join('')}</code>`);
     lines.push('</body>');
     lines.push('</html>');
@@ -105,7 +117,60 @@ async function generateHTMLCoverageReport(dir, name, code, ranges) {
     await fs.outputFile(path.join(dir, `${name}.html`), lines.join('\n'));
 }
 
+
+/**
+ * @param {string} dir
+ * @param {FileCoverageInfo[]} info
+ * @returns {Promise<void>}
+ */
+async function generateIndexHTMLCoveragePage(dir, info) {
+    /** @type {string[]} */
+    const lines = [];
+    lines.push('<!DOCTYPE html>');
+    lines.push('<html>');
+    lines.push('<head>');
+    lines.push(`  <title>Code coverage reports</title>`);
+    lines.push('  <style>');
+    lines.push('    body { background: #111; color: #ccc; }');
+    lines.push('    a { color: #7ae; }');
+    lines.push('  </style>');
+    lines.push('</head>');
+    lines.push('<body>');
+    lines.push(`  <h1>Code coverage reports</h1>`);
+    const totalCoverage = info.reduce((sum, i) => sum + i.coverage * i.length, 0);
+    const totalLength = info.reduce((sum, i) => sum + i.length, 0);
+    lines.push(`  <h3>Total coverage ${(totalCoverage / totalLength * 100).toFixed(0)}%</h3>`);
+    lines.push('  <table>');
+    info.forEach((i) => {
+        lines.push('    <tr>');
+        lines.push(`      <td>${(i.coverage * 100).toFixed(0)}%</td>`);
+        lines.push(`      <td><a href="${i.name}.html">${i.name}</a></td>`);
+        lines.push('    </tr>');
+    });
+    lines.push('  </table>');
+    lines.push('</body>');
+    lines.push('</html>');
+
+    await fs.outputFile(path.join(dir, 'index.html'), lines.join('\n'));
+}
+
+/**
+ * @param {string} dir
+ * @param {import('puppeteer-core').CoverageEntry[]} coverage
+ */
+async function generateHTMLCoverageReports(dir, coverage) {
+    const info = coverage
+        .filter(({url}) => url.startsWith('chrome-extension://'))
+        .map(({url, text, ranges}) => {
+            const name = url.replace(/^chrome-extension:\/\/.*?\//, '');
+            return getCoverageInfo(name, text, ranges);
+        });
+
+    await generateIndexHTMLCoveragePage(dir, info);
+    await Promise.all(info.map((i) => generateHTMLCoverageReport(dir, i)));
+}
+
 module.exports = {
     logCoverage,
-    generateHTMLCoverageReport,
+    generateHTMLCoverageReports,
 };

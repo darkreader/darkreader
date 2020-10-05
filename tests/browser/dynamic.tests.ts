@@ -1,42 +1,8 @@
-import {Browser, Page} from 'puppeteer-core';
-import {generateHTMLCoverageReport} from './coverage';
-
-const timeout = 5000;
-const serverURL = 'http://localhost:8891'
-
 function multiline(...lines) {
     return lines.join('\n');
 }
 
 describe('Loading test page', () => {
-    const browser: Browser = (global as any).__BROWSER__;
-    const setServerPaths = (global as any).__SET_SERVER_PATHS__;
-    let page: Page;
-
-    const loadTestPage = async (paths) => {
-        setServerPaths(paths);
-        await page.goto(serverURL);
-    };
-
-    beforeAll(async () => {
-        page = await browser.newPage();
-        page.on('pageerror', (err) => process.emit('uncaughtException', err));
-        await page.coverage.startJSCoverage();
-    }, timeout);
-
-    afterAll(async () => {
-        const coverage = await page.coverage.stopJSCoverage();
-        await page.close();
-        coverage
-            .filter(({url}) => url.startsWith('chrome-extension://'))
-            .forEach((c) => generateHTMLCoverageReport(
-                './tests/browser/reports/',
-                c.url.replace(/^chrome-extension:\/\/.*?\//, ''),
-                c.text,
-                c.ranges,
-            ));
-    });
-
     it('should load without errors', async () => {
         await loadTestPage({
             '/': multiline(

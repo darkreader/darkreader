@@ -3,8 +3,6 @@ const http = require('http');
 const path = require('path');
 const url = require('url');
 
-const PORT = 8891;
-
 /** @type {import('http').Server} */
 let server;
 /** @type {{[path: string]: string}} */
@@ -47,12 +45,13 @@ function handleRequest(req, res) {
 
 /**
  * @returns {Promise<void>}
+ * @param {number} port
  */
-function start() {
+function start(port) {
     return new Promise((resolve) => {
         server = http
             .createServer(handleRequest)
-            .listen(PORT, () => resolve());
+            .listen(port, () => resolve());
     });
 }
 

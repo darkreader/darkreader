@@ -64,9 +64,9 @@ function createUrlRegex(urlTemplate: string): RegExp {
     let afterSlash: string;
     if ((slashIndex = urlTemplate.indexOf('/')) >= 0) {
         beforeSlash = urlTemplate.substring(0, slashIndex); // google.*
-        afterSlash = urlTemplate.replace(/\$/, '').substring(slashIndex); // /login/abc
+        afterSlash = urlTemplate.replace(/\$/g, '').substring(slashIndex); // /login/abc
     } else {
-        beforeSlash = urlTemplate.replace(/\$/, '');
+        beforeSlash = urlTemplate.replace(/\$/g, '');
     }
 
     //

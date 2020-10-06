@@ -73,14 +73,17 @@ export function getManageableStyles(node: Node, results = [] as StyleElement[], 
     return results;
 }
 
+const syncStyleSet = new WeakSet<HTMLStyleElement | SVGStyleElement>();
+const corsStyleSet = new WeakSet<HTMLStyleElement>();
+
 export function manageStyle(element: StyleElement, {update, loadingStart, loadingEnd}): StyleManager {
     const prevStyles: HTMLStyleElement[] = [];
     let next: Element = element;
     while ((next = next.nextElementSibling) && next.matches('.darkreader')) {
         prevStyles.push(next as HTMLStyleElement);
     }
-    let corsCopy: HTMLStyleElement = prevStyles.find((el) => el.matches('.darkreader--cors')) || null;
-    let syncStyle: HTMLStyleElement | SVGStyleElement = prevStyles.find((el) => el.matches('.darkreader--sync')) || null;
+    let corsCopy: HTMLStyleElement = prevStyles.find((el) => el.matches('.darkreader--cors') && !corsStyleSet.has(el)) || null;
+    let syncStyle: HTMLStyleElement | SVGStyleElement = prevStyles.find((el) => el.matches('.darkreader--sync') && !syncStyleSet.has(el)) || null;
 
     let corsCopyPositionWatcher: ReturnType<typeof watchForNodePosition> = null;
     let syncStylePositionWatcher: ReturnType<typeof watchForNodePosition> = null;
@@ -128,6 +131,7 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
         syncStyle.classList.add('darkreader');
         syncStyle.classList.add('darkreader--sync');
         syncStyle.media = 'screen';
+        syncStyleSet.add(syncStyle);
     }
 
     let isLoadingRules = false;
@@ -240,7 +244,6 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
             }
 
             syncStylePositionWatcher && syncStylePositionWatcher.stop();
-            insertStyle();
 
             // Firefox issue: Some websites get CSP warning,
             // when `textContent` is not set (e.g. pypi.org).
@@ -250,6 +253,8 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
             if (syncStyle.sheet == null) {
                 syncStyle.textContent = '';
             }
+
+            insertStyle();
 
             const sheet = syncStyle.sheet;
             for (let i = sheet.cssRules.length - 1; i >= 0; i--) {
@@ -433,7 +438,7 @@ async function loadText(url: string) {
     return await bgFetch({url, responseType: 'text', mimeType: 'text/css'});
 }
 
-async function replaceCSSImports(cssText: string, basePath: string) {
+async function replaceCSSImports(cssText: string, basePath: string, cache = new Map<string, string>()) {
     cssText = removeCSSComments(cssText);
     cssText = replaceCSSFontFace(cssText);
     cssText = replaceCSSRelativeURLsWithAbsolute(cssText, basePath);
@@ -443,12 +448,17 @@ async function replaceCSSImports(cssText: string, basePath: string) {
         const importURL = getCSSImportURL(match);
         const absoluteURL = getAbsoluteURL(basePath, importURL);
         let importedCSS: string;
-        try {
-            importedCSS = await loadText(absoluteURL);
-            importedCSS = await replaceCSSImports(importedCSS, getCSSBaseBath(absoluteURL));
-        } catch (err) {
-            logWarn(err);
-            importedCSS = '';
+        if (cache.has(absoluteURL)) {
+            importedCSS = cache.get(absoluteURL);
+        } else {
+            try {
+                importedCSS = await loadText(absoluteURL);
+                cache.set(absoluteURL, importedCSS);
+                importedCSS = await replaceCSSImports(importedCSS, getCSSBaseBath(absoluteURL), cache);
+            } catch (err) {
+                logWarn(err);
+                importedCSS = '';
+            }
         }
         cssText = cssText.split(match).join(importedCSS);
     }
@@ -470,6 +480,6 @@ function createCORSCopy(srcElement: StyleElement, cssText: string) {
     cors.textContent = cssText;
     srcElement.parentNode.insertBefore(cors, srcElement.nextSibling);
     cors.sheet.disabled = true;
-
+    corsStyleSet.add(cors);
     return cors;
 }

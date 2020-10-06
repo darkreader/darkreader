@@ -90,6 +90,10 @@ function Body({data, tab, actions}: BodyProps) {
             <textarea
                 id="editor"
                 onrender={onTextRender}
+                spellcheck="false"
+                autocorrect="off"
+                autocomplete="off"
+                autocapitalize="off"
             />
             <label id="error-text">{state.errorText}</label>
             <div id="buttons">

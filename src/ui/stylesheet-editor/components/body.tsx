@@ -59,6 +59,10 @@ export default function Body({data, tab, actions}: BodyProps) {
                 native
                 placeholder={placeholderText}
                 onrender={onTextRender}
+                spellcheck="false"
+                autocorrect="off"
+                autocomplete="off"
+                autocapitalize="off"
             />
             <div id="buttons">
                 <Button onclick={reset}>Reset</Button>

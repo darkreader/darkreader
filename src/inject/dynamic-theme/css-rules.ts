@@ -6,7 +6,7 @@ export function iterateCSSRules(rules: CSSRuleList, iterate: (rule: CSSStyleRule
     forEach(rules, (rule) => {
         if (rule instanceof CSSMediaRule) {
             const media = Array.from(rule.media);
-            if (media.includes('screen') || media.includes('all') || !(media.includes('print') || media.includes('speech'))) {
+            if (media.includes('screen') || media.includes('all') || (!(media.includes('print') || media.includes('speech')) && !matchMedia(rule.media.mediaText))) {
                 iterateCSSRules(rule.cssRules, iterate);
             }
         } else if (rule instanceof CSSStyleRule) {

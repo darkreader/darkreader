@@ -11,7 +11,7 @@
     "prepublishOnly": "npm test && npm run api",
     "release": "npm test && node tasks/build.js --release",
     "test": "npm run test:config && npm run test:inject && npm run test:utils",
-    "test:browser": "jest --config=tests/browser/jest.config.js",
+    "test:browser": "jest --config=tests/browser/jest.config.js --runInBand",
     "test:config": "jest --config=tests/config/jest.config.js",
     "test:config:debug": "node --inspect-brk ./node_modules/jest/bin/jest --config=tests/config/jest.config.js --runInBand --no-cache --watch",
     "test:inject": "jest --config=tests/inject/jest.config.js",
@@ -61,6 +61,7 @@
     "ts-node": "9.0.0",
     "tsconfig-paths": "3.9.0",
     "typescript": "4.0.3",
+    "web-ext": "5.2.0",
     "ws": "7.3.1",
     "yazl": "2.5.1"
   }

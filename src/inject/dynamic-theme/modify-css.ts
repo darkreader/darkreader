@@ -15,6 +15,7 @@ export interface ModifiableCSSDeclaration {
     value: string | CSSValueModifier;
     important: boolean;
     sourceValue: string;
+    keyText: string;
 }
 
 export interface ModifiableCSSRule {
@@ -23,9 +24,10 @@ export interface ModifiableCSSRule {
     declarations: ModifiableCSSDeclaration[];
 }
 
-export function getModifiableCSSDeclaration(property: string, value: string, rule: CSSStyleRule, ignoreImageSelectors: string[], isCancelled: () => boolean): ModifiableCSSDeclaration {
+export function getModifiableCSSDeclaration(property: string, value: string, rule: CSSStyleRule | CSSKeyframeRule, ignoreImageSelectors: string[], isCancelled: () => boolean): ModifiableCSSDeclaration {
     const important = Boolean(rule && rule.style && rule.style.getPropertyPriority(property));
     const sourceValue = value;
+    const keyText = rule instanceof CSSKeyframeRule ? rule.keyText : '';
     if (property.startsWith('--')) {
         return null;
     } else if (
@@ -35,17 +37,17 @@ export function getModifiableCSSDeclaration(property: string, value: string, rul
     ) {
         const modifier = getColorModifier(property, value);
         if (modifier) {
-            return {property, value: modifier, important, sourceValue};
+            return {property, value: modifier, important, sourceValue, keyText};
         }
-    } else if (property === 'background-image' || property === 'list-style-image') {
-        const modifier = getBgImageModifier(value, rule, ignoreImageSelectors, isCancelled);
+    } else if (!(rule instanceof CSSKeyframeRule) && property === 'background-image' || property === 'list-style-image') {
+        const modifier = getBgImageModifier(value, rule as CSSStyleRule, ignoreImageSelectors, isCancelled);
         if (modifier) {
-            return {property, value: modifier, important, sourceValue};
+            return {property, value: modifier, important, sourceValue, keyText};
         }
     } else if (property.indexOf('shadow') >= 0) {
         const modifier = getShadowModifier(property, value);
         if (modifier) {
-            return {property, value: modifier, important, sourceValue};
+            return {property, value: modifier, important, sourceValue, keyText};
         }
     }
     return null;

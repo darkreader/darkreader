@@ -105,7 +105,11 @@ export function createStyleSheetModifier() {
             let modRule: ModifiableCSSRule = null;
             if (modDecs.length > 0) {
                 const parentRule = rule.parentRule;
-                modRule = {selector: rule.selectorText, declarations: modDecs, parentRule};
+                if (rule instanceof CSSStyleRule) {
+                    modRule = {selector: rule.selectorText, declarations: modDecs, parentRule};
+                } else if (rule instanceof CSSKeyframeRule) {
+                    modRule = {selector: `@keyframes ${(parentRule as CSSKeyframesRule).name}`, declarations: modDecs, parentRule};
+                }
                 modRules.push(modRule);
             }
             rulesModCache.set(cssText, modRule);
@@ -143,15 +147,25 @@ export function createStyleSheetModifier() {
             important: boolean;
             sourceValue: string;
             asyncKey?: number;
+            keyText: string;
         }
 
         function setRule(target: CSSStyleSheet | CSSGroupingRule, index: number, rule: ReadyStyleRule) {
             const {selector, declarations} = rule;
-            target.insertRule(`${selector} {}`, index);
-            const style = (target.cssRules.item(index) as CSSStyleRule).style;
-            declarations.forEach(({property, value, important, sourceValue}) => {
-                style.setProperty(property, value == null ? sourceValue : value, important ? 'important' : '');
-            });
+            if (selector.startsWith('@keyframes')) {
+                let text = `${selector} {`;
+                declarations.forEach(({property, value, important, sourceValue, keyText}) => {
+                    text += `${keyText} {${property}: ${value == null ? sourceValue : value} ${important ? 'important' : ''}}`;
+                });
+                text += '}';
+                target.insertRule(`${text}`, index);
+            } else {
+                target.insertRule(`${selector} {}`, index);
+                const style = (target.cssRules.item(index) as CSSStyleRule).style;
+                declarations.forEach(({property, value, important, sourceValue}) => {
+                    style.setProperty(property, value == null ? sourceValue : value, important ? 'important' : '');
+                });
+            }
         }
 
         interface AsyncRule {
@@ -190,12 +204,12 @@ export function createStyleSheetModifier() {
             const readyDeclarations = readyStyleRule.declarations;
             group.rules.push(readyStyleRule);
 
-            declarations.forEach(({property, value, important, sourceValue}) => {
+            declarations.forEach(({property, value, important, sourceValue, keyText}) => {
                 if (typeof value === 'function') {
                     const modified = value(theme);
                     if (modified instanceof Promise) {
                         const asyncKey = asyncDeclarationCounter++;
-                        const asyncDeclaration: ReadyDeclaration = {property, value: null, important, asyncKey, sourceValue};
+                        const asyncDeclaration: ReadyDeclaration = {property, value: null, important, asyncKey, sourceValue, keyText};
                         readyDeclarations.push(asyncDeclaration);
                         const promise = modified;
                         const currentRenderId = renderId;
@@ -212,10 +226,10 @@ export function createStyleSheetModifier() {
                             });
                         });
                     } else {
-                        readyDeclarations.push({property, value: modified, important, sourceValue});
+                        readyDeclarations.push({property, value: modified, important, sourceValue, keyText});
                     }
                 } else {
-                    readyDeclarations.push({property, value, important, sourceValue});
+                    readyDeclarations.push({property, value, important, sourceValue, keyText});
                 }
             });
         });

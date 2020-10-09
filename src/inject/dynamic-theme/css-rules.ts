@@ -2,14 +2,16 @@ import {forEach} from '../../utils/array';
 import {parseURL, getAbsoluteURL} from './url';
 import {logWarn} from '../utils/log';
 
-export function iterateCSSRules(rules: CSSRuleList, iterate: (rule: CSSStyleRule) => void) {
+type IterationRules = CSSStyleRule | CSSKeyframeRule;
+
+export function iterateCSSRules(rules: CSSRuleList, iterate: (rule: IterationRules) => void) {
     forEach(rules, (rule) => {
         if (rule instanceof CSSMediaRule) {
             const media = Array.from(rule.media);
             if (media.includes('screen') || media.includes('all') || !(media.includes('print') || media.includes('speech'))) {
                 iterateCSSRules(rule.cssRules, iterate);
             }
-        } else if (rule instanceof CSSStyleRule) {
+        } else if (rule instanceof CSSStyleRule || rule instanceof CSSKeyframeRule) {
             iterate(rule);
         } else if (rule instanceof CSSImportRule) {
             try {
@@ -21,8 +23,10 @@ export function iterateCSSRules(rules: CSSRuleList, iterate: (rule: CSSStyleRule
             if (CSS.supports(rule.conditionText)) {
                 iterateCSSRules(rule.cssRules, iterate);
             }
+        } else if (rule instanceof CSSKeyframesRule) {
+            iterateCSSRules(rule.cssRules, iterate);
         } else {
-            logWarn(`CSSRule type not supported`, rule);
+            logWarn(`CSSRule type is not supported`, rule);
         }
     });
 }

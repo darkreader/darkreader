@@ -8,19 +8,14 @@ const webExt = require('web-ext');
 
 const TEST_SERVER_PORT = 8891;
 const FIREFOX_DEVTOOLS_PORT = 8893;
-const TEST_BROWSER = 'firefox';
 
 class PuppeteerEnvironment extends JestNodeEnvironment {
     async setup() {
         await super.setup();
 
-        /** @type {'chrome' | 'firefox'} */
-        const product = TEST_BROWSER;
-        this.product = product;
-
         /** @type {import('puppeteer-core').Browser} */
         let browser;
-        if (product === 'chrome') {
+        if (this.global.product === 'chrome') {
             const executablePath = await getChromePath();
             browser = await puppeteer.launch({
                 executablePath,
@@ -31,7 +26,7 @@ class PuppeteerEnvironment extends JestNodeEnvironment {
                     '--show-component-extension-options',
                 ],
             });
-        } else if (product === 'firefox') {
+        } else if (this.global.product === 'firefox') {
             const firefoxPath = await getFirefoxPath();
             try {
                 await webExt.cmd.run({
@@ -58,7 +53,7 @@ class PuppeteerEnvironment extends JestNodeEnvironment {
         const page = await browser.newPage();
         page.setCacheEnabled(false);
         page.on('pageerror', (err) => process.emit('uncaughtException', err));
-        if (product !== 'firefox') {
+        if (this.global.product !== 'firefox') {
             await page.coverage.startJSCoverage();
         }
         this.page = page;
@@ -77,9 +72,11 @@ class PuppeteerEnvironment extends JestNodeEnvironment {
     async teardown() {
         await super.teardown();
 
-        if (this.product !== 'firefox') {
+        if (this.global.product !== 'firefox') {
             const coverage = await this.page.coverage.stopJSCoverage();
-            await generateHTMLCoverageReports('./tests/browser/reports/', coverage);
+            const dir = './tests/browser/reports/';
+            await generateHTMLCoverageReports(dir, coverage);
+            console.info('Coverage reports generated in', dir);
         }
 
         this.browser.close();

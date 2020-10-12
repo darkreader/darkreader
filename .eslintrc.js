@@ -43,6 +43,7 @@ module.exports = {
         '@typescript-eslint/no-object-literal-type-assertion': 'off',
         '@typescript-eslint/no-use-before-define': 'off',
         '@typescript-eslint/explicit-module-boundary-types': 'off',
+        '@typescript-eslint/no-duplicate-imports': 'error',
     },
     overrides: [
         {

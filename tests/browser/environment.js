@@ -7,13 +7,15 @@ const server = require('./server');
 const webExt = require('web-ext');
 
 const TEST_SERVER_PORT = 8891;
+const FIREFOX_DEVTOOLS_PORT = 8893;
+const TEST_BROWSER = 'firefox';
 
 class PuppeteerEnvironment extends JestNodeEnvironment {
     async setup() {
         await super.setup();
 
         /** @type {'chrome' | 'firefox'} */
-        const product = 'chrome';
+        const product = TEST_BROWSER;
         this.product = product;
 
         /** @type {import('puppeteer-core').Browser} */
@@ -32,15 +34,16 @@ class PuppeteerEnvironment extends JestNodeEnvironment {
         } else if (product === 'firefox') {
             const firefoxPath = await getFirefoxPath();
             try {
-                const runner = await webExt.cmd.run({
+                await webExt.cmd.run({
                     sourceDir: firefoxExtensionDebugDir,
                     firefox: firefoxPath,
+                    args: ['--remote-debugging-port', FIREFOX_DEVTOOLS_PORT],
                 }, {
                     shouldExitProgram: false,
                 });
-                const {debuggerPort} = runner.extensionRunners[0].runningInfo;
+                await new Promise((resolve) => setTimeout(resolve, 2000));
                 browser = await puppeteer.connect({
-                    browserWSEndpoint: `ws://localhost:${debuggerPort}`,
+                    browserURL: `http://localhost:${FIREFOX_DEVTOOLS_PORT}`,
                 });
             } catch (err) {
                 console.error(err);
@@ -52,12 +55,11 @@ class PuppeteerEnvironment extends JestNodeEnvironment {
 
         await server.start(TEST_SERVER_PORT);
 
-        const page = (await browser.pages())[0];
+        const page = await browser.newPage();
         page.setCacheEnabled(false);
         page.on('pageerror', (err) => process.emit('uncaughtException', err));
         if (product !== 'firefox') {
             await page.coverage.startJSCoverage();
-
         }
         this.page = page;
         this.global.page = page;

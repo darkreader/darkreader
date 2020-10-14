@@ -2,21 +2,18 @@ module.exports = {
     verbose: true,
     testEnvironment: 'jsdom',
     transform: {
-        '^.+\\.ts(x?)$': 'ts-jest'
+        '^.+\\.ts$': 'ts-jest'
     },
-    testRegex: 'tests/utils/.*\\.tests\\.ts(x?)$',
+    testRegex: 'tests/utils/.*\\.tests\\.ts$',
     moduleFileExtensions: [
         'ts',
-        'tsx',
         'js'
     ],
+    rootDir: '../../',
     collectCoverage: false,
-    coverageDirectory: 'coverage',
+    coverageDirectory: 'tests/coverage',
     collectCoverageFrom: [
-        'src/**/*.{ts,tsx}'
-    ],
-    coveragePathIgnorePatterns: [
-        '^.+\\.d\\.ts$'
+        '<rootDir>/src/**/*.ts',
     ],
     globals: {
         'ts-jest': {

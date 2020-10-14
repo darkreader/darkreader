@@ -74,7 +74,7 @@ class PuppeteerEnvironment extends JestNodeEnvironment {
 
         if (this.global.product !== 'firefox') {
             const coverage = await this.page.coverage.stopJSCoverage();
-            const dir = './tests/browser/reports/';
+            const dir = './tests/browser/coverage/';
             await generateHTMLCoverageReports(dir, coverage);
             console.info('Coverage reports generated in', dir);
         }

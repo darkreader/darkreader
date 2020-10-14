@@ -24,7 +24,7 @@ export function enable(themeOptions: Partial<Theme> = {}, fixes: DynamicThemeFix
 }
 
 export function disable() {
-    removeDynamicTheme();
+    removeDynamicTheme({removeFallback: true});
 }
 
 const darkScheme = matchMedia('(prefers-color-scheme: dark)');

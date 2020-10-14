@@ -412,7 +412,7 @@ export function createOrUpdateDynamicTheme(filterConfig: FilterConfig, dynamicTh
             if (document.head) {
                 headObserver.disconnect();
                 if (isAnotherDarkReaderInstanceActive()) {
-                    removeDynamicTheme();
+                    removeDynamicTheme({removeFallback: true});
                     return;
                 }
                 createThemeAndWatchForUpdates();
@@ -422,9 +422,9 @@ export function createOrUpdateDynamicTheme(filterConfig: FilterConfig, dynamicTh
     }
 }
 
-export function removeDynamicTheme() {
+export function removeDynamicTheme(options: {removeFallback: boolean}) {
     cleanDynamicThemeCache();
-    removeNode(document.querySelector('.darkreader--fallback'));
+    options.removeFallback && removeNode(document.querySelector('.darkreader--fallback'));
     if (document.head) {
         restoreMetaThemeColor();
         removeNode(document.head.querySelector('.darkreader--user-agent'));

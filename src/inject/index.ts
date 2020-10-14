@@ -10,13 +10,13 @@ function onMessage({type, data}) {
         case 'add-css-filter':
         case 'add-static-theme': {
             const css = data;
-            removeDynamicTheme();
+            removeDynamicTheme({removeFallback: false});
             createOrUpdateStyle(css);
             break;
         }
         case 'add-svg-filter': {
             const {css, svgMatrix, svgReverseMatrix} = data;
-            removeDynamicTheme();
+            removeDynamicTheme({removeFallback: false});
             createOrUpdateSVGFilter(svgMatrix, svgReverseMatrix);
             createOrUpdateStyle(css);
             break;
@@ -35,7 +35,7 @@ function onMessage({type, data}) {
         case 'clean-up': {
             removeStyle();
             removeSVGFilter();
-            removeDynamicTheme();
+            removeDynamicTheme({removeFallback: true});
             break;
         }
     }

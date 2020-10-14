@@ -1,6 +1,35 @@
 import {UserSettings} from '../definitions';
 import {isIPV6, compareIPV6} from './ipv6';
 
+let anchor: HTMLAnchorElement;
+
+function fixBaseURL($url: string) {
+    if (!anchor) {
+        anchor = document.createElement('a');
+    }
+    anchor.href = $url;
+    return anchor.href;
+}
+
+export function parseURL($url: string, $base: string = null) {
+    if ($base) {
+        $base = fixBaseURL($base);
+        return new URL($url, $base);
+    }
+    $url = fixBaseURL($url);
+    return new URL($url);
+}
+
+export function getAbsoluteURL($base: string, $relative: string) {
+    if ($relative.match(/^data\:/)) {
+        return $relative;
+    }
+
+    const b = parseURL($base);
+    const a = parseURL($relative, b.href);
+    return a.href;
+}
+
 export function getURLHostOrProtocol($url: string) {
     const url = new URL($url);
     if (url.host) {

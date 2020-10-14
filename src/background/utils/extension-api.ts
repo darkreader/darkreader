@@ -31,6 +31,42 @@ export function canInjectScript(url: string) {
     );
 }
 
+export function readSyncStorage<T extends {[key: string]: any}>(defaults: T): Promise<T> {
+    return new Promise<T>((resolve) => {
+        chrome.storage.sync.get(defaults, (sync: T) => {
+            resolve(sync);
+        });
+    });
+}
+
+export function readLocalStorage<T extends {[key: string]: any}>(defaults: T): Promise<T> {
+    return new Promise<T>((resolve) => {
+        chrome.storage.local.get(defaults, (local: T) => {
+            resolve(local);
+        });
+    });
+}
+
+export function writeSyncStorage<T extends {[key: string]: any}>(values: T): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+        chrome.storage.sync.set(values, () => {
+            if (chrome.runtime.lastError) {
+                reject(chrome.runtime.lastError);
+                return;
+            }
+            resolve();
+        });
+    });
+}
+
+export function writeLocalStorage<T extends {[key: string]: any}>(values: T): Promise<void> {
+    return new Promise<void>((resolve) => {
+        chrome.storage.local.set(values, () => {
+            resolve();
+        });
+    });
+}
+
 export function getFontList() {
     return new Promise<string[]>((resolve) => {
         if (!chrome.fontSettings) {

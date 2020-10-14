@@ -1,6 +1,6 @@
 {
   "name": "darkreader",
-  "version": "4.9.10",
+  "version": "4.9.21",
   "description": "Dark theme for every website",
   "scripts": {
     "api": "node tasks/build.js --api",
@@ -10,8 +10,13 @@
     "debug-watch": "node tasks/build.js --debug --watch",
     "prepublishOnly": "npm test && npm run api",
     "release": "npm test && node tasks/build.js --release",
-    "test": "jest --config=tests/jest.config.js",
-    "test:inject": "jest --config=tests/inject/jest.config.js"
+    "test": "npm run test:config && npm run test:inject && npm run test:utils",
+    "test:config": "jest --config=tests/config/jest.config.js",
+    "test:config:debug": "node --inspect-brk ./node_modules/jest/bin/jest --config=tests/config/jest.config.js --runInBand --no-cache --watch",
+    "test:inject": "jest --config=tests/inject/jest.config.js",
+    "test:inject:debug": "node --inspect-brk ./node_modules/jest/bin/jest --config=tests/inject/jest.config.js --runInBand --no-cache --watch",
+    "test:utils": "jest --config=tests/utils/jest.config.js",
+    "test:utils:debug": "node --inspect-brk ./node_modules/jest/bin/jest --config=tests/utils/jest.config.js --runInBand --no-cache --watch"
   },
   "main": "darkreader.js",
   "repository": {
@@ -28,34 +33,32 @@
     "type": "opencollective",
     "url": "https://opencollective.com/darkreader"
   },
-  "dependencies": {
-    "malevic": "0.18.3"
-  },
   "devDependencies": {
-    "@rollup/plugin-commonjs": "13.0.0",
-    "@rollup/plugin-node-resolve": "8.0.1",
+    "@rollup/plugin-commonjs": "15.1.0",
+    "@rollup/plugin-node-resolve": "9.0.0",
     "@rollup/plugin-replace": "2.3.3",
-    "@rollup/pluginutils": "3.1.0",
-    "@types/chrome": "0.0.115",
-    "@types/jest": "26.0.0",
-    "@types/node": "14.0.13",
-    "@typescript-eslint/eslint-plugin": "3.2.0",
-    "@typescript-eslint/parser": "3.2.0",
-    "chokidar": "3.4.0",
-    "eslint": "7.2.0",
+    "@rollup/pluginutils": "4.0.0",
+    "@types/chrome": "0.0.124",
+    "@types/jest": "26.0.14",
+    "@types/node": "14.11.8",
+    "@typescript-eslint/eslint-plugin": "4.4.1",
+    "@typescript-eslint/parser": "4.4.1",
+    "chokidar": "3.4.3",
+    "eslint": "7.11.0",
     "eslint-plugin-local": "1.0.0",
     "fs-extra": "9.0.1",
     "globby": "11.0.1",
-    "jest": "26.0.1",
-    "less": "3.11.3",
-    "prettier": "2.0.5",
-    "rollup": "2.16.1",
-    "rollup-plugin-typescript2": "0.27.1",
-    "ts-jest": "26.1.0",
-    "ts-node": "8.10.2",
+    "jest": "26.5.3",
+    "less": "3.12.2",
+    "malevic": "0.18.6",
+    "prettier": "2.1.2",
+    "rollup": "2.30.0",
+    "rollup-plugin-typescript2": "0.27.3",
+    "ts-jest": "26.4.1",
+    "ts-node": "9.0.0",
     "tsconfig-paths": "3.9.0",
-    "typescript": "3.9.5",
-    "ws": "7.3.0",
+    "typescript": "4.0.3",
+    "ws": "7.3.1",
     "yazl": "2.5.1"
   }
 }

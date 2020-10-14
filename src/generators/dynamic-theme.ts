@@ -8,6 +8,7 @@ const dynamicThemeFixesCommands = {
     'INVERT': 'invert',
     'CSS': 'css',
     'IGNORE INLINE STYLE': 'ignoreInlineStyle',
+    'IGNORE IMAGE ANALYSIS': 'ignoreImageAnalysis',
 };
 
 export function parseDynamicThemeFixes(text: string) {
@@ -54,6 +55,7 @@ export function getDynamicThemeFixesFor(url: string, frameURL: string, fixes: Dy
         invert: fixes[0].invert || [],
         css: fixes[0].css || [],
         ignoreInlineStyle: fixes[0].ignoreInlineStyle || [],
+        ignoreImageAnalysis: fixes[0].ignoreImageAnalysis || [],
     };
     if (enabledForPDF) {
         common.invert = common.invert.concat('embed[type="application/pdf"]');
@@ -80,5 +82,6 @@ export function getDynamicThemeFixesFor(url: string, frameURL: string, fixes: Dy
         invert: common.invert.concat(match.invert || []),
         css: [common.css, match.css].filter((s) => s).join('\n'),
         ignoreInlineStyle: common.ignoreInlineStyle.concat(match.ignoreInlineStyle || []),
+        ignoreImageAnalysis: common.ignoreImageAnalysis.concat(match.ignoreImageAnalysis || []),
     };
 }

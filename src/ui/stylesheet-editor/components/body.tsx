@@ -1,6 +1,6 @@
 import {m} from 'malevic';
 import {Button} from '../../controls';
-import {getURLHost, isURLInList} from '../../../utils/url';
+import {getURLHostOrProtocol, isURLInList} from '../../../utils/url';
 import {ExtWrapper, TabInfo} from '../../../definitions';
 
 interface BodyProps extends ExtWrapper {
@@ -9,7 +9,7 @@ interface BodyProps extends ExtWrapper {
 
 export default function Body({data, tab, actions}: BodyProps) {
 
-    const host = getURLHost(tab.url);
+    const host = getURLHostOrProtocol(tab.url);
     const custom = data.settings.customThemes.find(({url}) => isURLInList(tab.url, url));
 
     let textNode: HTMLTextAreaElement;
@@ -59,6 +59,10 @@ export default function Body({data, tab, actions}: BodyProps) {
                 native
                 placeholder={placeholderText}
                 onrender={onTextRender}
+                spellcheck="false"
+                autocorrect="off"
+                autocomplete="off"
+                autocapitalize="off"
             />
             <div id="buttons">
                 <Button onclick={reset}>Reset</Button>

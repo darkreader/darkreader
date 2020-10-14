@@ -72,6 +72,7 @@ export function watchForNodePosition<T extends Node>(
     onRestore = Function.prototype,
 ) {
     const MAX_ATTEMPTS_COUNT = 10;
+    const RETRY_TIMEOUT = getDuration({seconds: 2});
     const ATTEMPTS_INTERVAL = getDuration({seconds: 10});
     const prevSibling = node.previousSibling;
     let parent = node.parentNode;
@@ -83,15 +84,24 @@ export function watchForNodePosition<T extends Node>(
     }
     let attempts = 0;
     let start: number = null;
+    let timeoutId: number = null;
     const restore = throttle(() => {
+        if (timeoutId) {
+            return;
+        }
         attempts++;
         const now = Date.now();
         if (start == null) {
             start = now;
         } else if (attempts >= MAX_ATTEMPTS_COUNT) {
             if (now - start < ATTEMPTS_INTERVAL) {
-                logWarn('Node position watcher stopped: some script conflicts with Dark Reader and can cause high CPU usage', node, prevSibling);
-                stop();
+                logWarn(`Node position watcher paused: retry in ${RETRY_TIMEOUT}ms`, node, prevSibling);
+                timeoutId = setTimeout(() => {
+                    start = null;
+                    attempts = 0;
+                    timeoutId = null;
+                    restore();
+                }, RETRY_TIMEOUT);
                 return;
             }
             start = now;
@@ -135,8 +145,12 @@ export function watchForNodePosition<T extends Node>(
         observer.observe(parent, {childList: true});
     };
     const stop = () => {
+        clearTimeout(timeoutId);
         observer.disconnect();
         restore.cancel();
+    };
+    const skip = () => {
+        observer.takeRecords();
     };
     const updateParent = (parentNode: Node & ParentNode) => {
         parent = parentNode;
@@ -144,10 +158,13 @@ export function watchForNodePosition<T extends Node>(
         run();
     };
     run();
-    return {run, stop};
+    return {run, stop, skip};
 }
 
-export function iterateShadowNodes(root: Node, iterator: (node: Element) => void) {
+export function iterateShadowHosts(root: Node, iterator: (host: Element) => void) {
+    if (root == null) {
+        return;
+    }
     const walker = document.createTreeWalker(
         root,
         NodeFilter.SHOW_ELEMENT,
@@ -156,7 +173,6 @@ export function iterateShadowNodes(root: Node, iterator: (node: Element) => void
                 return (node as Element).shadowRoot == null ? NodeFilter.FILTER_SKIP : NodeFilter.FILTER_ACCEPT;
             }
         },
-        false,
     );
     for (
         let node = ((root as Element).shadowRoot ? walker.currentNode : walker.nextNode()) as Element;
@@ -164,7 +180,7 @@ export function iterateShadowNodes(root: Node, iterator: (node: Element) => void
         node = walker.nextNode() as Element
     ) {
         iterator(node);
-        iterateShadowNodes(node.shadowRoot, iterator);
+        iterateShadowHosts(node.shadowRoot, iterator);
     }
 }
 

@@ -5,9 +5,14 @@ module.exports = {
     rules: {
         'array-bracket-spacing': ['error', 'never'],
         'block-spacing': ['error', 'always'],
+        'comma-spacing': ['error', {
+            before: false,
+            after: true,
+        }],
         'indent': ['error', 4, {
             'SwitchCase': 1,
         }],
+        'jsx-quotes': ['error', 'prefer-double'],
         'keyword-spacing': ['error', {
             after: true,
             before: true,
@@ -23,6 +28,7 @@ module.exports = {
             named: 'never',
         }],
         'space-in-parens': ['error', 'never'],
+        'space-infix-ops': 'error',
         'spaced-comment': ['error', 'always', {exceptions: ['-']}],
         'quotes': ['error', 'single', {
             allowTemplateLiterals: true,
@@ -37,6 +43,7 @@ module.exports = {
         '@typescript-eslint/no-object-literal-type-assertion': 'off',
         '@typescript-eslint/no-use-before-define': 'off',
         '@typescript-eslint/explicit-module-boundary-types': 'off',
+        '@typescript-eslint/no-duplicate-imports': 'error',
     },
     overrides: [
         {

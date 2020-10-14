@@ -38,4 +38,5 @@ export const COLOR_SCHEMES = {
     Dracula: {
         background: '#282b36',
         text: '#e8e6e3',
+    },
 };

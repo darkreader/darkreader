@@ -1,6 +1,6 @@
 import {forEach, push} from '../../utils/array';
 import {isDefinedSelectorSupported} from '../../utils/platform';
-import {iterateShadowNodes, createOptimizedTreeObserver, ElementsTreeOperations} from '../utils/dom';
+import {iterateShadowHosts, createOptimizedTreeObserver, ElementsTreeOperations} from '../utils/dom';
 import {shouldManageStyle, getManageableStyles, StyleElement} from './style-manager';
 
 const observers = [] as {disconnect(): void}[];
@@ -68,7 +68,7 @@ function unsubscribeFromDefineCustomElements() {
     undefinedGroups.clear();
 }
 
-export function watchForStyleChanges(currentStyles: StyleElement[], update: (styles: ChangedStyles) => void) {
+export function watchForStyleChanges(currentStyles: StyleElement[], update: (styles: ChangedStyles) => void, shadowRootDiscovered: (root: ShadowRoot) => void) {
     stopWatchingForStyleChanges();
 
     const prevStyles = new Set<StyleElement>(currentStyles);
@@ -126,7 +126,7 @@ export function watchForStyleChanges(currentStyles: StyleElement[], update: (sty
         handleStyleOperations({createdStyles, removedStyles, movedStyles});
 
         additions.forEach((n) => {
-            iterateShadowNodes(n, subscribeForShadowRootChanges);
+            iterateShadowHosts(n, subscribeForShadowRootChanges);
             collectUndefinedElements(n);
         });
     }
@@ -155,7 +155,7 @@ export function watchForStyleChanges(currentStyles: StyleElement[], update: (sty
 
         handleStyleOperations({createdStyles, removedStyles, movedStyles});
 
-        iterateShadowNodes(root, subscribeForShadowRootChanges);
+        iterateShadowHosts(root, subscribeForShadowRootChanges);
         collectUndefinedElements(root);
     }
 
@@ -182,26 +182,36 @@ export function watchForStyleChanges(currentStyles: StyleElement[], update: (sty
             onHugeMutations: handleHugeTreeMutations,
         });
         const attrObserver = new MutationObserver(handleAttributeMutations);
-        attrObserver.observe(root, {attributes: true, attributeFilter: ['rel', 'disabled'], subtree: true});
+        attrObserver.observe(root, {attributes: true, attributeFilter: ['rel', 'disabled', 'media'], subtree: true});
         observers.push(treeObserver, attrObserver);
         observedRoots.add(root);
     }
 
     function subscribeForShadowRootChanges(node: Element) {
-        if (node.shadowRoot == null || observedRoots.has(node.shadowRoot)) {
+        const {shadowRoot} = node;
+        if (shadowRoot == null || observedRoots.has(shadowRoot)) {
             return;
         }
-        observe(node.shadowRoot);
+        observe(shadowRoot);
+        shadowRootDiscovered(shadowRoot);
     }
 
     observe(document);
-    iterateShadowNodes(document.documentElement, subscribeForShadowRootChanges);
+    iterateShadowHosts(document.documentElement, subscribeForShadowRootChanges);
 
     watchWhenCustomElementsDefined((hosts) => {
         const newStyles: StyleElement[] = [];
         hosts.forEach((host) => push(newStyles, getManageableStyles(host.shadowRoot)));
         update({created: newStyles, updated: [], removed: [], moved: []});
-        hosts.forEach((h) => subscribeForShadowRootChanges(h));
+        hosts.forEach((host) => {
+            const {shadowRoot} = host;
+            if (shadowRoot == null) {
+                return;
+            }
+            subscribeForShadowRootChanges(host);
+            iterateShadowHosts(shadowRoot, subscribeForShadowRootChanges);
+            collectUndefinedElements(shadowRoot);
+        });
     });
     collectUndefinedElements(document);
 }

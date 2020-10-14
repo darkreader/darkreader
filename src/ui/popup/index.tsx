@@ -7,6 +7,16 @@ import {popupHasBuiltInHorizontalBorders, popupHasBuiltInBorders, fixNotClosingP
 import {ExtensionData, ExtensionActions, TabInfo} from '../../definitions';
 
 function renderBody(data: ExtensionData, tab: TabInfo, actions: ExtensionActions) {
+    if (data.settings.previewNewDesign) {
+        if (!document.documentElement.classList.contains('preview')) {
+            document.documentElement.classList.add('preview');
+        }
+    } else {
+        if (document.documentElement.classList.contains('preview')) {
+            document.documentElement.classList.remove('preview');
+        }
+    }
+
     sync(document.body, (
         <Body data={data} tab={tab} actions={actions} />
     ));
@@ -24,7 +34,7 @@ async function start() {
     connector.subscribeToChanges((data) => renderBody(data, tab, connector));
 }
 
-start();
+addEventListener('load', start);
 
 document.documentElement.classList.toggle('mobile', isMobile());
 document.documentElement.classList.toggle('firefox', isFirefox());

@@ -73,6 +73,36 @@ declare namespace DarkReader {
          * Default 0.
          */
         textStroke: number;
+        /**
+         * Background color to use for dark mode.
+         * Default #181a1b
+         */
+        darkSchemeBackgroundColor: string;
+        /**
+         * Text color to use for dark mode.
+         * Default #e8e6e3
+         */
+        darkSchemeTextColor: string;
+        /**
+         * Background color to use for light mode.
+         * Default #dcdad7
+         */
+        lightSchemeBackgroundColor: string;
+        /**
+         * Text color to use for light mode.
+         * Default #181a1b
+         */
+        lightSchemeTextColor: string;
+        /**
+         * Scrollbar color
+         * Default auto
+         */
+        scrollbarColor: string;
+        /**
+         * Selection color
+         * Default auto
+         */
+        selectionColor: string;
     }
 
     /**
@@ -96,6 +126,16 @@ declare namespace DarkReader {
          * ```
          */
         css: string;
+        /**
+         * List of CSS selectors where it's inline style should not be analyzed
+         * Mostly used for color pickers
+         */
+        ignoreInlineStyle: string[];
+        /**
+         * List of CSS selectors where it's image should not be analyzed
+         * Mostly used for wrongly inverted background-images
+         */
+        ignoreImageAnalysis: string[];
     }
 }
 

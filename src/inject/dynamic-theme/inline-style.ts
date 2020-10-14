@@ -1,5 +1,5 @@
 import {forEach, push} from '../../utils/array';
-import {iterateShadowNodes, createOptimizedTreeObserver} from '../utils/dom';
+import {iterateShadowHosts, createOptimizedTreeObserver} from '../utils/dom';
 import {iterateCSSDeclarations} from './css-rules';
 import {getModifiableCSSDeclaration} from './modify-css';
 import {FilterConfig} from '../../definitions';
@@ -123,8 +123,8 @@ export function watchForInlineStyles(
     shadowRootDiscovered: (root: ShadowRoot) => void,
 ) {
     deepWatchForInlineStyles(document, elementStyleDidChange, shadowRootDiscovered);
-    iterateShadowNodes(document.documentElement, (node) => {
-        deepWatchForInlineStyles(node.shadowRoot, elementStyleDidChange, shadowRootDiscovered);
+    iterateShadowHosts(document.documentElement, (host) => {
+        deepWatchForInlineStyles(host.shadowRoot, elementStyleDidChange, shadowRootDiscovered);
     });
 }
 
@@ -148,7 +148,7 @@ function deepWatchForInlineStyles(
             discoveredNodes.add(el);
             elementStyleDidChange(el);
         });
-        iterateShadowNodes(node, (n) => {
+        iterateShadowHosts(node, (n) => {
             if (discoveredNodes.has(node)) {
                 return;
             }
@@ -204,7 +204,7 @@ function getInlineStyleCacheKey(el: HTMLElement, theme: FilterConfig) {
 }
 
 function shouldIgnoreInlineStyle(element: HTMLElement, selectors: string[]) {
-    for (let i = 0; i < selectors.length; i++) {
+    for (let i = 0, len = selectors.length; i < len; i++) {
         const ingnoredSelector = selectors[i];
         if (element.matches(ingnoredSelector)) {
             return true;
@@ -213,7 +213,7 @@ function shouldIgnoreInlineStyle(element: HTMLElement, selectors: string[]) {
     return false;
 }
 
-export function overrideInlineStyle(element: HTMLElement, theme: FilterConfig, ignoreSelectors: string[]) {
+export function overrideInlineStyle(element: HTMLElement, theme: FilterConfig, ignoreInlineSelectors: string[], ignoreImageSelectors: string[]) {
     const cacheKey = getInlineStyleCacheKey(element, theme);
     if (cacheKey === inlineStyleCache.get(element)) {
         return;
@@ -224,7 +224,7 @@ export function overrideInlineStyle(element: HTMLElement, theme: FilterConfig, i
     function setCustomProp(targetCSSProp: string, modifierCSSProp: string, cssVal: string) {
         const {customProp, dataAttr} = overrides[targetCSSProp];
 
-        const mod = getModifiableCSSDeclaration(modifierCSSProp, cssVal, null, null);
+        const mod = getModifiableCSSDeclaration(modifierCSSProp, cssVal, null, ignoreImageSelectors, null);
         if (!mod) {
             return;
         }
@@ -239,8 +239,8 @@ export function overrideInlineStyle(element: HTMLElement, theme: FilterConfig, i
         unsetProps.delete(targetCSSProp);
     }
 
-    if (ignoreSelectors.length > 0) {
-        if (shouldIgnoreInlineStyle(element, ignoreSelectors)) {
+    if (ignoreInlineSelectors.length > 0) {
+        if (shouldIgnoreInlineStyle(element, ignoreInlineSelectors)) {
             unsetProps.forEach((cssProp) => {
                 const {store, dataAttr} = overrides[cssProp];
                 store.delete(element);

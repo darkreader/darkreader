@@ -1,17 +1,19 @@
-/**
- * Compares if IPV6 addresses are the same.
- * @param firstIP First IP to compare with
- * @param secondIP Second IP to compare with
- */
-export function compareIPV6(firstIP: string, secondIP: string) {
-    firstIP = (firstIP
-        .replace(/^\^/, '') // Remove ^ at start
-        .replace(/\$$/, '') // Remove $ at end
-        .replace(/^.*?\/{2,3}/, '') // Remove scheme
-        .replace(/\?.*$/, '') // Remove query
-        .replace(/\/$/, '') // Remove last slash
-    );
-    const ip = secondIP.toLowerCase();
-    const ip2 = firstIP.toLowerCase();
-    return ip === ip2;
+export function isIPV6(url: string) {
+    const openingBracketIndex = url.indexOf('[');
+    if (openingBracketIndex < 0) {
+        return false;
+    }
+    const queryIndex = url.indexOf('?');
+    if (queryIndex >= 0 && openingBracketIndex > queryIndex) {
+        return false;
+    }
+    return true;
+}
+
+const ipV6HostRegex = /\[.*?\](\:\d+)?/;
+
+export function compareIPV6(firstURL: string, secondURL: string) {
+    const firstHost = firstURL.match(ipV6HostRegex)[0];
+    const secondHost = secondURL.match(ipV6HostRegex)[0];
+    return firstHost === secondHost;
 }

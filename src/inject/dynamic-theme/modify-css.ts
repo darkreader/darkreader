@@ -23,7 +23,7 @@ export interface ModifiableCSSRule {
     declarations: ModifiableCSSDeclaration[];
 }
 
-export function getModifiableCSSDeclaration(property: string, value: string, rule: CSSStyleRule, isCancelled: () => boolean): ModifiableCSSDeclaration {
+export function getModifiableCSSDeclaration(property: string, value: string, rule: CSSStyleRule, ignoreImageSelectors: string[], isCancelled: () => boolean): ModifiableCSSDeclaration {
     const important = Boolean(rule && rule.style && rule.style.getPropertyPriority(property));
     const sourceValue = value;
     if (property.startsWith('--')) {
@@ -38,7 +38,7 @@ export function getModifiableCSSDeclaration(property: string, value: string, rul
             return {property, value: modifier, important, sourceValue};
         }
     } else if (property === 'background-image' || property === 'list-style-image') {
-        const modifier = getBgImageModifier(property, value, rule, isCancelled);
+        const modifier = getBgImageModifier(value, rule, ignoreImageSelectors, isCancelled);
         if (modifier) {
             return {property, value: modifier, important, sourceValue};
         }
@@ -51,51 +51,50 @@ export function getModifiableCSSDeclaration(property: string, value: string, rul
     return null;
 }
 
-export function getModifiedUserAgentStyle(filter: FilterConfig, isIFrame: boolean) {
+export function getModifiedUserAgentStyle(theme: Theme, isIFrame: boolean, styleSystemControls: boolean) {
     const lines: string[] = [];
     if (!isIFrame) {
         lines.push('html {');
-        lines.push(`    background-color: ${modifyBackgroundColor({r: 255, g: 255, b: 255}, filter)} !important;`);
+        lines.push(`    background-color: ${modifyBackgroundColor({r: 255, g: 255, b: 255}, theme)} !important;`);
         lines.push('}');
     }
-    lines.push(`${isIFrame ? '' : 'html, body, '}input, textarea, select, button {`);
-    lines.push(`    background-color: ${modifyBackgroundColor({r: 255, g: 255, b: 255}, filter)};`);
+    lines.push(`${isIFrame ? '' : 'html, body, '}${styleSystemControls ? 'input, textarea, select, button' : ''} {`);
+    lines.push(`    background-color: ${modifyBackgroundColor({r: 255, g: 255, b: 255}, theme)};`);
     lines.push('}');
-    lines.push('html, body, input, textarea, select, button {');
-    lines.push(`    border-color: ${modifyBorderColor({r: 76, g: 76, b: 76}, filter)};`);
-    lines.push(`    color: ${modifyForegroundColor({r: 0, g: 0, b: 0}, filter)};`);
+    lines.push(`html, body, ${styleSystemControls ? 'input, textarea, select, button' : ''} {`);
+    lines.push(`    border-color: ${modifyBorderColor({r: 76, g: 76, b: 76}, theme)};`);
+    lines.push(`    color: ${modifyForegroundColor({r: 0, g: 0, b: 0}, theme)};`);
     lines.push('}');
     lines.push('a {');
-    lines.push(`    color: ${modifyForegroundColor({r: 0, g: 64, b: 255}, filter)};`);
+    lines.push(`    color: ${modifyForegroundColor({r: 0, g: 64, b: 255}, theme)};`);
     lines.push('}');
     lines.push('table {');
-    lines.push(`    border-color: ${modifyBorderColor({r: 128, g: 128, b: 128}, filter)};`);
+    lines.push(`    border-color: ${modifyBorderColor({r: 128, g: 128, b: 128}, theme)};`);
     lines.push('}');
     lines.push('::placeholder {');
-    lines.push(`    color: ${modifyForegroundColor({r: 169, g: 169, b: 169}, filter)};`);
+    lines.push(`    color: ${modifyForegroundColor({r: 169, g: 169, b: 169}, theme)};`);
     lines.push('}');
     lines.push('input:-webkit-autofill,');
     lines.push('textarea:-webkit-autofill,');
     lines.push('select:-webkit-autofill {');
-    lines.push(`    background-color: ${modifyBackgroundColor({r: 250, g: 255, b: 189}, filter)} !important;`);
-    lines.push(`    color: ${modifyForegroundColor({r: 0, g: 0, b: 0}, filter)} !important;`);
+    lines.push(`    background-color: ${modifyBackgroundColor({r: 250, g: 255, b: 189}, theme)} !important;`);
+    lines.push(`    color: ${modifyForegroundColor({r: 0, g: 0, b: 0}, theme)} !important;`);
     lines.push('}');
-    if (filter.scrollbarColor) {
-        lines.push(getModifiedScrollbarStyle(filter));
+    if (theme.scrollbarColor) {
+        lines.push(getModifiedScrollbarStyle(theme));
     }
-    if (filter.selectionColor) {
-        lines.push(getModifiedSelectionStyle(filter));
+    if (theme.selectionColor) {
+        lines.push(getModifiedSelectionStyle(theme));
     }
     return lines.join('\n');
 }
 
-function getModifiedSelectionStyle(theme: Theme) {
-    const lines: string[] = [];
+export function getSelectionColor(theme: Theme) {
     let backgroundColorSelection: string;
     let foregroundColorSelection: string;
     if (theme.selectionColor === 'auto') {
-        backgroundColorSelection = modifyBackgroundColor({r: 0, g: 96, b: 212}, theme);
-        foregroundColorSelection = modifyForegroundColor({r: 255, g: 255, b: 255}, theme);
+        backgroundColorSelection = modifyBackgroundColor({r: 0, g: 96, b: 212}, {...theme, grayscale: 0});
+        foregroundColorSelection = modifyForegroundColor({r: 255, g: 255, b: 255}, {...theme, grayscale: 0});
     } else {
         const rgb = parse(theme.selectionColor);
         const hsl = rgbToHSL(rgb);
@@ -106,6 +105,14 @@ function getModifiedSelectionStyle(theme: Theme) {
             foregroundColorSelection = '#000';
         }
     }
+    return {backgroundColorSelection, foregroundColorSelection};
+}
+
+function getModifiedSelectionStyle(theme: Theme) {
+    const lines: string[] = [];
+    const modifiedSelectionColor = getSelectionColor(theme);
+    const backgroundColorSelection = modifiedSelectionColor.backgroundColorSelection;
+    const foregroundColorSelection = modifiedSelectionColor.foregroundColorSelection;
     ['::selection', '::-moz-selection'].forEach((selection) => {
         lines.push(`${selection} {`);
         lines.push(`    background-color: ${backgroundColorSelection} !important;`);
@@ -227,7 +234,24 @@ const gradientRegex = /[\-a-z]+gradient\(([^\(\)]*(\(([^\(\)]*(\(.*?\)))*[^\(\)]
 const imageDetailsCache = new Map<string, ImageDetails>();
 const awaitingForImageLoading = new Map<string, ((imageDetails: ImageDetails) => void)[]>();
 
-function getBgImageModifier(prop: string, value: string, rule: CSSStyleRule, isCancelled: () => boolean): string | CSSValueModifier {
+function shouldIgnoreImage(rule: CSSStyleRule, selectors: string[]) {
+    if (!rule || selectors.length === 0) {
+        return false;
+    }
+    if (selectors.some((s) => s === '*')) {
+        return true;
+    }
+    const ruleSelectors = rule.selectorText.split(/,\s*/g);
+    for (let i = 0; i < selectors.length; i++) {
+        const ignoredSelector = selectors[i];
+        if (ruleSelectors.some((s) => s === ignoredSelector)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+function getBgImageModifier(value: string, rule: CSSStyleRule, ignoreImageSelectors: string[], isCancelled: () => boolean): string | CSSValueModifier {
     try {
         const gradients = getMatches(gradientRegex, value);
         const urls = getMatches(cssURLRegex, value);
@@ -305,6 +329,9 @@ function getBgImageModifier(prop: string, value: string, rule: CSSStyleRule, isC
                     imageDetails = imageDetailsCache.get(url);
                 } else {
                     try {
+                        if (shouldIgnoreImage(rule, ignoreImageSelectors)) {
+                            return null;
+                        }
                         if (awaitingForImageLoading.has(url)) {
                             const awaiters = awaitingForImageLoading.get(url);
                             imageDetails = await new Promise<ImageDetails>((resolve) => awaiters.push(resolve));

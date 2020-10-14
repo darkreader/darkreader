@@ -28,6 +28,7 @@ function getTempCSSStyleSheet(): {sheet: CSSStyleSheet; remove: () => void} {
     style.classList.add('darkreader');
     style.classList.add('darkreader--temp');
     style.media = 'screen';
+    style.textContent = '';
     (document.head || document).append(style);
     return {sheet: style.sheet, remove: () => style.remove()};
 }
@@ -44,6 +45,7 @@ export function createStyleSheetModifier() {
         sourceCSSRules: CSSRuleList;
         theme: Theme;
         variables: Map<string, string>;
+        ignoreImageAnalysis: string[]
         force: boolean;
         prepareSheet: () => CSSStyleSheet;
         isAsyncCancelled: () => boolean;
@@ -51,7 +53,7 @@ export function createStyleSheetModifier() {
 
     function modifySheet(options: ModifySheetOptions): void {
         const rules = options.sourceCSSRules;
-        const {theme, variables, force, prepareSheet, isAsyncCancelled} = options;
+        const {theme, variables, ignoreImageAnalysis, force, prepareSheet, isAsyncCancelled} = options;
 
         let rulesChanged = (rulesModCache.size === 0);
         const notFoundCacheKeys = new Set(rulesModCache.keys());
@@ -94,7 +96,7 @@ export function createStyleSheetModifier() {
             const modDecs: ModifiableCSSDeclaration[] = [];
             const targetRule = varsRule || rule;
             targetRule && targetRule.style && iterateCSSDeclarations(targetRule.style, (property, value) => {
-                const mod = getModifiableCSSDeclaration(property, value, rule, isAsyncCancelled);
+                const mod = getModifiableCSSDeclaration(property, value, rule, ignoreImageAnalysis, isAsyncCancelled);
                 if (mod) {
                     modDecs.push(mod);
                 }
@@ -162,22 +164,28 @@ export function createStyleSheetModifier() {
         let asyncDeclarationCounter = 0;
 
         const rootReadyGroup: ReadyGroup = {rule: null, rules: [], isGroup: true};
-        const parentGroupRefs = new WeakMap<CSSRule, ReadyGroup>();
+        const groupRefs = new WeakMap<CSSRule, ReadyGroup>();
 
-        modRules.filter((r) => r).forEach(({selector, declarations, parentRule}) => {
-            let group: ReadyGroup;
-            if (parentRule == null) {
-                group = rootReadyGroup;
-            } else if (parentGroupRefs.has(parentRule)) {
-                group = parentGroupRefs.get(parentRule);
-            } else {
-                group = {rule: parentRule, rules: [], isGroup: true};
-                parentGroupRefs.set(parentRule, group);
-                const grandParent = (parentRule as CSSRule).parentRule;
-                const parentGroup = grandParent ? parentGroupRefs.get(grandParent) : rootReadyGroup;
-                parentGroup.rules.push(group);
+        function getGroup(rule: CSSRule): ReadyGroup {
+            if (rule == null) {
+                return rootReadyGroup;
             }
 
+            if (groupRefs.has(rule)) {
+                return groupRefs.get(rule);
+            }
+
+            const group: ReadyGroup = {rule, rules: [], isGroup: true};
+            groupRefs.set(rule, group);
+
+            const parentGroup = getGroup(rule.parentRule);
+            parentGroup.rules.push(group);
+
+            return group;
+        }
+
+        modRules.filter((r) => r).forEach(({selector, declarations, parentRule}) => {
+            const group = getGroup(parentRule);
             const readyStyleRule: ReadyStyleRule = {selector, declarations: [], isGroup: false};
             const readyDeclarations = readyStyleRule.declarations;
             group.rules.push(readyStyleRule);

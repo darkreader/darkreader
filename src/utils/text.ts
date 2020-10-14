@@ -60,3 +60,47 @@ export function getMatches(regex: RegExp, input: string, group = 0) {
 export function getStringSize(value: string) {
     return value.length * 2;
 }
+
+export function formatCSS(text: string) {
+
+    function trimLeft(text: string) {
+        return text.replace(/^\s+/, '');
+    }
+
+    function getIndent(depth: number) {
+        if (depth === 0) {
+            return '';
+        }
+        return ' '.repeat(4 * depth);
+    }
+
+    const emptyRuleRegexp = /[^{}]+{\s*}/g;
+    while (emptyRuleRegexp.test(text)) {
+        text = text.replace(emptyRuleRegexp, '');
+    }
+
+    const css = (text
+        .replace(/\s{2,}/g, ' ') // Replacing multiple spaces to one
+        .replace(/\{/g, '{\n') // {
+        .replace(/\}/g, '\n}\n') // }
+        .replace(/\;(?![^(\(|\")]*(\)|\"))/g, ';\n') // ; and do not target between () and ""
+        .replace(/\,(?![^(\(|\")]*(\)|\"))/g, ',\n') // , and do not target between () and ""
+        .replace(/\n\s*\n/g, '\n') // Remove \n Without any characters between it to the next \n
+        .split('\n'));
+
+    let depth = 0;
+    const formatted = [];
+
+    for (let x = 0, len = css.length; x < len; x++) {
+        const line = css[x] + '\n';
+        if (line.match(/\{/)) { // {
+            formatted.push(getIndent(depth++) + trimLeft(line));
+        } else if (line.match(/\}/)) { // }
+            formatted.push(getIndent(--depth) + trimLeft(line));
+        } else { // CSS line
+            formatted.push(getIndent(depth) + trimLeft(line));
+        }
+    }
+
+    return formatted.join('').trim();
+}

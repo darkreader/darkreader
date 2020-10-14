@@ -1,8 +1,8 @@
 import {m} from 'malevic';
-import {DEFAULT_SETTINGS} from '../../../../defaults';
+import {DEFAULT_SETTINGS, DEFAULT_THEME, DEFAULT_COLORS} from '../../../../defaults';
 import {Theme} from '../../../../definitions';
 import {ViewProps} from '../../types';
-import {BackgroundColor, Brightness, Contrast, Grayscale, Mode, ResetButton, Scheme, Scrollbar, SelectionColorEditor, Sepia, TextColor} from '../controls';
+import {BackgroundColor, Brightness, Contrast, FontPicker, Grayscale, Mode, ResetButton, Scheme, Scrollbar, SelectionColorEditor, Sepia, TextColor, TextStroke, UseFont, StyleSystemControls} from '../controls';
 import ThemePresetPicker from '../preset-picker';
 import {getCurrentThemePreset} from '../utils';
 import Collapsible from './collapsible-panel';
@@ -47,12 +47,13 @@ function MainGroup({theme, change}: ThemeGroupProps) {
 
 function ColorsGroup({theme, change}: ThemeGroupProps) {
     const isDarkScheme = theme.mode === 1;
+    const csProp: keyof Theme = isDarkScheme ? 'darkColorScheme' : 'lightColorScheme';
     const bgProp: keyof Theme = isDarkScheme ? 'darkSchemeBackgroundColor' : 'lightSchemeBackgroundColor';
     const fgProp: keyof Theme = isDarkScheme ? 'darkSchemeTextColor' : 'lightSchemeTextColor';
-    const csProp: keyof Theme = isDarkScheme ? 'darkColorScheme' : 'lightColorScheme';
-    const defaultSchemeColors = isDarkScheme ? COLOR_SCHEMES.Normal_Dark: COLOR_SCHEMES.Normal_Light;
-    const colorSchemeValues: string[] = (isDarkScheme ? DARK_COLOR_SCHEME : LIGHT_COLOR_SCHEME).sort((a, b) => a.localeCompare(b)) ;
+    const defaultSchemeColors = isDarkScheme ? DEFAULT_COLORS.darkScheme : DEFAULT_COLORS.lightScheme;
+    const defaultMatrixValues: Partial<Theme> = {brightness: DEFAULT_THEME.brightness, contrast: DEFAULT_THEME.contrast, sepia: DEFAULT_THEME.sepia, grayscale: DEFAULT_THEME.grayscale};
     const currentColorScheme = isDarkScheme ? theme.darkColorScheme : theme.lightColorScheme;
+    const colorSchemeValues: string[] = (isDarkScheme ? DARK_COLOR_SCHEME : LIGHT_COLOR_SCHEME).sort((a, b) => a.localeCompare(b)) ;
 
     function onColorSchemeChange(newColor: string) {
         change({[csProp]: newColor});
@@ -63,15 +64,15 @@ function ColorsGroup({theme, change}: ThemeGroupProps) {
     return (
         <Array>
             <BackgroundColor
-                value={theme[bgProp]}
-                defaultColor={defaultSchemeColors.background}
-                onChange={(v) => change({[bgProp]: v})}
+                value={theme[bgProp] === 'auto' ? defaultSchemeColors.background : theme[bgProp]}
+                onChange={(v) => change({[bgProp]: v, ...defaultMatrixValues})}
+                canReset={theme[bgProp] !== defaultSchemeColors.background}
                 onReset={() => change({[bgProp]: DEFAULT_SETTINGS.theme[bgProp]})}
             />
             <TextColor
-                value={theme[fgProp]}
-                defaultColor={defaultSchemeColors.text}
-                onChange={(v) => change({[fgProp]: v})}
+                value={theme[fgProp] === 'auto' ? defaultSchemeColors.text : theme[fgProp]}
+                onChange={(v) => change({[fgProp]: v, ...defaultMatrixValues})}
+                canReset={theme[fgProp] !== defaultSchemeColors.text}
                 onReset={() => change({[fgProp]: DEFAULT_SETTINGS.theme[fgProp]})}
             />
             <Scrollbar
@@ -93,6 +94,34 @@ function ColorsGroup({theme, change}: ThemeGroupProps) {
     );
 }
 
+interface FontGroupsProps extends ThemeGroupProps {
+    fonts: string[];
+}
+
+function FontGroup({theme, fonts, change}: FontGroupsProps) {
+    return (
+        <Array>
+            <UseFont
+                value={theme.useFont}
+                onChange={(useFont) => change({useFont})}
+            />
+            <FontPicker
+                theme={theme}
+                fonts={fonts}
+                onChange={(fontFamily) => change({fontFamily})}
+            />
+            <TextStroke
+                value={theme.textStroke}
+                onChange={(textStroke) => change({textStroke})}
+            />
+            <StyleSystemControls
+                value={theme.styleSystemControls}
+                onChange={(styleSystemControls) => change({styleSystemControls})}
+            />
+        </Array>
+    );
+}
+
 export default function ThemePage(props: ViewProps) {
     const {theme, change} = getCurrentThemePreset(props);
 
@@ -105,6 +134,9 @@ export default function ThemePage(props: ViewProps) {
                 </Collapsible.Group>
                 <Collapsible.Group id="colors" label="Colors">
                     <ColorsGroup theme={theme} change={change} />
+                </Collapsible.Group>
+                <Collapsible.Group id="font" label="Font & more">
+                    <FontGroup theme={theme} fonts={props.data.fonts} change={change} />
                 </Collapsible.Group>
             </Collapsible>
             <ResetButton {...props} />

@@ -13,10 +13,16 @@ module.exports.rules = {
         create(context) {
             return {
                 JSXOpeningElement(node) {
-                    const variable = node.name.name;
-                    if (variable) {
-                        context.markVariableAsUsed(variable);
+                    let variable;
+                    const jsxTag = node.name;
+                    if (jsxTag.type === 'JSXIdentifier') {
+                        variable = jsxTag.name;
+                    } else if (jsxTag.type === 'JSXMemberExpression') {
+                        variable = jsxTag.object.name;
+                    } else {
+                        console.warn('Unsupported JSX identifier', jsxTag);
                     }
+                    context.markVariableAsUsed(variable);
                 },
             };
         },

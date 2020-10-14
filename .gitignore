@@ -10,9 +10,9 @@ darkreader.js
 
 # Node.js modules
 #-----------------------------------
-node_modules
+node_modules/
 
 # IDE and editor configs
 #-----------------------------------
-.idea
-.vscode
+.idea/
+.vscode/

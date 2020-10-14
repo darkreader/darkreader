@@ -304,7 +304,7 @@ export class Extension {
     }
 
     toggleURL(url: string) {
-        const isInDarkList = isURLInList(url, this.config.DARK_SITES);
+        const isInDarkList = isURLInList(url, this.config.DARK_SITES) && !this.user.settings.applyToListedOnly;
         const siteList = isInDarkList ?
             this.user.settings.siteListEnabled.slice() :
             this.user.settings.siteList.slice();

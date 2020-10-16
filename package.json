@@ -12,7 +12,7 @@
     "release": "npm test && node tasks/build.js --release",
     "test": "jest --config=tests/jest.config.js",
     "test:coverage": "jest --config=tests/jest.config.js --coverage",
-    "test:browser": "npm run debug && jest --config=tests/browser/jest.config.chrome.js --runInBand && jest --config=tests/browser/jest.config.firefox.js --runInBand",
+    "test:browser": "npm run debug && jest --config=tests/browser/jest.config.js --runInBand",
     "test:config": "jest --config=tests/config/jest.config.js",
     "test:config:debug": "node --inspect-brk ./node_modules/jest/bin/jest --config=tests/config/jest.config.js --runInBand --no-cache --watch",
     "test:inject": "jest --config=tests/inject/jest.config.js",

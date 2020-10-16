@@ -1,4 +1,4 @@
-const jestConfig = require('./jest.config');
+const jestConfig = require('./jest.config.shared');
 
 module.exports = {
     ...jestConfig,

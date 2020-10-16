@@ -59,12 +59,15 @@ class PuppeteerEnvironment extends JestNodeEnvironment {
         this.page = page;
         this.global.page = page;
 
+        // TODO: Find a way to wait for the extension to start
+        await new Promise((promise) => setTimeout(promise, 1000));
+
         const loadTestPage = async (paths) => {
             server.setPaths(paths);
             await page.bringToFront();
             await page.goto(`http://localhost:${TEST_SERVER_PORT}`);
             // TODO: Determine why sometimes tests are executed before content script
-            await page.evaluate(() => new Promise((resolve) => setTimeout(resolve, 100)));
+            await page.evaluate(() => new Promise((resolve) => setTimeout(resolve, 1000)));
         };
         this.global.loadTestPage = loadTestPage;
     }

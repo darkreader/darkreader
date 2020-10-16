@@ -148,7 +148,7 @@ export function createStyleSheetModifier() {
         function setRule(target: CSSStyleSheet | CSSGroupingRule, index: number, rule: ReadyStyleRule) {
             const {selector, declarations} = rule;
             target.insertRule(`${selector} {}`, index);
-            const style = (target.cssRules.item(index) as CSSStyleRule).style;
+            const style = (target.cssRules[index] as CSSStyleRule).style;
             declarations.forEach(({property, value, important, sourceValue}) => {
                 style.setProperty(property, value == null ? sourceValue : value, important ? 'important' : '');
             });

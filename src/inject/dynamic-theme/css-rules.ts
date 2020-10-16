@@ -1,5 +1,5 @@
 import {forEach} from '../../utils/array';
-import {parseURL, getAbsoluteURL} from './url';
+import {parseURL, getAbsoluteURL} from '../../utils/url';
 import {logWarn} from '../utils/log';
 
 export function iterateCSSRules(rules: CSSRuleList, iterate: (rule: CSSStyleRule) => void) {

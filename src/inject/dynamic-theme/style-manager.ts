@@ -1,13 +1,13 @@
-import {getCSSVariables, replaceCSSRelativeURLsWithAbsolute, removeCSSComments, replaceCSSFontFace, getCSSURLValue, cssImportRegex, getCSSBaseBath} from './css-rules';
-import {bgFetch} from './network';
+import {Theme} from '../../definitions';
+import {forEach} from '../../utils/array';
+import {IS_SHADOW_DOM_SUPPORTED} from '../../utils/platform';
+import {getMatches} from '../../utils/text';
+import {getAbsoluteURL} from '../../utils/url';
 import {watchForNodePosition, removeNode, iterateShadowHosts} from '../utils/dom';
 import {logWarn} from '../utils/log';
-import {forEach} from '../../utils/array';
-import {getMatches} from '../../utils/text';
-import {Theme} from '../../definitions';
+import {getCSSVariables, replaceCSSRelativeURLsWithAbsolute, removeCSSComments, replaceCSSFontFace, getCSSURLValue, cssImportRegex, getCSSBaseBath} from './css-rules';
+import {bgFetch} from './network';
 import {createStyleSheetModifier} from './stylesheet-modifier';
-import {getAbsoluteURL} from './url';
-import {IS_SHADOW_DOM_SUPPORTED} from '../../utils/platform';
 
 declare global {
     interface HTMLStyleElement {

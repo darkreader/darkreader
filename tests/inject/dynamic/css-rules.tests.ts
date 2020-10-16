@@ -1,4 +1,4 @@
-import {replaceCSSVariables} from '../../src/inject/dynamic-theme/css-rules';
+import {replaceCSSVariables} from '../../../src/inject/dynamic-theme/css-rules';
 
 test('Replace CSS variables', () => {
     expect(

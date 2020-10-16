@@ -7,7 +7,6 @@ const theme = {
     darkSchemeBackgroundColor: 'black',
     darkSchemeTextColor: 'white',
 };
-theme.darkSchemeTextColor
 let container: HTMLElement;
 
 beforeEach(() => {

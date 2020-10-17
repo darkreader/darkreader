@@ -1,27 +1,28 @@
-import {getChromeVersion, compareChromeVersions, isWindows, isMacOS, isVivaldi, isOpera, isYaBrowser, isEdge} from '../../../utils/platform';
+import {platformData, compareChromeVersions} from '../../../utils/platform';
+
 
 export function popupHasBuiltInBorders() {
-    const chromeVersion = getChromeVersion();
+    const chromeVersion = platformData.chromiumVersion;
     return Boolean(
         chromeVersion &&
-        !isVivaldi() &&
-        !isYaBrowser() &&
-        !isOpera() &&
-        isWindows() &&
+        !platformData.isVivaldi &&
+        !platformData.isYaBrowser &&
+        !platformData.isOpera &&
+        platformData.isWindows &&
         compareChromeVersions(chromeVersion, '62.0.3167.0') < 0
     );
 }
 
 export function popupHasBuiltInHorizontalBorders() {
-    const chromeVersion = getChromeVersion();
+    const chromeVersion = platformData.chromiumVersion;
     return Boolean(
         chromeVersion &&
-        !isVivaldi() &&
-        !isYaBrowser() &&
-        !isEdge() &&
-        !isOpera() && (
-            (isWindows() && compareChromeVersions(chromeVersion, '62.0.3167.0') >= 0) && compareChromeVersions(chromeVersion, '74.0.0.0') < 0 ||
-            (isMacOS() && compareChromeVersions(chromeVersion, '67.0.3373.0') >= 0 && compareChromeVersions(chromeVersion, '73.0.3661.0') < 0)
+        !platformData.isVivaldi &&
+        !platformData.isYaBrowser &&
+        !platformData.isEdge &&
+        !platformData.isOpera && (
+            (platformData.isWindows && compareChromeVersions(chromeVersion, '62.0.3167.0') >= 0) && compareChromeVersions(chromeVersion, '74.0.0.0') < 0 ||
+            (platformData.isMacOS && compareChromeVersions(chromeVersion, '67.0.3373.0') >= 0 && compareChromeVersions(chromeVersion, '73.0.3661.0') < 0)
         )
     );
 }

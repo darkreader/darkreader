@@ -4,6 +4,9 @@ import {DEFAULT_THEME} from '../defaults';
 import {Theme, DynamicThemeFix} from '../definitions';
 import ThemeEngines from '../generators/theme-engines';
 import {createOrUpdateDynamicTheme, removeDynamicTheme} from '../inject/dynamic-theme';
+import {runPlatformTest} from '../utils/platform';
+
+runPlatformTest();
 
 const isIFrame = (() => {
     try {

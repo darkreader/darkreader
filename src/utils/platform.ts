@@ -1,56 +1,38 @@
-export function isChromiumBased() {
-    return navigator.userAgent.toLowerCase().includes('chrome') || navigator.userAgent.toLowerCase().includes('chromium');
-}
+import {PlatformData} from '../definitions';
 
-export function isFirefox() {
-    return navigator.userAgent.includes('Firefox');
-}
+export const platformData: PlatformData = {} as any;
 
-export function isVivaldi() {
-    return navigator.userAgent.toLowerCase().includes('vivaldi');
-}
-
-export function isYaBrowser() {
-    return navigator.userAgent.toLowerCase().includes('yabrowser');
-}
-
-export function isOpera() {
-    const agent = navigator.userAgent.toLowerCase();
-    return agent.includes('opr') || agent.includes('opera');
-}
-
-export function isEdge() {
-    return navigator.userAgent.includes('Edg');
-}
-
-export function isWindows() {
-    if (typeof navigator === 'undefined') {
-        return null;
-    }
-    return navigator.platform.toLowerCase().startsWith('win');
-}
-
-export function isMacOS() {
-    if (typeof navigator === 'undefined') {
-        return null;
-    }
-    return navigator.platform.toLowerCase().startsWith('mac');
-}
-
-export function isMobile() {
-    if (typeof navigator === 'undefined') {
-        return null;
-    }
-    return navigator.userAgent.toLowerCase().includes('mobile');
-}
-
-export function getChromeVersion() {
-    const agent = navigator.userAgent.toLowerCase();
-    const m = agent.match(/chrom[e|ium]\/([^ ]+)/);
+export function runPlatformTest() {
+    const userAgent = navigator.userAgent.toLowerCase();
+    const platform = navigator.platform.toLowerCase();
+    platformData.isChromium = userAgent.includes('chrome') || userAgent.includes('chromium');
+    platformData.isFirefox = userAgent.includes('firefox');
+    platformData.isVivaldi = userAgent.includes('vivaldi');
+    platformData.isYaBrowser = userAgent.includes('yabrowser');
+    platformData.isOpera = userAgent.includes('opr') || userAgent.includes('opera');
+    platformData.isEdge = userAgent.includes('edg');
+    platformData.isWindows = platform.startsWith('win');
+    platformData.isMacOS = platform.startsWith('mac');
+    platformData.isMobile = userAgent.includes('mobile');
+    const m = userAgent.match(/chrom[e|ium]\/([^ ]+)/);
     if (m && m[1]) {
-        return m[1];
+        platformData.chromiumVersion = m[1];
+    } else {
+        platformData.chromiumVersion = '';
     }
-    return null;
+    try {
+        document.querySelector(':defined');
+        platformData.isDefinedSelectorSupported = true;
+    } catch (err) {
+        platformData.isDefinedSelectorSupported = false;
+    }
+    platformData.isShadowDomSupported = typeof ShadowRoot === 'function';
+    try {
+        new CSSStyleSheet();
+        platformData.isCSSStyleSheetConstructorSupported = true;
+    } catch (err) {
+        platformData.isCSSStyleSheetConstructorSupported = false;
+    }
 }
 
 export function compareChromeVersions($a: string, $b: string) {
@@ -64,22 +46,3 @@ export function compareChromeVersions($a: string, $b: string) {
     return 0;
 }
 
-export function isDefinedSelectorSupported() {
-    try {
-        document.querySelector(':defined');
-        return true;
-    } catch (err) {
-        return false;
-    }
-}
-
-export const IS_SHADOW_DOM_SUPPORTED = typeof ShadowRoot === 'function';
-
-export function isCSSStyleSheetConstructorSupported() {
-    try {
-        new CSSStyleSheet();
-        return true;
-    } catch (err) {
-        return false;
-    }
-}

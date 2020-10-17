@@ -2,7 +2,7 @@ import {m} from 'malevic';
 import {MultiSwitch} from '../../../controls';
 import ThemeEngines from '../../../../generators/theme-engines';
 import {getLocalMessage} from '../../../../utils/locales';
-import {isFirefox} from '../../../../utils/platform';
+import {platformData} from '../../../../utils/platform';
 
 const engineNames = [
     [ThemeEngines.cssFilter, getLocalMessage('engine_filter')],
@@ -19,7 +19,7 @@ interface EngineSwitchProps {
 function openCSSEditor() {
     chrome.windows.create({
         type: 'panel',
-        url: isFirefox() ? '../stylesheet-editor/index.html' : 'ui/stylesheet-editor/index.html',
+        url: platformData.isFirefox ? '../stylesheet-editor/index.html' : 'ui/stylesheet-editor/index.html',
         width: 600,
         height: 600,
     });

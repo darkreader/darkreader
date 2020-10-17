@@ -3,11 +3,11 @@ import CustomSettingsToggle from '../custom-settings-toggle';
 import EngineSwitch from '../engine-switch';
 import FontSettings from '../font-settings';
 import {Toggle} from '../../../controls';
-import {isFirefox} from '../../../../utils/platform';
 import {isURLInList} from '../../../../utils/url';
 import {compileMarkdown} from '../../utils/markdown';
 import {getLocalMessage} from '../../../../utils/locales';
 import {ExtWrapper, FilterConfig, TabInfo} from '../../../../definitions';
+import {platformData} from '../../../../utils/platform';
 
 export default function MoreSettings({data, actions, tab}: ExtWrapper & {tab: TabInfo}) {
 
@@ -29,7 +29,7 @@ export default function MoreSettings({data, actions, tab}: ExtWrapper & {tab: Ta
                 <FontSettings config={filterConfig} fonts={data.fonts} onChange={setConfig} />
             </div>
             <div class="more-settings__section">
-                {isFirefox() ? null : <p class="more-settings__description">
+                {platformData.isFirefox ? null : <p class="more-settings__description">
                     {compileMarkdown(getLocalMessage('try_experimental_theme_engines'))}
                 </p>}
                 <EngineSwitch engine={filterConfig.engine} onChange={(engine) => setConfig({engine})} />
@@ -50,7 +50,7 @@ export default function MoreSettings({data, actions, tab}: ExtWrapper & {tab: Ta
                     </p>
                 )}
             </div>
-            {isFirefox() ? (
+            {platformData.isFirefox ? (
                 <div class="more-settings__section">
                     <Toggle
                         checked={data.settings.changeBrowserTheme}

@@ -9,13 +9,13 @@ import {removeNode, watchForNodePosition, iterateShadowHosts, isDOMReady, addDOM
 import {logWarn} from '../utils/log';
 import {throttle} from '../utils/throttle';
 import {clamp} from '../../utils/math';
-import {isFirefox} from '../../utils/platform';
 import {getCSSFilterValue} from '../../generators/css-filter';
 import {modifyColor} from '../../generators/modify-colors';
 import {createTextStyle} from '../../generators/text-style';
 import {FilterConfig, DynamicThemeFix} from '../../definitions';
 import {generateUID} from '../../utils/uid';
 import {createAdoptedStyleSheetOverride, AdoptedStyleSheetManager} from './adopted-style-manger';
+import {platformData} from '../../utils/platform';
 
 const variables = new Map<string, string>();
 const INSTANCE_ID = generateUID();
@@ -402,7 +402,7 @@ export function createOrUpdateDynamicTheme(filterConfig: FilterConfig, dynamicTh
         }
         createThemeAndWatchForUpdates();
     } else {
-        if (!isFirefox()) {
+        if (!platformData.isFirefox) {
             const fallbackStyle = createOrUpdateStyle('darkreader--fallback');
             document.documentElement.appendChild(fallbackStyle);
             fallbackStyle.textContent = getModifiedFallbackStyle(filter, {strict: true});

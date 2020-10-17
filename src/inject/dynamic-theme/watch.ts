@@ -1,7 +1,7 @@
 import {forEach, push} from '../../utils/array';
-import {isDefinedSelectorSupported} from '../../utils/platform';
 import {iterateShadowHosts, createOptimizedTreeObserver, ElementsTreeOperations} from '../utils/dom';
 import {shouldManageStyle, getManageableStyles, StyleElement} from './style-manager';
+import {platformData} from '../../utils/platform';
 
 const observers = [] as {disconnect(): void}[];
 let observedRoots: WeakSet<Node>;
@@ -17,7 +17,7 @@ const undefinedGroups = new Map<string, Set<Element>>();
 let elementsDefinitionCallback: (elements: Element[]) => void;
 
 function collectUndefinedElements(root: ParentNode) {
-    if (!isDefinedSelectorSupported()) {
+    if (!platformData.isDefinedSelectorSupported) {
         return;
     }
     forEach(root.querySelectorAll(':not(:defined)'),

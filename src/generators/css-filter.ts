@@ -5,7 +5,7 @@ import {parseArray, formatArray} from '../utils/text';
 import {compareURLPatterns, isURLInList} from '../utils/url';
 import {createTextStyle} from './text-style';
 import {FilterConfig, InversionFix} from '../definitions';
-import {compareChromeVersions, getChromeVersion, isChromiumBased} from '../utils/platform';
+import {compareChromeVersions, platformData} from '../utils/platform';
 
 export enum FilterMode {
     light = 0,
@@ -20,9 +20,9 @@ export enum FilterMode {
  * Patch: https://chromium-review.googlesource.com/c/chromium/src/+/1979258
  */
 export function hasChromiumIssue501582() {
-    const chromeVersion = getChromeVersion();
+    const chromeVersion = platformData.chromiumVersion;
     return Boolean(
-        isChromiumBased() &&
+        platformData.isChromium &&
         compareChromeVersions(chromeVersion, '81.0.4035.0') >= 0
     );
 }

@@ -3,9 +3,9 @@ import {withState, useState} from 'malevic/state';
 import {Button} from '../../controls';
 import ThemeEngines from '../../../generators/theme-engines';
 import {DEVTOOLS_DOCS_URL} from '../../../utils/links';
-import {isFirefox} from '../../../utils/platform';
 import {ExtWrapper, TabInfo} from '../../../definitions';
 import {getCurrentThemePreset} from '../../popup/theme/utils';
+import {platformData} from '../../../utils/platform';
 
 type BodyProps = ExtWrapper & {tab: TabInfo};
 
@@ -42,7 +42,7 @@ function Body({data, tab, actions}: BodyProps) {
             if (e.key === 'Tab') {
                 e.preventDefault();
                 const indent = ' '.repeat(4);
-                if (isFirefox()) {
+                if (platformData.isFirefox) {
                     // https://bugzilla.mozilla.org/show_bug.cgi?id=1220696
                     const start = node.selectionStart;
                     const end = node.selectionEnd;

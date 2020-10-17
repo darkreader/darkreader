@@ -1,4 +1,5 @@
-import {isFirefox} from './platform';
+import {platformData} from './platform';
+
 
 async function getOKResponse(url: string, mimeType?: string) {
     const response = await fetch(
@@ -10,7 +11,7 @@ async function getOKResponse(url: string, mimeType?: string) {
     );
 
     // Firefox bug, content type is "application/x-unknown-content-type"
-    if (isFirefox() && mimeType === 'text/css' && url.startsWith('moz-extension://') && url.endsWith('.css')) {
+    if (platformData.isFirefox && mimeType === 'text/css' && url.startsWith('moz-extension://') && url.endsWith('.css')) {
         return response;
     }
 

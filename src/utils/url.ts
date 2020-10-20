@@ -67,7 +67,7 @@ export function isURLMatched(url: string, urlTemplate: string): boolean {
     const isSecondIPV6 = isIPV6(urlTemplate);
     if (isFirstIPV6 && isSecondIPV6) {
         return compareIPV6(url, urlTemplate);
-    } else if (!isSecondIPV6 && !isSecondIPV6) {
+    } else if (!isFirstIPV6 && !isSecondIPV6) {
         const regex = createUrlRegex(urlTemplate);
         return Boolean(url.match(regex));
     } else {
@@ -93,9 +93,9 @@ function createUrlRegex(urlTemplate: string): RegExp {
     let afterSlash: string;
     if ((slashIndex = urlTemplate.indexOf('/')) >= 0) {
         beforeSlash = urlTemplate.substring(0, slashIndex); // google.*
-        afterSlash = urlTemplate.replace('$', '').substring(slashIndex); // /login/abc
+        afterSlash = urlTemplate.replace(/\$/g, '').substring(slashIndex); // /login/abc
     } else {
-        beforeSlash = urlTemplate.replace('$', '');
+        beforeSlash = urlTemplate.replace(/\$/g, '');
     }
 
     //

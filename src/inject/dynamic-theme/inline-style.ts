@@ -170,9 +170,10 @@ function deepWatchForInlineStyles(
     });
     treeObservers.set(root, treeObserver);
 
-    let attributecount = 0;
+    let attemptCount = 0;
     let start = null;
     const ATTEMPTS_INTERVAL = getDuration({seconds: 10});
+    const RETRY_TIMEOUT = getDuration({seconds: 2});
     const MAX_ATTEMPTS_COUNT = 50;
     let cache: MutationRecord[];
     let timeoutId: number = null;
@@ -192,23 +193,23 @@ function deepWatchForInlineStyles(
             cache.push(...mutations);
             return;
         }
-        attributecount++;
+        attemptCount++;
         const now = Date.now();
         if (start == null) {
             start = now;
-        } else if (attributecount >= MAX_ATTEMPTS_COUNT) {
+        } else if (attemptCount >= MAX_ATTEMPTS_COUNT) {
             if (now - start < ATTEMPTS_INTERVAL) {
                 timeoutId = setTimeout(() => {
                     start = null;
-                    attributecount = 0;
+                    attemptCount = 0;
                     timeoutId = null;
                     handleAttributionMutations(cache);
-                }, 2000);
+                }, RETRY_TIMEOUT);
                 cache.push(...mutations);
                 return;
             }
             start = now;
-            attributecount = 1;
+            attemptCount = 1;
         }
         handleAttributionMutations(mutations);
     });

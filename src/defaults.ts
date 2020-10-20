@@ -1,6 +1,6 @@
 import {Theme, UserSettings} from './definitions';
 import ThemeEngines from './generators/theme-engines';
-import {platformData} from './utils/platform';
+import {isMacOS, isWindows} from './utils/platform';
 
 export const DEFAULT_COLORS = {
     darkScheme: {
@@ -20,7 +20,7 @@ export const DEFAULT_THEME: Theme = {
     grayscale: 0,
     sepia: 0,
     useFont: false,
-    fontFamily: platformData.isMacOS ? 'Helvetica Neue' : platformData.isWindows ? 'Segoe UI' : 'Open Sans',
+    fontFamily: isMacOS ? 'Helvetica Neue' : isWindows ? 'Segoe UI' : 'Open Sans',
     textStroke: 0,
     engine: ThemeEngines.dynamicTheme,
     stylesheet: '',
@@ -28,7 +28,7 @@ export const DEFAULT_THEME: Theme = {
     darkSchemeTextColor: DEFAULT_COLORS.darkScheme.text,
     lightSchemeBackgroundColor: DEFAULT_COLORS.lightScheme.background,
     lightSchemeTextColor: DEFAULT_COLORS.lightScheme.text,
-    scrollbarColor: platformData.isMacOS ? '' : 'auto',
+    scrollbarColor: isMacOS ? '' : 'auto',
     selectionColor: 'auto',
     styleSystemControls: true,
 };

@@ -4,7 +4,6 @@ import {createOrUpdateDynamicTheme, removeDynamicTheme, cleanDynamicThemeCache} 
 import {logInfo, logWarn} from './utils/log';
 import {watchForColorSchemeChange} from './utils/watch-color-scheme';
 import {collectCSS} from './dynamic-theme/css-collection';
-import {runPlatformTest} from '../utils/platform';
 
 function onMessage({type, data}) {
     switch (type) {
@@ -41,8 +40,6 @@ function onMessage({type, data}) {
         }
     }
 }
-
-runPlatformTest();
 
 // TODO: Use background page color scheme watcher when browser bugs fixed.
 const colorSchemeWatcher = watchForColorSchemeChange(({isDark}) => {

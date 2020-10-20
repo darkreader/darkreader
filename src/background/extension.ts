@@ -16,7 +16,7 @@ import createStaticStylesheet from '../generators/static-theme';
 import {createSVGFilterStylesheet, getSVGFilterMatrixValue, getSVGReverseFilterMatrixValue} from '../generators/svg-filter';
 import {ExtensionData, FilterConfig, News, Shortcuts, UserSettings, TabInfo} from '../definitions';
 import {isSystemDarkModeEnabled} from '../utils/media-query';
-import {platformData} from '../utils/platform';
+import {isFirefox} from '../utils/platform';
 
 const AUTO_TIME_CHECK_INTERVAL = getDuration({seconds: 10});
 
@@ -59,7 +59,7 @@ export class Extension {
             const now = new Date();
             return isInTimeInterval(now, this.user.settings.time.activation, this.user.settings.time.deactivation);
         } else if (automation === 'system') {
-            if (platformData.isFirefox) {
+            if (isFirefox) {
                 // BUG: Firefox background page always matches initial color scheme.
                 return this.wasLastColorSchemeDark == null
                     ? isSystemDarkModeEnabled()
@@ -396,7 +396,7 @@ export class Extension {
                     };
                 }
                 case ThemeEngines.svgFilter: {
-                    if (platformData.isFirefox) {
+                    if (isFirefox) {
                         return {
                             type: 'add-css-filter',
                             data: createSVGFilterStylesheet(theme, url, frameURL, this.config.INVERSION_FIXES),

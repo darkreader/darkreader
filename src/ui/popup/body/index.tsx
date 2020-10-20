@@ -11,7 +11,7 @@ import SiteListPage from '../site-list-page';
 import ThemePage from '../theme/page';
 import {ViewProps} from '../types';
 import ManageSettingsPage from '../manage-settings-page';
-import {platformData} from '../../../utils/platform';
+import {isMobile} from '../../../utils/platform';
 
 function Logo() {
     return (
@@ -148,7 +148,7 @@ function AppVersion() {
 export default function Body(props: ViewProps) {
     const context = getContext();
     context.onCreate(() => {
-        if (platformData.isMobile) {
+        if (isMobile) {
             window.addEventListener('contextmenu', (e) => e.preventDefault());
         }
     });

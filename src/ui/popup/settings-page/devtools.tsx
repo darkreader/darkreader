@@ -4,10 +4,10 @@ import {getLocalMessage} from '../../../utils/locales';
 import {NavButton} from '../../controls';
 import ControlGroup from '../control-group';
 import {ViewProps} from '../types';
-import {platformData} from '../../../utils/platform';
+import {isMobile, isFirefox} from '../../../utils/platform';
 
 function getExistingDevToolsObject(): Promise<chrome.windows.Window> | Promise<chrome.tabs.Tab> {
-    if (platformData.isMobile) {
+    if (isMobile) {
         return new Promise<chrome.tabs.Tab>((resolve) => {
             chrome.tabs.query({}, (t) => {
                 for (const tab of t) {
@@ -38,7 +38,7 @@ function getExistingDevToolsObject(): Promise<chrome.windows.Window> | Promise<c
 
 async function openDevTools() {
     const devToolsObject = await getExistingDevToolsObject();
-    if (platformData.isMobile) {
+    if (isMobile) {
         if (devToolsObject) {
             chrome.tabs.update(devToolsObject.id, {'active': true});
             window.close();
@@ -54,7 +54,7 @@ async function openDevTools() {
         } else {
             chrome.windows.create({
                 type: 'popup',
-                url: platformData.isFirefox ? '../devtools/index.html' : 'ui/devtools/index.html',
+                url: isFirefox ? '../devtools/index.html' : 'ui/devtools/index.html',
                 width: 600,
                 height: 600,
             });

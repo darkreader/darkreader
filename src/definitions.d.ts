@@ -172,19 +172,3 @@ export interface News {
     important: boolean;
     read?: boolean;
 }
-
-export interface PlatformData {
-    isChromium: boolean;
-    isFirefox: boolean;
-    isVivaldi: boolean;
-    isYaBrowser: boolean;
-    isOpera: boolean;
-    isEdge: boolean;
-    isWindows: boolean;
-    isMacOS: boolean;
-    isMobile: boolean;
-    chromiumVersion: string;
-    isShadowDomSupported: boolean;
-    isDefinedSelectorSupported: boolean;
-    isCSSStyleSheetConstructorSupported: boolean;
-}

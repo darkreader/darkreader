@@ -15,7 +15,7 @@ import {createTextStyle} from '../../generators/text-style';
 import {FilterConfig, DynamicThemeFix} from '../../definitions';
 import {generateUID} from '../../utils/uid';
 import {createAdoptedStyleSheetOverride, AdoptedStyleSheetManager} from './adopted-style-manger';
-import {platformData} from '../../utils/platform';
+import {isFirefox} from '../../utils/platform';
 
 const variables = new Map<string, string>();
 const INSTANCE_ID = generateUID();
@@ -402,7 +402,7 @@ export function createOrUpdateDynamicTheme(filterConfig: FilterConfig, dynamicTh
         }
         createThemeAndWatchForUpdates();
     } else {
-        if (!platformData.isFirefox) {
+        if (!isFirefox) {
             const fallbackStyle = createOrUpdateStyle('darkreader--fallback');
             document.documentElement.appendChild(fallbackStyle);
             fallbackStyle.textContent = getModifiedFallbackStyle(filter, {strict: true});

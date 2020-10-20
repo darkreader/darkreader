@@ -1,4 +1,4 @@
-import {platformData} from '../utils/platform';
+import {isFirefox} from '../utils/platform';
 
 export function classes(...args: (string | {[cls: string]: boolean})[]) {
     const classes = [];
@@ -36,7 +36,7 @@ export function openFile(options: {extensions: string[]}, callback: (content: st
 }
 
 export function saveFile(name: string, content: string) {
-    if (platformData.isFirefox) {
+    if (isFirefox) {
         const a = document.createElement('a');
         a.href = URL.createObjectURL(new Blob([content]));
         a.download = name;

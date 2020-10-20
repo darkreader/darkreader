@@ -1,5 +1,5 @@
 import {isPDF} from '../../utils/url';
-import {platformData} from '../../utils/platform';
+import {isFirefox, isEdge} from '../../utils/platform';
 
 declare const browser: {
     commands: {
@@ -8,7 +8,7 @@ declare const browser: {
 };
 
 export function canInjectScript(url: string) {
-    if (platformData.isFirefox) {
+    if (isFirefox) {
         return (url
             && !url.startsWith('about:')
             && !url.startsWith('moz')
@@ -17,7 +17,7 @@ export function canInjectScript(url: string) {
             && !isPDF(url)
         );
     }
-    if (platformData.isEdge) {
+    if (isEdge) {
         return (url
             && !url.startsWith('chrome')
             && !url.startsWith('edge')

@@ -1,39 +1,47 @@
-import {PlatformData} from '../definitions';
+let userAgent = typeof navigator === 'undefined' ? 'some useragent' : navigator.userAgent.toLowerCase();
+let platform = typeof navigator === 'undefined' ? 'some platform' : navigator.platform.toLowerCase();
 
-export const platformData: PlatformData = {} as any;
 
-export function runPlatformTest() {
-    const userAgent = navigator.userAgent.toLowerCase();
-    const platform = navigator.platform.toLowerCase();
-    platformData.isChromium = userAgent.includes('chrome') || userAgent.includes('chromium');
-    platformData.isFirefox = userAgent.includes('firefox');
-    platformData.isVivaldi = userAgent.includes('vivaldi');
-    platformData.isYaBrowser = userAgent.includes('yabrowser');
-    platformData.isOpera = userAgent.includes('opr') || userAgent.includes('opera');
-    platformData.isEdge = userAgent.includes('edg');
-    platformData.isWindows = platform.startsWith('win');
-    platformData.isMacOS = platform.startsWith('mac');
-    platformData.isMobile = userAgent.includes('mobile');
-    const m = userAgent.match(/chrom[e|ium]\/([^ ]+)/);
-    if (m && m[1]) {
-        platformData.chromiumVersion = m[1];
-    } else {
-        platformData.chromiumVersion = '';
-    }
+export const isChromium = userAgent.includes('chrome') || userAgent.includes('chromium');
+export const isFirefox = userAgent.includes('firefox');
+export const isVivaldi = userAgent.includes('vivaldi');
+export const isYaBrowser = userAgent.includes('yabrowser');
+export const isOpera = userAgent.includes('opr') || userAgent.includes('opera');
+export const isEdge = userAgent.includes('edg');
+export const isWindows = platform.startsWith('win');
+export const isMacOS = platform.startsWith('mac');
+export const isMobile = userAgent.includes('mobile');
+export const isShadowDomSupported = typeof ShadowRoot === 'function';
+export let chromiumVersion: string = null;
+let m = userAgent.match(/chrom[e|ium]\/([^ ]+)/);
+if (m && m[1]) {
+    chromiumVersion = m[1];
+} else {
+    chromiumVersion = '';
+}
+
+// Clean up memory
+userAgent = null;
+platform = null;
+m = null;
+
+export const isDefinedSelectorSupported = (() => {
     try {
         document.querySelector(':defined');
-        platformData.isDefinedSelectorSupported = true;
+        return true;
     } catch (err) {
-        platformData.isDefinedSelectorSupported = false;
+        return false;
     }
-    platformData.isShadowDomSupported = typeof ShadowRoot === 'function';
+})();
+
+export const isCSSStyleSheetConstructorSupported = (() => {
     try {
         new CSSStyleSheet();
-        platformData.isCSSStyleSheetConstructorSupported = true;
+        return true;
     } catch (err) {
-        platformData.isCSSStyleSheetConstructorSupported = false;
+        return false;
     }
-}
+})();
 
 export function compareChromeVersions($a: string, $b: string) {
     const a = $a.split('.').map((x) => parseInt(x));

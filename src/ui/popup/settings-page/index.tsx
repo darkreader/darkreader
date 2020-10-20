@@ -6,7 +6,7 @@ import ManageSettingsButton from './mange-settings-button';
 import SiteListButton from './site-list-button';
 import EnabledByDefaultGroup from './enabled-by-default';
 import ChangeBrowserTheme from './change-browser-theme';
-import {platformData} from '../../../utils/platform';
+import {isFirefox} from '../../../utils/platform';
 
 
 type SettingsPageProps = ViewProps & {
@@ -19,7 +19,7 @@ export default function SettingsPage(props: SettingsPageProps) {
     return (
         <section class="m-section">
             <EnabledByDefaultGroup {...props} />
-            {platformData.isFirefox ? <ChangeBrowserTheme {...props}/> : null}
+            {isFirefox ? <ChangeBrowserTheme {...props}/> : null}
             <SiteListButton onClick={props.onSiteListNavClick} />
             <DevToolsGroup {...props} />
             <AutomationButton onClick={props.onAutomationNavClick} />

@@ -3,14 +3,14 @@ import ThemeEngines from '../../../../generators/theme-engines';
 import {getLocalMessage} from '../../../../utils/locales';
 import {DropDown} from '../../../controls';
 import ThemeControl from './theme-control';
-import {platformData} from '../../../../utils/platform';
+import {isFirefox} from '../../../../utils/platform';
 
 export default function Mode(props: {mode: string; onChange: (mode: string) => void}) {
 
     function openCSSEditor() {
         chrome.windows.create({
             type: 'panel',
-            url: platformData.isFirefox ? '../stylesheet-editor/index.html' : 'ui/stylesheet-editor/index.html',
+            url: isFirefox ? '../stylesheet-editor/index.html' : 'ui/stylesheet-editor/index.html',
             width: 600,
             height: 600,
         });

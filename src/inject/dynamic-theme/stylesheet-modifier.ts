@@ -2,7 +2,7 @@ import {Theme} from '../../definitions';
 import {createAsyncTasksQueue} from '../utils/throttle';
 import {iterateCSSRules, iterateCSSDeclarations, replaceCSSVariables} from './css-rules';
 import {getModifiableCSSDeclaration, ModifiableCSSDeclaration, ModifiableCSSRule} from './modify-css';
-import {platformData} from '../../utils/platform';
+import {isCSSStyleSheetConstructorSupported} from '../../utils/platform';
 
 const themeCacheKeys: (keyof Theme)[] = [
     'mode',
@@ -21,7 +21,7 @@ function getThemeKey(theme: Theme) {
 }
 
 function getTempCSSStyleSheet(): {sheet: CSSStyleSheet; remove: () => void} {
-    if (platformData.isCSSStyleSheetConstructorSupported) {
+    if (isCSSStyleSheetConstructorSupported) {
         return {sheet: new CSSStyleSheet(), remove: () => null};
     }
     const style = document.createElement('style');

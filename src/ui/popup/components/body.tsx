@@ -16,7 +16,7 @@ import {DONATE_URL, GITHUB_URL, PRIVACY_URL, TWITTER_URL, getHelpURL} from '../.
 import {getLocalMessage} from '../../../utils/locales';
 import {compose} from '../../utils';
 import {ExtensionData, ExtensionActions, TabInfo, News as NewsObject} from '../../../definitions';
-import {platformData} from '../../../utils/platform';
+import {isMobile, isFirefox} from '../../../utils/platform';
 
 interface BodyProps {
     data: ExtensionData;
@@ -34,7 +34,7 @@ interface BodyState {
 function openDevTools() {
     chrome.windows.create({
         type: 'panel',
-        url: platformData.isFirefox ? '../devtools/index.html' : 'ui/devtools/index.html',
+        url: isFirefox ? '../devtools/index.html' : 'ui/devtools/index.html',
         width: 600,
         height: 600,
     });
@@ -57,7 +57,7 @@ function Body(props: BodyProps) {
         );
     }
 
-    if (platformData.isMobile || props.data.settings.previewNewDesign) {
+    if (isMobile || props.data.settings.previewNewDesign) {
         return <NewBody {...props} />;
     }
 

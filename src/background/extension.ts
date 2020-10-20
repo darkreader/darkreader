@@ -315,7 +315,7 @@ export class Extension {
         } else {
             siteList.splice(index, 1);
         }
-        if (shouldBeRemovedFromEnabledList ) {
+        if (shouldBeRemovedFromEnabledList) {
             this.changeSettings({siteListEnabled: siteList});
         } else {
             this.changeSettings({siteList});

@@ -1,3 +1,5 @@
+import {removeNode} from './utils/dom';
+
 if (
     document.documentElement instanceof HTMLHtmlElement &&
     matchMedia('(prefers-color-scheme: dark)').matches &&
@@ -25,4 +27,8 @@ if (
         });
         observer.observe(root, {childList: true});
     }
+}
+
+export function removeFallbackStyle() {
+    removeNode(document.querySelector('.darkreader--fallback'));
 }

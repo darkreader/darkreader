@@ -1,5 +1,5 @@
 import {createNodeAsap, removeNode} from './utils/dom';
-import {removeDynamicTheme} from './dynamic-theme/index';
+import {removeFallbackStyle} from './fallback';
 
 export function createOrUpdateStyle(css: string) {
     createNodeAsap({
@@ -10,7 +10,15 @@ export function createOrUpdateStyle(css: string) {
             style.type = 'text/css';
             style.textContent = css;
             target.appendChild(style);
-            removeDynamicTheme({removeFallback: true});
+            const wait = (animationFrame: number) => requestAnimationFrame(() => {
+                if (animationFrame !== 60) {
+                    animationFrame++;
+                    wait(animationFrame);
+                } else {
+                    removeFallbackStyle();
+                }
+            });
+            wait(0);
         },
         updateNode: (existing) => {
             if (css.replace(/^\s+/gm, '') !== existing.textContent.replace(/^\s+/gm, '')) {

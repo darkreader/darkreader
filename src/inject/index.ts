@@ -4,19 +4,20 @@ import {createOrUpdateDynamicTheme, removeDynamicTheme, cleanDynamicThemeCache} 
 import {logInfo, logWarn} from './utils/log';
 import {watchForColorSchemeChange} from './utils/watch-color-scheme';
 import {collectCSS} from './dynamic-theme/css-collection';
+import {removeFallbackStyle} from './fallback';
 
 function onMessage({type, data}) {
     switch (type) {
         case 'add-css-filter':
         case 'add-static-theme': {
             const css = data;
-            removeDynamicTheme({removeFallback: false});
+            removeDynamicTheme();
             createOrUpdateStyle(css);
             break;
         }
         case 'add-svg-filter': {
             const {css, svgMatrix, svgReverseMatrix} = data;
-            removeDynamicTheme({removeFallback: false});
+            removeDynamicTheme();
             createOrUpdateSVGFilter(svgMatrix, svgReverseMatrix);
             createOrUpdateStyle(css);
             break;
@@ -35,7 +36,8 @@ function onMessage({type, data}) {
         case 'clean-up': {
             removeStyle();
             removeSVGFilter();
-            removeDynamicTheme({removeFallback: true});
+            removeDynamicTheme();
+            removeFallbackStyle();
             break;
         }
     }

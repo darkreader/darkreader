@@ -4,6 +4,7 @@ import {DEFAULT_THEME} from '../defaults';
 import {Theme, DynamicThemeFix} from '../definitions';
 import ThemeEngines from '../generators/theme-engines';
 import {createOrUpdateDynamicTheme, removeDynamicTheme} from '../inject/dynamic-theme';
+import {removeFallbackStyle} from '../inject/fallback';
 
 const isIFrame = (() => {
     try {
@@ -24,7 +25,8 @@ export function enable(themeOptions: Partial<Theme> = {}, fixes: DynamicThemeFix
 }
 
 export function disable() {
-    removeDynamicTheme({removeFallback: true});
+    removeDynamicTheme();
+    removeFallbackStyle();
 }
 
 const darkScheme = matchMedia('(prefers-color-scheme: dark)');

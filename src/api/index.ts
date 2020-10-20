@@ -4,6 +4,7 @@ import {DEFAULT_THEME} from '../defaults';
 import {Theme, DynamicThemeFix} from '../definitions';
 import ThemeEngines from '../generators/theme-engines';
 import {createOrUpdateDynamicTheme, removeDynamicTheme} from '../inject/dynamic-theme';
+import {collectCSS} from '../inject/dynamic-theme/css-collection';
 
 const isIFrame = (() => {
     try {
@@ -50,6 +51,10 @@ export function auto(themeOptions: Partial<Theme> | false = {}, fixes: DynamicTh
         darkScheme.removeListener(handleColorScheme);
         disable();
     }
+}
+
+export async function exportGeneratedCSS(): Promise<string> {
+    return await collectCSS();
 }
 
 export const setFetchMethod = setFetch;

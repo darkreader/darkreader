@@ -1,10 +1,10 @@
 import {parse, RGBA, rgbToHSL, hslToString} from '../../utils/color';
 import {clamp} from '../../utils/math';
 import {getMatches} from '../../utils/text';
+import {getAbsoluteURL} from '../../utils/url';
 import {modifyBackgroundColor, modifyBorderColor, modifyForegroundColor, modifyGradientColor, modifyShadowColor, clearColorModificationCache} from '../../generators/modify-colors';
 import {cssURLRegex, getCSSURLValue, getCSSBaseBath} from './css-rules';
 import {getImageDetails, getFilteredImageDataURL, ImageDetails, cleanImageProcessingCache} from './image';
-import {getAbsoluteURL} from './url';
 import {logWarn, logInfo} from '../utils/log';
 import {FilterConfig, Theme} from '../../definitions';
 

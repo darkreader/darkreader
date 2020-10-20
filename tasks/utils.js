@@ -6,8 +6,8 @@ const colors = Object.entries({
 }).reduce((map, [key, value]) => Object.assign(map, {[key]: (text) => `${value}${text}\x1b[0m`}), {});
 
 function logWithTime(text) {
-    const time = (new Date()).toISOString().substring(11, 19);
-    return console.log(`${colors.gray(`${time}`)} ${text}`);
+    const now = new Date();
+    return console.log(`${colors.gray(`${now.getHours()}:${now.getMinutes()}:${now.getSeconds()}`)} ${text}`);
 }
 
 const log = Object.assign((text) => logWithTime(text), {

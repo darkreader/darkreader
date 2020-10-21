@@ -24,6 +24,9 @@ let tempStyle: HTMLStyleElement = null;
 
 function getTempCSSStyleSheet(): CSSStyleSheet {
     if (tempStyle) {
+        if (tempStyle.parentNode !== document.head) {
+            document.head.append(tempStyle);
+        }
         return (tempStyle as HTMLStyleElement).sheet;
     }
     if (isCSSStyleSheetConstructorSupported()) {

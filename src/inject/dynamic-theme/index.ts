@@ -13,12 +13,10 @@ import {getCSSFilterValue} from '../../generators/css-filter';
 import {modifyColor} from '../../generators/modify-colors';
 import {createTextStyle} from '../../generators/text-style';
 import {FilterConfig, DynamicThemeFix} from '../../definitions';
-import {generateUID} from '../../utils/uid';
 import {createAdoptedStyleSheetOverride, AdoptedStyleSheetManager} from './adopted-style-manger';
 import {isFirefox} from '../../utils/platform';
 
 const variables = new Map<string, string>();
-const INSTANCE_ID = generateUID();
 const styleManagers = new Map<StyleElement, StyleManager>();
 const adoptedStyleManagers = [] as Array<AdoptedStyleSheetManager>;
 let filter: FilterConfig = null;
@@ -372,22 +370,37 @@ function stopWatchingForUpdates() {
     removeDOMReadyListener(onDOMReady);
 }
 
-function createDarkReaderInstanceMarker() {
+function createColorSchemeInstanceMarker() {
     const metaElement: HTMLMetaElement = document.createElement('meta');
-    metaElement.name = 'darkreader';
-    metaElement.content = INSTANCE_ID;
+    metaElement.name = 'color-scheme';
+    metaElement.content = filter.mode ? 'dark' : 'light';
     document.head.appendChild(metaElement);
 }
 
-function isAnotherDarkReaderInstanceActive() {
-    const meta: HTMLMetaElement = document.querySelector('meta[name="darkreader"]');
-    if (meta) {
-        if (meta.content !== INSTANCE_ID) {
-            return true;
-        }
+function hasSiteSupportedColorScheme() {
+    const meta: HTMLMetaElement = document.querySelector('meta[name="color-scheme"]');
+    if (!meta) {
+        createColorSchemeInstanceMarker();
         return false;
+    }
+    const includeDarkColorScheme = meta.content.includes('dark');
+    const includeLightColorScheme = meta.content.includes('light');
+    if (
+        (meta.content === 'dark' ||
+        (includeDarkColorScheme && includeLightColorScheme && matchMedia('(prefers-color-scheme: dark)'))) &&
+        filter.mode
+    ) {
+        return true;
+    } else if (
+        (
+            (meta.content === 'light' || meta.content === 'only light') &&
+            (includeLightColorScheme && includeDarkColorScheme && matchMedia('(prefers-color-scheme: light)'))
+        ) &&
+        !filter.mode
+    ) {
+        return true;
     } else {
-        createDarkReaderInstanceMarker();
+        createColorSchemeInstanceMarker();
         return false;
     }
 }
@@ -397,7 +410,8 @@ export function createOrUpdateDynamicTheme(filterConfig: FilterConfig, dynamicTh
     fixes = dynamicThemeFixes;
     isIFrame = iframe;
     if (document.head) {
-        if (isAnotherDarkReaderInstanceActive()) {
+        if (hasSiteSupportedColorScheme()) {
+            removeDynamicTheme();
             return;
         }
         createThemeAndWatchForUpdates();
@@ -411,7 +425,7 @@ export function createOrUpdateDynamicTheme(filterConfig: FilterConfig, dynamicTh
         const headObserver = new MutationObserver(() => {
             if (document.head) {
                 headObserver.disconnect();
-                if (isAnotherDarkReaderInstanceActive()) {
+                if (hasSiteSupportedColorScheme()) {
                     removeDynamicTheme();
                     return;
                 }

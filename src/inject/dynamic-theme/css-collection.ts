@@ -66,7 +66,7 @@ export async function collectCSS() {
         css.push(await replaceBlobs(formattedCSS));
         css.push('');
     }
-    
+
     addStaticCSS('.darkreader--override', 'Override Style');
 
     return css.join('\n');

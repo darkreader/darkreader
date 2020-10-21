@@ -20,30 +20,22 @@ function getThemeKey(theme: Theme) {
     return themeCacheKeys.map((p) => `${p}:${theme[p]}`).join(';');
 }
 
-let tempStyle: HTMLStyleElement | CSSStyleSheet = null;
+let tempStyle: CSSStyleSheet = null;
 
 function getTempCSSStyleSheet(): CSSStyleSheet {
     if (tempStyle) {
-        if (tempStyle instanceof HTMLStyleElement) {
-            if (tempStyle.parentNode !== document.head) {
-                document.head.append(tempStyle);
-            }
-            return (tempStyle as HTMLStyleElement).sheet;
-        } else {
-            return tempStyle as CSSStyleSheet;
-        }
+        return tempStyle;
     }
     if (isCSSStyleSheetConstructorSupported) {
         tempStyle = new CSSStyleSheet();
         return tempStyle;
+    } else {
+        const tempStyleElement = document.createElement('style');
+        document.head.append(tempStyleElement);
+        tempStyle = tempStyleElement.sheet;
+        document.head.removeChild(tempStyleElement);
+        return tempStyle;
     }
-    tempStyle = document.createElement('style');
-    tempStyle.classList.add('darkreader');
-    tempStyle.classList.add('darkreader--temp');
-    tempStyle.media = 'screen';
-    tempStyle.textContent = '';
-    document.head.append(tempStyle);
-    return tempStyle.sheet;
 }
 
 const asyncQueue = createAsyncTasksQueue();

@@ -1,5 +1,5 @@
-import {isFirefox, isEdge} from '../../utils/platform';
 import {isPDF} from '../../utils/url';
+import {isFirefox, isEdge} from '../../utils/platform';
 
 declare const browser: {
     commands: {
@@ -8,7 +8,7 @@ declare const browser: {
 };
 
 export function canInjectScript(url: string) {
-    if (isFirefox()) {
+    if (isFirefox) {
         return (url
             && !url.startsWith('about:')
             && !url.startsWith('moz')
@@ -17,7 +17,7 @@ export function canInjectScript(url: string) {
             && !isPDF(url)
         );
     }
-    if (isEdge()) {
+    if (isEdge) {
         return (url
             && !url.startsWith('chrome')
             && !url.startsWith('edge')
@@ -29,6 +29,42 @@ export function canInjectScript(url: string) {
         && !url.startsWith('chrome')
         && !url.startsWith('https://chrome.google.com/webstore')
     );
+}
+
+export function readSyncStorage<T extends {[key: string]: any}>(defaults: T): Promise<T> {
+    return new Promise<T>((resolve) => {
+        chrome.storage.sync.get(defaults, (sync: T) => {
+            resolve(sync);
+        });
+    });
+}
+
+export function readLocalStorage<T extends {[key: string]: any}>(defaults: T): Promise<T> {
+    return new Promise<T>((resolve) => {
+        chrome.storage.local.get(defaults, (local: T) => {
+            resolve(local);
+        });
+    });
+}
+
+export function writeSyncStorage<T extends {[key: string]: any}>(values: T): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+        chrome.storage.sync.set(values, () => {
+            if (chrome.runtime.lastError) {
+                reject(chrome.runtime.lastError);
+                return;
+            }
+            resolve();
+        });
+    });
+}
+
+export function writeLocalStorage<T extends {[key: string]: any}>(values: T): Promise<void> {
+    return new Promise<void>((resolve) => {
+        chrome.storage.local.set(values, () => {
+            resolve();
+        });
+    });
 }
 
 export function getFontList() {

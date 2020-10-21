@@ -9,13 +9,13 @@ import {removeNode, watchForNodePosition, iterateShadowHosts, isDOMReady, addDOM
 import {logWarn} from '../utils/log';
 import {throttle} from '../utils/throttle';
 import {clamp} from '../../utils/math';
-import {isFirefox} from '../../utils/platform';
 import {getCSSFilterValue} from '../../generators/css-filter';
 import {modifyColor} from '../../generators/modify-colors';
 import {createTextStyle} from '../../generators/text-style';
 import {FilterConfig, DynamicThemeFix} from '../../definitions';
 import {generateUID} from '../../utils/uid';
 import {createAdoptedStyleSheetOverride, AdoptedStyleSheetManager} from './adopted-style-manger';
+import {isFirefox} from '../../utils/platform';
 
 const variables = new Map<string, string>();
 const INSTANCE_ID = generateUID();
@@ -49,13 +49,13 @@ function stopStylePositionWatchers() {
 }
 
 function createStaticStyleOverrides() {
-    const fallbackStyle = createOrUpdateStyle('darkreader--fallback');
+    const fallbackStyle = createOrUpdateStyle('darkreader--fallback', document);
     fallbackStyle.textContent = getModifiedFallbackStyle(filter, {strict: true});
     document.head.insertBefore(fallbackStyle, document.head.firstChild);
     setupStylePositionWatcher(fallbackStyle, 'fallback');
 
     const userAgentStyle = createOrUpdateStyle('darkreader--user-agent');
-    userAgentStyle.textContent = getModifiedUserAgentStyle(filter, isIFrame);
+    userAgentStyle.textContent = getModifiedUserAgentStyle(filter, isIFrame, filter.styleSystemControls);
     document.head.insertBefore(userAgentStyle, fallbackStyle.nextSibling);
     setupStylePositionWatcher(userAgentStyle, 'user-agent');
 
@@ -115,6 +115,9 @@ function createShadowStaticStyleOverrides(root: ShadowRoot) {
     const inlineStyle = createOrUpdateStyle('darkreader--inline', root);
     inlineStyle.textContent = getInlineOverrideStyle();
     root.insertBefore(inlineStyle, root.firstChild);
+    const overrideStyle = createOrUpdateStyle('darkreader--override', root);
+    overrideStyle.textContent = fixes && fixes.css ? replaceCSSTemplates(fixes.css) : '';
+    root.insertBefore(overrideStyle, inlineStyle.nextSibling);
     shadowRootsWithOverrides.add(root);
 }
 
@@ -131,7 +134,7 @@ function replaceCSSTemplates($cssText: string) {
 }
 
 function cleanFallbackStyle() {
-    const fallback = document.head.querySelector('.darkreader--fallback');
+    const fallback = document.querySelector('.darkreader--fallback');
     if (fallback) {
         fallback.textContent = '';
     }
@@ -336,6 +339,7 @@ function watchForUpdates() {
         newManagers.forEach((manager) => manager.watch());
         stylesToRestore.forEach((style) => styleManagers.get(style).restore());
     }, (shadowRoot) => {
+        createShadowStaticStyleOverrides(shadowRoot);
         handleAdoptedStyleSheets(shadowRoot);
     });
 
@@ -398,7 +402,7 @@ export function createOrUpdateDynamicTheme(filterConfig: FilterConfig, dynamicTh
         }
         createThemeAndWatchForUpdates();
     } else {
-        if (!isFirefox()) {
+        if (!isFirefox) {
             const fallbackStyle = createOrUpdateStyle('darkreader--fallback');
             document.documentElement.appendChild(fallbackStyle);
             fallbackStyle.textContent = getModifiedFallbackStyle(filter, {strict: true});
@@ -432,6 +436,7 @@ export function removeDynamicTheme() {
     }
     shadowRootsWithOverrides.forEach((root) => {
         removeNode(root.querySelector('.darkreader--inline'));
+        removeNode(root.querySelector('.darkreader--override'));
     });
     shadowRootsWithOverrides.clear();
     forEach(styleManagers.keys(), (el) => removeManager(el));

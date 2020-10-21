@@ -1,6 +1,35 @@
 import {UserSettings} from '../definitions';
 import {isIPV6, compareIPV6} from './ipv6';
 
+let anchor: HTMLAnchorElement;
+
+function fixBaseURL($url: string) {
+    if (!anchor) {
+        anchor = document.createElement('a');
+    }
+    anchor.href = $url;
+    return anchor.href;
+}
+
+export function parseURL($url: string, $base: string = null) {
+    if ($base) {
+        $base = fixBaseURL($base);
+        return new URL($url, $base);
+    }
+    $url = fixBaseURL($url);
+    return new URL($url);
+}
+
+export function getAbsoluteURL($base: string, $relative: string) {
+    if ($relative.match(/^data\:/)) {
+        return $relative;
+    }
+
+    const b = parseURL($base);
+    const a = parseURL($relative, b.href);
+    return a.href;
+}
+
 export function getURLHostOrProtocol($url: string) {
     const url = new URL($url);
     if (url.host) {
@@ -38,7 +67,7 @@ export function isURLMatched(url: string, urlTemplate: string): boolean {
     const isSecondIPV6 = isIPV6(urlTemplate);
     if (isFirstIPV6 && isSecondIPV6) {
         return compareIPV6(url, urlTemplate);
-    } else if (!isSecondIPV6 && !isSecondIPV6) {
+    } else if (!isFirstIPV6 && !isSecondIPV6) {
         const regex = createUrlRegex(urlTemplate);
         return Boolean(url.match(regex));
     } else {
@@ -64,9 +93,9 @@ function createUrlRegex(urlTemplate: string): RegExp {
     let afterSlash: string;
     if ((slashIndex = urlTemplate.indexOf('/')) >= 0) {
         beforeSlash = urlTemplate.substring(0, slashIndex); // google.*
-        afterSlash = urlTemplate.replace('$', '').substring(slashIndex); // /login/abc
+        afterSlash = urlTemplate.replace(/\$/g, '').substring(slashIndex); // /login/abc
     } else {
-        beforeSlash = urlTemplate.replace('$', '');
+        beforeSlash = urlTemplate.replace(/\$/g, '');
     }
 
     //
@@ -137,10 +166,10 @@ export function isPDF(url: string) {
 }
 
 export function isURLEnabled(url: string, userSettings: UserSettings, {isProtected, isInDarkList}) {
-    if (isProtected && userSettings.enableForProtectedPages) {
+    if (isProtected && !userSettings.enableForProtectedPages) {
         return false;
     }
-    if (isPDF(url) && userSettings.enableForPDF) {
+    if (isPDF(url)) {
         return userSettings.enableForPDF;
     }
     const isURLInUserList = isURLInList(url, userSettings.siteList);

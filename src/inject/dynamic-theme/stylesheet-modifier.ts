@@ -1,8 +1,8 @@
 import {Theme} from '../../definitions';
-import {isCSSStyleSheetConstructorSupported} from '../../utils/platform';
 import {createAsyncTasksQueue} from '../utils/throttle';
 import {iterateCSSRules, iterateCSSDeclarations, replaceCSSVariables} from './css-rules';
 import {getModifiableCSSDeclaration, ModifiableCSSDeclaration, ModifiableCSSRule} from './modify-css';
+import {isCSSStyleSheetConstructorSupported} from '../../utils/platform';
 
 const themeCacheKeys: (keyof Theme)[] = [
     'mode',
@@ -21,13 +21,14 @@ function getThemeKey(theme: Theme) {
 }
 
 function getTempCSSStyleSheet(): {sheet: CSSStyleSheet; remove: () => void} {
-    if (isCSSStyleSheetConstructorSupported()) {
+    if (isCSSStyleSheetConstructorSupported) {
         return {sheet: new CSSStyleSheet(), remove: () => null};
     }
     const style = document.createElement('style');
     style.classList.add('darkreader');
     style.classList.add('darkreader--temp');
     style.media = 'screen';
+    style.textContent = '';
     (document.head || document).append(style);
     return {sheet: style.sheet, remove: () => style.remove()};
 }
@@ -147,7 +148,7 @@ export function createStyleSheetModifier() {
         function setRule(target: CSSStyleSheet | CSSGroupingRule, index: number, rule: ReadyStyleRule) {
             const {selector, declarations} = rule;
             target.insertRule(`${selector} {}`, index);
-            const style = (target.cssRules.item(index) as CSSStyleRule).style;
+            const style = (target.cssRules[index] as CSSStyleRule).style;
             declarations.forEach(({property, value, important, sourceValue}) => {
                 style.setProperty(property, value == null ? sourceValue : value, important ? 'important' : '');
             });

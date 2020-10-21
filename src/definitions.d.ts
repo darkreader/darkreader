@@ -54,6 +54,7 @@ export interface Theme {
     lightSchemeTextColor: string;
     scrollbarColor: '' | 'auto' | string;
     selectionColor: '' | 'auto' | string;
+    styleSystemControls: boolean;
 }
 
 export type FilterConfig = Theme;

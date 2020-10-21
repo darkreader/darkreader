@@ -36,7 +36,7 @@ export function openFile(options: {extensions: string[]}, callback: (content: st
 }
 
 export function saveFile(name: string, content: string) {
-    if (isFirefox()) {
+    if (isFirefox) {
         const a = document.createElement('a');
         a.href = URL.createObjectURL(new Blob([content]));
         a.download = name;

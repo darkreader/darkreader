@@ -1,5 +1,5 @@
 import {forEach} from '../../utils/array';
-import {parseURL, getAbsoluteURL} from './url';
+import {parseURL, getAbsoluteURL} from '../../utils/url';
 import {logWarn} from '../utils/log';
 
 export function iterateCSSRules(rules: CSSRuleList, iterate: (rule: CSSStyleRule) => void) {
@@ -16,6 +16,10 @@ export function iterateCSSRules(rules: CSSRuleList, iterate: (rule: CSSStyleRule
                 iterateCSSRules(rule.styleSheet.cssRules, iterate);
             } catch (err) {
                 logWarn(err);
+            }
+        } else if (rule instanceof CSSSupportsRule) {
+            if (CSS.supports(rule.conditionText)) {
+                iterateCSSRules(rule.cssRules, iterate);
             }
         } else {
             logWarn(`CSSRule type not supported`, rule);

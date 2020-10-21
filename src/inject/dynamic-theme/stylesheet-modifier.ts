@@ -1,8 +1,8 @@
 import {Theme} from '../../definitions';
-import {isCSSStyleSheetConstructorSupported} from '../../utils/platform';
 import {createAsyncTasksQueue} from '../utils/throttle';
 import {iterateCSSRules, iterateCSSDeclarations, replaceCSSVariables} from './css-rules';
 import {getModifiableCSSDeclaration, ModifiableCSSDeclaration, ModifiableCSSRule} from './modify-css';
+import {isCSSStyleSheetConstructorSupported} from '../../utils/platform';
 
 const themeCacheKeys: (keyof Theme)[] = [
     'mode',
@@ -33,7 +33,7 @@ function getTempCSSStyleSheet(): CSSStyleSheet {
             return tempStyle as CSSStyleSheet;
         }
     }
-    if (isCSSStyleSheetConstructorSupported()) {
+    if (isCSSStyleSheetConstructorSupported) {
         tempStyle = new CSSStyleSheet();
         return tempStyle;
     }

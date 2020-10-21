@@ -206,15 +206,18 @@ DarkReader.enable({
 
 DarkReader.disable();
 
-// Enable when system color scheme is dark
+// Enable when system color scheme is dark.
 DarkReader.auto({
     brightness: 100,
     contrast: 90,
     sepia: 10
 });
 
-// Stop watching for system color scheme
+// Stop watching for system color scheme.
 DarkReader.auto(false);
+
+// Get the generated CSS of Dark Reader returned as a string.
+const CSS = await DarkReader.exportGeneratedCSS();
 ```
 ... or if you are using ES modules
 ```javascript
@@ -222,6 +225,7 @@ import {
     enable as enableDarkMode,
     disable as disableDarkMode,
     auto as followSystemColorScheme,
+    exportGeneratedCSS as collectCSS,
 } from 'darkreader';
 
 enableDarkMode({
@@ -233,6 +237,8 @@ enableDarkMode({
 disableDarkMode();
 
 followSystemColorScheme();
+
+const CSS = await collectCSS();
 ```
 
 ## Contributors

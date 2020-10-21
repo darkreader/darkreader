@@ -3,6 +3,7 @@ import {bgFetch} from './network';
 import {getURLHostOrProtocol} from '../../utils/url';
 import {loadAsDataURL} from '../../utils/network';
 import {FilterConfig} from '../../definitions';
+import {logWarn} from '../utils/log';
 
 export interface ImageDetails {
     src: string;
@@ -73,6 +74,10 @@ function analyzeImage(image: HTMLImageElement) {
         createCanvas();
     }
     const {naturalWidth, naturalHeight} = image;
+    if (naturalHeight === 0 || naturalWidth === 0) {
+        logWarn(`logWarn(Image is empty ${image.currentSrc})`);
+        return null;
+    }
     const naturalPixelsCount = naturalWidth * naturalHeight;
     const k = Math.min(1, Math.sqrt(MAX_ANALIZE_PIXELS_COUNT / naturalPixelsCount));
     const width = Math.ceil(naturalWidth * k);

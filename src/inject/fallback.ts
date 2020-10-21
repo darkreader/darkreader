@@ -1,5 +1,3 @@
-import {removeNode} from './utils/dom';
-
 if (
     document.documentElement instanceof HTMLHtmlElement &&
     matchMedia('(prefers-color-scheme: dark)').matches &&
@@ -30,5 +28,6 @@ if (
 }
 
 export function removeFallbackStyle() {
-    removeNode(document.querySelector('.darkreader--fallback'));
+    const fallbackStyle = document.querySelector('.darkreader--fallback')
+    fallbackStyle && fallbackStyle.parentNode && fallbackStyle.parentNode.removeChild(fallbackStyle);
 }

@@ -10,15 +10,7 @@ export function createOrUpdateStyle(css: string) {
             style.type = 'text/css';
             style.textContent = css;
             target.appendChild(style);
-            const wait = (animationFrame: number) => requestAnimationFrame(() => {
-                if (animationFrame !== 60) {
-                    animationFrame++;
-                    wait(animationFrame);
-                } else {
-                    removeFallbackStyle();
-                }
-            });
-            wait(0);
+            removeFallbackStyle();
         },
         updateNode: (existing) => {
             if (css.replace(/^\s+/gm, '') !== existing.textContent.replace(/^\s+/gm, '')) {

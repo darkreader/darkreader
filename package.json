@@ -41,7 +41,7 @@
     "@rollup/plugin-replace": "2.3.3",
     "@rollup/pluginutils": "4.0.0",
     "@types/chrome": "0.0.125",
-    "@types/jest": "26.0.14",
+    "@types/jest": "26.0.15",
     "@types/node": "14.11.8",
     "@types/puppeteer-core": "2.0.0",
     "@typescript-eslint/eslint-plugin": "4.5.0",

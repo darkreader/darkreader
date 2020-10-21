@@ -4,6 +4,8 @@ import {iterateCSSDeclarations} from './css-rules';
 import {getModifiableCSSDeclaration} from './modify-css';
 import {FilterConfig} from '../../definitions';
 import {IS_SHADOW_DOM_SUPPORTED} from '../../utils/platform';
+import {getDuration} from '../../utils/time';
+import {throttle} from '../utils/throttle';
 
 interface Overrides {
     [cssProp: string]: {
@@ -168,7 +170,15 @@ function deepWatchForInlineStyles(
     });
     treeObservers.set(root, treeObserver);
 
-    const attrObserver = new MutationObserver((mutations) => {
+    let attemptCount = 0;
+    let start = null;
+    const ATTEMPTS_INTERVAL = getDuration({seconds: 10});
+    const RETRY_TIMEOUT = getDuration({seconds: 2});
+    const MAX_ATTEMPTS_COUNT = 50;
+    let cache: MutationRecord[];
+    let timeoutId: number = null;
+
+    const handleAttributionMutations = throttle((mutations: MutationRecord[]) => {
         mutations.forEach((m) => {
             if (INLINE_STYLE_ATTRS.includes(m.attributeName)) {
                 elementStyleDidChange(m.target as HTMLElement);
@@ -177,6 +187,31 @@ function deepWatchForInlineStyles(
                 .filter(({store, dataAttr}) => store.has(m.target) && !(m.target as HTMLElement).hasAttribute(dataAttr))
                 .forEach(({dataAttr}) => (m.target as HTMLElement).setAttribute(dataAttr, ''));
         });
+    });
+    const attrObserver = new MutationObserver((mutations) => {
+        if (timeoutId) {
+            cache.push(...mutations);
+            return;
+        }
+        attemptCount++;
+        const now = Date.now();
+        if (start == null) {
+            start = now;
+        } else if (attemptCount >= MAX_ATTEMPTS_COUNT) {
+            if (now - start < ATTEMPTS_INTERVAL) {
+                timeoutId = setTimeout(() => {
+                    start = null;
+                    attemptCount = 0;
+                    timeoutId = null;
+                    handleAttributionMutations(cache);
+                }, RETRY_TIMEOUT);
+                cache.push(...mutations);
+                return;
+            }
+            start = now;
+            attemptCount = 1;
+        }
+        handleAttributionMutations(mutations);
     });
     attrObserver.observe(root, {
         attributes: true,

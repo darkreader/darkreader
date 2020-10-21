@@ -20,17 +20,22 @@ function getThemeKey(theme: Theme) {
     return themeCacheKeys.map((p) => `${p}:${theme[p]}`).join(';');
 }
 
-let tempStyle: HTMLStyleElement = null;
+let tempStyle: HTMLStyleElement | CSSStyleSheet = null;
 
 function getTempCSSStyleSheet(): CSSStyleSheet {
     if (tempStyle) {
-        if (tempStyle.parentNode !== document.head) {
-            document.head.append(tempStyle);
+        if (tempStyle instanceof HTMLStyleElement) {
+            if (tempStyle.parentNode !== document.head) {
+                document.head.append(tempStyle);
+            }
+            return (tempStyle as HTMLStyleElement).sheet;
+        } else {
+            return tempStyle as CSSStyleSheet;
         }
-        return (tempStyle as HTMLStyleElement).sheet;
     }
     if (isCSSStyleSheetConstructorSupported()) {
-        return new CSSStyleSheet();
+        tempStyle = new CSSStyleSheet();
+        return tempStyle;
     }
     tempStyle = document.createElement('style');
     tempStyle.classList.add('darkreader');
@@ -83,7 +88,6 @@ export function createStyleSheetModifier() {
             // to properly handle composite properties (e.g. background -> background-color)
             let vars: CSSStyleSheet;
             let varsRule: CSSStyleRule = null;
-            let varIndex: number = null;
             if (variables.size > 0 || cssText.includes('var(')) {
                 const cssTextWithVariables = replaceCSSVariables(cssText, variables);
                 if (rulesTextCache.get(cssText) !== cssTextWithVariables) {
@@ -91,8 +95,7 @@ export function createStyleSheetModifier() {
                     textDiffersFromPrev = true;
                     vars = getTempCSSStyleSheet();
                     vars.insertRule(cssTextWithVariables);
-                    varIndex = vars.cssRules.length - 1;
-                    varsRule = vars.cssRules[varIndex] as CSSStyleRule;
+                    varsRule = vars.cssRules[0] as CSSStyleRule;
                 }
             }
 
@@ -120,7 +123,7 @@ export function createStyleSheetModifier() {
             }
             rulesModCache.set(cssText, modRule);
 
-            vars && vars.deleteRule(varIndex);
+            vars && vars.deleteRule(0);
         });
 
         notFoundCacheKeys.forEach((key) => {

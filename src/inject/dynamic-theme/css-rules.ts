@@ -1,9 +1,13 @@
 import {forEach} from '../../utils/array';
 import {parseURL, getAbsoluteURL} from '../../utils/url';
 import {logWarn} from '../utils/log';
+import {linkLoading} from '../utils/dom';
+
+const importCache = new Map<string, CSSRuleList>();
 
 export function iterateCSSRules(rules: CSSRuleList, iterate: (rule: CSSStyleRule) => void) {
-    forEach(rules, (rule) => {
+
+    const iterateCSSType = async (rule: any) => {
         if (rule instanceof CSSMediaRule) {
             const media = Array.from(rule.media);
             if (media.includes('screen') || media.includes('all') || !(media.includes('print') || media.includes('speech'))) {
@@ -15,7 +19,14 @@ export function iterateCSSRules(rules: CSSRuleList, iterate: (rule: CSSStyleRule
             try {
                 iterateCSSRules(rule.styleSheet.cssRules, iterate);
             } catch (err) {
-                logWarn(err);
+                if (importCache.get(rule.href)) {
+                    iterateCSSRules(importCache.get(rule.href), iterate);
+                } else {
+                    await linkLoading(rule.parentStyleSheet.ownerNode as HTMLLinkElement);
+                    importCache.set(rule.href, rule.styleSheet.cssRules);
+                    iterateCSSType(rule);
+                    logWarn(err);
+                }
             }
         } else if (rule instanceof CSSSupportsRule) {
             if (CSS.supports(rule.conditionText)) {
@@ -24,7 +35,9 @@ export function iterateCSSRules(rules: CSSRuleList, iterate: (rule: CSSStyleRule
         } else {
             logWarn(`CSSRule type not supported`, rule);
         }
-    });
+    }
+    forEach(rules, async (rule) => await iterateCSSType(rule));
+
 }
 
 export function iterateCSSDeclarations(style: CSSStyleDeclaration, iterate: (property: string, value: string) => void) {

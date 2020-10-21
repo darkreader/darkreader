@@ -20,7 +20,7 @@ export const DEFAULT_THEME: Theme = {
     grayscale: 0,
     sepia: 0,
     useFont: false,
-    fontFamily: isMacOS() ? 'Helvetica Neue' : isWindows() ? 'Segoe UI' : 'Open Sans',
+    fontFamily: isMacOS ? 'Helvetica Neue' : isWindows ? 'Segoe UI' : 'Open Sans',
     textStroke: 0,
     engine: ThemeEngines.dynamicTheme,
     stylesheet: '',
@@ -28,7 +28,7 @@ export const DEFAULT_THEME: Theme = {
     darkSchemeTextColor: DEFAULT_COLORS.darkScheme.text,
     lightSchemeBackgroundColor: DEFAULT_COLORS.lightScheme.background,
     lightSchemeTextColor: DEFAULT_COLORS.lightScheme.text,
-    scrollbarColor: isMacOS() ? '' : 'auto',
+    scrollbarColor: isMacOS ? '' : 'auto',
     selectionColor: 'auto',
     styleSystemControls: true,
 };

@@ -1,6 +1,5 @@
 import {Theme} from '../../definitions';
 import {forEach} from '../../utils/array';
-import {IS_SHADOW_DOM_SUPPORTED} from '../../utils/platform';
 import {getMatches} from '../../utils/text';
 import {getAbsoluteURL} from '../../utils/url';
 import {watchForNodePosition, removeNode, iterateShadowHosts} from '../utils/dom';
@@ -8,6 +7,7 @@ import {logWarn} from '../utils/log';
 import {getCSSVariables, replaceCSSRelativeURLsWithAbsolute, removeCSSComments, replaceCSSFontFace, getCSSURLValue, cssImportRegex, getCSSBaseBath} from './css-rules';
 import {bgFetch} from './network';
 import {createStyleSheetModifier} from './stylesheet-modifier';
+import {isShadowDomSupported} from '../../utils/platform';
 
 declare global {
     interface HTMLStyleElement {
@@ -61,7 +61,7 @@ export function shouldManageStyle(element: Node) {
 export function getManageableStyles(node: Node, results = [] as StyleElement[], deep = true) {
     if (shouldManageStyle(node)) {
         results.push(node as StyleElement);
-    } else if (node instanceof Element || (IS_SHADOW_DOM_SUPPORTED && node instanceof ShadowRoot) || node === document) {
+    } else if (node instanceof Element || (isShadowDomSupported && node instanceof ShadowRoot) || node === document) {
         forEach(
             (node as Element).querySelectorAll(STYLE_SELECTOR),
             (style: StyleElement) => getManageableStyles(style, results, false),

@@ -1,6 +1,5 @@
-let userAgent = typeof navigator === 'undefined' ? 'some useragent' : navigator.userAgent.toLowerCase();
-let platform = typeof navigator === 'undefined' ? 'some platform' : navigator.platform.toLowerCase();
-
+const userAgent = typeof navigator === 'undefined' ? 'some useragent' : navigator.userAgent.toLowerCase();
+const platform = typeof navigator === 'undefined' ? 'some platform' : navigator.platform.toLowerCase();
 
 export const isChromium = userAgent.includes('chrome') || userAgent.includes('chromium');
 export const isFirefox = userAgent.includes('firefox');
@@ -12,18 +11,15 @@ export const isWindows = platform.startsWith('win');
 export const isMacOS = platform.startsWith('mac');
 export const isMobile = userAgent.includes('mobile');
 export const isShadowDomSupported = typeof ShadowRoot === 'function';
-export let chromiumVersion: string = null;
-let m = userAgent.match(/chrom[e|ium]\/([^ ]+)/);
-if (m && m[1]) {
-    chromiumVersion = m[1];
-} else {
-    chromiumVersion = '';
-}
 
-// Clean up memory
-userAgent = null;
-platform = null;
-m = null;
+export const chromiumVersion = (() => {
+    const m = userAgent.match(/chrom[e|ium]\/([^ ]+)/);
+    if (m && m[1]) {
+        return m[1];
+    } else {
+        return '';
+    }
+})();
 
 export const isDefinedSelectorSupported = (() => {
     try {

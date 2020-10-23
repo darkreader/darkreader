@@ -2,7 +2,7 @@ import {Theme} from '../../definitions';
 import {createAsyncTasksQueue} from '../utils/throttle';
 import {iterateCSSRules, iterateCSSDeclarations, replaceCSSVariables} from './css-rules';
 import {getModifiableCSSDeclaration, ModifiableCSSDeclaration, ModifiableCSSRule} from './modify-css';
-import {getTempCSSStyleSheet} from 'inject/utils/dom';
+import {getTempCSSStyleSheet} from '../utils/dom';
 
 const themeCacheKeys: (keyof Theme)[] = [
     'mode',

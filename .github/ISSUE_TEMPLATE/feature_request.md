@@ -9,6 +9,7 @@ assignees: ''
 <!--
 Thank you for taking the time to suggest a feature request.
 Please make sure there is no existing issue about this kind of feature.
+Make sure to fill out every section when needed else remove the section.
 -->
 
 **Is your feature request related to a problem? Please describe.**

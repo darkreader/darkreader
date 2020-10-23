@@ -182,7 +182,7 @@ function createDynamicStyleOverrides() {
         }
     });
     const ignoredInlineSelectors = fixes && Array.isArray(fixes.ignoreInlineStyle) ? fixes.ignoreInlineStyle : [];
-    inlineStyleElements.forEach((el) => overrideInlineStyle(el as HTMLElement, filter, getIgnoreImageAnalysisSelectors(), ignoredInlineSelectors));
+    inlineStyleElements.forEach((el) => overrideInlineStyle(el as HTMLElement, filter, variables, getIgnoreImageAnalysisSelectors(), ignoredInlineSelectors));
     handleAdoptedStyleSheets(document);
 }
 
@@ -345,7 +345,7 @@ function watchForUpdates() {
 
     const ignoredInlineSelectors = fixes && Array.isArray(fixes.ignoreInlineStyle) ? fixes.ignoreInlineStyle : [];
     watchForInlineStyles((element) => {
-        overrideInlineStyle(element, filter, ignoredInlineSelectors, getIgnoreImageAnalysisSelectors());
+        overrideInlineStyle(element, filter, variables, ignoredInlineSelectors, getIgnoreImageAnalysisSelectors());
         if (element === document.documentElement) {
             const rootVariables = getElementCSSVariables(document.documentElement);
             if (rootVariables.size > 0) {
@@ -357,7 +357,7 @@ function watchForUpdates() {
         const inlineStyleElements = root.querySelectorAll(INLINE_STYLE_SELECTOR);
         if (inlineStyleElements.length > 0) {
             createShadowStaticStyleOverrides(root);
-            forEach(inlineStyleElements, (el) => overrideInlineStyle(el as HTMLElement, filter, getIgnoreImageAnalysisSelectors(), ignoredInlineSelectors));
+            forEach(inlineStyleElements, (el) => overrideInlineStyle(el as HTMLElement, filter, variables, getIgnoreImageAnalysisSelectors(), ignoredInlineSelectors));
         }
     });
 

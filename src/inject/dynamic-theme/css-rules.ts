@@ -30,7 +30,7 @@ export function iterateCSSRules(rules: CSSRuleList, iterate: (rule: CSSStyleRule
 export function iterateCSSDeclarations(style: CSSStyleDeclaration, iterate: (property: string, value: string) => void) {
     forEach(style, (property) => {
         const value = style.getPropertyValue(property).trim();
-        if (!value) {
+        if (!value && value !== 'inital') {
             return;
         }
         iterate(property, value);

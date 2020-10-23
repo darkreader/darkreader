@@ -1,6 +1,6 @@
 import {forEach, push} from '../../utils/array';
-import {iterateShadowHosts, createOptimizedTreeObserver} from '../utils/dom';
-import {iterateCSSDeclarations} from './css-rules';
+import {iterateShadowHosts, createOptimizedTreeObserver, getTempCSSStyleSheet} from '../utils/dom';
+import {iterateCSSDeclarations, replaceCSSVariables} from './css-rules';
 import {getModifiableCSSDeclaration} from './modify-css';
 import {FilterConfig} from '../../definitions';
 import {isShadowDomSupported} from '../../utils/platform';
@@ -248,7 +248,7 @@ function shouldIgnoreInlineStyle(element: HTMLElement, selectors: string[]) {
     return false;
 }
 
-export function overrideInlineStyle(element: HTMLElement, theme: FilterConfig, ignoreInlineSelectors: string[], ignoreImageSelectors: string[]) {
+export function overrideInlineStyle(element: HTMLElement, theme: FilterConfig, variables: Map<string, string>, ignoreInlineSelectors: string[], ignoreImageSelectors: string[]) {
     const cacheKey = getInlineStyleCacheKey(element, theme);
     if (cacheKey === inlineStyleCache.get(element)) {
         return;
@@ -313,7 +313,19 @@ export function overrideInlineStyle(element: HTMLElement, theme: FilterConfig, i
         const value = element.getAttribute('stroke');
         setCustomProp('stroke', element instanceof SVGLineElement || element instanceof SVGTextElement ? 'border-color' : 'color', value);
     }
-    element.style && iterateCSSDeclarations(element.style, (property, value) => {
+
+    // Put CSS text with inserted CSS variables into separate <style> element
+    // to properly handle composite properties (e.g. background -> background-color)
+    let elementStyle: CSSStyleRule = null;
+    const temp = getTempCSSStyleSheet();
+    const cssText = replaceCSSVariables(element.style.cssText, variables);
+    temp.insertRule(`temp { ${cssText} } `);
+    elementStyle = temp.cssRules[0] as CSSStyleRule;
+    temp.removeRule(0);
+
+    const targetRule = elementStyle;
+
+    targetRule.style && iterateCSSDeclarations(targetRule.style, (property, value) => {
         // Temporaty ignore background images
         // due to possible performance issues
         // and complexity of handling async requests
@@ -324,8 +336,8 @@ export function overrideInlineStyle(element: HTMLElement, theme: FilterConfig, i
             setCustomProp(property, property, value);
         }
     });
-    if (element.style && element instanceof SVGTextElement && element.style.fill) {
-        setCustomProp('fill', 'color', element.style.getPropertyValue('fill'));
+    if (targetRule.style && element instanceof SVGTextElement && targetRule.style.fill) {
+        setCustomProp('fill', 'color', targetRule.style.getPropertyValue('fill'));
     }
 
     forEach(unsetProps, (cssProp) => {

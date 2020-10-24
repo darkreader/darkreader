@@ -1,7 +1,6 @@
 import {canInjectScript} from '../background/utils/extension-api';
 import {createFileLoader} from './utils/network';
 import {Message} from '../definitions';
-import {isChromium} from '../utils/platform';
 
 function queryTabs(query: chrome.tabs.QueryInfo) {
     return new Promise<chrome.tabs.Tab[]>((resolve) => {
@@ -25,9 +24,9 @@ interface PortInfo {
     port: chrome.runtime.Port;
 }
 
+const tempPorts: number[] = [];
 export default class TabManager {
     private ports: Map<number, Map<number, PortInfo>>;
-
     constructor({getConnectionMessage, onColorSchemeChange}: TabManagerOptions) {
         this.ports = new Map();
         chrome.runtime.onConnect.addListener((port) => {
@@ -55,13 +54,15 @@ export default class TabManager {
 
                 let framesPorts: Map<number, PortInfo>;
                 if (this.ports.has(tabId)) {
+                    // Prevents from running 2 instances.
+                    // Every tabId that is used won't be used again right? Else this needs some .splice :)
+                    if (tempPorts.indexOf(tabId) !== -1) {
+                        return;
+                    }
                     framesPorts = this.ports.get(tabId);
                 } else {
                     framesPorts = new Map();
                     this.ports.set(tabId, framesPorts);
-                    if (isChromium) {
-                        return;
-                    }
                 }
                 framesPorts.set(frameId, {url: senderURL, port});
                 port.onDisconnect.addListener(() => {
@@ -113,6 +114,79 @@ export default class TabManager {
                     .postMessage({type: 'export-css'});
             }
         });
+    }
+
+    handleXHR({getConnectionMessage}) {
+        const prefId = 'styleViaXhr';
+        const blobUrlPrefix = 'blob:' + chrome.runtime.getURL('/');
+        const stylesToPass = {};
+        const reqFilter = {
+            urls: ['<all_urls>'],
+            types: ['main_frame', 'sub_frame'] as any[],
+        };
+        chrome.webRequest.onBeforeRequest.addListener(prepareStyles, reqFilter);
+        chrome.webRequest.onHeadersReceived.addListener(passStyles, reqFilter, [
+            'blocking',
+            'responseHeaders',
+            'extraHeaders',
+        ]);
+        chrome.declarativeContent.onPageChanged.removeRules([prefId], async () => {
+            chrome.declarativeContent.onPageChanged.addRules([{
+                id: prefId,
+                conditions: [
+                    new chrome.declarativeContent.PageStateMatcher({
+                        pageUrl: {urlContains: ':'},
+                    }),
+                ],
+                actions: [
+                    new (chrome.declarativeContent as any).RequestContentScript({
+                        allFrames: true,
+                        // This runs earlier than document_start
+                        js: chrome.runtime.getManifest().content_scripts[0].js,
+                    }),
+                ],
+            }]);
+        });
+
+        function prepareStyles(req: chrome.webRequest.WebRequestBodyDetails) {
+            if (tempPorts.indexOf(req.tabId) === -1) {
+                tempPorts.push(req.tabId);
+            }
+            function passDataToObject(str: any) {
+                str = JSON.stringify(str);
+                stylesToPass[req.requestId] = URL.createObjectURL(new Blob([str])).slice(blobUrlPrefix.length);
+                setTimeout(cleanUp, 600e3, req.requestId);
+            }
+            const message = getConnectionMessage({
+                url: req.url,
+                frameURL: req.frameId === 0 ? null : req.url,
+            });
+            if (message instanceof Promise) {
+                message.then((asyncMessage) => asyncMessage && passDataToObject(asyncMessage));
+            } else if (message) {
+                passDataToObject(message);
+            }
+        }
+
+        function passStyles(req: chrome.webRequest.WebResponseHeadersDetails) {
+            const blobId = stylesToPass[req.requestId];
+            if (blobId) {
+                const {responseHeaders} = req;
+                responseHeaders.push({
+                    name: 'Set-Cookie',
+                    value: `${chrome.runtime.id}=${blobId}`,
+                });
+                return {responseHeaders};
+            }
+        }
+
+        function cleanUp(key: string) {
+            const blobId = stylesToPass[key];
+            delete stylesToPass[key];
+            if (blobId) {
+                URL.revokeObjectURL(blobUrlPrefix + blobId);
+            }
+        }
     }
 
     async updateContentScript(options: {runOnProtectedPages: boolean}) {

@@ -13,12 +13,10 @@ import {getCSSFilterValue} from '../../generators/css-filter';
 import {modifyColor} from '../../generators/modify-colors';
 import {createTextStyle} from '../../generators/text-style';
 import {FilterConfig, DynamicThemeFix} from '../../definitions';
-import {generateUID} from '../../utils/uid';
-import {createAdoptedStyleSheetOverride, AdoptedStyleSheetManager} from './adopted-style-manger';
+import {createAdoptedStyleSheetOverride, AdoptedStyleSheetManager, fallBackStyle, removeFallbackSheet} from './adopted-style-manger';
 import {isFirefox} from '../../utils/platform';
 
 const variables = new Map<string, string>();
-const INSTANCE_ID = generateUID();
 const styleManagers = new Map<StyleElement, StyleManager>();
 const adoptedStyleManagers = [] as Array<AdoptedStyleSheetManager>;
 let filter: FilterConfig = null;
@@ -138,6 +136,7 @@ function cleanFallbackStyle() {
     if (fallback) {
         fallback.textContent = '';
     }
+    removeFallbackSheet();
 }
 
 function getIgnoreImageAnalysisSelectors() {
@@ -372,46 +371,48 @@ function stopWatchingForUpdates() {
     removeDOMReadyListener(onDOMReady);
 }
 
-function createDarkReaderInstanceMarker() {
+function createDarkReaderInstanceMarker(instanceSignature: string) {
     const metaElement: HTMLMetaElement = document.createElement('meta');
     metaElement.name = 'darkreader';
-    metaElement.content = INSTANCE_ID;
+    metaElement.content = instanceSignature;
     document.head.appendChild(metaElement);
 }
 
-function isAnotherDarkReaderInstanceActive() {
+function isAnotherDarkReaderInstanceActive(instanceSignature: string) {
     const meta: HTMLMetaElement = document.querySelector('meta[name="darkreader"]');
     if (meta) {
-        if (meta.content !== INSTANCE_ID) {
+        if (meta.content !== instanceSignature) {
             return true;
         }
         return false;
     } else {
-        createDarkReaderInstanceMarker();
+        createDarkReaderInstanceMarker(instanceSignature);
         return false;
     }
 }
 
-export function createOrUpdateDynamicTheme(filterConfig: FilterConfig, dynamicThemeFixes: DynamicThemeFix, iframe: boolean) {
+export function createOrUpdateDynamicTheme(filterConfig: FilterConfig, dynamicThemeFixes: DynamicThemeFix, iframe: boolean, instanceSignature: string) {
     filter = filterConfig;
     fixes = dynamicThemeFixes;
     isIFrame = iframe;
     if (document.head) {
-        if (isAnotherDarkReaderInstanceActive()) {
+        if (isAnotherDarkReaderInstanceActive(instanceSignature)) {
+            removeDynamicTheme();
             return;
         }
         createThemeAndWatchForUpdates();
     } else {
-        if (!isFirefox) {
+        if (!isFirefox && !fallBackStyle) {
             const fallbackStyle = createOrUpdateStyle('darkreader--fallback');
             document.documentElement.appendChild(fallbackStyle);
             fallbackStyle.textContent = getModifiedFallbackStyle(filter, {strict: true});
+            removeFallbackSheet();
         }
 
         const headObserver = new MutationObserver(() => {
             if (document.head) {
                 headObserver.disconnect();
-                if (isAnotherDarkReaderInstanceActive()) {
+                if (isAnotherDarkReaderInstanceActive(instanceSignature)) {
                     removeDynamicTheme();
                     return;
                 }
@@ -446,6 +447,7 @@ export function removeDynamicTheme() {
         manager.destroy();
     });
     adoptedStyleManagers.splice(0);
+    removeFallbackSheet();
 }
 
 export function cleanDynamicThemeCache() {

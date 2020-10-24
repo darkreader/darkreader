@@ -21,7 +21,7 @@ export function enable(themeOptions: Partial<Theme> = {}, fixes: DynamicThemeFix
     if (theme.engine !== ThemeEngines.dynamicTheme) {
         throw new Error('Theme engine is not supported.');
     }
-    createOrUpdateDynamicTheme(theme, fixes, isIFrame);
+    createOrUpdateDynamicTheme(theme, fixes, isIFrame, 'API');
 }
 
 export function disable() {

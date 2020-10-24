@@ -1,13 +1,28 @@
 import {Theme} from '../../definitions';
 import {createStyleSheetModifier} from './stylesheet-modifier';
 import {getCSSVariables} from './css-rules';
+import {isCSSStyleSheetConstructorSupported} from '../../utils/platform';
 
+export let fallBackStyle = isCSSStyleSheetConstructorSupported ? new CSSStyleSheet : null;
 const adoptedStyleOverrides = new WeakMap<CSSStyleSheet, CSSStyleSheet>();
 const overrideList = new WeakSet<CSSStyleSheet>();
 
 export interface AdoptedStyleSheetManager {
     render(theme: Theme, variables: Map<string, string>, ignoreImageAnalysis: string[]): void;
     destroy(): void;
+}
+
+export function removeFallbackSheet() {
+    if (fallBackStyle) {
+        const newSheets = [...document.adoptedStyleSheets];
+        const fallBackIndex = document.adoptedStyleSheets.indexOf(fallBackStyle);
+        if (fallBackIndex === -1) {
+            return;
+        }
+        newSheets.splice(fallBackIndex, 1);
+        document.adoptedStyleSheets = newSheets;
+        fallBackStyle = null;
+    }
 }
 
 export function createAdoptedStyleSheetOverride(node: Document | ShadowRoot): AdoptedStyleSheetManager {
@@ -46,6 +61,9 @@ export function createAdoptedStyleSheetOverride(node: Document | ShadowRoot): Ad
 
     function render(theme: Theme, globalVariables: Map<string, string>, ignoreImageAnalysis: string[]) {
         node.adoptedStyleSheets.forEach((sheet) => {
+            if (sheet === fallBackStyle) {
+                return;
+            }
             if (overrideList.has(sheet)) {
                 return;
             }

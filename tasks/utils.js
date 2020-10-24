@@ -7,7 +7,10 @@ const colors = Object.entries({
 
 function logWithTime(text) {
     const now = new Date();
-    return console.log(`${colors.gray(`${now.getHours()}:${now.getMinutes()}:${now.getSeconds()}`)} ${text}`);
+    const seconds = now.getSeconds().toString().padStart(2, 0);
+    const minutes = now.getMinutes().toString().padStart(2, 0);
+    const hours = now.getHours().toString().padStart(2, 0);
+    return console.log(`${colors.gray(`${hours}:${minutes}:${seconds}`)} ${text}`);
 }
 
 const log = Object.assign((text) => logWithTime(text), {

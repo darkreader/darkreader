@@ -1,7 +1,17 @@
+export const isCSSStyleSheetConstructorSupported = (() => {
+    try {
+        new CSSStyleSheet();
+        return true;
+    } catch (err) {
+        return false;
+    }
+})();
+
 if (
     document.documentElement instanceof HTMLHtmlElement &&
     matchMedia('(prefers-color-scheme: dark)').matches &&
-    !document.querySelector('.darkreader--fallback')
+    !document.querySelector('.darkreader--fallback') &&
+    !isCSSStyleSheetConstructorSupported
 ) {
     const css = 'html, body, body :not(iframe) { background-color: #181a1b !important; border-color: #776e62 !important; color: #e8e6e3 !important; }';
     const fallback = document.createElement('style');

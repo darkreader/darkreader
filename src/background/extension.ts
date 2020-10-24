@@ -96,6 +96,7 @@ export class Extension {
         this.registerCommands();
 
         this.ready = true;
+        this.tabs.handleXHR({getConnectionMessage: ({url, frameURL}) => { return this.getConnectionMessage(url, frameURL); }});
         this.tabs.updateContentScript({runOnProtectedPages: this.user.settings.enableForProtectedPages});
 
         this.awaiting.forEach((ready) => ready());

@@ -5,6 +5,7 @@ import {logInfo, logWarn} from './utils/log';
 import {watchForColorSchemeChange} from './utils/watch-color-scheme';
 import {collectCSS} from './dynamic-theme/css-collection';
 import {isChromium} from '../utils/platform';
+import {fallBackStyle, removeFallbackSheet} from './dynamic-theme/adopted-style-manger';
 
 function onMessage({type, data}) {
     switch (type) {
@@ -25,7 +26,7 @@ function onMessage({type, data}) {
         case 'add-dynamic-theme': {
             const {filter, fixes, isIFrame} = data;
             removeStyle();
-            createOrUpdateDynamicTheme(filter, fixes, isIFrame);
+            createOrUpdateDynamicTheme(filter, fixes, isIFrame, 'extension');
             break;
         }
         case 'export-css': {
@@ -45,12 +46,12 @@ function onMessage({type, data}) {
 function getDataViaXHR() {
     if (new RegExp(`(^|\\s|;)${chrome.runtime.id}=\\s*([-\\w]+)\\s*(;|$)`).test(document.cookie)) {
         const data = RegExp.$2;
-        const url = 'blob:' + chrome.runtime.getURL(data.slice(1));
+        const url = 'blob:' + chrome.runtime.getURL(data);
         document.cookie = `${chrome.runtime.id}=1; max-age=0`; // Remove the cookie
         let res: any;
         try {
             const xhr = new XMLHttpRequest();
-            xhr.open('GET', url, false); // Synchronous XHR request.
+            xhr.open('GET', url, false); // Synchronous XHR request so it won't slow down performance.
             xhr.send();
             res = JSON.parse(xhr.response);
             URL.revokeObjectURL(url);
@@ -76,5 +77,14 @@ port.onDisconnect.addListener(() => {
 });
 
 if (isChromium) {
-    onMessage(getDataViaXHR());
+    if (Array.isArray(document.adoptedStyleSheets) && fallBackStyle) {
+        fallBackStyle.insertRule('html, body, body :not(iframe) { background-color: #181a1b !important; border-color: #776e62 !important; color: #e8e6e3 !important; }');
+        document.adoptedStyleSheets = [...document.adoptedStyleSheets, fallBackStyle];
+    }
+    const data = getDataViaXHR();
+    if (data) {
+        onMessage(data);
+    } else {
+        removeFallbackSheet();
+    }
 }

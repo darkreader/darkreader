@@ -77,11 +77,11 @@ port.onDisconnect.addListener(() => {
 });
 
 if (isChromium) {
-    if (Array.isArray(document.adoptedStyleSheets) && fallBackStyle) {
+    const data = getDataViaXHR();
+    if (Array.isArray(document.adoptedStyleSheets) && fallBackStyle && data && data.type !== 'clean-up' && data.type !== 'unsupported-sender') {
         fallBackStyle.insertRule('html, body, body :not(iframe) { background-color: #181a1b !important; border-color: #776e62 !important; color: #e8e6e3 !important; }');
         document.adoptedStyleSheets = [...document.adoptedStyleSheets, fallBackStyle];
     }
-    const data = getDataViaXHR();
     if (data) {
         onMessage(data);
     } else {

@@ -1,12 +1,14 @@
 <p align="center"><a href="https://darkreader.org" target="_blank" rel="noreferrer noopener"><img width="250" alt="Dark Reader's mascot" src="https://raw.githubusercontent.com/darkreader/darkreader.github.io/master/images/darkreader-mascot.svg"></a></p>
 <p align="center">Dark Reader <strong>analyzes</strong> web pages and aims to <strong>reduce the eyestrain</strong> while you browse the web.</p>
-
+<br/>
 <p align="center"><a rel="noreferrer noopener" href="https://chrome.google.com/webstore/detail/dark-reader/eimadpbcbfnmbkopoojfekhnkhdbieeh/">Chrome Web Store</a> | <a rel="noreferrer noopener" href="https://addons.mozilla.org/en-US/firefox/addon/darkreader/">Firefox Add-ons</a> | <a rel="noreferrer noopener" href="https://microsoftedge.microsoft.com/addons/detail/dark-reader/ifoakfbpdcdoeenechcleahebpibofpc/">Edge Addons</a>
+    
+<h2 align="center">Dark Reader</h2>  
+<br/>
+<p align="center">Dark Reader is an <strong>open-source</strong> MIT-licensed <strong>browser extension</strong>, that is designed to analyzes web pages. Based on its analysis Dark Reader will generate a dark mode based on the analysis. Hereby Dark Reader aims to <strong>reduce the eyestrain</strong> of the user. Dark Reader is <strong>feature-rich</strong> and can be configured in many ways trough the UI.</p>
 
-<h2 align="center">Dark Reader</h2>
-
-Dark Reader is an open-source MIT-licensed <strong>browser extension</strong>, that is designed to analyzes web pages. Based on its analysis Dark Reader will generate a dark mode based on the analysis. Hereby Dark Reader aims to <strong>reduce the eyestrain</strong> of the user. Dark Reader is <strong>feature-rich</strong> and can be configured in many ways trough the UI.
-
+<br/>
+<br/>
 <h2>Questions</h2>
 
 Most questions can be answered by reading the [help page](https://darkreader.org/help/).
@@ -91,13 +93,13 @@ However, this can be bypassed by the following steps:
 
 <h2 align="center">Contributors</h2>
 
-<p align="center"><strong>Dark Reader exists thanks to all the people who have contributed to Dark Reader!</strong></p>
+<p align="center" color="e84545"><strong>Dark Reader exists thanks to all the people who have contributed to Dark Reader!</strong></p>
 
 <p align="center"><a rel="noreferrer noopener" href="https://github.com/darkreader/darkreader/graphs/contributors/"><img src="https://opencollective.com/darkreader/contributors.svg?width=890&button=false" /></a></p>
 
 <h2 align="center">Backers</h2>
 
-<p align="center"><strong>Thank you to all our generous backers!</strong></p>
+<p align="center" color="e84545"><strong>Thank you to all our generous backers!</strong></p>
 
 <p align="center"><a rel="noreferrer noopener" href="https://opencollective.com/darkreader#backers" target="_blank"><img src="https://opencollective.com/darkreader/backers.svg?width=890"></a></p>
 
@@ -105,7 +107,7 @@ However, this can be bypassed by the following steps:
 
 <p align="center">Support Dark Reader by <a rel="noreferrer noopener" href="https://opencollective.com/darkreader#sponsor">becoming a sponsor</a></p>
 
-<p align="center"><strong>Thank you to our wonderful sponsors!</strong></p>
+<div border="6px"><p align="center" color="e84545"><strong>Thank you to our wonderful sponsors!</strong></p></div>
 
 <a href="https://opencollective.com/darkreader/sponsor/0/website" target="_blank" rel="noreferrer noopener"><img src="https://opencollective.com/darkreader/sponsor/0/avatar.svg"></a>
 <a href="https://opencollective.com/darkreader/sponsor/1/website" target="_blank" rel="noreferrer noopener"><img src="https://opencollective.com/darkreader/sponsor/1/avatar.svg"></a>

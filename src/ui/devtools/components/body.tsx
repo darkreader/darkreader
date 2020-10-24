@@ -33,6 +33,47 @@ function Body({data, tab, actions}: BodyProps) {
             reset: () => actions.resetDevDynamicThemeFixes(),
         });
 
+    function completeBracket(keyDownEvent, textNode) {
+        let start;
+        switch (keyDownEvent.key) {
+            case '{':
+                keyDownEvent.preventDefault();
+                document.execCommand('insertText', false, '{');
+                start = textNode.selectionStart;
+                document.execCommand('insertText', false, '}');
+                textNode.setSelectionRange(start, start); // Move mouse cursor between the brackets
+                break;
+            case '(':
+                keyDownEvent.preventDefault();
+                document.execCommand('insertText', false, '(');
+                start = textNode.selectionStart;
+                document.execCommand('insertText', false, ')');
+                textNode.setSelectionRange(start, start);
+                break;
+            case '[':
+                keyDownEvent.preventDefault();
+                document.execCommand('insertText', false, '[');
+                start = textNode.selectionStart;
+                document.execCommand('insertText', false, ']');
+                textNode.setSelectionRange(start, start);
+                break;
+            case "'":
+                keyDownEvent.preventDefault();
+                document.execCommand('insertText', false, '\'');
+                start = textNode.selectionStart;
+                document.execCommand('insertText', false, '\'');
+                textNode.setSelectionRange(start, start);
+                break;
+            case '"':
+                keyDownEvent.preventDefault();
+                document.execCommand('insertText', false, '"');
+                start = textNode.selectionStart;
+                document.execCommand('insertText', false, '"');
+                textNode.setSelectionRange(start, start);
+                break;
+        }
+    }
+
     function onTextRender(node: HTMLTextAreaElement) {
         textNode = node;
         if (!state.errorText) {
@@ -56,45 +97,7 @@ function Body({data, tab, actions}: BodyProps) {
                     document.execCommand('insertText', false, indent);
                 }
             }
-            let start;
-            switch (e.key) {
-                case "{":
-                    e.preventDefault();
-                    document.execCommand('insertText', false, '{');
-                    start = node.selectionStart;
-                    document.execCommand('insertText', false, '}');
-                    node.setSelectionRange(start, start); // Move mouse cursor between the brackets
-                    break
-                case "(":
-                    e.preventDefault();
-                    document.execCommand('insertText', false, '(');
-                    start = node.selectionStart;
-                    document.execCommand('insertText', false, ')');
-                    node.setSelectionRange(start, start);
-                    break
-                case "[":
-                    e.preventDefault();
-                    document.execCommand('insertText', false, '[');
-                    start = node.selectionStart;
-                    document.execCommand('insertText', false, ']');
-                    node.setSelectionRange(start, start);
-                    break
-                case "'":
-                    e.preventDefault();
-                    document.execCommand('insertText', false, '\'');
-                    start = node.selectionStart;
-                    document.execCommand('insertText', false, '\'');
-                    node.setSelectionRange(start, start);
-                    break
-                case "\"":
-                    e.preventDefault();
-                    document.execCommand('insertText', false, '"');
-                    start = node.selectionStart;
-                    document.execCommand('insertText', false, '"');
-                    node.setSelectionRange(start, start);
-                    break
-            }
-            // TODO: When backspace key is pressed, check if the next char is a bracket, and delete both brackets
+            completeBracket(e, node);
         });
     }
 

@@ -4,6 +4,7 @@ import {createOrUpdateDynamicTheme, removeDynamicTheme, cleanDynamicThemeCache} 
 import {logInfo, logWarn} from './utils/log';
 import {watchForColorSchemeChange} from './utils/watch-color-scheme';
 import {collectCSS} from './dynamic-theme/css-collection';
+import {isChromium} from '../utils/platform';
 
 function onMessage({type, data}) {
     switch (type) {
@@ -41,6 +42,25 @@ function onMessage({type, data}) {
     }
 }
 
+function getDataViaXHR() {
+    if (new RegExp(`(^|\\s|;)${chrome.runtime.id}=\\s*([-\\w]+)\\s*(;|$)`).test(document.cookie)) {
+        const data = RegExp.$2;
+        const url = 'blob:' + chrome.runtime.getURL(data.slice(1));
+        document.cookie = `${chrome.runtime.id}=1; max-age=0`; // Remove the cookie
+        let res: any;
+        try {
+            const xhr = new XMLHttpRequest();
+            xhr.open('GET', url, false); // Synchronous XHR request.
+            xhr.send();
+            res = JSON.parse(xhr.response);
+            URL.revokeObjectURL(url);
+        } catch (err) {
+            logWarn(err);
+        }
+        return res;
+    }
+}
+
 // TODO: Use background page color scheme watcher when browser bugs fixed.
 const colorSchemeWatcher = watchForColorSchemeChange(({isDark}) => {
     logInfo('Media query was changed');
@@ -55,3 +75,6 @@ port.onDisconnect.addListener(() => {
     colorSchemeWatcher.disconnect();
 });
 
+if (isChromium) {
+    onMessage(getDataViaXHR());
+}

@@ -7,6 +7,7 @@ import SiteListButton from './site-list-button';
 import EnabledByDefaultGroup from './enabled-by-default';
 import ChangeBrowserTheme from './change-browser-theme';
 import {isFirefox} from '../../../utils/platform';
+import EnableFastExecution from './fast-execution';
 
 
 type SettingsPageProps = ViewProps & {
@@ -19,7 +20,7 @@ export default function SettingsPage(props: SettingsPageProps) {
     return (
         <section class="m-section">
             <EnabledByDefaultGroup {...props} />
-            {isFirefox ? <ChangeBrowserTheme {...props}/> : null}
+            {isFirefox ? <ChangeBrowserTheme {...props}/> : <EnableFastExecution />}
             <SiteListButton onClick={props.onSiteListNavClick} />
             <DevToolsGroup {...props} />
             <AutomationButton onClick={props.onAutomationNavClick} />

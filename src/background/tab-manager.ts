@@ -1,6 +1,7 @@
 import {canInjectScript} from '../background/utils/extension-api';
 import {createFileLoader} from './utils/network';
 import {Message} from '../definitions';
+import {isChromium} from '../utils/platform';
 
 function queryTabs(query: chrome.tabs.QueryInfo) {
     return new Promise<chrome.tabs.Tab[]>((resolve) => {
@@ -39,7 +40,6 @@ export default class TabManager {
                         port.postMessage(message);
                     }
                 };
-
                 const isPanel = port.sender.tab == null;
                 if (isPanel) {
                     // NOTE: Vivaldi and Opera can show a page in a side panel,
@@ -59,6 +59,9 @@ export default class TabManager {
                 } else {
                     framesPorts = new Map();
                     this.ports.set(tabId, framesPorts);
+                    if (isChromium) {
+                        return;
+                    }
                 }
                 framesPorts.set(frameId, {url: senderURL, port});
                 port.onDisconnect.addListener(() => {

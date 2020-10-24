@@ -40,6 +40,9 @@
         "fontSettings",
         "storage",
         "tabs",
+        "webRequest",
+        "webRequestBlocking",
+        "declarativeContent",
         "<all_urls>"
     ],
     "commands": {

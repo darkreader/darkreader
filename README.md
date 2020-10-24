@@ -92,22 +92,22 @@ However, this can be bypassed by the following steps:
 - Enable the `Synchronize site fixes` setting, under `Settings -> Manage Settings`.
 
 <h2 align="center">Contributors</h2>
-
-<p align="center" color="e84545"><strong>Dark Reader exists thanks to all the people who have contributed to Dark Reader!</strong></p>
-
+<br/>
+<h3 align="center" color="D66853"><strong>Dark Reader exists thanks to all the people who have contributed to Dark Reader!</strong></h3>
+<br/>
+<br/>
 <p align="center"><a rel="noreferrer noopener" href="https://github.com/darkreader/darkreader/graphs/contributors/"><img src="https://opencollective.com/darkreader/contributors.svg?width=890&button=false" /></a></p>
 
 <h2 align="center">Backers</h2>
-
-<p align="center" color="e84545"><strong>Thank you to all our generous backers!</strong></p>
-
+<br/>
+<h3 align="center" color="D66853"><strong>Thank you to all our generous backers!</strong></h3>
+<br/>
+<br/>
 <p align="center"><a rel="noreferrer noopener" href="https://opencollective.com/darkreader#backers" target="_blank"><img src="https://opencollective.com/darkreader/backers.svg?width=890"></a></p>
 
-<h2 align="center">Sponsers</h2>
-
+<h2 align="center">Sponsers</h2>  
 <p align="center">Support Dark Reader by <a rel="noreferrer noopener" href="https://opencollective.com/darkreader#sponsor">becoming a sponsor</a></p>
-
-<div border="6px"><p align="center" color="e84545"><strong>Thank you to our wonderful sponsors!</strong></p></div>
+<h3 align="center" color="D66853"><strong>Thank you to our wonderful sponsors!</strong></h3>
 
 <a href="https://opencollective.com/darkreader/sponsor/0/website" target="_blank" rel="noreferrer noopener"><img src="https://opencollective.com/darkreader/sponsor/0/avatar.svg"></a>
 <a href="https://opencollective.com/darkreader/sponsor/1/website" target="_blank" rel="noreferrer noopener"><img src="https://opencollective.com/darkreader/sponsor/1/avatar.svg"></a>

@@ -89,11 +89,11 @@ function analyzeImage(image: HTMLImageElement) {
     let darkPixelsCount = 0;
     let lightPixelsCount = 0;
 
-    let i: number, x: number, y: number;
+    let i: number;
     let r: number, g: number, b: number, a: number;
     let l: number;
     for (let y = 0; y < naturalHeight; y++) {
-        for (x = 0; x < naturalWidth; x++) {
+        for (let x = 0; x < naturalWidth; x++) {
             i = 4 * (y * naturalWidth + x);
             r = imageData[i] / 255;
             g = imageData[i + 1] / 255;

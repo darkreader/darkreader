@@ -20,25 +20,35 @@ function getFgPole(theme: Theme) {
 }
 
 const colorModificationCache = new Map<ColorFunction, Map<string, string>>();
-const colorParseCache = new Map<string, HSLA>();
+const HSLAParseCache = new Map<string, HSLA>();
 
 function parseToHSLWithCache(color: string) {
-    if (colorParseCache.has(color)) {
-        return colorParseCache.get(color);
+    if (HSLAParseCache.has(color)) {
+        return HSLAParseCache.get(color);
     }
     const rgb = parse(color);
     const hsl = rgbToHSL(rgb);
-    colorParseCache.set(color, hsl);
+    HSLAParseCache.set(color, hsl);
     return hsl;
 }
 
 export function clearColorModificationCache() {
     colorModificationCache.clear();
-    colorParseCache.clear();
+    HSLAParseCache.clear();
 }
 
 const rgbCacheKeys: (keyof RGBA)[] = ['r', 'g', 'b', 'a'];
-const themeCacheKeys: (keyof Theme)[] = ['mode', 'brightness', 'contrast', 'grayscale', 'sepia', 'darkSchemeBackgroundColor', 'darkSchemeTextColor', 'lightSchemeBackgroundColor', 'lightSchemeTextColor'];
+export const themeCacheKeys: (keyof Theme)[] = [
+    'mode',
+    'brightness',
+    'contrast',
+    'grayscale',
+    'sepia',
+    'darkSchemeBackgroundColor',
+    'darkSchemeTextColor',
+    'lightSchemeBackgroundColor',
+    'lightSchemeTextColor',
+];
 
 function getCacheId(rgb: RGBA, theme: Theme) {
     return rgbCacheKeys.map((k) => rgb[k] as any)

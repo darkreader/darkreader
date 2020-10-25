@@ -50,17 +50,14 @@ async function urlToImage(url: string) {
     });
 }
 
-const MAX_ANALIZE_PIXELS_COUNT = 32 * 32;
 let canvas: HTMLCanvasElement | OffscreenCanvas;
 let context: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D;
 
 function createCanvas() {
-    const maxWidth = MAX_ANALIZE_PIXELS_COUNT;
-    const maxHeight = MAX_ANALIZE_PIXELS_COUNT;
     canvas = document.createElement('canvas');
-    canvas.width = maxWidth;
-    canvas.height = maxHeight;
-    context = canvas.getContext('2d');
+    canvas.width = 1024;
+    canvas.height = 1024;
+    context = canvas.getContext('2d', );
     context.imageSmoothingEnabled = false;
 }
 
@@ -79,14 +76,10 @@ function analyzeImage(image: HTMLImageElement) {
         return null;
     }
     const naturalPixelsCount = naturalWidth * naturalHeight;
-    const k = Math.min(1, Math.sqrt(MAX_ANALIZE_PIXELS_COUNT / naturalPixelsCount));
-    const width = Math.ceil(naturalWidth * k);
-    const height = Math.ceil(naturalHeight * k);
-    context.clearRect(0, 0, width, height);
+    context.clearRect(0, 0, naturalWidth, naturalHeight);
 
-    context.drawImage(image, 0, 0, naturalWidth, naturalHeight, 0, 0, width, height);
-    const imageData = context.getImageData(0, 0, width, height);
-    const d = imageData.data;
+    context.drawImage(image, 0, 0, naturalWidth, naturalHeight);
+    const imageData = context.getImageData(0, 0, naturalWidth, naturalHeight).data;
 
     const TRANSPARENT_ALPHA_THRESHOLD = 0.05;
     const DARK_LIGHTNESS_THRESHOLD = 0.4;
@@ -99,13 +92,13 @@ function analyzeImage(image: HTMLImageElement) {
     let i: number, x: number, y: number;
     let r: number, g: number, b: number, a: number;
     let l: number;
-    for (y = 0; y < height; y++) {
-        for (x = 0; x < width; x++) {
-            i = 4 * (y * width + x);
-            r = d[i + 0] / 255;
-            g = d[i + 1] / 255;
-            b = d[i + 2] / 255;
-            a = d[i + 3] / 255;
+    for (y = 0; y < naturalHeight; y++) {
+        for (x = 0; x < naturalWidth; x++) {
+            i = 4 * (y * naturalWidth + x);
+            r = imageData[i + 0] / 255;
+            g = imageData[i + 1] / 255;
+            b = imageData[i + 2] / 255;
+            a = imageData[i + 3] / 255;
 
             if (a < TRANSPARENT_ALPHA_THRESHOLD) {
                 transparentPixelsCount++;
@@ -123,7 +116,7 @@ function analyzeImage(image: HTMLImageElement) {
         }
     }
 
-    const totalPixelsCount = width * height;
+    const totalPixelsCount = naturalWidth * naturalHeight;
     const opaquePixelsCount = totalPixelsCount - transparentPixelsCount;
 
     const DARK_IMAGE_THRESHOLD = 0.7;

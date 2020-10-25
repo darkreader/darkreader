@@ -3,18 +3,7 @@ import {createAsyncTasksQueue} from '../utils/throttle';
 import {iterateCSSRules, iterateCSSDeclarations, replaceCSSVariables} from './css-rules';
 import {getModifiableCSSDeclaration, ModifiableCSSDeclaration, ModifiableCSSRule} from './modify-css';
 import {isCSSStyleSheetConstructorSupported} from '../../utils/platform';
-
-const themeCacheKeys: (keyof Theme)[] = [
-    'mode',
-    'brightness',
-    'contrast',
-    'grayscale',
-    'sepia',
-    'darkSchemeBackgroundColor',
-    'darkSchemeTextColor',
-    'lightSchemeBackgroundColor',
-    'lightSchemeTextColor',
-];
+import {themeCacheKeys} from '../../generators/modify-colors';
 
 function getThemeKey(theme: Theme) {
     return themeCacheKeys.map((p) => `${p}:${theme[p]}`).join(';');

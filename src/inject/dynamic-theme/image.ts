@@ -92,10 +92,10 @@ function analyzeImage(image: HTMLImageElement) {
     let i: number, x: number, y: number;
     let r: number, g: number, b: number, a: number;
     let l: number;
-    for (y = 0; y < naturalHeight; y++) {
+    for (let y = 0; y < naturalHeight; y++) {
         for (x = 0; x < naturalWidth; x++) {
             i = 4 * (y * naturalWidth + x);
-            r = imageData[i + 0] / 255;
+            r = imageData[i] / 255;
             g = imageData[i + 1] / 255;
             b = imageData[i + 2] / 255;
             a = imageData[i + 3] / 255;

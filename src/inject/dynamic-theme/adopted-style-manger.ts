@@ -3,7 +3,7 @@ import {createStyleSheetModifier} from './stylesheet-modifier';
 import {getCSSVariables} from './css-rules';
 import {isCSSStyleSheetConstructorSupported} from '../../utils/platform';
 
-export let fallBackStyle = isCSSStyleSheetConstructorSupported ? new CSSStyleSheet : null;
+export let fallBackStyle = isCSSStyleSheetConstructorSupported ? new CSSStyleSheet() : null;
 const adoptedStyleOverrides = new WeakMap<CSSStyleSheet, CSSStyleSheet>();
 const overrideList = new WeakSet<CSSStyleSheet>();
 

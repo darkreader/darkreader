@@ -43,24 +43,34 @@ function onMessage({type, data}) {
     }
 }
 
-function getDataViaXHR() {
-    if (new RegExp(`(^|\\s|;)${chrome.runtime.id}=\\s*([-\\w]+)\\s*(;|$)`).test(document.cookie)) {
-        const data = RegExp.$2;
-        const url = 'blob:' + chrome.runtime.getURL(data);
-        document.cookie = `${chrome.runtime.id}=1; max-age=0`; // Remove the cookie
-        let res: any;
-        try {
-            const xhr = new XMLHttpRequest();
-            xhr.open('GET', url, false); // Synchronous XHR request so it won't slow down performance.
-            xhr.send();
-            res = JSON.parse(xhr.response);
-            URL.revokeObjectURL(url);
-        } catch (err) {
-            logWarn(err);
-        }
-        return res;
+function getDataViaXhr(data: string) {
+    const url = 'blob:' + chrome.runtime.getURL(data);
+    try {
+        // Remove the cookie
+        document.cookie = `${chrome.runtime.id}=1; max-age=0`;
+        const xhr = new XMLHttpRequest();
+        // Synchronous XHR request so it won't affect performance.
+        xhr.open('GET', url, false);
+        xhr.send();
+        URL.revokeObjectURL(url);
+        return JSON.parse(xhr.response);
+    } catch (err) {
+        logWarn(err);
+    } finally {
+        URL.revokeObjectURL(url);
     }
 }
+
+function getXhrBlobID() {
+    try {
+        // Getting the cookie of a document can fail on sandboxed frames.
+        const {cookie} = document; 
+        return new RegExp(`(^|\\s|;)${chrome.runtime.id}=\\s*([-\\w]+)\\s*(;|$)`).exec(cookie)[2];
+    } catch (err) {
+        logWarn(err);
+    }
+}
+
 
 // TODO: Use background page color scheme watcher when browser bugs fixed.
 const colorSchemeWatcher = watchForColorSchemeChange(({isDark}) => {
@@ -77,7 +87,8 @@ port.onDisconnect.addListener(() => {
 });
 
 if (isChromium) {
-    const data = getDataViaXHR();
+    const blobID = getXhrBlobID();
+    const data = blobID && getDataViaXhr(blobID);
     if (Array.isArray(document.adoptedStyleSheets) && fallBackStyle && data && data.type !== 'clean-up' && data.type !== 'unsupported-sender') {
         fallBackStyle.insertRule('html, body, body :not(iframe) { background-color: #181a1b !important; border-color: #776e62 !important; color: #e8e6e3 !important; }');
         document.adoptedStyleSheets = [...document.adoptedStyleSheets, fallBackStyle];

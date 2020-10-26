@@ -175,7 +175,7 @@ function deepWatchForInlineStyles(
     const ATTEMPTS_INTERVAL = getDuration({seconds: 10});
     const RETRY_TIMEOUT = getDuration({seconds: 2});
     const MAX_ATTEMPTS_COUNT = 50;
-    let cache: MutationRecord[];
+    let cache: MutationRecord[] = [];
     let timeoutId: number = null;
 
     const handleAttributionMutations = throttle((mutations: MutationRecord[]) => {
@@ -203,7 +203,9 @@ function deepWatchForInlineStyles(
                     start = null;
                     attemptCount = 0;
                     timeoutId = null;
-                    handleAttributionMutations(cache);
+                    const attributeCache = cache;
+                    cache = [];
+                    handleAttributionMutations(attributeCache);
                 }, RETRY_TIMEOUT);
                 cache.push(...mutations);
                 return;

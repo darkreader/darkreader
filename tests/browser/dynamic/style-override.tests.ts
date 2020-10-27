@@ -55,20 +55,20 @@ describe('Style override', () => {
                 '<!DOCTYPE html>',
                 '<html>',
                 '<head>',
-                '   <script>',
-                '       const styleElement = document.createElement("style");',
-                '       styleElement.classList.add("testcase-style")',
-                '       document.head.append(styleElement);',
-                '       styleElement.sheet.insertRule("h1 { color: gray } ")',
-                '       styleElement.sheet.insertRule("strong { color: red } ")',
-                '   </script>',
                 '</head>',
                 '<body>',
                 '    <h1>Style <strong>override</strong>!</h1>',
                 '</body>',
-                '<html>',
                 '</html>',
             ),
+        });
+
+        await page.evaluate(() => {
+            const styleElement = document.createElement('style');
+            styleElement.classList.add('testcase-style');
+            document.head.append(styleElement);
+            styleElement.sheet.insertRule('h1 { color: gray }');
+            styleElement.sheet.insertRule('strong { color: red }');
         });
 
         await expect(page.evaluate(() => getComputedStyle(document.querySelector('h1')).color)).resolves.toBe('rgb(152, 143, 129)');
@@ -89,20 +89,20 @@ describe('Style override', () => {
                 '<!DOCTYPE html>',
                 '<html>',
                 '<head>',
-                '   <script>',
-                '       const styleElement = document.createElement("style");',
-                '       styleElement.classList.add("testcase-style")',
-                '       document.head.append(styleElement);',
-                '       styleElement.sheet.insertRule("h1 { color: gray } ")',
-                '       styleElement.sheet.insertRule("strong { color: red } ")',
-                '   </script>',
                 '</head>',
                 '<body>',
-                '    <h1>Some test foor...... <strong>Moving stylleessss!!!</strong>!</h1>',
+                '    <h1>Some test foor...... <strong>Moving styles</strong>!</h1>',
                 '</body>',
-                '<html>',
                 '</html>',
             ),
+        });
+
+        await page.evaluate(() => {
+            const styleElement = document.createElement('style');
+            styleElement.classList.add('testcase-style');
+            document.head.append(styleElement);
+            styleElement.sheet.insertRule('h1 { color: gray } ');
+            styleElement.sheet.insertRule('strong { color: red } ');
         });
 
         await expect(page.evaluate(async () => {
@@ -120,20 +120,20 @@ describe('Style override', () => {
                 '<!DOCTYPE html>',
                 '<html>',
                 '<head>',
-                '   <script>',
-                '       const styleElement = document.createElement("style");',
-                '       styleElement.classList.add("testcase-style")',
-                '       document.head.append(styleElement);',
-                '       styleElement.sheet.insertRule("h1 { color: gray } ")',
-                '       styleElement.sheet.insertRule("strong { color: red } ")',
-                '   </script>',
                 '</head>',
                 '<body>',
-                '    <h1>Some test foor...... <strong>Oh uhm removing styles ;(</strong>!</h1>',
+                '    <h1>Some test foor...... <strong>Oh uhm removing styles :(</strong>!</h1>',
                 '</body>',
-                '<html>',
                 '</html>',
             ),
+        });
+
+        await page.evaluate(() => {
+            const styleElement = document.createElement('style');
+            styleElement.classList.add('testcase-style');
+            document.head.append(styleElement);
+            styleElement.sheet.insertRule('h1 { color: gray }');
+            styleElement.sheet.insertRule('strong { color: red }');
         });
 
         await expect(page.evaluate(async () => {
@@ -152,25 +152,25 @@ describe('Style override', () => {
                 '<!DOCTYPE html>',
                 '<html>',
                 '<head>',
-                '   <script>',
-                '       const styleElement = document.createElement("style");',
-                '       styleElement.classList.add("testcase-style")',
-                '       document.head.append(styleElement);',
-                '       styleElement.sheet.insertRule("h1 { color: gray } ")',
-                '       styleElement.sheet.insertRule("strong { color: red } ")',
-                '   </script>',
                 '</head>',
                 '<body>',
-                '    <h1>Some test foor...... <strong>Oh uhm a pink background ;(</strong>!</h1>',
+                '    <h1>Some test foor...... <strong>Oh uhm a pink background</strong></h1>',
                 '</body>',
-                '<html>',
                 '</html>',
             ),
         });
 
+        await page.evaluate(() => {
+            const styleElement = document.createElement('style');
+            styleElement.classList.add('testcase-style');
+            document.head.append(styleElement);
+            styleElement.sheet.insertRule('h1 { color: gray }');
+            styleElement.sheet.insertRule('strong { color: red }');
+        });
+
         await expect(page.evaluate(async () => {
             const style = document.querySelector('.testcase-style');
-            (style as HTMLStyleElement).sheet.insertRule('html { background-color: pink } ');
+            (style as HTMLStyleElement).sheet.insertRule('html { background-color: pink }');
             await new Promise((resolve) => setTimeout(resolve, 1000));
             return (style.nextSibling as HTMLStyleElement).sheet.cssRules[0].cssText;
         })).resolves.toBe('html { background-color: rgb(89, 0, 16); }');
@@ -187,7 +187,6 @@ describe('Style override', () => {
                 '<body>',
                 '    <h1>Some test foor...... <strong>Oh uhm what?</strong>!</h1>',
                 '</body>',
-                '<html>',
                 '</html>',
             ),
         });
@@ -196,8 +195,8 @@ describe('Style override', () => {
             const styleElement = document.createElement('style');
             styleElement.classList.add('testcase-style');
             document.head.append(styleElement);
-            styleElement.sheet.insertRule('h1 { color: pink } ');
-            styleElement.sheet.insertRule('strong { color: orange } ');
+            styleElement.sheet.insertRule('h1 { color: pink }');
+            styleElement.sheet.insertRule('strong { color: orange }');
             await new Promise((resolve) => setTimeout(resolve, 1000));
             return (styleElement.nextSibling as HTMLStyleElement).sheet.cssRules.length === 2 && (styleElement.nextSibling as HTMLStyleElement).classList.contains('darkreader--sync');
         })).resolves.toBe(true);

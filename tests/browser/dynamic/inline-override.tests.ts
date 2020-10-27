@@ -5,10 +5,10 @@ describe('Inline style override', () => {
         '<!DOCTYPE html>',
         '<html>',
         '<head>',
+        '</head>',
         '<body>',
         '    <span style="color: red;">Inline style override</span>',
         '</body>',
-        '<html>',
         '</html>',
     );
 
@@ -19,6 +19,7 @@ describe('Inline style override', () => {
 
         await expect(page.evaluate(() => getComputedStyle(document.querySelector('span')).color)).resolves.toBe('rgb(255, 26, 26)');
     });
+
     it('should watch for inline style change', async () => {
         await loadTestPage({
             '/': inlineStyleMarkup,

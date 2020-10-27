@@ -7,11 +7,11 @@ describe('Style override', () => {
                 '<!DOCTYPE html>',
                 '<html>',
                 '<head>',
+                '</head>',
                 '<body>',
                 '    Text',
                 '    <a href="#">Link</a>',
                 '</body>',
-                '<html>',
                 '</html>',
             ),
         });
@@ -37,7 +37,6 @@ describe('Style override', () => {
                 '<body>',
                 '    <h1>Style <strong>override</strong>!</h1>',
                 '</body>',
-                '<html>',
                 '</html>',
             ),
         });

@@ -4,7 +4,7 @@ module.exports = {
     transform: {
         '^.+\\.ts(x?)$': 'ts-jest'
     },
-    testRegex: 'tests/browser/.*link-override\\.tests\\.ts(x?)$',
+    testRegex: 'tests/browser/.*\\.tests\\.ts(x?)$',
     moduleFileExtensions: [
         'ts',
         'tsx',

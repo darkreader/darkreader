@@ -3,10 +3,11 @@ const JestNodeEnvironment = require('jest-environment-node');
 const puppeteer = require('puppeteer-core');
 const {generateHTMLCoverageReports} = require('./coverage');
 const {getChromePath, getFirefoxPath, chromeExtensionDebugDir, firefoxExtensionDebugDir} = require('./paths');
-const server = require('./server');
+const {createTestServer} = require('./server');
 const webExt = require('web-ext');
 
 const TEST_SERVER_PORT = 8891;
+const CORS_SERVER_PORT = 8892;
 const FIREFOX_DEVTOOLS_PORT = 8893;
 
 class PuppeteerEnvironment extends JestNodeEnvironment {
@@ -48,7 +49,8 @@ class PuppeteerEnvironment extends JestNodeEnvironment {
         this.browser = browser;
         this.global.browser = browser;
 
-        await server.start(TEST_SERVER_PORT);
+        this.testServer = await createTestServer(TEST_SERVER_PORT);
+        this.corsServer = await createTestServer(CORS_SERVER_PORT);
 
         const page = await browser.newPage();
         page.setCacheEnabled(false);
@@ -63,13 +65,16 @@ class PuppeteerEnvironment extends JestNodeEnvironment {
         await new Promise((promise) => setTimeout(promise, 1000));
 
         const loadTestPage = async (paths) => {
-            server.setPaths(paths);
+            const {cors, ...testPaths} = paths;
+            this.testServer.setPaths(testPaths);
+            cors && this.corsServer.setPaths(cors);
             await page.bringToFront();
             await page.goto(`http://localhost:${TEST_SERVER_PORT}`);
             // TODO: Determine why sometimes tests are executed before content script
             await page.evaluate(() => new Promise((resolve) => setTimeout(resolve, 1000)));
         };
         this.global.loadTestPage = loadTestPage;
+        this.global.corsURL = this.corsServer.url;
     }
 
     async teardown() {
@@ -83,7 +88,8 @@ class PuppeteerEnvironment extends JestNodeEnvironment {
         }
 
         this.browser.close();
-        await server.close();
+        await this.testServer.close();
+        await this.corsServer.close();
     }
 }
 

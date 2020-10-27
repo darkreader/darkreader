@@ -27,4 +27,32 @@ describe('Link override', () => {
         await expect(page.evaluate(() => getComputedStyle(document.querySelector('h1')).color)).resolves.toBe('rgb(232, 230, 227)');
         await expect(page.evaluate(() => getComputedStyle(document.querySelector('h1 strong')).color)).resolves.toBe('rgb(255, 26, 26)');
     });
+    it('should override CORS style', async () => {
+        await loadTestPage({
+            '/': multiline(
+                '<!DOCTYPE html>',
+                '<html>',
+                '<head>',
+                `    <link rel="stylesheet" href="${corsURL}/style.css"/>`,
+                '</head>',
+                '<body>',
+                '    <h1>CORS style <strong>override</strong>!</h1>',
+                '</body>',
+                '<html>',
+                '</html>',
+            ),
+            cors: {
+                '/style.css': multiline(
+                    'body { background: gray; }',
+                    'h1 strong { color: red; }',
+                ),
+            },
+        });
+
+        await expect(page.evaluate(() => getComputedStyle(document.documentElement).backgroundColor)).resolves.toBe('rgb(24, 26, 27)');
+        await expect(page.evaluate(() => getComputedStyle(document.body).backgroundColor)).resolves.toBe('rgb(96, 104, 108)');
+        await expect(page.evaluate(() => getComputedStyle(document.body).color)).resolves.toBe('rgb(232, 230, 227)');
+        await expect(page.evaluate(() => getComputedStyle(document.querySelector('h1')).color)).resolves.toBe('rgb(232, 230, 227)');
+        await expect(page.evaluate(() => getComputedStyle(document.querySelector('h1 strong')).color)).resolves.toBe('rgb(255, 26, 26)');
+    });
 });

@@ -12,7 +12,6 @@ describe('Link override', () => {
                 '<body>',
                 '    <h1>Link style <strong>override</strong>!</h1>',
                 '</body>',
-                '<html>',
                 '</html>',
             ),
             '/style.css': multiline(
@@ -39,7 +38,6 @@ describe('Link override', () => {
                 '<body>',
                 '    <h1>CORS style <strong>override</strong>!</h1>',
                 '</body>',
-                '<html>',
                 '</html>',
             ),
             cors: {
@@ -68,9 +66,8 @@ describe('Link override', () => {
                 '    <link rel="stylesheet" href="style.css"/>',
                 '</head>',
                 '<body>',
-                '    <h1><strong>Fallback</strong> style</h1>',
+                '    <h1>Link loading <strong>delay</strong></h1>',
                 '</body>',
-                '<html>',
                 '</html>',
             ),
             '/style.css': async (_, res) => {

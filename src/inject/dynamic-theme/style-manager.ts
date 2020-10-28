@@ -147,7 +147,7 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
                 logWarn(accessError);
             }
 
-            if ((cssRules && !accessError) || isStillLoadingError(accessError)) {
+            if ((!cssRules && !accessError) || isStillLoadingError(accessError)) {
                 try {
                     await linkLoading(element);
                 } catch (err) {

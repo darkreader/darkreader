@@ -21,3 +21,4 @@ tests/browser/coverage/
 #-----------------------------------
 .idea/
 .vscode/
+*.code-workspace

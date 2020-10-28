@@ -41,7 +41,7 @@
     "@rollup/plugin-commonjs": "15.1.0",
     "@rollup/plugin-node-resolve": "10.0.0",
     "@rollup/plugin-replace": "2.3.4",
-    "@rollup/pluginutils": "4.0.0",
+    "@rollup/pluginutils": "4.1.0",
     "@types/chrome": "0.0.125",
     "@types/jest": "26.0.15",
     "@types/node": "14.14.0",

@@ -233,7 +233,7 @@ export function createStyleSheetModifier() {
                 if (rule instanceof CSSMediaRule) {
                     const {media} = rule;
                     const index = parent.cssRules.length;
-                    parent.insertRule(`@media ${media} {}`, index);
+                    parent.insertRule(`@media ${media.mediaText} {}`, index);
                     return parent.cssRules[index] as CSSMediaRule;
                 }
                 return parent;

@@ -19,13 +19,15 @@ afterEach(() => {
 });
 
 describe('Style override', () => {
-    test('should override static style', () => {
+    it('should override static style', () => {
         const style = document.createElement('style');
         style.textContent = 'body { background-color: white; } h1 { color: black; }';
         container.append(style);
 
         const modifier = createStyleSheetModifier();
-        const override = new CSSStyleSheet();
+        const overrideStyle = document.createElement('style');
+        container.append(overrideStyle);
+        const override = overrideStyle.sheet;
         modifier.modifySheet({
             theme,
             sourceCSSRules: style.sheet.cssRules,
@@ -38,8 +40,8 @@ describe('Style override', () => {
 
         expect(override.cssRules.length).toBe(2);
         expect((override.cssRules[0] as CSSStyleRule).selectorText).toBe('body');
-        expect((override.cssRules[0] as CSSStyleRule).style.getPropertyValue('background-color')).toBe('#000000');
+        expect((override.cssRules[0] as CSSStyleRule).style.getPropertyValue('background-color')).toBe('rgb(0, 0, 0)');
         expect((override.cssRules[1] as CSSStyleRule).selectorText).toBe('h1');
-        expect((override.cssRules[1] as CSSStyleRule).style.getPropertyValue('color')).toBe('#ffffff');
+        expect((override.cssRules[1] as CSSStyleRule).style.getPropertyValue('color')).toBe('rgb(255, 255, 255)');
     });
 });

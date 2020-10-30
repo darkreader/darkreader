@@ -210,7 +210,7 @@ function createManager(element: StyleElement) {
         }
     }
 
-    function update() {
+    const update = () => {
         const details = manager.details();
         if (!details) {
             return;
@@ -222,6 +222,8 @@ function createManager(element: StyleElement) {
             throttledRenderAllStyles();
         }
     }
+
+    (window as any).update = update;
 
     const manager = manageStyle(element, {update, loadingStart, loadingEnd});
     styleManagers.set(element, manager);

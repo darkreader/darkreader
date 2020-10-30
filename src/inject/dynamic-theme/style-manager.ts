@@ -2,7 +2,7 @@ import {Theme} from '../../definitions';
 import {forEach} from '../../utils/array';
 import {getMatches} from '../../utils/text';
 import {getAbsoluteURL} from '../../utils/url';
-import {watchForNodePosition, removeNode, iterateShadowHosts} from '../utils/dom';
+import {watchForNodePosition, removeNode, iterateShadowHosts, addRuleFunction, deleteRuleFunction, insertRuleFunction, removeRuleFunction} from '../utils/dom';
 import {logWarn} from '../utils/log';
 import {getCSSVariables, replaceCSSRelativeURLsWithAbsolute, removeCSSComments, replaceCSSFontFace, getCSSURLValue, cssImportRegex, getCSSBaseBath} from './css-rules';
 import {bgFetch} from './network';
@@ -318,36 +318,33 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
         return cssRules;
     }
 
-    let rulesChangeKey: number = null;
-    let rulesCheckFrameId: number = null;
-
-    function updateRulesChangeKey() {
-        const rules = safeGetSheetRules();
-        if (rules) {
-            rulesChangeKey = rules.length;
-        }
-    }
-
-    function didRulesKeyChange() {
-        const rules = safeGetSheetRules();
-        return rules && rules.length !== rulesChangeKey;
-    }
-
     function subscribeToSheetChanges() {
-        updateRulesChangeKey();
-        unsubscribeFromSheetChanges();
-        const checkForUpdate = () => {
-            if (didRulesKeyChange()) {
-                updateRulesChangeKey();
-                update();
-            }
-            rulesCheckFrameId = requestAnimationFrame(checkForUpdate);
+        function proxyAddRule(selector, style, index) {
+            const returnValue = addRuleFunction.value.call(element.sheet, selector, style, index);
+            update();
+            return returnValue;
         };
-        checkForUpdate();
-    }
+        Object.defineProperty(CSSStyleSheet.prototype, 'addRule', {...addRuleFunction, value: proxyAddRule});
 
-    function unsubscribeFromSheetChanges() {
-        cancelAnimationFrame(rulesCheckFrameId);
+        function proxyInsertRule(rule, index) {
+            const returnValue = insertRuleFunction.value.call(element.sheet, rule, index);
+            update();
+            return returnValue;
+        };
+        Object.defineProperty(CSSStyleSheet.prototype, 'insertRule', {...insertRuleFunction, value: proxyInsertRule});
+        Object.defineProperty((element.sheet as any).__proto__, 'insertRule', {...insertRuleFunction, value: proxyInsertRule});
+        function proxyDeleteRule(index) {
+            deleteRuleFunction.value.call(element.sheet, index);
+            update();
+        };
+        Object.defineProperty(CSSStyleSheet.prototype, 'deleteRule', {...deleteRuleFunction, value: proxyDeleteRule});
+
+        function proxyRemoveRule(index) {
+            removeRuleFunction.value.call(element.sheet, index);
+            update();
+        };
+        Object.defineProperty(CSSStyleSheet.prototype, 'removeRule', {...removeRuleFunction, value: proxyRemoveRule});
+
     }
 
     function pause() {
@@ -355,7 +352,6 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
         cancelAsyncOperations = true;
         corsCopyPositionWatcher && corsCopyPositionWatcher.stop();
         syncStylePositionWatcher && syncStylePositionWatcher.stop();
-        unsubscribeFromSheetChanges();
     }
 
     function destroy() {
@@ -392,7 +388,6 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
         syncStylePositionWatcher && syncStylePositionWatcher.skip();
         if (shouldForceRender) {
             forceRenderStyle = true;
-            updateRulesChangeKey();
             update();
         }
     }

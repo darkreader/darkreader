@@ -16,7 +16,7 @@ import {FilterConfig, DynamicThemeFix} from '../../definitions';
 import {generateUID} from '../../utils/uid';
 import {createAdoptedStyleSheetOverride, AdoptedStyleSheetManager} from './adopted-style-manger';
 import {isFirefox} from '../../utils/platform';
-import {injectProxy} from './stylesheet-proxy';
+import {injectProxy, removeProxyOnPrototype} from './stylesheet-proxy';
 
 const variables = new Map<string, string>();
 const INSTANCE_ID = generateUID();
@@ -112,7 +112,14 @@ function createStaticStyleOverrides() {
     setupNodePositionWatcher(variableStyle, 'variables');
 
     const proxyScript = createOrUpdateElement('darkreader--proxy', undefined, 'script');
-    proxyScript.textContent = `${injectProxy.toString()}\ninjectProxy();`;
+    proxyScript.textContent = `// First get the originial 'native code' of the function.
+        window['addRuleFunction'] = Object.getOwnPropertyDescriptor(CSSStyleSheet.prototype, 'addRule');
+        window['insertRuleFunction'] = Object.getOwnPropertyDescriptor(CSSStyleSheet.prototype, 'insertRule');
+        window['deleteRuleFunction'] = Object.getOwnPropertyDescriptor(CSSStyleSheet.prototype, 'deleteRule');
+        window['removeRuleFunction'] = Object.getOwnPropertyDescriptor(CSSStyleSheet.prototype, 'removeRule');
+        ${injectProxy.toString()}
+        ${removeProxyOnPrototype.toString()}
+        injectProxy();`;
     document.head.insertBefore(proxyScript, variableStyle.nextSibling);
     setupNodePositionWatcher(proxyScript, 'proxy');
 }
@@ -430,6 +437,18 @@ export function createOrUpdateDynamicTheme(filterConfig: FilterConfig, dynamicTh
     }
 }
 
+function removeProxy() {
+    const proxy = document.head.querySelector('.darkreader--proxy');
+    if (proxy) {
+        const Dproxy = document.createElement('script');
+        Dproxy.textContent = 'removeProxyOnPrototype()';
+        document.head.append(Dproxy);
+        removeNode(Dproxy);
+        removeNode(proxy);
+    }
+
+}
+
 export function removeDynamicTheme() {
     cleanDynamicThemeCache();
     removeNode(document.querySelector('.darkreader--fallback'));
@@ -441,6 +460,7 @@ export function removeDynamicTheme() {
         removeNode(document.head.querySelector('.darkreader--inline'));
         removeNode(document.head.querySelector('.darkreader--override'));
         removeNode(document.head.querySelector('meta[name="darkreader"]'));
+        removeProxy();
     }
     shadowRootsWithOverrides.forEach((root) => {
         removeNode(root.querySelector('.darkreader--inline'));

@@ -56,7 +56,7 @@ test('URL is enabled', () => {
         {siteList: ['google.com/maps'], siteListEnabled: [], applyToListedOnly: true} as UserSettings,
         {isProtected: false, isInDarkList: false},
     )).toBe(false);
-    debugger;
+
     // Special URLs
     expect(isURLEnabled(
         'https://chrome.google.com/webstore',
@@ -240,12 +240,18 @@ test('URL is enabled', () => {
     expect(isURLInList('https://support.discord.com', ['/^(https:\/\/)(?!blog|support)([a-z0-9.]+)(.com)$/i', 'blog.discord.com'])).toBe(false);
 
     // Test subdomain
-    expect(isURLMatched('https://discord.com', 'discord.com')).toBe(true);
-    expect(isURLMatched('https://support.discord.com', 'discord.com')).toBe(false);
-    expect(isURLMatched('https://support.discord.com', 'support.discord.com')).toBe(true);
-    expect(isURLInList('https://blog.discord.com', ['!blog.discord.com'])).toBe(false);
-    expect(isURLInList('https://blog.discord.com', ['!blog.discord.com', 'discord.com'])).toBe(false);
-    expect(isURLInList('https://discord.com', ['!blog.discord.com', 'discord.com'])).toBe(true);
+    expect(isURLMatched('https://discord.com/', 'discord.com')).toBe(true);
+    expect(isURLMatched('https://support.discord.com/', 'discord.com')).toBe(false);
+    expect(isURLMatched('https://support.discord.com/', 'support.discord.com')).toBe(true);
+    expect(isURLInList('https://blog.discord.com/', ['!blog.discord.com'])).toBe(false);
+    expect(isURLInList('https://blog.discord.com/', ['!blog.discord.com', 'discord.com'])).toBe(false);
+    expect(isURLInList('https://discord.com/', ['!blog.discord.com', 'discord.com'])).toBe(true);
+    expect(isURLInList('https://codegolf.stackexchange.com/', ['stackexchange.com'])).toBe(false);
+    expect(isURLInList('https://codegolf.stackexchange.com/', ['codegolf.stackexchange.com'])).toBe(true);
+    expect(isURLInList('https://codegolf.stackexchange.com/', ['*.stackexchange.com'])).toBe(true);
+    expect(isURLInList('https://codegolf.stackexchange.com/', ['*.stackexchange.com', '!codegolf.stackexchange.com'])).toBe(false);
+    expect(isURLInList('https://codegolf.stackexchange.com/', ['codegolf.*.com', '!codegolf.stackexchange.com'])).toBe(false);
+    expect(isURLInList('https://codegolf.stackexchange.com/', ['codegolf.*.com'])).toBe(true);
 
     // Temporary Dark Sites list fix
     expect(isURLEnabled(

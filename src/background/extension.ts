@@ -308,7 +308,7 @@ export class Extension {
         const siteList = isInDarkList ?
             this.user.settings.siteListEnabled.slice() :
             this.user.settings.siteList.slice();
-        let pattern = getURLHostOrProtocol(url);
+        const pattern = getURLHostOrProtocol(url);
 
         const index = siteList.indexOf(pattern);
         if (index < 0) {

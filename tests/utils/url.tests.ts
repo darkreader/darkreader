@@ -8,7 +8,7 @@ test('URL is enabled', () => {
         'https://mail.google.com/mail/u/0/',
         {siteList: ['google.com'], siteListEnabled: [], applyToListedOnly: false} as UserSettings,
         {isProtected: false, isInDarkList: false},
-    )).toBe(false);
+    )).toBe(true);
     expect(isURLEnabled(
         'https://mail.google.com/mail/u/0/',
         {siteList: ['mail.google.com'], siteListEnabled: [], applyToListedOnly: false} as UserSettings,
@@ -40,10 +40,10 @@ test('URL is enabled', () => {
         'https://mail.google.com/mail/u/0/',
         {siteList: ['google.com'], siteListEnabled: [], applyToListedOnly: true} as UserSettings,
         {isProtected: false, isInDarkList: false},
-    )).toBe(true);
+    )).toBe(false);
     expect(isURLEnabled(
         'https://mail.google.com/mail/u/0/',
-        {siteList: ['google.*/mail'], siteListEnabled: [], applyToListedOnly: true} as UserSettings,
+        {siteList: ['mail.google.*/mail'], siteListEnabled: [], applyToListedOnly: true} as UserSettings,
         {isProtected: false, isInDarkList: false},
     )).toBe(true);
     expect(isURLEnabled(
@@ -56,7 +56,7 @@ test('URL is enabled', () => {
         {siteList: ['google.com/maps'], siteListEnabled: [], applyToListedOnly: true} as UserSettings,
         {isProtected: false, isInDarkList: false},
     )).toBe(false);
-
+    debugger;
     // Special URLs
     expect(isURLEnabled(
         'https://chrome.google.com/webstore',
@@ -196,11 +196,11 @@ test('URL is enabled', () => {
     // Test with list's
     expect(isURLInList('https://www.google.com', ['google.com', 'example.org'])).toBe(true);
     expect(isURLInList('https://www.google.org', ['google.com', 'example.org'])).toBe(false);
-    expect(isURLInList('https://mail.google.com/mail/u/0/', ['example.org', 'google.*/mail/*/0'])).toBe(true);
+    expect(isURLInList('https://mail.google.com/mail/u/0/', ['example.org', 'mail.google.*/mail/*/0'])).toBe(true);
     expect(isURLInList('https://mail.google.com/mail/u/1/', ['example.org', 'google.*/mail/*/0'])).toBe(false);
     expect(isURLInList('https://www.discord.com', ['discord.com', '!blog.discord.com'])).toBe(true);
     expect(isURLInList('https://blog.discord.com', ['discord.com', '!blog.discord.com'])).toBe(false);
-    expect(isURLInList('https://support.discord.com', ['discord.com', '!blog.discord.com'])).toBe(true);
+    expect(isURLInList('https://support.discord.com', ['support.discord.com', '!blog.discord.com'])).toBe(true);
     expect(isURLInList('https://support.discord.com', ['discord.com', '!support.discord.com'])).toBe(false);
     expect(isURLInList('https://mail.google.com/compose/', ['google.com', '!mail.google.com', 'mail.google.com/compose'])).toBe(true);
     expect(isURLInList('https://mail.google.com/', ['google.com', '!mail.google.com', 'mail.google.com/compose'])).toBe(false);
@@ -216,7 +216,8 @@ test('URL is enabled', () => {
 
     // Test subdomain
     expect(isURLMatched('https://discord.com', 'discord.com')).toBe(true);
-    expect(isURLMatched('https://support.discord.com', 'discord.com')).toBe(true);
+    expect(isURLMatched('https://support.discord.com', 'discord.com')).toBe(false);
+    expect(isURLMatched('https://support.discord.com', 'support.discord.com')).toBe(true);
     expect(isURLInList('https://blog.discord.com', ['!blog.discord.com'])).toBe(false);
     expect(isURLInList('https://blog.discord.com', ['!blog.discord.com', 'discord.com'])).toBe(false);
     expect(isURLInList('https://discord.com', ['!blog.discord.com', 'discord.com'])).toBe(true);

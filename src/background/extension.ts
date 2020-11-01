@@ -302,11 +302,6 @@ export class Extension {
             this.user.settings.siteList.slice();
         let pattern = getURLHostOrProtocol(url);
 
-        const maindomain = pattern.substr(pattern.indexOf('.') + 1);
-        if (siteList.indexOf(maindomain) > -1) {
-            pattern = `!${pattern}`;
-        }
-
         const index = siteList.indexOf(pattern);
         if (index < 0) {
             siteList.push(pattern);

@@ -5,7 +5,7 @@ interface MatchInterface {
     negated: boolean;
 }
 
-function makeRegexp(pattern: string) {
+function makeRegexp(pattern: string): MatchInterface {
     if (regexpCache.has(pattern)) {
         return regexpCache.get(pattern);
     }
@@ -24,7 +24,7 @@ function makeRegexp(pattern: string) {
         return regObject;
     }
     pattern = pattern.replace(/[|\\{}()[\]^$+*?.]/g, '\\$&').replace(/-/g, '\\x2d').replace(/\\\*/g, '[\\s\\S]*');
-    const regexp = new RegExp(`${pattern}`, 'i');
+    const regexp = new RegExp(`^${pattern}`, 'i');
     const regObject: MatchInterface = {
         regexp,
         negated,
@@ -33,84 +33,69 @@ function makeRegexp(pattern: string) {
     return regObject;
 }
 
+function sanitazeInput(input: string) {
+    return (input.replace(/^\^/, '')
+        .replace(/\$$/, '')
+        .replace(/^.*?\/{2,3}/, '')
+        .replace(/\?.*$/, '')
+        .replace(/\/$/, '')
+        .replace(/^www./, '')
+    );
+}
+
 export function isMatch(input: string, pattern: string) {
     if (input === '' || pattern === '') {
         return false;
     }
+
     if (pattern[0] === '/') {
         const flag = pattern.substr(pattern.lastIndexOf('/') + 1);
         pattern = pattern.substr(1).substr(0, pattern.lastIndexOf('/') - 1);
         return (new RegExp(pattern, flag)).test(input);
     }
-    input = (input
-        .toString()
-        .replace(/^\^/, '')
-        .replace(/\$$/, '')
-        .replace(/^.*?\/{2,3}/, '')
-        .replace(/\?.*$/, '')
-        .replace(/\/$/, '')
-    );
-    const strippedPattern: string = (pattern
-        .toString()
-        .replace(/^\^/, '')
-        .replace(/\$$/, '')
-        .replace(/^.*?\/{2,3}/, '')
-        .replace(/\?.*$/, '')
-        .replace(/\/$/, '')
-        .replace(/\$www./, '')
-    );
-    const regObject: MatchInterface = makeRegexp(strippedPattern);
-    const regexp: RegExp = regObject.regexp;
-    const matched = regexp.test(input);
-    if (!matched) {
-        if (regObject.negated) {
-            return true;
-        } else {
-            return false;
-        }
-    } else {
-        if (regObject.negated) {
-            return false;
-        } else {
-            return true;
-        }
-    }
+
+    input = sanitazeInput(input);
+    const strippedPattern = sanitazeInput(pattern);
+    const compiledRegexp: MatchInterface = makeRegexp(strippedPattern);
+    const regexp: RegExp = compiledRegexp.regexp;
+    const match = Boolean(regexp.exec(input));
+
+    const matched = compiledRegexp.negated ? !match : match;
+    return matched;
 }
 
 export function isInPattern(input: string, patterns: any[]) {
     if (input == '' || patterns.length === 0) {
         return false;
     }
-    input = (input.replace(/^\^/, '')
-        .replace(/\$$/, '')
-        .replace(/^.*?\/{2,3}/, '')
-        .replace(/\?.*$/, '')
-        .replace(/\/$/, '')
-    );
-    patterns = patterns.sort(function (a, b){
-        return a.length - b.length;
-    });
-    let endresult = false;
-    for (let x = 0, len = patterns.length; x < len; x++) {
-        const pattern: string = (patterns[x]
-            .replace(/^\^/, '')
-            .replace(/\$$/, '')
-            .replace(/^.*?\/{2,3}/, '')
-            .replace(/\?.*$/, '')
-            .replace(/\/$/, '')
-            .replace(/\$www./, '')
-        );
-        const regObject: MatchInterface = makeRegexp(pattern);
-        const regexp: RegExp = regObject.regexp;
-        const matched = regexp.test(input);
+
+    input = sanitazeInput(input);
+    const omit = new Set();
+    const keep = new Set();
+    const items = new Set();
+    let negatives = 0;
+
+    for (let i = 0, len = patterns.length; i < len; i++) {
+        const pattern = sanitazeInput(patterns[i]);
+        const matchRegex = makeRegexp(pattern);
+        items.add(pattern[0] === '!' ? pattern.slice(1) : pattern);
+        const negated = matchRegex.negated;
+        if (negated) {
+            negatives++;
+        }
+        const matched = Boolean(matchRegex.regexp.exec(input));
         if (!matched) {
             continue;
         }
-        if (regObject.negated) {
-            endresult = false;
+        if (negated) {
+            omit.add(input);
         } else {
-            endresult = true;
+            omit.delete(input);
+            keep.add(input);
         }
     }
-    return endresult;
+
+    const result = negatives === patterns.length ? [...items] : [...keep];
+    const matches = result.filter(item => !omit.has(item));
+    return matches.length !== 0;
 }

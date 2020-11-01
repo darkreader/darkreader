@@ -352,8 +352,3 @@ export function getTempCSSStyleSheet(): CSSStyleSheet {
         return tempStyle;
     }
 }
-
-export const addRuleFunction = Object.getOwnPropertyDescriptor((getTempCSSStyleSheet() as any).__proto__, 'addRule');
-export const insertRuleFunction = Object.getOwnPropertyDescriptor((getTempCSSStyleSheet() as any).__proto__, 'insertRule');
-export const deleteRuleFunction = Object.getOwnPropertyDescriptor((getTempCSSStyleSheet() as any).__proto__, 'deleteRule');
-export const removeRuleFunction = Object.getOwnPropertyDescriptor((getTempCSSStyleSheet() as any).__proto__, 'removeRule');

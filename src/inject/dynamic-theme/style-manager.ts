@@ -319,31 +319,49 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
     }
 
     function subscribeToSheetChanges() {
-        function proxyAddRule(selector, style, index) {
-            const returnValue = addRuleFunction.value.call(element.sheet, selector, style, index);
-            update();
-            return returnValue;
-        };
-        Object.defineProperty(CSSStyleSheet.prototype, 'addRule', {...addRuleFunction, value: proxyAddRule});
 
-        function proxyInsertRule(rule, index) {
-            const returnValue = insertRuleFunction.value.call(element.sheet, rule, index);
+        element.addEventListener('updateSheet', () => {
             update();
-            return returnValue;
-        };
-        Object.defineProperty(CSSStyleSheet.prototype, 'insertRule', {...insertRuleFunction, value: proxyInsertRule});
-        Object.defineProperty((element.sheet as any).__proto__, 'insertRule', {...insertRuleFunction, value: proxyInsertRule});
-        function proxyDeleteRule(index) {
-            deleteRuleFunction.value.call(element.sheet, index);
-            update();
-        };
-        Object.defineProperty(CSSStyleSheet.prototype, 'deleteRule', {...deleteRuleFunction, value: proxyDeleteRule});
+        });
 
-        function proxyRemoveRule(index) {
-            removeRuleFunction.value.call(element.sheet, index);
-            update();
-        };
-        Object.defineProperty(CSSStyleSheet.prototype, 'removeRule', {...removeRuleFunction, value: proxyRemoveRule});
+        let script = document.head.querySelector('.darkreader-proxy') as HTMLScriptElement;
+        if (!script) {
+            script = document.createElement('script');
+            script.classList.add('darkreader');
+            script.classList.add('darkreader-proxy');
+            script.textContent = `const addRuleFunction = Object.getOwnPropertyDescriptor(CSSStyleSheet.prototype, 'addRule');
+            const insertRuleFunction = Object.getOwnPropertyDescriptor(CSSStyleSheet.prototype, 'insertRule');
+            const deleteRuleFunction = Object.getOwnPropertyDescriptor(CSSStyleSheet.prototype, 'deleteRule');
+            const removeRuleFunction = Object.getOwnPropertyDescriptor(CSSStyleSheet.prototype, 'removeRule');
+            const event = new Event('updateSheet');
+            function proxyAddRule(selector, style, index) {
+                const returnValue = addRuleFunction.value.call(this, selector, style, index);
+                this.ownerNode.dispatchEvent(event);
+                return returnValue;
+            };
+            Object.defineProperty(CSSStyleSheet.prototype, 'addRule', {...addRuleFunction, value: proxyAddRule});
+    
+            function proxyInsertRule(rule, index) {
+                const returnValue = insertRuleFunction.value.call(this, rule, index);
+                this.ownerNode.dispatchEvent(event);
+                return returnValue;
+            };
+            Object.defineProperty(CSSStyleSheet.prototype, 'insertRule', {...insertRuleFunction, value: proxyInsertRule});
+    
+            function proxyDeleteRule(index) {
+                deleteRuleFunction.value.call(this, index);
+                this.ownerNode.dispatchEvent(event);
+            };
+            Object.defineProperty(CSSStyleSheet.prototype, 'deleteRule', {...deleteRuleFunction, value: proxyDeleteRule});
+
+            function proxyRemoveRule(index) {
+                removeRuleFunction.value.call(this, index);
+                this.ownerNode.dispatchEvent(event);
+            };
+            Object.defineProperty(CSSStyleSheet.prototype, 'removeRule', {...removeRuleFunction, value: proxyRemoveRule});`;
+
+        }
+        document.head.append(script);
 
     }
 

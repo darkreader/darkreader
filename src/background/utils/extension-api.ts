@@ -13,7 +13,7 @@ export function canInjectScript(url: string) {
             && !url.startsWith('about:')
             && !url.startsWith('moz')
             && !url.startsWith('view-source:')
-            && !url.startsWith('https://addons.mozilla.org')
+            && !url.startsWith('https://addons.mozilla.org/')
             && !isPDF(url)
         );
     }

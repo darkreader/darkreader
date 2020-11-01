@@ -348,10 +348,10 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
                     return -1;
                 }
                 function proxyInsertRule(rule, index) {
-                    insertRuleFunction.value.call(this, rule, index);
+                    // Cache the return value of insertRule as insertRule has the chance to not return the originial index.
+                    const returnValue = insertRuleFunction.value.call(this, rule, index);
                     this.ownerNode.dispatchEvent(event);
-                    // InsertRule should return the index https://developer.mozilla.org/en-US/docs/Web/API/CSSStyleSheet/insertRule#Return_value.
-                    return index;
+                    return returnValue;
                 }
                 function proxyDeleteRule(index) {
                     deleteRuleFunction.value.call(this, index);

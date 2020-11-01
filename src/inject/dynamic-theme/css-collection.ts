@@ -39,7 +39,7 @@ export async function collectCSS() {
     const css = [banner];
 
     function addStaticCSS(selector: string, comment: string) {
-        const staticStyle = document.head.querySelector(selector);
+        const staticStyle = document.querySelector(selector);
         if (staticStyle && staticStyle.textContent) {
             css.push(`/* ${comment} */`);
             css.push(staticStyle.textContent);
@@ -51,7 +51,6 @@ export async function collectCSS() {
     addStaticCSS('.darkreader--user-agent', 'User-Agent Style');
     addStaticCSS('.darkreader--text', 'Text Style');
     addStaticCSS('.darkreader--invert', 'Invert Style');
-    addStaticCSS('.darkreader--override', 'Override Style');
     addStaticCSS('.darkreader--variables', 'Variables Style');
 
     const modifiedCSS = [];
@@ -67,6 +66,8 @@ export async function collectCSS() {
         css.push(await replaceBlobs(formattedCSS));
         css.push('');
     }
+
+    addStaticCSS('.darkreader--override', 'Override Style');
 
     return css.join('\n');
 }

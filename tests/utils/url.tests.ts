@@ -1,4 +1,4 @@
-import {isURLEnabled, isPDF, isURLMatched, isURLInList, getURLHostOrProtocol} from '../../src/utils/url';
+import {isURLEnabled, isURLMatched, isPDF, getURLHostOrProtocol, getAbsoluteURL, isURLInList} from '../../src/utils/url';
 import {UserSettings} from '../../src/definitions';
 
 test('URL is enabled', () => {
@@ -60,24 +60,39 @@ test('URL is enabled', () => {
     // Special URLs
     expect(isURLEnabled(
         'https://chrome.google.com/webstore',
-        {siteList: ['chrome.google.com'], siteListEnabled: [], applyToListedOnly: false} as UserSettings,
+        {siteList: ['chrome.google.com'], siteListEnabled: [], applyToListedOnly: false, enableForProtectedPages: true} as UserSettings,
         {isProtected: true, isInDarkList: false},
     )).toBe(false);
     expect(isURLEnabled(
         'https://chrome.google.com/webstore',
-        {siteList: ['chrome.google.com'], siteListEnabled: [], applyToListedOnly: true} as UserSettings,
+        {siteList: ['chrome.google.com'], siteListEnabled: [], applyToListedOnly: true, enableForProtectedPages: true} as UserSettings,
+        {isProtected: true, isInDarkList: false},
+    )).toBe(true);
+    expect(isURLEnabled(
+        'https://chrome.google.com/webstore',
+        {siteList: [], siteListEnabled: [], applyToListedOnly: false, enableForProtectedPages: false} as UserSettings,
+        {isProtected: true, isInDarkList: false},
+    )).toBe(false);
+    expect(isURLEnabled(
+        'https://chrome.google.com/webstore',
+        {siteList: ['chrome.google.com'], siteListEnabled: [], applyToListedOnly: false, enableForProtectedPages: true} as UserSettings,
         {isProtected: true, isInDarkList: false},
     )).toBe(false);
     expect(isURLEnabled(
         'https://microsoftedge.microsoft.com/addons',
-        {siteList: ['microsoftedge.microsoft.com'], siteListEnabled: [], applyToListedOnly: false} as UserSettings,
+        {siteList: ['microsoftedge.microsoft.com'], siteListEnabled: [], applyToListedOnly: false, enableForProtectedPages: true} as UserSettings,
         {isProtected: true, isInDarkList: false},
     )).toBe(false);
     expect(isURLEnabled(
         'https://microsoftedge.microsoft.com/addons',
-        {siteList: ['microsoftedge.microsoft.com'], siteListEnabled: [], applyToListedOnly: true} as UserSettings,
+        {siteList: ['microsoftedge.microsoft.com'], siteListEnabled: [], applyToListedOnly: true, enableForProtectedPages: true} as UserSettings,
         {isProtected: true, isInDarkList: false},
-    )).toBe(false);
+    )).toBe(true);
+    expect(isURLEnabled(
+        'https://duckduckgo.com',
+        {siteList: [], siteListEnabled: [], applyToListedOnly: false, enableForProtectedPages: true} as UserSettings,
+        {isProtected: false, isInDarkList: false},
+    )).toBe(true);
     expect(isURLEnabled(
         'https://darkreader.org/',
         {siteList: [], siteListEnabled: [], applyToListedOnly: false} as UserSettings,
@@ -90,9 +105,19 @@ test('URL is enabled', () => {
     )).toBe(true);
     expect(isURLEnabled(
         'https://www.google.com/file.pdf',
+        {enableForPDF: true, siteList: ['darkreader.org'], siteListEnabled: [], applyToListedOnly: false} as UserSettings,
+        {isProtected: false, isInDarkList: false},
+    )).toBe(true);
+    expect(isURLEnabled(
+        'https://www.google.com/file.pdf',
         {enableForPDF: true, siteList: ['darkreader.org'], siteListEnabled: [], applyToListedOnly: true} as UserSettings,
         {isProtected: false, isInDarkList: false},
     )).toBe(true);
+    expect(isURLEnabled(
+        'https://www.google.com/file.pdf',
+        {enableForPDF: false, siteList: ['darkreader.org'], siteListEnabled: [], applyToListedOnly: false} as UserSettings,
+        {isProtected: false, isInDarkList: false},
+    )).toBe(false);
     expect(isURLEnabled(
         'https://www.google.com/file.pdf/resource',
         {enableForPDF: true, siteList: ['darkreader.org'], siteListEnabled: [], applyToListedOnly: true} as UserSettings,
@@ -248,4 +273,27 @@ test('Get URL host or protocol', () => {
     expect(getURLHostOrProtocol('http://user:pass@www.example.org')).toBe('www.example.org');
     expect(getURLHostOrProtocol('data:text/html,<html>Hello</html>')).toBe('data:');
     expect(getURLHostOrProtocol('file:///Users/index.html')).toBe('file:');
+});
+
+test('Absolute URL', () => {
+    expect(getAbsoluteURL('https://www.google.com', 'image.jpg')).toBe('https://www.google.com/image.jpg');
+    expect(getAbsoluteURL('https://www.google.com', '/image.jpg')).toBe('https://www.google.com/image.jpg');
+    expect(getAbsoluteURL('https://www.google.com/path', '/image.jpg')).toBe('https://www.google.com/image.jpg');
+    expect(getAbsoluteURL('//www.google.com', '/image.jpg')).toBe(`${location.protocol}//www.google.com/image.jpg`);
+    expect(getAbsoluteURL('https://www.google.com', 'image.jpg?size=128')).toBe('https://www.google.com/image.jpg?size=128');
+    expect(getAbsoluteURL('https://www.google.com/path', 'image.jpg')).toBe('https://www.google.com/image.jpg');
+    expect(getAbsoluteURL('https://www.google.com/path/', 'image.jpg')).toBe('https://www.google.com/path/image.jpg');
+    expect(getAbsoluteURL('https://www.google.com/long/path', '../image.jpg')).toBe('https://www.google.com/image.jpg');
+    expect(getAbsoluteURL('https://www.google.com/long/path/', '../image.jpg')).toBe('https://www.google.com/long/image.jpg');
+    expect(getAbsoluteURL('https://www.google.com/long/path/', '../another/image.jpg')).toBe('https://www.google.com/long/another/image.jpg');
+    expect(getAbsoluteURL('https://www.google.com/path/page.html', 'image.jpg')).toBe('https://www.google.com/path/image.jpg');
+    expect(getAbsoluteURL('https://www.google.com/path/page.html', '/image.jpg')).toBe('https://www.google.com/image.jpg');
+    expect(getAbsoluteURL('https://www.google.com', '//www.google.com/path/image.jpg')).toBe('https://www.google.com/path/image.jpg');
+    expect(getAbsoluteURL('https://www.google.com', '//www.google.com/path/../another/image.jpg')).toBe('https://www.google.com/another/image.jpg');
+    expect(getAbsoluteURL('https://www.google.com', 'https://www.google.com/path/image.jpg')).toBe('https://www.google.com/path/image.jpg');
+    expect(getAbsoluteURL('https://www.google.com', 'https://www.google.com/path/../another/image.jpg')).toBe('https://www.google.com/another/image.jpg');
+    expect(getAbsoluteURL('https://www.google.com/path/page.html', 'image.jpg')).toBe('https://www.google.com/path/image.jpg');
+    expect(getAbsoluteURL('https://www.google.com/path/page.html', '../image.jpg')).toBe('https://www.google.com/image.jpg');
+    expect(getAbsoluteURL('path/index.html', 'image.jpg')).toBe(`${location.origin}/path/image.jpg`);
+    expect(getAbsoluteURL('path/index.html', '/image.jpg?size=128')).toBe(`${location.origin}/image.jpg?size=128`);
 });

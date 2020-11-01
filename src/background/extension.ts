@@ -7,7 +7,6 @@ import TabManager from './tab-manager';
 import UserStorage from './user-storage';
 import {setWindowTheme, resetWindowTheme} from './window-theme';
 import {getFontList, getCommands, setShortcut, canInjectScript} from './utils/extension-api';
-import {isFirefox} from '../utils/platform';
 import {isInTimeInterval, getDuration, isNightAtLocation} from '../utils/time';
 import {isURLInList, getURLHostOrProtocol, isURLEnabled} from '../utils/url';
 import ThemeEngines from '../generators/theme-engines';
@@ -17,6 +16,7 @@ import createStaticStylesheet from '../generators/static-theme';
 import {createSVGFilterStylesheet, getSVGFilterMatrixValue, getSVGReverseFilterMatrixValue} from '../generators/svg-filter';
 import {ExtensionData, FilterConfig, News, Shortcuts, UserSettings, TabInfo} from '../definitions';
 import {isSystemDarkModeEnabled} from '../utils/media-query';
+import {isFirefox} from '../utils/platform';
 
 const AUTO_TIME_CHECK_INTERVAL = getDuration({seconds: 10});
 
@@ -41,7 +41,12 @@ export class Extension {
         this.messenger = new Messenger(this.getMessengerAdapter());
         this.news = new Newsmaker((news) => this.onNewsUpdate(news));
         this.tabs = new TabManager({
-            getConnectionMessage: (url, frameURL) => this.getConnectionMessage(url, frameURL),
+            getConnectionMessage: ({url, frameURL, unsupportedSender}) => {
+                if (unsupportedSender) {
+                    return this.getUnsupportedSenderMessage();
+                }
+                return this.getConnectionMessage(url, frameURL);
+            },
             onColorSchemeChange: this.onColorSchemeChange,
         });
         this.user = new UserStorage();
@@ -54,7 +59,7 @@ export class Extension {
             const now = new Date();
             return isInTimeInterval(now, this.user.settings.time.activation, this.user.settings.time.deactivation);
         } else if (automation === 'system') {
-            if (isFirefox()) {
+            if (isFirefox) {
                 // BUG: Firefox background page always matches initial color scheme.
                 return this.wasLastColorSchemeDark == null
                     ? isSystemDarkModeEnabled()
@@ -91,14 +96,13 @@ export class Extension {
         this.registerCommands();
 
         this.ready = true;
-        this.tabs.updateContentScript();
+        this.tabs.updateContentScript({runOnProtectedPages: this.user.settings.enableForProtectedPages});
 
         this.awaiting.forEach((ready) => ready());
         this.awaiting = null;
 
         this.startAutoTimeCheck();
         this.news.subscribe();
-        this.user.cleanup();
     }
 
     private popupOpeningListener: () => void = null;
@@ -207,14 +211,18 @@ export class Extension {
 
     private getConnectionMessage(url, frameURL) {
         if (this.ready) {
-            return this.isEnabled() && this.getTabMessage(url, frameURL);
+            return this.getTabMessage(url, frameURL);
         } else {
             return new Promise((resolve) => {
                 this.awaiting.push(() => {
-                    resolve(this.isEnabled() && this.getTabMessage(url, frameURL));
+                    resolve(this.getTabMessage(url, frameURL));
                 });
             });
         }
+    }
+
+    private getUnsupportedSenderMessage() {
+        return {type: 'unsupported-sender'};
     }
 
     private wasEnabledOnLastCheck: boolean;
@@ -389,7 +397,7 @@ export class Extension {
                     };
                 }
                 case ThemeEngines.svgFilter: {
-                    if (isFirefox()) {
+                    if (isFirefox) {
                         return {
                             type: 'add-css-filter',
                             data: createSVGFilterStylesheet(theme, url, frameURL, this.config.INVERSION_FIXES),
@@ -426,9 +434,9 @@ export class Extension {
                     throw new Error(`Unknown engine ${theme.engine}`);
                 }
             }
-        } else {
-            console.log(`Site is not inverted: ${url}`);
         }
+
+        console.log(`Site is not inverted: ${url}`);
         return {
             type: 'clean-up',
         };

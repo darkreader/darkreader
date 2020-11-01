@@ -4,6 +4,7 @@
         "module": "commonjs",
         "outDir": "",
         "types": [
+            "chrome",
             "jest"
         ]
     }

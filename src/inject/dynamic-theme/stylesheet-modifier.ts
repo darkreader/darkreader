@@ -1,8 +1,8 @@
 import {Theme} from '../../definitions';
-import {isCSSStyleSheetConstructorSupported} from '../../utils/platform';
 import {createAsyncTasksQueue} from '../utils/throttle';
 import {iterateCSSRules, iterateCSSDeclarations, replaceCSSVariables} from './css-rules';
 import {getModifiableCSSDeclaration, ModifiableCSSDeclaration, ModifiableCSSRule} from './modify-css';
+import {isCSSStyleSheetConstructorSupported} from '../../utils/platform';
 
 const themeCacheKeys: (keyof Theme)[] = [
     'mode',
@@ -20,16 +20,22 @@ function getThemeKey(theme: Theme) {
     return themeCacheKeys.map((p) => `${p}:${theme[p]}`).join(';');
 }
 
-function getTempCSSStyleSheet(): {sheet: CSSStyleSheet; remove: () => void} {
-    if (isCSSStyleSheetConstructorSupported()) {
-        return {sheet: new CSSStyleSheet(), remove: () => null};
+let tempStyle: CSSStyleSheet = null;
+
+function getTempCSSStyleSheet(): CSSStyleSheet {
+    if (tempStyle) {
+        return tempStyle;
     }
-    const style = document.createElement('style');
-    style.classList.add('darkreader');
-    style.classList.add('darkreader--temp');
-    style.media = 'screen';
-    (document.head || document).append(style);
-    return {sheet: style.sheet, remove: () => style.remove()};
+    if (isCSSStyleSheetConstructorSupported) {
+        tempStyle = new CSSStyleSheet();
+        return tempStyle;
+    } else {
+        const tempStyleElement = document.createElement('style');
+        document.head.append(tempStyleElement);
+        tempStyle = tempStyleElement.sheet;
+        document.head.removeChild(tempStyleElement);
+        return tempStyle;
+    }
 }
 
 const asyncQueue = createAsyncTasksQueue();
@@ -72,7 +78,7 @@ export function createStyleSheetModifier() {
 
             // Put CSS text with inserted CSS variables into separate <style> element
             // to properly handle composite properties (e.g. background -> background-color)
-            let vars: {sheet: CSSStyleSheet; remove: () => void};
+            let vars: CSSStyleSheet;
             let varsRule: CSSStyleRule = null;
             if (variables.size > 0 || cssText.includes('var(')) {
                 const cssTextWithVariables = replaceCSSVariables(cssText, variables);
@@ -80,8 +86,8 @@ export function createStyleSheetModifier() {
                     rulesTextCache.set(cssText, cssTextWithVariables);
                     textDiffersFromPrev = true;
                     vars = getTempCSSStyleSheet();
-                    vars.sheet.insertRule(cssTextWithVariables);
-                    varsRule = vars.sheet.cssRules[0] as CSSStyleRule;
+                    vars.insertRule(cssTextWithVariables);
+                    varsRule = vars.cssRules[0] as CSSStyleRule;
                 }
             }
 
@@ -109,7 +115,7 @@ export function createStyleSheetModifier() {
             }
             rulesModCache.set(cssText, modRule);
 
-            vars && vars.remove();
+            vars && vars.deleteRule(0);
         });
 
         notFoundCacheKeys.forEach((key) => {
@@ -147,7 +153,7 @@ export function createStyleSheetModifier() {
         function setRule(target: CSSStyleSheet | CSSGroupingRule, index: number, rule: ReadyStyleRule) {
             const {selector, declarations} = rule;
             target.insertRule(`${selector} {}`, index);
-            const style = (target.cssRules.item(index) as CSSStyleRule).style;
+            const style = (target.cssRules[index] as CSSStyleRule).style;
             declarations.forEach(({property, value, important, sourceValue}) => {
                 style.setProperty(property, value == null ? sourceValue : value, important ? 'important' : '');
             });
@@ -227,7 +233,7 @@ export function createStyleSheetModifier() {
                 if (rule instanceof CSSMediaRule) {
                     const {media} = rule;
                     const index = parent.cssRules.length;
-                    parent.insertRule(`@media ${media} {}`, index);
+                    parent.insertRule(`@media ${media.mediaText} {}`, index);
                     return parent.cssRules[index] as CSSMediaRule;
                 }
                 return parent;

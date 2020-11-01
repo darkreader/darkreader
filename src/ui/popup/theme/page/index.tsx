@@ -2,7 +2,7 @@ import {m} from 'malevic';
 import {DEFAULT_SETTINGS, DEFAULT_THEME, DEFAULT_COLORS} from '../../../../defaults';
 import {Theme} from '../../../../definitions';
 import {ViewProps} from '../../types';
-import {BackgroundColor, Brightness, Contrast, FontPicker, Grayscale, Mode, ResetButton, Scheme, Scrollbar, SelectionColorEditor, Sepia, TextColor, TextStroke, UseFont} from '../controls';
+import {BackgroundColor, Brightness, Contrast, FontPicker, Grayscale, Mode, ResetButton, Scheme, Scrollbar, SelectionColorEditor, Sepia, TextColor, TextStroke, UseFont, StyleSystemControls} from '../controls';
 import ThemePresetPicker from '../preset-picker';
 import {getCurrentThemePreset} from '../utils';
 import Collapsible from './collapsible-panel';
@@ -98,6 +98,10 @@ function FontGroup({theme, fonts, change}: FontGroupsProps) {
                 value={theme.textStroke}
                 onChange={(textStroke) => change({textStroke})}
             />
+            <StyleSystemControls
+                value={theme.styleSystemControls}
+                onChange={(styleSystemControls) => change({styleSystemControls})}
+            />
         </Array>
     );
 }
@@ -115,7 +119,7 @@ export default function ThemePage(props: ViewProps) {
                 <Collapsible.Group id="colors" label="Colors">
                     <ColorsGroup theme={theme} change={change} />
                 </Collapsible.Group>
-                <Collapsible.Group id="font" label="Font, text stroke">
+                <Collapsible.Group id="font" label="Font & more">
                     <FontGroup theme={theme} fonts={props.data.fonts} change={change} />
                 </Collapsible.Group>
             </Collapsible>

@@ -1,7 +1,7 @@
 import {forEach, push} from '../../utils/array';
-import {isDefinedSelectorSupported} from '../../utils/platform';
 import {iterateShadowHosts, createOptimizedTreeObserver, ElementsTreeOperations} from '../utils/dom';
 import {shouldManageStyle, getManageableStyles, StyleElement} from './style-manager';
+import {isDefinedSelectorSupported} from '../../utils/platform';
 
 const observers = [] as {disconnect(): void}[];
 let observedRoots: WeakSet<Node>;
@@ -17,7 +17,7 @@ const undefinedGroups = new Map<string, Set<Element>>();
 let elementsDefinitionCallback: (elements: Element[]) => void;
 
 function collectUndefinedElements(root: ParentNode) {
-    if (!isDefinedSelectorSupported()) {
+    if (!isDefinedSelectorSupported) {
         return;
     }
     forEach(root.querySelectorAll(':not(:defined)'),
@@ -182,7 +182,7 @@ export function watchForStyleChanges(currentStyles: StyleElement[], update: (sty
             onHugeMutations: handleHugeTreeMutations,
         });
         const attrObserver = new MutationObserver(handleAttributeMutations);
-        attrObserver.observe(root, {attributes: true, attributeFilter: ['rel', 'disabled'], subtree: true});
+        attrObserver.observe(root, {attributes: true, attributeFilter: ['rel', 'disabled', 'media'], subtree: true});
         observers.push(treeObserver, attrObserver);
         observedRoots.add(root);
     }

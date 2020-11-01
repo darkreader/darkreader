@@ -319,59 +319,7 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
     }
 
     function subscribeToSheetChanges() {
-
-        element.addEventListener('updateSheet', () => {
-            update();
-        });
-
-        let script = document.head.querySelector('.darkreader-proxy') as HTMLScriptElement;
-        if (!script) {
-            script = document.createElement('script');
-            script.classList.add('darkreader');
-            script.classList.add('darkreader-proxy');
-            script.textContent = `
-                // First get the originial 'native code' of the function.
-                const addRuleFunction = Object.getOwnPropertyDescriptor(CSSStyleSheet.prototype, 'addRule');
-                const insertRuleFunction = Object.getOwnPropertyDescriptor(CSSStyleSheet.prototype, 'insertRule');
-                const deleteRuleFunction = Object.getOwnPropertyDescriptor(CSSStyleSheet.prototype, 'deleteRule');
-                const removeRuleFunction = Object.getOwnPropertyDescriptor(CSSStyleSheet.prototype, 'removeRule');
-
-                // Create a new Event so it can be dispatched.
-                const event = new Event('updateSheet');
-
-                // Create the proxy function that should be identicial to the native one's.
-
-                function proxyAddRule(selector, style, index) {
-                    addRuleFunction.value.call(this, selector, style, index);
-                    this.ownerNode.dispatchEvent(event);
-                    // Check why it returns -1 https://developer.mozilla.org/en-US/docs/Web/API/CSSStyleSheet/addRule#Return_value.
-                    return -1;
-                }
-                function proxyInsertRule(rule, index) {
-                    // Cache the return value of insertRule as insertRule has the chance to not return the originial index.
-                    const returnValue = insertRuleFunction.value.call(this, rule, index);
-                    this.ownerNode.dispatchEvent(event);
-                    return returnValue;
-                }
-                function proxyDeleteRule(index) {
-                    deleteRuleFunction.value.call(this, index);
-                    this.ownerNode.dispatchEvent(event);
-                }
-                function proxyRemoveRule(index) {
-                    removeRuleFunction.value.call(this, index);
-                    this.ownerNode.dispatchEvent(event);
-                }
-
-                // Define the prototype of the CSSStyleSheet to use the proxy function.
-                Object.defineProperty(CSSStyleSheet.prototype, 'addRule', {...addRuleFunction, value: proxyAddRule});
-                Object.defineProperty(CSSStyleSheet.prototype, 'insertRule', {...insertRuleFunction, value: proxyInsertRule});
-                Object.defineProperty(CSSStyleSheet.prototype, 'deleteRule', {...deleteRuleFunction, value: proxyDeleteRule});
-                Object.defineProperty(CSSStyleSheet.prototype, 'removeRule', {...removeRuleFunction, value: proxyRemoveRule});
-            `;
-
-        }
-        document.head.append(script);
-
+        element.addEventListener('updateSheet', update);
     }
 
     function pause() {
@@ -385,6 +333,7 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
         pause();
         removeNode(corsCopy);
         removeNode(syncStyle);
+        element.removeEventListener('updateSheet', update);
     }
 
     function watch() {

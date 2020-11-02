@@ -16,6 +16,7 @@ node_modules/
 #-----------------------------------
 tests/coverage/
 tests/browser/coverage/
+tests/inject/coverage/
 
 # IDE and editor configs
 #-----------------------------------

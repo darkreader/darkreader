@@ -32,7 +32,7 @@ async function createTestServer(/** @type {number} */port) {
             return;
         }
 
-        const contentOrListener = paths[pathName]
+        const contentOrListener = paths[pathName];
 
         if (typeof contentOrListener === 'function') {
             const listener = contentOrListener;

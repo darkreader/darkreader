@@ -1,15 +1,18 @@
 if (!window.hasOwnProperty('chrome')) {
-    const listeners = new Set();
-    window['chrome'] = {
-        runtime: {
-            onMessage: {
-                addListener: (listener) => {
-                    listeners.add(listener);
-                },
-                removeListener: (listener) => {
-                    listeners.delete(listener);
-                },
-            },
+    window.chrome = {} as any;
+}
+if (!chrome.hasOwnProperty('runtime')) {
+    chrome.runtime = {} as any;
+}
+if (!chrome.runtime.hasOwnProperty('onMessage')) {
+    type AnyFunction = () => void;
+    const listeners = new Set<AnyFunction>();
+    chrome.runtime.onMessage = {
+        addListener: (listener: AnyFunction) => {
+            listeners.add(listener);
+        },
+        removeListener: (listener: AnyFunction) => {
+            listeners.delete(listener);
         },
     } as any;
 }

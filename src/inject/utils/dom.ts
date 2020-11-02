@@ -1,3 +1,4 @@
+import {isCSSStyleSheetConstructorSupported} from './../../utils/platform';
 import {logWarn} from './log';
 import {throttle} from './throttle';
 import {forEach} from '../../utils/array';
@@ -332,4 +333,22 @@ export function createOptimizedTreeObserver(root: Document | ShadowRoot, callbac
             }
         },
     };
+}
+
+let tempStyle: CSSStyleSheet = null;
+
+export function getTempCSSStyleSheet(): CSSStyleSheet {
+    if (tempStyle) {
+        return tempStyle;
+    }
+    if (isCSSStyleSheetConstructorSupported) {
+        tempStyle = new CSSStyleSheet();
+        return tempStyle;
+    } else {
+        const tempStyleElement = document.createElement('style');
+        document.head.append(tempStyleElement);
+        tempStyle = tempStyleElement.sheet;
+        document.head.removeChild(tempStyleElement);
+        return tempStyle;
+    }
 }

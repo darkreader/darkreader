@@ -318,36 +318,8 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
         return cssRules;
     }
 
-    let rulesChangeKey: number = null;
-    let rulesCheckFrameId: number = null;
-
-    function updateRulesChangeKey() {
-        const rules = safeGetSheetRules();
-        if (rules) {
-            rulesChangeKey = rules.length;
-        }
-    }
-
-    function didRulesKeyChange() {
-        const rules = safeGetSheetRules();
-        return rules && rules.length !== rulesChangeKey;
-    }
-
     function subscribeToSheetChanges() {
-        updateRulesChangeKey();
-        unsubscribeFromSheetChanges();
-        const checkForUpdate = () => {
-            if (didRulesKeyChange()) {
-                updateRulesChangeKey();
-                update();
-            }
-            rulesCheckFrameId = requestAnimationFrame(checkForUpdate);
-        };
-        checkForUpdate();
-    }
-
-    function unsubscribeFromSheetChanges() {
-        cancelAnimationFrame(rulesCheckFrameId);
+        element.addEventListener('__darkreader__updateSheet', update);
     }
 
     function pause() {
@@ -355,13 +327,13 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
         cancelAsyncOperations = true;
         corsCopyPositionWatcher && corsCopyPositionWatcher.stop();
         syncStylePositionWatcher && syncStylePositionWatcher.stop();
-        unsubscribeFromSheetChanges();
     }
 
     function destroy() {
         pause();
         removeNode(corsCopy);
         removeNode(syncStyle);
+        element.removeEventListener('__darkreader__updateSheet', update);
     }
 
     function watch() {
@@ -392,7 +364,6 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
         syncStylePositionWatcher && syncStylePositionWatcher.skip();
         if (shouldForceRender) {
             forceRenderStyle = true;
-            updateRulesChangeKey();
             update();
         }
     }

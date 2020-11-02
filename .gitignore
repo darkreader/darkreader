@@ -23,3 +23,4 @@ tests/inject/coverage/
 #-----------------------------------
 .idea/
 .vscode/
+*.code-workspace

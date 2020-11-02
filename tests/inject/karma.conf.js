@@ -24,9 +24,13 @@ module.exports = (config) => {
                 rollupPluginCommonjs(),
                 rollupPluginTypescript({
                     typescript,
-                    tsconfig: 'tests/inject/tsconfig.json',
+                    tsconfig: 'src/tsconfig.json',
                     tsconfigOverride: {
                         compilerOptions: {
+                            types: [
+                                'chrome',
+                                'jasmine',
+                            ],
                             removeComments: false,
                             sourceMap: true,
                         },

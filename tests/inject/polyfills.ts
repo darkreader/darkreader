@@ -5,12 +5,12 @@ if (!chrome.hasOwnProperty('runtime')) {
     chrome.runtime = {} as any;
 }
 if (!chrome.runtime.hasOwnProperty('onMessage')) {
-    const listeners = new Set();
+    const listeners = new Set<Function>();
     chrome.runtime.onMessage = {
-        addListener: (listener) => {
+        addListener: (listener: Function) => {
             listeners.add(listener);
         },
-        removeListener: (listener) => {
+        removeListener: (listener: Function) => {
             listeners.delete(listener);
         },
     } as any;

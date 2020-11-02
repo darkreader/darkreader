@@ -3,7 +3,7 @@ if (
     matchMedia('(prefers-color-scheme: dark)').matches &&
     !document.querySelector('.darkreader--fallback')
 ) {
-    const css = 'html, body, body :not(iframe) { background-color: #181a1b !important; border-color: #776e62 !important; color: #e8e6e3 !important; opacity: 1 !important; }';
+    const css = 'html, body, body :not(iframe) { background-color: #181a1b !important; border-color: #776e62 !important; color: #e8e6e3 !important; } html, body { opacity: 1 !important; }';
     const fallback = document.createElement('style');
     fallback.classList.add('darkreader');
     fallback.classList.add('darkreader--fallback');

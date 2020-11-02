@@ -108,6 +108,11 @@ declare namespace DarkReader {
          * Default auto
          */
         selectionColor: string;
+        /**
+         * Specifies if it has to style system controls/
+         * Default true
+         */
+        styleSystemControls: boolean;
     }
 
     /**

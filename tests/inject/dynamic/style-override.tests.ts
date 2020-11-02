@@ -137,7 +137,7 @@ describe('Style override', () => {
         style.sheet.insertRule('strong { color: red }');
 
         (style as HTMLStyleElement).sheet.insertRule('html { background-color: pink }');
-        await timeout(1000);
+        await timeout(100);
         expect((style.nextSibling as HTMLStyleElement).sheet.cssRules[0].cssText).toBe('html { background-color: rgb(50, 0, 9); }');
 
     });
@@ -154,7 +154,7 @@ describe('Style override', () => {
         style.sheet.insertRule('h1 { color: pink }');
         style.sheet.insertRule('strong { color: orange }');
 
-        await timeout(1000);
+        await timeout(100);
         const newStyle: HTMLStyleElement = document.querySelector('.testcase-style');
         expect((newStyle.nextSibling as HTMLStyleElement).sheet.cssRules.length === 2 &&
             (newStyle.nextSibling as HTMLStyleElement).classList.contains('darkreader--sync'))

@@ -16,7 +16,7 @@ import {FilterConfig, DynamicThemeFix} from '../../definitions';
 import {generateUID} from '../../utils/uid';
 import {createAdoptedStyleSheetOverride, AdoptedStyleSheetManager} from './adopted-style-manger';
 import {isFirefox} from '../../utils/platform';
-import {injectProxy, removeProxyOnPrototype} from './stylesheet-proxy';
+import {injectProxy} from './stylesheet-proxy';
 
 const variables = new Map<string, string>();
 const INSTANCE_ID = generateUID();
@@ -26,18 +26,27 @@ let filter: FilterConfig = null;
 let fixes: DynamicThemeFix = null;
 let isIFrame: boolean = null;
 
-function createOrUpdateElement(className: string, root: ParentNode = document.head || document, elementType = 'style') {
-    let element = root.querySelector(`.${className}`);
+function createOrUpdateStyle(className: string, root: ParentNode = document.head || document) {
+    let element: HTMLStyleElement = root.querySelector(`.${className}`);
     if (!element) {
-        element = document.createElement(elementType);
+        element = document.createElement('style');
         element.classList.add('darkreader');
         element.classList.add(className);
-        if (element instanceof HTMLStyleElement) {
-            element.media = 'screen';
-        }
+        element.media = 'screen';
     }
     return element;
 }
+
+function createOrUpdateScript(className: string, root: ParentNode = document.head || document) {
+    let element: HTMLScriptElement = root.querySelector(`.${className}`);
+    if (!element) {
+        element = document.createElement('script');
+        element.classList.add('darkreader');
+        element.classList.add(className);
+    }
+    return element;
+}
+
 
 const nodePositionWatchers = new Map<string, ReturnType<typeof watchForNodePosition>>();
 
@@ -52,17 +61,17 @@ function stopStylePositionWatchers() {
 }
 
 function createStaticStyleOverrides() {
-    const fallbackStyle = createOrUpdateElement('darkreader--fallback', document);
+    const fallbackStyle = createOrUpdateStyle('darkreader--fallback', document);
     fallbackStyle.textContent = getModifiedFallbackStyle(filter, {strict: true});
     document.head.insertBefore(fallbackStyle, document.head.firstChild);
     setupNodePositionWatcher(fallbackStyle, 'fallback');
 
-    const userAgentStyle = createOrUpdateElement('darkreader--user-agent',);
+    const userAgentStyle = createOrUpdateStyle('darkreader--user-agent');
     userAgentStyle.textContent = getModifiedUserAgentStyle(filter, isIFrame, filter.styleSystemControls);
     document.head.insertBefore(userAgentStyle, fallbackStyle.nextSibling);
     setupNodePositionWatcher(userAgentStyle, 'user-agent');
 
-    const textStyle = createOrUpdateElement('darkreader--text');
+    const textStyle = createOrUpdateStyle('darkreader--text');
     if (filter.useFont || filter.textStroke > 0) {
         textStyle.textContent = createTextStyle(filter);
     } else {
@@ -71,7 +80,7 @@ function createStaticStyleOverrides() {
     document.head.insertBefore(textStyle, fallbackStyle.nextSibling);
     setupNodePositionWatcher(textStyle, 'text');
 
-    const invertStyle = createOrUpdateElement('darkreader--invert');
+    const invertStyle = createOrUpdateStyle('darkreader--invert');
     if (fixes && Array.isArray(fixes.invert) && fixes.invert.length > 0) {
         invertStyle.textContent = [
             `${fixes.invert.join(', ')} {`,
@@ -87,17 +96,17 @@ function createStaticStyleOverrides() {
     document.head.insertBefore(invertStyle, textStyle.nextSibling);
     setupNodePositionWatcher(invertStyle, 'invert');
 
-    const inlineStyle = createOrUpdateElement('darkreader--inline');
+    const inlineStyle = createOrUpdateStyle('darkreader--inline');
     inlineStyle.textContent = getInlineOverrideStyle();
     document.head.insertBefore(inlineStyle, invertStyle.nextSibling);
     setupNodePositionWatcher(inlineStyle, 'inline');
 
-    const overrideStyle = createOrUpdateElement('darkreader--override');
+    const overrideStyle = createOrUpdateStyle('darkreader--override');
     overrideStyle.textContent = fixes && fixes.css ? replaceCSSTemplates(fixes.css) : '';
     document.head.appendChild(overrideStyle);
     setupNodePositionWatcher(overrideStyle, 'override');
 
-    const variableStyle = createOrUpdateElement('darkreader--variables');
+    const variableStyle = createOrUpdateStyle('darkreader--variables');
     const selectionColors = getSelectionColor(filter);
     const {darkSchemeBackgroundColor, darkSchemeTextColor, lightSchemeBackgroundColor, lightSchemeTextColor} = filter;
     variableStyle.textContent = [
@@ -111,26 +120,18 @@ function createStaticStyleOverrides() {
     document.head.insertBefore(variableStyle, inlineStyle.nextSibling);
     setupNodePositionWatcher(variableStyle, 'variables');
 
-    const proxyScript = createOrUpdateElement('darkreader--proxy', undefined, 'script');
-    proxyScript.textContent = `// First get the originial 'native code' of the function.
-        window['addRuleFunction'] = Object.getOwnPropertyDescriptor(CSSStyleSheet.prototype, 'addRule');
-        window['insertRuleFunction'] = Object.getOwnPropertyDescriptor(CSSStyleSheet.prototype, 'insertRule');
-        window['deleteRuleFunction'] = Object.getOwnPropertyDescriptor(CSSStyleSheet.prototype, 'deleteRule');
-        window['removeRuleFunction'] = Object.getOwnPropertyDescriptor(CSSStyleSheet.prototype, 'removeRule');
-        ${injectProxy.toString()}
-        ${removeProxyOnPrototype.toString()}
-        injectProxy();`;
+    const proxyScript = createOrUpdateScript('darkreader--proxy');
+    proxyScript.textContent = `(${injectProxy})()`;
     document.head.insertBefore(proxyScript, variableStyle.nextSibling);
-    setupNodePositionWatcher(proxyScript, 'proxy');
 }
 
 const shadowRootsWithOverrides = new Set<ShadowRoot>();
 
 function createShadowStaticStyleOverrides(root: ShadowRoot) {
-    const inlineStyle = createOrUpdateElement('darkreader--inline', root);
+    const inlineStyle = createOrUpdateStyle('darkreader--inline', root);
     inlineStyle.textContent = getInlineOverrideStyle();
     root.insertBefore(inlineStyle, root.firstChild);
-    const overrideStyle = createOrUpdateElement('darkreader--override', root);
+    const overrideStyle = createOrUpdateStyle('darkreader--override', root);
     overrideStyle.textContent = fixes && fixes.css ? replaceCSSTemplates(fixes.css) : '';
     root.insertBefore(overrideStyle, inlineStyle.nextSibling);
     shadowRootsWithOverrides.add(root);
@@ -418,7 +419,7 @@ export function createOrUpdateDynamicTheme(filterConfig: FilterConfig, dynamicTh
         createThemeAndWatchForUpdates();
     } else {
         if (!isFirefox) {
-            const fallbackStyle = createOrUpdateElement('darkreader--fallback');
+            const fallbackStyle = createOrUpdateStyle('darkreader--fallback');
             document.documentElement.appendChild(fallbackStyle);
             fallbackStyle.textContent = getModifiedFallbackStyle(filter, {strict: true});
         }
@@ -438,15 +439,8 @@ export function createOrUpdateDynamicTheme(filterConfig: FilterConfig, dynamicTh
 }
 
 function removeProxy() {
-    const proxy = document.head.querySelector('.darkreader--proxy');
-    if (proxy) {
-        const Dproxy = document.createElement('script');
-        Dproxy.textContent = 'removeProxyOnPrototype()';
-        document.head.append(Dproxy);
-        removeNode(Dproxy);
-        removeNode(proxy);
-    }
-
+    document.dispatchEvent(new CustomEvent('__darkreader__cleanUp'));
+    removeNode(document.head.querySelector('.darkreader--proxy'));
 }
 
 export function removeDynamicTheme() {

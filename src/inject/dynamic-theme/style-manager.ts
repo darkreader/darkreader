@@ -319,7 +319,7 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
     }
 
     function subscribeToSheetChanges() {
-        element.addEventListener('updateSheet', update);
+        element.addEventListener('__darkreader__updateSheet', update);
     }
 
     function pause() {
@@ -333,7 +333,7 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
         pause();
         removeNode(corsCopy);
         removeNode(syncStyle);
-        element.removeEventListener('updateSheet', update);
+        element.removeEventListener('__darkreader__updateSheet', update);
     }
 
     function watch() {

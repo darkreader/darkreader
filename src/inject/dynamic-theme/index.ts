@@ -175,9 +175,9 @@ function createDynamicStyleOverrides() {
 
     const inlineStyleElements = toArray(document.querySelectorAll(INLINE_STYLE_SELECTOR));
     iterateShadowHosts(document.documentElement, (host) => {
+        createShadowStaticStyleOverrides(host.shadowRoot);
         const elements = host.shadowRoot.querySelectorAll(INLINE_STYLE_SELECTOR);
         if (elements.length > 0) {
-            createShadowStaticStyleOverrides(host.shadowRoot);
             push(inlineStyleElements, elements);
         }
     });
@@ -354,9 +354,9 @@ function watchForUpdates() {
             }
         }
     }, (root) => {
+        createShadowStaticStyleOverrides(root);
         const inlineStyleElements = root.querySelectorAll(INLINE_STYLE_SELECTOR);
         if (inlineStyleElements.length > 0) {
-            createShadowStaticStyleOverrides(root);
             forEach(inlineStyleElements, (el) => overrideInlineStyle(el as HTMLElement, filter, getIgnoreImageAnalysisSelectors(), ignoredInlineSelectors));
         }
     });

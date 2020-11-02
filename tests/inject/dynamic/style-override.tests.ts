@@ -2,7 +2,7 @@ import '../polyfills';
 import {DEFAULT_THEME} from '../../../src/defaults';
 import {createOrUpdateDynamicTheme, removeDynamicTheme} from '../../../src/inject/dynamic-theme';
 import {createStyleSheetModifier} from '../../../src/inject/dynamic-theme/stylesheet-modifier';
-import {multiline} from '../../test-utils';
+import {multiline, timeout} from '../../test-utils';
 
 const theme = {
     ...DEFAULT_THEME,
@@ -74,4 +74,91 @@ describe('Style override', () => {
         expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(255, 255, 255)');
         expect(getComputedStyle(container.querySelector('h1 strong')).color).toBe('rgb(255, 26, 26)');
     });
+
+    it('should restore override', async () => {
+        container.innerHTML = multiline(
+            '<style class="testcase-style">',
+            '    h1 { color: gray; }',
+            '    h1 strong { color: red; }',
+            '</style>',
+            '<h1>Style <strong>override</strong>!</h1>',
+        );
+        createOrUpdateDynamicTheme(theme, null, false);
+        expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(141, 141, 141)');
+        expect(getComputedStyle(container.querySelector('h1 strong')).color).toBe('rgb(255, 26, 26)');
+
+        const style = document.querySelector('.testcase-style');
+        style.nextSibling.remove();
+        await timeout(100);
+        expect((style.nextSibling as HTMLStyleElement).classList.contains('darkreader--sync')).toBe(true);
+
+    });
+
+    it('should move override', async () => {
+        container.innerHTML = multiline(
+            '<style class="testcase-style">',
+            '    h1 { background: gray; }',
+            '    h1 strong { color: red; }',
+            '</style>',
+            '<h1>Some test foor...... <strong>Moving styles</strong>!</h1>',
+        );
+        createOrUpdateDynamicTheme(theme, null, false);
+        const style = document.querySelector('.testcase-style');
+        document.head.append(style);
+        await timeout(100);
+        expect((style.nextSibling as HTMLStyleElement).classList.contains('darkreader--sync')).toBe(true);
+    });
+
+    it('should remove override', async () => {
+        container.innerHTML = multiline(
+            '<style class="testcase-style">',
+            '    h1 { background: gray; }',
+            '    h1 strong { color: red; }',
+            '</style>',
+            '<h1>Some test foor...... <strong>Oh uhm removing styles :(</strong>!</h1>',
+        );
+        createOrUpdateDynamicTheme(theme, null, false);
+        const style = document.querySelector('.testcase-style');
+        const sibling = style.nextSibling;
+        style.remove();
+        await timeout(100);
+        expect(sibling.isConnected && !((sibling as HTMLStyleElement).classList.contains('darkreader--sync'))).toBe(false);
+
+    });
+
+    it('should react to updated style', async () => {
+        container.innerHTML = multiline(
+            '<style class="testcase-style"></style>',
+            '<h1>Some test foor...... <strong>Oh uhm a pink background</strong></h1>',
+        );
+        createOrUpdateDynamicTheme(theme, null, false);
+        const style: HTMLStyleElement = document.querySelector('.testcase-style');
+        style.sheet.insertRule('h1 { color: gray }');
+        style.sheet.insertRule('strong { color: red }');
+
+        (style as HTMLStyleElement).sheet.insertRule('html { background-color: pink }');
+        await timeout(1000);
+        expect((style.nextSibling as HTMLStyleElement).sheet.cssRules[0].cssText).toBe('html { background-color: rgb(50, 0, 9); }');
+
+    });
+
+    it('should react to a new style', async () => {
+        container.innerHTML = multiline(
+            '<h1>Some test foor...... <strong>Oh uhm what?</strong>!</h1>',
+        );
+        createOrUpdateDynamicTheme(theme, null, false);
+
+        const style: HTMLStyleElement = document.createElement('style');
+        style.classList.add('testcase-style');
+        container.append(style);
+        style.sheet.insertRule('h1 { color: pink }');
+        style.sheet.insertRule('strong { color: orange }');
+
+        await timeout(1000);
+        const newStyle: HTMLStyleElement = document.querySelector('.testcase-style');
+        expect((newStyle.nextSibling as HTMLStyleElement).sheet.cssRules.length === 2 &&
+            (newStyle.nextSibling as HTMLStyleElement).classList.contains('darkreader--sync'))
+            .toBe(true);
+    });
+
 });

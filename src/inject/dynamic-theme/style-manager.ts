@@ -318,8 +318,29 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
         return cssRules;
     }
 
+    let areSheetChangesPending = false;
+
     function subscribeToSheetChanges() {
-        element.addEventListener('__darkreader__updateSheet', update);
+        element.addEventListener('__darkreader__updateSheet', () => {
+            if (areSheetChangesPending) {
+                return;
+            }
+
+            function handleSheetChanges() {
+                areSheetChangesPending = false;
+                if (cancelAsyncOperations) {
+                    return;
+                }
+                update();
+            }
+
+            areSheetChangesPending = true;
+            if (typeof queueMicrotask === 'function') {
+                queueMicrotask(handleSheetChanges);
+            } else {
+                requestAnimationFrame(handleSheetChanges);
+            }
+        });
     }
 
     function pause() {

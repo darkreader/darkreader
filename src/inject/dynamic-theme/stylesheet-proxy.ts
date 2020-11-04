@@ -46,8 +46,8 @@ export function injectProxy() {
         }
     }
 
-    Object.defineProperty(CSSStyleSheet.prototype, 'addRule', Object.assign(Object.assign({}, addRuleDescriptor), {value: proxyAddRule}));
-    Object.defineProperty(CSSStyleSheet.prototype, 'insertRule', Object.assign(Object.assign({}, insertRuleDescriptor), {value: proxyInsertRule}));
-    Object.defineProperty(CSSStyleSheet.prototype, 'deleteRule', Object.assign(Object.assign({}, deleteRuleDescriptor), {value: proxyDeleteRule}));
-    Object.defineProperty(CSSStyleSheet.prototype, 'removeRule', Object.assign(Object.assign({}, removeRuleDescriptor), {value: proxyRemoveRule}));
+    Object.defineProperty(CSSStyleSheet.prototype, 'addRule', Object.assign({}, addRuleDescriptor, {value: proxyAddRule}));
+    Object.defineProperty(CSSStyleSheet.prototype, 'insertRule', Object.assign({}, insertRuleDescriptor, {value: proxyInsertRule}));
+    Object.defineProperty(CSSStyleSheet.prototype, 'deleteRule', Object.assign({}, deleteRuleDescriptor, {value: proxyDeleteRule}));
+    Object.defineProperty(CSSStyleSheet.prototype, 'removeRule', Object.assign({}, removeRuleDescriptor, {value: proxyRemoveRule}));
 }

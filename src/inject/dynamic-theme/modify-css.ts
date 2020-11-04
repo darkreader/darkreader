@@ -230,7 +230,7 @@ function getColorModifier(prop: string, value: string): string | CSSValueModifie
     }
 }
 
-const gradientRegex = /[\-a-z]+gradient\(((?:\([^\)]*\)|[^\)\(]*){0,15} *)\)/g;
+export const gradientRegex = /[\-a-z]+gradient\(((?:\([^\)]*\)|[^\)\(]*){0,20} *)\)/g;
 const imageDetailsCache = new Map<string, ImageDetails>();
 const awaitingForImageLoading = new Map<string, ((imageDetails: ImageDetails) => void)[]>();
 

@@ -37,7 +37,7 @@ class PuppeteerEnvironment extends JestNodeEnvironment {
                 }, {
                     shouldExitProgram: false,
                 });
-                await new Promise((resolve) => setTimeout(resolve, 2000));
+                await new Promise((resolve) => setTimeout(resolve, 6000));
                 browser = await puppeteer.connect({
                     browserURL: `http://localhost:${FIREFOX_DEVTOOLS_PORT}`,
                 });

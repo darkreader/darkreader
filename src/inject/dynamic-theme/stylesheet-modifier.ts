@@ -2,7 +2,7 @@ import {Theme} from '../../definitions';
 import {createAsyncTasksQueue} from '../utils/throttle';
 import {iterateCSSRules, iterateCSSDeclarations, replaceCSSVariables} from './css-rules';
 import {getModifiableCSSDeclaration, ModifiableCSSDeclaration, ModifiableCSSRule} from './modify-css';
-import {isCSSStyleSheetConstructorSupported} from '../../utils/platform';
+import {getTempCSSStyleSheet} from '../utils/dom';
 
 const themeCacheKeys: (keyof Theme)[] = [
     'mode',
@@ -18,24 +18,6 @@ const themeCacheKeys: (keyof Theme)[] = [
 
 function getThemeKey(theme: Theme) {
     return themeCacheKeys.map((p) => `${p}:${theme[p]}`).join(';');
-}
-
-let tempStyle: CSSStyleSheet = null;
-
-function getTempCSSStyleSheet(): CSSStyleSheet {
-    if (tempStyle) {
-        return tempStyle;
-    }
-    if (isCSSStyleSheetConstructorSupported) {
-        tempStyle = new CSSStyleSheet();
-        return tempStyle;
-    } else {
-        const tempStyleElement = document.createElement('style');
-        document.head.append(tempStyleElement);
-        tempStyle = tempStyleElement.sheet;
-        document.head.removeChild(tempStyleElement);
-        return tempStyle;
-    }
 }
 
 const asyncQueue = createAsyncTasksQueue();
@@ -233,7 +215,7 @@ export function createStyleSheetModifier() {
                 if (rule instanceof CSSMediaRule) {
                     const {media} = rule;
                     const index = parent.cssRules.length;
-                    parent.insertRule(`@media ${media} {}`, index);
+                    parent.insertRule(`@media ${media.mediaText} {}`, index);
                     return parent.cssRules[index] as CSSMediaRule;
                 }
                 return parent;

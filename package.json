@@ -55,7 +55,7 @@
     "fs-extra": "9.0.1",
     "globby": "11.0.1",
     "jasmine-core": "3.6.0",
-    "jest": "26.6.1",
+    "jest": "26.6.2",
     "karma": "5.2.3",
     "karma-chrome-launcher": "3.1.0",
     "karma-coverage": "2.0.3",

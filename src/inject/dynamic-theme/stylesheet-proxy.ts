@@ -17,29 +17,37 @@ export function injectProxy() {
 
     function proxyAddRule(selector?: string, style?: string, index?: number): number {
         addRuleDescriptor.value.call(this, selector, style, index);
-        this.ownerNode.dispatchEvent(updateSheetEvent);
+        if (this.ownerNode && !this.ownerNode.classList.contains('darkreader')) {
+            this.ownerNode.dispatchEvent(updateSheetEvent);
+        }
         // Should always returns -1 https://developer.mozilla.org/en-US/docs/Web/API/CSSStyleSheet/addRule#Return_value.
         return -1;
     }
 
     function proxyInsertRule(rule: string, index?: number): number {
         const returnValue = insertRuleDescriptor.value.call(this, rule, index);
-        this.ownerNode.dispatchEvent(updateSheetEvent);
+        if (this.ownerNode && !this.ownerNode.classList.contains('darkreader')) {
+            this.ownerNode.dispatchEvent(updateSheetEvent);
+        }
         return returnValue;
     }
 
     function proxyDeleteRule(index: number): void {
         deleteRuleDescriptor.value.call(this, index);
-        this.ownerNode.dispatchEvent(updateSheetEvent);
+        if (this.ownerNode && !this.ownerNode.classList.contains('darkreader')) {
+            this.ownerNode.dispatchEvent(updateSheetEvent);
+        }
     }
 
     function proxyRemoveRule(index?: number): void {
         removeRuleDescriptor.value.call(this, index);
-        this.ownerNode.dispatchEvent(updateSheetEvent);
+        if (this.ownerNode && !this.ownerNode.classList.contains('darkreader')) {
+            this.ownerNode.dispatchEvent(updateSheetEvent);
+        }
     }
 
-    Object.defineProperty(CSSStyleSheet.prototype, 'addRule', {...addRuleDescriptor, value: proxyAddRule});
-    Object.defineProperty(CSSStyleSheet.prototype, 'insertRule', {...insertRuleDescriptor, value: proxyInsertRule});
-    Object.defineProperty(CSSStyleSheet.prototype, 'deleteRule', {...deleteRuleDescriptor, value: proxyDeleteRule});
-    Object.defineProperty(CSSStyleSheet.prototype, 'removeRule', {...removeRuleDescriptor, value: proxyRemoveRule});
+    Object.defineProperty(CSSStyleSheet.prototype, 'addRule', Object.assign({}, addRuleDescriptor, {value: proxyAddRule}));
+    Object.defineProperty(CSSStyleSheet.prototype, 'insertRule', Object.assign({}, insertRuleDescriptor, {value: proxyInsertRule}));
+    Object.defineProperty(CSSStyleSheet.prototype, 'deleteRule', Object.assign({}, deleteRuleDescriptor, {value: proxyDeleteRule}));
+    Object.defineProperty(CSSStyleSheet.prototype, 'removeRule', Object.assign({}, removeRuleDescriptor, {value: proxyRemoveRule}));
 }

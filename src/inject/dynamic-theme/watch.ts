@@ -37,6 +37,15 @@ function collectUndefinedElements(root: ParentNode) {
         });
 }
 
+const resolvers = new Map<string, () => void>();
+
+const handleIsDefined = (e: any) => {
+    if (resolvers.has(e.details.tag)) {
+        const resolve = resolvers.get(e.details.tag);
+        resolve && resolve();
+    }
+}
+
 function customElementsWhenDefined($tag: string) {
     return new Promise((resolve) => {
         // `customElements.whenDefined` is not available in extensions
@@ -44,11 +53,7 @@ function customElementsWhenDefined($tag: string) {
         if (window.customElements && typeof window.customElements.whenDefined === 'function') {
             customElements.whenDefined($tag).then(resolve);
         } else {
-            document.addEventListener('__darkreader__isDefined', (e: any) => {
-                if (e.details.tag === $tag) {
-                    resolve();
-                }
-            });
+            resolvers.set($tag, resolve);
             document.dispatchEvent(new CustomEvent('__darkreader__addUndefinedResolver', {detail: {tag: $tag}}));
         }
     });
@@ -61,6 +66,7 @@ function watchWhenCustomElementsDefined(callback: (elements: Element[]) => void)
 function unsubscribeFromDefineCustomElements() {
     elementsDefinitionCallback = null;
     undefinedGroups.clear();
+    document.removeEventListener('__darkreader__isDefined', handleIsDefined);
 }
 
 export function watchForStyleChanges(currentStyles: StyleElement[], update: (styles: ChangedStyles) => void, shadowRootDiscovered: (root: ShadowRoot) => void) {
@@ -208,6 +214,7 @@ export function watchForStyleChanges(currentStyles: StyleElement[], update: (sty
             collectUndefinedElements(shadowRoot);
         });
     });
+    document.addEventListener('__darkreader__isDefined', handleIsDefined);
     collectUndefinedElements(document);
 }
 

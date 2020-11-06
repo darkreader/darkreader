@@ -37,24 +37,19 @@ function collectUndefinedElements(root: ParentNode) {
         });
 }
 
-function customElementsWhenDefined(tag: string) {
+function customElementsWhenDefined($tag: string) {
     return new Promise((resolve) => {
         // `customElements.whenDefined` is not available in extensions
         // https://bugs.chromium.org/p/chromium/issues/detail?id=390807
         if (window.customElements && typeof window.customElements.whenDefined === 'function') {
-            customElements.whenDefined(tag).then(resolve);
+            customElements.whenDefined($tag).then(resolve);
         } else {
-            const checkIfDefined = () => {
-                const elements = undefinedGroups.get(tag);
-                if (elements && elements.size > 0) {
-                    if (elements.values().next().value.matches(':defined')) {
-                        resolve();
-                    } else {
-                        requestAnimationFrame(checkIfDefined);
-                    }
+            document.addEventListener('__darkreader__isDefined', (e: any) => {
+                if (e.details.tag === $tag) {
+                    resolve();
                 }
-            };
-            requestAnimationFrame(checkIfDefined);
+            });
+            document.dispatchEvent(new CustomEvent('__darkreader__addUndefinedResolver', {detail: {tag: $tag}}));
         }
     });
 }

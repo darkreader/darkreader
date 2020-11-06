@@ -10,6 +10,7 @@ export function injectProxy() {
         Object.defineProperty(CSSStyleSheet.prototype, 'deleteRule', deleteRuleDescriptor);
         Object.defineProperty(CSSStyleSheet.prototype, 'removeRule', removeRuleDescriptor);
         document.removeEventListener('__darkreader__cleanUp', cleanUp);
+        document.removeEventListener('__darkreader__addUndefinedResolver', (e: any) => addUndefinedResolver(e.details.tag));
     };
 
     const addUndefinedResolver = ($tag: string) => {
@@ -19,7 +20,7 @@ export function injectProxy() {
     };
 
     document.addEventListener('__darkreader__cleanUp', cleanUp);
-    document.addEventListener('__darkreader__addUndefinedResolver', (e: any) => addUndefinedResolver(e.info.tag))
+    document.addEventListener('__darkreader__addUndefinedResolver', (e: any) => addUndefinedResolver(e.details.tag));
 
     const updateSheetEvent = new Event('__darkreader__updateSheet');
 
@@ -49,7 +50,7 @@ export function injectProxy() {
 
     function proxyRemoveRule(index?: number): void {
         removeRuleDescriptor.value.call(this, index);
-        if (this.ownerNode && !this.ownerN ode.classList.contains('darkreader')) {
+        if (this.ownerNode && !this.ownerNode.classList.contains('darkreader')) {
             this.ownerNode.dispatchEvent(updateSheetEvent);
         }
     }

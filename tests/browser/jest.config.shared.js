@@ -20,7 +20,7 @@ module.exports = {
     ],
     globals: {
         'ts-jest': {
-            tsConfig: './tests/browser/tsconfig.json'
+            tsconfig: './tests/browser/tsconfig.json'
         },
         __DEBUG__: false,
     }

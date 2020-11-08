@@ -1,11 +1,11 @@
 {
     "extends": "../../src/tsconfig",
     "compilerOptions": {
-        "module": "commonjs",
+        "module": "es2015",
         "outDir": "",
         "types": [
             "chrome",
-            "jest"
+            "jasmine"
         ]
     }
 }

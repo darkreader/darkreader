@@ -316,16 +316,19 @@ export function overrideInlineStyle(element: HTMLElement, theme: FilterConfig, v
         setCustomProp('stroke', element instanceof SVGLineElement || element instanceof SVGTextElement ? 'border-color' : 'color', value);
     }
 
-    // Put CSS text with inserted CSS variables into separate <style> element
-    // to properly handle composite properties (e.g. background -> background-color)
     let elementStyle: CSSStyleRule = null;
-    const temp = getTempCSSStyleSheet();
-    const cssText = replaceCSSVariables(element.style.cssText, variables);
-    temp.insertRule(`temp { ${cssText} } `);
-    elementStyle = temp.cssRules[0] as CSSStyleRule;
-    temp.removeRule(0);
 
-    const targetRule = elementStyle;
+    if (element.style.cssText.indexOf('var(') !== -1) {
+        // Put CSS text with inserted CSS variables into separate <style> element
+        // to properly handle composite properties (e.g. background -> background-color)
+        const temp = getTempCSSStyleSheet();
+        const cssText = replaceCSSVariables(element.style.cssText, variables);
+        temp.insertRule(`temp { ${cssText} } `);
+        elementStyle = temp.cssRules[0] as CSSStyleRule;
+        temp.removeRule(0);
+    }
+
+    const targetRule = elementStyle || element;
 
     targetRule.style && iterateCSSDeclarations(targetRule.style, (property, value) => {
         // Temporaty ignore background images

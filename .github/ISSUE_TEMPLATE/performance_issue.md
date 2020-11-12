@@ -33,5 +33,5 @@ If you don't know how to get your browser/darkreader version please search it up
 **System info:**
  - OS: [e.g. Windows, MacOS, Linux]
  - Browser: [e.g. chrome, safari]
- - Darkreader Version: [e.g. 4.9.9]
+ - Dark Reader Version: [e.g. 4.9.9]
 

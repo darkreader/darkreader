@@ -44,7 +44,7 @@ module.exports = (config) => {
                     '__WATCH__': 'false',
                 }),
                 rollupPluginIstanbul({
-                    exclude: 'tests/**/*.*',
+                    exclude: ['tests/**/*.*', 'src/inject/dynamic-theme/stylesheet-proxy.ts'],
                 }),
             ],
             output: {

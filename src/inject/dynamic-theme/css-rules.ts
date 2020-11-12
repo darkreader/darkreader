@@ -22,10 +22,14 @@ export function iterateCSSRules(rules: CSSRuleList, iterate: (rule: CSSStyleRule
                 if (importCache.get(rule.href)) {
                     iterateCSSRules(importCache.get(rule.href), iterate);
                 } else {
-                    await linkLoading(rule.parentStyleSheet.ownerNode as HTMLLinkElement);
+                    let parentStyleSheet = rule.parentStyleSheet
+                    // Make sure nested stylesheets get the right ownerNode.
+                    while (parentStyleSheet.parentStyleSheet != null) {
+                        parentStyleSheet = parentStyleSheet.parentStyleSheet;
+                    }
+                    await linkLoading(parentStyleSheet.ownerNode as HTMLLinkElement);
                     importCache.set(rule.href, rule.styleSheet.cssRules);
-                    iterateCSSType(rule);
-                    logWarn(err);
+                    iterateCSSRules(rule.styleSheet.cssRules, iterate);
                 }
             }
         } else if (rule instanceof CSSSupportsRule) {
@@ -35,7 +39,7 @@ export function iterateCSSRules(rules: CSSRuleList, iterate: (rule: CSSStyleRule
         } else {
             logWarn(`CSSRule type not supported`, rule);
         }
-    }
+    };
     forEach(rules, async (rule) => await iterateCSSType(rule));
 
 }

@@ -2,7 +2,7 @@ import {Theme} from '../../definitions';
 import {createAsyncTasksQueue} from '../utils/throttle';
 import {iterateCSSRules, iterateCSSDeclarations, replaceCSSVariables} from './css-rules';
 import {getModifiableCSSDeclaration, ModifiableCSSDeclaration, ModifiableCSSRule} from './modify-css';
-import {isCSSStyleSheetConstructorSupported} from '../../utils/platform';
+import {getTempCSSStyleSheet} from '../utils/dom';
 
 const themeCacheKeys: (keyof Theme)[] = [
     'mode',
@@ -18,19 +18,6 @@ const themeCacheKeys: (keyof Theme)[] = [
 
 function getThemeKey(theme: Theme) {
     return themeCacheKeys.map((p) => `${p}:${theme[p]}`).join(';');
-}
-
-function getTempCSSStyleSheet(): {sheet: CSSStyleSheet; remove: () => void} {
-    if (isCSSStyleSheetConstructorSupported) {
-        return {sheet: new CSSStyleSheet(), remove: () => null};
-    }
-    const style = document.createElement('style');
-    style.classList.add('darkreader');
-    style.classList.add('darkreader--temp');
-    style.media = 'screen';
-    style.textContent = '';
-    (document.head || document).append(style);
-    return {sheet: style.sheet, remove: () => style.remove()};
 }
 
 const asyncQueue = createAsyncTasksQueue();
@@ -73,7 +60,7 @@ export function createStyleSheetModifier() {
 
             // Put CSS text with inserted CSS variables into separate <style> element
             // to properly handle composite properties (e.g. background -> background-color)
-            let vars: {sheet: CSSStyleSheet; remove: () => void};
+            let vars: CSSStyleSheet;
             let varsRule: CSSStyleRule = null;
             if (variables.size > 0 || cssText.includes('var(')) {
                 const cssTextWithVariables = replaceCSSVariables(cssText, variables);
@@ -81,8 +68,8 @@ export function createStyleSheetModifier() {
                     rulesTextCache.set(cssText, cssTextWithVariables);
                     textDiffersFromPrev = true;
                     vars = getTempCSSStyleSheet();
-                    vars.sheet.insertRule(cssTextWithVariables);
-                    varsRule = vars.sheet.cssRules[0] as CSSStyleRule;
+                    vars.insertRule(cssTextWithVariables);
+                    varsRule = vars.cssRules[0] as CSSStyleRule;
                 }
             }
 
@@ -110,7 +97,7 @@ export function createStyleSheetModifier() {
             }
             rulesModCache.set(cssText, modRule);
 
-            vars && vars.remove();
+            vars && vars.deleteRule(0);
         });
 
         notFoundCacheKeys.forEach((key) => {
@@ -228,7 +215,7 @@ export function createStyleSheetModifier() {
                 if (rule instanceof CSSMediaRule) {
                     const {media} = rule;
                     const index = parent.cssRules.length;
-                    parent.insertRule(`@media ${media} {}`, index);
+                    parent.insertRule(`@media ${media.mediaText} {}`, index);
                     return parent.cssRules[index] as CSSMediaRule;
                 }
                 return parent;

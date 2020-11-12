@@ -46,9 +46,9 @@ export function auto(themeOptions: Partial<Theme> | false = {}, fixes: DynamicTh
     if (themeOptions) {
         store = {themeOptions, fixes};
         handleColorScheme();
-        darkScheme.addListener(handleColorScheme);
+        darkScheme.addEventListener('change', handleColorScheme);
     } else {
-        darkScheme.removeListener(handleColorScheme);
+        darkScheme.removeEventListener('change', handleColorScheme);
         disable();
     }
 }

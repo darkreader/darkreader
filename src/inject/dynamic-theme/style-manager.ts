@@ -147,8 +147,7 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
                 logWarn(accessError);
             }
 
-            const isSheetEmpty = !(cssRules || accessError);
-            if (isSheetEmpty || isStillLoadingError(accessError)) {
+            if ((!cssRules && !accessError) || isStillLoadingError(accessError)) {
                 try {
                     await linkLoading(element);
                 } catch (err) {
@@ -245,6 +244,7 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
             }
 
             syncStylePositionWatcher && syncStylePositionWatcher.stop();
+            insertStyle();
 
             // Firefox issue: Some websites get CSP warning,
             // when `textContent` is not set (e.g. pypi.org).
@@ -254,8 +254,6 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
             if (syncStyle.sheet == null) {
                 syncStyle.textContent = '';
             }
-
-            insertStyle();
 
             const sheet = syncStyle.sheet;
             for (let i = sheet.cssRules.length - 1; i >= 0; i--) {
@@ -320,36 +318,29 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
         return cssRules;
     }
 
-    let rulesChangeKey: number = null;
-    let rulesCheckFrameId: number = null;
-
-    function updateRulesChangeKey() {
-        const rules = safeGetSheetRules();
-        if (rules) {
-            rulesChangeKey = rules.length;
-        }
-    }
-
-    function didRulesKeyChange() {
-        const rules = safeGetSheetRules();
-        return rules && rules.length !== rulesChangeKey;
-    }
+    let areSheetChangesPending = false;
 
     function subscribeToSheetChanges() {
-        updateRulesChangeKey();
-        unsubscribeFromSheetChanges();
-        const checkForUpdate = () => {
-            if (didRulesKeyChange()) {
-                updateRulesChangeKey();
+        element.addEventListener('__darkreader__updateSheet', () => {
+            if (areSheetChangesPending) {
+                return;
+            }
+
+            function handleSheetChanges() {
+                areSheetChangesPending = false;
+                if (cancelAsyncOperations) {
+                    return;
+                }
                 update();
             }
-            rulesCheckFrameId = requestAnimationFrame(checkForUpdate);
-        };
-        checkForUpdate();
-    }
 
-    function unsubscribeFromSheetChanges() {
-        cancelAnimationFrame(rulesCheckFrameId);
+            areSheetChangesPending = true;
+            if (typeof queueMicrotask === 'function') {
+                queueMicrotask(handleSheetChanges);
+            } else {
+                requestAnimationFrame(handleSheetChanges);
+            }
+        });
     }
 
     function pause() {
@@ -357,13 +348,13 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
         cancelAsyncOperations = true;
         corsCopyPositionWatcher && corsCopyPositionWatcher.stop();
         syncStylePositionWatcher && syncStylePositionWatcher.stop();
-        unsubscribeFromSheetChanges();
     }
 
     function destroy() {
         pause();
         removeNode(corsCopy);
         removeNode(syncStyle);
+        element.removeEventListener('__darkreader__updateSheet', update);
     }
 
     function watch() {
@@ -394,7 +385,6 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
         syncStylePositionWatcher && syncStylePositionWatcher.skip();
         if (shouldForceRender) {
             forceRenderStyle = true;
-            updateRulesChangeKey();
             update();
         }
     }

@@ -37,6 +37,17 @@
     "type": "opencollective",
     "url": "https://opencollective.com/darkreader"
   },
+  "keywords": [
+    "dark-theme",
+    "chrome-extension",
+    "firefox-addon",
+    "dark-mode",
+    "night-mode",
+    "darkmode",
+    "nightmode",
+    "accessibility",
+    "eye-care"
+  ],
   "devDependencies": {
     "@rollup/plugin-commonjs": "16.0.0",
     "@rollup/plugin-node-resolve": "10.0.0",

@@ -36,7 +36,7 @@ describe('Handle Media Queries', () => {
 
         createOrUpdateDynamicTheme(theme, null, false);
         await timeout(100);
-        
+
         expect(getComputedStyle(document.querySelector('h1')).backgroundColor).toBe('rgb(0, 102, 0)');
         expect(getComputedStyle(document.querySelector('h1 strong')).color).toBe('rgb(255, 174, 26)');
         expect(document.querySelector('.testcase-style-2').nextElementSibling.classList.contains('darkreader--sync')).toBe(false);
@@ -53,7 +53,7 @@ describe('Handle Media Queries', () => {
 
         createOrUpdateDynamicTheme(theme, null, false);
         await timeout(100);
-        
+
         expect(getComputedStyle(document.querySelector('h1')).backgroundColor).toBe('rgb(0, 102, 0)');
         expect(getComputedStyle(document.querySelector('h1 strong')).color).toBe('rgb(255, 174, 26)');
         expect(document.querySelector('.testcase-style').nextElementSibling.classList.contains('darkreader--sync')).toBe(true);
@@ -77,10 +77,30 @@ describe('Handle Media Queries', () => {
 
         createOrUpdateDynamicTheme(theme, null, false);
         await timeout(100);
-        
+
         expect(getComputedStyle(document.querySelector('h1')).backgroundColor).toBe('rgb(0, 102, 0)');
         expect(getComputedStyle(document.querySelector('h1 strong')).color).toBe('rgb(255, 174, 26)');
         expect(getComputedStyle(document.body).backgroundColor).toBe('rgb(0, 0, 0)');
     });
-    
+
+    it('should check for CSS @media', async () => {
+        container.innerHTML = multiline(
+            '<style class="testcase-style">',
+            '    @media screen and (min-width: 2px) {',
+            '       h1 { background: green; }',
+            '    }',
+            '    @media screen and (min-width: 200000px) {',
+            '       h1 { background: orange; }',
+            '    }',
+            '</style>',
+            '<h1>Some test media query i guess</h1>',
+        );
+
+        createOrUpdateDynamicTheme(theme, null, false);
+        await timeout(100);
+
+        expect(getComputedStyle(document.querySelector('h1')).backgroundColor).toBe('rgb(0, 102, 0)');
+        expect((document.querySelector('.testcase-style').nextElementSibling as HTMLStyleElement).sheet.cssRules.length).toBe(2);
+    });
+
 });

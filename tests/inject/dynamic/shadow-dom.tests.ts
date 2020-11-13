@@ -88,4 +88,53 @@ describe('Handle Shadow-DOM', () => {
         expect(getComputedStyle(shadowRoot.querySelector('p')).color).toBe('rgb(255, 26, 26)');
     });
 
+    it('should handle defined elements', async () => {
+        container.innerHTML = multiline(
+            '<svg-container>',
+            '   <svg viewBox="0 0 100 30">',
+            '       <style class="testcase-style">#svg-text { color: red; }</style>',
+            '       <text id="svg-text" y="20">I am SVG</text>',
+            '   </svg>',
+            '</svg-container>',
+        );
+        class SVGContainer extends HTMLElement {
+            constructor() {
+                super();
+                const shadowRoot = this.attachShadow({mode: 'open'});
+                shadowRoot.append(...this.childNodes as any);
+            }
+        }
+        customElements.define('svg-container', SVGContainer);
+
+        createOrUpdateDynamicTheme(theme, null, false);
+
+        await timeout(100);
+        expect(getComputedStyle(document.querySelector('svg-container').shadowRoot.querySelector('text')).color).toBe('rgb(255, 26, 26)');
+    });
+
+    it('should react to defined elements', async () => {
+        container.innerHTML = multiline(
+            '<svg-container2>',
+            '   <svg viewBox="0 0 100 30">',
+            '       <style class="testcase-style">#svg-text { color: red; }</style>',
+            '       <text id="svg-text" y="20">I am SVG</text>',
+            '   </svg>',
+            '</svg-container2>',
+        );
+        class SVGContainer extends HTMLElement {
+            constructor() {
+                super();
+                const shadowRoot = this.attachShadow({mode: 'open'});
+                shadowRoot.append(...this.childNodes as any);
+            }
+        }
+
+        createOrUpdateDynamicTheme(theme, null, false);
+
+        await timeout(100);
+        customElements.define('svg-container2', SVGContainer);
+        await timeout(100);
+        expect(getComputedStyle(document.querySelector('svg-container2').shadowRoot.querySelector('text')).color).toBe('rgb(255, 26, 26)');
+    });
+
 });

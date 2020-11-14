@@ -13,12 +13,7 @@ interface UserStorageOptions {
 export default class UserStorage {
     constructor({onSettingsChange}: UserStorageOptions) {
         this.settings = null;
-        chrome.storage.onChanged.addListener(() => {
-            if (!isWriting) {
-                this.loadSettings();
-                onSettingsChange();
-            }
-        });
+        chrome.storage.onChanged.addListener(() => !isWriting && this.loadSettings() && onSettingsChange());
     }
 
     settings: Readonly<UserSettings>;

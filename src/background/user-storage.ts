@@ -2,13 +2,23 @@ import {DEFAULT_SETTINGS, DEFAULT_THEME} from '../defaults';
 import {debounce} from '../utils/debounce';
 import {isURLMatched} from '../utils/url';
 import {UserSettings} from '../definitions';
-import {readSyncStorage, readLocalStorage, writeSyncStorage, writeLocalStorage} from './utils/extension-api';
+import {readSyncStorage, readLocalStorage, writeSyncStorage, writeLocalStorage, isWriting} from './utils/extension-api';
 
 const SAVE_TIMEOUT = 1000;
 
+interface UserStorageOptions {
+    onSettingsChange: () => any;
+}
+
 export default class UserStorage {
-    constructor() {
+    constructor({onSettingsChange}: UserStorageOptions) {
         this.settings = null;
+        chrome.storage.onChanged.addListener(() => {
+            if (!isWriting) {
+                this.loadSettings();
+                onSettingsChange();
+            }
+        });
     }
 
     settings: Readonly<UserSettings>;

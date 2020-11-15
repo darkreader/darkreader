@@ -166,7 +166,7 @@ export function watchForStyleChanges(currentStyles: StyleElement[], update: (sty
             if (m.target.isConnected) {
                 if (shouldManageStyle(m.target)) {
                     updatedStyles.add(m.target as StyleElement);
-                } else if (shouldManageStyle(m.target, {disableDisabled: true})) {
+                } else if ((m.target as HTMLLinkElement).disabled && shouldManageStyle(m.target, {disableDisabled: true})) {
                     removedStyles.add(m.target as StyleElement);
                 }
             }

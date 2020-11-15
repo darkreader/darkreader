@@ -89,11 +89,17 @@ const overrides: Overrides = {
         dataAttr: 'data-darkreader-inline-outline',
         store: new WeakSet(),
     },
+    'stop-color': {
+        customProp: '--darkreader-inline-stopcolor',
+        cssProp: 'stop-color',
+        dataAttr: 'data-darkreader-inline-stopcolor',
+        store: new WeakSet(),
+    },
 };
 
 const overridesList = Object.values(overrides);
 
-const INLINE_STYLE_ATTRS = ['style', 'fill', 'stroke', 'bgcolor', 'color'];
+const INLINE_STYLE_ATTRS = ['style', 'fill', 'stop-color', 'stroke', 'bgcolor', 'color'];
 export const INLINE_STYLE_SELECTOR = INLINE_STYLE_ATTRS.map((attr) => `[${attr}]`).join(', ');
 
 export function getInlineOverrideStyle() {
@@ -301,15 +307,20 @@ export function overrideInlineStyle(element: HTMLElement, theme: FilterConfig, i
         }
         setCustomProp('color', 'color', value);
     }
-    if (element.hasAttribute('fill') && element instanceof SVGElement) {
-        const SMALL_SVG_LIMIT = 32;
-        const value = element.getAttribute('fill');
-        let isBg = false;
-        if (!(element instanceof SVGTextElement)) {
-            const {width, height} = element.getBoundingClientRect();
-            isBg = (width > SMALL_SVG_LIMIT || height > SMALL_SVG_LIMIT);
+    if (element instanceof SVGElement) {
+        if (element.hasAttribute('fill')) {
+            const SMALL_SVG_LIMIT = 32;
+            const value = element.getAttribute('fill');
+            let isBg = false;
+            if (!(element instanceof SVGTextElement)) {
+                const {width, height} = element.getBoundingClientRect();
+                isBg = (width > SMALL_SVG_LIMIT || height > SMALL_SVG_LIMIT);
+            }
+            setCustomProp('fill', isBg ? 'background-color' : 'color', value);
         }
-        setCustomProp('fill', isBg ? 'background-color' : 'color', value);
+        if (element.hasAttribute('stop-color')) {
+            setCustomProp('stop-color', 'background-color', element.getAttribute('stop-color'));
+        }
     }
     if (element.hasAttribute('stroke')) {
         const value = element.getAttribute('stroke');

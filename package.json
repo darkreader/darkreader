@@ -32,6 +32,17 @@
   "bugs": {
     "url": "https://github.com/darkreader/darkreader/issues"
   },
+  "keywords": [
+    "dark-theme",
+    "chrome-extension",
+    "firefox-addon",
+    "dark-mode",
+    "night-mode",
+    "darkmode",
+    "nightmode",
+    "accessibility",
+    "eye-care"
+  ],
   "homepage": "https://darkreader.org/",
   "funding": {
     "type": "opencollective",

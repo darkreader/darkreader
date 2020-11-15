@@ -40,7 +40,7 @@ export interface StyleManager {
 
 export const STYLE_SELECTOR = 'style, link[rel*="stylesheet" i]:not([disabled])';
 
-export function shouldManageStyle(element: Node) {
+export function shouldManageStyle(element: Node, options?: {disableDisabled: boolean}) {
     return (
         (
             (element instanceof HTMLStyleElement) ||
@@ -49,7 +49,10 @@ export function shouldManageStyle(element: Node) {
                 element instanceof HTMLLinkElement &&
                 element.rel &&
                 element.rel.toLowerCase().includes('stylesheet') &&
-                !element.disabled
+                (
+                    (options && options.disableDisabled) ||
+                    !element.disabled
+                )
             )
         ) &&
         !element.classList.contains('darkreader') &&

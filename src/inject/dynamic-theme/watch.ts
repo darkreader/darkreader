@@ -161,16 +161,21 @@ export function watchForStyleChanges(currentStyles: StyleElement[], update: (sty
 
     function handleAttributeMutations(mutations: MutationRecord[]) {
         const updatedStyles = new Set<StyleElement>();
+        const removedStyles = new Set<StyleElement>();
         mutations.forEach((m) => {
-            if (shouldManageStyle(m.target) && m.target.isConnected) {
-                updatedStyles.add(m.target as StyleElement);
+            if (m.target.isConnected) {
+                if (shouldManageStyle(m.target)) {
+                    updatedStyles.add(m.target as StyleElement);
+                } else if (shouldManageStyle(m.target, {disableDisabled: true})) {
+                    removedStyles.add(m.target as StyleElement);
+                }
             }
         });
-        if (updatedStyles.size > 0) {
+        if (updatedStyles.size + removedStyles.size > 0) {
             update({
                 updated: Array.from(updatedStyles),
                 created: [],
-                removed: [],
+                removed: Array.from(removedStyles),
                 moved: [],
             });
         }

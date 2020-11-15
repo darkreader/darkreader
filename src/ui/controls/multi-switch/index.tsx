@@ -2,7 +2,7 @@ import {m} from 'malevic';
 
 interface MultiSwitchProps {
     class?: string;
-    options: string[];
+    options: Array<string>;
     value: string;
     onChange: (value: string) => void;
 }

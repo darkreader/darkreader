@@ -36,7 +36,7 @@ describe('Handle Media Queries', () => {
 
         createOrUpdateDynamicTheme(theme, null, false);
         await timeout(100);
-        
+
         expect(getComputedStyle(document.querySelector('h1')).backgroundColor).toBe('rgb(0, 102, 0)');
         expect(getComputedStyle(document.querySelector('h1 strong')).color).toBe('rgb(255, 174, 26)');
         expect(document.querySelector('.testcase-style-2').nextElementSibling.classList.contains('darkreader--sync')).toBe(false);
@@ -53,7 +53,7 @@ describe('Handle Media Queries', () => {
 
         createOrUpdateDynamicTheme(theme, null, false);
         await timeout(100);
-        
+
         expect(getComputedStyle(document.querySelector('h1')).backgroundColor).toBe('rgb(0, 102, 0)');
         expect(getComputedStyle(document.querySelector('h1 strong')).color).toBe('rgb(255, 174, 26)');
         expect(document.querySelector('.testcase-style').nextElementSibling.classList.contains('darkreader--sync')).toBe(true);
@@ -77,10 +77,10 @@ describe('Handle Media Queries', () => {
 
         createOrUpdateDynamicTheme(theme, null, false);
         await timeout(100);
-        
+
         expect(getComputedStyle(document.querySelector('h1')).backgroundColor).toBe('rgb(0, 102, 0)');
         expect(getComputedStyle(document.querySelector('h1 strong')).color).toBe('rgb(255, 174, 26)');
         expect(getComputedStyle(document.body).backgroundColor).toBe('rgb(0, 0, 0)');
     });
-    
+
 });

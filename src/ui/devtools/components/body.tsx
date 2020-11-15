@@ -3,7 +3,7 @@ import {withState, useState} from 'malevic/state';
 import {Button} from '../../controls';
 import ThemeEngines from '../../../generators/theme-engines';
 import {DEVTOOLS_DOCS_URL} from '../../../utils/links';
-import {ExtWrapper, TabInfo} from '../../../definitions';
+import type {ExtWrapper, TabInfo} from '../../../definitions';
 import {getCurrentThemePreset} from '../../popup/theme/utils';
 import {isFirefox} from '../../../utils/platform';
 
@@ -64,7 +64,7 @@ function Body({data, tab, actions}: BodyProps) {
         try {
             await wrapper.apply(text);
             setState({errorText: null});
-        } catch (err) {
+        } catch (err: unknown) {
             setState({
                 errorText: String(err),
             });

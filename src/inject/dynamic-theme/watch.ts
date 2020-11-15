@@ -1,20 +1,22 @@
 import {forEach, push} from '../../utils/array';
-import {iterateShadowHosts, createOptimizedTreeObserver, ElementsTreeOperations} from '../utils/dom';
-import {shouldManageStyle, getManageableStyles, StyleElement} from './style-manager';
+import type {ElementsTreeOperations} from '../utils/dom';
+import {iterateShadowHosts, createOptimizedTreeObserver} from '../utils/dom';
+import type {StyleElement} from './style-manager';
+import {shouldManageStyle, getManageableStyles} from './style-manager';
 import {isDefinedSelectorSupported} from '../../utils/platform';
 
-const observers = [] as {disconnect(): void}[];
+const observers = [] as Array<{disconnect(): void}>;
 let observedRoots: WeakSet<Node>;
 
 interface ChangedStyles {
-    created: StyleElement[];
-    updated: StyleElement[];
-    removed: StyleElement[];
-    moved: StyleElement[];
+    created: Array<StyleElement>;
+    updated: Array<StyleElement>;
+    removed: Array<StyleElement>;
+    moved: Array<StyleElement>;
 }
 
 const undefinedGroups = new Map<string, Set<Element>>();
-let elementsDefinitionCallback: (elements: Element[]) => void;
+let elementsDefinitionCallback: (elements: Array<Element>) => void;
 
 function collectUndefinedElements(root: ParentNode) {
     if (!isDefinedSelectorSupported) {
@@ -59,7 +61,7 @@ function customElementsWhenDefined(tag: string) {
     });
 }
 
-function watchWhenCustomElementsDefined(callback: (elements: Element[]) => void) {
+function watchWhenCustomElementsDefined(callback: (elements: Array<Element>) => void) {
     elementsDefinitionCallback = callback;
 }
 
@@ -68,7 +70,7 @@ function unsubscribeFromDefineCustomElements() {
     undefinedGroups.clear();
 }
 
-export function watchForStyleChanges(currentStyles: StyleElement[], update: (styles: ChangedStyles) => void, shadowRootDiscovered: (root: ShadowRoot) => void) {
+export function watchForStyleChanges(currentStyles: Array<StyleElement>, update: (styles: ChangedStyles) => void, shadowRootDiscovered: (root: ShadowRoot) => void) {
     stopWatchingForStyleChanges();
 
     const prevStyles = new Set<StyleElement>(currentStyles);
@@ -159,7 +161,7 @@ export function watchForStyleChanges(currentStyles: StyleElement[], update: (sty
         collectUndefinedElements(root);
     }
 
-    function handleAttributeMutations(mutations: MutationRecord[]) {
+    function handleAttributeMutations(mutations: Array<MutationRecord>) {
         const updatedStyles = new Set<StyleElement>();
         mutations.forEach((m) => {
             if (shouldManageStyle(m.target) && m.target.isConnected) {
@@ -200,7 +202,7 @@ export function watchForStyleChanges(currentStyles: StyleElement[], update: (sty
     iterateShadowHosts(document.documentElement, subscribeForShadowRootChanges);
 
     watchWhenCustomElementsDefined((hosts) => {
-        const newStyles: StyleElement[] = [];
+        const newStyles: Array<StyleElement> = [];
         hosts.forEach((host) => push(newStyles, getManageableStyles(host.shadowRoot)));
         update({created: newStyles, updated: [], removed: [], moved: []});
         hosts.forEach((host) => {

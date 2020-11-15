@@ -1,4 +1,4 @@
-export function multiline(...lines: string[]) {
+export function multiline(...lines: Array<string>) {
     return lines.join('\n');
 }
 

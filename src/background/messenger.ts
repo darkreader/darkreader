@@ -1,4 +1,4 @@
-import {ExtensionData, FilterConfig, TabInfo, Message, UserSettings} from '../definitions';
+import type {ExtensionData, FilterConfig, TabInfo, Message, UserSettings} from '../definitions';
 
 export interface ExtensionAdapter {
     collect: () => Promise<ExtensionData>;
@@ -6,7 +6,7 @@ export interface ExtensionAdapter {
     changeSettings: (settings: Partial<UserSettings>) => void;
     setTheme: (theme: Partial<FilterConfig>) => void;
     setShortcut: ({command, shortcut}) => void;
-    markNewsAsRead: (ids: string[]) => void;
+    markNewsAsRead: (ids: Array<string>) => void;
     toggleURL: (pattern: string) => void;
     onPopupOpen: () => void;
     loadConfig: (options: {local: boolean}) => Promise<void>;

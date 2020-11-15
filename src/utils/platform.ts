@@ -25,7 +25,7 @@ export const isDefinedSelectorSupported = (() => {
     try {
         document.querySelector(':defined');
         return true;
-    } catch (err) {
+    } catch (err: unknown) {
         return false;
     }
 })();
@@ -34,7 +34,7 @@ export const isCSSStyleSheetConstructorSupported = (() => {
     try {
         new CSSStyleSheet();
         return true;
-    } catch (err) {
+    } catch (err: unknown) {
         return false;
     }
 })();

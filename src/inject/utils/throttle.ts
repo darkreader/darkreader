@@ -1,9 +1,9 @@
-export function throttle<T extends(...args: any[]) => any>(callback: T) {
+export function throttle<T extends(...args: Array<any>) => any>(callback: T) {
     let pending = false;
     let frameId: number = null;
-    let lastArgs: any[];
+    let lastArgs: Array<any>;
 
-    const throttled: T = ((...args: any[]) => {
+    const throttled: T = ((...args: Array<any>) => {
         lastArgs = args;
         if (frameId) {
             pending = true;
@@ -31,12 +31,12 @@ export function throttle<T extends(...args: any[]) => any>(callback: T) {
 type Task = () => void;
 
 export function createAsyncTasksQueue() {
-    const tasks: Task[] = [];
+    const tasks: Array<Task> = [];
     let frameId = null;
 
     function runTasks() {
         let task: Task;
-        while (task = tasks.shift()) {
+        while ((task = tasks.shift())) {
             task();
         }
         frameId = null;

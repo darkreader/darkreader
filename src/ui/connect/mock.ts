@@ -1,5 +1,5 @@
 import {getURLHostOrProtocol} from '../../utils/url';
-import {ExtensionData, TabInfo, Theme, UserSettings} from '../../definitions';
+import type {ExtensionData, TabInfo, Theme, UserSettings} from '../../definitions';
 
 export function getMockData(override = {} as Partial<ExtensionData>): ExtensionData {
     return Object.assign({
@@ -109,7 +109,7 @@ export function createConnectorMock() {
             }
             listener(data);
         },
-        markNewsAsRead(ids: string[]) {
+        markNewsAsRead(ids: Array<string>) {
             data.news
                 .filter(({id}) => ids.includes(id))
                 .forEach((news) => news.read = true);

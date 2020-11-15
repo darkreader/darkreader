@@ -23,9 +23,9 @@ async function sendMessage(...args) {
                 text = await response.text();
             }
             messageListeners.forEach((cb) => cb({type: 'fetch-response', data: text, error: null, id}));
-        } catch (error) {
-            console.error(error);
-            messageListeners.forEach((cb) => cb({type: 'fetch-response', data: null, error, id}));
+        } catch (err: unknown) {
+            console.error(err);
+            messageListeners.forEach((cb) => cb({type: 'fetch-response', data: null, err, id}));
         }
     }
 }

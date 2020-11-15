@@ -1,7 +1,7 @@
 import {m} from 'malevic';
-import {ViewProps} from '../types';
+import type {ViewProps} from '../types';
 import ControlGroup from '../control-group';
-import {UserSettings} from '../../../definitions';
+import type {UserSettings} from '../../../definitions';
 import {Button} from '../../controls';
 import {openFile} from '../../utils';
 import {DEFAULT_SETTINGS} from '../../../defaults';
@@ -39,7 +39,7 @@ export default function ImportButton(props: ViewProps) {
                 const content: UserSettings = JSON.parse(result);
                 const result2 = getValidatedObject(content, DEFAULT_SETTINGS);
                 props.actions.changeSettings({...result2});
-            } catch (err) {
+            } catch (err: unknown) {
                 // TODO Make overlay Error
                 console.error(err);
             }

@@ -4,7 +4,7 @@ import CustomSettingsToggle from '../custom-settings-toggle';
 import ModeToggle from './mode-toggle';
 import {getLocalMessage} from '../../../../utils/locales';
 import {isURLInList} from '../../../../utils/url';
-import {ExtWrapper, TabInfo, FilterConfig} from '../../../../definitions';
+import type {ExtWrapper, TabInfo, FilterConfig} from '../../../../definitions';
 
 export default function FilterSettings({data, actions, tab}: ExtWrapper & {tab: TabInfo}) {
 

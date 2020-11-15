@@ -5,7 +5,7 @@ interface ResetButtonProps {
     onClick: () => void;
 }
 
-export default function ResetButton(props: ResetButtonProps, ...content: Malevic.Child[]) {
+export default function ResetButton(props: ResetButtonProps, ...content: Array<Malevic.Child>) {
     return (
         <Button
             class="reset-button"

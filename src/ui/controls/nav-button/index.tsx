@@ -6,7 +6,7 @@ interface NavButtonProps {
     onClick: () => void;
 }
 
-export default function ResetButton(props: NavButtonProps, ...content: Malevic.Child[]) {
+export default function ResetButton(props: NavButtonProps, ...content: Array<Malevic.Child>) {
     return (
         <Button
             class={['nav-button', props.class]}

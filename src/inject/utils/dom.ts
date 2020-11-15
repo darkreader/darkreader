@@ -212,7 +212,7 @@ if (!isDOMReady()) {
 
 const HUGE_MUTATIONS_COUNT = 1000;
 
-function isHugeMutation(mutations: MutationRecord[]) {
+function isHugeMutation(mutations: Array<MutationRecord>) {
     if (mutations.length > HUGE_MUTATIONS_COUNT) {
         return true;
     }
@@ -234,7 +234,7 @@ export interface ElementsTreeOperations {
     deletions: Set<Element>;
 }
 
-function getElementsTreeOperations(mutations: MutationRecord[]): ElementsTreeOperations {
+function getElementsTreeOperations(mutations: Array<MutationRecord>): ElementsTreeOperations {
     const additions = new Set<Element>();
     const deletions = new Set<Element>();
     const moves = new Set<Element>();
@@ -256,8 +256,8 @@ function getElementsTreeOperations(mutations: MutationRecord[]): ElementsTreeOpe
     });
     moves.forEach((n) => additions.delete(n));
 
-    const duplicateAdditions = [] as Element[];
-    const duplicateDeletions = [] as Element[];
+    const duplicateAdditions = [] as Array<Element>;
+    const duplicateDeletions = [] as Array<Element>;
     additions.forEach((node) => {
         if (additions.has(node.parentElement)) {
             duplicateAdditions.push(node);
@@ -295,7 +295,7 @@ export function createOptimizedTreeObserver(root: Document | ShadowRoot, callbac
         let hadHugeMutationsBefore = false;
         let subscribedForReadyState = false;
 
-        observer = new MutationObserver((mutations: MutationRecord[]) => {
+        observer = new MutationObserver((mutations: Array<MutationRecord>) => {
             if (isHugeMutation(mutations)) {
                 if (!hadHugeMutationsBefore || isDOMReady()) {
                     observerCallbacks.forEach(({onHugeMutations}) => onHugeMutations(root));

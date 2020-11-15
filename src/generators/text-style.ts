@@ -1,7 +1,7 @@
-import {FilterConfig} from '../definitions';
+import type {FilterConfig} from '../definitions';
 
 export function createTextStyle(config: FilterConfig): string {
-    const lines: string[] = [];
+    const lines: Array<string> = [];
     // Don't target pre elements as they are preformatted element's e.g. code blocks
     lines.push('*:not(pre) {');
 

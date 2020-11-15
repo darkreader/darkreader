@@ -27,7 +27,7 @@ function parse24HTime(time: string) {
     return time.split(':').map((x) => parseInt(x));
 }
 
-function compareTime(a: number[], b: number[]) {
+function compareTime(a: Array<number>, b: Array<number>) {
     if (a[0] === b[0] && a[1] === b[1]) {
         return 0;
     }

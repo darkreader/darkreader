@@ -33,7 +33,7 @@ declare namespace DarkReader {
     /**
      * Returns the generated CSS by Dark Reader as a string.
      */
-    function exportGeneratedCSS(): Promise<string>
+    function exportGeneratedCSS(): Promise<string>;
 
     /**
      * Theme options.
@@ -123,7 +123,7 @@ declare namespace DarkReader {
          * List of CSS selectors that should be inverted.
          * Usually icons that are contained in sprites.
          */
-        invert: string[];
+        invert: Array<string>;
         /**
          * Additional CSS.
          * ${color} template should be used to apply theme options to a color.
@@ -140,12 +140,12 @@ declare namespace DarkReader {
          * List of CSS selectors where it's inline style should not be analyzed
          * Mostly used for color pickers
          */
-        ignoreInlineStyle: string[];
+        ignoreInlineStyle: Array<string>;
         /**
          * List of CSS selectors where it's image should not be analyzed
          * Mostly used for wrongly inverted background-images
          */
-        ignoreImageAnalysis: string[];
+        ignoreImageAnalysis: Array<string>;
     }
 }
 

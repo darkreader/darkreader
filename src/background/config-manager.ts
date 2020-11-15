@@ -4,7 +4,7 @@ import {getDuration} from '../utils/time';
 import {parseInversionFixes} from '../generators/css-filter';
 import {parseDynamicThemeFixes} from '../generators/dynamic-theme';
 import {parseStaticThemes} from '../generators/static-theme';
-import {InversionFix, StaticTheme, DynamicThemeFix} from '../definitions';
+import type {InversionFix, StaticTheme, DynamicThemeFix} from '../definitions';
 
 const CONFIG_URLs = {
     darkSites: {
@@ -27,10 +27,10 @@ const CONFIG_URLs = {
 const REMOTE_TIMEOUT_MS = getDuration({seconds: 10});
 
 export default class ConfigManager {
-    DARK_SITES?: string[];
-    DYNAMIC_THEME_FIXES?: DynamicThemeFix[];
-    INVERSION_FIXES?: InversionFix[];
-    STATIC_THEMES?: StaticTheme[];
+    DARK_SITES?: Array<string>;
+    DYNAMIC_THEME_FIXES?: Array<DynamicThemeFix>;
+    INVERSION_FIXES?: Array<InversionFix>;
+    STATIC_THEMES?: Array<StaticTheme>;
 
     raw = {
         darkSites: null,
@@ -63,7 +63,7 @@ export default class ConfigManager {
                     url: `${remoteURL}?nocache=${Date.now()}`,
                     timeout: REMOTE_TIMEOUT_MS
                 });
-            } catch (err) {
+            } catch (err: unknown) {
                 console.error(`${name} remote load error`, err);
                 $config = await loadLocal();
             }

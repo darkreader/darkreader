@@ -2,7 +2,7 @@ import {formatSitesFixesConfig} from './utils/format';
 import {parseSitesFixesConfig} from './utils/parse';
 import {parseArray, formatArray} from '../utils/text';
 import {compareURLPatterns, isURLInList} from '../utils/url';
-import {DynamicThemeFix} from '../definitions';
+import type {DynamicThemeFix} from '../definitions';
 
 const dynamicThemeFixesCommands = {
     'INVERT': 'invert',
@@ -24,7 +24,7 @@ export function parseDynamicThemeFixes(text: string) {
     });
 }
 
-export function formatDynamicThemeFixes(dynamicThemeFixes: DynamicThemeFix[]) {
+export function formatDynamicThemeFixes(dynamicThemeFixes: Array<DynamicThemeFix>) {
     const fixes = dynamicThemeFixes.slice().sort((a, b) => compareURLPatterns(a.url[0], b.url[0]));
 
     return formatSitesFixesConfig(fixes, {
@@ -45,7 +45,7 @@ export function formatDynamicThemeFixes(dynamicThemeFixes: DynamicThemeFix[]) {
     });
 }
 
-export function getDynamicThemeFixesFor(url: string, frameURL: string, fixes: DynamicThemeFix[], enabledForPDF: boolean) {
+export function getDynamicThemeFixesFor(url: string, frameURL: string, fixes: Array<DynamicThemeFix>, enabledForPDF: boolean) {
     if (fixes.length === 0 || fixes[0].url[0] !== '*') {
         return null;
     }

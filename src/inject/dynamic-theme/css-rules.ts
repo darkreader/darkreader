@@ -14,7 +14,7 @@ export function iterateCSSRules(rules: CSSRuleList, iterate: (rule: CSSStyleRule
         } else if (rule instanceof CSSImportRule) {
             try {
                 iterateCSSRules(rule.styleSheet.cssRules, iterate);
-            } catch (err) {
+            } catch (err: unknown) {
                 logWarn(err);
             }
         } else if (rule instanceof CSSSupportsRule) {

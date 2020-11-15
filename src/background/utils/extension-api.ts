@@ -68,7 +68,7 @@ export function writeLocalStorage<T extends {[key: string]: any}>(values: T): Pr
 }
 
 export function getFontList() {
-    return new Promise<string[]>((resolve) => {
+    return new Promise<Array<string>>((resolve) => {
         if (!chrome.fontSettings) {
             // Todo: Remove it as soon as Firefox and Edge get support.
             resolve([
@@ -89,7 +89,7 @@ export function getFontList() {
 }
 
 export function getCommands() {
-    return new Promise<chrome.commands.Command[]>((resolve) => {
+    return new Promise<Array<chrome.commands.Command>>((resolve) => {
         if (!chrome.commands) {
             resolve([]);
             return;

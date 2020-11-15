@@ -1,9 +1,9 @@
 import {createFilterMatrix, Matrix} from './utils/matrix';
 import {cssFilterStyleSheetTemplate} from './css-filter';
-import {FilterConfig, InversionFix} from '../definitions';
+import type {FilterConfig, InversionFix} from '../definitions';
 import {isFirefox} from '../utils/platform';
 
-export function createSVGFilterStylesheet(config: FilterConfig, url: string, frameURL: string, inversionFixes: InversionFix[]) {
+export function createSVGFilterStylesheet(config: FilterConfig, url: string, frameURL: string, inversionFixes: Array<InversionFix>) {
     let filterValue: string;
     let reverseFilterValue: string;
     if (isFirefox) {
@@ -29,7 +29,7 @@ function getEmbeddedSVGFilterValue(matrixValue: string) {
     return `url(data:image/svg+xml;base64,${btoa(svg)}#${id})`;
 }
 
-function toSVGMatrix(matrix: number[][]) {
+function toSVGMatrix(matrix: Array<Array<number>>) {
     return matrix.slice(0, 4).map(m => m.map(m => m.toFixed(3)).join(' ')).join(' ');
 }
 

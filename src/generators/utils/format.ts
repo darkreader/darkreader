@@ -1,19 +1,19 @@
 import {push} from '../../utils/array';
 
 interface SiteFix {
-    url: string[];
+    url: Array<string>;
     [prop: string]: any;
 }
 
 interface SitesFixesFormatOptions {
-    props: string[];
+    props: Array<string>;
     getPropCommandName: (prop: string) => string;
     formatPropValue: (prop: string, value) => string;
     shouldIgnoreProp: (props: string, value) => boolean;
 }
 
-export function formatSitesFixesConfig(fixes: SiteFix[], options: SitesFixesFormatOptions) {
-    const lines: string[] = [];
+export function formatSitesFixesConfig(fixes: Array<SiteFix>, options: SitesFixesFormatOptions) {
+    const lines: Array<string> = [];
 
     fixes.forEach((fix, i) => {
         push(lines, fix.url);

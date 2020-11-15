@@ -1,7 +1,8 @@
 import ConfigManager from './config-manager';
 import DevTools from './devtools';
 import IconManager from './icon-manager';
-import Messenger, {ExtensionAdapter} from './messenger';
+import type {ExtensionAdapter} from './messenger';
+import Messenger from './messenger';
 import Newsmaker from './newsmaker';
 import TabManager from './tab-manager';
 import UserStorage from './user-storage';
@@ -14,7 +15,7 @@ import createCSSFilterStylesheet from '../generators/css-filter';
 import {getDynamicThemeFixesFor} from '../generators/dynamic-theme';
 import createStaticStylesheet from '../generators/static-theme';
 import {createSVGFilterStylesheet, getSVGFilterMatrixValue, getSVGReverseFilterMatrixValue} from '../generators/svg-filter';
-import {ExtensionData, FilterConfig, News, Shortcuts, UserSettings, TabInfo} from '../definitions';
+import type {ExtensionData, FilterConfig, News, Shortcuts, UserSettings, TabInfo} from '../definitions';
 import {isSystemDarkModeEnabled} from '../utils/media-query';
 import {isFirefox} from '../utils/platform';
 
@@ -25,7 +26,7 @@ export class Extension {
 
     config: ConfigManager;
     devtools: DevTools;
-    fonts: string[];
+    fonts: Array<string>;
     icon: IconManager;
     messenger: Messenger;
     news: Newsmaker;
@@ -79,7 +80,7 @@ export class Extension {
         return this.user.settings.enabled;
     }
 
-    private awaiting: (() => void)[];
+    private awaiting: Array<() => void>;
 
     async start() {
         await this.config.load({local: true});
@@ -193,7 +194,7 @@ export class Extension {
         };
     }
 
-    private onNewsUpdate(news: News[]) {
+    private onNewsUpdate(news: Array<News>) {
         const latestNews = news.length > 0 && news[0];
         if (latestNews && latestNews.important && !latestNews.read) {
             this.icon.showImportantBadge();

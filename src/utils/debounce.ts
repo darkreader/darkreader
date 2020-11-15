@@ -1,8 +1,8 @@
-type AnyFn = (...args: any[]) => any;
+type AnyFn = (...args: Array<any>) => any;
 
 export function debounce<F extends AnyFn>(delay: number, fn: F): F {
     let timeoutId: number = null;
-    return ((...args: any[]) => {
+    return ((...args: Array<any>) => {
         if (timeoutId) {
             clearTimeout(timeoutId);
         }

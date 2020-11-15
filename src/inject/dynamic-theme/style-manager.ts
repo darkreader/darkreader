@@ -1,4 +1,4 @@
-import {Theme} from '../../definitions';
+import type {Theme} from '../../definitions';
 import {forEach} from '../../utils/array';
 import {getMatches} from '../../utils/text';
 import {getAbsoluteURL} from '../../utils/url';
@@ -31,7 +31,7 @@ export type StyleElement = HTMLLinkElement | HTMLStyleElement;
 
 export interface StyleManager {
     details(): {variables: Map<string, string>};
-    render(theme: Theme, variables: Map<string, string>, ignoreImageAnalysis: string[]): void;
+    render(theme: Theme, variables: Map<string, string>, ignoreImageAnalysis: Array<string>): void;
     pause(): void;
     destroy(): void;
     watch(): void;
@@ -58,7 +58,7 @@ export function shouldManageStyle(element: Node) {
     );
 }
 
-export function getManageableStyles(node: Node, results = [] as StyleElement[], deep = true) {
+export function getManageableStyles(node: Node, results = [] as Array<StyleElement>, deep = true) {
     if (shouldManageStyle(node)) {
         results.push(node as StyleElement);
     } else if (node instanceof Element || (isShadowDomSupported && node instanceof ShadowRoot) || node === document) {
@@ -77,7 +77,7 @@ const syncStyleSet = new WeakSet<HTMLStyleElement | SVGStyleElement>();
 const corsStyleSet = new WeakSet<HTMLStyleElement>();
 
 export function manageStyle(element: StyleElement, {update, loadingStart, loadingEnd}): StyleManager {
-    const prevStyles: HTMLStyleElement[] = [];
+    const prevStyles: Array<HTMLStyleElement> = [];
     let next: Element = element;
     while ((next = next.nextElementSibling) && next.matches('.darkreader')) {
         prevStyles.push(next as HTMLStyleElement);
@@ -150,7 +150,7 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
             if ((!cssRules && !accessError) || isStillLoadingError(accessError)) {
                 try {
                     await linkLoading(element);
-                } catch (err) {
+                } catch (err: unknown) {
                     // NOTE: Some @import resources can fail,
                     // but the style sheet can still be valid.
                     // There's no way to get the actual error.
@@ -191,7 +191,7 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
             try {
                 const fullCSSText = await replaceCSSImports(cssText, cssBasePath);
                 corsCopy = createCORSCopy(element, fullCSSText);
-            } catch (err) {
+            } catch (err: unknown) {
                 logWarn(err);
             }
             if (corsCopy) {
@@ -230,7 +230,7 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
 
     let forceRenderStyle = false;
 
-    function render(theme: Theme, variables: Map<string, string>, ignoreImageAnalysis: string[]) {
+    function render(theme: Theme, variables: Map<string, string>, ignoreImageAnalysis: Array<string>) {
         const rules = getRulesSync();
         if (!rules) {
             return;
@@ -295,8 +295,8 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
                 return [null, null];
             }
             return [element.sheet.cssRules, null];
-        } catch (err) {
-            return [null, err];
+        } catch (err: unknown) {
+            return [null, err as Error];
         }
     }
 
@@ -446,7 +446,7 @@ async function replaceCSSImports(cssText: string, basePath: string, cache = new 
                 importedCSS = await loadText(absoluteURL);
                 cache.set(absoluteURL, importedCSS);
                 importedCSS = await replaceCSSImports(importedCSS, getCSSBaseBath(absoluteURL), cache);
-            } catch (err) {
+            } catch (err: unknown) {
                 logWarn(err);
                 importedCSS = '';
             }

@@ -1,7 +1,7 @@
 import {parse} from '../../utils/color';
 import {modifyBackgroundColor} from '../../generators/modify-colors';
 import {logWarn} from '../utils/log';
-import {FilterConfig} from '../../definitions';
+import type {FilterConfig} from '../../definitions';
 
 const metaThemeColorName = 'theme-color';
 const metaThemeColorSelector = `meta[name="${metaThemeColorName}"]`;
@@ -13,7 +13,7 @@ function changeMetaThemeColor(meta: HTMLMetaElement, theme: FilterConfig) {
     try {
         const color = parse(srcMetaThemeColor);
         meta.content = modifyBackgroundColor(color, theme);
-    } catch (err) {
+    } catch (err: unknown) {
         logWarn(err);
     }
 }

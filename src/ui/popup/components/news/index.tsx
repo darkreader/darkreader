@@ -2,19 +2,18 @@ import {m} from 'malevic';
 import {Button} from '../../../controls';
 import {BLOG_URL} from '../../../../utils/links';
 import {getLocalMessage, getUILanguage} from '../../../../utils/locales';
-import {News} from '../../../../definitions';
+import type {News} from '../../../../definitions';
 
 interface NewsProps {
-    news: News[];
+    news: Array<News>;
     expanded: boolean;
-    onNewsOpen: (...news: News[]) => void;
+    onNewsOpen: (...news: Array<News>) => void;
     onClose: () => void;
 }
 
-
 const NEWS_COUNT = 2;
 
-export function News({news, expanded, onNewsOpen, onClose}: NewsProps) {
+export function NewsGroup({news, expanded, onNewsOpen, onClose}: NewsProps) {
     return (
         <div class={{'news': true, 'news--expanded': expanded}}>
             <div class="news__header">
@@ -29,7 +28,7 @@ export function News({news, expanded, onNewsOpen, onClose}: NewsProps) {
                         // Workaround for https://bugs.chromium.org/p/chromium/issues/detail?id=811403
                         const locale = getUILanguage();
                         formattedDate = date.toLocaleDateString(locale, {month: 'short', day: 'numeric'});
-                    } catch (err) {
+                    } catch (err: unknown) {
                         formattedDate = date.toISOString().substring(0, 10);
                     }
                     return (

@@ -1,11 +1,11 @@
 import {m} from 'malevic';
-import {ViewProps} from '../types';
+import type {ViewProps} from '../types';
 import SiteList from './site-list';
 import CheckButton from '../check-button';
 import {isFirefox} from '../../../utils/platform';
 
 export default function SiteListPage(props: ViewProps) {
-    function onSiteListChange(sites: string[]) {
+    function onSiteListChange(sites: Array<string>) {
         props.actions.changeSettings({siteList: sites});
     }
     function onInvertPDFChange(checked: boolean) {

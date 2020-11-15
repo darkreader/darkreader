@@ -1,7 +1,7 @@
 import {DEFAULT_SETTINGS, DEFAULT_THEME} from '../defaults';
 import {debounce} from '../utils/debounce';
 import {isURLMatched} from '../utils/url';
-import {UserSettings} from '../definitions';
+import type {UserSettings} from '../definitions';
 import {readSyncStorage, readLocalStorage, writeSyncStorage, writeLocalStorage} from './utils/extension-api';
 
 const SAVE_TIMEOUT = 1000;
@@ -61,7 +61,7 @@ export default class UserStorage {
         await writeLocalStorage(obj);
         try {
             await writeSyncStorage(obj);
-        } catch (err) {
+        } catch (err: unknown) {
             console.warn('Settings synchronization was disabled due to error:', chrome.runtime.lastError);
             this.set({syncSettings: false});
         }
@@ -72,7 +72,7 @@ export default class UserStorage {
         if (settings.syncSettings) {
             try {
                 await writeSyncStorage(settings);
-            } catch (err) {
+            } catch (err: unknown) {
                 console.warn('Settings synchronization was disabled due to error:', chrome.runtime.lastError);
                 this.set({syncSettings: false});
                 await this.saveSyncSetting(false);
@@ -101,7 +101,7 @@ export default class UserStorage {
                     isURLMatched('https://google.com/', pattern);
                     isURLMatched('[::1]:1337', pattern);
                     isOK = true;
-                } catch (err) {
+                } catch (err: unknown) {
                     console.warn(`Pattern "${pattern}" excluded`);
                 }
                 return isOK && pattern !== '/';

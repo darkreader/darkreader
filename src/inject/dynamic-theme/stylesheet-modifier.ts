@@ -1,10 +1,11 @@
-import {Theme} from '../../definitions';
+import type {Theme} from '../../definitions';
 import {createAsyncTasksQueue} from '../utils/throttle';
 import {iterateCSSRules, iterateCSSDeclarations, replaceCSSVariables} from './css-rules';
-import {getModifiableCSSDeclaration, ModifiableCSSDeclaration, ModifiableCSSRule} from './modify-css';
+import type {ModifiableCSSDeclaration, ModifiableCSSRule} from './modify-css';
+import {getModifiableCSSDeclaration} from './modify-css';
 import {getTempCSSStyleSheet} from '../utils/dom';
 
-const themeCacheKeys: (keyof Theme)[] = [
+const themeCacheKeys: Array<keyof Theme> = [
     'mode',
     'brightness',
     'contrast',
@@ -32,7 +33,7 @@ export function createStyleSheetModifier() {
         sourceCSSRules: CSSRuleList;
         theme: Theme;
         variables: Map<string, string>;
-        ignoreImageAnalysis: string[]
+        ignoreImageAnalysis: Array<string>;
         force: boolean;
         prepareSheet: () => CSSStyleSheet;
         isAsyncCancelled: () => boolean;
@@ -47,7 +48,7 @@ export function createStyleSheetModifier() {
         const themeKey = getThemeKey(theme);
         const themeChanged = (themeKey !== prevFilterKey);
 
-        const modRules: ModifiableCSSRule[] = [];
+        const modRules: Array<ModifiableCSSRule> = [];
         iterateCSSRules(rules, (rule) => {
             const cssText = rule.cssText;
             let textDiffersFromPrev = false;
@@ -80,7 +81,7 @@ export function createStyleSheetModifier() {
                 return;
             }
 
-            const modDecs: ModifiableCSSDeclaration[] = [];
+            const modDecs: Array<ModifiableCSSDeclaration> = [];
             const targetRule = varsRule || rule;
             targetRule && targetRule.style && iterateCSSDeclarations(targetRule.style, (property, value) => {
                 const mod = getModifiableCSSDeclaration(property, value, rule, ignoreImageAnalysis, isAsyncCancelled);
@@ -115,13 +116,13 @@ export function createStyleSheetModifier() {
         interface ReadyGroup {
             isGroup: true;
             rule: any;
-            rules: (ReadyGroup | ReadyStyleRule)[];
+            rules: Array<ReadyGroup | ReadyStyleRule>;
         }
 
         interface ReadyStyleRule {
             isGroup: false;
             selector: string;
-            declarations: ReadyDeclaration[];
+            declarations: Array<ReadyDeclaration>;
         }
 
         interface ReadyDeclaration {

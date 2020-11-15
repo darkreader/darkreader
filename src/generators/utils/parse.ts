@@ -1,22 +1,22 @@
 import {parseArray} from '../../utils/text';
 
 interface SiteProps {
-    url: string[];
+    url: Array<string>;
 }
 
 interface SitesFixesParserOptions {
-    commands: string[];
+    commands: Array<string>;
     getCommandPropName: (command: string) => string;
     parseCommandValue: (command: string, value: string) => any;
 }
 
 export function parseSitesFixesConfig<T extends SiteProps>(text: string, options: SitesFixesParserOptions) {
-    const sites: T[] = [];
+    const sites: Array<T> = [];
 
     const blocks = text.replace(/\r/g, '').split(/^\s*={2,}\s*$/gm);
     blocks.forEach((block) => {
         const lines = block.split('\n');
-        const commandIndices: number[] = [];
+        const commandIndices: Array<number> = [];
         lines.forEach((ln, i) => {
             if (ln.match(/^\s*[A-Z]+(\s[A-Z]+)*\s*$/)) {
                 commandIndices.push(i);
@@ -28,7 +28,7 @@ export function parseSitesFixesConfig<T extends SiteProps>(text: string, options
         }
 
         const siteFix = {
-            url: parseArray(lines.slice(0, commandIndices[0]).join('\n')) as string[],
+            url: parseArray(lines.slice(0, commandIndices[0]).join('\n')) as Array<string>,
         } as T;
 
         commandIndices.forEach((commandIndex, i) => {

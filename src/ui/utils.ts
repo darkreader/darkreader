@@ -1,6 +1,6 @@
 import {isFirefox} from '../utils/platform';
 
-export function classes(...args: (string | {[cls: string]: boolean})[]) {
+export function classes(...args: Array<string | {[cls: string]: boolean}>) {
     const classes = [];
     args.filter((c) => Boolean(c)).forEach((c) => {
         if (typeof c === 'string') {
@@ -12,11 +12,11 @@ export function classes(...args: (string | {[cls: string]: boolean})[]) {
     return classes.join(' ');
 }
 
-export function compose<T extends Malevic.Component>(type: T, ...wrappers: ((t: T) => T)[]) {
+export function compose<T extends Malevic.Component>(type: T, ...wrappers: Array<(t: T) => T>) {
     return wrappers.reduce((t, w) => w(t), type);
 }
 
-export function openFile(options: {extensions: string[]}, callback: (content: string) => void) {
+export function openFile(options: {extensions: Array<string>}, callback: (content: string) => void) {
     const input = document.createElement('input');
     input.type = 'file';
     input.style.display = 'none';
@@ -46,11 +46,11 @@ export function saveFile(name: string, content: string) {
     }
 }
 
-type AnyVoidFunction = (...args: any[]) => void;
+type AnyVoidFunction = (...args: Array<any>) => void;
 
 export function throttle<F extends AnyVoidFunction>(callback: F): F {
     let frameId = null;
-    return ((...args: any[]) => {
+    return ((...args: Array<any>) => {
         if (!frameId) {
             callback(...args);
             frameId = requestAnimationFrame(() => (frameId = null));

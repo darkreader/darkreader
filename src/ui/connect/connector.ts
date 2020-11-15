@@ -1,4 +1,4 @@
-import {ExtensionData, ExtensionActions, FilterConfig, TabInfo, Message, UserSettings} from '../../definitions';
+import type {ExtensionData, ExtensionActions, FilterConfig, TabInfo, Message, UserSettings} from '../../definitions';
 
 export default class Connector implements ExtensionActions {
     private port: chrome.runtime.Port;
@@ -69,7 +69,7 @@ export default class Connector implements ExtensionActions {
         this.port.postMessage({type: 'toggle-url', data: url});
     }
 
-    markNewsAsRead(ids: string[]) {
+    markNewsAsRead(ids: Array<string>) {
         this.port.postMessage({type: 'mark-news-as-read', data: ids});
     }
 

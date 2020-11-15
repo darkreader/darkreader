@@ -9,7 +9,7 @@ import {Page, PageViewer} from '../page-viewer';
 import SettingsPage from '../settings-page';
 import SiteListPage from '../site-list-page';
 import ThemePage from '../theme/page';
-import {ViewProps} from '../types';
+import type {ViewProps} from '../types';
 import ManageSettingsPage from '../manage-settings-page';
 import {isMobile} from '../../../utils/platform';
 
@@ -71,7 +71,7 @@ function Pages(props: ViewProps) {
 
     function onBackClick() {
         const activePage = store.activePage;
-        const settingsPageSubpages = ['automation', 'manage-settings', 'site-list'] as PageId[];
+        const settingsPageSubpages = ['automation', 'manage-settings', 'site-list'] as Array<PageId>;
         if (settingsPageSubpages.includes(activePage)) {
             store.activePage = 'settings';
         } else {

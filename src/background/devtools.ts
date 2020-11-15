@@ -1,7 +1,7 @@
 import {parseInversionFixes, formatInversionFixes} from '../generators/css-filter';
 import {parseDynamicThemeFixes, formatDynamicThemeFixes} from '../generators/dynamic-theme';
 import {parseStaticThemes, formatStaticThemes} from '../generators/static-theme';
-import ConfigManager from './config-manager';
+import type ConfigManager from './config-manager';
 
 interface DevToolsStorage {
     get(key: string): string;
@@ -14,7 +14,7 @@ class LocalStorageWrapper implements DevToolsStorage {
     get(key: string) {
         try {
             return localStorage.getItem(key);
-        } catch (err) {
+        } catch (err: unknown) {
             console.error(err);
             return null;
         }
@@ -22,7 +22,7 @@ class LocalStorageWrapper implements DevToolsStorage {
     set(key: string, value: string) {
         try {
             localStorage.setItem(key, value);
-        } catch (err) {
+        } catch (err: unknown) {
             console.error(err);
             return;
         }
@@ -30,7 +30,7 @@ class LocalStorageWrapper implements DevToolsStorage {
     remove(key: string) {
         try {
             localStorage.removeItem(key);
-        } catch (err) {
+        } catch (err: unknown) {
             console.error(err);
             return;
         }
@@ -38,7 +38,7 @@ class LocalStorageWrapper implements DevToolsStorage {
     has(key: string) {
         try {
             return localStorage.getItem(key) != null;
-        } catch (err) {
+        } catch (err: unknown) {
             console.error(err);
             return false;
         }
@@ -115,8 +115,8 @@ export default class DevTools {
             this.saveDynamicThemeFixes(formatted);
             this.onChange();
             return null;
-        } catch (err) {
-            return err;
+        } catch (err: unknown) {
+            return err as Error;
         }
     }
 
@@ -153,8 +153,8 @@ export default class DevTools {
             this.saveInversionFixes(formatted);
             this.onChange();
             return null;
-        } catch (err) {
-            return err;
+        } catch (err: unknown) {
+            return err as Error;
         }
     }
 
@@ -191,8 +191,8 @@ export default class DevTools {
             this.saveStaticThemes(formatted);
             this.onChange();
             return null;
-        } catch (err) {
-            return err;
+        } catch (err: unknown) {
+            return err as Error;
         }
     }
 }

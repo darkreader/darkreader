@@ -1,4 +1,4 @@
-import {UserSettings} from '../definitions';
+import type {UserSettings} from '../definitions';
 import {isIPV6, compareIPV6} from './ipv6';
 
 let anchor: HTMLAnchorElement;
@@ -48,7 +48,7 @@ export function compareURLPatterns(a: string, b: string) {
  * @param url Site URL.
  * @paramlist List to search into.
  */
-export function isURLInList(url: string, list: string[]) {
+export function isURLInList(url: string, list: Array<string>) {
     for (let i = 0; i < list.length; i++) {
         if (isURLMatched(url, list[i])) {
             return true;

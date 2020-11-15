@@ -2,7 +2,7 @@ import {forEach, push} from '../../utils/array';
 import {iterateShadowHosts, createOptimizedTreeObserver} from '../utils/dom';
 import {iterateCSSDeclarations} from './css-rules';
 import {getModifiableCSSDeclaration} from './modify-css';
-import {FilterConfig} from '../../definitions';
+import type {FilterConfig} from '../../definitions';
 import {isShadowDomSupported} from '../../utils/platform';
 import {getDuration} from '../../utils/time';
 import {throttle} from '../utils/throttle';
@@ -107,7 +107,7 @@ export function getInlineOverrideStyle() {
 }
 
 function getInlineStyleElements(root: Node) {
-    const results: Element[] = [];
+    const results: Array<Element> = [];
     if (root instanceof Element && root.matches(INLINE_STYLE_SELECTOR)) {
         results.push(root);
     }
@@ -175,10 +175,10 @@ function deepWatchForInlineStyles(
     const ATTEMPTS_INTERVAL = getDuration({seconds: 10});
     const RETRY_TIMEOUT = getDuration({seconds: 2});
     const MAX_ATTEMPTS_COUNT = 50;
-    let cache: MutationRecord[] = [];
+    let cache: Array<MutationRecord> = [];
     let timeoutId: number = null;
 
-    const handleAttributionMutations = throttle((mutations: MutationRecord[]) => {
+    const handleAttributionMutations = throttle((mutations: Array<MutationRecord>) => {
         mutations.forEach((m) => {
             if (INLINE_STYLE_ATTRS.includes(m.attributeName)) {
                 elementStyleDidChange(m.target as HTMLElement);
@@ -240,7 +240,7 @@ function getInlineStyleCacheKey(el: HTMLElement, theme: FilterConfig) {
         .join(' ');
 }
 
-function shouldIgnoreInlineStyle(element: HTMLElement, selectors: string[]) {
+function shouldIgnoreInlineStyle(element: HTMLElement, selectors: Array<string>) {
     for (let i = 0, len = selectors.length; i < len; i++) {
         const ingnoredSelector = selectors[i];
         if (element.matches(ingnoredSelector)) {
@@ -250,7 +250,7 @@ function shouldIgnoreInlineStyle(element: HTMLElement, selectors: string[]) {
     return false;
 }
 
-export function overrideInlineStyle(element: HTMLElement, theme: FilterConfig, ignoreInlineSelectors: string[], ignoreImageSelectors: string[]) {
+export function overrideInlineStyle(element: HTMLElement, theme: FilterConfig, ignoreInlineSelectors: Array<string>, ignoreImageSelectors: Array<string>) {
     const cacheKey = getInlineStyleCacheKey(element, theme);
     if (cacheKey === inlineStyleCache.get(element)) {
         return;

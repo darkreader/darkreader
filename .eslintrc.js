@@ -5,23 +5,17 @@ module.exports = {
     rules: {
         'array-bracket-spacing': ['error', 'never'],
         'block-spacing': ['error', 'always'],
-        'comma-spacing': ['error', {
-            before: false,
-            after: true,
-        }],
+        'comma-spacing': 'off',
         'indent': ['error', 4, {
             'SwitchCase': 1,
         }],
         'jsx-quotes': ['error', 'prefer-double'],
-        'keyword-spacing': ['error', {
-            after: true,
-            before: true,
-        }],
+        'keyword-spacing': 'off',
         'object-curly-spacing': ['error', 'never'],
         'no-multi-spaces': 'error',
         'no-trailing-spaces': 'error',
         'no-whitespace-before-property': 'error',
-        'semi': ['error', 'always'],
+        'semi': 'off',
         'space-before-function-paren': ['error', {
             anonymous: 'always',
             asyncArrow: 'always',
@@ -30,11 +24,11 @@ module.exports = {
         'space-in-parens': ['error', 'never'],
         'space-infix-ops': 'error',
         'spaced-comment': ['error', 'always', {exceptions: ['-']}],
-        'quotes': ['error', 'single', {
-            allowTemplateLiterals: true,
-            avoidEscape: true,
-        }],
-        'eol-last': ["error", "always"],
+        'quotes': 'off',
+        'eol-last': ['error', 'always'],
+        'no-cond-assign': 'error',
+        'brace-style': 'off',
+        'no-redeclare': 'off',
         '@typescript-eslint/camelcase': 'off',
         '@typescript-eslint/explicit-function-return-type': 'off',
         '@typescript-eslint/explicit-member-accessibility': 'off',
@@ -43,13 +37,40 @@ module.exports = {
         '@typescript-eslint/no-object-literal-type-assertion': 'off',
         '@typescript-eslint/no-use-before-define': 'off',
         '@typescript-eslint/explicit-module-boundary-types': 'off',
-        '@typescript-eslint/no-duplicate-imports': 'error',
+        '@typescript-eslint/no-duplicate-imports': 'warn',
+        '@typescript-eslint/array-type': ['warn', {
+            default: 'generic',
+        }],
+        '@typescript-eslint/consistent-type-assertions': 'error',
+        '@typescript-eslint/consistent-type-imports': 'error',
+        '@typescript-eslint/member-delimiter-style': ['error', {
+            singleline: {
+                requireLast: true
+            },
+        }],
+        '@typescript-eslint/no-implicit-any-catch': 'warn',
+        '@typescript-eslint/semi': ['error', 'always'],
+        '@typescript-eslint/brace-style': 'error',
+        '@typescript-eslint/comma-spacing': ['error', {
+            before: false,
+            after: true,
+        }],
+        '@typescript-eslint/keyword-spacing': ['error', {
+            after: true,
+            before: true,
+        }],
+        '@typescript-eslint/quotes': ['error', 'single', {
+            allowTemplateLiterals: true,
+            avoidEscape: true,
+        }],
+        '@typescript-eslint/no-redeclare': 'error',
     },
     overrides: [
         {
             files: ['tasks/**/*.js', 'tests/**/*.js'],
             rules: {
                 '@typescript-eslint/no-var-requires': 'off',
+                '@typescript-eslint/no-implicit-any-catch': 'off'
             },
         },
         {

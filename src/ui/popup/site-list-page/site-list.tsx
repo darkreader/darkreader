@@ -4,8 +4,8 @@ import {TextBox} from '../../controls';
 import VirtualScroll from '../../controls/virtual-scroll';
 
 interface SiteListProps {
-    siteList: string[];
-    onChange: (sites: string[]) => void;
+    siteList: Array<string>;
+    onChange: (sites: Array<string>) => void;
 }
 
 interface SiteListStore {

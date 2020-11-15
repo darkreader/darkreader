@@ -1,6 +1,6 @@
 {
     "compilerOptions": {
-        "target": "esnext",
+        "target": "es2019",
         "baseUrl": ".",
         "module": "es2015",
         "moduleResolution": "node",

@@ -1,13 +1,13 @@
-import {getCSSVariables, replaceCSSRelativeURLsWithAbsolute, removeCSSComments, replaceCSSFontFace, getCSSURLValue, cssImportRegex, getCSSBaseBath} from './css-rules';
-import {bgFetch} from './network';
-import {watchForNodePosition, removeNode, iterateShadowHosts} from '../utils/dom';
-import {logWarn} from '../utils/log';
+import {Theme} from '../../definitions';
 import {forEach} from '../../utils/array';
 import {getMatches} from '../../utils/text';
-import {Theme} from '../../definitions';
+import {getAbsoluteURL} from '../../utils/url';
+import {watchForNodePosition, removeNode, iterateShadowHosts} from '../utils/dom';
+import {logWarn} from '../utils/log';
+import {getCSSVariables, replaceCSSRelativeURLsWithAbsolute, removeCSSComments, replaceCSSFontFace, getCSSURLValue, cssImportRegex, getCSSBaseBath} from './css-rules';
+import {bgFetch} from './network';
 import {createStyleSheetModifier} from './stylesheet-modifier';
-import {getAbsoluteURL} from './url';
-import {IS_SHADOW_DOM_SUPPORTED} from '../../utils/platform';
+import {isShadowDomSupported} from '../../utils/platform';
 
 declare global {
     interface HTMLStyleElement {
@@ -61,7 +61,7 @@ export function shouldManageStyle(element: Node) {
 export function getManageableStyles(node: Node, results = [] as StyleElement[], deep = true) {
     if (shouldManageStyle(node)) {
         results.push(node as StyleElement);
-    } else if (node instanceof Element || (IS_SHADOW_DOM_SUPPORTED && node instanceof ShadowRoot) || node === document) {
+    } else if (node instanceof Element || (isShadowDomSupported && node instanceof ShadowRoot) || node === document) {
         forEach(
             (node as Element).querySelectorAll(STYLE_SELECTOR),
             (style: StyleElement) => getManageableStyles(style, results, false),
@@ -147,7 +147,7 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
                 logWarn(accessError);
             }
 
-            if ((cssRules && !accessError) || isStillLoadingError(accessError)) {
+            if ((!cssRules && !accessError) || isStillLoadingError(accessError)) {
                 try {
                     await linkLoading(element);
                 } catch (err) {
@@ -318,36 +318,29 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
         return cssRules;
     }
 
-    let rulesChangeKey: number = null;
-    let rulesCheckFrameId: number = null;
-
-    function updateRulesChangeKey() {
-        const rules = safeGetSheetRules();
-        if (rules) {
-            rulesChangeKey = rules.length;
-        }
-    }
-
-    function didRulesKeyChange() {
-        const rules = safeGetSheetRules();
-        return rules && rules.length !== rulesChangeKey;
-    }
+    let areSheetChangesPending = false;
 
     function subscribeToSheetChanges() {
-        updateRulesChangeKey();
-        unsubscribeFromSheetChanges();
-        const checkForUpdate = () => {
-            if (didRulesKeyChange()) {
-                updateRulesChangeKey();
+        element.addEventListener('__darkreader__updateSheet', () => {
+            if (areSheetChangesPending) {
+                return;
+            }
+
+            function handleSheetChanges() {
+                areSheetChangesPending = false;
+                if (cancelAsyncOperations) {
+                    return;
+                }
                 update();
             }
-            rulesCheckFrameId = requestAnimationFrame(checkForUpdate);
-        };
-        checkForUpdate();
-    }
 
-    function unsubscribeFromSheetChanges() {
-        cancelAnimationFrame(rulesCheckFrameId);
+            areSheetChangesPending = true;
+            if (typeof queueMicrotask === 'function') {
+                queueMicrotask(handleSheetChanges);
+            } else {
+                requestAnimationFrame(handleSheetChanges);
+            }
+        });
     }
 
     function pause() {
@@ -355,13 +348,13 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
         cancelAsyncOperations = true;
         corsCopyPositionWatcher && corsCopyPositionWatcher.stop();
         syncStylePositionWatcher && syncStylePositionWatcher.stop();
-        unsubscribeFromSheetChanges();
     }
 
     function destroy() {
         pause();
         removeNode(corsCopy);
         removeNode(syncStyle);
+        element.removeEventListener('__darkreader__updateSheet', update);
     }
 
     function watch() {
@@ -392,7 +385,6 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
         syncStylePositionWatcher && syncStylePositionWatcher.skip();
         if (shouldForceRender) {
             forceRenderStyle = true;
-            updateRulesChangeKey();
             update();
         }
     }

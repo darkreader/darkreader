@@ -54,3 +54,4 @@ port.onDisconnect.addListener(() => {
     cleanDynamicThemeCache();
     colorSchemeWatcher.disconnect();
 });
+

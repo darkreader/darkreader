@@ -1,10 +1,10 @@
 import {parse, RGBA, rgbToHSL, hslToString} from '../../utils/color';
 import {clamp} from '../../utils/math';
 import {getMatches} from '../../utils/text';
+import {getAbsoluteURL} from '../../utils/url';
 import {modifyBackgroundColor, modifyBorderColor, modifyForegroundColor, modifyGradientColor, modifyShadowColor, clearColorModificationCache} from '../../generators/modify-colors';
 import {cssURLRegex, getCSSURLValue, getCSSBaseBath} from './css-rules';
 import {getImageDetails, getFilteredImageDataURL, ImageDetails, cleanImageProcessingCache} from './image';
-import {getAbsoluteURL} from './url';
 import {logWarn, logInfo} from '../utils/log';
 import {FilterConfig, Theme} from '../../definitions';
 
@@ -234,13 +234,17 @@ const gradientRegex = /[\-a-z]+gradient\(([^\(\)]*(\(([^\(\)]*(\(.*?\)))*[^\(\)]
 const imageDetailsCache = new Map<string, ImageDetails>();
 const awaitingForImageLoading = new Map<string, ((imageDetails: ImageDetails) => void)[]>();
 
-function shouldIgnoreImage(element: CSSStyleRule, selectors: string[]) {
-    if (!element) {
+function shouldIgnoreImage(rule: CSSStyleRule, selectors: string[]) {
+    if (!rule || selectors.length === 0) {
         return false;
     }
+    if (selectors.some((s) => s === '*')) {
+        return true;
+    }
+    const ruleSelectors = rule.selectorText.split(/,\s*/g);
     for (let i = 0; i < selectors.length; i++) {
-        const ingnoredSelector = selectors[i];
-        if (element.selectorText.match(ingnoredSelector)) {
+        const ignoredSelector = selectors[i];
+        if (ruleSelectors.some((s) => s === ignoredSelector)) {
             return true;
         }
     }

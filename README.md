@@ -1,18 +1,20 @@
-# Dark Reader for Google Chrome and Mozilla Firefox
+# Dark Reader for Google Chrome, Microsoft Edge and Mozilla Firefox
 
 ![Dark Reader screenshot](https://i.imgur.com/DyBlYwU.png)
 
 This extension **inverts brightness** of web pages and aims to **reduce eyestrain** while you browse the web.  
-Visit [Chrome Web Store](https://chrome.google.com/webstore/detail/dark-reader/eimadpbcbfnmbkopoojfekhnkhdbieeh)
+Visit [Edge Addons](https://microsoftedge.microsoft.com/addons/detail/dark-reader/ifoakfbpdcdoeenechcleahebpibofpc), [Chrome Web Store](https://chrome.google.com/webstore/detail/dark-reader/eimadpbcbfnmbkopoojfekhnkhdbieeh)
 and [Firefox Add-ons](https://addons.mozilla.org/en-US/firefox/addon/darkreader/)
 for more info.
 
 ## How to contribute
 
 ### Sponsor!
+
 [Donate](https://opencollective.com/darkreader) via Open Collective.
 
 ### Translate!
+
 [Improve or suggest](https://github.com/darkreader/darkreader/tree/master/src/_locales) a translation.
 See the list of [language codes](https://developer.chrome.com/webstore/i18n#localeTable) that we can support.
 
@@ -81,6 +83,7 @@ IGNORE INLINE STYLE
 IGNORE IMAGE ANALYSIS
 .logo
 ```
+
 - `INVERT` rule inverts specified elements.
 For **Dynamic mode** use `INVERT` only for dark images that are invisible on dark backgrounds (icons, diagrams, charts, `<img>` and `<svg>` elements).
 - `CSS` rule adds custom CSS to a web page.
@@ -155,7 +158,8 @@ To build and debug the extension **install the [Node.js](https://nodejs.org/)** 
 Install development dependencies by running `npm install` in the project root folder.  
 Then execute `npm run debug`.
 
-#### Chrome
+#### Chrome and Edge
+
 - Open the `chrome://extensions` page.
 - Disable the official Dark Reader version.
 - Enable the **Developer mode**.
@@ -163,6 +167,7 @@ Then execute `npm run debug`.
 - Navigate to the project's `debug/` folder.
 
 #### Firefox
+
 - Open the `about:addons` page.
 - Disable the official Dark Reader version.
 - Open `about:debugging#addons` page.
@@ -181,9 +186,11 @@ Run tests by executing `npm test`.
 Submit a **pull request**, and wait for **review**.
 
 ## Building for use
+
 You can install the extension from a file.  
 Install [Node.js LTS](https://nodejs.org/en/). Download the source code (or check out from git).  
 Open terminal in root folder and run:  
+
 - `npm install`  
 - `npm run release`  
 
@@ -192,11 +199,13 @@ This will generate `build.zip` for use in Chromium browsers and `build-firefox.x
 ## Using for a website
 
 You can use Dark Reader to enable dark mode on your website!
+
 - Install the package from NPM (`npm install darkreader`)
 - or build from the source code (`npm run api`)
 - or include the script via a CDN such as [unpkg](https://unpkg.com/darkreader/) or [jsDelivr](https://www.jsdelivr.com/package/npm/darkreader)
 
 Then use the following API
+
 ```javascript
 DarkReader.enable({
     brightness: 100,
@@ -206,22 +215,28 @@ DarkReader.enable({
 
 DarkReader.disable();
 
-// Enable when system color scheme is dark
+// Enable when system color scheme is dark.
 DarkReader.auto({
     brightness: 100,
     contrast: 90,
     sepia: 10
 });
 
-// Stop watching for system color scheme
+// Stop watching for system color scheme.
 DarkReader.auto(false);
+
+// Get the generated CSS of Dark Reader returned as a string.
+const CSS = await DarkReader.exportGeneratedCSS();
 ```
+
 ... or if you are using ES modules
+
 ```javascript
 import {
     enable as enableDarkMode,
     disable as disableDarkMode,
     auto as followSystemColorScheme,
+    exportGeneratedCSS as collectCSS,
 } from 'darkreader';
 
 enableDarkMode({
@@ -233,6 +248,8 @@ enableDarkMode({
 disableDarkMode();
 
 followSystemColorScheme();
+
+const CSS = await collectCSS();
 ```
 
 ## Contributors

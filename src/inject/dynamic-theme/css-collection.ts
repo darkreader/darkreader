@@ -51,7 +51,6 @@ export async function collectCSS() {
     addStaticCSS('.darkreader--user-agent', 'User-Agent Style');
     addStaticCSS('.darkreader--text', 'Text Style');
     addStaticCSS('.darkreader--invert', 'Invert Style');
-    addStaticCSS('.darkreader--override', 'Override Style');
     addStaticCSS('.darkreader--variables', 'Variables Style');
 
     const modifiedCSS = [];
@@ -67,6 +66,8 @@ export async function collectCSS() {
         css.push(await replaceBlobs(formattedCSS));
         css.push('');
     }
+
+    addStaticCSS('.darkreader--override', 'Override Style');
 
     return css.join('\n');
 }

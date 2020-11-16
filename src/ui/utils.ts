@@ -16,7 +16,7 @@ export function compose<T extends Malevic.Component>(type: T, ...wrappers: Array
     return wrappers.reduce((t, w) => w(t), type);
 }
 
-export function openFile(options: {extensions: Array<string>}, callback: (content: string) => void) {
+export function openFile(options: {extensions: string[]}, callback: (content: string) => void) {
     const input = document.createElement('input');
     input.type = 'file';
     input.style.display = 'none';
@@ -46,11 +46,11 @@ export function saveFile(name: string, content: string) {
     }
 }
 
-type AnyVoidFunction = (...args: Array<any>) => void;
+type AnyVoidFunction = (...args: any[]) => void;
 
 export function throttle<F extends AnyVoidFunction>(callback: F): F {
     let frameId = null;
-    return ((...args: Array<any>) => {
+    return ((...args: any[]) => {
         if (!frameId) {
             callback(...args);
             frameId = requestAnimationFrame(() => (frameId = null));

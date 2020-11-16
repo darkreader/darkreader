@@ -78,7 +78,7 @@ function Body(props: BodyProps) {
         setState({newsOpen: !state.newsOpen, didNewsSlideIn: state.didNewsSlideIn || !state.newsOpen});
     }
 
-    function onNewsOpen(...news: Array<NewsObject>) {
+    function onNewsOpen(...news: NewsObject[]) {
         const unread = news.filter(({read}) => !read);
         if (unread.length > 0) {
             props.actions.markNewsAsRead(unread.map(({id}) => id));

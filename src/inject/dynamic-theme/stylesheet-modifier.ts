@@ -33,7 +33,7 @@ export function createStyleSheetModifier() {
         sourceCSSRules: CSSRuleList;
         theme: Theme;
         variables: Map<string, string>;
-        ignoreImageAnalysis: Array<string>;
+        ignoreImageAnalysis: string[];
         force: boolean;
         prepareSheet: () => CSSStyleSheet;
         isAsyncCancelled: () => boolean;
@@ -48,7 +48,7 @@ export function createStyleSheetModifier() {
         const themeKey = getThemeKey(theme);
         const themeChanged = (themeKey !== prevFilterKey);
 
-        const modRules: Array<ModifiableCSSRule> = [];
+        const modRules: ModifiableCSSRule[] = [];
         iterateCSSRules(rules, (rule) => {
             const cssText = rule.cssText;
             let textDiffersFromPrev = false;
@@ -81,7 +81,7 @@ export function createStyleSheetModifier() {
                 return;
             }
 
-            const modDecs: Array<ModifiableCSSDeclaration> = [];
+            const modDecs: ModifiableCSSDeclaration[] = [];
             const targetRule = varsRule || rule;
             targetRule && targetRule.style && iterateCSSDeclarations(targetRule.style, (property, value) => {
                 const mod = getModifiableCSSDeclaration(property, value, rule, ignoreImageAnalysis, isAsyncCancelled);
@@ -122,7 +122,7 @@ export function createStyleSheetModifier() {
         interface ReadyStyleRule {
             isGroup: false;
             selector: string;
-            declarations: Array<ReadyDeclaration>;
+            declarations: ReadyDeclaration[];
         }
 
         interface ReadyDeclaration {

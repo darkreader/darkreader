@@ -9,14 +9,14 @@ const observers = [] as Array<{disconnect(): void}>;
 let observedRoots: WeakSet<Node>;
 
 interface ChangedStyles {
-    created: Array<StyleElement>;
-    updated: Array<StyleElement>;
-    removed: Array<StyleElement>;
-    moved: Array<StyleElement>;
+    created: StyleElement[];
+    updated: StyleElement[];
+    removed: StyleElement[];
+    moved: StyleElement[];
 }
 
 const undefinedGroups = new Map<string, Set<Element>>();
-let elementsDefinitionCallback: (elements: Array<Element>) => void;
+let elementsDefinitionCallback: (elements: Element[]) => void;
 
 function collectUndefinedElements(root: ParentNode) {
     if (!isDefinedSelectorSupported) {
@@ -61,7 +61,7 @@ async function customElementsWhenDefined(tag: string) {
     });
 }
 
-function watchWhenCustomElementsDefined(callback: (elements: Array<Element>) => void) {
+function watchWhenCustomElementsDefined(callback: (elements: Element[]) => void) {
     elementsDefinitionCallback = callback;
 }
 
@@ -70,7 +70,7 @@ function unsubscribeFromDefineCustomElements() {
     undefinedGroups.clear();
 }
 
-export function watchForStyleChanges(currentStyles: Array<StyleElement>, update: (styles: ChangedStyles) => void, shadowRootDiscovered: (root: ShadowRoot) => void) {
+export function watchForStyleChanges(currentStyles: StyleElement[], update: (styles: ChangedStyles) => void, shadowRootDiscovered: (root: ShadowRoot) => void) {
     stopWatchingForStyleChanges();
 
     const prevStyles = new Set<StyleElement>(currentStyles);
@@ -161,7 +161,7 @@ export function watchForStyleChanges(currentStyles: Array<StyleElement>, update:
         collectUndefinedElements(root);
     }
 
-    function handleAttributeMutations(mutations: Array<MutationRecord>) {
+    function handleAttributeMutations(mutations: MutationRecord[]) {
         const updatedStyles = new Set<StyleElement>();
         mutations.forEach((m) => {
             if (shouldManageStyle(m.target) && m.target.isConnected) {
@@ -202,7 +202,7 @@ export function watchForStyleChanges(currentStyles: Array<StyleElement>, update:
     iterateShadowHosts(document.documentElement, subscribeForShadowRootChanges);
 
     watchWhenCustomElementsDefined((hosts) => {
-        const newStyles: Array<StyleElement> = [];
+        const newStyles: StyleElement[] = [];
         hosts.forEach((host) => push(newStyles, getManageableStyles(host.shadowRoot)));
         update({created: newStyles, updated: [], removed: [], moved: []});
         hosts.forEach((host) => {

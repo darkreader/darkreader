@@ -27,10 +27,10 @@ const CONFIG_URLs = {
 const REMOTE_TIMEOUT_MS = getDuration({seconds: 10});
 
 export default class ConfigManager {
-    DARK_SITES?: Array<string>;
-    DYNAMIC_THEME_FIXES?: Array<DynamicThemeFix>;
-    INVERSION_FIXES?: Array<InversionFix>;
-    STATIC_THEMES?: Array<StaticTheme>;
+    DARK_SITES?: string[];
+    DYNAMIC_THEME_FIXES?: DynamicThemeFix[];
+    INVERSION_FIXES?: InversionFix[];
+    STATIC_THEMES?: StaticTheme[];
 
     raw = {
         darkSites: null,
@@ -63,7 +63,7 @@ export default class ConfigManager {
                     url: `${remoteURL}?nocache=${Date.now()}`,
                     timeout: REMOTE_TIMEOUT_MS
                 });
-            } catch (err: unknown) {
+            } catch (err) {
                 console.error(`${name} remote load error`, err);
                 $config = await loadLocal();
             }

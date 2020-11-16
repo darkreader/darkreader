@@ -5,7 +5,7 @@ import type {FilterConfig} from '../../../../definitions';
 
 interface FontSettingsProps {
     config: FilterConfig;
-    fonts: Array<string>;
+    fonts: string[];
     onChange: (config: Partial<FilterConfig>) => void;
 }
 

@@ -13,7 +13,7 @@ function changeMetaThemeColor(meta: HTMLMetaElement, theme: FilterConfig) {
     try {
         const color = parse(srcMetaThemeColor);
         meta.content = modifyBackgroundColor(color, theme);
-    } catch (err: unknown) {
+    } catch (err) {
         logWarn(err);
     }
 }

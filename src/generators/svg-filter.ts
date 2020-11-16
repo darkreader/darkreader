@@ -3,7 +3,7 @@ import {cssFilterStyleSheetTemplate} from './css-filter';
 import type {FilterConfig, InversionFix} from '../definitions';
 import {isFirefox} from '../utils/platform';
 
-export function createSVGFilterStylesheet(config: FilterConfig, url: string, frameURL: string, inversionFixes: Array<InversionFix>) {
+export function createSVGFilterStylesheet(config: FilterConfig, url: string, frameURL: string, inversionFixes: InversionFix[]) {
     let filterValue: string;
     let reverseFilterValue: string;
     if (isFirefox) {
@@ -29,7 +29,7 @@ function getEmbeddedSVGFilterValue(matrixValue: string) {
     return `url(data:image/svg+xml;base64,${btoa(svg)}#${id})`;
 }
 
-function toSVGMatrix(matrix: Array<Array<number>>) {
+function toSVGMatrix(matrix: number[][]) {
     return matrix.slice(0, 4).map(m => m.map(m => m.toFixed(3)).join(' ')).join(' ');
 }
 

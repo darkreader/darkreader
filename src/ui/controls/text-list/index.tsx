@@ -4,11 +4,11 @@ import TextBox from '../textbox';
 import VirtualScroll from '../virtual-scroll';
 
 interface TextListProps {
-    values: Array<string>;
+    values: string[];
     placeholder: string;
     isFocused?: boolean;
     class?: string;
-    onChange: (values: Array<string>) => void;
+    onChange: (values: string[]) => void;
 }
 
 export default function TextList(props: TextListProps) {

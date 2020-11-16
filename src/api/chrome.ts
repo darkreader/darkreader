@@ -23,7 +23,7 @@ async function sendMessage(...args) {
                 text = await response.text();
             }
             messageListeners.forEach((cb) => cb({type: 'fetch-response', data: text, error: null, id}));
-        } catch (err: unknown) {
+        } catch (err) {
             console.error(err);
             messageListeners.forEach((cb) => cb({type: 'fetch-response', data: null, err, id}));
         }

@@ -24,7 +24,7 @@ export function parseDynamicThemeFixes(text: string) {
     });
 }
 
-export function formatDynamicThemeFixes(dynamicThemeFixes: Array<DynamicThemeFix>) {
+export function formatDynamicThemeFixes(dynamicThemeFixes: DynamicThemeFix[]) {
     const fixes = dynamicThemeFixes.slice().sort((a, b) => compareURLPatterns(a.url[0], b.url[0]));
 
     return formatSitesFixesConfig(fixes, {
@@ -45,7 +45,7 @@ export function formatDynamicThemeFixes(dynamicThemeFixes: Array<DynamicThemeFix
     });
 }
 
-export function getDynamicThemeFixesFor(url: string, frameURL: string, fixes: Array<DynamicThemeFix>, enabledForPDF: boolean) {
+export function getDynamicThemeFixesFor(url: string, frameURL: string, fixes: DynamicThemeFix[], enabledForPDF: boolean) {
     if (fixes.length === 0 || fixes[0].url[0] !== '*') {
         return null;
     }

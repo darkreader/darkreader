@@ -69,7 +69,7 @@ export default class Connector implements ExtensionActions {
         this.port.postMessage({type: 'toggle-url', data: url});
     }
 
-    markNewsAsRead(ids: Array<string>) {
+    markNewsAsRead(ids: string[]) {
         this.port.postMessage({type: 'mark-news-as-read', data: ids});
     }
 

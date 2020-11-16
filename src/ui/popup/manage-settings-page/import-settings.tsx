@@ -39,7 +39,7 @@ export default function ImportButton(props: ViewProps) {
                 const content: UserSettings = JSON.parse(result);
                 const result2 = getValidatedObject(content, DEFAULT_SETTINGS);
                 props.actions.changeSettings({...result2});
-            } catch (err: unknown) {
+            } catch (err) {
                 // TODO Make overlay Error
                 console.error(err);
             }

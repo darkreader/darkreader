@@ -6,7 +6,7 @@ export interface ExtensionAdapter {
     changeSettings: (settings: Partial<UserSettings>) => void;
     setTheme: (theme: Partial<FilterConfig>) => void;
     setShortcut: ({command, shortcut}) => void;
-    markNewsAsRead: (ids: Array<string>) => Promise<void>;
+    markNewsAsRead: (ids: string[]) => Promise<void>;
     toggleURL: (pattern: string) => void;
     onPopupOpen: () => void;
     loadConfig: (options: {local: boolean}) => Promise<void>;

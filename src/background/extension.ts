@@ -26,7 +26,7 @@ export class Extension {
 
     config: ConfigManager;
     devtools: DevTools;
-    fonts: Array<string>;
+    fonts: string[];
     icon: IconManager;
     messenger: Messenger;
     news: Newsmaker;
@@ -194,7 +194,7 @@ export class Extension {
         };
     }
 
-    private onNewsUpdate(news: Array<News>) {
+    private onNewsUpdate(news: News[]) {
         const latestNews = news.length > 0 && news[0];
         if (latestNews && latestNews.important && !latestNews.read) {
             this.icon.showImportantBadge();

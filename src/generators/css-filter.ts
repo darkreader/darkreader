@@ -26,16 +26,16 @@ export function hasChromiumIssue501582() {
     );
 }
 
-export default function createCSSFilterStyleSheet(config: FilterConfig, url: string, frameURL: string, inversionFixes: Array<InversionFix>) {
+export default function createCSSFilterStyleSheet(config: FilterConfig, url: string, frameURL: string, inversionFixes: InversionFix[]) {
     const filterValue = getCSSFilterValue(config);
     const reverseFilterValue = 'invert(100%) hue-rotate(180deg)';
     return cssFilterStyleSheetTemplate(filterValue, reverseFilterValue, config, url, frameURL, inversionFixes);
 }
 
-export function cssFilterStyleSheetTemplate(filterValue: string, reverseFilterValue: string, config: FilterConfig, url: string, frameURL: string, inversionFixes: Array<InversionFix>) {
+export function cssFilterStyleSheetTemplate(filterValue: string, reverseFilterValue: string, config: FilterConfig, url: string, frameURL: string, inversionFixes: InversionFix[]) {
     const fix = getInversionFixesFor(frameURL || url, inversionFixes);
 
-    const lines: Array<string> = [];
+    const lines: string[] = [];
 
     lines.push('@media screen {');
 
@@ -109,7 +109,7 @@ export function cssFilterStyleSheetTemplate(filterValue: string, reverseFilterVa
 }
 
 export function getCSSFilterValue(config: FilterConfig) {
-    const filters: Array<string> = [];
+    const filters: string[] = [];
 
     if (config.mode === FilterMode.dark) {
         filters.push('invert(100%) hue-rotate(180deg)');
@@ -143,12 +143,12 @@ function createLeadingRule(filterValue: string): string {
     ].join('\n');
 }
 
-function joinSelectors(selectors: Array<string>) {
+function joinSelectors(selectors: string[]) {
     return selectors.map((s) => s.replace(/\,$/, '')).join(',\n');
 }
 
 function createReverseRule(reverseFilterValue: string, fix: InversionFix): string {
-    const lines: Array<string> = [];
+    const lines: string[] = [];
 
     if (fix.invert.length > 0) {
         lines.push(`${joinSelectors(fix.invert)} {`);
@@ -179,7 +179,7 @@ function createReverseRule(reverseFilterValue: string, fix: InversionFix): strin
 * @param url Site URL.
 * @param inversionFixes List of inversion fixes.
 */
-export function getInversionFixesFor(url: string, inversionFixes: Array<InversionFix>): InversionFix {
+export function getInversionFixesFor(url: string, inversionFixes: InversionFix[]): InversionFix {
     const common = {
         url: inversionFixes[0].url,
         invert: inversionFixes[0].invert || [],
@@ -228,7 +228,7 @@ export function parseInversionFixes(text: string) {
     });
 }
 
-export function formatInversionFixes(inversionFixes: Array<InversionFix>) {
+export function formatInversionFixes(inversionFixes: InversionFix[]) {
     const fixes = inversionFixes.slice().sort((a, b) => compareURLPatterns(a.url[0], b.url[0]));
 
     return formatSitesFixesConfig(fixes, {

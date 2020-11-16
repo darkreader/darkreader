@@ -6,10 +6,10 @@ import {readSyncStorage, readLocalStorage, writeSyncStorage, writeLocalStorage} 
 export default class Newsmaker {
     static UPDATE_INTERVAL = getDuration({hours: 4});
 
-    latest: Array<News>;
-    onUpdate: (news: Array<News>) => void;
+    latest: News[];
+    onUpdate: (news: News[]) => void;
 
-    constructor(onUpdate: (news: Array<News>) => void) {
+    constructor(onUpdate: (news: News[]) => void) {
         this.latest = [];
         this.onUpdate = onUpdate;
     }
@@ -27,7 +27,7 @@ export default class Newsmaker {
         }
     }
 
-    private async getReadNews(): Promise<Array<string>> {
+    private async getReadNews(): Promise<string[]> {
         const sync = await readSyncStorage({readNews: []});
         const local = await readLocalStorage({readNews: []});
         return Array.from(new Set([
@@ -41,7 +41,7 @@ export default class Newsmaker {
             const response = await fetch(`https://darkreader.github.io/blog/posts.json?date=${(new Date()).toISOString().substring(0, 10)}`, {cache: 'no-cache'});
             const $news = await response.json();
             const readNews = await this.getReadNews();
-            const news: Array<News> = $news.map(({id, date, headline, important}) => {
+            const news: News[] = $news.map(({id, date, headline, important}) => {
                 const url = getBlogPostURL(id);
                 const read = this.isRead(id, readNews);
                 return {id, date, headline, url, important, read};
@@ -53,13 +53,13 @@ export default class Newsmaker {
                 }
             }
             return news;
-        } catch (err: unknown) {
+        } catch (err) {
             console.error(err);
             return null;
         }
     }
 
-    async markAsRead(...ids: Array<string>) {
+    async markAsRead(...ids: string[]) {
         const readNews = await this.getReadNews();
         const results = readNews.slice();
         let changed = false;
@@ -81,7 +81,7 @@ export default class Newsmaker {
         }
     }
 
-    isRead(id: string, readNews: Array<string>) {
+    isRead(id: string, readNews: string[]) {
         return readNews.includes(id);
     }
 }

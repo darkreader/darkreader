@@ -3,7 +3,7 @@ import {createFileLoader} from './utils/network';
 import type {Message} from '../definitions';
 
 async function queryTabs(query: chrome.tabs.QueryInfo) {
-    return new Promise<Array<chrome.tabs.Tab>>((resolve) => {
+    return new Promise<chrome.tabs.Tab[]>((resolve) => {
         chrome.tabs.query(query, (tabs) => resolve(tabs));
     });
 }
@@ -87,8 +87,8 @@ export default class TabManager {
                 try {
                     const response = await fileLoader.get({url, responseType, mimeType});
                     sendResponse({data: response});
-                } catch (err: unknown) {
-                    sendResponse({error: err && (err as Error).message ? (err as Error).message : err});
+                } catch (err) {
+                    sendResponse({error: err && err.message ? err.message : err});
                 }
             }
 

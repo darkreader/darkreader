@@ -22,10 +22,10 @@ export interface ModifiableCSSDeclaration {
 export interface ModifiableCSSRule {
     selector: string;
     parentRule: any;
-    declarations: Array<ModifiableCSSDeclaration>;
+    declarations: ModifiableCSSDeclaration[];
 }
 
-export function getModifiableCSSDeclaration(property: string, value: string, rule: CSSStyleRule, ignoreImageSelectors: Array<string>, isCancelled: () => boolean): ModifiableCSSDeclaration {
+export function getModifiableCSSDeclaration(property: string, value: string, rule: CSSStyleRule, ignoreImageSelectors: string[], isCancelled: () => boolean): ModifiableCSSDeclaration {
     const important = Boolean(rule && rule.style && rule.style.getPropertyPriority(property));
     const sourceValue = value;
     if (property.startsWith('--')) {
@@ -54,7 +54,7 @@ export function getModifiableCSSDeclaration(property: string, value: string, rul
 }
 
 export function getModifiedUserAgentStyle(theme: Theme, isIFrame: boolean, styleSystemControls: boolean) {
-    const lines: Array<string> = [];
+    const lines: string[] = [];
     if (!isIFrame) {
         lines.push('html {');
         lines.push(`    background-color: ${modifyBackgroundColor({r: 255, g: 255, b: 255}, theme)} !important;`);
@@ -111,7 +111,7 @@ export function getSelectionColor(theme: Theme) {
 }
 
 function getModifiedSelectionStyle(theme: Theme) {
-    const lines: Array<string> = [];
+    const lines: string[] = [];
     const modifiedSelectionColor = getSelectionColor(theme);
     const backgroundColorSelection = modifiedSelectionColor.backgroundColorSelection;
     const foregroundColorSelection = modifiedSelectionColor.foregroundColorSelection;
@@ -125,7 +125,7 @@ function getModifiedSelectionStyle(theme: Theme) {
 }
 
 function getModifiedScrollbarStyle(theme: Theme) {
-    const lines: Array<string> = [];
+    const lines: string[] = [];
     let colorTrack: string;
     let colorIcons: string;
     let colorThumb: string;
@@ -174,7 +174,7 @@ function getModifiedScrollbarStyle(theme: Theme) {
 }
 
 export function getModifiedFallbackStyle(filter: FilterConfig, {strict}) {
-    const lines: Array<string> = [];
+    const lines: string[] = [];
     lines.push(`html, body, ${strict ? 'body :not(iframe)' : 'body > :not(iframe)'} {`);
     lines.push(`    background-color: ${modifyBackgroundColor({r: 255, g: 255, b: 255}, filter)} !important;`);
     lines.push(`    border-color: ${modifyBorderColor({r: 64, g: 64, b: 64}, filter)} !important;`);
@@ -207,7 +207,7 @@ export function parseColorWithCache($color: string) {
 function tryParseColor($color: string) {
     try {
         return parseColorWithCache($color);
-    } catch (err: unknown) {
+    } catch (err) {
         return null;
     }
 }
@@ -226,7 +226,7 @@ function getColorModifier(prop: string, value: string): string | CSSValueModifie
         }
         return (filter) => modifyForegroundColor(rgb, filter);
 
-    } catch (err: unknown) {
+    } catch (err) {
         logWarn('Color parse error', err);
         return null;
     }
@@ -236,7 +236,7 @@ const gradientRegex = /[\-a-z]+gradient\(([^\(\)]*(\(([^\(\)]*(\(.*?\)))*[^\(\)]
 const imageDetailsCache = new Map<string, ImageDetails>();
 const awaitingForImageLoading = new Map<string, Array<(imageDetails: ImageDetails) => void>>();
 
-function shouldIgnoreImage(rule: CSSStyleRule, selectors: Array<string>) {
+function shouldIgnoreImage(rule: CSSStyleRule, selectors: string[]) {
     if (!rule || selectors.length === 0) {
         return false;
     }
@@ -253,7 +253,7 @@ function shouldIgnoreImage(rule: CSSStyleRule, selectors: Array<string>) {
     return false;
 }
 
-function getBgImageModifier(value: string, rule: CSSStyleRule, ignoreImageSelectors: Array<string>, isCancelled: () => boolean): string | CSSValueModifier {
+function getBgImageModifier(value: string, rule: CSSStyleRule, ignoreImageSelectors: string[], isCancelled: () => boolean): string | CSSValueModifier {
     try {
         const gradients = getMatches(gradientRegex, value);
         const urls = getMatches(cssURLRegex, value);
@@ -262,7 +262,7 @@ function getBgImageModifier(value: string, rule: CSSStyleRule, ignoreImageSelect
             return value;
         }
 
-        const getIndices = (matches: Array<string>) => {
+        const getIndices = (matches: string[]) => {
             let index = 0;
             return matches.map((match) => {
                 const valueIndex = value.indexOf(match, index);
@@ -350,7 +350,7 @@ function getBgImageModifier(value: string, rule: CSSStyleRule, ignoreImageSelect
                         if (isCancelled()) {
                             return null;
                         }
-                    } catch (err: unknown) {
+                    } catch (err) {
                         logWarn(err);
                         if (awaitingForImageLoading.has(url)) {
                             awaitingForImageLoading.get(url).forEach((resolve) => resolve(null));
@@ -389,7 +389,7 @@ function getBgImageModifier(value: string, rule: CSSStyleRule, ignoreImageSelect
             return result;
         };
 
-        const modifiers: Array<CSSValueModifier> = [];
+        const modifiers: CSSValueModifier[] = [];
 
         let index = 0;
         matches.forEach(({match, type, index: matchStart}, i) => {
@@ -414,7 +414,7 @@ function getBgImageModifier(value: string, rule: CSSStyleRule, ignoreImageSelect
             return results.join('');
         };
 
-    } catch (err: unknown) {
+    } catch (err) {
         logWarn(`Unable to parse gradient ${value}`, err);
         return null;
     }
@@ -438,7 +438,7 @@ function getShadowModifier(prop: string, value: string): CSSValueModifier {
 
         return (filter: FilterConfig) => modifiers.map((modify) => modify(filter)).join('');
 
-    } catch (err: unknown) {
+    } catch (err) {
         logWarn(`Unable to parse shadow ${value}`, err);
         return null;
     }

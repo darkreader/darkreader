@@ -23,7 +23,7 @@ import {injectProxy} from './stylesheet-proxy';
 const variables = new Map<string, string>();
 const INSTANCE_ID = generateUID();
 const styleManagers = new Map<StyleElement, StyleManager>();
-const adoptedStyleManagers = [] as Array<AdoptedStyleSheetManager>;
+const adoptedStyleManagers = [] as AdoptedStyleSheetManager[];
 let filter: FilterConfig = null;
 let fixes: DynamicThemeFix = null;
 let isIFrame: boolean = null;
@@ -144,7 +144,7 @@ function replaceCSSTemplates($cssText: string) {
         try {
             const color = parseColorWithCache($color);
             return modifyColor(color, filter);
-        } catch (err: unknown) {
+        } catch (err) {
             logWarn(err);
             return $color;
         }

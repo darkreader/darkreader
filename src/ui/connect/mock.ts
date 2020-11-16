@@ -109,7 +109,7 @@ export function createConnectorMock() {
             }
             listener(data);
         },
-        markNewsAsRead(ids: Array<string>) {
+        markNewsAsRead(ids: string[]) {
             data.news
                 .filter(({id}) => ids.includes(id))
                 .forEach((news) => news.read = true);

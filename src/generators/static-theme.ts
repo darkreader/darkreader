@@ -7,17 +7,17 @@ import {compareURLPatterns, isURLInList} from '../utils/url';
 import type {FilterConfig, StaticTheme} from '../definitions';
 
 interface ThemeColors {
-    [prop: string]: Array<number>;
-    neutralBg: Array<number>;
-    neutralText: Array<number>;
-    redBg: Array<number>;
-    redText: Array<number>;
-    greenBg: Array<number>;
-    greenText: Array<number>;
-    blueBg: Array<number>;
-    blueText: Array<number>;
-    fadeBg: Array<number>;
-    fadeText: Array<number>;
+    [prop: string]: number[];
+    neutralBg: number[];
+    neutralText: number[];
+    redBg: number[];
+    redText: number[];
+    greenBg: number[];
+    greenText: number[];
+    blueBg: number[];
+    blueText: number[];
+    fadeBg: number[];
+    fadeText: number[];
 }
 
 const darkTheme: ThemeColors = {
@@ -46,18 +46,18 @@ const lightTheme: ThemeColors = {
     fadeText: [0, 0, 0, 0.5],
 };
 
-function rgb([r, g, b, a]: Array<number>) {
+function rgb([r, g, b, a]: number[]) {
     if (typeof a === 'number') {
         return `rgba(${r}, ${g}, ${b}, ${a})`;
     }
     return `rgb(${r}, ${g}, ${b})`;
 }
 
-function mix(color1: Array<number>, color2: Array<number>, t: number) {
+function mix(color1: number[], color2: number[], t: number) {
     return color1.map((c, i) => Math.round(c * (1 - t) + color2[i] * t));
 }
 
-export default function createStaticStylesheet(config: FilterConfig, url: string, frameURL: string, staticThemes: Array<StaticTheme>) {
+export default function createStaticStylesheet(config: FilterConfig, url: string, frameURL: string, staticThemes: StaticTheme[]) {
     const srcTheme = config.mode === 1 ? darkTheme : lightTheme;
     const theme = Object.entries(srcTheme).reduce((t, [prop, color]) => {
         t[prop] = applyColorMatrix(color, createFilterMatrix({...config, mode: 0}));
@@ -67,7 +67,7 @@ export default function createStaticStylesheet(config: FilterConfig, url: string
     const commonTheme = getCommonTheme(staticThemes);
     const siteTheme = getThemeFor(frameURL || url, staticThemes);
 
-    const lines: Array<string> = [];
+    const lines: string[] = [];
 
     if (!siteTheme || !siteTheme.noCommon) {
         lines.push('/* Common theme */');
@@ -89,13 +89,13 @@ export default function createStaticStylesheet(config: FilterConfig, url: string
         .join('\n');
 }
 
-function createRuleGen(getSelectors: (siteTheme: StaticTheme) => Array<string>, generateDeclarations: (theme: ThemeColors) => Array<string>, modifySelector: ((s: string) => string) = (s) => s) {
+function createRuleGen(getSelectors: (siteTheme: StaticTheme) => string[], generateDeclarations: (theme: ThemeColors) => string[], modifySelector: ((s: string) => string) = (s) => s) {
     return (siteTheme: StaticTheme, themeColors: ThemeColors) => {
         const selectors = getSelectors(siteTheme);
         if (selectors == null || selectors.length === 0) {
             return null;
         }
-        const lines: Array<string> = [];
+        const lines: string[] = [];
         selectors.forEach((s, i) => {
             let ln = modifySelector(s);
             if (i < selectors.length - 1) {
@@ -236,7 +236,7 @@ function camelCaseToUpperCase(text: string) {
     return text.replace(/([a-z])([A-Z])/g, '$1 $2').toUpperCase();
 }
 
-export function formatStaticThemes(staticThemes: Array<StaticTheme>) {
+export function formatStaticThemes(staticThemes: StaticTheme[]) {
     const themes = staticThemes.slice().sort((a, b) => compareURLPatterns(a.url[0], b.url[0]));
 
     return formatSitesFixesConfig(themes, {
@@ -257,11 +257,11 @@ export function formatStaticThemes(staticThemes: Array<StaticTheme>) {
     });
 }
 
-function getCommonTheme(themes: Array<StaticTheme>) {
+function getCommonTheme(themes: StaticTheme[]) {
     return themes[0];
 }
 
-function getThemeFor(url: string, themes: Array<StaticTheme>) {
+function getThemeFor(url: string, themes: StaticTheme[]) {
     const sortedBySpecificity = themes
         .slice(1)
         .map((theme) => {

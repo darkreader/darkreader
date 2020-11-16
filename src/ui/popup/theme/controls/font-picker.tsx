@@ -5,7 +5,7 @@ import type {Theme} from '../../../../definitions';
 
 interface FontPickerProps {
     theme: Theme;
-    fonts: Array<string>;
+    fonts: string[];
     onChange: (font: string) => void;
 }
 

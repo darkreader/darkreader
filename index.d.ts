@@ -123,7 +123,7 @@ declare namespace DarkReader {
          * List of CSS selectors that should be inverted.
          * Usually icons that are contained in sprites.
          */
-        invert: Array<string>;
+        invert: string[];
         /**
          * Additional CSS.
          * ${color} template should be used to apply theme options to a color.
@@ -140,12 +140,12 @@ declare namespace DarkReader {
          * List of CSS selectors where it's inline style should not be analyzed
          * Mostly used for color pickers
          */
-        ignoreInlineStyle: Array<string>;
+        ignoreInlineStyle: string[];
         /**
          * List of CSS selectors where it's image should not be analyzed
          * Mostly used for wrongly inverted background-images
          */
-        ignoreImageAnalysis: Array<string>;
+        ignoreImageAnalysis: string[];
     }
 }
 

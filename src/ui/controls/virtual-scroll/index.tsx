@@ -3,7 +3,7 @@ import {render, getContext} from 'malevic/dom';
 
 interface VirtualScrollProps {
     root: Malevic.Spec;
-    items: Array<Malevic.Spec>;
+    items: Malevic.Spec[];
     scrollToIndex?: number;
 }
 

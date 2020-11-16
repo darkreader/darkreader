@@ -5,9 +5,9 @@ import {getLocalMessage, getUILanguage} from '../../../../utils/locales';
 import type {News} from '../../../../definitions';
 
 interface NewsProps {
-    news: Array<News>;
+    news: News[];
     expanded: boolean;
-    onNewsOpen: (...news: Array<News>) => void;
+    onNewsOpen: (...news: News[]) => void;
     onClose: () => void;
 }
 
@@ -28,7 +28,7 @@ export function NewsGroup({news, expanded, onNewsOpen, onClose}: NewsProps) {
                         // Workaround for https://bugs.chromium.org/p/chromium/issues/detail?id=811403
                         const locale = getUILanguage();
                         formattedDate = date.toLocaleDateString(locale, {month: 'short', day: 'numeric'});
-                    } catch (err: unknown) {
+                    } catch (err) {
                         formattedDate = date.toISOString().substring(0, 10);
                     }
                     return (

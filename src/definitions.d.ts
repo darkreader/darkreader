@@ -4,8 +4,8 @@ export interface ExtensionData {
     isEnabled: boolean;
     isReady: boolean;
     settings: UserSettings;
-    fonts: Array<string>;
-    news: Array<News>;
+    fonts: string[];
+    news: News[];
     shortcuts: Shortcuts;
     devtools: {
         dynamicFixesText: string;
@@ -22,7 +22,7 @@ export interface ExtensionActions {
     setTheme(theme: Partial<FilterConfig>);
     setShortcut(command: string, shortcut: string);
     toggleURL(url: string);
-    markNewsAsRead(ids: Array<string>);
+    markNewsAsRead(ids: string[]);
     loadConfig(options: {local: boolean});
     applyDevDynamicThemeFixes(text: string): Promise<void>;
     resetDevDynamicThemeFixes();
@@ -60,24 +60,24 @@ export interface Theme {
 export type FilterConfig = Theme;
 
 export interface CustomSiteConfig {
-    url: Array<string>;
+    url: string[];
     theme: FilterConfig;
 }
 
 export interface ThemePreset {
     id: string;
     name: string;
-    urls: Array<string>;
+    urls: string[];
     theme: Theme;
 }
 
 export interface UserSettings {
     enabled: boolean;
     theme: FilterConfig;
-    presets: Array<ThemePreset>;
-    customThemes: Array<CustomSiteConfig>;
-    siteList: Array<string>;
-    siteListEnabled: Array<string>;
+    presets: ThemePreset[];
+    customThemes: CustomSiteConfig[];
+    siteList: string[];
+    siteListEnabled: string[];
     applyToListedOnly: boolean;
     changeBrowserTheme: boolean;
     notifyOfNews: boolean;
@@ -119,48 +119,48 @@ export interface Shortcuts {
 }
 
 export interface DynamicThemeFix {
-    url: Array<string>;
-    invert: Array<string>;
+    url: string[];
+    invert: string[];
     css: string;
-    ignoreInlineStyle: Array<string>;
-    ignoreImageAnalysis: Array<string>;
+    ignoreInlineStyle: string[];
+    ignoreImageAnalysis: string[];
 }
 
 export interface InversionFix {
-    url: Array<string>;
-    invert: Array<string>;
-    noinvert: Array<string>;
-    removebg: Array<string>;
+    url: string[];
+    invert: string[];
+    noinvert: string[];
+    removebg: string[];
     css: string;
 }
 
 export interface StaticTheme {
-    url: Array<string>;
-    neutralBg?: Array<string>;
-    neutralBgActive?: Array<string>;
-    neutralText?: Array<string>;
-    neutralTextActive?: Array<string>;
-    neutralBorder?: Array<string>;
-    redBg?: Array<string>;
-    redBgActive?: Array<string>;
-    redText?: Array<string>;
-    redTextActive?: Array<string>;
-    redBorder?: Array<string>;
-    greenBg?: Array<string>;
-    greenBgActive?: Array<string>;
-    greenText?: Array<string>;
-    greenTextActive?: Array<string>;
-    greenBorder?: Array<string>;
-    blueBg?: Array<string>;
-    blueBgActive?: Array<string>;
-    blueText?: Array<string>;
-    blueTextActive?: Array<string>;
-    blueBorder?: Array<string>;
-    fadeBg?: Array<string>;
-    fadeText?: Array<string>;
-    transparentBg?: Array<string>;
-    noImage?: Array<string>;
-    invert?: Array<string>;
+    url: string[];
+    neutralBg?: string[];
+    neutralBgActive?: string[];
+    neutralText?: string[];
+    neutralTextActive?: string[];
+    neutralBorder?: string[];
+    redBg?: string[];
+    redBgActive?: string[];
+    redText?: string[];
+    redTextActive?: string[];
+    redBorder?: string[];
+    greenBg?: string[];
+    greenBgActive?: string[];
+    greenText?: string[];
+    greenTextActive?: string[];
+    greenBorder?: string[];
+    blueBg?: string[];
+    blueBgActive?: string[];
+    blueText?: string[];
+    blueTextActive?: string[];
+    blueBorder?: string[];
+    fadeBg?: string[];
+    fadeText?: string[];
+    transparentBg?: string[];
+    noImage?: string[];
+    invert?: string[];
     noCommon?: boolean;
 }
 

@@ -48,7 +48,7 @@ export function compareURLPatterns(a: string, b: string) {
  * @param url Site URL.
  * @paramlist List to search into.
  */
-export function isURLInList(url: string, list: Array<string>) {
+export function isURLInList(url: string, list: string[]) {
     for (let i = 0; i < list.length; i++) {
         if (isURLMatched(url, list[i])) {
             return true;

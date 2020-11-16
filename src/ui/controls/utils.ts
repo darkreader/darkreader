@@ -1,6 +1,6 @@
 import {classes} from '../utils';
 
-function toArray<T>(x: T | Array<T>) {
+function toArray<T>(x: T | T[]) {
     return Array.isArray(x) ? x : [x];
 }
 
@@ -12,7 +12,7 @@ export function mergeClass(
     return classes(...normalized);
 }
 
-export function omitAttrs(omit: Array<string>, attrs: Malevic.NodeAttrs) {
+export function omitAttrs(omit: string[], attrs: Malevic.NodeAttrs) {
     const result: Malevic.NodeAttrs = {};
     Object.keys(attrs).forEach((key) => {
         if (omit.indexOf(key) < 0) {

@@ -79,7 +79,7 @@ function ColorsGroup({theme, change}: ThemeGroupProps) {
 }
 
 interface FontGroupsProps extends ThemeGroupProps {
-    fonts: Array<string>;
+    fonts: string[];
 }
 
 function FontGroup({theme, fonts, change}: FontGroupsProps) {

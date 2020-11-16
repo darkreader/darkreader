@@ -6,8 +6,8 @@ export function clamp(x: number, min: number, max: number) {
     return Math.min(max, Math.max(min, x));
 }
 
-export function multiplyMatrices(m1: Array<Array<number>>, m2: Array<Array<number>>) {
-    const result: Array<Array<number>> = [];
+export function multiplyMatrices(m1: number[][], m2: number[][]) {
+    const result: number[][] = [];
     for (let i = 0, len = m1.length; i < len; i++) {
         result[i] = [];
         for (let j = 0, len2 = m2[0].length; j < len2; j++) {

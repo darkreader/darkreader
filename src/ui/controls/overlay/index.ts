@@ -40,7 +40,7 @@ interface OverlayPortalProps {
     onOuterClick?: () => void;
 }
 
-function Portal(props: OverlayPortalProps, ...content: Array<Malevic.Child>) {
+function Portal(props: OverlayPortalProps, ...content: Malevic.Child[]) {
     const context = getContext();
 
     context.onRender(() => {

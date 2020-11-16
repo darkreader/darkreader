@@ -44,12 +44,12 @@ export function parseArray(text: string) {
         .filter((s) => s);
 }
 
-export function formatArray(arr: Array<string>) {
+export function formatArray(arr: string[]) {
     return arr.concat('').join('\n');
 }
 
 export function getMatches(regex: RegExp, input: string, group = 0) {
-    const matches: Array<string> = [];
+    const matches: string[] = [];
     let m: RegExpMatchArray;
     while ((m = regex.exec(input))) {
         matches.push(m[group]);

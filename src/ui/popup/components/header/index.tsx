@@ -8,7 +8,7 @@ import WatchIcon from '../../main-page/watch-icon';
 import SiteToggle from '../site-toggle';
 import MoreToggleSettings from './more-toggle-settings';
 
-function multiline(...lines: Array<string>) {
+function multiline(...lines: string[]) {
     return lines.join('\n');
 }
 

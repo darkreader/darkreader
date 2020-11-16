@@ -14,7 +14,7 @@ class LocalStorageWrapper implements DevToolsStorage {
     get(key: string) {
         try {
             return localStorage.getItem(key);
-        } catch (err: unknown) {
+        } catch (err) {
             console.error(err);
             return null;
         }
@@ -22,7 +22,7 @@ class LocalStorageWrapper implements DevToolsStorage {
     set(key: string, value: string) {
         try {
             localStorage.setItem(key, value);
-        } catch (err: unknown) {
+        } catch (err) {
             console.error(err);
             return;
         }
@@ -30,7 +30,7 @@ class LocalStorageWrapper implements DevToolsStorage {
     remove(key: string) {
         try {
             localStorage.removeItem(key);
-        } catch (err: unknown) {
+        } catch (err) {
             console.error(err);
             return;
         }
@@ -38,7 +38,7 @@ class LocalStorageWrapper implements DevToolsStorage {
     has(key: string) {
         try {
             return localStorage.getItem(key) != null;
-        } catch (err: unknown) {
+        } catch (err) {
             console.error(err);
             return false;
         }
@@ -115,8 +115,8 @@ export default class DevTools {
             this.saveDynamicThemeFixes(formatted);
             this.onChange();
             return null;
-        } catch (err: unknown) {
-            return err as Error;
+        } catch (err) {
+            return err;
         }
     }
 
@@ -153,8 +153,8 @@ export default class DevTools {
             this.saveInversionFixes(formatted);
             this.onChange();
             return null;
-        } catch (err: unknown) {
-            return err as Error;
+        } catch (err) {
+            return err;
         }
     }
 
@@ -191,8 +191,8 @@ export default class DevTools {
             this.saveStaticThemes(formatted);
             this.onChange();
             return null;
-        } catch (err: unknown) {
-            return err as Error;
+        } catch (err) {
+            return err;
         }
     }
 }

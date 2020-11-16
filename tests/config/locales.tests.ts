@@ -2,7 +2,7 @@ import {readFile as fsReadFile, readdir as fsReadDir} from 'fs';
 import {resolve as resolvePath} from 'path';
 
 function readDir(dir) {
-    return new Promise<Array<string>>((resolve, reject) => {
+    return new Promise<string[]>((resolve, reject) => {
         fsReadDir(resolvePath(__dirname, dir), (err, files) => {
             if (err) {
                 reject(err);
@@ -29,7 +29,7 @@ test('Locales', async () => {
     const files = await readDir('../../src/_locales');
     const enLocale = await readLocale('en.config');
     const enLines = enLocale.split('\n');
-    const locales: Array<string> = [];
+    const locales: string[] = [];
     for (const file of files) {
         const locale = await readLocale(file);
         locales.push(locale);

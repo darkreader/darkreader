@@ -8,7 +8,7 @@ const theme = {
     darkSchemeTextColor: 'white',
 };
 let container: HTMLElement;
-const links: Array<HTMLLinkElement> = [];
+const links: HTMLLinkElement[] = [];
 
 function createStyleLink(href) {
     const link = document.createElement('link');

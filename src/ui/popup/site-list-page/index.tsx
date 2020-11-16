@@ -5,7 +5,7 @@ import CheckButton from '../check-button';
 import {isFirefox} from '../../../utils/platform';
 
 export default function SiteListPage(props: ViewProps) {
-    function onSiteListChange(sites: Array<string>) {
+    function onSiteListChange(sites: string[]) {
         props.actions.changeSettings({siteList: sites});
     }
     function onInvertPDFChange(checked: boolean) {

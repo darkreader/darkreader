@@ -9,7 +9,7 @@ import {collectCSS} from '../inject/dynamic-theme/css-collection';
 const isIFrame = (() => {
     try {
         return window.self !== window.top;
-    } catch (err: unknown) {
+    } catch (err) {
         console.warn(err);
         return true;
     }

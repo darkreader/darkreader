@@ -138,7 +138,7 @@ export function parse($color: string): RGBA {
     throw new Error(`Unable to parse ${$color}`);
 }
 
-function getNumbersFromString(str: string, splitter: RegExp, range: Array<number>, units: {[unit: string]: number}) {
+function getNumbersFromString(str: string, splitter: RegExp, range: number[], units: {[unit: string]: number}) {
     const raw = str.split(splitter).filter((x) => x);
     const unitsList = Object.entries(units);
     const numbers = raw.map((r) => r.trim()).map((r, i) => {

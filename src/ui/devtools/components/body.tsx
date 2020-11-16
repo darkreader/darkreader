@@ -64,7 +64,7 @@ function Body({data, tab, actions}: BodyProps) {
         try {
             await wrapper.apply(text);
             setState({errorText: null});
-        } catch (err: unknown) {
+        } catch (err) {
             setState({
                 errorText: String(err),
             });

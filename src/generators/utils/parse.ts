@@ -1,22 +1,22 @@
 import {parseArray} from '../../utils/text';
 
 interface SiteProps {
-    url: Array<string>;
+    url: string[];
 }
 
 interface SitesFixesParserOptions {
-    commands: Array<string>;
+    commands: string[];
     getCommandPropName: (command: string) => string;
     parseCommandValue: (command: string, value: string) => any;
 }
 
 export function parseSitesFixesConfig<T extends SiteProps>(text: string, options: SitesFixesParserOptions) {
-    const sites: Array<T> = [];
+    const sites: T[] = [];
 
     const blocks = text.replace(/\r/g, '').split(/^\s*={2,}\s*$/gm);
     blocks.forEach((block) => {
         const lines = block.split('\n');
-        const commandIndices: Array<number> = [];
+        const commandIndices: number[] = [];
         lines.forEach((ln, i) => {
             if (ln.match(/^\s*[A-Z]+(\s[A-Z]+)*\s*$/)) {
                 commandIndices.push(i);

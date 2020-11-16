@@ -163,11 +163,12 @@ export function watchForStyleChanges(currentStyles: StyleElement[], update: (sty
         const updatedStyles = new Set<StyleElement>();
         const removedStyles = new Set<StyleElement>();
         mutations.forEach((m) => {
-            if (m.target.isConnected) {
-                if (shouldManageStyle(m.target)) {
-                    updatedStyles.add(m.target as StyleElement);
-                } else if ((m.target as HTMLLinkElement).disabled && shouldManageStyle(m.target, {disableDisabled: true})) {
-                    removedStyles.add(m.target as StyleElement);
+            const {target} = m;
+            if (target.isConnected) {
+                if (shouldManageStyle(target)) {
+                    updatedStyles.add(target as StyleElement);
+                } else if (target instanceof HTMLLinkElement && target.disabled) {
+                    removedStyles.add(target as StyleElement);
                 }
             }
         });

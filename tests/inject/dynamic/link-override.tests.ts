@@ -65,7 +65,7 @@ describe('Link override', () => {
 
         expect(document.querySelector('.testcase--link').nextElementSibling.classList.contains('darkreader--sync')).toBe(true);
         link.disabled = true;
-        
+
         await timeout(100);
 
         expect(document.querySelector('.testcase--link').nextElementSibling.classList.contains('darkreader--sync')).toBe(false);

@@ -47,13 +47,9 @@ export function readLocalStorage<T extends {[key: string]: any}>(defaults: T): P
     });
 }
 
-export let isWriting = false;
-
 export function writeSyncStorage<T extends {[key: string]: any}>(values: T): Promise<void> {
-    isWriting = true;
     return new Promise<void>((resolve, reject) => {
         chrome.storage.sync.set(values, () => {
-            isWriting = false;
             if (chrome.runtime.lastError) {
                 reject(chrome.runtime.lastError);
                 return;
@@ -64,14 +60,16 @@ export function writeSyncStorage<T extends {[key: string]: any}>(values: T): Pro
 }
 
 export function writeLocalStorage<T extends {[key: string]: any}>(values: T): Promise<void> {
-    isWriting = true;
     return new Promise<void>((resolve) => {
         chrome.storage.local.set(values, () => {
-            isWriting = false;
             resolve();
         });
     });
 }
+
+export const subscribeToOuterSettingsChange = (callback: () => void) => {
+    chrome.storage.onChanged.addListener(callback);
+};
 
 export function getFontList() {
     return new Promise<string[]>((resolve) => {

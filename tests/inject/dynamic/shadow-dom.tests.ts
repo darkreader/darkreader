@@ -101,7 +101,13 @@ describe('Handle Shadow-DOM', () => {
             constructor() {
                 super();
                 const shadowRoot = this.attachShadow({mode: 'open'});
-                shadowRoot.append(...this.childNodes as any);
+                const style = document.createElement('style');
+                style.textContent = 'p { color: pink }';
+                const text = document.createElement('p');
+                text.textContent = 'Some text content that should be pink.';
+
+                shadowRoot.append(style);
+                shadowRoot.append(text);
             }
         }
         customElements.define('svg-container', SVGContainer);
@@ -109,12 +115,13 @@ describe('Handle Shadow-DOM', () => {
         createOrUpdateDynamicTheme(theme, null, false);
 
         await timeout(100);
-        expect(getComputedStyle(document.querySelector('svg-container').shadowRoot.querySelector('text')).color).toBe('rgb(255, 26, 26)');
+        const shadowRoot = document.querySelector('svg-container').shadowRoot;
+        expect(getComputedStyle(shadowRoot.querySelector('p')).color).toBe('rgb(255, 198, 208)');
     });
 
     it('should react to defined elements', async () => {
         container.innerHTML = multiline(
-            '<svg-container2>',
+            '<svg-container-2>',
             '   <svg viewBox="0 0 100 30">',
             '       <style class="testcase-style">#svg-text { color: red; }</style>',
             '       <text id="svg-text" y="20">I am SVG</text>',
@@ -125,16 +132,23 @@ describe('Handle Shadow-DOM', () => {
             constructor() {
                 super();
                 const shadowRoot = this.attachShadow({mode: 'open'});
-                shadowRoot.append(...this.childNodes as any);
+                const style = document.createElement('style');
+                style.textContent = 'p { color: pink }';
+                const text = document.createElement('p');
+                text.textContent = 'Some text content that should be pink.';
+
+                shadowRoot.append(style);
+                shadowRoot.append(text);
             }
         }
 
         createOrUpdateDynamicTheme(theme, null, false);
 
         await timeout(100);
-        customElements.define('svg-container2', SVGContainer);
+        customElements.define('svg-container-2', SVGContainer);
         await timeout(100);
-        expect(getComputedStyle(document.querySelector('svg-container2').shadowRoot.querySelector('text')).color).toBe('rgb(255, 26, 26)');
+        const shadowRoot = document.querySelector('svg-container-2').shadowRoot;
+        expect(getComputedStyle(shadowRoot.querySelector('p')).color).toBe('rgb(255, 198, 208)');
     });
 
 });

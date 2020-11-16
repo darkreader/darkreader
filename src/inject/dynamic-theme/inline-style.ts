@@ -12,7 +12,6 @@ interface Overrides {
         customProp: string;
         cssProp: string;
         dataAttr: string;
-        store: WeakSet<Node>;
     };
 }
 
@@ -21,73 +20,61 @@ const overrides: Overrides = {
         customProp: '--darkreader-inline-bgcolor',
         cssProp: 'background-color',
         dataAttr: 'data-darkreader-inline-bgcolor',
-        store: new WeakSet(),
     },
     'background-image': {
         customProp: '--darkreader-inline-bgimage',
         cssProp: 'background-image',
         dataAttr: 'data-darkreader-inline-bgimage',
-        store: new WeakSet(),
     },
     'border-color': {
         customProp: '--darkreader-inline-border',
         cssProp: 'border-color',
         dataAttr: 'data-darkreader-inline-border',
-        store: new WeakSet(),
     },
     'border-bottom-color': {
         customProp: '--darkreader-inline-border-bottom',
         cssProp: 'border-bottom-color',
         dataAttr: 'data-darkreader-inline-border-bottom',
-        store: new WeakSet(),
     },
     'border-left-color': {
         customProp: '--darkreader-inline-border-left',
         cssProp: 'border-left-color',
         dataAttr: 'data-darkreader-inline-border-left',
-        store: new WeakSet(),
     },
     'border-right-color': {
         customProp: '--darkreader-inline-border-right',
         cssProp: 'border-right-color',
         dataAttr: 'data-darkreader-inline-border-right',
-        store: new WeakSet(),
     },
     'border-top-color': {
         customProp: '--darkreader-inline-border-top',
         cssProp: 'border-top-color',
         dataAttr: 'data-darkreader-inline-border-top',
-        store: new WeakSet(),
     },
     'box-shadow': {
         customProp: '--darkreader-inline-boxshadow',
         cssProp: 'box-shadow',
         dataAttr: 'data-darkreader-inline-boxshadow',
-        store: new WeakSet(),
     },
     'color': {
         customProp: '--darkreader-inline-color',
         cssProp: 'color',
         dataAttr: 'data-darkreader-inline-color',
-        store: new WeakSet(),
     },
     'fill': {
         customProp: '--darkreader-inline-fill',
         cssProp: 'fill',
         dataAttr: 'data-darkreader-inline-fill',
-        store: new WeakSet(),
     },
     'stroke': {
         customProp: '--darkreader-inline-stroke',
         cssProp: 'stroke',
         dataAttr: 'data-darkreader-inline-stroke',
-        store: new WeakSet(),
     },
     'outline-color': {
         customProp: '--darkreader-inline-outline',
         cssProp: 'outline-color',
         dataAttr: 'data-darkreader-inline-outline',
-        store: new WeakSet(),
     },
 };
 
@@ -184,7 +171,7 @@ function deepWatchForInlineStyles(
                 elementStyleDidChange(m.target as HTMLElement);
             }
             overridesList
-                .filter(({store, dataAttr}) => store.has(m.target) && !(m.target as HTMLElement).hasAttribute(dataAttr))
+                .filter(({dataAttr}) => !(m.target as HTMLElement).hasAttribute(dataAttr))
                 .forEach(({dataAttr}) => (m.target as HTMLElement).setAttribute(dataAttr, ''));
         });
     });
@@ -279,9 +266,7 @@ export function overrideInlineStyle(element: HTMLElement, theme: FilterConfig, i
     if (ignoreInlineSelectors.length > 0) {
         if (shouldIgnoreInlineStyle(element, ignoreInlineSelectors)) {
             unsetProps.forEach((cssProp) => {
-                const {store, dataAttr} = overrides[cssProp];
-                store.delete(element);
-                element.removeAttribute(dataAttr);
+                element.removeAttribute(overrides[cssProp].dataAttr);
             });
             return;
         }
@@ -331,9 +316,7 @@ export function overrideInlineStyle(element: HTMLElement, theme: FilterConfig, i
     }
 
     forEach(unsetProps, (cssProp) => {
-        const {store, dataAttr} = overrides[cssProp];
-        store.delete(element);
-        element.removeAttribute(dataAttr);
+        element.removeAttribute(overrides[cssProp].dataAttr);
     });
     inlineStyleCache.set(element, getInlineStyleCacheKey(element, theme));
 }

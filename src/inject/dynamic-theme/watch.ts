@@ -39,22 +39,22 @@ function collectUndefinedElements(root: ParentNode) {
 
 const resolvers = new Map<string, () => void>();
 
-const handleIsDefined = (e: any) => {
-    if (resolvers.has(e.details.tag)) {
-        const resolve = resolvers.get(e.details.tag);
+function handleIsDefined(e: CustomEvent<{tag: string}>)  {
+    if (resolvers.has(e.detail.tag)) {
+        const resolve = resolvers.get(e.detail.tag);
         resolve && resolve();
     }
 }
 
-function customElementsWhenDefined($tag: string) {
+function customElementsWhenDefined(tag: string) {
     return new Promise((resolve) => {
         // `customElements.whenDefined` is not available in extensions
         // https://bugs.chromium.org/p/chromium/issues/detail?id=390807
         if (window.customElements && typeof window.customElements.whenDefined === 'function') {
-            customElements.whenDefined($tag).then(resolve);
+            customElements.whenDefined(tag).then(resolve);
         } else {
-            resolvers.set($tag, resolve);
-            document.dispatchEvent(new CustomEvent('__darkreader__addUndefinedResolver', {detail: {tag: $tag}}));
+            resolvers.set(tag, resolve);
+            document.dispatchEvent(new CustomEvent('__darkreader__addUndefinedResolver', {detail: {tag: tag}}));
         }
     });
 }

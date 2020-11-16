@@ -2,7 +2,7 @@ import {canInjectScript} from '../background/utils/extension-api';
 import {createFileLoader} from './utils/network';
 import type {Message} from '../definitions';
 
-function queryTabs(query: chrome.tabs.QueryInfo) {
+async function queryTabs(query: chrome.tabs.QueryInfo) {
     return new Promise<Array<chrome.tabs.Tab>>((resolve) => {
         chrome.tabs.query(query, (tabs) => resolve(tabs));
     });

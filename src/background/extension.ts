@@ -127,7 +127,7 @@ export class Extension {
             setTheme: (theme) => this.setTheme(theme),
             setShortcut: ({command, shortcut}) => this.setShortcut(command, shortcut),
             toggleURL: (url) => this.toggleURL(url),
-            markNewsAsRead: (ids) => this.news.markAsRead(...ids),
+            markNewsAsRead: async (ids) => await this.news.markAsRead(...ids),
             onPopupOpen: () => this.popupOpeningListener && this.popupOpeningListener(),
             loadConfig: async (options) => await this.config.load(options),
             applyDevDynamicThemeFixes: (text) => this.devtools.applyDynamicThemeFixes(text),

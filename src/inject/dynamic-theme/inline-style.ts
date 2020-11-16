@@ -269,7 +269,7 @@ export function overrideInlineStyle(element: HTMLElement, theme: FilterConfig, i
         if (typeof value === 'function') {
             value = value(theme) as string;
         }
-        element.style.setProperty(customProp, value as string);
+        element.style.setProperty(customProp, value);
         if (!element.hasAttribute(dataAttr)) {
             element.setAttribute(dataAttr, '');
         }

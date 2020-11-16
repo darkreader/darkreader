@@ -78,10 +78,10 @@ export function createConnectorMock() {
     const data = getMockData();
     const tab = getMockActiveTabInfo();
     const connector = {
-        getData() {
+        async getData() {
             return Promise.resolve(data);
         },
-        getActiveTabInfo() {
+        async getActiveTabInfo() {
             return Promise.resolve(tab);
         },
         subscribeToChanges(callback) {

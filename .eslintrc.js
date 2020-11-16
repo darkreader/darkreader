@@ -43,11 +43,7 @@ module.exports = {
         }],
         '@typescript-eslint/consistent-type-assertions': 'error',
         '@typescript-eslint/consistent-type-imports': 'error',
-        '@typescript-eslint/member-delimiter-style': ['error', {
-            singleline: {
-                requireLast: true
-            },
-        }],
+        '@typescript-eslint/member-delimiter-style': 'error',
         '@typescript-eslint/no-implicit-any-catch': 'warn',
         '@typescript-eslint/semi': ['error', 'always'],
         '@typescript-eslint/brace-style': 'error',
@@ -79,6 +75,18 @@ module.exports = {
                 'local/jsx-uses-m-pragma': 'error',
                 'local/jsx-uses-vars': 'error',
             },
+        },
+        {
+            files: ['src/**/*.ts'],
+            parserOptions: {
+                ecmaVersion: 2019,
+                project: 'src/tsconfig.json',
+            },
+            rules: {
+                '@typescript-eslint/no-implied-eval': 'error',
+                '@typescript-eslint/switch-exhaustiveness-check': 'error',
+                '@typescript-eslint/promise-function-async': 'error',
+            }
         },
     ],
 };

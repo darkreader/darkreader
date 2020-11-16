@@ -399,7 +399,7 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
     };
 }
 
-function linkLoading(link: HTMLLinkElement) {
+async function linkLoading(link: HTMLLinkElement) {
     return new Promise<void>((resolve, reject) => {
         const cleanUp = () => {
             link.removeEventListener('load', onLoad);

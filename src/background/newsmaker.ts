@@ -16,7 +16,7 @@ export default class Newsmaker {
 
     subscribe() {
         this.updateNews();
-        setInterval(() => this.updateNews(), Newsmaker.UPDATE_INTERVAL);
+        setInterval(async () => await this.updateNews(), Newsmaker.UPDATE_INTERVAL);
     }
 
     private async updateNews() {

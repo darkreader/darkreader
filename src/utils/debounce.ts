@@ -10,5 +10,5 @@ export function debounce<F extends AnyFn>(delay: number, fn: F): F {
             timeoutId = null;
             fn(...args);
         }, delay);
-    }) as any;
+    }) as F;
 }

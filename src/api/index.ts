@@ -26,12 +26,8 @@ export function enable(themeOptions: Partial<Theme> = {}, fixes: DynamicThemeFix
     enabled = true;
 }
 
-export function toggle(themeOptions: Partial<Theme> = {}, fixes: DynamicThemeFix = null) {
-    if (enabled) {
-        disable();
-    } else {
-        enable(themeOptions, fixes);
-    }
+export function isEnabled() {
+    return enabled;
 }
 
 export function disable() {

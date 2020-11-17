@@ -13,8 +13,10 @@ const links: HTMLLinkElement[] = [];
 function createStyleLink(href) {
     const link = document.createElement('link');
     link.rel = 'stylesheet';
+    link.classList.add('testcase--link');
     link.href = href;
     document.head.append(link);
+    links.push(link);
     return link;
 }
 
@@ -41,9 +43,34 @@ describe('Link override', () => {
             '<h1>Link <strong>override</strong>!</h1>',
         );
         createOrUpdateDynamicTheme(theme, null, false);
+
         await timeout(100);
+
         expect(getComputedStyle(container.querySelector('h1')).backgroundColor).toBe('rgb(102, 102, 102)');
         expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(255, 255, 255)');
         expect(getComputedStyle(container.querySelector('h1 strong')).color).toBe('rgb(255, 26, 26)');
     });
+
+    it('should not remove manager from disabled link ', async () => {
+        const link = createStyleLink(`data:text/css;utf8,${encodeURIComponent(multiline(
+            'h1 { background: gray; }',
+            'h1 strong { color: red; }',
+        ))}`);
+        container.innerHTML = multiline(
+            '<h1>Link <strong>disabled</strong>!</h1>',
+        );
+        createOrUpdateDynamicTheme(theme, null, false);
+
+        await timeout(100);
+
+        expect(document.querySelector('.testcase--link').nextElementSibling.classList.contains('darkreader--sync')).toBe(true);
+        link.disabled = true;
+
+        await timeout(100);
+
+        expect(document.querySelector('.testcase--link').nextElementSibling.classList.contains('darkreader--sync')).toBe(false);
+
+    });
+
 });
+

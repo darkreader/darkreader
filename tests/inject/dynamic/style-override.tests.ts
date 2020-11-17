@@ -104,7 +104,8 @@ describe('Style override', () => {
         );
         createOrUpdateDynamicTheme(theme, null, false);
         const style = document.querySelector('.testcase-style');
-        document.head.append(style);
+        container.append(style);
+
         await timeout(100);
         expect((style.nextSibling as HTMLStyleElement).classList.contains('darkreader--sync')).toBe(true);
     });

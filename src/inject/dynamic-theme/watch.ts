@@ -42,7 +42,7 @@ const resolvers = new Map<string, () => void>();
 function handleIsDefined(e: CustomEvent<{tag: string}>)  {
     if (resolvers.has(e.detail.tag)) {
         const resolve = resolvers.get(e.detail.tag);
-        resolve && resolve();
+        resolve();
     }
 }
 
@@ -54,7 +54,7 @@ function customElementsWhenDefined(tag: string) {
             customElements.whenDefined(tag).then(resolve);
         } else {
             resolvers.set(tag, resolve);
-            document.dispatchEvent(new CustomEvent('__darkreader__addUndefinedResolver', {detail: {tag: tag}}));
+            document.dispatchEvent(new CustomEvent('__darkreader__addUndefinedResolver', {detail: {tag}}));
         }
     });
 }

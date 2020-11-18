@@ -76,13 +76,31 @@ describe('Link override', () => {
             '<h1><strong>Cross-origin</strong> link override</h1>',
         );
         createOrUpdateDynamicTheme(theme, null, false);
-        await timeout(1000);
+        await timeout(100);
         expect(getComputedStyle(container.querySelector('h1')).backgroundColor).toBe('rgb(102, 102, 102)');
         expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(255, 255, 255)');
         expect(getComputedStyle(container.querySelector('h1 strong')).color).toBe('rgb(255, 26, 26)');
     });
 
-    it('should not remove manager from disabled link ', async () => {
+    it('should override cross-origin imports in linked CSS', async () => {
+        const importedCSS = 'h1 { background: gray; }';
+        const importedURL = getCSSEchoURL(importedCSS);
+        stubBackgroundFetchResponse(importedURL, importedCSS);
+        createCorsLink(multiline(
+            `@import "${importedURL}";`,
+            'h1 strong { color: red; }',
+        ));
+        container.innerHTML = multiline(
+            '<h1><strong>Cross-origin import</strong> link override</h1>',
+        );
+        createOrUpdateDynamicTheme(theme, null, false);
+        await timeout(100);
+        expect(getComputedStyle(container.querySelector('h1')).backgroundColor).toBe('rgb(102, 102, 102)');
+        expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(255, 255, 255)');
+        expect(getComputedStyle(container.querySelector('h1 strong')).color).toBe('rgb(255, 26, 26)');
+    });
+
+    it('should remove manager from disabled link ', async () => {
         const link = createStyleLink(`data:text/css;utf8,${encodeURIComponent(multiline(
             'h1 { background: gray; }',
             'h1 strong { color: red; }',
@@ -100,8 +118,6 @@ describe('Link override', () => {
         await timeout(100);
 
         expect(document.querySelector('.testcase--link').nextElementSibling.classList.contains('darkreader--sync')).toBe(false);
-
     });
-
 });
 

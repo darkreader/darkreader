@@ -88,66 +88,58 @@ describe('Handle Shadow-DOM', () => {
         expect(getComputedStyle(shadowRoot.querySelector('p')).color).toBe('rgb(255, 26, 26)');
     });
 
-    it('should handle defined elements', async () => {
+    it('should handle defined custom elements', async () => {
         container.innerHTML = multiline(
-            '<svg-container>',
-            '   <svg viewBox="0 0 100 30">',
-            '       <style class="testcase-style">#svg-text { color: red; }</style>',
-            '       <text id="svg-text" y="20">I am SVG</text>',
-            '   </svg>',
-            '</svg-container>',
+            '<custom-element>',
+            '</custom-element>',
         );
-        class SVGContainer extends HTMLElement {
+        class CustomElement extends HTMLElement {
             constructor() {
                 super();
                 const shadowRoot = this.attachShadow({mode: 'open'});
                 const style = document.createElement('style');
                 style.textContent = 'p { color: pink }';
-                const text = document.createElement('p');
-                text.textContent = 'Some text content that should be pink.';
+                const paragraph = document.createElement('p');
+                paragraph.textContent = 'Some text content that should be pink.';
 
                 shadowRoot.append(style);
-                shadowRoot.append(text);
+                shadowRoot.append(paragraph);
             }
         }
-        customElements.define('svg-container', SVGContainer);
+        customElements.define('custom-element', CustomElement);
 
         createOrUpdateDynamicTheme(theme, null, false);
 
         await timeout(100);
-        const shadowRoot = document.querySelector('svg-container').shadowRoot;
+        const shadowRoot = document.querySelector('custom-element').shadowRoot;
         expect(getComputedStyle(shadowRoot.querySelector('p')).color).toBe('rgb(255, 198, 208)');
     });
 
-    it('should react to defined elements', async () => {
+    it('should react to defined custom elements', async () => {
         container.innerHTML = multiline(
-            '<svg-container-2>',
-            '   <svg viewBox="0 0 100 30">',
-            '       <style class="testcase-style">#svg-text { color: red; }</style>',
-            '       <text id="svg-text" y="20">I am SVG</text>',
-            '   </svg>',
-            '</svg-container2>',
+            '<delayed-custom-element>',
+            '</delayed-custom-element>',
         );
-        class SVGContainer extends HTMLElement {
+        class DelayedCustomElement extends HTMLElement {
             constructor() {
                 super();
                 const shadowRoot = this.attachShadow({mode: 'open'});
                 const style = document.createElement('style');
                 style.textContent = 'p { color: pink }';
-                const text = document.createElement('p');
-                text.textContent = 'Some text content that should be pink.';
+                const paragraph = document.createElement('p');
+                paragraph.textContent = 'Some text content that should be pink.';
 
                 shadowRoot.append(style);
-                shadowRoot.append(text);
+                shadowRoot.append(paragraph);
             }
         }
 
         createOrUpdateDynamicTheme(theme, null, false);
 
         await timeout(100);
-        customElements.define('svg-container-2', SVGContainer);
+        customElements.define('delayed-custom-element', DelayedCustomElement);
         await timeout(100);
-        const shadowRoot = document.querySelector('svg-container-2').shadowRoot;
+        const shadowRoot = document.querySelector('delayed-custom-element').shadowRoot;
         expect(getComputedStyle(shadowRoot.querySelector('p')).color).toBe('rgb(255, 198, 208)');
     });
 

@@ -88,4 +88,59 @@ describe('Handle Shadow-DOM', () => {
         expect(getComputedStyle(shadowRoot.querySelector('p')).color).toBe('rgb(255, 26, 26)');
     });
 
+    it('should handle defined custom elements', async () => {
+        container.innerHTML = multiline(
+            '<custom-element>',
+            '</custom-element>',
+        );
+        class CustomElement extends HTMLElement {
+            constructor() {
+                super();
+                const shadowRoot = this.attachShadow({mode: 'open'});
+                const style = document.createElement('style');
+                style.textContent = 'p { color: pink }';
+                const paragraph = document.createElement('p');
+                paragraph.textContent = 'Some text content that should be pink.';
+
+                shadowRoot.append(style);
+                shadowRoot.append(paragraph);
+            }
+        }
+        customElements.define('custom-element', CustomElement);
+
+        createOrUpdateDynamicTheme(theme, null, false);
+
+        await timeout(100);
+        const shadowRoot = document.querySelector('custom-element').shadowRoot;
+        expect(getComputedStyle(shadowRoot.querySelector('p')).color).toBe('rgb(255, 198, 208)');
+    });
+
+    it('should react to defined custom elements', async () => {
+        container.innerHTML = multiline(
+            '<delayed-custom-element>',
+            '</delayed-custom-element>',
+        );
+        class DelayedCustomElement extends HTMLElement {
+            constructor() {
+                super();
+                const shadowRoot = this.attachShadow({mode: 'open'});
+                const style = document.createElement('style');
+                style.textContent = 'p { color: pink }';
+                const paragraph = document.createElement('p');
+                paragraph.textContent = 'Some text content that should be pink.';
+
+                shadowRoot.append(style);
+                shadowRoot.append(paragraph);
+            }
+        }
+
+        createOrUpdateDynamicTheme(theme, null, false);
+
+        await timeout(100);
+        customElements.define('delayed-custom-element', DelayedCustomElement);
+        await timeout(100);
+        const shadowRoot = document.querySelector('delayed-custom-element').shadowRoot;
+        expect(getComputedStyle(shadowRoot.querySelector('p')).color).toBe('rgb(255, 198, 208)');
+    });
+
 });

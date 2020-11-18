@@ -1,7 +1,9 @@
 import {DEFAULT_THEME} from '../../../src/defaults';
 import {createOrUpdateDynamicTheme, removeDynamicTheme} from '../../../src/inject/dynamic-theme';
+import {isSafari} from '../../../src/utils/platform';
 import {multiline, timeout} from '../../test-utils';
 import {stubChromeRuntimeMessage, resetChromeRuntimeMessageStub, stubBackgroundFetchResponse} from '../background-stub';
+import {getCSSEchoURL} from '../echo-client';
 
 const theme = {
     ...DEFAULT_THEME,
@@ -19,14 +21,6 @@ function createStyleLink(href: string) {
     document.head.append(link);
     links.push(link);
     return link;
-}
-
-function getEchoURL(content: string, type = 'text/plain') {
-    return `http://localhost:9966/echo?${new URLSearchParams({type, content})}`;
-}
-
-function getCSSEchoURL(content: string) {
-    return getEchoURL(content, 'text/css');
 }
 
 function createCorsLink(content: string) {
@@ -112,12 +106,12 @@ describe('Link override', () => {
 
         await timeout(100);
 
-        expect(document.querySelector('.testcase--link').nextElementSibling.classList.contains('darkreader--sync')).toBe(true);
+        expect(document.querySelector('.testcase--link').nextElementSibling.classList.contains(isSafari ? 'darkreader--cors' : 'darkreader--sync')).toBe(true);
         link.disabled = true;
 
         await timeout(100);
 
-        expect(document.querySelector('.testcase--link').nextElementSibling.classList.contains('darkreader--sync')).toBe(false);
+        expect(document.querySelector('.testcase--link').nextElementSibling.classList.contains(isSafari ? 'darkreader--cors' : 'darkreader--sync')).toBe(false);
     });
 });
 

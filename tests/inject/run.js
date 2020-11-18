@@ -15,6 +15,13 @@ async function run() {
         echoServer.close();
     });
     karmaServer.start();
+
+    async function stop() {
+        await /** @type {any} */(karmaServer).stop();
+    }
+
+    process.on('exit', stop);
+    process.on('SIGINT', stop);
 }
 
 run();

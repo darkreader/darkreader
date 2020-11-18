@@ -19,6 +19,7 @@ If applicable, the link of the website where the performance issue is noticed.
 **How to Reproduce**
 Steps to reproduce the behavior:
 An example of this is
+>
 > 1. Go to x site
 > 2. Go to x feature
 > 3. Notice spikes in CPU Usage
@@ -31,7 +32,7 @@ Please add a version of the browser you are using.
 If you don't know how to get your browser/darkreader version please search it up online.
 -->
 **System info:**
- - OS: [e.g. Windows, MacOS, Linux]
- - Browser: [e.g. chrome, safari]
- - Dark Reader Version: [e.g. 4.9.9]
 
+- OS: [e.g. Windows, MacOS, Linux]
+- Browser: [e.g. chrome, safari]
+- Dark Reader Version: [e.g. 4.9.9]

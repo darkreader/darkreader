@@ -31,7 +31,8 @@ export function getModifiableCSSDeclaration(property: string, value: string, rul
     } else if (
         (property.indexOf('color') >= 0 && property !== '-webkit-print-color-adjust') ||
         property === 'fill' ||
-        property === 'stroke'
+        property === 'stroke' ||
+        property === 'stop-color'
     ) {
         const modifier = getColorModifier(property, value);
         if (modifier) {

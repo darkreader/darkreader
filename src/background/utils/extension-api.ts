@@ -19,7 +19,6 @@ export function canInjectScript(url: string) {
     }
     if (isEdge) {
         return (url
-            && !url.startsWith('about')
             && !url.startsWith('chrome')
             && !url.startsWith('data')
             && !url.startsWith('devtools')
@@ -30,7 +29,6 @@ export function canInjectScript(url: string) {
         );
     }
     return (url
-        && !url.startsWith('about')
         && !url.startsWith('chrome')
         && !url.startsWith('https://chrome.google.com/webstore')
         && !url.startsWith('data')

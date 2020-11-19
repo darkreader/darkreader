@@ -37,6 +37,15 @@ function collectUndefinedElements(root: ParentNode) {
         });
 }
 
+const resolvers = new Map<string, () => void>();
+
+function handleIsDefined(e: CustomEvent<{tag: string}>)  {
+    if (resolvers.has(e.detail.tag)) {
+        const resolve = resolvers.get(e.detail.tag);
+        resolve();
+    }
+}
+
 function customElementsWhenDefined(tag: string) {
     return new Promise((resolve) => {
         // `customElements.whenDefined` is not available in extensions
@@ -44,17 +53,8 @@ function customElementsWhenDefined(tag: string) {
         if (window.customElements && typeof window.customElements.whenDefined === 'function') {
             customElements.whenDefined(tag).then(resolve);
         } else {
-            const checkIfDefined = () => {
-                const elements = undefinedGroups.get(tag);
-                if (elements && elements.size > 0) {
-                    if (elements.values().next().value.matches(':defined')) {
-                        resolve();
-                    } else {
-                        requestAnimationFrame(checkIfDefined);
-                    }
-                }
-            };
-            requestAnimationFrame(checkIfDefined);
+            resolvers.set(tag, resolve);
+            document.dispatchEvent(new CustomEvent('__darkreader__addUndefinedResolver', {detail: {tag}}));
         }
     });
 }
@@ -66,6 +66,7 @@ function watchWhenCustomElementsDefined(callback: (elements: Element[]) => void)
 function unsubscribeFromDefineCustomElements() {
     elementsDefinitionCallback = null;
     undefinedGroups.clear();
+    document.removeEventListener('__darkreader__isDefined', handleIsDefined);
 }
 
 export function watchForStyleChanges(currentStyles: StyleElement[], update: (styles: ChangedStyles) => void, shadowRootDiscovered: (root: ShadowRoot) => void) {
@@ -161,16 +162,22 @@ export function watchForStyleChanges(currentStyles: StyleElement[], update: (sty
 
     function handleAttributeMutations(mutations: MutationRecord[]) {
         const updatedStyles = new Set<StyleElement>();
+        const removedStyles = new Set<StyleElement>();
         mutations.forEach((m) => {
-            if (shouldManageStyle(m.target) && m.target.isConnected) {
-                updatedStyles.add(m.target as StyleElement);
+            const {target} = m;
+            if (target.isConnected) {
+                if (shouldManageStyle(target)) {
+                    updatedStyles.add(target as StyleElement);
+                } else if (target instanceof HTMLLinkElement && target.disabled) {
+                    removedStyles.add(target as StyleElement);
+                }
             }
         });
-        if (updatedStyles.size > 0) {
+        if (updatedStyles.size + removedStyles.size > 0) {
             update({
                 updated: Array.from(updatedStyles),
                 created: [],
-                removed: [],
+                removed: Array.from(removedStyles),
                 moved: [],
             });
         }
@@ -213,6 +220,7 @@ export function watchForStyleChanges(currentStyles: StyleElement[], update: (sty
             collectUndefinedElements(shadowRoot);
         });
     });
+    document.addEventListener('__darkreader__isDefined', handleIsDefined);
     collectUndefinedElements(document);
 }
 

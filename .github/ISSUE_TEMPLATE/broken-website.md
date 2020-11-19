@@ -9,15 +9,16 @@ assignees: ''
 
 <!--
 Thank you for taking the time to report a broken website.
-Please make sure there is no existing issue about this broken website.
+Please make sure there is no existing issue with this broken website.
 -->
 
 **Website**
-The link of the broken website
+The link to the broken website
 
 **How to Reproduce**
 Steps to reproduce the behavior:
 An example of this is
+>
 > 1. Go to x site
 > 2. Hover over x button
 > 3. See that when hovering it isn't changing colors
@@ -36,9 +37,10 @@ Please add a version of the browser you are using.
 If you don't know how to get your browser/darkreader version please search it up online.
 -->
 **System info:**
- - OS: [e.g. Windows, MacOS, Linux]
- - Browser: [e.g. chrome, safari]
- - Darkreader Version: [e.g. 4.9.9]
- 
+
+- OS: [e.g. Windows, MacOS, Linux]
+- Browser: [e.g. chrome, safari]
+- Darkreader Version: [e.g. 4.9.9]
+
 **Additional context**
 Add any other context about the problem here.

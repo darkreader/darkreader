@@ -19,10 +19,14 @@ export function canInjectScript(url: string) {
     }
     if (isEdge) {
         return (url
+            && !url.startsWith('about')
             && !url.startsWith('chrome')
+            && !url.startsWith('data')
+            && !url.startsWith('devtools')
             && !url.startsWith('edge')
             && !url.startsWith('https://chrome.google.com/webstore')
             && !url.startsWith('https://microsoftedge.microsoft.com/addons')
+            && !url.startsWith('view-source')
         );
     }
     return (url

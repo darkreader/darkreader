@@ -13,7 +13,10 @@ interface UserStorageOptions {
 export default class UserStorage {
     constructor({onRemoteSettingsChange}: UserStorageOptions) {
         this.settings = null;
-        subscribeToOuterSettingsChange(this.loadSettings && onRemoteSettingsChange);
+        subscribeToOuterSettingsChange(async () => {
+            await this.loadSettings();
+            onRemoteSettingsChange()
+        });
     }
 
     settings: Readonly<UserSettings>;

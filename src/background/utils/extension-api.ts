@@ -32,6 +32,8 @@ export function canInjectScript(url: string) {
     );
 }
 
+let isWriting = false;
+
 export function readSyncStorage<T extends {[key: string]: any}>(defaults: T): Promise<T> {
     return new Promise<T>((resolve) => {
         chrome.storage.sync.get(defaults, (sync: T) => {
@@ -50,26 +52,30 @@ export function readLocalStorage<T extends {[key: string]: any}>(defaults: T): P
 
 export function writeSyncStorage<T extends {[key: string]: any}>(values: T): Promise<void> {
     return new Promise<void>((resolve, reject) => {
+        isWriting = true;
         chrome.storage.sync.set(values, () => {
             if (chrome.runtime.lastError) {
                 reject(chrome.runtime.lastError);
                 return;
             }
             resolve();
+            setTimeout(() => isWriting = false);
         });
     });
 }
 
 export function writeLocalStorage<T extends {[key: string]: any}>(values: T): Promise<void> {
     return new Promise<void>((resolve) => {
+        isWriting = true;
         chrome.storage.local.set(values, () => {
             resolve();
+            setTimeout(() => isWriting = false);
         });
     });
 }
 
 export const subscribeToOuterSettingsChange = (callback: () => void) => {
-    chrome.storage.onChanged.addListener(callback);
+    !isWriting && chrome.storage.onChanged.addListener(callback);
 };
 
 export function getFontList() {

@@ -216,27 +216,28 @@ describe('Style override', () => {
                 '</html>',
             ),
         });
-        class CustomElement extends HTMLElement {
-            constructor() {
-                super();
-                const shadowRoot = this.attachShadow({mode: 'open'});
-                const style = document.createElement('style');
-                style.textContent = 'p { color: pink }';
-                const paragraph = document.createElement('p');
-                paragraph.textContent = 'Some text content that should be pink.';
-
-                shadowRoot.append(style);
-                shadowRoot.append(paragraph);
-            }
-        }
 
         await expect(page.evaluate(async () => {
+            class CustomElement extends HTMLElement {
+                constructor() {
+                    super();
+                    const shadowRoot = this.attachShadow({mode: 'open'});
+                    const style = document.createElement('style');
+                    style.textContent = 'p { color: pink }';
+                    const paragraph = document.createElement('p');
+                    paragraph.textContent = 'Some text content that should be pink.';
+
+                    shadowRoot.append(style);
+                    shadowRoot.append(paragraph);
+                }
+            }
+
             customElements.define('custom-element', CustomElement);
-            await new Promise((resolve) => setTimeout(resolve));
+            await new Promise((resolve) => setTimeout(resolve, 100));
             const shadowRoot = document.querySelector('custom-element').shadowRoot;
             return getComputedStyle(shadowRoot.querySelector('p')).color;
 
-        })) .resolves.toBe('rgb(255, 198, 208)');
-    })
+        })).resolves.toBe('rgb(255, 160, 177)');
+    });
 
 });

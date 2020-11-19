@@ -170,14 +170,11 @@ function deepWatchForInlineStyles(
     let cache: MutationRecord[] = [];
     let timeoutId: number = null;
 
-    const handleAttributionMutations = throttle((mutations: MutationRecord[]) => {
+    const handleAttributeMutations = throttle((mutations: MutationRecord[]) => {
         mutations.forEach((m) => {
             if (INLINE_STYLE_ATTRS.includes(m.attributeName)) {
                 elementStyleDidChange(m.target as HTMLElement);
             }
-            overridesList
-                .filter(({dataAttr}) => !(m.target as HTMLElement).hasAttribute(dataAttr))
-                .forEach(({dataAttr}) => (m.target as HTMLElement).setAttribute(dataAttr, ''));
         });
     });
     const attrObserver = new MutationObserver((mutations) => {
@@ -197,7 +194,7 @@ function deepWatchForInlineStyles(
                     timeoutId = null;
                     const attributeCache = cache;
                     cache = [];
-                    handleAttributionMutations(attributeCache);
+                    handleAttributeMutations(attributeCache);
                 }, RETRY_TIMEOUT);
                 cache.push(...mutations);
                 return;
@@ -205,7 +202,7 @@ function deepWatchForInlineStyles(
             start = now;
             attemptCount = 1;
         }
-        handleAttributionMutations(mutations);
+        handleAttributeMutations(mutations);
     });
     attrObserver.observe(root, {
         attributes: true,

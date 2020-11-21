@@ -49,7 +49,7 @@ export class Extension {
             },
             onColorSchemeChange: this.onColorSchemeChange,
         });
-        this.user = new UserStorage({onRemoteSettingsChange: () => this.onSettingsChanged});
+        this.user = new UserStorage({onRemoteSettingsChange: () => this.onSettingsChanged()});
         this.awaiting = [];
     }
 

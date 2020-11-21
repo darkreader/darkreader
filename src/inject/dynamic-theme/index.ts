@@ -10,13 +10,14 @@ import {logWarn} from '../utils/log';
 import {throttle} from '../utils/throttle';
 import {clamp} from '../../utils/math';
 import {getCSSFilterValue} from '../../generators/css-filter';
-import {modifyColor} from '../../generators/modify-colors';
+import {modifyBackgroundColor, modifyColor, modifyForegroundColor} from '../../generators/modify-colors';
 import {createTextStyle} from '../../generators/text-style';
 import {FilterConfig, DynamicThemeFix} from '../../definitions';
 import {generateUID} from '../../utils/uid';
 import {createAdoptedStyleSheetOverride, AdoptedStyleSheetManager} from './adopted-style-manger';
 import {isFirefox} from '../../utils/platform';
 import {injectProxy} from './stylesheet-proxy';
+import { parse } from 'utils/color';
 
 const variables = new Map<string, string>();
 const INSTANCE_ID = generateUID();
@@ -108,11 +109,22 @@ function createStaticStyleOverrides() {
 
     const variableStyle = createOrUpdateStyle('darkreader--variables');
     const selectionColors = getSelectionColor(filter);
-    const {darkSchemeBackgroundColor, darkSchemeTextColor, lightSchemeBackgroundColor, lightSchemeTextColor} = filter;
+    const {darkSchemeBackgroundColor, darkSchemeTextColor, lightSchemeBackgroundColor, lightSchemeTextColor, mode, brightness, contrast, sepia, grayscale} = filter;
+    let schemeBackgroundColor = mode === 0 ? lightSchemeBackgroundColor : darkSchemeBackgroundColor;
+    let schemeTextColor = mode === 0 ? lightSchemeTextColor : darkSchemeTextColor;
+    if (brightness !== 100 || contrast !== 100 || sepia !== 0 || grayscale !== 0) {
+        if (mode === 0) {
+            schemeBackgroundColor = modifyBackgroundColor(parse(lightSchemeBackgroundColor), filter);
+            schemeTextColor = modifyForegroundColor(parse(darkSchemeTextColor), filter);
+        } else {
+            schemeBackgroundColor = modifyBackgroundColor(parse(darkSchemeBackgroundColor), filter);
+            schemeTextColor = modifyForegroundColor(parse(darkSchemeTextColor), filter);
+        }
+    }
     variableStyle.textContent = [
         `:root {`,
-        `   --darkreader-neutral-background: ${filter.mode === 0 ? lightSchemeBackgroundColor : darkSchemeBackgroundColor};`,
-        `   --darkreader-neutral-text: ${filter.mode === 0 ? lightSchemeTextColor : darkSchemeTextColor};`,
+        `   --darkreader-neutral-background: ${schemeBackgroundColor};`,
+        `   --darkreader-neutral-text: ${schemeTextColor};`,
         `   --darkreader-selection-background: ${selectionColors.backgroundColorSelection};`,
         `   --darkreader-selection-text: ${selectionColors.foregroundColorSelection};`,
         `}`

@@ -17,7 +17,7 @@ import {generateUID} from '../../utils/uid';
 import {createAdoptedStyleSheetOverride, AdoptedStyleSheetManager} from './adopted-style-manger';
 import {isFirefox} from '../../utils/platform';
 import {injectProxy} from './stylesheet-proxy';
-import { parse } from 'utils/color';
+import {parse} from '../../utils/color';
 
 const variables = new Map<string, string>();
 const INSTANCE_ID = generateUID();

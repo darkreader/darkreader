@@ -1,7 +1,7 @@
 import {DEFAULT_SETTINGS, DEFAULT_THEME} from '../defaults';
 import {debounce} from '../utils/debounce';
 import {isURLMatched} from '../utils/url';
-import {UserSettings} from '../definitions';
+import type {UserSettings} from '../definitions';
 import {readSyncStorage, readLocalStorage, writeSyncStorage, writeLocalStorage, subscribeToOuterSettingsChange} from './utils/extension-api';
 
 const SAVE_TIMEOUT = 1000;
@@ -15,7 +15,7 @@ export default class UserStorage {
         this.settings = null;
         subscribeToOuterSettingsChange(async () => {
             await this.loadSettings();
-            onRemoteSettingsChange()
+            onRemoteSettingsChange();
         });
     }
 

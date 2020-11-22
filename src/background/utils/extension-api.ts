@@ -39,7 +39,7 @@ export function canInjectScript(url: string) {
 
 let isWriting = false;
 
-export function readSyncStorage<T extends {[key: string]: any}>(defaults: T): Promise<T> {
+export async function readSyncStorage<T extends {[key: string]: any}>(defaults: T): Promise<T> {
     return new Promise<T>((resolve) => {
         chrome.storage.sync.get(defaults, (sync: T) => {
             resolve(sync);
@@ -83,7 +83,7 @@ export const subscribeToOuterSettingsChange = (callback: () => void) => {
     !isWriting && chrome.storage.onChanged.addListener(callback);
 };
 
-export function getFontList() {
+export async function getFontList() {
     return new Promise<string[]>((resolve) => {
         if (!chrome.fontSettings) {
             // Todo: Remove it as soon as Firefox and Edge get support.

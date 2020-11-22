@@ -1,5 +1,5 @@
 import {canInjectScript} from '../background/utils/extension-api';
-import {createFileLoader} from './utils/network';
+import {createFileLoader, FileLoader} from './utils/network';
 import type {Message} from '../definitions';
 
 async function queryTabs(query: chrome.tabs.QueryInfo) {
@@ -26,6 +26,7 @@ interface PortInfo {
 
 export default class TabManager {
     private ports: Map<number, Map<number, PortInfo>>;
+    private fileLoader: FileLoader;
 
     constructor({getConnectionMessage, onColorSchemeChange}: TabManagerOptions) {
         this.ports = new Map();
@@ -75,7 +76,7 @@ export default class TabManager {
             }
         });
 
-        const fileLoader = createFileLoader();
+        this.fileLoader = createFileLoader();
 
         chrome.runtime.onMessage.addListener(async ({type, data, id}: Message, sender) => {
             if (type === 'fetch') {
@@ -85,7 +86,7 @@ export default class TabManager {
                 // Sometimes fetch error behaves like synchronous and sends `undefined`
                 const sendResponse = (response) => chrome.tabs.sendMessage(sender.tab.id, {type: 'fetch-response', id, ...response});
                 try {
-                    const response = await fileLoader.get({url, responseType, mimeType});
+                    const response = await this.fileLoader.get({url, responseType, mimeType});
                     sendResponse({data: response});
                 } catch (err) {
                     sendResponse({error: err && err.message ? err.message : err});
@@ -110,6 +111,35 @@ export default class TabManager {
                     .postMessage({type: 'export-css'});
             }
         });
+    }
+
+    addCSSListener() {
+        const listener = (details: chrome.webRequest.WebRequestBodyDetails) => {
+            const filter = (chrome.webRequest as any).filterResponseData(details.requestId);
+            const decoder = new TextDecoder('utf-8');
+            const encoder = new TextEncoder();
+
+            const data = [];
+            filter.ondata = (event: any) => {
+                data.push(decoder.decode(event.data, {stream: true}));
+            };
+
+            filter.onstop = () => {
+                data.push(decoder.decode());
+                const responseData = data.join('');
+                this.fileLoader.setData({
+                    url: details.url,
+                    data: responseData
+                });
+                filter.write(encoder.encode(responseData));
+                filter.close();
+            };
+        };
+        chrome.webRequest.onBeforeRequest.addListener(
+            listener,
+            {urls: ['<all_urls>'], types: ['stylesheet']},
+            ['blocking']
+        );
     }
 
     async updateContentScript(options: {runOnProtectedPages: boolean}) {

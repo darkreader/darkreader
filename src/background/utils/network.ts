@@ -100,7 +100,12 @@ interface FetchRequestParameters {
     mimeType?: string;
 }
 
-export function createFileLoader() {
+export interface FileLoader {
+    get: ({url, responseType, mimeType}: FetchRequestParameters) => Promise<string>;
+    setData: ({url, data}) => void;
+}
+
+export function createFileLoader(): FileLoader {
     const caches = {
         'data-url': new LimitedCacheStorage(),
         'text': new LimitedCacheStorage(),
@@ -123,5 +128,9 @@ export function createFileLoader() {
         return data;
     }
 
-    return {get};
+    function setData({url, data}) {
+        caches['text'].set(url, data);
+    }
+
+    return {get, setData};
 }

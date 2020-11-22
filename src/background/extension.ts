@@ -97,6 +97,7 @@ export class Extension {
         this.registerCommands();
 
         this.ready = true;
+        isFirefox && this.tabs.addCSSListener();
         this.tabs.updateContentScript({runOnProtectedPages: this.user.settings.enableForProtectedPages});
 
         this.awaiting.forEach((ready) => ready());

@@ -1,5 +1,6 @@
 import {canInjectScript} from '../background/utils/extension-api';
-import {createFileLoader, FileLoader} from './utils/network';
+import type {FileLoader} from './utils/network';
+import {createFileLoader} from './utils/network';
 import type {Message} from '../definitions';
 
 async function queryTabs(query: chrome.tabs.QueryInfo) {

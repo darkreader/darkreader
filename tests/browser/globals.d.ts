@@ -1,5 +1,5 @@
-import {RequestListener} from 'http';
-import {Page, DirectNavigationOptions} from 'puppeteer-core';
+import type {RequestListener} from 'http';
+import type {Page, DirectNavigationOptions} from 'puppeteer-core';
 
 type PathsObject = {[path: string]: string | RequestListener | PathsObject};
 

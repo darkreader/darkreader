@@ -39,7 +39,7 @@ export function canInjectScript(url: string) {
 
 let isWriting = false;
 
-export function readSyncStorage<T extends {[key: string]: any}>(defaults: T): Promise<T> {
+export async function readSyncStorage<T extends {[key: string]: any}>(defaults: T): Promise<T> {
     return new Promise<T>((resolve) => {
         chrome.storage.sync.get(defaults, (sync: T) => {
             resolve(sync);
@@ -47,7 +47,7 @@ export function readSyncStorage<T extends {[key: string]: any}>(defaults: T): Pr
     });
 }
 
-export function readLocalStorage<T extends {[key: string]: any}>(defaults: T): Promise<T> {
+export async function readLocalStorage<T extends {[key: string]: any}>(defaults: T): Promise<T> {
     return new Promise<T>((resolve) => {
         chrome.storage.local.get(defaults, (local: T) => {
             resolve(local);
@@ -55,7 +55,7 @@ export function readLocalStorage<T extends {[key: string]: any}>(defaults: T): P
     });
 }
 
-export function writeSyncStorage<T extends {[key: string]: any}>(values: T): Promise<void> {
+export async function writeSyncStorage<T extends {[key: string]: any}>(values: T): Promise<void> {
     return new Promise<void>((resolve, reject) => {
         isWriting = true;
         chrome.storage.sync.set(values, () => {
@@ -69,7 +69,7 @@ export function writeSyncStorage<T extends {[key: string]: any}>(values: T): Pro
     });
 }
 
-export function writeLocalStorage<T extends {[key: string]: any}>(values: T): Promise<void> {
+export async function writeLocalStorage<T extends {[key: string]: any}>(values: T): Promise<void> {
     return new Promise<void>((resolve) => {
         isWriting = true;
         chrome.storage.local.set(values, () => {
@@ -83,7 +83,7 @@ export const subscribeToOuterSettingsChange = (callback: () => void) => {
     !isWriting && chrome.storage.onChanged.addListener(callback);
 };
 
-export function getFontList() {
+export async function getFontList() {
     return new Promise<string[]>((resolve) => {
         if (!chrome.fontSettings) {
             // Todo: Remove it as soon as Firefox and Edge get support.
@@ -104,7 +104,7 @@ export function getFontList() {
     });
 }
 
-export function getCommands() {
+export async function getCommands() {
     return new Promise<chrome.commands.Command[]>((resolve) => {
         if (!chrome.commands) {
             resolve([]);

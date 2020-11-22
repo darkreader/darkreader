@@ -1,4 +1,4 @@
-import {UserSettings} from '../definitions';
+import type {UserSettings} from '../definitions';
 import {isIPV6, compareIPV6} from './ipv6';
 
 let anchor: HTMLAnchorElement;

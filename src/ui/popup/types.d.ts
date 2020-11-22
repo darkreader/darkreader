@@ -1,4 +1,4 @@
-import {ExtensionData, ExtensionActions, TabInfo} from '../../definitions';
+import type {ExtensionData, ExtensionActions, TabInfo} from '../../definitions';
 
 export interface ViewProps {
     actions: ExtensionActions;

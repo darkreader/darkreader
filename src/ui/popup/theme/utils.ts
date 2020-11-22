@@ -1,6 +1,6 @@
-import {Theme} from '../../../definitions';
+import type {Theme} from '../../../definitions';
 import {isURLInList} from '../../../utils/url';
-import {ViewProps} from '../types';
+import type {ViewProps} from '../types';
 
 export function getCurrentThemePreset(props: ViewProps) {
     const custom = props.data.settings.customThemes.find(

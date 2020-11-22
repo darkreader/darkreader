@@ -2,7 +2,7 @@ import {m} from 'malevic';
 import {Button} from '../../../controls';
 import {getURLHostOrProtocol, isURLInList} from '../../../../utils/url';
 import {getLocalMessage} from '../../../../utils/locales';
-import {ExtWrapper, TabInfo} from '../../../../definitions';
+import type {ExtWrapper, TabInfo} from '../../../../definitions';
 
 export default function CustomSettingsToggle({data, tab, actions}: ExtWrapper & {tab: TabInfo}) {
     const host = getURLHostOrProtocol(tab.url);

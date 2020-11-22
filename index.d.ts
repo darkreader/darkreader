@@ -33,7 +33,7 @@ declare namespace DarkReader {
     /**
      * Returns the generated CSS by Dark Reader as a string.
      */
-    function exportGeneratedCSS(): Promise<string>
+    function exportGeneratedCSS(): Promise<string>;
 
     /**
      * Theme options.

@@ -7,7 +7,7 @@ interface RequestParams {
     timeout?: number;
 }
 
-export function readText(params: RequestParams): Promise<string> {
+export async function readText(params: RequestParams): Promise<string> {
     return new Promise((resolve, reject) => {
         const request = new XMLHttpRequest();
         request.overrideMimeType('text/plain');

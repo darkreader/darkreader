@@ -1,6 +1,6 @@
 import {getBlogPostURL} from '../utils/links';
 import {getDuration} from '../utils/time';
-import {News} from '../definitions';
+import type {News} from '../definitions';
 import {readSyncStorage, readLocalStorage, writeSyncStorage, writeLocalStorage} from './utils/extension-api';
 
 export default class Newsmaker {
@@ -16,7 +16,7 @@ export default class Newsmaker {
 
     subscribe() {
         this.updateNews();
-        setInterval(() => this.updateNews(), Newsmaker.UPDATE_INTERVAL);
+        setInterval(async () => await this.updateNews(), Newsmaker.UPDATE_INTERVAL);
     }
 
     private async updateNews() {

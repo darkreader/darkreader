@@ -1,7 +1,7 @@
 import {m} from 'malevic';
 import {CheckBox, UpDown, Select} from '../../../controls';
 import {getLocalMessage} from '../../../../utils/locales';
-import {FilterConfig} from '../../../../definitions';
+import type {FilterConfig} from '../../../../definitions';
 
 interface FontSettingsProps {
     config: FilterConfig;

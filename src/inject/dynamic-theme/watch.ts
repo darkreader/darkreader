@@ -1,9 +1,11 @@
 import {forEach, push} from '../../utils/array';
-import {iterateShadowHosts, createOptimizedTreeObserver, ElementsTreeOperations} from '../utils/dom';
-import {shouldManageStyle, getManageableStyles, StyleElement} from './style-manager';
+import type {ElementsTreeOperations} from '../utils/dom';
+import {iterateShadowHosts, createOptimizedTreeObserver} from '../utils/dom';
+import type {StyleElement} from './style-manager';
+import {shouldManageStyle, getManageableStyles} from './style-manager';
 import {isDefinedSelectorSupported} from '../../utils/platform';
 
-const observers = [] as {disconnect(): void}[];
+const observers = [] as Array<{disconnect(): void}>;
 let observedRoots: WeakSet<Node>;
 
 interface ChangedStyles {
@@ -39,14 +41,14 @@ function collectUndefinedElements(root: ParentNode) {
 
 const resolvers = new Map<string, () => void>();
 
-function handleIsDefined(e: CustomEvent<{tag: string}>)  {
+function handleIsDefined(e: CustomEvent<{tag: string}>) {
     if (resolvers.has(e.detail.tag)) {
         const resolve = resolvers.get(e.detail.tag);
         resolve();
     }
 }
 
-function customElementsWhenDefined(tag: string) {
+async function customElementsWhenDefined(tag: string) {
     return new Promise((resolve) => {
         // `customElements.whenDefined` is not available in extensions
         // https://bugs.chromium.org/p/chromium/issues/detail?id=390807

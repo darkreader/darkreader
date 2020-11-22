@@ -21,21 +21,16 @@ const standardTask = [
     copy,
 ];
 
-async function release() {
-    log.ok('RELEASE');
-    try {
-        await runTasks([...standardTask, codeStyle, zip], {debug: false, watch: false});
-        log.ok('MISSION PASSED! RESPECT +');
-    } catch (err) {
-        log.error(`MISSION FAILED!`);
-        process.exit(13);
-    }
-}
+const buildTask = [
+    ...standardTask, 
+    codeStyle, 
+    zip
+];
 
-async function debug({watch}) {
-    log.ok('DEBUG');
+async function build({debug, watch}) {
+    log.ok('BUILD');
     try {
-        await runTasks(standardTask, {debug: true, watch: watch});
+        await runTasks(debug ? standardTask : buildTask, {debug, watch});
         if (watch) {
             standardTask.forEach((task) => task.watch());
             reload({type: reload.FULL});
@@ -63,11 +58,8 @@ async function api() {
 async function run() {
     const args = process.argv.slice(2);
 
-    if (args.includes('--release')) {
-        await release();
-    }
-    if (args.includes('--debug')) {
-        await debug({watch: args.includes('--watch')});
+    if (args.includes('--build')) {
+        await build({watch: args.includes('--watch'), debug: args.includes('--debug')});
     }
     if (args.includes('--api')) {
         await api();

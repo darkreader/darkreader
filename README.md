@@ -174,8 +174,9 @@ Then execute `npm run debug`.
 - Click **Load Temporary Add-on** button
 - Open the `debug-firefox/manifest.json` file.
 
-After making any code changes, the project will be automatically recompiled.  
-If the extension **does not reload** automatically, it can be reloaded manually on the extensions page.
+
+If you want the project automatically recompiled, after making any code changes.
+Run `npm run debug-watch` instead of `npm run debug`.
 
 For editing the code you can use any text editor or web IDE (like [Visual Studio Code](https://code.visualstudio.com), [Atom](https://atom.io/), or [WebStorm](https://www.jetbrains.com/webstorm/)).
 
@@ -192,7 +193,7 @@ Install [Node.js LTS](https://nodejs.org/en/). Download the source code (or chec
 Open terminal in root folder and run:  
 
 - `npm install`  
-- `npm run release`  
+- `npm run build`  
 
 This will generate `build.zip` for use in Chromium browsers and `build-firefox.xpi` for use in Firefox.
 

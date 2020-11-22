@@ -1,6 +1,6 @@
 {
   "name": "darkreader",
-  "version": "4.9.23",
+  "version": "4.9.24",
   "description": "Dark mode for every website",
   "scripts": {
     "api": "node tasks/build.js --api",
@@ -17,8 +17,8 @@
     "test:config:debug": "node --inspect-brk ./node_modules/jest/bin/jest --config=tests/config/jest.config.js --runInBand --no-cache --watch",
     "test:coverage": "jest --config=tests/jest.config.js --coverage",
     "test:firefox": "npm run debug && jest --config=tests/browser/jest.config.firefox.js --runInBand",
-    "test:inject": "karma start tests/inject/karma.conf.js",
-    "test:inject:debug": "karma start tests/inject/karma.conf.js --debug",
+    "test:inject": "node tests/inject/run.js",
+    "test:inject:debug": "node tests/inject/run.js --debug",
     "test:utils": "jest --config=tests/utils/jest.config.js",
     "test:utils:debug": "node --inspect-brk ./node_modules/jest/bin/jest --config=tests/utils/jest.config.js --runInBand --no-cache --watch"
   },
@@ -32,6 +32,29 @@
   "bugs": {
     "url": "https://github.com/darkreader/darkreader/issues"
   },
+  "keywords": [
+    "dark-theme",
+    "dark-mode",
+    "night-mode",
+    "darkmode",
+    "nightmode",
+    "accessibility",
+    "eye-care"
+  ],
+  "browserslist": [
+    "supports es5",
+    "not ie > 0",
+    "not ie_mob > 0",
+    "not op_mini all",
+    "not op_mob < 59",
+    "not android < 4.4",
+    "not ios_saf < 6",
+    "not safari < 6",
+    "not opera < 15",
+    "not chrome < 18",
+    "not firefox < 33",
+    "not edge <= 18"
+  ],
   "homepage": "https://darkreader.org/",
   "funding": {
     "type": "opencollective",
@@ -45,10 +68,11 @@
     "@types/chrome": "0.0.126",
     "@types/jasmine": "3.6.1",
     "@types/jest": "26.0.15",
-    "@types/node": "14.14.7",
+    "@types/karma": "5.0.1",
+    "@types/node": "14.14.8",
     "@types/puppeteer-core": "2.0.0",
-    "@typescript-eslint/eslint-plugin": "4.7.0",
-    "@typescript-eslint/parser": "4.7.0",
+    "@typescript-eslint/eslint-plugin": "4.8.1",
+    "@typescript-eslint/parser": "4.8.1",
     "chokidar": "3.4.3",
     "eslint": "7.13.0",
     "eslint-plugin-local": "1.0.0",
@@ -66,8 +90,8 @@
     "less": "3.12.2",
     "malevic": "0.18.6",
     "prettier": "2.1.2",
-    "puppeteer-core": "5.4.1",
-    "rollup": "2.33.1",
+    "puppeteer-core": "5.5.0",
+    "rollup": "2.33.2",
     "rollup-plugin-istanbul2": "2.0.2",
     "rollup-plugin-typescript2": "0.29.0",
     "ts-jest": "26.4.4",

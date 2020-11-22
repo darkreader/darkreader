@@ -1,7 +1,8 @@
 import ConfigManager from './config-manager';
 import DevTools from './devtools';
 import IconManager from './icon-manager';
-import Messenger, {ExtensionAdapter} from './messenger';
+import type {ExtensionAdapter} from './messenger';
+import Messenger from './messenger';
 import Newsmaker from './newsmaker';
 import TabManager from './tab-manager';
 import UserStorage from './user-storage';
@@ -14,7 +15,7 @@ import createCSSFilterStylesheet from '../generators/css-filter';
 import {getDynamicThemeFixesFor} from '../generators/dynamic-theme';
 import createStaticStylesheet from '../generators/static-theme';
 import {createSVGFilterStylesheet, getSVGFilterMatrixValue, getSVGReverseFilterMatrixValue} from '../generators/svg-filter';
-import {ExtensionData, FilterConfig, News, Shortcuts, UserSettings, TabInfo} from '../definitions';
+import type {ExtensionData, FilterConfig, News, Shortcuts, UserSettings, TabInfo} from '../definitions';
 import {isSystemDarkModeEnabled} from '../utils/media-query';
 import {isFirefox} from '../utils/platform';
 
@@ -49,7 +50,7 @@ export class Extension {
             },
             onColorSchemeChange: this.onColorSchemeChange,
         });
-        this.user = new UserStorage();
+        this.user = new UserStorage({onRemoteSettingsChange: () => this.onSettingsChanged()});
         this.awaiting = [];
     }
 
@@ -79,7 +80,7 @@ export class Extension {
         return this.user.settings.enabled;
     }
 
-    private awaiting: (() => void)[];
+    private awaiting: Array<() => void>;
 
     async start() {
         await this.config.load({local: true});
@@ -126,7 +127,7 @@ export class Extension {
             setTheme: (theme) => this.setTheme(theme),
             setShortcut: ({command, shortcut}) => this.setShortcut(command, shortcut),
             toggleURL: (url) => this.toggleURL(url),
-            markNewsAsRead: (ids) => this.news.markAsRead(...ids),
+            markNewsAsRead: async (ids) => await this.news.markAsRead(...ids),
             onPopupOpen: () => this.popupOpeningListener && this.popupOpeningListener(),
             loadConfig: async (options) => await this.config.load(options),
             applyDevDynamicThemeFixes: (text) => this.devtools.applyDynamicThemeFixes(text),

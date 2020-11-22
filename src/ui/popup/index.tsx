@@ -3,7 +3,7 @@ import {sync} from 'malevic/dom';
 import connect from '../connect';
 import Body from './components/body';
 import {popupHasBuiltInHorizontalBorders, popupHasBuiltInBorders, fixNotClosingPopupOnNavigation} from './utils/issues';
-import {ExtensionData, ExtensionActions, TabInfo} from '../../definitions';
+import type {ExtensionData, ExtensionActions, TabInfo} from '../../definitions';
 import {isMobile, isFirefox} from '../../utils/platform';
 
 function renderBody(data: ExtensionData, tab: TabInfo, actions: ExtensionActions) {

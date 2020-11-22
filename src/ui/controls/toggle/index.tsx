@@ -1,4 +1,5 @@
-import {m, Child} from 'malevic';
+import type {Child} from 'malevic';
+import {m} from 'malevic';
 
 interface ToggleProps {
     checked: boolean;

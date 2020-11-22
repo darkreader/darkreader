@@ -71,5 +71,13 @@ describe('Managing CSS rules', () => {
                 new Map([['--text', 'var(--alert)'], ['--alert', 'red']]),
             )
         ).toBe('body { color: red; } h1 { color: red; }');
+
+        expect(
+            replaceCSSVariables(
+                'body { color: var(--text, #ccc); }',
+                new Map(),
+            )
+        ).toBe('body { color: #ccc; }');
+
     });
 });

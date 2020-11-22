@@ -66,4 +66,20 @@ describe('Should parse and handle different color formats', () => {
         expect(getComputedStyle(container.querySelector('h1 strong')).color).toBe('rgb(51, 125, 255)');
         expect(getComputedStyle(container).backgroundColor).toBe('rgba(0, 0, 204, 0.05)');
     });
+
+    it('should modify knownColors', async () => {
+        container.innerHTML = multiline(
+            '<style>',
+            '    h1 { background: rebeccapurple; }',
+            '    h1 strong { color: InfoBackground; }',
+            '    body { background-color: transparent; }',
+            '</style>',
+            '<h1>Weird color <strong>Power</strong>!</h1>',
+        );
+        createOrUpdateDynamicTheme(theme, null, false);
+        await timeout(100);
+        expect(getComputedStyle(container.querySelector('h1')).backgroundColor).toBe('rgb(82, 41, 122)');
+        expect(getComputedStyle(container.querySelector('h1 strong')).color).toBe('rgb(249, 250, 166)');
+        expect(getComputedStyle(container).backgroundColor).toBe('rgba(0, 0, 0, 0)');
+    });
 });

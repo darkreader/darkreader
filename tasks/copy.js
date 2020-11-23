@@ -5,19 +5,22 @@ const reload = require('./reload');
 const {createTask} = require('./task');
 
 const srcDir = 'src';
+const modulesDir = 'node_modules';
 const cwdPaths = [
     'background/index.html',
     'config/**/*.config',
-    'dependencies/**/*.*',
     'icons/**/*.*',
     'ui/assets/**/*.*',
     'ui/popup/compatibility.js',
     'manifest.json',
 ];
-const paths = cwdPaths.map((path) => `${srcDir}/${path}`);
+const dependenciesPaths = [
+    'codemirror/**/*.*'
+]
+const paths = cwdPaths.map((path) => `${srcDir}/${path}`).concat(dependenciesPaths.map((path) => `${modulesDir}/${path}`));
 
 function getCwdPath(/** @type {string} */srcPath) {
-    return srcPath.substring(srcDir.length + 1);
+    return srcPath.split('/').splice(1).join('/');
 }
 
 async function patchFirefoxManifest({debug}) {
@@ -30,11 +33,11 @@ async function patchFirefoxManifest({debug}) {
 
 async function copyFile(path, {debug, firefox}) {
     const cwdPath = getCwdPath(path);
-    const destDir = getDestDir({debug, firefox});
+    var destDir = getDestDir({debug, firefox});
     if (firefox && cwdPath === 'manifest.json') {
         await patchFirefoxManifest({debug});
     } else {
-        const src = `${srcDir}/${cwdPath}`;
+        const src = path;
         const dest = `${destDir}/${cwdPath}`;
         await fs.copy(src, dest);
     }

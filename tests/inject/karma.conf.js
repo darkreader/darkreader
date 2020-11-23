@@ -12,6 +12,7 @@ module.exports = (config) => {
         basePath: '../../',
         frameworks: ['jasmine'],
         files: [
+            'tests/inject/customize.ts',
             'tests/inject/polyfills.ts',
             {pattern: 'tests/inject/**/*.tests.ts', watched: false},
         ],

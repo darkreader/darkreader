@@ -1,7 +1,7 @@
 import '../polyfills';
 import {DEFAULT_THEME} from '../../../src/defaults';
 import {createOrUpdateDynamicTheme, removeDynamicTheme} from '../../../src/inject/dynamic-theme';
-import {timeout} from '../../test-utils';
+import {multiline, timeout} from '../../test-utils';
 
 const theme = {
     ...DEFAULT_THEME,
@@ -36,5 +36,21 @@ describe('Inline style override', () => {
         span.style.color = 'green';
         await timeout(0);
         expect(getComputedStyle(span).color).toBe('rgb(140, 255, 140)');
+    });
+
+    it('should override only a single inline style property', async () => {
+        container.innerHTML = multiline(
+            '<style>.bg-gray { background: gray; }</style>',
+            '<span class="bg-gray" style="color: red;">Inline style override</span>',
+        );
+        createOrUpdateDynamicTheme(theme, null, false);
+        const span = container.querySelector('span');
+        expect(getComputedStyle(span).backgroundColor).toBe('rgb(102, 102, 102)');
+        expect(getComputedStyle(span).color).toBe('rgb(255, 26, 26)');
+
+        span.style.color = 'green';
+        await timeout(0);
+        expect(getComputedStyle(span).color).toBe('rgb(140, 255, 140)');
+        expect(getComputedStyle(span).backgroundColor).toBe('rgb(102, 102, 102)');
     });
 });

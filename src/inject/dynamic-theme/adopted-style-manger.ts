@@ -1,4 +1,4 @@
-import {Theme} from '../../definitions';
+import type {Theme} from '../../definitions';
 import {createStyleSheetModifier} from './stylesheet-modifier';
 import {getCSSVariables} from './css-rules';
 

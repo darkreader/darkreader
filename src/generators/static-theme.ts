@@ -4,7 +4,7 @@ import {applyColorMatrix, createFilterMatrix} from './utils/matrix';
 import {parseSitesFixesConfig} from './utils/parse';
 import {parseArray, formatArray} from '../utils/text';
 import {compareURLPatterns, isURLInList} from '../utils/url';
-import {FilterConfig, StaticTheme} from '../definitions';
+import type {FilterConfig, StaticTheme} from '../definitions';
 
 interface ThemeColors {
     [prop: string]: number[];

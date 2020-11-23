@@ -1,7 +1,7 @@
 import {m} from 'malevic';
 import {Button, CheckBox, TextBox, TimeRangePicker} from '../../../controls';
 import {getLocalMessage} from '../../../../utils/locales';
-import {ExtWrapper} from '../../../../definitions';
+import type {ExtWrapper} from '../../../../definitions';
 
 type MoreToggleSettingsProps = ExtWrapper & {
     isExpanded: boolean;

@@ -1,10 +1,11 @@
-import {Theme} from '../../definitions';
+import type {Theme} from '../../definitions';
 import {createAsyncTasksQueue} from '../utils/throttle';
 import {iterateCSSRules, iterateCSSDeclarations, replaceCSSVariables} from './css-rules';
-import {getModifiableCSSDeclaration, ModifiableCSSDeclaration, ModifiableCSSRule} from './modify-css';
+import type {ModifiableCSSDeclaration, ModifiableCSSRule} from './modify-css';
+import {getModifiableCSSDeclaration} from './modify-css';
 import {getTempCSSStyleSheet} from '../utils/dom';
 
-const themeCacheKeys: (keyof Theme)[] = [
+const themeCacheKeys: Array<keyof Theme> = [
     'mode',
     'brightness',
     'contrast',
@@ -32,7 +33,7 @@ export function createStyleSheetModifier() {
         sourceCSSRules: CSSRuleList;
         theme: Theme;
         variables: Map<string, string>;
-        ignoreImageAnalysis: string[]
+        ignoreImageAnalysis: string[];
         force: boolean;
         prepareSheet: () => CSSStyleSheet;
         isAsyncCancelled: () => boolean;
@@ -115,7 +116,7 @@ export function createStyleSheetModifier() {
         interface ReadyGroup {
             isGroup: true;
             rule: any;
-            rules: (ReadyGroup | ReadyStyleRule)[];
+            rules: Array<ReadyGroup | ReadyStyleRule>;
         }
 
         interface ReadyStyleRule {

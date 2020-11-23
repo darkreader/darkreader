@@ -1,4 +1,4 @@
-import {Theme} from '../../definitions';
+import type {Theme} from '../../definitions';
 import {forEach} from '../../utils/array';
 import {getMatches} from '../../utils/text';
 import {getAbsoluteURL} from '../../utils/url';
@@ -20,10 +20,10 @@ declare global {
         sheet: CSSStyleSheet;
     }
     interface Document {
-        adoptedStyleSheets: Array<CSSStyleSheet>;
+        adoptedStyleSheets: CSSStyleSheet[];
     }
     interface ShadowRoot {
-        adoptedStyleSheets: Array<CSSStyleSheet>;
+        adoptedStyleSheets: CSSStyleSheet[];
     }
 }
 
@@ -399,7 +399,7 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
     };
 }
 
-function linkLoading(link: HTMLLinkElement) {
+async function linkLoading(link: HTMLLinkElement) {
     return new Promise<void>((resolve, reject) => {
         const cleanUp = () => {
             link.removeEventListener('load', onLoad);

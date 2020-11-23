@@ -2,7 +2,7 @@ import {formatSitesFixesConfig} from './utils/format';
 import {parseSitesFixesConfig} from './utils/parse';
 import {parseArray, formatArray} from '../utils/text';
 import {compareURLPatterns, isURLInList} from '../utils/url';
-import {DynamicThemeFix} from '../definitions';
+import type {DynamicThemeFix} from '../definitions';
 
 export const dynamicThemeFixesCommands = {
     'INVERT': 'invert',

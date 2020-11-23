@@ -75,6 +75,24 @@ describe('Style override', () => {
         expect(getComputedStyle(container.querySelector('h1 strong')).color).toBe('rgb(255, 26, 26)');
     });
 
+    it('should override style with @import', async () => {
+        container.innerHTML = multiline(
+            '<style>',
+            `    @import "data:text/css;utf8,${encodeURIComponent('h1 { background: gray; }')}";`,
+            '    h1 strong { color: red; }',
+            '</style>',
+            '<h1>Style <strong>with @import</strong>!</h1>',
+        );
+        createOrUpdateDynamicTheme(theme, null, false);
+
+        await timeout(100);
+
+        expect(getComputedStyle(container).backgroundColor).toBe('rgb(0, 0, 0)');
+        expect(getComputedStyle(container.querySelector('h1')).backgroundColor).toBe('rgb(102, 102, 102)');
+        expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(255, 255, 255)');
+        expect(getComputedStyle(container.querySelector('h1 strong')).color).toBe('rgb(255, 26, 26)');
+    });
+
     it('should restore override', async () => {
         container.innerHTML = multiline(
             '<style class="testcase-style">',

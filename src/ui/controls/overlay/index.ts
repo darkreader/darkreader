@@ -58,7 +58,7 @@ function Portal(props: OverlayPortalProps, ...content: Malevic.Child[]) {
         render(container, null);
     });
 
-    return context.leave();
+    return context.leave() as void;
 }
 
 export default Object.assign(Overlay, {Portal});

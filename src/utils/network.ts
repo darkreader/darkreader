@@ -1,13 +1,20 @@
+import {logWarn} from '../inject/utils/log';
 import {isFirefox} from './platform';
 
 async function getOKResponse(url: string, mimeType?: string) {
-    const response = await fetch(
-        url,
-        {
-            cache: 'force-cache',
-            credentials: 'omit',
-        },
-    );
+    let response: Response;
+    try {
+        response = await fetch(
+            url,
+            {
+                cache: 'force-cache',
+                credentials: 'omit',
+            },
+        );
+    } catch (err) {
+        logWarn(err);
+        throw new Error(`Unable to load ${url} ${response.status} ${response.statusText}`);
+    }
 
     // Firefox bug, content type is "application/x-unknown-content-type"
     if (isFirefox && mimeType === 'text/css' && url.startsWith('moz-extension://') && url.endsWith('.css')) {

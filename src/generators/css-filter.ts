@@ -208,7 +208,7 @@ export function getInversionFixesFor(url: string, inversionFixes: InversionFix[]
     return common;
 }
 
-const inversionFixesCommands = {
+export const inversionFixesCommands = {
     'INVERT': 'invert',
     'NO INVERT': 'noinvert',
     'REMOVE BG': 'removebg',

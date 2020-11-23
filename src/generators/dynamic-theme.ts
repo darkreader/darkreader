@@ -4,7 +4,7 @@ import {parseArray, formatArray} from '../utils/text';
 import {compareURLPatterns, isURLInList} from '../utils/url';
 import {DynamicThemeFix} from '../definitions';
 
-const dynamicThemeFixesCommands = {
+export const dynamicThemeFixesCommands = {
     'INVERT': 'invert',
     'CSS': 'css',
     'IGNORE INLINE STYLE': 'ignoreInlineStyle',

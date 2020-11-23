@@ -172,7 +172,7 @@ const ruleGenerators = [
     createRuleGen((t) => t.invert, () => ['filter: invert(100%) hue-rotate(180deg)']),
 ];
 
-const staticThemeCommands = [
+export const staticThemeCommands = [
     'NO COMMON',
 
     'NEUTRAL BG',

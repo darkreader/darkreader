@@ -3,6 +3,15 @@ import {Button} from '../../controls';
 import {getURLHostOrProtocol, isURLInList} from '../../../utils/url';
 import {ExtWrapper, TabInfo} from '../../../definitions';
 
+declare namespace CodeMirror {
+    function fromTextArea(node: HTMLTextAreaElement, obj: object): mirror;
+}
+
+interface mirror {
+    getValue(): string;
+    setSize(width: string, height: string): void;
+}
+
 interface BodyProps extends ExtWrapper {
     tab: TabInfo;
 }
@@ -12,7 +21,7 @@ export default function Body({data, tab, actions}: BodyProps) {
     const host = getURLHostOrProtocol(tab.url);
     const custom = data.settings.customThemes.find(({url}) => isURLInList(tab.url, url));
 
-    let textNode: HTMLTextAreaElement;
+    let codeMirror: mirror;
 
     const placeholderText = [
         '* {',
@@ -22,10 +31,33 @@ export default function Body({data, tab, actions}: BodyProps) {
     ].join('\n');
 
     function onTextRender(node) {
-        textNode = node;
-        textNode.value = (custom ? custom.theme.stylesheet : data.settings.theme.stylesheet) || '';
-        if (document.activeElement !== textNode) {
-            textNode.focus();
+        node.value = (custom ? custom.theme.stylesheet : data.settings.theme.stylesheet) || '';
+        if (document.activeElement !== node) {
+            node.focus();
+        }
+        if (document.querySelectorAll('div.CodeMirror').length == 0) {
+            setTimeout(function() {
+                codeMirror = CodeMirror.fromTextArea(node, {
+                    mode: 'css',
+                    lineNumbers: true,
+                    lineWrapping: true,
+                    theme: 'dracula',
+                    styleActiveLine: true
+                });
+                codeMirror.setSize('90%', '80%');
+            }, 0);
+        }
+        else {
+            setTimeout(function() {
+                codeMirror = CodeMirror.fromTextArea(node, {
+                    mode: 'css',
+                    lineNumbers: true,
+                    theme: 'dracula',
+                    styleActiveLine: true,
+                });
+                codeMirror.setSize('90%', '80%');
+                document.querySelectorAll('div.CodeMirror')[1].remove();
+            }, 0);
         }
     }
 
@@ -43,7 +75,7 @@ export default function Body({data, tab, actions}: BodyProps) {
     }
 
     function apply() {
-        const css = textNode.value;
+        const css = codeMirror.getValue();
         applyStyleSheet(css);
     }
 
@@ -55,14 +87,9 @@ export default function Body({data, tab, actions}: BodyProps) {
             </header>
             <h3 id="sub-title">{custom ? host : 'All websites'}</h3>
             <textarea
-                id="editor"
                 native
                 placeholder={placeholderText}
                 onrender={onTextRender}
-                spellcheck="false"
-                autocorrect="off"
-                autocomplete="off"
-                autocapitalize="off"
             />
             <div id="buttons">
                 <Button onclick={reset}>Reset</Button>

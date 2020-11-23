@@ -8,6 +8,7 @@ const srcDir = 'src';
 const cwdPaths = [
     'background/index.html',
     'config/**/*.config',
+    'dependencies/**/*.*',
     'icons/**/*.*',
     'ui/assets/**/*.*',
     'ui/popup/compatibility.js',

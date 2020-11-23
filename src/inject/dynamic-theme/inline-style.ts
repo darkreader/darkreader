@@ -80,7 +80,6 @@ const overrides: Overrides = {
         customProp: '--darkreader-inline-stopcolor',
         cssProp: 'stop-color',
         dataAttr: 'data-darkreader-inline-stopcolor',
-        store: new WeakSet(),
     },
 };
 

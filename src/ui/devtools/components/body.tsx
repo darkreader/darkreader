@@ -5,13 +5,29 @@ import ThemeEngines from '../../../generators/theme-engines';
 import {DEVTOOLS_DOCS_URL} from '../../../utils/links';
 import {ExtWrapper, TabInfo} from '../../../definitions';
 import {getCurrentThemePreset} from '../../popup/theme/utils';
-import {isFirefox} from '../../../utils/platform';
+import {staticThemeCommands} from '../../../generators/static-theme';
+import {inversionFixesCommands} from '../../../generators/css-filter';
+import {dynamicThemeFixesCommands} from '../../../generators/dynamic-theme';
 
 type BodyProps = ExtWrapper & {tab: TabInfo};
 
+declare namespace CodeMirror {
+    function fromTextArea(node: HTMLTextAreaElement, obj: object): mirror;
+    function defineSimpleMode(name: string, configuration: object): void;
+    function defineMode(name: string, modeFunc: (config: object) => object): void;
+    function getMode(config: object, name: string): object;
+    function multiplexingMode(mode: object, info: object): object;
+}
+
+interface mirror {
+    getValue(): string;
+    refresh(): void;
+    setSize(width: string, height: string): void;
+}
+
 function Body({data, tab, actions}: BodyProps) {
     const {state, setState} = useState({errorText: null as string});
-    let textNode: HTMLTextAreaElement;
+    let codeMirror: mirror;
     const previewButtonText = data.settings.previewNewDesign ? 'Switch to old design' : 'Preview new design';
     const {theme} = getCurrentThemePreset({data, tab, actions});
 
@@ -21,46 +37,79 @@ function Body({data, tab, actions}: BodyProps) {
             fixesText: data.devtools.staticThemesText,
             apply: (text) => actions.applyDevStaticThemes(text),
             reset: () => actions.resetDevStaticThemes(),
+            keywords: staticThemeCommands,
         } : theme.engine === ThemeEngines.cssFilter || theme.engine === ThemeEngines.svgFilter ? {
             header: 'Inversion Fix Editor',
             fixesText: data.devtools.filterFixesText,
             apply: (text) => actions.applyDevInversionFixes(text),
             reset: () => actions.resetDevInversionFixes(),
+            keywords: Object.keys(inversionFixesCommands),
         } : {
             header: 'Dynamic Theme Editor',
             fixesText: data.devtools.dynamicFixesText,
             apply: (text) => actions.applyDevDynamicThemeFixes(text),
             reset: () => actions.resetDevDynamicThemeFixes(),
+            keywords: Object.keys(dynamicThemeFixesCommands),
         });
 
     function onTextRender(node: HTMLTextAreaElement) {
-        textNode = node;
         if (!state.errorText) {
-            textNode.value = wrapper.fixesText;
+            node.value = wrapper.fixesText;
         }
-        node.addEventListener('keydown', (e) => {
-            if (e.key === 'Tab') {
-                e.preventDefault();
-                const indent = ' '.repeat(4);
-                if (isFirefox) {
-                    // https://bugzilla.mozilla.org/show_bug.cgi?id=1220696
-                    const start = node.selectionStart;
-                    const end = node.selectionEnd;
-                    const before = node.value.substring(0, start);
-                    const after = node.value.substring(end);
-                    node.focus();
-                    node.value = `${before}${indent}${after}`;
-                    const cursorPos = start + indent.length;
-                    node.setSelectionRange(cursorPos, cursorPos);
-                } else {
-                    document.execCommand('insertText', false, indent);
+        if (document.querySelectorAll('div.CodeMirror').length === 0) {
+            CodeMirror.defineSimpleMode('mainConfig', {
+                start: [
+                  {
+                    regex: RegExp('^((?!' + wrapper.keywords.join('|') + '|^=).)*$', 'gm'),
+                    token: 'string',
+                  },
+                ],
+            });
+            CodeMirror.defineMode('darkreaderConfig', function (config) {
+              return CodeMirror.multiplexingMode(
+                CodeMirror.getMode({}, 'mainConfig'),
+                {
+                    open: RegExp('(' + wrapper.keywords.join('|') + ')', 'g'),
+                    close: '================================',
+                    mode: CodeMirror.getMode({}, 'css'),
+                    delimStyle: 'delimit',
                 }
-            }
-        });
+              );
+            });
+            setTimeout(function() {
+                codeMirror = CodeMirror.fromTextArea(node, {
+                    mode: 'darkreaderConfig',
+                    lineNumbers: true,
+                    lineWrapping: true,
+                    theme: 'dracula',
+                    styleActiveLine: true,
+                });
+                codeMirror.setSize('90%', '80%');
+            }, 0);
+            setInterval(function() {
+                document.querySelectorAll('pre.CodeMirror-line > span[role="presentation"]').forEach(function(element: HTMLElement) {
+                    if (wrapper.keywords.includes(element.textContent) && !element.innerHTML.includes('class="cm-atom')) {
+                        element.innerHTML = '<span class="cm-atom">' + element.textContent + '</span>';
+                    }
+                });
+            }, 10);
+        } else {
+            setTimeout(function() {
+                codeMirror = CodeMirror.fromTextArea(node, {
+                    mode: 'darkreaderConfig',
+                    lineNumbers: true,
+                    theme: 'dracula',
+                    styleActiveLine: true,
+                });
+                document.querySelectorAll('div.CodeMirror')[1].remove();
+                codeMirror.setSize('90%', '80%');
+                codeMirror.refresh();
+            }, 0);
+        }
     }
 
     async function apply() {
-        const text = textNode.value;
+        const text = codeMirror.getValue();
         try {
             await wrapper.apply(text);
             setState({errorText: null});
@@ -88,12 +137,7 @@ function Body({data, tab, actions}: BodyProps) {
             </header>
             <h3 id="sub-title">{wrapper.header}</h3>
             <textarea
-                id="editor"
                 onrender={onTextRender}
-                spellcheck="false"
-                autocorrect="off"
-                autocomplete="off"
-                autocapitalize="off"
             />
             <label id="error-text">{state.errorText}</label>
             <div id="buttons">

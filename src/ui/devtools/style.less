@@ -53,27 +53,30 @@ header {
     text-transform: uppercase;
 }
 
-#editor {
-    background-color: @color-input-back;
-    border: @size-border solid @color-border;
+.CodeMirror-linenumber {
+    left: -6px !important;
+}
+
+.CodeMirror-scrollbar-filler {
+    display: none !important;
+}
+
+div.CodeMirror {
+    &, .CodeMirror-gutters {
+        background-color: @color-input-back !important;
+    }
+    border: @size-border solid @color-border !important;
     box-sizing: border-box;
-    color: @color-input-fore;
     flex: auto;
-    font-family: monospace;
     font-size: @size-text-normal;
     min-width: 9rem;
     outline: none;
     padding: @size-control-inner / 2 - @size-text-normal / 2;
     resize: none;
     white-space: pre;
-    width: 100%;
 
-    &::placeholder {
-        color: @color-input-fore-placeholder;
-    }
-
-    &:hover {
-        background-color: @editor-active-back;
+    &:hover, &:hover > div.CodeMirror-scroll > div.CodeMirror-gutters {
+        background-color: @editor-active-back !important;
 
         &::-webkit-scrollbar,
         &::-webkit-scrollbar-corner {
@@ -81,15 +84,18 @@ header {
         }
     }
 
-    &:focus {
-        background-color: @editor-active-back;
-        color: @editor-active-fore;
+    &:focus, &:focus > div.CodeMirror-scroll > div.CodeMirror-gutters {
+        background-color: @editor-active-back !important;
 
         &::-webkit-scrollbar,
         &::-webkit-scrollbar-corner {
             background-color: @editor-active-back;
         }
     }
+}
+
+pre.CodeMirror-placeholder {
+    color: @color-input-fore-placeholder !important;
 }
 
 #error-text {

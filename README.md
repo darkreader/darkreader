@@ -175,8 +175,8 @@ Then execute `npm run debug`.
 - Open the `debug-firefox/manifest.json` file.
 
 
-If you want the project automatically recompiled, after making any code changes.
-Run `npm run debug-watch` instead of `npm run debug`.
+If you want the project to be automatically recompiled after making code changes,
+run `npm run debug-watch` instead of `npm run debug`.
 
 For editing the code you can use any text editor or web IDE (like [Visual Studio Code](https://code.visualstudio.com), [Atom](https://atom.io/), or [WebStorm](https://www.jetbrains.com/webstorm/)).
 

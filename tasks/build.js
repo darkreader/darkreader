@@ -22,8 +22,8 @@ const standardTask = [
 ];
 
 const buildTask = [
-    ...standardTask, 
-    codeStyle, 
+    ...standardTask,
+    codeStyle,
     zip
 ];
 

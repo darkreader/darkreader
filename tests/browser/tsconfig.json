@@ -5,6 +5,7 @@
         "module": "commonjs",
         "outDir": "",
         "types": [
+            "chrome",
             "jest",
             "puppeteer-core"
         ],

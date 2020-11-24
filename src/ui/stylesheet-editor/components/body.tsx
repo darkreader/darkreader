@@ -9,6 +9,7 @@ declare namespace CodeMirror {
 
 interface mirror {
     getValue(): string;
+    refresh(): void;
     setSize(width: string, height: string): void;
 }
 
@@ -55,8 +56,9 @@ export default function Body({data, tab, actions}: BodyProps) {
                     theme: 'dracula',
                     styleActiveLine: true,
                 });
-                codeMirror.setSize('90%', '80%');
                 document.querySelectorAll('div.CodeMirror')[1].remove();
+                codeMirror.setSize('90%', '80%');
+                codeMirror.refresh();
             }, 0);
         }
     }

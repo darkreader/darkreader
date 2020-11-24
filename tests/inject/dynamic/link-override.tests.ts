@@ -70,7 +70,7 @@ describe('Link override', () => {
             '<h1><strong>Cross-origin</strong> link override</h1>',
         );
         createOrUpdateDynamicTheme(theme, null, false);
-        await timeout(100);
+        await timeout(200);
         expect(getComputedStyle(container.querySelector('h1')).backgroundColor).toBe('rgb(102, 102, 102)');
         expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(255, 255, 255)');
         expect(getComputedStyle(container.querySelector('h1 strong')).color).toBe('rgb(255, 26, 26)');
@@ -87,6 +87,26 @@ describe('Link override', () => {
         container.innerHTML = multiline(
             '<h1><strong>Cross-origin import</strong> link override</h1>',
         );
+        createOrUpdateDynamicTheme(theme, null, false);
+        await timeout(200);
+        expect(getComputedStyle(container.querySelector('h1')).backgroundColor).toBe('rgb(102, 102, 102)');
+        expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(255, 255, 255)');
+        expect(getComputedStyle(container.querySelector('h1 strong')).color).toBe('rgb(255, 26, 26)');
+    });
+
+    it('should override cross-origin link that has already been loaded', async () => {
+        createCorsLink(multiline(
+            'h1 { background: gray; }',
+            'h1 strong { color: red; }',
+        ));
+        container.innerHTML = multiline(
+            '<h1>Loaded <strong>cross-origin</strong> link override</h1>',
+        );
+        await timeout(500);
+        expect(getComputedStyle(container.querySelector('h1')).backgroundColor).toBe('rgb(128, 128, 128)');
+        expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(0, 0, 0)');
+        expect(getComputedStyle(container.querySelector('h1 strong')).color).toBe('rgb(255, 0, 0)');
+
         createOrUpdateDynamicTheme(theme, null, false);
         await timeout(100);
         expect(getComputedStyle(container.querySelector('h1')).backgroundColor).toBe('rgb(102, 102, 102)');

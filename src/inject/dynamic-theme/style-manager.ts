@@ -7,7 +7,7 @@ import {logWarn} from '../utils/log';
 import {getCSSVariables, replaceCSSRelativeURLsWithAbsolute, removeCSSComments, replaceCSSFontFace, getCSSURLValue, cssImportRegex, getCSSBaseBath} from './css-rules';
 import {bgFetch} from './network';
 import {createStyleSheetModifier} from './stylesheet-modifier';
-import {isShadowDomSupported} from '../../utils/platform';
+import {isShadowDomSupported, isSafari} from '../../utils/platform';
 
 declare global {
     interface HTMLStyleElement {
@@ -152,7 +152,11 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
                 logWarn(accessError);
             }
 
-            if ((!cssRules && !accessError) || isStillLoadingError(accessError)) {
+            if (
+                (!cssRules && !accessError && !isSafari) ||
+                (isSafari && !element.sheet) ||
+                isStillLoadingError(accessError)
+            ) {
                 try {
                     await linkLoading(element);
                 } catch (err) {

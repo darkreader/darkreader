@@ -109,18 +109,11 @@ function createStaticStyleOverrides() {
 
     const variableStyle = createOrUpdateStyle('darkreader--variables');
     const selectionColors = getSelectionColor(filter);
-    const {darkSchemeBackgroundColor, darkSchemeTextColor, lightSchemeBackgroundColor, lightSchemeTextColor, mode, brightness, contrast, sepia, grayscale} = filter;
+    const {darkSchemeBackgroundColor, darkSchemeTextColor, lightSchemeBackgroundColor, lightSchemeTextColor, mode} = filter;
     let schemeBackgroundColor = mode === 0 ? lightSchemeBackgroundColor : darkSchemeBackgroundColor;
     let schemeTextColor = mode === 0 ? lightSchemeTextColor : darkSchemeTextColor;
-    if (brightness !== 100 || contrast !== 100 || sepia !== 0 || grayscale !== 0) {
-        if (mode === 0) {
-            schemeBackgroundColor = modifyBackgroundColor(parse(lightSchemeBackgroundColor), filter);
-            schemeTextColor = modifyForegroundColor(parse(darkSchemeTextColor), filter);
-        } else {
-            schemeBackgroundColor = modifyBackgroundColor(parse(darkSchemeBackgroundColor), filter);
-            schemeTextColor = modifyForegroundColor(parse(darkSchemeTextColor), filter);
-        }
-    }
+    schemeBackgroundColor = modifyBackgroundColor(parse(schemeBackgroundColor), filter);
+    schemeTextColor = modifyForegroundColor(parse(schemeTextColor), filter);
     variableStyle.textContent = [
         `:root {`,
         `   --darkreader-neutral-background: ${schemeBackgroundColor};`,

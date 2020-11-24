@@ -15,7 +15,7 @@ export default class UserStorage {
         this.settings = null;
         subscribeToOuterSettingsChange(async () => {
             await this.loadSettings();
-            onRemoteSettingsChange()
+            onRemoteSettingsChange();
         });
     }
 

@@ -27,8 +27,8 @@ const buildTask = [
     zip
 ];
 
-async function build({debug, watch}) {
-    log.ok('BUILD');
+async function release({debug, watch}) {
+    log.ok('RELEASE');
     try {
         await runTasks(debug ? standardTask : buildTask, {debug, watch});
         if (watch) {
@@ -58,8 +58,8 @@ async function api() {
 async function run() {
     const args = process.argv.slice(2);
 
-    if (args.includes('--build')) {
-        await build({watch: args.includes('--watch'), debug: args.includes('--debug')});
+    if (args.includes('--release')) {
+        await release({watch: args.includes('--watch'), debug: args.includes('--debug')});
     }
     if (args.includes('--api')) {
         await api();

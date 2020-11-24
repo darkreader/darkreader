@@ -40,7 +40,7 @@ function collectUndefinedElements(root: ParentNode) {
 }
 
 let canOptimizeUsingProxy = false;
-document.addEventListener('__darkreader__allowsInlineScript', () => {
+document.addEventListener('__darkreader__inlineScriptsAllowed', () => {
     canOptimizeUsingProxy = true;
 });
 

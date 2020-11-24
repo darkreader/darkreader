@@ -1,5 +1,5 @@
 export function injectProxy() {
-    document.dispatchEvent(new CustomEvent('__darkreader__allowsInlineScript'));
+    document.dispatchEvent(new CustomEvent('__darkreader__inlineScriptsAllowed'));
 
     const addRuleDescriptor = Object.getOwnPropertyDescriptor(CSSStyleSheet.prototype, 'addRule');
     const insertRuleDescriptor = Object.getOwnPropertyDescriptor(CSSStyleSheet.prototype, 'insertRule');

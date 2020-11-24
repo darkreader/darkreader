@@ -77,7 +77,7 @@ const syncStyleSet = new WeakSet<HTMLStyleElement | SVGStyleElement>();
 const corsStyleSet = new WeakSet<HTMLStyleElement>();
 
 let canOptimizeUsingProxy = false;
-document.addEventListener('__darkreader__allowsInlineScript', () => {
+document.addEventListener('__darkreader__inlineScriptsAllowed', () => {
     canOptimizeUsingProxy = true;
 });
 
@@ -323,6 +323,13 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
         return cssRules;
     }
 
+    function watchForSheetChanges() {
+        watchForSheetChangesUsingProxy();
+        if (!canOptimizeUsingProxy) {
+            watchForSheetChangesUsingRAF();
+        }
+    }
+
     let rulesChangeKey: number = null;
     let rulesCheckFrameId: number = null;
 
@@ -336,13 +343,6 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
     function didRulesKeyChange() {
         const rules = safeGetSheetRules();
         return rules && rules.length !== rulesChangeKey;
-    }
-
-    function watchForSheetChanges() {
-        watchForSheetChangesUsingProxy();
-        if (!canOptimizeUsingProxy) {
-            watchForSheetChangesUsingRAF();
-        }
     }
 
     function watchForSheetChangesUsingRAF() {

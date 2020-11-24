@@ -1,8 +1,42 @@
-import {UserSettings} from '../definitions';
-import {compareIPV6} from './ipv6';
+import type {UserSettings} from '../definitions';
+import {isIPV6, compareIPV6} from './ipv6';
 
-export function getURLHost(url: string) {
-    return url.match(/^(.*?\/{2,3})?(.+?)(\/|$)/)[2];
+let anchor: HTMLAnchorElement;
+
+function fixBaseURL($url: string) {
+    if (!anchor) {
+        anchor = document.createElement('a');
+    }
+    anchor.href = $url;
+    return anchor.href;
+}
+
+export function parseURL($url: string, $base: string = null) {
+    if ($base) {
+        $base = fixBaseURL($base);
+        return new URL($url, $base);
+    }
+    $url = fixBaseURL($url);
+    return new URL($url);
+}
+
+export function getAbsoluteURL($base: string, $relative: string) {
+    if ($relative.match(/^data\:/)) {
+        return $relative;
+    }
+
+    const b = parseURL($base);
+    const a = parseURL($relative, b.href);
+    return a.href;
+}
+
+export function getURLHostOrProtocol($url: string) {
+    const url = new URL($url);
+    if (url.host) {
+        return url.host;
+    } else {
+        return url.protocol;
+    }
 }
 
 export function compareURLPatterns(a: string, b: string) {
@@ -29,11 +63,11 @@ export function isURLInList(url: string, list: string[]) {
  * @param urlTemplate URL template ("google.*", "youtube.com" etc).
  */
 export function isURLMatched(url: string, urlTemplate: string): boolean {
-    const isFirstIPV6 = url.includes('[');
-    const isSecondIPV6 = urlTemplate.includes('[');
+    const isFirstIPV6 = isIPV6(url);
+    const isSecondIPV6 = isIPV6(urlTemplate);
     if (isFirstIPV6 && isSecondIPV6) {
         return compareIPV6(url, urlTemplate);
-    } else if (!isFirstIPV6 && ! isSecondIPV6){
+    } else if (!isFirstIPV6 && !isSecondIPV6) {
         const regex = createUrlRegex(urlTemplate);
         return Boolean(url.match(regex));
     } else {
@@ -59,9 +93,9 @@ function createUrlRegex(urlTemplate: string): RegExp {
     let afterSlash: string;
     if ((slashIndex = urlTemplate.indexOf('/')) >= 0) {
         beforeSlash = urlTemplate.substring(0, slashIndex); // google.*
-        afterSlash = urlTemplate.replace('$', '').substring(slashIndex); // /login/abc
+        afterSlash = urlTemplate.replace(/\$/g, '').substring(slashIndex); // /login/abc
     } else {
-        beforeSlash = urlTemplate.replace('$', '');
+        beforeSlash = urlTemplate.replace(/\$/g, '');
     }
 
     //
@@ -113,6 +147,9 @@ export function isPDF(url: string) {
         if (url.includes('#')) {
             url = url.substring(0, url.lastIndexOf('#'));
         }
+        if (url.match(/(wikipedia|wikimedia).org/i) && url.match(/(wikipedia|wikimedia)\.org\/.*\/[a-z]+\:[^\:\/]+\.pdf/i)) {
+            return false;
+        }
         if (url.endsWith('.pdf')) {
             for (let i = url.length; 0 < i; i--) {
                 if (url[i] === '=') {
@@ -129,10 +166,10 @@ export function isPDF(url: string) {
 }
 
 export function isURLEnabled(url: string, userSettings: UserSettings, {isProtected, isInDarkList}) {
-    if (isProtected) {
+    if (isProtected && !userSettings.enableForProtectedPages) {
         return false;
     }
-    if (isPDF(url) && userSettings.enableForPDF) {
+    if (isPDF(url)) {
         return userSettings.enableForPDF;
     }
     const isURLInUserList = isURLInList(url, userSettings.siteList);

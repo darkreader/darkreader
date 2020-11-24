@@ -60,6 +60,15 @@ const jsEntries = [
         watchFiles: null,
     },
     {
+        src: 'src/inject/fallback.ts',
+        dest: 'inject/fallback.js',
+        reloadType: reload.FULL,
+        async postBuild({debug}) {
+            await copyToFF({cwdPath: this.dest, debug});
+        },
+        watchFiles: null,
+    },
+    {
         src: 'src/ui/devtools/index.tsx',
         dest: 'ui/devtools/index.js',
         reloadType: reload.UI,

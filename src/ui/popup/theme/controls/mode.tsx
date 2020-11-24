@@ -10,28 +10,25 @@ export default function Mode(props: {mode: string; onChange: (mode: string) => v
     function openCSSEditor() {
         chrome.windows.create({
             type: 'panel',
-            url: isFirefox() ? '../stylesheet-editor/index.html' : 'ui/stylesheet-editor/index.html',
+            url: isFirefox ? '../stylesheet-editor/index.html' : 'ui/stylesheet-editor/index.html',
             width: 600,
             height: 600,
         });
     }
 
     const modes = [
-        [ThemeEngines.dynamicTheme, getLocalMessage('engine_dynamic')],
-        [ThemeEngines.cssFilter, getLocalMessage('engine_filter')],
-        [ThemeEngines.svgFilter, getLocalMessage('engine_filter_plus')],
-        [ThemeEngines.staticTheme, getLocalMessage('engine_static')],
+        {id: ThemeEngines.dynamicTheme, content: getLocalMessage('engine_dynamic')},
+        {id: ThemeEngines.cssFilter, content: getLocalMessage('engine_filter')},
+        {id: ThemeEngines.svgFilter, content: getLocalMessage('engine_filter_plus')},
+        {id: ThemeEngines.staticTheme, content: getLocalMessage('engine_static')},
     ];
     return (
         <ThemeControl label="Mode">
             <div class="mode-control-container">
                 <DropDown
-                    selected={modes.find((m) => m[0] === props.mode)[1]}
-                    values={modes.map((m) => m[1])}
-                    onChange={(v) => {
-                        const mode = modes.find((m) => m[1] === v)[0];
-                        props.onChange(mode);
-                    }}
+                    selected={modes.find((m) => m.id === props.mode).id}
+                    options={modes}
+                    onChange={props.onChange}
                 />
                 <span
                     class={{

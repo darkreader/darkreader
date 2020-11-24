@@ -2,15 +2,16 @@ import {m} from 'malevic';
 import {getContext} from 'malevic/dom';
 import {DONATE_URL} from '../../../utils/links';
 import {getLocalMessage} from '../../../utils/locales';
-import {isMobile} from '../../../utils/platform';
 import {Overlay} from '../../controls';
 import AutomationPage from '../automation-page';
 import MainPage from '../main-page';
 import {Page, PageViewer} from '../page-viewer';
 import SettingsPage from '../settings-page';
+import SiteListPage from '../site-list-page';
 import ThemePage from '../theme/page';
-import {ViewProps} from '../types';
+import type {ViewProps} from '../types';
 import ManageSettingsPage from '../manage-settings-page';
+import {isMobile} from '../../../utils/platform';
 
 function Logo() {
     return (
@@ -25,10 +26,19 @@ function Logo() {
     );
 }
 
+type PageId = (
+    'main'
+    | 'theme'
+    | 'settings'
+    | 'site-list'
+    | 'automation'
+    | 'manage-settings'
+);
+
 function Pages(props: ViewProps) {
     const context = getContext();
     const store = context.store as {
-        activePage: 'main' | 'theme' | 'settings' | 'automation' | 'manage-settings';
+        activePage: PageId;
     };
     if (store.activePage == null) {
         store.activePage = 'main';
@@ -54,8 +64,15 @@ function Pages(props: ViewProps) {
         context.refresh();
     }
 
+    function onSiteListNavClick() {
+        store.activePage = 'site-list';
+        context.refresh();
+    }
+
     function onBackClick() {
-        if (store.activePage === 'automation' || store.activePage === 'manage-settings') {
+        const activePage = store.activePage;
+        const settingsPageSubpages = ['automation', 'manage-settings', 'site-list'] as PageId[];
+        if (settingsPageSubpages.includes(activePage)) {
             store.activePage = 'settings';
         } else {
             store.activePage = 'main';
@@ -83,6 +100,12 @@ function Pages(props: ViewProps) {
                     {...props}
                     onAutomationNavClick={onAutomationNavClick}
                     onManageSettingsClick={onManageSettingsClick}
+                    onSiteListNavClick={onSiteListNavClick}
+                />
+            </Page>
+            <Page id="site-list">
+                <SiteListPage
+                    {...props}
                 />
             </Page>
             <Page id="automation">
@@ -111,11 +134,21 @@ function DonateGroup() {
     );
 }
 
+let appVersion: string;
+
+function AppVersion() {
+    if (!appVersion) {
+        appVersion = chrome.runtime.getManifest().version;
+    }
+    return (
+        <label class="darkreader-version">Version 5 Preview ({appVersion})</label>
+    );
+}
+
 export default function Body(props: ViewProps) {
     const context = getContext();
     context.onCreate(() => {
-        document.documentElement.classList.add('preview');
-        if (isMobile()) {
+        if (isMobile) {
             window.addEventListener('contextmenu', (e) => e.preventDefault());
         }
     });
@@ -134,6 +167,7 @@ export default function Body(props: ViewProps) {
             <section class="m-section">
                 <DonateGroup />
             </section>
+            <AppVersion />
             <Overlay />
         </body>
     );

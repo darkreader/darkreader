@@ -1,9 +1,10 @@
 import './chrome';
 import {setFetchMethod as setFetch} from './fetch';
 import {DEFAULT_THEME} from '../defaults';
-import {Theme, DynamicThemeFix} from '../definitions';
+import type {Theme, DynamicThemeFix} from '../definitions';
 import ThemeEngines from '../generators/theme-engines';
 import {createOrUpdateDynamicTheme, removeDynamicTheme} from '../inject/dynamic-theme';
+import {collectCSS} from '../inject/dynamic-theme/css-collection';
 
 const isIFrame = (() => {
     try {
@@ -18,9 +19,8 @@ export function enable(themeOptions: Partial<Theme> = {}, fixes: DynamicThemeFix
     const theme = {...DEFAULT_THEME, ...themeOptions};
 
     if (theme.engine !== ThemeEngines.dynamicTheme) {
-        throw new Error('Theme engine is not supported');
+        throw new Error('Theme engine is not supported.');
     }
-
     createOrUpdateDynamicTheme(theme, fixes, isIFrame);
 }
 
@@ -46,11 +46,15 @@ export function auto(themeOptions: Partial<Theme> | false = {}, fixes: DynamicTh
     if (themeOptions) {
         store = {themeOptions, fixes};
         handleColorScheme();
-        darkScheme.addListener(handleColorScheme);
+        darkScheme.addEventListener('change', handleColorScheme);
     } else {
-        darkScheme.removeListener(handleColorScheme);
+        darkScheme.removeEventListener('change', handleColorScheme);
         disable();
     }
+}
+
+export async function exportGeneratedCSS(): Promise<string> {
+    return await collectCSS();
 }
 
 export const setFetchMethod = setFetch;

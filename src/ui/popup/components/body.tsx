@@ -1,4 +1,5 @@
 import {m} from 'malevic';
+import {getContext} from 'malevic/dom';
 import {withForms} from 'malevic/forms';
 import {withState, useState} from 'malevic/state';
 import {TabPanel, Button} from '../../controls';
@@ -7,15 +8,15 @@ import {Header, MoreToggleSettings} from './header';
 import Loader from './loader';
 import NewBody from '../body';
 import MoreSettings from './more-settings';
-import {News, NewsButton} from './news';
+import {NewsGroup, NewsButton} from './news';
 import SiteListSettings from './site-list-settings';
 import ThemeEngines from '../../../generators/theme-engines';
-import {isFirefox, isMobile} from '../../../utils/platform';
 import {getDuration} from '../../../utils/time';
 import {DONATE_URL, GITHUB_URL, PRIVACY_URL, TWITTER_URL, getHelpURL} from '../../../utils/links';
 import {getLocalMessage} from '../../../utils/locales';
 import {compose} from '../../utils';
-import {ExtensionData, ExtensionActions, TabInfo, News as NewsObject} from '../../../definitions';
+import type {ExtensionData, ExtensionActions, TabInfo, News as NewsObject} from '../../../definitions';
+import {isMobile, isFirefox} from '../../../utils/platform';
 
 interface BodyProps {
     data: ExtensionData;
@@ -26,25 +27,28 @@ interface BodyProps {
 interface BodyState {
     activeTab: string;
     newsOpen: boolean;
+    didNewsSlideIn: boolean;
     moreToggleSettingsOpen: boolean;
 }
 
 function openDevTools() {
     chrome.windows.create({
         type: 'panel',
-        url: isFirefox() ? '../devtools/index.html' : 'ui/devtools/index.html',
+        url: isFirefox ? '../devtools/index.html' : 'ui/devtools/index.html',
         width: 600,
         height: 600,
     });
 }
 
 function Body(props: BodyProps) {
-    const latestNews = props.data.news.length > 0 ? props.data.news[0] : null;
+    const context = getContext();
     const {state, setState} = useState<BodyState>({
         activeTab: 'Filter',
-        newsOpen: latestNews && latestNews.important && !latestNews.read,
+        newsOpen: false,
+        didNewsSlideIn: false,
         moreToggleSettingsOpen: false,
     });
+
     if (!props.data.isReady) {
         return (
             <body>
@@ -53,17 +57,25 @@ function Body(props: BodyProps) {
         );
     }
 
-    if (isMobile() || props.data.settings.previewNewDesign) {
+    if (isMobile || props.data.settings.previewNewDesign) {
         return <NewBody {...props} />;
     }
 
     const unreadNews = props.data.news.filter(({read}) => !read);
+    const latestNews = props.data.news.length > 0 ? props.data.news[0] : null;
+    const isFirstNewsUnread = latestNews && !latestNews.read;
+
+    context.onRender(() => {
+        if (isFirstNewsUnread && !state.newsOpen && !state.didNewsSlideIn) {
+            setTimeout(toggleNews, 750);
+        }
+    });
 
     function toggleNews() {
         if (state.newsOpen && unreadNews.length > 0) {
             props.actions.markNewsAsRead(unreadNews.map(({id}) => id));
         }
-        setState({newsOpen: !state.newsOpen});
+        setState({newsOpen: !state.newsOpen, didNewsSlideIn: state.didNewsSlideIn || !state.newsOpen});
     }
 
     function onNewsOpen(...news: NewsObject[]) {
@@ -150,7 +162,7 @@ function Body(props: BodyProps) {
                     </Button>
                 </div>
             </footer>
-            <News
+            <NewsGroup
                 news={props.data.news}
                 expanded={state.newsOpen}
                 onNewsOpen={onNewsOpen}

@@ -1,13 +1,13 @@
-import {getCSSVariables, replaceCSSRelativeURLsWithAbsolute, removeCSSComments, replaceCSSFontFace, getCSSURLValue, cssImportRegex, getCSSBaseBath} from './css-rules';
-import {bgFetch} from './network';
-import {watchForNodePosition, removeNode, iterateShadowNodes} from '../utils/dom';
-import {logWarn} from '../utils/log';
+import type {Theme} from '../../definitions';
 import {forEach} from '../../utils/array';
 import {getMatches} from '../../utils/text';
-import {Theme} from '../../definitions';
+import {getAbsoluteURL} from '../../utils/url';
+import {watchForNodePosition, removeNode, iterateShadowHosts} from '../utils/dom';
+import {logWarn} from '../utils/log';
+import {getCSSVariables, replaceCSSRelativeURLsWithAbsolute, removeCSSComments, replaceCSSFontFace, getCSSURLValue, cssImportRegex, getCSSBaseBath} from './css-rules';
+import {bgFetch} from './network';
 import {createStyleSheetModifier} from './stylesheet-modifier';
-import {getAbsoluteURL} from './url';
-import {IS_SHADOW_DOM_SUPPORTED} from '../../utils/platform';
+import {isShadowDomSupported, isSafari} from '../../utils/platform';
 
 declare global {
     interface HTMLStyleElement {
@@ -19,13 +19,19 @@ declare global {
     interface SVGStyleElement {
         sheet: CSSStyleSheet;
     }
+    interface Document {
+        adoptedStyleSheets: CSSStyleSheet[];
+    }
+    interface ShadowRoot {
+        adoptedStyleSheets: CSSStyleSheet[];
+    }
 }
 
 export type StyleElement = HTMLLinkElement | HTMLStyleElement;
 
 export interface StyleManager {
     details(): {variables: Map<string, string>};
-    render(theme: Theme, variables: Map<string, string>): void;
+    render(theme: Theme, variables: Map<string, string>, ignoreImageAnalysis: string[]): void;
     pause(): void;
     destroy(): void;
     watch(): void;
@@ -52,18 +58,28 @@ export function shouldManageStyle(element: Node) {
     );
 }
 
-export function getManageableStyles(node: Node, results = [] as StyleElement[]) {
+export function getManageableStyles(node: Node, results = [] as StyleElement[], deep = true) {
     if (shouldManageStyle(node)) {
         results.push(node as StyleElement);
-    } else if (node instanceof Element || (IS_SHADOW_DOM_SUPPORTED && node instanceof ShadowRoot) || node === document) {
+    } else if (node instanceof Element || (isShadowDomSupported && node instanceof ShadowRoot) || node === document) {
         forEach(
             (node as Element).querySelectorAll(STYLE_SELECTOR),
-            (style: StyleElement) => getManageableStyles(style, results)
+            (style: StyleElement) => getManageableStyles(style, results, false),
         );
-        iterateShadowNodes(node, (host) => getManageableStyles(host.shadowRoot, results));
+        if (deep) {
+            iterateShadowHosts(node, (host) => getManageableStyles(host.shadowRoot, results, false));
+        }
     }
     return results;
 }
+
+const syncStyleSet = new WeakSet<HTMLStyleElement | SVGStyleElement>();
+const corsStyleSet = new WeakSet<HTMLStyleElement>();
+
+let canOptimizeUsingProxy = false;
+document.addEventListener('__darkreader__inlineScriptsAllowed', () => {
+    canOptimizeUsingProxy = true;
+});
 
 export function manageStyle(element: StyleElement, {update, loadingStart, loadingEnd}): StyleManager {
     const prevStyles: HTMLStyleElement[] = [];
@@ -71,8 +87,8 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
     while ((next = next.nextElementSibling) && next.matches('.darkreader')) {
         prevStyles.push(next as HTMLStyleElement);
     }
-    let corsCopy: HTMLStyleElement = prevStyles.find((el) => el.matches('.darkreader--cors')) || null;
-    let syncStyle: HTMLStyleElement | SVGStyleElement = prevStyles.find((el) => el.matches('.darkreader--sync')) || null;
+    let corsCopy: HTMLStyleElement = prevStyles.find((el) => el.matches('.darkreader--cors') && !corsStyleSet.has(el)) || null;
+    let syncStyle: HTMLStyleElement | SVGStyleElement = prevStyles.find((el) => el.matches('.darkreader--sync') && !syncStyleSet.has(el)) || null;
 
     let corsCopyPositionWatcher: ReturnType<typeof watchForNodePosition> = null;
     let syncStylePositionWatcher: ReturnType<typeof watchForNodePosition> = null;
@@ -120,6 +136,7 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
         syncStyle.classList.add('darkreader');
         syncStyle.classList.add('darkreader--sync');
         syncStyle.media = 'screen';
+        syncStyleSet.add(syncStyle);
     }
 
     let isLoadingRules = false;
@@ -135,7 +152,11 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
                 logWarn(accessError);
             }
 
-            if ((cssRules && !accessError) || isStillLoadingError(accessError)) {
+            if (
+                (!cssRules && !accessError && !isSafari) ||
+                (isSafari && !element.sheet) ||
+                isStillLoadingError(accessError)
+            ) {
                 try {
                     await linkLoading(element);
                 } catch (err) {
@@ -218,7 +239,7 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
 
     let forceRenderStyle = false;
 
-    function render(theme: Theme, variables: Map<string, string>) {
+    function render(theme: Theme, variables: Map<string, string>, ignoreImageAnalysis: string[]) {
         const rules = getRulesSync();
         if (!rules) {
             return;
@@ -251,19 +272,25 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
             if (syncStylePositionWatcher) {
                 syncStylePositionWatcher.run();
             } else {
-                syncStylePositionWatcher = watchForNodePosition(syncStyle, 'prev-sibling', buildOverrides);
+                syncStylePositionWatcher = watchForNodePosition(syncStyle, 'prev-sibling', () => {
+                    forceRenderStyle = true;
+                    buildOverrides();
+                });
             }
 
             return syncStyle.sheet;
         }
 
         function buildOverrides() {
+            const force = forceRenderStyle;
+            forceRenderStyle = false;
             sheetModifier.modifySheet({
                 prepareSheet: prepareOverridesSheet,
                 sourceCSSRules: rules,
                 theme,
                 variables,
-                force: forceRenderStyle,
+                ignoreImageAnalysis,
+                force,
                 isAsyncCancelled: () => cancelAsyncOperations,
             });
         }
@@ -300,6 +327,13 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
         return cssRules;
     }
 
+    function watchForSheetChanges() {
+        watchForSheetChangesUsingProxy();
+        if (!canOptimizeUsingProxy) {
+            watchForSheetChangesUsingRAF();
+        }
+    }
+
     let rulesChangeKey: number = null;
     let rulesCheckFrameId: number = null;
 
@@ -315,10 +349,14 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
         return rules && rules.length !== rulesChangeKey;
     }
 
-    function subscribeToSheetChanges() {
+    function watchForSheetChangesUsingRAF() {
         updateRulesChangeKey();
-        unsubscribeFromSheetChanges();
+        stopWatchingForSheetChangesUsingRAF();
         const checkForUpdate = () => {
+            if (canOptimizeUsingProxy) {
+                stopWatchingForSheetChangesUsingRAF();
+                return;
+            }
             if (didRulesKeyChange()) {
                 updateRulesChangeKey();
                 update();
@@ -328,8 +366,46 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
         checkForUpdate();
     }
 
-    function unsubscribeFromSheetChanges() {
+    function stopWatchingForSheetChangesUsingRAF() {
         cancelAnimationFrame(rulesCheckFrameId);
+    }
+
+    let areSheetChangesPending = false;
+
+    function onSheetChange() {
+        canOptimizeUsingProxy = true;
+        stopWatchingForSheetChangesUsingRAF();
+        if (areSheetChangesPending) {
+            return;
+        }
+
+        function handleSheetChanges() {
+            areSheetChangesPending = false;
+            if (cancelAsyncOperations) {
+                return;
+            }
+            update();
+        }
+
+        areSheetChangesPending = true;
+        if (typeof queueMicrotask === 'function') {
+            queueMicrotask(handleSheetChanges);
+        } else {
+            requestAnimationFrame(handleSheetChanges);
+        }
+    }
+
+    function watchForSheetChangesUsingProxy() {
+        element.addEventListener('__darkreader__updateSheet', onSheetChange);
+    }
+
+    function stopWatchingForSheetChangesUsingProxy() {
+        element.removeEventListener('__darkreader__updateSheet', onSheetChange);
+    }
+
+    function stopWatchingForSheetChanges() {
+        stopWatchingForSheetChangesUsingProxy();
+        stopWatchingForSheetChangesUsingRAF();
     }
 
     function pause() {
@@ -337,7 +413,7 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
         cancelAsyncOperations = true;
         corsCopyPositionWatcher && corsCopyPositionWatcher.stop();
         syncStylePositionWatcher && syncStylePositionWatcher.stop();
-        unsubscribeFromSheetChanges();
+        stopWatchingForSheetChanges();
     }
 
     function destroy() {
@@ -349,7 +425,7 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
     function watch() {
         observer.observe(element, observerOptions);
         if (element instanceof HTMLStyleElement) {
-            subscribeToSheetChanges();
+            watchForSheetChanges();
         }
     }
 
@@ -370,9 +446,10 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
         logWarn('Restore style', syncStyle, element);
         const shouldForceRender = syncStyle.sheet == null || syncStyle.sheet.cssRules.length > 0;
         insertStyle();
+        corsCopyPositionWatcher && corsCopyPositionWatcher.skip();
+        syncStylePositionWatcher && syncStylePositionWatcher.skip();
         if (shouldForceRender) {
             forceRenderStyle = true;
-            updateRulesChangeKey();
             update();
         }
     }
@@ -387,7 +464,7 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
     };
 }
 
-function linkLoading(link: HTMLLinkElement) {
+async function linkLoading(link: HTMLLinkElement) {
     return new Promise<void>((resolve, reject) => {
         const cleanUp = () => {
             link.removeEventListener('load', onLoad);
@@ -417,7 +494,7 @@ async function loadText(url: string) {
     return await bgFetch({url, responseType: 'text', mimeType: 'text/css'});
 }
 
-async function replaceCSSImports(cssText: string, basePath: string) {
+async function replaceCSSImports(cssText: string, basePath: string, cache = new Map<string, string>()) {
     cssText = removeCSSComments(cssText);
     cssText = replaceCSSFontFace(cssText);
     cssText = replaceCSSRelativeURLsWithAbsolute(cssText, basePath);
@@ -427,12 +504,17 @@ async function replaceCSSImports(cssText: string, basePath: string) {
         const importURL = getCSSImportURL(match);
         const absoluteURL = getAbsoluteURL(basePath, importURL);
         let importedCSS: string;
-        try {
-            importedCSS = await loadText(absoluteURL);
-            importedCSS = await replaceCSSImports(importedCSS, getCSSBaseBath(absoluteURL));
-        } catch (err) {
-            logWarn(err);
-            importedCSS = '';
+        if (cache.has(absoluteURL)) {
+            importedCSS = cache.get(absoluteURL);
+        } else {
+            try {
+                importedCSS = await loadText(absoluteURL);
+                cache.set(absoluteURL, importedCSS);
+                importedCSS = await replaceCSSImports(importedCSS, getCSSBaseBath(absoluteURL), cache);
+            } catch (err) {
+                logWarn(err);
+                importedCSS = '';
+            }
         }
         cssText = cssText.split(match).join(importedCSS);
     }
@@ -454,6 +536,6 @@ function createCORSCopy(srcElement: StyleElement, cssText: string) {
     cors.textContent = cssText;
     srcElement.parentNode.insertBefore(cors, srcElement.nextSibling);
     cors.sheet.disabled = true;
-
+    corsStyleSet.add(cors);
     return cors;
 }

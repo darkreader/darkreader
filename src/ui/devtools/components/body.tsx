@@ -3,23 +3,25 @@ import {withState, useState} from 'malevic/state';
 import {Button} from '../../controls';
 import ThemeEngines from '../../../generators/theme-engines';
 import {DEVTOOLS_DOCS_URL} from '../../../utils/links';
+import type {ExtWrapper, TabInfo} from '../../../definitions';
+import {getCurrentThemePreset} from '../../popup/theme/utils';
 import {isFirefox} from '../../../utils/platform';
-import {ExtWrapper} from '../../../definitions';
 
-type BodyProps = ExtWrapper;
+type BodyProps = ExtWrapper & {tab: TabInfo};
 
-function Body({data, actions}: BodyProps) {
+function Body({data, tab, actions}: BodyProps) {
     const {state, setState} = useState({errorText: null as string});
     let textNode: HTMLTextAreaElement;
     const previewButtonText = data.settings.previewNewDesign ? 'Switch to old design' : 'Preview new design';
+    const {theme} = getCurrentThemePreset({data, tab, actions});
 
-    const wrapper = (data.settings.theme.engine === ThemeEngines.staticTheme
+    const wrapper = (theme.engine === ThemeEngines.staticTheme
         ? {
             header: 'Static Theme Editor',
             fixesText: data.devtools.staticThemesText,
             apply: (text) => actions.applyDevStaticThemes(text),
             reset: () => actions.resetDevStaticThemes(),
-        } : data.settings.theme.engine === ThemeEngines.cssFilter || data.settings.theme.engine === ThemeEngines.svgFilter ? {
+        } : theme.engine === ThemeEngines.cssFilter || theme.engine === ThemeEngines.svgFilter ? {
             header: 'Inversion Fix Editor',
             fixesText: data.devtools.filterFixesText,
             apply: (text) => actions.applyDevInversionFixes(text),
@@ -40,7 +42,7 @@ function Body({data, actions}: BodyProps) {
             if (e.key === 'Tab') {
                 e.preventDefault();
                 const indent = ' '.repeat(4);
-                if (isFirefox()) {
+                if (isFirefox) {
                     // https://bugzilla.mozilla.org/show_bug.cgi?id=1220696
                     const start = node.selectionStart;
                     const end = node.selectionEnd;
@@ -88,6 +90,10 @@ function Body({data, actions}: BodyProps) {
             <textarea
                 id="editor"
                 onrender={onTextRender}
+                spellcheck="false"
+                autocorrect="off"
+                autocomplete="off"
+                autocapitalize="off"
             />
             <label id="error-text">{state.errorText}</label>
             <div id="buttons">

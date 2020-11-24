@@ -1,5 +1,5 @@
-import {getURLHost} from '../../utils/url';
-import {ExtensionData, TabInfo, Theme, UserSettings} from '../../definitions';
+import {getURLHostOrProtocol} from '../../utils/url';
+import type {ExtensionData, TabInfo, Theme, UserSettings} from '../../definitions';
 
 export function getMockData(override = {} as Partial<ExtensionData>): ExtensionData {
     return Object.assign({
@@ -7,6 +7,7 @@ export function getMockData(override = {} as Partial<ExtensionData>): ExtensionD
         isReady: true,
         settings: {
             enabled: true,
+            presets: [],
             theme: {
                 mode: 1,
                 brightness: 110,
@@ -19,6 +20,7 @@ export function getMockData(override = {} as Partial<ExtensionData>): ExtensionD
                 engine: 'cssFilter',
                 stylesheet: '',
                 scrollbarColor: 'auto',
+                styleSystemControls: true,
             } as Theme,
             customThemes: [],
             siteList: [],
@@ -26,6 +28,7 @@ export function getMockData(override = {} as Partial<ExtensionData>): ExtensionD
             applyToListedOnly: false,
             changeBrowserTheme: false,
             enableForPDF: true,
+            enableForProtectedPages: false,
             notifyOfNews: false,
             syncSettings: true,
             automation: '',
@@ -75,10 +78,10 @@ export function createConnectorMock() {
     const data = getMockData();
     const tab = getMockActiveTabInfo();
     const connector = {
-        getData() {
+        async getData() {
             return Promise.resolve(data);
         },
-        getActiveTabInfo() {
+        async getActiveTabInfo() {
             return Promise.resolve(tab);
         },
         subscribeToChanges(callback) {
@@ -97,7 +100,7 @@ export function createConnectorMock() {
             listener(data);
         },
         toggleURL(url) {
-            const pattern = getURLHost(url);
+            const pattern = getURLHostOrProtocol(url);
             const index = data.settings.siteList.indexOf(pattern);
             if (index >= 0) {
                 data.settings.siteList.splice(index, 1, pattern);

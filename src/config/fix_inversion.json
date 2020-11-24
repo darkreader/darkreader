@@ -734,6 +734,12 @@
             "rules": "#hlogo a { text-indent: -256em !important; }"
         },
         {
+            "url": "systemuicons.com",
+            "invert": [
+                "img"
+            ]
+        },
+        {
             "url": "terrytao.wordpress.com",
             "noinvert": "img"
         },

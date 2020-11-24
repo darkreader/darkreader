@@ -102,4 +102,26 @@ describe('Handle Media Queries', () => {
         expect(getComputedStyle(document.querySelector('h1')).backgroundColor).toBe('rgb(0, 102, 0)');
         expect((document.querySelector('.testcase-style').nextElementSibling as HTMLStyleElement).sheet.cssRules.length).toBe(2);
     });
+
+    it('should check for nested CSS @media', async () => {
+        container.innerHTML = multiline(
+            '<style class="testcase-style">',
+            '   @media screen and (min-width: 2px) {',
+            '       @media screen and (min-width: 2px) {',
+            '           h1 { background: green; }',
+            '       }',
+            '   }',
+            '   @media screen and (min-width: 200000px) {',
+            '       h1 { background: orange; }',
+            '   }',
+            '</style>',
+            '<h1>Some test media query i guess</h1>',
+        );
+
+        createOrUpdateDynamicTheme(theme, null, false);
+        await timeout(100);
+
+        expect(getComputedStyle(document.querySelector('h1')).backgroundColor).toBe('rgb(0, 102, 0)');
+        expect((document.querySelector('.testcase-style').nextElementSibling as HTMLStyleElement).sheet.cssRules.length).toBe(2);
+    });
 });

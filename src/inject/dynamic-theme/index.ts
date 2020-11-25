@@ -19,7 +19,8 @@ import type {AdoptedStyleSheetManager} from './adopted-style-manger';
 import {createAdoptedStyleSheetOverride} from './adopted-style-manger';
 import {isFirefox} from '../../utils/platform';
 import {injectProxy} from './stylesheet-proxy';
-import {parse, RGBA} from '../../utils/color';
+import type {RGBA} from '../../utils/color';
+import {parse} from '../../utils/color';
 
 const variables = new Map<string, DarkReaderVariable>();
 const parsedVariables = {};

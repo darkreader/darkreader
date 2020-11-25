@@ -11,12 +11,36 @@ import {dynamicThemeFixesCommands} from '../../../generators/dynamic-theme';
 
 type BodyProps = ExtWrapper & {tab: TabInfo};
 
+// eslint-disable-next-line @typescript-eslint/no-namespace
 declare namespace CodeMirror {
-    function fromTextArea(node: HTMLTextAreaElement, obj: object): mirror;
-    function defineSimpleMode(name: string, configuration: object): void;
-    function defineMode(name: string, modeFunc: (config: object) => object): void;
-    function getMode(config: object, name: string): object;
-    function multiplexingMode(mode: object, info: object): object;
+    function fromTextArea(node: HTMLTextAreaElement, obj: mirrorConfig): mirror;
+    function defineSimpleMode(name: string, configuration: simpleModeConfig): void;
+    function defineMode(name: string, modeFunc: () => any): void;
+    function getMode(config: any, name: string): any;
+    function multiplexingMode(mode: any, info: multiplexingModeConfig): any;
+}
+
+interface mirrorConfig {
+    mode: string;
+    lineNumbers: boolean;
+    lineWrapping: boolean;
+    theme: string;
+    styleActiveLine: boolean;
+}
+
+interface simpleModeConfig {
+    start: Array<{
+        regex: RegExp;
+        token: string;
+    }>;
+}
+
+interface multiplexingModeConfig {
+    open: string | RegExp;
+    close: string | RegExp;
+    mode: any;
+    delimStyle: string;
+    parseDelimiters?: boolean;
 }
 
 interface mirror {
@@ -102,6 +126,7 @@ function Body({data, tab, actions}: BodyProps) {
                 codeMirror = CodeMirror.fromTextArea(node, {
                     mode: 'darkreaderConfig',
                     lineNumbers: true,
+                    lineWrapping: true,
                     theme: 'dracula',
                     styleActiveLine: true,
                 });

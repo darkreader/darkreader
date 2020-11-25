@@ -3,8 +3,17 @@ import {Button} from '../../controls';
 import {getURLHostOrProtocol, isURLInList} from '../../../utils/url';
 import type {ExtWrapper, TabInfo} from '../../../definitions';
 
+// eslint-disable-next-line @typescript-eslint/no-namespace
 declare namespace CodeMirror {
-    function fromTextArea(node: HTMLTextAreaElement, obj: object): mirror;
+    function fromTextArea(node: HTMLTextAreaElement, obj: mirrorConfig): mirror;
+}
+
+interface mirrorConfig {
+    mode: string;
+    lineNumbers: boolean;
+    lineWrapping: boolean;
+    theme: string;
+    styleActiveLine: boolean;
 }
 
 interface mirror {
@@ -52,6 +61,7 @@ export default function Body({data, tab, actions}: BodyProps) {
                 codeMirror = CodeMirror.fromTextArea(node, {
                     mode: 'css',
                     lineNumbers: true,
+                    lineWrapping: true,
                     theme: 'dracula',
                     styleActiveLine: true,
                 });

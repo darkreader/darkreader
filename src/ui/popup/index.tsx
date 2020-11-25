@@ -65,4 +65,29 @@ if (DEBUG) {
             location.reload();
         }
     });
+
+    const socket = new WebSocket(`ws://localhost:8894`);
+    socket.onmessage = (e) => {
+        const respond = (message: any) => socket.send(JSON.stringify(message));
+        try {
+            const message = JSON.parse(e.data);
+            if (message.type === 'click') {
+                const selector = message.data;
+                const element = document.querySelector(selector);
+                element.click();
+                respond({type: 'click-response'});
+            } else if (message.type === 'exists') {
+                const selector = message.data;
+                const element = document.querySelector(selector);
+                respond({type: 'exists-response', data: element != null});
+            } else if (message.type === 'rect') {
+                const selector = message.data;
+                const element = document.querySelector(selector);
+                const rect = (element as HTMLElement).getBoundingClientRect();
+                respond({type: 'rect-response', data: {left: rect.left, top: rect.top, width: rect.width, height: rect.height}});
+            }
+        } catch (err) {
+            respond({type: 'error', data: String(err)});
+        }
+    };
 }

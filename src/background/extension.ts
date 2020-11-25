@@ -50,7 +50,7 @@ export class Extension {
             },
             onColorSchemeChange: this.onColorSchemeChange,
         });
-        this.user = new UserStorage({onRemoteSettingsChange: () => this.onSettingsChanged()});
+        this.user = new UserStorage({onRemoteSettingsChange: () => this.onRemoteSettingsChange()});
         this.awaiting = [];
     }
 
@@ -112,13 +112,13 @@ export class Extension {
         return {
             collect: async () => {
                 if (!this.ready) {
-                    await new Promise((resolve) => this.awaiting.push(resolve));
+                    await new Promise<void>((resolve) => this.awaiting.push(resolve));
                 }
                 return await this.collectData();
             },
             getActiveTabInfo: async () => {
                 if (!this.ready) {
-                    await new Promise((resolve) => this.awaiting.push(resolve));
+                    await new Promise<void>((resolve) => this.awaiting.push(resolve));
                 }
                 const url = await this.tabs.getActiveTabURL();
                 return this.getURLInfo(url);
@@ -214,7 +214,7 @@ export class Extension {
         if (this.ready) {
             return this.getTabMessage(url, frameURL);
         } else {
-            return new Promise((resolve) => {
+            return new Promise<{type: string; data?: any}>((resolve) => {
                 this.awaiting.push(() => {
                     resolve(this.getTabMessage(url, frameURL));
                 });
@@ -361,6 +361,11 @@ export class Extension {
         this.tabs.sendMessage(this.getTabMessage);
         this.saveUserSettings();
         this.reportChanges();
+    }
+
+    private onRemoteSettingsChange() {
+        // TODO: Requires proper handling and more testing
+        // to prevent cycling across instances.
     }
 
 

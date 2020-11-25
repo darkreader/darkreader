@@ -80,7 +80,11 @@ export async function writeLocalStorage<T extends {[key: string]: any}>(values: 
 }
 
 export const subscribeToOuterSettingsChange = (callback: () => void) => {
-    !isWriting && chrome.storage.onChanged.addListener(callback);
+    chrome.storage.onChanged.addListener(() => {
+        if (!isWriting) {
+            callback();
+        }
+    });
 };
 
 export async function getFontList() {

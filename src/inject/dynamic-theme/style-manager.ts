@@ -7,7 +7,7 @@ import {logWarn} from '../utils/log';
 import {getCSSVariables, replaceCSSRelativeURLsWithAbsolute, removeCSSComments, replaceCSSFontFace, getCSSURLValue, cssImportRegex, getCSSBaseBath} from './css-rules';
 import {bgFetch} from './network';
 import {createStyleSheetModifier} from './stylesheet-modifier';
-import {isShadowDomSupported} from '../../utils/platform';
+import {isShadowDomSupported, isSafari} from '../../utils/platform';
 
 declare global {
     interface HTMLStyleElement {
@@ -75,6 +75,11 @@ export function getManageableStyles(node: Node, results = [] as StyleElement[], 
 
 const syncStyleSet = new WeakSet<HTMLStyleElement | SVGStyleElement>();
 const corsStyleSet = new WeakSet<HTMLStyleElement>();
+
+let canOptimizeUsingProxy = false;
+document.addEventListener('__darkreader__inlineScriptsAllowed', () => {
+    canOptimizeUsingProxy = true;
+});
 
 export function manageStyle(element: StyleElement, {update, loadingStart, loadingEnd}): StyleManager {
     const prevStyles: HTMLStyleElement[] = [];
@@ -147,7 +152,11 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
                 logWarn(accessError);
             }
 
-            if ((!cssRules && !accessError) || isStillLoadingError(accessError)) {
+            if (
+                (!cssRules && !accessError && !isSafari) ||
+                (isSafari && !element.sheet) ||
+                isStillLoadingError(accessError)
+            ) {
                 try {
                     await linkLoading(element);
                 } catch (err) {
@@ -318,29 +327,85 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
         return cssRules;
     }
 
-    let areSheetChangesPending = false;
+    function watchForSheetChanges() {
+        watchForSheetChangesUsingProxy();
+        if (!canOptimizeUsingProxy) {
+            watchForSheetChangesUsingRAF();
+        }
+    }
 
-    function subscribeToSheetChanges() {
-        element.addEventListener('__darkreader__updateSheet', () => {
-            if (areSheetChangesPending) {
+    let rulesChangeKey: number = null;
+    let rulesCheckFrameId: number = null;
+
+    function updateRulesChangeKey() {
+        const rules = safeGetSheetRules();
+        if (rules) {
+            rulesChangeKey = rules.length;
+        }
+    }
+
+    function didRulesKeyChange() {
+        const rules = safeGetSheetRules();
+        return rules && rules.length !== rulesChangeKey;
+    }
+
+    function watchForSheetChangesUsingRAF() {
+        updateRulesChangeKey();
+        stopWatchingForSheetChangesUsingRAF();
+        const checkForUpdate = () => {
+            if (canOptimizeUsingProxy) {
+                stopWatchingForSheetChangesUsingRAF();
                 return;
             }
-
-            function handleSheetChanges() {
-                areSheetChangesPending = false;
-                if (cancelAsyncOperations) {
-                    return;
-                }
+            if (didRulesKeyChange()) {
+                updateRulesChangeKey();
                 update();
             }
+            rulesCheckFrameId = requestAnimationFrame(checkForUpdate);
+        };
+        checkForUpdate();
+    }
 
-            areSheetChangesPending = true;
-            if (typeof queueMicrotask === 'function') {
-                queueMicrotask(handleSheetChanges);
-            } else {
-                requestAnimationFrame(handleSheetChanges);
+    function stopWatchingForSheetChangesUsingRAF() {
+        cancelAnimationFrame(rulesCheckFrameId);
+    }
+
+    let areSheetChangesPending = false;
+
+    function onSheetChange() {
+        canOptimizeUsingProxy = true;
+        stopWatchingForSheetChangesUsingRAF();
+        if (areSheetChangesPending) {
+            return;
+        }
+
+        function handleSheetChanges() {
+            areSheetChangesPending = false;
+            if (cancelAsyncOperations) {
+                return;
             }
-        });
+            update();
+        }
+
+        areSheetChangesPending = true;
+        if (typeof queueMicrotask === 'function') {
+            queueMicrotask(handleSheetChanges);
+        } else {
+            requestAnimationFrame(handleSheetChanges);
+        }
+    }
+
+    function watchForSheetChangesUsingProxy() {
+        element.addEventListener('__darkreader__updateSheet', onSheetChange);
+    }
+
+    function stopWatchingForSheetChangesUsingProxy() {
+        element.removeEventListener('__darkreader__updateSheet', onSheetChange);
+    }
+
+    function stopWatchingForSheetChanges() {
+        stopWatchingForSheetChangesUsingProxy();
+        stopWatchingForSheetChangesUsingRAF();
     }
 
     function pause() {
@@ -348,19 +413,19 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
         cancelAsyncOperations = true;
         corsCopyPositionWatcher && corsCopyPositionWatcher.stop();
         syncStylePositionWatcher && syncStylePositionWatcher.stop();
+        stopWatchingForSheetChanges();
     }
 
     function destroy() {
         pause();
         removeNode(corsCopy);
         removeNode(syncStyle);
-        element.removeEventListener('__darkreader__updateSheet', update);
     }
 
     function watch() {
         observer.observe(element, observerOptions);
         if (element instanceof HTMLStyleElement) {
-            subscribeToSheetChanges();
+            watchForSheetChanges();
         }
     }
 

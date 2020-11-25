@@ -37,7 +37,7 @@ export default function Body({data, tab, actions}: BodyProps) {
             node.focus();
         }
         if (document.querySelectorAll('div.CodeMirror').length == 0) {
-            setTimeout(function() {
+            setTimeout(function () {
                 codeMirror = CodeMirror.fromTextArea(node, {
                     mode: 'css',
                     lineNumbers: true,
@@ -47,9 +47,8 @@ export default function Body({data, tab, actions}: BodyProps) {
                 });
                 codeMirror.setSize('90%', '80%');
             }, 0);
-        }
-        else {
-            setTimeout(function() {
+        } else {
+            setTimeout(function () {
                 codeMirror = CodeMirror.fromTextArea(node, {
                     mode: 'css',
                     lineNumbers: true,

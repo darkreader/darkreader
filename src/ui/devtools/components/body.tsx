@@ -23,6 +23,7 @@ interface mirror {
     getValue(): string;
     refresh(): void;
     setSize(width: string, height: string): void;
+    on(event: string, callback: () => void): void;
 }
 
 function Body({data, tab, actions}: BodyProps) {
@@ -52,6 +53,14 @@ function Body({data, tab, actions}: BodyProps) {
             keywords: Object.keys(dynamicThemeFixesCommands),
         });
 
+    function onchange() {
+        document.querySelectorAll('pre.CodeMirror-line > span[role="presentation"]').forEach(function (element: HTMLElement) {
+            if (wrapper.keywords.includes(element.textContent) && !element.innerHTML.includes('class="cm-atom')) {
+                element.innerHTML = '<span class="cm-atom">' + element.textContent + '</span>';
+            }
+        });
+    }
+
     function onTextRender(node: HTMLTextAreaElement) {
         if (!state.errorText) {
             node.value = wrapper.fixesText;
@@ -59,24 +68,24 @@ function Body({data, tab, actions}: BodyProps) {
         if (document.querySelectorAll('div.CodeMirror').length === 0) {
             CodeMirror.defineSimpleMode('mainConfig', {
                 start: [
-                  {
-                    regex: RegExp('^((?!' + wrapper.keywords.join('|') + '|^=).)*$', 'gm'),
-                    token: 'string',
-                  },
+                    {
+                        regex: RegExp('^((?!' + wrapper.keywords.join('|') + '|^=).)*$', 'gm'),
+                        token: 'string',
+                    },
                 ],
             });
-            CodeMirror.defineMode('darkreaderConfig', function (config) {
-              return CodeMirror.multiplexingMode(
-                CodeMirror.getMode({}, 'mainConfig'),
-                {
-                    open: RegExp('(' + wrapper.keywords.join('|') + ')', 'g'),
-                    close: '================================',
-                    mode: CodeMirror.getMode({}, 'css'),
-                    delimStyle: 'delimit',
-                }
-              );
+            CodeMirror.defineMode('darkreaderConfig', function () {
+                return CodeMirror.multiplexingMode(
+                    CodeMirror.getMode({}, 'mainConfig'),
+                    {
+                        open: RegExp('(' + wrapper.keywords.join('|') + ')', 'g'),
+                        close: '================================',
+                        mode: CodeMirror.getMode({}, 'css'),
+                        delimStyle: 'delimit',
+                    }
+                );
             });
-            setTimeout(function() {
+            setTimeout(function () {
                 codeMirror = CodeMirror.fromTextArea(node, {
                     mode: 'darkreaderConfig',
                     lineNumbers: true,
@@ -85,16 +94,11 @@ function Body({data, tab, actions}: BodyProps) {
                     styleActiveLine: true,
                 });
                 codeMirror.setSize('90%', '80%');
+                onchange();
+                codeMirror.on('update', onchange);
             }, 0);
-            setInterval(function() {
-                document.querySelectorAll('pre.CodeMirror-line > span[role="presentation"]').forEach(function(element: HTMLElement) {
-                    if (wrapper.keywords.includes(element.textContent) && !element.innerHTML.includes('class="cm-atom')) {
-                        element.innerHTML = '<span class="cm-atom">' + element.textContent + '</span>';
-                    }
-                });
-            }, 10);
         } else {
-            setTimeout(function() {
+            setTimeout(function () {
                 codeMirror = CodeMirror.fromTextArea(node, {
                     mode: 'darkreaderConfig',
                     lineNumbers: true,
@@ -103,6 +107,8 @@ function Body({data, tab, actions}: BodyProps) {
                 });
                 document.querySelectorAll('div.CodeMirror')[1].remove();
                 codeMirror.setSize('90%', '80%');
+                onchange();
+                codeMirror.on('update', onchange);
                 codeMirror.refresh();
             }, 0);
         }

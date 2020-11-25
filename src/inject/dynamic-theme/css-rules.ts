@@ -1,6 +1,7 @@
 import {forEach} from '../../utils/array';
 import {parseURL, getAbsoluteURL} from '../../utils/url';
 import {logWarn} from '../utils/log';
+import type {DarkReaderVariable} from './style-manager';
 
 export function iterateCSSRules(rules: CSSRuleList, iterate: (rule: CSSStyleRule) => void) {
     forEach(rules, (rule) => {
@@ -42,11 +43,11 @@ function isCSSVariable(property: string) {
 }
 
 export function getCSSVariables(rules: CSSRuleList) {
-    const variables = new Map<string, string>();
+    const variables = new Map<string, DarkReaderVariable>();
     rules && iterateCSSRules(rules, (rule) => {
         rule.style && iterateCSSDeclarations(rule.style, (property, value) => {
             if (isCSSVariable(property)) {
-                variables.set(property, value);
+                variables.set(rule.selectorText, {property, value});
             }
         });
     });
@@ -54,10 +55,11 @@ export function getCSSVariables(rules: CSSRuleList) {
 }
 
 export function getElementCSSVariables(element: HTMLElement) {
-    const variables = new Map<string, string>();
+    const variables = new Map<string, DarkReaderVariable>();
+    const selector = element.tagName.toLowerCase();
     iterateCSSDeclarations(element.style, (property, value) => {
         if (isCSSVariable(property)) {
-            variables.set(property, value);
+            variables.set(selector, {property, value});
         }
     });
     return variables;
@@ -92,46 +94,4 @@ const fontFaceRegex = /@font-face\s*{[^}]*}/g;
 
 export function replaceCSSFontFace($css: string) {
     return $css.replace(fontFaceRegex, '');
-}
-
-const varRegex = /var\((--[^\s,\(\)]+),?\s*([^\(\)]*(\([^\(\)]*\)[^\(\)]*)*\s*)\)/g;
-
-export function replaceCSSVariables(
-    value: string,
-    variables: Map<string, string>,
-    stack = new Set<string>(),
-) {
-    let missing = false;
-    const unresolvable = new Set<string>();
-    const result = value.replace(varRegex, (match, name, fallback) => {
-        if (stack.has(name)) {
-            logWarn(`Circular reference to variable ${name}`);
-            if (fallback) {
-                return fallback;
-            }
-            missing = true;
-            return match;
-        }
-        if (variables.has(name)) {
-            const value = variables.get(name);
-            if (value.match(varRegex)) {
-                unresolvable.add(name);
-            }
-            return value;
-        } else if (fallback) {
-            return fallback;
-        } else {
-            logWarn(`Variable ${name} not found`);
-            missing = true;
-        }
-        return match;
-    });
-    if (missing) {
-        return result;
-    }
-    if (result.match(varRegex)) {
-        unresolvable.forEach((v) => stack.add(v));
-        return replaceCSSVariables(result, variables, stack);
-    }
-    return result;
 }

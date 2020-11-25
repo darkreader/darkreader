@@ -1,9 +1,8 @@
 import type {Theme} from '../../definitions';
 import {createAsyncTasksQueue} from '../utils/throttle';
-import {iterateCSSRules, iterateCSSDeclarations, replaceCSSVariables} from './css-rules';
+import {iterateCSSRules, iterateCSSDeclarations} from './css-rules';
 import type {ModifiableCSSDeclaration, ModifiableCSSRule} from './modify-css';
 import {getModifiableCSSDeclaration} from './modify-css';
-import {getTempCSSStyleSheet} from '../utils/dom';
 
 const themeCacheKeys: Array<keyof Theme> = [
     'mode',
@@ -32,7 +31,6 @@ export function createStyleSheetModifier() {
     interface ModifySheetOptions {
         sourceCSSRules: CSSRuleList;
         theme: Theme;
-        variables: Map<string, string>;
         ignoreImageAnalysis: string[];
         force: boolean;
         prepareSheet: () => CSSStyleSheet;
@@ -41,7 +39,7 @@ export function createStyleSheetModifier() {
 
     function modifySheet(options: ModifySheetOptions): void {
         const rules = options.sourceCSSRules;
-        const {theme, variables, ignoreImageAnalysis, force, prepareSheet, isAsyncCancelled} = options;
+        const {theme, ignoreImageAnalysis, force, prepareSheet, isAsyncCancelled} = options;
 
         let rulesChanged = (rulesModCache.size === 0);
         const notFoundCacheKeys = new Set(rulesModCache.keys());
@@ -59,21 +57,6 @@ export function createStyleSheetModifier() {
                 textDiffersFromPrev = true;
             }
 
-            // Put CSS text with inserted CSS variables into separate <style> element
-            // to properly handle composite properties (e.g. background -> background-color)
-            let vars: CSSStyleSheet;
-            let varsRule: CSSStyleRule = null;
-            if (variables.size > 0 || cssText.includes('var(')) {
-                const cssTextWithVariables = replaceCSSVariables(cssText, variables);
-                if (rulesTextCache.get(cssText) !== cssTextWithVariables) {
-                    rulesTextCache.set(cssText, cssTextWithVariables);
-                    textDiffersFromPrev = true;
-                    vars = getTempCSSStyleSheet();
-                    vars.insertRule(cssTextWithVariables);
-                    varsRule = vars.cssRules[0] as CSSStyleRule;
-                }
-            }
-
             if (textDiffersFromPrev) {
                 rulesChanged = true;
             } else {
@@ -82,8 +65,7 @@ export function createStyleSheetModifier() {
             }
 
             const modDecs: ModifiableCSSDeclaration[] = [];
-            const targetRule = varsRule || rule;
-            targetRule && targetRule.style && iterateCSSDeclarations(targetRule.style, (property, value) => {
+            rule && rule.style && iterateCSSDeclarations(rule.style, (property, value) => {
                 const mod = getModifiableCSSDeclaration(property, value, rule, ignoreImageAnalysis, isAsyncCancelled);
                 if (mod) {
                     modDecs.push(mod);
@@ -97,8 +79,6 @@ export function createStyleSheetModifier() {
                 modRules.push(modRule);
             }
             rulesModCache.set(cssText, modRule);
-
-            vars && vars.deleteRule(0);
         });
 
         notFoundCacheKeys.forEach((key) => {

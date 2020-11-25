@@ -1,8 +1,8 @@
-import {replaceCSSVariables, getElementCSSVariables} from './css-rules';
+import {getElementCSSVariables} from './css-rules';
 import {overrideInlineStyle, getInlineOverrideStyle, watchForInlineStyles, stopWatchingForInlineStyles, INLINE_STYLE_SELECTOR} from './inline-style';
 import {changeMetaThemeColorWhenAvailable, restoreMetaThemeColor} from './meta-theme-color';
 import {getModifiedUserAgentStyle, getModifiedFallbackStyle, cleanModificationCache, parseColorWithCache, getSelectionColor} from './modify-css';
-import type {StyleElement, StyleManager} from './style-manager';
+import type {DarkReaderVariable, StyleElement, StyleManager} from './style-manager';
 import {manageStyle, getManageableStyles} from './style-manager';
 import {watchForStyleChanges, stopWatchingForStyleChanges} from './watch';
 import {forEach, push, toArray} from '../../utils/array';
@@ -19,9 +19,10 @@ import type {AdoptedStyleSheetManager} from './adopted-style-manger';
 import {createAdoptedStyleSheetOverride} from './adopted-style-manger';
 import {isFirefox} from '../../utils/platform';
 import {injectProxy} from './stylesheet-proxy';
-import {parse} from '../../utils/color';
+import {parse, RGBA} from '../../utils/color';
 
-const variables = new Map<string, string>();
+const variables = new Map<string, DarkReaderVariable>();
+const parsedVariables = {};
 const INSTANCE_ID = generateUID();
 const styleManagers = new Map<StyleElement, StyleManager>();
 const adoptedStyleManagers = [] as AdoptedStyleSheetManager[];
@@ -130,6 +131,10 @@ function createStaticStyleOverrides() {
     const proxyScript = createOrUpdateScript('darkreader--proxy');
     proxyScript.textContent = `(${injectProxy})()`;
     document.head.insertBefore(proxyScript, variableStyle.nextSibling);
+
+    const dynamicVariableStyle = createOrUpdateStyle('darkreader--dynamicVariable');
+    dynamicVariableStyle.textContent = '';
+    document.head.insertBefore(dynamicVariableStyle, proxyScript.nextSibling);
 }
 
 const shadowRootsWithOverrides = new Set<ShadowRoot>();
@@ -182,7 +187,7 @@ function createDynamicStyleOverrides() {
         .filter((details) => details && details.variables.size > 0)
         .map(({variables}) => variables);
     if (newVariables.length === 0) {
-        styleManagers.forEach((manager) => manager.render(filter, variables, getIgnoreImageAnalysisSelectors()));
+        styleManagers.forEach((manager) => manager.render(filter, getIgnoreImageAnalysisSelectors()));
         if (loadingStyles.size === 0) {
             cleanFallbackStyle();
         }
@@ -239,7 +244,7 @@ function createManager(element: StyleElement) {
             return;
         }
         if (details.variables.size === 0) {
-            manager.render(filter, variables, getIgnoreImageAnalysisSelectors());
+            manager.render(filter, getIgnoreImageAnalysisSelectors());
         } else {
             updateVariables(details.variables);
             throttledRenderAllStyles();
@@ -252,16 +257,54 @@ function createManager(element: StyleElement) {
     return manager;
 }
 
-function updateVariables(newVars: Map<string, string>) {
+function updateVariables(newVars: Map<string, DarkReaderVariable>) {
     if (newVars.size === 0) {
         return;
     }
     newVars.forEach((value, key) => {
+        delete parsedVariables[`${key};${value.property}`];
         variables.set(key, value);
     });
+    const variablesStyle: HTMLStyleElement = createOrUpdateStyle('darkreader--dynamicVariable');
+    const {sheet} = variablesStyle;
+
+    for (let i = sheet.cssRules.length - 1; i >= 0; i--) {
+        sheet.deleteRule(i);
+    }
+
     variables.forEach((value, key) => {
-        variables.set(key, replaceCSSVariables(value, variables));
+        if (parsedVariables[`${key};${value.property}`]) {
+            const {modifiedBackground, modifiedText} = parsedVariables[`${key};${value.property}`];
+            sheet.insertRule([
+                `${key} {`,
+                `   --darkreader-bg${value.property}: ${modifiedBackground};`,
+                `   --darkreader-text${value.property}: ${modifiedText};`,
+                `}`
+            ].join('\n'));
+        } else {
+            let parsedValue: RGBA;
+            try {
+                parsedValue = parse(value.value);
+            } catch (err) {
+                logWarn(err);
+                return;
+            }
+            const modifiedBackground = modifyBackgroundColor(parsedValue, filter);
+            const modifiedText = modifyForegroundColor(parsedValue, filter);
+            parsedVariables[`${key};${value.property}`] = {
+                modifiedBackground,
+                modifiedText
+            };
+            sheet.insertRule([
+                `${key} {`,
+                `   --darkreader-bg${value.property}: ${modifiedBackground};`,
+                `   --darkreader-text${value.property}: ${modifiedText};`,
+                `}`
+            ].join('\n'));
+        }
     });
+
+
 }
 
 function removeManager(element: StyleElement) {
@@ -273,8 +316,8 @@ function removeManager(element: StyleElement) {
 }
 
 const throttledRenderAllStyles = throttle((callback?: () => void) => {
-    styleManagers.forEach((manager) => manager.render(filter, variables, getIgnoreImageAnalysisSelectors()));
-    adoptedStyleManagers.forEach((manager) => manager.render(filter, variables, getIgnoreImageAnalysisSelectors()));
+    styleManagers.forEach((manager) => manager.render(filter, getIgnoreImageAnalysisSelectors()));
+    adoptedStyleManagers.forEach((manager) => manager.render(filter, getIgnoreImageAnalysisSelectors()));
     callback && callback();
 });
 
@@ -333,7 +376,7 @@ function handleAdoptedStyleSheets(node: ShadowRoot | Document) {
             const newManger = createAdoptedStyleSheetOverride(node);
 
             adoptedStyleManagers.push(newManger);
-            newManger.render(filter, variables, getIgnoreImageAnalysisSelectors());
+            newManger.render(filter, getIgnoreImageAnalysisSelectors());
         }
     }
 }
@@ -354,7 +397,7 @@ function watchForUpdates() {
             .filter((details) => details && details.variables.size > 0)
             .map(({variables}) => variables);
         if (newVariables.length === 0) {
-            newManagers.forEach((manager) => manager.render(filter, variables, getIgnoreImageAnalysisSelectors()));
+            newManagers.forEach((manager) => manager.render(filter, getIgnoreImageAnalysisSelectors()));
         } else {
             newVariables.forEach((variables) => updateVariables(variables));
             throttledRenderAllStyles();

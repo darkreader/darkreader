@@ -25,6 +25,8 @@ export interface ModifiableCSSRule {
     declarations: ModifiableCSSDeclaration[];
 }
 
+const varRegex = /var\((--[^\s,\(\)]+),?\s*([^\(\)]*(\([^\(\)]*\)[^\(\)]*)*\s*)\)/g;
+
 export function getModifiableCSSDeclaration(property: string, value: string, rule: CSSStyleRule, ignoreImageSelectors: string[], isCancelled: () => boolean): ModifiableCSSDeclaration {
     const important = Boolean(rule && rule.style && rule.style.getPropertyPriority(property));
     const sourceValue = value;
@@ -36,6 +38,15 @@ export function getModifiableCSSDeclaration(property: string, value: string, rul
         property === 'stroke' ||
         property === 'stop-color'
     ) {
+        if (value.startsWith('var(')) {
+            const modifed = value.replace(varRegex, (_, name) => {
+                if (property.indexOf('background') >= 0) {
+                    return `var(--darkreader-bg${name})`;
+                }
+                return `var(--darkreader-text${name})`;
+            });
+            return {property, value: modifed, important, sourceValue};
+        }
         const modifier = getColorModifier(property, value);
         if (modifier) {
             return {property, value: modifier, important, sourceValue};

@@ -33,7 +33,7 @@ async function patchFirefoxManifest({debug}) {
 
 async function copyFile(path, {debug, firefox}) {
     const cwdPath = getCwdPath(path);
-    var destDir = getDestDir({debug, firefox});
+    const destDir = getDestDir({debug, firefox});
     if (firefox && cwdPath === 'manifest.json') {
         await patchFirefoxManifest({debug});
     } else {

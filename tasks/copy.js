@@ -16,7 +16,7 @@ const cwdPaths = [
 ];
 const dependenciesPaths = [
     'codemirror/**/*.*'
-]
+];
 const paths = cwdPaths.map((path) => `${srcDir}/${path}`).concat(dependenciesPaths.map((path) => `${modulesDir}/${path}`));
 
 function getCwdPath(/** @type {string} */srcPath) {

@@ -112,13 +112,13 @@ export class Extension {
         return {
             collect: async () => {
                 if (!this.ready) {
-                    await new Promise((resolve) => this.awaiting.push(resolve));
+                    await new Promise<void>((resolve) => this.awaiting.push(resolve));
                 }
                 return await this.collectData();
             },
             getActiveTabInfo: async () => {
                 if (!this.ready) {
-                    await new Promise((resolve) => this.awaiting.push(resolve));
+                    await new Promise<void>((resolve) => this.awaiting.push(resolve));
                 }
                 const url = await this.tabs.getActiveTabURL();
                 return this.getURLInfo(url);
@@ -214,7 +214,7 @@ export class Extension {
         if (this.ready) {
             return this.getTabMessage(url, frameURL);
         } else {
-            return new Promise((resolve) => {
+            return new Promise<{type: string; data?: any}>((resolve) => {
                 this.awaiting.push(() => {
                     resolve(this.getTabMessage(url, frameURL));
                 });

@@ -50,7 +50,7 @@ export class Extension {
             },
             onColorSchemeChange: this.onColorSchemeChange,
         });
-        this.user = new UserStorage({onRemoteSettingsChange: () => this.onSettingsChanged()});
+        this.user = new UserStorage({onRemoteSettingsChange: () => this.onRemoteSettingsChange()});
         this.awaiting = [];
     }
 
@@ -361,6 +361,11 @@ export class Extension {
         this.tabs.sendMessage(this.getTabMessage);
         this.saveUserSettings();
         this.reportChanges();
+    }
+
+    private onRemoteSettingsChange() {
+        // TODO: Requires proper handling and more testing
+        // to prevent cycling across instances.
     }
 
 

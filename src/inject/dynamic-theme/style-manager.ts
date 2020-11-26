@@ -334,7 +334,9 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
 
     function watchForSheetChanges() {
         watchForSheetChangesUsingProxy();
-        if (!canOptimizeUsingProxy) {
+        // Sometimes sheet can be null in Firefox and Safari
+        // So need to watch for it using rAF
+        if (!(canOptimizeUsingProxy && element.sheet)) {
             watchForSheetChangesUsingRAF();
         }
     }
@@ -342,29 +344,26 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
     let rulesChangeKey: number = null;
     let rulesCheckFrameId: number = null;
 
-    function updateRulesChangeKey() {
+    function getRulesChangeKey() {
         const rules = safeGetSheetRules();
-        if (rules) {
-            rulesChangeKey = rules.length;
-        }
+        return rules ? rules.length : null;
     }
 
     function didRulesKeyChange() {
-        const rules = safeGetSheetRules();
-        return rules && rules.length !== rulesChangeKey;
+        return getRulesChangeKey() !== rulesChangeKey;
     }
 
     function watchForSheetChangesUsingRAF() {
-        updateRulesChangeKey();
+        rulesChangeKey = getRulesChangeKey();
         stopWatchingForSheetChangesUsingRAF();
         const checkForUpdate = () => {
-            if (canOptimizeUsingProxy) {
+            if (didRulesKeyChange()) {
+                rulesChangeKey = getRulesChangeKey();
+                update();
+            }
+            if (canOptimizeUsingProxy && element.sheet) {
                 stopWatchingForSheetChangesUsingRAF();
                 return;
-            }
-            if (didRulesKeyChange()) {
-                updateRulesChangeKey();
-                update();
             }
             rulesCheckFrameId = requestAnimationFrame(checkForUpdate);
         };

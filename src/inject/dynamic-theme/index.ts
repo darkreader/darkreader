@@ -11,7 +11,7 @@ import {logWarn} from '../utils/log';
 import {throttle} from '../utils/throttle';
 import {clamp} from '../../utils/math';
 import {getCSSFilterValue} from '../../generators/css-filter';
-import {modifyBackgroundColor, modifyColor, modifyForegroundColor} from '../../generators/modify-colors';
+import {modifyBackgroundColor, modifyBorderColor, modifyColor, modifyForegroundColor} from '../../generators/modify-colors';
 import {createTextStyle} from '../../generators/text-style';
 import type {FilterConfig, DynamicThemeFix} from '../../definitions';
 import {generateUID} from '../../utils/uid';
@@ -275,11 +275,28 @@ function updateVariables(newVars: Map<string, DarkReaderVariable>) {
 
     variables.forEach((value, key) => {
         if (parsedVariables[`${key};${value.property}`]) {
-            const {modifiedBackground, modifiedText} = parsedVariables[`${key};${value.property}`];
+            const {modifiedBackground, modifiedText, modifiedBorder} = parsedVariables[`${key};${value.property}`];
             sheet.insertRule([
                 `${key} {`,
                 `   --darkreader-bg${value.property}: ${modifiedBackground};`,
                 `   --darkreader-text${value.property}: ${modifiedText};`,
+                `   --darkreader-border${value.property}: ${modifiedBorder}`,
+                `}`
+            ].join('\n'));
+        } else if (value.value.includes('var(')) {
+            const modifiedBackground = `--darkreader-bg${value.property}`;
+            const modifiedText = `--darkreader-text${value.property}`;
+            const modifiedBorder = `--darkreader-border${value.property}`;
+            parsedVariables[`${key};${value.property}`] = {
+                modifiedBackground,
+                modifiedText,
+                modifiedBorder,
+            };
+            sheet.insertRule([
+                `${key} {`,
+                `   --darkreader-bg${value.property}: ${modifiedBackground};`,
+                `   --darkreader-text${value.property}: ${modifiedText};`,
+                `   --darkreader-border${value.property}: ${modifiedBorder}`,
                 `}`
             ].join('\n'));
         } else {
@@ -290,16 +307,20 @@ function updateVariables(newVars: Map<string, DarkReaderVariable>) {
                 logWarn(err);
                 return;
             }
+
             const modifiedBackground = modifyBackgroundColor(parsedValue, filter);
             const modifiedText = modifyForegroundColor(parsedValue, filter);
+            const modifiedBorder = modifyBorderColor(parsedValue, filter);
             parsedVariables[`${key};${value.property}`] = {
                 modifiedBackground,
-                modifiedText
+                modifiedText,
+                modifiedBorder,
             };
             sheet.insertRule([
                 `${key} {`,
                 `   --darkreader-bg${value.property}: ${modifiedBackground};`,
                 `   --darkreader-text${value.property}: ${modifiedText};`,
+                `   --darkreader-border${value.property}: ${modifiedBorder}`,
                 `}`
             ].join('\n'));
         }

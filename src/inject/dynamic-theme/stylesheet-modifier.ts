@@ -1,4 +1,5 @@
 import type {Theme} from '../../definitions';
+import {getTempCSSStyleSheet} from '../utils/dom';
 import {createAsyncTasksQueue} from '../utils/throttle';
 import {iterateCSSRules, iterateCSSDeclarations} from './css-rules';
 import type {ModifiableCSSDeclaration, ModifiableCSSRule} from './modify-css';
@@ -57,6 +58,17 @@ export function createStyleSheetModifier() {
                 textDiffersFromPrev = true;
             }
 
+            // Put CSS text with inserted CSS variables into separate <style> element
+            // to properly handle composite properties (e.g. background -> background-color)
+            let vars: CSSStyleSheet;
+            let varsRule: CSSStyleRule = null;
+            if (cssText.includes('var(')) {
+                // TODO: replace variables with color value.
+                vars = getTempCSSStyleSheet();
+                vars.insertRule(cssText);
+                varsRule = vars.cssRules[0] as CSSStyleRule;
+            }
+
             if (textDiffersFromPrev) {
                 rulesChanged = true;
             } else {
@@ -65,7 +77,8 @@ export function createStyleSheetModifier() {
             }
 
             const modDecs: ModifiableCSSDeclaration[] = [];
-            rule && rule.style && iterateCSSDeclarations(rule.style, (property, value) => {
+            const targetRule = varsRule || rule;
+            targetRule && targetRule.style && iterateCSSDeclarations(targetRule.style, (property, value) => {
                 const mod = getModifiableCSSDeclaration(property, value, rule, ignoreImageAnalysis, isAsyncCancelled);
                 if (mod) {
                     modDecs.push(mod);
@@ -79,6 +92,8 @@ export function createStyleSheetModifier() {
                 modRules.push(modRule);
             }
             rulesModCache.set(cssText, modRule);
+
+            vars && vars.deleteRule(0);
         });
 
         notFoundCacheKeys.forEach((key) => {

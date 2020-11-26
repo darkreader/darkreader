@@ -1,4 +1,4 @@
-import {getElementCSSVariables} from './css-rules';
+import {getElementCSSVariables, replaceCSSVariables} from './css-rules';
 import {overrideInlineStyle, getInlineOverrideStyle, watchForInlineStyles, stopWatchingForInlineStyles, INLINE_STYLE_SELECTOR} from './inline-style';
 import {changeMetaThemeColorWhenAvailable, restoreMetaThemeColor} from './meta-theme-color';
 import {getModifiedUserAgentStyle, getModifiedFallbackStyle, cleanModificationCache, parseColorWithCache, getSelectionColor} from './modify-css';
@@ -268,6 +268,11 @@ function updateVariables(newVars: Map<string, DarkReaderVariable>) {
         delete parsedVariables[`${key};${value.property}`];
         variables.set(key, value);
     });
+
+    legacyVaribales.forEach((value, key) => {
+        legacyVaribales.set(key, replaceCSSVariables(value, legacyVaribales)[0]);
+    });
+
     const variablesStyle: HTMLStyleElement = createOrUpdateStyle('darkreader--dynamicVariable');
     const {sheet} = variablesStyle;
 
@@ -276,6 +281,7 @@ function updateVariables(newVars: Map<string, DarkReaderVariable>) {
     }
 
     variables.forEach((value, key) => {
+        key = key.split(';')[0];
         if (parsedVariables[`${key};${value.property}`]) {
             const {modifiedBackground, modifiedText, modifiedBorder} = parsedVariables[`${key};${value.property}`];
             sheet.insertRule([

@@ -47,7 +47,7 @@ export function getCSSVariables(rules: CSSRuleList) {
     rules && iterateCSSRules(rules, (rule) => {
         rule.style && iterateCSSDeclarations(rule.style, (property, value) => {
             if (isCSSVariable(property)) {
-                variables.set(rule.selectorText, {property, value});
+                variables.set(`${rule.selectorText};${property}`, {property, value});
             }
         });
     });
@@ -59,7 +59,7 @@ export function getElementCSSVariables(element: HTMLElement) {
     const selector = element.tagName.toLowerCase();
     iterateCSSDeclarations(element.style, (property, value) => {
         if (isCSSVariable(property)) {
-            variables.set(selector, {property, value});
+            variables.set(`${selector};${property}`, {property, value});
         }
     });
     return variables;

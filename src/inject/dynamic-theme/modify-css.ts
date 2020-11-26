@@ -4,7 +4,7 @@ import {clamp} from '../../utils/math';
 import {getMatches} from '../../utils/text';
 import {getAbsoluteURL} from '../../utils/url';
 import {modifyBackgroundColor, modifyBorderColor, modifyForegroundColor, modifyGradientColor, modifyShadowColor, clearColorModificationCache} from '../../generators/modify-colors';
-import {cssURLRegex, getCSSURLValue, getCSSBaseBath} from './css-rules';
+import {cssURLRegex, getCSSURLValue, getCSSBaseBath, varRegex} from './css-rules';
 import type {ImageDetails} from './image';
 import {getImageDetails, getFilteredImageDataURL, cleanImageProcessingCache} from './image';
 import {logWarn, logInfo} from '../utils/log';
@@ -24,8 +24,6 @@ export interface ModifiableCSSRule {
     parentRule: any;
     declarations: ModifiableCSSDeclaration[];
 }
-
-const varRegex = /var\((--[^\s,\(\)]+),?\s*([^\(\)]*(\([^\(\)]*\)[^\(\)]*)*\s*)\)/g;
 
 export function getModifiableCSSDeclaration(property: string, value: string, rule: CSSStyleRule, ignoreImageSelectors: string[], isCancelled: () => boolean): ModifiableCSSDeclaration {
     const important = Boolean(rule && rule.style && rule.style.getPropertyPriority(property));

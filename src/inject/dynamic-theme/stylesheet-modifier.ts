@@ -1,7 +1,7 @@
 import type {Theme} from '../../definitions';
 import {getTempCSSStyleSheet} from '../utils/dom';
 import {createAsyncTasksQueue} from '../utils/throttle';
-import {iterateCSSRules, iterateCSSDeclarations} from './css-rules';
+import {iterateCSSRules, iterateCSSDeclarations, replaceCSSVariables} from './css-rules';
 import type {ModifiableCSSDeclaration, ModifiableCSSRule} from './modify-css';
 import {getModifiableCSSDeclaration} from './modify-css';
 
@@ -31,6 +31,7 @@ export function createStyleSheetModifier() {
 
     interface ModifySheetOptions {
         sourceCSSRules: CSSRuleList;
+        variables: Map<string, string>;
         theme: Theme;
         ignoreImageAnalysis: string[];
         force: boolean;
@@ -40,7 +41,7 @@ export function createStyleSheetModifier() {
 
     function modifySheet(options: ModifySheetOptions): void {
         const rules = options.sourceCSSRules;
-        const {theme, ignoreImageAnalysis, force, prepareSheet, isAsyncCancelled} = options;
+        const {theme, variables, ignoreImageAnalysis, force, prepareSheet, isAsyncCancelled} = options;
 
         let rulesChanged = (rulesModCache.size === 0);
         const notFoundCacheKeys = new Set(rulesModCache.keys());
@@ -62,10 +63,12 @@ export function createStyleSheetModifier() {
             // to properly handle composite properties (e.g. background -> background-color)
             let vars: CSSStyleSheet;
             let varsRule: CSSStyleRule = null;
+            let replacedMap: Map<string, string> = new Map<string, string>();
             if (cssText.includes('var(')) {
-                // TODO: replace variables with color value.
+                const [replacedCSSText, resultMap] = replaceCSSVariables(cssText, variables);
+                replacedMap = resultMap;
                 vars = getTempCSSStyleSheet();
-                vars.insertRule(cssText);
+                vars.insertRule(replacedCSSText);
                 varsRule = vars.cssRules[0] as CSSStyleRule;
             }
 
@@ -79,6 +82,9 @@ export function createStyleSheetModifier() {
             const modDecs: ModifiableCSSDeclaration[] = [];
             const targetRule = varsRule || rule;
             targetRule && targetRule.style && iterateCSSDeclarations(targetRule.style, (property, value) => {
+                if (replacedMap.has(value)) {
+                    value = replacedMap.get(value);
+                }
                 const mod = getModifiableCSSDeclaration(property, value, rule, ignoreImageAnalysis, isAsyncCancelled);
                 if (mod) {
                     modDecs.push(mod);

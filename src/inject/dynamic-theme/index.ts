@@ -22,6 +22,7 @@ import {injectProxy} from './stylesheet-proxy';
 import type {RGBA} from '../../utils/color';
 import {parse} from '../../utils/color';
 
+const legacyVaribales = new Map<string, string>();
 const variables = new Map<string, DarkReaderVariable>();
 const parsedVariables = {};
 const INSTANCE_ID = generateUID();
@@ -188,7 +189,7 @@ function createDynamicStyleOverrides() {
         .filter((details) => details && details.variables.size > 0)
         .map(({variables}) => variables);
     if (newVariables.length === 0) {
-        styleManagers.forEach((manager) => manager.render(filter, getIgnoreImageAnalysisSelectors()));
+        styleManagers.forEach((manager) => manager.render(filter, legacyVaribales, getIgnoreImageAnalysisSelectors()));
         if (loadingStyles.size === 0) {
             cleanFallbackStyle();
         }
@@ -245,7 +246,7 @@ function createManager(element: StyleElement) {
             return;
         }
         if (details.variables.size === 0) {
-            manager.render(filter, getIgnoreImageAnalysisSelectors());
+            manager.render(filter, legacyVaribales, getIgnoreImageAnalysisSelectors());
         } else {
             updateVariables(details.variables);
             throttledRenderAllStyles();
@@ -263,6 +264,7 @@ function updateVariables(newVars: Map<string, DarkReaderVariable>) {
         return;
     }
     newVars.forEach((value, key) => {
+        legacyVaribales.set(value.property, value.value);
         delete parsedVariables[`${key};${value.property}`];
         variables.set(key, value);
     });
@@ -338,8 +340,8 @@ function removeManager(element: StyleElement) {
 }
 
 const throttledRenderAllStyles = throttle((callback?: () => void) => {
-    styleManagers.forEach((manager) => manager.render(filter, getIgnoreImageAnalysisSelectors()));
-    adoptedStyleManagers.forEach((manager) => manager.render(filter, getIgnoreImageAnalysisSelectors()));
+    styleManagers.forEach((manager) => manager.render(filter, legacyVaribales, getIgnoreImageAnalysisSelectors()));
+    adoptedStyleManagers.forEach((manager) => manager.render(filter, legacyVaribales, getIgnoreImageAnalysisSelectors()));
     callback && callback();
 });
 
@@ -398,7 +400,7 @@ function handleAdoptedStyleSheets(node: ShadowRoot | Document) {
             const newManger = createAdoptedStyleSheetOverride(node);
 
             adoptedStyleManagers.push(newManger);
-            newManger.render(filter, getIgnoreImageAnalysisSelectors());
+            newManger.render(filter, legacyVaribales, getIgnoreImageAnalysisSelectors());
         }
     }
 }
@@ -419,7 +421,7 @@ function watchForUpdates() {
             .filter((details) => details && details.variables.size > 0)
             .map(({variables}) => variables);
         if (newVariables.length === 0) {
-            newManagers.forEach((manager) => manager.render(filter, getIgnoreImageAnalysisSelectors()));
+            newManagers.forEach((manager) => manager.render(filter, legacyVaribales, getIgnoreImageAnalysisSelectors()));
         } else {
             newVariables.forEach((variables) => updateVariables(variables));
             throttledRenderAllStyles();

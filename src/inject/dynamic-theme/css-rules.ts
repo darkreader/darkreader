@@ -95,3 +95,52 @@ const fontFaceRegex = /@font-face\s*{[^}]*}/g;
 export function replaceCSSFontFace($css: string) {
     return $css.replace(fontFaceRegex, '');
 }
+
+export const varRegex = /var\((--[^\s,\(\)]+),?\s*([^\(\)]*(\([^\(\)]*\)[^\(\)]*)*\s*)\)/g;
+
+export function replaceCSSVariables(
+    value: string,
+    variables: Map<string, string>,
+    stack = new Set<string>(),
+) {
+    let missing = false;
+    const unresolvable = new Set<string>();
+    const replacedMap = new Map<string, string>();
+    const result = value.replace(varRegex, (match, name, fallback: string) => {
+        if (stack.has(name)) {
+            logWarn(`Circular reference to variable ${name}`);
+            if (fallback) {
+                replacedMap.set(fallback, name);
+                return fallback;
+            }
+            missing = true;
+            replacedMap.set(match, match);
+            return match;
+        }
+        if (variables.has(name)) {
+            const value = variables.get(name);
+            if (value.match(varRegex)) {
+                unresolvable.add(name);
+            }
+            replacedMap.set(value, match);
+            return value;
+        } else if (fallback) {
+            replacedMap.set(fallback, match);
+            return fallback;
+        } else {
+            logWarn(`Variable ${name} not found`);
+            missing = true;
+        }
+        replacedMap.set(match, match);
+        return match;
+    });
+    if (missing) {
+        return [result, replacedMap];
+    }
+    if (result.match(varRegex)) {
+        unresolvable.forEach((v) => stack.add(v));
+        return replaceCSSVariables(result, variables, stack);
+
+    }
+    return [result, replacedMap];
+}

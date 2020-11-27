@@ -14,6 +14,8 @@ interface mirrorConfig {
     lineWrapping: boolean;
     theme: string;
     styleActiveLine: boolean;
+    matchBrackets: boolean;
+    autoCloseBrackets: boolean;
 }
 
 interface mirror {
@@ -52,7 +54,9 @@ export default function Body({data, tab, actions}: BodyProps) {
                     lineNumbers: true,
                     lineWrapping: true,
                     theme: 'dracula',
-                    styleActiveLine: true
+                    styleActiveLine: true,
+                    matchBrackets: true,
+                    autoCloseBrackets: true,
                 });
                 codeMirror.setSize('90%', '80%');
             }, 0);
@@ -64,6 +68,8 @@ export default function Body({data, tab, actions}: BodyProps) {
                     lineWrapping: true,
                     theme: 'dracula',
                     styleActiveLine: true,
+                    matchBrackets: true,
+                    autoCloseBrackets: true,
                 });
                 document.querySelectorAll('div.CodeMirror')[1].remove();
                 codeMirror.setSize('90%', '80%');

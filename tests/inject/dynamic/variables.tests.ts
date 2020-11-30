@@ -243,6 +243,32 @@ describe('Should handle variables correctly', () => {
         expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(255, 26, 26)');
     });
 
+    it('should handle internal conversion of hex to RGB', async () => {
+        container.innerHTML = multiline(
+            '<style>',
+            '   :root {',
+            '       --bg: #fff;',
+            '       --text: #000;',
+            '   }',
+            '</style>',
+            '<style>',
+            '   body {',
+            '       color: var(--text);',
+            '   }',
+            '   h1 {',
+            '       background: var(--bg);',
+            '       color: var(--text);',
+            '   }',
+            '</style>',
+            '<h1>Dark <strong>Theme</strong>!</h1>',
+        );
+        createOrUpdateDynamicTheme(theme, null, false);
+        await timeout(100);
+        expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(232, 230, 227)');
+        expect(getComputedStyle(container.querySelector('h1')).backgroundColor).toBe('rgb(24, 26, 27)');
+        expect(getComputedStyle(container).color).toBe('rgb(232, 230, 227)');
+    });
+
 });
 
 describe('Managing CSS rules', () => {

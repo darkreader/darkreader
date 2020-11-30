@@ -20,7 +20,7 @@ import {createAdoptedStyleSheetOverride} from './adopted-style-manger';
 import {isFirefox} from '../../utils/platform';
 import {injectProxy} from './stylesheet-proxy';
 import type {RGBA} from '../../utils/color';
-import {parse} from '../../utils/color';
+import {parse, rgbToString} from '../../utils/color';
 
 const legacyVaribales = new Map<string, string>();
 const variables = new Map<string, DarkReaderVariable>();
@@ -270,7 +270,16 @@ function updateVariables(newVars: Map<string, DarkReaderVariable>) {
     });
 
     legacyVaribales.forEach((value, key) => {
-        legacyVaribales.set(key, replaceCSSVariables(value, legacyVaribales)[0]);
+        if (value.includes('--')) {
+            legacyVaribales.set(key, replaceCSSVariables(value, legacyVaribales)[0]);
+        }
+        try {
+            const parsed = parse(value);
+            const RGB = rgbToString(parsed);
+            legacyVaribales.set(key, RGB);
+        } catch (err) {
+            return;
+        }
     });
 
     variables.forEach((value, key) => {

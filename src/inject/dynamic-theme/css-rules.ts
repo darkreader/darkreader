@@ -110,7 +110,7 @@ export function replaceCSSVariables(
         if (stack.has(name)) {
             logWarn(`Circular reference to variable ${name}`);
             if (fallback) {
-                replacedMap.set(fallback, name);
+                replacedMap.set(fallback, fallback);
                 return fallback;
             }
             missing = true;
@@ -125,7 +125,7 @@ export function replaceCSSVariables(
             replacedMap.set(value, match);
             return value;
         } else if (fallback) {
-            replacedMap.set(fallback, match);
+            replacedMap.set(fallback, fallback);
             return fallback;
         } else {
             logWarn(`Variable ${name} not found`);

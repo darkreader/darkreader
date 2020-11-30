@@ -24,7 +24,7 @@ import {parse} from '../../utils/color';
 
 const legacyVaribales = new Map<string, string>();
 const variables = new Map<string, DarkReaderVariable>();
-const parsedVariables = {};
+let parsedVariables = {};
 const INSTANCE_ID = generateUID();
 const styleManagers = new Map<StyleElement, StyleManager>();
 const adoptedStyleManagers = [] as AdoptedStyleSheetManager[];
@@ -271,6 +271,13 @@ function updateVariables(newVars: Map<string, DarkReaderVariable>) {
 
     legacyVaribales.forEach((value, key) => {
         legacyVaribales.set(key, replaceCSSVariables(value, legacyVaribales)[0]);
+    });
+
+    variables.forEach((value, key) => {
+        variables.set(key, {
+            value: replaceCSSVariables(value.value, legacyVaribales)[0],
+            property: value.property
+        });
     });
 
     const variablesStyle: HTMLStyleElement = createOrUpdateStyle('darkreader--dynamicVariable');
@@ -548,6 +555,9 @@ export function removeDynamicTheme() {
         manager.destroy();
     });
     adoptedStyleManagers.splice(0);
+    legacyVaribales.clear();
+    variables.clear();
+    parsedVariables = {};
 }
 
 export function cleanDynamicThemeCache() {

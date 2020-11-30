@@ -18,6 +18,7 @@ afterEach(() => {
     container.innerHTML = '';
 });
 
+
 describe('Should handle variables correctly', () => {
 
     it('should handle variables with different CSS Selectors', async () => {
@@ -43,6 +44,201 @@ describe('Should handle variables correctly', () => {
         );
         createOrUpdateDynamicTheme(theme, null, false);
         await timeout(100);
+        expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(114, 255, 114)');
+    });
+
+    it('No variable', async () => {
+        container.innerHTML = multiline(
+            '<style>',
+            '   h1 {',
+            '       background: var(--bg);',
+            '       color: var(--text);',
+            '   }',
+            '</style>',
+            '<h1>Dark <strong>Theme</strong>!</h1>',
+        );
+        createOrUpdateDynamicTheme(theme, null, false);
+        await timeout(100);
+        expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(232, 230, 227)');
+        expect(getComputedStyle(container.querySelector('h1')).backgroundColor).toBe('rgba(0, 0, 0, 0)');
+    });
+
+    it('should handle basic variables', async () => {
+        container.innerHTML = multiline(
+            '<style>',
+            '   :root {',
+            '       --bg: white;',
+            '       --text: black;',
+            '   }',
+            '</style>',
+            '<style>',
+            '   body {',
+            '       color: var(--text);',
+            '   }',
+            '   h1 {',
+            '       background: var(--bg);',
+            '       color: var(--text);',
+            '   }',
+            '</style>',
+            '<h1>Dark <strong>Theme</strong>!</h1>',
+        );
+        createOrUpdateDynamicTheme(theme, null, false);
+        await timeout(100);
+        expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(232, 230, 227)');
+        expect(getComputedStyle(container.querySelector('h1')).backgroundColor).toBe('rgb(24, 26, 27)');
+        expect(getComputedStyle(container).color).toBe('rgb(232, 230, 227)');
+    });
+
+    it('should not prefer fallback variable when not needed', async () => {
+        container.innerHTML = multiline(
+            '<style>',
+            '   :root {',
+            '       --text: black;',
+            '   }',
+            '</style>',
+            '<style>',
+            '   body {',
+            '       color: var(--text, red);',
+            '   }',
+            '</style>',
+            '<h1>Dark <strong>Theme</strong>!</h1>',
+        );
+        createOrUpdateDynamicTheme(theme, null, false);
+        await timeout(100);
+        expect(getComputedStyle(container).color).toBe('rgb(232, 230, 227)');
+    });
+
+    it('should prefer fallback variable when needed', async () => {
+        container.innerHTML = multiline(
+            '<style>',
+            '   body {',
+            '       color: var(--text, red);',
+            '   }',
+            '</style>',
+            '<h1>Dark <strong>Theme</strong>!</h1>',
+        );
+        createOrUpdateDynamicTheme(theme, null, false);
+        await timeout(100);
+        expect(getComputedStyle(container).color).toBe('rgb(255, 26, 26)');
+    });
+
+    it('should prefer nested fallback variable when needed', async () => {
+        container.innerHTML = multiline(
+            '<style>',
+            '    :root {',
+            '        --alert: red;',
+            '    }',
+            '</style>',
+            '<style>',
+            '   body {',
+            '       color: var(--text, var(--alert));',
+            '   }',
+            '</style>',
+            '<h1>Dark <strong>Theme</strong>!</h1>',
+        );
+        createOrUpdateDynamicTheme(theme, null, false);
+        await timeout(100);
+        expect(getComputedStyle(container).color).toBe('rgb(255, 26, 26)');
+    });
+
+    it('should prefer fallback variable of nested fallback when needed', async () => {
+        container.innerHTML = multiline(
+            '<style>',
+            '   body {',
+            '       color: var(--text, var(--alert, green));',
+            '   }',
+            '</style>',
+            '<h1>Dark <strong>Theme</strong>!</h1>',
+        );
+        createOrUpdateDynamicTheme(theme, null, false);
+        await timeout(100);
+        expect(getComputedStyle(container).color).toBe('rgb(114, 255, 114)');
+    });
+
+    it('should replace to variable when needed', async () => {
+        container.innerHTML = multiline(
+            '<style>',
+            '    :root {',
+            '        --text: var(--text);',
+            '    }',
+            '</style>',
+            '<style>',
+            '   body {',
+            '       color: var(--text);',
+            '   }',
+            '</style>',
+            '<h1>Dark <strong>Theme</strong>!</h1>',
+        );
+        createOrUpdateDynamicTheme(theme, null, false);
+        await timeout(100);
+        expect(getComputedStyle(container).color).toBe('rgb(232, 230, 227)');
+    });
+
+    it('should replace to nested variable when needed', async () => {
+        container.innerHTML = multiline(
+            '<style>',
+            '    :root {',
+            '        --text: var(--alert);',
+            '        --alert: var(--text);',
+            '    }',
+            '</style>',
+            '<style>',
+            '   body {',
+            '       color: var(--text);',
+            '   }',
+            '</style>',
+            '<h1>Dark <strong>Theme</strong>!</h1>',
+        );
+        createOrUpdateDynamicTheme(theme, null, false);
+        await timeout(100);
+        expect(getComputedStyle(container).color).toBe('rgb(232, 230, 227)');
+    });
+
+    it('should replace to nested variable when needed', async () => {
+        container.innerHTML = multiline(
+            '<style>',
+            '    :root {',
+            '        --text: var(--alert);',
+            '        --alert: var(--text);',
+            '	 }',
+            '</style>',
+            '<style>',
+            '    body {',
+            '        color: var(--text, var(--alert));',
+            '    }',
+            '    h1 {',
+            '        color: var(--text);',
+            '    }',
+            '</style>',
+            '<h1>Dark <strong>Theme</strong>!</h1>',
+        );
+        createOrUpdateDynamicTheme(theme, null, false);
+        await timeout(100);
+        expect(getComputedStyle(container).color).toBe('rgb(232, 230, 227)');
+        expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(232, 230, 227)');
+    });
+
+    it('should replace to a nested variable value when needed', async () => {
+        container.innerHTML = multiline(
+            '<style>',
+            ':root {',
+            '    --text: var(--alert);',
+            '    --alert: red;',
+            '}',
+            '</style>',
+            '<style>',
+            '   body {',
+            '        color: var(--text);',
+            '   }',
+            '   h1 {',
+            '        color: var(--alert);',
+            '    }',
+            '</style>',
+            '<h1>Dark <strong>Theme</strong>!</h1>',
+        );
+        createOrUpdateDynamicTheme(theme, null, false);
+        await timeout(100);
+        expect(getComputedStyle(container).color).toBe('rgb(255, 26, 26)');
         expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(255, 26, 26)');
     });
 

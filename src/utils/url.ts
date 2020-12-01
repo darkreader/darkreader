@@ -34,6 +34,8 @@ export function getURLHostOrProtocol($url: string) {
     const url = new URL($url);
     if (url.host) {
         return url.host;
+    } else if (url.protocol === 'file:') {
+        return url.pathname;
     } else {
         return url.protocol;
     }

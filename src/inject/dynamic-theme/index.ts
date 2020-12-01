@@ -135,13 +135,10 @@ function createStaticStyleOverrides() {
     document.head.insertBefore(proxyScript, variableStyle.nextSibling);
 
     const dynamicVariableStyle = createOrUpdateStyle('darkreader--dynamicVariable');
-    if (variables.size > 0) {
-        parsedVariables = {};
-        updateVariables(variables);
-    } else {
-        dynamicVariableStyle.textContent = '';
-    }
+    dynamicVariableStyle.textContent = '';
     document.head.insertBefore(dynamicVariableStyle, proxyScript.nextSibling);
+    parsedVariables = {};
+    updateVariables(variables);
 }
 
 const shadowRootsWithOverrides = new Set<ShadowRoot>();

@@ -9,7 +9,7 @@ import type {ImageDetails} from './image';
 import {getImageDetails, getFilteredImageDataURL, cleanImageProcessingCache} from './image';
 import {logWarn, logInfo} from '../utils/log';
 import type {FilterConfig, Theme} from '../../definitions';
-import { isFirefox } from '../../utils/platform';
+import {isFirefox} from '../../utils/platform';
 
 type CSSValueModifier = (filter: FilterConfig) => string | Promise<string>;
 

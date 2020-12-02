@@ -1,6 +1,7 @@
 import {canInjectScript} from '../background/utils/extension-api';
 import {createFileLoader} from './utils/network';
 import type {Message} from '../definitions';
+import {isFirefox} from '../utils/platform';
 
 async function queryTabs(query: chrome.tabs.QueryInfo) {
     return new Promise<chrome.tabs.Tab[]>((resolve) => {
@@ -117,7 +118,7 @@ export default class TabManager {
     }
 
     handleXHR({getConnectionMessage}) {
-        const prefId = 'styleViaXhr';
+        const prefId = 'settingsOverXHR';
         const blobUrlPrefix = 'blob:' + chrome.runtime.getURL('/');
         const stylesToPass = {};
         const reqFilter = {
@@ -130,23 +131,25 @@ export default class TabManager {
             'responseHeaders',
             'extraHeaders',
         ]);
-        chrome.declarativeContent.onPageChanged.removeRules([prefId], async () => {
-            chrome.declarativeContent.onPageChanged.addRules([{
-                id: prefId,
-                conditions: [
-                    new chrome.declarativeContent.PageStateMatcher({
-                        pageUrl: {urlContains: ':'},
-                    }),
-                ],
-                actions: [
-                    new (chrome.declarativeContent as any).RequestContentScript({
-                        allFrames: true,
-                        // This runs earlier than document_start
-                        js: chrome.runtime.getManifest().content_scripts[0].js,
-                    }),
-                ],
-            }]);
-        });
+        if (!isFirefox) {
+            chrome.declarativeContent.onPageChanged.removeRules([prefId], async () => {
+                chrome.declarativeContent.onPageChanged.addRules([{
+                    id: prefId,
+                    conditions: [
+                        new chrome.declarativeContent.PageStateMatcher({
+                            pageUrl: {urlContains: ':'},
+                        }),
+                    ],
+                    actions: [
+                        new (chrome.declarativeContent as any).RequestContentScript({
+                            allFrames: true,
+                            // This runs earlier than document_start
+                            js: chrome.runtime.getManifest().content_scripts[0].js,
+                        }),
+                    ],
+                }]);
+            });
+        }
 
         function prepareStyles(req: chrome.webRequest.WebRequestBodyDetails) {
             if (tempPorts.indexOf(req.tabId) === -1) {

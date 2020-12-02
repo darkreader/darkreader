@@ -2,7 +2,8 @@ const userAgent = typeof navigator === 'undefined' ? 'some useragent' : navigato
 const platform = typeof navigator === 'undefined' ? 'some platform' : navigator.platform.toLowerCase();
 
 export const isChromium = userAgent.includes('chrome') || userAgent.includes('chromium');
-export const isFirefox = userAgent.includes('firefox');
+export const isThunderbird = userAgent.includes('thunderbird');
+export const isFirefox = userAgent.includes('firefox') || isThunderbird;
 export const isVivaldi = userAgent.includes('vivaldi');
 export const isYaBrowser = userAgent.includes('yabrowser');
 export const isOpera = userAgent.includes('opr') || userAgent.includes('opera');

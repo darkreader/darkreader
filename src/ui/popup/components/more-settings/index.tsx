@@ -6,7 +6,7 @@ import {Toggle} from '../../../controls';
 import {isURLInList} from '../../../../utils/url';
 import {compileMarkdown} from '../../utils/markdown';
 import {getLocalMessage} from '../../../../utils/locales';
-import {ExtWrapper, FilterConfig, TabInfo} from '../../../../definitions';
+import type {ExtWrapper, FilterConfig, TabInfo} from '../../../../definitions';
 import {isFirefox} from '../../../../utils/platform';
 
 export default function MoreSettings({data, actions, tab}: ExtWrapper & {tab: TabInfo}) {

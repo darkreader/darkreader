@@ -1,5 +1,5 @@
 import {m} from 'malevic';
-import {ViewProps} from '../types';
+import type {ViewProps} from '../types';
 import AutomationButton from './automation-button';
 import DevToolsGroup from './devtools';
 import ManageSettingsButton from './mange-settings-button';

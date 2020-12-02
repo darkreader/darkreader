@@ -64,7 +64,7 @@ function getDataViaXhr(data: string) {
 function getXhrBlobID() {
     try {
         // Getting the cookie of a document can fail on sandboxed frames.
-        const {cookie} = document; 
+        const {cookie} = document;
         return new RegExp(`(^|\\s|;)${chrome.runtime.id}=\\s*([-\\w]+)\\s*(;|$)`).exec(cookie)[2];
     } catch (err) {
         logWarn(err);

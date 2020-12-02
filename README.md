@@ -10,9 +10,11 @@ for more info.
 ## How to contribute
 
 ### Sponsor!
+
 [Donate](https://opencollective.com/darkreader) via Open Collective.
 
 ### Translate!
+
 [Improve or suggest](https://github.com/darkreader/darkreader/tree/master/src/_locales) a translation.
 See the list of [language codes](https://developer.chrome.com/webstore/i18n#localeTable) that we can support.
 
@@ -81,6 +83,7 @@ IGNORE INLINE STYLE
 IGNORE IMAGE ANALYSIS
 .logo
 ```
+
 - `INVERT` rule inverts specified elements.
 For **Dynamic mode** use `INVERT` only for dark images that are invisible on dark backgrounds (icons, diagrams, charts, `<img>` and `<svg>` elements).
 - `CSS` rule adds custom CSS to a web page.
@@ -156,6 +159,7 @@ Install development dependencies by running `npm install` in the project root fo
 Then execute `npm run debug`.
 
 #### Chrome and Edge
+
 - Open the `chrome://extensions` page.
 - Disable the official Dark Reader version.
 - Enable the **Developer mode**.
@@ -163,14 +167,16 @@ Then execute `npm run debug`.
 - Navigate to the project's `debug/` folder.
 
 #### Firefox
+
 - Open the `about:addons` page.
 - Disable the official Dark Reader version.
 - Open `about:debugging#addons` page.
 - Click **Load Temporary Add-on** button
 - Open the `debug-firefox/manifest.json` file.
 
-After making any code changes, the project will be automatically recompiled.  
-If the extension **does not reload** automatically, it can be reloaded manually on the extensions page.
+
+If you want the project to be automatically recompiled after making code changes,
+run `npm run debug-watch` instead of `npm run debug`.
 
 For editing the code you can use any text editor or web IDE (like [Visual Studio Code](https://code.visualstudio.com), [Atom](https://atom.io/), or [WebStorm](https://www.jetbrains.com/webstorm/)).
 
@@ -181,22 +187,26 @@ Run tests by executing `npm test`.
 Submit a **pull request**, and wait for **review**.
 
 ## Building for use
+
 You can install the extension from a file.  
 Install [Node.js LTS](https://nodejs.org/en/). Download the source code (or check out from git).  
 Open terminal in root folder and run:  
+
 - `npm install`  
-- `npm run release`  
+- `npm run build`  
 
 This will generate `build.zip` for use in Chromium browsers and `build-firefox.xpi` for use in Firefox.
 
 ## Using for a website
 
 You can use Dark Reader to enable dark mode on your website!
+
 - Install the package from NPM (`npm install darkreader`)
 - or build from the source code (`npm run api`)
 - or include the script via a CDN such as [unpkg](https://unpkg.com/darkreader/) or [jsDelivr](https://www.jsdelivr.com/package/npm/darkreader)
 
 Then use the following API
+
 ```javascript
 DarkReader.enable({
     brightness: 100,
@@ -219,7 +229,9 @@ DarkReader.auto(false);
 // Get the generated CSS of Dark Reader returned as a string.
 const CSS = await DarkReader.exportGeneratedCSS();
 ```
+
 ... or if you are using ES modules
+
 ```javascript
 import {
     enable as enableDarkMode,

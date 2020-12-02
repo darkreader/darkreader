@@ -33,7 +33,7 @@ declare namespace DarkReader {
     /**
      * Returns the generated CSS by Dark Reader as a string.
      */
-    function exportGeneratedCSS(): Promise<string>
+    function exportGeneratedCSS(): Promise<string>;
 
     /**
      * Theme options.
@@ -108,6 +108,11 @@ declare namespace DarkReader {
          * Default auto
          */
         selectionColor: string;
+        /**
+         * Specifies if it has to style system controls/
+         * Default true
+         */
+        styleSystemControls: boolean;
     }
 
     /**

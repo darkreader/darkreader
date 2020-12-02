@@ -1,7 +1,7 @@
 import './chrome';
 import {setFetchMethod as setFetch} from './fetch';
 import {DEFAULT_THEME} from '../defaults';
-import {Theme, DynamicThemeFix} from '../definitions';
+import type {Theme, DynamicThemeFix} from '../definitions';
 import ThemeEngines from '../generators/theme-engines';
 import {createOrUpdateDynamicTheme, removeDynamicTheme} from '../inject/dynamic-theme';
 import {collectCSS} from '../inject/dynamic-theme/css-collection';
@@ -46,9 +46,9 @@ export function auto(themeOptions: Partial<Theme> | false = {}, fixes: DynamicTh
     if (themeOptions) {
         store = {themeOptions, fixes};
         handleColorScheme();
-        darkScheme.addListener(handleColorScheme);
+        darkScheme.addEventListener('change', handleColorScheme);
     } else {
-        darkScheme.removeListener(handleColorScheme);
+        darkScheme.removeEventListener('change', handleColorScheme);
         disable();
     }
 }

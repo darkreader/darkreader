@@ -51,7 +51,7 @@ export function formatArray(arr: string[]) {
 export function getMatches(regex: RegExp, input: string, group = 0) {
     const matches: string[] = [];
     let m: RegExpMatchArray;
-    while (m = regex.exec(input)) {
+    while ((m = regex.exec(input))) {
         matches.push(m[group]);
     }
     return matches;

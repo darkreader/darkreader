@@ -80,11 +80,11 @@ export default function SiteList(props: SiteListProps) {
                     onrender={onRender}
                     placeholder="google.com/maps"
                 />
-                <span
+                {text ? <span
                     class="site-list__item__remove"
                     role="button"
                     onclick={removeValue}
-                />
+                /> : null}
             </div>
         );
     }

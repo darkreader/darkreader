@@ -7,10 +7,11 @@ const colors = Object.entries({
 
 function logWithTime(text) {
     const now = new Date();
-    const seconds = now.getSeconds().toString().padStart(2, 0);
-    const minutes = now.getMinutes().toString().padStart(2, 0);
-    const hours = now.getHours().toString().padStart(2, 0);
-    return console.log(`${colors.gray(`${hours}:${minutes}:${seconds}`)} ${text}`);
+    const hours = now.getHours();
+    const minutes = now.getMinutes();
+    const seconds = now.getSeconds();
+    const leftpad = (n) => String(n).padStart(2, '0');
+    return console.log(`${colors.gray([hours, minutes, seconds].map(leftpad).join(':'))} ${text}`);
 }
 
 const log = Object.assign((text) => logWithTime(text), {

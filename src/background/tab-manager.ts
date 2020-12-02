@@ -124,6 +124,15 @@ export default class TabManager {
             }));
     }
 
+    registerMailDisplayScript() {
+        // @ts-ignore: not a standard WebExtension API, Thunderbird only
+        chrome.messageDisplayScripts.register({
+            js: [
+                {file: '/inject/index.js'}
+            ]
+        });
+    }
+
     async sendMessage(getMessage: (url: string, frameUrl: string) => any) {
         (await queryTabs({}))
             .filter((tab) => this.ports.has(tab.id))

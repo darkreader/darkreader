@@ -1,7 +1,7 @@
 import {forEach} from '../../utils/array';
 import {parseURL, getAbsoluteURL} from '../../utils/url';
 import {logWarn} from '../utils/log';
-import type {DarkReaderVariable} from './style-manager';
+import type {Variable} from './variables';
 
 export function iterateCSSRules(rules: CSSRuleList, iterate: (rule: CSSStyleRule) => void) {
     forEach(rules, (rule) => {
@@ -43,7 +43,7 @@ function isCSSVariable(property: string) {
 }
 
 export function getCSSVariables(rules: CSSRuleList) {
-    const variables = new Map<string, DarkReaderVariable>();
+    const variables = new Map<string, Variable>();
     rules && iterateCSSRules(rules, (rule) => {
         rule.style && iterateCSSDeclarations(rule.style, (property, value) => {
             if (isCSSVariable(property)) {
@@ -55,7 +55,7 @@ export function getCSSVariables(rules: CSSRuleList) {
 }
 
 export function getElementCSSVariables(element: HTMLElement) {
-    const variables = new Map<string, DarkReaderVariable>();
+    const variables = new Map<string, Variable>();
     iterateCSSDeclarations(element.style, (property, value) => {
         if (isCSSVariable(property)) {
             variables.set(`:root;${property}`, {property, value});

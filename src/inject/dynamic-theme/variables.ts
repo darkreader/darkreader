@@ -37,49 +37,42 @@ export function updateVariables(newVars: Map<string, Variable>, theme: Theme) {
     });
 
     legacyVariables.forEach((value, key) => {
-        if (value.includes('--')) {
-            legacyVariables.set(key, replaceCSSVariables(value, legacyVariables)[0]);
-        }
+        value.includes('var(') && legacyVariables.set(key, replaceCSSVariables(value, legacyVariables)[0]);
         try {
-            const parsed = parse(value);
-            const RGB = rgbToString(parsed);
-            legacyVariables.set(key, RGB);
+            legacyVariables.set(key, rgbToString(parse(value)));
         } catch (err) {
+            logWarn(err);
             return;
         }
     });
 
-    variables.forEach((value, key) => {
-        variables.set(key, {
-            value: replaceCSSVariables(value.value, legacyVariables)[0],
-            property: value.property
+    variables.forEach((variable, key) => {
+        variable.value.includes('var(') && variables.set(key, {
+            value: replaceCSSVariables(variable.value, legacyVariables)[0],
+            property: variable.property
         });
     });
 
     const variablesStyle: HTMLStyleElement = document.head.querySelector(`.darkreader--dynamicVariable`);
     const {sheet} = variablesStyle;
-
     for (let i = sheet.cssRules.length - 1; i >= 0; i--) {
         sheet.deleteRule(i);
     }
 
     const declarations: VariableDeclaration[] = [];
-
-    variables.forEach((value, key) => {
+    variables.forEach((variable, key) => {
         const selector = key.split(';')[0];
-        const {property} = value;
+        const {property, value} = variable;
         if (cachedVariables.has(key)) {
             const {modifiedBackground, modifiedText, modifiedBorder} = cachedVariables.get(key);
             declarations.push({selector, key, property, modifiedBackground, modifiedText, modifiedBorder});
-        } else if (value.value.includes('var(')) {
-            const modifiedBackground = `--darkreader-bg${value.property}`;
-            const modifiedText = `--darkreader-text${value.property}`;
-            const modifiedBorder = `--darkreader-border${value.property}`;
+        } else if (value.includes('var(')) {
+            const [modifiedBackground, modifiedText, modifiedBorder] = ['bg', 'text', 'border'].map((value) => `--darkreader-${value}${property}`);
             declarations.push({selector, key, property, modifiedBackground, modifiedText, modifiedBorder});
         } else {
             let parsedValue: RGBA;
             try {
-                parsedValue = parse(value.value);
+                parsedValue = parse(value);
             } catch (err) {
                 logWarn(err);
                 return;
@@ -92,19 +85,8 @@ export function updateVariables(newVars: Map<string, Variable>, theme: Theme) {
     });
 
     declarations.forEach(({selector, key, property, modifiedBackground, modifiedText, modifiedBorder}) => {
-        cachedVariables.set(key, {
-            modifiedBackground,
-            modifiedText,
-            modifiedBorder,
-        });
-        sheet.insertRule([
-            `${selector} {`,
-            `   --darkreader-bg${property}: ${modifiedBackground};`,
-            `   --darkreader-text${property}: ${modifiedText};`,
-            `   --darkreader-border${property}: ${modifiedBorder};`,
-            `}`
-        ].join('\n'));
+        cachedVariables.set(key, {modifiedBackground, modifiedText, modifiedBorder});
+        const modifiedVariables = [['bg', modifiedBackground], ['text', modifiedText], ['border', modifiedBorder]].map((value) => `--darkreader-${value[0]}${property}: ${value[1]};`);
+        sheet.insertRule(`${selector} { ${modifiedVariables.join(' ')} }`);
     });
-
-
 }

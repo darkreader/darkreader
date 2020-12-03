@@ -1,8 +1,8 @@
-import {getElementCSSVariables, replaceCSSVariables} from './css-rules';
+import {getElementCSSVariables} from './css-rules';
 import {overrideInlineStyle, getInlineOverrideStyle, watchForInlineStyles, stopWatchingForInlineStyles, INLINE_STYLE_SELECTOR} from './inline-style';
 import {changeMetaThemeColorWhenAvailable, restoreMetaThemeColor} from './meta-theme-color';
 import {getModifiedUserAgentStyle, getModifiedFallbackStyle, cleanModificationCache, parseColorWithCache, getSelectionColor} from './modify-css';
-import type {DarkReaderVariable, StyleElement, StyleManager} from './style-manager';
+import type {StyleElement, StyleManager} from './style-manager';
 import {manageStyle, getManageableStyles} from './style-manager';
 import {watchForStyleChanges, stopWatchingForStyleChanges} from './watch';
 import {forEach, push, toArray} from '../../utils/array';
@@ -11,7 +11,7 @@ import {logWarn} from '../utils/log';
 import {throttle} from '../utils/throttle';
 import {clamp} from '../../utils/math';
 import {getCSSFilterValue} from '../../generators/css-filter';
-import {modifyBackgroundColor, modifyBorderColor, modifyColor, modifyForegroundColor} from '../../generators/modify-colors';
+import {modifyBackgroundColor, modifyColor, modifyForegroundColor} from '../../generators/modify-colors';
 import {createTextStyle} from '../../generators/text-style';
 import type {FilterConfig, DynamicThemeFix} from '../../definitions';
 import {generateUID} from '../../utils/uid';
@@ -19,12 +19,9 @@ import type {AdoptedStyleSheetManager} from './adopted-style-manger';
 import {createAdoptedStyleSheetOverride} from './adopted-style-manger';
 import {isFirefox} from '../../utils/platform';
 import {injectProxy} from './stylesheet-proxy';
-import type {RGBA} from '../../utils/color';
-import {parse, rgbToString} from '../../utils/color';
+import {parse} from '../../utils/color';
+import {legacyVariables, parsedVariables, updateVariables, variables} from './variables';
 
-const legacyVariables = new Map<string, string>();
-const variables = new Map<string, DarkReaderVariable>();
-let parsedVariables = {};
 const INSTANCE_ID = generateUID();
 const styleManagers = new Map<StyleElement, StyleManager>();
 const adoptedStyleManagers = [] as AdoptedStyleSheetManager[];
@@ -138,8 +135,8 @@ function createStaticStyleOverrides() {
     dynamicVariableStyle.textContent = '';
     document.head.insertBefore(dynamicVariableStyle, proxyScript.nextSibling);
     if (variables.size > 0) {
-        parsedVariables = {};
-        updateVariables(variables);
+        parsedVariables.clear();
+        updateVariables(variables, filter);
     }
 }
 
@@ -181,7 +178,7 @@ function getIgnoreImageAnalysisSelectors() {
 function createDynamicStyleOverrides() {
     cancelRendering();
 
-    updateVariables(getElementCSSVariables(document.documentElement));
+    updateVariables(getElementCSSVariables(document.documentElement), filter);
 
     const allStyles = getManageableStyles(document);
 
@@ -198,7 +195,7 @@ function createDynamicStyleOverrides() {
             cleanFallbackStyle();
         }
     } else {
-        newVariables.forEach((variables) => updateVariables(variables));
+        newVariables.forEach((variables) => updateVariables(variables, filter));
         throttledRenderAllStyles(() => {
             if (loadingStyles.size === 0) {
                 cleanFallbackStyle();
@@ -252,7 +249,7 @@ function createManager(element: StyleElement) {
         if (details.variables.size === 0) {
             manager.render(filter, legacyVariables, getIgnoreImageAnalysisSelectors());
         } else {
-            updateVariables(details.variables);
+            updateVariables(details.variables, filter);
             throttledRenderAllStyles();
         }
     }
@@ -263,99 +260,6 @@ function createManager(element: StyleElement) {
     return manager;
 }
 
-function updateVariables(newVars: Map<string, DarkReaderVariable>) {
-    if (newVars.size === 0) {
-        return;
-    }
-    newVars.forEach((value, key) => {
-        legacyVariables.set(value.property, value.value);
-        delete parsedVariables[key];
-        variables.set(key, value);
-    });
-
-    legacyVariables.forEach((value, key) => {
-        if (value.includes('--')) {
-            legacyVariables.set(key, replaceCSSVariables(value, legacyVariables)[0]);
-        }
-        try {
-            const parsed = parse(value);
-            const RGB = rgbToString(parsed);
-            legacyVariables.set(key, RGB);
-        } catch (err) {
-            return;
-        }
-    });
-
-    variables.forEach((value, key) => {
-        variables.set(key, {
-            value: replaceCSSVariables(value.value, legacyVariables)[0],
-            property: value.property
-        });
-    });
-
-    const variablesStyle: HTMLStyleElement = createOrUpdateStyle('darkreader--dynamicVariable');
-    const {sheet} = variablesStyle;
-
-    for (let i = sheet.cssRules.length - 1; i >= 0; i--) {
-        sheet.deleteRule(i);
-    }
-
-    variables.forEach((value, key) => {
-        key = key.split(';')[0];
-        if (parsedVariables[`${key};${value.property}`]) {
-            const {modifiedBackground, modifiedText, modifiedBorder} = parsedVariables[`${key};${value.property}`];
-            sheet.insertRule([
-                `${key} {`,
-                `   --darkreader-bg${value.property}: ${modifiedBackground};`,
-                `   --darkreader-text${value.property}: ${modifiedText};`,
-                `   --darkreader-border${value.property}: ${modifiedBorder}`,
-                `}`
-            ].join('\n'));
-        } else if (value.value.includes('var(')) {
-            const modifiedBackground = `--darkreader-bg${value.property}`;
-            const modifiedText = `--darkreader-text${value.property}`;
-            const modifiedBorder = `--darkreader-border${value.property}`;
-            parsedVariables[`${key};${value.property}`] = {
-                modifiedBackground,
-                modifiedText,
-                modifiedBorder,
-            };
-            sheet.insertRule([
-                `${key} {`,
-                `   --darkreader-bg${value.property}: ${modifiedBackground};`,
-                `   --darkreader-text${value.property}: ${modifiedText};`,
-                `   --darkreader-border${value.property}: ${modifiedBorder}`,
-                `}`
-            ].join('\n'));
-        } else {
-            let parsedValue: RGBA;
-            try {
-                parsedValue = parse(value.value);
-            } catch (err) {
-                logWarn(err);
-                return;
-            }
-
-            const modifiedBackground = modifyBackgroundColor(parsedValue, filter);
-            const modifiedText = modifyForegroundColor(parsedValue, filter);
-            const modifiedBorder = modifyBorderColor(parsedValue, filter);
-            parsedVariables[`${key};${value.property}`] = {
-                modifiedBackground,
-                modifiedText,
-                modifiedBorder,
-            };
-            sheet.insertRule([
-                `${key} {`,
-                `   --darkreader-bg${value.property}: ${modifiedBackground};`,
-                `   --darkreader-text${value.property}: ${modifiedText};`,
-                `   --darkreader-border${value.property}: ${modifiedBorder}`,
-                `}`
-            ].join('\n'));
-        }
-    });
-
-
-}
 
 function removeManager(element: StyleElement) {
     const manager = styleManagers.get(element);
@@ -449,7 +353,7 @@ function watchForUpdates() {
         if (newVariables.length === 0) {
             newManagers.forEach((manager) => manager.render(filter, legacyVariables, getIgnoreImageAnalysisSelectors()));
         } else {
-            newVariables.forEach((variables) => updateVariables(variables));
+            newVariables.forEach((variables) => updateVariables(variables, filter));
             throttledRenderAllStyles();
         }
         newManagers.forEach((manager) => manager.watch());
@@ -465,7 +369,7 @@ function watchForUpdates() {
         if (element === document.documentElement) {
             const rootVariables = getElementCSSVariables(document.documentElement);
             if (rootVariables.size > 0) {
-                updateVariables(rootVariables);
+                updateVariables(rootVariables, filter);
                 throttledRenderAllStyles();
             }
         }
@@ -571,7 +475,7 @@ export function removeDynamicTheme() {
     adoptedStyleManagers.splice(0);
     legacyVariables.clear();
     variables.clear();
-    parsedVariables = {};
+    parsedVariables.clear();
 }
 
 export function cleanDynamicThemeCache() {

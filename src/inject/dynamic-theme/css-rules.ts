@@ -56,10 +56,9 @@ export function getCSSVariables(rules: CSSRuleList) {
 
 export function getElementCSSVariables(element: HTMLElement) {
     const variables = new Map<string, DarkReaderVariable>();
-    const selector = element.tagName.toLowerCase();
     iterateCSSDeclarations(element.style, (property, value) => {
         if (isCSSVariable(property)) {
-            variables.set(`${selector};${property}`, {property, value});
+            variables.set(`:root;${property}`, {property, value});
         }
     });
     return variables;

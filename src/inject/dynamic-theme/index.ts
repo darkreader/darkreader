@@ -269,7 +269,7 @@ function updateVariables(newVars: Map<string, DarkReaderVariable>) {
     }
     newVars.forEach((value, key) => {
         legacyVariables.set(value.property, value.value);
-        delete parsedVariables[`${key};${value.property}`];
+        delete parsedVariables[key];
         variables.set(key, value);
     });
 

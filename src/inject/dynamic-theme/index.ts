@@ -20,7 +20,7 @@ import {createAdoptedStyleSheetOverride} from './adopted-style-manger';
 import {isFirefox} from '../../utils/platform';
 import {injectProxy} from './stylesheet-proxy';
 import {parse} from '../../utils/color';
-import {legacyVariables, parsedVariables, updateVariables, variables} from './variables';
+import {legacyVariables, cachedVariables, updateVariables, variables} from './variables';
 
 const INSTANCE_ID = generateUID();
 const styleManagers = new Map<StyleElement, StyleManager>();
@@ -135,7 +135,7 @@ function createStaticStyleOverrides() {
     dynamicVariableStyle.textContent = '';
     document.head.insertBefore(dynamicVariableStyle, proxyScript.nextSibling);
     if (variables.size > 0) {
-        parsedVariables.clear();
+        cachedVariables.clear();
         updateVariables(variables, filter);
     }
 }
@@ -475,7 +475,7 @@ export function removeDynamicTheme() {
     adoptedStyleManagers.splice(0);
     legacyVariables.clear();
     variables.clear();
-    parsedVariables.clear();
+    cachedVariables.clear();
 }
 
 export function cleanDynamicThemeCache() {

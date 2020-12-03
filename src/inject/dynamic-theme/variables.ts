@@ -4,11 +4,10 @@ import type {RGBA} from '../../utils/color';
 import {parse, rgbToString} from '../../utils/color';
 import {logWarn} from '../utils/log';
 import {replaceCSSVariables} from './css-rules';
-import type {DarkReaderVariable} from './style-manager';
 
 export const legacyVariables = new Map<string, string>();
-export const variables = new Map<string, DarkReaderVariable>();
-export const parsedVariables = new Map<string, CachedVariables>();
+export const variables = new Map<string, Variable>();
+export const cachedVariables = new Map<string, CachedVariables>();
 
 interface CachedVariables {
     modifiedBackground: string;
@@ -22,13 +21,18 @@ interface VariableDeclaration extends CachedVariables {
     property: string;
 }
 
-export function updateVariables(newVars: Map<string, DarkReaderVariable>, theme: Theme) {
+export interface Variable {
+    property: string;
+    value: string;
+}
+
+export function updateVariables(newVars: Map<string, Variable>, theme: Theme) {
     if (newVars.size === 0) {
         return;
     }
     newVars.forEach((value, key) => {
         legacyVariables.set(value.property, value.value);
-        parsedVariables.delete(key);
+        cachedVariables.delete(key);
         variables.set(key, value);
     });
 
@@ -64,8 +68,8 @@ export function updateVariables(newVars: Map<string, DarkReaderVariable>, theme:
     variables.forEach((value, key) => {
         const selector = key.split(';')[0];
         const {property} = value;
-        if (parsedVariables.has(key)) {
-            const {modifiedBackground, modifiedText, modifiedBorder} = parsedVariables.get(key);
+        if (cachedVariables.has(key)) {
+            const {modifiedBackground, modifiedText, modifiedBorder} = cachedVariables.get(key);
             declarations.push({selector, key, property, modifiedBackground, modifiedText, modifiedBorder});
         } else if (value.value.includes('var(')) {
             const modifiedBackground = `--darkreader-bg${value.property}`;
@@ -88,7 +92,7 @@ export function updateVariables(newVars: Map<string, DarkReaderVariable>, theme:
     });
 
     declarations.forEach(({selector, key, property, modifiedBackground, modifiedText, modifiedBorder}) => {
-        parsedVariables.set(key, {
+        cachedVariables.set(key, {
             modifiedBackground,
             modifiedText,
             modifiedBorder,

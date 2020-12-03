@@ -8,6 +8,7 @@ import {getCSSVariables, replaceCSSRelativeURLsWithAbsolute, removeCSSComments, 
 import {bgFetch} from './network';
 import {createStyleSheetModifier} from './stylesheet-modifier';
 import {isShadowDomSupported, isSafari} from '../../utils/platform';
+import type {Variable} from './variables';
 
 declare global {
     interface HTMLStyleElement {
@@ -29,13 +30,8 @@ declare global {
 
 export type StyleElement = HTMLLinkElement | HTMLStyleElement;
 
-export interface DarkReaderVariable {
-    property: string;
-    value: string;
-}
-
 export interface StyleManager {
-    details(): {variables: Map<string, DarkReaderVariable>};
+    details(): {variables: Map<string, Variable>};
     render(theme: Theme, variables: Map<string, string>, ignoreImageAnalysis: string[]): void;
     pause(): void;
     destroy(): void;

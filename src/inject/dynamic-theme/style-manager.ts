@@ -105,7 +105,7 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
     const observer = new MutationObserver(() => {
         update();
     });
-    const observerOptions: MutationObserverInit = {attributes: true, childList: true, characterData: true};
+    const observerOptions: MutationObserverInit = {attributes: true, childList: true, subtree: true, characterData: true};
 
     function containsCSSImport() {
         return element instanceof HTMLStyleElement && element.textContent.trim().match(cssImportRegex);

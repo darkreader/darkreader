@@ -29,9 +29,12 @@ async function bundleCSS({debug}) {
     }
     const dir = getDestDir({debug});
     const firefoxDir = getDestDir({debug, firefox: true});
+    const thunderBirdDir = getDestDir({debug, thunderbird: true});
     for (const dest of Object.values(files)) {
         const ffDest = `${firefoxDir}/${dest.substring(dir.length + 1)}`;
+        const tbDest = `${thunderBirdDir}/${dest.substring(dir.length + 1)}`;
         await fs.copy(dest, ffDest);
+        await fs.copy(dest, tbDest);
     }
 }
 

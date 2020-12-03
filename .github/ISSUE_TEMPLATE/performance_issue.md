@@ -38,7 +38,7 @@ A link to either profile.zip *Chromium only* or a firefox profiler *Firefox only
 - Dark Reader Version: [e.g. 4.9.9]
 
 <!--
-  Did this performance occur with DarkReader off?
+  Do you have this performance issue with Dark Reader disabled?
   Does it happen in other browsers?
   Do you have hardware acceleration enabled?
 -->

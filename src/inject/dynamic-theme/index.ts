@@ -22,7 +22,7 @@ import {injectProxy} from './stylesheet-proxy';
 import type {RGBA} from '../../utils/color';
 import {parse, rgbToString} from '../../utils/color';
 
-const legacyVaribales = new Map<string, string>();
+const legacyVariables = new Map<string, string>();
 const variables = new Map<string, DarkReaderVariable>();
 let parsedVariables = {};
 const INSTANCE_ID = generateUID();
@@ -193,7 +193,7 @@ function createDynamicStyleOverrides() {
         .filter((details) => details && details.variables.size > 0)
         .map(({variables}) => variables);
     if (newVariables.length === 0) {
-        styleManagers.forEach((manager) => manager.render(filter, legacyVaribales, getIgnoreImageAnalysisSelectors()));
+        styleManagers.forEach((manager) => manager.render(filter, legacyVariables, getIgnoreImageAnalysisSelectors()));
         if (loadingStyles.size === 0) {
             cleanFallbackStyle();
         }
@@ -250,7 +250,7 @@ function createManager(element: StyleElement) {
             return;
         }
         if (details.variables.size === 0) {
-            manager.render(filter, legacyVaribales, getIgnoreImageAnalysisSelectors());
+            manager.render(filter, legacyVariables, getIgnoreImageAnalysisSelectors());
         } else {
             updateVariables(details.variables);
             throttledRenderAllStyles();
@@ -268,19 +268,19 @@ function updateVariables(newVars: Map<string, DarkReaderVariable>) {
         return;
     }
     newVars.forEach((value, key) => {
-        legacyVaribales.set(value.property, value.value);
+        legacyVariables.set(value.property, value.value);
         delete parsedVariables[`${key};${value.property}`];
         variables.set(key, value);
     });
 
-    legacyVaribales.forEach((value, key) => {
+    legacyVariables.forEach((value, key) => {
         if (value.includes('--')) {
-            legacyVaribales.set(key, replaceCSSVariables(value, legacyVaribales)[0]);
+            legacyVariables.set(key, replaceCSSVariables(value, legacyVariables)[0]);
         }
         try {
             const parsed = parse(value);
             const RGB = rgbToString(parsed);
-            legacyVaribales.set(key, RGB);
+            legacyVariables.set(key, RGB);
         } catch (err) {
             return;
         }
@@ -288,7 +288,7 @@ function updateVariables(newVars: Map<string, DarkReaderVariable>) {
 
     variables.forEach((value, key) => {
         variables.set(key, {
-            value: replaceCSSVariables(value.value, legacyVaribales)[0],
+            value: replaceCSSVariables(value.value, legacyVariables)[0],
             property: value.property
         });
     });
@@ -366,8 +366,8 @@ function removeManager(element: StyleElement) {
 }
 
 const throttledRenderAllStyles = throttle((callback?: () => void) => {
-    styleManagers.forEach((manager) => manager.render(filter, legacyVaribales, getIgnoreImageAnalysisSelectors()));
-    adoptedStyleManagers.forEach((manager) => manager.render(filter, legacyVaribales, getIgnoreImageAnalysisSelectors()));
+    styleManagers.forEach((manager) => manager.render(filter, legacyVariables, getIgnoreImageAnalysisSelectors()));
+    adoptedStyleManagers.forEach((manager) => manager.render(filter, legacyVariables, getIgnoreImageAnalysisSelectors()));
     callback && callback();
 });
 
@@ -426,7 +426,7 @@ function handleAdoptedStyleSheets(node: ShadowRoot | Document) {
             const newManger = createAdoptedStyleSheetOverride(node);
 
             adoptedStyleManagers.push(newManger);
-            newManger.render(filter, legacyVaribales, getIgnoreImageAnalysisSelectors());
+            newManger.render(filter, legacyVariables, getIgnoreImageAnalysisSelectors());
         }
     }
 }
@@ -447,7 +447,7 @@ function watchForUpdates() {
             .filter((details) => details && details.variables.size > 0)
             .map(({variables}) => variables);
         if (newVariables.length === 0) {
-            newManagers.forEach((manager) => manager.render(filter, legacyVaribales, getIgnoreImageAnalysisSelectors()));
+            newManagers.forEach((manager) => manager.render(filter, legacyVariables, getIgnoreImageAnalysisSelectors()));
         } else {
             newVariables.forEach((variables) => updateVariables(variables));
             throttledRenderAllStyles();
@@ -569,7 +569,7 @@ export function removeDynamicTheme() {
         manager.destroy();
     });
     adoptedStyleManagers.splice(0);
-    legacyVaribales.clear();
+    legacyVariables.clear();
     variables.clear();
     parsedVariables = {};
 }

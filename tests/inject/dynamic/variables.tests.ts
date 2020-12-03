@@ -207,4 +207,24 @@ describe('CSS Variables Override', () => {
         await timeout(100);
         expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(140, 255, 140)');
     });
+
+    it('should consider variable selector', () => {
+        container.innerHTML = multiline(
+            '<style>',
+            '    .red {',
+            '        --text: red;',
+            '    }',
+            '    .green {',
+            '        --text: green;',
+            '    }',
+            '    h1 { color: var(--text); }',
+            '</style>',
+            '<h1 class="red">Red CSS variable</h1>',
+            '<h1 class="green">Green CSS variable</h1>',
+        );
+        createOrUpdateDynamicTheme(theme, null, false);
+        expect(getComputedStyle(container).backgroundColor).toBe('rgb(0, 0, 0)');
+        expect(getComputedStyle(container.querySelector('.red')).color).toBe('rgb(255, 26, 26)');
+        expect(getComputedStyle(container.querySelector('.green')).color).toBe('rgb(140, 255, 140)');
+    });
 });

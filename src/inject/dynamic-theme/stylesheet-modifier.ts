@@ -64,12 +64,16 @@ export function createStyleSheetModifier() {
             let vars: CSSStyleSheet;
             let varsRule: CSSStyleRule = null;
             let replacedMap: Map<string, string> = new Map<string, string>();
-            if (cssText.includes('var(')) {
-                const [replacedCSSText, resultMap] = replaceCSSVariables(cssText, variables);
-                replacedMap = resultMap;
-                vars = getTempCSSStyleSheet();
-                vars.insertRule(replacedCSSText);
-                varsRule = vars.cssRules[0] as CSSStyleRule;
+            if (variables.size > 0 || cssText.includes('var(')) {
+                const [cssTextWithVariables, resultMap] = replaceCSSVariables(cssText, variables);
+                if (rulesTextCache.get(cssText) !== cssTextWithVariables) {
+                    replacedMap = resultMap;
+                    rulesTextCache.set(cssText, cssTextWithVariables);
+                    textDiffersFromPrev = true;
+                    vars = getTempCSSStyleSheet();
+                    vars.insertRule(cssTextWithVariables);
+                    varsRule = vars.cssRules[0] as CSSStyleRule;
+                }
             }
 
             if (textDiffersFromPrev) {

@@ -1,5 +1,5 @@
-import {UserSettings} from '../definitions';
-import {isMatch, isInPattern} from './matching';
+import type {UserSettings} from '../definitions';
+import {isInPattern, isMatch} from './matching';
 
 let anchor: HTMLAnchorElement;
 

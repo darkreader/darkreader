@@ -1,5 +1,5 @@
 import {m} from 'malevic';
-import {ViewProps} from '../types';
+import type {ViewProps} from '../types';
 import ResetButtonGroup from './reset-settings-button';
 import ImportButton from './import-settings';
 import ExportButton from './export-settings';

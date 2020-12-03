@@ -1,4 +1,4 @@
-import {Theme} from '../../definitions';
+import type {Theme} from '../../definitions';
 import {forEach} from '../../utils/array';
 import {getMatches} from '../../utils/text';
 import {getAbsoluteURL} from '../../utils/url';
@@ -7,7 +7,7 @@ import {logWarn} from '../utils/log';
 import {getCSSVariables, replaceCSSRelativeURLsWithAbsolute, removeCSSComments, replaceCSSFontFace, getCSSURLValue, cssImportRegex, getCSSBaseBath} from './css-rules';
 import {bgFetch} from './network';
 import {createStyleSheetModifier} from './stylesheet-modifier';
-import {isShadowDomSupported} from '../../utils/platform';
+import {isShadowDomSupported, isSafari} from '../../utils/platform';
 
 declare global {
     interface HTMLStyleElement {
@@ -20,10 +20,10 @@ declare global {
         sheet: CSSStyleSheet;
     }
     interface Document {
-        adoptedStyleSheets: Array<CSSStyleSheet>;
+        adoptedStyleSheets: CSSStyleSheet[];
     }
     interface ShadowRoot {
-        adoptedStyleSheets: Array<CSSStyleSheet>;
+        adoptedStyleSheets: CSSStyleSheet[];
     }
 }
 
@@ -75,6 +75,11 @@ export function getManageableStyles(node: Node, results = [] as StyleElement[], 
 
 const syncStyleSet = new WeakSet<HTMLStyleElement | SVGStyleElement>();
 const corsStyleSet = new WeakSet<HTMLStyleElement>();
+
+let canOptimizeUsingProxy = false;
+document.addEventListener('__darkreader__inlineScriptsAllowed', () => {
+    canOptimizeUsingProxy = true;
+});
 
 export function manageStyle(element: StyleElement, {update, loadingStart, loadingEnd}): StyleManager {
     const prevStyles: HTMLStyleElement[] = [];
@@ -147,7 +152,11 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
                 logWarn(accessError);
             }
 
-            if ((!cssRules && !accessError) || isStillLoadingError(accessError)) {
+            if (
+                (!cssRules && !accessError && !isSafari) ||
+                (isSafari && !element.sheet) ||
+                isStillLoadingError(accessError)
+            ) {
                 try {
                     await linkLoading(element);
                 } catch (err) {
@@ -318,36 +327,84 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
         return cssRules;
     }
 
-    let rulesChangeKey: number = null;
-    let rulesCheckFrameId: number = null;
-
-    function updateRulesChangeKey() {
-        const rules = safeGetSheetRules();
-        if (rules) {
-            rulesChangeKey = rules.length;
+    function watchForSheetChanges() {
+        watchForSheetChangesUsingProxy();
+        // Sometimes sheet can be null in Firefox and Safari
+        // So need to watch for it using rAF
+        if (!(canOptimizeUsingProxy && element.sheet)) {
+            watchForSheetChangesUsingRAF();
         }
     }
 
-    function didRulesKeyChange() {
+    let rulesChangeKey: number = null;
+    let rulesCheckFrameId: number = null;
+
+    function getRulesChangeKey() {
         const rules = safeGetSheetRules();
-        return rules && rules.length !== rulesChangeKey;
+        return rules ? rules.length : null;
     }
 
-    function subscribeToSheetChanges() {
-        updateRulesChangeKey();
-        unsubscribeFromSheetChanges();
+    function didRulesKeyChange() {
+        return getRulesChangeKey() !== rulesChangeKey;
+    }
+
+    function watchForSheetChangesUsingRAF() {
+        rulesChangeKey = getRulesChangeKey();
+        stopWatchingForSheetChangesUsingRAF();
         const checkForUpdate = () => {
             if (didRulesKeyChange()) {
-                updateRulesChangeKey();
+                rulesChangeKey = getRulesChangeKey();
                 update();
+            }
+            if (canOptimizeUsingProxy && element.sheet) {
+                stopWatchingForSheetChangesUsingRAF();
+                return;
             }
             rulesCheckFrameId = requestAnimationFrame(checkForUpdate);
         };
         checkForUpdate();
     }
 
-    function unsubscribeFromSheetChanges() {
+    function stopWatchingForSheetChangesUsingRAF() {
         cancelAnimationFrame(rulesCheckFrameId);
+    }
+
+    let areSheetChangesPending = false;
+
+    function onSheetChange() {
+        canOptimizeUsingProxy = true;
+        stopWatchingForSheetChangesUsingRAF();
+        if (areSheetChangesPending) {
+            return;
+        }
+
+        function handleSheetChanges() {
+            areSheetChangesPending = false;
+            if (cancelAsyncOperations) {
+                return;
+            }
+            update();
+        }
+
+        areSheetChangesPending = true;
+        if (typeof queueMicrotask === 'function') {
+            queueMicrotask(handleSheetChanges);
+        } else {
+            requestAnimationFrame(handleSheetChanges);
+        }
+    }
+
+    function watchForSheetChangesUsingProxy() {
+        element.addEventListener('__darkreader__updateSheet', onSheetChange);
+    }
+
+    function stopWatchingForSheetChangesUsingProxy() {
+        element.removeEventListener('__darkreader__updateSheet', onSheetChange);
+    }
+
+    function stopWatchingForSheetChanges() {
+        stopWatchingForSheetChangesUsingProxy();
+        stopWatchingForSheetChangesUsingRAF();
     }
 
     function pause() {
@@ -355,7 +412,7 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
         cancelAsyncOperations = true;
         corsCopyPositionWatcher && corsCopyPositionWatcher.stop();
         syncStylePositionWatcher && syncStylePositionWatcher.stop();
-        unsubscribeFromSheetChanges();
+        stopWatchingForSheetChanges();
     }
 
     function destroy() {
@@ -367,7 +424,7 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
     function watch() {
         observer.observe(element, observerOptions);
         if (element instanceof HTMLStyleElement) {
-            subscribeToSheetChanges();
+            watchForSheetChanges();
         }
     }
 
@@ -392,7 +449,6 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
         syncStylePositionWatcher && syncStylePositionWatcher.skip();
         if (shouldForceRender) {
             forceRenderStyle = true;
-            updateRulesChangeKey();
             update();
         }
     }
@@ -407,7 +463,7 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
     };
 }
 
-function linkLoading(link: HTMLLinkElement) {
+async function linkLoading(link: HTMLLinkElement) {
     return new Promise<void>((resolve, reject) => {
         const cleanUp = () => {
             link.removeEventListener('load', onLoad);

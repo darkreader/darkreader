@@ -8,14 +8,14 @@ import {Header, MoreToggleSettings} from './header';
 import Loader from './loader';
 import NewBody from '../body';
 import MoreSettings from './more-settings';
-import {News, NewsButton} from './news';
+import {NewsGroup, NewsButton} from './news';
 import SiteListSettings from './site-list-settings';
 import ThemeEngines from '../../../generators/theme-engines';
 import {getDuration} from '../../../utils/time';
 import {DONATE_URL, GITHUB_URL, PRIVACY_URL, TWITTER_URL, getHelpURL} from '../../../utils/links';
 import {getLocalMessage} from '../../../utils/locales';
 import {compose} from '../../utils';
-import {ExtensionData, ExtensionActions, TabInfo, News as NewsObject} from '../../../definitions';
+import type {ExtensionData, ExtensionActions, TabInfo, News as NewsObject} from '../../../definitions';
 import {isMobile, isFirefox} from '../../../utils/platform';
 
 interface BodyProps {
@@ -162,7 +162,7 @@ function Body(props: BodyProps) {
                     </Button>
                 </div>
             </footer>
-            <News
+            <NewsGroup
                 news={props.data.news}
                 expanded={state.newsOpen}
                 onNewsOpen={onNewsOpen}

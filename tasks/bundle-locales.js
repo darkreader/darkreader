@@ -11,7 +11,7 @@ async function bundleLocale(/** @type {string} */filePath, {debug}) {
 
     const regex = /@([a-z0-9_]+)/ig;
     let match;
-    while (match = regex.exec(file)) {
+    while ((match = regex.exec(file))) {
         const messageName = match[1];
         const messageStart = match.index + match[0].length;
         let messageEnd = file.indexOf('@', messageStart);

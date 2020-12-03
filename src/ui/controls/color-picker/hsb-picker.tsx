@@ -1,6 +1,7 @@
 import {m} from 'malevic';
 import {getContext} from 'malevic/dom';
-import {rgbToHSL, parse, hslToString, rgbToHexString, RGBA} from '../../../utils/color';
+import type {RGBA} from '../../../utils/color';
+import {rgbToHSL, parse, hslToString, rgbToHexString} from '../../../utils/color';
 import {clamp, scale} from '../../../utils/math';
 import {createSwipeHandler} from '../../utils';
 

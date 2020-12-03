@@ -28,7 +28,7 @@ export function parseSitesFixesConfig<T extends SiteProps>(text: string, options
         }
 
         const siteFix = {
-            url: parseArray(lines.slice(0, commandIndices[0]).join('\n')) as string[],
+            url: parseArray(lines.slice(0, commandIndices[0]).join('\n')),
         } as T;
 
         commandIndices.forEach((commandIndex, i) => {

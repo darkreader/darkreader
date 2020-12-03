@@ -18,6 +18,7 @@ beforeEach(() => {
 afterEach(() => {
     removeDynamicTheme();
     container.innerHTML = '';
+    document.documentElement.removeAttribute('style');
 });
 
 describe('CSS Variables Override', () => {
@@ -187,6 +188,22 @@ describe('CSS Variables Override', () => {
 
         const styleElement = document.getElementById('variables') as HTMLStyleElement;
         styleElement.textContent = ':root { --text: green; }';
+        await timeout(100);
+        expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(140, 255, 140)');
+    });
+
+    it('should use <html> element variables', async () => {
+        document.documentElement.setAttribute('style', '--text: red;');
+        container.innerHTML = multiline(
+            '<style>',
+            '    h1 { color: var(--text); }',
+            '</style>',
+            '<h1>CSS <strong>variables</strong>!</h1>',
+        );
+        createOrUpdateDynamicTheme(theme, null, false);
+        expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(255, 26, 26)');
+
+        document.documentElement.setAttribute('style', '--text: green;');
         await timeout(100);
         expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(140, 255, 140)');
     });

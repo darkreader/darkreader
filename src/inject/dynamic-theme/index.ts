@@ -478,6 +478,7 @@ export function removeDynamicTheme() {
 }
 
 export function cleanDynamicThemeCache() {
+    variables.clear();
     stopWatchingForDocumentVisibility();
     cancelRendering();
     stopWatchingForUpdates();

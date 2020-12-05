@@ -17,6 +17,7 @@ interface CachedVariables {
 
 interface VariableDeclaration extends CachedVariables {
     selector: string;
+    parentGroups: string[];
     key: string;
     property: string;
 }
@@ -24,6 +25,7 @@ interface VariableDeclaration extends CachedVariables {
 export interface Variable {
     property: string;
     value: string;
+    parentGroups: string[];
 }
 
 export function updateVariables(newVars: Map<string, Variable>, theme: Theme) {
@@ -49,7 +51,8 @@ export function updateVariables(newVars: Map<string, Variable>, theme: Theme) {
     variables.forEach((variable, key) => {
         variable.value.includes('var(') && variables.set(key, {
             value: replaceCSSVariables(variable.value, legacyVariables)[0],
-            property: variable.property
+            property: variable.property,
+            parentGroups: variable.parentGroups
         });
     });
 
@@ -62,13 +65,14 @@ export function updateVariables(newVars: Map<string, Variable>, theme: Theme) {
     const declarations: VariableDeclaration[] = [];
     variables.forEach((variable, key) => {
         const selector = key.split(';')[0];
-        const {property, value} = variable;
+        const {property, value, parentGroups} = variable;
+        const standardDeclaration = {selector, key, property, parentGroups};
         if (cachedVariables.has(key)) {
             const {modifiedBackground, modifiedText, modifiedBorder} = cachedVariables.get(key);
-            declarations.push({selector, key, property, modifiedBackground, modifiedText, modifiedBorder});
+            declarations.push({...standardDeclaration, modifiedBackground, modifiedText, modifiedBorder});
         } else if (value.includes('var(')) {
             const [modifiedBackground, modifiedText, modifiedBorder] = ['bg', 'text', 'border'].map((value) => `--darkreader-${value}${property}`);
-            declarations.push({selector, key, property, modifiedBackground, modifiedText, modifiedBorder});
+            declarations.push({...standardDeclaration, modifiedBackground, modifiedText, modifiedBorder});
         } else {
             let parsedValue: RGBA;
             try {
@@ -80,13 +84,28 @@ export function updateVariables(newVars: Map<string, Variable>, theme: Theme) {
             const modifiedBackground = modifyBackgroundColor(parsedValue, theme);
             const modifiedText = modifyForegroundColor(parsedValue, theme);
             const modifiedBorder = modifyBorderColor(parsedValue, theme);
-            declarations.push({selector, key, property, modifiedBackground, modifiedText, modifiedBorder});
+            declarations.push({...standardDeclaration, modifiedBackground, modifiedText, modifiedBorder});
         }
     });
 
-    declarations.forEach(({selector, key, property, modifiedBackground, modifiedText, modifiedBorder}) => {
+    function createTarget(conditionText: string, parent: CSSStyleSheet | CSSGroupingRule): CSSGroupingRule {
+        const index = parent.cssRules.length;
+        parent.insertRule(`@media ${conditionText} {}`, index);
+        return parent.cssRules[index] as CSSGroupingRule;
+    }
+
+    declarations.forEach(({selector, key, property, parentGroups, modifiedBackground, modifiedText, modifiedBorder}) => {
         cachedVariables.set(key, {modifiedBackground, modifiedText, modifiedBorder});
         const modifiedVariables = [['bg', modifiedBackground], ['text', modifiedText], ['border', modifiedBorder]].map((value) => `--darkreader-${value[0]}${property}: ${value[1]};`);
-        sheet.insertRule(`${selector} { ${modifiedVariables.join(' ')} }`);
+        if (!parentGroups.length) {
+            sheet.insertRule(`${selector} { ${modifiedVariables.join(' ')} }`);
+        } else {
+            let target: CSSStyleSheet | CSSGroupingRule = sheet;
+            while (parentGroups.length) {
+                target = createTarget(parentGroups[0], target);
+                parentGroups.shift();
+            }
+            target.insertRule(`${selector} { ${modifiedVariables.join(' ')} }`, target.cssRules.length);
+        }
     });
 }

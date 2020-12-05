@@ -42,12 +42,22 @@ function isCSSVariable(property: string) {
     return property.startsWith('--') && !property.startsWith('--darkreader');
 }
 
+function getParentGroups(rule: CSSRule, stack: string[] = []): string[] {
+    const {parentRule} = rule;
+    if (!parentRule || !(parentRule instanceof CSSMediaRule)) {
+        return stack;
+    }
+    stack.push(parentRule.conditionText);
+    return getParentGroups(parentRule, stack);
+}
+
 export function getCSSVariables(rules: CSSRuleList) {
     const variables = new Map<string, Variable>();
     rules && iterateCSSRules(rules, (rule) => {
+        const parentGroups = getParentGroups(rule);
         rule.style && iterateCSSDeclarations(rule.style, (property, value) => {
             if (isCSSVariable(property)) {
-                variables.set(`${rule.selectorText};${property}`, {property, value});
+                variables.set(`${rule.selectorText};${property}`, {property, value, parentGroups});
             }
         });
     });
@@ -58,7 +68,7 @@ export function getElementCSSVariables(element: HTMLElement) {
     const variables = new Map<string, Variable>();
     iterateCSSDeclarations(element.style, (property, value) => {
         if (isCSSVariable(property)) {
-            variables.set(`:root;${property}`, {property, value});
+            variables.set(`:root;${property}`, {property, value, parentGroups: []});
         }
     });
     return variables;

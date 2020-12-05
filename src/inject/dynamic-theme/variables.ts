@@ -97,15 +97,11 @@ export function updateVariables(newVars: Map<string, Variable>, theme: Theme) {
     declarations.forEach(({selector, key, property, parentGroups, modifiedBackground, modifiedText, modifiedBorder}) => {
         cachedVariables.set(key, {modifiedBackground, modifiedText, modifiedBorder});
         const modifiedVariables = [['bg', modifiedBackground], ['text', modifiedText], ['border', modifiedBorder]].map((value) => `--darkreader-${value[0]}${property}: ${value[1]};`);
-        if (!parentGroups.length) {
-            sheet.insertRule(`${selector} { ${modifiedVariables.join(' ')} }`);
-        } else {
-            let target: CSSStyleSheet | CSSGroupingRule = sheet;
-            while (parentGroups.length) {
-                target = createTarget(parentGroups[0], target);
-                parentGroups.shift();
-            }
-            target.insertRule(`${selector} { ${modifiedVariables.join(' ')} }`, target.cssRules.length);
+        let target: CSSStyleSheet | CSSGroupingRule = sheet;
+        while (parentGroups.length) {
+            target = createTarget(parentGroups[0], target);
+            parentGroups.shift();
         }
+        target.insertRule(`${selector} { ${modifiedVariables.join(' ')} }`, target.cssRules.length);
     });
 }

@@ -17,6 +17,7 @@ import {getLocalMessage} from '../../../utils/locales';
 import {compose} from '../../utils';
 import type {ExtensionData, ExtensionActions, TabInfo, News as NewsObject} from '../../../definitions';
 import {isMobile, isFirefox, isThunderbird} from '../../../utils/platform';
+import Link from './link';
 
 interface BodyProps {
     data: ExtensionData;
@@ -148,15 +149,15 @@ function Body(props: BodyProps) {
 
             <footer>
                 <div class="footer-links">
-                    <a class="footer-links__link" href={PRIVACY_URL} target="_blank" rel="noopener noreferrer">{getLocalMessage('privacy')}</a>
-                    <a class="footer-links__link" href={TWITTER_URL} target="_blank" rel="noopener noreferrer">Twitter</a>
-                    <a class="footer-links__link" href={GITHUB_URL} target="_blank" rel="noopener noreferrer">GitHub</a>
-                    <a class="footer-links__link" href={getHelpURL()} target="_blank" rel="noopener noreferrer">{getLocalMessage('help')}</a>
+                    <Link cls="footer-links__link" url={PRIVACY_URL}>{getLocalMessage('privacy')}</Link>
+                    <Link cls="footer-links__link" url={TWITTER_URL}>Twitter</Link>
+                    <Link cls="footer-links__link" url={GITHUB_URL}>GitHub</Link>
+                    <Link cls="footer-links__link" url={getHelpURL()}>{getLocalMessage('help')}</Link>
                 </div>
                 <div class="footer-buttons">
-                    <a class="donate-link" href={DONATE_URL} target="_blank" rel="noopener noreferrer">
+                    <Link cls="donate-link" url={DONATE_URL}>
                         <span class="donate-link__text">{getLocalMessage('donate')}</span>
-                    </a>
+                    </Link>
                     <NewsButton active={state.newsOpen} count={displayedNewsCount} onClick={toggleNews} />
                     <Button
                         onclick={openDevTools}

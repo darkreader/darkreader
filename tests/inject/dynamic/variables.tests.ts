@@ -269,6 +269,69 @@ describe('Should handle variables correctly', () => {
         expect(getComputedStyle(container).color).toBe('rgb(232, 230, 227)');
     });
 
+    it('should handle media variables', () => {
+        container.innerHTML = multiline(
+            '<style>',
+            '    @media screen and (min-width: 2px) {',
+            '        .red {',
+            '            --text: red;',
+            '        }',
+            '    }',
+            '    @media screen and (min-width: 2000000px) {',
+            '        .green {',
+            '            --text: green;',
+            '        }',
+            '    }',
+            '    h1 { color: var(--text); }',
+            '</style>',
+            '<h1 class="red">Red CSS variable</h1>',
+            '<h1 class="green">Green CSS variable</h1>',
+        );
+        createOrUpdateDynamicTheme(theme, null, false);
+        expect(getComputedStyle(container).backgroundColor).toBe('rgb(0, 0, 0)');
+        expect(getComputedStyle(container.querySelector('.red')).color).toBe('rgb(255, 26, 26)');
+        expect(getComputedStyle(container.querySelector('.green')).color).toBe('rgb(255, 255, 255)');
+    });
+
+    it('should handle nested variables', () => {
+        container.innerHTML = multiline(
+            '<style>',
+            '    @media screen and (min-width: 2px) {',
+            '        @media screen and (min-width: 3px) {',
+            '            .red {',
+            '                --text: red;',
+            '            }',
+            '        }',
+            '    }',
+            '    @media screen and (min-width: 2px) {',
+            '        @media screen and (min-width: 2000000px) {',
+            '            .green {',
+            '                --text: green;',
+            '            }',
+            '        }',
+            '    }',
+            '    @media screen and (min-width: 2000000px) {',
+            '        @media screen and (min-width: 2px) {',
+            '            .orange {',
+            '                --text: orange;',
+            '            }',
+            '        }',
+            '    }',
+            '    h1 {',
+            '        color: var(--text);',
+            '    }',
+            '</style>',
+            '<h1 class="red">Red CSS variable</h1>',
+            '<h1 class="green">Green CSS variable</h1>',
+            '<h1 class="orange">Orange CSS variable</h1>',
+        );
+        createOrUpdateDynamicTheme(theme, null, false);
+        expect(getComputedStyle(container).backgroundColor).toBe('rgb(0, 0, 0)');
+        expect(getComputedStyle(container.querySelector('.red')).color).toBe('rgb(255, 26, 26)');
+        expect(getComputedStyle(container.querySelector('.green')).color).toBe('rgb(255, 255, 255)');
+        expect(getComputedStyle(container.querySelector('.orange')).color).toBe('rgb(255, 255, 255)');
+    });
+
 });
 
 describe('Managing CSS rules', () => {

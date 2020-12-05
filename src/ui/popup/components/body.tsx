@@ -121,7 +121,7 @@ function Body(props: BodyProps) {
             <TabPanel
                 activeTab={state.activeTab}
                 onSwitchTab={(tab) => setState({activeTab: tab})}
-                tabs={isThunderbird? {
+                tabs={isThunderbird ? {
                     'Filter': (
                         <FilterSettings data={props.data} actions={props.actions} tab={props.tab} />
                     ),

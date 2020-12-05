@@ -1,6 +1,6 @@
 import {isFirefox} from '../utils/platform';
 
-export function classes(...args: (string | {[cls: string]: boolean})[]) {
+export function classes(...args: Array<string | {[cls: string]: boolean}>) {
     const classes = [];
     args.filter((c) => Boolean(c)).forEach((c) => {
         if (typeof c === 'string') {
@@ -12,7 +12,7 @@ export function classes(...args: (string | {[cls: string]: boolean})[]) {
     return classes.join(' ');
 }
 
-export function compose<T extends Malevic.Component>(type: T, ...wrappers: ((t: T) => T)[]) {
+export function compose<T extends Malevic.Component>(type: T, ...wrappers: Array<(t: T) => T>) {
     return wrappers.reduce((t, w) => w(t), type);
 }
 

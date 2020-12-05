@@ -1,5 +1,5 @@
 import {isURLEnabled, isURLMatched, isPDF, getURLHostOrProtocol, getAbsoluteURL} from '../../src/utils/url';
-import {UserSettings} from '../../src/definitions';
+import type {UserSettings} from '../../src/definitions';
 
 test('URL is enabled', () => {
     // Not invert listed

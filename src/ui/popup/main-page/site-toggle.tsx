@@ -2,7 +2,7 @@ import {m} from 'malevic';
 import {isURLEnabled, isPDF} from '../../../utils/url';
 import SiteToggle from '../components/site-toggle';
 import ControlGroup from '../control-group';
-import {ViewProps} from '../types';
+import type {ViewProps} from '../types';
 
 export default function SiteToggleGroup(props: ViewProps) {
     const isPageEnabled = isURLEnabled(props.tab.url, props.data.settings, props.tab);

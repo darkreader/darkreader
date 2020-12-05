@@ -23,15 +23,17 @@ Read more about contributing to Dark Reader in [CONTRIBUTE.md](https://github.co
 
 You can install the extension from a file.  
 Install [Node.js LTS](https://nodejs.org/en/). Download the source code (or check out from git).  
-Open the terminal in the root folder and execute the following commands:  
+Open terminal in root folder and run:  
+
 - `npm install`  
-- `npm run release`  
+- `npm run build`  
 
 This will generate a `build.zip` file that is useable in a Chromium-based browser and also a `build-firefox.xpi` file that is useable in Firefox.
 
 ## Using Dark Reader for a website
 
 You can use Dark Reader to enable dark mode on your website!
+
 - Install the package from NPM (`npm install darkreader`)
 - or build from the source code (`npm run api`)
 - or include the script via a CDN such as [unpkg](https://unpkg.com/darkreader/) or [jsDelivr](https://www.jsdelivr.com/package/npm/darkreader)
@@ -59,7 +61,9 @@ DarkReader.auto(false);
 // Get the generated CSS of Dark Reader returned as a string.
 const CSS = await DarkReader.exportGeneratedCSS();
 ```
+
 ... or if you are using ES modules
+
 ```javascript
 import {
     enable as enableDarkMode,

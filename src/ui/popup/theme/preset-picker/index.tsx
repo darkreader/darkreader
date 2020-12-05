@@ -1,9 +1,9 @@
 import {m} from 'malevic';
 import {getContext} from 'malevic/dom';
-import {ThemePreset} from '../../../../definitions';
+import type {ThemePreset} from '../../../../definitions';
 import {isURLInList, isURLMatched, getURLHostOrProtocol} from '../../../../utils/url';
 import {DropDown, MessageBox} from '../../../controls';
-import {ViewProps} from '../../types';
+import type {ViewProps} from '../../types';
 import {generateUID} from '../../../../utils/uid';
 
 function PresetItem(props: ViewProps & {preset: ThemePreset}) {

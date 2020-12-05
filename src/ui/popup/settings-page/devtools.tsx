@@ -3,7 +3,7 @@ import ThemeEngines from '../../../generators/theme-engines';
 import {getLocalMessage} from '../../../utils/locales';
 import {NavButton} from '../../controls';
 import ControlGroup from '../control-group';
-import {ViewProps} from '../types';
+import type {ViewProps} from '../types';
 import {isMobile, isFirefox} from '../../../utils/platform';
 
 function getExistingDevToolsObject(): Promise<chrome.windows.Window> | Promise<chrome.tabs.Tab> {

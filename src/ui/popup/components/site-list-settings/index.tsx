@@ -1,7 +1,7 @@
 import {m} from 'malevic';
 import {Toggle, TextList, Shortcut} from '../../../controls';
 import {getLocalMessage} from '../../../../utils/locales';
-import {ExtWrapper} from '../../../../definitions';
+import type {ExtWrapper} from '../../../../definitions';
 
 interface SiteListSettingsProps extends ExtWrapper {
     isFocused: boolean;

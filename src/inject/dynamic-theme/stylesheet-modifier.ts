@@ -1,10 +1,11 @@
-import {Theme} from '../../definitions';
+import type {Theme} from '../../definitions';
 import {createAsyncTasksQueue} from '../utils/throttle';
 import {iterateCSSRules, iterateCSSDeclarations, replaceCSSVariables} from './css-rules';
-import {getModifiableCSSDeclaration, ModifiableCSSDeclaration, ModifiableCSSRule} from './modify-css';
-import {isCSSStyleSheetConstructorSupported} from '../../utils/platform';
+import type {ModifiableCSSDeclaration, ModifiableCSSRule} from './modify-css';
+import {getModifiableCSSDeclaration} from './modify-css';
+import {getTempCSSStyleSheet} from '../utils/dom';
 
-const themeCacheKeys: (keyof Theme)[] = [
+const themeCacheKeys: Array<keyof Theme> = [
     'mode',
     'brightness',
     'contrast',
@@ -20,24 +21,6 @@ function getThemeKey(theme: Theme) {
     return themeCacheKeys.map((p) => `${p}:${theme[p]}`).join(';');
 }
 
-let tempStyle: CSSStyleSheet = null;
-
-function getTempCSSStyleSheet(): CSSStyleSheet {
-    if (tempStyle) {
-        return tempStyle;
-    }
-    if (isCSSStyleSheetConstructorSupported) {
-        tempStyle = new CSSStyleSheet();
-        return tempStyle;
-    } else {
-        const tempStyleElement = document.createElement('style');
-        document.head.append(tempStyleElement);
-        tempStyle = tempStyleElement.sheet;
-        document.head.removeChild(tempStyleElement);
-        return tempStyle;
-    }
-}
-
 const asyncQueue = createAsyncTasksQueue();
 
 export function createStyleSheetModifier() {
@@ -50,7 +33,7 @@ export function createStyleSheetModifier() {
         sourceCSSRules: CSSRuleList;
         theme: Theme;
         variables: Map<string, string>;
-        ignoreImageAnalysis: string[]
+        ignoreImageAnalysis: string[];
         force: boolean;
         prepareSheet: () => CSSStyleSheet;
         isAsyncCancelled: () => boolean;
@@ -133,7 +116,7 @@ export function createStyleSheetModifier() {
         interface ReadyGroup {
             isGroup: true;
             rule: any;
-            rules: (ReadyGroup | ReadyStyleRule)[];
+            rules: Array<ReadyGroup | ReadyStyleRule>;
         }
 
         interface ReadyStyleRule {
@@ -233,7 +216,7 @@ export function createStyleSheetModifier() {
                 if (rule instanceof CSSMediaRule) {
                     const {media} = rule;
                     const index = parent.cssRules.length;
-                    parent.insertRule(`@media ${media} {}`, index);
+                    parent.insertRule(`@media ${media.mediaText} {}`, index);
                     return parent.cssRules[index] as CSSMediaRule;
                 }
                 return parent;

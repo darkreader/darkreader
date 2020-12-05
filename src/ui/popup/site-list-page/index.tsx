@@ -1,5 +1,5 @@
 import {m} from 'malevic';
-import {ViewProps} from '../types';
+import type {ViewProps} from '../types';
 import SiteList from './site-list';
 import CheckButton from '../check-button';
 import {isFirefox} from '../../../utils/platform';

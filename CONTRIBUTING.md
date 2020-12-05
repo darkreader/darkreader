@@ -2,17 +2,17 @@
 
 <p align="center">Contributing to Dark Reader, can be in a variety of ways. Proceed reading the CONTRIBUTE.md to learn more about the variety of ways. Thank you in advance for reading this CONTRIBUTE.md.</p>
 
-<h2>Sponser!</h2>
+## Sponsor!
 
 <a href="https://opencollective.com/darkreader/donate" target="_blank" rel="noreferrer noopener"> <img src="https://opencollective.com/darkreader/donate/button@2x.png?color=blue" width=300 /></a> 
 <p>Sponser the development of Dark Reader</p>
 
-<h2>Translation</h2>
+## Translation
 
 [Improve or suggest](https://github.com/darkreader/darkreader/tree/master/src/_locales) a translation.
 See the list of [language codes](https://developer.chrome.com/webstore/i18n#localeTable) that we can support.
 
-<h2>Fix a wrong inversion!</h2>
+## Fix a wrong inversion!
 
 If a website is **already dark** *(that has all pages dark by default)*, you can **add it to the [dark-sites.config](https://github.com/alexanderby/darkreader/blob/master/src/config/dark-sites.config) file**
 *(please, preserve the alphabetical order)*.
@@ -27,7 +27,7 @@ or **[inversion-fixes.config](https://github.com/alexanderby/darkreader/blob/mas
 
 Proceed reading CONTRIBUTE.md to know how to make a fix for the appropriate mode.
 
-<h2>How to use the Dev Tools!</h2>
+## How to use the Dev Tools!
 
 Dev Tools is designed to **fix minor issues** on a web page
 *(like dark icon on a dark background, removing a bright background, adding a white background to a transparent image, etc.)*.
@@ -36,7 +36,7 @@ For **Filter mode**, it is a common practice to invert already dark page parts.
 
 - Open **Chrome Dev Tools** (F12) in Chrome or "Inspector" (Ctrl+Shift+C) in Firefox.
 - Click on **element picker** (top-left corner). It is enabled automatically in Firefox.
-- Pick wrongly inverted element.
+- Pick a wrongly inverted element.
 - Choose a **[selector](https://developer.mozilla.org/docs/Web/CSS/CSS_Selectors)** for that element or all similar elements (e.g. if element has `class="icon small"`, selector may look like `.icon`).
 - Click **Dark Reader icon**.
 - Click **Open developer tools** (at bottom of Dark Reader popup).
@@ -86,7 +86,7 @@ For **Dynamic mode** use `INVERT` only for dark images that are invisible on dar
 (e.g. for `<p style="color: red">` element's `style` attribute will not be changed).
 - `IGNORE IMAGE ANALYSIS` rule will prevent background images from being analyzed for matched selectors.
 
-<h2>Dynamic variables</h2>
+## Dynamic variables
 
 When making a fix for background or text colors,
 instead of using hardcoded colors (like `#fff`, `#000`, `black` or `white`),
@@ -114,7 +114,7 @@ Here is a full list of the available CSS variables:
 - `--darkreader-selection-background` corresponds to user's Selection Background Color setting.
 - `--darkreader-selection-text` corresponds to user's Selection Text Color setting.
 
-<h2>Fixes for Filter and Filter+ mode</h2>
+## Fixes for Filter and Filter+ mode
 
 ```
 inversion-fixes.config
@@ -143,9 +143,9 @@ CSS
 - If an inverted element contains images or other content that becomes wrongly displayed, `NO INVERT` rule can be used.
 - `REMOVE BG` removes the background image from an element and forces a black background.
 
-<h2>Add new features or fix bugs!</h2>
+## Add new features or fix bugs!
 
-If you would like to **add new feature** to Dark Reader or **fix a bug**, **submit an issue** in GitHub (if there is no existing one), **discuss** it with active contributors, and wait for **approval**.
+If you would like to **add a new feature** to Dark Reader or **fix a bug**, **submit an issue** in GitHub (if there is no existing one), **discuss** it with active contributors, and wait for **approval**.
 
 To build and debug the extension **install the [Node.js](https://nodejs.org/)** LTS.  
 Install development dependencies by running `npm install` in the project root folder.  
@@ -168,8 +168,7 @@ Then execute `npm run debug`.
 If you execute `npm run debug-watch` instead of `npm run debug`.
 It will after making any code changes, the project will be automatically recompiled.  
 
-
-<h2>Tips</h2>
+## Tips
 
 For editing the code you can use any text editor or web IDE (like [Visual Studio Code](https://code.visualstudio.com), [Atom](https://atom.io/), or [WebStorm](https://www.jetbrains.com/webstorm/)).
 

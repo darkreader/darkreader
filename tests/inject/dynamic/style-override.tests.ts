@@ -163,6 +163,22 @@ describe('Style override', () => {
 
     });
 
+    it('should react on style text change', async () => {
+        container.innerHTML = multiline(
+            '<style class="testcase-style">',
+            '    h1 strong { color: red; }',
+            '</style>',
+            '<h1>Style <strong>text change</strong></h1>',
+        );
+        createOrUpdateDynamicTheme(theme, null, false);
+        expect(getComputedStyle(document.querySelector('h1 strong')).color).toBe('rgb(255, 26, 26)');
+
+        document.querySelector('.testcase-style').textContent = 'h1 strong { color: green; }';
+        await timeout(100);
+        expect(getComputedStyle(document.querySelector('h1 strong')).color).toBe('rgb(140, 255, 140)');
+
+    });
+
     it('should react to a new style', async () => {
         container.innerHTML = multiline(
             '<h1>Some test foor...... <strong>Oh uhm what?</strong>!</h1>',

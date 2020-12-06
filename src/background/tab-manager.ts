@@ -131,7 +131,18 @@ export default class TabManager {
             'responseHeaders',
             'extraHeaders',
         ]);
-        if (!isFirefox) {
+        if (isFirefox) {
+            // This runs earlier than document_start
+            (chrome as any).contentScripts.register({
+                'js': [
+                    {file: '/inject/fallback.js'},
+                    {file: '/inject/index.js'},
+                ],
+                'matches': ['<all_urls>'],
+                'allFrames': true,
+                'runAt': 'document_start'
+            });
+        } else {
             chrome.declarativeContent.onPageChanged.removeRules([prefId], async () => {
                 chrome.declarativeContent.onPageChanged.addRules([{
                     id: prefId,

@@ -30,7 +30,7 @@ function getEmbeddedSVGFilterValue(matrixValue: string) {
 }
 
 function toSVGMatrix(matrix: number[][]) {
-    return matrix.slice(0, 4).map(m => m.map(m => m.toFixed(3)).join(' ')).join(' ');
+    return matrix.slice(0, 4).map((m) => m.map((m) => m.toFixed(3)).join(' ')).join(' ');
 }
 
 export function getSVGFilterMatrixValue(config: FilterConfig) {

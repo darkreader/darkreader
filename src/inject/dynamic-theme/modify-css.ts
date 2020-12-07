@@ -1,12 +1,14 @@
-import {parse, RGBA, rgbToHSL, hslToString} from '../../utils/color';
+import type {RGBA} from '../../utils/color';
+import {parse, rgbToHSL, hslToString} from '../../utils/color';
 import {clamp} from '../../utils/math';
 import {getMatches} from '../../utils/text';
 import {getAbsoluteURL} from '../../utils/url';
 import {modifyBackgroundColor, modifyBorderColor, modifyForegroundColor, modifyGradientColor, modifyShadowColor, clearColorModificationCache} from '../../generators/modify-colors';
 import {cssURLRegex, getCSSURLValue, getCSSBaseBath} from './css-rules';
-import {getImageDetails, getFilteredImageDataURL, ImageDetails, cleanImageProcessingCache} from './image';
+import type {ImageDetails} from './image';
+import {getImageDetails, getFilteredImageDataURL, cleanImageProcessingCache} from './image';
 import {logWarn, logInfo} from '../utils/log';
-import {FilterConfig, Theme} from '../../definitions';
+import type {FilterConfig, Theme} from '../../definitions';
 
 type CSSValueModifier = (filter: FilterConfig) => string | Promise<string>;
 
@@ -233,7 +235,7 @@ function getColorModifier(prop: string, value: string): string | CSSValueModifie
 
 const gradientRegex = /[\-a-z]+gradient\(([^\(\)]*(\(([^\(\)]*(\(.*?\)))*[^\(\)]*\))){0,15}[^\(\)]*\)/g;
 const imageDetailsCache = new Map<string, ImageDetails>();
-const awaitingForImageLoading = new Map<string, ((imageDetails: ImageDetails) => void)[]>();
+const awaitingForImageLoading = new Map<string, Array<(imageDetails: ImageDetails) => void>>();
 
 function shouldIgnoreImage(rule: CSSStyleRule, selectors: string[]) {
     if (!rule || selectors.length === 0) {

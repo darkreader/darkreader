@@ -48,19 +48,20 @@ describe('Style override', () => {
         expect((override.cssRules[1] as CSSStyleRule).style.getPropertyValue('color')).toBe('rgb(255, 255, 255)');
     });
 
-    it('should override User Agent style', () => {
+    it('should override User Agent style', async () => {
         container.innerHTML = multiline(
             '<span>Text</span>',
             '<a href="#">Link</a>',
         );
         createOrUpdateDynamicTheme(theme, null, false);
+        await timeout(100);
         expect(getComputedStyle(container).backgroundColor).toBe('rgb(0, 0, 0)');
         expect(getComputedStyle(container).color).toBe('rgb(255, 255, 255)');
         expect(getComputedStyle(container.querySelector('span')).color).toBe('rgb(255, 255, 255)');
         expect(getComputedStyle(container.querySelector('a')).color).toBe('rgb(51, 145, 255)');
     });
 
-    it('should override static style', () => {
+    it('should override static style', async () => {
         container.innerHTML = multiline(
             '<style>',
             '    h1 { background: gray; }',
@@ -69,6 +70,7 @@ describe('Style override', () => {
             '<h1>Style <strong>override</strong>!</h1>',
         );
         createOrUpdateDynamicTheme(theme, null, false);
+        await timeout(100);
         expect(getComputedStyle(container).backgroundColor).toBe('rgb(0, 0, 0)');
         expect(getComputedStyle(container.querySelector('h1')).backgroundColor).toBe('rgb(102, 102, 102)');
         expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(255, 255, 255)');
@@ -158,6 +160,22 @@ describe('Style override', () => {
         (style as HTMLStyleElement).sheet.insertRule('html { background-color: pink }');
         await timeout(100);
         expect((style.nextSibling as HTMLStyleElement).sheet.cssRules[0].cssText).toBe('html { background-color: rgb(50, 0, 9); }');
+
+    });
+
+    it('should react on style text change', async () => {
+        container.innerHTML = multiline(
+            '<style class="testcase-style">',
+            '    h1 strong { color: red; }',
+            '</style>',
+            '<h1>Style <strong>text change</strong></h1>',
+        );
+        createOrUpdateDynamicTheme(theme, null, false);
+        expect(getComputedStyle(document.querySelector('h1 strong')).color).toBe('rgb(255, 26, 26)');
+
+        document.querySelector('.testcase-style').textContent = 'h1 strong { color: green; }';
+        await timeout(100);
+        expect(getComputedStyle(document.querySelector('h1 strong')).color).toBe('rgb(140, 255, 140)');
 
     });
 

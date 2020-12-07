@@ -170,7 +170,7 @@ describe('Style override', () => {
         await expect(page.evaluate(async () => {
             const style = document.querySelector('.testcase-style');
             (style as HTMLStyleElement).sheet.insertRule('html { background-color: pink }');
-            await new Promise((resolve) => setTimeout(resolve, 1000));
+            await new Promise((resolve) => setTimeout(resolve));
             return (style.nextSibling as HTMLStyleElement).sheet.cssRules[0].cssText;
         })).resolves.toBe('html { background-color: rgb(89, 0, 16); }');
 
@@ -196,10 +196,48 @@ describe('Style override', () => {
             document.head.append(styleElement);
             styleElement.sheet.insertRule('h1 { color: pink }');
             styleElement.sheet.insertRule('strong { color: orange }');
-            await new Promise((resolve) => setTimeout(resolve, 1000));
+            await new Promise((resolve) => setTimeout(resolve));
             return (styleElement.nextSibling as HTMLStyleElement).sheet.cssRules.length === 2 && (styleElement.nextSibling as HTMLStyleElement).classList.contains('darkreader--sync');
         })).resolves.toBe(true);
 
+    });
+
+    it('should handle defined custom elements', async () => {
+        await loadTestPage({
+            '/': multiline(
+                '<!DOCTYPE html>',
+                '<html>',
+                '<head>',
+                '</head>',
+                '<body>',
+                '<custom-element>',
+                '</custom-element>',
+                '</body>',
+                '</html>',
+            ),
+        });
+
+        await expect(page.evaluate(async () => {
+            class CustomElement extends HTMLElement {
+                constructor() {
+                    super();
+                    const shadowRoot = this.attachShadow({mode: 'open'});
+                    const style = document.createElement('style');
+                    style.textContent = 'p { color: pink }';
+                    const paragraph = document.createElement('p');
+                    paragraph.textContent = 'Some text content that should be pink.';
+
+                    shadowRoot.append(style);
+                    shadowRoot.append(paragraph);
+                }
+            }
+
+            customElements.define('custom-element', CustomElement);
+            await new Promise((resolve) => setTimeout(resolve, 100));
+            const shadowRoot = document.querySelector('custom-element').shadowRoot;
+            return getComputedStyle(shadowRoot.querySelector('p')).color;
+
+        })).resolves.toBe('rgb(255, 160, 177)');
     });
 
 });

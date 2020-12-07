@@ -1,5 +1,6 @@
-import {FilterConfig, Theme} from '../definitions';
-import {parse, rgbToHSL, hslToRGB, rgbToString, rgbToHexString, RGBA, HSLA} from '../utils/color';
+import type {FilterConfig, Theme} from '../definitions';
+import type {RGBA, HSLA} from '../utils/color';
+import {parse, rgbToHSL, hslToRGB, rgbToString, rgbToHexString} from '../utils/color';
 import {scale} from '../utils/math';
 import {applyColorMatrix, createFilterMatrix} from './utils/matrix';
 
@@ -37,8 +38,8 @@ export function clearColorModificationCache() {
     colorParseCache.clear();
 }
 
-const rgbCacheKeys: (keyof RGBA)[] = ['r', 'g', 'b', 'a'];
-const themeCacheKeys: (keyof Theme)[] = ['mode', 'brightness', 'contrast', 'grayscale', 'sepia', 'darkSchemeBackgroundColor', 'darkSchemeTextColor', 'lightSchemeBackgroundColor', 'lightSchemeTextColor'];
+const rgbCacheKeys: Array<keyof RGBA> = ['r', 'g', 'b', 'a'];
+const themeCacheKeys: Array<keyof Theme> = ['mode', 'brightness', 'contrast', 'grayscale', 'sepia', 'darkSchemeBackgroundColor', 'darkSchemeTextColor', 'lightSchemeBackgroundColor', 'lightSchemeTextColor'];
 
 function getCacheId(rgb: RGBA, theme: Theme) {
     return rgbCacheKeys.map((k) => rgb[k] as any)

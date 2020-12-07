@@ -37,7 +37,9 @@ export function canInjectScript(url: string) {
     );
 }
 
-export function readSyncStorage<T extends {[key: string]: any}>(defaults: T): Promise<T> {
+let isWriting = false;
+
+export async function readSyncStorage<T extends {[key: string]: any}>(defaults: T): Promise<T> {
     return new Promise<T>((resolve) => {
         chrome.storage.sync.get(defaults, (sync: T) => {
             resolve(sync);
@@ -45,7 +47,7 @@ export function readSyncStorage<T extends {[key: string]: any}>(defaults: T): Pr
     });
 }
 
-export function readLocalStorage<T extends {[key: string]: any}>(defaults: T): Promise<T> {
+export async function readLocalStorage<T extends {[key: string]: any}>(defaults: T): Promise<T> {
     return new Promise<T>((resolve) => {
         chrome.storage.local.get(defaults, (local: T) => {
             resolve(local);
@@ -53,27 +55,39 @@ export function readLocalStorage<T extends {[key: string]: any}>(defaults: T): P
     });
 }
 
-export function writeSyncStorage<T extends {[key: string]: any}>(values: T): Promise<void> {
+export async function writeSyncStorage<T extends {[key: string]: any}>(values: T): Promise<void> {
     return new Promise<void>((resolve, reject) => {
+        isWriting = true;
         chrome.storage.sync.set(values, () => {
             if (chrome.runtime.lastError) {
                 reject(chrome.runtime.lastError);
                 return;
             }
             resolve();
+            setTimeout(() => isWriting = false);
         });
     });
 }
 
-export function writeLocalStorage<T extends {[key: string]: any}>(values: T): Promise<void> {
+export async function writeLocalStorage<T extends {[key: string]: any}>(values: T): Promise<void> {
     return new Promise<void>((resolve) => {
+        isWriting = true;
         chrome.storage.local.set(values, () => {
             resolve();
+            setTimeout(() => isWriting = false);
         });
     });
 }
 
-export function getFontList() {
+export const subscribeToOuterSettingsChange = (callback: () => void) => {
+    chrome.storage.onChanged.addListener(() => {
+        if (!isWriting) {
+            callback();
+        }
+    });
+};
+
+export async function getFontList() {
     return new Promise<string[]>((resolve) => {
         if (!chrome.fontSettings) {
             // Todo: Remove it as soon as Firefox and Edge get support.
@@ -94,7 +108,7 @@ export function getFontList() {
     });
 }
 
-export function getCommands() {
+export async function getCommands() {
     return new Promise<chrome.commands.Command[]>((resolve) => {
         if (!chrome.commands) {
             resolve([]);

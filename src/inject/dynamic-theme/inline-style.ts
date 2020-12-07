@@ -2,7 +2,7 @@ import {forEach, push} from '../../utils/array';
 import {iterateShadowHosts, createOptimizedTreeObserver} from '../utils/dom';
 import {iterateCSSDeclarations} from './css-rules';
 import {getModifiableCSSDeclaration} from './modify-css';
-import {FilterConfig} from '../../definitions';
+import type {FilterConfig} from '../../definitions';
 import {isShadowDomSupported} from '../../utils/platform';
 import {getDuration} from '../../utils/time';
 import {throttle} from '../utils/throttle';
@@ -258,7 +258,7 @@ export function overrideInlineStyle(element: HTMLElement, theme: FilterConfig, i
         if (typeof value === 'function') {
             value = value(theme) as string;
         }
-        element.style.setProperty(customProp, value as string);
+        element.style.setProperty(customProp, value);
         if (!element.hasAttribute(dataAttr)) {
             element.setAttribute(dataAttr, '');
         }

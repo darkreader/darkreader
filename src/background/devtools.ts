@@ -1,7 +1,7 @@
 import {parseInversionFixes, formatInversionFixes} from '../generators/css-filter';
 import {parseDynamicThemeFixes, formatDynamicThemeFixes} from '../generators/dynamic-theme';
 import {parseStaticThemes, formatStaticThemes} from '../generators/static-theme';
-import ConfigManager from './config-manager';
+import type ConfigManager from './config-manager';
 
 interface DevToolsStorage {
     get(key: string): string;

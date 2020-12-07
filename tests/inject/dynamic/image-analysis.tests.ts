@@ -3,6 +3,7 @@ import {DEFAULT_THEME} from '../../../src/defaults';
 import {createOrUpdateDynamicTheme, removeDynamicTheme} from '../../../src/inject/dynamic-theme';
 import {getImageDetails} from '../../../src/inject/dynamic-theme/image';
 import {multiline, timeout} from '../../test-utils';
+import type {DynamicThemeFix} from '../../../src/definitions';
 
 const theme = {
     ...DEFAULT_THEME,
@@ -218,5 +219,26 @@ describe('Image analysis', () => {
         await timeout(100);
         const bgImageValue = getComputedStyle(container.querySelector('h1')).backgroundImage;
         expect(bgImageValue).toBe('none');
+    });
+
+    it('should ignore image analysis', async () => {
+        container.innerHTML = multiline(
+            '<style>',
+            getSVGImageCSS(images.darkTransparentIcon, 16, 16, 'i'),
+            '</style>',
+            '<h1>Dark icon <i></i></h1>',
+        );
+        const fixes: DynamicThemeFix = {
+            url: ['*'],
+            invert: [''],
+            css: '',
+            ignoreInlineStyle: ['.'],
+            ignoreImageAnalysis: ['*'],
+
+        };
+        createOrUpdateDynamicTheme(theme, fixes, false);
+        await timeout(100);
+        const backgroundImage = getComputedStyle(container.querySelector('i')).backgroundImage;
+        expect(backgroundImage).toContain('data:');
     });
 });

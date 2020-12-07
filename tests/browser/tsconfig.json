@@ -5,8 +5,13 @@
         "module": "commonjs",
         "outDir": "",
         "types": [
+            "chrome",
             "jest",
             "puppeteer-core"
+        ],
+        "lib": [
+            "ES6",
+            "dom"
         ]
     }
 }

@@ -33,7 +33,6 @@ module.exports = {
         '@typescript-eslint/array-type': ['error', {
             default: 'array-simple',
         }],
-        'eol-last': ['error', 'always'],
         'yoda': ['error', 'never'],
         '@typescript-eslint/brace-style': 'error',
         '@typescript-eslint/camelcase': 'off',

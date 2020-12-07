@@ -888,7 +888,10 @@
             "rules": ".qrcode { border: 8px solid black; }"
         },
         {
-            "url": "wikipedia.org",
+            "url": [
+                "wikipedia.org",
+                "wiki.haskell.org"
+            ],
             "invert": [
                 ".mwe-popups-discreet > svg",
                 ".mw-mmv-overlay"

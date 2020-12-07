@@ -25,7 +25,7 @@ async function createEchoServer(/** @type {number} */port) {
             return;
         }
 
-        const contentType = parsedQuery.type || 'text/plain'
+        const contentType = parsedQuery.type || 'text/plain';
         const content = parsedQuery.content;
 
         res.statusCode = 200;

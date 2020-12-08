@@ -42,8 +42,13 @@ function isCSSVariable(property: string) {
     return property.startsWith('--') && !property.startsWith('--darkreader');
 }
 
+const cachedParents = new WeakMap<CSSRule, string[]>();
+
 function getParentGroups(rule: CSSRule, stack: string[] = []): string[] {
     const {parentRule} = rule;
+    if (cachedParents.has(parentRule)) {
+        return cachedParents.get(parentRule).concat(stack);
+    }
     if (!parentRule || !(parentRule instanceof CSSMediaRule)) {
         return stack;
     }
@@ -52,12 +57,15 @@ function getParentGroups(rule: CSSRule, stack: string[] = []): string[] {
 }
 
 export function getCSSVariables(rules: CSSRuleList) {
-    const variables = new Map<string, Variable>();
+    const variables = new Map<string, Map<string, Variable>>();
     rules && iterateCSSRules(rules, (rule) => {
+        if (!variables.has(rule.selectorText)) {
+            variables.set(rule.selectorText, new Map());
+        }
         const parentGroups = getParentGroups(rule);
         rule.style && iterateCSSDeclarations(rule.style, (property, value) => {
             if (isCSSVariable(property)) {
-                variables.set(`${rule.selectorText};${property}`, {property, value, parentGroups});
+                variables.get(rule.selectorText).set(property, {value, parentGroups});
             }
         });
     });
@@ -65,10 +73,11 @@ export function getCSSVariables(rules: CSSRuleList) {
 }
 
 export function getElementCSSVariables(element: HTMLElement) {
-    const variables = new Map<string, Variable>();
+    const variables = new Map<string, Map<string, Variable>>();
+    variables.set(':root', new Map());
     iterateCSSDeclarations(element.style, (property, value) => {
         if (isCSSVariable(property)) {
-            variables.set(`:root;${property}`, {property, value, parentGroups: []});
+            variables.get(':root').set(property, {value, parentGroups: []});
         }
     });
     return variables;

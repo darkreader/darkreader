@@ -63,7 +63,11 @@ export function createAdoptedStyleSheetOverride(node: Document | ShadowRoot): Ad
             }
 
             const variables: Map<string, string> = globalVariables;
-            getCSSVariables(sheet.cssRules).forEach((value) => variables.set(value.property, value.value));
+            getCSSVariables(sheet.cssRules).forEach((properties) => {
+                properties.forEach((variable, property)=> {
+                    variables.set(property, variable.value);
+                });
+            });
 
             const sheetModifier = createStyleSheetModifier();
             sheetModifier.modifySheet({

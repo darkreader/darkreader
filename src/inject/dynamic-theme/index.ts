@@ -132,7 +132,7 @@ function createStaticStyleOverrides() {
     proxyScript.textContent = `(${injectProxy})()`;
     document.head.insertBefore(proxyScript, variableStyle.nextSibling);
 
-    const dynamicVariableStyle = createOrUpdateStyle('darkreader--dynamicVariable');
+    const dynamicVariableStyle = createOrUpdateStyle('darkreader--dynamic-variables');
     dynamicVariableStyle.textContent = '';
     document.head.insertBefore(dynamicVariableStyle, proxyScript.nextSibling);
     if (variables.size > 0) {
@@ -458,7 +458,7 @@ export function removeDynamicTheme() {
         removeNode(document.head.querySelector('.darkreader--invert'));
         removeNode(document.head.querySelector('.darkreader--inline'));
         removeNode(document.head.querySelector('.darkreader--override'));
-        removeNode(document.head.querySelector('.darkreader--dynamicVariable'));
+        removeNode(document.head.querySelector('.darkreader--dynamic-variable'));
         removeNode(document.head.querySelector('meta[name="darkreader"]'));
         removeProxy();
     }

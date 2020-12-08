@@ -52,6 +52,7 @@ export async function collectCSS() {
     addStaticCSS('.darkreader--text', 'Text Style');
     addStaticCSS('.darkreader--invert', 'Invert Style');
     addStaticCSS('.darkreader--variables', 'Variables Style');
+    addStaticCSS('.darkreader--dynamic-variables', 'Dynamic Variables Style');
 
     const modifiedCSS = [];
     document.querySelectorAll('.darkreader--sync').forEach((element: HTMLStyleElement) => {

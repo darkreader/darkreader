@@ -53,7 +53,9 @@ function getParentGroups(rule: CSSRule, stack: string[] = []): string[] {
         return stack;
     }
     stack.push(parentRule.conditionText);
-    return getParentGroups(parentRule, stack);
+    const parentGroups = getParentGroups(parentRule, stack);
+    cachedParents.set(parentRule, parentGroups);
+    return parentGroups;
 }
 
 export function getCSSVariables(rules: CSSRuleList) {

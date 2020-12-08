@@ -21,6 +21,7 @@ import {isFirefox} from '../../utils/platform';
 import {injectProxy} from './stylesheet-proxy';
 import {parse} from '../../utils/color';
 import {legacyVariables, cachedVariables, updateVariables, variables} from './variables';
+import {parsedURLCache} from '../../utils/url';
 
 const INSTANCE_ID = generateUID();
 const styleManagers = new Map<StyleElement, StyleManager>();
@@ -473,13 +474,13 @@ export function removeDynamicTheme() {
         manager.destroy();
     });
     adoptedStyleManagers.splice(0);
-    legacyVariables.clear();
-    variables.clear();
-    cachedVariables.clear();
 }
 
 export function cleanDynamicThemeCache() {
+    legacyVariables.clear();
     variables.clear();
+    cachedVariables.clear();
+    parsedURLCache.clear();
     stopWatchingForDocumentVisibility();
     cancelRendering();
     stopWatchingForUpdates();

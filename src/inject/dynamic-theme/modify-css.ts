@@ -9,6 +9,7 @@ import type {ImageDetails} from './image';
 import {getImageDetails, getFilteredImageDataURL, cleanImageProcessingCache} from './image';
 import {logWarn, logInfo} from '../utils/log';
 import type {FilterConfig, Theme} from '../../definitions';
+import {isFirefox} from '../../utils/platform';
 
 type CSSValueModifier = (filter: FilterConfig) => string | Promise<string>;
 
@@ -179,9 +180,11 @@ function getModifiedScrollbarStyle(theme: Theme) {
     lines.push('::-webkit-scrollbar-corner {');
     lines.push(`    background-color: ${colorCorner};`);
     lines.push('}');
-    lines.push('* {');
-    lines.push(`    scrollbar-color: ${colorTrack} ${colorThumb};`);
-    lines.push('}');
+    if (isFirefox) {
+        lines.push('* {');
+        lines.push(`    scrollbar-color: ${colorThumb} ${colorTrack};`);
+        lines.push('}');
+    }
     return lines.join('\n');
 }
 

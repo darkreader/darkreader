@@ -17,7 +17,7 @@ If the help page doesn't answer your question, open up a [issue](https://github.
 
 ## How to contribute
 
-Read more about contributing to Dark Reader in [CONTRIBUTE.md](https://github.com/darkreader/darkreader/blob/master/CONTRIBUTE.md).
+Read more about contributing to Dark Reader in [CONTRIBUTE.md](https://github.com/darkreader/darkreader/blob/master/CONTRIBUTING.md).
 
 ## Building for use
 

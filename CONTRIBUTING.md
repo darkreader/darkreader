@@ -1,11 +1,12 @@
 <h2 align="center">Contributing</h2>
 
-<p align="center">Contributing to Dark Reader, can be in a variety of ways. Proceed reading the CONTRIBUTE.md to learn more about the variety of ways. Thank you in advance for reading this CONTRIBUTE.md.</p>
+<p align="center">Contributing to Dark Reader, can be in a variety of ways. Proceed reading the <code>CONTRIBUTING.md</code> to learn more about the variety of ways. Thank you in advance for reading this <code>CONTRIBUTING.md</code>.</p>
 
 ## Sponsor!
 
-<a href="https://opencollective.com/darkreader/donate" target="_blank" rel="noreferrer noopener"> <img src="https://opencollective.com/darkreader/donate/button@2x.png?color=blue" width=300 /></a> 
-<p>Sponser the development of Dark Reader</p>
+<a href="https://opencollective.com/darkreader/donate" target="_blank" rel="noreferrer noopener"> <img src="https://opencollective.com/darkreader/donate/button@2x.png?color=blue" width=300 /></a>
+
+Sponser the development of Dark Reader
 
 ## Translation
 
@@ -14,14 +15,14 @@ See the list of [language codes](https://developer.chrome.com/webstore/i18n#loca
 
 ## Fix a wrong inversion!
 
-If a website is **already dark** *(that has all pages dark by default)*, you can **add it to the [dark-sites.config](https://github.com/alexanderby/darkreader/blob/master/src/config/dark-sites.config) file**
+If a website is **already dark** *(that has all pages dark by default)*, you can **add it to the [dark-sites.config](https://github.com/darkreader/darkreader/blob/master/src/config/dark-sites.config) file**
 *(please, preserve the alphabetical order)*.
 
 If certain **parts** of a web page are **wrongly inverted or styled**,
 you can fix this by specifying appropriate [**CSS selectors**](https://developer.mozilla.org/docs/Web/CSS/CSS_Selectors) in
-**[dynamic-theme-fixes.config](https://github.com/alexanderby/darkreader/blob/master/src/config/dynamic-theme-fixes.config)**
+**[dynamic-theme-fixes.config](https://github.com/darkreader/darkreader/blob/master/src/config/dynamic-theme-fixes.config)**
 (for Dynamic Theme mode)
-or **[inversion-fixes.config](https://github.com/alexanderby/darkreader/blob/master/src/config/inversion-fixes.config)**
+or **[inversion-fixes.config](https://github.com/darkreader/darkreader/blob/master/src/config/inversion-fixes.config)**
 (for Filter and Filter+ modes)
 *(please, preserve alphabetical order by URL, use short selectors, and preserve code style)*.
 
@@ -44,8 +45,8 @@ For **Filter mode**, it is a common practice to invert already dark page parts.
 - Click **Apply**.
 - Check how it looks both in **Light** and **Dark** mode.
 - If the **fix works** open
-**[dynamic-theme-fixes.config](https://github.com/alexanderby/darkreader/blob/master/src/config/dynamic-theme-fixes.config) file**
-or **[inversion-fixes.config](https://github.com/alexanderby/darkreader/blob/master/src/config/inversion-fixes.config) file**.
+**[dynamic-theme-fixes.config](https://github.com/darkreader/darkreader/blob/master/src/config/dynamic-theme-fixes.config) file**
+or **[inversion-fixes.config](https://github.com/darkreader/darkreader/blob/master/src/config/inversion-fixes.config) file**.
 - Click **Edit** (login to GitHub first).
 - **Insert your fix** there. Preserve **alphabetic order** by URL.
 - Provide a **short description** of what you have done.
@@ -56,7 +57,7 @@ or **[inversion-fixes.config](https://github.com/alexanderby/darkreader/blob/mas
 - When you see a **green checkmark** then everything is fine.
 - Dark Reader developer will **review** and merge your changes, making them available to all users.
 
-```
+```CSS
 dynamic-theme-fixes.config
 ================================
 
@@ -77,6 +78,7 @@ IGNORE INLINE STYLE
 IGNORE IMAGE ANALYSIS
 .logo
 ```
+
 - `INVERT` rule inverts specified elements.
 For **Dynamic mode** use `INVERT` only for dark images that are invisible on dark backgrounds (icons, diagrams, charts, `<img>` and `<svg>` elements).
 - `CSS` rule adds custom CSS to a web page.
@@ -92,7 +94,7 @@ When making a fix for background or text colors,
 instead of using hardcoded colors (like `#fff`, `#000`, `black` or `white`),
 please use CSS variables that are generated based on the user settings:
 
-```
+```CSS
 dynamic-theme-fixes.config
 ================================
 example.com
@@ -116,7 +118,7 @@ Here is a full list of the available CSS variables:
 
 ## Fixes for Filter and Filter+ mode
 
-```
+```CSS
 inversion-fixes.config
 ================================
 
@@ -151,14 +153,14 @@ To build and debug the extension **install the [Node.js](https://nodejs.org/)** 
 Install development dependencies by running `npm install` in the project root folder.  
 Then execute `npm run debug`.
 
-<h4>Chrome and Edge</h4>
+#### Chrome and Edge
 - Open the `chrome://extensions` page.
 - Disable the official Dark Reader version.
 - Enable the **Developer mode**.
 - Click **Load unpacked extension** button
 - Navigate to the project's `debug/` folder.
 
-<h4>Firefox</h4>
+#### Firefox
 - Open the `about:addons` page.
 - Disable the official Dark Reader version.
 - Open `about:debugging#addons` page.

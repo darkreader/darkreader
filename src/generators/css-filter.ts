@@ -236,7 +236,7 @@ export function formatInversionFixes(inversionFixes: InversionFix[]) {
         getPropCommandName: (prop) => Object.entries(inversionFixesCommands).find(([, p]) => p === prop)[0],
         formatPropValue: (prop, value) => {
             if (prop === 'css') {
-                return value.trim();
+                return value.trim().replace(/\n+/g, '\n');
             }
             return formatArray(value).trim();
         },

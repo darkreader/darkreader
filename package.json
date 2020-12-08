@@ -6,7 +6,7 @@
     "api": "node tasks/build.js --api",
     "benchmark-server": "node tests/benchmark-server/index.js",
     "build": "node tasks/build.js --release",
-    "code-style": "eslint --fix \"src/**/*.ts\" \"src/**/*.tsx\" \"tasks/**/*.js\" \"tests/**/*.ts\" \"tests/**/*.js\" \"index.d.ts\"",
+    "code-style": "eslint --fix \"src/**/*.ts\" \"src/**/*.tsx\" \"tasks/**/*.js\" \"tests/**/*.js\" \"tests/**/*.ts\" \".eslintrc.js\" \"index.d.ts\"",
     "debug": "node tasks/build.js --debug",
     "debug-watch": "node tasks/build.js --debug --watch",
     "lint": "eslint \"src/**/*.ts\" \"src/**/*.tsx\" \"tasks/**/*.js\" \"tests/**/*.ts\" \"tests/**/*.js\" \"index.d.ts\"",

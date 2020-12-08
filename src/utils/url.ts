@@ -151,7 +151,7 @@ export function isPDF(url: string) {
             return false;
         }
         if (url.endsWith('.pdf')) {
-            for (let i = url.length; 0 < i; i--) {
+            for (let i = url.length; i > 0; i--) {
                 if (url[i] === '=') {
                     return false;
                 } else if (url[i] === '/') {

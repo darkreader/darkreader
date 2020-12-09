@@ -341,6 +341,32 @@ describe('CSS Variables Override', () => {
         expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(140, 255, 140)');
     });
 
+    it('should preserve media after change', () => {
+        container.innerHTML = multiline(
+            '<style>',
+            '    @media screen and (min-width: 2px) {',
+            '        /* This media should be used */',
+            '        h1 {',
+            '            --text: green;',
+            '        }',
+            '    }',
+            '    @media screen and (max-width: 2px) {',
+            '        /* This media should not be used */',
+            '        h1 {',
+            '            --text: red;',
+            '        }',
+            '    }',
+            '    h1 { color: var(--text); }',
+            '</style>',
+            '<h1>Media after change</h1>',
+        );
+        createOrUpdateDynamicTheme(theme, null, false);
+        expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(140, 255, 140)');
+
+        createOrUpdateDynamicTheme(theme, null, false);
+        expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(140, 255, 140)');
+    });
+
     it('should handle same selector with different variables', () => {
         container.innerHTML = multiline(
             '<style>',

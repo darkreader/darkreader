@@ -51,16 +51,6 @@ export function updateVariables(newVars: Map<string, Map<string, Variable>>, the
         }
     });
 
-    variables.forEach((properties, key) => {
-        properties.forEach((variable, property) => {
-            variable.value.includes('var(') && variables.get(key).set(property, {
-                value: replaceCSSVariables(variable.value, legacyVariables)[0],
-                parentGroups: variable.parentGroups,
-                selectorText: variable.selectorText,
-            });
-        });
-    });
-
     const variablesStyle: HTMLStyleElement = document.head.querySelector(`.darkreader--dynamic-variables`);
     const {sheet} = variablesStyle;
     for (let i = sheet.cssRules.length - 1; i >= 0; i--) {
@@ -76,7 +66,9 @@ export function updateVariables(newVars: Map<string, Map<string, Variable>>, the
                 const {modifiedBackground, modifiedText, modifiedBorder} = cachedVariables.get(key).get(property);
                 declarations.push({...standardDeclaration, modifiedBackground, modifiedText, modifiedBorder});
             } else if (value.includes('var(')) {
-                const [modifiedBackground, modifiedText, modifiedBorder] = ['bg', 'text', 'border'].map((value) => `var(--darkreader-v-${value}${property})`);
+                // Removes var() from the value and thereby preseve any fallback specified.
+                const variableProperty = value.substring(4, value.length - 1);
+                const [modifiedBackground, modifiedText, modifiedBorder] = ['bg', 'text', 'border'].map((value) => `var(--darkreader-v-${value}${variableProperty})`);
                 declarations.push({...standardDeclaration, modifiedBackground, modifiedText, modifiedBorder});
             } else {
                 let parsedValue: RGBA;
@@ -102,7 +94,7 @@ export function updateVariables(newVars: Map<string, Map<string, Variable>>, the
 
     declarations.forEach(({selectorText, key, property, parentGroups, modifiedBackground, modifiedText, modifiedBorder}) => {
         cachedVariables.get(key).set(property, {modifiedBackground, modifiedText, modifiedBorder});
-        const modifiedVariables = [['bg', modifiedBackground], ['text', modifiedText], ['border', modifiedBorder]].map((value) => `--darkreader-${value[0]}${property}: ${value[1]};`);
+        const modifiedVariables = [['bg', modifiedBackground], ['text', modifiedText], ['border', modifiedBorder]].map((value) => `--darkreader-v-${value[0]}${property}: ${value[1]};`);
         let target: CSSStyleSheet | CSSGroupingRule = sheet;
         for (let i = 0, len = parentGroups.length; i < len; i++) {
             target = createTarget(parentGroups[i], target);

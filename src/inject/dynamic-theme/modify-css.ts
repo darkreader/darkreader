@@ -40,11 +40,11 @@ export function getModifiableCSSDeclaration(property: string, value: string, rul
         if (value.startsWith('var(')) {
             const modifed = value.replace(varRegex, (_, name) => {
                 if (property.indexOf('background') >= 0) {
-                    return `var(--darkreader-bg${name})`;
+                    return `var(--darkreader-v-bg${name})`;
                 } else if (property.indexOf('border') >= 0 || property.indexOf('outline') >= 0) {
-                    return `var(--darkreader-border${name})`;
+                    return `var(--darkreader-v-border${name})`;
                 }
-                return `var(--darkreader-text${name})`;
+                return `var(--darkreader-v-text${name})`;
             });
             return {property, value: modifed, important, sourceValue};
         }

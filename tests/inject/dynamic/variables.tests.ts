@@ -319,4 +319,25 @@ describe('CSS Variables Override', () => {
         expect(getComputedStyle(container.querySelector('.green')).color).toBe('rgb(255, 255, 255)');
         expect(getComputedStyle(container.querySelector('.orange')).color).toBe('rgb(255, 255, 255)');
     });
+
+    it('should handle media with the same selectors', () => {
+        container.innerHTML = multiline(
+            '<style>',
+            '    @media screen and (min-width: 2px) {',
+            '        h1 {',
+            '            --text: green;',
+            '        }',
+            '    }',
+            '    @media screen and (max-width: 2px) {',
+            '        h1 {',
+            '            --text: red;',
+            '        }',
+            '    }',
+            '    h1 { color: var(--text); }',
+            '</style>',
+            '<h1>Media with same selectors</h1>',
+        );
+        createOrUpdateDynamicTheme(theme, null, false);
+        expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(140, 255, 140)');
+    });
 });

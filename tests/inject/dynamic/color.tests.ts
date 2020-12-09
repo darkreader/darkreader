@@ -29,7 +29,6 @@ describe('Should parse and handle different color formats', () => {
             '<h1>RGB <strong>Power</strong>!</h1>',
         );
         createOrUpdateDynamicTheme(theme, null, false);
-        await timeout(100);
         expect(getComputedStyle(container.querySelector('h1')).backgroundColor).toBe('rgb(126, 68, 10)');
         expect(getComputedStyle(container.querySelector('h1 strong')).color).toBe('rgb(205, 200, 194)');
         expect(getComputedStyle(container).backgroundColor).toBe('rgba(41, 136, 41, 0.4)');
@@ -45,7 +44,6 @@ describe('Should parse and handle different color formats', () => {
             '<h1>HSL <strong>Power</strong>!</h1>',
         );
         createOrUpdateDynamicTheme(theme, null, false);
-        await timeout(100);
         expect(getComputedStyle(container.querySelector('h1')).backgroundColor).toBe('rgb(72, 29, 114)');
         expect(getComputedStyle(container.querySelector('h1 strong')).color).toBe('rgb(176, 129, 223)');
         expect(getComputedStyle(container).backgroundColor).toBe('rgb(72, 29, 114)');
@@ -61,7 +59,6 @@ describe('Should parse and handle different color formats', () => {
             '<h1>HSLA <strong>Power</strong>!</h1>',
         );
         createOrUpdateDynamicTheme(theme, null, false);
-        await timeout(100);
         expect(getComputedStyle(container.querySelector('h1')).backgroundColor).toBe('rgba(0, 0, 204, 0.7)');
         expect(getComputedStyle(container.querySelector('h1 strong')).color).toBe('rgb(51, 125, 255)');
         expect(getComputedStyle(container).backgroundColor).toBe('rgba(0, 0, 204, 0.05)');
@@ -77,7 +74,6 @@ describe('Should parse and handle different color formats', () => {
             '<h1>Weird color <strong>Power</strong>!</h1>',
         );
         createOrUpdateDynamicTheme(theme, null, false);
-        await timeout(100);
         expect(getComputedStyle(container.querySelector('h1')).backgroundColor).toBe('rgb(82, 41, 122)');
         expect(getComputedStyle(container.querySelector('h1 strong')).color).toBe('rgb(249, 250, 166)');
         expect(getComputedStyle(container).backgroundColor).toBe('rgba(0, 0, 0, 0)');

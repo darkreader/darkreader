@@ -360,4 +360,24 @@ describe('CSS Variables Override', () => {
         expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(140, 255, 140)');
         expect(getComputedStyle(container.querySelector('h1')).backgroundColor).toBe('rgb(204, 0, 0)');
     });
+
+    it('should properly modify variables in light mode', () => {
+        container.innerHTML = multiline(
+            '<style>',
+            '    :root {',
+            '        --bg: white;',
+            '        --text: black;',
+            '    }',
+            '    h1 {',
+            '        background: var(--bg);',
+            '        color: var(--text);',
+            '    }',
+            '</style>',
+            '<h1>Light scheme</h1>',
+        );
+        const lightTheme = {...theme, mode: 0, lightSchemeBackgroundColor: '#dddddd', lightSchemeTextColor: '#222222'};
+        createOrUpdateDynamicTheme(lightTheme, null, false);
+        expect(getComputedStyle(container.querySelector('h1')).backgroundColor).toBe('rgb(221, 221, 221)');
+        expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(34, 34, 34)');
+    });
 });

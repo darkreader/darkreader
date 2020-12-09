@@ -59,14 +59,15 @@ function getParentGroups(rule: CSSRule, stack: string[] = []): string[] {
 }
 
 export function getCSSVariables(rules: CSSRuleList) {
-    const variables = new Map<string[], Map<string, Variable>>();
+    const variables = new Map<string, Map<string, Variable>>();
     rules && iterateCSSRules(rules, (rule) => {
         const parentGroups = getParentGroups(rule);
-        const key = [...parentGroups, rule.selectorText];
+        const {selectorText} = rule;
+        const key = [...parentGroups, selectorText].join('');
         !variables.has(key) && variables.set(key, new Map());
         rule.style && iterateCSSDeclarations(rule.style, (property, value) => {
             if (isCSSVariable(property)) {
-                variables.get(key).set(property, {value});
+                variables.get(key).set(property, {value, parentGroups, selectorText});
             }
         });
         variables.has(key) && variables.get(key).size === 0 && variables.delete(key);
@@ -75,12 +76,12 @@ export function getCSSVariables(rules: CSSRuleList) {
 }
 
 export function getElementCSSVariables(element: HTMLElement) {
-    const variables = new Map<string[], Map<string, Variable>>();
-    const key = [':root'];
+    const variables = new Map<string, Map<string, Variable>>();
+    const key = ':root';
     variables.set(key, new Map());
     iterateCSSDeclarations(element.style, (property, value) => {
         if (isCSSVariable(property)) {
-            variables.get(key).set(property, {value});
+            variables.get(key).set(property, {value, parentGroups: [], selectorText: ':root'});
         }
     });
     variables.has(key) && variables.get(key).size === 0 && variables.delete(key);

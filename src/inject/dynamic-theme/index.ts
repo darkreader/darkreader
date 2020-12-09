@@ -20,6 +20,7 @@ import {createAdoptedStyleSheetOverride} from './adopted-style-manger';
 import {isFirefox} from '../../utils/platform';
 import {injectProxy} from './stylesheet-proxy';
 import {parse} from '../../utils/color';
+import {parsedURLCache} from '../../utils/url';
 
 const variables = new Map<string, string>();
 const INSTANCE_ID = generateUID();
@@ -475,9 +476,11 @@ export function removeDynamicTheme() {
         manager.destroy();
     });
     adoptedStyleManagers.splice(0);
+    parsedURLCache.clear();
 }
 
 export function cleanDynamicThemeCache() {
+    variables.clear();
     stopWatchingForDocumentVisibility();
     cancelRendering();
     stopWatchingForUpdates();

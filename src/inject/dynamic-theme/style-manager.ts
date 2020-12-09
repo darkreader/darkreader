@@ -31,7 +31,7 @@ declare global {
 export type StyleElement = HTMLLinkElement | HTMLStyleElement;
 
 export interface StyleManager {
-    details(): {variables: Map<string, Map<string, Variable>>};
+    details(): {variables: Map<string[], Map<string, Variable>>};
     render(theme: Theme, variables: Map<string, string>, ignoreImageAnalysis: string[]): void;
     pause(): void;
     destroy(): void;

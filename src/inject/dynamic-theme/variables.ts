@@ -6,8 +6,8 @@ import {logWarn} from '../utils/log';
 import {replaceCSSVariables} from './css-rules';
 
 export const legacyVariables = new Map<string, string>();
-export const variables = new Map<string, Map<string, Variable>>();
-export const cachedVariables = new Map<string, Map<string, CachedVariables>>();
+export const variables = new Map<string[], Map<string, Variable>>();
+export const cachedVariables = new Map<string[], Map<string, CachedVariables>>();
 
 interface CachedVariables {
     modifiedBackground: string;
@@ -16,6 +16,7 @@ interface CachedVariables {
 }
 
 interface VariableDeclaration extends CachedVariables {
+    path: string[];
     selector: string;
     parentGroups: string[];
     property: string;
@@ -23,20 +24,19 @@ interface VariableDeclaration extends CachedVariables {
 
 export interface Variable {
     value: string;
-    parentGroups: string[];
 }
 
-export function updateVariables(newVars: Map<string, Map<string, Variable>>, theme: Theme) {
+export function updateVariables(newVars: Map<string[], Map<string, Variable>>, theme: Theme) {
     if (newVars.size === 0) {
         return;
     }
-    newVars.forEach((properties, selector) => {
-        !variables.has(selector) && variables.set(selector, new Map());
-        !cachedVariables.has(selector) && cachedVariables.set(selector, new Map());
+    newVars.forEach((properties, path) => {
+        !variables.has(path) && variables.set(path, new Map());
+        !cachedVariables.has(path) && cachedVariables.set(path, new Map());
         properties.forEach((variable, property) => {
             legacyVariables.set(property, variable.value);
-            variables.get(selector).set(property, variable);
-            cachedVariables.has(selector) && cachedVariables.get(selector).delete(property);
+            variables.get(path).set(property, variable);
+            cachedVariables.has(path) && cachedVariables.get(path).delete(property);
         });
     });
 
@@ -50,11 +50,10 @@ export function updateVariables(newVars: Map<string, Map<string, Variable>>, the
         }
     });
 
-    variables.forEach((properties, selector) => {
+    variables.forEach((properties, key) => {
         properties.forEach((variable, property) => {
-            variable.value.includes('var(') && variables.get(selector).set(property, {
+            variable.value.includes('var(') && variables.get(key).set(property, {
                 value: replaceCSSVariables(variable.value, legacyVariables)[0],
-                parentGroups: variable.parentGroups
             });
         });
     });
@@ -66,12 +65,14 @@ export function updateVariables(newVars: Map<string, Map<string, Variable>>, the
     }
 
     const declarations: VariableDeclaration[] = [];
-    variables.forEach((properties, selector) => {
+    variables.forEach((properties, path) => {
         properties.forEach((variable, property) => {
-            const {value, parentGroups} = variable;
-            const standardDeclaration = {selector, property, parentGroups};
-            if (cachedVariables.has(selector) && cachedVariables.get(selector).has(property)) {
-                const {modifiedBackground, modifiedText, modifiedBorder} = cachedVariables.get(selector).get(property);
+            const copyPath = [...path];
+            const [selector, parentGroups] = [copyPath.pop(), copyPath];
+            const {value} = variable;
+            const standardDeclaration = {selector, property, parentGroups, path};
+            if (cachedVariables.has(path) && cachedVariables.get(path).has(property)) {
+                const {modifiedBackground, modifiedText, modifiedBorder} = cachedVariables.get(path).get(property);
                 declarations.push({...standardDeclaration, modifiedBackground, modifiedText, modifiedBorder});
             } else if (value.includes('var(')) {
                 const [modifiedBackground, modifiedText, modifiedBorder] = ['bg', 'text', 'border'].map((value) => `var(--darkreader-v-${value}${property})`);
@@ -98,8 +99,8 @@ export function updateVariables(newVars: Map<string, Map<string, Variable>>, the
         return parent.cssRules[index] as CSSGroupingRule;
     }
 
-    declarations.forEach(({selector, property, parentGroups, modifiedBackground, modifiedText, modifiedBorder}) => {
-        cachedVariables.get(selector).set(property, {modifiedBackground, modifiedText, modifiedBorder});
+    declarations.forEach(({selector, path, property, parentGroups, modifiedBackground, modifiedText, modifiedBorder}) => {
+        cachedVariables.get(path).set(property, {modifiedBackground, modifiedText, modifiedBorder});
         const modifiedVariables = [['bg', modifiedBackground], ['text', modifiedText], ['border', modifiedBorder]].map((value) => `--darkreader-${value[0]}${property}: ${value[1]};`);
         let target: CSSStyleSheet | CSSGroupingRule = sheet;
         while (parentGroups.length) {

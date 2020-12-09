@@ -1,7 +1,7 @@
 import '../polyfills';
 import {DEFAULT_THEME} from '../../../src/defaults';
 import {createOrUpdateDynamicTheme, removeDynamicTheme} from '../../../src/inject/dynamic-theme';
-import {multiline, timeout} from '../../test-utils';
+import {multiline} from '../../test-utils';
 import type {DynamicThemeFix} from '../../../src/definitions';
 
 let container: HTMLElement;

@@ -350,7 +350,7 @@ describe('CSS Variables Override', () => {
             '        }',
             '        h1 {',
             '            --bg: red;',
-            '        }',            
+            '        }',
             '    }',
             '    h1 { color: var(--text); background-color: var(--bg); }',
             '</style>',

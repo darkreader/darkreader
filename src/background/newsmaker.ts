@@ -8,6 +8,7 @@ export default class Newsmaker {
 
     latest: News[];
     onUpdate: (news: News[]) => void;
+    newsInterval: number;
 
     constructor(onUpdate: (news: News[]) => void) {
         this.latest = [];
@@ -16,7 +17,11 @@ export default class Newsmaker {
 
     subscribe() {
         this.updateNews();
-        setInterval(async () => await this.updateNews(), Newsmaker.UPDATE_INTERVAL);
+        this.newsInterval = setInterval(async () => await this.updateNews(), Newsmaker.UPDATE_INTERVAL);
+    }
+
+    unSubscribe() {
+        clearInterval(this.newsInterval);
     }
 
     private async updateNews() {

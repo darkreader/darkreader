@@ -103,7 +103,7 @@ export class Extension {
         this.awaiting = null;
 
         this.startAutoTimeCheck();
-        this.news.subscribe();
+        this.user.settings.notifyOfNews && this.news.subscribe();
     }
 
     private popupOpeningListener: () => void = null;
@@ -284,6 +284,9 @@ export class Extension {
             } else {
                 resetWindowTheme();
             }
+        }
+        if (prev.notifyOfNews !== this.user.settings.notifyOfNews) {
+            this.user.settings.notifyOfNews ? this.news.subscribe() : this.news.unSubscribe();
         }
 
         this.onSettingsChanged();

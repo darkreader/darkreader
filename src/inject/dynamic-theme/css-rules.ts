@@ -52,7 +52,7 @@ function getParentGroups(rule: CSSRule, stack: string[] = []): string[] {
     if (!parentRule || !(parentRule instanceof CSSMediaRule)) {
         return stack;
     }
-    stack.push(parentRule.conditionText);
+    stack.push(parentRule.media.mediaText);
     const parentGroups = getParentGroups(parentRule, stack);
     cachedParents.set(parentRule, parentGroups);
     return parentGroups;

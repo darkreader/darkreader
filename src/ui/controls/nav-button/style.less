@@ -1,10 +1,18 @@
 @import "../../theme.less";
 
 .nav-button {
-    background-image: @icon-right;
-    background-position: center right 0.25rem;
+    &.external-link {
+        background-image: @icon-external;
+        background-size: 1.5rem;
+        background-position: center right;
+    }
+    &:not(.external-link) {
+        background-image: @icon-right;
+        background-size: 1rem;
+        background-position: center right 0.25rem;
+    }
     background-repeat: no-repeat;
-    background-size: 1rem;
+    background-position: center right 0.25rem;
     border-radius: @size-control-inner / 2 + @size-border;
     width: calc(100% - 2 * @size-border);
 

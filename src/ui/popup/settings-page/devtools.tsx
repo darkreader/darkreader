@@ -79,6 +79,7 @@ export default function DevToolsGroup(props: ViewProps) {
                     class={{
                         'dev-tools-button': true,
                         'dev-tools-button--has-custom-fixes': hasCustomFixes,
+                        'external-link': true,
                     }}
                 >
                     🛠 {getLocalMessage('open_dev_tools')}

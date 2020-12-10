@@ -96,6 +96,6 @@ export function isInPattern(input: string, patterns: any[]) {
     }
 
     const result = negatives === patterns.length ? [...items] : [...keep];
-    const matches = result.filter(item => !omit.has(item));
+    const matches = result.filter((item) => !omit.has(item));
     return matches.length !== 0;
 }

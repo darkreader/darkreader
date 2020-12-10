@@ -141,7 +141,6 @@ test('URL is enabled', () => {
         {isProtected: false, isInDarkList: false},
     )).toBe(true);
 
-    debugger;
     expect(isURLEnabled(
         'https://github.community/',
         {siteList: ['github.com*'], siteListEnabled: [], applyToListedOnly: false} as UserSettings,

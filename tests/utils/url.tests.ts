@@ -134,6 +134,20 @@ test('URL is enabled', () => {
         {isProtected: false, isInDarkList: false},
     )).toBe(false);
 
+    // Matching base
+    expect(isURLEnabled(
+        'https://github.community/',
+        {siteList: ['github.com'], siteListEnabled: [], applyToListedOnly: false} as UserSettings,
+        {isProtected: false, isInDarkList: false},
+    )).toBe(true);
+
+    debugger;
+    expect(isURLEnabled(
+        'https://github.community/',
+        {siteList: ['github.com*'], siteListEnabled: [], applyToListedOnly: false} as UserSettings,
+        {isProtected: false, isInDarkList: false},
+    )).toBe(false);
+
     // Test for PDF enabling
     expect(isPDF(
         'https://www.google.com/file.pdf'

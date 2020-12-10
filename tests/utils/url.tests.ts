@@ -160,7 +160,6 @@ test('URL is enabled', () => {
         {siteList: ['192.168.1.11'], siteListEnabled: [], applyToListedOnly: false} as UserSettings,
         {isProtected: false, isInDarkList: false},
     )).toBe(true);
-    debugger;
     expect(isURLEnabled(
         '192.168.1.1:80',
         {siteList: ['192.168.1.1'], siteListEnabled: [], applyToListedOnly: false} as UserSettings,

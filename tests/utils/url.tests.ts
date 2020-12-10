@@ -140,12 +140,48 @@ test('URL is enabled', () => {
         {siteList: ['github.com'], siteListEnabled: [], applyToListedOnly: false} as UserSettings,
         {isProtected: false, isInDarkList: false},
     )).toBe(true);
-
     expect(isURLEnabled(
         'https://github.community/',
         {siteList: ['github.com*'], siteListEnabled: [], applyToListedOnly: false} as UserSettings,
         {isProtected: false, isInDarkList: false},
     )).toBe(false);
+    expect(isURLEnabled(
+        '192.1681.1.11',
+        {siteList: ['192.168.1.1'], siteListEnabled: [], applyToListedOnly: false} as UserSettings,
+        {isProtected: false, isInDarkList: false},
+    )).toBe(true);
+    expect(isURLEnabled(
+        '192.168.1.11',
+        {siteList: ['192.168.1.11'], siteListEnabled: [], applyToListedOnly: false} as UserSettings,
+        {isProtected: false, isInDarkList: false},
+    )).toBe(false);
+    expect(isURLEnabled(
+        '192.168.1.1',
+        {siteList: ['192.168.1.11'], siteListEnabled: [], applyToListedOnly: false} as UserSettings,
+        {isProtected: false, isInDarkList: false},
+    )).toBe(true);
+    debugger;
+    expect(isURLEnabled(
+        '192.168.1.1:80',
+        {siteList: ['192.168.1.1'], siteListEnabled: [], applyToListedOnly: false} as UserSettings,
+        {isProtected: false, isInDarkList: false},
+    )).toBe(false);
+    expect(isURLEnabled(
+        '192.168.1.1',
+        {siteList: ['192.168.1.1:80'], siteListEnabled: [], applyToListedOnly: false} as UserSettings,
+        {isProtected: false, isInDarkList: false},
+    )).toBe(true);
+    expect(isURLEnabled(
+        '192.168.1.1:80',
+        {siteList: ['192.168.1.1'], siteListEnabled: [], applyToListedOnly: false} as UserSettings,
+        {isProtected: false, isInDarkList: false},
+    )).toBe(false);
+    expect(isURLEnabled(
+        '192.168.1.1:80',
+        {siteList: ['192.168.1.1:443'], siteListEnabled: [], applyToListedOnly: false} as UserSettings,
+        {isProtected: false, isInDarkList: false},
+    )).toBe(true);
+
 
     // Test for PDF enabling
     expect(isPDF(

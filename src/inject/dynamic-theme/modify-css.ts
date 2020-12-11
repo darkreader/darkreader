@@ -11,7 +11,7 @@ import {logWarn, logInfo} from '../utils/log';
 import type {FilterConfig, Theme} from '../../definitions';
 import {isFirefox} from '../../utils/platform';
 
-type CSSValueModifier = (filter: FilterConfig) => string | Promise<string>;
+export type CSSValueModifier = (theme: Theme) => string | Promise<string>;
 
 export interface ModifiableCSSDeclaration {
     property: string;
@@ -53,12 +53,25 @@ export function getModifiableCSSDeclaration(property: string, value: string, rul
             return {property, value: modifier, important, sourceValue};
         }
     } else if (property === 'background-image' || property === 'list-style-image') {
-        const modifier = getBgImageModifier(value, rule, ignoreImageSelectors, isCancelled);
+        const imageRule: ImageRule = {
+            selectorText: rule.selectorText,
+            parentSheet: {
+                href: rule.parentStyleSheet.href,
+                baseURIofOwner: rule.parentStyleSheet.ownerNode ? rule.parentStyleSheet.ownerNode.baseURI : null
+            }
+        };
+        if (value.startsWith('var(')) {
+            const modifed = value.replace(varRegex, (_, name) => {
+                return `var(--darkreader-v-bgImage${name})`;
+            });
+            return {property, value: modifed, important, sourceValue};
+        }
+        const modifier = getBgModifier(value, imageRule, ignoreImageSelectors, isCancelled);
         if (modifier) {
             return {property, value: modifier, important, sourceValue};
         }
     } else if (property.indexOf('shadow') >= 0) {
-        const modifier = getShadowModifier(property, value);
+        const modifier = getShadowModifier(value);
         if (modifier) {
             return {property, value: modifier, important, sourceValue};
         }
@@ -251,14 +264,14 @@ const gradientRegex = /[\-a-z]+gradient\(([^\(\)]*(\(([^\(\)]*(\(.*?\)))*[^\(\)]
 const imageDetailsCache = new Map<string, ImageDetails>();
 const awaitingForImageLoading = new Map<string, Array<(imageDetails: ImageDetails) => void>>();
 
-function shouldIgnoreImage(rule: CSSStyleRule, selectors: string[]) {
-    if (!rule || selectors.length === 0) {
+function shouldIgnoreImage(selectorText: string, selectors: string[]) {
+    if (!selectorText || selectors.length === 0) {
         return false;
     }
     if (selectors.some((s) => s === '*')) {
         return true;
     }
-    const ruleSelectors = rule.selectorText.split(/,\s*/g);
+    const ruleSelectors = selectorText.split(/,\s*/g);
     for (let i = 0; i < selectors.length; i++) {
         const ignoredSelector = selectors[i];
         if (ruleSelectors.some((s) => s === ignoredSelector)) {
@@ -268,7 +281,15 @@ function shouldIgnoreImage(rule: CSSStyleRule, selectors: string[]) {
     return false;
 }
 
-function getBgImageModifier(value: string, rule: CSSStyleRule, ignoreImageSelectors: string[], isCancelled: () => boolean): string | CSSValueModifier {
+interface ImageRule {
+    selectorText: string;
+    parentSheet: {
+        href: string;
+        baseURIofOwner: string;
+    };
+}
+
+export function getBgModifier(value: string, rule: ImageRule, ignoreImageSelectors: string[], isCancelled: () => boolean): string | CSSValueModifier {
     try {
         const gradients = getMatches(gradientRegex, value);
         const urls = getMatches(cssURLRegex, value);
@@ -328,12 +349,16 @@ function getBgImageModifier(value: string, rule: CSSStyleRule, ignoreImageSelect
         };
 
         const getURLModifier = (urlValue: string) => {
+            const {parentSheet, selectorText} = rule;
+            if (shouldIgnoreImage(selectorText, ignoreImageSelectors)) {
+                return null;
+            }
             let url = getCSSURLValue(urlValue);
-            if (rule.parentStyleSheet.href) {
-                const basePath = getCSSBaseBath(rule.parentStyleSheet.href);
+            if (parentSheet.href) {
+                const basePath = getCSSBaseBath(parentSheet.href);
                 url = getAbsoluteURL(basePath, url);
-            } else if (rule.parentStyleSheet.ownerNode && rule.parentStyleSheet.ownerNode.baseURI) {
-                url = getAbsoluteURL(rule.parentStyleSheet.ownerNode.baseURI, url);
+            } else if (parentSheet.baseURIofOwner) {
+                url = getAbsoluteURL(parentSheet.baseURIofOwner, url);
             } else {
                 url = getAbsoluteURL(location.origin, url);
             }
@@ -346,7 +371,7 @@ function getBgImageModifier(value: string, rule: CSSStyleRule, ignoreImageSelect
                     imageDetails = imageDetailsCache.get(url);
                 } else {
                     try {
-                        if (shouldIgnoreImage(rule, ignoreImageSelectors)) {
+                        if (shouldIgnoreImage(selectorText, ignoreImageSelectors)) {
                             return null;
                         }
                         if (awaitingForImageLoading.has(url)) {
@@ -435,7 +460,7 @@ function getBgImageModifier(value: string, rule: CSSStyleRule, ignoreImageSelect
     }
 }
 
-function getShadowModifier(prop: string, value: string): CSSValueModifier {
+function getShadowModifier(value: string): CSSValueModifier {
     try {
         let index = 0;
         const colorMatches = getMatches(/(^|\s)([a-z]+\(.+?\)|#[0-9a-f]+|[a-z]+)(.*?(inset|outset)?($|,))/ig, value, 2);

@@ -195,9 +195,8 @@ export function createStyleSheetModifier() {
                         const asyncKey = asyncDeclarationCounter++;
                         const asyncDeclaration: ReadyDeclaration = {property, value: null, important, asyncKey, sourceValue};
                         readyDeclarations.push(asyncDeclaration);
-                        const promise = modified;
                         const currentRenderId = renderId;
-                        promise.then((asyncValue) => {
+                        modified.then((asyncValue) => {
                             if (!asyncValue || isAsyncCancelled() || currentRenderId !== renderId) {
                                 return;
                             }

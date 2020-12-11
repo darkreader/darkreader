@@ -137,7 +137,7 @@ function createStaticStyleOverrides() {
     document.head.insertBefore(dynamicVariableStyle, proxyScript.nextSibling);
     if (variables.size > 0) {
         cachedVariables.clear();
-        updateVariables(variables, filter);
+        updateVariables(variables, filter, getIgnoreImageAnalysisSelectors());
     }
 }
 
@@ -179,7 +179,7 @@ function getIgnoreImageAnalysisSelectors() {
 function createDynamicStyleOverrides() {
     cancelRendering();
 
-    updateVariables(getElementCSSVariables(document.documentElement), filter);
+    updateVariables(getElementCSSVariables(document.documentElement), filter, getIgnoreImageAnalysisSelectors());
 
     const allStyles = getManageableStyles(document);
 
@@ -196,7 +196,7 @@ function createDynamicStyleOverrides() {
             cleanFallbackStyle();
         }
     } else {
-        newVariables.forEach((variables) => updateVariables(variables, filter));
+        newVariables.forEach((variables) => updateVariables(variables, filter, getIgnoreImageAnalysisSelectors()));
         throttledRenderAllStyles(() => {
             if (loadingStyles.size === 0) {
                 cleanFallbackStyle();
@@ -250,7 +250,7 @@ function createManager(element: StyleElement) {
         if (details.variables.size === 0) {
             manager.render(filter, legacyVariables, getIgnoreImageAnalysisSelectors());
         } else {
-            updateVariables(details.variables, filter);
+            updateVariables(details.variables, filter, getIgnoreImageAnalysisSelectors());
             throttledRenderAllStyles();
         }
     }
@@ -354,7 +354,7 @@ function watchForUpdates() {
         if (newVariables.length === 0) {
             newManagers.forEach((manager) => manager.render(filter, legacyVariables, getIgnoreImageAnalysisSelectors()));
         } else {
-            newVariables.forEach((variables) => updateVariables(variables, filter));
+            newVariables.forEach((variables) => updateVariables(variables, filter, getIgnoreImageAnalysisSelectors()));
             throttledRenderAllStyles();
         }
         newManagers.forEach((manager) => manager.watch());
@@ -370,7 +370,7 @@ function watchForUpdates() {
         if (element === document.documentElement) {
             const rootVariables = getElementCSSVariables(document.documentElement);
             if (rootVariables.size > 0) {
-                updateVariables(rootVariables, filter);
+                updateVariables(rootVariables, filter, getIgnoreImageAnalysisSelectors());
                 throttledRenderAllStyles();
             }
         }

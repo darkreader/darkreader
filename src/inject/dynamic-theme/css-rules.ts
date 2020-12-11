@@ -67,7 +67,14 @@ export function getCSSVariables(rules: CSSRuleList) {
         !variables.has(key) && variables.set(key, new Map());
         rule.style && iterateCSSDeclarations(rule.style, (property, value) => {
             if (isCSSVariable(property)) {
-                variables.get(key).set(property, {value, parentGroups, selectorText});
+                if (value.includes('url(')) {
+                    variables.get(key).set(property, {value, parentGroups, selectorText, imageInfo: {
+                        href: rule.parentStyleSheet.href,
+                        baseURIofOwner: rule.parentStyleSheet.ownerNode ? rule.parentStyleSheet.ownerNode.baseURI : null
+                    }});
+                } else {
+                    variables.get(key).set(property, {value, parentGroups, selectorText});
+                }
             }
         });
         variables.has(key) && variables.get(key).size === 0 && variables.delete(key);

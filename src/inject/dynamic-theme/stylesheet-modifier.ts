@@ -63,15 +63,20 @@ export function createStyleSheetModifier() {
             // to properly handle composite properties (e.g. background -> background-color)
             let vars: CSSStyleSheet;
             let varsRule: CSSStyleRule = null;
-            let replacedMap: Map<string, string> = new Map<string, string>();
+            const variablesMap: Map<string, string> = new Map<string, string>();
             if (variables.size > 0 || cssText.includes('var(')) {
-                const [cssTextWithVariables, resultMap] = replaceCSSVariables(cssText, variables);
-                if (rulesTextCache.get(cssText) !== cssTextWithVariables) {
-                    replacedMap = resultMap;
-                    rulesTextCache.set(cssText, cssTextWithVariables);
+                const {result, replacedMap} = replaceCSSVariables(cssText, variables);
+                if (rulesTextCache.get(cssText) !== result) {
+                    replacedMap.forEach((value, key) => {
+                        // match space but not between () or []
+                        key.split(/\s(?![^\(|\"]*(?:\)|\"))/).forEach((property) => {
+                            variablesMap.set(property, value);
+                        });
+                    });
+                    rulesTextCache.set(cssText, result);
                     textDiffersFromPrev = true;
                     vars = getTempCSSStyleSheet();
-                    vars.insertRule(cssTextWithVariables);
+                    vars.insertRule(result);
                     varsRule = vars.cssRules[0] as CSSStyleRule;
                 }
             }
@@ -86,8 +91,8 @@ export function createStyleSheetModifier() {
             const modDecs: ModifiableCSSDeclaration[] = [];
             const targetRule = varsRule || rule;
             targetRule && targetRule.style && iterateCSSDeclarations(targetRule.style, (property, value) => {
-                if (replacedMap.has(value)) {
-                    value = replacedMap.get(value);
+                if (variablesMap.has(value)) {
+                    value = variablesMap.get(value);
                 }
                 const mod = getModifiableCSSDeclaration(property, value, rule, ignoreImageAnalysis, isAsyncCancelled);
                 if (mod) {

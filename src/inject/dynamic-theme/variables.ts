@@ -4,7 +4,7 @@ import type {RGBA} from '../../utils/color';
 import {parse, rgbToString} from '../../utils/color';
 import {push} from '../../utils/array';
 import {logWarn} from '../utils/log';
-import {replaceCSSVariables} from './css-rules';
+import {replaceCSSVariables, varRegex} from './css-rules';
 
 export const legacyVariables = new Map<string, string>();
 export const variables = new Map<string, Map<string, Variable>>();
@@ -43,7 +43,7 @@ export function updateVariables(newVars: Map<string, Map<string, Variable>>, the
     });
 
     legacyVariables.forEach((value, key) => {
-        value.includes('var(') && legacyVariables.set(key, replaceCSSVariables(value, legacyVariables)[0]);
+        value.includes('var(') && legacyVariables.set(key, replaceCSSVariables(value, legacyVariables).result);
         try {
             legacyVariables.set(key, rgbToString(parse(value)));
         } catch (err) {
@@ -67,10 +67,11 @@ export function updateVariables(newVars: Map<string, Map<string, Variable>>, the
                 const {modifiedBackground, modifiedText, modifiedBorder} = cachedVariables.get(key).get(property);
                 declarations.push({...standardDeclaration, modifiedBackground, modifiedText, modifiedBorder});
             } else if (value.includes('var(')) {
-                // Removes var() from the value and thereby preseve any fallback specified.
-                const variableProperty = value.substring(4, value.length - 1);
-                const [modifiedBackground, modifiedText, modifiedBorder] = ['bg', 'text', 'border'].map((value) => `var(--darkreader-v-${value}${variableProperty})`);
-                declarations.push({...standardDeclaration, modifiedBackground, modifiedText, modifiedBorder});
+                let match: RegExpExecArray;
+                while ((match = varRegex.exec(value)) != null) {
+                    const [modifiedBackground, modifiedText, modifiedBorder] = ['bg', 'text', 'border'].map((value) => `var(--darkreader-v-${value}${match[1]}, ${match[0]})`);
+                    declarations.push({...standardDeclaration, modifiedBackground, modifiedText, modifiedBorder});
+                }
             } else {
                 let parsedValue: RGBA;
                 try {

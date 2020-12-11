@@ -121,11 +121,15 @@ export function replaceCSSFontFace($css: string) {
 
 export const varRegex = /var\((--[^\s,\(\)]+),?\s*([^\(\)]*(\([^\(\)]*\)[^\(\)]*)*\s*)\)/g;
 
+interface replacedMap {
+    result: string;
+    replacedMap: Map<string, string>;
+}
 export function replaceCSSVariables(
     value: string,
     variables: Map<string, string>,
     stack = new Set<string>(),
-) {
+): replacedMap {
     let missing = false;
     const unresolvable = new Set<string>();
     const replacedMap = new Map<string, string>();
@@ -158,12 +162,12 @@ export function replaceCSSVariables(
         return match;
     });
     if (missing) {
-        return [result, replacedMap];
+        return {result, replacedMap};
     }
     if (result.match(varRegex)) {
         unresolvable.forEach((v) => stack.add(v));
         return replaceCSSVariables(result, variables, stack);
 
     }
-    return [result, replacedMap];
+    return {result, replacedMap};
 }

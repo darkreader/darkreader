@@ -406,4 +406,43 @@ describe('CSS Variables Override', () => {
         expect(getComputedStyle(container.querySelector('h1')).backgroundColor).toBe('rgb(221, 221, 221)');
         expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(34, 34, 34)');
     });
+
+    it('should handle variables inside values', () => {
+        container.innerHTML = multiline(
+            '<style>',
+            '    :root {',
+            '        --border-color: #ff0000;',
+            '        --text: green;',
+            '    }',
+            '    h1 {',
+            '        border: 2px solid var(--border-color);',
+            '        color: var(--text);',
+            '    }',
+            '</style>',
+            '<h1>Border with variable</h1>',
+        );
+        createOrUpdateDynamicTheme(theme, null, false);
+        expect(getComputedStyle(container.querySelector('h1')).borderColor).toBe('rgb(179, 0, 0)');
+        expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(140, 255, 140)');
+    });
+
+    it('should handle variables that have variables inside', () => {
+        container.innerHTML = multiline(
+            '<style>',
+            '    :root {',
+            '        --dark-red: #ff0000;',
+            '        --border: 2px solid var(--dark-red);',
+            '        --text: green;',
+            '    }',
+            '    h1 {',
+            '        border: var(--border);',
+            '        color: var(--text);',
+            '    }',
+            '</style>',
+            '<h1>Border with variable</h1>',
+        );
+        createOrUpdateDynamicTheme(theme, null, false);
+        expect(getComputedStyle(container.querySelector('h1')).borderColor).toBe('rgb(179, 0, 0)');
+        expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(140, 255, 140)');
+    });
 });

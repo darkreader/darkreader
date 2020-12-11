@@ -123,22 +123,20 @@ export default class TabManager {
         const stylesToPass = {};
         const reqFilter = {
             urls: ['<all_urls>'],
-            types: ['main_frame', 'sub_frame'] as any[],
+            types: ['main_frame', 'sub_frame'] as chrome.webRequest.ResourceType[],
         };
         chrome.webRequest.onBeforeRequest.addListener(prepareStyles, reqFilter);
-        chrome.webRequest.onHeadersReceived.addListener(passStyles, reqFilter, [
-            'blocking',
-            'responseHeaders',
-            'extraHeaders',
-        ]);
+        const extraInfo = isFirefox ? ['blocking', 'responseHeaders'] : ['blocking', 'responseHeaders', 'extraHeaders'];
+        chrome.webRequest.onHeadersReceived.addListener(passStyles, reqFilter, extraInfo);
         if (isFirefox) {
             // This runs earlier than document_start
             (chrome as any).contentScripts.register({
+                'matches': ['<all_urls>'],
                 'js': [
                     {file: '/inject/fallback.js'},
                     {file: '/inject/index.js'},
                 ],
-                'matches': ['<all_urls>'],
+                'matchAboutBlank': true,
                 'allFrames': true,
                 'runAt': 'document_start'
             });
@@ -173,6 +171,7 @@ export default class TabManager {
             }
             const message = getConnectionMessage({
                 url: req.url,
+                // Need some workaround to get the right URL here, edge-cases are possible to get the wrong one
                 frameURL: req.frameId === 0 ? null : req.url,
             });
             if (message instanceof Promise) {

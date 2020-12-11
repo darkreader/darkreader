@@ -2,6 +2,7 @@ import type {Theme} from '../../definitions';
 import {modifyBackgroundColor, modifyBorderColor, modifyForegroundColor} from '../../generators/modify-colors';
 import type {RGBA} from '../../utils/color';
 import {parse, rgbToString} from '../../utils/color';
+import {push} from '../../utils/array';
 import {logWarn} from '../utils/log';
 import {replaceCSSVariables} from './css-rules';
 
@@ -86,19 +87,48 @@ export function updateVariables(newVars: Map<string, Map<string, Variable>>, the
         });
     });
 
+    const targets = new WeakMap<CSSStyleSheet | CSSGroupingRule, Map<string, CSSGroupingRule>>();
+
     function createTarget(conditionText: string, parent: CSSStyleSheet | CSSGroupingRule): CSSGroupingRule {
+        if (targets.has(parent)) {
+            const targetMap = targets.get(parent);
+            if (targetMap.has(conditionText)) {
+                return targetMap.get(conditionText);
+            }
+        } else {
+            targets.set(parent, new Map());
+        }
         const index = parent.cssRules.length;
         parent.insertRule(`@media ${conditionText} {}`, index);
-        return parent.cssRules[index] as CSSGroupingRule;
+        const target = parent.cssRules[index] as CSSGroupingRule;
+        targets.get(parent).set(conditionText, target);
+        return target;
     }
+
+    type SelectorGroup = {target: CSSStyleSheet | CSSGroupingRule; selector: string; variables: string[]};
+    const selectorGroups: SelectorGroup[] = [];
 
     declarations.forEach(({selectorText, key, property, parentGroups, modifiedBackground, modifiedText, modifiedBorder}) => {
         cachedVariables.get(key).set(property, {modifiedBackground, modifiedText, modifiedBorder});
-        const modifiedVariables = [['bg', modifiedBackground], ['text', modifiedText], ['border', modifiedBorder]].map((value) => `--darkreader-v-${value[0]}${property}: ${value[1]};`);
+        const modifiedVariables = [['bg', modifiedBackground], ['text', modifiedText], ['border', modifiedBorder]].map(([type, value]) => `--darkreader-v-${type}${property}: ${value};`);
         let target: CSSStyleSheet | CSSGroupingRule = sheet;
         for (let i = 0, len = parentGroups.length; i < len; i++) {
             target = createTarget(parentGroups[i], target);
         }
-        target.insertRule(`${selectorText} { ${modifiedVariables.join(' ')} }`, target.cssRules.length);
+        let hasMatchedSelectorGroup = false;
+        if (selectorGroups.length > 0) {
+            const lastGroup = selectorGroups[selectorGroups.length - 1];
+            if (lastGroup.target === target && lastGroup.selector === selectorText) {
+                push(lastGroup.variables, modifiedVariables);
+                hasMatchedSelectorGroup = true;
+            }
+        }
+        if (!hasMatchedSelectorGroup) {
+            selectorGroups.push({target, selector: selectorText, variables: modifiedVariables.slice()});
+        }
+    });
+
+    selectorGroups.forEach(({target, selector, variables}) => {
+        target.insertRule(`${selector} { ${variables.join(' ')} }`, target.cssRules.length);
     });
 }

@@ -13,12 +13,6 @@ debug.log
 #-----------------------------------
 node_modules/
 
-# Code coverage reports
-#-----------------------------------
-tests/coverage/
-tests/browser/coverage/
-tests/inject/coverage/
-
 # IDE and editor configs
 #-----------------------------------
 .idea/

@@ -3,8 +3,7 @@ const {getDestDir} = require('./paths');
 const reload = require('./reload');
 const {PORT} = reload;
 const {createTask} = require('./task');
-const {build} = require('esbuild');
-const globby = require('globby');
+const {build, buildSync} = require('esbuild');
 
 async function copyToFF({cwdPath, debug}) {
     const destPath = `${getDestDir({debug})}/${cwdPath}`;
@@ -28,12 +27,8 @@ function patchFirefoxJS(/** @type {string} */code) {
  * @property {string} dest
  * @property {string} reloadType
  * @property {({debug}) => Promise<void>} postBuild
- * @property {string} watchFiles
- * @property {import('esbuild').BuildIncremental} bundle
+ * @property {{watchFiles: string[], bundle: import('esbuild').BuildIncremental, collectDependencies: () => string[]}} watchInfo
  */
-
-// TODO: Make use of the custom metaFile hack in tests/inject/esbuild-preprocessor.js to have an accurate watchFiles.
-// NOTE: Only for when watch flag is enabled due to an extra `build` call.
 
 /** @type {JSEntry[]} */
 const jsEntries = [
@@ -47,8 +42,11 @@ const jsEntries = [
             const code = await fs.readFile(destPath, 'utf8');
             await fs.outputFile(ffDestPath, patchFirefoxJS(code));
         },
-        watchFiles: 'src/background/**',
-        bundle: null,
+        watchInfo: {
+            watchFiles: null,
+            bundle: null,
+            collectDependencies: null,
+        },
     },
     {
         src: 'src/inject/index.ts',
@@ -57,8 +55,11 @@ const jsEntries = [
         async postBuild({debug}) {
             await copyToFF({cwdPath: this.dest, debug});
         },
-        watchFiles: 'src/inject/!(fallback.ts)**',
-        bundle: null,
+        watchInfo: {
+            watchFiles: null,
+            bundle: null,
+            collectDependencies: null,
+        },
     },
     {
         src: 'src/inject/fallback.ts',
@@ -67,8 +68,11 @@ const jsEntries = [
         async postBuild({debug}) {
             await copyToFF({cwdPath: this.dest, debug});
         },
-        watchFiles: 'src/inject/fallback.ts',
-        bundle: null,
+        watchInfo: {
+            watchFiles: null,
+            bundle: null,
+            collectDependencies: null,
+        },
     },
     {
         src: 'src/ui/devtools/index.tsx',
@@ -77,8 +81,11 @@ const jsEntries = [
         async postBuild({debug}) {
             await copyToFF({cwdPath: this.dest, debug});
         },
-        watchFiles: 'src/ui/devtools/**',
-        bundle: null,
+        watchInfo: {
+            watchFiles: null,
+            bundle: null,
+            collectDependencies: null,
+        },
     },
     {
         src: 'src/ui/popup/index.tsx',
@@ -87,8 +94,11 @@ const jsEntries = [
         async postBuild({debug}) {
             await copyToFF({cwdPath: this.dest, debug});
         },
-        watchFiles: 'src/ui/popup/**',
-        bundle: null,
+        watchInfo: {
+            watchFiles: null,
+            bundle: null,
+            collectDependencies: null,
+        },
     },
     {
         src: 'src/ui/stylesheet-editor/index.tsx',
@@ -97,14 +107,42 @@ const jsEntries = [
         async postBuild({debug}) {
             await copyToFF({cwdPath: this.dest, debug});
         },
-        watchFiles: 'src/ui/stylesheet-editor/**',
-        bundle: null,
+        watchInfo: {
+            watchFiles: null,
+            bundle: null,
+            collectDependencies: null,
+        },
     },
 ];
 
+const collectDependencies = (src, dest) => {
+    return {
+        dependencies: () => {
+            const result = buildSync({
+                entryPoints: [src],
+                outfile: dest,
+                write: false,
+                bundle: true,
+                metafile: 'meta.json',
+                format: 'iife',
+                sourcemap: 'inline',
+                target: 'es2019',
+                charset: 'utf8',
+                metafile: 'meta.json',
+                define: {
+                    '__DEBUG__': 'false',
+                    '__PORT__': '-1',
+                    '__WATCH__': 'false',
+                }
+            });
+            const metaEntry = JSON.parse(result.outputFiles.find((entry) => entry.path.endsWith('meta.json')).text);
+            return Object.keys(metaEntry.inputs);
+        }
+    };
+};
 async function bundleJS(/** @type {JSEntry} */entry, {debug, watch}) {
     const {src, dest} = entry;
-
+    const outfile = `${getDestDir({debug})}/${dest}`;
     const bundle = await build({
         incremental: watch ? true : false,
         sourcemap: debug ? 'inline' : false,
@@ -114,22 +152,29 @@ async function bundleJS(/** @type {JSEntry} */entry, {debug, watch}) {
         format: 'iife',
         avoidTDZ: true,
         write: true,
-        outfile: `${getDestDir({debug})}/${dest}`,
+        outfile,
         entryPoints: [src],
         treeShaking: true,
         define: {
             '__DEBUG__': debug ? 'true' : 'false',
             '__PORT__': watch ? String(PORT) : '-1',
             '__WATCH__': watch ? 'true' : 'false',
-        },
+        }
     });
-    entry.bundle = bundle;
+    if (watch) {
+        const collectFunction = collectDependencies(src, outfile);
+        entry.watchInfo.bundle = bundle;
+        entry.watchInfo.watchFiles = collectFunction.dependencies();
+        entry.watchInfo.collectDependencies = collectFunction.dependencies;
+    }
     await entry.postBuild({debug});
 }
 
 function getWatchFiles() {
     const watchFiles = new Set();
-    jsEntries.forEach((entry) => watchFiles.add(entry.watchFiles));
+    jsEntries.forEach((entry) => {
+        entry.watchInfo.watchFiles.forEach((file) => watchFiles.add(file));
+    });
     return Array.from(watchFiles);
 }
 
@@ -148,13 +193,15 @@ module.exports = createTask(
     },
     async (changedFiles, watcher) => {
         const entries = jsEntries.filter(async (entry) => {
-            const watchFiles = await globby(entry.watchFiles);
             return changedFiles.some((changed) => {
-                return watchFiles.includes(changed);
+                return entry.watchInfo.watchFiles.includes(changed);
             });
         });
         await Promise.all(
-            entries.map((e) => e.bundle.rebuild())
+            entries.map((entry) => {
+                entry.watchInfo.bundle.rebuild();
+                entry.watchInfo.watchFiles = entry.watchInfo.collectDependencies();
+            })
         );
 
         const newWatchFiles = getWatchFiles();

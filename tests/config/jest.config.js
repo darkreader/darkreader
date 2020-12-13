@@ -10,9 +10,4 @@ module.exports = {
         'js'
     ],
     rootDir: '../../',
-    collectCoverage: false,
-    coverageDirectory: 'tests/coverage',
-    collectCoverageFrom: [
-        '<rootDir>/src/**/*.ts',
-    ],
 };

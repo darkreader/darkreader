@@ -69,8 +69,10 @@ function createPreprocessor(config, emitter, logger) {
                     '__WATCH__': 'false',
                 }
             });
-            const metaEntry =
-            JSON.parse(result.outputFiles.find((entry) => entry.path.endsWith('meta.json')).text);
+            /**
+             * @type {import('esbuild').Metadata}}
+             */
+            const metaEntry = JSON.parse(result.outputFiles.find((entry) => entry.path.endsWith('meta.json')).text);
             const dependencies = Object.keys(metaEntry.inputs);
             if (registerDependencies != null) {
                 registerDependencies(originalPath, dependencies);

@@ -17,7 +17,7 @@ function getLessFiles({debug}) {
 async function bundleCSSEntry({src, dest}) {
     const srcDir = path.join(process.cwd(), path.dirname(src));
     const input = await fs.readFile(src, {encoding: 'utf8'});
-    const output = await less.render(input, {paths: [srcDir]});
+    const output = await less.render(input, {paths: [srcDir], strictUnits: true});
     const {css} = output;
     await fs.outputFile(dest, css, {encoding: 'utf8'});
 }

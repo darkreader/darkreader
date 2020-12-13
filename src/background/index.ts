@@ -13,7 +13,8 @@ chrome.runtime.onInstalled.addListener(({reason}) => {
 
 chrome.runtime.setUninstallURL(UNINSTALL_URL);
 
-const welcome = `  /''''\\
+const welcome = `
+  /''''\\
  (0)==(0)
 /__||||__\\
 Welcome to Dark Reader!`;

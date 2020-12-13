@@ -21,7 +21,7 @@ afterEach(() => {
 });
 
 describe('Handle Shadow-DOM', () => {
-    it('should add static overrides', async () => {
+    it('should add static overrides', () => {
         container.innerHTML = multiline(
             '<div class="shadow-dom-wrapper"></div>',
         );
@@ -63,7 +63,7 @@ describe('Handle Shadow-DOM', () => {
         style.sheet.insertRule('h1 { color: gray }');
         style.sheet.insertRule('strong { color: red }');
 
-        await timeout(100);
+        await timeout(0);
         const shadowRoot = document.querySelector('.shadow-dom-wrapper').shadowRoot;
         const testCase = shadowRoot.querySelector('.test-case-style');
         expect(shadowRoot.firstElementChild.classList.contains('darkreader--inline')).toBe(true);
@@ -83,7 +83,7 @@ describe('Handle Shadow-DOM', () => {
         standardElement.style.color = 'red';
         shadow.appendChild(standardElement);
 
-        await timeout(100);
+        await timeout(0);
         const shadowRoot = document.querySelector('.shadow-dom-wrapper').shadowRoot;
         expect(getComputedStyle(shadowRoot.querySelector('p')).color).toBe('rgb(255, 26, 26)');
     });
@@ -109,8 +109,6 @@ describe('Handle Shadow-DOM', () => {
         customElements.define('custom-element', CustomElement);
 
         createOrUpdateDynamicTheme(theme, null, false);
-
-        await timeout(100);
         const shadowRoot = document.querySelector('custom-element').shadowRoot;
         expect(getComputedStyle(shadowRoot.querySelector('p')).color).toBe('rgb(255, 198, 208)');
     });
@@ -135,10 +133,9 @@ describe('Handle Shadow-DOM', () => {
         }
 
         createOrUpdateDynamicTheme(theme, null, false);
-
-        await timeout(100);
         customElements.define('delayed-custom-element', DelayedCustomElement);
-        await timeout(100);
+
+        await timeout(0);
         const shadowRoot = document.querySelector('delayed-custom-element').shadowRoot;
         expect(getComputedStyle(shadowRoot.querySelector('p')).color).toBe('rgb(255, 198, 208)');
     });

@@ -2,7 +2,7 @@ module.exports = {
     verbose: true,
     testEnvironment: 'jsdom',
     transform: {
-        '^.+\\.ts$': 'ts-jest'
+        '^.+\\.ts$': './tests/esbuild-transform.js'
     },
     testRegex: 'tests/inject/.*\\.tests\\.ts$',
     moduleFileExtensions: [
@@ -16,9 +16,6 @@ module.exports = {
         '<rootDir>/src/**/*.ts',
     ],
     globals: {
-        'ts-jest': {
-            tsconfig: './tests/inject/tsconfig.json'
-        },
         __DEBUG__: false,
     }
 };

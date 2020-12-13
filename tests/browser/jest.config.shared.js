@@ -2,7 +2,7 @@ module.exports = {
     testEnvironment: './environment.js',
     verbose: true,
     transform: {
-        '^.+\\.ts(x?)$': 'ts-jest'
+        '^.+\\.ts(x?)$': './tests/esbuild-transform.js'
     },
     testRegex: 'tests/browser/.*\\.tests\\.ts(x?)$',
     moduleFileExtensions: [
@@ -19,9 +19,6 @@ module.exports = {
         '^.+\\.d\\.ts$'
     ],
     globals: {
-        'ts-jest': {
-            tsconfig: './tests/browser/tsconfig.json'
-        },
         __DEBUG__: false,
     }
 };

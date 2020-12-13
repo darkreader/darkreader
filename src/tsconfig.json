@@ -16,7 +16,8 @@
         "downlevelIteration": true,
         "noEmit": true,
         "jsx": "react",
-        "jsxFactory": "m"
+        "jsxFactory": "m",
+        "incremental": true
     },
     "exclude": [
         "node_modules"

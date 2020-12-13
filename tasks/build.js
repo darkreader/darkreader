@@ -11,6 +11,7 @@ const codeStyle = require('./code-style');
 const zip = require('./zip');
 const {runTasks} = require('./task');
 const {log} = require('./utils');
+const typeCheck = require('./type-checking');
 
 const standardTask = [
     clean,
@@ -57,6 +58,8 @@ async function api() {
 
 async function run() {
     const args = process.argv.slice(2);
+
+    await runTasks([typeCheck]);
 
     if (args.includes('--release')) {
         await build({debug: false, watch: false});

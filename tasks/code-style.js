@@ -6,14 +6,9 @@ const {createTask} = require('./task');
 const {log} = require('./utils');
 
 const options = {
-    arrowParens: 'always',
-    bracketSpacing: false,
     endOfLine: 'crlf',
     printWidth: 80,
-    quoteProps: 'consistent',
-    singleQuote: false,
     tabWidth: 4,
-    trailingComma: 'none',
 };
 
 const extensions = ['html', 'css', 'js'];

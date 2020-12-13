@@ -2,7 +2,7 @@ module.exports = {
     verbose: true,
     testEnvironment: 'jsdom',
     transform: {
-        '^.+\\.ts$': 'ts-jest'
+        '^.+\\.ts$': './tests/esbuild-transform.js'
     },
     testRegex: 'tests/utils/.*\\.tests\\.ts$',
     moduleFileExtensions: [
@@ -15,9 +15,4 @@ module.exports = {
     collectCoverageFrom: [
         '<rootDir>/src/**/*.ts',
     ],
-    globals: {
-        'ts-jest': {
-            tsconfig: './tests/utils/tsconfig.json'
-        }
-    }
 };

@@ -188,7 +188,7 @@ describe('CSS Variables Override', () => {
 
         const styleElement = document.getElementById('variables') as HTMLStyleElement;
         styleElement.textContent = ':root { --text: green; }';
-        await timeout(100);
+        await timeout(50);
         expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(140, 255, 140)');
     });
 
@@ -204,7 +204,7 @@ describe('CSS Variables Override', () => {
         expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(255, 26, 26)');
 
         document.documentElement.setAttribute('style', '--text: green;');
-        await timeout(100);
+        await timeout(0);
         expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(140, 255, 140)');
     });
 });

@@ -74,7 +74,7 @@ function createTask(name, run) {
 
 /**
  * @param {Task[]} tasks
- * @param {TaskOptions} options
+ * @param {TaskOptions} [options]
  */
 async function runTasks(tasks, options) {
     for (const task of tasks) {

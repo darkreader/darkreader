@@ -1,7 +1,7 @@
 import '../polyfills';
 import {DEFAULT_THEME} from '../../../src/defaults';
 import {createOrUpdateDynamicTheme, removeDynamicTheme} from '../../../src/inject/dynamic-theme';
-import {multiline, timeout} from '../../test-utils';
+import {multiline} from '../../test-utils';
 import type {DynamicThemeFix} from '../../../src/definitions';
 
 let container: HTMLElement;
@@ -17,7 +17,7 @@ afterEach(() => {
 });
 
 describe('Should handle different settings', () => {
-    it('should invert', async () => {
+    it('should invert', () => {
         container.innerHTML = multiline(
             '<div class="logo">Some logo</div>',
         );
@@ -30,10 +30,9 @@ describe('Should handle different settings', () => {
 
         };
         createOrUpdateDynamicTheme(DEFAULT_THEME, fixes, false);
-        await timeout(100);
         expect(getComputedStyle(container.querySelector('.logo')).filter).toBe('invert(1) hue-rotate(180deg) contrast(0.9)');
     });
-    it('should CSS', async () => {
+    it('should CSS', () => {
         container.innerHTML = multiline(
             '<p class="text">Some text need to be red</p>',
         );
@@ -46,11 +45,10 @@ describe('Should handle different settings', () => {
 
         };
         createOrUpdateDynamicTheme(DEFAULT_THEME, fixes, false);
-        await timeout(100);
         expect(getComputedStyle(container.querySelector('.text')).color).toBe('rgb(255, 0, 0)');
     });
 
-    it('should ignore inline style', async () => {
+    it('should ignore inline style', () => {
         container.innerHTML = multiline(
             '<p class="text" style="background-color: purple">Some text need to be red</p>',
         );
@@ -63,7 +61,6 @@ describe('Should handle different settings', () => {
 
         };
         createOrUpdateDynamicTheme(DEFAULT_THEME, fixes, false);
-        await timeout(100);
         expect(getComputedStyle(container.querySelector('.text')).backgroundColor).toBe('rgb(102, 0, 102)');
     });
 

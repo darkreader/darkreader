@@ -171,7 +171,7 @@ describe('Image analysis', () => {
             '<h1>Dark icon <i></i></h1>',
         );
         createOrUpdateDynamicTheme(theme, null, false);
-        await timeout(100);
+        await timeout(50);
         const bgImageValue = getComputedStyle(container.querySelector('i')).backgroundImage;
         const info = await getBgImageInfo(bgImageValue);
         expect(info.darkness).toBe(0);
@@ -186,7 +186,6 @@ describe('Image analysis', () => {
             '<h1>Light icon <i></i></h1>',
         );
         createOrUpdateDynamicTheme(theme, null, false);
-        await timeout(100);
         const bgImageValue = getComputedStyle(container.querySelector('i')).backgroundImage;
         const info = await getBgImageInfo(bgImageValue);
         expect(info.darkness).toBe(0);
@@ -201,7 +200,6 @@ describe('Image analysis', () => {
             '<h1>Dark background</h1>',
         );
         createOrUpdateDynamicTheme(theme, null, false);
-        await timeout(100);
         const bgImageValue = getComputedStyle(container.querySelector('h1')).backgroundImage;
         const info = await getBgImageInfo(bgImageValue);
         expect(info.darkness).toBe(1);
@@ -216,12 +214,12 @@ describe('Image analysis', () => {
             '<h1>Light background</h1>',
         );
         createOrUpdateDynamicTheme(theme, null, false);
-        await timeout(100);
+        await timeout(50);
         const bgImageValue = getComputedStyle(container.querySelector('h1')).backgroundImage;
         expect(bgImageValue).toBe('none');
     });
 
-    it('should ignore image analysis', async () => {
+    it('should ignore image analysis', () => {
         container.innerHTML = multiline(
             '<style>',
             getSVGImageCSS(images.darkTransparentIcon, 16, 16, 'i'),
@@ -237,7 +235,6 @@ describe('Image analysis', () => {
 
         };
         createOrUpdateDynamicTheme(theme, fixes, false);
-        await timeout(100);
         const backgroundImage = getComputedStyle(container.querySelector('i')).backgroundImage;
         expect(backgroundImage).toContain('data:');
     });

@@ -21,7 +21,7 @@ afterEach(() => {
 });
 
 describe('Handle Media Queries', () => {
-    it('should not style blacklisted media', async () => {
+    it('should not style blacklisted media', () => {
         container.innerHTML = multiline(
             '<style class="testcase-style">',
             '    h1 { background: green; }',
@@ -35,8 +35,6 @@ describe('Handle Media Queries', () => {
         );
 
         createOrUpdateDynamicTheme(theme, null, false);
-        await timeout(100);
-
         expect(getComputedStyle(document.querySelector('h1')).backgroundColor).toBe('rgb(0, 102, 0)');
         expect(getComputedStyle(document.querySelector('h1 strong')).color).toBe('rgb(255, 174, 26)');
         expect(document.querySelector('.testcase-style-2').nextElementSibling.classList.contains('darkreader--sync')).toBe(false);
@@ -52,14 +50,14 @@ describe('Handle Media Queries', () => {
         );
 
         createOrUpdateDynamicTheme(theme, null, false);
-        await timeout(100);
 
+        await timeout(0);
         expect(getComputedStyle(document.querySelector('h1')).backgroundColor).toBe('rgb(0, 102, 0)');
         expect(getComputedStyle(document.querySelector('h1 strong')).color).toBe('rgb(255, 174, 26)');
         expect(document.querySelector('.testcase-style').nextElementSibling.classList.contains('darkreader--sync')).toBe(true);
     });
 
-    it('should check for CSS support', async () => {
+    it('should check for CSS support', () => {
         container.innerHTML = multiline(
             '<style class="testcase-style">',
             '    @supports (background: green) {',
@@ -76,14 +74,12 @@ describe('Handle Media Queries', () => {
         );
 
         createOrUpdateDynamicTheme(theme, null, false);
-        await timeout(100);
-
         expect(getComputedStyle(document.querySelector('h1')).backgroundColor).toBe('rgb(0, 102, 0)');
         expect(getComputedStyle(document.querySelector('h1 strong')).color).toBe('rgb(255, 174, 26)');
         expect(getComputedStyle(document.body).backgroundColor).toBe('rgb(0, 0, 0)');
     });
 
-    it('should check for CSS @media', async () => {
+    it('should check for CSS @media', () => {
         container.innerHTML = multiline(
             '<style class="testcase-style">',
             '    @media screen and (min-width: 2px) {',
@@ -97,13 +93,11 @@ describe('Handle Media Queries', () => {
         );
 
         createOrUpdateDynamicTheme(theme, null, false);
-        await timeout(100);
-
         expect(getComputedStyle(document.querySelector('h1')).backgroundColor).toBe('rgb(0, 102, 0)');
         expect((document.querySelector('.testcase-style').nextElementSibling as HTMLStyleElement).sheet.cssRules.length).toBe(2);
     });
 
-    it('should check for nested CSS @media', async () => {
+    it('should check for nested CSS @media', () => {
         container.innerHTML = multiline(
             '<style class="testcase-style">',
             '   @media screen and (min-width: 2px) {',
@@ -119,8 +113,6 @@ describe('Handle Media Queries', () => {
         );
 
         createOrUpdateDynamicTheme(theme, null, false);
-        await timeout(100);
-
         expect(getComputedStyle(document.querySelector('h1')).backgroundColor).toBe('rgb(0, 102, 0)');
         expect((document.querySelector('.testcase-style').nextElementSibling as HTMLStyleElement).sheet.cssRules.length).toBe(2);
     });

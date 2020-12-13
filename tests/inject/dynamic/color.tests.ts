@@ -1,7 +1,7 @@
 import '../polyfills';
 import {DEFAULT_THEME} from '../../../src/defaults';
 import {createOrUpdateDynamicTheme, removeDynamicTheme} from '../../../src/inject/dynamic-theme';
-import {multiline, timeout} from '../../test-utils';
+import {multiline} from '../../test-utils';
 
 const theme = {
     ...DEFAULT_THEME
@@ -19,7 +19,7 @@ afterEach(() => {
 });
 
 describe('Should parse and handle different color formats', () => {
-    it('should modify RGBA', async () => {
+    it('should modify RGBA', () => {
         container.innerHTML = multiline(
             '<style>',
             '    h1 { background: rgb(245, 185, 124); }',
@@ -29,13 +29,12 @@ describe('Should parse and handle different color formats', () => {
             '<h1>RGB <strong>Power</strong>!</h1>',
         );
         createOrUpdateDynamicTheme(theme, null, false);
-        await timeout(100);
         expect(getComputedStyle(container.querySelector('h1')).backgroundColor).toBe('rgb(126, 68, 10)');
         expect(getComputedStyle(container.querySelector('h1 strong')).color).toBe('rgb(205, 200, 194)');
         expect(getComputedStyle(container).backgroundColor).toBe('rgba(41, 136, 41, 0.4)');
     });
 
-    it('should modify HSL', async () => {
+    it('should modify HSL', () => {
         container.innerHTML = multiline(
             '<style>',
             '    h1 { background: hsl(270,60%,70%); }',
@@ -45,13 +44,12 @@ describe('Should parse and handle different color formats', () => {
             '<h1>HSL <strong>Power</strong>!</h1>',
         );
         createOrUpdateDynamicTheme(theme, null, false);
-        await timeout(100);
         expect(getComputedStyle(container.querySelector('h1')).backgroundColor).toBe('rgb(72, 29, 114)');
         expect(getComputedStyle(container.querySelector('h1 strong')).color).toBe('rgb(176, 129, 223)');
         expect(getComputedStyle(container).backgroundColor).toBe('rgb(72, 29, 114)');
     });
 
-    it('should modify HSLA', async () => {
+    it('should modify HSLA', () => {
         container.innerHTML = multiline(
             '<style>',
             '    h1 { background: hsla(240, 100%, 50%, .7); }',
@@ -61,13 +59,12 @@ describe('Should parse and handle different color formats', () => {
             '<h1>HSLA <strong>Power</strong>!</h1>',
         );
         createOrUpdateDynamicTheme(theme, null, false);
-        await timeout(100);
         expect(getComputedStyle(container.querySelector('h1')).backgroundColor).toBe('rgba(0, 0, 204, 0.7)');
         expect(getComputedStyle(container.querySelector('h1 strong')).color).toBe('rgb(51, 125, 255)');
         expect(getComputedStyle(container).backgroundColor).toBe('rgba(0, 0, 204, 0.05)');
     });
 
-    it('should modify knownColors', async () => {
+    it('should modify knownColors', () => {
         container.innerHTML = multiline(
             '<style>',
             '    h1 { background: rebeccapurple; }',
@@ -77,7 +74,6 @@ describe('Should parse and handle different color formats', () => {
             '<h1>Weird color <strong>Power</strong>!</h1>',
         );
         createOrUpdateDynamicTheme(theme, null, false);
-        await timeout(100);
         expect(getComputedStyle(container.querySelector('h1')).backgroundColor).toBe('rgb(82, 41, 122)');
         expect(getComputedStyle(container.querySelector('h1 strong')).color).toBe('rgb(249, 250, 166)');
         expect(getComputedStyle(container).backgroundColor).toBe('rgba(0, 0, 0, 0)');

@@ -46,19 +46,20 @@ function createPreprocessor(config, emitter, logger) {
     };
 
 
-    return function preprocess(_, file, done) {
+    return async function preprocess(_, file, done) {
         file.path = transformPath(file.originalPath);
         const originalPath = file.originalPath;
 
         try {
             const outFileKey = 'out.js';
-            log.info('Generating bundle for ./%s', originalPath);
-            const result = esbuild.buildSync({
+            log.info('Generating code for ./%s', originalPath);
+            const result = await esbuild.build({
                 entryPoints: [originalPath],
                 format: 'iife',
                 outfile: outFileKey,
                 write: false,
                 bundle: true,
+                avoidTDZ: false,
                 sourcemap: 'inline',
                 target: 'es2019',
                 charset: 'utf8',
@@ -80,7 +81,7 @@ function createPreprocessor(config, emitter, logger) {
             const outputEntry = result.outputFiles.find((entry) => entry.path.endsWith(outFileKey));
             done(null, outputEntry.text);
         } catch (error) {
-            log.error('Failed to process ./%s\n\n%s\n', originalPath, error.stack);
+            log.error('Failed to produce code for ./%s\n\n%s\n', originalPath, error.stack);
             done(error, null);
         }
     };

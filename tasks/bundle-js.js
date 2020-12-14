@@ -159,7 +159,8 @@ async function bundleJS(/** @type {JSEntry} */entry, {debug, watch}) {
             '__DEBUG__': debug ? 'true' : 'false',
             '__PORT__': watch ? String(PORT) : '-1',
             '__WATCH__': watch ? 'true' : 'false',
-        }
+        },
+        minifySyntax: true,
     });
     if (watch) {
         const collectFunction = collectDependencies(src, outfile);

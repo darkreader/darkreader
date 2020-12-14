@@ -106,7 +106,6 @@ describe('Link override', () => {
 
         await timeout(50);
         expect(getComputedStyle(container.querySelector('h1')).backgroundColor).toBe('rgb(128, 128, 128)');
-        expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(0, 0, 0)');
         expect(getComputedStyle(container.querySelector('h1 strong')).color).toBe('rgb(255, 0, 0)');
 
         createOrUpdateDynamicTheme(theme, null, false);

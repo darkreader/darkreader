@@ -5,7 +5,7 @@ import {parse, rgbToString} from '../../utils/color';
 import {push} from '../../utils/array';
 import {logWarn} from '../utils/log';
 import {replaceCSSVariables, varRegex} from './css-rules';
-import {getBgModifier} from './modify-css';
+import {getBgModifier, gradientRegex} from './modify-css';
 
 export const legacyVariables = new Map<string, string>();
 export const variables = new Map<string, Map<string, Variable>>();
@@ -91,10 +91,10 @@ export function updateVariables(newVars: Map<string, Map<string, Variable>>, the
                     const [modifiedBackground, modifiedText, modifiedBorder] = ['bg', 'text', 'border', 'bgImage'].map((value) => `var(--darkreader-v-${value}${match[1]}, ${match[0]})`);
                     declarations.push({...standardDeclaration, modifiedBackground, modifiedText, modifiedBorder});
                 }
-            } else if (imageInfo) {
+            } else if (imageInfo || gradientRegex.test(value)) {
                 const rule = {
                     selectorText,
-                    parentSheet: imageInfo
+                    parentSheet: imageInfo ? imageInfo : null
                 };
                 const modifier = getBgModifier(value, rule, ignoreImageSelectors, () => false);
                 if (typeof modifier === 'function') {

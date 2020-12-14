@@ -6,7 +6,6 @@ import {push} from '../../utils/array';
 import {logWarn} from '../utils/log';
 import {replaceCSSVariables, varRegex} from './css-rules';
 import {getBgModifier} from './modify-css';
-import {createAsyncTasksQueue} from '../utils/throttle';
 
 export const legacyVariables = new Map<string, string>();
 export const variables = new Map<string, Map<string, Variable>>();
@@ -27,11 +26,7 @@ interface VariableDeclaration extends CachedVariables {
 }
 
 interface AsyncVariableDeclaration {
-    property: string;
-    selectorText: string;
     target: (CSSStyleSheet | CSSGroupingRule);
-    index: number;
-    modifiedBackgroundImage?: string;
 }
 
 interface ImageVariable {
@@ -45,8 +40,6 @@ export interface Variable {
     parentGroups: string[];
     imageInfo?: ImageVariable;
 }
-
-const asyncQueue = createAsyncTasksQueue();
 
 export function updateVariables(newVars: Map<string, Map<string, Variable>>, theme: Theme, ignoreImageSelectors: string[]) {
     if (newVars.size === 0) {
@@ -81,6 +74,9 @@ export function updateVariables(newVars: Map<string, Map<string, Variable>>, the
     const asyncDeclarations = new Map<number, AsyncVariableDeclaration>();
     let asyncDeclarationCounter = 0;
 
+    let isAsyncFinished = false;
+    const asyncListeners = new Set<() => void>();
+
     const declarations: VariableDeclaration[] = [];
     variables.forEach((properties, key) => {
         properties.forEach((variable, property) => {
@@ -111,10 +107,11 @@ export function updateVariables(newVars: Map<string, Map<string, Variable>>, the
                             if (!asyncValue) {
                                 return;
                             }
-                            asyncDeclarations.set(asyncKey, {...asyncDeclarations.get(asyncKey), modifiedBackgroundImage: asyncValue});
-                            asyncQueue.add(() => {
-                                rebuildAsyncRule(asyncKey);
-                            });
+                            const options = {selectorText, modifiedBackgroundImage: asyncValue, property};
+                            isAsyncFinished ? rebuildAsyncRule(asyncKey, options) :
+                                asyncListeners.add(() => {
+                                    rebuildAsyncRule(asyncKey, options);
+                                });
                         });
                     } else {
                         declarations.push({...standardDeclaration, modifiedBackgroundImage: modified});
@@ -156,7 +153,7 @@ export function updateVariables(newVars: Map<string, Map<string, Variable>>, the
         return target;
     }
 
-    type SelectorGroup = {target: CSSStyleSheet | CSSGroupingRule; selector: string; variables: string[]; property: string; asyncKey: number};
+    type SelectorGroup = {target: CSSStyleSheet | CSSGroupingRule; selector: string; variables: string[]; property: string; asyncKey: number[]};
     const selectorGroups: SelectorGroup[] = [];
 
     declarations.forEach(({selectorText, asyncKey, key, property, parentGroups, modifiedBackground, modifiedText, modifiedBorder, modifiedBackgroundImage}) => {
@@ -171,24 +168,27 @@ export function updateVariables(newVars: Map<string, Map<string, Variable>>, the
             const lastGroup = selectorGroups[selectorGroups.length - 1];
             if (lastGroup.target === target && lastGroup.selector === selectorText) {
                 push(lastGroup.variables, modifiedVariables);
+                push(lastGroup.asyncKey, [asyncKey]);
                 hasMatchedSelectorGroup = true;
             }
         }
         if (!hasMatchedSelectorGroup) {
-            selectorGroups.push({target, selector: selectorText, variables: modifiedVariables.slice(), asyncKey, property});
+            selectorGroups.push({target, selector: selectorText, variables: modifiedVariables.slice(), asyncKey: [asyncKey], property});
         }
     });
 
-    selectorGroups.forEach(({target, selector, variables, asyncKey, property}) => {
+    selectorGroups.forEach(({target, selector, variables, asyncKey}) => {
         const index = target.cssRules.length;
-        asyncKey != null && asyncDeclarations.set(asyncKey, {index, selectorText: selector, target, property});
+        asyncKey.filter((x) => x != null).forEach((asyncKey) => asyncDeclarations.set(asyncKey, {target}));
         target.insertRule(`${selector} { ${variables.join(' ')} }`, index);
     });
 
-    function rebuildAsyncRule(key: number) {
-        const {target, index, selectorText, modifiedBackgroundImage, property} = asyncDeclarations.get(key);
-        target.deleteRule(index);
+    function rebuildAsyncRule(key: number, {selectorText, modifiedBackgroundImage, property}) {
+        const {target} = asyncDeclarations.get(key);
+        const index = target.cssRules.length;
         target.insertRule(`${selectorText} { --darkreader-v-bgImage${property}: ${modifiedBackgroundImage}; }`, index);
         asyncDeclarations.delete(key);
     }
+    isAsyncFinished = true;
+    asyncListeners.forEach((listener) => listener());
 }

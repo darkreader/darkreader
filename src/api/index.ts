@@ -5,10 +5,11 @@ import type {Theme, DynamicThemeFix} from '../definitions';
 import ThemeEngines from '../generators/theme-engines';
 import {createOrUpdateDynamicTheme, removeDynamicTheme} from '../inject/dynamic-theme';
 import {collectCSS} from '../inject/dynamic-theme/css-collection';
+import {isWindowDefined} from '../utils/platform';
 
 const isIFrame = (() => {
     try {
-        return window.self !== window.top;
+        return isWindowDefined && window.self !== window.top;
     } catch (err) {
         console.warn(err);
         return true;
@@ -28,7 +29,7 @@ export function disable() {
     removeDynamicTheme();
 }
 
-const darkScheme = matchMedia('(prefers-color-scheme: dark)');
+const darkScheme = isWindowDefined && matchMedia('(prefers-color-scheme: dark)');
 let store = {
     themeOptions: null as Partial<Theme>,
     fixes: null as DynamicThemeFix,

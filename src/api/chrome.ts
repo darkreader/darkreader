@@ -1,11 +1,9 @@
 import {readResponseAsDataURL} from '../utils/network';
 import {callFetchMethod} from './fetch';
+import {chromeAPI} from './mock';
 
-if (!window.chrome) {
-    window.chrome = {} as any;
-}
-if (!chrome.runtime) {
-    chrome.runtime = {} as any;
+if (!chromeAPI.runtime) {
+    chromeAPI.runtime = {} as any;
 }
 
 const messageListeners = new Set<(...args) => void>();
@@ -34,25 +32,25 @@ function addMessageListener(callback) {
     messageListeners.add(callback);
 }
 
-if (typeof chrome.runtime.sendMessage === 'function') {
-    const nativeSendMessage = chrome.runtime.sendMessage;
-    chrome.runtime.sendMessage = (...args) => {
+if (typeof chromeAPI.runtime.sendMessage === 'function') {
+    const nativeSendMessage = chromeAPI.runtime.sendMessage;
+    chromeAPI.runtime.sendMessage = (...args) => {
         sendMessage(...args);
-        nativeSendMessage.apply(chrome.runtime, args);
+        nativeSendMessage.apply(chromeAPI.runtime, args);
     };
 } else {
-    chrome.runtime.sendMessage = sendMessage;
+    chromeAPI.runtime.sendMessage = sendMessage;
 }
 
-if (!chrome.runtime.onMessage) {
-    chrome.runtime.onMessage = {} as any;
+if (!chromeAPI.runtime.onMessage) {
+    chromeAPI.runtime.onMessage = {} as any;
 }
-if (typeof chrome.runtime.onMessage.addListener === 'function') {
-    const nativeAddListener = chrome.runtime.onMessage.addListener;
-    chrome.runtime.onMessage.addListener = (...args) => {
+if (typeof chromeAPI.runtime.onMessage.addListener === 'function') {
+    const nativeAddListener = chromeAPI.runtime.onMessage.addListener;
+    chromeAPI.runtime.onMessage.addListener = (...args: [callback: (message: any, sender: chrome.runtime.MessageSender, sendResponse: (response?: any) => void) => void]) => {
         addMessageListener(...args);
-        nativeAddListener.apply(chrome.runtime.onMessage, args);
+        nativeAddListener.apply(chromeAPI.runtime.onMessage, args);
     };
 } else {
-    chrome.runtime.onMessage.addListener = addMessageListener;
+    chromeAPI.runtime.onMessage.addListener = addMessageListener;
 }

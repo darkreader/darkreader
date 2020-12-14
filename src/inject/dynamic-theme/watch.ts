@@ -3,7 +3,7 @@ import type {ElementsTreeOperations} from '../utils/dom';
 import {iterateShadowHosts, createOptimizedTreeObserver} from '../utils/dom';
 import type {StyleElement} from './style-manager';
 import {shouldManageStyle, getManageableStyles} from './style-manager';
-import {isDefinedSelectorSupported} from '../../utils/platform';
+import {isDefinedSelectorSupported, isDocumentDefined} from '../../utils/platform';
 
 const observers = [] as Array<{disconnect(): void}>;
 let observedRoots: WeakSet<Node>;
@@ -40,7 +40,8 @@ function collectUndefinedElements(root: ParentNode) {
 }
 
 let canOptimizeUsingProxy = false;
-document.addEventListener('__darkreader__inlineScriptsAllowed', () => {
+
+isDocumentDefined && document.addEventListener('__darkreader__inlineScriptsAllowed', () => {
     canOptimizeUsingProxy = true;
 });
 

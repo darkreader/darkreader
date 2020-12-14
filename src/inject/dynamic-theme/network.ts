@@ -1,3 +1,5 @@
+import {chromeAPI} from '../../api/mock';
+
 interface FetchRequest {
     url: string;
     responseType: 'data-url' | 'text';
@@ -13,11 +15,11 @@ export async function bgFetch(request: FetchRequest) {
         const id = ++counter;
         resolvers.set(id, resolve);
         rejectors.set(id, reject);
-        chrome.runtime.sendMessage({type: 'fetch', data: request, id});
+        chromeAPI.runtime.sendMessage({type: 'fetch', data: request, id});
     });
 }
 
-chrome.runtime.onMessage.addListener(({type, data, error, id}) => {
+chromeAPI.runtime.onMessage.addListener(({type, data, error, id}) => {
     if (type === 'fetch-response') {
         const resolve = resolvers.get(id);
         const reject = rejectors.get(id);

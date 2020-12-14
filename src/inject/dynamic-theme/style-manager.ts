@@ -7,7 +7,7 @@ import {logWarn} from '../utils/log';
 import {getCSSVariables, replaceCSSRelativeURLsWithAbsolute, removeCSSComments, replaceCSSFontFace, getCSSURLValue, cssImportRegex, getCSSBaseBath} from './css-rules';
 import {bgFetch} from './network';
 import {createStyleSheetModifier} from './stylesheet-modifier';
-import {isShadowDomSupported, isSafari} from '../../utils/platform';
+import {isShadowDomSupported, isSafari, isDocumentDefined} from '../../utils/platform';
 
 declare global {
     interface HTMLStyleElement {
@@ -77,7 +77,7 @@ const syncStyleSet = new WeakSet<HTMLStyleElement | SVGStyleElement>();
 const corsStyleSet = new WeakSet<HTMLStyleElement>();
 
 let canOptimizeUsingProxy = false;
-document.addEventListener('__darkreader__inlineScriptsAllowed', () => {
+isDocumentDefined && document.addEventListener('__darkreader__inlineScriptsAllowed', () => {
     canOptimizeUsingProxy = true;
 });
 

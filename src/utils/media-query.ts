@@ -1,4 +1,4 @@
-const matchesMediaQuery = (query: string) => Boolean(window.matchMedia(query).matches);
+const matchesMediaQuery = (query: string) => matchMedia(query).matches;
 
 const matchesDarkTheme = () => matchesMediaQuery('(prefers-color-scheme: dark)');
 const matchesLightTheme = () => matchesMediaQuery('(prefers-color-scheme: light)');

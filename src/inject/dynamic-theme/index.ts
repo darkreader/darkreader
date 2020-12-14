@@ -17,13 +17,13 @@ import type {FilterConfig, DynamicThemeFix} from '../../definitions';
 import {generateUID} from '../../utils/uid';
 import type {AdoptedStyleSheetManager} from './adopted-style-manger';
 import {createAdoptedStyleSheetOverride} from './adopted-style-manger';
-import {isFirefox} from '../../utils/platform';
+import {isCryptoDefined, isDocumentDefined, isFirefox} from '../../utils/platform';
 import {injectProxy} from './stylesheet-proxy';
 import {parse} from '../../utils/color';
 import {parsedURLCache} from '../../utils/url';
 
 const variables = new Map<string, string>();
-const INSTANCE_ID = generateUID();
+const INSTANCE_ID = isCryptoDefined ? generateUID() : '';
 const styleManagers = new Map<StyleElement, StyleManager>();
 const adoptedStyleManagers = [] as AdoptedStyleSheetManager[];
 let filter: FilterConfig = null;
@@ -290,7 +290,7 @@ function onDOMReady() {
 }
 
 let documentVisibilityListener: () => void = null;
-let didDocumentShowUp = !document.hidden;
+let didDocumentShowUp = isDocumentDefined && !document.hidden;
 
 function watchForDocumentVisibility(callback: () => void) {
     const alreadyWatching = Boolean(documentVisibilityListener);

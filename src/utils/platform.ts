@@ -12,6 +12,9 @@ export const isWindows = platform.startsWith('win');
 export const isMacOS = platform.startsWith('mac');
 export const isMobile = userAgent.includes('mobile');
 export const isShadowDomSupported = typeof ShadowRoot === 'function';
+export const isWindowDefined = typeof window !== 'undefined';
+export const isDocumentDefined = typeof document !== 'undefined';
+export const isCryptoDefined = typeof crypto !== 'undefined';
 
 export const chromiumVersion = (() => {
     const m = userAgent.match(/chrom[e|ium]\/([^ ]+)/);

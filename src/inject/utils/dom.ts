@@ -1,4 +1,4 @@
-import {isCSSStyleSheetConstructorSupported} from './../../utils/platform';
+import {isCSSStyleSheetConstructorSupported, isDocumentDefined} from './../../utils/platform';
 import {logWarn} from './log';
 import {throttle} from './throttle';
 import {forEach} from '../../utils/array';
@@ -199,7 +199,8 @@ export function removeDOMReadyListener(listener: () => void) {
     readyStateListeners.delete(listener);
 }
 
-if (!isDOMReady()) {
+
+if (isDocumentDefined && !isDOMReady()) {
     const onReadyStateChange = () => {
         if (isDOMReady()) {
             document.removeEventListener('readystatechange', onReadyStateChange);

@@ -150,7 +150,7 @@ async function bundleJS(/** @type {JSEntry} */entry, {debug, watch}) {
         target: 'es2019',
         charset: 'utf8',
         format: 'iife',
-        avoidTDZ: true,
+        avoidTDZ: false,
         write: true,
         outfile,
         entryPoints: [src],

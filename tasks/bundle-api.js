@@ -2,7 +2,7 @@ const packageJSON = require('../package.json');
 const {build} = require('esbuild');
 const {createTask} = require('./task');
 
-async function bundleAPI({debug}) {
+async function bundleAPI() {
     const src = ['src/api/index.ts'];
     const dest = 'darkreader.js';
 
@@ -12,10 +12,10 @@ async function bundleAPI({debug}) {
         outfile: dest,
         bundle: true,
         define: {
-            '__DEBUG__': debug
+            '__DEBUG__': false,
         },
         target: 'es2015',
-        avoidTDZ: true,
+        avoidTDZ: false,
         charset: 'utf8',
         banner: `/**\n * Dark Reader v${packageJSON.version}\n * https://darkreader.org/\n */\n`,
         format: 'iife',

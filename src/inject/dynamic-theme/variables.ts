@@ -5,7 +5,7 @@ import {parse, rgbToString} from '../../utils/color';
 import {push} from '../../utils/array';
 import {logWarn} from '../utils/log';
 import {replaceCSSVariables, varRegex} from './css-rules';
-import {getBgModifier, gradientRegex} from './modify-css';
+import {getBgModifier, gradientRegex, tryParseColor} from './modify-css';
 
 export const legacyVariables = new Map<string, string>();
 export const variables = new Map<string, Map<string, Variable>>();
@@ -57,12 +57,11 @@ export function updateVariables(newVars: Map<string, Map<string, Variable>>, the
 
     legacyVariables.forEach((value, key) => {
         value.includes('var(') && legacyVariables.set(key, replaceCSSVariables(value, legacyVariables).result);
-        try {
-            legacyVariables.set(key, rgbToString(parse(value)));
-        } catch (err) {
-            logWarn(err);
+        const parsed = tryParseColor(value);
+        if (!parsed) {
             return;
         }
+        legacyVariables.set(key, rgbToString(parsed));
     });
 
     const variablesStyle: HTMLStyleElement = document.head.querySelector(`.darkreader--dynamic-variables`);

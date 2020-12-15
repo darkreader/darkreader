@@ -1,9 +1,10 @@
 import type {Theme} from '../../definitions';
+import {lazyRGBMatch, parseColorToRGBWithCache} from '../../utils/color';
 import {getTempCSSStyleSheet} from '../utils/dom';
 import {createAsyncTasksQueue} from '../utils/throttle';
 import {iterateCSSRules, iterateCSSDeclarations, replaceCSSVariables} from './css-rules';
 import type {ModifiableCSSDeclaration, ModifiableCSSRule} from './modify-css';
-import {getModifiableCSSDeclaration} from './modify-css';
+import {gradientRegex, getModifiableCSSDeclaration} from './modify-css';
 
 const themeCacheKeys: Array<keyof Theme> = [
     'mode',
@@ -68,8 +69,19 @@ export function createStyleSheetModifier() {
                 const {result, replacedMap} = replaceCSSVariables(cssText, variables);
                 if (rulesTextCache.get(cssText) !== result) {
                     replacedMap.forEach((value, key) => {
-                        // match space but not between () or []
-                        key.split(/\s(?![^\(|\"]*(?:\)|\"))/).forEach((property) => {
+                        key = parseColorToRGBWithCache(key);
+                        key = key.replace(gradientRegex, (gradient) => {
+                            variablesMap.set(gradient, value);
+                            return '';
+                        });
+                        key = key.replace(lazyRGBMatch, (rgb) => {
+                            variablesMap.set(rgb, value);
+                            return '';
+                        });
+                        if (!key) {
+                            return;
+                        }
+                        key.split(/\s/).forEach((property) => {
                             variablesMap.set(property, value);
                         });
                     });

@@ -422,7 +422,10 @@ describe('CSS Variables Override', () => {
             '<h1>Border with variable</h1>',
         );
         createOrUpdateDynamicTheme(theme, null, false);
-        expect(getComputedStyle(container.querySelector('h1')).borderColor).toBe('rgb(179, 0, 0)');
+        expect(getComputedStyle(container.querySelector('h1')).borderTopColor).toBe('rgb(179, 0, 0)');
+        expect(getComputedStyle(container.querySelector('h1')).borderBottomColor).toBe('rgb(179, 0, 0)');
+        expect(getComputedStyle(container.querySelector('h1')).borderLeftColor).toBe('rgb(179, 0, 0)');
+        expect(getComputedStyle(container.querySelector('h1')).borderRightColor).toBe('rgb(179, 0, 0)');
         expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(140, 255, 140)');
     });
 
@@ -442,7 +445,32 @@ describe('CSS Variables Override', () => {
             '<h1>Border with variable</h1>',
         );
         createOrUpdateDynamicTheme(theme, null, false);
-        expect(getComputedStyle(container.querySelector('h1')).borderColor).toBe('rgb(179, 0, 0)');
+        expect(getComputedStyle(container.querySelector('h1')).borderTopColor).toBe('rgb(179, 0, 0)');
+        expect(getComputedStyle(container.querySelector('h1')).borderBottomColor).toBe('rgb(179, 0, 0)');
+        expect(getComputedStyle(container.querySelector('h1')).borderLeftColor).toBe('rgb(179, 0, 0)');
+        expect(getComputedStyle(container.querySelector('h1')).borderRightColor).toBe('rgb(179, 0, 0)');
         expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(140, 255, 140)');
+    });
+
+    it('should handle gradients', () => {
+        container.innerHTML = multiline(
+            '<style>',
+            '    :root {',
+            '        --color: red;',
+            '        --image: linear-gradient(#f69d3c, #3f87a6);',
+            '        --bg: green;',
+            '    }',
+            '    h1 {',
+            '        color: var(--color);',
+            '        background-color: var(--bg);',
+            '        background-image: var(--image);',
+            '    }',
+            '</style>',
+            '<h1>Weow Gradients</h1>',
+        );
+        createOrUpdateDynamicTheme(theme, null, false);
+        expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(255, 26, 26)');
+        expect(getComputedStyle(container.querySelector('h1')).backgroundColor).toBe('rgb(0, 102, 0)');
+        expect(getComputedStyle(container.querySelector('h1')).backgroundImage).toBe('linear-gradient(rgb(156, 85, 7), rgb(50, 108, 133))');
     });
 });

@@ -53,13 +53,17 @@ export function getModifiableCSSDeclaration(property: string, value: string, rul
             return {property, value: modifier, important, sourceValue};
         }
     } else if (property === 'background-image' || property === 'list-style-image') {
-        const imageRule: ImageRule = {
-            selectorText: rule.selectorText,
-            parentSheet: {
-                href: rule.parentStyleSheet.href,
-                baseURIofOwner: rule.parentStyleSheet.ownerNode ? rule.parentStyleSheet.ownerNode.baseURI : null
-            }
-        };
+        let imageRule: ImageRule = null;
+        if (rule) {
+            imageRule = {
+                selectorText: rule.selectorText,
+                parentSheet: {
+                    href: rule.parentStyleSheet.href,
+                    baseURIofOwner: rule.parentStyleSheet.ownerNode ? rule.parentStyleSheet.ownerNode.baseURI : null
+                }
+
+            };
+        }
         if (value.startsWith('var(')) {
             const modifed = value.replace(varRegex, (_, name) => {
                 return `var(--darkreader-v-bgImage${name})`;
@@ -232,7 +236,7 @@ export function parseColorWithCache($color: string) {
     return color;
 }
 
-function tryParseColor($color: string) {
+export function tryParseColor($color: string) {
     try {
         return parseColorWithCache($color);
     } catch (err) {
@@ -291,8 +295,8 @@ interface ImageRule {
 
 export function getBgModifier(value: string, rule: ImageRule, ignoreImageSelectors: string[], isCancelled: () => boolean): string | CSSValueModifier {
     try {
-        const gradients = getMatches(gradientRegex, value);
-        const urls = getMatches(cssURLRegex, value);
+        const gradients = value.match(gradientRegex) || [];
+        const urls = value.match(cssURLRegex) || [];
 
         if (urls.length === 0 && gradients.length === 0) {
             return value;
@@ -444,7 +448,7 @@ export function getBgModifier(value: string, rule: ImageRule, ignoreImageSelecto
         });
 
         return (filter: FilterConfig) => {
-            const results = modifiers.map((modify) => modify(filter));
+            const results = modifiers.filter((modify) => Boolean(modify)).map((modify) => modify(filter));
             if (results.some((r) => r instanceof Promise)) {
                 return Promise.all(results)
                     .then((asyncResults) => {

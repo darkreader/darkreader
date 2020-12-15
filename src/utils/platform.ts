@@ -15,6 +15,7 @@ export const isShadowDomSupported = typeof ShadowRoot === 'function';
 export const isWindowDefined = typeof window !== 'undefined';
 export const isDocumentDefined = typeof document !== 'undefined';
 export const isCryptoDefined = typeof crypto !== 'undefined';
+export const isAPIUseable = isWindowDefined && isDocumentDefined;
 
 export const chromiumVersion = (() => {
     const m = userAgent.match(/chrom[e|ium]\/([^ ]+)/);

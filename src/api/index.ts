@@ -5,7 +5,7 @@ import type {Theme, DynamicThemeFix} from '../definitions';
 import ThemeEngines from '../generators/theme-engines';
 import {createOrUpdateDynamicTheme, removeDynamicTheme} from '../inject/dynamic-theme';
 import {collectCSS} from '../inject/dynamic-theme/css-collection';
-import {isWindowDefined} from '../utils/platform';
+import {isAPIUseable, isWindowDefined} from '../utils/platform';
 
 const isIFrame = (() => {
     try {
@@ -17,6 +17,9 @@ const isIFrame = (() => {
 })();
 
 export function enable(themeOptions: Partial<Theme> = {}, fixes: DynamicThemeFix = null) {
+    if (!isAPIUseable) {
+        return;
+    }
     const theme = {...DEFAULT_THEME, ...themeOptions};
 
     if (theme.engine !== ThemeEngines.dynamicTheme) {
@@ -26,6 +29,9 @@ export function enable(themeOptions: Partial<Theme> = {}, fixes: DynamicThemeFix
 }
 
 export function disable() {
+    if (!isAPIUseable) {
+        return;
+    }
     removeDynamicTheme();
 }
 
@@ -36,6 +42,9 @@ let store = {
 };
 
 function handleColorScheme() {
+    if (!isAPIUseable) {
+        return;
+    }
     if (darkScheme.matches) {
         enable(store.themeOptions, store.fixes);
     } else {
@@ -44,6 +53,9 @@ function handleColorScheme() {
 }
 
 export function auto(themeOptions: Partial<Theme> | false = {}, fixes: DynamicThemeFix = null) {
+    if (!isAPIUseable) {
+        return;
+    }
     if (themeOptions) {
         store = {themeOptions, fixes};
         handleColorScheme();
@@ -55,6 +67,9 @@ export function auto(themeOptions: Partial<Theme> | false = {}, fixes: DynamicTh
 }
 
 export async function exportGeneratedCSS(): Promise<string> {
+    if (!isAPIUseable) {
+        return;
+    }
     return await collectCSS();
 }
 

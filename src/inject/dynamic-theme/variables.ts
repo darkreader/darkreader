@@ -94,7 +94,7 @@ export function updateVariables(newVars: Map<string, Map<string, Variable>>, the
             } else if (imageInfo || gradientRegex.test(value)) {
                 const rule = {
                     selectorText,
-                    parentSheet: imageInfo ? imageInfo : null
+                    parentSheet: imageInfo
                 };
                 const modifier = getBgModifier(value, rule, ignoreImageSelectors, () => false);
                 if (typeof modifier === 'function') {

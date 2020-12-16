@@ -46,7 +46,7 @@ const themeColorTypes = {
     toolbar_vertical_separator: 'border',
 };
 
-const $colors = {
+const standardThemeColors = {
     // 'accentcolor' is the deprecated predecessor of 'frame'.
     // https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json/theme#colors
     accentcolor: '#111111',
@@ -55,6 +55,8 @@ const $colors = {
     ntp_text: 'black',
     popup: '#cccccc',
     popup_text: 'black',
+    popup_highlight: '#333',
+    popup_highlight_text: 'black',
     sidebar: '#cccccc',
     sidebar_border: '#333',
     sidebar_text: 'black',
@@ -70,7 +72,7 @@ const $colors = {
 };
 
 export function setWindowTheme(filter: FilterConfig) {
-    const colors = Object.entries($colors).reduce((obj, [key, value]) => {
+    const colors = Object.entries(standardThemeColors).reduce((obj, [key, value]) => {
         const type = themeColorTypes[key];
         const modify: ((rgb: RGBA, filter: FilterConfig) => string) = {
             'bg': modifyBackgroundColor,

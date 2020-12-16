@@ -71,7 +71,7 @@
     "@typescript-eslint/eslint-plugin": "4.10.0",
     "@typescript-eslint/parser": "4.10.0",
     "chokidar": "3.4.3",
-    "esbuild": "0.8.22",
+    "esbuild": "0.8.23",
     "eslint": "7.15.0",
     "eslint-plugin-local": "1.0.0",
     "fs-extra": "9.0.1",

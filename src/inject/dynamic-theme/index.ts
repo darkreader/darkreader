@@ -15,7 +15,7 @@ import {modifyBackgroundColor, modifyColor, modifyForegroundColor} from '../../g
 import {createTextStyle} from '../../generators/text-style';
 import type {FilterConfig, DynamicThemeFix} from '../../definitions';
 import type {AdoptedStyleSheetManager} from './adopted-style-manger';
-import {fallBackStyle, removeFallbackSheet, createAdoptedStyleSheetOverride} from './adopted-style-manger';
+import {removeFallbackSheet, createAdoptedStyleSheetOverride} from './adopted-style-manger';
 import {isFirefox} from '../../utils/platform';
 import {injectProxy} from './stylesheet-proxy';
 import {parse} from '../../utils/color';
@@ -328,7 +328,7 @@ function createThemeAndWatchForUpdates() {
 }
 
 function handleAdoptedStyleSheets(node: ShadowRoot | Document) {
-    if (Array.isArray(node.adoptedStyleSheets)) {
+    if (isCSSStyleSheetConstructorSupported) {
         if (node.adoptedStyleSheets.length > 0) {
             const newManger = createAdoptedStyleSheetOverride(node);
 
@@ -426,7 +426,7 @@ export function createOrUpdateDynamicTheme(filterConfig: FilterConfig, dynamicTh
         }
         createThemeAndWatchForUpdates();
     } else {
-        if (!isFirefox && !fallBackStyle) {
+        if (!isFirefox) {
             const fallbackStyle = createOrUpdateStyle('darkreader--fallback');
             document.documentElement.appendChild(fallbackStyle);
             fallbackStyle.textContent = getModifiedFallbackStyle(filter, {strict: true});

@@ -4,7 +4,7 @@ import {createOrUpdateDynamicTheme, removeDynamicTheme, cleanDynamicThemeCache} 
 import {logInfo, logWarn} from './utils/log';
 import {watchForColorSchemeChange} from './utils/watch-color-scheme';
 import {collectCSS} from './dynamic-theme/css-collection';
-import {fallBackStyle, removeFallbackSheet} from './dynamic-theme/adopted-style-manger';
+import {removeFallbackSheet} from './dynamic-theme/adopted-style-manger';
 
 function onMessage({type, data}) {
     switch (type) {
@@ -87,12 +87,4 @@ port.onDisconnect.addListener(() => {
 
 const blobID = getXhrBlobID();
 const data = blobID && getDataViaXhr(blobID);
-if (Array.isArray(document.adoptedStyleSheets) && fallBackStyle && data && data.type !== 'clean-up' && data.type !== 'unsupported-sender') {
-    fallBackStyle.insertRule('html, body, body :not(iframe) { background-color: #181a1b !important; border-color: #776e62 !important; color: #e8e6e3 !important; }');
-    document.adoptedStyleSheets = [...document.adoptedStyleSheets, fallBackStyle];
-}
-if (data) {
-    onMessage(data);
-} else {
-    removeFallbackSheet();
-}
+data ? onMessage(data) : removeFallbackSheet();

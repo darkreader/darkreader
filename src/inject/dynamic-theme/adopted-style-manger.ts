@@ -2,8 +2,8 @@ import type {Theme} from '../../definitions';
 import {createStyleSheetModifier} from './stylesheet-modifier';
 import {getCSSVariables} from './css-rules';
 import {isCSSStyleSheetConstructorSupported} from '../../utils/platform';
+import {forEach} from '../../utils/array';
 
-export let fallBackStyle = isCSSStyleSheetConstructorSupported ? new CSSStyleSheet() : null;
 const adoptedStyleOverrides = new WeakMap<CSSStyleSheet, CSSStyleSheet>();
 const overrideList = new WeakSet<CSSStyleSheet>();
 
@@ -13,15 +13,15 @@ export interface AdoptedStyleSheetManager {
 }
 
 export function removeFallbackSheet() {
-    if (fallBackStyle) {
-        const newSheets = [...document.adoptedStyleSheets];
-        const fallBackIndex = document.adoptedStyleSheets.indexOf(fallBackStyle);
-        if (fallBackIndex === -1) {
-            return;
-        }
-        newSheets.splice(fallBackIndex, 1);
-        document.adoptedStyleSheets = newSheets;
-        fallBackStyle = null;
+    if (isCSSStyleSheetConstructorSupported) {
+        forEach(document.adoptedStyleSheets, (sheet) => {
+            if (sheet.media.mediaText === '__darkreader_fallback__') {
+                const newSheets = [...document.adoptedStyleSheets];
+                const fallBackIndex = document.adoptedStyleSheets.indexOf(sheet);
+                newSheets.splice(fallBackIndex, 1);
+                document.adoptedStyleSheets = newSheets;
+            }
+        });
     }
 }
 
@@ -61,7 +61,7 @@ export function createAdoptedStyleSheetOverride(node: Document | ShadowRoot): Ad
 
     function render(theme: Theme, globalVariables: Map<string, string>, ignoreImageAnalysis: string[]) {
         node.adoptedStyleSheets.forEach((sheet) => {
-            if (sheet === fallBackStyle) {
+            if (sheet.media.mediaText === '__darkreader_fallback__') {
                 return;
             }
             if (overrideList.has(sheet)) {

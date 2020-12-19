@@ -16,7 +16,7 @@ import {createTextStyle} from '../../generators/text-style';
 import type {FilterConfig, DynamicThemeFix} from '../../definitions';
 import type {AdoptedStyleSheetManager} from './adopted-style-manger';
 import {removeFallbackSheet, createAdoptedStyleSheetOverride} from './adopted-style-manger';
-import {isFirefox} from '../../utils/platform';
+import {isCSSStyleSheetConstructorSupported} from '../../utils/platform';
 import {injectProxy} from './stylesheet-proxy';
 import {parse} from '../../utils/color';
 import {parsedURLCache} from '../../utils/url';
@@ -426,7 +426,7 @@ export function createOrUpdateDynamicTheme(filterConfig: FilterConfig, dynamicTh
         }
         createThemeAndWatchForUpdates();
     } else {
-        if (!isFirefox) {
+        if (!isCSSStyleSheetConstructorSupported) {
             const fallbackStyle = createOrUpdateStyle('darkreader--fallback');
             document.documentElement.appendChild(fallbackStyle);
             fallbackStyle.textContent = getModifiedFallbackStyle(filter, {strict: true});

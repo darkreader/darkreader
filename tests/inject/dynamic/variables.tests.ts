@@ -452,25 +452,110 @@ describe('CSS Variables Override', () => {
         expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(140, 255, 140)');
     });
 
-    it('should handle gradients', () => {
+    it('should handle variables with gradients', () => {
         container.innerHTML = multiline(
             '<style>',
             '    :root {',
-            '        --color: red;',
-            '        --image: linear-gradient(#f69d3c, #3f87a6);',
+            '        --text: red;',
+            '        --gradient: linear-gradient(red, white);',
             '        --bg: green;',
             '    }',
             '    h1 {',
-            '        color: var(--color);',
+            '        color: var(--text);',
             '        background-color: var(--bg);',
-            '        background-image: var(--image);',
+            '        background-image: var(--gradient);',
+            '    }',
+            '    h2 {',
+            '        background: var(--gradient);',
             '    }',
             '</style>',
             '<h1>Weow Gradients</h1>',
+            '<h2>Gradient 2</h2>'
         );
         createOrUpdateDynamicTheme(theme, null, false);
         expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(255, 26, 26)');
         expect(getComputedStyle(container.querySelector('h1')).backgroundColor).toBe('rgb(0, 102, 0)');
-        expect(getComputedStyle(container.querySelector('h1')).backgroundImage).toBe('linear-gradient(rgb(156, 85, 7), rgb(50, 108, 133))');
+        expect(getComputedStyle(container.querySelector('h1')).backgroundImage).toBe('linear-gradient(rgb(204, 0, 0), rgb(0, 0, 0))');
+        expect(getComputedStyle(container.querySelector('h2')).backgroundImage).toBe('linear-gradient(rgb(204, 0, 0), rgb(0, 0, 0))');
+    });
+
+    it('should handle variables with background images', async () => {
+        const darkIcon = multiline(
+            '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 8 8" width="8" height="8">',
+            '    <circle fill="black" cx="4" cy="4" r="3" />',
+            '</svg>',
+        );
+        const redCross = multiline(
+            '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 8 8" width="8" height="8">',
+            '    <path fill="red" d="M3,1 h2 v2 h2 v2 h-2 v2 h-2 v-2 h-2 v-2 h2 z" />',
+            '</svg>',
+        );
+        container.innerHTML = multiline(
+            '<style>',
+            '    :root {',
+            `        --icon: url("data:image/svg+xml;base64,${btoa(darkIcon)}");`,
+            `        --red-cross: url("data:image/svg+xml;base64,${btoa(redCross)}");`,
+            '        --bg: green;',
+            '    }',
+            '    .icon1 {',
+            '        background-color: var(--bg);',
+            '        background-image: var(--icon);',
+            '        background-repeat: no-repeat;',
+            '        background-size: 100%;',
+            '        display: inline-block;',
+            '        height: 1rem;',
+            '        width: 1rem;',
+            '    }',
+            '    .icon2 {',
+            '        background: no-repeat center/100% var(--icon);',
+            '        display: inline-block;',
+            '        height: 1rem;',
+            '        width: 1rem;',
+            '    }',
+            '    .icon3 {',
+            '        background: no-repeat center/100% var(--red-cross), no-repeat center/100% var(--icon);',
+            '        display: inline-block;',
+            '        height: 1rem;',
+            '        width: 1rem;',
+            '    }',
+            '</style>',
+            '<h1>',
+            '    <i class="icon1"></i>',
+            '    <i class="icon2"></i>',
+            '    <i class="icon3"></i>',
+            '    Icons',
+            '</h1>',
+        );
+        createOrUpdateDynamicTheme(theme, null, false);
+        await timeout(50);
+        expect(getComputedStyle(container.querySelector('.icon1')).backgroundImage).toMatch(/^url\("blob:.*"\)$/);
+        expect(getComputedStyle(container.querySelector('.icon2')).backgroundImage).toMatch(/^url\("blob:.*"\)$/);
+        expect(getComputedStyle(container.querySelector('.icon3')).backgroundImage).toMatch(/^url\("blob:.*"\), url\("blob:.*"\)$/);
+    });
+
+    it('should handle variables with gradients and images', async () => {
+        const darkIcon = multiline(
+            '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 8 8" width="8" height="8">',
+            '    <circle fill="black" cx="4" cy="4" r="3" />',
+            '</svg>',
+        );
+        container.innerHTML = multiline(
+            '<style>',
+            '    :root {',
+            `        --icon: url("data:image/svg+xml;base64,${btoa(darkIcon)}");`,
+            '        --gradient: linear-gradient(red, white);',
+            '    }',
+            '    .icon {',
+            '        background: no-repeat center/100% var(--icon), var(--gradient);',
+            '        display: inline-block;',
+            '        height: 1rem;',
+            '        width: 1rem;',
+            '    }',
+            '</style>',
+            '<h1><i class="icon"></i>Mixed background</h1>',
+        );
+        createOrUpdateDynamicTheme(theme, null, false);
+        await timeout(50);
+        expect(getComputedStyle(container.querySelector('.icon')).backgroundImage).toMatch(/^url\("blob:.*"\), linear-gradient\(rgb\(204, 0, 0\), rgb\(0, 0, 0\)\)$/);
     });
 });

@@ -1,6 +1,6 @@
 import type {FilterConfig, Theme} from '../definitions';
 import type {RGBA, HSLA} from '../utils/color';
-import {parse, rgbToHSL, hslToRGB, rgbToString, rgbToHexString} from '../utils/color';
+import {rgbToHSL, hslToRGB, rgbToString, rgbToHexString, parseColorWithCache} from '../utils/color';
 import {scale} from '../utils/math';
 import {applyColorMatrix, createFilterMatrix} from './utils/matrix';
 
@@ -27,7 +27,7 @@ function parseToHSLWithCache(color: string) {
     if (colorParseCache.has(color)) {
         return colorParseCache.get(color);
     }
-    const rgb = parse(color);
+    const rgb = parseColorWithCache(color);
     const hsl = rgbToHSL(rgb);
     colorParseCache.set(color, hsl);
     return hsl;

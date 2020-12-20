@@ -1,6 +1,6 @@
 import {m} from 'malevic';
 import {getContext} from 'malevic/dom';
-import {parse} from '../../../utils/color';
+import {tryParseColor} from '../../../utils/color';
 import TextBox from '../textbox';
 import HSBPicker from './hsb-picker';
 
@@ -13,12 +13,7 @@ interface ColorPickerProps {
 }
 
 function isValidColor(color: string) {
-    try {
-        parse(color);
-        return true;
-    } catch (err) {
-        return false;
-    }
+    return Boolean(tryParseColor(color));
 }
 
 const colorPickerFocuses = new WeakMap<Node, () => void>();

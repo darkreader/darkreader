@@ -138,6 +138,26 @@ export function parse($color: string): RGBA {
     throw new Error(`Unable to parse ${$color}`);
 }
 
+export const colorParseCache = new Map<string, RGBA>();
+
+export function parseColorWithCache($color: string) {
+    $color = $color.trim();
+    if (colorParseCache.has($color)) {
+        return colorParseCache.get($color);
+    }
+    const color = parse($color);
+    colorParseCache.set($color, color);
+    return color;
+}
+
+export function tryParseColor($color: string) {
+    try {
+        return parseColorWithCache($color);
+    } catch (err) {
+        return null;
+    }
+}
+
 function getNumbersFromString(str: string, splitter: RegExp, range: number[], units: {[unit: string]: number}) {
     const raw = str.split(splitter).filter((x) => x);
     const unitsList = Object.entries(units);

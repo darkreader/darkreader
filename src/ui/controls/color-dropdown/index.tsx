@@ -2,7 +2,7 @@ import {m} from 'malevic';
 import {getContext} from 'malevic/dom';
 import ColorPicker from '../color-picker';
 import DropDown from '../dropdown';
-import {parse} from '../../../utils/color';
+import {tryParseColor} from '../../../utils/color';
 
 interface ColorDropDownProps {
     class?: string;
@@ -49,14 +49,7 @@ export default function ColorDropDown(props: ColorDropDownProps) {
         props.onChange(result);
     }
 
-    let isPickerVisible: boolean;
-
-    try {
-        parse(props.value);
-        isPickerVisible = true;
-    } catch (err) {
-        isPickerVisible = false;
-    }
+    const isPickerVisible = Boolean(tryParseColor(props.value));
 
     const prevValue = context.prev ? context.prev.props.value : null;
     const shouldFocusOnPicker = (

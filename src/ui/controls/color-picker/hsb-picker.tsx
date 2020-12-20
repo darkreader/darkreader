@@ -1,7 +1,7 @@
 import {m} from 'malevic';
 import {getContext} from 'malevic/dom';
 import type {RGBA} from '../../../utils/color';
-import {rgbToHSL, parse, hslToString, rgbToHexString} from '../../../utils/color';
+import {rgbToHSL, hslToString, rgbToHexString, parseColorWithCache} from '../../../utils/color';
 import {clamp, scale} from '../../../utils/math';
 import {createSwipeHandler} from '../../utils';
 
@@ -110,7 +110,7 @@ export default function HSBPicker(props: HSBPickerProps) {
     const didColorChange = props.color !== prevColor && props.color !== prevActiveColor;
     let activeHSB: HSB;
     if (didColorChange) {
-        const rgb = parse(props.color);
+        const rgb = parseColorWithCache(props.color);
         activeHSB = rgbToHSB(rgb);
         store.activeHSB = activeHSB;
     } else {
@@ -119,7 +119,7 @@ export default function HSBPicker(props: HSBPickerProps) {
 
     function onSBCanvasRender(canvas: HTMLCanvasElement) {
         const hue = activeHSB.h;
-        const prevHue = prevColor && rgbToHSB(parse(prevColor)).h;
+        const prevHue = prevColor && rgbToHSB(parseColorWithCache(prevColor)).h;
         if (hue === prevHue) {
             return;
         }

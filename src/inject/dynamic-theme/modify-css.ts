@@ -47,7 +47,7 @@ export function getModifiableCSSDeclaration(property: string, value: string, rul
             return {property, value: modifier, important, sourceValue};
         }
     } else if (property.indexOf('shadow') >= 0) {
-        const modifier = getShadowModifier(property, value);
+        const modifier = getShadowModifier(value);
         if (modifier) {
             return {property, value: modifier, important, sourceValue};
         }
@@ -424,7 +424,7 @@ function getBgImageModifier(value: string, rule: CSSStyleRule, ignoreImageSelect
     }
 }
 
-function getShadowModifier(prop: string, value: string): CSSValueModifier {
+function getShadowModifier(value: string): CSSValueModifier {
     try {
         let index = 0;
         const colorMatches = getMatches(/(^|\s)([a-z]+\(.+?\)|#[0-9a-f]+|[a-z]+)(.*?(inset|outset)?($|,))/ig, value, 2);

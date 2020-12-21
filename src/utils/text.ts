@@ -51,7 +51,7 @@ export function formatArray(arr: string[]) {
 export function getMatches(regex: RegExp, input: string, group = 0) {
     const matches: string[] = [];
     let m: RegExpMatchArray;
-    while (m = regex.exec(input)) {
+    while ((m = regex.exec(input))) {
         matches.push(m[group]);
     }
     return matches;
@@ -83,8 +83,8 @@ export function formatCSS(text: string) {
         .replace(/\s{2,}/g, ' ') // Replacing multiple spaces to one
         .replace(/\{/g, '{\n') // {
         .replace(/\}/g, '\n}\n') // }
-        .replace(/\;(?![^(\(|\")]*(\)|\"))/g, ';\n') // ; and do not target between () and ""
-        .replace(/\,(?![^(\(|\")]*(\)|\"))/g, ',\n') // , and do not target between () and ""
+        .replace(/\;(?![^\(|\"]*(\)|\"))/g, ';\n') // ; and do not target between () and ""
+        .replace(/\,(?![^\(|\"]*(\)|\"))/g, ',\n') // , and do not target between () and ""
         .replace(/\n\s*\n/g, '\n') // Remove \n Without any characters between it to the next \n
         .split('\n'));
 

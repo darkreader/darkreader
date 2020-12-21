@@ -1,4 +1,4 @@
-import {FilterMode} from './generators/css-filter';
+import type {FilterMode} from './generators/css-filter';
 
 export interface ExtensionData {
     isEnabled: boolean;
@@ -54,6 +54,7 @@ export interface Theme {
     lightSchemeTextColor: string;
     scrollbarColor: '' | 'auto' | string;
     selectionColor: '' | 'auto' | string;
+    styleSystemControls: boolean;
 }
 
 export type FilterConfig = Theme;

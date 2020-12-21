@@ -1,9 +1,11 @@
 import {forEach, push} from '../../utils/array';
+import type {ElementsTreeOperations} from '../utils/dom';
+import {iterateShadowHosts, createOptimizedTreeObserver} from '../utils/dom';
+import type {StyleElement} from './style-manager';
+import {shouldManageStyle, getManageableStyles} from './style-manager';
 import {isDefinedSelectorSupported} from '../../utils/platform';
-import {iterateShadowHosts, createOptimizedTreeObserver, ElementsTreeOperations} from '../utils/dom';
-import {shouldManageStyle, getManageableStyles, StyleElement} from './style-manager';
 
-const observers = [] as {disconnect(): void}[];
+const observers = [] as Array<{disconnect(): void}>;
 let observedRoots: WeakSet<Node>;
 
 interface ChangedStyles {
@@ -17,7 +19,7 @@ const undefinedGroups = new Map<string, Set<Element>>();
 let elementsDefinitionCallback: (elements: Element[]) => void;
 
 function collectUndefinedElements(root: ParentNode) {
-    if (!isDefinedSelectorSupported()) {
+    if (!isDefinedSelectorSupported) {
         return;
     }
     forEach(root.querySelectorAll(':not(:defined)'),
@@ -37,12 +39,30 @@ function collectUndefinedElements(root: ParentNode) {
         });
 }
 
-function customElementsWhenDefined(tag: string) {
-    return new Promise((resolve) => {
+let canOptimizeUsingProxy = false;
+document.addEventListener('__darkreader__inlineScriptsAllowed', () => {
+    canOptimizeUsingProxy = true;
+});
+
+const resolvers = new Map<string, () => void>();
+
+function handleIsDefined(e: CustomEvent<{tag: string}>) {
+    canOptimizeUsingProxy = true;
+    if (resolvers.has(e.detail.tag)) {
+        const resolve = resolvers.get(e.detail.tag);
+        resolve();
+    }
+}
+
+async function customElementsWhenDefined(tag: string) {
+    return new Promise<void>((resolve) => {
         // `customElements.whenDefined` is not available in extensions
         // https://bugs.chromium.org/p/chromium/issues/detail?id=390807
-        if (window.customElements && typeof window.customElements.whenDefined === 'function') {
+        if (window.customElements && typeof customElements.whenDefined === 'function') {
             customElements.whenDefined(tag).then(resolve);
+        } else if (canOptimizeUsingProxy) {
+            resolvers.set(tag, resolve);
+            document.dispatchEvent(new CustomEvent('__darkreader__addUndefinedResolver', {detail: {tag}}));
         } else {
             const checkIfDefined = () => {
                 const elements = undefinedGroups.get(tag);
@@ -66,6 +86,7 @@ function watchWhenCustomElementsDefined(callback: (elements: Element[]) => void)
 function unsubscribeFromDefineCustomElements() {
     elementsDefinitionCallback = null;
     undefinedGroups.clear();
+    document.removeEventListener('__darkreader__isDefined', handleIsDefined);
 }
 
 export function watchForStyleChanges(currentStyles: StyleElement[], update: (styles: ChangedStyles) => void, shadowRootDiscovered: (root: ShadowRoot) => void) {
@@ -161,16 +182,22 @@ export function watchForStyleChanges(currentStyles: StyleElement[], update: (sty
 
     function handleAttributeMutations(mutations: MutationRecord[]) {
         const updatedStyles = new Set<StyleElement>();
+        const removedStyles = new Set<StyleElement>();
         mutations.forEach((m) => {
-            if (shouldManageStyle(m.target) && m.target.isConnected) {
-                updatedStyles.add(m.target as StyleElement);
+            const {target} = m;
+            if (target.isConnected) {
+                if (shouldManageStyle(target)) {
+                    updatedStyles.add(target as StyleElement);
+                } else if (target instanceof HTMLLinkElement && target.disabled) {
+                    removedStyles.add(target as StyleElement);
+                }
             }
         });
-        if (updatedStyles.size > 0) {
+        if (updatedStyles.size + removedStyles.size > 0) {
             update({
                 updated: Array.from(updatedStyles),
                 created: [],
-                removed: [],
+                removed: Array.from(removedStyles),
                 moved: [],
             });
         }
@@ -182,7 +209,7 @@ export function watchForStyleChanges(currentStyles: StyleElement[], update: (sty
             onHugeMutations: handleHugeTreeMutations,
         });
         const attrObserver = new MutationObserver(handleAttributeMutations);
-        attrObserver.observe(root, {attributes: true, attributeFilter: ['rel', 'disabled'], subtree: true});
+        attrObserver.observe(root, {attributes: true, attributeFilter: ['rel', 'disabled', 'media'], subtree: true});
         observers.push(treeObserver, attrObserver);
         observedRoots.add(root);
     }
@@ -213,6 +240,7 @@ export function watchForStyleChanges(currentStyles: StyleElement[], update: (sty
             collectUndefinedElements(shadowRoot);
         });
     });
+    document.addEventListener('__darkreader__isDefined', handleIsDefined);
     collectUndefinedElements(document);
 }
 

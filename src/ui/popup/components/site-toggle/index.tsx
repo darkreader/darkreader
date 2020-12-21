@@ -2,7 +2,7 @@ import {m} from 'malevic';
 import CheckmarkIcon from './checkmark-icon';
 import {Button} from '../../../controls';
 import {getURLHostOrProtocol, isURLEnabled, isPDF} from '../../../../utils/url';
-import {ExtWrapper, TabInfo} from '../../../../definitions';
+import type {ExtWrapper, TabInfo} from '../../../../definitions';
 
 export default function SiteToggleButton({data, tab, actions}: ExtWrapper & {tab: TabInfo}) {
 
@@ -14,7 +14,7 @@ export default function SiteToggleButton({data, tab, actions}: ExtWrapper & {tab
         }
     }
     const toggleHasEffect = (
-        data.isEnabled &&
+        data.settings.enableForProtectedPages ||
         !tab.isProtected
     );
     const pdf = isPDF(tab.url);
@@ -32,12 +32,12 @@ export default function SiteToggleButton({data, tab, actions}: ExtWrapper & {tab
         <Button
             class={{
                 'site-toggle': true,
-                'site-toggle--active': pdf ? data.settings.enableForPDF : isSiteEnabled,
+                'site-toggle--active': isSiteEnabled,
                 'site-toggle--disabled': !toggleHasEffect
             }}
             onclick={onSiteToggleClick}
         >
-            <span class="site-toggle__mark"><CheckmarkIcon isEnabled={isSiteEnabled} /></span>
+            <span class="site-toggle__mark"><CheckmarkIcon isChecked={isSiteEnabled} /></span>
             {' '}
             <span class="site-toggle__url" >{pdf ? 'PDF' : urlText}</span>
         </Button>

@@ -1,6 +1,7 @@
-import {parse, RGBA} from '../utils/color';
+import type {RGBA} from '../utils/color';
+import {parse} from '../utils/color';
 import {modifyBackgroundColor, modifyForegroundColor, modifyBorderColor} from '../generators/modify-colors';
-import {FilterConfig} from '../definitions';
+import type {FilterConfig} from '../definitions';
 
 declare const browser: {
     theme: {
@@ -16,11 +17,16 @@ const themeColorTypes = {
     frame: 'bg',
     icons: 'text',
     icons_attention: 'text',
+    ntp_background: 'bg',
+    ntp_text: 'text',
     popup: 'bg',
     popup_border: 'bg',
     popup_highlight: 'bg',
     popup_highlight_text: 'text',
     popup_text: 'text',
+    sidebar: 'bg',
+    sidebar_border: 'border',
+    sidebar_text: 'text',
     tab_background_text: 'text',
     tab_line: 'bg',
     tab_loading: 'bg',
@@ -45,8 +51,13 @@ const $colors = {
     // https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json/theme#colors
     accentcolor: '#111111',
     frame: '#111111',
+    ntp_background: 'white',
+    ntp_text: 'black',
     popup: '#cccccc',
     popup_text: 'black',
+    sidebar: '#cccccc',
+    sidebar_border: '#333',
+    sidebar_text: 'black',
     tab_background_text: 'white',
     tab_line: '#23aeff',
     tab_loading: '#23aeff',

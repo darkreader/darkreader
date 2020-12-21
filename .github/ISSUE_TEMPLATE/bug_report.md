@@ -9,7 +9,7 @@ assignees: ''
 
 <!--
 Thank you for taking the time to report a bug.
-Please make sure there is no existing issue about this kind of bug.
+Please make sure there is no existing issue with this kind of bug.
 -->
 
 ### **Describe the bug**
@@ -38,10 +38,12 @@ If applicable, add screenshots to help explain your problem.
 Please add a version of the browser you are using. 
 If you don't know how to get your browser/darkreader version please search it up online.
 -->
+
 ### **System Information:**
- - OS: [e.g. iOS 11]
- - Browser: [e.g. Chrome 73, Safari 13]
- - Dark Reader version: [e.g. 4.9.9]
+
+- OS: [e.g. iOS 11]
+- Browser: [e.g. Chrome 73, Safari 13]
+- Dark Reader version: [e.g. 4.9.9]
 
 ### **Additional context**
 

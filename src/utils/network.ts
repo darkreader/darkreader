@@ -10,7 +10,7 @@ async function getOKResponse(url: string, mimeType?: string) {
     );
 
     // Firefox bug, content type is "application/x-unknown-content-type"
-    if (isFirefox() && mimeType === 'text/css' && url.startsWith('moz-extension://') && url.endsWith('.css')) {
+    if (isFirefox && mimeType === 'text/css' && url.startsWith('moz-extension://') && url.endsWith('.css')) {
         return response;
     }
 

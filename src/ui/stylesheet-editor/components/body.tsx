@@ -1,7 +1,7 @@
 import {m} from 'malevic';
 import {Button} from '../../controls';
 import {getURLHostOrProtocol, isURLInList} from '../../../utils/url';
-import {ExtWrapper, TabInfo} from '../../../definitions';
+import type {ExtWrapper, TabInfo} from '../../../definitions';
 
 interface BodyProps extends ExtWrapper {
     tab: TabInfo;
@@ -59,6 +59,10 @@ export default function Body({data, tab, actions}: BodyProps) {
                 native
                 placeholder={placeholderText}
                 onrender={onTextRender}
+                spellcheck="false"
+                autocorrect="off"
+                autocomplete="off"
+                autocapitalize="off"
             />
             <div id="buttons">
                 <Button onclick={reset}>Reset</Button>

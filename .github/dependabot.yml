@@ -1,0 +1,12 @@
+version: 2
+updates:
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "wednesday"
+    labels:
+      - "dependencies"
+    reviewers:
+      - "Gusted"
+    open-pull-requests-limit: 10

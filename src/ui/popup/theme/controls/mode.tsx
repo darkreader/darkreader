@@ -10,7 +10,7 @@ export default function Mode(props: {mode: string; onChange: (mode: string) => v
     function openCSSEditor() {
         chrome.windows.create({
             type: 'panel',
-            url: isFirefox() ? '../stylesheet-editor/index.html' : 'ui/stylesheet-editor/index.html',
+            url: isFirefox ? '../stylesheet-editor/index.html' : 'ui/stylesheet-editor/index.html',
             width: 600,
             height: 600,
         });

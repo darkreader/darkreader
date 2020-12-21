@@ -2,7 +2,6 @@ import {m} from 'malevic';
 import {getContext} from 'malevic/dom';
 import {DONATE_URL} from '../../../utils/links';
 import {getLocalMessage} from '../../../utils/locales';
-import {isMobile} from '../../../utils/platform';
 import {Overlay} from '../../controls';
 import AutomationPage from '../automation-page';
 import MainPage from '../main-page';
@@ -10,8 +9,9 @@ import {Page, PageViewer} from '../page-viewer';
 import SettingsPage from '../settings-page';
 import SiteListPage from '../site-list-page';
 import ThemePage from '../theme/page';
-import {ViewProps} from '../types';
+import type {ViewProps} from '../types';
 import ManageSettingsPage from '../manage-settings-page';
+import {isMobile} from '../../../utils/platform';
 
 function Logo() {
     return (
@@ -148,7 +148,7 @@ function AppVersion() {
 export default function Body(props: ViewProps) {
     const context = getContext();
     context.onCreate(() => {
-        if (isMobile()) {
+        if (isMobile) {
             window.addEventListener('contextmenu', (e) => e.preventDefault());
         }
     });

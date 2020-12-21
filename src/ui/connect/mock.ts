@@ -1,5 +1,5 @@
 import {getURLHostOrProtocol} from '../../utils/url';
-import {ExtensionData, TabInfo, Theme, UserSettings} from '../../definitions';
+import type {ExtensionData, TabInfo, Theme, UserSettings} from '../../definitions';
 
 export function getMockData(override = {} as Partial<ExtensionData>): ExtensionData {
     return Object.assign({
@@ -20,6 +20,7 @@ export function getMockData(override = {} as Partial<ExtensionData>): ExtensionD
                 engine: 'cssFilter',
                 stylesheet: '',
                 scrollbarColor: 'auto',
+                styleSystemControls: true,
             } as Theme,
             customThemes: [],
             siteList: [],
@@ -77,10 +78,10 @@ export function createConnectorMock() {
     const data = getMockData();
     const tab = getMockActiveTabInfo();
     const connector = {
-        getData() {
+        async getData() {
             return Promise.resolve(data);
         },
-        getActiveTabInfo() {
+        async getActiveTabInfo() {
             return Promise.resolve(tab);
         },
         subscribeToChanges(callback) {

@@ -1,10 +1,10 @@
 import {m} from 'malevic';
-import {Theme} from '../../../definitions';
+import type {Theme} from '../../../definitions';
 import {Button} from '../../controls';
 import {Brightness, Contrast, Scheme, Mode} from '../theme/controls';
 import ThemePresetPicker from '../theme/preset-picker';
 import {getCurrentThemePreset} from '../theme/utils';
-import {ViewProps} from '../types';
+import type {ViewProps} from '../types';
 
 function ThemeControls(props: {theme: Theme; onChange: (theme: Partial<Theme>) => void}) {
     const {theme, onChange} = props;

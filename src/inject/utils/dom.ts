@@ -1,3 +1,4 @@
+import {isCSSStyleSheetConstructorSupported} from './../../utils/platform';
 import {logWarn} from './log';
 import {throttle} from './throttle';
 import {forEach} from '../../utils/array';
@@ -173,7 +174,6 @@ export function iterateShadowHosts(root: Node, iterator: (host: Element) => void
                 return (node as Element).shadowRoot == null ? NodeFilter.FILTER_SKIP : NodeFilter.FILTER_ACCEPT;
             }
         },
-        false,
     );
     for (
         let node = ((root as Element).shadowRoot ? walker.currentNode : walker.nextNode()) as Element;
@@ -333,4 +333,22 @@ export function createOptimizedTreeObserver(root: Document | ShadowRoot, callbac
             }
         },
     };
+}
+
+let tempStyle: CSSStyleSheet = null;
+
+export function getTempCSSStyleSheet(): CSSStyleSheet {
+    if (tempStyle) {
+        return tempStyle;
+    }
+    if (isCSSStyleSheetConstructorSupported) {
+        tempStyle = new CSSStyleSheet();
+        return tempStyle;
+    } else {
+        const tempStyleElement = document.createElement('style');
+        document.head.append(tempStyleElement);
+        tempStyle = tempStyleElement.sheet;
+        document.head.removeChild(tempStyleElement);
+        return tempStyle;
+    }
 }

@@ -1,5 +1,6 @@
-import {FilterConfig, Theme} from '../definitions';
-import {parse, rgbToHSL, hslToRGB, rgbToString, rgbToHexString, RGBA, HSLA} from '../utils/color';
+import type {FilterConfig, Theme} from '../definitions';
+import type {RGBA, HSLA} from '../utils/color';
+import {parse, rgbToHSL, hslToRGB, rgbToString, rgbToHexString} from '../utils/color';
 import {scale} from '../utils/math';
 import {applyColorMatrix, createFilterMatrix} from './utils/matrix';
 
@@ -37,8 +38,8 @@ export function clearColorModificationCache() {
     colorParseCache.clear();
 }
 
-const rgbCacheKeys: (keyof RGBA)[] = ['r', 'g', 'b', 'a'];
-const themeCacheKeys: (keyof Theme)[] = ['mode', 'brightness', 'contrast', 'grayscale', 'sepia', 'darkSchemeBackgroundColor', 'darkSchemeTextColor', 'lightSchemeBackgroundColor', 'lightSchemeTextColor'];
+const rgbCacheKeys: Array<keyof RGBA> = ['r', 'g', 'b', 'a'];
+const themeCacheKeys: Array<keyof Theme> = ['mode', 'brightness', 'contrast', 'grayscale', 'sepia', 'darkSchemeBackgroundColor', 'darkSchemeTextColor', 'lightSchemeBackgroundColor', 'lightSchemeTextColor'];
 
 function getCacheId(rgb: RGBA, theme: Theme) {
     return rgbCacheKeys.map((k) => rgb[k] as any)
@@ -194,7 +195,7 @@ function modifyFgHSL({h, s, l, a}: HSLA, pole: HSLA) {
     }
 
     let hx = h;
-    let lx = l;
+    let lx: number;
     if (isBlue) {
         hx = modifyBlueFgHue(h);
         lx = scale(l, 0, 0.5, pole.l, Math.min(1, MIN_FG_LIGHTNESS + 0.05));

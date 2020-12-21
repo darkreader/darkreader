@@ -1,7 +1,7 @@
 import {m} from 'malevic';
-import {ViewProps} from '../types';
+import type {ViewProps} from '../types';
 import ControlGroup from '../control-group';
-import {UserSettings} from '../../../definitions';
+import type {UserSettings} from '../../../definitions';
 import {Button} from '../../controls';
 import {openFile} from '../../utils';
 import {DEFAULT_SETTINGS} from '../../../defaults';

@@ -1,12 +1,15 @@
-import {parse, RGBA, rgbToHSL, hslToString} from '../../utils/color';
+import type {RGBA} from '../../utils/color';
+import {parse, rgbToHSL, hslToString} from '../../utils/color';
 import {clamp} from '../../utils/math';
 import {getMatches} from '../../utils/text';
+import {getAbsoluteURL} from '../../utils/url';
 import {modifyBackgroundColor, modifyBorderColor, modifyForegroundColor, modifyGradientColor, modifyShadowColor, clearColorModificationCache} from '../../generators/modify-colors';
 import {cssURLRegex, getCSSURLValue, getCSSBaseBath} from './css-rules';
-import {getImageDetails, getFilteredImageDataURL, ImageDetails, cleanImageProcessingCache} from './image';
-import {getAbsoluteURL} from './url';
+import type {ImageDetails} from './image';
+import {getImageDetails, getFilteredImageDataURL, cleanImageProcessingCache} from './image';
 import {logWarn, logInfo} from '../utils/log';
-import {FilterConfig, Theme} from '../../definitions';
+import type {FilterConfig, Theme} from '../../definitions';
+import {isFirefox} from '../../utils/platform';
 
 type CSSValueModifier = (filter: FilterConfig) => string | Promise<string>;
 
@@ -31,7 +34,8 @@ export function getModifiableCSSDeclaration(property: string, value: string, rul
     } else if (
         (property.indexOf('color') >= 0 && property !== '-webkit-print-color-adjust') ||
         property === 'fill' ||
-        property === 'stroke'
+        property === 'stroke' ||
+        property === 'stop-color'
     ) {
         const modifier = getColorModifier(property, value);
         if (modifier) {
@@ -51,40 +55,40 @@ export function getModifiableCSSDeclaration(property: string, value: string, rul
     return null;
 }
 
-export function getModifiedUserAgentStyle(filter: FilterConfig, isIFrame: boolean) {
+export function getModifiedUserAgentStyle(theme: Theme, isIFrame: boolean, styleSystemControls: boolean) {
     const lines: string[] = [];
     if (!isIFrame) {
         lines.push('html {');
-        lines.push(`    background-color: ${modifyBackgroundColor({r: 255, g: 255, b: 255}, filter)} !important;`);
+        lines.push(`    background-color: ${modifyBackgroundColor({r: 255, g: 255, b: 255}, theme)} !important;`);
         lines.push('}');
     }
-    lines.push(`${isIFrame ? '' : 'html, body, '}input, textarea, select, button {`);
-    lines.push(`    background-color: ${modifyBackgroundColor({r: 255, g: 255, b: 255}, filter)};`);
+    lines.push(`${isIFrame ? '' : 'html, body, '}${styleSystemControls ? 'input, textarea, select, button' : ''} {`);
+    lines.push(`    background-color: ${modifyBackgroundColor({r: 255, g: 255, b: 255}, theme)};`);
     lines.push('}');
-    lines.push('html, body, input, textarea, select, button {');
-    lines.push(`    border-color: ${modifyBorderColor({r: 76, g: 76, b: 76}, filter)};`);
-    lines.push(`    color: ${modifyForegroundColor({r: 0, g: 0, b: 0}, filter)};`);
+    lines.push(`html, body, ${styleSystemControls ? 'input, textarea, select, button' : ''} {`);
+    lines.push(`    border-color: ${modifyBorderColor({r: 76, g: 76, b: 76}, theme)};`);
+    lines.push(`    color: ${modifyForegroundColor({r: 0, g: 0, b: 0}, theme)};`);
     lines.push('}');
     lines.push('a {');
-    lines.push(`    color: ${modifyForegroundColor({r: 0, g: 64, b: 255}, filter)};`);
+    lines.push(`    color: ${modifyForegroundColor({r: 0, g: 64, b: 255}, theme)};`);
     lines.push('}');
     lines.push('table {');
-    lines.push(`    border-color: ${modifyBorderColor({r: 128, g: 128, b: 128}, filter)};`);
+    lines.push(`    border-color: ${modifyBorderColor({r: 128, g: 128, b: 128}, theme)};`);
     lines.push('}');
     lines.push('::placeholder {');
-    lines.push(`    color: ${modifyForegroundColor({r: 169, g: 169, b: 169}, filter)};`);
+    lines.push(`    color: ${modifyForegroundColor({r: 169, g: 169, b: 169}, theme)};`);
     lines.push('}');
     lines.push('input:-webkit-autofill,');
     lines.push('textarea:-webkit-autofill,');
     lines.push('select:-webkit-autofill {');
-    lines.push(`    background-color: ${modifyBackgroundColor({r: 250, g: 255, b: 189}, filter)} !important;`);
-    lines.push(`    color: ${modifyForegroundColor({r: 0, g: 0, b: 0}, filter)} !important;`);
+    lines.push(`    background-color: ${modifyBackgroundColor({r: 250, g: 255, b: 189}, theme)} !important;`);
+    lines.push(`    color: ${modifyForegroundColor({r: 0, g: 0, b: 0}, theme)} !important;`);
     lines.push('}');
-    if (filter.scrollbarColor) {
-        lines.push(getModifiedScrollbarStyle(filter));
+    if (theme.scrollbarColor) {
+        lines.push(getModifiedScrollbarStyle(theme));
     }
-    if (filter.selectionColor) {
-        lines.push(getModifiedSelectionStyle(filter));
+    if (theme.selectionColor) {
+        lines.push(getModifiedSelectionStyle(theme));
     }
     return lines.join('\n');
 }
@@ -107,6 +111,7 @@ export function getSelectionColor(theme: Theme) {
     }
     return {backgroundColorSelection, foregroundColorSelection};
 }
+
 function getModifiedSelectionStyle(theme: Theme) {
     const lines: string[] = [];
     const modifiedSelectionColor = getSelectionColor(theme);
@@ -164,9 +169,11 @@ function getModifiedScrollbarStyle(theme: Theme) {
     lines.push('::-webkit-scrollbar-corner {');
     lines.push(`    background-color: ${colorCorner};`);
     lines.push('}');
-    lines.push('* {');
-    lines.push(`    scrollbar-color: ${colorTrack} ${colorThumb};`);
-    lines.push('}');
+    if (isFirefox) {
+        lines.push('* {');
+        lines.push(`    scrollbar-color: ${colorThumb} ${colorTrack};`);
+        lines.push('}');
+    }
     return lines.join('\n');
 }
 
@@ -231,15 +238,19 @@ function getColorModifier(prop: string, value: string): string | CSSValueModifie
 
 const gradientRegex = /[\-a-z]+gradient\(([^\(\)]*(\(([^\(\)]*(\(.*?\)))*[^\(\)]*\))){0,15}[^\(\)]*\)/g;
 const imageDetailsCache = new Map<string, ImageDetails>();
-const awaitingForImageLoading = new Map<string, ((imageDetails: ImageDetails) => void)[]>();
+const awaitingForImageLoading = new Map<string, Array<(imageDetails: ImageDetails) => void>>();
 
-function shouldIgnoreImage(element: CSSStyleRule, selectors: string[]) {
-    if (!element) {
+function shouldIgnoreImage(rule: CSSStyleRule, selectors: string[]) {
+    if (!rule || selectors.length === 0) {
         return false;
     }
+    if (selectors.some((s) => s === '*')) {
+        return true;
+    }
+    const ruleSelectors = rule.selectorText.split(/,\s*/g);
     for (let i = 0; i < selectors.length; i++) {
-        const ingnoredSelector = selectors[i];
-        if (element.selectorText.match(ingnoredSelector)) {
+        const ignoredSelector = selectors[i];
+        if (ruleSelectors.some((s) => s === ignoredSelector)) {
             return true;
         }
     }

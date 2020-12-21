@@ -74,6 +74,7 @@ export interface ThemePreset {
 export interface ShadowCopy {
     id: string;
     copy: Partial<UserSettings>;
+    oldSettings: Partial<UserSettings>;
 }
 
 export interface UserSettings {
@@ -182,5 +183,5 @@ export interface News {
 
 export interface ExternalRequest {
     type: string;
-    data: any;
+    data?: any;
 }

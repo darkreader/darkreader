@@ -24,22 +24,28 @@ export function getValidatedObject<T>(source: any, compare: T): Partial<T> {
     return result;
 }
 
-export function getPreviousObject<T>(source: any, compare: T): Partial<T> {
+export function getPreviousObject<T>(source: any, compare: T, current: any): Partial<T> {
     const result = {};
-    if (source == null || typeof source !== 'object') {
+    if (source == null || typeof source !== 'object' || Array.isArray(source)) {
         return null;
     }
     Object.keys(source).forEach((key) => {
         const value = source[key];
         const compareValue = compare[key];
+        const currentValue = current[key];
         if (value == null || compare[key] == null) {
             return;
         }
-        // TODO: Array implementation.
-        if (typeof value === 'object' && typeof compareValue === 'object') {
-            result[key] = getPreviousObject(value, compareValue);
-        } else if (value !== compareValue) {
-            result[key] = compareValue;
+        const sourceArray = Array.isArray(value);
+        const compareArray = Array.isArray(compareValue);
+        if (sourceArray || compareArray) {
+            if (sourceArray && compareArray) {
+                result[key] = currentValue;
+            }
+        } else if (typeof value === 'object' && typeof compareValue === 'object') {
+            result[key] = getPreviousObject(value, compareValue, current);
+        } else if (value === compareValue) {
+            result[key] = currentValue;
         }
     });
     return result;

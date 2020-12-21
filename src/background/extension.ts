@@ -171,18 +171,16 @@ export class Extension {
     }
 
     private copyShadowCopy(setting: Partial<UserSettings>, origin: string) {
-        let shadowCopy = this.user.settings.shadowCopy.find(({id}) => id === origin);
-        let index: number;
+        const newshadowCopy = this.user.settings.shadowCopy.slice();
+        let shadowCopy = newshadowCopy.find(({id}) => id === origin);
+        const index = shadowCopy ? newshadowCopy.indexOf(shadowCopy) : newshadowCopy.length;
         if (!shadowCopy) {
-            index = this.user.settings.shadowCopy.push({id: origin, copy: {} as UserSettings}) - 1;
-            shadowCopy = this.user.settings.shadowCopy[index];
-
-        } else {
-            index = this.user.settings.shadowCopy.indexOf(shadowCopy);
+            newshadowCopy.push({id: origin, copy: {} as UserSettings, oldSettings: this.user.settings});
+            shadowCopy = newshadowCopy[index];
         }
         shadowCopy.copy = {...shadowCopy.copy, ...setting};
-        this.user.settings.shadowCopy[index] = shadowCopy;
-        this.changeSettings({shadowCopy: this.user.settings.shadowCopy});
+        newshadowCopy[index] = shadowCopy;
+        this.changeSettings({shadowCopy: newshadowCopy});
     }
 
     externalRequestsHandler(incomingData: ExternalRequest, origin: string) {
@@ -243,11 +241,11 @@ export class Extension {
                 logWarn('No data detected to reset settings.');
                 return;
             }
-            // TODO: Previous implementation so it will not compare against DEFAULT_SETTINGS what most users don't have probably.
-            const previousSettings = getPreviousObject(shadowCopy.copy, DEFAULT_SETTINGS);
+            const previousSettings = getPreviousObject(shadowCopy.copy, this.user.settings, shadowCopy.oldSettings);
             const index = this.user.settings.shadowCopy.indexOf(shadowCopy);
-            this.user.settings.shadowCopy.splice(index, 1);
-            this.changeSettings({...previousSettings, ...this.user.settings.shadowCopy});
+            const newshadowCopy = this.user.settings.shadowCopy.slice();
+            newshadowCopy.splice(index, 1);
+            previousSettings ? this.changeSettings({...previousSettings, shadowCopy: newshadowCopy}) : this.changeSettings({shadowCopy: newshadowCopy});
             logInfo('Resseted', this.user.settings);
         }
     }
@@ -257,6 +255,7 @@ export class Extension {
             if (this.user.settings.enableExternalConnections) {
                 logInfo(`Port ${port.sender.origin} has been connected to dark reader.`);
                 port.onMessage.addListener((incomingData) => this.externalRequestsHandler(incomingData, port.sender.origin));
+                port.onDisconnect.addListener(() => this.externalRequestsHandler({type: 'resetSettings'}, port.sender.origin));
             } else {
                 logWarn(`Port: ${port.sender.origin}, tried to make contact, but the Enable External Connections setting is not enabled and there by blocked.`);
             }

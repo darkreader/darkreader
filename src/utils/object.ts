@@ -24,7 +24,7 @@ export function getValidatedObject<T>(source: any, compare: T): Partial<T> {
     return result;
 }
 
-export function getPreviousObject<T>(source: any, compare: T, current: any): Partial<T> {
+export function getPreviousObject<T>(source: any, compare: T, previous: any): Partial<T> {
     const result = {};
     if (source == null || typeof source !== 'object' || Array.isArray(source)) {
         return null;
@@ -32,7 +32,7 @@ export function getPreviousObject<T>(source: any, compare: T, current: any): Par
     Object.keys(source).forEach((key) => {
         const value = source[key];
         const compareValue = compare[key];
-        const currentValue = current[key];
+        const previousValue = previous[key];
         if (value == null || compare[key] == null) {
             return;
         }
@@ -40,12 +40,15 @@ export function getPreviousObject<T>(source: any, compare: T, current: any): Par
         const compareArray = Array.isArray(compareValue);
         if (sourceArray || compareArray) {
             if (sourceArray && compareArray) {
-                result[key] = currentValue;
+                const addedValues = (compareValue as string[]).filter((entry) => !(previousValue as string[]).includes(entry));
+                const removedValues = (previousValue as string[]).filter((entry) => !(compareValue as string[]).includes(entry));
+                const newArray: string[] = (compareValue as string[]).filter((entry) => !addedValues.includes(entry));
+                result[key] = [...newArray, ...removedValues];
             }
         } else if (typeof value === 'object' && typeof compareValue === 'object') {
-            result[key] = getPreviousObject(value, compareValue, current);
+            result[key] = getPreviousObject(value, compareValue, previous);
         } else if (value === compareValue) {
-            result[key] = currentValue;
+            result[key] = previousValue;
         }
     });
     return result;

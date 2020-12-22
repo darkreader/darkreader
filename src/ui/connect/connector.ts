@@ -1,4 +1,4 @@
-import {ExtensionData, ExtensionActions, FilterConfig, TabInfo, Message, UserSettings} from '../../definitions';
+import type {ExtensionData, ExtensionActions, FilterConfig, TabInfo, Message, UserSettings} from '../../definitions';
 
 export default class Connector implements ExtensionActions {
     private port: chrome.runtime.Port;
@@ -13,7 +13,7 @@ export default class Connector implements ExtensionActions {
         return ++this.counter;
     }
 
-    private sendRequest<T>(request: Message, executor: (response: Message, resolve: (data?: T) => void, reject: (error: Error) => void) => void) {
+    private async sendRequest<T>(request: Message, executor: (response: Message, resolve: (data?: T) => void, reject: (error: Error) => void) => void) {
         const id = this.getRequestId();
         return new Promise<T>((resolve, reject) => {
             const listener = ({id: responseId, ...response}: Message) => {
@@ -27,12 +27,12 @@ export default class Connector implements ExtensionActions {
         });
     }
 
-    getData() {
-        return this.sendRequest<ExtensionData>({type: 'get-data'}, ({data}, resolve) => resolve(data));
+    async getData() {
+        return await this.sendRequest<ExtensionData>({type: 'get-data'}, ({data}, resolve) => resolve(data));
     }
 
-    getActiveTabInfo() {
-        return this.sendRequest<TabInfo>({type: 'get-active-tab-info'}, ({data}, resolve) => resolve(data));
+    async getActiveTabInfo() {
+        return await this.sendRequest<TabInfo>({type: 'get-active-tab-info'}, ({data}, resolve) => resolve(data));
     }
 
     subscribeToChanges(callback: (data: ExtensionData) => void) {
@@ -73,24 +73,28 @@ export default class Connector implements ExtensionActions {
         this.port.postMessage({type: 'mark-news-as-read', data: ids});
     }
 
-    applyDevDynamicThemeFixes(text: string) {
-        return this.sendRequest<void>({type: 'apply-dev-dynamic-theme-fixes', data: text}, ({error}, resolve, reject) => error ? reject(error) : resolve());
+    loadConfig(options: {local: boolean}) {
+        this.port.postMessage({type: 'load-config', data: options});
+    }
+
+    async applyDevDynamicThemeFixes(text: string) {
+        return await this.sendRequest<void>({type: 'apply-dev-dynamic-theme-fixes', data: text}, ({error}, resolve, reject) => error ? reject(error) : resolve());
     }
 
     resetDevDynamicThemeFixes() {
         this.port.postMessage({type: 'reset-dev-dynamic-theme-fixes'});
     }
 
-    applyDevInversionFixes(text: string) {
-        return this.sendRequest<void>({type: 'apply-dev-inversion-fixes', data: text}, ({error}, resolve, reject) => error ? reject(error) : resolve());
+    async applyDevInversionFixes(text: string) {
+        return await this.sendRequest<void>({type: 'apply-dev-inversion-fixes', data: text}, ({error}, resolve, reject) => error ? reject(error) : resolve());
     }
 
     resetDevInversionFixes() {
         this.port.postMessage({type: 'reset-dev-inversion-fixes'});
     }
 
-    applyDevStaticThemes(text: string) {
-        return this.sendRequest<void>({type: 'apply-dev-static-themes', data: text}, ({error}, resolve, reject) => error ? reject(error) : resolve());
+    async applyDevStaticThemes(text: string) {
+        return await this.sendRequest<void>({type: 'apply-dev-static-themes', data: text}, ({error}, resolve, reject) => error ? reject(error) : resolve());
     }
 
     resetDevStaticThemes() {

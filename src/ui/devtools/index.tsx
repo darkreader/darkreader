@@ -3,8 +3,8 @@ import {sync} from 'malevic/dom';
 import Body from './components/body';
 import connect from '../connect';
 
-function renderBody(data, actions) {
-    sync(document.body, <Body data={data} actions={actions} />);
+function renderBody(data, tab, actions) {
+    sync(document.body, <Body data={data} tab={tab} actions={actions} />);
 }
 
 async function start() {
@@ -12,8 +12,9 @@ async function start() {
     window.addEventListener('unload', () => connector.disconnect());
 
     const data = await connector.getData();
-    renderBody(data, connector);
-    connector.subscribeToChanges((data) => renderBody(data, connector));
+    const tabInfo = await connector.getActiveTabInfo();
+    renderBody(data, tabInfo, connector);
+    connector.subscribeToChanges((data) => renderBody(data, tabInfo, connector));
 }
 
 start();

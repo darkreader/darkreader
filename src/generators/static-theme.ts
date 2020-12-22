@@ -1,11 +1,10 @@
-import {isURLInList} from '../utils/url';
 import {createTextStyle} from './text-style';
 import {formatSitesFixesConfig} from './utils/format';
 import {applyColorMatrix, createFilterMatrix} from './utils/matrix';
 import {parseSitesFixesConfig} from './utils/parse';
 import {parseArray, formatArray} from '../utils/text';
-import {compareURLPatterns} from '../utils/url';
-import {FilterConfig, StaticTheme} from '../definitions';
+import {compareURLPatterns, isURLInList} from '../utils/url';
+import type {FilterConfig, StaticTheme} from '../definitions';
 
 interface ThemeColors {
     [prop: string]: number[];

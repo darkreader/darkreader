@@ -58,6 +58,7 @@ const pages = [
         rootComponent: DevToolsBody,
         props: {
             data: getMockData({isReady: false}),
+            tab: getMockActiveTabInfo(),
             actions: null,
         },
     },

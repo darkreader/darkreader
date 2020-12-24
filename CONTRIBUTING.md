@@ -15,7 +15,7 @@ See the list of [language codes](https://developer.chrome.com/webstore/i18n#loca
 
 ## Fix a wrong inversion!
 
-If a website is **already dark** *(that has all pages dark by default)*, you can **add it to the [dark-sites.config](https://github.com/darkreader/darkreader/blob/master/src/config/dark-sites.config) file**
+If a website is **already dark**, that regardless of system's preffered color-scheme has all pages dark by default. You can **add it to the [dark-sites.config](https://github.com/darkreader/darkreader/blob/master/src/config/dark-sites.config) file**
 *(please, preserve the alphabetical order)*.
 
 If certain **parts** of a web page are **wrongly inverted or styled**,

@@ -12,6 +12,7 @@
         "storage",
         "tabs",
         "theme",
+        "nativeMessaging",
         "<all_urls>"
     ]
 }

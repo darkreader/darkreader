@@ -32,3 +32,10 @@ export function toArray<T>(items: ArrayLike<T>) {
     }
     return results;
 }
+
+export function isArrayEqual<t>(array1: ArrayLike<t>, array2: ArrayLike<t>): boolean {
+    if (array1.length !== array2.length) {
+        return false;
+    }
+    return !(array1 < array2 || array2 < array1);
+}

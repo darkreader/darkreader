@@ -77,6 +77,12 @@ export interface ShadowCopy {
     oldSettings: Partial<UserSettings>;
 }
 
+export interface ExternalConnection {
+    id: string;
+    isNative: boolean;
+    blockedActions: string[];
+}
+
 export interface UserSettings {
     enabled: boolean;
     theme: FilterConfig;
@@ -97,6 +103,7 @@ export interface UserSettings {
     enableForProtectedPages: boolean;
     enableExternalConnections: boolean;
     shadowCopy: ShadowCopy[];
+    externalConnections: ExternalConnection[];
 }
 
 export interface TimeSettings {
@@ -183,5 +190,6 @@ export interface News {
 
 export interface ExternalRequest {
     type: string;
+    isNative: boolean;
     data?: any;
 }

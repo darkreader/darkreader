@@ -1,10 +1,13 @@
-export function getValidatedObject<T>(source: any, compare: T): Partial<T> {
+export function getValidatedObject<T>(source: any, compare: T, sanitizeList: string[] = []): Partial<T> {
     const result = {};
     if (source == null || typeof source !== 'object' || Array.isArray(source)) {
         return null;
     }
     Object.keys(source).forEach((key) => {
         const value = source[key];
+        if (sanitizeList.includes(value)) {
+            return;
+        }
         const compareValue = compare[key];
         if (value == null || compareValue == null) {
             return;
@@ -16,7 +19,7 @@ export function getValidatedObject<T>(source: any, compare: T): Partial<T> {
                 result[key] = value;
             }
         } else if (typeof value === 'object' && typeof compareValue === 'object') {
-            result[key] = getValidatedObject(value, compareValue);
+            result[key] = getValidatedObject(value, compareValue, sanitizeList);
         } else if (typeof value === typeof compareValue) {
             result[key] = value;
         }

@@ -55,11 +55,9 @@ let canvas: HTMLCanvasElement | OffscreenCanvas;
 let context: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D;
 
 function createCanvas() {
-    const maxWidth = MAX_ANALIZE_PIXELS_COUNT;
-    const maxHeight = MAX_ANALIZE_PIXELS_COUNT;
     canvas = document.createElement('canvas');
-    canvas.width = maxWidth;
-    canvas.height = maxHeight;
+    canvas.width = MAX_ANALIZE_PIXELS_COUNT;
+    canvas.height = MAX_ANALIZE_PIXELS_COUNT;
     context = canvas.getContext('2d');
     context.imageSmoothingEnabled = false;
 }
@@ -79,14 +77,12 @@ function analyzeImage(image: HTMLImageElement) {
         return null;
     }
     const naturalPixelsCount = naturalWidth * naturalHeight;
-    const k = Math.min(1, Math.sqrt(MAX_ANALIZE_PIXELS_COUNT / naturalPixelsCount));
-    const width = Math.ceil(naturalWidth * k);
-    const height = Math.ceil(naturalHeight * k);
-    context.clearRect(0, 0, width, height);
+    context.clearRect(0, 0, naturalWidth, naturalHeight);
 
-    context.drawImage(image, 0, 0, naturalWidth, naturalHeight, 0, 0, width, height);
-    const imageData = context.getImageData(0, 0, width, height);
+    context.drawImage(image, 0, 0, naturalWidth, naturalHeight);
+    const imageData = context.getImageData(0, 0, naturalWidth, naturalHeight);
     const d = imageData.data;
+    const dataLength = d.length / 4;
 
     const TRANSPARENT_ALPHA_THRESHOLD = 0.05;
     const DARK_LIGHTNESS_THRESHOLD = 0.4;
@@ -96,34 +92,32 @@ function analyzeImage(image: HTMLImageElement) {
     let darkPixelsCount = 0;
     let lightPixelsCount = 0;
 
-    let i: number, x: number, y: number;
+    let i: number;
     let r: number, g: number, b: number, a: number;
     let l: number;
-    for (y = 0; y < height; y++) {
-        for (x = 0; x < width; x++) {
-            i = 4 * (y * width + x);
-            r = d[i + 0] / 255;
-            g = d[i + 1] / 255;
-            b = d[i + 2] / 255;
-            a = d[i + 3] / 255;
+    for (let x = 0; x < dataLength; x++) {
+        i = x * 4;
+        r = d[i + 0];
+        g = d[i + 1];
+        b = d[i + 2];
+        a = d[i + 3];
 
-            if (a < TRANSPARENT_ALPHA_THRESHOLD) {
-                transparentPixelsCount++;
-            } else {
-                // Use sRGB to determine the `pixel Lightness`
-                // https://en.wikipedia.org/wiki/Relative_luminance
-                l = 0.2126 * r + 0.7152 * g + 0.0722 * b;
-                if (l < DARK_LIGHTNESS_THRESHOLD) {
-                    darkPixelsCount++;
-                }
-                if (l > LIGHT_LIGHTNESS_THRESHOLD) {
-                    lightPixelsCount++;
-                }
+        if (a < TRANSPARENT_ALPHA_THRESHOLD) {
+            transparentPixelsCount++;
+        } else {
+            // Use sRGB to determine the `pixel Lightness`
+            // https://en.wikipedia.org/wiki/Relative_luminance
+            l = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+            if (l < DARK_LIGHTNESS_THRESHOLD) {
+                darkPixelsCount++;
+            }
+            if (l > LIGHT_LIGHTNESS_THRESHOLD) {
+                lightPixelsCount++;
             }
         }
     }
 
-    const totalPixelsCount = width * height;
+    const totalPixelsCount = naturalWidth * naturalHeight;
     const opaquePixelsCount = totalPixelsCount - transparentPixelsCount;
 
     const DARK_IMAGE_THRESHOLD = 0.7;

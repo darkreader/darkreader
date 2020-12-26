@@ -92,27 +92,29 @@ async function getBgImageInfo(bgImageValue: string) {
     canvas.width = width;
     canvas.height = height;
     const context = canvas.getContext('2d');
+    context.imageSmoothingEnabled = false;
     context.drawImage(image, 0, 0, width, height);
 
-    const d = context.getImageData(0, 0, width, height).data;
+    const imageData = context.getImageData(0, 0, width, height);
+    const d = imageData.data;
+    const dataLength = d.length;
+
     let lightPixels = 0;
     let darkPixels = 0;
     let opaquePixels = 0;
-    for (let y = 0; y < height; y++) {
-        for (let x = 0; x < width; x++) {
-            const i = 4 * (x + width * y);
-            const r = d[i + 0];
-            const g = d[i + 1];
-            const b = d[i + 2];
-            const a = d[i + 3];
-            if (a > 127) {
-                opaquePixels++;
-                const lightness = (r + g + b) / 3 / 255;
-                if (lightness > 0.7) {
-                    lightPixels++;
-                } else if (lightness < 0.3) {
-                    darkPixels++;
-                }
+    for (let x = 0; x < dataLength; x++) {
+        const i = x * 4;
+        const r = d[i + 0];
+        const g = d[i + 1];
+        const b = d[i + 2];
+        const a = d[i + 3];
+        if (a > 127) {
+            opaquePixels++;
+            const lightness = (r + g + b) / 3 / 255;
+            if (lightness > 0.7) {
+                lightPixels++;
+            } else if (lightness < 0.3) {
+                darkPixels++;
             }
         }
     }

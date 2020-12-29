@@ -415,7 +415,7 @@ function isAnotherDarkReaderInstanceActive(instanceSignature: string) {
     }
 }
 
-export function createOrUpdateDynamicTheme(filterConfig: FilterConfig, dynamicThemeFixes: DynamicThemeFix, iframe: boolean, instanceSignature: string) {
+export function createOrUpdateDynamicTheme(filterConfig: FilterConfig, dynamicThemeFixes: DynamicThemeFix, iframe: boolean, instanceSignature = 'none') {
     filter = filterConfig;
     fixes = dynamicThemeFixes;
     isIFrame = iframe;

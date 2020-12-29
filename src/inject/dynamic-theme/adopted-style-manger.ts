@@ -12,7 +12,7 @@ export interface AdoptedStyleSheetManager {
     destroy(): void;
 }
 
-export function removeFallbackSheet() {
+export const removeFallbackSheet = () => requestAnimationFrame(() => {
     if (isCSSStyleSheetConstructorSupported) {
         forEach(document.adoptedStyleSheets, (sheet) => {
             if (sheet.media.mediaText === '__darkreader_fallback__') {
@@ -23,7 +23,7 @@ export function removeFallbackSheet() {
             }
         });
     }
-}
+});
 
 export function createAdoptedStyleSheetOverride(node: Document | ShadowRoot): AdoptedStyleSheetManager {
 

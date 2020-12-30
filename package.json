@@ -72,7 +72,7 @@
     "@types/jest": "26.0.19",
     "@types/karma": "5.0.1",
     "@types/node": "14.14.14",
-    "@types/puppeteer-core": "2.0.0",
+    "@types/puppeteer-core": "5.4.0",
     "@typescript-eslint/eslint-plugin": "4.11.0",
     "@typescript-eslint/parser": "4.11.0",
     "chokidar": "3.4.3",

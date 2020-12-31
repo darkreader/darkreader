@@ -1,10 +1,9 @@
 import type {Theme} from '../../definitions';
-import {lazyRGBMatch, parseColorToRGBWithCache} from '../../utils/color';
-import {getTempCSSStyleSheet} from '../utils/dom';
 import {createAsyncTasksQueue} from '../utils/throttle';
-import {iterateCSSRules, iterateCSSDeclarations, replaceCSSVariables} from './css-rules';
+import {iterateCSSRules, iterateCSSDeclarations} from './css-rules';
 import type {ModifiableCSSDeclaration, ModifiableCSSRule} from './modify-css';
 import {gradientRegex, getModifiableCSSDeclaration} from './modify-css';
+import {CSSVariableModifier} from './variables';
 
 const themeCacheKeys: Array<keyof Theme> = [
     'mode',
@@ -32,7 +31,6 @@ export function createStyleSheetModifier() {
 
     interface ModifySheetOptions {
         sourceCSSRules: CSSRuleList;
-        variables: Map<string, string>;
         theme: Theme;
         ignoreImageAnalysis: string[];
         force: boolean;
@@ -42,7 +40,7 @@ export function createStyleSheetModifier() {
 
     function modifySheet(options: ModifySheetOptions): void {
         const rules = options.sourceCSSRules;
-        const {theme, variables, ignoreImageAnalysis, force, prepareSheet, isAsyncCancelled} = options;
+        const {theme, ignoreImageAnalysis, force, prepareSheet, isAsyncCancelled} = options;
 
         let rulesChanged = (rulesModCache.size === 0);
         const notFoundCacheKeys = new Set(rulesModCache.keys());
@@ -60,39 +58,6 @@ export function createStyleSheetModifier() {
                 textDiffersFromPrev = true;
             }
 
-            // Put CSS text with inserted CSS variables into separate <style> element
-            // to properly handle composite properties (e.g. background -> background-color)
-            let vars: CSSStyleSheet;
-            let varsRule: CSSStyleRule = null;
-            const variablesMap: Map<string, string> = new Map<string, string>();
-            if (variables.size > 0 || cssText.includes('var(')) {
-                const {result, replacedMap} = replaceCSSVariables(cssText, variables);
-                if (rulesTextCache.get(cssText) !== result) {
-                    replacedMap.forEach((value, key) => {
-                        key = parseColorToRGBWithCache(key);
-                        key = key.replace(gradientRegex, (gradient) => {
-                            variablesMap.set(gradient, value);
-                            return '';
-                        });
-                        key = key.replace(lazyRGBMatch, (rgb) => {
-                            variablesMap.set(rgb, value);
-                            return '';
-                        });
-                        if (!key) {
-                            return;
-                        }
-                        key.split(/\s/).forEach((property) => {
-                            variablesMap.set(property, value);
-                        });
-                    });
-                    rulesTextCache.set(cssText, result);
-                    textDiffersFromPrev = true;
-                    vars = getTempCSSStyleSheet();
-                    vars.insertRule(result);
-                    varsRule = vars.cssRules[0] as CSSStyleRule;
-                }
-            }
-
             if (textDiffersFromPrev) {
                 rulesChanged = true;
             } else {
@@ -101,11 +66,7 @@ export function createStyleSheetModifier() {
             }
 
             const modDecs: ModifiableCSSDeclaration[] = [];
-            const targetRule = varsRule || rule;
-            targetRule && targetRule.style && iterateCSSDeclarations(targetRule.style, (property, value) => {
-                if (variablesMap.has(value)) {
-                    value = variablesMap.get(value);
-                }
+            rule.style && iterateCSSDeclarations(rule.style, (property, value) => {
                 const mod = getModifiableCSSDeclaration(property, value, rule, ignoreImageAnalysis, isAsyncCancelled);
                 if (mod) {
                     modDecs.push(mod);
@@ -119,8 +80,6 @@ export function createStyleSheetModifier() {
                 modRules.push(modRule);
             }
             rulesModCache.set(cssText, modRule);
-
-            vars && vars.deleteRule(0);
         });
 
         notFoundCacheKeys.forEach((key) => {
@@ -149,7 +108,7 @@ export function createStyleSheetModifier() {
 
         interface ReadyDeclaration {
             property: string;
-            value: string;
+            value: string | Array<{property: string; value: string}>;
             important: boolean;
             sourceValue: string;
             asyncKey?: number;
@@ -160,7 +119,7 @@ export function createStyleSheetModifier() {
             target.insertRule(`${selector} {}`, index);
             const style = (target.cssRules[index] as CSSStyleRule).style;
             declarations.forEach(({property, value, important, sourceValue}) => {
-                style.setProperty(property, value == null ? sourceValue : value, important ? 'important' : '');
+                style.setProperty(property, value == null ? sourceValue : value as string, important ? 'important' : '');
             });
         }
 
@@ -220,8 +179,12 @@ export function createStyleSheetModifier() {
                                 rebuildAsyncRule(asyncKey);
                             });
                         });
+                    } else if (property.startsWith('--')) {
+                        (modified as ReturnType<CSSVariableModifier>).forEach((mod) => {
+                            readyDeclarations.push({property: mod.property, value: mod.value, important, sourceValue});
+                        });
                     } else {
-                        readyDeclarations.push({property, value: modified, important, sourceValue});
+                        readyDeclarations.push({property, value: modified as string, important, sourceValue});
                     }
                 } else {
                     readyDeclarations.push({property, value, important, sourceValue});

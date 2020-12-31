@@ -455,7 +455,6 @@ describe('CSS Variables Override', () => {
         expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(140, 255, 140)');
     });
 
-    /*
     it('should handle variables with gradients', () => {
         container.innerHTML = multiline(
             '<style>',
@@ -562,5 +561,4 @@ describe('CSS Variables Override', () => {
         await timeout(50);
         expect(getComputedStyle(container.querySelector('.icon')).backgroundImage).toMatch(/^url\("blob:.*"\), linear-gradient\(rgb\(204, 0, 0\), rgb\(0, 0, 0\)\)$/);
     });
-    */
 });

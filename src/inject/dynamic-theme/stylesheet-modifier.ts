@@ -159,29 +159,37 @@ export function createStyleSheetModifier() {
             const readyDeclarations = readyStyleRule.declarations;
             group.rules.push(readyStyleRule);
 
+            function handleAsyncDeclaration(property: string, modified: Promise<string>, important: boolean, sourceValue: string) {
+                const asyncKey = asyncDeclarationCounter++;
+                const asyncDeclaration: ReadyDeclaration = {property, value: null, important, asyncKey, sourceValue};
+                readyDeclarations.push(asyncDeclaration);
+                const currentRenderId = renderId;
+                modified.then((asyncValue) => {
+                    if (!asyncValue || isAsyncCancelled() || currentRenderId !== renderId) {
+                        return;
+                    }
+                    asyncDeclaration.value = asyncValue;
+                    asyncQueue.add(() => {
+                        if (isAsyncCancelled() || currentRenderId !== renderId) {
+                            return;
+                        }
+                        rebuildAsyncRule(asyncKey);
+                    });
+                });
+            }
+
             declarations.forEach(({property, value, important, sourceValue}) => {
                 if (typeof value === 'function') {
                     const modified = value(theme);
                     if (modified instanceof Promise) {
-                        const asyncKey = asyncDeclarationCounter++;
-                        const asyncDeclaration: ReadyDeclaration = {property, value: null, important, asyncKey, sourceValue};
-                        readyDeclarations.push(asyncDeclaration);
-                        const currentRenderId = renderId;
-                        modified.then((asyncValue) => {
-                            if (!asyncValue || isAsyncCancelled() || currentRenderId !== renderId) {
-                                return;
-                            }
-                            asyncDeclaration.value = asyncValue;
-                            asyncQueue.add(() => {
-                                if (isAsyncCancelled() || currentRenderId !== renderId) {
-                                    return;
-                                }
-                                rebuildAsyncRule(asyncKey);
-                            });
-                        });
+                        handleAsyncDeclaration(property, modified, important, sourceValue);
                     } else if (property.startsWith('--')) {
                         (modified as ReturnType<CSSVariableModifier>).forEach((mod) => {
-                            readyDeclarations.push({property: mod.property, value: mod.value, important, sourceValue});
+                            if (mod.value instanceof Promise) {
+                                handleAsyncDeclaration(mod.property, mod.value, important, sourceValue);
+                            } else {
+                                readyDeclarations.push({property: mod.property, value: mod.value, important, sourceValue});
+                            }
                         });
                     } else {
                         readyDeclarations.push({property, value: modified as string, important, sourceValue});

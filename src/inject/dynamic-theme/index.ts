@@ -446,7 +446,7 @@ export function removeDynamicTheme() {
 }
 
 export function cleanDynamicThemeCache() {
-    variablesStore.reset();
+    variablesStore.clear();
     parsedURLCache.clear();
     stopWatchingForDocumentVisibility();
     cancelRendering();

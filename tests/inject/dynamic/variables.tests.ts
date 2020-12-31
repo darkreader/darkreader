@@ -410,7 +410,6 @@ describe('CSS Variables Override', () => {
         expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(34, 34, 34)');
     });
 
-    /*
     it('should handle variables inside values', () => {
         container.innerHTML = multiline(
             '<style>',
@@ -456,6 +455,7 @@ describe('CSS Variables Override', () => {
         expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(140, 255, 140)');
     });
 
+    /*
     it('should handle variables with gradients', () => {
         container.innerHTML = multiline(
             '<style>',

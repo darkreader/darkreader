@@ -157,6 +157,11 @@ function tryModifyTextColor(color: string, theme: Theme) {
     return rgb ? modifyForegroundColor(rgb, theme) : color;
 }
 
+function tryModifyBorderColor(color: string, theme: Theme) {
+    const rgb = tryParseColor(color);
+    return rgb ? modifyBorderColor(rgb, theme) : color;
+}
+
 class VariablesStore {
     private definedVars: Set<string>;
     private varRefs: Map<string, Set<string>>;
@@ -215,40 +220,35 @@ class VariablesStore {
     getModifierForVariable(varName: string, sourceValue: string): CSSVariableModifier {
         return (theme) => {
             const modifiedVars: ReturnType<CSSVariableModifier> = [];
-            if (this.bgColorVars.has(varName)) {
-                const property = wrapBgColorVariableName(varName);
+
+            function addModifiedValue(
+                typeSet: Set<string>,
+                varNameWrapper: (name: string) => string,
+                colorModifier: (c: string, t: Theme) => string,
+            ) {
+                if (!typeSet.has(varName)) {
+                    return;
+                }
+                const property = varNameWrapper(varName);
                 let modifiedValue: string;
                 if (isVarDependant(sourceValue)) {
                     modifiedValue = replaceCSSVariablesNames(
                         sourceValue,
-                        (v) => wrapBgColorVariableName(v),
-                        (fallback) => tryModifyBgColor(fallback, theme),
+                        (v) => varNameWrapper(v),
+                        (fallback) => colorModifier(fallback, theme),
                     );
                 } else {
-                    modifiedValue = tryModifyBgColor(sourceValue, theme);
+                    modifiedValue = colorModifier(sourceValue, theme);
                 }
                 modifiedVars.push({
                     property,
                     value: modifiedValue,
                 });
             }
-            if (this.textColorVars.has(varName)) {
-                const property = wrapTextColorVariableName(varName);
-                let modifiedValue: string;
-                if (isVarDependant(sourceValue)) {
-                    modifiedValue = replaceCSSVariablesNames(
-                        sourceValue,
-                        (v) => wrapTextColorVariableName(v),
-                        (fallback) => tryModifyTextColor(fallback, theme),
-                    );
-                } else {
-                    modifiedValue = tryModifyTextColor(sourceValue, theme);
-                }
-                modifiedVars.push({
-                    property,
-                    value: modifiedValue,
-                });
-            }
+
+            addModifiedValue(this.bgColorVars, wrapBgColorVariableName, tryModifyBgColor);
+            addModifiedValue(this.textColorVars, wrapTextColorVariableName, tryModifyTextColor);
+            addModifiedValue(this.borderColorVars, wrapBorderColorVariableName, tryModifyBorderColor);
             return modifiedVars;
         };
     }
@@ -289,6 +289,15 @@ class VariablesStore {
                 );
             };
         }
+        if (property === 'border-color' || property === 'border') {
+            return (theme) => {
+                return replaceCSSVariablesNames(
+                    sourceValue,
+                    (v) => wrapBorderColorVariableName(v),
+                    (fallback) => tryModifyTextColor(fallback, theme),
+                );
+            };
+        }
         return null;
     }
 
@@ -325,7 +334,7 @@ class VariablesStore {
                 this.iterateVarDeps(value, (v) => this.bgColorVars.add(v));
             } else if (property === 'color') {
                 this.iterateVarDeps(value, (v) => this.textColorVars.add(v));
-            } else if (property === 'border-color') {
+            } else if (property === 'border-color' || property === 'border') {
                 this.iterateVarDeps(value, (v) => this.borderColorVars.add(v));
             } else if (property === 'background') {
                 this.iterateVarDeps(value, (v) => {

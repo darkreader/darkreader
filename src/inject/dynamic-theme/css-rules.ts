@@ -38,6 +38,9 @@ export function iterateCSSDeclarations(style: CSSStyleDeclaration, iterate: (pro
     if (style.background && style.background.includes('var(')) {
         iterate('background', style.background);
     }
+    if (style.border && style.border.includes('var(')) {
+        iterate('border', style.border);
+    }
 }
 
 export const cssURLRegex = /url\((('.+?')|(".+?")|([^\)]*?))\)/g;

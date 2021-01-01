@@ -127,7 +127,7 @@ export function getParenthesesRange(input: string, searchStartIndex = 0) {
             if (openIndex < 0 || closingIndex < openIndex) {
                 depth--;
                 if (depth === 0) {
-                    return [firstOpenIndex, closingIndex + 1];
+                    return [firstOpenIndex, input[closingIndex] === ')' ? closingIndex : closingIndex + 1];
                 }
                 i = closingIndex;
             } else {

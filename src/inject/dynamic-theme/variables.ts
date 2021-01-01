@@ -1,4 +1,4 @@
-import {modifyBackgroundColor, modifyBorderColor, modifyForegroundColor, modifyGradientColor, modifyShadowColor} from '../../generators/modify-colors';
+import {modifyBackgroundColor, modifyBorderColor, modifyForegroundColor} from '../../generators/modify-colors';
 import {getParenthesesRange} from '../../utils/text';
 import {iterateCSSRules, iterateCSSDeclarations} from './css-rules';
 import {tryParseColor, getBgImageModifier} from './modify-css';
@@ -155,7 +155,7 @@ class VariablesStore {
     }
 
     private collectVariables(rules: CSSRuleList) {
-        iterateVariables(rules, (varName, value, rule) => {
+        iterateVariables(rules, (varName, value) => {
             if (this.definedVars.has(varName)) {
                 return;
             }
@@ -179,7 +179,7 @@ class VariablesStore {
     }
 
     private collectVarDependants(rules: CSSRuleList) {
-        iterateVarDependants(rules, (property, value, rule) => {
+        iterateVarDependants(rules, (property, value) => {
             if (property.startsWith('--')) {
                 this.iterateVarDeps(value, (ref) => {
                     if (!this.varRefs.has(property)) {
@@ -257,7 +257,7 @@ function replaceVariablesMatches(input: string, replacer: (match: string) => str
 
     const inputLength = input.length;
     const replacements = matches.map((m) => replacer(m.value));
-    let parts: string[] = [];
+    const parts: string[] = [];
     parts.push(input.substring(0, matches[0].start));
     for (let i = 0; i < matchesCount; i++) {
         parts.push(replacements[i]);

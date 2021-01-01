@@ -34,7 +34,6 @@ describe('Style override', () => {
         modifier.modifySheet({
             theme,
             sourceCSSRules: style.sheet.cssRules,
-            variables: new Map(),
             ignoreImageAnalysis: [],
             force: false,
             prepareSheet: () => override,

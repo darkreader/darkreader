@@ -2,8 +2,8 @@ import type {Theme} from '../../definitions';
 import {createAsyncTasksQueue} from '../utils/throttle';
 import {iterateCSSRules, iterateCSSDeclarations} from './css-rules';
 import type {ModifiableCSSDeclaration, ModifiableCSSRule} from './modify-css';
-import {gradientRegex, getModifiableCSSDeclaration} from './modify-css';
-import {CSSVariableModifier} from './variables';
+import {getModifiableCSSDeclaration} from './modify-css';
+import type {CSSVariableModifier} from './variables';
 
 const themeCacheKeys: Array<keyof Theme> = [
     'mode',

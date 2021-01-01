@@ -178,9 +178,12 @@ function createDynamicStyleOverrides() {
     const newManagers = allStyles
         .filter((style) => !styleManagers.has(style))
         .map((style) => createManager(style));
-    newManagers.forEach((manager) => {
-        variablesStore.addRulesForMatching(manager.details().rules);
-    });
+    newManagers
+        .map((manager) => manager.details())
+        .filter((detail) => detail && detail.rules.length > 0)
+        .forEach((detail) => {
+            variablesStore.addRulesForMatching(detail.rules);
+        });
     variablesStore.matchVariablesAndDependants();
     styleManagers.forEach((manager) => manager.render(filter, getIgnoreImageAnalysisSelectors()));
     if (loadingStyles.size === 0) {
@@ -226,7 +229,11 @@ function createManager(element: StyleElement) {
     }
 
     function update() {
-        variablesStore.addRulesForMatching(manager.details().rules);
+        const details = manager.details();
+        if (!details) {
+            return;
+        }
+        variablesStore.addRulesForMatching(details.rules);
         variablesStore.matchVariablesAndDependants();
         manager.render(filter, getIgnoreImageAnalysisSelectors());
     }

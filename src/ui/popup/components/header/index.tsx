@@ -7,7 +7,6 @@ import SystemIcon from '../../main-page/system-icon';
 import WatchIcon from '../../main-page/watch-icon';
 import SiteToggle from '../site-toggle';
 import MoreToggleSettings from './more-toggle-settings';
-import Link from '../link';
 
 function multiline(...lines: string[]) {
     return lines.join('\n');
@@ -34,9 +33,9 @@ function Header({data, actions, tab, onMoreToggleSettingsClick}: HeaderProps) {
 
     return (
         <header class="header">
-            <Link cls="header__logo" url="https://darkreader.org/">
+            <a class="header__logo" href="https://darkreader.org/" target="_blank" rel="noopener noreferrer">
                 Dark Reader
-            </Link>
+            </a>
             <div class="header__control header__site-toggle">
                 <SiteToggle
                     data={data}

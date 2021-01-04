@@ -101,11 +101,12 @@ test('CSS formatting', () => {
 });
 
 test('Parenthesis Range', () => {
-    expect(getParenthesesRange('()')).toEqual([0, 1]);
-    expect(getParenthesesRange('rgb(0, 0, 0)')).toEqual([3, 11]);
-    expect(getParenthesesRange('rgb(0, 0, 0), rgb(0, 0, 0)')).toEqual([3, 11]);
-    expect(getParenthesesRange('rgb(0, 0, 0), rgb(0, 0, 0)', 12)).toEqual([17, 25]);
-    expect(getParenthesesRange('rgb(0, var(--x, var(--y)), 0)')).toEqual([3, 28]);
-    expect(getParenthesesRange('rgb(0, var(--x, var(--y)), 0)', 4)).toEqual([10, 24]);
-    expect(getParenthesesRange('rgb(0, var(--x, var(--y)), 0), rgb(0, 0, 0)')).toEqual([3, 28]);
+    expect(getParenthesesRange('missing')).toBe(null);
+    expect(getParenthesesRange('()')).toEqual({start: 0, end: 2});
+    expect(getParenthesesRange('rgb(0, 0, 0)')).toEqual({start: 3, end: 12});
+    expect(getParenthesesRange('rgb(0, 0, 0), rgb(0, 0, 0)')).toEqual({start: 3, end: 12});
+    expect(getParenthesesRange('rgb(0, 0, 0), rgb(0, 0, 0)', 12)).toEqual({start: 17, end: 26});
+    expect(getParenthesesRange('rgb(0, var(--x, var(--y)), 0)')).toEqual({start: 3, end: 29});
+    expect(getParenthesesRange('rgb(0, var(--x, var(--y)), 0)', 4)).toEqual({start: 10, end: 25});
+    expect(getParenthesesRange('rgb(0, var(--x, var(--y)), 0), rgb(0, 0, 0)')).toEqual({start: 3, end: 29});
 });

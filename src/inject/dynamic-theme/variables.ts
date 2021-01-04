@@ -219,21 +219,24 @@ class VariablesStore {
 
 export const variablesStore = new VariablesStore();
 
-type Range = [number, number];
-
-interface VariableMatch {
-    value: string;
+interface Range {
     start: number;
     end: number;
+}
+
+interface VariableMatch extends Range {
+    value: string;
 }
 
 function getVariableRange(input: string, searchStart = 0): Range {
     const start = input.indexOf('var(', searchStart);
     if (start >= 0) {
-        const [, end] = getParenthesesRange(input, start + 3);
-        return [start, end];
+        const range = getParenthesesRange(input, start + 3);
+        if (range) {
+            return {start, end: range.end};
+        }
+        return null;
     }
-    return null;
 }
 
 function getVariablesMatches(input: string): VariableMatch[] {
@@ -241,9 +244,9 @@ function getVariablesMatches(input: string): VariableMatch[] {
     let i = 0;
     let range: Range;
     while ((range = getVariableRange(input, i))) {
-        const [start, end] = range;
+        const {start, end} = range;
         ranges.push({start, end, value: input.substring(start, end)});
-        i = range[1] + 1;
+        i = range.end + 1;
     }
     return ranges;
 }
@@ -309,12 +312,12 @@ export function replaceCSSVariablesNames(
 
 function iterateVariables(
     rules: CSSRuleList,
-    iterator: (varName: string, varValue: string, rule: CSSStyleRule) => void,
+    iterator: (varName: string, varValue: string) => void,
 ) {
     iterateCSSRules(rules, (rule) => {
         rule.style && iterateCSSDeclarations(rule.style, (property, value) => {
             if (property.startsWith('--')) {
-                iterator(property, value, rule);
+                iterator(property, value);
             }
         });
     });
@@ -322,12 +325,12 @@ function iterateVariables(
 
 function iterateVarDependants(
     rules: CSSRuleList,
-    iterator: (property: string, value: string, rule: CSSStyleRule) => void,
+    iterator: (property: string, value: string) => void,
 ) {
     iterateCSSRules(rules, (rule) => {
         rule.style && iterateCSSDeclarations(rule.style, (property, value) => {
             if (isVarDependant(value)) {
-                iterator(property, value, rule);
+                iterator(property, value);
             }
         });
     });

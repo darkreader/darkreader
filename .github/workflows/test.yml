@@ -27,12 +27,10 @@ jobs:
       - name: Set up npm cache
         uses: actions/cache@v2
         with:
-          path: |
-            ~/.npm
-            .eslintcache
-          key: ${{ runner.os }}-${{ hashFiles('.eslintcache') }}-${{ hashFiles('package-lock.json') }}
+          path: ~/.npm
+          key: ${{ runner.os }}-${{ hashFiles('package-lock.json') }}
           restore-keys: |
-            ${{ runner.OS }}-${{ hashFiles('.eslintcache') }}-${{ hashFiles('package-lock.json') }}
+            ${{ runner.OS }}-${{ hashFiles('package-lock.json') }}
             ${{ runner.OS }}
       
       - name: Install npm dependencies

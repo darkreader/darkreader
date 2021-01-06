@@ -30,9 +30,9 @@ jobs:
           path: |
             ~/.npm
             .eslintcache
-          key: ${{ runner.os }}-${{ hashFiles('package-lock.json') }}}
+          key: ${{ runner.os }}-${{ hashFiles('.eslintcache') }}-${{ hashFiles('package-lock.json') }}
           restore-keys: |
-            ${{ runner.OS }}-${{ hashFiles('package-lock.json') }}
+            ${{ runner.OS }}-${{ hashFiles('.eslintcache') }}-${{ hashFiles('package-lock.json') }}
             ${{ runner.OS }}
       
       - name: Install npm dependencies

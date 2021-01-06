@@ -1,4 +1,4 @@
-name: Run tests on Push or Pull Request
+name: Run tests on Pull Requests
 on:
   push:
     branches:
@@ -6,15 +6,31 @@ on:
   pull_request:
     branches:
       - master
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - ready_for_review
 jobs:
-  tests:
-    name: Run Tests
+  test:
+    name: Install NPM With caching
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-    - uses: actions/setup-node@v1
+    - uses: actions/setup-node@v2
       with:
-        node-version: 12.x
+        node-version: 14
+    - uses: actions/cache@v2
+      env:
+        cache-name: cache-node-modules
+      with:
+        # npm cache files are stored in `~/.npm` on Linux
+        path: ~/.npm
+        key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-build-${{ env.cache-name }}-
+          ${{ runner.os }}-build-
+          ${{ runner.os }}-
     - run: npm install
     - run: npm test
     - run: npm run lint

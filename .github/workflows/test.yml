@@ -39,7 +39,7 @@ jobs:
         run: npm ci
 
       - name: Run test agains code
-        run: npm test
+        run: npm run test
 
       - name: Lint code for code-style errors
         run: npm run lint

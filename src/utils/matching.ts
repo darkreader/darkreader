@@ -36,8 +36,8 @@ function makeRegexp(pattern: string): MatchInterface {
 function sanitazeInput(input: string) {
     return (input.replace(/^\^/, '')
         .replace(/\$$/, '')
-        .replace(/^.*?\/{2,3}/, '')
         .replace(/\?.*$/, '')
+        .replace(/^.*?\/{2,3}/, '')
         .replace(/\/$/, '')
         .replace(/^www./, '')
     );

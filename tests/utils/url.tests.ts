@@ -180,6 +180,17 @@ test('URL is enabled', () => {
         {siteList: ['192.168.1.1:443'], siteListEnabled: [], applyToListedOnly: false} as UserSettings,
         {isProtected: false, isInDarkList: false},
     )).toBe(true);
+    expect(isURLEnabled(
+        'https://google.com/search?q=site:https://www.example.com',
+        {siteList: ['example.com'], siteListEnabled: [], applyToListedOnly: false} as UserSettings,
+        {isProtected: false, isInDarkList: false},
+    )).toBe(true);
+    expect(isURLEnabled(
+        'google.com/search?q=site:https://www.example.com',
+        {siteList: ['example.com'], siteListEnabled: [], applyToListedOnly: false} as UserSettings,
+        {isProtected: false, isInDarkList: false},
+    )).toBe(true);
+
 
 
     // Test for PDF enabling

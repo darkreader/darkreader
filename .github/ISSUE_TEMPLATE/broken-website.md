@@ -1,7 +1,7 @@
 ---
 name: Broken website
 about: Creates a broken website report about Darkreader
-title: "[Broken Website] "
+title: "[Broken Website] Insert title here"
 labels: Broken Website
 assignees: ''
 

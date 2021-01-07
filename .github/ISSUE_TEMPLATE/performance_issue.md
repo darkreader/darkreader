@@ -1,7 +1,7 @@
 ---
 name: Performance issues
 about: Adress a performance issue of Dark Reader
-title: "[Performance] "
+title: "[Performance] Insert title here"
 labels:
 assignees: ''
 

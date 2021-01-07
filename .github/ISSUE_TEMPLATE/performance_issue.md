@@ -7,8 +7,10 @@ assignees: ''
 
 ---
 
-<!-- ⚠⚠ Do not delete this issue template! ⚠⚠ -->	 
-<!-- Issues that do not use the issue template/don't fill out the essential information are likely to be ignored and closed. -->
+<!-- 
+  ⚠⚠ Do not delete this issue template! ⚠⚠ 
+  Issues that do not use the issue template/don't fill out the essential information are likely to be ignored and closed. 
+-->
 
 <!--
   Thank you for taking the time to a performance issue.
@@ -17,18 +19,16 @@ assignees: ''
 -->
 
 **Website**
-If applicable, the link of the website where the performance issue is noticed.
+<!-- If applicable, the link of the website where the performance issue is noticed. -->
 
 **How to Reproduce**
-Steps to reproduce the behavior:
-An example of this is
->
-> 1. Go to x site
-> 2. Go to x feature
-> 3. Notice spikes in CPU Usage
+<!-- We need to know how you encountered the bug to properly troubleshoot the issue. -->
+- Go to '...'
+- Click on '...'
+- Notice spikes in CPU Usage
 
 **Performance Profiler**
-A link to either profile.zip *Chromium only* or a firefox profiler *Firefox only*.
+<!-- A link to either profile.zip *Chromium only* or a firefox profiler *Firefox only*. -->
 
 <!--
   Please add a version of the browser you are using. 
@@ -36,9 +36,9 @@ A link to either profile.zip *Chromium only* or a firefox profiler *Firefox only
 -->
 **System info:**
 
-- OS: [e.g. Windows, MacOS, Linux]
-- Browser: [e.g. chrome, safari]
-- Dark Reader Version: [e.g. 4.9.9]
+- OS: <!-- [e.g. Windows, MacOS, Linux] -->
+- Browser: <!-- [e.g. Chrome 84, Safari 13] -->
+- Darkreader Version: <!-- [e.g. 4.9.26] -->
 
 <!--
   Do you have this performance issue with Dark Reader disabled?
@@ -46,4 +46,5 @@ A link to either profile.zip *Chromium only* or a firefox profiler *Firefox only
   Do you have hardware acceleration enabled?
 -->
 **Additional context**
-Elaborate on the problem
+<!-- Add any other context or screenshots about the feature request here. -->
+

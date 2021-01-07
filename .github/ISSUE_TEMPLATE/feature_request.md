@@ -6,6 +6,10 @@ labels: enhancement
 assignees: ''
 
 ---
+
+<!-- ⚠⚠ Do not delete this issue template! ⚠⚠ -->
+<!-- Issues that do not use the issue template/don't fill out the basic info are likely to be ignored and closed. -->
+
 <!--
 Thank you for taking the time to suggest a feature request.
 Please make sure there is no existing issue about this kind of feature.

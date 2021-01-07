@@ -17,35 +17,39 @@ Thank you for taking the time to report a broken website.
 Please make sure there is no existing issue with this broken website.
 -->
 
-**Website**
+# Broken Website
+
+## Website
 <!-- The link of the website where you can observe the issue. -->
 
-**How to Reproduce**
+## How to Reproduce
 <!-- We need to know how you encountered the bug to properly troubleshoot the issue. -->
 Steps to reproduce the behavior:
-An example of this is
+An example of this is:
+
 - Go to x site
 - Hover over x button
 - See that when hovering it isn't changing colors
 
-**Expected behavior**
+## Expected behavior
 <!-- A clear and concise description of what you expected to happen. -->
 
-**Actual behavior**
+## Actual behavior
 <!-- A clear and concise description of what actually happened. -->
 
-**Screenshots**
+## Screenshots
 <!-- If applicable, add screenshots to help explain your problem. -->
 
 <!--
 Please add a version of the browser you are using. 
 If you don't know how to get your browser/darkreader version please search it up online.
 -->
-**System info:**
+
+## System Information
 
 - OS: <!-- [e.g. Windows, MacOS, Linux] -->
 - Browser: <!-- [e.g. Chrome, Safari] -->
 - Darkreader Version: <!-- [e.g. 4.9.26] -->
 
-**Additional context**
+## Additional context
 <!-- Add any other context about the problem here. -->

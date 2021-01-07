@@ -18,23 +18,29 @@ assignees: ''
   And make sure it's a actually performance issue, e.g. a extra 1 second to loading the website isn't a performance issue.
 -->
 
-**Website**
+# Performance Issue
+
+## Website
 <!-- If applicable, the link of the website where the performance issue is noticed. -->
 
-**How to Reproduce**
+## How to Reproduce
 <!-- We need to know how you encountered the bug to properly troubleshoot the issue. -->
+Steps to reproduce the behavior:
+An example of this is:
+
 - Go to '...'
 - Click on '...'
 - Notice spikes in CPU Usage
 
-**Performance Profiler**
+## Performance Profiler
 <!-- A link to either profile.zip *Chromium only* or a firefox profiler *Firefox only*. -->
 
 <!--
   Please add a version of the browser you are using. 
   If you don't know how to get your browser/darkreader version please search it up online.
 -->
-**System info:**
+
+## System Information
 
 - OS: <!-- [e.g. Windows, MacOS, Linux] -->
 - Browser: <!-- [e.g. Chrome 84, Safari 13] -->
@@ -45,6 +51,6 @@ assignees: ''
   Does it happen in other browsers?
   Do you have hardware acceleration enabled?
 -->
-**Additional context**
-<!-- Add any other context or screenshots about the feature request here. -->
 
+## Additional context
+<!-- Add any other context or screenshots about the feature request here. -->

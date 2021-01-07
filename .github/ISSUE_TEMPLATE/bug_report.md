@@ -17,22 +17,27 @@ Thank you for taking the time to report a bug.
 Please make sure there is no existing issue with this kind of bug.
 -->
 
-**Describe the bug**
+# Bug Report
+
+## Describe the bug
 <!-- A clear and concise description of what the bug is. -->
 
-**Steps to reproduce**
+## Steps to reproduce
 <!-- We need to know how you encountered the bug to properly troubleshoot the issue. -->
+Steps to reproduce the behavior:
+An example of this is:
+
 - Go to '...'
 - Click on '...'
 - Scroll down to '...'
 
-**Expected behavior**
+## Expected behavior
 <!-- A clear and concise description of what you expected to happen. -->
 
-**Actual behavior**
+## Actual behavior
 <!-- A clear and concise description of what actually happened. -->
 
-**Screenshots**
+## Screenshots
 <!-- If applicable, add screenshots to help explain your problem. -->
 
 <!--
@@ -40,12 +45,11 @@ Please add a version of the browser you are using.
 If you don't know how to get your browser/darkreader version please search it up online.
 -->
 
-### **System Information:**
+## System Information
 
 - OS: <!-- [e.g. Windows, MacOS, Linux] -->
 - Browser: <!-- [e.g. Chrome 84, Safari 13] -->
 - Darkreader Version: <!-- [e.g. 4.9.26] -->
 
-### **Additional context**
-
-Add any other context about the problem here.
+## Additional context
+<!--Add any other context about the problem here. -->

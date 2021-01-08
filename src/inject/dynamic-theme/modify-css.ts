@@ -470,10 +470,16 @@ function getVariableModifier(
     prop: string,
     value: string,
     rule: CSSStyleRule,
-    ignoderImgSelectors: string[],
+    ignoredImgSelectors: string[],
     isCancelled: () => boolean,
 ): CSSVariableModifier {
-    return variablesStore.getModifierForVariable(prop, value, rule, ignoderImgSelectors, isCancelled);
+    return variablesStore.getModifierForVariable({
+        varName: prop,
+        sourceValue: value,
+        rule,
+        ignoredImgSelectors,
+        isCancelled,
+    });
 }
 
 function getVariableDependantModifier(prop: string, value: string) {

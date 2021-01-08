@@ -27,6 +27,7 @@ export function createStyleSheetModifier() {
     let renderId = 0;
     const rulesTextCache = new Map<string, string>();
     const rulesModCache = new Map<string, ModifiableCSSRule>();
+    const varTypeChangeCleaners = new Set<() => void>();
     let prevFilterKey: string = null;
 
     interface ModifySheetOptions {
@@ -112,6 +113,7 @@ export function createStyleSheetModifier() {
             important: boolean;
             sourceValue: string;
             asyncKey?: number;
+            varKey?: number;
         }
 
         function setRule(target: CSSStyleSheet | CSSGroupingRule, index: number, rule: ReadyStyleRule) {
@@ -123,14 +125,16 @@ export function createStyleSheetModifier() {
             });
         }
 
-        interface AsyncRule {
+        interface RuleInfo {
             rule: ReadyStyleRule;
             target: (CSSStyleSheet | CSSGroupingRule);
             index: number;
         }
 
-        const asyncDeclarations = new Map<number, AsyncRule>();
+        const asyncDeclarations = new Map<number, RuleInfo>();
+        const varDeclarations = new Map<number, RuleInfo>();
         let asyncDeclarationCounter = 0;
+        let varDeclarationCounter = 0;
 
         const rootReadyGroup: ReadyGroup = {rule: null, rules: [], isGroup: true};
         const groupRefs = new WeakMap<CSSRule, ReadyGroup>();
@@ -153,6 +157,9 @@ export function createStyleSheetModifier() {
             return group;
         }
 
+        varTypeChangeCleaners.forEach((clear) => clear());
+        varTypeChangeCleaners.clear();
+
         modRules.filter((r) => r).forEach(({selector, declarations, parentRule}) => {
             const group = getGroup(parentRule);
             const readyStyleRule: ReadyStyleRule = {selector, declarations: [], isGroup: false};
@@ -160,7 +167,7 @@ export function createStyleSheetModifier() {
             group.rules.push(readyStyleRule);
 
             function handleAsyncDeclaration(property: string, modified: Promise<string>, important: boolean, sourceValue: string) {
-                const asyncKey = asyncDeclarationCounter++;
+                const asyncKey = ++asyncDeclarationCounter;
                 const asyncDeclaration: ReadyDeclaration = {property, value: null, important, asyncKey, sourceValue};
                 readyDeclarations.push(asyncDeclaration);
                 const currentRenderId = renderId;
@@ -178,19 +185,40 @@ export function createStyleSheetModifier() {
                 });
             }
 
+            function handleVarDeclarations(property: string, modified: ReturnType<CSSVariableModifier>, important: boolean, sourceValue: string) {
+                const {declarations: varDecs, onTypeChange} = modified as ReturnType<CSSVariableModifier>;
+                const varKey = ++varDeclarationCounter;
+                const index = readyDeclarations.length;
+                let oldDecsCount = varDecs.length;
+                if (varDecs.length === 0) {
+                    readyDeclarations.push({property, value: sourceValue, important, sourceValue, varKey});
+                    oldDecsCount = 1;
+                }
+                varDecs.forEach((mod) => {
+                    if (mod.value instanceof Promise) {
+                        handleAsyncDeclaration(mod.property, mod.value, important, sourceValue);
+                    } else {
+                        readyDeclarations.push({property: mod.property, value: mod.value, important, sourceValue, varKey});
+                    }
+                });
+                onTypeChange.addListener((newDecs) => {
+                    const readyVarDecs = newDecs.map((mod) => {
+                        return {property: mod.property, value: mod.value as string, important, sourceValue, varKey};
+                    });
+                    readyDeclarations.splice(index, oldDecsCount, ...readyVarDecs);
+                    oldDecsCount = readyVarDecs.length;
+                    rebuildVarRule(varKey);
+                });
+                varTypeChangeCleaners.add(() => onTypeChange.removeListeners());
+            }
+
             declarations.forEach(({property, value, important, sourceValue}) => {
                 if (typeof value === 'function') {
                     const modified = value(theme);
                     if (modified instanceof Promise) {
                         handleAsyncDeclaration(property, modified, important, sourceValue);
                     } else if (property.startsWith('--')) {
-                        (modified as ReturnType<CSSVariableModifier>).forEach((mod) => {
-                            if (mod.value instanceof Promise) {
-                                handleAsyncDeclaration(mod.property, mod.value, important, sourceValue);
-                            } else {
-                                readyDeclarations.push({property: mod.property, value: mod.value, important, sourceValue});
-                            }
-                        });
+                        handleVarDeclarations(property, modified as any, important, sourceValue);
                     } else {
                         readyDeclarations.push({property, value: modified as string, important, sourceValue});
                     }
@@ -231,9 +259,14 @@ export function createStyleSheetModifier() {
 
             iterateReadyRules(rootReadyGroup, sheet, (rule, target) => {
                 const index = target.cssRules.length;
-                rule.declarations
-                    .filter(({value}) => value == null)
-                    .forEach(({asyncKey}) => asyncDeclarations.set(asyncKey, {rule, target, index}));
+                rule.declarations.forEach(({asyncKey, varKey}) => {
+                    if (asyncKey != null) {
+                        asyncDeclarations.set(asyncKey, {rule, target, index});
+                    }
+                    if (varKey != null) {
+                        varDeclarations.set(varKey, {rule, target, index});
+                    }
+                });
                 setRule(target, index, rule);
             });
         }
@@ -243,6 +276,12 @@ export function createStyleSheetModifier() {
             target.deleteRule(index);
             setRule(target, index, rule);
             asyncDeclarations.delete(key);
+        }
+
+        function rebuildVarRule(key: number) {
+            const {rule, target, index} = varDeclarations.get(key);
+            target.deleteRule(index);
+            setRule(target, index, rule);
         }
 
         buildStyleSheet();

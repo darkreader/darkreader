@@ -206,7 +206,7 @@ function createDynamicStyleOverrides() {
         }
     });
     const ignoredInlineSelectors = fixes && Array.isArray(fixes.ignoreInlineStyle) ? fixes.ignoreInlineStyle : [];
-    inlineStyleElements.forEach((el) => overrideInlineStyle(el as HTMLElement, filter, getIgnoreImageAnalysisSelectors(), ignoredInlineSelectors));
+    inlineStyleElements.forEach((el) => overrideInlineStyle(el as HTMLElement, filter, ignoredInlineSelectors, getIgnoreImageAnalysisSelectors()));
     handleAdoptedStyleSheets(document);
 }
 
@@ -381,7 +381,7 @@ function watchForUpdates() {
         createShadowStaticStyleOverrides(root);
         const inlineStyleElements = root.querySelectorAll(INLINE_STYLE_SELECTOR);
         if (inlineStyleElements.length > 0) {
-            forEach(inlineStyleElements, (el) => overrideInlineStyle(el as HTMLElement, filter, getIgnoreImageAnalysisSelectors(), ignoredInlineSelectors));
+            forEach(inlineStyleElements, (el) => overrideInlineStyle(el as HTMLElement, filter, ignoredInlineSelectors, getIgnoreImageAnalysisSelectors()));
         }
     });
 

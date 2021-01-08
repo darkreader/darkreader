@@ -287,7 +287,7 @@ class VariablesStore {
                         return;
                     }
                     if (this.unknownColorVars.has(v)) {
-                        this.resolveVariableType(this.bgColorVars, v)
+                        this.resolveVariableType(this.bgColorVars, v);
                         return;
                     }
                 });

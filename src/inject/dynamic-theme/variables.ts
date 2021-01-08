@@ -80,10 +80,10 @@ class VariablesStore {
         this.changedTypeVars.forEach((varName) => {
             if (this.typeChangeSubscriptions.has(varName)) {
                 this.typeChangeSubscriptions
-                .get(varName)
-                .forEach((callback) => {
-                    callback();
-                });
+                    .get(varName)
+                    .forEach((callback) => {
+                        callback();
+                    });
             }
         });
         this.changedTypeVars.clear();
@@ -125,7 +125,7 @@ class VariablesStore {
                         property,
                         value: modifiedValue,
                     });
-                }
+                };
 
                 addModifiedValue(VAR_TYPE_BGCOLOR, wrapBgColorVariableName, tryModifyBgColor);
                 addModifiedValue(VAR_TYPE_TEXTCOLOR, wrapTextColorVariableName, tryModifyTextColor);
@@ -267,7 +267,7 @@ class VariablesStore {
         this.varTypes.set(varName, newType);
         if (newType !== initialType || this.undefinedVars.has(varName)) {
             this.changedTypeVars.add(varName);
-            this.undefinedVars.delete(varName)
+            this.undefinedVars.delete(varName);
         }
     }
 

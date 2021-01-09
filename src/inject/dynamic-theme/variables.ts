@@ -2,6 +2,7 @@ import {modifyBackgroundColor, modifyBorderColor, modifyForegroundColor} from '.
 import {getParenthesesRange} from '../../utils/text';
 import {iterateCSSRules, iterateCSSDeclarations} from './css-rules';
 import {tryParseColor, getBgImageModifier} from './modify-css';
+import type {CSSValueModifier} from './modify-css';
 import type {Theme} from '../../definitions';
 
 export interface ModifiedVarDeclaration {
@@ -28,6 +29,7 @@ class VariablesStore {
     private definedVars = new Set<string>();
     private varRefs = new Map<string, Set<string>>();
     private unknownColorVars = new Set<string>();
+    private unknownBgVars = new Set<string>();
     private undefinedVars = new Set<string>();
     private initialVarTypes = new Map<string, number>();
     private changedTypeVars = new Set<string>();
@@ -39,6 +41,7 @@ class VariablesStore {
         this.definedVars.clear();
         this.varRefs.clear();
         this.unknownColorVars.clear();
+        this.unknownBgVars.clear();
         this.undefinedVars.clear();
         this.initialVarTypes.clear();
         this.changedTypeVars.clear();
@@ -72,7 +75,21 @@ class VariablesStore {
         });
 
         this.unknownColorVars.forEach((v) => {
-            if (!this.isVarType(v, VAR_TYPE_BGCOLOR | VAR_TYPE_TEXTCOLOR | VAR_TYPE_BORDERCOLOR)) {
+            if (this.unknownBgVars.has(v)) {
+                this.unknownColorVars.delete(v);
+                this.unknownBgVars.delete(v);
+                this.resolveVariableType(v, VAR_TYPE_BGCOLOR);
+            } else if (this.isVarType(v, VAR_TYPE_BGCOLOR | VAR_TYPE_TEXTCOLOR | VAR_TYPE_BORDERCOLOR)) {
+                this.unknownColorVars.delete(v);
+            } else {
+                this.undefinedVars.add(v);
+            }
+        });
+
+        this.unknownBgVars.forEach((v) => {
+            if (this.isVarType(v, VAR_TYPE_BGCOLOR | VAR_TYPE_BGIMG)) {
+                this.unknownBgVars.delete(v);
+            } else {
                 this.undefinedVars.add(v);
             }
         });
@@ -175,7 +192,7 @@ class VariablesStore {
         };
     }
 
-    getModifierForVarDependant(property: string, sourceValue: string): (theme: Theme) => string {
+    getModifierForVarDependant(property: string, sourceValue: string): CSSValueModifier {
         if (property === 'background-color') {
             return (theme) => {
                 return replaceCSSVariablesNames(
@@ -196,7 +213,8 @@ class VariablesStore {
         }
         if (property === 'background' || property === 'background-image') {
             return (theme) => {
-                return replaceCSSVariablesNames(
+                const unknownVars = new Set<string>();
+                const modify = () => replaceCSSVariablesNames(
                     sourceValue,
                     (v) => {
                         if (this.isVarType(v, VAR_TYPE_BGCOLOR)) {
@@ -205,10 +223,24 @@ class VariablesStore {
                         if (this.isVarType(v, VAR_TYPE_BGIMG)) {
                             return wrapBgImgVariableName(v);
                         }
+                        unknownVars.add(v);
                         return v;
                     },
                     (fallback) => tryModifyBgColor(fallback, theme),
                 );
+                const modified = modify();
+                if (unknownVars.size > 0) {
+                    return new Promise<string>((resolve) => {
+                        const firstUnknownVar = unknownVars.values().next().value;
+                        const callback = () => {
+                            this.unsubscribeFromVariableTypeChanges(firstUnknownVar, callback);
+                            const newValue = modify();
+                            resolve(newValue);
+                        };
+                        this.subscribeForVarTypeChange(firstUnknownVar, callback);
+                    });
+                }
+                return modified;
             };
         }
         if (property === 'border-color' || property === 'border') {
@@ -269,6 +301,8 @@ class VariablesStore {
             this.changedTypeVars.add(varName);
             this.undefinedVars.delete(varName);
         }
+        this.unknownColorVars.delete(varName);
+        this.unknownBgVars.delete(varName);
     }
 
     private collectVarDependants(rules: CSSRuleList) {
@@ -291,10 +325,11 @@ class VariablesStore {
                     if (this.isVarType(v, VAR_TYPE_BGCOLOR | VAR_TYPE_BGIMG)) {
                         return;
                     }
-                    if (this.unknownColorVars.has(v)) {
+                    if (this.unknownColorVars.has(v) || this.isVarType(v, VAR_TYPE_TEXTCOLOR | VAR_TYPE_BORDERCOLOR)) {
                         this.resolveVariableType(v, VAR_TYPE_BGCOLOR);
                         return;
                     }
+                    this.unknownBgVars.add(v);
                 });
             }
         });

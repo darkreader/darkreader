@@ -188,6 +188,7 @@ export function createStyleSheetModifier() {
             function handleVarDeclarations(property: string, modified: ReturnType<CSSVariableModifier>, important: boolean, sourceValue: string) {
                 const {declarations: varDecs, onTypeChange} = modified as ReturnType<CSSVariableModifier>;
                 const varKey = ++varDeclarationCounter;
+                const currentRenderId = renderId;
                 const index = readyDeclarations.length;
                 let oldDecsCount = varDecs.length;
                 if (varDecs.length === 0) {
@@ -202,6 +203,9 @@ export function createStyleSheetModifier() {
                     }
                 });
                 onTypeChange.addListener((newDecs) => {
+                    if (isAsyncCancelled() || currentRenderId !== renderId) {
+                        return;
+                    }
                     const readyVarDecs = newDecs.map((mod) => {
                         return {property: mod.property, value: mod.value as string, important, sourceValue, varKey};
                     });

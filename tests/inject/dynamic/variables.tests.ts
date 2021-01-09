@@ -642,4 +642,27 @@ describe('CSS Variables Override', () => {
         expect(getComputedStyle(container.querySelector('h1')).backgroundColor).toBe('rgb(0, 102, 0)');
         expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(140, 255, 140)');
     });
+
+    it('should rebuild dependant variable rule when type becomes known', async () => {
+        container.innerHTML = multiline(
+            '<style>',
+            '    h1 {',
+            '        background: var(--color);',
+            '    }',
+            '</style>',
+            '<h1>Asynchronous variables</h1>',
+        );
+        createOrUpdateDynamicTheme(theme, null, false);
+        expect(getComputedStyle(container.querySelector('h1')).backgroundColor).toBe('rgba(0, 0, 0, 0)');
+
+        const anotherStyle = document.createElement('style');
+        anotherStyle.textContent = multiline(
+            ':root {',
+            '    --color: green;',
+            '}',
+        );
+        container.append(anotherStyle);
+        await timeout(50);
+        expect(getComputedStyle(container.querySelector('h1')).backgroundColor).toBe('rgb(0, 102, 0)');
+    });
 });

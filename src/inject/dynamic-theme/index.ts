@@ -330,7 +330,12 @@ function watchForUpdates() {
         stylesToRemove.forEach((style) => removeManager(style));
         const newManagers = stylesToManage
             .map((style) => createManager(style));
-        newManagers.forEach((manager) => variablesStore.addRulesForMatching(manager.details().rules));
+        newManagers
+            .map((manager) => manager.details())
+            .filter((detail) => detail && detail.rules.length > 0)
+            .forEach((detail) => {
+                variablesStore.addRulesForMatching(detail.rules);
+            });
         variablesStore.matchVariablesAndDependants();
         newManagers.forEach((manager) => manager.render(filter, getIgnoreImageAnalysisSelectors()));
         newManagers.forEach((manager) => manager.watch());

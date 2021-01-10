@@ -258,6 +258,10 @@ const CSS = await collectCSS();
 const isEnabled = isDarkReaderEnabled();
 ```
 
+... or you can also use the darkreader with other modern frontend framework. Please refer to:
+
+- [react-darkreader](https://github.com/Turkyden/react-darkreader)
+
 ## Contributors
 
 This project exists thanks to all the people who contribute!

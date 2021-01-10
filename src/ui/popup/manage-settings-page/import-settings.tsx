@@ -35,13 +35,11 @@ export default function ImportButton(props: ViewProps) {
 
     function importSettings() {
         openFile({extensions: ['json']}, (result: string) => {
-            try {
-                const content: UserSettings = JSON.parse(result);
-                const result2 = getValidatedObject(content, DEFAULT_SETTINGS);
-                props.actions.changeSettings({...result2});
-            } catch (err) {
-                // TODO Make overlay Error
-                console.error(err);
+            const content: UserSettings = JSON.parse(result);
+            const result2 = getValidatedObject(content, DEFAULT_SETTINGS);
+            props.actions.changeSettings({...result2});
+            if (window.location.href.endsWith('#import')) {
+                window.close();
             }
         });
     }

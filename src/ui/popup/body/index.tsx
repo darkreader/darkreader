@@ -12,6 +12,7 @@ import ThemePage from '../theme/page';
 import type {ViewProps} from '../types';
 import ManageSettingsPage from '../manage-settings-page';
 import {isMobile} from '../../../utils/platform';
+import ImportButton from '../manage-settings-page/import-settings';
 
 function Logo() {
     return (
@@ -78,6 +79,12 @@ function Pages(props: ViewProps) {
             store.activePage = 'main';
         }
         context.refresh();
+    }
+
+    if (typeof window !== 'undefined' && window.location.href.endsWith('#import')) {
+        return (
+            <ImportButton {...props} />
+        );
     }
 
     return (

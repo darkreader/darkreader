@@ -17,6 +17,10 @@ export function compose<T extends Malevic.Component>(type: T, ...wrappers: Array
 }
 
 export function openFile(options: {extensions: string[]}, callback: (content: string) => void) {
+    if (isFirefox && !window.location.href.endsWith('#import')) {
+        chrome.tabs.create({url: window.location.href + '#import', active: true});
+        window.close();
+    }
     const input = document.createElement('input');
     input.type = 'file';
     input.style.display = 'none';

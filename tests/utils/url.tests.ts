@@ -260,6 +260,11 @@ test('URL is enabled', () => {
         {siteList: [], siteListEnabled: [], applyToListedOnly: true} as UserSettings,
         {isProtected: false, isInDarkList: true},
     )).toEqual(false);
+    expect(isURLEnabled(
+        'github.com/darkreader/darkreader/issues/[',
+        {siteList: ['github.com'], siteListEnabled: [], applyToListedOnly: false} as UserSettings,
+        {isProtected: false, isInDarkList: false}
+    )).toEqual(false);
 
     // Test wildcards usage
     expect(isURLMatched('https://www.google.com/', 'google.*')).toBe(true);

@@ -1,4 +1,4 @@
-import {isFirefox} from '../utils/platform';
+import {isFirefox, isOpera} from '../utils/platform';
 
 export function classes(...args: Array<string | {[cls: string]: boolean}>) {
     const classes = [];
@@ -17,7 +17,9 @@ export function compose<T extends Malevic.Component>(type: T, ...wrappers: Array
 }
 
 export function openFile(options: {extensions: string[]}, callback: (content: string) => void) {
-    if (isFirefox && !window.location.href.endsWith('#import')) {
+    // Firefox and Opera will behave/bug to close the window on a popup.
+    // When you open a file dialog, this should provide a workaround.
+    if ((isFirefox || isOpera) && !window.location.href.endsWith('#import')) {
         chrome.tabs.create({url: window.location.href + '#import', active: true});
         window.close();
     }

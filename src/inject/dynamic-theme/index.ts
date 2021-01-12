@@ -340,7 +340,7 @@ function watchForUpdates() {
     const managedStyles = Array.from(styleManagers.keys());
     watchForStyleChanges(managedStyles, ({created, updated, removed, moved}) => {
         const stylesToRemove = removed;
-        const stylesToManage = created.concat(updated).concat(moved)
+        const stylesToManage = [...created, ... updated, ...moved]
             .filter((style) => !styleManagers.has(style));
         const stylesToRestore = moved
             .filter((style) => styleManagers.has(style));

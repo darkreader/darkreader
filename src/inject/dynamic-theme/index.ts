@@ -141,9 +141,15 @@ function createShadowStaticStyleOverrides(root: ShadowRoot) {
     const inlineStyle = createOrUpdateStyle('darkreader--inline', root);
     inlineStyle.textContent = getInlineOverrideStyle();
     root.insertBefore(inlineStyle, root.firstChild);
+
+    const userAgentStyle = createOrUpdateStyle('darkreader--user-agent');
+    userAgentStyle.textContent = getModifiedUserAgentStyle(filter, isIFrame, filter.styleSystemControls);
+    root.insertBefore(userAgentStyle, inlineStyle.nextSibling);
+
     const overrideStyle = createOrUpdateStyle('darkreader--override', root);
     overrideStyle.textContent = fixes && fixes.css ? replaceCSSTemplates(fixes.css) : '';
-    root.insertBefore(overrideStyle, inlineStyle.nextSibling);
+    root.insertBefore(overrideStyle, userAgentStyle.nextSibling);
+
     shadowRootsWithOverrides.add(root);
 }
 
@@ -466,6 +472,7 @@ export function removeDynamicTheme() {
     }
     shadowRootsWithOverrides.forEach((root) => {
         removeNode(root.querySelector('.darkreader--inline'));
+        removeNode(root.querySelector('.darkreader--user-agent'));
         removeNode(root.querySelector('.darkreader--override'));
     });
     shadowRootsWithOverrides.clear();

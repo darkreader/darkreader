@@ -72,9 +72,6 @@ export function getModifiedUserAgentStyle(theme: Theme, isIFrame: boolean, style
     lines.push('a {');
     lines.push(`    color: ${modifyForegroundColor({r: 0, g: 0, b: 238}, theme)};`);
     lines.push('}');
-    lines.push('a:visited {');
-    lines.push(`    color: ${modifyForegroundColor({r: 85, g: 26, b: 139}, theme)};`);
-    lines.push('}');
     lines.push('table {');
     lines.push(`    border-color: ${modifyBorderColor({r: 128, g: 128, b: 128}, theme)};`);
     lines.push('}');

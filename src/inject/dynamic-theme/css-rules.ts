@@ -27,6 +27,15 @@ export function iterateCSSRules(rules: CSSRuleList, iterate: (rule: CSSStyleRule
     });
 }
 
+const complexVarDependantProperties = [
+    'background',
+    'border',
+    'border-bottom',
+    'border-left',
+    'border-right',
+    'border-top',
+];
+
 export function iterateCSSDeclarations(style: CSSStyleDeclaration, iterate: (property: string, value: string) => void) {
     forEach(style, (property) => {
         const value = style.getPropertyValue(property).trim();
@@ -35,12 +44,12 @@ export function iterateCSSDeclarations(style: CSSStyleDeclaration, iterate: (pro
         }
         iterate(property, value);
     });
-    if (style.background && style.background.includes('var(')) {
-        iterate('background', style.background);
-    }
-    if (style.border && style.border.includes('var(')) {
-        iterate('border', style.border);
-    }
+    complexVarDependantProperties.forEach((cp) => {
+        const cv = style[cp];
+        if (cv && cv.includes('var(')) {
+            iterate(cp, cv);
+        }
+    });
 }
 
 export const cssURLRegex = /url\((('.+?')|(".+?")|([^\)]*?))\)/g;

@@ -243,7 +243,7 @@ class VariablesStore {
                 return modified;
             };
         }
-        if (property === 'border-color' || property === 'border') {
+        if (property.startsWith('border')) {
             return (theme) => {
                 return replaceCSSVariablesNames(
                     sourceValue,
@@ -318,7 +318,7 @@ class VariablesStore {
                 this.iterateVarDeps(value, (v) => this.resolveVariableType(v, VAR_TYPE_BGCOLOR));
             } else if (property === 'color') {
                 this.iterateVarDeps(value, (v) => this.resolveVariableType(v, VAR_TYPE_TEXTCOLOR));
-            } else if (property === 'border-color' || property === 'border') {
+            } else if (property.startsWith('border')) {
                 this.iterateVarDeps(value, (v) => this.resolveVariableType(v, VAR_TYPE_BORDERCOLOR));
             } else if (property === 'background' || property === 'background-image') {
                 this.iterateVarDeps(value, (v) => {

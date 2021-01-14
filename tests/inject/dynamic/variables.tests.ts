@@ -444,17 +444,14 @@ describe('CSS Variables Override', () => {
             '        --text: green;',
             '    }',
             '    h1 {',
-            '        border: 2px solid var(--border-color);',
+            '        border-bottom: 2px solid var(--border-color);',
             '        color: var(--text);',
             '    }',
             '</style>',
             '<h1>Border with variable</h1>',
         );
         createOrUpdateDynamicTheme(theme, null, false);
-        expect(getComputedStyle(container.querySelector('h1')).borderTopColor).toBe('rgb(179, 0, 0)');
         expect(getComputedStyle(container.querySelector('h1')).borderBottomColor).toBe('rgb(179, 0, 0)');
-        expect(getComputedStyle(container.querySelector('h1')).borderLeftColor).toBe('rgb(179, 0, 0)');
-        expect(getComputedStyle(container.querySelector('h1')).borderRightColor).toBe('rgb(179, 0, 0)');
         expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(140, 255, 140)');
     });
 

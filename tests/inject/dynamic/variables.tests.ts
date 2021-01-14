@@ -158,6 +158,28 @@ describe('CSS Variables Override', () => {
         expect(getComputedStyle(container.querySelector('.light')).color).toBe('rgb(255, 26, 26)');
     });
 
+    /*
+    it('should handle variables having multiple types in complex properties', () => {
+        container.innerHTML = multiline(
+            '<style>',
+            '    :root {',
+            '        --color: green;',
+            '    }',
+            '    h1 {',
+            '        border: 1px solid var(--color);',
+            '    }',
+            '    h1 {',
+            '        background: linear-gradient(var(--color), white);',
+            '    }',
+            '</style>',
+            '<h1>Variables</h1>',
+        );
+        createOrUpdateDynamicTheme(theme, null, false);
+        expect(getComputedStyle(container.querySelector('h1')).backgroundImage).toBe('linear-gradient(rgb(0, 102, 0), rgb(0, 0, 0))');
+        expect(getComputedStyle(container.querySelector('h1')).borderColor).toBe('rgb(0, 217, 0)');
+    });
+    */
+
     it('should use fallback when nested variables are missing', () => {
         container.innerHTML = multiline(
             '<style>',
@@ -612,6 +634,71 @@ describe('CSS Variables Override', () => {
         expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(255, 26, 26)');
     });
 
+    it('should handle async resolution of multiple variable types', async () => {
+        container.innerHTML = multiline(
+            '<style>',
+            '    :root {',
+            '        --color: green;',
+            '    }',
+            '</style>',
+            '<h1>Asynchronous variables with multiple types</h1>',
+        );
+        createOrUpdateDynamicTheme(theme, null, false);
+        expect(getComputedStyle(container.querySelector('h1')).backgroundColor).toBe('rgba(0, 0, 0, 0)');
+        expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(255, 255, 255)');
+
+        const anotherStyle = document.createElement('style');
+        anotherStyle.textContent = multiline(
+            'h1 {',
+            '    background: var(--color);',
+            '    border: 1px solid var(--color);',
+            '    color: var(--color);',
+            '}',
+        );
+        container.append(anotherStyle);
+        await timeout(0);
+        expect(getComputedStyle(container.querySelector('h1')).backgroundColor).toBe('rgb(0, 102, 0)');
+        expect(getComputedStyle(container.querySelector('h1')).borderColor).toBe('rgb(0, 217, 0)');
+        expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(140, 255, 140)');
+    });
+
+    it('should handle variable type resolution when style changed', async () => {
+        container.innerHTML = multiline(
+            '<style>',
+            '    :root {',
+            '        --color1: yellow;',
+            '        --color2: blue;',
+            '    }',
+            '</style>',
+            '<h1>Asynchronous variables</h1>',
+        );
+        createOrUpdateDynamicTheme(theme, null, false);
+        expect(getComputedStyle(container.querySelector('h1')).backgroundColor).toBe('rgba(0, 0, 0, 0)');
+        expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(255, 255, 255)');
+
+        const styleEl = container.querySelector('style');
+        styleEl.textContent = multiline(
+            ':root {',
+            '    --color1: red;',
+            '    --color2: green;',
+            '    --color3: blue;',
+            '}',
+        );
+        await timeout(0);
+
+        const anotherStyle = document.createElement('style');
+        anotherStyle.textContent = multiline(
+            'h1 {',
+            '    background: var(--color2);',
+            '    color: var(--color1);',
+            '}',
+        );
+        container.append(anotherStyle);
+        await timeout(0);
+        expect(getComputedStyle(container.querySelector('h1')).backgroundColor).toBe('rgb(0, 102, 0)');
+        expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(255, 26, 26)');
+    });
+
     it('should handle variable type change', async () => {
         container.innerHTML = multiline(
             '<style>',
@@ -661,5 +748,104 @@ describe('CSS Variables Override', () => {
         container.append(anotherStyle);
         await timeout(50);
         expect(getComputedStyle(container.querySelector('h1')).backgroundColor).toBe('rgb(0, 102, 0)');
+    });
+
+    it('should not affect other declarations when variable type resolved', async () => {
+        container.innerHTML = multiline(
+            '<style>',
+            '    :root {',
+            '        --color1: red;',
+            '        --color2: green;',
+            '    }',
+            '</style>',
+            '<h1 class="color1">Variables with color 1</h1>',
+            '<h1 class="color2">Variables with color 2</h1>',
+        );
+        createOrUpdateDynamicTheme(theme, null, false);
+        expect(getComputedStyle(container.querySelector('.color1')).backgroundColor).toBe('rgba(0, 0, 0, 0)');
+        expect(getComputedStyle(container.querySelector('.color1')).color).toBe('rgb(255, 255, 255)');
+        expect(getComputedStyle(container.querySelector('.color2')).backgroundColor).toBe('rgba(0, 0, 0, 0)');
+        expect(getComputedStyle(container.querySelector('.color2')).color).toBe('rgb(255, 255, 255)');
+
+        const anotherStyle = document.createElement('style');
+        anotherStyle.textContent = multiline(
+            '.color1 {',
+            '    background: var(--color1);',
+            '    color: var(--color1);',
+            '}',
+            '.color2 {',
+            '    background: var(--color2);',
+            '    color: var(--color2);',
+            '}',
+        );
+        container.append(anotherStyle);
+        await timeout(0);
+        expect(getComputedStyle(container.querySelector('.color1')).backgroundColor).toBe('rgb(204, 0, 0)');
+        expect(getComputedStyle(container.querySelector('.color1')).color).toBe('rgb(255, 26, 26)');
+        expect(getComputedStyle(container.querySelector('.color2')).backgroundColor).toBe('rgb(0, 102, 0)');
+        expect(getComputedStyle(container.querySelector('.color2')).color).toBe('rgb(140, 255, 140)');
+    });
+
+    it('should not affect other declarations when variable type resolved', async () => {
+        container.innerHTML = multiline(
+            '<style>',
+            '    h1 {',
+            '        --color-bg: red;',
+            '        border: green;',
+            '    }',
+            '    h1 {',
+            '        --color-text: green;',
+            '    }',
+            '</style>',
+            '<h1>Variables along with other declarations</h1>',
+        );
+        createOrUpdateDynamicTheme(theme, null, false);
+        expect(getComputedStyle(container.querySelector('h1')).backgroundColor).toBe('rgba(0, 0, 0, 0)');
+        expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(255, 255, 255)');
+        expect(getComputedStyle(container.querySelector('h1')).borderColor).toBe('rgb(0, 217, 0)');
+
+        const anotherStyle = document.createElement('style');
+        anotherStyle.textContent = multiline(
+            'h1 {',
+            '    background-color: var(--color-bg);',
+            '    color: var(--color-text);',
+            '}',
+        );
+        container.append(anotherStyle);
+        await timeout(0);
+        expect(getComputedStyle(container.querySelector('h1')).backgroundColor).toBe('rgb(204, 0, 0)');
+        expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(140, 255, 140)');
+        expect(getComputedStyle(container.querySelector('h1')).borderColor).toBe('rgb(0, 217, 0)');
+    });
+
+    it('should not affect other declarations when dependency variable type resolved', async () => {
+        container.innerHTML = multiline(
+            '<style>',
+            '    h1 {',
+            '        background: var(--color);',
+            '        border: green;',
+            '    }',
+            '    h1 {',
+            '        color: red;',
+            '    }',
+            '</style>',
+            '<h1>Dependency variable</h1>',
+        );
+        createOrUpdateDynamicTheme(theme, null, false);
+        expect(getComputedStyle(container.querySelector('h1')).backgroundColor).toBe('rgba(0, 0, 0, 0)');
+        expect(getComputedStyle(container.querySelector('h1')).borderColor).toBe('rgb(0, 217, 0)');
+        expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(255, 26, 26)');
+
+        const anotherStyle = document.createElement('style');
+        anotherStyle.textContent = multiline(
+            ':root {',
+            '    --color: green;',
+            '}',
+        );
+        container.append(anotherStyle);
+        await timeout(50);
+        expect(getComputedStyle(container.querySelector('h1')).backgroundColor).toBe('rgb(0, 102, 0)');
+        expect(getComputedStyle(container.querySelector('h1')).borderColor).toBe('rgb(0, 217, 0)');
+        expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(255, 26, 26)');
     });
 });

@@ -189,17 +189,20 @@ export function createStyleSheetModifier() {
                 const {declarations: varDecs, onTypeChange} = modified as ReturnType<CSSVariableModifier>;
                 const varKey = ++varDeclarationCounter;
                 const currentRenderId = renderId;
-                const index = readyDeclarations.length;
-                let oldDecsCount = varDecs.length;
+                const initialIndex = readyDeclarations.length;
+                let oldDecs: ReadyDeclaration[] = [];
                 if (varDecs.length === 0) {
-                    readyDeclarations.push({property, value: sourceValue, important, sourceValue, varKey});
-                    oldDecsCount = 1;
+                    const tempDec = {property, value: sourceValue, important, sourceValue, varKey};
+                    readyDeclarations.push(tempDec);
+                    oldDecs = [tempDec];
                 }
                 varDecs.forEach((mod) => {
                     if (mod.value instanceof Promise) {
                         handleAsyncDeclaration(mod.property, mod.value, important, sourceValue);
                     } else {
-                        readyDeclarations.push({property: mod.property, value: mod.value, important, sourceValue, varKey});
+                        const readyDec = {property: mod.property, value: mod.value, important, sourceValue, varKey};
+                        readyDeclarations.push(readyDec);
+                        oldDecs.push(readyDec);
                     }
                 });
                 onTypeChange.addListener((newDecs) => {
@@ -209,8 +212,10 @@ export function createStyleSheetModifier() {
                     const readyVarDecs = newDecs.map((mod) => {
                         return {property: mod.property, value: mod.value as string, important, sourceValue, varKey};
                     });
-                    readyDeclarations.splice(index, oldDecsCount, ...readyVarDecs);
-                    oldDecsCount = readyVarDecs.length;
+                    // TODO: Don't search for index, store some way or use Linked List.
+                    const index = readyDeclarations.indexOf(oldDecs[0], initialIndex);
+                    readyDeclarations.splice(index, oldDecs.length, ...readyVarDecs);
+                    oldDecs = readyVarDecs;
                     rebuildVarRule(varKey);
                 });
                 varTypeChangeCleaners.add(() => onTypeChange.removeListeners());

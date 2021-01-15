@@ -1,4 +1,5 @@
 import {forEach} from '../../utils/array';
+import {isSafari} from '../../utils/platform';
 import {parseURL, getAbsoluteURL} from '../../utils/url';
 import {logWarn} from '../utils/log';
 
@@ -29,7 +30,7 @@ export function iterateCSSRules(rules: CSSRuleList, iterate: (rule: CSSStyleRule
 
 // These properties are not iterable
 // when they depend on variables
-const complexVarDependantProperties = [
+const shorthandVarDependantProperties = [
     'background',
     'border',
     'border-color',
@@ -39,6 +40,11 @@ const complexVarDependantProperties = [
     'border-top',
 ];
 
+const shorthandVarDepPropRegexps = isSafari ? shorthandVarDependantProperties.map((prop) => {
+    const regexp = new RegExp(`${prop}:\s*(.*?)\s*;`);
+    return [prop, regexp] as [string, RegExp];
+}) : null;
+
 export function iterateCSSDeclarations(style: CSSStyleDeclaration, iterate: (property: string, value: string) => void) {
     forEach(style, (property) => {
         const value = style.getPropertyValue(property).trim();
@@ -47,12 +53,23 @@ export function iterateCSSDeclarations(style: CSSStyleDeclaration, iterate: (pro
         }
         iterate(property, value);
     });
-    complexVarDependantProperties.forEach((cp) => {
-        const cv = style.getPropertyValue(cp);
-        if (cv && cv.includes('var(')) {
-            iterate(cp, cv);
-        }
-    });
+    if (isSafari && style.cssText.includes('var(')) {
+        // Safari doesn't show shorthand properties' values
+        shorthandVarDepPropRegexps.forEach(([prop, regexp]) => {
+            const match = style.cssText.match(regexp);
+            if (match && match[1]) {
+                const val = match[1].trim();
+                iterate(prop, val);
+            }
+        });
+    } else {
+        shorthandVarDependantProperties.forEach((prop) => {
+            const val = style.getPropertyValue(prop);
+            if (val && val.includes('var(')) {
+                iterate(prop, val);
+            }
+        });
+    }
 }
 
 export const cssURLRegex = /url\((('.+?')|(".+?")|([^\)]*?))\)/g;

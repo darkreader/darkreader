@@ -160,7 +160,7 @@ describe('CSS Variables Override', () => {
     });
 
     /*
-    it('should handle variables having multiple types in complex properties', () => {
+    it('should handle variables having multiple types in shorthand properties', () => {
         container.innerHTML = multiline(
             '<style>',
             '    :root {',
@@ -288,9 +288,6 @@ describe('CSS Variables Override', () => {
             '   }',
             '</style>',
             '<style>',
-            '   body {',
-            '       color: var(--text);',
-            '   }',
             '   h1 {',
             '       background: var(--bg);',
             '       color: var(--text);',
@@ -301,7 +298,6 @@ describe('CSS Variables Override', () => {
         createOrUpdateDynamicTheme(theme, null, false);
         expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(255, 255, 255)');
         expect(getComputedStyle(container.querySelector('h1')).backgroundColor).toBe('rgb(0, 0, 0)');
-        expect(getComputedStyle(container).color).toBe('rgb(255, 255, 255)');
     });
 
     it('should handle media variables', () => {

@@ -397,6 +397,9 @@ export function createOrUpdateDynamicTheme(filterConfig: FilterConfig, dynamicTh
     if (fixes) {
         ignoreImageAnalysisSelectors = Array.isArray(fixes.ignoreImageAnalysis) ? fixes.ignoreImageAnalysis : [];
         ignoredInlineSelectors = Array.isArray(fixes.ignoreInlineStyle) ? fixes.ignoreInlineStyle : [];
+    } else {
+        ignoreImageAnalysisSelectors = [];
+        ignoredInlineSelectors = [];
     }
     isIFrame = iframe;
     if (document.head) {

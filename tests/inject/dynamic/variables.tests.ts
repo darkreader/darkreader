@@ -1,5 +1,6 @@
 import '../polyfills';
 import {DEFAULT_THEME} from '../../../src/defaults';
+import {isFirefox} from '../../../src/utils/platform';
 import {createOrUpdateDynamicTheme, removeDynamicTheme} from '../../../src/inject/dynamic-theme';
 import {multiline, timeout} from '../../test-utils';
 
@@ -514,7 +515,15 @@ describe('CSS Variables Override', () => {
             '<h1>Border color with variable</h1>',
         );
         createOrUpdateDynamicTheme(theme, null, false);
-        expect(getComputedStyle(container.querySelector('h1')).borderColor).toBe('rgb(0, 217, 0)');
+        const elementStyle = getComputedStyle(container.querySelector('h1'));
+        if (isFirefox) {
+            expect(elementStyle.borderTopColor).toBe('rgb(0, 217, 0)');
+            expect(elementStyle.borderRightColor).toBe('rgb(0, 217, 0)');
+            expect(elementStyle.borderBottomColor).toBe('rgb(0, 217, 0)');
+            expect(elementStyle.borderLeftColor).toBe('rgb(0, 217, 0)');
+        } else {
+            expect(elementStyle.borderColor).toBe('rgb(0, 217, 0)');
+        }
     });
 
     it('should handle variables with gradients', () => {
@@ -620,7 +629,7 @@ describe('CSS Variables Override', () => {
             '<h1><i class="icon"></i>Mixed background</h1>',
         );
         createOrUpdateDynamicTheme(theme, null, false);
-        await timeout(50);
+        await timeout(100);
         expect(getComputedStyle(container.querySelector('.icon')).backgroundImage).toMatch(/^url\("blob:.*"\), linear-gradient\(rgb\(204, 0, 0\), rgb\(0, 0, 0\)\)$/);
     });
 
@@ -674,9 +683,17 @@ describe('CSS Variables Override', () => {
         );
         container.append(anotherStyle);
         await timeout(0);
-        expect(getComputedStyle(container.querySelector('h1')).backgroundColor).toBe('rgb(0, 102, 0)');
-        expect(getComputedStyle(container.querySelector('h1')).borderColor).toBe('rgb(0, 217, 0)');
-        expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(140, 255, 140)');
+        const updatedStyle = getComputedStyle(container.querySelector('h1'));
+        expect(updatedStyle.backgroundColor).toBe('rgb(0, 102, 0)');
+        expect(updatedStyle.color).toBe('rgb(140, 255, 140)');
+        if (isFirefox) {
+            expect(updatedStyle.borderTopColor).toBe('rgb(0, 217, 0)');
+            expect(updatedStyle.borderRightColor).toBe('rgb(0, 217, 0)');
+            expect(updatedStyle.borderBottomColor).toBe('rgb(0, 217, 0)');
+            expect(updatedStyle.borderLeftColor).toBe('rgb(0, 217, 0)');
+        } else {
+            expect(updatedStyle.borderColor).toBe('rgb(0, 217, 0)');
+        }
     });
 
     it('should handle variable type resolution when style changed', async () => {
@@ -817,9 +834,17 @@ describe('CSS Variables Override', () => {
             '<h1>Variables along with other declarations</h1>',
         );
         createOrUpdateDynamicTheme(theme, null, false);
-        expect(getComputedStyle(container.querySelector('h1')).backgroundColor).toBe('rgba(0, 0, 0, 0)');
-        expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(255, 255, 255)');
-        expect(getComputedStyle(container.querySelector('h1')).borderColor).toBe('rgb(0, 217, 0)');
+        const elementStyle = getComputedStyle(container.querySelector('h1'));
+        expect(elementStyle.backgroundColor).toBe('rgba(0, 0, 0, 0)');
+        expect(elementStyle.color).toBe('rgb(255, 255, 255)');
+        if (isFirefox) {
+            expect(elementStyle.borderTopColor).toBe('rgb(0, 217, 0)');
+            expect(elementStyle.borderRightColor).toBe('rgb(0, 217, 0)');
+            expect(elementStyle.borderBottomColor).toBe('rgb(0, 217, 0)');
+            expect(elementStyle.borderLeftColor).toBe('rgb(0, 217, 0)');
+        } else {
+            expect(elementStyle.borderColor).toBe('rgb(0, 217, 0)');
+        }
 
         const anotherStyle = document.createElement('style');
         anotherStyle.textContent = multiline(
@@ -830,9 +855,17 @@ describe('CSS Variables Override', () => {
         );
         container.append(anotherStyle);
         await timeout(0);
-        expect(getComputedStyle(container.querySelector('h1')).backgroundColor).toBe('rgb(204, 0, 0)');
-        expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(140, 255, 140)');
-        expect(getComputedStyle(container.querySelector('h1')).borderColor).toBe('rgb(0, 217, 0)');
+        const updatedStyle = getComputedStyle(container.querySelector('h1'));
+        expect(updatedStyle.backgroundColor).toBe('rgb(204, 0, 0)');
+        expect(updatedStyle.color).toBe('rgb(140, 255, 140)');
+        if (isFirefox) {
+            expect(updatedStyle.borderTopColor).toBe('rgb(0, 217, 0)');
+            expect(updatedStyle.borderRightColor).toBe('rgb(0, 217, 0)');
+            expect(updatedStyle.borderBottomColor).toBe('rgb(0, 217, 0)');
+            expect(updatedStyle.borderLeftColor).toBe('rgb(0, 217, 0)');
+        } else {
+            expect(updatedStyle.borderColor).toBe('rgb(0, 217, 0)');
+        }
     });
 
     it('should not affect other declarations when dependency variable type resolved', async () => {
@@ -849,9 +882,17 @@ describe('CSS Variables Override', () => {
             '<h1>Dependency variable</h1>',
         );
         createOrUpdateDynamicTheme(theme, null, false);
-        expect(getComputedStyle(container.querySelector('h1')).backgroundColor).toBe('rgba(0, 0, 0, 0)');
-        expect(getComputedStyle(container.querySelector('h1')).borderColor).toBe('rgb(0, 217, 0)');
-        expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(255, 26, 26)');
+        const elementStyle = getComputedStyle(container.querySelector('h1'));
+        expect(elementStyle.backgroundColor).toBe('rgba(0, 0, 0, 0)');
+        expect(elementStyle.color).toBe('rgb(255, 26, 26)');
+        if (isFirefox) {
+            expect(elementStyle.borderTopColor).toBe('rgb(0, 217, 0)');
+            expect(elementStyle.borderRightColor).toBe('rgb(0, 217, 0)');
+            expect(elementStyle.borderBottomColor).toBe('rgb(0, 217, 0)');
+            expect(elementStyle.borderLeftColor).toBe('rgb(0, 217, 0)');
+        } else {
+            expect(elementStyle.borderColor).toBe('rgb(0, 217, 0)');
+        }
 
         const anotherStyle = document.createElement('style');
         anotherStyle.textContent = multiline(
@@ -861,8 +902,16 @@ describe('CSS Variables Override', () => {
         );
         container.append(anotherStyle);
         await timeout(50);
-        expect(getComputedStyle(container.querySelector('h1')).backgroundColor).toBe('rgb(0, 102, 0)');
-        expect(getComputedStyle(container.querySelector('h1')).borderColor).toBe('rgb(0, 217, 0)');
-        expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(255, 26, 26)');
+        const updatedStyle = getComputedStyle(container.querySelector('h1'));
+        expect(updatedStyle.backgroundColor).toBe('rgb(0, 102, 0)');
+        expect(updatedStyle.color).toBe('rgb(255, 26, 26)');
+        if (isFirefox) {
+            expect(updatedStyle.borderTopColor).toBe('rgb(0, 217, 0)');
+            expect(updatedStyle.borderRightColor).toBe('rgb(0, 217, 0)');
+            expect(updatedStyle.borderBottomColor).toBe('rgb(0, 217, 0)');
+            expect(updatedStyle.borderLeftColor).toBe('rgb(0, 217, 0)');
+        } else {
+            expect(updatedStyle.borderColor).toBe('rgb(0, 217, 0)');
+        }
     });
 });

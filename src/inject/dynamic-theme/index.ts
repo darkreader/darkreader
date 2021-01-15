@@ -29,7 +29,7 @@ const adoptedStyleManagers = [] as AdoptedStyleSheetManager[];
 let filter: FilterConfig = null;
 let fixes: DynamicThemeFix = null;
 let isIFrame: boolean = null;
-let ignoreImageAnalysisSelectors: string[] = null;
+let ignoredImageAnalysisSelectors: string[] = null;
 let ignoredInlineSelectors: string[] = null;
 
 function createOrUpdateStyle(className: string, root: ParentNode = document.head || document) {
@@ -181,7 +181,7 @@ function createDynamicStyleOverrides() {
         .filter((details) => details && details.variables.size > 0)
         .map(({variables}) => variables);
     if (newVariables.length === 0) {
-        styleManagers.forEach((manager) => manager.render(filter, variables, ignoreImageAnalysisSelectors));
+        styleManagers.forEach((manager) => manager.render(filter, variables, ignoredImageAnalysisSelectors));
         if (loadingStyles.size === 0) {
             cleanFallbackStyle();
         }
@@ -203,7 +203,7 @@ function createDynamicStyleOverrides() {
             push(inlineStyleElements, elements);
         }
     });
-    inlineStyleElements.forEach((el) => overrideInlineStyle(el as HTMLElement, filter, ignoredInlineSelectors, ignoreImageAnalysisSelectors));
+    inlineStyleElements.forEach((el) => overrideInlineStyle(el as HTMLElement, filter, ignoredInlineSelectors, ignoredImageAnalysisSelectors));
     handleAdoptedStyleSheets(document);
 }
 
@@ -237,7 +237,7 @@ function createManager(element: StyleElement) {
             return;
         }
         if (details.variables.size === 0) {
-            manager.render(filter, variables, ignoreImageAnalysisSelectors);
+            manager.render(filter, variables, ignoredImageAnalysisSelectors);
         } else {
             updateVariables(details.variables);
             throttledRenderAllStyles();
@@ -271,8 +271,8 @@ function removeManager(element: StyleElement) {
 }
 
 const throttledRenderAllStyles = throttle((callback?: () => void) => {
-    styleManagers.forEach((manager) => manager.render(filter, variables, ignoreImageAnalysisSelectors));
-    adoptedStyleManagers.forEach((manager) => manager.render(filter, variables, ignoreImageAnalysisSelectors));
+    styleManagers.forEach((manager) => manager.render(filter, variables, ignoredImageAnalysisSelectors));
+    adoptedStyleManagers.forEach((manager) => manager.render(filter, variables, ignoredImageAnalysisSelectors));
     callback && callback();
 });
 
@@ -331,7 +331,7 @@ function handleAdoptedStyleSheets(node: ShadowRoot | Document) {
             const newManger = createAdoptedStyleSheetOverride(node);
 
             adoptedStyleManagers.push(newManger);
-            newManger.render(filter, variables, ignoreImageAnalysisSelectors);
+            newManger.render(filter, variables, ignoredImageAnalysisSelectors);
         }
     }
 }
@@ -352,7 +352,7 @@ function watchForUpdates() {
             .filter((details) => details && details.variables.size > 0)
             .map(({variables}) => variables);
         if (newVariables.length === 0) {
-            newManagers.forEach((manager) => manager.render(filter, variables, ignoreImageAnalysisSelectors));
+            newManagers.forEach((manager) => manager.render(filter, variables, ignoredImageAnalysisSelectors));
         } else {
             newVariables.forEach((variables) => updateVariables(variables));
             throttledRenderAllStyles();
@@ -365,7 +365,7 @@ function watchForUpdates() {
     });
 
     watchForInlineStyles((element) => {
-        overrideInlineStyle(element, filter, ignoredInlineSelectors, ignoreImageAnalysisSelectors);
+        overrideInlineStyle(element, filter, ignoredInlineSelectors, ignoredImageAnalysisSelectors);
         if (element === document.documentElement) {
             const rootVariables = getElementCSSVariables(document.documentElement);
             if (rootVariables.size > 0) {
@@ -377,7 +377,7 @@ function watchForUpdates() {
         createShadowStaticStyleOverrides(root);
         const inlineStyleElements = root.querySelectorAll(INLINE_STYLE_SELECTOR);
         if (inlineStyleElements.length > 0) {
-            forEach(inlineStyleElements, (el) => overrideInlineStyle(el as HTMLElement, filter, ignoredInlineSelectors, ignoreImageAnalysisSelectors));
+            forEach(inlineStyleElements, (el) => overrideInlineStyle(el as HTMLElement, filter, ignoredInlineSelectors, ignoredImageAnalysisSelectors));
         }
     });
 
@@ -416,8 +416,11 @@ export function createOrUpdateDynamicTheme(filterConfig: FilterConfig, dynamicTh
     filter = filterConfig;
     fixes = dynamicThemeFixes;
     if (fixes) {
-        ignoreImageAnalysisSelectors = Array.isArray(fixes.ignoreImageAnalysis) ? fixes.ignoreImageAnalysis : [];
+        ignoredImageAnalysisSelectors = Array.isArray(fixes.ignoreImageAnalysis) ? fixes.ignoreImageAnalysis : [];
         ignoredInlineSelectors = Array.isArray(fixes.ignoreInlineStyle) ? fixes.ignoreInlineStyle : [];
+    } else {
+        ignoredImageAnalysisSelectors = [];
+        ignoredInlineSelectors = [];
     }
     isIFrame = iframe;
     if (document.head) {

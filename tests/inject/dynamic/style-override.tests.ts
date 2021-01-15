@@ -21,7 +21,7 @@ afterEach(() => {
     container.innerHTML = '';
 });
 
-describe('Style override', () => {
+describe('STYLE ELEMENTS', () => {
     it('should fill CSSStyleSheet with overriden rules', () => {
         const style = document.createElement('style');
         style.textContent = 'body { background-color: white; } h1 { color: black; }';

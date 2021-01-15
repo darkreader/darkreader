@@ -227,6 +227,9 @@ DarkReader.auto(false);
 
 // Get the generated CSS of Dark Reader returned as a string.
 const CSS = await DarkReader.exportGeneratedCSS();
+
+// Check if Dark Reader is enabled.
+const isEnabled = DarkReader.isEnabled();
 ```
 
 ... or if you are using ES modules
@@ -237,6 +240,7 @@ import {
     disable as disableDarkMode,
     auto as followSystemColorScheme,
     exportGeneratedCSS as collectCSS,
+    isEnabled as isDarkReaderEnabled
 } from 'darkreader';
 
 enableDarkMode({
@@ -250,6 +254,8 @@ disableDarkMode();
 followSystemColorScheme();
 
 const CSS = await collectCSS();
+
+const isEnabled = isDarkReaderEnabled();
 ```
 
 ## Contributors

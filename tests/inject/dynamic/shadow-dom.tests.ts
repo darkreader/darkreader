@@ -20,7 +20,7 @@ afterEach(() => {
     container.innerHTML = '';
 });
 
-describe('Handle Shadow-DOM', () => {
+describe('SHADOW DOM', () => {
     it('should add static overrides', async () => {
         container.innerHTML = multiline(
             '<div class="shadow-dom-wrapper"></div>',

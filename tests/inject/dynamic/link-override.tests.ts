@@ -43,7 +43,7 @@ afterEach(() => {
     resetChromeRuntimeMessageStub();
 });
 
-describe('Link override', () => {
+describe('LINK STYLES', () => {
     it('should override same-origin link', async () => {
         createStyleLink(`data:text/css;utf8,${encodeURIComponent(multiline(
             'h1 { background: gray; }',

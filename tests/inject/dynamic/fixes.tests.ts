@@ -16,8 +16,8 @@ afterEach(() => {
     container.innerHTML = '';
 });
 
-describe('Should handle different settings', () => {
-    it('should invert', async () => {
+describe('FIXES', () => {
+    it('should invert selectors', async () => {
         container.innerHTML = multiline(
             '<div class="logo">Some logo</div>',
         );
@@ -32,7 +32,8 @@ describe('Should handle different settings', () => {
         createOrUpdateDynamicTheme(DEFAULT_THEME, fixes, false);
         expect(getComputedStyle(container.querySelector('.logo')).filter).toBe('invert(1) hue-rotate(180deg) contrast(0.9)');
     });
-    it('should CSS', async () => {
+
+    it('should insert CSS', async () => {
         container.innerHTML = multiline(
             '<p class="text">Some text need to be red</p>',
         );
@@ -61,7 +62,6 @@ describe('Should handle different settings', () => {
 
         };
         createOrUpdateDynamicTheme(DEFAULT_THEME, fixes, false);
-        expect(getComputedStyle(container.querySelector('.text')).backgroundColor).toBe('rgb(102, 0, 102)');
+        expect(getComputedStyle(container.querySelector('.text')).backgroundColor).toBe('rgb(128, 0, 128)');
     });
-
 });

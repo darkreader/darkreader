@@ -20,7 +20,7 @@ afterEach(() => {
     container.innerHTML = '';
 });
 
-describe('Handle Media Queries', () => {
+describe('MEDIA QUERIES', () => {
     it('should not style blacklisted media', async () => {
         container.innerHTML = multiline(
             '<style class="testcase-style">',

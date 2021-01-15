@@ -138,51 +138,6 @@ export function parse($color: string): RGBA {
     throw new Error(`Unable to parse ${$color}`);
 }
 
-const lazyHSLMatch = /hsla?\([^\(\)]+\)/g;
-const lazyHexMatch = /#[0-9a-f]+/gi;
-export const lazyRGBMatch = /rgba?\([^\(\)]+\)/;
-
-const colorParseCache = new Map<string, RGBA>();
-
-export function parseColorWithCache($color: string) {
-    $color = $color.trim();
-    if (colorParseCache.has($color)) {
-        return colorParseCache.get($color);
-    }
-    const color = parse($color);
-    colorParseCache.set($color, color);
-    return color;
-}
-
-const colorToRGBParseCache = new Map<string, string>();
-
-export function parseColorToRGBWithCache($color: string) {
-    $color = $color.trim();
-    if (colorToRGBParseCache.has($color)) {
-        return colorToRGBParseCache.get($color);
-    }
-    const color = parseColorsToRGB($color);
-    colorToRGBParseCache.set($color, color);
-    return color;
-}
-
-// Convert known colors that will change in a stylesheet to the expected RGB
-export function parseColorsToRGB($color: string) {
-    let color = $color.trim().toLowerCase();
-    let didChange = false;
-
-    if (color.match(lazyHSLMatch)) {
-        color = color.replace(lazyHSLMatch, (hsl) => rgbToString(parseHSL(hsl)));
-        didChange = true;
-    }
-    if (color.match(lazyHexMatch)) {
-        color = color.replace(lazyHexMatch, (hex) => rgbToString(parseHex(hex)));
-        didChange = true;
-    }
-
-    return didChange ? color : $color;
-}
-
 function getNumbersFromString(str: string, splitter: RegExp, range: number[], units: {[unit: string]: number}) {
     const raw = str.split(splitter).filter((x) => x);
     const unitsList = Object.entries(units);

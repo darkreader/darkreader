@@ -280,8 +280,8 @@ export function getBgImageModifier(
     isCancelled: () => boolean,
 ): string | CSSValueModifier {
     try {
-        const gradients = value.match(gradientRegex) || [];
-        const urls = value.match(cssURLRegex) || [];
+        const gradients = getMatches(gradientRegex, value);
+        const urls = getMatches(cssURLRegex, value);
 
         if (urls.length === 0 && gradients.length === 0) {
             return value;
@@ -426,7 +426,7 @@ export function getBgImageModifier(
         });
 
         return (filter: FilterConfig) => {
-            const results = modifiers.filter((modify) => Boolean(modify)).map((modify) => modify(filter));
+            const results = modifiers.map((modify) => modify(filter));
             if (results.some((r) => r instanceof Promise)) {
                 return Promise.all(results)
                     .then((asyncResults) => {

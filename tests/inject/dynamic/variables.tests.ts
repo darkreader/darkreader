@@ -575,7 +575,7 @@ describe('CSS Variables Override', () => {
             '</h1>',
         );
         createOrUpdateDynamicTheme(theme, null, false);
-        await timeout(50);
+        await timeout(100);
         expect(getComputedStyle(container.querySelector('.icon1')).backgroundImage).toMatch(/^url\("blob:.*"\)$/);
         expect(getComputedStyle(container.querySelector('.icon2')).backgroundImage).toMatch(/^url\("blob:.*"\)$/);
         expect(getComputedStyle(container.querySelector('.icon3')).backgroundImage).toMatch(/^url\("blob:.*"\), url\("blob:.*"\)$/);

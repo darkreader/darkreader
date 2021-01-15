@@ -500,6 +500,23 @@ describe('CSS Variables Override', () => {
         expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(140, 255, 140)');
     });
 
+    it('should handle border color variables', () => {
+        container.innerHTML = multiline(
+            '<style>',
+            '    :root {',
+            '        --border-color: green;',
+            '    }',
+            '    h1 {',
+            '        border: 1px solid;',
+            '        border-color: var(--border-color);',
+            '    }',
+            '</style>',
+            '<h1>Border color with variable</h1>',
+        );
+        createOrUpdateDynamicTheme(theme, null, false);
+        expect(getComputedStyle(container.querySelector('h1')).borderColor).toBe('rgb(0, 217, 0)');
+    });
+
     it('should handle variables with gradients', () => {
         container.innerHTML = multiline(
             '<style>',

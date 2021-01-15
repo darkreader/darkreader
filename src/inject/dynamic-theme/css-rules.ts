@@ -27,9 +27,12 @@ export function iterateCSSRules(rules: CSSRuleList, iterate: (rule: CSSStyleRule
     });
 }
 
+// These properties are not iterable
+// when they depend on variables
 const complexVarDependantProperties = [
     'background',
     'border',
+    'border-color',
     'border-bottom',
     'border-left',
     'border-right',
@@ -45,7 +48,7 @@ export function iterateCSSDeclarations(style: CSSStyleDeclaration, iterate: (pro
         iterate(property, value);
     });
     complexVarDependantProperties.forEach((cp) => {
-        const cv = style[cp];
+        const cv = style.getPropertyValue(cp);
         if (cv && cv.includes('var(')) {
             iterate(cp, cv);
         }

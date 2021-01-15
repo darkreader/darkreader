@@ -426,7 +426,7 @@ export function getBgImageModifier(
         });
 
         return (filter: FilterConfig) => {
-            const results = modifiers.map((modify) => modify(filter));
+            const results = modifiers.filter(Boolean).map((modify) => modify(filter));
             if (results.some((r) => r instanceof Promise)) {
                 return Promise.all(results)
                     .then((asyncResults) => {

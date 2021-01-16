@@ -25,26 +25,27 @@ assignees: ''
 
 ## How to Reproduce
 <!-- We need to know how you encountered the bug to properly troubleshoot the issue. -->
-Steps to reproduce the behavior:
-An example of this is:
-
-- Go to '...'
-- Click on '...'
-- Notice spikes in CPU Usage
+<!--
+  Steps to reproduce the behavior:
+  An example of this is:
+    - Go to '...'
+    - Click on '...'
+    - Notice spikes in CPU Usage
+-->
 
 ## Performance Profiler
 <!-- A link to either profile.zip *Chromium only* or a firefox profiler *Firefox only*. -->
 
 <!--
   Please add a version of the browser you are using. 
-  If you don't know how to get your browser/darkreader version please search it up online.
+  If you don't know how to get your browser/Dark Reader version please search it up online.
 -->
 
 ## System Information
 
 - OS: <!-- [e.g. Windows, MacOS, Linux] -->
 - Browser: <!-- [e.g. Chrome 84, Safari 13] -->
-- Darkreader Version: <!-- [e.g. 4.9.26] -->
+- Dark Reader Version: <!-- [e.g. 4.9.26] -->
 
 <!--
   Do you have this performance issue with Dark Reader disabled?

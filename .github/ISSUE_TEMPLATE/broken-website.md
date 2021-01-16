@@ -1,6 +1,6 @@
 ---
 name: Broken website
-about: Creates a broken website report about Darkreader
+about: Creates a broken website report about Dark Reader
 title: "[Broken Website] Insert title here"
 labels: Broken Website
 assignees: ''
@@ -24,12 +24,13 @@ Please make sure there is no existing issue with this broken website.
 
 ## How to Reproduce
 <!-- We need to know how you encountered the bug to properly troubleshoot the issue. -->
-Steps to reproduce the behavior:
-An example of this is:
-
-- Go to x site
-- Hover over x button
-- See that when hovering it isn't changing colors
+<!--
+  Steps to reproduce the behavior:
+  An example of this is:
+  - Go to x site
+  - Hover over x button
+  - See that when hovering it isn't changing colors
+-->
 
 ## Expected behavior
 <!-- A clear and concise description of what you expected to happen. -->
@@ -42,14 +43,14 @@ An example of this is:
 
 <!--
 Please add a version of the browser you are using. 
-If you don't know how to get your browser/darkreader version please search it up online.
+If you don't know how to get your browser/Dark Reader version please search it up online.
 -->
 
 ## System Information
 
 - OS: <!-- [e.g. Windows, MacOS, Linux] -->
 - Browser: <!-- [e.g. Chrome, Safari] -->
-- Darkreader Version: <!-- [e.g. 4.9.26] -->
+- Dark Reader Version: <!-- [e.g. 4.9.26] -->
 
 ## Additional context
 <!-- Add any other context about the problem here. -->

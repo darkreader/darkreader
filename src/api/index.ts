@@ -5,7 +5,7 @@ import type {Theme, DynamicThemeFix} from '../definitions';
 import ThemeEngines from '../generators/theme-engines';
 import {createOrUpdateDynamicTheme, removeDynamicTheme} from '../inject/dynamic-theme';
 import {collectCSS} from '../inject/dynamic-theme/css-collection';
-import {isAPIUseable, isWindowDefined} from '../utils/platform';
+import {isAPIUseable, isMatchMediaEventDefined, isWindowDefined} from '../utils/platform';
 
 const isIFrame = (() => {
     try {
@@ -59,9 +59,9 @@ export function auto(themeOptions: Partial<Theme> | false = {}, fixes: DynamicTh
     if (themeOptions) {
         store = {themeOptions, fixes};
         handleColorScheme();
-        darkScheme.addEventListener('change', handleColorScheme);
+        isMatchMediaEventDefined && darkScheme.addEventListener('change', handleColorScheme);
     } else {
-        darkScheme.removeEventListener('change', handleColorScheme);
+        isMatchMediaEventDefined && darkScheme.removeEventListener('change', handleColorScheme);
         disable();
     }
 }

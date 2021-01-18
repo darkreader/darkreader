@@ -12,7 +12,7 @@ export function injectProxy() {
         Object.defineProperty(CSSStyleSheet.prototype, 'deleteRule', deleteRuleDescriptor);
         Object.defineProperty(CSSStyleSheet.prototype, 'removeRule', removeRuleDescriptor);
         document.removeEventListener('__darkreader__cleanUp', cleanUp);
-        document.removeEventListener('__darkreader__addUndefinedResolver', (e: CustomEvent<{tag: string}>) => addUndefinedResolver(e));
+        document.removeEventListener('__darkreader__addUndefinedResolver', addUndefinedResolver);
     };
 
     const addUndefinedResolver = (e: CustomEvent<{tag: string}>) => {
@@ -22,7 +22,7 @@ export function injectProxy() {
     };
 
     document.addEventListener('__darkreader__cleanUp', cleanUp);
-    document.addEventListener('__darkreader__addUndefinedResolver', (e: CustomEvent<{tag: string}>) => addUndefinedResolver(e));
+    document.addEventListener('__darkreader__addUndefinedResolver', addUndefinedResolver);
 
     const updateSheetEvent = new Event('__darkreader__updateSheet');
 

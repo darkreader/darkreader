@@ -18,7 +18,7 @@ afterEach(() => {
     container.innerHTML = '';
 });
 
-describe('Should parse and handle different color formats', () => {
+describe('COLOR PARSING', () => {
     it('should modify RGBA', async () => {
         container.innerHTML = multiline(
             '<style>',

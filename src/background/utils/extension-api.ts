@@ -1,6 +1,5 @@
 import {isPDF} from '../../utils/url';
 import {isFirefox, isEdge} from '../../utils/platform';
-import {DEFAULT_SETTINGS} from '../../defaults';
 import {logWarn} from '../../inject/utils/log';
 
 declare const browser: {

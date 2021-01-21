@@ -40,16 +40,24 @@ export function canInjectScript(url: string) {
 let isWriting = false;
 
 export async function readSyncStorage<T extends {[key: string]: any}>(defaults: T): Promise<T> {
-    return new Promise<T>((resolve) => {
+    return new Promise<T>((resolve, reject) => {
         chrome.storage.sync.get(defaults, (sync: T) => {
+            if (chrome.runtime.lastError) {
+                reject(chrome.runtime.lastError);
+                return;
+            }
             resolve(sync);
         });
     });
 }
 
 export async function readLocalStorage<T extends {[key: string]: any}>(defaults: T): Promise<T> {
-    return new Promise<T>((resolve) => {
+    return new Promise<T>((resolve, reject) => {
         chrome.storage.local.get(defaults, (local: T) => {
+            if (chrome.runtime.lastError) {
+                reject(chrome.runtime.lastError);
+                return;
+            }
             resolve(local);
         });
     });

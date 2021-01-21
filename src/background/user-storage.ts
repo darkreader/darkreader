@@ -37,7 +37,7 @@ export default class UserStorage {
     }
 
     private async loadSettingsFromStorage() {
-        const local = await readLocalStorage(DEFAULT_SETTINGS);
+        const local = await readLocalStorage(DEFAULT_SETTINGS) || DEFAULT_SETTINGS;
         if (local.syncSettings == null) {
             local.syncSettings = DEFAULT_SETTINGS.syncSettings;
         }

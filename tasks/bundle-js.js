@@ -11,10 +11,12 @@ const reload = require('./reload');
 const {PORT} = reload;
 const {createTask} = require('./task');
 
-async function copyToFF({cwdPath, debug}) {
+async function copyToBrowsers({cwdPath, debug}) {
     const destPath = `${getDestDir({debug})}/${cwdPath}`;
     const ffDestPath = `${getDestDir({debug, firefox: true})}/${cwdPath}`;
+    const tbDestPath = `${getDestDir({debug, thunderbird: true})}/${cwdPath}`;
     await fs.copy(destPath, ffDestPath);
+    await fs.copy(destPath, tbDestPath);
 }
 
 function replace(str, find, replace) {
@@ -45,8 +47,11 @@ const jsEntries = [
         async postBuild({debug}) {
             const destPath = `${getDestDir({debug})}/${this.dest}`;
             const ffDestPath = `${getDestDir({debug, firefox: true})}/${this.dest}`;
+            const tbDestPath = `${getDestDir({debug, thunderbird: true})}/${this.dest}`;
             const code = await fs.readFile(destPath, 'utf8');
-            await fs.outputFile(ffDestPath, patchFirefoxJS(code));
+            const patchedCode = patchFirefoxJS(code);
+            await fs.outputFile(ffDestPath, patchedCode);
+            await fs.copy(ffDestPath, tbDestPath);
         },
         watchFiles: null,
     },
@@ -55,7 +60,7 @@ const jsEntries = [
         dest: 'inject/index.js',
         reloadType: reload.FULL,
         async postBuild({debug}) {
-            await copyToFF({cwdPath: this.dest, debug});
+            await copyToBrowsers({cwdPath: this.dest, debug});
         },
         watchFiles: null,
     },
@@ -64,7 +69,7 @@ const jsEntries = [
         dest: 'inject/fallback.js',
         reloadType: reload.FULL,
         async postBuild({debug}) {
-            await copyToFF({cwdPath: this.dest, debug});
+            await copyToBrowsers({cwdPath: this.dest, debug});
         },
         watchFiles: null,
     },
@@ -73,7 +78,7 @@ const jsEntries = [
         dest: 'ui/devtools/index.js',
         reloadType: reload.UI,
         async postBuild({debug}) {
-            await copyToFF({cwdPath: this.dest, debug});
+            await copyToBrowsers({cwdPath: this.dest, debug});
         },
         watchFiles: null,
     },
@@ -82,7 +87,7 @@ const jsEntries = [
         dest: 'ui/popup/index.js',
         reloadType: reload.UI,
         async postBuild({debug}) {
-            await copyToFF({cwdPath: this.dest, debug});
+            await copyToBrowsers({cwdPath: this.dest, debug});
         },
         watchFiles: null,
     },
@@ -91,7 +96,7 @@ const jsEntries = [
         dest: 'ui/stylesheet-editor/index.js',
         reloadType: reload.UI,
         async postBuild({debug}) {
-            await copyToFF({cwdPath: this.dest, debug});
+            await copyToBrowsers({cwdPath: this.dest, debug});
         },
         watchFiles: null,
     },

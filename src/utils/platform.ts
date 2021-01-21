@@ -12,6 +12,10 @@ export const isWindows = platform.startsWith('win');
 export const isMacOS = platform.startsWith('mac');
 export const isMobile = userAgent.includes('mobile');
 export const isShadowDomSupported = typeof ShadowRoot === 'function';
+export const isMatchMediaChangeEventListenerSupported = (
+    typeof MediaQueryList === 'function' &&
+    typeof MediaQueryList.prototype.addEventListener === 'function'
+);
 
 export const chromiumVersion = (() => {
     const m = userAgent.match(/chrom[e|ium]\/([^ ]+)/);

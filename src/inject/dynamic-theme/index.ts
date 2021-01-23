@@ -427,6 +427,7 @@ export function createOrUpdateDynamicTheme(filterConfig: FilterConfig, dynamicTh
         if (isAnotherDarkReaderInstanceActive()) {
             return;
         }
+        document.documentElement.classList.add(`darkreader-${filter.engine}-${filter.mode ? 'dark' : 'light'}`);
         createThemeAndWatchForUpdates();
     } else {
         if (!isFirefox) {
@@ -455,6 +456,7 @@ function removeProxy() {
 }
 
 export function removeDynamicTheme() {
+    filter && document.documentElement.classList.remove(`darkreader-${filter.engine}-${filter.mode ? 'dark' : 'light'}`);
     cleanDynamicThemeCache();
     removeNode(document.querySelector('.darkreader--fallback'));
     if (document.head) {

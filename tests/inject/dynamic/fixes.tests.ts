@@ -17,6 +17,11 @@ afterEach(() => {
 });
 
 describe('FIXES', () => {
+    it('should should class name HTML', () => {
+        createOrUpdateDynamicTheme(DEFAULT_THEME, null, false);
+        expect(document.documentElement.classList.contains(`darkreader-${DEFAULT_THEME.engine}-${DEFAULT_THEME.mode}`));
+    });
+
     it('should invert selectors', async () => {
         container.innerHTML = multiline(
             '<div class="logo">Some logo</div>',

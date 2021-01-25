@@ -3,8 +3,8 @@
 ![Dark Reader screenshot](https://i.imgur.com/DyBlYwU.png)
 
 This extension **inverts brightness** of web pages and aims to **reduce eyestrain** while you browse the web.  
-Visit [Edge Addons](https://microsoftedge.microsoft.com/addons/detail/dark-reader/ifoakfbpdcdoeenechcleahebpibofpc), [Chrome Web Store](https://chrome.google.com/webstore/detail/dark-reader/eimadpbcbfnmbkopoojfekhnkhdbieeh)
-and [Firefox Add-ons](https://addons.mozilla.org/en-US/firefox/addon/darkreader/)
+Visit [Edge Addons](https://microsoftedge.microsoft.com/addons/detail/dark-reader/ifoakfbpdcdoeenechcleahebpibofpc), [Chrome Web Store](https://chrome.google.com/webstore/detail/dark-reader/eimadpbcbfnmbkopoojfekhnkhdbieeh), 
+[Firefox Add-ons](https://addons.mozilla.org/en-US/firefox/addon/darkreader/) and [Thunderbird Add-ons](https://addons.thunderbird.net/en-US/thunderbird/addon/darkreader)
 for more info.
 
 ## How to contribute

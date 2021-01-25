@@ -9,7 +9,7 @@
     "code-style": "eslint --cache --fix \"src/**/*.ts\" \"src/**/*.tsx\" \"tasks/**/*.js\" \"tests/**/*.js\" \"tests/**/*.ts\" \".eslintrc.js\" \"index.d.ts\"",
     "debug": "node tasks/build.js --debug",
     "debug-watch": "node tasks/build.js --debug --watch",
-    "lint": "eslint --cache \"src/**/*.ts\" \"src/**/*.tsx\" \"tasks/**/*.js\" \"tests/**/*.ts\" \"tests/**/*.js\" \"index.d.ts\"",
+    "lint": "eslint \"src/**/*.ts\" \"src/**/*.tsx\" \"tasks/**/*.js\" \"tests/**/*.ts\" \"tests/**/*.js\" \"index.d.ts\"",
     "prepublishOnly": "npm test && npm run api",
     "release": "npm test && npm run lint && node tasks/build.js --release",
     "test": "jest --config=tests/jest.config.js",

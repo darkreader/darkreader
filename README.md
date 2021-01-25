@@ -1,10 +1,10 @@
-# Dark Reader for Google Chrome, Microsoft Edge and Mozilla Firefox
+# Dark Reader for Google Chrome, Microsoft Edge, Mozilla Firefox and Mozilla Thunderbird
 
 ![Dark Reader screenshot](https://i.imgur.com/DyBlYwU.png)
 
 This extension **inverts brightness** of web pages and aims to **reduce eyestrain** while you browse the web.  
-Visit [Edge Addons](https://microsoftedge.microsoft.com/addons/detail/dark-reader/ifoakfbpdcdoeenechcleahebpibofpc), [Chrome Web Store](https://chrome.google.com/webstore/detail/dark-reader/eimadpbcbfnmbkopoojfekhnkhdbieeh)
-and [Firefox Add-ons](https://addons.mozilla.org/en-US/firefox/addon/darkreader/)
+Visit [Edge Addons](https://microsoftedge.microsoft.com/addons/detail/dark-reader/ifoakfbpdcdoeenechcleahebpibofpc), [Chrome Web Store](https://chrome.google.com/webstore/detail/dark-reader/eimadpbcbfnmbkopoojfekhnkhdbieeh), 
+[Firefox Add-ons](https://addons.mozilla.org/en-US/firefox/addon/darkreader/) and [Thunderbird Add-ons](https://addons.thunderbird.net/en-US/thunderbird/addon/darkreader)
 for more info.
 
 ## How to contribute
@@ -227,6 +227,9 @@ DarkReader.auto(false);
 
 // Get the generated CSS of Dark Reader returned as a string.
 const CSS = await DarkReader.exportGeneratedCSS();
+
+// Check if Dark Reader is enabled.
+const isEnabled = DarkReader.isEnabled();
 ```
 
 ... or if you are using ES modules
@@ -237,6 +240,7 @@ import {
     disable as disableDarkMode,
     auto as followSystemColorScheme,
     exportGeneratedCSS as collectCSS,
+    isEnabled as isDarkReaderEnabled
 } from 'darkreader';
 
 enableDarkMode({
@@ -250,6 +254,8 @@ disableDarkMode();
 followSystemColorScheme();
 
 const CSS = await collectCSS();
+
+const isEnabled = isDarkReaderEnabled();
 ```
 
 ## Contributors

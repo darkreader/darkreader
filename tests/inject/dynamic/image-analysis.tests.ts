@@ -122,7 +122,7 @@ async function getBgImageInfo(bgImageValue: string) {
     };
 }
 
-describe('Image analysis', () => {
+describe('IMAGE ANALYSIS', () => {
     it('should analyze dark icon', async () => {
         const details = await getImageDetails(svgToDataURL(images.darkIcon));
         expect(details.width).toBe(8);

@@ -6,6 +6,9 @@ build.zip
 build-firefox
 debug-firefox
 build-firefox.xpi
+build-thunderbird
+debug-thunderbird
+build-thunderbird.xpi
 darkreader.js
 debug.log
 
@@ -25,6 +28,6 @@ tests/inject/coverage/
 .vscode/
 *.code-workspace
 
-# Caching
+# Cache files
 #-----------------------------------
 .eslintcache

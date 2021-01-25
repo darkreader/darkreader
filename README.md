@@ -1,4 +1,4 @@
-# Dark Reader for Google Chrome, Microsoft Edge and Mozilla Firefox
+# Dark Reader for Google Chrome, Microsoft Edge, Mozilla Firefox and Mozilla Thunderbird
 
 ![Dark Reader screenshot](https://i.imgur.com/DyBlYwU.png)
 

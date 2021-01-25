@@ -21,7 +21,7 @@ See the list of [language codes](https://developer.chrome.com/webstore/i18n#loca
 ### Fix a wrong inversion
 
 If a website is **already dark** (has all pages dark by default), you can **add it to the [dark-sites.config](https://github.com/alexanderby/darkreader/blob/master/src/config/dark-sites.config) file**
-*(please, preserve alphabetical order)*.
+(*please, preserve alphabetical order, [Recommend Website](https://www.textfixer.com/tools/alphabetical-order.php)*).
 
 If some **parts** of a web page are **wrongly inverted**,
 you can fix this by specifying appropriate [**CSS selectors**](https://developer.mozilla.org/docs/Web/CSS/CSS_Selectors) in

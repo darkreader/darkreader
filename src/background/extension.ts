@@ -430,13 +430,13 @@ export class Extension {
                     };
                 }
                 case ThemeEngines.dynamicTheme: {
-                    const filter = {...theme};
-                    delete filter.engine;
+                    const themeConfig = {...theme};
+                    delete themeConfig.engine;
                     const fixes = getDynamicThemeFixesFor(url, frameURL, this.config.DYNAMIC_THEME_FIXES, this.user.settings.enableForPDF);
                     const isIFrame = frameURL != null;
                     return {
                         type: 'add-dynamic-theme',
-                        data: {filter, fixes, isIFrame},
+                        data: {theme: themeConfig, fixes, isIFrame},
                     };
                 }
                 default: {

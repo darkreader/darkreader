@@ -1,4 +1,4 @@
-import type {FilterConfig, Theme} from '../definitions';
+import type {Theme} from '../definitions';
 import type {RGBA, HSLA} from '../utils/color';
 import {parse, rgbToHSL, hslToRGB, rgbToString, rgbToHexString} from '../utils/color';
 import {scale} from '../utils/math';
@@ -80,7 +80,7 @@ function noopHSL(hsl: HSLA) {
     return hsl;
 }
 
-export function modifyColor(rgb: RGBA, theme: FilterConfig) {
+export function modifyColor(rgb: RGBA, theme: Theme) {
     return modifyColorWithCache(rgb, theme, noopHSL);
 }
 
@@ -245,10 +245,10 @@ export function modifyBorderColor(rgb: RGBA, theme: Theme) {
     return modifyColorWithCache(rgb, {...theme, mode: 0}, modifyBorderHSL, poleFg, poleBg);
 }
 
-export function modifyShadowColor(rgb: RGBA, filter: FilterConfig) {
-    return modifyBackgroundColor(rgb, filter);
+export function modifyShadowColor(rgb: RGBA, theme: Theme) {
+    return modifyBackgroundColor(rgb, theme);
 }
 
-export function modifyGradientColor(rgb: RGBA, filter: FilterConfig) {
-    return modifyBackgroundColor(rgb, filter);
+export function modifyGradientColor(rgb: RGBA, theme: Theme) {
+    return modifyBackgroundColor(rgb, theme);
 }

@@ -1,4 +1,4 @@
-import type {ExtensionData, ExtensionActions, FilterConfig, TabInfo, Message, UserSettings} from '../../definitions';
+import type {ExtensionData, ExtensionActions, Theme, TabInfo, Message, UserSettings} from '../../definitions';
 
 export default class Connector implements ExtensionActions {
     private port: chrome.runtime.Port;
@@ -61,7 +61,7 @@ export default class Connector implements ExtensionActions {
         this.port.postMessage({type: 'change-settings', data: settings});
     }
 
-    setTheme(theme: Partial<FilterConfig>) {
+    setTheme(theme: Partial<Theme>) {
         this.port.postMessage({type: 'set-theme', data: theme});
     }
 

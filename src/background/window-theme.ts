@@ -1,7 +1,7 @@
 import type {RGBA} from '../utils/color';
 import {parse} from '../utils/color';
 import {modifyBackgroundColor, modifyForegroundColor, modifyBorderColor} from '../generators/modify-colors';
-import type {FilterConfig} from '../definitions';
+import type {Theme} from '../definitions';
 
 declare const browser: {
     theme: {
@@ -69,16 +69,16 @@ const $colors = {
     toolbar_field_text: 'black',
 };
 
-export function setWindowTheme(filter: FilterConfig) {
+export function setWindowTheme(theme: Theme) {
     const colors = Object.entries($colors).reduce((obj, [key, value]) => {
         const type = themeColorTypes[key];
-        const modify: ((rgb: RGBA, filter: FilterConfig) => string) = {
+        const modify: ((rgb: RGBA, theme: Theme) => string) = {
             'bg': modifyBackgroundColor,
             'text': modifyForegroundColor,
             'border': modifyBorderColor,
         }[type];
         const rgb = parse(value);
-        const modified = modify(rgb, filter);
+        const modified = modify(rgb, theme);
         obj[key] = modified;
         return obj;
     }, {});

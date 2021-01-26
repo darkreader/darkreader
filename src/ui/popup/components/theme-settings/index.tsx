@@ -4,73 +4,73 @@ import CustomSettingsToggle from '../custom-settings-toggle';
 import ModeToggle from './mode-toggle';
 import {getLocalMessage} from '../../../../utils/locales';
 import {isURLInList} from '../../../../utils/url';
-import type {ExtWrapper, TabInfo, FilterConfig} from '../../../../definitions';
+import type {ExtWrapper, TabInfo, Theme} from '../../../../definitions';
 
-export default function FilterSettings({data, actions, tab}: ExtWrapper & {tab: TabInfo}) {
+export default function ThemeSettings({data, actions, tab}: ExtWrapper & {tab: TabInfo}) {
 
     const custom = data.settings.customThemes.find(({url}) => isURLInList(tab.url, url));
-    const filterConfig = custom ? custom.theme : data.settings.theme;
+    const theme = custom ? custom.theme : data.settings.theme;
 
-    function setConfig(config: Partial<FilterConfig>) {
+    function setTheme(theme: Partial<Theme>) {
         if (custom) {
-            custom.theme = {...custom.theme, ...config};
+            custom.theme = {...custom.theme, ...theme};
             actions.changeSettings({customThemes: data.settings.customThemes});
         } else {
-            actions.setTheme(config);
+            actions.setTheme(theme);
         }
     }
 
     const brightness = (
         <UpDown
-            value={filterConfig.brightness}
+            value={theme.brightness}
             min={50}
             max={150}
             step={5}
             default={100}
             name={getLocalMessage('brightness')}
-            onChange={(value) => setConfig({brightness: value})}
+            onChange={(value) => setTheme({brightness: value})}
         />
     );
 
     const contrast = (
         <UpDown
-            value={filterConfig.contrast}
+            value={theme.contrast}
             min={50}
             max={150}
             step={5}
             default={100}
             name={getLocalMessage('contrast')}
-            onChange={(value) => setConfig({contrast: value})}
+            onChange={(value) => setTheme({contrast: value})}
         />
     );
 
     const grayscale = (
         <UpDown
-            value={filterConfig.grayscale}
+            value={theme.grayscale}
             min={0}
             max={100}
             step={5}
             default={0}
             name={getLocalMessage('grayscale')}
-            onChange={(value) => setConfig({grayscale: value})}
+            onChange={(value) => setTheme({grayscale: value})}
         />
     );
 
     const sepia = (
         <UpDown
-            value={filterConfig.sepia}
+            value={theme.sepia}
             min={0}
             max={100}
             step={5}
             default={0}
             name={getLocalMessage('sepia')}
-            onChange={(value) => setConfig({sepia: value})}
+            onChange={(value) => setTheme({sepia: value})}
         />
     );
 
     return (
-        <section class="filter-settings">
-            <ModeToggle mode={filterConfig.mode} onChange={(mode) => setConfig({mode})} />
+        <section class="theme-settings">
+            <ModeToggle mode={theme.mode} onChange={(mode) => setTheme({mode})} />
             {brightness}
             {contrast}
             {sepia}

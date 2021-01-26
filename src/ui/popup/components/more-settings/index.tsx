@@ -6,33 +6,33 @@ import {Toggle} from '../../../controls';
 import {isURLInList} from '../../../../utils/url';
 import {compileMarkdown} from '../../utils/markdown';
 import {getLocalMessage} from '../../../../utils/locales';
-import type {ExtWrapper, FilterConfig, TabInfo} from '../../../../definitions';
+import type {ExtWrapper, Theme, TabInfo} from '../../../../definitions';
 import {isFirefox} from '../../../../utils/platform';
 
 export default function MoreSettings({data, actions, tab}: ExtWrapper & {tab: TabInfo}) {
 
     const custom = data.settings.customThemes.find(({url}) => isURLInList(tab.url, url));
-    const filterConfig = custom ? custom.theme : data.settings.theme;
+    const theme = custom ? custom.theme : data.settings.theme;
 
-    function setConfig(config: Partial<FilterConfig>) {
+    function setTheme(theme: Partial<Theme>) {
         if (custom) {
-            custom.theme = {...custom.theme, ...config};
+            custom.theme = {...custom.theme, ...theme};
             actions.changeSettings({customThemes: data.settings.customThemes});
         } else {
-            actions.setTheme(config);
+            actions.setTheme(theme);
         }
     }
 
     return (
         <section class="more-settings">
             <div class="more-settings__section">
-                <FontSettings config={filterConfig} fonts={data.fonts} onChange={setConfig} />
+                <FontSettings theme={theme} fonts={data.fonts} onChange={setTheme} />
             </div>
             <div class="more-settings__section">
                 {isFirefox ? null : <p class="more-settings__description">
                     {compileMarkdown(getLocalMessage('try_experimental_theme_engines'))}
                 </p>}
-                <EngineSwitch engine={filterConfig.engine} onChange={(engine) => setConfig({engine})} />
+                <EngineSwitch engine={theme.engine} onChange={(engine) => setTheme({engine})} />
             </div>
             <div class="more-settings__section">
                 <CustomSettingsToggle data={data} tab={tab} actions={actions} />

@@ -8,10 +8,10 @@ import {cssURLRegex, getCSSURLValue, getCSSBaseBath} from './css-rules';
 import type {ImageDetails} from './image';
 import {getImageDetails, getFilteredImageDataURL, cleanImageProcessingCache} from './image';
 import {logWarn, logInfo} from '../utils/log';
-import type {FilterConfig, Theme} from '../../definitions';
+import type {Theme} from '../../definitions';
 import {isFirefox} from '../../utils/platform';
 
-type CSSValueModifier = (filter: FilterConfig) => string | Promise<string>;
+type CSSValueModifier = (theme: Theme) => string | Promise<string>;
 
 export interface ModifiableCSSDeclaration {
     property: string;
@@ -177,12 +177,12 @@ function getModifiedScrollbarStyle(theme: Theme) {
     return lines.join('\n');
 }
 
-export function getModifiedFallbackStyle(filter: FilterConfig, {strict}) {
+export function getModifiedFallbackStyle(theme: Theme, {strict}) {
     const lines: string[] = [];
     lines.push(`html, body, ${strict ? 'body :not(iframe)' : 'body > :not(iframe)'} {`);
-    lines.push(`    background-color: ${modifyBackgroundColor({r: 255, g: 255, b: 255}, filter)} !important;`);
-    lines.push(`    border-color: ${modifyBorderColor({r: 64, g: 64, b: 64}, filter)} !important;`);
-    lines.push(`    color: ${modifyForegroundColor({r: 0, g: 0, b: 0}, filter)} !important;`);
+    lines.push(`    background-color: ${modifyBackgroundColor({r: 255, g: 255, b: 255}, theme)} !important;`);
+    lines.push(`    border-color: ${modifyBorderColor({r: 64, g: 64, b: 64}, theme)} !important;`);
+    lines.push(`    color: ${modifyForegroundColor({r: 0, g: 0, b: 0}, theme)} !important;`);
     lines.push('}');
     return lines.join('\n');
 }
@@ -291,28 +291,28 @@ function getBgImageModifier(value: string, rule: CSSStyleRule, ignoreImageSelect
 
                 let rgb = tryParseColor(part);
                 if (rgb) {
-                    return (filter: FilterConfig) => modifyGradientColor(rgb, filter);
+                    return (theme: Theme) => modifyGradientColor(rgb, theme);
                 }
 
                 const space = part.lastIndexOf(' ');
                 rgb = tryParseColor(part.substring(0, space));
                 if (rgb) {
-                    return (filter: FilterConfig) => `${modifyGradientColor(rgb, filter)} ${part.substring(space + 1)}`;
+                    return (theme: Theme) => `${modifyGradientColor(rgb, theme)} ${part.substring(space + 1)}`;
                 }
 
                 const colorStopMatch = part.match(colorStopRegex);
                 if (colorStopMatch) {
                     rgb = tryParseColor(colorStopMatch[3]);
                     if (rgb) {
-                        return (filter: FilterConfig) => `${colorStopMatch[1]}(${colorStopMatch[2] ? `${colorStopMatch[2]}, ` : ''}${modifyGradientColor(rgb, filter)})`;
+                        return (theme: Theme) => `${colorStopMatch[1]}(${colorStopMatch[2] ? `${colorStopMatch[2]}, ` : ''}${modifyGradientColor(rgb, theme)})`;
                     }
                 }
 
                 return () => part;
             });
 
-            return (filter: FilterConfig) => {
-                return `${type}(${parts.map((modify) => modify(filter)).join(', ')})`;
+            return (theme: Theme) => {
+                return `${type}(${parts.map((modify) => modify(theme)).join(', ')})`;
             };
         };
 
@@ -329,7 +329,7 @@ function getBgImageModifier(value: string, rule: CSSStyleRule, ignoreImageSelect
 
             const absoluteValue = `url("${url}")`;
 
-            return async (filter: FilterConfig) => {
+            return async (theme: Theme) => {
                 let imageDetails: ImageDetails;
                 if (imageDetailsCache.has(url)) {
                     imageDetails = imageDetailsCache.get(url);
@@ -363,29 +363,29 @@ function getBgImageModifier(value: string, rule: CSSStyleRule, ignoreImageSelect
                         return absoluteValue;
                     }
                 }
-                const bgImageValue = getBgImageValue(imageDetails, filter) || absoluteValue;
+                const bgImageValue = getBgImageValue(imageDetails, theme) || absoluteValue;
                 return bgImageValue;
             };
         };
 
-        const getBgImageValue = (imageDetails: ImageDetails, filter: FilterConfig) => {
+        const getBgImageValue = (imageDetails: ImageDetails, theme: Theme) => {
             const {isDark, isLight, isTransparent, isLarge, width} = imageDetails;
             let result: string;
-            if (isDark && isTransparent && filter.mode === 1 && !isLarge && width > 2) {
+            if (isDark && isTransparent && theme.mode === 1 && !isLarge && width > 2) {
                 logInfo(`Inverting dark image ${imageDetails.src}`);
-                const inverted = getFilteredImageDataURL(imageDetails, {...filter, sepia: clamp(filter.sepia + 10, 0, 100)});
+                const inverted = getFilteredImageDataURL(imageDetails, {...theme, sepia: clamp(theme.sepia + 10, 0, 100)});
                 result = `url("${inverted}")`;
-            } else if (isLight && !isTransparent && filter.mode === 1) {
+            } else if (isLight && !isTransparent && theme.mode === 1) {
                 if (isLarge) {
                     result = 'none';
                 } else {
                     logInfo(`Dimming light image ${imageDetails.src}`);
-                    const dimmed = getFilteredImageDataURL(imageDetails, filter);
+                    const dimmed = getFilteredImageDataURL(imageDetails, theme);
                     result = `url("${dimmed}")`;
                 }
-            } else if (filter.mode === 0 && isLight && !isLarge) {
+            } else if (theme.mode === 0 && isLight && !isLarge) {
                 logInfo(`Applying filter to image ${imageDetails.src}`);
-                const filtered = getFilteredImageDataURL(imageDetails, {...filter, brightness: clamp(filter.brightness - 10, 5, 200), sepia: clamp(filter.sepia + 10, 0, 100)});
+                const filtered = getFilteredImageDataURL(imageDetails, {...theme, brightness: clamp(theme.brightness - 10, 5, 200), sepia: clamp(theme.sepia + 10, 0, 100)});
                 result = `url("${filtered}")`;
             } else {
                 result = null;
@@ -407,8 +407,8 @@ function getBgImageModifier(value: string, rule: CSSStyleRule, ignoreImageSelect
             }
         });
 
-        return (filter: FilterConfig) => {
-            const results = modifiers.map((modify) => modify(filter));
+        return (theme: Theme) => {
+            const results = modifiers.map((modify) => modify(theme));
             if (results.some((r) => r instanceof Promise)) {
                 return Promise.all(results)
                     .then((asyncResults) => {
@@ -437,10 +437,10 @@ function getShadowModifier(value: string): CSSValueModifier {
             if (!rgb) {
                 return () => value.substring(prefixIndex, matchEnd);
             }
-            return (filter: FilterConfig) => `${value.substring(prefixIndex, matchIndex)}${modifyShadowColor(rgb, filter)}${i === colorMatches.length - 1 ? value.substring(matchEnd) : ''}`;
+            return (filter: Theme) => `${value.substring(prefixIndex, matchIndex)}${modifyShadowColor(rgb, filter)}${i === colorMatches.length - 1 ? value.substring(matchEnd) : ''}`;
         });
 
-        return (filter: FilterConfig) => modifiers.map((modify) => modify(filter)).join('');
+        return (filter: Theme) => modifiers.map((modify) => modify(filter)).join('');
 
     } catch (err) {
         logWarn(`Unable to parse shadow ${value}`, err);

@@ -22,9 +22,9 @@ function onMessage({type, data}) {
             break;
         }
         case 'add-dynamic-theme': {
-            const {filter, fixes, isIFrame} = data;
+            const {theme, fixes, isIFrame} = data;
             removeStyle();
-            createOrUpdateDynamicTheme(filter, fixes, isIFrame);
+            createOrUpdateDynamicTheme(theme, fixes, isIFrame);
             break;
         }
         case 'export-css': {

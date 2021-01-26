@@ -15,7 +15,7 @@ import createCSSFilterStylesheet from '../generators/css-filter';
 import {getDynamicThemeFixesFor} from '../generators/dynamic-theme';
 import createStaticStylesheet from '../generators/static-theme';
 import {createSVGFilterStylesheet, getSVGFilterMatrixValue, getSVGReverseFilterMatrixValue} from '../generators/svg-filter';
-import type {ExtensionData, FilterConfig, News, Shortcuts, UserSettings, TabInfo} from '../definitions';
+import type {ExtensionData, Theme, News, Shortcuts, UserSettings, TabInfo} from '../definitions';
 import {isSystemDarkModeEnabled} from '../utils/media-query';
 import {isFirefox, isThunderbird} from '../utils/platform';
 
@@ -293,7 +293,7 @@ export class Extension {
         this.onSettingsChanged();
     }
 
-    setTheme($theme: Partial<FilterConfig>) {
+    setTheme($theme: Partial<Theme>) {
         this.user.set({theme: {...this.user.settings.theme, ...$theme}});
 
         if (this.isEnabled() && this.user.settings.changeBrowserTheme) {

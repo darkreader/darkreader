@@ -3,7 +3,7 @@ import {getContext} from 'malevic/dom';
 import {withForms} from 'malevic/forms';
 import {withState, useState} from 'malevic/state';
 import {TabPanel, Button} from '../../controls';
-import FilterSettings from './filter-settings';
+import ThemeSettings from './theme-settings';
 import {Header, MoreToggleSettings} from './header';
 import Loader from './loader';
 import NewBody from '../body';
@@ -43,7 +43,7 @@ function openDevTools() {
 function Body(props: BodyProps) {
     const context = getContext();
     const {state, setState} = useState<BodyState>({
-        activeTab: 'Filter',
+        activeTab: 'Theme',
         newsOpen: false,
         didNewsSlideIn: false,
         moreToggleSettingsOpen: false,
@@ -122,15 +122,15 @@ function Body(props: BodyProps) {
                 activeTab={state.activeTab}
                 onSwitchTab={(tab) => setState({activeTab: tab})}
                 tabs={isThunderbird ? {
-                    'Filter': (
-                        <FilterSettings data={props.data} actions={props.actions} tab={props.tab} />
+                    'Theme': (
+                        <ThemeSettings data={props.data} actions={props.actions} tab={props.tab} />
                     ),
                     'More': (
                         <MoreSettings data={props.data} actions={props.actions} tab={props.tab} />
                     ),
                 } : {
-                    'Filter': (
-                        <FilterSettings data={props.data} actions={props.actions} tab={props.tab} />
+                    'Theme': (
+                        <ThemeSettings data={props.data} actions={props.actions} tab={props.tab} />
                     ),
                     'Site list': (
                         <SiteListSettings data={props.data} actions={props.actions} isFocused={state.activeTab === 'Site list'} />
@@ -140,7 +140,7 @@ function Body(props: BodyProps) {
                     ),
                 }}
                 tabLabels={{
-                    'Filter': getLocalMessage('filter'),
+                    'Theme': getLocalMessage('filter'),
                     'Site list': getLocalMessage('site_list'),
                     'More': getLocalMessage('more'),
                 }}

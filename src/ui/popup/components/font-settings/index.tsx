@@ -1,25 +1,25 @@
 import {m} from 'malevic';
 import {CheckBox, UpDown, Select} from '../../../controls';
 import {getLocalMessage} from '../../../../utils/locales';
-import type {FilterConfig} from '../../../../definitions';
+import type {Theme} from '../../../../definitions';
 
 interface FontSettingsProps {
-    config: FilterConfig;
+    theme: Theme;
     fonts: string[];
-    onChange: (config: Partial<FilterConfig>) => void;
+    onChange: (theme: Partial<Theme>) => void;
 }
 
-export default function FontSettings({config, fonts, onChange}: FontSettingsProps) {
+export default function FontSettings({theme, fonts, onChange}: FontSettingsProps) {
     return (
         <section class="font-settings">
             <div class="font-settings__font-select-container">
                 <div class="font-settings__font-select-container__line">
                     <CheckBox
-                        checked={config.useFont}
+                        checked={theme.useFont}
                         onchange={(e) => onChange({useFont: e.target.checked})}
                     />
                     <Select
-                        value={config.fontFamily}
+                        value={theme.fontFamily}
                         onChange={(value) => onChange({fontFamily: value})}
                         options={fonts.reduce((map, font) => {
                             map[font] = (
@@ -36,7 +36,7 @@ export default function FontSettings({config, fonts, onChange}: FontSettingsProp
                 </label>
             </div>
             <UpDown
-                value={config.textStroke}
+                value={theme.textStroke}
                 min={0}
                 max={1}
                 step={0.1}

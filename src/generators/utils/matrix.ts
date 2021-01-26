@@ -1,21 +1,21 @@
 import {clamp, multiplyMatrices} from '../../utils/math';
-import type {FilterConfig} from '../../definitions';
+import type {Theme} from '../../definitions';
 
-export function createFilterMatrix(config: FilterConfig) {
+export function createFilterMatrix(theme: Theme) {
     let m = Matrix.identity();
-    if (config.sepia !== 0) {
-        m = multiplyMatrices(m, Matrix.sepia(config.sepia / 100));
+    if (theme.sepia !== 0) {
+        m = multiplyMatrices(m, Matrix.sepia(theme.sepia / 100));
     }
-    if (config.grayscale !== 0) {
-        m = multiplyMatrices(m, Matrix.grayscale(config.grayscale / 100));
+    if (theme.grayscale !== 0) {
+        m = multiplyMatrices(m, Matrix.grayscale(theme.grayscale / 100));
     }
-    if (config.contrast !== 100) {
-        m = multiplyMatrices(m, Matrix.contrast(config.contrast / 100));
+    if (theme.contrast !== 100) {
+        m = multiplyMatrices(m, Matrix.contrast(theme.contrast / 100));
     }
-    if (config.brightness !== 100) {
-        m = multiplyMatrices(m, Matrix.brightness(config.brightness / 100));
+    if (theme.brightness !== 100) {
+        m = multiplyMatrices(m, Matrix.brightness(theme.brightness / 100));
     }
-    if (config.mode === 1) {
+    if (theme.mode === 1) {
         m = multiplyMatrices(m, Matrix.invertNHue());
     }
     return m;

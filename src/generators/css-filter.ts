@@ -4,10 +4,10 @@ import {parseSitesFixesConfig} from './utils/parse';
 import {parseArray, formatArray} from '../utils/text';
 import {compareURLPatterns, isURLInList} from '../utils/url';
 import {createTextStyle} from './text-style';
-import type {FilterConfig, InversionFix} from '../definitions';
+import type {Theme, InversionFix} from '../definitions';
 import {compareChromeVersions, chromiumVersion, isChromium} from '../utils/platform';
 
-export enum FilterMode {
+export enum ThemeMode {
     light = 0,
     dark = 1
 }
@@ -26,13 +26,13 @@ export function hasChromiumIssue501582() {
     );
 }
 
-export default function createCSSFilterStyleSheet(config: FilterConfig, url: string, frameURL: string, inversionFixes: InversionFix[]) {
-    const filterValue = getCSSFilterValue(config);
+export default function createCSSFilterStyleSheet(theme: Theme, url: string, frameURL: string, inversionFixes: InversionFix[]) {
+    const filterValue = getCSSFilterValue(theme);
     const reverseFilterValue = 'invert(100%) hue-rotate(180deg)';
-    return cssFilterStyleSheetTemplate(filterValue, reverseFilterValue, config, url, frameURL, inversionFixes);
+    return cssFilterStyleSheetTemplate(filterValue, reverseFilterValue, theme, url, frameURL, inversionFixes);
 }
 
-export function cssFilterStyleSheetTemplate(filterValue: string, reverseFilterValue: string, config: FilterConfig, url: string, frameURL: string, inversionFixes: InversionFix[]) {
+export function cssFilterStyleSheetTemplate(filterValue: string, reverseFilterValue: string, theme: Theme, url: string, frameURL: string, inversionFixes: InversionFix[]) {
     const fix = getInversionFixesFor(frameURL || url, inversionFixes);
 
     const lines: string[] = [];
@@ -46,18 +46,18 @@ export function cssFilterStyleSheetTemplate(filterValue: string, reverseFilterVa
         lines.push(createLeadingRule(filterValue));
     }
 
-    if (config.mode === FilterMode.dark) {
+    if (theme.mode === ThemeMode.dark) {
         // Add reverse rule
         lines.push('');
         lines.push('/* Reverse rule */');
         lines.push(createReverseRule(reverseFilterValue, fix));
     }
 
-    if (config.useFont || config.textStroke > 0) {
+    if (theme.useFont || theme.textStroke > 0) {
         // Add text rule
         lines.push('');
         lines.push('/* Font */');
-        lines.push(createTextStyle(config));
+        lines.push(createTextStyle(theme));
     }
 
     // Fix bad font hinting after inversion
@@ -79,8 +79,8 @@ export function cssFilterStyleSheetTemplate(filterValue: string, reverseFilterVa
 
     if (!frameURL) {
         // If user has the chrome issue the colors should be the other way around as of the rootcolors will affect the whole background color of the page
-        const rootColors = hasChromiumIssue501582() && config.mode === FilterMode.dark ? [0, 0, 0] : [255, 255, 255];
-        const [r, g, b] = applyColorMatrix(rootColors, createFilterMatrix(config));
+        const rootColors = hasChromiumIssue501582() && theme.mode === ThemeMode.dark ? [0, 0, 0] : [255, 255, 255];
+        const [r, g, b] = applyColorMatrix(rootColors, createFilterMatrix(theme));
         const bgColor = {
             r: Math.round(r),
             g: Math.round(g),
@@ -96,7 +96,7 @@ export function cssFilterStyleSheetTemplate(filterValue: string, reverseFilterVa
         lines.push('}');
     }
 
-    if (fix.css && fix.css.length > 0 && config.mode === FilterMode.dark) {
+    if (fix.css && fix.css.length > 0 && theme.mode === ThemeMode.dark) {
         lines.push('');
         lines.push('/* Custom rules */');
         lines.push(fix.css);
@@ -108,23 +108,23 @@ export function cssFilterStyleSheetTemplate(filterValue: string, reverseFilterVa
     return lines.join('\n');
 }
 
-export function getCSSFilterValue(config: FilterConfig) {
+export function getCSSFilterValue(theme: Theme) {
     const filters: string[] = [];
 
-    if (config.mode === FilterMode.dark) {
+    if (theme.mode === ThemeMode.dark) {
         filters.push('invert(100%) hue-rotate(180deg)');
     }
-    if (config.brightness !== 100) {
-        filters.push(`brightness(${config.brightness}%)`);
+    if (theme.brightness !== 100) {
+        filters.push(`brightness(${theme.brightness}%)`);
     }
-    if (config.contrast !== 100) {
-        filters.push(`contrast(${config.contrast}%)`);
+    if (theme.contrast !== 100) {
+        filters.push(`contrast(${theme.contrast}%)`);
     }
-    if (config.grayscale !== 0) {
-        filters.push(`grayscale(${config.grayscale}%)`);
+    if (theme.grayscale !== 0) {
+        filters.push(`grayscale(${theme.grayscale}%)`);
     }
-    if (config.sepia !== 0) {
-        filters.push(`sepia(${config.sepia}%)`);
+    if (theme.sepia !== 0) {
+        filters.push(`sepia(${theme.sepia}%)`);
     }
 
     if (filters.length === 0) {

@@ -1,4 +1,4 @@
-import type {FilterMode} from './generators/css-filter';
+import type {ThemeMode} from './generators/css-filter';
 
 export interface ExtensionData {
     isEnabled: boolean;
@@ -19,7 +19,7 @@ export interface ExtensionData {
 
 export interface ExtensionActions {
     changeSettings(settings: Partial<UserSettings>);
-    setTheme(theme: Partial<FilterConfig>);
+    setTheme(theme: Partial<Theme>);
     setShortcut(command: string, shortcut: string);
     toggleURL(url: string);
     markNewsAsRead(ids: string[]);
@@ -38,7 +38,7 @@ export interface ExtWrapper {
 }
 
 export interface Theme {
-    mode: FilterMode;
+    mode: ThemeMode;
     brightness: number;
     contrast: number;
     grayscale: number;
@@ -57,11 +57,9 @@ export interface Theme {
     styleSystemControls: boolean;
 }
 
-export type FilterConfig = Theme;
-
 export interface CustomSiteConfig {
     url: string[];
-    theme: FilterConfig;
+    theme: Theme;
 }
 
 export interface ThemePreset {
@@ -73,7 +71,7 @@ export interface ThemePreset {
 
 export interface UserSettings {
     enabled: boolean;
-    theme: FilterConfig;
+    theme: Theme;
     presets: ThemePreset[];
     customThemes: CustomSiteConfig[];
     siteList: string[];

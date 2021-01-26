@@ -2,7 +2,7 @@ import {forEach, push} from '../../utils/array';
 import {iterateShadowHosts, createOptimizedTreeObserver} from '../utils/dom';
 import {iterateCSSDeclarations} from './css-rules';
 import {getModifiableCSSDeclaration} from './modify-css';
-import type {FilterConfig} from '../../definitions';
+import type {Theme} from '../../definitions';
 import {isShadowDomSupported} from '../../utils/platform';
 import {getDuration} from '../../utils/time';
 import {throttle} from '../utils/throttle';
@@ -222,7 +222,7 @@ export function stopWatchingForInlineStyles() {
 const inlineStyleCache = new WeakMap<HTMLElement, string>();
 const filterProps = ['brightness', 'contrast', 'grayscale', 'sepia', 'mode'];
 
-function getInlineStyleCacheKey(el: HTMLElement, theme: FilterConfig) {
+function getInlineStyleCacheKey(el: HTMLElement, theme: Theme) {
     return INLINE_STYLE_ATTRS
         .map((attr) => `${attr}="${el.getAttribute(attr)}"`)
         .concat(filterProps.map((prop) => `${prop}="${theme[prop]}"`))
@@ -239,7 +239,7 @@ function shouldIgnoreInlineStyle(element: HTMLElement, selectors: string[]) {
     return false;
 }
 
-export function overrideInlineStyle(element: HTMLElement, theme: FilterConfig, ignoreInlineSelectors: string[], ignoreImageSelectors: string[]) {
+export function overrideInlineStyle(element: HTMLElement, theme: Theme, ignoreInlineSelectors: string[], ignoreImageSelectors: string[]) {
     const cacheKey = getInlineStyleCacheKey(element, theme);
     if (cacheKey === inlineStyleCache.get(element)) {
         return;

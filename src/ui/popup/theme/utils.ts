@@ -15,19 +15,19 @@ export function getCurrentThemePreset(props: ViewProps) {
             preset.theme :
             props.data.settings.theme;
 
-    function setTheme(config: Partial<Theme>) {
+    function setTheme(theme: Partial<Theme>) {
         if (custom) {
-            custom.theme = {...custom.theme, ...config};
+            custom.theme = {...custom.theme, ...theme};
             props.actions.changeSettings({
                 customThemes: props.data.settings.customThemes,
             });
         } else if (preset) {
-            preset.theme = {...preset.theme, ...config};
+            preset.theme = {...preset.theme, ...theme};
             props.actions.changeSettings({
                 presets: props.data.settings.presets,
             });
         } else {
-            props.actions.setTheme(config);
+            props.actions.setTheme(theme);
         }
     }
 

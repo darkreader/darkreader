@@ -4,7 +4,7 @@ import {applyColorMatrix, createFilterMatrix} from './utils/matrix';
 import {parseSitesFixesConfig} from './utils/parse';
 import {parseArray, formatArray} from '../utils/text';
 import {compareURLPatterns, isURLInList} from '../utils/url';
-import type {FilterConfig, StaticTheme} from '../definitions';
+import type {Theme, StaticTheme} from '../definitions';
 
 interface ThemeColors {
     [prop: string]: number[];
@@ -57,10 +57,10 @@ function mix(color1: number[], color2: number[], t: number) {
     return color1.map((c, i) => Math.round(c * (1 - t) + color2[i] * t));
 }
 
-export default function createStaticStylesheet(config: FilterConfig, url: string, frameURL: string, staticThemes: StaticTheme[]) {
-    const srcTheme = config.mode === 1 ? darkTheme : lightTheme;
-    const theme = Object.entries(srcTheme).reduce((t, [prop, color]) => {
-        t[prop] = applyColorMatrix(color, createFilterMatrix({...config, mode: 0}));
+export default function createStaticStylesheet(theme: Theme, url: string, frameURL: string, staticThemes: StaticTheme[]) {
+    const srcTheme = theme.mode === 1 ? darkTheme : lightTheme;
+    const themeColors = Object.entries(srcTheme).reduce((t, [prop, color]) => {
+        t[prop] = applyColorMatrix(color, createFilterMatrix({...theme, mode: 0}));
         return t;
     }, {} as ThemeColors);
 
@@ -71,17 +71,17 @@ export default function createStaticStylesheet(config: FilterConfig, url: string
 
     if (!siteTheme || !siteTheme.noCommon) {
         lines.push('/* Common theme */');
-        lines.push(...ruleGenerators.map((gen) => gen(commonTheme, theme)));
+        lines.push(...ruleGenerators.map((gen) => gen(commonTheme, themeColors)));
     }
 
     if (siteTheme) {
         lines.push(`/* Theme for ${siteTheme.url.join(' ')} */`);
-        lines.push(...ruleGenerators.map((gen) => gen(siteTheme, theme)));
+        lines.push(...ruleGenerators.map((gen) => gen(siteTheme, themeColors)));
     }
 
-    if (config.useFont || config.textStroke > 0) {
+    if (theme.useFont || theme.textStroke > 0) {
         lines.push('/* Font */');
-        lines.push(createTextStyle(config));
+        lines.push(createTextStyle(theme));
     }
 
     return lines

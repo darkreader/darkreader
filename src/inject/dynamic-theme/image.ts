@@ -2,7 +2,7 @@ import {getSVGFilterMatrixValue} from '../../generators/svg-filter';
 import {bgFetch} from './network';
 import {getURLHostOrProtocol} from '../../utils/url';
 import {loadAsDataURL} from '../../utils/network';
-import type {FilterConfig} from '../../definitions';
+import type {Theme} from '../../definitions';
 import {logWarn} from '../utils/log';
 
 export interface ImageDetails {
@@ -141,8 +141,8 @@ function analyzeImage(image: HTMLImageElement) {
 
 const objectURLs = new Set<string>();
 
-export function getFilteredImageDataURL({dataURL, width, height}: ImageDetails, filter: FilterConfig) {
-    const matrix = getSVGFilterMatrixValue(filter);
+export function getFilteredImageDataURL({dataURL, width, height}: ImageDetails, theme: Theme) {
+    const matrix = getSVGFilterMatrixValue(theme);
     const svg = [
         `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="${width}" height="${height}">`,
         '<defs>',

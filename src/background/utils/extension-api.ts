@@ -1,5 +1,6 @@
 import {isPDF} from '../../utils/url';
 import {isFirefox, isEdge} from '../../utils/platform';
+import {logWarn} from '../../inject/utils/log';
 
 declare const browser: {
     commands: {
@@ -42,6 +43,11 @@ let isWriting = false;
 export async function readSyncStorage<T extends {[key: string]: any}>(defaults: T): Promise<T> {
     return new Promise<T>((resolve) => {
         chrome.storage.sync.get(defaults, (sync: T) => {
+            if (chrome.runtime.lastError) {
+                logWarn(chrome.runtime.lastError.message);
+                resolve(defaults);
+                return;
+            }
             resolve(sync);
         });
     });
@@ -50,6 +56,11 @@ export async function readSyncStorage<T extends {[key: string]: any}>(defaults: 
 export async function readLocalStorage<T extends {[key: string]: any}>(defaults: T): Promise<T> {
     return new Promise<T>((resolve) => {
         chrome.storage.local.get(defaults, (local: T) => {
+            if (chrome.runtime.lastError) {
+                logWarn(chrome.runtime.lastError.message);
+                resolve(defaults);
+                return;
+            }
             resolve(local);
         });
     });

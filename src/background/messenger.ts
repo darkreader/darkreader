@@ -73,6 +73,7 @@ export default class Messenger {
             }
             case 'load-config': {
                 await this.adapter.loadConfig(data);
+                break;
             }
             case 'apply-dev-dynamic-theme-fixes': {
                 const error = this.adapter.applyDevDynamicThemeFixes(data);

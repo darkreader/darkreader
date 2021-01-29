@@ -5,6 +5,7 @@ import type {Theme, DynamicThemeFix} from '../definitions';
 import ThemeEngines from '../generators/theme-engines';
 import {createOrUpdateDynamicTheme, removeDynamicTheme} from '../inject/dynamic-theme';
 import {collectCSS} from '../inject/dynamic-theme/css-collection';
+import {isMatchMediaChangeEventListenerSupported} from '../utils/platform';
 
 let isDarkReaderEnabled = false;
 const isIFrame = (() => {
@@ -53,9 +54,17 @@ export function auto(themeOptions: Partial<Theme> | false = {}, fixes: DynamicTh
     if (themeOptions) {
         store = {themeOptions, fixes};
         handleColorScheme();
-        darkScheme.addEventListener('change', handleColorScheme);
+        if (isMatchMediaChangeEventListenerSupported) {
+            darkScheme.addEventListener('change', handleColorScheme);
+        } else {
+            darkScheme.addListener(handleColorScheme);
+        }
     } else {
-        darkScheme.removeEventListener('change', handleColorScheme);
+        if (isMatchMediaChangeEventListenerSupported) {
+            darkScheme.removeEventListener('change', handleColorScheme);
+        } else {
+            darkScheme.removeListener(handleColorScheme);
+        }
         disable();
     }
 }

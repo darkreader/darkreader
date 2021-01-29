@@ -9,6 +9,7 @@ import type {ImageDetails} from './image';
 import {getImageDetails, getFilteredImageDataURL, cleanImageProcessingCache} from './image';
 import {logWarn, logInfo} from '../utils/log';
 import type {FilterConfig, Theme} from '../../definitions';
+import {isFirefox} from '../../utils/platform';
 
 type CSSValueModifier = (filter: FilterConfig) => string | Promise<string>;
 
@@ -46,7 +47,7 @@ export function getModifiableCSSDeclaration(property: string, value: string, rul
             return {property, value: modifier, important, sourceValue};
         }
     } else if (property.indexOf('shadow') >= 0) {
-        const modifier = getShadowModifier(property, value);
+        const modifier = getShadowModifier(value);
         if (modifier) {
             return {property, value: modifier, important, sourceValue};
         }
@@ -168,9 +169,11 @@ function getModifiedScrollbarStyle(theme: Theme) {
     lines.push('::-webkit-scrollbar-corner {');
     lines.push(`    background-color: ${colorCorner};`);
     lines.push('}');
-    lines.push('* {');
-    lines.push(`    scrollbar-color: ${colorTrack} ${colorThumb};`);
-    lines.push('}');
+    if (isFirefox) {
+        lines.push('* {');
+        lines.push(`    scrollbar-color: ${colorThumb} ${colorTrack};`);
+        lines.push('}');
+    }
     return lines.join('\n');
 }
 
@@ -421,7 +424,7 @@ function getBgImageModifier(value: string, rule: CSSStyleRule, ignoreImageSelect
     }
 }
 
-function getShadowModifier(prop: string, value: string): CSSValueModifier {
+function getShadowModifier(value: string): CSSValueModifier {
     try {
         let index = 0;
         const colorMatches = getMatches(/(^|\s)([a-z]+\(.+?\)|#[0-9a-f]+|[a-z]+)(.*?(inset|outset)?($|,))/ig, value, 2);

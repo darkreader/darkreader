@@ -2,7 +2,8 @@ const userAgent = typeof navigator === 'undefined' ? 'some useragent' : navigato
 const platform = typeof navigator === 'undefined' ? 'some platform' : navigator.platform.toLowerCase();
 
 export const isChromium = userAgent.includes('chrome') || userAgent.includes('chromium');
-export const isFirefox = userAgent.includes('firefox');
+export const isThunderbird = userAgent.includes('thunderbird');
+export const isFirefox = userAgent.includes('firefox') || isThunderbird;
 export const isVivaldi = userAgent.includes('vivaldi');
 export const isYaBrowser = userAgent.includes('yabrowser');
 export const isOpera = userAgent.includes('opr') || userAgent.includes('opera');
@@ -12,6 +13,10 @@ export const isWindows = platform.startsWith('win');
 export const isMacOS = platform.startsWith('mac');
 export const isMobile = userAgent.includes('mobile');
 export const isShadowDomSupported = typeof ShadowRoot === 'function';
+export const isMatchMediaChangeEventListenerSupported = (
+    typeof MediaQueryList === 'function' &&
+    typeof MediaQueryList.prototype.addEventListener === 'function'
+);
 
 export const chromiumVersion = (() => {
     const m = userAgent.match(/chrom[e|ium]\/([^ ]+)/);

@@ -308,13 +308,13 @@ function stopWatchingForDocumentVisibility() {
     documentVisibilityListener = null;
 }
 
+function runDynamicStyle() {
+    createDynamicStyleOverrides();
+    watchForUpdates();
+}
+
 function createThemeAndWatchForUpdates() {
     createStaticStyleOverrides();
-
-    function runDynamicStyle() {
-        createDynamicStyleOverrides();
-        watchForUpdates();
-    }
 
     if (document.hidden) {
         watchForDocumentVisibility(runDynamicStyle);

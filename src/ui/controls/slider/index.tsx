@@ -59,6 +59,7 @@ export default function Slider(props: SliderProps) {
     }
 
     function onPointerDown(startEvt: MouseEvent | TouchEvent) {
+
         if (store.isActive) {
             return;
         }
@@ -75,8 +76,9 @@ export default function Slider(props: SliderProps) {
                 ? (startEvt as TouchEvent).changedTouches[0].identifier
                 : null;
 
+            const find = (touches: TouchList) => Array.from(touches).find((t) => t.identifier === touchId);
+
             function getTouch(e: TouchEvent) {
-                const find = (touches: TouchList) => Array.from(touches).find((t) => t.identifier === touchId);
                 return find(e.changedTouches) || find(e.touches);
             }
 

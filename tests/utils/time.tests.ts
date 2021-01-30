@@ -33,9 +33,9 @@ test('Duration', () => {
     })).toEqual(289488000);
 });
 
-test('Sunrize/sunset', () => {
-    const utcDate = (y, m, d, hh, mm) => new Date(Date.UTC(y, m, d, hh, mm));
+const utcDate = (y, m, d, hh, mm) => new Date(Date.UTC(y, m, d, hh, mm));
 
+test('Sunrize/sunset', () => {
     expect(isNightAtLocation(utcDate(2019, 8, 9, 0, 0), 52, 0)).toBe(true);
     expect(isNightAtLocation(utcDate(2019, 8, 9, 5, 0), 52, 0)).toBe(true);
     expect(isNightAtLocation(utcDate(2019, 8, 9, 7, 0), 52, 0)).toBe(false);

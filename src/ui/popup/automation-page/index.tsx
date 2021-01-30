@@ -3,6 +3,14 @@ import {getLocalMessage} from '../../../utils/locales';
 import {CheckBox, TimeRangePicker, TextBox, Button} from '../../controls';
 import type {ViewProps} from '../types';
 
+function getLocationString(location: number) {
+    if (location == null) {
+        return '';
+    }
+
+    return `${location}°`;
+}
+
 export default function AutomationPage(props: ViewProps) {
     const isSystemAutomation = props.data.settings.automation === 'system';
     const locationSettings = props.data.settings.location;
@@ -16,14 +24,6 @@ export default function AutomationPage(props: ViewProps) {
             max: 180,
         },
     };
-
-    function getLocationString(location: number) {
-        if (location == null) {
-            return '';
-        }
-
-        return `${location}°`;
-    }
 
     function locationChanged(inputElement: HTMLInputElement, newValue: string, type: string) {
         if (newValue.trim() === '') {

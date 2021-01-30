@@ -121,6 +121,8 @@ export default class TabManager {
         });
     }
 
+    isExtensionPage = (url: string) => url.startsWith('chrome-extension:') || url.startsWith('moz-extension:');
+
     async updateContentScript(options: {runOnProtectedPages: boolean}) {
         (await queryTabs({}))
             .filter((tab) => options.runOnProtectedPages || canInjectScript(tab.url))
@@ -161,16 +163,16 @@ export default class TabManager {
     async getActiveTabURL() {
         return (await this.getActiveTab()).url;
     }
+
     async getActiveTab() {
         let tab = (await queryTabs({
             active: true,
             lastFocusedWindow: true
         }))[0];
         // When Dark Reader's Dev Tools are open, query can return extension's page instead of expected page
-        const isExtensionPage = (url: string) => url.startsWith('chrome-extension:') || url.startsWith('moz-extension:');
-        if (!tab || isExtensionPage(tab.url)) {
+        if (!tab || this.isExtensionPage(tab.url)) {
             const tabs = (await queryTabs({active: true}));
-            tab = tabs.find((t) => !isExtensionPage(t.url)) || tab;
+            tab = tabs.find((t) => !this.isExtensionPage(t.url)) || tab;
         }
         return tab;
     }

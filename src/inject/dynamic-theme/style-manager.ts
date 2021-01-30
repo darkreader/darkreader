@@ -81,6 +81,14 @@ document.addEventListener('__darkreader__inlineScriptsAllowed', () => {
     canOptimizeUsingProxy = true;
 });
 
+
+// NOTE: In Firefox, when link is loading,
+// `sheet` property is not null,
+// but `cssRules` access error is thrown
+function isStillLoadingError(error: Error) {
+    return error && error.message && error.message.includes('loading');
+}
+
 export function manageStyle(element: StyleElement, {update, loadingStart, loadingEnd}): StyleManager {
     const prevStyles: HTMLStyleElement[] = [];
     let next: Element = element;
@@ -307,13 +315,6 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
         } catch (err) {
             return [null, err];
         }
-    }
-
-    // NOTE: In Firefox, when link is loading,
-    // `sheet` property is not null,
-    // but `cssRules` access error is thrown
-    function isStillLoadingError(error: Error) {
-        return error && error.message && error.message.includes('loading');
     }
 
     // Seems like Firefox bug: silent exception is produced

@@ -5,12 +5,13 @@ const colors = Object.entries({
     yellow: '\x1b[33m',
 }).reduce((map, [key, value]) => Object.assign(map, {[key]: (text) => `${value}${text}\x1b[0m`}), {});
 
+const leftpad = (n) => String(n).padStart(2, '0');
+
 function logWithTime(text) {
     const now = new Date();
     const hours = now.getHours();
     const minutes = now.getMinutes();
     const seconds = now.getSeconds();
-    const leftpad = (n) => String(n).padStart(2, '0');
     return console.log(`${colors.gray([hours, minutes, seconds].map(leftpad).join(':'))} ${text}`);
 }
 

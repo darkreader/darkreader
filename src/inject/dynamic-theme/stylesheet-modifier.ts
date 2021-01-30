@@ -210,18 +210,18 @@ export function createStyleSheetModifier() {
 
         const sheet = prepareSheet();
 
-        function buildStyleSheet() {
-            function createTarget(group: ReadyGroup, parent: CSSStyleSheet | CSSGroupingRule): CSSStyleSheet | CSSGroupingRule {
-                const {rule} = group;
-                if (rule instanceof CSSMediaRule) {
-                    const {media} = rule;
-                    const index = parent.cssRules.length;
-                    parent.insertRule(`@media ${media.mediaText} {}`, index);
-                    return parent.cssRules[index] as CSSMediaRule;
-                }
-                return parent;
+        function createTarget(group: ReadyGroup, parent: CSSStyleSheet | CSSGroupingRule): CSSStyleSheet | CSSGroupingRule {
+            const {rule} = group;
+            if (rule instanceof CSSMediaRule) {
+                const {media} = rule;
+                const index = parent.cssRules.length;
+                parent.insertRule(`@media ${media.mediaText} {}`, index);
+                return parent.cssRules[index] as CSSMediaRule;
             }
+            return parent;
+        }
 
+        function buildStyleSheet() {
             function iterateReadyRules(
                 group: ReadyGroup,
                 target: CSSStyleSheet | CSSGroupingRule,

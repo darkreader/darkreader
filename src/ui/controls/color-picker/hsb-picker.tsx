@@ -100,6 +100,10 @@ function renderSB(hue: number, canvas: HTMLCanvasElement) {
     });
 }
 
+function onHueCanvasCreate(canvas: HTMLCanvasElement) {
+    renderHue(canvas);
+}
+
 export default function HSBPicker(props: HSBPickerProps) {
     const context = getContext();
     const store = context.store as HSBPickerState;
@@ -124,10 +128,6 @@ export default function HSBPicker(props: HSBPickerProps) {
             return;
         }
         renderSB(hue, canvas);
-    }
-
-    function onHueCanvasCreate(canvas: HTMLCanvasElement) {
-        renderHue(canvas);
     }
 
     function createHSBSwipeHandler(getEventHSB: (e: {clientX: number; clientY: number; rect: ClientRect}) => HSB) {

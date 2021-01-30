@@ -61,19 +61,17 @@ export function getStringSize(value: string) {
     return value.length * 2;
 }
 
+function trimLeft(text: string) {
+    return text.replace(/^\s+/, '');
+}
+function getIndent(depth: number) {
+    if (depth === 0) {
+        return '';
+    }
+    return ' '.repeat(4 * depth);
+}
+
 export function formatCSS(text: string) {
-
-    function trimLeft(text: string) {
-        return text.replace(/^\s+/, '');
-    }
-
-    function getIndent(depth: number) {
-        if (depth === 0) {
-            return '';
-        }
-        return ' '.repeat(4 * depth);
-    }
-
     const emptyRuleRegexp = /[^{}]+{\s*}/g;
     while (emptyRuleRegexp.test(text)) {
         text = text.replace(emptyRuleRegexp, '');

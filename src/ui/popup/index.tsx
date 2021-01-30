@@ -48,6 +48,8 @@ if (isFirefox) {
 declare const __DEBUG__: boolean;
 const DEBUG = __DEBUG__;
 if (DEBUG) {
+    const respond = (message: any) => socket.send(JSON.stringify(message));
+
     chrome.runtime.onMessage.addListener(({type}) => {
         if (type === 'css-update') {
             document.querySelectorAll('link[rel="stylesheet"]').forEach((link: HTMLLinkElement) => {
@@ -68,7 +70,6 @@ if (DEBUG) {
 
     const socket = new WebSocket(`ws://localhost:8894`);
     socket.onmessage = (e) => {
-        const respond = (message: any) => socket.send(JSON.stringify(message));
         try {
             const message = JSON.parse(e.data);
             if (message.type === 'click') {

@@ -8,6 +8,14 @@ type MoreToggleSettingsProps = ExtWrapper & {
     onClose: () => void;
 };
 
+function getLocationString(location: number) {
+    if (location == null) {
+        return '';
+    }
+
+    return `${location}°`;
+}
+
 export default function MoreToggleSettings({data, actions, isExpanded, onClose}: MoreToggleSettingsProps) {
     const isSystemAutomation = data.settings.automation === 'system';
     const locationSettings = data.settings.location;
@@ -21,14 +29,6 @@ export default function MoreToggleSettings({data, actions, isExpanded, onClose}:
             max: 180,
         },
     };
-
-    function getLocationString(location: number) {
-        if (location == null) {
-            return '';
-        }
-
-        return `${location}°`;
-    }
 
     function locationChanged(inputElement: HTMLInputElement, newValue: string, type: string) {
         if (newValue.trim() === '') {

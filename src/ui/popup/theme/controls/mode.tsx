@@ -5,17 +5,16 @@ import {DropDown} from '../../../controls';
 import ThemeControl from './theme-control';
 import {isFirefox} from '../../../../utils/platform';
 
+function openCSSEditor() {
+    chrome.windows.create({
+        type: 'panel',
+        url: isFirefox ? '../stylesheet-editor/index.html' : 'ui/stylesheet-editor/index.html',
+        width: 600,
+        height: 600,
+    });
+}
+
 export default function Mode(props: {mode: string; onChange: (mode: string) => void}) {
-
-    function openCSSEditor() {
-        chrome.windows.create({
-            type: 'panel',
-            url: isFirefox ? '../stylesheet-editor/index.html' : 'ui/stylesheet-editor/index.html',
-            width: 600,
-            height: 600,
-        });
-    }
-
     const modes = [
         {id: ThemeEngines.dynamicTheme, content: getLocalMessage('engine_dynamic')},
         {id: ThemeEngines.cssFilter, content: getLocalMessage('engine_filter')},

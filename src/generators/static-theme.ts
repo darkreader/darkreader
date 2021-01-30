@@ -70,18 +70,15 @@ export default function createStaticStylesheet(config: FilterConfig, url: string
     const lines: string[] = [];
 
     if (!siteTheme || !siteTheme.noCommon) {
-        lines.push('/* Common theme */');
-        lines.push(...ruleGenerators.map((gen) => gen(commonTheme, theme)));
+        lines.push('/* Common theme */', ...ruleGenerators.map((gen) => gen(commonTheme, theme)));
     }
 
     if (siteTheme) {
-        lines.push(`/* Theme for ${siteTheme.url.join(' ')} */`);
-        lines.push(...ruleGenerators.map((gen) => gen(siteTheme, theme)));
+        lines.push(`/* Theme for ${siteTheme.url.join(' ')} */`, ...ruleGenerators.map((gen) => gen(siteTheme, theme)));
     }
 
     if (config.useFont || config.textStroke > 0) {
-        lines.push('/* Font */');
-        lines.push(createTextStyle(config));
+        lines.push('/* Font */', createTextStyle(config));
     }
 
     return lines

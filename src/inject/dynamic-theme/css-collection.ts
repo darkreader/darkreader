@@ -41,9 +41,7 @@ export async function collectCSS() {
     function addStaticCSS(selector: string, comment: string) {
         const staticStyle = document.querySelector(selector);
         if (staticStyle && staticStyle.textContent) {
-            css.push(`/* ${comment} */`);
-            css.push(staticStyle.textContent);
-            css.push('');
+            css.push(`/* ${comment} */`, staticStyle.textContent, '');
         }
     }
 
@@ -62,9 +60,7 @@ export async function collectCSS() {
 
     if (modifiedCSS.length != 0) {
         const formattedCSS = formatCSS(modifiedCSS.join('\n'));
-        css.push('/* Modified CSS */');
-        css.push(await replaceBlobs(formattedCSS));
-        css.push('');
+        css.push('/* Modified CSS */', await replaceBlobs(formattedCSS), '');
     }
 
     addStaticCSS('.darkreader--override', 'Override Style');

@@ -67,6 +67,7 @@ module.exports = {
         }],
         'unicorn/consistent-function-scoping': 'error',
         'unicorn/escape-case': 'error',
+        'unicorn/no-array-push-push': 'error',
     },
     overrides: [
         {
@@ -94,6 +95,12 @@ module.exports = {
                 '@typescript-eslint/switch-exhaustiveness-check': 'error',
                 '@typescript-eslint/promise-function-async': 'error',
             }
+        },
+        {
+            files: ['src/inject/dynamic-theme/modify-css.ts', 'tests/browser/coverage.js'],
+            rules: {
+                'unicorn/no-array-push-push': 'off',
+            },
         },
     ],
 };

@@ -11,8 +11,7 @@ export function createTextStyle(config: FilterConfig): string {
     }
 
     if (config.textStroke > 0) {
-        lines.push(`  -webkit-text-stroke: ${config.textStroke}px !important;`);
-        lines.push(`  text-stroke: ${config.textStroke}px !important;`);
+        lines.push(`  -webkit-text-stroke: ${config.textStroke}px !important;`, `  text-stroke: ${config.textStroke}px !important;`);
     }
 
     lines.push('}');

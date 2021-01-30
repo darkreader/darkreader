@@ -41,40 +41,23 @@ export function cssFilterStyleSheetTemplate(filterValue: string, reverseFilterVa
 
     // Add leading rule
     if (filterValue && !frameURL) {
-        lines.push('');
-        lines.push('/* Leading rule */');
-        lines.push(createLeadingRule(filterValue));
+        lines.push('', '/* Leading rule */', createLeadingRule(filterValue));
     }
 
     if (config.mode === FilterMode.dark) {
         // Add reverse rule
-        lines.push('');
-        lines.push('/* Reverse rule */');
-        lines.push(createReverseRule(reverseFilterValue, fix));
+        lines.push('', '/* Reverse rule */', createReverseRule(reverseFilterValue, fix));
     }
 
     if (config.useFont || config.textStroke > 0) {
         // Add text rule
-        lines.push('');
-        lines.push('/* Font */');
-        lines.push(createTextStyle(config));
+        lines.push('', '/* Font */', createTextStyle(config));
     }
 
     // Fix bad font hinting after inversion
-    lines.push('');
-    lines.push('/* Text contrast */');
-    lines.push('html {');
-    lines.push('  text-shadow: 0 0 0 !important;');
-    lines.push('}');
-
-    // Full screen fix
-    lines.push('');
-    lines.push('/* Full screen */');
+    lines.push('', '/* Text contrast */', 'html {', '  text-shadow: 0 0 0 !important;', '}', '', '/* Full screen */');
     [':-webkit-full-screen', ':-moz-full-screen', ':fullscreen'].forEach((fullScreen) => {
-        lines.push(`${fullScreen}, ${fullScreen} * {`);
-        lines.push('  -webkit-filter: none !important;');
-        lines.push('  filter: none !important;');
-        lines.push('}');
+        lines.push(`${fullScreen}, ${fullScreen} * {`, '  -webkit-filter: none !important;', '  filter: none !important;', '}');
     });
 
     if (!frameURL) {
@@ -89,21 +72,14 @@ export function cssFilterStyleSheetTemplate(filterValue: string, reverseFilterVa
                 return `rgb(${this.r},${this.g},${this.b})`;
             },
         };
-        lines.push('');
-        lines.push('/* Page background */');
-        lines.push('html {');
-        lines.push(`  background: ${bgColor} !important;`);
-        lines.push('}');
+        lines.push('', '/* Page background */', 'html {', `  background: ${bgColor} !important;`, '}');
     }
 
     if (fix.css && fix.css.length > 0 && config.mode === FilterMode.dark) {
-        lines.push('');
-        lines.push('/* Custom rules */');
-        lines.push(fix.css);
+        lines.push('', '/* Custom rules */', fix.css);
     }
 
-    lines.push('');
-    lines.push('}');
+    lines.push('', '}');
 
     return lines.join('\n');
 }
@@ -151,23 +127,15 @@ function createReverseRule(reverseFilterValue: string, fix: InversionFix): strin
     const lines: string[] = [];
 
     if (fix.invert.length > 0) {
-        lines.push(`${joinSelectors(fix.invert)} {`);
-        lines.push(`  -webkit-filter: ${reverseFilterValue} !important;`);
-        lines.push(`  filter: ${reverseFilterValue} !important;`);
-        lines.push('}');
+        lines.push(`${joinSelectors(fix.invert)} {`, `  -webkit-filter: ${reverseFilterValue} !important;`, `  filter: ${reverseFilterValue} !important;`, '}');
     }
 
     if (fix.noinvert.length > 0) {
-        lines.push(`${joinSelectors(fix.noinvert)} {`);
-        lines.push('  -webkit-filter: none !important;');
-        lines.push('  filter: none !important;');
-        lines.push('}');
+        lines.push(`${joinSelectors(fix.noinvert)} {`, '  -webkit-filter: none !important;', '  filter: none !important;', '}');
     }
 
     if (fix.removebg.length > 0) {
-        lines.push(`${joinSelectors(fix.removebg)} {`);
-        lines.push('  background: white !important;');
-        lines.push('}');
+        lines.push(`${joinSelectors(fix.removebg)} {`, '  background: white !important;', '}');
     }
 
     return lines.join('\n');

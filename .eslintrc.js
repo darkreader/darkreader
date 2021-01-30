@@ -62,6 +62,9 @@ module.exports = {
             avoidEscape: true,
         }],
         'unicorn/better-regex': 'error',
+        'unicorn/catch-error-name': ['error', {
+            name: 'err',
+        }],
     },
     overrides: [
         {

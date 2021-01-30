@@ -25,7 +25,7 @@ async function sendMessage(...args) {
             messageListeners.forEach((cb) => cb({type: 'fetch-response', data: text, error: null, id}));
         } catch (err) {
             console.error(err);
-            messageListeners.forEach((cb) => cb({type: 'fetch-response', data: null, err, id}));
+            messageListeners.forEach((cb) => cb({type: 'fetch-response', data: null, err: err, id}));
         }
     }
 }

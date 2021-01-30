@@ -67,7 +67,8 @@ function createPreprocessor(config, emitter, logger) {
                     '__DEBUG__': 'false',
                     '__PORT__': '-1',
                     '__WATCH__': 'false',
-                }
+                },
+                banner: '"use strict";',
             });
             /**
              * @type {import('esbuild').Metadata}}

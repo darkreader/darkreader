@@ -7,6 +7,7 @@ module.exports = {
             format: 'cjs',
             target: 'es2019',
             sourcemap: 'inline',
+            banner: '"use strict";',
         });
         return {
             code: result.code,

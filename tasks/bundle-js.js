@@ -165,6 +165,8 @@ async function bundleJS(/** @type {JSEntry} */entry, {debug, watch}) {
             '__WATCH__': watch ? 'true' : 'false',
         },
         minifySyntax: true,
+        banner: '"use strict";',
+        
     });
     if (watch) {
         const collectFunction = collectDependencies(src, outfile);

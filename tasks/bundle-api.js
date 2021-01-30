@@ -22,6 +22,7 @@ async function bundleAPI() {
         globalName: 'DarkReader',
         treeShaking: true,
         minifySyntax: true,
+        banner: '"use strict";',
     });
 }
 

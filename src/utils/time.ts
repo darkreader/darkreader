@@ -94,7 +94,7 @@ function getSunsetSunriseUTCTime(
         const M = (0.9856 * t) - 3.289;
 
         // calculate the Sun's true longitude
-        let L = M + (1.916 * Math.sin(M * D2R)) + (0.020 * Math.sin(2 * M * D2R)) + 282.634;
+        let L = M + (1.916 * Math.sin(M * D2R)) + (0.02 * Math.sin(2 * M * D2R)) + 282.634;
         if (L > 360) {
             L = L - 360;
         } else if (L < 0) {

@@ -70,6 +70,7 @@ module.exports = {
         'unicorn/no-array-push-push': 'error',
         'unicorn/no-lonely-if': 'error',
         'unicorn/no-new-array': 'error',
+        'unicorn/no-zero-fractions': 'error',
     },
     overrides: [
         {

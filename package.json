@@ -78,6 +78,7 @@
     "chokidar": "3.5.1",
     "eslint": "7.18.0",
     "eslint-plugin-local": "1.0.0",
+    "eslint-plugin-unicorn": "27.0.0",
     "fs-extra": "9.1.0",
     "globby": "11.0.2",
     "jasmine-core": "3.6.0",

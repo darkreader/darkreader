@@ -1,6 +1,6 @@
 module.exports = {
     parser: '@typescript-eslint/parser',
-    plugins: ['@typescript-eslint', 'local'],
+    plugins: ['@typescript-eslint', 'unicorn', 'local'],
     extends: ['plugin:@typescript-eslint/recommended'],
     rules: {
         'array-bracket-spacing': ['error', 'never'],
@@ -61,6 +61,7 @@ module.exports = {
             allowTemplateLiterals: true,
             avoidEscape: true,
         }],
+        'unicorn/better-regex': 'error',
     },
     overrides: [
         {

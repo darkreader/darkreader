@@ -2,7 +2,7 @@ import {forEach} from '../../utils/array';
 import {loadAsDataURL} from '../../utils/network';
 import {getMatches, formatCSS} from '../../utils/text';
 
-const blobRegex = /url\(\"(blob\:.*?)\"\)/g;
+const blobRegex = /url\("(blob:.*?)"\)/g;
 
 async function replaceBlobs(text: string) {
     const promises = [];

@@ -9,7 +9,7 @@ async function bundleLocale(/** @type {string} */filePath, {debug}) {
 
     const messages = {};
 
-    const regex = /@([a-z0-9_]+)/ig;
+    const regex = /@(\w+)/gi;
     let match;
     while ((match = regex.exec(file))) {
         const messageName = match[1];

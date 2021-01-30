@@ -276,14 +276,14 @@ export function overrideInlineStyle(element: HTMLElement, theme: FilterConfig, i
 
     if (element.hasAttribute('bgcolor')) {
         let value = element.getAttribute('bgcolor');
-        if (value.match(/^[0-9a-f]{3}$/i) || value.match(/^[0-9a-f]{6}$/i)) {
+        if (value.match(/^[\da-f]{3}$/i) || value.match(/^[\da-f]{6}$/i)) {
             value = `#${value}`;
         }
         setCustomProp('background-color', 'background-color', value);
     }
     if (element.hasAttribute('color')) {
         let value = element.getAttribute('color');
-        if (value.match(/^[0-9a-f]{3}$/i) || value.match(/^[0-9a-f]{6}$/i)) {
+        if (value.match(/^[\da-f]{3}$/i) || value.match(/^[\da-f]{6}$/i)) {
             value = `#${value}`;
         }
         setCustomProp('color', 'color', value);

@@ -236,7 +236,7 @@ function getColorModifier(prop: string, value: string): string | CSSValueModifie
     }
 }
 
-const gradientRegex = /[\-a-z]+gradient\(([^\(\)]*(\(([^\(\)]*(\(.*?\)))*[^\(\)]*\))){0,15}[^\(\)]*\)/g;
+const gradientRegex = /[a-z\-]+gradient\(([^()]*(\(([^()]*(\(.*?\)))*[^()]*\))){0,15}[^()]*\)/g;
 const imageDetailsCache = new Map<string, ImageDetails>();
 const awaitingForImageLoading = new Map<string, Array<(imageDetails: ImageDetails) => void>>();
 
@@ -283,8 +283,8 @@ function getBgImageModifier(value: string, rule: CSSStyleRule, ignoreImageSelect
             const type = match[1];
             const content = match[2];
 
-            const partsRegex = /([^\(\),]+(\([^\(\)]*(\([^\(\)]*\)*[^\(\)]*)?\))?[^\(\),]*),?/g;
-            const colorStopRegex = /^(from|color-stop|to)\(([^\(\)]*?,\s*)?(.*?)\)$/;
+            const partsRegex = /([^(),]+(\([^()]*(\([^()]*\)*[^()]*)?\))?[^(),]*),?/g;
+            const colorStopRegex = /^(from|color-stop|to)\(([^()]*?,\s*)?(.*?)\)$/;
 
             const parts = getMatches(partsRegex, content, 1).map((part) => {
                 part = part.trim();
@@ -427,7 +427,7 @@ function getBgImageModifier(value: string, rule: CSSStyleRule, ignoreImageSelect
 function getShadowModifier(value: string): CSSValueModifier {
     try {
         let index = 0;
-        const colorMatches = getMatches(/(^|\s)([a-z]+\(.+?\)|#[0-9a-f]+|[a-z]+)(.*?(inset|outset)?($|,))/ig, value, 2);
+        const colorMatches = getMatches(/(^|\s)([a-z]+\(.+?\)|#[\da-f]+|[a-z]+)(.*?(inset|outset)?($|,))/gi, value, 2);
         const modifiers = colorMatches.map((match, i) => {
             const prefixIndex = index;
             const matchIndex = value.indexOf(match, index);

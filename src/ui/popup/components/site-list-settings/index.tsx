@@ -10,7 +10,7 @@ interface SiteListSettingsProps extends ExtWrapper {
 export default function SiteListSettings({data, actions, isFocused}: SiteListSettingsProps) {
 
     function isSiteUrlValid(value: string) {
-        return /^([^\.\s]+?\.?)+$/.test(value);
+        return /^([^\s.]+?\.?)+$/.test(value);
     }
 
     return (

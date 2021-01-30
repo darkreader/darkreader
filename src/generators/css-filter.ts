@@ -144,7 +144,7 @@ function createLeadingRule(filterValue: string): string {
 }
 
 function joinSelectors(selectors: string[]) {
-    return selectors.map((s) => s.replace(/\,$/, '')).join(',\n');
+    return selectors.map((s) => s.replace(/,$/, '')).join(',\n');
 }
 
 function createReverseRule(reverseFilterValue: string, fix: InversionFix): string {

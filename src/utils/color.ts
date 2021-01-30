@@ -104,9 +104,9 @@ export function hslToString(hsl: HSLA) {
     return `hsl(${toFixed(h)}, ${toFixed(s * 100)}%, ${toFixed(l * 100)}%)`;
 }
 
-const rgbMatch = /^rgba?\([^\(\)]+\)$/;
-const hslMatch = /^hsla?\([^\(\)]+\)$/;
-const hexMatch = /^#[0-9a-f]+$/i;
+const rgbMatch = /^rgba?\([^()]+\)$/;
+const hslMatch = /^hsla?\([^()]+\)$/;
+const hexMatch = /^#[\da-f]+$/i;
 
 export function parse($color: string): RGBA {
     const c = $color.trim().toLowerCase();
@@ -157,7 +157,7 @@ function getNumbersFromString(str: string, splitter: RegExp, range: number[], un
     return numbers;
 }
 
-const rgbSplitter = /rgba?|\(|\)|\/|,|\s/ig;
+const rgbSplitter = /rgba?|\(|\)|\/|,|\s/gi;
 const rgbRange = [255, 255, 255, 1];
 const rgbUnits = {'%': 100};
 
@@ -166,7 +166,7 @@ function parseRGB($rgb: string) {
     return {r, g, b, a};
 }
 
-const hslSplitter = /hsla?|\(|\)|\/|,|\s/ig;
+const hslSplitter = /hsla?|\(|\)|\/|,|\s/gi;
 const hslRange = [360, 1, 1, 1];
 const hslUnits = {'%': 100, 'deg': 360, 'rad': 2 * Math.PI, 'turn': 1};
 

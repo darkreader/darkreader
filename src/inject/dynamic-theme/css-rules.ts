@@ -63,8 +63,8 @@ export function getElementCSSVariables(element: HTMLElement) {
     return variables;
 }
 
-export const cssURLRegex = /url\((('.+?')|(".+?")|([^\)]*?))\)/g;
-export const cssImportRegex = /@import\s*(url\()?(('.+?')|(".+?")|([^\)]*?))\)?;?/g;
+export const cssURLRegex = /url\((('.+?')|(".+?")|([^)]*?))\)/g;
+export const cssImportRegex = /@import\s*(url\()?(('.+?')|(".+?")|([^)]*?))\)?;?/g;
 
 export function getCSSURLValue(cssURL: string) {
     return cssURL.replace(/^url\((.*)\)$/, '$1').replace(/^"(.*)"$/, '$1').replace(/^'(.*)'$/, '$1');
@@ -72,7 +72,7 @@ export function getCSSURLValue(cssURL: string) {
 
 export function getCSSBaseBath(url: string) {
     const cssURL = parseURL(url);
-    return `${cssURL.origin}${cssURL.pathname.replace(/\?.*$/, '').replace(/(\/)([^\/]+)$/i, '$1')}`;
+    return `${cssURL.origin}${cssURL.pathname.replace(/\?.*$/, '').replace(/(\/)([^/]+)$/i, '$1')}`;
 }
 
 export function replaceCSSRelativeURLsWithAbsolute($css: string, cssBasePath: string) {
@@ -82,7 +82,7 @@ export function replaceCSSRelativeURLsWithAbsolute($css: string, cssBasePath: st
     });
 }
 
-const cssCommentsRegex = /\/\*[\s\S]*?\*\//g;
+const cssCommentsRegex = /\/\*[\S\s]*?\*\//g;
 
 export function removeCSSComments($css: string) {
     return $css.replace(cssCommentsRegex, '');
@@ -94,7 +94,7 @@ export function replaceCSSFontFace($css: string) {
     return $css.replace(fontFaceRegex, '');
 }
 
-const varRegex = /var\((--[^\s,\(\)]+),?\s*([^\(\)]*(\([^\(\)]*\)[^\(\)]*)*\s*)\)/g;
+const varRegex = /var\((--[^\s(),]+),?\s*([^()]*(\([^()]*\)[^()]*)*\s*)\)/g;
 
 export function replaceCSSVariables(
     value: string,

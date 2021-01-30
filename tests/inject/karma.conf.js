@@ -24,7 +24,7 @@ module.exports = (config) => {
             'karma-firefox-launcher',
             'karma-safari-launcher',
             'karma-jasmine',
-            require('./esbuild-preprocessor')
+            require('../esbuild-preprocessor')
         ],
     });
 };

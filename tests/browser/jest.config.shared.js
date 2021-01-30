@@ -1,5 +1,5 @@
 module.exports = {
-    testEnvironment: './environment.js',
+    testEnvironment: './tests/browser/environment.js',
     verbose: true,
     transform: {
         '^.+\\.ts(x?)$': './tests/esbuild-transform.js'
@@ -20,5 +20,6 @@ module.exports = {
     ],
     globals: {
         __DEBUG__: false,
-    }
+    },
+    rootDir: '../../',
 };

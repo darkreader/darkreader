@@ -4,4 +4,5 @@ module.exports = {
         'tests/utils/jest.config.js',
     ],
     verbose: true,
+    rootDir: '../',
 };

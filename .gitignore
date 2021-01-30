@@ -22,6 +22,10 @@ node_modules/
 .vscode/
 *.code-workspace
 
+# Coverge
+#-----------------------------------
+tests/browser/coverage/
+
 # Cache files
 #-----------------------------------
 .eslintcache

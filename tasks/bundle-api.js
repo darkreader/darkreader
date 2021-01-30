@@ -15,7 +15,6 @@ async function bundleAPI() {
             '__DEBUG__': false,
         },
         target: 'es2015',
-        avoidTDZ: false,
         charset: 'utf8',
         banner: `/**\n * Dark Reader v${packageJSON.version}\n * https://darkreader.org/\n */\n`,
         format: 'iife',

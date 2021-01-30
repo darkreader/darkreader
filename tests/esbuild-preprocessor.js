@@ -59,7 +59,6 @@ function createPreprocessor(config, emitter, logger) {
                 outfile: outFileKey,
                 write: false,
                 bundle: true,
-                avoidTDZ: false,
                 sourcemap: 'inline',
                 target: 'es2019',
                 charset: 'utf8',

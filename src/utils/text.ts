@@ -20,7 +20,7 @@ export function getTextPositionMessage(text: string, index: number) {
         message += text.substring(text.lastIndexOf('\n') + 1);
     }
     message += '\n';
-    message += `${new Array(column).join('-')}^`;
+    message += `${Array.from({length: column}).join('-')}^`;
     return message;
 }
 

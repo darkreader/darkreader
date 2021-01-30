@@ -69,6 +69,7 @@ module.exports = {
         'unicorn/escape-case': 'error',
         'unicorn/no-array-push-push': 'error',
         'unicorn/no-lonely-if': 'error',
+        'unicorn/no-new-array': 'error',
     },
     overrides: [
         {

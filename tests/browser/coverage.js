@@ -41,11 +41,11 @@ function splitCode(code, ranges) {
 }
 
 function red(/** @type {string} */text) {
-    return `\x1b[31m${text}\x1b[0m`;
+    return `\x1B[31m${text}\x1B[0m`;
 }
 
 function green(/** @type {string} */text) {
-    return `\x1b[32m${text}\x1b[0m`;
+    return `\x1B[32m${text}\x1B[0m`;
 }
 
 /**

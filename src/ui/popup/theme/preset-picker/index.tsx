@@ -58,7 +58,7 @@ export default function PresetPicker(props: ViewProps) {
 
     const defaultOption = {id: 'default', content: 'Theme for all websites'};
     const addNewPresetOption = props.data.settings.presets.length < MAX_ALLOWED_PRESETS ?
-        {id: 'add-preset', content: '\uff0b Create new theme'} :
+        {id: 'add-preset', content: '\uFF0B Create new theme'} :
         null;
     const userPresetsOptions = props.data.settings.presets.map((preset) => {
         if (preset.id === selectedPresetId) {

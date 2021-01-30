@@ -1,9 +1,9 @@
 const colors = Object.entries({
-    gray: '\x1b[90m',
-    green: '\x1b[32m',
-    red: '\x1b[31m',
-    yellow: '\x1b[33m',
-}).reduce((map, [key, value]) => Object.assign(map, {[key]: (text) => `${value}${text}\x1b[0m`}), {});
+    gray: '\x1B[90m',
+    green: '\x1B[32m',
+    red: '\x1B[31m',
+    yellow: '\x1B[33m',
+}).reduce((map, [key, value]) => Object.assign(map, {[key]: (text) => `${value}${text}\x1B[0m`}), {});
 
 const leftpad = (n) => String(n).padStart(2, '0');
 

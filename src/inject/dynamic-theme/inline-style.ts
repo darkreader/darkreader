@@ -265,13 +265,11 @@ export function overrideInlineStyle(element: HTMLElement, theme: FilterConfig, i
         unsetProps.delete(targetCSSProp);
     }
 
-    if (ignoreInlineSelectors.length > 0) {
-        if (shouldIgnoreInlineStyle(element, ignoreInlineSelectors)) {
-            unsetProps.forEach((cssProp) => {
-                element.removeAttribute(overrides[cssProp].dataAttr);
-            });
-            return;
-        }
+    if (ignoreInlineSelectors.length > 0 && shouldIgnoreInlineStyle(element, ignoreInlineSelectors)) {
+        unsetProps.forEach((cssProp) => {
+            element.removeAttribute(overrides[cssProp].dataAttr);
+        });
+        return;
     }
 
     if (element.hasAttribute('bgcolor')) {

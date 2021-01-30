@@ -326,13 +326,11 @@ function createThemeAndWatchForUpdates() {
 }
 
 function handleAdoptedStyleSheets(node: ShadowRoot | Document) {
-    if (Array.isArray(node.adoptedStyleSheets)) {
-        if (node.adoptedStyleSheets.length > 0) {
-            const newManger = createAdoptedStyleSheetOverride(node);
+    if (Array.isArray(node.adoptedStyleSheets) && node.adoptedStyleSheets.length > 0) {
+        const newManger = createAdoptedStyleSheetOverride(node);
 
-            adoptedStyleManagers.push(newManger);
-            newManger.render(filter, variables, ignoredImageAnalysisSelectors);
-        }
+        adoptedStyleManagers.push(newManger);
+        newManger.render(filter, variables, ignoredImageAnalysisSelectors);
     }
 }
 

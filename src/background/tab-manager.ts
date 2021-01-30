@@ -85,13 +85,12 @@ export default class TabManager {
                 // Using custom response due to Chrome and Firefox incompatibility
                 // Sometimes fetch error behaves like synchronous and sends `undefined`
                 const sendResponse = (response) => chrome.tabs.sendMessage(sender.tab.id, {type: 'fetch-response', id, ...response});
-                if (isThunderbird) {
-                    // In thunderbird some CSS is loaded on a chrome:// URL.
-                    // Thunderbird restricted Add-ons to load those URL's.
-                    if ((url as string).startsWith('chrome://')) {
-                        sendResponse({data: null});
-                        return;
-                    }
+
+                // In thunderbird some CSS is loaded on a chrome:// URL.
+                // Thunderbird restricted Add-ons to load those URL's.
+                if (isThunderbird && (url as string).startsWith('chrome://')) {
+                    sendResponse({data: null});
+                    return;
                 }
                 try {
                     const response = await fileLoader.get({url, responseType, mimeType});

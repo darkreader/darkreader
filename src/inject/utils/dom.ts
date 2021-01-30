@@ -109,12 +109,10 @@ export function watchForNodePosition<T extends Node>(
             attempts = 1;
         }
 
-        if (mode === 'parent') {
-            if (prevSibling && prevSibling.parentNode !== parent) {
-                logWarn('Unable to restore node position: sibling parent changed', node, prevSibling, parent);
-                stop();
-                return;
-            }
+        if (mode === 'parent' && prevSibling && prevSibling.parentNode !== parent) {
+            logWarn('Unable to restore node position: sibling parent changed', node, prevSibling, parent);
+            stop();
+            return;
         }
 
         if (mode === 'prev-sibling') {

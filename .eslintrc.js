@@ -68,6 +68,7 @@ module.exports = {
         'unicorn/consistent-function-scoping': 'error',
         'unicorn/escape-case': 'error',
         'unicorn/no-array-push-push': 'error',
+        'unicorn/no-lonely-if': 'error',
     },
     overrides: [
         {

@@ -71,6 +71,7 @@ module.exports = {
         'unicorn/no-lonely-if': 'error',
         'unicorn/no-new-array': 'error',
         'unicorn/no-zero-fractions': 'error',
+        'unicorn/number-literal-case': 'error',
     },
     overrides: [
         {

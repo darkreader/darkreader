@@ -28,7 +28,7 @@ export function openFile(options: {extensions: string[]}, callback: (content: st
     input.onchange = () => {
         if (input.files[0]) {
             reader.readAsText(input.files[0]);
-            document.body.removeChild(input);
+            input.remove();
         }
     };
     document.body.appendChild(input);

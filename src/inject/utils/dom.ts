@@ -63,8 +63,8 @@ export function createNodeAsap({
     }
 }
 
-export function removeNode(node: Node) {
-    node && node.parentNode && node.parentNode.removeChild(node);
+export function removeNode(node: ChildNode) {
+    node && node.remove();
 }
 
 export function watchForNodePosition<T extends Node>(
@@ -346,7 +346,7 @@ export function getTempCSSStyleSheet(): CSSStyleSheet {
         const tempStyleElement = document.createElement('style');
         document.head.append(tempStyleElement);
         tempStyle = tempStyleElement.sheet;
-        document.head.removeChild(tempStyleElement);
+        tempStyleElement.remove();
         return tempStyle;
     }
 }

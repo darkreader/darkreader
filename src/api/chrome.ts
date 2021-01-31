@@ -16,12 +16,7 @@ async function sendMessage(...args) {
         try {
             const {url, responseType} = args[0].data;
             const response = await callFetchMethod(url);
-            let text: string;
-            if (responseType === 'data-url') {
-                text = await readResponseAsDataURL(response);
-            } else {
-                text = await response.text();
-            }
+            const text = await (responseType === 'data-url' ? readResponseAsDataURL(response) : response.text());
             messageListeners.forEach((cb) => cb({type: 'fetch-response', data: text, error: null, id}));
         } catch (err) {
             console.error(err);

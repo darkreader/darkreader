@@ -103,11 +103,7 @@ export function getSelectionColor(theme: Theme) {
         const rgb = parse(theme.selectionColor);
         const hsl = rgbToHSL(rgb);
         backgroundColorSelection = theme.selectionColor;
-        if (hsl.l < 0.5) {
-            foregroundColorSelection = '#FFF';
-        } else {
-            foregroundColorSelection = '#000';
-        }
+        foregroundColorSelection = hsl.l < 0.5 ? '#FFF' : '#000';
     }
     return {backgroundColorSelection, foregroundColorSelection};
 }

@@ -14,11 +14,7 @@ export function getTextPositionMessage(text: string, index: number) {
     const column = index - prevLn;
     message += `line ${line}, column ${column}`;
     message += '\n';
-    if (index < text.length) {
-        message += text.substring(prevLn + 1, nextLn);
-    } else {
-        message += text.substring(text.lastIndexOf('\n') + 1);
-    }
+    message += index < text.length ? text.substring(prevLn + 1, nextLn) : text.substring(text.lastIndexOf('\n') + 1);
     message += '\n';
     message += `${Array.from({length: column}).join('-')}^`;
     return message;

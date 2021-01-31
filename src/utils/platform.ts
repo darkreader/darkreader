@@ -20,11 +20,7 @@ export const isMatchMediaChangeEventListenerSupported = (
 
 export const chromiumVersion = (() => {
     const m = userAgent.match(/chrom[eimu|]\/([^ ]+)/);
-    if (m && m[1]) {
-        return m[1];
-    } else {
-        return '';
-    }
+    return m && m[1] ? m[1] : '';
 })();
 
 export const isDefinedSelectorSupported = (() => {

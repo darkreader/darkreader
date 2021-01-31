@@ -215,15 +215,11 @@ export class Extension {
     }
 
     private getConnectionMessage(url, frameURL) {
-        if (this.ready) {
-            return this.getTabMessage(url, frameURL);
-        } else {
-            return new Promise<{type: string; data?: any}>((resolve) => {
-                this.awaiting.push(() => {
-                    resolve(this.getTabMessage(url, frameURL));
-                });
+        return this.ready ? this.getTabMessage(url, frameURL) : new Promise<{type: string; data?: any}>((resolve) => {
+            this.awaiting.push(() => {
+                resolve(this.getTabMessage(url, frameURL));
             });
-        }
+        });
     }
 
     private getUnsupportedSenderMessage() {

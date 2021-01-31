@@ -40,11 +40,7 @@ export function getAbsoluteURL($base: string, $relative: string) {
 
 export function getURLHostOrProtocol($url: string) {
     const url = new URL($url);
-    if (url.host) {
-        return url.host;
-    } else {
-        return url.protocol;
-    }
+    return url.host ? url.host : url.protocol;
 }
 
 export function compareURLPatterns(a: string, b: string) {

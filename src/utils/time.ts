@@ -200,9 +200,5 @@ export function isNightAtLocation(
         date.getUTCSeconds() * getDuration({seconds: 1})
     );
 
-    if (sunsetTime > sunriseTime) {
-        return (currentTime > sunsetTime) || (currentTime < sunriseTime);
-    } else {
-        return (currentTime > sunsetTime) && (currentTime < sunriseTime);
-    }
+    return sunsetTime > sunriseTime ? (currentTime > sunsetTime) || (currentTime < sunriseTime) : (currentTime > sunsetTime) && (currentTime < sunriseTime);
 }

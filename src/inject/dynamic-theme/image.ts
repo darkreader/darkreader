@@ -17,12 +17,7 @@ export interface ImageDetails {
 }
 
 export async function getImageDetails(url: string) {
-    let dataURL: string;
-    if (url.startsWith('data:')) {
-        dataURL = url;
-    } else {
-        dataURL = await getImageDataURL(url);
-    }
+    const dataURL = url.startsWith('data:') ? url : (await getImageDataURL(url));
     const image = await urlToImage(dataURL);
     const info = analyzeImage(image);
     return {

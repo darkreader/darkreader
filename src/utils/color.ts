@@ -142,13 +142,8 @@ function getNumbersFromString(str: string, splitter: RegExp, range: number[], un
     const raw = str.split(splitter).filter((x) => x);
     const unitsList = Object.entries(units);
     const numbers = raw.map((r) => r.trim()).map((r, i) => {
-        let n: number;
         const unit = unitsList.find(([u]) => r.endsWith(u));
-        if (unit) {
-            n = parseFloat(r.substring(0, r.length - unit[0].length)) / unit[1] * range[i];
-        } else {
-            n = parseFloat(r);
-        }
+        const n = unit ? parseFloat(r.substring(0, r.length - unit[0].length)) / unit[1] * range[i] : parseFloat(r);
         if (range[i] > 1) {
             return Math.round(n);
         }

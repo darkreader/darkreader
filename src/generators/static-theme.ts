@@ -95,11 +95,7 @@ function createRuleGen(getSelectors: (siteTheme: StaticTheme) => string[], gener
         const lines: string[] = [];
         selectors.forEach((s, i) => {
             let ln = modifySelector(s);
-            if (i < selectors.length - 1) {
-                ln += ',';
-            } else {
-                ln += ' {';
-            }
+            ln += i < selectors.length - 1 ? ',' : ' {';
             lines.push(ln);
         });
         const declarations = generateDeclarations(themeColors);

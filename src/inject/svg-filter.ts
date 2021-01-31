@@ -16,7 +16,7 @@ export function createOrUpdateSVGFilter(svgMatrix: string, svgReverseMatrix: str
                 filter.setAttribute('width', '99999');
                 filter.setAttribute('height', '99999');
 
-                filter.appendChild(createColorMatrix(matrix));
+                filter.append(createColorMatrix(matrix));
                 return filter;
             };
             const createColorMatrix = (matrix: string) => {
@@ -29,9 +29,9 @@ export function createOrUpdateSVGFilter(svgMatrix: string, svgReverseMatrix: str
             svg.id = 'dark-reader-svg';
             svg.style.height = '0';
             svg.style.width = '0';
-            svg.appendChild(createMatrixFilter('dark-reader-filter', svgMatrix));
-            svg.appendChild(createMatrixFilter('dark-reader-reverse-filter', svgReverseMatrix));
-            target.appendChild(svg);
+            svg.append(createMatrixFilter('dark-reader-filter', svgMatrix));
+            svg.append(createMatrixFilter('dark-reader-reverse-filter', svgReverseMatrix));
+            target.append(svg);
         },
         updateNode: (existing) => {
             const existingMatrix = existing.firstChild.firstChild as SVGFEColorMatrixElement;

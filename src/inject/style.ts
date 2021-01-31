@@ -8,7 +8,7 @@ export function createOrUpdateStyle(css: string) {
             style.id = 'dark-reader-style';
             style.type = 'text/css';
             style.textContent = css;
-            target.appendChild(style);
+            target.append(style);
         },
         updateNode: (existing) => {
             if (css.replace(/^\s+/gm, '') !== existing.textContent.replace(/^\s+/gm, '')) {

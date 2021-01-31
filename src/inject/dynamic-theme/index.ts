@@ -109,7 +109,7 @@ function createStaticStyleOverrides() {
 
     const overrideStyle = createOrUpdateStyle('darkreader--override');
     overrideStyle.textContent = fixes && fixes.css ? replaceCSSTemplates(fixes.css) : '';
-    document.head.appendChild(overrideStyle);
+    document.head.append(overrideStyle);
     setupNodePositionWatcher(overrideStyle, 'override');
 
     const variableStyle = createOrUpdateStyle('darkreader--variables');
@@ -394,7 +394,7 @@ function createDarkReaderInstanceMarker() {
     const metaElement: HTMLMetaElement = document.createElement('meta');
     metaElement.name = 'darkreader';
     metaElement.content = INSTANCE_ID;
-    document.head.appendChild(metaElement);
+    document.head.append(metaElement);
 }
 
 function isAnotherDarkReaderInstanceActive() {
@@ -429,7 +429,7 @@ export function createOrUpdateDynamicTheme(filterConfig: FilterConfig, dynamicTh
     } else {
         if (!isFirefox) {
             const fallbackStyle = createOrUpdateStyle('darkreader--fallback');
-            document.documentElement.appendChild(fallbackStyle);
+            document.documentElement.append(fallbackStyle);
             fallbackStyle.textContent = getModifiedFallbackStyle(filter, {strict: true});
         }
 

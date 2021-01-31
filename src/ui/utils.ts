@@ -31,7 +31,7 @@ export function openFile(options: {extensions: string[]}, callback: (content: st
             input.remove();
         }
     };
-    document.body.appendChild(input);
+    document.body.append(input);
     input.click();
 }
 

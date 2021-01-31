@@ -39,7 +39,7 @@ describe('SHADOW DOM', () => {
         const shadow = document.querySelector('.shadow-dom-wrapper').attachShadow({mode: 'open'});
         const style = document.createElement('style');
         style.classList.add('test-case-style');
-        shadow.appendChild(style);
+        shadow.append(style);
         style.sheet.insertRule('h1 { color: gray }');
         style.sheet.insertRule('strong { color: red }');
         createOrUpdateDynamicTheme(theme, null, false);
@@ -59,7 +59,7 @@ describe('SHADOW DOM', () => {
         createOrUpdateDynamicTheme(theme, null, false);
         const style = document.createElement('style');
         style.classList.add('test-case-style');
-        shadow.appendChild(style);
+        shadow.append(style);
         style.sheet.insertRule('h1 { color: gray }');
         style.sheet.insertRule('strong { color: red }');
 
@@ -81,7 +81,7 @@ describe('SHADOW DOM', () => {
         createOrUpdateDynamicTheme(theme, null, false);
         const standardElement = document.createElement('p');
         standardElement.style.color = 'red';
-        shadow.appendChild(standardElement);
+        shadow.append(standardElement);
 
         await timeout(100);
         const shadowRoot = document.querySelector('.shadow-dom-wrapper').shadowRoot;

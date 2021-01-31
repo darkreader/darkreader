@@ -72,6 +72,7 @@ module.exports = {
         'unicorn/no-new-array': 'error',
         'unicorn/no-zero-fractions': 'error',
         'unicorn/number-literal-case': 'error',
+        'unicorn/prefer-dom-node-append': 'error',
         'unicorn/prefer-dom-node-remove': 'error',
         'unicorn/prefer-ternary': 'error',
     },

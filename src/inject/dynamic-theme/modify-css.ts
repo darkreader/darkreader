@@ -365,22 +365,22 @@ function getBgImageModifier(value: string, rule: CSSStyleRule, ignoreImageSelect
         };
 
         const getBgImageValue = (imageDetails: ImageDetails, filter: FilterConfig) => {
-            const {isDark, isLight, isTransparent, isLarge, width} = imageDetails;
+            const {isDark, isLight, isTransparent, isLarge, width, src} = imageDetails;
             let result: string;
             if (isDark && isTransparent && filter.mode === 1 && !isLarge && width > 2) {
-                logInfo(`Inverting dark image ${imageDetails.src}`);
+                logInfo(`Inverting dark image ${src}`);
                 const inverted = getFilteredImageDataURL(imageDetails, {...filter, sepia: clamp(filter.sepia + 10, 0, 100)});
                 result = `url("${inverted}")`;
             } else if (isLight && !isTransparent && filter.mode === 1) {
                 if (isLarge) {
                     result = 'none';
                 } else {
-                    logInfo(`Dimming light image ${imageDetails.src}`);
+                    logInfo(`Dimming light image ${src}`);
                     const dimmed = getFilteredImageDataURL(imageDetails, filter);
                     result = `url("${dimmed}")`;
                 }
             } else if (filter.mode === 0 && isLight && !isLarge) {
-                logInfo(`Applying filter to image ${imageDetails.src}`);
+                logInfo(`Applying filter to image ${src}`);
                 const filtered = getFilteredImageDataURL(imageDetails, {...filter, brightness: clamp(filter.brightness - 10, 5, 200), sepia: clamp(filter.sepia + 10, 0, 100)});
                 result = `url("${filtered}")`;
             } else {

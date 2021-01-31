@@ -49,10 +49,10 @@ export default class TabManager {
                     return;
                 }
 
-                const tabId = port.sender.tab.id;
-                const {frameId} = port.sender;
-                const senderURL = port.sender.url;
-                const tabURL = port.sender.tab.url;
+                const {frameId, url, tab} = port.sender;
+                const tabId = tab.id;
+                const senderURL = url;
+                const tabURL = tab.url;
 
                 let framesPorts: Map<number, PortInfo>;
                 if (this.ports.has(tabId)) {

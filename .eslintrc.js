@@ -65,6 +65,7 @@ module.exports = {
         'unicorn/catch-error-name': ['error', {
             name: 'err',
         }],
+        'unicorn/consistent-destructuring': 'error',
         'unicorn/consistent-function-scoping': 'error',
         'unicorn/escape-case': 'error',
         'unicorn/no-array-push-push': 'error',

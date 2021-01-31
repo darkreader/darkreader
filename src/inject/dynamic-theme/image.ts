@@ -68,9 +68,9 @@ function analyzeImage(image: HTMLImageElement) {
     if (!canvas) {
         createCanvas();
     }
-    const {naturalWidth, naturalHeight} = image;
+    const {naturalWidth, naturalHeight, currentSrc} = image;
     if (naturalHeight === 0 || naturalWidth === 0) {
-        logWarn(`logWarn(Image is empty ${image.currentSrc})`);
+        logWarn(`logWarn(Image is empty ${currentSrc})`);
         return null;
     }
     const naturalPixelsCount = naturalWidth * naturalHeight;

@@ -10,7 +10,7 @@ interface ToggleProps {
 }
 
 export default function Toggle(props: ToggleProps) {
-    const {checked, onChange} = props;
+    const {checked, labelOff, labelOn, onChange} = props;
 
     const cls = [
         'toggle',
@@ -36,13 +36,13 @@ export default function Toggle(props: ToggleProps) {
                 class={clsOn}
                 onclick={onChange ? () => !checked && onChange(true) : null}
             >
-                {props.labelOn}
+                {labelOn}
             </span>
             <span
                 class={clsOff}
                 onclick={onChange ? () => checked && onChange(false) : null}
             >
-                {props.labelOff}
+                {labelOff}
             </span>
         </span>
     );

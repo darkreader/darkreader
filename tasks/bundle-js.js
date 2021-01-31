@@ -8,7 +8,6 @@ const rollupPluginTypescript = require('rollup-plugin-typescript2');
 const typescript = require('typescript');
 const {getDestDir} = require('./paths');
 const reload = require('./reload');
-const {PORT} = reload;
 const {createTask} = require('./task');
 
 async function copyToBrowsers({cwdPath, debug}) {
@@ -123,7 +122,7 @@ async function bundleJS(/** @type {JSEntry} */entry, {debug, watch}) {
             }),
             rollupPluginReplace({
                 '__DEBUG__': debug ? 'true' : 'false',
-                '__PORT__': watch ? String(PORT) : '-1',
+                '__PORT__': watch ? String(reload.PORT) : '-1',
                 '__WATCH__': watch ? 'true' : 'false',
             }),
         ].filter((x) => x)

@@ -32,7 +32,7 @@ export default function VirtualScroll(props: VirtualScrollProps) {
             const tempNode = render(root, tempItem).firstElementChild;
             store.itemHeight = tempNode.getBoundingClientRect().height;
         }
-        const {itemHeight} = store;
+        const {itemHeight, nodesIndices} = store;
 
         const wrapper = render(root, (
             <div
@@ -58,12 +58,12 @@ export default function VirtualScroll(props: VirtualScrollProps) {
                 current = current.parentElement;
             }
             if (current) {
-                focusedIndex = store.nodesIndices.get(current);
+                focusedIndex = nodesIndices.get(current);
             }
         }
 
-        store.nodesIndices = store.nodesIndices || new WeakMap();
-        const saveNodeIndex = (node: Element, index: number) => store.nodesIndices.set(node, index);
+        store.nodesIndices = nodesIndices || new WeakMap();
+        const saveNodeIndex = (node: Element, index: number) => nodesIndices.set(node, index);
 
         const items = props.items
             .map((item, index) => {

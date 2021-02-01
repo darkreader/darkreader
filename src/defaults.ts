@@ -48,6 +48,7 @@ export const DEFAULT_SETTINGS: UserSettings = {
     syncSettings: true,
     syncSitesFixes: false,
     automation: '',
+    automationBehaviour: 'OnOff',
     time: {
         activation: '18:00',
         deactivation: '9:00',

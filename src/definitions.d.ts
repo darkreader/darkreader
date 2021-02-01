@@ -86,6 +86,7 @@ export interface UserSettings {
     syncSettings: boolean;
     syncSitesFixes: boolean;
     automation: '' | 'time' | 'system' | 'location';
+    automationBehaviour: 'OnOff' | 'Scheme';
     time: TimeSettings;
     location: LocationSettings;
     previewNewDesign: boolean;

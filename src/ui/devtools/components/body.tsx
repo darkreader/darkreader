@@ -3,9 +3,9 @@ import {withState, useState} from 'malevic/state';
 import {Button} from '../../controls';
 import ThemeEngines from '../../../generators/theme-engines';
 import {DEVTOOLS_DOCS_URL} from '../../../utils/links';
-import type {ExtWrapper, TabInfo} from '../../../definitions';
-import {getCurrentThemePreset} from '../../popup/theme/utils';
 import {isFirefox} from '../../../utils/platform';
+import {ExtWrapper, TabInfo} from '../../../definitions';
+import {isURLInList} from '../../../utils/url';
 
 type BodyProps = ExtWrapper & {tab: TabInfo};
 
@@ -13,7 +13,8 @@ function Body({data, tab, actions}: BodyProps) {
     const {state, setState} = useState({errorText: null as string});
     let textNode: HTMLTextAreaElement;
     const previewButtonText = data.settings.previewNewDesign ? 'Switch to old design' : 'Preview new design';
-    const {theme} = getCurrentThemePreset({data, tab, actions});
+    const custom = data.settings.customThemes.find(({url: urlList}) => isURLInList(tab.url, urlList));
+    const theme = custom ? custom.theme : data.settings.theme;
 
     const wrapper = (theme.engine === ThemeEngines.staticTheme
         ? {
@@ -42,7 +43,7 @@ function Body({data, tab, actions}: BodyProps) {
             if (e.key === 'Tab') {
                 e.preventDefault();
                 const indent = ' '.repeat(4);
-                if (isFirefox) {
+                if (isFirefox()) {
                     // https://bugzilla.mozilla.org/show_bug.cgi?id=1220696
                     const start = node.selectionStart;
                     const end = node.selectionEnd;
@@ -90,10 +91,6 @@ function Body({data, tab, actions}: BodyProps) {
             <textarea
                 id="editor"
                 onrender={onTextRender}
-                spellcheck="false"
-                autocorrect="off"
-                autocomplete="off"
-                autocapitalize="off"
             />
             <label id="error-text">{state.errorText}</label>
             <div id="buttons">

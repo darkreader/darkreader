@@ -54,6 +54,8 @@ export interface Theme {
     lightSchemeTextColor: string;
     scrollbarColor: '' | 'auto' | string;
     selectionColor: '' | 'auto' | string;
+    lightColorScheme: string;
+    darkColorScheme: string;
     styleSystemControls: boolean;
 }
 

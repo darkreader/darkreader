@@ -6,6 +6,8 @@ import {BackgroundColor, Brightness, Contrast, FontPicker, Grayscale, Mode, Rese
 import ThemePresetPicker from '../preset-picker';
 import {getCurrentThemePreset} from '../utils';
 import Collapsible from './collapsible-panel';
+import {COLOR_SCHEMES, DARK_COLOR_SCHEME, LIGHT_COLOR_SCHEME} from '../../../../colorScheme';
+import ColorSchemeDropDown from '../controls/color-scheme';
 
 interface ThemeGroupProps {
     theme: Theme;
@@ -45,10 +47,19 @@ function MainGroup({theme, change}: ThemeGroupProps) {
 
 function ColorsGroup({theme, change}: ThemeGroupProps) {
     const isDarkScheme = theme.mode === 1;
+    const csProp: keyof Theme = isDarkScheme ? 'darkColorScheme' : 'lightColorScheme';
     const bgProp: keyof Theme = isDarkScheme ? 'darkSchemeBackgroundColor' : 'lightSchemeBackgroundColor';
     const fgProp: keyof Theme = isDarkScheme ? 'darkSchemeTextColor' : 'lightSchemeTextColor';
     const defaultSchemeColors = isDarkScheme ? DEFAULT_COLORS.darkScheme : DEFAULT_COLORS.lightScheme;
     const defaultMatrixValues: Partial<Theme> = {brightness: DEFAULT_THEME.brightness, contrast: DEFAULT_THEME.contrast, sepia: DEFAULT_THEME.sepia, grayscale: DEFAULT_THEME.grayscale};
+    const currentColorScheme = isDarkScheme ? theme.darkColorScheme : theme.lightColorScheme;
+    const colorSchemeValues: string[] = (isDarkScheme ? DARK_COLOR_SCHEME : LIGHT_COLOR_SCHEME).sort((a, b) => a.localeCompare(b)) ;
+
+    function onColorSchemeChange(newColor: string) {
+        change({[csProp]: newColor});
+        change({[bgProp]: COLOR_SCHEMES[newColor].background});
+        change({[fgProp]: COLOR_SCHEMES[newColor].text});
+    }
 
     return (
         <Array>
@@ -73,6 +84,11 @@ function ColorsGroup({theme, change}: ThemeGroupProps) {
                 value={theme.selectionColor}
                 onChange={(v) => change({selectionColor: v})}
                 onReset={() => change({selectionColor: DEFAULT_SETTINGS.theme.selectionColor})}
+            />
+            <ColorSchemeDropDown
+                selected={currentColorScheme}
+                values={colorSchemeValues}
+                onChange={(v) => onColorSchemeChange(v)}
             />
         </Array>
     );

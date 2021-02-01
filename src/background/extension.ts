@@ -309,8 +309,8 @@ export class Extension {
     }
 
     toggleURL(url: string) {
-        const isInDarkList = isURLInList(url, this.config.DARK_SITES);
-        const siteList = isInDarkList ?
+        const shouldBeRemovedFromEnabledList  = isURLInList(url, this.config.DARK_SITES) && !this.user.settings.applyToListedOnly;
+        const siteList = shouldBeRemovedFromEnabledList ?
             this.user.settings.siteListEnabled.slice() :
             this.user.settings.siteList.slice();
         const pattern = getURLHostOrProtocol(url);
@@ -320,7 +320,7 @@ export class Extension {
         } else {
             siteList.splice(index, 1);
         }
-        if (isInDarkList) {
+        if (shouldBeRemovedFromEnabledList) {
             this.changeSettings({siteListEnabled: siteList});
         } else {
             this.changeSettings({siteList});

@@ -63,7 +63,7 @@
     "url": "https://opencollective.com/darkreader"
   },
   "devDependencies": {
-    "@rollup/plugin-commonjs": "17.0.0",
+    "@rollup/plugin-commonjs": "17.1.0",
     "@rollup/plugin-node-resolve": "11.1.0",
     "@rollup/plugin-replace": "2.3.4",
     "@rollup/pluginutils": "4.1.0",

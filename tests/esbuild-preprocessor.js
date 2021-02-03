@@ -1,89 +1,122 @@
-const path = require('path');
+//@ts-check
+
 const esbuild = require('esbuild');
-const chokidar = require('chokidar');
+const path = require('path');
+const {Server, ConfigOptions} = require('karma');
 
+/**
+ * 
+ * @param {ConfigOptions & esbuild.BuildOptions} config 
+ * @param {Server} emitter 
+ * @param {*} logger 
+ */
 function createPreprocessor(config, emitter, logger) {
-    const log = logger.create('preprocessor.esbuild');
+    const log = logger.create('esbuild');
+    const transformPath = (filepath) => filepath.replace(/\.ts$/, '.js');
+    const DEBOUNCE_TIMEOUT = 250;
 
-    // Maps each reference file to a Set of entry point files.
-    // ELI5 every reference(imports/requires) from the tests files will also get watched.
-    // However this is done dynamic for best results and making it not hardcoded
-    const reverseDependencies = new Map();
-
-    let registerDependencies = null;
-
-    if (!config.singleRun && config.autoWatch) {
-        const patterns = config.files.map((file) => file.pattern);
-        const ignored = config.exclude ? config.exclude : null;
-        const watcher = chokidar.watch(patterns, {ignored});
-        watcher.on('change', (changedPath) => {
-            const entryPoints = reverseDependencies.get(changedPath);
-            if (entryPoints == null) {
-                return;
+    function debounce(fn, delay) {
+        let timeoutId = null;
+        return ((...args) => {
+            if (timeoutId) {
+                clearTimeout(timeoutId);
             }
-            for (let entryPoint of entryPoints) {
-                if (path.sep !== '/') {
-                    entryPoint = entryPoint.replace(/\\/g, '/');
-                }
-                emitter._fileList.changeFile(entryPoint, true);
-            }
+            timeoutId = setTimeout(() => {
+                timeoutId = null;
+                fn(...args);
+            }, delay);
         });
-        registerDependencies = (entryPoint, dependencies) => {
-            for (const dep of dependencies) {
-                let revDeps = reverseDependencies.get(dep);
-                if (revDeps === undefined) {
-                    watcher.add(dep);
-                    revDeps = new Set();
-                    reverseDependencies.set(dep, revDeps);
-                }
-                revDeps.add(entryPoint);
-            }
-        };
     }
+    const watchMode = !config.singleRun && config.autoWatch;
+    const onWatchChange = debounce(() => {
+        emitter.refreshFiles();
+        console.log('watch build succeeded');
+    }, DEBOUNCE_TIMEOUT);
 
-    const transformPath = (filepath) => {
-        return filepath.replace(/\.ts$/, '.js');
-    };
+    const watch = watchMode ? { 
+        onRebuild(error, result) {
+            if (error) {
+                console.error('watch build failed:', error);
+            } else if (result) {
+                onWatchChange();
+            }
+        }
+    } : false;
 
+    const base = config.basePath || process.cwd();
+    /** @type esbuild.Service */
+    let service = null;
+
+	/**
+     * @param {string[]} files
+     */
+	async function build(files) {
+		const result = await service.build({
+            entryPoints: files,
+            write: false,
+            bundle: true,
+            sourcemap: 'external',
+            target: 'es2019',
+            charset: 'utf8',
+            outdir: base,
+            watch,
+            define: {
+                '__DEBUG__': 'false',
+                '__PORT__': '-1',
+                '__WATCH__': 'false',
+            },
+            banner: '"use strict";',
+		});
+		return result;
+    }
+    
+    let stopped = false;
 
     return async function preprocess(_, file, done) {
         file.path = transformPath(file.originalPath);
         const originalPath = file.originalPath;
 
-        try {
-            const outFileKey = 'out.js';
-            log.info('Generating code for ./%s', originalPath);
-            const result = await esbuild.build({
-                entryPoints: [originalPath],
-                format: 'iife',
-                outfile: outFileKey,
-                write: false,
-                bundle: true,
-                sourcemap: 'inline',
-                target: 'es2019',
-                charset: 'utf8',
-                metafile: 'meta.json',
-                define: {
-                    '__DEBUG__': 'false',
-                    '__PORT__': '-1',
-                    '__WATCH__': 'false',
-                },
-                banner: '"use strict";',
-            });
-            /**
-             * @type {import('esbuild').Metadata}}
-             */
-            const metaEntry = JSON.parse(result.outputFiles.find((entry) => entry.path.endsWith('meta.json')).text);
-            const dependencies = Object.keys(metaEntry.inputs);
-            if (registerDependencies != null) {
-                registerDependencies(originalPath, dependencies);
-            }
-            const outputEntry = result.outputFiles.find((entry) => entry.path.endsWith(outFileKey));
-            done(null, outputEntry.text);
-        } catch (error) {
-            log.error('Failed to produce code for ./%s\n\n%s\n', originalPath, error.stack);
-            done(error, null);
+        if (!service) {
+			service = await esbuild.startService();
+			emitter.on("exit", (done) => {
+				stopped = true;
+				service.stop();
+				done();
+			});
         }
+
+        try {
+            log.info('Generating code for ./%s', originalPath);
+			const result = await build([originalPath]);
+            const map = result.outputFiles[0];
+			const mapText = JSON.parse(map.text);
+			mapText.sources = mapText.sources.map((source) => path.join(base, source));
+			const source = result.outputFiles[1];
+
+			file.sourceMap = mapText;
+			done(null, source.text);
+		} catch (err) {
+			// Use a non-empty string because `karma-sourcemap` crashes
+			// otherwse.
+			const dummy = `(function () {})()`;
+			// Prevent flood of error logs when we shutdown
+			if (stopped) {
+				done(null, dummy);
+				return;
+			}
+			log.error(err.message);
+
+			if (watchMode) {
+				// Never return an error in watch mode, otherwise the
+				// watcher will shutdown.
+				// Use a dummy file instead because the original content
+				// may content syntax not supported by a browser or the
+				// way the script was loaded. This breaks the watcher too.
+				done(null, dummy);
+			} else {
+				done(err, null);
+			}
+		}
     };
 }
 

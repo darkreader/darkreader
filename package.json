@@ -82,7 +82,7 @@
     "globby": "11.0.2",
     "jasmine-core": "3.6.0",
     "jest": "26.6.3",
-    "karma": "6.0.2",
+    "karma": "6.1.0",
     "karma-chrome-launcher": "3.1.0",
     "karma-coverage": "2.0.3",
     "karma-firefox-launcher": "2.1.0",

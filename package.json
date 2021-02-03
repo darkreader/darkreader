@@ -89,7 +89,7 @@
     "karma-jasmine": "4.0.1",
     "karma-rollup-preprocessor": "7.0.5",
     "karma-safari-launcher": "1.0.0",
-    "less": "4.1.0",
+    "less": "4.1.1",
     "malevic": "0.18.6",
     "prettier": "2.2.1",
     "puppeteer-core": "5.5.0",

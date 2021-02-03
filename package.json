@@ -67,7 +67,7 @@
     "@rollup/plugin-node-resolve": "11.1.0",
     "@rollup/plugin-replace": "2.3.4",
     "@rollup/pluginutils": "4.1.0",
-    "@types/chrome": "0.0.128",
+    "@types/chrome": "0.0.129",
     "@types/jasmine": "3.6.3",
     "@types/jest": "26.0.20",
     "@types/karma": "5.0.1",

@@ -1,15 +1,6 @@
-//@ts-check
-
 const esbuild = require('esbuild');
 const path = require('path');
-const {Server, ConfigOptions} = require('karma');
 
-/**
- * 
- * @param {ConfigOptions & esbuild.BuildOptions} config 
- * @param {Server} emitter 
- * @param {*} logger 
- */
 function createPreprocessor(config, emitter, logger) {
     const log = logger.create('esbuild');
     const transformPath = (filepath) => filepath.replace(/\.ts$/, '.js');
@@ -33,7 +24,7 @@ function createPreprocessor(config, emitter, logger) {
         console.log('watch build succeeded');
     }, DEBOUNCE_TIMEOUT);
 
-    const watch = watchMode ? { 
+    const watch = watchMode ? {
         onRebuild(error, result) {
             if (error) {
                 console.error('watch build failed:', error);
@@ -47,11 +38,11 @@ function createPreprocessor(config, emitter, logger) {
     /** @type esbuild.Service */
     let service = null;
 
-	/**
+    /**
      * @param {string[]} files
      */
-	async function build(files) {
-		const result = await service.build({
+    async function build(files) {
+        const result = await service.build({
             entryPoints: files,
             write: false,
             bundle: true,
@@ -66,10 +57,10 @@ function createPreprocessor(config, emitter, logger) {
                 '__WATCH__': 'false',
             },
             banner: '"use strict";',
-		});
-		return result;
+        });
+        return result;
     }
-    
+
     let stopped = false;
 
     return async function preprocess(_, file, done) {
@@ -77,46 +68,46 @@ function createPreprocessor(config, emitter, logger) {
         const originalPath = file.originalPath;
 
         if (!service) {
-			service = await esbuild.startService();
-			emitter.on("exit", (done) => {
-				stopped = true;
-				service.stop();
-				done();
-			});
+            service = await esbuild.startService();
+            emitter.on('exit', (done) => {
+                stopped = true;
+                service.stop();
+                done();
+            });
         }
 
         try {
             log.info('Generating code for ./%s', originalPath);
-			const result = await build([originalPath]);
+            const result = await build([originalPath]);
             const map = result.outputFiles[0];
-			const mapText = JSON.parse(map.text);
-			mapText.sources = mapText.sources.map((source) => path.join(base, source));
-			const source = result.outputFiles[1];
+            const mapText = JSON.parse(map.text);
+            mapText.sources = mapText.sources.map((source) => path.join(base, source));
+            const source = result.outputFiles[1];
 
-			file.sourceMap = mapText;
-			done(null, source.text);
-		} catch (err) {
-			// Use a non-empty string because `karma-sourcemap` crashes
-			// otherwse.
-			const dummy = `(function () {})()`;
-			// Prevent flood of error logs when we shutdown
-			if (stopped) {
-				done(null, dummy);
-				return;
-			}
-			log.error(err.message);
+            file.sourceMap = mapText;
+            done(null, source.text);
+        } catch (err) {
+            // Use a non-empty string because `karma-sourcemap` crashes
+            // otherwse.
+            const dummy = `(function () {})()`;
+            // Prevent flood of error logs when we shutdown
+            if (stopped) {
+                done(null, dummy);
+                return;
+            }
+            log.error(err.message);
 
-			if (watchMode) {
-				// Never return an error in watch mode, otherwise the
-				// watcher will shutdown.
-				// Use a dummy file instead because the original content
-				// may content syntax not supported by a browser or the
-				// way the script was loaded. This breaks the watcher too.
-				done(null, dummy);
-			} else {
-				done(err, null);
-			}
-		}
+            if (watchMode) {
+                // Never return an error in watch mode, otherwise the
+                // watcher will shutdown.
+                // Use a dummy file instead because the original content
+                // may content syntax not supported by a browser or the
+                // way the script was loaded. This breaks the watcher too.
+                done(null, dummy);
+            } else {
+                done(err, null);
+            }
+        }
     };
 }
 

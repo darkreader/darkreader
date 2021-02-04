@@ -1,7 +1,7 @@
 ---
 name: Broken website
 about: Creates a broken website report about Dark Reader
-title: "[Broken Website] Insert title here"
+title: "[Broken Website] Replace with title"
 labels: Broken Website
 assignees: ''
 
@@ -26,7 +26,6 @@ Make sure to fill out every section when needed else remove the section.
 ## How to Reproduce
 <!-- We need to know how you encountered the bug to properly troubleshoot the issue. -->
 <!--
-  Steps to reproduce the behavior:
   An example of this is:
   - Go to x site
   - Hover over x button
@@ -42,15 +41,14 @@ Make sure to fill out every section when needed else remove the section.
 ## Screenshots
 <!-- If applicable, add screenshots to help explain your problem. -->
 
+## System Information
 <!--
-Please add a version of the browser you are using. 
-If you don't know how to get your browser/Dark Reader version please search it up online.
+  Please add a version of the browser you are using. 
+  If you don't know how to get your browser/Dark Reader version please search it up online.
 -->
 
-## System Information
-
 - OS: <!-- [e.g. Windows, MacOS, Linux] -->
-- Browser: <!-- [e.g. Chrome, Safari] -->
+- Browser: <!-- [e.g. Chrome 84, Safari 13] -->
 - Dark Reader Version: <!-- [e.g. 4.9.26] -->
 
 ## Additional context

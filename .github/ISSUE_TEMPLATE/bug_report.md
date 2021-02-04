@@ -1,7 +1,7 @@
 ---
 name: Bug report
 about: Create a bug report to help us improve
-title: "[BUG] Insert title here"
+title: "[BUG] Replace with title"
 labels: bug
 assignees: ''
 
@@ -26,7 +26,6 @@ Make sure to fill out every section when needed else remove the section.
 ## Steps to reproduce
 <!-- We need to know how you encountered the bug to properly troubleshoot the issue. -->
 <!--
-  Steps to reproduce the behavior:
   An example of this is:
   - Go to x site
   - Hover over x button
@@ -42,12 +41,11 @@ Make sure to fill out every section when needed else remove the section.
 ## Screenshots
 <!-- If applicable, add screenshots to help explain your problem. -->
 
-<!--
-Please add a version of the browser you are using. 
-If you don't know how to get your browser/Dark Reader version please search it up online.
--->
-
 ## System Information
+<!--
+  Please add a version of the browser you are using. 
+  If you don't know how to get your browser/Dark Reader version please search it up online.
+-->
 
 - OS: <!-- [e.g. Windows, MacOS, Linux] -->
 - Browser: <!-- [e.g. Chrome 84, Safari 13] -->

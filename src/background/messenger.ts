@@ -1,4 +1,4 @@
-import {ExtensionData, FilterConfig, TabInfo, Message, UserSettings} from '../definitions';
+import type {ExtensionData, FilterConfig, TabInfo, Message, UserSettings} from '../definitions';
 
 export interface ExtensionAdapter {
     collect: () => Promise<ExtensionData>;
@@ -6,7 +6,7 @@ export interface ExtensionAdapter {
     changeSettings: (settings: Partial<UserSettings>) => void;
     setTheme: (theme: Partial<FilterConfig>) => void;
     setShortcut: ({command, shortcut}) => void;
-    markNewsAsRead: (ids: string[]) => void;
+    markNewsAsRead: (ids: string[]) => Promise<void>;
     toggleURL: (pattern: string) => void;
     onPopupOpen: () => void;
     loadConfig: (options: {local: boolean}) => Promise<void>;
@@ -27,7 +27,7 @@ export default class Messenger {
         this.adapter = adapter;
         chrome.runtime.onConnect.addListener((port) => {
             if (port.name === 'ui') {
-                port.onMessage.addListener((message) => this.onUIMessage(port, message));
+                port.onMessage.addListener(async (message) => await this.onUIMessage(port, message));
                 this.adapter.onPopupOpen();
             }
         });
@@ -73,6 +73,7 @@ export default class Messenger {
             }
             case 'load-config': {
                 await this.adapter.loadConfig(data);
+                break;
             }
             case 'apply-dev-dynamic-theme-fixes': {
                 const error = this.adapter.applyDevDynamicThemeFixes(data);

@@ -1,4 +1,4 @@
-import {Theme} from '../../definitions';
+import type {Theme} from '../../definitions';
 import {forEach} from '../../utils/array';
 import {getMatches} from '../../utils/text';
 import {getAbsoluteURL} from '../../utils/url';
@@ -7,7 +7,7 @@ import {logWarn} from '../utils/log';
 import {getCSSVariables, replaceCSSRelativeURLsWithAbsolute, removeCSSComments, replaceCSSFontFace, getCSSURLValue, cssImportRegex, getCSSBaseBath} from './css-rules';
 import {bgFetch} from './network';
 import {createStyleSheetModifier} from './stylesheet-modifier';
-import {isShadowDomSupported} from '../../utils/platform';
+import {isShadowDomSupported, isSafari, isThunderbird} from '../../utils/platform';
 
 declare global {
     interface HTMLStyleElement {
@@ -20,10 +20,10 @@ declare global {
         sheet: CSSStyleSheet;
     }
     interface Document {
-        adoptedStyleSheets: Array<CSSStyleSheet>;
+        adoptedStyleSheets: CSSStyleSheet[];
     }
     interface ShadowRoot {
-        adoptedStyleSheets: Array<CSSStyleSheet>;
+        adoptedStyleSheets: CSSStyleSheet[];
     }
 }
 
@@ -76,6 +76,11 @@ export function getManageableStyles(node: Node, results = [] as StyleElement[], 
 const syncStyleSet = new WeakSet<HTMLStyleElement | SVGStyleElement>();
 const corsStyleSet = new WeakSet<HTMLStyleElement>();
 
+let canOptimizeUsingProxy = false;
+document.addEventListener('__darkreader__inlineScriptsAllowed', () => {
+    canOptimizeUsingProxy = true;
+});
+
 export function manageStyle(element: StyleElement, {update, loadingStart, loadingEnd}): StyleManager {
     const prevStyles: HTMLStyleElement[] = [];
     let next: Element = element;
@@ -95,7 +100,7 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
     const observer = new MutationObserver(() => {
         update();
     });
-    const observerOptions: MutationObserverInit = {attributes: true, childList: true, characterData: true};
+    const observerOptions: MutationObserverInit = {attributes: true, childList: true, subtree: true, characterData: true};
 
     function containsCSSImport() {
         return element instanceof HTMLStyleElement && element.textContent.trim().match(cssImportRegex);
@@ -147,7 +152,11 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
                 logWarn(accessError);
             }
 
-            if ((!cssRules && !accessError) || isStillLoadingError(accessError)) {
+            if (
+                (!cssRules && !accessError && !isSafari) ||
+                (isSafari && !element.sheet) ||
+                isStillLoadingError(accessError)
+            ) {
                 try {
                     await linkLoading(element);
                 } catch (err) {
@@ -318,29 +327,84 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
         return cssRules;
     }
 
-    let areSheetChangesPending = false;
+    function watchForSheetChanges() {
+        watchForSheetChangesUsingProxy();
+        // Sometimes sheet can be null in Firefox and Safari
+        // So need to watch for it using rAF
+        if (!isThunderbird && !(canOptimizeUsingProxy && element.sheet)) {
+            watchForSheetChangesUsingRAF();
+        }
+    }
 
-    function subscribeToSheetChanges() {
-        element.addEventListener('__darkreader__updateSheet', () => {
-            if (areSheetChangesPending) {
-                return;
-            }
+    let rulesChangeKey: number = null;
+    let rulesCheckFrameId: number = null;
 
-            function handleSheetChanges() {
-                areSheetChangesPending = false;
-                if (cancelAsyncOperations) {
-                    return;
-                }
+    function getRulesChangeKey() {
+        const rules = safeGetSheetRules();
+        return rules ? rules.length : null;
+    }
+
+    function didRulesKeyChange() {
+        return getRulesChangeKey() !== rulesChangeKey;
+    }
+
+    function watchForSheetChangesUsingRAF() {
+        rulesChangeKey = getRulesChangeKey();
+        stopWatchingForSheetChangesUsingRAF();
+        const checkForUpdate = () => {
+            if (didRulesKeyChange()) {
+                rulesChangeKey = getRulesChangeKey();
                 update();
             }
-
-            areSheetChangesPending = true;
-            if (typeof queueMicrotask === 'function') {
-                queueMicrotask(handleSheetChanges);
-            } else {
-                requestAnimationFrame(handleSheetChanges);
+            if (canOptimizeUsingProxy && element.sheet) {
+                stopWatchingForSheetChangesUsingRAF();
+                return;
             }
-        });
+            rulesCheckFrameId = requestAnimationFrame(checkForUpdate);
+        };
+        checkForUpdate();
+    }
+
+    function stopWatchingForSheetChangesUsingRAF() {
+        cancelAnimationFrame(rulesCheckFrameId);
+    }
+
+    let areSheetChangesPending = false;
+
+    function onSheetChange() {
+        canOptimizeUsingProxy = true;
+        stopWatchingForSheetChangesUsingRAF();
+        if (areSheetChangesPending) {
+            return;
+        }
+
+        function handleSheetChanges() {
+            areSheetChangesPending = false;
+            if (cancelAsyncOperations) {
+                return;
+            }
+            update();
+        }
+
+        areSheetChangesPending = true;
+        if (typeof queueMicrotask === 'function') {
+            queueMicrotask(handleSheetChanges);
+        } else {
+            requestAnimationFrame(handleSheetChanges);
+        }
+    }
+
+    function watchForSheetChangesUsingProxy() {
+        element.addEventListener('__darkreader__updateSheet', onSheetChange);
+    }
+
+    function stopWatchingForSheetChangesUsingProxy() {
+        element.removeEventListener('__darkreader__updateSheet', onSheetChange);
+    }
+
+    function stopWatchingForSheetChanges() {
+        stopWatchingForSheetChangesUsingProxy();
+        stopWatchingForSheetChangesUsingRAF();
     }
 
     function pause() {
@@ -348,19 +412,19 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
         cancelAsyncOperations = true;
         corsCopyPositionWatcher && corsCopyPositionWatcher.stop();
         syncStylePositionWatcher && syncStylePositionWatcher.stop();
+        stopWatchingForSheetChanges();
     }
 
     function destroy() {
         pause();
         removeNode(corsCopy);
         removeNode(syncStyle);
-        element.removeEventListener('__darkreader__updateSheet', update);
     }
 
     function watch() {
         observer.observe(element, observerOptions);
         if (element instanceof HTMLStyleElement) {
-            subscribeToSheetChanges();
+            watchForSheetChanges();
         }
     }
 

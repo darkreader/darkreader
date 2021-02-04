@@ -17,7 +17,7 @@ Latest version is supported.
 
 In case there is a vulnerability left behind, immediately notify
 to <darkreaderapp@gmail.com>; unless you can fix it yourself,
-in which case open a pull request on 
+in which case open a pull request on
 <https://github.com/darkreader/darkreader/pulls>.
 
 Alexander Shutau, owner

@@ -131,7 +131,7 @@ function createStaticStyleOverrides() {
     setupNodePositionWatcher(variableStyle, 'variables');
 
     const proxyScript = createOrUpdateScript('darkreader--proxy');
-    const blob = new Blob([`(${injectProxy})()`], { type: 'text/javascript' });
+    const blob = new Blob([`(${injectProxy})()`], {type: 'text/javascript'});
     const url = URL.createObjectURL(blob);
     proxyScript.src = url;
     proxyScript.textContent = '';

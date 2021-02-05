@@ -131,8 +131,13 @@ function createStaticStyleOverrides() {
     setupNodePositionWatcher(variableStyle, 'variables');
 
     const proxyScript = createOrUpdateScript('darkreader--proxy');
-    proxyScript.textContent = `(${injectProxy})()`;
+    const blob = new Blob([`(${injectProxy})()`], { type: 'text/javascript' });
+    const url = URL.createObjectURL(blob);
+    proxyScript.src = url;
+    proxyScript.textContent = '';
     document.head.insertBefore(proxyScript, variableStyle.nextSibling);
+    URL.revokeObjectURL(url);
+    proxyScript.remove();
 }
 
 const shadowRootsWithOverrides = new Set<ShadowRoot>();

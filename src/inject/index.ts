@@ -1,19 +1,14 @@
 import {createOrUpdateStyle, removeStyle} from './style';
 import {createOrUpdateSVGFilter, removeSVGFilter} from './svg-filter';
-import {createOrUpdateDynamicTheme, removeDynamicTheme, cleanDynamicThemeCache} from './dynamic-theme';
+import {cleanDynamicThemeCache, createOrUpdateDynamicTheme, removeDynamicTheme} from './dynamic-theme';
 import {logInfo, logWarn} from './utils/log';
-import {watchForColorSchemeChange} from './utils/watch-color-scheme';
 import {collectCSS} from './dynamic-theme/css-collection';
 import {removeFallbackSheet} from './dynamic-theme/adopted-style-manger';
+import {contentScriptPort} from './port';
+import {watchForColorSchemeChange} from './utils/watch-color-scheme';
 
-let RaceWhoseFirst: 'CONTENTSCRIPT' | 'CUSTOM';
 
-function onMessage({type, data}) {
-    if (!RaceWhoseFirst) {
-        RaceWhoseFirst = 'CONTENTSCRIPT';
-    } else if (RaceWhoseFirst !== 'CONTENTSCRIPT') {
-        return;
-    }
+export function onMessage({type, data}) {
     switch (type) {
         case 'add-css-filter':
         case 'add-static-theme': {
@@ -32,7 +27,7 @@ function onMessage({type, data}) {
         case 'add-dynamic-theme': {
             const {filter, fixes, isIFrame} = data;
             removeStyle();
-            createOrUpdateDynamicTheme(filter, fixes, isIFrame, 'extension');
+            createOrUpdateDynamicTheme(filter, fixes, isIFrame);
             break;
         }
         case 'export-css': {
@@ -77,16 +72,14 @@ function getXhrBlobID() {
     }
 }
 
-
 // TODO: Use background page color scheme watcher when browser bugs fixed.
 const colorSchemeWatcher = watchForColorSchemeChange(({isDark}) => {
     logInfo('Media query was changed');
     chrome.runtime.sendMessage({type: 'color-scheme-change', data: {isDark}});
 });
 
-const port = chrome.runtime.connect({name: 'tab'});
-port.onMessage.addListener(onMessage);
-port.onDisconnect.addListener(() => {
+contentScriptPort.onMessage.addListener(onMessage);
+contentScriptPort.onDisconnect.addListener(() => {
     logWarn('disconnect');
     cleanDynamicThemeCache();
     colorSchemeWatcher.disconnect();
@@ -94,9 +87,4 @@ port.onDisconnect.addListener(() => {
 
 const blobID = getXhrBlobID();
 const data = blobID && getDataViaXhr(blobID);
-if (data && RaceWhoseFirst !== 'CONTENTSCRIPT') {
-    onMessage(data);
-    RaceWhoseFirst = 'CUSTOM';
-} else {
-    removeFallbackSheet();
-}
+data ? onMessage(data) : removeFallbackSheet();

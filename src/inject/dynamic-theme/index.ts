@@ -20,10 +20,13 @@ import {isCSSStyleSheetConstructorSupported} from '../../utils/platform';
 import {injectProxy} from './stylesheet-proxy';
 import {parse} from '../../utils/color';
 import {parsedURLCache} from '../../utils/url';
+import {generateUID} from '../../utils/uid';
+import {disconnectContentScript} from 'inject/port';
 
 const variables = new Map<string, string>();
 const styleManagers = new Map<StyleElement, StyleManager>();
 const adoptedStyleManagers = [] as AdoptedStyleSheetManager[];
+const INSTANCEID = generateUID();
 let filter: FilterConfig = null;
 let fixes: DynamicThemeFix = null;
 let isIFrame: boolean = null;
@@ -391,27 +394,33 @@ function stopWatchingForUpdates() {
     removeDOMReadyListener(onDOMReady);
 }
 
-function createDarkReaderInstanceMarker(instanceSignature: string) {
+function createDarkReaderInstanceMarker() {
     const metaElement: HTMLMetaElement = document.createElement('meta');
     metaElement.name = 'darkreader';
-    metaElement.content = instanceSignature;
+    metaElement.content = INSTANCEID;
     document.head.appendChild(metaElement);
 }
 
-function isAnotherDarkReaderInstanceActive(instanceSignature: string) {
+function isAnotherDarkReaderInstanceActive() {
+    console.log('META LOGGING');
     const meta: HTMLMetaElement = document.querySelector('meta[name="darkreader"]');
     if (meta) {
-        if (meta.content !== instanceSignature) {
+        if (meta.content !== INSTANCEID) {
+            disconnectContentScript();
+            console.log('DISCONNECTED');
             return true;
         }
+        console.log('SAME META');
         return false;
     } else {
-        createDarkReaderInstanceMarker(instanceSignature);
+        console.log('NEW META');
+        createDarkReaderInstanceMarker();
         return false;
     }
+
 }
 
-export function createOrUpdateDynamicTheme(filterConfig: FilterConfig, dynamicThemeFixes: DynamicThemeFix, iframe: boolean, instanceSignature = 'none') {
+export function createOrUpdateDynamicTheme(filterConfig: FilterConfig, dynamicThemeFixes: DynamicThemeFix, iframe: boolean) {
     filter = filterConfig;
     fixes = dynamicThemeFixes;
     if (fixes) {
@@ -423,7 +432,7 @@ export function createOrUpdateDynamicTheme(filterConfig: FilterConfig, dynamicTh
     }
     isIFrame = iframe;
     if (document.head) {
-        if (isAnotherDarkReaderInstanceActive(instanceSignature)) {
+        if (isAnotherDarkReaderInstanceActive()) {
             removeDynamicTheme();
             return;
         }
@@ -439,7 +448,7 @@ export function createOrUpdateDynamicTheme(filterConfig: FilterConfig, dynamicTh
         const headObserver = new MutationObserver(() => {
             if (document.head) {
                 headObserver.disconnect();
-                if (isAnotherDarkReaderInstanceActive(instanceSignature)) {
+                if (isAnotherDarkReaderInstanceActive()) {
                     removeDynamicTheme();
                     return;
                 }

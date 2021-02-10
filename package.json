@@ -71,7 +71,7 @@
     "@types/jasmine": "3.6.3",
     "@types/jest": "26.0.20",
     "@types/karma": "6.1.0",
-    "@types/node": "14.14.22",
+    "@types/node": "14.14.25",
     "@types/puppeteer-core": "5.4.0",
     "@typescript-eslint/eslint-plugin": "4.14.2",
     "@typescript-eslint/parser": "4.14.2",

@@ -6,7 +6,14 @@ import {watchForColorSchemeChange} from './utils/watch-color-scheme';
 import {collectCSS} from './dynamic-theme/css-collection';
 import {removeFallbackSheet} from './dynamic-theme/adopted-style-manger';
 
+let RaceWhoseFirst: 'CONTENTSCRIPT' | 'CUSTOM';
+
 function onMessage({type, data}) {
+    if (!RaceWhoseFirst) {
+        RaceWhoseFirst = 'CONTENTSCRIPT';
+    } else if (RaceWhoseFirst !== 'CONTENTSCRIPT') {
+        return;
+    }
     switch (type) {
         case 'add-css-filter':
         case 'add-static-theme': {
@@ -87,4 +94,9 @@ port.onDisconnect.addListener(() => {
 
 const blobID = getXhrBlobID();
 const data = blobID && getDataViaXhr(blobID);
-data ? onMessage(data) : removeFallbackSheet();
+if (data && RaceWhoseFirst !== 'CONTENTSCRIPT') {
+    onMessage(data);
+    RaceWhoseFirst = 'CUSTOM';
+} else {
+    removeFallbackSheet();
+}

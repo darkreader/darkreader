@@ -79,6 +79,11 @@ declare namespace DarkReader {
          */
         textStroke: number;
         /**
+         * Makes bold text look brighter.
+         * Default false.
+         */
+        boldTextBrightness: boolean;
+        /**
          * Background color to use for dark mode.
          * Default #181a1b
          */

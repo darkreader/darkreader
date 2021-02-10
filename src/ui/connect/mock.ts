@@ -17,6 +17,7 @@ export function getMockData(override = {} as Partial<ExtensionData>): ExtensionD
                 useFont: false,
                 fontFamily: 'Segoe UI',
                 textStroke: 0,
+                boldTextBrightness: false,
                 engine: 'cssFilter',
                 stylesheet: '',
                 scrollbarColor: 'auto',

@@ -17,5 +17,11 @@ export function createTextStyle(config: FilterConfig): string {
 
     lines.push('}');
 
+    if (config.boldTextBrightness) {
+        lines.push('b {');
+        lines.push(`  filter: brightness(200%) !important;`);
+        lines.push('}');
+    }
+
     return lines.join('\n');
 }

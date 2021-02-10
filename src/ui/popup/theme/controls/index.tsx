@@ -1,4 +1,5 @@
 import BackgroundColor from './background-color';
+import BoldTextBrightness from './bold-text-brightness';
 import Brightness from './brightness';
 import Contrast from './contrast';
 import FontPicker from './font-picker';
@@ -17,6 +18,7 @@ import UseFont from './use-font';
 export {
     BackgroundColor,
     Brightness,
+    BoldTextBrightness,
     Contrast,
     FontPicker,
     Grayscale,

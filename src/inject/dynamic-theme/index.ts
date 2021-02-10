@@ -78,7 +78,7 @@ function createStaticStyleOverrides() {
     setupNodePositionWatcher(userAgentStyle, 'user-agent');
 
     const textStyle = createOrUpdateStyle('darkreader--text');
-    if (filter.useFont || filter.textStroke > 0) {
+    if (filter.useFont || filter.textStroke > 0 || filter.boldTextBrightness) {
         textStyle.textContent = createTextStyle(filter);
     } else {
         textStyle.textContent = '';
@@ -141,9 +141,19 @@ function createShadowStaticStyleOverrides(root: ShadowRoot) {
     const inlineStyle = createOrUpdateStyle('darkreader--inline', root);
     inlineStyle.textContent = getInlineOverrideStyle();
     root.insertBefore(inlineStyle, root.firstChild);
+
+    const textStyle = createOrUpdateStyle('darkreader--text');
+    if (filter.useFont || filter.textStroke > 0 || filter.boldTextBrightness) {
+        textStyle.textContent = createTextStyle(filter);
+    } else {
+        textStyle.textContent = '';
+    }
+    root.insertBefore(textStyle, inlineStyle.nextSibling);
+
     const overrideStyle = createOrUpdateStyle('darkreader--override', root);
     overrideStyle.textContent = fixes && fixes.css ? replaceCSSTemplates(fixes.css) : '';
-    root.insertBefore(overrideStyle, inlineStyle.nextSibling);
+    root.insertBefore(overrideStyle, textStyle.nextSibling);
+
     shadowRootsWithOverrides.add(root);
 }
 
@@ -469,6 +479,7 @@ export function removeDynamicTheme() {
     }
     shadowRootsWithOverrides.forEach((root) => {
         removeNode(root.querySelector('.darkreader--inline'));
+        removeNode(root.querySelector('.darkreader--text'));
         removeNode(root.querySelector('.darkreader--override'));
     });
     shadowRootsWithOverrides.clear();

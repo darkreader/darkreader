@@ -46,6 +46,7 @@ export interface Theme {
     useFont: boolean;
     fontFamily: string;
     textStroke: number;
+    boldTextBrightness: boolean;
     engine: string;
     stylesheet: string;
     darkSchemeBackgroundColor: string;

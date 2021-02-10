@@ -22,6 +22,7 @@ export const DEFAULT_THEME: Theme = {
     useFont: false,
     fontFamily: isMacOS ? 'Helvetica Neue' : isWindows ? 'Segoe UI' : 'Open Sans',
     textStroke: 0,
+    boldTextBrightness: false,
     engine: ThemeEngines.dynamicTheme,
     stylesheet: '',
     darkSchemeBackgroundColor: DEFAULT_COLORS.darkScheme.background,

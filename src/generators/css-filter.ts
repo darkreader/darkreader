@@ -53,7 +53,7 @@ export function cssFilterStyleSheetTemplate(filterValue: string, reverseFilterVa
         lines.push(createReverseRule(reverseFilterValue, fix));
     }
 
-    if (config.useFont || config.textStroke > 0) {
+    if (config.useFont || config.textStroke > 0 || config.boldTextBrightness) {
         // Add text rule
         lines.push('');
         lines.push('/* Font */');

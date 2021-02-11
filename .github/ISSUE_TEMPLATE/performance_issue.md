@@ -1,7 +1,7 @@
 ---
 name: Performance issues
 about: Adress a performance issue of Dark Reader
-title: "[Performance] Insert title here"
+title: "[Performance] Replace with title"
 labels:
 assignees: ''
 
@@ -26,7 +26,6 @@ assignees: ''
 ## How to Reproduce
 <!-- We need to know how you encountered the bug to properly troubleshoot the issue. -->
 <!--
-  Steps to reproduce the behavior:
   An example of this is:
     - Go to '...'
     - Click on '...'
@@ -36,12 +35,11 @@ assignees: ''
 ## Performance Profiler
 <!-- A link to either profile.zip *Chromium only* or a firefox profiler *Firefox only*. -->
 
+## System Information
 <!--
   Please add a version of the browser you are using. 
   If you don't know how to get your browser/Dark Reader version please search it up online.
 -->
-
-## System Information
 
 - OS: <!-- [e.g. Windows, MacOS, Linux] -->
 - Browser: <!-- [e.g. Chrome 84, Safari 13] -->

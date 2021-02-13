@@ -2,7 +2,7 @@ import {m} from 'malevic';
 import {DEFAULT_SETTINGS, DEFAULT_THEME, DEFAULT_COLORS} from '../../../../defaults';
 import type {Theme} from '../../../../definitions';
 import type {ViewProps} from '../../types';
-import {BackgroundColor, Brightness, Contrast, FontPicker, Grayscale, Mode, ResetButton, Scheme, Scrollbar, SelectionColorEditor, Sepia, TextColor, TextStroke, UseFont, StyleSystemControls} from '../controls';
+import {BackgroundColor, Brightness, Contrast, FontPicker, Grayscale, Mode, ResetButton, Scheme, Scrollbar, SelectionColorEditor, Sepia, TextColor, TextStroke, UseFont, StyleSystemControls, LinkColorEditor} from '../controls';
 import ThemePresetPicker from '../preset-picker';
 import {getCurrentThemePreset} from '../utils';
 import Collapsible from './collapsible-panel';
@@ -73,6 +73,11 @@ function ColorsGroup({theme, change}: ThemeGroupProps) {
                 value={theme.selectionColor}
                 onChange={(v) => change({selectionColor: v})}
                 onReset={() => change({selectionColor: DEFAULT_SETTINGS.theme.selectionColor})}
+            />
+            <LinkColorEditor
+                value={theme.linkColor}
+                onChange={(v) => change({linkColor: v})}
+                onReset={() => change({linkColor: DEFAULT_SETTINGS.theme.linkColor})}
             />
         </Array>
     );

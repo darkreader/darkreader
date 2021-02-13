@@ -69,9 +69,26 @@ export function getModifiedUserAgentStyle(theme: Theme, isIFrame: boolean, style
     lines.push(`    border-color: ${modifyBorderColor({r: 76, g: 76, b: 76}, theme)};`);
     lines.push(`    color: ${modifyForegroundColor({r: 0, g: 0, b: 0}, theme)};`);
     lines.push('}');
-    lines.push('a {');
-    lines.push(`    color: ${modifyForegroundColor({r: 0, g: 64, b: 255}, theme)};`);
-    lines.push('}');
+    let linkColor: string;
+    let visitedLinkColor: string;
+    if (theme.linkColor === 'auto') {
+        linkColor = modifyForegroundColor({r: 0, g: 64, b: 255}, theme);
+    } else {
+        const hsl = rgbToHSL(parse(theme.linkColor));
+        const lighten = (lighter: number) => ({...hsl, l: clamp(hsl.l + lighter, 0, 1)});
+        linkColor = hslToString(hsl);
+        visitedLinkColor = hslToString(lighten(0.2));
+    }
+    if (linkColor) {
+        lines.push('a {');
+        lines.push(`    color: ${linkColor};`);
+        lines.push('}');
+    }
+    if (visitedLinkColor) {
+        lines.push('a:visited {');
+        lines.push(`    color: ${visitedLinkColor};`);
+        lines.push('}');
+    }
     lines.push('table {');
     lines.push(`    border-color: ${modifyBorderColor({r: 128, g: 128, b: 128}, theme)};`);
     lines.push('}');

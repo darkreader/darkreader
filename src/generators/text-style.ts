@@ -19,7 +19,8 @@ export function createTextStyle(config: FilterConfig): string {
 
     if (config.boldTextBrightness) {
         lines.push('b {');
-        lines.push(`  filter: brightness(200%) !important;`);
+        lines.push(`  -webkit-text-stroke: 0.4px !important;`);
+        lines.push(`  text-stroke: 0.4px !important;`);
         lines.push('}');
     }
 

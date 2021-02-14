@@ -32,7 +32,7 @@ describe('Toggling The Extension', () => {
         await expect(page.evaluate(() => getComputedStyle(document.querySelector('a')).color)).resolves.toBe('rgb(51, 145, 255)');
 
         await popupUtils.click('.toggle__off');
-        await timeout(500);
+        await timeout(1000);
 
         await expect(page.evaluate(() => getComputedStyle(document.documentElement).backgroundColor)).resolves.toBe('rgba(0, 0, 0, 0)');
         await expect(page.evaluate(() => getComputedStyle(document.documentElement).color)).resolves.toBe('rgb(0, 0, 0)');
@@ -42,7 +42,7 @@ describe('Toggling The Extension', () => {
         await expect(page.evaluate(() => getComputedStyle(document.querySelector('a')).color)).resolves.toBe('rgb(0, 0, 238)');
 
         await popupUtils.click('.toggle__on');
-        await timeout(500);
+        await timeout(1000);
 
         await expect(page.evaluate(() => getComputedStyle(document.documentElement).backgroundColor)).resolves.toBe('rgb(24, 26, 27)');
         await expect(page.evaluate(() => getComputedStyle(document.documentElement).color)).resolves.toBe('rgb(232, 230, 227)');

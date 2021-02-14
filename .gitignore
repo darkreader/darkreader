@@ -22,9 +22,11 @@ node_modules/
 .vscode/
 *.code-workspace
 
-# Coverge
+# Code coverage reports
 #-----------------------------------
+tests/coverage/
 tests/browser/coverage/
+tests/inject/coverage/
 
 # Cache files
 #-----------------------------------

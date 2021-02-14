@@ -8,7 +8,7 @@ module.exports = (config) => {
             {pattern: 'tests/inject/**/*.tests.ts', watched: true, type: 'js'},
         ],
         preprocessors: {
-            '**/*.+(ts|tsx)': ['esbuild'],
+            '**/*.+(ts|tsx)': ['esbuild', 'coverage'],
         },
         port: 9876,
         colors: true,
@@ -18,12 +18,18 @@ module.exports = (config) => {
             ['Chrome'] :
             ['Chrome', 'Firefox', process.platform === 'darwin' ? 'Safari' : null].filter(Boolean),
         singleRun: config.debug ? false : true,
+        reporters: ['progress', 'coverage'],
+        coverageReporter: {
+            type: 'html',
+            dir: 'tests/inject/coverage/',
+        },
         concurrency: config.debug ? Infinity : 1,
         plugins: [
             'karma-chrome-launcher',
             'karma-firefox-launcher',
             'karma-safari-launcher',
             'karma-jasmine',
+            'karma-coverage',
             require('../esbuild-preprocessor')
         ],
     });

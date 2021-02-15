@@ -88,7 +88,7 @@ async function bundleJS(/** @type {JSEntry} */entry, {debug, watch}) {
     const outfile = `${getDestDir({debug})}/${dest}`;
     await build({
         incremental: watch ? true : false,
-        watch: {
+        watch: watch ? {
             onRebuild(error) {
                 if (error) {
                     console.error('watch build failed:', error);
@@ -97,7 +97,7 @@ async function bundleJS(/** @type {JSEntry} */entry, {debug, watch}) {
                     console.error('watch build succeeded');
                 }
             },
-        },
+        } : null,
         sourcemap: debug ? 'inline' : false,
         bundle: true,
         target: 'es2019',
@@ -120,7 +120,5 @@ async function bundleJS(/** @type {JSEntry} */entry, {debug, watch}) {
 
 module.exports = createTask(
     'bundle-js',
-    async ({debug, watch}) => await Promise.all(
-        jsEntries.forEach((entry) => bundleJS(entry, {debug, watch}))
-    )
+    async ({debug, watch}) => jsEntries.forEach((entry) => bundleJS(entry, {debug, watch}))
 );

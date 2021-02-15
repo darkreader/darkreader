@@ -15,6 +15,7 @@ const typeCheck = require('./type-checking');
 
 const standardTask = [
     clean,
+    typeCheck,
     bundleJS,
     bundleCSS,
     bundleHTML,
@@ -58,8 +59,6 @@ async function api() {
 
 async function run() {
     const args = process.argv.slice(2);
-
-    await runTasks([typeCheck]);
 
     if (args.includes('--release')) {
         await build({debug: false, watch: false});

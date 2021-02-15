@@ -6,7 +6,14 @@ export function iterateCSSRules(rules: CSSRuleList, iterate: (rule: CSSStyleRule
     forEach(rules, (rule) => {
         if (rule instanceof CSSMediaRule) {
             const media = Array.from(rule.media);
-            if (media.includes('screen') || media.includes('all') || !(media.includes('print') || media.includes('speech'))) {
+            media.map((mediaRule) => {
+                if (mediaRule.includes('and')) {
+                    mediaRule.split(' and ').forEach((splittedRule) => media.push(splittedRule));
+                } else {
+                    return mediaRule;
+                }
+            });
+            if (media.includes('screen') || media.includes('all') || !((media.includes('print') && (media.length !== 1 && !matchMedia(rule.media.mediaText).matches)) || media.includes('speech'))) {
                 iterateCSSRules(rule.cssRules, iterate);
             }
         } else if (rule instanceof CSSStyleRule) {

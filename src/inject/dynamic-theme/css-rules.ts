@@ -7,7 +7,7 @@ export function iterateCSSRules(rules: CSSRuleList, iterate: (rule: CSSStyleRule
         if (rule instanceof CSSMediaRule) {
             const media = Array.from(rule.media);
             media.map((mediaRule) => {
-                if (mediaRule.includes('and')) {
+                if (mediaRule.includes(' and ')) {
                     mediaRule.split(' and ').forEach((splittedRule) => media.push(splittedRule));
                 } else {
                     return mediaRule;

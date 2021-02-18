@@ -29,7 +29,7 @@ export function enable(themeOptions: Partial<Theme> = {}, fixes: DynamicThemeFix
     isDarkReaderEnabled = true;
 
     const enableDynamicThemeEvent = new CustomEvent('__darkreader__enableDynamicTheme', {detail: {theme, fixes}});
-    getAllIFrames().forEach((IFrame) => IFrame.contentWindow.dispatchEvent(enableDynamicThemeEvent));
+    getAllIFrames().forEach((IFrame) => IFrame.contentDocument.dispatchEvent(enableDynamicThemeEvent));
 }
 
 export function isEnabled() {

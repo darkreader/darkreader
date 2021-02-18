@@ -4,7 +4,9 @@ export function getAllIFrames(workingDocument = document): HTMLIFrameElement[] {
     let IFrames: HTMLIFrameElement[] = [];
     IFrames = [...IFrames, ...workingDocument.getElementsByTagName('iframe')];
     // Recursive checking IFrames.
-    IFrames.forEach((IFrame) => IFrames.concat(getAllIFrames(IFrame.contentDocument)));
+    IFrames.forEach((IFrame) => {
+        IFrames = [...IFrames, ...getAllIFrames(IFrame.contentDocument)];
+    });
     return IFrames;
 }
 
@@ -37,18 +39,18 @@ const isDOMReady = (IFrameDocument: Document) => IFrameDocument.readyState === '
 const onMutation = (workingDocument: Document) => {
     getAllIFrames(workingDocument).forEach((IFrame) => {
         if (!IFrame.getAttribute('isdarkreaderactived')) {
-            const {contentDocument} = IFrame;
-            if (isDOMReady(contentDocument)) {
-                onNewIFrame(IFrame);
-            } else {
-                const onReadyStateChange = () => {
-                    if (isDOMReady(contentDocument)) {
-                        contentDocument.removeEventListener('readystatechange', () => onReadyStateChange);
-                        onNewIFrame(IFrame);
-                    }
-                };
-                contentDocument.addEventListener('readystatechange', onReadyStateChange);
-            }
+            const onReadyStateChange = () => {
+                if (isDOMReady(IFrame.contentDocument)) {
+                    IFrame.contentDocument.removeEventListener('readystatechange', onReadyStateChange);
+                    IFrame.removeEventListener('load', onReadyStateChange);
+                    onNewIFrame(IFrame);
+                } else {
+                    console.log(IFrame.contentDocument.readyState, IFrame.src)
+                }
+            };
+            IFrame.contentDocument.addEventListener('readystatechange', onReadyStateChange);
+            IFrame.addEventListener('load', onReadyStateChange);
+            onReadyStateChange();
         }
     });
 };
@@ -66,5 +68,5 @@ export function setupIFrameObserver(workingDocument = document) {
     const observer = new MutationObserver(() => {
         onMutation(observerDocument);
     });
-    observer.observe(observerDocument, {childList: true, subtree: true});
+    observer.observe(observerDocument.documentElement, {childList: true, subtree: true});
 }

@@ -44,8 +44,6 @@ const onMutation = (workingDocument: Document) => {
                     IFrame.contentDocument.removeEventListener('readystatechange', onReadyStateChange);
                     IFrame.removeEventListener('load', onReadyStateChange);
                     onNewIFrame(IFrame);
-                } else {
-                    console.log(IFrame.contentDocument.readyState, IFrame.src)
                 }
             };
             IFrame.contentDocument.addEventListener('readystatechange', onReadyStateChange);

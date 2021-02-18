@@ -7,7 +7,8 @@
         "lib": [
             "es2015",
             "es2017",
-            "dom"
+            "dom",
+            "DOM.Iterable"
         ],
         "types": [
             "chrome"

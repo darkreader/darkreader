@@ -32,6 +32,7 @@ async function bundleAPI({debug}) {
             }),
             rollupPluginReplace({
                 '__DEBUG__': 'false',
+                '__API__': 'true',
             }),
         ].filter((x) => x)
     });

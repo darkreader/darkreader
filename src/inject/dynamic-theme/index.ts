@@ -13,7 +13,7 @@ import {clamp} from '../../utils/math';
 import {getCSSFilterValue} from '../../generators/css-filter';
 import {modifyBackgroundColor, modifyColor, modifyForegroundColor} from '../../generators/modify-colors';
 import {createTextStyle} from '../../generators/text-style';
-import type {FilterConfig, DynamicThemeFix} from '../../definitions';
+import type {FilterConfig, DynamicThemeFix, Theme} from '../../definitions';
 import {generateUID} from '../../utils/uid';
 import type {AdoptedStyleSheetManager} from './adopted-style-manger';
 import {createAdoptedStyleSheetOverride} from './adopted-style-manger';
@@ -488,4 +488,17 @@ export function cleanDynamicThemeCache() {
     cancelRendering();
     stopWatchingForUpdates();
     cleanModificationCache();
+}
+
+declare const __API__: boolean;
+if (__API__) {
+    const addEnableDynamicTheme = (e: CustomEvent<{theme: Theme; fixes: DynamicThemeFix}>) => {
+        // Using this listener is only utilized by Dark Reader's API specified for IFrame's functioniallty.
+        // Thus can be safe assumed it's an iframe.
+        createOrUpdateDynamicTheme(e.detail.theme, e.detail.fixes, true);
+    };
+
+    document.addEventListener('__darkreader__removeDynamicTheme', () => removeDynamicTheme());
+    document.addEventListener('__darkreader__enableDynamicTheme', addEnableDynamicTheme);
+    document.dispatchEvent(new CustomEvent('__darkreader__IAmReady'));
 }

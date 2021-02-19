@@ -6,7 +6,7 @@ import ThemeEngines from '../generators/theme-engines';
 import {createOrUpdateDynamicTheme, removeDynamicTheme} from '../inject/dynamic-theme';
 import {collectCSS} from '../inject/dynamic-theme/css-collection';
 import {isMatchMediaChangeEventListenerSupported} from '../utils/platform';
-import {getAllIFrames, setupIFrameData, setupIFrameObserver} from './iframes';
+import {ensureIFrameIsLoaded, getAllIFrames, setupIFrameData, setupIFrameObserver} from './iframes';
 
 let isDarkReaderEnabled = false;
 const isIFrame = (() => {
@@ -29,7 +29,7 @@ export function enable(themeOptions: Partial<Theme> = {}, fixes: DynamicThemeFix
     isDarkReaderEnabled = true;
 
     const enableDynamicThemeEvent = new CustomEvent('__darkreader__enableDynamicTheme', {detail: {theme, fixes}});
-    getAllIFrames(document).forEach((IFrame) => IFrame.contentDocument.dispatchEvent(enableDynamicThemeEvent));
+    getAllIFrames(document).forEach(async (IFrame) => (await ensureIFrameIsLoaded(IFrame)).contentDocument.dispatchEvent(enableDynamicThemeEvent));
 }
 
 export function isEnabled() {
@@ -40,7 +40,7 @@ export function disable() {
     removeDynamicTheme();
     isDarkReaderEnabled = false;
     const removeDynamicThemeEvent = new CustomEvent('__darkreader__removeDynamicTheme');
-    getAllIFrames(document).forEach((IFrame) => IFrame.contentDocument.dispatchEvent(removeDynamicThemeEvent));
+    getAllIFrames(document).forEach(async (IFrame) => (await ensureIFrameIsLoaded(IFrame)).contentDocument.dispatchEvent(removeDynamicThemeEvent));
 }
 
 const darkScheme = matchMedia('(prefers-color-scheme: dark)');

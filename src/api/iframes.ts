@@ -71,3 +71,23 @@ export function setupIFrameObserver(workingDocument = document) {
     });
     observer.observe(observerDocument.documentElement, {childList: true, subtree: true});
 }
+
+
+export async function ensureIFrameIsLoaded(IFrame: HTMLIFrameElement): Promise<HTMLIFrameElement> {
+    const isLoaded = (IFrame: HTMLIFrameElement) => IFrame.contentDocument && (IFrame.contentDocument.readyState === 'complete' || IFrame.contentDocument.readyState === 'interactive');
+    return new Promise((resolve) => {
+        if (isLoaded(IFrame)) {
+            return resolve(IFrame);
+        } else {
+            const onLoaded = () => {
+                if (isLoaded(IFrame)) {
+                    IFrame.removeEventListener('load', onLoaded);
+                    IFrame.contentDocument.removeEventListener('readystatechange', onLoaded);
+                    resolve(IFrame);
+                }
+            };
+            IFrame.addEventListener('load', onLoaded);
+            IFrame.contentDocument && IFrame.contentDocument.addEventListener('readystatechange', onLoaded);
+        }
+    });
+}

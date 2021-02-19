@@ -1,6 +1,9 @@
 import type {DynamicThemeFix, Theme} from 'definitions';
 
-export function getAllIFrames(workingDocument = document): HTMLIFrameElement[] {
+export function getAllIFrames(workingDocument: Document): HTMLIFrameElement[] {
+    if (!workingDocument) {
+        return [];
+    }
     let IFrames: HTMLIFrameElement[] = [];
     IFrames = [...IFrames, ...workingDocument.getElementsByTagName('iframe')];
     // Recursive checking IFrames.

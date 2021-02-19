@@ -29,7 +29,7 @@ export function enable(themeOptions: Partial<Theme> = {}, fixes: DynamicThemeFix
     isDarkReaderEnabled = true;
 
     const enableDynamicThemeEvent = new CustomEvent('__darkreader__enableDynamicTheme', {detail: {theme, fixes}});
-    getAllIFrames().forEach((IFrame) => IFrame.contentDocument.dispatchEvent(enableDynamicThemeEvent));
+    getAllIFrames(document).forEach((IFrame) => IFrame.contentDocument.dispatchEvent(enableDynamicThemeEvent));
 }
 
 export function isEnabled() {
@@ -40,7 +40,7 @@ export function disable() {
     removeDynamicTheme();
     isDarkReaderEnabled = false;
     const removeDynamicThemeEvent = new CustomEvent('__darkreader__removeDynamicTheme');
-    getAllIFrames().forEach((IFrame) => IFrame.contentDocument.dispatchEvent(removeDynamicThemeEvent));
+    getAllIFrames(document).forEach((IFrame) => IFrame.contentDocument.dispatchEvent(removeDynamicThemeEvent));
 }
 
 const darkScheme = matchMedia('(prefers-color-scheme: dark)');

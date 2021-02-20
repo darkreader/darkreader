@@ -36,10 +36,9 @@ const onNewIFrame = (IFrame: HTMLIFrameElement) => {
 };
 
 const onMutation = (workingDocument: Document) => {
-    getAllIFrames(workingDocument).forEach(async (IFrame) => {
+    getAllIFrames(workingDocument).forEach((IFrame) => {
         if (!IFrame.getAttribute('isdarkreaderactived')) {
-            const loadedIFrame = await ensureIFrameIsLoaded(IFrame);
-            onNewIFrame(loadedIFrame);
+            ensureIFrameIsLoaded(IFrame, () => !IFrame.getAttribute('isdarkreaderactived') && onNewIFrame(IFrame));
         }
     });
 };
@@ -61,24 +60,39 @@ export function setupIFrameObserver(workingDocument = document) {
 }
 
 
-export async function ensureIFrameIsLoaded(IFrame: HTMLIFrameElement): Promise<HTMLIFrameElement> {
-    const isLoaded = (IFrame: HTMLIFrameElement) => IFrame.contentDocument && (IFrame.contentDocument.readyState === 'complete' || IFrame.contentDocument.readyState === 'interactive');
-    return new Promise((resolve) => {
-        if (isLoaded(IFrame)) {
-            return resolve(IFrame);
-        } else {
-            const onLoaded = () => {
-                if (isLoaded(IFrame)) {
-                    IFrame.removeEventListener('load', onLoaded);
-                    IFrame.contentDocument.removeEventListener('readystatechange', onLoaded);
-                    IFrame.contentWindow.removeEventListener('load', onLoaded);
-                    resolve(IFrame);
-                }
-            };
-            IFrame.addEventListener('load', onLoaded);
-            IFrame.contentDocument && IFrame.contentDocument.addEventListener('readystatechange', onLoaded);
-            IFrame.contentWindow && IFrame.contentWindow.window && IFrame.contentWindow.window.addEventListener('load', onLoaded);
-            onLoaded();
+export function ensureIFrameIsLoaded(IFrame: HTMLIFrameElement, callback: (IFrameDocument: Document) => void): void {
+    let timeoutID: number;
+    let fired = false;
+
+    function ready() {
+        if (!fired) {
+            fired = true;
+            clearTimeout(timeoutID);
+            callback(IFrame.contentDocument);
         }
+    }
+
+    // use iFrame load as a backup - though the other events should occur first
+    IFrame.addEventListener('load', () => {
+        ready();
     });
+
+    function checkLoaded() {
+        const doc = IFrame.contentDocument;
+        // We can tell if there is a dummy document installed because the dummy document
+        // will have an URL that starts with "about:".  The real document will not have that URL
+        if (doc.URL.indexOf('about:') !== 0) {
+            if (doc.readyState === 'complete') {
+                ready.call(doc);
+            } else {
+                // set event listener for DOMContentLoaded on the new document
+                doc.addEventListener('DOMContentLoaded', ready);
+                doc.addEventListener('readystatechange', ready);
+            }
+        } else {
+            // still same old original document, so keep looking for content or new document
+            timeoutID = setTimeout(checkLoaded);
+        }
+    }
+    checkLoaded();
 }

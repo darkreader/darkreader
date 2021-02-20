@@ -9,6 +9,7 @@ import {isMatchMediaChangeEventListenerSupported} from '../utils/platform';
 import {ensureIFrameIsLoaded, getAllIFrames, setupIFrameData, setupIFrameObserver} from './iframes';
 
 let isDarkReaderEnabled = false;
+let usesIFrames = false;
 const isIFrame = (() => {
     try {
         return window.self !== window.top;
@@ -29,7 +30,7 @@ export function enable(themeOptions: Partial<Theme> = {}, fixes: DynamicThemeFix
     isDarkReaderEnabled = true;
 
     const enableDynamicThemeEvent = new CustomEvent('__darkreader__enableDynamicTheme', {detail: {theme, fixes}});
-    getAllIFrames(document).forEach(async (IFrame) => (await ensureIFrameIsLoaded(IFrame)).contentDocument.dispatchEvent(enableDynamicThemeEvent));
+    usesIFrames && getAllIFrames(document).forEach((IFrame) => ensureIFrameIsLoaded(IFrame, (IFrameDocument) => IFrameDocument.dispatchEvent(enableDynamicThemeEvent)));
 }
 
 export function isEnabled() {
@@ -40,7 +41,7 @@ export function disable() {
     removeDynamicTheme();
     isDarkReaderEnabled = false;
     const removeDynamicThemeEvent = new CustomEvent('__darkreader__removeDynamicTheme');
-    getAllIFrames(document).forEach(async (IFrame) => (await ensureIFrameIsLoaded(IFrame)).contentDocument.dispatchEvent(removeDynamicThemeEvent));
+    usesIFrames && getAllIFrames(document).forEach((IFrame) => ensureIFrameIsLoaded(IFrame, (IFrameDocument) => IFrameDocument.dispatchEvent(removeDynamicThemeEvent)));
 }
 
 const darkScheme = matchMedia('(prefers-color-scheme: dark)');
@@ -87,6 +88,7 @@ export function setupIFrameListener(listener: (IFrameDocument: Document) => void
     if (!listener || listener.length !== 1) {
         throw new Error('Must provide an listener with 1 argument, the literatal template should follow "(IFrameDocument: Document) => void".');
     }
+    usesIFrames = true;
     setupIFrameObserver();
     setupIFrameData(listener, getStore, () => isDarkReaderEnabled);
 }

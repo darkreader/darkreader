@@ -39,7 +39,7 @@ const onMutation = (workingDocument: Document) => {
     getAllIFrames(workingDocument).forEach(async (IFrame) => {
         if (!IFrame.getAttribute('isdarkreaderactived')) {
             const loadedIFrame = await ensureIFrameIsLoaded(IFrame);
-            onNewIFrame(loadedIFrame)
+            onNewIFrame(loadedIFrame);
         }
     });
 };

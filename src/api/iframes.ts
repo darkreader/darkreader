@@ -23,35 +23,23 @@ const onNewIFrame = (IFrame: HTMLIFrameElement) => {
     setupIFrameObserver(contentDocument);
     IFrame.setAttribute('isdarkreaderactived', '1');
     if (isEnabled()) {
-        if ((IFrame.contentWindow as any).DarkReader) {
-            contentDocument.dispatchEvent(new CustomEvent('__darkreader__enableDynamicTheme', {detail: getStore()}));
-        } else {
-            const dispatchCustomEvent = () => {
-                if (isEnabled()) {
-                    contentDocument.dispatchEvent(new CustomEvent('__darkreader__enableDynamicTheme', {detail: getStore()}));
-                    contentDocument.removeEventListener('__darkreader__IAmReady', dispatchCustomEvent);
-                }
-            };
-            contentDocument.addEventListener('__darkreader__IAmReady', dispatchCustomEvent);
-        }
+        // Cannot ensure darkreader.js has been loaded.
+        contentDocument.dispatchEvent(new CustomEvent('__darkreader__enableDynamicTheme', {detail: getStore()}));
+        const dispatchCustomEvent = () => {
+            if (isEnabled()) {
+                contentDocument.dispatchEvent(new CustomEvent('__darkreader__enableDynamicTheme', {detail: getStore()}));
+                contentDocument.removeEventListener('__darkreader__IAmReady', dispatchCustomEvent);
+            }
+        };
+        contentDocument.addEventListener('__darkreader__IAmReady', dispatchCustomEvent);
     }
 };
 
-const isDOMReady = (IFrameDocument: Document) => IFrameDocument.readyState === 'complete' || IFrameDocument.readyState === 'interactive';
-
 const onMutation = (workingDocument: Document) => {
-    getAllIFrames(workingDocument).forEach((IFrame) => {
+    getAllIFrames(workingDocument).forEach(async (IFrame) => {
         if (!IFrame.getAttribute('isdarkreaderactived')) {
-            const onReadyStateChange = () => {
-                if (isDOMReady(IFrame.contentDocument)) {
-                    IFrame.contentDocument.removeEventListener('readystatechange', onReadyStateChange);
-                    IFrame.removeEventListener('load', onReadyStateChange);
-                    onNewIFrame(IFrame);
-                }
-            };
-            IFrame.contentDocument.addEventListener('readystatechange', onReadyStateChange);
-            IFrame.addEventListener('load', onReadyStateChange);
-            onReadyStateChange();
+            const loadedIFrame = await ensureIFrameIsLoaded(IFrame);
+            onNewIFrame(loadedIFrame)
         }
     });
 };
@@ -83,11 +71,14 @@ export async function ensureIFrameIsLoaded(IFrame: HTMLIFrameElement): Promise<H
                 if (isLoaded(IFrame)) {
                     IFrame.removeEventListener('load', onLoaded);
                     IFrame.contentDocument.removeEventListener('readystatechange', onLoaded);
+                    IFrame.contentWindow.removeEventListener('load', onLoaded);
                     resolve(IFrame);
                 }
             };
             IFrame.addEventListener('load', onLoaded);
             IFrame.contentDocument && IFrame.contentDocument.addEventListener('readystatechange', onLoaded);
+            IFrame.contentWindow && IFrame.contentWindow.window && IFrame.contentWindow.window.addEventListener('load', onLoaded);
+            onLoaded();
         }
     });
 }

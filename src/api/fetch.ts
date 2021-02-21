@@ -38,9 +38,9 @@ const resolvers = new Map<string, (data: any) => void>();
 
 export async function apiFetch(url: string, responseType: string) {
     return new Promise<Response>((resolve) => {
-        const id = `${++counter}-${window.location.pathname}`;
+        const id = `${++counter}-${window.location.href}`;
         resolvers.set(id, resolve);
-        window.postMessage({type: 'fetch-api', data: url, id, responseType}, window.location.origin);
+        (window.top.postMessage as any)({type: 'fetch-api', url, id, responseType});
     });
 }
 

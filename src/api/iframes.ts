@@ -59,7 +59,6 @@ export function setupIFrameObserver(workingDocument = document) {
     observer.observe(observerDocument.documentElement, {childList: true, subtree: true});
 }
 
-
 export function ensureIFrameIsLoaded(IFrame: HTMLIFrameElement, callback: (IFrameDocument: Document) => void): void {
     let timeoutID: number;
     let fired = false;
@@ -81,7 +80,7 @@ export function ensureIFrameIsLoaded(IFrame: HTMLIFrameElement, callback: (IFram
         const doc = IFrame.contentDocument;
         // We can tell if there is a dummy document installed because the dummy document
         // will have an URL that starts with "about:".  The real document will not have that URL
-        if (doc.URL.indexOf('about:') !== 0) {
+        if (doc && doc.URL.indexOf('about:') !== 0) {
             if (doc.readyState === 'complete') {
                 ready.call(doc);
             } else {
@@ -96,3 +95,12 @@ export function ensureIFrameIsLoaded(IFrame: HTMLIFrameElement, callback: (IFram
     }
     checkLoaded();
 }
+
+export const isIFrame = (() => {
+    try {
+        return window.self !== window.top;
+    } catch (err) {
+        console.warn(err);
+        return true;
+    }
+})();

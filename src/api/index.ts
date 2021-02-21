@@ -6,18 +6,10 @@ import ThemeEngines from '../generators/theme-engines';
 import {createOrUpdateDynamicTheme, removeDynamicTheme} from '../inject/dynamic-theme';
 import {collectCSS} from '../inject/dynamic-theme/css-collection';
 import {isMatchMediaChangeEventListenerSupported} from '../utils/platform';
-import {ensureIFrameIsLoaded, getAllIFrames, setupIFrameData, setupIFrameObserver} from './iframes';
+import {ensureIFrameIsLoaded, getAllIFrames, isIFrame, setupIFrameData, setupIFrameObserver} from './iframes';
 
 let isDarkReaderEnabled = false;
 let usesIFrames = false;
-const isIFrame = (() => {
-    try {
-        return window.self !== window.top;
-    } catch (err) {
-        console.warn(err);
-        return true;
-    }
-})();
 
 export function enable(themeOptions: Partial<Theme> = {}, fixes: DynamicThemeFix = null) {
     const theme = {...DEFAULT_THEME, ...themeOptions};

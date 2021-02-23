@@ -1,7 +1,7 @@
 ---
 name: Feature request
 about: Suggest a new Feature for Dark Reader
-title: "[Feature Request] Insert title here"
+title: "[Feature Request] Replace with title"
 labels: enhancement
 assignees: ''
 

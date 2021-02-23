@@ -3,6 +3,7 @@ import {createAsyncTasksQueue} from '../utils/throttle';
 import {iterateCSSRules, iterateCSSDeclarations} from './css-rules';
 import type {ModifiableCSSDeclaration, ModifiableCSSRule} from './modify-css';
 import {getModifiableCSSDeclaration} from './modify-css';
+import {variablesStore} from './variables';
 import type {CSSVariableModifier} from './variables';
 
 const themeCacheKeys: Array<keyof Theme> = [
@@ -68,7 +69,7 @@ export function createStyleSheetModifier() {
 
             const modDecs: ModifiableCSSDeclaration[] = [];
             rule.style && iterateCSSDeclarations(rule.style, (property, value) => {
-                const mod = getModifiableCSSDeclaration(property, value, rule, ignoreImageAnalysis, isAsyncCancelled);
+                const mod = getModifiableCSSDeclaration(property, value, rule, variablesStore, ignoreImageAnalysis, isAsyncCancelled);
                 if (mod) {
                     modDecs.push(mod);
                 }

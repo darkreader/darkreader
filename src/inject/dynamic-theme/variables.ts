@@ -23,7 +23,7 @@ const VAR_TYPE_TEXTCOLOR = 1 << 1;
 const VAR_TYPE_BORDERCOLOR = 1 << 2;
 const VAR_TYPE_BGIMG = 1 << 3;
 
-class VariablesStore {
+export class VariablesStore {
     private varTypes = new Map<string, number>();
     private rulesQueue = [] as CSSRuleList[];
     private definedVars = new Set<string>();

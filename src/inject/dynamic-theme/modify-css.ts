@@ -7,8 +7,7 @@ import {modifyBackgroundColor, modifyBorderColor, modifyForegroundColor, modifyG
 import {cssURLRegex, getCSSURLValue, getCSSBaseBath} from './css-rules';
 import type {ImageDetails} from './image';
 import {getImageDetails, getFilteredImageDataURL, cleanImageProcessingCache} from './image';
-import {variablesStore} from './variables';
-import type {CSSVariableModifier} from './variables';
+import type {CSSVariableModifier, VariablesStore} from './variables';
 import {logWarn, logInfo} from '../utils/log';
 import type {FilterConfig, Theme} from '../../definitions';
 import {isFirefox} from '../../utils/platform';
@@ -32,18 +31,19 @@ export function getModifiableCSSDeclaration(
     property: string,
     value: string,
     rule: CSSStyleRule,
+    variablesStore: VariablesStore,
     ignoreImageSelectors: string[],
     isCancelled: () => boolean,
 ): ModifiableCSSDeclaration {
     const important = Boolean(rule && rule.style && rule.style.getPropertyPriority(property));
     const sourceValue = value;
     if (property.startsWith('--')) {
-        const modifier = getVariableModifier(property, value, rule, ignoreImageSelectors, isCancelled);
+        const modifier = getVariableModifier(variablesStore, property, value, rule, ignoreImageSelectors, isCancelled);
         if (modifier) {
             return {property, value: modifier, important, sourceValue};
         }
     } else if (value.includes('var(')) {
-        const modifier = getVariableDependantModifier(property, value);
+        const modifier = getVariableDependantModifier(variablesStore, property, value);
         if (modifier) {
             return {property, value: modifier, important, sourceValue};
         }
@@ -467,6 +467,7 @@ function getShadowModifier(value: string): CSSValueModifier {
 }
 
 function getVariableModifier(
+    variablesStore: VariablesStore,
     prop: string,
     value: string,
     rule: CSSStyleRule,
@@ -482,7 +483,11 @@ function getVariableModifier(
     });
 }
 
-function getVariableDependantModifier(prop: string, value: string) {
+function getVariableDependantModifier(
+    variablesStore: VariablesStore,
+    prop: string,
+    value: string,
+) {
     return variablesStore.getModifierForVarDependant(prop, value);
 }
 

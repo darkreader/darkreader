@@ -1,5 +1,4 @@
 const rollup = require('rollup');
-const rollupPluginCommonjs = require('@rollup/plugin-commonjs');
 const rollupPluginNodeResolve = require('@rollup/plugin-node-resolve').default;
 const rollupPluginReplace = require('@rollup/plugin-replace');
 const rollupPluginTypescript = require('rollup-plugin-typescript2');
@@ -17,7 +16,6 @@ async function bundleAPI({debug}) {
         input: src,
         plugins: [
             rollupPluginNodeResolve(),
-            rollupPluginCommonjs(),
             rollupPluginTypescript({
                 typescript,
                 tsconfig: 'src/tsconfig.json',

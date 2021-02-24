@@ -93,7 +93,7 @@
     "puppeteer-core": "7.1.0",
     "rollup": "2.39.0",
     "rollup-plugin-istanbul2": "2.0.2",
-    "rollup-plugin-typescript2": "0.29.0",
+    "rollup-plugin-typescript2": "0.30.0",
     "ts-jest": "26.5.1",
     "ts-node": "9.1.1",
     "tsconfig-paths": "3.9.0",

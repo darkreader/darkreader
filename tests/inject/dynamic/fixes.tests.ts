@@ -19,7 +19,7 @@ afterEach(() => {
 describe('FIXES', () => {
     it('should should class name HTML', () => {
         createOrUpdateDynamicTheme(DEFAULT_THEME, null, false);
-        expect(document.documentElement.getAttribute(`data-darkreader-${DEFAULT_THEME.engine}`)).toBe(DEFAULT_THEME.mode ? 'dark' : 'light');
+        expect(document.documentElement.getAttribute(`data-darkreader`)).toBe(`${DEFAULT_THEME.engine}-${DEFAULT_THEME.mode ? 'dark' : 'light'}`);
     });
 
     it('should invert selectors', async () => {

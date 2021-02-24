@@ -427,7 +427,7 @@ export function createOrUpdateDynamicTheme(filterConfig: FilterConfig, dynamicTh
         if (isAnotherDarkReaderInstanceActive()) {
             return;
         }
-        document.documentElement.setAttribute(`data-darkreader`, filter.engine + filter.mode ? 'dark' : 'light');
+        document.documentElement.setAttribute(`data-darkreader`, `${filter.engine}-${filter.mode ? 'dark' : 'light'}`);
         createThemeAndWatchForUpdates();
     } else {
         if (!isFirefox) {

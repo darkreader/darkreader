@@ -11,14 +11,14 @@ function onMessage({type, data}) {
         case 'add-static-theme': {
             const css = data;
             removeDynamicTheme();
-            createOrUpdateStyle(css);
+            createOrUpdateStyle(css, 'static');
             break;
         }
         case 'add-svg-filter': {
             const {css, svgMatrix, svgReverseMatrix} = data;
             removeDynamicTheme();
             createOrUpdateSVGFilter(svgMatrix, svgReverseMatrix);
-            createOrUpdateStyle(css);
+            createOrUpdateStyle(css, 'filter');
             break;
         }
         case 'add-dynamic-theme': {

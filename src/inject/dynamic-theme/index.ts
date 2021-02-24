@@ -427,7 +427,7 @@ export function createOrUpdateDynamicTheme(filterConfig: FilterConfig, dynamicTh
         if (isAnotherDarkReaderInstanceActive()) {
             return;
         }
-        document.documentElement.setAttribute(`data-darkreader-${filter.engine}`, filter.mode ? 'dark' : 'light');
+        document.documentElement.setAttribute(`data-darkreader`, filter.engine + filter.mode ? 'dark' : 'light');
         createThemeAndWatchForUpdates();
     } else {
         if (!isFirefox) {
@@ -456,7 +456,7 @@ function removeProxy() {
 }
 
 export function removeDynamicTheme() {
-    filter && document.documentElement.removeAttribute(`data-darkreader-${filter.engine}`);
+    document.documentElement.removeAttribute(`data-darkreader`);
     cleanDynamicThemeCache();
     removeNode(document.querySelector('.darkreader--fallback'));
     if (document.head) {

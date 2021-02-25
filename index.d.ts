@@ -36,6 +36,12 @@ declare namespace DarkReader {
     function exportGeneratedCSS(): Promise<string>;
 
     /**
+     * Setup an listener function for when Dark Reader detects new IFrames.
+     * Use this function to add an copy of darkreader.js inside the IFrame.
+     */
+    function setupIFrameListener(listener: (IFrameDocument: Document) => void): void;
+
+    /**
      * Theme options.
      */
     interface Theme {

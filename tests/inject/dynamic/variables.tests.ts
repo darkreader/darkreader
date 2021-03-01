@@ -22,7 +22,7 @@ afterEach(() => {
     document.documentElement.removeAttribute('style');
 });
 
-describe('CSS Variables Override', () => {
+describe('CSS VARIABLES OVERRIDE', () => {
     it('should override style with variables', () => {
         container.innerHTML = multiline(
             '<style>',
@@ -294,6 +294,85 @@ describe('CSS Variables Override', () => {
             '   }',
             '</style>',
             '<h1>Dark <strong>Theme</strong>!</h1>',
+        );
+        createOrUpdateDynamicTheme(theme, null, false);
+        expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(255, 255, 255)');
+        expect(getComputedStyle(container.querySelector('h1')).backgroundColor).toBe('rgb(0, 0, 0)');
+    });
+
+    it('should handle variables inside color values', async () => {
+        container.innerHTML = multiline(
+            '<style>',
+            '    :root {',
+            '        --bg: 255, 255, 255;',
+            '        --text: 0, 0, 0;',
+            '    }',
+            '</style>',
+            '<style>',
+            '    h1 {',
+            '        background: rgb(var(--bg));',
+            '        color: rgb(var(--text));',
+            '    }',
+            '</style>',
+            '<h1>Colors with variables inside</h1>',
+        );
+        createOrUpdateDynamicTheme(theme, null, false);
+        expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(255, 255, 255)');
+        expect(getComputedStyle(container.querySelector('h1')).backgroundColor).toBe('rgb(0, 0, 0)');
+    });
+
+    it('should use fallback when variable inside a color not found', async () => {
+        container.innerHTML = multiline(
+            '<style>',
+            '    h1 {',
+            '        background: rgb(var(--bg, 255, 0, 0));',
+            '    }',
+            '</style>',
+            '<h1>Colors with variables inside</h1>',
+        );
+        createOrUpdateDynamicTheme(theme, null, false);
+        expect(getComputedStyle(container.querySelector('h1')).backgroundColor).toBe('rgb(204, 0, 0)');
+    });
+
+    it('should handle variables inside color values that reference other variables', async () => {
+        container.innerHTML = multiline(
+            '<style>',
+            '    :root {',
+            '        --v255: 255;',
+            '        --black: 0, 0, 0;',
+            '        --white: var(--v255), var(--v255), var(--v255);',
+            '        --bg: var(--unknown, var(--white));',
+            '        --text: var(--black);',
+            '    }',
+            '</style>',
+            '<style>',
+            '    h1 {',
+            '        background: rgb(var(--bg));',
+            '        color: rgb(var(--text));',
+            '    }',
+            '</style>',
+            '<h1>Colors with variables inside</h1>',
+        );
+        createOrUpdateDynamicTheme(theme, null, false);
+        expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(255, 255, 255)');
+        expect(getComputedStyle(container.querySelector('h1')).backgroundColor).toBe('rgb(0, 0, 0)');
+    });
+
+    it('should handle cyclic references inside color values', async () => {
+        container.innerHTML = multiline(
+            '<style>',
+            '    :root {',
+            '        --bg: var(--text);',
+            '        --text: var(--bg);',
+            '    }',
+            '</style>',
+            '<style>',
+            '    h1 {',
+            '        background: rgb(var(--bg));',
+            '        color: rgb(var(--text));',
+            '    }',
+            '</style>',
+            '<h1>Colors with variables inside</h1>',
         );
         createOrUpdateDynamicTheme(theme, null, false);
         expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(255, 255, 255)');

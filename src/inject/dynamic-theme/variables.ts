@@ -34,6 +34,7 @@ export class VariablesStore {
     private initialVarTypes = new Map<string, number>();
     private changedTypeVars = new Set<string>();
     private typeChangeSubscriptions = new Map<string, Set<() => void>>();
+    private unstableVarValues = new Map<string, string>();
 
     clear() {
         this.varTypes.clear();
@@ -46,6 +47,7 @@ export class VariablesStore {
         this.initialVarTypes.clear();
         this.changedTypeVars.clear();
         this.typeChangeSubscriptions.clear();
+        this.unstableVarValues.clear();
     }
 
     private isVarType(varName: string, typeNum: number) {
@@ -193,6 +195,18 @@ export class VariablesStore {
     }
 
     getModifierForVarDependant(property: string, sourceValue: string): CSSValueModifier {
+        if (['rgb(', 'rgba(', 'hsl(', 'hsla('].some((s) => sourceValue.startsWith(s))) {
+            const isBg = property.startsWith('background');
+            const isText = property === 'color';
+            return (theme) => {
+                let value = insertVarValues(sourceValue, this.unstableVarValues);
+                if (!value) {
+                    value = isBg ? '#ffffff' : isText ? '#000000' : '#888888';
+                }
+                const modifier = isBg ? tryModifyBgColor : isText ? tryModifyTextColor : tryModifyBorderColor;
+                return modifier(value, theme);
+            };
+        }
         if (property === 'background-color') {
             return (theme) => {
                 return replaceCSSVariablesNames(
@@ -270,6 +284,7 @@ export class VariablesStore {
 
     private collectVariables(rules: CSSRuleList) {
         iterateVariables(rules, (varName, value) => {
+            this.unstableVarValues.set(varName, value);
             if (this.definedVars.has(varName)) {
                 return;
             }
@@ -504,4 +519,35 @@ function tryModifyTextColor(color: string, theme: Theme) {
 function tryModifyBorderColor(color: string, theme: Theme) {
     const rgb = tryParseColor(color);
     return rgb ? modifyBorderColor(rgb, theme) : color;
+}
+
+function insertVarValues(source: string, varValues: Map<string, string>, stack = new Set<string>()) {
+    let containsUnresolvedVar = false;
+    const matchReplacer = (match: string) => {
+        const {name, fallback} = getVariableNameAndFallback(match);
+        if (stack.has(name)) {
+            containsUnresolvedVar = true;
+            return null;
+        }
+        stack.add(name);
+        const varValue = varValues.get(name) || fallback;
+        let inserted: string = null;
+        if (varValue) {
+            if (isVarDependant(varValue)) {
+                inserted = insertVarValues(varValue, varValues, stack);
+            } else {
+                inserted = varValue;
+            }
+        }
+        if (!inserted) {
+            containsUnresolvedVar = true;
+            return null;
+        }
+        return inserted;
+    };
+    const replaced = replaceVariablesMatches(source, matchReplacer);
+    if (containsUnresolvedVar) {
+        return null;
+    }
+    return replaced;
 }

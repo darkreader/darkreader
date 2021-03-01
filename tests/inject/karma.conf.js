@@ -38,6 +38,7 @@ module.exports = (config) => {
                     cacheRoot: `${fs.realpathSync(os.tmpdir())}/darkreader_typescript_test_cache`,
                 }),
                 rollupPluginReplace({
+                    preventAssignment: true,
                     '__DEBUG__': 'false',
                     '__PORT__': '-1',
                     '__WATCH__': 'false',

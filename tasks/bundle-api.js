@@ -29,6 +29,7 @@ async function bundleAPI({debug}) {
                 cacheRoot: debug ? `${fs.realpathSync(os.tmpdir())}/darkreader_api_typescript_cache` : null,
             }),
             rollupPluginReplace({
+                preventAssignment: true,
                 '__DEBUG__': 'false',
             }),
         ].filter((x) => x)

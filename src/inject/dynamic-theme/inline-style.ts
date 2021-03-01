@@ -2,6 +2,7 @@ import {forEach, push} from '../../utils/array';
 import {iterateShadowHosts, createOptimizedTreeObserver} from '../utils/dom';
 import {iterateCSSDeclarations} from './css-rules';
 import {getModifiableCSSDeclaration} from './modify-css';
+import {variablesStore} from './variables';
 import type {FilterConfig} from '../../definitions';
 import {isShadowDomSupported} from '../../utils/platform';
 import {getDuration} from '../../utils/time';
@@ -250,7 +251,7 @@ export function overrideInlineStyle(element: HTMLElement, theme: FilterConfig, i
     function setCustomProp(targetCSSProp: string, modifierCSSProp: string, cssVal: string) {
         const {customProp, dataAttr} = overrides[targetCSSProp];
 
-        const mod = getModifiableCSSDeclaration(modifierCSSProp, cssVal, null, ignoreImageSelectors, null);
+        const mod = getModifiableCSSDeclaration(modifierCSSProp, cssVal, null, variablesStore, ignoreImageSelectors, null);
         if (!mod) {
             return;
         }

@@ -195,7 +195,7 @@ export class VariablesStore {
     }
 
     getModifierForVarDependant(property: string, sourceValue: string): CSSValueModifier {
-        if (sourceValue.match(/^(rgb|hsl)a?\(/)) {
+        if (sourceValue.match(/^\s*(rgb|hsl)a?\(/)) {
             const isBg = property.startsWith('background');
             const isText = property === 'color';
             return (theme) => {

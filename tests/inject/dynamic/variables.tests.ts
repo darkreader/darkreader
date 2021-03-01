@@ -394,7 +394,15 @@ describe('CSS VARIABLES OVERRIDE', () => {
             '<h1>Colors with variables inside</h1>',
         );
         createOrUpdateDynamicTheme(theme, null, false);
-        expect(getComputedStyle(container.querySelector('h1')).borderColor).toBe('rgb(179, 0, 0)');
+        const elementStyle = getComputedStyle(container.querySelector('h1'));
+        if (isFirefox) {
+            expect(elementStyle.borderTopColor).toBe('rgb(179, 0, 0)');
+            expect(elementStyle.borderRightColor).toBe('rgb(179, 0, 0)');
+            expect(elementStyle.borderBottomColor).toBe('rgb(179, 0, 0)');
+            expect(elementStyle.borderLeftColor).toBe('rgb(179, 0, 0)');
+        } else {
+            expect(elementStyle.borderColor).toBe('rgb(179, 0, 0)');
+        }
     });
 
     it('should handle media variables', () => {

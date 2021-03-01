@@ -29,6 +29,7 @@ export class VariablesStore {
     private definedVars = new Set<string>();
     private varRefs = new Map<string, Set<string>>();
     private unknownColorVars = new Set<string>();
+    private constructedColorVars = new Set<string>();
     private unknownBgVars = new Set<string>();
     private undefinedVars = new Set<string>();
     private initialVarTypes = new Map<string, number>();
@@ -42,6 +43,7 @@ export class VariablesStore {
         this.definedVars.clear();
         this.varRefs.clear();
         this.unknownColorVars.clear();
+        this.constructedColorVars.clear();
         this.unknownBgVars.clear();
         this.undefinedVars.clear();
         this.initialVarTypes.clear();
@@ -132,11 +134,19 @@ export class VariablesStore {
                     const property = varNameWrapper(varName);
                     let modifiedValue: string;
                     if (isVarDependant(sourceValue)) {
-                        modifiedValue = replaceCSSVariablesNames(
-                            sourceValue,
-                            (v) => varNameWrapper(v),
-                            (fallback) => colorModifier(fallback, theme),
-                        );
+                        if (this.constructedColorVars.has(varName)) {
+                            let value = insertVarValues(sourceValue, this.unstableVarValues);
+                            if (!value) {
+                                value = typeNum === VAR_TYPE_BGCOLOR ? '#ffffff' : '#000000';
+                            }
+                            modifiedValue = colorModifier(value, theme);
+                        } else {
+                            modifiedValue = replaceCSSVariablesNames(
+                                sourceValue,
+                                (v) => varNameWrapper(v),
+                                (fallback) => colorModifier(fallback, theme),
+                            );
+                        }
                     } else {
                         modifiedValue = colorModifier(sourceValue, theme);
                     }
@@ -308,6 +318,10 @@ export class VariablesStore {
             this.definedVars.add(varName);
 
             if (isVarDependant(value)) {
+                if (value.match(/^\s*(rgb|hsl)a?\(/)) {
+                    this.constructedColorVars.add(varName);
+                    this.unknownColorVars.add(varName);
+                }
                 return;
             }
 

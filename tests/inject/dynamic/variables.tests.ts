@@ -358,6 +358,25 @@ describe('CSS VARIABLES OVERRIDE', () => {
         expect(getComputedStyle(container.querySelector('h1')).backgroundColor).toBe('rgb(0, 0, 0)');
     });
 
+    it('should handle variables that reference colors with variables', async () => {
+        container.innerHTML = multiline(
+            '<style>',
+            '    :root {',
+            '        --red: 255, 0, 0;',
+            '        --bg: rgb(var(--red));',
+            '    }',
+            '</style>',
+            '<style>',
+            '    h1 {',
+            '        background: var(--bg);',
+            '    }',
+            '</style>',
+            '<h1>Colors with variables inside</h1>',
+        );
+        createOrUpdateDynamicTheme(theme, null, false);
+        expect(getComputedStyle(container.querySelector('h1')).backgroundColor).toBe('rgb(204, 0, 0)');
+    });
+
     it('should handle cyclic references inside color values', async () => {
         container.innerHTML = multiline(
             '<style>',

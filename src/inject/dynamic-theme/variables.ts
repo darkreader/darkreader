@@ -195,13 +195,13 @@ export class VariablesStore {
     }
 
     getModifierForVarDependant(property: string, sourceValue: string): CSSValueModifier {
-        if (['rgb(', 'rgba(', 'hsl(', 'hsla('].some((s) => sourceValue.startsWith(s))) {
+        if (sourceValue.match(/^(rgb|hsl)a?\(/)) {
             const isBg = property.startsWith('background');
             const isText = property === 'color';
             return (theme) => {
                 let value = insertVarValues(sourceValue, this.unstableVarValues);
                 if (!value) {
-                    value = isBg ? '#ffffff' : isText ? '#000000' : '#888888';
+                    value = isBg ? '#ffffff' : '#000000';
                 }
                 const modifier = isBg ? tryModifyBgColor : isText ? tryModifyTextColor : tryModifyBorderColor;
                 return modifier(value, theme);
@@ -258,6 +258,23 @@ export class VariablesStore {
             };
         }
         if (property.startsWith('border')) {
+            if (sourceValue.endsWith(')')) {
+                const colorTypeMatch = sourceValue.match(/((rgb|hsl)a?)\(/);
+                if (colorTypeMatch) {
+                    const index = colorTypeMatch.index;
+                    return (theme) => {
+                        const value = insertVarValues(sourceValue, this.unstableVarValues);
+                        if (!value) {
+                            return sourceValue;
+                        }
+                        const beginning = sourceValue.substring(0, index);
+                        const color = sourceValue.substring(index, sourceValue.length);
+                        const inserted = insertVarValues(color, this.unstableVarValues);
+                        const modified = tryModifyBorderColor(inserted, theme);
+                        return `${beginning}${modified}`;
+                    };
+                }
+            }
             return (theme) => {
                 return replaceCSSVariablesNames(
                     sourceValue,

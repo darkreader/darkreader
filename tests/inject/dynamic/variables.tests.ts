@@ -379,6 +379,24 @@ describe('CSS VARIABLES OVERRIDE', () => {
         expect(getComputedStyle(container.querySelector('h1')).backgroundColor).toBe('rgb(0, 0, 0)');
     });
 
+    it('should handle variables inside border color values', async () => {
+        container.innerHTML = multiline(
+            '<style>',
+            '    :root {',
+            '        --red: 255, 0, 0;',
+            '    }',
+            '</style>',
+            '<style>',
+            '    h1 {',
+            '        border: 1px solid rgb(var(--red));',
+            '    }',
+            '</style>',
+            '<h1>Colors with variables inside</h1>',
+        );
+        createOrUpdateDynamicTheme(theme, null, false);
+        expect(getComputedStyle(container.querySelector('h1')).borderColor).toBe('rgb(179, 0, 0)');
+    });
+
     it('should handle media variables', () => {
         container.innerHTML = multiline(
             '<style>',

@@ -94,7 +94,7 @@ const isEnabled = isDarkReaderEnabled();
 
 Automatically syncing the site fixes to every Dark Reader user was disabled because the GitHub team doesn't allow using GitHub as a CDN. Storing these files and making requests to other resources would be expensive and look suspicious. As such, changes are included with each new Dark Reader release.
 
-However, this can be bypassed by the following steps:
+However, this can be enabled by the following steps:
 
 - Click on the Dark Reader icon.
 - Click on the Dev tools button (in the bottom-right corner).

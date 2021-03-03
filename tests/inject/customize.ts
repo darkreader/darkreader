@@ -1,4 +1,7 @@
 (() => {
+    if (window.top === window.self) {
+        return;
+    }
     const topDoc = window.top.document;
     const style = topDoc.createElement('style');
     style.textContent = [

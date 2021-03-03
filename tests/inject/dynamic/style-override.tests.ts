@@ -34,7 +34,6 @@ describe('STYLE ELEMENTS', () => {
         modifier.modifySheet({
             theme,
             sourceCSSRules: style.sheet.cssRules,
-            variables: new Map(),
             ignoreImageAnalysis: [],
             force: false,
             prepareSheet: () => override,
@@ -105,7 +104,6 @@ describe('STYLE ELEMENTS', () => {
         expect(getComputedStyle(container.querySelector('h1 strong')).color).toBe('rgb(255, 26, 26)');
         const style = document.querySelector('.testcase-style');
         style.nextSibling.remove();
-
         await timeout(0);
         expect((style.nextSibling as HTMLStyleElement).classList.contains('darkreader--sync')).toBe(true);
 
@@ -139,7 +137,6 @@ describe('STYLE ELEMENTS', () => {
         const style = document.querySelector('.testcase-style');
         const sibling = style.nextSibling;
         style.remove();
-
         await timeout(0);
         expect(sibling.isConnected && !((sibling as HTMLStyleElement).classList.contains('darkreader--sync'))).toBe(false);
 
@@ -155,7 +152,6 @@ describe('STYLE ELEMENTS', () => {
         style.sheet.insertRule('h1 { color: gray }');
         style.sheet.insertRule('strong { color: red }');
         (style as HTMLStyleElement).sheet.insertRule('html { background-color: pink }');
-
         await timeout(0);
         expect((style.nextSibling as HTMLStyleElement).sheet.cssRules[0].cssText).toBe('html { background-color: rgb(50, 0, 9); }');
 
@@ -171,7 +167,6 @@ describe('STYLE ELEMENTS', () => {
         createOrUpdateDynamicTheme(theme, null, false);
         expect(getComputedStyle(document.querySelector('h1 strong')).color).toBe('rgb(255, 26, 26)');
         document.querySelector('.testcase-style').textContent = 'h1 strong { color: green; }';
-
         await timeout(0);
         expect(getComputedStyle(document.querySelector('h1 strong')).color).toBe('rgb(140, 255, 140)');
 

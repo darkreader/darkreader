@@ -70,7 +70,7 @@ describe('LINK STYLES', () => {
         );
         createOrUpdateDynamicTheme(theme, null, false);
 
-        await timeout(100);
+        await timeout(50);
         expect(getComputedStyle(container.querySelector('h1')).backgroundColor).toBe('rgb(102, 102, 102)');
         expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(255, 255, 255)');
         expect(getComputedStyle(container.querySelector('h1 strong')).color).toBe('rgb(255, 26, 26)');
@@ -128,7 +128,7 @@ describe('LINK STYLES', () => {
         await timeout(50);
         expect(document.querySelector('.testcase--link').nextElementSibling.classList.contains(isSafari ? 'darkreader--cors' : 'darkreader--sync')).toBe(true);
         link.disabled = true;
-
+        
         await timeout(0);
         expect(document.querySelector('.testcase--link').nextElementSibling.classList.contains(isSafari ? 'darkreader--cors' : 'darkreader--sync')).toBe(false);
     });

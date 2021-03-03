@@ -134,7 +134,6 @@ describe('SHADOW DOM', () => {
 
         createOrUpdateDynamicTheme(theme, null, false);
         customElements.define('delayed-custom-element', DelayedCustomElement);
-
         await timeout(0);
         const shadowRoot = document.querySelector('delayed-custom-element').shadowRoot;
         expect(getComputedStyle(shadowRoot.querySelector('p')).color).toBe('rgb(255, 198, 208)');

@@ -241,7 +241,7 @@ describe('CSS Variables Override', () => {
         await timeout(0);
         expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(140, 255, 140)');
     });
-    
+
     it('should consider variable selector', () => {
         container.innerHTML = multiline(
             '<style>',

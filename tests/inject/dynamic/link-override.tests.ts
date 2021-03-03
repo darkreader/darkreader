@@ -128,7 +128,7 @@ describe('LINK STYLES', () => {
         await timeout(50);
         expect(document.querySelector('.testcase--link').nextElementSibling.classList.contains(isSafari ? 'darkreader--cors' : 'darkreader--sync')).toBe(true);
         link.disabled = true;
-        
+
         await timeout(0);
         expect(document.querySelector('.testcase--link').nextElementSibling.classList.contains(isSafari ? 'darkreader--cors' : 'darkreader--sync')).toBe(false);
     });

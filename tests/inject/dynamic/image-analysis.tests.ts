@@ -171,7 +171,7 @@ describe('IMAGE ANALYSIS', () => {
             '<h1>Dark icon <i></i></h1>',
         );
         createOrUpdateDynamicTheme(theme, null, false);
-        await timeout(100);
+        await timeout(50);
         const bgImageValue = getComputedStyle(container.querySelector('i')).backgroundImage;
         const info = await getBgImageInfo(bgImageValue);
         expect(info.darkness).toBe(0);
@@ -186,7 +186,6 @@ describe('IMAGE ANALYSIS', () => {
             '<h1>Light icon <i></i></h1>',
         );
         createOrUpdateDynamicTheme(theme, null, false);
-        await timeout(100);
         const bgImageValue = getComputedStyle(container.querySelector('i')).backgroundImage;
         const info = await getBgImageInfo(bgImageValue);
         expect(info.darkness).toBe(0);
@@ -201,7 +200,6 @@ describe('IMAGE ANALYSIS', () => {
             '<h1>Dark background</h1>',
         );
         createOrUpdateDynamicTheme(theme, null, false);
-        await timeout(100);
         const bgImageValue = getComputedStyle(container.querySelector('h1')).backgroundImage;
         const info = await getBgImageInfo(bgImageValue);
         expect(info.darkness).toBe(1);
@@ -216,7 +214,7 @@ describe('IMAGE ANALYSIS', () => {
             '<h1>Light background</h1>',
         );
         createOrUpdateDynamicTheme(theme, null, false);
-        await timeout(100);
+        await timeout(50);
         const bgImageValue = getComputedStyle(container.querySelector('h1')).backgroundImage;
         expect(bgImageValue).toBe('none');
     });
@@ -237,7 +235,6 @@ describe('IMAGE ANALYSIS', () => {
 
         };
         createOrUpdateDynamicTheme(theme, fixes, false);
-        await timeout(100);
         const backgroundImage = getComputedStyle(container.querySelector('i')).backgroundImage;
         expect(backgroundImage).toContain('data:');
     });

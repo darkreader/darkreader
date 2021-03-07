@@ -74,7 +74,7 @@ describe('Link override', () => {
                 res.statusCode = 200;
                 res.setHeader('Content-Type', 'text/css');
 
-                await new Promise((resolve) => proceedCSSResponse = resolve);
+                await new Promise<void>((resolve) => proceedCSSResponse = resolve);
 
                 res.end(multiline(
                     'body { background: gray; }',

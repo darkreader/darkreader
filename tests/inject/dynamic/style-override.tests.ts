@@ -191,4 +191,25 @@ describe('STYLE ELEMENTS', () => {
             .toBe(true);
     });
 
+    it('should not return dark reader styles', async () => {
+        container.innerHTML = multiline(
+            '<h1>Some test foor...... <strong>Oh uhm what?</strong>!</h1>',
+        );
+        createOrUpdateDynamicTheme(theme, null, false);
+        expect(document.styleSheets.length).toBe(0);
+    });
+
+    it('should return normal styles', async () => {
+        container.innerHTML = multiline(
+            '<style>',
+            '   h1 {',
+            '       color: green;',
+            '   }',
+            '</style>',
+            '<h1>Some test foor...... <strong>Oh uhm what?</strong>!</h1>',
+        );
+        createOrUpdateDynamicTheme(theme, null, false);
+        expect(document.styleSheets.length).toBe(1);
+    });
+
 });

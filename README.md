@@ -1,24 +1,24 @@
-# Dark Reader for Google Chrome, Microsoft Edge and Mozilla Firefox
+# Dark Reader for Google Chrome, Microsoft Edge, Mozilla Firefox and Mozilla Thunderbird
 
 ![Dark Reader screenshot](https://i.imgur.com/DyBlYwU.png)
 
 This extension **inverts brightness** of web pages and aims to **reduce eyestrain** while you browse the web.  
-Visit [Edge Addons](https://microsoftedge.microsoft.com/addons/detail/dark-reader/ifoakfbpdcdoeenechcleahebpibofpc), [Chrome Web Store](https://chrome.google.com/webstore/detail/dark-reader/eimadpbcbfnmbkopoojfekhnkhdbieeh)
-and [Firefox Add-ons](https://addons.mozilla.org/en-US/firefox/addon/darkreader/)
+Visit [Edge Addons](https://microsoftedge.microsoft.com/addons/detail/dark-reader/ifoakfbpdcdoeenechcleahebpibofpc), [Chrome Web Store](https://chrome.google.com/webstore/detail/dark-reader/eimadpbcbfnmbkopoojfekhnkhdbieeh), 
+[Firefox Add-ons](https://addons.mozilla.org/en-US/firefox/addon/darkreader/) and [Thunderbird Add-ons](https://addons.thunderbird.net/en-US/thunderbird/addon/darkreader)
 for more info.
 
 ## How to contribute
 
-### Sponsor!
+### Sponsor
 
 [Donate](https://opencollective.com/darkreader) via Open Collective.
 
-### Translate!
+### Translate
 
 [Improve or suggest](https://github.com/darkreader/darkreader/tree/master/src/_locales) a translation.
 See the list of [language codes](https://developer.chrome.com/webstore/i18n#localeTable) that we can support.
 
-### Fix a wrong inversion!
+### Fix a wrong inversion
 
 If a website is **already dark** (has all pages dark by default), you can **add it to the [dark-sites.config](https://github.com/alexanderby/darkreader/blob/master/src/config/dark-sites.config) file**
 *(please, preserve alphabetical order)*.
@@ -33,7 +33,7 @@ or **[inversion-fixes.config](https://github.com/alexanderby/darkreader/blob/mas
 
 Automatically syncing the above files to every Dark Reader user was disabled because the GitHub team doesn't allow using GitHub as a CDN. Storing these files and making requests to other resources would be expensive and look suspicious. As such, changes are included with each new Dark Reader release.
 
-### Use Dev Tools!
+### Use Dev Tools
 
 Dev Tools is designed to **fix minor issues** on a web page
 *(like dark icon on dark background, removing bright background, adding white background to transparent image, etc.)*.
@@ -93,7 +93,7 @@ For **Dynamic mode** use `INVERT` only for dark images that are invisible on dar
 (e.g. for `<p style="color: red">` element's `style` attribute will not be changed).
 - `IGNORE IMAGE ANALYSIS` rule will prevent background images from being analyzed for matched selectors.
 
-**Dynamic variables**
+#### Dynamic variables
 
 When making a fix for background or text colors,
 instead of using hardcoded colors (like `#fff`, `#000`, `black` or `white`),
@@ -121,7 +121,7 @@ Here is a full list of available CSS variables:
 - `--darkreader-selection-background` corresponds to user's Selection Background Color setting.
 - `--darkreader-selection-text` corresponds to user's Selection Text Color setting.
 
-**Fixes for Filter and Filter+ modes**.
+#### Fixes for Filter and Filter+ modes
 
 ```
 inversion-fixes.config
@@ -150,7 +150,7 @@ CSS
 - If an inverted element contains images or other content that becomes wrongly displayed, `NO INVERT` rule can be used.
 - `REMOVE BG` removes the background image from an element and forces a black background.
 
-### Add new features or fix bugs!
+### Add new features or fix bugs
 
 If you would like to **add new feature** to Dark Reader or **fix a bug**, **submit an issue** in GitHub (if there is no existing one), **discuss** it with active contributors, and wait for **approval**.
 
@@ -173,7 +173,6 @@ Then execute `npm run debug`.
 - Open `about:debugging#addons` page.
 - Click **Load Temporary Add-on** button
 - Open the `debug-firefox/manifest.json` file.
-
 
 If you want the project to be automatically recompiled after making code changes,
 run `npm run debug-watch` instead of `npm run debug`.
@@ -228,6 +227,9 @@ DarkReader.auto(false);
 
 // Get the generated CSS of Dark Reader returned as a string.
 const CSS = await DarkReader.exportGeneratedCSS();
+
+// Check if Dark Reader is enabled.
+const isEnabled = DarkReader.isEnabled();
 ```
 
 ... or if you are using ES modules
@@ -238,6 +240,7 @@ import {
     disable as disableDarkMode,
     auto as followSystemColorScheme,
     exportGeneratedCSS as collectCSS,
+    isEnabled as isDarkReaderEnabled
 } from 'darkreader';
 
 enableDarkMode({
@@ -251,6 +254,8 @@ disableDarkMode();
 followSystemColorScheme();
 
 const CSS = await collectCSS();
+
+const isEnabled = isDarkReaderEnabled();
 ```
 
 ## Contributors

@@ -17,7 +17,7 @@ import createStaticStylesheet from '../generators/static-theme';
 import {createSVGFilterStylesheet, getSVGFilterMatrixValue, getSVGReverseFilterMatrixValue} from '../generators/svg-filter';
 import type {ExtensionData, FilterConfig, News, Shortcuts, UserSettings, TabInfo} from '../definitions';
 import {isSystemDarkModeEnabled} from '../utils/media-query';
-import {isFirefox} from '../utils/platform';
+import {isFirefox, isThunderbird} from '../utils/platform';
 
 const AUTO_TIME_CHECK_INTERVAL = getDuration({seconds: 10});
 
@@ -97,7 +97,11 @@ export class Extension {
         this.registerCommands();
 
         this.ready = true;
-        this.tabs.updateContentScript({runOnProtectedPages: this.user.settings.enableForProtectedPages});
+        if (isThunderbird) {
+            this.tabs.registerMailDisplayScript();
+        } else {
+            this.tabs.updateContentScript({runOnProtectedPages: this.user.settings.enableForProtectedPages});
+        }
 
         this.awaiting.forEach((ready) => ready());
         this.awaiting = null;

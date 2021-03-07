@@ -1,7 +1,7 @@
 import {m} from 'malevic';
 import {Shortcut, Toggle} from '../../../controls';
 import {getLocalMessage} from '../../../../utils/locales';
-import {ExtWrapper, TabInfo} from '../../../../definitions';
+import type {ExtWrapper, TabInfo} from '../../../../definitions';
 import SunMoonIcon from '../../main-page/sun-moon-icon';
 import SystemIcon from '../../main-page/system-icon';
 import WatchIcon from '../../main-page/watch-icon';

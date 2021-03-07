@@ -1,5 +1,5 @@
 import {m} from 'malevic';
-import {ViewProps} from '../types';
+import type {ViewProps} from '../types';
 import CheckButton from '../check-button';
 
 export default function SyncConfigButton(props: ViewProps) {

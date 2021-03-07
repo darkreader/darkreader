@@ -1,8 +1,9 @@
 import {canInjectScript} from '../background/utils/extension-api';
 import {createFileLoader} from './utils/network';
-import {Message} from '../definitions';
+import type {Message} from '../definitions';
+import {isThunderbird} from '../utils/platform';
 
-function queryTabs(query: chrome.tabs.QueryInfo) {
+async function queryTabs(query: chrome.tabs.QueryInfo) {
     return new Promise<chrome.tabs.Tab[]>((resolve) => {
         chrome.tabs.query(query, (tabs) => resolve(tabs));
     });
@@ -84,6 +85,14 @@ export default class TabManager {
                 // Using custom response due to Chrome and Firefox incompatibility
                 // Sometimes fetch error behaves like synchronous and sends `undefined`
                 const sendResponse = (response) => chrome.tabs.sendMessage(sender.tab.id, {type: 'fetch-response', id, ...response});
+                if (isThunderbird) {
+                    // In thunderbird some CSS is loaded on a chrome:// URL.
+                    // Thunderbird restricted Add-ons to load those URL's.
+                    if ((url as string).startsWith('chrome://')) {
+                        sendResponse({data: null});
+                        return;
+                    }
+                }
                 try {
                     const response = await fileLoader.get({url, responseType, mimeType});
                     sendResponse({data: response});
@@ -122,6 +131,15 @@ export default class TabManager {
                 allFrames: true,
                 matchAboutBlank: true,
             }));
+    }
+
+    async registerMailDisplayScript() {
+        await (chrome as any).messageDisplayScripts.register({
+            js: [
+                {file: '/inject/fallback.js'},
+                {file: '/inject/index.js'},
+            ]
+        });
     }
 
     async sendMessage(getMessage: (url: string, frameUrl: string) => any) {

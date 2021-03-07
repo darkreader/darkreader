@@ -1,7 +1,7 @@
 import {m} from 'malevic';
 import {Button} from '../../controls';
 import {getURLHostOrProtocol, isURLInList} from '../../../utils/url';
-import {ExtWrapper, TabInfo} from '../../../definitions';
+import type {ExtWrapper, TabInfo} from '../../../definitions';
 
 interface BodyProps extends ExtWrapper {
     tab: TabInfo;

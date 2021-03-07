@@ -20,7 +20,7 @@ afterEach(() => {
     container.innerHTML = '';
 });
 
-describe('Handle Shadow-DOM', () => {
+describe('SHADOW DOM', () => {
     it('should add static overrides', async () => {
         container.innerHTML = multiline(
             '<div class="shadow-dom-wrapper"></div>',
@@ -63,7 +63,7 @@ describe('Handle Shadow-DOM', () => {
         style.sheet.insertRule('h1 { color: gray }');
         style.sheet.insertRule('strong { color: red }');
 
-        await timeout(100);
+        await timeout(0);
         const shadowRoot = document.querySelector('.shadow-dom-wrapper').shadowRoot;
         const testCase = shadowRoot.querySelector('.test-case-style');
         expect(shadowRoot.firstElementChild.classList.contains('darkreader--inline')).toBe(true);
@@ -83,9 +83,60 @@ describe('Handle Shadow-DOM', () => {
         standardElement.style.color = 'red';
         shadow.appendChild(standardElement);
 
-        await timeout(100);
+        await timeout(0);
         const shadowRoot = document.querySelector('.shadow-dom-wrapper').shadowRoot;
         expect(getComputedStyle(shadowRoot.querySelector('p')).color).toBe('rgb(255, 26, 26)');
+    });
+
+    it('should handle defined custom elements', async () => {
+        container.innerHTML = multiline(
+            '<custom-element>',
+            '</custom-element>',
+        );
+        class CustomElement extends HTMLElement {
+            constructor() {
+                super();
+                const shadowRoot = this.attachShadow({mode: 'open'});
+                const style = document.createElement('style');
+                style.textContent = 'p { color: pink }';
+                const paragraph = document.createElement('p');
+                paragraph.textContent = 'Some text content that should be pink.';
+
+                shadowRoot.append(style);
+                shadowRoot.append(paragraph);
+            }
+        }
+        customElements.define('custom-element', CustomElement);
+
+        createOrUpdateDynamicTheme(theme, null, false);
+        const shadowRoot = document.querySelector('custom-element').shadowRoot;
+        expect(getComputedStyle(shadowRoot.querySelector('p')).color).toBe('rgb(255, 198, 208)');
+    });
+
+    it('should react to defined custom elements', async () => {
+        container.innerHTML = multiline(
+            '<delayed-custom-element>',
+            '</delayed-custom-element>',
+        );
+        class DelayedCustomElement extends HTMLElement {
+            constructor() {
+                super();
+                const shadowRoot = this.attachShadow({mode: 'open'});
+                const style = document.createElement('style');
+                style.textContent = 'p { color: pink }';
+                const paragraph = document.createElement('p');
+                paragraph.textContent = 'Some text content that should be pink.';
+
+                shadowRoot.append(style);
+                shadowRoot.append(paragraph);
+            }
+        }
+
+        createOrUpdateDynamicTheme(theme, null, false);
+        customElements.define('delayed-custom-element', DelayedCustomElement);
+        await timeout(0);
+        const shadowRoot = document.querySelector('delayed-custom-element').shadowRoot;
+        expect(getComputedStyle(shadowRoot.querySelector('p')).color).toBe('rgb(255, 198, 208)');
     });
 
 });

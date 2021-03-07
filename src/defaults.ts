@@ -1,4 +1,4 @@
-import {Theme, UserSettings} from './definitions';
+import type {Theme, UserSettings} from './definitions';
 import ThemeEngines from './generators/theme-engines';
 import {isMacOS, isWindows} from './utils/platform';
 

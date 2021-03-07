@@ -2,7 +2,8 @@ import {m} from 'malevic';
 import CheckmarkIcon from './checkmark-icon';
 import {Button} from '../../../controls';
 import {getURLHostOrProtocol, isURLEnabled, isPDF} from '../../../../utils/url';
-import {ExtWrapper, TabInfo} from '../../../../definitions';
+import type {ExtWrapper, TabInfo} from '../../../../definitions';
+import {isThunderbird} from '../../../../utils/platform';
 
 export default function SiteToggleButton({data, tab, actions}: ExtWrapper & {tab: TabInfo}) {
 
@@ -33,7 +34,7 @@ export default function SiteToggleButton({data, tab, actions}: ExtWrapper & {tab
             class={{
                 'site-toggle': true,
                 'site-toggle--active': isSiteEnabled,
-                'site-toggle--disabled': !toggleHasEffect
+                'site-toggle--disabled': !toggleHasEffect || isThunderbird
             }}
             onclick={onSiteToggleClick}
         >

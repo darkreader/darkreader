@@ -36,7 +36,7 @@ export function createAsyncTasksQueue() {
 
     function runTasks() {
         let task: Task;
-        while (task = tasks.shift()) {
+        while ((task = tasks.shift())) {
             task();
         }
         frameId = null;

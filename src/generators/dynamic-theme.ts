@@ -2,7 +2,7 @@ import {formatSitesFixesConfig} from './utils/format';
 import {parseSitesFixesConfig} from './utils/parse';
 import {parseArray, formatArray} from '../utils/text';
 import {compareURLPatterns, isURLInList} from '../utils/url';
-import {DynamicThemeFix} from '../definitions';
+import type {DynamicThemeFix} from '../definitions';
 
 const dynamicThemeFixesCommands = {
     'INVERT': 'invert',
@@ -32,7 +32,7 @@ export function formatDynamicThemeFixes(dynamicThemeFixes: DynamicThemeFix[]) {
         getPropCommandName: (prop) => Object.entries(dynamicThemeFixesCommands).find(([, p]) => p === prop)[0],
         formatPropValue: (prop, value) => {
             if (prop === 'css') {
-                return value.trim();
+                return (value as string).trim().replace(/\n+/g, '\n');
             }
             return formatArray(value).trim();
         },

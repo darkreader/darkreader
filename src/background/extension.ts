@@ -77,6 +77,8 @@ export class Extension {
                         const now = new Date();
                         return isNightAtLocation(now, latitude, longitude);
                     }
+                default:
+                    return this.user.settings.enabled;
             }
         } else {
             return this.user.settings.enabled;

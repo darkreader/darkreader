@@ -363,12 +363,66 @@ describe('CSS VARIABLES OVERRIDE', () => {
             '<style>',
             '    :root {',
             '        --red: 255, 0, 0;',
+            '        --blue: 0, 0, 255;',
+            '        --rgb-blue: rgb(var(--blue));',
             '        --bg: rgb(var(--red));',
+            '        --text: var(--rgb-blue);',
             '    }',
             '</style>',
             '<style>',
             '    h1 {',
             '        background: var(--bg);',
+            '        color: var(--text);',
+            '    }',
+            '</style>',
+            '<h1>Colors with variables inside</h1>',
+        );
+        createOrUpdateDynamicTheme(theme, null, false);
+        expect(getComputedStyle(container.querySelector('h1')).backgroundColor).toBe('rgb(204, 0, 0)');
+        expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(51, 125, 255)');
+    });
+
+    it('should handle variables that reference colors with variables asynchronously', async () => {
+        container.innerHTML = multiline(
+            '<style>',
+            '    :root {',
+            '        --red: 255, 0, 0;',
+            '        --bg: rgb(var(--red));',
+            '    }',
+            '    h1 {',
+            '        color: var(--text);',
+            '    }',
+            '</style>',
+            '<h1>Colors with variables inside</h1>',
+        );
+        createOrUpdateDynamicTheme(theme, null, false);
+        const anotherStyle = document.createElement('style');
+        anotherStyle.textContent = multiline(
+            ':root {',
+            '    --blue: 0, 0, 255;',
+            '    --rgb-blue: rgb(var(--blue));',
+            '    --text: var(--rgb-blue);',
+            '}',
+            'h1 {',
+            '    background: var(--bg);',
+            '}',
+        );
+        container.append(anotherStyle);
+        await timeout(0);
+        expect(getComputedStyle(container.querySelector('h1')).backgroundColor).toBe('rgb(204, 0, 0)');
+        expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(51, 125, 255)');
+    });
+
+    it('should handle variables with and without vars in color values', async () => {
+        container.innerHTML = multiline(
+            '<style>',
+            '    :root {',
+            '        --red: 255, 0, 0;',
+            '        --bg: green;',
+            '    }',
+            '    h1 {',
+            '        --bg: rgb(var(--red));',
+            '        background: var(--bg)',
             '    }',
             '</style>',
             '<h1>Colors with variables inside</h1>',

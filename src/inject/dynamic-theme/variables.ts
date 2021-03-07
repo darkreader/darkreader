@@ -29,7 +29,6 @@ export class VariablesStore {
     private definedVars = new Set<string>();
     private varRefs = new Map<string, Set<string>>();
     private unknownColorVars = new Set<string>();
-    private constructedColorVars = new Set<string>();
     private unknownBgVars = new Set<string>();
     private undefinedVars = new Set<string>();
     private initialVarTypes = new Map<string, number>();
@@ -43,7 +42,6 @@ export class VariablesStore {
         this.definedVars.clear();
         this.varRefs.clear();
         this.unknownColorVars.clear();
-        this.constructedColorVars.clear();
         this.unknownBgVars.clear();
         this.undefinedVars.clear();
         this.initialVarTypes.clear();
@@ -134,7 +132,7 @@ export class VariablesStore {
                     const property = varNameWrapper(varName);
                     let modifiedValue: string;
                     if (isVarDependant(sourceValue)) {
-                        if (this.constructedColorVars.has(varName)) {
+                        if (isConstructedColorVar(sourceValue)) {
                             let value = insertVarValues(sourceValue, this.unstableVarValues);
                             if (!value) {
                                 value = typeNum === VAR_TYPE_BGCOLOR ? '#ffffff' : '#000000';
@@ -312,18 +310,15 @@ export class VariablesStore {
     private collectVariables(rules: CSSRuleList) {
         iterateVariables(rules, (varName, value) => {
             this.unstableVarValues.set(varName, value);
+
+            if (isVarDependant(value) && isConstructedColorVar(value)) {
+                this.unknownColorVars.add(varName);
+                this.definedVars.add(varName);
+            }
             if (this.definedVars.has(varName)) {
                 return;
             }
             this.definedVars.add(varName);
-
-            if (isVarDependant(value)) {
-                if (value.match(/^\s*(rgb|hsl)a?\(/)) {
-                    this.constructedColorVars.add(varName);
-                    this.unknownColorVars.add(varName);
-                }
-                return;
-            }
 
             const color = tryParseColor(value);
             if (color) {
@@ -535,6 +530,10 @@ function wrapBgImgVariableName(name: string) {
 
 function isVarDependant(value: string) {
     return value.includes('var(');
+}
+
+function isConstructedColorVar(value: string) {
+    return value.match(/^\s*(rgb|hsl)a?\(/);
 }
 
 function tryModifyBgColor(color: string, theme: Theme) {

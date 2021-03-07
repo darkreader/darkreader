@@ -1,6 +1,5 @@
 const fs = require('fs-extra');
 const os = require('os');
-const rollupPluginCommonjs = require('@rollup/plugin-commonjs');
 const rollupPluginIstanbul = require('rollup-plugin-istanbul2');
 const rollupPluginNodeResolve = require('@rollup/plugin-node-resolve').default;
 const rollupPluginReplace = require('@rollup/plugin-replace');
@@ -22,7 +21,6 @@ module.exports = (config) => {
         rollupPreprocessor: {
             plugins: [
                 rollupPluginNodeResolve(),
-                rollupPluginCommonjs(),
                 rollupPluginTypescript({
                     typescript,
                     tsconfig: 'src/tsconfig.json',
@@ -41,6 +39,7 @@ module.exports = (config) => {
                 }),
                 rollupPluginReplace({
                     '__API__': 'false',
+                    preventAssignment: true,
                     '__DEBUG__': 'false',
                     '__PORT__': '-1',
                     '__WATCH__': 'false',

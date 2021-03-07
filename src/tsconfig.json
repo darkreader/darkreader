@@ -8,7 +8,11 @@
             "es2015",
             "es2017",
             "dom",
+<<<<<<< HEAD
             "DOM.Iterable"
+=======
+            "dom.iterable"
+>>>>>>> master
         ],
         "types": [
             "chrome"

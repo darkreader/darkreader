@@ -3,6 +3,7 @@ import {DEFAULT_THEME} from '../../../src/defaults';
 import {createOrUpdateDynamicTheme, removeDynamicTheme} from '../../../src/inject/dynamic-theme';
 import {getImageDetails} from '../../../src/inject/dynamic-theme/image';
 import {multiline, timeout} from '../../test-utils';
+import type {DynamicThemeFix} from '../../../src/definitions';
 
 const theme = {
     ...DEFAULT_THEME,
@@ -121,7 +122,7 @@ async function getBgImageInfo(bgImageValue: string) {
     };
 }
 
-describe('Image analysis', () => {
+describe('IMAGE ANALYSIS', () => {
     it('should analyze dark icon', async () => {
         const details = await getImageDetails(svgToDataURL(images.darkIcon));
         expect(details.width).toBe(8);
@@ -170,7 +171,7 @@ describe('Image analysis', () => {
             '<h1>Dark icon <i></i></h1>',
         );
         createOrUpdateDynamicTheme(theme, null, false);
-        await timeout(100);
+        await timeout(50);
         const bgImageValue = getComputedStyle(container.querySelector('i')).backgroundImage;
         const info = await getBgImageInfo(bgImageValue);
         expect(info.darkness).toBe(0);
@@ -185,7 +186,6 @@ describe('Image analysis', () => {
             '<h1>Light icon <i></i></h1>',
         );
         createOrUpdateDynamicTheme(theme, null, false);
-        await timeout(100);
         const bgImageValue = getComputedStyle(container.querySelector('i')).backgroundImage;
         const info = await getBgImageInfo(bgImageValue);
         expect(info.darkness).toBe(0);
@@ -200,7 +200,6 @@ describe('Image analysis', () => {
             '<h1>Dark background</h1>',
         );
         createOrUpdateDynamicTheme(theme, null, false);
-        await timeout(100);
         const bgImageValue = getComputedStyle(container.querySelector('h1')).backgroundImage;
         const info = await getBgImageInfo(bgImageValue);
         expect(info.darkness).toBe(1);
@@ -215,8 +214,28 @@ describe('Image analysis', () => {
             '<h1>Light background</h1>',
         );
         createOrUpdateDynamicTheme(theme, null, false);
-        await timeout(100);
+        await timeout(50);
         const bgImageValue = getComputedStyle(container.querySelector('h1')).backgroundImage;
         expect(bgImageValue).toBe('none');
+    });
+
+    it('should ignore image analysis', async () => {
+        container.innerHTML = multiline(
+            '<style>',
+            getSVGImageCSS(images.darkTransparentIcon, 16, 16, 'i'),
+            '</style>',
+            '<h1>Dark icon <i></i></h1>',
+        );
+        const fixes: DynamicThemeFix = {
+            url: ['*'],
+            invert: [''],
+            css: '',
+            ignoreInlineStyle: ['.'],
+            ignoreImageAnalysis: ['*'],
+
+        };
+        createOrUpdateDynamicTheme(theme, fixes, false);
+        const backgroundImage = getComputedStyle(container.querySelector('i')).backgroundImage;
+        expect(backgroundImage).toContain('data:');
     });
 });

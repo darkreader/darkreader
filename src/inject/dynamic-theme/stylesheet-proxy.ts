@@ -1,8 +1,11 @@
 export function injectProxy() {
+    document.dispatchEvent(new CustomEvent('__darkreader__inlineScriptsAllowed'));
+
     const addRuleDescriptor = Object.getOwnPropertyDescriptor(CSSStyleSheet.prototype, 'addRule');
     const insertRuleDescriptor = Object.getOwnPropertyDescriptor(CSSStyleSheet.prototype, 'insertRule');
     const deleteRuleDescriptor = Object.getOwnPropertyDescriptor(CSSStyleSheet.prototype, 'deleteRule');
     const removeRuleDescriptor = Object.getOwnPropertyDescriptor(CSSStyleSheet.prototype, 'removeRule');
+    const documentStyleSheetsDescriptor = Object.getOwnPropertyDescriptor(Document.prototype, 'styleSheets');
 
     const cleanUp = () => {
         Object.defineProperty(CSSStyleSheet.prototype, 'addRule', addRuleDescriptor);
@@ -10,7 +13,7 @@ export function injectProxy() {
         Object.defineProperty(CSSStyleSheet.prototype, 'deleteRule', deleteRuleDescriptor);
         Object.defineProperty(CSSStyleSheet.prototype, 'removeRule', removeRuleDescriptor);
         document.removeEventListener('__darkreader__cleanUp', cleanUp);
-        document.removeEventListener('__darkreader__addUndefinedResolver', (e: CustomEvent<{tag: string}>) => addUndefinedResolver(e));
+        document.removeEventListener('__darkreader__addUndefinedResolver', addUndefinedResolver);
     };
 
     const addUndefinedResolver = (e: CustomEvent<{tag: string}>) => {
@@ -20,7 +23,7 @@ export function injectProxy() {
     };
 
     document.addEventListener('__darkreader__cleanUp', cleanUp);
-    document.addEventListener('__darkreader__addUndefinedResolver', (e: CustomEvent<{tag: string}>) => addUndefinedResolver(e));
+    document.addEventListener('__darkreader__addUndefinedResolver', addUndefinedResolver);
 
     const updateSheetEvent = new Event('__darkreader__updateSheet');
 
@@ -55,8 +58,14 @@ export function injectProxy() {
         }
     }
 
+    function proxyDocumentStyleSheets() {
+        // Preserves StyleSheetList prototype.
+        return Object.setPrototypeOf([...documentStyleSheetsDescriptor.get.call(this)].filter((styleSheet: CSSStyleSheet) => !(styleSheet.ownerNode as HTMLElement).classList.contains('darkreader')), StyleSheetList.prototype);
+    }
+
     Object.defineProperty(CSSStyleSheet.prototype, 'addRule', Object.assign({}, addRuleDescriptor, {value: proxyAddRule}));
     Object.defineProperty(CSSStyleSheet.prototype, 'insertRule', Object.assign({}, insertRuleDescriptor, {value: proxyInsertRule}));
     Object.defineProperty(CSSStyleSheet.prototype, 'deleteRule', Object.assign({}, deleteRuleDescriptor, {value: proxyDeleteRule}));
     Object.defineProperty(CSSStyleSheet.prototype, 'removeRule', Object.assign({}, removeRuleDescriptor, {value: proxyRemoveRule}));
+    Object.defineProperty(Document.prototype, 'styleSheets', Object.assign({}, documentStyleSheetsDescriptor, {get: proxyDocumentStyleSheets}));
 }

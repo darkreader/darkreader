@@ -1,4 +1,5 @@
 import type {DynamicThemeFix, Theme} from 'definitions';
+import {getDuration} from '../utils/time';
 
 export function getAllIFrames(workingDocument: Document): HTMLIFrameElement[] {
     if (!workingDocument) {
@@ -59,8 +60,11 @@ export function setupIFrameObserver(workingDocument = document) {
     observer.observe(observerDocument.documentElement, {childList: true, subtree: true});
 }
 
+const maxTimeoutDuration = getDuration({seconds: 5});
+
 export function ensureIFrameIsLoaded(IFrame: HTMLIFrameElement, callback: (IFrameDocument: Document) => void): void {
     let timeoutID: number;
+    let maxTimeoutID: number;
     let fired = false;
 
     function ready() {
@@ -89,8 +93,16 @@ export function ensureIFrameIsLoaded(IFrame: HTMLIFrameElement, callback: (IFram
                 doc.addEventListener('readystatechange', ready);
             }
         } else {
-            // still same old original document, so keep looking for content or new document
+            // Still the same old original document, so keep looking for content or new document
             timeoutID = setTimeout(checkLoaded);
+
+            // Let's not endlessly wait on a document if it won't load.
+            // Due to browser reasons.
+            if (!maxTimeoutID) {
+                setTimeout(() => {
+                    clearTimeout(timeoutID);
+                }, maxTimeoutDuration);
+            }
         }
     }
     checkLoaded();

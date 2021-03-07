@@ -4,6 +4,7 @@ module.exports = {
     extends: ['plugin:@typescript-eslint/recommended'],
     rules: {
         'array-bracket-spacing': ['error', 'never'],
+        'arrow-parens': ['error', 'always'],
         'block-spacing': ['error', 'always'],
         'brace-style': 'off',
         'comma-spacing': 'off',
@@ -32,6 +33,7 @@ module.exports = {
         '@typescript-eslint/array-type': ['error', {
             default: 'array-simple',
         }],
+        'yoda': ['error', 'never'],
         '@typescript-eslint/brace-style': 'error',
         '@typescript-eslint/camelcase': 'off',
         '@typescript-eslint/comma-spacing': ['error', {

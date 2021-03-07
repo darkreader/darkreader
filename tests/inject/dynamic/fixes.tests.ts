@@ -1,7 +1,7 @@
 import '../polyfills';
 import {DEFAULT_THEME} from '../../../src/defaults';
 import {createOrUpdateDynamicTheme, removeDynamicTheme} from '../../../src/inject/dynamic-theme';
-import {multiline, timeout} from '../../test-utils';
+import {multiline} from '../../test-utils';
 import type {DynamicThemeFix} from '../../../src/definitions';
 
 let container: HTMLElement;
@@ -30,7 +30,6 @@ describe('FIXES', () => {
 
         };
         createOrUpdateDynamicTheme(DEFAULT_THEME, fixes, false);
-        await timeout(100);
         expect(getComputedStyle(container.querySelector('.logo')).filter).toBe('invert(1) hue-rotate(180deg) contrast(0.9)');
     });
 
@@ -47,7 +46,6 @@ describe('FIXES', () => {
 
         };
         createOrUpdateDynamicTheme(DEFAULT_THEME, fixes, false);
-        await timeout(100);
         expect(getComputedStyle(container.querySelector('.text')).color).toBe('rgb(255, 0, 0)');
     });
 
@@ -64,7 +62,6 @@ describe('FIXES', () => {
 
         };
         createOrUpdateDynamicTheme(DEFAULT_THEME, fixes, false);
-        await timeout(100);
         expect(getComputedStyle(container.querySelector('.text')).backgroundColor).toBe('rgb(128, 0, 128)');
     });
 });

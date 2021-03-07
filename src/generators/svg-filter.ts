@@ -1,6 +1,6 @@
 import {createFilterMatrix, Matrix} from './utils/matrix';
 import {cssFilterStyleSheetTemplate} from './css-filter';
-import {FilterConfig, InversionFix} from '../definitions';
+import type {FilterConfig, InversionFix} from '../definitions';
 import {isFirefox} from '../utils/platform';
 
 export function createSVGFilterStylesheet(config: FilterConfig, url: string, frameURL: string, inversionFixes: InversionFix[]) {
@@ -30,7 +30,7 @@ function getEmbeddedSVGFilterValue(matrixValue: string) {
 }
 
 function toSVGMatrix(matrix: number[][]) {
-    return matrix.slice(0, 4).map(m => m.map(m => m.toFixed(3)).join(' ')).join(' ');
+    return matrix.slice(0, 4).map((m) => m.map((m) => m.toFixed(3)).join(' ')).join(' ');
 }
 
 export function getSVGFilterMatrixValue(config: FilterConfig) {

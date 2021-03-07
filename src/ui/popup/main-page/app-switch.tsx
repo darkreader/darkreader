@@ -2,7 +2,7 @@ import {m} from 'malevic';
 import {getLocalMessage} from '../../../utils/locales';
 import {MultiSwitch} from '../../controls';
 import ControlGroup from '../control-group';
-import {ViewProps} from '../types';
+import type {ViewProps} from '../types';
 import WatchIcon from './watch-icon';
 import SunMoonIcon from './sun-moon-icon';
 import SystemIcon from './system-icon';

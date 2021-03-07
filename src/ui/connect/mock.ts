@@ -1,5 +1,5 @@
 import {getURLHostOrProtocol} from '../../utils/url';
-import {ExtensionData, TabInfo, Theme, UserSettings} from '../../definitions';
+import type {ExtensionData, TabInfo, Theme, UserSettings} from '../../definitions';
 
 export function getMockData(override = {} as Partial<ExtensionData>): ExtensionData {
     return Object.assign({
@@ -78,10 +78,10 @@ export function createConnectorMock() {
     const data = getMockData();
     const tab = getMockActiveTabInfo();
     const connector = {
-        getData() {
+        async getData() {
             return Promise.resolve(data);
         },
-        getActiveTabInfo() {
+        async getActiveTabInfo() {
             return Promise.resolve(tab);
         },
         subscribeToChanges(callback) {

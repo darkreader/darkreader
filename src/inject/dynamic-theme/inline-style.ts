@@ -2,7 +2,8 @@ import {forEach, push} from '../../utils/array';
 import {iterateShadowHosts, createOptimizedTreeObserver, getTempCSSStyleSheet} from '../utils/dom';
 import {iterateCSSDeclarations, replaceCSSVariables} from './css-rules';
 import {getModifiableCSSDeclaration} from './modify-css';
-import {FilterConfig} from '../../definitions';
+import {variablesStore} from './variables';
+import type {FilterConfig} from '../../definitions';
 import {isShadowDomSupported} from '../../utils/platform';
 import {getDuration} from '../../utils/time';
 import {throttle} from '../utils/throttle';
@@ -12,7 +13,6 @@ interface Overrides {
         customProp: string;
         cssProp: string;
         dataAttr: string;
-        store: WeakSet<Node>;
     };
 }
 
@@ -21,79 +21,72 @@ const overrides: Overrides = {
         customProp: '--darkreader-inline-bgcolor',
         cssProp: 'background-color',
         dataAttr: 'data-darkreader-inline-bgcolor',
-        store: new WeakSet(),
     },
     'background-image': {
         customProp: '--darkreader-inline-bgimage',
         cssProp: 'background-image',
         dataAttr: 'data-darkreader-inline-bgimage',
-        store: new WeakSet(),
     },
     'border-color': {
         customProp: '--darkreader-inline-border',
         cssProp: 'border-color',
         dataAttr: 'data-darkreader-inline-border',
-        store: new WeakSet(),
     },
     'border-bottom-color': {
         customProp: '--darkreader-inline-border-bottom',
         cssProp: 'border-bottom-color',
         dataAttr: 'data-darkreader-inline-border-bottom',
-        store: new WeakSet(),
     },
     'border-left-color': {
         customProp: '--darkreader-inline-border-left',
         cssProp: 'border-left-color',
         dataAttr: 'data-darkreader-inline-border-left',
-        store: new WeakSet(),
     },
     'border-right-color': {
         customProp: '--darkreader-inline-border-right',
         cssProp: 'border-right-color',
         dataAttr: 'data-darkreader-inline-border-right',
-        store: new WeakSet(),
     },
     'border-top-color': {
         customProp: '--darkreader-inline-border-top',
         cssProp: 'border-top-color',
         dataAttr: 'data-darkreader-inline-border-top',
-        store: new WeakSet(),
     },
     'box-shadow': {
         customProp: '--darkreader-inline-boxshadow',
         cssProp: 'box-shadow',
         dataAttr: 'data-darkreader-inline-boxshadow',
-        store: new WeakSet(),
     },
     'color': {
         customProp: '--darkreader-inline-color',
         cssProp: 'color',
         dataAttr: 'data-darkreader-inline-color',
-        store: new WeakSet(),
     },
     'fill': {
         customProp: '--darkreader-inline-fill',
         cssProp: 'fill',
         dataAttr: 'data-darkreader-inline-fill',
-        store: new WeakSet(),
     },
     'stroke': {
         customProp: '--darkreader-inline-stroke',
         cssProp: 'stroke',
         dataAttr: 'data-darkreader-inline-stroke',
-        store: new WeakSet(),
     },
     'outline-color': {
         customProp: '--darkreader-inline-outline',
         cssProp: 'outline-color',
         dataAttr: 'data-darkreader-inline-outline',
-        store: new WeakSet(),
+    },
+    'stop-color': {
+        customProp: '--darkreader-inline-stopcolor',
+        cssProp: 'stop-color',
+        dataAttr: 'data-darkreader-inline-stopcolor',
     },
 };
 
 const overridesList = Object.values(overrides);
 
-const INLINE_STYLE_ATTRS = ['style', 'fill', 'stroke', 'bgcolor', 'color'];
+const INLINE_STYLE_ATTRS = ['style', 'fill', 'stop-color', 'stroke', 'bgcolor', 'color'];
 export const INLINE_STYLE_SELECTOR = INLINE_STYLE_ATTRS.map((attr) => `[${attr}]`).join(', ');
 
 export function getInlineOverrideStyle() {
@@ -178,14 +171,11 @@ function deepWatchForInlineStyles(
     let cache: MutationRecord[] = [];
     let timeoutId: number = null;
 
-    const handleAttributionMutations = throttle((mutations: MutationRecord[]) => {
+    const handleAttributeMutations = throttle((mutations: MutationRecord[]) => {
         mutations.forEach((m) => {
             if (INLINE_STYLE_ATTRS.includes(m.attributeName)) {
                 elementStyleDidChange(m.target as HTMLElement);
             }
-            overridesList
-                .filter(({store, dataAttr}) => store.has(m.target) && !(m.target as HTMLElement).hasAttribute(dataAttr))
-                .forEach(({dataAttr}) => (m.target as HTMLElement).setAttribute(dataAttr, ''));
         });
     });
     const attrObserver = new MutationObserver((mutations) => {
@@ -205,7 +195,7 @@ function deepWatchForInlineStyles(
                     timeoutId = null;
                     const attributeCache = cache;
                     cache = [];
-                    handleAttributionMutations(attributeCache);
+                    handleAttributeMutations(attributeCache);
                 }, RETRY_TIMEOUT);
                 cache.push(...mutations);
                 return;
@@ -213,7 +203,7 @@ function deepWatchForInlineStyles(
             start = now;
             attemptCount = 1;
         }
-        handleAttributionMutations(mutations);
+        handleAttributeMutations(mutations);
     });
     attrObserver.observe(root, {
         attributes: true,
@@ -261,7 +251,7 @@ export function overrideInlineStyle(element: HTMLElement, theme: FilterConfig, v
     function setCustomProp(targetCSSProp: string, modifierCSSProp: string, cssVal: string) {
         const {customProp, dataAttr} = overrides[targetCSSProp];
 
-        const mod = getModifiableCSSDeclaration(modifierCSSProp, cssVal, null, ignoreImageSelectors, null);
+        const mod = getModifiableCSSDeclaration(modifierCSSProp, cssVal, null, variablesStore, ignoreImageSelectors, null);
         if (!mod) {
             return;
         }
@@ -269,7 +259,7 @@ export function overrideInlineStyle(element: HTMLElement, theme: FilterConfig, v
         if (typeof value === 'function') {
             value = value(theme) as string;
         }
-        element.style.setProperty(customProp, value as string);
+        element.style.setProperty(customProp, value);
         if (!element.hasAttribute(dataAttr)) {
             element.setAttribute(dataAttr, '');
         }
@@ -279,9 +269,7 @@ export function overrideInlineStyle(element: HTMLElement, theme: FilterConfig, v
     if (ignoreInlineSelectors.length > 0) {
         if (shouldIgnoreInlineStyle(element, ignoreInlineSelectors)) {
             unsetProps.forEach((cssProp) => {
-                const {store, dataAttr} = overrides[cssProp];
-                store.delete(element);
-                element.removeAttribute(dataAttr);
+                element.removeAttribute(overrides[cssProp].dataAttr);
             });
             return;
         }
@@ -301,15 +289,20 @@ export function overrideInlineStyle(element: HTMLElement, theme: FilterConfig, v
         }
         setCustomProp('color', 'color', value);
     }
-    if (element.hasAttribute('fill') && element instanceof SVGElement) {
-        const SMALL_SVG_LIMIT = 32;
-        const value = element.getAttribute('fill');
-        let isBg = false;
-        if (!(element instanceof SVGTextElement)) {
-            const {width, height} = element.getBoundingClientRect();
-            isBg = (width > SMALL_SVG_LIMIT || height > SMALL_SVG_LIMIT);
+    if (element instanceof SVGElement) {
+        if (element.hasAttribute('fill')) {
+            const SMALL_SVG_LIMIT = 32;
+            const value = element.getAttribute('fill');
+            let isBg = false;
+            if (!(element instanceof SVGTextElement)) {
+                const {width, height} = element.getBoundingClientRect();
+                isBg = (width > SMALL_SVG_LIMIT || height > SMALL_SVG_LIMIT);
+            }
+            setCustomProp('fill', isBg ? 'background-color' : 'color', value);
         }
-        setCustomProp('fill', isBg ? 'background-color' : 'color', value);
+        if (element.hasAttribute('stop-color')) {
+            setCustomProp('stop-color', 'background-color', element.getAttribute('stop-color'));
+        }
     }
     if (element.hasAttribute('stroke')) {
         const value = element.getAttribute('stroke');
@@ -346,9 +339,7 @@ export function overrideInlineStyle(element: HTMLElement, theme: FilterConfig, v
     }
 
     forEach(unsetProps, (cssProp) => {
-        const {store, dataAttr} = overrides[cssProp];
-        store.delete(element);
-        element.removeAttribute(dataAttr);
+        element.removeAttribute(overrides[cssProp].dataAttr);
     });
     inlineStyleCache.set(element, getInlineStyleCacheKey(element, theme));
 }

@@ -18,7 +18,7 @@ export function forEach<T>(items: Iterable<T> | ArrayLike<T>, iterator: (item: T
 
 // NOTE: Pushing items like `arr.push(...items)` is 3x slower in Firefox
 // https://jsben.ch/nr9OF
-export function push<T>(array: Array<T>, addition: Iterable<T> | ArrayLike<T>) {
+export function push<T>(array: T[], addition: Iterable<T> | ArrayLike<T>) {
     forEach(addition, (a) => array.push(a));
 }
 
@@ -26,7 +26,7 @@ export function push<T>(array: Array<T>, addition: Iterable<T> | ArrayLike<T>) {
 // https://jsben.ch/FJ1mO
 // https://jsben.ch/ZmViL
 export function toArray<T>(items: ArrayLike<T>) {
-    const results = [] as Array<T>;
+    const results = [] as T[];
     for (let i = 0, len = items.length; i < len; i++) {
         results.push(items[i]);
     }

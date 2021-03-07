@@ -300,7 +300,7 @@ describe('CSS VARIABLES OVERRIDE', () => {
         expect(getComputedStyle(container.querySelector('h1')).backgroundColor).toBe('rgb(0, 0, 0)');
     });
 
-    it('should handle variables inside color values', async () => {
+    it('should handle variables inside color values (constructed colors)', async () => {
         container.innerHTML = multiline(
             '<style>',
             '    :root {',
@@ -334,15 +334,14 @@ describe('CSS VARIABLES OVERRIDE', () => {
         expect(getComputedStyle(container.querySelector('h1')).backgroundColor).toBe('rgb(204, 0, 0)');
     });
 
-    it('should handle variables inside color values that reference other variables', async () => {
+    it('should handle variables in constructed colors that refer to other vars', async () => {
         container.innerHTML = multiline(
             '<style>',
             '    :root {',
             '        --v255: 255;',
-            '        --black: 0, 0, 0;',
-            '        --white: var(--v255), var(--v255), var(--v255);',
-            '        --bg: var(--unknown, var(--white));',
-            '        --text: var(--black);',
+            '        --red: var(--v255), 0, 0;',
+            '        --bg: var(--unknown, var(--red));',
+            '        --text: var(--red);',
             '    }',
             '</style>',
             '<style>',
@@ -354,11 +353,11 @@ describe('CSS VARIABLES OVERRIDE', () => {
             '<h1>Colors with variables inside</h1>',
         );
         createOrUpdateDynamicTheme(theme, null, false);
-        expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(255, 255, 255)');
-        expect(getComputedStyle(container.querySelector('h1')).backgroundColor).toBe('rgb(0, 0, 0)');
+        expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(255, 26, 26)');
+        expect(getComputedStyle(container.querySelector('h1')).backgroundColor).toBe('rgb(204, 0, 0)');
     });
 
-    it('should handle variables that reference colors with variables', async () => {
+    it('should handle variables that refer to constructed colors', async () => {
         container.innerHTML = multiline(
             '<style>',
             '    :root {',
@@ -382,7 +381,7 @@ describe('CSS VARIABLES OVERRIDE', () => {
         expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(51, 125, 255)');
     });
 
-    it('should handle variables that reference colors with variables asynchronously', async () => {
+    it('should handle variables that refer to constructed colors asynchronously', async () => {
         container.innerHTML = multiline(
             '<style>',
             '    :root {',
@@ -413,7 +412,7 @@ describe('CSS VARIABLES OVERRIDE', () => {
         expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(51, 125, 255)');
     });
 
-    it('should handle variables with and without vars in color values', async () => {
+    it('should handle variables that are both contructed and usual colors', async () => {
         container.innerHTML = multiline(
             '<style>',
             '    :root {',
@@ -431,7 +430,7 @@ describe('CSS VARIABLES OVERRIDE', () => {
         expect(getComputedStyle(container.querySelector('h1')).backgroundColor).toBe('rgb(204, 0, 0)');
     });
 
-    it('should handle cyclic references inside color values', async () => {
+    it('should handle cyclic references in constructed colors', async () => {
         container.innerHTML = multiline(
             '<style>',
             '    :root {',

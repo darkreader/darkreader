@@ -1,4 +1,4 @@
-import {rgbToHSL, hslToString, RGBA, parse} from '../../utils/color';
+import {rgbToHSL, hslToString, parse} from '../../utils/color';
 import {clamp} from '../../utils/math';
 import {getMatches} from '../../utils/text';
 import {getAbsoluteURL} from '../../utils/url';
@@ -10,6 +10,7 @@ import type {CSSVariableModifier, VariablesStore} from './variables';
 import {logWarn, logInfo} from '../utils/log';
 import type {FilterConfig, Theme} from '../../definitions';
 import {isFirefox} from '../../utils/platform';
+import type {RGBA} from '../../utils/color';
 
 export type CSSValueModifier = (theme: Theme) => string | Promise<string>;
 

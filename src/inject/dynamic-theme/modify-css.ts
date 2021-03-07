@@ -170,24 +170,24 @@ function getModifiedScrollbarStyle(theme: Theme) {
         colorThumbActive = hslToString(lighten(0.2));
     }
     lines.push('::-webkit-scrollbar {');
-    lines.push(`    background-color: ${colorTrack};`);
-    lines.push(`    color: ${colorIcons};`);
+    lines.push(`    background-color: ${colorTrack}!important;`);
+    lines.push(`    color: ${colorIcons}!important;;`);
     lines.push('}');
     lines.push('::-webkit-scrollbar-thumb {');
-    lines.push(`    background-color: ${colorThumb};`);
+    lines.push(`    background-color: ${colorThumb}!important;`);
     lines.push('}');
     lines.push('::-webkit-scrollbar-thumb:hover {');
-    lines.push(`    background-color: ${colorThumbHover};`);
+    lines.push(`    background-color: ${colorThumbHover}!important;`);
     lines.push('}');
     lines.push('::-webkit-scrollbar-thumb:active {');
-    lines.push(`    background-color: ${colorThumbActive};`);
+    lines.push(`    background-color: ${colorThumbActive}!important;`);
     lines.push('}');
     lines.push('::-webkit-scrollbar-corner {');
-    lines.push(`    background-color: ${colorCorner};`);
+    lines.push(`    background-color: ${colorCorner}!important;`);
     lines.push('}');
     if (isFirefox) {
         lines.push('* {');
-        lines.push(`    scrollbar-color: ${colorThumb} ${colorTrack};`);
+        lines.push(`    scrollbar-color: ${colorThumb} ${colorTrack}!important;`);
         lines.push('}');
     }
     return lines.join('\n');

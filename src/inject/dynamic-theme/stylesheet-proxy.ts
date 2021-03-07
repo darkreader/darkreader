@@ -5,6 +5,7 @@ export function injectProxy() {
     const insertRuleDescriptor = Object.getOwnPropertyDescriptor(CSSStyleSheet.prototype, 'insertRule');
     const deleteRuleDescriptor = Object.getOwnPropertyDescriptor(CSSStyleSheet.prototype, 'deleteRule');
     const removeRuleDescriptor = Object.getOwnPropertyDescriptor(CSSStyleSheet.prototype, 'removeRule');
+    const documentStyleSheetsDescriptor = Object.getOwnPropertyDescriptor(Document.prototype, 'styleSheets');
 
     const cleanUp = () => {
         Object.defineProperty(CSSStyleSheet.prototype, 'addRule', addRuleDescriptor);
@@ -57,8 +58,14 @@ export function injectProxy() {
         }
     }
 
+    function proxyDocumentStyleSheets() {
+        // Preserves StyleSheetList prototype.
+        return Object.setPrototypeOf([...documentStyleSheetsDescriptor.get.call(this)].filter((styleSheet: CSSStyleSheet) => !(styleSheet.ownerNode as HTMLElement).classList.contains('darkreader')), StyleSheetList.prototype);
+    }
+
     Object.defineProperty(CSSStyleSheet.prototype, 'addRule', Object.assign({}, addRuleDescriptor, {value: proxyAddRule}));
     Object.defineProperty(CSSStyleSheet.prototype, 'insertRule', Object.assign({}, insertRuleDescriptor, {value: proxyInsertRule}));
     Object.defineProperty(CSSStyleSheet.prototype, 'deleteRule', Object.assign({}, deleteRuleDescriptor, {value: proxyDeleteRule}));
     Object.defineProperty(CSSStyleSheet.prototype, 'removeRule', Object.assign({}, removeRuleDescriptor, {value: proxyRemoveRule}));
+    Object.defineProperty(Document.prototype, 'styleSheets', Object.assign({}, documentStyleSheetsDescriptor, {get: proxyDocumentStyleSheets}));
 }

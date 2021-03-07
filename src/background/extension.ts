@@ -20,8 +20,8 @@ import {isSystemDarkModeEnabled} from '../utils/media-query';
 import {logInfo, logWarn} from '../inject/utils/log';
 import {DEFAULT_SETTINGS, DEFAULT_THEME} from '../defaults';
 import {getValidatedObject, getPreviousObject} from '../utils/object';
-import {isFirefox} from '../utils/platform';
 import {forEach, isArrayEqual} from '../utils/array';
+import {isFirefox, isThunderbird} from '../utils/platform';
 
 const AUTO_TIME_CHECK_INTERVAL = getDuration({seconds: 10});
 
@@ -102,7 +102,11 @@ export class Extension {
         this.registerExternalConnections();
 
         this.ready = true;
-        this.tabs.updateContentScript({runOnProtectedPages: this.user.settings.enableForProtectedPages});
+        if (isThunderbird) {
+            this.tabs.registerMailDisplayScript();
+        } else {
+            this.tabs.updateContentScript({runOnProtectedPages: this.user.settings.enableForProtectedPages});
+        }
 
         this.awaiting.forEach((ready) => ready());
         this.awaiting = null;

@@ -239,12 +239,12 @@ function getColorModifier(prop: string, value: string): string | CSSValueModifie
     try {
         const rgb = parseColorWithCache(value);
         if (prop.indexOf('background') >= 0) {
-            return (filter) => modifyBackgroundColor(rgb, filter);
+            return (theme) => modifyBackgroundColor(rgb, theme);
         }
         if (prop.indexOf('border') >= 0 || prop.indexOf('outline') >= 0) {
-            return (filter) => modifyBorderColor(rgb, filter);
+            return (theme) => modifyBorderColor(rgb, theme);
         }
-        return (filter) => modifyForegroundColor(rgb, filter);
+        return (theme) => modifyForegroundColor(rgb, theme);
 
     } catch (err) {
         logWarn('Color parse error', err);
@@ -455,10 +455,10 @@ function getShadowModifier(value: string): CSSValueModifier {
             if (!rgb) {
                 return () => value.substring(prefixIndex, matchEnd);
             }
-            return (filter: Theme) => `${value.substring(prefixIndex, matchIndex)}${modifyShadowColor(rgb, filter)}${i === colorMatches.length - 1 ? value.substring(matchEnd) : ''}`;
+            return (theme: Theme) => `${value.substring(prefixIndex, matchIndex)}${modifyShadowColor(rgb, theme)}${i === colorMatches.length - 1 ? value.substring(matchEnd) : ''}`;
         });
 
-        return (filter: Theme) => modifiers.map((modify) => modify(filter)).join('');
+        return (theme: Theme) => modifiers.map((modify) => modify(theme)).join('');
 
     } catch (err) {
         logWarn(`Unable to parse shadow ${value}`, err);

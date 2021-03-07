@@ -1,7 +1,6 @@
 const fs = require('fs-extra');
 const os = require('os');
 const rollup = require('rollup');
-const rollupPluginCommonjs = require('@rollup/plugin-commonjs');
 const rollupPluginNodeResolve = require('@rollup/plugin-node-resolve').default;
 const rollupPluginReplace = require('@rollup/plugin-replace');
 const rollupPluginTypescript = require('rollup-plugin-typescript2');
@@ -11,10 +10,12 @@ const reload = require('./reload');
 const {PORT} = reload;
 const {createTask} = require('./task');
 
-async function copyToFF({cwdPath, debug}) {
+async function copyToBrowsers({cwdPath, debug}) {
     const destPath = `${getDestDir({debug})}/${cwdPath}`;
     const ffDestPath = `${getDestDir({debug, firefox: true})}/${cwdPath}`;
+    const tbDestPath = `${getDestDir({debug, thunderbird: true})}/${cwdPath}`;
     await fs.copy(destPath, ffDestPath);
+    await fs.copy(destPath, tbDestPath);
 }
 
 function replace(str, find, replace) {
@@ -45,8 +46,11 @@ const jsEntries = [
         async postBuild({debug}) {
             const destPath = `${getDestDir({debug})}/${this.dest}`;
             const ffDestPath = `${getDestDir({debug, firefox: true})}/${this.dest}`;
+            const tbDestPath = `${getDestDir({debug, thunderbird: true})}/${this.dest}`;
             const code = await fs.readFile(destPath, 'utf8');
-            await fs.outputFile(ffDestPath, patchFirefoxJS(code));
+            const patchedCode = patchFirefoxJS(code);
+            await fs.outputFile(ffDestPath, patchedCode);
+            await fs.copy(ffDestPath, tbDestPath);
         },
         watchFiles: null,
     },
@@ -55,7 +59,7 @@ const jsEntries = [
         dest: 'inject/index.js',
         reloadType: reload.FULL,
         async postBuild({debug}) {
-            await copyToFF({cwdPath: this.dest, debug});
+            await copyToBrowsers({cwdPath: this.dest, debug});
         },
         watchFiles: null,
     },
@@ -64,7 +68,7 @@ const jsEntries = [
         dest: 'inject/fallback.js',
         reloadType: reload.FULL,
         async postBuild({debug}) {
-            await copyToFF({cwdPath: this.dest, debug});
+            await copyToBrowsers({cwdPath: this.dest, debug});
         },
         watchFiles: null,
     },
@@ -73,7 +77,7 @@ const jsEntries = [
         dest: 'ui/devtools/index.js',
         reloadType: reload.UI,
         async postBuild({debug}) {
-            await copyToFF({cwdPath: this.dest, debug});
+            await copyToBrowsers({cwdPath: this.dest, debug});
         },
         watchFiles: null,
     },
@@ -82,7 +86,7 @@ const jsEntries = [
         dest: 'ui/popup/index.js',
         reloadType: reload.UI,
         async postBuild({debug}) {
-            await copyToFF({cwdPath: this.dest, debug});
+            await copyToBrowsers({cwdPath: this.dest, debug});
         },
         watchFiles: null,
     },
@@ -91,7 +95,7 @@ const jsEntries = [
         dest: 'ui/stylesheet-editor/index.js',
         reloadType: reload.UI,
         async postBuild({debug}) {
-            await copyToFF({cwdPath: this.dest, debug});
+            await copyToBrowsers({cwdPath: this.dest, debug});
         },
         watchFiles: null,
     },
@@ -103,7 +107,6 @@ async function bundleJS(/** @type {JSEntry} */entry, {debug, watch}) {
         input: src,
         plugins: [
             rollupPluginNodeResolve(),
-            rollupPluginCommonjs(),
             rollupPluginTypescript({
                 typescript,
                 tsconfig: 'src/tsconfig.json',
@@ -117,6 +120,7 @@ async function bundleJS(/** @type {JSEntry} */entry, {debug, watch}) {
                 cacheRoot: debug ? `${fs.realpathSync(os.tmpdir())}/darkreader_typescript_cache` : null,
             }),
             rollupPluginReplace({
+                preventAssignment: true,
                 '__DEBUG__': debug ? 'true' : 'false',
                 '__PORT__': watch ? String(PORT) : '-1',
                 '__WATCH__': watch ? 'true' : 'false',

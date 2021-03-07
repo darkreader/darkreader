@@ -6,6 +6,9 @@ build.zip
 build-firefox
 debug-firefox
 build-firefox.xpi
+build-thunderbird
+debug-thunderbird
+build-thunderbird.xpi
 darkreader.js
 debug.log
 

@@ -30,7 +30,7 @@ export async function getImageDetails(url: string) {
 }
 
 async function getImageDataURL(url: string) {
-    if (getURLHostOrProtocol(url) === (location.host || location.protocol)) {
+    if (getURLHostOrProtocol(url) === ((location.host && url.startsWith(location.protocol)) || location.protocol)) {
         return await loadAsDataURL(url);
     }
     return await bgFetch({url, responseType: 'data-url'});

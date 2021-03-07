@@ -98,3 +98,37 @@ export function formatCSS(text: string) {
 
     return formatted.join('').trim();
 }
+
+export function getParenthesesRange(input: string, searchStartIndex = 0) {
+    const length = input.length;
+    let depth = 0;
+    let firstOpenIndex = -1;
+    for (let i = searchStartIndex; i < length; i++) {
+        if (depth === 0) {
+            const openIndex = input.indexOf('(', i);
+            if (openIndex < 0) {
+                break;
+            }
+            firstOpenIndex = openIndex;
+            depth++;
+            i = openIndex;
+        } else {
+            const closingIndex = input.indexOf(')', i);
+            if (closingIndex < 0) {
+                break;
+            }
+            const openIndex = input.indexOf('(', i);
+            if (openIndex < 0 || closingIndex < openIndex) {
+                depth--;
+                if (depth === 0) {
+                    return {start: firstOpenIndex, end: closingIndex + 1};
+                }
+                i = closingIndex;
+            } else {
+                depth++;
+                i = openIndex;
+            }
+        }
+    }
+    return null;
+}

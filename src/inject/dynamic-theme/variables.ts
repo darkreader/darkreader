@@ -128,16 +128,11 @@ export class VariablesStore {
                         return;
                     }
                     const property = varNameWrapper(varName);
-                    let modifiedValue: string;
-                    if (isVarDependant(sourceValue)) {
-                        modifiedValue = replaceCSSVariablesNames(
-                            sourceValue,
-                            (v) => varNameWrapper(v),
-                            (fallback) => colorModifier(fallback, theme),
-                        );
-                    } else {
-                        modifiedValue = colorModifier(sourceValue, theme);
-                    }
+                    const modifiedValue = isVarDependant(sourceValue) ? replaceCSSVariablesNames(
+                        sourceValue,
+                        (v) => varNameWrapper(v),
+                        (fallback) => colorModifier(fallback, theme),
+                    ) : colorModifier(sourceValue, theme);
                     declarations.push({
                         property,
                         value: modifiedValue,
@@ -374,7 +369,7 @@ function getVariablesMatches(input: string): VariableMatch[] {
     while ((range = getVariableRange(input, i))) {
         const {start, end} = range;
         ranges.push({start, end, value: input.substring(start, end)});
-        i = range.end + 1;
+        i = end + 1;
     }
     return ranges;
 }

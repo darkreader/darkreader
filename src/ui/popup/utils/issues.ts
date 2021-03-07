@@ -1,4 +1,4 @@
-import {compareChromeVersions, chromiumVersion, isWindows, isOpera, isYaBrowser, isVivaldi, isEdge, isMacOS} from '../../../utils/platform';
+import {compareChromeVersions, chromiumVersion, isWindows, isOpera, isYaBrowser, isVivaldi, isEdge, isMacOS, isThunderbird} from '../../../utils/platform';
 
 
 export function popupHasBuiltInBorders() {
@@ -37,7 +37,9 @@ export function fixNotClosingPopupOnNavigation() {
         if (target && target.hasAttribute('href')) {
             chrome.tabs.create({url: target.getAttribute('href')});
             e.preventDefault();
-            window.close();
+            if (!isThunderbird) {
+                window.close();
+            }
         }
     });
 }

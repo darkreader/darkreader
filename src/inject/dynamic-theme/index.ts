@@ -21,7 +21,7 @@ import {parse} from '../../utils/color';
 import {parsedURLCache} from '../../utils/url';
 import {variablesStore} from './variables';
 import {generateUID} from '../../utils/uid';
-import { disconnectContentScript } from '../port';
+import {disconnectContentScript} from '../port';
 
 const styleManagers = new Map<StyleElement, StyleManager>();
 const adoptedStyleManagers = [] as AdoptedStyleSheetManager[];

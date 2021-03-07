@@ -1,4 +1,3 @@
-import {replaceCSSVariables, getElementCSSVariables} from './css-rules';
 import {overrideInlineStyle, getInlineOverrideStyle, watchForInlineStyles, stopWatchingForInlineStyles, INLINE_STYLE_SELECTOR} from './inline-style';
 import {changeMetaThemeColorWhenAvailable, restoreMetaThemeColor} from './meta-theme-color';
 import {getModifiedUserAgentStyle, getModifiedFallbackStyle, cleanModificationCache, parseColorWithCache, getSelectionColor} from './modify-css';
@@ -21,8 +20,8 @@ import {isFirefox} from '../../utils/platform';
 import {injectProxy} from './stylesheet-proxy';
 import {parse} from '../../utils/color';
 import {parsedURLCache} from '../../utils/url';
+import {variablesStore} from './variables';
 
-const variables = new Map<string, string>();
 const INSTANCE_ID = generateUID();
 const styleManagers = new Map<StyleElement, StyleManager>();
 const adoptedStyleManagers = [] as AdoptedStyleSheetManager[];
@@ -169,29 +168,24 @@ function cleanFallbackStyle() {
 function createDynamicStyleOverrides() {
     cancelRendering();
 
-    updateVariables(getElementCSSVariables(document.documentElement));
+    // TODO: Handle root element variables
+    // updateVariables(getElementCSSVariables(document.documentElement), filter, getIgnoreImageAnalysisSelectors());
 
     const allStyles = getManageableStyles(document);
 
     const newManagers = allStyles
         .filter((style) => !styleManagers.has(style))
         .map((style) => createManager(style));
-    const newVariables = newManagers
+    newManagers
         .map((manager) => manager.details())
-        .filter((details) => details && details.variables.size > 0)
-        .map(({variables}) => variables);
-    if (newVariables.length === 0) {
-        styleManagers.forEach((manager) => manager.render(filter, variables, ignoredImageAnalysisSelectors));
-        if (loadingStyles.size === 0) {
-            cleanFallbackStyle();
-        }
-    } else {
-        newVariables.forEach((variables) => updateVariables(variables));
-        throttledRenderAllStyles(() => {
-            if (loadingStyles.size === 0) {
-                cleanFallbackStyle();
-            }
+        .filter((detail) => detail && detail.rules.length > 0)
+        .forEach((detail) => {
+            variablesStore.addRulesForMatching(detail.rules);
         });
+    variablesStore.matchVariablesAndDependants();
+    styleManagers.forEach((manager) => manager.render(filter, ignoredImageAnalysisSelectors));
+    if (loadingStyles.size === 0) {
+        cleanFallbackStyle();
     }
     newManagers.forEach((manager) => manager.watch());
 
@@ -236,12 +230,9 @@ function createManager(element: StyleElement) {
         if (!details) {
             return;
         }
-        if (details.variables.size === 0) {
-            manager.render(filter, variables, ignoredImageAnalysisSelectors);
-        } else {
-            updateVariables(details.variables);
-            throttledRenderAllStyles();
-        }
+        variablesStore.addRulesForMatching(details.rules);
+        variablesStore.matchVariablesAndDependants();
+        manager.render(filter, ignoredImageAnalysisSelectors);
     }
 
     const manager = manageStyle(element, {update, loadingStart, loadingEnd});
@@ -250,17 +241,6 @@ function createManager(element: StyleElement) {
     return manager;
 }
 
-function updateVariables(newVars: Map<string, string>) {
-    if (newVars.size === 0) {
-        return;
-    }
-    newVars.forEach((value, key) => {
-        variables.set(key, value);
-    });
-    variables.forEach((value, key) => {
-        variables.set(key, replaceCSSVariables(value, variables));
-    });
-}
 
 function removeManager(element: StyleElement) {
     const manager = styleManagers.get(element);
@@ -271,8 +251,8 @@ function removeManager(element: StyleElement) {
 }
 
 const throttledRenderAllStyles = throttle((callback?: () => void) => {
-    styleManagers.forEach((manager) => manager.render(filter, variables, ignoredImageAnalysisSelectors));
-    adoptedStyleManagers.forEach((manager) => manager.render(filter, variables, ignoredImageAnalysisSelectors));
+    styleManagers.forEach((manager) => manager.render(filter, ignoredImageAnalysisSelectors));
+    adoptedStyleManagers.forEach((manager) => manager.render(filter, ignoredImageAnalysisSelectors));
     callback && callback();
 });
 
@@ -331,7 +311,7 @@ function handleAdoptedStyleSheets(node: ShadowRoot | Document) {
             const newManger = createAdoptedStyleSheetOverride(node);
 
             adoptedStyleManagers.push(newManger);
-            newManger.render(filter, variables, ignoredImageAnalysisSelectors);
+            newManger.render(filter, ignoredImageAnalysisSelectors);
         }
     }
 }
@@ -347,16 +327,14 @@ function watchForUpdates() {
         stylesToRemove.forEach((style) => removeManager(style));
         const newManagers = stylesToManage
             .map((style) => createManager(style));
-        const newVariables = newManagers
+        newManagers
             .map((manager) => manager.details())
-            .filter((details) => details && details.variables.size > 0)
-            .map(({variables}) => variables);
-        if (newVariables.length === 0) {
-            newManagers.forEach((manager) => manager.render(filter, variables, ignoredImageAnalysisSelectors));
-        } else {
-            newVariables.forEach((variables) => updateVariables(variables));
-            throttledRenderAllStyles();
-        }
+            .filter((detail) => detail && detail.rules.length > 0)
+            .forEach((detail) => {
+                variablesStore.addRulesForMatching(detail.rules);
+            });
+        variablesStore.matchVariablesAndDependants();
+        newManagers.forEach((manager) => manager.render(filter, ignoredImageAnalysisSelectors));
         newManagers.forEach((manager) => manager.watch());
         stylesToRestore.forEach((style) => styleManagers.get(style).restore());
     }, (shadowRoot) => {
@@ -367,11 +345,12 @@ function watchForUpdates() {
     watchForInlineStyles((element) => {
         overrideInlineStyle(element, filter, ignoredInlineSelectors, ignoredImageAnalysisSelectors);
         if (element === document.documentElement) {
-            const rootVariables = getElementCSSVariables(document.documentElement);
-            if (rootVariables.size > 0) {
-                updateVariables(rootVariables);
-                throttledRenderAllStyles();
-            }
+            // TODO: Handle root element variables
+            // const rootVariables = getElementCSSVariables(document.documentElement);
+            // if (rootVariables.size > 0) {
+            //     updateVariables(rootVariables, filter, getIgnoreImageAnalysisSelectors());
+            //     throttledRenderAllStyles();
+            // }
         }
     }, (root) => {
         createShadowStaticStyleOverrides(root);
@@ -481,11 +460,11 @@ export function removeDynamicTheme() {
         manager.destroy();
     });
     adoptedStyleManagers.splice(0);
-    parsedURLCache.clear();
 }
 
 export function cleanDynamicThemeCache() {
-    variables.clear();
+    variablesStore.clear();
+    parsedURLCache.clear();
     stopWatchingForDocumentVisibility();
     cancelRendering();
     stopWatchingForUpdates();

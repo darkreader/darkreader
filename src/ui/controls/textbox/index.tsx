@@ -11,6 +11,6 @@ export default function TextBox(props: TextBoxProps) {
     const attrs = omitAttrs(['class', 'type'], props);
 
     return (
-        <input class={cls} type="text" {...attrs} />
+        <input class={cls} type="text" spellcheck="false" {...attrs} />
     );
 }

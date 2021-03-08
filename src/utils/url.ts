@@ -1,7 +1,9 @@
-import {UserSettings} from '../definitions';
+import type {UserSettings} from '../definitions';
 import {isIPV6, compareIPV6} from './ipv6';
 
 let anchor: HTMLAnchorElement;
+
+export const parsedURLCache = new Map<string, URL>();
 
 function fixBaseURL($url: string) {
     if (!anchor) {
@@ -12,12 +14,18 @@ function fixBaseURL($url: string) {
 }
 
 export function parseURL($url: string, $base: string = null) {
-    if ($base) {
-        $base = fixBaseURL($base);
-        return new URL($url, $base);
+    const key = `${$url}${$base ? ';' + $base : ''}`;
+    if (parsedURLCache.has(key)) {
+        return parsedURLCache.get(key);
     }
-    $url = fixBaseURL($url);
-    return new URL($url);
+    if ($base) {
+        const parsedURL = new URL($url, fixBaseURL($base));
+        parsedURLCache.set(key, parsedURL);
+        return parsedURL;
+    }
+    const parsedURL = new URL(fixBaseURL($url));
+    parsedURLCache.set($url, parsedURL);
+    return parsedURL;
 }
 
 export function getAbsoluteURL($base: string, $relative: string) {
@@ -151,7 +159,7 @@ export function isPDF(url: string) {
             return false;
         }
         if (url.endsWith('.pdf')) {
-            for (let i = url.length; 0 < i; i--) {
+            for (let i = url.length; i > 0; i--) {
                 if (url[i] === '=') {
                     return false;
                 } else if (url[i] === '/') {

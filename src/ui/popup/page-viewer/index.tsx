@@ -30,7 +30,7 @@ interface PageViewerProps {
 
 export function PageViewer(
     props: PageViewerProps,
-    ...pages: Malevic.ComponentSpec<PageProps>[]
+    ...pages: Array<Malevic.ComponentSpec<PageProps>>
 ) {
     return (
         <div class="page-viewer">

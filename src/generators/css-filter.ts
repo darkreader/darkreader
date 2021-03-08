@@ -4,7 +4,7 @@ import {parseSitesFixesConfig} from './utils/parse';
 import {parseArray, formatArray} from '../utils/text';
 import {compareURLPatterns, isURLInList} from '../utils/url';
 import {createTextStyle} from './text-style';
-import {FilterConfig, InversionFix} from '../definitions';
+import type {FilterConfig, InversionFix} from '../definitions';
 import {compareChromeVersions, chromiumVersion, isChromium} from '../utils/platform';
 
 export enum FilterMode {
@@ -236,7 +236,7 @@ export function formatInversionFixes(inversionFixes: InversionFix[]) {
         getPropCommandName: (prop) => Object.entries(inversionFixesCommands).find(([, p]) => p === prop)[0],
         formatPropValue: (prop, value) => {
             if (prop === 'css') {
-                return value.trim();
+                return (value as string).trim().replace(/\n+/g, '\n');
             }
             return formatArray(value).trim();
         },

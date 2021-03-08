@@ -6,7 +6,11 @@ build.zip
 build-firefox
 debug-firefox
 build-firefox.xpi
+build-thunderbird
+debug-thunderbird
+build-thunderbird.xpi
 darkreader.js
+debug.log
 
 # Node.js modules
 #-----------------------------------
@@ -16,8 +20,14 @@ node_modules/
 #-----------------------------------
 tests/coverage/
 tests/browser/coverage/
+tests/inject/coverage/
 
 # IDE and editor configs
 #-----------------------------------
 .idea/
 .vscode/
+*.code-workspace
+
+# Cache files
+#-----------------------------------
+.eslintcache

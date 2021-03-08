@@ -12,7 +12,6 @@ import {clamp} from '../../utils/math';
 import {getCSSFilterValue} from '../../generators/css-filter';
 import {modifyBackgroundColor, modifyColor, modifyForegroundColor} from '../../generators/modify-colors';
 import {createTextStyle} from '../../generators/text-style';
-import {generateUID} from '../../utils/uid';
 import {isFirefox} from '../../utils/platform';
 import {injectProxy} from './stylesheet-proxy';
 import {parse} from '../../utils/color';

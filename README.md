@@ -20,14 +20,14 @@ See the list of [language codes](https://developer.chrome.com/webstore/i18n#loca
 
 ### Fix a wrong inversion
 
-If a website is **already dark** (has all pages dark by default), you can **add it to the [dark-sites.config](https://github.com/alexanderby/darkreader/blob/master/src/config/dark-sites.config) file**
+If a website is **already dark** (has all pages dark by default), you can **add it to the [dark-sites.config](src/config/dark-sites.config) file**
 *(please, preserve alphabetical order)*.
 
 If some **parts** of a web page are **wrongly inverted**,
 you can fix this by specifying appropriate [**CSS selectors**](https://developer.mozilla.org/docs/Web/CSS/CSS_Selectors) in
-**[dynamic-theme-fixes.config](https://github.com/alexanderby/darkreader/blob/master/src/config/dynamic-theme-fixes.config)**
+**[dynamic-theme-fixes.config](src/config/dynamic-theme-fixes.config)**
 (for Dynamic Theme mode)
-or **[inversion-fixes.config](https://github.com/alexanderby/darkreader/blob/master/src/config/inversion-fixes.config)**
+or **[inversion-fixes.config](src/config/inversion-fixes.config)**
 (for Filter and Filter+ modes)
 *(please, preserve alphabetical order by URL, use short selectors, and preserve code style)*.
 
@@ -50,8 +50,8 @@ For **Filter mode**, it is a common practice to invert already dark page parts.
 - Click **Apply**.
 - Check how it looks both in **Light** and **Dark** mode.
 - If the **fix works** open
-**[dynamic-theme-fixes.config](https://github.com/alexanderby/darkreader/blob/master/src/config/dynamic-theme-fixes.config) file**
-or **[inversion-fixes.config](https://github.com/alexanderby/darkreader/blob/master/src/config/inversion-fixes.config) file**.
+**[dynamic-theme-fixes.config](src/config/dynamic-theme-fixes.config) file**
+or **[inversion-fixes.config](src/config/inversion-fixes.config) file**.
 - Click **Edit** (login to GitHub first).
 - **Insert your fix** there. Preserve **alphabetic order** by URL.
 - Provide a **short description** of what you have done.

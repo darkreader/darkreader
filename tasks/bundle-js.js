@@ -112,7 +112,7 @@ async function bundleJS(/** @type {JSEntry} */entry, {debug, watch}) {
             '__WATCH__': watch ? 'true' : 'false',
         },
         minifySyntax: true,
-        banner: '"use strict";'
+        banner: {js: '"use strict";'},
 
     });
     await entry.postBuild({debug});

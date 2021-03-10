@@ -56,7 +56,7 @@ function createPreprocessor(config, emitter, logger) {
                 '__PORT__': '-1',
                 '__WATCH__': 'false',
             },
-            banner: '"use strict";',
+            banner: {js: '"use strict";'},
         });
         return result;
     }

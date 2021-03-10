@@ -2,7 +2,7 @@
 <p align="center">Dark Reader <strong>analyzes</strong> web pages and aims to <strong>reduce the eyestrain</strong> while you browse the web.</p>
 <br/>
 <p align="center"><a rel="noreferrer noopener" href="https://chrome.google.com/webstore/detail/dark-reader/eimadpbcbfnmbkopoojfekhnkhdbieeh/"><img alt="Chrome Web Store" src="https://img.shields.io/badge/Chrome%20Web%20Store-141e24.svg?&style=flat-square&logo=google-chrome&logoColor=white"></a><a rel="noreferrer noopener" href="https://addons.mozilla.org/en-US/firefox/addon/darkreader/"><img alt="Firefox Add-ons" src="https://img.shields.io/badge/Firefox%20Addons-141e24.svg?&style=flat-square&logo=firefox-browser&logoColor=white"></a><a rel="noreferrer noopener" href="https://microsoftedge.microsoft.com/addons/detail/dark-reader/ifoakfbpdcdoeenechcleahebpibofpc/"><img alt="Edge Addons" src="https://img.shields.io/badge/Edge%20Addons-141e24.svg?&style=flat-square&logo=microsoft-edge&logoColor=white"></a><a el="noreferrer noopener" href="https://addons.thunderbird.net/en-US/thunderbird/addon/darkreader"><img alt="Thunderbird" src="https://img.shields.io/badge/Thunderbird-141e24.svg?&style=flat-square&logo=thunderbird&logoColor=white"></a>
-    
+
 <h2 align="center">Dark Reader</h2>
 <br/>
 <p align="center">Dark Reader is an <strong>open-source</strong> MIT-licensed <strong>browser extension</strong>, that is designed to analyzes web pages. Based on its analysis Dark Reader will generate a dark mode based on this. Hereby Dark Reader aims to <strong>reduce the eyestrain</strong> of the user. Dark Reader is <strong>feature-rich</strong> and can be configured in many ways throughout the UI.</p>
@@ -59,6 +59,9 @@ DarkReader.auto(false);
 
 // Get the generated CSS of Dark Reader returned as a string.
 const CSS = await DarkReader.exportGeneratedCSS();
+
+// Check if Dark Reader is enabled.
+const isEnabled = DarkReader.isEnabled();
 ```
 
 ... or if you are using ES modules
@@ -69,6 +72,7 @@ import {
     disable as disableDarkMode,
     auto as followSystemColorScheme,
     exportGeneratedCSS as collectCSS,
+    isEnabled as isDarkReaderEnabled
 } from 'darkreader';
 
 enableDarkMode({
@@ -82,13 +86,15 @@ disableDarkMode();
 followSystemColorScheme();
 
 const CSS = await collectCSS();
+
+const isEnabled = isDarkReaderEnabled();
 ```
 
 ## Site fixes
 
 Automatically syncing the site fixes to every Dark Reader user was disabled because the GitHub team doesn't allow using GitHub as a CDN. Storing these files and making requests to other resources would be expensive and look suspicious. As such, changes are included with each new Dark Reader release.
 
-However, this can be bypassed by the following steps:
+However, this can be enabled by the following steps:
 
 - Click on the Dark Reader icon.
 - Click on the Dev tools button (in the bottom-right corner).

@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 370 370">
+    <path fill="none" stroke="#000" d="M203 2h100v96H203V2"/>
+    <text transform="translate(225 28)" font-family="Open Sans" font-size="11">
+        <tspan>Web page</tspan>
+    </text>
+    <text transform="translate(208 70)" font-family="Open Sans" font-size="9">
+        <tspan>Styles</tspan>
+    </text>
+    <text transform="translate(250 85)" font-family="Open Sans" font-size="9">
+        <tspan>Elements</tspan>
+    </text>
+    <path fill="none" stroke="#000" d="M32.38 10.7h83.93v80.94H32.38V10.7"/>
+    <text transform="translate(45 55)" font-family="Open Sans">
+        <tspan x="0">Browser</tspan>
+    </text>
+    <path fill="none" stroke="#000" stroke-width="3" d="M127.79 57.02h58.06"/>
+    <path fill-rule="evenodd" d="m179.86 74.15-.45.36-.22-34.2 18.18 17.64-17.5 16.2"/>
+    <text transform="translate(128 40)" font-family="Open Sans" font-size="9" text-anchor="middle">
+        <tspan x="24">Injects</tspan>
+        <tspan x="24" dy="12">Dark Reader</tspan>
+    </text>
+    <path fill="none" stroke="#000" d="M204.24 152.74h93.29v89.98h-93.29v-89.98"/>
+    <text transform="translate(210 180)" font-size="8" text-anchor="middle">
+        <tspan x="44" font-size="9" font-family="Open Sans">Dark Reader&apos;s</tspan>
+        <tspan x="44" dy="15" font-size="9" font-family="Open Sans">injected code:</tspan>
+        <tspan x="44" dy="20" font-family="Open Sans">Collect Styles</tspan>
+    </text>
+    <path fill="none" stroke="#000" stroke-width="3" d="M189.65 185.6h-58.06"/>
+    <path fill-rule="evenodd" stroke="#000" stroke-width="3" d="m137.58 202.73.45.36.22-34.2-18.18 17.64 17.5 16.2m-57.63 59.15.36-.45-34.2-.23 17.64 18.18 16.2-17.5"/>
+    <path fill="none" stroke="#000" d="M212.82 284.34h83.93v80.95h-83.93v-80.95"/>
+    <text transform="translate(254 316)" font-family="Open Sans" font-size="8" text-anchor="middle">
+        <tspan x="0">Iterate the List</tspan>
+        <tspan x="0" dy="13">and inject items</tspan>
+        <tspan x="0" dy="13">into the stylesheet</tspan>
+    </text>
+    <path fill="none" stroke="#000" d="M23 285.14h86.54v80.95H23v-80.95"/>
+    <text transform="translate(33 316)" font-family="Open Sans" font-size="8" text-anchor="middle">
+        <tspan x="32">Create a list</tspan>
+        <tspan x="32" dy="13">of the</tspan>
+        <tspan x="32" dy="13">modified styles</tspan>
+    </text>
+    <path fill="none" stroke="#000" d="M22.11 143.01h88.37v80.95H22.1v-80.95"/>
+    <text transform="translate(29 175)" font-family="Open Sans" font-size="8" text-anchor="middle">
+        <tspan x="39">Analyze styles</tspan>
+        <tspan x="39" dy="13">create a preprocessed</tspan>
+        <tspan x="39" dy="13">styles list.</tspan>
+    </text>
+    <path fill-rule="evenodd" stroke="#000" stroke-width="3" d="m170.8 307.73-.46-.36-.22 34.2 18.18-17.64-17.5-16.2m98.33-175.12.36-.45-34.2-.23 17.64 18.18 16.2-17.5"/>
+    <path fill="none" stroke="#000" d="M302 40.22H201.59m238.8 81.46 3.56 4.07"/>
+    <path fill="none" stroke="#000" stroke-width="3" d="M252.52 105.39v25.97M63.13 229.6v31.57m63.13 63.64h42.8"/>
+</svg>

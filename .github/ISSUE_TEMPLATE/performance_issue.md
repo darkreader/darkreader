@@ -43,7 +43,7 @@ assignees: ''
 
 - OS: <!-- [e.g. Windows, MacOS, Linux] -->
 - Browser: <!-- [e.g. Chrome 84, Safari 13] -->
-- Dark Reader Version: <!-- [e.g. 4.9.26] -->
+- Dark Reader Version: <!-- [e.g. 4.9.29] -->
 
 <!--
   Do you have this performance issue with Dark Reader disabled?

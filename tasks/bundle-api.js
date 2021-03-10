@@ -16,13 +16,12 @@ async function bundleAPI() {
         },
         target: 'es2015',
         charset: 'utf8',
-        banner: `/**\n * Dark Reader v${packageJSON.version}\n * https://darkreader.org/\n */\n`,
+        banner: {js: `/**\n * Dark Reader v${packageJSON.version}\n * https://darkreader.org/\n */\n"use strict";`},
         format: 'iife',
         sourcemap: false,
         globalName: 'DarkReader',
         treeShaking: true,
         minifySyntax: true,
-        banner: '"use strict";',
     });
 }
 

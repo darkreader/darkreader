@@ -366,11 +366,19 @@ export class VariablesStore {
                     if (this.isVarType(v, VAR_TYPE_BGCOLOR | VAR_TYPE_BGIMG)) {
                         return;
                     }
-                    if (this.unknownColorVars.has(v) || this.isVarType(v, VAR_TYPE_TEXTCOLOR | VAR_TYPE_BORDERCOLOR)) {
-                        this.resolveVariableType(v, VAR_TYPE_BGCOLOR);
-                        return;
-                    }
-                    this.unknownBgVars.add(v);
+                    const isBgColor = this.findVarRef(v, (ref) => {
+                        return (
+                            this.unknownColorVars.has(ref) ||
+                            this.isVarType(ref, VAR_TYPE_TEXTCOLOR | VAR_TYPE_BORDERCOLOR)
+                        );
+                    }) != null;
+                    this.itarateVarRefs(v, (ref) => {
+                        if (isBgColor) {
+                            this.resolveVariableType(ref, VAR_TYPE_BGCOLOR);
+                        } else {
+                            this.unknownBgVars.add(ref);
+                        }
+                    });
                 });
             }
         });
@@ -383,6 +391,35 @@ export class VariablesStore {
         const varDeps = new Set<string>();
         iterateVarDependencies(value, (v) => varDeps.add(v));
         varDeps.forEach((v) => iterator(v));
+    }
+
+    private findVarRef(varName: string, iterator: (v: string) => boolean, stack = new Set<string>()) {
+        if (stack.has(varName)) {
+            return null;
+        }
+        stack.add(varName);
+        const result = iterator(varName);
+        if (result) {
+            return varName;
+        }
+        const refs = this.varRefs.get(varName);
+        if (!refs || refs.size === 0) {
+            return null;
+        }
+        for (const ref of refs) {
+            const found = this.findVarRef(ref, iterator, stack);
+            if (found) {
+                return found;
+            }
+        }
+        return null;
+    }
+
+    private itarateVarRefs(varName: string, iterator: (v: string) => void) {
+        this.findVarRef(varName, (ref) => {
+            iterator(ref);
+            return false;
+        });
     }
 }
 

@@ -114,12 +114,14 @@ CSS
 
 ```
 
-Here is a full list of available CSS variables:
+Here is a full table of available CSS variables:
 
-- `--darkreader-neutral-background` should be mostly used for elements that have a wrong background color (usually bright backgrounds that should be dark).
-- `--darkreader-neutral-text` should be used for elements with a wrong text color (usually dark texts that should be light).
-- `--darkreader-selection-background` corresponds to user's Selection Background Color setting.
-- `--darkreader-selection-text` corresponds to user's Selection Text Color setting.
+| Variable                            | Description                     |
+|-------------------------------------|---------------------------------|
+| `--darkreader-neutral-background`   | Background Color                |
+| `--darkreader-neutral-text`         | Text Color                      |
+| `--darkreader-selection-background` | User's Text Color setting       |
+| `-darkreader-selection-text`        | User's Background Color setting |
 
 #### Fixes for Filter and Filter+ modes
 

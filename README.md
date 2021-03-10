@@ -116,12 +116,12 @@ CSS
 
 Here is a full table of available CSS variables:
 
-| Variable                            | Description                     |
-|-------------------------------------|---------------------------------|
-| `--darkreader-neutral-background`   | Background Color                |
-| `--darkreader-neutral-text`         | Text Color                      |
-| `--darkreader-selection-background` | User's Text Color setting       |
-| `-darkreader-selection-text`        | User's Background Color setting |
+| Variable                            	| Description                     	| Use                                                         	|
+|-------------------------------------	|---------------------------------	|-------------------------------------------------------------	|
+| `--darkreader-neutral-background`   	| Background Color                	| Mostly used for elements that have a wrong background color 	|
+| `--darkreader-neutral-text`         	| Text Color                      	| Used for elements with a wrong text color                   	|
+| `--darkreader-selection-background` 	| User's Text Color setting       	| The user's Text Color setting                               	|
+| `-darkreader-selection-text`        	| User's Background Color setting 	| The user's Background Color setting                         	|
 
 #### Fixes for Filter and Filter+ modes
 

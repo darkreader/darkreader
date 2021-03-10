@@ -371,7 +371,7 @@ export class VariablesStore {
                             this.unknownColorVars.has(ref) ||
                             this.isVarType(ref, VAR_TYPE_TEXTCOLOR | VAR_TYPE_BORDERCOLOR)
                         );
-                    });
+                    }) != null;
                     this.itarateVarRefs(v, (ref) => {
                         if (isBgColor) {
                             this.resolveVariableType(ref, VAR_TYPE_BGCOLOR);
@@ -400,7 +400,7 @@ export class VariablesStore {
         stack.add(varName);
         const result = iterator(varName);
         if (result) {
-            return result;
+            return varName;
         }
         const refs = this.varRefs.get(varName);
         if (!refs || refs.size === 0) {

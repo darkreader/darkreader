@@ -125,5 +125,5 @@ async function bundleJS(/** @type {JSEntry} */entry, {debug, watch}) {
 
 module.exports = createTask(
     'bundle-js',
-    async ({debug, watch}) => jsEntries.forEach((entry) => bundleJS(entry, {debug, watch}))
+    async ({debug, watch}) => jsEntries.forEach(async (entry) => await bundleJS(entry, {debug, watch}))
 );

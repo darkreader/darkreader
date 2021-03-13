@@ -38,6 +38,8 @@ const shorthandVarDependantProperties = [
     'border-left',
     'border-right',
     'border-top',
+    'outline',
+    'outline-color',
 ];
 
 const shorthandVarDepPropRegexps = isSafari ? shorthandVarDependantProperties.map((prop) => {

@@ -100,6 +100,7 @@ async function bundleJS(/** @type {JSEntry} */entry, {debug, watch}) {
         } : null,
         sourcemap: debug ? 'inline' : false,
         bundle: true,
+        platform: 'browser',
         target: 'es2019',
         charset: 'utf8',
         format: 'iife',
@@ -113,6 +114,7 @@ async function bundleJS(/** @type {JSEntry} */entry, {debug, watch}) {
         },
         minifySyntax: true,
         banner: {js: '"use strict";'},
+        external: ['malevic/forms', 'malevic/dom', 'malevic/state', 'malevic/string'],
 
     });
     await entry.postBuild({debug});

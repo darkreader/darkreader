@@ -312,7 +312,7 @@ export function overrideInlineStyle(element: HTMLElement, theme: FilterConfig, i
         // Temporaty ignore background images
         // due to possible performance issues
         // and complexity of handling async requests
-        if (property === 'background-image' && value.indexOf('url') >= 0) {
+        if (property === 'background-image' && value.includes('url')) {
             return;
         }
         if (overrides.hasOwnProperty(property)) {

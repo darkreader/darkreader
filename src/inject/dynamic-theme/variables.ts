@@ -233,7 +233,7 @@ export class VariablesStore {
                 );
             };
         }
-        if (property === 'background' || property === 'background-image') {
+        if (property === 'background' || property === 'background-image' || property === 'box-shadow') {
             return (theme) => {
                 const unknownVars = new Set<string>();
                 const modify = () => replaceCSSVariablesNames(
@@ -265,7 +265,7 @@ export class VariablesStore {
                 return modified;
             };
         }
-        if (property.startsWith('border')) {
+        if (property.startsWith('border') || property.startsWith('outline')) {
             if (sourceValue.endsWith(')')) {
                 const colorTypeMatch = sourceValue.match(/((rgb|hsl)a?)\(/);
                 if (colorTypeMatch) {
@@ -355,11 +355,11 @@ export class VariablesStore {
                     }
                     this.varRefs.get(property).add(ref);
                 });
-            } else if (property === 'background-color') {
+            } else if (property === 'background-color' || property === 'box-shadow') {
                 this.iterateVarDeps(value, (v) => this.resolveVariableType(v, VAR_TYPE_BGCOLOR));
             } else if (property === 'color') {
                 this.iterateVarDeps(value, (v) => this.resolveVariableType(v, VAR_TYPE_TEXTCOLOR));
-            } else if (property.startsWith('border')) {
+            } else if (property.startsWith('border') || property.startsWith('outline')) {
                 this.iterateVarDeps(value, (v) => this.resolveVariableType(v, VAR_TYPE_BORDERCOLOR));
             } else if (property === 'background' || property === 'background-image') {
                 this.iterateVarDeps(value, (v) => {

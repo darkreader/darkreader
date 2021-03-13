@@ -114,7 +114,10 @@ async function bundleJS(/** @type {JSEntry} */entry, {debug, watch}) {
         },
         minifySyntax: true,
         banner: {js: '"use strict";'},
-        external: ['malevic/forms', 'malevic/dom', 'malevic/state', 'malevic/string'],
+        // To properly configure malevic imports.
+        // We need to set custom paths.
+        // So that ESBuild will pick up the right files.
+        tsconfig: './tasks/custom-tsconfig.json',
 
     });
     await entry.postBuild({debug});

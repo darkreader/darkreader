@@ -1,0 +1,10 @@
+{
+    "extends": "../src/tsconfig.json",
+    "compilerOptions": {
+        "baseUrl": "./../",
+        "paths": {
+            "malevic/*": ["node_modules/malevic/umd/*"],
+            "malevic": ["node_modules/malevic/umd/index"]
+        }
+    }
+}

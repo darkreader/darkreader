@@ -48,7 +48,7 @@ export function getModifiableCSSDeclaration(
             return {property, value: modifier, important, sourceValue};
         }
     } else if (
-        (property.indexOf('color') >= 0 && property !== '-webkit-print-color-adjust') ||
+        (property.includes('color') && property !== '-webkit-print-color-adjust') ||
         property === 'fill' ||
         property === 'stroke' ||
         property === 'stop-color'
@@ -62,7 +62,7 @@ export function getModifiableCSSDeclaration(
         if (modifier) {
             return {property, value: modifier, important, sourceValue};
         }
-    } else if (property.indexOf('shadow') >= 0) {
+    } else if (property.includes('shadow')) {
         const modifier = getShadowModifier(value);
         if (modifier) {
             return {property, value: modifier, important, sourceValue};
@@ -238,10 +238,10 @@ function getColorModifier(prop: string, value: string): string | CSSValueModifie
     }
     try {
         const rgb = parseColorWithCache(value);
-        if (prop.indexOf('background') >= 0) {
+        if (prop.includes('background')) {
             return (filter) => modifyBackgroundColor(rgb, filter);
         }
-        if (prop.indexOf('border') >= 0 || prop.indexOf('outline') >= 0) {
+        if (prop.includes('border') || prop.includes('outline')) {
             return (filter) => modifyBorderColor(rgb, filter);
         }
         return (filter) => modifyForegroundColor(rgb, filter);

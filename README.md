@@ -12,7 +12,7 @@
 ## Questions
 
 Most questions can be answered by reading the [help page](https://darkreader.org/help/).
-If the help page doesn't answer your question, open up a [issue](https://github.com/darkreader/darkreader/issues/new?assignees=&labels=question&template=question.md&title=%5BQuestion%5D+Replace+with+title) and fill out the necessary info. 
+If the help page doesn't answer your question, open up an [issue](https://github.com/darkreader/darkreader/issues/new?assignees=&labels=question&template=question.md&title=%5BQuestion%5D+Replace+with+title) and fill out the necessary info. 
 
 ## How to contribute
 

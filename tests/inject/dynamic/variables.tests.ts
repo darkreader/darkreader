@@ -257,7 +257,6 @@ describe('CSS VARIABLES OVERRIDE', () => {
         expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(140, 255, 140)');
     });
 
-    /*
     it('should use <html> element variables', async () => {
         document.documentElement.setAttribute('style', '--text: red;');
         container.innerHTML = multiline(
@@ -273,7 +272,6 @@ describe('CSS VARIABLES OVERRIDE', () => {
         await timeout(0);
         expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(140, 255, 140)');
     });
-    */
 
     it('should consider variable selector', () => {
         container.innerHTML = multiline(

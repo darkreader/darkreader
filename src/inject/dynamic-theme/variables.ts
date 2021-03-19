@@ -64,9 +64,11 @@ export class VariablesStore {
     matchVariablesAndDependants() {
         this.changedTypeVars.clear();
         this.initialVarTypes = new Map(this.varTypes);
+        this.collectRootVariables();
         this.rulesQueue.forEach((rules) => this.collectVariables(rules));
         this.rulesQueue.forEach((rules) => this.collectVarDependants(rules));
         this.rulesQueue.splice(0);
+        this.collectRootVarDependants();
 
         this.varRefs.forEach((refs, v) => {
             refs.forEach((r) => {
@@ -309,28 +311,40 @@ export class VariablesStore {
 
     private collectVariables(rules: CSSRuleList) {
         iterateVariables(rules, (varName, value) => {
-            this.unstableVarValues.set(varName, value);
+            this.inspectVariable(varName, value);
+        });
+    }
 
-            if (isVarDependant(value) && isConstructedColorVar(value)) {
-                this.unknownColorVars.add(varName);
-                this.definedVars.add(varName);
-            }
-            if (this.definedVars.has(varName)) {
-                return;
-            }
-            this.definedVars.add(varName);
-
-            const color = tryParseColor(value);
-            if (color) {
-                this.unknownColorVars.add(varName);
-            } else if (
-                value.includes('url(') ||
-                value.includes('linear-gradient(') ||
-                value.includes('radial-gradient(')
-            ) {
-                this.resolveVariableType(varName, VAR_TYPE_BGIMG);
+    private collectRootVariables() {
+        iterateCSSDeclarations(document.documentElement.style, (property, value) => {
+            if (isVariable(property)) {
+                this.inspectVariable(property, value);
             }
         });
+    }
+
+    private inspectVariable(varName: string, value: string) {
+        this.unstableVarValues.set(varName, value);
+
+        if (isVarDependant(value) && isConstructedColorVar(value)) {
+            this.unknownColorVars.add(varName);
+            this.definedVars.add(varName);
+        }
+        if (this.definedVars.has(varName)) {
+            return;
+        }
+        this.definedVars.add(varName);
+
+        const color = tryParseColor(value);
+        if (color) {
+            this.unknownColorVars.add(varName);
+        } else if (
+            value.includes('url(') ||
+            value.includes('linear-gradient(') ||
+            value.includes('radial-gradient(')
+        ) {
+            this.resolveVariableType(varName, VAR_TYPE_BGIMG);
+        }
     }
 
     private resolveVariableType(varName: string, typeNum: number) {
@@ -348,40 +362,52 @@ export class VariablesStore {
 
     private collectVarDependants(rules: CSSRuleList) {
         iterateVarDependants(rules, (property, value) => {
-            if (property.startsWith('--')) {
-                this.iterateVarDeps(value, (ref) => {
-                    if (!this.varRefs.has(property)) {
-                        this.varRefs.set(property, new Set());
-                    }
-                    this.varRefs.get(property).add(ref);
-                });
-            } else if (property === 'background-color' || property === 'box-shadow') {
-                this.iterateVarDeps(value, (v) => this.resolveVariableType(v, VAR_TYPE_BGCOLOR));
-            } else if (property === 'color') {
-                this.iterateVarDeps(value, (v) => this.resolveVariableType(v, VAR_TYPE_TEXTCOLOR));
-            } else if (property.startsWith('border') || property.startsWith('outline')) {
-                this.iterateVarDeps(value, (v) => this.resolveVariableType(v, VAR_TYPE_BORDERCOLOR));
-            } else if (property === 'background' || property === 'background-image') {
-                this.iterateVarDeps(value, (v) => {
-                    if (this.isVarType(v, VAR_TYPE_BGCOLOR | VAR_TYPE_BGIMG)) {
-                        return;
-                    }
-                    const isBgColor = this.findVarRef(v, (ref) => {
-                        return (
-                            this.unknownColorVars.has(ref) ||
-                            this.isVarType(ref, VAR_TYPE_TEXTCOLOR | VAR_TYPE_BORDERCOLOR)
-                        );
-                    }) != null;
-                    this.itarateVarRefs(v, (ref) => {
-                        if (isBgColor) {
-                            this.resolveVariableType(ref, VAR_TYPE_BGCOLOR);
-                        } else {
-                            this.unknownBgVars.add(ref);
-                        }
-                    });
-                });
+            this.inspectVerDependant(property, value);
+        });
+    }
+
+    private collectRootVarDependants() {
+        iterateCSSDeclarations(document.documentElement.style, (property, value) => {
+            if (isVarDependant(value)) {
+                this.inspectVerDependant(property, value);
             }
         });
+    }
+
+    private inspectVerDependant(property: string, value: string) {
+        if (isVariable(property)) {
+            this.iterateVarDeps(value, (ref) => {
+                if (!this.varRefs.has(property)) {
+                    this.varRefs.set(property, new Set());
+                }
+                this.varRefs.get(property).add(ref);
+            });
+        } else if (property === 'background-color' || property === 'box-shadow') {
+            this.iterateVarDeps(value, (v) => this.resolveVariableType(v, VAR_TYPE_BGCOLOR));
+        } else if (property === 'color') {
+            this.iterateVarDeps(value, (v) => this.resolveVariableType(v, VAR_TYPE_TEXTCOLOR));
+        } else if (property.startsWith('border') || property.startsWith('outline')) {
+            this.iterateVarDeps(value, (v) => this.resolveVariableType(v, VAR_TYPE_BORDERCOLOR));
+        } else if (property === 'background' || property === 'background-image') {
+            this.iterateVarDeps(value, (v) => {
+                if (this.isVarType(v, VAR_TYPE_BGCOLOR | VAR_TYPE_BGIMG)) {
+                    return;
+                }
+                const isBgColor = this.findVarRef(v, (ref) => {
+                    return (
+                        this.unknownColorVars.has(ref) ||
+                        this.isVarType(ref, VAR_TYPE_TEXTCOLOR | VAR_TYPE_BORDERCOLOR)
+                    );
+                }) != null;
+                this.itarateVarRefs(v, (ref) => {
+                    if (isBgColor) {
+                        this.resolveVariableType(ref, VAR_TYPE_BGCOLOR);
+                    } else {
+                        this.unknownBgVars.add(ref);
+                    }
+                });
+            });
+        }
     }
 
     private iterateVarDeps(
@@ -420,6 +446,35 @@ export class VariablesStore {
             iterator(ref);
             return false;
         });
+    }
+
+    putRootVars(styleElement: HTMLStyleElement, theme: Theme) {
+        const sheet = styleElement.sheet;
+        if (sheet.cssRules.length > 0) {
+            sheet.deleteRule(0);
+        }
+        const declarations = new Map<string, string>();
+        iterateCSSDeclarations(document.documentElement.style, (property, value) => {
+            if (isVariable(property)) {
+                if (this.isVarType(property, VAR_TYPE_BGCOLOR)) {
+                    declarations.set(wrapBgColorVariableName(property), tryModifyBgColor(value, theme));
+                }
+                if (this.isVarType(property, VAR_TYPE_TEXTCOLOR)) {
+                    declarations.set(wrapTextColorVariableName(property), tryModifyTextColor(value, theme));
+                }
+                if (this.isVarType(property, VAR_TYPE_BORDERCOLOR)) {
+                    declarations.set(wrapBorderColorVariableName(property), tryModifyBorderColor(value, theme));
+                }
+            }
+        });
+        const cssLines = [] as string[];
+        cssLines.push(':root {');
+        for (const [property, value] of declarations) {
+            cssLines.push(`    ${property}: ${value};`);
+        }
+        cssLines.push('}');
+        const cssText = cssLines.join('\n');
+        sheet.insertRule(cssText);
     }
 }
 
@@ -563,6 +618,10 @@ function wrapBorderColorVariableName(name: string) {
 
 function wrapBgImgVariableName(name: string) {
     return `--darkreader-bgimg${name}`;
+}
+
+function isVariable(property: string) {
+    return property.startsWith('--');
 }
 
 function isVarDependant(value: string) {

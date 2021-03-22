@@ -24,7 +24,7 @@ function makeRegexp(pattern: string): MatchInterface {
         return regObject;
     }
     pattern = pattern.replace(/[|\\{}()[\]^$+*?.]/g, '\\$&').replace(/-/g, '\\x2d').replace(/\\\*/g, '[\\s\\S]*');
-    const regexp = new RegExp(`^${pattern}(?![A-Za-z0-9])`, 'i');
+    const regexp = new RegExp(`^${pattern}(?![A-Za-z0-9.])`, 'i');
     const regObject: MatchInterface = {
         regexp,
         negated,

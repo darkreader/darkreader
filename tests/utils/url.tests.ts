@@ -326,7 +326,7 @@ test('URL is enabled', () => {
     expect(isURLInList('https://codegolf.stackexchange.com/', ['*.stackexchange.com', '!codegolf.stackexchange.com'])).toBe(false);
     expect(isURLInList('https://codegolf.stackexchange.com/', ['codegolf.*.com', '!codegolf.stackexchange.com'])).toBe(false);
     expect(isURLInList('https://codegolf.stackexchange.com/', ['codegolf.*.com'])).toBe(true);
-    
+
     // Temporary Dark Sites list fix
     expect(isURLEnabled(
         'https://darkreader.org/',

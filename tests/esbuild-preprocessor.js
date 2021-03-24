@@ -35,14 +35,12 @@ function createPreprocessor(config, emitter, logger) {
     } : false;
 
     const base = config.basePath || process.cwd();
-    /** @type esbuild.Service */
-    let service = null;
-
+    
     /**
      * @param {string[]} files
      */
     async function build(files) {
-        const result = await service.build({
+        const result = await esbuild.build({
             entryPoints: files,
             write: false,
             bundle: true,
@@ -66,15 +64,6 @@ function createPreprocessor(config, emitter, logger) {
     return async function preprocess(_, file, done) {
         file.path = transformPath(file.originalPath);
         const originalPath = file.originalPath;
-
-        if (!service) {
-            service = await esbuild.startService();
-            emitter.on('exit', (done) => {
-                stopped = true;
-                service.stop();
-                done();
-            });
-        }
 
         try {
             log.info('Generating code for ./%s', originalPath);

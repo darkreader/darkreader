@@ -15,6 +15,7 @@
     "test": "jest --config=tests/jest.config.js",
     "test:browser": "npm run debug && jest --config=tests/browser/jest.config.js --runInBand",
     "test:chrome": "npm run debug && jest --config=tests/browser/jest.config.chrome.js --runInBand",
+    "test:ci": "jest --config=tests/jest.config.js --runInBand",
     "test:config": "jest --config=tests/config/jest.config.js",
     "test:config:debug": "node --inspect-brk ./node_modules/jest/bin/jest --config=tests/config/jest.config.js --runInBand --no-cache --watch",
     "test:coverage": "jest --config=tests/jest.config.js --coverage",

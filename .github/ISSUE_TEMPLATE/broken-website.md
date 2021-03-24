@@ -46,9 +46,9 @@ Please make sure there is no existing issue with this broken website.
   If you don't know how to get your browser/Dark Reader version please search it up online.
 -->
 
-- OS: <!-- [e.g. Windows, MacOS, Linux] -->
+- OS: <!-- [e.g. Windows, macOS, Linux] -->
 - Browser: <!-- [e.g. Chrome 84, Safari 13] -->
-- Dark Reader Version: <!-- [e.g. 4.9.26] -->
+- Dark Reader Version: <!-- [e.g. 4.9.29] -->
 
 ## Additional context
 <!-- Add any other context about the problem here. -->

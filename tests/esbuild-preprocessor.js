@@ -35,7 +35,7 @@ function createPreprocessor(config, emitter, logger) {
     } : false;
 
     const base = config.basePath || process.cwd();
-    
+
     /**
      * @param {string[]} files
      */

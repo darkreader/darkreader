@@ -3,9 +3,9 @@ const {createTask} = require('./task');
 
 async function typeCheck() {
     await new Promise((resolve, reject) => {
-        execFile(process.execPath, [require.resolve('typescript/lib/tsc.js'), '--project', 'src/tsconfig.json'], (err) => {
-            if (err) {
-                reject(new Error(`tsc has exited with error: ${err.message}`));
+        execFile(process.execPath, [require.resolve('typescript/lib/tsc.js'), '--project', 'src/tsconfig.json'], (_, std) => {
+            if (std) {
+                reject(`tsc has exited with error\n${std}`);
             } else {
                 resolve();
             }

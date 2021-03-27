@@ -53,7 +53,11 @@ function ColorsGroup({theme, change}: ThemeGroupProps) {
     const defaultSchemeColors = isDarkScheme ? DEFAULT_COLORS.darkScheme : DEFAULT_COLORS.lightScheme;
     const defaultMatrixValues: Partial<Theme> = {brightness: DEFAULT_THEME.brightness, contrast: DEFAULT_THEME.contrast, sepia: DEFAULT_THEME.sepia, grayscale: DEFAULT_THEME.grayscale};
     const currentColorScheme = isDarkScheme ? theme.darkColorScheme : theme.lightColorScheme;
-    const colorSchemeValues: string[] = (isDarkScheme ? DARK_COLOR_SCHEME : LIGHT_COLOR_SCHEME).sort((a, b) => a.localeCompare(b)) ;
+    const colorSchemeValues: Array<{id: string; content: string}> = (isDarkScheme ? DARK_COLOR_SCHEME : LIGHT_COLOR_SCHEME)
+        .sort((a, b) => a.localeCompare(b))
+        .map((value) => {
+            return {id: value, content: value};
+        });
 
     function onColorSchemeChange(newColor: string) {
         change({[csProp]: newColor});

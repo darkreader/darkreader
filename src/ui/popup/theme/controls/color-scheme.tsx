@@ -4,17 +4,20 @@ import ThemeControl from './theme-control';
 
 interface ColorSchemeDropDownProps {
     selected: string;
-    values: string[];
+    values: Array<{id: string; content: string}>;
     onChange: (value: string) => void;
 }
 
 export default function ColorSchemeDropDown(props: ColorSchemeDropDownProps) {
+    function onColorSchemeChange(value: string) {
+        props.onChange(value);
+    }
     return (
         <ThemeControl label="Color Scheme">
             <DropDown
                 selected={props.selected}
-                values={props.values}
-                onChange={(v) => props.onChange(v)}
+                options={props.values}
+                onChange={onColorSchemeChange}
             />
         </ThemeControl>
     );

@@ -20,7 +20,7 @@ afterEach(() => {
     container.innerHTML = '';
 });
 
-describe('Inline style override', () => {
+describe('INLINE STYLES', () => {
     it('should override inline style', () => {
         container.innerHTML = '<span style="color: red;">Inline style override</span>';
         createOrUpdateDynamicTheme(theme, null, false);

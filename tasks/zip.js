@@ -21,9 +21,11 @@ async function archiveDirectory({dir, dest}) {
 async function zip({debug}) {
     const dir = getDestDir({debug});
     const firefoxDir = getDestDir({debug, firefox: true});
+    const thunderBirdDir = getDestDir({debug, thunderbird: true});
 
     await archiveDirectory({dir, dest: 'build.zip'});
     await archiveDirectory({dir: firefoxDir, dest: 'build-firefox.xpi'});
+    await archiveDirectory({dir: thunderBirdDir, dest: 'build-thunderbird.xpi'});
 }
 
 module.exports = createTask(

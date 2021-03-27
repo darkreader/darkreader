@@ -51,7 +51,7 @@ export function formatArray(arr: string[]) {
 export function getMatches(regex: RegExp, input: string, group = 0) {
     const matches: string[] = [];
     let m: RegExpMatchArray;
-    while (m = regex.exec(input)) {
+    while ((m = regex.exec(input))) {
         matches.push(m[group]);
     }
     return matches;
@@ -83,8 +83,8 @@ export function formatCSS(text: string) {
         .replace(/\s{2,}/g, ' ') // Replacing multiple spaces to one
         .replace(/\{/g, '{\n') // {
         .replace(/\}/g, '\n}\n') // }
-        .replace(/\;(?![^(\(|\")]*(\)|\"))/g, ';\n') // ; and do not target between () and ""
-        .replace(/\,(?![^(\(|\")]*(\)|\"))/g, ',\n') // , and do not target between () and ""
+        .replace(/\;(?![^\(|\"]*(\)|\"))/g, ';\n') // ; and do not target between () and ""
+        .replace(/\,(?![^\(|\"]*(\)|\"))/g, ',\n') // , and do not target between () and ""
         .replace(/\n\s*\n/g, '\n') // Remove \n Without any characters between it to the next \n
         .split('\n'));
 
@@ -103,4 +103,38 @@ export function formatCSS(text: string) {
     }
 
     return formatted.join('').trim();
+}
+
+export function getParenthesesRange(input: string, searchStartIndex = 0) {
+    const length = input.length;
+    let depth = 0;
+    let firstOpenIndex = -1;
+    for (let i = searchStartIndex; i < length; i++) {
+        if (depth === 0) {
+            const openIndex = input.indexOf('(', i);
+            if (openIndex < 0) {
+                break;
+            }
+            firstOpenIndex = openIndex;
+            depth++;
+            i = openIndex;
+        } else {
+            const closingIndex = input.indexOf(')', i);
+            if (closingIndex < 0) {
+                break;
+            }
+            const openIndex = input.indexOf('(', i);
+            if (openIndex < 0 || closingIndex < openIndex) {
+                depth--;
+                if (depth === 0) {
+                    return {start: firstOpenIndex, end: closingIndex + 1};
+                }
+                i = closingIndex;
+            } else {
+                depth++;
+                i = openIndex;
+            }
+        }
+    }
+    return null;
 }

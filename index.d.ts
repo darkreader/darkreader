@@ -31,6 +31,11 @@ declare namespace DarkReader {
     function setFetchMethod(fetch: (url: string) => Promise<Response>): void;
 
     /**
+     * Returns the generated CSS by Dark Reader as a string.
+     */
+    function exportGeneratedCSS(): Promise<string>;
+
+    /**
      * Theme options.
      */
     interface Theme {
@@ -103,6 +108,11 @@ declare namespace DarkReader {
          * Default auto
          */
         selectionColor: string;
+        /**
+         * Specifies if it has to style system controls/
+         * Default true
+         */
+        styleSystemControls: boolean;
     }
 
     /**

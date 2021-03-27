@@ -1,7 +1,7 @@
 import {m} from 'malevic';
 import {mergeClass} from '../utils';
+import type {Shortcuts} from '../../../definitions';
 import {isFirefox, isEdge} from '../../../utils/platform';
-import {Shortcuts} from '../../../definitions';
 
 interface ShortcutLinkProps {
     class?: string | {[cls: string]: any};
@@ -79,11 +79,11 @@ export default function ShortcutLink(props: ShortcutLinkProps) {
 
     function onClick(e: Event) {
         e.preventDefault();
-        if (isFirefox()) {
+        if (isFirefox) {
             startEnteringShortcut(e.target as HTMLAnchorElement);
             return;
         }
-        if (isEdge()) {
+        if (isEdge) {
             chrome.tabs.create({
                 url: `edge://extensions/shortcuts`,
                 active: true

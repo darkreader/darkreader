@@ -4,8 +4,8 @@ import {parseSitesFixesConfig} from './utils/parse';
 import {parseArray, formatArray} from '../utils/text';
 import {compareURLPatterns, isURLInList} from '../utils/url';
 import {createTextStyle} from './text-style';
-import {FilterConfig, InversionFix} from '../definitions';
-import {compareChromeVersions, getChromeVersion, isChromiumBased} from '../utils/platform';
+import type {FilterConfig, InversionFix} from '../definitions';
+import {compareChromeVersions, chromiumVersion, isChromium} from '../utils/platform';
 
 export enum FilterMode {
     light = 0,
@@ -20,10 +20,9 @@ export enum FilterMode {
  * Patch: https://chromium-review.googlesource.com/c/chromium/src/+/1979258
  */
 export function hasChromiumIssue501582() {
-    const chromeVersion = getChromeVersion();
     return Boolean(
-        isChromiumBased() &&
-        compareChromeVersions(chromeVersion, '81.0.4035.0') >= 0
+        isChromium &&
+        compareChromeVersions(chromiumVersion, '81.0.4035.0') >= 0
     );
 }
 
@@ -237,7 +236,7 @@ export function formatInversionFixes(inversionFixes: InversionFix[]) {
         getPropCommandName: (prop) => Object.entries(inversionFixesCommands).find(([, p]) => p === prop)[0],
         formatPropValue: (prop, value) => {
             if (prop === 'css') {
-                return value.trim();
+                return (value as string).trim().replace(/\n+/g, '\n');
             }
             return formatArray(value).trim();
         },

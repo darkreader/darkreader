@@ -1,8 +1,8 @@
 import {m} from 'malevic';
-import {isFirefox} from '../../../utils/platform';
-import {ViewProps} from '../types';
+import type {ViewProps} from '../types';
 import SiteList from './site-list';
 import CheckButton from '../check-button';
+import {isFirefox} from '../../../utils/platform';
 
 export default function SiteListPage(props: ViewProps) {
     function onSiteListChange(sites: string[]) {
@@ -26,7 +26,7 @@ export default function SiteListPage(props: ViewProps) {
                 onChange={onSiteListChange}
             />
             <label class="site-list-page__description">Enter website name and press Enter</label>
-            {isFirefox() ? null : <CheckButton
+            {isFirefox ? null : <CheckButton
                 checked={props.data.settings.enableForPDF}
                 label="Enable for PDF files"
                 description={props.data.settings.enableForPDF ?

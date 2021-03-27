@@ -2,25 +2,22 @@ module.exports = {
     verbose: true,
     testEnvironment: 'node',
     transform: {
-        '^.+\\.ts(x?)$': 'ts-jest'
+        '^.+\\.ts$': 'ts-jest'
     },
-    testRegex: 'tests/config/.*\\.tests\\.ts(x?)$',
+    testRegex: 'tests/config/.*\\.tests\\.ts$',
     moduleFileExtensions: [
         'ts',
-        'tsx',
         'js'
     ],
+    rootDir: '../../',
     collectCoverage: false,
-    coverageDirectory: 'coverage',
+    coverageDirectory: 'tests/coverage',
     collectCoverageFrom: [
-        'src/**/*.{ts,tsx}'
-    ],
-    coveragePathIgnorePatterns: [
-        '^.+\\.d\\.ts$'
+        '<rootDir>/src/**/*.ts',
     ],
     globals: {
         'ts-jest': {
-            tsConfig: './tests/config/tsconfig.json'
+            tsconfig: './tests/config/tsconfig.json'
         }
     }
 };

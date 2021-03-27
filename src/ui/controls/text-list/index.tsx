@@ -19,7 +19,7 @@ export default function TextList(props: TextListProps) {
         const index = context.store.indices.get(e.target);
         const values = props.values.slice();
         const value = e.target.value.trim();
-        if (values.indexOf(value) >= 0) {
+        if (values.includes(value)) {
             return;
         }
 

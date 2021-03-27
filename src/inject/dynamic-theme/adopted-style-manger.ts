@@ -1,12 +1,11 @@
-import {Theme} from '../../definitions';
+import type {Theme} from '../../definitions';
 import {createStyleSheetModifier} from './stylesheet-modifier';
-import {getCSSVariables} from './css-rules';
 
 const adoptedStyleOverrides = new WeakMap<CSSStyleSheet, CSSStyleSheet>();
 const overrideList = new WeakSet<CSSStyleSheet>();
 
 export interface AdoptedStyleSheetManager {
-    render(theme: Theme, variables: Map<string, string>, ignoreImageAnalysis: string[]): void;
+    render(theme: Theme, ignoreImageAnalysis: string[]): void;
     destroy(): void;
 }
 
@@ -44,7 +43,7 @@ export function createAdoptedStyleSheetOverride(node: Document | ShadowRoot): Ad
         node.adoptedStyleSheets = newSheets;
     }
 
-    function render(theme: Theme, globalVariables: Map<string, string>, ignoreImageAnalysis: string[]) {
+    function render(theme: Theme, ignoreImageAnalysis: string[]) {
         node.adoptedStyleSheets.forEach((sheet) => {
             if (overrideList.has(sheet)) {
                 return;
@@ -62,16 +61,11 @@ export function createAdoptedStyleSheetOverride(node: Document | ShadowRoot): Ad
                 return override;
             }
 
-            // TODO: Make each adoptedStyleSheet variable good for the respective `shadow-root scope`.
-            const variables: Map<string, string> = globalVariables;
-            getCSSVariables(sheet.cssRules).forEach((value, key) => variables.set(key, value));
-
             const sheetModifier = createStyleSheetModifier();
             sheetModifier.modifySheet({
                 prepareSheet: prepareOverridesSheet,
                 sourceCSSRules: rules,
                 theme,
-                variables,
                 ignoreImageAnalysis,
                 force: false,
                 isAsyncCancelled: () => cancelAsyncOperations,

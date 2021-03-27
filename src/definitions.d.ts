@@ -1,4 +1,4 @@
-import {FilterMode} from './generators/css-filter';
+import type {FilterMode} from './generators/css-filter';
 
 export interface ExtensionData {
     isEnabled: boolean;

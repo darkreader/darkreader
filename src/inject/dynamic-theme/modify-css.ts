@@ -1,18 +1,22 @@
-import {parse, RGBA, rgbToHSL, hslToString} from '../../utils/color';
+import type {RGBA} from '../../utils/color';
+import {parse, rgbToHSL, hslToString} from '../../utils/color';
 import {clamp} from '../../utils/math';
 import {getMatches} from '../../utils/text';
+import {getAbsoluteURL} from '../../utils/url';
 import {modifyBackgroundColor, modifyBorderColor, modifyForegroundColor, modifyGradientColor, modifyShadowColor, clearColorModificationCache} from '../../generators/modify-colors';
 import {cssURLRegex, getCSSURLValue, getCSSBaseBath} from './css-rules';
-import {getImageDetails, getFilteredImageDataURL, ImageDetails, cleanImageProcessingCache} from './image';
-import {getAbsoluteURL} from './url';
+import type {ImageDetails} from './image';
+import {getImageDetails, getFilteredImageDataURL, cleanImageProcessingCache} from './image';
+import type {CSSVariableModifier, VariablesStore} from './variables';
 import {logWarn, logInfo} from '../utils/log';
-import {FilterConfig, Theme} from '../../definitions';
+import type {FilterConfig, Theme} from '../../definitions';
+import {isFirefox} from '../../utils/platform';
 
-type CSSValueModifier = (filter: FilterConfig) => string | Promise<string>;
+export type CSSValueModifier = (theme: Theme) => string | Promise<string>;
 
 export interface ModifiableCSSDeclaration {
     property: string;
-    value: string | CSSValueModifier;
+    value: string | CSSValueModifier | CSSVariableModifier;
     important: boolean;
     sourceValue: string;
 }
@@ -23,15 +27,31 @@ export interface ModifiableCSSRule {
     declarations: ModifiableCSSDeclaration[];
 }
 
-export function getModifiableCSSDeclaration(property: string, value: string, rule: CSSStyleRule, ignoreImageSelectors: string[], isCancelled: () => boolean): ModifiableCSSDeclaration {
+export function getModifiableCSSDeclaration(
+    property: string,
+    value: string,
+    rule: CSSStyleRule,
+    variablesStore: VariablesStore,
+    ignoreImageSelectors: string[],
+    isCancelled: () => boolean,
+): ModifiableCSSDeclaration {
     const important = Boolean(rule && rule.style && rule.style.getPropertyPriority(property));
     const sourceValue = value;
     if (property.startsWith('--')) {
-        return null;
+        const modifier = getVariableModifier(variablesStore, property, value, rule, ignoreImageSelectors, isCancelled);
+        if (modifier) {
+            return {property, value: modifier, important, sourceValue};
+        }
+    } else if (value.includes('var(')) {
+        const modifier = getVariableDependantModifier(variablesStore, property, value);
+        if (modifier) {
+            return {property, value: modifier, important, sourceValue};
+        }
     } else if (
-        (property.indexOf('color') >= 0 && property !== '-webkit-print-color-adjust') ||
+        (property.includes('color') && property !== '-webkit-print-color-adjust') ||
         property === 'fill' ||
-        property === 'stroke'
+        property === 'stroke' ||
+        property === 'stop-color'
     ) {
         const modifier = getColorModifier(property, value);
         if (modifier) {
@@ -42,8 +62,8 @@ export function getModifiableCSSDeclaration(property: string, value: string, rul
         if (modifier) {
             return {property, value: modifier, important, sourceValue};
         }
-    } else if (property.indexOf('shadow') >= 0) {
-        const modifier = getShadowModifier(property, value);
+    } else if (property.includes('shadow')) {
+        const modifier = getShadowModifier(value);
         if (modifier) {
             return {property, value: modifier, important, sourceValue};
         }
@@ -165,9 +185,11 @@ function getModifiedScrollbarStyle(theme: Theme) {
     lines.push('::-webkit-scrollbar-corner {');
     lines.push(`    background-color: ${colorCorner};`);
     lines.push('}');
-    lines.push('* {');
-    lines.push(`    scrollbar-color: ${colorTrack} ${colorThumb};`);
-    lines.push('}');
+    if (isFirefox) {
+        lines.push('* {');
+        lines.push(`    scrollbar-color: ${colorThumb} ${colorTrack};`);
+        lines.push('}');
+    }
     return lines.join('\n');
 }
 
@@ -202,7 +224,7 @@ export function parseColorWithCache($color: string) {
     return color;
 }
 
-function tryParseColor($color: string) {
+export function tryParseColor($color: string) {
     try {
         return parseColorWithCache($color);
     } catch (err) {
@@ -216,10 +238,10 @@ function getColorModifier(prop: string, value: string): string | CSSValueModifie
     }
     try {
         const rgb = parseColorWithCache(value);
-        if (prop.indexOf('background') >= 0) {
+        if (prop.includes('background')) {
             return (filter) => modifyBackgroundColor(rgb, filter);
         }
-        if (prop.indexOf('border') >= 0 || prop.indexOf('outline') >= 0) {
+        if (prop.includes('border') || prop.includes('outline')) {
             return (filter) => modifyBorderColor(rgb, filter);
         }
         return (filter) => modifyForegroundColor(rgb, filter);
@@ -230,18 +252,18 @@ function getColorModifier(prop: string, value: string): string | CSSValueModifie
     }
 }
 
-const gradientRegex = /[\-a-z]+gradient\(([^\(\)]*(\(([^\(\)]*(\(.*?\)))*[^\(\)]*\))){0,15}[^\(\)]*\)/g;
+export const gradientRegex = /[\-a-z]+gradient\(([^\(\)]*(\(([^\(\)]*(\(.*?\)))*[^\(\)]*\))){0,15}[^\(\)]*\)/g;
 const imageDetailsCache = new Map<string, ImageDetails>();
-const awaitingForImageLoading = new Map<string, ((imageDetails: ImageDetails) => void)[]>();
+const awaitingForImageLoading = new Map<string, Array<(imageDetails: ImageDetails) => void>>();
 
-function shouldIgnoreImage(rule: CSSStyleRule, selectors: string[]) {
-    if (!rule || selectors.length === 0) {
+function shouldIgnoreImage(selectorText: string, selectors: string[]) {
+    if (!selectorText || selectors.length === 0) {
         return false;
     }
     if (selectors.some((s) => s === '*')) {
         return true;
     }
-    const ruleSelectors = rule.selectorText.split(/,\s*/g);
+    const ruleSelectors = selectorText.split(/,\s*/g);
     for (let i = 0; i < selectors.length; i++) {
         const ignoredSelector = selectors[i];
         if (ruleSelectors.some((s) => s === ignoredSelector)) {
@@ -251,7 +273,12 @@ function shouldIgnoreImage(rule: CSSStyleRule, selectors: string[]) {
     return false;
 }
 
-function getBgImageModifier(value: string, rule: CSSStyleRule, ignoreImageSelectors: string[], isCancelled: () => boolean): string | CSSValueModifier {
+export function getBgImageModifier(
+    value: string,
+    rule: CSSStyleRule,
+    ignoreImageSelectors: string[],
+    isCancelled: () => boolean,
+): string | CSSValueModifier {
     try {
         const gradients = getMatches(gradientRegex, value);
         const urls = getMatches(cssURLRegex, value);
@@ -311,15 +338,15 @@ function getBgImageModifier(value: string, rule: CSSStyleRule, ignoreImageSelect
         };
 
         const getURLModifier = (urlValue: string) => {
-            let url = getCSSURLValue(urlValue);
-            if (rule.parentStyleSheet.href) {
-                const basePath = getCSSBaseBath(rule.parentStyleSheet.href);
-                url = getAbsoluteURL(basePath, url);
-            } else if (rule.parentStyleSheet.ownerNode && rule.parentStyleSheet.ownerNode.baseURI) {
-                url = getAbsoluteURL(rule.parentStyleSheet.ownerNode.baseURI, url);
-            } else {
-                url = getAbsoluteURL(location.origin, url);
+            if (shouldIgnoreImage(rule.selectorText, ignoreImageSelectors)) {
+                return null;
             }
+            let url = getCSSURLValue(urlValue);
+            const {parentStyleSheet} = rule;
+            const baseURL = parentStyleSheet.href ?
+                getCSSBaseBath(parentStyleSheet.href) :
+                parentStyleSheet.ownerNode?.baseURI || location.origin;
+            url = getAbsoluteURL(baseURL, url);
 
             const absoluteValue = `url("${url}")`;
 
@@ -329,9 +356,6 @@ function getBgImageModifier(value: string, rule: CSSStyleRule, ignoreImageSelect
                     imageDetails = imageDetailsCache.get(url);
                 } else {
                     try {
-                        if (shouldIgnoreImage(rule, ignoreImageSelectors)) {
-                            return null;
-                        }
                         if (awaitingForImageLoading.has(url)) {
                             const awaiters = awaitingForImageLoading.get(url);
                             imageDetails = await new Promise<ImageDetails>((resolve) => awaiters.push(resolve));
@@ -402,7 +426,7 @@ function getBgImageModifier(value: string, rule: CSSStyleRule, ignoreImageSelect
         });
 
         return (filter: FilterConfig) => {
-            const results = modifiers.map((modify) => modify(filter));
+            const results = modifiers.filter(Boolean).map((modify) => modify(filter));
             if (results.some((r) => r instanceof Promise)) {
                 return Promise.all(results)
                     .then((asyncResults) => {
@@ -418,7 +442,7 @@ function getBgImageModifier(value: string, rule: CSSStyleRule, ignoreImageSelect
     }
 }
 
-function getShadowModifier(prop: string, value: string): CSSValueModifier {
+function getShadowModifier(value: string): CSSValueModifier {
     try {
         let index = 0;
         const colorMatches = getMatches(/(^|\s)([a-z]+\(.+?\)|#[0-9a-f]+|[a-z]+)(.*?(inset|outset)?($|,))/ig, value, 2);
@@ -440,6 +464,31 @@ function getShadowModifier(prop: string, value: string): CSSValueModifier {
         logWarn(`Unable to parse shadow ${value}`, err);
         return null;
     }
+}
+
+function getVariableModifier(
+    variablesStore: VariablesStore,
+    prop: string,
+    value: string,
+    rule: CSSStyleRule,
+    ignoredImgSelectors: string[],
+    isCancelled: () => boolean,
+): CSSVariableModifier {
+    return variablesStore.getModifierForVariable({
+        varName: prop,
+        sourceValue: value,
+        rule,
+        ignoredImgSelectors,
+        isCancelled,
+    });
+}
+
+function getVariableDependantModifier(
+    variablesStore: VariablesStore,
+    prop: string,
+    value: string,
+) {
+    return variablesStore.getModifierForVarDependant(prop, value);
 }
 
 export function cleanModificationCache() {

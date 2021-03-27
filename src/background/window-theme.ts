@@ -1,6 +1,7 @@
-import {parse, RGBA} from '../utils/color';
+import type {RGBA} from '../utils/color';
+import {parse} from '../utils/color';
 import {modifyBackgroundColor, modifyForegroundColor, modifyBorderColor} from '../generators/modify-colors';
-import {FilterConfig} from '../definitions';
+import type {FilterConfig} from '../definitions';
 
 declare const browser: {
     theme: {

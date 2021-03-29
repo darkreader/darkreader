@@ -91,9 +91,12 @@ export function getModifiedUserAgentStyle(theme: Theme, isIFrame: boolean, style
         linkColor = modifyForegroundColor({r: 0, g: 64, b: 255}, theme);
     } else {
         const hsl = rgbToHSL(parse(theme.linkColor));
-        const lighten = (lighter: number) => ({...hsl, l: clamp(hsl.l + lighter, 0, 1)});
         linkColor = hslToString(hsl);
-        visitedLinkColor = hslToString(lighten(0.2));
+        const h: number = (hsl.h > 315 ? hsl.h - 360 : hsl.h) + 45;
+        visitedLinkColor = hslToString({
+            l: clamp(hsl.l + 0.2, 0, 1),
+            s: clamp(hsl.s - 0.3, 0, 1),
+            h});
     }
     if (linkColor) {
         lines.push('a {');

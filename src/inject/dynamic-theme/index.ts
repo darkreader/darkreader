@@ -406,7 +406,8 @@ export function createOrUpdateDynamicTheme(filterConfig: FilterConfig, dynamicTh
         if (isAnotherDarkReaderInstanceActive()) {
             return;
         }
-        document.documentElement.setAttribute(`data-darkreader`, `${filter.engine}-${filter.mode ? 'dark' : 'light'}`);
+        document.documentElement.setAttribute('data-darkreader-mode', filter.engine);
+        document.documentElement.setAttribute('data-darkreader-scheme', filter.mode ? 'dark' : 'dimmed');
         createThemeAndWatchForUpdates();
     } else {
         if (!isFirefox) {
@@ -435,7 +436,8 @@ function removeProxy() {
 }
 
 export function removeDynamicTheme() {
-    document.documentElement.removeAttribute(`data-darkreader`);
+    document.documentElement.removeAttribute(`data-darkreader-mode`);
+    document.documentElement.removeAttribute(`data-darkreader-scheme`);
     cleanDynamicThemeCache();
     removeNode(document.querySelector('.darkreader--fallback'));
     if (document.head) {

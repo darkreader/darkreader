@@ -22,7 +22,7 @@ describe('FIXES', () => {
         createOrUpdateDynamicTheme(DEFAULT_THEME, null, false);
         expect(document.documentElement.getAttribute(`data-darkreader-mode`)).toBe(DEFAULT_THEME.engine);
         expect(document.documentElement.getAttribute('data-darkreader-scheme')).toBe('dark');
-        
+
         createOrUpdateDynamicTheme({...DEFAULT_THEME, mode: FilterMode.light}, null, false);
         expect(document.documentElement.getAttribute('data-darkreader-scheme')).toBe('dimmed');
     });

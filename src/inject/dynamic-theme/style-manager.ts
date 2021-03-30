@@ -94,6 +94,7 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
     let syncStylePositionWatcher: ReturnType<typeof watchForNodePosition> = null;
 
     let cancelAsyncOperations = false;
+    let isOverrideEmpty = true;
 
     const sheetModifier = createStyleSheetModifier();
 
@@ -297,6 +298,7 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
         }
 
         buildOverrides();
+        isOverrideEmpty = !(syncStyle && syncStyle.sheet && syncStyle.sheet.cssRules.length > 0);
     }
 
     function getRulesOrError(): [CSSRuleList, Error] {
@@ -444,11 +446,10 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
         }
 
         logWarn('Restore style', syncStyle, element);
-        const shouldForceRender = syncStyle.sheet == null || syncStyle.sheet.cssRules.length > 0;
         insertStyle();
         corsCopyPositionWatcher && corsCopyPositionWatcher.skip();
         syncStylePositionWatcher && syncStylePositionWatcher.skip();
-        if (shouldForceRender) {
+        if (!isOverrideEmpty) {
             forceRenderStyle = true;
             update();
         }

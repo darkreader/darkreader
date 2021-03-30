@@ -87,7 +87,7 @@ export function getModifiedUserAgentStyle(theme: Theme, isIFrame: boolean, style
     lines.push('}');
     let linkColor: string;
     let visitedLinkColor: string;
-    const isLinkColorAuto = theme.linkColor === 'auto'
+    const isLinkColorAuto = theme.linkColor === 'auto';
     if (isLinkColorAuto) {
         linkColor = modifyForegroundColor({r: 0, g: 64, b: 255}, theme);
     } else {

@@ -100,12 +100,12 @@ export function getModifiedUserAgentStyle(theme: Theme, isIFrame: boolean, style
     }
     if (linkColor) {
         lines.push('a {');
-        lines.push(`    color: ${linkColor};`);
+        lines.push(`    color: ${linkColor} !important;`);
         lines.push('}');
     }
     if (visitedLinkColor) {
         lines.push('a:visited {');
-        lines.push(`    color: ${visitedLinkColor};`);
+        lines.push(`    color: ${visitedLinkColor} !important;`);
         lines.push('}');
     }
     lines.push('table {');

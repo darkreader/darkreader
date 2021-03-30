@@ -19,7 +19,6 @@ export default function LinkColorEditor(props: LinkColorEditorProps) {
                 onChange={props.onChange}
                 onReset={props.onReset}
                 hasAutoOption
-                hasDefaultOption
             />
         </ThemeControl>
     );

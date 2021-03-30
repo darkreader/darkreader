@@ -406,7 +406,7 @@ export function createOrUpdateDynamicTheme(filterConfig: FilterConfig, dynamicTh
         if (isAnotherDarkReaderInstanceActive()) {
             return;
         }
-        document.documentElement.setAttribute('data-darkreader-mode', filter.engine);
+        document.documentElement.setAttribute('data-darkreader-mode', 'dynamic');
         document.documentElement.setAttribute('data-darkreader-scheme', filter.mode ? 'dark' : 'dimmed');
         createThemeAndWatchForUpdates();
     } else {

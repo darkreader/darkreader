@@ -11,7 +11,7 @@ function onMessage({type, data}) {
         case 'add-static-theme': {
             const css = data;
             removeDynamicTheme();
-            createOrUpdateStyle(css, 'static');
+            createOrUpdateStyle(css, type === 'add-static-theme' ? 'static' : 'filter');
             break;
         }
         case 'add-svg-filter': {

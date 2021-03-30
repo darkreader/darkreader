@@ -6,16 +6,10 @@ import {logWarn} from '../utils/log';
 export function iterateCSSRules(rules: CSSRuleList, iterate: (rule: CSSStyleRule) => void) {
     forEach(rules, (rule) => {
         if (rule instanceof CSSMediaRule) {
-            const media: string[] = [];
-            Array.from(rule.media).forEach((mediaRule) => {
-                if (mediaRule.includes(' and ')) {
-                    mediaRule.split(' and ').forEach((splittedRule) => media.push(splittedRule));
-                } else {
-                    return media.push(mediaRule);
-                }
-            });
-            const isScreenOrAll = media.some((m) => m.startsWith('screen') || m.startsWith('all'));
-            const isPrintOrSpeech = media.some((m) => m.startsWith('print') || m.startsWith('speech'));
+            const media = Array.from(rule.media);
+            const isScreenOrAll = media.some((m) => m.includes('screen') || m.includes('all'));
+            const isPrintOrSpeech = media.some((m) => m.includes('print') || m.includes('speech'));
+
             if (isScreenOrAll || !isPrintOrSpeech) {
                 iterateCSSRules(rule.cssRules, iterate);
             }

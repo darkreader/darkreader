@@ -7,8 +7,8 @@ export function iterateCSSRules(rules: CSSRuleList, iterate: (rule: CSSStyleRule
     forEach(rules, (rule) => {
         if (rule instanceof CSSMediaRule) {
             const media = Array.from(rule.media);
-            const isScreenOrAll = media.some((m) => m.includes('screen') || m.includes('all'));
-            const isPrintOrSpeech = media.some((m) => m.includes('print') || m.includes('speech'));
+            const isScreenOrAll = media.some((m) => m.startsWith('screen') || m.startsWith('all'));
+            const isPrintOrSpeech = media.some((m) => m.startsWith('print') || m.startsWith('speech'));
 
             if (isScreenOrAll || !isPrintOrSpeech) {
                 iterateCSSRules(rule.cssRules, iterate);

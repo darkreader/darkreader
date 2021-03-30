@@ -295,10 +295,10 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
                 force,
                 isAsyncCancelled: () => cancelAsyncOperations,
             });
+            isOverrideEmpty = syncStyle.sheet.cssRules.length === 0;
         }
 
         buildOverrides();
-        isOverrideEmpty = !(syncStyle && syncStyle.sheet && syncStyle.sheet.cssRules.length > 0);
     }
 
     function getRulesOrError(): [CSSRuleList, Error] {

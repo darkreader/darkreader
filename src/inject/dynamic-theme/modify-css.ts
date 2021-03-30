@@ -87,25 +87,26 @@ export function getModifiedUserAgentStyle(theme: Theme, isIFrame: boolean, style
     lines.push('}');
     let linkColor: string;
     let visitedLinkColor: string;
-    if (theme.linkColor === 'auto') {
+    const isLinkColorAuto = theme.linkColor === 'auto'
+    if (isLinkColorAuto) {
         linkColor = modifyForegroundColor({r: 0, g: 64, b: 255}, theme);
     } else {
         const hsl = rgbToHSL(parse(theme.linkColor));
         linkColor = hslToString(hsl);
         const h: number = (hsl.h > 315 ? hsl.h - 360 : hsl.h) + 45;
         visitedLinkColor = hslToString({
-            l: clamp(hsl.l + 0.2, 0, 1),
+            l: hsl.l,
             s: clamp(hsl.s - 0.3, 0, 1),
             h});
     }
     if (linkColor) {
         lines.push('a {');
-        lines.push(`    color: ${linkColor} !important;`);
+        lines.push(`    color: ${linkColor} ${isLinkColorAuto ? '' : '!important;'}`);
         lines.push('}');
     }
     if (visitedLinkColor) {
         lines.push('a:visited {');
-        lines.push(`    color: ${visitedLinkColor} !important;`);
+        lines.push(`    color: ${visitedLinkColor} ${isLinkColorAuto ? '' : '!important;'}`);
         lines.push('}');
     }
     lines.push('table {');

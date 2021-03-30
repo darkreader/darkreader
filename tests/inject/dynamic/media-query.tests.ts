@@ -127,9 +127,8 @@ describe('MEDIA QUERIES', () => {
             '    h1 { background: gray; }',
             '    h1 strong { color: red; }',
             '</style>',
-            '<h1>Some test foor...... <strong>Oh uhm removing styles :(</strong>!</h1>',
+            '<h1>Some test foor...... <strong>Oh uh media query :D</strong>!</h1>',
         );
-        debugger;
         createOrUpdateDynamicTheme(theme, null, false);
         expect(getComputedStyle(document.querySelector('h1')).backgroundColor).toBe('rgb(102, 102, 102)');
         expect(getComputedStyle(document.querySelector('h1 strong')).color).toBe('rgb(255, 26, 26)');

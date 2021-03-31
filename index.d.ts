@@ -114,6 +114,11 @@ declare namespace DarkReader {
          */
         linkColor: string;
         /**
+         * Links color
+         * Default none
+         */
+        visitedLinkColor: string;
+        /**
          * Specifies if it has to style system controls/
          * Default true
          */

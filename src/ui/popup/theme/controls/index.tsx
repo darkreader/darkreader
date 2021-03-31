@@ -14,6 +14,7 @@ import StyleSystemControls from './style-system-controls';
 import TextColor from './text-color';
 import TextStroke from './text-stroke';
 import UseFont from './use-font';
+import VisitedLinkColorEditor from './visited-link';
 
 export {
     BackgroundColor,
@@ -32,4 +33,5 @@ export {
     TextColor,
     TextStroke,
     UseFont,
+    VisitedLinkColorEditor,
 };

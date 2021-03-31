@@ -31,6 +31,7 @@ export const DEFAULT_THEME: Theme = {
     scrollbarColor: isMacOS ? '' : 'auto',
     selectionColor: 'auto',
     linkColor: 'auto',
+    visitedLinkColor: '',
     styleSystemControls: true,
 };
 

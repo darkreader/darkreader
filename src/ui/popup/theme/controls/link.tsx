@@ -2,7 +2,7 @@ import {m} from 'malevic';
 import ThemeControl from './theme-control';
 import {ColorDropDown} from '../../../controls';
 
-type LinkColorEditorValue = '' | 'auto' | string;
+type LinkColorEditorValue = 'auto' | string;
 
 interface LinkColorEditorProps {
     value: LinkColorEditorValue;

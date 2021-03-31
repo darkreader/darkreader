@@ -230,27 +230,4 @@ describe('STYLE ELEMENTS', () => {
         expect(getComputedStyle(container.querySelector('h1')).backgroundColor).toBe('rgb(102, 102, 102)');
         expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(140, 255, 140)');
     });
-
-    // What is this test for?
-    it('should not return dark reader styles', async () => {
-        container.innerHTML = multiline(
-            '<h1>Some test foor...... <strong>Oh uhm what?</strong>!</h1>',
-        );
-        createOrUpdateDynamicTheme(theme, null, false);
-        expect(document.styleSheets.length).toBe(0);
-    });
-
-    // What is this test for?
-    it('should return normal styles', async () => {
-        container.innerHTML = multiline(
-            '<style>',
-            '   h1 {',
-            '       color: green;',
-            '   }',
-            '</style>',
-            '<h1>Some test foor...... <strong>Oh uhm what?</strong>!</h1>',
-        );
-        createOrUpdateDynamicTheme(theme, null, false);
-        expect(document.styleSheets.length).toBe(1);
-    });
 });

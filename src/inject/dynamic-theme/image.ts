@@ -1,6 +1,5 @@
 import {getSVGFilterMatrixValue} from '../../generators/svg-filter';
 import {bgFetch} from './network';
-import {getURLHostOrProtocol} from '../../utils/url';
 import {loadAsDataURL} from '../../utils/network';
 import type {FilterConfig} from '../../definitions';
 import {logWarn} from '../utils/log';

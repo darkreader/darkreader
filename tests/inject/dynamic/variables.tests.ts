@@ -140,7 +140,26 @@ describe('CSS VARIABLES OVERRIDE', () => {
             '        --red: red;',
             '        --bg: var(--red);',
             '    }',
-            '    h1 { background: var(--bg); }',
+            '    h1 {',
+            '        background: var(--bg);',
+            '    }',
+            '</style>',
+            '<h1>CSS <strong>variables</strong></h1>',
+        );
+        createOrUpdateDynamicTheme(theme, null, false);
+        expect(getComputedStyle(container.querySelector('h1')).backgroundColor).toBe('rgb(204, 0, 0)');
+    });
+
+    it('should handle background with deep color refs (backwards)', () => {
+        container.innerHTML = multiline(
+            '<style>',
+            '    h1 {',
+            '        background: var(--bg);',
+            '    }',
+            '    :root {',
+            '        --red: red;',
+            '        --bg: var(--red);',
+            '    }',
             '</style>',
             '<h1>CSS <strong>variables</strong></h1>',
         );

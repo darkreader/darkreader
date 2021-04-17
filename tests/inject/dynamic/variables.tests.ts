@@ -133,6 +133,40 @@ describe('CSS VARIABLES OVERRIDE', () => {
         expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(255, 26, 26)');
     });
 
+    it('should handle shorthand background with deep color refs', () => {
+        container.innerHTML = multiline(
+            '<style>',
+            '    :root {',
+            '        --red: red;',
+            '        --bg: var(--red);',
+            '    }',
+            '    h1 {',
+            '        background: var(--bg);',
+            '    }',
+            '</style>',
+            '<h1>CSS <strong>variables</strong></h1>',
+        );
+        createOrUpdateDynamicTheme(theme, null, false);
+        expect(getComputedStyle(container.querySelector('h1')).backgroundColor).toBe('rgb(204, 0, 0)');
+    });
+
+    it('should handle background with deep color refs (backwards)', () => {
+        container.innerHTML = multiline(
+            '<style>',
+            '    h1 {',
+            '        background: var(--bg);',
+            '    }',
+            '    :root {',
+            '        --red: red;',
+            '        --bg: var(--red);',
+            '    }',
+            '</style>',
+            '<h1>CSS <strong>variables</strong></h1>',
+        );
+        createOrUpdateDynamicTheme(theme, null, false);
+        expect(getComputedStyle(container.querySelector('h1')).backgroundColor).toBe('rgb(204, 0, 0)');
+    });
+
     it('should handle variables having multiple types', () => {
         container.innerHTML = multiline(
             '<style>',
@@ -242,7 +276,6 @@ describe('CSS VARIABLES OVERRIDE', () => {
         expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(140, 255, 140)');
     });
 
-    /*
     it('should use <html> element variables', async () => {
         document.documentElement.setAttribute('style', '--text: red;');
         container.innerHTML = multiline(
@@ -258,7 +291,6 @@ describe('CSS VARIABLES OVERRIDE', () => {
         await timeout(0);
         expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(140, 255, 140)');
     });
-    */
 
     it('should consider variable selector', () => {
         container.innerHTML = multiline(

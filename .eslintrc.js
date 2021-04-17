@@ -15,6 +15,7 @@ module.exports = {
         'jsx-quotes': ['error', 'prefer-double'],
         'keyword-spacing': 'off',
         'object-curly-spacing': ['error', 'never'],
+        'no-debugger': 'error',
         'no-cond-assign': 'error',
         'no-multi-spaces': 'error',
         'no-redeclare': 'off',

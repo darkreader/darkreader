@@ -36,8 +36,8 @@ jobs:
       - name: Install npm dependencies
         run: npm ci
 
-      - name: Run test agains code
-        run: npm run test
+      - name: Run test against code
+        run: npm run test:ci
 
       - name: Lint code for code-style errors
         run: npm run lint

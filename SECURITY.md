@@ -10,8 +10,8 @@ Latest version is supported.
 
 | Version   | Supported          |
 | --------- | ------------------ |
-| 4.9.16    | :white_check_mark: |
-| < 4.9.16  | :x:                |
+| 4.9.29    | :white_check_mark: |
+| < 4.9.29  | :x:                |
 
 ## Reporting a Vulnerability
 

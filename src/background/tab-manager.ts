@@ -78,6 +78,15 @@ export default class TabManager {
 
         const fileLoader = createFileLoader();
 
+        const onWebRequestError = (responseDetails: chrome.webRequest.WebResponseErrorDetails) => {
+            if (responseDetails.error.toLowerCase().includes('abort')) {
+                fileLoader.set({url: responseDetails.url, responseType: 'data-url', value: ''});
+                fileLoader.set({url: responseDetails.url, responseType: 'text', value: ''});
+            }
+        };
+
+        !isThunderbird && chrome.webRequest.onErrorOccurred.addListener(onWebRequestError, {urls: ['<all_urls>']});
+
         chrome.runtime.onMessage.addListener(async ({type, data, id}: Message, sender) => {
             if (type === 'fetch') {
                 const {url, responseType, mimeType} = data;

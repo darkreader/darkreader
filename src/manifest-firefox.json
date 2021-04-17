@@ -12,6 +12,7 @@
         "storage",
         "tabs",
         "theme",
+        "webRequest",
         "<all_urls>"
     ]
 }

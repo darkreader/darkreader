@@ -7,7 +7,6 @@ const bundleLocales = require('./bundle-locales');
 const clean = require('./clean');
 const copy = require('./copy');
 const reload = require('./reload');
-const codeStyle = require('./code-style');
 const zip = require('./zip');
 const {runTasks} = require('./task');
 const {log} = require('./utils');
@@ -25,7 +24,6 @@ const standardTask = [
 
 const buildTask = [
     ...standardTask,
-    codeStyle,
     zip
 ];
 

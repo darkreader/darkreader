@@ -91,10 +91,13 @@ export class VariablesStore {
         });
 
         this.unknownBgVars.forEach((v) => {
-            const hasUnknownColor = this.findVarRef(v, (ref) => {
-                return this.unknownColorVars.has(ref);
+            const hasColor = this.findVarRef(v, (ref) => {
+                return (
+                    this.unknownColorVars.has(ref) ||
+                    this.isVarType(ref, VAR_TYPE_TEXTCOLOR | VAR_TYPE_BORDERCOLOR)
+                );
             }) != null;
-            if (hasUnknownColor) {
+            if (hasColor) {
                 this.itarateVarRefs(v, (ref) => {
                     this.resolveVariableType(ref, VAR_TYPE_BGCOLOR);
                 });

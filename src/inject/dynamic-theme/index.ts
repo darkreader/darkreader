@@ -131,6 +131,7 @@ function createStaticStyleOverrides() {
     setupNodePositionWatcher(variableStyle, 'variables');
 
     const rootVarsStyle = createOrUpdateStyle('darkreader--root-vars');
+    rootVarsStyle.textContent = '';
     document.head.insertBefore(rootVarsStyle, variableStyle.nextSibling);
 
     const proxyScript = createOrUpdateScript('darkreader--proxy');

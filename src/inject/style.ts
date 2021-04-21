@@ -1,9 +1,10 @@
 import {createNodeAsap, removeNode} from './utils/dom';
 
-export function createOrUpdateStyle(css: string) {
+export function createOrUpdateStyle(css: string, type: string) {
     createNodeAsap({
         selectNode: () => document.getElementById('dark-reader-style'),
         createNode: (target) => {
+            document.documentElement.setAttribute('data-darkreader-mode', type);
             const style = document.createElement('style');
             style.id = 'dark-reader-style';
             style.type = 'text/css';
@@ -27,4 +28,5 @@ export function createOrUpdateStyle(css: string) {
 
 export function removeStyle() {
     removeNode(document.getElementById('dark-reader-style'));
+    document.documentElement.removeAttribute('data-darkreader-mode');
 }

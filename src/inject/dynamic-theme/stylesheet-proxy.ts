@@ -7,7 +7,7 @@ export function injectProxy() {
     const removeRuleDescriptor = Object.getOwnPropertyDescriptor(CSSStyleSheet.prototype, 'removeRule');
 
     // TODO: Remove wrapper when the issue is resolved in Pushbullet.com
-    const shouldWrapDocStyleSheets = location.hostname.endsWith('pushbullet.com');
+    const shouldWrapDocStyleSheets = location.hostname.endsWith('pushbullet.com') || location.hostname.endsWith('ilsole24ore.com');
     const documentStyleSheetsDescriptor = shouldWrapDocStyleSheets ? Object.getOwnPropertyDescriptor(Document.prototype, 'styleSheets') : null;
 
     const cleanUp = () => {

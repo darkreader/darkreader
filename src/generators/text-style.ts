@@ -3,7 +3,7 @@ import type {FilterConfig} from '../definitions';
 export function createTextStyle(config: FilterConfig): string {
     const lines: string[] = [];
     // Don't target pre elements as they are preformatted element's e.g. code blocks
-    // Not add known font's libraries, to try preserve icons.
+    // Exclude font libraries to preserve icons
     lines.push('*:not(pre, .far, .fa, .glyphicon) {');
 
     if (config.useFont && config.fontFamily) {

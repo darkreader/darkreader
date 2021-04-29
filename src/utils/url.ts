@@ -29,7 +29,7 @@ export function parseURL($url: string, $base: string = null) {
 }
 
 export function getAbsoluteURL($base: string, $relative: string) {
-    if ($relative.match(/^data\:/)) {
+    if ($relative.match(/^data\\?\:/)) {
         return $relative;
     }
 

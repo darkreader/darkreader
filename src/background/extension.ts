@@ -9,7 +9,7 @@ import UserStorage from './user-storage';
 import {setWindowTheme, resetWindowTheme} from './window-theme';
 import {getFontList, getCommands, setShortcut, canInjectScript} from './utils/extension-api';
 import {isInTimeInterval, getDuration, isNightAtLocation} from '../utils/time';
-import {isURLInList, getURLHostOrProtocol, isURLEnabled} from '../utils/url';
+import {isURLInList, getURLHostOrProtocol, isURLEnabled, isPDF} from '../utils/url';
 import ThemeEngines from '../generators/theme-engines';
 import createCSSFilterStylesheet from '../generators/css-filter';
 import {getDynamicThemeFixesFor} from '../generators/dynamic-theme';
@@ -148,7 +148,7 @@ export class Extension {
             // Fix for Firefox Android
             return;
         }
-        chrome.commands.onCommand.addListener((command) => {
+        chrome.commands.onCommand.addListener(async (command) => {
             if (command === 'toggle') {
                 console.log('Toggle command entered');
                 this.changeSettings({
@@ -158,7 +158,12 @@ export class Extension {
             }
             if (command === 'addSite') {
                 console.log('Add Site command entered');
-                this.toggleCurrentSite();
+                const url = await this.tabs.getActiveTabURL();
+                if (isPDF(url)) {
+                    this.changeSettings({enableForPDF: !this.user.settings.enableForPDF});
+                } else {
+                    this.toggleURL(url);
+                }
             }
             if (command === 'switchEngine') {
                 console.log('Switch Engine command entered');

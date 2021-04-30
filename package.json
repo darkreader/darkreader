@@ -1,6 +1,6 @@
 {
   "name": "darkreader",
-  "version": "4.9.29",
+  "version": "4.9.32",
   "description": "Dark mode for every website",
   "scripts": {
     "api": "node tasks/build.js --api",
@@ -91,11 +91,11 @@
     "less": "4.1.1",
     "malevic": "0.18.6",
     "prettier": "2.2.1",
-    "puppeteer-core": "7.1.0",
+    "puppeteer-core": "8.0.0",
     "rollup": "2.39.1",
     "rollup-plugin-istanbul2": "2.0.2",
     "rollup-plugin-typescript2": "0.30.0",
-    "ts-jest": "26.5.2",
+    "ts-jest": "26.5.5",
     "ts-node": "9.1.1",
     "tsconfig-paths": "3.9.0",
     "tslib": "2.1.0",

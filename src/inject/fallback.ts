@@ -1,24 +1,18 @@
-const isCSSStyleSheetConstructorSupported = (() => {
-    try {
-        new CSSStyleSheet();
-        return true;
-    } catch (err) {
-        return false;
-    }
-})();
+const css = 'html, body, body :not(iframe) { background-color: #181a1b !important; border-color: #776e62 !important; color: #e8e6e3 !important; }';
+const enforceOpacity = 'html, body { opacity: 1 !important; }';
 
-if (!isCSSStyleSheetConstructorSupported) {
+if (document.adoptedStyleSheets) {
+    const fallBackStyle: CSSStyleSheet = new (CSSStyleSheet as any)({media: '__darkreader_fallback__'});
+    fallBackStyle.insertRule(css);
+    fallBackStyle.insertRule(enforceOpacity);
+    document.adoptedStyleSheets = [...document.adoptedStyleSheets, fallBackStyle];
+} else {
     if (
         document.documentElement instanceof HTMLHtmlElement &&
-        matchMedia('(prefers-color-scheme: dark)').matches &&
         !document.querySelector('.darkreader--fallback')
     ) {
-        const css = 'html, body, body :not(iframe) { background-color: #181a1b !important; border-color: #776e62 !important; color: #e8e6e3 !important; } html, body { opacity: 1 !important; }';
         const fallback = document.createElement('style');
-        fallback.classList.add('darkreader');
-        fallback.classList.add('darkreader--fallback');
-        fallback.media = 'screen';
-        fallback.textContent = css;
+        fallback.textContent = `${css} ${enforceOpacity}`;
 
         if (document.head) {
             document.head.append(fallback);
@@ -35,9 +29,8 @@ if (!isCSSStyleSheetConstructorSupported) {
             });
             observer.observe(root, {childList: true});
         }
+        fallback.classList.add('darkreader');
+        fallback.classList.add('darkreader--fallback');
+        fallback.media = 'screen';
     }
-} else {
-    const fallBackStyle = new (CSSStyleSheet as any)({media: '__darkreader_fallback__'});
-    fallBackStyle.insertRule('html, body, body :not(iframe) { background-color: #181a1b !important; border-color: #776e62 !important; color: #e8e6e3 !important; }');
-    document.adoptedStyleSheets = [...document.adoptedStyleSheets, fallBackStyle];
 }

@@ -28,5 +28,7 @@ export function createOrUpdateStyle(css: string, type: string) {
 
 export function removeStyle() {
     removeNode(document.getElementById('dark-reader-style'));
-    document.documentElement.removeAttribute('data-darkreader-mode');
+    if (document && document.documentElement) {
+        document.documentElement.removeAttribute('data-darkreader-mode');
+    }
 }

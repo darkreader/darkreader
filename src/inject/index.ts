@@ -72,12 +72,6 @@ function getXhrBlobID() {
     }
 }
 
-// TODO: Use background page color scheme watcher when browser bugs fixed.
-const colorSchemeWatcher = watchForColorSchemeChange(({isDark}) => {
-    logInfo('Media query was changed');
-    chrome.runtime.sendMessage({type: 'color-scheme-change', data: {isDark}});
-});
-
 contentScriptPort.onMessage.addListener(onMessage);
 contentScriptPort.onDisconnect.addListener(() => {
     logWarn('disconnect');
@@ -88,3 +82,9 @@ contentScriptPort.onDisconnect.addListener(() => {
 const blobID = getXhrBlobID();
 const data = blobID && getDataViaXhr(blobID);
 data ? onMessage(data) : removeFallbackSheet();
+
+// TODO: Use background page color scheme watcher when browser bugs fixed.
+const colorSchemeWatcher = watchForColorSchemeChange(({isDark}) => {
+    logInfo('Media query was changed');
+    chrome.runtime.sendMessage({type: 'color-scheme-change', data: {isDark}});
+});

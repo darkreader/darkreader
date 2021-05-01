@@ -33,7 +33,10 @@ _______|_______/__/ ____ \\__\\__|___\\__\\__|___\\__\\____
 |  ____  \\|  |__/  ______  \\|  |__/  /|  |___|  ____  \\
 |__|   \\__\\____/__/      \\__\\_______/ |______|__|   \\__\\
                 https://darkreader.org
-*/`;
+*/
+
+/*! Dark reader generated CSS | Licensed under MIT https://github.com/darkreader/darkreader/blob/master/LICENSE */
+`;
 
 export async function collectCSS() {
     const css = [banner];

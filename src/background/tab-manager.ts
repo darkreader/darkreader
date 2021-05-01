@@ -25,7 +25,6 @@ interface PortInfo {
     port: chrome.runtime.Port;
 }
 
-const tempPorts: number[] = [];
 const injectedCode = `${(data: string) => {
     window[Symbol.for('__DARKREADER__')] = data;
 }}`;
@@ -59,11 +58,6 @@ export default class TabManager {
 
                 let framesPorts: Map<number, PortInfo>;
                 if (this.ports.has(tabId)) {
-                    // Prevents from running 2 instances.
-                    // Every tabId that is used won't be used again right? Else this needs some .splice :)
-                    if (tempPorts.indexOf(tabId) !== -1) {
-                        return;
-                    }
                     framesPorts = this.ports.get(tabId);
                 } else {
                     framesPorts = new Map();
@@ -130,6 +124,11 @@ export default class TabManager {
     }
 
     handleXHR({getConnectionMessage}) {
+        const addPort = (tabId: number) => {
+            if (!this.ports.has(tabId)) {
+                this.ports.set(tabId, new Map());
+            }
+        };
         // On before Navigating to the tab the script has to be send for execution.
         chrome.webNavigation.onBeforeNavigate.addListener(injectData);
 
@@ -143,7 +142,8 @@ export default class TabManager {
             }, () => void 0);
 
             let data: string;
-            const executeScripts = () => {
+            function executeScripts() {
+                addPort(req.tabId);
                 chrome.tabs.executeScript(req.tabId, {
                     frameId: req.frameId,
                     runAt: 'document_start',
@@ -156,7 +156,7 @@ export default class TabManager {
                     matchAboutBlank: true,
                     file: '/inject/index.js',
                 }, () => void 0);
-            };
+            }
 
             const message = getConnectionMessage({
                 url: req.url,

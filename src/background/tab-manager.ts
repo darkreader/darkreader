@@ -1,7 +1,7 @@
 import {canInjectScript} from '../background/utils/extension-api';
 import {createFileLoader} from './utils/network';
 import type {Message} from '../definitions';
-import {isFirefox, isThunderbird} from '../utils/platform';
+import {isThunderbird} from '../utils/platform';
 
 async function queryTabs(query: chrome.tabs.QueryInfo) {
     return new Promise<chrome.tabs.Tab[]>((resolve) => {
@@ -26,6 +26,10 @@ interface PortInfo {
 }
 
 const tempPorts: number[] = [];
+const injectedCode = `${(data: string) => {
+    window[Symbol.for('__DARKREADER__')] = data;
+}}`;
+
 export default class TabManager {
     private ports: Map<number, Map<number, PortInfo>>;
     constructor({getConnectionMessage, onColorSchemeChange}: TabManagerOptions) {
@@ -126,86 +130,49 @@ export default class TabManager {
     }
 
     handleXHR({getConnectionMessage}) {
-        const prefId = 'settingsOverXHR';
-        const blobUrlPrefix = 'blob:' + chrome.runtime.getURL('/');
-        const stylesToPass = {};
-        const reqFilter = {
-            urls: ['<all_urls>'],
-            types: ['main_frame', 'sub_frame'] as chrome.webRequest.ResourceType[],
-        };
-        chrome.webRequest.onBeforeRequest.addListener(prepareStyles, reqFilter);
-        const extraInfo = isFirefox ? ['blocking', 'responseHeaders'] : ['blocking', 'responseHeaders', 'extraHeaders'];
-        chrome.webRequest.onHeadersReceived.addListener(passStyles, reqFilter, extraInfo);
-        if (isFirefox) {
-            // This runs earlier than document_start
-            (chrome as any).contentScripts.register({
-                'matches': ['<all_urls>'],
-                'js': [
-                    {file: '/inject/fallback.js'},
-                    {file: '/inject/index.js'},
-                ],
-                'matchAboutBlank': true,
-                'allFrames': true,
-                'runAt': 'document_start'
-            });
-        } else {
-            chrome.declarativeContent.onPageChanged.removeRules([prefId], async () => {
-                chrome.declarativeContent.onPageChanged.addRules([{
-                    id: prefId,
-                    conditions: [
-                        new chrome.declarativeContent.PageStateMatcher({
-                            pageUrl: {urlContains: ':'},
-                        }),
-                    ],
-                    actions: [
-                        new (chrome.declarativeContent as any).RequestContentScript({
-                            allFrames: true,
-                            // This runs earlier than document_start
-                            js: chrome.runtime.getManifest().content_scripts[0].js,
-                        }),
-                    ],
-                }]);
-            });
-        }
+        // On before Navigating to the tab the script has to be send for execution.
+        chrome.webNavigation.onBeforeNavigate.addListener(injectData);
 
-        function prepareStyles(req: chrome.webRequest.WebRequestBodyDetails) {
-            if (tempPorts.indexOf(req.tabId) === -1) {
-                tempPorts.push(req.tabId);
-            }
-            function passDataToObject(str: any) {
-                str = JSON.stringify(str);
-                stylesToPass[req.requestId] = URL.createObjectURL(new Blob([str])).slice(blobUrlPrefix.length);
-                setTimeout(cleanUp, 600e3, req.requestId);
-            }
+        function injectData(req: chrome.webNavigation.WebNavigationParentedCallbackDetails) {
+            // Execute the Fallback and don't let it wait for the connectionMessage to come back.
+            chrome.tabs.executeScript(req.tabId, {
+                allFrames: true,
+                runAt: 'document_start',
+                matchAboutBlank: true,
+                file: '/inject/fallback.js',
+            }, () => void 0);
+
+            let data: string;
+            const executeScripts = () => {
+                chrome.tabs.executeScript(req.tabId, {
+                    frameId: req.frameId,
+                    runAt: 'document_start',
+                    matchAboutBlank: true,
+                    code: `(${injectedCode})(${data})`
+                }, () => void 0);
+                chrome.tabs.executeScript(req.tabId, {
+                    allFrames: true,
+                    runAt: 'document_start',
+                    matchAboutBlank: true,
+                    file: '/inject/index.js',
+                }, () => void 0);
+            };
+
             const message = getConnectionMessage({
                 url: req.url,
                 // Need some workaround to get the right URL here, edge-cases are possible to get the wrong one
                 frameURL: req.frameId === 0 ? null : req.url,
             });
             if (message instanceof Promise) {
-                message.then((asyncMessage) => asyncMessage && passDataToObject(asyncMessage));
-            } else if (message) {
-                passDataToObject(message);
-            }
-        }
-
-        function passStyles(req: chrome.webRequest.WebResponseHeadersDetails) {
-            const blobId = stylesToPass[req.requestId];
-            if (blobId) {
-                const {responseHeaders} = req;
-                responseHeaders.push({
-                    name: 'Set-Cookie',
-                    value: `${chrome.runtime.id}=${blobId}`,
+                message.then((asyncMessage) => {
+                    if (asyncMessage) {
+                        data = JSON.stringify(asyncMessage);
+                    }
+                    executeScripts();
                 });
-                return {responseHeaders};
-            }
-        }
-
-        function cleanUp(key: string) {
-            const blobId = stylesToPass[key];
-            delete stylesToPass[key];
-            if (blobId) {
-                URL.revokeObjectURL(blobUrlPrefix + blobId);
+            } else if (message) {
+                data = JSON.stringify(message);
+                executeScripts();
             }
         }
     }

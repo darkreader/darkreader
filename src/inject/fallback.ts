@@ -4,7 +4,6 @@ const enforceOpacity = 'html, body { opacity: 1 !important; }';
 if (document.adoptedStyleSheets) {
     const fallBackStyle: CSSStyleSheet = new (CSSStyleSheet as any)({media: '__darkreader_fallback__'});
     fallBackStyle.insertRule(css);
-    fallBackStyle.insertRule(enforceOpacity);
     document.adoptedStyleSheets = [...document.adoptedStyleSheets, fallBackStyle];
 } else {
     if (

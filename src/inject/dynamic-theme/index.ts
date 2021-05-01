@@ -382,18 +382,14 @@ function createDarkReaderInstanceMarker() {
 }
 
 function isAnotherDarkReaderInstanceActive() {
-    console.log('META LOGGING');
     const meta: HTMLMetaElement = document.querySelector('meta[name="darkreader"]');
     if (meta) {
         if (meta.content !== INSTANCEID) {
             disconnectContentScript();
-            console.log('DISCONNECTED');
             return true;
         }
-        console.log('SAME META');
         return false;
     } else {
-        console.log('NEW META');
         createDarkReaderInstanceMarker();
         return false;
     }

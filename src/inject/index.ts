@@ -44,34 +44,6 @@ export function onMessage({type, data}) {
     }
 }
 
-function getDataViaXhr(data: string) {
-    const url = 'blob:' + chrome.runtime.getURL(data);
-    try {
-        // Remove the cookie
-        document.cookie = `${chrome.runtime.id}=1; max-age=0`;
-        const xhr = new XMLHttpRequest();
-        // Synchronous XHR request so it won't affect performance.
-        xhr.open('GET', url, false);
-        xhr.send();
-        URL.revokeObjectURL(url);
-        return JSON.parse(xhr.response);
-    } catch (err) {
-        logWarn(err);
-    } finally {
-        URL.revokeObjectURL(url);
-    }
-}
-
-function getXhrBlobID() {
-    try {
-        // Getting the cookie of a document can fail on sandboxed frames.
-        const {cookie} = document;
-        return new RegExp(`(^|\\s|;)${chrome.runtime.id}=\\s*([-\\w]+)\\s*(;|$)`).exec(cookie)[2];
-    } catch (err) {
-        logWarn(err);
-    }
-}
-
 contentScriptPort.onMessage.addListener(onMessage);
 contentScriptPort.onDisconnect.addListener(() => {
     logWarn('disconnect');
@@ -79,9 +51,8 @@ contentScriptPort.onDisconnect.addListener(() => {
     colorSchemeWatcher.disconnect();
 });
 
-const blobID = getXhrBlobID();
-const data = blobID && getDataViaXhr(blobID);
-data ? onMessage(data) : removeFallbackSheet();
+const data = window[Symbol.for('__DARKREADER__')];
+data ? onMessage(JSON.parse(data)) : removeFallbackSheet();
 
 // TODO: Use background page color scheme watcher when browser bugs fixed.
 const colorSchemeWatcher = watchForColorSchemeChange(({isDark}) => {

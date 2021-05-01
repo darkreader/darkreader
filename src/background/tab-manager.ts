@@ -124,15 +124,7 @@ export default class TabManager {
     }
 
     handleXHR({getConnectionMessage}) {
-        const addPort = (tabId: number) => {
-            if (!this.ports.has(tabId)) {
-                this.ports.set(tabId, new Map());
-            }
-        };
-        // On before Navigating to the tab the script has to be send for execution.
-        chrome.webNavigation.onBeforeNavigate.addListener(injectData);
-
-        function injectData(req: chrome.webNavigation.WebNavigationParentedCallbackDetails) {
+        const injectData = (req: chrome.webNavigation.WebNavigationParentedCallbackDetails) => {
             // Execute the Fallback and don't let it wait for the connectionMessage to come back.
             chrome.tabs.executeScript(req.tabId, {
                 allFrames: true,
@@ -142,8 +134,10 @@ export default class TabManager {
             }, () => void 0);
 
             let data: string;
-            function executeScripts() {
-                addPort(req.tabId);
+            const executeScripts = () => {
+                if (!this.ports.has(req.tabId)) {
+                    this.ports.set(req.tabId, new Map());
+                }
                 chrome.tabs.executeScript(req.tabId, {
                     frameId: req.frameId,
                     runAt: 'document_start',
@@ -156,12 +150,10 @@ export default class TabManager {
                     matchAboutBlank: true,
                     file: '/inject/index.js',
                 }, () => void 0);
-            }
+            };
 
             const message = getConnectionMessage({
                 url: req.url,
-                // Need some workaround to get the right URL here, edge-cases are possible to get the wrong one
-                frameURL: req.frameId === 0 ? null : req.url,
             });
             if (message instanceof Promise) {
                 message.then((asyncMessage) => {
@@ -174,7 +166,10 @@ export default class TabManager {
                 data = JSON.stringify(message);
                 executeScripts();
             }
-        }
+        };
+
+        // On before Navigating to the tab the script has to be send for execution.
+        chrome.webNavigation.onBeforeNavigate.addListener(injectData);
     }
 
     async updateContentScript(options: {runOnProtectedPages: boolean}) {

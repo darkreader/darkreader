@@ -74,11 +74,14 @@ export function formatCSS(text: string) {
         return ' '.repeat(4 * depth);
     }
 
-    const emptyRuleRegexp = /[^{}]+{\s*}/g;
-    while (emptyRuleRegexp.test(text)) {
-        text = text.replace(emptyRuleRegexp, '');
+    // Dont execute this kind of Regex on large CSS, as this isn't necessary.
+    // Maxium of 50K characters.
+    if (text.length < 50000) {
+        const emptyRuleRegexp = /[^{}]+{\s*}/;
+        while (emptyRuleRegexp.test(text)) {
+            text = text.replace(emptyRuleRegexp, '');
+        }
     }
-
     const css = (text
         .replace(/\s{2,}/g, ' ') // Replacing multiple spaces to one
         .replace(/\{/g, '{\n') // {
@@ -93,9 +96,9 @@ export function formatCSS(text: string) {
 
     for (let x = 0, len = css.length; x < len; x++) {
         const line = css[x] + '\n';
-        if (line.match(/\{/)) { // {
+        if (line.includes('{')) { // {
             formatted.push(getIndent(depth++) + trimLeft(line));
-        } else if (line.match(/\}/)) { // }
+        } else if (line.includes('\}')) { // }
             formatted.push(getIndent(--depth) + trimLeft(line));
         } else { // CSS line
             formatted.push(getIndent(depth) + trimLeft(line));

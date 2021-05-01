@@ -9,7 +9,7 @@ function makeRegexp(pattern: string): MatchInterface {
     if (regexpCache.has(pattern)) {
         return regexpCache.get(pattern);
     }
-    
+
     const negated = pattern[0] === '!';
     if (negated) {
         pattern = pattern.substr(1);

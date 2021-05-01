@@ -7,7 +7,10 @@ export function iterateCSSRules(rules: CSSRuleList, iterate: (rule: CSSStyleRule
     forEach(rules, (rule) => {
         if (rule instanceof CSSMediaRule) {
             const media = Array.from(rule.media);
-            if (media.includes('screen') || media.includes('all') || !(media.includes('print') || media.includes('speech'))) {
+            const isScreenOrAll = media.some((m) => m.startsWith('screen') || m.startsWith('all'));
+            const isPrintOrSpeech = media.some((m) => m.startsWith('print') || m.startsWith('speech'));
+
+            if (isScreenOrAll || !isPrintOrSpeech) {
                 iterateCSSRules(rule.cssRules, iterate);
             }
         } else if (rule instanceof CSSStyleRule) {
@@ -38,10 +41,12 @@ const shorthandVarDependantProperties = [
     'border-left',
     'border-right',
     'border-top',
+    'outline',
+    'outline-color',
 ];
 
 const shorthandVarDepPropRegexps = isSafari ? shorthandVarDependantProperties.map((prop) => {
-    const regexp = new RegExp(`${prop}:\s*(.*?)\s*;`);
+    const regexp = new RegExp(`${prop}:\\s*(.*?)\\s*;`);
     return [prop, regexp] as [string, RegExp];
 }) : null;
 

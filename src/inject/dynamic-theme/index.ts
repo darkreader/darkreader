@@ -38,6 +38,7 @@ function createOrUpdateStyle(className: string, root: ParentNode = document.head
         element.classList.add('darkreader');
         element.classList.add(className);
         element.media = 'screen';
+        element.textContent = '';
     }
     return element;
 }
@@ -129,9 +130,12 @@ function createStaticStyleOverrides() {
     document.head.insertBefore(variableStyle, inlineStyle.nextSibling);
     setupNodePositionWatcher(variableStyle, 'variables');
 
+    const rootVarsStyle = createOrUpdateStyle('darkreader--root-vars');
+    document.head.insertBefore(rootVarsStyle, variableStyle.nextSibling);
+
     const proxyScript = createOrUpdateScript('darkreader--proxy');
     proxyScript.textContent = `(${injectProxy})()`;
-    document.head.insertBefore(proxyScript, variableStyle.nextSibling);
+    document.head.insertBefore(proxyScript, rootVarsStyle.nextSibling);
 }
 
 const shadowRootsWithOverrides = new Set<ShadowRoot>();
@@ -168,9 +172,6 @@ function cleanFallbackStyle() {
 function createDynamicStyleOverrides() {
     cancelRendering();
 
-    // TODO: Handle root element variables
-    // updateVariables(getElementCSSVariables(document.documentElement), filter, getIgnoreImageAnalysisSelectors());
-
     const allStyles = getManageableStyles(document);
 
     const newManagers = allStyles
@@ -183,6 +184,7 @@ function createDynamicStyleOverrides() {
             variablesStore.addRulesForMatching(detail.rules);
         });
     variablesStore.matchVariablesAndDependants();
+    variablesStore.putRootVars(document.head.querySelector('.darkreader--root-vars'), filter);
     styleManagers.forEach((manager) => manager.render(filter, ignoredImageAnalysisSelectors));
     if (loadingStyles.size === 0) {
         cleanFallbackStyle();
@@ -345,12 +347,11 @@ function watchForUpdates() {
     watchForInlineStyles((element) => {
         overrideInlineStyle(element, filter, ignoredInlineSelectors, ignoredImageAnalysisSelectors);
         if (element === document.documentElement) {
-            // TODO: Handle root element variables
-            // const rootVariables = getElementCSSVariables(document.documentElement);
-            // if (rootVariables.size > 0) {
-            //     updateVariables(rootVariables, filter, getIgnoreImageAnalysisSelectors());
-            //     throttledRenderAllStyles();
-            // }
+            const styleAttr = element.getAttribute('style');
+            if (styleAttr.includes('--')) {
+                variablesStore.matchVariablesAndDependants();
+                variablesStore.putRootVars(document.head.querySelector('.darkreader--root-vars'), filter);
+            }
         }
     }, (root) => {
         createShadowStaticStyleOverrides(root);
@@ -406,6 +407,8 @@ export function createOrUpdateDynamicTheme(filterConfig: FilterConfig, dynamicTh
         if (isAnotherDarkReaderInstanceActive()) {
             return;
         }
+        document.documentElement.setAttribute('data-darkreader-mode', 'dynamic');
+        document.documentElement.setAttribute('data-darkreader-scheme', filter.mode ? 'dark' : 'dimmed');
         createThemeAndWatchForUpdates();
     } else {
         if (!isFirefox) {
@@ -434,6 +437,8 @@ function removeProxy() {
 }
 
 export function removeDynamicTheme() {
+    document.documentElement.removeAttribute(`data-darkreader-mode`);
+    document.documentElement.removeAttribute(`data-darkreader-scheme`);
     cleanDynamicThemeCache();
     removeNode(document.querySelector('.darkreader--fallback'));
     if (document.head) {
@@ -443,6 +448,8 @@ export function removeDynamicTheme() {
         removeNode(document.head.querySelector('.darkreader--invert'));
         removeNode(document.head.querySelector('.darkreader--inline'));
         removeNode(document.head.querySelector('.darkreader--override'));
+        removeNode(document.head.querySelector('.darkreader--variables'));
+        removeNode(document.head.querySelector('.darkreader--root-vars'));
         removeNode(document.head.querySelector('meta[name="darkreader"]'));
         removeProxy();
     }

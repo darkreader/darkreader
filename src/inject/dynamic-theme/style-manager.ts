@@ -7,7 +7,7 @@ import {logWarn} from '../utils/log';
 import {replaceCSSRelativeURLsWithAbsolute, removeCSSComments, replaceCSSFontFace, getCSSURLValue, cssImportRegex, getCSSBaseBath} from './css-rules';
 import {bgFetch} from './network';
 import {createStyleSheetModifier} from './stylesheet-modifier';
-import {isShadowDomSupported, isSafari, isThunderbird} from '../../utils/platform';
+import {isShadowDomSupported, isSafari, isThunderbird, isChromium} from '../../utils/platform';
 
 declare global {
     interface HTMLStyleElement {
@@ -94,6 +94,7 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
     let syncStylePositionWatcher: ReturnType<typeof watchForNodePosition> = null;
 
     let cancelAsyncOperations = false;
+    let isOverrideEmpty = true;
 
     const sheetModifier = createStyleSheetModifier();
 
@@ -136,6 +137,9 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
         syncStyle.classList.add('darkreader');
         syncStyle.classList.add('darkreader--sync');
         syncStyle.media = 'screen';
+        if (!isChromium && element.title) {
+            syncStyle.title = element.title;
+        }
         syncStyleSet.add(syncStyle);
     }
 
@@ -291,6 +295,7 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
                 force,
                 isAsyncCancelled: () => cancelAsyncOperations,
             });
+            isOverrideEmpty = syncStyle.sheet.cssRules.length === 0;
         }
 
         buildOverrides();
@@ -441,11 +446,10 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
         }
 
         logWarn('Restore style', syncStyle, element);
-        const shouldForceRender = syncStyle.sheet == null || syncStyle.sheet.cssRules.length > 0;
         insertStyle();
         corsCopyPositionWatcher && corsCopyPositionWatcher.skip();
         syncStylePositionWatcher && syncStylePositionWatcher.skip();
-        if (shouldForceRender) {
+        if (!isOverrideEmpty) {
             forceRenderStyle = true;
             update();
         }

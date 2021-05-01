@@ -346,6 +346,7 @@ export function getTempCSSStyleSheet(): CSSStyleSheet {
         return tempStyle;
     } else {
         const tempStyleElement = document.createElement('style');
+        tempStyleElement.textContent = '';
         document.head.append(tempStyleElement);
         tempStyle = tempStyleElement.sheet;
         document.head.removeChild(tempStyleElement);

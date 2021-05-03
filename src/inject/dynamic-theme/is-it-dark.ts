@@ -31,10 +31,10 @@ export function IsItDark(variableStore: VariablesStore, selectorText: string, st
             return false;
         }
 
-        // TODO: detect Variable and get value of variable.
-        // Have some storage to hold all variables + selectorText.
         let backgroundColor: RGBA;
         if (backgroundValue.startsWith('var(')) {
+            // Possible TODO: Check if variable isn't present and fallback to fallback value or/and
+            // subscribe to the typeChange thingy logic in variableStore.
             backgroundColor = tryParseColor(variableStore.getRawValue(backgroundValue));
         } else {
             backgroundColor = tryParseColor(backgroundValue);
@@ -48,6 +48,9 @@ export function IsItDark(variableStore: VariablesStore, selectorText: string, st
         return backgroundColorHSLA.l < IS_DARK_TRESHOLD;
     };
 
+    // We are just watching if the document.head is present.
+    // But that doesn't mean the document.body is already loaded.
+    // So we have to send an Promise we the document body isn't loaded yet.
     if (!document.body) {
         if (!bodyObserver) {
             bodyObserver = new MutationObserver(() => {
@@ -61,9 +64,7 @@ export function IsItDark(variableStore: VariablesStore, selectorText: string, st
             bodyObserver.observe(document, {childList: true, subtree: true});
         }
         return new Promise<boolean>((resolve) => {
-            waitTillBody().then(() => {
-                resolve(actualFunction());
-            });
+            waitTillBody().then(() => resolve(actualFunction()));
         });
     }
     return actualFunction();

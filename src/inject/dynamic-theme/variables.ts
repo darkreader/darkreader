@@ -34,7 +34,7 @@ export class VariablesStore {
     private initialVarTypes = new Map<string, number>();
     private changedTypeVars = new Set<string>();
     private typeChangeSubscriptions = new Map<string, Set<() => void>>();
-    private unstablleVarValuesWithPath = new Map<string, Map<string[], string>>();
+    private unstableVarValuesWithPath = new Map<string, Map<string[], string>>();
     private unstableVarValues = new Map<string, string>();
 
     clear() {
@@ -48,7 +48,7 @@ export class VariablesStore {
         this.initialVarTypes.clear();
         this.changedTypeVars.clear();
         this.typeChangeSubscriptions.clear();
-        this.unstablleVarValuesWithPath.clear();
+        this.unstableVarValuesWithPath.clear();
         this.unstableVarValues.clear();
     }
 
@@ -63,7 +63,7 @@ export class VariablesStore {
         if (isVarDependant(varName)) {
             varName = getVariableNameAndFallback(varName).name;
         }
-        const possibleValues = this.unstablleVarValuesWithPath.get(varName);
+        const possibleValues = this.unstableVarValuesWithPath.get(varName);
         for (const [key, value] of possibleValues) {
             if (key.every((matchCondition) => {
                 if (matchCondition.startsWith('@media')) {
@@ -354,12 +354,12 @@ export class VariablesStore {
     }
 
     private inspectVariable(varName: string, value: string, rule: CSSStyleRule) {
-        if (!this.unstablleVarValuesWithPath.has(varName)) {
-            this.unstablleVarValuesWithPath.set(varName, new Map());
+        if (!this.unstableVarValuesWithPath.has(varName)) {
+            this.unstableVarValuesWithPath.set(varName, new Map());
         }
 
         if (!rule) {
-            this.unstablleVarValuesWithPath.get(varName).set([':root'], value);
+            this.unstableVarValuesWithPath.get(varName).set([':root'], value);
         } else {
             const paths = [':root'];
             let parentRule = rule.parentRule;
@@ -367,7 +367,7 @@ export class VariablesStore {
                 paths.push('@media ' + parentRule.media.mediaText);
                 parentRule = parentRule.parentRule;
             }
-            this.unstablleVarValuesWithPath.get(varName).set(paths, value);
+            this.unstableVarValuesWithPath.get(varName).set(paths, value);
         }
 
         this.unstableVarValues.set(varName, value);

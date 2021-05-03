@@ -4,6 +4,7 @@ import {iterateCSSRules, iterateCSSDeclarations} from './css-rules';
 import {tryParseColor, getBgImageModifier} from './modify-css';
 import type {CSSValueModifier} from './modify-css';
 import type {Theme} from '../../definitions';
+import {toArray} from '../../utils/array';
 
 export interface ModifiedVarDeclaration {
     property: string;
@@ -34,6 +35,7 @@ export class VariablesStore {
     private initialVarTypes = new Map<string, number>();
     private changedTypeVars = new Set<string>();
     private typeChangeSubscriptions = new Map<string, Set<() => void>>();
+    private unstablleVarValuesWithPath = new Map<string, Map<string[], string>>();
     private unstableVarValues = new Map<string, string>();
 
     clear() {
@@ -47,6 +49,7 @@ export class VariablesStore {
         this.initialVarTypes.clear();
         this.changedTypeVars.clear();
         this.typeChangeSubscriptions.clear();
+        this.unstablleVarValuesWithPath.clear();
         this.unstableVarValues.clear();
     }
 
@@ -55,6 +58,24 @@ export class VariablesStore {
             this.varTypes.has(varName) &&
             (this.varTypes.get(varName) & typeNum) > 0
         );
+    }
+
+    getRawValue(varName: string) {
+        if (isVarDependant(varName)) {
+            varName = getVariableNameAndFallback(varName).name;
+        }
+        const possibleValues = this.unstablleVarValuesWithPath.get(varName);
+        for (const [key, value] of possibleValues) {
+            if (key.every((matchCondition) => {
+                if (matchCondition.startsWith('@media')) {
+                    return matchMedia(matchCondition.slice(7)).matches;
+                } else {
+                    return document.documentElement.matches(matchCondition) || document.body.matches(matchCondition);
+                }
+            })) {
+                return value;
+            }
+        }
     }
 
     addRulesForMatching(rules: CSSRuleList) {
@@ -320,20 +341,36 @@ export class VariablesStore {
     }
 
     private collectVariables(rules: CSSRuleList) {
-        iterateVariables(rules, (varName, value) => {
-            this.inspectVariable(varName, value);
+        iterateVariables(rules, (varName, value, rule) => {
+            this.inspectVariable(varName, value, rule);
         });
     }
 
     private collectRootVariables() {
         iterateCSSDeclarations(document.documentElement.style, (property, value) => {
             if (isVariable(property)) {
-                this.inspectVariable(property, value);
+                this.inspectVariable(property, value, null);
             }
         });
     }
 
-    private inspectVariable(varName: string, value: string) {
+    private inspectVariable(varName: string, value: string, rule: CSSStyleRule) {
+        if (!this.unstablleVarValuesWithPath.has(varName)) {
+            this.unstablleVarValuesWithPath.set(varName, new Map());
+        }
+
+        if (!rule) {
+            this.unstablleVarValuesWithPath.get(varName).set([':root'], value);
+        } else {
+            const paths = [':root'];
+            let parentRule = rule.parentRule;
+            while (parentRule != null && parentRule instanceof CSSMediaRule) {
+                paths.push('@media ' + parentRule.media.mediaText);
+                parentRule = parentRule.parentRule;
+            }
+            this.unstablleVarValuesWithPath.get(varName).set(paths, value);
+        }
+
         this.unstableVarValues.set(varName, value);
 
         if (isVarDependant(value) && isConstructedColorVar(value)) {
@@ -372,19 +409,19 @@ export class VariablesStore {
 
     private collectVarDependants(rules: CSSRuleList) {
         iterateVarDependants(rules, (property, value) => {
-            this.inspectVerDependant(property, value);
+            this.inspectVarDependant(property, value);
         });
     }
 
     private collectRootVarDependants() {
         iterateCSSDeclarations(document.documentElement.style, (property, value) => {
             if (isVarDependant(value)) {
-                this.inspectVerDependant(property, value);
+                this.inspectVarDependant(property, value);
             }
         });
     }
 
-    private inspectVerDependant(property: string, value: string) {
+    private inspectVarDependant(property: string, value: string) {
         if (isVariable(property)) {
             this.iterateVarDeps(value, (ref) => {
                 if (!this.varRefs.has(property)) {
@@ -583,12 +620,12 @@ export function replaceCSSVariablesNames(
 
 function iterateVariables(
     rules: CSSRuleList,
-    iterator: (varName: string, varValue: string) => void,
+    iterator: (varName: string, varValue: string, rule: CSSStyleRule) => void,
 ) {
     iterateCSSRules(rules, (rule) => {
         rule.style && iterateCSSDeclarations(rule.style, (property, value) => {
             if (property.startsWith('--')) {
-                iterator(property, value);
+                iterator(property, value, rule);
             }
         });
     });

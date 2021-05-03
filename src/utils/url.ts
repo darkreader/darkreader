@@ -176,7 +176,7 @@ export function isPDF(url: string) {
     return false;
 }
 
-export function isURLEnabled(url: string, userSettings: UserSettings, {isProtected, isInDarkList}) {
+export function isURLEnabled(url: string, userSettings: UserSettings, {isProtected}) {
     if (isProtected && !userSettings.enableForProtectedPages) {
         return false;
     }
@@ -190,8 +190,8 @@ export function isURLEnabled(url: string, userSettings: UserSettings, {isProtect
         return isURLInUserList;
     }
 
-    if (isURLInEnabledList && isInDarkList) {
+    if (isURLInEnabledList) {
         return true;
     }
-    return (!isInDarkList && !isURLInUserList);
+    return !isURLInUserList;
 }

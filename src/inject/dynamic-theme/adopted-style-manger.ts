@@ -9,7 +9,7 @@ export interface AdoptedStyleSheetManager {
     destroy(): void;
 }
 
-export function createAdoptedStyleSheetOverride(node: Document | ShadowRoot): AdoptedStyleSheetManager {
+export function createAdoptedStyleSheetOverride(node: Document | ShadowRoot, {onDarkPage}): AdoptedStyleSheetManager {
 
     let cancelAsyncOperations = false;
 
@@ -69,6 +69,7 @@ export function createAdoptedStyleSheetOverride(node: Document | ShadowRoot): Ad
                 ignoreImageAnalysis,
                 force: false,
                 isAsyncCancelled: () => cancelAsyncOperations,
+                onDark: () => onDarkPage(),
             });
         });
     }

@@ -46,10 +46,6 @@ function Header({data, actions, tab, onMoreToggleSettingsClick}: HeaderProps) {
                     <span class="header__site-toggle__unable-text">
                         {getLocalMessage('page_protected')}
                     </span>
-                ) : tab.isInDarkList ? (
-                    <span class="header__site-toggle__unable-text">
-                        {getLocalMessage('page_in_dark_list')}
-                    </span>
                 ) : (
                     <Shortcut
                         commandName="addSite"

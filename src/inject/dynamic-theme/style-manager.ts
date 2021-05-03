@@ -81,7 +81,7 @@ document.addEventListener('__darkreader__inlineScriptsAllowed', () => {
     canOptimizeUsingProxy = true;
 });
 
-export function manageStyle(element: StyleElement, {update, loadingStart, loadingEnd}): StyleManager {
+export function manageStyle(element: StyleElement, {update, loadingStart, loadingEnd, onDarkPage}): StyleManager {
     const prevStyles: HTMLStyleElement[] = [];
     let next: Element = element;
     while ((next = next.nextElementSibling) && next.matches('.darkreader')) {
@@ -294,6 +294,7 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
                 ignoreImageAnalysis,
                 force,
                 isAsyncCancelled: () => cancelAsyncOperations,
+                onDark: () => onDarkPage(),
             });
             isOverrideEmpty = syncStyle.sheet.cssRules.length === 0;
         }

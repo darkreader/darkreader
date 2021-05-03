@@ -40,10 +40,6 @@ export default function MoreSettings({data, actions, tab}: ExtWrapper & {tab: Ta
                     <p class="more-settings__description more-settings__description--warning">
                         {getLocalMessage('page_protected').replace(/\n/g, ' ')}
                     </p>
-                ) : tab.isInDarkList ? (
-                    <p class="more-settings__description more-settings__description--warning">
-                        {getLocalMessage('page_in_dark_list').replace(/\n/g, ' ')}
-                    </p>
                 ) : (
                     <p class="more-settings__description">
                         {getLocalMessage('only_for_description')}

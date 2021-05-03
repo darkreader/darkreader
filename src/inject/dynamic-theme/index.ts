@@ -237,7 +237,7 @@ function createManager(element: StyleElement) {
         manager.render(filter, ignoredImageAnalysisSelectors);
     }
 
-    const manager = manageStyle(element, {update, loadingStart, loadingEnd});
+    const manager = manageStyle(element, {update, loadingStart, loadingEnd, onDarkPage: () => removeDynamicTheme()});
     styleManagers.set(element, manager);
 
     return manager;
@@ -310,7 +310,7 @@ function createThemeAndWatchForUpdates() {
 function handleAdoptedStyleSheets(node: ShadowRoot | Document) {
     if (Array.isArray(node.adoptedStyleSheets)) {
         if (node.adoptedStyleSheets.length > 0) {
-            const newManger = createAdoptedStyleSheetOverride(node);
+            const newManger = createAdoptedStyleSheetOverride(node, {onDarkPage: () => removeDynamicTheme()});
 
             adoptedStyleManagers.push(newManger);
             newManger.render(filter, ignoredImageAnalysisSelectors);

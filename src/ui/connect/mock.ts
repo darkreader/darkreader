@@ -69,7 +69,6 @@ export function getMockActiveTabInfo(): TabInfo {
     return {
         url: 'https://darkreader.org/',
         isProtected: false,
-        isInDarkList: false,
     };
 }
 

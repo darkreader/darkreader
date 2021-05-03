@@ -1,7 +1,7 @@
 import {readFile} from 'fs';
 import {resolve as resolvePath} from 'path';
 import {compareURLPatterns} from '../../src/utils/url';
-import {parseArray, formatArray, getTextDiffIndex, getTextPositionMessage} from '../../src/utils/text';
+import {getTextDiffIndex, getTextPositionMessage} from '../../src/utils/text';
 import {parseInversionFixes, formatInversionFixes} from '../../src/generators/css-filter';
 import {parseDynamicThemeFixes, formatDynamicThemeFixes} from '../../src/generators/dynamic-theme';
 import {parseStaticThemes, formatStaticThemes} from '../../src/generators/static-theme';
@@ -30,23 +30,6 @@ function throwIfDifferent(input: string, expected: string, message: string) {
         }
     };
 }
-
-test('Dark Sites list', async () => {
-    const file = await readConfig('dark-sites.config');
-    const sites = parseArray(file);
-
-    // is not empty
-    expect(sites.length).toBeGreaterThan(0);
-
-    // url patterns should have no protocol
-    expect(sites.every(isURLPatternValid)).toBe(true);
-
-    // sites are sorted alphabetically
-    expect(sites).toEqual(sites.slice().sort(compareURLPatterns));
-
-    // sites are properly formatted
-    expect(throwIfDifferent(file, formatArray(sites), 'Dark Sites list format error')).not.toThrow();
-});
 
 test('Dynamic Theme Fixes config', async () => {
     const file = await readConfig('dynamic-theme-fixes.config');

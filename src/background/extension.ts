@@ -314,10 +314,7 @@ export class Extension {
     }
 
     toggleURL(url: string) {
-        const isInDarkList = isURLInList(url, this.config.DARK_SITES);
-        const siteList = isInDarkList ?
-            this.user.settings.siteListEnabled.slice() :
-            this.user.settings.siteList.slice();
+        const siteList = this.user.settings.siteList.slice();
         const pattern = getURLHostOrProtocol(url);
         const index = siteList.indexOf(pattern);
         if (index < 0) {
@@ -325,11 +322,7 @@ export class Extension {
         } else {
             siteList.splice(index, 1);
         }
-        if (isInDarkList) {
-            this.changeSettings({siteListEnabled: siteList});
-        } else {
-            this.changeSettings({siteList});
-        }
+        this.changeSettings({siteList});
     }
 
     /**
@@ -385,12 +378,9 @@ export class Extension {
     //----------------------
 
     private getURLInfo(url: string): TabInfo {
-        const {DARK_SITES} = this.config;
-        const isInDarkList = isURLInList(url, DARK_SITES);
         const isProtected = !canInjectScript(url);
         return {
             url,
-            isInDarkList,
             isProtected,
         };
     }

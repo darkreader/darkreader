@@ -1,5 +1,4 @@
 import {readText} from './utils/network';
-import {parseArray} from '../utils/text';
 import {getDuration} from '../utils/time';
 import {parseInversionFixes} from '../generators/css-filter';
 import {parseDynamicThemeFixes} from '../generators/dynamic-theme';
@@ -7,10 +6,6 @@ import {parseStaticThemes} from '../generators/static-theme';
 import type {InversionFix, StaticTheme, DynamicThemeFix} from '../definitions';
 
 const CONFIG_URLs = {
-    darkSites: {
-        remote: 'https://raw.githubusercontent.com/darkreader/darkreader/master/src/config/dark-sites.config',
-        local: '../config/dark-sites.config',
-    },
     dynamicThemeFixes: {
         remote: 'https://raw.githubusercontent.com/darkreader/darkreader/master/src/config/dynamic-theme-fixes.config',
         local: '../config/dynamic-theme-fixes.config',
@@ -33,14 +28,12 @@ export default class ConfigManager {
     STATIC_THEMES?: StaticTheme[];
 
     raw = {
-        darkSites: null,
         dynamicThemeFixes: null,
         inversionFixes: null,
         staticThemes: null,
     };
 
     overrides = {
-        darkSites: null,
         dynamicThemeFixes: null,
         inversionFixes: null,
         staticThemes: null,
@@ -69,19 +62,6 @@ export default class ConfigManager {
             }
         }
         success($config);
-    }
-
-    private async loadDarkSites({local}) {
-        await this.loadConfig({
-            name: 'Dark Sites',
-            local,
-            localURL: CONFIG_URLs.darkSites.local,
-            remoteURL: CONFIG_URLs.darkSites.remote,
-            success: ($sites: string) => {
-                this.raw.darkSites = $sites;
-                this.handleDarkSites();
-            },
-        });
     }
 
     private async loadDynamicThemeFixes({local}) {
@@ -125,16 +105,10 @@ export default class ConfigManager {
 
     async load(config: {local: boolean}) {
         await Promise.all([
-            this.loadDarkSites(config),
             this.loadDynamicThemeFixes(config),
             this.loadInversionFixes(config),
             this.loadStaticThemes(config),
         ]).catch((err) => console.error('Fatality', err));
-    }
-
-    private handleDarkSites() {
-        const $sites = this.overrides.darkSites || this.raw.darkSites;
-        this.DARK_SITES = parseArray($sites);
     }
 
     handleDynamicThemeFixes() {

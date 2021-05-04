@@ -18,6 +18,7 @@ import {createSVGFilterStylesheet, getSVGFilterMatrixValue, getSVGReverseFilterM
 import type {ExtensionData, FilterConfig, News, Shortcuts, UserSettings, TabInfo} from '../definitions';
 import {isSystemDarkModeEnabled} from '../utils/media-query';
 import {isFirefox, isThunderbird} from '../utils/platform';
+import {debounce} from '../utils/debounce';
 
 const AUTO_TIME_CHECK_INTERVAL = getDuration({seconds: 10});
 
@@ -148,7 +149,7 @@ export class Extension {
             // Fix for Firefox Android
             return;
         }
-        chrome.commands.onCommand.addListener(async (command) => {
+        chrome.commands.onCommand.addListener(debounce(500, async (command) => {
             if (command === 'toggle') {
                 console.log('Toggle command entered');
                 this.changeSettings({
@@ -172,7 +173,7 @@ export class Extension {
                 const next = index === engines.length - 1 ? engines[0] : engines[index + 1];
                 this.setTheme({engine: next});
             }
-        });
+        }));
     }
 
     private async getShortcuts() {

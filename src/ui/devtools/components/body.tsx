@@ -6,14 +6,22 @@ import {DEVTOOLS_DOCS_URL} from '../../../utils/links';
 import type {ExtWrapper, TabInfo} from '../../../definitions';
 import {getCurrentThemePreset} from '../../popup/theme/utils';
 import {isFirefox} from '../../../utils/platform';
+import {getLocalMessage} from '../../../utils/locales';
 
 type BodyProps = ExtWrapper & {tab: TabInfo};
 
 function Body({data, tab, actions}: BodyProps) {
     const {state, setState} = useState({errorText: null as string});
     let textNode: HTMLTextAreaElement;
-    const previewButtonText = data.settings.previewNewDesign ? 'Switch to old design' : 'Preview new design';
+    const previewButtonText = data.settings.previewNewDesign ? getLocalMessage('switch_to_old_design') : getLocalMessage('preview_new_design');
     const {theme} = getCurrentThemePreset({data, tab, actions});
+    const devToolsDescription = [
+        getLocalMessage('dev_tools_description_1'),
+        getLocalMessage('dev_tools_description_2'),
+        getLocalMessage('dev_tools_description_3'),
+        getLocalMessage('dev_tools_description_4'),
+        getLocalMessage('dev_tools_description_5'),
+    ];
 
     const wrapper = (theme.engine === ThemeEngines.staticTheme
         ? {
@@ -27,7 +35,7 @@ function Body({data, tab, actions}: BodyProps) {
             apply: (text) => actions.applyDevInversionFixes(text),
             reset: () => actions.resetDevInversionFixes(),
         } : {
-            header: 'Dynamic Theme Editor',
+            header: getLocalMessage('dynamic_theme_editor'),
             fixesText: data.devtools.dynamicFixesText,
             apply: (text) => actions.applyDevDynamicThemeFixes(text),
             reset: () => actions.resetDevDynamicThemeFixes(),
@@ -84,7 +92,7 @@ function Body({data, tab, actions}: BodyProps) {
         <body>
             <header>
                 <img id="logo" src="../assets/images/darkreader-type.svg" alt="Dark Reader" />
-                <h1 id="title">Developer Tools</h1>
+                <h1 id="title">{getLocalMessage('developer_tools')}</h1>
             </header>
             <h3 id="sub-title">{wrapper.header}</h3>
             <textarea
@@ -97,14 +105,13 @@ function Body({data, tab, actions}: BodyProps) {
             />
             <label id="error-text">{state.errorText}</label>
             <div id="buttons">
-                <Button onclick={reset}>Reset</Button>
-                <Button onclick={apply}>Apply</Button>
+                <Button onclick={reset}>{getLocalMessage('reset')}</Button>
+                <Button onclick={apply}>{getLocalMessage('apply')}</Button>
                 <Button class="preview-design-button" onclick={toggleDesign}>{previewButtonText}</Button>
             </div>
             <p id="description">
-                Read about this tool <strong><a href={DEVTOOLS_DOCS_URL} target="_blank" rel="noopener noreferrer">here</a></strong>.
-                If a <strong>popular</strong> website looks incorrect
-                e-mail to <strong>DarkReaderApp@gmail.com</strong>
+                {devToolsDescription[0]} <strong><a href={DEVTOOLS_DOCS_URL} target="_blank" rel="noopener noreferrer"> {devToolsDescription[1]}</a></strong>.&nbsp;
+                {devToolsDescription[2]} <strong>{devToolsDescription[3]}</strong> {devToolsDescription[4]} <strong>DarkReaderApp@gmail.com</strong>
             </p>
         </body>
     );

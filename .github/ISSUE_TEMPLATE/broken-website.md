@@ -47,8 +47,8 @@ Please make sure there is no existing issue with this broken website.
 -->
 
 - OS: <!-- [e.g. Windows, macOS, Linux] -->
-- Browser: <!-- [e.g. Chrome 89, Firefox 87, Safari 14] -->
-- Dark Reader Version: <!-- [e.g. 4.9.30] -->
+- Browser: <!-- [e.g. Chrome 90, Firefox 88, Safari 14.1] -->
+- Dark Reader Version: <!-- [e.g. 4.9.32] -->
 
 ## Additional context
 <!-- Add any other context about the problem here. -->

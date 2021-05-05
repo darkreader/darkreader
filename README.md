@@ -22,7 +22,7 @@ Read more about contributing to Dark Reader in [CONTRIBUTING.md](https://github.
 
 You can install the extension from a file.  
 Install [Node.js LTS](https://nodejs.org/en/). Download the source code (or check out from git).  
-Open terminal in root folder and run:  
+Open terminal in the root folder and run:  
 
 - `npm install`  
 - `npm run build`  
@@ -106,17 +106,18 @@ However, this can be enabled by the following steps:
 <h3 align="center"><strong>Dark Reader exists thanks to all the people who have contributed to Dark Reader!</strong></h3>
 <br/>
 <br/>
-<p align="center"><a rel="noreferrer noopener" href="https://github.com/darkreader/darkreader/graphs/contributors/"><img src="https://opencollective.com/darkreader/contributors.svg?width=890&button=false" /></a></p>
+<p align="center"><a rel="noreferrer noopener" href="https://github.com/darkreader/darkreader/graphs/contributors/"><img src="https://opencollective.com/darkreader/contributors.svg?width=890&button=false"/></a></p>
 
 <h2 align="center">Backers</h2>
 <br/>
-<h3 align="center"><strong>Thank you to all our generous backers!</strong></h3>
+<h3 align="center"><strong>Thank you to all our generous backers! </strong>Support Dark Reader by <a rel="noreferrer noopener" href="https://opencollective.com/darkreader" target="_blank">Becoming a backer</a></h3>
 <br/>
 <br/>
-<p align="center"><a rel="noreferrer noopener" href="https://opencollective.com/darkreader#backers" target="_blank"><img src="https://opencollective.com/darkreader/backers.svg?width=890"></a></p>
+<p align="center"><a rel="noreferrer noopener" href="https://opencollective.com/darkreader#backers" target="_blank"><img src="https://opencollective.com/darkreader/backers.svg?width=890&limit=1000"></a></p>
 
 <h2 align="center">Sponsers</h2>
-<p align="center">Support Dark Reader by <a rel="noreferrer noopener" href="https://opencollective.com/darkreader#sponsor">becoming a sponsor</a></p>
+<p>Does your company use Dark Reader? Ask your manager or the marketing team if your company would be interested in supporting our project. With supportingm, it will allow the maintainers to dedicate more time for maintenance and new features for everyone. Also, your company's logo will show <a rel="noreferrer noopener" href="https://github.com/darkreader/darkreader#readme" target="_blank">on Github</a> - who doesn't want a little extra exposure? <a rel="noreferrer noopener" href="https://opencollective.com/darkreader" target="_blank">Here's the info</a>.</p>
+
 <h3 align="center"><strong>Thank you to our wonderful sponsors!</strong></h3>
 
 <a href="https://opencollective.com/darkreader/sponsor/0/website" target="_blank" rel="noreferrer noopener"><img src="https://opencollective.com/darkreader/sponsor/0/avatar.svg"></a>
@@ -129,3 +130,4 @@ However, this can be enabled by the following steps:
 <a href="https://opencollective.com/darkreader/sponsor/7/website" target="_blank" rel="noreferrer noopener"><img src="https://opencollective.com/darkreader/sponsor/7/avatar.svg"></a>
 <a href="https://opencollective.com/darkreader/sponsor/8/website" target="_blank" rel="noreferrer noopener"><img src="https://opencollective.com/darkreader/sponsor/8/avatar.svg"></a>
 <a href="https://opencollective.com/darkreader/sponsor/9/website" target="_blank" rel="noreferrer noopener"><img src="https://opencollective.com/darkreader/sponsor/9/avatar.svg"></a>
+<a href="https://opencollective.com/darkreader/sponsor/10/website" target="_blank" rel="noreferrer noopener"><img src="https://opencollective.com/darkreader/sponsor/10/avatar.svg"></a>

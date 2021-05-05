@@ -15,6 +15,7 @@ assignees: ''
 <!--
 Thank you for taking the time to report a broken website.
 Please make sure there is no existing issue with this broken website.
+Make sure to fill out every section when needed else remove the section.
 -->
 
 # Broken Website

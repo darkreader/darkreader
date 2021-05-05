@@ -1,6 +1,6 @@
 <h2 align="center">Contributing</h2>
 
-<p align="center">Contributing to Dark Reader can be in a variety of ways. Here you can learn more about the variety of ways. Thank you in advance for reading this <code>CONTRIBUTING.md</code>.</p>
+<p align="center">Contributing to Dark Reader can be in a variety of ways. Here, you can learn more about it. Thank you in advance for reading this <code>CONTRIBUTING.md</code>.</p>
 
 ## Sponsor!
 

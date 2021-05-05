@@ -47,7 +47,7 @@ Please make sure there is no existing issue with this kind of bug.
 -->
 
 - OS: <!-- [e.g. Windows, macOS, Linux] -->
-- Browser: <!-- [e.g. Chrome 90, Firefox 88, Safari 14.1] -->
+- Browser: <!-- [e.g. Chrome 90, Firefox 88, Safari 14] -->
 - Dark Reader Version: <!-- [e.g. 4.9.32] -->
 
 ## Additional context

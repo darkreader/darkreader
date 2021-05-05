@@ -1,6 +1,6 @@
 <h2 align="center">Contributing</h2>
 
-<p align="center">Contributing to Dark Reader, can be in a variety of ways. Proceed reading the <code>CONTRIBUTING.md</code> to learn more about the variety of ways. Thank you in advance for reading this <code>CONTRIBUTING.md</code>.</p>
+<p align="center">Contributing to Dark Reader can be in a variety of ways. Here you can learn more about the variety of ways. Thank you in advance for reading this <code>CONTRIBUTING.md</code>.</p>
 
 ## Sponsor!
 
@@ -23,10 +23,9 @@ you can fix this by specifying appropriate [**CSS selectors**](https://developer
 **[dynamic-theme-fixes.config](https://github.com/darkreader/darkreader/blob/master/src/config/dynamic-theme-fixes.config)**
 (for Dynamic Theme mode)
 or **[inversion-fixes.config](https://github.com/darkreader/darkreader/blob/master/src/config/inversion-fixes.config)**
-(for Filter and Filter+ modes)
-*(please, preserve alphabetical order by URL, use short selectors, and preserve code style)*.
+(for Filter and Filter+ modes) *(__Please, preserve alphabetical order by URL, use short selectors, and preserve code style__)*
 
-Proceed reading CONTRIBUTE.md to know how to make a fix for the appropriate mode.
+Below you can learn how to make a fix for the appropriate mode.
 
 ## How to use the Dev Tools!
 
@@ -35,7 +34,7 @@ Dev Tools is designed to **fix minor issues** on a web page
 If the page looks partially dark and bright in **Dynamic mode**, it's considered a bug.
 For **Filter mode**, it is a common practice to invert already dark page parts.
 
-- Open **Chrome Dev Tools** (F12) in Chrome or "Inspector" (Ctrl+Shift+C) in Firefox.
+- Open **Chrome Dev Tools** (`F12`) in Chrome or "Inspector" (`Ctrl+Shift+C`) in Firefox.
 - Click on **element picker** (top-left corner). It is enabled automatically in Firefox.
 - Pick a wrongly inverted element.
 - Choose a **[selector](https://developer.mozilla.org/docs/Web/CSS/CSS_Selectors)** for that element or all similar elements (e.g. if element has `class="icon small"`, selector may look like `.icon`).

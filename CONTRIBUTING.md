@@ -23,7 +23,7 @@ you can fix this by specifying appropriate [**CSS selectors**](https://developer
 **[dynamic-theme-fixes.config](https://github.com/darkreader/darkreader/blob/master/src/config/dynamic-theme-fixes.config)**
 (for Dynamic Theme mode)
 or **[inversion-fixes.config](https://github.com/darkreader/darkreader/blob/master/src/config/inversion-fixes.config)**
-(for Filter and Filter+ modes) __*(Please, preserve alphabetical order by URL, use short selectors, and preserve code style*__
+(for Filter and Filter+ modes) *(__Please, preserve alphabetical order by URL, use short selectors, and preserve code style__)*
 
 Below you can learn how to make a fix for the appropriate mode.
 

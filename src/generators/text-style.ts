@@ -4,7 +4,7 @@ export function createTextStyle(config: FilterConfig): string {
     const lines: string[] = [];
     // Don't target pre elements as they are preformatted element's e.g. code blocks
     // Exclude font libraries to preserve icons
-    lines.push('*:not(pre, .far, .fa, .glyphicon, [class*="vjs-"], .fab, .fa-github) {');
+    lines.push('*:not(pre, .far, .fa, .glyphicon, [class*="vjs-"], .fab, .fa-github, .fas) {');
 
     if (config.useFont && config.fontFamily) {
         // TODO: Validate...

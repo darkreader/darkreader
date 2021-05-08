@@ -235,6 +235,11 @@ test('URL is enabled', () => {
         {siteList: [], siteListEnabled: ['darkreader.org'], applyToListedOnly: false} as UserSettings,
         {isProtected: false, isInDarkList: false},
     )).toBe(true);
+    expect(isURLEnabled(
+        'https://www.netflix.com',
+        {enableForPDF: true, siteList: [''], siteListEnabled: ['wwww.netflix.com'], applyToListedOnly: true} as UserSettings,
+        {isProtected: false, isInDarkList: true},
+    )).toBe(true);
 });
 
 test('Get URL host or protocol', () => {

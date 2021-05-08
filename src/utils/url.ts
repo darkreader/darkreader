@@ -181,12 +181,12 @@ export function isURLEnabled(url: string, userSettings: UserSettings, {isProtect
         return userSettings.enableForPDF;
     }
     const isURLInUserList = isURLInList(url, userSettings.siteList);
-    if (userSettings.applyToListedOnly) {
-        return isURLInUserList;
-    }
-    // TODO: Use `siteListEnabled`, `siteListDisabled`, `enabledByDefault` options.
-    // Delete `siteList` and `applyToListedOnly` options, transfer user's values.
     const isURLInEnabledList = isURLInList(url, userSettings.siteListEnabled);
+
+    if (userSettings.applyToListedOnly) {
+        return isURLInUserList || isURLInEnabledList;
+    }
+
     if (isURLInEnabledList && isInDarkList) {
         return true;
     }

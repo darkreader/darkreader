@@ -9,6 +9,7 @@ const dynamicThemeFixesCommands = {
     'CSS': 'css',
     'IGNORE INLINE STYLE': 'ignoreInlineStyle',
     'IGNORE IMAGE ANALYSIS': 'ignoreImageAnalysis',
+    'IGNORE DARK SELECTOR': 'ignoreDarkSelector',
 };
 
 export function parseDynamicThemeFixes(text: string) {
@@ -56,6 +57,7 @@ export function getDynamicThemeFixesFor(url: string, frameURL: string, fixes: Dy
         css: fixes[0].css || [],
         ignoreInlineStyle: fixes[0].ignoreInlineStyle || [],
         ignoreImageAnalysis: fixes[0].ignoreImageAnalysis || [],
+        ignoreDarkSelector: fixes[0].ignoreDarkSelector || [],
     };
     if (enabledForPDF) {
         common.invert = common.invert.concat('embed[type="application/pdf"]');
@@ -83,5 +85,6 @@ export function getDynamicThemeFixesFor(url: string, frameURL: string, fixes: Dy
         css: [common.css, match.css].filter((s) => s).join('\n'),
         ignoreInlineStyle: common.ignoreInlineStyle.concat(match.ignoreInlineStyle || []),
         ignoreImageAnalysis: common.ignoreImageAnalysis.concat(match.ignoreImageAnalysis || []),
+        ignoreDarkSelector: common.ignoreDarkSelector.concat(match.ignoreDarkSelector || []),
     };
 }

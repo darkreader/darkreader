@@ -38,6 +38,8 @@ describe('STYLE ELEMENTS', () => {
             force: false,
             prepareSheet: () => override,
             isAsyncCancelled: () => false,
+            onDark: () => fail(),
+            ignoreDarkSelector: [],
         });
 
         expect(override.cssRules.length).toBe(2);

@@ -31,7 +31,7 @@ export type StyleElement = HTMLLinkElement | HTMLStyleElement;
 
 export interface StyleManager {
     details(): {rules: CSSRuleList};
-    render(theme: Theme, ignoreImageAnalysis: string[]): void;
+    render(theme: Theme, ignoreImageAnalysis: string[], ignoreDarkSelector: string[]): void;
     pause(): void;
     destroy(): void;
     watch(): void;
@@ -242,7 +242,7 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
 
     let forceRenderStyle = false;
 
-    function render(theme: Theme, ignoreImageAnalysis: string[]) {
+    function render(theme: Theme, ignoreImageAnalysis: string[], ignoreDarkSelector: string[]) {
         const rules = getRulesSync();
         if (!rules) {
             return;
@@ -295,6 +295,7 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
                 force,
                 isAsyncCancelled: () => cancelAsyncOperations,
                 onDark: () => onDarkPage(),
+                ignoreDarkSelector,
             });
             isOverrideEmpty = syncStyle.sheet.cssRules.length === 0;
         }

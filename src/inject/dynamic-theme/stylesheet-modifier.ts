@@ -26,6 +26,23 @@ function getThemeKey(theme: Theme) {
 
 const asyncQueue = createAsyncTasksQueue();
 
+
+function shouldIgnoreSelector(selectorText: string, selectors: string[]) {
+    if (!selectorText || selectors.length === 0) {
+        return false;
+    }
+    if (selectors.some((s) => s === '*')) {
+        return true;
+    }
+    const ruleSelectors = selectorText.split(/,\s*/g);
+    for (let i = 0, len = selectors.length; i < len; i++) {
+        if (ruleSelectors.some((s) => s === selectors[i])) {
+            return true;
+        }
+    }
+    return false;
+}
+
 export function createStyleSheetModifier() {
     let renderId = 0;
     const rulesTextCache = new Map<string, string>();
@@ -41,11 +58,12 @@ export function createStyleSheetModifier() {
         prepareSheet: () => CSSStyleSheet;
         isAsyncCancelled: () => boolean;
         onDark: () => void;
+        ignoreDarkSelector: string[];
     }
 
     function modifySheet(options: ModifySheetOptions): void {
         const rules = options.sourceCSSRules;
-        const {theme, ignoreImageAnalysis, force, prepareSheet, isAsyncCancelled, onDark} = options;
+        const {theme, ignoreImageAnalysis, force, prepareSheet, isAsyncCancelled, onDark, ignoreDarkSelector} = options;
 
         let rulesChanged = (rulesModCache.size === 0);
         const notFoundCacheKeys = new Set(rulesModCache.keys());
@@ -64,22 +82,24 @@ export function createStyleSheetModifier() {
                 return;
             }
             const {cssText, selectorText, style} = rule;
-            const result = IsItDark(variablesStore, selectorText, style);
-            if (typeof result === 'boolean') {
-                if (result) {
-                    upOnStumbleDarkPage();
-                    return;
-                }
-            } else if (result instanceof Promise) {
-                let shouldReturn = false;
-                result.then((result) => {
+            if (!shouldIgnoreSelector(selectorText, ignoreDarkSelector)) {
+                const result = IsItDark(variablesStore, selectorText, style);
+                if (typeof result === 'boolean') {
                     if (result) {
                         upOnStumbleDarkPage();
-                        shouldReturn = true;
+                        return;
                     }
-                });
-                if (shouldReturn) {
-                    return;
+                } else if (result instanceof Promise) {
+                    let shouldReturn = false;
+                    result.then((result) => {
+                        if (result) {
+                            upOnStumbleDarkPage();
+                            shouldReturn = true;
+                        }
+                    });
+                    if (shouldReturn) {
+                        return;
+                    }
                 }
             }
             let textDiffersFromPrev = false;

@@ -146,6 +146,11 @@ declare namespace DarkReader {
          * Mostly used for wrongly inverted background-images
          */
         ignoreImageAnalysis: string[];
+        /**
+         * List of CSS selectors that should not be considered/determine
+         * If a site is already dark, this is to migate false-positives.
+         */
+        ignoreDarkSelector: string[];
     }
 }
 

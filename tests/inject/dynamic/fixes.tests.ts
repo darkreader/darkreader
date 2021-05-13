@@ -37,6 +37,7 @@ describe('FIXES', () => {
             css: '',
             ignoreInlineStyle: [],
             ignoreImageAnalysis: [],
+            ignoreDarkSelector: [],
 
         };
         createOrUpdateDynamicTheme(DEFAULT_THEME, fixes, false);
@@ -53,6 +54,7 @@ describe('FIXES', () => {
             css: '.text { color: red }',
             ignoreInlineStyle: [],
             ignoreImageAnalysis: [],
+            ignoreDarkSelector: [],
 
         };
         createOrUpdateDynamicTheme(DEFAULT_THEME, fixes, false);
@@ -69,6 +71,7 @@ describe('FIXES', () => {
             css: '',
             ignoreInlineStyle: ['.text'],
             ignoreImageAnalysis: [],
+            ignoreDarkSelector: [],
 
         };
         createOrUpdateDynamicTheme(DEFAULT_THEME, fixes, false);

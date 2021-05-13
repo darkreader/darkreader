@@ -123,6 +123,7 @@ export interface DynamicThemeFix {
     css: string;
     ignoreInlineStyle: string[];
     ignoreImageAnalysis: string[];
+    ignoreDarkSelector: string[];
 }
 
 export interface InversionFix {

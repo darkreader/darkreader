@@ -29,6 +29,7 @@ let filter: FilterConfig = null;
 let fixes: DynamicThemeFix = null;
 let isIFrame: boolean = null;
 let ignoredImageAnalysisSelectors: string[] = null;
+let ignoredDarkSelector: string[] = null;
 let ignoredInlineSelectors: string[] = null;
 
 function createOrUpdateStyle(className: string, root: ParentNode = document.head || document) {
@@ -185,7 +186,7 @@ function createDynamicStyleOverrides() {
         });
     variablesStore.matchVariablesAndDependants();
     variablesStore.putRootVars(document.head.querySelector('.darkreader--root-vars'), filter);
-    styleManagers.forEach((manager) => manager.render(filter, ignoredImageAnalysisSelectors));
+    styleManagers.forEach((manager) => manager.render(filter, ignoredImageAnalysisSelectors, ignoredDarkSelector));
     if (loadingStyles.size === 0) {
         cleanFallbackStyle();
     }
@@ -234,7 +235,7 @@ function createManager(element: StyleElement) {
         }
         variablesStore.addRulesForMatching(details.rules);
         variablesStore.matchVariablesAndDependants();
-        manager.render(filter, ignoredImageAnalysisSelectors);
+        manager.render(filter, ignoredImageAnalysisSelectors, ignoredDarkSelector);
     }
 
     const manager = manageStyle(element, {update, loadingStart, loadingEnd, onDarkPage: () => removeDynamicTheme()});
@@ -253,8 +254,8 @@ function removeManager(element: StyleElement) {
 }
 
 const throttledRenderAllStyles = throttle((callback?: () => void) => {
-    styleManagers.forEach((manager) => manager.render(filter, ignoredImageAnalysisSelectors));
-    adoptedStyleManagers.forEach((manager) => manager.render(filter, ignoredImageAnalysisSelectors));
+    styleManagers.forEach((manager) => manager.render(filter, ignoredImageAnalysisSelectors, ignoredDarkSelector));
+    adoptedStyleManagers.forEach((manager) => manager.render(filter, ignoredImageAnalysisSelectors, ignoredDarkSelector));
     callback && callback();
 });
 
@@ -313,7 +314,7 @@ function handleAdoptedStyleSheets(node: ShadowRoot | Document) {
             const newManger = createAdoptedStyleSheetOverride(node, {onDarkPage: () => removeDynamicTheme()});
 
             adoptedStyleManagers.push(newManger);
-            newManger.render(filter, ignoredImageAnalysisSelectors);
+            newManger.render(filter, ignoredImageAnalysisSelectors, ignoredDarkSelector);
         }
     }
 }
@@ -336,7 +337,7 @@ function watchForUpdates() {
                 variablesStore.addRulesForMatching(detail.rules);
             });
         variablesStore.matchVariablesAndDependants();
-        newManagers.forEach((manager) => manager.render(filter, ignoredImageAnalysisSelectors));
+        newManagers.forEach((manager) => manager.render(filter, ignoredImageAnalysisSelectors, ignoredDarkSelector));
         newManagers.forEach((manager) => manager.watch());
         stylesToRestore.forEach((style) => styleManagers.get(style).restore());
     }, (shadowRoot) => {
@@ -398,9 +399,11 @@ export function createOrUpdateDynamicTheme(filterConfig: FilterConfig, dynamicTh
     if (fixes) {
         ignoredImageAnalysisSelectors = Array.isArray(fixes.ignoreImageAnalysis) ? fixes.ignoreImageAnalysis : [];
         ignoredInlineSelectors = Array.isArray(fixes.ignoreInlineStyle) ? fixes.ignoreInlineStyle : [];
+        ignoredDarkSelector = Array.isArray(fixes.ignoreDarkSelector) ? fixes.ignoreDarkSelector : [];
     } else {
         ignoredImageAnalysisSelectors = [];
         ignoredInlineSelectors = [];
+        ignoredDarkSelector = [];
     }
     isIFrame = iframe;
     if (document.head) {

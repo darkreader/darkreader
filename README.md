@@ -12,7 +12,7 @@
 ## Questions
 
 Most questions can be answered by reading the [help page](https://darkreader.org/help/).
-If the help page doesn't answer your question, open up an [issue](https://github.com/darkreader/darkreader/issues/new/) and choose the template 'Question' and fill out the necessary info. 
+If the help page doesn't answer your question, open up an [issue](https://github.com/darkreader/darkreader/issues/new/) and choose the template 'Question' and fill out the necessary info.
 
 ## How to contribute
 
@@ -20,12 +20,12 @@ Read more about contributing to Dark Reader in [CONTRIBUTING.md](https://github.
 
 ## Building for use
 
-You can install the extension from a file.  
-Install [Node.js LTS](https://nodejs.org/en/). Download the source code (or check out from git).  
-Open terminal in the root folder and run:  
+You can install the extension from a file.
+Install [Node.js LTS](https://nodejs.org/en/). Download the source code (or check out from git).
+Open terminal in the root folder and run:
 
-- `npm install`  
-- `npm run build`  
+- `npm install`
+- `npm run build`
 
 This will generate a `build.zip` file that is useable in a Chromium-based browser and also a `build-firefox.xpi` file that is useable in Firefox.
 
@@ -115,8 +115,8 @@ However, this can be enabled by the following steps:
 <br/>
 <p align="center"><a rel="noreferrer noopener" href="https://opencollective.com/darkreader#backers" target="_blank"><img src="https://opencollective.com/darkreader/backers.svg?width=890&limit=1000"></a></p>
 
-<h2 align="center">Sponsers</h2>
-<p>Does your company use Dark Reader? Ask your manager or the marketing team if your company would be interested in supporting our project. By supporting this project, it will allow the maintainers to dedicate more time for maintenance and new features for everyone. Also, your company's logo will show <a rel="noreferrer noopener" href="https://github.com/darkreader/darkreader#sponsers" target="_blank">on Github</a> - who doesn't want a little extra exposure? <a rel="noreferrer noopener" href="https://opencollective.com/darkreader" target="_blank">Here's the info</a>.</p>
+<h2 align="center">Sponsors</h2>
+<p>Does your company use Dark Reader? Ask your manager or the marketing team if your company would be interested in supporting our project. By supporting this project, it will allow the maintainers to dedicate more time for maintenance and new features for everyone. Also, your company's logo will show <a rel="noreferrer noopener" href="https://github.com/darkreader/darkreader#sponsors" target="_blank">on Github</a> - who doesn't want a little extra exposure? <a rel="noreferrer noopener" href="https://opencollective.com/darkreader" target="_blank">Here's the info</a>.</p>
 
 <h3 align="center"><strong>Thank you to our wonderful sponsors!</strong></h3>
 

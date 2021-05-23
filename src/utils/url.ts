@@ -183,8 +183,8 @@ export function isURLEnabled(url: string, userSettings: UserSettings, {isProtect
     const isURLInUserList = isURLInList(url, userSettings.siteList);
     const isURLInEnabledList = isURLInList(url, userSettings.siteListEnabled);
 
-    if (userSettings.applyToListedOnly) {
-        return isURLInUserList || isURLInEnabledList;
+    if (userSettings.applyToListedOnly && !isURLInEnabledList) {
+        return isURLInUserList;
     }
 
     if (isURLInEnabledList && isInDarkList) {

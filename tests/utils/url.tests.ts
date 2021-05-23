@@ -236,8 +236,13 @@ test('URL is enabled', () => {
         {isProtected: false, isInDarkList: false},
     )).toBe(true);
     expect(isURLEnabled(
-        'https://www.netflix.com',
-        {enableForPDF: true, siteList: [''], siteListEnabled: ['wwww.netflix.com'], applyToListedOnly: true} as UserSettings,
+        'https://netflix.com',
+        {enableForPDF: true, siteList: [''], siteListEnabled: ['netflix.com'], applyToListedOnly: true} as UserSettings,
+        {isProtected: false, isInDarkList: true},
+    )).toBe(true);
+    expect(isURLEnabled(
+        'https://netflix.com',
+        {enableForPDF: true, siteList: [''], siteListEnabled: ['netflix.com'], applyToListedOnly: false} as UserSettings,
         {isProtected: false, isInDarkList: true},
     )).toBe(true);
 });

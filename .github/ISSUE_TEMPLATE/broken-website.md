@@ -53,7 +53,7 @@ assignees: ''
 
 - OS: <!-- e.g. Windows, macOS, Linux -->
 - Browser: <!-- e.g. Chrome 91, Firefox 88, Safari 14 -->
-- Dark Reader Version: <!-- e.g. 4.9.32 -->
+- Dark Reader Version: <!-- e.g. 4.9.33 -->
 
 ## Additional context
 <!-- Add any other context about the problem here. -->

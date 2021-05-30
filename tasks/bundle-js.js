@@ -73,6 +73,15 @@ const jsEntries = [
         watchFiles: null,
     },
     {
+        src: 'src/background/analyze-image.ts',
+        dest: 'background/analyze-image.js',
+        reloadType: reload.FULL,
+        async postBuild({debug}) {
+            await copyToBrowsers({cwdPath: this.dest, debug});
+        },
+        watchFiles: null,
+    },
+    {
         src: 'src/ui/devtools/index.tsx',
         dest: 'ui/devtools/index.js',
         reloadType: reload.UI,

@@ -2,7 +2,7 @@ import {getSVGFilterMatrixValue} from '../../generators/svg-filter';
 import {bgFetch} from './network';
 import {loadAsDataURL} from '../../utils/network';
 import type {FilterConfig} from '../../definitions';
-import {logWarn} from '../utils/log';
+import type {WorkerData} from '../../background/analyze-image';
 
 export interface ImageDetails {
     src: string;
@@ -15,40 +15,6 @@ export interface ImageDetails {
     isLarge: boolean;
 }
 
-export async function getImageDetails(url: string) {
-    let dataURL: string;
-    if (url.startsWith('data:')) {
-        dataURL = url;
-    } else {
-        dataURL = await getImageDataURL(url);
-    }
-    const image = await urlToImage(dataURL);
-    const info = analyzeImage(image);
-    return {
-        src: url,
-        dataURL,
-        width: image.naturalWidth,
-        height: image.naturalHeight,
-        ...info,
-    };
-}
-
-async function getImageDataURL(url: string) {
-    const parsedURL = new URL(url);
-    if (parsedURL.origin === location.origin) {
-        return await loadAsDataURL(url);
-    }
-    return await bgFetch({url, responseType: 'data-url'});
-}
-
-async function urlToImage(url: string) {
-    return new Promise<HTMLImageElement>((resolve, reject) => {
-        const image = new Image();
-        image.onload = () => resolve(image);
-        image.onerror = () => reject(`Unable to load image ${url}`);
-        image.src = url;
-    });
-}
 
 const MAX_ANALIZE_PIXELS_COUNT = 32 * 32;
 let canvas: HTMLCanvasElement | OffscreenCanvas;
@@ -64,18 +30,26 @@ function createCanvas() {
     context.imageSmoothingEnabled = false;
 }
 
-function removeCanvas() {
-    canvas = null;
-    context = null;
+let imageID = 0;
+const imageResolvers = new Map<number, (data: ImageDetails) => void>();
+const imageRejectors = new Map<number, () => void>();
+
+async function urlToImage(url: string) {
+    return new Promise<HTMLImageElement>((resolve, reject) => {
+        const image = new Image();
+        image.onload = () => resolve(image);
+        image.onerror = () => reject(`Unable to load image ${url}`);
+        image.src = url;
+    });
 }
 
-function analyzeImage(image: HTMLImageElement) {
+
+function preAnalyzeImage(image: HTMLImageElement) {
     if (!canvas) {
         createCanvas();
     }
     const {naturalWidth, naturalHeight} = image;
     if (naturalHeight === 0 || naturalWidth === 0) {
-        logWarn(`logWarn(Image is empty ${image.currentSrc})`);
         return null;
     }
     const naturalPixelsCount = naturalWidth * naturalHeight;
@@ -85,58 +59,52 @@ function analyzeImage(image: HTMLImageElement) {
     context.clearRect(0, 0, width, height);
 
     context.drawImage(image, 0, 0, naturalWidth, naturalHeight, 0, 0, width, height);
-    const imageData = context.getImageData(0, 0, width, height);
-    const d = imageData.data;
+    return [context.getImageData(0, 0, width, height).data.buffer, width, height, naturalWidth, naturalHeight];
+}
 
-    const TRANSPARENT_ALPHA_THRESHOLD = 0.05;
-    const DARK_LIGHTNESS_THRESHOLD = 0.4;
-    const LIGHT_LIGHTNESS_THRESHOLD = 0.7;
+export async function getImageDetails(url: string) {
+    return new Promise<ImageDetails>(async (resolve, reject) => {
+        let dataURL: string;
+        if (url.startsWith('data:')) {
+            dataURL = url;
+        } else {
+            dataURL = await getImageDataURL(url);
+        }
+        const imageData = preAnalyzeImage(await urlToImage(dataURL));
 
-    let transparentPixelsCount = 0;
-    let darkPixelsCount = 0;
-    let lightPixelsCount = 0;
+        const id = ++imageID;
+        imageResolvers.set(id, resolve);
+        imageRejectors.set(id, reject);
+        chrome.runtime.sendMessage({type: 'analyze-image', data: [dataURL, url, id, ...imageData], id});
+    });
+}
 
-    let i: number, x: number, y: number;
-    let r: number, g: number, b: number, a: number;
-    let l: number;
-    for (y = 0; y < height; y++) {
-        for (x = 0; x < width; x++) {
-            i = 4 * (y * width + x);
-            r = d[i + 0] / 255;
-            g = d[i + 1] / 255;
-            b = d[i + 2] / 255;
-            a = d[i + 3] / 255;
+chrome.runtime.onMessage.addListener(({type, data, id}) => {
+    if (type === 'analyze-image-response') {
+        const {url, dataURL, details, success} = data as WorkerData;
+        const resolve = imageResolvers.get(id);
+        const reject = imageRejectors.get(id);
+        imageResolvers.delete(id);
+        imageRejectors.delete(id);
 
-            if (a < TRANSPARENT_ALPHA_THRESHOLD) {
-                transparentPixelsCount++;
-            } else {
-                // Use sRGB to determine the `pixel Lightness`
-                // https://en.wikipedia.org/wiki/Relative_luminance
-                l = 0.2126 * r + 0.7152 * g + 0.0722 * b;
-                if (l < DARK_LIGHTNESS_THRESHOLD) {
-                    darkPixelsCount++;
-                }
-                if (l > LIGHT_LIGHTNESS_THRESHOLD) {
-                    lightPixelsCount++;
-                }
-            }
+        if (!success) {
+            reject && reject();
+        } else {
+            resolve && resolve({
+                src: url,
+                dataURL,
+                ...details
+            });
         }
     }
+});
 
-    const totalPixelsCount = width * height;
-    const opaquePixelsCount = totalPixelsCount - transparentPixelsCount;
-
-    const DARK_IMAGE_THRESHOLD = 0.7;
-    const LIGHT_IMAGE_THRESHOLD = 0.7;
-    const TRANSPARENT_IMAGE_THRESHOLD = 0.1;
-    const LARGE_IMAGE_PIXELS_COUNT = 800 * 600;
-
-    return {
-        isDark: ((darkPixelsCount / opaquePixelsCount) >= DARK_IMAGE_THRESHOLD),
-        isLight: ((lightPixelsCount / opaquePixelsCount) >= LIGHT_IMAGE_THRESHOLD),
-        isTransparent: ((transparentPixelsCount / totalPixelsCount) >= TRANSPARENT_IMAGE_THRESHOLD),
-        isLarge: (naturalPixelsCount >= LARGE_IMAGE_PIXELS_COUNT),
-    };
+async function getImageDataURL(url: string) {
+    const parsedURL = new URL(url);
+    if (parsedURL.origin === location.origin) {
+        return await loadAsDataURL(url);
+    }
+    return await bgFetch({url, responseType: 'data-url'});
 }
 
 const objectURLs = new Set<string>();
@@ -164,7 +132,6 @@ export function getFilteredImageDataURL({dataURL, width, height}: ImageDetails, 
 }
 
 export function cleanImageProcessingCache() {
-    removeCanvas();
     objectURLs.forEach((u) => URL.revokeObjectURL(u));
     objectURLs.clear();
 }

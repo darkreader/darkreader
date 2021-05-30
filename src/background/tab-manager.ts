@@ -2,6 +2,7 @@ import {canInjectScript} from '../background/utils/extension-api';
 import {createFileLoader} from './utils/network';
 import type {Message} from '../definitions';
 import {isThunderbird} from '../utils/platform';
+import type {WorkerData} from './analyze-image';
 
 async function queryTabs(query: chrome.tabs.QueryInfo) {
     return new Promise<chrome.tabs.Tab[]>((resolve) => {
@@ -27,9 +28,11 @@ interface PortInfo {
 
 export default class TabManager {
     private ports: Map<number, Map<number, PortInfo>>;
+    private canvasWorker: Worker;
 
     constructor({getConnectionMessage, onColorSchemeChange}: TabManagerOptions) {
         this.ports = new Map();
+        this.canvasWorker = new Worker('/background/analyze-image.js');
         chrome.runtime.onConnect.addListener((port) => {
             if (port.name === 'tab') {
                 const reply = (options: ConnectionMessageOptions) => {
@@ -78,6 +81,12 @@ export default class TabManager {
 
         const fileLoader = createFileLoader();
 
+        this.canvasWorker.onmessage = function (event: MessageEvent) {
+            const {dataURL, url, id, senderID, details, success} = event.data as WorkerData;
+            const sendResponse = (response) => chrome.tabs.sendMessage(senderID, {type: 'analyze-image-response', id, ...response});
+            sendResponse({data: {dataURL, url, details, success}});
+        };
+
         chrome.runtime.onMessage.addListener(async ({type, data, id}: Message, sender) => {
             if (type === 'fetch') {
                 const {url, responseType, mimeType} = data;
@@ -117,6 +126,9 @@ export default class TabManager {
                     .get(activeTab.id)
                     .get(0).port
                     .postMessage({type: 'export-css'});
+            }
+            if (type === 'analyze-image') {
+                this.canvasWorker.postMessage([...data, sender.tab.id]);
             }
         });
     }

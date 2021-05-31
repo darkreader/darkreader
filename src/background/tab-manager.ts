@@ -80,7 +80,7 @@ export default class TabManager {
 
         chrome.runtime.onMessage.addListener(async ({type, data, id}: Message, sender) => {
             if (type === 'fetch') {
-                const {url, responseType, mimeType} = data;
+                const {url, responseType, mimeType, origin} = data;
 
                 // Using custom response due to Chrome and Firefox incompatibility
                 // Sometimes fetch error behaves like synchronous and sends `undefined`
@@ -94,7 +94,7 @@ export default class TabManager {
                     }
                 }
                 try {
-                    const response = await fileLoader.get({url, responseType, mimeType});
+                    const response = await fileLoader.get({url, responseType, mimeType, origin});
                     sendResponse({data: response});
                 } catch (err) {
                     sendResponse({error: err && err.message ? err.message : err});

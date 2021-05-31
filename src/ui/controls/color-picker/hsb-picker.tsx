@@ -4,6 +4,7 @@ import type {RGBA} from '../../../utils/color';
 import {rgbToHSL, parse, hslToString, rgbToHexString} from '../../../utils/color';
 import {clamp, scale} from '../../../utils/math';
 import {createSwipeHandler} from '../../utils';
+import {isElementHidden} from '../utils';
 
 interface HSB {
     h: number;
@@ -18,6 +19,8 @@ interface HSBPickerProps {
 }
 
 interface HSBPickerState {
+    prevHidden: boolean;
+    hueCanvasRendered: boolean;
     activeHSB: HSB;
     activeChangeHandler: (color: string) => void;
     hueTouchStartHandler: (e: TouchEvent) => void;
@@ -118,15 +121,24 @@ export default function HSBPicker(props: HSBPickerProps) {
     }
 
     function onSBCanvasRender(canvas: HTMLCanvasElement) {
-        const hue = activeHSB.h;
-        const prevHue = prevColor && rgbToHSB(parse(prevColor)).h;
-        if (hue === prevHue) {
+        if (isElementHidden(canvas)) {
+            context.store.wasPrevHidden = true;
             return;
         }
+        const hue = activeHSB.h;
+        const prevHue = prevColor && rgbToHSB(parse(prevColor)).h;
+        if (!context.store.wasPrevHidden && hue === prevHue) {
+            return;
+        }
+        context.store.wasPrevHidden = false;
         renderSB(hue, canvas);
     }
 
-    function onHueCanvasCreate(canvas: HTMLCanvasElement) {
+    function onHueCanvasRender(canvas: HTMLCanvasElement) {
+        if (isElementHidden(canvas) || context.store.hueCanvasRendered) {
+            return;
+        }
+        context.store.hueCanvasRendered = true;
         renderHue(canvas);
     }
 
@@ -207,7 +219,7 @@ export default function HSBPicker(props: HSBPickerProps) {
                     store.hueTouchStartHandler = onHuePointerDown;
                 }}
             >
-                <canvas class="hsb-picker__hue-canvas" oncreate={onHueCanvasCreate} />
+                <canvas class="hsb-picker__hue-canvas" onrender={onHueCanvasRender} />
                 <span class="hsb-picker__hue-cursor" style={hueCursorStyle}></span>
             </span>
         </span>

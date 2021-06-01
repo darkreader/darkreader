@@ -22,7 +22,7 @@ export enum FilterMode {
 export function hasPatchForChromiumIssue501582() {
     return Boolean(
         isChromium &&
-        compareChromeVersions(chromiumVersion, '81.0.4035.0') <= 0
+        compareChromeVersions(chromiumVersion, '81.0.4035.0') >= 0
     );
 }
 
@@ -79,10 +79,11 @@ export function cssFilterStyleSheetTemplate(filterValue: string, reverseFilterVa
 
     if (!frameURL) {
         const light = [255, 255, 255];
-        // If browser affected by Chromium Issue 501582, set html element's background dark
+        // If browser not affected by Chromium Issue 501582, set light background on html
+        // else apply color matrix first to invert light color before setting as background
         const bgColor = hasPatchForChromiumIssue501582() && config.mode === FilterMode.dark ?
-            applyColorMatrix(light, createFilterMatrix(config)).map(Math.round) :
-            light;
+            light :
+            applyColorMatrix(light, createFilterMatrix(config)).map(Math.round);
         lines.push('');
         lines.push('/* Page background */');
         lines.push('html {');

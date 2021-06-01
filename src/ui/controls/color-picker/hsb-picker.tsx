@@ -27,7 +27,7 @@ interface HSBPickerState {
     sbTouchStartHandler: (e: TouchEvent) => void;
 }
 
-const HSBPickerDefaults: HSBPickerState = {
+const hsbPickerDefaults: HSBPickerState = {
     wasPrevHidden: true,
     hueCanvasRendered: false,
     activeHSB: null,
@@ -114,7 +114,7 @@ function renderSB(hue: number, canvas: HTMLCanvasElement) {
 
 export default function HSBPicker(props: HSBPickerProps) {
     const context = getContext();
-    const store = context.getStore(HSBPickerDefaults) as HSBPickerState;
+    const store = context.getStore(hsbPickerDefaults) as HSBPickerState;
     store.activeChangeHandler = props.onChange;
 
     const prevColor = context.prev && context.prev.props.color;
@@ -136,13 +136,13 @@ export default function HSBPicker(props: HSBPickerProps) {
         const hue = activeHSB.h;
         const prevHue = prevColor && rgbToHSB(parse(prevColor)).h;
         if (store.wasPrevHidden || hue !== prevHue) {
-            store.wasPrevHidden = false;
             renderSB(hue, canvas);
         }
+        store.wasPrevHidden = false;
     }
 
     function onHueCanvasRender(canvas: HTMLCanvasElement) {
-        if (isElementHidden(canvas) || store.hueCanvasRendered) {
+        if (store.hueCanvasRendered || isElementHidden(canvas)) {
             return;
         }
         store.hueCanvasRendered = true;

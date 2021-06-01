@@ -19,7 +19,7 @@ interface HSBPickerProps {
 }
 
 interface HSBPickerState {
-    prevHidden: boolean;
+    wasPrevHidden: boolean;
     hueCanvasRendered: boolean;
     activeHSB: HSB;
     activeChangeHandler: (color: string) => void;
@@ -122,23 +122,23 @@ export default function HSBPicker(props: HSBPickerProps) {
 
     function onSBCanvasRender(canvas: HTMLCanvasElement) {
         if (isElementHidden(canvas)) {
-            context.store.wasPrevHidden = true;
+            store.wasPrevHidden = true;
             return;
         }
         const hue = activeHSB.h;
         const prevHue = prevColor && rgbToHSB(parse(prevColor)).h;
-        if (!context.store.wasPrevHidden && hue === prevHue) {
+        if (!store.wasPrevHidden && hue === prevHue) {
             return;
         }
-        context.store.wasPrevHidden = false;
+        store.wasPrevHidden = false;
         renderSB(hue, canvas);
     }
 
     function onHueCanvasRender(canvas: HTMLCanvasElement) {
-        if (isElementHidden(canvas) || context.store.hueCanvasRendered) {
+        if (isElementHidden(canvas) || store.hueCanvasRendered) {
             return;
         }
-        context.store.hueCanvasRendered = true;
+        store.hueCanvasRendered = true;
         renderHue(canvas);
     }
 

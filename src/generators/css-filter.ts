@@ -79,11 +79,10 @@ export function cssFilterStyleSheetTemplate(filterValue: string, reverseFilterVa
 
     if (!frameURL) {
         const light = [255, 255, 255];
-        // If browser not affected by Chromium Issue 501582, set light background on html
-        // else apply color matrix first to invert light color before setting as background
-        const bgColor = hasPatchForChromiumIssue501582() && config.mode === FilterMode.dark ?
-            light :
-            applyColorMatrix(light, createFilterMatrix(config)).map(Math.round);
+        // If browser affected by Chromium Issue 501582, set dark background on html
+        const bgColor = !hasPatchForChromiumIssue501582() && config.mode === FilterMode.dark ?
+            applyColorMatrix(light, createFilterMatrix(config)).map(Math.round) :
+            light;
         lines.push('');
         lines.push('/* Page background */');
         lines.push('html {');

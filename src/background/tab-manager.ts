@@ -125,12 +125,16 @@ export default class TabManager {
         (await queryTabs({}))
             .filter((tab) => options.runOnProtectedPages || canInjectScript(tab.url))
             .filter((tab) => !this.ports.has(tab.id))
-            .forEach((tab) => !tab.discarded && chrome.tabs.executeScript(tab.id, {
-                runAt: 'document_start',
-                file: '/inject/index.js',
-                allFrames: true,
-                matchAboutBlank: true,
-            }));
+            .forEach((tab) => {
+                if (!tab.discarded) {
+                    chrome.tabs.executeScript(tab.id, {
+                        runAt: 'document_start',
+                        file: '/inject/index.js',
+                        allFrames: true,
+                        matchAboutBlank: true,
+                    });
+                }
+            });
     }
 
     async registerMailDisplayScript() {

@@ -135,7 +135,7 @@ export default function HSBPicker(props: HSBPickerProps) {
         }
         const hue = activeHSB.h;
         const prevHue = prevColor && rgbToHSB(parse(prevColor)).h;
-        if (store.wasPrevHidden || hue === prevHue) {
+        if (store.wasPrevHidden || hue !== prevHue) {
             store.wasPrevHidden = false;
             renderSB(hue, canvas);
         }

@@ -78,8 +78,7 @@ export function cssFilterStyleSheetTemplate(filterValue: string, reverseFilterVa
 
     if (!frameURL) {
         // If user has the chrome issue the colors should be the other way around as of the rootcolors will affect the whole background color of the page
-        const rootColors = hasChromiumIssue501582() && config.mode === FilterMode.dark ? [0, 0, 0] : [255, 255, 255];
-        const bgColor = `rgb(${rootColors.join(',')})`;
+        const bgColor = hasChromiumIssue501582() && config.mode === FilterMode.dark ? 'black' : 'white';
         lines.push('');
         lines.push('/* Page background */');
         lines.push('html {');

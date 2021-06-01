@@ -22,7 +22,7 @@ export enum FilterMode {
 export function hasChromiumIssue501582() {
     return Boolean(
         isChromium &&
-        compareChromeVersions(chromiumVersion, '81.0.4035.0') >= 0
+        compareChromeVersions(chromiumVersion, '81.0.4035.0') <= 0
     );
 }
 
@@ -80,15 +80,7 @@ export function cssFilterStyleSheetTemplate(filterValue: string, reverseFilterVa
     if (!frameURL) {
         // If user has the chrome issue the colors should be the other way around as of the rootcolors will affect the whole background color of the page
         const rootColors = hasChromiumIssue501582() && config.mode === FilterMode.dark ? [0, 0, 0] : [255, 255, 255];
-        const [r, g, b] = applyColorMatrix(rootColors, createFilterMatrix(config));
-        const bgColor = {
-            r: Math.round(r),
-            g: Math.round(g),
-            b: Math.round(b),
-            toString() {
-                return `rgb(${this.r},${this.g},${this.b})`;
-            },
-        };
+        const bgColor = `rgb(${rootColors.join(',')})`;
         lines.push('');
         lines.push('/* Page background */');
         lines.push('html {');

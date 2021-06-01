@@ -78,10 +78,11 @@ export function cssFilterStyleSheetTemplate(filterValue: string, reverseFilterVa
     });
 
     if (!frameURL) {
+        const light = [255, 255, 255];
         // If browser affected by Chromium Issue 501582, set html element's background dark
         const bgColor = hasPatchForChromiumIssue501582() && config.mode === FilterMode.dark ?
-            applyColorMatrix([0, 0, 0], createFilterMatrix(config)).map(Math.round) :
-            [255, 255, 255];
+            applyColorMatrix(light, createFilterMatrix(config)).map(Math.round) :
+            light;
         lines.push('');
         lines.push('/* Page background */');
         lines.push('html {');

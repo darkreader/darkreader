@@ -40,10 +40,19 @@ blah blah blah
 
 ### Installing prerequisites 
 
-#### Installing git
+#### Installing via Homebrew
 
-#### Installing NodeJS
+1. Install [homebrew](https://brew.sh/) by pasting the script below in a macOS Terminal. (Skip this step if you already installed homebrew)
 
+```sh
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+```
+
+2. After installing homebrew, execute this script below in a macOS Terminal.
+
+```sh
+brew install node git
+```
 
 ## Linux instructions
 

@@ -15,13 +15,19 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor i
 
 ## Windows instructions
 
-blah blah blah
+blah blah 
+
+### Installing prerequisites 
 
 ## macOS instructions
 
 blah blah blah
 
+### Installing prerequisites 
+
 ## Linux instructions
 
 blah blah blah
+
+### Installing prerequisites
 

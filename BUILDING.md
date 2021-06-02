@@ -41,8 +41,10 @@ brew install node git
 
 blah blah blah
 
-### Installing prerequisites
+### Installing prerequisites via built-in package managers
 
-#### Installing git
-
-#### Installing NodeJS
+- Debian / Ubuntu: `sudo apt-get install nodejs git`
+- Fedora: `sudo dnf install nodejs git`
+- Arch Linux / Manjaro: `sudo pacman -S nodejs git`
+- CentOS / RHEL: `sudo yum install nodejs git`
+- Gentoo: `emerge --verbose net-libs/nodejs dev-vcs/git`

@@ -28,11 +28,11 @@ blah blah blah
 - cake
 - also cake
 
-## UNIX / Linux instructions
+## Linux instructions
 
 blah blah blah
 
-### UNIX / Linux prerequisites
+### Linux prerequisites
 
 - cat
 - more cats

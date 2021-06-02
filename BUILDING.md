@@ -22,11 +22,21 @@ blah blah
 
 ### Installing prerequisites 
 
+#### Installing git
+
+#### Installing NodeJS
+
+
 ## macOS instructions
 
 blah blah blah
 
 ### Installing prerequisites 
+
+#### Installing git
+
+#### Installing NodeJS
+
 
 ## Linux instructions
 
@@ -34,3 +44,6 @@ blah blah blah
 
 ### Installing prerequisites
 
+#### Installing git
+
+#### Installing NodeJS

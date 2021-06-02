@@ -4,8 +4,11 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor i
 
 ## Table of Contents
 - [Windows instructions](https://github.com/AndrewDaGuy/darkreader/blob/Building-Patch/BUILDING.md#windows-instructions)
+  - [Windows prerequisites](https://github.com/AndrewDaGuy/darkreader/blob/Building-Patch/BUILDING.md#windows-prerequisites)
 - [macOS instructions](https://github.com/AndrewDaGuy/darkreader/blob/Building-Patch/BUILDING.md#macos-instructions)
+  - [macOS prerequisites](https://github.com/AndrewDaGuy/darkreader/blob/Building-Patch/BUILDING.md#macos-prerequisites)
 - [UNIX / Linux instructions](https://github.com/AndrewDaGuy/darkreader/blob/Building-Patch/BUILDING.md#unix--linux-instructions)
+  - [UNIX / Linux prerequisites](https://github.com/AndrewDaGuy/darkreader/blob/Building-Patch/BUILDING.md#unix--linux-prerequisites)
 
 ## Windows instructions
 

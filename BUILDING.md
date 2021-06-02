@@ -37,8 +37,10 @@ blah blah blah
 
 ### Installing prerequisites via built-in package managers
 
-- Debian / Ubuntu: `sudo apt-get install nodejs git`
-- Fedora: `sudo dnf install nodejs git`
-- Arch Linux / Manjaro: `sudo pacman -S nodejs git`
-- CentOS / RHEL: `sudo yum install nodejs git`
-- Gentoo: `emerge --verbose net-libs/nodejs dev-vcs/git`
+| Distribution         | Command                                        | Package Manager                                               |
+|----------------------|------------------------------------------------|---------------------------------------------------------------|
+| Debian / Ubuntu      | `sudo apt-get install nodejs git`              | [`apt`](https://en.wikipedia.org/wiki/APT_(software))         |
+| Arch Linux / Manjaro | `sudo pacman -S nodejs git`                    | [`pacman`](https://wiki.archlinux.org/title/Pacman)           |
+| CentOS / RHEL        | `sudo yum install nodejs git`                  | [`yum`](https://en.wikipedia.org/wiki/Yum_(software))         |
+| Fedora               | `sudo dnf install nodejs git`                  | [`dnf`](https://docs.fedoraproject.org/en-US/quick-docs/dnf/) |
+| Gentoo               | `emerge --verbose net-libs/nodejs dev-vcs/git` | [`emerge`](https://wiki.gentoo.org/wiki/Portage)              |

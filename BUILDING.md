@@ -4,17 +4,17 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor i
 
 ## Table of Contents
 - [Windows instructions](https://github.com/AndrewDaGuy/darkreader/blob/Building-Patch/BUILDING.md#windows-instructions)
-  - [Windows prerequisites](https://github.com/AndrewDaGuy/darkreader/blob/Building-Patch/BUILDING.md#windows-prerequisites)
+  - [Prerequisites](https://github.com/AndrewDaGuy/darkreader/blob/Building-Patch/BUILDING.md#windows-prerequisites)
 - [macOS instructions](https://github.com/AndrewDaGuy/darkreader/blob/Building-Patch/BUILDING.md#macos-instructions)
-  - [macOS prerequisites](https://github.com/AndrewDaGuy/darkreader/blob/Building-Patch/BUILDING.md#macos-prerequisites)
+  - [Prerequisites](https://github.com/AndrewDaGuy/darkreader/blob/Building-Patch/BUILDING.md#macos-prerequisites)
 - [Linux instructions](https://github.com/AndrewDaGuy/darkreader/blob/Building-Patch/BUILDING.md#unix--linux-instructions)
-  - [Linux prerequisites](https://github.com/AndrewDaGuy/darkreader/blob/Building-Patch/BUILDING.md#unix--linux-prerequisites)
+  - [Prerequisites](https://github.com/AndrewDaGuy/darkreader/blob/Building-Patch/BUILDING.md#unix--linux-prerequisites)
 
 ## Windows instructions
 
 blah blah blah
 
-### Windows prerequisites
+### Prerequisites
 
 - hammer
 - more hammers
@@ -23,7 +23,7 @@ blah blah blah
 
 blah blah blah
 
-### macOS prerequisites
+### Prerequisites
 
 - cake
 - also cake
@@ -32,7 +32,7 @@ blah blah blah
 
 blah blah blah
 
-### Linux prerequisites
+### Prerequisites
 
 - cat
 - more cats

@@ -21,7 +21,7 @@ blah blah
 
 ## macOS instructions
 
-blah blah blah
+_macOS 10.14 or later is required_
 
 ### Installing prerequisites via Homebrew
 

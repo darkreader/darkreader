@@ -19,7 +19,7 @@ _macOS 10.14 or later is required_
 
 ### Installing prerequisites via Homebrew
 
-1. Install [homebrew](https://brew.sh/) by pasting the script below in a macOS Terminal.(Skip this step if you already installed homebrew)
+1. Install [homebrew](https://brew.sh/) by pasting the script below in a macOS Terminal.
 
 ```sh
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"

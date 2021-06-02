@@ -38,11 +38,9 @@ blah blah
 
 blah blah blah
 
-### Installing prerequisites 
+### Installing prerequisites via Homebrew
 
-#### Installing via Homebrew
-
-1. Install [homebrew](https://brew.sh/) by pasting the script below in a macOS Terminal. (Skip this step if you already installed homebrew)
+1. Install [homebrew](https://brew.sh/) by pasting the script below in a macOS Terminal.(Skip this step if you already installed homebrew)
 
 ```sh
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"

@@ -33,8 +33,6 @@ brew install node git
 
 ## Linux instructions
 
-blah blah blah
-
 ### Installing prerequisites via built-in package managers
 
 | Distribution         | Command                                        | Package Manager                                               |

@@ -119,11 +119,12 @@ export function createStyleSheetModifier() {
 
         function setRule(target: CSSStyleSheet | CSSGroupingRule, index: number, rule: ReadyStyleRule) {
             const {selector, declarations} = rule;
-            target.insertRule(`${selector} {}`, index);
-            const style = (target.cssRules[index] as CSSStyleRule).style;
-            declarations.forEach(({property, value, important, sourceValue}) => {
-                style.setProperty(property, value == null ? sourceValue : value as string, important ? 'important' : '');
-            });
+            const getDeclarationText = (dec: ReadyDeclaration) => {
+                const {property, value, important, sourceValue} = dec;
+                return `${property}: ${value == null ? sourceValue : value}${important ? ' !important' : ''};`;
+            };
+            const ruleText = `${selector} { ${declarations.map(getDeclarationText).join(' ')} }`;
+            target.insertRule(ruleText, index);
         }
 
         interface RuleInfo {

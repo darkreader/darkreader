@@ -91,7 +91,17 @@ export class VariablesStore {
         });
 
         this.unknownBgVars.forEach((v) => {
-            if (this.isVarType(v, VAR_TYPE_BGCOLOR | VAR_TYPE_BGIMG)) {
+            const hasColor = this.findVarRef(v, (ref) => {
+                return (
+                    this.unknownColorVars.has(ref) ||
+                    this.isVarType(ref, VAR_TYPE_TEXTCOLOR | VAR_TYPE_BORDERCOLOR)
+                );
+            }) != null;
+            if (hasColor) {
+                this.itarateVarRefs(v, (ref) => {
+                    this.resolveVariableType(ref, VAR_TYPE_BGCOLOR);
+                });
+            } else if (this.isVarType(v, VAR_TYPE_BGCOLOR | VAR_TYPE_BGIMG)) {
                 this.unknownBgVars.delete(v);
             } else {
                 this.undefinedVars.add(v);

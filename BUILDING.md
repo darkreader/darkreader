@@ -7,15 +7,29 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor i
 - [macOS instructions](https://github.com/AndrewDaGuy/darkreader/blob/Building-Patch/BUILDING.md#macos-instructions)
 - [UNIX / Linux instructions](https://github.com/AndrewDaGuy/darkreader/blob/Building-Patch/BUILDING.md#unix--linux-instructions)
 
-### Windows instructions
+## Windows instructions
 
 blah blah blah
 
+### Windows prerequisites
 
-### macOS instructions
+- hammer
+- more hammers
+
+## macOS instructions
 
 blah blah blah
 
-### UNIX / Linux instructions
+### macOS prerequisites
+
+- cake
+- also cake
+
+## UNIX / Linux instructions
 
 blah blah blah
+
+### UNIX / Linux prerequisites
+
+- cat
+- more cats

@@ -4,10 +4,10 @@ import {getMatches} from '../../utils/text';
 import {getAbsoluteURL} from '../../utils/url';
 import {watchForNodePosition, removeNode, iterateShadowHosts} from '../utils/dom';
 import {logWarn} from '../utils/log';
-import {getCSSVariables, replaceCSSRelativeURLsWithAbsolute, removeCSSComments, replaceCSSFontFace, getCSSURLValue, cssImportRegex, getCSSBaseBath} from './css-rules';
+import {replaceCSSRelativeURLsWithAbsolute, removeCSSComments, replaceCSSFontFace, getCSSURLValue, cssImportRegex, getCSSBaseBath} from './css-rules';
 import {bgFetch} from './network';
 import {createStyleSheetModifier} from './stylesheet-modifier';
-import {isShadowDomSupported, isSafari, isThunderbird} from '../../utils/platform';
+import {isShadowDomSupported, isSafari, isThunderbird, isChromium} from '../../utils/platform';
 
 declare global {
     interface HTMLStyleElement {
@@ -30,8 +30,8 @@ declare global {
 export type StyleElement = HTMLLinkElement | HTMLStyleElement;
 
 export interface StyleManager {
-    details(): {variables: Map<string, string>};
-    render(theme: Theme, variables: Map<string, string>, ignoreImageAnalysis: string[]): void;
+    details(): {rules: CSSRuleList};
+    render(theme: Theme, ignoreImageAnalysis: string[]): void;
     pause(): void;
     destroy(): void;
     watch(): void;
@@ -94,6 +94,7 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
     let syncStylePositionWatcher: ReturnType<typeof watchForNodePosition> = null;
 
     let cancelAsyncOperations = false;
+    let isOverrideEmpty = true;
 
     const sheetModifier = createStyleSheetModifier();
 
@@ -136,6 +137,9 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
         syncStyle.classList.add('darkreader');
         syncStyle.classList.add('darkreader--sync');
         syncStyle.media = 'screen';
+        if (!isChromium && element.title) {
+            syncStyle.title = element.title;
+        }
         syncStyleSet.add(syncStyle);
     }
 
@@ -233,13 +237,12 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
             });
             return null;
         }
-        const variables = getCSSVariables(rules);
-        return {variables};
+        return {rules};
     }
 
     let forceRenderStyle = false;
 
-    function render(theme: Theme, variables: Map<string, string>, ignoreImageAnalysis: string[]) {
+    function render(theme: Theme, ignoreImageAnalysis: string[]) {
         const rules = getRulesSync();
         if (!rules) {
             return;
@@ -288,11 +291,11 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
                 prepareSheet: prepareOverridesSheet,
                 sourceCSSRules: rules,
                 theme,
-                variables,
                 ignoreImageAnalysis,
                 force,
                 isAsyncCancelled: () => cancelAsyncOperations,
             });
+            isOverrideEmpty = syncStyle.sheet.cssRules.length === 0;
         }
 
         buildOverrides();
@@ -443,11 +446,10 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
         }
 
         logWarn('Restore style', syncStyle, element);
-        const shouldForceRender = syncStyle.sheet == null || syncStyle.sheet.cssRules.length > 0;
         insertStyle();
         corsCopyPositionWatcher && corsCopyPositionWatcher.skip();
         syncStylePositionWatcher && syncStylePositionWatcher.skip();
-        if (shouldForceRender) {
+        if (!isOverrideEmpty) {
             forceRenderStyle = true;
             update();
         }
@@ -490,7 +492,7 @@ async function loadText(url: string) {
     if (url.startsWith('data:')) {
         return await (await fetch(url)).text();
     }
-    return await bgFetch({url, responseType: 'text', mimeType: 'text/css'});
+    return await bgFetch({url, responseType: 'text', mimeType: 'text/css', origin: window.location.origin});
 }
 
 async function replaceCSSImports(cssText: string, basePath: string, cache = new Map<string, string>()) {

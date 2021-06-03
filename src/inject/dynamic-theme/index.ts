@@ -1,4 +1,3 @@
-import {replaceCSSVariables, getElementCSSVariables} from './css-rules';
 import {overrideInlineStyle, getInlineOverrideStyle, watchForInlineStyles, stopWatchingForInlineStyles, INLINE_STYLE_SELECTOR} from './inline-style';
 import {changeMetaThemeColorWhenAvailable, restoreMetaThemeColor} from './meta-theme-color';
 import {getModifiedUserAgentStyle, getModifiedFallbackStyle, cleanModificationCache, parseColorWithCache, getSelectionColor} from './modify-css';
@@ -21,8 +20,8 @@ import {isFirefox} from '../../utils/platform';
 import {injectProxy} from './stylesheet-proxy';
 import {parse} from '../../utils/color';
 import {parsedURLCache} from '../../utils/url';
+import {variablesStore} from './variables';
 
-const variables = new Map<string, string>();
 const INSTANCE_ID = generateUID();
 const styleManagers = new Map<StyleElement, StyleManager>();
 const adoptedStyleManagers = [] as AdoptedStyleSheetManager[];
@@ -39,6 +38,7 @@ function createOrUpdateStyle(className: string, root: ParentNode = document.head
         element.classList.add('darkreader');
         element.classList.add(className);
         element.media = 'screen';
+        element.textContent = '';
     }
     return element;
 }
@@ -130,9 +130,12 @@ function createStaticStyleOverrides() {
     document.head.insertBefore(variableStyle, inlineStyle.nextSibling);
     setupNodePositionWatcher(variableStyle, 'variables');
 
+    const rootVarsStyle = createOrUpdateStyle('darkreader--root-vars');
+    document.head.insertBefore(rootVarsStyle, variableStyle.nextSibling);
+
     const proxyScript = createOrUpdateScript('darkreader--proxy');
     proxyScript.textContent = `(${injectProxy})()`;
-    document.head.insertBefore(proxyScript, variableStyle.nextSibling);
+    document.head.insertBefore(proxyScript, rootVarsStyle.nextSibling);
 }
 
 const shadowRootsWithOverrides = new Set<ShadowRoot>();
@@ -169,29 +172,22 @@ function cleanFallbackStyle() {
 function createDynamicStyleOverrides() {
     cancelRendering();
 
-    updateVariables(getElementCSSVariables(document.documentElement));
-
     const allStyles = getManageableStyles(document);
 
     const newManagers = allStyles
         .filter((style) => !styleManagers.has(style))
         .map((style) => createManager(style));
-    const newVariables = newManagers
+    newManagers
         .map((manager) => manager.details())
-        .filter((details) => details && details.variables.size > 0)
-        .map(({variables}) => variables);
-    if (newVariables.length === 0) {
-        styleManagers.forEach((manager) => manager.render(filter, variables, ignoredImageAnalysisSelectors));
-        if (loadingStyles.size === 0) {
-            cleanFallbackStyle();
-        }
-    } else {
-        newVariables.forEach((variables) => updateVariables(variables));
-        throttledRenderAllStyles(() => {
-            if (loadingStyles.size === 0) {
-                cleanFallbackStyle();
-            }
+        .filter((detail) => detail && detail.rules.length > 0)
+        .forEach((detail) => {
+            variablesStore.addRulesForMatching(detail.rules);
         });
+    variablesStore.matchVariablesAndDependants();
+    variablesStore.putRootVars(document.head.querySelector('.darkreader--root-vars'), filter);
+    styleManagers.forEach((manager) => manager.render(filter, ignoredImageAnalysisSelectors));
+    if (loadingStyles.size === 0) {
+        cleanFallbackStyle();
     }
     newManagers.forEach((manager) => manager.watch());
 
@@ -236,12 +232,9 @@ function createManager(element: StyleElement) {
         if (!details) {
             return;
         }
-        if (details.variables.size === 0) {
-            manager.render(filter, variables, ignoredImageAnalysisSelectors);
-        } else {
-            updateVariables(details.variables);
-            throttledRenderAllStyles();
-        }
+        variablesStore.addRulesForMatching(details.rules);
+        variablesStore.matchVariablesAndDependants();
+        manager.render(filter, ignoredImageAnalysisSelectors);
     }
 
     const manager = manageStyle(element, {update, loadingStart, loadingEnd});
@@ -250,17 +243,6 @@ function createManager(element: StyleElement) {
     return manager;
 }
 
-function updateVariables(newVars: Map<string, string>) {
-    if (newVars.size === 0) {
-        return;
-    }
-    newVars.forEach((value, key) => {
-        variables.set(key, value);
-    });
-    variables.forEach((value, key) => {
-        variables.set(key, replaceCSSVariables(value, variables));
-    });
-}
 
 function removeManager(element: StyleElement) {
     const manager = styleManagers.get(element);
@@ -271,8 +253,8 @@ function removeManager(element: StyleElement) {
 }
 
 const throttledRenderAllStyles = throttle((callback?: () => void) => {
-    styleManagers.forEach((manager) => manager.render(filter, variables, ignoredImageAnalysisSelectors));
-    adoptedStyleManagers.forEach((manager) => manager.render(filter, variables, ignoredImageAnalysisSelectors));
+    styleManagers.forEach((manager) => manager.render(filter, ignoredImageAnalysisSelectors));
+    adoptedStyleManagers.forEach((manager) => manager.render(filter, ignoredImageAnalysisSelectors));
     callback && callback();
 });
 
@@ -331,7 +313,7 @@ function handleAdoptedStyleSheets(node: ShadowRoot | Document) {
             const newManger = createAdoptedStyleSheetOverride(node);
 
             adoptedStyleManagers.push(newManger);
-            newManger.render(filter, variables, ignoredImageAnalysisSelectors);
+            newManger.render(filter, ignoredImageAnalysisSelectors);
         }
     }
 }
@@ -347,16 +329,14 @@ function watchForUpdates() {
         stylesToRemove.forEach((style) => removeManager(style));
         const newManagers = stylesToManage
             .map((style) => createManager(style));
-        const newVariables = newManagers
+        newManagers
             .map((manager) => manager.details())
-            .filter((details) => details && details.variables.size > 0)
-            .map(({variables}) => variables);
-        if (newVariables.length === 0) {
-            newManagers.forEach((manager) => manager.render(filter, variables, ignoredImageAnalysisSelectors));
-        } else {
-            newVariables.forEach((variables) => updateVariables(variables));
-            throttledRenderAllStyles();
-        }
+            .filter((detail) => detail && detail.rules.length > 0)
+            .forEach((detail) => {
+                variablesStore.addRulesForMatching(detail.rules);
+            });
+        variablesStore.matchVariablesAndDependants();
+        newManagers.forEach((manager) => manager.render(filter, ignoredImageAnalysisSelectors));
         newManagers.forEach((manager) => manager.watch());
         stylesToRestore.forEach((style) => styleManagers.get(style).restore());
     }, (shadowRoot) => {
@@ -367,10 +347,10 @@ function watchForUpdates() {
     watchForInlineStyles((element) => {
         overrideInlineStyle(element, filter, ignoredInlineSelectors, ignoredImageAnalysisSelectors);
         if (element === document.documentElement) {
-            const rootVariables = getElementCSSVariables(document.documentElement);
-            if (rootVariables.size > 0) {
-                updateVariables(rootVariables);
-                throttledRenderAllStyles();
+            const styleAttr = element.getAttribute('style');
+            if (styleAttr.includes('--')) {
+                variablesStore.matchVariablesAndDependants();
+                variablesStore.putRootVars(document.head.querySelector('.darkreader--root-vars'), filter);
             }
         }
     }, (root) => {
@@ -427,6 +407,8 @@ export function createOrUpdateDynamicTheme(filterConfig: FilterConfig, dynamicTh
         if (isAnotherDarkReaderInstanceActive()) {
             return;
         }
+        document.documentElement.setAttribute('data-darkreader-mode', 'dynamic');
+        document.documentElement.setAttribute('data-darkreader-scheme', filter.mode ? 'dark' : 'dimmed');
         createThemeAndWatchForUpdates();
     } else {
         if (!isFirefox) {
@@ -455,6 +437,8 @@ function removeProxy() {
 }
 
 export function removeDynamicTheme() {
+    document.documentElement.removeAttribute(`data-darkreader-mode`);
+    document.documentElement.removeAttribute(`data-darkreader-scheme`);
     cleanDynamicThemeCache();
     removeNode(document.querySelector('.darkreader--fallback'));
     if (document.head) {
@@ -464,6 +448,8 @@ export function removeDynamicTheme() {
         removeNode(document.head.querySelector('.darkreader--invert'));
         removeNode(document.head.querySelector('.darkreader--inline'));
         removeNode(document.head.querySelector('.darkreader--override'));
+        removeNode(document.head.querySelector('.darkreader--variables'));
+        removeNode(document.head.querySelector('.darkreader--root-vars'));
         removeNode(document.head.querySelector('meta[name="darkreader"]'));
         removeProxy();
     }
@@ -479,11 +465,11 @@ export function removeDynamicTheme() {
         manager.destroy();
     });
     adoptedStyleManagers.splice(0);
-    parsedURLCache.clear();
 }
 
 export function cleanDynamicThemeCache() {
-    variables.clear();
+    variablesStore.clear();
+    parsedURLCache.clear();
     stopWatchingForDocumentVisibility();
     cancelRendering();
     stopWatchingForUpdates();

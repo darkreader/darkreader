@@ -1,4 +1,4 @@
-import {formatCSS} from '../../src/utils/text';
+import {formatCSS, getParenthesesRange} from '../../src/utils/text';
 
 test('CSS formatting', () => {
     expect(formatCSS('div { color: red; }'))
@@ -98,4 +98,15 @@ test('CSS formatting', () => {
             '    }',
             '}',
         ].join('\n'));
+});
+
+test('Parenthesis Range', () => {
+    expect(getParenthesesRange('missing')).toBe(null);
+    expect(getParenthesesRange('()')).toEqual({start: 0, end: 2});
+    expect(getParenthesesRange('rgb(0, 0, 0)')).toEqual({start: 3, end: 12});
+    expect(getParenthesesRange('rgb(0, 0, 0), rgb(0, 0, 0)')).toEqual({start: 3, end: 12});
+    expect(getParenthesesRange('rgb(0, 0, 0), rgb(0, 0, 0)', 12)).toEqual({start: 17, end: 26});
+    expect(getParenthesesRange('rgb(0, var(--x, var(--y)), 0)')).toEqual({start: 3, end: 29});
+    expect(getParenthesesRange('rgb(0, var(--x, var(--y)), 0)', 4)).toEqual({start: 10, end: 25});
+    expect(getParenthesesRange('rgb(0, var(--x, var(--y)), 0), rgb(0, 0, 0)')).toEqual({start: 3, end: 29});
 });

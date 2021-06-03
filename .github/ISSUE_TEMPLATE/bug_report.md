@@ -15,6 +15,7 @@ assignees: ''
 <!--
 Thank you for taking the time to report a bug.
 Please make sure there is no existing issue with this kind of bug.
+Make sure to fill out every section when needed else remove the section.
 -->
 
 # Bug Report
@@ -46,9 +47,9 @@ Please make sure there is no existing issue with this kind of bug.
   If you don't know how to get your browser/Dark Reader version please search it up online.
 -->
 
-- OS: <!-- [e.g. Windows, MacOS, Linux] -->
-- Browser: <!-- [e.g. Chrome 84, Safari 13] -->
-- Dark Reader Version: <!-- [e.g. 4.9.26] -->
+- OS: <!-- [e.g. Windows, macOS, Linux] -->
+- Browser: <!-- [e.g. Chrome 89, Firefox 87, Safari 14] -->
+- Dark Reader Version: <!-- [e.g. 4.9.30] -->
 
 ## Additional context
 <!--Add any other context about the problem here. -->

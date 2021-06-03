@@ -18,9 +18,9 @@ afterEach(() => {
 });
 
 describe('FIXES', () => {
-    it('should should class name HTML', () => {
+    it('should add custom attributes to root element', () => {
         createOrUpdateDynamicTheme(DEFAULT_THEME, null, false);
-        expect(document.documentElement.getAttribute(`data-darkreader-mode`)).toBe(DEFAULT_THEME.engine);
+        expect(document.documentElement.getAttribute(`data-darkreader-mode`)).toBe('dynamic');
         expect(document.documentElement.getAttribute('data-darkreader-scheme')).toBe('dark');
 
         createOrUpdateDynamicTheme({...DEFAULT_THEME, mode: FilterMode.light}, null, false);

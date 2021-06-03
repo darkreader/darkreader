@@ -46,7 +46,7 @@ const shorthandVarDependantProperties = [
 ];
 
 const shorthandVarDepPropRegexps = isSafari ? shorthandVarDependantProperties.map((prop) => {
-    const regexp = new RegExp(`${prop}:\s*(.*?)\s*;`);
+    const regexp = new RegExp(`${prop}:\\s*(.*?)\\s*;`);
     return [prop, regexp] as [string, RegExp];
 }) : null;
 

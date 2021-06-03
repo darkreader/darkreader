@@ -38,6 +38,7 @@ function createOrUpdateStyle(className: string, root: ParentNode = document.head
         element.classList.add('darkreader');
         element.classList.add(className);
         element.media = 'screen';
+        element.textContent = '';
     }
     return element;
 }

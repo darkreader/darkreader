@@ -98,6 +98,7 @@ interface FetchRequestParameters {
     url: string;
     responseType: 'data-url' | 'text';
     mimeType?: string;
+    origin?: string;
 }
 
 export function createFileLoader() {
@@ -111,14 +112,14 @@ export function createFileLoader() {
         'text': loadAsText,
     };
 
-    async function get({url, responseType, mimeType}: FetchRequestParameters) {
+    async function get({url, responseType, mimeType, origin}: FetchRequestParameters) {
         const cache = caches[responseType];
         const load = loaders[responseType];
         if (cache.has(url)) {
             return cache.get(url);
         }
 
-        const data = await load(url, mimeType);
+        const data = await load(url, mimeType, origin);
         cache.set(url, data);
         return data;
     }

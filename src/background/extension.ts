@@ -165,12 +165,38 @@ export class Extension {
                     this.toggleURL(url);
                 }
             }
+            // If they use the normal shortcut, it only changes the global setting (even if this site has its own theme)
             if (command === 'switchEngine') {
                 console.log('Switch Engine command entered');
                 const engines = Object.values(ThemeEngines);
-                const index = engines.indexOf(this.user.settings.theme.engine);
-                const next = index === engines.length - 1 ? engines[0] : engines[index + 1];
-                this.setTheme({engine: next});
+                const index = engines.indexOf(this.user.settings.theme.engine);``;
+                const nextEngine = engines[(index + 1) % engines.length];
+                this.setTheme({engine: nextEngine});
+            }
+            // If they use the per-site shortcut, it changes it for just this site (creating a theme if necessary)
+            if (command === 'switchEngineForCurrentSite') {
+                console.log('Switch Engine for current site command entered');
+                const currentTabUrl = await this.tabs.getActiveTabURL();
+                const host = getURLHostOrProtocol(currentTabUrl);
+
+                // Find the site-specific theme
+                let customThemes = this.user.settings.customThemes.slice();
+                let customTheme = customThemes.find(({url}) => isURLInList(currentTabUrl, url));
+                // Make a site-specific theme if there isn't one
+                if (!customTheme) {
+                    customTheme = {
+                        url: [host],
+                        theme: {...this.user.settings.theme},
+                    };
+                    customThemes = customThemes.concat(customTheme);
+                }
+                // Change the site theme to use the next engine
+                const engines = Object.values(ThemeEngines);
+                const index = engines.indexOf(customTheme.theme.engine);
+                const nextEngine = engines[(index + 1) % engines.length];
+                customTheme.theme.engine = nextEngine;
+
+                this.changeSettings({customThemes});
             }
         });
     }

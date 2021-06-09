@@ -57,6 +57,9 @@
         },
         "switchEngine": {
             "description": "__MSG_theme_generation_mode__"
+        },
+        "switchEngineForCurrentSite": {
+            "description": "__MSG_theme_generation_mode_current_site__"
         }
     }
 }

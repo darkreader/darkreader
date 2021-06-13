@@ -20,7 +20,9 @@
     },
     "background": {
         "persistent": true,
-        "page": "background/index.html"
+        "scripts": [
+            "background/index.js"
+        ]
     },
     "content_scripts": [
         {

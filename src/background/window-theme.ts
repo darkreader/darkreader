@@ -59,7 +59,6 @@ const $colors = {
     sidebar_border: '#333',
     sidebar_text: 'black',
     tab_background_text: 'white',
-    tab_line: '#23aeff',
     tab_loading: '#23aeff',
     // 'textcolor' is the predecessor of 'tab_background_text'.
     // https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json/theme#colors

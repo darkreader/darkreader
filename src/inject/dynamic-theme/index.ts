@@ -9,7 +9,7 @@ import {removeNode, watchForNodePosition, iterateShadowHosts, isDOMReady, addDOM
 import {logWarn} from '../utils/log';
 import {throttle} from '../utils/throttle';
 import {clamp} from '../../utils/math';
-import {getCSSFilterValue} from '../../generators/css-filter';
+import {FilterMode, getCSSFilterValue} from '../../generators/css-filter';
 import {modifyBackgroundColor, modifyColor, modifyForegroundColor} from '../../generators/modify-colors';
 import {createTextStyle} from '../../generators/text-style';
 import type {FilterConfig, DynamicThemeFix} from '../../definitions';
@@ -87,18 +87,30 @@ function createStaticStyleOverrides() {
     setupNodePositionWatcher(textStyle, 'text');
 
     const invertStyle = createOrUpdateStyle('darkreader--invert');
+    let invertStyleContent = '';
     if (fixes && Array.isArray(fixes.invert) && fixes.invert.length > 0) {
-        invertStyle.textContent = [
+        invertStyleContent += [
             `${fixes.invert.join(', ')} {`,
             `    filter: ${getCSSFilterValue({
                 ...filter,
                 contrast: filter.mode === 0 ? filter.contrast : clamp(filter.contrast - 10, 0, 100),
             })} !important;`,
+            '',
             '}',
         ].join('\n');
-    } else {
-        invertStyle.textContent = '';
     }
+    const imageFilter = getCSSFilterValue({
+        ...filter,
+        mode: FilterMode.light // Disables the invert() hue-rotate()
+    });
+    if (imageFilter) {
+        invertStyleContent += [
+            'img {',
+            `   filter: ${imageFilter} !important;`,
+            '}'
+        ].join('\n');
+    }
+    invertStyle.textContent = invertStyleContent;
     document.head.insertBefore(invertStyle, textStyle.nextSibling);
     setupNodePositionWatcher(invertStyle, 'invert');
 

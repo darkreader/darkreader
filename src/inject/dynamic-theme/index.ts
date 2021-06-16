@@ -95,8 +95,7 @@ function createStaticStyleOverrides() {
                 ...filter,
                 contrast: filter.mode === 0 ? filter.contrast : clamp(filter.contrast - 10, 0, 100),
             })} !important;`,
-            '',
-            '}',
+            '}\n',
         ].join('\n');
     }
     const imageFilter = getCSSFilterValue({
@@ -104,11 +103,8 @@ function createStaticStyleOverrides() {
         mode: FilterMode.light // Disables the invert() hue-rotate()
     });
     if (imageFilter) {
-        invertStyleContent += [
-            'img {',
-            `   filter: ${imageFilter} !important;`,
-            '}'
-        ].join('\n');
+        invertStyleContent +=
+            `img { filter: ${imageFilter} !important;\n`;
     }
     invertStyle.textContent = invertStyleContent;
     document.head.insertBefore(invertStyle, textStyle.nextSibling);

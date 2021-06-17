@@ -8,11 +8,6 @@ blah blah
 
 ### Installing prerequisites 
 
-#### Installing git
-
-#### Installing NodeJS
-
-
 ## macOS instructions
 
 _macOS 10.14 or later is required_

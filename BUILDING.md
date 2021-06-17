@@ -2,7 +2,7 @@
 
 Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
 
-## Windows instructions
+## Microsoft Windows instructions
 
 Requirements:
 - Windows 7+ / Windows Server 2003+

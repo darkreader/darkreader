@@ -26,7 +26,7 @@ Full code:
 ```ps1
 <#
 Note: This script hasn't been tested yet
-DISClAIMER: I don't know how to write powershell code :c
+DISCLAIMER: I don't know how to write powershell code :c
 #>
 
 function menu {

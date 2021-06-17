@@ -8,6 +8,8 @@ blah blah
 
 ### Installing prerequisites 
 
+some text idk
+
 ## macOS instructions
 
 _macOS 10.14 or later is required_

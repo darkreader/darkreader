@@ -4,7 +4,9 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor i
 
 ## Windows instructions
 
-blah blah
+Requirements:
+- Windows 7+ / Windows Server 2003+
+- PowerShell v2+
 
 ### Installing prerequisites
 

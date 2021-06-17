@@ -4,9 +4,9 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor i
 
 ## Windows instructions
 
-blah blah 
+blah blah
 
-### Installing prerequisites 
+### Installing prerequisites
 
 some text idk
 
@@ -22,7 +22,7 @@ _macOS Mojave (10.14) or later is required_
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 ```
 
-2. After installing homebrew, execute this script below in a terminal.
+2. After installing homebrew, execute this script below in a terminal to install the packages.
 
 ```sh
 brew install node git

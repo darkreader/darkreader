@@ -18,7 +18,15 @@ choco install nodejs git
 
 ### Installing prerequisites via scoop
 
-mmhm
+_Requirements for scoop is listed at [lukesampson/scoop#requirements](https://github.com/lukesampson/scoop#requirements)_
+
+1. Follow the installation steps on [lukesampson/scoop#installation](https://github.com/lukesampson/scoop#installation).
+
+2. After installing, execute this scrpt below to install the packges.
+
+```ps1
+scoop install nodejs git
+```
 
 ## macOS instructions
 

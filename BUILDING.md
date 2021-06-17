@@ -10,7 +10,7 @@ _Microsoft Windows 7 or later is required_
 
 1. Follow the installation steps on [chocolatey.org/install](https://chocolatey.org/install).
 
-2. After installing chocolatey, execute this script below to install the packages required.
+2. After installation, run the script below.
 
 ```ps1
 choco install nodejs git
@@ -22,8 +22,8 @@ _Requirements for scoop is listed at [lukesampson/scoop#requirements](https://gi
 
 1. Follow the installation steps on [lukesampson/scoop#installation](https://github.com/lukesampson/scoop#installation).
 
-2. After installing, execute this scrpt below to install the packges.
-
+2. After installing, run this scrpt below.
+3. 
 ```ps1
 scoop install nodejs git
 ```
@@ -36,7 +36,7 @@ _macOS Mojave (10.14) or later is required_
 
 1. Follow the installation steps on [brew.sh](https://brew.sh/).  _(Skip this step if you already have homebrew)_
  
-2. After installing homebrew, execute this script below in a terminal to install the packages.
+2. After installation, run this script below in a terminal.
 
 ```sh
 brew install node git

@@ -19,13 +19,13 @@ _macOS 10.14 or later is required_
 
 ### Installing prerequisites via Homebrew
 
-1. Install [homebrew](https://brew.sh/) by pasting the script below in a macOS Terminal. _(Skip this step if you already have homebrew)_
+1. Install [homebrew](https://brew.sh/) by pasting the script below in a terminal. _(Skip this step if you already have homebrew)_
 
 ```sh
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 ```
 
-2. After installing homebrew, execute this script below in a macOS Terminal.
+2. After installing homebrew, execute this script below in a terminal.
 
 ```sh
 brew install node git

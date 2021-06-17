@@ -8,9 +8,12 @@ Requirements:
 - Windows 7+ / Windows Server 2003+
 - PowerShell v2+
 
-### Installing prerequisites
+### Installing prerequisites via chocolatey
 
-some text idk
+#### Installing chocolatey
+
+_Taken from [chocolatey.org/install](https://chocolatey.org/install#individual)_
+
 
 ## macOS instructions
 

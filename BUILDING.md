@@ -12,7 +12,7 @@ some text idk
 
 ## macOS instructions
 
-_macOS 10.14 or later is required_
+_macOS Mojave (10.14) or later is required_
 
 ### Installing prerequisites via Homebrew
 

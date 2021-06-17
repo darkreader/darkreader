@@ -20,7 +20,7 @@ Read more about contributing to Dark Reader in [CONTRIBUTING.md](https://github.
 
 ## Building Dark Reader
 
-See [BUILDING.md](https://github.com/AndrewDaGuy/darkreader/blob/Building-Patch/BUILDING.md) for instructions on how to build Dark Reader
+See [BUILDING.md](https://github.com/arche-dev/darkreader/blob/Building-Patch/BUILDING.md) for instructions on how to build Dark Reader
 
 ## Using Dark Reader for a website
 

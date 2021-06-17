@@ -16,6 +16,10 @@ _Microsoft Windows 7 or later is required_
 choco install nodejs git
 ```
 
+### Installing prerequisites via scoop
+
+mmhm
+
 ## macOS instructions
 
 _macOS Mojave (10.14) or later is required_

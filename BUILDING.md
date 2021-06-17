@@ -8,7 +8,7 @@ _Microsoft Windows 7 or later is required_
 
 ### Installing prerequisites via chocolatey
 
-1. Follow the installation steps on [chocolatey.org/install](https://chocolatey.org/install)
+1. Follow the installation steps on [chocolatey.org/install](https://chocolatey.org/install).
 
 2. After installing chocolatey, execute this script below to install the packages required.
 
@@ -22,12 +22,8 @@ _macOS Mojave (10.14) or later is required_
 
 ### Installing prerequisites via Homebrew
 
-1. Install [homebrew](https://brew.sh/) by pasting the script below in a terminal. _(Skip this step if you already have homebrew)_
-
-```sh
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-```
-
+1. Follow the installation steps on [brew.sh](https://brew.sh/).  _(Skip this step if you already have homebrew)_
+ 
 2. After installing homebrew, execute this script below in a terminal to install the packages.
 
 ```sh

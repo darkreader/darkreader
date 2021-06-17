@@ -13,7 +13,7 @@ _Microsoft Windows 7 or later is required_
 2. After installing chocolatey, execute this script below to install the packages required.
 
 ```ps1
-choco install nodejs git;
+choco install nodejs git
 ```
 
 ## macOS instructions

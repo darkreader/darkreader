@@ -6,12 +6,38 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor i
 
 _Microsoft Windows 7 or later is required_
 
-### Installing prerequisites via chocolatey
+### Installing prerequisites via Chocolatey
 
-#### Installing chocolatey
+_Chocolatey installation steps based on [chocolatey.org/install](https://chocolatey.org/install)_
 
-_Taken from [chocolatey.org/install](https://chocolatey.org/install#individual)_
+1. Make sure you're using powershell as an [administrator](https://www.howtogeek.com/194041/how-to-open-the-command-prompt-as-administrator-in-windows-8.1/ "HowToGeek: How to Open the Command Prompt as Administrator in Windows 8 or 10"). You can also install as a non-admin, check [Non-Administrative Installation](https://docs.chocolatey.org/en-us/choco/setup#non-administrative-install)
+2. Install with powershell.exe
 
+> ⚠️ __NOTE__: Please inspect [chocolatey.org/install.ps1](https://chocolatey.org/install.ps1) prior to running any of these scripts to ensure safety. We already know it's safe, but you should verify  the security and contents of any script from the internet you are not familiar with. All of these scripts download a remote PowerShell script and execute it on your machine. We take security very seriously. [Learn more about our security protocols](https://docs.chocolatey.org/en-us/information/security).
+
+With PowerShell, you must ensure [`Get-ExecutionPolicy`](https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_execution_policies?view=powershell-7.1) is not Restricted. We suggest using `Bypass` to bypass the policy to get things installed or `AllSigned` for quite a bit more security.
+
+- Run `Get-ExecutionPolicy`. If it returns `Restricted`, then run
+
+```ps1
+Set-ExecutionPolicy AllSigned
+```
+or
+```ps1
+Set-ExecutionPolicy Bypass -Scope Process
+```
+
+Now execute the following script:
+
+```ps1
+Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
+```
+
+3. After installing chocolatey, execute this script below to install the packages required.
+
+```ps1
+choco install nodejs git;
+```
 
 ## macOS instructions
 

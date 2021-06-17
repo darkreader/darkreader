@@ -4,9 +4,7 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor i
 
 ## Microsoft Windows instructions
 
-Requirements:
-- Windows 7+ / Windows Server 2003+
-- PowerShell v2+
+_Microsoft Windows 7 or later is required_
 
 ### Installing prerequisites via chocolatey
 

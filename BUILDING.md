@@ -22,7 +22,7 @@ _Requirements for scoop is listed at [lukesampson/scoop#requirements](https://gi
 1. Follow the installation steps on [lukesampson/scoop#installation](https://github.com/lukesampson/scoop#installation).
 
 2. After installing, run this scrpt below.
-3. 
+
 ```ps1
 scoop install nodejs git
 ```

@@ -7,7 +7,7 @@ _Microsoft Windows 7 or later is required_
 
 ### Installing prerequisites via chocolatey
 
-1. Follow the installation steps on [chocolatey.org/install](https://chocolatey.org/install).
+1. Follow the installation steps on [docs.chocolatey.org/choco/setup](https://docs.chocolatey.org/en-us/choco/setup).
 
 2. After installation, run the script below.
 

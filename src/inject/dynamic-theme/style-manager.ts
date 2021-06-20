@@ -429,7 +429,7 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
         removeNode(corsCopy);
         removeNode(syncStyle);
         loadingEnd();
-        if (loadingLinkID) {
+        if (loadingLinkID && loadingLinkStyles.has(loadingLinkID)) {
             loadingLinkStyles.get(loadingLinkID)();
             loadingLinkStyles.delete(loadingLinkID);
         }

@@ -53,4 +53,15 @@ describe('INLINE STYLES', () => {
         expect(getComputedStyle(span).color).toBe('rgb(140, 255, 140)');
         expect(getComputedStyle(span).backgroundColor).toBe('rgb(102, 102, 102)');
     });
+
+    it('should clean up the customProp after originial is gone', async () => {
+        container.innerHTML = '<span style="outline: red;">Watch inline style</span>';
+        createOrUpdateDynamicTheme(theme, null, false);
+        const span = document.querySelector('span');
+        expect(span.getAttribute('style')).toBe('outline: red; --darkreader-inline-outline:#b30000;');
+
+        span.style.outline = '';
+        await timeout(0);
+        expect(span.getAttribute('style')).toBe('');
+    });
 });

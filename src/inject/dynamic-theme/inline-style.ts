@@ -85,6 +85,8 @@ const overrides: Overrides = {
 };
 
 const overridesList = Object.values(overrides);
+const customPropsList = {};
+overridesList.forEach(({cssProp, customProp}) => customPropsList[customProp] = cssProp);
 
 const INLINE_STYLE_ATTRS = ['style', 'fill', 'stop-color', 'stroke', 'bgcolor', 'color'];
 export const INLINE_STYLE_SELECTOR = INLINE_STYLE_ATTRS.map((attr) => `[${attr}]`).join(', ');
@@ -317,6 +319,11 @@ export function overrideInlineStyle(element: HTMLElement, theme: FilterConfig, i
         }
         if (overrides.hasOwnProperty(property)) {
             setCustomProp(property, property, value);
+        } else {
+            const customProp = customPropsList[property];
+            if (customProp && !element.style[customProp]) {
+                element.style.setProperty(property, '');
+            }
         }
     });
     if (element.style && element instanceof SVGTextElement && element.style.fill) {

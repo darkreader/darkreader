@@ -19,7 +19,7 @@ choco install nodejs git
 
 1. Follow the installation steps on [lukesampson/scoop](https://github.com/lukesampson/scoop).
 
-2. After installing, run this scrpt below.
+2. After installation, run this scrpt below.
 
 ```ps1
 scoop install nodejs git

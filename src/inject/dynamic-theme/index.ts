@@ -465,6 +465,7 @@ export function removeDynamicTheme() {
     shadowRootsWithOverrides.clear();
     forEach(styleManagers.keys(), (el) => removeManager(el));
     loadingStylesCounter = 0;
+    loadingStyles.clear();
     forEach(document.querySelectorAll('.darkreader'), removeNode);
 
     adoptedStyleManagers.forEach((manager) => {

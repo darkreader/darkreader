@@ -35,7 +35,7 @@ _macOS Mojave (10.14) or later is required_
  
 2. After installation, run this script below in a terminal.
 
-```sh
+```bash
 brew install node git
 ```
 

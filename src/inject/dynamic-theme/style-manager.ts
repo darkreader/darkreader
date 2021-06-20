@@ -3,7 +3,7 @@ import {forEach} from '../../utils/array';
 import {getMatches} from '../../utils/text';
 import {getAbsoluteURL} from '../../utils/url';
 import {watchForNodePosition, removeNode, iterateShadowHosts} from '../utils/dom';
-import {logWarn} from '../utils/log';
+import {logInfo, logWarn} from '../utils/log';
 import {replaceCSSRelativeURLsWithAbsolute, removeCSSComments, replaceCSSFontFace, getCSSURLValue, cssImportRegex, getCSSBaseBath} from './css-rules';
 import {bgFetch} from './network';
 import {createStyleSheetModifier} from './stylesheet-modifier';
@@ -167,6 +167,7 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
             ) {
                 try {
                     loadingLinkID = ++loadingLinkStyle;
+                    logInfo(`Linkelement ${loadingLinkID} is not loaded yet and thus will be await for`, element);
                     await linkLoading(element, loadingLinkID);
                 } catch (err) {
                     // NOTE: Some @import resources can fail,
@@ -484,11 +485,12 @@ async function linkLoading(link: HTMLLinkElement, loadingID: number) {
         };
         const onLoad = () => {
             cleanUp();
+            logInfo(`Linkelement ${loadingID} has been loaded`);
             resolve();
         };
         const onError = () => {
             cleanUp();
-            reject(`Link loading failed ${link.href}`);
+            reject(`Linkelement ${loadingID} couldn't be loaded. ${link.href}`);
         };
         loadingLinkStyles.set(loadingID, reject);
         link.addEventListener('load', onLoad);

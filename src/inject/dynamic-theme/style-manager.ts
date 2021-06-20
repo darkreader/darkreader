@@ -81,6 +81,9 @@ document.addEventListener('__darkreader__inlineScriptsAllowed', () => {
     canOptimizeUsingProxy = true;
 });
 
+let loadingLinkStyle = 0;
+const loadingLinkStyles = new Map<number, (reason?: any) => void>();
+
 export function manageStyle(element: StyleElement, {update, loadingStart, loadingEnd}): StyleManager {
     const prevStyles: HTMLStyleElement[] = [];
     let next: Element = element;
@@ -145,6 +148,7 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
 
     let isLoadingRules = false;
     let wasLoadingError = false;
+    let loadingLinkID = 0;
 
     async function getRulesAsync(): Promise<CSSRuleList> {
         let cssText: string;
@@ -162,7 +166,8 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
                 isStillLoadingError(accessError)
             ) {
                 try {
-                    await linkLoading(element);
+                    loadingLinkID = ++loadingLinkStyle;
+                    await linkLoading(element, loadingLinkID);
                 } catch (err) {
                     // NOTE: Some @import resources can fail,
                     // but the style sheet can still be valid.
@@ -422,6 +427,11 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
         pause();
         removeNode(corsCopy);
         removeNode(syncStyle);
+        loadingEnd();
+        if (loadingLinkID) {
+            loadingLinkStyles.get(loadingLinkID)();
+            loadingLinkStyles.delete(loadingLinkID);
+        }
     }
 
     function watch() {
@@ -465,11 +475,12 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
     };
 }
 
-async function linkLoading(link: HTMLLinkElement) {
+async function linkLoading(link: HTMLLinkElement, loadingID: number) {
     return new Promise<void>((resolve, reject) => {
         const cleanUp = () => {
             link.removeEventListener('load', onLoad);
             link.removeEventListener('error', onError);
+            loadingLinkStyles.delete(loadingID);
         };
         const onLoad = () => {
             cleanUp();
@@ -479,6 +490,7 @@ async function linkLoading(link: HTMLLinkElement) {
             cleanUp();
             reject(`Link loading failed ${link.href}`);
         };
+        loadingLinkStyles.set(loadingID, reject);
         link.addEventListener('load', onLoad);
         link.addEventListener('error', onError);
     });

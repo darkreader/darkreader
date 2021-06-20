@@ -6,7 +6,7 @@ import {manageStyle, getManageableStyles} from './style-manager';
 import {watchForStyleChanges, stopWatchingForStyleChanges} from './watch';
 import {forEach, push, toArray} from '../../utils/array';
 import {removeNode, watchForNodePosition, iterateShadowHosts, isDOMReady, addDOMReadyListener, removeDOMReadyListener} from '../utils/dom';
-import {logWarn} from '../utils/log';
+import {logInfo, logWarn} from '../utils/log';
 import {throttle} from '../utils/throttle';
 import {clamp} from '../../utils/math';
 import {getCSSFilterValue} from '../../generators/css-filter';
@@ -208,10 +208,11 @@ const loadingStyles = new Set();
 
 function createManager(element: StyleElement) {
     const loadingStyleId = ++loadingStylesCounter;
-
+    logInfo(`New manager for element, with loadingStyleID ${loadingStyleId}`, element);
     function loadingStart() {
         if (!isDOMReady() || !didDocumentShowUp) {
             loadingStyles.add(loadingStyleId);
+            logInfo(`Current amount of styles loading: ${loadingStyles.size}`);
 
             const fallbackStyle = document.querySelector('.darkreader--fallback');
             if (!fallbackStyle.textContent) {
@@ -222,6 +223,7 @@ function createManager(element: StyleElement) {
 
     function loadingEnd() {
         loadingStyles.delete(loadingStyleId);
+        logInfo(`Removed loadingStyle ${loadingStyleId}, now awaiting: ${loadingStyles.size}`);
         if (loadingStyles.size === 0 && isDOMReady()) {
             cleanFallbackStyle();
         }
@@ -265,7 +267,9 @@ const cancelRendering = function () {
 function onDOMReady() {
     if (loadingStyles.size === 0) {
         cleanFallbackStyle();
+        return;
     }
+    logWarn(loadingStyles);
 }
 
 let documentVisibilityListener: () => void = null;
@@ -326,6 +330,7 @@ function watchForUpdates() {
             .filter((style) => !styleManagers.has(style));
         const stylesToRestore = moved
             .filter((style) => styleManagers.has(style));
+        logInfo(`Styles to be removed:`, stylesToRemove);
         stylesToRemove.forEach((style) => removeManager(style));
         const newManagers = stylesToManage
             .map((style) => createManager(style));
@@ -459,6 +464,7 @@ export function removeDynamicTheme() {
     });
     shadowRootsWithOverrides.clear();
     forEach(styleManagers.keys(), (el) => removeManager(el));
+    loadingStylesCounter = 0;
     forEach(document.querySelectorAll('.darkreader'), removeNode);
 
     adoptedStyleManagers.forEach((manager) => {

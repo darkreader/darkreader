@@ -55,12 +55,12 @@ describe('INLINE STYLES', () => {
     });
 
     it('should clean up the customProp after originial is gone', async () => {
-        container.innerHTML = '<span style="outline: red;">Watch inline style</span>';
+        container.innerHTML = '<span style="color: red;">Watch inline style</span>';
         createOrUpdateDynamicTheme(theme, null, false);
         const span = document.querySelector('span');
-        expect(span.getAttribute('style')).toBe('outline: red; --darkreader-inline-outline:#b30000;');
+        expect(span.getAttribute('style')).toBe('color: red; --darkreader-inline-color:#ff1a1a;');
 
-        span.style.outline = '';
+        span.style.color = '';
         await timeout(0);
         expect(span.getAttribute('style')).toBe('');
     });

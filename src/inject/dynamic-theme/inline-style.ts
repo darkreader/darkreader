@@ -321,7 +321,7 @@ export function overrideInlineStyle(element: HTMLElement, theme: FilterConfig, i
             setCustomProp(property, property, value);
         } else {
             const customProp = customPropsList[property];
-            if (customProp && !element.style[customProp]) {
+            if (customProp && (!element.style[customProp] && !element.hasAttribute(customProp))) {
                 element.style.setProperty(property, '');
             }
         }

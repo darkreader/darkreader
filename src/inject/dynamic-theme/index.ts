@@ -2,6 +2,7 @@ import {overrideInlineStyle, getInlineOverrideStyle, watchForInlineStyles, stopW
 import {changeMetaThemeColorWhenAvailable, restoreMetaThemeColor} from './meta-theme-color';
 import {getModifiedUserAgentStyle, getModifiedFallbackStyle, cleanModificationCache, parseColorWithCache, getSelectionColor} from './modify-css';
 import type {StyleElement, StyleManager} from './style-manager';
+import {loadingLinkStyles} from './style-manager';
 import {manageStyle, getManageableStyles} from './style-manager';
 import {watchForStyleChanges, stopWatchingForStyleChanges} from './watch';
 import {forEach, push, toArray} from '../../utils/array';
@@ -464,8 +465,8 @@ export function removeDynamicTheme() {
     });
     shadowRootsWithOverrides.clear();
     forEach(styleManagers.keys(), (el) => removeManager(el));
-    loadingStylesCounter = 0;
     loadingStyles.clear();
+    loadingLinkStyles.clear();
     forEach(document.querySelectorAll('.darkreader'), removeNode);
 
     adoptedStyleManagers.forEach((manager) => {

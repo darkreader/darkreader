@@ -81,8 +81,8 @@ document.addEventListener('__darkreader__inlineScriptsAllowed', () => {
     canOptimizeUsingProxy = true;
 });
 
-let loadingLinkStyle = 0;
-const loadingLinkStyles = new Map<number, (reason?: any) => void>();
+export let loadingLinkStyle = 0;
+export const loadingLinkStyles = new Map<number, (reason?: any) => void>();
 
 export function manageStyle(element: StyleElement, {update, loadingStart, loadingEnd}): StyleManager {
     const prevStyles: HTMLStyleElement[] = [];

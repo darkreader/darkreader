@@ -62,7 +62,8 @@ test('Dynamic Theme Fixes config', async () => {
     expect(fixes.map(({url}) => url[0])).toEqual(fixes.map(({url}) => url[0]).sort(compareURLPatterns));
 
     // selectors should have no comma
-    expect(fixes.every(({invert, ignoreInlineStyle, ignoreImageAnalysis}) => (invert || []).concat(ignoreInlineStyle || []).concat(ignoreImageAnalysis || []).every((s) => s.indexOf(',') < 0))).toBe(true);
+    const commaSelector = /\,(?![^\(|\"]*(\)|\"))/;
+    expect(fixes.every(({invert, ignoreInlineStyle, ignoreImageAnalysis}) => (invert || []).concat(ignoreInlineStyle || []).concat(ignoreImageAnalysis || []).every((s) => !commaSelector.test(s)))).toBe(true);
 
     // fixes are properly formatted
     expect(throwIfDifferent(file, formatDynamicThemeFixes(fixes), 'Dynamic fixes format error')).not.toThrow();

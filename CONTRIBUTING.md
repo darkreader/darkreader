@@ -98,10 +98,10 @@ example.com
 
 CSS
 .logo {
-    background-color: var(--darkreader-neutral-background);
+    background-color: var(--darkreader-neutral-background) !important;
 }
 .footer > p {
-    color: var(--darkreader-neutral-text);
+    color: var(--darkreader-neutral-text) !important;
 }
 
 ```

@@ -322,7 +322,7 @@ export function createOptimizedTreeObserver(root: Document | ShadowRoot, callbac
                 } else {
                     if (!subscribedForReadyState) {
                         domReadyListener = () => observerCallbacks.forEach(({onHugeMutations}) => onHugeMutations(root));
-                        addDOMCompleteListener(domReadyListener);
+                        addDOMReadyListener(domReadyListener);
                         subscribedForReadyState = true;
                     }
                 }

@@ -5,7 +5,7 @@ import type {StyleElement, StyleManager} from './style-manager';
 import {manageStyle, getManageableStyles} from './style-manager';
 import {watchForStyleChanges, stopWatchingForStyleChanges} from './watch';
 import {forEach, push, toArray} from '../../utils/array';
-import {removeNode, watchForNodePosition, iterateShadowHosts, isDOMReady, addDOMCompleteListener, removeDOMReadyListener, cleanCompleteDomListeners} from '../utils/dom';
+import {removeNode, watchForNodePosition, iterateShadowHosts, isDOMReady, addDOMCompleteListener, removeDOMReadyListener, cleanCompleteDomListeners, addDOMReadyListener} from '../utils/dom';
 import {logWarn} from '../utils/log';
 import {throttle} from '../utils/throttle';
 import {clamp} from '../../utils/math';
@@ -361,7 +361,7 @@ function watchForUpdates() {
         }
     });
 
-    addDOMCompleteListener(onDOMReady);
+    addDOMReadyListener(onDOMReady);
 }
 
 function stopWatchingForUpdates() {

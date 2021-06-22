@@ -199,12 +199,32 @@ export function removeDOMReadyListener(listener: () => void) {
     readyStateListeners.delete(listener);
 }
 
+// `interactive` can and will be fired when their are still stylesheets loading.
+// We use certain actions that can cause a forced layout change, which is bad.
+export function isCompleteDomReady() {
+    return document.readyState === 'complete';
+}
+
+export const completeDomListeners = new Set<() => void>();
+
+export function addDOMCompleteListener(listener: () => void) {
+    completeDomListeners.add(listener);
+}
+
+export function cleanCompleteDomListeners() {
+    completeDomListeners.clear();
+}
+
 if (!isDOMReady()) {
     const onReadyStateChange = () => {
         if (isDOMReady()) {
-            document.removeEventListener('readystatechange', onReadyStateChange);
             readyStateListeners.forEach((listener) => listener());
             readyStateListeners.clear();
+            if (isCompleteDomReady()) {
+                document.removeEventListener('readystatechange', onReadyStateChange);
+                completeDomListeners.forEach((listener) => listener());
+                completeDomListeners.clear();
+            }
         }
     };
     document.addEventListener('readystatechange', onReadyStateChange);
@@ -302,7 +322,7 @@ export function createOptimizedTreeObserver(root: Document | ShadowRoot, callbac
                 } else {
                     if (!subscribedForReadyState) {
                         domReadyListener = () => observerCallbacks.forEach(({onHugeMutations}) => onHugeMutations(root));
-                        addDOMReadyListener(domReadyListener);
+                        addDOMCompleteListener(domReadyListener);
                         subscribedForReadyState = true;
                     }
                 }

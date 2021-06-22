@@ -42,6 +42,25 @@ describe('CSS VARIABLES OVERRIDE', () => {
         expect(getComputedStyle(container.querySelector('h1 strong')).color).toBe('rgb(255, 26, 26)');
     });
 
+    it('should override style with variables(that contain spaces)', () => {
+        container.innerHTML = multiline(
+            '<style>',
+            '    :root {',
+            '        --bg: gray;',
+            '        --text: red;',
+            '    }',
+            '    h1 { background: var( --bg ); }',
+            '    h1 strong { color: var( --text ); }',
+            '</style>',
+            '<h1>CSS <strong>variables</strong>!</h1>',
+        );
+        createOrUpdateDynamicTheme(theme, null, false);
+        expect(getComputedStyle(container).backgroundColor).toBe('rgb(0, 0, 0)');
+        expect(getComputedStyle(container.querySelector('h1')).backgroundColor).toBe('rgb(102, 102, 102)');
+        expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(255, 255, 255)');
+        expect(getComputedStyle(container.querySelector('h1 strong')).color).toBe('rgb(255, 26, 26)');
+    });
+
     it('should override style with variables (reverse order)', () => {
         container.innerHTML = multiline(
             '<style>',

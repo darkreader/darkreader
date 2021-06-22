@@ -19,36 +19,45 @@ export interface ExtensionAdapter {
 }
 
 export default class Messenger {
-    private reporters: Set<(info: ExtensionData) => void>;
     private adapter: ExtensionAdapter;
+    private changeListenerCount: number;
 
     constructor(adapter: ExtensionAdapter) {
-        this.reporters = new Set();
         this.adapter = adapter;
-        chrome.runtime.onConnect.addListener((port) => {
-            if (port.name === 'ui') {
-                port.onMessage.addListener(async (message) => await this.onUIMessage(port, message));
+        this.changeListenerCount = 0;
+        chrome.runtime.onMessage.addListener((message: Message, sender: any, sendResponse: (any) => void) => {
+            if (message.name === 'ui') {
+                this.onUIMessage(message, sendResponse);
                 this.adapter.onPopupOpen();
+                return ([
+                    'get-data',
+                    'get-active-tab-info',
+                    'apply-dev-dynamic-theme-fixes',
+                    'apply-dev-inversion-fixes',
+                    'apply-dev-static-themes'
+                ].includes(message.type));
             }
         });
     }
 
-    private async onUIMessage(port: chrome.runtime.Port, {type, id, data}: Message) {
+    private async onUIMessage({type, id, data}: Message, sendResponse: (any) => void) {
         switch (type) {
             case 'get-data': {
                 const data = await this.adapter.collect();
-                port.postMessage({id, data});
+                sendResponse({data});
                 break;
             }
             case 'get-active-tab-info': {
                 const data = await this.adapter.getActiveTabInfo();
-                port.postMessage({id, data});
+                sendResponse({data});
                 break;
             }
             case 'subscribe-to-changes': {
-                const report = (data) => port.postMessage({id, data});
-                this.reporters.add(report);
-                port.onDisconnect.addListener(() => this.reporters.delete(report));
+                this.changeListenerCount++;
+                break;
+            }
+            case 'unsubscribe-from-changes': {
+                this.changeListenerCount--;
                 break;
             }
             case 'change-settings': {
@@ -77,7 +86,7 @@ export default class Messenger {
             }
             case 'apply-dev-dynamic-theme-fixes': {
                 const error = this.adapter.applyDevDynamicThemeFixes(data);
-                port.postMessage({id, error: (error ? error.message : null)});
+                sendResponse({error: (error ? error.message : null)});
                 break;
             }
             case 'reset-dev-dynamic-theme-fixes': {
@@ -86,7 +95,7 @@ export default class Messenger {
             }
             case 'apply-dev-inversion-fixes': {
                 const error = this.adapter.applyDevInversionFixes(data);
-                port.postMessage({id, error: (error ? error.message : null)});
+                sendResponse({error: (error ? error.message : null)});
                 break;
             }
             case 'reset-dev-inversion-fixes': {
@@ -95,7 +104,7 @@ export default class Messenger {
             }
             case 'apply-dev-static-themes': {
                 const error = this.adapter.applyDevStaticThemes(data);
-                port.postMessage({id, error: error ? error.message : null});
+                sendResponse({error: error ? error.message : null});
                 break;
             }
             case 'reset-dev-static-themes': {
@@ -106,6 +115,7 @@ export default class Messenger {
     }
 
     reportChanges(data: ExtensionData) {
-        this.reporters.forEach((report) => report(data));
+        if (this.changeListenerCount > 0)
+            chrome.runtime.sendMessage({name: 'background', type: 'changes', data});
     }
 }

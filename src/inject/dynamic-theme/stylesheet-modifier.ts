@@ -5,7 +5,7 @@ import type {ModifiableCSSDeclaration, ModifiableCSSRule} from './modify-css';
 import {getModifiableCSSDeclaration} from './modify-css';
 import {variablesStore} from './variables';
 import type {CSSVariableModifier} from './variables';
-import {addDOMCompleteListener, isCompleteDomReady, isDOMReady, removeDOMReadyListener} from '../utils/dom';
+import {addDOMCompleteListener, isCompleteDomReady, removeDOMReadyListener} from '../utils/dom';
 
 const themeCacheKeys: Array<keyof Theme> = [
     'mode',

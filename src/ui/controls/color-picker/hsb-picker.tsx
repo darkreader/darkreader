@@ -4,6 +4,7 @@ import type {RGBA} from '../../../utils/color';
 import {rgbToHSL, parse, hslToString, rgbToHexString} from '../../../utils/color';
 import {clamp, scale} from '../../../utils/math';
 import {createSwipeHandler} from '../../utils';
+import {isElementHidden} from '../utils';
 
 interface HSB {
     h: number;
@@ -18,11 +19,22 @@ interface HSBPickerProps {
 }
 
 interface HSBPickerState {
+    wasPrevHidden: boolean;
+    hueCanvasRendered: boolean;
     activeHSB: HSB;
     activeChangeHandler: (color: string) => void;
     hueTouchStartHandler: (e: TouchEvent) => void;
     sbTouchStartHandler: (e: TouchEvent) => void;
 }
+
+const hsbPickerDefaults: HSBPickerState = {
+    wasPrevHidden: true,
+    hueCanvasRendered: false,
+    activeHSB: null,
+    activeChangeHandler: null,
+    hueTouchStartHandler: null,
+    sbTouchStartHandler: null
+};
 
 function rgbToHSB({r, g, b}: RGBA) {
     const min = Math.min(r, g, b);
@@ -102,7 +114,7 @@ function renderSB(hue: number, canvas: HTMLCanvasElement) {
 
 export default function HSBPicker(props: HSBPickerProps) {
     const context = getContext();
-    const store = context.store as HSBPickerState;
+    const store = context.getStore(hsbPickerDefaults) as HSBPickerState;
     store.activeChangeHandler = props.onChange;
 
     const prevColor = context.prev && context.prev.props.color;
@@ -118,15 +130,22 @@ export default function HSBPicker(props: HSBPickerProps) {
     }
 
     function onSBCanvasRender(canvas: HTMLCanvasElement) {
-        const hue = activeHSB.h;
-        const prevHue = prevColor && rgbToHSB(parse(prevColor)).h;
-        if (hue === prevHue) {
+        if (isElementHidden(canvas)) {
             return;
         }
-        renderSB(hue, canvas);
+        const hue = activeHSB.h;
+        const prevHue = prevColor && rgbToHSB(parse(prevColor)).h;
+        if (store.wasPrevHidden || hue !== prevHue) {
+            renderSB(hue, canvas);
+        }
+        store.wasPrevHidden = false;
     }
 
-    function onHueCanvasCreate(canvas: HTMLCanvasElement) {
+    function onHueCanvasRender(canvas: HTMLCanvasElement) {
+        if (store.hueCanvasRendered || isElementHidden(canvas)) {
+            return;
+        }
+        store.hueCanvasRendered = true;
         renderHue(canvas);
     }
 
@@ -207,7 +226,7 @@ export default function HSBPicker(props: HSBPickerProps) {
                     store.hueTouchStartHandler = onHuePointerDown;
                 }}
             >
-                <canvas class="hsb-picker__hue-canvas" oncreate={onHueCanvasCreate} />
+                <canvas class="hsb-picker__hue-canvas" onrender={onHueCanvasRender} />
                 <span class="hsb-picker__hue-cursor" style={hueCursorStyle}></span>
             </span>
         </span>

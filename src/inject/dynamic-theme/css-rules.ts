@@ -1,9 +1,10 @@
 import {forEach} from '../../utils/array';
 import {isSafari} from '../../utils/platform';
 import {parseURL, getAbsoluteURL} from '../../utils/url';
+import {addDOMCompleteListener, isCompleteDomReady} from '../utils/dom';
 import {logWarn} from '../utils/log';
 
-export function iterateCSSRules(rules: CSSRuleList, iterate: (rule: CSSStyleRule) => void) {
+export function iterateCSSRules(rules: CSSRuleList, iterate: (rule: CSSStyleRule) => void, rebuildWhenReady?: () => void) {
     forEach(rules, (rule) => {
         if (rule instanceof CSSMediaRule) {
             const media = Array.from(rule.media);
@@ -11,19 +12,30 @@ export function iterateCSSRules(rules: CSSRuleList, iterate: (rule: CSSStyleRule
             const isPrintOrSpeech = media.some((m) => m.startsWith('print') || m.startsWith('speech'));
 
             if (isScreenOrAll || !isPrintOrSpeech) {
-                iterateCSSRules(rule.cssRules, iterate);
+                iterateCSSRules(rule.cssRules, iterate, rebuildWhenReady);
             }
         } else if (rule instanceof CSSStyleRule) {
             iterate(rule);
         } else if (rule instanceof CSSImportRule) {
-            try {
-                iterateCSSRules(rule.styleSheet.cssRules, iterate);
-            } catch (err) {
-                logWarn(err);
+            const iterateCSSImportRule = () => {
+                try {
+                    iterateCSSRules(rule.styleSheet.cssRules, iterate, rebuildWhenReady);
+                } catch (err) {
+                    logWarn(err);
+                }
+            };
+            if (!isCompleteDomReady()) {
+                if (rebuildWhenReady) {
+                    rebuildWhenReady();
+                    return;
+                }
+                addDOMCompleteListener(iterateCSSImportRule);
+            } else {
+                iterateCSSImportRule();
             }
         } else if (rule instanceof CSSSupportsRule) {
             if (CSS.supports(rule.conditionText)) {
-                iterateCSSRules(rule.cssRules, iterate);
+                iterateCSSRules(rule.cssRules, iterate, rebuildWhenReady);
             }
         } else {
             logWarn(`CSSRule type not supported`, rule);

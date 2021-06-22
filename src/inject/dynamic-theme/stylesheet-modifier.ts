@@ -5,6 +5,7 @@ import type {ModifiableCSSDeclaration, ModifiableCSSRule} from './modify-css';
 import {getModifiableCSSDeclaration} from './modify-css';
 import {variablesStore} from './variables';
 import type {CSSVariableModifier} from './variables';
+import {addDOMCompleteListener, isCompleteDomReady, isDOMReady, removeDOMReadyListener} from '../utils/dom';
 
 const themeCacheKeys: Array<keyof Theme> = [
     'mode',
@@ -39,6 +40,8 @@ export function createStyleSheetModifier() {
         prepareSheet: () => CSSStyleSheet;
         isAsyncCancelled: () => boolean;
     }
+
+    let rebuildSheet: () => void;
 
     function modifySheet(options: ModifySheetOptions): void {
         const rules = options.sourceCSSRules;
@@ -82,6 +85,20 @@ export function createStyleSheetModifier() {
                 modRules.push(modRule);
             }
             rulesModCache.set(cssText, modRule);
+        }, () => {
+            if (isCompleteDomReady()) {
+                return;
+            }
+            // Due to how the current systemwork, we cannot "allocated rules on the modified stylesheet",
+            // without knowing how many/where they are going to be. Because the rules aren't loaded, we just don't know.
+            // And thus unfortunaly requires a 'expensive' rebuild... ;(
+            if (rebuildSheet) {
+                removeDOMReadyListener(rebuildSheet);
+            }
+            rebuildSheet = () => {
+                modifySheet(options);
+            };
+            addDOMCompleteListener(rebuildSheet);
         });
 
         notFoundCacheKeys.forEach((key) => {

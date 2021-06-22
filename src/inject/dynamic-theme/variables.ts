@@ -4,7 +4,6 @@ import {iterateCSSRules, iterateCSSDeclarations} from './css-rules';
 import {tryParseColor, getBgImageModifier} from './modify-css';
 import type {CSSValueModifier} from './modify-css';
 import type {Theme} from '../../definitions';
-import {getTempCSSStyleSheet} from '../utils/dom';
 
 export interface ModifiedVarDeclaration {
     property: string;

@@ -660,7 +660,7 @@ function tryModifyBorderColor(color: string, theme: Theme) {
         const rgb = tryParseColor(color);
         return rgb ? modifyBorderColor(rgb, theme) : color;
     }
-    let borderParts = color.split(' ');
+    let borderParts = color.split(/\s(?![^\(|\"]*(\)|\"))/g);
     borderParts = borderParts.map((part) => {
         const rgb = tryParseColor(part);
         return rgb ? modifyBorderColor(rgb, theme) : part;

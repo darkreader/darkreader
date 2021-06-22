@@ -1138,4 +1138,42 @@ describe('CSS VARIABLES OVERRIDE', () => {
             expect(updatedStyle.borderColor).toBe('rgb(0, 217, 0)');
         }
     });
+    it('should return modified value when only fallback is known', async () => {
+        container.innerHTML = multiline(
+            '<style>',
+            '    :root {',
+            '        --fallback: green',
+            '    }',
+            '    h1 {',
+            '        background: var(--color, var(--fallback));',
+            '    }',
+            '</style>',
+            '<h1>Asynchronous variables</h1>',
+        );
+        createOrUpdateDynamicTheme(theme, null, false);
+        expect(getComputedStyle(container.querySelector('h1')).backgroundColor).toBe('rgb(0, 102, 0)');
+    });
+    it('should handle border colors', async () => {
+        container.innerHTML = multiline(
+            '<style>',
+            '    :root {',
+            '        --border: 1px solid rgb(255, 0, 0)',
+            '    }',
+            '    h1 {',
+            '        border: var(--border);',
+            '    }',
+            '</style>',
+            '<h1>Asynchronous variables</h1>',
+        );
+        createOrUpdateDynamicTheme(theme, null, false);
+        const elementStyle = getComputedStyle(container.querySelector('h1'));
+        if (isFirefox) {
+            expect(elementStyle.borderTopColor).toBe('rgb(179, 0, 0)');
+            expect(elementStyle.borderRightColor).toBe('rgb(179, 0, 0)');
+            expect(elementStyle.borderBottomColor).toBe('rgb(179, 0, 0)');
+            expect(elementStyle.borderLeftColor).toBe('rgb(179, 0, 0)');
+        } else {
+            expect(elementStyle.borderColor).toBe('rgb(179, 0, 0)');
+        }
+    });
 });

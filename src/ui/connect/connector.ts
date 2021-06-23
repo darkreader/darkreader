@@ -7,20 +7,23 @@ export default class Connector implements ExtensionActions {
         this.changeSubscribers = new Set();
     }
 
-    private async sendRequest<T>(request: Message, executor: (response: Message, resolve: (data?: T) => void, reject: (error: Error) => void) => void) {
+    private async sendRequest<T>(request: Message) {
         return new Promise<T>((resolve, reject) => {
-            chrome.runtime.sendMessage({name: 'ui', ...request}, (response) => {
-                executor(response, resolve, reject);
+            chrome.runtime.sendMessage({name: 'ui', ...request}, ({data, error}) => {
+                if (error)
+                    reject(error);
+                else
+                    resolve(data);
             });
         });
     }
 
     async getData() {
-        return await this.sendRequest<ExtensionData>({type: 'get-data'}, ({data}, resolve) => resolve(data));
+        return await this.sendRequest<ExtensionData>({type: 'get-data'});
     }
 
     async getActiveTabInfo() {
-        return await this.sendRequest<TabInfo>({type: 'get-active-tab-info'}, ({data}, resolve) => resolve(data));
+        return await this.sendRequest<TabInfo>({type: 'get-active-tab-info'});
     }
 
     private onChangesReceived = ({name, type, data}: Message) => {
@@ -69,7 +72,7 @@ export default class Connector implements ExtensionActions {
     }
 
     async applyDevDynamicThemeFixes(text: string) {
-        return await this.sendRequest<void>({type: 'apply-dev-dynamic-theme-fixes', data: text}, ({error}, resolve, reject) => error ? reject(error) : resolve());
+        return await this.sendRequest<void>({type: 'apply-dev-dynamic-theme-fixes', data: text});
     }
 
     resetDevDynamicThemeFixes() {
@@ -77,7 +80,7 @@ export default class Connector implements ExtensionActions {
     }
 
     async applyDevInversionFixes(text: string) {
-        return await this.sendRequest<void>({type: 'apply-dev-inversion-fixes', data: text}, ({error}, resolve, reject) => error ? reject(error) : resolve());
+        return await this.sendRequest<void>({type: 'apply-dev-inversion-fixes', data: text});
     }
 
     resetDevInversionFixes() {
@@ -85,7 +88,7 @@ export default class Connector implements ExtensionActions {
     }
 
     async applyDevStaticThemes(text: string) {
-        return await this.sendRequest<void>({type: 'apply-dev-static-themes', data: text}, ({error}, resolve, reject) => error ? reject(error) : resolve());
+        return await this.sendRequest<void>({type: 'apply-dev-static-themes', data: text});
     }
 
     resetDevStaticThemes() {

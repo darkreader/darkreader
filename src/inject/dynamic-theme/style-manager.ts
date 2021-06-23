@@ -294,8 +294,9 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
                 ignoreImageAnalysis,
                 force,
                 isAsyncCancelled: () => cancelAsyncOperations,
+            }).then(() => {
+                isOverrideEmpty = syncStyle.sheet.cssRules.length === 0;
             });
-            isOverrideEmpty = syncStyle.sheet.cssRules.length === 0;
         }
 
         buildOverrides();

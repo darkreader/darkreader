@@ -41,9 +41,7 @@ export function createStyleSheetModifier() {
         isAsyncCancelled: () => boolean;
     }
 
-    let rebuildSheet: () => void;
-
-    function modifySheet(options: ModifySheetOptions): void {
+    async function modifySheet(options: ModifySheetOptions): Promise<void> {
         const rules = options.sourceCSSRules;
         const {theme, ignoreImageAnalysis, force, prepareSheet, isAsyncCancelled} = options;
 
@@ -53,7 +51,7 @@ export function createStyleSheetModifier() {
         const themeChanged = (themeKey !== prevFilterKey);
 
         const modRules: ModifiableCSSRule[] = [];
-        iterateCSSRules(rules, (rule) => {
+        await iterateCSSRules(rules, (rule) => {
             const cssText = rule.cssText;
             let textDiffersFromPrev = false;
 
@@ -85,20 +83,6 @@ export function createStyleSheetModifier() {
                 modRules.push(modRule);
             }
             rulesModCache.set(cssText, modRule);
-        }, () => {
-            if (isCompleteDomReady()) {
-                return;
-            }
-            // Due to how the current systemwork, we cannot "allocated rules on the modified stylesheet",
-            // without knowing how many/where they are going to be. Because the rules aren't loaded, we just don't know.
-            // And thus unfortunaly requires a 'expensive' rebuild... ;(
-            if (rebuildSheet) {
-                removeDOMReadyListener(rebuildSheet);
-            }
-            rebuildSheet = () => {
-                modifySheet(options);
-            };
-            addDOMCompleteListener(rebuildSheet);
         });
 
         notFoundCacheKeys.forEach((key) => {

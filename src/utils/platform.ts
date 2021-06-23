@@ -36,15 +36,6 @@ export const isDefinedSelectorSupported = (() => {
     }
 })();
 
-export const isCSSStyleSheetConstructorSupported = (() => {
-    try {
-        new CSSStyleSheet();
-        return true;
-    } catch (err) {
-        return false;
-    }
-})();
-
 export function compareChromeVersions($a: string, $b: string) {
     const a = $a.split('.').map((x) => parseInt(x));
     const b = $b.split('.').map((x) => parseInt(x));

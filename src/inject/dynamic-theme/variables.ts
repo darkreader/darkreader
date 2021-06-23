@@ -550,7 +550,7 @@ function getVariableNameAndFallback(match: string) {
         name = match.substring(4, commaIndex).trim();
         fallback = match.substring(commaIndex + 1, match.length - 1).trim();
     } else {
-        name = match.substring(4, match.length - 1);
+        name = match.substring(4, match.length - 1).trim();
         fallback = '';
     }
     return {name, fallback};
@@ -558,19 +558,19 @@ function getVariableNameAndFallback(match: string) {
 
 export function replaceCSSVariablesNames(
     value: string,
-    nemeReplacer: (varName: string) => string,
+    nameReplacer: (varName: string) => string,
     fallbackReplacer?: (fallbackValue: string) => string,
 ): string {
     const matchReplacer = (match: string) => {
         const {name, fallback} = getVariableNameAndFallback(match);
-        const newName = nemeReplacer(name);
+        const newName = nameReplacer(name);
         if (!fallback) {
             return `var(${newName})`;
         }
 
         let newFallback: string;
         if (isVarDependant(fallback)) {
-            newFallback = replaceCSSVariablesNames(fallback, nemeReplacer, fallbackReplacer);
+            newFallback = replaceCSSVariablesNames(fallback, nameReplacer, fallbackReplacer);
         } else if (fallbackReplacer) {
             newFallback = fallbackReplacer(fallback);
         } else {

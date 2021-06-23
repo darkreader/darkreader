@@ -31,25 +31,20 @@ export default class Messenger {
                 this.adapter.onPopupOpen();
                 return ([
                     'get-data',
-                    'get-active-tab-info',
-                    'apply-dev-dynamic-theme-fixes',
-                    'apply-dev-inversion-fixes',
-                    'apply-dev-static-themes'
+                    'get-active-tab-info'
                 ].includes(message.type));
             }
         });
     }
 
-    private async onUIMessage({type, data}: Message, sendResponse: (any) => void) {
+    private onUIMessage({type, data}: Message, sendResponse: (any) => void) {
         switch (type) {
             case 'get-data': {
-                const data = await this.adapter.collect();
-                sendResponse({data});
+                this.adapter.collect().then((data) => sendResponse({data}));
                 break;
             }
             case 'get-active-tab-info': {
-                const data = await this.adapter.getActiveTabInfo();
-                sendResponse({data});
+                this.adapter.getActiveTabInfo().then((data) => sendResponse({data}));
                 break;
             }
             case 'subscribe-to-changes': {
@@ -81,7 +76,7 @@ export default class Messenger {
                 break;
             }
             case 'load-config': {
-                await this.adapter.loadConfig(data);
+                this.adapter.loadConfig(data);
                 break;
             }
             case 'apply-dev-dynamic-theme-fixes': {

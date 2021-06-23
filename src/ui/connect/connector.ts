@@ -25,7 +25,7 @@ export default class Connector implements ExtensionActions {
 
     private onChangesReceived = ({name, type, data}: Message) => {
         if (name === 'background' && type === 'changes')
-            this.changeSubscribers.forEach(callback => callback(data))
+            this.changeSubscribers.forEach((callback) => callback(data));
     };
 
     subscribeToChanges(callback: (data: ExtensionData) => void) {
@@ -94,7 +94,7 @@ export default class Connector implements ExtensionActions {
 
     disconnect() {
         if (this.changeSubscribers.size > 0) {
-            this.changeSubscribers = new Set();
+            this.changeSubscribers.clear();
             chrome.runtime.onMessage.removeListener(this.onChangesReceived);
             chrome.runtime.sendMessage({name: 'ui', type: 'unsubscribe-from-changes'});
         }

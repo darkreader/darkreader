@@ -25,7 +25,7 @@ export default class Messenger {
     constructor(adapter: ExtensionAdapter) {
         this.adapter = adapter;
         this.changeListenerCount = 0;
-        chrome.runtime.onMessage.addListener((message: Message, sender: any, sendResponse: (any) => void) => {
+        chrome.runtime.onMessage.addListener((message: Message, _: any, sendResponse: (any) => void) => {
             if (message.name === 'ui') {
                 this.onUIMessage(message, sendResponse);
                 this.adapter.onPopupOpen();
@@ -40,7 +40,7 @@ export default class Messenger {
         });
     }
 
-    private async onUIMessage({type, id, data}: Message, sendResponse: (any) => void) {
+    private async onUIMessage({type, data}: Message, sendResponse: (any) => void) {
         switch (type) {
             case 'get-data': {
                 const data = await this.adapter.collect();

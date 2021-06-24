@@ -85,8 +85,8 @@ const overrides: Overrides = {
 };
 
 const overridesList = Object.values(overrides);
-const customPropsList = {};
-overridesList.forEach(({cssProp, customProp}) => customPropsList[customProp] = cssProp);
+const normalizedPropList = {};
+overridesList.forEach(({cssProp, customProp}) => normalizedPropList[customProp] = cssProp);
 
 const INLINE_STYLE_ATTRS = ['style', 'fill', 'stop-color', 'stroke', 'bgcolor', 'color'];
 export const INLINE_STYLE_SELECTOR = INLINE_STYLE_ATTRS.map((attr) => `[${attr}]`).join(', ');
@@ -320,8 +320,8 @@ export function overrideInlineStyle(element: HTMLElement, theme: FilterConfig, i
         if (overrides.hasOwnProperty(property)) {
             setCustomProp(property, property, value);
         } else {
-            const customProp = customPropsList[property];
-            if (customProp && (!element.style[customProp] && !element.hasAttribute(customProp))) {
+            const overridenProp = normalizedPropList[property];
+            if (overridenProp && (!element.style.getPropertyValue(overridenProp) && !element.hasAttribute(overridenProp))) {
                 element.style.setProperty(property, '');
             }
         }

@@ -201,18 +201,18 @@ export function removeDOMReadyListener(listener: () => void) {
 
 // `interactive` can and will be fired when their are still stylesheets loading.
 // We use certain actions that can cause a forced layout change, which is bad.
-export function isCompleteDomReady() {
+export function isReadyStateComplete() {
     return document.readyState === 'complete';
 }
 
-export const completeDomListeners = new Set<() => void>();
+const readyStateCompleteListeners = new Set<() => void>();
 
-export function addDOMCompleteListener(listener: () => void) {
-    completeDomListeners.add(listener);
+export function addReadyStateCompleteListener(listener: () => void) {
+    readyStateCompleteListeners.add(listener);
 }
 
-export function cleanCompleteDomListeners() {
-    completeDomListeners.clear();
+export function cleanReadyStateCompleteListeners() {
+    readyStateCompleteListeners.clear();
 }
 
 if (!isDOMReady()) {
@@ -220,10 +220,10 @@ if (!isDOMReady()) {
         if (isDOMReady()) {
             readyStateListeners.forEach((listener) => listener());
             readyStateListeners.clear();
-            if (isCompleteDomReady()) {
+            if (isReadyStateComplete()) {
                 document.removeEventListener('readystatechange', onReadyStateChange);
-                completeDomListeners.forEach((listener) => listener());
-                completeDomListeners.clear();
+                readyStateCompleteListeners.forEach((listener) => listener());
+                readyStateCompleteListeners.clear();
             }
         }
     };

@@ -1,5 +1,5 @@
 import {forEach, push} from '../../utils/array';
-import {iterateShadowHosts, createOptimizedTreeObserver, isCompleteDomReady, addDOMCompleteListener} from '../utils/dom';
+import {iterateShadowHosts, createOptimizedTreeObserver, isReadyStateComplete, addReadyStateCompleteListener} from '../utils/dom';
 import {iterateCSSDeclarations} from './css-rules';
 import {getModifiableCSSDeclaration} from './modify-css';
 import {variablesStore} from './variables';
@@ -303,10 +303,10 @@ export function overrideInlineStyle(element: HTMLElement, theme: FilterConfig, i
                     const isBg = (width > SMALL_SVG_LIMIT || height > SMALL_SVG_LIMIT);
                     setCustomProp('fill', isBg ? 'background-color' : 'color', value);
                 };
-                if (!isCompleteDomReady()) {
-                    addDOMCompleteListener(handleSVGElement);
-                } else {
+                if (isReadyStateComplete()) {
                     handleSVGElement();
+                } else {
+                    addReadyStateCompleteListener(handleSVGElement);
                 }
             } else {
                 setCustomProp('fill', 'color', value);

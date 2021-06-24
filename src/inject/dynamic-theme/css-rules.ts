@@ -1,7 +1,7 @@
 import {forEach} from '../../utils/array';
 import {isSafari} from '../../utils/platform';
 import {parseURL, getAbsoluteURL} from '../../utils/url';
-import {addDOMCompleteListener, isCompleteDomReady} from '../utils/dom';
+import {addReadyStateCompleteListener, isReadyStateComplete as isReadyStateComplete} from '../utils/dom';
 import {logWarn} from '../utils/log';
 
 export async function iterateCSSRules(rules: CSSRuleList, iterate: (rule: CSSStyleRule) => void) {
@@ -26,17 +26,17 @@ export async function iterateCSSRules(rules: CSSRuleList, iterate: (rule: CSSSty
                         logWarn(err);
                     }
                 };
-                if (!isCompleteDomReady()) {
+                if (isReadyStateComplete()) {
+                    iterateCSSImportRule();
+                } else {
                     loadingRules++;
-                    addDOMCompleteListener(() => {
+                    addReadyStateCompleteListener(() => {
                         loadingRules--;
                         iterateCSSImportRule();
                         if (loadingRules === 0) {
                             resolve();
                         }
                     });
-                } else {
-                    iterateCSSImportRule();
                 }
             } else if (rule instanceof CSSSupportsRule) {
                 if (CSS.supports(rule.conditionText)) {

@@ -40,7 +40,7 @@ export default class Messenger {
         // This is a work-around for Firefox bug which does not let to responding to onMessage handler above.
         if (isFirefox) {
             chrome.runtime.onConnect.addListener((port) => {
-                let promise = null;
+                let promise: Promise<ExtensionData | TabInfo>;
                 switch (port.name) {
                     case 'ui-get-data':
                         promise = this.adapter.collect();

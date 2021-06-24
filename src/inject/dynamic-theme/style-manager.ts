@@ -81,8 +81,8 @@ document.addEventListener('__darkreader__inlineScriptsAllowed', () => {
     canOptimizeUsingProxy = true;
 });
 
-export let loadingLinkStyle = 0;
-export const loadingLinkStyles = new Map<number, (reason?: any) => void>();
+let loadingLinkCounter = 0;
+export const storedRejectorsForLoadingLinks = new Map<number, (reason?: any) => void>();
 
 export function manageStyle(element: StyleElement, {update, loadingStart, loadingEnd}): StyleManager {
     const prevStyles: HTMLStyleElement[] = [];
@@ -148,7 +148,7 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
 
     let isLoadingRules = false;
     let wasLoadingError = false;
-    let loadingLinkID = 0;
+    const loadingLinkId = ++loadingLinkCounter;
 
     async function getRulesAsync(): Promise<CSSRuleList> {
         let cssText: string;
@@ -166,9 +166,8 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
                 isStillLoadingError(accessError)
             ) {
                 try {
-                    loadingLinkID = ++loadingLinkStyle;
-                    logInfo(`Linkelement ${loadingLinkID} is not loaded yet and thus will be await for`, element);
-                    await linkLoading(element, loadingLinkID);
+                    logInfo(`Linkelement ${loadingLinkId} is not loaded yet and thus will be await for`, element);
+                    await linkLoading(element, loadingLinkId);
                 } catch (err) {
                     // NOTE: Some @import resources can fail,
                     // but the style sheet can still be valid.
@@ -429,10 +428,12 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
         removeNode(corsCopy);
         removeNode(syncStyle);
         loadingEnd();
-        if (loadingLinkID && loadingLinkStyles.has(loadingLinkID)) {
-            loadingLinkStyles.get(loadingLinkID)();
-            loadingLinkStyles.delete(loadingLinkID);
+        let reject: (reason?: any) => void;
+        if (storedRejectorsForLoadingLinks.has(loadingLinkId)) {
+            reject = storedRejectorsForLoadingLinks.get(loadingLinkId);
+            storedRejectorsForLoadingLinks.delete(loadingLinkId);
         }
+        reject && reject();
     }
 
     function watch() {
@@ -476,23 +477,26 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
     };
 }
 
-async function linkLoading(link: HTMLLinkElement, loadingID: number) {
+async function linkLoading(link: HTMLLinkElement, loadingId: number) {
     return new Promise<void>((resolve, reject) => {
         const cleanUp = () => {
             link.removeEventListener('load', onLoad);
             link.removeEventListener('error', onError);
-            loadingLinkStyles.delete(loadingID);
+            storedRejectorsForLoadingLinks.delete(loadingId);
         };
         const onLoad = () => {
             cleanUp();
-            logInfo(`Linkelement ${loadingID} has been loaded`);
+            logInfo(`Linkelement ${loadingId} has been loaded`);
             resolve();
         };
         const onError = () => {
             cleanUp();
-            reject(`Linkelement ${loadingID} couldn't be loaded. ${link.href}`);
+            reject(`Linkelement ${loadingId} couldn't be loaded. ${link.href}`);
         };
-        loadingLinkStyles.set(loadingID, reject);
+        storedRejectorsForLoadingLinks.set(loadingId, () => {
+            cleanUp();
+            reject();
+        });
         link.addEventListener('load', onLoad);
         link.addEventListener('error', onError);
     });

@@ -269,7 +269,7 @@ function onDOMReady() {
         cleanFallbackStyle();
         return;
     }
-    logWarn(loadingStyles);
+    logWarn(`DOM is ready, but still have ${loadingStyles} styles being loaded.`);
 }
 
 let documentVisibilityListener: () => void = null;

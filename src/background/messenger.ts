@@ -1,3 +1,4 @@
+import {isChromium, isFirefox} from 'utils/platform';
 import type {ExtensionData, FilterConfig, TabInfo, Message, UserSettings} from '../definitions';
 
 export interface ExtensionAdapter {
@@ -35,6 +36,23 @@ export default class Messenger {
                 ].includes(message.type));
             }
         });
+
+        // This is a work-around for Firefox bug which does not let to responding to onMessage handler above.
+        if (isFirefox)
+            chrome.runtime.onConnect.addListener((port) => {
+                let promise = null;
+                switch (port.name) {
+                    case 'ui-get-data':
+                        promise = this.adapter.collect();
+                        break;
+                    case 'ui-get-active-tab-info':
+                        promise = this.adapter.getActiveTabInfo();
+                        break;
+                    default:
+                        return;
+                }
+                promise.then((data) => port.postMessage({data})).catch((error) => port.postMessage({error}));
+            });
     }
 
     private onUIMessage({type, data}: Message, sendResponse: (any) => void) {
@@ -110,7 +128,7 @@ export default class Messenger {
     }
 
     reportChanges(data: ExtensionData) {
-        if (this.changeListenerCount > 0)
+        if (this.changeListenerCount > 0 || !isChromium)
             chrome.runtime.sendMessage({name: 'background', type: 'changes', data});
     }
 }

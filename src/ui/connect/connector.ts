@@ -1,3 +1,4 @@
+import {isChromium, isFirefox} from 'utils/platform';
 import type {ExtensionData, ExtensionActions, FilterConfig, TabInfo, Message, UserSettings} from '../../definitions';
 
 export default class Connector implements ExtensionActions {
@@ -18,11 +19,30 @@ export default class Connector implements ExtensionActions {
         });
     }
 
+    private async poorMansSendRequest<T>(name: string) {
+        return new Promise<T>((resolve, reject) => {
+            const dataPort = chrome.runtime.connect({name});
+            dataPort.onDisconnect.addListener(() => reject());
+            dataPort.onMessage.addListener(({data, error}) => {
+                if (error)
+                    reject(error);
+                else {
+                    resolve(data);
+                }
+                dataPort.disconnect();
+            });
+        });
+    }
+
     async getData() {
+        if (isFirefox)
+            return this.poorMansSendRequest<ExtensionData>('ui-get-data');
         return await this.sendRequest<ExtensionData>({type: 'get-data'});
     }
 
     async getActiveTabInfo() {
+        if (isFirefox)
+            return this.poorMansSendRequest<TabInfo>('ui-get-active-tab-info');
         return await this.sendRequest<TabInfo>({type: 'get-active-tab-info'});
     }
 
@@ -35,7 +55,8 @@ export default class Connector implements ExtensionActions {
         this.changeSubscribers.add(callback);
         if (this.changeSubscribers.size === 1) {
             chrome.runtime.onMessage.addListener(this.onChangesReceived);
-            chrome.runtime.sendMessage({name: 'ui', type: 'subscribe-to-changes'});
+            if (isChromium)
+                chrome.runtime.sendMessage({name: 'ui', type: 'subscribe-to-changes'});
         }
     }
 
@@ -99,7 +120,8 @@ export default class Connector implements ExtensionActions {
         if (this.changeSubscribers.size > 0) {
             this.changeSubscribers.clear();
             chrome.runtime.onMessage.removeListener(this.onChangesReceived);
-            chrome.runtime.sendMessage({name: 'ui', type: 'unsubscribe-from-changes'});
+            if (isChromium)
+                chrome.runtime.sendMessage({name: 'ui', type: 'unsubscribe-from-changes'});
         }
     }
 }

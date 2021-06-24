@@ -11,22 +11,23 @@ export default class Connector implements ExtensionActions {
     private async sendRequest<T>(request: Message) {
         return new Promise<T>((resolve, reject) => {
             chrome.runtime.sendMessage({name: 'ui', ...request}, ({data, error}) => {
-                if (error)
+                if (error) {
                     reject(error);
-                else
+                } else {
                     resolve(data);
+                }
             });
         });
     }
 
-    private async poorMansSendRequest<T>(name: string) {
+    private async firefoxSendRequestWithResponse<T>(name: string) {
         return new Promise<T>((resolve, reject) => {
             const dataPort = chrome.runtime.connect({name});
             dataPort.onDisconnect.addListener(() => reject());
             dataPort.onMessage.addListener(({data, error}) => {
-                if (error)
+                if (error) {
                     reject(error);
-                else {
+                } else {
                     resolve(data);
                 }
                 dataPort.disconnect();
@@ -35,28 +36,32 @@ export default class Connector implements ExtensionActions {
     }
 
     async getData() {
-        if (isFirefox)
-            return this.poorMansSendRequest<ExtensionData>('ui-get-data');
+        if (isFirefox) {
+            return this.firefoxSendRequestWithResponse<ExtensionData>('ui-get-data');
+        }
         return await this.sendRequest<ExtensionData>({type: 'get-data'});
     }
 
     async getActiveTabInfo() {
-        if (isFirefox)
-            return this.poorMansSendRequest<TabInfo>('ui-get-active-tab-info');
+        if (isFirefox) {
+            return this.firefoxSendRequestWithResponse<TabInfo>('ui-get-active-tab-info');
+        }
         return await this.sendRequest<TabInfo>({type: 'get-active-tab-info'});
     }
 
     private onChangesReceived = ({name, type, data}: Message) => {
-        if (name === 'background' && type === 'changes')
+        if (name === 'background' && type === 'changes') {
             this.changeSubscribers.forEach((callback) => callback(data));
+        }
     };
 
     subscribeToChanges(callback: (data: ExtensionData) => void) {
         this.changeSubscribers.add(callback);
         if (this.changeSubscribers.size === 1) {
             chrome.runtime.onMessage.addListener(this.onChangesReceived);
-            if (isChromium)
+            if (isChromium) {
                 chrome.runtime.sendMessage({name: 'ui', type: 'subscribe-to-changes'});
+            }
         }
     }
 
@@ -120,8 +125,9 @@ export default class Connector implements ExtensionActions {
         if (this.changeSubscribers.size > 0) {
             this.changeSubscribers.clear();
             chrome.runtime.onMessage.removeListener(this.onChangesReceived);
-            if (isChromium)
+            if (isChromium) {
                 chrome.runtime.sendMessage({name: 'ui', type: 'unsubscribe-from-changes'});
+            }
         }
     }
 }

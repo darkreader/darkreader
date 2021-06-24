@@ -38,7 +38,7 @@ export default class Messenger {
         });
 
         // This is a work-around for Firefox bug which does not let to responding to onMessage handler above.
-        if (isFirefox)
+        if (isFirefox) {
             chrome.runtime.onConnect.addListener((port) => {
                 let promise = null;
                 switch (port.name) {
@@ -53,6 +53,7 @@ export default class Messenger {
                 }
                 promise.then((data) => port.postMessage({data})).catch((error) => port.postMessage({error}));
             });
+        }
     }
 
     private onUIMessage({type, data}: Message, sendResponse: (any) => void) {
@@ -128,7 +129,8 @@ export default class Messenger {
     }
 
     reportChanges(data: ExtensionData) {
-        if (this.changeListenerCount > 0 || !isChromium)
+        if (this.changeListenerCount > 0 || !isChromium) {
             chrome.runtime.sendMessage({name: 'background', type: 'changes', data});
+        }
     }
 }

@@ -1,7 +1,7 @@
 import {createOrUpdateStyle, removeStyle} from './style';
 import {createOrUpdateSVGFilter, removeSVGFilter} from './svg-filter';
-import {createOrUpdateDynamicTheme, removeDynamicTheme, cleanDynamicThemeCache} from './dynamic-theme';
-import {logInfo, logWarn} from './utils/log';
+import {createOrUpdateDynamicTheme, removeDynamicTheme} from './dynamic-theme';
+import {logInfo} from './utils/log';
 import {watchForColorSchemeChange} from './utils/watch-color-scheme';
 import {collectCSS} from './dynamic-theme/css-collection';
 
@@ -42,16 +42,18 @@ function onMessage({type, data}) {
 }
 
 // TODO: Use background page color scheme watcher when browser bugs fixed.
-const colorSchemeWatcher = watchForColorSchemeChange(({isDark}) => {
+watchForColorSchemeChange(({isDark}) => {
     logInfo('Media query was changed');
     chrome.runtime.sendMessage({type: 'color-scheme-change', data: {isDark}});
 });
 
-const port = chrome.runtime.connect({name: 'tab'});
-port.onMessage.addListener(onMessage);
-port.onDisconnect.addListener(() => {
-    logWarn('disconnect');
-    cleanDynamicThemeCache();
-    colorSchemeWatcher.disconnect();
+chrome.runtime.onMessage.addListener(onMessage);
+chrome.runtime.sendMessage({type: 'tab'});
+
+window.addEventListener('unload', () => {
+    chrome.runtime.sendMessage({type: 'tab-unload'});
 });
 
+// TODO: figure out if this needs to call
+// cleanDynamicThemeCache();
+// watchForColorSchemeChange(...).disconnect();

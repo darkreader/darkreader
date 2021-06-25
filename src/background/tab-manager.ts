@@ -20,59 +20,61 @@ interface TabManagerOptions {
     onColorSchemeChange: ({isDark}) => void;
 }
 
-interface PortInfo {
-    url: string;
-    port: chrome.runtime.Port;
-}
-
 export default class TabManager {
-    private ports: Map<number, Map<number, PortInfo>>;
+    private tabs: Map<number, Map<number, string>>;
 
     constructor({getConnectionMessage, onColorSchemeChange}: TabManagerOptions) {
-        this.ports = new Map();
-        chrome.runtime.onConnect.addListener((port) => {
-            if (port.name === 'tab') {
-                const reply = (options: ConnectionMessageOptions) => {
-                    const message = getConnectionMessage(options);
-                    if (message instanceof Promise) {
-                        message.then((asyncMessage) => asyncMessage && port.postMessage(asyncMessage));
-                    } else if (message) {
-                        port.postMessage(message);
+        this.tabs = new Map();
+        chrome.runtime.onMessage.addListener((message, sender) => {
+            switch (message.type) {
+                case 'tab':
+                    const reply = (options: ConnectionMessageOptions) => {
+                        const message = getConnectionMessage(options);
+                        if (message instanceof Promise) {
+                            message.then((asyncMessage) => asyncMessage && chrome.tabs.sendMessage(sender.tab.id, asyncMessage, {frameId: sender.frameId}));
+                        } else if (message) {
+                            chrome.tabs.sendMessage(sender.tab.id, message, {frameId: sender.frameId});
+                        }
+                    };
+
+                    const isPanel = sender.tab == null;
+                    if (isPanel) {
+                        // NOTE: Vivaldi and Opera can show a page in a side panel,
+                        // but it is not possible to handle messaging correctly (no tab ID, frame ID).
+                        reply({url: sender.url, frameURL: null, unsupportedSender: true});
+                        return;
                     }
-                };
 
-                const isPanel = port.sender.tab == null;
-                if (isPanel) {
-                    // NOTE: Vivaldi and Opera can show a page in a side panel,
-                    // but it is not possible to handle messaging correctly (no tab ID, frame ID).
-                    reply({url: port.sender.url, frameURL: null, unsupportedSender: true});
-                    return;
-                }
+                    const tabId = sender.tab.id;
+                    const {frameId} = sender;
+                    const senderURL = sender.url;
+                    const tabURL = sender.tab.url;
 
-                const tabId = port.sender.tab.id;
-                const {frameId} = port.sender;
-                const senderURL = port.sender.url;
-                const tabURL = port.sender.tab.url;
-
-                let framesPorts: Map<number, PortInfo>;
-                if (this.ports.has(tabId)) {
-                    framesPorts = this.ports.get(tabId);
-                } else {
-                    framesPorts = new Map();
-                    this.ports.set(tabId, framesPorts);
-                }
-                framesPorts.set(frameId, {url: senderURL, port});
-                port.onDisconnect.addListener(() => {
-                    framesPorts.delete(frameId);
-                    if (framesPorts.size === 0) {
-                        this.ports.delete(tabId);
+                    let frames: Map<number, string>;
+                    if (this.tabs.has(tabId)) {
+                        frames = this.tabs.get(tabId);
+                    } else {
+                        frames = new Map();
+                        this.tabs.set(tabId, frames);
                     }
-                });
+                    frames.set(frameId, senderURL);
 
-                reply({
-                    url: tabURL,
-                    frameURL: frameId === 0 ? null : senderURL,
-                });
+                    reply({
+                        url: tabURL,
+                        frameURL: frameId === 0 ? null : senderURL,
+                    });
+                    break;
+                case 'tab-unload':
+                    if (!sender.tab) {
+                        console.error('Unexpected message', message, sender);
+                        break;
+                    }
+
+                    const framesForDeletion = this.tabs.get(sender.tab.id);
+                    if (framesForDeletion) {
+                        framesForDeletion.delete(sender.frameId);
+                    }
+                    break;
             }
         });
 
@@ -113,10 +115,7 @@ export default class TabManager {
             }
             if (type === 'request-export-css') {
                 const activeTab = await this.getActiveTab();
-                this.ports
-                    .get(activeTab.id)
-                    .get(0).port
-                    .postMessage({type: 'export-css'});
+                chrome.tabs.sendMessage(activeTab.id, {type: 'export-css'}, {frameId: 0});
             }
         });
     }
@@ -124,7 +123,7 @@ export default class TabManager {
     async updateContentScript(options: {runOnProtectedPages: boolean}) {
         (await queryTabs({}))
             .filter((tab) => options.runOnProtectedPages || canInjectScript(tab.url))
-            .filter((tab) => !this.ports.has(tab.id))
+            .filter((tab) => !this.tabs.has(tab.id))
             .forEach((tab) => {
                 if (!tab.discarded) {
                     chrome.tabs.executeScript(tab.id, {
@@ -148,15 +147,15 @@ export default class TabManager {
 
     async sendMessage(getMessage: (url: string, frameUrl: string) => any) {
         (await queryTabs({}))
-            .filter((tab) => this.ports.has(tab.id))
+            .filter((tab) => this.tabs.has(tab.id))
             .forEach((tab) => {
-                const framesPorts = this.ports.get(tab.id);
-                framesPorts.forEach(({url, port}, frameId) => {
+                const frames = this.tabs.get(tab.id);
+                frames.forEach((url, frameId) => {
                     const message = getMessage(tab.url, frameId === 0 ? null : url);
                     if (tab.active && frameId === 0) {
-                        port.postMessage(message);
+                        chrome.tabs.sendMessage(tab.id, message, {frameId});
                     } else {
-                        setTimeout(() => port.postMessage(message));
+                        setTimeout(() => chrome.tabs.sendMessage(tab.id, message, {frameId}));
                     }
                 });
             });

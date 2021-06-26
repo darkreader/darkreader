@@ -502,6 +502,9 @@ async function linkLoading(link: HTMLLinkElement, loadingId: number) {
         });
         link.addEventListener('load', onLoad);
         link.addEventListener('error', onError);
+        if (!link.href) {
+            onError();
+        }
     });
 }
 

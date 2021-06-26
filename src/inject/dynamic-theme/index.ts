@@ -204,7 +204,7 @@ function createDynamicStyleOverrides() {
 }
 
 let loadingStylesCounter = 0;
-const loadingStyles = new Set();
+const loadingStyles = new Set<number>();
 
 function createManager(element: StyleElement) {
     const loadingStyleId = ++loadingStylesCounter;
@@ -224,6 +224,7 @@ function createManager(element: StyleElement) {
     function loadingEnd() {
         loadingStyles.delete(loadingStyleId);
         logInfo(`Removed loadingStyle ${loadingStyleId}, now awaiting: ${loadingStyles.size}`);
+        logInfo(`To-do to be loaded`, loadingStyles);
         if (loadingStyles.size === 0 && isDOMReady()) {
             cleanFallbackStyle();
         }
@@ -269,7 +270,7 @@ function onDOMReady() {
         cleanFallbackStyle();
         return;
     }
-    logWarn(`DOM is ready, but still have ${loadingStyles} styles being loaded.`);
+    logWarn(`DOM is ready, but still have styles being loaded.`, loadingStyles);
 }
 
 let documentVisibilityListener: () => void = null;

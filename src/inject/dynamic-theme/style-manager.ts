@@ -82,7 +82,11 @@ document.addEventListener('__darkreader__inlineScriptsAllowed', () => {
 });
 
 let loadingLinkCounter = 0;
-export const storedRejectorsForLoadingLinks = new Map<number, (reason?: any) => void>();
+const rejectorsForLoadingLinks = new Map<number, (reason?: any) => void>();
+
+export function cleanLoadingLinks() {
+    rejectorsForLoadingLinks.clear();
+}
 
 export function manageStyle(element: StyleElement, {update, loadingStart, loadingEnd}): StyleManager {
     const prevStyles: HTMLStyleElement[] = [];
@@ -428,12 +432,11 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
         removeNode(corsCopy);
         removeNode(syncStyle);
         loadingEnd();
-        let reject: (reason?: any) => void;
-        if (storedRejectorsForLoadingLinks.has(loadingLinkId)) {
-            reject = storedRejectorsForLoadingLinks.get(loadingLinkId);
-            storedRejectorsForLoadingLinks.delete(loadingLinkId);
+        if (rejectorsForLoadingLinks.has(loadingLinkId)) {
+            const reject = rejectorsForLoadingLinks.get(loadingLinkId);
+            rejectorsForLoadingLinks.delete(loadingLinkId);
+            reject && reject();
         }
-        reject && reject();
     }
 
     function watch() {
@@ -482,7 +485,7 @@ async function linkLoading(link: HTMLLinkElement, loadingId: number) {
         const cleanUp = () => {
             link.removeEventListener('load', onLoad);
             link.removeEventListener('error', onError);
-            storedRejectorsForLoadingLinks.delete(loadingId);
+            rejectorsForLoadingLinks.delete(loadingId);
         };
         const onLoad = () => {
             cleanUp();
@@ -493,7 +496,7 @@ async function linkLoading(link: HTMLLinkElement, loadingId: number) {
             cleanUp();
             reject(`Linkelement ${loadingId} couldn't be loaded. ${link.href}`);
         };
-        storedRejectorsForLoadingLinks.set(loadingId, () => {
+        rejectorsForLoadingLinks.set(loadingId, () => {
             cleanUp();
             reject();
         });

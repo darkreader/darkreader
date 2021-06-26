@@ -50,7 +50,7 @@ watchForColorSchemeChange(({isDark}) => {
 chrome.runtime.onMessage.addListener(onMessage);
 chrome.runtime.sendMessage({type: 'tab'});
 
-window.addEventListener('unload', () => {
+addEventListener('unload', () => {
     chrome.runtime.sendMessage({type: 'tab-unload'});
 });
 

@@ -2,6 +2,7 @@ import {canInjectScript} from '../background/utils/extension-api';
 import {createFileLoader} from './utils/network';
 import type {Message} from '../definitions';
 import {isThunderbird} from '../utils/platform';
+import {logWarn} from '../inject/utils/log';
 
 async function queryTabs(query: chrome.tabs.QueryInfo) {
     return new Promise<chrome.tabs.Tab[]>((resolve) => {
@@ -66,14 +67,12 @@ export default class TabManager {
                     break;
                 case 'tab-unload':
                     if (!sender.tab) {
-                        console.error('Unexpected message', message, sender);
+                        logWarn('Unexpected message', message, sender);
                         break;
                     }
 
                     const framesForDeletion = this.tabs.get(sender.tab.id);
-                    if (framesForDeletion) {
-                        framesForDeletion.delete(sender.frameId);
-                    }
+                    framesForDeletion && framesForDeletion.delete(sender.frameId);
                     break;
             }
         });

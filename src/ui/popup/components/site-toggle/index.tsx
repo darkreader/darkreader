@@ -6,7 +6,6 @@ import type {ExtWrapper, TabInfo} from '../../../../definitions';
 import {isThunderbird} from '../../../../utils/platform';
 
 export default function SiteToggleButton({data, tab, actions}: ExtWrapper & {tab: TabInfo}) {
-
     function onSiteToggleClick() {
         if (pdf) {
             actions.changeSettings({enableForPDF: !data.settings.enableForPDF});

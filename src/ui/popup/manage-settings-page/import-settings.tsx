@@ -7,7 +7,6 @@ import {openFile} from '../../utils';
 import {DEFAULT_SETTINGS} from '../../../defaults';
 
 export default function ImportButton(props: ViewProps) {
-
     function getValidatedObject<T>(source: any, compare: T): Partial<T> {
         const result = {};
         if (source == null || typeof source !== 'object' || Array.isArray(source)) {

@@ -18,7 +18,6 @@ type HeaderProps = ExtWrapper & {
 };
 
 function Header({data, actions, tab, onMoreToggleSettingsClick}: HeaderProps) {
-
     function toggleExtension(enabled) {
         actions.changeSettings({
             enabled,

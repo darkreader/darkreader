@@ -96,26 +96,26 @@ function getSunsetSunriseUTCTime(
         // calculate the Sun's true longitude
         let L = M + (1.916 * Math.sin(M * D2R)) + (0.020 * Math.sin(2 * M * D2R)) + 282.634;
         if (L > 360) {
-            L = L - 360;
+            L -= 360;
         } else if (L < 0) {
-            L = L + 360;
+            L += 360;
         }
 
         // calculate the Sun's right ascension
         let RA = R2D * Math.atan(0.91764 * Math.tan(L * D2R));
         if (RA > 360) {
-            RA = RA - 360;
+            RA -= 360;
         } else if (RA < 0) {
-            RA = RA + 360;
+            RA += 360;
         }
 
         // right ascension value needs to be in the same qua
         const Lquadrant = (Math.floor(L / (90))) * 90;
         const RAquadrant = (Math.floor(RA / 90)) * 90;
-        RA = RA + (Lquadrant - RAquadrant);
+        RA += (Lquadrant - RAquadrant);
 
         // right ascension value needs to be converted into hours
-        RA = RA / 15;
+        RA /= 15;
 
         // calculate the Sun's declination
         const sinDec = 0.39782 * Math.sin(L * D2R);
@@ -147,9 +147,9 @@ function getSunsetSunriseUTCTime(
         // adjust back to UTC
         let UT = T - lnHour;
         if (UT > 24) {
-            UT = UT - 24;
+            UT -= 24;
         } else if (UT < 0) {
-            UT = UT + 24;
+            UT += 24;
         }
 
         // convert to milliseconds
@@ -202,7 +202,6 @@ export function isNightAtLocation(
 
     if (sunsetTime > sunriseTime) {
         return (currentTime > sunsetTime) || (currentTime < sunriseTime);
-    } else {
-        return (currentTime > sunsetTime) && (currentTime < sunriseTime);
     }
+    return (currentTime > sunsetTime) && (currentTime < sunriseTime);
 }

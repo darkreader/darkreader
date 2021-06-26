@@ -386,10 +386,9 @@ function isAnotherDarkReaderInstanceActive() {
             return true;
         }
         return false;
-    } else {
-        createDarkReaderInstanceMarker();
-        return false;
     }
+    createDarkReaderInstanceMarker();
+    return false;
 }
 
 export function createOrUpdateDynamicTheme(filterConfig: FilterConfig, dynamicThemeFixes: DynamicThemeFix, iframe: boolean) {

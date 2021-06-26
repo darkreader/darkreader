@@ -60,7 +60,7 @@ export async function collectCSS() {
         });
     });
 
-    if (modifiedCSS.length != 0) {
+    if (modifiedCSS.length) {
         const formattedCSS = formatCSS(modifiedCSS.join('\n'));
         css.push('/* Modified CSS */');
         css.push(await replaceBlobs(formattedCSS));

@@ -22,9 +22,8 @@ export const chromiumVersion = (() => {
     const m = userAgent.match(/chrom[e|ium]\/([^ ]+)/);
     if (m && m[1]) {
         return m[1];
-    } else {
-        return '';
     }
+    return '';
 })();
 
 export const isDefinedSelectorSupported = (() => {

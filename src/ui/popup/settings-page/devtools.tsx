@@ -48,17 +48,15 @@ async function openDevTools() {
             });
             window.close();
         }
+    } else if (devToolsObject) {
+        chrome.windows.update(devToolsObject.id, {'focused': true});
     } else {
-        if (devToolsObject) {
-            chrome.windows.update(devToolsObject.id, {'focused': true});
-        } else {
-            chrome.windows.create({
-                type: 'popup',
-                url: isFirefox ? '../devtools/index.html' : 'ui/devtools/index.html',
-                width: 600,
-                height: 600,
-            });
-        }
+        chrome.windows.create({
+            type: 'popup',
+            url: isFirefox ? '../devtools/index.html' : 'ui/devtools/index.html',
+            width: 600,
+            height: 600,
+        });
     }
 }
 

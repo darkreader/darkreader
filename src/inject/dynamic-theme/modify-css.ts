@@ -245,7 +245,6 @@ function getColorModifier(prop: string, value: string): string | CSSValueModifie
             return (filter) => modifyBorderColor(rgb, filter);
         }
         return (filter) => modifyForegroundColor(rgb, filter);
-
     } catch (err) {
         logWarn('Color parse error', err);
         return null;
@@ -435,7 +434,6 @@ export function getBgImageModifier(
             }
             return results.join('');
         };
-
     } catch (err) {
         logWarn(`Unable to parse gradient ${value}`, err);
         return null;
@@ -459,7 +457,6 @@ function getShadowModifier(value: string): CSSValueModifier {
         });
 
         return (filter: FilterConfig) => modifiers.map((modify) => modify(filter)).join('');
-
     } catch (err) {
         logWarn(`Unable to parse shadow ${value}`, err);
         return null;

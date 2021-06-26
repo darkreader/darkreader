@@ -16,12 +16,11 @@ function stickToStep(x: number, step: number) {
     const s = Math.round(x / step) * step;
     const exp = Math.floor(Math.log10(step));
     if (exp >= 0) {
-        const m = Math.pow(10, exp);
+        const m = 10 ** exp;
         return Math.round(s / m) * m;
-    } else {
-        const m = Math.pow(10, -exp);
-        return Math.round(s * m) / m;
     }
+    const m = 10 ** -exp;
+    return Math.round(s * m) / m;
 }
 
 export default function Slider(props: SliderProps) {

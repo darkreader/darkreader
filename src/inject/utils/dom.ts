@@ -298,12 +298,10 @@ export function createOptimizedTreeObserver(root: Document | ShadowRoot, callbac
             if (isHugeMutation(mutations)) {
                 if (!hadHugeMutationsBefore || isDOMReady()) {
                     observerCallbacks.forEach(({onHugeMutations}) => onHugeMutations(root));
-                } else {
-                    if (!subscribedForReadyState) {
-                        domReadyListener = () => observerCallbacks.forEach(({onHugeMutations}) => onHugeMutations(root));
-                        addDOMReadyListener(domReadyListener);
-                        subscribedForReadyState = true;
-                    }
+                } else if (!subscribedForReadyState) {
+                    domReadyListener = () => observerCallbacks.forEach(({onHugeMutations}) => onHugeMutations(root));
+                    addDOMReadyListener(domReadyListener);
+                    subscribedForReadyState = true;
                 }
                 hadHugeMutationsBefore = true;
             } else {

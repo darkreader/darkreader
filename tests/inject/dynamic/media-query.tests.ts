@@ -151,5 +151,4 @@ describe('MEDIA QUERIES', () => {
         createOrUpdateDynamicTheme(theme, null, false);
         expect(getComputedStyle(document.querySelector('h1')).backgroundColor).toBe('rgb(0, 102, 0)');
     });
-
 });

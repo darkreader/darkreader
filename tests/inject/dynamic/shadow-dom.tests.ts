@@ -138,5 +138,4 @@ describe('SHADOW DOM', () => {
         const shadowRoot = document.querySelector('delayed-custom-element').shadowRoot;
         expect(getComputedStyle(shadowRoot.querySelector('p')).color).toBe('rgb(255, 198, 208)');
     });
-
 });

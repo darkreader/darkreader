@@ -139,10 +139,8 @@ function analyzeImage(image: HTMLImageElement) {
     };
 }
 
-const objectURLs = new Set<string>();
-
-export function getFilteredImageDataURL({dataURL, width, height}: ImageDetails, filter: FilterConfig) {
-    const matrix = getSVGFilterMatrixValue(filter);
+export function getFilteredImageDataURL({dataURL, width, height}: ImageDetails, theme: FilterConfig): string {
+    const matrix = getSVGFilterMatrixValue(theme);
     const svg = [
         `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="${width}" height="${height}">`,
         '<defs>',
@@ -153,18 +151,9 @@ export function getFilteredImageDataURL({dataURL, width, height}: ImageDetails, 
         `<image width="${width}" height="${height}" filter="url(#darkreader-image-filter)" xlink:href="${dataURL}" />`,
         '</svg>',
     ].join('');
-    const bytes = new Uint8Array(svg.length);
-    for (let i = 0; i < svg.length; i++) {
-        bytes[i] = svg.charCodeAt(i);
-    }
-    const blob = new Blob([bytes], {type: 'image/svg+xml'});
-    const objectURL = URL.createObjectURL(blob);
-    objectURLs.add(objectURL);
-    return objectURL;
+    return `data:image/svg+xml;base64,${btoa(svg)}`;
 }
 
 export function cleanImageProcessingCache() {
     removeCanvas();
-    objectURLs.forEach((u) => URL.revokeObjectURL(u));
-    objectURLs.clear();
 }

@@ -21,12 +21,10 @@ export function createFilterMatrix(config: FilterConfig) {
     return m;
 }
 
-export function applyColorMatrix([r, g, b, a]: number[], matrix: number[][]) {
+export function applyColorMatrix([r, g, b]: number[], matrix: number[][]) {
     const rgb = [[r / 255], [g / 255], [b / 255], [1], [1]];
     const result = multiplyMatrices(matrix, rgb);
-    let res = [0, 1, 2].map((i) => clamp(Math.round(result[i][0] * 255), 0, 255));
-    if(a !== undefined) res.push(a);
-    return res;
+    return [0, 1, 2].map((i) => clamp(Math.round(result[i][0] * 255), 0, 255));
 }
 
 export const Matrix = {

@@ -121,10 +121,10 @@ export default class TabManager {
         });
     }
 
-    // It can happen in cases whereby the tab.url is empty.
-    // Luckily this only and will only happen on `about:blank`-like pages.
-    // Due to this we can safely use `about:blank` as fallback value.
     getTabURLOrAboutBlank(tabURL: string): string {
+        // It can happen in cases whereby the tab.url is empty.
+        // Luckily this only and will only happen on `about:blank`-like pages.
+        // Due to this we can safely use `about:blank` as fallback value.
         return tabURL || 'about:blank';
     }
 

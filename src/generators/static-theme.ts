@@ -62,7 +62,7 @@ export default function createStaticStylesheet(config: FilterConfig, url: string
     const theme = Object.entries(srcTheme).reduce((t, [prop, color]) => {
         const [r, g, b, a] = color;
         t[prop] = applyColorMatrix([r, g, b], createFilterMatrix({...config, mode: 0}));
-        if(a !== undefined) {
+        if (a !== undefined) {
             t[prop].push(a);
         }
         return t;

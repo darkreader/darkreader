@@ -42,6 +42,25 @@ describe('CSS VARIABLES OVERRIDE', () => {
         expect(getComputedStyle(container.querySelector('h1 strong')).color).toBe('rgb(255, 26, 26)');
     });
 
+    it('should override style with variables(that contain spaces)', () => {
+        container.innerHTML = multiline(
+            '<style>',
+            '    :root {',
+            '        --bg: gray;',
+            '        --text: red;',
+            '    }',
+            '    h1 { background: var( --bg ); }',
+            '    h1 strong { color: var( --text ); }',
+            '</style>',
+            '<h1>CSS <strong>variables</strong>!</h1>',
+        );
+        createOrUpdateDynamicTheme(theme, null, false);
+        expect(getComputedStyle(container).backgroundColor).toBe('rgb(0, 0, 0)');
+        expect(getComputedStyle(container.querySelector('h1')).backgroundColor).toBe('rgb(102, 102, 102)');
+        expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(255, 255, 255)');
+        expect(getComputedStyle(container.querySelector('h1 strong')).color).toBe('rgb(255, 26, 26)');
+    });
+
     it('should override style with variables (reverse order)', () => {
         container.innerHTML = multiline(
             '<style>',
@@ -826,9 +845,9 @@ describe('CSS VARIABLES OVERRIDE', () => {
         );
         createOrUpdateDynamicTheme(theme, null, false);
         await timeout(100);
-        expect(getComputedStyle(container.querySelector('.icon1')).backgroundImage).toMatch(/^url\("blob:.*"\)$/);
-        expect(getComputedStyle(container.querySelector('.icon2')).backgroundImage).toMatch(/^url\("blob:.*"\)$/);
-        expect(getComputedStyle(container.querySelector('.icon3')).backgroundImage).toMatch(/^url\("blob:.*"\), url\("blob:.*"\)$/);
+        expect(getComputedStyle(container.querySelector('.icon1')).backgroundImage).toMatch(/^url\("data:image\/svg\+xml;base64,.*"\)$/);
+        expect(getComputedStyle(container.querySelector('.icon2')).backgroundImage).toMatch(/^url\("data:image\/svg\+xml;base64,.*"\)$/);
+        expect(getComputedStyle(container.querySelector('.icon3')).backgroundImage).toMatch(/^url\("data:image\/svg\+xml;base64,.*"\), url\("data:image\/svg\+xml;base64,.*"\)$/);
     });
 
     it('should handle variables with gradients and images', async () => {
@@ -854,7 +873,7 @@ describe('CSS VARIABLES OVERRIDE', () => {
         );
         createOrUpdateDynamicTheme(theme, null, false);
         await timeout(100);
-        expect(getComputedStyle(container.querySelector('.icon')).backgroundImage).toMatch(/^url\("blob:.*"\), linear-gradient\(rgb\(204, 0, 0\), rgb\(0, 0, 0\)\)$/);
+        expect(getComputedStyle(container.querySelector('.icon')).backgroundImage).toMatch(/^url\("data:image\/svg\+xml;base64,.*"\), linear-gradient\(rgb\(204, 0, 0\), rgb\(0, 0, 0\)\)$/);
     });
 
     it('should handle asynchronous variable type resolution', async () => {

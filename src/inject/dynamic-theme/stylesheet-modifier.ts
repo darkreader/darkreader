@@ -26,7 +26,7 @@ const asyncQueue = createAsyncTasksQueue();
 
 export function createStyleSheetModifier() {
     let renderId = 0;
-    const rulesTextCache = new Map<string, string>();
+    const rulesTextCache = new Set<string>();
     const rulesModCache = new Map<string, ModifiableCSSRule>();
     const varTypeChangeCleaners = new Set<() => void>();
     let prevFilterKey: string = null;
@@ -50,13 +50,16 @@ export function createStyleSheetModifier() {
         const themeChanged = (themeKey !== prevFilterKey);
 
         const modRules: ModifiableCSSRule[] = [];
-        await iterateCSSRules(rules, (rule) => {
-            const cssText = rule.cssText;
+        iterateCSSRules(rules, (rule) => {
+            let cssText = rule.cssText;
             let textDiffersFromPrev = false;
 
             notFoundCacheKeys.delete(cssText);
+            if (rule.parentRule instanceof CSSMediaRule) {
+                cssText += `;${ (rule.parentRule as CSSMediaRule).media.mediaText}`;
+            }
             if (!rulesTextCache.has(cssText)) {
-                rulesTextCache.set(cssText, cssText);
+                rulesTextCache.add(cssText);
                 textDiffersFromPrev = true;
             }
 

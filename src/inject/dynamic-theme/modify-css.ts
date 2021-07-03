@@ -36,16 +36,15 @@ export function getModifiableCSSDeclaration(
     isCancelled: () => boolean,
 ): ModifiableCSSDeclaration {
     const important = Boolean(rule && rule.style && rule.style.getPropertyPriority(property));
-    const sourceValue = value;
     if (property.startsWith('--')) {
         const modifier = getVariableModifier(variablesStore, property, value, rule, ignoreImageSelectors, isCancelled);
         if (modifier) {
-            return {property, value: modifier, important, sourceValue};
+            return {property, value: modifier, important, sourceValue: value};
         }
     } else if (value.includes('var(')) {
         const modifier = getVariableDependantModifier(variablesStore, property, value);
         if (modifier) {
-            return {property, value: modifier, important, sourceValue};
+            return {property, value: modifier, important, sourceValue: value};
         }
     } else if (
         (property.includes('color') && property !== '-webkit-print-color-adjust') ||
@@ -55,17 +54,17 @@ export function getModifiableCSSDeclaration(
     ) {
         const modifier = getColorModifier(property, value);
         if (modifier) {
-            return {property, value: modifier, important, sourceValue};
+            return {property, value: modifier, important, sourceValue: value};
         }
     } else if (property === 'background-image' || property === 'list-style-image') {
         const modifier = getBgImageModifier(value, rule, ignoreImageSelectors, isCancelled);
         if (modifier) {
-            return {property, value: modifier, important, sourceValue};
+            return {property, value: modifier, important, sourceValue: value};
         }
     } else if (property.includes('shadow')) {
         const modifier = getShadowModifier(value);
         if (modifier) {
-            return {property, value: modifier, important, sourceValue};
+            return {property, value: modifier, important, sourceValue: value};
         }
     }
     return null;

@@ -62,15 +62,18 @@ export function iterateCSSDeclarations(style: CSSStyleDeclaration, iterate: (pro
         }
         iterate(property, value);
     });
-    if (isSafari && style.cssText.includes('var(')) {
-        // Safari doesn't show shorthand properties' values
-        shorthandVarDepPropRegexps.forEach(([prop, regexp]) => {
-            const match = style.cssText.match(regexp);
-            if (match && match[1]) {
-                const val = match[1].trim();
-                iterate(prop, val);
-            }
-        });
+    if (isSafari) {
+        const cssText = style.cssText;
+        if (cssText.includes('var(')) {
+            // Safari doesn't show shorthand properties' values
+            shorthandVarDepPropRegexps.forEach(([prop, regexp]) => {
+                const match = cssText.match(regexp);
+                if (match && match[1]) {
+                    const val = match[1].trim();
+                    iterate(prop, val);
+                }
+            });
+        }
     } else {
         shorthandVarDependantProperties.forEach((prop) => {
             const val = style.getPropertyValue(prop);

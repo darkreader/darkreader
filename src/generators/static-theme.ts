@@ -60,7 +60,11 @@ function mix(color1: number[], color2: number[], t: number) {
 export default function createStaticStylesheet(config: FilterConfig, url: string, frameURL: string, staticThemes: StaticTheme[]) {
     const srcTheme = config.mode === 1 ? darkTheme : lightTheme;
     const theme = Object.entries(srcTheme).reduce((t, [prop, color]) => {
-        t[prop] = applyColorMatrix(color, createFilterMatrix({...config, mode: 0}));
+        const [r, g, b, a] = color;
+        t[prop] = applyColorMatrix([r, g, b], createFilterMatrix({...config, mode: 0}));
+        if (a !== undefined) {
+            t[prop].push(a);
+        }
         return t;
     }, {} as ThemeColors);
 

@@ -24,6 +24,8 @@ declare const __PORT__: number;
 const WATCH = __WATCH__;
 
 if (WATCH) {
+    const tabs = new Set<number>();
+
     const PORT = __PORT__;
     const listen = () => {
         const socket = new WebSocket(`ws://localhost:${PORT}`);
@@ -43,6 +45,7 @@ if (WATCH) {
                     break;
                 }
                 case 'reload:full': {
+                    tabs.forEach((tabId) => chrome.tabs.sendMessage(tabId, {type: 'reload'}));
                     chrome.runtime.reload();
                     break;
                 }
@@ -51,4 +54,20 @@ if (WATCH) {
         socket.onclose = () => setTimeout(listen, 1000);
     };
     listen();
+
+    chrome.runtime.onMessage.addListener((message, sender) => {
+        const tabId = sender.tab.id;
+        if (!tabId || sender.frameId !== 0) {
+            return;
+        }
+
+        switch (message.type) {
+            case 'tab':
+                tabs.add(tabId);
+                break;
+            case 'tab-unload':
+                tabs.delete(tabId);
+                break;
+        }
+    });
 }

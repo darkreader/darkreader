@@ -1,53 +1,33 @@
 import {forEach} from '../../utils/array';
 import {isSafari} from '../../utils/platform';
 import {parseURL, getAbsoluteURL} from '../../utils/url';
-import {addReadyStateCompleteListener, isReadyStateComplete as isReadyStateComplete} from '../utils/dom';
-import {logWarn} from '../utils/log';
+import {logInfo, logWarn} from '../utils/log';
 
-export async function iterateCSSRules(rules: CSSRuleList, iterate: (rule: CSSStyleRule) => void) {
-    return new Promise<void>((resolve) => {
-        let loadingRules = 0;
-        forEach(rules, (rule) => {
-            if (rule instanceof CSSMediaRule) {
-                const media = Array.from(rule.media);
-                const isScreenOrAll = media.some((m) => m.startsWith('screen') || m.startsWith('all'));
-                const isPrintOrSpeech = media.some((m) => m.startsWith('print') || m.startsWith('speech'));
+export function iterateCSSRules(rules: CSSRuleList, iterate: (rule: CSSStyleRule) => void, hasNonLoadedLinks: () => void = () => void 0) {
+    forEach(rules, (rule) => {
+        if (rule instanceof CSSMediaRule) {
+            const media = Array.from(rule.media);
+            const isScreenOrAll = media.some((m) => m.startsWith('screen') || m.startsWith('all'));
+            const isPrintOrSpeech = media.some((m) => m.startsWith('print') || m.startsWith('speech'));
 
-                if (isScreenOrAll || !isPrintOrSpeech) {
-                    iterateCSSRules(rule.cssRules, iterate);
-                }
-            } else if (rule instanceof CSSStyleRule) {
-                iterate(rule);
-            } else if (rule instanceof CSSImportRule) {
-                const iterateCSSImportRule = () => {
-                    try {
-                        iterateCSSRules(rule.styleSheet.cssRules, iterate);
-                    } catch (err) {
-                        logWarn(err);
-                    }
-                };
-                if (isReadyStateComplete()) {
-                    iterateCSSImportRule();
-                } else {
-                    loadingRules++;
-                    addReadyStateCompleteListener(() => {
-                        loadingRules--;
-                        iterateCSSImportRule();
-                        if (loadingRules === 0) {
-                            resolve();
-                        }
-                    });
-                }
-            } else if (rule instanceof CSSSupportsRule) {
-                if (CSS.supports(rule.conditionText)) {
-                    iterateCSSRules(rule.cssRules, iterate);
-                }
-            } else {
-                logWarn(`CSSRule type not supported`, rule);
+            if (isScreenOrAll || !isPrintOrSpeech) {
+                iterateCSSRules(rule.cssRules, iterate, hasNonLoadedLinks);
             }
-        });
-        if (loadingRules === 0) {
-            resolve();
+        } else if (rule instanceof CSSStyleRule) {
+            iterate(rule);
+        } else if (rule instanceof CSSImportRule) {
+            try {
+                iterateCSSRules(rule.styleSheet.cssRules, iterate, hasNonLoadedLinks);
+            } catch (err) {
+                logInfo(`Found a non-loaded link.`);
+                hasNonLoadedLinks();
+            }
+        } else if (rule instanceof CSSSupportsRule) {
+            if (CSS.supports(rule.conditionText)) {
+                iterateCSSRules(rule.cssRules, iterate, hasNonLoadedLinks);
+            }
+        } else {
+            logWarn(`CSSRule type not supported`, rule);
         }
     });
 }

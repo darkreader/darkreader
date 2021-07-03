@@ -30,6 +30,7 @@ export function createStyleSheetModifier() {
     const rulesModCache = new Map<string, ModifiableCSSRule>();
     const varTypeChangeCleaners = new Set<() => void>();
     let prevFilterKey: string = null;
+    let foundNonLoadedLinks = false;
 
     interface ModifySheetOptions {
         sourceCSSRules: CSSRuleList;
@@ -40,11 +41,16 @@ export function createStyleSheetModifier() {
         isAsyncCancelled: () => boolean;
     }
 
-    async function modifySheet(options: ModifySheetOptions): Promise<void> {
+    function hasNotLoadedImports() {
+        return foundNonLoadedLinks;
+    }
+
+    function modifySheet(options: ModifySheetOptions) {
         const rules = options.sourceCSSRules;
         const {theme, ignoreImageAnalysis, force, prepareSheet, isAsyncCancelled} = options;
 
         let rulesChanged = (rulesModCache.size === 0);
+        foundNonLoadedLinks = false;
         const notFoundCacheKeys = new Set(rulesModCache.keys());
         const themeKey = getThemeKey(theme);
         const themeChanged = (themeKey !== prevFilterKey);
@@ -85,6 +91,8 @@ export function createStyleSheetModifier() {
                 modRules.push(modRule);
             }
             rulesModCache.set(cssText, modRule);
+        }, () => {
+            foundNonLoadedLinks = true;
         });
 
         notFoundCacheKeys.forEach((key) => {
@@ -301,5 +309,5 @@ export function createStyleSheetModifier() {
         buildStyleSheet();
     }
 
-    return {modifySheet};
+    return {modifySheet, hasNotLoadedImports};
 }

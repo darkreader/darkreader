@@ -8,7 +8,9 @@ export function iterateCSSRules(rules: CSSRuleList, iterate: (rule: CSSStyleRule
         // Don't rely on prototype or instanceof, they are slow implementations within the browsers.
         // However we can rely on certain properties to indentify which CSSRule we are dealing with.
         // And it's 2x so fast, https://jsben.ch/B0eLa
-        if ((rule as CSSImportRule).href) {
+        if ((rule as CSSStyleRule).selectorText) {
+            iterate((rule as CSSStyleRule));
+        } else if ((rule as CSSImportRule).href) {
             try {
                 iterateCSSRules((rule as CSSImportRule).styleSheet.cssRules, iterate);
             } catch (err) {
@@ -26,8 +28,6 @@ export function iterateCSSRules(rules: CSSRuleList, iterate: (rule: CSSStyleRule
             if (CSS.supports((rule as CSSSupportsRule).conditionText)) {
                 iterateCSSRules((rule as CSSSupportsRule).cssRules, iterate);
             }
-        } else if ((rule as CSSStyleRule).selectorText) {
-            iterate((rule as CSSStyleRule));
         } else {
             logWarn(`CSSRule type not supported`, rule);
         }

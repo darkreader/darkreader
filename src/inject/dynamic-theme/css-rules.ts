@@ -31,9 +31,9 @@ export function iterateCSSRules(rules: CSSRuleList, iterate: (rule: CSSStyleRule
                 logInfo(`Found a non-loaded link.`);
                 onMediaRuleError && onMediaRuleError();
             }
-        } else if (rule instanceof CSSSupportsRule) {
-            if (CSS.supports(rule.conditionText)) {
-                iterateCSSRules(rule.cssRules, iterate, onMediaRuleError);
+        } else if ((rule as CSSSupportsRule).conditionText) {
+            if (CSS.supports((rule as CSSSupportsRule).conditionText)) {
+                iterateCSSRules((rule as CSSSupportsRule).cssRules, iterate, onMediaRuleError);
             }
         } else {
             logWarn(`CSSRule type not supported`, rule);

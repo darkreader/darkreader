@@ -53,7 +53,7 @@ export function shouldManageStyle(element: Node) {
             )
         ) &&
         !element.classList.contains('darkreader') &&
-        element.media !== 'print' &&
+        element.media.toLowerCase() !== 'print' &&
         !element.classList.contains('stylus')
     );
 }

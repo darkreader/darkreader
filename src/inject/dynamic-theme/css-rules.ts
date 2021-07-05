@@ -14,7 +14,8 @@ export function iterateCSSRules(rules: CSSRuleList, iterate: (rule: CSSStyleRule
             try {
                 iterateCSSRules((rule as CSSImportRule).styleSheet.cssRules, iterate, onMediaRuleError);
             } catch (err) {
-                logWarn(err);
+                logInfo(`Found a non-loaded link.`);
+                onMediaRuleError && onMediaRuleError();
             }
         } else if ((rule as CSSMediaRule).media) {
             const media = Array.from((rule as CSSMediaRule).media);
@@ -23,13 +24,6 @@ export function iterateCSSRules(rules: CSSRuleList, iterate: (rule: CSSStyleRule
 
             if (isScreenOrAll || !isPrintOrSpeech) {
                 iterateCSSRules((rule as CSSMediaRule).cssRules, iterate, onMediaRuleError);
-            }
-        } else if ((rule as CSSImportRule).href) {
-            try {
-                iterateCSSRules((rule as CSSImportRule).styleSheet.cssRules, iterate, onMediaRuleError);
-            } catch (err) {
-                logInfo(`Found a non-loaded link.`);
-                onMediaRuleError && onMediaRuleError();
             }
         } else if ((rule as CSSSupportsRule).conditionText) {
             if (CSS.supports((rule as CSSSupportsRule).conditionText)) {

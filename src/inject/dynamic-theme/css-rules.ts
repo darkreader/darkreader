@@ -3,7 +3,7 @@ import {isSafari} from '../../utils/platform';
 import {parseURL, getAbsoluteURL} from '../../utils/url';
 import {logInfo, logWarn} from '../utils/log';
 
-export function iterateCSSRules(rules: CSSRuleList, iterate: (rule: CSSStyleRule) => void, hasNonLoadedLinks: () => void = () => void 0) {
+export function iterateCSSRules(rules: CSSRuleList, iterate: (rule: CSSStyleRule) => void, onMediaRuleError: () => void) {
     forEach(rules, (rule) => {
         if (rule instanceof CSSMediaRule) {
             const media = Array.from(rule.media);
@@ -11,20 +11,20 @@ export function iterateCSSRules(rules: CSSRuleList, iterate: (rule: CSSStyleRule
             const isPrintOrSpeech = media.some((m) => m.startsWith('print') || m.startsWith('speech'));
 
             if (isScreenOrAll || !isPrintOrSpeech) {
-                iterateCSSRules(rule.cssRules, iterate, hasNonLoadedLinks);
+                iterateCSSRules(rule.cssRules, iterate, onMediaRuleError);
             }
         } else if (rule instanceof CSSStyleRule) {
             iterate(rule);
         } else if (rule instanceof CSSImportRule) {
             try {
-                iterateCSSRules(rule.styleSheet.cssRules, iterate, hasNonLoadedLinks);
+                iterateCSSRules(rule.styleSheet.cssRules, iterate, onMediaRuleError);
             } catch (err) {
                 logInfo(`Found a non-loaded link.`);
-                hasNonLoadedLinks();
+                onMediaRuleError && onMediaRuleError();
             }
         } else if (rule instanceof CSSSupportsRule) {
             if (CSS.supports(rule.conditionText)) {
-                iterateCSSRules(rule.cssRules, iterate, hasNonLoadedLinks);
+                iterateCSSRules(rule.cssRules, iterate, onMediaRuleError);
             }
         } else {
             logWarn(`CSSRule type not supported`, rule);

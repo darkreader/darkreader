@@ -5,25 +5,28 @@ import {logWarn} from '../utils/log';
 
 export function iterateCSSRules(rules: CSSRuleList, iterate: (rule: CSSStyleRule) => void) {
     forEach(rules, (rule) => {
-        if (rule instanceof CSSMediaRule) {
-            const media = Array.from(rule.media);
+        // Don't rely on prototype or instanceof, they are slow implementations within the browsers.
+        // However we can rely on certain properties to indentify which CSSRule we are dealing with.
+        // And it's 2x so fast, https://jsben.ch/B0eLa
+        if ((rule as CSSStyleRule).selectorText) {
+            iterate((rule as CSSStyleRule));
+        } else if ((rule as CSSImportRule).href) {
+            try {
+                iterateCSSRules((rule as CSSImportRule).styleSheet.cssRules, iterate);
+            } catch (err) {
+                logWarn(err);
+            }
+        } else if ((rule as CSSMediaRule).media) {
+            const media = Array.from((rule as CSSMediaRule).media);
             const isScreenOrAll = media.some((m) => m.startsWith('screen') || m.startsWith('all'));
             const isPrintOrSpeech = media.some((m) => m.startsWith('print') || m.startsWith('speech'));
 
             if (isScreenOrAll || !isPrintOrSpeech) {
-                iterateCSSRules(rule.cssRules, iterate);
+                iterateCSSRules((rule as CSSMediaRule).cssRules, iterate);
             }
-        } else if (rule instanceof CSSStyleRule) {
-            iterate(rule);
-        } else if (rule instanceof CSSImportRule) {
-            try {
-                iterateCSSRules(rule.styleSheet.cssRules, iterate);
-            } catch (err) {
-                logWarn(err);
-            }
-        } else if (rule instanceof CSSSupportsRule) {
-            if (CSS.supports(rule.conditionText)) {
-                iterateCSSRules(rule.cssRules, iterate);
+        } else if ((rule as CSSSupportsRule).conditionText) {
+            if (CSS.supports((rule as CSSSupportsRule).conditionText)) {
+                iterateCSSRules((rule as CSSSupportsRule).cssRules, iterate);
             }
         } else {
             logWarn(`CSSRule type not supported`, rule);

@@ -198,12 +198,32 @@ export function removeDOMReadyListener(listener: () => void) {
     readyStateListeners.delete(listener);
 }
 
+// `interactive` can and will be fired when their are still stylesheets loading.
+// We use certain actions that can cause a forced layout change, which is bad.
+export function isReadyStateComplete() {
+    return document.readyState === 'complete';
+}
+
+const readyStateCompleteListeners = new Set<() => void>();
+
+export function addReadyStateCompleteListener(listener: () => void) {
+    readyStateCompleteListeners.add(listener);
+}
+
+export function cleanReadyStateCompleteListeners() {
+    readyStateCompleteListeners.clear();
+}
+
 if (!isDOMReady()) {
     const onReadyStateChange = () => {
         if (isDOMReady()) {
-            document.removeEventListener('readystatechange', onReadyStateChange);
             readyStateListeners.forEach((listener) => listener());
             readyStateListeners.clear();
+            if (isReadyStateComplete()) {
+                document.removeEventListener('readystatechange', onReadyStateChange);
+                readyStateCompleteListeners.forEach((listener) => listener());
+                readyStateCompleteListeners.clear();
+            }
         }
     };
     document.addEventListener('readystatechange', onReadyStateChange);

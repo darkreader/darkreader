@@ -1,9 +1,9 @@
 import {forEach} from '../../utils/array';
 import {isSafari} from '../../utils/platform';
 import {parseURL, getAbsoluteURL} from '../../utils/url';
-import {logWarn} from '../utils/log';
+import {logInfo, logWarn} from '../utils/log';
 
-export function iterateCSSRules(rules: CSSRuleList, iterate: (rule: CSSStyleRule) => void) {
+export function iterateCSSRules(rules: CSSRuleList, iterate: (rule: CSSStyleRule) => void, onMediaRuleError: () => void) {
     forEach(rules, (rule) => {
         // Don't rely on prototype or instanceof, they are slow implementations within the browsers.
         // However we can rely on certain properties to indentify which CSSRule we are dealing with.
@@ -12,9 +12,10 @@ export function iterateCSSRules(rules: CSSRuleList, iterate: (rule: CSSStyleRule
             iterate((rule as CSSStyleRule));
         } else if ((rule as CSSImportRule).href) {
             try {
-                iterateCSSRules((rule as CSSImportRule).styleSheet.cssRules, iterate);
+                iterateCSSRules((rule as CSSImportRule).styleSheet.cssRules, iterate, onMediaRuleError);
             } catch (err) {
-                logWarn(err);
+                logInfo(`Found a non-loaded link.`);
+                onMediaRuleError && onMediaRuleError();
             }
         } else if ((rule as CSSMediaRule).media) {
             const media = Array.from((rule as CSSMediaRule).media);
@@ -22,11 +23,11 @@ export function iterateCSSRules(rules: CSSRuleList, iterate: (rule: CSSStyleRule
             const isPrintOrSpeech = media.some((m) => m.startsWith('print') || m.startsWith('speech'));
 
             if (isScreenOrAll || !isPrintOrSpeech) {
-                iterateCSSRules((rule as CSSMediaRule).cssRules, iterate);
+                iterateCSSRules((rule as CSSMediaRule).cssRules, iterate, onMediaRuleError);
             }
         } else if ((rule as CSSSupportsRule).conditionText) {
             if (CSS.supports((rule as CSSSupportsRule).conditionText)) {
-                iterateCSSRules((rule as CSSSupportsRule).cssRules, iterate);
+                iterateCSSRules((rule as CSSSupportsRule).cssRules, iterate, onMediaRuleError);
             }
         } else {
             logWarn(`CSSRule type not supported`, rule);

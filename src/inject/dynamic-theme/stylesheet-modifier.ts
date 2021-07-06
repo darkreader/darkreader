@@ -24,16 +24,19 @@ function getThemeKey(theme: Theme) {
 
 const asyncQueue = createAsyncTasksQueue();
 
+// 'not-found' It means dark reader didn't found any non loaded link(s) on this stylesheet.
+// 'found' It means that dark reader did found non loaded link(s) and wasn't rebuilt yet.
+// 'found-and-rebuilt' It means that dark reader previously found non-loaded-links,
+// but has since then rebuilt the stylesheet.
+type NonLoadedLinkStatus = | 'not-found' | 'found' | 'found-and-rebuilt';
+
 export function createStyleSheetModifier() {
     let renderId = 0;
     const rulesTextCache = new Set<string>();
     const rulesModCache = new Map<string, ModifiableCSSRule>();
     const varTypeChangeCleaners = new Set<() => void>();
     let prevFilterKey: string = null;
-    // 0 Default value.
-    // 1 OWO! Found a non loaded link.
-    // 2 Found a non loaded link but already handled(second try after readyState === 'complete');
-    let foundNonLoadedLinks = 0;
+    let nonLoadedLinkStatus: NonLoadedLinkStatus = 'not-found';
 
     interface ModifySheetOptions {
         sourceCSSRules: CSSRuleList;
@@ -44,8 +47,8 @@ export function createStyleSheetModifier() {
         isAsyncCancelled: () => boolean;
     }
 
-    function hasNotLoadedImports() {
-        return foundNonLoadedLinks === 1;
+    function getNotLoadedLinkStatus() {
+        return nonLoadedLinkStatus;
     }
 
     function modifySheet(options: ModifySheetOptions) {
@@ -53,8 +56,8 @@ export function createStyleSheetModifier() {
         const {theme, ignoreImageAnalysis, force, prepareSheet, isAsyncCancelled} = options;
 
         let rulesChanged = (rulesModCache.size === 0);
-        if (foundNonLoadedLinks === 1) {
-            foundNonLoadedLinks = 2;
+        if (nonLoadedLinkStatus === 'found') {
+            nonLoadedLinkStatus = 'found-and-rebuilt';
         }
         const notFoundCacheKeys = new Set(rulesModCache.keys());
         const themeKey = getThemeKey(theme);
@@ -97,8 +100,8 @@ export function createStyleSheetModifier() {
             }
             rulesModCache.set(cssText, modRule);
         }, () => {
-            if (foundNonLoadedLinks !== 2) {
-                foundNonLoadedLinks = 1;
+            if (nonLoadedLinkStatus !== 'found-and-rebuilt') {
+                nonLoadedLinkStatus = 'found';
             }
         });
 
@@ -316,5 +319,5 @@ export function createStyleSheetModifier() {
         buildStyleSheet();
     }
 
-    return {modifySheet, hasNotLoadedImports};
+    return {modifySheet, getNotLoadedLinkStatus};
 }

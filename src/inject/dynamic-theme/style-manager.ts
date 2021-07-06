@@ -305,7 +305,7 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
                 isAsyncCancelled: () => cancelAsyncOperations,
             });
             isOverrideEmpty = syncStyle.sheet.cssRules.length === 0;
-            if (sheetModifier.hasNotLoadedImports()) {
+            if (sheetModifier.getNotLoadedLinkStatus() === 'found') {
                 // "update" function schedules rebuilding the style
                 // ideally to wait for link loading, because some sites put links any time,
                 // but it can be complicated, so waiting for document completion can do the trick

@@ -3,7 +3,7 @@ import {isSafari} from '../../utils/platform';
 import {parseURL, getAbsoluteURL} from '../../utils/url';
 import {logInfo, logWarn} from '../utils/log';
 
-export function iterateCSSRules(rules: CSSRuleList, iterate: (rule: CSSStyleRule) => void, onMediaRuleError: () => void) {
+export function iterateCSSRules(rules: CSSRuleList, iterate: (rule: CSSStyleRule) => void, onMediaRuleError?: () => void) {
     forEach(rules, (rule) => {
         // Don't rely on prototype or instanceof, they are slow implementations within the browsers.
         // However we can rely on certain properties to indentify which CSSRule we are dealing with.

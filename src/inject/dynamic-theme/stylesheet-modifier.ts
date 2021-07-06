@@ -30,11 +30,6 @@ export function createStyleSheetModifier() {
     const rulesModCache = new Map<string, ModifiableCSSRule>();
     const varTypeChangeCleaners = new Set<() => void>();
     let prevFilterKey: string = null;
-    // 'false' It means Dark Reader didn't find any non loaded link(s) on this stylesheet.
-    // 'true' It means that Dark Reader has found non loaded link(s).
-    let hasNonLoadedLink = false;
-
-    let hasRebuilt = false;
     interface ModifySheetOptions {
         sourceCSSRules: CSSRuleList;
         theme: Theme;
@@ -44,8 +39,10 @@ export function createStyleSheetModifier() {
         isAsyncCancelled: () => boolean;
     }
 
-    function shouldRebuiltStyle() {
-        return hasNonLoadedLink && !hasRebuilt;
+    let hasNonLoadedLink = false;
+    let wasRebuilt = false;
+    function shouldRebuildStyle() {
+        return hasNonLoadedLink && !wasRebuilt;
     }
 
     function modifySheet(options: ModifySheetOptions) {
@@ -58,7 +55,7 @@ export function createStyleSheetModifier() {
         const themeChanged = (themeKey !== prevFilterKey);
 
         if (hasNonLoadedLink) {
-            hasRebuilt = true;
+            wasRebuilt = true;
         }
 
         const modRules: ModifiableCSSRule[] = [];
@@ -315,5 +312,5 @@ export function createStyleSheetModifier() {
         buildStyleSheet();
     }
 
-    return {modifySheet, shouldRebuiltStyle};
+    return {modifySheet, shouldRebuildStyle};
 }

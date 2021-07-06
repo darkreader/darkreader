@@ -24,20 +24,17 @@ function getThemeKey(theme: Theme) {
 
 const asyncQueue = createAsyncTasksQueue();
 
-// 'not-found' It means dark reader didn't found any non loaded link(s) on this stylesheet.
-// 'found' It means that dark reader did found non loaded link(s) and wasn't rebuilt yet.
-// 'found-and-rebuilt' It means that dark reader previously found non-loaded-links,
-// but has since then rebuilt the stylesheet.
-type NonLoadedLinkStatus = | 'not-found' | 'found' | 'found-and-rebuilt';
-
 export function createStyleSheetModifier() {
     let renderId = 0;
     const rulesTextCache = new Set<string>();
     const rulesModCache = new Map<string, ModifiableCSSRule>();
     const varTypeChangeCleaners = new Set<() => void>();
     let prevFilterKey: string = null;
-    let nonLoadedLinkStatus: NonLoadedLinkStatus = 'not-found';
+    // 'false' It means Dark Reader didn't find any non loaded link(s) on this stylesheet.
+    // 'true' It means that Dark Reader has found non loaded link(s).
+    let hasNonLoadedLink = false;
 
+    let hasRebuilt = false;
     interface ModifySheetOptions {
         sourceCSSRules: CSSRuleList;
         theme: Theme;
@@ -47,8 +44,8 @@ export function createStyleSheetModifier() {
         isAsyncCancelled: () => boolean;
     }
 
-    function getNotLoadedLinkStatus() {
-        return nonLoadedLinkStatus;
+    function shouldRebuiltStyle() {
+        return hasNonLoadedLink && !hasRebuilt;
     }
 
     function modifySheet(options: ModifySheetOptions) {
@@ -56,12 +53,13 @@ export function createStyleSheetModifier() {
         const {theme, ignoreImageAnalysis, force, prepareSheet, isAsyncCancelled} = options;
 
         let rulesChanged = (rulesModCache.size === 0);
-        if (nonLoadedLinkStatus === 'found') {
-            nonLoadedLinkStatus = 'found-and-rebuilt';
-        }
         const notFoundCacheKeys = new Set(rulesModCache.keys());
         const themeKey = getThemeKey(theme);
         const themeChanged = (themeKey !== prevFilterKey);
+
+        if (hasNonLoadedLink) {
+            hasRebuilt = true;
+        }
 
         const modRules: ModifiableCSSRule[] = [];
         iterateCSSRules(rules, (rule) => {
@@ -100,9 +98,7 @@ export function createStyleSheetModifier() {
             }
             rulesModCache.set(cssText, modRule);
         }, () => {
-            if (nonLoadedLinkStatus !== 'found-and-rebuilt') {
-                nonLoadedLinkStatus = 'found';
-            }
+            hasNonLoadedLink = true;
         });
 
         notFoundCacheKeys.forEach((key) => {
@@ -319,5 +315,5 @@ export function createStyleSheetModifier() {
         buildStyleSheet();
     }
 
-    return {modifySheet, getNotLoadedLinkStatus};
+    return {modifySheet, shouldRebuiltStyle};
 }

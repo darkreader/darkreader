@@ -2,7 +2,7 @@ import type {Theme} from '../../definitions';
 import {forEach} from '../../utils/array';
 import {getMatches} from '../../utils/text';
 import {getAbsoluteURL} from '../../utils/url';
-import {watchForNodePosition, removeNode, iterateShadowHosts} from '../utils/dom';
+import {watchForNodePosition, removeNode, iterateShadowHosts, addReadyStateCompleteListener} from '../utils/dom';
 import {logInfo, logWarn} from '../utils/log';
 import {replaceCSSRelativeURLsWithAbsolute, removeCSSComments, replaceCSSFontFace, getCSSURLValue, cssImportRegex, getCSSBaseBath} from './css-rules';
 import {bgFetch} from './network';
@@ -305,6 +305,12 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
                 isAsyncCancelled: () => cancelAsyncOperations,
             });
             isOverrideEmpty = syncStyle.sheet.cssRules.length === 0;
+            if (sheetModifier.hasNotLoadedImports()) {
+                // "update" function schedules rebuilding the style
+                // ideally to wait for link loading, because some sites put links any time,
+                // but it can be complicated, so waiting for document completion can do the trick
+                addReadyStateCompleteListener(() => update());
+            }
         }
 
         buildOverrides();

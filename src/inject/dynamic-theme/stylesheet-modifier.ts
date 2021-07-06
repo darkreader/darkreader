@@ -30,8 +30,6 @@ export function createStyleSheetModifier() {
     const rulesModCache = new Map<string, ModifiableCSSRule>();
     const varTypeChangeCleaners = new Set<() => void>();
     let prevFilterKey: string = null;
-    let foundNonLoadedLinks = false;
-
     interface ModifySheetOptions {
         sourceCSSRules: CSSRuleList;
         theme: Theme;
@@ -41,8 +39,10 @@ export function createStyleSheetModifier() {
         isAsyncCancelled: () => boolean;
     }
 
-    function hasNotLoadedImports() {
-        return foundNonLoadedLinks;
+    let hasNonLoadedLink = false;
+    let wasRebuilt = false;
+    function shouldRebuildStyle() {
+        return hasNonLoadedLink && !wasRebuilt;
     }
 
     function modifySheet(options: ModifySheetOptions) {
@@ -50,10 +50,13 @@ export function createStyleSheetModifier() {
         const {theme, ignoreImageAnalysis, force, prepareSheet, isAsyncCancelled} = options;
 
         let rulesChanged = (rulesModCache.size === 0);
-        foundNonLoadedLinks = false;
         const notFoundCacheKeys = new Set(rulesModCache.keys());
         const themeKey = getThemeKey(theme);
         const themeChanged = (themeKey !== prevFilterKey);
+
+        if (hasNonLoadedLink) {
+            wasRebuilt = true;
+        }
 
         const modRules: ModifiableCSSRule[] = [];
         iterateCSSRules(rules, (rule) => {
@@ -92,7 +95,7 @@ export function createStyleSheetModifier() {
             }
             rulesModCache.set(cssText, modRule);
         }, () => {
-            foundNonLoadedLinks = true;
+            hasNonLoadedLink = true;
         });
 
         notFoundCacheKeys.forEach((key) => {
@@ -309,5 +312,5 @@ export function createStyleSheetModifier() {
         buildStyleSheet();
     }
 
-    return {modifySheet, hasNotLoadedImports};
+    return {modifySheet, shouldRebuildStyle};
 }

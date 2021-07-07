@@ -13,10 +13,16 @@ Sponser the development of Dark Reader
 [Improve or suggest](https://github.com/darkreader/darkreader/tree/master/src/_locales) a translation.
 See the list of [language codes](https://developer.chrome.com/webstore/i18n#localeTable) that we can support.
 
-## Fix a wrong inversion!
+## Add a already dark site
 
-If a website is **already dark**, that regardless of system's preferred color-scheme has all pages dark by default. You can **add it to the [dark-sites.config](https://github.com/darkreader/darkreader/blob/master/src/config/dark-sites.config) file**
+If a website is **already dark** and meets the requirement:
+- Regardless of system's preferred color-scheme has all pages dark by default.
+- That aren't (CNAME) redirects, only add URL's that actually display the website.
+
+Then, you can **add it to the [dark-sites.config](https://github.com/darkreader/darkreader/blob/master/src/config/dark-sites.config) file**
 *(please, preserve the alphabetical order)*.
+
+## Fix a wrong inversion!
 
 If certain **parts** of a web page are **wrongly inverted or styled**,
 you can fix this by specifying appropriate [**CSS selectors**](https://developer.mozilla.org/docs/Web/CSS/CSS_Selectors) in

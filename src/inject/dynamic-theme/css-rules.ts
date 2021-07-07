@@ -73,14 +73,14 @@ export function iterateCSSDeclarations(style: CSSStyleDeclaration, iterate: (pro
                     iterate(prop, val);
                 }
             });
-        } else {
-            shorthandVarDependantProperties.forEach((prop) => {
-                const val = style.getPropertyValue(prop);
-                if (val && val.includes('var(')) {
-                    iterate(prop, val);
-                }
-            });
         }
+    } else {
+        shorthandVarDependantProperties.forEach((prop) => {
+            const val = style.getPropertyValue(prop);
+            if (val && val.includes('var(')) {
+                iterate(prop, val);
+            }
+        });
     }
 }
 

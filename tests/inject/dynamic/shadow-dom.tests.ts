@@ -2,7 +2,7 @@ import '../polyfills';
 import {DEFAULT_THEME} from '../../../src/defaults';
 import {createOrUpdateDynamicTheme, removeDynamicTheme} from '../../../src/inject/dynamic-theme';
 import {multiline, timeout} from '../../test-utils';
-import {isFirefox} from 'utils/platform';
+import {isFirefox, isSafari} from 'utils/platform';
 
 const theme = {
     ...DEFAULT_THEME,
@@ -142,7 +142,7 @@ describe('SHADOW DOM', () => {
 
     it('should override styles', async () => {
         // Firefox by default doesn't enable the CSSStyleSheet constructor.
-        if (isFirefox) {
+        if (isFirefox || isSafari) {
             return;
         }
 

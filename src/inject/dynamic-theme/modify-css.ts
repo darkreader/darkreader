@@ -27,6 +27,10 @@ export interface ModifiableCSSRule {
     declarations: ModifiableCSSDeclaration[];
 }
 
+function getPriority(ruleStyle: CSSStyleDeclaration, property: string) {
+    return Boolean(ruleStyle && ruleStyle.getPropertyPriority(property));
+}
+
 export function getModifiableCSSDeclaration(
     property: string,
     value: string,
@@ -38,12 +42,12 @@ export function getModifiableCSSDeclaration(
     if (property.startsWith('--')) {
         const modifier = getVariableModifier(variablesStore, property, value, rule, ignoreImageSelectors, isCancelled);
         if (modifier) {
-            return {property, value: modifier, important: Boolean(rule && rule.style && rule.style.getPropertyPriority(property)), sourceValue: value};
+            return {property, value: modifier, important: getPriority(rule.style, property), sourceValue: value};
         }
     } else if (value.includes('var(')) {
         const modifier = getVariableDependantModifier(variablesStore, property, value);
         if (modifier) {
-            return {property, value: modifier, important: Boolean(rule && rule.style && rule.style.getPropertyPriority(property)), sourceValue: value};
+            return {property, value: modifier, important: getPriority(rule.style, property), sourceValue: value};
         }
     } else if (
         (property.includes('color') && property !== '-webkit-print-color-adjust') ||
@@ -53,17 +57,17 @@ export function getModifiableCSSDeclaration(
     ) {
         const modifier = getColorModifier(property, value);
         if (modifier) {
-            return {property, value: modifier, important: Boolean(rule && rule.style && rule.style.getPropertyPriority(property)), sourceValue: value};
+            return {property, value: modifier, important: getPriority(rule.style, property), sourceValue: value};
         }
     } else if (property === 'background-image' || property === 'list-style-image') {
         const modifier = getBgImageModifier(value, rule, ignoreImageSelectors, isCancelled);
         if (modifier) {
-            return {property, value: modifier, important: Boolean(rule && rule.style && rule.style.getPropertyPriority(property)), sourceValue: value};
+            return {property, value: modifier, important: getPriority(rule.style, property), sourceValue: value};
         }
     } else if (property.includes('shadow')) {
         const modifier = getShadowModifier(value);
         if (modifier) {
-            return {property, value: modifier, important: Boolean(rule && rule.style && rule.style.getPropertyPriority(property)), sourceValue: value};
+            return {property, value: modifier, important: getPriority(rule.style, property), sourceValue: value};
         }
     }
     return null;

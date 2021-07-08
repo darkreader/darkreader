@@ -185,6 +185,9 @@ function createDynamicStyleOverrides() {
         });
     variablesStore.matchVariablesAndDependants();
     variablesStore.putRootVars(document.head.querySelector('.darkreader--root-vars'), filter);
+    variablesStore.setOnRootVariableChange(() => {
+        variablesStore.putRootVars(document.head.querySelector('.darkreader--root-vars'), filter);
+    });
     styleManagers.forEach((manager) => manager.render(filter, ignoredImageAnalysisSelectors));
     if (loadingStyles.size === 0) {
         cleanFallbackStyle();

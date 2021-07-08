@@ -1157,4 +1157,19 @@ describe('CSS VARIABLES OVERRIDE', () => {
             expect(updatedStyle.borderColor).toBe('rgb(0, 217, 0)');
         }
     });
+
+    it('should add variables to root after the variable type is discovered', async () => {
+        document.documentElement.setAttribute('style', '--text: red;');
+        container.innerHTML = multiline(
+            '<style class="testcase-sheet">',
+            '</style>',
+            '<h1>Dependency variable</h1>',
+        );
+        createOrUpdateDynamicTheme(theme, null, false);
+        const sheet = (document.querySelector('.testcase-sheet') as HTMLStyleElement).sheet;
+        sheet.insertRule('h1 { color: var(--text);');
+
+        await timeout(0);
+        expect(getComputedStyle(document.querySelector('h1')).color).toBe('rgb(255, 26, 26)');
+    });
 });

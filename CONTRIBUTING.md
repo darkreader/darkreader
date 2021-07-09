@@ -2,47 +2,47 @@
 
 <p align="center">Contributing to Dark Reader can be in a variety of ways. Here, you can learn more about it. Thank you in advance for reading this <code>CONTRIBUTING.md</code>.</p>
 
-## Sponsor!
+## Sponsor
 
 <a href="https://opencollective.com/darkreader/donate" target="_blank" rel="noreferrer noopener"> <img src="https://opencollective.com/darkreader/donate/button@2x.png?color=blue" width=300 /></a>
 
-Sponser the development of Dark Reader
+Sponsor the development of Dark Reader
 
 ## Translation
 
 [Improve or suggest](https://github.com/darkreader/darkreader/tree/master/src/_locales) a translation.
 See the list of [language codes](https://developer.chrome.com/webstore/i18n#localeTable) that we can support.
 
-## Add a already dark site
+## Adding a website that is already dark
 
-If a website is **already dark** and meets the requirement:
-- Regardless of system's preferred color-scheme has all pages dark by default.
-- That aren't (CNAME) redirects, only add URL's that actually display the website.
+If a website is **already dark** and meets the following requirements:
+- All pages are dark by default regardless of the system's preferred color-scheme.
+- The URL is the actual website address. (No CNAME or URL redirects)
 
 Then, you can **add it to the [dark-sites.config](https://github.com/darkreader/darkreader/blob/master/src/config/dark-sites.config) file**
 *(please, preserve the alphabetical order)*.
 
-## Fix a wrong inversion!
+## Fixing incorrect inversions
 
-If certain **parts** of a web page are **wrongly inverted or styled**,
-you can fix this by specifying appropriate [**CSS selectors**](https://developer.mozilla.org/docs/Web/CSS/CSS_Selectors) in
+If certain **parts** of a web page are **incorrectly inverted or styled**,
+you can fix this by specifying the appropriate [**CSS selectors**](https://developer.mozilla.org/docs/Web/CSS/CSS_Selectors) in
 **[dynamic-theme-fixes.config](https://github.com/darkreader/darkreader/blob/master/src/config/dynamic-theme-fixes.config)**
 (for Dynamic Theme mode)
 or **[inversion-fixes.config](https://github.com/darkreader/darkreader/blob/master/src/config/inversion-fixes.config)**
-(for Filter and Filter+ modes) *(__Please, preserve alphabetical order by URL, use short selectors, and preserve code style__)*
+(for Filter and Filter+ modes) *(__Please, preserve alphabetical order by URL, use short selectors, and preserve code style__)*.
 
 Below you can learn how to make a fix for the appropriate mode.
 
-## How to use the Dev Tools!
+## How to use the Dev Tools
 
 Dev Tools is designed to **fix minor issues** on a web page
 *(like dark icon on a dark background, removing a bright background, adding a white background to a transparent image, etc.)*.
 If the page looks partially dark and bright in **Dynamic mode**, it's considered a bug.
-For **Filter mode**, it is a common practice to invert already dark page parts.
+For **Filter mode**, it is a common practice to invert parts of the page that are already dark.
 
 - Open **Chrome Dev Tools** (`F12`) in Chrome or "Inspector" (`Ctrl+Shift+C`) in Firefox.
 - Click on **element picker** (top-left corner). It is enabled automatically in Firefox.
-- Pick a wrongly inverted element.
+- Pick an incorrectly inverted element.
 - Choose a **[selector](https://developer.mozilla.org/docs/Web/CSS/CSS_Selectors)** for that element or all similar elements (e.g. if element has `class="icon small"`, selector may look like `.icon`).
 - Click **Dark Reader icon**.
 - Click **Open developer tools** (at bottom of Dark Reader popup).
@@ -147,10 +147,10 @@ CSS
 ```
 
 - Filter and Filter+ work by inverting the whole web page and reverting necessary parts (images, videos, etc.), listed in the `INVERT` section.
-- If an inverted element contains images or other content that becomes wrongly displayed, `NO INVERT` rule can be used.
+- If an inverted element contains images or other content that becomes incorrectly displayed, `NO INVERT` rule can be used.
 - `REMOVE BG` removes the background image from an element and forces a black background.
 
-## Add new features or fix bugs!
+## Adding new features or fixing bugs
 
 If you would like to **add a new feature** to Dark Reader or **fix a bug**, **submit an issue** in GitHub (if there is no existing one), **discuss** it with active contributors, and wait for **approval**.
 
@@ -184,5 +184,5 @@ This can automatically be done by executing `npm run code-style`.
 
 Run tests by executing `npm test` to make sure it will pass the test.
 
-If you think the code is ready to be reviewed and merged. 
-You can Submit a **pull request**, and wait for **review**.
+If you think the code is ready to be reviewed and merged, 
+you can submit a **pull request** and wait for **review**.

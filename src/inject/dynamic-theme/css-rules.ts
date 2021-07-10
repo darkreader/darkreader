@@ -62,22 +62,29 @@ export function iterateCSSDeclarations(style: CSSStyleDeclaration, iterate: (pro
         }
         iterate(property, value);
     });
-    if (isSafari && style.cssText.includes('var(')) {
-        // Safari doesn't show shorthand properties' values
-        shorthandVarDepPropRegexps.forEach(([prop, regexp]) => {
-            const match = style.cssText.match(regexp);
-            if (match && match[1]) {
-                const val = match[1].trim();
-                iterate(prop, val);
-            }
-        });
-    } else {
-        shorthandVarDependantProperties.forEach((prop) => {
-            const val = style.getPropertyValue(prop);
-            if (val && val.includes('var(')) {
-                iterate(prop, val);
-            }
-        });
+
+    // Bigger sites like gmail.com and google.com will love this optimization.
+    // As a side-effect, styles with a lot of `var(` will notice a maximum slowdown of ~50ms.
+    // Against the bigger sites that saves around ~150ms+ it's a good win.
+    const cssText = style.cssText;
+    if (cssText.includes('var(')) {
+        if (isSafari) {
+            // Safari doesn't show shorthand properties' values
+            shorthandVarDepPropRegexps.forEach(([prop, regexp]) => {
+                const match = cssText.match(regexp);
+                if (match && match[1]) {
+                    const val = match[1].trim();
+                    iterate(prop, val);
+                }
+            });
+        } else {
+            shorthandVarDependantProperties.forEach((prop) => {
+                const val = style.getPropertyValue(prop);
+                if (val && val.includes('var(')) {
+                    iterate(prop, val);
+                }
+            });
+        }
     }
 }
 

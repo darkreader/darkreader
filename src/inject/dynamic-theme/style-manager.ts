@@ -114,6 +114,28 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
         return element instanceof HTMLStyleElement && element.textContent.trim().match(cssImportRegex);
     }
 
+    // It loops trough the cssRules and check for CSSImportRule and their `href`.
+    // If the `href` isn't local and doesn't start with the same-origin.
+    // We can be ensure that's a cross-origin import
+    // And should add a cors-sheet to this element.
+    function hasCrossOriginImports(cssRules: CSSRuleList) {
+        let result = false;
+        if (cssRules) {
+            let rule: CSSRule;
+            cssRulesLoop:
+            for (let i = 0, len = cssRules.length; i < len; i++) {
+                rule = cssRules[i];
+                if ((rule as CSSImportRule).href) {
+                    if ((rule as CSSImportRule).href.startsWith('http') && !(rule as CSSImportRule).href.startsWith(location.origin)) {
+                        result = true;
+                        break cssRulesLoop;
+                    }
+                }
+            }
+        }
+        return result;
+    }
+
     function getRulesSync(): CSSRuleList {
         if (corsCopy) {
             return corsCopy.sheet.cssRules;
@@ -121,7 +143,13 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
         if (containsCSSImport()) {
             return null;
         }
-        return safeGetSheetRules();
+
+        const cssRules = safeGetSheetRules();
+        if (hasCrossOriginImports(cssRules)) {
+            return null;
+        }
+
+        return cssRules;
     }
 
     function insertStyle() {
@@ -191,7 +219,8 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
                 }
             }
 
-            if (cssRules != null) {
+            const crossOriginImport = hasCrossOriginImports(cssRules);
+            if (cssRules != null && !crossOriginImport) {
                 return cssRules;
             }
 

@@ -253,7 +253,7 @@ export function overrideInlineStyle(element: HTMLElement, theme: FilterConfig, i
     function setCustomProp(targetCSSProp: string, modifierCSSProp: string, cssVal: string) {
         const {customProp, dataAttr} = overrides[targetCSSProp];
 
-        const mod = getModifiableCSSDeclaration(modifierCSSProp, cssVal, null, variablesStore, ignoreImageSelectors, null);
+        const mod = getModifiableCSSDeclaration(modifierCSSProp, cssVal, {} as CSSStyleRule, variablesStore, ignoreImageSelectors, null);
         if (!mod) {
             return;
         }

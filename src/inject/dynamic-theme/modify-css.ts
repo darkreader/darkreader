@@ -344,7 +344,7 @@ export function getBgImageModifier(
             }
             let url = getCSSURLValue(urlValue);
             const {parentStyleSheet} = rule;
-            const baseURL = parentStyleSheet.href ?
+            const baseURL = (parentStyleSheet && parentStyleSheet.href) ?
                 getCSSBaseBath(parentStyleSheet.href) :
                 parentStyleSheet.ownerNode?.baseURI || location.origin;
             url = getAbsoluteURL(baseURL, url);

@@ -5,7 +5,7 @@
 
 <h2 align="center">Dark Reader</h2>
 <br/>
-<p align="center">Dark Reader is an <strong>open-source</strong> MIT-licensed <strong>browser extension</strong> that is designed to analyze web pages. Based on its analysis, Dark Reader will generate a dark mode. Hereby, Dark Reader aims to <strong>reduce the eyestrain</strong> of the user. Dark Reader is <strong>feature-rich</strong> and can be configured in many ways throughout the UI.</p>
+<p align="center">Dark Reader is an <strong>open-source</strong> MIT-licensed <strong>browser extension</strong> that is designed to analyze web pages. Based on its analysis, Dark Reader will generate a dark mode that aims to <strong>reduce the eyestrain</strong> of the user. Dark Reader is <strong>feature-rich</strong> and can be configured in many ways throughout the UI.</p>
 <br/>
 <br/>
 

@@ -65,4 +65,12 @@ describe('INLINE STYLES', () => {
         await timeout(0);
         expect(span.getAttribute('style')).toBe('');
     });
+
+    it(`shouldn't touch rel="mask-icon"`, async () => {
+        container.innerHTML = '<link rel="mask-icon" color="red">';
+        createOrUpdateDynamicTheme(theme, null, false);
+
+        const maskIcon = document.querySelector('link[rel="mask-icon"]');
+        expect(maskIcon.getAttribute('style')).toBe(null);
+    });
 });

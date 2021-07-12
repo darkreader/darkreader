@@ -119,6 +119,13 @@ export default class TabManager {
         });
     }
 
+    getTabURL(tab: chrome.tabs.Tab): string {
+        // It can happen in cases whereby the tab.url is empty.
+        // Luckily this only and will only happen on `about:blank`-like pages.
+        // Due to this we can safely use `about:blank` as fallback value.
+        return tab.url || 'about:blank';
+    }
+
     async updateContentScript(options: {runOnProtectedPages: boolean}) {
         (await queryTabs({}))
             .filter((tab) => options.runOnProtectedPages || canInjectScript(tab.url))
@@ -148,9 +155,9 @@ export default class TabManager {
         (await queryTabs({}))
             .filter((tab) => this.tabs.has(tab.id))
             .forEach((tab) => {
-                const frames = this.tabs.get(tab.id);
-                frames.forEach((url, frameId) => {
-                    const message = getMessage(tab.url, frameId === 0 ? null : url);
+                const framesPorts = this.ports.get(tab.id);
+                framesPorts.forEach(({url, port}, frameId) => {
+                    const message = getMessage(this.getTabURL(tab), frameId === 0 ? null : url);
                     if (tab.active && frameId === 0) {
                         chrome.tabs.sendMessage(tab.id, message, {frameId});
                     } else {
@@ -161,7 +168,7 @@ export default class TabManager {
     }
 
     async getActiveTabURL() {
-        return (await this.getActiveTab()).url;
+        return this.getTabURL(await this.getActiveTab());
     }
     async getActiveTab() {
         let tab = (await queryTabs({

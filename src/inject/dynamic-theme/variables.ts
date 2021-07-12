@@ -35,6 +35,7 @@ export class VariablesStore {
     private changedTypeVars = new Set<string>();
     private typeChangeSubscriptions = new Map<string, Set<() => void>>();
     private unstableVarValues = new Map<string, string>();
+    private onRootVariableDefined: () => void;
 
     clear() {
         this.varTypes.clear();
@@ -310,7 +311,10 @@ export class VariablesStore {
         if (!this.typeChangeSubscriptions.has(varName)) {
             this.typeChangeSubscriptions.set(varName, new Set());
         }
-        this.typeChangeSubscriptions.get(varName).add(callback);
+        const rootStore = this.typeChangeSubscriptions.get(varName);
+        if (!rootStore.has(callback)) {
+            rootStore.add(callback);
+        }
     }
 
     private unsubscribeFromVariableTypeChanges(varName: string, callback: () => void) {
@@ -458,6 +462,10 @@ export class VariablesStore {
         });
     }
 
+    setOnRootVariableChange(callback: () => void) {
+        this.onRootVariableDefined = callback;
+    }
+
     putRootVars(styleElement: HTMLStyleElement, theme: Theme) {
         const sheet = styleElement.sheet;
         if (sheet.cssRules.length > 0) {
@@ -475,6 +483,7 @@ export class VariablesStore {
                 if (this.isVarType(property, VAR_TYPE_BORDERCOLOR)) {
                     declarations.set(wrapBorderColorVariableName(property), tryModifyBorderColor(value, theme));
                 }
+                this.subscribeForVarTypeChange(property, this.onRootVariableDefined);
             }
         });
         const cssLines = [] as string[];

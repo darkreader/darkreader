@@ -5,7 +5,7 @@ import type {StyleElement, StyleManager} from './style-manager';
 import {manageStyle, getManageableStyles, cleanLoadingLinks} from './style-manager';
 import {watchForStyleChanges, stopWatchingForStyleChanges} from './watch';
 import {forEach, push, toArray} from '../../utils/array';
-import {removeNode, watchForNodePosition, iterateShadowHosts, isDOMReady, addDOMReadyListener, removeDOMReadyListener} from '../utils/dom';
+import {removeNode, watchForNodePosition, iterateShadowHosts, isDOMReady, removeDOMReadyListener, cleanReadyStateCompleteListeners, addDOMReadyListener} from '../utils/dom';
 import {logInfo, logWarn} from '../utils/log';
 import {throttle} from '../utils/throttle';
 import {clamp} from '../../utils/math';
@@ -185,6 +185,9 @@ function createDynamicStyleOverrides() {
         });
     variablesStore.matchVariablesAndDependants();
     variablesStore.putRootVars(document.head.querySelector('.darkreader--root-vars'), filter);
+    variablesStore.setOnRootVariableChange(() => {
+        variablesStore.putRootVars(document.head.querySelector('.darkreader--root-vars'), filter);
+    });
     styleManagers.forEach((manager) => manager.render(filter, ignoredImageAnalysisSelectors));
     if (loadingStyles.size === 0) {
         cleanFallbackStyle();
@@ -376,6 +379,7 @@ function stopWatchingForUpdates() {
     stopWatchingForStyleChanges();
     stopWatchingForInlineStyles();
     removeDOMReadyListener(onDOMReady);
+    cleanReadyStateCompleteListeners();
 }
 
 function createDarkReaderInstanceMarker() {

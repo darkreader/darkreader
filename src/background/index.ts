@@ -6,14 +6,6 @@ import {canInjectScript} from '../background/utils/extension-api';
 const extension = new Extension();
 extension.start();
 
-chrome.runtime.onInstalled.addListener(({reason}) => {
-    if (reason === 'install') {
-        chrome.tabs.create({url: getHelpURL()});
-    }
-});
-
-chrome.runtime.setUninstallURL(UNINSTALL_URL);
-
 const welcome = `  /''''\\
  (0)==(0)
 /__||||__\\
@@ -59,4 +51,12 @@ if (WATCH) {
         socket.onclose = () => setTimeout(listen, 1000);
     };
     listen();
+} else {
+    chrome.runtime.onInstalled.addListener(({reason}) => {
+        if (reason === 'install') {
+            chrome.tabs.create({url: getHelpURL()});
+        }
+    });
+
+    chrome.runtime.setUninstallURL(UNINSTALL_URL);
 }

@@ -1,5 +1,5 @@
 import {forEach, push} from '../../utils/array';
-import {iterateShadowHosts, createOptimizedTreeObserver} from '../utils/dom';
+import {iterateShadowHosts, createOptimizedTreeObserver, isReadyStateComplete, addReadyStateCompleteListener} from '../utils/dom';
 import {iterateCSSDeclarations} from './css-rules';
 import {getModifiableCSSDeclaration} from './modify-css';
 import {variablesStore} from './variables';
@@ -253,7 +253,7 @@ export function overrideInlineStyle(element: HTMLElement, theme: FilterConfig, i
     function setCustomProp(targetCSSProp: string, modifierCSSProp: string, cssVal: string) {
         const {customProp, dataAttr} = overrides[targetCSSProp];
 
-        const mod = getModifiableCSSDeclaration(modifierCSSProp, cssVal, null, variablesStore, ignoreImageSelectors, null);
+        const mod = getModifiableCSSDeclaration(modifierCSSProp, cssVal, {} as CSSStyleRule, variablesStore, ignoreImageSelectors, null);
         if (!mod) {
             return;
         }
@@ -295,12 +295,24 @@ export function overrideInlineStyle(element: HTMLElement, theme: FilterConfig, i
         if (element.hasAttribute('fill')) {
             const SMALL_SVG_LIMIT = 32;
             const value = element.getAttribute('fill');
-            let isBg = false;
             if (!(element instanceof SVGTextElement)) {
-                const {width, height} = element.getBoundingClientRect();
-                isBg = (width > SMALL_SVG_LIMIT || height > SMALL_SVG_LIMIT);
+                // getBoundingClientRect forces a layout change. And when it so happens that.
+                // The DOM is not in the `complete` readystate. It will cause the layout to be drawn.
+                // And it will cause a layout of unstyled content which results in white flashes.
+                // Therefor the check if the DOM is at the `complete` readystate.
+                const handleSVGElement = () => {
+                    const {width, height} = element.getBoundingClientRect();
+                    const isBg = (width > SMALL_SVG_LIMIT || height > SMALL_SVG_LIMIT);
+                    setCustomProp('fill', isBg ? 'background-color' : 'color', value);
+                };
+                if (isReadyStateComplete()) {
+                    handleSVGElement();
+                } else {
+                    addReadyStateCompleteListener(handleSVGElement);
+                }
+            } else {
+                setCustomProp('fill', 'color', value);
             }
-            setCustomProp('fill', isBg ? 'background-color' : 'color', value);
         }
         if (element.hasAttribute('stop-color')) {
             setCustomProp('stop-color', 'background-color', element.getAttribute('stop-color'));

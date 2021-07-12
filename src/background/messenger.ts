@@ -1,4 +1,4 @@
-import {isChromium, isFirefox} from 'utils/platform';
+import {isFirefox} from '../utils/platform';
 import type {ExtensionData, FilterConfig, TabInfo, Message, UserSettings} from '../definitions';
 
 export interface ExtensionAdapter {
@@ -27,7 +27,7 @@ export default class Messenger {
         this.adapter = adapter;
         this.changeListenerCount = 0;
         chrome.runtime.onMessage.addListener((message: Message, _: any, sendResponse: (any) => void) => {
-            if (message.name === 'ui') {
+            if (message.from === 'ui') {
                 this.onUIMessage(message, sendResponse);
                 this.adapter.onPopupOpen();
                 return ([
@@ -51,12 +51,13 @@ export default class Messenger {
                     default:
                         return;
                 }
-                promise.then((data) => port.postMessage({data})).catch((error) => port.postMessage({error}));
+                promise.then((data) => port.postMessage({data}))
+                .catch((error) => port.postMessage({error}));
             });
         }
     }
 
-    private onUIMessage({type, data}: Message, sendResponse: (any) => void) {
+    private onUIMessage({type, data}: Message, sendResponse: (response: any) => void) {
         switch (type) {
             case 'get-data': {
                 this.adapter.collect().then((data) => sendResponse({data}));
@@ -129,7 +130,7 @@ export default class Messenger {
     }
 
     reportChanges(data: ExtensionData) {
-        if (this.changeListenerCount > 0 || !isChromium) {
+        if (this.changeListenerCount > 0 || isFirefox) {
             chrome.runtime.sendMessage({name: 'background', type: 'changes', data});
         }
     }

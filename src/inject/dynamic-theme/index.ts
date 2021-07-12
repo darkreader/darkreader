@@ -21,6 +21,7 @@ import {injectProxy} from './stylesheet-proxy';
 import {parse} from '../../utils/color';
 import {parsedURLCache} from '../../utils/url';
 import {variablesStore} from './variables';
+import {setImagesPerSecond} from './image';
 
 const INSTANCE_ID = generateUID();
 const styleManagers = new Map<StyleElement, StyleManager>();
@@ -304,6 +305,7 @@ function createThemeAndWatchForUpdates() {
     createStaticStyleOverrides();
 
     function runDynamicStyle() {
+        setImagesPerSecond(filter.maxImgPerSec);
         createDynamicStyleOverrides();
         watchForUpdates();
     }

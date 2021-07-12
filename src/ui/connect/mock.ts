@@ -21,6 +21,7 @@ export function getMockData(override = {} as Partial<ExtensionData>): ExtensionD
                 stylesheet: '',
                 scrollbarColor: 'auto',
                 styleSystemControls: true,
+                maxImgPerSec: 15,
             } as Theme,
             customThemes: [],
             siteList: [],

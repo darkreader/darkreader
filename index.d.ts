@@ -109,10 +109,16 @@ declare namespace DarkReader {
          */
         selectionColor: string;
         /**
-         * Specifies if it has to style system controls/
+         * Specifies if it has to style system controls
          * Default true
          */
         styleSystemControls: boolean;
+        /**
+         * Specifies how many images can be analyzed per second.
+         * Default 30
+         */
+         maxImgPerSec: number;
+
     }
 
     /**

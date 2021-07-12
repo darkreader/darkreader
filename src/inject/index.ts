@@ -40,7 +40,9 @@ function onMessage({type, data}) {
         }
         case 'reload':
             logWarn('Cleaning up before update');
-            removeEventListener('unload', onUnload);
+            removeEventListener('pagehide', onPagehide);
+            removeEventListener('freeze', onFreeze);
+            removeEventListener('resume', onResume);
             cleanDynamicThemeCache();
             colorSchemeWatcher.disconnect();
             break;
@@ -54,10 +56,22 @@ const colorSchemeWatcher = watchForColorSchemeChange(({isDark}) => {
 });
 
 chrome.runtime.onMessage.addListener(onMessage);
-chrome.runtime.sendMessage({type: 'tab'});
+chrome.runtime.sendMessage({type: 'frame'});
 
-function onUnload() {
-    chrome.runtime.sendMessage({type: 'tab-unload'});
+function onPagehide(e) {
+    if (e.persisted === false) {
+        chrome.runtime.sendMessage({type: 'frame-forget'});
+    }
 }
 
-addEventListener('unload', onUnload);
+function onFreeze() {
+    chrome.runtime.sendMessage({type: 'frame-forget'});
+}
+
+function onResume() {
+    chrome.runtime.sendMessage({type: 'frame-resume'});
+}
+
+addEventListener('pagehide', onPagehide);
+addEventListener('freeze', onFreeze);
+addEventListener('resume', onResume);

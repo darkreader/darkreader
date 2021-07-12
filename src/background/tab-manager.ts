@@ -27,8 +27,19 @@ export default class TabManager {
     constructor({getConnectionMessage, onColorSchemeChange}: TabManagerOptions) {
         this.tabs = new Map();
         chrome.runtime.onMessage.addListener((message, sender) => {
+            function addFrame(tabs: any, tabId: number, frameId: number, senderURL: string) {
+                let frames: Map<number, string>;
+                if (tabs.has(tabId)) {
+                    frames = tabs.get(tabId);
+                } else {
+                    frames = new Map();
+                    tabs.set(tabId, frames);
+                }
+                frames.set(frameId, senderURL);
+            }
+
             switch (message.type) {
-                case 'tab':
+                case 'frame': {
                     const reply = (options: ConnectionMessageOptions) => {
                         const message = getConnectionMessage(options);
                         if (message instanceof Promise) {
@@ -51,21 +62,15 @@ export default class TabManager {
                     const senderURL = sender.url;
                     const tabURL = sender.tab.url;
 
-                    let frames: Map<number, string>;
-                    if (this.tabs.has(tabId)) {
-                        frames = this.tabs.get(tabId);
-                    } else {
-                        frames = new Map();
-                        this.tabs.set(tabId, frames);
-                    }
-                    frames.set(frameId, senderURL);
+                    addFrame(this.tabs, tabId, frameId, senderURL);
 
                     reply({
                         url: tabURL,
                         frameURL: frameId === 0 ? null : senderURL,
                     });
                     break;
-                case 'tab-unload':
+                }
+                case 'frame-forget': {
                     if (!sender.tab) {
                         logWarn('Unexpected message', message, sender);
                         break;
@@ -73,6 +78,10 @@ export default class TabManager {
 
                     const framesForDeletion = this.tabs.get(sender.tab.id);
                     framesForDeletion && framesForDeletion.delete(sender.frameId);
+                    break;
+                }
+                case 'frame-resume':
+                    addFrame(this.tabs, sender.tab.id, sender.frameId, sender.url);
                     break;
             }
         });

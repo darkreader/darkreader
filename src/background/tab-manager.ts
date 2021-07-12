@@ -155,8 +155,8 @@ export default class TabManager {
         (await queryTabs({}))
             .filter((tab) => this.tabs.has(tab.id))
             .forEach((tab) => {
-                const framesPorts = this.ports.get(tab.id);
-                framesPorts.forEach(({url, port}, frameId) => {
+                const frames = this.tabs.get(tab.id);
+                frames.forEach((url, frameId) => {
                     const message = getMessage(this.getTabURL(tab), frameId === 0 ? null : url);
                     if (tab.active && frameId === 0) {
                         chrome.tabs.sendMessage(tab.id, message, {frameId});

@@ -1,6 +1,7 @@
 import '../polyfills';
 import {DEFAULT_THEME} from '../../../src/defaults';
 import {createOrUpdateDynamicTheme, removeDynamicTheme} from '../../../src/inject/dynamic-theme';
+import {isSafari} from '../../../src/utils/platform';
 import {multiline, timeout} from '../../test-utils';
 
 const theme = {
@@ -52,5 +53,16 @@ describe('INLINE STYLES', () => {
         await timeout(0);
         expect(getComputedStyle(span).color).toBe('rgb(140, 255, 140)');
         expect(getComputedStyle(span).backgroundColor).toBe('rgb(102, 102, 102)');
+    });
+
+    it('should clean up the customProp after originial is gone', async () => {
+        container.innerHTML = '<span style="color: red;">Watch inline style</span>';
+        createOrUpdateDynamicTheme(theme, null, false);
+        const span = document.querySelector('span');
+        expect(span.getAttribute('style')).toBe(`color: red; --darkreader-inline-color:${isSafari ? ' ' : ''}#ff1a1a;`);
+
+        span.style.color = '';
+        await timeout(0);
+        expect(span.getAttribute('style')).toBe('');
     });
 });

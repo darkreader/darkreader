@@ -19,7 +19,7 @@ export enum FilterMode {
  * Bug report: https://bugs.chromium.org/p/chromium/issues/detail?id=501582
  * Patch: https://chromium-review.googlesource.com/c/chromium/src/+/1979258
  */
-export function hasChromiumIssue501582() {
+export function hasPatchForChromiumIssue501582() {
     return Boolean(
         isChromium &&
         compareChromeVersions(chromiumVersion, '81.0.4035.0') >= 0
@@ -78,21 +78,15 @@ export function cssFilterStyleSheetTemplate(filterValue: string, reverseFilterVa
     });
 
     if (!frameURL) {
-        // If user has the chrome issue the colors should be the other way around as of the rootcolors will affect the whole background color of the page
-        const rootColors = hasChromiumIssue501582() && config.mode === FilterMode.dark ? [0, 0, 0] : [255, 255, 255];
-        const [r, g, b] = applyColorMatrix(rootColors, createFilterMatrix(config));
-        const bgColor = {
-            r: Math.round(r),
-            g: Math.round(g),
-            b: Math.round(b),
-            toString() {
-                return `rgb(${this.r},${this.g},${this.b})`;
-            },
-        };
+        const light = [255, 255, 255];
+        // If browser affected by Chromium Issue 501582, set dark background on html
+        const bgColor = !hasPatchForChromiumIssue501582() && config.mode === FilterMode.dark ?
+            applyColorMatrix(light, createFilterMatrix(config)).map(Math.round) :
+            light;
         lines.push('');
         lines.push('/* Page background */');
         lines.push('html {');
-        lines.push(`  background: ${bgColor} !important;`);
+        lines.push(`  background: rgb(${bgColor.join(',')}) !important;`);
         lines.push('}');
     }
 

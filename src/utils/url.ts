@@ -14,7 +14,7 @@ function fixBaseURL($url: string) {
 }
 
 export function parseURL($url: string, $base: string = null) {
-    const key = `${$url}${$base ? ';' + $base : ''}`;
+    const key = `${$url}${$base ? `;${ $base}` : ''}`;
     if (parsedURLCache.has(key)) {
         return parsedURLCache.get(key);
     }
@@ -42,9 +42,8 @@ export function getURLHostOrProtocol($url: string) {
     const url = new URL($url);
     if (url.host) {
         return url.host;
-    } else {
-        return url.protocol;
     }
+    return url.protocol;
 }
 
 export function compareURLPatterns(a: string, b: string) {
@@ -78,9 +77,8 @@ export function isURLMatched(url: string, urlTemplate: string): boolean {
     } else if (!isFirstIPV6 && !isSecondIPV6) {
         const regex = createUrlRegex(urlTemplate);
         return Boolean(url.match(regex));
-    } else {
-        return false;
     }
+    return false;
 }
 
 function createUrlRegex(urlTemplate: string): RegExp {

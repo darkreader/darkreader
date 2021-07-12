@@ -8,7 +8,6 @@ interface BodyProps extends ExtWrapper {
 }
 
 export default function Body({data, tab, actions}: BodyProps) {
-
     const host = getURLHostOrProtocol(tab.url);
     const custom = data.settings.customThemes.find(({url}) => isURLInList(tab.url, url));
 

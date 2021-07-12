@@ -52,7 +52,7 @@ export default class Messenger {
                         return;
                 }
                 promise.then((data) => port.postMessage({data}))
-                .catch((error) => port.postMessage({error}));
+                    .catch((error) => port.postMessage({error}));
             });
         }
     }

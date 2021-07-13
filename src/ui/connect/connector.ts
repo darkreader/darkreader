@@ -55,7 +55,7 @@ export default class Connector implements ExtensionActions {
         }
     };
 
-    private sendMessage(data?: any) {
+    private sendMessage(data: any) {
         chrome.runtime.sendMessage({from: 'ui', ...data});
     }
 

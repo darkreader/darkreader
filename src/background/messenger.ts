@@ -26,7 +26,7 @@ export default class Messenger {
     constructor(adapter: ExtensionAdapter) {
         this.adapter = adapter;
         this.changeListenerCount = 0;
-        chrome.runtime.onMessage.addListener((message: Message, _: any, sendResponse: (any) => void) => {
+        chrome.runtime.onMessage.addListener((message: Message, _: any, sendResponse: (response: any) => void) => {
             if (message.from === 'ui') {
                 this.onUIMessage(message, sendResponse);
                 this.adapter.onPopupOpen();

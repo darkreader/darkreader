@@ -1,3 +1,4 @@
+import {isFirefox} from '../utils/platform';
 import type {ExtensionData, FilterConfig, TabInfo, Message, UserSettings} from '../definitions';
 
 export interface ExtensionAdapter {
@@ -19,36 +20,59 @@ export interface ExtensionAdapter {
 }
 
 export default class Messenger {
-    private reporters: Set<(info: ExtensionData) => void>;
     private adapter: ExtensionAdapter;
+    private changeListenerCount: number;
 
     constructor(adapter: ExtensionAdapter) {
-        this.reporters = new Set();
         this.adapter = adapter;
-        chrome.runtime.onConnect.addListener((port) => {
-            if (port.name === 'ui') {
-                port.onMessage.addListener(async (message) => await this.onUIMessage(port, message));
+        this.changeListenerCount = 0;
+        chrome.runtime.onMessage.addListener((message: Message, _: any, sendResponse: (response: any) => void) => {
+            if (message.from === 'ui') {
+                this.onUIMessage(message, sendResponse);
                 this.adapter.onPopupOpen();
+                return ([
+                    'get-data',
+                    'get-active-tab-info'
+                ].includes(message.type));
             }
         });
+
+        // This is a work-around for Firefox bug which does not let to responding to onMessage handler above.
+        if (isFirefox) {
+            chrome.runtime.onConnect.addListener((port) => {
+                let promise: Promise<ExtensionData | TabInfo>;
+                switch (port.name) {
+                    case 'ui-get-data':
+                        promise = this.adapter.collect();
+                        break;
+                    case 'ui-get-active-tab-info':
+                        promise = this.adapter.getActiveTabInfo();
+                        break;
+                    default:
+                        return;
+                }
+                promise.then((data) => port.postMessage({data}))
+                    .catch((error) => port.postMessage({error}));
+            });
+        }
     }
 
-    private async onUIMessage(port: chrome.runtime.Port, {type, id, data}: Message) {
+    private onUIMessage({type, data}: Message, sendResponse: (response: any) => void) {
         switch (type) {
             case 'get-data': {
-                const data = await this.adapter.collect();
-                port.postMessage({id, data});
+                this.adapter.collect().then((data) => sendResponse({data}));
                 break;
             }
             case 'get-active-tab-info': {
-                const data = await this.adapter.getActiveTabInfo();
-                port.postMessage({id, data});
+                this.adapter.getActiveTabInfo().then((data) => sendResponse({data}));
                 break;
             }
             case 'subscribe-to-changes': {
-                const report = (data) => port.postMessage({id, data});
-                this.reporters.add(report);
-                port.onDisconnect.addListener(() => this.reporters.delete(report));
+                this.changeListenerCount++;
+                break;
+            }
+            case 'unsubscribe-from-changes': {
+                this.changeListenerCount--;
                 break;
             }
             case 'change-settings': {
@@ -72,12 +96,12 @@ export default class Messenger {
                 break;
             }
             case 'load-config': {
-                await this.adapter.loadConfig(data);
+                this.adapter.loadConfig(data);
                 break;
             }
             case 'apply-dev-dynamic-theme-fixes': {
                 const error = this.adapter.applyDevDynamicThemeFixes(data);
-                port.postMessage({id, error: (error ? error.message : null)});
+                sendResponse({error: (error ? error.message : null)});
                 break;
             }
             case 'reset-dev-dynamic-theme-fixes': {
@@ -86,7 +110,7 @@ export default class Messenger {
             }
             case 'apply-dev-inversion-fixes': {
                 const error = this.adapter.applyDevInversionFixes(data);
-                port.postMessage({id, error: (error ? error.message : null)});
+                sendResponse({error: (error ? error.message : null)});
                 break;
             }
             case 'reset-dev-inversion-fixes': {
@@ -95,7 +119,7 @@ export default class Messenger {
             }
             case 'apply-dev-static-themes': {
                 const error = this.adapter.applyDevStaticThemes(data);
-                port.postMessage({id, error: error ? error.message : null});
+                sendResponse({error: error ? error.message : null});
                 break;
             }
             case 'reset-dev-static-themes': {
@@ -106,6 +130,8 @@ export default class Messenger {
     }
 
     reportChanges(data: ExtensionData) {
-        this.reporters.forEach((report) => report(data));
+        if (this.changeListenerCount > 0 || isFirefox) {
+            chrome.runtime.sendMessage({name: 'background', type: 'changes', data});
+        }
     }
 }

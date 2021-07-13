@@ -284,7 +284,11 @@ export function overrideInlineStyle(element: HTMLElement, theme: FilterConfig, i
         }
         setCustomProp('background-color', 'background-color', value);
     }
-    if (element.hasAttribute('color')) {
+
+    // We can catch some link elements here, that are from `<link rel="mask-icon" color="#000000">`.
+    // It's valid HTML code according to the specs, https://html.spec.whatwg.org/#attr-link-color
+    // We don't want to touch such link as it cause weird behavior of the browser(Silent DOMException).
+    if (element.hasAttribute('color') && (element as HTMLLinkElement).rel !== 'mask-icon') {
         let value = element.getAttribute('color');
         if (value.match(/^[0-9a-f]{3}$/i) || value.match(/^[0-9a-f]{6}$/i)) {
             value = `#${value}`;

@@ -65,7 +65,7 @@ function onPagehide(e) {
 }
 
 function onFreeze() {
-    chrome.runtime.sendMessage({type: 'frame-forget'});
+    chrome.runtime.sendMessage({type: 'frame-freeze'});
 }
 
 function onResume() {

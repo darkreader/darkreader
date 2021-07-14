@@ -2,7 +2,7 @@ import {canInjectScript} from '../background/utils/extension-api';
 import {createFileLoader} from './utils/network';
 import type {Message} from '../definitions';
 import {isThunderbird} from '../utils/platform';
-import {logWarn} from '../inject/utils/log';
+import {logInfo, logWarn} from '../inject/utils/log';
 
 async function queryTabs(query: chrome.tabs.QueryInfo) {
     return new Promise<chrome.tabs.Tab[]>((resolve) => {
@@ -21,21 +21,26 @@ interface TabManagerOptions {
     onColorSchemeChange: ({isDark}) => void;
 }
 
+interface FrameInfo {
+    url: string;
+    state: 'normal' | 'frozen';
+}
+
 export default class TabManager {
-    private tabs: Map<number, Map<number, string>>;
+    private tabs: Map<number, Map<number, FrameInfo>>;
 
     constructor({getConnectionMessage, onColorSchemeChange}: TabManagerOptions) {
         this.tabs = new Map();
         chrome.runtime.onMessage.addListener((message, sender) => {
             function addFrame(tabs: any, tabId: number, frameId: number, senderURL: string) {
-                let frames: Map<number, string>;
+                let frames: Map<number, FrameInfo>;
                 if (tabs.has(tabId)) {
                     frames = tabs.get(tabId);
                 } else {
                     frames = new Map();
                     tabs.set(tabId, frames);
                 }
-                frames.set(frameId, senderURL);
+                frames.set(frameId, {url: senderURL, state: 'normal'});
             }
 
             switch (message.type) {
@@ -80,6 +85,9 @@ export default class TabManager {
                     framesForDeletion && framesForDeletion.delete(sender.frameId);
                     break;
                 }
+                case 'frame-freeze':
+                    this.tabs.get(sender.tab.id).get(sender.frameId).state = 'frozen';
+                    break;
                 case 'frame-resume':
                     addFrame(this.tabs, sender.tab.id, sender.frameId, sender.url);
                     break;
@@ -165,7 +173,11 @@ export default class TabManager {
             .filter((tab) => this.tabs.has(tab.id))
             .forEach((tab) => {
                 const frames = this.tabs.get(tab.id);
-                frames.forEach((url, frameId) => {
+                frames.forEach(({url, state}, frameId) => {
+                    if (state === 'frozen') {
+                        // TODO: avoid sending messages to frozen tabs for performance reasons.
+                        logInfo('Sending message to a frozen tab.');
+                    }
                     const message = getMessage(this.getTabURL(tab), frameId === 0 ? null : url);
                     if (tab.active && frameId === 0) {
                         chrome.tabs.sendMessage(tab.id, message, {frameId});

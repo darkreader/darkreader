@@ -4,7 +4,7 @@ import {parseArray, formatArray} from '../utils/text';
 import {compareURLPatterns, isURLInList} from '../utils/url';
 import type {DynamicThemeFix} from '../definitions';
 
-const dynamicThemeFixesCommands = {
+const dynamicThemeFixesCommands: { [key: string]: string } = {
     'INVERT': 'invert',
     'CSS': 'css',
     'IGNORE INLINE STYLE': 'ignoreInlineStyle',
@@ -53,7 +53,10 @@ export function getDynamicThemeFixesFor(url: string, frameURL: string, fixes: Dy
     const common = {
         url: fixes[0].url,
         invert: fixes[0].invert || [],
-        css: fixes[0].css || [],
+        // TODO: is this correct?
+        // May be it should be:
+        // css: fixes[0].css || '',
+        css: fixes[0].css || [] as any[],
         ignoreInlineStyle: fixes[0].ignoreInlineStyle || [],
         ignoreImageAnalysis: fixes[0].ignoreImageAnalysis || [],
     };

@@ -20,7 +20,7 @@ export default function Body({data, tab, actions}: BodyProps) {
         '}',
     ].join('\n');
 
-    function onTextRender(node) {
+    function onTextRender(node: HTMLTextAreaElement) {
         textNode = node;
         textNode.value = (custom ? custom.theme.stylesheet : data.settings.theme.stylesheet) || '';
         if (document.activeElement !== textNode) {

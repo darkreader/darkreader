@@ -16,6 +16,7 @@
         "allowJs": true,
         "downlevelIteration": true,
         "noEmit": true,
+        "noImplicitAny": true,
         "jsx": "react",
         "jsxFactory": "m"
     },

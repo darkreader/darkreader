@@ -88,7 +88,7 @@ export function cleanLoadingLinks() {
     rejectorsForLoadingLinks.clear();
 }
 
-export function manageStyle(element: StyleElement, {update, loadingStart, loadingEnd}): StyleManager {
+export function manageStyle(element: StyleElement, {update, loadingStart, loadingEnd}: {update: () => void; loadingStart: () => void; loadingEnd: () => void}): StyleManager {
     const prevStyles: HTMLStyleElement[] = [];
     let next: Element = element;
     while ((next = next.nextElementSibling) && next.matches('.darkreader')) {

@@ -39,7 +39,8 @@ export function parseSitesFixesConfig<T extends SiteProps>(text: string, options
                 return;
             }
             const value = options.parseCommandValue(command, valueText);
-            siteFix[prop] = value;
+            // TODO: test this
+            siteFix[prop as keyof T] = value;
         });
 
         sites.push(siteFix);

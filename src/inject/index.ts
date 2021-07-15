@@ -4,8 +4,9 @@ import {createOrUpdateDynamicTheme, removeDynamicTheme, cleanDynamicThemeCache} 
 import {logInfo, logWarn} from './utils/log';
 import {watchForColorSchemeChange} from './utils/watch-color-scheme';
 import {collectCSS} from './dynamic-theme/css-collection';
+import type {Message} from '../definitions';
 
-function onMessage({type, data}) {
+function onMessage({type, data}: Message) {
     switch (type) {
         case 'add-css-filter':
         case 'add-static-theme': {

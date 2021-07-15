@@ -219,7 +219,7 @@ export class Extension {
         this.icon.hideBadge();
     }
 
-    private getConnectionMessage(url, frameURL) {
+    private getConnectionMessage(url: string, frameURL: string) {
         if (this.ready) {
             return this.getTabMessage(url, frameURL);
         }
@@ -245,9 +245,9 @@ export class Extension {
         }, AUTO_TIME_CHECK_INTERVAL);
     }
 
-    private wasLastColorSchemeDark = null;
+    private wasLastColorSchemeDark: boolean = null;
 
-    private onColorSchemeChange = ({isDark}) => {
+    private onColorSchemeChange = ({isDark}: {isDark: boolean}) => {
         this.wasLastColorSchemeDark = isDark;
         if (this.user.settings.automation !== 'system') {
             return;

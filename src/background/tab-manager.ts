@@ -17,7 +17,7 @@ interface ConnectionMessageOptions {
 
 interface TabManagerOptions {
     getConnectionMessage: (options: ConnectionMessageOptions) => any;
-    onColorSchemeChange: ({isDark}) => void;
+    onColorSchemeChange: ({isDark}: {isDark: boolean}) => void;
 }
 
 interface PortInfo {
@@ -84,7 +84,7 @@ export default class TabManager {
 
                 // Using custom response due to Chrome and Firefox incompatibility
                 // Sometimes fetch error behaves like synchronous and sends `undefined`
-                const sendResponse = (response) => chrome.tabs.sendMessage(sender.tab.id, {type: 'fetch-response', id, ...response});
+                const sendResponse = (response: any) => chrome.tabs.sendMessage(sender.tab.id, {type: 'fetch-response', id, ...response});
                 if (isThunderbird) {
                     // In thunderbird some CSS is loaded on a chrome:// URL.
                     // Thunderbird restricted Add-ons to load those URL's.

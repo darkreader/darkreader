@@ -3,7 +3,7 @@ import {sync} from 'malevic/dom';
 import Body from './components/body';
 import connect from '../connect';
 
-function renderBody(data, tab, actions) {
+function renderBody(data: any, tab: any, actions: any) {
     sync(document.body, <Body data={data} tab={tab} actions={actions} />);
 }
 

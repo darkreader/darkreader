@@ -6,7 +6,7 @@ export interface ExtensionAdapter {
     getActiveTabInfo: () => Promise<TabInfo>;
     changeSettings: (settings: Partial<UserSettings>) => void;
     setTheme: (theme: Partial<FilterConfig>) => void;
-    setShortcut: ({command, shortcut}) => void;
+    setShortcut: ({command, shortcut}: {command: string; shortcut: string}) => void;
     markNewsAsRead: (ids: string[]) => Promise<void>;
     toggleURL: (pattern: string) => void;
     onPopupOpen: () => void;
@@ -26,7 +26,7 @@ export default class Messenger {
     constructor(adapter: ExtensionAdapter) {
         this.adapter = adapter;
         this.changeListenerCount = 0;
-        chrome.runtime.onMessage.addListener((message: Message, _: any, sendResponse: (response: any) => void) => {
+        chrome.runtime.onMessage.addListener((message: Message, _, sendResponse: (response: any) => void) => {
             if (message.from === 'ui') {
                 this.onUIMessage(message, sendResponse);
                 this.adapter.onPopupOpen();

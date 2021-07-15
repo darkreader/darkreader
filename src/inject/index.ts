@@ -38,6 +38,14 @@ function onMessage({type, data}) {
             removeDynamicTheme();
             break;
         }
+        case 'reload':
+            logWarn('Cleaning up before update');
+            removeEventListener('pagehide', onPagehide);
+            removeEventListener('freeze', onFreeze);
+            removeEventListener('resume', onResume);
+            cleanDynamicThemeCache();
+            colorSchemeWatcher.disconnect();
+            break;
     }
 }
 
@@ -47,11 +55,23 @@ const colorSchemeWatcher = watchForColorSchemeChange(({isDark}) => {
     chrome.runtime.sendMessage({type: 'color-scheme-change', data: {isDark}});
 });
 
-const port = chrome.runtime.connect({name: 'tab'});
-port.onMessage.addListener(onMessage);
-port.onDisconnect.addListener(() => {
-    logWarn('disconnect');
-    cleanDynamicThemeCache();
-    colorSchemeWatcher.disconnect();
-});
+chrome.runtime.onMessage.addListener(onMessage);
+chrome.runtime.sendMessage({type: 'frame'});
 
+function onPagehide(e) {
+    if (e.persisted === false) {
+        chrome.runtime.sendMessage({type: 'frame-forget'});
+    }
+}
+
+function onFreeze() {
+    chrome.runtime.sendMessage({type: 'frame-freeze'});
+}
+
+function onResume() {
+    chrome.runtime.sendMessage({type: 'frame-resume'});
+}
+
+addEventListener('pagehide', onPagehide);
+addEventListener('freeze', onFreeze);
+addEventListener('resume', onResume);

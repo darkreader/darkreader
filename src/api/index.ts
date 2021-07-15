@@ -6,16 +6,10 @@ import ThemeEngines from '../generators/theme-engines';
 import {createOrUpdateDynamicTheme, removeDynamicTheme} from '../inject/dynamic-theme';
 import {collectCSS} from '../inject/dynamic-theme/css-collection';
 import {isMatchMediaChangeEventListenerSupported} from '../utils/platform';
+import {ensureIFrameIsLoaded, getAllIFrames, isIFrame, setupIFrameData, setupIFrameObserver} from './iframes';
 
 let isDarkReaderEnabled = false;
-const isIFrame = (() => {
-    try {
-        return window.self !== window.top;
-    } catch (err) {
-        console.warn(err);
-        return true;
-    }
-})();
+let usesIFrames = false;
 
 export function enable(themeOptions: Partial<Theme> = {}, fixes: DynamicThemeFix = null) {
     const theme = {...DEFAULT_THEME, ...themeOptions};
@@ -23,8 +17,12 @@ export function enable(themeOptions: Partial<Theme> = {}, fixes: DynamicThemeFix
     if (theme.engine !== ThemeEngines.dynamicTheme) {
         throw new Error('Theme engine is not supported.');
     }
+    store = {theme, fixes};
     createOrUpdateDynamicTheme(theme, fixes, isIFrame);
     isDarkReaderEnabled = true;
+
+    const enableDynamicThemeEvent = new CustomEvent('__darkreader__enableDynamicTheme', {detail: {theme, fixes}});
+    usesIFrames && getAllIFrames(document).forEach((IFrame) => ensureIFrameIsLoaded(IFrame, (IFrameDocument) => IFrameDocument.dispatchEvent(enableDynamicThemeEvent)));
 }
 
 export function isEnabled() {
@@ -34,17 +32,21 @@ export function isEnabled() {
 export function disable() {
     removeDynamicTheme();
     isDarkReaderEnabled = false;
+    const removeDynamicThemeEvent = new CustomEvent('__darkreader__removeDynamicTheme');
+    usesIFrames && getAllIFrames(document).forEach((IFrame) => ensureIFrameIsLoaded(IFrame, (IFrameDocument) => IFrameDocument.dispatchEvent(removeDynamicThemeEvent)));
 }
 
 const darkScheme = matchMedia('(prefers-color-scheme: dark)');
 let store = {
-    themeOptions: null as Partial<Theme>,
+    theme: null as Theme,
     fixes: null as DynamicThemeFix,
 };
 
+const getStore = () => store;
+
 function handleColorScheme() {
     if (darkScheme.matches) {
-        enable(store.themeOptions, store.fixes);
+        enable(store.theme, store.fixes);
     } else {
         disable();
     }
@@ -52,7 +54,8 @@ function handleColorScheme() {
 
 export function auto(themeOptions: Partial<Theme> | false = {}, fixes: DynamicThemeFix = null) {
     if (themeOptions) {
-        store = {themeOptions, fixes};
+        const theme = {...DEFAULT_THEME, ...themeOptions};
+        store = {theme, fixes};
         handleColorScheme();
         if (isMatchMediaChangeEventListenerSupported) {
             darkScheme.addEventListener('change', handleColorScheme);
@@ -71,6 +74,15 @@ export function auto(themeOptions: Partial<Theme> | false = {}, fixes: DynamicTh
 
 export async function exportGeneratedCSS(): Promise<string> {
     return await collectCSS();
+}
+
+export function setupIFrameListener(listener: (IFrameDocument: Document) => void) {
+    if (!listener || listener.length !== 1) {
+        throw new Error('Must provide an listener with 1 argument, the literatal template should follow "(IFrameDocument: Document) => void".');
+    }
+    usesIFrames = true;
+    setupIFrameObserver();
+    setupIFrameData(listener, getStore, () => isDarkReaderEnabled);
 }
 
 export const setFetchMethod = setFetch;

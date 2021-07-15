@@ -15,12 +15,16 @@ async function sendMessage(...args) {
         const {id} = args[0];
         try {
             const {url, responseType} = args[0].data;
-            const response = await callFetchMethod(url);
+            const response = await callFetchMethod(url, responseType);
             let text: string;
-            if (responseType === 'data-url') {
-                text = await readResponseAsDataURL(response);
+            if (typeof response === 'string') {
+                text = response;
             } else {
-                text = await response.text();
+                if (responseType === 'data-url') {
+                    text = await readResponseAsDataURL(response);
+                } else {
+                    text = await response.text();
+                }
             }
             messageListeners.forEach((cb) => cb({type: 'fetch-response', data: text, error: null, id}));
         } catch (err) {

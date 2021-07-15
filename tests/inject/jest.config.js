@@ -20,5 +20,6 @@ module.exports = {
             tsconfig: './tests/inject/tsconfig.json'
         },
         __DEBUG__: false,
+        __API__: false,
     }
 };

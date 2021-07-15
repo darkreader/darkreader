@@ -131,7 +131,12 @@ export default class Messenger {
 
     reportChanges(data: ExtensionData) {
         if (this.changeListenerCount > 0 || isFirefox) {
-            chrome.runtime.sendMessage({name: 'background', type: 'changes', data});
+            const message: Message = {
+                from: 'background',
+                type: 'changes',
+                data
+            };
+            chrome.runtime.sendMessage(message);
         }
     }
 }

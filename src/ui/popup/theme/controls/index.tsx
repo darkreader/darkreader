@@ -3,6 +3,7 @@ import Brightness from './brightness';
 import Contrast from './contrast';
 import FontPicker from './font-picker';
 import Grayscale from './grayscale';
+import MaxImagePerSecond from './image-per-second';
 import Mode from './mode';
 import ResetButton from './reset-button';
 import Scheme from './scheme';
@@ -20,6 +21,7 @@ export {
     Contrast,
     FontPicker,
     Grayscale,
+    MaxImagePerSecond,
     Mode,
     ResetButton,
     Scheme,

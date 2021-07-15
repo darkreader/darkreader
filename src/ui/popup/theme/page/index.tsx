@@ -2,7 +2,7 @@ import {m} from 'malevic';
 import {DEFAULT_SETTINGS, DEFAULT_THEME, DEFAULT_COLORS} from '../../../../defaults';
 import type {Theme} from '../../../../definitions';
 import type {ViewProps} from '../../types';
-import {BackgroundColor, Brightness, Contrast, FontPicker, Grayscale, Mode, ResetButton, Scheme, Scrollbar, SelectionColorEditor, Sepia, TextColor, TextStroke, UseFont, StyleSystemControls} from '../controls';
+import {BackgroundColor, Brightness, Contrast, FontPicker, Grayscale, Mode, ResetButton, Scheme, Scrollbar, SelectionColorEditor, Sepia, TextColor, TextStroke, UseFont, StyleSystemControls, MaxImagePerSecond} from '../controls';
 import ThemePresetPicker from '../preset-picker';
 import {getCurrentThemePreset} from '../utils';
 import Collapsible from './collapsible-panel';
@@ -101,6 +101,10 @@ function FontGroup({theme, fonts, change}: FontGroupsProps) {
             <StyleSystemControls
                 value={theme.styleSystemControls}
                 onChange={(styleSystemControls) => change({styleSystemControls})}
+            />
+            <MaxImagePerSecond
+                value={theme.maxImgPerSec}
+                onChange={(maxImgPerSec) => change({maxImgPerSec})}
             />
         </Array>
     );

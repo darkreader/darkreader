@@ -7,27 +7,26 @@ import {openFile} from '../../utils';
 import {DEFAULT_SETTINGS} from '../../../defaults';
 
 export default function ImportButton(props: ViewProps) {
-    function getValidatedObject<T>(source: T, compare: T): Partial<T> {
-        const result = {} as Partial<T>;
+    function getValidatedObject<T>(source: T, compare: T): T {
+        const result = {} as T;
         if (source == null || typeof source !== 'object' || Array.isArray(source)) {
             return null;
         }
-        Object.keys(source).forEach((key) => {
-            const value = source[key as keyof T];
-            if (value == null || compare[key as keyof T] == null) {
+        Object.keys(source).forEach((key: Extract<keyof T, string>) => {
+            const value = source[key];
+            if (value == null || compare[key] == null) {
                 return;
             }
             const array1 = Array.isArray(value);
-            const array2 = Array.isArray(compare[key as keyof T]);
+            const array2 = Array.isArray(compare[key]);
             if (array1 || array2) {
                 if (array1 && array2) {
-                    result[key as keyof T] = value;
+                    result[key] = value;
                 }
-            } else if (typeof value === 'object' && typeof compare[key as keyof T] === 'object') {
-                // TODO: this any is ugly
-                result[key as keyof T] = getValidatedObject(value, compare[key as keyof T]) as any;
-            } else if (typeof value === typeof compare[key as keyof T]) {
-                result[key as keyof T] = value;
+            } else if (typeof value === 'object' && typeof compare[key] === 'object') {
+                result[key] = getValidatedObject(value, compare[key]);
+            } else if (typeof value === typeof compare[key]) {
+                result[key] = value;
             }
         });
         return result;

@@ -131,9 +131,9 @@ test('Static Themes config', async () => {
     expect(themes.map(({url}) => url[0])).toEqual(themes.map(({url}) => url[0]).sort(compareURLPatterns));
 
     // selectors should have no comma
-    expect(themes.every((t) => Object.keys(t)
+    expect(themes.every((t) => (Object.keys(t) as Array<keyof StaticTheme>)
         .filter((prop) => ['url', 'noCommon'].indexOf(prop) < 0)
-        .every((prop) => (t[prop as keyof StaticTheme] as string[])
+        .every((prop) => (t[prop] as string[])
             .every((s) => s.indexOf(',') < 0)))).toBe(true);
 
     // fixes are properly formatted

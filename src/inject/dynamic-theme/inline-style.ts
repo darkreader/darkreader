@@ -223,12 +223,12 @@ export function stopWatchingForInlineStyles() {
 }
 
 const inlineStyleCache = new WeakMap<HTMLElement, string>();
-const filterProps = ['brightness', 'contrast', 'grayscale', 'sepia', 'mode'];
+const filterProps: Array<keyof FilterConfig> = ['brightness', 'contrast', 'grayscale', 'sepia', 'mode'];
 
 function getInlineStyleCacheKey(el: HTMLElement, theme: FilterConfig) {
     return INLINE_STYLE_ATTRS
         .map((attr) => `${attr}="${el.getAttribute(attr)}"`)
-        .concat(filterProps.map((prop: keyof FilterConfig) => `${prop}="${theme[prop]}"`))
+        .concat(filterProps.map((prop) => `${prop}="${theme[prop]}"`))
         .join(' ');
 }
 

@@ -4,13 +4,13 @@ interface SiteProps {
     url: string[];
 }
 
-interface SitesFixesParserOptions {
+interface SitesFixesParserOptions<T> {
     commands: string[];
-    getCommandPropName: (command: string) => string;
+    getCommandPropName: (command: string) => keyof T;
     parseCommandValue: (command: string, value: string) => any;
 }
 
-export function parseSitesFixesConfig<T extends SiteProps>(text: string, options: SitesFixesParserOptions) {
+export function parseSitesFixesConfig<T extends SiteProps>(text: string, options: SitesFixesParserOptions<T>) {
     const sites: T[] = [];
 
     const blocks = text.replace(/\r/g, '').split(/^\s*={2,}\s*$/gm);
@@ -39,8 +39,7 @@ export function parseSitesFixesConfig<T extends SiteProps>(text: string, options
                 return;
             }
             const value = options.parseCommandValue(command, valueText);
-            // TODO: test this
-            siteFix[prop as keyof T] = value;
+            siteFix[prop] = value;
         });
 
         sites.push(siteFix);

@@ -226,7 +226,7 @@ function upperCaseToCamelCase(text: string) {
 export function parseStaticThemes($themes: string) {
     return parseSitesFixesConfig<StaticTheme>($themes, {
         commands: staticThemeCommands,
-        getCommandPropName: upperCaseToCamelCase,
+        getCommandPropName: upperCaseToCamelCase as any,
         parseCommandValue: (command, value) => {
             if (command === 'NO COMMON') {
                 return true;

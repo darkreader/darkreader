@@ -1,15 +1,17 @@
 ---
 name: Question
-about: Ask a question 
-title: "[Question]"
+about: Ask a question about Dark Reader.
+title: "[Question] Place title here"
 labels: question
 assignees: ''
-
 ---
+
 <!--
-Before asking a question make sure that you have read:
-http://darkreader.org/help/
+Before asking a question, ensure that you have read:
+https://darkreader.org/help/
+
+Place a brief description in the title of this question.
 -->
 
-**Question**
-A clear and concise description of what your question is.
+# Question
+<!-- Provide a clear and concise description of what the question is. -->

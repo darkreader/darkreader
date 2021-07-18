@@ -1,6 +1,6 @@
 import {loadAsDataURL, loadAsText} from '../../utils/network';
 import {getStringSize} from '../../utils/text';
-import {getDuration} from '../../utils/time';
+import {getDuration, getDurationInMinutes} from '../../utils/time';
 
 interface RequestParams {
     url: string;
@@ -38,12 +38,18 @@ interface CacheRecord {
 class LimitedCacheStorage {
     static QUOTA_BYTES = ((navigator as any).deviceMemory || 4) * 16 * 1024 * 1024;
     static TTL = getDuration({minutes: 10});
+    static ALARM_NAME = 'network';
 
     private bytesInUse = 0;
     private records = new Map<string, CacheRecord>();
 
     constructor() {
-        setInterval(() => this.removeExpiredRecords(), getDuration({minutes: 1}));
+        chrome.alarms.onAlarm.addListener(async (alarm) => {
+            if (alarm.name === LimitedCacheStorage.ALARM_NAME) {
+                this.removeExpiredRecords();
+            }
+        });
+        chrome.alarms.create(LimitedCacheStorage.ALARM_NAME, {periodInMinutes: getDurationInMinutes({minutes: 1})});
     }
 
     has(url: string) {

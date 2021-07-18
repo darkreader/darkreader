@@ -214,7 +214,7 @@ const staticThemeCommands = {
 export function parseStaticThemes($themes: string) {
     return parseSitesFixesConfig<StaticTheme>($themes, {
         commands: Object.keys(staticThemeCommands),
-        getCommandPropName: (command) => staticThemeCommands[command] || null,
+        getCommandPropName: (command) => staticThemeCommands[command],
         parseCommandValue: (command, value) => {
             if (command === 'NO COMMON') {
                 return true;

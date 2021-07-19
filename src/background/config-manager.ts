@@ -51,7 +51,6 @@ export default class ConfigManager {
         local,
         localURL,
         remoteURL,
-        success,
     }) {
         let $config: string;
         const loadLocal = async () => await readText({url: localURL});
@@ -68,59 +67,52 @@ export default class ConfigManager {
                 $config = await loadLocal();
             }
         }
-        success($config);
+        return $config;
     }
 
     private async loadDarkSites({local}) {
-        await this.loadConfig({
+        const sites = await this.loadConfig({
             name: 'Dark Sites',
             local,
             localURL: CONFIG_URLs.darkSites.local,
             remoteURL: CONFIG_URLs.darkSites.remote,
-            success: ($sites: string) => {
-                this.raw.darkSites = $sites;
-                this.handleDarkSites();
-            },
         });
+        this.raw.darkSites = sites;
+        this.handleDarkSites();
+
     }
 
     private async loadDynamicThemeFixes({local}) {
-        await this.loadConfig({
+        const fixes = await this.loadConfig({
             name: 'Dynamic Theme Fixes',
             local,
             localURL: CONFIG_URLs.dynamicThemeFixes.local,
             remoteURL: CONFIG_URLs.dynamicThemeFixes.remote,
-            success: ($fixes: string) => {
-                this.raw.dynamicThemeFixes = $fixes;
-                this.handleDynamicThemeFixes();
-            },
         });
-    }
+        this.raw.dynamicThemeFixes = fixes;
+        this.handleDynamicThemeFixes();
+}
 
     private async loadInversionFixes({local}) {
-        await this.loadConfig({
+        const fixes = await this.loadConfig({
             name: 'Inversion Fixes',
             local,
             localURL: CONFIG_URLs.inversionFixes.local,
             remoteURL: CONFIG_URLs.inversionFixes.remote,
-            success: ($fixes: string) => {
-                this.raw.inversionFixes = $fixes;
-                this.handleInversionFixes();
-            },
         });
-    }
+        this.raw.inversionFixes = fixes;
+        this.handleInversionFixes();
+}
 
     private async loadStaticThemes({local}) {
-        await this.loadConfig({
+        const themes = await this.loadConfig({
             name: 'Static Themes',
             local,
             localURL: CONFIG_URLs.staticThemes.local,
             remoteURL: CONFIG_URLs.staticThemes.remote,
-            success: ($themes: string) => {
-                this.raw.staticThemes = $themes;
-                this.handleStaticThemes();
-            },
         });
+        this.raw.staticThemes = themes;
+        this.handleStaticThemes();
     }
 
     async load(config: {local: boolean}) {

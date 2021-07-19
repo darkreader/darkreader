@@ -54,25 +54,25 @@ interface Duration {
     seconds?: number;
 }
 
-export function getDurationInMinutes(time: Duration) {
+export function getDuration(time: Duration) {
     let duration = 0;
     if (time.seconds) {
-        duration += time.seconds * 1000 / 60;
+        duration += time.seconds * 1000;
     }
     if (time.minutes) {
-        duration += time.minutes * 1000;
+        duration += time.minutes * 60 * 1000;
     }
     if (time.hours) {
-        duration += time.hours * 60 * 1000;
+        duration += time.hours * 60 * 60 * 1000;
     }
     if (time.days) {
-        duration += time.days * 24 * 60 * 1000;
+        duration += time.days * 24 * 60 * 60 * 1000;
     }
     return duration;
 }
 
-export function getDuration(time: Duration) {
-    return getDurationInMinutes(time) * 60;
+export function getDurationInMinutes(time: Duration) {
+    return getDuration(time) / 1000 / 60;
 }
 
 function getSunsetSunriseUTCTime(

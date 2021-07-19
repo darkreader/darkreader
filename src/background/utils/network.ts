@@ -49,7 +49,7 @@ class LimitedCacheStorage {
                 this.removeExpiredRecords();
             }
         });
-        chrome.alarms.create(LimitedCacheStorage.ALARM_NAME, {periodInMinutes: getDurationInMinutes({minutes: 1})});
+        chrome.alarms.create(LimitedCacheStorage.ALARM_NAME, {periodInMinutes: 1});
     }
 
     has(url: string) {

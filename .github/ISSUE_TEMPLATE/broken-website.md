@@ -1,22 +1,18 @@
 ---
 name: Broken Website Report
 about: Create a report about a website issue you experienced while using Dark Reader.
-title: "[Broken Website] Place title here"
+title: "[Broken Website] Replace with title"
 labels: Broken Website
 assignees: ''
 ---
 
 <!--
-⚠⚠ Do not delete this issue template! ⚠⚠
-Reported issues must use this template and have all the necessary information provided. Incomplete reports are likely to be ignored and closed.
+  ⚠⚠ Do not delete this issue template! ⚠⚠
+  Reported issues must use this template and have all the necessary information provided. Incomplete reports are likely to be ignored and closed.
 -->
 
 <!--
-Thank you for taking the time to create a report about a website issue.
-Ensure that there are no other existing reports for this website issue.
-Also, remember to fill out every section on this report and remove any
-that are not needed. Finally, place the website address in the title of
-this report.
+  Thank you for taking the time to create a report about a website issue. Ensure that there are no other existing reports for this website issue. Also, remember to fill out every section on this report and remove any that are not needed. Finally, place the website address in the title of this report.
 -->
 
 # Broken Website Report
@@ -25,7 +21,7 @@ this report.
 <!-- Provide the website address to allow us to troubleshoot this website issue. -->
 
 ## Steps To Reproduce
-<!-- Provide steps to reproduce to allow us to troubleshoot this website issue. -->
+<!-- Provide steps to reproduce the problem, and allowing us to troubleshoot this website issue. -->
 <!--
 Here is an example:
 - Go to example.com.
@@ -40,13 +36,11 @@ Here is an example:
 <!-- Provide a clear and concise description of what happened. -->
 
 ## Screenshots
-<!-- Add screenshots to help explain this website issue. -->
+<!-- If applicable, add screenshots to help explain this website issue. -->
 
 ## System Information
 <!--
-Specify the browser name and version as well as the Dark Reader version you are
-using. Please do an online search for help if you are not familiar with how
-to get this information.
+  Specify the browser name and version as well as the Dark Reader version you are using. Please do an online search for help if you are not familiar with how to get this information.
 -->
 
 - OS: <!-- e.g. Windows, macOS, Linux -->

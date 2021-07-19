@@ -31,7 +31,6 @@ export const DEFAULT_THEME: Theme = {
     scrollbarColor: isMacOS ? '' : 'auto',
     selectionColor: 'auto',
     styleSystemControls: true,
-    maxImgPerSec: 30,
 };
 
 export const DEFAULT_SETTINGS: UserSettings = {

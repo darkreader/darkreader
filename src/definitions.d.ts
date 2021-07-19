@@ -55,7 +55,6 @@ export interface Theme {
     scrollbarColor: '' | 'auto' | string;
     selectionColor: '' | 'auto' | string;
     styleSystemControls: boolean;
-    maxImgPerSec: number;
 }
 
 export type FilterConfig = Theme;

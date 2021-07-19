@@ -44,7 +44,7 @@ export default class TabManager {
             }
 
             switch (message.type) {
-                case 'frame': {
+                case 'frame-connect': {
                     const reply = (options: ConnectionMessageOptions) => {
                         const message = getConnectionMessage(options);
                         if (message instanceof Promise) {

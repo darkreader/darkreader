@@ -40,7 +40,7 @@ function onMessage({type, data}) {
         }
         case 'reload':
             logWarn('Cleaning up before update');
-            removeEventListener('pagehide', onPagehide);
+            removeEventListener('pagehide', onPageHide);
             removeEventListener('freeze', onFreeze);
             removeEventListener('resume', onResume);
             cleanDynamicThemeCache();
@@ -56,9 +56,9 @@ const colorSchemeWatcher = watchForColorSchemeChange(({isDark}) => {
 });
 
 chrome.runtime.onMessage.addListener(onMessage);
-chrome.runtime.sendMessage({type: 'frame'});
+chrome.runtime.sendMessage({type: 'frame-connect'});
 
-function onPagehide(e) {
+function onPageHide(e) {
     if (e.persisted === false) {
         chrome.runtime.sendMessage({type: 'frame-forget'});
     }
@@ -72,6 +72,6 @@ function onResume() {
     chrome.runtime.sendMessage({type: 'frame-resume'});
 }
 
-addEventListener('pagehide', onPagehide);
+addEventListener('pagehide', onPageHide);
 addEventListener('freeze', onFreeze);
 addEventListener('resume', onResume);

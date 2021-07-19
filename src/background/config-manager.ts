@@ -79,7 +79,6 @@ export default class ConfigManager {
         });
         this.raw.darkSites = sites;
         this.handleDarkSites();
-
     }
 
     private async loadDynamicThemeFixes({local}) {
@@ -91,7 +90,7 @@ export default class ConfigManager {
         });
         this.raw.dynamicThemeFixes = fixes;
         this.handleDynamicThemeFixes();
-}
+    }
 
     private async loadInversionFixes({local}) {
         const fixes = await this.loadConfig({
@@ -102,7 +101,7 @@ export default class ConfigManager {
         });
         this.raw.inversionFixes = fixes;
         this.handleInversionFixes();
-}
+    }
 
     private async loadStaticThemes({local}) {
         const themes = await this.loadConfig({

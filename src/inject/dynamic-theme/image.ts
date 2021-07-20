@@ -2,7 +2,7 @@ import {getSVGFilterMatrixValue} from '../../generators/svg-filter';
 import {bgFetch} from './network';
 import {loadAsDataURL} from '../../utils/network';
 import type {FilterConfig} from '../../definitions';
-import {logWarn} from '../utils/log';
+import {logInfo, logWarn} from '../utils/log';
 import AsyncQueue from '../../utils/async-queue';
 
 export interface ImageDetails {
@@ -14,6 +14,7 @@ export interface ImageDetails {
     isLight: boolean;
     isTransparent: boolean;
     isLarge: boolean;
+    isTooLarge: boolean;
 }
 
 const imageManager = new AsyncQueue();
@@ -76,6 +77,9 @@ function removeCanvas() {
     context = null;
 }
 
+// 5MB
+const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
+
 function analyzeImage(image: HTMLImageElement) {
     if (!canvas) {
         createCanvas();
@@ -85,6 +89,24 @@ function analyzeImage(image: HTMLImageElement) {
         logWarn(`logWarn(Image is empty ${image.currentSrc})`);
         return null;
     }
+
+    // Get good appromized image size in memory terms.
+    // Width * Height * 4(R, G, B, A) and 500B(metadata) because rgba can contain up to 3 digits.
+    const size = naturalWidth * naturalHeight * 4 + 500;
+    // Is it over ~5MB? Let's not decode the image, it's something that's useless to analyze.
+    // And very performance senstive for the browser to decode this image(~50ms) and take into account
+    // It's being async `drawImage` calls.
+    if (size > MAX_IMAGE_SIZE) {
+        logInfo('Skipped large image analyzing(Larger than 5mb in memory)');
+        return {
+            isDark: false,
+            isLight: false,
+            isTransparent: false,
+            isLarge: false,
+            isTooLarge: true,
+        };
+    }
+
     const naturalPixelsCount = naturalWidth * naturalHeight;
     const k = Math.min(1, Math.sqrt(MAX_ANALIZE_PIXELS_COUNT / naturalPixelsCount));
     const width = Math.ceil(naturalWidth * k);
@@ -143,6 +165,7 @@ function analyzeImage(image: HTMLImageElement) {
         isLight: ((lightPixelsCount / opaquePixelsCount) >= LIGHT_IMAGE_THRESHOLD),
         isTransparent: ((transparentPixelsCount / totalPixelsCount) >= TRANSPARENT_IMAGE_THRESHOLD),
         isLarge: (naturalPixelsCount >= LARGE_IMAGE_PIXELS_COUNT),
+        isTooLarge: false,
     };
 }
 

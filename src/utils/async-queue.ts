@@ -1,39 +1,39 @@
 export type QueueEntry = () => void;
 
-// queue manager is an class that helps with managing tasks.
+// AsyncQueue is as class that helps with managing tasks.
 // More specifically, it helps with tasks that are often used.
 // It's fully asyncronous and uses promises and tries to get 60FPS.
 export default class AsyncQueue {
     private queue: QueueEntry[] = [];
-    private timerID: number = null;
+    private timerId: number = null;
     private frameDuration = 1000 / 60;
 
     addToQueue(entry: QueueEntry) {
         this.queue.push(entry);
-        this.requestQueue();
+        this.startQueue();
     }
 
     stopQueue() {
-        if (this.timerID !== null) {
-            cancelAnimationFrame(this.timerID);
-            this.timerID = null;
+        if (this.timerId !== null) {
+            cancelAnimationFrame(this.timerId);
+            this.timerId = null;
         }
         this.queue = [];
     }
 
     // Ensures 60FPS.
-    private requestQueue() {
-        if (this.timerID) {
+    private startQueue() {
+        if (this.timerId) {
             return;
         }
-        this.timerID = requestAnimationFrame(() => {
-            this.timerID = null;
+        this.timerId = requestAnimationFrame(() => {
+            this.timerId = null;
             const start = Date.now();
             let cb: () => void;
             while ((cb = this.queue.shift())) {
                 cb();
                 if (Date.now() - start >= this.frameDuration) {
-                    this.requestQueue();
+                    this.startQueue();
                     break;
                 }
             }

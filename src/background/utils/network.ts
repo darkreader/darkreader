@@ -1,6 +1,6 @@
 import {loadAsDataURL, loadAsText} from '../../utils/network';
 import {getStringSize} from '../../utils/text';
-import {getDuration, getDurationInMinutes} from '../../utils/time';
+import {getDuration} from '../../utils/time';
 
 interface RequestParams {
     url: string;

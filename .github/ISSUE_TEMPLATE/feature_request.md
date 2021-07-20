@@ -8,11 +8,15 @@ assignees: ''
 
 <!--
   ⚠⚠ Do not delete this issue template! ⚠⚠
-  Reported issues must use this template and have all the necessary information provided. Incomplete reports are likely to be ignored and closed.
+  Reported issues must use this template and have all the necessary information provided.
+  Incomplete reports are likely to be ignored and closed.
 -->
 
 <!--
-  Thank you for taking the time to create a feature request. Ensure that there are no other existing requests for this feature. Also, remember to fill out every section on this request and remove any that are not needed. Finally, place a brief description in the title of this request.
+  Thank you for taking the time to create a feature request.
+  Ensure that there are no other existing requests for this feature.
+  Also, remember to fill out every section on this request and remove any that are not needed.
+  Finally, place a brief description in the title of this request.
 -->
 
 # Feature Request
@@ -21,7 +25,7 @@ assignees: ''
 <!-- Provide a clear and concise description of the problem and the solution. -->
 
 ## Screenshots
-<!-- If applicable, add screenshots to help explain this bug. -->
+<!-- If applicable, add screenshots to help explain this feature request. -->
 
 ## Additional Context
 <!-- Provide any additional information about this feature request. -->

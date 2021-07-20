@@ -8,11 +8,17 @@ assignees: ''
 
 <!--
   ⚠⚠ Do not delete this issue template! ⚠⚠
-  Reported issues must use this template and have all the necessary information provided. Incomplete reports are likely to be ignored and closed.
+  Reported issues must use this template and have all the necessary information provided.
+  Incomplete reports are likely to be ignored and closed.
 -->
 
 <!--
-  Thank you for taking the time to create a report about a performance issue. Ensure that there are no other existing reports for this performance issue. Also, remember to fill out every section on this report and remove any that are not needed. Finally, place a brief description in the title of this report. NOTE: Ensure that this is an actual performance issue. One extra second to load the website is not a performance issue.
+  Thank you for taking the time to create a report about a performance issue.
+  Ensure that there are no other existing reports for this performance issue.
+  Also, remember to fill out every section on this report and remove any that are not needed.
+  Finally, place a brief description in the title of this report.
+  NOTE: Ensure that this is an actual performance issue.
+  One extra second to load the website is not a performance issue.
 -->
 
 # Performance Issue Report
@@ -33,11 +39,12 @@ Here is an example:
 <!-- Provide a link to a Chromium or a Firefox profile. -->
 
 ## Screenshots
-<!-- If applicable, add screenshots to help explain this website issue. -->
+<!-- If applicable, add screenshots to help explain this performance issue. -->
 
 ## System Information
 <!--
-  Specify the browser name and version as well as the Dark Reader version you are using. Please do an online search for help if you are not familiar with how to get this information.
+  Specify the browser name and version as well as the Dark Reader version you are using.
+  Please do an online search for help if you are not familiar with how to get this information.
 -->
 
 - OS: <!-- e.g. Windows, macOS, Linux -->

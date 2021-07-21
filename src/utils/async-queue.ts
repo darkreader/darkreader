@@ -1,6 +1,6 @@
 export type QueueEntry = () => void;
 
-// AsyncQueue is as class that helps with managing tasks.
+// AsyncQueue is a class that helps with managing tasks.
 // More specifically, it helps with tasks that are often used.
 // It's fully asyncronous and uses promises and tries to get 60FPS.
 export default class AsyncQueue {

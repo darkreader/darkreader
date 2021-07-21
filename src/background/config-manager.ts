@@ -39,14 +39,14 @@ export default class ConfigManager {
     INVERSION_FIXES?: InversionFix[];
     STATIC_THEMES?: StaticTheme[];
 
-    raw: any = {
+    raw = {
         darkSites: null,
         dynamicThemeFixes: null,
         inversionFixes: null,
         staticThemes: null,
     };
 
-    overrides: any = {
+    overrides = {
         darkSites: null,
         dynamicThemeFixes: null,
         inversionFixes: null,

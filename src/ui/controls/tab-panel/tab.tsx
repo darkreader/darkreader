@@ -1,6 +1,6 @@
 import {m} from 'malevic';
 
-export default function Tab({isActive}: any, ...children: any[]) {
+export default function Tab({isActive}, ...children) {
     const tabCls = {
         'tab-panel__tab': true,
         'tab-panel__tab--active': isActive

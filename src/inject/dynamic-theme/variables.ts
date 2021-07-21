@@ -447,7 +447,7 @@ export class VariablesStore {
             return null;
         }
         for (const ref of refs) {
-            const found: any = this.findVarRef(ref, iterator, stack);
+            const found = this.findVarRef(ref, iterator, stack);
             if (found) {
                 return found;
             }

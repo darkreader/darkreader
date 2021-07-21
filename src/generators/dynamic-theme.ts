@@ -53,7 +53,7 @@ export function getDynamicThemeFixesFor(url: string, frameURL: string, fixes: Dy
     const common = {
         url: fixes[0].url,
         invert: fixes[0].invert || [],
-        css: fixes[0].css || [] as any[],
+        css: fixes[0].css || [],
         ignoreInlineStyle: fixes[0].ignoreInlineStyle || [],
         ignoreImageAnalysis: fixes[0].ignoreImageAnalysis || [],
     };

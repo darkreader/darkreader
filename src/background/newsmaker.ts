@@ -1,10 +1,11 @@
 import {getBlogPostURL} from '../utils/links';
-import {getDuration} from '../utils/time';
+import {getDurationInMinutes} from '../utils/time';
 import type {News} from '../definitions';
 import {readSyncStorage, readLocalStorage, writeSyncStorage, writeLocalStorage} from './utils/extension-api';
 
 export default class Newsmaker {
-    static UPDATE_INTERVAL = getDuration({hours: 4});
+    static UPDATE_INTERVAL = getDurationInMinutes({hours: 4});
+    static ALARM_NAME = 'newsmaker';
 
     latest: News[];
     onUpdate: (news: News[]) => void;
@@ -16,7 +17,12 @@ export default class Newsmaker {
 
     subscribe() {
         this.updateNews();
-        setInterval(async () => await this.updateNews(), Newsmaker.UPDATE_INTERVAL);
+        chrome.alarms.onAlarm.addListener(async (alarm) => {
+            if (alarm.name === Newsmaker.ALARM_NAME) {
+                await this.updateNews();
+            }
+        });
+        chrome.alarms.create(Newsmaker.ALARM_NAME, {periodInMinutes: Newsmaker.UPDATE_INTERVAL});
     }
 
     private async updateNews() {

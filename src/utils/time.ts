@@ -71,6 +71,10 @@ export function getDuration(time: Duration) {
     return duration;
 }
 
+export function getDurationInMinutes(time: Duration) {
+    return getDuration(time) / 1000 / 60;
+}
+
 function getSunsetSunriseUTCTime(
     date: Date,
     latitude: number,

@@ -3,6 +3,7 @@ import {bgFetch} from './network';
 import {loadAsDataURL} from '../../utils/network';
 import type {FilterConfig} from '../../definitions';
 import {logWarn} from '../utils/log';
+import AsyncQueue from '../../utils/async-queue';
 
 export interface ImageDetails {
     src: string;
@@ -15,22 +16,28 @@ export interface ImageDetails {
     isLarge: boolean;
 }
 
+const imageManager = new AsyncQueue();
+
 export async function getImageDetails(url: string) {
-    let dataURL: string;
-    if (url.startsWith('data:')) {
-        dataURL = url;
-    } else {
-        dataURL = await getImageDataURL(url);
-    }
-    const image = await urlToImage(dataURL);
-    const info = analyzeImage(image);
-    return {
-        src: url,
-        dataURL,
-        width: image.naturalWidth,
-        height: image.naturalHeight,
-        ...info,
-    };
+    return new Promise<ImageDetails>(async (resolve) => {
+        let dataURL: string;
+        if (url.startsWith('data:')) {
+            dataURL = url;
+        } else {
+            dataURL = await getImageDataURL(url);
+        }
+
+        const image = await urlToImage(dataURL);
+        imageManager.addToQueue(() => {
+            resolve({
+                src: url,
+                dataURL,
+                width: image.naturalWidth,
+                height: image.naturalHeight,
+                ...analyzeImage(image),
+            });
+        });
+    });
 }
 
 async function getImageDataURL(url: string) {
@@ -139,6 +146,7 @@ function analyzeImage(image: HTMLImageElement) {
     };
 }
 
+
 export function getFilteredImageDataURL({dataURL, width, height}: ImageDetails, theme: FilterConfig): string {
     const matrix = getSVGFilterMatrixValue(theme);
     const svg = [
@@ -155,5 +163,6 @@ export function getFilteredImageDataURL({dataURL, width, height}: ImageDetails, 
 }
 
 export function cleanImageProcessingCache() {
+    imageManager && imageManager.stopQueue();
     removeCanvas();
 }

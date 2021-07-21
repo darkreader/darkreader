@@ -59,7 +59,7 @@ const colorSchemeWatcher = watchForColorSchemeChange(({isDark}) => {
 chrome.runtime.onMessage.addListener(onMessage);
 chrome.runtime.sendMessage({type: 'frame-connect'});
 
-function onPageHide(e) {
+function onPageHide(e: PageTransitionEvent) {
     if (e.persisted === false) {
         chrome.runtime.sendMessage({type: 'frame-forget'});
     }

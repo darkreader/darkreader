@@ -27,7 +27,10 @@ const CONFIG_URLs = {
 const REMOTE_TIMEOUT_MS = getDuration({seconds: 10});
 
 interface Config {
+    name?: string;
     local: boolean;
+    localURL?: string;
+    remoteURL?: string;
 }
 
 export default class ConfigManager {
@@ -55,7 +58,7 @@ export default class ConfigManager {
         local,
         localURL,
         remoteURL,
-    }) {
+    }: Config) {
         let $config: string;
         const loadLocal = async () => await readText({url: localURL});
         if (local) {
@@ -74,7 +77,7 @@ export default class ConfigManager {
         return $config;
     }
 
-    private async loadDarkSites({local}) {
+    private async loadDarkSites({local}: Config) {
         const sites = await this.loadConfig({
             name: 'Dark Sites',
             local,
@@ -85,7 +88,7 @@ export default class ConfigManager {
         this.handleDarkSites();
     }
 
-    private async loadDynamicThemeFixes({local}) {
+    private async loadDynamicThemeFixes({local}: Config) {
         const fixes = await this.loadConfig({
             name: 'Dynamic Theme Fixes',
             local,
@@ -96,7 +99,7 @@ export default class ConfigManager {
         this.handleDynamicThemeFixes();
     }
 
-    private async loadInversionFixes({local}) {
+    private async loadInversionFixes({local}: Config) {
         const fixes = await this.loadConfig({
             name: 'Inversion Fixes',
             local,
@@ -107,7 +110,7 @@ export default class ConfigManager {
         this.handleInversionFixes();
     }
 
-    private async loadStaticThemes({local}) {
+    private async loadStaticThemes({local}: Config) {
         const themes = await this.loadConfig({
             name: 'Static Themes',
             local,

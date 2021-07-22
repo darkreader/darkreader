@@ -48,7 +48,15 @@ if (WATCH) {
                 }
             }
         };
-        socket.onclose = () => setTimeout(listen, 1000);
+        socket.onclose = () => {
+            const ALARM_NAME = 'socket-close';
+            chrome.alarms.onAlarm.addListener((alarm) => {
+                if (alarm.name === ALARM_NAME) {
+                    listen();
+                }
+            });
+            chrome.alarms.create(ALARM_NAME, {delayInMinutes: 1 / 60});
+        };
     };
     listen();
 } else {

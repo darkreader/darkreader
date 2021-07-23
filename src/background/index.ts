@@ -18,6 +18,16 @@ const WATCH = __WATCH__;
 
 if (WATCH) {
     const PORT = __PORT__;
+    const ALARM_NAME = 'socket-close';
+
+    const socketAlarmListener = (alarm) => {
+        if (alarm.name === ALARM_NAME) {
+            listen();
+        }
+    };
+
+    chrome.alarms.onAlarm.addListener(socketAlarmListener);
+
     const listen = () => {
         const socket = new WebSocket(`ws://localhost:${PORT}`);
         const send = (message: any) => socket.send(JSON.stringify(message));
@@ -48,15 +58,7 @@ if (WATCH) {
                 }
             }
         };
-        socket.onclose = () => {
-            const ALARM_NAME = 'socket-close';
-            chrome.alarms.onAlarm.addListener((alarm) => {
-                if (alarm.name === ALARM_NAME) {
-                    listen();
-                }
-            });
-            chrome.alarms.create(ALARM_NAME, {delayInMinutes: 1 / 60});
-        };
+        socket.onclose = () => chrome.alarms.create(ALARM_NAME, {delayInMinutes: 1 / 60});
     };
     listen();
 } else {

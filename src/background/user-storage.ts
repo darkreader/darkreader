@@ -6,16 +6,11 @@ import {readSyncStorage, readLocalStorage, writeSyncStorage, writeLocalStorage, 
 
 const SAVE_TIMEOUT = 1000;
 
-interface UserStorageOptions {
-    onRemoteSettingsChange: () => any;
-}
-
 export default class UserStorage {
-    constructor({onRemoteSettingsChange}: UserStorageOptions) {
+    constructor() {
         this.settings = null;
         subscribeToOuterSettingsChange(async () => {
             await this.loadSettings();
-            onRemoteSettingsChange();
         });
     }
 

@@ -19,6 +19,7 @@ const WATCH = __WATCH__;
 if (WATCH) {
     const PORT = __PORT__;
     const ALARM_NAME = 'socket-close';
+    const PING_INTERVAL_IN_MINUTES = 1 / 60;
 
     const socketAlarmListener = (alarm) => {
         if (alarm.name === ALARM_NAME) {
@@ -26,12 +27,12 @@ if (WATCH) {
         }
     };
 
-    chrome.alarms.onAlarm.addListener(socketAlarmListener);
-
     const listen = () => {
         const socket = new WebSocket(`ws://localhost:${PORT}`);
         const send = (message: any) => socket.send(JSON.stringify(message));
         socket.onmessage = (e) => {
+            chrome.alarms.onAlarm.removeListener(socketAlarmListener);
+
             const message = JSON.parse(e.data);
             if (message.type.startsWith('reload:')) {
                 send({type: 'reloading'});
@@ -58,7 +59,10 @@ if (WATCH) {
                 }
             }
         };
-        socket.onclose = () => chrome.alarms.create(ALARM_NAME, {delayInMinutes: 1 / 60});
+        socket.onclose = () => {
+            chrome.alarms.onAlarm.addListener(socketAlarmListener);
+            chrome.alarms.create(ALARM_NAME, {delayInMinutes: PING_INTERVAL_IN_MINUTES});
+        };
     };
     listen();
 } else {

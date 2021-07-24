@@ -1,3 +1,5 @@
+import type {TimeCheck} from 'definitions';
+
 export function parseTime($time: string) {
     const parts = $time.split(':').slice(0, 2);
     const lowercased = $time.trim().toLowerCase();
@@ -37,14 +39,24 @@ function compareTime(a: number[], b: number[]) {
     return 1;
 }
 
-export function isInTimeInterval(date: Date, time0: string, time1: string) {
+function dummyTime() {
+    return (new Date()).getTime() + getDuration({seconds: 10});
+}
+
+export function isInTimeInterval(date: Date, time0: string, time1: string): TimeCheck {
     const a = parse24HTime(time0);
     const b = parse24HTime(time1);
     const t = [date.getHours(), date.getMinutes()];
     if (compareTime(a, b) > 0) {
-        return compareTime(a, t) <= 0 || compareTime(t, b) < 0;
+        return {
+            rightNow: compareTime(a, t) <= 0 || compareTime(t, b) < 0,
+            nextCheck: dummyTime()
+        };
     }
-    return compareTime(a, t) <= 0 && compareTime(t, b) < 0;
+    return {
+        rightNow: compareTime(a, t) <= 0 && compareTime(t, b) < 0,
+        nextCheck: dummyTime()
+    };
 }
 
 interface Duration {
@@ -187,13 +199,19 @@ export function isNightAtLocation(
     date: Date,
     latitude: number,
     longitude: number,
-) {
+): TimeCheck {
     const time = getSunsetSunriseUTCTime(date, latitude, longitude);
 
     if (time.alwaysDay) {
-        return false;
+        return {
+            rightNow: false,
+            nextCheck: dummyTime()
+        };
     } else if (time.alwaysNight) {
-        return true;
+        return {
+            rightNow: true,
+            nextCheck: dummyTime()
+        };
     }
 
     const sunriseTime = time.sunriseTime;
@@ -205,7 +223,13 @@ export function isNightAtLocation(
     );
 
     if (sunsetTime > sunriseTime) {
-        return (currentTime > sunsetTime) || (currentTime < sunriseTime);
+        return {
+            rightNow: (currentTime > sunsetTime) || (currentTime < sunriseTime),
+            nextCheck: dummyTime()
+        };
     }
-    return (currentTime > sunsetTime) && (currentTime < sunriseTime);
+    return {
+        rightNow: (currentTime > sunsetTime) && (currentTime < sunriseTime),
+        nextCheck: dummyTime()
+    };
 }

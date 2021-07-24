@@ -8,18 +8,16 @@ import TabManager from './tab-manager';
 import UserStorage from './user-storage';
 import {setWindowTheme, resetWindowTheme} from './window-theme';
 import {getFontList, getCommands, setShortcut, canInjectScript} from './utils/extension-api';
-import {isInTimeInterval, getDuration, isNightAtLocation} from '../utils/time';
+import {isInTimeInterval, isNightAtLocation} from '../utils/time';
 import {isURLInList, getURLHostOrProtocol, isURLEnabled, isPDF} from '../utils/url';
 import ThemeEngines from '../generators/theme-engines';
 import createCSSFilterStylesheet from '../generators/css-filter';
 import {getDynamicThemeFixesFor} from '../generators/dynamic-theme';
 import createStaticStylesheet from '../generators/static-theme';
 import {createSVGFilterStylesheet, getSVGFilterMatrixValue, getSVGReverseFilterMatrixValue} from '../generators/svg-filter';
-import type {ExtensionData, FilterConfig, News, Shortcuts, UserSettings, TabInfo} from '../definitions';
+import type {ExtensionData, FilterConfig, News, Shortcuts, UserSettings, TabInfo, TimeCheck} from '../definitions';
 import {isSystemDarkModeEnabled} from '../utils/media-query';
 import {isFirefox, isThunderbird} from '../utils/platform';
-
-const AUTO_TIME_CHECK_INTERVAL = getDuration({seconds: 10});
 
 export class Extension {
     ready: boolean;
@@ -33,6 +31,9 @@ export class Extension {
     tabs: TabManager;
     user: UserStorage;
 
+    private isEnabledNow: boolean = null;
+
+    static ALARM_NAME = 'auto-time-alarm';
     constructor() {
         this.ready = false;
 
@@ -54,30 +55,51 @@ export class Extension {
         this.awaiting = [];
     }
 
-    isEnabled() {
-        const {automation} = this.user.settings;
-        if (automation === 'time') {
-            const now = new Date();
-            return isInTimeInterval(now, this.user.settings.time.activation, this.user.settings.time.deactivation);
-        } else if (automation === 'system') {
-            if (isFirefox) {
-                // BUG: Firefox background page always matches initial color scheme.
-                return this.wasLastColorSchemeDark == null
-                    ? isSystemDarkModeEnabled()
-                    : this.wasLastColorSchemeDark;
-            }
-            return isSystemDarkModeEnabled();
-        } else if (automation === 'location') {
-            const latitude = this.user.settings.location.latitude;
-            const longitude = this.user.settings.location.longitude;
+    private alarmListener = (alarm): void => {
+        if (alarm.name === Extension.ALARM_NAME) {
+            this.handleAutoCheck();
+        }
+    };
 
-            if (latitude != null && longitude != null) {
-                const now = new Date();
-                return isNightAtLocation(now, latitude, longitude);
-            }
+    isEnabled(): boolean {
+        if (this.isEnabledNow !== null) {
+            return this.isEnabledNow;
         }
 
-        return this.user.settings.enabled;
+        const {automation} = this.user.settings;
+
+        let goodTime: TimeCheck = null;
+        switch (automation) {
+            case 'time':
+                const now = new Date();
+                goodTime = isInTimeInterval(now, this.user.settings.time.activation, this.user.settings.time.deactivation);
+                break;
+            case 'system':
+                if (isFirefox) {
+                    // BUG: Firefox background page always matches initial color scheme.
+                    return this.wasLastColorSchemeDark == null
+                        ? isSystemDarkModeEnabled()
+                        : this.wasLastColorSchemeDark;
+                }
+                return isSystemDarkModeEnabled();
+            case 'location': {
+                const latitude = this.user.settings.location.latitude;
+                const longitude = this.user.settings.location.longitude;
+
+                if (latitude != null && longitude != null) {
+                    const now = new Date();
+                    goodTime = isNightAtLocation(now, latitude, longitude);
+                }
+                break;
+            }
+            default:
+                return this.user.settings.enabled;
+        }
+        this.isEnabledNow = goodTime.rightNow;
+        if (goodTime.nextCheck) {
+            chrome.alarms.create(Extension.ALARM_NAME, {when: goodTime.nextCheck});
+        }
+        return goodTime.rightNow;
     }
 
     private awaiting: Array<() => void>;
@@ -237,12 +259,8 @@ export class Extension {
     private wasEnabledOnLastCheck: boolean;
 
     private startAutoTimeCheck() {
-        setInterval(() => {
-            if (!this.ready || this.user.settings.automation === '') {
-                return;
-            }
-            this.handleAutoCheck();
-        }, AUTO_TIME_CHECK_INTERVAL);
+        chrome.alarms.onAlarm.addListener(this.alarmListener);
+        this.handleAutoCheck();
     }
 
     private wasLastColorSchemeDark = null;
@@ -259,6 +277,7 @@ export class Extension {
         if (!this.ready) {
             return;
         }
+        this.isEnabledNow = null;
         const isEnabled = this.isEnabled();
         if (this.wasEnabledOnLastCheck !== isEnabled) {
             this.wasEnabledOnLastCheck = isEnabled;
@@ -347,6 +366,7 @@ export class Extension {
     //
 
     private onAppToggle() {
+        this.isEnabledNow = null;
         if (this.isEnabled()) {
             this.icon.setActive();
             if (this.user.settings.changeBrowserTheme) {

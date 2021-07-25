@@ -1,6 +1,17 @@
 # Building Dark Reader
 
+## Table of Contents
+
+blah blah table stuff here
+
 ## Installing prerequisites
+
+The step below installs:
+
+- [git](https://git-scm.com/)
+- [NodeJS](https://nodejs.org/)
+
+If you already have these you can skip this and proceed to the [next step](#placeholder)
 
 ### Microsoft Windows
 
@@ -20,7 +31,7 @@ choco install nodejs git
 
 1. Follow the installation steps on [lukesampson/scoop](https://github.com/lukesampson/scoop).
 
-2. After installation, run this scrpt below.
+2. After installation, run this command below.
 
 ```ps1
 scoop install nodejs git
@@ -34,7 +45,7 @@ _macOS Mojave (10.14) or later is required_
 
 1. Follow the installation steps on [brew.sh](https://brew.sh/).  _(Skip this step if you already have homebrew)_
  
-2. After installation, run this script below in a terminal.
+2. After installation, run this command below in a terminal.
 
 ```bash
 brew install node git
@@ -51,3 +62,58 @@ brew install node git
 | Debian / Ubuntu      | `sudo apt install nodejs git`                  | [`apt`](https://en.wikipedia.org/wiki/APT_(software))         |
 | Fedora               | `sudo dnf install nodejs git`                  | [`dnf`](https://docs.fedoraproject.org/en-US/quick-docs/dnf/) |
 | Gentoo               | `emerge net-libs/nodejs dev-vcs/git`           | [`portage`](https://wiki.gentoo.org/wiki/Portage)             |
+
+## Cloning
+
+1. Clone darkreader by running this command below:
+
+```sh
+git clone https://github.com/darkreader/darkreader.git
+```
+
+![image](https://user-images.githubusercontent.com/66189242/126913195-4d517b8d-8766-49a1-b85f-e908999fe50e.png)
+
+2. You'll also need to "`cd`" into darkreader by running:
+
+```sh
+cd darkreader
+```
+
+![image](https://user-images.githubusercontent.com/66189242/126913398-971f800f-bdad-495c-aac8-452d42a2f70f.png)
+
+
+> **Note**: If you want to clone another fork of darkreader you can do:
+> ```sh
+> git clone https://github.com/USER/REPO_NAME.git
+> ```
+>
+> For example if we want to clone `example`s darkreader at https://github.com/example/darkreader, we can do:
+> ```sh
+> git clone https://github.com/example/darkreader.git
+> ```
+
+
+3. *(Optional)* If you want to change the branch to test another version of darkreader you can do:
+ 
+```sh
+git checkout [BRANCH NAME]
+```
+
+![image](https://user-images.githubusercontent.com/66189242/126913746-a4ade6ab-96d1-41b0-ab6c-2409f5155107.png)
+
+
+You can get a list of branches by doing:
+
+```sh
+git branch -va
+```
+ 
+![image](https://user-images.githubusercontent.com/66189242/126913646-d9c9c76d-248b-4edc-bb37-4b41a660bdb5.png)
+
+> **Note**: Remember to remove the `origin/` and `remotes/` parts on the list!
+> 
+> For example, `remotes/origin/CORS-Patch` becomes `CORS-Patch`
+> 
+> ---
+> 
+> If you want to exit, you can press `q` to exit.

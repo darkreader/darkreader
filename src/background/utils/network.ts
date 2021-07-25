@@ -42,14 +42,24 @@ class LimitedCacheStorage {
 
     private bytesInUse = 0;
     private records = new Map<string, CacheRecord>();
+    private hasAlarm: boolean = false;
 
     constructor() {
         chrome.alarms.onAlarm.addListener(async (alarm) => {
             if (alarm.name === LimitedCacheStorage.ALARM_NAME) {
+                // We schedule only one-time alarms, so once it goes off,
+                // there are no more alarms scheduled.
+                this.hasAlarm = false;
                 this.removeExpiredRecords();
             }
         });
-        chrome.alarms.create(LimitedCacheStorage.ALARM_NAME, {periodInMinutes: 1});
+    }
+
+    private ensureAlarmIsScheduled(){
+        if (!this.hasAlarm) {
+            chrome.alarms.create(LimitedCacheStorage.ALARM_NAME, {delayInMinutes: 1});
+            this.hasAlarm = true;
+        }
     }
 
     has(url: string) {
@@ -68,6 +78,8 @@ class LimitedCacheStorage {
     }
 
     set(url: string, value: string) {
+        this.ensureAlarmIsScheduled();
+
         const size = getStringSize(value);
         if (size > LimitedCacheStorage.QUOTA_BYTES) {
             return;
@@ -96,6 +108,10 @@ class LimitedCacheStorage {
             } else {
                 break;
             }
+        }
+
+        if (this.records.size !== 0) {
+            this.ensureAlarmIsScheduled();
         }
     }
 }

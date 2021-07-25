@@ -42,7 +42,7 @@ class LimitedCacheStorage {
 
     private bytesInUse = 0;
     private records = new Map<string, CacheRecord>();
-    private hasAlarm: boolean = false;
+    private hasAlarm = false;
 
     constructor() {
         chrome.alarms.onAlarm.addListener(async (alarm) => {

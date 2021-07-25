@@ -1,11 +1,12 @@
 # Building Dark Reader
 
+## Installing prerequisites
 
-## Microsoft Windows instructions
+### Microsoft Windows
 
 _Microsoft Windows 7 or later is required_
 
-### Installing prerequisites via chocolatey
+#### Chocolatey
 
 1. Follow the installation steps on [docs.chocolatey.org/choco/setup](https://docs.chocolatey.org/en-us/choco/setup).
 
@@ -15,7 +16,7 @@ _Microsoft Windows 7 or later is required_
 choco install nodejs git
 ```
 
-### Installing prerequisites via scoop
+#### Scoop
 
 1. Follow the installation steps on [lukesampson/scoop](https://github.com/lukesampson/scoop).
 
@@ -25,11 +26,11 @@ choco install nodejs git
 scoop install nodejs git
 ```
 
-## macOS instructions
+### macOS
 
 _macOS Mojave (10.14) or later is required_
 
-### Installing prerequisites via Homebrew
+#### Homebrew
 
 1. Follow the installation steps on [brew.sh](https://brew.sh/).  _(Skip this step if you already have homebrew)_
  
@@ -39,9 +40,9 @@ _macOS Mojave (10.14) or later is required_
 brew install node git
 ```
 
-## Linux instructions
+### Linux
 
-### Installing prerequisites via built-in package managers
+#### Installing prerequisites via built-in package managers
 
 | Distribution         | Command                                        | Package Manager                                               |
 |----------------------|------------------------------------------------|---------------------------------------------------------------|

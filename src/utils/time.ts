@@ -29,11 +29,11 @@ function parse24HTime(time: string) {
     return time.split(':').map((x) => parseInt(x));
 }
 
-function compareTime(a: number[], b: number[]) {
-    if (a[0] === b[0] && a[1] === b[1]) {
+function compareTime(time1: number[], time2: number[]) {
+    if (time1[0] === time2[0] && time1[1] === time2[1]) {
         return 0;
     }
-    if (a[0] < b[0] || (a[0] === b[0] && a[1] < b[1])) {
+    if (time1[0] < time2[0] || (time1[0] === time2[0] && time1[1] < time2[1])) {
         return -1;
     }
     return 1;

@@ -43,19 +43,47 @@ function dummyTime() {
     return (new Date()).getTime() + getDuration({seconds: 10});
 }
 
-export function isInTimeInterval(date: Date, time0: string, time1: string): TimeCheck {
+// a <= b
+function nextIntervalTime(a, b, t, date: Date): number {
+    if (compareTime(a, b) === 0) {
+        return null;
+    }
+
+    if (compareTime(t, a) < 0) {
+        // t < a <= b
+        // Schedule for todate at time a
+        date.setHours(a[0]);
+        date.setMinutes(a[1]);
+        return date.getTime();
+    }
+
+    if (compareTime(t, b) < 0) {
+        // a <= t < b
+        // Schedule for today at time b
+        date.setHours(b[0]);
+        date.setMinutes(b[1]);
+        return date.getTime();
+    }
+
+    // a <= b <= t
+    // Schedule for tomorrow at time a
+    return (new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1, a[0], a[1])).getTime();
+}
+
+export function isInTimeInterval(time0: string, time1: string, date?: Date): TimeCheck {
+    date = date || new Date();
     const a = parse24HTime(time0);
     const b = parse24HTime(time1);
     const t = [date.getHours(), date.getMinutes()];
     if (compareTime(a, b) > 0) {
         return {
             rightNow: compareTime(a, t) <= 0 || compareTime(t, b) < 0,
-            nextCheck: dummyTime()
+            nextCheck: nextIntervalTime(b, a, t, date)
         };
     }
     return {
         rightNow: compareTime(a, t) <= 0 && compareTime(t, b) < 0,
-        nextCheck: dummyTime()
+        nextCheck: nextIntervalTime(a, b, t, date)
     };
 }
 

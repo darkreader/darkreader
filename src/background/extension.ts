@@ -71,8 +71,7 @@ export class Extension {
         let goodTime: TimeCheck = null;
         switch (automation) {
             case 'time':
-                const now = new Date();
-                goodTime = isInTimeInterval(now, this.user.settings.time.activation, this.user.settings.time.deactivation);
+                goodTime = isInTimeInterval(this.user.settings.time.activation, this.user.settings.time.deactivation);
                 break;
             case 'system':
                 if (isFirefox) {

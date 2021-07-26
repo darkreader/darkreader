@@ -38,12 +38,18 @@ interface CacheRecord {
 class LimitedCacheStorage {
     static QUOTA_BYTES = ((navigator as any).deviceMemory || 4) * 16 * 1024 * 1024;
     static TTL = getDuration({minutes: 10});
+    static ALARM_NAME = 'network';
 
     private bytesInUse = 0;
     private records = new Map<string, CacheRecord>();
 
     constructor() {
-        setInterval(() => this.removeExpiredRecords(), getDuration({minutes: 1}));
+        chrome.alarms.onAlarm.addListener(async (alarm) => {
+            if (alarm.name === LimitedCacheStorage.ALARM_NAME) {
+                this.removeExpiredRecords();
+            }
+        });
+        chrome.alarms.create(LimitedCacheStorage.ALARM_NAME, {periodInMinutes: 1});
     }
 
     has(url: string) {
@@ -98,6 +104,7 @@ interface FetchRequestParameters {
     url: string;
     responseType: 'data-url' | 'text';
     mimeType?: string;
+    origin?: string;
 }
 
 export function createFileLoader() {
@@ -111,14 +118,14 @@ export function createFileLoader() {
         'text': loadAsText,
     };
 
-    async function get({url, responseType, mimeType}: FetchRequestParameters) {
+    async function get({url, responseType, mimeType, origin}: FetchRequestParameters) {
         const cache = caches[responseType];
         const load = loaders[responseType];
         if (cache.has(url)) {
             return cache.get(url);
         }
 
-        const data = await load(url, mimeType);
+        const data = await load(url, mimeType, origin);
         cache.set(url, data);
         return data;
     }

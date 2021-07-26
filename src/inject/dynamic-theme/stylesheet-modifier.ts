@@ -26,11 +26,10 @@ const asyncQueue = createAsyncTasksQueue();
 
 export function createStyleSheetModifier() {
     let renderId = 0;
-    const rulesTextCache = new Map<string, string>();
+    const rulesTextCache = new Set<string>();
     const rulesModCache = new Map<string, ModifiableCSSRule>();
     const varTypeChangeCleaners = new Set<() => void>();
     let prevFilterKey: string = null;
-
     interface ModifySheetOptions {
         sourceCSSRules: CSSRuleList;
         theme: Theme;
@@ -40,7 +39,13 @@ export function createStyleSheetModifier() {
         isAsyncCancelled: () => boolean;
     }
 
-    function modifySheet(options: ModifySheetOptions): void {
+    let hasNonLoadedLink = false;
+    let wasRebuilt = false;
+    function shouldRebuildStyle() {
+        return hasNonLoadedLink && !wasRebuilt;
+    }
+
+    function modifySheet(options: ModifySheetOptions) {
         const rules = options.sourceCSSRules;
         const {theme, ignoreImageAnalysis, force, prepareSheet, isAsyncCancelled} = options;
 
@@ -49,14 +54,21 @@ export function createStyleSheetModifier() {
         const themeKey = getThemeKey(theme);
         const themeChanged = (themeKey !== prevFilterKey);
 
+        if (hasNonLoadedLink) {
+            wasRebuilt = true;
+        }
+
         const modRules: ModifiableCSSRule[] = [];
         iterateCSSRules(rules, (rule) => {
-            const cssText = rule.cssText;
+            let cssText = rule.cssText;
             let textDiffersFromPrev = false;
 
             notFoundCacheKeys.delete(cssText);
+            if (rule.parentRule instanceof CSSMediaRule) {
+                cssText += `;${ (rule.parentRule as CSSMediaRule).media.mediaText}`;
+            }
             if (!rulesTextCache.has(cssText)) {
-                rulesTextCache.set(cssText, cssText);
+                rulesTextCache.add(cssText);
                 textDiffersFromPrev = true;
             }
 
@@ -82,6 +94,8 @@ export function createStyleSheetModifier() {
                 modRules.push(modRule);
             }
             rulesModCache.set(cssText, modRule);
+        }, () => {
+            hasNonLoadedLink = true;
         });
 
         notFoundCacheKeys.forEach((key) => {
@@ -119,11 +133,12 @@ export function createStyleSheetModifier() {
 
         function setRule(target: CSSStyleSheet | CSSGroupingRule, index: number, rule: ReadyStyleRule) {
             const {selector, declarations} = rule;
-            target.insertRule(`${selector} {}`, index);
-            const style = (target.cssRules[index] as CSSStyleRule).style;
-            declarations.forEach(({property, value, important, sourceValue}) => {
-                style.setProperty(property, value == null ? sourceValue : value as string, important ? 'important' : '');
-            });
+            const getDeclarationText = (dec: ReadyDeclaration) => {
+                const {property, value, important, sourceValue} = dec;
+                return `${property}: ${value == null ? sourceValue : value}${important ? ' !important' : ''};`;
+            };
+            const ruleText = `${selector} { ${declarations.map(getDeclarationText).join(' ')} }`;
+            target.insertRule(ruleText, index);
         }
 
         interface RuleInfo {
@@ -297,5 +312,5 @@ export function createStyleSheetModifier() {
         buildStyleSheet();
     }
 
-    return {modifySheet};
+    return {modifySheet, shouldRebuildStyle};
 }

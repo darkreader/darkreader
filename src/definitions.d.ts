@@ -109,7 +109,8 @@ export interface TabInfo {
 
 export interface Message {
     type: string;
-    data?: any;
+    from: string;
+    data: any;
     id?: any;
     error?: any;
 }

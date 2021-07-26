@@ -1,4 +1,3 @@
-import {isCSSStyleSheetConstructorSupported} from './../../utils/platform';
 import {logWarn} from './log';
 import {throttle} from './throttle';
 import {forEach} from '../../utils/array';
@@ -199,12 +198,32 @@ export function removeDOMReadyListener(listener: () => void) {
     readyStateListeners.delete(listener);
 }
 
+// `interactive` can and will be fired when their are still stylesheets loading.
+// We use certain actions that can cause a forced layout change, which is bad.
+export function isReadyStateComplete() {
+    return document.readyState === 'complete';
+}
+
+const readyStateCompleteListeners = new Set<() => void>();
+
+export function addReadyStateCompleteListener(listener: () => void) {
+    readyStateCompleteListeners.add(listener);
+}
+
+export function cleanReadyStateCompleteListeners() {
+    readyStateCompleteListeners.clear();
+}
+
 if (!isDOMReady()) {
     const onReadyStateChange = () => {
         if (isDOMReady()) {
-            document.removeEventListener('readystatechange', onReadyStateChange);
             readyStateListeners.forEach((listener) => listener());
             readyStateListeners.clear();
+            if (isReadyStateComplete()) {
+                document.removeEventListener('readystatechange', onReadyStateChange);
+                readyStateCompleteListeners.forEach((listener) => listener());
+                readyStateCompleteListeners.clear();
+            }
         }
     };
     document.addEventListener('readystatechange', onReadyStateChange);
@@ -299,12 +318,10 @@ export function createOptimizedTreeObserver(root: Document | ShadowRoot, callbac
             if (isHugeMutation(mutations)) {
                 if (!hadHugeMutationsBefore || isDOMReady()) {
                     observerCallbacks.forEach(({onHugeMutations}) => onHugeMutations(root));
-                } else {
-                    if (!subscribedForReadyState) {
-                        domReadyListener = () => observerCallbacks.forEach(({onHugeMutations}) => onHugeMutations(root));
-                        addDOMReadyListener(domReadyListener);
-                        subscribedForReadyState = true;
-                    }
+                } else if (!subscribedForReadyState) {
+                    domReadyListener = () => observerCallbacks.forEach(({onHugeMutations}) => onHugeMutations(root));
+                    addDOMReadyListener(domReadyListener);
+                    subscribedForReadyState = true;
                 }
                 hadHugeMutationsBefore = true;
             } else {
@@ -333,22 +350,4 @@ export function createOptimizedTreeObserver(root: Document | ShadowRoot, callbac
             }
         },
     };
-}
-
-let tempStyle: CSSStyleSheet = null;
-
-export function getTempCSSStyleSheet(): CSSStyleSheet {
-    if (tempStyle) {
-        return tempStyle;
-    }
-    if (isCSSStyleSheetConstructorSupported) {
-        tempStyle = new CSSStyleSheet();
-        return tempStyle;
-    } else {
-        const tempStyleElement = document.createElement('style');
-        document.head.append(tempStyleElement);
-        tempStyle = tempStyleElement.sheet;
-        document.head.removeChild(tempStyleElement);
-        return tempStyle;
-    }
 }

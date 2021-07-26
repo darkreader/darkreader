@@ -1,17 +1,10 @@
 import {Extension} from './extension';
 import {getHelpURL, UNINSTALL_URL} from '../utils/links';
+import {canInjectScript} from '../background/utils/extension-api';
 
 // Initialize extension
 const extension = new Extension();
 extension.start();
-
-chrome.runtime.onInstalled.addListener(({reason}) => {
-    if (reason === 'install') {
-        chrome.tabs.create({url: getHelpURL()});
-    }
-});
-
-chrome.runtime.setUninstallURL(UNINSTALL_URL);
 
 const welcome = `  /''''\\
  (0)==(0)
@@ -43,7 +36,14 @@ if (WATCH) {
                     break;
                 }
                 case 'reload:full': {
-                    chrome.runtime.reload();
+                    chrome.tabs.query({}, (tabs) => {
+                        for (const tab of tabs) {
+                            if (canInjectScript(tab.url)) {
+                                chrome.tabs.sendMessage(tab.id, {type: 'reload'});
+                            }
+                        }
+                        chrome.runtime.reload();
+                    });
                     break;
                 }
             }
@@ -51,4 +51,12 @@ if (WATCH) {
         socket.onclose = () => setTimeout(listen, 1000);
     };
     listen();
+} else {
+    chrome.runtime.onInstalled.addListener(({reason}) => {
+        if (reason === 'install') {
+            chrome.tabs.create({url: getHelpURL()});
+        }
+    });
+
+    chrome.runtime.setUninstallURL(UNINSTALL_URL);
 }

@@ -39,10 +39,6 @@ function compareTime(time1: number[], time2: number[]) {
     return 1;
 }
 
-function dummyTime() {
-    return (new Date()).getTime() + getDuration({seconds: 10});
-}
-
 // a <= b
 function nextIntervalTime(a, b, t, date: Date): number {
     if (compareTime(a, b) === 0) {
@@ -252,13 +248,47 @@ export function isNightAtLocation(
     );
 
     if (sunsetTime > sunriseTime) {
+        // Timeline:
+        // --- sunrise <----> sunset ---
+        const inTimeInterval = (currentTime > sunsetTime) || (currentTime < sunriseTime);
+        let nextCheck: number;
+        if (inTimeInterval) {
+            // Timeline:
+            // --- sunrise <----> sunset ---
+            //               ^
+            //          Current time
+            nextCheck = sunsetTime - currentTime;
+        } else {
+            // Timeline:
+            // --- sunrise <----> sunset ---
+            //  ^
+            // Current time
+            nextCheck = sunriseTime - currentTime;
+        }
         return {
-            rightNow: (currentTime > sunsetTime) || (currentTime < sunriseTime),
-            nextCheck: dummyTime()
+            rightNow: inTimeInterval,
+            nextCheck,
         };
     }
+    // Timeline:
+    // --- sunset <----> sunrise ---
+    const inTimeInterval = (currentTime > sunsetTime) && (currentTime < sunriseTime);
+    let nextCheck: number;
+    if (inTimeInterval) {
+        // Timeline:
+        // --- sunset <----> sunrise ---
+        //               ^
+        //          Current time
+        nextCheck = sunriseTime - currentTime;
+    } else {
+        // Timeline:
+        // --- sunset <----> sunrise ---
+        //  ^
+        // Current time
+        nextCheck = sunsetTime - currentTime;
+    }
     return {
-        rightNow: (currentTime > sunsetTime) && (currentTime < sunriseTime),
-        nextCheck: dummyTime()
+        rightNow: inTimeInterval,
+        nextCheck,
     };
 }

@@ -196,7 +196,7 @@ function getSunsetSunriseUTCTime(
         return {
             alwaysDay: false,
             alwaysNight: false,
-            time: UT * getDuration({hours: 1}),
+            time: Math.round(UT * getDuration({hours: 1})),
         };
     }
 
@@ -247,48 +247,70 @@ export function isNightAtLocation(
         date.getUTCSeconds() * getDuration({seconds: 1})
     );
 
-    if (sunsetTime > sunriseTime) {
+    if (sunriseTime < sunsetTime) {
         // Timeline:
         // --- sunrise <----> sunset ---
-        const inTimeInterval = (currentTime > sunsetTime) || (currentTime < sunriseTime);
+        let rightNow: boolean;
         let nextCheck: number;
-        if (inTimeInterval) {
-            // Timeline:
-            // --- sunrise <----> sunset ---
-            //               ^
-            //          Current time
-            nextCheck = sunsetTime - currentTime;
-        } else {
+        if (currentTime < sunriseTime) {
             // Timeline:
             // --- sunrise <----> sunset ---
             //  ^
             // Current time
-            nextCheck = sunriseTime - currentTime;
+            rightNow = true;
+            nextCheck = Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate(), 0, 0, 0, sunriseTime);
+        }
+        if ((sunriseTime < currentTime) && (currentTime < sunsetTime)) {
+            // Timeline:
+            // --- sunrise <----> sunset ---
+            //               ^
+            //          Current time
+            rightNow = false;
+            nextCheck = Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate(), 0, 0, 0, sunsetTime);
+        }
+        if (sunsetTime < currentTime) {
+            // Timeline:
+            // --- sunrise <----> sunset ---
+            //                            ^
+            //                        Current time
+            rightNow = true;
+            nextCheck = Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate() + 1, 0, 0, 0, sunriseTime);
         }
         return {
-            rightNow: inTimeInterval,
+            rightNow,
             nextCheck,
         };
     }
     // Timeline:
     // --- sunset <----> sunrise ---
-    const inTimeInterval = (currentTime > sunsetTime) && (currentTime < sunriseTime);
+    let rightNow: boolean;
     let nextCheck: number;
-    if (inTimeInterval) {
-        // Timeline:
-        // --- sunset <----> sunrise ---
-        //               ^
-        //          Current time
-        nextCheck = sunriseTime - currentTime;
-    } else {
+    if (currentTime < sunsetTime) {
         // Timeline:
         // --- sunset <----> sunrise ---
         //  ^
         // Current time
-        nextCheck = sunsetTime - currentTime;
+        rightNow = false
+        nextCheck = Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate(), 0, 0, 0, sunsetTime);
+    }
+    if ((sunsetTime < currentTime) && (currentTime < sunriseTime)) {
+        // Timeline:
+        // --- sunset <----> sunrise ---
+        //               ^
+        //          Current time
+        rightNow = true
+        nextCheck = Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate(), 0, 0, 0, sunriseTime);
+    }
+    if ((sunsetTime < currentTime) && (currentTime < sunriseTime)) {
+        // Timeline:
+        // --- sunset <----> sunrise ---
+        //                            ^
+        //                         Current time
+        rightNow = false
+        nextCheck = Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate() + 1, 0, 0, 0, sunsetTime);
     }
     return {
-        rightNow: inTimeInterval,
+        rightNow,
         nextCheck,
     };
 }

@@ -233,12 +233,12 @@ export function isNightAtLocation(
     if (time.alwaysDay) {
         return {
             rightNow: false,
-            nextCheck: dummyTime()
+            nextCheck: date.getTime() + getDuration({days: 1})
         };
     } else if (time.alwaysNight) {
         return {
             rightNow: true,
-            nextCheck: dummyTime()
+            nextCheck: date.getTime() + getDuration({days: 1})
         };
     }
 

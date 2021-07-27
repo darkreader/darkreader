@@ -290,7 +290,7 @@ export function isNightAtLocation(
         // --- sunset <----> sunrise ---
         //  ^
         // Current time
-        rightNow = false
+        rightNow = false;
         nextCheck = Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate(), 0, 0, 0, sunsetTime);
     }
     if ((sunsetTime < currentTime) && (currentTime < sunriseTime)) {
@@ -298,7 +298,7 @@ export function isNightAtLocation(
         // --- sunset <----> sunrise ---
         //               ^
         //          Current time
-        rightNow = true
+        rightNow = true;
         nextCheck = Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate(), 0, 0, 0, sunriseTime);
     }
     if ((sunsetTime < currentTime) && (currentTime < sunriseTime)) {
@@ -306,7 +306,7 @@ export function isNightAtLocation(
         // --- sunset <----> sunrise ---
         //                            ^
         //                         Current time
-        rightNow = false
+        rightNow = false;
         nextCheck = Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate() + 1, 0, 0, 0, sunsetTime);
     }
     return {

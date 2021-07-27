@@ -224,10 +224,11 @@ function getSunsetSunriseUTCTime(
 }
 
 export function isNightAtLocation(
-    date: Date,
     latitude: number,
     longitude: number,
+    date?: Date,
 ): TimeCheck {
+    date = date || new Date();
     const time = getSunsetSunriseUTCTime(date, latitude, longitude);
 
     if (time.alwaysDay) {

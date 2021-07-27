@@ -86,8 +86,7 @@ export class Extension {
                 const longitude = this.user.settings.location.longitude;
 
                 if (latitude != null && longitude != null) {
-                    const now = new Date();
-                    goodTime = isNightAtLocation(now, latitude, longitude);
+                    goodTime = isNightAtLocation(latitude, longitude);
                 }
                 break;
             }

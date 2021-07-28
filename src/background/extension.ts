@@ -68,10 +68,10 @@ export class Extension {
 
         const {automation} = this.user.settings;
 
-        let goodTime: TimeCheck = null;
+        let timingInformation: TimeCheck = null;
         switch (automation) {
             case 'time':
-                goodTime = isInTimeInterval(this.user.settings.time.activation, this.user.settings.time.deactivation);
+                timingInformation = isInTimeInterval(this.user.settings.time.activation, this.user.settings.time.deactivation);
                 break;
             case 'system':
                 if (isFirefox) {
@@ -86,18 +86,18 @@ export class Extension {
                 const longitude = this.user.settings.location.longitude;
 
                 if (latitude != null && longitude != null) {
-                    goodTime = isNightAtLocation(latitude, longitude);
+                    timingInformation = isNightAtLocation(latitude, longitude);
                 }
                 break;
             }
             default:
                 return this.user.settings.enabled;
         }
-        this.isEnabledNow = goodTime.rightNow;
-        if (goodTime.nextCheck) {
-            chrome.alarms.create(Extension.ALARM_NAME, {when: goodTime.nextCheck});
+        this.isEnabledNow = timingInformation.rightNow;
+        if (timingInformation.nextCheck) {
+            chrome.alarms.create(Extension.ALARM_NAME, {when: timingInformation.nextCheck});
         }
-        return goodTime.rightNow;
+        return timingInformation.rightNow;
     }
 
     private awaiting: Array<() => void>;

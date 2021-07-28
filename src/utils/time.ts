@@ -40,30 +40,30 @@ function compareTime(time1: number[], time2: number[]) {
 }
 
 // a <= b
-function nextIntervalTime(a, b, t, date: Date): number {
-    if (compareTime(a, b) === 0) {
+function nextIntervalTime(time1, time2, currentTime, date: Date): number {
+    if (compareTime(time1, time2) === 0) {
         return null;
     }
 
-    if (compareTime(t, a) < 0) {
+    if (compareTime(currentTime, time1) < 0) {
         // t < a <= b
         // Schedule for todate at time a
-        date.setHours(a[0]);
-        date.setMinutes(a[1]);
+        date.setHours(time1[0]);
+        date.setMinutes(time1[1]);
         return date.getTime();
     }
 
-    if (compareTime(t, b) < 0) {
+    if (compareTime(currentTime, time2) < 0) {
         // a <= t < b
         // Schedule for today at time b
-        date.setHours(b[0]);
-        date.setMinutes(b[1]);
+        date.setHours(time2[0]);
+        date.setMinutes(time2[1]);
         return date.getTime();
     }
 
     // a <= b <= t
     // Schedule for tomorrow at time a
-    return (new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1, a[0], a[1])).getTime();
+    return (new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1, time1[0], time1[1])).getTime();
 }
 
 export function isInTimeInterval(time0: string, time1: string, date?: Date): TimeCheck {

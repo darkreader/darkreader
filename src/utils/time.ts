@@ -116,9 +116,9 @@ function getSunsetSunriseUTCTime(
     latitude: number,
     longitude: number,
 ) {
-    const dec31 = new Date(date.getUTCFullYear(), 0, 0);
+    const dec31 = Date.UTC(date.getUTCFullYear(), 0, 0, 0, 0, 0, 0);
     const oneDay = getDuration({days: 1});
-    const dayOfYear = Math.floor((Number(date) - Number(dec31)) / oneDay);
+    const dayOfYear = Math.floor((date.getTime() - dec31) / oneDay);
 
     const zenith = 90.83333333333333;
     const D2R = Math.PI / 180;

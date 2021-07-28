@@ -38,25 +38,25 @@ test('Sunrize/sunset', () => {
 
     expect(isNightAtLocation(52, 0, utcDate(2019, 8, 9, 0, 0))).toEqual({rightNow: true, nextCheck: Date.UTC(2019, 8, 9, 5, 24, 2, 501)});
     expect(isNightAtLocation(52, 0, utcDate(2019, 8, 9, 5, 0))).toEqual({rightNow: true, nextCheck: Date.UTC(2019, 8, 9, 5, 24, 2, 501)});
-    expect(isNightAtLocation(52, 0, utcDate(2019, 8, 9, 7, 0))).toEqual({rightNow: false, nextCheck: 1568053786448});
-    expect(isNightAtLocation(52, 0, utcDate(2019, 8, 9, 12, 0))).toEqual({rightNow: false, nextCheck: 1568053786448});
-    expect(isNightAtLocation(52, 0, utcDate(2019, 8, 9, 18, 0))).toEqual({rightNow: false, nextCheck: 1568053786448});
-    expect(isNightAtLocation(52, 0, utcDate(2019, 8, 9, 20, 0))).toEqual({rightNow: true, nextCheck: 1568093042501});
-    expect(isNightAtLocation(52, 0, utcDate(2019, 8, 9, 23, 59))).toEqual({rightNow: true, nextCheck: 1568093042501});
+    expect(isNightAtLocation(52, 0, utcDate(2019, 8, 9, 7, 0))).toEqual({rightNow: false, nextCheck: Date.UTC(2019, 8, 9, 18, 29, 46, 448)});
+    expect(isNightAtLocation(52, 0, utcDate(2019, 8, 9, 12, 0))).toEqual({rightNow: false, nextCheck: Date.UTC(2019, 8, 9, 18, 29, 46, 448)});
+    expect(isNightAtLocation(52, 0, utcDate(2019, 8, 9, 18, 0))).toEqual({rightNow: false, nextCheck: Date.UTC(2019, 8, 9, 18, 29, 46, 448)});
+    expect(isNightAtLocation(52, 0, utcDate(2019, 8, 9, 20, 0))).toEqual({rightNow: true, nextCheck: Date.UTC(2019, 8, 10, 5, 24, 2, 501)});
+    expect(isNightAtLocation(52, 0, utcDate(2019, 8, 9, 23, 59))).toEqual({rightNow: true, nextCheck: Date.UTC(2019, 8, 10, 5, 24, 2, 501)});
 
-    expect(isNightAtLocation(52, 30, utcDate(2019, 8, 9, 0, 0))).toEqual({rightNow: true, nextCheck: 1567999434365});
-    expect(isNightAtLocation(52, 30, utcDate(2019, 8, 9, 3, 0))).toEqual({rightNow: true, nextCheck: 1567999434365});
-    expect(isNightAtLocation(52, 30, utcDate(2019, 8, 9, 5, 0))).toEqual({rightNow: false, nextCheck: 1568046598045});
-    expect(isNightAtLocation(52, 30, utcDate(2019, 8, 9, 10, 0))).toEqual({rightNow: false, nextCheck: 1568046598045});
-    expect(isNightAtLocation(52, 30, utcDate(2019, 8, 9, 16, 0))).toEqual({rightNow: false, nextCheck: 1568046598045});
-    expect(isNightAtLocation(52, 30, utcDate(2019, 8, 9, 18, 0))).toEqual({rightNow: true, nextCheck: 1568085834365});
-    expect(isNightAtLocation(52, 30, utcDate(2019, 8, 9, 23, 59))).toEqual({rightNow: true, nextCheck: 1568085834365});
+    expect(isNightAtLocation(52, 30, utcDate(2019, 8, 9, 0, 0))).toEqual({rightNow: true, nextCheck: Date.UTC(2019, 8, 9, 3, 23, 54, 365)});
+    expect(isNightAtLocation(52, 30, utcDate(2019, 8, 9, 3, 0))).toEqual({rightNow: true, nextCheck: Date.UTC(2019, 8, 9, 3, 23, 54, 365)});
+    expect(isNightAtLocation(52, 30, utcDate(2019, 8, 9, 5, 0))).toEqual({rightNow: false, nextCheck: Date.UTC(2019, 8, 9, 16, 29, 58, 45)});
+    expect(isNightAtLocation(52, 30, utcDate(2019, 8, 9, 10, 0))).toEqual({rightNow: false, nextCheck: Date.UTC(2019, 8, 9, 16, 29, 58, 45)});
+    expect(isNightAtLocation(52, 30, utcDate(2019, 8, 9, 16, 0))).toEqual({rightNow: false, nextCheck: Date.UTC(2019, 8, 9, 16, 29, 58, 45)});
+    expect(isNightAtLocation(52, 30, utcDate(2019, 8, 9, 18, 0))).toEqual({rightNow: true, nextCheck: Date.UTC(2019, 8, 10, 3, 23, 54, 365)});
+    expect(isNightAtLocation(52, 30, utcDate(2019, 8, 9, 23, 59))).toEqual({rightNow: true, nextCheck: Date.UTC(2019, 8, 10, 3, 23, 54, 365)});
 
-    expect(isNightAtLocation(52, -30, utcDate(2019, 8, 9, 0, 0))).toEqual({rightNow: true, nextCheck: 1568013850637});
-    expect(isNightAtLocation(52, -30, utcDate(2019, 8, 9, 7, 0))).toEqual({rightNow: true, nextCheck: 1568013850637});
-    expect(isNightAtLocation(52, -30, utcDate(2019, 8, 9, 9, 0))).toEqual({rightNow: false, nextCheck: 1568060974848});
-    expect(isNightAtLocation(52, -30, utcDate(2019, 8, 9, 14, 0))).toEqual({rightNow: false, nextCheck: 1568060974848});
-    expect(isNightAtLocation(52, -30, utcDate(2019, 8, 9, 20, 0))).toEqual({rightNow: false, nextCheck: 1568060974848});
-    expect(isNightAtLocation(52, -30, utcDate(2019, 8, 9, 22, 0))).toEqual({rightNow: true, nextCheck: 1568100250637});
-    expect(isNightAtLocation(52, -30, utcDate(2019, 8, 9, 23, 59))).toEqual({rightNow: true, nextCheck: 1568100250637});
+    expect(isNightAtLocation(52, -30, utcDate(2019, 8, 9, 0, 0))).toEqual({rightNow: true, nextCheck: Date.UTC(2019, 8, 9, 7, 24, 10, 637)});
+    expect(isNightAtLocation(52, -30, utcDate(2019, 8, 9, 7, 0))).toEqual({rightNow: true, nextCheck: Date.UTC(2019, 8, 9, 7, 24, 10, 637)});
+    expect(isNightAtLocation(52, -30, utcDate(2019, 8, 9, 9, 0))).toEqual({rightNow: false, nextCheck: Date.UTC(2019, 8, 9, 20, 29, 34, 848)});
+    expect(isNightAtLocation(52, -30, utcDate(2019, 8, 9, 14, 0))).toEqual({rightNow: false, nextCheck: Date.UTC(2019, 8, 9, 20, 29, 34, 848)});
+    expect(isNightAtLocation(52, -30, utcDate(2019, 8, 9, 20, 0))).toEqual({rightNow: false, nextCheck: Date.UTC(2019, 8, 9, 20, 29, 34, 848)});
+    expect(isNightAtLocation(52, -30, utcDate(2019, 8, 9, 22, 0))).toEqual({rightNow: true, nextCheck: Date.UTC(2019, 8, 10, 7, 24, 10, 637)});
+    expect(isNightAtLocation(52, -30, utcDate(2019, 8, 9, 23, 59))).toEqual({rightNow: true, nextCheck: Date.UTC(2019, 8, 10, 7, 24, 10, 637)});
 });

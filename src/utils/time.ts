@@ -268,8 +268,6 @@ export function isNightAtLocation(
     } else if ((sunsetTime < currentTime) && (currentTime < sunriseTime)) {
         // Timeline:
         // --- sunset <----> sunrise ---
-        // Timeline:
-        // --- sunset <----> sunrise ---
         //               ^
         //          Current time
         rightNow = true;

@@ -66,8 +66,7 @@ function nextIntervalTime(time1, time2, currentTime, date: Date): number {
     return (new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1, time1[0], time1[1])).getTime();
 }
 
-export function isInTimeInterval(time0: string, time1: string, date?: Date): TimeCheck {
-    date = date || new Date();
+export function isInTimeInterval(time0: string, time1: string, date: Date = new Date()): TimeCheck {
     const a = parse24HTime(time0);
     const b = parse24HTime(time1);
     const t = [date.getHours(), date.getMinutes()];
@@ -222,9 +221,8 @@ function getSunsetSunriseUTCTime(
 export function isNightAtLocation(
     latitude: number,
     longitude: number,
-    date?: Date,
+    date: Date = new Date(),
 ): TimeCheck {
-    date = date || new Date();
     const time = getSunsetSunriseUTCTime(date, latitude, longitude);
 
     if (time.alwaysDay) {

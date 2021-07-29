@@ -82,8 +82,7 @@ export class Extension {
                 }
                 return isSystemDarkModeEnabled();
             case 'location': {
-                const latitude = this.user.settings.location.latitude;
-                const longitude = this.user.settings.location.longitude;
+                const {latitude, longitude} = this.user.settings.location;
 
                 if (latitude != null && longitude != null) {
                     timingInformation = isNightAtLocation(latitude, longitude);

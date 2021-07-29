@@ -1,4 +1,4 @@
-import {isInTimeInterval, isNightAtLocation, parseTime, getDuration} from '../../src/utils/time';
+import {isInTimeInterval, isNightAtLocation, parseTime, getDuration, getDurationInMinutes} from '../../src/utils/time';
 
 test('Time interval', () => {
     expect(isInTimeInterval('9:00', '12:00', new Date(2018, 11, 4, 10))).toEqual({rightNow: true, nextCheck: new Date(2018, 11, 4, 12).getTime()});
@@ -31,6 +31,13 @@ test('Duration', () => {
         hours: 8,
         days: 3
     })).toEqual(289488000);
+
+    expect(getDurationInMinutes({
+        seconds: 27,
+        minutes: 25,
+        hours: 5,
+        days: 7
+    })).toEqual(10405.45);
 });
 
 test('Sunrize/sunset', () => {
@@ -59,4 +66,12 @@ test('Sunrize/sunset', () => {
     expect(isNightAtLocation(52, -30, utcDate(2019, 8, 9, 20, 0))).toEqual({rightNow: false, nextCheck: Date.UTC(2019, 8, 9, 20, 29, 34, 848)});
     expect(isNightAtLocation(52, -30, utcDate(2019, 8, 9, 22, 0))).toEqual({rightNow: true, nextCheck: Date.UTC(2019, 8, 10, 7, 24, 10, 637)});
     expect(isNightAtLocation(52, -30, utcDate(2019, 8, 9, 23, 59))).toEqual({rightNow: true, nextCheck: Date.UTC(2019, 8, 10, 7, 24, 10, 637)});
+
+    // Polar day and night
+    expect(isNightAtLocation(71, 0, utcDate(2019, 5, 15, 0, 0))).toEqual({rightNow: false, nextCheck: Date.UTC(2019, 5, 16, 0, 0, 0, 0)});
+    expect(isNightAtLocation(-71, 0, utcDate(2019, 5, 15, 0, 0))).toEqual({rightNow: true, nextCheck: Date.UTC(2019, 5, 16, 0, 0, 0, 0)});
+
+    // Places where sunset comes before sunrise (in UTC)
+    expect(isNightAtLocation(0, 180, utcDate(2019, 8, 9, 0, 0))).toEqual({rightNow: false, nextCheck: Date.UTC(2019, 8, 9, 6, 0, 50, 152)});
+    expect(isNightAtLocation(0, 180, utcDate(2019, 8, 9, 7, 0))).toEqual({rightNow: true, nextCheck: Date.UTC(2019, 8, 9, 17, 54, 18, 610)});
 });

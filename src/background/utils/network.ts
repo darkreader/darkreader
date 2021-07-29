@@ -42,23 +42,23 @@ class LimitedCacheStorage {
 
     private bytesInUse = 0;
     private records = new Map<string, CacheRecord>();
-    private hasAlarm = false;
+    private alarmIsActive = false;
 
     constructor() {
         chrome.alarms.onAlarm.addListener(async (alarm) => {
             if (alarm.name === LimitedCacheStorage.ALARM_NAME) {
                 // We schedule only one-time alarms, so once it goes off,
                 // there are no more alarms scheduled.
-                this.hasAlarm = false;
+                this.alarmIsActive = false;
                 this.removeExpiredRecords();
             }
         });
     }
 
     private ensureAlarmIsScheduled(){
-        if (!this.hasAlarm) {
+        if (!this.alarmIsActive) {
             chrome.alarms.create(LimitedCacheStorage.ALARM_NAME, {delayInMinutes: 1});
-            this.hasAlarm = true;
+            this.alarmIsActive = true;
         }
     }
 

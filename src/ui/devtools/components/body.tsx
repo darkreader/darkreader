@@ -1,6 +1,7 @@
 import {m} from 'malevic';
+import {getContext} from 'malevic/dom';
 import {withState, useState} from 'malevic/state';
-import {Button} from '../../controls';
+import {Button, MessageBox, Overlay} from '../../controls';
 import ThemeEngines from '../../../generators/theme-engines';
 import {DEVTOOLS_DOCS_URL} from '../../../utils/links';
 import type {ExtWrapper, TabInfo} from '../../../definitions';
@@ -10,6 +11,7 @@ import {isFirefox} from '../../../utils/platform';
 type BodyProps = ExtWrapper & {tab: TabInfo};
 
 function Body({data, tab, actions}: BodyProps) {
+    const context = getContext();
     const {state, setState} = useState({errorText: null as string});
     let textNode: HTMLTextAreaElement;
     const previewButtonText = data.settings.previewNewDesign ? 'Switch to old design' : 'Preview new design';
@@ -71,7 +73,26 @@ function Body({data, tab, actions}: BodyProps) {
         }
     }
 
+    function showDialog() {
+        context.store.isDialogVisible = true;
+        context.refresh();
+    }
+
+    function hideDialog() {
+        context.store.isDialogVisible = false;
+        context.refresh();
+    }
+
+    const dialog = context && context.store.isDialogVisible ? (
+        <MessageBox
+            caption="Are you sure you want to remove current changes? You cannot restore them later."
+            onOK={reset}
+            onCancel={hideDialog}
+        />
+    ) : null;
+
     function reset() {
+        context.store.isDialogVisible = false;
         wrapper.reset();
         setState({errorText: null});
     }
@@ -97,7 +118,10 @@ function Body({data, tab, actions}: BodyProps) {
             />
             <label id="error-text">{state.errorText}</label>
             <div id="buttons">
-                <Button onclick={reset}>Reset</Button>
+                <Button onclick={showDialog}>
+                    Reset changes
+                    {dialog}
+                </Button>
                 <Button onclick={apply}>Apply</Button>
                 <Button class="preview-design-button" onclick={toggleDesign}>{previewButtonText}</Button>
             </div>
@@ -106,6 +130,7 @@ function Body({data, tab, actions}: BodyProps) {
                 If a <strong>popular</strong> website looks incorrect
                 e-mail to <strong>DarkReaderApp@gmail.com</strong>
             </p>
+            <Overlay />
         </body>
     );
 }

@@ -1,3 +1,5 @@
+import type {Message} from 'definitions';
+
 interface FetchRequest {
     url: string;
     responseType: 'data-url' | 'text';
@@ -18,7 +20,7 @@ export async function bgFetch(request: FetchRequest) {
     });
 }
 
-chrome.runtime.onMessage.addListener(({type, data, error, id}) => {
+chrome.runtime.onMessage.addListener(({type, data, error, id}: Message) => {
     if (type === 'fetch-response') {
         const resolve = resolvers.get(id);
         const reject = rejectors.get(id);

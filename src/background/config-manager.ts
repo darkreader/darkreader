@@ -40,17 +40,17 @@ export default class ConfigManager {
     STATIC_THEMES?: StaticTheme[];
 
     raw = {
-        darkSites: null,
-        dynamicThemeFixes: null,
-        inversionFixes: null,
-        staticThemes: null,
+        darkSites: null as string,
+        dynamicThemeFixes: null as string,
+        inversionFixes: null as string,
+        staticThemes: null as string,
     };
 
     overrides = {
-        darkSites: null,
-        dynamicThemeFixes: null,
-        inversionFixes: null,
-        staticThemes: null,
+        darkSites: null as string,
+        dynamicThemeFixes: null as string,
+        inversionFixes: null as string,
+        staticThemes: null as string,
     };
 
     private async loadConfig({

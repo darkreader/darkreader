@@ -245,19 +245,11 @@ export function isNightAtLocation(
         date.getUTCSeconds() * getDuration({seconds: 1})
     );
 
+    let rightNow: boolean;
+    let nextCheck: number;
     if (sunriseTime < sunsetTime) {
         // Timeline:
         // --- sunrise <----> sunset ---
-        let rightNow: boolean;
-        let nextCheck: number;
-        if (currentTime < sunriseTime) {
-            // Timeline:
-            // --- sunrise <----> sunset ---
-            //  ^
-            // Current time
-            rightNow = true;
-            nextCheck = Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate(), 0, 0, 0, sunriseTime);
-        }
         if ((sunriseTime < currentTime) && (currentTime < sunsetTime)) {
             // Timeline:
             // --- sunrise <----> sunset ---
@@ -265,48 +257,32 @@ export function isNightAtLocation(
             //          Current time
             rightNow = false;
             nextCheck = Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate(), 0, 0, 0, sunsetTime);
-        }
-        if (sunsetTime < currentTime) {
+        } else {
             // Timeline:
             // --- sunrise <----> sunset ---
-            //                            ^
-            //                        Current time
+            //   ^                       ^
+            //           Current time
             rightNow = true;
-            nextCheck = Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate() + 1, 0, 0, 0, sunriseTime);
+            nextCheck = Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate() + (sunsetTime < currentTime ? 1 : 0), 0, 0, 0, sunriseTime);
         }
-        return {
-            rightNow,
-            nextCheck,
-        };
-    }
-    // Timeline:
-    // --- sunset <----> sunrise ---
-    let rightNow: boolean;
-    let nextCheck: number;
-    if (currentTime < sunsetTime) {
+    } else if ((sunsetTime < currentTime) && (currentTime < sunriseTime)) {
         // Timeline:
         // --- sunset <----> sunrise ---
-        //  ^
-        // Current time
-        rightNow = false;
-        nextCheck = Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate(), 0, 0, 0, sunsetTime);
-    }
-    if ((sunsetTime < currentTime) && (currentTime < sunriseTime)) {
         // Timeline:
         // --- sunset <----> sunrise ---
         //               ^
         //          Current time
         rightNow = true;
         nextCheck = Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate(), 0, 0, 0, sunriseTime);
-    }
-    if ((sunsetTime < currentTime) && (currentTime < sunriseTime)) {
+    } else {
         // Timeline:
         // --- sunset <----> sunrise ---
-        //                            ^
-        //                         Current time
+        //   ^                       ^
+        //           Current time
         rightNow = false;
-        nextCheck = Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate() + 1, 0, 0, 0, sunsetTime);
+        nextCheck = Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate() + (sunriseTime < currentTime ? 1 : 0), 0, 0, 0, sunsetTime);
     }
+
     return {
         rightNow,
         nextCheck,

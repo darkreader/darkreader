@@ -1,16 +1,29 @@
-import {isInTimeInterval, isNightAtLocation, parseTime, getDuration, getDurationInMinutes} from '../../src/utils/time';
+import {isInTimeInterval, nextIntervalTime, isNightAtLocation, parseTime, getDuration, getDurationInMinutes} from '../../src/utils/time';
 
 test('Time interval', () => {
-    expect(isInTimeInterval('9:00', '12:00', new Date(2018, 11, 4, 10))).toEqual({rightNow: true, nextCheck: new Date(2018, 11, 4, 12).getTime()});
-    expect(isInTimeInterval('10:00', '10:00', new Date(2018, 11, 4, 10))).toEqual({rightNow: false, nextCheck: null});
-    expect(isInTimeInterval('10:00', '10:00', new Date(2018, 11, 4, 12))).toEqual({rightNow: false, nextCheck: null});
-    expect(isInTimeInterval('10:00', '10:00', new Date(2018, 11, 4, 8))).toEqual({rightNow: false, nextCheck: null});
-    expect(isInTimeInterval('9:00', '10:00', new Date(2018, 11, 4, 10))).toEqual({rightNow: false, nextCheck: new Date(2018, 11, 5, 9).getTime()});
-    expect(isInTimeInterval('9:01', '10:00', new Date(2018, 11, 4, 9, 2))).toEqual({rightNow: true, nextCheck: new Date(2018, 11, 4, 10).getTime()});
-    expect(isInTimeInterval('9:00', '10:01', new Date(2018, 11, 4, 10))).toEqual({rightNow: true, nextCheck: new Date(2018, 11, 4, 10, 1).getTime()});
-    expect(isInTimeInterval('18:00', '12:00', new Date(2018, 11, 4, 10))).toEqual({rightNow: true, nextCheck: new Date(2018, 11, 4, 12).getTime()});
-    expect(isInTimeInterval('18:00', '9:00', new Date(2018, 11, 4, 10))).toEqual({rightNow: false, nextCheck: new Date(2018, 11, 4, 18).getTime()});
-    expect(isInTimeInterval('18:00', '9:00', new Date(2018, 11, 4, 22))).toEqual({rightNow: true, nextCheck: new Date(2018, 11, 5, 9).getTime()});
+    expect(isInTimeInterval('9:00', '12:00', new Date(2018, 11, 4, 10))).toEqual(true);
+    expect(isInTimeInterval('10:00', '10:00', new Date(2018, 11, 4, 10))).toEqual(false);
+    expect(isInTimeInterval('10:00', '10:00', new Date(2018, 11, 4, 12))).toEqual(false);
+    expect(isInTimeInterval('10:00', '10:00', new Date(2018, 11, 4, 8))).toEqual(false);
+    expect(isInTimeInterval('9:00', '10:00', new Date(2018, 11, 4, 10))).toEqual(false);
+    expect(isInTimeInterval('9:01', '10:00', new Date(2018, 11, 4, 9, 2))).toEqual(true);
+    expect(isInTimeInterval('9:00', '10:01', new Date(2018, 11, 4, 10))).toEqual(true);
+    expect(isInTimeInterval('18:00', '12:00', new Date(2018, 11, 4, 10))).toEqual(true);
+    expect(isInTimeInterval('18:00', '9:00', new Date(2018, 11, 4, 10))).toEqual(false);
+    expect(isInTimeInterval('18:00', '9:00', new Date(2018, 11, 4, 22))).toEqual(true);
+});
+
+test('Time interval prediction', () => {
+    expect(nextIntervalTime('9:00', '12:00', new Date(2018, 11, 4, 10))).toEqual(new Date(2018, 11, 4, 12).getTime());
+    expect(nextIntervalTime('10:00', '10:00', new Date(2018, 11, 4, 10))).toEqual(null);
+    expect(nextIntervalTime('10:00', '10:00', new Date(2018, 11, 4, 12))).toEqual(null);
+    expect(nextIntervalTime('10:00', '10:00', new Date(2018, 11, 4, 8))).toEqual(null);
+    expect(nextIntervalTime('9:00', '10:00', new Date(2018, 11, 4, 10))).toEqual(new Date(2018, 11, 5, 9).getTime());
+    expect(nextIntervalTime('9:01', '10:00', new Date(2018, 11, 4, 9, 2))).toEqual(new Date(2018, 11, 4, 10).getTime());
+    expect(nextIntervalTime('9:00', '10:01', new Date(2018, 11, 4, 10))).toEqual(new Date(2018, 11, 4, 10, 1).getTime());
+    expect(nextIntervalTime('18:00', '12:00', new Date(2018, 11, 4, 10))).toEqual(new Date(2018, 11, 4, 12).getTime());
+    expect(nextIntervalTime('18:00', '9:00', new Date(2018, 11, 4, 10))).toEqual(new Date(2018, 11, 4, 18).getTime());
+    expect(nextIntervalTime('18:00', '9:00', new Date(2018, 11, 4, 22))).toEqual(new Date(2018, 11, 5, 9).getTime());
 });
 
 test('Time parse', () => {

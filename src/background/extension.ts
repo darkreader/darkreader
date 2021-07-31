@@ -8,14 +8,14 @@ import TabManager from './tab-manager';
 import UserStorage from './user-storage';
 import {setWindowTheme, resetWindowTheme} from './window-theme';
 import {getFontList, getCommands, setShortcut, canInjectScript} from './utils/extension-api';
-import {isInTimeInterval, isNightAtLocation} from '../utils/time';
+import {isInTimeInterval, nextIntervalTime, isNightAtLocation} from '../utils/time';
 import {isURLInList, getURLHostOrProtocol, isURLEnabled, isPDF} from '../utils/url';
 import ThemeEngines from '../generators/theme-engines';
 import createCSSFilterStylesheet from '../generators/css-filter';
 import {getDynamicThemeFixesFor} from '../generators/dynamic-theme';
 import createStaticStylesheet from '../generators/static-theme';
 import {createSVGFilterStylesheet, getSVGFilterMatrixValue, getSVGReverseFilterMatrixValue} from '../generators/svg-filter';
-import type {ExtensionData, FilterConfig, News, Shortcuts, UserSettings, TabInfo, TimeCheck} from '../definitions';
+import type {ExtensionData, FilterConfig, News, Shortcuts, UserSettings, TabInfo} from '../definitions';
 import {isSystemDarkModeEnabled} from '../utils/media-query';
 import {isFirefox, isThunderbird} from '../utils/platform';
 
@@ -67,36 +67,40 @@ export class Extension {
         }
 
         const {automation} = this.user.settings;
-
-        let timingInformation: TimeCheck = null;
+        let nextCheck: number;
         switch (automation) {
             case 'time':
-                timingInformation = isInTimeInterval(this.user.settings.time.activation, this.user.settings.time.deactivation);
+                this.isEnabledNow = isInTimeInterval(this.user.settings.time.activation, this.user.settings.time.deactivation);
+                nextCheck = nextIntervalTime(this.user.settings.time.activation, this.user.settings.time.deactivation);
                 break;
             case 'system':
                 if (isFirefox) {
                     // BUG: Firefox background page always matches initial color scheme.
-                    return this.wasLastColorSchemeDark == null
+                    this.isEnabledNow = this.wasLastColorSchemeDark == null
                         ? isSystemDarkModeEnabled()
                         : this.wasLastColorSchemeDark;
+                } else {
+                    this.isEnabledNow = isSystemDarkModeEnabled();
                 }
-                return isSystemDarkModeEnabled();
+                break;
             case 'location': {
                 const {latitude, longitude} = this.user.settings.location;
 
                 if (latitude != null && longitude != null) {
-                    timingInformation = isNightAtLocation(latitude, longitude);
+                    const info = isNightAtLocation(latitude, longitude);
+                    this.isEnabledNow = info.rightNow;
+                    nextCheck = info.nextCheck;
                 }
                 break;
             }
             default:
-                return this.user.settings.enabled;
+                this.isEnabledNow = this.user.settings.enabled;
+                break;
         }
-        this.isEnabledNow = timingInformation.rightNow;
-        if (timingInformation.nextCheck) {
-            chrome.alarms.create(Extension.ALARM_NAME, {when: timingInformation.nextCheck});
+        if (nextCheck) {
+            chrome.alarms.create(Extension.ALARM_NAME, {when: nextCheck});
         }
-        return timingInformation.rightNow;
+        return this.isEnabledNow;
     }
 
     private awaiting: Array<() => void>;

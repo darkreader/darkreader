@@ -11,7 +11,7 @@ test('Unique identifier generation', () => {
     globalThis.crypto = {
         getRandomValues: (buffer) => {
             shim1();
-            return randomFillSync(buffer)
+            return randomFillSync(buffer);
         },
     } as any;
     const uid1 = generateUID();

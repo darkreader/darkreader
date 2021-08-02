@@ -1,3 +1,5 @@
+import type {TimeCheck} from 'definitions';
+
 export function parseTime($time: string) {
     const parts = $time.split(':').slice(0, 2);
     const lowercased = $time.trim().toLowerCase();
@@ -27,24 +29,57 @@ function parse24HTime(time: string) {
     return time.split(':').map((x) => parseInt(x));
 }
 
-function compareTime(a: number[], b: number[]) {
-    if (a[0] === b[0] && a[1] === b[1]) {
+function compareTime(time1: number[], time2: number[]) {
+    if (time1[0] === time2[0] && time1[1] === time2[1]) {
         return 0;
     }
-    if (a[0] < b[0] || (a[0] === b[0] && a[1] < b[1])) {
+    if (time1[0] < time2[0] || (time1[0] === time2[0] && time1[1] < time2[1])) {
         return -1;
     }
     return 1;
 }
 
-export function isInTimeInterval(date: Date, time0: string, time1: string) {
+// a <= b
+function nextIntervalTime(time1, time2, currentTime, date: Date): number {
+    if (compareTime(time1, time2) === 0) {
+        return null;
+    }
+
+    if (compareTime(currentTime, time1) < 0) {
+        // t < a <= b
+        // Schedule for todate at time a
+        date.setHours(time1[0]);
+        date.setMinutes(time1[1]);
+        return date.getTime();
+    }
+
+    if (compareTime(currentTime, time2) < 0) {
+        // a <= t < b
+        // Schedule for today at time b
+        date.setHours(time2[0]);
+        date.setMinutes(time2[1]);
+        return date.getTime();
+    }
+
+    // a <= b <= t
+    // Schedule for tomorrow at time a
+    return (new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1, time1[0], time1[1])).getTime();
+}
+
+export function isInTimeInterval(time0: string, time1: string, date: Date = new Date()): TimeCheck {
     const a = parse24HTime(time0);
     const b = parse24HTime(time1);
     const t = [date.getHours(), date.getMinutes()];
     if (compareTime(a, b) > 0) {
-        return compareTime(a, t) <= 0 || compareTime(t, b) < 0;
+        return {
+            rightNow: compareTime(a, t) <= 0 || compareTime(t, b) < 0,
+            nextCheck: nextIntervalTime(b, a, t, date)
+        };
     }
-    return compareTime(a, t) <= 0 && compareTime(t, b) < 0;
+    return {
+        rightNow: compareTime(a, t) <= 0 && compareTime(t, b) < 0,
+        nextCheck: nextIntervalTime(a, b, t, date)
+    };
 }
 
 interface Duration {
@@ -71,14 +106,18 @@ export function getDuration(time: Duration) {
     return duration;
 }
 
+export function getDurationInMinutes(time: Duration) {
+    return getDuration(time) / 1000 / 60;
+}
+
 function getSunsetSunriseUTCTime(
     date: Date,
     latitude: number,
     longitude: number,
 ) {
-    const dec31 = new Date(date.getUTCFullYear(), 0, 0);
+    const dec31 = Date.UTC(date.getUTCFullYear(), 0, 0, 0, 0, 0, 0);
     const oneDay = getDuration({days: 1});
-    const dayOfYear = Math.floor((Number(date) - Number(dec31)) / oneDay);
+    const dayOfYear = Math.floor((date.getTime() - dec31) / oneDay);
 
     const zenith = 90.83333333333333;
     const D2R = Math.PI / 180;
@@ -156,7 +195,7 @@ function getSunsetSunriseUTCTime(
         return {
             alwaysDay: false,
             alwaysNight: false,
-            time: UT * getDuration({hours: 1}),
+            time: Math.round(UT * getDuration({hours: 1})),
         };
     }
 
@@ -180,16 +219,22 @@ function getSunsetSunriseUTCTime(
 }
 
 export function isNightAtLocation(
-    date: Date,
     latitude: number,
     longitude: number,
-) {
+    date: Date = new Date(),
+): TimeCheck {
     const time = getSunsetSunriseUTCTime(date, latitude, longitude);
 
     if (time.alwaysDay) {
-        return false;
+        return {
+            rightNow: false,
+            nextCheck: date.getTime() + getDuration({days: 1})
+        };
     } else if (time.alwaysNight) {
-        return true;
+        return {
+            rightNow: true,
+            nextCheck: date.getTime() + getDuration({days: 1})
+        };
     }
 
     const sunriseTime = time.sunriseTime;
@@ -200,8 +245,44 @@ export function isNightAtLocation(
         date.getUTCSeconds() * getDuration({seconds: 1})
     );
 
-    if (sunsetTime > sunriseTime) {
-        return (currentTime > sunsetTime) || (currentTime < sunriseTime);
+    let rightNow: boolean;
+    let nextCheck: number;
+    if (sunriseTime < sunsetTime) {
+        // Timeline:
+        // --- sunrise <----> sunset ---
+        if ((sunriseTime < currentTime) && (currentTime < sunsetTime)) {
+            // Timeline:
+            // --- sunrise <----> sunset ---
+            //               ^
+            //          Current time
+            rightNow = false;
+            nextCheck = Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate(), 0, 0, 0, sunsetTime);
+        } else {
+            // Timeline:
+            // --- sunrise <----> sunset ---
+            //   ^                       ^
+            //           Current time
+            rightNow = true;
+            nextCheck = Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate() + (sunsetTime < currentTime ? 1 : 0), 0, 0, 0, sunriseTime);
+        }
+    } else if ((sunsetTime < currentTime) && (currentTime < sunriseTime)) {
+        // Timeline:
+        // --- sunset <----> sunrise ---
+        //               ^
+        //          Current time
+        rightNow = true;
+        nextCheck = Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate(), 0, 0, 0, sunriseTime);
+    } else {
+        // Timeline:
+        // --- sunset <----> sunrise ---
+        //   ^                       ^
+        //           Current time
+        rightNow = false;
+        nextCheck = Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate() + (sunriseTime < currentTime ? 1 : 0), 0, 0, 0, sunsetTime);
     }
-    return (currentTime > sunsetTime) && (currentTime < sunriseTime);
+
+    return {
+        rightNow,
+        nextCheck,
+    };
 }

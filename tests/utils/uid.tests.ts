@@ -2,7 +2,7 @@ import {randomFillSync} from 'crypto';
 import {generateUID} from '../../src/utils/uid';
 
 test('Unique identifier generation', () => {
-    // Make sure we are not messing up global context for the tests
+    // Make sure we are not messing up global context for somebody else
     expect('crypto' in globalThis).toEqual(false);
 
     // Create a shim for crypto API
@@ -28,5 +28,5 @@ test('Unique identifier generation', () => {
     expect(generateUID()).toEqual('a19cc926bf7f4d5fbf9c202bc7a4c7c6');
     expect(shim2).toHaveBeenCalled();
 
-    globalThis.crypto = undefined;
+    delete globalThis.crypto;
 });

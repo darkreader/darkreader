@@ -1,107 +1,137 @@
+import {isFirefox} from 'utils/platform';
 import type {ExtensionData, ExtensionActions, FilterConfig, TabInfo, Message, UserSettings} from '../../definitions';
 
 export default class Connector implements ExtensionActions {
-    private port: chrome.runtime.Port;
-    private counter: number;
+    private changeSubscribers: Set<(data: ExtensionData) => void>;
 
     constructor() {
-        this.counter = 0;
-        this.port = chrome.runtime.connect({name: 'ui'});
+        this.changeSubscribers = new Set();
     }
 
-    private getRequestId() {
-        return ++this.counter;
-    }
-
-    private async sendRequest<T>(request: Message, executor: (response: Message, resolve: (data?: T) => void, reject: (error: Error) => void) => void) {
-        const id = this.getRequestId();
+    private async sendRequest<T>(type: string, data?: any) {
         return new Promise<T>((resolve, reject) => {
-            const listener = ({id: responseId, ...response}: Message) => {
-                if (responseId === id) {
-                    executor(response, resolve, reject);
-                    this.port.onMessage.removeListener(listener);
+            chrome.runtime.sendMessage({from: 'ui', type, ...data}, ({data, error}) => {
+                if (error) {
+                    reject(error);
+                } else {
+                    resolve(data);
                 }
-            };
-            this.port.onMessage.addListener(listener);
-            this.port.postMessage({...request, id});
+            });
+        });
+    }
+
+    private async firefoxSendRequestWithResponse<T>(name: string) {
+        return new Promise<T>((resolve, reject) => {
+            const dataPort = chrome.runtime.connect({name});
+            dataPort.onDisconnect.addListener(() => reject());
+            dataPort.onMessage.addListener(({data, error}) => {
+                if (error) {
+                    reject(error);
+                } else {
+                    resolve(data);
+                }
+                dataPort.disconnect();
+            });
         });
     }
 
     async getData() {
-        return await this.sendRequest<ExtensionData>({type: 'get-data'}, ({data}, resolve) => resolve(data));
+        if (isFirefox) {
+            return await this.firefoxSendRequestWithResponse<ExtensionData>('ui-get-data');
+        }
+        return await this.sendRequest<ExtensionData>('get-data');
     }
 
     async getActiveTabInfo() {
-        return await this.sendRequest<TabInfo>({type: 'get-active-tab-info'}, ({data}, resolve) => resolve(data));
+        if (isFirefox) {
+            return await this.firefoxSendRequestWithResponse<TabInfo>('ui-get-active-tab-info');
+        }
+        return await this.sendRequest<TabInfo>('get-active-tab-info');
+    }
+
+    private onChangesReceived = ({from, type, data}: Message) => {
+        if (from === 'background' && type === 'changes') {
+            this.changeSubscribers.forEach((callback) => callback(data));
+        }
+    };
+
+    private sendMessage(data: any) {
+        chrome.runtime.sendMessage({from: 'ui', ...data});
     }
 
     subscribeToChanges(callback: (data: ExtensionData) => void) {
-        const id = this.getRequestId();
-        this.port.onMessage.addListener(({id: responseId, data}: Message) => {
-            if (responseId === id) {
-                callback(data);
+        this.changeSubscribers.add(callback);
+        if (this.changeSubscribers.size === 1) {
+            chrome.runtime.onMessage.addListener(this.onChangesReceived);
+            if (!isFirefox) {
+                this.sendMessage({type: 'subscribe-to-changes'});
             }
-        });
-        this.port.postMessage({type: 'subscribe-to-changes', id});
+        }
     }
 
     enable() {
-        this.port.postMessage({type: 'enable'});
+        this.sendMessage({type: 'enable'});
     }
 
     disable() {
-        this.port.postMessage({type: 'disable'});
+        this.sendMessage({type: 'disable'});
     }
 
     setShortcut(command: string, shortcut: string) {
-        this.port.postMessage({type: 'set-shortcut', data: {command, shortcut}});
+        this.sendMessage({type: 'set-shortcut', data: {command, shortcut}});
     }
 
     changeSettings(settings: Partial<UserSettings>) {
-        this.port.postMessage({type: 'change-settings', data: settings});
+        this.sendMessage({type: 'change-settings', data: settings});
     }
 
     setTheme(theme: Partial<FilterConfig>) {
-        this.port.postMessage({type: 'set-theme', data: theme});
+        this.sendMessage({type: 'set-theme', data: theme});
     }
 
     toggleURL(url: string) {
-        this.port.postMessage({type: 'toggle-url', data: url});
+        this.sendMessage({type: 'toggle-url', data: url});
     }
 
     markNewsAsRead(ids: string[]) {
-        this.port.postMessage({type: 'mark-news-as-read', data: ids});
+        this.sendMessage({type: 'mark-news-as-read', data: ids});
     }
 
     loadConfig(options: {local: boolean}) {
-        this.port.postMessage({type: 'load-config', data: options});
+        this.sendMessage({type: 'load-config', data: options});
     }
 
     async applyDevDynamicThemeFixes(text: string) {
-        return await this.sendRequest<void>({type: 'apply-dev-dynamic-theme-fixes', data: text}, ({error}, resolve, reject) => error ? reject(error) : resolve());
+        return await this.sendRequest<void>('apply-dev-dynamic-theme-fixes', {data: text});
     }
 
     resetDevDynamicThemeFixes() {
-        this.port.postMessage({type: 'reset-dev-dynamic-theme-fixes'});
+        this.sendMessage({type: 'reset-dev-dynamic-theme-fixes'});
     }
 
     async applyDevInversionFixes(text: string) {
-        return await this.sendRequest<void>({type: 'apply-dev-inversion-fixes', data: text}, ({error}, resolve, reject) => error ? reject(error) : resolve());
+        return await this.sendRequest<void>('apply-dev-inversion-fixes', {data: text});
     }
 
     resetDevInversionFixes() {
-        this.port.postMessage({type: 'reset-dev-inversion-fixes'});
+        this.sendMessage({type: 'reset-dev-inversion-fixes'});
     }
 
     async applyDevStaticThemes(text: string) {
-        return await this.sendRequest<void>({type: 'apply-dev-static-themes', data: text}, ({error}, resolve, reject) => error ? reject(error) : resolve());
+        return await this.sendRequest<void>('apply-dev-static-themes', {data: text});
     }
 
     resetDevStaticThemes() {
-        this.port.postMessage({type: 'reset-dev-static-themes'});
+        this.sendMessage({type: 'reset-dev-static-themes'});
     }
 
     disconnect() {
-        this.port.disconnect();
+        if (this.changeSubscribers.size > 0) {
+            this.changeSubscribers.clear();
+            chrome.runtime.onMessage.removeListener(this.onChangesReceived);
+            if (!isFirefox) {
+                this.sendMessage({type: 'unsubscribe-from-changes'});
+            }
+        }
     }
 }

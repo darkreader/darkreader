@@ -24,7 +24,6 @@ class LocalStorageWrapper implements DevToolsStorage {
             localStorage.setItem(key, value);
         } catch (err) {
             console.error(err);
-            return;
         }
     }
     remove(key: string) {
@@ -32,7 +31,6 @@ class LocalStorageWrapper implements DevToolsStorage {
             localStorage.removeItem(key);
         } catch (err) {
             console.error(err);
-            return;
         }
     }
     has(key: string) {

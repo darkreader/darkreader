@@ -6,7 +6,6 @@ import ThemeControl from './theme-control';
 import {isFirefox} from '../../../../utils/platform';
 
 export default function Mode(props: {mode: string; onChange: (mode: string) => void}) {
-
     function openCSSEditor() {
         chrome.windows.create({
             type: 'panel',

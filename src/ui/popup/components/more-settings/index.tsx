@@ -10,7 +10,6 @@ import type {ExtWrapper, FilterConfig, TabInfo} from '../../../../definitions';
 import {isFirefox} from '../../../../utils/platform';
 
 export default function MoreSettings({data, actions, tab}: ExtWrapper & {tab: TabInfo}) {
-
     const custom = data.settings.customThemes.find(({url}) => isURLInList(tab.url, url));
     const filterConfig = custom ? custom.theme : data.settings.theme;
 

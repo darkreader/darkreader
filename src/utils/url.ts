@@ -14,7 +14,7 @@ function fixBaseURL($url: string) {
 }
 
 export function parseURL($url: string, $base: string = null) {
-    const key = `${$url}${$base ? ';' + $base : ''}`;
+    const key = `${$url}${$base ? `;${ $base}` : ''}`;
     if (parsedURLCache.has(key)) {
         return parsedURLCache.get(key);
     }
@@ -29,7 +29,7 @@ export function parseURL($url: string, $base: string = null) {
 }
 
 export function getAbsoluteURL($base: string, $relative: string) {
-    if ($relative.match(/^data\:/)) {
+    if ($relative.match(/^data\\?\:/)) {
         return $relative;
     }
 
@@ -42,9 +42,8 @@ export function getURLHostOrProtocol($url: string) {
     const url = new URL($url);
     if (url.host) {
         return url.host;
-    } else {
-        return url.protocol;
     }
+    return url.protocol;
 }
 
 export function compareURLPatterns(a: string, b: string) {
@@ -77,7 +76,10 @@ export function isPDF(url: string) {
         if (url.includes('#')) {
             url = url.substring(0, url.lastIndexOf('#'));
         }
-        if (url.match(/(wikipedia|wikimedia).org/i) && url.match(/(wikipedia|wikimedia)\.org\/.*\/[a-z]+\:[^\:\/]+\.pdf/i)) {
+        if (
+            (url.match(/(wikipedia|wikimedia).org/i) && url.match(/(wikipedia|wikimedia)\.org\/.*\/[a-z]+\:[^\:\/]+\.pdf/i)) ||
+            (url.match(/timetravel\.mementoweb\.org\/reconstruct/i) && url.match(/\.pdf$/i))
+        ) {
             return false;
         }
         if (url.endsWith('.pdf')) {
@@ -103,12 +105,12 @@ export function isURLEnabled(url: string, userSettings: UserSettings, {isProtect
         return userSettings.enableForPDF;
     }
     const isURLInUserList = isURLInList(url, userSettings.siteList);
-    if (userSettings.applyToListedOnly) {
+    const isURLInEnabledList = isURLInList(url, userSettings.siteListEnabled);
+
+    if (userSettings.applyToListedOnly && !isURLInEnabledList) {
         return isURLInUserList;
     }
-    // TODO: Use `siteListEnabled`, `siteListDisabled`, `enabledByDefault` options.
-    // Delete `siteList` and `applyToListedOnly` options, transfer user's values.
-    const isURLInEnabledList = isURLInList(url, userSettings.siteListEnabled);
+
     if (isURLInEnabledList && isInDarkList) {
         return true;
     }

@@ -101,6 +101,11 @@ export interface LocationSettings {
     longitude: number;
 }
 
+export interface TimeCheck {
+    rightNow: boolean;
+    nextCheck: number;
+}
+
 export interface TabInfo {
     url: string;
     isProtected: boolean;
@@ -109,7 +114,8 @@ export interface TabInfo {
 
 export interface Message {
     type: string;
-    data?: any;
+    from: string;
+    data: any;
     id?: any;
     error?: any;
 }

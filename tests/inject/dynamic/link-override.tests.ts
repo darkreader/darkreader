@@ -132,5 +132,24 @@ describe('LINK STYLES', () => {
         await timeout(0);
         expect(document.querySelector('.testcase--link').nextElementSibling.classList.contains(isSafari ? 'darkreader--cors' : 'darkreader--sync')).toBe(false);
     });
+    it("Shouldn't wait on link that won't be loaded", async () => {
+        const link = createStyleLink(null);
+        link.setAttribute('data-href', `data:text/css;utf8,${encodeURIComponent(multiline(
+            'h1 { background: green !important; }',
+            'h1 strong { color: orange !important; }',
+        ))}`);
+        container.innerHTML = multiline(
+            '<style>',
+            '   h1 { background: gray; }',
+            '</style>',
+            '<h1>Link <strong>loading with non-href attribute</strong>!</h1>',
+        );
+        createOrUpdateDynamicTheme(theme, null, false);
+
+        await timeout(0);
+        const h1 = document.querySelector('h1');
+        expect(getComputedStyle(h1).backgroundColor).toBe('rgb(102, 102, 102)');
+        expect(document.querySelector('.darkreader--fallback').textContent).toBe('');
+    });
 });
 

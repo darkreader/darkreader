@@ -279,6 +279,12 @@ test('URL is enabled', () => {
         {isProtected: false, isInDarkList: false}
     )).toEqual(false);
 
+    expect(isURLEnabled(
+        'https://example.com/://a.com',
+        {siteList: ['https://a.com/'], siteListEnabled: [], applyToListedOnly: false} as UserSettings,
+        {isProtected: false, isInDarkList: false},
+    )).toBe(true);
+
     // Test wildcards usage
     expect(isURLMatched('https://www.google.com/', 'google.*')).toBe(true);
     expect(isURLMatched('https://www.googla.com/', 'google.*')).toBe(false);

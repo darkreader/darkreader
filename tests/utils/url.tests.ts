@@ -2,7 +2,6 @@ import {isURLEnabled, isURLMatched, isPDF, getURLHostOrProtocol, getAbsoluteURL,
 import type {UserSettings} from '../../src/definitions';
 
 test('URL is enabled', () => {
-
     // Not invert listed
     expect(isURLEnabled(
         'https://mail.google.com/mail/u/0/',

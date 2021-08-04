@@ -78,7 +78,7 @@ export function isMatch(input: string, pattern: string) {
 }
 
 export function isInPattern(input: string, patterns: any[]) {
-    if (input == '' || patterns.length === 0) {
+    if (input === '' || patterns.length === 0) {
         return false;
     }
 

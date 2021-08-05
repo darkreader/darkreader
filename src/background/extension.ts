@@ -8,7 +8,7 @@ import TabManager from './tab-manager';
 import UserStorage from './user-storage';
 import {setWindowTheme, resetWindowTheme} from './window-theme';
 import {getFontList, getCommands, setShortcut, canInjectScript} from './utils/extension-api';
-import {isInTimeInterval, nextTimeInterval, isNightAtLocation, nextNightAtLocation} from '../utils/time';
+import {isInTimeIntervalLocal, nextTimeInterval, isNightAtLocation, nextNightAtLocation} from '../utils/time';
 import {isURLInList, getURLHostOrProtocol, isURLEnabled, isPDF} from '../utils/url';
 import ThemeEngines from '../generators/theme-engines';
 import createCSSFilterStylesheet from '../generators/css-filter';
@@ -70,7 +70,7 @@ export class Extension {
         let nextCheck: number;
         switch (automation) {
             case 'time':
-                this.isEnabledCached = isInTimeInterval(this.user.settings.time.activation, this.user.settings.time.deactivation);
+                this.isEnabledCached = isInTimeIntervalLocal(this.user.settings.time.activation, this.user.settings.time.deactivation);
                 nextCheck = nextTimeInterval(this.user.settings.time.activation, this.user.settings.time.deactivation);
                 break;
             case 'system':

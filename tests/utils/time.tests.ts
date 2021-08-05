@@ -1,17 +1,17 @@
-import {isInTimeInterval, nextTimeInterval, isNightAtLocation, nextNightAtLocation, parseTime, getDuration, getDurationInMinutes} from '../../src/utils/time';
+import {isInTimeIntervalLocal, nextTimeInterval, isNightAtLocation, nextNightAtLocation, parseTime, getDuration, getDurationInMinutes} from '../../src/utils/time';
 
 test('Time interval', () => {
-    // isInTimeInterval is time-zone dependent
-    expect(isInTimeInterval('9:00', '12:00', new Date(2018, 11, 4, 10))).toEqual(true);
-    expect(isInTimeInterval('10:00', '10:00', new Date(2018, 11, 4, 10))).toEqual(false);
-    expect(isInTimeInterval('10:00', '10:00', new Date(2018, 11, 4, 12))).toEqual(false);
-    expect(isInTimeInterval('10:00', '10:00', new Date(2018, 11, 4, 8))).toEqual(false);
-    expect(isInTimeInterval('9:00', '10:00', new Date(2018, 11, 4, 10))).toEqual(false);
-    expect(isInTimeInterval('9:01', '10:00', new Date(2018, 11, 4, 9, 2))).toEqual(true);
-    expect(isInTimeInterval('9:00', '10:01', new Date(2018, 11, 4, 10))).toEqual(true);
-    expect(isInTimeInterval('18:00', '12:00', new Date(2018, 11, 4, 10))).toEqual(true);
-    expect(isInTimeInterval('18:00', '9:00', new Date(2018, 11, 4, 10))).toEqual(false);
-    expect(isInTimeInterval('18:00', '9:00', new Date(2018, 11, 4, 22))).toEqual(true);
+    // isInTimeIntervalLocal is time-zone dependent
+    expect(isInTimeIntervalLocal('9:00', '12:00', new Date(2018, 11, 4, 10))).toEqual(true);
+    expect(isInTimeIntervalLocal('10:00', '10:00', new Date(2018, 11, 4, 10))).toEqual(false);
+    expect(isInTimeIntervalLocal('10:00', '10:00', new Date(2018, 11, 4, 12))).toEqual(false);
+    expect(isInTimeIntervalLocal('10:00', '10:00', new Date(2018, 11, 4, 8))).toEqual(false);
+    expect(isInTimeIntervalLocal('9:00', '10:00', new Date(2018, 11, 4, 10))).toEqual(false);
+    expect(isInTimeIntervalLocal('9:01', '10:00', new Date(2018, 11, 4, 9, 2))).toEqual(true);
+    expect(isInTimeIntervalLocal('9:00', '10:01', new Date(2018, 11, 4, 10))).toEqual(true);
+    expect(isInTimeIntervalLocal('18:00', '12:00', new Date(2018, 11, 4, 10))).toEqual(true);
+    expect(isInTimeIntervalLocal('18:00', '9:00', new Date(2018, 11, 4, 10))).toEqual(false);
+    expect(isInTimeIntervalLocal('18:00', '9:00', new Date(2018, 11, 4, 22))).toEqual(true);
 });
 
 test('Time interval prediction', () => {

@@ -72,7 +72,7 @@ export function nextTimeInterval(time0: string, time1: string, date: Date = new 
     return (new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1, a[0], a[1])).getTime();
 }
 
-export function isInTimeInterval(time0: string, time1: string, date: Date = new Date()): boolean {
+export function isInTimeIntervalLocal(time0: string, time1: string, date: Date = new Date()): boolean {
     const a = parse24HTime(time0);
     const b = parse24HTime(time1);
     const t = [date.getHours(), date.getMinutes()];
@@ -80,6 +80,13 @@ export function isInTimeInterval(time0: string, time1: string, date: Date = new 
         return compareTime(a, t) <= 0 || compareTime(t, b) < 0;
     }
     return compareTime(a, t) <= 0 && compareTime(t, b) < 0;
+}
+
+function isInTimeIntervalUTC(time0: number, time1: number, timestamp: number) {
+    if (time1 < time0) {
+        return timestamp <= time1 || time0 <= timestamp;
+    }
+    return time0 < timestamp && timestamp < time1;
 }
 
 interface Duration {
@@ -240,34 +247,7 @@ export function isNightAtLocation(
         date.getUTCMilliseconds()
     );
 
-    if (sunriseTime < sunsetTime) {
-        // Timeline:
-        // --- sunrise <----> sunset ---
-        if ((sunriseTime < currentTime) && (currentTime < sunsetTime)) {
-            // Timeline:
-            // --- sunrise <----> sunset ---
-            //               ^
-            //          Current time
-            return false;
-        }
-        // Timeline:
-        // --- sunrise <----> sunset ---
-        //   ^                       ^
-        //           Current time
-        return true;
-    }
-    if ((sunsetTime < currentTime) && (currentTime < sunriseTime)) {
-        // Timeline:
-        // --- sunset <----> sunrise ---
-        //               ^
-        //          Current time
-        return true;
-    }
-    // Timeline:
-    // --- sunset <----> sunrise ---
-    //   ^                       ^
-    //           Current time
-    return false;
+    return isInTimeIntervalUTC(sunsetTime, sunriseTime, currentTime);
 }
 
 export function nextNightAtLocation(

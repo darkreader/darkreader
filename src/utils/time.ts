@@ -237,7 +237,7 @@ export function isNightAtLocation(
         date.getUTCHours() * getDuration({hours: 1}) +
         date.getUTCMinutes() * getDuration({minutes: 1}) +
         date.getUTCSeconds() * getDuration({seconds: 1}) +
-        date.getMilliseconds()
+        date.getUTCMilliseconds()
     );
 
     if (sunriseTime < sunsetTime) {
@@ -289,7 +289,7 @@ export function nextNightAtLocation(
         date.getUTCHours() * getDuration({hours: 1}) +
         date.getUTCMinutes() * getDuration({minutes: 1}) +
         date.getUTCSeconds() * getDuration({seconds: 1}) +
-        date.getMilliseconds()
+        date.getUTCMilliseconds()
     );
 
     if (sunriseTime < sunsetTime) {

@@ -94,7 +94,7 @@ export default class UserStorage {
     set($settings: Partial<UserSettings>) {
         if ($settings.siteList) {
             if (!Array.isArray($settings.siteList)) {
-                const list = [];
+                const list: string[] = [];
                 for (const key in ($settings.siteList as any)) {
                     const index = Number(key);
                     if (!isNaN(index)) {

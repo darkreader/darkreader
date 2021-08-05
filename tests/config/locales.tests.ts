@@ -1,7 +1,7 @@
 import {readFile as fsReadFile, readdir as fsReadDir} from 'fs';
 import {resolve as resolvePath} from 'path';
 
-function readDir(dir) {
+function readDir(dir: string) {
     return new Promise<string[]>((resolve, reject) => {
         fsReadDir(resolvePath(__dirname, dir), (err, files) => {
             if (err) {
@@ -13,7 +13,7 @@ function readDir(dir) {
     });
 }
 
-function readLocale(name) {
+function readLocale(name: string) {
     return new Promise<string>((resolve, reject) => {
         fsReadFile(resolvePath(__dirname, '../../src/_locales/', name), {encoding: 'utf-8'}, (err, data) => {
             if (err) {

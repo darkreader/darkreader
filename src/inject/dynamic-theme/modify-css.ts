@@ -195,7 +195,7 @@ function getModifiedScrollbarStyle(theme: Theme) {
     return lines.join('\n');
 }
 
-export function getModifiedFallbackStyle(filter: FilterConfig, {strict}) {
+export function getModifiedFallbackStyle(filter: FilterConfig, {strict}: {strict: boolean}) {
     const lines: string[] = [];
     lines.push(`html, body, ${strict ? 'body :not(iframe)' : 'body > :not(iframe)'} {`);
     lines.push(`    background-color: ${modifyBackgroundColor({r: 255, g: 255, b: 255}, filter)} !important;`);

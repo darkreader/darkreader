@@ -18,18 +18,18 @@ export interface ExtensionData {
 }
 
 export interface ExtensionActions {
-    changeSettings(settings: Partial<UserSettings>);
-    setTheme(theme: Partial<FilterConfig>);
-    setShortcut(command: string, shortcut: string);
-    toggleURL(url: string);
-    markNewsAsRead(ids: string[]);
-    loadConfig(options: {local: boolean});
+    changeSettings(settings: Partial<UserSettings>): void;
+    setTheme(theme: Partial<FilterConfig>): void;
+    setShortcut(command: string, shortcut: string): void;
+    toggleURL(url: string): void;
+    markNewsAsRead(ids: string[]): void;
+    loadConfig(options: {local: boolean}): void;
     applyDevDynamicThemeFixes(text: string): Promise<void>;
-    resetDevDynamicThemeFixes();
+    resetDevDynamicThemeFixes(): void;
     applyDevInversionFixes(text: string): Promise<void>;
-    resetDevInversionFixes();
+    resetDevInversionFixes(): void;
     applyDevStaticThemes(text: string): Promise<void>;
-    resetDevStaticThemes();
+    resetDevStaticThemes(): void;
 }
 
 export interface ExtWrapper {
@@ -99,11 +99,6 @@ export interface TimeSettings {
 export interface LocationSettings {
     latitude: number;
     longitude: number;
-}
-
-export interface TimeCheck {
-    rightNow: boolean;
-    nextCheck: number;
 }
 
 export interface TabInfo {

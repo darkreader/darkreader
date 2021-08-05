@@ -85,7 +85,7 @@ const overrides: Overrides = {
 };
 
 const overridesList = Object.values(overrides);
-const normalizedPropList = {};
+const normalizedPropList: { [key: string]: string } = {};
 overridesList.forEach(({cssProp, customProp}) => normalizedPropList[customProp] = cssProp);
 
 const INLINE_STYLE_ATTRS = ['style', 'fill', 'stop-color', 'stroke', 'bgcolor', 'color'];
@@ -166,7 +166,7 @@ function deepWatchForInlineStyles(
     treeObservers.set(root, treeObserver);
 
     let attemptCount = 0;
-    let start = null;
+    let start: number = null;
     const ATTEMPTS_INTERVAL = getDuration({seconds: 10});
     const RETRY_TIMEOUT = getDuration({seconds: 2});
     const MAX_ATTEMPTS_COUNT = 50;
@@ -223,7 +223,7 @@ export function stopWatchingForInlineStyles() {
 }
 
 const inlineStyleCache = new WeakMap<HTMLElement, string>();
-const filterProps = ['brightness', 'contrast', 'grayscale', 'sepia', 'mode'];
+const filterProps: Array<keyof FilterConfig> = ['brightness', 'contrast', 'grayscale', 'sepia', 'mode'];
 
 function getInlineStyleCacheKey(el: HTMLElement, theme: FilterConfig) {
     return INLINE_STYLE_ATTRS

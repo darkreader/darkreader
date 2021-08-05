@@ -433,7 +433,7 @@ export class VariablesStore {
         varDeps.forEach((v) => iterator(v));
     }
 
-    private findVarRef(varName: string, iterator: (v: string) => boolean, stack = new Set<string>()) {
+    private findVarRef(varName: string, iterator: (v: string) => boolean, stack = new Set<string>()): string {
         if (stack.has(varName)) {
             return null;
         }

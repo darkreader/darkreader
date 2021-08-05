@@ -40,7 +40,7 @@ function compareTime(time1: number[], time2: number[]) {
 }
 
 // a <= b
-function nextIntervalTime(time1, time2, currentTime, date: Date): number {
+function nextIntervalTime(time1: number[], time2: number[], currentTime: number[], date: Date): number {
     if (compareTime(time1, time2) === 0) {
         return null;
     }

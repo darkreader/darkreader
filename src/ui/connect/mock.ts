@@ -73,8 +73,10 @@ export function getMockActiveTabInfo(): TabInfo {
     };
 }
 
+type listener = (data: ExtensionData) => void;
+
 export function createConnectorMock() {
-    let listener: (data) => void = null;
+    let listener: listener = null;
     const data = getMockData();
     const tab = getMockActiveTabInfo();
     const connector = {
@@ -84,22 +86,22 @@ export function createConnectorMock() {
         async getActiveTabInfo() {
             return Promise.resolve(tab);
         },
-        subscribeToChanges(callback) {
+        subscribeToChanges(callback: listener) {
             listener = callback;
         },
-        changeSettings(settings) {
+        changeSettings(settings: UserSettings) {
             Object.assign(data.settings, settings);
             listener(data);
         },
-        setTheme(theme) {
+        setTheme(theme: Theme) {
             Object.assign(data.settings.theme, theme);
             listener(data);
         },
-        setShortcut(command, shortcut) {
+        setShortcut(command: string, shortcut: string) {
             Object.assign(data.shortcuts, {[command]: shortcut});
             listener(data);
         },
-        toggleURL(url) {
+        toggleURL(url: string) {
             const pattern = getURLHostOrProtocol(url);
             const index = data.settings.siteList.indexOf(pattern);
             if (index >= 0) {

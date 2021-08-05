@@ -37,14 +37,14 @@ function compareTime(time1: number[], time2: number[]) {
     return 1;
 }
 
-export function nextIntervalTime(time0: string, time1: string, date: Date = new Date()): number {
+export function nextTimeInterval(time0: string, time1: string, date: Date = new Date()): number {
     const a = parse24HTime(time0);
     const b = parse24HTime(time1);
     const t = [date.getHours(), date.getMinutes()];
 
     // Ensure a <= b
     if (compareTime(a, b) > 0) {
-        return nextIntervalTime(time1, time0, date);
+        return nextTimeInterval(time1, time0, date);
     }
 
     if (compareTime(a, b) === 0) {
@@ -269,7 +269,7 @@ export function isNightAtLocation(
     return false;
 }
 
-export function nextSunriseOrSunset(
+export function nextNightAtLocation(
     latitude: number,
     longitude: number,
     date: Date = new Date(),

@@ -1,4 +1,4 @@
-import {isInTimeInterval, nextIntervalTime, isNightAtLocation, nextSunriseOrSunset, parseTime, getDuration, getDurationInMinutes} from '../../src/utils/time';
+import {isInTimeInterval, nextTimeInterval, isNightAtLocation, nextNightAtLocation, parseTime, getDuration, getDurationInMinutes} from '../../src/utils/time';
 
 test('Time interval', () => {
     expect(isInTimeInterval('9:00', '12:00', new Date(2018, 11, 4, 10))).toEqual(true);
@@ -14,16 +14,16 @@ test('Time interval', () => {
 });
 
 test('Time interval prediction', () => {
-    expect(nextIntervalTime('9:00', '12:00', new Date(2018, 11, 4, 10))).toEqual(new Date(2018, 11, 4, 12).getTime());
-    expect(nextIntervalTime('10:00', '10:00', new Date(2018, 11, 4, 10))).toEqual(null);
-    expect(nextIntervalTime('10:00', '10:00', new Date(2018, 11, 4, 12))).toEqual(null);
-    expect(nextIntervalTime('10:00', '10:00', new Date(2018, 11, 4, 8))).toEqual(null);
-    expect(nextIntervalTime('9:00', '10:00', new Date(2018, 11, 4, 10))).toEqual(new Date(2018, 11, 5, 9).getTime());
-    expect(nextIntervalTime('9:01', '10:00', new Date(2018, 11, 4, 9, 2))).toEqual(new Date(2018, 11, 4, 10).getTime());
-    expect(nextIntervalTime('9:00', '10:01', new Date(2018, 11, 4, 10))).toEqual(new Date(2018, 11, 4, 10, 1).getTime());
-    expect(nextIntervalTime('18:00', '12:00', new Date(2018, 11, 4, 10))).toEqual(new Date(2018, 11, 4, 12).getTime());
-    expect(nextIntervalTime('18:00', '9:00', new Date(2018, 11, 4, 10))).toEqual(new Date(2018, 11, 4, 18).getTime());
-    expect(nextIntervalTime('18:00', '9:00', new Date(2018, 11, 4, 22))).toEqual(new Date(2018, 11, 5, 9).getTime());
+    expect(nextTimeInterval('9:00', '12:00', new Date(2018, 11, 4, 10))).toEqual(new Date(2018, 11, 4, 12).getTime());
+    expect(nextTimeInterval('10:00', '10:00', new Date(2018, 11, 4, 10))).toEqual(null);
+    expect(nextTimeInterval('10:00', '10:00', new Date(2018, 11, 4, 12))).toEqual(null);
+    expect(nextTimeInterval('10:00', '10:00', new Date(2018, 11, 4, 8))).toEqual(null);
+    expect(nextTimeInterval('9:00', '10:00', new Date(2018, 11, 4, 10))).toEqual(new Date(2018, 11, 5, 9).getTime());
+    expect(nextTimeInterval('9:01', '10:00', new Date(2018, 11, 4, 9, 2))).toEqual(new Date(2018, 11, 4, 10).getTime());
+    expect(nextTimeInterval('9:00', '10:01', new Date(2018, 11, 4, 10))).toEqual(new Date(2018, 11, 4, 10, 1).getTime());
+    expect(nextTimeInterval('18:00', '12:00', new Date(2018, 11, 4, 10))).toEqual(new Date(2018, 11, 4, 12).getTime());
+    expect(nextTimeInterval('18:00', '9:00', new Date(2018, 11, 4, 10))).toEqual(new Date(2018, 11, 4, 18).getTime());
+    expect(nextTimeInterval('18:00', '9:00', new Date(2018, 11, 4, 22))).toEqual(new Date(2018, 11, 5, 9).getTime());
 });
 
 test('Time parse', () => {
@@ -92,35 +92,35 @@ test('Nigth check', () => {
 test('Sunrise/sunset', () => {
     const utcDate = (y, m, d, hh, mm) => new Date(Date.UTC(y, m, d, hh, mm));
 
-    expect(nextSunriseOrSunset(52, 0, utcDate(2019, 8, 9, 0, 0))).toEqual(Date.UTC(2019, 8, 9, 5, 24, 2, 501));
-    expect(nextSunriseOrSunset(52, 0, utcDate(2019, 8, 9, 5, 0))).toEqual(Date.UTC(2019, 8, 9, 5, 24, 2, 501));
-    expect(nextSunriseOrSunset(52, 0, utcDate(2019, 8, 9, 7, 0))).toEqual(Date.UTC(2019, 8, 9, 18, 29, 46, 448));
-    expect(nextSunriseOrSunset(52, 0, utcDate(2019, 8, 9, 12, 0))).toEqual(Date.UTC(2019, 8, 9, 18, 29, 46, 448));
-    expect(nextSunriseOrSunset(52, 0, utcDate(2019, 8, 9, 18, 0))).toEqual(Date.UTC(2019, 8, 9, 18, 29, 46, 448));
-    expect(nextSunriseOrSunset(52, 0, utcDate(2019, 8, 9, 20, 0))).toEqual(Date.UTC(2019, 8, 10, 5, 24, 2, 501));
-    expect(nextSunriseOrSunset(52, 0, utcDate(2019, 8, 9, 23, 59))).toEqual(Date.UTC(2019, 8, 10, 5, 24, 2, 501));
+    expect(nextNightAtLocation(52, 0, utcDate(2019, 8, 9, 0, 0))).toEqual(Date.UTC(2019, 8, 9, 5, 24, 2, 501));
+    expect(nextNightAtLocation(52, 0, utcDate(2019, 8, 9, 5, 0))).toEqual(Date.UTC(2019, 8, 9, 5, 24, 2, 501));
+    expect(nextNightAtLocation(52, 0, utcDate(2019, 8, 9, 7, 0))).toEqual(Date.UTC(2019, 8, 9, 18, 29, 46, 448));
+    expect(nextNightAtLocation(52, 0, utcDate(2019, 8, 9, 12, 0))).toEqual(Date.UTC(2019, 8, 9, 18, 29, 46, 448));
+    expect(nextNightAtLocation(52, 0, utcDate(2019, 8, 9, 18, 0))).toEqual(Date.UTC(2019, 8, 9, 18, 29, 46, 448));
+    expect(nextNightAtLocation(52, 0, utcDate(2019, 8, 9, 20, 0))).toEqual(Date.UTC(2019, 8, 10, 5, 24, 2, 501));
+    expect(nextNightAtLocation(52, 0, utcDate(2019, 8, 9, 23, 59))).toEqual(Date.UTC(2019, 8, 10, 5, 24, 2, 501));
 
-    expect(nextSunriseOrSunset(52, 30, utcDate(2019, 8, 9, 0, 0))).toEqual(Date.UTC(2019, 8, 9, 3, 23, 54, 365));
-    expect(nextSunriseOrSunset(52, 30, utcDate(2019, 8, 9, 3, 0))).toEqual(Date.UTC(2019, 8, 9, 3, 23, 54, 365));
-    expect(nextSunriseOrSunset(52, 30, utcDate(2019, 8, 9, 5, 0))).toEqual(Date.UTC(2019, 8, 9, 16, 29, 58, 45));
-    expect(nextSunriseOrSunset(52, 30, utcDate(2019, 8, 9, 10, 0))).toEqual(Date.UTC(2019, 8, 9, 16, 29, 58, 45));
-    expect(nextSunriseOrSunset(52, 30, utcDate(2019, 8, 9, 16, 0))).toEqual(Date.UTC(2019, 8, 9, 16, 29, 58, 45));
-    expect(nextSunriseOrSunset(52, 30, utcDate(2019, 8, 9, 18, 0))).toEqual(Date.UTC(2019, 8, 10, 3, 23, 54, 365));
-    expect(nextSunriseOrSunset(52, 30, utcDate(2019, 8, 9, 23, 59))).toEqual(Date.UTC(2019, 8, 10, 3, 23, 54, 365));
+    expect(nextNightAtLocation(52, 30, utcDate(2019, 8, 9, 0, 0))).toEqual(Date.UTC(2019, 8, 9, 3, 23, 54, 365));
+    expect(nextNightAtLocation(52, 30, utcDate(2019, 8, 9, 3, 0))).toEqual(Date.UTC(2019, 8, 9, 3, 23, 54, 365));
+    expect(nextNightAtLocation(52, 30, utcDate(2019, 8, 9, 5, 0))).toEqual(Date.UTC(2019, 8, 9, 16, 29, 58, 45));
+    expect(nextNightAtLocation(52, 30, utcDate(2019, 8, 9, 10, 0))).toEqual(Date.UTC(2019, 8, 9, 16, 29, 58, 45));
+    expect(nextNightAtLocation(52, 30, utcDate(2019, 8, 9, 16, 0))).toEqual(Date.UTC(2019, 8, 9, 16, 29, 58, 45));
+    expect(nextNightAtLocation(52, 30, utcDate(2019, 8, 9, 18, 0))).toEqual(Date.UTC(2019, 8, 10, 3, 23, 54, 365));
+    expect(nextNightAtLocation(52, 30, utcDate(2019, 8, 9, 23, 59))).toEqual(Date.UTC(2019, 8, 10, 3, 23, 54, 365));
 
-    expect(nextSunriseOrSunset(52, -30, utcDate(2019, 8, 9, 0, 0))).toEqual(Date.UTC(2019, 8, 9, 7, 24, 10, 637));
-    expect(nextSunriseOrSunset(52, -30, utcDate(2019, 8, 9, 7, 0))).toEqual(Date.UTC(2019, 8, 9, 7, 24, 10, 637));
-    expect(nextSunriseOrSunset(52, -30, utcDate(2019, 8, 9, 9, 0))).toEqual(Date.UTC(2019, 8, 9, 20, 29, 34, 848));
-    expect(nextSunriseOrSunset(52, -30, utcDate(2019, 8, 9, 14, 0))).toEqual(Date.UTC(2019, 8, 9, 20, 29, 34, 848));
-    expect(nextSunriseOrSunset(52, -30, utcDate(2019, 8, 9, 20, 0))).toEqual(Date.UTC(2019, 8, 9, 20, 29, 34, 848));
-    expect(nextSunriseOrSunset(52, -30, utcDate(2019, 8, 9, 22, 0))).toEqual(Date.UTC(2019, 8, 10, 7, 24, 10, 637));
-    expect(nextSunriseOrSunset(52, -30, utcDate(2019, 8, 9, 23, 59))).toEqual(Date.UTC(2019, 8, 10, 7, 24, 10, 637));
+    expect(nextNightAtLocation(52, -30, utcDate(2019, 8, 9, 0, 0))).toEqual(Date.UTC(2019, 8, 9, 7, 24, 10, 637));
+    expect(nextNightAtLocation(52, -30, utcDate(2019, 8, 9, 7, 0))).toEqual(Date.UTC(2019, 8, 9, 7, 24, 10, 637));
+    expect(nextNightAtLocation(52, -30, utcDate(2019, 8, 9, 9, 0))).toEqual(Date.UTC(2019, 8, 9, 20, 29, 34, 848));
+    expect(nextNightAtLocation(52, -30, utcDate(2019, 8, 9, 14, 0))).toEqual(Date.UTC(2019, 8, 9, 20, 29, 34, 848));
+    expect(nextNightAtLocation(52, -30, utcDate(2019, 8, 9, 20, 0))).toEqual(Date.UTC(2019, 8, 9, 20, 29, 34, 848));
+    expect(nextNightAtLocation(52, -30, utcDate(2019, 8, 9, 22, 0))).toEqual(Date.UTC(2019, 8, 10, 7, 24, 10, 637));
+    expect(nextNightAtLocation(52, -30, utcDate(2019, 8, 9, 23, 59))).toEqual(Date.UTC(2019, 8, 10, 7, 24, 10, 637));
 
     // Polar day and night
-    expect(nextSunriseOrSunset(71, 0, utcDate(2019, 5, 15, 0, 0))).toEqual(Date.UTC(2019, 5, 16, 0, 0, 0, 0));
-    expect(nextSunriseOrSunset(-71, 0, utcDate(2019, 5, 15, 0, 0))).toEqual(Date.UTC(2019, 5, 16, 0, 0, 0, 0));
+    expect(nextNightAtLocation(71, 0, utcDate(2019, 5, 15, 0, 0))).toEqual(Date.UTC(2019, 5, 16, 0, 0, 0, 0));
+    expect(nextNightAtLocation(-71, 0, utcDate(2019, 5, 15, 0, 0))).toEqual(Date.UTC(2019, 5, 16, 0, 0, 0, 0));
 
     // Places where sunset comes before sunrise (in UTC)
-    expect(nextSunriseOrSunset(0, 180, utcDate(2019, 8, 9, 0, 0))).toEqual(Date.UTC(2019, 8, 9, 6, 0, 50, 152));
-    expect(nextSunriseOrSunset(0, 180, utcDate(2019, 8, 9, 7, 0))).toEqual(Date.UTC(2019, 8, 9, 17, 54, 18, 610));
+    expect(nextNightAtLocation(0, 180, utcDate(2019, 8, 9, 0, 0))).toEqual(Date.UTC(2019, 8, 9, 6, 0, 50, 152));
+    expect(nextNightAtLocation(0, 180, utcDate(2019, 8, 9, 7, 0))).toEqual(Date.UTC(2019, 8, 9, 17, 54, 18, 610));
 });

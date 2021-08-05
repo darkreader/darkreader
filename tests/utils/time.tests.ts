@@ -1,6 +1,7 @@
 import {isInTimeInterval, nextTimeInterval, isNightAtLocation, nextNightAtLocation, parseTime, getDuration, getDurationInMinutes} from '../../src/utils/time';
 
 test('Time interval', () => {
+    // isInTimeInterval is time-zone dependent
     expect(isInTimeInterval('9:00', '12:00', new Date(2018, 11, 4, 10))).toEqual(true);
     expect(isInTimeInterval('10:00', '10:00', new Date(2018, 11, 4, 10))).toEqual(false);
     expect(isInTimeInterval('10:00', '10:00', new Date(2018, 11, 4, 12))).toEqual(false);
@@ -14,6 +15,7 @@ test('Time interval', () => {
 });
 
 test('Time interval prediction', () => {
+    // nextTimeInterval() returns time-zone dependent timestamp
     expect(nextTimeInterval('9:00', '12:00', new Date(2018, 11, 4, 10))).toEqual(new Date(2018, 11, 4, 12).getTime());
     expect(nextTimeInterval('10:00', '10:00', new Date(2018, 11, 4, 10))).toEqual(null);
     expect(nextTimeInterval('10:00', '10:00', new Date(2018, 11, 4, 12))).toEqual(null);

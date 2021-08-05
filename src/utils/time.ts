@@ -111,9 +111,9 @@ export function getDurationInMinutes(time: Duration) {
 }
 
 function getSunsetSunriseUTCTime(
-    date: Date,
     latitude: number,
     longitude: number,
+    date: Date,
 ) {
     const dec31 = Date.UTC(date.getUTCFullYear(), 0, 0, 0, 0, 0, 0);
     const oneDay = getDuration({days: 1});
@@ -223,7 +223,7 @@ export function isNightAtLocation(
     longitude: number,
     date: Date = new Date(),
 ): boolean {
-    const time = getSunsetSunriseUTCTime(date, latitude, longitude);
+    const time = getSunsetSunriseUTCTime(latitude, longitude, date);
 
     if (time.alwaysDay) {
         return false;
@@ -275,7 +275,7 @@ export function nextNightAtLocation(
     longitude: number,
     date: Date = new Date(),
 ): number {
-    const time = getSunsetSunriseUTCTime(date, latitude, longitude);
+    const time = getSunsetSunriseUTCTime(latitude, longitude, date);
 
     if (time.alwaysDay) {
         return date.getTime() + getDuration({days: 1});

@@ -8,14 +8,14 @@ import TabManager from './tab-manager';
 import UserStorage from './user-storage';
 import {setWindowTheme, resetWindowTheme} from './window-theme';
 import {getFontList, getCommands, setShortcut, canInjectScript} from './utils/extension-api';
-import {isInTimeInterval, isNightAtLocation} from '../utils/time';
+import {isInTimeIntervalLocal, nextTimeInterval, isNightAtLocation, nextNightAtLocation} from '../utils/time';
 import {isURLInList, getURLHostOrProtocol, isURLEnabled, isPDF} from '../utils/url';
 import ThemeEngines from '../generators/theme-engines';
 import createCSSFilterStylesheet from '../generators/css-filter';
 import {getDynamicThemeFixesFor} from '../generators/dynamic-theme';
 import createStaticStylesheet from '../generators/static-theme';
 import {createSVGFilterStylesheet, getSVGFilterMatrixValue, getSVGReverseFilterMatrixValue} from '../generators/svg-filter';
-import type {ExtensionData, FilterConfig, News, Shortcuts, UserSettings, TabInfo, TimeCheck} from '../definitions';
+import type {ExtensionData, FilterConfig, News, Shortcuts, UserSettings, TabInfo} from '../definitions';
 import {isSystemDarkModeEnabled} from '../utils/media-query';
 import {isFirefox, isThunderbird} from '../utils/platform';
 
@@ -31,7 +31,7 @@ export class Extension {
     tabs: TabManager;
     user: UserStorage;
 
-    private isEnabledNow: boolean = null;
+    private isEnabledCached: boolean = null;
 
     static ALARM_NAME = 'auto-time-alarm';
     constructor() {
@@ -62,41 +62,44 @@ export class Extension {
     };
 
     isEnabled(): boolean {
-        if (this.isEnabledNow !== null) {
-            return this.isEnabledNow;
+        if (this.isEnabledCached !== null) {
+            return this.isEnabledCached;
         }
 
         const {automation} = this.user.settings;
-
-        let timingInformation: TimeCheck = null;
+        let nextCheck: number;
         switch (automation) {
             case 'time':
-                timingInformation = isInTimeInterval(this.user.settings.time.activation, this.user.settings.time.deactivation);
+                this.isEnabledCached = isInTimeIntervalLocal(this.user.settings.time.activation, this.user.settings.time.deactivation);
+                nextCheck = nextTimeInterval(this.user.settings.time.activation, this.user.settings.time.deactivation);
                 break;
             case 'system':
                 if (isFirefox) {
                     // BUG: Firefox background page always matches initial color scheme.
-                    return this.wasLastColorSchemeDark == null
+                    this.isEnabledCached = this.wasLastColorSchemeDark == null
                         ? isSystemDarkModeEnabled()
                         : this.wasLastColorSchemeDark;
+                } else {
+                    this.isEnabledCached = isSystemDarkModeEnabled();
                 }
-                return isSystemDarkModeEnabled();
+                break;
             case 'location': {
                 const {latitude, longitude} = this.user.settings.location;
 
                 if (latitude != null && longitude != null) {
-                    timingInformation = isNightAtLocation(latitude, longitude);
+                    this.isEnabledCached = isNightAtLocation(latitude, longitude);
+                    nextCheck = nextNightAtLocation(latitude, longitude);
                 }
                 break;
             }
             default:
-                return this.user.settings.enabled;
+                this.isEnabledCached = this.user.settings.enabled;
+                break;
         }
-        this.isEnabledNow = timingInformation.rightNow;
-        if (timingInformation.nextCheck) {
-            chrome.alarms.create(Extension.ALARM_NAME, {when: timingInformation.nextCheck});
+        if (nextCheck) {
+            chrome.alarms.create(Extension.ALARM_NAME, {when: nextCheck});
         }
-        return timingInformation.rightNow;
+        return this.isEnabledCached;
     }
 
     private awaiting: Array<() => void>;
@@ -274,7 +277,7 @@ export class Extension {
         if (!this.ready) {
             return;
         }
-        this.isEnabledNow = null;
+        this.isEnabledCached = null;
         const isEnabled = this.isEnabled();
         if (this.wasEnabledOnLastCheck !== isEnabled) {
             this.wasEnabledOnLastCheck = isEnabled;
@@ -363,7 +366,7 @@ export class Extension {
     //
 
     private onAppToggle() {
-        this.isEnabledNow = null;
+        this.isEnabledCached = null;
         if (this.isEnabled()) {
             this.icon.setActive();
             if (this.user.settings.changeBrowserTheme) {

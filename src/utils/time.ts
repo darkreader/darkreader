@@ -1,5 +1,3 @@
-import type {TimeCheck} from 'definitions';
-
 export function parseTime($time: string) {
     const parts = $time.split(':').slice(0, 2);
     const lowercased = $time.trim().toLowerCase();
@@ -39,47 +37,56 @@ function compareTime(time1: number[], time2: number[]) {
     return 1;
 }
 
-// a <= b
-function nextIntervalTime(time1: number[], time2: number[], currentTime: number[], date: Date): number {
-    if (compareTime(time1, time2) === 0) {
+export function nextTimeInterval(time0: string, time1: string, date: Date = new Date()): number {
+    const a = parse24HTime(time0);
+    const b = parse24HTime(time1);
+    const t = [date.getHours(), date.getMinutes()];
+
+    // Ensure a <= b
+    if (compareTime(a, b) > 0) {
+        return nextTimeInterval(time1, time0, date);
+    }
+
+    if (compareTime(a, b) === 0) {
         return null;
     }
 
-    if (compareTime(currentTime, time1) < 0) {
+    if (compareTime(t, a) < 0) {
         // t < a <= b
         // Schedule for todate at time a
-        date.setHours(time1[0]);
-        date.setMinutes(time1[1]);
+        date.setHours(a[0]);
+        date.setMinutes(a[1]);
         return date.getTime();
     }
 
-    if (compareTime(currentTime, time2) < 0) {
+    if (compareTime(t, b) < 0) {
         // a <= t < b
         // Schedule for today at time b
-        date.setHours(time2[0]);
-        date.setMinutes(time2[1]);
+        date.setHours(b[0]);
+        date.setMinutes(b[1]);
         return date.getTime();
     }
 
     // a <= b <= t
     // Schedule for tomorrow at time a
-    return (new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1, time1[0], time1[1])).getTime();
+    return (new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1, a[0], a[1])).getTime();
 }
 
-export function isInTimeInterval(time0: string, time1: string, date: Date = new Date()): TimeCheck {
+export function isInTimeIntervalLocal(time0: string, time1: string, date: Date = new Date()): boolean {
     const a = parse24HTime(time0);
     const b = parse24HTime(time1);
     const t = [date.getHours(), date.getMinutes()];
     if (compareTime(a, b) > 0) {
-        return {
-            rightNow: compareTime(a, t) <= 0 || compareTime(t, b) < 0,
-            nextCheck: nextIntervalTime(b, a, t, date)
-        };
+        return compareTime(a, t) <= 0 || compareTime(t, b) < 0;
     }
-    return {
-        rightNow: compareTime(a, t) <= 0 && compareTime(t, b) < 0,
-        nextCheck: nextIntervalTime(a, b, t, date)
-    };
+    return compareTime(a, t) <= 0 && compareTime(t, b) < 0;
+}
+
+function isInTimeIntervalUTC(time0: number, time1: number, timestamp: number) {
+    if (time1 < time0) {
+        return timestamp <= time1 || time0 <= timestamp;
+    }
+    return time0 < timestamp && timestamp < time1;
 }
 
 interface Duration {
@@ -111,9 +118,9 @@ export function getDurationInMinutes(time: Duration) {
 }
 
 function getSunsetSunriseUTCTime(
-    date: Date,
     latitude: number,
     longitude: number,
+    date: Date,
 ) {
     const dec31 = Date.UTC(date.getUTCFullYear(), 0, 0, 0, 0, 0, 0);
     const oneDay = getDuration({days: 1});
@@ -222,19 +229,13 @@ export function isNightAtLocation(
     latitude: number,
     longitude: number,
     date: Date = new Date(),
-): TimeCheck {
-    const time = getSunsetSunriseUTCTime(date, latitude, longitude);
+): boolean {
+    const time = getSunsetSunriseUTCTime(latitude, longitude, date);
 
     if (time.alwaysDay) {
-        return {
-            rightNow: false,
-            nextCheck: date.getTime() + getDuration({days: 1})
-        };
+        return false;
     } else if (time.alwaysNight) {
-        return {
-            rightNow: true,
-            nextCheck: date.getTime() + getDuration({days: 1})
-        };
+        return true;
     }
 
     const sunriseTime = time.sunriseTime;
@@ -242,11 +243,35 @@ export function isNightAtLocation(
     const currentTime = (
         date.getUTCHours() * getDuration({hours: 1}) +
         date.getUTCMinutes() * getDuration({minutes: 1}) +
-        date.getUTCSeconds() * getDuration({seconds: 1})
+        date.getUTCSeconds() * getDuration({seconds: 1}) +
+        date.getUTCMilliseconds()
     );
 
-    let rightNow: boolean;
-    let nextCheck: number;
+    return isInTimeIntervalUTC(sunsetTime, sunriseTime, currentTime);
+}
+
+export function nextNightAtLocation(
+    latitude: number,
+    longitude: number,
+    date: Date = new Date(),
+): number {
+    const time = getSunsetSunriseUTCTime(latitude, longitude, date);
+
+    if (time.alwaysDay) {
+        return date.getTime() + getDuration({days: 1});
+    } else if (time.alwaysNight) {
+        return date.getTime() + getDuration({days: 1});
+    }
+
+    const sunriseTime = time.sunriseTime;
+    const sunsetTime = time.sunsetTime;
+    const currentTime = (
+        date.getUTCHours() * getDuration({hours: 1}) +
+        date.getUTCMinutes() * getDuration({minutes: 1}) +
+        date.getUTCSeconds() * getDuration({seconds: 1}) +
+        date.getUTCMilliseconds()
+    );
+
     if (sunriseTime < sunsetTime) {
         // Timeline:
         // --- sunrise <----> sunset ---
@@ -255,34 +280,24 @@ export function isNightAtLocation(
             // --- sunrise <----> sunset ---
             //               ^
             //          Current time
-            rightNow = false;
-            nextCheck = Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate(), 0, 0, 0, sunsetTime);
-        } else {
-            // Timeline:
-            // --- sunrise <----> sunset ---
-            //   ^                       ^
-            //           Current time
-            rightNow = true;
-            nextCheck = Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate() + (sunsetTime < currentTime ? 1 : 0), 0, 0, 0, sunriseTime);
+            return Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate(), 0, 0, 0, sunsetTime);
         }
-    } else if ((sunsetTime < currentTime) && (currentTime < sunriseTime)) {
+        // Timeline:
+        // --- sunrise <----> sunset ---
+        //   ^                       ^
+        //           Current time
+        return Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate() + (sunsetTime < currentTime ? 1 : 0), 0, 0, 0, sunriseTime);
+    }
+    if ((sunsetTime < currentTime) && (currentTime < sunriseTime)) {
         // Timeline:
         // --- sunset <----> sunrise ---
         //               ^
         //          Current time
-        rightNow = true;
-        nextCheck = Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate(), 0, 0, 0, sunriseTime);
-    } else {
-        // Timeline:
-        // --- sunset <----> sunrise ---
-        //   ^                       ^
-        //           Current time
-        rightNow = false;
-        nextCheck = Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate() + (sunriseTime < currentTime ? 1 : 0), 0, 0, 0, sunsetTime);
+        return Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate(), 0, 0, 0, sunriseTime);
     }
-
-    return {
-        rightNow,
-        nextCheck,
-    };
+    // Timeline:
+    // --- sunset <----> sunrise ---
+    //   ^                       ^
+    //           Current time
+    return Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate() + (sunriseTime < currentTime ? 1 : 0), 0, 0, 0, sunsetTime);
 }

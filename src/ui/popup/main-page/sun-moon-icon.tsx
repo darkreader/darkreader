@@ -18,7 +18,7 @@ export default function SunMoonIcon({date, latitude, longitude}: {date: Date; la
         );
     }
 
-    if (isNightAtLocation(latitude, longitude, date).rightNow) {
+    if (isNightAtLocation(latitude, longitude, date)) {
         // moon icon
         return (
             <svg viewBox="0 0 16 16">

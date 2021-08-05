@@ -31,7 +31,7 @@ export class Extension {
     tabs: TabManager;
     user: UserStorage;
 
-    private isEnabledNow: boolean = null;
+    private isEnabledCached: boolean = null;
 
     static ALARM_NAME = 'auto-time-alarm';
     constructor() {
@@ -62,25 +62,25 @@ export class Extension {
     };
 
     isEnabled(): boolean {
-        if (this.isEnabledNow !== null) {
-            return this.isEnabledNow;
+        if (this.isEnabledCached !== null) {
+            return this.isEnabledCached;
         }
 
         const {automation} = this.user.settings;
         let nextCheck: number;
         switch (automation) {
             case 'time':
-                this.isEnabledNow = isInTimeInterval(this.user.settings.time.activation, this.user.settings.time.deactivation);
+                this.isEnabledCached = isInTimeInterval(this.user.settings.time.activation, this.user.settings.time.deactivation);
                 nextCheck = nextIntervalTime(this.user.settings.time.activation, this.user.settings.time.deactivation);
                 break;
             case 'system':
                 if (isFirefox) {
                     // BUG: Firefox background page always matches initial color scheme.
-                    this.isEnabledNow = this.wasLastColorSchemeDark == null
+                    this.isEnabledCached = this.wasLastColorSchemeDark == null
                         ? isSystemDarkModeEnabled()
                         : this.wasLastColorSchemeDark;
                 } else {
-                    this.isEnabledNow = isSystemDarkModeEnabled();
+                    this.isEnabledCached = isSystemDarkModeEnabled();
                 }
                 break;
             case 'location': {
@@ -88,19 +88,19 @@ export class Extension {
 
                 if (latitude != null && longitude != null) {
                     const info = isNightAtLocation(latitude, longitude);
-                    this.isEnabledNow = info.rightNow;
+                    this.isEnabledCached = info.rightNow;
                     nextCheck = info.nextCheck;
                 }
                 break;
             }
             default:
-                this.isEnabledNow = this.user.settings.enabled;
+                this.isEnabledCached = this.user.settings.enabled;
                 break;
         }
         if (nextCheck) {
             chrome.alarms.create(Extension.ALARM_NAME, {when: nextCheck});
         }
-        return this.isEnabledNow;
+        return this.isEnabledCached;
     }
 
     private awaiting: Array<() => void>;
@@ -278,7 +278,7 @@ export class Extension {
         if (!this.ready) {
             return;
         }
-        this.isEnabledNow = null;
+        this.isEnabledCached = null;
         const isEnabled = this.isEnabled();
         if (this.wasEnabledOnLastCheck !== isEnabled) {
             this.wasEnabledOnLastCheck = isEnabled;
@@ -367,7 +367,7 @@ export class Extension {
     //
 
     private onAppToggle() {
-        this.isEnabledNow = null;
+        this.isEnabledCached = null;
         if (this.isEnabled()) {
             this.icon.setActive();
             if (this.user.settings.changeBrowserTheme) {

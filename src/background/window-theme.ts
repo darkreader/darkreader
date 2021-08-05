@@ -10,7 +10,7 @@ declare const browser: {
     };
 };
 
-const themeColorTypes = {
+const themeColorTypes: { [key: string]: string } = {
     accentcolor: 'bg',
     button_background_active: 'text',
     button_background_hover: 'text',
@@ -46,7 +46,7 @@ const themeColorTypes = {
     toolbar_vertical_separator: 'border',
 };
 
-const $colors = {
+const $colors: { [key: string]: string } = {
     // 'accentcolor' is the deprecated predecessor of 'frame'.
     // https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json/theme#colors
     accentcolor: '#111111',
@@ -69,8 +69,8 @@ const $colors = {
 };
 
 export function setWindowTheme(filter: FilterConfig) {
-    const colors = Object.entries($colors).reduce((obj, [key, value]) => {
-        const type = themeColorTypes[key];
+    const colors = Object.entries($colors).reduce((obj: { [key: string]: string }, [key, value]) => {
+        const type: string = themeColorTypes[key];
         const modify: ((rgb: RGBA, filter: FilterConfig) => string) = {
             'bg': modifyBackgroundColor,
             'text': modifyForegroundColor,

@@ -5,7 +5,7 @@ import ControlGroup from '../control-group';
 import {getURLHostOrProtocol} from '../../../utils/url';
 
 export default function ExportTheme() {
-    const listener = ({type, data}, sender: chrome.runtime.MessageSender) => {
+    const listener = ({type, data}: {type: string; data: string}, sender: chrome.runtime.MessageSender) => {
         if (type === 'export-css-response') {
             const url = getURLHostOrProtocol(sender.tab.url).replace(/[^a-z0-1\-]/g, '-');
             saveFile(`DarkReader-${url}.css`, data);

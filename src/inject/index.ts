@@ -4,8 +4,9 @@ import {createOrUpdateDynamicTheme, removeDynamicTheme, cleanDynamicThemeCache} 
 import {logInfo, logWarn} from './utils/log';
 import {watchForColorSchemeChange} from './utils/watch-color-scheme';
 import {collectCSS} from './dynamic-theme/css-collection';
+import type {Message} from '../definitions';
 
-function onMessage({type, data}) {
+function onMessage({type, data}: Message) {
     switch (type) {
         case 'add-css-filter':
         case 'add-static-theme': {
@@ -58,7 +59,7 @@ const colorSchemeWatcher = watchForColorSchemeChange(({isDark}) => {
 chrome.runtime.onMessage.addListener(onMessage);
 chrome.runtime.sendMessage({type: 'frame-connect'});
 
-function onPageHide(e) {
+function onPageHide(e: PageTransitionEvent) {
     if (e.persisted === false) {
         chrome.runtime.sendMessage({type: 'frame-forget'});
     }

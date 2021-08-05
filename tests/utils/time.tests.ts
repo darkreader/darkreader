@@ -92,7 +92,7 @@ test('Nigth check', () => {
 });
 
 test('Sunrise/sunset', () => {
-    const utcDate = (y, m, d, hh, mm) => new Date(Date.UTC(y, m, d, hh, mm));
+    const utcDate = (y: number, m: number, d: number, hh: number, mm: number) => new Date(Date.UTC(y, m, d, hh, mm));
 
     expect(nextNightAtLocation(52, 0, utcDate(2019, 8, 9, 0, 0))).toEqual(Date.UTC(2019, 8, 9, 5, 24, 2, 501));
     expect(nextNightAtLocation(52, 0, utcDate(2019, 8, 9, 5, 0))).toEqual(Date.UTC(2019, 8, 9, 5, 24, 2, 501));

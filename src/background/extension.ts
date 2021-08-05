@@ -55,7 +55,7 @@ export class Extension {
         this.awaiting = [];
     }
 
-    private alarmListener = (alarm): void => {
+    private alarmListener = (alarm: chrome.alarms.Alarm): void => {
         if (alarm.name === Extension.ALARM_NAME) {
             this.handleAutoCheck();
         }

@@ -21,7 +21,7 @@ if (WATCH) {
     const ALARM_NAME = 'socket-close';
     const PING_INTERVAL_IN_MINUTES = 1 / 60;
 
-    const socketAlarmListener = (alarm) => {
+    const socketAlarmListener = (alarm: chrome.alarms.Alarm) => {
         if (alarm.name === ALARM_NAME) {
             listen();
         }

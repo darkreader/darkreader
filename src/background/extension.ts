@@ -8,7 +8,7 @@ import TabManager from './tab-manager';
 import UserStorage from './user-storage';
 import {setWindowTheme, resetWindowTheme} from './window-theme';
 import {getFontList, getCommands, setShortcut, canInjectScript} from './utils/extension-api';
-import {isInTimeInterval, nextIntervalTime, isNightAtLocation} from '../utils/time';
+import {isInTimeInterval, nextIntervalTime, isNightAtLocation, nextSunriseOrSunset} from '../utils/time';
 import {isURLInList, getURLHostOrProtocol, isURLEnabled, isPDF} from '../utils/url';
 import ThemeEngines from '../generators/theme-engines';
 import createCSSFilterStylesheet from '../generators/css-filter';
@@ -87,9 +87,8 @@ export class Extension {
                 const {latitude, longitude} = this.user.settings.location;
 
                 if (latitude != null && longitude != null) {
-                    const info = isNightAtLocation(latitude, longitude);
-                    this.isEnabledCached = info.rightNow;
-                    nextCheck = info.nextCheck;
+                    this.isEnabledCached = isNightAtLocation(latitude, longitude);
+                    nextCheck = nextSunriseOrSunset(latitude, longitude);
                 }
                 break;
             }

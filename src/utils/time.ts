@@ -222,22 +222,13 @@ export function isNightAtLocation(
     latitude: number,
     longitude: number,
     date: Date = new Date(),
-): {
-    rightNow: boolean;
-    nextCheck: number;
-} {
+): boolean {
     const time = getSunsetSunriseUTCTime(date, latitude, longitude);
 
     if (time.alwaysDay) {
-        return {
-            rightNow: false,
-            nextCheck: date.getTime() + getDuration({days: 1})
-        };
+        return false;
     } else if (time.alwaysNight) {
-        return {
-            rightNow: true,
-            nextCheck: date.getTime() + getDuration({days: 1})
-        };
+        return true;
     }
 
     const sunriseTime = time.sunriseTime;
@@ -248,8 +239,6 @@ export function isNightAtLocation(
         date.getUTCSeconds() * getDuration({seconds: 1})
     );
 
-    let rightNow: boolean;
-    let nextCheck: number;
     if (sunriseTime < sunsetTime) {
         // Timeline:
         // --- sunrise <----> sunset ---
@@ -258,34 +247,75 @@ export function isNightAtLocation(
             // --- sunrise <----> sunset ---
             //               ^
             //          Current time
-            rightNow = false;
-            nextCheck = Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate(), 0, 0, 0, sunsetTime);
-        } else {
-            // Timeline:
-            // --- sunrise <----> sunset ---
-            //   ^                       ^
-            //           Current time
-            rightNow = true;
-            nextCheck = Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate() + (sunsetTime < currentTime ? 1 : 0), 0, 0, 0, sunriseTime);
+            return false;
         }
-    } else if ((sunsetTime < currentTime) && (currentTime < sunriseTime)) {
+        // Timeline:
+        // --- sunrise <----> sunset ---
+        //   ^                       ^
+        //           Current time
+        return true;
+    }
+    if ((sunsetTime < currentTime) && (currentTime < sunriseTime)) {
         // Timeline:
         // --- sunset <----> sunrise ---
         //               ^
         //          Current time
-        rightNow = true;
-        nextCheck = Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate(), 0, 0, 0, sunriseTime);
-    } else {
-        // Timeline:
-        // --- sunset <----> sunrise ---
-        //   ^                       ^
-        //           Current time
-        rightNow = false;
-        nextCheck = Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate() + (sunriseTime < currentTime ? 1 : 0), 0, 0, 0, sunsetTime);
+        return true;
+    }
+    // Timeline:
+    // --- sunset <----> sunrise ---
+    //   ^                       ^
+    //           Current time
+    return false;
+}
+
+export function nextSunriseOrSunset(
+    latitude: number,
+    longitude: number,
+    date: Date = new Date(),
+): number {
+    const time = getSunsetSunriseUTCTime(date, latitude, longitude);
+
+    if (time.alwaysDay) {
+        return date.getTime() + getDuration({days: 1});
+    } else if (time.alwaysNight) {
+        return date.getTime() + getDuration({days: 1});
     }
 
-    return {
-        rightNow,
-        nextCheck,
-    };
+    const sunriseTime = time.sunriseTime;
+    const sunsetTime = time.sunsetTime;
+    const currentTime = (
+        date.getUTCHours() * getDuration({hours: 1}) +
+        date.getUTCMinutes() * getDuration({minutes: 1}) +
+        date.getUTCSeconds() * getDuration({seconds: 1})
+    );
+
+    if (sunriseTime < sunsetTime) {
+        // Timeline:
+        // --- sunrise <----> sunset ---
+        if ((sunriseTime < currentTime) && (currentTime < sunsetTime)) {
+            // Timeline:
+            // --- sunrise <----> sunset ---
+            //               ^
+            //          Current time
+            return Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate(), 0, 0, 0, sunsetTime);
+        }
+        // Timeline:
+        // --- sunrise <----> sunset ---
+        //   ^                       ^
+        //           Current time
+        return Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate() + (sunsetTime < currentTime ? 1 : 0), 0, 0, 0, sunriseTime);
+    }
+    if ((sunsetTime < currentTime) && (currentTime < sunriseTime)) {
+        // Timeline:
+        // --- sunset <----> sunrise ---
+        //               ^
+        //          Current time
+        return Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate(), 0, 0, 0, sunriseTime);
+    }
+    // Timeline:
+    // --- sunset <----> sunrise ---
+    //   ^                       ^
+    //           Current time
+    return Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate() + (sunriseTime < currentTime ? 1 : 0), 0, 0, 0, sunsetTime);
 }

@@ -10,7 +10,7 @@ export default class Connector implements ExtensionActions {
 
     private async sendRequest<T>(type: string, data?: any) {
         return new Promise<T>((resolve, reject) => {
-            chrome.runtime.sendMessage({from: 'ui', type, ...data}, ({data, error}) => {
+            chrome.runtime.sendMessage<Message>({from: 'ui', type, ...data}, ({data, error}) => {
                 if (error) {
                     reject(error);
                 } else {
@@ -56,7 +56,7 @@ export default class Connector implements ExtensionActions {
     };
 
     private sendMessage(data: any) {
-        chrome.runtime.sendMessage({from: 'ui', ...data});
+        chrome.runtime.sendMessage<Message>({from: 'ui', ...data});
     }
 
     subscribeToChanges(callback: (data: ExtensionData) => void) {

@@ -48,9 +48,9 @@ export default class TabManager {
                     const reply = (options: ConnectionMessageOptions) => {
                         const message = getConnectionMessage(options);
                         if (message instanceof Promise) {
-                            message.then((asyncMessage) => asyncMessage && chrome.tabs.sendMessage(sender.tab.id, asyncMessage, {frameId: sender.frameId}));
+                            message.then((asyncMessage) => asyncMessage && chrome.tabs.sendMessage<Message>(sender.tab.id, asyncMessage, {frameId: sender.frameId}));
                         } else if (message) {
-                            chrome.tabs.sendMessage(sender.tab.id, message, {frameId: sender.frameId});
+                            chrome.tabs.sendMessage<Message>(sender.tab.id, message, {frameId: sender.frameId});
                         }
                     };
 
@@ -102,7 +102,7 @@ export default class TabManager {
 
                 // Using custom response due to Chrome and Firefox incompatibility
                 // Sometimes fetch error behaves like synchronous and sends `undefined`
-                const sendResponse = (response: Partial<Message>) => chrome.tabs.sendMessage(sender.tab.id, {type: 'fetch-response', id, ...response});
+                const sendResponse = (response: Partial<Message>) => chrome.tabs.sendMessage<Message>(sender.tab.id, {type: 'fetch-response', id, ...response});
                 if (isThunderbird) {
                     // In thunderbird some CSS is loaded on a chrome:// URL.
                     // Thunderbird restricted Add-ons to load those URL's.
@@ -131,7 +131,7 @@ export default class TabManager {
             }
             if (type === 'request-export-css') {
                 const activeTab = await this.getActiveTab();
-                chrome.tabs.sendMessage(activeTab.id, {type: 'export-css'}, {frameId: 0});
+                chrome.tabs.sendMessage<Message>(activeTab.id, {type: 'export-css'}, {frameId: 0});
             }
         });
     }
@@ -180,9 +180,9 @@ export default class TabManager {
                     }
                     const message = getMessage(this.getTabURL(tab), frameId === 0 ? null : url);
                     if (tab.active && frameId === 0) {
-                        chrome.tabs.sendMessage(tab.id, message, {frameId});
+                        chrome.tabs.sendMessage<Message>(tab.id, message, {frameId});
                     } else {
-                        setTimeout(() => chrome.tabs.sendMessage(tab.id, message, {frameId}));
+                        setTimeout(() => chrome.tabs.sendMessage<Message>(tab.id, message, {frameId}));
                     }
                 });
             });

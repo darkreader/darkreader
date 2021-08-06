@@ -69,14 +69,6 @@ export default class Connector implements ExtensionActions {
         }
     }
 
-    enable() {
-        this.sendMessage({type: 'enable'});
-    }
-
-    disable() {
-        this.sendMessage({type: 'disable'});
-    }
-
     setShortcut(command: string, shortcut: string) {
         this.sendMessage({type: 'set-shortcut', data: {command, shortcut}});
     }

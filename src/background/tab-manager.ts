@@ -23,7 +23,21 @@ interface TabManagerOptions {
 
 interface FrameInfo {
     url: string;
-    state: 'normal' | 'frozen';
+    state: DocumentState;
+}
+
+/*
+ * These states correspond to possible document states in Page Lifecycle API:
+ * https://developers.google.com/web/updates/2018/07/page-lifecycle-api#developer-recommendations-for-each-state
+ * Some states are not currently used (they are declared for future-proofing).
+ */
+enum DocumentState {
+    ACTIVE = 0,
+    PASSIVE = 1,
+    HIDDEN = 2,
+    FROZEN = 3,
+    TERMINATED = 4,
+    DISCARDED = 5
 }
 
 export default class TabManager {
@@ -40,7 +54,7 @@ export default class TabManager {
                     frames = new Map();
                     tabs.set(tabId, frames);
                 }
-                frames.set(frameId, {url: senderURL, state: 'normal'});
+                frames.set(frameId, {url: senderURL, state: DocumentState.ACTIVE});
             }
 
             switch (message.type) {
@@ -86,7 +100,7 @@ export default class TabManager {
                     break;
                 }
                 case 'frame-freeze':
-                    this.tabs.get(sender.tab.id).get(sender.frameId).state = 'frozen';
+                    this.tabs.get(sender.tab.id).get(sender.frameId).state = DocumentState.FROZEN;
                     break;
                 case 'frame-resume':
                     addFrame(this.tabs, sender.tab.id, sender.frameId, sender.url);
@@ -174,7 +188,7 @@ export default class TabManager {
             .forEach((tab) => {
                 const frames = this.tabs.get(tab.id);
                 frames.forEach(({url, state}, frameId) => {
-                    if (state === 'frozen') {
+                    if (state === DocumentState.FROZEN) {
                         // TODO: avoid sending messages to frozen tabs for performance reasons.
                         logInfo('Sending message to a frozen tab.');
                     }

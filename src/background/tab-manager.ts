@@ -188,7 +188,7 @@ export default class TabManager {
             .forEach((tab) => {
                 const frames = this.tabs.get(tab.id);
                 frames.forEach(({url, state}, frameId) => {
-                    if (state === DocumentState.FROZEN) {
+                    if (state !== DocumentState.ACTIVE && state !== DocumentState.PASSIVE) {
                         // TODO: avoid sending messages to frozen tabs for performance reasons.
                         logInfo('Sending message to a frozen tab.');
                     }

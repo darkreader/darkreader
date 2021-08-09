@@ -1,4 +1,5 @@
 import type {Message} from 'definitions';
+import {MessageType} from 'utils/message';
 
 interface FetchRequest {
     url: string;
@@ -21,7 +22,7 @@ export async function bgFetch(request: FetchRequest) {
 }
 
 chrome.runtime.onMessage.addListener(({type, data, error, id}: Message) => {
-    if (type === 'fetch-response') {
+    if (type === MessageType.BACKGROUND_FETCH_RESPONSE) {
         const resolve = resolvers.get(id);
         const reject = rejectors.get(id);
         resolvers.delete(id);

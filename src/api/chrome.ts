@@ -1,3 +1,4 @@
+import {MessageType} from 'utils/message';
 import {readResponseAsDataURL} from '../utils/network';
 import {callFetchMethod} from './fetch';
 
@@ -11,7 +12,7 @@ if (!chrome.runtime) {
 const messageListeners = new Set<(...args) => void>();
 
 async function sendMessage(...args) {
-    if (args[0] && args[0].type === 'fetch') {
+    if (args[0] && args[0].type === MessageType.CS_FETCH) {
         const {id} = args[0];
         try {
             const {url, responseType} = args[0].data;
@@ -22,10 +23,10 @@ async function sendMessage(...args) {
             } else {
                 text = await response.text();
             }
-            messageListeners.forEach((cb) => cb({type: 'fetch-response', data: text, error: null, id}));
+            messageListeners.forEach((cb) => cb({type: MessageType.BACKGROUND_FETCH_RESPONSE, data: text, error: null, id}));
         } catch (err) {
             console.error(err);
-            messageListeners.forEach((cb) => cb({type: 'fetch-response', data: null, err, id}));
+            messageListeners.forEach((cb) => cb({type: MessageType.BACKGROUND_FETCH_RESPONSE, data: null, err, id}));
         }
     }
 }

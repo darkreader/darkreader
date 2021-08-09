@@ -3,6 +3,7 @@ import {createFileLoader} from './utils/network';
 import type {Message} from '../definitions';
 import {isThunderbird} from '../utils/platform';
 import {logInfo, logWarn} from '../inject/utils/log';
+import {MessageType} from 'utils/message';
 
 async function queryTabs(query: chrome.tabs.QueryInfo) {
     return new Promise<chrome.tabs.Tab[]>((resolve) => {
@@ -111,12 +112,12 @@ export default class TabManager {
         const fileLoader = createFileLoader();
 
         chrome.runtime.onMessage.addListener(async ({type, data, id}: Message, sender) => {
-            if (type === 'fetch') {
+            if (type === MessageType.CS_FETCH) {
                 const {url, responseType, mimeType, origin} = data;
 
                 // Using custom response due to Chrome and Firefox incompatibility
                 // Sometimes fetch error behaves like synchronous and sends `undefined`
-                const sendResponse = (response: Partial<Message>) => chrome.tabs.sendMessage<Message>(sender.tab.id, {type: 'fetch-response', id, ...response});
+                const sendResponse = (response: Partial<Message>) => chrome.tabs.sendMessage<Message>(sender.tab.id, {type: MessageType.BACKGROUND_FETCH_RESPONSE, id, ...response});
                 if (isThunderbird) {
                     // In thunderbird some CSS is loaded on a chrome:// URL.
                     // Thunderbird restricted Add-ons to load those URL's.
@@ -133,19 +134,19 @@ export default class TabManager {
                 }
             }
 
-            if (type === 'color-scheme-change') {
+            if (type === MessageType.CS_COLOR_SCHEME_CHANGE) {
                 onColorSchemeChange(data);
             }
-            if (type === 'save-file') {
+            if (type === MessageType.UI_SAVE_FILE) {
                 const {content, name} = data;
                 const a = document.createElement('a');
                 a.href = URL.createObjectURL(new Blob([content]));
                 a.download = name;
                 a.click();
             }
-            if (type === 'request-export-css') {
+            if (type === MessageType.UI_REQUEST_EXPORT_CSS) {
                 const activeTab = await this.getActiveTab();
-                chrome.tabs.sendMessage<Message>(activeTab.id, {type: 'export-css'}, {frameId: 0});
+                chrome.tabs.sendMessage<Message>(activeTab.id, {type: MessageType.BACKGROUND_EXPORT_CSS}, {frameId: 0});
             }
         });
     }

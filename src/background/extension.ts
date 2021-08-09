@@ -18,6 +18,7 @@ import {createSVGFilterStylesheet, getSVGFilterMatrixValue, getSVGReverseFilterM
 import type {ExtensionData, FilterConfig, News, Shortcuts, UserSettings, TabInfo} from '../definitions';
 import {isSystemDarkModeEnabled} from '../utils/media-query';
 import {isFirefox, isThunderbird} from '../utils/platform';
+import {MessageType} from '../utils/message';
 
 export class Extension {
     ready: boolean;
@@ -245,7 +246,7 @@ export class Extension {
         if (this.ready) {
             return this.getTabMessage(url, frameURL);
         }
-        return new Promise<{type: string; data?: any}>((resolve) => {
+        return new Promise<{type: MessageType; data?: any}>((resolve) => {
             this.awaiting.push(() => {
                 resolve(this.getTabMessage(url, frameURL));
             });
@@ -253,7 +254,7 @@ export class Extension {
     }
 
     private getUnsupportedSenderMessage() {
-        return {type: 'unsupported-sender'};
+        return {type: MessageType.BACKGROUND_UNSUPPORTED_SENDER};
     }
 
     private wasEnabledOnLastCheck: boolean;
@@ -425,19 +426,19 @@ export class Extension {
             switch (theme.engine) {
                 case ThemeEngines.cssFilter: {
                     return {
-                        type: 'add-css-filter',
+                        type: MessageType.BACKGROUND_ADD_CSS_FILTER,
                         data: createCSSFilterStylesheet(theme, url, frameURL, this.config.INVERSION_FIXES),
                     };
                 }
                 case ThemeEngines.svgFilter: {
                     if (isFirefox) {
                         return {
-                            type: 'add-css-filter',
+                            type: MessageType.BACKGROUND_ADD_CSS_FILTER,
                             data: createSVGFilterStylesheet(theme, url, frameURL, this.config.INVERSION_FIXES),
                         };
                     }
                     return {
-                        type: 'add-svg-filter',
+                        type: MessageType.BACKGROUND_ADD_SVG_FILTER,
                         data: {
                             css: createSVGFilterStylesheet(theme, url, frameURL, this.config.INVERSION_FIXES),
                             svgMatrix: getSVGFilterMatrixValue(theme),
@@ -447,7 +448,7 @@ export class Extension {
                 }
                 case ThemeEngines.staticTheme: {
                     return {
-                        type: 'add-static-theme',
+                        type: MessageType.BACKGROUND_ADD_STATIC_THEME,
                         data: theme.stylesheet && theme.stylesheet.trim() ?
                             theme.stylesheet :
                             createStaticStylesheet(theme, url, frameURL, this.config.STATIC_THEMES),
@@ -459,7 +460,7 @@ export class Extension {
                     const fixes = getDynamicThemeFixesFor(url, frameURL, this.config.DYNAMIC_THEME_FIXES, this.user.settings.enableForPDF);
                     const isIFrame = frameURL != null;
                     return {
-                        type: 'add-dynamic-theme',
+                        type: MessageType.BACKGROUND_ADD_DYNAMIC_THEME,
                         data: {filter, fixes, isIFrame},
                     };
                 }
@@ -471,7 +472,7 @@ export class Extension {
 
         console.log(`Site is not inverted: ${url}`);
         return {
-            type: 'clean-up',
+            type: MessageType.BACKGROUND_CLEAN_UP,
         };
     };
 

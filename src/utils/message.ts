@@ -1,6 +1,4 @@
 export enum MessageType {
-    UI_ENABLE,
-    UI_DISABLE,
     UI_GET_DATA,
     UI_GET_ACTIVE_TAB_INFO,
     UI_SUBSCRIBE_TO_CHANGES,
@@ -42,8 +40,6 @@ export enum MessageType {
 
 // This map exists only for debugging convenience and is not used in the final build output.
 export const MessageTypeDescriptions = {
-    [MessageType.UI_ENABLE]: 'enable',
-    [MessageType.UI_DISABLE]: 'disable',
     [MessageType.UI_GET_DATA]: 'ui-get-data',
     [MessageType.UI_GET_ACTIVE_TAB_INFO]: 'ui-get-active-tab-info',
     [MessageType.UI_SUBSCRIBE_TO_CHANGES]: 'subscribe-to-changes',

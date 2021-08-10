@@ -19,6 +19,7 @@ import type {ExtensionData, FilterConfig, News, Shortcuts, UserSettings, TabInfo
 import {isSystemDarkModeEnabled} from '../utils/media-query';
 import {isFirefox, isThunderbird} from '../utils/platform';
 import {MessageType} from '../utils/message';
+import {logInfo} from '../utils/log';
 
 export class Extension {
     ready: boolean;
@@ -115,7 +116,7 @@ export class Extension {
         }
         this.onAppToggle();
         this.changeSettings(this.user.settings);
-        console.log('loaded', this.user.settings);
+        logInfo('loaded', this.user.settings);
 
         this.registerCommands();
 
@@ -173,14 +174,14 @@ export class Extension {
         }
         chrome.commands.onCommand.addListener(async (command) => {
             if (command === 'toggle') {
-                console.log('Toggle command entered');
+                logInfo('Toggle command entered');
                 this.changeSettings({
                     enabled: !this.isEnabled(),
                     automation: '',
                 });
             }
             if (command === 'addSite') {
-                console.log('Add Site command entered');
+                logInfo('Add Site command entered');
                 const url = await this.tabs.getActiveTabURL();
                 if (isPDF(url)) {
                     this.changeSettings({enableForPDF: !this.user.settings.enableForPDF});
@@ -189,7 +190,7 @@ export class Extension {
                 }
             }
             if (command === 'switchEngine') {
-                console.log('Switch Engine command entered');
+                logInfo('Switch Engine command entered');
                 const engines = Object.values(ThemeEngines);
                 const index = engines.indexOf(this.user.settings.theme.engine);
                 const next = index === engines.length - 1 ? engines[0] : engines[index + 1];
@@ -422,7 +423,7 @@ export class Extension {
             const preset = custom ? null : this.user.settings.presets.find(({urls}) => isURLInList(url, urls));
             const theme = custom ? custom.theme : preset ? preset.theme : this.user.settings.theme;
 
-            console.log(`Creating CSS for url: ${url}`);
+            logInfo(`Creating CSS for url: ${url}`);
             switch (theme.engine) {
                 case ThemeEngines.cssFilter: {
                     return {
@@ -470,7 +471,7 @@ export class Extension {
             }
         }
 
-        console.log(`Site is not inverted: ${url}`);
+        logInfo(`Site is not inverted: ${url}`);
         return {
             type: MessageType.BG_CLEAN_UP,
         };
@@ -482,6 +483,6 @@ export class Extension {
 
     private async saveUserSettings() {
         await this.user.saveSettings();
-        console.log('saved', this.user.settings);
+        logInfo('saved', this.user.settings);
     }
 }

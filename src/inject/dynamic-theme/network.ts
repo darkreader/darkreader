@@ -1,4 +1,4 @@
-import type {Message} from 'definitions';
+import type {Message} from '../../definitions';
 import {MessageType} from 'utils/message';
 
 interface FetchRequest {

@@ -77,6 +77,60 @@ module.exports = {
         'import/no-unresolved': ['error', {
             ignore: ['^malevic\/'],
         }],
+        'import/no-restricted-paths': ['error', {
+            zones: [{
+                target: './src/inject/',
+                from: './src/background/',
+            },
+            {
+                target: './src/inject/',
+                from: './src/ui/',
+            },
+            {
+                target: './src/inject/',
+                from: './src/api/',
+            },
+            {
+                target: './src/inject/',
+                from: './tests/',
+            },
+            {
+                target: './src/background/',
+                from: './src/inject/',
+            },
+            {
+                target: './src/background/',
+                from: './src/ui/',
+            },
+            {
+                target: './src/background/',
+                from: './tests/',
+            },
+            {
+                target: './src/ui/',
+                from: './src/inject/',
+            },
+            {
+                target: './src/ui/',
+                from: './src/background/',
+            },
+            {
+                target: './src/ui/',
+                from: './tests/',
+            },
+            {
+                target: './src/generators/',
+                from: './src/inject/',
+            },
+            {
+                target: './src/generators/',
+                from: './src/background/',
+            },
+            {
+                target: './src/generators/',
+                from: './src/ui/',
+            }],
+        }],
     },
 
     overrides: [

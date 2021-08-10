@@ -2,7 +2,7 @@ import {getSVGFilterMatrixValue} from '../../generators/svg-filter';
 import {bgFetch} from './network';
 import {loadAsDataURL} from '../../utils/network';
 import type {FilterConfig} from '../../definitions';
-import {logInfo, logWarn} from '../utils/log';
+import {logInfo, logWarn} from '../../utils/log';
 import AsyncQueue from '../../utils/async-queue';
 
 export interface ImageDetails {

@@ -1,3 +1,4 @@
+import {logWarn} from '../../utils/log';
 import {PromiseBarrier} from '../../utils/promise-barrier';
 import {isNonPersistent} from './migration';
 
@@ -98,7 +99,7 @@ export class StateManager {
                 // fallthrough
             case StateManagerState.INITIAL:
                 // Make sure not to overwrite data before it is loaded
-                console.warn('StateManager.saveState is called while loading data. Possible data race!');
+                logWarn('StateManager.saveState is called while loading data. Possible data race!');
                 await this.loadStateBarrier.entry();
                 this.meta = StateManagerState.SAVING;
                 break;
@@ -120,7 +121,7 @@ export class StateManager {
                 case StateManagerState.DISABLED:
                 case StateManagerState.LOADING:
                 case StateManagerState.READY:
-                    console.warn('Unexpected state. Possible data race!');
+                    logWarn('Unexpected state. Possible data race!');
                     // fallthrough
                 case StateManagerState.SAVING:
                     this.meta = StateManagerState.READY;

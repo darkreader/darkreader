@@ -3,7 +3,7 @@ import {forEach} from '../../utils/array';
 import {getMatches} from '../../utils/text';
 import {getAbsoluteURL} from '../../utils/url';
 import {watchForNodePosition, removeNode, iterateShadowHosts, addReadyStateCompleteListener} from '../utils/dom';
-import {logInfo, logWarn} from '../utils/log';
+import {logInfo, logWarn} from '../../utils/log';
 import {replaceCSSRelativeURLsWithAbsolute, removeCSSComments, replaceCSSFontFace, getCSSURLValue, cssImportRegex, getCSSBaseBath} from './css-rules';
 import {bgFetch} from './network';
 import {createStyleSheetModifier} from './stylesheet-modifier';

@@ -33,7 +33,7 @@ function initalSetup() {
     });
     global.chrome.i18n.getUILanguage = global.chrome.i18n.getUILanguage || (() => 'en-US');
     require('ts-node').register({
-        ...tsConfig,
+        transpileOnly: true,
         compilerOptions: {
             ...tsConfig.compilerOptions,
             module: 'commonjs',

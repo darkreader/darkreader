@@ -56,42 +56,38 @@ export default class Connector implements ExtensionActions {
         }
     };
 
-    private sendMessage(data: any) {
-        chrome.runtime.sendMessage<Message>(data);
-    }
-
     subscribeToChanges(callback: (data: ExtensionData) => void) {
         this.changeSubscribers.add(callback);
         if (this.changeSubscribers.size === 1) {
             chrome.runtime.onMessage.addListener(this.onChangesReceived);
             if (!isFirefox) {
-                this.sendMessage({type: MessageType.UI_SUBSCRIBE_TO_CHANGES});
+                chrome.runtime.sendMessage<Message>({type: MessageType.UI_SUBSCRIBE_TO_CHANGES});
             }
         }
     }
 
     setShortcut(command: string, shortcut: string) {
-        this.sendMessage({type: MessageType.UI_SET_SHORTCUT, data: {command, shortcut}});
+        chrome.runtime.sendMessage<Message>({type: MessageType.UI_SET_SHORTCUT, data: {command, shortcut}});
     }
 
     changeSettings(settings: Partial<UserSettings>) {
-        this.sendMessage({type: MessageType.UI_CHANGE_SETTINGS, data: settings});
+        chrome.runtime.sendMessage<Message>({type: MessageType.UI_CHANGE_SETTINGS, data: settings});
     }
 
     setTheme(theme: Partial<FilterConfig>) {
-        this.sendMessage({type: MessageType.UI_SET_THEME, data: theme});
+        chrome.runtime.sendMessage<Message>({type: MessageType.UI_SET_THEME, data: theme});
     }
 
     toggleURL(url: string) {
-        this.sendMessage({type: MessageType.UI_TOGGLE_URL, data: url});
+        chrome.runtime.sendMessage<Message>({type: MessageType.UI_TOGGLE_URL, data: url});
     }
 
     markNewsAsRead(ids: string[]) {
-        this.sendMessage({type: MessageType.UI_MARK_NEWS_AS_READ, data: ids});
+        chrome.runtime.sendMessage<Message>({type: MessageType.UI_MARK_NEWS_AS_READ, data: ids});
     }
 
     loadConfig(options: {local: boolean}) {
-        this.sendMessage({type: MessageType.UI_LOAD_CONFIG, data: options});
+        chrome.runtime.sendMessage<Message>({type: MessageType.UI_LOAD_CONFIG, data: options});
     }
 
     async applyDevDynamicThemeFixes(text: string) {
@@ -99,7 +95,7 @@ export default class Connector implements ExtensionActions {
     }
 
     resetDevDynamicThemeFixes() {
-        this.sendMessage({type: MessageType.UI_RESET_DEV_DYNAMIC_THEME_FIXES});
+        chrome.runtime.sendMessage<Message>({type: MessageType.UI_RESET_DEV_DYNAMIC_THEME_FIXES});
     }
 
     async applyDevInversionFixes(text: string) {
@@ -107,7 +103,7 @@ export default class Connector implements ExtensionActions {
     }
 
     resetDevInversionFixes() {
-        this.sendMessage({type: MessageType.UI_RESET_DEV_INVERSION_FIXES});
+        chrome.runtime.sendMessage<Message>({type: MessageType.UI_RESET_DEV_INVERSION_FIXES});
     }
 
     async applyDevStaticThemes(text: string) {
@@ -115,7 +111,7 @@ export default class Connector implements ExtensionActions {
     }
 
     resetDevStaticThemes() {
-        this.sendMessage({type: MessageType.UI_RESET_DEV_STATIC_THEMES});
+        chrome.runtime.sendMessage<Message>({type: MessageType.UI_RESET_DEV_STATIC_THEMES});
     }
 
     disconnect() {
@@ -123,7 +119,7 @@ export default class Connector implements ExtensionActions {
             this.changeSubscribers.clear();
             chrome.runtime.onMessage.removeListener(this.onChangesReceived);
             if (!isFirefox) {
-                this.sendMessage({type: MessageType.UI_UNSUBSCRIBE_FROM_CHANGES});
+                chrome.runtime.sendMessage<Message>({type: MessageType.UI_UNSUBSCRIBE_FROM_CHANGES});
             }
         }
     }

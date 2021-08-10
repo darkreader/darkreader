@@ -1,7 +1,10 @@
+import type {Message} from 'definitions';
+
 interface FetchRequest {
     url: string;
     responseType: 'data-url' | 'text';
     mimeType?: string;
+    origin?: string;
 }
 
 let counter = 0;
@@ -17,7 +20,7 @@ export async function bgFetch(request: FetchRequest) {
     });
 }
 
-chrome.runtime.onMessage.addListener(({type, data, error, id}) => {
+chrome.runtime.onMessage.addListener(({type, data, error, id}: Message) => {
     if (type === 'fetch-response') {
         const resolve = resolvers.get(id);
         const reject = rejectors.get(id);

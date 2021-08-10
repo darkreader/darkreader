@@ -11,10 +11,8 @@ function renderBody(data: ExtensionData, tab: TabInfo, actions: ExtensionActions
         if (!document.documentElement.classList.contains('preview')) {
             document.documentElement.classList.add('preview');
         }
-    } else {
-        if (document.documentElement.classList.contains('preview')) {
-            document.documentElement.classList.remove('preview');
-        }
+    } else if (document.documentElement.classList.contains('preview')) {
+        document.documentElement.classList.remove('preview');
     }
 
     sync(document.body, (

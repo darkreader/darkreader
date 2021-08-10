@@ -25,7 +25,7 @@ export default function AutomationPage(props: ViewProps) {
         return `${location}°`;
     }
 
-    function locationChanged(inputElement: HTMLInputElement, newValue: string, type: string) {
+    function locationChanged(inputElement: HTMLInputElement, newValue: string, type: 'latitude' | 'longitude') {
         if (newValue.trim() === '') {
             inputElement.value = '';
 

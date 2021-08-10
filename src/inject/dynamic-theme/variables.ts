@@ -35,6 +35,7 @@ export class VariablesStore {
     private changedTypeVars = new Set<string>();
     private typeChangeSubscriptions = new Map<string, Set<() => void>>();
     private unstableVarValues = new Map<string, string>();
+    private onRootVariableDefined: () => void;
 
     clear() {
         this.varTypes.clear();
@@ -91,10 +92,13 @@ export class VariablesStore {
         });
 
         this.unknownBgVars.forEach((v) => {
-            const hasUnknownColor = this.findVarRef(v, (ref) => {
-                return this.unknownColorVars.has(ref);
+            const hasColor = this.findVarRef(v, (ref) => {
+                return (
+                    this.unknownColorVars.has(ref) ||
+                    this.isVarType(ref, VAR_TYPE_TEXTCOLOR | VAR_TYPE_BORDERCOLOR)
+                );
             }) != null;
-            if (hasUnknownColor) {
+            if (hasColor) {
                 this.itarateVarRefs(v, (ref) => {
                     this.resolveVariableType(ref, VAR_TYPE_BGCOLOR);
                 });
@@ -307,7 +311,10 @@ export class VariablesStore {
         if (!this.typeChangeSubscriptions.has(varName)) {
             this.typeChangeSubscriptions.set(varName, new Set());
         }
-        this.typeChangeSubscriptions.get(varName).add(callback);
+        const rootStore = this.typeChangeSubscriptions.get(varName);
+        if (!rootStore.has(callback)) {
+            rootStore.add(callback);
+        }
     }
 
     private unsubscribeFromVariableTypeChanges(varName: string, callback: () => void) {
@@ -426,7 +433,7 @@ export class VariablesStore {
         varDeps.forEach((v) => iterator(v));
     }
 
-    private findVarRef(varName: string, iterator: (v: string) => boolean, stack = new Set<string>()) {
+    private findVarRef(varName: string, iterator: (v: string) => boolean, stack = new Set<string>()): string {
         if (stack.has(varName)) {
             return null;
         }
@@ -455,6 +462,10 @@ export class VariablesStore {
         });
     }
 
+    setOnRootVariableChange(callback: () => void) {
+        this.onRootVariableDefined = callback;
+    }
+
     putRootVars(styleElement: HTMLStyleElement, theme: Theme) {
         const sheet = styleElement.sheet;
         if (sheet.cssRules.length > 0) {
@@ -472,6 +483,7 @@ export class VariablesStore {
                 if (this.isVarType(property, VAR_TYPE_BORDERCOLOR)) {
                     declarations.set(wrapBorderColorVariableName(property), tryModifyBorderColor(value, theme));
                 }
+                this.subscribeForVarTypeChange(property, this.onRootVariableDefined);
             }
         });
         const cssLines = [] as string[];
@@ -547,7 +559,7 @@ function getVariableNameAndFallback(match: string) {
         name = match.substring(4, commaIndex).trim();
         fallback = match.substring(commaIndex + 1, match.length - 1).trim();
     } else {
-        name = match.substring(4, match.length - 1);
+        name = match.substring(4, match.length - 1).trim();
         fallback = '';
     }
     return {name, fallback};
@@ -555,19 +567,19 @@ function getVariableNameAndFallback(match: string) {
 
 export function replaceCSSVariablesNames(
     value: string,
-    nemeReplacer: (varName: string) => string,
+    nameReplacer: (varName: string) => string,
     fallbackReplacer?: (fallbackValue: string) => string,
 ): string {
     const matchReplacer = (match: string) => {
         const {name, fallback} = getVariableNameAndFallback(match);
-        const newName = nemeReplacer(name);
+        const newName = nameReplacer(name);
         if (!fallback) {
             return `var(${newName})`;
         }
 
         let newFallback: string;
         if (isVarDependant(fallback)) {
-            newFallback = replaceCSSVariablesNames(fallback, nemeReplacer, fallbackReplacer);
+            newFallback = replaceCSSVariablesNames(fallback, nameReplacer, fallbackReplacer);
         } else if (fallbackReplacer) {
             newFallback = fallbackReplacer(fallback);
         } else {

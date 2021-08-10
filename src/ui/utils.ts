@@ -1,7 +1,7 @@
 import {isFirefox} from '../utils/platform';
 
 export function classes(...args: Array<string | {[cls: string]: boolean}>) {
-    const classes = [];
+    const classes: string[] = [];
     args.filter((c) => Boolean(c)).forEach((c) => {
         if (typeof c === 'string') {
             classes.push(c);
@@ -49,7 +49,7 @@ export function saveFile(name: string, content: string) {
 type AnyVoidFunction = (...args: any[]) => void;
 
 export function throttle<F extends AnyVoidFunction>(callback: F): F {
-    let frameId = null;
+    let frameId: number = null;
     return ((...args: any[]) => {
         if (!frameId) {
             callback(...args);
@@ -104,7 +104,7 @@ function onSwipeStart(
         moveHandler(se, e);
     });
 
-    function onPointerUp(e) {
+    function onPointerUp(e: MouseEvent) {
         unsubscribe();
         const se = getSwipeEventObject(e);
         upHandler(se, e);

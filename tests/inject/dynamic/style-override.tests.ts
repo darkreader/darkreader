@@ -147,7 +147,6 @@ describe('STYLE ELEMENTS', () => {
         expect(document.querySelector('.darkreader--sync')).toBe(null);
         expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(255, 255, 255)');
         expect(getComputedStyle(container.querySelector('h1 strong')).color).toBe('rgb(255, 255, 255)');
-
     });
 
     it('should react to updated style', async () => {
@@ -180,7 +179,6 @@ describe('STYLE ELEMENTS', () => {
         document.querySelector('.testcase-style').textContent = 'h1 strong { color: green; }';
         await timeout(0);
         expect(getComputedStyle(document.querySelector('h1 strong')).color).toBe('rgb(140, 255, 140)');
-
     });
 
     it('should react to a new style', async () => {

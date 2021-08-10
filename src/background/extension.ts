@@ -8,7 +8,7 @@ import TabManager from './tab-manager';
 import UserStorage from './user-storage';
 import {setWindowTheme, resetWindowTheme} from './window-theme';
 import {getFontList, getCommands, setShortcut, canInjectScript} from './utils/extension-api';
-import {isInTimeInterval, getDuration, isNightAtLocation} from '../utils/time';
+import {isInTimeIntervalLocal, nextTimeInterval, isNightAtLocation, nextNightAtLocation} from '../utils/time';
 import {isURLInList, getURLHostOrProtocol, isURLEnabled, isPDF} from '../utils/url';
 import ThemeEngines from '../generators/theme-engines';
 import createCSSFilterStylesheet from '../generators/css-filter';
@@ -18,8 +18,6 @@ import {createSVGFilterStylesheet, getSVGFilterMatrixValue, getSVGReverseFilterM
 import type {ExtensionData, FilterConfig, News, Shortcuts, UserSettings, TabInfo} from '../definitions';
 import {isSystemDarkModeEnabled} from '../utils/media-query';
 import {isFirefox, isThunderbird} from '../utils/platform';
-
-const AUTO_TIME_CHECK_INTERVAL = getDuration({seconds: 10});
 
 export class Extension {
     ready: boolean;
@@ -33,6 +31,9 @@ export class Extension {
     tabs: TabManager;
     user: UserStorage;
 
+    private isEnabledCached: boolean = null;
+
+    static ALARM_NAME = 'auto-time-alarm';
     constructor() {
         this.ready = false;
 
@@ -54,30 +55,51 @@ export class Extension {
         this.awaiting = [];
     }
 
-    isEnabled() {
-        const {automation} = this.user.settings;
-        if (automation === 'time') {
-            const now = new Date();
-            return isInTimeInterval(now, this.user.settings.time.activation, this.user.settings.time.deactivation);
-        } else if (automation === 'system') {
-            if (isFirefox) {
-                // BUG: Firefox background page always matches initial color scheme.
-                return this.wasLastColorSchemeDark == null
-                    ? isSystemDarkModeEnabled()
-                    : this.wasLastColorSchemeDark;
-            }
-            return isSystemDarkModeEnabled();
-        } else if (automation === 'location') {
-            const latitude = this.user.settings.location.latitude;
-            const longitude = this.user.settings.location.longitude;
+    private alarmListener = (alarm: chrome.alarms.Alarm): void => {
+        if (alarm.name === Extension.ALARM_NAME) {
+            this.handleAutoCheck();
+        }
+    };
 
-            if (latitude != null && longitude != null) {
-                const now = new Date();
-                return isNightAtLocation(now, latitude, longitude);
-            }
+    isEnabled(): boolean {
+        if (this.isEnabledCached !== null) {
+            return this.isEnabledCached;
         }
 
-        return this.user.settings.enabled;
+        const {automation} = this.user.settings;
+        let nextCheck: number;
+        switch (automation) {
+            case 'time':
+                this.isEnabledCached = isInTimeIntervalLocal(this.user.settings.time.activation, this.user.settings.time.deactivation);
+                nextCheck = nextTimeInterval(this.user.settings.time.activation, this.user.settings.time.deactivation);
+                break;
+            case 'system':
+                if (isFirefox) {
+                    // BUG: Firefox background page always matches initial color scheme.
+                    this.isEnabledCached = this.wasLastColorSchemeDark == null
+                        ? isSystemDarkModeEnabled()
+                        : this.wasLastColorSchemeDark;
+                } else {
+                    this.isEnabledCached = isSystemDarkModeEnabled();
+                }
+                break;
+            case 'location': {
+                const {latitude, longitude} = this.user.settings.location;
+
+                if (latitude != null && longitude != null) {
+                    this.isEnabledCached = isNightAtLocation(latitude, longitude);
+                    nextCheck = nextNightAtLocation(latitude, longitude);
+                }
+                break;
+            }
+            default:
+                this.isEnabledCached = this.user.settings.enabled;
+                break;
+        }
+        if (nextCheck) {
+            chrome.alarms.create(Extension.ALARM_NAME, {when: nextCheck});
+        }
+        return this.isEnabledCached;
     }
 
     private awaiting: Array<() => void>;
@@ -190,7 +212,7 @@ export class Extension {
             isReady: this.ready,
             settings: this.user.settings,
             fonts: this.fonts,
-            news: this.news.latest,
+            news: await this.news.getLatest(),
             shortcuts: await this.getShortcuts(),
             devtools: {
                 dynamicFixesText: this.devtools.getDynamicThemeFixesText(),
@@ -219,16 +241,15 @@ export class Extension {
         this.icon.hideBadge();
     }
 
-    private getConnectionMessage(url, frameURL) {
+    private getConnectionMessage(url: string, frameURL: string) {
         if (this.ready) {
             return this.getTabMessage(url, frameURL);
-        } else {
-            return new Promise<{type: string; data?: any}>((resolve) => {
-                this.awaiting.push(() => {
-                    resolve(this.getTabMessage(url, frameURL));
-                });
-            });
         }
+        return new Promise<{type: string; data?: any}>((resolve) => {
+            this.awaiting.push(() => {
+                resolve(this.getTabMessage(url, frameURL));
+            });
+        });
     }
 
     private getUnsupportedSenderMessage() {
@@ -238,17 +259,13 @@ export class Extension {
     private wasEnabledOnLastCheck: boolean;
 
     private startAutoTimeCheck() {
-        setInterval(() => {
-            if (!this.ready || this.user.settings.automation === '') {
-                return;
-            }
-            this.handleAutoCheck();
-        }, AUTO_TIME_CHECK_INTERVAL);
+        chrome.alarms.onAlarm.addListener(this.alarmListener);
+        this.handleAutoCheck();
     }
 
-    private wasLastColorSchemeDark = null;
+    private wasLastColorSchemeDark: boolean = null;
 
-    private onColorSchemeChange = ({isDark}) => {
+    private onColorSchemeChange = ({isDark}: {isDark: boolean}) => {
         this.wasLastColorSchemeDark = isDark;
         if (this.user.settings.automation !== 'system') {
             return;
@@ -260,6 +277,7 @@ export class Extension {
         if (!this.ready) {
             return;
         }
+        this.isEnabledCached = null;
         const isEnabled = this.isEnabled();
         if (this.wasEnabledOnLastCheck !== isEnabled) {
             this.wasEnabledOnLastCheck = isEnabled;
@@ -348,6 +366,7 @@ export class Extension {
     //
 
     private onAppToggle() {
+        this.isEnabledCached = null;
         if (this.isEnabled()) {
             this.icon.setActive();
             if (this.user.settings.changeBrowserTheme) {

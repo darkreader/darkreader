@@ -7,7 +7,6 @@ import {isURLInList} from '../../../../utils/url';
 import type {ExtWrapper, TabInfo, FilterConfig} from '../../../../definitions';
 
 export default function FilterSettings({data, actions, tab}: ExtWrapper & {tab: TabInfo}) {
-
     const custom = data.settings.customThemes.find(({url}) => isURLInList(tab.url, url));
     const filterConfig = custom ? custom.theme : data.settings.theme;
 

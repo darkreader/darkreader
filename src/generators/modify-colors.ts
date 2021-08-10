@@ -90,7 +90,7 @@ function modifyLightSchemeColor(rgb: RGBA, theme: Theme) {
     return modifyColorWithCache(rgb, theme, modifyLightModeHSL, poleFg, poleBg);
 }
 
-function modifyLightModeHSL({h, s, l, a}, poleFg: HSLA, poleBg: HSLA) {
+function modifyLightModeHSL({h, s, l, a}: HSLA, poleFg: HSLA, poleBg: HSLA) {
     const isDark = l < 0.5;
     let isNeutral: boolean;
     if (isDark) {
@@ -214,7 +214,7 @@ export function modifyForegroundColor(rgb: RGBA, theme: Theme) {
     return modifyColorWithCache(rgb, {...theme, mode: 0}, modifyFgHSL, pole);
 }
 
-function modifyBorderHSL({h, s, l, a}, poleFg: HSLA, poleBg: HSLA) {
+function modifyBorderHSL({h, s, l, a}: HSLA, poleFg: HSLA, poleBg: HSLA) {
     const isDark = l < 0.5;
     const isNeutral = l < 0.2 || s < 0.24;
 

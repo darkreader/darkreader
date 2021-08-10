@@ -67,7 +67,6 @@ async function run() {
     if (args.includes('--api')) {
         await api();
     }
-
 }
 
 run();

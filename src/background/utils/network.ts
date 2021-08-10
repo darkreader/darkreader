@@ -38,12 +38,28 @@ interface CacheRecord {
 class LimitedCacheStorage {
     static QUOTA_BYTES = ((navigator as any).deviceMemory || 4) * 16 * 1024 * 1024;
     static TTL = getDuration({minutes: 10});
+    static ALARM_NAME = 'network';
 
     private bytesInUse = 0;
     private records = new Map<string, CacheRecord>();
+    private alarmIsActive = false;
 
     constructor() {
-        setInterval(() => this.removeExpiredRecords(), getDuration({minutes: 1}));
+        chrome.alarms.onAlarm.addListener(async (alarm) => {
+            if (alarm.name === LimitedCacheStorage.ALARM_NAME) {
+                // We schedule only one-time alarms, so once it goes off,
+                // there are no more alarms scheduled.
+                this.alarmIsActive = false;
+                this.removeExpiredRecords();
+            }
+        });
+    }
+
+    private ensureAlarmIsScheduled(){
+        if (!this.alarmIsActive) {
+            chrome.alarms.create(LimitedCacheStorage.ALARM_NAME, {delayInMinutes: 1});
+            this.alarmIsActive = true;
+        }
     }
 
     has(url: string) {
@@ -62,6 +78,8 @@ class LimitedCacheStorage {
     }
 
     set(url: string, value: string) {
+        this.ensureAlarmIsScheduled();
+
         const size = getStringSize(value);
         if (size > LimitedCacheStorage.QUOTA_BYTES) {
             return;
@@ -91,6 +109,10 @@ class LimitedCacheStorage {
                 break;
             }
         }
+
+        if (this.records.size !== 0) {
+            this.ensureAlarmIsScheduled();
+        }
     }
 }
 
@@ -98,6 +120,7 @@ interface FetchRequestParameters {
     url: string;
     responseType: 'data-url' | 'text';
     mimeType?: string;
+    origin?: string;
 }
 
 export function createFileLoader() {
@@ -111,14 +134,14 @@ export function createFileLoader() {
         'text': loadAsText,
     };
 
-    async function get({url, responseType, mimeType}: FetchRequestParameters) {
+    async function get({url, responseType, mimeType, origin}: FetchRequestParameters) {
         const cache = caches[responseType];
         const load = loaders[responseType];
         if (cache.has(url)) {
             return cache.get(url);
         }
 
-        const data = await load(url, mimeType);
+        const data = await load(url, mimeType, origin);
         cache.set(url, data);
         return data;
     }

@@ -9,7 +9,6 @@ let PopupBody;
 let CSSEditorBody;
 let getMockedData;
 let getMockedActiveTabInfo;
-const tsConfig = require('../src/tsconfig.json');
 
 
 let pages = [];
@@ -32,13 +31,7 @@ function initalSetup() {
         return message;
     });
     global.chrome.i18n.getUILanguage = global.chrome.i18n.getUILanguage || (() => 'en-US');
-    require('ts-node').register({
-        transpileOnly: true,
-        compilerOptions: {
-            ...tsConfig.compilerOptions,
-            module: 'commonjs',
-        },
-    });
+    require('esbuild-register/dist/node').register();
     require('tsconfig-paths').register({
         baseUrl: './',
         paths: {

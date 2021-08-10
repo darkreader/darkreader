@@ -4,6 +4,7 @@ import type {Message} from '../definitions';
 import {isThunderbird} from '../utils/platform';
 import {logInfo, logWarn} from '../inject/utils/log';
 import {MessageType} from 'utils/message';
+import {StateManager} from './utils/state-manager';
 
 async function queryTabs(query: chrome.tabs.QueryInfo) {
     return new Promise<chrome.tabs.Tab[]>((resolve) => {
@@ -42,21 +43,27 @@ enum DocumentState {
 }
 
 export default class TabManager {
-    private tabs: Map<number, Map<number, FrameInfo>>;
+    private tabs: {[tabId: number]: {[frameId: number]: FrameInfo}};
+    private stateManager: StateManager;
+    static LOCAL_STORAGE_KEY = 'TabManager-state';
 
     constructor({getConnectionMessage, onColorSchemeChange}: TabManagerOptions) {
-        this.tabs = new Map();
-        chrome.runtime.onMessage.addListener((message, sender) => {
-            function addFrame(tabs: any, tabId: number, frameId: number, senderURL: string) {
-                let frames: Map<number, FrameInfo>;
-                if (tabs.has(tabId)) {
-                    frames = tabs.get(tabId);
+        this.stateManager = new StateManager(TabManager.LOCAL_STORAGE_KEY, this, {tabs: {}});
+        this.tabs = {};
+
+        chrome.runtime.onMessage.addListener(async (message, sender) => {
+            function addFrame(tabs: {[tabId: number]: {[frameId: number]: FrameInfo}}, tabId: number, frameId: number, senderURL: string) {
+                let frames: {[frameId: number]: FrameInfo};
+                if (tabs[tabId]) {
+                    frames = tabs[tabId];
                 } else {
-                    frames = new Map();
-                    tabs.set(tabId, frames);
+                    frames = {};
+                    tabs[tabId] = frames;
                 }
-                frames.set(frameId, {url: senderURL, state: DocumentState.ACTIVE});
+                frames[frameId] = {url: senderURL, state: DocumentState.ACTIVE};
             }
+
+            await this.stateManager.loadState();
 
             switch (message.type) {
                 case 'frame-connect': {
@@ -95,18 +102,29 @@ export default class TabManager {
                         logWarn('Unexpected message', message, sender);
                         break;
                     }
+                    const tabId = sender.tab.id;
+                    const frameId = sender.frameId;
 
-                    const framesForDeletion = this.tabs.get(sender.tab.id);
-                    framesForDeletion && framesForDeletion.delete(sender.frameId);
+                    if (frameId === 0) {
+                        delete this.tabs[tabId];
+                    }
+
+                    if (this.tabs[tabId] && this.tabs[tabId][frameId]) {
+                        // We need to use delete here because Object.entries()
+                        // in sendMessage() would enumerate undefined as well.
+                        delete this.tabs[tabId][frameId];
+                    }
                     break;
                 }
                 case 'frame-freeze':
-                    this.tabs.get(sender.tab.id).get(sender.frameId).state = DocumentState.FROZEN;
+                    this.tabs[sender.tab.id][sender.frameId].state = DocumentState.FROZEN;
                     break;
                 case 'frame-resume':
                     addFrame(this.tabs, sender.tab.id, sender.frameId, sender.url);
                     break;
             }
+
+            this.stateManager.saveState();
         });
 
         const fileLoader = createFileLoader();
@@ -161,7 +179,7 @@ export default class TabManager {
     async updateContentScript(options: {runOnProtectedPages: boolean}) {
         (await queryTabs({}))
             .filter((tab) => options.runOnProtectedPages || canInjectScript(tab.url))
-            .filter((tab) => !this.tabs.has(tab.id))
+            .filter((tab) => !Boolean(this.tabs[tab.id]))
             .forEach((tab) => {
                 if (!tab.discarded) {
                     chrome.tabs.executeScript(tab.id, {
@@ -185,10 +203,10 @@ export default class TabManager {
 
     async sendMessage(getMessage: (url: string, frameUrl: string) => any) {
         (await queryTabs({}))
-            .filter((tab) => this.tabs.has(tab.id))
+            .filter((tab) => Boolean(this.tabs[tab.id]))
             .forEach((tab) => {
-                const frames = this.tabs.get(tab.id);
-                frames.forEach(({url, state}, frameId) => {
+                const frames = this.tabs[tab.id];
+                Object.entries(frames).forEach(([_, {url, state}], frameId) => {
                     if (state !== DocumentState.ACTIVE && state !== DocumentState.PASSIVE) {
                         // TODO: avoid sending messages to frozen tabs for performance reasons.
                         logInfo('Sending message to a frozen tab.');

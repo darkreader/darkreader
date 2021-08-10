@@ -1,7 +1,7 @@
 module.exports = {
     parser: '@typescript-eslint/parser',
     plugins: ['@typescript-eslint', 'local'],
-    extends: ['plugin:@typescript-eslint/recommended'],
+    extends: ['plugin:@typescript-eslint/recommended', 'plugin:import/recommended', 'plugin:import/typescript'],
     rules: {
         'array-bracket-spacing': ['error', 'never'],
         'arrow-parens': ['error', 'always'],
@@ -74,7 +74,11 @@ module.exports = {
             allowTemplateLiterals: true,
             avoidEscape: true,
         }],
+        'import/no-unresolved': ['error', {
+            ignore: ['^malevic\/'],
+        }],
     },
+
     overrides: [
         {
             files: ['tasks/**/*.js', 'tests/**/*.js'],

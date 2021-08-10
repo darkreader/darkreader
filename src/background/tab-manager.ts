@@ -2,7 +2,7 @@ import {canInjectScript} from '../background/utils/extension-api';
 import {createFileLoader} from './utils/network';
 import type {Message} from '../definitions';
 import {isThunderbird} from '../utils/platform';
-import {logInfo, logWarn} from '../inject/utils/log';
+import {logInfo, logWarn} from '../utils/log';
 import {StateManager} from './utils/state-manager';
 
 async function queryTabs(query: chrome.tabs.QueryInfo) {
@@ -205,7 +205,7 @@ export default class TabManager {
             .filter((tab) => Boolean(this.tabs[tab.id]))
             .forEach((tab) => {
                 const frames = this.tabs[tab.id];
-                Object.entries(frames).forEach(([_, {url, state}], frameId) => {
+                Object.entries(frames).forEach(([, {url, state}], frameId) => {
                     if (state !== DocumentState.ACTIVE && state !== DocumentState.PASSIVE) {
                         // TODO: avoid sending messages to frozen tabs for performance reasons.
                         logInfo('Sending message to a frozen tab.');

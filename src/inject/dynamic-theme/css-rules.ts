@@ -1,7 +1,7 @@
 import {forEach} from '../../utils/array';
 import {isSafari} from '../../utils/platform';
 import {parseURL, getAbsoluteURL} from '../../utils/url';
-import {logInfo, logWarn} from '../utils/log';
+import {logInfo, logWarn} from '../../utils/log';
 
 export function iterateCSSRules(rules: CSSRuleList, iterate: (rule: CSSStyleRule) => void, onMediaRuleError?: () => void) {
     forEach(rules, (rule) => {

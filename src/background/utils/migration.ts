@@ -1,4 +1,4 @@
-import {isChromium} from 'utils/platform';
+import {isChromium} from '../../utils/platform';
 
 export function isNonPersistent() {
     if (!isChromium) {

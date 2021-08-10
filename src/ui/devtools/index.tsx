@@ -2,7 +2,7 @@ import {m} from 'malevic';
 import {sync} from 'malevic/dom';
 import Body from './components/body';
 import connect from '../connect';
-import type {ExtensionData, TabInfo} from 'definitions';
+import type {ExtensionData, TabInfo} from '../../definitions';
 import type Connector from '../connect/connector';
 
 function renderBody(data: ExtensionData, tab: TabInfo, actions: Connector) {

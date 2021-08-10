@@ -1,4 +1,4 @@
-import {logWarn} from 'inject/utils/log';
+import {logWarn} from '../../utils/log';
 import {PromiseBarrier} from '../../utils/promise-barrier';
 import {isNonPersistent} from './migration';
 

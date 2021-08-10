@@ -2,7 +2,7 @@ import '../polyfills';
 import {DEFAULT_THEME} from '../../../src/defaults';
 import {createOrUpdateDynamicTheme, removeDynamicTheme} from '../../../src/inject/dynamic-theme';
 import {multiline, timeout} from '../../test-utils';
-import {isFirefox, isSafari} from 'utils/platform';
+import {isFirefox, isSafari} from '../../../src/utils/platform';
 
 const theme = {
     ...DEFAULT_THEME,

@@ -3,6 +3,7 @@ import {debounce} from '../utils/debounce';
 import {isURLMatched} from '../utils/url';
 import type {UserSettings} from '../definitions';
 import {readSyncStorage, readLocalStorage, writeSyncStorage, writeLocalStorage, subscribeToOuterSettingsChange} from './utils/extension-api';
+import {logWarn} from '../utils/log';
 
 const SAVE_TIMEOUT = 1000;
 
@@ -48,7 +49,7 @@ export default class UserStorage {
 
         const $sync = await readSyncStorage(DEFAULT_SETTINGS);
         if (!$sync) {
-            console.warn('Sync settings are missing');
+            logWarn('Sync settings are missing');
             local.syncSettings = false;
             this.set({syncSettings: false});
             this.saveSyncSetting(false);
@@ -70,7 +71,7 @@ export default class UserStorage {
         try {
             await writeSyncStorage(obj);
         } catch (err) {
-            console.warn('Settings synchronization was disabled due to error:', chrome.runtime.lastError);
+            logWarn('Settings synchronization was disabled due to error:', chrome.runtime.lastError);
             this.set({syncSettings: false});
         }
     }
@@ -81,7 +82,7 @@ export default class UserStorage {
             try {
                 await writeSyncStorage(settings);
             } catch (err) {
-                console.warn('Settings synchronization was disabled due to error:', chrome.runtime.lastError);
+                logWarn('Settings synchronization was disabled due to error:', chrome.runtime.lastError);
                 this.set({syncSettings: false});
                 await this.saveSyncSetting(false);
                 await writeLocalStorage(settings);
@@ -110,7 +111,7 @@ export default class UserStorage {
                     isURLMatched('[::1]:1337', pattern);
                     isOK = true;
                 } catch (err) {
-                    console.warn(`Pattern "${pattern}" excluded`);
+                    logWarn(`Pattern "${pattern}" excluded`);
                 }
                 return isOK && pattern !== '/';
             });

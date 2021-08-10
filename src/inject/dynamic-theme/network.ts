@@ -1,4 +1,4 @@
-import type {Message} from 'definitions';
+import type {Message} from '../../definitions';
 
 interface FetchRequest {
     url: string;

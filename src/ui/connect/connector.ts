@@ -1,4 +1,4 @@
-import {isFirefox} from 'utils/platform';
+import {isFirefox} from '../../utils/platform';
 import type {ExtensionData, ExtensionActions, FilterConfig, TabInfo, Message, UserSettings} from '../../definitions';
 
 export default class Connector implements ExtensionActions {

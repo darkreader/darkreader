@@ -6,7 +6,7 @@ import {variablesStore} from './variables';
 import type {FilterConfig} from '../../definitions';
 import {isShadowDomSupported} from '../../utils/platform';
 import {getDuration} from '../../utils/time';
-import {throttle} from '../utils/throttle';
+import {throttle} from '../../utils/throttle';
 
 interface Overrides {
     [cssProp: string]: {

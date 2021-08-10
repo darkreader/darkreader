@@ -212,7 +212,7 @@ export class Extension {
             isReady: this.ready,
             settings: this.user.settings,
             fonts: this.fonts,
-            news: this.news.latest,
+            news: await this.news.getLatest(),
             shortcuts: await this.getShortcuts(),
             devtools: {
                 dynamicFixesText: this.devtools.getDynamicThemeFixesText(),

@@ -23,10 +23,10 @@ async function sendMessage(...args) {
             } else {
                 text = await response.text();
             }
-            messageListeners.forEach((cb) => cb({type: MessageType.BACKGROUND_FETCH_RESPONSE, data: text, error: null, id}));
+            messageListeners.forEach((cb) => cb({type: MessageType.BG_FETCH_RESPONSE, data: text, error: null, id}));
         } catch (err) {
             console.error(err);
-            messageListeners.forEach((cb) => cb({type: MessageType.BACKGROUND_FETCH_RESPONSE, data: null, err, id}));
+            messageListeners.forEach((cb) => cb({type: MessageType.BG_FETCH_RESPONSE, data: null, err, id}));
         }
     }
 }

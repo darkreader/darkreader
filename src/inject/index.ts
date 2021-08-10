@@ -9,38 +9,38 @@ import {MessageType} from 'utils/message';
 
 function onMessage({type, data}: Message) {
     switch (type) {
-        case MessageType.BACKGROUND_ADD_CSS_FILTER:
-        case MessageType.BACKGROUND_ADD_STATIC_THEME: {
+        case MessageType.BG_ADD_CSS_FILTER:
+        case MessageType.BG_ADD_STATIC_THEME: {
             const css = data;
             removeDynamicTheme();
-            createOrUpdateStyle(css, type === MessageType.BACKGROUND_ADD_STATIC_THEME ? 'static' : 'filter');
+            createOrUpdateStyle(css, type === MessageType.BG_ADD_STATIC_THEME ? 'static' : 'filter');
             break;
         }
-        case MessageType.BACKGROUND_ADD_SVG_FILTER: {
+        case MessageType.BG_ADD_SVG_FILTER: {
             const {css, svgMatrix, svgReverseMatrix} = data;
             removeDynamicTheme();
             createOrUpdateSVGFilter(svgMatrix, svgReverseMatrix);
             createOrUpdateStyle(css, 'filter');
             break;
         }
-        case MessageType.BACKGROUND_ADD_DYNAMIC_THEME: {
+        case MessageType.BG_ADD_DYNAMIC_THEME: {
             const {filter, fixes, isIFrame} = data;
             removeStyle();
             createOrUpdateDynamicTheme(filter, fixes, isIFrame);
             break;
         }
-        case MessageType.BACKGROUND_EXPORT_CSS: {
+        case MessageType.BG_EXPORT_CSS: {
             collectCSS().then((collectedCSS) => chrome.runtime.sendMessage<Message>({type: MessageType.CS_EXPORT_CSS_RESPONSE, data: collectedCSS}));
             break;
         }
-        case MessageType.BACKGROUND_UNSUPPORTED_SENDER:
-        case MessageType.BACKGROUND_CLEAN_UP: {
+        case MessageType.BG_UNSUPPORTED_SENDER:
+        case MessageType.BG_CLEAN_UP: {
             removeStyle();
             removeSVGFilter();
             removeDynamicTheme();
             break;
         }
-        case MessageType.BACKGROUND_RELOAD:
+        case MessageType.BG_RELOAD:
             logWarn('Cleaning up before update');
             removeEventListener('pagehide', onPageHide);
             removeEventListener('freeze', onFreeze);

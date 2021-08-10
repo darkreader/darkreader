@@ -1,5 +1,4 @@
 import type {FilterMode} from './generators/css-filter';
-import type {MessageType} from 'utils/message';
 
 export interface ExtensionData {
     isEnabled: boolean;
@@ -109,7 +108,7 @@ export interface TabInfo {
 }
 
 export interface Message {
-    type: MessageType;
+    type: number;
     data?: any;
     id?: number;
     error?: any;

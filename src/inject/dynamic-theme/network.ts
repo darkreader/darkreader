@@ -22,7 +22,7 @@ export async function bgFetch(request: FetchRequest) {
 }
 
 chrome.runtime.onMessage.addListener(({type, data, error, id}: Message) => {
-    if (type === MessageType.BACKGROUND_FETCH_RESPONSE) {
+    if (type === MessageType.BG_FETCH_RESPONSE) {
         const resolve = resolvers.get(id);
         const reject = rejectors.get(id);
         resolvers.delete(id);

@@ -135,7 +135,7 @@ export default class TabManager {
 
                 // Using custom response due to Chrome and Firefox incompatibility
                 // Sometimes fetch error behaves like synchronous and sends `undefined`
-                const sendResponse = (response: Partial<Message>) => chrome.tabs.sendMessage<Message>(sender.tab.id, {type: MessageType.BACKGROUND_FETCH_RESPONSE, id, ...response});
+                const sendResponse = (response: Partial<Message>) => chrome.tabs.sendMessage<Message>(sender.tab.id, {type: MessageType.BG_FETCH_RESPONSE, id, ...response});
                 if (isThunderbird) {
                     // In thunderbird some CSS is loaded on a chrome:// URL.
                     // Thunderbird restricted Add-ons to load those URL's.
@@ -164,7 +164,7 @@ export default class TabManager {
             }
             if (type === MessageType.UI_REQUEST_EXPORT_CSS) {
                 const activeTab = await this.getActiveTab();
-                chrome.tabs.sendMessage<Message>(activeTab.id, {type: MessageType.BACKGROUND_EXPORT_CSS}, {frameId: 0});
+                chrome.tabs.sendMessage<Message>(activeTab.id, {type: MessageType.BG_EXPORT_CSS}, {frameId: 0});
             }
         });
     }

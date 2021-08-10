@@ -246,7 +246,7 @@ export class Extension {
         if (this.ready) {
             return this.getTabMessage(url, frameURL);
         }
-        return new Promise<{type: MessageType; data?: any}>((resolve) => {
+        return new Promise<{type: number; data?: any}>((resolve) => {
             this.awaiting.push(() => {
                 resolve(this.getTabMessage(url, frameURL));
             });
@@ -254,7 +254,7 @@ export class Extension {
     }
 
     private getUnsupportedSenderMessage() {
-        return {type: MessageType.BACKGROUND_UNSUPPORTED_SENDER};
+        return {type: MessageType.BG_UNSUPPORTED_SENDER};
     }
 
     private wasEnabledOnLastCheck: boolean;
@@ -426,19 +426,19 @@ export class Extension {
             switch (theme.engine) {
                 case ThemeEngines.cssFilter: {
                     return {
-                        type: MessageType.BACKGROUND_ADD_CSS_FILTER,
+                        type: MessageType.BG_ADD_CSS_FILTER,
                         data: createCSSFilterStylesheet(theme, url, frameURL, this.config.INVERSION_FIXES),
                     };
                 }
                 case ThemeEngines.svgFilter: {
                     if (isFirefox) {
                         return {
-                            type: MessageType.BACKGROUND_ADD_CSS_FILTER,
+                            type: MessageType.BG_ADD_CSS_FILTER,
                             data: createSVGFilterStylesheet(theme, url, frameURL, this.config.INVERSION_FIXES),
                         };
                     }
                     return {
-                        type: MessageType.BACKGROUND_ADD_SVG_FILTER,
+                        type: MessageType.BG_ADD_SVG_FILTER,
                         data: {
                             css: createSVGFilterStylesheet(theme, url, frameURL, this.config.INVERSION_FIXES),
                             svgMatrix: getSVGFilterMatrixValue(theme),
@@ -448,7 +448,7 @@ export class Extension {
                 }
                 case ThemeEngines.staticTheme: {
                     return {
-                        type: MessageType.BACKGROUND_ADD_STATIC_THEME,
+                        type: MessageType.BG_ADD_STATIC_THEME,
                         data: theme.stylesheet && theme.stylesheet.trim() ?
                             theme.stylesheet :
                             createStaticStylesheet(theme, url, frameURL, this.config.STATIC_THEMES),
@@ -460,7 +460,7 @@ export class Extension {
                     const fixes = getDynamicThemeFixesFor(url, frameURL, this.config.DYNAMIC_THEME_FIXES, this.user.settings.enableForPDF);
                     const isIFrame = frameURL != null;
                     return {
-                        type: MessageType.BACKGROUND_ADD_DYNAMIC_THEME,
+                        type: MessageType.BG_ADD_DYNAMIC_THEME,
                         data: {filter, fixes, isIFrame},
                     };
                 }
@@ -472,7 +472,7 @@ export class Extension {
 
         console.log(`Site is not inverted: ${url}`);
         return {
-            type: MessageType.BACKGROUND_CLEAN_UP,
+            type: MessageType.BG_CLEAN_UP,
         };
     };
 

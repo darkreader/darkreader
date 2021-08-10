@@ -9,7 +9,7 @@ export default class Connector implements ExtensionActions {
         this.changeSubscribers = new Set();
     }
 
-    private async sendRequest<T>(type: MessageType, data?: any) {
+    private async sendRequest<T>(type: number, data?: any) {
         return new Promise<T>((resolve, reject) => {
             chrome.runtime.sendMessage<Message>({type, ...data}, ({data, error}: Message) => {
                 if (error) {
@@ -21,7 +21,7 @@ export default class Connector implements ExtensionActions {
         });
     }
 
-    private async firefoxSendRequestWithResponse<T>(type: MessageType) {
+    private async firefoxSendRequestWithResponse<T>(type: number) {
         return new Promise<T>((resolve, reject) => {
             const dataPort = chrome.runtime.connect({name: String(type)});
             dataPort.onDisconnect.addListener(() => reject());
@@ -51,7 +51,7 @@ export default class Connector implements ExtensionActions {
     }
 
     private onChangesReceived = ({type, data}: Message) => {
-        if (type === MessageType.BACKGROUND_CHANGES) {
+        if (type === MessageType.BG_CHANGES) {
             this.changeSubscribers.forEach((callback) => callback(data));
         }
     };

@@ -50,6 +50,15 @@ const jsEntries = [
         src: 'src/inject/index.ts',
         dest: 'inject/index.js',
         async postBuild({debug}) {
+            const destPath = `${getDestDir({debug})}/${this.dest}`;
+            let code = await fs.readFile(destPath, 'utf8');
+            // Optimize the logInfo and logWarn functions.
+            code = code.replace(
+                'function logInfo(...args) {\n    false;\n  }\n  function logWarn(...args) {\n    false;\n  }',
+                'function logInfo(...args) { }\n  function logWarn(...args) { }'
+            );
+            await fs.outputFile(destPath, code);
+
             await copyToBrowsers({cwdPath: this.dest, debug});
         },
     },
@@ -112,7 +121,7 @@ async function bundleJS(/** @type {JSEntry} */entry, {debug, watch}) {
             '__PORT__': watch ? String(PORT) : '-1',
             '__WATCH__': watch ? 'true' : 'false',
         },
-        minifySyntax: true,
+        minifySyntax: false,
         banner: {js: '"use strict";'},
         // To properly configure malevic imports.
         // We need to set custom paths.

@@ -1,6 +1,6 @@
 import {isFirefox} from '../../utils/platform';
 import type {ExtensionData, ExtensionActions, FilterConfig, TabInfo, Message, UserSettings} from '../../definitions';
-import {MessageType} from 'utils/message';
+import {MessageType} from '../../utils/message';
 
 export default class Connector implements ExtensionActions {
     private changeSubscribers: Set<(data: ExtensionData) => void>;

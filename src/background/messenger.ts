@@ -1,6 +1,6 @@
 import {isFirefox} from '../utils/platform';
 import type {ExtensionData, FilterConfig, TabInfo, Message, UserSettings} from '../definitions';
-import {MessageType} from 'utils/message';
+import {MessageType} from '../utils/message';
 
 export interface ExtensionAdapter {
     collect: () => Promise<ExtensionData>;

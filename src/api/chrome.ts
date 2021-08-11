@@ -1,4 +1,4 @@
-import {MessageType} from 'utils/message';
+import {MessageType} from '../utils/message';
 import {readResponseAsDataURL} from '../utils/network';
 import {callFetchMethod} from './fetch';
 

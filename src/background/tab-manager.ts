@@ -2,7 +2,7 @@ import {canInjectScript} from '../background/utils/extension-api';
 import {createFileLoader} from './utils/network';
 import type {Message} from '../definitions';
 import {isThunderbird} from '../utils/platform';
-import {MessageType} from 'utils/message';
+import {MessageType} from '../utils/message';
 import {logInfo, logWarn} from '../utils/log';
 import {StateManager} from './utils/state-manager';
 

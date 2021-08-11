@@ -1,5 +1,5 @@
 import type {Message} from '../../definitions';
-import {MessageType} from 'utils/message';
+import {MessageType} from '../../utils/message';
 
 interface FetchRequest {
     url: string;

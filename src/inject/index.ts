@@ -5,7 +5,7 @@ import {logInfo, logWarn} from '../utils/log';
 import {watchForColorSchemeChange} from './utils/watch-color-scheme';
 import {collectCSS} from './dynamic-theme/css-collection';
 import type {Message} from '../definitions';
-import {MessageType} from 'utils/message';
+import {MessageType} from '../utils/message';
 
 function onMessage({type, data}: Message) {
     switch (type) {

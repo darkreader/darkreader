@@ -123,7 +123,7 @@ export default class Messenger {
                 sendResponse({error: error ? error.message : null});
                 break;
             }
-            case MessageType.UI_RESET_DEV_DYNAMIC_THEME_FIXES: {
+            case MessageType.UI_RESET_DEV_STATIC_THEMES: {
                 this.adapter.resetDevStaticThemes();
                 break;
             }

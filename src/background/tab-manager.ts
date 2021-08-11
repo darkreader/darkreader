@@ -51,7 +51,7 @@ export default class TabManager {
         this.stateManager = new StateManager(TabManager.LOCAL_STORAGE_KEY, this, {tabs: {}});
         this.tabs = {};
 
-        chrome.runtime.onMessage.addListener(async (message, sender) => {
+        chrome.runtime.onMessage.addListener(async (message: Message, sender) => {
             function addFrame(tabs: {[tabId: number]: {[frameId: number]: FrameInfo}}, tabId: number, frameId: number, senderURL: string) {
                 let frames: {[frameId: number]: FrameInfo};
                 if (tabs[tabId]) {
@@ -66,7 +66,7 @@ export default class TabManager {
             await this.stateManager.loadState();
 
             switch (message.type) {
-                case 'frame-connect': {
+                case MessageType.CS_FRAME_CONNECT: {
                     const reply = (options: ConnectionMessageOptions) => {
                         const message = getConnectionMessage(options);
                         if (message instanceof Promise) {
@@ -97,7 +97,7 @@ export default class TabManager {
                     });
                     break;
                 }
-                case 'frame-forget': {
+                case MessageType.CS_FRAME_FORGET: {
                     if (!sender.tab) {
                         logWarn('Unexpected message', message, sender);
                         break;
@@ -116,10 +116,10 @@ export default class TabManager {
                     }
                     break;
                 }
-                case 'frame-freeze':
+                case MessageType.CS_FRAME_FREEZE:
                     this.tabs[sender.tab.id][sender.frameId].state = DocumentState.FROZEN;
                     break;
-                case 'frame-resume':
+                case MessageType.CS_FRAME_RESUME:
                     addFrame(this.tabs, sender.tab.id, sender.frameId, sender.url);
                     break;
             }

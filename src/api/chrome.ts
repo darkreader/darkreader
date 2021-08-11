@@ -1,3 +1,4 @@
+import type {Message} from '../definitions';
 import {readResponseAsDataURL} from '../utils/network';
 import {callFetchMethod} from './fetch';
 
@@ -22,10 +23,10 @@ async function sendMessage(...args) {
             } else {
                 text = await response.text();
             }
-            messageListeners.forEach((cb) => cb({type: 'fetch-response', data: text, error: null, id}));
-        } catch (err) {
-            console.error(err);
-            messageListeners.forEach((cb) => cb({type: 'fetch-response', data: null, err, id}));
+            messageListeners.forEach((cb) => cb(<Message>{type: 'fetch-response', data: text, error: null, id}));
+        } catch (error) {
+            console.error(error);
+            messageListeners.forEach((cb) => cb(<Message>{type: 'fetch-response', data: null, error, id}));
         }
     }
 }

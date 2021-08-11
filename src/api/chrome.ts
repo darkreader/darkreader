@@ -9,7 +9,7 @@ if (!chrome.runtime) {
     chrome.runtime = {} as any;
 }
 
-const messageListeners = new Set<(...args) => void>();
+const messageListeners = new Set<(message: Message) => void>();
 
 async function sendMessage(...args) {
     if (args[0] && args[0].type === 'fetch') {
@@ -23,10 +23,10 @@ async function sendMessage(...args) {
             } else {
                 text = await response.text();
             }
-            messageListeners.forEach((cb) => cb(<Message>{type: 'fetch-response', data: text, error: null, id}));
+            messageListeners.forEach((cb) => cb({type: 'fetch-response', data: text, error: null, id}));
         } catch (error) {
             console.error(error);
-            messageListeners.forEach((cb) => cb(<Message>{type: 'fetch-response', data: null, error, id}));
+            messageListeners.forEach((cb) => cb({type: 'fetch-response', data: null, error, id}));
         }
     }
 }

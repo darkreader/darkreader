@@ -127,9 +127,6 @@ export default class Messenger {
                 this.adapter.resetDevStaticThemes();
                 break;
             }
-            default:
-                // NOOP
-                break;
         }
     }
 

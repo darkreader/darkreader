@@ -48,9 +48,6 @@ function onMessage({type, data}: Message) {
             cleanDynamicThemeCache();
             colorSchemeWatcher.disconnect();
             break;
-        default:
-            // NOOP
-            break;
     }
 }
 

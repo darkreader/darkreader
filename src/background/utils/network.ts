@@ -9,22 +9,56 @@ interface RequestParams {
 
 export async function readText(params: RequestParams): Promise<string> {
     return new Promise((resolve, reject) => {
-        const request = new XMLHttpRequest();
-        request.overrideMimeType('text/plain');
-        request.open('GET', params.url, true);
-        request.onload = () => {
-            if (request.status >= 200 && request.status < 300) {
-                resolve(request.responseText);
-            } else {
-                reject(new Error(`${request.status}: ${request.statusText}`));
+        if (XMLHttpRequest) {
+            // Use XMLHttpRequest if it is available
+            const request = new XMLHttpRequest();
+            request.overrideMimeType('text/plain');
+            request.open('GET', params.url, true);
+            request.onload = () => {
+                if (request.status >= 200 && request.status < 300) {
+                    resolve(request.responseText);
+                } else {
+                    reject(new Error(`${request.status}: ${request.statusText}`));
+                }
+            };
+            request.onerror = () => reject(new Error(`${request.status}: ${request.statusText}`));
+            if (params.timeout) {
+                request.timeout = params.timeout;
+                request.ontimeout = () => reject(new Error('File loading stopped due to timeout'));
             }
-        };
-        request.onerror = () => reject(new Error(`${request.status}: ${request.statusText}`));
-        if (params.timeout) {
-            request.timeout = params.timeout;
-            request.ontimeout = () => reject(new Error('File loading stopped due to timeout'));
+            request.send();
+        } else if (fetch) {
+            // XMLHttpRequest is not available in Service Worker contexts like
+            // Manifest V3 background context
+            let abortController: AbortController;
+            let signal: AbortSignal;
+            let timedOut = false;
+            if (params.timeout) {
+                abortController = new AbortController();
+                signal = abortController.signal;
+                setTimeout(() => {
+                    abortController.abort();
+                    timedOut = true;
+                }, params.timeout);
+            }
+
+            fetch(params.url, {signal})
+                .then((response) => {
+                    if (response.status >= 200 && (response.status < 300)) {
+                        resolve(response.text());
+                    } else {
+                        reject(new Error(`${response.status}: ${response.statusText}`));
+                    }
+                }).catch((error) => {
+                    if (timedOut) {
+                        reject(new Error('File loading stopped due to timeout'));
+                    } else {
+                        reject(error);
+                    }
+                });
+        } else {
+            reject(new Error(`Neither XMLHttpRequest nor Fetch API are accessible!`));
         }
-        request.send();
     });
 }
 

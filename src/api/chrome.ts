@@ -1,3 +1,4 @@
+import type {Message} from '../definitions';
 import {readResponseAsDataURL} from '../utils/network';
 import {callFetchMethod} from './fetch';
 
@@ -8,7 +9,7 @@ if (!chrome.runtime) {
     chrome.runtime = {} as any;
 }
 
-const messageListeners = new Set<(...args) => void>();
+const messageListeners = new Set<(message: Message) => void>();
 
 async function sendMessage(...args) {
     if (args[0] && args[0].type === 'fetch') {
@@ -23,9 +24,9 @@ async function sendMessage(...args) {
                 text = await response.text();
             }
             messageListeners.forEach((cb) => cb({type: 'fetch-response', data: text, error: null, id}));
-        } catch (err) {
-            console.error(err);
-            messageListeners.forEach((cb) => cb({type: 'fetch-response', data: null, err, id}));
+        } catch (error) {
+            console.error(error);
+            messageListeners.forEach((cb) => cb({type: 'fetch-response', data: null, error, id}));
         }
     }
 }

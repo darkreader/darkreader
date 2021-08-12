@@ -75,6 +75,7 @@
     "@typescript-eslint/eslint-plugin": "4.28.2",
     "@typescript-eslint/parser": "4.28.2",
     "chokidar": "3.5.2",
+    "darkreader-translations": "https://github.com/darkreader/darkreader-translations-imported",
     "eslint": "7.30.0",
     "eslint-plugin-local": "1.0.0",
     "fs-extra": "10.0.0",

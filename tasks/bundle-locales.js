@@ -1,59 +1,46 @@
+// @ts-check
+const {bundleLocale} = require('darkreader-translations/bundle');
 const fs = require('fs-extra');
+const path = require('path');
 const {getDestDir} = require('./paths');
 const reload = require('./reload');
 const {createTask} = require('./task');
 
-async function bundleLocale(/** @type {string} */filePath, {debug}) {
-    let file = await fs.readFile(filePath, 'utf8');
-    file = file.replace(/^#.*?$/gm, '');
+const LOCALES_DIR = `${path.dirname(require.resolve('darkreader-translations/package.json'))}/locales`;
+const LOCALES_WATCH_GLOB = `${LOCALES_DIR}/**/*.config`;
 
-    const messages = {};
-
-    const regex = /@([a-z0-9_]+)/ig;
-    let match;
-    while ((match = regex.exec(file))) {
-        const messageName = match[1];
-        const messageStart = match.index + match[0].length;
-        let messageEnd = file.indexOf('@', messageStart);
-        if (messageEnd < 0) {
-            messageEnd = file.length;
-        }
-        messages[messageName] = {
-            message: file.substring(messageStart, messageEnd).trim()
-        };
-    }
-
-    const fileName = filePath.substring(filePath.lastIndexOf('/') + 1);
-    const locale = fileName.substring(0, fileName.lastIndexOf('.')).replace('-', '_');
-    const json = `${JSON.stringify(messages, null, 4)}\n`;
-    const getOutputPath = (dir) => `${dir}/_locales/${locale}/messages.json`;
+/**
+ * @param {string} locale
+ * @param {boolean} debug
+ * @returns {string[]}
+ */
+const getOutputPaths = (locale, debug) => {
     const chromeDir = getDestDir({debug});
     const firefoxDir = getDestDir({debug, firefox: true});
     const thunderBirdDir = getDestDir({debug, thunderbird: true});
-    await fs.outputFile(getOutputPath(chromeDir), json);
-    await fs.outputFile(getOutputPath(firefoxDir), json);
-    await fs.outputFile(getOutputPath(thunderBirdDir), json);
-}
+    return [chromeDir, firefoxDir, thunderBirdDir].map((dir) => {
+        return `${dir}/_locales/${locale}/messages.json`;
+    });
+};
 
-async function bundleLocales({debug}) {
-    const localesSrcDir = 'src/_locales';
-    const list = await fs.readdir(localesSrcDir);
+async function bundleLocalesTask({debug}) {
+    const list = await fs.readdir(LOCALES_DIR);
     for (const name of list) {
         if (!name.endsWith('.config')) {
             continue;
         }
-        await bundleLocale(`${localesSrcDir}/${name}`, {debug});
+        await bundleLocale(`${LOCALES_DIR}/${name}`, (loc) => getOutputPaths(loc, debug));
     }
 }
 
 module.exports = createTask(
     'bundle-locales',
-    bundleLocales,
+    bundleLocalesTask,
 ).addWatcher(
-    ['src/_locales/**/*.config'],
+    [LOCALES_WATCH_GLOB],
     async (changedFiles) => {
         for (const file of changedFiles) {
-            await bundleLocale(file, {debug: true});
+            await bundleLocale(file, (loc) => getOutputPaths(loc, true));
         }
         reload({type: reload.FULL});
     },

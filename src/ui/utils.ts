@@ -1,4 +1,6 @@
+import {MessageType} from '../utils/message';
 import {isFirefox} from '../utils/platform';
+import type {Message} from '../definitions';
 
 export function classes(...args: Array<string | {[cls: string]: boolean}>) {
     const classes: string[] = [];
@@ -42,7 +44,7 @@ export function saveFile(name: string, content: string) {
         a.download = name;
         a.click();
     } else {
-        chrome.runtime.sendMessage({type: 'save-file', data: {name, content}});
+        chrome.runtime.sendMessage<Message>({type: MessageType.UI_SAVE_FILE, data: {name, content}});
     }
 }
 

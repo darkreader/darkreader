@@ -1,14 +1,6 @@
 # Build files
 #-----------------------------------
-build
-debug
-build.zip
-build-firefox
-debug-firefox
-build-firefox.xpi
-build-thunderbird
-debug-thunderbird
-build-thunderbird.xpi
+build/
 darkreader.js
 debug.log
 

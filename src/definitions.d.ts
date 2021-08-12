@@ -1,5 +1,4 @@
 import type {FilterMode} from './generators/css-filter';
-import {MessageType} from './utils/message';
 
 export interface ExtensionData {
     isEnabled: boolean;

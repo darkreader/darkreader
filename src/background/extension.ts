@@ -247,7 +247,7 @@ export class Extension {
         if (this.ready) {
             return this.getTabMessage(url, frameURL);
         }
-        return new Promise<{type: number; data?: any}>((resolve) => {
+        return new Promise<{type: string; data?: any}>((resolve) => {
             this.awaiting.push(() => {
                 resolve(this.getTabMessage(url, frameURL));
             });

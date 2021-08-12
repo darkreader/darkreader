@@ -43,10 +43,10 @@ export default class Messenger {
             chrome.runtime.onConnect.addListener((port) => {
                 let promise: Promise<ExtensionData | TabInfo>;
                 switch (port.name) {
-                    case String(MessageType.UI_GET_DATA):
+                    case MessageType.UI_GET_DATA:
                         promise = this.adapter.collect();
                         break;
-                    case String(MessageType.UI_GET_ACTIVE_TAB_INFO):
+                    case MessageType.UI_GET_ACTIVE_TAB_INFO:
                         promise = this.adapter.getActiveTabInfo();
                         break;
                     default:

@@ -9,7 +9,7 @@ export default class Connector implements ExtensionActions {
         this.changeSubscribers = new Set();
     }
 
-    private async sendRequest<T>(type: number, data?: any) {
+    private async sendRequest<T>(type: string, data?: any) {
         return new Promise<T>((resolve, reject) => {
             chrome.runtime.sendMessage<Message>({type, ...data}, ({data, error}: Message) => {
                 if (error) {
@@ -21,9 +21,9 @@ export default class Connector implements ExtensionActions {
         });
     }
 
-    private async firefoxSendRequestWithResponse<T>(type: number) {
+    private async firefoxSendRequestWithResponse<T>(type: string) {
         return new Promise<T>((resolve, reject) => {
-            const dataPort = chrome.runtime.connect({name: String(type)});
+            const dataPort = chrome.runtime.connect({name: type});
             dataPort.onDisconnect.addListener(() => reject());
             dataPort.onMessage.addListener(({data, error}) => {
                 if (error) {

@@ -1,0 +1,20 @@
+@import "../../theme";
+
+.time-range-picker {
+    display: inline-flex;
+
+    &__input {
+        flex: auto;
+        text-align: center;
+        text-indent: 0;
+        width: 100%;
+    }
+
+    &__input--start {
+        border-right: none;
+    }
+
+    &__input--end {
+        border-left: @size-border-inner solid @color-border;
+    }
+}

@@ -1,5 +1,7 @@
 const fs = require('fs-extra');
 const {getDestDir} = require('./paths');
+const reload = require('./reload');
+const {createTask} = require('./task');
 
 const enLocale = fs.readFileSync('src/_locales/en.config', {encoding: 'utf8'}).replace(/^#.*?$/gm, '');
 global.chrome = global.chrome || {};
@@ -21,56 +23,95 @@ global.chrome.i18n.getUILanguage = global.chrome.i18n.getUILanguage || (() => 'e
 
 const tsConfig = require('../src/tsconfig.json');
 require('ts-node').register({
-    ...tsConfig,
+    transpileOnly: true,
     compilerOptions: {
         ...tsConfig.compilerOptions,
         module: 'commonjs',
     },
-    ignore: []
 });
-const Malevic = require('malevic');
+require('tsconfig-paths').register({
+    baseUrl: './',
+    paths: {
+        'malevic/*': ['node_modules/malevic/umd/*'],
+        'malevic': ['node_modules/malevic/umd/index'],
+    }
+});
+const Malevic = require('malevic/umd/index');
+const MalevicString = require('malevic/umd/string');
 const DevToolsBody = require('../src/ui/devtools/components/body').default;
 const PopupBody = require('../src/ui/popup/components/body').default;
 const CSSEditorBody = require('../src/ui/stylesheet-editor/components/body').default;
 const {getMockData, getMockActiveTabInfo} = require('../src/ui/connect/mock');
 
-module.exports = function createBundleHtmlTask(gulp) {
-    gulp.task('html-release', async () => await bundleHtml({production: true}));
-    gulp.task('html-debug', async () => await bundleHtml({production: false}));
+const pages = [
+    {
+        cwdPath: 'ui/popup/index.html',
+        rootComponent: PopupBody,
+        props: {
+            data: getMockData({isReady: false}),
+            tab: getMockActiveTabInfo(),
+            actions: null,
+        },
+    },
+    {
+        cwdPath: 'ui/devtools/index.html',
+        rootComponent: DevToolsBody,
+        props: {
+            data: getMockData({isReady: false}),
+            tab: getMockActiveTabInfo(),
+            actions: null,
+        },
+    },
+    {
+        cwdPath: 'ui/stylesheet-editor/index.html',
+        rootComponent: CSSEditorBody,
+        props: {
+            data: getMockData({isReady: false}),
+            tab: getMockActiveTabInfo(),
+            actions: null,
+        },
+    },
+];
 
-    async function bundleHtml({production}) {
-        const dir = getDestDir({production});
-        await bundleDevToolsHtml({dir});
-        await bundlePopupHtml({dir});
-        await bundleCSSEditorHtml({dir});
-    }
+async function bundleHTMLPage({cwdPath, rootComponent, props}, {debug}) {
+    let html = await fs.readFile(`src/${cwdPath}`, 'utf8');
+    const bodyText = MalevicString.stringify(Malevic.m(rootComponent, props));
+    html = html.replace('$BODY', bodyText);
 
-    async function bundleDevToolsHtml({dir}) {
-        let html = await fs.readFile('src/ui/devtools/index.html', 'utf8');
-        const data = getMockData();
-        const actions = null;
-        const bodyText = Malevic.renderToString(DevToolsBody({data, actions}));
-        html = html.replace('$BODY', bodyText);
-        await fs.outputFile(`${dir}/ui/devtools/index.html`, html);
-    }
+    const getPath = (dir) => `${dir}/${cwdPath}`;
+    const outPath = getPath(getDestDir({debug}));
+    const firefoxPath = getPath(getDestDir({debug, firefox: true}));
+    const thunderBirdPath = getPath(getDestDir({debug, thunderbird: true}));
+    await fs.outputFile(outPath, html);
+    await fs.copy(outPath, firefoxPath);
+    await fs.copy(outPath, thunderBirdPath);
+}
 
-    async function bundlePopupHtml({dir}) {
-        let html = await fs.readFile('src/ui/popup/index.html', 'utf8');
-        const data = getMockData({isReady: false});
-        const tab = getMockActiveTabInfo();
-        const actions = null;
-        const bodyText = Malevic.renderToString(PopupBody({data, tab, actions}));
-        html = html.replace('$BODY', bodyText);
-        await fs.outputFile(`${dir}/ui/popup/index.html`, html);
+async function bundleHTML({debug}) {
+    for (const page of pages) {
+        await bundleHTMLPage(page, {debug});
     }
+}
 
-    async function bundleCSSEditorHtml({dir}) {
-        let html = await fs.readFile('src/ui/stylesheet-editor/index.html', 'utf8');
-        const data = getMockData();
-        const tab = getMockActiveTabInfo();
-        const actions = null;
-        const bodyText = Malevic.renderToString(CSSEditorBody({data, tab, actions}));
-        html = html.replace('$BODY', bodyText);
-        await fs.outputFile(`${dir}/ui/stylesheet-editor/index.html`, html);
-    }
-};
+function getSrcPath(cwdPath) {
+    return `src/${cwdPath}`;
+}
+
+async function rebuildHTML(changedFiles) {
+    await Promise.all(
+        pages
+            .filter((page) => changedFiles.some((changed) => changed === getSrcPath(page.cwdPath)))
+            .map((page) => bundleHTMLPage(page, {debug: true}))
+    );
+}
+
+module.exports = createTask(
+    'bundle-html',
+    bundleHTML,
+).addWatcher(
+    pages.map((page) => getSrcPath(page.cwdPath)),
+    async (changedFiles) => {
+        await rebuildHTML(changedFiles);
+        reload({type: reload.UI});
+    },
+);

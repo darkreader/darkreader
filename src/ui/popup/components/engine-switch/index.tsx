@@ -1,4 +1,4 @@
-import {html} from 'malevic';
+import {m} from 'malevic';
 import {MultiSwitch} from '../../../controls';
 import ThemeEngines from '../../../../generators/theme-engines';
 import {getLocalMessage} from '../../../../utils/locales';
@@ -19,7 +19,7 @@ interface EngineSwitchProps {
 function openCSSEditor() {
     chrome.windows.create({
         type: 'panel',
-        url: isFirefox() ? '../stylesheet-editor/index.html' : 'ui/stylesheet-editor/index.html',
+        url: isFirefox ? '../stylesheet-editor/index.html' : 'ui/stylesheet-editor/index.html',
         width: 600,
         height: 600,
     });
@@ -29,9 +29,9 @@ export default function EngineSwitch({engine, onChange}: EngineSwitchProps) {
     return (
         <div class="engine-switch">
             <MultiSwitch
-                value={engineNames.find(([code, name]) => code === engine)[1]}
-                options={engineNames.map(([code, name]) => name)}
-                onChange={(value) => onChange(engineNames.find(([code, name]) => name === value)[0])}
+                value={engineNames.find(([code]) => code === engine)[1]}
+                options={engineNames.map(([, name]) => name)}
+                onChange={(value) => onChange(engineNames.find(([, name]) => name === value)[0])}
             />
             <span
                 class={{

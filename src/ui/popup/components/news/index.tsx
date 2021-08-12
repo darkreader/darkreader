@@ -1,8 +1,8 @@
-import {html} from 'malevic';
+import {m} from 'malevic';
 import {Button} from '../../../controls';
 import {BLOG_URL} from '../../../../utils/links';
 import {getLocalMessage, getUILanguage} from '../../../../utils/locales';
-import {News} from '../../../../definitions';
+import type {News} from '../../../../definitions';
 
 interface NewsProps {
     news: News[];
@@ -11,10 +11,9 @@ interface NewsProps {
     onClose: () => void;
 }
 
-
 const NEWS_COUNT = 2;
 
-export function News({news, expanded, onNewsOpen, onClose}: NewsProps) {
+export function NewsGroup({news, expanded, onNewsOpen, onClose}: NewsProps) {
     return (
         <div class={{'news': true, 'news--expanded': expanded}}>
             <div class="news__header">
@@ -33,8 +32,14 @@ export function News({news, expanded, onNewsOpen, onClose}: NewsProps) {
                         formattedDate = date.toISOString().substring(0, 10);
                     }
                     return (
-                        <div class={{'news__event': true, 'news__event--unread': !event.read}}>
-                            <a class="news__event__link" onclick={() => onNewsOpen(event)} href={event.url} target="_blank">
+                        <div
+                            class={{
+                                'news__event': true,
+                                'news__event--unread': !event.read,
+                                'news__event--important': event.important,
+                            }}
+                        >
+                            <a class="news__event__link" onclick={() => onNewsOpen(event)} href={event.url} target="_blank" rel="noopener noreferrer">
                                 <span class="news__event__date">
                                     {formattedDate}
                                 </span>
@@ -53,6 +58,7 @@ export function News({news, expanded, onNewsOpen, onClose}: NewsProps) {
                         href={BLOG_URL}
                         target="_blank"
                         onclick={() => onNewsOpen(...news)}
+                        rel="noopener noreferrer"
                     >{getLocalMessage('read_more')}</a>
                 )}
             </div>

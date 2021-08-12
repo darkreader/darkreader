@@ -1,26 +1,53 @@
-const gulpConnect = require('gulp-connect');
-const runSequence = require('run-sequence');
-const {getDestDir} = require('./paths');
+const chokidar = require('chokidar');
+const {log} = require('./utils');
 
-module.exports = function createWatchTask(gulp) {
-    gulp.task('js-debug-reload', (done) => runSequence(['js-debug', 'html-debug'], 'foxify-debug', 'reload', done));
-    gulp.task('css-debug-reload', (done) => runSequence('css-debug', 'reload', done));
-    gulp.task('html-debug-reload', (done) => runSequence('html-debug', 'reload', done));
-    gulp.task('config-debug-reload', (done) => runSequence('copy-debug', 'foxify-debug', 'reload', done));
-    gulp.task('locales-debug-reload', (done) => runSequence('locales-debug', 'reload', done));
+const DEBOUNCE = 200;
 
-    gulp.task('watch', ['js-debug', 'css-debug', 'html-debug', 'copy-debug', 'locales-debug'], () => {
-        gulp.watch(['src/**/*.ts', 'src/**/*.tsx', 'src/**/*.js'], ['js-debug-reload']);
-        gulp.watch(['src/**/*.less'], ['css-debug-reload']);
-        gulp.watch(['src/**/*.html'], ['html-debug-reload']);
-        gulp.watch(['src/config/**/*.config', 'src/*.json'], ['config-debug-reload']);
-        gulp.watch(['src/_locales/**/*.config'], ['locales-debug-reload']);
+/**
+ * @param {Object} options
+ * @param {string[]} options.files
+ * @param {(files: string[]) => void | Promise<void>} options.onChange
+ */
+function watch(options) {
+    const queue = new Set();
+    let timeoutId = null;
 
-        gulpConnect.server({
-            host: '0.0.0.0',
-            port: 2014,
-            root: `./${getDestDir({production: false})}/ui/`,
-            livereload: true,
-        });
-    });
-};
+    function onChange(path) {
+        queue.add(path);
+
+        if (timeoutId != null) {
+            return;
+        }
+
+        timeoutId = setTimeout(async () => {
+            timeoutId = null;
+            try {
+                const changedFiles = Array.from(queue).sort();
+                log.ok(`Files changed:${changedFiles.map((path) => `\n${path}`)}`);
+                queue.clear();
+                await options.onChange(changedFiles);
+                if (timeoutId) {
+                    return;
+                }
+            } catch (err) {
+                log.error(err);
+            }
+        }, DEBOUNCE);
+    }
+
+    const watcher = chokidar.watch(options.files, {ignoreInitial: true})
+        .on('add', onChange)
+        .on('change', onChange)
+        .on('unlink', onChange);
+
+    function stop() {
+        watcher.close();
+    }
+
+    process.on('exit', stop);
+    process.on('SIGINT', stop);
+
+    return watcher;
+}
+
+module.exports = watch;

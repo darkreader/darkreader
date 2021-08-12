@@ -1,12 +1,12 @@
-import {classes} from 'malevic';
+import {classes} from '../utils';
 
 function toArray<T>(x: T | T[]) {
     return Array.isArray(x) ? x : [x];
 }
 
 export function mergeClass(
-    cls: string | {[cls: string]: any;} | (string | {[cls: string]: any;})[],
-    propsCls: string | {[cls: string]: any;} | (string | {[cls: string]: any;})[]
+    cls: string | {[cls: string]: any} | Array<string | {[cls: string]: any}>,
+    propsCls: string | {[cls: string]: any} | Array<string | {[cls: string]: any}>
 ) {
     const normalized = toArray(cls).concat(toArray(propsCls));
     return classes(...normalized);
@@ -20,4 +20,8 @@ export function omitAttrs(omit: string[], attrs: Malevic.NodeAttrs) {
         }
     });
     return result;
+}
+
+export function isElementHidden(element: HTMLElement) {
+    return element.offsetParent === null;
 }

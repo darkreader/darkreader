@@ -1,0 +1,49 @@
+@import "../../theme.less";
+
+.check-button {
+    .checkbox {
+        border-radius: @size-control-inner / 2 + @size-border;
+        width: calc(100% - 2 * @size-border);
+
+        &__checkmark {
+            background-color: @color-control-active;
+            border-radius: @size-control-inner / 2;
+
+            &::before,
+            &::after {
+                display: none;
+            }
+        }
+
+        &__content {
+            align-items: center;
+            display: flex;
+            flex: auto;
+            height: @size-control-inner;
+            justify-content: center;
+            -moz-user-select: none;
+            user-select: none;
+        }
+
+        &__input:checked ~ * {
+            color: @color-control-fore;
+        }
+
+        &__input:checked ~ .checkbox__checkmark {
+            background-image: @icon-check;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-size: 1rem;
+        }
+    }
+
+    &__description {
+        display: inline-block;
+        font-size: @size-text-small;
+        line-height: @size-text-small-height;
+        text-align: center;
+        -moz-user-select: none;
+        user-select: none;
+        width: 100%;
+    }
+}

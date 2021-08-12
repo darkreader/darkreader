@@ -1,0 +1,33 @@
+@import "../../theme.less";
+
+.message-box {
+    background-color: @color-back;
+    border-bottom: @size-border solid @color-border;
+    border-top: @size-border solid @color-border;
+    display: flex;
+    flex-direction: column;
+    padding: @indent-large;
+
+    &__caption {
+        text-align: center;
+    }
+
+    &__buttons {
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        margin-top: @indent-small;
+    }
+
+    &__button {
+        min-width: 4rem;
+
+        &:not(:first-child) {
+            margin-left: @indent-small;
+        }
+    }
+
+    &__button-ok {
+        border-color: gray;
+    }
+}

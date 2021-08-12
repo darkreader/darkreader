@@ -1,4 +1,4 @@
-import {FilterMode} from './generators/css-filter';
+import type {FilterMode} from './generators/css-filter';
 
 export interface ExtensionData {
     isEnabled: boolean;
@@ -7,23 +7,29 @@ export interface ExtensionData {
     fonts: string[];
     news: News[];
     shortcuts: Shortcuts;
-    devDynamicThemeFixesText: string;
-    devInversionFixesText: string;
-    devStaticThemesText: string;
+    devtools: {
+        dynamicFixesText: string;
+        filterFixesText: string;
+        staticThemesText: string;
+        hasCustomDynamicFixes: boolean;
+        hasCustomFilterFixes: boolean;
+        hasCustomStaticFixes: boolean;
+    };
 }
 
 export interface ExtensionActions {
-    changeSettings(settings: Partial<UserSettings>);
-    setTheme(theme: Partial<FilterConfig>);
-    setShortcut(command: string, shortcut: string);
-    toggleSitePattern(pattern: string);
-    markNewsAsRead(ids: string[]);
+    changeSettings(settings: Partial<UserSettings>): void;
+    setTheme(theme: Partial<FilterConfig>): void;
+    setShortcut(command: string, shortcut: string): void;
+    toggleURL(url: string): void;
+    markNewsAsRead(ids: string[]): void;
+    loadConfig(options: {local: boolean}): void;
     applyDevDynamicThemeFixes(text: string): Promise<void>;
-    resetDevDynamicThemeFixes();
+    resetDevDynamicThemeFixes(): void;
     applyDevInversionFixes(text: string): Promise<void>;
-    resetDevInversionFixes();
+    resetDevInversionFixes(): void;
     applyDevStaticThemes(text: string): Promise<void>;
-    resetDevStaticThemes();
+    resetDevStaticThemes(): void;
 }
 
 export interface ExtWrapper {
@@ -31,7 +37,7 @@ export interface ExtWrapper {
     actions: ExtensionActions;
 }
 
-export interface FilterConfig {
+export interface Theme {
     mode: FilterMode;
     brightness: number;
     contrast: number;
@@ -42,24 +48,57 @@ export interface FilterConfig {
     textStroke: number;
     engine: string;
     stylesheet: string;
+    darkSchemeBackgroundColor: string;
+    darkSchemeTextColor: string;
+    lightSchemeBackgroundColor: string;
+    lightSchemeTextColor: string;
+    scrollbarColor: '' | 'auto' | string;
+    selectionColor: '' | 'auto' | string;
+    styleSystemControls: boolean;
 }
+
+export type FilterConfig = Theme;
 
 export interface CustomSiteConfig {
     url: string[];
     theme: FilterConfig;
 }
 
+export interface ThemePreset {
+    id: string;
+    name: string;
+    urls: string[];
+    theme: Theme;
+}
+
 export interface UserSettings {
     enabled: boolean;
     theme: FilterConfig;
+    presets: ThemePreset[];
     customThemes: CustomSiteConfig[];
     siteList: string[];
+    siteListEnabled: string[];
     applyToListedOnly: boolean;
     changeBrowserTheme: boolean;
-    activationTime: string;
-    deactivationTime: string;
     notifyOfNews: boolean;
     syncSettings: boolean;
+    syncSitesFixes: boolean;
+    automation: '' | 'time' | 'system' | 'location';
+    time: TimeSettings;
+    location: LocationSettings;
+    previewNewDesign: boolean;
+    enableForPDF: boolean;
+    enableForProtectedPages: boolean;
+}
+
+export interface TimeSettings {
+    activation: string;
+    deactivation: string;
+}
+
+export interface LocationSettings {
+    latitude: number;
+    longitude: number;
 }
 
 export interface TabInfo {
@@ -71,7 +110,7 @@ export interface TabInfo {
 export interface Message {
     type: string;
     data?: any;
-    id?: any;
+    id?: number;
     error?: any;
 }
 
@@ -81,7 +120,10 @@ export interface Shortcuts {
 
 export interface DynamicThemeFix {
     url: string[];
-    invert?: string[];
+    invert: string[];
+    css: string;
+    ignoreInlineStyle: string[];
+    ignoreImageAnalysis: string[];
 }
 
 export interface InversionFix {
@@ -127,5 +169,6 @@ export interface News {
     date: string;
     url: string;
     headline: string;
+    important: boolean;
     read?: boolean;
 }

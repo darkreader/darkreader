@@ -1,8 +1,10 @@
-import {FilterConfig} from '../definitions'
+import type {FilterConfig} from '../definitions';
 
 export function createTextStyle(config: FilterConfig): string {
     const lines: string[] = [];
-    lines.push('* {');
+    // Don't target pre elements as they are preformatted element's e.g. code blocks
+    // Exclude font libraries to preserve icons
+    lines.push('*:not(pre, .far, .fa, .glyphicon, [class*="vjs-"], .fab, .fa-github, .fas, .material-icons, .icofont, .typcn, mu, [class*="mu-"], .glyphicon, .icon) {');
 
     if (config.useFont && config.fontFamily) {
         // TODO: Validate...

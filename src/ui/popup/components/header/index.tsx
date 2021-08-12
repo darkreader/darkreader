@@ -1,22 +1,40 @@
-import {html} from 'malevic';
-import SiteToggle from '../site-toggle';
+import {m} from 'malevic';
 import {Shortcut, Toggle} from '../../../controls';
 import {getLocalMessage} from '../../../../utils/locales';
-import {ExtWrapper, TabInfo} from '../../../../definitions';
+import type {ExtWrapper, TabInfo, UserSettings} from '../../../../definitions';
+import SunMoonIcon from '../../main-page/sun-moon-icon';
+import SystemIcon from '../../main-page/system-icon';
+import WatchIcon from '../../main-page/watch-icon';
+import SiteToggle from '../site-toggle';
+import MoreToggleSettings from './more-toggle-settings';
 
-function multiline(...lines) {
+function multiline(...lines: string[]) {
     return lines.join('\n');
 }
 
-export default function TopSection({data, actions, tab}: ExtWrapper & {tab: TabInfo}) {
+type HeaderProps = ExtWrapper & {
+    tab: TabInfo;
+    onMoreToggleSettingsClick: () => void;
+};
 
-    function toggleExtension(enabled) {
-        actions.changeSettings({enabled});
+function Header({data, actions, tab, onMoreToggleSettingsClick}: HeaderProps) {
+    function toggleExtension(enabled: UserSettings['enabled']) {
+        actions.changeSettings({
+            enabled,
+            automation: '',
+        });
     }
+
+    const isAutomation = Boolean(data.settings.automation);
+    const isTimeAutomation = data.settings.automation === 'time';
+    const isLocationAutomation = data.settings.automation === 'location';
+    const now = new Date();
 
     return (
         <header class="header">
-            <img class="header__logo" src="../assets/images/darkreader-type.svg" alt="Dark Reader" />
+            <a class="header__logo" href="https://darkreader.org/" target="_blank" rel="noopener noreferrer">
+                Dark Reader
+            </a>
             <div class="header__control header__site-toggle">
                 <SiteToggle
                     data={data}
@@ -54,7 +72,28 @@ export default function TopSection({data, actions, tab}: ExtWrapper & {tab: TabI
                     )}
                     onSetShortcut={(shortcut) => actions.setShortcut('toggle', shortcut)}
                 />
+                <span
+                    class="header__app-toggle__more-button"
+                    onclick={onMoreToggleSettingsClick}
+                ></span>
+                <span
+                    class={{
+                        'header__app-toggle__time': true,
+                        'header__app-toggle__time--active': isAutomation,
+                    }}
+                >
+                    {(isTimeAutomation
+                        ? <WatchIcon hours={now.getHours()} minutes={now.getMinutes()} />
+                        : (isLocationAutomation
+                            ? (<SunMoonIcon date={now} latitude={data.settings.location.latitude} longitude={data.settings.location.longitude} />)
+                            : <SystemIcon />))}
+                </span>
             </div>
         </header>
     );
 }
+
+export {
+    Header,
+    MoreToggleSettings, // TODO: Implement portals to place elements into <body>.
+};

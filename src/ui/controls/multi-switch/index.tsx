@@ -1,4 +1,4 @@
-import {html} from 'malevic';
+import {m} from 'malevic';
 
 interface MultiSwitchProps {
     class?: string;
@@ -7,7 +7,7 @@ interface MultiSwitchProps {
     onChange: (value: string) => void;
 }
 
-export default function MultiSwitch(props: MultiSwitchProps) {
+export default function MultiSwitch(props: MultiSwitchProps, ...children) {
     return (
         <span class={['multi-switch', props.class]}>
             <span
@@ -28,6 +28,7 @@ export default function MultiSwitch(props: MultiSwitchProps) {
                     {option}
                 </span>
             ))}
+            {...children}
         </span>
     );
 }

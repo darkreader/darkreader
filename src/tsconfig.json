@@ -1,21 +1,23 @@
 {
     "compilerOptions": {
-        "target": "esnext",
+        "target": "es2019",
         "baseUrl": ".",
         "module": "es2015",
         "moduleResolution": "node",
         "lib": [
             "es2015",
             "es2017",
-            "dom"
+            "dom",
+            "dom.iterable"
         ],
         "types": [
             "chrome"
         ],
         "allowJs": true,
+        "downlevelIteration": true,
         "noEmit": true,
         "jsx": "react",
-        "jsxFactory": "html"
+        "jsxFactory": "m"
     },
     "exclude": [
         "node_modules"

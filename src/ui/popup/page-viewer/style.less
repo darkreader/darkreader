@@ -1,0 +1,34 @@
+@import "../../theme.less";
+
+.page-viewer {
+    height: 100%;
+    position: relative;
+}
+
+.page {
+    align-items: stretch;
+    background-color: @color-back;
+    display: none;
+    flex-direction: column;
+    height: 100%;
+    justify-content: stretch;
+    left: 0;
+    position: absolute;
+    top: 0;
+    width: 100%;
+
+    &--active {
+        display: flex;
+    }
+
+    &__back-button {
+        background-image: @icon-left;
+        background-position: center left 0.25rem;
+        background-repeat: no-repeat;
+        background-size: 1rem;
+        border-radius: @size-control-inner / 2 + @size-border;
+        flex: none;
+        margin-top: @indent-small;
+        width: calc(100% - 2 * @size-border);
+    }
+}

@@ -1,13 +1,18 @@
+import type {Message} from '../../definitions';
+import {MessageType} from '../../utils/message';
+
 interface FetchRequest {
     url: string;
     responseType: 'data-url' | 'text';
+    mimeType?: string;
+    origin?: string;
 }
 
 let counter = 0;
 const resolvers = new Map<number, (data) => void>();
 const rejectors = new Map<number, (error) => void>();
 
-export function bgFetch(request: FetchRequest) {
+export async function bgFetch(request: FetchRequest) {
     return new Promise<string>((resolve, reject) => {
         const id = ++counter;
         resolvers.set(id, resolve);
@@ -16,8 +21,8 @@ export function bgFetch(request: FetchRequest) {
     });
 }
 
-chrome.runtime.onMessage.addListener(({type, data, error, id}) => {
-    if (type === 'fetch-response') {
+chrome.runtime.onMessage.addListener(({type, data, error, id}: Message) => {
+    if (type === MessageType.BG_FETCH_RESPONSE) {
         const resolve = resolvers.get(id);
         const reject = rejectors.get(id);
         resolvers.delete(id);

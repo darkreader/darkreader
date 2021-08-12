@@ -1,5 +1,5 @@
 import {clamp, multiplyMatrices} from '../../utils/math';
-import {FilterConfig} from '../../definitions';
+import type {FilterConfig} from '../../definitions';
 
 export function createFilterMatrix(config: FilterConfig) {
     let m = Matrix.identity();

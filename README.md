@@ -1,146 +1,133 @@
-Dark Reader for Google Chrome and Mozilla Firefox
-================
-![Dark Reader screenshot](https://lh3.googleusercontent.com/tTJIIIAqfJWymqPM9LAmivl11kWmF-XXLABues4OwfjOED_ntsJZdLY0VTG0XFCW0W_wYSll7Q=w640-h400-e365)
+<p align="center"><a href="https://darkreader.org" target="_blank" rel="noreferrer noopener"><img width="250" alt="Dark Reader's mascot" src="https://raw.githubusercontent.com/darkreader/darkreader.github.io/master/images/darkreader-mascot.svg"></a></p>
+<p align="center">Dark Reader <strong>analyzes</strong> web pages and aims to <strong>reduce the eyestrain</strong> while you browse the web.</p>
+<br/>
+<p align="center"><a rel="noreferrer noopener" href="https://chrome.google.com/webstore/detail/dark-reader/eimadpbcbfnmbkopoojfekhnkhdbieeh/"><img alt="Chrome Web Store" src="https://img.shields.io/badge/Chrome-141e24.svg?&style=for-the-badge&logo=google-chrome&logoColor=white"></a>  <a rel="noreferrer noopener" href="https://addons.mozilla.org/firefox/addon/darkreader/"><img alt="Firefox Add-ons" src="https://img.shields.io/badge/Firefox-141e24.svg?&style=for-the-badge&logo=firefox-browser&logoColor=white"></a>  <a rel="noreferrer noopener" href="https://microsoftedge.microsoft.com/addons/detail/dark-reader/ifoakfbpdcdoeenechcleahebpibofpc/"><img alt="Edge Addons" src="https://img.shields.io/badge/Edge-141e24.svg?&style=for-the-badge&logo=microsoft-edge&logoColor=white"></a>  <a el="noreferrer noopener" href="https://addons.thunderbird.net/thunderbird/addon/darkreader"><img alt="Thunderbird" src="https://img.shields.io/badge/Thunderbird-141e24.svg?&style=for-the-badge&logo=thunderbird&logoColor=white"></a>
 
-This extension **inverts brightness** of web pages and aims to **reduce eyestrain** while browsing the web.
-Visit [Chrome Web Store](https://chrome.google.com/webstore/detail/dark-reader/eimadpbcbfnmbkopoojfekhnkhdbieeh)
-and [Firefox Add-ons](https://addons.mozilla.org/en-US/firefox/addon/darkreader/)
-for more info.
+<h2 align="center">Dark Reader</h2>
+<br/>
+<p align="center">Dark Reader is an <strong>open-source</strong> MIT-licensed <strong>browser extension</strong> that is designed to analyze web pages. Based on its analysis, Dark Reader will generate a dark mode that aims to <strong>reduce the eyestrain</strong> of the user. Dark Reader is <strong>feature-rich</strong> and can be configured in many ways throughout the UI.</p>
+<br/>
+<br/>
+
+## Questions
+
+Most questions can be answered by reading the [help page](https://darkreader.org/help/).
+If the help page doesn't answer your question, open up an [issue](https://github.com/darkreader/darkreader/issues/new/) and choose the template 'Question' and fill out the necessary info. 
 
 ## How to contribute
 
-### Sponsorship
-[Donate](https://opencollective.com/darkreader) via Open Collective.
+Read more about contributing to Dark Reader in [CONTRIBUTING.md](https://github.com/darkreader/darkreader/blob/master/CONTRIBUTING.md).
 
-### Translation
-Improve or suggest a translation [here](https://github.com/darkreader/darkreader/tree/master/src/_locales).
-See the list of supported [language codes](https://developer.chrome.com/webstore/i18n#localeTable).
+## Building for use
 
-### Fixing wrong inversion
+You can install the extension from a file.  
+Install [Node.js LTS](https://nodejs.org/en/). Download the source code (or check out from git).  
+Open terminal in the root folder and run:  
 
-If some site is **already dark**, you can **add it to [dark-sites.config](https://github.com/alexanderby/darkreader/blob/master/src/config/dark-sites.config) file**
-*(please, preserve alphabetical order)*.
+- `npm install`  
+- `npm run build`  
 
-If some **parts** of web-pages are **wrongly inverted**,
-you can specify necessary **CSS selectors** at
-**[dynamic-theme-fixes.config](https://github.com/alexanderby/darkreader/blob/master/src/config/dynamic-theme-fixes.config) file**
-(for Dynamic Theme mode)
-or **[inversion-fixes.config](https://github.com/alexanderby/darkreader/blob/master/src/config/inversion-fixes.config) file**
-(for Filter and Filter+ modes)
-*(please, preserve alphabetical order by URL, use short selectors, preserve code style)*.
+This will generate a `build/release/darkreader-chrome.zip` file that is useable in a Chromium-based browser and also a `build/release/darkreader-firefox.xpi` file that is useable in Firefox.
 
-Notice that merged changes to these files are automatically delivered to all users **within 15 minutes**.
+## Using Dark Reader for a website
 
-### Using Dev Tools
+You can use Dark Reader to enable dark mode on your website!
 
-- Open **Chrome Dev Tools** (F12).
-- Click on **element picker** (top-left corner).
-- Pick wrongly inverted element.
-- Choose a **[selector](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Selectors)** for that element or all similar elements (e.g. if element has `class="icon small"` selector may look like `.icon`).
-- Click **Dark Reader icon**.
-- Click **Open developer tools** (at bottom).
-- Find or add a block containing URL and selectors to invert.
+- Install the package from NPM (`npm install darkreader`)
+- or build from the source code (`npm run api`)
+- or include the script via a CDN such as [unpkg](https://unpkg.com/darkreader/) or [jsDelivr](https://www.jsdelivr.com/package/npm/darkreader)
+
+Then you can use the following code to control Dark Reader's API
+```javascript
+DarkReader.enable({
+    brightness: 100,
+    contrast: 90,
+    sepia: 10
+});
+
+DarkReader.disable();
+
+// Enable when the system color scheme is dark.
+DarkReader.auto({
+    brightness: 100,
+    contrast: 90,
+    sepia: 10
+});
+
+// Stop watching for the system color scheme.
+DarkReader.auto(false);
+
+// Get the generated CSS of Dark Reader returned as a string.
+const CSS = await DarkReader.exportGeneratedCSS();
+
+// Check if Dark Reader is enabled.
+const isEnabled = DarkReader.isEnabled();
 ```
-================================
 
-example.com
+... or if you are using ES modules
 
-INVERT
-.icon
+```javascript
+import {
+    enable as enableDarkMode,
+    disable as disableDarkMode,
+    auto as followSystemColorScheme,
+    exportGeneratedCSS as collectCSS,
+    isEnabled as isDarkReaderEnabled
+} from 'darkreader';
 
+enableDarkMode({
+    brightness: 100,
+    contrast: 90,
+    sepia: 10,
+});
+
+disableDarkMode();
+
+followSystemColorScheme();
+
+const CSS = await collectCSS();
+
+const isEnabled = isDarkReaderEnabled();
 ```
-- *WARNING:* For **Dynamic Theme mode** use `INVERT` only for dark images, that are invisible on dark backgrounds (icons, diagrams, charts, `<img>` and `<svg>` elements).
-Image analysis will be improved in future and this rule should become unnecessary.
-- **For Filter and Filter+ config** it is also possible to specify custom CSS rules. If chosen element contains images or other content that becomes wrongly displayed, `NO INVERT` rule can be used. `REMOVE BG` removes background image from element.
-*IMPORTANT: When Dark mode is on, the whole page (root `<html>` element) is inverted by filter. To revert the images, videos etc. `INVERT` selectors are used, so the inversion will be applied to these elements twice. If inverted elements contain other elements that match the `INVERT` selectors, then these elements will be inverted 3 or more times. To prevent it `NO INVERT` selectors are used.*
-```
-================================
 
-example.com
+## Site fixes
 
-INVERT
-.icon
-.button
-#player
+Automatically syncing the site fixes to every Dark Reader user was disabled because the GitHub team doesn't allow using GitHub as a CDN. Storing these files and making requests to other resources would be expensive and look suspicious. As such, changes are included with each new Dark Reader release.
 
-NO INVERT
-#player *
+However, this can be enabled by the following steps:
 
-REMOVE BG
-.bg-photo
+- Click on the Dark Reader icon.
+- Click on the Dev tools button (in the bottom-right corner).
+- Click on the Preview new design button.
+- Enable the `Synchronize site fixes` setting, under `Settings -> Manage Settings`.
 
-CSS
-.overlay {
-    background: rgba(255, 255, 255, 0.5);
-}
-```
-- Click **Apply**.
-- If the **fix worked** open
-**[dynamic-theme-fixes.config](https://github.com/alexanderby/darkreader/blob/master/src/config/dynamic-theme-fixes.config) file**
-or **[inversion-fixes.config](https://github.com/alexanderby/darkreader/blob/master/src/config/inversion-fixes.config) file**.
-- Click **edit** (sign-in to GitHub first).
-- **Insert your fix** there. Preserve **alphabetical order** by URL.
-- Provide a **short description** of what you have done.
-- Click **Propose file change**.
-- Review your changes. Click **Create pull request**.
-- The Travis CI will run tests reviewing your changes.
-- If you see a **red cross** click **Details** and see what is wrong and edit existing Pull Request.
-- When you see a **green checkmark** than everything is fine.
-- Dark Reader developer will **review** and merge your changes making them available for all users.
+<h2 align="center">Contributors</h2>
+<br/>
+<h3 align="center"><strong>Dark Reader exists thanks to all the people who have contributed to Dark Reader!</strong></h3>
+<br/>
+<br/>
+<p align="center"><a rel="noreferrer noopener" href="https://github.com/darkreader/darkreader/graphs/contributors/"><img src="https://opencollective.com/darkreader/contributors.svg?width=890&button=false"/></a></p>
 
-### Adding new features or fixing bugs
+<h2 align="center">Backers</h2>
+<br/>
+<h3 align="center"><strong>Thank you to all our generous backers! </strong>Support Dark Reader by <a rel="noreferrer noopener" href="https://opencollective.com/darkreader" target="_blank">Becoming a backer</a></h3>
+<br/>
+<br/>
+<p align="center"><a rel="noreferrer noopener" href="https://opencollective.com/darkreader#backers" target="_blank"><img src="https://opencollective.com/darkreader/backers.svg?width=890&limit=1000"></a></p>
 
-If you would like to **add new feature** to Dark Reader or **fix a bug**, **submit an issue** in GitHub (if there is no existing one), **discuss** it with active contributors, wait for **approvement**.
+<h2 align="center">Sponsors</h2>
+<p>Does your company use Dark Reader? Ask your manager or the marketing team if your company would be interested in supporting our project. By supporting this project, it will allow the maintainers to dedicate more time for maintenance and new features for everyone. Also, your company's logo will show <a rel="noreferrer noopener" href="https://github.com/darkreader/darkreader#sponsors" target="_blank">on GitHub</a> - who doesn't want a little extra exposure? <a rel="noreferrer noopener" href="https://opencollective.com/darkreader" target="_blank">Here's the info</a>.</p>
 
-In order to build and debug the extension **install the [Node.js](https://nodejs.org/)** LTS.
-Install development dependencies by running `npm install` in project root folder.
-Then execute `npm run debug`.
+<h3 align="center"><strong>Thank you to our wonderful sponsors!</strong></h3>
 
-#### Chrome
-Open the `chrome://extensions` page.
-Disable the official Dark Reader version.
-Enable the **Developer mode**.
-Click **Load unpacked extension** button, navigate to project's `debug/` folder.
-
-#### Firefox
-Open `about:addons` page.
-Disable the official Dark Reader version.
-Open `about:debugging#addons` page.
-Click **Load Temporary Add-on** button, open `debug-firefox/manifest.json` file.
-
-After making any code changes the project will be automatically recompiled.
-If the extension **didn't reload** automatically it can be reloaded manually on the extensions page.
-
-For editing the code you can use any text editor or web IDE (like [Visual Studio Code](https://code.visualstudio.com), [Atom](https://atom.io/), [WebStorm](https://www.jetbrains.com/webstorm/)).
-**Preserve code style** (whitespaces etc).
-
-Run tests by executing `npm test`.
-
-Submit a **pull request**, wait for **review**.
-
-## Contributors
-
-This project exists thanks to all the people who contribute
-
-<a href="graphs/contributors"><img src="https://opencollective.com/darkreader/contributors.svg?width=890&button=false" /></a>
-
-## Backers
-
-Thank you to all our backers!
-
-<a href="https://opencollective.com/darkreader#backers" target="_blank"><img src="https://opencollective.com/darkreader/backers.svg?width=890"></a>
-
-## Sponsors
-
-Support this project by [becoming a sponsor](https://opencollective.com/darkreader#sponsor)
-
-<a href="https://opencollective.com/darkreader/sponsor/0/website" target="_blank"><img src="https://opencollective.com/darkreader/sponsor/0/avatar.svg"></a>
-<a href="https://opencollective.com/darkreader/sponsor/1/website" target="_blank"><img src="https://opencollective.com/darkreader/sponsor/1/avatar.svg"></a>
-<a href="https://opencollective.com/darkreader/sponsor/2/website" target="_blank"><img src="https://opencollective.com/darkreader/sponsor/2/avatar.svg"></a>
-<a href="https://opencollective.com/darkreader/sponsor/3/website" target="_blank"><img src="https://opencollective.com/darkreader/sponsor/3/avatar.svg"></a>
-<a href="https://opencollective.com/darkreader/sponsor/4/website" target="_blank"><img src="https://opencollective.com/darkreader/sponsor/4/avatar.svg"></a>
-<a href="https://opencollective.com/darkreader/sponsor/5/website" target="_blank"><img src="https://opencollective.com/darkreader/sponsor/5/avatar.svg"></a>
-<a href="https://opencollective.com/darkreader/sponsor/6/website" target="_blank"><img src="https://opencollective.com/darkreader/sponsor/6/avatar.svg"></a>
-<a href="https://opencollective.com/darkreader/sponsor/7/website" target="_blank"><img src="https://opencollective.com/darkreader/sponsor/7/avatar.svg"></a>
-<a href="https://opencollective.com/darkreader/sponsor/8/website" target="_blank"><img src="https://opencollective.com/darkreader/sponsor/8/avatar.svg"></a>
-<a href="https://opencollective.com/darkreader/sponsor/9/website" target="_blank"><img src="https://opencollective.com/darkreader/sponsor/9/avatar.svg"></a>
+<a href="https://opencollective.com/darkreader/sponsor/0/website" target="_blank" rel="noreferrer noopener"><img src="https://opencollective.com/darkreader/sponsor/0/avatar.svg"></a>
+<a href="https://opencollective.com/darkreader/sponsor/1/website" target="_blank" rel="noreferrer noopener"><img src="https://opencollective.com/darkreader/sponsor/1/avatar.svg"></a>
+<a href="https://opencollective.com/darkreader/sponsor/2/website" target="_blank" rel="noreferrer noopener"><img src="https://opencollective.com/darkreader/sponsor/2/avatar.svg"></a>
+<a href="https://opencollective.com/darkreader/sponsor/3/website" target="_blank" rel="noreferrer noopener"><img src="https://opencollective.com/darkreader/sponsor/3/avatar.svg"></a>
+<a href="https://opencollective.com/darkreader/sponsor/4/website" target="_blank" rel="noreferrer noopener"><img src="https://opencollective.com/darkreader/sponsor/4/avatar.svg"></a>
+<a href="https://opencollective.com/darkreader/sponsor/5/website" target="_blank" rel="noreferrer noopener"><img src="https://opencollective.com/darkreader/sponsor/5/avatar.svg"></a>
+<a href="https://opencollective.com/darkreader/sponsor/6/website" target="_blank" rel="noreferrer noopener"><img src="https://opencollective.com/darkreader/sponsor/6/avatar.svg"></a>
+<a href="https://opencollective.com/darkreader/sponsor/7/website" target="_blank" rel="noreferrer noopener"><img src="https://opencollective.com/darkreader/sponsor/7/avatar.svg"></a>
+<a href="https://opencollective.com/darkreader/sponsor/8/website" target="_blank" rel="noreferrer noopener"><img src="https://opencollective.com/darkreader/sponsor/8/avatar.svg"></a>
+<a href="https://opencollective.com/darkreader/sponsor/9/website" target="_blank" rel="noreferrer noopener"><img src="https://opencollective.com/darkreader/sponsor/9/avatar.svg"></a>
+<a href="https://opencollective.com/darkreader/sponsor/10/website" target="_blank" rel="noreferrer noopener"><img src="https://opencollective.com/darkreader/sponsor/10/avatar.svg"></a>

@@ -1,0 +1,23 @@
+@import "../../theme.less";
+
+.reset-button {
+    border-radius: @size-control-inner / 2 + @size-border;
+    width: calc(100% - 2 * @size-border);
+
+    &__content {
+        align-items: center;
+        display: inline-flex;
+        flex-direction: row;
+        height: 100%;
+    }
+
+    &__icon {
+        background-image: @icon-reset;
+        background-position: 0 0;
+        background-size: 1rem;
+        display: inline-block;
+        height: 1rem;
+        margin-right: 0.125rem;
+        width: 1rem;
+    }
+}

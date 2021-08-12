@@ -80,6 +80,7 @@
         color: @color-fore;
         display: block;
         flex: none;
+        position: relative;
 
         &__date {
             display: block;
@@ -98,6 +99,27 @@
 
         &--unread {
             font-weight: bold;
+
+            &:first-child {
+                color: @color-heading;
+            }
+        }
+
+        &--important {
+            color: @color-heading;
+        }
+
+        &--important&--unread {
+            &::before {
+                background-color: @color-heading;
+                content: "";
+                height: 100%;
+                position: absolute;
+                right: calc(100% + @indent-large / 2);
+                text-align: center;
+                top: 0;
+                width: @size-border;
+            }
         }
     }
 

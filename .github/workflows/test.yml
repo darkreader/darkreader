@@ -1,0 +1,43 @@
+name: Run tests on Pull Request or Push
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - ready_for_review
+jobs:
+  test:
+    name: Run tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clone repository
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: 14.x
+      
+      - name: Set up npm cache
+        uses: actions/cache@v2
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            ${{ runner.OS }}-${{ hashFiles('package-lock.json') }}
+            ${{ runner.OS }}
+      
+      - name: Install npm dependencies
+        run: npm ci
+
+      - name: Run test against code
+        run: npm run test:ci
+
+      - name: Lint code for code-style errors
+        run: npm run lint

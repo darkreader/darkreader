@@ -1,4 +1,4 @@
-import {html} from 'malevic';
+import {m} from 'malevic';
 
 export function compileMarkdown(markdown: string) {
     return markdown.split('**')

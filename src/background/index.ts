@@ -1,34 +1,76 @@
 import {Extension} from './extension';
-import {getHelpURL} from '../utils/links';
+import {getHelpURL, UNINSTALL_URL} from '../utils/links';
+import {canInjectScript} from '../background/utils/extension-api';
 
 // Initialize extension
 const extension = new Extension();
 extension.start();
 
-chrome.runtime.onInstalled.addListener(({reason}) => {
-    if (reason === 'install') {
-        chrome.tabs.create({url: getHelpURL()});
-    }
-});
+const welcome = `  /''''\\
+ (0)==(0)
+/__||||__\\
+Welcome to Dark Reader!`;
+console.log(welcome);
 
-declare const __DEBUG__: boolean;
-const DEBUG = __DEBUG__;
+declare const __WATCH__: boolean;
+declare const __PORT__: number;
+const WATCH = __WATCH__;
 
-if (DEBUG) {
-    // Reload extension on connection
+if (WATCH) {
+    const PORT = __PORT__;
+    const ALARM_NAME = 'socket-close';
+    const PING_INTERVAL_IN_MINUTES = 1 / 60;
+
+    const socketAlarmListener = (alarm: chrome.alarms.Alarm) => {
+        if (alarm.name === ALARM_NAME) {
+            listen();
+        }
+    };
+
     const listen = () => {
-        const req = new XMLHttpRequest();
-        req.open('GET', 'http://localhost:8890/', true);
-        req.overrideMimeType('text/plain');
-        req.onload = () => {
-            if (req.status >= 200 && req.status < 300 && req.responseText === 'reload') {
-                chrome.runtime.reload();
-            } else {
-                setTimeout(listen, 2000);
+        const socket = new WebSocket(`ws://localhost:${PORT}`);
+        const send = (message: any) => socket.send(JSON.stringify(message));
+        socket.onmessage = (e) => {
+            chrome.alarms.onAlarm.removeListener(socketAlarmListener);
+
+            const message = JSON.parse(e.data);
+            if (message.type.startsWith('reload:')) {
+                send({type: 'reloading'});
+            }
+            switch (message.type) {
+                case 'reload:css': {
+                    chrome.runtime.sendMessage({type: 'css-update'});
+                    break;
+                }
+                case 'reload:ui': {
+                    chrome.runtime.sendMessage({type: 'ui-update'});
+                    break;
+                }
+                case 'reload:full': {
+                    chrome.tabs.query({}, (tabs) => {
+                        for (const tab of tabs) {
+                            if (canInjectScript(tab.url)) {
+                                chrome.tabs.sendMessage(tab.id, {type: 'reload'});
+                            }
+                        }
+                        chrome.runtime.reload();
+                    });
+                    break;
+                }
             }
         };
-        req.onerror = () => setTimeout(listen, 2000);
-        req.send();
+        socket.onclose = () => {
+            chrome.alarms.onAlarm.addListener(socketAlarmListener);
+            chrome.alarms.create(ALARM_NAME, {delayInMinutes: PING_INTERVAL_IN_MINUTES});
+        };
     };
-    setTimeout(listen, 2000);
+    listen();
+} else {
+    chrome.runtime.onInstalled.addListener(({reason}) => {
+        if (reason === 'install') {
+            chrome.tabs.create({url: getHelpURL()});
+        }
+    });
+
+    chrome.runtime.setUninstallURL(UNINSTALL_URL);
 }

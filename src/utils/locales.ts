@@ -3,5 +3,9 @@ export function getLocalMessage(messageName: string) {
 }
 
 export function getUILanguage() {
-    return chrome.i18n.getUILanguage();
+    const code = chrome.i18n.getUILanguage();
+    if (code.endsWith('-mac')) {
+        return code.substring(0, code.length - 4);
+    }
+    return code;
 }

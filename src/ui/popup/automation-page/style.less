@@ -1,0 +1,139 @@
+@import "../../theme";
+
+.automation-page {
+    &__button--active {
+        background: @color-control-active;
+
+        &:hover {
+            background: @color-control-active;
+        }
+    }
+
+    &__line {
+        display: flex;
+        flex-direction: row;
+
+        .checkbox {
+            border-bottom-left-radius: @size-control-inner / 2 + @size-border;
+            border-right: none;
+            border-top-left-radius: @size-control-inner / 2 + @size-border;
+            flex: none;
+
+            &__checkmark {
+                background-image: @icon-cross;
+                background-position: 0.3125rem 0.25rem;
+                background-repeat: no-repeat;
+                background-size: 1rem;
+
+                &::before,
+                &::after {
+                    display: none;
+                }
+            }
+
+            &__input:checked ~ .checkbox__checkmark {
+                background-image: @icon-check;
+                background-position: 0.375rem 0.25rem;
+            }
+        }
+
+        .time-range-picker .time-range-picker__input--start {
+            border-left: @size-border-inner solid @color-border;
+        }
+
+        .time-range-picker .time-range-picker__input--end {
+            border-bottom-right-radius: @size-control-inner / 2 + @size-border;
+            border-top-right-radius: @size-control-inner / 2 + @size-border;
+        }
+    }
+
+    &__label {
+        font-size: @size-text-small;
+        line-height: @size-text-small-height;
+        text-align: center;
+    }
+
+    &__description {
+        font-size: @size-text-small;
+        line-height: @size-text-small-height;
+        margin: 0;
+        text-align: center;
+        white-space: nowrap;
+    }
+
+    &__location-description {
+        font-size: @size-text-small;
+        line-height: @size-text-small-height;
+        margin: 0;
+        text-align: center;
+        white-space: nowrap;
+    }
+
+    &::after {
+        background-image: linear-gradient(to bottom, fadeout(@color-back, 10%), fadeout(@color-back, 100%));
+        content: "";
+        display: block;
+        height: @size-control-inner;
+        left: 0;
+        margin-top: @size-border;
+        pointer-events: none;
+        position: absolute;
+        top: 100%;
+        transition: height @time-slow;
+        width: 100%;
+    }
+
+    &__location {
+        margin-top: @indent-small;
+
+        &__latitude,
+        &__longitude {
+            flex: auto;
+            text-align: center;
+            text-indent: 0;
+            width: 100%;
+        }
+
+        &__latitude {
+            border-left: @size-border-inner solid @color-border;
+            border-right: none;
+        }
+
+        &__longitude {
+            border-bottom-right-radius: @size-control-inner / 2 + @size-border;
+            border-left: @size-border-inner solid @color-border;
+            border-top-right-radius: @size-control-inner / 2 + @size-border;
+        }
+    }
+
+    &__system-dark-mode {
+        display: flex;
+        flex-direction: row;
+        margin-top: @indent-small;
+
+        &__checkbox {
+            flex: none;
+        }
+
+        &__button {
+            border-bottom-right-radius: @size-control-inner / 2 + @size-border;
+            border-left-width: @size-border-inner;
+            border-top-right-radius: @size-control-inner / 2 + @size-border;
+            color: @color-input-fore;
+            flex: auto;
+
+            &--active {
+                color: @color-control-fore;
+            }
+        }
+
+        &:hover &__button,
+        &:hover &__checkbox {
+            background-color: @color-control-hover;
+        }
+    }
+    
+    .toggle {
+        width: 100%;
+    }
+}

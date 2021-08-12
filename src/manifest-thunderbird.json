@@ -1,0 +1,19 @@
+{
+    "applications": {
+        "gecko": {
+            "id": "addon@darkreader.org",
+            "strict_min_version": "78.0a1"
+        }
+    },
+    "background": {
+        "page": "background/index.html"
+    },
+    "permissions": [
+        "alarms",
+        "storage",
+        "tabs",
+        "theme",
+        "messagesModify",
+        "<all_urls>"
+    ]
+}

@@ -1,4 +1,4 @@
-import {html} from 'malevic';
+import {m} from 'malevic';
 import Button from '../button';
 import Track from './track';
 import {getLocalMessage} from '../../../utils/locales';
@@ -14,7 +14,6 @@ interface UpDownProps {
 }
 
 export default function UpDown(props: UpDownProps) {
-
     const buttonDownCls = {
         'updown__button': true,
         'updown__button--disabled': props.value === props.min
@@ -26,14 +25,14 @@ export default function UpDown(props: UpDownProps) {
     };
 
     function normalize(x: number) {
-        const exp = Math.ceil(Math.log10(props.step));
-        if (exp >= 1) {
-            const m = Math.pow(10, exp);
-            return Math.round(x / m) * m;
-        } else {
-            const m = Math.pow(10, -exp);
-            return Math.round(x * m) / m;
+        const s = Math.round(x / props.step) * props.step;
+        const exp = Math.floor(Math.log10(props.step));
+        if (exp >= 0) {
+            const m = 10 ** exp;
+            return Math.round(s / m) * m;
         }
+        const m = 10 ** -exp;
+        return Math.round(s * m) / m;
     }
 
     function clamp(x: number) {

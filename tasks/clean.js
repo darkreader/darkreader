@@ -1,9 +1,14 @@
 const fs = require('fs-extra');
 const {getDestDir} = require('./paths');
+const {createTask} = require('./task');
 
-module.exports = function createCleanTask(gulp) {
-    gulp.task('clean', async () => {
-        await fs.remove(getDestDir({production: true}));
-        await fs.remove(getDestDir({production: true, firefox: true}));
-    });
-};
+async function clean({debug}) {
+    await fs.remove(getDestDir({debug}));
+    await fs.remove(getDestDir({debug, firefox: true}));
+    await fs.remove(getDestDir({debug, thunderbird: true}));
+}
+
+module.exports = createTask(
+    'clean',
+    clean,
+);

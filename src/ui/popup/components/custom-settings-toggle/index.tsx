@@ -1,29 +1,28 @@
-import {html} from 'malevic';
+import {m} from 'malevic';
 import {Button} from '../../../controls';
-import {getURLHost, isURLInList} from '../../../../utils/url';
+import {getURLHostOrProtocol, isURLInList} from '../../../../utils/url';
 import {getLocalMessage} from '../../../../utils/locales';
-import {ExtWrapper, TabInfo} from '../../../../definitions';
+import type {ExtWrapper, TabInfo} from '../../../../definitions';
+import {isThunderbird} from '../../../../utils/platform';
 
 export default function CustomSettingsToggle({data, tab, actions}: ExtWrapper & {tab: TabInfo}) {
-    const host = getURLHost(tab.url || '');
+    const host = getURLHostOrProtocol(tab.url);
 
     const isCustom = data.settings.customThemes.some(({url}) => isURLInList(tab.url, url));
 
-    const urlText = (host
-        ? host
-            .split('.')
-            .reduce((elements, part, i) => elements.concat(
-                <wbr />,
-                `${i > 0 ? '.' : ''}${part}`
-            ), [])
-        : 'current site');
+    const urlText = host
+        .split('.')
+        .reduce((elements, part, i) => elements.concat(
+            <wbr />,
+            `${i > 0 ? '.' : ''}${part}`
+        ), []);
 
     return (
         <Button
             class={{
                 'custom-settings-toggle': true,
                 'custom-settings-toggle--checked': isCustom,
-                'custom-settings-toggle--disabled': tab.isProtected || (tab.isInDarkList && !data.settings.applyToListedOnly),
+                'custom-settings-toggle--disabled': tab.isProtected || isThunderbird,
             }}
             onclick={(e) => {
                 if (isCustom) {

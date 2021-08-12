@@ -14,7 +14,6 @@ body {
     flex-direction: column;
     height: 100%;
     margin: 0 auto;
-    max-width: 60rem;
 }
 
 header {
@@ -113,9 +112,14 @@ header {
     }
 
     .button {
-        min-width: 4rem;
+        min-width: 3rem;
         max-width: 6rem;
         width: 100%;
+    }
+
+    .preview-design-button {
+        border-color: gray;
+        max-width: 8rem;
     }
 }
 
@@ -148,4 +152,8 @@ header {
     #buttons {
         margin-bottom: @indent-small;
     }
+}
+
+.message-box {
+    border: @size-border solid @color-border;
 }

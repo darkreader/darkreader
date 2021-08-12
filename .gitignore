@@ -1,17 +1,25 @@
 # Build files
 #-----------------------------------
-build
-debug
-build.zip
-build-firefox
-debug-firefox
-build-firefox.xpi
+build/
+darkreader.js
+debug.log
 
 # Node.js modules
 #-----------------------------------
-node_modules
+node_modules/
+
+# Code coverage reports
+#-----------------------------------
+tests/coverage/
+tests/browser/coverage/
+tests/inject/coverage/
 
 # IDE and editor configs
 #-----------------------------------
-.idea
-.vscode
+.idea/
+.vscode/
+*.code-workspace
+
+# Cache files
+#-----------------------------------
+.eslintcache

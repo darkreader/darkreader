@@ -1,114 +1,203 @@
-import {parse, RGBA} from '../../utils/color';
+import type {RGBA} from '../../utils/color';
+import {parse, rgbToHSL, hslToString} from '../../utils/color';
 import {clamp} from '../../utils/math';
-import {isMacOS} from '../../utils/platform';
 import {getMatches} from '../../utils/text';
-import {modifyBackgroundColor, modifyBorderColor, modifyForegroundColor, modifyGradientColor, modifyShadowColor, clearColorModificationCache} from '../../generators/modify-colors'
+import {getAbsoluteURL} from '../../utils/url';
+import {modifyBackgroundColor, modifyBorderColor, modifyForegroundColor, modifyGradientColor, modifyShadowColor, clearColorModificationCache} from '../../generators/modify-colors';
 import {cssURLRegex, getCSSURLValue, getCSSBaseBath} from './css-rules';
-import {getImageDetails, getFilteredImageDataURL, ImageDetails} from './image';
-import {getAbsoluteURL} from './url';
-import {logWarn, logInfo} from '../utils/log';
-import {FilterConfig} from '../../definitions';
+import type {ImageDetails} from './image';
+import {getImageDetails, getFilteredImageDataURL, cleanImageProcessingCache} from './image';
+import type {CSSVariableModifier, VariablesStore} from './variables';
+import {logWarn, logInfo} from '../../utils/log';
+import type {FilterConfig, Theme} from '../../definitions';
+import {isFirefox} from '../../utils/platform';
 
-type CSSValueModifier = (filter: FilterConfig) => string | Promise<string>;
+export type CSSValueModifier = (theme: Theme) => string | Promise<string>;
 
 export interface ModifiableCSSDeclaration {
     property: string;
-    value: string | CSSValueModifier;
+    value: string | CSSValueModifier | CSSVariableModifier;
     important: boolean;
+    sourceValue: string;
 }
 
 export interface ModifiableCSSRule {
     selector: string;
-    media?: string;
+    parentRule: any;
     declarations: ModifiableCSSDeclaration[];
 }
 
-export function getModifiableCSSDeclaration(property: string, value: string, rule: CSSStyleRule, isCancelled: () => boolean): ModifiableCSSDeclaration {
-    const important = Boolean(rule && rule.style && rule.style.getPropertyPriority(property));
+function getPriority(ruleStyle: CSSStyleDeclaration, property: string) {
+    return Boolean(ruleStyle && ruleStyle.getPropertyPriority(property));
+}
+
+export function getModifiableCSSDeclaration(
+    property: string,
+    value: string,
+    rule: CSSStyleRule,
+    variablesStore: VariablesStore,
+    ignoreImageSelectors: string[],
+    isCancelled: () => boolean,
+): ModifiableCSSDeclaration {
     if (property.startsWith('--')) {
-        return null;
+        const modifier = getVariableModifier(variablesStore, property, value, rule, ignoreImageSelectors, isCancelled);
+        if (modifier) {
+            return {property, value: modifier, important: getPriority(rule.style, property), sourceValue: value};
+        }
+    } else if (value.includes('var(')) {
+        const modifier = getVariableDependantModifier(variablesStore, property, value);
+        if (modifier) {
+            return {property, value: modifier, important: getPriority(rule.style, property), sourceValue: value};
+        }
     } else if (
-        (property.indexOf('color') >= 0 && property !== '-webkit-print-color-adjust') ||
+        (property.includes('color') && property !== '-webkit-print-color-adjust') ||
         property === 'fill' ||
-        property === 'stroke'
+        property === 'stroke' ||
+        property === 'stop-color'
     ) {
         const modifier = getColorModifier(property, value);
         if (modifier) {
-            return {property, value: modifier, important};
+            return {property, value: modifier, important: getPriority(rule.style, property), sourceValue: value};
         }
-    } else if (property === 'background-image') {
-        const modifier = getBgImageModifier(property, value, rule, isCancelled);
+    } else if (property === 'background-image' || property === 'list-style-image') {
+        const modifier = getBgImageModifier(value, rule, ignoreImageSelectors, isCancelled);
         if (modifier) {
-            return {property, value: modifier, important};
+            return {property, value: modifier, important: getPriority(rule.style, property), sourceValue: value};
         }
-    } else if (property.indexOf('shadow') >= 0) {
-        const modifier = getShadowModifier(property, value);
+    } else if (property.includes('shadow')) {
+        const modifier = getShadowModifier(value);
         if (modifier) {
-            return {property, value: modifier, important};
+            return {property, value: modifier, important: getPriority(rule.style, property), sourceValue: value};
         }
     }
     return null;
 }
 
-export function getModifiedUserAgentStyle(filter: FilterConfig, isIFrame: boolean) {
+export function getModifiedUserAgentStyle(theme: Theme, isIFrame: boolean, styleSystemControls: boolean) {
     const lines: string[] = [];
     if (!isIFrame) {
         lines.push('html {');
-        lines.push(`    background-color: ${modifyBackgroundColor({r: 255, g: 255, b: 255}, filter)} !important;`);
+        lines.push(`    background-color: ${modifyBackgroundColor({r: 255, g: 255, b: 255}, theme)} !important;`);
         lines.push('}');
     }
-    lines.push(`${isIFrame ? '' : 'html, body, '}input, textarea, select, button {`);
-    lines.push(`    background-color: ${modifyBackgroundColor({r: 255, g: 255, b: 255}, filter)};`);
+    lines.push(`${isIFrame ? '' : 'html, body, '}${styleSystemControls ? 'input, textarea, select, button' : ''} {`);
+    lines.push(`    background-color: ${modifyBackgroundColor({r: 255, g: 255, b: 255}, theme)};`);
     lines.push('}');
-    lines.push('html, body, input, textarea, select, button {');
-    lines.push(`    border-color: ${modifyBorderColor({r: 76, g: 76, b: 76}, filter)};`);
-    lines.push(`    color: ${modifyForegroundColor({r: 0, g: 0, b: 0}, filter)};`);
+    lines.push(`html, body, ${styleSystemControls ? 'input, textarea, select, button' : ''} {`);
+    lines.push(`    border-color: ${modifyBorderColor({r: 76, g: 76, b: 76}, theme)};`);
+    lines.push(`    color: ${modifyForegroundColor({r: 0, g: 0, b: 0}, theme)};`);
     lines.push('}');
     lines.push('a {');
-    lines.push(`    color: ${modifyForegroundColor({r: 0, g: 64, b: 255}, filter)};`);
+    lines.push(`    color: ${modifyForegroundColor({r: 0, g: 64, b: 255}, theme)};`);
     lines.push('}');
     lines.push('table {');
-    lines.push(`    border-color: ${modifyBorderColor({r: 128, g: 128, b: 128}, filter)};`);
+    lines.push(`    border-color: ${modifyBorderColor({r: 128, g: 128, b: 128}, theme)};`);
     lines.push('}');
     lines.push('::placeholder {');
-    lines.push(`    color: ${modifyForegroundColor({r: 169, g: 169, b: 169}, filter)};`);
+    lines.push(`    color: ${modifyForegroundColor({r: 169, g: 169, b: 169}, theme)};`);
     lines.push('}');
-    ['::selection', '::-moz-selection'].forEach((selection) => {
-        lines.push(`${selection} {`);
-        lines.push(`    background-color: ${modifyBackgroundColor({r: 0, g: 96, b: 212}, filter)};`);
-        lines.push(`    color: ${modifyForegroundColor({r: 255, g: 255, b: 255}, filter)};`);
-        lines.push('}');
-    });
     lines.push('input:-webkit-autofill,');
     lines.push('textarea:-webkit-autofill,');
     lines.push('select:-webkit-autofill {');
-    lines.push(`    background-color: ${modifyBackgroundColor({r: 250, g: 255, b: 189}, filter)} !important;`);
-    lines.push(`    color: ${modifyForegroundColor({r: 0, g: 0, b: 0}, filter)} !important;`);
+    lines.push(`    background-color: ${modifyBackgroundColor({r: 250, g: 255, b: 189}, theme)} !important;`);
+    lines.push(`    color: ${modifyForegroundColor({r: 0, g: 0, b: 0}, theme)} !important;`);
     lines.push('}');
-    if (!isMacOS()) {
-        lines.push('::-webkit-scrollbar {');
-        lines.push(`    background-color: ${modifyBackgroundColor({r: 241, g: 241, b: 241}, filter)};`);
-        lines.push(`    color: ${modifyForegroundColor({r: 96, g: 96, b: 96}, filter)};`);
+    if (theme.scrollbarColor) {
+        lines.push(getModifiedScrollbarStyle(theme));
+    }
+    if (theme.selectionColor) {
+        lines.push(getModifiedSelectionStyle(theme));
+    }
+    return lines.join('\n');
+}
+
+export function getSelectionColor(theme: Theme) {
+    let backgroundColorSelection: string;
+    let foregroundColorSelection: string;
+    if (theme.selectionColor === 'auto') {
+        backgroundColorSelection = modifyBackgroundColor({r: 0, g: 96, b: 212}, {...theme, grayscale: 0});
+        foregroundColorSelection = modifyForegroundColor({r: 255, g: 255, b: 255}, {...theme, grayscale: 0});
+    } else {
+        const rgb = parse(theme.selectionColor);
+        const hsl = rgbToHSL(rgb);
+        backgroundColorSelection = theme.selectionColor;
+        if (hsl.l < 0.5) {
+            foregroundColorSelection = '#FFF';
+        } else {
+            foregroundColorSelection = '#000';
+        }
+    }
+    return {backgroundColorSelection, foregroundColorSelection};
+}
+
+function getModifiedSelectionStyle(theme: Theme) {
+    const lines: string[] = [];
+    const modifiedSelectionColor = getSelectionColor(theme);
+    const backgroundColorSelection = modifiedSelectionColor.backgroundColorSelection;
+    const foregroundColorSelection = modifiedSelectionColor.foregroundColorSelection;
+    ['::selection', '::-moz-selection'].forEach((selection) => {
+        lines.push(`${selection} {`);
+        lines.push(`    background-color: ${backgroundColorSelection} !important;`);
+        lines.push(`    color: ${foregroundColorSelection} !important;`);
         lines.push('}');
-        lines.push('::-webkit-scrollbar-thumb {');
-        lines.push(`    background-color: ${modifyBackgroundColor({r: 193, g: 193, b: 193}, filter)};`);
-        lines.push('}');
-        lines.push('::-webkit-scrollbar-thumb:hover {');
-        lines.push(`    background-color: ${modifyBackgroundColor({r: 166, g: 166, b: 166}, filter)};`);
-        lines.push('}');
-        lines.push('::-webkit-scrollbar-thumb:active {');;
-        lines.push(`    background-color: ${modifyBackgroundColor({r: 96, g: 96, b: 96}, filter)};`);
-        lines.push('}');
-        lines.push('::-webkit-scrollbar-corner {');
-        lines.push(`    background-color: ${modifyBackgroundColor({r: 255, g: 255, b: 255}, filter)};`);
+    });
+    return lines.join('\n');
+}
+
+function getModifiedScrollbarStyle(theme: Theme) {
+    const lines: string[] = [];
+    let colorTrack: string;
+    let colorIcons: string;
+    let colorThumb: string;
+    let colorThumbHover: string;
+    let colorThumbActive: string;
+    let colorCorner: string;
+    if (theme.scrollbarColor === 'auto') {
+        colorTrack = modifyBackgroundColor({r: 241, g: 241, b: 241}, theme);
+        colorIcons = modifyForegroundColor({r: 96, g: 96, b: 96}, theme);
+        colorThumb = modifyBackgroundColor({r: 176, g: 176, b: 176}, theme);
+        colorThumbHover = modifyBackgroundColor({r: 144, g: 144, b: 144}, theme);
+        colorThumbActive = modifyBackgroundColor({r: 96, g: 96, b: 96}, theme);
+        colorCorner = modifyBackgroundColor({r: 255, g: 255, b: 255}, theme);
+    } else {
+        const rgb = parse(theme.scrollbarColor);
+        const hsl = rgbToHSL(rgb);
+        const isLight = hsl.l > 0.5;
+        const lighten = (lighter: number) => ({...hsl, l: clamp(hsl.l + lighter, 0, 1)});
+        const darken = (darker: number) => ({...hsl, l: clamp(hsl.l - darker, 0, 1)});
+        colorTrack = hslToString(darken(0.4));
+        colorIcons = hslToString(isLight ? darken(0.4) : lighten(0.4));
+        colorThumb = hslToString(hsl);
+        colorThumbHover = hslToString(lighten(0.1));
+        colorThumbActive = hslToString(lighten(0.2));
+    }
+    lines.push('::-webkit-scrollbar {');
+    lines.push(`    background-color: ${colorTrack};`);
+    lines.push(`    color: ${colorIcons};`);
+    lines.push('}');
+    lines.push('::-webkit-scrollbar-thumb {');
+    lines.push(`    background-color: ${colorThumb};`);
+    lines.push('}');
+    lines.push('::-webkit-scrollbar-thumb:hover {');
+    lines.push(`    background-color: ${colorThumbHover};`);
+    lines.push('}');
+    lines.push('::-webkit-scrollbar-thumb:active {');
+    lines.push(`    background-color: ${colorThumbActive};`);
+    lines.push('}');
+    lines.push('::-webkit-scrollbar-corner {');
+    lines.push(`    background-color: ${colorCorner};`);
+    lines.push('}');
+    if (isFirefox) {
+        lines.push('* {');
+        lines.push(`    scrollbar-color: ${colorThumb} ${colorTrack};`);
         lines.push('}');
     }
     return lines.join('\n');
 }
 
-export function getModifiedFallbackStyle(filter: FilterConfig) {
+export function getModifiedFallbackStyle(filter: FilterConfig, {strict}: {strict: boolean}) {
     const lines: string[] = [];
-    lines.push('html, html * {');
+    lines.push(`html, body, ${strict ? 'body :not(iframe)' : 'body > :not(iframe)'} {`);
     lines.push(`    background-color: ${modifyBackgroundColor({r: 255, g: 255, b: 255}, filter)} !important;`);
     lines.push(`    border-color: ${modifyBorderColor({r: 64, g: 64, b: 64}, filter)} !important;`);
     lines.push(`    color: ${modifyForegroundColor({r: 0, g: 0, b: 0}, filter)} !important;`);
@@ -122,11 +211,12 @@ const unparsableColors = new Set([
     'initial',
     'currentcolor',
     'none',
+    'unset',
 ]);
 
 const colorParseCache = new Map<string, RGBA>();
 
-function parseColorWithCache($color: string) {
+export function parseColorWithCache($color: string) {
     $color = $color.trim();
     if (colorParseCache.has($color)) {
         return colorParseCache.get($color);
@@ -136,7 +226,7 @@ function parseColorWithCache($color: string) {
     return color;
 }
 
-function tryParseColor($color: string) {
+export function tryParseColor($color: string) {
     try {
         return parseColorWithCache($color);
     } catch (err) {
@@ -150,25 +240,46 @@ function getColorModifier(prop: string, value: string): string | CSSValueModifie
     }
     try {
         const rgb = parseColorWithCache(value);
-        if (prop.indexOf('background') >= 0) {
+        if (prop.includes('background')) {
             return (filter) => modifyBackgroundColor(rgb, filter);
         }
-        if (prop.indexOf('border') >= 0 || prop.indexOf('outline') >= 0) {
+        if (prop.includes('border') || prop.includes('outline')) {
             return (filter) => modifyBorderColor(rgb, filter);
         }
         return (filter) => modifyForegroundColor(rgb, filter);
-
     } catch (err) {
         logWarn('Color parse error', err);
         return null;
     }
 }
 
-const gradientRegex = /[\-a-z]+gradient\(([^\(\)]*(\(([^\(\)]*(\(.*?\)))*[^\(\)]*\)))*[^\(\)]*\)/g;
+export const gradientRegex = /[\-a-z]+gradient\(([^\(\)]*(\(([^\(\)]*(\(.*?\)))*[^\(\)]*\))){0,15}[^\(\)]*\)/g;
 const imageDetailsCache = new Map<string, ImageDetails>();
-const awaitingForImageLoading = new Map<string, ((imageDetails: ImageDetails) => void)[]>();
+const awaitingForImageLoading = new Map<string, Array<(imageDetails: ImageDetails) => void>>();
 
-function getBgImageModifier(prop: string, value: string, rule: CSSStyleRule, isCancelled: () => boolean): string | CSSValueModifier {
+function shouldIgnoreImage(selectorText: string, selectors: string[]) {
+    if (!selectorText || selectors.length === 0) {
+        return false;
+    }
+    if (selectors.some((s) => s === '*')) {
+        return true;
+    }
+    const ruleSelectors = selectorText.split(/,\s*/g);
+    for (let i = 0; i < selectors.length; i++) {
+        const ignoredSelector = selectors[i];
+        if (ruleSelectors.some((s) => s === ignoredSelector)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+export function getBgImageModifier(
+    value: string,
+    rule: CSSStyleRule,
+    ignoreImageSelectors: string[],
+    isCancelled: () => boolean,
+): string | CSSValueModifier {
     try {
         const gradients = getMatches(gradientRegex, value);
         const urls = getMatches(cssURLRegex, value);
@@ -228,15 +339,15 @@ function getBgImageModifier(prop: string, value: string, rule: CSSStyleRule, isC
         };
 
         const getURLModifier = (urlValue: string) => {
-            let url = getCSSURLValue(urlValue);
-            if (rule.parentStyleSheet.href) {
-                const basePath = getCSSBaseBath(rule.parentStyleSheet.href);
-                url = getAbsoluteURL(basePath, url);
-            } else if (rule.parentStyleSheet.ownerNode && rule.parentStyleSheet.ownerNode.baseURI) {
-                url = getAbsoluteURL(rule.parentStyleSheet.ownerNode.baseURI, url);
-            } else {
-                url = getAbsoluteURL(location.origin, url);
+            if (shouldIgnoreImage(rule.selectorText, ignoreImageSelectors)) {
+                return null;
             }
+            let url = getCSSURLValue(urlValue);
+            const {parentStyleSheet} = rule;
+            const baseURL = (parentStyleSheet && parentStyleSheet.href) ?
+                getCSSBaseBath(parentStyleSheet.href) :
+                parentStyleSheet.ownerNode?.baseURI || location.origin;
+            url = getAbsoluteURL(baseURL, url);
 
             const absoluteValue = `url("${url}")`;
 
@@ -277,9 +388,11 @@ function getBgImageModifier(prop: string, value: string, rule: CSSStyleRule, isC
         };
 
         const getBgImageValue = (imageDetails: ImageDetails, filter: FilterConfig) => {
-            const {isDark, isLight, isTransparent, isLarge, width} = imageDetails;
+            const {isDark, isLight, isTransparent, isLarge, isTooLarge, width} = imageDetails;
             let result: string;
-            if (isDark && isTransparent && filter.mode === 1 && !isLarge && width > 2) {
+            if (isTooLarge) {
+                result = `url("${imageDetails.src}")`;
+            } else if (isDark && isTransparent && filter.mode === 1 && !isLarge && width > 2) {
                 logInfo(`Inverting dark image ${imageDetails.src}`);
                 const inverted = getFilteredImageDataURL(imageDetails, {...filter, sepia: clamp(filter.sepia + 10, 0, 100)});
                 result = `url("${inverted}")`;
@@ -316,7 +429,7 @@ function getBgImageModifier(prop: string, value: string, rule: CSSStyleRule, isC
         });
 
         return (filter: FilterConfig) => {
-            const results = modifiers.map((modify) => modify(filter));
+            const results = modifiers.filter(Boolean).map((modify) => modify(filter));
             if (results.some((r) => r instanceof Promise)) {
                 return Promise.all(results)
                     .then((asyncResults) => {
@@ -324,15 +437,14 @@ function getBgImageModifier(prop: string, value: string, rule: CSSStyleRule, isC
                     });
             }
             return results.join('');
-        }
-
+        };
     } catch (err) {
         logWarn(`Unable to parse gradient ${value}`, err);
         return null;
     }
 }
 
-function getShadowModifier(prop: string, value: string): CSSValueModifier {
+function getShadowModifier(value: string): CSSValueModifier {
     try {
         let index = 0;
         const colorMatches = getMatches(/(^|\s)([a-z]+\(.+?\)|#[0-9a-f]+|[a-z]+)(.*?(inset|outset)?($|,))/ig, value, 2);
@@ -349,16 +461,41 @@ function getShadowModifier(prop: string, value: string): CSSValueModifier {
         });
 
         return (filter: FilterConfig) => modifiers.map((modify) => modify(filter)).join('');
-
     } catch (err) {
         logWarn(`Unable to parse shadow ${value}`, err);
         return null;
     }
 }
 
+function getVariableModifier(
+    variablesStore: VariablesStore,
+    prop: string,
+    value: string,
+    rule: CSSStyleRule,
+    ignoredImgSelectors: string[],
+    isCancelled: () => boolean,
+): CSSVariableModifier {
+    return variablesStore.getModifierForVariable({
+        varName: prop,
+        sourceValue: value,
+        rule,
+        ignoredImgSelectors,
+        isCancelled,
+    });
+}
+
+function getVariableDependantModifier(
+    variablesStore: VariablesStore,
+    prop: string,
+    value: string,
+) {
+    return variablesStore.getModifierForVarDependant(prop, value);
+}
+
 export function cleanModificationCache() {
     colorParseCache.clear();
     clearColorModificationCache();
     imageDetailsCache.clear();
+    cleanImageProcessingCache();
     awaitingForImageLoading.clear();
 }

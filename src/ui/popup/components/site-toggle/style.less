@@ -1,7 +1,7 @@
 @import "../../../theme";
 
 .site-toggle {
-    color: @color-fore;
+    color: @color-input-fore;
     white-space: normal;
 
     &--disabled {
@@ -9,7 +9,16 @@
         pointer-events: none;
     }
 
-    &__url {
-        color: @color-control-fore;
+    &__mark {
+        svg {
+            fill: currentColor;
+            height: @size-text-normal;
+            vertical-align: bottom;
+            width: @size-text-normal;
+        }
+    }
+
+    &--active {
+        color: @color-input-fore-active;
     }
 }

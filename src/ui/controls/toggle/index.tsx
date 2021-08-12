@@ -1,10 +1,11 @@
-import {html, ChildDeclaration} from 'malevic';
+import type {Child} from 'malevic';
+import {m} from 'malevic';
 
 interface ToggleProps {
     checked: boolean;
     class?: string;
-    labelOn: ChildDeclaration;
-    labelOff: ChildDeclaration;
+    labelOn: Child;
+    labelOff: Child;
     onChange: (checked: boolean) => void;
 }
 

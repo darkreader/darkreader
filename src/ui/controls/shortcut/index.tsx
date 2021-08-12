@@ -1,23 +1,24 @@
-import {html} from 'malevic';
+import {m} from 'malevic';
 import {mergeClass} from '../utils';
-import {isFirefox, isMobile} from '../../../utils/platform';
-import {Shortcuts} from '../../../definitions';
+import type {Shortcuts} from '../../../definitions';
+import {isFirefox, isEdge} from '../../../utils/platform';
 
 interface ShortcutLinkProps {
     class?: string | {[cls: string]: any};
     commandName: string;
     shortcuts: Shortcuts;
     textTemplate: (shortcut: string) => string;
-    onSetShortcut: (shortvut: string) => void;
+    onSetShortcut: (shortcut: string) => void;
 }
 
 /**
- * Displays a shortcut and navigates 
+ * Displays a shortcut and navigates
  * to Chrome Commands page on click.
  */
 export default function ShortcutLink(props: ShortcutLinkProps) {
     const cls = mergeClass('shortcut', props.class);
     const shortcut = props.shortcuts[props.commandName];
+    const shortcutMessage = props.textTemplate(shortcut);
 
     let enteringShortcutInProgress = false;
 
@@ -78,8 +79,15 @@ export default function ShortcutLink(props: ShortcutLinkProps) {
 
     function onClick(e: Event) {
         e.preventDefault();
-        if (isFirefox()) {
+        if (isFirefox) {
             startEnteringShortcut(e.target as HTMLAnchorElement);
+            return;
+        }
+        if (isEdge) {
+            chrome.tabs.create({
+                url: `edge://extensions/shortcuts`,
+                active: true
+            });
             return;
         }
         chrome.tabs.create({
@@ -88,11 +96,16 @@ export default function ShortcutLink(props: ShortcutLinkProps) {
         });
     }
 
+    function onRender(node: HTMLAnchorElement) {
+        node.textContent = shortcutMessage;
+    }
+
     return (
         <a
             class={cls}
             href="#"
             onclick={onClick}
-        >{props.textTemplate(shortcut)}</a>
+            oncreate={onRender}
+        ></a>
     );
 }

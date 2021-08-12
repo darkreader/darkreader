@@ -1,0 +1,19 @@
+@import "../../theme.less";
+
+.overlay {
+    align-items: center;
+    background-color: fade(@color-back, 50%);
+    flex-direction: column;
+    display: inline-flex;
+    height: 100%;
+    justify-content: center;
+    left: 0;
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 2;
+
+    &:empty {
+        display: none;
+    }
+}

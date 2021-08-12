@@ -40,7 +40,13 @@ const jsEntries = [
             const destPath = `${getDestDir({debug})}/${this.dest}`;
             const ffDestPath = `${getDestDir({debug, firefox: true})}/${this.dest}`;
             const tbDestPath = `${getDestDir({debug, thunderbird: true})}/${this.dest}`;
-            const code = await fs.readFile(destPath, 'utf8');
+            let code = await fs.readFile(destPath, 'utf8');
+            // Optimize the logInfo and logWarn functions.
+            code = code.replace(
+                'function logInfo(...args) {\n    false;\n  }\n  function logWarn(...args) {\n    false;\n  }',
+                'function logInfo(...args) { }\n  function logWarn(...args) { }'
+            );
+            await fs.outputFile(destPath, code);
             const patchedCode = patchFirefoxJS(code);
             await fs.outputFile(ffDestPath, patchedCode);
             await fs.copy(ffDestPath, tbDestPath);

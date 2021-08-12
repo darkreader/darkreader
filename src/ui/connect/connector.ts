@@ -1,4 +1,4 @@
-import {isFirefox} from 'utils/platform';
+import {isFirefox} from '../../utils/platform';
 import type {ExtensionData, ExtensionActions, FilterConfig, TabInfo, Message, UserSettings} from '../../definitions';
 
 export default class Connector implements ExtensionActions {
@@ -10,7 +10,7 @@ export default class Connector implements ExtensionActions {
 
     private async sendRequest<T>(type: string, data?: any) {
         return new Promise<T>((resolve, reject) => {
-            chrome.runtime.sendMessage({from: 'ui', type, ...data}, ({data, error}) => {
+            chrome.runtime.sendMessage<Message>({from: 'ui', type, ...data}, ({data, error}) => {
                 if (error) {
                     reject(error);
                 } else {
@@ -56,7 +56,7 @@ export default class Connector implements ExtensionActions {
     };
 
     private sendMessage(data: any) {
-        chrome.runtime.sendMessage({from: 'ui', ...data});
+        chrome.runtime.sendMessage<Message>({from: 'ui', ...data});
     }
 
     subscribeToChanges(callback: (data: ExtensionData) => void) {
@@ -67,14 +67,6 @@ export default class Connector implements ExtensionActions {
                 this.sendMessage({type: 'subscribe-to-changes'});
             }
         }
-    }
-
-    enable() {
-        this.sendMessage({type: 'enable'});
-    }
-
-    disable() {
-        this.sendMessage({type: 'disable'});
     }
 
     setShortcut(command: string, shortcut: string) {

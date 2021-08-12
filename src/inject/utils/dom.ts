@@ -1,5 +1,5 @@
-import {logWarn} from './log';
-import {throttle} from './throttle';
+import {logWarn} from '../../utils/log';
+import {throttle} from '../../utils/throttle';
 import {forEach} from '../../utils/array';
 import {getDuration} from '../../utils/time';
 

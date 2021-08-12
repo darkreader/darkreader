@@ -2,15 +2,23 @@ import {getBlogPostURL} from '../utils/links';
 import {getDurationInMinutes} from '../utils/time';
 import type {News} from '../definitions';
 import {readSyncStorage, readLocalStorage, writeSyncStorage, writeLocalStorage} from './utils/extension-api';
+import {StateManager} from './utils/state-manager';
 
 export default class Newsmaker {
     static UPDATE_INTERVAL = getDurationInMinutes({hours: 4});
     static ALARM_NAME = 'newsmaker';
+    static LOCAL_STORAGE_KEY = 'Newsmaker-state';
 
-    latest: News[];
+    private stateManager: StateManager;
+    private latest: News[];
+    async getLatest(): Promise<News[]> {
+        await this.stateManager.loadState();
+        return this.latest;
+    }
     onUpdate: (news: News[]) => void;
 
     constructor(onUpdate: (news: News[]) => void) {
+        this.stateManager = new StateManager(Newsmaker.LOCAL_STORAGE_KEY, this, {latest: []});
         this.latest = [];
         this.onUpdate = onUpdate;
     }
@@ -30,6 +38,7 @@ export default class Newsmaker {
         if (Array.isArray(news)) {
             this.latest = news;
             this.onUpdate(this.latest);
+            await this.stateManager.saveState();
         }
     }
 
@@ -84,6 +93,7 @@ export default class Newsmaker {
             const obj = {readNews: results};
             await writeLocalStorage(obj);
             await writeSyncStorage(obj);
+            await this.stateManager.saveState();
         }
     }
 

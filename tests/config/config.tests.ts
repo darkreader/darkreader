@@ -5,7 +5,7 @@ import {parseArray, formatArray, getTextDiffIndex, getTextPositionMessage} from 
 import {parseInversionFixes, formatInversionFixes} from '../../src/generators/css-filter';
 import {parseDynamicThemeFixes, formatDynamicThemeFixes} from '../../src/generators/dynamic-theme';
 import {parseStaticThemes, formatStaticThemes} from '../../src/generators/static-theme';
-import type {StaticTheme} from 'definitions';
+import type {StaticTheme} from '../../src/definitions';
 
 function readConfig(fileName: string) {
     return new Promise<string>((resolve, reject) => {

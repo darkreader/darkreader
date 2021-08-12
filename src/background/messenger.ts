@@ -27,8 +27,9 @@ export default class Messenger {
     constructor(adapter: ExtensionAdapter) {
         this.adapter = adapter;
         this.changeListenerCount = 0;
+        const allowedSenderURL = [chrome.runtime.getURL('/ui/popup/index.html'), chrome.runtime.getURL('/ui/devtools/index.html')];
         chrome.runtime.onMessage.addListener((message: Message, sender: chrome.runtime.MessageSender, sendResponse: (response: any) => void) => {
-            if (sender.url === chrome.runtime.getURL('/ui/popup/index.html')) {
+            if (allowedSenderURL.includes(sender.url)) {
                 this.onUIMessage(message, sendResponse);
                 this.adapter.onPopupOpen();
                 return ([
@@ -48,6 +49,35 @@ export default class Messenger {
                         break;
                     case MessageType.UI_GET_ACTIVE_TAB_INFO:
                         promise = this.adapter.getActiveTabInfo();
+                        break;
+                    // These types require data, so we need to add a listener to the port.
+                    case MessageType.UI_APPLY_DEV_DYNAMIC_THEME_FIXES:
+                    case MessageType.UI_APPLY_DEV_INVERSION_FIXES:
+                    case MessageType.UI_APPLY_DEV_STATIC_THEMES:
+                        promise = new Promise((resolve, reject) => {
+                            port.onMessage.addListener((message: Message) => {
+                                const {data} = message;
+                                let error: Error;
+                                switch (port.name) {
+                                    case MessageType.UI_APPLY_DEV_DYNAMIC_THEME_FIXES:
+                                        error = this.adapter.applyDevDynamicThemeFixes(data);
+                                        break;
+                                    case MessageType.UI_APPLY_DEV_INVERSION_FIXES:
+                                        error = this.adapter.applyDevInversionFixes(data);
+                                        break;
+                                    case MessageType.UI_APPLY_DEV_STATIC_THEMES:
+                                        error = this.adapter.applyDevStaticThemes(data);
+                                        break;
+                                    default:
+                                        throw new Error(`Unknown port name: ${port.name}`);
+                                }
+                                if (error) {
+                                    reject(error);
+                                } else {
+                                    resolve(null);
+                                }
+                            });
+                        });
                         break;
                     default:
                         return;

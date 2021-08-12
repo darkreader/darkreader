@@ -21,7 +21,7 @@ export default class Connector implements ExtensionActions {
         });
     }
 
-    private async firefoxSendRequestWithResponse<T>(type: string) {
+    private async firefoxSendRequestWithResponse<T>(type: string, data?: any) {
         return new Promise<T>((resolve, reject) => {
             const dataPort = chrome.runtime.connect({name: type});
             dataPort.onDisconnect.addListener(() => reject());
@@ -33,6 +33,7 @@ export default class Connector implements ExtensionActions {
                 }
                 dataPort.disconnect();
             });
+            data && dataPort.postMessage(data);
         });
     }
 
@@ -91,6 +92,9 @@ export default class Connector implements ExtensionActions {
     }
 
     async applyDevDynamicThemeFixes(text: string) {
+        if (isFirefox) {
+            return await this.firefoxSendRequestWithResponse<void>(MessageType.UI_APPLY_DEV_DYNAMIC_THEME_FIXES, {data: text});
+        }
         return await this.sendRequest<void>(MessageType.UI_APPLY_DEV_DYNAMIC_THEME_FIXES, {data: text});
     }
 
@@ -99,6 +103,9 @@ export default class Connector implements ExtensionActions {
     }
 
     async applyDevInversionFixes(text: string) {
+        if (isFirefox) {
+            return await this.firefoxSendRequestWithResponse<void>(MessageType.UI_APPLY_DEV_INVERSION_FIXES, {data: text});
+        }
         return await this.sendRequest<void>(MessageType.UI_APPLY_DEV_INVERSION_FIXES, {data: text});
     }
 
@@ -107,6 +114,9 @@ export default class Connector implements ExtensionActions {
     }
 
     async applyDevStaticThemes(text: string) {
+        if (isFirefox) {
+            return await this.firefoxSendRequestWithResponse<void>(MessageType.UI_APPLY_DEV_STATIC_THEMES, {data: text});
+        }
         return await this.sendRequest<void>(MessageType.UI_APPLY_DEV_STATIC_THEMES, {data: text});
     }
 

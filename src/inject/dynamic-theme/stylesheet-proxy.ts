@@ -85,12 +85,27 @@ export function injectProxy() {
     }
 
     function proxyGetElementsByTagName(tagName: string): NodeListOf<HTMLElement> {
-        let elements: NodeListOf<HTMLElement> = getElementsByTagNameDescriptor.value.call(this, tagName);
-        if (tagName === 'style') {
-            elements = Object.setPrototypeOf([...elements].filter((element: HTMLElement) => {
-                return !element.classList.contains('darkreader');
-            }), NodeList.prototype);
-        }
+        const getCurrentElementValue = () => {
+            let elements: NodeListOf<HTMLElement> = getElementsByTagNameDescriptor.value.call(this, tagName);
+            if (tagName === 'style') {
+                elements = Object.setPrototypeOf([...elements].filter((element: HTMLElement) => {
+                    return !element.classList.contains('darkreader');
+                }), NodeList.prototype);
+            }
+            return elements;
+        };
+
+        let elements = getCurrentElementValue();
+        // Don't ask just trust me.
+        // Because NodeListOf and HTMLCollection are so called "live objects".
+        // Every time you access them, it will return all tagnames from
+        // current situation of the DOM. Instead of a static list.
+        const NodeListBehavior: ProxyHandler<NodeListOf<HTMLElement>> = {
+            get: function (_: NodeListOf<HTMLElement>, property: string) {
+                return getCurrentElementValue()[property];
+            }
+        };
+        elements = new Proxy(elements, NodeListBehavior);
         return elements;
     }
 

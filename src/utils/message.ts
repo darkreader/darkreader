@@ -28,6 +28,8 @@ export const MessageType = {
     BG_CLEAN_UP: 'bg-clean-up',
     BG_RELOAD: 'bg-reload',
     BG_FETCH_RESPONSE: 'bg-fetch-response',
+    BG_UI_UPDATE: 'bg-ui-update',
+    BG_CSS_UPDATE: 'bg-css-update',
 
     CS_COLOR_SCHEME_CHANGE: 'cs-color-scheme-change',
     CS_FRAME_CONNECT: 'cs-frame-connect',

@@ -1,6 +1,8 @@
 import {Extension} from './extension';
 import {getHelpURL, UNINSTALL_URL} from '../utils/links';
 import {canInjectScript} from '../background/utils/extension-api';
+import type {Message} from '../definitions';
+import {MessageType} from '../utils/message';
 
 // Initialize extension
 const extension = new Extension();
@@ -39,18 +41,18 @@ if (WATCH) {
             }
             switch (message.type) {
                 case 'reload:css': {
-                    chrome.runtime.sendMessage({type: 'css-update'});
+                    chrome.runtime.sendMessage<Message>({type: MessageType.BG_CSS_UPDATE});
                     break;
                 }
                 case 'reload:ui': {
-                    chrome.runtime.sendMessage({type: 'ui-update'});
+                    chrome.runtime.sendMessage<Message>({type: MessageType.BG_UI_UPDATE});
                     break;
                 }
                 case 'reload:full': {
                     chrome.tabs.query({}, (tabs) => {
                         for (const tab of tabs) {
                             if (canInjectScript(tab.url)) {
-                                chrome.tabs.sendMessage(tab.id, {type: 'reload'});
+                                chrome.tabs.sendMessage<Message>(tab.id, {type: MessageType.BG_RELOAD});
                             }
                         }
                         chrome.runtime.reload();

@@ -17,7 +17,7 @@ export async function bgFetch(request: FetchRequest) {
         const id = ++counter;
         resolvers.set(id, resolve);
         rejectors.set(id, reject);
-        chrome.runtime.sendMessage({type: MessageType.CS_FETCH, data: request, id});
+        chrome.runtime.sendMessage<Message>({type: MessageType.CS_FETCH, data: request, id});
     });
 }
 

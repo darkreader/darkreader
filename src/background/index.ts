@@ -2,7 +2,7 @@ import {Extension} from './extension';
 import {getHelpURL, UNINSTALL_URL} from '../utils/links';
 import {canInjectScript} from '../background/utils/extension-api';
 import type {Message} from '../definitions';
-import {MessageType} from 'utils/message';
+import {MessageType} from '../utils/message';
 
 // Initialize extension
 const extension = new Extension();

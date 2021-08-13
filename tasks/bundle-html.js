@@ -23,7 +23,7 @@ global.chrome.i18n.getUILanguage = global.chrome.i18n.getUILanguage || (() => 'e
 
 const tsConfig = require('../src/tsconfig.json');
 require('ts-node').register({
-    ...tsConfig,
+    transpileOnly: true,
     compilerOptions: {
         ...tsConfig.compilerOptions,
         module: 'commonjs',

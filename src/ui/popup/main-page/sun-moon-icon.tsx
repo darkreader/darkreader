@@ -1,7 +1,7 @@
 import {m} from 'malevic';
 import {isNightAtLocation} from '../../../utils/time';
 
-export default function SunMoonIcon({date, latitude, longitude}) {
+export default function SunMoonIcon({date, latitude, longitude}: {date: Date; latitude: number; longitude: number}) {
     if (latitude == null || longitude == null) {
         // question mark icon
         return (
@@ -18,7 +18,7 @@ export default function SunMoonIcon({date, latitude, longitude}) {
         );
     }
 
-    if (isNightAtLocation(date, latitude, longitude)) {
+    if (isNightAtLocation(latitude, longitude, date)) {
         // moon icon
         return (
             <svg viewBox="0 0 16 16">

@@ -76,7 +76,9 @@ export default class TabManager {
                         }
                     };
 
-                    const isPanel = sender.tab == null;
+                    // Workaround for thunderbird, not sure how. But sometimes sender.tab is undefined but accessing it.
+                    // Will actually throw a very nice error.
+                    const isPanel = typeof sender === 'undefined' || typeof sender.tab === 'undefined';
                     if (isPanel) {
                         // NOTE: Vivaldi and Opera can show a page in a side panel,
                         // but it is not possible to handle messaging correctly (no tab ID, frame ID).

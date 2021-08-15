@@ -6,8 +6,10 @@ import {watchForColorSchemeChange} from './utils/watch-color-scheme';
 import {collectCSS} from './dynamic-theme/css-collection';
 import type {Message} from '../definitions';
 import {MessageType} from '../utils/message';
+import {isThunderbird} from '../utils/platform';
 
 function onMessage({type, data}: Message) {
+    logInfo('onMessage', type, data);
     switch (type) {
         case MessageType.BG_ADD_CSS_FILTER:
         case MessageType.BG_ADD_STATIC_THEME: {
@@ -74,6 +76,10 @@ function onResume() {
     chrome.runtime.sendMessage<Message>({type: MessageType.CS_FRAME_RESUME});
 }
 
-addEventListener('pagehide', onPageHide);
-addEventListener('freeze', onFreeze);
-addEventListener('resume', onResume);
+// Thunderbird don't has "tabs", and emails aren't 'frozen' or 'cached'.
+// And will currently error: `Promise rejected after context unloaded: Actor 'Conduits' destroyed before query 'RuntimeMessage' was resolved`
+if (!isThunderbird) {
+    addEventListener('pagehide', onPageHide);
+    addEventListener('freeze', onFreeze);
+    addEventListener('resume', onResume);
+}

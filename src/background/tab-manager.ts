@@ -19,7 +19,7 @@ interface ConnectionMessageOptions {
 }
 
 interface TabManagerOptions {
-    getConnectionMessage: (options: ConnectionMessageOptions) => any;
+    getConnectionMessage: (options: ConnectionMessageOptions) => Message | Promise<Message>;
     onColorSchemeChange: ({isDark}: {isDark: boolean}) => void;
 }
 
@@ -201,7 +201,7 @@ export default class TabManager {
         });
     }
 
-    async sendMessage(getMessage: (url: string, frameUrl: string) => any) {
+    async sendMessage(getMessage: (url: string, frameUrl: string) => Message) {
         (await queryTabs({}))
             .filter((tab) => Boolean(this.tabs[tab.id]))
             .forEach((tab) => {

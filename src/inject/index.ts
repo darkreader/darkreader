@@ -29,7 +29,7 @@ function sendMessage(message: Message) {
     }
     try {
         chrome.runtime.sendMessage<Message>(message);
-    } catch(e) {
+    } catch (e) {
         /*
          * Background can be unreachable if:
          *  - extension was disabled

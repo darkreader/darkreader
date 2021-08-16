@@ -8,6 +8,38 @@ import type {Message} from '../definitions';
 import {MessageType} from '../utils/message';
 import {isThunderbird} from '../utils/platform';
 
+let unloaded = false;
+let colorSchemeWatcher;
+
+function cleanup() {
+    unloaded = true;
+    removeEventListener('pagehide', onPageHide);
+    removeEventListener('freeze', onFreeze);
+    removeEventListener('resume', onResume);
+    cleanDynamicThemeCache();
+    if (colorSchemeWatcher) {
+        colorSchemeWatcher.disconnect();
+        colorSchemeWatcher = null;
+    }
+}
+
+function sendMessage(message: Message) {
+    if (unloaded) {
+        return;
+    }
+    try {
+        chrome.runtime.sendMessage<Message>(message);
+    } catch(e) {
+        /*
+         * Background can be unreachable if:
+         *  - extension was disabled
+         *  - extension was uninstalled
+         *  - extension was updated and this is the old instance of content script
+         */
+        cleanup();
+    }
+}
+
 function onMessage({type, data}: Message) {
     logInfo('onMessage', type, data);
     switch (type) {
@@ -32,7 +64,7 @@ function onMessage({type, data}: Message) {
             break;
         }
         case MessageType.BG_EXPORT_CSS: {
-            collectCSS().then((collectedCSS) => chrome.runtime.sendMessage<Message>({type: MessageType.CS_EXPORT_CSS_RESPONSE, data: collectedCSS}));
+            collectCSS().then((collectedCSS) => sendMessage({type: MessageType.CS_EXPORT_CSS_RESPONSE, data: collectedCSS}));
             break;
         }
         case MessageType.BG_UNSUPPORTED_SENDER:
@@ -44,36 +76,32 @@ function onMessage({type, data}: Message) {
         }
         case MessageType.BG_RELOAD:
             logWarn('Cleaning up before update');
-            removeEventListener('pagehide', onPageHide);
-            removeEventListener('freeze', onFreeze);
-            removeEventListener('resume', onResume);
-            cleanDynamicThemeCache();
-            colorSchemeWatcher.disconnect();
+            cleanup();
             break;
     }
 }
 
 // TODO: Use background page color scheme watcher when browser bugs fixed.
-const colorSchemeWatcher = watchForColorSchemeChange(({isDark}) => {
+colorSchemeWatcher = watchForColorSchemeChange(({isDark}) => {
     logInfo('Media query was changed');
-    chrome.runtime.sendMessage<Message>({type: MessageType.CS_COLOR_SCHEME_CHANGE, data: {isDark}});
+    sendMessage({type: MessageType.CS_COLOR_SCHEME_CHANGE, data: {isDark}});
 });
 
 chrome.runtime.onMessage.addListener(onMessage);
-chrome.runtime.sendMessage<Message>({type: MessageType.CS_FRAME_CONNECT});
+sendMessage({type: MessageType.CS_FRAME_CONNECT});
 
 function onPageHide(e: PageTransitionEvent) {
     if (e.persisted === false) {
-        chrome.runtime.sendMessage<Message>({type: MessageType.CS_FRAME_FORGET});
+        sendMessage({type: MessageType.CS_FRAME_FORGET});
     }
 }
 
 function onFreeze() {
-    chrome.runtime.sendMessage<Message>({type: MessageType.CS_FRAME_FREEZE});
+    sendMessage({type: MessageType.CS_FRAME_FREEZE});
 }
 
 function onResume() {
-    chrome.runtime.sendMessage<Message>({type: MessageType.CS_FRAME_RESUME});
+    sendMessage({type: MessageType.CS_FRAME_RESUME});
 }
 
 // Thunderbird don't has "tabs", and emails aren't 'frozen' or 'cached'.

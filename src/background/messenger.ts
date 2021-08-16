@@ -161,7 +161,7 @@ export default class Messenger {
     }
 
     reportChanges(data: ExtensionData) {
-        if (this.changeListenerCount > 0 || isFirefox) {
+        if (this.changeListenerCount > 0) {
             chrome.runtime.sendMessage<Message>({
                 type: MessageType.BG_CHANGES,
                 data

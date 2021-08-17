@@ -12,7 +12,7 @@ import {isInTimeIntervalLocal, nextTimeInterval, isNightAtLocation, nextNightAtL
 import {isURLInList, getURLHostOrProtocol, isURLEnabled, isPDF} from '../utils/url';
 import ThemeEngines from '../generators/theme-engines';
 import createCSSFilterStylesheet from '../generators/css-filter';
-import {getDynamicThemeFixesFor} from '../generators/dynamic-theme';
+import {getDynamicThemeFixesFor, getDynamicThemeFixesForNew} from '../generators/dynamic-theme';
 import createStaticStylesheet from '../generators/static-theme';
 import {createSVGFilterStylesheet, getSVGFilterMatrixValue, getSVGReverseFilterMatrixValue} from '../generators/svg-filter';
 import type {ExtensionData, FilterConfig, News, Shortcuts, UserSettings, TabInfo} from '../definitions';
@@ -21,6 +21,10 @@ import {isFirefox, isThunderbird} from '../utils/platform';
 import {MessageType} from '../utils/message';
 import {logInfo, logWarn} from '../utils/log';
 import {PromiseBarrier} from '../utils/promise-barrier';
+
+// TODO: remove
+import {parseInversionFixes} from '../generators/css-filter';
+import {parseStaticThemes} from '../generators/static-theme';
 
 export class Extension {
     config: ConfigManager;
@@ -419,20 +423,20 @@ export class Extension {
                 case ThemeEngines.cssFilter: {
                     return {
                         type: MessageType.BG_ADD_CSS_FILTER,
-                        data: createCSSFilterStylesheet(theme, url, frameURL, this.config.INVERSION_FIXES),
+                        data: createCSSFilterStylesheet(theme, url, frameURL, parseInversionFixes(this.config.INVERSION_FIXES_RAW)),
                     };
                 }
                 case ThemeEngines.svgFilter: {
                     if (isFirefox) {
                         return {
                             type: MessageType.BG_ADD_CSS_FILTER,
-                            data: createSVGFilterStylesheet(theme, url, frameURL, this.config.INVERSION_FIXES),
+                            data: createSVGFilterStylesheet(theme, url, frameURL, parseInversionFixes(this.config.INVERSION_FIXES_RAW)),
                         };
                     }
                     return {
                         type: MessageType.BG_ADD_SVG_FILTER,
                         data: {
-                            css: createSVGFilterStylesheet(theme, url, frameURL, this.config.INVERSION_FIXES),
+                            css: createSVGFilterStylesheet(theme, url, frameURL, parseInversionFixes(this.config.INVERSION_FIXES_RAW)),
                             svgMatrix: getSVGFilterMatrixValue(theme),
                             svgReverseMatrix: getSVGReverseFilterMatrixValue(),
                         },
@@ -443,17 +447,18 @@ export class Extension {
                         type: MessageType.BG_ADD_STATIC_THEME,
                         data: theme.stylesheet && theme.stylesheet.trim() ?
                             theme.stylesheet :
-                            createStaticStylesheet(theme, url, frameURL, this.config.STATIC_THEMES),
+                            createStaticStylesheet(theme, url, frameURL, parseStaticThemes(this.config.STATIC_THEMES_RAW)),
                     };
                 }
                 case ThemeEngines.dynamicTheme: {
                     const filter = {...theme};
                     delete filter.engine;
-                    const fixes = getDynamicThemeFixesFor(url, frameURL, this.config.DYNAMIC_THEME_FIXES, this.user.settings.enableForPDF);
+                    //const fixes = getDynamicThemeFixesFor(url, frameURL, this.config.DYNAMIC_THEME_FIXES, this.user.settings.enableForPDF);
+                    const fixesNew = getDynamicThemeFixesForNew(url, frameURL, this.config.DYNAMIC_THEME_FIXES_RAW, this.config.DYNAMIC_THEME_FIXES_INDEX, this.user.settings.enableForPDF);
                     const isIFrame = frameURL != null;
                     return {
                         type: MessageType.BG_ADD_DYNAMIC_THEME,
-                        data: {filter, fixes, isIFrame},
+                        data: {filter, fixesNew, isIFrame},
                     };
                 }
                 default: {

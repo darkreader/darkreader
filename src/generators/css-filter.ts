@@ -1,6 +1,6 @@
 import {formatSitesFixesConfig} from './utils/format';
 import {applyColorMatrix, createFilterMatrix} from './utils/matrix';
-import {parseSitesFixesConfig} from './utils/parse';
+import {parseSitesFixesConfig, indexSitesFixesConfig} from './utils/parse';
 import {parseArray, formatArray} from '../utils/text';
 import {compareURLPatterns, isURLInList} from '../utils/url';
 import {createTextStyle} from './text-style';
@@ -220,6 +220,10 @@ export function parseInversionFixes(text: string) {
             return parseArray(value);
         },
     });
+}
+
+export function indexInversionFixes(text: string) {
+    return indexSitesFixesConfig<InversionFix>(text);
 }
 
 export function formatInversionFixes(inversionFixes: InversionFix[]) {

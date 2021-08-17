@@ -1,5 +1,6 @@
 import {formatSitesFixesConfig} from './utils/format';
-import {parseSitesFixesConfig} from './utils/parse';
+import {parseSitesFixesConfig, indexSitesFixesConfig, getSitesFixesFor} from './utils/parse';
+import type {SitePropsIndex} from './utils/parse';
 import {parseArray, formatArray} from '../utils/text';
 import {compareURLPatterns, isURLInList} from '../utils/url';
 import type {DynamicThemeFix} from '../definitions';
@@ -22,6 +23,10 @@ export function parseDynamicThemeFixes(text: string) {
             return parseArray(value);
         },
     });
+}
+
+export function indexDynamicThemeFixes(text: string) {
+    return indexSitesFixesConfig<DynamicThemeFix>(text);
 }
 
 export function formatDynamicThemeFixes(dynamicThemeFixes: DynamicThemeFix[]) {
@@ -62,6 +67,59 @@ export function getDynamicThemeFixesFor(url: string, frameURL: string, fixes: Dy
     }
     const sortedBySpecificity = fixes
         .slice(1)
+        .map((theme) => {
+            return {
+                specificity: isURLInList(frameURL || url, theme.url) ? theme.url[0].length : 0,
+                theme
+            };
+        })
+        .filter(({specificity}) => specificity > 0)
+        .sort((a, b) => b.specificity - a.specificity);
+
+    if (sortedBySpecificity.length === 0) {
+        return common;
+    }
+
+    const match = sortedBySpecificity[0].theme;
+
+    return {
+        url: match.url,
+        invert: common.invert.concat(match.invert || []),
+        css: [common.css, match.css].filter((s) => s).join('\n'),
+        ignoreInlineStyle: common.ignoreInlineStyle.concat(match.ignoreInlineStyle || []),
+        ignoreImageAnalysis: common.ignoreImageAnalysis.concat(match.ignoreImageAnalysis || []),
+    };
+}
+
+export function getDynamicThemeFixesForNew(url: string, frameURL: string, text: string, index: SitePropsIndex<DynamicThemeFix>, enabledForPDF: boolean) {
+    const fixes = getSitesFixesFor(url, frameURL, text, index, {
+        commands: Object.keys(dynamicThemeFixesCommands),
+        getCommandPropName: (command) => dynamicThemeFixesCommands[command],
+        parseCommandValue: (command, value) => {
+            if (command === 'CSS') {
+                return value.trim();
+            }
+            return parseArray(value);
+        },
+    });
+
+    if (fixes.length === 0 || fixes[fixes.length - 1].url[0] !== '*') {
+        return null;
+    }
+    const genericFix = fixes[fixes.length - 1];
+
+    const common = {
+        url: genericFix.url,
+        invert: genericFix.invert || [],
+        css: genericFix.css || [],
+        ignoreInlineStyle: genericFix.ignoreInlineStyle || [],
+        ignoreImageAnalysis: genericFix.ignoreImageAnalysis || [],
+    };
+    if (enabledForPDF) {
+        common.invert = common.invert.concat('embed[type="application/pdf"]');
+    }
+    const sortedBySpecificity = fixes
+        .slice(0, fixes.length - 1)
         .map((theme) => {
             return {
                 specificity: isURLInList(frameURL || url, theme.url) ? theme.url[0].length : 0,

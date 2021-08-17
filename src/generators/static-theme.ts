@@ -1,7 +1,7 @@
 import {createTextStyle} from './text-style';
 import {formatSitesFixesConfig} from './utils/format';
 import {applyColorMatrix, createFilterMatrix} from './utils/matrix';
-import {parseSitesFixesConfig} from './utils/parse';
+import {parseSitesFixesConfig, indexSitesFixesConfig} from './utils/parse';
 import {parseArray, formatArray} from '../utils/text';
 import {compareURLPatterns, isURLInList} from '../utils/url';
 import type {FilterConfig, StaticTheme} from '../definitions';
@@ -222,6 +222,10 @@ export function parseStaticThemes($themes: string) {
             return parseArray(value);
         }
     });
+}
+
+export function indexStaticThemes(themes: string) {
+    return indexSitesFixesConfig<StaticTheme>(themes);
 }
 
 function camelCaseToUpperCase(text: string) {

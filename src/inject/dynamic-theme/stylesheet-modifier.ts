@@ -1,5 +1,5 @@
 import type {Theme} from '../../definitions';
-import {createAsyncTasksQueue} from '../utils/throttle';
+import {createAsyncTasksQueue} from '../../utils/throttle';
 import {iterateCSSRules, iterateCSSDeclarations} from './css-rules';
 import type {ModifiableCSSDeclaration, ModifiableCSSRule} from './modify-css';
 import {getModifiableCSSDeclaration} from './modify-css';

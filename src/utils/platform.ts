@@ -46,3 +46,6 @@ export function compareChromeVersions($a: string, $b: string) {
     return 0;
 }
 
+export const isXMLHttpRequestSupported = typeof XMLHttpRequest === 'function';
+
+export const isFetchSupported = typeof fetch === 'function';

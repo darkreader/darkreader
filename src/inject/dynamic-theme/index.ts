@@ -6,8 +6,8 @@ import {manageStyle, getManageableStyles, cleanLoadingLinks} from './style-manag
 import {watchForStyleChanges, stopWatchingForStyleChanges} from './watch';
 import {forEach, push, toArray} from '../../utils/array';
 import {removeNode, watchForNodePosition, iterateShadowHosts, isDOMReady, removeDOMReadyListener, cleanReadyStateCompleteListeners, addDOMReadyListener} from '../utils/dom';
-import {logInfo, logWarn} from '../utils/log';
-import {throttle} from '../utils/throttle';
+import {logInfo, logWarn} from '../../utils/log';
+import {throttle} from '../../utils/throttle';
 import {clamp} from '../../utils/math';
 import {getCSSFilterValue} from '../../generators/css-filter';
 import {modifyBackgroundColor, modifyColor, modifyForegroundColor} from '../../generators/modify-colors';
@@ -134,8 +134,13 @@ function createStaticStyleOverrides() {
     document.head.insertBefore(rootVarsStyle, variableStyle.nextSibling);
 
     const proxyScript = createOrUpdateScript('darkreader--proxy');
-    proxyScript.textContent = `(${injectProxy})()`;
+    const blob = new Blob([`(${injectProxy})()`], {type: 'text/javascript'});
+    const url = URL.createObjectURL(blob);
+    proxyScript.src = url;
+    proxyScript.textContent = '';
     document.head.insertBefore(proxyScript, rootVarsStyle.nextSibling);
+    URL.revokeObjectURL(url);
+    proxyScript.remove();
 }
 
 const shadowRootsWithOverrides = new Set<ShadowRoot>();

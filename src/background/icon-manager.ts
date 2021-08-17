@@ -1,3 +1,5 @@
+import {isThunderbird} from '../utils/platform';
+
 const ICON_PATHS = {
     active_19: '../icons/dr_active_19.png',
     active_38: '../icons/dr_active_38.png',
@@ -11,8 +13,8 @@ export default class IconManager {
     }
 
     setActive() {
-        if (!chrome.browserAction.setIcon) {
-            // Fix for Firefox Android
+        if (!chrome.browserAction.setIcon || isThunderbird) {
+            // Fix for Firefox Android and Thunderbird.
             return;
         }
         chrome.browserAction.setIcon({
@@ -24,8 +26,8 @@ export default class IconManager {
     }
 
     setInactive() {
-        if (!chrome.browserAction.setIcon) {
-            // Fix for Firefox Android
+        if (!chrome.browserAction.setIcon || isThunderbird) {
+            // Fix for Firefox Android and Thunderbird.
             return;
         }
         chrome.browserAction.setIcon({

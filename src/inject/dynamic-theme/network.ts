@@ -1,4 +1,5 @@
-import type {Message} from 'definitions';
+import type {Message} from '../../definitions';
+import {MessageType} from '../../utils/message';
 
 interface FetchRequest {
     url: string;
@@ -16,12 +17,12 @@ export async function bgFetch(request: FetchRequest) {
         const id = ++counter;
         resolvers.set(id, resolve);
         rejectors.set(id, reject);
-        chrome.runtime.sendMessage({type: 'fetch', data: request, id});
+        chrome.runtime.sendMessage<Message>({type: MessageType.CS_FETCH, data: request, id});
     });
 }
 
 chrome.runtime.onMessage.addListener(({type, data, error, id}: Message) => {
-    if (type === 'fetch-response') {
+    if (type === MessageType.BG_FETCH_RESPONSE) {
         const resolve = resolvers.get(id);
         const reject = rejectors.get(id);
         resolvers.delete(id);

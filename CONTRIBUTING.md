@@ -163,16 +163,16 @@ Then execute `npm run debug`.
 - Disable the official Dark Reader version.
 - Enable the **Developer mode**.
 - Click **Load unpacked extension** button
-- Navigate to the project's `debug/` folder.
+- Navigate to the project's `build/debug/chrome` folder.
 
 #### Firefox
 - Open the `about:addons` page.
 - Disable the official Dark Reader version.
 - Open `about:debugging#addons` page.
 - Click **Load Temporary Add-on** button
-- Open the `debug-firefox/manifest.json` file.
+- Open the `build/debug/firefox/manifest.json` file.
 
-If you execute `npm run debug-watch` instead of `npm run debug`.
+If you execute `npm run debug:watch` instead of `npm run debug`.
 It will after making any code changes, the project will be automatically recompiled.  
 
 ## Tips

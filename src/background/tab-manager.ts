@@ -2,6 +2,7 @@ import {canInjectScript} from '../background/utils/extension-api';
 import {createFileLoader} from './utils/network';
 import type {Message} from '../definitions';
 import {isThunderbird} from '../utils/platform';
+import {MessageType} from '../utils/message';
 import {logInfo, logWarn} from '../utils/log';
 import {StateManager} from './utils/state-manager';
 
@@ -18,7 +19,7 @@ interface ConnectionMessageOptions {
 }
 
 interface TabManagerOptions {
-    getConnectionMessage: (options: ConnectionMessageOptions) => any;
+    getConnectionMessage: (options: ConnectionMessageOptions) => Message | Promise<Message>;
     onColorSchemeChange: ({isDark}: {isDark: boolean}) => void;
 }
 
@@ -50,7 +51,7 @@ export default class TabManager {
         this.stateManager = new StateManager(TabManager.LOCAL_STORAGE_KEY, this, {tabs: {}});
         this.tabs = {};
 
-        chrome.runtime.onMessage.addListener(async (message, sender) => {
+        chrome.runtime.onMessage.addListener(async (message: Message, sender) => {
             function addFrame(tabs: {[tabId: number]: {[frameId: number]: FrameInfo}}, tabId: number, frameId: number, senderURL: string) {
                 let frames: {[frameId: number]: FrameInfo};
                 if (tabs[tabId]) {
@@ -65,7 +66,7 @@ export default class TabManager {
             await this.stateManager.loadState();
 
             switch (message.type) {
-                case 'frame-connect': {
+                case MessageType.CS_FRAME_CONNECT: {
                     const reply = (options: ConnectionMessageOptions) => {
                         const message = getConnectionMessage(options);
                         if (message instanceof Promise) {
@@ -75,7 +76,9 @@ export default class TabManager {
                         }
                     };
 
-                    const isPanel = sender.tab == null;
+                    // Workaround for thunderbird, not sure how. But sometimes sender.tab is undefined but accessing it.
+                    // Will actually throw a very nice error.
+                    const isPanel = typeof sender === 'undefined' || typeof sender.tab === 'undefined';
                     if (isPanel) {
                         // NOTE: Vivaldi and Opera can show a page in a side panel,
                         // but it is not possible to handle messaging correctly (no tab ID, frame ID).
@@ -96,7 +99,7 @@ export default class TabManager {
                     });
                     break;
                 }
-                case 'frame-forget': {
+                case MessageType.CS_FRAME_FORGET: {
                     if (!sender.tab) {
                         logWarn('Unexpected message', message, sender);
                         break;
@@ -115,10 +118,10 @@ export default class TabManager {
                     }
                     break;
                 }
-                case 'frame-freeze':
+                case MessageType.CS_FRAME_FREEZE:
                     this.tabs[sender.tab.id][sender.frameId].state = DocumentState.FROZEN;
                     break;
-                case 'frame-resume':
+                case MessageType.CS_FRAME_RESUME:
                     addFrame(this.tabs, sender.tab.id, sender.frameId, sender.url);
                     break;
             }
@@ -129,12 +132,12 @@ export default class TabManager {
         const fileLoader = createFileLoader();
 
         chrome.runtime.onMessage.addListener(async ({type, data, id}: Message, sender) => {
-            if (type === 'fetch') {
+            if (type === MessageType.CS_FETCH) {
                 const {url, responseType, mimeType, origin} = data;
 
                 // Using custom response due to Chrome and Firefox incompatibility
                 // Sometimes fetch error behaves like synchronous and sends `undefined`
-                const sendResponse = (response: Partial<Message>) => chrome.tabs.sendMessage<Message>(sender.tab.id, {type: 'fetch-response', id, ...response});
+                const sendResponse = (response: Partial<Message>) => chrome.tabs.sendMessage<Message>(sender.tab.id, {type: MessageType.BG_FETCH_RESPONSE, id, ...response});
                 if (isThunderbird) {
                     // In thunderbird some CSS is loaded on a chrome:// URL.
                     // Thunderbird restricted Add-ons to load those URL's.
@@ -151,19 +154,19 @@ export default class TabManager {
                 }
             }
 
-            if (type === 'color-scheme-change') {
+            if (type === MessageType.CS_COLOR_SCHEME_CHANGE) {
                 onColorSchemeChange(data);
             }
-            if (type === 'save-file') {
+            if (type === MessageType.UI_SAVE_FILE) {
                 const {content, name} = data;
                 const a = document.createElement('a');
                 a.href = URL.createObjectURL(new Blob([content]));
                 a.download = name;
                 a.click();
             }
-            if (type === 'request-export-css') {
+            if (type === MessageType.UI_REQUEST_EXPORT_CSS) {
                 const activeTab = await this.getActiveTab();
-                chrome.tabs.sendMessage<Message>(activeTab.id, {type: 'export-css'}, {frameId: 0});
+                chrome.tabs.sendMessage<Message>(activeTab.id, {type: MessageType.BG_EXPORT_CSS}, {frameId: 0});
             }
         });
     }
@@ -200,7 +203,7 @@ export default class TabManager {
         });
     }
 
-    async sendMessage(getMessage: (url: string, frameUrl: string) => any) {
+    async sendMessage(getMessage: (url: string, frameUrl: string) => Message) {
         (await queryTabs({}))
             .filter((tab) => Boolean(this.tabs[tab.id]))
             .forEach((tab) => {

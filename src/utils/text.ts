@@ -62,7 +62,6 @@ export function getStringSize(value: string) {
 }
 
 export function formatCSS(text: string) {
-
     function trimLeft(text: string) {
         return text.replace(/^\s+/, '');
     }
@@ -92,7 +91,7 @@ export function formatCSS(text: string) {
     const formatted = [];
 
     for (let x = 0, len = css.length; x < len; x++) {
-        const line = css[x] + '\n';
+        const line = `${css[x] }\n`;
         if (line.match(/\{/)) { // {
             formatted.push(getIndent(depth++) + trimLeft(line));
         } else if (line.match(/\}/)) { // }

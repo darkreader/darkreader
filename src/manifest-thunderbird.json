@@ -9,10 +9,12 @@
         "page": "background/index.html"
     },
     "permissions": [
+        "alarms",
         "storage",
         "tabs",
         "theme",
         "messagesModify",
         "<all_urls>"
-    ]
+    ],
+    "version": "4.9.34.1"
 }

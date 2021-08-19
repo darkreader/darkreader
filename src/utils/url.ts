@@ -1,5 +1,6 @@
 import type {UserSettings} from '../definitions';
 import {isIPV6, compareIPV6} from './ipv6';
+import {isThunderbird} from './platform';
 
 let anchor: HTMLAnchorElement;
 
@@ -14,7 +15,7 @@ function fixBaseURL($url: string) {
 }
 
 export function parseURL($url: string, $base: string = null) {
-    const key = `${$url}${$base ? ';' + $base : ''}`;
+    const key = `${$url}${$base ? `;${ $base}` : ''}`;
     if (parsedURLCache.has(key)) {
         return parsedURLCache.get(key);
     }
@@ -42,9 +43,8 @@ export function getURLHostOrProtocol($url: string) {
     const url = new URL($url);
     if (url.host) {
         return url.host;
-    } else {
-        return url.protocol;
     }
+    return url.protocol;
 }
 
 export function compareURLPatterns(a: string, b: string) {
@@ -78,9 +78,8 @@ export function isURLMatched(url: string, urlTemplate: string): boolean {
     } else if (!isFirstIPV6 && !isSecondIPV6) {
         const regex = createUrlRegex(urlTemplate);
         return Boolean(url.match(regex));
-    } else {
-        return false;
     }
+    return false;
 }
 
 function createUrlRegex(urlTemplate: string): RegExp {
@@ -176,9 +175,14 @@ export function isPDF(url: string) {
     return false;
 }
 
-export function isURLEnabled(url: string, userSettings: UserSettings, {isProtected, isInDarkList}) {
+export function isURLEnabled(url: string, userSettings: UserSettings, {isProtected, isInDarkList}: {isProtected: boolean; isInDarkList: boolean}) {
     if (isProtected && !userSettings.enableForProtectedPages) {
         return false;
+    }
+    // Only URL's with emails are getting here on thunderbird
+    // So we can skip the checks and just return true.
+    if (isThunderbird) {
+        return true;
     }
     if (isPDF(url)) {
         return userSettings.enableForPDF;

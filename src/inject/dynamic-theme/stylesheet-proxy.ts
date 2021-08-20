@@ -12,6 +12,13 @@ export function injectProxy() {
         location.hostname.endsWith('allegro.pl');
     const documentStyleSheetsDescriptor = shouldWrapDocStyleSheets ? Object.getOwnPropertyDescriptor(Document.prototype, 'styleSheets') : null;
 
+    // Reference:
+    // https://github.com/darkreader/darkreader/issues/6480#issuecomment-897696175
+    const shouldWrapHTMLElement = location.hostname.endsWith('baidu.com');
+
+    const getElementsByTagNameDescriptor = shouldWrapHTMLElement ?
+        Object.getOwnPropertyDescriptor(Element.prototype, 'getElementsByTagName') : null;
+
     const cleanUp = () => {
         Object.defineProperty(CSSStyleSheet.prototype, 'addRule', addRuleDescriptor);
         Object.defineProperty(CSSStyleSheet.prototype, 'insertRule', insertRuleDescriptor);
@@ -21,6 +28,9 @@ export function injectProxy() {
         document.removeEventListener('__darkreader__addUndefinedResolver', addUndefinedResolver);
         if (shouldWrapDocStyleSheets) {
             Object.defineProperty(Document.prototype, 'styleSheets', documentStyleSheetsDescriptor);
+        }
+        if (shouldWrapHTMLElement) {
+            Object.defineProperty(Element.prototype, 'getElementsByTagName', getElementsByTagNameDescriptor);
         }
     };
 
@@ -74,11 +84,39 @@ export function injectProxy() {
         return Object.setPrototypeOf(filtered, StyleSheetList.prototype);
     }
 
+    function proxyGetElementsByTagName(tagName: string): NodeListOf<HTMLElement> {
+        const getCurrentElementValue = () => {
+            let elements: NodeListOf<HTMLElement> = getElementsByTagNameDescriptor.value.call(this, tagName);
+            if (tagName === 'style') {
+                elements = Object.setPrototypeOf([...elements].filter((element: HTMLElement) => {
+                    return !element.classList.contains('darkreader');
+                }), NodeList.prototype);
+            }
+            return elements;
+        };
+
+        let elements = getCurrentElementValue();
+        // Don't ask just trust me.
+        // Because NodeListOf and HTMLCollection are so called "live objects".
+        // Every time you access them, it will return all tagnames from
+        // current situation of the DOM. Instead of a static list.
+        const NodeListBehavior: ProxyHandler<NodeListOf<HTMLElement>> = {
+            get: function (_: NodeListOf<HTMLElement>, property: string) {
+                return getCurrentElementValue()[property];
+            }
+        };
+        elements = new Proxy(elements, NodeListBehavior);
+        return elements;
+    }
+
     Object.defineProperty(CSSStyleSheet.prototype, 'addRule', Object.assign({}, addRuleDescriptor, {value: proxyAddRule}));
     Object.defineProperty(CSSStyleSheet.prototype, 'insertRule', Object.assign({}, insertRuleDescriptor, {value: proxyInsertRule}));
     Object.defineProperty(CSSStyleSheet.prototype, 'deleteRule', Object.assign({}, deleteRuleDescriptor, {value: proxyDeleteRule}));
     Object.defineProperty(CSSStyleSheet.prototype, 'removeRule', Object.assign({}, removeRuleDescriptor, {value: proxyRemoveRule}));
     if (shouldWrapDocStyleSheets) {
         Object.defineProperty(Document.prototype, 'styleSheets', Object.assign({}, documentStyleSheetsDescriptor, {get: proxyDocumentStyleSheets}));
+    }
+    if (shouldWrapHTMLElement) {
+        Object.defineProperty(Element.prototype, 'getElementsByTagName', Object.assign({}, getElementsByTagNameDescriptor, {value: proxyGetElementsByTagName}));
     }
 }

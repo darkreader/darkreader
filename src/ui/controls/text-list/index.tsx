@@ -15,7 +15,7 @@ export default function TextList(props: TextListProps) {
     const context = getContext();
     context.store.indices = context.store.indices || new WeakMap();
 
-    function onTextChange(e) {
+    function onTextChange(e: {target: HTMLInputElement}) {
         const index = context.store.indices.get(e.target);
         const values = props.values.slice();
         const value = e.target.value.trim();

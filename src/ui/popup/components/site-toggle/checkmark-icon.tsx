@@ -1,6 +1,6 @@
 import {m} from 'malevic';
 
-export default function CheckmarkIcon({isChecked}) {
+export default function CheckmarkIcon({isChecked}: {isChecked: boolean}) {
     return (
         <svg viewBox="0 0 8 8">
             <path

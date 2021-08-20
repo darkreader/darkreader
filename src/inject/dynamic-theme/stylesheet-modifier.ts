@@ -81,7 +81,36 @@ export function createStyleSheetModifier() {
 
             const modDecs: ModifiableCSSDeclaration[] = [];
             rule.style && iterateCSSDeclarations(rule.style, (property, value) => {
-                const mod = getModifiableCSSDeclaration(property, value, rule, variablesStore, ignoreImageAnalysis, isAsyncCancelled);
+                let mod: ModifiableCSSDeclaration;
+                // Special edge-case for border-{top,right,bottom,left}: 0;
+                // This will be parsed to 0px none. But the color value will be currentColor.
+                // Which doesn't correspond to the actual color that will be used.
+                // As it actually indicates that the border(of that direction) is not visible.
+                // So we need to fix this, by detecting this case and replacing the value with
+                // the `0` value. With the border-{top,right,bottom,left} as property.
+                if (property.startsWith('border') && property.endsWith('color') && value.toLowerCase() === 'currentcolor') {
+                    // Now we have a border-{top,right,bottom,left}-color rule with currentColor as color value.
+                    // So we're going to check if border-{top,right,bottom,left} is set to '0px none' which indicates
+                    // that the border is not visible and thus we can skip the color value.
+
+                    // Get the value of the border-{top,right,bottom,left} property depending
+                    // on the current property variable type. We simply remove the last occurence
+                    // of `-color` from the property name to do this.
+                    const borderProperty = property.slice(0, -6);
+                    const borderValue = rule.style[borderProperty];
+                    if (borderValue === '0px none') {
+                        // Another special edge-case! If the root-cause is `border: 0` we can skip the color value.
+                        // This is because the border is not visible and thus the color value is not needed.
+                        // This is a bit of a hack, but it works.
+                        if (rule.style.border !== '0px none') {
+                            // Border is not visible, so we need to replace the color value with `0`
+                            mod = {property: borderProperty, value: '0', important: Boolean(rule.style.getPropertyPriority(borderProperty)), sourceValue: value};
+                        }
+                    }
+                }
+                if (!mod) {
+                    mod = getModifiableCSSDeclaration(property, value, rule, variablesStore, ignoreImageAnalysis, isAsyncCancelled);
+                }
                 if (mod) {
                     modDecs.push(mod);
                 }

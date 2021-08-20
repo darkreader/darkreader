@@ -64,6 +64,10 @@ export class Extension {
     };
 
     isEnabled(): boolean {
+        if (!this.ready) {
+            return false;
+        }
+
         if (this.isEnabledCached !== null) {
             return this.isEnabledCached;
         }
@@ -173,6 +177,9 @@ export class Extension {
             return;
         }
         chrome.commands.onCommand.addListener(async (command) => {
+            if (!this.ready) {
+                return;
+            }
             if (command === 'toggle') {
                 logInfo('Toggle command entered');
                 this.changeSettings({

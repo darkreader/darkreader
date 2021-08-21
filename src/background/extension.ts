@@ -154,7 +154,9 @@ export class Extension {
                     await new Promise<void>((resolve) => this.awaiting.push(resolve));
                 }
                 const url = await this.tabs.getActiveTabURL();
-                return this.getURLInfo(url);
+                const info = this.getURLInfo(url);
+                info.isInjected = await this.tabs.canAccessActiveTab();
+                return info;
             },
             changeSettings: (settings) => this.changeSettings(settings),
             setTheme: (theme) => this.setTheme(theme),
@@ -421,6 +423,7 @@ export class Extension {
             url,
             isInDarkList,
             isProtected,
+            isInjected: null
         };
     }
 

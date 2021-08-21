@@ -19,7 +19,7 @@ import type {ExtensionData, FilterConfig, News, Shortcuts, UserSettings, TabInfo
 import {isSystemDarkModeEnabled} from '../utils/media-query';
 import {isFirefox, isThunderbird} from '../utils/platform';
 import {MessageType} from '../utils/message';
-import {logInfo} from '../utils/log';
+import {logInfo, logWarn} from '../utils/log';
 
 export class Extension {
     ready: boolean;
@@ -66,6 +66,11 @@ export class Extension {
     isEnabled(): boolean {
         if (this.isEnabledCached !== null) {
             return this.isEnabledCached;
+        }
+
+        if (!this.user.settings) {
+            logWarn('Extension.isEnabled() was called before Extension.user.settings is available.');
+            return false;
         }
 
         const {automation} = this.user.settings;
@@ -173,6 +178,9 @@ export class Extension {
             return;
         }
         chrome.commands.onCommand.addListener(async (command) => {
+            if (!this.user.settings) {
+                await this.user.loadSettings();
+            }
             if (command === 'toggle') {
                 logInfo('Toggle command entered');
                 this.changeSettings({

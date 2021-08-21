@@ -1,3 +1,5 @@
+import {MessageType} from '../../src/utils/message';
+
 let nativeSendMessage: typeof chrome.runtime.sendMessage;
 const bgResponses = new Map<string, string>();
 
@@ -6,7 +8,7 @@ export function stubChromeRuntimeMessage() {
     const listeners = chrome.runtime.onMessage['__listeners__'];
 
     chrome.runtime.sendMessage = (message: any) => {
-        if (message.type === 'fetch') {
+        if (message.type === MessageType.CS_FETCH) {
             const {id, data: {url}} = message;
             setTimeout(() => {
                 listeners.forEach((listener) => {
@@ -14,7 +16,7 @@ export function stubChromeRuntimeMessage() {
                         throw new Error('Response is missing, use `stubBackgroundFetchResponse()`');
                     }
                     const data = bgResponses.get(url);
-                    listener({type: 'fetch-response', data, error: null, id});
+                    listener({type: MessageType.BG_FETCH_RESPONSE, data, error: null, id});
                 });
             });
         }

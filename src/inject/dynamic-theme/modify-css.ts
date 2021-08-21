@@ -8,7 +8,7 @@ import {cssURLRegex, getCSSURLValue, getCSSBaseBath} from './css-rules';
 import type {ImageDetails} from './image';
 import {getImageDetails, getFilteredImageDataURL, cleanImageProcessingCache} from './image';
 import type {CSSVariableModifier, VariablesStore} from './variables';
-import {logWarn, logInfo} from '../utils/log';
+import {logWarn, logInfo} from '../../utils/log';
 import type {FilterConfig, Theme} from '../../definitions';
 import {isFirefox} from '../../utils/platform';
 
@@ -195,7 +195,7 @@ function getModifiedScrollbarStyle(theme: Theme) {
     return lines.join('\n');
 }
 
-export function getModifiedFallbackStyle(filter: FilterConfig, {strict}) {
+export function getModifiedFallbackStyle(filter: FilterConfig, {strict}: {strict: boolean}) {
     const lines: string[] = [];
     lines.push(`html, body, ${strict ? 'body :not(iframe)' : 'body > :not(iframe)'} {`);
     lines.push(`    background-color: ${modifyBackgroundColor({r: 255, g: 255, b: 255}, filter)} !important;`);
@@ -388,9 +388,11 @@ export function getBgImageModifier(
         };
 
         const getBgImageValue = (imageDetails: ImageDetails, filter: FilterConfig) => {
-            const {isDark, isLight, isTransparent, isLarge, width} = imageDetails;
+            const {isDark, isLight, isTransparent, isLarge, isTooLarge, width} = imageDetails;
             let result: string;
-            if (isDark && isTransparent && filter.mode === 1 && !isLarge && width > 2) {
+            if (isTooLarge) {
+                result = `url("${imageDetails.src}")`;
+            } else if (isDark && isTransparent && filter.mode === 1 && !isLarge && width > 2) {
                 logInfo(`Inverting dark image ${imageDetails.src}`);
                 const inverted = getFilteredImageDataURL(imageDetails, {...filter, sepia: clamp(filter.sepia + 10, 0, 100)});
                 result = `url("${inverted}")`;

@@ -3,7 +3,8 @@ if (
     matchMedia('(prefers-color-scheme: dark)').matches &&
     !document.querySelector('.darkreader--fallback')
 ) {
-    const css = 'html, body, body :not(iframe) { background-color: #181a1b !important; border-color: #776e62 !important; color: #e8e6e3 !important; } html, body { opacity: 1 !important; transition: none !important; }';
+    // https://github.com/darkreader/darkreader/issues/3618#issuecomment-895477598
+    const css = 'html, body, body :not(iframe):not(div[style^="position:absolute;top:0;left:-"]) { background-color: #181a1b !important; border-color: #776e62 !important; color: #e8e6e3 !important; } html, body { opacity: 1 !important; transition: none !important; }';
     const fallback = document.createElement('style');
     fallback.classList.add('darkreader');
     fallback.classList.add('darkreader--fallback');

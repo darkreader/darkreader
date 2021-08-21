@@ -5,7 +5,7 @@ import {getMatches, formatCSS} from '../../utils/text';
 const blobRegex = /url\(\"(blob\:.*?)\"\)/g;
 
 async function replaceBlobs(text: string) {
-    const promises = [];
+    const promises: Array<Promise<string>> = [];
     getMatches(blobRegex, text, 1).forEach((url) => {
         const promise = loadAsDataURL(url);
         promises.push(promise);
@@ -33,7 +33,10 @@ _______|_______/__/ ____ \\__\\__|___\\__\\__|___\\__\\____
 |  ____  \\|  |__/  ______  \\|  |__/  /|  |___|  ____  \\
 |__|   \\__\\____/__/      \\__\\_______/ |______|__|   \\__\\
                 https://darkreader.org
-*/`;
+*/
+
+/*! Dark reader generated CSS | Licensed under MIT https://github.com/darkreader/darkreader/blob/master/LICENSE */
+`;
 
 export async function collectCSS() {
     const css = [banner];
@@ -53,7 +56,7 @@ export async function collectCSS() {
     addStaticCSS('.darkreader--invert', 'Invert Style');
     addStaticCSS('.darkreader--variables', 'Variables Style');
 
-    const modifiedCSS = [];
+    const modifiedCSS: string[] = [];
     document.querySelectorAll('.darkreader--sync').forEach((element: HTMLStyleElement) => {
         forEach(element.sheet.cssRules, (rule) => {
             rule && rule.cssText && modifiedCSS.push(rule.cssText);

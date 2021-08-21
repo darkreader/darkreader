@@ -2,7 +2,9 @@ import {canInjectScript} from '../background/utils/extension-api';
 import {createFileLoader} from './utils/network';
 import type {Message} from '../definitions';
 import {isThunderbird} from '../utils/platform';
-import {logInfo, logWarn} from '../inject/utils/log';
+import {MessageType} from '../utils/message';
+import {logInfo, logWarn} from '../utils/log';
+import {StateManager} from './utils/state-manager';
 
 async function queryTabs(query: chrome.tabs.QueryInfo) {
     return new Promise<chrome.tabs.Tab[]>((resolve) => {
@@ -17,44 +19,66 @@ interface ConnectionMessageOptions {
 }
 
 interface TabManagerOptions {
-    getConnectionMessage: (options: ConnectionMessageOptions) => any;
-    onColorSchemeChange: ({isDark}) => void;
+    getConnectionMessage: (options: ConnectionMessageOptions) => Message | Promise<Message>;
+    onColorSchemeChange: ({isDark}: {isDark: boolean}) => void;
 }
 
 interface FrameInfo {
     url: string;
-    state: 'normal' | 'frozen';
+    state: DocumentState;
+}
+
+/*
+ * These states correspond to possible document states in Page Lifecycle API:
+ * https://developers.google.com/web/updates/2018/07/page-lifecycle-api#developer-recommendations-for-each-state
+ * Some states are not currently used (they are declared for future-proofing).
+ */
+enum DocumentState {
+    ACTIVE = 0,
+    PASSIVE = 1,
+    HIDDEN = 2,
+    FROZEN = 3,
+    TERMINATED = 4,
+    DISCARDED = 5
 }
 
 export default class TabManager {
-    private tabs: Map<number, Map<number, FrameInfo>>;
+    private tabs: {[tabId: number]: {[frameId: number]: FrameInfo}};
+    private stateManager: StateManager;
+    static LOCAL_STORAGE_KEY = 'TabManager-state';
 
     constructor({getConnectionMessage, onColorSchemeChange}: TabManagerOptions) {
-        this.tabs = new Map();
-        chrome.runtime.onMessage.addListener((message, sender) => {
-            function addFrame(tabs: any, tabId: number, frameId: number, senderURL: string) {
-                let frames: Map<number, FrameInfo>;
-                if (tabs.has(tabId)) {
-                    frames = tabs.get(tabId);
+        this.stateManager = new StateManager(TabManager.LOCAL_STORAGE_KEY, this, {tabs: {}});
+        this.tabs = {};
+
+        chrome.runtime.onMessage.addListener(async (message: Message, sender) => {
+            function addFrame(tabs: {[tabId: number]: {[frameId: number]: FrameInfo}}, tabId: number, frameId: number, senderURL: string) {
+                let frames: {[frameId: number]: FrameInfo};
+                if (tabs[tabId]) {
+                    frames = tabs[tabId];
                 } else {
-                    frames = new Map();
-                    tabs.set(tabId, frames);
+                    frames = {};
+                    tabs[tabId] = frames;
                 }
-                frames.set(frameId, {url: senderURL, state: 'normal'});
+                frames[frameId] = {url: senderURL, state: DocumentState.ACTIVE};
             }
 
+            await this.stateManager.loadState();
+
             switch (message.type) {
-                case 'frame-connect': {
+                case MessageType.CS_FRAME_CONNECT: {
                     const reply = (options: ConnectionMessageOptions) => {
                         const message = getConnectionMessage(options);
                         if (message instanceof Promise) {
-                            message.then((asyncMessage) => asyncMessage && chrome.tabs.sendMessage(sender.tab.id, asyncMessage, {frameId: sender.frameId}));
+                            message.then((asyncMessage) => asyncMessage && chrome.tabs.sendMessage<Message>(sender.tab.id, asyncMessage, {frameId: sender.frameId}));
                         } else if (message) {
-                            chrome.tabs.sendMessage(sender.tab.id, message, {frameId: sender.frameId});
+                            chrome.tabs.sendMessage<Message>(sender.tab.id, message, {frameId: sender.frameId});
                         }
                     };
 
-                    const isPanel = sender.tab == null;
+                    // Workaround for thunderbird, not sure how. But sometimes sender.tab is undefined but accessing it.
+                    // Will actually throw a very nice error.
+                    const isPanel = typeof sender === 'undefined' || typeof sender.tab === 'undefined';
                     if (isPanel) {
                         // NOTE: Vivaldi and Opera can show a page in a side panel,
                         // but it is not possible to handle messaging correctly (no tab ID, frame ID).
@@ -75,34 +99,45 @@ export default class TabManager {
                     });
                     break;
                 }
-                case 'frame-forget': {
+                case MessageType.CS_FRAME_FORGET: {
                     if (!sender.tab) {
                         logWarn('Unexpected message', message, sender);
                         break;
                     }
+                    const tabId = sender.tab.id;
+                    const frameId = sender.frameId;
 
-                    const framesForDeletion = this.tabs.get(sender.tab.id);
-                    framesForDeletion && framesForDeletion.delete(sender.frameId);
+                    if (frameId === 0) {
+                        delete this.tabs[tabId];
+                    }
+
+                    if (this.tabs[tabId] && this.tabs[tabId][frameId]) {
+                        // We need to use delete here because Object.entries()
+                        // in sendMessage() would enumerate undefined as well.
+                        delete this.tabs[tabId][frameId];
+                    }
                     break;
                 }
-                case 'frame-freeze':
-                    this.tabs.get(sender.tab.id).get(sender.frameId).state = 'frozen';
+                case MessageType.CS_FRAME_FREEZE:
+                    this.tabs[sender.tab.id][sender.frameId].state = DocumentState.FROZEN;
                     break;
-                case 'frame-resume':
+                case MessageType.CS_FRAME_RESUME:
                     addFrame(this.tabs, sender.tab.id, sender.frameId, sender.url);
                     break;
             }
+
+            this.stateManager.saveState();
         });
 
         const fileLoader = createFileLoader();
 
         chrome.runtime.onMessage.addListener(async ({type, data, id}: Message, sender) => {
-            if (type === 'fetch') {
+            if (type === MessageType.CS_FETCH) {
                 const {url, responseType, mimeType, origin} = data;
 
                 // Using custom response due to Chrome and Firefox incompatibility
                 // Sometimes fetch error behaves like synchronous and sends `undefined`
-                const sendResponse = (response) => chrome.tabs.sendMessage(sender.tab.id, {type: 'fetch-response', id, ...response});
+                const sendResponse = (response: Partial<Message>) => chrome.tabs.sendMessage<Message>(sender.tab.id, {type: MessageType.BG_FETCH_RESPONSE, id, ...response});
                 if (isThunderbird) {
                     // In thunderbird some CSS is loaded on a chrome:// URL.
                     // Thunderbird restricted Add-ons to load those URL's.
@@ -119,19 +154,19 @@ export default class TabManager {
                 }
             }
 
-            if (type === 'color-scheme-change') {
+            if (type === MessageType.CS_COLOR_SCHEME_CHANGE) {
                 onColorSchemeChange(data);
             }
-            if (type === 'save-file') {
+            if (type === MessageType.UI_SAVE_FILE) {
                 const {content, name} = data;
                 const a = document.createElement('a');
                 a.href = URL.createObjectURL(new Blob([content]));
                 a.download = name;
                 a.click();
             }
-            if (type === 'request-export-css') {
+            if (type === MessageType.UI_REQUEST_EXPORT_CSS) {
                 const activeTab = await this.getActiveTab();
-                chrome.tabs.sendMessage(activeTab.id, {type: 'export-css'}, {frameId: 0});
+                chrome.tabs.sendMessage<Message>(activeTab.id, {type: MessageType.BG_EXPORT_CSS}, {frameId: 0});
             }
         });
     }
@@ -146,7 +181,7 @@ export default class TabManager {
     async updateContentScript(options: {runOnProtectedPages: boolean}) {
         (await queryTabs({}))
             .filter((tab) => options.runOnProtectedPages || canInjectScript(tab.url))
-            .filter((tab) => !this.tabs.has(tab.id))
+            .filter((tab) => !Boolean(this.tabs[tab.id]))
             .forEach((tab) => {
                 if (!tab.discarded) {
                     chrome.tabs.executeScript(tab.id, {
@@ -168,21 +203,21 @@ export default class TabManager {
         });
     }
 
-    async sendMessage(getMessage: (url: string, frameUrl: string) => any) {
+    async sendMessage(getMessage: (url: string, frameUrl: string) => Message) {
         (await queryTabs({}))
-            .filter((tab) => this.tabs.has(tab.id))
+            .filter((tab) => Boolean(this.tabs[tab.id]))
             .forEach((tab) => {
-                const frames = this.tabs.get(tab.id);
-                frames.forEach(({url, state}, frameId) => {
-                    if (state === 'frozen') {
+                const frames = this.tabs[tab.id];
+                Object.entries(frames).forEach(([, {url, state}], frameId) => {
+                    if (state !== DocumentState.ACTIVE && state !== DocumentState.PASSIVE) {
                         // TODO: avoid sending messages to frozen tabs for performance reasons.
                         logInfo('Sending message to a frozen tab.');
                     }
                     const message = getMessage(this.getTabURL(tab), frameId === 0 ? null : url);
                     if (tab.active && frameId === 0) {
-                        chrome.tabs.sendMessage(tab.id, message, {frameId});
+                        chrome.tabs.sendMessage<Message>(tab.id, message, {frameId});
                     } else {
-                        setTimeout(() => chrome.tabs.sendMessage(tab.id, message, {frameId}));
+                        setTimeout(() => chrome.tabs.sendMessage<Message>(tab.id, message, {frameId}));
                     }
                 });
             });

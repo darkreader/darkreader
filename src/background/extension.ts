@@ -118,13 +118,13 @@ export class Extension {
         if (this.user.settings.syncSitesFixes) {
             await this.config.load({local: false});
         }
-        this.onAppToggle();
         this.changeSettings(this.user.settings);
         logInfo('loaded', this.user.settings);
 
         this.registerCommands();
 
         this.ready = true;
+        this.onAppToggle();
         if (isThunderbird) {
             this.tabs.registerMailDisplayScript();
         } else {

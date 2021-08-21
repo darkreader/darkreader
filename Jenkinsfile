@@ -4,9 +4,8 @@ pipeline {
     stages {
         stage('Build') {
             steps {
+                checkout(scm)
                 echo 'Building..'
-                bat 'make' 
-                archiveArtifacts artifacts: '**/target/*.jar', fingerprint: true
             }
         }
         stage('Test') {

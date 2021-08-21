@@ -223,6 +223,10 @@ export default class TabManager {
             });
     }
 
+    async canAccessActiveTab(): Promise<boolean> {
+        const tab = await this.getActiveTab();
+        return Boolean(this.tabs[tab.id]);
+    }
     async getActiveTabURL() {
         return this.getTabURL(await this.getActiveTab());
     }

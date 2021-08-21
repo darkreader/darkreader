@@ -19,7 +19,7 @@ import type {ExtensionData, FilterConfig, News, Shortcuts, UserSettings, TabInfo
 import {isSystemDarkModeEnabled} from '../utils/media-query';
 import {isFirefox, isThunderbird} from '../utils/platform';
 import {MessageType} from '../utils/message';
-import {logInfo} from '../utils/log';
+import {logInfo, logWarn} from '../utils/log';
 
 export class Extension {
     ready: boolean;
@@ -64,12 +64,13 @@ export class Extension {
     };
 
     isEnabled(): boolean {
-        if (!this.ready) {
-            return false;
-        }
-
         if (this.isEnabledCached !== null) {
             return this.isEnabledCached;
+        }
+
+        if (!this.user.settings) {
+            logWarn('Extension.isEnabled() was called before Extension.user.settings is available.');
+            return false;
         }
 
         const {automation} = this.user.settings;
@@ -118,13 +119,13 @@ export class Extension {
         if (this.user.settings.syncSitesFixes) {
             await this.config.load({local: false});
         }
+        this.onAppToggle();
         this.changeSettings(this.user.settings);
         logInfo('loaded', this.user.settings);
 
         this.registerCommands();
 
         this.ready = true;
-        this.onAppToggle();
         if (isThunderbird) {
             this.tabs.registerMailDisplayScript();
         } else {
@@ -177,8 +178,8 @@ export class Extension {
             return;
         }
         chrome.commands.onCommand.addListener(async (command) => {
-            if (!this.ready) {
-                return;
+            if (!this.user.settings) {
+                await this.user.loadSettings();
             }
             if (command === 'toggle') {
                 logInfo('Toggle command entered');

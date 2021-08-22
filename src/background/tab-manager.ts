@@ -52,6 +52,14 @@ export default class TabManager {
         this.tabs = {};
 
         chrome.runtime.onMessage.addListener(async (message: Message, sender) => {
+            // Explicitly filter out all irrelevant messages
+            if (![MessageType.CS_FRAME_CONNECT,
+                MessageType.CS_FRAME_FORGET,
+                MessageType.CS_FRAME_FREEZE,
+                MessageType.CS_FRAME_RESUME].includes(message.type)) {
+                return;
+            }
+
             function addFrame(tabs: {[tabId: number]: {[frameId: number]: FrameInfo}}, tabId: number, frameId: number, senderURL: string) {
                 let frames: {[frameId: number]: FrameInfo};
                 if (tabs[tabId]) {

@@ -34,6 +34,10 @@ export class Extension {
     user: UserStorage;
 
     private isEnabledCached: boolean = null;
+    private wasEnabledOnLastCheck: boolean = null;
+    private awaiting: Array<() => void>;
+    private popupOpeningListener: () => void = null;
+    private wasLastColorSchemeDark: boolean = null;
 
     static ALARM_NAME = 'auto-time-alarm';
     constructor() {
@@ -57,11 +61,11 @@ export class Extension {
         this.awaiting = [];
     }
 
-    private alarmListener = (alarm: chrome.alarms.Alarm): void => {
+    private alarmListener(alarm: chrome.alarms.Alarm): void {
         if (alarm.name === Extension.ALARM_NAME) {
             this.handleAutoCheck();
         }
-    };
+    }
 
     isEnabled(): boolean {
         if (this.isEnabledCached !== null) {
@@ -109,8 +113,6 @@ export class Extension {
         return this.isEnabledCached;
     }
 
-    private awaiting: Array<() => void>;
-
     async start() {
         await this.config.load({local: true});
         this.fonts = await getFontList();
@@ -138,8 +140,6 @@ export class Extension {
         this.startAutoTimeCheck();
         this.news.subscribe();
     }
-
-    private popupOpeningListener: () => void = null;
 
     private getMessengerAdapter(): ExtensionAdapter {
         return {
@@ -268,17 +268,15 @@ export class Extension {
         return {type: MessageType.BG_UNSUPPORTED_SENDER};
     }
 
-    private wasEnabledOnLastCheck: boolean;
-
     private startAutoTimeCheck() {
         chrome.alarms.onAlarm.addListener(this.alarmListener);
         this.handleAutoCheck();
     }
 
-    private wasLastColorSchemeDark: boolean = null;
-
     private onColorSchemeChange = ({isDark}: {isDark: boolean}) => {
-        this.wasLastColorSchemeDark = isDark;
+        if (isFirefox) {
+            this.wasLastColorSchemeDark = isDark;
+        }
         if (this.user.settings.automation !== 'system') {
             return;
         }
@@ -291,7 +289,7 @@ export class Extension {
         }
         this.isEnabledCached = null;
         const isEnabled = this.isEnabled();
-        if (this.wasEnabledOnLastCheck !== isEnabled) {
+        if (this.wasEnabledOnLastCheck === null || this.wasEnabledOnLastCheck !== isEnabled) {
             this.wasEnabledOnLastCheck = isEnabled;
             this.onAppToggle();
             this.tabs.sendMessage(this.getTabMessage);

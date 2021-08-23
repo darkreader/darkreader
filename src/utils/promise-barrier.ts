@@ -1,3 +1,9 @@
+export const PromiseBarrierState = {
+    PENDING: 'pending',
+    FULFILLED: 'fulfilled',
+    REJECTED: 'rejected',
+};
+
 export class PromiseBarrier {
     private resolves: Array<(value?: any) => void> = [];
     private rejects: Array<(reason?: any) => void> = [];
@@ -25,6 +31,8 @@ export class PromiseBarrier {
         this.wasResolved = true;
         this.resolution = value;
         this.resolves.forEach((resolve) => resolve(value));
+        this.resolves = null;
+        this.rejects = null;
         return new Promise<void>((resolve) => setTimeout(() => resolve()));
     }
 
@@ -35,6 +43,17 @@ export class PromiseBarrier {
         this.wasRejected = true;
         this.resolution = reason;
         this.rejects.forEach((reject) => reject(reason));
+        this.resolves = null;
+        this.rejects = null;
         return new Promise<void>((resolve) => setTimeout(() => resolve()));
+    }
+
+    get state() {
+        if (this.wasResolved) {
+            return PromiseBarrierState.FULFILLED;
+        } else if (this.wasRejected) {
+            return PromiseBarrierState.REJECTED;
+        }
+        return PromiseBarrierState.PENDING;
     }
 }

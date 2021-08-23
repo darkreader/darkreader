@@ -104,6 +104,7 @@ export interface LocationSettings {
 export interface TabInfo {
     url: string;
     isProtected: boolean;
+    isInjected: boolean;
     isInDarkList: boolean;
 }
 

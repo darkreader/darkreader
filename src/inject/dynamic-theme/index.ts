@@ -152,6 +152,21 @@ function createShadowStaticStyleOverrides(root: ShadowRoot) {
     const overrideStyle = createOrUpdateStyle('darkreader--override', root);
     overrideStyle.textContent = fixes && fixes.css ? replaceCSSTemplates(fixes.css) : '';
     root.insertBefore(overrideStyle, inlineStyle.nextSibling);
+
+    const invertStyle = createOrUpdateStyle('darkreader--invert', root);
+    if (fixes && Array.isArray(fixes.invert) && fixes.invert.length > 0) {
+        invertStyle.textContent = [
+            `${fixes.invert.join(', ')} {`,
+            `    filter: ${getCSSFilterValue({
+                ...filter,
+                contrast: filter.mode === 0 ? filter.contrast : clamp(filter.contrast - 10, 0, 100),
+            })} !important;`,
+            '}',
+        ].join('\n');
+    } else {
+        invertStyle.textContent = '';
+    }
+    root.insertBefore(invertStyle, overrideStyle.nextSibling);
     shadowRootsWithOverrides.add(root);
 }
 

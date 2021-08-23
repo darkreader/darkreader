@@ -19,7 +19,7 @@ import type {ExtensionData, FilterConfig, News, Shortcuts, UserSettings, TabInfo
 import {isSystemDarkModeEnabled} from '../utils/media-query';
 import {isFirefox, isThunderbird} from '../utils/platform';
 import {MessageType} from '../utils/message';
-import {logInfo} from '../utils/log';
+import {logInfo, logWarn} from '../utils/log';
 
 export class Extension {
     ready: boolean;
@@ -34,6 +34,10 @@ export class Extension {
     user: UserStorage;
 
     private isEnabledCached: boolean = null;
+    private wasEnabledOnLastCheck: boolean = null;
+    private awaiting: Array<() => void>;
+    private popupOpeningListener: () => void = null;
+    private wasLastColorSchemeDark: boolean = null;
 
     static ALARM_NAME = 'auto-time-alarm';
     constructor() {
@@ -57,15 +61,20 @@ export class Extension {
         this.awaiting = [];
     }
 
-    private alarmListener = (alarm: chrome.alarms.Alarm): void => {
+    private alarmListener(alarm: chrome.alarms.Alarm): void {
         if (alarm.name === Extension.ALARM_NAME) {
             this.handleAutoCheck();
         }
-    };
+    }
 
     isEnabled(): boolean {
         if (this.isEnabledCached !== null) {
             return this.isEnabledCached;
+        }
+
+        if (!this.user.settings) {
+            logWarn('Extension.isEnabled() was called before Extension.user.settings is available.');
+            return false;
         }
 
         const {automation} = this.user.settings;
@@ -104,8 +113,6 @@ export class Extension {
         return this.isEnabledCached;
     }
 
-    private awaiting: Array<() => void>;
-
     async start() {
         await this.config.load({local: true});
         this.fonts = await getFontList();
@@ -134,8 +141,6 @@ export class Extension {
         this.news.subscribe();
     }
 
-    private popupOpeningListener: () => void = null;
-
     private getMessengerAdapter(): ExtensionAdapter {
         return {
             collect: async () => {
@@ -149,7 +154,9 @@ export class Extension {
                     await new Promise<void>((resolve) => this.awaiting.push(resolve));
                 }
                 const url = await this.tabs.getActiveTabURL();
-                return this.getURLInfo(url);
+                const info = this.getURLInfo(url);
+                info.isInjected = await this.tabs.canAccessActiveTab();
+                return info;
             },
             changeSettings: (settings) => this.changeSettings(settings),
             setTheme: (theme) => this.setTheme(theme),
@@ -173,6 +180,9 @@ export class Extension {
             return;
         }
         chrome.commands.onCommand.addListener(async (command) => {
+            if (!this.user.settings) {
+                await this.user.loadSettings();
+            }
             if (command === 'toggle') {
                 logInfo('Toggle command entered');
                 this.changeSettings({
@@ -258,17 +268,15 @@ export class Extension {
         return {type: MessageType.BG_UNSUPPORTED_SENDER};
     }
 
-    private wasEnabledOnLastCheck: boolean;
-
     private startAutoTimeCheck() {
         chrome.alarms.onAlarm.addListener(this.alarmListener);
         this.handleAutoCheck();
     }
 
-    private wasLastColorSchemeDark: boolean = null;
-
     private onColorSchemeChange = ({isDark}: {isDark: boolean}) => {
-        this.wasLastColorSchemeDark = isDark;
+        if (isFirefox) {
+            this.wasLastColorSchemeDark = isDark;
+        }
         if (this.user.settings.automation !== 'system') {
             return;
         }
@@ -281,7 +289,7 @@ export class Extension {
         }
         this.isEnabledCached = null;
         const isEnabled = this.isEnabled();
-        if (this.wasEnabledOnLastCheck !== isEnabled) {
+        if (this.wasEnabledOnLastCheck === null || this.wasEnabledOnLastCheck !== isEnabled) {
             this.wasEnabledOnLastCheck = isEnabled;
             this.onAppToggle();
             this.tabs.sendMessage(this.getTabMessage);
@@ -413,6 +421,7 @@ export class Extension {
             url,
             isInDarkList,
             isProtected,
+            isInjected: null
         };
     }
 

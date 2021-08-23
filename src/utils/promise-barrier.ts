@@ -31,6 +31,8 @@ export class PromiseBarrier {
         this.wasResolved = true;
         this.resolution = value;
         this.resolves.forEach((resolve) => resolve(value));
+        this.resolves = null;
+        this.rejects = null;
         return new Promise<void>((resolve) => setTimeout(() => resolve()));
     }
 
@@ -41,6 +43,8 @@ export class PromiseBarrier {
         this.wasRejected = true;
         this.resolution = reason;
         this.rejects.forEach((reject) => reject(reason));
+        this.resolves = null;
+        this.rejects = null;
         return new Promise<void>((resolve) => setTimeout(() => resolve()));
     }
 

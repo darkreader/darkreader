@@ -28,7 +28,7 @@ jobs:
           max_defects_rate: '0.01'
           max_complex_functions_rate: '0.1'
           max_long_functions_rate: '0.01'
-          project_name: ''
+          project_name: 'darkreader'
           max_timeout_sec: '600'
           
         

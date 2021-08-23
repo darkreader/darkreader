@@ -49,7 +49,7 @@ Here is an example:
 -->
 
 - OS: <!-- e.g. Windows, macOS, Linux -->
-- Browser: <!-- e.g. Chrome 91, Firefox 90, Edge 91, Safari 14 -->
+- Browser: <!-- e.g. Chrome 92, Firefox 91, Edge 91, Safari 14 -->
 - Dark Reader Version: <!-- e.g. 4.9.34 -->
 
 ## Additional Context

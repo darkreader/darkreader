@@ -1,12 +1,12 @@
 import {createFilterMatrix, Matrix} from './utils/matrix';
+import {cssFilterStyleSheetTemplate} from './css-filter';
+import type {FilterConfig, InversionFix} from '../definitions';
 import {isFirefox} from '../utils/platform';
-import {cssFilterStyleheetTemplate} from './css-filter';
-import {FilterConfig, InversionFix} from '../definitions';
 
 export function createSVGFilterStylesheet(config: FilterConfig, url: string, frameURL: string, inversionFixes: InversionFix[]) {
     let filterValue: string;
     let reverseFilterValue: string;
-    if (isFirefox()) {
+    if (isFirefox) {
         filterValue = getEmbeddedSVGFilterValue(getSVGFilterMatrixValue(config));
         reverseFilterValue = getEmbeddedSVGFilterValue(getSVGReverseFilterMatrixValue());
     } else {
@@ -14,7 +14,7 @@ export function createSVGFilterStylesheet(config: FilterConfig, url: string, fra
         filterValue = 'url(#dark-reader-filter)';
         reverseFilterValue = 'url(#dark-reader-reverse-filter)';
     }
-    return cssFilterStyleheetTemplate(filterValue, reverseFilterValue, config, url, frameURL, inversionFixes);
+    return cssFilterStyleSheetTemplate(filterValue, reverseFilterValue, config, url, frameURL, inversionFixes);
 }
 
 function getEmbeddedSVGFilterValue(matrixValue: string) {
@@ -30,7 +30,7 @@ function getEmbeddedSVGFilterValue(matrixValue: string) {
 }
 
 function toSVGMatrix(matrix: number[][]) {
-    return matrix.slice(0, 4).map(m => m.map(m => m.toFixed(3)).join(' ')).join(' ');
+    return matrix.slice(0, 4).map((m) => m.map((m) => m.toFixed(3)).join(' ')).join(' ');
 }
 
 export function getSVGFilterMatrixValue(config: FilterConfig) {

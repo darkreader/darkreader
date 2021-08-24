@@ -1,5 +1,5 @@
-import {getURLHost} from '../../utils/url';
-import {ExtensionData, TabInfo, Theme, UserSettings} from '../../definitions';
+import {getURLHostOrProtocol} from '../../utils/url';
+import type {ExtensionData, TabInfo, Theme, UserSettings} from '../../definitions';
 
 export function getMockData(override = {} as Partial<ExtensionData>): ExtensionData {
     return Object.assign({
@@ -7,6 +7,7 @@ export function getMockData(override = {} as Partial<ExtensionData>): ExtensionD
         isReady: true,
         settings: {
             enabled: true,
+            presets: [],
             theme: {
                 mode: 1,
                 brightness: 110,
@@ -19,6 +20,7 @@ export function getMockData(override = {} as Partial<ExtensionData>): ExtensionD
                 engine: 'cssFilter',
                 stylesheet: '',
                 scrollbarColor: 'auto',
+                styleSystemControls: true,
             } as Theme,
             customThemes: [],
             siteList: [],
@@ -26,6 +28,7 @@ export function getMockData(override = {} as Partial<ExtensionData>): ExtensionD
             applyToListedOnly: false,
             changeBrowserTheme: false,
             enableForPDF: true,
+            enableForProtectedPages: false,
             notifyOfNews: false,
             syncSettings: true,
             automation: '',
@@ -69,37 +72,40 @@ export function getMockActiveTabInfo(): TabInfo {
         url: 'https://darkreader.org/',
         isProtected: false,
         isInDarkList: false,
+        isInjected: true,
     };
 }
 
+type listener = (data: ExtensionData) => void;
+
 export function createConnectorMock() {
-    let listener: (data) => void = null;
+    let listener: listener = null;
     const data = getMockData();
     const tab = getMockActiveTabInfo();
     const connector = {
-        getData() {
+        async getData() {
             return Promise.resolve(data);
         },
-        getActiveTabInfo() {
+        async getActiveTabInfo() {
             return Promise.resolve(tab);
         },
-        subscribeToChanges(callback) {
+        subscribeToChanges(callback: listener) {
             listener = callback;
         },
-        changeSettings(settings) {
+        changeSettings(settings: UserSettings) {
             Object.assign(data.settings, settings);
             listener(data);
         },
-        setTheme(theme) {
+        setTheme(theme: Theme) {
             Object.assign(data.settings.theme, theme);
             listener(data);
         },
-        setShortcut(command, shortcut) {
+        setShortcut(command: string, shortcut: string) {
             Object.assign(data.shortcuts, {[command]: shortcut});
             listener(data);
         },
-        toggleURL(url) {
-            const pattern = getURLHost(url);
+        toggleURL(url: string) {
+            const pattern = getURLHostOrProtocol(url);
             const index = data.settings.siteList.indexOf(pattern);
             if (index >= 0) {
                 data.settings.siteList.splice(index, 1, pattern);

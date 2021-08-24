@@ -1,6 +1,6 @@
 import {m} from 'malevic';
 import CheckButton from '../check-button';
-import {ViewProps} from '../types';
+import type {ViewProps} from '../types';
 
 export default function EnabledByDefaultGroup(props: ViewProps) {
     function onEnabledByDefaultChange(checked: boolean) {

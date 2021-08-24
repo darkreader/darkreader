@@ -1,7 +1,7 @@
 import {m} from 'malevic';
 import {CheckBox, UpDown, Select} from '../../../controls';
 import {getLocalMessage} from '../../../../utils/locales';
-import {FilterConfig} from '../../../../definitions';
+import type {FilterConfig} from '../../../../definitions';
 
 interface FontSettingsProps {
     config: FilterConfig;
@@ -16,7 +16,7 @@ export default function FontSettings({config, fonts, onChange}: FontSettingsProp
                 <div class="font-settings__font-select-container__line">
                     <CheckBox
                         checked={config.useFont}
-                        onchange={(e) => onChange({useFont: e.target.checked})}
+                        onchange={(e: {target: HTMLInputElement}) => onChange({useFont: e.target.checked})}
                     />
                     <Select
                         value={config.fontFamily}

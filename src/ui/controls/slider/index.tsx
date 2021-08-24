@@ -1,5 +1,7 @@
 import {m} from 'malevic';
 import {getContext} from 'malevic/dom';
+import {throttle} from '../../../utils/throttle';
+import {scale, clamp} from '../../../utils/math';
 
 interface SliderProps {
     value: number;
@@ -10,24 +12,15 @@ interface SliderProps {
     onChange: (value: number) => void;
 }
 
-function clamp(x: number, min: number, max: number) {
-    return Math.min(max, Math.max(min, x));
-}
-
-function scale(x: number, inLow: number, inHigh: number, outLow: number, outHigh: number) {
-    return (x - inLow) / (inHigh - inLow) * (outHigh - outLow) + outLow;
-}
-
 function stickToStep(x: number, step: number) {
     const s = Math.round(x / step) * step;
     const exp = Math.floor(Math.log10(step));
     if (exp >= 0) {
-        const m = Math.pow(10, exp);
+        const m = 10 ** exp;
         return Math.round(s / m) * m;
-    } else {
-        const m = Math.pow(10, -exp);
-        return Math.round(s * m) / m;
     }
+    const m = 10 ** -exp;
+    return Math.round(s * m) / m;
 }
 
 export default function Slider(props: SliderProps) {
@@ -38,6 +31,8 @@ export default function Slider(props: SliderProps) {
         activeProps: SliderProps;
         trackNode: HTMLElement;
         thumbNode: HTMLElement;
+        wheelTimeoutId: number;
+        wheelValue: number;
     };
 
     store.activeProps = props;
@@ -168,11 +163,40 @@ export default function Slider(props: SliderProps) {
         stickToStep(getValue(), props.step)
     );
 
+    function scaleWheelDelta(delta: number) {
+        return scale(delta, 0, -1000, 0, props.max - props.min);
+    }
+
+    const refreshOnWheel = throttle(() => {
+        store.activeValue = stickToStep(store.wheelValue, props.step);
+        store.wheelTimeoutId = setTimeout(() => {
+            const {onChange} = store.activeProps;
+            onChange(store.activeValue);
+            store.isActive = false;
+            store.activeValue = null;
+            store.wheelValue = null;
+        }, 400);
+        context.refresh();
+    });
+
+    function onWheel(event: WheelEvent) {
+        if (store.wheelValue == null) {
+            store.wheelValue = getValue();
+        }
+        store.isActive = true;
+        clearTimeout(store.wheelTimeoutId);
+        event.preventDefault();
+        const accumulatedValue = store.wheelValue + scaleWheelDelta(event.deltaY);
+        store.wheelValue = clamp(accumulatedValue, props.min, props.max);
+        refreshOnWheel();
+    }
+
     return (
         <span
             class={{'slider': true, 'slider--active': store.isActive}}
             oncreate={onRootCreate}
             onmousedown={onPointerDown}
+            onwheel={onWheel}
         >
             <span
                 class="slider__track"

@@ -28,23 +28,23 @@ export default function ColorDropDown(props: ColorDropDownProps) {
         CUSTOM: 'Custom',
     };
 
-    const dropDownValues = [
-        props.hasDefaultOption ? labels.DEFAULT : null,
-        props.hasAutoOption ? labels.AUTO : null,
-        labels.CUSTOM,
+    const dropDownOptions = [
+        props.hasDefaultOption ? {id: 'default', content: labels.DEFAULT} : null,
+        props.hasAutoOption ? {id: 'auto', content: labels.AUTO} : null,
+        {id: 'custom', content: labels.CUSTOM},
     ].filter((v) => v);
 
     const selectedDropDownValue = (
-        props.value === '' ? labels.DEFAULT :
-            props.value === 'auto' ? labels.AUTO :
-                labels.CUSTOM
+        props.value === '' ? 'default' :
+            props.value === 'auto' ? 'auto' :
+                'custom'
     );
 
     function onDropDownChange(value: string) {
         const result = {
-            [labels.DEFAULT]: '',
-            [labels.AUTO]: 'auto',
-            [labels.CUSTOM]: props.colorSuggestion,
+            default: '',
+            auto: 'auto',
+            custom: props.colorSuggestion,
         }[value];
         props.onChange(result);
     }
@@ -58,6 +58,20 @@ export default function ColorDropDown(props: ColorDropDownProps) {
         isPickerVisible = false;
     }
 
+    const prevValue = context.prev ? context.prev.props.value : null;
+    const shouldFocusOnPicker = (
+        (props.value !== '' && props.value !== 'auto') &&
+        prevValue != null &&
+        (prevValue === '' || prevValue === 'auto')
+    );
+
+    function onRootRender(root: Element) {
+        if (shouldFocusOnPicker) {
+            const pickerNode = root.querySelector('.color-dropdown__picker');
+            ColorPicker.focus(pickerNode);
+        }
+    }
+
     return (
         <span
             class={{
@@ -65,9 +79,10 @@ export default function ColorDropDown(props: ColorDropDownProps) {
                 'color-dropdown--open': store.isOpen,
                 [props.class]: Boolean(props.class),
             }}
+            onrender={onRootRender}
         >
             <DropDown class="color-dropdown__options"
-                values={dropDownValues}
+                options={dropDownOptions}
                 selected={selectedDropDownValue}
                 onChange={onDropDownChange}
             />
@@ -78,6 +93,7 @@ export default function ColorDropDown(props: ColorDropDownProps) {
                 }}
                 color={props.value}
                 onChange={props.onChange}
+                canReset={true}
                 onReset={props.onReset}
             />
         </span>

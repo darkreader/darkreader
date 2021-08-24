@@ -11,7 +11,7 @@ async function bundleLocale(/** @type {string} */filePath, {debug}) {
 
     const regex = /@([a-z0-9_]+)/ig;
     let match;
-    while (match = regex.exec(file)) {
+    while ((match = regex.exec(file))) {
         const messageName = match[1];
         const messageStart = match.index + match[0].length;
         let messageEnd = file.indexOf('@', messageStart);
@@ -29,8 +29,10 @@ async function bundleLocale(/** @type {string} */filePath, {debug}) {
     const getOutputPath = (dir) => `${dir}/_locales/${locale}/messages.json`;
     const chromeDir = getDestDir({debug});
     const firefoxDir = getDestDir({debug, firefox: true});
+    const thunderBirdDir = getDestDir({debug, thunderbird: true});
     await fs.outputFile(getOutputPath(chromeDir), json);
     await fs.outputFile(getOutputPath(firefoxDir), json);
+    await fs.outputFile(getOutputPath(thunderBirdDir), json);
 }
 
 async function bundleLocales({debug}) {

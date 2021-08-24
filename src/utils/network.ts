@@ -1,16 +1,17 @@
 import {isFirefox} from './platform';
 
-async function getOKResponse(url: string, mimeType?: string) {
+async function getOKResponse(url: string, mimeType?: string, origin?: string) {
     const response = await fetch(
         url,
         {
             cache: 'force-cache',
             credentials: 'omit',
+            referrer: origin
         },
     );
 
     // Firefox bug, content type is "application/x-unknown-content-type"
-    if (isFirefox() && mimeType === 'text/css' && url.startsWith('moz-extension://') && url.endsWith('.css')) {
+    if (isFirefox && mimeType === 'text/css' && url.startsWith('moz-extension://') && url.endsWith('.css')) {
         return response;
     }
 
@@ -40,7 +41,7 @@ export async function readResponseAsDataURL(response: Response) {
     return dataURL;
 }
 
-export async function loadAsText(url: string, mimeType?: string) {
-    const response = await getOKResponse(url, mimeType);
+export async function loadAsText(url: string, mimeType?: string, origin?: string) {
+    const response = await getOKResponse(url, mimeType, origin);
     return await response.text();
 }

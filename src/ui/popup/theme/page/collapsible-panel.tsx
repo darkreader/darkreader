@@ -1,7 +1,7 @@
 import {m} from 'malevic';
 import {getContext} from 'malevic/dom';
 
-function CollapsiblePanel({}, ...groups: Malevic.ComponentSpec<CollapsibleGroupProps>[]) {
+function CollapsiblePanel({}, ...groups: Array<Malevic.ComponentSpec<CollapsibleGroupProps>>) {
     const context = getContext();
     const store = context.store as {activeGroup: string};
     if (store.activeGroup == null) {

@@ -1,9 +1,11 @@
 import {forEach, push} from '../../utils/array';
+import type {ElementsTreeOperations} from '../utils/dom';
+import {iterateShadowHosts, createOptimizedTreeObserver} from '../utils/dom';
+import type {StyleElement} from './style-manager';
+import {shouldManageStyle, getManageableStyles} from './style-manager';
 import {isDefinedSelectorSupported} from '../../utils/platform';
-import {iterateShadowNodes, createOptimizedTreeObserver, ElementsTreeOperations} from '../utils/dom';
-import {shouldManageStyle, getManageableStyles, StyleElement} from './style-manager';
 
-const observers = [] as {disconnect(): void}[];
+const observers = [] as Array<{disconnect(): void}>;
 let observedRoots: WeakSet<Node>;
 
 interface ChangedStyles {
@@ -17,12 +19,21 @@ const undefinedGroups = new Map<string, Set<Element>>();
 let elementsDefinitionCallback: (elements: Element[]) => void;
 
 function collectUndefinedElements(root: ParentNode) {
-    if (!isDefinedSelectorSupported()) {
+    if (!isDefinedSelectorSupported) {
         return;
     }
     forEach(root.querySelectorAll(':not(:defined)'),
         (el) => {
-            const tag = el.tagName.toLowerCase();
+            let tag = el.tagName.toLowerCase();
+            if (!tag.includes('-')) {
+                const extendedTag = el.getAttribute('is');
+                if (extendedTag) {
+                    tag = extendedTag;
+                } else {
+                    // Happens for <template> on YouTube
+                    return;
+                }
+            }
             if (!undefinedGroups.has(tag)) {
                 undefinedGroups.set(tag, new Set());
                 customElementsWhenDefined(tag).then(() => {
@@ -37,12 +48,30 @@ function collectUndefinedElements(root: ParentNode) {
         });
 }
 
-function customElementsWhenDefined(tag: string) {
-    return new Promise((resolve) => {
+let canOptimizeUsingProxy = false;
+document.addEventListener('__darkreader__inlineScriptsAllowed', () => {
+    canOptimizeUsingProxy = true;
+});
+
+const resolvers = new Map<string, () => void>();
+
+function handleIsDefined(e: CustomEvent<{tag: string}>) {
+    canOptimizeUsingProxy = true;
+    if (resolvers.has(e.detail.tag)) {
+        const resolve = resolvers.get(e.detail.tag);
+        resolve();
+    }
+}
+
+async function customElementsWhenDefined(tag: string) {
+    return new Promise<void>((resolve) => {
         // `customElements.whenDefined` is not available in extensions
         // https://bugs.chromium.org/p/chromium/issues/detail?id=390807
-        if (window.customElements && typeof window.customElements.whenDefined === 'function') {
+        if (window.customElements && typeof customElements.whenDefined === 'function') {
             customElements.whenDefined(tag).then(resolve);
+        } else if (canOptimizeUsingProxy) {
+            resolvers.set(tag, resolve);
+            document.dispatchEvent(new CustomEvent('__darkreader__addUndefinedResolver', {detail: {tag}}));
         } else {
             const checkIfDefined = () => {
                 const elements = undefinedGroups.get(tag);
@@ -66,9 +95,10 @@ function watchWhenCustomElementsDefined(callback: (elements: Element[]) => void)
 function unsubscribeFromDefineCustomElements() {
     elementsDefinitionCallback = null;
     undefinedGroups.clear();
+    document.removeEventListener('__darkreader__isDefined', handleIsDefined);
 }
 
-export function watchForStyleChanges(currentStyles: StyleElement[], update: (styles: ChangedStyles) => void) {
+export function watchForStyleChanges(currentStyles: StyleElement[], update: (styles: ChangedStyles) => void, shadowRootDiscovered: (root: ShadowRoot) => void) {
     stopWatchingForStyleChanges();
 
     const prevStyles = new Set<StyleElement>(currentStyles);
@@ -126,7 +156,7 @@ export function watchForStyleChanges(currentStyles: StyleElement[], update: (sty
         handleStyleOperations({createdStyles, removedStyles, movedStyles});
 
         additions.forEach((n) => {
-            iterateShadowNodes(n, subscribeForShadowRootChanges);
+            iterateShadowHosts(n, subscribeForShadowRootChanges);
             collectUndefinedElements(n);
         });
     }
@@ -155,22 +185,28 @@ export function watchForStyleChanges(currentStyles: StyleElement[], update: (sty
 
         handleStyleOperations({createdStyles, removedStyles, movedStyles});
 
-        iterateShadowNodes(root, subscribeForShadowRootChanges);
+        iterateShadowHosts(root, subscribeForShadowRootChanges);
         collectUndefinedElements(root);
     }
 
     function handleAttributeMutations(mutations: MutationRecord[]) {
         const updatedStyles = new Set<StyleElement>();
+        const removedStyles = new Set<StyleElement>();
         mutations.forEach((m) => {
-            if (shouldManageStyle(m.target) && m.target.isConnected) {
-                updatedStyles.add(m.target as StyleElement);
+            const {target} = m;
+            if (target.isConnected) {
+                if (shouldManageStyle(target)) {
+                    updatedStyles.add(target as StyleElement);
+                } else if (target instanceof HTMLLinkElement && target.disabled) {
+                    removedStyles.add(target as StyleElement);
+                }
             }
         });
-        if (updatedStyles.size > 0) {
+        if (updatedStyles.size + removedStyles.size > 0) {
             update({
                 updated: Array.from(updatedStyles),
                 created: [],
-                removed: [],
+                removed: Array.from(removedStyles),
                 moved: [],
             });
         }
@@ -182,27 +218,38 @@ export function watchForStyleChanges(currentStyles: StyleElement[], update: (sty
             onHugeMutations: handleHugeTreeMutations,
         });
         const attrObserver = new MutationObserver(handleAttributeMutations);
-        attrObserver.observe(root, {attributes: true, attributeFilter: ['rel', 'disabled'], subtree: true});
+        attrObserver.observe(root, {attributes: true, attributeFilter: ['rel', 'disabled', 'media'], subtree: true});
         observers.push(treeObserver, attrObserver);
         observedRoots.add(root);
     }
 
     function subscribeForShadowRootChanges(node: Element) {
-        if (node.shadowRoot == null || observedRoots.has(node.shadowRoot)) {
+        const {shadowRoot} = node;
+        if (shadowRoot == null || observedRoots.has(shadowRoot)) {
             return;
         }
-        observe(node.shadowRoot);
+        observe(shadowRoot);
+        shadowRootDiscovered(shadowRoot);
     }
 
     observe(document);
-    iterateShadowNodes(document.documentElement, subscribeForShadowRootChanges);
+    iterateShadowHosts(document.documentElement, subscribeForShadowRootChanges);
 
     watchWhenCustomElementsDefined((hosts) => {
         const newStyles: StyleElement[] = [];
         hosts.forEach((host) => push(newStyles, getManageableStyles(host.shadowRoot)));
         update({created: newStyles, updated: [], removed: [], moved: []});
-        hosts.forEach((h) => subscribeForShadowRootChanges(h));
+        hosts.forEach((host) => {
+            const {shadowRoot} = host;
+            if (shadowRoot == null) {
+                return;
+            }
+            subscribeForShadowRootChanges(host);
+            iterateShadowHosts(shadowRoot, subscribeForShadowRootChanges);
+            collectUndefinedElements(shadowRoot);
+        });
     });
+    document.addEventListener('__darkreader__isDefined', handleIsDefined);
     collectUndefinedElements(document);
 }
 

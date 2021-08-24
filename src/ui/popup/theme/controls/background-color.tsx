@@ -1,25 +1,24 @@
 import {m} from 'malevic';
-import {ColorDropDown} from '../../../controls';
+import {ColorPicker} from '../../../controls';
 import ThemeControl from './theme-control';
 
 type BgColorValue = 'auto' | string;
 
 interface BgColorEditorProps {
     value: BgColorValue;
-    defaultColor: string;
     onChange: (value: BgColorValue) => void;
+    canReset: boolean;
     onReset: () => void;
 }
 
 export default function BackgroundColorEditor(props: BgColorEditorProps) {
     return (
         <ThemeControl label="Background">
-            <ColorDropDown
-                value={props.value}
-                colorSuggestion={props.defaultColor}
+            <ColorPicker
+                color={props.value}
                 onChange={props.onChange}
+                canReset={props.canReset}
                 onReset={props.onReset}
-                hasAutoOption
             />
         </ThemeControl>
     );

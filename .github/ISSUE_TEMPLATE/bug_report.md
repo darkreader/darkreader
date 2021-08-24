@@ -1,48 +1,56 @@
 ---
-name: Bug report
-about: Create a bug report to help us improve
-title: "[BUG]"
+name: Bug Report
+about: Create a report about a bug you experienced while using Dark Reader.
+title: "[Bug] Replace with title"
 labels: bug
 assignees: ''
-
 ---
 
 <!--
-Thank you for taking the time to report a bug.
-Please make sure there is no existing issue about this kind of bug.
+  ⚠⚠ Do not delete this issue template! ⚠⚠
+  Reported issues must use this template and have all the necessary information provided.
+  Incomplete reports are likely to be ignored and closed.
 -->
-
-### **Describe the bug**
-
-A clear and concise description of what the bug is.
-
-### **Steps to reproduce**
-
-- Go to '...'
-- Click on '...'
-- Scroll down to '...'
-
-### **Expected behavior**
-
-A clear and concise description of what you expected to happen.
-
-### **Actual behavior**
-
-A clear and concise description of what actually happened.
-
-### **Screenshots**
-
-If applicable, add screenshots to help explain your problem.
 
 <!--
-Please add a version of the browser you are using. 
-If you don't know how to get your browser/darkreader version please search it up online.
+  Thank you for taking the time to create a report about a bug.
+  Ensure that there are no other existing reports for this bug.
+  Also, remember to fill out every section on this report and remove any that are not needed.
+  Finally, place a brief description in the title of this report.
 -->
-### **System Information:**
- - OS: [e.g. iOS 11]
- - Browser: [e.g. Chrome 73, Safari 13]
- - Dark Reader version: [e.g. 4.9.9]
 
-### **Additional context**
+# Bug Report
 
-Add any other context about the problem here.
+## Bug Description
+<!-- Provide a clear and concise description to allow us to troubleshoot this bug. -->
+
+## Steps To Reproduce
+<!-- Provide steps to reproduce the problem, and allowing us to troubleshoot this bug. -->
+<!--
+Here is an example:
+- Go to example.com.
+- Hover over the example button.
+- Notice that when hovering over the example button, it does not change color.
+-->
+
+## Expected Behavior
+<!-- Provide a clear and concise description of what you expected to happen. -->
+
+## Actual Behavior
+<!-- Provide a clear and concise description of what happened. -->
+
+## Screenshots
+<!-- If applicable, add screenshots to help explain this bug. -->
+
+## System Information
+<!--
+  Specify the browser name and version as well as the Dark Reader version you are using.
+  Please do an online search for help if you are not familiar with how to get this information.
+-->
+
+- OS: <!-- e.g. Windows, macOS, Linux -->
+- Browser: <!-- e.g. Chrome 91, Firefox 90, Edge 91, Safari 14 -->
+- Dark Reader Version: <!-- e.g. 4.9.34 -->
+
+## Additional Context
+<!-- Provide any additional information about this bug. -->

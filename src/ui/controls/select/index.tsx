@@ -6,6 +6,7 @@ import TextBox from '../textbox';
 import VirtualScroll from '../virtual-scroll';
 
 interface SelectProps {
+    class?: any;
     value: string;
     options: {
         [value: string]: Malevic.Child;
@@ -26,7 +27,7 @@ function Select(props: SelectProps) {
     const valueNodes: Map<string, Element> = store.valueNodes || (store.valueNodes = new Map());
     const nodesValues: WeakMap<Element, string> = store.nodesValues || (store.nodesValues = new WeakMap());
 
-    function onRender(node) {
+    function onRender(node: Element) {
         store.rootNode = node;
     }
 
@@ -105,14 +106,21 @@ function Select(props: SelectProps) {
         nodesValues.set(domNode, value);
     }
 
-    function removeValueNode(value) {
+    function removeValueNode(value: string) {
         const el = valueNodes.get(value);
         valueNodes.delete(value);
         nodesValues.delete(el);
     }
 
     return (
-        <span class="select" onrender={onRender}>
+        <span
+            class={[
+                'select',
+                state.isExpanded && 'select--expanded',
+                props.class,
+            ]}
+            onrender={onRender}
+        >
             <span class="select__line">
                 <TextBox
                     class="select__textbox"

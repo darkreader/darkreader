@@ -4,8 +4,8 @@ import {parseSitesFixesConfig} from './utils/parse';
 import {parseArray, formatArray} from '../utils/text';
 import {compareURLPatterns, isURLInList} from '../utils/url';
 import {createTextStyle} from './text-style';
-import {FilterConfig, InversionFix} from '../definitions';
-import {compareChromeVersions, getChromeVersion, isChromiumBased} from '../utils/platform';
+import type {FilterConfig, InversionFix} from '../definitions';
+import {compareChromeVersions, chromiumVersion, isChromium} from '../utils/platform';
 
 export enum FilterMode {
     light = 0,
@@ -19,21 +19,20 @@ export enum FilterMode {
  * Bug report: https://bugs.chromium.org/p/chromium/issues/detail?id=501582
  * Patch: https://chromium-review.googlesource.com/c/chromium/src/+/1979258
  */
-export function hasChromiumIssue501582() {
-    const chromeVersion = getChromeVersion();
+export function hasPatchForChromiumIssue501582() {
     return Boolean(
-        isChromiumBased() &&
-        compareChromeVersions(chromeVersion, '81.0.4035.0') >= 0
+        isChromium &&
+        compareChromeVersions(chromiumVersion, '81.0.4035.0') >= 0
     );
 }
 
-export default function createCSSFilterStyleheet(config: FilterConfig, url: string, frameURL: string, inversionFixes: InversionFix[]) {
+export default function createCSSFilterStyleSheet(config: FilterConfig, url: string, frameURL: string, inversionFixes: InversionFix[]) {
     const filterValue = getCSSFilterValue(config);
     const reverseFilterValue = 'invert(100%) hue-rotate(180deg)';
-    return cssFilterStyleheetTemplate(filterValue, reverseFilterValue, config, url, frameURL, inversionFixes);
+    return cssFilterStyleSheetTemplate(filterValue, reverseFilterValue, config, url, frameURL, inversionFixes);
 }
 
-export function cssFilterStyleheetTemplate(filterValue: string, reverseFilterValue: string, config: FilterConfig, url: string, frameURL: string, inversionFixes: InversionFix[]) {
+export function cssFilterStyleSheetTemplate(filterValue: string, reverseFilterValue: string, config: FilterConfig, url: string, frameURL: string, inversionFixes: InversionFix[]) {
     const fix = getInversionFixesFor(frameURL || url, inversionFixes);
 
     const lines: string[] = [];
@@ -79,21 +78,15 @@ export function cssFilterStyleheetTemplate(filterValue: string, reverseFilterVal
     });
 
     if (!frameURL) {
-        // If user has the chrome issue the colors should be the other way around as of the rootcolors will affect the whole background color of the page
-        const rootColors = hasChromiumIssue501582() && config.mode === FilterMode.dark ? [0, 0, 0] : [255, 255, 255];
-        const [r, g, b] = applyColorMatrix(rootColors, createFilterMatrix(config));
-        const bgColor = {
-            r: Math.round(r),
-            g: Math.round(g),
-            b: Math.round(b),
-            toString() {
-                return `rgb(${this.r},${this.g},${this.b})`;
-            },
-        };
+        const light = [255, 255, 255];
+        // If browser affected by Chromium Issue 501582, set dark background on html
+        const bgColor = !hasPatchForChromiumIssue501582() && config.mode === FilterMode.dark ?
+            applyColorMatrix(light, createFilterMatrix(config)).map(Math.round) :
+            light;
         lines.push('');
         lines.push('/* Page background */');
         lines.push('html {');
-        lines.push(`  background: ${bgColor} !important;`);
+        lines.push(`  background: rgb(${bgColor.join(',')}) !important;`);
         lines.push('}');
     }
 
@@ -209,7 +202,7 @@ export function getInversionFixesFor(url: string, inversionFixes: InversionFix[]
     return common;
 }
 
-const inversionFixesCommands = {
+const inversionFixesCommands: { [key: string]: keyof InversionFix } = {
     'INVERT': 'invert',
     'NO INVERT': 'noinvert',
     'REMOVE BG': 'removebg',
@@ -219,7 +212,7 @@ const inversionFixesCommands = {
 export function parseInversionFixes(text: string) {
     return parseSitesFixesConfig<InversionFix>(text, {
         commands: Object.keys(inversionFixesCommands),
-        getCommandPropName: (command) => inversionFixesCommands[command] || null,
+        getCommandPropName: (command) => inversionFixesCommands[command],
         parseCommandValue: (command, value) => {
             if (command === 'CSS') {
                 return value.trim();
@@ -237,7 +230,7 @@ export function formatInversionFixes(inversionFixes: InversionFix[]) {
         getPropCommandName: (prop) => Object.entries(inversionFixesCommands).find(([, p]) => p === prop)[0],
         formatPropValue: (prop, value) => {
             if (prop === 'css') {
-                return value.trim();
+                return (value as string).trim().replace(/\n+/g, '\n');
             }
             return formatArray(value).trim();
         },

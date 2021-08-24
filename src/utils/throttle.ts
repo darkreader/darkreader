@@ -32,11 +32,11 @@ type Task = () => void;
 
 export function createAsyncTasksQueue() {
     const tasks: Task[] = [];
-    let frameId = null;
+    let frameId: number = null;
 
     function runTasks() {
         let task: Task;
-        while (task = tasks.shift()) {
+        while ((task = tasks.shift())) {
             task();
         }
         frameId = null;

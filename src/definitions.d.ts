@@ -1,4 +1,4 @@
-import {FilterMode} from './generators/css-filter';
+import type {FilterMode} from './generators/css-filter';
 
 export interface ExtensionData {
     isEnabled: boolean;
@@ -18,17 +18,18 @@ export interface ExtensionData {
 }
 
 export interface ExtensionActions {
-    changeSettings(settings: Partial<UserSettings>);
-    setTheme(theme: Partial<FilterConfig>);
-    setShortcut(command: string, shortcut: string);
-    toggleURL(url: string);
-    markNewsAsRead(ids: string[]);
+    changeSettings(settings: Partial<UserSettings>): void;
+    setTheme(theme: Partial<FilterConfig>): void;
+    setShortcut(command: string, shortcut: string): void;
+    toggleURL(url: string): void;
+    markNewsAsRead(ids: string[]): void;
+    loadConfig(options: {local: boolean}): void;
     applyDevDynamicThemeFixes(text: string): Promise<void>;
-    resetDevDynamicThemeFixes();
+    resetDevDynamicThemeFixes(): void;
     applyDevInversionFixes(text: string): Promise<void>;
-    resetDevInversionFixes();
+    resetDevInversionFixes(): void;
     applyDevStaticThemes(text: string): Promise<void>;
-    resetDevStaticThemes();
+    resetDevStaticThemes(): void;
 }
 
 export interface ExtWrapper {
@@ -36,7 +37,7 @@ export interface ExtWrapper {
     actions: ExtensionActions;
 }
 
-export interface FilterConfig {
+export interface Theme {
     mode: FilterMode;
     brightness: number;
     contrast: number;
@@ -47,24 +48,33 @@ export interface FilterConfig {
     textStroke: number;
     engine: string;
     stylesheet: string;
-    darkSchemeBackgroundColor: 'auto' | string;
-    darkSchemeTextColor: 'auto' | string;
-    lightSchemeBackgroundColor: 'auto' | string;
-    lightSchemeTextColor: 'auto' | string;
+    darkSchemeBackgroundColor: string;
+    darkSchemeTextColor: string;
+    lightSchemeBackgroundColor: string;
+    lightSchemeTextColor: string;
     scrollbarColor: '' | 'auto' | string;
     selectionColor: '' | 'auto' | string;
+    styleSystemControls: boolean;
 }
 
-export type Theme = FilterConfig;
+export type FilterConfig = Theme;
 
 export interface CustomSiteConfig {
     url: string[];
     theme: FilterConfig;
 }
 
+export interface ThemePreset {
+    id: string;
+    name: string;
+    urls: string[];
+    theme: Theme;
+}
+
 export interface UserSettings {
     enabled: boolean;
     theme: FilterConfig;
+    presets: ThemePreset[];
     customThemes: CustomSiteConfig[];
     siteList: string[];
     siteListEnabled: string[];
@@ -72,12 +82,14 @@ export interface UserSettings {
     changeBrowserTheme: boolean;
     notifyOfNews: boolean;
     syncSettings: boolean;
+    syncSitesFixes: boolean;
     automation: '' | 'time' | 'system' | 'location';
     automationBehaviour: 'OnOff' | 'Scheme';
     time: TimeSettings;
     location: LocationSettings;
     previewNewDesign: boolean;
     enableForPDF: boolean;
+    enableForProtectedPages: boolean;
 }
 
 export interface TimeSettings {
@@ -93,13 +105,14 @@ export interface LocationSettings {
 export interface TabInfo {
     url: string;
     isProtected: boolean;
+    isInjected: boolean;
     isInDarkList: boolean;
 }
 
 export interface Message {
     type: string;
     data?: any;
-    id?: any;
+    id?: number;
     error?: any;
 }
 
@@ -109,9 +122,10 @@ export interface Shortcuts {
 
 export interface DynamicThemeFix {
     url: string[];
-    ignoreInlineStyle: string[];
     invert: string[];
     css: string;
+    ignoreInlineStyle: string[];
+    ignoreImageAnalysis: string[];
 }
 
 export interface InversionFix {

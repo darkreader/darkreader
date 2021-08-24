@@ -1,10 +1,12 @@
-import {Theme} from '../../definitions';
-import {isCSSStyleSheetConstructorSupported} from '../../utils/platform';
-import {createAsyncTasksQueue} from '../utils/throttle';
-import {iterateCSSRules, iterateCSSDeclarations, replaceCSSVariables} from './css-rules';
-import {getModifiableCSSDeclaration, ModifiableCSSDeclaration, ModifiableCSSRule} from './modify-css';
+import type {Theme} from '../../definitions';
+import {createAsyncTasksQueue} from '../../utils/throttle';
+import {iterateCSSRules, iterateCSSDeclarations} from './css-rules';
+import type {ModifiableCSSDeclaration, ModifiableCSSRule} from './modify-css';
+import {getModifiableCSSDeclaration} from './modify-css';
+import {variablesStore} from './variables';
+import type {CSSVariableModifier} from './variables';
 
-const themeCacheKeys: (keyof Theme)[] = [
+const themeCacheKeys: Array<keyof Theme> = [
     'mode',
     'brightness',
     'contrast',
@@ -20,68 +22,54 @@ function getThemeKey(theme: Theme) {
     return themeCacheKeys.map((p) => `${p}:${theme[p]}`).join(';');
 }
 
-function getTempCSSStyleSheet(): {sheet: CSSStyleSheet; remove: () => void} {
-    if (isCSSStyleSheetConstructorSupported()) {
-        return {sheet: new CSSStyleSheet(), remove: () => null};
-    }
-    const style = document.createElement('style');
-    style.classList.add('darkreader');
-    style.classList.add('darkreader--temp');
-    style.media = 'screen';
-    (document.head || document).append(style);
-    return {sheet: style.sheet, remove: () => style.remove()};
-}
-
 const asyncQueue = createAsyncTasksQueue();
 
 export function createStyleSheetModifier() {
     let renderId = 0;
-    const rulesTextCache = new Map<string, string>();
+    const rulesTextCache = new Set<string>();
     const rulesModCache = new Map<string, ModifiableCSSRule>();
+    const varTypeChangeCleaners = new Set<() => void>();
     let prevFilterKey: string = null;
-
     interface ModifySheetOptions {
         sourceCSSRules: CSSRuleList;
         theme: Theme;
-        variables: Map<string, string>;
+        ignoreImageAnalysis: string[];
         force: boolean;
         prepareSheet: () => CSSStyleSheet;
         isAsyncCancelled: () => boolean;
     }
 
-    function modifySheet(options: ModifySheetOptions): void {
+    let hasNonLoadedLink = false;
+    let wasRebuilt = false;
+    function shouldRebuildStyle() {
+        return hasNonLoadedLink && !wasRebuilt;
+    }
+
+    function modifySheet(options: ModifySheetOptions) {
         const rules = options.sourceCSSRules;
-        const {theme, variables, force, prepareSheet, isAsyncCancelled} = options;
+        const {theme, ignoreImageAnalysis, force, prepareSheet, isAsyncCancelled} = options;
 
         let rulesChanged = (rulesModCache.size === 0);
         const notFoundCacheKeys = new Set(rulesModCache.keys());
         const themeKey = getThemeKey(theme);
         const themeChanged = (themeKey !== prevFilterKey);
 
+        if (hasNonLoadedLink) {
+            wasRebuilt = true;
+        }
+
         const modRules: ModifiableCSSRule[] = [];
         iterateCSSRules(rules, (rule) => {
-            const cssText = rule.cssText;
+            let cssText = rule.cssText;
             let textDiffersFromPrev = false;
 
             notFoundCacheKeys.delete(cssText);
-            if (!rulesTextCache.has(cssText)) {
-                rulesTextCache.set(cssText, cssText);
-                textDiffersFromPrev = true;
+            if (rule.parentRule instanceof CSSMediaRule) {
+                cssText += `;${ (rule.parentRule as CSSMediaRule).media.mediaText}`;
             }
-
-            // Put CSS text with inserted CSS variables into separate <style> element
-            // to properly handle composite properties (e.g. background -> background-color)
-            let vars: {sheet: CSSStyleSheet; remove: () => void};
-            let varsRule: CSSStyleRule = null;
-            if (variables.size > 0 || cssText.includes('var(')) {
-                const cssTextWithVariables = replaceCSSVariables(cssText, variables);
-                if (rulesTextCache.get(cssText) !== cssTextWithVariables) {
-                    rulesTextCache.set(cssText, cssTextWithVariables);
-                    textDiffersFromPrev = true;
-                    vars = getTempCSSStyleSheet();
-                    vars.sheet.insertRule(cssTextWithVariables);
-                    varsRule = vars.sheet.cssRules[0] as CSSStyleRule;
-                }
+            if (!rulesTextCache.has(cssText)) {
+                rulesTextCache.add(cssText);
+                textDiffersFromPrev = true;
             }
 
             if (textDiffersFromPrev) {
@@ -92,9 +80,8 @@ export function createStyleSheetModifier() {
             }
 
             const modDecs: ModifiableCSSDeclaration[] = [];
-            const targetRule = varsRule || rule;
-            targetRule && targetRule.style && iterateCSSDeclarations(targetRule.style, (property, value) => {
-                const mod = getModifiableCSSDeclaration(property, value, rule, isAsyncCancelled);
+            rule.style && iterateCSSDeclarations(rule.style, (property, value) => {
+                const mod = getModifiableCSSDeclaration(property, value, rule, variablesStore, ignoreImageAnalysis, isAsyncCancelled);
                 if (mod) {
                     modDecs.push(mod);
                 }
@@ -107,8 +94,8 @@ export function createStyleSheetModifier() {
                 modRules.push(modRule);
             }
             rulesModCache.set(cssText, modRule);
-
-            vars && vars.remove();
+        }, () => {
+            hasNonLoadedLink = true;
         });
 
         notFoundCacheKeys.forEach((key) => {
@@ -126,7 +113,7 @@ export function createStyleSheetModifier() {
         interface ReadyGroup {
             isGroup: true;
             rule: any;
-            rules: (ReadyGroup | ReadyStyleRule)[];
+            rules: Array<ReadyGroup | ReadyStyleRule>;
         }
 
         interface ReadyStyleRule {
@@ -137,74 +124,128 @@ export function createStyleSheetModifier() {
 
         interface ReadyDeclaration {
             property: string;
-            value: string;
+            value: string | Array<{property: string; value: string}>;
             important: boolean;
             sourceValue: string;
             asyncKey?: number;
+            varKey?: number;
         }
 
         function setRule(target: CSSStyleSheet | CSSGroupingRule, index: number, rule: ReadyStyleRule) {
             const {selector, declarations} = rule;
-            target.insertRule(`${selector} {}`, index);
-            const style = (target.cssRules.item(index) as CSSStyleRule).style;
-            declarations.forEach(({property, value, important, sourceValue}) => {
-                style.setProperty(property, value == null ? sourceValue : value, important ? 'important' : '');
-            });
+            const getDeclarationText = (dec: ReadyDeclaration) => {
+                const {property, value, important, sourceValue} = dec;
+                return `${property}: ${value == null ? sourceValue : value}${important ? ' !important' : ''};`;
+            };
+            const ruleText = `${selector} { ${declarations.map(getDeclarationText).join(' ')} }`;
+            target.insertRule(ruleText, index);
         }
 
-        interface AsyncRule {
+        interface RuleInfo {
             rule: ReadyStyleRule;
             target: (CSSStyleSheet | CSSGroupingRule);
             index: number;
         }
 
-        const asyncDeclarations = new Map<number, AsyncRule>();
+        const asyncDeclarations = new Map<number, RuleInfo>();
+        const varDeclarations = new Map<number, RuleInfo>();
         let asyncDeclarationCounter = 0;
+        let varDeclarationCounter = 0;
 
         const rootReadyGroup: ReadyGroup = {rule: null, rules: [], isGroup: true};
-        const parentGroupRefs = new WeakMap<CSSRule, ReadyGroup>();
+        const groupRefs = new WeakMap<CSSRule, ReadyGroup>();
 
-        modRules.filter((r) => r).forEach(({selector, declarations, parentRule}) => {
-            let group: ReadyGroup;
-            if (parentRule == null) {
-                group = rootReadyGroup;
-            } else if (parentGroupRefs.has(parentRule)) {
-                group = parentGroupRefs.get(parentRule);
-            } else {
-                group = {rule: parentRule, rules: [], isGroup: true};
-                parentGroupRefs.set(parentRule, group);
-                const grandParent = (parentRule as CSSRule).parentRule;
-                const parentGroup = grandParent ? parentGroupRefs.get(grandParent) : rootReadyGroup;
-                parentGroup.rules.push(group);
+        function getGroup(rule: CSSRule): ReadyGroup {
+            if (rule == null) {
+                return rootReadyGroup;
             }
 
+            if (groupRefs.has(rule)) {
+                return groupRefs.get(rule);
+            }
+
+            const group: ReadyGroup = {rule, rules: [], isGroup: true};
+            groupRefs.set(rule, group);
+
+            const parentGroup = getGroup(rule.parentRule);
+            parentGroup.rules.push(group);
+
+            return group;
+        }
+
+        varTypeChangeCleaners.forEach((clear) => clear());
+        varTypeChangeCleaners.clear();
+
+        modRules.filter((r) => r).forEach(({selector, declarations, parentRule}) => {
+            const group = getGroup(parentRule);
             const readyStyleRule: ReadyStyleRule = {selector, declarations: [], isGroup: false};
             const readyDeclarations = readyStyleRule.declarations;
             group.rules.push(readyStyleRule);
+
+            function handleAsyncDeclaration(property: string, modified: Promise<string>, important: boolean, sourceValue: string) {
+                const asyncKey = ++asyncDeclarationCounter;
+                const asyncDeclaration: ReadyDeclaration = {property, value: null, important, asyncKey, sourceValue};
+                readyDeclarations.push(asyncDeclaration);
+                const currentRenderId = renderId;
+                modified.then((asyncValue) => {
+                    if (!asyncValue || isAsyncCancelled() || currentRenderId !== renderId) {
+                        return;
+                    }
+                    asyncDeclaration.value = asyncValue;
+                    asyncQueue.add(() => {
+                        if (isAsyncCancelled() || currentRenderId !== renderId) {
+                            return;
+                        }
+                        rebuildAsyncRule(asyncKey);
+                    });
+                });
+            }
+
+            function handleVarDeclarations(property: string, modified: ReturnType<CSSVariableModifier>, important: boolean, sourceValue: string) {
+                const {declarations: varDecs, onTypeChange} = modified as ReturnType<CSSVariableModifier>;
+                const varKey = ++varDeclarationCounter;
+                const currentRenderId = renderId;
+                const initialIndex = readyDeclarations.length;
+                let oldDecs: ReadyDeclaration[] = [];
+                if (varDecs.length === 0) {
+                    const tempDec = {property, value: sourceValue, important, sourceValue, varKey};
+                    readyDeclarations.push(tempDec);
+                    oldDecs = [tempDec];
+                }
+                varDecs.forEach((mod) => {
+                    if (mod.value instanceof Promise) {
+                        handleAsyncDeclaration(mod.property, mod.value, important, sourceValue);
+                    } else {
+                        const readyDec = {property: mod.property, value: mod.value, important, sourceValue, varKey};
+                        readyDeclarations.push(readyDec);
+                        oldDecs.push(readyDec);
+                    }
+                });
+                onTypeChange.addListener((newDecs) => {
+                    if (isAsyncCancelled() || currentRenderId !== renderId) {
+                        return;
+                    }
+                    const readyVarDecs = newDecs.map((mod) => {
+                        return {property: mod.property, value: mod.value as string, important, sourceValue, varKey};
+                    });
+                    // TODO: Don't search for index, store some way or use Linked List.
+                    const index = readyDeclarations.indexOf(oldDecs[0], initialIndex);
+                    readyDeclarations.splice(index, oldDecs.length, ...readyVarDecs);
+                    oldDecs = readyVarDecs;
+                    rebuildVarRule(varKey);
+                });
+                varTypeChangeCleaners.add(() => onTypeChange.removeListeners());
+            }
 
             declarations.forEach(({property, value, important, sourceValue}) => {
                 if (typeof value === 'function') {
                     const modified = value(theme);
                     if (modified instanceof Promise) {
-                        const asyncKey = asyncDeclarationCounter++;
-                        const asyncDeclaration: ReadyDeclaration = {property, value: null, important, asyncKey, sourceValue};
-                        readyDeclarations.push(asyncDeclaration);
-                        const promise = modified;
-                        const currentRenderId = renderId;
-                        promise.then((asyncValue) => {
-                            if (!asyncValue || isAsyncCancelled() || currentRenderId !== renderId) {
-                                return;
-                            }
-                            asyncDeclaration.value = asyncValue;
-                            asyncQueue.add(() => {
-                                if (isAsyncCancelled() || currentRenderId !== renderId) {
-                                    return;
-                                }
-                                rebuildAsyncRule(asyncKey);
-                            });
-                        });
+                        handleAsyncDeclaration(property, modified, important, sourceValue);
+                    } else if (property.startsWith('--')) {
+                        handleVarDeclarations(property, modified as any, important, sourceValue);
                     } else {
-                        readyDeclarations.push({property, value: modified, important, sourceValue});
+                        readyDeclarations.push({property, value: modified as string, important, sourceValue});
                     }
                 } else {
                     readyDeclarations.push({property, value, important, sourceValue});
@@ -220,7 +261,7 @@ export function createStyleSheetModifier() {
                 if (rule instanceof CSSMediaRule) {
                     const {media} = rule;
                     const index = parent.cssRules.length;
-                    parent.insertRule(`@media ${media} {}`, index);
+                    parent.insertRule(`@media ${media.mediaText} {}`, index);
                     return parent.cssRules[index] as CSSMediaRule;
                 }
                 return parent;
@@ -243,9 +284,14 @@ export function createStyleSheetModifier() {
 
             iterateReadyRules(rootReadyGroup, sheet, (rule, target) => {
                 const index = target.cssRules.length;
-                rule.declarations
-                    .filter(({value}) => value == null)
-                    .forEach(({asyncKey}) => asyncDeclarations.set(asyncKey, {rule, target, index}));
+                rule.declarations.forEach(({asyncKey, varKey}) => {
+                    if (asyncKey != null) {
+                        asyncDeclarations.set(asyncKey, {rule, target, index});
+                    }
+                    if (varKey != null) {
+                        varDeclarations.set(varKey, {rule, target, index});
+                    }
+                });
                 setRule(target, index, rule);
             });
         }
@@ -257,8 +303,14 @@ export function createStyleSheetModifier() {
             asyncDeclarations.delete(key);
         }
 
+        function rebuildVarRule(key: number) {
+            const {rule, target, index} = varDeclarations.get(key);
+            target.deleteRule(index);
+            setRule(target, index, rule);
+        }
+
         buildStyleSheet();
     }
 
-    return {modifySheet};
+    return {modifySheet, shouldRebuildStyle};
 }

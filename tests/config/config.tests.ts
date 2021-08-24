@@ -1,14 +1,15 @@
 import {readFile} from 'fs';
 import {resolve as resolvePath} from 'path';
-import {compareURLPatterns} from '../src/utils/url';
-import {parseArray, formatArray, getTextDiffIndex, getTextPositionMessage} from '../src/utils/text';
-import {parseInversionFixes, formatInversionFixes} from '../src/generators/css-filter';
-import {parseDynamicThemeFixes, formatDynamicThemeFixes} from '../src/generators/dynamic-theme';
-import {parseStaticThemes, formatStaticThemes} from '../src/generators/static-theme';
+import {compareURLPatterns} from '../../src/utils/url';
+import {parseArray, formatArray, getTextDiffIndex, getTextPositionMessage} from '../../src/utils/text';
+import {parseInversionFixes, formatInversionFixes} from '../../src/generators/css-filter';
+import {parseDynamicThemeFixes, formatDynamicThemeFixes} from '../../src/generators/dynamic-theme';
+import {parseStaticThemes, formatStaticThemes} from '../../src/generators/static-theme';
+import type {StaticTheme} from '../../src/definitions';
 
-function readConfig(fileName) {
+function readConfig(fileName: string) {
     return new Promise<string>((resolve, reject) => {
-        readFile(resolvePath(__dirname, '../src/config/', fileName), {encoding: 'utf-8'}, (err, data) => {
+        readFile(resolvePath(__dirname, '../../src/config/', fileName), {encoding: 'utf-8'}, (err, data) => {
             if (err) {
                 reject(err);
                 return;
@@ -62,7 +63,8 @@ test('Dynamic Theme Fixes config', async () => {
     expect(fixes.map(({url}) => url[0])).toEqual(fixes.map(({url}) => url[0]).sort(compareURLPatterns));
 
     // selectors should have no comma
-    expect(fixes.every(({invert, ignoreInlineStyle}) => (invert || []).concat(ignoreInlineStyle || []).every((s) => s.indexOf(',') < 0))).toBe(true);
+    const commaSelector = /\,(?![^\(|\"]*(\)|\"))/;
+    expect(fixes.every(({invert, ignoreInlineStyle, ignoreImageAnalysis}) => (invert || []).concat(ignoreInlineStyle || []).concat(ignoreImageAnalysis || []).every((s) => !commaSelector.test(s)))).toBe(true);
 
     // fixes are properly formatted
     expect(throwIfDifferent(file, formatDynamicThemeFixes(fixes), 'Dynamic fixes format error')).not.toThrow();
@@ -84,10 +86,14 @@ test('Dynamic Theme Fixes config', async () => {
         '========',
         'wikipedia.org',
         'IGNORE INLINE STYLE', 'a', 'b',
+        '========',
+        'duckduckgo.com',
+        'IGNORE IMAGE ANALYSIS', 'img[alt="Logo"]', 'canvas',
     ].join('\r\n'))).toEqual([
         {url: ['inbox.google.com', 'mail.google.com'], invert: ['a', 'b'], css: '.x { color: white !important; }'},
         {url: ['twitter.com'], invert: ['c', 'd']},
         {url: ['wikipedia.org'], ignoreInlineStyle: ['a', 'b']},
+        {url: ['duckduckgo.com'], ignoreImageAnalysis: ['img[alt="Logo"]', 'canvas']},
     ]);
 });
 
@@ -125,9 +131,9 @@ test('Static Themes config', async () => {
     expect(themes.map(({url}) => url[0])).toEqual(themes.map(({url}) => url[0]).sort(compareURLPatterns));
 
     // selectors should have no comma
-    expect(themes.every((t) => Object.keys(t)
+    expect(themes.every((t) => (Object.keys(t) as Array<keyof StaticTheme>)
         .filter((prop) => ['url', 'noCommon'].indexOf(prop) < 0)
-        .every((prop) => t[prop]
+        .every((prop) => (t[prop] as string[])
             .every((s) => s.indexOf(',') < 0)))).toBe(true);
 
     // fixes are properly formatted

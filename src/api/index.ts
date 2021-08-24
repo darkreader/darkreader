@@ -1,10 +1,13 @@
 import './chrome';
 import {setFetchMethod as setFetch} from './fetch';
 import {DEFAULT_THEME} from '../defaults';
-import {Theme, DynamicThemeFix} from '../definitions';
+import type {Theme, DynamicThemeFix} from '../definitions';
 import ThemeEngines from '../generators/theme-engines';
 import {createOrUpdateDynamicTheme, removeDynamicTheme} from '../inject/dynamic-theme';
+import {collectCSS} from '../inject/dynamic-theme/css-collection';
+import {isMatchMediaChangeEventListenerSupported} from '../utils/platform';
 
+let isDarkReaderEnabled = false;
 const isIFrame = (() => {
     try {
         return window.self !== window.top;
@@ -18,14 +21,19 @@ export function enable(themeOptions: Partial<Theme> = {}, fixes: DynamicThemeFix
     const theme = {...DEFAULT_THEME, ...themeOptions};
 
     if (theme.engine !== ThemeEngines.dynamicTheme) {
-        throw new Error('Theme engine is not supported');
+        throw new Error('Theme engine is not supported.');
     }
-
     createOrUpdateDynamicTheme(theme, fixes, isIFrame);
+    isDarkReaderEnabled = true;
+}
+
+export function isEnabled() {
+    return isDarkReaderEnabled;
 }
 
 export function disable() {
     removeDynamicTheme();
+    isDarkReaderEnabled = false;
 }
 
 const darkScheme = matchMedia('(prefers-color-scheme: dark)');
@@ -46,11 +54,23 @@ export function auto(themeOptions: Partial<Theme> | false = {}, fixes: DynamicTh
     if (themeOptions) {
         store = {themeOptions, fixes};
         handleColorScheme();
-        darkScheme.addListener(handleColorScheme);
+        if (isMatchMediaChangeEventListenerSupported) {
+            darkScheme.addEventListener('change', handleColorScheme);
+        } else {
+            darkScheme.addListener(handleColorScheme);
+        }
     } else {
-        darkScheme.removeListener(handleColorScheme);
+        if (isMatchMediaChangeEventListenerSupported) {
+            darkScheme.removeEventListener('change', handleColorScheme);
+        } else {
+            darkScheme.removeListener(handleColorScheme);
+        }
         disable();
     }
+}
+
+export async function exportGeneratedCSS(): Promise<string> {
+    return await collectCSS();
 }
 
 export const setFetchMethod = setFetch;

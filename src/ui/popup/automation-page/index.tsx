@@ -1,13 +1,12 @@
 import {m} from 'malevic';
 import {getLocalMessage} from '../../../utils/locales';
 import {CheckBox, TimeRangePicker, TextBox, Button} from '../../controls';
-import {ViewProps} from '../types';
+import type {ViewProps} from '../types';
 import DropDown from '../../controls/dropdown/index';
 
 export default function AutomationPage(props: ViewProps) {
     const isSystemAutomation = props.data.settings.automation === 'system';
     const locationSettings = props.data.settings.location;
-    const behaviourValues = ['OnOff', 'Scheme'];
     const values = {
         'latitude': {
             min: -90,
@@ -27,7 +26,7 @@ export default function AutomationPage(props: ViewProps) {
         return `${location}°`;
     }
 
-    function locationChanged(inputElement: HTMLInputElement, newValue: string, type: string) {
+    function locationChanged(inputElement: HTMLInputElement, newValue: string, type: 'latitude' | 'longitude') {
         if (newValue.trim() === '') {
             inputElement.value = '';
 
@@ -139,10 +138,13 @@ export default function AutomationPage(props: ViewProps) {
             <DropDown
                 onChange={(selected: any) => props.actions.changeSettings({automationBehaviour: selected})}
                 selected={props.data.settings.automationBehaviour}
-                values={behaviourValues}
+                options={[
+                    {id: 'OnOff', content: 'Toggle on/off'},
+                    {id: 'Scheme', content: 'Toggle dark/light'},
+                ]}
             />
             <p class="automation-page__description">
-                Behaviour if automation is toggled blah blah I'm a developer not a Writer.
+                Decide what dark reader should do on automation.
             </p>
         </div>
     );

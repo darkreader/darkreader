@@ -1,5 +1,5 @@
 import {m} from 'malevic';
-import {ViewProps} from '../types';
+import type {ViewProps} from '../types';
 import {Button} from '../../controls';
 import {saveFile} from '../../utils';
 import ControlGroup from '../control-group';

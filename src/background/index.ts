@@ -7,6 +7,9 @@ import {MessageType} from '../utils/message';
 // Initialize extension
 const extension = new Extension();
 extension.start();
+if (chrome.commands) {
+    chrome.commands.onCommand.addListener((command, tab) => extension.onCommand(command));
+}
 
 const welcome = `  /''''\\
  (0)==(0)

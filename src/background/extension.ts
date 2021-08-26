@@ -119,8 +119,6 @@ export class Extension {
         this.onAppToggle();
         logInfo('loaded', this.user.settings);
 
-        this.registerCommands();
-
         if (isThunderbird) {
             this.tabs.registerMailDisplayScript();
         } else {
@@ -160,23 +158,19 @@ export class Extension {
         };
     }
 
-    private registerCommands() {
-        if (!chrome.commands) {
-            // Fix for Firefox Android
-            return;
+    async onCommand(command) {
+        if (!this.user.settings) {
+            await this.user.loadSettings();
         }
-        chrome.commands.onCommand.addListener(async (command) => {
-            if (!this.user.settings) {
-                await this.user.loadSettings();
-            }
-            if (command === 'toggle') {
+        switch (command) {
+            case 'toggle':
                 logInfo('Toggle command entered');
                 this.changeSettings({
                     enabled: !this.isEnabled(),
                     automation: '',
                 });
-            }
-            if (command === 'addSite') {
+                break;
+            case 'addSite': {
                 logInfo('Add Site command entered');
                 const url = await this.tabs.getActiveTabURL();
                 if (isPDF(url)) {
@@ -184,15 +178,17 @@ export class Extension {
                 } else {
                     this.toggleURL(url);
                 }
+                break;
             }
-            if (command === 'switchEngine') {
+            case 'switchEngine': {
                 logInfo('Switch Engine command entered');
                 const engines = Object.values(ThemeEngines);
                 const index = engines.indexOf(this.user.settings.theme.engine);
                 const next = index === engines.length - 1 ? engines[0] : engines[index + 1];
                 this.setTheme({engine: next});
+                break;
             }
-        });
+        }
     }
 
     private async getShortcuts() {

@@ -100,7 +100,9 @@ export class StateManager {
             case StateManagerState.INITIAL:
                 // Make sure not to overwrite data before it is loaded
                 logWarn('StateManager.saveState is called while loading data. Possible data race!');
-                await this.loadStateBarrier.entry();
+                if (this.loadStateBarrier) {
+                    await this.loadStateBarrier.entry();
+                }
                 this.meta = StateManagerState.SAVING;
                 break;
             case StateManagerState.READY:

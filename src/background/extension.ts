@@ -158,7 +158,7 @@ export class Extension {
         };
     }
 
-    async onCommand(command) {
+    async onCommand(command: string) {
         if (!this.user.settings) {
             await this.user.loadSettings();
         }

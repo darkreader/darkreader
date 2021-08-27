@@ -7,6 +7,10 @@ import {MessageType} from '../utils/message';
 // Initialize extension
 const extension = new Extension();
 extension.start();
+if (chrome.commands) {
+    // Firefox Android does not support chrome.commands
+    chrome.commands.onCommand.addListener(async (command, tab) => extension.onCommand(command, tab.url));
+}
 
 const welcome = `  /''''\\
  (0)==(0)

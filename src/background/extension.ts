@@ -119,8 +119,6 @@ export class Extension {
         this.onAppToggle();
         logInfo('loaded', this.user.settings);
 
-        this.registerCommands();
-
         if (isThunderbird) {
             this.tabs.registerMailDisplayScript();
         } else {
@@ -160,39 +158,35 @@ export class Extension {
         };
     }
 
-    private registerCommands() {
-        if (!chrome.commands) {
-            // Fix for Firefox Android
-            return;
+    async onCommand(command: string, url: string) {
+        if (!this.user.settings) {
+            await this.user.loadSettings();
         }
-        chrome.commands.onCommand.addListener(async (command) => {
-            if (!this.user.settings) {
-                await this.user.loadSettings();
-            }
-            if (command === 'toggle') {
+        switch (command) {
+            case 'toggle':
                 logInfo('Toggle command entered');
                 this.changeSettings({
                     enabled: !this.isEnabled(),
                     automation: '',
                 });
-            }
-            if (command === 'addSite') {
+                break;
+            case 'addSite':
                 logInfo('Add Site command entered');
-                const url = await this.tabs.getActiveTabURL();
                 if (isPDF(url)) {
                     this.changeSettings({enableForPDF: !this.user.settings.enableForPDF});
                 } else {
                     this.toggleURL(url);
                 }
-            }
-            if (command === 'switchEngine') {
+                break;
+            case 'switchEngine': {
                 logInfo('Switch Engine command entered');
                 const engines = Object.values(ThemeEngines);
                 const index = engines.indexOf(this.user.settings.theme.engine);
-                const next = index === engines.length - 1 ? engines[0] : engines[index + 1];
+                const next = engines[(index + 1) % engines.length];
                 this.setTheme({engine: next});
+                break;
             }
-        });
+        }
     }
 
     private async getShortcuts() {

@@ -53,6 +53,8 @@ export class Extension {
             onColorSchemeChange: this.onColorSchemeChange,
         });
         this.user = new UserStorage({onRemoteSettingsChange: () => this.onRemoteSettingsChange()});
+
+        chrome.alarms.onAlarm.addListener(this.alarmListener);
     }
 
     private alarmListener(alarm: chrome.alarms.Alarm): void {
@@ -125,7 +127,6 @@ export class Extension {
             this.tabs.updateContentScript({runOnProtectedPages: this.user.settings.enableForProtectedPages});
         }
 
-        this.startAutoTimeCheck();
         this.news.subscribe();
     }
 
@@ -255,11 +256,6 @@ export class Extension {
 
     private getUnsupportedSenderMessage() {
         return {type: MessageType.BG_UNSUPPORTED_SENDER};
-    }
-
-    private startAutoTimeCheck() {
-        chrome.alarms.onAlarm.addListener(this.alarmListener);
-        this.handleAutoCheck();
     }
 
     private onColorSchemeChange = ({isDark}: {isDark: boolean}) => {

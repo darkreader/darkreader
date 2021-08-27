@@ -9,7 +9,7 @@ const extension = new Extension();
 extension.start();
 if (chrome.commands) {
     // Firefox Android does not support chrome.commands
-    chrome.commands.onCommand.addListener((command, tab) => extension.onCommand(command, tab.url));
+    chrome.commands.onCommand.addListener(async (command, tab) => extension.onCommand(command, tab.url));
 }
 
 const welcome = `  /''''\\

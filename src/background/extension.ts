@@ -109,7 +109,6 @@ export class Extension {
 
     async start() {
         await this.config.load({local: true});
-        this.fonts = await getFontList();
 
         await this.user.loadSettings();
         if (this.user.settings.syncSitesFixes) {
@@ -207,6 +206,9 @@ export class Extension {
     private async collectData(): Promise<ExtensionData> {
         if (!this.user.settings) {
             await this.user.loadSettings();
+        }
+        if (!this.fonts) {
+            this.fonts = await getFontList();
         }
         return {
             isEnabled: this.isEnabled(),

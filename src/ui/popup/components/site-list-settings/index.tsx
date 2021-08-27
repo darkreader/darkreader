@@ -15,7 +15,7 @@ export default function SiteListSettings({data, actions, isFocused}: SiteListSet
         } catch (_) {
             return false;
         }
-        return url.protocol === "http:" || url.protocol === "https:";
+        return url.protocol === 'http:' || url.protocol === 'https:';
     }
 
     return (

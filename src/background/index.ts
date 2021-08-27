@@ -8,7 +8,8 @@ import {MessageType} from '../utils/message';
 const extension = new Extension();
 extension.start();
 if (chrome.commands) {
-    chrome.commands.onCommand.addListener((command, tab) => extension.onCommand(command));
+    // Firefox Android does not support chrome.commands
+    chrome.commands.onCommand.addListener((command, tab) => extension.onCommand(command, tab.url));
 }
 
 const welcome = `  /''''\\

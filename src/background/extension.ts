@@ -158,7 +158,7 @@ export class Extension {
         };
     }
 
-    async onCommand(command: string) {
+    async onCommand(command: string, url: string) {
         if (!this.user.settings) {
             await this.user.loadSettings();
         }
@@ -170,21 +170,19 @@ export class Extension {
                     automation: '',
                 });
                 break;
-            case 'addSite': {
+            case 'addSite':
                 logInfo('Add Site command entered');
-                const url = await this.tabs.getActiveTabURL();
                 if (isPDF(url)) {
                     this.changeSettings({enableForPDF: !this.user.settings.enableForPDF});
                 } else {
                     this.toggleURL(url);
                 }
                 break;
-            }
             case 'switchEngine': {
                 logInfo('Switch Engine command entered');
                 const engines = Object.values(ThemeEngines);
                 const index = engines.indexOf(this.user.settings.theme.engine);
-                const next = index === engines.length - 1 ? engines[0] : engines[index + 1];
+                const next = engines[(index + 1) % engines.length];
                 this.setTheme({engine: next});
                 break;
             }

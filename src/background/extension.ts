@@ -11,9 +11,9 @@ import {getFontList, getCommands, setShortcut, canInjectScript} from './utils/ex
 import {isInTimeIntervalLocal, nextTimeInterval, isNightAtLocation, nextNightAtLocation} from '../utils/time';
 import {isURLInList, getURLHostOrProtocol, isURLEnabled, isPDF} from '../utils/url';
 import ThemeEngines from '../generators/theme-engines';
-import createCSSFilterStylesheet from '../generators/css-filter';
-import {getDynamicThemeFixesFor, getDynamicThemeFixesForNew} from '../generators/dynamic-theme';
-import createStaticStylesheet from '../generators/static-theme';
+import createCSSFilterStylesheet, {parseInversionFixes} from '../generators/css-filter';
+import {getDynamicThemeFixesForNew} from '../generators/dynamic-theme';
+import createStaticStylesheet, {parseStaticThemes} from '../generators/static-theme';
 import {createSVGFilterStylesheet, getSVGFilterMatrixValue, getSVGReverseFilterMatrixValue} from '../generators/svg-filter';
 import type {ExtensionData, FilterConfig, News, Shortcuts, UserSettings, TabInfo} from '../definitions';
 import {isSystemDarkModeEnabled} from '../utils/media-query';
@@ -22,9 +22,7 @@ import {MessageType} from '../utils/message';
 import {logInfo, logWarn} from '../utils/log';
 import {PromiseBarrier} from '../utils/promise-barrier';
 
-// TODO: remove
-import {parseInversionFixes} from '../generators/css-filter';
-import {parseStaticThemes} from '../generators/static-theme';
+// TODO: remove parseStaticThemes and parseInversionFixes
 
 export class Extension {
     config: ConfigManager;
@@ -453,7 +451,6 @@ export class Extension {
                 case ThemeEngines.dynamicTheme: {
                     const filter = {...theme};
                     delete filter.engine;
-                    //const fixes = getDynamicThemeFixesFor(url, frameURL, this.config.DYNAMIC_THEME_FIXES, this.user.settings.enableForPDF);
                     const fixesNew = getDynamicThemeFixesForNew(url, frameURL, this.config.DYNAMIC_THEME_FIXES_RAW, this.config.DYNAMIC_THEME_FIXES_INDEX, this.user.settings.enableForPDF);
                     const isIFrame = frameURL != null;
                     return {

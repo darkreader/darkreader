@@ -199,3 +199,7 @@ export function isURLEnabled(url: string, userSettings: UserSettings, {isProtect
     }
     return (!isInDarkList && !isURLInUserList);
 }
+
+export function isFullyQualifiedDomain(candidate: string) {
+    return /^[a-z0-9.-]+$/.test(candidate);
+}

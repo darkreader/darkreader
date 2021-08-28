@@ -1,9 +1,9 @@
 import {readText} from './utils/network';
 import {parseArray} from '../utils/text';
 import {getDuration} from '../utils/time';
-import {indexInversionFixes, parseInversionFixes} from '../generators/css-filter';
-import {indexDynamicThemeFixes, parseDynamicThemeFixes} from '../generators/dynamic-theme';
-import {indexStaticThemes, parseStaticThemes} from '../generators/static-theme';
+import {indexInversionFixes} from '../generators/css-filter';
+import {indexDynamicThemeFixes} from '../generators/dynamic-theme';
+import {indexStaticThemes} from '../generators/static-theme';
 import type {InversionFix, StaticTheme, DynamicThemeFix} from '../definitions';
 import type {SitePropsIndex} from '../generators/utils/parse';
 

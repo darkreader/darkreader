@@ -1,26 +1,20 @@
+import {isURLMatched, isFullyQualifiedDomain} from '../../utils/url';
 import {parseArray} from '../../utils/text';
 
 interface SiteProps {
     url: string[];
 }
 
-interface SitePropsIndexRecord {
+interface SitePropsOffsetRecord {
     start: number;
     end: number;
 }
 
-// label is a valid DNS label or special '*' value
-interface SitePropsIndexRecordRecursive<T> {
-    children?: {
-        [label: string]: SitePropsIndexRecordRecursive<T>;
-    };
-    records?: number | number[];
-}
-
 export interface SitePropsIndex<T extends SiteProps> {
-    leafs: SitePropsIndexRecord[];
-    root: SitePropsIndexRecordRecursive<T>;
-    cache: Map<number, T>;
+    offsets: SitePropsOffsetRecord[];
+    domains: {[domain: string]: number | number[]};
+    domainPatterns: {[domainPattern: string]: number | number[]};
+    cache: {[offsetId: number]: T};
 }
 
 interface SitesFixesParserOptions<T> {
@@ -68,8 +62,9 @@ export function parseSitesFixesConfig<T extends SiteProps>(text: string, options
 }
 
 export function indexSitesFixesConfig<T extends SiteProps>(text: string): SitePropsIndex<T> {
-    const root: SitePropsIndexRecordRecursive<T> = {};
-    const leafs: SitePropsIndexRecord[] = [];
+    const domains: {[domain: string]: number | number[]} = {};
+    const domainPatterns: {[domainPattern: string]: number | number[]} = {};
+    const offsets: SitePropsOffsetRecord[] = [];
 
     function processBlock(recordStart: number, recordEnd: number) {
         // TODO: more formal definition of URLs and delimiters
@@ -87,35 +82,30 @@ export function indexSitesFixesConfig<T extends SiteProps>(text: string): SitePr
         }
 
         const urls = parseArray(lines.slice(0, commandIndices[0]).join('\n'));
-        const index = leafs.length;
+        const index = offsets.length;
         for (const url of urls) {
             // TODO: make sure this is correct
             const domain = url.split('/')[0];
-            const labels = domain.split('.');
-            let node = root;
-            for (let i = labels.length - 1; i >= 0; i--) {
-                const label = labels[i];
-                if (!node.children) {
-                    node.children = {};
+            if (isFullyQualifiedDomain(domain)) {
+                if (typeof domains[domain] === 'undefined') {
+                    domains[domain] = index;
+                } else if (typeof domains[domain] === 'number') {
+                    domains[domain] = [(domains[domain] as number), index];
+                } else if (typeof domains[domain] === 'object') {
+                    (domains[domain] as number[]).push(index);
                 }
-                if (!node.children[label]) {
-                    node.children[label] = {};
-                }
-                node = node.children[label];
+                continue;
             }
-            if (node.records) {
-                if (typeof node.records === 'number') {
-                    node.records = [node.records, index];
-                } else {
-                    // node.records is number[]
-                    node.records.push(index);
-                }
-            } else {
-                node.records = index;
+
+            if (typeof domains[domain] === 'undefined') {
+                domainPatterns[domain] = index;
+            } else if (typeof domains[domain] === 'number') {
+                domainPatterns[domain] = [(domainPatterns[domain] as number), index];
+            } else if (typeof domains[domain] === 'object') {
+                (domainPatterns[domain] as number[]).push(index);
             }
-            
         }
-        leafs.push({
+        offsets.push({
             start: recordStart,
             end: recordEnd
         });
@@ -137,58 +127,32 @@ export function indexSitesFixesConfig<T extends SiteProps>(text: string): SitePr
         }
     }
 
-    return {root, leafs, cache: new Map<number, T>()};
+    return {offsets, domains, domainPatterns, cache: {}};
 }
 
-export function parseSiteFixConfig<T extends SiteProps>(text: string, options: SitesFixesParserOptions<T>, indexRecord: SitePropsIndexRecord): T {
+export function parseSiteFixConfig<T extends SiteProps>(text: string, options: SitesFixesParserOptions<T>, indexRecord: SitePropsOffsetRecord): T {
     const block = text.substring(indexRecord.start, indexRecord.end);
     return parseSitesFixesConfig<T>(block, options)[0];
 }
 
 export function getSitesFixesFor<T extends SiteProps>(url: string, frameURL: string, text: string, index: SitePropsIndex<T>, options: SitesFixesParserOptions<T>): T[] {
-    const labels = (frameURL || url).split('.');
+    const records: T[] = [];
     let recordIds: number[] = [];
-    const stack: Array<[number, SitePropsIndexRecordRecursive<T>]> = [[
-        labels.length - 1,
-        index.root,
-    ]];
-    while (stack.length) {
-        const task = stack.pop();
-        const index = task[0];
-        const node = task[1];
-        const label = labels[index];
-
-        if (node.records) {
-            // TODO: make sure there is no GC waste
-            recordIds = recordIds.concat(node.records);
-        }
-
-        // Explore wildcard match
-        if (node.children && node.children['*']) {
-            stack.push([
-                index - 1,
-                node.children['*'],
-            ]);
-        }
-
-        // Explore exact label match
-        if (node.children && node.children[label]) {
-            stack.push([
-                index - 1,
-                node.children[label],
-            ]);
+    const domain = url.split('/')[0];
+    if (index.domains[domain]) {
+        recordIds = recordIds.concat(index.domains[domain]);
+    }
+    for (const pattern of Object.keys(index.domainPatterns)) {
+        if (isURLMatched(url, pattern)) {
+            recordIds = recordIds.concat(index.domainPatterns[pattern]);
         }
     }
 
-    const records: T[] = [];
-    for (const id of recordIds) {
-        if (index.cache.has(id)) {
-            records.push(index.cache.get(id));
-        } else {
-            const record = parseSiteFixConfig<T>(text, options, index.leafs[id]);
-            index.cache.set(id, record);
-            records.push(record);
+    for (const id of ((new Set(recordIds)).keys())) {
+        if (!index.cache[id]) {
+            index.cache[id] = parseSiteFixConfig<T>(text, options, index.offsets[id]);
         }
+        records.push(index.cache[id]);
     }
 
     return records;

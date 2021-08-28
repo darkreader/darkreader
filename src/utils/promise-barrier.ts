@@ -1,9 +1,3 @@
-export const PromiseBarrierState = {
-    PENDING: 'pending',
-    FULFILLED: 'fulfilled',
-    REJECTED: 'rejected',
-};
-
 export class PromiseBarrier {
     private resolves: Array<(value?: any) => void> = [];
     private rejects: Array<(reason?: any) => void> = [];
@@ -48,12 +42,15 @@ export class PromiseBarrier {
         return new Promise<void>((resolve) => setTimeout(() => resolve()));
     }
 
-    get state() {
-        if (this.wasResolved) {
-            return PromiseBarrierState.FULFILLED;
-        } else if (this.wasRejected) {
-            return PromiseBarrierState.REJECTED;
-        }
-        return PromiseBarrierState.PENDING;
+    isPending(): boolean {
+        return !this.wasResolved && !this.wasRejected;
+    }
+
+    isFulfilled(): boolean {
+        return this.wasResolved;
+    }
+
+    isRejected(): boolean {
+        return this.wasRejected;
     }
 }

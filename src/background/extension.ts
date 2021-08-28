@@ -20,7 +20,7 @@ import {isSystemDarkModeEnabled} from '../utils/media-query';
 import {isFirefox, isThunderbird} from '../utils/platform';
 import {MessageType} from '../utils/message';
 import {logInfo, logWarn} from '../utils/log';
-import {PromiseBarrier, PromiseBarrierState} from '../utils/promise-barrier';
+import {PromiseBarrier} from '../utils/promise-barrier';
 
 export class Extension {
     config: ConfigManager;
@@ -163,7 +163,7 @@ export class Extension {
     }
 
     async onCommand(command: string, url: string) {
-        if (this.startBarrier.state === PromiseBarrierState.PENDING) {
+        if (this.startBarrier.isPending()) {
             await this.startBarrier.entry();
         }
         switch (command) {

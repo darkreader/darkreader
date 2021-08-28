@@ -1,4 +1,4 @@
-import {PromiseBarrier, PromiseBarrierState} from '../../src/utils/promise-barrier';
+import {PromiseBarrier} from '../../src/utils/promise-barrier';
 
 test('Promise barrier utility', async () => {
     const barrier = new PromiseBarrier();
@@ -12,20 +12,28 @@ test('Promise barrier utility', async () => {
     expect(fn1).toBeCalled();
     expect(fn2).not.toBeCalled();
 
-    expect(barrier.state).toBe(PromiseBarrierState.PENDING);
+    expect(barrier.isPending()).toBe(true);
+    expect(barrier.isFulfilled()).toBe(false);
+    expect(barrier.isRejected()).toBe(false);
     await barrier.resolve(2);
-    expect(barrier.state).toBe(PromiseBarrierState.FULFILLED);
+    expect(barrier.isFulfilled()).toBe(true);
+    expect(barrier.isPending()).toBe(false);
+    expect(barrier.isRejected()).toBe(false);
     expect(fn1).toBeCalledTimes(1);
     expect(fn2).toBeCalledWith(2);
 });
 
 test('Promise barrier utility: awaiting for barrier after it was settled', async () => {
-    const barrierResolved = new PromiseBarrier();
-    expect(barrierResolved.state).toBe(PromiseBarrierState.PENDING);
-    const promise1 = barrierResolved.resolve('Hello World!');
-    expect(barrierResolved.state).toBe(PromiseBarrierState.FULFILLED);
+    const barrierFulfilled = new PromiseBarrier();
+    expect(barrierFulfilled.isPending()).toBe(true);
+    expect(barrierFulfilled.isFulfilled()).toBe(false);
+    expect(barrierFulfilled.isRejected()).toBe(false);
+    const promise1 = barrierFulfilled.resolve('Hello World!');
+    expect(barrierFulfilled.isFulfilled()).toBe(true);
+    expect(barrierFulfilled.isPending()).toBe(false);
+    expect(barrierFulfilled.isRejected()).toBe(false);
     const fn1 = jest.fn();
-    (async () => fn1(await barrierResolved.entry()))();
+    (async () => fn1(await barrierFulfilled.entry()))();
     await promise1;
     expect(fn1).toBeCalledWith('Hello World!');
 
@@ -44,20 +52,30 @@ test('Promise barrier utility: awaiting for barrier after it was settled', async
 });
 
 test('Promise barrier utility: resolving multiple times', async () => {
-    const barrierResolved = new PromiseBarrier();
-    expect(barrierResolved.state).toBe(PromiseBarrierState.PENDING);
-    barrierResolved.resolve('Hello World!');
-    expect(barrierResolved.state).toBe(PromiseBarrierState.FULFILLED);
-    barrierResolved.resolve('Hello World 2!');
-    expect(barrierResolved.state).toBe(PromiseBarrierState.FULFILLED);
+    const barrierFulfilled = new PromiseBarrier();
+    expect(barrierFulfilled.isPending()).toBe(true);
+    expect(barrierFulfilled.isFulfilled()).toBe(false);
+    expect(barrierFulfilled.isRejected()).toBe(false);
+    barrierFulfilled.resolve('Hello World!');
+    expect(barrierFulfilled.isFulfilled()).toBe(true);
+    expect(barrierFulfilled.isPending()).toBe(false);
+    expect(barrierFulfilled.isRejected()).toBe(false);
+    barrierFulfilled.resolve('Hello World 2!');
+    expect(barrierFulfilled.isFulfilled()).toBe(true);
+    expect(barrierFulfilled.isPending()).toBe(false);
+    expect(barrierFulfilled.isRejected()).toBe(false);
     const fn1 = jest.fn();
-    (async () => fn1(await barrierResolved.entry()))();
+    (async () => fn1(await barrierFulfilled.entry()))();
     setTimeout(() => expect(fn1).toBeCalledWith('Hello World!'));
 
     const barrierRejected = new PromiseBarrier();
-    expect(barrierRejected.state).toBe(PromiseBarrierState.PENDING);
+    expect(barrierRejected.isPending()).toBe(true);
+    expect(barrierRejected.isFulfilled()).toBe(false);
+    expect(barrierRejected.isRejected()).toBe(false);
     await barrierRejected.reject('rejection reason');
-    expect(barrierRejected.state).toBe(PromiseBarrierState.REJECTED);
+    expect(barrierRejected.isRejected()).toBe(true);
+    expect(barrierRejected.isPending()).toBe(false);
+    expect(barrierRejected.isFulfilled()).toBe(false);
     barrierRejected.reject('rejection reason 2');
     const fn2 = jest.fn();
     (async () => {

@@ -20,6 +20,7 @@ import {isSystemDarkModeEnabled} from '../utils/media-query';
 import {isFirefox, isThunderbird} from '../utils/platform';
 import {MessageType} from '../utils/message';
 import {logInfo, logWarn} from '../utils/log';
+import {PromiseBarrier} from '../utils/promise-barrier';
 
 export class Extension {
     config: ConfigManager;
@@ -35,6 +36,7 @@ export class Extension {
     private wasEnabledOnLastCheck: boolean = null;
     private popupOpeningListener: () => void = null;
     private wasLastColorSchemeDark: boolean = null;
+    private startBarrier: PromiseBarrier = null;
 
     static ALARM_NAME = 'auto-time-alarm';
     constructor() {
@@ -53,6 +55,7 @@ export class Extension {
             onColorSchemeChange: this.onColorSchemeChange,
         });
         this.user = new UserStorage({onRemoteSettingsChange: () => this.onRemoteSettingsChange()});
+        this.startBarrier = new PromiseBarrier();
 
         chrome.alarms.onAlarm.addListener(this.alarmListener);
     }
@@ -126,6 +129,7 @@ export class Extension {
         }
 
         this.news.subscribe();
+        this.startBarrier.resolve();
     }
 
     private getMessengerAdapter(): ExtensionAdapter {
@@ -159,8 +163,8 @@ export class Extension {
     }
 
     async onCommand(command: string, url: string) {
-        if (!this.user.settings) {
-            await this.user.loadSettings();
+        if (this.startBarrier.isPending()) {
+            await this.startBarrier.entry();
         }
         switch (command) {
             case 'toggle':

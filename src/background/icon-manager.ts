@@ -8,10 +8,6 @@ const ICON_PATHS = {
 };
 
 export default class IconManager {
-    constructor() {
-        this.setActive();
-    }
-
     setActive() {
         if (!chrome.browserAction.setIcon || isThunderbird) {
             // Fix for Firefox Android and Thunderbird.

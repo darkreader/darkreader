@@ -163,9 +163,6 @@ export class Extension {
     }
 
     async onCommand(command: string, url: string) {
-        if (!this.user.settings) {
-            await this.user.loadSettings();
-        }
         if (this.startBarrier.state === PromiseBarrierState.PENDING) {
             await this.startBarrier.entry();
         }

@@ -23,9 +23,13 @@ async function zip({debug}) {
     const firefoxDir = getDestDir({debug, firefox: true});
     const thunderBirdDir = getDestDir({debug, thunderbird: true});
 
-    await archiveDirectory({dir, dest: 'build.zip'});
-    await archiveDirectory({dir: firefoxDir, dest: 'build-firefox.xpi'});
-    await archiveDirectory({dir: thunderBirdDir, dest: 'build-thunderbird.xpi'});
+    const releaseDir = 'build/release';
+    const chromeDest = `${releaseDir}/darkreader-chrome.zip`;
+    const firefoxDest = `${releaseDir}/darkreader-firefox.xpi`;
+    const thunderbirdDest = `${releaseDir}/darkreader-thunderbird.xpi`;
+    await archiveDirectory({dir, dest: chromeDest});
+    await archiveDirectory({dir: firefoxDir, dest: firefoxDest});
+    await archiveDirectory({dir: thunderBirdDir, dest: thunderbirdDest});
 }
 
 module.exports = createTask(

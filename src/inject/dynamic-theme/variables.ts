@@ -35,6 +35,7 @@ export class VariablesStore {
     private changedTypeVars = new Set<string>();
     private typeChangeSubscriptions = new Map<string, Set<() => void>>();
     private unstableVarValues = new Map<string, string>();
+    private onRootVariableDefined: () => void;
 
     clear() {
         this.varTypes.clear();
@@ -64,9 +65,11 @@ export class VariablesStore {
     matchVariablesAndDependants() {
         this.changedTypeVars.clear();
         this.initialVarTypes = new Map(this.varTypes);
+        this.collectRootVariables();
         this.rulesQueue.forEach((rules) => this.collectVariables(rules));
         this.rulesQueue.forEach((rules) => this.collectVarDependants(rules));
         this.rulesQueue.splice(0);
+        this.collectRootVarDependants();
 
         this.varRefs.forEach((refs, v) => {
             refs.forEach((r) => {
@@ -89,7 +92,17 @@ export class VariablesStore {
         });
 
         this.unknownBgVars.forEach((v) => {
-            if (this.isVarType(v, VAR_TYPE_BGCOLOR | VAR_TYPE_BGIMG)) {
+            const hasColor = this.findVarRef(v, (ref) => {
+                return (
+                    this.unknownColorVars.has(ref) ||
+                    this.isVarType(ref, VAR_TYPE_TEXTCOLOR | VAR_TYPE_BORDERCOLOR)
+                );
+            }) != null;
+            if (hasColor) {
+                this.itarateVarRefs(v, (ref) => {
+                    this.resolveVariableType(ref, VAR_TYPE_BGCOLOR);
+                });
+            } else if (this.isVarType(v, VAR_TYPE_BGCOLOR | VAR_TYPE_BGIMG)) {
                 this.unknownBgVars.delete(v);
             } else {
                 this.undefinedVars.add(v);
@@ -233,7 +246,7 @@ export class VariablesStore {
                 );
             };
         }
-        if (property === 'background' || property === 'background-image') {
+        if (property === 'background' || property === 'background-image' || property === 'box-shadow') {
             return (theme) => {
                 const unknownVars = new Set<string>();
                 const modify = () => replaceCSSVariablesNames(
@@ -265,7 +278,7 @@ export class VariablesStore {
                 return modified;
             };
         }
-        if (property.startsWith('border')) {
+        if (property.startsWith('border') || property.startsWith('outline')) {
             if (sourceValue.endsWith(')')) {
                 const colorTypeMatch = sourceValue.match(/((rgb|hsl)a?)\(/);
                 if (colorTypeMatch) {
@@ -298,7 +311,10 @@ export class VariablesStore {
         if (!this.typeChangeSubscriptions.has(varName)) {
             this.typeChangeSubscriptions.set(varName, new Set());
         }
-        this.typeChangeSubscriptions.get(varName).add(callback);
+        const rootStore = this.typeChangeSubscriptions.get(varName);
+        if (!rootStore.has(callback)) {
+            rootStore.add(callback);
+        }
     }
 
     private unsubscribeFromVariableTypeChanges(varName: string, callback: () => void) {
@@ -309,28 +325,40 @@ export class VariablesStore {
 
     private collectVariables(rules: CSSRuleList) {
         iterateVariables(rules, (varName, value) => {
-            this.unstableVarValues.set(varName, value);
+            this.inspectVariable(varName, value);
+        });
+    }
 
-            if (isVarDependant(value) && isConstructedColorVar(value)) {
-                this.unknownColorVars.add(varName);
-                this.definedVars.add(varName);
-            }
-            if (this.definedVars.has(varName)) {
-                return;
-            }
-            this.definedVars.add(varName);
-
-            const color = tryParseColor(value);
-            if (color) {
-                this.unknownColorVars.add(varName);
-            } else if (
-                value.includes('url(') ||
-                value.includes('linear-gradient(') ||
-                value.includes('radial-gradient(')
-            ) {
-                this.resolveVariableType(varName, VAR_TYPE_BGIMG);
+    private collectRootVariables() {
+        iterateCSSDeclarations(document.documentElement.style, (property, value) => {
+            if (isVariable(property)) {
+                this.inspectVariable(property, value);
             }
         });
+    }
+
+    private inspectVariable(varName: string, value: string) {
+        this.unstableVarValues.set(varName, value);
+
+        if (isVarDependant(value) && isConstructedColorVar(value)) {
+            this.unknownColorVars.add(varName);
+            this.definedVars.add(varName);
+        }
+        if (this.definedVars.has(varName)) {
+            return;
+        }
+        this.definedVars.add(varName);
+
+        const color = tryParseColor(value);
+        if (color) {
+            this.unknownColorVars.add(varName);
+        } else if (
+            value.includes('url(') ||
+            value.includes('linear-gradient(') ||
+            value.includes('radial-gradient(')
+        ) {
+            this.resolveVariableType(varName, VAR_TYPE_BGIMG);
+        }
     }
 
     private resolveVariableType(varName: string, typeNum: number) {
@@ -348,32 +376,52 @@ export class VariablesStore {
 
     private collectVarDependants(rules: CSSRuleList) {
         iterateVarDependants(rules, (property, value) => {
-            if (property.startsWith('--')) {
-                this.iterateVarDeps(value, (ref) => {
-                    if (!this.varRefs.has(property)) {
-                        this.varRefs.set(property, new Set());
-                    }
-                    this.varRefs.get(property).add(ref);
-                });
-            } else if (property === 'background-color') {
-                this.iterateVarDeps(value, (v) => this.resolveVariableType(v, VAR_TYPE_BGCOLOR));
-            } else if (property === 'color') {
-                this.iterateVarDeps(value, (v) => this.resolveVariableType(v, VAR_TYPE_TEXTCOLOR));
-            } else if (property.startsWith('border')) {
-                this.iterateVarDeps(value, (v) => this.resolveVariableType(v, VAR_TYPE_BORDERCOLOR));
-            } else if (property === 'background' || property === 'background-image') {
-                this.iterateVarDeps(value, (v) => {
-                    if (this.isVarType(v, VAR_TYPE_BGCOLOR | VAR_TYPE_BGIMG)) {
-                        return;
-                    }
-                    if (this.unknownColorVars.has(v) || this.isVarType(v, VAR_TYPE_TEXTCOLOR | VAR_TYPE_BORDERCOLOR)) {
-                        this.resolveVariableType(v, VAR_TYPE_BGCOLOR);
-                        return;
-                    }
-                    this.unknownBgVars.add(v);
-                });
+            this.inspectVerDependant(property, value);
+        });
+    }
+
+    private collectRootVarDependants() {
+        iterateCSSDeclarations(document.documentElement.style, (property, value) => {
+            if (isVarDependant(value)) {
+                this.inspectVerDependant(property, value);
             }
         });
+    }
+
+    private inspectVerDependant(property: string, value: string) {
+        if (isVariable(property)) {
+            this.iterateVarDeps(value, (ref) => {
+                if (!this.varRefs.has(property)) {
+                    this.varRefs.set(property, new Set());
+                }
+                this.varRefs.get(property).add(ref);
+            });
+        } else if (property === 'background-color' || property === 'box-shadow') {
+            this.iterateVarDeps(value, (v) => this.resolveVariableType(v, VAR_TYPE_BGCOLOR));
+        } else if (property === 'color') {
+            this.iterateVarDeps(value, (v) => this.resolveVariableType(v, VAR_TYPE_TEXTCOLOR));
+        } else if (property.startsWith('border') || property.startsWith('outline')) {
+            this.iterateVarDeps(value, (v) => this.resolveVariableType(v, VAR_TYPE_BORDERCOLOR));
+        } else if (property === 'background' || property === 'background-image') {
+            this.iterateVarDeps(value, (v) => {
+                if (this.isVarType(v, VAR_TYPE_BGCOLOR | VAR_TYPE_BGIMG)) {
+                    return;
+                }
+                const isBgColor = this.findVarRef(v, (ref) => {
+                    return (
+                        this.unknownColorVars.has(ref) ||
+                        this.isVarType(ref, VAR_TYPE_TEXTCOLOR | VAR_TYPE_BORDERCOLOR)
+                    );
+                }) != null;
+                this.itarateVarRefs(v, (ref) => {
+                    if (isBgColor) {
+                        this.resolveVariableType(ref, VAR_TYPE_BGCOLOR);
+                    } else {
+                        this.unknownBgVars.add(ref);
+                    }
+                });
+            });
+        }
     }
 
     private iterateVarDeps(
@@ -383,6 +431,69 @@ export class VariablesStore {
         const varDeps = new Set<string>();
         iterateVarDependencies(value, (v) => varDeps.add(v));
         varDeps.forEach((v) => iterator(v));
+    }
+
+    private findVarRef(varName: string, iterator: (v: string) => boolean, stack = new Set<string>()): string {
+        if (stack.has(varName)) {
+            return null;
+        }
+        stack.add(varName);
+        const result = iterator(varName);
+        if (result) {
+            return varName;
+        }
+        const refs = this.varRefs.get(varName);
+        if (!refs || refs.size === 0) {
+            return null;
+        }
+        for (const ref of refs) {
+            const found = this.findVarRef(ref, iterator, stack);
+            if (found) {
+                return found;
+            }
+        }
+        return null;
+    }
+
+    private itarateVarRefs(varName: string, iterator: (v: string) => void) {
+        this.findVarRef(varName, (ref) => {
+            iterator(ref);
+            return false;
+        });
+    }
+
+    setOnRootVariableChange(callback: () => void) {
+        this.onRootVariableDefined = callback;
+    }
+
+    putRootVars(styleElement: HTMLStyleElement, theme: Theme) {
+        const sheet = styleElement.sheet;
+        if (sheet.cssRules.length > 0) {
+            sheet.deleteRule(0);
+        }
+        const declarations = new Map<string, string>();
+        iterateCSSDeclarations(document.documentElement.style, (property, value) => {
+            if (isVariable(property)) {
+                if (this.isVarType(property, VAR_TYPE_BGCOLOR)) {
+                    declarations.set(wrapBgColorVariableName(property), tryModifyBgColor(value, theme));
+                }
+                if (this.isVarType(property, VAR_TYPE_TEXTCOLOR)) {
+                    declarations.set(wrapTextColorVariableName(property), tryModifyTextColor(value, theme));
+                }
+                if (this.isVarType(property, VAR_TYPE_BORDERCOLOR)) {
+                    declarations.set(wrapBorderColorVariableName(property), tryModifyBorderColor(value, theme));
+                }
+                this.subscribeForVarTypeChange(property, this.onRootVariableDefined);
+            }
+        });
+        const cssLines = [] as string[];
+        cssLines.push(':root {');
+        for (const [property, value] of declarations) {
+            cssLines.push(`    ${property}: ${value};`);
+        }
+        cssLines.push('}');
+        const cssText = cssLines.join('\n');
+        sheet.insertRule(cssText);
     }
 }
 
@@ -448,7 +559,7 @@ function getVariableNameAndFallback(match: string) {
         name = match.substring(4, commaIndex).trim();
         fallback = match.substring(commaIndex + 1, match.length - 1).trim();
     } else {
-        name = match.substring(4, match.length - 1);
+        name = match.substring(4, match.length - 1).trim();
         fallback = '';
     }
     return {name, fallback};
@@ -456,19 +567,19 @@ function getVariableNameAndFallback(match: string) {
 
 export function replaceCSSVariablesNames(
     value: string,
-    nemeReplacer: (varName: string) => string,
+    nameReplacer: (varName: string) => string,
     fallbackReplacer?: (fallbackValue: string) => string,
 ): string {
     const matchReplacer = (match: string) => {
         const {name, fallback} = getVariableNameAndFallback(match);
-        const newName = nemeReplacer(name);
+        const newName = nameReplacer(name);
         if (!fallback) {
             return `var(${newName})`;
         }
 
         let newFallback: string;
         if (isVarDependant(fallback)) {
-            newFallback = replaceCSSVariablesNames(fallback, nemeReplacer, fallbackReplacer);
+            newFallback = replaceCSSVariablesNames(fallback, nameReplacer, fallbackReplacer);
         } else if (fallbackReplacer) {
             newFallback = fallbackReplacer(fallback);
         } else {
@@ -526,6 +637,10 @@ function wrapBorderColorVariableName(name: string) {
 
 function wrapBgImgVariableName(name: string) {
     return `--darkreader-bgimg${name}`;
+}
+
+function isVariable(property: string) {
+    return property.startsWith('--');
 }
 
 function isVarDependant(value: string) {

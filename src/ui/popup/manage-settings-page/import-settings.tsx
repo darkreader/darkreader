@@ -7,13 +7,12 @@ import {openFile} from '../../utils';
 import {DEFAULT_SETTINGS} from '../../../defaults';
 
 export default function ImportButton(props: ViewProps) {
-
-    function getValidatedObject<T>(source: any, compare: T): Partial<T> {
-        const result = {};
+    function getValidatedObject<T>(source: T, compare: T): T {
+        const result = {} as T;
         if (source == null || typeof source !== 'object' || Array.isArray(source)) {
             return null;
         }
-        Object.keys(source).forEach((key) => {
+        Object.keys(source).forEach((key: Extract<keyof T, string>) => {
             const value = source[key];
             if (value == null || compare[key] == null) {
                 return;
@@ -37,7 +36,7 @@ export default function ImportButton(props: ViewProps) {
         openFile({extensions: ['json']}, (result: string) => {
             try {
                 const content: UserSettings = JSON.parse(result);
-                const result2 = getValidatedObject(content, DEFAULT_SETTINGS);
+                const result2 = getValidatedObject<UserSettings>(content, DEFAULT_SETTINGS);
                 props.actions.changeSettings({...result2});
             } catch (err) {
                 // TODO Make overlay Error

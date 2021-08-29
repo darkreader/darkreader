@@ -26,6 +26,13 @@ const CONFIG_URLs = {
 };
 const REMOTE_TIMEOUT_MS = getDuration({seconds: 10});
 
+interface Config {
+    name?: string;
+    local: boolean;
+    localURL?: string;
+    remoteURL?: string;
+}
+
 export default class ConfigManager {
     DARK_SITES?: string[];
     DYNAMIC_THEME_FIXES?: DynamicThemeFix[];
@@ -33,17 +40,17 @@ export default class ConfigManager {
     STATIC_THEMES?: StaticTheme[];
 
     raw = {
-        darkSites: null,
-        dynamicThemeFixes: null,
-        inversionFixes: null,
-        staticThemes: null,
+        darkSites: null as string,
+        dynamicThemeFixes: null as string,
+        inversionFixes: null as string,
+        staticThemes: null as string,
     };
 
     overrides = {
-        darkSites: null,
-        dynamicThemeFixes: null,
-        inversionFixes: null,
-        staticThemes: null,
+        darkSites: null as string,
+        dynamicThemeFixes: null as string,
+        inversionFixes: null as string,
+        staticThemes: null as string,
     };
 
     private async loadConfig({
@@ -51,8 +58,7 @@ export default class ConfigManager {
         local,
         localURL,
         remoteURL,
-        success,
-    }) {
+    }: Config) {
         let $config: string;
         const loadLocal = async () => await readText({url: localURL});
         if (local) {
@@ -68,62 +74,54 @@ export default class ConfigManager {
                 $config = await loadLocal();
             }
         }
-        success($config);
+        return $config;
     }
 
-    private async loadDarkSites({local}) {
-        await this.loadConfig({
+    private async loadDarkSites({local}: Config) {
+        const sites = await this.loadConfig({
             name: 'Dark Sites',
             local,
             localURL: CONFIG_URLs.darkSites.local,
             remoteURL: CONFIG_URLs.darkSites.remote,
-            success: ($sites: string) => {
-                this.raw.darkSites = $sites;
-                this.handleDarkSites();
-            },
         });
+        this.raw.darkSites = sites;
+        this.handleDarkSites();
     }
 
-    private async loadDynamicThemeFixes({local}) {
-        await this.loadConfig({
+    private async loadDynamicThemeFixes({local}: Config) {
+        const fixes = await this.loadConfig({
             name: 'Dynamic Theme Fixes',
             local,
             localURL: CONFIG_URLs.dynamicThemeFixes.local,
             remoteURL: CONFIG_URLs.dynamicThemeFixes.remote,
-            success: ($fixes: string) => {
-                this.raw.dynamicThemeFixes = $fixes;
-                this.handleDynamicThemeFixes();
-            },
         });
+        this.raw.dynamicThemeFixes = fixes;
+        this.handleDynamicThemeFixes();
     }
 
-    private async loadInversionFixes({local}) {
-        await this.loadConfig({
+    private async loadInversionFixes({local}: Config) {
+        const fixes = await this.loadConfig({
             name: 'Inversion Fixes',
             local,
             localURL: CONFIG_URLs.inversionFixes.local,
             remoteURL: CONFIG_URLs.inversionFixes.remote,
-            success: ($fixes: string) => {
-                this.raw.inversionFixes = $fixes;
-                this.handleInversionFixes();
-            },
         });
+        this.raw.inversionFixes = fixes;
+        this.handleInversionFixes();
     }
 
-    private async loadStaticThemes({local}) {
-        await this.loadConfig({
+    private async loadStaticThemes({local}: Config) {
+        const themes = await this.loadConfig({
             name: 'Static Themes',
             local,
             localURL: CONFIG_URLs.staticThemes.local,
             remoteURL: CONFIG_URLs.staticThemes.remote,
-            success: ($themes: string) => {
-                this.raw.staticThemes = $themes;
-                this.handleStaticThemes();
-            },
         });
+        this.raw.staticThemes = themes;
+        this.handleStaticThemes();
     }
 
-    async load(config: {local: boolean}) {
+    async load(config: Config) {
         await Promise.all([
             this.loadDarkSites(config),
             this.loadDynamicThemeFixes(config),

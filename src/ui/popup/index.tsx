@@ -5,16 +5,15 @@ import Body from './components/body';
 import {popupHasBuiltInHorizontalBorders, popupHasBuiltInBorders, fixNotClosingPopupOnNavigation} from './utils/issues';
 import type {ExtensionData, ExtensionActions, TabInfo} from '../../definitions';
 import {isMobile, isFirefox} from '../../utils/platform';
+import {MessageType} from '../../utils/message';
 
 function renderBody(data: ExtensionData, tab: TabInfo, actions: ExtensionActions) {
     if (data.settings.previewNewDesign) {
         if (!document.documentElement.classList.contains('preview')) {
             document.documentElement.classList.add('preview');
         }
-    } else {
-        if (document.documentElement.classList.contains('preview')) {
-            document.documentElement.classList.remove('preview');
-        }
+    } else if (document.documentElement.classList.contains('preview')) {
+        document.documentElement.classList.remove('preview');
     }
 
     sync(document.body, (
@@ -49,7 +48,7 @@ declare const __DEBUG__: boolean;
 const DEBUG = __DEBUG__;
 if (DEBUG) {
     chrome.runtime.onMessage.addListener(({type}) => {
-        if (type === 'css-update') {
+        if (type === MessageType.BG_CSS_UPDATE) {
             document.querySelectorAll('link[rel="stylesheet"]').forEach((link: HTMLLinkElement) => {
                 const url = link.href;
                 link.disabled = true;
@@ -61,7 +60,7 @@ if (DEBUG) {
             });
         }
 
-        if (type === 'ui-update') {
+        if (type === MessageType.BG_UI_UPDATE) {
             location.reload();
         }
     });

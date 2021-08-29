@@ -8,7 +8,7 @@ import {cssURLRegex, getCSSURLValue, getCSSBaseBath} from './css-rules';
 import type {ImageDetails} from './image';
 import {getImageDetails, getFilteredImageDataURL, cleanImageProcessingCache} from './image';
 import type {CSSVariableModifier, VariablesStore} from './variables';
-import {logWarn, logInfo} from '../utils/log';
+import {logWarn, logInfo} from '../../utils/log';
 import type {FilterConfig, Theme} from '../../definitions';
 import {isFirefox} from '../../utils/platform';
 
@@ -27,6 +27,10 @@ export interface ModifiableCSSRule {
     declarations: ModifiableCSSDeclaration[];
 }
 
+function getPriority(ruleStyle: CSSStyleDeclaration, property: string) {
+    return Boolean(ruleStyle && ruleStyle.getPropertyPriority(property));
+}
+
 export function getModifiableCSSDeclaration(
     property: string,
     value: string,
@@ -35,37 +39,35 @@ export function getModifiableCSSDeclaration(
     ignoreImageSelectors: string[],
     isCancelled: () => boolean,
 ): ModifiableCSSDeclaration {
-    const important = Boolean(rule && rule.style && rule.style.getPropertyPriority(property));
-    const sourceValue = value;
     if (property.startsWith('--')) {
         const modifier = getVariableModifier(variablesStore, property, value, rule, ignoreImageSelectors, isCancelled);
         if (modifier) {
-            return {property, value: modifier, important, sourceValue};
+            return {property, value: modifier, important: getPriority(rule.style, property), sourceValue: value};
         }
     } else if (value.includes('var(')) {
         const modifier = getVariableDependantModifier(variablesStore, property, value);
         if (modifier) {
-            return {property, value: modifier, important, sourceValue};
+            return {property, value: modifier, important: getPriority(rule.style, property), sourceValue: value};
         }
     } else if (
-        (property.indexOf('color') >= 0 && property !== '-webkit-print-color-adjust') ||
+        (property.includes('color') && property !== '-webkit-print-color-adjust') ||
         property === 'fill' ||
         property === 'stroke' ||
         property === 'stop-color'
     ) {
         const modifier = getColorModifier(property, value);
         if (modifier) {
-            return {property, value: modifier, important, sourceValue};
+            return {property, value: modifier, important: getPriority(rule.style, property), sourceValue: value};
         }
     } else if (property === 'background-image' || property === 'list-style-image') {
         const modifier = getBgImageModifier(value, rule, ignoreImageSelectors, isCancelled);
         if (modifier) {
-            return {property, value: modifier, important, sourceValue};
+            return {property, value: modifier, important: getPriority(rule.style, property), sourceValue: value};
         }
-    } else if (property.indexOf('shadow') >= 0) {
+    } else if (property.includes('shadow')) {
         const modifier = getShadowModifier(value);
         if (modifier) {
-            return {property, value: modifier, important, sourceValue};
+            return {property, value: modifier, important: getPriority(rule.style, property), sourceValue: value};
         }
     }
     return null;
@@ -193,7 +195,7 @@ function getModifiedScrollbarStyle(theme: Theme) {
     return lines.join('\n');
 }
 
-export function getModifiedFallbackStyle(filter: FilterConfig, {strict}) {
+export function getModifiedFallbackStyle(filter: FilterConfig, {strict}: {strict: boolean}) {
     const lines: string[] = [];
     lines.push(`html, body, ${strict ? 'body :not(iframe)' : 'body > :not(iframe)'} {`);
     lines.push(`    background-color: ${modifyBackgroundColor({r: 255, g: 255, b: 255}, filter)} !important;`);
@@ -238,14 +240,13 @@ function getColorModifier(prop: string, value: string): string | CSSValueModifie
     }
     try {
         const rgb = parseColorWithCache(value);
-        if (prop.indexOf('background') >= 0) {
+        if (prop.includes('background')) {
             return (filter) => modifyBackgroundColor(rgb, filter);
         }
-        if (prop.indexOf('border') >= 0 || prop.indexOf('outline') >= 0) {
+        if (prop.includes('border') || prop.includes('outline')) {
             return (filter) => modifyBorderColor(rgb, filter);
         }
         return (filter) => modifyForegroundColor(rgb, filter);
-
     } catch (err) {
         logWarn('Color parse error', err);
         return null;
@@ -343,7 +344,7 @@ export function getBgImageModifier(
             }
             let url = getCSSURLValue(urlValue);
             const {parentStyleSheet} = rule;
-            const baseURL = parentStyleSheet.href ?
+            const baseURL = (parentStyleSheet && parentStyleSheet.href) ?
                 getCSSBaseBath(parentStyleSheet.href) :
                 parentStyleSheet.ownerNode?.baseURI || location.origin;
             url = getAbsoluteURL(baseURL, url);
@@ -387,9 +388,11 @@ export function getBgImageModifier(
         };
 
         const getBgImageValue = (imageDetails: ImageDetails, filter: FilterConfig) => {
-            const {isDark, isLight, isTransparent, isLarge, width} = imageDetails;
+            const {isDark, isLight, isTransparent, isLarge, isTooLarge, width} = imageDetails;
             let result: string;
-            if (isDark && isTransparent && filter.mode === 1 && !isLarge && width > 2) {
+            if (isTooLarge) {
+                result = `url("${imageDetails.src}")`;
+            } else if (isDark && isTransparent && filter.mode === 1 && !isLarge && width > 2) {
                 logInfo(`Inverting dark image ${imageDetails.src}`);
                 const inverted = getFilteredImageDataURL(imageDetails, {...filter, sepia: clamp(filter.sepia + 10, 0, 100)});
                 result = `url("${inverted}")`;
@@ -435,7 +438,6 @@ export function getBgImageModifier(
             }
             return results.join('');
         };
-
     } catch (err) {
         logWarn(`Unable to parse gradient ${value}`, err);
         return null;
@@ -459,7 +461,6 @@ function getShadowModifier(value: string): CSSValueModifier {
         });
 
         return (filter: FilterConfig) => modifiers.map((modify) => modify(filter)).join('');
-
     } catch (err) {
         logWarn(`Unable to parse shadow ${value}`, err);
         return null;

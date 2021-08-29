@@ -37,7 +37,6 @@ http.createServer((request, response) => {
         };
         write();
     }
-
 }).listen(port, function () {
     console.log(`The benchmark server has been opened on port ${port}`);
 });
@@ -47,7 +46,7 @@ http.createServer((request, response) => {
  * @param {string | number} length
  */
 function chunkString(str, length) {
-    return str.match(new RegExp('.{1,' + length + '}', 'g'));
+    return str.match(new RegExp(`.{1,${ length }}`, 'g'));
 }
 
 /**
@@ -60,7 +59,7 @@ function CSS(query) {
     const generated = parseInt(realquery[1]);
     let result = '';
     for (let x = 1; x <= generated; x++) {
-        result = result + `.GeneratedLinkElement${x} { background-color: black }\n`;
+        result = `${result }.GeneratedLinkElement${x} { background-color: black }\n`;
     }
     return result;
 }
@@ -78,7 +77,7 @@ function link(amount) {
     }
     result = `\t\t\t<link rel="stylesheet" type="text/css" href="style.css?generated=${amount}">\n`;
     for (let x = 1; x <= amount; x++) {
-        element = element + `\t\t<p class="GeneratedLinkElement${x}">This is an GeneratedLinkElement ${x}</p>\n`;
+        element = `${element }\t\t<p class="GeneratedLinkElement${x}">This is an GeneratedLinkElement ${x}</p>\n`;
     }
     return [result, element];
 }
@@ -94,7 +93,7 @@ function style(amount) {
         return result;
     }
     for (let x = 1; x <= amount; x++) {
-        result = result + `\t\t<p style="background-color: green">This is an inline style element ${x}</p>\n`;
+        result = `${result }\t\t<p style="background-color: green">This is an inline style element ${x}</p>\n`;
     }
     return result;
 }
@@ -110,12 +109,12 @@ function rule(amount) {
     if (amount === 0) {
         return result;
     }
-    result = result + '\t\t\t<style>';
+    result = `${result }\t\t\t<style>`;
     for (let x = 1; x <= amount; x++) {
-        result = result + `.GeneratedElement${x} { background-color: red }\n`;
-        element = element + `\t\t<p class="GeneratedElement${x}">This is an GeneratedElement ${x}</p>\n`;
+        result = `${result }.GeneratedElement${x} { background-color: red }\n`;
+        element = `${element }\t\t<p class="GeneratedElement${x}">This is an GeneratedElement ${x}</p>\n`;
     }
-    result = result + '</style>\n';
+    result = `${result }</style>\n`;
     return [result, element];
 }
 
@@ -146,5 +145,4 @@ function getHTML(query) {
         '</html>',
     );
     return HTML;
-
 }

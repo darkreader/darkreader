@@ -4,7 +4,7 @@ import {parseArray, formatArray} from '../utils/text';
 import {compareURLPatterns, isURLInList} from '../utils/url';
 import type {DynamicThemeFix} from '../definitions';
 
-const dynamicThemeFixesCommands = {
+const dynamicThemeFixesCommands: { [key: string]: keyof DynamicThemeFix } = {
     'INVERT': 'invert',
     'CSS': 'css',
     'IGNORE INLINE STYLE': 'ignoreInlineStyle',
@@ -14,7 +14,7 @@ const dynamicThemeFixesCommands = {
 export function parseDynamicThemeFixes(text: string) {
     return parseSitesFixesConfig<DynamicThemeFix>(text, {
         commands: Object.keys(dynamicThemeFixesCommands),
-        getCommandPropName: (command) => dynamicThemeFixesCommands[command] || null,
+        getCommandPropName: (command) => dynamicThemeFixesCommands[command],
         parseCommandValue: (command, value) => {
             if (command === 'CSS') {
                 return value.trim();

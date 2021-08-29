@@ -1,7 +1,7 @@
 # Security Policy
 
 Dark Reader is known to have no intentional security vulnerabilities.
-If reported, vulnerabilites will be fixed in the shortest time possible,
+If reported, vulnerabilities will be fixed in the shortest time possible,
 with minimal impact possible.
 
 ## Supported Versions
@@ -10,8 +10,8 @@ Latest version is supported.
 
 | Version   | Supported          |
 | --------- | ------------------ |
-| 4.9.16    | :white_check_mark: |
-| < 4.9.16  | :x:                |
+| 4.9.33    | :white_check_mark: |
+| < 4.9.33  | :x:                |
 
 ## Reporting a Vulnerability
 

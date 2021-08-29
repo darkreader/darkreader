@@ -60,7 +60,11 @@ function mix(color1: number[], color2: number[], t: number) {
 export default function createStaticStylesheet(config: FilterConfig, url: string, frameURL: string, staticThemes: StaticTheme[]) {
     const srcTheme = config.mode === 1 ? darkTheme : lightTheme;
     const theme = Object.entries(srcTheme).reduce((t, [prop, color]) => {
-        t[prop] = applyColorMatrix(color, createFilterMatrix({...config, mode: 0}));
+        const [r, g, b, a] = color;
+        t[prop] = applyColorMatrix([r, g, b], createFilterMatrix({...config, mode: 0}));
+        if (a !== undefined) {
+            t[prop].push(a);
+        }
         return t;
     }, {} as ThemeColors);
 
@@ -172,57 +176,45 @@ const ruleGenerators = [
     createRuleGen((t) => t.invert, () => ['filter: invert(100%) hue-rotate(180deg)']),
 ];
 
-const staticThemeCommands = [
-    'NO COMMON',
+const staticThemeCommands: { [key: string]: keyof StaticTheme } = {
+    'NO COMMON': 'noCommon',
 
-    'NEUTRAL BG',
-    'NEUTRAL BG ACTIVE',
-    'NEUTRAL TEXT',
-    'NEUTRAL TEXT ACTIVE',
-    'NEUTRAL BORDER',
+    'NEUTRAL BG': 'neutralBg',
+    'NEUTRAL BG ACTIVE': 'neutralBgActive',
+    'NEUTRAL TEXT': 'neutralText',
+    'NEUTRAL TEXT ACTIVE': 'neutralTextActive',
+    'NEUTRAL BORDER': 'neutralBorder',
 
-    'RED BG',
-    'RED BG ACTIVE',
-    'RED TEXT',
-    'RED TEXT ACTIVE',
-    'RED BORDER',
+    'RED BG': 'redBg',
+    'RED BG ACTIVE': 'redBgActive',
+    'RED TEXT': 'redText',
+    'RED TEXT ACTIVE': 'redTextActive',
+    'RED BORDER': 'redBorder',
 
-    'GREEN BG',
-    'GREEN BG ACTIVE',
-    'GREEN TEXT',
-    'GREEN TEXT ACTIVE',
-    'GREEN BORDER',
+    'GREEN BG': 'greenBg',
+    'GREEN BG ACTIVE': 'greenBgActive',
+    'GREEN TEXT': 'greenText',
+    'GREEN TEXT ACTIVE': 'greenTextActive',
+    'GREEN BORDER': 'greenBorder',
 
-    'BLUE BG',
-    'BLUE BG ACTIVE',
-    'BLUE TEXT',
-    'BLUE TEXT ACTIVE',
-    'BLUE BORDER',
+    'BLUE BG': 'blueBg',
+    'BLUE BG ACTIVE': 'blueBgActive',
+    'BLUE TEXT': 'blueText',
+    'BLUE TEXT ACTIVE': 'blueTextActive',
+    'BLUE BORDER': 'blueBorder',
 
-    'FADE BG',
-    'FADE TEXT',
-    'TRANSPARENT BG',
+    'FADE BG': 'fadeBg',
+    'FADE TEXT': 'fadeText',
+    'TRANSPARENT BG': 'transparentBg',
 
-    'NO IMAGE',
-    'INVERT',
-];
-
-function upperCaseToCamelCase(text: string) {
-    return text
-        .split(' ')
-        .map((word, i) => {
-            return (i === 0
-                ? word.toLowerCase()
-                : (word.charAt(0).toUpperCase() + word.substr(1).toLowerCase())
-            );
-        })
-        .join('');
-}
+    'NO IMAGE': 'noImage',
+    'INVERT': 'invert',
+};
 
 export function parseStaticThemes($themes: string) {
     return parseSitesFixesConfig<StaticTheme>($themes, {
-        commands: staticThemeCommands,
-        getCommandPropName: upperCaseToCamelCase,
+        commands: Object.keys(staticThemeCommands),
+        getCommandPropName: (command) => staticThemeCommands[command],
         parseCommandValue: (command, value) => {
             if (command === 'NO COMMON') {
                 return true;
@@ -240,7 +232,7 @@ export function formatStaticThemes(staticThemes: StaticTheme[]) {
     const themes = staticThemes.slice().sort((a, b) => compareURLPatterns(a.url[0], b.url[0]));
 
     return formatSitesFixesConfig(themes, {
-        props: staticThemeCommands.map(upperCaseToCamelCase),
+        props: Object.values(staticThemeCommands),
         getPropCommandName: camelCaseToUpperCase,
         formatPropValue: (prop, value) => {
             if (prop === 'noCommon') {

@@ -1,6 +1,7 @@
 import {formatSitesFixesConfig} from './utils/format';
 import {applyColorMatrix, createFilterMatrix} from './utils/matrix';
-import {parseSitesFixesConfig, SitePropsIndex, getSitesFixesFor} from './utils/parse';
+import {parseSitesFixesConfig, getSitesFixesFor} from './utils/parse';
+import type {SitePropsIndex} from './utils/parse';
 import {parseArray, formatArray} from '../utils/text';
 import {compareURLPatterns, isURLInList} from '../utils/url';
 import {createTextStyle} from './text-style';

@@ -1,7 +1,8 @@
 import {createTextStyle} from './text-style';
 import {formatSitesFixesConfig} from './utils/format';
 import {applyColorMatrix, createFilterMatrix} from './utils/matrix';
-import {parseSitesFixesConfig} from './utils/parse';
+import {parseSitesFixesConfig, getSitesFixesFor} from './utils/parse';
+import type {SitePropsIndex} from './utils/parse';
 import {parseArray, formatArray} from '../utils/text';
 import {compareURLPatterns, isURLInList} from '../utils/url';
 import type {FilterConfig, StaticTheme} from '../definitions';
@@ -57,7 +58,7 @@ function mix(color1: number[], color2: number[], t: number) {
     return color1.map((c, i) => Math.round(c * (1 - t) + color2[i] * t));
 }
 
-export default function createStaticStylesheet(config: FilterConfig, url: string, frameURL: string, staticThemes: StaticTheme[]) {
+export default function createStaticStylesheet(config: FilterConfig, url: string, frameURL: string, staticThemes: string, staticThemesIndex: SitePropsIndex<StaticTheme>) {
     const srcTheme = config.mode === 1 ? darkTheme : lightTheme;
     const theme = Object.entries(srcTheme).reduce((t, [prop, color]) => {
         const [r, g, b, a] = color;
@@ -68,8 +69,8 @@ export default function createStaticStylesheet(config: FilterConfig, url: string
         return t;
     }, {} as ThemeColors);
 
-    const commonTheme = getCommonTheme(staticThemes);
-    const siteTheme = getThemeFor(frameURL || url, staticThemes);
+    const commonTheme = getCommonTheme(staticThemes, staticThemesIndex);
+    const siteTheme = getThemeFor(frameURL || url, staticThemes, staticThemesIndex);
 
     const lines: string[] = [];
 
@@ -249,11 +250,23 @@ export function formatStaticThemes(staticThemes: StaticTheme[]) {
     });
 }
 
-function getCommonTheme(themes: StaticTheme[]) {
-    return themes[0];
+// TODO: do not rely on common theme being the first in the file
+function getCommonTheme(staticThemes: string, staticThemesIndex: SitePropsIndex<StaticTheme>): StaticTheme {
+    const staticThemeText = staticThemes.substring(0, staticThemesIndex.offsets[0].end);
+    return parseStaticThemes(staticThemeText)[0];
 }
 
-function getThemeFor(url: string, themes: StaticTheme[]) {
+function getThemeFor(url: string, staticThemes: string, staticThemesIndex: SitePropsIndex<StaticTheme>) {
+    const themes = getSitesFixesFor<StaticTheme>(url, staticThemes, staticThemesIndex, {
+        commands: Object.keys(staticThemeCommands),
+        getCommandPropName: (command) => staticThemeCommands[command],
+        parseCommandValue: (command, value) => {
+            if (command === 'NO COMMON') {
+                return true;
+            }
+            return parseArray(value);
+        }
+    });
     const sortedBySpecificity = themes
         .slice(1)
         .map((theme) => {

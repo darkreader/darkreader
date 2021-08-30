@@ -13,7 +13,7 @@ import {isURLInList, getURLHostOrProtocol, isURLEnabled, isPDF} from '../utils/u
 import ThemeEngines from '../generators/theme-engines';
 import createCSSFilterStylesheet from '../generators/css-filter';
 import {getDynamicThemeFixesForNew} from '../generators/dynamic-theme';
-import createStaticStylesheet, {parseStaticThemes} from '../generators/static-theme';
+import createStaticStylesheet from '../generators/static-theme';
 import {createSVGFilterStylesheet, getSVGFilterMatrixValue, getSVGReverseFilterMatrixValue} from '../generators/svg-filter';
 import type {ExtensionData, FilterConfig, News, Shortcuts, UserSettings, TabInfo} from '../definitions';
 import {isSystemDarkModeEnabled} from '../utils/media-query';
@@ -21,8 +21,6 @@ import {isFirefox, isThunderbird} from '../utils/platform';
 import {MessageType} from '../utils/message';
 import {logInfo, logWarn} from '../utils/log';
 import {PromiseBarrier} from '../utils/promise-barrier';
-
-// TODO: remove parseStaticThemes
 
 export class Extension {
     config: ConfigManager;
@@ -445,7 +443,7 @@ export class Extension {
                         type: MessageType.BG_ADD_STATIC_THEME,
                         data: theme.stylesheet && theme.stylesheet.trim() ?
                             theme.stylesheet :
-                            createStaticStylesheet(theme, url, frameURL, parseStaticThemes(this.config.STATIC_THEMES_RAW)),
+                            createStaticStylesheet(theme, url, frameURL, this.config.STATIC_THEMES_RAW, this.config.STATIC_THEMES_INDEX),
                     };
                 }
                 case ThemeEngines.dynamicTheme: {

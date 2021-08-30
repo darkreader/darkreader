@@ -135,7 +135,7 @@ export function parseSiteFixConfig<T extends SiteProps>(text: string, options: S
     return parseSitesFixesConfig<T>(block, options)[0];
 }
 
-export function getSitesFixesFor<T extends SiteProps>(url: string, frameURL: string, text: string, index: SitePropsIndex<T>, options: SitesFixesParserOptions<T>): T[] {
+export function getSitesFixesFor<T extends SiteProps>(url: string, text: string, index: SitePropsIndex<T>, options: SitesFixesParserOptions<T>): T[] {
     const records: T[] = [];
     let recordIds: number[] = [];
     const domain = url.split('/')[0];

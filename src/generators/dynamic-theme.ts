@@ -88,7 +88,7 @@ export function getDynamicThemeFixesFor(url: string, frameURL: string, fixes: Dy
 }
 
 export function getDynamicThemeFixesForNew(url: string, frameURL: string, text: string, index: SitePropsIndex<DynamicThemeFix>, enabledForPDF: boolean) {
-    const fixes = getSitesFixesFor(url, frameURL, text, index, {
+    const fixes = getSitesFixesFor(frameURL || url, text, index, {
         commands: Object.keys(dynamicThemeFixesCommands),
         getCommandPropName: (command) => dynamicThemeFixesCommands[command],
         parseCommandValue: (command, value) => {

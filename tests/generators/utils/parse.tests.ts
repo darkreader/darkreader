@@ -32,7 +32,7 @@ test('Index config', () => {
     };
     const index = indexSitesFixesConfig(config);
 
-    const fixes = getSitesFixesFor('example.com', null, config, index, options);
+    const fixes = getSitesFixesFor('example.com', config, index, options);
     expect(fixes).toEqual([
         {
             'url': ['example.com'],

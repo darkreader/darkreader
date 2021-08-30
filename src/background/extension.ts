@@ -11,7 +11,7 @@ import {getFontList, getCommands, setShortcut, canInjectScript} from './utils/ex
 import {isInTimeIntervalLocal, nextTimeInterval, isNightAtLocation, nextNightAtLocation} from '../utils/time';
 import {isURLInList, getURLHostOrProtocol, isURLEnabled, isPDF} from '../utils/url';
 import ThemeEngines from '../generators/theme-engines';
-import createCSSFilterStylesheet, {parseInversionFixes} from '../generators/css-filter';
+import createCSSFilterStylesheet from '../generators/css-filter';
 import {getDynamicThemeFixesForNew} from '../generators/dynamic-theme';
 import createStaticStylesheet, {parseStaticThemes} from '../generators/static-theme';
 import {createSVGFilterStylesheet, getSVGFilterMatrixValue, getSVGReverseFilterMatrixValue} from '../generators/svg-filter';
@@ -22,7 +22,7 @@ import {MessageType} from '../utils/message';
 import {logInfo, logWarn} from '../utils/log';
 import {PromiseBarrier} from '../utils/promise-barrier';
 
-// TODO: remove parseStaticThemes and parseInversionFixes
+// TODO: remove parseStaticThemes
 
 export class Extension {
     config: ConfigManager;
@@ -421,20 +421,20 @@ export class Extension {
                 case ThemeEngines.cssFilter: {
                     return {
                         type: MessageType.BG_ADD_CSS_FILTER,
-                        data: createCSSFilterStylesheet(theme, url, frameURL, parseInversionFixes(this.config.INVERSION_FIXES_RAW)),
+                        data: createCSSFilterStylesheet(theme, url, frameURL, this.config.INVERSION_FIXES_RAW, this.config.INVERSION_FIXES_INDEX),
                     };
                 }
                 case ThemeEngines.svgFilter: {
                     if (isFirefox) {
                         return {
                             type: MessageType.BG_ADD_CSS_FILTER,
-                            data: createSVGFilterStylesheet(theme, url, frameURL, parseInversionFixes(this.config.INVERSION_FIXES_RAW)),
+                            data: createSVGFilterStylesheet(theme, url, frameURL, this.config.INVERSION_FIXES_RAW, this.config.INVERSION_FIXES_INDEX),
                         };
                     }
                     return {
                         type: MessageType.BG_ADD_SVG_FILTER,
                         data: {
-                            css: createSVGFilterStylesheet(theme, url, frameURL, parseInversionFixes(this.config.INVERSION_FIXES_RAW)),
+                            css: createSVGFilterStylesheet(theme, url, frameURL, this.config.INVERSION_FIXES_RAW, this.config.INVERSION_FIXES_INDEX),
                             svgMatrix: getSVGFilterMatrixValue(theme),
                             svgReverseMatrix: getSVGReverseFilterMatrixValue(),
                         },

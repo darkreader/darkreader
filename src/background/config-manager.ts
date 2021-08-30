@@ -1,9 +1,7 @@
 import {readText} from './utils/network';
 import {parseArray} from '../utils/text';
 import {getDuration} from '../utils/time';
-import {indexInversionFixes} from '../generators/css-filter';
-import {indexDynamicThemeFixes} from '../generators/dynamic-theme';
-import {indexStaticThemes} from '../generators/static-theme';
+import {indexSitesFixesConfig} from '../generators/utils/parse';
 import type {InversionFix, StaticTheme, DynamicThemeFix} from '../definitions';
 import type {SitePropsIndex} from '../generators/utils/parse';
 
@@ -141,19 +139,19 @@ export default class ConfigManager {
 
     handleDynamicThemeFixes() {
         const $fixes = this.overrides.dynamicThemeFixes || this.raw.dynamicThemeFixes;
-        this.DYNAMIC_THEME_FIXES_INDEX = indexDynamicThemeFixes($fixes);
+        this.DYNAMIC_THEME_FIXES_INDEX = indexSitesFixesConfig<DynamicThemeFix>($fixes);
         this.DYNAMIC_THEME_FIXES_RAW = $fixes;
     }
 
     handleInversionFixes() {
         const $fixes = this.overrides.inversionFixes || this.raw.inversionFixes;
-        this.INVERSION_FIXES_INDEX = indexInversionFixes($fixes);
+        this.INVERSION_FIXES_INDEX = indexSitesFixesConfig<InversionFix>($fixes);
         this.INVERSION_FIXES_RAW = $fixes;
     }
 
     handleStaticThemes() {
         const $themes = this.overrides.staticThemes || this.raw.staticThemes;
-        this.STATIC_THEMES_INDEX = indexStaticThemes($themes);
+        this.STATIC_THEMES_INDEX = indexSitesFixesConfig<StaticTheme>($themes);
         this.STATIC_THEMES_RAW = $themes;
     }
 }

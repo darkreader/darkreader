@@ -1,5 +1,5 @@
 import {formatSitesFixesConfig} from './utils/format';
-import {parseSitesFixesConfig, indexSitesFixesConfig, getSitesFixesFor} from './utils/parse';
+import {parseSitesFixesConfig, getSitesFixesFor} from './utils/parse';
 import type {SitePropsIndex} from './utils/parse';
 import {parseArray, formatArray} from '../utils/text';
 import {compareURLPatterns, isURLInList} from '../utils/url';
@@ -23,10 +23,6 @@ export function parseDynamicThemeFixes(text: string) {
             return parseArray(value);
         },
     });
-}
-
-export function indexDynamicThemeFixes(text: string) {
-    return indexSitesFixesConfig<DynamicThemeFix>(text);
 }
 
 export function formatDynamicThemeFixes(dynamicThemeFixes: DynamicThemeFix[]) {

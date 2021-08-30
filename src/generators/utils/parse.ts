@@ -85,7 +85,7 @@ export function indexSitesFixesConfig<T extends SiteProps>(text: string): SitePr
         const index = offsets.length;
         for (const url of urls) {
             // TODO: make sure this is correct
-            const domain = url.split('/')[0];
+            const domain = url.split('/')[0].toLowerCase();
             if (isFullyQualifiedDomain(domain)) {
                 if (typeof domains[domain] === 'undefined') {
                     domains[domain] = index;
@@ -138,7 +138,7 @@ export function parseSiteFixConfig<T extends SiteProps>(text: string, options: S
 export function getSitesFixesFor<T extends SiteProps>(url: string, text: string, index: SitePropsIndex<T>, options: SitesFixesParserOptions<T>): T[] {
     const records: T[] = [];
     let recordIds: number[] = [];
-    const domain = url.split('/')[0];
+    const domain = url.split('/')[0].toLowerCase();
     if (index.domains[domain]) {
         recordIds = recordIds.concat(index.domains[domain]);
     }

@@ -544,7 +544,9 @@ async function linkLoading(link: HTMLLinkElement, loadingId: number) {
 }
 
 function getCSSImportURL(importDeclaration: string) {
-    return getCSSURLValue(importDeclaration.substring(8).replace(/;$/, ''));
+    // Substring(7) is used to remove `@import` from the string.
+    // And then use .trip() to remove the possible whitespaces.
+    return getCSSURLValue(importDeclaration.substring(7).trim().replace(/;$/, ''));
 }
 
 async function loadText(url: string) {

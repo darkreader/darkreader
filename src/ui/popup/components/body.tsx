@@ -66,7 +66,7 @@ function Body(props: BodyProps) {
     const isFirstNewsUnread = latestNews && !latestNews.read;
 
     context.onRender(() => {
-        if (props.data.settings.notifyOfNews && isFirstNewsUnread && !state.newsOpen && !state.didNewsSlideIn) {
+        if (props.data.settings.fetchNews && isFirstNewsUnread && !state.newsOpen && !state.didNewsSlideIn) {
             setTimeout(toggleNews, 750);
         }
     });

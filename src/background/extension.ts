@@ -128,7 +128,7 @@ export class Extension {
             this.tabs.updateContentScript({runOnProtectedPages: this.user.settings.enableForProtectedPages});
         }
 
-        this.user.settings.notifyOfNews && this.news.subscribe();
+        this.user.settings.fetchNews && this.news.subscribe();
         this.startBarrier.resolve();
     }
 
@@ -305,8 +305,8 @@ export class Extension {
                 resetWindowTheme();
             }
         }
-        if (prev.notifyOfNews !== this.user.settings.notifyOfNews) {
-            this.user.settings.notifyOfNews ? this.news.subscribe() : this.news.unSubscribe();
+        if (prev.fetchNews !== this.user.settings.fetchNews) {
+            this.user.settings.fetchNews ? this.news.subscribe() : this.news.unSubscribe();
         }
 
         this.onSettingsChanged();

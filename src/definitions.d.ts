@@ -73,6 +73,7 @@ export interface ThemePreset {
 
 export interface UserSettings {
     enabled: boolean;
+    fetchNews: boolean;
     theme: FilterConfig;
     presets: ThemePreset[];
     customThemes: CustomSiteConfig[];

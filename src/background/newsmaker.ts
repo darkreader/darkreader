@@ -11,6 +11,7 @@ export default class Newsmaker {
 
     private stateManager: StateManager;
     private latest: News[];
+    private latestTimestamp: number;
     async getLatest(): Promise<News[]> {
         await this.stateManager.loadState();
         return this.latest;
@@ -18,22 +19,28 @@ export default class Newsmaker {
     onUpdate: (news: News[]) => void;
 
     constructor(onUpdate: (news: News[]) => void) {
-        this.stateManager = new StateManager(Newsmaker.LOCAL_STORAGE_KEY, this, {latest: []});
+        this.stateManager = new StateManager(Newsmaker.LOCAL_STORAGE_KEY, this, {latest: [], latestTimestamp: null});
         this.latest = [];
+        this.latestTimestamp = null;
         this.onUpdate = onUpdate;
     }
 
+    private async alarmListener(alarm: chrome.alarms.Alarm) {
+        if (alarm.name === Newsmaker.ALARM_NAME) {
+            await this.updateNews();
+        }
+    }
+
     subscribe() {
-        this.updateNews();
-        chrome.alarms.onAlarm.addListener(async (alarm) => {
-            if (alarm.name === Newsmaker.ALARM_NAME) {
-                await this.updateNews();
-            }
-        });
+        if ((this.latestTimestamp === null) || (Date.now() < this.latestTimestamp + Newsmaker.UPDATE_INTERVAL)) {
+            this.updateNews();
+        }
+        chrome.alarms.onAlarm.addListener(this.alarmListener);
         chrome.alarms.create(Newsmaker.ALARM_NAME, {periodInMinutes: Newsmaker.UPDATE_INTERVAL});
     }
 
     unSubscribe() {
+        chrome.alarms.onAlarm.removeListener(this.alarmListener);
         chrome.alarms.clear(Newsmaker.ALARM_NAME);
     }
 
@@ -41,6 +48,7 @@ export default class Newsmaker {
         const news = await this.getNews();
         if (Array.isArray(news)) {
             this.latest = news;
+            this.latestTimestamp = Date.now();
             this.onUpdate(this.latest);
             await this.stateManager.saveState();
         }

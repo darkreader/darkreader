@@ -250,7 +250,6 @@ export function formatStaticThemes(staticThemes: StaticTheme[]) {
     });
 }
 
-// TODO: do not rely on common theme being the first in the file
 function getCommonTheme(staticThemes: string, staticThemesIndex: SitePropsIndex<StaticTheme>): StaticTheme {
     const staticThemeText = staticThemes.substring(0, staticThemesIndex.offsets[0].end);
     return parseStaticThemes(staticThemeText)[0];

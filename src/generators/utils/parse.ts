@@ -84,10 +84,10 @@ export function indexSitesFixesConfig<T extends SiteProps>(text: string): SitePr
         const urls = parseArray(lines.slice(0, commandIndices[0]).join('\n'));
         const index = offsets.length;
         for (const url of urls) {
-            // TODO: make sure this is correct
+            // URL patterns are guaranteed to not have protocol and leading '/'
             const domain = url.split('/')[0].toLowerCase();
             if (isFullyQualifiedDomain(domain)) {
-                if (typeof domains[domain] === 'undefined') {
+                if (!domains[domain]) {
                     domains[domain] = index;
                 } else if (typeof domains[domain] === 'number') {
                     domains[domain] = [(domains[domain] as number), index];
@@ -97,7 +97,7 @@ export function indexSitesFixesConfig<T extends SiteProps>(text: string): SitePr
                 continue;
             }
 
-            if (typeof domains[domain] === 'undefined') {
+            if (!domains[domain]) {
                 domainPatterns[domain] = index;
             } else if (typeof domains[domain] === 'number') {
                 domainPatterns[domain] = [(domainPatterns[domain] as number), index];

@@ -2,7 +2,7 @@ import {m} from 'malevic';
 import type {ViewProps} from '../types';
 import CheckButton from '../check-button';
 
-export default function CheckNews(props: ViewProps) {
+export default function FetchNews(props: ViewProps) {
     function onFetchNewsChange(checked: boolean) {
         props.actions.changeSettings({fetchNews: checked});
     }

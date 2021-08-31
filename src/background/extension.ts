@@ -234,12 +234,6 @@ export class Extension {
             return;
         }
 
-        const unread = news.filter(({read}) => !read);
-        if (unread.length > 0 && this.user.settings.notifyOfNews) {
-            this.icon.showUnreadReleaseNotesBadge(unread.length);
-            return;
-        }
-
         this.icon.hideBadge();
     }
 

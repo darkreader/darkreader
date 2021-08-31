@@ -86,7 +86,7 @@ function Body(props: BodyProps) {
     }
 
     let displayedNewsCount = unreadNews.length;
-    if (unreadNews.length > 0 && !props.data.settings.notifyOfNews) {
+    if (unreadNews.length > 0) {
         const latest = new Date(unreadNews[0].date);
         const today = new Date();
         const newsWereLongTimeAgo = latest.getTime() < today.getTime() - getDuration({days: 14});

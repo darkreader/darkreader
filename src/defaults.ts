@@ -43,7 +43,6 @@ export const DEFAULT_SETTINGS: UserSettings = {
     siteListEnabled: [],
     applyToListedOnly: false,
     changeBrowserTheme: false,
-    notifyOfNews: false,
     syncSettings: true,
     syncSitesFixes: false,
     automation: '',

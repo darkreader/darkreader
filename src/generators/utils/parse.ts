@@ -31,7 +31,7 @@ export function parseSitesFixesConfig<T extends SiteProps>(text: string, options
         const lines = block.split('\n');
         const commandIndices: number[] = [];
         lines.forEach((ln, i) => {
-            if (ln.match(/^\s*[A-Z]+(\s[A-Z]+)*\s*$/)) {
+            if (ln.match(/^[A-Z]+(\s[A-Z]+){0,2}$/)) {
                 commandIndices.push(i);
             }
         });
@@ -77,7 +77,7 @@ export function indexSitesFixesConfig<T extends SiteProps>(text: string): SitePr
         const lines = block.split('\n');
         const commandIndices: number[] = [];
         lines.forEach((ln, i) => {
-            if (ln.match(/^\s*[A-Z]+(\s[A-Z]+)*\s*$/)) {
+            if (ln.match(/^[A-Z]+(\s[A-Z]+){0,2}$/)) {
                 commandIndices.push(i);
             }
         });

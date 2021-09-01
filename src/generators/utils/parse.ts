@@ -5,13 +5,8 @@ interface SiteProps {
     url: string[];
 }
 
-interface SitePropsOffsetRecord {
-    start: number;
-    end: number;
-}
-
 export interface SitePropsIndex<T extends SiteProps> {
-    offsets: SitePropsOffsetRecord[];
+    offsets: number[];
     domains: {[domain: string]: number | number[]};
     domainPatterns: {[domainPattern: string]: number | number[]};
     cache: {[offsetId: number]: T};
@@ -69,7 +64,7 @@ function getDomain(url: string) {
 export function indexSitesFixesConfig<T extends SiteProps>(text: string): SitePropsIndex<T> {
     const domains: {[domain: string]: number | number[]} = {};
     const domainPatterns: {[domainPattern: string]: number | number[]} = {};
-    const offsets: SitePropsOffsetRecord[] = [];
+    const offsets: number[] = [];
 
     function processBlock(recordStart: number, recordEnd: number) {
         // TODO: more formal definition of URLs and delimiters
@@ -87,7 +82,7 @@ export function indexSitesFixesConfig<T extends SiteProps>(text: string): SitePr
         }
 
         const urls = parseArray(lines.slice(0, commandIndices[0]).join('\n'));
-        const index = offsets.length;
+        const index = offsets.length / 2;
         for (const url of urls) {
             const domain = getDomain(url);
             if (isFullyQualifiedDomain(domain)) {
@@ -109,10 +104,7 @@ export function indexSitesFixesConfig<T extends SiteProps>(text: string): SitePr
                 (domainPatterns[domain] as number[]).push(index);
             }
         }
-        offsets.push({
-            start: recordStart,
-            end: recordEnd
-        });
+        offsets.push(recordStart, recordEnd);
     }
 
     let recordStart = 0;
@@ -132,8 +124,8 @@ export function indexSitesFixesConfig<T extends SiteProps>(text: string): SitePr
     return {offsets, domains, domainPatterns, cache: {}};
 }
 
-export function parseSiteFixConfig<T extends SiteProps>(text: string, options: SitesFixesParserOptions<T>, indexRecord: SitePropsOffsetRecord): T {
-    const block = text.substring(indexRecord.start, indexRecord.end);
+export function parseSiteFixConfig<T extends SiteProps>(text: string, options: SitesFixesParserOptions<T>, recordStart: number, recordEnd: number): T {
+    const block = text.substring(recordStart, recordEnd);
     return parseSitesFixesConfig<T>(block, options)[0];
 }
 
@@ -152,7 +144,7 @@ export function getSitesFixesFor<T extends SiteProps>(url: string, text: string,
 
     for (const id of ((new Set(recordIds)).keys())) {
         if (!index.cache[id]) {
-            index.cache[id] = parseSiteFixConfig<T>(text, options, index.offsets[id]);
+            index.cache[id] = parseSiteFixConfig<T>(text, options, index.offsets[2*id], index.offsets[2*id+1]);
         }
         records.push(index.cache[id]);
     }

@@ -21,6 +21,7 @@ import {isFirefox, isThunderbird} from '../utils/platform';
 import {MessageType} from '../utils/message';
 import {logInfo, logWarn} from '../utils/log';
 import {PromiseBarrier} from '../utils/promise-barrier';
+import {StateManager} from './utils/state-manager';
 
 export class Extension {
     config: ConfigManager;
@@ -37,8 +38,10 @@ export class Extension {
     private popupOpeningListener: () => void = null;
     private wasLastColorSchemeDark: boolean = null;
     private startBarrier: PromiseBarrier = null;
+    private stateManager: StateManager = null;
 
     static ALARM_NAME = 'auto-time-alarm';
+    static LOCAL_STORAGE_KEY = 'Extension-state';
     constructor() {
         this.icon = new IconManager();
         this.config = new ConfigManager();
@@ -56,6 +59,10 @@ export class Extension {
         });
         this.user = new UserStorage({onRemoteSettingsChange: () => this.onRemoteSettingsChange()});
         this.startBarrier = new PromiseBarrier();
+        this.stateManager = new StateManager(Extension.LOCAL_STORAGE_KEY, this, {
+            isEnabledCached: null,
+            wasEnabledOnLastCheck: null,
+        });
 
         chrome.alarms.onAlarm.addListener(this.alarmListener);
     }
@@ -141,6 +148,7 @@ export class Extension {
                 if (!this.user.settings) {
                     await this.user.loadSettings();
                 }
+                await this.stateManager.loadState();
                 const url = await this.tabs.getActiveTabURL();
                 const info = this.getURLInfo(url);
                 info.isInjected = await this.tabs.canAccessActiveTab();
@@ -166,6 +174,7 @@ export class Extension {
         if (this.startBarrier.isPending()) {
             await this.startBarrier.entry();
         }
+        this.stateManager.loadState();
         switch (command) {
             case 'toggle':
                 logInfo('Toggle command entered');
@@ -209,6 +218,7 @@ export class Extension {
         if (!this.fonts) {
             this.fonts = await getFontList();
         }
+        await this.stateManager.loadState();
         return {
             isEnabled: this.isEnabled(),
             isReady: true,
@@ -270,6 +280,7 @@ export class Extension {
         if (!this.user.settings) {
             await this.user.loadSettings();
         }
+        await this.stateManager.loadState();
         this.isEnabledCached = null;
         const isEnabled = this.isEnabled();
         if (this.wasEnabledOnLastCheck === null || this.wasEnabledOnLastCheck !== isEnabled) {
@@ -277,6 +288,7 @@ export class Extension {
             this.onAppToggle();
             this.tabs.sendMessage(this.getTabMessage);
             this.reportChanges();
+            this.stateManager.saveState();
         }
     }
 
@@ -377,10 +389,12 @@ export class Extension {
         if (!this.user.settings) {
             await this.user.loadSettings();
         }
+        await this.stateManager.loadState();
         this.wasEnabledOnLastCheck = this.isEnabled();
         this.tabs.sendMessage(this.getTabMessage);
         this.saveUserSettings();
         this.reportChanges();
+        this.stateManager.saveState();
     }
 
     private onRemoteSettingsChange() {

@@ -6,7 +6,7 @@ interface SiteProps {
 }
 
 export interface SitePropsIndex<T extends SiteProps> {
-    offsets: number[];
+    offsets: string;
     domains: {[domain: string]: number | number[]};
     domainPatterns: {[domainPattern: string]: number | number[]};
     cache: {[offsetId: number]: T};
@@ -59,6 +59,21 @@ export function parseSitesFixesConfig<T extends SiteProps>(text: string, options
 // URL patterns are guaranteed to not have protocol and leading '/'
 function getDomain(url: string) {
     return url.split('/')[0].toLowerCase();
+}
+
+function encodeOffsets(offsets: number[]): string {
+    return offsets.map((x) => {
+        let string = x.toString(32);
+        return '0'.repeat(4 - string.length) + string;
+    }).join('');
+}
+
+function decodeOffset(offsets: string, index: number = 0): [number, number] {
+    const base = 8 * index;
+    return [
+        parseInt(offsets.substring(base + 0, base + 4), 32),
+        parseInt(offsets.substring(base + 4, base + 8), 32),
+    ]
 }
 
 export function indexSitesFixesConfig<T extends SiteProps>(text: string): SitePropsIndex<T> {
@@ -122,7 +137,8 @@ export function indexSitesFixesConfig<T extends SiteProps>(text: string): SitePr
     }
     processBlock(recordStart, text.length, count);
 
-    return {offsets, domains, domainPatterns, cache: {}};
+
+    return {offsets: encodeOffsets(offsets), domains, domainPatterns, cache: {}};
 }
 
 export function parseSiteFixConfig<T extends SiteProps>(text: string, options: SitesFixesParserOptions<T>, recordStart: number, recordEnd: number): T {
@@ -145,7 +161,8 @@ export function getSitesFixesFor<T extends SiteProps>(url: string, text: string,
 
     for (const id of ((new Set(recordIds)).keys())) {
         if (!index.cache[id]) {
-            index.cache[id] = parseSiteFixConfig<T>(text, options, index.offsets[2*id], index.offsets[2*id+1]);
+            const [start, end] = decodeOffset(index.offsets, id);
+            index.cache[id] = parseSiteFixConfig<T>(text, options, start, end);
         }
         records.push(index.cache[id]);
     }

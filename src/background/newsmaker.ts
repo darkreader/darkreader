@@ -32,7 +32,7 @@ export default class Newsmaker {
     }
 
     subscribe() {
-        if ((this.latestTimestamp === null) || (Date.now() < this.latestTimestamp + Newsmaker.UPDATE_INTERVAL)) {
+        if ((this.latestTimestamp === null) || (this.latestTimestamp + Newsmaker.UPDATE_INTERVAL < Date.now())) {
             this.updateNews();
         }
         chrome.alarms.onAlarm.addListener(this.alarmListener);

@@ -61,6 +61,11 @@ export function parseSitesFixesConfig<T extends SiteProps>(text: string, options
     return sites;
 }
 
+// URL patterns are guaranteed to not have protocol and leading '/'
+function getDomain(url: string) {
+    return url.split('/')[0].toLowerCase();
+}
+
 export function indexSitesFixesConfig<T extends SiteProps>(text: string): SitePropsIndex<T> {
     const domains: {[domain: string]: number | number[]} = {};
     const domainPatterns: {[domainPattern: string]: number | number[]} = {};
@@ -84,8 +89,7 @@ export function indexSitesFixesConfig<T extends SiteProps>(text: string): SitePr
         const urls = parseArray(lines.slice(0, commandIndices[0]).join('\n'));
         const index = offsets.length;
         for (const url of urls) {
-            // URL patterns are guaranteed to not have protocol and leading '/'
-            const domain = url.split('/')[0].toLowerCase();
+            const domain = getDomain(url);
             if (isFullyQualifiedDomain(domain)) {
                 if (!domains[domain]) {
                     domains[domain] = index;
@@ -138,7 +142,7 @@ export function parseSiteFixConfig<T extends SiteProps>(text: string, options: S
 export function getSitesFixesFor<T extends SiteProps>(url: string, text: string, index: SitePropsIndex<T>, options: SitesFixesParserOptions<T>): T[] {
     const records: T[] = [];
     let recordIds: number[] = [];
-    const domain = url.split('/')[0].toLowerCase();
+    const domain = getDomain(url);
     if (index.domains[domain]) {
         recordIds = recordIds.concat(index.domains[domain]);
     }

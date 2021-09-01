@@ -118,18 +118,16 @@ export function indexSitesFixesConfig<T extends SiteProps>(text: string): SitePr
     let recordStart = 0;
     // Delimiter between two blocks
     const delimiterRegex = /\r?\s*={2,}\s*\r?/gm;
-    while (true) {
-        const delimiter = delimiterRegex.exec(text);
-        const nextDelimiterStart = delimiter ? delimiter.index : text.length;
-        const nextDelimiterEnd = delimiter ? delimiter.index + delimiter[0].length : text.length;
+    let delimiter: RegExpMatchArray;
+    while ((delimiter = delimiterRegex.exec(text))) {
+        const nextDelimiterStart = delimiter.index;
+        const nextDelimiterEnd = delimiter.index + delimiter[0].length;
 
         processBlock(recordStart, nextDelimiterStart);
 
         recordStart = nextDelimiterEnd;
-        if (delimiter === null) {
-            break;
-        }
     }
+    processBlock(recordStart, text.length);
 
     return {offsets, domains, domainPatterns, cache: {}};
 }

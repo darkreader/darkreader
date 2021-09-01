@@ -66,7 +66,7 @@ export function indexSitesFixesConfig<T extends SiteProps>(text: string): SitePr
     const domainPatterns: {[domainPattern: string]: number | number[]} = {};
     const offsets: number[] = [];
 
-    function processBlock(recordStart: number, recordEnd: number) {
+    function processBlock(recordStart: number, recordEnd: number, index: number) {
         // TODO: more formal definition of URLs and delimiters
         const block = text.substring(recordStart, recordEnd);
         const lines = block.split('\n');
@@ -82,7 +82,6 @@ export function indexSitesFixesConfig<T extends SiteProps>(text: string): SitePr
         }
 
         const urls = parseArray(lines.slice(0, commandIndices[0]).join('\n'));
-        const index = offsets.length / 2;
         for (const url of urls) {
             const domain = getDomain(url);
             if (isFullyQualifiedDomain(domain)) {
@@ -111,15 +110,17 @@ export function indexSitesFixesConfig<T extends SiteProps>(text: string): SitePr
     // Delimiter between two blocks
     const delimiterRegex = /\r?\s*={2,}\s*\r?/gm;
     let delimiter: RegExpMatchArray;
+    let count = 0;
     while ((delimiter = delimiterRegex.exec(text))) {
         const nextDelimiterStart = delimiter.index;
         const nextDelimiterEnd = delimiter.index + delimiter[0].length;
 
-        processBlock(recordStart, nextDelimiterStart);
+        processBlock(recordStart, nextDelimiterStart, count);
 
         recordStart = nextDelimiterEnd;
+        count++;
     }
-    processBlock(recordStart, text.length);
+    processBlock(recordStart, text.length, count);
 
     return {offsets, domains, domainPatterns, cache: {}};
 }

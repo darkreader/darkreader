@@ -12,7 +12,7 @@ import {isInTimeIntervalLocal, nextTimeInterval, isNightAtLocation, nextNightAtL
 import {isURLInList, getURLHostOrProtocol, isURLEnabled, isPDF} from '../utils/url';
 import ThemeEngines from '../generators/theme-engines';
 import createCSSFilterStylesheet from '../generators/css-filter';
-import {getDynamicThemeFixesForNew} from '../generators/dynamic-theme';
+import {getDynamicThemeFixesFor} from '../generators/dynamic-theme';
 import createStaticStylesheet from '../generators/static-theme';
 import {createSVGFilterStylesheet, getSVGFilterMatrixValue, getSVGReverseFilterMatrixValue} from '../generators/svg-filter';
 import type {ExtensionData, FilterConfig, News, Shortcuts, UserSettings, TabInfo} from '../definitions';
@@ -463,7 +463,7 @@ export class Extension {
                 case ThemeEngines.dynamicTheme: {
                     const filter = {...theme};
                     delete filter.engine;
-                    const fixesNew = getDynamicThemeFixesForNew(url, frameURL, this.config.DYNAMIC_THEME_FIXES_RAW, this.config.DYNAMIC_THEME_FIXES_INDEX, this.user.settings.enableForPDF);
+                    const fixesNew = getDynamicThemeFixesFor(url, frameURL, this.config.DYNAMIC_THEME_FIXES_RAW, this.config.DYNAMIC_THEME_FIXES_INDEX, this.user.settings.enableForPDF);
                     const isIFrame = frameURL != null;
                     return {
                         type: MessageType.BG_ADD_DYNAMIC_THEME,

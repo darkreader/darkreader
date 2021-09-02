@@ -1,4 +1,5 @@
 import {indexSitesFixesConfig, getSitesFixesFor} from '../../../src/generators/utils/parse';
+import type {SitesFixesParserOptions} from '../../../src/generators/utils/parse';
 
 test('Index config', () => {
     const record1 =
@@ -25,7 +26,7 @@ test('Index config', () => {
     \n\
     ${record2}`;
 
-    const options = {
+    const options: SitesFixesParserOptions<any> = {
         commands: ['DIRECTIVE1', 'MULTILINEDIRECTIVE'],
         getCommandPropName: (command) => command,
         parseCommandValue: (_, value) => value.trim(),

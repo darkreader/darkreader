@@ -12,7 +12,7 @@ export interface SitePropsIndex<T extends SiteProps> {
     cache: {[offsetId: number]: T};
 }
 
-interface SitesFixesParserOptions<T> {
+export interface SitesFixesParserOptions<T> {
     commands: string[];
     getCommandPropName: (command: string) => keyof T;
     parseCommandValue: (command: string, value: string) => any;

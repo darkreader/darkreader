@@ -463,11 +463,11 @@ export class Extension {
                 case ThemeEngines.dynamicTheme: {
                     const filter = {...theme};
                     delete filter.engine;
-                    const fixesNew = getDynamicThemeFixesFor(url, frameURL, this.config.DYNAMIC_THEME_FIXES_RAW, this.config.DYNAMIC_THEME_FIXES_INDEX, this.user.settings.enableForPDF);
+                    const fixes = getDynamicThemeFixesFor(url, frameURL, this.config.DYNAMIC_THEME_FIXES_RAW, this.config.DYNAMIC_THEME_FIXES_INDEX, this.user.settings.enableForPDF);
                     const isIFrame = frameURL != null;
                     return {
                         type: MessageType.BG_ADD_DYNAMIC_THEME,
-                        data: {filter, fixesNew, isIFrame},
+                        data: {filter, fixes, isIFrame},
                     };
                 }
                 default: {

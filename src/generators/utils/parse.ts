@@ -118,9 +118,9 @@ export function indexSitesFixesConfig<T extends SiteProps>(text: string): SitePr
             if (isFullyQualifiedDomain(domain)) {
                 if (!domains[domain]) {
                     domains[domain] = index;
-                } else if (typeof domains[domain] === 'number') {
+                } else if (typeof domains[domain] === 'number' && domains[domain] !== index) {
                     domains[domain] = [(domains[domain] as number), index];
-                } else if (typeof domains[domain] === 'object') {
+                } else if (typeof domains[domain] === 'object' && !((domains[domain] as number[]).includes(index))) {
                     (domains[domain] as number[]).push(index);
                 }
                 continue;
@@ -128,9 +128,9 @@ export function indexSitesFixesConfig<T extends SiteProps>(text: string): SitePr
 
             if (!domains[domain]) {
                 domainPatterns[domain] = index;
-            } else if (typeof domains[domain] === 'number') {
+            } else if (typeof domains[domain] === 'number' && domains[domain] !== index) {
                 domainPatterns[domain] = [(domainPatterns[domain] as number), index];
-            } else if (typeof domains[domain] === 'object') {
+            } else if (typeof domains[domain] === 'object' && !((domains[domain] as number[]).includes(index))) {
                 (domainPatterns[domain] as number[]).push(index);
             }
         }
@@ -152,7 +152,6 @@ export function indexSitesFixesConfig<T extends SiteProps>(text: string): SitePr
         count++;
     }
     processBlock(recordStart, text.length, count);
-
 
     return {offsets: encodeOffsets(offsets), domains, domainPatterns, cache: {}};
 }

@@ -251,7 +251,7 @@ export function formatStaticThemes(staticThemes: StaticTheme[]) {
 }
 
 function getCommonTheme(staticThemes: string, staticThemesIndex: SitePropsIndex<StaticTheme>): StaticTheme {
-    const length = parseInt(staticThemesIndex.offsets.substring(4, 8), 32);
+    const length = parseInt(staticThemesIndex.offsets.substring(4, 4 + 3), 36);
     const staticThemeText = staticThemes.substring(0, length);
     return parseStaticThemes(staticThemeText)[0];
 }

@@ -61,25 +61,38 @@ function getDomain(url: string) {
     return url.split('/')[0].toLowerCase();
 }
 
-function encodeOffsets(offsets: number[]): string {
-    return offsets.map((x) => {
-        let string = x.toString(32);
-        return '0'.repeat(4 - string.length) + string;
+/*
+ * Encode all offsets into a string, where each record is 6 bytes long:
+ *  - 4 bytes for start offset
+ *  - 2 bytes for record length (end offset - start offset)
+ * Both values are stored in base 36 (radix 36) notation.
+ * Maximum supported numbers:
+ *  - start offset must be no more than parseInt('zzzz', 36) = 1679615
+ *  - length must be no more than parseInt('zzzz', 36) = 1295
+ */
+function encodeOffsets(offsets: Array<[number, number]>): string {
+    return offsets.map(([offset, length]) => {
+        const stringOffset = offset.toString(36);
+        const stringLength = length.toString(36);
+        return '0'.repeat(4 - stringOffset.length) + stringOffset + '0'.repeat(2 - stringLength.length) + stringLength;
     }).join('');
 }
 
-function decodeOffset(offsets: string, index: number = 0): [number, number] {
-    const base = 8 * index;
+function decodeOffset(offsets: string, index: number): [number, number] {
+    const base = (4 + 2) * index;
+    const offset = parseInt(offsets.substring(base + 0, base + 4), 36);
+    const length = parseInt(offsets.substring(base + 4, base + 4 + 2), 36);
     return [
-        parseInt(offsets.substring(base + 0, base + 4), 32),
-        parseInt(offsets.substring(base + 4, base + 8), 32),
-    ]
+        offset,
+        offset + length,
+    ];
 }
 
 export function indexSitesFixesConfig<T extends SiteProps>(text: string): SitePropsIndex<T> {
     const domains: {[domain: string]: number | number[]} = {};
     const domainPatterns: {[domainPattern: string]: number | number[]} = {};
-    const offsets: number[] = [];
+    // Array of tuples, where first number is an offset of record start and second number is record length.
+    const offsets: Array<[number, number]> = [];
 
     function processBlock(recordStart: number, recordEnd: number, index: number) {
         // TODO: more formal definition of URLs and delimiters
@@ -118,7 +131,7 @@ export function indexSitesFixesConfig<T extends SiteProps>(text: string): SitePr
                 (domainPatterns[domain] as number[]).push(index);
             }
         }
-        offsets.push(recordStart, recordEnd);
+        offsets.push([recordStart, recordEnd - recordStart]);
     }
 
     let recordStart = 0;

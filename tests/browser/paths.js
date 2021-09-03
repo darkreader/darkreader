@@ -50,8 +50,8 @@ async function getFirefoxPath() {
     return await linuxAppPath('firefox-nightly');
 }
 
-const chromeExtensionDebugDir = path.join(__dirname, '../../debug');
-const firefoxExtensionDebugDir = path.join(__dirname, '../../debug-firefox');
+const chromeExtensionDebugDir = path.join(__dirname, '../../build/debug/chrome');
+const firefoxExtensionDebugDir = path.join(__dirname, '../../build/debug/firefox');
 
 module.exports = {
     getChromePath,

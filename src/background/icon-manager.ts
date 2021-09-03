@@ -39,11 +39,6 @@ export default class IconManager {
         chrome.browserAction.setBadgeText({text: '!'});
     }
 
-    showUnreadReleaseNotesBadge(count: number) {
-        chrome.browserAction.setBadgeBackgroundColor({color: '#e96c4c'});
-        chrome.browserAction.setBadgeText({text: String(count)});
-    }
-
     hideBadge() {
         chrome.browserAction.setBadgeText({text: ''});
     }

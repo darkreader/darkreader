@@ -51,15 +51,9 @@ export default class TabManager {
         this.stateManager = new StateManager(TabManager.LOCAL_STORAGE_KEY, this, {tabs: {}});
         this.tabs = {};
 
-        chrome.runtime.onMessage.addListener(async (message: Message, sender) => {
-            // Explicitly filter out all irrelevant messages
-            if (![MessageType.CS_FRAME_CONNECT,
-                MessageType.CS_FRAME_FORGET,
-                MessageType.CS_FRAME_FREEZE,
-                MessageType.CS_FRAME_RESUME].includes(message.type)) {
-                return;
-            }
+        const fileLoader = createFileLoader();
 
+        chrome.runtime.onMessage.addListener(async (message: Message, sender) => {
             function addFrame(tabs: {[tabId: number]: {[frameId: number]: FrameInfo}}, tabId: number, frameId: number, senderURL: string) {
                 let frames: {[frameId: number]: FrameInfo};
                 if (tabs[tabId]) {
@@ -71,10 +65,9 @@ export default class TabManager {
                 frames[frameId] = {url: senderURL, state: DocumentState.ACTIVE};
             }
 
-            await this.stateManager.loadState();
-
             switch (message.type) {
                 case MessageType.CS_FRAME_CONNECT: {
+                    await this.stateManager.loadState();
                     const reply = (options: ConnectionMessageOptions) => {
                         const message = getConnectionMessage(options);
                         if (message instanceof Promise) {
@@ -105,9 +98,11 @@ export default class TabManager {
                         url: tabURL,
                         frameURL: frameId === 0 ? null : senderURL,
                     });
+                    this.stateManager.saveState();
                     break;
                 }
                 case MessageType.CS_FRAME_FORGET: {
+                    await this.stateManager.loadState();
                     if (!sender.tab) {
                         logWarn('Unexpected message', message, sender);
                         break;
@@ -124,57 +119,62 @@ export default class TabManager {
                         // in sendMessage() would enumerate undefined as well.
                         delete this.tabs[tabId][frameId];
                     }
+                    this.stateManager.saveState();
                     break;
                 }
                 case MessageType.CS_FRAME_FREEZE:
+                    await this.stateManager.loadState();
                     this.tabs[sender.tab.id][sender.frameId].state = DocumentState.FROZEN;
+                    this.stateManager.saveState();
                     break;
                 case MessageType.CS_FRAME_RESUME:
+                    await this.stateManager.loadState();
                     addFrame(this.tabs, sender.tab.id, sender.frameId, sender.url);
+                    this.stateManager.saveState();
                     break;
-            }
 
-            this.stateManager.saveState();
-        });
-
-        const fileLoader = createFileLoader();
-
-        chrome.runtime.onMessage.addListener(async ({type, data, id}: Message, sender) => {
-            if (type === MessageType.CS_FETCH) {
-                const {url, responseType, mimeType, origin} = data;
-
-                // Using custom response due to Chrome and Firefox incompatibility
-                // Sometimes fetch error behaves like synchronous and sends `undefined`
-                const sendResponse = (response: Partial<Message>) => chrome.tabs.sendMessage<Message>(sender.tab.id, {type: MessageType.BG_FETCH_RESPONSE, id, ...response});
-                if (isThunderbird) {
-                    // In thunderbird some CSS is loaded on a chrome:// URL.
-                    // Thunderbird restricted Add-ons to load those URL's.
-                    if ((url as string).startsWith('chrome://')) {
-                        sendResponse({data: null});
-                        return;
+                case MessageType.CS_FETCH: {
+                    // Using custom response due to Chrome and Firefox incompatibility
+                    // Sometimes fetch error behaves like synchronous and sends `undefined`
+                    const id = message.id;
+                    const sendResponse = (response: Partial<Message>) => chrome.tabs.sendMessage<Message>(sender.tab.id, {type: MessageType.BG_FETCH_RESPONSE, id, ...response});
+                    if (isThunderbird) {
+                        // In thunderbird some CSS is loaded on a chrome:// URL.
+                        // Thunderbird restricted Add-ons to load those URL's.
+                        if ((message.data.url as string).startsWith('chrome://')) {
+                            sendResponse({data: null});
+                            return;
+                        }
                     }
+                    try {
+                        const {url, responseType, mimeType, origin} = message.data;
+                        const response = await fileLoader.get({url, responseType, mimeType, origin});
+                        sendResponse({data: response});
+                    } catch (err) {
+                        sendResponse({error: err && err.message ? err.message : err});
+                    }
+                    break;
                 }
-                try {
-                    const response = await fileLoader.get({url, responseType, mimeType, origin});
-                    sendResponse({data: response});
-                } catch (err) {
-                    sendResponse({error: err && err.message ? err.message : err});
-                }
-            }
 
-            if (type === MessageType.CS_COLOR_SCHEME_CHANGE) {
-                onColorSchemeChange(data);
-            }
-            if (type === MessageType.UI_SAVE_FILE) {
-                const {content, name} = data;
-                const a = document.createElement('a');
-                a.href = URL.createObjectURL(new Blob([content]));
-                a.download = name;
-                a.click();
-            }
-            if (type === MessageType.UI_REQUEST_EXPORT_CSS) {
-                const activeTab = await this.getActiveTab();
-                chrome.tabs.sendMessage<Message>(activeTab.id, {type: MessageType.BG_EXPORT_CSS}, {frameId: 0});
+                case MessageType.CS_COLOR_SCHEME_CHANGE: {
+                    onColorSchemeChange(message.data);
+                    break;
+                }
+
+                case MessageType.UI_SAVE_FILE: {
+                    const {content, name} = message.data;
+                    const a = document.createElement('a');
+                    a.href = URL.createObjectURL(new Blob([content]));
+                    a.download = name;
+                    a.click();
+                    break;
+                }
+
+                case MessageType.UI_REQUEST_EXPORT_CSS: {
+                    const activeTab = await this.getActiveTab();
+                    chrome.tabs.sendMessage<Message>(activeTab.id, {type: MessageType.BG_EXPORT_CSS}, {frameId: 0});
+                    break;
+                }
             }
         });
     }

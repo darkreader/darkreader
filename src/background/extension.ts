@@ -20,10 +20,10 @@ import {isSystemDarkModeEnabled} from '../utils/media-query';
 import {isFirefox, isThunderbird} from '../utils/platform';
 import {MessageType} from '../utils/message';
 import {logInfo, logWarn} from '../utils/log';
+import {PromiseBarrier} from '../utils/promise-barrier';
+import {StateManager} from './utils/state-manager';
 
 export class Extension {
-    ready: boolean;
-
     config: ConfigManager;
     devtools: DevTools;
     fonts: string[];
@@ -35,17 +35,17 @@ export class Extension {
 
     private isEnabledCached: boolean = null;
     private wasEnabledOnLastCheck: boolean = null;
-    private awaiting: Array<() => void>;
     private popupOpeningListener: () => void = null;
     private wasLastColorSchemeDark: boolean = null;
+    private startBarrier: PromiseBarrier = null;
+    private stateManager: StateManager = null;
 
     static ALARM_NAME = 'auto-time-alarm';
+    static LOCAL_STORAGE_KEY = 'Extension-state';
     constructor() {
-        this.ready = false;
-
         this.icon = new IconManager();
         this.config = new ConfigManager();
-        this.devtools = new DevTools(this.config, () => this.onSettingsChanged());
+        this.devtools = new DevTools(this.config, async () => this.onSettingsChanged());
         this.messenger = new Messenger(this.getMessengerAdapter());
         this.news = new Newsmaker((news) => this.onNewsUpdate(news));
         this.tabs = new TabManager({
@@ -58,7 +58,13 @@ export class Extension {
             onColorSchemeChange: this.onColorSchemeChange,
         });
         this.user = new UserStorage({onRemoteSettingsChange: () => this.onRemoteSettingsChange()});
-        this.awaiting = [];
+        this.startBarrier = new PromiseBarrier();
+        this.stateManager = new StateManager(Extension.LOCAL_STORAGE_KEY, this, {
+            isEnabledCached: null,
+            wasEnabledOnLastCheck: null,
+        });
+
+        chrome.alarms.onAlarm.addListener(this.alarmListener);
     }
 
     private alarmListener(alarm: chrome.alarms.Alarm): void {
@@ -115,44 +121,34 @@ export class Extension {
 
     async start() {
         await this.config.load({local: true});
-        this.fonts = await getFontList();
 
         await this.user.loadSettings();
         if (this.user.settings.syncSitesFixes) {
             await this.config.load({local: false});
         }
         this.onAppToggle();
-        this.changeSettings(this.user.settings);
         logInfo('loaded', this.user.settings);
 
-        this.registerCommands();
-
-        this.ready = true;
         if (isThunderbird) {
             this.tabs.registerMailDisplayScript();
         } else {
             this.tabs.updateContentScript({runOnProtectedPages: this.user.settings.enableForProtectedPages});
         }
 
-        this.awaiting.forEach((ready) => ready());
-        this.awaiting = null;
-
-        this.startAutoTimeCheck();
         this.news.subscribe();
+        this.startBarrier.resolve();
     }
 
     private getMessengerAdapter(): ExtensionAdapter {
         return {
             collect: async () => {
-                if (!this.ready) {
-                    await new Promise<void>((resolve) => this.awaiting.push(resolve));
-                }
                 return await this.collectData();
             },
             getActiveTabInfo: async () => {
-                if (!this.ready) {
-                    await new Promise<void>((resolve) => this.awaiting.push(resolve));
+                if (!this.user.settings) {
+                    await this.user.loadSettings();
                 }
+                await this.stateManager.loadState();
                 const url = await this.tabs.getActiveTabURL();
                 const info = this.getURLInfo(url);
                 info.isInjected = await this.tabs.canAccessActiveTab();
@@ -174,39 +170,36 @@ export class Extension {
         };
     }
 
-    private registerCommands() {
-        if (!chrome.commands) {
-            // Fix for Firefox Android
-            return;
+    async onCommand(command: string, url: string) {
+        if (this.startBarrier.isPending()) {
+            await this.startBarrier.entry();
         }
-        chrome.commands.onCommand.addListener(async (command) => {
-            if (!this.user.settings) {
-                await this.user.loadSettings();
-            }
-            if (command === 'toggle') {
+        this.stateManager.loadState();
+        switch (command) {
+            case 'toggle':
                 logInfo('Toggle command entered');
                 this.changeSettings({
                     enabled: !this.isEnabled(),
                     automation: '',
                 });
-            }
-            if (command === 'addSite') {
+                break;
+            case 'addSite':
                 logInfo('Add Site command entered');
-                const url = await this.tabs.getActiveTabURL();
                 if (isPDF(url)) {
                     this.changeSettings({enableForPDF: !this.user.settings.enableForPDF});
                 } else {
                     this.toggleURL(url);
                 }
-            }
-            if (command === 'switchEngine') {
+                break;
+            case 'switchEngine': {
                 logInfo('Switch Engine command entered');
                 const engines = Object.values(ThemeEngines);
                 const index = engines.indexOf(this.user.settings.theme.engine);
-                const next = index === engines.length - 1 ? engines[0] : engines[index + 1];
+                const next = engines[(index + 1) % engines.length];
                 this.setTheme({engine: next});
+                break;
             }
-        });
+        }
     }
 
     private async getShortcuts() {
@@ -219,9 +212,16 @@ export class Extension {
     }
 
     private async collectData(): Promise<ExtensionData> {
+        if (!this.user.settings) {
+            await this.user.loadSettings();
+        }
+        if (!this.fonts) {
+            this.fonts = await getFontList();
+        }
+        await this.stateManager.loadState();
         return {
             isEnabled: this.isEnabled(),
-            isReady: this.ready,
+            isReady: true,
             settings: this.user.settings,
             fonts: this.fonts,
             news: await this.news.getLatest(),
@@ -254,23 +254,16 @@ export class Extension {
     }
 
     private getConnectionMessage(url: string, frameURL: string) {
-        if (this.ready) {
+        if (this.user.settings) {
             return this.getTabMessage(url, frameURL);
         }
         return new Promise<{type: string; data?: any}>((resolve) => {
-            this.awaiting.push(() => {
-                resolve(this.getTabMessage(url, frameURL));
-            });
+            this.user.loadSettings().then(() => resolve(this.getTabMessage(url, frameURL)));
         });
     }
 
     private getUnsupportedSenderMessage() {
         return {type: MessageType.BG_UNSUPPORTED_SENDER};
-    }
-
-    private startAutoTimeCheck() {
-        chrome.alarms.onAlarm.addListener(this.alarmListener);
-        this.handleAutoCheck();
     }
 
     private onColorSchemeChange = ({isDark}: {isDark: boolean}) => {
@@ -283,10 +276,11 @@ export class Extension {
         this.handleAutoCheck();
     };
 
-    private handleAutoCheck = () => {
-        if (!this.ready) {
-            return;
+    private async handleAutoCheck() {
+        if (!this.user.settings) {
+            await this.user.loadSettings();
         }
+        await this.stateManager.loadState();
         this.isEnabledCached = null;
         const isEnabled = this.isEnabled();
         if (this.wasEnabledOnLastCheck === null || this.wasEnabledOnLastCheck !== isEnabled) {
@@ -294,8 +288,9 @@ export class Extension {
             this.onAppToggle();
             this.tabs.sendMessage(this.getTabMessage);
             this.reportChanges();
+            this.stateManager.saveState();
         }
-    };
+    }
 
     changeSettings($settings: Partial<UserSettings>) {
         const prev = {...this.user.settings};
@@ -390,15 +385,16 @@ export class Extension {
         }
     }
 
-    private onSettingsChanged() {
-        if (!this.ready) {
-            return;
+    private async onSettingsChanged() {
+        if (!this.user.settings) {
+            await this.user.loadSettings();
         }
-
+        await this.stateManager.loadState();
         this.wasEnabledOnLastCheck = this.isEnabled();
         this.tabs.sendMessage(this.getTabMessage);
         this.saveUserSettings();
         this.reportChanges();
+        this.stateManager.saveState();
     }
 
     private onRemoteSettingsChange() {

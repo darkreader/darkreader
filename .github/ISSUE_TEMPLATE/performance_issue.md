@@ -15,19 +15,22 @@ assignees: ''
 <!--
   Thank you for taking the time to create a report about a performance issue.
   Ensure that there are no other existing reports for this performance issue.
-  Also, remember to fill out every section on this report and remove any that are not needed.
+  Please check if the issue is resolved after a restart of the browser.
+  Additionally, you should check if the issue persists in a new browser profile.
+  Remember to fill out every section on this report and remove any that are not needed.
   Finally, place a brief description in the title of this report.
   NOTE: Ensure that this is an actual performance issue.
   One extra second to load the website is not a performance issue.
 -->
 
+
 # Performance Issue Report
 
 ## Website Address
-<!-- Provide the website address to allow us to troubleshoot this performance issue. -->
+<!-- Provide the website address. -->
 
 ## Steps To Reproduce
-<!-- Provide steps to reproduce the problem, and allowing us to troubleshoot this performance issue. -->
+<!-- Provide steps to reproduce the problem, which will allow us to troubleshoot this performance issue. -->
 <!--
 Here is an example:
 - Go to example.com.

@@ -139,7 +139,7 @@ export function indexSitesFixesConfig<T extends SiteProps>(text: string): SitePr
 
     let recordStart = 0;
     // Delimiter between two blocks
-    const delimiterRegex = /\r?\s*={2,}\s*\r?/gm;
+    const delimiterRegex = /\s*={2,}\s*/gm;
     let delimiter: RegExpMatchArray;
     let count = 0;
     while ((delimiter = delimiterRegex.exec(text))) {

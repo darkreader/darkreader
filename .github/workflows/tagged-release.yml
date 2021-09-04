@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
     inputs:
       retention_days:
-        description: 'Retantion duration (in days)'
+        description: 'Retention duration (in days)'
         required: true
         default: '1'
 

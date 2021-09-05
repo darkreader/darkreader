@@ -20,24 +20,28 @@ export interface ImageDetails {
 const imageManager = new AsyncQueue();
 
 export async function getImageDetails(url: string) {
-    return new Promise<ImageDetails>(async (resolve) => {
-        let dataURL: string;
-        if (url.startsWith('data:')) {
-            dataURL = url;
-        } else {
-            dataURL = await getImageDataURL(url);
-        }
+    return new Promise<ImageDetails>(async (resolve, reject) => {
+        try {
+            let dataURL: string;
+            if (url.startsWith('data:')) {
+                dataURL = url;
+            } else {
+                dataURL = await getImageDataURL(url);
+            }
 
-        const image = await urlToImage(dataURL);
-        imageManager.addToQueue(() => {
-            resolve({
-                src: url,
-                dataURL,
-                width: image.naturalWidth,
-                height: image.naturalHeight,
-                ...analyzeImage(image),
+            const image = await urlToImage(dataURL);
+            imageManager.addToQueue(() => {
+                resolve({
+                    src: url,
+                    dataURL,
+                    width: image.naturalWidth,
+                    height: image.naturalHeight,
+                    ...analyzeImage(image),
+                });
             });
-        });
+        } catch (error) {
+            reject(error);
+        }
     });
 }
 

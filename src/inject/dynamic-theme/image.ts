@@ -21,14 +21,14 @@ const imageManager = new AsyncQueue();
 
 export async function getImageDetails(url: string) {
     return new Promise<ImageDetails>(async (resolve, reject) => {
-        try {
-            let dataURL: string;
-            if (url.startsWith('data:')) {
-                dataURL = url;
-            } else {
-                dataURL = await getImageDataURL(url);
-            }
+        let dataURL: string;
+        if (url.startsWith('data:')) {
+            dataURL = url;
+        } else {
+            dataURL = await getImageDataURL(url);
+        }
 
+        try {
             const image = await urlToImage(dataURL);
             imageManager.addToQueue(() => {
                 resolve({

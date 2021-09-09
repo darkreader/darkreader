@@ -73,6 +73,7 @@ export interface ThemePreset {
 
 export interface UserSettings {
     enabled: boolean;
+    fetchNews: boolean;
     theme: FilterConfig;
     presets: ThemePreset[];
     customThemes: CustomSiteConfig[];
@@ -80,7 +81,6 @@ export interface UserSettings {
     siteListEnabled: string[];
     applyToListedOnly: boolean;
     changeBrowserTheme: boolean;
-    notifyOfNews: boolean;
     syncSettings: boolean;
     syncSitesFixes: boolean;
     automation: '' | 'time' | 'system' | 'location';

@@ -135,7 +135,7 @@ export class Extension {
             this.tabs.updateContentScript({runOnProtectedPages: this.user.settings.enableForProtectedPages});
         }
 
-        this.news.subscribe();
+        this.user.settings.fetchNews && this.news.subscribe();
         this.startBarrier.resolve();
     }
 
@@ -244,12 +244,6 @@ export class Extension {
             return;
         }
 
-        const unread = news.filter(({read}) => !read);
-        if (unread.length > 0 && this.user.settings.notifyOfNews) {
-            this.icon.showUnreadReleaseNotesBadge(unread.length);
-            return;
-        }
-
         this.icon.hideBadge();
     }
 
@@ -316,6 +310,9 @@ export class Extension {
             } else {
                 resetWindowTheme();
             }
+        }
+        if (prev.fetchNews !== this.user.settings.fetchNews) {
+            this.user.settings.fetchNews ? this.news.subscribe() : this.news.unSubscribe();
         }
 
         this.onSettingsChanged();

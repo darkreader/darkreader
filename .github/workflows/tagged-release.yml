@@ -4,6 +4,12 @@ on:
   push:
     tags:
       - "v*"
+  workflow_dispatch:
+    inputs:
+      retention_days:
+        description: 'Retention duration (in days)'
+        required: true
+        default: '1'
 
 jobs:
   build:
@@ -38,3 +44,9 @@ jobs:
         with:
           files: |
             build/release/darkreader-*
+
+      - name: Upload built artifact
+        uses: actions/upload-artifact@v2
+        with:
+          path: build/release/darkreader-*
+          retention-days: ${{ inputs.retention_days }}

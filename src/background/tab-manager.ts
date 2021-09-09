@@ -45,13 +45,12 @@ enum DocumentState {
 export default class TabManager {
     private tabs: {[tabId: number]: {[frameId: number]: FrameInfo}};
     private stateManager: StateManager;
+    private fileLoader: any = null;
     static LOCAL_STORAGE_KEY = 'TabManager-state';
 
     constructor({getConnectionMessage, onColorSchemeChange}: TabManagerOptions) {
         this.stateManager = new StateManager(TabManager.LOCAL_STORAGE_KEY, this, {tabs: {}});
         this.tabs = {};
-
-        const fileLoader = createFileLoader();
 
         chrome.runtime.onMessage.addListener(async (message: Message, sender) => {
             function addFrame(tabs: {[tabId: number]: {[frameId: number]: FrameInfo}}, tabId: number, frameId: number, senderURL: string) {
@@ -148,7 +147,10 @@ export default class TabManager {
                     }
                     try {
                         const {url, responseType, mimeType, origin} = message.data;
-                        const response = await fileLoader.get({url, responseType, mimeType, origin});
+                        if (!this.fileLoader) {
+                            this.fileLoader = createFileLoader();
+                        }
+                        const response = await this.fileLoader.get({url, responseType, mimeType, origin});
                         sendResponse({data: response});
                     } catch (err) {
                         sendResponse({error: err && err.message ? err.message : err});

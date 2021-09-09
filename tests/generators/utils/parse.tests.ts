@@ -45,3 +45,31 @@ test('Index config', () => {
             'hello\nworld'
         }]);
 });
+
+test('Empty config', () => {
+    const config =
+    '*\n' +
+    '\n' +
+    'DIRECTIVE\n' +
+    'hello world\n' +
+    '\n' +
+    '====================\n' +
+    '\n' +
+    'invalid.example\n' +
+    '\n';
+
+    const options: SitesFixesParserOptions<any> = {
+        commands: ['DIRECTIVE'],
+        getCommandPropName: (command) => command,
+        parseCommandValue: (_, value) => value.trim(),
+    };
+    const index = indexSitesFixesConfig(config);
+
+    const fixesGeneric = getSitesFixesFor('example.com', config, index, options);
+    const fixesInvalid = getSitesFixesFor('invalid.example', config, index, options);
+    expect(fixesGeneric).toEqual([{
+        'url': ['*'],
+        'DIRECTIVE': 'hello world',
+    }]);
+    expect(fixesInvalid).toEqual(fixesGeneric);
+});

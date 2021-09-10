@@ -66,7 +66,7 @@ function getDomain(url: string) {
 }
 
 /*
- * Encode all offsets into a string, where each record is 6 bytes long:
+ * Encode all offsets into a string, where each record is 7 bytes long:
  *  - 4 bytes for start offset
  *  - 3 bytes for record length (end offset - start offset)
  * Both values are stored in base 36 (radix 36) notation.
@@ -130,11 +130,11 @@ export function indexSitesFixesConfig<T extends SiteProps>(text: string): SitePr
                 continue;
             }
 
-            if (!domains[domain]) {
+            if (!domainPatterns[domain]) {
                 domainPatterns[domain] = index;
-            } else if (typeof domains[domain] === 'number' && domains[domain] !== index) {
+            } else if (typeof domainPatterns[domain] === 'number' && domainPatterns[domain] !== index) {
                 domainPatterns[domain] = [(domainPatterns[domain] as number), index];
-            } else if (typeof domains[domain] === 'object' && !((domains[domain] as number[]).includes(index))) {
+            } else if (typeof domainPatterns[domain] === 'object' && !((domainPatterns[domain] as number[]).includes(index))) {
                 (domainPatterns[domain] as number[]).push(index);
             }
         }

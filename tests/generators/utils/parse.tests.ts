@@ -2,29 +2,25 @@ import {indexSitesFixesConfig, getSitesFixesFor} from '../../../src/generators/u
 import type {SitesFixesParserOptions} from '../../../src/generators/utils/parse';
 
 test('Index config', () => {
-    const record1 =
-    '*\n' +
-    '\n' +
-    'DIRECTIVE\n' +
-    'hi\n' +
-    '\n' +
-    'MULTILINEDIRECTIVE\n' +
-    'hello\n' +
-    'world\n';
-
-    const record2 =
-    'example.com\n' +
-    '\n' +
-    'CSS\n' +
-    'div {\n' +
-    '  color: green;\n' +
-    '}\n';
-
-    const config = `${record1}\
-    \n\
-    =====================\n\
-    \n\
-    ${record2}`;
+    const config = [
+        '*',
+        '',
+        'DIRECTIVE',
+        'hi',
+        '',
+        'MULTILINEDIRECTIVE',
+        'hello',
+        'world',
+        '',
+        '==================',
+        '',
+        'example.com',
+        '',
+        'CSS',
+        'div {',
+        '  color: green;',
+        '}'
+    ].join('\n');
 
     const options: SitesFixesParserOptions<any> = {
         commands: ['DIRECTIVE1', 'MULTILINEDIRECTIVE'],
@@ -47,16 +43,17 @@ test('Index config', () => {
 });
 
 test('Empty config', () => {
-    const config =
-    '*\n' +
-    '\n' +
-    'DIRECTIVE\n' +
-    'hello world\n' +
-    '\n' +
-    '====================\n' +
-    '\n' +
-    'invalid.example\n' +
-    '\n';
+    const config = [
+        '*',
+        '',
+        'DIRECTIVE',
+        'hello world',
+        '',
+        '====================',
+        '',
+        'invalid.example',
+        ''
+    ].join('\n');
 
     const options: SitesFixesParserOptions<any> = {
         commands: ['DIRECTIVE'],
@@ -72,4 +69,132 @@ test('Empty config', () => {
         'DIRECTIVE': 'hello world',
     }]);
     expect(fixesInvalid).toEqual(fixesGeneric);
+});
+
+test('Domain appearing in multiple records', () => {
+    const config = [
+        '*',
+        '',
+        'DIRECTIVE',
+        'hello world',
+        '',
+        '====================',
+        '',
+        'example.com',
+        '*.example.net',
+        '',
+        'DIRECTIVE',
+        'one',
+        '',
+        '====================',
+        '',
+        'example.com',
+        '*.example.net',
+        '',
+        'DIRECTIVE',
+        'two',
+        '',
+        '====================',
+        '',
+        'example.com',
+        '*.example.net',
+        '',
+        'DIRECTIVE',
+        'three',
+        ''
+    ].join('\n');
+
+    const options: SitesFixesParserOptions<any> = {
+        commands: ['DIRECTIVE'],
+        getCommandPropName: (command) => command,
+        parseCommandValue: (_, value) => value.trim(),
+    };
+    const index = indexSitesFixesConfig(config);
+
+    const fixesFQD = getSitesFixesFor('example.com', config, index, options);
+    const fixesWildcard = getSitesFixesFor('sub.example.net', config, index, options);
+    expect(fixesFQD).toEqual([
+        {
+            'url': ['example.com', '*.example.net'],
+            'DIRECTIVE': 'one'
+        }, {
+            'url': ['example.com', '*.example.net'],
+            'DIRECTIVE': 'two'
+        }, {
+            'url': ['example.com', '*.example.net'],
+            'DIRECTIVE': 'three'
+        }, {
+            'url': ['*'],
+            'DIRECTIVE': 'hello world'
+        }]);
+    expect(fixesWildcard).toEqual([
+        {
+            'url': ['*'],
+            'DIRECTIVE': 'hello world'
+        }, {
+            'url': ['example.com', '*.example.net'],
+            'DIRECTIVE': 'one'
+        }, {
+            'url': ['example.com', '*.example.net'],
+            'DIRECTIVE': 'two'
+        }, {
+            'url': ['example.com', '*.example.net'],
+            'DIRECTIVE': 'three'
+        }]);
+});
+
+test('Domain appearing multiple times within the same record', () => {
+    const config = [
+        '*',
+        '',
+        'DIRECTIVE',
+        'hello world',
+        '',
+        '====================',
+        '',
+        'example.com',
+        '*.example.net',
+        'example.com',
+        '*.example.net',
+        '',
+        'DIRECTIVE',
+        'one',
+        ''
+    ].join('\n');
+
+    const options: SitesFixesParserOptions<any> = {
+        commands: ['DIRECTIVE'],
+        getCommandPropName: (command) => command,
+        parseCommandValue: (_, value) => value.trim(),
+    };
+    const index = indexSitesFixesConfig(config);
+
+    const fixesFQD = getSitesFixesFor('example.com', config, index, options);
+    const fixesWildcard = getSitesFixesFor('sub.example.net', config, index, options);
+    expect(fixesFQD).toEqual([
+        {
+            'url': [
+                'example.com',
+                '*.example.net',
+                'example.com',
+                '*.example.net'
+            ],
+            'DIRECTIVE': 'one'
+        }, {
+            'url': ['*'],
+            'DIRECTIVE': 'hello world'
+        }]);
+    expect(fixesWildcard).toEqual([
+        {
+            'url': ['*'],
+            'DIRECTIVE': 'hello world'
+        }, {
+            'url': [
+                'example.com',
+                '*.example.net',
+                'example.com',
+                '*.example.net'
+            ],
+            'DIRECTIVE': 'one'
+        }]);
 });

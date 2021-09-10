@@ -1,7 +1,7 @@
 const fs = require('fs');
 const globby = require('globby');
 const yazl = require('yazl');
-const {getDestDir} = require('./paths');
+const {getDestDir, PLATFORM} = require('./paths');
 const {createTask} = require('./task');
 
 function archiveFiles({files, dest, cwd}) {
@@ -19,9 +19,9 @@ async function archiveDirectory({dir, dest}) {
 }
 
 async function zip({debug}) {
-    const dir = getDestDir({debug});
-    const firefoxDir = getDestDir({debug, firefox: true});
-    const thunderBirdDir = getDestDir({debug, thunderbird: true});
+    const dir = getDestDir({debug, platform: PLATFORM.CHROME});
+    const firefoxDir = getDestDir({debug, platform: PLATFORM.FIREFOX});
+    const thunderBirdDir = getDestDir({debug, platform: PLATFORM.THUNDERBIRD});
 
     const releaseDir = 'build/release';
     const chromeDest = `${releaseDir}/darkreader-chrome.zip`;

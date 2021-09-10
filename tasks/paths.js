@@ -1,7 +1,11 @@
 module.exports = {
-    getDestDir: function ({debug, firefox, thunderbird}) {
-        const browser = thunderbird ? 'thunderbird' : firefox ? 'firefox' : 'chrome';
+    PLATFORM: {
+        CHROME: 'chrome',
+        FIREFOX: 'firefox',
+        THUNDERBIRD: 'thubderbird',
+    },
+    getDestDir: function ({debug, platform}) {
         const buildTypeDir = `build/${debug ? 'debug' : 'release'}`;
-        return `${buildTypeDir}/${browser}`;
+        return `${buildTypeDir}/${platform}`;
     }
 };

@@ -430,20 +430,20 @@ export class Extension {
                 case ThemeEngines.cssFilter: {
                     return {
                         type: MessageType.BG_ADD_CSS_FILTER,
-                        data: createCSSFilterStylesheet(theme, url, frameURL, this.config.INVERSION_FIXES),
+                        data: createCSSFilterStylesheet(theme, url, frameURL, this.config.INVERSION_FIXES_RAW, this.config.INVERSION_FIXES_INDEX),
                     };
                 }
                 case ThemeEngines.svgFilter: {
                     if (isFirefox) {
                         return {
                             type: MessageType.BG_ADD_CSS_FILTER,
-                            data: createSVGFilterStylesheet(theme, url, frameURL, this.config.INVERSION_FIXES),
+                            data: createSVGFilterStylesheet(theme, url, frameURL, this.config.INVERSION_FIXES_RAW, this.config.INVERSION_FIXES_INDEX),
                         };
                     }
                     return {
                         type: MessageType.BG_ADD_SVG_FILTER,
                         data: {
-                            css: createSVGFilterStylesheet(theme, url, frameURL, this.config.INVERSION_FIXES),
+                            css: createSVGFilterStylesheet(theme, url, frameURL, this.config.INVERSION_FIXES_RAW, this.config.INVERSION_FIXES_INDEX),
                             svgMatrix: getSVGFilterMatrixValue(theme),
                             svgReverseMatrix: getSVGReverseFilterMatrixValue(),
                         },
@@ -454,13 +454,13 @@ export class Extension {
                         type: MessageType.BG_ADD_STATIC_THEME,
                         data: theme.stylesheet && theme.stylesheet.trim() ?
                             theme.stylesheet :
-                            createStaticStylesheet(theme, url, frameURL, this.config.STATIC_THEMES),
+                            createStaticStylesheet(theme, url, frameURL, this.config.STATIC_THEMES_RAW, this.config.STATIC_THEMES_INDEX),
                     };
                 }
                 case ThemeEngines.dynamicTheme: {
                     const filter = {...theme};
                     delete filter.engine;
-                    const fixes = getDynamicThemeFixesFor(url, frameURL, this.config.DYNAMIC_THEME_FIXES, this.user.settings.enableForPDF);
+                    const fixes = getDynamicThemeFixesFor(url, frameURL, this.config.DYNAMIC_THEME_FIXES_RAW, this.config.DYNAMIC_THEME_FIXES_INDEX, this.user.settings.enableForPDF);
                     const isIFrame = frameURL != null;
                     return {
                         type: MessageType.BG_ADD_DYNAMIC_THEME,

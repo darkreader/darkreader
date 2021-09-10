@@ -1,5 +1,6 @@
 import {formatSitesFixesConfig} from './utils/format';
-import {parseSitesFixesConfig} from './utils/parse';
+import {parseSitesFixesConfig, getSitesFixesFor} from './utils/parse';
+import type {SitePropsIndex} from './utils/parse';
 import {parseArray, formatArray} from '../utils/text';
 import {compareURLPatterns, isURLInList} from '../utils/url';
 import type {DynamicThemeFix} from '../definitions';
@@ -45,23 +46,35 @@ export function formatDynamicThemeFixes(dynamicThemeFixes: DynamicThemeFix[]) {
     });
 }
 
-export function getDynamicThemeFixesFor(url: string, frameURL: string, fixes: DynamicThemeFix[], enabledForPDF: boolean) {
-    if (fixes.length === 0 || fixes[0].url[0] !== '*') {
+export function getDynamicThemeFixesFor(url: string, frameURL: string, text: string, index: SitePropsIndex<DynamicThemeFix>, enabledForPDF: boolean) {
+    const fixes = getSitesFixesFor(frameURL || url, text, index, {
+        commands: Object.keys(dynamicThemeFixesCommands),
+        getCommandPropName: (command) => dynamicThemeFixesCommands[command],
+        parseCommandValue: (command, value) => {
+            if (command === 'CSS') {
+                return value.trim();
+            }
+            return parseArray(value);
+        },
+    });
+
+    if (fixes.length === 0 || fixes[fixes.length - 1].url[0] !== '*') {
         return null;
     }
+    const genericFix = fixes[fixes.length - 1];
 
     const common = {
-        url: fixes[0].url,
-        invert: fixes[0].invert || [],
-        css: fixes[0].css || [],
-        ignoreInlineStyle: fixes[0].ignoreInlineStyle || [],
-        ignoreImageAnalysis: fixes[0].ignoreImageAnalysis || [],
+        url: genericFix.url,
+        invert: genericFix.invert || [],
+        css: genericFix.css || [],
+        ignoreInlineStyle: genericFix.ignoreInlineStyle || [],
+        ignoreImageAnalysis: genericFix.ignoreImageAnalysis || [],
     };
     if (enabledForPDF) {
         common.invert = common.invert.concat('embed[type="application/pdf"]');
     }
     const sortedBySpecificity = fixes
-        .slice(1)
+        .slice(0, fixes.length - 1)
         .map((theme) => {
             return {
                 specificity: isURLInList(frameURL || url, theme.url) ? theme.url[0].length : 0,

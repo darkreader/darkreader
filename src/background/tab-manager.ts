@@ -46,13 +46,11 @@ export default class TabManager {
     private tabs: {[tabId: number]: {[frameId: number]: FrameInfo}};
     private stateManager: StateManager;
     private fileLoader: any = null;
-    private onColorSchemeChange: ({isDark}: {isDark: boolean}) => void;
     static LOCAL_STORAGE_KEY = 'TabManager-state';
 
     constructor({getConnectionMessage, onColorSchemeChange}: TabManagerOptions) {
         this.stateManager = new StateManager(TabManager.LOCAL_STORAGE_KEY, this, {tabs: {}});
         this.tabs = {};
-        this.onColorSchemeChange = onColorSchemeChange;
 
         chrome.runtime.onMessage.addListener(async (message: Message, sender) => {
             function addFrame(tabs: {[tabId: number]: {[frameId: number]: FrameInfo}}, tabId: number, frameId: number, senderURL: string) {
@@ -264,12 +262,5 @@ export default class TabManager {
             tab = tabs.find((t) => !isExtensionPage(t.url)) || tab;
         }
         return tab;
-    }
-
-    async querySystemColorScheme() {
-        if (!isMV3) {
-            logWarn('querySystemColorScheme() was called in non-MV3 build.');
-            return;
-        }
     }
 }

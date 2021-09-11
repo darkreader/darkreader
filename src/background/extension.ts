@@ -38,8 +38,6 @@ export class Extension {
     private popupOpeningListener: () => void = null;
     // Is used only with Firefox to bypass Firefox bug
     private wasLastColorSchemeDark: boolean = null;
-    // Is used only with MV3 to store current color scheme
-    private isColorSchemeDark: boolean = null;
     private startBarrier: PromiseBarrier = null;
     private stateManager: StateManager = null;
 
@@ -65,7 +63,6 @@ export class Extension {
         this.stateManager = new StateManager(Extension.LOCAL_STORAGE_KEY, this, {
             isEnabledCached: null,
             wasEnabledOnLastCheck: null,
-            isColorSchemeDark: null,
         });
 
         chrome.alarms.onAlarm.addListener(this.alarmListener);
@@ -96,13 +93,8 @@ export class Extension {
                 break;
             case 'system':
                 if (isMV3) {
-                    if (this.isColorSchemeDark === false || this.isColorSchemeDark === true) {
-                        this.isEnabledCached = this.isColorSchemeDark;
-                    } else {
-                        // Assume that dark theme is on for now, and then asynchroneously query it from content script
-                        this.isEnabledCached = true;
-                        this.tabs.querySystemColorScheme();
-                    }
+                    logWarn('system automation is not yet supported. Defaulting to ON.');
+                    this.isEnabledCached = true;
                     break;
                 }
                 if (isFirefox) {
@@ -168,10 +160,7 @@ export class Extension {
                 info.isInjected = await this.tabs.canAccessActiveTab();
                 return info;
             },
-            changeSettings: (settings, isDark) => {
-                this.isColorSchemeDark = isDark;
-                this.changeSettings(settings);
-            },
+            changeSettings: (settings) => this.changeSettings(settings),
             setTheme: (theme) => this.setTheme(theme),
             setShortcut: ({command, shortcut}) => this.setShortcut(command, shortcut),
             toggleURL: (url) => this.toggleURL(url),

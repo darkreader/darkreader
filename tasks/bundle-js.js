@@ -5,15 +5,15 @@ const rollupPluginNodeResolve = require('@rollup/plugin-node-resolve').default;
 const rollupPluginReplace = require('@rollup/plugin-replace');
 const rollupPluginTypescript = require('rollup-plugin-typescript2');
 const typescript = require('typescript');
-const {getDestDir} = require('./paths');
+const {getDestDir, PLATFORM} = require('./paths');
 const reload = require('./reload');
 const {PORT} = reload;
 const {createTask} = require('./task');
 
 async function copyToBrowsers({cwdPath, debug}) {
-    const destPath = `${getDestDir({debug})}/${cwdPath}`;
-    const ffDestPath = `${getDestDir({debug, firefox: true})}/${cwdPath}`;
-    const tbDestPath = `${getDestDir({debug, thunderbird: true})}/${cwdPath}`;
+    const destPath = `${getDestDir({debug, platform: PLATFORM.CHROME})}/${cwdPath}`;
+    const ffDestPath = `${getDestDir({debug, platform: PLATFORM.FIREFOX})}/${cwdPath}`;
+    const tbDestPath = `${getDestDir({debug, platform: PLATFORM.THUNDERBIRD})}/${cwdPath}`;
     await fs.copy(destPath, ffDestPath);
     await fs.copy(destPath, tbDestPath);
 }
@@ -44,9 +44,9 @@ const jsEntries = [
         dest: 'background/index.js',
         reloadType: reload.FULL,
         async postBuild({debug}) {
-            const destPath = `${getDestDir({debug})}/${this.dest}`;
-            const ffDestPath = `${getDestDir({debug, firefox: true})}/${this.dest}`;
-            const tbDestPath = `${getDestDir({debug, thunderbird: true})}/${this.dest}`;
+            const destPath = `${getDestDir({debug, platform: PLATFORM.CHROME})}/${this.dest}`;
+            const ffDestPath = `${getDestDir({debug, platform: PLATFORM.FIREFOX})}/${this.dest}`;
+            const tbDestPath = `${getDestDir({debug, platform: PLATFORM.THUNDERBIRD})}/${this.dest}`;
             const code = await fs.readFile(destPath, 'utf8');
             const patchedCode = patchFirefoxJS(code);
             await fs.outputFile(ffDestPath, patchedCode);
@@ -129,7 +129,7 @@ async function bundleJS(/** @type {JSEntry} */entry, {debug, watch}) {
     });
     entry.watchFiles = bundle.watchFiles;
     await bundle.write({
-        file: `${getDestDir({debug})}/${dest}`,
+        file: `${getDestDir({debug, platform: PLATFORM.CHROME})}/${dest}`,
         strict: true,
         format: 'iife',
         sourcemap: debug ? 'inline' : false,

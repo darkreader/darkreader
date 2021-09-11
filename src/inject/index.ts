@@ -7,6 +7,7 @@ import {collectCSS} from './dynamic-theme/css-collection';
 import type {Message} from '../definitions';
 import {MessageType} from '../utils/message';
 import {isThunderbird} from '../utils/platform';
+import {isSystemDarkModeEnabled} from '../utils/media-query';
 
 let unloaded = false;
 let colorSchemeWatcher;
@@ -77,6 +78,12 @@ function onMessage({type, data}: Message) {
         case MessageType.BG_RELOAD:
             logWarn('Cleaning up before update');
             cleanup();
+            break;
+        case MessageType.BG_QUERY_SYSTEM_COLOR_SCHEME:
+            chrome.runtime.sendMessage<Message>({
+                type: MessageType.CS_COLOR_SCHEME_CHANGE,
+                data: {isDark: isSystemDarkModeEnabled()}
+            });
             break;
     }
 }

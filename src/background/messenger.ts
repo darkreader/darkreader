@@ -5,7 +5,7 @@ import {MessageType} from '../utils/message';
 export interface ExtensionAdapter {
     collect: () => Promise<ExtensionData>;
     getActiveTabInfo: () => Promise<TabInfo>;
-    changeSettings: (settings: Partial<UserSettings>) => void;
+    changeSettings: (settings: Partial<UserSettings>, isDark: boolean) => void;
     setTheme: (theme: Partial<FilterConfig>) => void;
     setShortcut: ({command, shortcut}: {command: string; shortcut: string}) => void;
     markNewsAsRead: (ids: string[]) => Promise<void>;
@@ -107,7 +107,7 @@ export default class Messenger {
                 break;
             }
             case MessageType.UI_CHANGE_SETTINGS: {
-                this.adapter.changeSettings(data);
+                this.adapter.changeSettings(data.settings, data.isDark);
                 break;
             }
             case MessageType.UI_SET_THEME: {

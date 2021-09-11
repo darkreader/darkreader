@@ -13,8 +13,10 @@ const {createTask} = require('./task');
 async function copyToBrowsers({cwdPath, debug}) {
     const destPath = `${getDestDir({debug, platform: PLATFORM.CHROME})}/${cwdPath}`;
     const ffDestPath = `${getDestDir({debug, platform: PLATFORM.FIREFOX})}/${cwdPath}`;
+    const mv3DestPath = `${getDestDir({debug, platform: PLATFORM.CHROME_MV3})}/${cwdPath}`;
     const tbDestPath = `${getDestDir({debug, platform: PLATFORM.THUNDERBIRD})}/${cwdPath}`;
     await fs.copy(destPath, ffDestPath);
+    await fs.copy(destPath, mv3DestPath);
     await fs.copy(destPath, tbDestPath);
 }
 
@@ -25,6 +27,15 @@ function replace(str, find, replace) {
 function patchFirefoxJS(/** @type {string} */code) {
     code = replace(code, 'chrome.fontSettings.getFontList', `chrome['font' + 'Settings']['get' + 'Font' + 'List']`);
     code = replace(code, 'chrome.fontSettings', `chrome['font' + 'Settings']`);
+    return code;
+}
+
+function patchMV3JS(/** @type {string} */code) {
+    // MV3 moves a few APIs around
+    code = replace(code, 'chrome.browserAction.setIcon', 'chrome.action.setIcon');
+    code = replace(code, 'chrome.browserAction.setBadgeBackgroundColor', 'chrome.action.setBadgeBackgroundColor');
+    code = replace(code, 'chrome.browserAction.setBadgeText', 'chrome.action.setBadgeText');
+
     return code;
 }
 
@@ -46,10 +57,14 @@ const jsEntries = [
         async postBuild({debug}) {
             const destPath = `${getDestDir({debug, platform: PLATFORM.CHROME})}/${this.dest}`;
             const ffDestPath = `${getDestDir({debug, platform: PLATFORM.FIREFOX})}/${this.dest}`;
+            // Prior to Chrome 93, background service worker had to be in top-level directory
+            const mv3DestPath = `${getDestDir({debug, platform: PLATFORM.CHROME_MV3})}/background.js`;
             const tbDestPath = `${getDestDir({debug, platform: PLATFORM.THUNDERBIRD})}/${this.dest}`;
             const code = await fs.readFile(destPath, 'utf8');
-            const patchedCode = patchFirefoxJS(code);
-            await fs.outputFile(ffDestPath, patchedCode);
+            const patchedCodeFirefox = patchFirefoxJS(code);
+            const patchedCodeMV3 = patchMV3JS(code);
+            await fs.outputFile(ffDestPath, patchedCodeFirefox);
+            await fs.outputFile(mv3DestPath, patchedCodeMV3);
             await fs.copy(ffDestPath, tbDestPath);
         },
         watchFiles: null,

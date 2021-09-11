@@ -1,4 +1,9 @@
-const matchesMediaQuery = (query: string) => Boolean(window.matchMedia(query).matches);
+const matchesMediaQuery = (query: string) => {
+    if ('window' in globalThis) {
+        return Boolean(window.matchMedia(query).matches);
+    }
+    return false;
+};
 
 const matchesDarkTheme = () => matchesMediaQuery('(prefers-color-scheme: dark)');
 const matchesLightTheme = () => matchesMediaQuery('(prefers-color-scheme: light)');

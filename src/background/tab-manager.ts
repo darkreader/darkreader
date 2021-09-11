@@ -1,7 +1,7 @@
 import {canInjectScript} from '../background/utils/extension-api';
 import {createFileLoader} from './utils/network';
 import type {Message} from '../definitions';
-import {isThunderbird} from '../utils/platform';
+import {isMV3, isThunderbird} from '../utils/platform';
 import {MessageType} from '../utils/message';
 import {logInfo, logWarn} from '../utils/log';
 import {StateManager} from './utils/state-manager';
@@ -46,11 +46,13 @@ export default class TabManager {
     private tabs: {[tabId: number]: {[frameId: number]: FrameInfo}};
     private stateManager: StateManager;
     private fileLoader: any = null;
+    private onColorSchemeChange: ({isDark}: {isDark: boolean}) => void;
     static LOCAL_STORAGE_KEY = 'TabManager-state';
 
     constructor({getConnectionMessage, onColorSchemeChange}: TabManagerOptions) {
         this.stateManager = new StateManager(TabManager.LOCAL_STORAGE_KEY, this, {tabs: {}});
         this.tabs = {};
+        this.onColorSchemeChange = onColorSchemeChange;
 
         chrome.runtime.onMessage.addListener(async (message: Message, sender) => {
             function addFrame(tabs: {[tabId: number]: {[frameId: number]: FrameInfo}}, tabId: number, frameId: number, senderURL: string) {
@@ -194,12 +196,22 @@ export default class TabManager {
             .filter((tab) => !Boolean(this.tabs[tab.id]))
             .forEach((tab) => {
                 if (!tab.discarded) {
-                    chrome.tabs.executeScript(tab.id, {
-                        runAt: 'document_start',
-                        file: '/inject/index.js',
-                        allFrames: true,
-                        matchAboutBlank: true,
-                    });
+                    if (isMV3) {
+                        chrome.scripting.executeScript({
+                            target: {
+                                tabId: tab.id,
+                                allFrames: true,
+                            },
+                            files: ['/inject/index.js'],
+                        });
+                    } else {
+                        chrome.tabs.executeScript(tab.id, {
+                            runAt: 'document_start',
+                            file: '/inject/index.js',
+                            allFrames: true,
+                            matchAboutBlank: true,
+                        });
+                    }
                 }
             });
     }
@@ -252,5 +264,12 @@ export default class TabManager {
             tab = tabs.find((t) => !isExtensionPage(t.url)) || tab;
         }
         return tab;
+    }
+
+    async querySystemColorScheme() {
+        if (!isMV3) {
+            logWarn('querySystemColorScheme() was called in non-MV3 build.');
+            return;
+        }
     }
 }

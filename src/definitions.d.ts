@@ -18,7 +18,7 @@ export interface ExtensionData {
 }
 
 export interface ExtensionActions {
-    changeSettings(settings: Partial<UserSettings>): void;
+    changeSettings(settings: Partial<UserSettings>, isDark?: boolean): void;
     setTheme(theme: Partial<FilterConfig>): void;
     setShortcut(command: string, shortcut: string): void;
     toggleURL(url: string): void;

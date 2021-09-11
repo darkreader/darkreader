@@ -47,7 +47,12 @@ class PuppeteerEnvironment extends JestNodeEnvironment {
     }
 
     async launchChrome() {
-        const executablePath = await getChromePath();
+        let executablePath;
+        try {
+            executablePath = await getChromePath();
+        } catch (e) {
+            console.error(e);
+        }
         return await puppeteer.launch({
             executablePath,
             headless: false,
@@ -199,10 +204,13 @@ class PuppeteerEnvironment extends JestNodeEnvironment {
 
         await this.extensionPopup.close();
         await this.page.close();
-        await this.browser.close();
         await this.testServer.close();
         await this.corsServer.close();
         await this.popupTestServer.close();
+        // TODO: Remove this hack, as this is a issue with clearing the tmp file of firefox profile
+        // Which will cause a error with puppeteer when it's not cleared.
+        // But the clearing currently doesn't work, so we need to wait for the issue to be fixed.
+        // await this.browser.close();
     }
 }
 

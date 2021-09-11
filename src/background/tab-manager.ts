@@ -1,7 +1,7 @@
 import {canInjectScript} from '../background/utils/extension-api';
 import {createFileLoader} from './utils/network';
 import type {Message} from '../definitions';
-import {isThunderbird} from '../utils/platform';
+import {isMV3, isThunderbird} from '../utils/platform';
 import {MessageType} from '../utils/message';
 import {logInfo, logWarn} from '../utils/log';
 import {StateManager} from './utils/state-manager';
@@ -194,12 +194,22 @@ export default class TabManager {
             .filter((tab) => !Boolean(this.tabs[tab.id]))
             .forEach((tab) => {
                 if (!tab.discarded) {
-                    chrome.tabs.executeScript(tab.id, {
-                        runAt: 'document_start',
-                        file: '/inject/index.js',
-                        allFrames: true,
-                        matchAboutBlank: true,
-                    });
+                    if (isMV3) {
+                        chrome.scripting.executeScript({
+                            target: {
+                                tabId: tab.id,
+                                allFrames: true,
+                            },
+                            files: ['/inject/index.js'],
+                        });
+                    } else {
+                        chrome.tabs.executeScript(tab.id, {
+                            runAt: 'document_start',
+                            file: '/inject/index.js',
+                            allFrames: true,
+                            matchAboutBlank: true,
+                        });
+                    }
                 }
             });
     }

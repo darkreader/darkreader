@@ -44,9 +44,11 @@ function createOrUpdateStyle(className: string, root: ParentNode = document.head
 }
 
 function createOrUpdateScript(className: string, root: ParentNode = document.head || document) {
-    let element: HTMLScriptElement = root.querySelector(`.${className}`);
+    let element: HTMLElement = root.querySelector(`.${className}`);
     if (!element) {
-        element = document.createElement('script');
+        element = document.createElement('div');
+        const parent = document.createElement('div');
+        parent.appendChild(element);
         element.classList.add('darkreader');
         element.classList.add(className);
     }
@@ -64,6 +66,15 @@ function setupNodePositionWatcher(node: Node, alias: string) {
 function stopStylePositionWatchers() {
     forEach(nodePositionWatchers.values(), (watcher) => watcher.stop());
     nodePositionWatchers.clear();
+}
+
+/*
+ * We cancell propagation of our event before it reaches any other handlers
+ * by creating an extra 'parent' element and calling stopImmediatePropagation()
+ */
+function injectedProxyEventListener(event) {
+    event.stopImmediatePropagation();
+    injectProxy();
 }
 
 function createStaticStyleOverrides() {
@@ -134,13 +145,13 @@ function createStaticStyleOverrides() {
     document.head.insertBefore(rootVarsStyle, variableStyle.nextSibling);
 
     const proxyScript = createOrUpdateScript('darkreader--proxy');
-    const blob = new Blob([`(${injectProxy})()`], {type: 'text/javascript'});
-    const url = URL.createObjectURL(blob);
-    proxyScript.src = url;
     proxyScript.textContent = '';
-    document.head.insertBefore(proxyScript, rootVarsStyle.nextSibling);
-    URL.revokeObjectURL(url);
-    proxyScript.remove();
+    proxyScript.addEventListener('__darkreader__yeet', injectedProxyEventListener);
+    const event = new Event('__darkreader__yeet');
+    document.head.insertBefore(proxyScript.parentElement, rootVarsStyle.nextSibling);
+    proxyScript.dispatchEvent(event);
+    proxyScript.removeEventListener('__darkreader__yeet', injectedProxyEventListener);
+    proxyScript.parentElement.remove();
 }
 
 const shadowRootsWithOverrides = new Set<ShadowRoot>();

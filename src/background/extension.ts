@@ -17,7 +17,7 @@ import createStaticStylesheet from '../generators/static-theme';
 import {createSVGFilterStylesheet, getSVGFilterMatrixValue, getSVGReverseFilterMatrixValue} from '../generators/svg-filter';
 import type {ExtensionData, FilterConfig, News, Shortcuts, UserSettings, TabInfo} from '../definitions';
 import {isSystemDarkModeEnabled} from '../utils/media-query';
-import {isFirefox, isThunderbird} from '../utils/platform';
+import {isFirefox, isMV3, isThunderbird} from '../utils/platform';
 import {MessageType} from '../utils/message';
 import {logInfo, logWarn} from '../utils/log';
 import {PromiseBarrier} from '../utils/promise-barrier';
@@ -36,6 +36,7 @@ export class Extension {
     private isEnabledCached: boolean = null;
     private wasEnabledOnLastCheck: boolean = null;
     private popupOpeningListener: () => void = null;
+    // Is used only with Firefox to bypass Firefox bug
     private wasLastColorSchemeDark: boolean = null;
     private startBarrier: PromiseBarrier = null;
     private stateManager: StateManager = null;
@@ -91,6 +92,11 @@ export class Extension {
                 nextCheck = nextTimeInterval(this.user.settings.time.activation, this.user.settings.time.deactivation);
                 break;
             case 'system':
+                if (isMV3) {
+                    logWarn('system automation is not yet supported. Defaulting to ON.');
+                    this.isEnabledCached = true;
+                    break;
+                }
                 if (isFirefox) {
                     // BUG: Firefox background page always matches initial color scheme.
                     this.isEnabledCached = this.wasLastColorSchemeDark == null

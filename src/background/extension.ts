@@ -169,11 +169,7 @@ export class Extension {
                 return info;
             },
             changeSettings: (settings, isDark) => {
-                if (isDark === false || isDark === true) {
-                    this.isColorSchemeDark = isDark;
-                } else {
-                    this.isColorSchemeDark = null;
-                }
+                this.isColorSchemeDark = isDark;
                 this.changeSettings(settings);
             },
             setTheme: (theme) => this.setTheme(theme),

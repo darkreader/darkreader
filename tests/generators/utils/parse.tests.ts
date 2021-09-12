@@ -32,13 +32,13 @@ test('Index config', () => {
     const fixes = getSitesFixesFor('example.com', config, index, options);
     expect(fixes).toEqual([
         {
-            'url': ['example.com'],
-            'CSS': 'div {\n  color: green;\n}'
-        }, {
             'url': ['*'],
             'DIRECTIVE': 'hi',
             'MULTILINEDIRECTIVE':
             'hello\nworld'
+        }, {
+            'url': ['example.com'],
+            'CSS': 'div {\n  color: green;\n}'
         }]);
 });
 
@@ -115,6 +115,9 @@ test('Domain appearing in multiple records', () => {
     const fixesWildcard = getSitesFixesFor('sub.example.net', config, index, options);
     expect(fixesFQD).toEqual([
         {
+            'url': ['*'],
+            'DIRECTIVE': 'hello world'
+        }, {
             'url': ['example.com', '*.example.net'],
             'DIRECTIVE': 'one'
         }, {
@@ -123,9 +126,6 @@ test('Domain appearing in multiple records', () => {
         }, {
             'url': ['example.com', '*.example.net'],
             'DIRECTIVE': 'three'
-        }, {
-            'url': ['*'],
-            'DIRECTIVE': 'hello world'
         }]);
     expect(fixesWildcard).toEqual([
         {
@@ -173,6 +173,9 @@ test('Domain appearing multiple times within the same record', () => {
     const fixesWildcard = getSitesFixesFor('sub.example.net', config, index, options);
     expect(fixesFQD).toEqual([
         {
+            'url': ['*'],
+            'DIRECTIVE': 'hello world'
+        }, {
             'url': [
                 'example.com',
                 '*.example.net',
@@ -180,9 +183,6 @@ test('Domain appearing multiple times within the same record', () => {
                 '*.example.net'
             ],
             'DIRECTIVE': 'one'
-        }, {
-            'url': ['*'],
-            'DIRECTIVE': 'hello world'
         }]);
     expect(fixesWildcard).toEqual([
         {
@@ -196,5 +196,56 @@ test('Domain appearing multiple times within the same record', () => {
                 '*.example.net'
             ],
             'DIRECTIVE': 'one'
+        }]);
+});
+
+test('The generic fix appears first', () => {
+    const config = [
+        '*',
+        '',
+        'DIRECTIVE',
+        'hello world',
+        '',
+        '====================',
+        '',
+        '*.example.com',
+        '',
+        'DIRECTIVE',
+        'wildcard',
+        '',
+        '====================',
+        '',
+        'sub.example.com',
+        '',
+        'DIRECTIVE',
+        'sub',
+        '',
+        '====================',
+        '',
+        'long.sub.example.com',
+        '',
+        'DIRECTIVE',
+        'long',
+        ''
+    ].join('\n');
+
+    const options: SitesFixesParserOptions<any> = {
+        commands: ['DIRECTIVE'],
+        getCommandPropName: (command) => command,
+        parseCommandValue: (_, value) => value.trim(),
+    };
+    const index = indexSitesFixesConfig(config);
+
+    const fixesFQD = getSitesFixesFor('long.sub.example.com', config, index, options);
+    expect(fixesFQD).toEqual([
+        {
+            'url':['*'],
+            'DIRECTIVE':'hello world'
+        }, {
+            'url':['*.example.com'],
+            'DIRECTIVE':'wildcard'
+        }, {
+            'url':['long.sub.example.com'],
+            'DIRECTIVE':'long'
         }]);
 });

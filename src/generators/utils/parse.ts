@@ -178,8 +178,13 @@ export function getSitesFixesFor<T extends SiteProps>(url: string, text: string,
             recordIds = recordIds.concat(index.domainPatterns[pattern]);
         }
     }
-    if (index.domains[domain]) {
-        recordIds = recordIds.concat(index.domains[domain]);
+
+    const labels = domain.split('.');
+    for (let i = 0; i < labels.length; i++) {
+        const substring = labels.slice(i).join('.');
+        if (index.domains[substring] && isURLMatched(url, substring)) {
+            recordIds = recordIds.concat(index.domains[substring]);
+        }
     }
 
     const set = new Set();

@@ -239,13 +239,90 @@ test('The generic fix appears first', () => {
     const fixesFQD = getSitesFixesFor('long.sub.example.com', config, index, options);
     expect(fixesFQD).toEqual([
         {
-            'url':['*'],
+            'url': ['*'],
             'DIRECTIVE':'hello world'
         }, {
-            'url':['*.example.com'],
+            'url': ['*.example.com'],
             'DIRECTIVE':'wildcard'
         }, {
-            'url':['long.sub.example.com'],
+            'url': ['long.sub.example.com'],
             'DIRECTIVE':'long'
+        }, {
+            'url': ['sub.example.com'],
+            'DIRECTIVE':'sub'
+        }]);
+});
+
+test('Fixes appear only once', () => {
+    const config = [
+        '*',
+        '',
+        'DIRECTIVE',
+        'hello world',
+        '',
+        '====================',
+        '',
+        '*.example.com',
+        'www.example.com',
+        '',
+        'DIRECTIVE',
+        'duplicate',
+        ''
+    ].join('\n');
+
+    const options: SitesFixesParserOptions<any> = {
+        commands: ['DIRECTIVE'],
+        getCommandPropName: (command) => command,
+        parseCommandValue: (_, value) => value.trim(),
+    };
+    const index = indexSitesFixesConfig(config);
+
+    const fixes = getSitesFixesFor('www.example.com', config, index, options);
+    expect(fixes).toEqual([
+        {
+            'url': ['*'],
+            'DIRECTIVE': 'hello world'
+        }, {
+            'url': [
+                '*.example.com',
+                'www.example.com'
+            ],
+            'DIRECTIVE': 'duplicate'
+        }]);
+});
+
+test('Implied wildcards', () => {
+    const config = [
+        '*',
+        '',
+        'DIRECTIVE',
+        'hello world',
+        '',
+        '====================',
+        '',
+        'example.com',
+        '',
+        'DIRECTIVE',
+        'one',
+        ''
+    ].join('\n');
+
+    const options: SitesFixesParserOptions<any> = {
+        commands: ['DIRECTIVE'],
+        getCommandPropName: (command) => command,
+        parseCommandValue: (_, value) => value.trim(),
+    };
+    const index = indexSitesFixesConfig(config);
+
+    const fixes = getSitesFixesFor('www.example.com', config, index, options);
+    expect(fixes).toEqual([
+        {
+            'url': ['*'],
+            'DIRECTIVE': 'hello world'
+        }, {
+            'url': [
+                'example.com',
+            ],
+            'DIRECTIVE': 'one'
         }]);
 });

@@ -9,7 +9,12 @@ import {MessageType} from '../utils/message';
 import {isThunderbird} from '../utils/platform';
 
 let unloaded = false;
-let colorSchemeWatcher;
+
+// TODO: Use background page color scheme watcher when browser bugs fixed.
+let colorSchemeWatcher = watchForColorSchemeChange(({isDark}) => {
+    logInfo('Media query was changed');
+    sendMessage({type: MessageType.CS_COLOR_SCHEME_CHANGE, data: {isDark}});
+});
 
 function cleanup() {
     unloaded = true;
@@ -80,12 +85,6 @@ function onMessage({type, data}: Message) {
             break;
     }
 }
-
-// TODO: Use background page color scheme watcher when browser bugs fixed.
-colorSchemeWatcher = watchForColorSchemeChange(({isDark}) => {
-    logInfo('Media query was changed');
-    sendMessage({type: MessageType.CS_COLOR_SCHEME_CHANGE, data: {isDark}});
-});
 
 chrome.runtime.onMessage.addListener(onMessage);
 sendMessage({type: MessageType.CS_FRAME_CONNECT});

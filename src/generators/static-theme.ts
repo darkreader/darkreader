@@ -239,7 +239,7 @@ export function formatStaticThemes(staticThemes: StaticTheme[]) {
             if (prop === 'noCommon') {
                 return '';
             }
-            return formatArray(value).trim();
+            return formatArray(value as string[]).trim();
         },
         shouldIgnoreProp: (prop, value) => {
             if (prop === 'noCommon') {

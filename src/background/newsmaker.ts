@@ -4,12 +4,17 @@ import type {News} from '../definitions';
 import {readSyncStorage, readLocalStorage, writeSyncStorage, writeLocalStorage} from './utils/extension-api';
 import {StateManager} from './utils/state-manager';
 
+interface NewsmakerState {
+    latest: News[];
+    latestTimestamp: number;
+}
+
 export default class Newsmaker {
     static UPDATE_INTERVAL = getDurationInMinutes({hours: 4});
     static ALARM_NAME = 'newsmaker';
     static LOCAL_STORAGE_KEY = 'Newsmaker-state';
 
-    private stateManager: StateManager;
+    private stateManager: StateManager<NewsmakerState>;
     private latest: News[];
     private latestTimestamp: number;
     async getLatest(): Promise<News[]> {
@@ -19,7 +24,7 @@ export default class Newsmaker {
     onUpdate: (news: News[]) => void;
 
     constructor(onUpdate: (news: News[]) => void) {
-        this.stateManager = new StateManager(Newsmaker.LOCAL_STORAGE_KEY, this, {latest: [], latestTimestamp: null});
+        this.stateManager = new StateManager<NewsmakerState>(Newsmaker.LOCAL_STORAGE_KEY, this, {latest: [], latestTimestamp: null});
         this.latest = [];
         this.latestTimestamp = null;
         this.onUpdate = onUpdate;

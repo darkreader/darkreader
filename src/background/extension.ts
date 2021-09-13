@@ -23,6 +23,11 @@ import {logInfo, logWarn} from '../utils/log';
 import {PromiseBarrier} from '../utils/promise-barrier';
 import {StateManager} from './utils/state-manager';
 
+interface ExtensionState {
+    isEnabledCached: boolean;
+    wasEnabledOnLastCheck: boolean;
+}
+
 export class Extension {
     config: ConfigManager;
     devtools: DevTools;
@@ -39,7 +44,7 @@ export class Extension {
     // Is used only with Firefox to bypass Firefox bug
     private wasLastColorSchemeDark: boolean = null;
     private startBarrier: PromiseBarrier = null;
-    private stateManager: StateManager = null;
+    private stateManager: StateManager<ExtensionState> = null;
 
     static ALARM_NAME = 'auto-time-alarm';
     static LOCAL_STORAGE_KEY = 'Extension-state';
@@ -60,7 +65,7 @@ export class Extension {
         });
         this.user = new UserStorage({onRemoteSettingsChange: () => this.onRemoteSettingsChange()});
         this.startBarrier = new PromiseBarrier();
-        this.stateManager = new StateManager(Extension.LOCAL_STORAGE_KEY, this, {
+        this.stateManager = new StateManager<ExtensionState>(Extension.LOCAL_STORAGE_KEY, this, {
             isEnabledCached: null,
             wasEnabledOnLastCheck: null,
         });

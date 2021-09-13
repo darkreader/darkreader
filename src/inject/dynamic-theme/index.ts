@@ -72,7 +72,7 @@ function stopStylePositionWatchers() {
  * We cancell propagation of our event before it reaches any other handlers
  * by creating an extra 'parent' element and calling stopImmediatePropagation()
  */
-function injectedProxyEventListener(event) {
+function injectedProxyEventListener(event: Event) {
     event.stopImmediatePropagation();
     injectProxy();
 }

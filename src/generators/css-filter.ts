@@ -244,7 +244,7 @@ export function formatInversionFixes(inversionFixes: InversionFix[]) {
             if (prop === 'css') {
                 return (value as string).trim().replace(/\n+/g, '\n');
             }
-            return formatArray(value).trim();
+            return formatArray(value as string[]).trim();
         },
         shouldIgnoreProp: (prop, value) => {
             if (prop === 'css') {

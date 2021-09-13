@@ -49,7 +49,6 @@ export class Extension {
     static ALARM_NAME = 'auto-time-alarm';
     static LOCAL_STORAGE_KEY = 'Extension-state';
     constructor() {
-        this.icon = new IconManager();
         this.config = new ConfigManager();
         this.devtools = new DevTools(this.config, async () => this.onSettingsChanged());
         this.messenger = new Messenger(this.getMessengerAdapter());
@@ -249,6 +248,10 @@ export class Extension {
     }
 
     private onNewsUpdate(news: News[]) {
+        if (!this.icon) {
+            this.icon = new IconManager();
+        }
+
         const latestNews = news.length > 0 && news[0];
         if (latestNews && latestNews.important && !latestNews.read) {
             this.icon.showImportantBadge();
@@ -379,6 +382,10 @@ export class Extension {
     //
 
     private onAppToggle() {
+        if (!this.icon) {
+            this.icon = new IconManager();
+        }
+
         this.isEnabledCached = null;
         if (this.isEnabled()) {
             this.icon.setActive();

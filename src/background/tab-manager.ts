@@ -28,6 +28,10 @@ interface FrameInfo {
     state: DocumentState;
 }
 
+interface TabManagerState {
+    tabs: {[tabId: number]: {[frameId: number]: FrameInfo}};
+}
+
 /*
  * These states correspond to possible document states in Page Lifecycle API:
  * https://developers.google.com/web/updates/2018/07/page-lifecycle-api#developer-recommendations-for-each-state
@@ -44,12 +48,12 @@ enum DocumentState {
 
 export default class TabManager {
     private tabs: {[tabId: number]: {[frameId: number]: FrameInfo}};
-    private stateManager: StateManager;
+    private stateManager: StateManager<TabManagerState>;
     private fileLoader: any = null;
     static LOCAL_STORAGE_KEY = 'TabManager-state';
 
     constructor({getConnectionMessage, onColorSchemeChange}: TabManagerOptions) {
-        this.stateManager = new StateManager(TabManager.LOCAL_STORAGE_KEY, this, {tabs: {}});
+        this.stateManager = new StateManager<TabManagerState>(TabManager.LOCAL_STORAGE_KEY, this, {tabs: {}});
         this.tabs = {};
 
         chrome.runtime.onMessage.addListener(async (message: Message, sender) => {

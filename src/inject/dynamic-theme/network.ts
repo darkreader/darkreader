@@ -9,8 +9,8 @@ interface FetchRequest {
 }
 
 let counter = 0;
-const resolvers = new Map<number, (data) => void>();
-const rejectors = new Map<number, (error) => void>();
+const resolvers = new Map<number, (data: string) => void>();
+const rejectors = new Map<number, (reason?: any) => void>();
 
 export async function bgFetch(request: FetchRequest) {
     return new Promise<string>((resolve, reject) => {

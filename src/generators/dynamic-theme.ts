@@ -66,7 +66,7 @@ export function getDynamicThemeFixesFor(url: string, frameURL: string, text: str
     const common = {
         url: genericFix.url,
         invert: genericFix.invert || [],
-        css: genericFix.css || [],
+        css: genericFix.css || '',
         ignoreInlineStyle: genericFix.ignoreInlineStyle || [],
         ignoreImageAnalysis: genericFix.ignoreImageAnalysis || [],
     };

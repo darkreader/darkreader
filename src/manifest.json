@@ -43,6 +43,9 @@
         "tabs",
         "<all_urls>"
     ],
+    "optional_permissions": [
+        "contextMenus"
+    ],
     "commands": {
         "toggle": {
             "suggested_key": {

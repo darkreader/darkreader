@@ -57,4 +57,5 @@ export const DEFAULT_SETTINGS: UserSettings = {
     previewNewDesign: false,
     enableForPDF: true,
     enableForProtectedPages: false,
+    enableContextMenus: false,
 };

@@ -26,6 +26,7 @@ import {StateManager} from './utils/state-manager';
 interface ExtensionState {
     isEnabledCached: boolean;
     wasEnabledOnLastCheck: boolean;
+    registeredContextMenus: boolean;
 }
 
 export class Extension {
@@ -40,6 +41,7 @@ export class Extension {
 
     private isEnabledCached: boolean = null;
     private wasEnabledOnLastCheck: boolean = null;
+    private registeredContextMenus: boolean = null;
     private popupOpeningListener: () => void = null;
     // Is used only with Firefox to bypass Firefox bug
     private wasLastColorSchemeDark: boolean = null;
@@ -67,9 +69,19 @@ export class Extension {
         this.stateManager = new StateManager<ExtensionState>(Extension.LOCAL_STORAGE_KEY, this, {
             isEnabledCached: null,
             wasEnabledOnLastCheck: null,
+            registeredContextMenus: null,
         });
 
         chrome.alarms.onAlarm.addListener(this.alarmListener);
+
+        chrome.permissions.onRemoved.addListener((permissions) => {
+            // As far as we know, this code is never actually run because there
+            // is no browser UI for removing 'contextMenus' permission.
+            // This code exists for future-proofing in case browsers ever add such UI.
+            if (!permissions.permissions.includes('contextMenus')) {
+                this.registeredContextMenus = false;
+            }
+        });
     }
 
     private alarmListener(alarm: chrome.alarms.Alarm): void {
@@ -133,6 +145,15 @@ export class Extension {
         await this.config.load({local: true});
 
         await this.user.loadSettings();
+        if (this.user.settings.enableContextMenus && !this.registeredContextMenus) {
+            chrome.permissions.contains({permissions: ['contextMenus']}, (permitted) => {
+                if (permitted) {
+                    this.registerContextMenus();
+                } else {
+                    logWarn('User has enabled context menus, but did not provide permission.');
+                }
+            });
+        }
         if (this.user.settings.syncSitesFixes) {
             await this.config.load({local: false});
         }
@@ -180,7 +201,7 @@ export class Extension {
         };
     }
 
-    async onCommand(command: string, url: string) {
+    onCommand = async (command: string, url: string) => {
         if (this.startBarrier.isPending()) {
             await this.startBarrier.entry();
         }
@@ -210,6 +231,46 @@ export class Extension {
                 break;
             }
         }
+    };
+
+    private registerContextMenus() {
+        const onCommandToggle = async () => this.onCommand('toggle', null);
+        const onCommandAddSite = async (data: chrome.contextMenus.OnClickData) => this.onCommand('addSite', data.frameUrl);
+        const onCommandSwitchEngine = async () => this.onCommand('switchEngine', null);
+        chrome.contextMenus.removeAll(() => {
+            this.registeredContextMenus = false;
+            chrome.contextMenus.create({
+                id: 'DarkReader-top',
+                title: 'Dark Reader'
+            }, () => {
+                if (chrome.runtime.lastError) {
+                    // Failed to create the context menu
+                    return;
+                }
+                const msgToggle = chrome.i18n.getMessage('toggle_extension');
+                const msgAddSite = chrome.i18n.getMessage('toggle_current_site');
+                const msgSwitchEngine = chrome.i18n.getMessage('theme_generation_mode');
+                chrome.contextMenus.create({
+                    id: 'DarkReader-toggle',
+                    parentId: 'DarkReader-top',
+                    title: msgToggle || 'Toggle everywhere',
+                    onclick: onCommandToggle,
+                });
+                chrome.contextMenus.create({
+                    id: 'DarkReader-addSite',
+                    parentId: 'DarkReader-top',
+                    title: msgAddSite || 'Toggle for current site',
+                    onclick: onCommandAddSite,
+                });
+                chrome.contextMenus.create({
+                    id: 'DarkReader-switchEngine',
+                    parentId: 'DarkReader-top',
+                    title: msgSwitchEngine || 'Switch engine',
+                    onclick: onCommandSwitchEngine,
+                });
+                this.registeredContextMenus = true;
+            });
+        });
     }
 
     private async getShortcuts() {
@@ -329,6 +390,13 @@ export class Extension {
             this.user.settings.fetchNews ? this.news.subscribe() : this.news.unSubscribe();
         }
 
+        if (prev.enableContextMenus !== this.user.settings.enableContextMenus) {
+            if (this.user.settings.enableContextMenus) {
+                this.registerContextMenus();
+            } else {
+                chrome.contextMenus.removeAll();
+            }
+        }
         this.onSettingsChanged();
     }
 

@@ -40,7 +40,7 @@ function openDevTools() {
     });
 }
 
-function Body(props: BodyProps) {
+function Body(props: BodyProps & {fonts: string[]}) {
     const context = getContext();
     const {state, setState} = useState<BodyState>({
         activeTab: 'Filter',
@@ -58,7 +58,7 @@ function Body(props: BodyProps) {
     }
 
     if (isMobile || props.data.settings.previewNewDesign) {
-        return <NewBody {...props} />;
+        return <NewBody {...props} fonts={props.fonts}/>;
     }
 
     const unreadNews = props.data.news.filter(({read}) => !read);
@@ -126,7 +126,7 @@ function Body(props: BodyProps) {
                         <FilterSettings data={props.data} actions={props.actions} tab={props.tab} />
                     ),
                     'More': (
-                        <MoreSettings data={props.data} actions={props.actions} tab={props.tab} />
+                        <MoreSettings data={props.data} actions={props.actions} tab={props.tab} fonts={props.fonts}/>
                     ),
                 } : {
                     'Filter': (
@@ -136,7 +136,7 @@ function Body(props: BodyProps) {
                         <SiteListSettings data={props.data} actions={props.actions} isFocused={state.activeTab === 'Site list'} />
                     ),
                     'More': (
-                        <MoreSettings data={props.data} actions={props.actions} tab={props.tab} />
+                        <MoreSettings data={props.data} actions={props.actions} tab={props.tab} fonts={props.fonts}/>
                     ),
                 }}
                 tabLabels={{

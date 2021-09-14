@@ -231,7 +231,7 @@ export class Extension {
                 break;
             }
         }
-    }
+    };
 
     private registerContextMenus() {
         const onCommandToggle = async () => this.onCommand('toggle', null);

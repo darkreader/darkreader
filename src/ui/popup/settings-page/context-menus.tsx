@@ -26,10 +26,10 @@ export default function ContextMenusGroup(props: ViewProps) {
     return !isMobile && (
         <CheckButton
             checked={props.data.settings.enableContextMenus}
-            label={chrome.i18n.getMessage('context_menu_setting')}
+            label="Use context menus"
             description={props.data.settings.enableContextMenus ?
-                chrome.i18n.getMessage('context_menu_setting_enabled') :
-                chrome.i18n.getMessage('context_menu_setting_disabled')}
+                'Context menu integration is enabled' :
+                'Context menu integration is disabled'}
             onChange={onContextMenusChange}
         />
     );

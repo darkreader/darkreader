@@ -71,7 +71,7 @@ export function getDynamicThemeFixesFor(url: string, frameURL: string, text: str
         ignoreImageAnalysis: genericFix.ignoreImageAnalysis || [],
     };
     if (enabledForPDF) {
-        common.invert = common.invert.concat('embed[type="application/pdf"]');
+        common.css += '\nembed[type="application/pdf"] { filter: invert(100%) contrast(90%); }';
     }
     const sortedBySpecificity = fixes
         .slice(1)

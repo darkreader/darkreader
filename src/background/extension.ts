@@ -51,12 +51,10 @@ export class Extension {
     static ALARM_NAME = 'auto-time-alarm';
     static LOCAL_STORAGE_KEY = 'Extension-state';
     constructor() {
-        /*
-         * We need to stash a reference to extension object to use it within
-         * context menu activation handler.
-         * Storing this extra reference does not have any adverse effects on
-         * GC, since Extension object is long-living and does not need to be collected.
-         */
+        // We need to stash a reference to extension object to use it within
+        // context menu activation handler.
+        // Storing this extra reference does not have any adverse effects on
+        // GC, since Extension object is long-living and does not need to be collected.
         globalThis.extension = this;
 
         this.config = new ConfigManager();

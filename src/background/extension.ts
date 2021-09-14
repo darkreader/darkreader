@@ -51,12 +51,6 @@ export class Extension {
     static ALARM_NAME = 'auto-time-alarm';
     static LOCAL_STORAGE_KEY = 'Extension-state';
     constructor() {
-        // We need to stash a reference to extension object to use it within
-        // context menu activation handler.
-        // Storing this extra reference does not have any adverse effects on
-        // GC, since Extension object is long-living and does not need to be collected.
-        globalThis.extension = this;
-
         this.config = new ConfigManager();
         this.devtools = new DevTools(this.config, this.onSettingsChanged);
         this.messenger = new Messenger(this.getMessengerAdapter());
@@ -207,36 +201,33 @@ export class Extension {
         };
     }
 
-    async onCommand(command: string, url: string) {
-        // We need the following line to re-use this function for
-        // context menu handlers.
-        const extension = this || globalThis.extension;
-        if (extension.startBarrier.isPending()) {
-            await extension.startBarrier.entry();
+    onCommand = async (command: string, url: string) => {
+        if (this.startBarrier.isPending()) {
+            await this.startBarrier.entry();
         }
-        extension.stateManager.loadState();
+        this.stateManager.loadState();
         switch (command) {
             case 'toggle':
                 logInfo('Toggle command entered');
-                extension.changeSettings({
-                    enabled: !extension.isEnabled(),
+                this.changeSettings({
+                    enabled: !this.isEnabled(),
                     automation: '',
                 });
                 break;
             case 'addSite':
                 logInfo('Add Site command entered');
                 if (isPDF(url)) {
-                    extension.changeSettings({enableForPDF: !extension.user.settings.enableForPDF});
+                    this.changeSettings({enableForPDF: !this.user.settings.enableForPDF});
                 } else {
-                    extension.toggleURL(url);
+                    this.toggleURL(url);
                 }
                 break;
             case 'switchEngine': {
                 logInfo('Switch Engine command entered');
                 const engines = Object.values(ThemeEngines);
-                const index = engines.indexOf(extension.user.settings.theme.engine);
+                const index = engines.indexOf(this.user.settings.theme.engine);
                 const next = engines[(index + 1) % engines.length];
-                extension.setTheme({engine: next});
+                this.setTheme({engine: next});
                 break;
             }
         }

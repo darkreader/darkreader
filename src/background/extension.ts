@@ -49,11 +49,10 @@ export class Extension {
     static ALARM_NAME = 'auto-time-alarm';
     static LOCAL_STORAGE_KEY = 'Extension-state';
     constructor() {
-        this.icon = new IconManager();
         this.config = new ConfigManager();
-        this.devtools = new DevTools(this.config, async () => this.onSettingsChanged());
+        this.devtools = new DevTools(this.config, this.onSettingsChanged);
         this.messenger = new Messenger(this.getMessengerAdapter());
-        this.news = new Newsmaker((news) => this.onNewsUpdate(news));
+        this.news = new Newsmaker(this.onNewsUpdate);
         this.tabs = new TabManager({
             getConnectionMessage: ({url, frameURL, unsupportedSender}) => {
                 if (unsupportedSender) {
@@ -63,7 +62,7 @@ export class Extension {
             },
             onColorSchemeChange: this.onColorSchemeChange,
         });
-        this.user = new UserStorage({onRemoteSettingsChange: () => this.onRemoteSettingsChange()});
+        this.user = new UserStorage({onRemoteSettingsChange: this.onRemoteSettingsChange});
         this.startBarrier = new PromiseBarrier();
         this.stateManager = new StateManager<ExtensionState>(Extension.LOCAL_STORAGE_KEY, this, {
             isEnabledCached: null,
@@ -249,6 +248,10 @@ export class Extension {
     }
 
     private onNewsUpdate(news: News[]) {
+        if (!this.icon) {
+            this.icon = new IconManager();
+        }
+
         const latestNews = news.length > 0 && news[0];
         if (latestNews && latestNews.important && !latestNews.read) {
             this.icon.showImportantBadge();
@@ -379,6 +382,10 @@ export class Extension {
     //
 
     private onAppToggle() {
+        if (!this.icon) {
+            this.icon = new IconManager();
+        }
+
         this.isEnabledCached = null;
         if (this.isEnabled()) {
             this.icon.setActive();

@@ -89,6 +89,7 @@ export interface UserSettings {
     previewNewDesign: boolean;
     enableForPDF: boolean;
     enableForProtectedPages: boolean;
+    enableContextMenus: boolean;
 }
 
 export interface TimeSettings {

@@ -25,7 +25,11 @@ export async function getImageDetails(url: string) {
         if (url.startsWith('data:')) {
             dataURL = url;
         } else {
-            dataURL = await getImageDataURL(url);
+            try {
+                dataURL = await getImageDataURL(url);
+            } catch (error) {
+                reject(error);
+            }
         }
 
         try {

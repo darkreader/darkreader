@@ -120,7 +120,7 @@ export default function ThemePage(props: ViewProps) {
                     <ColorsGroup theme={theme} change={change} />
                 </Collapsible.Group>
                 <Collapsible.Group id="font" label="Font & more">
-                    <FontGroup theme={theme} fonts={props.data.fonts} change={change} />
+                    <FontGroup theme={theme} fonts={props.fonts} change={change} />
                 </Collapsible.Group>
             </Collapsible>
             <ResetButton {...props} />

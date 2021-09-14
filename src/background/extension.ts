@@ -7,7 +7,7 @@ import Newsmaker from './newsmaker';
 import TabManager from './tab-manager';
 import UserStorage from './user-storage';
 import {setWindowTheme, resetWindowTheme} from './window-theme';
-import {getFontList, getCommands, setShortcut, canInjectScript} from './utils/extension-api';
+import {getCommands, setShortcut, canInjectScript} from './utils/extension-api';
 import {isInTimeIntervalLocal, nextTimeInterval, isNightAtLocation, nextNightAtLocation} from '../utils/time';
 import {isURLInList, getURLHostOrProtocol, isURLEnabled, isPDF} from '../utils/url';
 import ThemeEngines from '../generators/theme-engines';
@@ -32,7 +32,6 @@ interface ExtensionState {
 export class Extension {
     config: ConfigManager;
     devtools: DevTools;
-    fonts: string[];
     icon: IconManager;
     messenger: Messenger;
     news: Newsmaker;
@@ -286,15 +285,11 @@ export class Extension {
         if (!this.user.settings) {
             await this.user.loadSettings();
         }
-        if (!this.fonts) {
-            this.fonts = await getFontList();
-        }
         await this.stateManager.loadState();
         return {
             isEnabled: this.isEnabled(),
             isReady: true,
             settings: this.user.settings,
-            fonts: this.fonts,
             news: await this.news.getLatest(),
             shortcuts: await this.getShortcuts(),
             devtools: {

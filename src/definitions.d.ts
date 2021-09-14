@@ -4,7 +4,6 @@ export interface ExtensionData {
     isEnabled: boolean;
     isReady: boolean;
     settings: UserSettings;
-    fonts: string[];
     news: News[];
     shortcuts: Shortcuts;
     devtools: {

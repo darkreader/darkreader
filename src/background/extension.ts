@@ -293,12 +293,12 @@ export class Extension {
             news: await this.news.getLatest(),
             shortcuts: await this.getShortcuts(),
             devtools: {
-                dynamicFixesText: this.devtools.getDynamicThemeFixesText(),
-                filterFixesText: this.devtools.getInversionFixesText(),
-                staticThemesText: this.devtools.getStaticThemesText(),
-                hasCustomDynamicFixes: this.devtools.hasCustomDynamicThemeFixes(),
-                hasCustomFilterFixes: this.devtools.hasCustomFilterFixes(),
-                hasCustomStaticFixes: this.devtools.hasCustomStaticFixes(),
+                dynamicFixesText: await this.devtools.getDynamicThemeFixesText(),
+                filterFixesText: await this.devtools.getInversionFixesText(),
+                staticThemesText: await this.devtools.getStaticThemesText(),
+                hasCustomDynamicFixes: await this.devtools.hasCustomDynamicThemeFixes(),
+                hasCustomFilterFixes: await this.devtools.hasCustomFilterFixes(),
+                hasCustomStaticFixes: await this.devtools.hasCustomStaticFixes(),
             },
         };
     }

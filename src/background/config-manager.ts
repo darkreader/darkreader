@@ -49,6 +49,7 @@ export default class ConfigManager {
     };
 
     overrides = {
+        ready: false,
         darkSites: null as string,
         dynamicThemeFixes: null as string,
         inversionFixes: null as string,

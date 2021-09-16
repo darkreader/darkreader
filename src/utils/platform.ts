@@ -50,4 +50,4 @@ export const isXMLHttpRequestSupported = typeof XMLHttpRequest === 'function';
 
 export const isFetchSupported = typeof fetch === 'function';
 
-export const isMV3 = globalThis.chrome && globalThis.chrome.runtime && globalThis.chrome.runtime.getManifest().manifest_version === 3;
+export const isMV3 = globalThis.chrome && globalThis.chrome.runtime && globalThis.chrome.runtime.getManifest && globalThis.chrome.runtime.getManifest().manifest_version === 3;

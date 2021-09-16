@@ -73,4 +73,13 @@ describe('INLINE STYLES', () => {
         const maskIcon = document.querySelector('link[rel="mask-icon"]');
         expect(maskIcon.getAttribute('style')).toBe(null);
     });
+
+    it(`shouldn't touch a "none" value for fill`, async () => {
+        container.innerHTML = `<svg> <rect width="100" height="100" fill="none" /></svg>`;
+        container.innerHTML += `<style> rect[width][height] { fill: red }</style>`;
+        createOrUpdateDynamicTheme(theme, null, false);
+
+        const rect = container.querySelector('rect');
+        expect(getComputedStyle(rect).fill).toBe('rgb(255, 26, 26)');
+    });
 });

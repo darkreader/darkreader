@@ -299,23 +299,25 @@ export function overrideInlineStyle(element: HTMLElement, theme: FilterConfig, i
         if (element.hasAttribute('fill')) {
             const SMALL_SVG_LIMIT = 32;
             const value = element.getAttribute('fill');
-            if (!(element instanceof SVGTextElement)) {
-                // getBoundingClientRect forces a layout change. And when it so happens that.
-                // The DOM is not in the `complete` readystate. It will cause the layout to be drawn.
-                // And it will cause a layout of unstyled content which results in white flashes.
-                // Therefor the check if the DOM is at the `complete` readystate.
-                const handleSVGElement = () => {
-                    const {width, height} = element.getBoundingClientRect();
-                    const isBg = (width > SMALL_SVG_LIMIT || height > SMALL_SVG_LIMIT);
-                    setCustomProp('fill', isBg ? 'background-color' : 'color', value);
-                };
-                if (isReadyStateComplete()) {
-                    handleSVGElement();
+            if (value !== 'none') {
+                if (!(element instanceof SVGTextElement)) {
+                    // getBoundingClientRect forces a layout change. And when it so happens that.
+                    // The DOM is not in the `complete` readystate. It will cause the layout to be drawn.
+                    // And it will cause a layout of unstyled content which results in white flashes.
+                    // Therefor the check if the DOM is at the `complete` readystate.
+                    const handleSVGElement = () => {
+                        const {width, height} = element.getBoundingClientRect();
+                        const isBg = (width > SMALL_SVG_LIMIT || height > SMALL_SVG_LIMIT);
+                        setCustomProp('fill', isBg ? 'background-color' : 'color', value);
+                    };
+                    if (isReadyStateComplete()) {
+                        handleSVGElement();
+                    } else {
+                        addReadyStateCompleteListener(handleSVGElement);
+                    }
                 } else {
-                    addReadyStateCompleteListener(handleSVGElement);
+                    setCustomProp('fill', 'color', value);
                 }
-            } else {
-                setCustomProp('fill', 'color', value);
             }
         }
         if (element.hasAttribute('stop-color')) {

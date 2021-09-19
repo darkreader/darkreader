@@ -218,7 +218,7 @@ export class VariablesStore {
     getModifierForVarDependant(property: string, sourceValue: string): CSSValueModifier {
         if (sourceValue.match(/^\s*(rgb|hsl)a?\(/)) {
             const isBg = property.startsWith('background');
-            const isText = property === 'color';
+            const isText = (property === 'color' || property === 'caret-color');
             return (theme) => {
                 let value = insertVarValues(sourceValue, this.unstableVarValues);
                 if (!value) {
@@ -237,7 +237,7 @@ export class VariablesStore {
                 );
             };
         }
-        if (property === 'color') {
+        if (property === 'color' || property === 'caret-color') {
             return (theme) => {
                 return replaceCSSVariablesNames(
                     sourceValue,
@@ -398,7 +398,7 @@ export class VariablesStore {
             });
         } else if (property === 'background-color' || property === 'box-shadow') {
             this.iterateVarDeps(value, (v) => this.resolveVariableType(v, VAR_TYPE_BGCOLOR));
-        } else if (property === 'color') {
+        } else if (property === 'color' || property === 'caret-color') {
             this.iterateVarDeps(value, (v) => this.resolveVariableType(v, VAR_TYPE_TEXTCOLOR));
         } else if (property.startsWith('border') || property.startsWith('outline')) {
             this.iterateVarDeps(value, (v) => this.resolveVariableType(v, VAR_TYPE_BORDERCOLOR));

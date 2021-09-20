@@ -42,9 +42,14 @@ const rgbCacheKeys: Array<keyof RGBA> = ['r', 'g', 'b', 'a'];
 const themeCacheKeys: Array<keyof Theme> = ['mode', 'brightness', 'contrast', 'grayscale', 'sepia', 'darkSchemeBackgroundColor', 'darkSchemeTextColor', 'lightSchemeBackgroundColor', 'lightSchemeTextColor'];
 
 function getCacheId(rgb: RGBA, theme: Theme) {
-    return rgbCacheKeys.map((k) => rgb[k] as any)
-        .concat(themeCacheKeys.map((k) => theme[k]))
-        .join(';');
+    let resultId = '';
+    rgbCacheKeys.forEach((key) => {
+        resultId += `${rgb[key]};`;
+    });
+    themeCacheKeys.forEach((key) => {
+        resultId += `${theme[key]};`;
+    });
+    return resultId;
 }
 
 function modifyColorWithCache(rgb: RGBA, theme: Theme, modifyHSL: (hsl: HSLA, pole?: HSLA, anotherPole?: HSLA) => HSLA, poleColor?: string, anotherPoleColor?: string) {

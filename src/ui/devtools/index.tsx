@@ -30,8 +30,8 @@ if (DEBUG) {
         try {
             const message = JSON.parse(e.data);
             const textarea: HTMLTextAreaElement = document.querySelector('textarea#editor');
-            const [buttonReset, buttonApply, buttonRedesign] = document.querySelectorAll('button');
-            switch(message.type) {
+            const [buttonReset, buttonApply] = document.querySelectorAll('button');
+            switch (message.type) {
                 case 'debug-devtools-paste':
                     textarea.value = message.data;
                     buttonApply.click();

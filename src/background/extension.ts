@@ -73,14 +73,16 @@ export class Extension {
 
         chrome.alarms.onAlarm.addListener(this.alarmListener);
 
-        chrome.permissions.onRemoved.addListener((permissions) => {
+        if (chrome.permissions.onRemoved) {
+            chrome.permissions.onRemoved.addListener((permissions) => {
             // As far as we know, this code is never actually run because there
             // is no browser UI for removing 'contextMenus' permission.
             // This code exists for future-proofing in case browsers ever add such UI.
-            if (!permissions.permissions.includes('contextMenus')) {
-                this.registeredContextMenus = false;
-            }
-        });
+                if (!permissions.permissions.includes('contextMenus')) {
+                    this.registeredContextMenus = false;
+                }
+            });
+        }
     }
 
     private alarmListener(alarm: chrome.alarms.Alarm): void {

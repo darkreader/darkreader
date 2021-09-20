@@ -26,6 +26,7 @@ class PuppeteerEnvironment extends JestNodeEnvironment {
         this.global.browser = this.browser;
 
         this.extensionPopup = await this.openPopupPage();
+        this.extensionDevtools = await this.openDevtoolsPage();
 
         this.page = await this.createTestPage();
         this.global.page = this.page;
@@ -105,31 +106,41 @@ class PuppeteerEnvironment extends JestNodeEnvironment {
     async openPopupPage() {
         let extensionPopup;
         if (this.global.product === 'chrome') {
-            extensionPopup = await this.openChromePopupPage();
+            extensionPopup = await this.openChromePage('/ui/popup/index.html');
         } else if (this.global.product === 'firefox') {
-            extensionPopup = await this.openFirefoxPopupPage();
+            extensionPopup = await this.openFirefoxPage('/ui/popup/index.html');
         }
         return extensionPopup;
     }
 
-    async openChromePopupPage() {
+    async openDevtoolsPage() {
+        let extensionDevtools;
+        if (this.global.product === 'chrome') {
+            extensionDevtools = await this.openChromePage('/ui/devtools/index.html');
+        } else if (this.global.product === 'firefox') {
+            extensionDevtools = await this.openFirefoxPage('/ui/devtools/index.html');
+        }
+        return extensionDevtools;
+    }
+
+    async openChromePage(path) {
         const targets = await this.browser.targets();
         const backgroundTarget = targets.find((t) => t.type() === 'background_page');
         const backgroundPage = await backgroundTarget.page();
 
-        const popupURL = backgroundPage.url().replace('/background/index.html', '/ui/popup/index.html');
-        const extensionPopup = await this.browser.newPage();
-        await extensionPopup.goto(popupURL);
+        const pageURL = backgroundPage.url().replace('/background/index.html', path);
+        const extensionPage = await this.browser.newPage();
+        await extensionPage.goto(pageURL);
 
-        return extensionPopup;
+        return extensionPage;
     }
 
-    async openFirefoxPopupPage() {
-        const extensionPopup = await this.browser.newPage();
+    async openFirefoxPage(path) {
+        const extensionPage = await this.browser.newPage();
         // Doesn't resolve due to https://github.com/puppeteer/puppeteer/issues/6616
-        extensionPopup.goto(`moz-extension://${this.firefoxInternalUUID}/ui/popup/index.html`);
+        extensionPage.goto(`moz-extension://${this.firefoxInternalUUID}${path}`);
         await new Promise((promise) => setTimeout(promise, 1000));
-        return extensionPopup;
+        return extensionPage;
     }
 
     assignTestGlobals() {
@@ -174,7 +185,7 @@ class PuppeteerEnvironment extends JestNodeEnvironment {
                 ws.on('close', () => sockets.delete(ws));
             });
 
-            function sendToPopup(message) {
+            function sendToUIPage(message) {
                 return new Promise((resolve, reject) => {
                     const responseType = `${message.type}-response`;
                     resolvers.set(responseType, resolve);
@@ -185,9 +196,13 @@ class PuppeteerEnvironment extends JestNodeEnvironment {
             }
 
             this.global.popupUtils = {
-                click: async (selector) => await sendToPopup({type: 'click', data: selector}),
-                exists: async (selector) => await sendToPopup({type: 'exists', data: selector}),
-                getBoundingRect: async (selector) => await sendToPopup({type: 'rect', data: selector}),
+                click: async (selector) => await sendToUIPage({type: 'click', data: selector}),
+                exists: async (selector) => await sendToUIPage({type: 'exists', data: selector}),
+            };
+
+            this.global.devtoolsUtils = {
+                paste: async (fixes) => await sendToUIPage({type: 'debug-devtools-paste', data: fixes}),
+                reset: async () => await sendToUIPage({type: 'debug-devtools-reset'}),
             };
         });
     }
@@ -203,6 +218,7 @@ class PuppeteerEnvironment extends JestNodeEnvironment {
         }
 
         await this.extensionPopup.close();
+        await this.extensionDevtools.close();
         await this.page.close();
         await this.testServer.close();
         await this.corsServer.close();

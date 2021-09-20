@@ -1,6 +1,6 @@
 import {overrideInlineStyle, getInlineOverrideStyle, watchForInlineStyles, stopWatchingForInlineStyles, INLINE_STYLE_SELECTOR} from './inline-style';
 import {changeMetaThemeColorWhenAvailable, restoreMetaThemeColor} from './meta-theme-color';
-import {getModifiedUserAgentStyle, getModifiedFallbackStyle, cleanModificationCache, parseColorWithCache, getSelectionColor} from './modify-css';
+import {getModifiedUserAgentStyle, getModifiedFallbackStyle, cleanModificationCache, parseColorWithCache, getSelectionColor, tryParseColor} from './modify-css';
 import type {StyleElement, StyleManager} from './style-manager';
 import {manageStyle, getManageableStyles, cleanLoadingLinks} from './style-manager';
 import {watchForStyleChanges, stopWatchingForStyleChanges} from './watch';
@@ -171,14 +171,13 @@ function createShadowStaticStyleOverrides(root: ShadowRoot) {
 }
 
 function replaceCSSTemplates($cssText: string) {
-    return $cssText.replace(/\${(.+?)}/g, (m0, $color) => {
-        try {
-            const color = parseColorWithCache($color);
+    return $cssText.replace(/\${(.+?)}/g, (_, $color) => {
+        const color = tryParseColor($color);
+        if (color) {
             return modifyColor(color, filter);
-        } catch (err) {
-            logWarn(err);
-            return $color;
         }
+        logWarn("Couldn't parse CSSTemplate's color.");
+        return $color;
     });
 }
 

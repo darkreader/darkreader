@@ -464,6 +464,7 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
 
     function destroy() {
         pause();
+        sheetModifier.destroy();
         removeNode(corsCopy);
         removeNode(syncStyle);
         loadingEnd();

@@ -30,8 +30,6 @@ const asyncQueue = createAsyncTasksQueue();
 
 export function createStyleSheetModifier() {
     let renderId = 0;
-    const rulesTextCache = new Set<string>();
-    const rulesModCache = new Map<string, ModifiableCSSRule>();
     const varTypeChangeCleaners = new Set<() => void>();
     let prevFilterKey: string = null;
     interface ModifySheetOptions {
@@ -45,16 +43,23 @@ export function createStyleSheetModifier() {
 
     let hasNonLoadedLink = false;
     let wasRebuilt = false;
+
     function shouldRebuildStyle() {
         return hasNonLoadedLink && !wasRebuilt;
+    }
+
+    function destroy() {
+        hasNonLoadedLink = false;
+        wasRebuilt = false;
+        prevFilterKey = null;
+        varTypeChangeCleaners.forEach((clear) => clear());
+        varTypeChangeCleaners.clear();
     }
 
     function modifySheet(options: ModifySheetOptions) {
         const rules = options.sourceCSSRules;
         const {theme, ignoreImageAnalysis, force, prepareSheet, isAsyncCancelled} = options;
 
-        let rulesChanged = (rulesModCache.size === 0);
-        const notFoundCacheKeys = new Set(rulesModCache.keys());
         const themeKey = getThemeKey(theme);
         const themeChanged = (themeKey !== prevFilterKey);
 
@@ -64,25 +69,6 @@ export function createStyleSheetModifier() {
 
         const modRules: ModifiableCSSRule[] = [];
         iterateCSSRules(rules, (rule) => {
-            let cssText = rule.cssText;
-            let textDiffersFromPrev = false;
-
-            notFoundCacheKeys.delete(cssText);
-            if (rule.parentRule instanceof CSSMediaRule) {
-                cssText += `;${ (rule.parentRule as CSSMediaRule).media.mediaText}`;
-            }
-            if (!rulesTextCache.has(cssText)) {
-                rulesTextCache.add(cssText);
-                textDiffersFromPrev = true;
-            }
-
-            if (textDiffersFromPrev) {
-                rulesChanged = true;
-            } else {
-                modRules.push(rulesModCache.get(cssText));
-                return;
-            }
-
             const modDecs: ModifiableCSSDeclaration[] = [];
             rule.style && iterateCSSDeclarations(rule.style, (property, value) => {
                 const mod = getModifiableCSSDeclaration(property, value, rule, variablesStore, ignoreImageAnalysis, isAsyncCancelled);
@@ -97,18 +83,12 @@ export function createStyleSheetModifier() {
                 modRule = {selector: rule.selectorText, declarations: modDecs, parentRule};
                 modRules.push(modRule);
             }
-            rulesModCache.set(cssText, modRule);
         }, () => {
             hasNonLoadedLink = true;
         });
-
-        notFoundCacheKeys.forEach((key) => {
-            rulesTextCache.delete(key);
-            rulesModCache.delete(key);
-        });
         prevFilterKey = themeKey;
 
-        if (!force && !rulesChanged && !themeChanged) {
+        if (!force && !modRules.length && !themeChanged) {
             return;
         }
 
@@ -316,5 +296,5 @@ export function createStyleSheetModifier() {
         buildStyleSheet();
     }
 
-    return {modifySheet, shouldRebuildStyle};
+    return {modifySheet, shouldRebuildStyle, destroy};
 }

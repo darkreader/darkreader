@@ -198,7 +198,7 @@ export class Extension {
         };
     }
 
-    onCommand = async (command: string, url: string) => {
+    onCommand = async (command: string, frameURL?: string) => {
         if (this.startBarrier.isPending()) {
             await this.startBarrier.entry();
         }
@@ -213,6 +213,7 @@ export class Extension {
                 break;
             case 'addSite':
                 logInfo('Add Site command entered');
+                const url = frameURL || await this.tabs.getActiveTabURL();
                 if (isPDF(url)) {
                     this.changeSettings({enableForPDF: !this.user.settings.enableForPDF});
                 } else {
@@ -231,9 +232,9 @@ export class Extension {
     };
 
     private registerContextMenus() {
-        const onCommandToggle = async () => this.onCommand('toggle', null);
+        const onCommandToggle = async () => this.onCommand('toggle');
         const onCommandAddSite = async (data: chrome.contextMenus.OnClickData) => this.onCommand('addSite', data.frameUrl);
-        const onCommandSwitchEngine = async () => this.onCommand('switchEngine', null);
+        const onCommandSwitchEngine = async () => this.onCommand('switchEngine');
         chrome.contextMenus.removeAll(() => {
             this.registeredContextMenus = false;
             chrome.contextMenus.create({

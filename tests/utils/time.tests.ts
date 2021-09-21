@@ -1,4 +1,4 @@
-import {isInTimeIntervalLocal, nextTimeInterval, isNightAtLocation, nextChangeAtLocation, parseTime, getDuration, getDurationInMinutes} from '../../src/utils/time';
+import {isInTimeIntervalLocal, nextTimeInterval, isNightAtLocation, nextTimeChangeAtLocation, parseTime, getDuration, getDurationInMinutes} from '../../src/utils/time';
 
 test('Time interval', () => {
     // isInTimeIntervalLocal is time-zone dependent
@@ -94,35 +94,35 @@ test('Nigth check', () => {
 test('Sunrise/sunset', () => {
     const utcDate = (y: number, m: number, d: number, hh: number, mm: number) => new Date(Date.UTC(y, m, d, hh, mm));
 
-    expect(nextChangeAtLocation(52, 0, utcDate(2019, 8, 9, 0, 0))).toEqual(Date.UTC(2019, 8, 9, 5, 24, 2, 501));
-    expect(nextChangeAtLocation(52, 0, utcDate(2019, 8, 9, 5, 0))).toEqual(Date.UTC(2019, 8, 9, 5, 24, 2, 501));
-    expect(nextChangeAtLocation(52, 0, utcDate(2019, 8, 9, 7, 0))).toEqual(Date.UTC(2019, 8, 9, 18, 29, 46, 448));
-    expect(nextChangeAtLocation(52, 0, utcDate(2019, 8, 9, 12, 0))).toEqual(Date.UTC(2019, 8, 9, 18, 29, 46, 448));
-    expect(nextChangeAtLocation(52, 0, utcDate(2019, 8, 9, 18, 0))).toEqual(Date.UTC(2019, 8, 9, 18, 29, 46, 448));
-    expect(nextChangeAtLocation(52, 0, utcDate(2019, 8, 9, 20, 0))).toEqual(Date.UTC(2019, 8, 10, 5, 24, 2, 501));
-    expect(nextChangeAtLocation(52, 0, utcDate(2019, 8, 9, 23, 59))).toEqual(Date.UTC(2019, 8, 10, 5, 24, 2, 501));
+    expect(nextTimeChangeAtLocation(52, 0, utcDate(2019, 8, 9, 0, 0))).toEqual(Date.UTC(2019, 8, 9, 5, 24, 2, 501));
+    expect(nextTimeChangeAtLocation(52, 0, utcDate(2019, 8, 9, 5, 0))).toEqual(Date.UTC(2019, 8, 9, 5, 24, 2, 501));
+    expect(nextTimeChangeAtLocation(52, 0, utcDate(2019, 8, 9, 7, 0))).toEqual(Date.UTC(2019, 8, 9, 18, 29, 46, 448));
+    expect(nextTimeChangeAtLocation(52, 0, utcDate(2019, 8, 9, 12, 0))).toEqual(Date.UTC(2019, 8, 9, 18, 29, 46, 448));
+    expect(nextTimeChangeAtLocation(52, 0, utcDate(2019, 8, 9, 18, 0))).toEqual(Date.UTC(2019, 8, 9, 18, 29, 46, 448));
+    expect(nextTimeChangeAtLocation(52, 0, utcDate(2019, 8, 9, 20, 0))).toEqual(Date.UTC(2019, 8, 10, 5, 24, 2, 501));
+    expect(nextTimeChangeAtLocation(52, 0, utcDate(2019, 8, 9, 23, 59))).toEqual(Date.UTC(2019, 8, 10, 5, 24, 2, 501));
 
-    expect(nextChangeAtLocation(52, 30, utcDate(2019, 8, 9, 0, 0))).toEqual(Date.UTC(2019, 8, 9, 3, 23, 54, 365));
-    expect(nextChangeAtLocation(52, 30, utcDate(2019, 8, 9, 3, 0))).toEqual(Date.UTC(2019, 8, 9, 3, 23, 54, 365));
-    expect(nextChangeAtLocation(52, 30, utcDate(2019, 8, 9, 5, 0))).toEqual(Date.UTC(2019, 8, 9, 16, 29, 58, 45));
-    expect(nextChangeAtLocation(52, 30, utcDate(2019, 8, 9, 10, 0))).toEqual(Date.UTC(2019, 8, 9, 16, 29, 58, 45));
-    expect(nextChangeAtLocation(52, 30, utcDate(2019, 8, 9, 16, 0))).toEqual(Date.UTC(2019, 8, 9, 16, 29, 58, 45));
-    expect(nextChangeAtLocation(52, 30, utcDate(2019, 8, 9, 18, 0))).toEqual(Date.UTC(2019, 8, 10, 3, 23, 54, 365));
-    expect(nextChangeAtLocation(52, 30, utcDate(2019, 8, 9, 23, 59))).toEqual(Date.UTC(2019, 8, 10, 3, 23, 54, 365));
+    expect(nextTimeChangeAtLocation(52, 30, utcDate(2019, 8, 9, 0, 0))).toEqual(Date.UTC(2019, 8, 9, 3, 23, 54, 365));
+    expect(nextTimeChangeAtLocation(52, 30, utcDate(2019, 8, 9, 3, 0))).toEqual(Date.UTC(2019, 8, 9, 3, 23, 54, 365));
+    expect(nextTimeChangeAtLocation(52, 30, utcDate(2019, 8, 9, 5, 0))).toEqual(Date.UTC(2019, 8, 9, 16, 29, 58, 45));
+    expect(nextTimeChangeAtLocation(52, 30, utcDate(2019, 8, 9, 10, 0))).toEqual(Date.UTC(2019, 8, 9, 16, 29, 58, 45));
+    expect(nextTimeChangeAtLocation(52, 30, utcDate(2019, 8, 9, 16, 0))).toEqual(Date.UTC(2019, 8, 9, 16, 29, 58, 45));
+    expect(nextTimeChangeAtLocation(52, 30, utcDate(2019, 8, 9, 18, 0))).toEqual(Date.UTC(2019, 8, 10, 3, 23, 54, 365));
+    expect(nextTimeChangeAtLocation(52, 30, utcDate(2019, 8, 9, 23, 59))).toEqual(Date.UTC(2019, 8, 10, 3, 23, 54, 365));
 
-    expect(nextChangeAtLocation(52, -30, utcDate(2019, 8, 9, 0, 0))).toEqual(Date.UTC(2019, 8, 9, 7, 24, 10, 637));
-    expect(nextChangeAtLocation(52, -30, utcDate(2019, 8, 9, 7, 0))).toEqual(Date.UTC(2019, 8, 9, 7, 24, 10, 637));
-    expect(nextChangeAtLocation(52, -30, utcDate(2019, 8, 9, 9, 0))).toEqual(Date.UTC(2019, 8, 9, 20, 29, 34, 848));
-    expect(nextChangeAtLocation(52, -30, utcDate(2019, 8, 9, 14, 0))).toEqual(Date.UTC(2019, 8, 9, 20, 29, 34, 848));
-    expect(nextChangeAtLocation(52, -30, utcDate(2019, 8, 9, 20, 0))).toEqual(Date.UTC(2019, 8, 9, 20, 29, 34, 848));
-    expect(nextChangeAtLocation(52, -30, utcDate(2019, 8, 9, 22, 0))).toEqual(Date.UTC(2019, 8, 10, 7, 24, 10, 637));
-    expect(nextChangeAtLocation(52, -30, utcDate(2019, 8, 9, 23, 59))).toEqual(Date.UTC(2019, 8, 10, 7, 24, 10, 637));
+    expect(nextTimeChangeAtLocation(52, -30, utcDate(2019, 8, 9, 0, 0))).toEqual(Date.UTC(2019, 8, 9, 7, 24, 10, 637));
+    expect(nextTimeChangeAtLocation(52, -30, utcDate(2019, 8, 9, 7, 0))).toEqual(Date.UTC(2019, 8, 9, 7, 24, 10, 637));
+    expect(nextTimeChangeAtLocation(52, -30, utcDate(2019, 8, 9, 9, 0))).toEqual(Date.UTC(2019, 8, 9, 20, 29, 34, 848));
+    expect(nextTimeChangeAtLocation(52, -30, utcDate(2019, 8, 9, 14, 0))).toEqual(Date.UTC(2019, 8, 9, 20, 29, 34, 848));
+    expect(nextTimeChangeAtLocation(52, -30, utcDate(2019, 8, 9, 20, 0))).toEqual(Date.UTC(2019, 8, 9, 20, 29, 34, 848));
+    expect(nextTimeChangeAtLocation(52, -30, utcDate(2019, 8, 9, 22, 0))).toEqual(Date.UTC(2019, 8, 10, 7, 24, 10, 637));
+    expect(nextTimeChangeAtLocation(52, -30, utcDate(2019, 8, 9, 23, 59))).toEqual(Date.UTC(2019, 8, 10, 7, 24, 10, 637));
 
     // Polar day and night
-    expect(nextChangeAtLocation(71, 0, utcDate(2019, 5, 15, 0, 0))).toEqual(Date.UTC(2019, 5, 16, 0, 0, 0, 0));
-    expect(nextChangeAtLocation(-71, 0, utcDate(2019, 5, 15, 0, 0))).toEqual(Date.UTC(2019, 5, 16, 0, 0, 0, 0));
+    expect(nextTimeChangeAtLocation(71, 0, utcDate(2019, 5, 15, 0, 0))).toEqual(Date.UTC(2019, 5, 16, 0, 0, 0, 0));
+    expect(nextTimeChangeAtLocation(-71, 0, utcDate(2019, 5, 15, 0, 0))).toEqual(Date.UTC(2019, 5, 16, 0, 0, 0, 0));
 
     // Places where sunset comes before sunrise (in UTC)
-    expect(nextChangeAtLocation(0, 180, utcDate(2019, 8, 9, 0, 0))).toEqual(Date.UTC(2019, 8, 9, 6, 0, 50, 152));
-    expect(nextChangeAtLocation(0, 180, utcDate(2019, 8, 9, 7, 0))).toEqual(Date.UTC(2019, 8, 9, 17, 54, 18, 610));
+    expect(nextTimeChangeAtLocation(0, 180, utcDate(2019, 8, 9, 0, 0))).toEqual(Date.UTC(2019, 8, 9, 6, 0, 50, 152));
+    expect(nextTimeChangeAtLocation(0, 180, utcDate(2019, 8, 9, 7, 0))).toEqual(Date.UTC(2019, 8, 9, 17, 54, 18, 610));
 });

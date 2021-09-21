@@ -250,7 +250,7 @@ export function isNightAtLocation(
     return isInTimeIntervalUTC(sunsetTime, sunriseTime, currentTime);
 }
 
-export function nextChangeAtLocation(
+export function nextTimeChangeAtLocation(
     latitude: number,
     longitude: number,
     date: Date = new Date(),
@@ -263,7 +263,7 @@ export function nextChangeAtLocation(
         return date.getTime() + getDuration({days: 1});
     }
 
-    const [time1, time2] = time.sunriseTime < time.sunsetTime ? [time.sunriseTime, time.sunsetTime] : [time.sunsetTime, time.sunriseTime];
+    const [firstTimeOnDay, lastTimeOnDay] = time.sunriseTime < time.sunsetTime ? [time.sunriseTime, time.sunsetTime] : [time.sunsetTime, time.sunriseTime];
     const currentTime = (
         date.getUTCHours() * getDuration({hours: 1}) +
         date.getUTCMinutes() * getDuration({minutes: 1}) +
@@ -271,23 +271,23 @@ export function nextChangeAtLocation(
         date.getUTCMilliseconds()
     );
 
-    if (currentTime <= time1) {
+    if (currentTime <= firstTimeOnDay) {
         // Timeline:
-        // --- time1 <---> time2 ---
+        // --- firstTimeOnDay <---> lastTimeOnDay ---
         //  ^
         // Current time
-        return Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate(), 0, 0, 0, time1);
+        return Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate(), 0, 0, 0, firstTimeOnDay);
     }
-    if (currentTime <= time2) {
+    if (currentTime <= lastTimeOnDay) {
         // Timeline:
-        // --- time1 <---> time2 ---
-        //             ^
-        //         Current time
-        return Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate(), 0, 0, 0, time2);
+        // --- firstTimeOnDay <---> lastTimeOnDay ---
+        //                      ^
+        //                 Current time
+        return Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate(), 0, 0, 0, lastTimeOnDay);
     }
     // Timeline:
-    // --- time1 <---> time2 ---
-    //                        ^
-    //                    Current time
-    return Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate() + 1, 0, 0, 0, time1);
+    // --- firstTimeOnDay <---> lastTimeOnDay ---
+    //                                         ^
+    //                                    Current time
+    return Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate() + 1, 0, 0, 0, firstTimeOnDay);
 }

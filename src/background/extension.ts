@@ -8,7 +8,7 @@ import TabManager from './tab-manager';
 import UserStorage from './user-storage';
 import {setWindowTheme, resetWindowTheme} from './window-theme';
 import {getCommands, setShortcut, canInjectScript} from './utils/extension-api';
-import {isInTimeIntervalLocal, nextTimeInterval, isNightAtLocation, nextNightAtLocation} from '../utils/time';
+import {isInTimeIntervalLocal, nextTimeInterval, isNightAtLocation, nextTimeChangeAtLocation} from '../utils/time';
 import {isURLInList, getURLHostOrProtocol, isURLEnabled, isPDF} from '../utils/url';
 import ThemeEngines from '../generators/theme-engines';
 import createCSSFilterStylesheet from '../generators/css-filter';
@@ -85,11 +85,11 @@ export class Extension {
         }
     }
 
-    private alarmListener(alarm: chrome.alarms.Alarm): void {
+    private alarmListener = (alarm: chrome.alarms.Alarm): void => {
         if (alarm.name === Extension.ALARM_NAME) {
             this.handleAutoCheck();
         }
-    }
+    };
 
     recalculateIsEnabled(): boolean {
         if (!this.user.settings) {
@@ -124,7 +124,7 @@ export class Extension {
 
                 if (latitude != null && longitude != null) {
                     this.isEnabled = isNightAtLocation(latitude, longitude);
-                    nextCheck = nextNightAtLocation(latitude, longitude);
+                    nextCheck = nextTimeChangeAtLocation(latitude, longitude);
                 }
                 break;
             }

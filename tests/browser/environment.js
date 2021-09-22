@@ -34,7 +34,12 @@ class PuppeteerEnvironment extends JestNodeEnvironment {
         this.assignTestGlobals();
 
         // Close sentinel about:blank page created by Puppeteer but not used in tests.
-        (await this.browser.pages())[0].close();
+        this.browser.pages().then((pages) => {
+            const sentinel = pages[0];
+            if (sentinel._target._targetInfo.url === 'about:blank') {
+                sentinel.close();
+            }
+        });
     }
 
     async launchBrowser() {

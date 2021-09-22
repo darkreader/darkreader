@@ -33,7 +33,7 @@ export default function ContextMenusGroup(props: ViewProps) {
             label="Use context menus"
             description={props.data.settings.enableContextMenus ?
                 'Context menu integration is enabled' :
-                'Context menu integration is disabled'}
+                `Context menu integration is disabled${isFirefox ? '\nNote: conext menus permission is not used.' : ''}`}
             onChange={onContextMenusChange}
         />
     );

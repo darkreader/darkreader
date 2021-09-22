@@ -33,7 +33,15 @@ function sendMessage(message: Message) {
         return;
     }
     try {
-        chrome.runtime.sendMessage<Message>(message);
+        chrome.runtime.sendMessage<Message>(message, (response) => {
+            // Vivaldi bug workaround. See TabManager for details.
+            if (response === 'unsupportedSender') {
+                removeStyle();
+                removeSVGFilter();
+                removeDynamicTheme();
+                cleanup();
+            }
+        });
     } catch (e) {
         /*
          * Background can be unreachable if:

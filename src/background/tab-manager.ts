@@ -1,7 +1,7 @@
 import {canInjectScript} from '../background/utils/extension-api';
 import {createFileLoader} from './utils/network';
 import type {Message} from '../definitions';
-import {isMV3, isThunderbird} from '../utils/platform';
+import {isFirefox, isMV3, isThunderbird} from '../utils/platform';
 import {MessageType} from '../utils/message';
 import {logInfo, logWarn} from '../utils/log';
 import {StateManager} from './utils/state-manager';
@@ -56,7 +56,7 @@ export default class TabManager {
         this.stateManager = new StateManager<TabManagerState>(TabManager.LOCAL_STORAGE_KEY, this, {tabs: {}});
         this.tabs = {};
 
-        chrome.runtime.onMessage.addListener(async (message: Message, sender) => {
+        chrome.runtime.onMessage.addListener(async (message: Message, sender, sendResponse) => {
             function addFrame(tabs: {[tabId: number]: {[frameId: number]: FrameInfo}}, tabId: number, frameId: number, senderURL: string) {
                 let frames: {[frameId: number]: FrameInfo};
                 if (tabs[tabId]) {
@@ -80,13 +80,18 @@ export default class TabManager {
                         }
                     };
 
-                    // Workaround for thunderbird, not sure how. But sometimes sender.tab is undefined but accessing it.
-                    // Will actually throw a very nice error.
+                    // Workaround for Thunderbird and Vivaldi.
+                    // On Thunderbird, sometimes sender.tab is undefined but accessing it will throw a very nice error.
+                    // On Vivaldi, sometimes sender.tab is undefined as well, but error is not very helpful.
                     const isPanel = typeof sender === 'undefined' || typeof sender.tab === 'undefined';
                     if (isPanel) {
                         // NOTE: Vivaldi and Opera can show a page in a side panel,
                         // but it is not possible to handle messaging correctly (no tab ID, frame ID).
-                        reply({url: sender.url, frameURL: null, unsupportedSender: true});
+                        if (isFirefox) {
+                            reply({url: sender.url, frameURL: null, unsupportedSender: true});
+                        } else {
+                            sendResponse('unsupportedSender');
+                        }
                         return;
                     }
 

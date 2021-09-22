@@ -30,17 +30,17 @@ export default class Newsmaker {
         this.onUpdate = onUpdate;
     }
 
-    private async alarmListener(alarm: chrome.alarms.Alarm) {
+    private alarmListener = (alarm: chrome.alarms.Alarm): void => {
         if (alarm.name === Newsmaker.ALARM_NAME) {
-            await this.updateNews();
+            this.updateNews();
         }
-    }
+    };
 
     subscribe() {
         if ((this.latestTimestamp === null) || (this.latestTimestamp + Newsmaker.UPDATE_INTERVAL < Date.now())) {
             this.updateNews();
         }
-        chrome.alarms.onAlarm.addListener(this.alarmListener);
+        chrome.alarms.onAlarm.addListener((alarm) => this.alarmListener(alarm));
         chrome.alarms.create(Newsmaker.ALARM_NAME, {periodInMinutes: Newsmaker.UPDATE_INTERVAL});
     }
 

@@ -1,11 +1,15 @@
 import {m} from 'malevic';
-import {isMobile} from '../../../utils/platform';
+import {isFirefox, isMobile} from '../../../utils/platform';
 import CheckButton from '../check-button';
 import type {ViewProps} from '../types';
 
 export default function ContextMenusGroup(props: ViewProps) {
     function onContextMenusChange(checked: boolean) {
         if (checked) {
+            if (isFirefox) {
+                props.actions.changeSettings({enableContextMenus: true});
+                return;
+            }
             // We have to request permissions in foreground context in response to user action.
             // 'contextMenus' permission is granted automatically without any permission prompts.
             chrome.permissions.request({permissions: ['contextMenus']}, (hasPermission: boolean) => {
@@ -29,7 +33,7 @@ export default function ContextMenusGroup(props: ViewProps) {
             label="Use context menus"
             description={props.data.settings.enableContextMenus ?
                 'Context menu integration is enabled' :
-                'Context menu integration is disabled'}
+                `Context menu integration is disabled${isFirefox ? '\nNote: context menus permission is not used.' : ''}`}
             onChange={onContextMenusChange}
         />
     );

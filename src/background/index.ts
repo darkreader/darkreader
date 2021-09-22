@@ -18,6 +18,7 @@ const welcome = `  /''''\\
 Welcome to Dark Reader!`;
 console.log(welcome);
 
+declare const __DEBUG__: boolean;
 declare const __WATCH__: boolean;
 declare const __PORT__: number;
 const WATCH = __WATCH__;
@@ -71,7 +72,7 @@ if (WATCH) {
         };
     };
     listen();
-} else {
+} else if (!__DEBUG__){
     chrome.runtime.onInstalled.addListener(({reason}) => {
         if (reason === 'install') {
             chrome.tabs.create({url: getHelpURL()});

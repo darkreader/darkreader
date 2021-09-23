@@ -16,5 +16,6 @@
         "theme",
         "<all_urls>"
     ],
-    "optional_permissions": null
+    "version": "4.9.37.1",
+    "optional_permissions": []
 }

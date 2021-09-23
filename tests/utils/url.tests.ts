@@ -285,7 +285,9 @@ test('URL is enabled', () => {
     )).toBe(true);
 
     // Test wildcards usage
-    expect(isURLMatched('https://www.google.com/', 'google.*')).toBe(true);
+    expect(isURLMatched('https://www.google.com/', 'www.google.*')).toBe(true);
+    expect(isURLMatched('https://www.google.com/', '*.google.*')).toBe(true);
+    expect(isURLMatched('https://www.google.com/', 'google.*')).toBe(false);
     expect(isURLMatched('https://www.googla.com/', 'google.*')).toBe(false);
     expect(isURLMatched('https://mail.google.com/compose', 'mail.google.*')).toBe(true);
     expect(isURLMatched('https://www.google.com/compose', 'mail.google.*')).toBe(false);
@@ -299,11 +301,12 @@ test('URL is enabled', () => {
     expect(isURLMatched('https://blog.example.com/', '!blog.*.com')).toBe(false);
 
     // Test with list's
-    expect(isURLInList('https://www.google.com', ['google.com', 'example.org'])).toBe(true);
+    expect(isURLInList('https://www.google.com', ['www.google.com', 'example.org'])).toBe(true);
+    expect(isURLInList('https://www.google.com', ['google.com', 'example.org'])).toBe(false);
     expect(isURLInList('https://www.google.org', ['google.com', 'example.org'])).toBe(false);
     expect(isURLInList('https://mail.google.com/mail/u/0/', ['example.org', 'mail.google.*/mail/*/0'])).toBe(true);
     expect(isURLInList('https://mail.google.com/mail/u/1/', ['example.org', 'google.*/mail/*/0'])).toBe(false);
-    expect(isURLInList('https://www.discord.com', ['discord.com', '!blog.discord.com'])).toBe(true);
+    expect(isURLInList('https://www.discord.com', ['www.discord.com', '!blog.discord.com'])).toBe(true);
     expect(isURLInList('https://blog.discord.com', ['discord.com', '!blog.discord.com'])).toBe(false);
     expect(isURLInList('https://support.discord.com', ['support.discord.com', '!blog.discord.com'])).toBe(true);
     expect(isURLInList('https://support.discord.com', ['discord.com', '!support.discord.com'])).toBe(false);

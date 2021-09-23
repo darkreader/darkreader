@@ -247,9 +247,6 @@ test('The generic fix appears first', () => {
         }, {
             'url': ['long.sub.example.com'],
             'DIRECTIVE':'long'
-        }, {
-            'url': ['sub.example.com'],
-            'DIRECTIVE':'sub'
         }]);
 });
 
@@ -291,7 +288,7 @@ test('Fixes appear only once', () => {
         }]);
 });
 
-test('Implied wildcards', () => {
+test('No implied wildcards', () => {
     const config = [
         '*',
         '',
@@ -319,10 +316,5 @@ test('Implied wildcards', () => {
         {
             'url': ['*'],
             'DIRECTIVE': 'hello world'
-        }, {
-            'url': [
-                'example.com',
-            ],
-            'DIRECTIVE': 'one'
         }]);
 });

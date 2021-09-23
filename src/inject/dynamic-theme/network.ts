@@ -1,3 +1,6 @@
+import type {Message} from '../../definitions';
+import {MessageType} from '../../utils/message';
+
 interface FetchRequest {
     url: string;
     responseType: 'data-url' | 'text';
@@ -6,20 +9,20 @@ interface FetchRequest {
 }
 
 let counter = 0;
-const resolvers = new Map<number, (data) => void>();
-const rejectors = new Map<number, (error) => void>();
+const resolvers = new Map<number, (data: string) => void>();
+const rejectors = new Map<number, (reason?: any) => void>();
 
 export async function bgFetch(request: FetchRequest) {
     return new Promise<string>((resolve, reject) => {
         const id = ++counter;
         resolvers.set(id, resolve);
         rejectors.set(id, reject);
-        chrome.runtime.sendMessage({type: 'fetch', data: request, id});
+        chrome.runtime.sendMessage<Message>({type: MessageType.CS_FETCH, data: request, id});
     });
 }
 
-chrome.runtime.onMessage.addListener(({type, data, error, id}) => {
-    if (type === 'fetch-response') {
+chrome.runtime.onMessage.addListener(({type, data, error, id}: Message) => {
+    if (type === MessageType.BG_FETCH_RESPONSE) {
         const resolve = resolvers.get(id);
         const reject = rejectors.get(id);
         resolvers.delete(id);

@@ -2,7 +2,7 @@ import '../polyfills';
 import {DEFAULT_THEME} from '../../../src/defaults';
 import {createOrUpdateDynamicTheme, removeDynamicTheme} from '../../../src/inject/dynamic-theme';
 import {multiline, timeout} from '../../test-utils';
-import {isFirefox, isSafari} from 'utils/platform';
+import {isFirefox, isSafari} from '../../../src/utils/platform';
 
 const theme = {
     ...DEFAULT_THEME,
@@ -31,6 +31,7 @@ describe('SHADOW DOM', () => {
         const shadowRoot = document.querySelector('.shadow-dom-wrapper').shadowRoot;
         expect(shadowRoot.firstElementChild.classList.contains('darkreader--inline')).toBe(true);
         expect(shadowRoot.firstElementChild.nextElementSibling.classList.contains('darkreader--override')).toBe(true);
+        expect(shadowRoot.firstElementChild.nextElementSibling.nextElementSibling.classList.contains('darkreader--invert')).toBe(true);
     });
 
     it('should override styles', async () => {

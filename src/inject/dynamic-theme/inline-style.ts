@@ -6,7 +6,7 @@ import {variablesStore} from './variables';
 import type {FilterConfig} from '../../definitions';
 import {isShadowDomSupported} from '../../utils/platform';
 import {getDuration} from '../../utils/time';
-import {throttle} from '../utils/throttle';
+import {throttle} from '../../utils/throttle';
 
 interface Overrides {
     [cssProp: string]: {
@@ -85,7 +85,7 @@ const overrides: Overrides = {
 };
 
 const overridesList = Object.values(overrides);
-const normalizedPropList = {};
+const normalizedPropList: { [key: string]: string } = {};
 overridesList.forEach(({cssProp, customProp}) => normalizedPropList[customProp] = cssProp);
 
 const INLINE_STYLE_ATTRS = ['style', 'fill', 'stop-color', 'stroke', 'bgcolor', 'color'];
@@ -166,7 +166,7 @@ function deepWatchForInlineStyles(
     treeObservers.set(root, treeObserver);
 
     let attemptCount = 0;
-    let start = null;
+    let start: number = null;
     const ATTEMPTS_INTERVAL = getDuration({seconds: 10});
     const RETRY_TIMEOUT = getDuration({seconds: 2});
     const MAX_ATTEMPTS_COUNT = 50;
@@ -223,7 +223,7 @@ export function stopWatchingForInlineStyles() {
 }
 
 const inlineStyleCache = new WeakMap<HTMLElement, string>();
-const filterProps = ['brightness', 'contrast', 'grayscale', 'sepia', 'mode'];
+const filterProps: Array<keyof FilterConfig> = ['brightness', 'contrast', 'grayscale', 'sepia', 'mode'];
 
 function getInlineStyleCacheKey(el: HTMLElement, theme: FilterConfig) {
     return INLINE_STYLE_ATTRS
@@ -299,23 +299,25 @@ export function overrideInlineStyle(element: HTMLElement, theme: FilterConfig, i
         if (element.hasAttribute('fill')) {
             const SMALL_SVG_LIMIT = 32;
             const value = element.getAttribute('fill');
-            if (!(element instanceof SVGTextElement)) {
-                // getBoundingClientRect forces a layout change. And when it so happens that.
-                // The DOM is not in the `complete` readystate. It will cause the layout to be drawn.
-                // And it will cause a layout of unstyled content which results in white flashes.
-                // Therefor the check if the DOM is at the `complete` readystate.
-                const handleSVGElement = () => {
-                    const {width, height} = element.getBoundingClientRect();
-                    const isBg = (width > SMALL_SVG_LIMIT || height > SMALL_SVG_LIMIT);
-                    setCustomProp('fill', isBg ? 'background-color' : 'color', value);
-                };
-                if (isReadyStateComplete()) {
-                    handleSVGElement();
+            if (value !== 'none') {
+                if (!(element instanceof SVGTextElement)) {
+                    // getBoundingClientRect forces a layout change. And when it so happens that.
+                    // The DOM is not in the `complete` readystate. It will cause the layout to be drawn.
+                    // And it will cause a layout of unstyled content which results in white flashes.
+                    // Therefor the check if the DOM is at the `complete` readystate.
+                    const handleSVGElement = () => {
+                        const {width, height} = element.getBoundingClientRect();
+                        const isBg = (width > SMALL_SVG_LIMIT || height > SMALL_SVG_LIMIT);
+                        setCustomProp('fill', isBg ? 'background-color' : 'color', value);
+                    };
+                    if (isReadyStateComplete()) {
+                        handleSVGElement();
+                    } else {
+                        addReadyStateCompleteListener(handleSVGElement);
+                    }
                 } else {
-                    addReadyStateCompleteListener(handleSVGElement);
+                    setCustomProp('fill', 'color', value);
                 }
-            } else {
-                setCustomProp('fill', 'color', value);
             }
         }
         if (element.hasAttribute('stop-color')) {

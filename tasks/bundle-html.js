@@ -1,5 +1,5 @@
 const fs = require('fs-extra');
-const {getDestDir} = require('./paths');
+const {getDestDir, PLATFORM} = require('./paths');
 const reload = require('./reload');
 const {createTask} = require('./task');
 
@@ -79,11 +79,13 @@ async function bundleHTMLPage({cwdPath, rootComponent, props}, {debug}) {
     html = html.replace('$BODY', bodyText);
 
     const getPath = (dir) => `${dir}/${cwdPath}`;
-    const outPath = getPath(getDestDir({debug}));
-    const firefoxPath = getPath(getDestDir({debug, firefox: true}));
-    const thunderBirdPath = getPath(getDestDir({debug, thunderbird: true}));
+    const outPath = getPath(getDestDir({debug, platform: PLATFORM.CHROME}));
+    const firefoxPath = getPath(getDestDir({debug, platform: PLATFORM.FIREFOX}));
+    const mv3Path = getPath(getDestDir({debug, platform: PLATFORM.CHROME_MV3}));
+    const thunderBirdPath = getPath(getDestDir({debug, platform: PLATFORM.THUNDERBIRD}));
     await fs.outputFile(outPath, html);
     await fs.copy(outPath, firefoxPath);
+    await fs.copy(outPath, mv3Path);
     await fs.copy(outPath, thunderBirdPath);
 }
 

@@ -5,8 +5,9 @@ import {parseArray, formatArray, getTextDiffIndex, getTextPositionMessage} from 
 import {parseInversionFixes, formatInversionFixes} from '../../src/generators/css-filter';
 import {parseDynamicThemeFixes, formatDynamicThemeFixes} from '../../src/generators/dynamic-theme';
 import {parseStaticThemes, formatStaticThemes} from '../../src/generators/static-theme';
+import type {StaticTheme} from '../../src/definitions';
 
-function readConfig(fileName) {
+function readConfig(fileName: string) {
     return new Promise<string>((resolve, reject) => {
         readFile(resolvePath(__dirname, '../../src/config/', fileName), {encoding: 'utf-8'}, (err, data) => {
             if (err) {
@@ -33,6 +34,10 @@ function throwIfDifferent(input: string, expected: string, message: string) {
 
 test('Dark Sites list', async () => {
     const file = await readConfig('dark-sites.config');
+
+    // there is no \r character
+    expect(file.indexOf('\r')).toEqual(-1);
+
     const sites = parseArray(file);
 
     // is not empty
@@ -50,6 +55,10 @@ test('Dark Sites list', async () => {
 
 test('Dynamic Theme Fixes config', async () => {
     const file = await readConfig('dynamic-theme-fixes.config');
+
+    // there is no \r character
+    expect(file.indexOf('\r')).toEqual(-1);
+
     const fixes = parseDynamicThemeFixes(file);
 
     // there is a common fix
@@ -88,7 +97,7 @@ test('Dynamic Theme Fixes config', async () => {
         '========',
         'duckduckgo.com',
         'IGNORE IMAGE ANALYSIS', 'img[alt="Logo"]', 'canvas',
-    ].join('\r\n'))).toEqual([
+    ].join('\n'))).toEqual([
         {url: ['inbox.google.com', 'mail.google.com'], invert: ['a', 'b'], css: '.x { color: white !important; }'},
         {url: ['twitter.com'], invert: ['c', 'd']},
         {url: ['wikipedia.org'], ignoreInlineStyle: ['a', 'b']},
@@ -98,6 +107,10 @@ test('Dynamic Theme Fixes config', async () => {
 
 test('Inversion Fixes config', async () => {
     const file = await readConfig('inversion-fixes.config');
+
+    // there is no \r character
+    expect(file.indexOf('\r')).toEqual(-1);
+
     const fixes = parseInversionFixes(file);
 
     // there is a common fix
@@ -118,6 +131,10 @@ test('Inversion Fixes config', async () => {
 
 test('Static Themes config', async () => {
     const file = await readConfig('static-themes.config');
+
+    // there is no \r character
+    expect(file.indexOf('\r')).toEqual(-1);
+
     const themes = parseStaticThemes(file);
 
     // there is a common theme
@@ -130,9 +147,9 @@ test('Static Themes config', async () => {
     expect(themes.map(({url}) => url[0])).toEqual(themes.map(({url}) => url[0]).sort(compareURLPatterns));
 
     // selectors should have no comma
-    expect(themes.every((t) => Object.keys(t)
+    expect(themes.every((t) => (Object.keys(t) as Array<keyof StaticTheme>)
         .filter((prop) => ['url', 'noCommon'].indexOf(prop) < 0)
-        .every((prop) => t[prop]
+        .every((prop) => (t[prop] as string[])
             .every((s) => s.indexOf(',') < 0)))).toBe(true);
 
     // fixes are properly formatted

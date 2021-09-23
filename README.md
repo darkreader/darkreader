@@ -12,7 +12,7 @@
 ## Questions
 
 Most questions can be answered by reading the [help page](https://darkreader.org/help/).
-If the help page doesn't answer your question, open up an [issue](https://github.com/darkreader/darkreader/issues/new/) and choose the template 'Question' and fill out the necessary info. 
+If the help page doesn't answer your question, open up a new [discussion](https://github.com/darkreader/darkreader/discussions).
 
 ## How to contribute
 
@@ -27,7 +27,7 @@ Open terminal in the root folder and run:
 - `npm install`  
 - `npm run build`  
 
-This will generate a `build.zip` file that is useable in a Chromium-based browser and also a `build-firefox.xpi` file that is useable in Firefox.
+This will generate a `build/release/darkreader-chrome.zip` file that is useable in a Chromium-based browser and also a `build/release/darkreader-firefox.xpi` file that is useable in Firefox.
 
 ## Using Dark Reader for a website
 

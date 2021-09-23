@@ -2,7 +2,7 @@ import {getSVGFilterMatrixValue} from '../../generators/svg-filter';
 import {bgFetch} from './network';
 import {loadAsDataURL} from '../../utils/network';
 import type {FilterConfig} from '../../definitions';
-import {logInfo, logWarn} from '../utils/log';
+import {logInfo, logWarn} from '../../utils/log';
 import AsyncQueue from '../../utils/async-queue';
 
 export interface ImageDetails {
@@ -20,24 +20,32 @@ export interface ImageDetails {
 const imageManager = new AsyncQueue();
 
 export async function getImageDetails(url: string) {
-    return new Promise<ImageDetails>(async (resolve) => {
+    return new Promise<ImageDetails>(async (resolve, reject) => {
         let dataURL: string;
         if (url.startsWith('data:')) {
             dataURL = url;
         } else {
-            dataURL = await getImageDataURL(url);
+            try {
+                dataURL = await getImageDataURL(url);
+            } catch (error) {
+                reject(error);
+            }
         }
 
-        const image = await urlToImage(dataURL);
-        imageManager.addToQueue(() => {
-            resolve({
-                src: url,
-                dataURL,
-                width: image.naturalWidth,
-                height: image.naturalHeight,
-                ...analyzeImage(image),
+        try {
+            const image = await urlToImage(dataURL);
+            imageManager.addToQueue(() => {
+                resolve({
+                    src: url,
+                    dataURL,
+                    width: image.naturalWidth,
+                    height: image.naturalHeight,
+                    ...analyzeImage(image),
+                });
             });
-        });
+        } catch (error) {
+            reject(error);
+        }
     });
 }
 

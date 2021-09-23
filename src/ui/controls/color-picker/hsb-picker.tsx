@@ -76,7 +76,7 @@ function hsbToString(hsb: HSB) {
     return rgbToHexString(rgb);
 }
 
-function render(canvas: HTMLCanvasElement, getPixel: (x, y) => Uint8ClampedArray) {
+function render(canvas: HTMLCanvasElement, getPixel: (x: number, y: number) => Uint8ClampedArray) {
     const {width, height} = canvas;
     const context = canvas.getContext('2d');
     const imageData = context.getImageData(0, 0, width, height);

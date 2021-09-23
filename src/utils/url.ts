@@ -1,5 +1,6 @@
 import type {UserSettings} from '../definitions';
 import {isInPattern, isMatch} from './matching';
+import {isThunderbird} from './platform';
 
 let anchor: HTMLAnchorElement;
 
@@ -97,9 +98,14 @@ export function isPDF(url: string) {
     return false;
 }
 
-export function isURLEnabled(url: string, userSettings: UserSettings, {isProtected, isInDarkList}) {
+export function isURLEnabled(url: string, userSettings: UserSettings, {isProtected, isInDarkList}: {isProtected: boolean; isInDarkList: boolean}) {
     if (isProtected && !userSettings.enableForProtectedPages) {
         return false;
+    }
+    // Only URL's with emails are getting here on thunderbird
+    // So we can skip the checks and just return true.
+    if (isThunderbird) {
+        return true;
     }
     if (isPDF(url)) {
         return userSettings.enableForPDF;
@@ -115,4 +121,8 @@ export function isURLEnabled(url: string, userSettings: UserSettings, {isProtect
         return true;
     }
     return (!isInDarkList && !isURLInUserList);
+}
+
+export function isFullyQualifiedDomain(candidate: string) {
+    return /^[a-z0-9.-]+$/.test(candidate);
 }

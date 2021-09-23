@@ -51,7 +51,6 @@ function sanitazeInput(input: string) {
         .replace(/\?.*$/, '')
         .replace(/^.*?\/{2,3}/, '')
         .replace(/\/$/, '')
-        .replace(/^www./, '')
     );
 }
 

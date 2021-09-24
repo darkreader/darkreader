@@ -247,6 +247,15 @@ export default class TabManager {
             });
     }
 
+    async registerMailDisplayScript() {
+        await (chrome as any).messageDisplayScripts.register({
+            js: [
+                {file: '/inject/fallback.js'},
+                {file: '/inject/index.js'},
+            ]
+        });
+    }
+
     async sendMessage() {
         this.timestamp++;
 
@@ -266,15 +275,6 @@ export default class TabManager {
                         this.tabs[tab.id][frameId].timestamp = this.timestamp;
                     });
             });
-    }
-
-    async registerMailDisplayScript() {
-        await (chrome as any).messageDisplayScripts.register({
-            js: [
-                {file: '/inject/fallback.js'},
-                {file: '/inject/index.js'},
-            ]
-        });
     }
 
     async canAccessActiveTab(): Promise<boolean> {

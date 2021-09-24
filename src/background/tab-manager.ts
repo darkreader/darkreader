@@ -211,7 +211,7 @@ export default class TabManager {
                     break;
                 }
             }
-            sendResponse('Nothing-to-be-seen-here');
+            sendResponse({type: '¯\\_(ツ)_/¯'});
             return true;
         });
     }

@@ -49,6 +49,8 @@ function sanitazeInput(input: string) {
     return (input.replace(/^\^/, '')
         .replace(/\$$/, '')
         .replace(/\?.*$/, '')
+        // Regular URLs have two slashes, while local file URLs have three:
+        // file:///C:/path/to/file
         .replace(/^.*?\/{2,3}/, '')
         .replace(/\/$/, '')
     );

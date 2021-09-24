@@ -221,27 +221,6 @@ export default class TabManager {
         return tab.url || 'about:blank';
     }
 
-    async sendMessage() {
-        this.timestamp++;
-
-        (await queryTabs({}))
-            .filter((tab) => Boolean(this.tabs[tab.id]))
-            .forEach((tab) => {
-                const frames = this.tabs[tab.id];
-                Object.entries(frames)
-                    .filter(([, {state}]) => state === DocumentState.ACTIVE || state === DocumentState.PASSIVE)
-                    .forEach(([, {url}], frameId) => {
-                        const message = this.getTabMessage(this.getTabURL(tab), frameId === 0 ? null : url);
-                        if (tab.active && frameId === 0) {
-                            chrome.tabs.sendMessage<Message>(tab.id, message, {frameId});
-                        } else {
-                            setTimeout(() => chrome.tabs.sendMessage<Message>(tab.id, message, {frameId}));
-                        }
-                        this.tabs[tab.id][frameId].timestamp = this.timestamp;
-                    });
-            });
-    }
-
     async updateContentScript(options: {runOnProtectedPages: boolean}) {
         (await queryTabs({}))
             .filter((tab) => options.runOnProtectedPages || canInjectScript(tab.url))
@@ -265,6 +244,27 @@ export default class TabManager {
                         });
                     }
                 }
+            });
+    }
+
+    async sendMessage() {
+        this.timestamp++;
+
+        (await queryTabs({}))
+            .filter((tab) => Boolean(this.tabs[tab.id]))
+            .forEach((tab) => {
+                const frames = this.tabs[tab.id];
+                Object.entries(frames)
+                    .filter(([, {state}]) => state === DocumentState.ACTIVE || state === DocumentState.PASSIVE)
+                    .forEach(([, {url}], frameId) => {
+                        const message = this.getTabMessage(this.getTabURL(tab), frameId === 0 ? null : url);
+                        if (tab.active && frameId === 0) {
+                            chrome.tabs.sendMessage<Message>(tab.id, message, {frameId});
+                        } else {
+                            setTimeout(() => chrome.tabs.sendMessage<Message>(tab.id, message, {frameId}));
+                        }
+                        this.tabs[tab.id][frameId].timestamp = this.timestamp;
+                    });
             });
     }
 

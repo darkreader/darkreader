@@ -3,7 +3,7 @@ import {createFileLoader} from './utils/network';
 import type {Message} from '../definitions';
 import {isFirefox, isMV3, isThunderbird} from '../utils/platform';
 import {MessageType} from '../utils/message';
-import {logInfo, logWarn} from '../utils/log';
+import {logWarn} from '../utils/log';
 import {StateManager} from './utils/state-manager';
 
 async function queryTabs(query: chrome.tabs.QueryInfo) {
@@ -20,16 +20,19 @@ interface ConnectionMessageOptions {
 
 interface TabManagerOptions {
     getConnectionMessage: (options: ConnectionMessageOptions) => Message | Promise<Message>;
+    getTabMessage: (url: string, frameUrl: string) => Message;
     onColorSchemeChange: ({isDark}: {isDark: boolean}) => void;
 }
 
 interface FrameInfo {
-    url: string;
+    url?: string;
     state: DocumentState;
+    timestamp: number;
 }
 
 interface TabManagerState {
     tabs: {[tabId: number]: {[frameId: number]: FrameInfo}};
+    timestamp: number;
 }
 
 /*
@@ -50,14 +53,17 @@ export default class TabManager {
     private tabs: {[tabId: number]: {[frameId: number]: FrameInfo}};
     private stateManager: StateManager<TabManagerState>;
     private fileLoader: any = null;
+    private getTabMessage: (url: string, frameUrl: string) => Message;
+    private timestamp: number = null;
     static LOCAL_STORAGE_KEY = 'TabManager-state';
 
-    constructor({getConnectionMessage, onColorSchemeChange}: TabManagerOptions) {
-        this.stateManager = new StateManager<TabManagerState>(TabManager.LOCAL_STORAGE_KEY, this, {tabs: {}});
+    constructor({getConnectionMessage, onColorSchemeChange, getTabMessage}: TabManagerOptions) {
+        this.stateManager = new StateManager<TabManagerState>(TabManager.LOCAL_STORAGE_KEY, this, {tabs: {}, timestamp: 0});
         this.tabs = {};
+        this.getTabMessage = getTabMessage;
 
         chrome.runtime.onMessage.addListener(async (message: Message, sender, sendResponse) => {
-            function addFrame(tabs: {[tabId: number]: {[frameId: number]: FrameInfo}}, tabId: number, frameId: number, senderURL: string) {
+            function addFrame(tabs: {[tabId: number]: {[frameId: number]: FrameInfo}}, tabId: number, frameId: number, senderURL: string, timestamp: number) {
                 let frames: {[frameId: number]: FrameInfo};
                 if (tabs[tabId]) {
                     frames = tabs[tabId];
@@ -65,7 +71,11 @@ export default class TabManager {
                     frames = {};
                     tabs[tabId] = frames;
                 }
-                frames[frameId] = {url: senderURL, state: DocumentState.ACTIVE};
+                frames[frameId] = {
+                    url: senderURL,
+                    state: DocumentState.ACTIVE,
+                    timestamp,
+                };
             }
 
             switch (message.type) {
@@ -100,7 +110,7 @@ export default class TabManager {
                     const senderURL = sender.url;
                     const tabURL = sender.tab.url;
 
-                    addFrame(this.tabs, tabId, frameId, senderURL);
+                    addFrame(this.tabs, tabId, frameId, senderURL, this.timestamp);
 
                     reply({
                         url: tabURL,
@@ -132,14 +142,28 @@ export default class TabManager {
                 }
                 case MessageType.CS_FRAME_FREEZE:
                     await this.stateManager.loadState();
-                    this.tabs[sender.tab.id][sender.frameId].state = DocumentState.FROZEN;
+                    const info = this.tabs[sender.tab.id][sender.frameId];
+                    info.state = DocumentState.FROZEN;
+                    info.url = null;
                     this.stateManager.saveState();
                     break;
-                case MessageType.CS_FRAME_RESUME:
+                case MessageType.CS_FRAME_RESUME: {
                     await this.stateManager.loadState();
-                    addFrame(this.tabs, sender.tab.id, sender.frameId, sender.url);
+                    const tabId = sender.tab.id;
+                    const frameId = sender.frameId;
+                    const frameURL = sender.url;
+                    if (this.tabs[tabId][frameId].timestamp < this.timestamp) {
+                        const message = this.getTabMessage(this.getTabURL(sender.tab), frameURL);
+                        chrome.tabs.sendMessage<Message>(tabId, message, {frameId});
+                    }
+                    this.tabs[sender.tab.id][sender.frameId] = {
+                        url: sender.url,
+                        state: DocumentState.ACTIVE,
+                        timestamp: this.timestamp,
+                    };
                     this.stateManager.saveState();
                     break;
+                }
 
                 case MessageType.CS_FETCH: {
                     // Using custom response due to Chrome and Firefox incompatibility
@@ -232,23 +256,24 @@ export default class TabManager {
         });
     }
 
-    async sendMessage(getMessage: (url: string, frameUrl: string) => Message) {
+    async sendMessage() {
+        this.timestamp++;
+
         (await queryTabs({}))
             .filter((tab) => Boolean(this.tabs[tab.id]))
             .forEach((tab) => {
                 const frames = this.tabs[tab.id];
-                Object.entries(frames).forEach(([, {url, state}], frameId) => {
-                    if (state !== DocumentState.ACTIVE && state !== DocumentState.PASSIVE) {
-                        // TODO: avoid sending messages to frozen tabs for performance reasons.
-                        logInfo('Sending message to a frozen tab.');
-                    }
-                    const message = getMessage(this.getTabURL(tab), frameId === 0 ? null : url);
-                    if (tab.active && frameId === 0) {
-                        chrome.tabs.sendMessage<Message>(tab.id, message, {frameId});
-                    } else {
-                        setTimeout(() => chrome.tabs.sendMessage<Message>(tab.id, message, {frameId}));
-                    }
-                });
+                Object.entries(frames)
+                    .filter(([, {state}]) => state === DocumentState.ACTIVE || state === DocumentState.PASSIVE)
+                    .forEach(([, {url}], frameId) => {
+                        const message = this.getTabMessage(this.getTabURL(tab), frameId === 0 ? null : url);
+                        if (tab.active && frameId === 0) {
+                            chrome.tabs.sendMessage<Message>(tab.id, message, {frameId});
+                        } else {
+                            setTimeout(() => chrome.tabs.sendMessage<Message>(tab.id, message, {frameId}));
+                        }
+                        this.tabs[tab.id][frameId].timestamp = this.timestamp;
+                    });
             });
     }
 

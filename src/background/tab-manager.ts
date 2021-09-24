@@ -102,7 +102,7 @@ export default class TabManager {
                         } else {
                             sendResponse('unsupportedSender');
                         }
-                        return;
+                        return true;
                     }
 
                     const tabId = sender.tab.id;
@@ -211,6 +211,8 @@ export default class TabManager {
                     break;
                 }
             }
+            sendResponse({type: '¯\\_(ツ)_/¯'});
+            return true;
         });
     }
 

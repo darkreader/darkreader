@@ -350,7 +350,7 @@ export class Extension {
         if (this.wasEnabledOnLastCheck === null || this.wasEnabledOnLastCheck !== isEnabled) {
             this.wasEnabledOnLastCheck = isEnabled;
             this.onAppToggle();
-            this.tabs.invalidateTimestamp();
+            this.tabs.sendMessage();
             this.reportChanges();
             this.stateManager.saveState();
         }
@@ -469,7 +469,7 @@ export class Extension {
         }
         await this.stateManager.loadState();
         this.wasEnabledOnLastCheck = this.isEnabled;
-        this.tabs.invalidateTimestamp();
+        this.tabs.sendMessage();
         this.saveUserSettings();
         this.reportChanges();
         this.stateManager.saveState();

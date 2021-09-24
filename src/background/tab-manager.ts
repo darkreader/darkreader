@@ -214,7 +214,14 @@ export default class TabManager {
         });
     }
 
-    async invalidateTimestamp() {
+    getTabURL(tab: chrome.tabs.Tab): string {
+        // It can happen in cases whereby the tab.url is empty.
+        // Luckily this only and will only happen on `about:blank`-like pages.
+        // Due to this we can safely use `about:blank` as fallback value.
+        return tab.url || 'about:blank';
+    }
+
+    async sendMessage() {
         this.timestamp++;
 
         (await queryTabs({}))
@@ -233,13 +240,6 @@ export default class TabManager {
                         this.tabs[tab.id][frameId].timestamp = this.timestamp;
                     });
             });
-    }
-
-    getTabURL(tab: chrome.tabs.Tab): string {
-        // It can happen in cases whereby the tab.url is empty.
-        // Luckily this only and will only happen on `about:blank`-like pages.
-        // Due to this we can safely use `about:blank` as fallback value.
-        return tab.url || 'about:blank';
     }
 
     async updateContentScript(options: {runOnProtectedPages: boolean}) {

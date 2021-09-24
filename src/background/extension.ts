@@ -62,7 +62,7 @@ export class Extension {
                 return this.getConnectionMessage(url, frameURL);
             },
             getTabMessage: this.getTabMessage,
-            onColorSchemeChange: this.onColorSchemeChange
+            onColorSchemeChange: this.onColorSchemeChange,
         });
         this.user = new UserStorage({onRemoteSettingsChange: () => this.onRemoteSettingsChange()});
         this.startBarrier = new PromiseBarrier();

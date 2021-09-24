@@ -74,7 +74,7 @@ export default class TabManager {
                 frames[frameId] = {
                     url: senderURL,
                     state: DocumentState.ACTIVE,
-                    timestamp: timestamp,
+                    timestamp,
                 };
             }
 

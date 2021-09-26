@@ -10,9 +10,12 @@
     },
     "permissions": [
         "alarms",
+        "contextMenus",
         "storage",
         "tabs",
         "theme",
         "<all_urls>"
-    ]
+    ],
+    "version": "4.9.37.1",
+    "optional_permissions": []
 }

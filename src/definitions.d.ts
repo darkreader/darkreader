@@ -4,7 +4,6 @@ export interface ExtensionData {
     isEnabled: boolean;
     isReady: boolean;
     settings: UserSettings;
-    fonts: string[];
     news: News[];
     shortcuts: Shortcuts;
     devtools: {
@@ -73,6 +72,7 @@ export interface ThemePreset {
 
 export interface UserSettings {
     enabled: boolean;
+    fetchNews: boolean;
     theme: FilterConfig;
     presets: ThemePreset[];
     customThemes: CustomSiteConfig[];
@@ -80,7 +80,6 @@ export interface UserSettings {
     siteListEnabled: string[];
     applyToListedOnly: boolean;
     changeBrowserTheme: boolean;
-    notifyOfNews: boolean;
     syncSettings: boolean;
     syncSitesFixes: boolean;
     automation: '' | 'time' | 'system' | 'location';
@@ -89,6 +88,7 @@ export interface UserSettings {
     previewNewDesign: boolean;
     enableForPDF: boolean;
     enableForProtectedPages: boolean;
+    enableContextMenus: boolean;
 }
 
 export interface TimeSettings {

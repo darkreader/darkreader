@@ -15,10 +15,11 @@ const helpLocales = [
     'en',
     'es',
     'fr',
-    'nl',
     'it',
+    'nl',
     'pt',
     'ru',
+    'tr',
     'zh-CN',
     'zh-TW',
 ];

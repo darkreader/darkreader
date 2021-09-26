@@ -33,7 +33,11 @@ export function getAbsoluteURL($base: string, $relative: string) {
     if ($relative.match(/^data\\?\:/)) {
         return $relative;
     }
-
+    // Check if relative starts with `//hostname...`.
+    // We have to add a protocol to make it absolute.
+    if (/^\/\//.test($relative)) {
+        return `${location.protocol}${$relative}`;
+    }
     const b = parseURL($base);
     const a = parseURL($relative, b.href);
     return a.href;
@@ -198,4 +202,8 @@ export function isURLEnabled(url: string, userSettings: UserSettings, {isProtect
         return true;
     }
     return (!isInDarkList && !isURLInUserList);
+}
+
+export function isFullyQualifiedDomain(candidate: string) {
+    return /^[a-z0-9.-]+$/.test(candidate);
 }

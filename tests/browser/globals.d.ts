@@ -10,6 +10,9 @@ declare global {
     const popupUtils: {
         click: (selector: string) => Promise<void>;
         exists: (selector: string) => Promise<boolean>;
-        getBoundingRect: (selector: string) => Promise<{left: number; top: number; width: number; height: number}>;
+    };
+    const devtoolsUtils : {
+        paste: (fixes: string) => Promise<void>;
+        reset: () => Promise<void>;
     };
 }

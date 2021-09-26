@@ -124,3 +124,24 @@ function onSwipeStart(
 export function createSwipeHandler(startHandler: StartSwipeHandler) {
     return (e: MouseEvent | TouchEvent) => onSwipeStart(e, startHandler);
 }
+
+export async function getFontList() {
+    return new Promise<string[]>((resolve) => {
+        if (!chrome.fontSettings) {
+            // Todo: Remove it as soon as Firefox and Edge get support.
+            resolve([
+                'serif',
+                'sans-serif',
+                'monospace',
+                'cursive',
+                'fantasy',
+                'system-ui'
+            ]);
+            return;
+        }
+        chrome.fontSettings.getFontList((list) => {
+            const fonts = list.map((f) => f.fontId);
+            resolve(fonts);
+        });
+    });
+}

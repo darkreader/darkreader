@@ -1,6 +1,7 @@
 import {formatSitesFixesConfig} from './utils/format';
 import {applyColorMatrix, createFilterMatrix} from './utils/matrix';
-import {parseSitesFixesConfig} from './utils/parse';
+import {parseSitesFixesConfig, getSitesFixesFor} from './utils/parse';
+import type {SitePropsIndex} from './utils/parse';
 import {parseArray, formatArray} from '../utils/text';
 import {compareURLPatterns, isURLInList} from '../utils/url';
 import {createTextStyle} from './text-style';
@@ -26,14 +27,14 @@ export function hasPatchForChromiumIssue501582() {
     );
 }
 
-export default function createCSSFilterStyleSheet(config: FilterConfig, url: string, frameURL: string, inversionFixes: InversionFix[]) {
+export default function createCSSFilterStyleSheet(config: FilterConfig, url: string, frameURL: string, fixes: string, index: SitePropsIndex<InversionFix>) {
     const filterValue = getCSSFilterValue(config);
     const reverseFilterValue = 'invert(100%) hue-rotate(180deg)';
-    return cssFilterStyleSheetTemplate(filterValue, reverseFilterValue, config, url, frameURL, inversionFixes);
+    return cssFilterStyleSheetTemplate(filterValue, reverseFilterValue, config, url, frameURL, fixes, index);
 }
 
-export function cssFilterStyleSheetTemplate(filterValue: string, reverseFilterValue: string, config: FilterConfig, url: string, frameURL: string, inversionFixes: InversionFix[]) {
-    const fix = getInversionFixesFor(frameURL || url, inversionFixes);
+export function cssFilterStyleSheetTemplate(filterValue: string, reverseFilterValue: string, config: FilterConfig, url: string, frameURL: string, fixes: string, index: SitePropsIndex<InversionFix>) {
+    const fix = getInversionFixesFor(frameURL || url, fixes, index);
 
     const lines: string[] = [];
 
@@ -173,7 +174,18 @@ function createReverseRule(reverseFilterValue: string, fix: InversionFix): strin
 * @param url Site URL.
 * @param inversionFixes List of inversion fixes.
 */
-export function getInversionFixesFor(url: string, inversionFixes: InversionFix[]): InversionFix {
+export function getInversionFixesFor(url: string, fixes: string, index: SitePropsIndex<InversionFix>): InversionFix {
+    const inversionFixes = getSitesFixesFor<InversionFix>(url, fixes, index, {
+        commands: Object.keys(inversionFixesCommands),
+        getCommandPropName: (command) => inversionFixesCommands[command],
+        parseCommandValue: (command, value) => {
+            if (command === 'CSS') {
+                return value.trim();
+            }
+            return parseArray(value);
+        },
+    });
+
     const common = {
         url: inversionFixes[0].url,
         invert: inversionFixes[0].invert || [],
@@ -232,7 +244,7 @@ export function formatInversionFixes(inversionFixes: InversionFix[]) {
             if (prop === 'css') {
                 return (value as string).trim().replace(/\n+/g, '\n');
             }
-            return formatArray(value).trim();
+            return formatArray(value as string[]).trim();
         },
         shouldIgnoreProp: (prop, value) => {
             if (prop === 'css') {

@@ -9,7 +9,7 @@ const extension = new Extension();
 extension.start();
 if (chrome.commands) {
     // Firefox Android does not support chrome.commands
-    chrome.commands.onCommand.addListener(async (command, tab) => extension.onCommand(command, tab.url));
+    chrome.commands.onCommand.addListener(async (command) => extension.onCommand(command));
 }
 
 const welcome = `  /''''\\
@@ -18,6 +18,7 @@ const welcome = `  /''''\\
 Welcome to Dark Reader!`;
 console.log(welcome);
 
+declare const __DEBUG__: boolean;
 declare const __WATCH__: boolean;
 declare const __PORT__: number;
 const WATCH = __WATCH__;
@@ -71,7 +72,7 @@ if (WATCH) {
         };
     };
     listen();
-} else {
+} else if (!__DEBUG__){
     chrome.runtime.onInstalled.addListener(({reason}) => {
         if (reason === 'install') {
             chrome.tabs.create({url: getHelpURL()});

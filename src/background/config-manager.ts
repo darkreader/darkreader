@@ -1,10 +1,9 @@
 import {readText} from './utils/network';
 import {parseArray} from '../utils/text';
 import {getDuration} from '../utils/time';
-import {parseInversionFixes} from '../generators/css-filter';
-import {parseDynamicThemeFixes} from '../generators/dynamic-theme';
-import {parseStaticThemes} from '../generators/static-theme';
+import {indexSitesFixesConfig} from '../generators/utils/parse';
 import type {InversionFix, StaticTheme, DynamicThemeFix} from '../definitions';
+import type {SitePropsIndex} from '../generators/utils/parse';
 
 const CONFIG_URLs = {
     darkSites: {
@@ -35,9 +34,12 @@ interface Config {
 
 export default class ConfigManager {
     DARK_SITES?: string[];
-    DYNAMIC_THEME_FIXES?: DynamicThemeFix[];
-    INVERSION_FIXES?: InversionFix[];
-    STATIC_THEMES?: StaticTheme[];
+    DYNAMIC_THEME_FIXES_INDEX?: SitePropsIndex<DynamicThemeFix>;
+    DYNAMIC_THEME_FIXES_RAW?: string;
+    INVERSION_FIXES_INDEX?: SitePropsIndex<InversionFix>;
+    INVERSION_FIXES_RAW?: string;
+    STATIC_THEMES_INDEX?: SitePropsIndex<StaticTheme>;
+    STATIC_THEMES_RAW?: string;
 
     raw = {
         darkSites: null as string,
@@ -137,16 +139,19 @@ export default class ConfigManager {
 
     handleDynamicThemeFixes() {
         const $fixes = this.overrides.dynamicThemeFixes || this.raw.dynamicThemeFixes;
-        this.DYNAMIC_THEME_FIXES = parseDynamicThemeFixes($fixes);
+        this.DYNAMIC_THEME_FIXES_INDEX = indexSitesFixesConfig<DynamicThemeFix>($fixes);
+        this.DYNAMIC_THEME_FIXES_RAW = $fixes;
     }
 
     handleInversionFixes() {
         const $fixes = this.overrides.inversionFixes || this.raw.inversionFixes;
-        this.INVERSION_FIXES = parseInversionFixes($fixes);
+        this.INVERSION_FIXES_INDEX = indexSitesFixesConfig<InversionFix>($fixes);
+        this.INVERSION_FIXES_RAW = $fixes;
     }
 
     handleStaticThemes() {
         const $themes = this.overrides.staticThemes || this.raw.staticThemes;
-        this.STATIC_THEMES = parseStaticThemes($themes);
+        this.STATIC_THEMES_INDEX = indexSitesFixesConfig<StaticTheme>($themes);
+        this.STATIC_THEMES_RAW = $themes;
     }
 }

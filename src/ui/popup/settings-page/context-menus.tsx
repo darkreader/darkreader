@@ -27,7 +27,7 @@ export default function ContextMenusGroup(props: ViewProps) {
         }
     }
 
-    return !isMobile && (
+    return isMobile ? null : (
         <CheckButton
             checked={props.data.settings.enableContextMenus}
             label="Use context menus"

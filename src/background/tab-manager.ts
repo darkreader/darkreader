@@ -117,6 +117,7 @@ export default class TabManager {
                         frameURL: frameId === 0 ? null : senderURL,
                     });
                     this.stateManager.saveState();
+                    sendResponse({type: '¯\\_(ツ)_/¯'});
                     break;
                 }
                 case MessageType.CS_FRAME_FORGET: {

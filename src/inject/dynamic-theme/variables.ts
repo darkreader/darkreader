@@ -1,7 +1,7 @@
 import {modifyBackgroundColor, modifyBorderColor, modifyForegroundColor} from '../../generators/modify-colors';
 import {getParenthesesRange} from '../../utils/text';
 import {iterateCSSRules, iterateCSSDeclarations} from './css-rules';
-import {tryParseColor, getBgImageModifier} from './modify-css';
+import {tryParseColor, getBgImageModifier, getShadowModifier} from './modify-css';
 import type {CSSValueModifier} from './modify-css';
 import type {Theme} from '../../definitions';
 
@@ -249,20 +249,28 @@ export class VariablesStore {
         if (property === 'background' || property === 'background-image' || property === 'box-shadow') {
             return (theme) => {
                 const unknownVars = new Set<string>();
-                const modify = () => replaceCSSVariablesNames(
-                    sourceValue,
-                    (v) => {
-                        if (this.isVarType(v, VAR_TYPE_BGCOLOR)) {
-                            return wrapBgColorVariableName(v);
-                        }
-                        if (this.isVarType(v, VAR_TYPE_BGIMG)) {
-                            return wrapBgImgVariableName(v);
-                        }
-                        unknownVars.add(v);
-                        return v;
-                    },
-                    (fallback) => tryModifyBgColor(fallback, theme),
-                );
+                const modify = () => {
+                    const variableReplaced = replaceCSSVariablesNames(
+                        sourceValue,
+                        (v) => {
+                            if (this.isVarType(v, VAR_TYPE_BGCOLOR)) {
+                                return wrapBgColorVariableName(v);
+                            }
+                            if (this.isVarType(v, VAR_TYPE_BGIMG)) {
+                                return wrapBgImgVariableName(v);
+                            }
+                            unknownVars.add(v);
+                            return v;
+                        },
+                        (fallback) => tryModifyBgColor(fallback, theme),
+                    );
+                    // Check if property is box-shadow and if so, do a pass-trough to modify the shadow
+                    if (property === 'box-shadow') {
+                        const shadowModifier = getShadowModifier(variableReplaced);
+                        return shadowModifier(theme) || variableReplaced;
+                    }
+                    return variableReplaced;
+                };
                 const modified = modify();
                 if (unknownVars.size > 0) {
                     return new Promise<string>((resolve) => {
@@ -275,6 +283,7 @@ export class VariablesStore {
                         this.subscribeForVarTypeChange(firstUnknownVar, callback);
                     });
                 }
+
                 return modified;
             };
         }

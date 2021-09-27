@@ -102,7 +102,7 @@ export default class TabManager {
                         } else {
                             sendResponse('unsupportedSender');
                         }
-                        return true;
+                        return;
                     }
 
                     const tabId = sender.tab.id;
@@ -117,6 +117,7 @@ export default class TabManager {
                         frameURL: frameId === 0 ? null : senderURL,
                     });
                     this.stateManager.saveState();
+                    sendResponse({type: '¯\\_(ツ)_/¯'});
                     break;
                 }
                 case MessageType.CS_FRAME_FORGET: {
@@ -211,8 +212,6 @@ export default class TabManager {
                     break;
                 }
             }
-            sendResponse({type: '¯\\_(ツ)_/¯'});
-            return true;
         });
     }
 

@@ -9,7 +9,7 @@ export function makeChromiumHappy() {
         if (![
             // TabManager
             MessageType.CS_FRAME_CONNECT,
-            
+
             // Messenger
             MessageType.UI_GET_DATA,
             MessageType.UI_GET_ACTIVE_TAB_INFO,

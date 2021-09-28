@@ -66,8 +66,7 @@ export class VariablesStore {
         this.changedTypeVars.clear();
         this.initialVarTypes = new Map(this.varTypes);
         this.collectRootVariables();
-        this.rulesQueue.forEach((rules) => this.collectVariables(rules));
-        this.rulesQueue.forEach((rules) => this.collectVarDependants(rules));
+        this.collectVariablesAndVarDep(this.rulesQueue);
         this.rulesQueue.splice(0);
         this.collectRootVarDependants();
 
@@ -332,9 +331,23 @@ export class VariablesStore {
         }
     }
 
-    private collectVariables(rules: CSSRuleList) {
-        iterateVariables(rules, (varName, value) => {
-            this.inspectVariable(varName, value);
+    // Because of the similair expensive task between the old `collectVariables`
+    // and `collectVarDepandant`, we only want to do it once.
+    // This function should only do the same expensive task once
+    // and ensure that the result comes to the correct task.
+    // The task is either `inspectVariable` or `inspectVarDependant`.
+    private collectVariablesAndVarDep(ruleList: CSSRuleList[]) {
+        ruleList.forEach((rules) => {
+            iterateCSSRules(rules, (rule) => {
+                rule.style && iterateCSSDeclarations(rule.style, (property, value) => {
+                    if (isVariable(property)) {
+                        this.inspectVariable(property, value);
+                    }
+                    if (isVarDependant(value)) {
+                        this.inspectVarDependant(property, value);
+                    }
+                });
+            });
         });
     }
 
@@ -383,21 +396,15 @@ export class VariablesStore {
         this.unknownBgVars.delete(varName);
     }
 
-    private collectVarDependants(rules: CSSRuleList) {
-        iterateVarDependants(rules, (property, value) => {
-            this.inspectVerDependant(property, value);
-        });
-    }
-
     private collectRootVarDependants() {
         iterateCSSDeclarations(document.documentElement.style, (property, value) => {
             if (isVarDependant(value)) {
-                this.inspectVerDependant(property, value);
+                this.inspectVarDependant(property, value);
             }
         });
     }
 
-    private inspectVerDependant(property: string, value: string) {
+    private inspectVarDependant(property: string, value: string) {
         if (isVariable(property)) {
             this.iterateVarDeps(value, (ref) => {
                 if (!this.varRefs.has(property)) {
@@ -597,32 +604,6 @@ export function replaceCSSVariablesNames(
         return `var(${newName}, ${newFallback})`;
     };
     return replaceVariablesMatches(value, matchReplacer);
-}
-
-function iterateVariables(
-    rules: CSSRuleList,
-    iterator: (varName: string, varValue: string) => void,
-) {
-    iterateCSSRules(rules, (rule) => {
-        rule.style && iterateCSSDeclarations(rule.style, (property, value) => {
-            if (property.startsWith('--')) {
-                iterator(property, value);
-            }
-        });
-    });
-}
-
-function iterateVarDependants(
-    rules: CSSRuleList,
-    iterator: (property: string, value: string) => void,
-) {
-    iterateCSSRules(rules, (rule) => {
-        rule.style && iterateCSSDeclarations(rule.style, (property, value) => {
-            if (isVarDependant(value)) {
-                iterator(property, value);
-            }
-        });
-    });
 }
 
 function iterateVarDependencies(value: string, iterator: (varName: string) => void) {

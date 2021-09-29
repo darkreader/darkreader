@@ -72,6 +72,7 @@ export async function writeSyncStorage<T extends {[key: string]: any}>(values: T
         chrome.storage.sync.set(values, () => {
             if (chrome.runtime.lastError) {
                 reject(chrome.runtime.lastError);
+                mutexStorageWriting.unlock();
                 return;
             }
             resolve();

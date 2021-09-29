@@ -46,7 +46,7 @@ export default function ImportButton(props: ViewProps) {
 
     const dialog = context && context.store.isDialogVisible ? (
         <MessageBox
-            caption="The given file has incorrect JSON."
+            caption="Invalid JSON in import file.  Data not imported."
             onOK={hideDialog}
             onCancel={hideDialog}
         />

@@ -16,9 +16,11 @@ export class Mutex {
     }
 
     // Request a lock from the mutex.
+    // It should only return/resolve once the lock is granted.
     public async lock() {
         // Easiest path, the mutex is not locked.
-        // We lock the mutex and
+        // We lock the mutex and check if the mutex is locked.
+        // If it is locked, we wait for the mutex to be unlocked.
         if (!this.locked) {
             this.locked = true;
             return;

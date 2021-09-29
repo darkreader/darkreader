@@ -1,6 +1,4 @@
-
 import {logWarn} from './log';
-
 
 /**
   * This is the Mutex(Not to confuse with RW-Mutex).

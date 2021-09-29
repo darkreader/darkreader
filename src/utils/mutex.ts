@@ -1,12 +1,14 @@
 
-// This is the Mutex(Not to confuse with RW-Mutex). This is to ensure that certain access are only done
-// by 1 callback/operation(a current fallpit of PromiseBarrier). This ensures that their is a global mutex
-// Which can be called by a finite amount of callbacks. We should ensure that the mutex can only be locked
-// by the first callback which has requrested it and only give the next callback the mutex lock once it's
-
 import {logWarn} from './log';
 
-// unlocked by the callback.
+
+/**
+  * This is the Mutex(Not to confuse with RW-Mutex).
+  * This is to ensure that certain access are only done by 1 callback(a current fallpit of PromiseBarrier).
+  * This ensures that their is a global mutex which can be called by a finite amount of callbacks.
+  * We should ensure that the mutex can only be locked by the first callback which has requrested it
+  * and only give the next callback the mutex lock once it's been released.
+ */
 export class Mutex {
     private awaitingResolves = [] as Array<() => void>;
     private locked = false;

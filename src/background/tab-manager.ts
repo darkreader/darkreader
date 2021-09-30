@@ -273,7 +273,9 @@ export default class TabManager {
                         } else {
                             setTimeout(() => chrome.tabs.sendMessage<Message>(tab.id, message, {frameId}));
                         }
-                        this.tabs[tab.id][frameId].timestamp = this.timestamp;
+                        if (this.tabs[tab.id][frameId]) {
+                            this.tabs[tab.id][frameId].timestamp = this.timestamp;
+                        }
                     });
             });
     }

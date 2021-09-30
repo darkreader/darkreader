@@ -78,8 +78,6 @@ export default class TabManager {
                 };
             }
 
-            console.log(message.type, sender.tab ? sender.tab.id : null, sender.frameId);
-
             switch (message.type) {
                 case MessageType.CS_FRAME_CONNECT: {
                     await this.stateManager.loadState();

@@ -78,6 +78,8 @@ export default class TabManager {
                 };
             }
 
+            console.log(message.type, sender.tab ? sender.tab.id : null, sender.frameId);
+
             switch (message.type) {
                 case MessageType.CS_FRAME_CONNECT: {
                     await this.stateManager.loadState();
@@ -273,7 +275,9 @@ export default class TabManager {
                         } else {
                             setTimeout(() => chrome.tabs.sendMessage<Message>(tab.id, message, {frameId}));
                         }
-                        this.tabs[tab.id][frameId].timestamp = this.timestamp;
+                        if (this.tabs[tab.id][frameId]) {
+                            this.tabs[tab.id][frameId].timestamp = this.timestamp;
+                        }
                     });
             });
     }

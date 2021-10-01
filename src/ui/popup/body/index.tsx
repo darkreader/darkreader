@@ -5,6 +5,7 @@ import {getLocalMessage} from '../../../utils/locales';
 import {Overlay} from '../../controls';
 import AutomationPage from '../automation-page';
 import MainPage from '../main-page';
+import NewsSection from '../news-section';
 import {Page, PageViewer} from '../page-viewer';
 import SettingsPage from '../settings-page';
 import SiteListPage from '../site-list-page';
@@ -157,6 +158,7 @@ export default function Body(props: ViewProps) {
             <section class="m-section">
                 <DonateGroup />
             </section>
+            <NewsSection {...props} />
             <Overlay />
         </body>
     );

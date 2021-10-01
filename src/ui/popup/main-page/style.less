@@ -2,13 +2,7 @@
 
 .app-switch {
     &__control {
-        border-radius: @size-control-inner / 2 + @size-border;
         width: calc(100% - @size-border * 2);
-
-        .multi-switch__highlight,
-        .multi-switch__option {
-            border-radius: @size-control-inner / 2;
-        }
     }
 
     &__description {
@@ -52,7 +46,6 @@
 
 .site-toggle-group {
     .site-toggle {
-        border-radius: @size-control-inner / 2 + @size-border;
         width: calc(100% - @size-border * 2);
     }
 
@@ -75,15 +68,12 @@
     &__presets-wrapper {
         background-color: @color-control-active;
         border: @size-border solid @color-border;
-        border-radius: @size-control-inner / 2 + @size-border;
         height: @size-control-inner;
         position: relative;
 
         &::before {
             border: @size-border solid @color-border;
             border-bottom: none;
-            border-top-left-radius: @size-control-inner / 2 + @size-border;
-            border-top-right-radius: @size-control-inner / 2 + @size-border;
             content: "";
             display: inline-block;
             height: @size-control-inner + 2 * @size-border;
@@ -96,8 +86,6 @@
 
     &__controls-wrapper {
         border-bottom: @size-border solid @color-border;
-        border-bottom-left-radius: @size-control-inner / 2 + @size-border;
-        border-bottom-right-radius: @size-control-inner / 2 + @size-border;
         border-left: @size-border solid @color-border;
         border-right: @size-border solid @color-border;
         padding: @indent-small;
@@ -110,7 +98,6 @@
         background-repeat: no-repeat;
         background-size: 1rem;
         border: none;
-        border-radius: @size-control-inner / 2;
         height: @size-control-inner - 0.25rem;
         margin-bottom: 0.125rem;
         margin-top: @indent-small + 0.125rem;

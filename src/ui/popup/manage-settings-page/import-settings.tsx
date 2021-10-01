@@ -2,11 +2,13 @@ import {m} from 'malevic';
 import type {ViewProps} from '../types';
 import ControlGroup from '../control-group';
 import type {UserSettings} from '../../../definitions';
-import {Button} from '../../controls';
+import {Button, MessageBox} from '../../controls';
 import {openFile} from '../../utils';
 import {DEFAULT_SETTINGS} from '../../../defaults';
+import {getContext} from 'malevic/dom';
 
 export default function ImportButton(props: ViewProps) {
+    const context = getContext();
     function getValidatedObject<T>(source: T, compare: T): T {
         const result = {} as T;
         if (source == null || typeof source !== 'object' || Array.isArray(source)) {
@@ -32,6 +34,24 @@ export default function ImportButton(props: ViewProps) {
         return result;
     }
 
+    function showDialog() {
+        context.store.isDialogVisible = true;
+        context.refresh();
+    }
+
+    function hideDialog() {
+        context.store.isDialogVisible = false;
+        context.refresh();
+    }
+
+    const dialog = context && context.store.isDialogVisible ? (
+        <MessageBox
+            caption="The given file has incorrect JSON."
+            onOK={hideDialog}
+            onCancel={hideDialog}
+        />
+    ) : null;
+
     function importSettings() {
         openFile({extensions: ['json']}, (result: string) => {
             try {
@@ -39,8 +59,8 @@ export default function ImportButton(props: ViewProps) {
                 const result2 = getValidatedObject<UserSettings>(content, DEFAULT_SETTINGS);
                 props.actions.changeSettings({...result2});
             } catch (err) {
-                // TODO Make overlay Error
                 console.error(err);
+                showDialog();
             }
         });
     }
@@ -53,6 +73,7 @@ export default function ImportButton(props: ViewProps) {
                     class="settings-button"
                 >
                     Import Settings
+                    {dialog}
                 </Button>
             </ControlGroup.Control>
             <ControlGroup.Description>

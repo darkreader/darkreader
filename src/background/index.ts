@@ -3,6 +3,7 @@ import {getHelpURL, UNINSTALL_URL} from '../utils/links';
 import {canInjectScript} from '../background/utils/extension-api';
 import type {Message} from '../definitions';
 import {MessageType} from '../utils/message';
+import {makeChromiumHappy} from './make-chromium-happy';
 
 // Initialize extension
 const extension = new Extension();
@@ -81,3 +82,5 @@ if (WATCH) {
 
     chrome.runtime.setUninstallURL(UNINSTALL_URL);
 }
+
+makeChromiumHappy();

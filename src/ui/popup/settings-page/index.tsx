@@ -7,6 +7,7 @@ import SiteListButton from './site-list-button';
 import EnabledByDefaultGroup from './enabled-by-default';
 import ChangeBrowserTheme from './change-browser-theme';
 import ContextMenusGroup from './context-menus';
+import Version from './version';
 import {isFirefox} from '../../../utils/platform';
 
 
@@ -26,6 +27,7 @@ export default function SettingsPage(props: SettingsPageProps) {
             <AutomationButton onClick={props.onAutomationNavClick} />
             <ContextMenusGroup {...props}/>
             <ManageSettingsButton onClick={props.onManageSettingsClick} />
+            <Version />
         </section>
     );
 }

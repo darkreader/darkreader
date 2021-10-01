@@ -123,6 +123,7 @@ function DonateGroup() {
     return (
         <div class="m-donate-group">
             <a class="m-donate-button" href={DONATE_URL} target="_blank" rel="noopener noreferrer">
+                <span class="m-donate-button__icon"></span>
                 <span class="m-donate-button__text">
                     {getLocalMessage('donate')}
                 </span>

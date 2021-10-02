@@ -444,10 +444,10 @@ export function getBgImageModifier(
     }
 }
 
-function getShadowModifier(value: string): CSSValueModifier {
+export function getShadowModifier(value: string): CSSValueModifier {
     try {
         let index = 0;
-        const colorMatches = getMatches(/(^|\s)([a-z]+\(.+?\)|#[0-9a-f]+|[a-z]+)(.*?(inset|outset)?($|,))/ig, value, 2);
+        const colorMatches = getMatches(/(^|\s)(?!calc)([a-z]+\(.+?\)|#[0-9a-f]+|[a-z]+)(.*?(inset|outset)?($|,))/ig, value, 2);
         const modifiers = colorMatches.map((match, i) => {
             const prefixIndex = index;
             const matchIndex = value.indexOf(match, index);

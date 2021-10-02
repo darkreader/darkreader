@@ -6,11 +6,7 @@ export function injectProxy() {
     const deleteRuleDescriptor = Object.getOwnPropertyDescriptor(CSSStyleSheet.prototype, 'deleteRule');
     const removeRuleDescriptor = Object.getOwnPropertyDescriptor(CSSStyleSheet.prototype, 'removeRule');
 
-    // TODO: Remove wrapper when the issue is resolved in Pushbullet.com
-    const shouldWrapDocStyleSheets = location.hostname.endsWith('pushbullet.com') ||
-        location.hostname.endsWith('ilsole24ore.com') ||
-        location.hostname.endsWith('allegro.pl');
-    const documentStyleSheetsDescriptor = shouldWrapDocStyleSheets ? Object.getOwnPropertyDescriptor(Document.prototype, 'styleSheets') : null;
+    const documentStyleSheetsDescriptor = Object.getOwnPropertyDescriptor(Document.prototype, 'styleSheets');
 
     // Reference:
     // https://github.com/darkreader/darkreader/issues/6480#issuecomment-897696175
@@ -26,9 +22,7 @@ export function injectProxy() {
         Object.defineProperty(CSSStyleSheet.prototype, 'removeRule', removeRuleDescriptor);
         document.removeEventListener('__darkreader__cleanUp', cleanUp);
         document.removeEventListener('__darkreader__addUndefinedResolver', addUndefinedResolver);
-        if (shouldWrapDocStyleSheets) {
-            Object.defineProperty(Document.prototype, 'styleSheets', documentStyleSheetsDescriptor);
-        }
+        Object.defineProperty(Document.prototype, 'styleSheets', documentStyleSheetsDescriptor);
         if (shouldWrapHTMLElement) {
             Object.defineProperty(Element.prototype, 'getElementsByTagName', getElementsByTagNameDescriptor);
         }
@@ -113,9 +107,7 @@ export function injectProxy() {
     Object.defineProperty(CSSStyleSheet.prototype, 'insertRule', Object.assign({}, insertRuleDescriptor, {value: proxyInsertRule}));
     Object.defineProperty(CSSStyleSheet.prototype, 'deleteRule', Object.assign({}, deleteRuleDescriptor, {value: proxyDeleteRule}));
     Object.defineProperty(CSSStyleSheet.prototype, 'removeRule', Object.assign({}, removeRuleDescriptor, {value: proxyRemoveRule}));
-    if (shouldWrapDocStyleSheets) {
-        Object.defineProperty(Document.prototype, 'styleSheets', Object.assign({}, documentStyleSheetsDescriptor, {get: proxyDocumentStyleSheets}));
-    }
+    Object.defineProperty(Document.prototype, 'styleSheets', Object.assign({}, documentStyleSheetsDescriptor, {get: proxyDocumentStyleSheets}));
     if (shouldWrapHTMLElement) {
         Object.defineProperty(Element.prototype, 'getElementsByTagName', Object.assign({}, getElementsByTagNameDescriptor, {value: proxyGetElementsByTagName}));
     }

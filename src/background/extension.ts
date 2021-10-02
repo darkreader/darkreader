@@ -61,6 +61,7 @@ export class Extension {
                 }
                 return this.getConnectionMessage(url, frameURL);
             },
+            getTabMessage: this.getTabMessage,
             onColorSchemeChange: this.onColorSchemeChange,
         });
         this.user = new UserStorage({onRemoteSettingsChange: () => this.onRemoteSettingsChange()});
@@ -349,7 +350,7 @@ export class Extension {
         if (this.wasEnabledOnLastCheck === null || this.wasEnabledOnLastCheck !== isEnabled) {
             this.wasEnabledOnLastCheck = isEnabled;
             this.onAppToggle();
-            this.tabs.sendMessage(this.getTabMessage);
+            this.tabs.sendMessage();
             this.reportChanges();
             this.stateManager.saveState();
         }
@@ -468,7 +469,7 @@ export class Extension {
         }
         await this.stateManager.loadState();
         this.wasEnabledOnLastCheck = this.isEnabled;
-        this.tabs.sendMessage(this.getTabMessage);
+        this.tabs.sendMessage();
         this.saveUserSettings();
         this.reportChanges();
         this.stateManager.saveState();

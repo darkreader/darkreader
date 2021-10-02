@@ -1,5 +1,6 @@
 import {isPDF} from '../../utils/url';
 import {isFirefox, isEdge} from '../../utils/platform';
+import {Mutex} from '../../utils/mutex';
 
 declare const browser: {
     commands: {
@@ -37,7 +38,7 @@ export function canInjectScript(url: string) {
     );
 }
 
-let isWriting = false;
+const mutexStorageWriting = new Mutex();
 
 export async function readSyncStorage<T extends {[key: string]: any}>(defaults: T): Promise<T> {
     return new Promise<T>((resolve) => {
@@ -66,32 +67,33 @@ export async function readLocalStorage<T extends {[key: string]: any}>(defaults:
 }
 
 export async function writeSyncStorage<T extends {[key: string]: any}>(values: T): Promise<void> {
-    return new Promise<void>((resolve, reject) => {
-        isWriting = true;
+    return new Promise<void>(async (resolve, reject) => {
+        await mutexStorageWriting.lock();
         chrome.storage.sync.set(values, () => {
             if (chrome.runtime.lastError) {
                 reject(chrome.runtime.lastError);
+                mutexStorageWriting.unlock();
                 return;
             }
             resolve();
-            setTimeout(() => isWriting = false);
+            setTimeout(() => mutexStorageWriting.unlock(), 500);
         });
     });
 }
 
 export async function writeLocalStorage<T extends {[key: string]: any}>(values: T): Promise<void> {
-    return new Promise<void>((resolve) => {
-        isWriting = true;
+    return new Promise<void>(async (resolve) => {
+        await mutexStorageWriting.lock();
         chrome.storage.local.set(values, () => {
             resolve();
-            setTimeout(() => isWriting = false);
+            setTimeout(() => mutexStorageWriting.unlock(), 500);
         });
     });
 }
 
 export const subscribeToOuterSettingsChange = (callback: () => void) => {
     chrome.storage.onChanged.addListener(() => {
-        if (!isWriting) {
+        if (!mutexStorageWriting.isLocked()) {
             callback();
         }
     });

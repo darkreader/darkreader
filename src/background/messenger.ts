@@ -27,7 +27,7 @@ export default class Messenger {
     constructor(adapter: ExtensionAdapter) {
         this.adapter = adapter;
         this.changeListenerCount = 0;
-        const allowedSenderURL = [chrome.runtime.getURL('/ui/popup/index.html'), chrome.runtime.getURL('/ui/devtools/index.html')];
+        const allowedSenderURL = [chrome.runtime.getURL('/ui/popup/index.html'), chrome.runtime.getURL('/ui/devtools/index.html'), chrome.runtime.getURL('/ui/stylesheet-editor/index.html')];
         chrome.runtime.onMessage.addListener((message: Message, sender: chrome.runtime.MessageSender, sendResponse: (response: any) => void) => {
             if (allowedSenderURL.includes(sender.url)) {
                 this.onUIMessage(message, sendResponse);

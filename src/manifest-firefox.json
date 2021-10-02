@@ -16,5 +16,5 @@
         "theme",
         "<all_urls>"
     ],
-    "optional_permissions": null
+    "optional_permissions": []
 }

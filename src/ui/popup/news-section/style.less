@@ -1,0 +1,41 @@
+@import "../../theme.less";
+
+.news-section {
+    background-color: @color-back;
+    bottom: 0;
+    box-sizing: border-box;
+    height: 1.875rem;
+    left: 0;
+    overflow: hidden;
+    padding: 0.375rem 1rem 0.5rem 1rem;
+    position: absolute;
+    text-align: center;
+    user-select: none;
+    white-space: nowrap;
+    width: 100%;
+
+    &__main-link {
+        box-sizing: border-box;
+        color: @color-fore;
+        display: inline-block;
+        font-weight: bold;
+        line-height: 1rem;
+        height: 1rem;
+        overflow: hidden;
+        position: relative;
+        text-overflow: ellipsis;
+        width: 100%;
+
+        &--fresh:not(:visited) {
+            color: @color-heading;
+        }
+
+        &:hover {
+            color: @color-control-fore;
+        }
+    }
+
+    &:empty {
+        display: none;
+    }
+}

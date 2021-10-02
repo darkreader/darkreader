@@ -33,7 +33,11 @@ export function getAbsoluteURL($base: string, $relative: string) {
     if ($relative.match(/^data\\?\:/)) {
         return $relative;
     }
-
+    // Check if relative starts with `//hostname...`.
+    // We have to add a protocol to make it absolute.
+    if (/^\/\//.test($relative)) {
+        return `${location.protocol}${$relative}`;
+    }
     const b = parseURL($base);
     const a = parseURL($relative, b.href);
     return a.href;

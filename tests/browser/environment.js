@@ -173,6 +173,7 @@ class PuppeteerEnvironment extends JestNodeEnvironment {
             const sockets = new Set();
             const resolvers = new Map();
             const rejectors = new Map();
+            let idCount = 0;
 
             wsServer.on('listening', () => resolve(wsServer));
 
@@ -181,14 +182,14 @@ class PuppeteerEnvironment extends JestNodeEnvironment {
                 ws.on('message', (data) => {
                     const message = JSON.parse(data);
                     if (message.type === 'error') {
-                        const reject = rejectors.get(message.type);
+                        const reject = rejectors.get(message.id).reject;
                         reject(message.data);
                     } else {
-                        const resolve = resolvers.get(message.type);
+                        const resolve = resolvers.get(message.id).resolve;
                         resolve(message.data);
                     }
-                    resolvers.delete(message.type);
-                    rejectors.delete(message.type);
+                    resolvers.delete(message.id);
+                    rejectors.delete(message.id);
                 });
                 ws.on('close', () => sockets.delete(ws));
             });
@@ -196,10 +197,11 @@ class PuppeteerEnvironment extends JestNodeEnvironment {
             function sendToUIPage(message) {
                 return new Promise((resolve, reject) => {
                     const responseType = `${message.type}-response`;
-                    resolvers.set(responseType, resolve);
-                    rejectors.set(responseType, reject);
-                    const json = JSON.stringify(message);
+                    resolvers.set(idCount, {responseType, resolve});
+                    rejectors.set(idCount, {responseType, reject});
+                    const json = JSON.stringify({...message, id: idCount});
                     sockets.forEach((ws) => ws.send(json));
+                    idCount++;
                 });
             }
 

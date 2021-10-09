@@ -29,6 +29,7 @@ export async function getImageDetails(url: string) {
                 dataURL = await getImageDataURL(url);
             } catch (error) {
                 reject(error);
+                return;
             }
         }
 

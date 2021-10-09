@@ -1,7 +1,7 @@
 import type {Theme} from '../../definitions';
 import {forEach} from '../../utils/array';
 import {getMatches} from '../../utils/text';
-import {getAbsoluteURL} from '../../utils/url';
+import {getAbsoluteURL, isRelativeHrefOnAbsolutePath} from '../../utils/url';
 import {watchForNodePosition, removeNode, iterateShadowHosts, addReadyStateCompleteListener} from '../utils/dom';
 import {logInfo, logWarn} from '../../utils/log';
 import {replaceCSSRelativeURLsWithAbsolute, removeCSSComments, replaceCSSFontFace, getCSSURLValue, cssImportRegex, getCSSBaseBath} from './css-rules';
@@ -144,6 +144,13 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
             return null;
         }
 
+        if (
+            element instanceof HTMLLinkElement &&
+            !isRelativeHrefOnAbsolutePath(element.href)
+        ) {
+            return null;
+        }
+
         const cssRules = safeGetSheetRules();
         if (hasCrossOriginImports(cssRules)) {
             return null;
@@ -219,9 +226,11 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
                 }
             }
 
-            const crossOriginImport = hasCrossOriginImports(cssRules);
-            if (cssRules != null && !crossOriginImport) {
-                return cssRules;
+            if (isRelativeHrefOnAbsolutePath(element.href)) {
+                const crossOriginImport = hasCrossOriginImports(cssRules);
+                if (cssRules != null && !crossOriginImport) {
+                    return cssRules;
+                }
             }
 
             cssText = await loadText(element.href);

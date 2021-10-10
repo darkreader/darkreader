@@ -27,24 +27,24 @@ if (DEBUG) {
     const socket = new WebSocket(`ws://localhost:8894`);
     socket.onmessage = (e) => {
         const respond = (message: any) => socket.send(JSON.stringify(message));
+        const message = JSON.parse(e.data);
         try {
-            const message = JSON.parse(e.data);
             const textarea: HTMLTextAreaElement = document.querySelector('textarea#editor');
             const [buttonReset, buttonApply] = document.querySelectorAll('button');
             switch (message.type) {
                 case 'debug-devtools-paste':
                     textarea.value = message.data;
                     buttonApply.click();
-                    respond({type: 'debug-devtools-paste-response'});
+                    respond({type: 'debug-devtools-paste-response', id: message.id});
                     break;
                 case 'debug-devtools-reset':
-                    respond({type: 'debug-devtools-reset-response'});
+                    respond({type: 'debug-devtools-reset-response', id: message.id});
                     buttonReset.click();
                     (document.querySelector('button.message-box__button-ok') as HTMLButtonElement).click();
                     break;
             }
         } catch (err) {
-            respond({type: 'error', data: String(err)});
+            respond({type: 'error', id: message.id, data: String(err)});
         }
     };
 }

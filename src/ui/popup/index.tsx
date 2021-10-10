@@ -76,16 +76,16 @@ if (DEBUG) {
                 const selector = message.data;
                 const element = document.querySelector(selector);
                 element.click();
-                respond({type: 'click-response'});
+                respond({type: 'click-response', id: message.id});
             } else if (message.type === 'exists') {
                 const selector = message.data;
                 const element = document.querySelector(selector);
-                respond({type: 'exists-response', data: element != null});
+                respond({type: 'exists-response', id: message.id, data: element != null});
             } else if (message.type === 'rect') {
                 const selector = message.data;
                 const element = document.querySelector(selector);
                 const rect = (element as HTMLElement).getBoundingClientRect();
-                respond({type: 'rect-response', data: {left: rect.left, top: rect.top, width: rect.width, height: rect.height}});
+                respond({type: 'rect-response', id: message.id, data: {left: rect.left, top: rect.top, width: rect.width, height: rect.height}});
             }
         } catch (err) {
             respond({type: 'error', data: String(err)});

@@ -1212,4 +1212,24 @@ describe('CSS VARIABLES OVERRIDE', () => {
 
         expect(elementStyle.boxShadow).toBe('rgb(0, 0, 0) -9px 0px 0px 0px');
     });
+
+    it(`shouldn't modify the raw value of box-shadow when their is no color`, async () => {
+        container.innerHTML = multiline(
+            '<style>',
+            '    h1 {',
+            '        --color-border-muted: green;',
+            '    }',
+            '    h1 {',
+            '        box-shadow: inset 0 -1px 0 var(--color-border-muted)',
+            '    }',
+            '</style>',
+            '<h1>COmplicated shit :(</h1>',
+        );
+        createOrUpdateDynamicTheme(theme, null, false);
+
+        await timeout(0);
+        const elementStyle = getComputedStyle(container.querySelector('h1'));
+
+        expect(elementStyle.boxShadow).toBe('rgb(0, 102, 0) 0px -1px 0px 0px inset');
+    });
 });

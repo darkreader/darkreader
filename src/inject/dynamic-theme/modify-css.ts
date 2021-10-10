@@ -14,6 +14,14 @@ import {isFirefox} from '../../utils/platform';
 
 export type CSSValueModifier = (theme: Theme) => string | Promise<string>;
 
+export interface CSSValueModifierResult {
+    result: string;
+    matchesLength: number;
+    unparseableMatchesLength: number;
+}
+
+export type CSSValueModifierWithInfo = (theme: Theme) => CSSValueModifierResult;
+
 export interface ModifiableCSSDeclaration {
     property: string;
     value: string | CSSValueModifier | CSSVariableModifier;
@@ -444,10 +452,11 @@ export function getBgImageModifier(
     }
 }
 
-export function getShadowModifier(value: string): CSSValueModifier {
+export function getShadowModifierWithInfo(value: string): CSSValueModifierWithInfo {
     try {
         let index = 0;
         const colorMatches = getMatches(/(^|\s)(?!calc)([a-z]+\(.+?\)|#[0-9a-f]+|[a-z]+)(.*?(inset|outset)?($|,))/ig, value, 2);
+        let notParsed = 0;
         const modifiers = colorMatches.map((match, i) => {
             const prefixIndex = index;
             const matchIndex = value.indexOf(match, index);
@@ -455,16 +464,32 @@ export function getShadowModifier(value: string): CSSValueModifier {
             index = matchEnd;
             const rgb = tryParseColor(match);
             if (!rgb) {
+                notParsed++;
                 return () => value.substring(prefixIndex, matchEnd);
             }
             return (filter: FilterConfig) => `${value.substring(prefixIndex, matchIndex)}${modifyShadowColor(rgb, filter)}${i === colorMatches.length - 1 ? value.substring(matchEnd) : ''}`;
         });
 
-        return (filter: FilterConfig) => modifiers.map((modify) => modify(filter)).join('');
+        return (filter: FilterConfig) => {
+            const modified = modifiers.map((modify) => modify(filter)).join('');
+            return {
+                matchesLength: colorMatches.length,
+                unparseableMatchesLength: notParsed,
+                result: modified,
+            };
+        };
     } catch (err) {
         logWarn(`Unable to parse shadow ${value}`, err);
         return null;
     }
+}
+
+export function getShadowModifier(value: string): CSSValueModifier {
+    const shadowModifier = getShadowModifierWithInfo(value);
+    if (!shadowModifier) {
+        return null;
+    }
+    return (theme: Theme) => shadowModifier(theme).result;
 }
 
 function getVariableModifier(

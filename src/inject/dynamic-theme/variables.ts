@@ -1,7 +1,7 @@
 import {modifyBackgroundColor, modifyBorderColor, modifyForegroundColor} from '../../generators/modify-colors';
 import {getParenthesesRange} from '../../utils/text';
 import {iterateCSSRules, iterateCSSDeclarations} from './css-rules';
-import {tryParseColor, getBgImageModifier, getShadowModifier} from './modify-css';
+import {tryParseColor, getBgImageModifier, getShadowModifierWithInfo} from './modify-css';
 import type {CSSValueModifier} from './modify-css';
 import type {Theme} from '../../definitions';
 
@@ -265,8 +265,11 @@ export class VariablesStore {
                     );
                     // Check if property is box-shadow and if so, do a pass-trough to modify the shadow
                     if (property === 'box-shadow') {
-                        const shadowModifier = getShadowModifier(variableReplaced);
-                        return shadowModifier(theme) || variableReplaced;
+                        const shadowModifier = getShadowModifierWithInfo(variableReplaced);
+                        const modifiedShadow = shadowModifier(theme);
+                        if (modifiedShadow.unparseableMatchesLength !== modifiedShadow.matchesLength) {
+                            return modifiedShadow.result;
+                        }
                     }
                     return variableReplaced;
                 };

@@ -127,6 +127,7 @@ async function bundleJS(/** @type {JSEntry} */entry, {debug, watch}) {
                 tsconfig: 'src/tsconfig.json',
                 tsconfigOverride: {
                     compilerOptions: {
+                        noImplicitAny: debug ? false : true,
                         removeComments: debug ? false : true,
                         sourceMap: debug ? true : false,
                     },

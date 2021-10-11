@@ -7,7 +7,7 @@ interface MultiSwitchProps {
     onChange: (value: string) => void;
 }
 
-export default function MultiSwitch(props: MultiSwitchProps, ...children: Array<Malevic.Child>) {
+export default function MultiSwitch(props: MultiSwitchProps, ...children: Malevic.Child[]) {
     return (
         <span class={['multi-switch', props.class]}>
             <span

@@ -507,6 +507,8 @@ export class Extension {
             const theme = custom ? custom.theme : preset ? preset.theme : this.user.settings.theme;
 
             logInfo(`Creating CSS for url: ${url}`);
+            logInfo(`Custom theme ${custom ? 'was found' : 'was not found'}, Preset theme ${preset ? 'was found' : 'was not found'}
+            The theme(${custom ? 'custom' : preset ? 'preset' : 'global'} settings) used is: ${JSON.stringify(theme)}`);
             switch (theme.engine) {
                 case ThemeEngines.cssFilter: {
                     return {

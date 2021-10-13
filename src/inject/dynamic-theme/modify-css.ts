@@ -11,6 +11,8 @@ import type {CSSVariableModifier, VariablesStore} from './variables';
 import {logWarn, logInfo} from '../../utils/log';
 import type {FilterConfig, Theme} from '../../definitions';
 import {isFirefox} from '../../utils/platform';
+import type {parsedGradient} from '../../utils/parsing';
+import {parseGradient} from '../../utils/parsing';
 
 export type CSSValueModifier = (theme: Theme) => string | Promise<string>;
 
@@ -261,7 +263,6 @@ function getColorModifier(prop: string, value: string): string | CSSValueModifie
     }
 }
 
-export const gradientRegex = /[\-a-z]+gradient\(([^\(\)]*(\(([^\(\)]*(\(.*?\)))*[^\(\)]*\))){0,15}[^\(\)]*\)/g;
 const imageDetailsCache = new Map<string, ImageDetails>();
 const awaitingForImageLoading = new Map<string, Array<(imageDetails: ImageDetails) => void>>();
 
@@ -282,6 +283,19 @@ function shouldIgnoreImage(selectorText: string, selectors: string[]) {
     return false;
 }
 
+interface bgImageMatches {
+    type: 'url' | 'gradient';
+    urlInfo?: {
+        index: number;
+        match: string;
+    };
+    gradientInfo?: {
+        type: string;
+        content: string;
+        hasComma: boolean;
+    };
+}
+
 export function getBgImageModifier(
     value: string,
     rule: CSSStyleRule,
@@ -289,7 +303,7 @@ export function getBgImageModifier(
     isCancelled: () => boolean,
 ): string | CSSValueModifier {
     try {
-        const gradients = getMatches(gradientRegex, value);
+        const gradients = parseGradient(value);
         const urls = getMatches(cssURLRegex, value);
 
         if (urls.length === 0 && gradients.length === 0) {
@@ -304,14 +318,15 @@ export function getBgImageModifier(
                 return {match, index: valueIndex};
             });
         };
-        const matches = getIndices(urls).map((i) => ({type: 'url', ...i}))
-            .concat(getIndices(gradients).map((i) => ({type: 'gradient', ...i})))
-            .sort((a, b) => a.index - b.index);
 
-        const getGradientModifier = (gradient: string) => {
-            const match = gradient.match(/^(.*-gradient)\((.*)\)$/);
-            const type = match[1];
-            const content = match[2];
+        const matches: bgImageMatches[] =
+            (getIndices(urls).map((i) => ({type: 'url', urlInfo: i})) as bgImageMatches[])
+                .concat(gradients.map((i) => ({type: 'gradient', gradientInfo: i})));
+
+        const getGradientModifier = (gradient: parsedGradient) => {
+            const type = gradient.type;
+            const content = gradient.content;
+            const hasComma = gradient.hasComma;
 
             const partsRegex = /([^\(\),]+(\([^\(\)]*(\([^\(\)]*\)*[^\(\)]*)?\))?[^\(\),]*),?/g;
             const colorStopRegex = /^(from|color-stop|to)\(([^\(\)]*?,\s*)?(.*?)\)$/;
@@ -342,7 +357,7 @@ export function getBgImageModifier(
             });
 
             return (filter: FilterConfig) => {
-                return `${type}(${parts.map((modify) => modify(filter)).join(', ')})`;
+                return `${type}(${parts.map((modify) => modify(filter)).join(', ')})${hasComma ? ', ' : ''}`;
             };
         };
 
@@ -425,14 +440,21 @@ export function getBgImageModifier(
         const modifiers: CSSValueModifier[] = [];
 
         let index = 0;
-        matches.forEach(({match, type, index: matchStart}, i) => {
-            const prefixStart = index;
-            const matchEnd = matchStart + match.length;
-            index = matchEnd;
-            modifiers.push(() => value.substring(prefixStart, matchStart));
-            modifiers.push(type === 'url' ? getURLModifier(match) : getGradientModifier(match));
-            if (i === matches.length - 1) {
-                modifiers.push(() => value.substring(matchEnd));
+        matches.forEach(({type, urlInfo, gradientInfo}, i) => {
+            if (type === 'url') {
+                const match = urlInfo.match;
+                const matchStart = urlInfo.index;
+                const prefixStart = index;
+                const matchEnd = matchStart + match.length;
+
+                index = matchEnd;
+                modifiers.push(() => value.substring(prefixStart, matchStart));
+                modifiers.push(getURLModifier(match));
+                if (i === matches.length - 1) {
+                    modifiers.push(() => value.substring(matchEnd));
+                }
+            } else if (type === 'gradient') {
+                modifiers.push(getGradientModifier(gradientInfo));
             }
         });
 

@@ -267,13 +267,13 @@ function getElementsTreeOperations(mutations: MutationRecord[]): ElementsTreeOpe
             if (n instanceof Element) {
                 if (n.isConnected) {
                     moves.add(n);
+                    additions.delete(n);
                 } else {
                     deletions.add(n);
                 }
             }
         });
     });
-    moves.forEach((n) => additions.delete(n));
 
     const duplicateAdditions = [] as Element[];
     const duplicateDeletions = [] as Element[];

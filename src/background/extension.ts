@@ -29,6 +29,8 @@ interface ExtensionState {
     registeredContextMenus: boolean;
 }
 
+declare const __DEBUG__: boolean;
+
 export class Extension {
     config: ConfigManager;
     devtools: DevTools;
@@ -166,6 +168,28 @@ export class Extension {
 
         this.user.settings.fetchNews && this.news.subscribe();
         this.startBarrier.resolve();
+
+        if (__DEBUG__) {
+            const socket = new WebSocket(`ws://localhost:8894`);
+            socket.onmessage = (e) => {
+                const respond = (message: any) => socket.send(JSON.stringify(message));
+                try {
+                    const message = JSON.parse(e.data);
+                    if (message.type === 'changeSettings') {
+                        const settings = message.data;
+                        this.changeSettings(settings);
+                        respond({type: 'changeSettings-response', id: message.id});
+                    } else if (message.type === 'collectData') {
+                        this.collectData().then((data) => {
+                            respond({type: 'collectData-response', id: message.id, data});
+                        });
+                    }
+                } catch (err) {
+                    respond({type: 'error', data: String(err)});
+                }
+            };
+
+        }
     }
 
     private getMessengerAdapter(): ExtensionAdapter {

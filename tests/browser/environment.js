@@ -214,6 +214,11 @@ class PuppeteerEnvironment extends JestNodeEnvironment {
                 paste: async (fixes) => await sendToUIPage({type: 'debug-devtools-paste', data: fixes}),
                 reset: async () => await sendToUIPage({type: 'debug-devtools-reset'}),
             };
+
+            this.global.backgroundUtils = {
+                changeSettings: async (settings) => await sendToUIPage({type: 'changeSettings', data: settings}),
+                collectData: async () => await sendToUIPage({type: 'collectData'}),
+            };
         });
     }
 

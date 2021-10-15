@@ -1,9 +1,9 @@
-export class PromiseBarrier {
-    private resolves: Array<(value?: any) => void> = [];
-    private rejects: Array<(reason?: any) => void> = [];
+export class PromiseBarrier<RESOLVUTION, REJECTION> {
+    private resolves: Array<(value?: RESOLVUTION) => void> = [];
+    private rejects: Array<(reason?: REJECTION) => void> = [];
     private wasResolved = false;
     private wasRejected = false;
-    private resolution: any;
+    private resolution: RESOLVUTION | REJECTION;
 
     async entry(){
         if (this.wasResolved) {
@@ -18,7 +18,7 @@ export class PromiseBarrier {
         });
     }
 
-    async resolve(value?: any){
+    async resolve(value?: RESOLVUTION){
         if (this.wasRejected || this.wasResolved) {
             return;
         }
@@ -30,7 +30,7 @@ export class PromiseBarrier {
         return new Promise<void>((resolve) => setTimeout(() => resolve()));
     }
 
-    async reject(reason?: any){
+    async reject(reason?: REJECTION){
         if (this.wasRejected || this.wasResolved) {
             return;
         }

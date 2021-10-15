@@ -15,7 +15,7 @@ import createCSSFilterStylesheet from '../generators/css-filter';
 import {getDynamicThemeFixesFor} from '../generators/dynamic-theme';
 import createStaticStylesheet from '../generators/static-theme';
 import {createSVGFilterStylesheet, getSVGFilterMatrixValue, getSVGReverseFilterMatrixValue} from '../generators/svg-filter';
-import type {ExtensionData, FilterConfig, News, Shortcuts, UserSettings, TabInfo} from '../definitions';
+import type {ExtensionData, FilterConfig, News, Shortcuts, UserSettings, TabInfo, TabData} from '../definitions';
 import {isSystemDarkModeEnabled} from '../utils/media-query';
 import {isFirefox, isMV3, isThunderbird} from '../utils/platform';
 import {MessageType} from '../utils/message';
@@ -344,7 +344,7 @@ export class Extension {
         if (this.user.settings) {
             return this.getTabMessage(url, frameURL);
         }
-        return new Promise<{type: string; data?: any}>((resolve) => {
+        return new Promise<TabData>((resolve) => {
             this.user.loadSettings().then(() => resolve(this.getTabMessage(url, frameURL)));
         });
     }
@@ -522,7 +522,7 @@ export class Extension {
         };
     }
 
-    private getTabMessage = (url: string, frameURL: string) => {
+    private getTabMessage = (url: string, frameURL: string): TabData => {
         const urlInfo = this.getURLInfo(url);
         if (this.isEnabled && isURLEnabled(url, this.user.settings, urlInfo)) {
             const custom = this.user.settings.customThemes.find(({url: urlList}) => isURLInList(url, urlList));

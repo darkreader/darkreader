@@ -151,7 +151,7 @@ class LimitedCacheStorage {
     }
 }
 
-interface FetchRequestParameters {
+export interface FetchRequestParameters {
     url: string;
     responseType: 'data-url' | 'text';
     mimeType?: string;

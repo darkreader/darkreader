@@ -1,5 +1,6 @@
 import {canInjectScript} from '../background/utils/extension-api';
 import {createFileLoader} from './utils/network';
+import type {FetchRequestParameters} from './utils/network';
 import type {Message} from '../definitions';
 import {isFirefox, isMV3, isThunderbird} from '../utils/platform';
 import {MessageType} from '../utils/message';
@@ -52,7 +53,7 @@ enum DocumentState {
 export default class TabManager {
     private tabs: {[tabId: number]: {[frameId: number]: FrameInfo}};
     private stateManager: StateManager<TabManagerState>;
-    private fileLoader: any = null;
+    private fileLoader: {get: (params: FetchRequestParameters) => Promise<string>} = null;
     private getTabMessage: (url: string, frameUrl: string) => Message;
     private timestamp: number = null;
     static LOCAL_STORAGE_KEY = 'TabManager-state';

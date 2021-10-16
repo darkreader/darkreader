@@ -188,7 +188,6 @@ export class Extension {
                     respond({type: 'error', data: String(err)});
                 }
             };
-
         }
     }
 

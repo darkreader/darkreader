@@ -40,9 +40,7 @@ export function canInjectScript(url: string) {
 
 const mutexStorageWriting = new Mutex();
 
-function metaName(key: string) {
-    return `${key}_meta`;
-}
+const metaVariantOfKey = (key: string) => `${key}_meta`;
 
 export async function readSyncStorage<T extends {[key: string]: any}>(defaults: T): Promise<T> {
     return new Promise<T>((resolve) => {
@@ -50,7 +48,7 @@ export async function readSyncStorage<T extends {[key: string]: any}>(defaults: 
         // Add split up meta
         for (const key in defaults) {
             prepared[key] = defaults[key];
-            prepared[metaName(key)] = false;
+            prepared[metaVariantOfKey(key)] = false;
         }
         chrome.storage.sync.get(prepared, (sync: any) => {
             if (chrome.runtime.lastError) {
@@ -60,23 +58,24 @@ export async function readSyncStorage<T extends {[key: string]: any}>(defaults: 
             }
 
             const meta: string[] = [];
-            const metaKeys: Array<{key: keyof T, count: number}> = [];
+            const metaKeys: Array<{key: keyof T; minimalKeysNeeded: number}> = [];
             for (const key in sync) {
-                const currMeta = sync[metaName(key)];
+                const currMeta = sync[metaVariantOfKey(key)];
                 if (currMeta) {
-                    metaKeys.push({key, count: currMeta.count});
-                    for (let i = 0; i < currMeta.count; i++) {
+                    metaKeys.push({key, minimalKeysNeeded: currMeta.minimalKeysNeeded});
+                    for (let i = 0; i < currMeta.minimalKeysNeeded; i++) {
                         meta.push(`${key}_${i}`);
                     }
                     break;
                 } else {
-                    delete sync[metaName(key)];
+                    delete sync[metaVariantOfKey(key)];
                 }
             }
 
             // If there are no split records, we can resolve already.
             if (meta.length === 0) {
                 resolve(sync);
+                return;
             }
 
             // Query the split record values and stitch them together.
@@ -87,9 +86,9 @@ export async function readSyncStorage<T extends {[key: string]: any}>(defaults: 
                     return;
                 }
 
-                for (const {key, count} of metaKeys) {
+                for (const {key, minimalKeysNeeded} of metaKeys) {
                     let string = '';
-                    for (let i = 0; i < count; i++) {
+                    for (let i = 0; i < minimalKeysNeeded; i++) {
                         string += sync2[`${key}_${i}`];
                     }
                     sync[key] = JSON.parse(string);
@@ -114,17 +113,20 @@ export async function readLocalStorage<T extends {[key: string]: any}>(defaults:
     });
 }
 
-function packageSyncStorage<T extends {[key: string]: any}>(values: T): {[key: string]: any} {
+function prepareSyncStorage<T extends {[key: string]: any}>(values: T): {[key: string]: any} {
     for (const key in values) {
         const value = values[key];
         const string = JSON.stringify(value);
         if (string.length > chrome.storage.sync.QUOTA_BYTES_PER_ITEM) {
-            const count = Math.ceil(string.length / chrome.storage.sync.QUOTA_BYTES_PER_ITEM);
-            for (let i = 0; i < count; i++) {
-                (values as any)[`${key}_${i}`] = string.substring(i * chrome.storage.sync.QUOTA_BYTES_PER_ITEM, (i+1) * chrome.storage.sync.QUOTA_BYTES_PER_ITEM);
+            const minimalKeysNeeded = Math.ceil(string.length / chrome.storage.sync.QUOTA_BYTES_PER_ITEM);
+            for (let i = 0; i < minimalKeysNeeded; i++) {
+                (values as any)[`${key}_${i}`] = string.substring(
+                    i * chrome.storage.sync.QUOTA_BYTES_PER_ITEM,
+                    (i + 1) * chrome.storage.sync.QUOTA_BYTES_PER_ITEM
+                );
             }
-            (values as any)[metaName(key)] = {
-                count
+            (values as any)[metaVariantOfKey(key)] = {
+                minimalKeysNeeded
             };
             values[key] = undefined;
         }
@@ -134,7 +136,7 @@ function packageSyncStorage<T extends {[key: string]: any}>(values: T): {[key: s
 
 export async function writeSyncStorage<T extends {[key: string]: any}>(values: T): Promise<void> {
     return new Promise<void>(async (resolve, reject) => {
-        const packaged = packageSyncStorage(values);
+        const packaged = prepareSyncStorage(values);
         await mutexStorageWriting.lock();
         chrome.storage.sync.set(packaged, () => {
             if (chrome.runtime.lastError) {

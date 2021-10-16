@@ -51,50 +51,24 @@ export async function readSyncStorage<T extends {[key: string]: any}>(defaults: 
                 return;
             }
 
+            const metaKeys = Object.keys(sync).filter((key) => key.endsWith('_meta'));
+            for (const metaKey in metaKeys) {
+                let string = '';
+                const key = metaKey.replace(/_meta$/, '');
+                const len = sync[metaKey].len;
+                for (let i = 0; i < len; i++) {
+                    string += sync[`${key}_${i}`];
+                    delete sync[`${key}_${i}`];
+                }
+                sync[key] = JSON.parse(string);
+            }
+
             sync = {
                 ...defaults,
                 ...sync
             };
 
-            const meta: string[] = [];
-            const metaKeys: Array<{key: keyof T; minimalKeysNeeded: number}> = [];
-            for (const key in sync) {
-                const currMeta = sync[metaVariantOfKey(key)];
-                if (currMeta) {
-                    metaKeys.push({key, minimalKeysNeeded: currMeta.len});
-                    for (let i = 0; i < currMeta.minimalKeysNeeded; i++) {
-                        meta.push(`${key}_${i}`);
-                    }
-                    break;
-                } else {
-                    delete sync[metaVariantOfKey(key)];
-                }
-            }
-
-            // If there are no split records, we can resolve already.
-            if (meta.length === 0) {
-                resolve(sync);
-                return;
-            }
-
-            // Query the split record values and stitch them together.
-            chrome.storage.sync.get(meta, (sync2: T) => {
-                if (chrome.runtime.lastError) {
-                    console.error(chrome.runtime.lastError.message);
-                    resolve(defaults);
-                    return;
-                }
-
-                for (const {key, minimalKeysNeeded} of metaKeys) {
-                    let string = '';
-                    for (let i = 0; i < minimalKeysNeeded; i++) {
-                        string += sync2[`${key}_${i}`];
-                    }
-                    sync[key] = JSON.parse(string);
-                }
-
-                resolve(sync);
-            });
+            resolve(sync);
         });
     });
 }

@@ -62,7 +62,7 @@ export async function readSyncStorage<T extends {[key: string]: any}>(defaults: 
             for (const key in sync) {
                 const currMeta = sync[metaVariantOfKey(key)];
                 if (currMeta) {
-                    metaKeys.push({key, minimalKeysNeeded: currMeta.minimalKeysNeeded});
+                    metaKeys.push({key, minimalKeysNeeded: currMeta.len});
                     for (let i = 0; i < currMeta.minimalKeysNeeded; i++) {
                         meta.push(`${key}_${i}`);
                     }
@@ -117,16 +117,15 @@ function prepareSyncStorage<T extends {[key: string]: any}>(values: T): {[key: s
     for (const key in values) {
         const value = values[key];
         const string = JSON.stringify(value);
-        if (string.length > chrome.storage.sync.QUOTA_BYTES_PER_ITEM) {
-            const minimalKeysNeeded = Math.ceil(string.length / chrome.storage.sync.QUOTA_BYTES_PER_ITEM);
+        const totalLength = string.length + key.length;
+        if (totalLength > chrome.storage.sync.QUOTA_BYTES_PER_ITEM) {
+            const maxLength = chrome.storage.sync.QUOTA_BYTES_PER_ITEM - key.length - 3;
+            const minimalKeysNeeded = Math.ceil(string.length / maxLength);
             for (let i = 0; i < minimalKeysNeeded; i++) {
-                (values as any)[`${key}_${i}`] = string.substring(
-                    i * chrome.storage.sync.QUOTA_BYTES_PER_ITEM,
-                    (i + 1) * chrome.storage.sync.QUOTA_BYTES_PER_ITEM
-                );
+                (values as any)[`${key}_${i}`] = string.substring(i * maxLength, (i + 1) * maxLength);
             }
             (values as any)[metaVariantOfKey(key)] = {
-                minimalKeysNeeded
+                len: minimalKeysNeeded
             };
             values[key] = undefined;
         }

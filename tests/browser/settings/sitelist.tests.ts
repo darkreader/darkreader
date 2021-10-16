@@ -6,9 +6,8 @@ describe('Modifying settings', () => {
             syncSettings: true,
         };
 
-        // 488 is a magic value: it is the number of sites with cummulative length
-        // over the browser limit on record size.
-        for (let i = 0; i < 488; i ++) {
+        // Cummulative length should be over the browser limit on record size.
+        for (let i = 0; i < 1000; i ++) {
             newSettings.siteList.push(`example${i}.com`);
         }
 
@@ -16,6 +15,6 @@ describe('Modifying settings', () => {
 
         const extensionData = await backgroundUtils.collectData();
         expect(extensionData.settings.syncSettings).toBe(true);
-        expect(extensionData.settings.siteList.length).toBe(488);
+        expect(extensionData.settings.siteList.length).toBe(1000);
     });
 });

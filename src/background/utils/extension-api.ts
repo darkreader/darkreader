@@ -57,8 +57,8 @@ export async function readSyncStorage<T extends {[key: string]: any}>(defaults: 
                 const key = metaKey.replace(/_meta$/, '');
                 const len = sync[metaKey].len;
                 for (let i = 0; i < len; i++) {
-                    string += sync[`${key}_${i}`];
-                    delete sync[`${key}_${i}`];
+                    string += sync[`${key}_${i.toString(36)}`];
+                    delete sync[`${key}_${i.toString(36)}`];
                 }
                 sync[key] = JSON.parse(string);
             }
@@ -90,12 +90,16 @@ function prepareSyncStorage<T extends {[key: string]: any}>(values: T): {[key: s
     for (const key in values) {
         const value = values[key];
         const string = JSON.stringify(value);
+        // The maximum size of any one item that each extension is allowed to store in the sync storage area,
+        // as measured by the JSON stringification of the item's value plus the length of its key.
+        // Source: https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/storage/sync
         const totalLength = string.length + key.length;
         if (totalLength > chrome.storage.sync.QUOTA_BYTES_PER_ITEM) {
-            const maxLength = chrome.storage.sync.QUOTA_BYTES_PER_ITEM - key.length - 3;
+            // This length limit permits us to store up to 1000 = (parseInt('rr', 36) + 1) records.
+            const maxLength = chrome.storage.sync.QUOTA_BYTES_PER_ITEM - key.length - 1 - 2;
             const minimalKeysNeeded = Math.ceil(string.length / maxLength);
             for (let i = 0; i < minimalKeysNeeded; i++) {
-                (values as any)[`${key}_${i}`] = string.substring(i * maxLength, (i + 1) * maxLength);
+                (values as any)[`${key}_${i.toString(36)}`] = string.substring(i * maxLength, (i + 1) * maxLength);
             }
             (values as any)[metaVariantOfKey(key)] = {
                 len: minimalKeysNeeded

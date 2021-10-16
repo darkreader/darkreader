@@ -40,8 +40,6 @@ export function canInjectScript(url: string) {
 
 const mutexStorageWriting = new Mutex();
 
-const metaVariantOfKey = (key: string) => `${key}_meta`;
-
 export async function readSyncStorage<T extends {[key: string]: any}>(defaults: T): Promise<T> {
     return new Promise<T>((resolve) => {
         chrome.storage.sync.get(null, (sync: any) => {
@@ -51,11 +49,13 @@ export async function readSyncStorage<T extends {[key: string]: any}>(defaults: 
                 return;
             }
 
-            const metaKeys = Object.keys(sync).filter((key) => key.endsWith('_meta'));
-            for (const metaKey in metaKeys) {
+            for (const key in sync) {
+                const len = sync[key].__meta_split_count;
+                if (!len) {
+                    continue;
+                }
+
                 let string = '';
-                const key = metaKey.replace(/_meta$/, '');
-                const len = sync[metaKey].len;
                 for (let i = 0; i < len; i++) {
                     string += sync[`${key}_${i.toString(36)}`];
                     delete sync[`${key}_${i.toString(36)}`];
@@ -101,8 +101,8 @@ function prepareSyncStorage<T extends {[key: string]: any}>(values: T): {[key: s
             for (let i = 0; i < minimalKeysNeeded; i++) {
                 (values as any)[`${key}_${i.toString(36)}`] = string.substring(i * maxLength, (i + 1) * maxLength);
             }
-            (values as any)[metaVariantOfKey(key)] = {
-                len: minimalKeysNeeded
+            (values as any)[key] = {
+                __meta_split_count: minimalKeysNeeded
             };
             values[key] = undefined;
         }

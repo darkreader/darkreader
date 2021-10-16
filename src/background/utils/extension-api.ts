@@ -50,17 +50,21 @@ export async function readSyncStorage<T extends {[key: string]: any}>(defaults: 
             }
 
             for (const key in sync) {
-                const len = sync[key].__meta_split_count;
-                if (!len) {
+                const metaKeysCount = sync[key].__meta_split_count;
+                if (!metaKeysCount) {
                     continue;
                 }
 
                 let string = '';
-                for (let i = 0; i < len; i++) {
+                for (let i = 0; i < metaKeysCount; i++) {
                     string += sync[`${key}_${i.toString(36)}`];
                     delete sync[`${key}_${i.toString(36)}`];
                 }
-                sync[key] = JSON.parse(string);
+                try {
+                    sync[key] = JSON.parse(string);
+                } catch (error) {
+                    console.error('Could not parse record from sync storage', string);
+                }
             }
 
             sync = {

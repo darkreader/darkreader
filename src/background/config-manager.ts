@@ -4,6 +4,10 @@ import {getDuration} from '../utils/time';
 import {indexSitesFixesConfig} from '../generators/utils/parse';
 import type {InversionFix, StaticTheme, DynamicThemeFix} from '../definitions';
 import type {SitePropsIndex} from '../generators/utils/parse';
+import type {ParsedColorSchemeConfig} from '../utils/colorscheme-parser';
+import {ParseColorSchemeConfig} from '../utils/colorscheme-parser';
+import {logWarn} from '../utils/log';
+import {DEFAULT_COLORSCHEME} from '../defaults';
 
 const CONFIG_URLs = {
     darkSites: {
@@ -21,6 +25,10 @@ const CONFIG_URLs = {
     staticThemes: {
         remote: 'https://raw.githubusercontent.com/darkreader/darkreader/master/src/config/static-themes.config',
         local: '../config/static-themes.config',
+    },
+    colorSchemes: {
+        remote: 'https://raw.githubusercontent.com/darkreader/darkreader/master/src/config/color-schemes.drconf',
+        local: '../config/color-schemes.drconf',
     },
 };
 const REMOTE_TIMEOUT_MS = getDuration({seconds: 10});
@@ -40,12 +48,14 @@ export default class ConfigManager {
     INVERSION_FIXES_RAW?: string;
     STATIC_THEMES_INDEX?: SitePropsIndex<StaticTheme>;
     STATIC_THEMES_RAW?: string;
+    COLOR_SCHEMES_RAW?: ParsedColorSchemeConfig;
 
     raw = {
         darkSites: null as string,
         dynamicThemeFixes: null as string,
         inversionFixes: null as string,
         staticThemes: null as string,
+        colorSchemes: null as string,
     };
 
     overrides = {
@@ -78,6 +88,18 @@ export default class ConfigManager {
         }
         return $config;
     }
+
+    private async loadColorSchemes({local}: Config) {
+        const $config = await this.loadConfig({
+            name: 'Color Schemes',
+            local,
+            localURL: CONFIG_URLs.colorSchemes.local,
+            remoteURL: CONFIG_URLs.colorSchemes.remote,
+        });
+        this.raw.colorSchemes = $config;
+        this.handleColorSchemes();
+    }
+
 
     private async loadDarkSites({local}: Config) {
         const sites = await this.loadConfig({
@@ -125,11 +147,23 @@ export default class ConfigManager {
 
     async load(config: Config) {
         await Promise.all([
+            this.loadColorSchemes(config),
             this.loadDarkSites(config),
             this.loadDynamicThemeFixes(config),
             this.loadInversionFixes(config),
             this.loadStaticThemes(config),
         ]).catch((err) => console.error('Fatality', err));
+    }
+
+    private handleColorSchemes() {
+        const $config = this.raw.colorSchemes;
+        const {result, error} = ParseColorSchemeConfig($config);
+        if (error) {
+            logWarn(`Color Schemes parse error, defaulting to fallback. ${error}.`);
+            this.COLOR_SCHEMES_RAW = DEFAULT_COLORSCHEME;
+            return;
+        }
+        this.COLOR_SCHEMES_RAW = result;
     }
 
     private handleDarkSites() {

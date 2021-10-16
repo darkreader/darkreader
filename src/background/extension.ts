@@ -292,6 +292,7 @@ export class Extension {
             settings: this.user.settings,
             news: await this.news.getLatest(),
             shortcuts: await this.getShortcuts(),
+            colorScheme: this.config.COLOR_SCHEMES_RAW,
             devtools: {
                 dynamicFixesText: this.devtools.getDynamicThemeFixesText(),
                 filterFixesText: this.devtools.getInversionFixesText(),

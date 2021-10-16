@@ -44,18 +44,17 @@ const metaVariantOfKey = (key: string) => `${key}_meta`;
 
 export async function readSyncStorage<T extends {[key: string]: any}>(defaults: T): Promise<T> {
     return new Promise<T>((resolve) => {
-        const prepared: any = {};
-        // Add split up meta
-        for (const key in defaults) {
-            prepared[key] = defaults[key];
-            prepared[metaVariantOfKey(key)] = false;
-        }
-        chrome.storage.sync.get(prepared, (sync: any) => {
+        chrome.storage.sync.get(null, (sync: any) => {
             if (chrome.runtime.lastError) {
                 console.error(chrome.runtime.lastError.message);
                 resolve(defaults);
                 return;
             }
+
+            sync = {
+                ...defaults,
+                ...sync
+            };
 
             const meta: string[] = [];
             const metaKeys: Array<{key: keyof T; minimalKeysNeeded: number}> = [];

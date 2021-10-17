@@ -30,6 +30,7 @@ class PersistentStorageWrapper implements DevToolsStorage {
                 if (chrome.runtime.lastError) {
                     console.error(chrome.runtime.lastError);
                     resolve(null);
+                    return;
                 }
                 this.cache[key] = result.key;
                 resolve(result.key);

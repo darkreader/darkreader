@@ -10,15 +10,6 @@ import {createStyleSheetModifier} from './stylesheet-modifier';
 import {isShadowDomSupported, isSafari, isThunderbird, isChromium} from '../../utils/platform';
 
 declare global {
-    interface HTMLStyleElement {
-        sheet: CSSStyleSheet;
-    }
-    interface HTMLLinkElement {
-        sheet: CSSStyleSheet;
-    }
-    interface SVGStyleElement {
-        sheet: CSSStyleSheet;
-    }
     interface Document {
         adoptedStyleSheets: CSSStyleSheet[];
     }

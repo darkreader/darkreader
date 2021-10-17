@@ -10,20 +10,14 @@ import {createStyleSheetModifier} from './stylesheet-modifier';
 import {isShadowDomSupported, isSafari, isThunderbird, isChromium} from '../../utils/platform';
 
 declare global {
-    interface HTMLStyleElement {
-        sheet: CSSStyleSheet;
-    }
-    interface HTMLLinkElement {
-        sheet: CSSStyleSheet;
-    }
-    interface SVGStyleElement {
-        sheet: CSSStyleSheet;
-    }
     interface Document {
         adoptedStyleSheets: CSSStyleSheet[];
     }
     interface ShadowRoot {
         adoptedStyleSheets: CSSStyleSheet[];
+    }
+    interface CSSStyleSheet {
+        replaceSync(text: string): void;
     }
 }
 
@@ -297,6 +291,24 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
 
         cancelAsyncOperations = false;
 
+        function removeCSSRulesFromSheet(sheet: CSSStyleSheet) {
+            // Check if we can use a fastpath by using sheet.replaceSync.
+            // Because replaceSync can throw DOMExceptions we have to use try-catch.
+            try {
+                if (sheet.replaceSync) {
+                    sheet.replaceSync('');
+                    return;
+                }
+            } catch (err) {
+                logWarn('Could not use fastpath for removing rules from stylesheet', err);
+            }
+            // If we hit this point, the replaceSync didn't work
+            // and we have to iterate over the CSSRules.
+            for (let i = sheet.cssRules.length - 1; i >= 0; i--) {
+                sheet.deleteRule(i);
+            }
+        }
+
         function prepareOverridesSheet() {
             if (!syncStyle) {
                 createSyncStyle();
@@ -315,9 +327,8 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
             }
 
             const sheet = syncStyle.sheet;
-            for (let i = sheet.cssRules.length - 1; i >= 0; i--) {
-                sheet.deleteRule(i);
-            }
+
+            removeCSSRulesFromSheet(sheet);
 
             if (syncStylePositionWatcher) {
                 syncStylePositionWatcher.run();

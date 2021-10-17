@@ -1,7 +1,7 @@
 # Security Policy
 
 Dark Reader is known to have no intentional security vulnerabilities.
-If reported, vulnerabilites will be fixed in the shortest time possible,
+If reported, vulnerabilities will be fixed in the shortest time possible,
 with minimal impact possible.
 
 ## Supported Versions

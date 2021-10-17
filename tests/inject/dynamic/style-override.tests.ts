@@ -91,6 +91,23 @@ describe('STYLE ELEMENTS', () => {
         expect(getComputedStyle(container.querySelector('h1 strong')).color).toBe('rgb(255, 26, 26)');
     });
 
+    it('should override style with @import"..."', async () => {
+        container.innerHTML = multiline(
+            '<style>',
+            `    @import"data:text/css;utf8,${encodeURIComponent('h1 { background: gray; }')}";`,
+            '    h1 strong { color: red; }',
+            '</style>',
+            '<h1>Style <strong>with @import"..."</strong>!</h1>',
+        );
+        createOrUpdateDynamicTheme(theme, null, false);
+
+        await timeout(50);
+        expect(getComputedStyle(container).backgroundColor).toBe('rgb(0, 0, 0)');
+        expect(getComputedStyle(container.querySelector('h1')).backgroundColor).toBe('rgb(102, 102, 102)');
+        expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(255, 255, 255)');
+        expect(getComputedStyle(container.querySelector('h1 strong')).color).toBe('rgb(255, 26, 26)');
+    });
+
     it('should restore override', async () => {
         container.innerHTML = multiline(
             '<style class="testcase-style">',
@@ -148,7 +165,6 @@ describe('STYLE ELEMENTS', () => {
         expect(document.querySelector('.darkreader--sync')).toBe(null);
         expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(255, 255, 255)');
         expect(getComputedStyle(container.querySelector('h1 strong')).color).toBe('rgb(255, 255, 255)');
-
     });
 
     it('should react to updated style', async () => {
@@ -182,7 +198,6 @@ describe('STYLE ELEMENTS', () => {
         document.querySelector('.testcase-style').textContent = 'h1 strong { color: green; }';
         await timeout(0);
         expect(getComputedStyle(document.querySelector('h1 strong')).color).toBe('rgb(140, 255, 140)');
-
     });
 
     it('should react to a new style', async () => {

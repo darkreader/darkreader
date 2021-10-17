@@ -1,60 +1,59 @@
 ---
-name: Broken website
-about: Creates a broken website report about Dark Reader
+name: Broken Website Report
+about: Create a report about a website issue you experienced while using Dark Reader.
 title: "[Broken Website] Replace with title"
 labels: Broken Website
 assignees: ''
 ---
 
-<!-- 
-  ⚠⚠ Do not delete this issue template! ⚠⚠ 
-  Issues that do not use the issue template/don't fill out the essential information are likely to be ignored and closed. 
+<!--
+  ⚠⚠ Do not delete this issue template! ⚠⚠
+  Reported issues must use this template and have all the necessary information provided.
+  Incomplete reports are likely to be ignored and closed.
 -->
 
 <!--
-  Thank you for taking the time to report a broken website.
-  Please make sure there is no existing issue with this broken website.
-  Make sure to fill out every section when needed else remove the section.
-  Don't forget to add the website in the issue title.
+  Thank you for taking the time to create a report about a website issue.
+  Ensure that there are no other existing reports for this website issue.
+  Please check if the issue is resolved after a restart of the browser.
+  Additionally, you should check if the issue persists in a new browser profile.
+  Remember to fill out every section on this report and remove any that are not needed.
+  Finally, place a brief description in the title of this report.
 -->
 
-# Broken Website
-## Website
-<!-- The link to the website where you can observe the issue. -->
 
+# Broken Website Report
 
-## How to Reproduce
-<!-- We need to know how you encountered the bug to properly troubleshoot the issue. -->
+## Website Address
+<!-- Provide the website address. -->
+
+## Steps To Reproduce
+<!-- Provide steps to reproduce the problem, which will allow us to troubleshoot this website issue. -->
 <!--
-  An example of this is:
-  - Go to x site
-  - Hover over x button
-  - See that when hovering it isn't changing colors
+Here is an example:
+- Go to example.com.
+- Hover over the example button.
+- Notice that when hovering over the example button, it does not change color.
 -->
 
+## Expected Behavior
+<!-- Provide a clear and concise description of what you expected to happen. -->
 
-## Expected behavior
-<!-- A clear and concise description of what you expected to happen. -->
-
-
-## Actual behavior
-<!-- A clear and concise description of what actually happened. -->
-
+## Actual Behavior
+<!-- Provide a clear and concise description of what happened. -->
 
 ## Screenshots
-<!-- If applicable, add screenshots to help explain your problem. -->
-
+<!-- If applicable, add screenshots to help explain this website issue. -->
 
 ## System Information
 <!--
-  Please add a version of the browser you are using. 
-  If you don't know how to get your browser/Dark Reader version please search it up online.
+  Specify the browser name and version as well as the Dark Reader version you are using.
+  Please do an online search for help if you are not familiar with how to get this information.
 -->
 
 - OS: <!-- e.g. Windows, macOS, Linux -->
-- Browser: <!-- e.g. Chrome 91, Firefox 88, Safari 14 -->
-- Dark Reader Version: <!-- e.g. 4.9.33 -->
+- Browser: <!-- e.g. Chrome 91, Firefox 90, Edge 91, Safari 14 -->
+- Dark Reader Version: <!-- e.g. 4.9.34 -->
 
-## Additional context
-<!-- Add any other context about the problem here. -->
-
+## Additional Context
+<!-- Provide any additional information about this website issue. -->

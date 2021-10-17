@@ -21,3 +21,7 @@ export function omitAttrs(omit: string[], attrs: Malevic.NodeAttrs) {
     });
     return result;
 }
+
+export function isElementHidden(element: HTMLElement) {
+    return element.offsetParent === null;
+}

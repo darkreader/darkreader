@@ -35,6 +35,7 @@ export const DEFAULT_THEME: Theme = {
 
 export const DEFAULT_SETTINGS: UserSettings = {
     enabled: true,
+    fetchNews: true,
     theme: DEFAULT_THEME,
     presets: [],
     customThemes: [],
@@ -42,7 +43,6 @@ export const DEFAULT_SETTINGS: UserSettings = {
     siteListEnabled: [],
     applyToListedOnly: false,
     changeBrowserTheme: false,
-    notifyOfNews: false,
     syncSettings: true,
     syncSitesFixes: false,
     automation: '',
@@ -57,4 +57,5 @@ export const DEFAULT_SETTINGS: UserSettings = {
     previewNewDesign: false,
     enableForPDF: true,
     enableForProtectedPages: false,
+    enableContextMenus: false,
 };

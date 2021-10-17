@@ -3,6 +3,8 @@ import {debounce} from '../utils/debounce';
 import {isURLMatched} from '../utils/url';
 import type {UserSettings} from '../definitions';
 import {readSyncStorage, readLocalStorage, writeSyncStorage, writeLocalStorage, subscribeToOuterSettingsChange} from './utils/extension-api';
+import {logWarn} from '../utils/log';
+import {PromiseBarrier} from '../utils/promise-barrier';
 
 const SAVE_TIMEOUT = 1000;
 
@@ -11,6 +13,9 @@ interface UserStorageOptions {
 }
 
 export default class UserStorage {
+    private loadBarrier: PromiseBarrier;
+    private saveStorageBarrier: PromiseBarrier;
+
     constructor({onRemoteSettingsChange}: UserStorageOptions) {
         this.settings = null;
         subscribeToOuterSettingsChange(async () => {
@@ -37,26 +42,35 @@ export default class UserStorage {
     }
 
     private async loadSettingsFromStorage() {
+        if (this.loadBarrier) {
+            return await this.loadBarrier.entry();
+        }
+        this.loadBarrier = new PromiseBarrier();
+
         const local = await readLocalStorage(DEFAULT_SETTINGS);
         if (local.syncSettings == null) {
             local.syncSettings = DEFAULT_SETTINGS.syncSettings;
         }
         if (!local.syncSettings) {
             this.fillDefaults(local);
+            this.loadBarrier.resolve(local);
             return local;
         }
 
         const $sync = await readSyncStorage(DEFAULT_SETTINGS);
         if (!$sync) {
-            console.warn('Sync settings are missing');
+            logWarn('Sync settings are missing');
             local.syncSettings = false;
             this.set({syncSettings: false});
             this.saveSyncSetting(false);
+            this.loadBarrier.resolve(local);
             return local;
         }
 
         const sync = await readSyncStorage(DEFAULT_SETTINGS);
         this.fillDefaults(sync);
+
+        this.loadBarrier.resolve(sync);
         return sync;
     }
 
@@ -70,18 +84,24 @@ export default class UserStorage {
         try {
             await writeSyncStorage(obj);
         } catch (err) {
-            console.warn('Settings synchronization was disabled due to error:', chrome.runtime.lastError);
+            logWarn('Settings synchronization was disabled due to error:', chrome.runtime.lastError);
             this.set({syncSettings: false});
         }
     }
 
     private saveSettingsIntoStorage = debounce(SAVE_TIMEOUT, async () => {
+        if (this.saveStorageBarrier) {
+            await this.saveStorageBarrier.entry();
+            return;
+        }
+        this.saveStorageBarrier = new PromiseBarrier();
+
         const settings = this.settings;
         if (settings.syncSettings) {
             try {
                 await writeSyncStorage(settings);
             } catch (err) {
-                console.warn('Settings synchronization was disabled due to error:', chrome.runtime.lastError);
+                logWarn('Settings synchronization was disabled due to error:', chrome.runtime.lastError);
                 this.set({syncSettings: false});
                 await this.saveSyncSetting(false);
                 await writeLocalStorage(settings);
@@ -89,12 +109,15 @@ export default class UserStorage {
         } else {
             await writeLocalStorage(settings);
         }
+
+        this.saveStorageBarrier.resolve();
+        this.saveStorageBarrier = null;
     });
 
     set($settings: Partial<UserSettings>) {
         if ($settings.siteList) {
             if (!Array.isArray($settings.siteList)) {
-                const list = [];
+                const list: string[] = [];
                 for (const key in ($settings.siteList as any)) {
                     const index = Number(key);
                     if (!isNaN(index)) {
@@ -110,7 +133,7 @@ export default class UserStorage {
                     isURLMatched('[::1]:1337', pattern);
                     isOK = true;
                 } catch (err) {
-                    console.warn(`Pattern "${pattern}" excluded`);
+                    logWarn(`Pattern "${pattern}" excluded`);
                 }
                 return isOK && pattern !== '/';
             });

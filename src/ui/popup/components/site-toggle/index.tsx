@@ -6,7 +6,6 @@ import type {ExtWrapper, TabInfo} from '../../../../definitions';
 import {isThunderbird} from '../../../../utils/platform';
 
 export default function SiteToggleButton({data, tab, actions}: ExtWrapper & {tab: TabInfo}) {
-
     function onSiteToggleClick() {
         if (pdf) {
             actions.changeSettings({enableForPDF: !data.settings.enableForPDF});
@@ -14,12 +13,13 @@ export default function SiteToggleButton({data, tab, actions}: ExtWrapper & {tab
             actions.toggleURL(tab.url);
         }
     }
+    const pdf = isPDF(tab.url);
     const toggleHasEffect = (
         data.settings.enableForProtectedPages ||
-        !tab.isProtected
+        (!tab.isProtected && !pdf) ||
+        tab.isInjected
     );
-    const pdf = isPDF(tab.url);
-    const isSiteEnabled = isURLEnabled(tab.url, data.settings, tab);
+    const isSiteEnabled = isURLEnabled(tab.url, data.settings, tab) && tab.isInjected;
     const host = getURLHostOrProtocol(tab.url);
 
     const urlText = host

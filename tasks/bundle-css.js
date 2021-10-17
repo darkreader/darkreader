@@ -1,12 +1,12 @@
 const fs = require('fs-extra');
 const less = require('less');
 const path = require('path');
-const {getDestDir} = require('./paths');
+const {getDestDir, PLATFORM} = require('./paths');
 const reload = require('./reload');
 const {createTask} = require('./task');
 
 function getLessFiles({debug}) {
-    const dir = getDestDir({debug});
+    const dir = getDestDir({debug, platform: PLATFORM.CHROME});
     return {
         'src/ui/devtools/style.less': `${dir}/ui/devtools/style.css`,
         'src/ui/popup/style.less': `${dir}/ui/popup/style.css`,
@@ -27,13 +27,16 @@ async function bundleCSS({debug}) {
     for (const [src, dest] of Object.entries(files)) {
         await bundleCSSEntry({src, dest});
     }
-    const dir = getDestDir({debug});
-    const firefoxDir = getDestDir({debug, firefox: true});
-    const thunderBirdDir = getDestDir({debug, thunderbird: true});
+    const dir = getDestDir({debug, platform: PLATFORM.CHROME});
+    const firefoxDir = getDestDir({debug, platform: PLATFORM.FIREFOX});
+    const mv3Dir = getDestDir({debug, platform: PLATFORM.CHROME_MV3});
+    const thunderBirdDir = getDestDir({debug, platform: PLATFORM.THUNDERBIRD});
     for (const dest of Object.values(files)) {
         const ffDest = `${firefoxDir}/${dest.substring(dir.length + 1)}`;
         const tbDest = `${thunderBirdDir}/${dest.substring(dir.length + 1)}`;
+        const mv3Dest = `${mv3Dir}/${dest.substring(dir.length + 1)}`;
         await fs.copy(dest, ffDest);
+        await fs.copy(dest, mv3Dest);
         await fs.copy(dest, tbDest);
     }
 }

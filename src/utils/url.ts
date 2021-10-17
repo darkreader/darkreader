@@ -1,5 +1,6 @@
 import type {UserSettings} from '../definitions';
 import {isIPV6, compareIPV6} from './ipv6';
+import {isThunderbird} from './platform';
 
 let anchor: HTMLAnchorElement;
 
@@ -14,7 +15,7 @@ function fixBaseURL($url: string) {
 }
 
 export function parseURL($url: string, $base: string = null) {
-    const key = `${$url}${$base ? ';' + $base : ''}`;
+    const key = `${$url}${$base ? `;${ $base}` : ''}`;
     if (parsedURLCache.has(key)) {
         return parsedURLCache.get(key);
     }
@@ -32,19 +33,49 @@ export function getAbsoluteURL($base: string, $relative: string) {
     if ($relative.match(/^data\\?\:/)) {
         return $relative;
     }
-
+    // Check if relative starts with `//hostname...`.
+    // We have to add a protocol to make it absolute.
+    if (/^\/\//.test($relative)) {
+        return `${location.protocol}${$relative}`;
+    }
     const b = parseURL($base);
     const a = parseURL($relative, b.href);
     return a.href;
+}
+
+// Check if any relative URL is on the window.location;
+// So that https://duck.com/ext.css would return true on https://duck.com/
+// But https://duck.com/styles/ext.css would return false on https://duck.com/
+// Visa versa https://duck.com/ext.css should return fasle on https://duck.com/search/
+// We're checking if any relative value within ext.css could potentially not be on the same path.
+export function isRelativeHrefOnAbsolutePath(href: string): boolean {
+    if (href.startsWith('data:')) {
+        return true;
+    }
+    const url = parseURL(href);
+    const base = parseURL(location.href);
+    if (url.protocol !== base.protocol) {
+        return false;
+    }
+    if (url.hostname !== base.hostname) {
+        return false;
+    }
+    if (url.port !== base.port) {
+        return false;
+    }
+    // Now check if the path is on the same path as the base
+    // We do this by getting the pathname up until the last slash.
+    const path = /.*\//.exec(url.pathname)[0];
+    const basePath = /.*\//.exec(base.pathname)[0];
+    return path === basePath;
 }
 
 export function getURLHostOrProtocol($url: string) {
     const url = new URL($url);
     if (url.host) {
         return url.host;
-    } else {
-        return url.protocol;
     }
+    return url.protocol;
 }
 
 export function compareURLPatterns(a: string, b: string) {
@@ -78,9 +109,8 @@ export function isURLMatched(url: string, urlTemplate: string): boolean {
     } else if (!isFirstIPV6 && !isSecondIPV6) {
         const regex = createUrlRegex(urlTemplate);
         return Boolean(url.match(regex));
-    } else {
-        return false;
     }
+    return false;
 }
 
 function createUrlRegex(urlTemplate: string): RegExp {
@@ -176,9 +206,14 @@ export function isPDF(url: string) {
     return false;
 }
 
-export function isURLEnabled(url: string, userSettings: UserSettings, {isProtected, isInDarkList}) {
+export function isURLEnabled(url: string, userSettings: UserSettings, {isProtected, isInDarkList}: {isProtected: boolean; isInDarkList: boolean}) {
     if (isProtected && !userSettings.enableForProtectedPages) {
         return false;
+    }
+    // Only URL's with emails are getting here on thunderbird
+    // So we can skip the checks and just return true.
+    if (isThunderbird) {
+        return true;
     }
     if (isPDF(url)) {
         return userSettings.enableForPDF;
@@ -194,4 +229,8 @@ export function isURLEnabled(url: string, userSettings: UserSettings, {isProtect
         return true;
     }
     return (!isInDarkList && !isURLInUserList);
+}
+
+export function isFullyQualifiedDomain(candidate: string) {
+    return /^[a-z0-9.-]+$/.test(candidate);
 }

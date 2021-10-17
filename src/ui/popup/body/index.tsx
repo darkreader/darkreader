@@ -5,6 +5,7 @@ import {getLocalMessage} from '../../../utils/locales';
 import {Overlay} from '../../controls';
 import AutomationPage from '../automation-page';
 import MainPage from '../main-page';
+import NewsSection from '../news-section';
 import {Page, PageViewer} from '../page-viewer';
 import SettingsPage from '../settings-page';
 import SiteListPage from '../site-list-page';
@@ -123,6 +124,7 @@ function DonateGroup() {
     return (
         <div class="m-donate-group">
             <a class="m-donate-button" href={DONATE_URL} target="_blank" rel="noopener noreferrer">
+                <span class="m-donate-button__icon"></span>
                 <span class="m-donate-button__text">
                     {getLocalMessage('donate')}
                 </span>
@@ -131,17 +133,6 @@ function DonateGroup() {
                 This project is sponsored by you
             </label>
         </div>
-    );
-}
-
-let appVersion: string;
-
-function AppVersion() {
-    if (!appVersion) {
-        appVersion = chrome.runtime.getManifest().version;
-    }
-    return (
-        <label class="darkreader-version">Version 5 Preview ({appVersion})</label>
     );
 }
 
@@ -167,7 +158,7 @@ export default function Body(props: ViewProps) {
             <section class="m-section">
                 <DonateGroup />
             </section>
-            <AppVersion />
+            <NewsSection {...props} />
             <Overlay />
         </body>
     );

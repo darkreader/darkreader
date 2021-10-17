@@ -24,7 +24,6 @@ class LocalStorageWrapper implements DevToolsStorage {
             localStorage.setItem(key, value);
         } catch (err) {
             console.error(err);
-            return;
         }
     }
     remove(key: string) {
@@ -32,7 +31,6 @@ class LocalStorageWrapper implements DevToolsStorage {
             localStorage.removeItem(key);
         } catch (err) {
             console.error(err);
-            return;
         }
     }
     has(key: string) {
@@ -96,7 +94,7 @@ export default class DevTools {
 
     getDynamicThemeFixesText() {
         const $fixes = this.getSavedDynamicThemeFixes();
-        const fixes = $fixes ? parseDynamicThemeFixes($fixes) : this.config.DYNAMIC_THEME_FIXES;
+        const fixes = $fixes ? parseDynamicThemeFixes($fixes) : parseDynamicThemeFixes(this.config.DYNAMIC_THEME_FIXES_RAW);
         return formatDynamicThemeFixes(fixes);
     }
 
@@ -134,7 +132,7 @@ export default class DevTools {
 
     getInversionFixesText() {
         const $fixes = this.getSavedInversionFixes();
-        const fixes = $fixes ? parseInversionFixes($fixes) : this.config.INVERSION_FIXES;
+        const fixes = $fixes ? parseInversionFixes($fixes) : parseInversionFixes(this.config.INVERSION_FIXES_RAW);
         return formatInversionFixes(fixes);
     }
 
@@ -172,7 +170,7 @@ export default class DevTools {
 
     getStaticThemesText() {
         const $themes = this.getSavedStaticThemes();
-        const themes = $themes ? parseStaticThemes($themes) : this.config.STATIC_THEMES;
+        const themes = $themes ? parseStaticThemes($themes) : parseStaticThemes(this.config.STATIC_THEMES_RAW);
         return formatStaticThemes(themes);
     }
 

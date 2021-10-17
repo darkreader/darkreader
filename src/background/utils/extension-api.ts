@@ -1,10 +1,10 @@
 import {isPDF} from '../../utils/url';
 import {isFirefox, isEdge} from '../../utils/platform';
-import {logWarn} from '../../inject/utils/log';
+import {Mutex} from '../../utils/mutex';
 
 declare const browser: {
     commands: {
-        update({name, shortcut}): void;
+        update({name, shortcut}: chrome.commands.Command): void;
     };
 };
 
@@ -38,13 +38,13 @@ export function canInjectScript(url: string) {
     );
 }
 
-let isWriting = false;
+const mutexStorageWriting = new Mutex();
 
 export async function readSyncStorage<T extends {[key: string]: any}>(defaults: T): Promise<T> {
     return new Promise<T>((resolve) => {
         chrome.storage.sync.get(defaults, (sync: T) => {
             if (chrome.runtime.lastError) {
-                logWarn(chrome.runtime.lastError.message);
+                console.error(chrome.runtime.lastError.message);
                 resolve(defaults);
                 return;
             }
@@ -57,7 +57,7 @@ export async function readLocalStorage<T extends {[key: string]: any}>(defaults:
     return new Promise<T>((resolve) => {
         chrome.storage.local.get(defaults, (local: T) => {
             if (chrome.runtime.lastError) {
-                logWarn(chrome.runtime.lastError.message);
+                console.error(chrome.runtime.lastError.message);
                 resolve(defaults);
                 return;
             }
@@ -67,57 +67,37 @@ export async function readLocalStorage<T extends {[key: string]: any}>(defaults:
 }
 
 export async function writeSyncStorage<T extends {[key: string]: any}>(values: T): Promise<void> {
-    return new Promise<void>((resolve, reject) => {
-        isWriting = true;
+    return new Promise<void>(async (resolve, reject) => {
+        await mutexStorageWriting.lock();
         chrome.storage.sync.set(values, () => {
             if (chrome.runtime.lastError) {
                 reject(chrome.runtime.lastError);
+                mutexStorageWriting.unlock();
                 return;
             }
             resolve();
-            setTimeout(() => isWriting = false);
+            setTimeout(() => mutexStorageWriting.unlock(), 500);
         });
     });
 }
 
 export async function writeLocalStorage<T extends {[key: string]: any}>(values: T): Promise<void> {
-    return new Promise<void>((resolve) => {
-        isWriting = true;
+    return new Promise<void>(async (resolve) => {
+        await mutexStorageWriting.lock();
         chrome.storage.local.set(values, () => {
             resolve();
-            setTimeout(() => isWriting = false);
+            setTimeout(() => mutexStorageWriting.unlock(), 500);
         });
     });
 }
 
 export const subscribeToOuterSettingsChange = (callback: () => void) => {
     chrome.storage.onChanged.addListener(() => {
-        if (!isWriting) {
+        if (!mutexStorageWriting.isLocked()) {
             callback();
         }
     });
 };
-
-export async function getFontList() {
-    return new Promise<string[]>((resolve) => {
-        if (!chrome.fontSettings) {
-            // Todo: Remove it as soon as Firefox and Edge get support.
-            resolve([
-                'serif',
-                'sans-serif',
-                'monospace',
-                'cursive',
-                'fantasy',
-                'system-ui'
-            ]);
-            return;
-        }
-        chrome.fontSettings.getFontList((list) => {
-            const fonts = list.map((f) => f.fontId);
-            resolve(fonts);
-        });
-    });
-}
 
 export async function getCommands() {
     return new Promise<chrome.commands.Command[]>((resolve) => {

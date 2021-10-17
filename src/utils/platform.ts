@@ -14,8 +14,8 @@ export const isYaBrowser = userAgent.includes('yabrowser');
 // Browser is known to be Opera if:
 //  1. navigator.userAgentData entry contains "Opera" or "Opera GX" brand, or
 //  2. navigator.userAgent contains "OPR" or "Opera"
-export const isOpera = Boolean(typeof navigator === 'object' && (navigator as any).userAgentData && (navigator as any).userAgentData.brands.filter((brand) => brand.brand === 'Opera' || brand.brand === 'Opera GX').length) || userAgent.includes('opr') || userAgent.includes('opera');
-export const isEdge = Boolean(typeof navigator === 'object' && (navigator as any).userAgentData && (navigator as any).userAgentData.brands.filter((brand) => brand.brand === 'Microsoft Edge').length) || userAgent.includes('edg');
+export const isOpera = Boolean(typeof navigator === 'object' && (navigator as any).userAgentData && (navigator as any).userAgentData.brands.filter((brand: any) => brand.brand === 'Opera' || brand.brand === 'Opera GX').length) || userAgent.includes('opr') || userAgent.includes('opera');
+export const isEdge = Boolean(typeof navigator === 'object' && (navigator as any).userAgentData && (navigator as any).userAgentData.brands.filter((brand: any) => brand.brand === 'Microsoft Edge').length) || userAgent.includes('edg');
 export const isSafari = userAgent.includes('safari') && !isChromium;
 export const isWindows = platform.startsWith('win');
 export const isMacOS = platform.startsWith('mac');

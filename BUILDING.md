@@ -55,13 +55,17 @@ brew install node git
 
 #### Installing prerequisites via built-in package managers
 
-| Distribution         | Command                                        | Package Manager                                               |
-|----------------------|------------------------------------------------|---------------------------------------------------------------|
-| Arch Linux / Manjaro | `sudo pacman -S nodejs git`                    | [`pacman`](https://wiki.archlinux.org/title/Pacman)           |
-| CentOS / RHEL        | `sudo yum install nodejs git`                  | [`yum`](https://en.wikipedia.org/wiki/Yum_(software))         |
-| Debian / Ubuntu      | `sudo apt install nodejs git`                  | [`apt`](https://en.wikipedia.org/wiki/APT_(software))         |
-| Fedora               | `sudo dnf install nodejs git`                  | [`dnf`](https://docs.fedoraproject.org/en-US/quick-docs/dnf/) |
-| Gentoo               | `emerge net-libs/nodejs dev-vcs/git`           | [`portage`](https://wiki.gentoo.org/wiki/Portage)             |
+Find your distrobution below and run the command listed in your terminal / console.
+
+| Distribution         | Command                                          | Package Manager                                               |
+|----------------------|--------------------------------------------------|---------------------------------------------------------------|
+| Arch Linux / Manjaro | `sudo pacman -S nodejs git`                      | [`pacman`](https://wiki.archlinux.org/title/Pacman)           |
+| CentOS / RHEL        | `sudo yum install nodejs git`                    | [`yum`](https://en.wikipedia.org/wiki/Yum_(software))         |
+| Debian / Ubuntu      | `sudo apt update && sudo apt install nodejs git` | [`apt`](https://en.wikipedia.org/wiki/APT_(software))         |
+| Fedora               | `sudo dnf install nodejs git`                    | [`dnf`](https://docs.fedoraproject.org/en-US/quick-docs/dnf/) |
+| Gentoo               | `emerge net-libs/nodejs dev-vcs/git`             | [`portage`](https://wiki.gentoo.org/wiki/Portage)             |
+
+
 
 ## Cloning
 

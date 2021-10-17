@@ -2,7 +2,7 @@
 
 ## Table of Contents
 
-blah blah table stuff here
+- Placeholder
 
 ## Installing prerequisites
 
@@ -73,7 +73,7 @@ git clone https://github.com/darkreader/darkreader.git
 
 ![image](https://user-images.githubusercontent.com/66189242/126913195-4d517b8d-8766-49a1-b85f-e908999fe50e.png)
 
-2. You'll also need to "`cd`" into darkreader by running:
+2. Then change your current directory to `darkreader`
 
 ```sh
 cd darkreader

@@ -122,11 +122,9 @@ export default class DevTools {
     private static KEY_STATIC = 'dev_static_themes';
 
     private loadConfigOverrides() {
-        Promise.all([
-            (async () => this.config.overrides.dynamicThemeFixes = await this.getSavedDynamicThemeFixes() || null),
-            (async () => this.config.overrides.inversionFixes = await this.getSavedInversionFixes() || null),
-            (async () => this.config.overrides.staticThemes = await this.getSavedStaticThemes() || null)
-        ]).then(() => this.config.overrides.ready = true);
+        this.config.overrides.dynamicThemeFixes = await this.getSavedDynamicThemeFixes() || null,
+        this.config.overrides.inversionFixes = await this.getSavedInversionFixes() || null,
+        this.config.overrides.staticThemes = await this.getSavedStaticThemes() || null
     }
 
     private async getSavedDynamicThemeFixes() {

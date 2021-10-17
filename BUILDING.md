@@ -65,6 +65,8 @@ Find your distrobution below and run the command listed in your terminal / conso
 | Fedora               | `sudo dnf install nodejs git`                    | [`dnf`](https://docs.fedoraproject.org/en-US/quick-docs/dnf/) |
 | Gentoo               | `emerge net-libs/nodejs dev-vcs/git`             | [`portage`](https://wiki.gentoo.org/wiki/Portage)             |
 
+![image](https://user-images.githubusercontent.com/66189242/137605819-cb8f1971-9297-4d66-a46a-5c47cdfbd7f0.png)
+
 
 
 ## Cloning

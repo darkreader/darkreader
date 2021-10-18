@@ -1,3 +1,4 @@
+import {logInfo} from '../utils/log';
 import {parseInversionFixes, formatInversionFixes} from '../generators/css-filter';
 import {parseDynamicThemeFixes, formatDynamicThemeFixes} from '../generators/dynamic-theme';
 import {parseStaticThemes, formatStaticThemes} from '../generators/static-theme';
@@ -7,7 +8,7 @@ import type ConfigManager from './config-manager';
 // into PersistentStorageWrapper. LocalStorageWrapper data might become inaccessible upon
 // update from MV2 to MV3 because service workers don't have localStorage.
 // TODO(bershanskiy): Add support for reads/writes of multiple keys at once for performance.
-// TODO: Popup UI heeds only hasCustom*Fixes() and nothing else. Consider storing that data separatelly.
+// TODO(bershanskiy): Popup UI heeds only hasCustom*Fixes() and nothing else. Consider storing that data separatelly.
 interface DevToolsStorage {
     get(key: string): Promise<string>;
     set(key: string, value: string): void;
@@ -15,8 +16,6 @@ interface DevToolsStorage {
     has(key: string): Promise<boolean>;
 }
 
-// TODO(bershanskiy): figure out minimum supported browser version and
-// may be use promisses directly.
 class PersistentStorageWrapper implements DevToolsStorage {
     // Cache information within background context for future use without waiting.
     private cache: {[key: string]: string} = {};
@@ -27,24 +26,37 @@ class PersistentStorageWrapper implements DevToolsStorage {
         }
         return new Promise<string>((resolve) => {
             chrome.storage.local.get(key, (result) => {
+                // If cache received a new value (from call to set())
+                // before we retreived an old value from storage,
+                // return the new value.
+                if (key in this.cache) {
+                    logInfo(`Key ${key} was written to during read operation.`);
+                    resolve(this.cache[key]);
+                    return;
+                }
+
                 if (chrome.runtime.lastError) {
                     console.error(chrome.runtime.lastError);
                     resolve(null);
                     return;
                 }
+
                 this.cache[key] = result.key;
                 resolve(result.key);
             });
         });
     }
+
     set(key: string, value: string) {
         this.cache[key] = value;
         chrome.storage.local.set({[key]: value});
     }
+
     remove(key: string) {
         this.cache[key] = undefined;
         chrome.storage.local.remove(key);
     }
+
     async has(key: string) {
         return Boolean(await this.get(key));
     }
@@ -122,10 +134,10 @@ export default class DevTools {
     private static KEY_FILTER = 'dev_inversion_fixes';
     private static KEY_STATIC = 'dev_static_themes';
 
-    private loadConfigOverrides() {
-        this.config.overrides.dynamicThemeFixes = await this.getSavedDynamicThemeFixes() || null,
-        this.config.overrides.inversionFixes = await this.getSavedInversionFixes() || null,
-        this.config.overrides.staticThemes = await this.getSavedStaticThemes() || null
+    private async loadConfigOverrides() {
+        this.config.overrides.dynamicThemeFixes = await this.getSavedDynamicThemeFixes() || null;
+        this.config.overrides.inversionFixes = await this.getSavedInversionFixes() || null;
+        this.config.overrides.staticThemes = await this.getSavedStaticThemes() || null;
     }
 
     private async getSavedDynamicThemeFixes() {

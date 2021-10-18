@@ -114,12 +114,12 @@ You can get a list of branches by doing:
 git branch -va
 ```
  
-![image](https://user-images.githubusercontent.com/66189242/126913646-d9c9c76d-248b-4edc-bb37-4b41a660bdb5.png)
+![image](https://user-images.githubusercontent.com/66189242/137687124-c69c6445-096b-413b-b35e-de7abd50012c.png)
 
-> **Note**: Remember
-to remove the `origin/` and `remotes/` parts on the list!
+> **Note**: Remember to remove the `origin/` and `remotes/` parts on the list!
 > 
 > For example, `remotes/origin/CORS-Patch` becomes `CORS-Patch`
+
 > 
 > ---
 > 

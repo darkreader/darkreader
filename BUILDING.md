@@ -6,12 +6,12 @@
 
 ## Installing prerequisites
 
-The step below installs:
+The step below i"newbies"nstalls:
 
 - [git](https://git-scm.com/)
 - [NodeJS](https://nodejs.org/)
 
-If you already have these you can skip this and proceed to the [next step](#placeholder) *<- note to self: replace this with the next step*
+If you already have these you can skip this and proceed to the [next step](#cloning)
 
 ### Microsoft Windows
 
@@ -55,7 +55,7 @@ brew install node git
 
 #### Installing prerequisites via built-in package managers
 
-Find your distrobution below and run the command listed in your terminal / console.
+Find your distrobution below and run the command listed in your built-in terminal / console.
 
 | Distribution         | Command                                              | Package Manager                                           |
 |----------------------|------------------------------------------------------|-----------------------------------------------------------|

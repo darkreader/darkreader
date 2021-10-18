@@ -11,7 +11,7 @@ The step below installs:
 - [git](https://git-scm.com/)
 - [NodeJS](https://nodejs.org/)
 
-If you already have these you can skip this and proceed to the [next step](#placeholder)
+If you already have these you can skip this and proceed to the [next step](#placeholder) *<- note to self: replace this with the next step*
 
 ### Microsoft Windows
 
@@ -57,11 +57,11 @@ brew install node git
 
 Find your distrobution below and run the command listed in your terminal / console.
 
-| Distribution         | Command                                          | Package Manager                                               |
-|----------------------|--------------------------------------------------|---------------------------------------------------------------|
-| Arch Linux / Manjaro | `sudo pacman -S nodejs git`                      | [`pacman`](https://wiki.archlinux.org/title/Pacman)           |
-| CentOS / RHEL        | `sudo yum install nodejs git`                    | [`yum`](https://en.wikipedia.org/wiki/Yum_(software))         |
-| Debian / Ubuntu      | `sudo apt update && sudo apt install nodejs git` | [`apt`](https://en.wikipedia.org/wiki/APT_(software))         |
+| Distribution         | Command                                              | Package Manager                                           |
+|----------------------|------------------------------------------------------|-----------------------------------------------------------|
+| Arch Linux / Manjaro | `sudo pacman -S nodejs git`                          | [`pacman`](https://wiki.archlinux.org/title/Pacman)       |
+| CentOS / RHEL        | `sudo yum install nodejs git`                        | [`yum`](https://en.wikipedia.org/wiki/Yum_(software))     |
+| Debian / Ubuntu      | `sudo apt update && sudo apt install nodejs npm git` | [`apt`](https://en.wikipedia.org/wiki/APT_(software))     |
 | Fedora               | `sudo dnf install nodejs git`                    | [`dnf`](https://docs.fedoraproject.org/en-US/quick-docs/dnf/) |
 | Gentoo               | `emerge net-libs/nodejs dev-vcs/git`             | [`portage`](https://wiki.gentoo.org/wiki/Portage)             |
 
@@ -85,7 +85,7 @@ git clone https://github.com/darkreader/darkreader.git
 cd darkreader
 ```
 
-![image](https://user-images.githubusercontent.com/66189242/126913398-971f800f-bdad-495c-aac8-452d42a2f70f.png)
+![image](https://user-images.githubusercontent.com/66189242/137685485-7c5c7efc-62e1-4f97-8609-73848dc1ded1.png)
 
 
 > **Note**: If you want to clone another fork of darkreader you can do:
@@ -116,10 +116,15 @@ git branch -va
  
 ![image](https://user-images.githubusercontent.com/66189242/126913646-d9c9c76d-248b-4edc-bb37-4b41a660bdb5.png)
 
-> **Note**: Remember to remove the `origin/` and `remotes/` parts on the list!
+> **Note**: Remember
+to remove the `origin/` and `remotes/` parts on the list!
 > 
 > For example, `remotes/origin/CORS-Patch` becomes `CORS-Patch`
 > 
 > ---
 > 
 > If you want to exit, you can press `q` to exit.
+
+## Building
+
+

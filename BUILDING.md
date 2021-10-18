@@ -6,7 +6,7 @@
 
 ## Installing prerequisites
 
-The step below i"newbies"nstalls:
+The step below installs:
 
 - [git](https://git-scm.com/)
 - [NodeJS](https://nodejs.org/)

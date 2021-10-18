@@ -127,4 +127,10 @@ git branch -va
 
 ## Building
 
+1. Install darkreaders dependencies by running:
+
+```sh
+npm install
+```
+
 

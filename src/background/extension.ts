@@ -46,7 +46,7 @@ export class Extension {
     private popupOpeningListener: () => void = null;
     // Is used only with Firefox to bypass Firefox bug
     private wasLastColorSchemeDark: boolean = null;
-    private startBarrier: PromiseBarrier = null;
+    private startBarrier: PromiseBarrier<void, void> = null;
     private stateManager: StateManager<ExtensionState> = null;
 
     static ALARM_NAME = 'auto-time-alarm';

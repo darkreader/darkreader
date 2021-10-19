@@ -3,14 +3,15 @@ export class PromiseBarrier<RESOLVUTION, REJECTION> {
     private rejects: Array<(reason?: REJECTION) => void> = [];
     private wasResolved = false;
     private wasRejected = false;
-    private resolution: RESOLVUTION | REJECTION;
+    private resolution: RESOLVUTION;
+    private reason: REJECTION;
 
-    async entry(){
+    async entry(): Promise<RESOLVUTION>{
         if (this.wasResolved) {
             return Promise.resolve(this.resolution);
         }
         if (this.wasRejected) {
-            return Promise.reject(this.resolution);
+            return Promise.reject(this.reason);
         }
         return new Promise((resolve, reject) => {
             this.resolves.push(resolve);
@@ -35,7 +36,7 @@ export class PromiseBarrier<RESOLVUTION, REJECTION> {
             return;
         }
         this.wasRejected = true;
-        this.resolution = reason;
+        this.reason = reason;
         this.rejects.forEach((reject) => reject(reason));
         this.resolves = null;
         this.rejects = null;

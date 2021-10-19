@@ -13,8 +13,8 @@ interface UserStorageOptions {
 }
 
 export default class UserStorage {
-    private loadBarrier: PromiseBarrier;
-    private saveStorageBarrier: PromiseBarrier;
+    private loadBarrier: PromiseBarrier<UserSettings, void>;
+    private saveStorageBarrier: PromiseBarrier<void, void>;
 
     constructor({onRemoteSettingsChange}: UserStorageOptions) {
         this.settings = null;
@@ -41,7 +41,7 @@ export default class UserStorage {
         });
     }
 
-    private async loadSettingsFromStorage() {
+    private async loadSettingsFromStorage(): Promise<UserSettings> {
         if (this.loadBarrier) {
             return await this.loadBarrier.entry();
         }

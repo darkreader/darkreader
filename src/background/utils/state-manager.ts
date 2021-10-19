@@ -69,6 +69,7 @@ export class StateManager<T> {
     // loadStateBarrier is guaranteed to exists only when meta is LOADING.
     private loadStateBarrier: PromiseBarrier<void, void> = null;
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     constructor(localStorageKey: string, parent: any, defaults: T){
         if (!isNonPersistent()) {
             // Do nothing if the current build uses persistent background

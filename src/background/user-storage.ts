@@ -9,7 +9,7 @@ import {PromiseBarrier} from '../utils/promise-barrier';
 const SAVE_TIMEOUT = 1000;
 
 interface UserStorageOptions {
-    onRemoteSettingsChange: () => any;
+    onRemoteSettingsChange: () => void;
 }
 
 export default class UserStorage {
@@ -118,7 +118,7 @@ export default class UserStorage {
         if ($settings.siteList) {
             if (!Array.isArray($settings.siteList)) {
                 const list: string[] = [];
-                for (const key in ($settings.siteList as any)) {
+                for (const key in ($settings.siteList as string[])) {
                     const index = Number(key);
                     if (!isNaN(index)) {
                         list[index] = $settings.siteList[key];

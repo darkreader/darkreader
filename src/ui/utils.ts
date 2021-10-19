@@ -48,10 +48,12 @@ export function saveFile(name: string, content: string) {
     }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnyVoidFunction = (...args: any[]) => void;
 
 export function throttle<F extends AnyVoidFunction>(callback: F): F {
     let frameId: number = null;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return ((...args: any[]) => {
         if (!frameId) {
             callback(...args);

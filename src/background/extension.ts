@@ -172,9 +172,9 @@ export class Extension {
         if (__DEBUG__) {
             const socket = new WebSocket(`ws://localhost:8894`);
             socket.onmessage = (e) => {
-                const respond = (message: any) => socket.send(JSON.stringify(message));
+                const respond = (message: {type: string; data?: ExtensionData | string; id?: number}) => socket.send(JSON.stringify(message));
                 try {
-                    const message = JSON.parse(e.data);
+                    const message: {type: string; data: Partial<UserSettings>; id: number} = JSON.parse(e.data);
                     if (message.type === 'changeSettings') {
                         const settings = message.data;
                         this.changeSettings(settings);

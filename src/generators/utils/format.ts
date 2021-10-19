@@ -2,6 +2,7 @@ import {push} from '../../utils/array';
 
 interface SiteFix {
     url: string[];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     [prop: string]: any;
 }
 

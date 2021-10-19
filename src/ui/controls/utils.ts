@@ -5,7 +5,9 @@ function toArray<T>(x: T | T[]) {
 }
 
 export function mergeClass(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     cls: string | {[cls: string]: any} | Array<string | {[cls: string]: any}>,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     propsCls: string | {[cls: string]: any} | Array<string | {[cls: string]: any}>
 ) {
     const normalized = toArray(cls).concat(toArray(propsCls));

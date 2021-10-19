@@ -1,4 +1,5 @@
 import {MessageType} from '../../src/utils/message';
+import type {Message} from '../../src/definitions';
 
 let nativeSendMessage: typeof chrome.runtime.sendMessage;
 const bgResponses = new Map<string, string>();
@@ -7,7 +8,7 @@ export function stubChromeRuntimeMessage() {
     nativeSendMessage = chrome.runtime.sendMessage;
     const listeners = chrome.runtime.onMessage['__listeners__'];
 
-    chrome.runtime.sendMessage = (message: any) => {
+    chrome.runtime.sendMessage = (message: Message) => {
         if (message.type === MessageType.CS_FETCH) {
             const {id, data: {url}} = message;
             setTimeout(() => {

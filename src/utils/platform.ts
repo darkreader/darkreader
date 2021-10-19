@@ -50,4 +50,5 @@ export const isXMLHttpRequestSupported = typeof XMLHttpRequest === 'function';
 
 export const isFetchSupported = typeof fetch === 'function';
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const isMV3 = (globalThis as any).chrome && (globalThis as any).chrome.runtime && (globalThis as any).chrome.runtime.getManifest && (globalThis as any).chrome.runtime.getManifest().manifest_version === 3;

@@ -71,6 +71,8 @@ interface CacheRecord {
 }
 
 class LimitedCacheStorage {
+    // TODO: remove any cast once declarations are updated
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     static QUOTA_BYTES = ((navigator as any).deviceMemory || 4) * 16 * 1024 * 1024;
     static TTL = getDuration({minutes: 10});
     static ALARM_NAME = 'network';

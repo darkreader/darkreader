@@ -18,6 +18,7 @@ export interface ExtensionData {
 
 export interface TabData {
     type: string;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     data?: any;
 }
 
@@ -115,8 +116,10 @@ export interface TabInfo {
 
 export interface Message {
     type: string;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     data?: any;
     id?: number;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     error?: any;
 }
 

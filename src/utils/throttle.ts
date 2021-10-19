@@ -1,8 +1,11 @@
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function throttle<T extends(...args: any[]) => any>(callback: T) {
     let pending = false;
     let frameId: number = null;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let lastArgs: any[];
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const throttled: T = ((...args: any[]) => {
         lastArgs = args;
         if (frameId) {
@@ -17,6 +20,7 @@ export function throttle<T extends(...args: any[]) => any>(callback: T) {
                 }
             });
         }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     }) as any;
 
     const cancel = () => {

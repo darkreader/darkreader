@@ -76,6 +76,7 @@ document.addEventListener('__darkreader__inlineScriptsAllowed', () => {
 });
 
 let loadingLinkCounter = 0;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const rejectorsForLoadingLinks = new Map<number, (reason?: any) => void>();
 
 export function cleanLoadingLinks() {

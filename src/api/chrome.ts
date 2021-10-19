@@ -4,9 +4,11 @@ import {readResponseAsDataURL} from '../utils/network';
 import {callFetchMethod} from './fetch';
 
 if (!window.chrome) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     window.chrome = {} as any;
 }
 if (!chrome.runtime) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     chrome.runtime = {} as any;
 }
 
@@ -47,6 +49,7 @@ if (typeof chrome.runtime.sendMessage === 'function') {
 }
 
 if (!chrome.runtime.onMessage) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     chrome.runtime.onMessage = {} as any;
 }
 if (typeof chrome.runtime.onMessage.addListener === 'function') {

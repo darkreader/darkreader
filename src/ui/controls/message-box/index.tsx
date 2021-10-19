@@ -6,6 +6,7 @@ interface MessageBoxProps {
     caption: string;
     onOK?: () => void;
     onCancel?: () => void;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     portalKey?: any;
 }
 

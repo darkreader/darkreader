@@ -250,6 +250,7 @@ export default class TabManager {
     }
 
     async registerMailDisplayScript() {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         await (chrome as any).messageDisplayScripts.register({
             js: [
                 {file: '/inject/fallback.js'},

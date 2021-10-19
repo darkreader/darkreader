@@ -3,8 +3,10 @@ import {parse} from '../utils/color';
 import {modifyBackgroundColor, modifyForegroundColor, modifyBorderColor} from '../generators/modify-colors';
 import type {FilterConfig} from '../definitions';
 
+// TODO: remove this after TypeScript declarations are updated
 declare const browser: {
     theme: {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         update: ((theme: any) => Promise<void>);
         reset: (() => Promise<void>);
     };

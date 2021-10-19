@@ -2,9 +2,11 @@ import {getContext, render} from 'malevic/dom';
 import {isStringifying} from 'malevic/string';
 
 const DEFAULT_OVERLAY_KEY = Symbol();
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const overlayNodes = new Map<any, HTMLElement>();
 const clickListeners = new WeakMap<HTMLElement, () => void>();
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function getOverlayDOMNode(key: any) {
     if (key == null) {
         key = DEFAULT_OVERLAY_KEY;
@@ -25,6 +27,7 @@ function getOverlayDOMNode(key: any) {
 }
 
 interface OverlayProps {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     key?: any;
 }
 
@@ -36,6 +39,7 @@ function Overlay(props: OverlayProps) {
 }
 
 interface OverlayPortalProps {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     key?: any;
     onOuterClick?: () => void;
 }

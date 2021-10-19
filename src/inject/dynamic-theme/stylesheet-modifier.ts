@@ -112,7 +112,7 @@ export function createStyleSheetModifier() {
 
         interface ReadyGroup {
             isGroup: true;
-            rule: any;
+            rule: CSSRule;
             rules: Array<ReadyGroup | ReadyStyleRule>;
         }
 
@@ -243,6 +243,7 @@ export function createStyleSheetModifier() {
                     if (modified instanceof Promise) {
                         handleAsyncDeclaration(property, modified, important, sourceValue);
                     } else if (property.startsWith('--')) {
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
                         handleVarDeclarations(property, modified as any, important, sourceValue);
                     } else {
                         readyDeclarations.push({property, value: modified as string, important, sourceValue});

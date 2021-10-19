@@ -2,6 +2,7 @@ import {m} from 'malevic';
 import Button from '../button';
 
 interface NavButtonProps {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     class?: any;
     onClick: () => void;
 }

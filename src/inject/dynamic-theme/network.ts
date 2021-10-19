@@ -10,6 +10,7 @@ interface FetchRequest {
 
 let counter = 0;
 const resolvers = new Map<number, (data: string) => void>();
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const rejectors = new Map<number, (reason?: any) => void>();
 
 export async function bgFetch(request: FetchRequest) {

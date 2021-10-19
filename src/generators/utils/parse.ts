@@ -15,7 +15,6 @@ export interface SitePropsIndex<T extends SiteProps> {
 export interface SitesFixesParserOptions<T> {
     commands: string[];
     getCommandPropName: (command: string) => keyof T;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     parseCommandValue: (command: string, value: string) => any;
 }
 

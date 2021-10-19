@@ -6,7 +6,6 @@ import type {FilterConfig} from '../definitions';
 // TODO: remove this after TypeScript declarations are updated
 declare const browser: {
     theme: {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         update: ((theme: any) => Promise<void>);
         reset: (() => Promise<void>);
     };

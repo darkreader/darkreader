@@ -5,7 +5,6 @@ import TextBox from '../textbox';
 import HSBPicker from './hsb-picker';
 
 interface ColorPickerProps {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     class?: any;
     color: string;
     onChange: (color: string) => void;

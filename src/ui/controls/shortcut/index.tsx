@@ -4,7 +4,6 @@ import type {Shortcuts} from '../../../definitions';
 import {isFirefox, isEdge} from '../../../utils/platform';
 
 interface ShortcutLinkProps {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     class?: string | {[cls: string]: any};
     commandName: string;
     shortcuts: Shortcuts;

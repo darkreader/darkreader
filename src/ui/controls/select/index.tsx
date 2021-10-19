@@ -6,7 +6,6 @@ import TextBox from '../textbox';
 import VirtualScroll from '../virtual-scroll';
 
 interface SelectProps {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     class?: any;
     value: string;
     options: {

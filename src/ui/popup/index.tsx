@@ -69,7 +69,6 @@ if (DEBUG) {
 
     const socket = new WebSocket(`ws://localhost:8894`);
     socket.onmessage = (e) => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const respond = (message: {type: string; id?: number; data?: any}) => socket.send(JSON.stringify(message));
         try {
             const message: {type: string; id: number; data: string} = JSON.parse(e.data);

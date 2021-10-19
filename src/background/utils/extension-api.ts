@@ -40,10 +40,8 @@ export function canInjectScript(url: string) {
 
 const mutexStorageWriting = new Mutex();
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function readSyncStorage<T extends {[key: string]: any}>(defaults: T): Promise<T> {
     return new Promise<T>((resolve) => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         chrome.storage.sync.get(null, (sync: any) => {
             if (chrome.runtime.lastError) {
                 console.error(chrome.runtime.lastError.message);
@@ -79,7 +77,6 @@ export async function readSyncStorage<T extends {[key: string]: any}>(defaults: 
     });
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function readLocalStorage<T extends {[key: string]: any}>(defaults: T): Promise<T> {
     return new Promise<T>((resolve) => {
         chrome.storage.local.get(defaults, (local: T) => {
@@ -93,7 +90,6 @@ export async function readLocalStorage<T extends {[key: string]: any}>(defaults:
     });
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function prepareSyncStorage<T extends {[key: string]: any}>(values: T): {[key: string]: any} {
     for (const key in values) {
         const value = values[key];
@@ -107,10 +103,8 @@ function prepareSyncStorage<T extends {[key: string]: any}>(values: T): {[key: s
             const maxLength = chrome.storage.sync.QUOTA_BYTES_PER_ITEM - key.length - 1 - 2;
             const minimalKeysNeeded = Math.ceil(string.length / maxLength);
             for (let i = 0; i < minimalKeysNeeded; i++) {
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 (values as any)[`${key}_${i.toString(36)}`] = string.substring(i * maxLength, (i + 1) * maxLength);
             }
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             (values as any)[key] = {
                 __meta_split_count: minimalKeysNeeded
             };
@@ -120,7 +114,6 @@ function prepareSyncStorage<T extends {[key: string]: any}>(values: T): {[key: s
     return values;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function writeSyncStorage<T extends {[key: string]: any}>(values: T): Promise<void> {
     return new Promise<void>(async (resolve, reject) => {
         const packaged = prepareSyncStorage(values);
@@ -137,7 +130,6 @@ export async function writeSyncStorage<T extends {[key: string]: any}>(values: T
     });
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function writeLocalStorage<T extends {[key: string]: any}>(values: T): Promise<void> {
     return new Promise<void>(async (resolve) => {
         await mutexStorageWriting.lock();

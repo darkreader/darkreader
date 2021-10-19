@@ -3,7 +3,6 @@ if (!window.hasOwnProperty('chrome')) {
     window.chrome = {} as any;
 }
 if (!chrome.hasOwnProperty('runtime')) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     chrome.runtime = {} as any;
 }
 if (!chrome.runtime.hasOwnProperty('onMessage')) {
@@ -16,7 +15,6 @@ if (!chrome.runtime.hasOwnProperty('onMessage')) {
         removeListener: (listener: AnyFunction) => {
             listeners.delete(listener);
         },
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any;
     chrome.runtime.onMessage['__listeners__'] = listeners;
 }

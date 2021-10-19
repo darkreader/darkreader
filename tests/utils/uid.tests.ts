@@ -13,7 +13,6 @@ test('Unique identifier generation', () => {
             shim1();
             return randomFillSync(buffer);
         },
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any;
     const uid1 = generateUID();
     expect(/^[a-f0-9]{32}$/.test(uid1)).toEqual(true);
@@ -25,7 +24,6 @@ test('Unique identifier generation', () => {
             shim2();
             return 'a19cc926-bf7f-4d5f-bf9c-202bc7a4c7c6';
         },
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any;
     expect(generateUID()).toEqual('a19cc926bf7f4d5fbf9c202bc7a4c7c6');
     expect(shim2).toHaveBeenCalled();

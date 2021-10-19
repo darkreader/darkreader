@@ -1,5 +1,4 @@
 if (!window.hasOwnProperty('chrome')) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     window.chrome = {} as any;
 }
 if (!chrome.hasOwnProperty('runtime')) {

@@ -16,6 +16,11 @@ export interface ExtensionData {
     };
 }
 
+export interface TabData {
+    type: string;
+    data?: any;
+}
+
 export interface ExtensionActions {
     changeSettings(settings: Partial<UserSettings>): void;
     setTheme(theme: Partial<FilterConfig>): void;

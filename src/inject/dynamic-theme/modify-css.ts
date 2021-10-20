@@ -31,7 +31,7 @@ export interface ModifiableCSSDeclaration {
 
 export interface ModifiableCSSRule {
     selector: string;
-    parentRule: any;
+    parentRule: CSSRule;
     declarations: ModifiableCSSDeclaration[];
 }
 

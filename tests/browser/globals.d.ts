@@ -1,6 +1,6 @@
 import type {RequestListener} from 'http';
 import type {Page, WaitForOptions} from 'puppeteer-core';
-import type {ExtensionData} from '../../src/definitions';
+import type {ExtensionData, UserSettings} from '../../src/definitions';
 
 type PathsObject = {[path: string]: string | RequestListener | PathsObject};
 
@@ -17,7 +17,7 @@ declare global {
         reset: () => Promise<void>;
     };
     const backgroundUtils: {
-        changeSettings: (settings: any) => Promise<void>;
+        changeSettings: (settings: Partial<UserSettings>) => Promise<void>;
         collectData: () => Promise<ExtensionData>;
     };
 }

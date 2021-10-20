@@ -3,6 +3,7 @@ import {parse} from '../utils/color';
 import {modifyBackgroundColor, modifyForegroundColor, modifyBorderColor} from '../generators/modify-colors';
 import type {FilterConfig} from '../definitions';
 
+// TODO: remove this after TypeScript declarations are updated
 declare const browser: {
     theme: {
         update: ((theme: any) => Promise<void>);

@@ -112,7 +112,7 @@ export function createStyleSheetModifier() {
 
         interface ReadyGroup {
             isGroup: true;
-            rule: any;
+            rule: CSSRule;
             rules: Array<ReadyGroup | ReadyStyleRule>;
         }
 

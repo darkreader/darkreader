@@ -15,7 +15,7 @@ import createCSSFilterStylesheet from '../generators/css-filter';
 import {getDynamicThemeFixesFor} from '../generators/dynamic-theme';
 import createStaticStylesheet from '../generators/static-theme';
 import {createSVGFilterStylesheet, getSVGFilterMatrixValue, getSVGReverseFilterMatrixValue} from '../generators/svg-filter';
-import type {ExtensionData, FilterConfig, News, Shortcuts, UserSettings, TabInfo} from '../definitions';
+import type {ExtensionData, FilterConfig, News, Shortcuts, UserSettings, TabInfo, TabData} from '../definitions';
 import {isSystemDarkModeEnabled} from '../utils/media-query';
 import {isFirefox, isMV3, isThunderbird} from '../utils/platform';
 import {MessageType} from '../utils/message';
@@ -46,7 +46,7 @@ export class Extension {
     private popupOpeningListener: () => void = null;
     // Is used only with Firefox to bypass Firefox bug
     private wasLastColorSchemeDark: boolean = null;
-    private startBarrier: PromiseBarrier = null;
+    private startBarrier: PromiseBarrier<void, void> = null;
     private stateManager: StateManager<ExtensionState> = null;
 
     static ALARM_NAME = 'auto-time-alarm';
@@ -172,9 +172,9 @@ export class Extension {
         if (__DEBUG__) {
             const socket = new WebSocket(`ws://localhost:8894`);
             socket.onmessage = (e) => {
-                const respond = (message: any) => socket.send(JSON.stringify(message));
+                const respond = (message: {type: string; data?: ExtensionData | string; id?: number}) => socket.send(JSON.stringify(message));
                 try {
-                    const message = JSON.parse(e.data);
+                    const message: {type: string; data: Partial<UserSettings>; id: number} = JSON.parse(e.data);
                     if (message.type === 'changeSettings') {
                         const settings = message.data;
                         this.changeSettings(settings);
@@ -344,7 +344,7 @@ export class Extension {
         if (this.user.settings) {
             return this.getTabMessage(url, frameURL);
         }
-        return new Promise<{type: string; data?: any}>((resolve) => {
+        return new Promise<TabData>((resolve) => {
             this.user.loadSettings().then(() => resolve(this.getTabMessage(url, frameURL)));
         });
     }
@@ -522,7 +522,7 @@ export class Extension {
         };
     }
 
-    private getTabMessage = (url: string, frameURL: string) => {
+    private getTabMessage = (url: string, frameURL: string): TabData => {
         const urlInfo = this.getURLInfo(url);
         if (this.isEnabled && isURLEnabled(url, this.user.settings, urlInfo)) {
             const custom = this.user.settings.customThemes.find(({url: urlList}) => isURLInList(url, urlList));

@@ -37,7 +37,7 @@ if (WATCH) {
 
     const listen = () => {
         const socket = new WebSocket(`ws://localhost:${PORT}`);
-        const send = (message: any) => socket.send(JSON.stringify(message));
+        const send = (message: {type: string}) => socket.send(JSON.stringify(message));
         socket.onmessage = (e) => {
             chrome.alarms.onAlarm.removeListener(socketAlarmListener);
 

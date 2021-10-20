@@ -71,6 +71,7 @@ interface CacheRecord {
 }
 
 class LimitedCacheStorage {
+    // TODO: remove any cast once declarations are updated
     static QUOTA_BYTES = ((navigator as any).deviceMemory || 4) * 16 * 1024 * 1024;
     static TTL = getDuration({minutes: 10});
     static ALARM_NAME = 'network';
@@ -151,7 +152,7 @@ class LimitedCacheStorage {
     }
 }
 
-interface FetchRequestParameters {
+export interface FetchRequestParameters {
     url: string;
     responseType: 'data-url' | 'text';
     mimeType?: string;

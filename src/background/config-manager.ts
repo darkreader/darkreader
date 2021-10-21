@@ -100,7 +100,6 @@ export default class ConfigManager {
         this.handleColorSchemes();
     }
 
-
     private async loadDarkSites({local}: Config) {
         const sites = await this.loadConfig({
             name: 'Dark Sites',

@@ -55,18 +55,17 @@ brew install node git
 
 #### Installing prerequisites via built-in package managers
 
-Find your distrobution below and run the command listed in your built-in terminal / console.
+1. Follow the instructions on https://nodejs.org/en/download/package-manager/ to get NodeJS
 
-| Distribution         | Command                                              | Package Manager                                           |
-|----------------------|------------------------------------------------------|-----------------------------------------------------------|
-| Arch Linux / Manjaro | `sudo pacman -S nodejs git`                          | [`pacman`](https://wiki.archlinux.org/title/Pacman)       |
-| CentOS / RHEL        | `sudo yum install nodejs git`                        | [`yum`](https://en.wikipedia.org/wiki/Yum_(software))     |
-| Debian / Ubuntu      | `sudo apt update && sudo apt install nodejs npm git` | [`apt`](https://en.wikipedia.org/wiki/APT_(software))     |
-| Fedora               | `sudo dnf install nodejs git`                    | [`dnf`](https://docs.fedoraproject.org/en-US/quick-docs/dnf/) |
-| Gentoo               | `emerge net-libs/nodejs dev-vcs/git`             | [`portage`](https://wiki.gentoo.org/wiki/Portage)             |
+2. placeholder
 
-![image](https://user-images.githubusercontent.com/66189242/137605819-cb8f1971-9297-4d66-a46a-5c47cdfbd7f0.png)
-
+| Distribution         | Command                | Package Manager                                               |
+|----------------------|------------------------|---------------------------------------------------------------|
+| Arch Linux / Manjaro | `sudo pacman -S git`   | [`pacman`](https://wiki.archlinux.org/title/Pacman)           |
+| CentOS / RHEL        | `sudo yum install git` | [`yum`](https://en.wikipedia.org/wiki/Yum_(software))         |
+| Debian / Ubuntu      | `sudo apt install git` | [`apt`](https://en.wikipedia.org/wiki/APT_(software))         |
+| Fedora               | `sudo dnf install git` | [`dnf`](https://docs.fedoraproject.org/en-US/quick-docs/dnf/) |
+| Gentoo               | `emerge dev-vcs/git`   | [`portage`](https://wiki.gentoo.org/wiki/Portage)             |
 
 
 ## Cloning

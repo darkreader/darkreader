@@ -57,12 +57,7 @@ export class Extension {
         this.messenger = new Messenger(this.getMessengerAdapter());
         this.news = new Newsmaker((news) => this.onNewsUpdate(news));
         this.tabs = new TabManager({
-            getConnectionMessage: ({url, frameURL, unsupportedSender}) => {
-                if (unsupportedSender) {
-                    return this.getUnsupportedSenderMessage();
-                }
-                return this.getConnectionMessage(url, frameURL);
-            },
+            getConnectionMessage: ({url, frameURL}) => this.getConnectionMessage(url, frameURL),
             getTabMessage: this.getTabMessage,
             onColorSchemeChange: this.onColorSchemeChange,
         });
@@ -347,10 +342,6 @@ export class Extension {
         return new Promise<TabData>((resolve) => {
             this.user.loadSettings().then(() => resolve(this.getTabMessage(url, frameURL)));
         });
-    }
-
-    private getUnsupportedSenderMessage() {
-        return {type: MessageType.BG_UNSUPPORTED_SENDER};
     }
 
     private onColorSchemeChange = ({isDark}: {isDark: boolean}) => {

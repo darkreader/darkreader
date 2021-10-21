@@ -13,6 +13,7 @@ export default function SiteToggleButton({data, tab, actions}: ExtWrapper & {tab
             actions.toggleURL(tab.url);
         }
     }
+
     const pdf = isPDF(tab.url);
     const toggleHasEffect = (
         data.settings.enableForProtectedPages ||

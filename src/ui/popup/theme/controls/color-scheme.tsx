@@ -12,6 +12,7 @@ export default function ColorSchemeDropDown(props: ColorSchemeDropDownProps) {
     function onColorSchemeChange(value: string) {
         props.onChange(value);
     }
+
     return (
         <ThemeControl label="Color Scheme">
             <DropDown

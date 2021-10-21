@@ -19,6 +19,7 @@ class LocalStorageWrapper implements DevToolsStorage {
             return null;
         }
     }
+
     set(key: string, value: string) {
         try {
             localStorage.setItem(key, value);
@@ -26,6 +27,7 @@ class LocalStorageWrapper implements DevToolsStorage {
             console.error(err);
         }
     }
+
     remove(key: string) {
         try {
             localStorage.removeItem(key);
@@ -33,6 +35,7 @@ class LocalStorageWrapper implements DevToolsStorage {
             console.error(err);
         }
     }
+
     has(key: string) {
         try {
             return localStorage.getItem(key) != null;
@@ -49,12 +52,15 @@ class TempStorage implements DevToolsStorage {
     get(key: string) {
         return this.map.get(key);
     }
+
     set(key: string, value: string) {
         this.map.set(key, value);
     }
+
     remove(key: string) {
         this.map.delete(key);
     }
+
     has(key: string) {
         return this.map.has(key);
     }

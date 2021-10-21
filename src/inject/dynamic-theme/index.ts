@@ -53,7 +53,6 @@ function createOrUpdateScript(className: string, root: ParentNode = document.hea
     return element;
 }
 
-
 const nodePositionWatchers = new Map<string, ReturnType<typeof watchForNodePosition>>();
 
 function setupNodePositionWatcher(node: Node, alias: string) {
@@ -265,7 +264,6 @@ function createManager(element: StyleElement) {
 
     return manager;
 }
-
 
 function removeManager(element: StyleElement) {
     const manager = styleManagers.get(element);

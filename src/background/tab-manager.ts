@@ -292,9 +292,11 @@ export default class TabManager {
         const tab = await this.getActiveTab();
         return Boolean(this.tabs[tab.id]);
     }
+
     async getActiveTabURL() {
         return this.getTabURL(await this.getActiveTab());
     }
+
     async getActiveTab() {
         let tab = (await queryTabs({
             active: true,

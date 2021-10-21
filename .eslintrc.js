@@ -47,6 +47,7 @@ module.exports = {
             default: 'array-simple',
         }],
         'yoda': ['error', 'never'],
+        'local/consistent-new-lines': 'error',
         '@typescript-eslint/brace-style': 'error',
         '@typescript-eslint/camelcase': 'off',
         '@typescript-eslint/comma-spacing': ['error', {

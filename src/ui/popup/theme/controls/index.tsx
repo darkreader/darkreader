@@ -1,6 +1,7 @@
 import BackgroundColor from './background-color';
 import Brightness from './brightness';
 import Contrast from './contrast';
+import ColorSchemeDropDown from './color-scheme';
 import FontPicker from './font-picker';
 import Grayscale from './grayscale';
 import Mode from './mode';
@@ -18,6 +19,7 @@ export {
     BackgroundColor,
     Brightness,
     Contrast,
+    ColorSchemeDropDown,
     FontPicker,
     Grayscale,
     Mode,

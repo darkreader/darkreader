@@ -62,6 +62,20 @@ export function getMockData(override = {} as Partial<ExtensionData>): ExtensionD
             hasCustomFilterFixes: false,
             hasCustomStaticFixes: false,
         },
+        colorScheme: {
+            dark: {
+                Default: {
+                    backgroundColor: '#1e1e1e',
+                    textColor: '#d4d4d4',
+                },
+            },
+            light: {
+                Default: {
+                    backgroundColor: '#ffffff',
+                    textColor: '#000000',
+                },
+            },
+        }
     } as ExtensionData, override);
 }
 

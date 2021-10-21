@@ -91,6 +91,24 @@ IGNORE IMAGE ANALYSIS
 | `IGNORE INLINE STYLE` | Prevents inline style analysis of matched elements. | *Example*: `<p style="color: red">` element's style attribute will not be changed. |
 | `IGNORE IMAGE ANALYSIS` | Prevents background images from being analyzed for matched selectors. |  |
 
+## Adding a new color scheme
+
+If you think you can add a new _popular_ or _unique_ but useable pre-defined colorscheme in Dark Reader you can add this to the
+`src/config/color-schemes.drconf` file. You can check the `docs/color-schemes-drconf.spec` for specific details about the file.
+Please follow the next steps to add a new color scheme:
+
+- Open
+**[color-schemes.drconf](https://github.com/darkreader/darkreader/blob/master/src/config/color-schemes.drconf) file**.
+- Click **Edit** (login to GitHub first).
+- **Insert your fix** there. Preserve **alphabetic order** by Color scheme name.
+- Provide a **short description** of what you have done.
+- Click **Propose file change**.
+- Review your changes. Click **Create pull request**.
+- Github actions will run tests to make sure it has the right code-style.
+- If you see a **red cross** click **Details** to see what is wrong and edit the existing Pull Request.
+- When you see a **green checkmark** then everything is fine.
+- Dark Reader developer will **review** and merge your changes, making them available.
+
 ## Dynamic variables
 
 When making a fix for background or text colors,

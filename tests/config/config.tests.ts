@@ -6,6 +6,7 @@ import {parseInversionFixes, formatInversionFixes} from '../../src/generators/cs
 import {parseDynamicThemeFixes, formatDynamicThemeFixes} from '../../src/generators/dynamic-theme';
 import {parseStaticThemes, formatStaticThemes} from '../../src/generators/static-theme';
 import type {StaticTheme} from '../../src/definitions';
+import {ParseColorSchemeConfig} from '../../src/utils/colorscheme-parser';
 
 function readConfig(fileName: string) {
     return new Promise<string>((resolve, reject) => {
@@ -154,4 +155,22 @@ test('Static Themes config', async () => {
 
     // fixes are properly formatted
     expect(throwIfDifferent(file, formatStaticThemes(themes), 'Static theme format error')).not.toThrow();
+});
+
+test('Colorscheme config', async () => {
+    const file = await readConfig('color-schemes.drconf');
+
+    // there is no \r character
+    expect(file.indexOf('\r')).toEqual(-1);
+
+    const {result: schemes, error} = ParseColorSchemeConfig(file);
+
+    // Their is no error
+    expect(error).toBeNull();
+
+    // There is a default Dark color scheme
+    expect(schemes.dark['Default']).toBeDefined();
+
+    // There is a default Light color scheme
+    expect(schemes.light['Default']).toBeDefined();
 });

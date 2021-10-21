@@ -12,7 +12,7 @@ if (!chrome.runtime) {
 
 const messageListeners = new Set<(message: Message) => void>();
 
-async function sendMessage(...args) {
+async function sendMessage(...args: any[]) {
     if (args[0] && args[0].type === MessageType.CS_FETCH) {
         const {id} = args[0];
         try {
@@ -32,13 +32,13 @@ async function sendMessage(...args) {
     }
 }
 
-function addMessageListener(callback) {
+function addMessageListener(callback: (data: any) => void) {
     messageListeners.add(callback);
 }
 
 if (typeof chrome.runtime.sendMessage === 'function') {
     const nativeSendMessage = chrome.runtime.sendMessage;
-    chrome.runtime.sendMessage = (...args) => {
+    chrome.runtime.sendMessage = (...args: any[]) => {
         sendMessage(...args);
         nativeSendMessage.apply(chrome.runtime, args);
     };
@@ -51,10 +51,10 @@ if (!chrome.runtime.onMessage) {
 }
 if (typeof chrome.runtime.onMessage.addListener === 'function') {
     const nativeAddListener = chrome.runtime.onMessage.addListener;
-    chrome.runtime.onMessage.addListener = (...args) => {
-        addMessageListener(...args);
+    chrome.runtime.onMessage.addListener = (...args: any[]) => {
+        addMessageListener(args[0]);
         nativeAddListener.apply(chrome.runtime.onMessage, args);
     };
 } else {
-    chrome.runtime.onMessage.addListener = addMessageListener;
+    chrome.runtime.onMessage.addListener = (...args: any[]) => addMessageListener(args[0]);
 }

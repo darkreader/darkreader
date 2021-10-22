@@ -29,11 +29,18 @@ function getNameOfFunction(node) {
                 return node.id.name;
             }
             // Okay let's get their parent node and see if we can
-             // extract the name from them.
+            // extract the name from them.
             return getNameOfFunction(node.parent);
         case 'MethodDefinition':
         case 'Property':
+        // @ts-ignore
+        case 'ClassProperty':
             return handleIdentifier(node.key);
+        case 'ArrowFunctionExpression':
+            return getNameOfFunction(node.parent)
+        case 'VariableDeclarator':
+            //@ts-ignore
+            return node.id.name
         default:
             throw new Error('Incorrect type of node has been passed to getNameOfFunction');
     }
@@ -44,7 +51,15 @@ function getNameOfFunction(node) {
  * @param {Rule.Node} node
  * @returns {boolean} returns if we should skip.
  */
-function shouldCheckNode(node) {
+function shouldSkipNewlineCheck(node) {
+    // Skip if the function declaration is a one-liner.
+    // Ex:
+    // const returnType = (node) => node.type;
+    if (node.type === 'ArrowFunctionExpression') {
+        if (node.loc.start.line === node.loc.end.line) {
+            return true;
+        }
+    }
     const parentNode = node.parent;
     const possibleEndLine = node.loc.end.line + 1;
     // Most of the time the function is part of a bigger node.
@@ -53,6 +68,44 @@ function shouldCheckNode(node) {
         return possibleEndLine == parentNode.parent.loc.end.line;
     }
     return possibleEndLine == parentNode.loc.end.line;
+}
+
+// A little helper function that filter select nodes,
+// To check if we should handle those nodes for
+// the rule.
+/**
+ * @param {Rule.Node} node
+ * @returns {boolean} returns if we should skip.
+ */
+function filterNodes(node) {
+    if (node.type === 'ArrowFunctionExpression') {
+        switch (node.parent.type) {
+            case 'CallExpression':
+            case 'NewExpression':
+            case 'AssignmentExpression':
+            case 'AssignmentPattern':
+            case 'ConditionalExpression':
+            case 'LogicalExpression':
+            case 'ReturnStatement':
+            case 'Property':
+            //@ts-ignore
+            case 'TSAsExpression':
+            //@ts-ignore
+            case 'JSXExpressionContainer':
+                return true;
+            default:
+                return false
+        }
+    } else {
+        switch (node.parent.type) {
+            case 'AssignmentExpression':
+            case 'ReturnStatement':
+            case 'Property':
+                return true;
+            default:
+                return false
+        }
+    }
 }
 
 /**
@@ -111,9 +164,8 @@ const rules = {
              * @param {Rule.Node} node
              */
             const checkNewLine = (node) => {
-                // Check if this node should be scanned,
-                const parentType = node.parent.type;
-                if (parentType === 'AssignmentExpression' || parentType === 'ReturnStatement' || parentType === 'Property') {
+                // Check if this node should be scanned.
+                if (filterNodes(node)) {
                     return;
                 }
                 // Get the 2 tokens after this node
@@ -147,7 +199,7 @@ const rules = {
                 }
                 // Also if it's the last function in some kind of bigger function
                 // of any kind of syntax that allows it, we should not error about it.
-                if (shouldCheckNode(node)) {
+                if (shouldSkipNewlineCheck(node)) {
                     return;
                 }
                 // Get the line after the function declaration.
@@ -158,6 +210,12 @@ const rules = {
                 // and report a error about it.
                 if (shouldBeEmptyLine) {
                     const range = node.range;
+                    if (node.type === 'ArrowFunctionExpression') {
+                        // Arrow function declarations must have a `;`
+                        // behind the `}` So to account for it, we make
+                        // the range 1 bit bigger.
+                        range[1]++;
+                    }
                     context.report({
                         node,
                         messageId: 'no-newline-after-declaration',
@@ -218,6 +276,7 @@ const rules = {
             return {
                 "FunctionDeclaration": checkNewLine,
                 "FunctionExpression": checkNewLine,
+                'ArrowFunctionExpression': checkNewLine,
             }
         }
     }

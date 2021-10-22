@@ -72,6 +72,7 @@ if (WATCH) {
             chrome.alarms.create(ALARM_NAME, {delayInMinutes: PING_INTERVAL_IN_MINUTES});
         };
     };
+
     listen();
 } else if (!__DEBUG__){
     chrome.runtime.onInstalled.addListener(({reason}) => {

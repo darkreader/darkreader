@@ -575,7 +575,6 @@ export class Extension {
         };
     };
 
-
     //-------------------------------------
     //          User settings
 

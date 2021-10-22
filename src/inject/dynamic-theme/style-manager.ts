@@ -442,6 +442,7 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
             }
             rulesCheckFrameId = requestAnimationFrame(checkForUpdate);
         };
+
         checkForUpdate();
     }
 
@@ -555,15 +556,18 @@ async function linkLoading(link: HTMLLinkElement, loadingId: number) {
             link.removeEventListener('error', onError);
             rejectorsForLoadingLinks.delete(loadingId);
         };
+
         const onLoad = () => {
             cleanUp();
             logInfo(`Linkelement ${loadingId} has been loaded`);
             resolve();
         };
+
         const onError = () => {
             cleanUp();
             reject(`Linkelement ${loadingId} couldn't be loaded. ${link.href}`);
         };
+
         rejectorsForLoadingLinks.set(loadingId, () => {
             cleanUp();
             reject();

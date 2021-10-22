@@ -15,7 +15,7 @@ import createCSSFilterStylesheet from '../generators/css-filter';
 import {getDynamicThemeFixesFor} from '../generators/dynamic-theme';
 import createStaticStylesheet from '../generators/static-theme';
 import {createSVGFilterStylesheet, getSVGFilterMatrixValue, getSVGReverseFilterMatrixValue} from '../generators/svg-filter';
-import type {ExtensionData, FilterConfig, News, Shortcuts, UserSettings, TabInfo} from '../definitions';
+import type {ExtensionData, FilterConfig, News, Shortcuts, UserSettings, TabInfo, TabData} from '../definitions';
 import {isSystemDarkModeEnabled} from '../utils/media-query';
 import {isFirefox, isMV3, isThunderbird} from '../utils/platform';
 import {MessageType} from '../utils/message';
@@ -28,6 +28,8 @@ interface ExtensionState {
     wasEnabledOnLastCheck: boolean;
     registeredContextMenus: boolean;
 }
+
+declare const __DEBUG__: boolean;
 
 export class Extension {
     config: ConfigManager;
@@ -44,7 +46,7 @@ export class Extension {
     private popupOpeningListener: () => void = null;
     // Is used only with Firefox to bypass Firefox bug
     private wasLastColorSchemeDark: boolean = null;
-    private startBarrier: PromiseBarrier = null;
+    private startBarrier: PromiseBarrier<void, void> = null;
     private stateManager: StateManager<ExtensionState> = null;
 
     static ALARM_NAME = 'auto-time-alarm';
@@ -55,12 +57,7 @@ export class Extension {
         this.messenger = new Messenger(this.getMessengerAdapter());
         this.news = new Newsmaker((news) => this.onNewsUpdate(news));
         this.tabs = new TabManager({
-            getConnectionMessage: ({url, frameURL, unsupportedSender}) => {
-                if (unsupportedSender) {
-                    return this.getUnsupportedSenderMessage();
-                }
-                return this.getConnectionMessage(url, frameURL);
-            },
+            getConnectionMessage: ({url, frameURL}) => this.getConnectionMessage(url, frameURL),
             getTabMessage: this.getTabMessage,
             onColorSchemeChange: this.onColorSchemeChange,
         });
@@ -166,6 +163,27 @@ export class Extension {
 
         this.user.settings.fetchNews && this.news.subscribe();
         this.startBarrier.resolve();
+
+        if (__DEBUG__) {
+            const socket = new WebSocket(`ws://localhost:8894`);
+            socket.onmessage = (e) => {
+                const respond = (message: {type: string; data?: ExtensionData | string; id?: number}) => socket.send(JSON.stringify(message));
+                try {
+                    const message: {type: string; data: Partial<UserSettings>; id: number} = JSON.parse(e.data);
+                    if (message.type === 'changeSettings') {
+                        const settings = message.data;
+                        this.changeSettings(settings);
+                        respond({type: 'changeSettings-response', id: message.id});
+                    } else if (message.type === 'collectData') {
+                        this.collectData().then((data) => {
+                            respond({type: 'collectData-response', id: message.id, data});
+                        });
+                    }
+                } catch (err) {
+                    respond({type: 'error', data: String(err)});
+                }
+            };
+        }
     }
 
     private getMessengerAdapter(): ExtensionAdapter {
@@ -292,6 +310,7 @@ export class Extension {
             settings: this.user.settings,
             news: await this.news.getLatest(),
             shortcuts: await this.getShortcuts(),
+            colorScheme: this.config.COLOR_SCHEMES_RAW,
             devtools: {
                 dynamicFixesText: this.devtools.getDynamicThemeFixesText(),
                 filterFixesText: this.devtools.getInversionFixesText(),
@@ -321,13 +340,9 @@ export class Extension {
         if (this.user.settings) {
             return this.getTabMessage(url, frameURL);
         }
-        return new Promise<{type: string; data?: any}>((resolve) => {
+        return new Promise<TabData>((resolve) => {
             this.user.loadSettings().then(() => resolve(this.getTabMessage(url, frameURL)));
         });
-    }
-
-    private getUnsupportedSenderMessage() {
-        return {type: MessageType.BG_UNSUPPORTED_SENDER};
     }
 
     private onColorSchemeChange = ({isDark}: {isDark: boolean}) => {
@@ -499,7 +514,7 @@ export class Extension {
         };
     }
 
-    private getTabMessage = (url: string, frameURL: string) => {
+    private getTabMessage = (url: string, frameURL: string): TabData => {
         const urlInfo = this.getURLInfo(url);
         if (this.isEnabled && isURLEnabled(url, this.user.settings, urlInfo)) {
             const custom = this.user.settings.customThemes.find(({url: urlList}) => isURLInList(url, urlList));
@@ -507,6 +522,8 @@ export class Extension {
             const theme = custom ? custom.theme : preset ? preset.theme : this.user.settings.theme;
 
             logInfo(`Creating CSS for url: ${url}`);
+            logInfo(`Custom theme ${custom ? 'was found' : 'was not found'}, Preset theme ${preset ? 'was found' : 'was not found'}
+            The theme(${custom ? 'custom' : preset ? 'preset' : 'global'} settings) used is: ${JSON.stringify(theme)}`);
             switch (theme.engine) {
                 case ThemeEngines.cssFilter: {
                     return {

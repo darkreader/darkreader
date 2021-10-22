@@ -1,5 +1,6 @@
 import {canInjectScript} from '../background/utils/extension-api';
 import {createFileLoader} from './utils/network';
+import type {FetchRequestParameters} from './utils/network';
 import type {Message} from '../definitions';
 import {isFirefox, isMV3, isThunderbird} from '../utils/platform';
 import {MessageType} from '../utils/message';
@@ -15,7 +16,6 @@ async function queryTabs(query: chrome.tabs.QueryInfo) {
 interface ConnectionMessageOptions {
     url: string;
     frameURL: string;
-    unsupportedSender?: boolean;
 }
 
 interface TabManagerOptions {
@@ -52,7 +52,7 @@ enum DocumentState {
 export default class TabManager {
     private tabs: {[tabId: number]: {[frameId: number]: FrameInfo}};
     private stateManager: StateManager<TabManagerState>;
-    private fileLoader: any = null;
+    private fileLoader: {get: (params: FetchRequestParameters) => Promise<string>} = null;
     private getTabMessage: (url: string, frameUrl: string) => Message;
     private timestamp: number = null;
     static LOCAL_STORAGE_KEY = 'TabManager-state';
@@ -98,7 +98,15 @@ export default class TabManager {
                         // NOTE: Vivaldi and Opera can show a page in a side panel,
                         // but it is not possible to handle messaging correctly (no tab ID, frame ID).
                         if (isFirefox) {
-                            reply({url: sender.url, frameURL: null, unsupportedSender: true});
+                            if (sender && sender.tab && typeof sender.tab.id === 'number') {
+                                chrome.tabs.sendMessage<Message>(sender.tab.id,
+                                    {
+                                        type: MessageType.BG_UNSUPPORTED_SENDER
+                                    },
+                                    {
+                                        frameId: sender && typeof sender.frameId === 'number' ? sender.frameId : undefined
+                                    });
+                            }
                         } else {
                             sendResponse('unsupportedSender');
                         }

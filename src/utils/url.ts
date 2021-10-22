@@ -43,6 +43,33 @@ export function getAbsoluteURL($base: string, $relative: string) {
     return a.href;
 }
 
+// Check if any relative URL is on the window.location;
+// So that https://duck.com/ext.css would return true on https://duck.com/
+// But https://duck.com/styles/ext.css would return false on https://duck.com/
+// Visa versa https://duck.com/ext.css should return fasle on https://duck.com/search/
+// We're checking if any relative value within ext.css could potentially not be on the same path.
+export function isRelativeHrefOnAbsolutePath(href: string): boolean {
+    if (href.startsWith('data:')) {
+        return true;
+    }
+    const url = parseURL(href);
+    const base = parseURL(location.href);
+    if (url.protocol !== base.protocol) {
+        return false;
+    }
+    if (url.hostname !== base.hostname) {
+        return false;
+    }
+    if (url.port !== base.port) {
+        return false;
+    }
+    // Now check if the path is on the same path as the base
+    // We do this by getting the pathname up until the last slash.
+    const path = /.*\//.exec(url.pathname)[0];
+    const basePath = /.*\//.exec(base.pathname)[0];
+    return path === basePath;
+}
+
 export function getURLHostOrProtocol($url: string) {
     const url = new URL($url);
     if (url.host) {

@@ -1,0 +1,41 @@
+Default
+
+DARK
+background: #181a1b
+text: #e8e6e3
+
+LIGHT
+background: #181a1b
+text: #e8e6e3
+
+================================
+
+Dracula
+
+DARK
+background: #282b36
+text: #e8e6e3
+
+================================
+
+Nord
+
+DARK
+background: #2e3440
+text: #eceff4
+
+LIGHT
+background: #eceff4
+text: #3b4252
+
+================================
+
+Solarized
+
+DARK
+background: #002b36
+text: #93a1a1
+
+LIGHT
+background: #fdf6e3
+text: #586e75

@@ -2,6 +2,19 @@ import {indexSitesFixesConfig, getSitesFixesFor} from '../../../src/generators/u
 import type {SitesFixesParserOptions} from '../../../src/generators/utils/parse';
 
 test('Index config', () => {
+    interface TestFix {
+        url: string[];
+        directive: string[];
+        multilineDirective: string[];
+        css: string;
+    }
+
+    const directiveMap: { [key: string]: keyof TestFix } = {
+        DIRECTIVE: 'directive',
+        MULTILINEDIRECTIVE: 'multilineDirective',
+        CSS: 'css'
+    };
+
     const config = [
         '*',
         '',
@@ -22,27 +35,36 @@ test('Index config', () => {
         '}'
     ].join('\n');
 
-    const options: SitesFixesParserOptions<any> = {
-        commands: ['DIRECTIVE1', 'MULTILINEDIRECTIVE'],
-        getCommandPropName: (command) => command,
+    const options: SitesFixesParserOptions<TestFix> = {
+        commands: Object.keys(directiveMap),
+        getCommandPropName: (command) => directiveMap[command],
         parseCommandValue: (_, value) => value.trim(),
     };
-    const index = indexSitesFixesConfig(config);
+    const index = indexSitesFixesConfig<TestFix>(config);
 
     const fixes = getSitesFixesFor('example.com', config, index, options);
     expect(fixes).toEqual([
         {
             'url': ['*'],
-            'DIRECTIVE': 'hi',
-            'MULTILINEDIRECTIVE':
+            'directive': 'hi',
+            'multilineDirective':
             'hello\nworld'
         }, {
             'url': ['example.com'],
-            'CSS': 'div {\n  color: green;\n}'
+            'css': 'div {\n  color: green;\n}'
         }]);
 });
 
 test('Empty config', () => {
+    interface TestFix {
+        url: string[];
+        directive: string[];
+    }
+
+    const directiveMap: { [key: string]: keyof TestFix } = {
+        DIRECTIVE: 'directive',
+    };
+
     const config = [
         '*',
         '',
@@ -55,23 +77,32 @@ test('Empty config', () => {
         ''
     ].join('\n');
 
-    const options: SitesFixesParserOptions<any> = {
-        commands: ['DIRECTIVE'],
-        getCommandPropName: (command) => command,
+    const options: SitesFixesParserOptions<TestFix> = {
+        commands: Object.keys(directiveMap),
+        getCommandPropName: (command) => directiveMap[command],
         parseCommandValue: (_, value) => value.trim(),
     };
-    const index = indexSitesFixesConfig(config);
+    const index = indexSitesFixesConfig<TestFix>(config);
 
     const fixesGeneric = getSitesFixesFor('example.com', config, index, options);
     const fixesInvalid = getSitesFixesFor('invalid.example', config, index, options);
     expect(fixesGeneric).toEqual([{
         'url': ['*'],
-        'DIRECTIVE': 'hello world',
+        'directive': 'hello world',
     }]);
     expect(fixesInvalid).toEqual(fixesGeneric);
 });
 
 test('Domain appearing in multiple records', () => {
+    interface TestFix {
+        url: string[];
+        directive: string[];
+    }
+
+    const directiveMap: { [key: string]: keyof TestFix } = {
+        DIRECTIVE: 'directive',
+    };
+
     const config = [
         '*',
         '',
@@ -104,46 +135,55 @@ test('Domain appearing in multiple records', () => {
         ''
     ].join('\n');
 
-    const options: SitesFixesParserOptions<any> = {
-        commands: ['DIRECTIVE'],
-        getCommandPropName: (command) => command,
+    const options: SitesFixesParserOptions<TestFix> = {
+        commands: Object.keys(directiveMap),
+        getCommandPropName: (command) => directiveMap[command],
         parseCommandValue: (_, value) => value.trim(),
     };
-    const index = indexSitesFixesConfig(config);
+    const index = indexSitesFixesConfig<TestFix>(config);
 
     const fixesFQD = getSitesFixesFor('example.com', config, index, options);
     const fixesWildcard = getSitesFixesFor('sub.example.net', config, index, options);
     expect(fixesFQD).toEqual([
         {
             'url': ['*'],
-            'DIRECTIVE': 'hello world'
+            'directive': 'hello world'
         }, {
             'url': ['example.com', '*.example.net'],
-            'DIRECTIVE': 'one'
+            'directive': 'one'
         }, {
             'url': ['example.com', '*.example.net'],
-            'DIRECTIVE': 'two'
+            'directive': 'two'
         }, {
             'url': ['example.com', '*.example.net'],
-            'DIRECTIVE': 'three'
+            'directive': 'three'
         }]);
     expect(fixesWildcard).toEqual([
         {
             'url': ['*'],
-            'DIRECTIVE': 'hello world'
+            'directive': 'hello world'
         }, {
             'url': ['example.com', '*.example.net'],
-            'DIRECTIVE': 'one'
+            'directive': 'one'
         }, {
             'url': ['example.com', '*.example.net'],
-            'DIRECTIVE': 'two'
+            'directive': 'two'
         }, {
             'url': ['example.com', '*.example.net'],
-            'DIRECTIVE': 'three'
+            'directive': 'three'
         }]);
 });
 
 test('Domain appearing multiple times within the same record', () => {
+    interface TestFix {
+        url: string[];
+        directive: string[];
+    }
+
+    const directiveMap: { [key: string]: keyof TestFix } = {
+        DIRECTIVE: 'directive',
+    };
+
     const config = [
         '*',
         '',
@@ -162,19 +202,19 @@ test('Domain appearing multiple times within the same record', () => {
         ''
     ].join('\n');
 
-    const options: SitesFixesParserOptions<any> = {
-        commands: ['DIRECTIVE'],
-        getCommandPropName: (command) => command,
+    const options: SitesFixesParserOptions<TestFix> = {
+        commands: Object.keys(directiveMap),
+        getCommandPropName: (command) => directiveMap[command],
         parseCommandValue: (_, value) => value.trim(),
     };
-    const index = indexSitesFixesConfig(config);
+    const index = indexSitesFixesConfig<TestFix>(config);
 
     const fixesFQD = getSitesFixesFor('example.com', config, index, options);
     const fixesWildcard = getSitesFixesFor('sub.example.net', config, index, options);
     expect(fixesFQD).toEqual([
         {
             'url': ['*'],
-            'DIRECTIVE': 'hello world'
+            'directive': 'hello world'
         }, {
             'url': [
                 'example.com',
@@ -182,12 +222,12 @@ test('Domain appearing multiple times within the same record', () => {
                 'example.com',
                 '*.example.net'
             ],
-            'DIRECTIVE': 'one'
+            'directive': 'one'
         }]);
     expect(fixesWildcard).toEqual([
         {
             'url': ['*'],
-            'DIRECTIVE': 'hello world'
+            'directive': 'hello world'
         }, {
             'url': [
                 'example.com',
@@ -195,11 +235,20 @@ test('Domain appearing multiple times within the same record', () => {
                 'example.com',
                 '*.example.net'
             ],
-            'DIRECTIVE': 'one'
+            'directive': 'one'
         }]);
 });
 
 test('The generic fix appears first', () => {
+    interface TestFix {
+        url: string[];
+        directive: string[];
+    }
+
+    const directiveMap: { [key: string]: keyof TestFix } = {
+        DIRECTIVE: 'directive',
+    };
+
     const config = [
         '*',
         '',
@@ -229,28 +278,37 @@ test('The generic fix appears first', () => {
         ''
     ].join('\n');
 
-    const options: SitesFixesParserOptions<any> = {
-        commands: ['DIRECTIVE'],
-        getCommandPropName: (command) => command,
+    const options: SitesFixesParserOptions<TestFix> = {
+        commands: Object.keys(directiveMap),
+        getCommandPropName: (command) => directiveMap[command],
         parseCommandValue: (_, value) => value.trim(),
     };
-    const index = indexSitesFixesConfig(config);
+    const index = indexSitesFixesConfig<TestFix>(config);
 
     const fixesFQD = getSitesFixesFor('long.sub.example.com', config, index, options);
     expect(fixesFQD).toEqual([
         {
             'url': ['*'],
-            'DIRECTIVE':'hello world'
+            'directive':'hello world'
         }, {
             'url': ['*.example.com'],
-            'DIRECTIVE':'wildcard'
+            'directive':'wildcard'
         }, {
             'url': ['long.sub.example.com'],
-            'DIRECTIVE':'long'
+            'directive':'long'
         }]);
 });
 
 test('Fixes appear only once', () => {
+    interface TestFix {
+        url: string[];
+        directive: string[];
+    }
+
+    const directiveMap: { [key: string]: keyof TestFix } = {
+        DIRECTIVE: 'directive',
+    };
+
     const config = [
         '*',
         '',
@@ -267,28 +325,37 @@ test('Fixes appear only once', () => {
         ''
     ].join('\n');
 
-    const options: SitesFixesParserOptions<any> = {
-        commands: ['DIRECTIVE'],
-        getCommandPropName: (command) => command,
+    const options: SitesFixesParserOptions<TestFix> = {
+        commands: Object.keys(directiveMap),
+        getCommandPropName: (command) => directiveMap[command],
         parseCommandValue: (_, value) => value.trim(),
     };
-    const index = indexSitesFixesConfig(config);
+    const index = indexSitesFixesConfig<TestFix>(config);
 
     const fixes = getSitesFixesFor('www.example.com', config, index, options);
     expect(fixes).toEqual([
         {
             'url': ['*'],
-            'DIRECTIVE': 'hello world'
+            'directive': 'hello world'
         }, {
             'url': [
                 '*.example.com',
                 'www.example.com'
             ],
-            'DIRECTIVE': 'duplicate'
+            'directive': 'duplicate'
         }]);
 });
 
 test('No implied wildcards', () => {
+    interface TestFix {
+        url: string[];
+        directive: string[];
+    }
+
+    const directiveMap: { [key: string]: keyof TestFix } = {
+        DIRECTIVE: 'directive',
+    };
+
     const config = [
         '*',
         '',
@@ -304,17 +371,17 @@ test('No implied wildcards', () => {
         ''
     ].join('\n');
 
-    const options: SitesFixesParserOptions<any> = {
-        commands: ['DIRECTIVE'],
-        getCommandPropName: (command) => command,
+    const options: SitesFixesParserOptions<TestFix> = {
+        commands: Object.keys(directiveMap),
+        getCommandPropName: (command) => directiveMap[command],
         parseCommandValue: (_, value) => value.trim(),
     };
-    const index = indexSitesFixesConfig(config);
+    const index = indexSitesFixesConfig<TestFix>(config);
 
     const fixes = getSitesFixesFor('www.example.com', config, index, options);
     expect(fixes).toEqual([
         {
             'url': ['*'],
-            'DIRECTIVE': 'hello world'
+            'directive': 'hello world'
         }]);
 });

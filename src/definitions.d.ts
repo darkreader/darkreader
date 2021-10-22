@@ -1,3 +1,4 @@
+import type {ParsedColorSchemeConfig} from './utils/colorscheme-parser';
 import type {FilterMode} from './generators/css-filter';
 
 export interface ExtensionData {
@@ -6,6 +7,7 @@ export interface ExtensionData {
     settings: UserSettings;
     news: News[];
     shortcuts: Shortcuts;
+    colorScheme: ParsedColorSchemeConfig;
     devtools: {
         dynamicFixesText: string;
         filterFixesText: string;
@@ -14,6 +16,11 @@ export interface ExtensionData {
         hasCustomFilterFixes: boolean;
         hasCustomStaticFixes: boolean;
     };
+}
+
+export interface TabData {
+    type: string;
+    data?: any;
 }
 
 export interface ExtensionActions {
@@ -54,6 +61,8 @@ export interface Theme {
     scrollbarColor: '' | 'auto' | string;
     selectionColor: '' | 'auto' | string;
     styleSystemControls: boolean;
+    lightColorScheme: string;
+    darkColorScheme: string;
 }
 
 export type FilterConfig = Theme;

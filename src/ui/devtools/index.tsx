@@ -26,8 +26,8 @@ const DEBUG = __DEBUG__;
 if (DEBUG) {
     const socket = new WebSocket(`ws://localhost:8894`);
     socket.onmessage = (e) => {
-        const respond = (message: any) => socket.send(JSON.stringify(message));
-        const message = JSON.parse(e.data);
+        const respond = (message: {type: string; id: number; data?: string}) => socket.send(JSON.stringify(message));
+        const message: {type: string; id: number; data: string} = JSON.parse(e.data);
         try {
             const textarea: HTMLTextAreaElement = document.querySelector('textarea#editor');
             const [buttonReset, buttonApply] = document.querySelectorAll('button');

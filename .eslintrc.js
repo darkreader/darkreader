@@ -136,10 +136,11 @@ module.exports = {
 
     overrides: [
         {
-            files: ['tasks/**/*.js', 'tests/**/*.js'],
+            files: ['tasks/**/*.js', 'tests/**/*.js', '.eslintplugin.js'],
             rules: {
                 '@typescript-eslint/no-var-requires': 'off',
-                '@typescript-eslint/no-implicit-any-catch': 'off'
+                '@typescript-eslint/no-implicit-any-catch': 'off',
+                '@typescript-eslint/ban-ts-comment': 'off',
             },
         },
         {

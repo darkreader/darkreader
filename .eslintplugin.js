@@ -1,9 +1,7 @@
-//@ts-check
-const {Rule} = require('eslint')
-
-// To handle PrivateIdentifier and Identifier nodes.
+// @ts-check
 
 /**
+ * To handle PrivateIdentifier and Identifier nodes.
  * @param { {type: string, name?: string;} } node
  * @returns {string}
  */
@@ -14,9 +12,9 @@ function handleIdentifier(node) {
     throw new Error('Cannot extract name of function by MethodDefintion');
 }
 
-// A little helper function to get the correct naming of the function.
 /**
- * @param {Rule.Node} node
+ * A little helper function to get the correct naming of the function.
+ * @param {import('eslint').Rule.Node} node
  * @returns {string}
  */
 function getNameOfFunction(node) {
@@ -37,10 +35,10 @@ function getNameOfFunction(node) {
         case 'ClassProperty':
             return handleIdentifier(node.key);
         case 'ArrowFunctionExpression':
-            return getNameOfFunction(node.parent)
+            return getNameOfFunction(node.parent);
         case 'VariableDeclarator':
-            //@ts-ignore
-            return node.id.name
+            // @ts-ignore
+            return node.id.name;
         default:
             throw new Error('Incorrect type of node has been passed to getNameOfFunction');
     }
@@ -48,7 +46,7 @@ function getNameOfFunction(node) {
 
 // A little helper function to check if the node should be linted.
 /**
- * @param {Rule.Node} node
+ * @param {import('eslint').Rule.Node} node
  * @returns {boolean} returns if we should skip.
  */
 function shouldSkipNewlineCheck(node) {
@@ -65,16 +63,16 @@ function shouldSkipNewlineCheck(node) {
     // Most of the time the function is part of a bigger node.
     // So when available, we want to compare against the parent's parent.
     if (parentNode.parent) {
-        return possibleEndLine == parentNode.parent.loc.end.line;
+        return possibleEndLine === parentNode.parent.loc.end.line;
     }
-    return possibleEndLine == parentNode.loc.end.line;
+    return possibleEndLine === parentNode.loc.end.line;
 }
 
 // A little helper function that filter select nodes,
 // To check if we should handle those nodes for
 // the rule.
 /**
- * @param {Rule.Node} node
+ * @param {import('eslint').Rule.Node} node
  * @returns {boolean} returns if we should skip.
  */
 function filterNodes(node) {
@@ -88,13 +86,13 @@ function filterNodes(node) {
             case 'LogicalExpression':
             case 'ReturnStatement':
             case 'Property':
-            //@ts-ignore
+            // @ts-ignore
             case 'TSAsExpression':
-            //@ts-ignore
+            // @ts-ignore
             case 'JSXExpressionContainer':
                 return true;
             default:
-                return false
+                return false;
         }
     } else {
         switch (node.parent.type) {
@@ -103,13 +101,13 @@ function filterNodes(node) {
             case 'Property':
                 return true;
             default:
-                return false
+                return false;
         }
     }
 }
 
 /**
- * @type {{[ruleName: string]: Rule.RuleModule}}
+ * @type {{[ruleName: string]: import('eslint').Rule.RuleModule}}
  */
 const rules = {
     'jsx-uses-m-pragma': {
@@ -155,13 +153,13 @@ const rules = {
             },
             fixable: 'whitespace',
             type: 'layout',
-            
+
         },
         create(context) {
             // Request the splitted(on \n) lines from eslint.
             const lines = context.getSourceCode().getLines();
             /**
-             * @param {Rule.Node} node
+             * @param {import('eslint').Rule.Node} node
              */
             const checkNewLine = (node) => {
                 // Check if this node should be scanned.
@@ -171,20 +169,20 @@ const rules = {
                 // Get the 2 tokens after this node
                 const endLoc = node.loc.end;
                 // Get the line where the function declaration ends.
-                const endLine = lines[endLoc.line-1];
+                const endLine = lines[endLoc.line - 1];
                 // Just ensure that the `}` is at the correct line + column.
-                if (endLine.length != endLoc.column) {
+                if (endLine.length !== endLoc.column) {
                     // A special edge-case,
                     //
                     // We might have `};`, let's check for that.
-                    if (endLine.length != endLoc.column + 1 && endLine[endLoc.column] === ';') {
+                    if (endLine.length !== endLoc.column + 1 && endLine[endLoc.column] === ';') {
                         // Cannot really apply any fix here without a expensive
                         // context-aware system. Developer should be smart enough
                         // to know why linter will error such message on code like:
                         // function log(message) {
-                        //     console.log(message)   
+                        //     console.log(message)
                         // } let a = 2;
-                        // 
+                        //
                         // A possible fix will to just move up all the text after the `}`
                         // to the next line.
                         context.report({
@@ -240,7 +238,7 @@ const rules = {
                 //
                 // Only does this check if lines.length > endLoc.line + 1
                 // otherwise it would indicate that we've reached the EOF.
-                if (lines.length > endLoc.line+1) {
+                if (lines.length > endLoc.line + 1) {
                     const lineAfterEmptyline = lines[endLoc.line + 1];
                     if (!lineAfterEmptyline) {
                         /**
@@ -271,16 +269,16 @@ const rules = {
                         });
                     }
                 }
-            }
+            };
 
             return {
-                "FunctionDeclaration": checkNewLine,
-                "FunctionExpression": checkNewLine,
+                'FunctionDeclaration': checkNewLine,
+                'FunctionExpression': checkNewLine,
                 'ArrowFunctionExpression': checkNewLine,
-            }
+            };
         }
     }
-}
+};
 
 module.exports = {
     rules

@@ -8,9 +8,11 @@ export default function SiteListPage(props: ViewProps) {
     function onSiteListChange(sites: string[]) {
         props.actions.changeSettings({siteList: sites});
     }
+
     function onInvertPDFChange(checked: boolean) {
         props.actions.changeSettings({enableForPDF: checked});
     }
+
     function onEnableForProtectedPages(value: boolean) {
         props.actions.changeSettings({enableForProtectedPages: value});
     }

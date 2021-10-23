@@ -35,6 +35,7 @@ http.createServer((request, response) => {
                 response.end();
             }
         };
+
         write();
     }
 }).listen(port, function () {

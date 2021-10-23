@@ -33,7 +33,7 @@ export interface ModifiableCSSDeclaration {
 
 export interface ModifiableCSSRule {
     selector: string;
-    parentRule: any;
+    parentRule: CSSRule;
     declarations: ModifiableCSSDeclaration[];
 }
 
@@ -207,7 +207,8 @@ function getModifiedScrollbarStyle(theme: Theme) {
 
 export function getModifiedFallbackStyle(filter: FilterConfig, {strict}: {strict: boolean}) {
     const lines: string[] = [];
-    lines.push(`html, body, ${strict ? 'body :not(iframe)' : 'body > :not(iframe)'} {`);
+    // https://github.com/darkreader/darkreader/issues/3618#issuecomment-895477598
+    lines.push(`html, body, ${strict ? 'body :not(iframe):not(div[style^="position:absolute;top:0;left:-"]' : 'body > :not(iframe)'} {`);
     lines.push(`    background-color: ${modifyBackgroundColor({r: 255, g: 255, b: 255}, filter)} !important;`);
     lines.push(`    border-color: ${modifyBorderColor({r: 64, g: 64, b: 64}, filter)} !important;`);
     lines.push(`    color: ${modifyForegroundColor({r: 0, g: 0, b: 0}, filter)} !important;`);

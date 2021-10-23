@@ -67,7 +67,7 @@ export class StateManager<T> {
 
     private meta: StateManagerState = StateManagerState.INITIAL;
     // loadStateBarrier is guaranteed to exists only when meta is LOADING.
-    private loadStateBarrier: PromiseBarrier = null;
+    private loadStateBarrier: PromiseBarrier<void, void> = null;
 
     constructor(localStorageKey: string, parent: any, defaults: T){
         if (!isNonPersistent()) {

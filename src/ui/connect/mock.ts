@@ -1,4 +1,3 @@
-import {getURLHostOrProtocol} from '../../utils/url';
 import type {ExtensionData, TabInfo, Theme, UserSettings} from '../../definitions';
 
 export function getMockData(override = {} as Partial<ExtensionData>): ExtensionData {
@@ -62,6 +61,20 @@ export function getMockData(override = {} as Partial<ExtensionData>): ExtensionD
             hasCustomFilterFixes: false,
             hasCustomStaticFixes: false,
         },
+        colorScheme: {
+            dark: {
+                Default: {
+                    backgroundColor: '#1e1e1e',
+                    textColor: '#d4d4d4',
+                },
+            },
+            light: {
+                Default: {
+                    backgroundColor: '#ffffff',
+                    textColor: '#000000',
+                },
+            },
+        }
     } as ExtensionData, override);
 }
 
@@ -72,55 +85,4 @@ export function getMockActiveTabInfo(): TabInfo {
         isInDarkList: false,
         isInjected: true,
     };
-}
-
-type listener = (data: ExtensionData) => void;
-
-export function createConnectorMock() {
-    let listener: listener = null;
-    const data = getMockData();
-    const tab = getMockActiveTabInfo();
-    const connector = {
-        async getData() {
-            return Promise.resolve(data);
-        },
-        async getActiveTabInfo() {
-            return Promise.resolve(tab);
-        },
-        subscribeToChanges(callback: listener) {
-            listener = callback;
-        },
-        changeSettings(settings: UserSettings) {
-            Object.assign(data.settings, settings);
-            listener(data);
-        },
-        setTheme(theme: Theme) {
-            Object.assign(data.settings.theme, theme);
-            listener(data);
-        },
-        setShortcut(command: string, shortcut: string) {
-            Object.assign(data.shortcuts, {[command]: shortcut});
-            listener(data);
-        },
-        toggleURL(url: string) {
-            const pattern = getURLHostOrProtocol(url);
-            const index = data.settings.siteList.indexOf(pattern);
-            if (index >= 0) {
-                data.settings.siteList.splice(index, 1, pattern);
-            } else {
-                data.settings.siteList.push(pattern);
-            }
-            listener(data);
-        },
-        markNewsAsRead(ids: string[]) {
-            data.news
-                .filter(({id}) => ids.includes(id))
-                .forEach((news) => news.read = true);
-            listener(data);
-        },
-        disconnect() {
-            //
-        },
-    };
-    return connector;
 }

@@ -10,7 +10,6 @@ import ContextMenusGroup from './context-menus';
 import Version from './version';
 import {isFirefox} from '../../../utils/platform';
 
-
 type SettingsPageProps = ViewProps & {
     onAutomationNavClick: () => void;
     onManageSettingsClick: () => void;

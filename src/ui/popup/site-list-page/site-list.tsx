@@ -72,6 +72,7 @@ export default function SiteList(props: SiteListProps) {
                 node.focus();
             }
         };
+
         return (
             <div class="site-list__item">
                 <TextBox

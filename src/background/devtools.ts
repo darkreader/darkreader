@@ -20,7 +20,40 @@ class PersistentStorageWrapper implements DevToolsStorage {
     // Cache information within background context for future use without waiting.
     private cache: {[key: string]: string} = {};
 
+    // TODO(bershanskiy): remove migrated and migrateFromLocalStorage after migration end.
+    // Part 1 of 2.
+    private migrated: boolean;
+
+    private async migrateFromLocalStorage() {
+        return new Promise<void>((resolve) => {
+            chrome.storage.local.get([
+                DevTools.KEY_DYNAMIC,
+                DevTools.KEY_FILTER,
+                DevTools.KEY_STATIC
+            ], (data) => {
+                if (data[DevTools.KEY_DYNAMIC] || data[DevTools.KEY_FILTER] || data[DevTools.KEY_STATIC]) {
+                    this.migrated = true;
+                    resolve();
+                    return;
+                }
+
+                this.cache[DevTools.KEY_DYNAMIC] = localStorage.getItem(DevTools.KEY_DYNAMIC);
+                this.cache[DevTools.KEY_FILTER] = localStorage.getItem(DevTools.KEY_FILTER);
+                this.cache[DevTools.KEY_STATIC] = localStorage.getItem(DevTools.KEY_STATIC);
+
+                chrome.storage.local.set(this.cache, () => {
+                    this.migrated = true;
+                    resolve();
+                });
+            });
+        });
+    }
+
     async get(key: string) {
+        if (!this.migrated) {
+            this.migrateFromLocalStorage();
+        }
+
         if (key in this.cache) {
             return this.cache[key];
         }
@@ -136,9 +169,11 @@ export default class DevTools {
         this.onChange = onChange;
     }
 
-    private static KEY_DYNAMIC = 'dev_dynamic_theme_fixes';
-    private static KEY_FILTER = 'dev_inversion_fixes';
-    private static KEY_STATIC = 'dev_static_themes';
+    // TODO(bershanskiy): make private again once PersistentStorageWrapper removes migration logic.
+    // Part 2 of 2.
+    static KEY_DYNAMIC = 'dev_dynamic_theme_fixes';
+    static KEY_FILTER = 'dev_inversion_fixes';
+    static KEY_STATIC = 'dev_static_themes';
 
     private async loadConfigOverrides() {
         this.config.overrides.dynamicThemeFixes = await this.getSavedDynamicThemeFixes() || null;

@@ -6,9 +6,9 @@ const bgResponses = new Map<string, string>();
 
 export function stubChromeRuntimeMessage() {
     nativeSendMessage = chrome.runtime.sendMessage;
-    const listeners = chrome.runtime.onMessage['__listeners__'];
+    const listeners: Array<(message: Message) => void> = (chrome.runtime.onMessage as any)['__listeners__'];
 
-    chrome.runtime.sendMessage = (message: Message) => {
+    (chrome.runtime as any).sendMessage = (message: Message) => {
         if (message.type === MessageType.CS_FETCH) {
             const {id, data: {url}} = message;
             setTimeout(() => {

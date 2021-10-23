@@ -1,6 +1,6 @@
 import {m} from 'malevic';
 import {sync} from 'malevic/dom';
-import connect from '../connect';
+import Connector from '../connect/connector';
 import Body from './components/body';
 import {popupHasBuiltInHorizontalBorders, popupHasBuiltInBorders, fixNotClosingPopupOnNavigation} from './utils/issues';
 import type {ExtensionData, ExtensionActions, TabInfo} from '../../definitions';
@@ -23,7 +23,7 @@ function renderBody(data: ExtensionData, tab: TabInfo, fonts: string[], actions:
 }
 
 async function start() {
-    const connector = connect();
+    const connector = new Connector();
     window.addEventListener('unload', () => connector.disconnect());
 
     const [data, tab, fonts] = await Promise.all([

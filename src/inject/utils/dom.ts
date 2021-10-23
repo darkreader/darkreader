@@ -144,19 +144,23 @@ export function watchForNodePosition<T extends Node>(
     const run = () => {
         observer.observe(parent, {childList: true});
     };
+
     const stop = () => {
         clearTimeout(timeoutId);
         observer.disconnect();
         restore.cancel();
     };
+
     const skip = () => {
         observer.takeRecords();
     };
+
     const updateParent = (parentNode: Node & ParentNode) => {
         parent = parentNode;
         stop();
         run();
     };
+
     run();
     return {run, stop, skip};
 }
@@ -226,6 +230,7 @@ if (!isDOMReady()) {
             }
         }
     };
+
     document.addEventListener('readystatechange', onReadyStateChange);
 }
 

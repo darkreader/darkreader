@@ -178,7 +178,6 @@ function analyzeImage(image: HTMLImageElement) {
     };
 }
 
-
 export function getFilteredImageDataURL({dataURL, width, height}: ImageDetails, theme: FilterConfig): string {
     const matrix = getSVGFilterMatrixValue(theme);
     const svg = [

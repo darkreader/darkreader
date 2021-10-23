@@ -7,6 +7,7 @@ export default function SyncConfigButton(props: ViewProps) {
         props.actions.changeSettings({syncSitesFixes});
         props.actions.loadConfig({local: !syncSitesFixes});
     }
+
     return (
         <CheckButton
             checked={props.data.settings.syncSitesFixes}

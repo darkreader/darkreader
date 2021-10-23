@@ -19,12 +19,14 @@ export function createOrUpdateSVGFilter(svgMatrix: string, svgReverseMatrix: str
                 filter.appendChild(createColorMatrix(matrix));
                 return filter;
             };
+
             const createColorMatrix = (matrix: string) => {
                 const colorMatrix = document.createElementNS(SVG_NS, 'feColorMatrix');
                 colorMatrix.setAttribute('type', 'matrix');
                 colorMatrix.setAttribute('values', matrix);
                 return colorMatrix;
             };
+
             const svg = document.createElementNS(SVG_NS, 'svg');
             svg.id = 'dark-reader-svg';
             svg.style.height = '0';

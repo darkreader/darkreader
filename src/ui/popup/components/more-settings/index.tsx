@@ -65,4 +65,3 @@ export default function MoreSettings({data, actions, tab, fonts}: ExtWrapper & {
         </section>
     );
 }
-

@@ -137,6 +137,7 @@ export function createStyleSheetModifier() {
                 const {property, value, important, sourceValue} = dec;
                 return `${property}: ${value == null ? sourceValue : value}${important ? ' !important' : ''};`;
             };
+
             const ruleText = `${selector} { ${declarations.map(getDeclarationText).join(' ')} }`;
             target.insertRule(ruleText, index);
         }

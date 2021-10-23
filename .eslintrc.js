@@ -47,6 +47,7 @@ module.exports = {
             default: 'array-simple',
         }],
         'yoda': ['error', 'never'],
+        'local/consistent-new-lines': 'error',
         '@typescript-eslint/brace-style': 'error',
         '@typescript-eslint/camelcase': 'off',
         '@typescript-eslint/comma-spacing': ['error', {
@@ -135,10 +136,11 @@ module.exports = {
 
     overrides: [
         {
-            files: ['tasks/**/*.js', 'tests/**/*.js'],
+            files: ['tasks/**/*.js', 'tests/**/*.js', '.eslintplugin.js'],
             rules: {
                 '@typescript-eslint/no-var-requires': 'off',
-                '@typescript-eslint/no-implicit-any-catch': 'off'
+                '@typescript-eslint/no-implicit-any-catch': 'off',
+                '@typescript-eslint/ban-ts-comment': 'off',
             },
         },
         {

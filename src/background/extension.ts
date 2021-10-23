@@ -453,7 +453,6 @@ export class Extension {
         this.toggleURL(url);
     }
 
-
     //------------------------------------
     //
     //       Handle config changes
@@ -494,7 +493,6 @@ export class Extension {
         // TODO: Requires proper handling and more testing
         // to prevent cycling across instances.
     }
-
 
     //----------------------
     //
@@ -576,7 +574,6 @@ export class Extension {
             type: MessageType.BG_CLEAN_UP,
         };
     };
-
 
     //-------------------------------------
     //          User settings

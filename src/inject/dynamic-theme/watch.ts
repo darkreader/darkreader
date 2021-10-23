@@ -83,6 +83,7 @@ async function customElementsWhenDefined(tag: string) {
                     }
                 }
             };
+
             requestAnimationFrame(checkIfDefined);
         }
     });

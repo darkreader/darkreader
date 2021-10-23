@@ -305,6 +305,7 @@ export function getBgImageModifier(
                 return {match, index: valueIndex};
             });
         };
+
         const matches = getIndices(urls).map((i) => ({type: 'url', ...i}))
             .concat(getIndices(gradients).map((i) => ({type: 'gradient', ...i})))
             .sort((a, b) => a.index - b.index);

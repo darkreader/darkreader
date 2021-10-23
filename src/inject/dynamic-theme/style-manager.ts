@@ -112,7 +112,7 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
     // If the `href` isn't local and doesn't start with the same-origin.
     // We can be ensure that's a cross-origin import
     // And should add a cors-sheet to this element.
-    function hasCrossOriginImports(cssRules: CSSRuleList) {
+    function hasImports(cssRules: CSSRuleList, checkCrossOrigin: boolean) {
         let result = false;
         if (cssRules) {
             let rule: CSSRule;
@@ -120,7 +120,12 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
             for (let i = 0, len = cssRules.length; i < len; i++) {
                 rule = cssRules[i];
                 if ((rule as CSSImportRule).href) {
-                    if ((rule as CSSImportRule).href.startsWith('http') && !(rule as CSSImportRule).href.startsWith(location.origin)) {
+                    if (checkCrossOrigin) {
+                        if ((rule as CSSImportRule).href.startsWith('http') && !(rule as CSSImportRule).href.startsWith(location.origin)) {
+                            result = true;
+                            break cssRulesLoop;
+                        }
+                    } else {
                         result = true;
                         break cssRulesLoop;
                     }
@@ -132,24 +137,31 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
 
     function getRulesSync(): CSSRuleList {
         if (corsCopy) {
+            logInfo('[getRulesSync] Using cors-copy.');
             return corsCopy.sheet.cssRules;
         }
         if (containsCSSImport()) {
-            return null;
-        }
-
-        if (
-            element instanceof HTMLLinkElement &&
-            !isRelativeHrefOnAbsolutePath(element.href)
-        ) {
+            logInfo('[getRulesSync] CSSImport detected.');
             return null;
         }
 
         const cssRules = safeGetSheetRules();
-        if (hasCrossOriginImports(cssRules)) {
+        if (
+            element instanceof HTMLLinkElement &&
+            !isRelativeHrefOnAbsolutePath(element.href) &&
+            hasImports(cssRules, false)
+        ) {
+            logInfo('[getRulesSync] CSSImportRule detected on non-local href.');
             return null;
         }
 
+        if (hasImports(cssRules, true)) {
+            logInfo('[getRulesSync] Cross-Origin CSSImportRule detected.');
+            return null;
+        }
+
+        logInfo('[getRulesSync] Using cssRules.');
+        !cssRules && logWarn('[getRulesSync] cssRules is null, trying again.');
         return cssRules;
     }
 
@@ -220,9 +232,10 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
                 }
             }
 
-            if (isRelativeHrefOnAbsolutePath(element.href)) {
-                const crossOriginImport = hasCrossOriginImports(cssRules);
-                if (cssRules != null && !crossOriginImport) {
+            if (cssRules) {
+                if (isRelativeHrefOnAbsolutePath(element.href)) {
+                    return cssRules;
+                } else if (!hasImports(cssRules, false)) {
                     return cssRules;
                 }
             }
@@ -429,6 +442,7 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
             }
             rulesCheckFrameId = requestAnimationFrame(checkForUpdate);
         };
+
         checkForUpdate();
     }
 
@@ -542,15 +556,18 @@ async function linkLoading(link: HTMLLinkElement, loadingId: number) {
             link.removeEventListener('error', onError);
             rejectorsForLoadingLinks.delete(loadingId);
         };
+
         const onLoad = () => {
             cleanUp();
             logInfo(`Linkelement ${loadingId} has been loaded`);
             resolve();
         };
+
         const onError = () => {
             cleanUp();
             reject(`Linkelement ${loadingId} couldn't be loaded. ${link.href}`);
         };
+
         rejectorsForLoadingLinks.set(loadingId, () => {
             cleanUp();
             reject();

@@ -16,7 +16,6 @@ async function queryTabs(query: chrome.tabs.QueryInfo) {
 interface ConnectionMessageOptions {
     url: string;
     frameURL: string;
-    unsupportedSender?: boolean;
 }
 
 interface TabManagerOptions {
@@ -99,7 +98,15 @@ export default class TabManager {
                         // NOTE: Vivaldi and Opera can show a page in a side panel,
                         // but it is not possible to handle messaging correctly (no tab ID, frame ID).
                         if (isFirefox) {
-                            reply({url: sender.url, frameURL: null, unsupportedSender: true});
+                            if (sender && sender.tab && typeof sender.tab.id === 'number') {
+                                chrome.tabs.sendMessage<Message>(sender.tab.id,
+                                    {
+                                        type: MessageType.BG_UNSUPPORTED_SENDER
+                                    },
+                                    {
+                                        frameId: sender && typeof sender.frameId === 'number' ? sender.frameId : undefined
+                                    });
+                            }
                         } else {
                             sendResponse('unsupportedSender');
                         }
@@ -285,9 +292,11 @@ export default class TabManager {
         const tab = await this.getActiveTab();
         return Boolean(this.tabs[tab.id]);
     }
+
     async getActiveTabURL() {
         return this.getTabURL(await this.getActiveTab());
     }
+
     async getActiveTab() {
         let tab = (await queryTabs({
             active: true,

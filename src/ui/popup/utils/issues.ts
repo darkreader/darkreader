@@ -1,6 +1,5 @@
 import {compareChromeVersions, chromiumVersion, isWindows, isOpera, isYaBrowser, isVivaldi, isEdge, isMacOS, isThunderbird} from '../../../utils/platform';
 
-
 export function popupHasBuiltInBorders() {
     return Boolean(
         chromiumVersion &&

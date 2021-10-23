@@ -44,7 +44,6 @@ async function getChromePath() {
     throw new Error('Could not find Chrome');
 }
 
-
 /**
  * @returns {Promise<string>}
  */

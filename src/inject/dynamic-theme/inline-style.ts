@@ -310,6 +310,7 @@ export function overrideInlineStyle(element: HTMLElement, theme: FilterConfig, i
                         const isBg = (width > SMALL_SVG_LIMIT || height > SMALL_SVG_LIMIT);
                         setCustomProp('fill', isBg ? 'background-color' : 'color', value);
                     };
+
                     if (isReadyStateComplete()) {
                         handleSVGElement();
                     } else {

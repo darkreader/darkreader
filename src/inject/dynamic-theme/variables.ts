@@ -197,6 +197,7 @@ export class VariablesStore {
                     const decs = getDeclarations();
                     onTypeChange(decs);
                 };
+
                 callbacks.add(callback);
                 this.subscribeForVarTypeChange(varName, callback);
             };
@@ -273,6 +274,7 @@ export class VariablesStore {
                     }
                     return variableReplaced;
                 };
+
                 const modified = modify();
                 if (unknownVars.size > 0) {
                     return new Promise<string>((resolve) => {
@@ -282,6 +284,7 @@ export class VariablesStore {
                             const newValue = modify();
                             resolve(newValue);
                         };
+
                         this.subscribeForVarTypeChange(firstUnknownVar, callback);
                     });
                 }
@@ -606,6 +609,7 @@ export function replaceCSSVariablesNames(
         }
         return `var(${newName}, ${newFallback})`;
     };
+
     return replaceVariablesMatches(value, matchReplacer);
 }
 
@@ -683,6 +687,7 @@ function insertVarValues(source: string, varValues: Map<string, string>, stack =
         }
         return inserted;
     };
+
     const replaced = replaceVariablesMatches(source, matchReplacer);
     if (containsUnresolvedVar) {
         return null;

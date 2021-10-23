@@ -10,7 +10,6 @@ test('Clamp', () => {
     expect(clamp(3, 1, 2)).toEqual(2);
 });
 
-
 test('Matrix multiplication', () => {
     expect(multiplyMatrices([[1]], [[2]])).toEqual([[2]]);
     expect(multiplyMatrices([[1, 2, 3], [6, 5, 3]], [[1, 2], [7, 4], [6, 2]])).toEqual([[33, 16], [59, 38]]);

@@ -56,7 +56,6 @@ export function ParseColorSchemeConfig(config: string): { result: ParsedColorSch
     // be more complicated to otherwise just add this '\n' here.
     const sections = config.split(`${SEPERATOR }\n\n`);
 
-
     const definedColorSchemeNames: Set<string> = new Set();
     let lastDefinedColorSchemeName: string | undefined = '';
 

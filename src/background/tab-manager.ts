@@ -55,7 +55,7 @@ export default class TabManager {
     private fileLoader: {get: (params: FetchRequestParameters) => Promise<string>} = null;
     private getTabMessage: (url: string, frameUrl: string) => Message;
     private timestamp: number = null;
-    static LOCAL_STORAGE_KEY = 'TabManager-state';
+    private static LOCAL_STORAGE_KEY = 'TabManager-state';
 
     constructor({getConnectionMessage, onColorSchemeChange, getTabMessage}: TabManagerOptions) {
         this.stateManager = new StateManager<TabManagerState>(TabManager.LOCAL_STORAGE_KEY, this, {tabs: {}, timestamp: 0});

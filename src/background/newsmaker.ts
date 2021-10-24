@@ -10,9 +10,9 @@ interface NewsmakerState {
 }
 
 export default class Newsmaker {
-    static UPDATE_INTERVAL = getDurationInMinutes({hours: 4});
-    static ALARM_NAME = 'newsmaker';
-    static LOCAL_STORAGE_KEY = 'Newsmaker-state';
+    private static UPDATE_INTERVAL = getDurationInMinutes({hours: 4});
+    private static ALARM_NAME = 'newsmaker';
+    private static LOCAL_STORAGE_KEY = 'Newsmaker-state';
 
     private stateManager: StateManager<NewsmakerState>;
     private latest: News[];

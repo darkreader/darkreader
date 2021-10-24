@@ -13,28 +13,34 @@ The step below installs:
 
 If you already have these you can skip this and proceed to the [next step](#cloning)
 
+### Cross-Platform
+
+_This method will work on Windows, macOS, and Linux_
+
+#### Site-Download
+
+##### git
+
+1. Go to [git-scm.com/downloads](https://git-scm.com/downloads) and select your OS
+2. Execute / Run the downloaded file
+
+##### NodeJS
+
+1. Go to [nodejs.org/en/download/](https://nodejs.org/en/download/), then select your OS
+2. Execute / Run the downloaded file
+
 ### Microsoft Windows
 
 _Microsoft Windows 7 or later is required_
 
 #### Chocolatey
 
-1. Follow the installation steps on [docs.chocolatey.org/choco/setup](https://docs.chocolatey.org/en-us/choco/setup).
+1. Follow the installation steps on [docs.chocolatey.org/choco/setup](https://docs.chocolatey.org/en-us/choco/setup). (_If you already have Chocolatey, skip this step_)
 
 2. After installation, run the script below.
 
 ```ps1
 choco install nodejs git
-```
-
-#### Scoop
-
-1. Follow the installation steps on [lukesampson/scoop](https://github.com/lukesampson/scoop).
-
-2. After installation, run this command below.
-
-```ps1
-scoop install nodejs git
 ```
 
 ### macOS
@@ -57,7 +63,7 @@ brew install node git
 
 1. Follow the instructions on https://nodejs.org/en/download/package-manager/ to get NodeJS
 
-2. placeholder
+2. To install `git` find your distribution
 
 | Distribution         | Command                | Package Manager                                               |
 |----------------------|------------------------|---------------------------------------------------------------|

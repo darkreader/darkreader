@@ -1,5 +1,5 @@
 import type {RGBA} from '../../utils/color';
-import {parse, rgbToHSL, hslToString} from '../../utils/color';
+import {lowerCalcExpression, parse, rgbToHSL, hslToString} from '../../utils/color';
 import {clamp} from '../../utils/math';
 import {getMatches} from '../../utils/text';
 import {getAbsoluteURL} from '../../utils/url';
@@ -229,6 +229,11 @@ export function parseColorWithCache($color: string) {
     $color = $color.trim();
     if (colorParseCache.has($color)) {
         return colorParseCache.get($color);
+    }
+    // We cannot _really_ parse any color which has the calc() expression
+    // So we try our best-efforts to remove those and then parse the value.
+    if ($color.includes('calc(')) {
+        $color = lowerCalcExpression($color);
     }
     const color = parse($color);
     colorParseCache.set($color, color);

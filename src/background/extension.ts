@@ -49,8 +49,8 @@ export class Extension {
     private startBarrier: PromiseBarrier<void, void> = null;
     private stateManager: StateManager<ExtensionState> = null;
 
-    static ALARM_NAME = 'auto-time-alarm';
-    static LOCAL_STORAGE_KEY = 'Extension-state';
+    private static ALARM_NAME = 'auto-time-alarm';
+    private static LOCAL_STORAGE_KEY = 'Extension-state';
     constructor() {
         this.config = new ConfigManager();
         this.devtools = new DevTools(this.config, async () => this.onSettingsChanged());

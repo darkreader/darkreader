@@ -14,7 +14,10 @@ interface DevToolsStorage {
     set(key: string, value: string): void;
     remove(key: string): void;
     has(key: string): Promise<boolean>;
+    setMigratedForTesting(value: boolean): void;
 }
+
+declare const __DEBUG__: boolean;
 
 class PersistentStorageWrapper implements DevToolsStorage {
     // Cache information within background context for future use without waiting.
@@ -24,6 +27,12 @@ class PersistentStorageWrapper implements DevToolsStorage {
     // Part 1 of 2.
     private migrated: boolean;
 
+    setMigratedForTesting(value: boolean) {
+        if (__DEBUG__) {
+            this.migrated = value;
+        }
+    }
+
     private async migrateFromLocalStorage() {
         return new Promise<void>((resolve) => {
             chrome.storage.local.get([
@@ -31,15 +40,18 @@ class PersistentStorageWrapper implements DevToolsStorage {
                 DevTools.KEY_FILTER,
                 DevTools.KEY_STATIC
             ], (data) => {
+                // If storage contains at least one relevant record, we consider data migrated.
                 if (data[DevTools.KEY_DYNAMIC] || data[DevTools.KEY_FILTER] || data[DevTools.KEY_STATIC]) {
                     this.migrated = true;
                     resolve();
                     return;
                 }
 
-                this.cache[DevTools.KEY_DYNAMIC] = localStorage.getItem(DevTools.KEY_DYNAMIC);
-                this.cache[DevTools.KEY_FILTER] = localStorage.getItem(DevTools.KEY_FILTER);
-                this.cache[DevTools.KEY_STATIC] = localStorage.getItem(DevTools.KEY_STATIC);
+                this.cache = {
+                    [DevTools.KEY_DYNAMIC]: localStorage.getItem(DevTools.KEY_DYNAMIC),
+                    [DevTools.KEY_FILTER]: localStorage.getItem(DevTools.KEY_FILTER),
+                    [DevTools.KEY_STATIC]: localStorage.getItem(DevTools.KEY_STATIC),
+                };
 
                 chrome.storage.local.set(this.cache, () => {
                     this.migrated = true;
@@ -51,7 +63,7 @@ class PersistentStorageWrapper implements DevToolsStorage {
 
     async get(key: string) {
         if (!this.migrated) {
-            this.migrateFromLocalStorage();
+            await this.migrateFromLocalStorage();
         }
 
         if (key in this.cache) {
@@ -60,7 +72,7 @@ class PersistentStorageWrapper implements DevToolsStorage {
         return new Promise<string>((resolve) => {
             chrome.storage.local.get(key, (result) => {
                 // If cache received a new value (from call to set())
-                // before we retreived an old value from storage,
+                // before we retreived the old value from storage,
                 // return the new value.
                 if (key in this.cache) {
                     logInfo(`Key ${key} was written to during read operation.`);
@@ -96,6 +108,8 @@ class PersistentStorageWrapper implements DevToolsStorage {
 }
 
 class LocalStorageWrapper implements DevToolsStorage {
+    setMigratedForTesting(value: boolean) {}
+
     async get(key: string) {
         try {
             return localStorage.getItem(key);
@@ -132,6 +146,8 @@ class LocalStorageWrapper implements DevToolsStorage {
 }
 
 class TempStorage implements DevToolsStorage {
+    setMigratedForTesting(value: boolean) {}
+
     map = new Map<string, string>();
 
     async get(key: string) {
@@ -174,6 +190,10 @@ export default class DevTools {
     static KEY_DYNAMIC = 'dev_dynamic_theme_fixes';
     static KEY_FILTER = 'dev_inversion_fixes';
     static KEY_STATIC = 'dev_static_themes';
+
+    setMigratedForTesting(value: boolean) {
+        this.store.setMigratedForTesting(value);
+    }
 
     private async loadConfigOverrides() {
         this.config.overrides.dynamicThemeFixes = await this.getSavedDynamicThemeFixes() || null;

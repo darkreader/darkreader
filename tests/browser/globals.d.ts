@@ -19,5 +19,8 @@ declare global {
     const backgroundUtils: {
         changeSettings: (settings: Partial<UserSettings>) => Promise<void>;
         collectData: () => Promise<ExtensionData>;
+        changeLocalStorage: (data: {[key: string]: any}) => Promise<void>;
+        getLocalStorage: () => Promise<{[key: string]: any}>;
+        setMigrated: (value: boolean) => Promise<void>;
     };
 }

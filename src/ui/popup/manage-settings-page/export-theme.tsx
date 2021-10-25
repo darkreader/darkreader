@@ -19,6 +19,7 @@ export default function ExportTheme() {
         chrome.runtime.onMessage.addListener(listener);
         chrome.runtime.sendMessage<Message>({type: MessageType.UI_REQUEST_EXPORT_CSS});
     }
+
     return (
         <ControlGroup>
             <ControlGroup.Control>

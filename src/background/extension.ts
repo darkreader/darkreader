@@ -170,7 +170,7 @@ export class Extension {
                 const respond = (message: {type: string; data?: ExtensionData | string | boolean | {[key: string]: string}; id?: number}) => socket.send(JSON.stringify(message));
                 try {
                     const message: {type: string; data: Partial<UserSettings> | boolean | {[key: string]: string}; id: number} = JSON.parse(e.data);
-                    switch(message.type) {
+                    switch (message.type) {
                         case 'changeSettings':
                             this.changeSettings(message.data as Partial<UserSettings>);
                             respond({type: 'changeSettings-response', id: message.id});

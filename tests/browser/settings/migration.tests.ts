@@ -12,14 +12,10 @@ describe('Migrate settings', () => {
             [DevTools.KEY_STATIC]: staticThemes,
         });
 
-        // chrome.storage.{local,sync}.set() fires callback only if data was actually changed
-        // so we write a dummy record and then immediatelly delete it.
-        await backgroundUtils.changeChromeStorage('local', {dummy: true});
         await backgroundUtils.changeChromeStorage('local', {
             [DevTools.KEY_DYNAMIC]: undefined,
             [DevTools.KEY_FILTER]: undefined,
             [DevTools.KEY_STATIC]: undefined,
-            dummy: undefined
         });
 
         await backgroundUtils.setMigrated(false);

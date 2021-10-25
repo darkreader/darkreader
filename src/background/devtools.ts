@@ -106,7 +106,7 @@ class PersistentStorageWrapper implements DevToolsStorage {
 
 class LocalStorageWrapper implements DevToolsStorage {
     setMigratedForTesting() {
-        if (!__DEBUG__) {
+        if (__DEBUG__) {
             logWarn('Unexpected call to setMigratedForTesting');
         }
     }
@@ -148,7 +148,7 @@ class LocalStorageWrapper implements DevToolsStorage {
 
 class TempStorage implements DevToolsStorage {
     setMigratedForTesting() {
-        if (!__DEBUG__) {
+        if (__DEBUG__) {
             logWarn('Unexpected call to setMigratedForTesting');
         }
     }

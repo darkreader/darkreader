@@ -338,7 +338,7 @@ export function lowerCalcExpression(color: string): string {
             break;
         }
         // Create the replacement string.
-        let replacement = '';
+        let replacement: string;
         if (operation === '+') {
             replacement = `${firstNumber + secondNumber}%`;
         } else {

@@ -23,6 +23,6 @@ declare global {
         getLocalStorage: () => Promise<{[key: string]: any}>;
         changeChromeStorage: (region: 'local' | 'sync', data: {[key: string]: any}) => Promise<void>;
         getChromeStorage: (region: 'local' | 'sync', keys: string[]) => Promise<{[key: string]: any}>;
-        setMigrated: (value: boolean) => Promise<void>;
+        setDataIsMigratedForTesting: (value: boolean) => Promise<void>;
     };
 }

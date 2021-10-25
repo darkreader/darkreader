@@ -18,7 +18,7 @@ describe('Migrate settings', () => {
             [DevTools.KEY_STATIC]: undefined,
         });
 
-        await backgroundUtils.setMigrated(false);
+        await backgroundUtils.setDataIsMigratedForTesting(false);
 
         // Data is propagate to ExtensionData object
         const extensionData = await backgroundUtils.collectData();

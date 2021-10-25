@@ -193,10 +193,10 @@ export class Extension {
                         const keys = (message.data as any).keys;
                         const region: 'local' | 'sync' = (message.data as any).region;
                         chrome.storage[region].get(keys, (data) => respond({type: 'getChromeStorage-response', data, id: message.id}));
-                    } else if (message.type === 'setMigrated') {
+                    } else if (message.type === 'setDataIsMigratedForTesting') {
                         const value = message.data as boolean;
-                        this.devtools.setMigratedForTesting(value);
-                        respond({type: 'setMigrated-response', id: message.id});
+                        this.devtools.setDataIsMigratedForTesting(value);
+                        respond({type: 'setDataIsMigratedForTesting-response', id: message.id});
                     }
                 } catch (err) {
                     respond({type: 'error', data: String(err)});

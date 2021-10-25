@@ -11,7 +11,7 @@ interface DevToolsStorage {
     set(key: string, value: string): void;
     remove(key: string): void;
     has(key: string): Promise<boolean>;
-    setMigratedForTesting(value: boolean): void;
+    setDataIsMigratedForTesting(value: boolean): void;
 }
 
 declare const __DEBUG__: boolean;
@@ -22,11 +22,11 @@ class PersistentStorageWrapper implements DevToolsStorage {
 
     // TODO(bershanskiy): remove migrated and migrateFromLocalStorage after migration end.
     // Part 1 of 2.
-    private migrated: boolean;
+    private dataIsMigrated = false;
 
-    setMigratedForTesting(value: boolean) {
+    setDataIsMigratedForTesting(value: boolean) {
         if (__DEBUG__) {
-            this.migrated = value;
+            this.dataIsMigrated = value;
         }
     }
 
@@ -39,7 +39,7 @@ class PersistentStorageWrapper implements DevToolsStorage {
             ], (data) => {
                 // If storage contains at least one relevant record, we consider data migrated.
                 if (data[DevTools.KEY_DYNAMIC] || data[DevTools.KEY_FILTER] || data[DevTools.KEY_STATIC]) {
-                    this.migrated = true;
+                    this.dataIsMigrated = true;
                     resolve();
                     return;
                 }
@@ -51,7 +51,7 @@ class PersistentStorageWrapper implements DevToolsStorage {
                 };
 
                 chrome.storage.local.set(this.cache, () => {
-                    this.migrated = true;
+                    this.dataIsMigrated = true;
                     resolve();
                 });
             });
@@ -59,7 +59,7 @@ class PersistentStorageWrapper implements DevToolsStorage {
     }
 
     async get(key: string) {
-        if (!this.migrated) {
+        if (!this.dataIsMigrated) {
             await this.migrateFromLocalStorage();
         }
 
@@ -105,9 +105,9 @@ class PersistentStorageWrapper implements DevToolsStorage {
 }
 
 class LocalStorageWrapper implements DevToolsStorage {
-    setMigratedForTesting() {
+    setDataIsMigratedForTesting() {
         if (__DEBUG__) {
-            logWarn('Unexpected call to setMigratedForTesting');
+            logWarn('Unexpected call to setDataIsMigratedForTesting');
         }
     }
 
@@ -147,9 +147,9 @@ class LocalStorageWrapper implements DevToolsStorage {
 }
 
 class TempStorage implements DevToolsStorage {
-    setMigratedForTesting() {
+    setDataIsMigratedForTesting() {
         if (__DEBUG__) {
-            logWarn('Unexpected call to setMigratedForTesting');
+            logWarn('Unexpected call to setDataIsMigratedForTesting');
         }
     }
 
@@ -196,8 +196,8 @@ export default class DevTools {
     static KEY_FILTER = 'dev_inversion_fixes';
     static KEY_STATIC = 'dev_static_themes';
 
-    setMigratedForTesting(value: boolean) {
-        this.store.setMigratedForTesting(value);
+    setDataIsMigratedForTesting(value: boolean) {
+        this.store.setDataIsMigratedForTesting(value);
     }
 
     private async loadConfigOverrides() {

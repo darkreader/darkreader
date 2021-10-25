@@ -4,9 +4,6 @@ import {parseDynamicThemeFixes, formatDynamicThemeFixes} from '../generators/dyn
 import {parseStaticThemes, formatStaticThemes} from '../generators/static-theme';
 import type ConfigManager from './config-manager';
 
-// TODO(bershanskiy): add migration path for moving data from LocalStorageWrapper
-// into PersistentStorageWrapper. LocalStorageWrapper data might become inaccessible upon
-// update from MV2 to MV3 because service workers don't have localStorage.
 // TODO(bershanskiy): Add support for reads/writes of multiple keys at once for performance.
 // TODO(bershanskiy): Popup UI heeds only hasCustom*Fixes() and nothing else. Consider storing that data separatelly.
 interface DevToolsStorage {

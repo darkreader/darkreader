@@ -1,4 +1,4 @@
-import {logInfo} from '../utils/log';
+import {logInfo, logWarn} from '../utils/log';
 import {parseInversionFixes, formatInversionFixes} from '../generators/css-filter';
 import {parseDynamicThemeFixes, formatDynamicThemeFixes} from '../generators/dynamic-theme';
 import {parseStaticThemes, formatStaticThemes} from '../generators/static-theme';
@@ -108,7 +108,11 @@ class PersistentStorageWrapper implements DevToolsStorage {
 }
 
 class LocalStorageWrapper implements DevToolsStorage {
-    setMigratedForTesting(value: boolean) {}
+    setMigratedForTesting() {
+        if (!__DEBUG__) {
+            logWarn('Unexpected call to setMigratedForTesting');
+        }
+    }
 
     async get(key: string) {
         try {
@@ -146,7 +150,11 @@ class LocalStorageWrapper implements DevToolsStorage {
 }
 
 class TempStorage implements DevToolsStorage {
-    setMigratedForTesting(value: boolean) {}
+    setMigratedForTesting() {
+        if (!__DEBUG__) {
+            logWarn('Unexpected call to setMigratedForTesting');
+        }
+    }
 
     map = new Map<string, string>();
 

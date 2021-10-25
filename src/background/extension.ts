@@ -169,9 +169,9 @@ export class Extension {
             socket.onmessage = (e) => {
                 const respond = (message: {type: string; data?: ExtensionData | string | boolean | {[key: string]: string}; id?: number}) => socket.send(JSON.stringify(message));
                 try {
-                    const message: {type: string; data: Partial<UserSettings>; id: number} = JSON.parse(e.data);
+                    const message: {type: string; data: Partial<UserSettings> | boolean | {[key: string]: string}; id: number} = JSON.parse(e.data);
                     if (message.type === 'changeSettings') {
-                        const settings = message.data;
+                        const settings = message.data as Partial<UserSettings>;
                         this.changeSettings(settings);
                         respond({type: 'changeSettings-response', id: message.id});
                     } else if (message.type === 'collectData') {
@@ -179,7 +179,7 @@ export class Extension {
                             respond({type: 'collectData-response', id: message.id, data});
                         });
                     } else if (message.type === 'changeLocalStorage') {
-                        const data = JSON.parse(e.data);
+                        const data = message.data as {[key: string]: string};
                         for (const key in data) {
                             localStorage[key] = data[key];
                         }
@@ -187,13 +187,12 @@ export class Extension {
                     } else if (message.type === 'getLocalStorage') {
                         respond({type: 'getLocalStorage-response', id: message.id, data: localStorage ? JSON.stringify(localStorage) : null});
                     } else if (message.type === 'changeChromeStorage') {
-                        const data = JSON.parse(message.data as string);
-                        const region: 'local' | 'sync' = data.region;
-                        chrome.storage[region].set(data.data, () => respond({type: 'changeChromeStorage-response', id: message.id}));
+                        const region: 'local' | 'sync' = (message.data as any).region;
+                        chrome.storage[region].set((message.data as any).data, () => respond({type: 'changeChromeStorage-response', id: message.id}));
                     } else if (message.type === 'getChromeStorage') {
-                        const data = JSON.parse(message.data as string);
-                        const region: 'local' | 'sync' = data.region;
-                        chrome.storage[region].get(data.keys, (data) => respond({type: 'getChromeStorage-response', data, id: message.id}));
+                        const keys = (message.data as any).keys;
+                        const region: 'local' | 'sync' = (message.data as any).region;
+                        chrome.storage[region].get(keys, (data) => respond({type: 'getChromeStorage-response', data, id: message.id}));
                     } else if (message.type === 'setMigrated') {
                         const value = message.data as boolean;
                         this.devtools.setMigratedForTesting(value);

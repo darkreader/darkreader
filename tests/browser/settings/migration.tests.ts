@@ -1,13 +1,32 @@
 import DevTools from '../../../src/background/devtools';
 
 describe('Migrate settings', () => {
-    it('should turn On/Off', async () => {
+    it('should migrate settings', async () => {
+        const dynamicFixes = '*\n\nINVERT\n.example\n\n================================\n\nexample.com\n\nINVERT\n.dynamic\n';
+        const filterFixes = '*\n\nINVERT\n.example\n\n================================\n\nexample.com\n\nINVERT\n.filter\n';
+        const staticThemes = '*\n\nINVERT\n.example\n\n================================\n\nexample.com\n\nINVERT\n.static\n';
+
         await backgroundUtils.changeLocalStorage({
-            [DevTools.KEY_DYNAMIC]: "hi",
-            [DevTools.KEY_FILTER]: "hi",
-            [DevTools.KEY_STATIC]: "hi",
+            [DevTools.KEY_DYNAMIC]: dynamicFixes,
+            [DevTools.KEY_FILTER]: filterFixes,
+            [DevTools.KEY_STATIC]: staticThemes,
         });
 
-        expect(true).toBe(true);
+        // chrome.storage.{local,sync}.set() fires callback only if data was actually changed
+        // so we write a dummy record and then immediatelly delete it.
+        await backgroundUtils.changeChromeStorage('local', {dummy: true});
+        await backgroundUtils.changeChromeStorage('local', {
+            [DevTools.KEY_DYNAMIC]: undefined,
+            [DevTools.KEY_FILTER]: undefined,
+            [DevTools.KEY_STATIC]: undefined,
+            dummy: undefined
+        });
+
+        await backgroundUtils.setMigrated(false);
+
+        const extensionData = await backgroundUtils.collectData();
+        expect(extensionData.devtools.dynamicFixesText).toEqual(dynamicFixes);
+        expect(extensionData.devtools.filterFixesText).toEqual(filterFixes);
+        expect(extensionData.devtools.staticThemesText).toEqual(staticThemes);
     });
 });

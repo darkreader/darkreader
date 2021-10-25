@@ -220,6 +220,8 @@ class PuppeteerEnvironment extends JestNodeEnvironment {
                 collectData: async () => await sendToUIPage({type: 'collectData'}),
                 changeLocalStorage: async (data) => await sendToUIPage({type: 'changeLocalStorage', data}),
                 getLocalStorage: async () => await sendToUIPage({type: 'getLocalStorage'}),
+                changeChromeStorage: async (region, data) => await sendToUIPage({type: 'changeChromeStorage', data: {region, data}}),
+                getChromeStorage: async(region, keys) => await sendToUIPage({type: 'getChromeStorage', data: {region, keys}}),
                 setMigrated: async (value) => await sendToUIPage({type: 'setMigrated', data: value}),
             };
         });

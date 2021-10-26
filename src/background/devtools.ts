@@ -31,7 +31,7 @@ class PersistentStorageWrapper implements DevToolsStorage {
     }
 
     // This function moves DevTools data from loclStorage to chrome.storage.local.
-    // This function is run on every backgroun context invocation, but it has effect only on the 
+    // This function is run on every backgroun context invocation, but it has effect only on the
     // first run.
     private async migrateFromLocalStorage() {
         return new Promise<void>((resolve) => {

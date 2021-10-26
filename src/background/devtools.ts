@@ -34,12 +34,23 @@ class PersistentStorageWrapper implements DevToolsStorage {
     // This function is run on every backgroun context invocation, but it has effect only on the
     // first run.
     private async migrateFromLocalStorage() {
+        // In MV3 world we can't access localStorage, so we can not migrate anything.
+        // Bail out and consider data migrated.
+        if (!localStorage) {
+            this.dataIsMigrated = true;
+            return;
+        }
+
         return new Promise<void>((resolve) => {
             chrome.storage.local.get([
                 DevTools.KEY_DYNAMIC,
                 DevTools.KEY_FILTER,
                 DevTools.KEY_STATIC
             ], (data) => {
+                if (chrome.runtime.lastError) {
+                    console.error('DevTools failed to migrate data', chrome.runtime.lastError);
+                    resolve();
+                }
                 // If storage contains at least one relevant record, we consider data migrated.
                 if (data[DevTools.KEY_DYNAMIC] || data[DevTools.KEY_FILTER] || data[DevTools.KEY_STATIC]) {
                     this.dataIsMigrated = true;
@@ -54,6 +65,10 @@ class PersistentStorageWrapper implements DevToolsStorage {
                 };
 
                 chrome.storage.local.set(this.cache, () => {
+                    if (chrome.runtime.lastError) {
+                        console.error('DevTools failed to migrate data', chrome.runtime.lastError);
+                        resolve();
+                    }
                     this.dataIsMigrated = true;
                     resolve();
                 });
@@ -81,7 +96,7 @@ class PersistentStorageWrapper implements DevToolsStorage {
                 }
 
                 if (chrome.runtime.lastError) {
-                    console.error(chrome.runtime.lastError);
+                    console.error('Failed to query DevTools data', chrome.runtime.lastError);
                     resolve(null);
                     return;
                 }
@@ -94,12 +109,20 @@ class PersistentStorageWrapper implements DevToolsStorage {
 
     set(key: string, value: string) {
         this.cache[key] = value;
-        chrome.storage.local.set({[key]: value});
+        chrome.storage.local.set({[key]: value}, () => {
+            if (chrome.runtime.lastError) {
+                console.error('Failed to write DevTools data', chrome.runtime.lastError);
+            }
+        });
     }
 
     remove(key: string) {
         this.cache[key] = undefined;
-        chrome.storage.local.remove(key);
+        chrome.storage.local.remove(key, () => {
+            if (chrome.runtime.lastError) {
+                console.error('Failed to delete DevTools data', chrome.runtime.lastError);
+            }
+        });
     }
 
     async has(key: string) {

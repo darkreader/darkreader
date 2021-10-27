@@ -19,5 +19,10 @@ declare global {
     const backgroundUtils: {
         changeSettings: (settings: Partial<UserSettings>) => Promise<void>;
         collectData: () => Promise<ExtensionData>;
+        changeLocalStorage: (data: {[key: string]: any}) => Promise<void>;
+        getLocalStorage: () => Promise<{[key: string]: any}>;
+        changeChromeStorage: (region: 'local' | 'sync', data: {[key: string]: any}) => Promise<void>;
+        getChromeStorage: (region: 'local' | 'sync', keys: string[]) => Promise<{[key: string]: any}>;
+        setDataIsMigratedForTesting: (value: boolean) => Promise<void>;
     };
 }

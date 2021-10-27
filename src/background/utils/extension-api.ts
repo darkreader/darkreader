@@ -141,8 +141,8 @@ export async function writeLocalStorage<T extends {[key: string]: any}>(values: 
 }
 
 export const subscribeToOuterSettingsChange = (callback: () => void) => {
-    chrome.storage.onChanged.addListener(() => {
-        if (!mutexStorageWriting.isLocked()) {
+    chrome.storage.onChanged.addListener((_, storageArea) => {
+        if (storageArea === 'sync' && !mutexStorageWriting.isLocked()) {
             callback();
         }
     });

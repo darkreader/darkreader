@@ -218,6 +218,11 @@ class PuppeteerEnvironment extends JestNodeEnvironment {
             this.global.backgroundUtils = {
                 changeSettings: async (settings) => await sendToUIPage({type: 'changeSettings', data: settings}),
                 collectData: async () => await sendToUIPage({type: 'collectData'}),
+                changeLocalStorage: async (data) => await sendToUIPage({type: 'changeLocalStorage', data}),
+                getLocalStorage: async () => await sendToUIPage({type: 'getLocalStorage'}),
+                changeChromeStorage: async (region, data) => await sendToUIPage({type: 'changeChromeStorage', data: {region, data}}),
+                getChromeStorage: async (region, keys) => await sendToUIPage({type: 'getChromeStorage', data: {region, keys}}),
+                setDataIsMigratedForTesting: async (value) => await sendToUIPage({type: 'setDataIsMigratedForTesting', data: value}),
             };
         });
     }

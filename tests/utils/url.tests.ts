@@ -230,6 +230,9 @@ test('URL is enabled', () => {
     expect(isPDF(
         'https://upload.wikimedia.org/wikipedia/commons/5/56/ExtIPA_chart_(2015).pdf'
     )).toBe(true);
+    expect(isPDF(
+        'https://google.com/File_[1].pdf'
+    )).toBe(true);
 
     // IPV6 Testing
     expect(isURLEnabled(

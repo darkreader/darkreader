@@ -167,17 +167,45 @@ export class Extension {
         if (__DEBUG__) {
             const socket = new WebSocket(`ws://localhost:8894`);
             socket.onmessage = (e) => {
-                const respond = (message: {type: string; data?: ExtensionData | string; id?: number}) => socket.send(JSON.stringify(message));
+                const respond = (message: {type: string; data?: ExtensionData | string | boolean | {[key: string]: string}; id?: number}) => socket.send(JSON.stringify(message));
                 try {
-                    const message: {type: string; data: Partial<UserSettings>; id: number} = JSON.parse(e.data);
-                    if (message.type === 'changeSettings') {
-                        const settings = message.data;
-                        this.changeSettings(settings);
-                        respond({type: 'changeSettings-response', id: message.id});
-                    } else if (message.type === 'collectData') {
-                        this.collectData().then((data) => {
-                            respond({type: 'collectData-response', id: message.id, data});
-                        });
+                    const message: {type: string; data: Partial<UserSettings> | boolean | {[key: string]: string}; id: number} = JSON.parse(e.data);
+                    switch (message.type) {
+                        case 'changeSettings':
+                            this.changeSettings(message.data as Partial<UserSettings>);
+                            respond({type: 'changeSettings-response', id: message.id});
+                            break;
+                        case 'collectData':
+                            this.collectData().then((data) => {
+                                respond({type: 'collectData-response', id: message.id, data});
+                            });
+                            break;
+                        case 'changeLocalStorage': {
+                            const data = message.data as {[key: string]: string};
+                            for (const key in data) {
+                                localStorage[key] = data[key];
+                            }
+                            respond({type: 'changeLocalStorage-response', id: message.id});
+                            break;
+                        }
+                        case 'getLocalStorage':
+                            respond({type: 'getLocalStorage-response', id: message.id, data: localStorage ? JSON.stringify(localStorage) : null});
+                            break;
+                        case 'changeChromeStorage': {
+                            const region: 'local' | 'sync' = (message.data as any).region;
+                            chrome.storage[region].set((message.data as any).data, () => respond({type: 'changeChromeStorage-response', id: message.id}));
+                            break;
+                        }
+                        case 'getChromeStorage': {
+                            const keys = (message.data as any).keys;
+                            const region: 'local' | 'sync' = (message.data as any).region;
+                            chrome.storage[region].get(keys, (data) => respond({type: 'getChromeStorage-response', data, id: message.id}));
+                            break;
+                        }
+                        case 'setDataIsMigratedForTesting':
+                            this.devtools.setDataIsMigratedForTesting(message.data as boolean);
+                            respond({type: 'setDataIsMigratedForTesting-response', id: message.id});
+                            break;
                     }
                 } catch (err) {
                     respond({type: 'error', data: String(err)});
@@ -312,12 +340,12 @@ export class Extension {
             shortcuts: await this.getShortcuts(),
             colorScheme: this.config.COLOR_SCHEMES_RAW,
             devtools: {
-                dynamicFixesText: this.devtools.getDynamicThemeFixesText(),
-                filterFixesText: this.devtools.getInversionFixesText(),
-                staticThemesText: this.devtools.getStaticThemesText(),
-                hasCustomDynamicFixes: this.devtools.hasCustomDynamicThemeFixes(),
-                hasCustomFilterFixes: this.devtools.hasCustomFilterFixes(),
-                hasCustomStaticFixes: this.devtools.hasCustomStaticFixes(),
+                dynamicFixesText: await this.devtools.getDynamicThemeFixesText(),
+                filterFixesText: await this.devtools.getInversionFixesText(),
+                staticThemesText: await this.devtools.getStaticThemesText(),
+                hasCustomDynamicFixes: await this.devtools.hasCustomDynamicThemeFixes(),
+                hasCustomFilterFixes: await this.devtools.hasCustomFilterFixes(),
+                hasCustomStaticFixes: await this.devtools.hasCustomStaticFixes(),
             },
         };
     }

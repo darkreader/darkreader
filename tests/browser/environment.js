@@ -182,10 +182,10 @@ class PuppeteerEnvironment extends JestNodeEnvironment {
                 ws.on('message', (data) => {
                     const message = JSON.parse(data);
                     if (message.type === 'error') {
-                        const reject = rejectors.get(message.id).reject;
+                        const reject = rejectors.get(message.id);
                         reject(message.data);
                     } else {
-                        const resolve = resolvers.get(message.id).resolve;
+                        const resolve = resolvers.get(message.id);
                         resolve(message.data);
                     }
                     resolvers.delete(message.id);
@@ -196,9 +196,8 @@ class PuppeteerEnvironment extends JestNodeEnvironment {
 
             function sendToUIPage(message) {
                 return new Promise((resolve, reject) => {
-                    const responseType = `${message.type}-response`;
-                    resolvers.set(idCount, {responseType, resolve});
-                    rejectors.set(idCount, {responseType, reject});
+                    resolvers.set(idCount, resolve);
+                    rejectors.set(idCount, reject);
                     const json = JSON.stringify({...message, id: idCount});
                     sockets.forEach((ws) => ws.send(json));
                     idCount++;
@@ -218,6 +217,11 @@ class PuppeteerEnvironment extends JestNodeEnvironment {
             this.global.backgroundUtils = {
                 changeSettings: async (settings) => await sendToUIPage({type: 'changeSettings', data: settings}),
                 collectData: async () => await sendToUIPage({type: 'collectData'}),
+                changeLocalStorage: async (data) => await sendToUIPage({type: 'changeLocalStorage', data}),
+                getLocalStorage: async () => await sendToUIPage({type: 'getLocalStorage'}),
+                changeChromeStorage: async (region, data) => await sendToUIPage({type: 'changeChromeStorage', data: {region, data}}),
+                getChromeStorage: async (region, keys) => await sendToUIPage({type: 'getChromeStorage', data: {region, keys}}),
+                setDataIsMigratedForTesting: async (value) => await sendToUIPage({type: 'setDataIsMigratedForTesting', data: value}),
             };
         });
     }

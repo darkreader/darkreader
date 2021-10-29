@@ -1,5 +1,5 @@
 import type {HSLA} from '../../src/utils/color';
-import {parse, hslToRGB, rgbToHSL, rgbToString, rgbToHexString, hslToString} from '../../src/utils/color';
+import {lowerCalcExpression, parse, hslToRGB, rgbToHSL, rgbToString, rgbToHexString, hslToString} from '../../src/utils/color';
 
 test('Color parsing', () => {
     expect(parse('rgb(255,0,153)')).toEqual({r: 255, g: 0, b: 153, a: 1});
@@ -93,4 +93,9 @@ test('Color conversion', () => {
     expect(round(rgbToHSL({r: 233, g: 109, b: 78}))).toEqual({h: 12, s: 0.78, l: 0.61, a: 1});
     expect(round(rgbToHSL({r: 11, g: 34, b: 40}))).toEqual({h: 192, s: 0.57, l: 0.10, a: 1});
     expect(round(rgbToHSL({r: 161, g: 28, b: 61}))).toEqual({h: 345, s: 0.7, l: 0.37, a: 1});
+});
+
+test('Lower calc expressions', () => {
+    expect(lowerCalcExpression('hsl(0, 0%, calc(95% - 3%))')).toEqual('hsl(0, 0%, 92%)');
+    expect(lowerCalcExpression('hsl(0, calc(25% + 12%), calc(95% - 3%))')).toEqual('hsl(0, 37%, 92%)');
 });

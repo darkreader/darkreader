@@ -82,4 +82,12 @@ describe('INLINE STYLES', () => {
         const rect = container.querySelector('rect');
         expect(getComputedStyle(rect).fill).toBe('rgb(255, 26, 26)');
     });
+
+    it('should assume default value for <path> without fill', () => {
+        container.innerHTML = `<svg> <path d="M1,4 l2,2 l4,-4 v1 l-4,4 l-2,-2 Z"> </path> </svg>`;
+        createOrUpdateDynamicTheme(theme, null, false);
+
+        const path = container.querySelector('path');
+        expect(getComputedStyle(path).fill).toBe('rgb(255, 255, 255)');
+    });
 });

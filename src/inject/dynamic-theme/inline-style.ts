@@ -89,7 +89,7 @@ const normalizedPropList: { [key: string]: string } = {};
 overridesList.forEach(({cssProp, customProp}) => normalizedPropList[customProp] = cssProp);
 
 const INLINE_STYLE_ATTRS = ['style', 'fill', 'stop-color', 'stroke', 'bgcolor', 'color'];
-export const INLINE_STYLE_SELECTOR = INLINE_STYLE_ATTRS.map((attr) => `[${attr}]`).join(', ');
+export const INLINE_STYLE_SELECTOR = `${INLINE_STYLE_ATTRS.map((attr) => `[${attr}]`).join(', ') }, path`;
 
 export function getInlineOverrideStyle() {
     return overridesList.map(({dataAttr, customProp, cssProp}) => {
@@ -320,6 +320,11 @@ export function overrideInlineStyle(element: HTMLElement, theme: FilterConfig, i
                     setCustomProp('fill', 'color', value);
                 }
             }
+        // Handle a edge-case whereby a element like `<path>` hasn't a specified
+        // fill-color, but still fills(defaulting to black color).
+        // See(Initial value): https://www.w3.org/TR/2018/CR-SVG2-20181004/painting.html#SpecifyingFillPaint
+        } else if (element.tagName === 'path' && element.hasAttribute('d')) {
+            setCustomProp('fill', 'color', 'black');
         }
         if (element.hasAttribute('stop-color')) {
             setCustomProp('stop-color', 'background-color', element.getAttribute('stop-color'));
@@ -341,10 +346,7 @@ export function overrideInlineStyle(element: HTMLElement, theme: FilterConfig, i
         } else {
             const overridenProp = normalizedPropList[property];
             if (overridenProp &&
-                (!element.style.getPropertyValue(overridenProp) && !element.hasAttribute(overridenProp))) {
-                if (overridenProp === 'background-color' && element.hasAttribute('bgcolor')) {
-                    return;
-                }
+                (!element.style.getPropertyValue(overridenProp) && !element.hasAttribute(overridenProp)) && unsetProps.has(overridenProp)) {
                 element.style.setProperty(property, '');
             }
         }

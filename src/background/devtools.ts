@@ -36,7 +36,7 @@ class PersistentStorageWrapper implements DevToolsStorage {
     private async migrateFromLocalStorage() {
         // In MV3 world we can't access localStorage, so we can not migrate anything.
         // Bail out and consider data migrated.
-        if (!localStorage) {
+        if (typeof localStorage === 'undefined') {
             this.dataIsMigrated = true;
             return;
         }
@@ -70,6 +70,10 @@ class PersistentStorageWrapper implements DevToolsStorage {
                         resolve();
                     }
                     this.dataIsMigrated = true;
+                    // Clean up localStorage after migration
+                    localStorage.removeItem(DevTools.KEY_DYNAMIC);
+                    localStorage.removeItem(DevTools.KEY_FILTER);
+                    localStorage.removeItem(DevTools.KEY_STATIC);
                     resolve();
                 });
             });

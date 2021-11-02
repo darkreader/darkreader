@@ -29,6 +29,7 @@ module.exports = (config) => {
                             types: [
                                 'chrome',
                                 'jasmine',
+                                'offscreencanvas'
                             ],
                             removeComments: false,
                             sourceMap: true,

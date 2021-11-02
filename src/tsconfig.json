@@ -12,7 +12,8 @@
             "dom.iterable"
         ],
         "types": [
-            "chrome"
+            "chrome",
+            "offscreencanvas"
         ],
         "allowJs": true,
         "downlevelIteration": true,

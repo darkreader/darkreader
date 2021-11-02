@@ -393,3 +393,57 @@ test('Implied wildcards', () => {
             'directive': 'one'
         }]);
 });
+
+// Regression test which ensures parser properly splits blocks (ignores Base64 padding within CSS).
+test('Base64 in CSS', () => {
+    interface TestFix {
+        url: string[];
+        directive: string[];
+        css: string[];
+    }
+
+    const directiveMap: { [key: string]: keyof TestFix } = {
+        DIRECTIVE: 'directive',
+        CSS: 'css',
+    };
+
+    const config = [
+        '*',
+        '',
+        'DIRECTIVE',
+        'hello world',
+        '',
+        '====================',
+        '',
+        'example.com',
+        '',
+        'CSS',
+        '.CodeMirror-merge-r-deleted, .CodeMirror-merge-l-deleted {',
+        "    background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAMAAAACCAIAAAASFvFNAAAAFklEQVQImWO84ePDwMCQ8uEDEwMMAAA1TAO4kytpLAAAAABJRU5ErkJggg==') !important;",
+        '}',
+        ''
+    ].join('\n');
+
+    const options: SitesFixesParserOptions<TestFix> = {
+        commands: Object.keys(directiveMap),
+        getCommandPropName: (command) => directiveMap[command],
+        parseCommandValue: (_, value) => value.trim(),
+    };
+    const index = indexSitesFixesConfig<TestFix>(config);
+
+    const fixes = getSitesFixesFor('www.example.com', config, index, options);
+    expect(fixes).toEqual([
+        {
+            'url': ['*'],
+            'directive': 'hello world'
+        }, {
+            'url': [
+                'example.com',
+            ],
+            'css': [
+                '.CodeMirror-merge-r-deleted, .CodeMirror-merge-l-deleted {',
+                "    background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAMAAAACCAIAAAASFvFNAAAAFklEQVQImWO84ePDwMCQ8uEDEwMMAAA1TAO4kytpLAAAAABJRU5ErkJggg==') !important;",
+                '}',
+            ].join('\n'),
+        }]);
+});

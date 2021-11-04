@@ -237,7 +237,7 @@ export default class DevTools {
     }
 
     private async getSavedDynamicThemeFixes() {
-        return this.store.get(DevTools.KEY_DYNAMIC) || null;
+        return this.store.get(DevTools.KEY_DYNAMIC);
     }
 
     private saveDynamicThemeFixes(text: string) {
@@ -275,7 +275,7 @@ export default class DevTools {
     }
 
     private async getSavedInversionFixes() {
-        return this.store.get(DevTools.KEY_FILTER) || null;
+        return this.store.get(DevTools.KEY_FILTER);
     }
 
     private saveInversionFixes(text: string) {
@@ -313,7 +313,7 @@ export default class DevTools {
     }
 
     private async getSavedStaticThemes() {
-        return this.store.get(DevTools.KEY_STATIC) || null;
+        return this.store.get(DevTools.KEY_STATIC);
     }
 
     private saveStaticThemes(text: string) {

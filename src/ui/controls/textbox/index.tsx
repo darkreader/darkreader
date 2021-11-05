@@ -2,7 +2,7 @@ import {m} from 'malevic';
 import {mergeClass, omitAttrs} from '../utils';
 
 interface TextBoxProps extends Malevic.NodeAttrs {
-    type?: "text" | "time";
+    type?: 'text' | 'time';
     oninput?: (e: Event & {target: HTMLInputElement}) => void;
     onchange?: (e: Event & {target: HTMLInputElement}) => void;
 }

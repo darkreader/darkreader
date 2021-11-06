@@ -53,21 +53,19 @@ export function isRelativeHrefOnAbsolutePath(href: string): boolean {
         return true;
     }
     const url = parseURL(href);
-    const base = parseURL(location.href);
-    if (url.protocol !== base.protocol) {
+
+    if (url.protocol !== location.protocol) {
         return false;
     }
-    if (url.hostname !== base.hostname) {
+    if (url.hostname !== location.hostname) {
         return false;
     }
-    if (url.port !== base.port) {
+    if (url.port !== location.port) {
         return false;
     }
     // Now check if the path is on the same path as the base
     // We do this by getting the pathname up until the last slash.
-    const path = /.*\//.exec(url.pathname)[0];
-    const basePath = /.*\//.exec(base.pathname)[0];
-    return path === basePath;
+    return url.pathname === location.pathname;
 }
 
 export function getURLHostOrProtocol($url: string) {

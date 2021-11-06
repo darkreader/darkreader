@@ -113,7 +113,6 @@ function prepareSyncStorage<T extends {[key: string]: any}>(values: T): {[key: s
             (values as any)[key] = {
                 __meta_split_count: minimalKeysNeeded
             };
-            values[key] = undefined;
         }
     }
     return values;

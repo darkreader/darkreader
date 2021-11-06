@@ -50,6 +50,11 @@ export async function readSyncStorage<T extends {[key: string]: any}>(defaults: 
             }
 
             for (const key in sync) {
+                // Just to be sure: https://github.com/darkreader/darkreader/issues/7270
+                // The value of sync[key] shouldn't be null.
+                if (!sync[key]) {
+                    continue;
+                }
                 const metaKeysCount = sync[key].__meta_split_count;
                 if (!metaKeysCount) {
                     continue;

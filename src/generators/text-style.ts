@@ -4,7 +4,21 @@ export function createTextStyle(config: FilterConfig): string {
     const lines: string[] = [];
     // Don't target pre elements as they are preformatted element's e.g. code blocks
     // Exclude font libraries to preserve icons
-    lines.push('*:not(pre, pre *, code, .far, .fa, .glyphicon, [class*="vjs-"], .fab, .fa-github, .fas, .material-icons, .icofont, .typcn, mu, [class*="mu-"], .glyphicon, .icon) {');
+    lines.push('*:not(' + [
+        'pre, pre *, code, .glyphicon, [class*="vjs-"], .icofont, .typcn, mu, [class*="mu-"], .glyphicon, .icon',
+
+        // Font Awesome
+        '.fab, .fa-github, .fas',
+
+        // Material Icons
+        '.material',
+
+        // GitHub
+        '.blob-code-inner, .blob-code-inner *',
+
+        // Gitlab
+        '.monaco-editor',
+    ].join(', ') + ') {');
 
     if (config.useFont && config.fontFamily) {
         // TODO: Validate...

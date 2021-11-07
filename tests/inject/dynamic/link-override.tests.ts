@@ -151,5 +151,24 @@ describe('LINK STYLES', () => {
         expect(getComputedStyle(h1).backgroundColor).toBe('rgb(102, 102, 102)');
         expect(document.querySelector('.darkreader--fallback').textContent).toBe('');
     });
+
+    it('should handle styles with @import "..." screen;', async () => {
+        const importedCSS = 'h1 { background: gray; }';
+        const importedURL = getCSSEchoURL(importedCSS);
+        stubBackgroundFetchResponse(importedURL, importedCSS);
+        createCorsLink(multiline(
+            `@import "${importedURL}" screen;`,
+            'h1 strong { color: red; }',
+        ));
+        container.innerHTML = multiline(
+            '<h1><strong>Cross-origin import</strong> link override</h1>',
+        );
+        createOrUpdateDynamicTheme(theme, null, false);
+
+        await timeout(100);
+        expect(getComputedStyle(container.querySelector('h1')).backgroundColor).toBe('rgb(102, 102, 102)');
+        expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(255, 255, 255)');
+        expect(getComputedStyle(container.querySelector('h1 strong')).color).toBe('rgb(255, 26, 26)');
+    });
 });
 

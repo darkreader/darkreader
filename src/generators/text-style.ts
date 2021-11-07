@@ -4,7 +4,7 @@ export function createTextStyle(config: FilterConfig): string {
     // Don't target pre elements as they are preformatted element's e.g. code blocks
     // Exclude font libraries to preserve icons
 
-    const exlcudingSelectors: string = [
+    const excludingSelectors: string = [
         'pre, pre *, code, .glyphicon, [class*="vjs-"], .icofont, .typcn, mu, [class*="mu-"], .glyphicon, .icon',
 
         // Font Awesome
@@ -21,7 +21,7 @@ export function createTextStyle(config: FilterConfig): string {
     ].join(', ');
 
     const lines: string[] = [];
-    lines.push(`*:not(${ exlcudingSelectors }) {`);
+    lines.push(`*:not(${ excludingSelectors }) {`);
 
     if (config.useFont && config.fontFamily) {
         // TODO: Validate...

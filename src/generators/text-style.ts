@@ -21,7 +21,7 @@ export function createTextStyle(config: FilterConfig): string {
     ].join(', ');
 
     const lines: string[] = [];
-    lines.push(`*:not(${ mono }) {`);
+    lines.push(`*:not(${ exlcudingSelectors }) {`);
 
     if (config.useFont && config.fontFamily) {
         // TODO: Validate...

@@ -103,7 +103,15 @@ export function getCSSBaseBath(url: string) {
 export function replaceCSSRelativeURLsWithAbsolute($css: string, cssBasePath: string) {
     return $css.replace(cssURLRegex, (match) => {
         const pathValue = getCSSURLValue(match);
-        return `url("${getAbsoluteURL(cssBasePath, pathValue)}")`;
+        // Sites can have any kind of specified URL, thus also invalid ones.
+        // To prevent the whole operation from failing, let's just skip those
+        // invalid URL's and let them be invalid.
+        try {
+            return `url("${getAbsoluteURL(cssBasePath, pathValue)}")`;
+        } catch (err) {
+            logWarn('Not able to replace relative URL with Absolute URL, skipping');
+            return match;
+        }
     });
 }
 

@@ -4,7 +4,7 @@ export function createTextStyle(config: FilterConfig): string {
     // Don't target pre elements as they are preformatted element's e.g. code blocks
     // Exclude font libraries to preserve icons
 
-    const mono: string = [
+    const exlcudingSelectors: string = [
         'pre, pre *, code, .glyphicon, [class*="vjs-"], .icofont, .typcn, mu, [class*="mu-"], .glyphicon, .icon',
 
         // Font Awesome

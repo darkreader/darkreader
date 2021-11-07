@@ -1,10 +1,10 @@
 import type {FilterConfig} from '../definitions';
 
 export function createTextStyle(config: FilterConfig): string {
-    const lines: string[] = [];
     // Don't target pre elements as they are preformatted element's e.g. code blocks
     // Exclude font libraries to preserve icons
-    lines.push('*:not(' + [
+
+    const mono: string = [
         'pre, pre *, code, .glyphicon, [class*="vjs-"], .icofont, .typcn, mu, [class*="mu-"], .glyphicon, .icon',
 
         // Font Awesome
@@ -18,7 +18,10 @@ export function createTextStyle(config: FilterConfig): string {
 
         // Gitlab
         '.monaco-editor',
-    ].join(', ') + ') {');
+    ].join(', ');
+
+    const lines: string[] = [];
+    lines.push(`*:not(${ mono }) {`);
 
     if (config.useFont && config.fontFamily) {
         // TODO: Validate...

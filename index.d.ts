@@ -23,7 +23,6 @@ declare namespace DarkReader {
      * @param isEnabled Boolean `false` value.
      */
     function auto(isEnabled: false): void;
-    
     /**
      * Returns if darkreader is enabled.
      */

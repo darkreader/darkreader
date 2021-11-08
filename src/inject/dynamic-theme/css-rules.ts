@@ -19,10 +19,10 @@ export function iterateCSSRules(rules: CSSRuleList, iterate: (rule: CSSStyleRule
             }
         } else if ((rule as CSSMediaRule).media) {
             const media = Array.from((rule as CSSMediaRule).media);
-            const isScreenOrAll = media.some((m) => m.startsWith('screen') || m.startsWith('all'));
+            const isScreenOrAllOrQuery = media.some((m) => m.startsWith('screen') || m.startsWith('all') || m.startsWith('('));
             const isPrintOrSpeech = media.some((m) => m.startsWith('print') || m.startsWith('speech'));
 
-            if (isScreenOrAll || !isPrintOrSpeech) {
+            if (isScreenOrAllOrQuery || !isPrintOrSpeech) {
                 iterateCSSRules((rule as CSSMediaRule).cssRules, iterate, onMediaRuleError);
             }
         } else if ((rule as CSSSupportsRule).conditionText) {

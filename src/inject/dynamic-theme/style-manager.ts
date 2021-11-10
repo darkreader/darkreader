@@ -23,8 +23,9 @@ declare global {
 
 export type StyleElement = HTMLLinkElement | HTMLStyleElement;
 
+export type detailsArgument = {secondRound: boolean};
 export interface StyleManager {
-    details(): {rules: CSSRuleList};
+    details(options: detailsArgument): {rules: CSSRuleList};
     render(theme: Theme, ignoreImageAnalysis: string[]): void;
     pause(): void;
     destroy(): void;
@@ -270,9 +271,18 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
         return null;
     }
 
-    function details() {
+    function details(options: detailsArgument) {
         const rules = getRulesSync();
         if (!rules) {
+            // secondRound is only true after it's
+            // has gone trough `details()` & `getRulesAsync` already
+            // So that means that `getRulesSync` shouldn't fail.
+            // However as a fail-safe to prevent loops, we should
+            // return null here and not continue to `getRulesAsync`
+            if (options.secondRound) {
+                logWarn('Detected dead-lock at details(), returning early to prevent it.');
+                return null;
+            }
             if (isLoadingRules || wasLoadingError) {
                 return null;
             }

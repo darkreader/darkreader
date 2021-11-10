@@ -233,9 +233,7 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
             }
 
             if (cssRules) {
-                if (isRelativeHrefOnAbsolutePath(element.href)) {
-                    return cssRules;
-                } else if (!hasImports(cssRules, false)) {
+                if (!hasImports(cssRules, false)) {
                     return cssRules;
                 }
             }

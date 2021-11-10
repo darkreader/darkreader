@@ -192,7 +192,7 @@ function createDynamicStyleOverrides() {
         .filter((style) => !styleManagers.has(style))
         .map((style) => createManager(style));
     newManagers
-        .map((manager) => manager.details())
+        .map((manager) => manager.details({secondRound: false}))
         .filter((detail) => detail && detail.rules.length > 0)
         .forEach((detail) => {
             variablesStore.addRulesForMatching(detail.rules);
@@ -250,7 +250,7 @@ function createManager(element: StyleElement) {
     }
 
     function update() {
-        const details = manager.details();
+        const details = manager.details({secondRound: true});
         if (!details) {
             return;
         }
@@ -354,7 +354,7 @@ function watchForUpdates() {
         const newManagers = stylesToManage
             .map((style) => createManager(style));
         newManagers
-            .map((manager) => manager.details())
+            .map((manager) => manager.details({secondRound: false}))
             .filter((detail) => detail && detail.rules.length > 0)
             .forEach((detail) => {
                 variablesStore.addRulesForMatching(detail.rules);

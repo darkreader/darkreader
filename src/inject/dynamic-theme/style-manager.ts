@@ -7,7 +7,7 @@ import {logInfo, logWarn} from '../../utils/log';
 import {replaceCSSRelativeURLsWithAbsolute, removeCSSComments, replaceCSSFontFace, getCSSURLValue, cssImportRegex, getCSSBaseBath} from './css-rules';
 import {bgFetch} from './network';
 import {createStyleSheetModifier} from './stylesheet-modifier';
-import {isShadowDomSupported, isSafari, isThunderbird, isChromium} from '../../utils/platform';
+import {isShadowDomSupported, isSafari, isThunderbird, isChromium, isFirefox} from '../../utils/platform';
 
 declare global {
     interface Document {
@@ -44,7 +44,8 @@ export function shouldManageStyle(element: Node) {
                 element instanceof HTMLLinkElement &&
                 element.rel &&
                 element.rel.toLowerCase().includes('stylesheet') &&
-                !element.disabled
+                !element.disabled &&
+                (isFirefox ? !element.href.startsWith('moz-extension://') : true)
             )
         ) &&
         !element.classList.contains('darkreader') &&

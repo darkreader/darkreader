@@ -54,6 +54,7 @@ class PersistentStorageWrapper implements DevToolsStorage {
                 // If storage contains at least one relevant record, we consider data migrated.
                 if (data[DevTools.KEY_DYNAMIC] || data[DevTools.KEY_FILTER] || data[DevTools.KEY_STATIC]) {
                     this.dataIsMigrated = true;
+                    this.cache = data;
                     resolve();
                     return;
                 }

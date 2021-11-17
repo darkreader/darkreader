@@ -138,7 +138,11 @@ export function createStyleSheetModifier() {
                 return `${property}: ${value == null ? sourceValue : value}${important ? ' !important' : ''};`;
             };
 
-            const ruleText = `${selector} { ${declarations.map(getDeclarationText).join(' ')} }`;
+            let cssRulesText = '';
+            declarations.forEach((declarations) => {
+                cssRulesText += `${getDeclarationText(declarations)} `;
+            });
+            const ruleText = `${selector} { ${cssRulesText} }`;
             target.insertRule(ruleText, index);
         }
 

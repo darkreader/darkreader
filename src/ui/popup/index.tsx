@@ -1,6 +1,6 @@
 import {m} from 'malevic';
 import {sync} from 'malevic/dom';
-import connect from '../connect';
+import Connector from '../connect/connector';
 import Body from './components/body';
 import {popupHasBuiltInHorizontalBorders, popupHasBuiltInBorders, fixNotClosingPopupOnNavigation} from './utils/issues';
 import type {ExtensionData, ExtensionActions, TabInfo} from '../../definitions';
@@ -23,7 +23,7 @@ function renderBody(data: ExtensionData, tab: TabInfo, fonts: string[], actions:
 }
 
 async function start() {
-    const connector = connect();
+    const connector = new Connector();
     window.addEventListener('unload', () => connector.disconnect());
 
     const [data, tab, fonts] = await Promise.all([
@@ -69,23 +69,23 @@ if (DEBUG) {
 
     const socket = new WebSocket(`ws://localhost:8894`);
     socket.onmessage = (e) => {
-        const respond = (message: any) => socket.send(JSON.stringify(message));
+        const respond = (message: {type: string; id?: number; data?: any}) => socket.send(JSON.stringify(message));
         try {
-            const message = JSON.parse(e.data);
+            const message: {type: string; id: number; data: string} = JSON.parse(e.data);
             if (message.type === 'click') {
                 const selector = message.data;
-                const element = document.querySelector(selector);
+                const element: HTMLElement = document.querySelector(selector);
                 element.click();
-                respond({type: 'click-response'});
+                respond({type: 'click-response', id: message.id});
             } else if (message.type === 'exists') {
                 const selector = message.data;
                 const element = document.querySelector(selector);
-                respond({type: 'exists-response', data: element != null});
+                respond({type: 'exists-response', id: message.id, data: element != null});
             } else if (message.type === 'rect') {
                 const selector = message.data;
-                const element = document.querySelector(selector);
-                const rect = (element as HTMLElement).getBoundingClientRect();
-                respond({type: 'rect-response', data: {left: rect.left, top: rect.top, width: rect.width, height: rect.height}});
+                const element: HTMLElement = document.querySelector(selector);
+                const rect = element.getBoundingClientRect();
+                respond({type: 'rect-response', id: message.id, data: {left: rect.left, top: rect.top, width: rect.width, height: rect.height}});
             }
         } catch (err) {
             respond({type: 'error', data: String(err)});

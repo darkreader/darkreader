@@ -42,12 +42,41 @@ const mutexStorageWriting = new Mutex();
 
 export async function readSyncStorage<T extends {[key: string]: any}>(defaults: T): Promise<T> {
     return new Promise<T>((resolve) => {
-        chrome.storage.sync.get(defaults, (sync: T) => {
+        chrome.storage.sync.get(null, (sync: any) => {
             if (chrome.runtime.lastError) {
                 console.error(chrome.runtime.lastError.message);
                 resolve(defaults);
                 return;
             }
+
+            for (const key in sync) {
+                // Just to be sure: https://github.com/darkreader/darkreader/issues/7270
+                // The value of sync[key] shouldn't be null.
+                if (!sync[key]) {
+                    continue;
+                }
+                const metaKeysCount = sync[key].__meta_split_count;
+                if (!metaKeysCount) {
+                    continue;
+                }
+
+                let string = '';
+                for (let i = 0; i < metaKeysCount; i++) {
+                    string += sync[`${key}_${i.toString(36)}`];
+                    delete sync[`${key}_${i.toString(36)}`];
+                }
+                try {
+                    sync[key] = JSON.parse(string);
+                } catch (error) {
+                    console.error('Could not parse record from sync storage', string);
+                }
+            }
+
+            sync = {
+                ...defaults,
+                ...sync
+            };
+
             resolve(sync);
         });
     });
@@ -66,10 +95,34 @@ export async function readLocalStorage<T extends {[key: string]: any}>(defaults:
     });
 }
 
+function prepareSyncStorage<T extends {[key: string]: any}>(values: T): {[key: string]: any} {
+    for (const key in values) {
+        const value = values[key];
+        const string = JSON.stringify(value);
+        // The maximum size of any one item that each extension is allowed to store in the sync storage area,
+        // as measured by the JSON stringification of the item's value plus the length of its key.
+        // Source: https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/storage/sync
+        const totalLength = string.length + key.length;
+        if (totalLength > chrome.storage.sync.QUOTA_BYTES_PER_ITEM) {
+            // This length limit permits us to store up to 1000 = (parseInt('rr', 36) + 1) records.
+            const maxLength = chrome.storage.sync.QUOTA_BYTES_PER_ITEM - key.length - 1 - 2;
+            const minimalKeysNeeded = Math.ceil(string.length / maxLength);
+            for (let i = 0; i < minimalKeysNeeded; i++) {
+                (values as any)[`${key}_${i.toString(36)}`] = string.substring(i * maxLength, (i + 1) * maxLength);
+            }
+            (values as any)[key] = {
+                __meta_split_count: minimalKeysNeeded
+            };
+        }
+    }
+    return values;
+}
+
 export async function writeSyncStorage<T extends {[key: string]: any}>(values: T): Promise<void> {
     return new Promise<void>(async (resolve, reject) => {
+        const packaged = prepareSyncStorage(values);
         await mutexStorageWriting.lock();
-        chrome.storage.sync.set(values, () => {
+        chrome.storage.sync.set(packaged, () => {
             if (chrome.runtime.lastError) {
                 reject(chrome.runtime.lastError);
                 mutexStorageWriting.unlock();
@@ -92,8 +145,8 @@ export async function writeLocalStorage<T extends {[key: string]: any}>(values: 
 }
 
 export const subscribeToOuterSettingsChange = (callback: () => void) => {
-    chrome.storage.onChanged.addListener(() => {
-        if (!mutexStorageWriting.isLocked()) {
+    chrome.storage.onChanged.addListener((_, storageArea) => {
+        if (storageArea === 'sync' && !mutexStorageWriting.isLocked()) {
             callback();
         }
     });

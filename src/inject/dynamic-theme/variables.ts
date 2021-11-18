@@ -1,7 +1,7 @@
 import {modifyBackgroundColor, modifyBorderColor, modifyForegroundColor} from '../../generators/modify-colors';
 import {getParenthesesRange} from '../../utils/text';
 import {iterateCSSRules, iterateCSSDeclarations} from './css-rules';
-import {tryParseColor, getBgImageModifier, getShadowModifier} from './modify-css';
+import {tryParseColor, getBgImageModifier, getShadowModifierWithInfo} from './modify-css';
 import type {CSSValueModifier} from './modify-css';
 import type {Theme} from '../../definitions';
 
@@ -197,6 +197,7 @@ export class VariablesStore {
                     const decs = getDeclarations();
                     onTypeChange(decs);
                 };
+
                 callbacks.add(callback);
                 this.subscribeForVarTypeChange(varName, callback);
             };
@@ -265,11 +266,15 @@ export class VariablesStore {
                     );
                     // Check if property is box-shadow and if so, do a pass-trough to modify the shadow
                     if (property === 'box-shadow') {
-                        const shadowModifier = getShadowModifier(variableReplaced);
-                        return shadowModifier(theme) || variableReplaced;
+                        const shadowModifier = getShadowModifierWithInfo(variableReplaced);
+                        const modifiedShadow = shadowModifier(theme);
+                        if (modifiedShadow.unparseableMatchesLength !== modifiedShadow.matchesLength) {
+                            return modifiedShadow.result;
+                        }
                     }
                     return variableReplaced;
                 };
+
                 const modified = modify();
                 if (unknownVars.size > 0) {
                     return new Promise<string>((resolve) => {
@@ -279,6 +284,7 @@ export class VariablesStore {
                             const newValue = modify();
                             resolve(newValue);
                         };
+
                         this.subscribeForVarTypeChange(firstUnknownVar, callback);
                     });
                 }
@@ -603,6 +609,7 @@ export function replaceCSSVariablesNames(
         }
         return `var(${newName}, ${newFallback})`;
     };
+
     return replaceVariablesMatches(value, matchReplacer);
 }
 
@@ -680,6 +687,7 @@ function insertVarValues(source: string, varValues: Map<string, string>, stack =
         }
         return inserted;
     };
+
     const replaced = replaceVariablesMatches(source, matchReplacer);
     if (containsUnresolvedVar) {
         return null;

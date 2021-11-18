@@ -15,7 +15,7 @@ import createCSSFilterStylesheet from '../generators/css-filter';
 import {getDynamicThemeFixesFor} from '../generators/dynamic-theme';
 import createStaticStylesheet from '../generators/static-theme';
 import {createSVGFilterStylesheet, getSVGFilterMatrixValue, getSVGReverseFilterMatrixValue} from '../generators/svg-filter';
-import type {ExtensionData, FilterConfig, News, Shortcuts, UserSettings, TabInfo} from '../definitions';
+import type {ExtensionData, FilterConfig, News, Shortcuts, UserSettings, TabInfo, TabData} from '../definitions';
 import {isSystemDarkModeEnabled} from '../utils/media-query';
 import {isFirefox, isMV3, isThunderbird} from '../utils/platform';
 import {MessageType} from '../utils/message';
@@ -28,6 +28,8 @@ interface ExtensionState {
     wasEnabledOnLastCheck: boolean;
     registeredContextMenus: boolean;
 }
+
+declare const __DEBUG__: boolean;
 
 export class Extension {
     config: ConfigManager;
@@ -44,23 +46,18 @@ export class Extension {
     private popupOpeningListener: () => void = null;
     // Is used only with Firefox to bypass Firefox bug
     private wasLastColorSchemeDark: boolean = null;
-    private startBarrier: PromiseBarrier = null;
+    private startBarrier: PromiseBarrier<void, void> = null;
     private stateManager: StateManager<ExtensionState> = null;
 
-    static ALARM_NAME = 'auto-time-alarm';
-    static LOCAL_STORAGE_KEY = 'Extension-state';
+    private static ALARM_NAME = 'auto-time-alarm';
+    private static LOCAL_STORAGE_KEY = 'Extension-state';
     constructor() {
         this.config = new ConfigManager();
         this.devtools = new DevTools(this.config, async () => this.onSettingsChanged());
         this.messenger = new Messenger(this.getMessengerAdapter());
         this.news = new Newsmaker((news) => this.onNewsUpdate(news));
         this.tabs = new TabManager({
-            getConnectionMessage: ({url, frameURL, unsupportedSender}) => {
-                if (unsupportedSender) {
-                    return this.getUnsupportedSenderMessage();
-                }
-                return this.getConnectionMessage(url, frameURL);
-            },
+            getConnectionMessage: ({url, frameURL}) => this.getConnectionMessage(url, frameURL),
             getTabMessage: this.getTabMessage,
             onColorSchemeChange: this.onColorSchemeChange,
         });
@@ -166,6 +163,55 @@ export class Extension {
 
         this.user.settings.fetchNews && this.news.subscribe();
         this.startBarrier.resolve();
+
+        if (__DEBUG__) {
+            const socket = new WebSocket(`ws://localhost:8894`);
+            socket.onmessage = (e) => {
+                const respond = (message: {type: string; data?: ExtensionData | string | boolean | {[key: string]: string}; id?: number}) => socket.send(JSON.stringify(message));
+                try {
+                    const message: {type: string; data: Partial<UserSettings> | boolean | {[key: string]: string}; id: number} = JSON.parse(e.data);
+                    switch (message.type) {
+                        case 'changeSettings':
+                            this.changeSettings(message.data as Partial<UserSettings>);
+                            respond({type: 'changeSettings-response', id: message.id});
+                            break;
+                        case 'collectData':
+                            this.collectData().then((data) => {
+                                respond({type: 'collectData-response', id: message.id, data});
+                            });
+                            break;
+                        case 'changeLocalStorage': {
+                            const data = message.data as {[key: string]: string};
+                            for (const key in data) {
+                                localStorage[key] = data[key];
+                            }
+                            respond({type: 'changeLocalStorage-response', id: message.id});
+                            break;
+                        }
+                        case 'getLocalStorage':
+                            respond({type: 'getLocalStorage-response', id: message.id, data: localStorage ? JSON.stringify(localStorage) : null});
+                            break;
+                        case 'changeChromeStorage': {
+                            const region: 'local' | 'sync' = (message.data as any).region;
+                            chrome.storage[region].set((message.data as any).data, () => respond({type: 'changeChromeStorage-response', id: message.id}));
+                            break;
+                        }
+                        case 'getChromeStorage': {
+                            const keys = (message.data as any).keys;
+                            const region: 'local' | 'sync' = (message.data as any).region;
+                            chrome.storage[region].get(keys, (data) => respond({type: 'getChromeStorage-response', data, id: message.id}));
+                            break;
+                        }
+                        case 'setDataIsMigratedForTesting':
+                            this.devtools.setDataIsMigratedForTesting(message.data as boolean);
+                            respond({type: 'setDataIsMigratedForTesting-response', id: message.id});
+                            break;
+                    }
+                } catch (err) {
+                    respond({type: 'error', data: String(err)});
+                }
+            };
+        }
     }
 
     private getMessengerAdapter(): ExtensionAdapter {
@@ -292,13 +338,14 @@ export class Extension {
             settings: this.user.settings,
             news: await this.news.getLatest(),
             shortcuts: await this.getShortcuts(),
+            colorScheme: this.config.COLOR_SCHEMES_RAW,
             devtools: {
-                dynamicFixesText: this.devtools.getDynamicThemeFixesText(),
-                filterFixesText: this.devtools.getInversionFixesText(),
-                staticThemesText: this.devtools.getStaticThemesText(),
-                hasCustomDynamicFixes: this.devtools.hasCustomDynamicThemeFixes(),
-                hasCustomFilterFixes: this.devtools.hasCustomFilterFixes(),
-                hasCustomStaticFixes: this.devtools.hasCustomStaticFixes(),
+                dynamicFixesText: await this.devtools.getDynamicThemeFixesText(),
+                filterFixesText: await this.devtools.getInversionFixesText(),
+                staticThemesText: await this.devtools.getStaticThemesText(),
+                hasCustomDynamicFixes: await this.devtools.hasCustomDynamicThemeFixes(),
+                hasCustomFilterFixes: await this.devtools.hasCustomFilterFixes(),
+                hasCustomStaticFixes: await this.devtools.hasCustomStaticFixes(),
             },
         };
     }
@@ -321,13 +368,9 @@ export class Extension {
         if (this.user.settings) {
             return this.getTabMessage(url, frameURL);
         }
-        return new Promise<{type: string; data?: any}>((resolve) => {
+        return new Promise<TabData>((resolve) => {
             this.user.loadSettings().then(() => resolve(this.getTabMessage(url, frameURL)));
         });
-    }
-
-    private getUnsupportedSenderMessage() {
-        return {type: MessageType.BG_UNSUPPORTED_SENDER};
     }
 
     private onColorSchemeChange = ({isDark}: {isDark: boolean}) => {
@@ -438,7 +481,6 @@ export class Extension {
         this.toggleURL(url);
     }
 
-
     //------------------------------------
     //
     //       Handle config changes
@@ -480,7 +522,6 @@ export class Extension {
         // to prevent cycling across instances.
     }
 
-
     //----------------------
     //
     // Add/remove css to tab
@@ -499,7 +540,7 @@ export class Extension {
         };
     }
 
-    private getTabMessage = (url: string, frameURL: string) => {
+    private getTabMessage = (url: string, frameURL: string): TabData => {
         const urlInfo = this.getURLInfo(url);
         if (this.isEnabled && isURLEnabled(url, this.user.settings, urlInfo)) {
             const custom = this.user.settings.customThemes.find(({url: urlList}) => isURLInList(url, urlList));
@@ -507,6 +548,8 @@ export class Extension {
             const theme = custom ? custom.theme : preset ? preset.theme : this.user.settings.theme;
 
             logInfo(`Creating CSS for url: ${url}`);
+            logInfo(`Custom theme ${custom ? 'was found' : 'was not found'}, Preset theme ${preset ? 'was found' : 'was not found'}
+            The theme(${custom ? 'custom' : preset ? 'preset' : 'global'} settings) used is: ${JSON.stringify(theme)}`);
             switch (theme.engine) {
                 case ThemeEngines.cssFilter: {
                     return {
@@ -559,7 +602,6 @@ export class Extension {
             type: MessageType.BG_CLEAN_UP,
         };
     };
-
 
     //-------------------------------------
     //          User settings

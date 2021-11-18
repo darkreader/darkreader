@@ -79,14 +79,16 @@ export function injectProxy() {
     }
 
     function proxyGetElementsByTagName(tagName: string): NodeListOf<HTMLElement> {
+        if (tagName !== 'style') {
+            return getElementsByTagNameDescriptor.value.call(this, tagName);
+        }
+
         const getCurrentElementValue = () => {
-            let elements: NodeListOf<HTMLElement> = getElementsByTagNameDescriptor.value.call(this, tagName);
-            if (tagName === 'style') {
-                elements = Object.setPrototypeOf([...elements].filter((element: HTMLElement) => {
-                    return !element.classList.contains('darkreader');
-                }), NodeList.prototype);
-            }
-            return elements;
+            const elements: NodeListOf<HTMLElement> = getElementsByTagNameDescriptor.value.call(this, tagName);
+
+            return Object.setPrototypeOf([...elements].filter((element: HTMLElement) => {
+                return !element.classList.contains('darkreader');
+            }), NodeList.prototype);
         };
 
         let elements = getCurrentElementValue();
@@ -96,7 +98,7 @@ export function injectProxy() {
         // current situation of the DOM. Instead of a static list.
         const NodeListBehavior: ProxyHandler<NodeListOf<HTMLElement>> = {
             get: function (_: NodeListOf<HTMLElement>, property: string) {
-                return getCurrentElementValue()[property];
+                return getCurrentElementValue()[Number(property)];
             }
         };
         elements = new Proxy(elements, NodeListBehavior);

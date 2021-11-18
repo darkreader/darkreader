@@ -7,7 +7,7 @@ const {createTask} = require('./task');
 const srcDir = 'src';
 const cwdPaths = [
     'background/index.html',
-    'config/**/*.config',
+    'config/**/*.{config,drconf}',
     'icons/**/*.*',
     'ui/assets/**/*.*',
     'ui/popup/compatibility.js',

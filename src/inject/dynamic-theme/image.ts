@@ -29,6 +29,7 @@ export async function getImageDetails(url: string) {
                 dataURL = await getImageDataURL(url);
             } catch (error) {
                 reject(error);
+                return;
             }
         }
 
@@ -176,7 +177,6 @@ function analyzeImage(image: HTMLImageElement) {
         isTooLarge: false,
     };
 }
-
 
 export function getFilteredImageDataURL({dataURL, width, height}: ImageDetails, theme: FilterConfig): string {
     const matrix = getSVGFilterMatrixValue(theme);

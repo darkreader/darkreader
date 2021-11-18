@@ -10,17 +10,13 @@ interface NewsmakerState {
 }
 
 export default class Newsmaker {
-    static UPDATE_INTERVAL = getDurationInMinutes({hours: 4});
-    static ALARM_NAME = 'newsmaker';
-    static LOCAL_STORAGE_KEY = 'Newsmaker-state';
+    private static UPDATE_INTERVAL = getDurationInMinutes({hours: 4});
+    private static ALARM_NAME = 'newsmaker';
+    private static LOCAL_STORAGE_KEY = 'Newsmaker-state';
 
     private stateManager: StateManager<NewsmakerState>;
     private latest: News[];
     private latestTimestamp: number;
-    async getLatest(): Promise<News[]> {
-        await this.stateManager.loadState();
-        return this.latest;
-    }
     onUpdate: (news: News[]) => void;
 
     constructor(onUpdate: (news: News[]) => void) {
@@ -28,6 +24,11 @@ export default class Newsmaker {
         this.latest = [];
         this.latestTimestamp = null;
         this.onUpdate = onUpdate;
+    }
+
+    async getLatest(): Promise<News[]> {
+        await this.stateManager.loadState();
+        return this.latest;
     }
 
     private alarmListener = (alarm: chrome.alarms.Alarm): void => {

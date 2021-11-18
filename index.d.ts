@@ -23,6 +23,10 @@ declare namespace DarkReader {
      * @param isEnabled Boolean `false` value.
      */
     function auto(isEnabled: false): void;
+    /**
+     * Returns if darkreader is enabled.
+     */
+    function isEnabled(): boolean;
 
     /**
      * Sets a function for making CORS requests.

@@ -173,6 +173,7 @@ class PuppeteerEnvironment extends JestNodeEnvironment {
             const sockets = new Set();
             const resolvers = new Map();
             const rejectors = new Map();
+            let idCount = 0;
 
             wsServer.on('listening', () => resolve(wsServer));
 
@@ -181,25 +182,25 @@ class PuppeteerEnvironment extends JestNodeEnvironment {
                 ws.on('message', (data) => {
                     const message = JSON.parse(data);
                     if (message.type === 'error') {
-                        const reject = rejectors.get(message.type);
+                        const reject = rejectors.get(message.id);
                         reject(message.data);
                     } else {
-                        const resolve = resolvers.get(message.type);
+                        const resolve = resolvers.get(message.id);
                         resolve(message.data);
                     }
-                    resolvers.delete(message.type);
-                    rejectors.delete(message.type);
+                    resolvers.delete(message.id);
+                    rejectors.delete(message.id);
                 });
                 ws.on('close', () => sockets.delete(ws));
             });
 
             function sendToUIPage(message) {
                 return new Promise((resolve, reject) => {
-                    const responseType = `${message.type}-response`;
-                    resolvers.set(responseType, resolve);
-                    rejectors.set(responseType, reject);
-                    const json = JSON.stringify(message);
+                    resolvers.set(idCount, resolve);
+                    rejectors.set(idCount, reject);
+                    const json = JSON.stringify({...message, id: idCount});
                     sockets.forEach((ws) => ws.send(json));
+                    idCount++;
                 });
             }
 
@@ -211,6 +212,16 @@ class PuppeteerEnvironment extends JestNodeEnvironment {
             this.global.devtoolsUtils = {
                 paste: async (fixes) => await sendToUIPage({type: 'debug-devtools-paste', data: fixes}),
                 reset: async () => await sendToUIPage({type: 'debug-devtools-reset'}),
+            };
+
+            this.global.backgroundUtils = {
+                changeSettings: async (settings) => await sendToUIPage({type: 'changeSettings', data: settings}),
+                collectData: async () => await sendToUIPage({type: 'collectData'}),
+                changeLocalStorage: async (data) => await sendToUIPage({type: 'changeLocalStorage', data}),
+                getLocalStorage: async () => await sendToUIPage({type: 'getLocalStorage'}),
+                changeChromeStorage: async (region, data) => await sendToUIPage({type: 'changeChromeStorage', data: {region, data}}),
+                getChromeStorage: async (region, keys) => await sendToUIPage({type: 'getChromeStorage', data: {region, keys}}),
+                setDataIsMigratedForTesting: async (value) => await sendToUIPage({type: 'setDataIsMigratedForTesting', data: value}),
             };
         });
     }

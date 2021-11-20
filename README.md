@@ -11,7 +11,7 @@
 
 ## Questions
 
-Most questions can be answered by reading the [help page](https://darkreader.org/help/).
+Most questions can be answered by reading the [help page](https://darkreader.org/help/) or the [interface documentation](https://github.com/darkreader/darkreader/blob/master/documentation/DOCUMENTATION.md).
 If the help page doesn't answer your question, open up a new [discussion](https://github.com/darkreader/darkreader/discussions).
 
 ## How to contribute

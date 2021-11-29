@@ -90,6 +90,9 @@ const CSS = await collectCSS();
 const isEnabled = isDarkReaderEnabled();
 ```
 
+Be aware, that darkreader will add the `chrome` object onto the `window` object, these are to stub certain functions that
+the code will use. They originate from the webextension-api.
+
 ## Site fixes
 
 Automatically syncing the site fixes to every Dark Reader user was disabled because the GitHub team doesn't allow using GitHub as a CDN. Storing these files and making requests to other resources would be expensive and look suspicious. As such, changes are included with each new Dark Reader release.

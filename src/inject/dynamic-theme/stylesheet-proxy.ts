@@ -1,4 +1,4 @@
-export function injectProxy() {
+export function injectProxy(enableStyleSheetsProxy: boolean) {
     document.dispatchEvent(new CustomEvent('__darkreader__inlineScriptsAllowed'));
 
     const addRuleDescriptor = Object.getOwnPropertyDescriptor(CSSStyleSheet.prototype, 'addRule');
@@ -6,7 +6,8 @@ export function injectProxy() {
     const deleteRuleDescriptor = Object.getOwnPropertyDescriptor(CSSStyleSheet.prototype, 'deleteRule');
     const removeRuleDescriptor = Object.getOwnPropertyDescriptor(CSSStyleSheet.prototype, 'removeRule');
 
-    const documentStyleSheetsDescriptor = Object.getOwnPropertyDescriptor(Document.prototype, 'styleSheets');
+    const documentStyleSheetsDescriptor = enableStyleSheetsProxy ?
+        Object.getOwnPropertyDescriptor(Document.prototype, 'styleSheets') : null;
 
     // Reference:
     // https://github.com/darkreader/darkreader/issues/6480#issuecomment-897696175
@@ -22,7 +23,9 @@ export function injectProxy() {
         Object.defineProperty(CSSStyleSheet.prototype, 'removeRule', removeRuleDescriptor);
         document.removeEventListener('__darkreader__cleanUp', cleanUp);
         document.removeEventListener('__darkreader__addUndefinedResolver', addUndefinedResolver);
-        Object.defineProperty(Document.prototype, 'styleSheets', documentStyleSheetsDescriptor);
+        if (enableStyleSheetsProxy) {
+            Object.defineProperty(Document.prototype, 'styleSheets', documentStyleSheetsDescriptor);
+        }
         if (shouldWrapHTMLElement) {
             Object.defineProperty(Element.prototype, 'getElementsByTagName', getElementsByTagNameDescriptor);
         }
@@ -109,7 +112,9 @@ export function injectProxy() {
     Object.defineProperty(CSSStyleSheet.prototype, 'insertRule', Object.assign({}, insertRuleDescriptor, {value: proxyInsertRule}));
     Object.defineProperty(CSSStyleSheet.prototype, 'deleteRule', Object.assign({}, deleteRuleDescriptor, {value: proxyDeleteRule}));
     Object.defineProperty(CSSStyleSheet.prototype, 'removeRule', Object.assign({}, removeRuleDescriptor, {value: proxyRemoveRule}));
-    Object.defineProperty(Document.prototype, 'styleSheets', Object.assign({}, documentStyleSheetsDescriptor, {get: proxyDocumentStyleSheets}));
+    if (enableStyleSheetsProxy) {
+        Object.defineProperty(Document.prototype, 'styleSheets', Object.assign({}, documentStyleSheetsDescriptor, {get: proxyDocumentStyleSheets}));
+    }
     if (shouldWrapHTMLElement) {
         Object.defineProperty(Element.prototype, 'getElementsByTagName', Object.assign({}, getElementsByTagNameDescriptor, {value: proxyGetElementsByTagName}));
     }

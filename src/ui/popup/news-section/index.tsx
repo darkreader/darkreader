@@ -24,6 +24,8 @@ export default function NewsSection(props: ViewProps) {
                     'news-section__main-link': true,
                     'news-section__main-link--fresh': isFresh(latest),
                 }}
+                target="_blank"
+                rel="noopener noreferrer"
             >
                 {latest.headline}
             </a> : null}

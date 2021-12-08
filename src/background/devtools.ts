@@ -3,6 +3,7 @@ import {parseInversionFixes, formatInversionFixes} from '../generators/css-filte
 import {parseDynamicThemeFixes, formatDynamicThemeFixes} from '../generators/dynamic-theme';
 import {parseStaticThemes, formatStaticThemes} from '../generators/static-theme';
 import type ConfigManager from './config-manager';
+import {isFirefox} from '../utils/platform';
 
 // TODO(bershanskiy): Add support for reads/writes of multiple keys at once for performance.
 // TODO(bershanskiy): Popup UI heeds only hasCustom*Fixes() and nothing else. Consider storing that data separatelly.
@@ -209,7 +210,9 @@ export default class DevTools {
     private store: DevToolsStorage;
 
     constructor(config: ConfigManager, onChange: () => void) {
-        if (typeof chrome.storage.local !== 'undefined' && chrome.storage.local !== null) {
+        // Firefox don't seem to like using storage.local to store big data on the background-extension.
+        // Disabling it for now and defaulting back to localStorage.
+        if (typeof chrome.storage.local !== 'undefined' && chrome.storage.local !== null && !isFirefox) {
             this.store = new PersistentStorageWrapper();
         } else if (typeof localStorage !== 'undefined' && localStorage != null) {
             this.store = new LocalStorageWrapper();

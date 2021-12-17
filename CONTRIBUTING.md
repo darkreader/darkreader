@@ -86,11 +86,11 @@ IGNORE IMAGE ANALYSIS
 ```
 
 | Rule | Description | Notes / Examples |
-|-|-|-|
-| `INVERT` | Inverts specified elements. | **Dynamic Mode**: INVERT only for dark images that are invisible on dark backgrounds. |
-| `CSS` | Adds custom CSS to a web page. | `!important` keyword should be specified for each CSS property to prevent overrides by other stylesheets.<br>**Dynamic mode** supports `${COLOR}` template, where `COLOR` is a color value before the inversion. <br>*Example*: `${white}` will become `${black}` in dark mode. |
-| `IGNORE INLINE STYLE` | Prevents inline style analysis of matched elements. | *Example*: `<p style="color: red">` element's style attribute will not be changed. |
-| `IGNORE IMAGE ANALYSIS` | Prevents background images from being analyzed for matched selectors. |  |
+|---|---|---|
+| **INVERT** | Inverts specified elements. | **Dynamic Mode**: INVERT only for dark images that are invisible on dark backgrounds. |
+| **CSS** | Adds custom CSS to a web page. | `!important` keyword should be specified for each CSS property to prevent overrides by other stylesheets.<br>**Dynamic mode** supports `${COLOR}` template, where `COLOR` is a color value before the inversion. <br>*Example*: `${white}` will become `${black}` in dark mode. |
+| **IGNORE&nbsp;INLINE&nbsp;STYLE** | Prevents inline style analysis of matched elements. | *Example*: `<p style="color: red">` element's style attribute will not be changed. |
+| **IGNORE&nbsp;IMAGE&nbsp;ANALYSIS** | Prevents background images from being analyzed for matched selectors. |  |
 
 ## Adding a new color scheme
 
@@ -132,13 +132,12 @@ CSS
 ```
 
 Here is a full table of available CSS variables:
-
 | Variable | Description | Use |
-|-|-|-|
-| `--darkreader-neutral-background` | Neutral background color that corresponds to the user's settings. | Mostly used for elements that have a wrong background color |
-| `--darkreader-neutral-text` | Neutral text color that corresponds to the user's settings. | Used for elements with a wrong text color |
-| `--darkreader-selection-background` | The text color setting defined by the user. | The user's Text Color setting |
-| `--darkreader-selection-text` | The background color setting defined by the user. | The user's Background Color setting |
+|---|---|---|
+| **`--darkreader-neutral-background`** | Neutral background color that <br>corresponds to the user's settings. | Mostly used for elements that have <br>a wrong background color |
+| **`--darkreader-neutral-text`** | Neutral text color that <br>corresponds to the user's settings. | Used for elements with a wrong text color |
+| **`--darkreader-selection-background`** | The text color setting <br>defined by the user. | The user's Text Color setting |
+| **`--darkreader-selection-text`** | The background color setting <br>defined by the user. | The user's Background Color setting |
 
 ## Fixes for Filter and Filter+ mode
 

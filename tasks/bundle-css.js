@@ -1,9 +1,9 @@
-const fs = require('fs-extra');
-const less = require('less');
-const path = require('path');
-const {getDestDir, PLATFORM} = require('./paths');
-const reload = require('./reload');
-const {createTask} = require('./task');
+import fs from 'fs-extra';
+import less from 'less';
+import path from 'path';
+import {getDestDir, PLATFORM} from './paths.js';
+import reload from './reload.js';
+import {createTask} from './task.js';
 
 function getLessFiles({debug}) {
     const dir = getDestDir({debug, platform: PLATFORM.CHROME});
@@ -41,7 +41,7 @@ async function bundleCSS({debug}) {
     }
 }
 
-module.exports = createTask(
+export default createTask(
     'bundle-css',
     bundleCSS,
 ).addWatcher(

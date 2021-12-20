@@ -1,7 +1,7 @@
-const fs = require('fs-extra');
-const {getDestDir, PLATFORM} = require('./paths');
-const reload = require('./reload');
-const {createTask} = require('./task');
+import fs from 'fs-extra';
+import {getDestDir, PLATFORM} from './paths.js';
+import reload from './reload.js';
+import {createTask} from './task.js';
 
 const enLocale = fs.readFileSync('src/_locales/en.config', {encoding: 'utf8'}).replace(/^#.*?$/gm, '');
 global.chrome = global.chrome || {};
@@ -21,27 +21,29 @@ global.chrome.i18n.getMessage = global.chrome.i18n.getMessage || ((name) => {
 });
 global.chrome.i18n.getUILanguage = global.chrome.i18n.getUILanguage || (() => 'en-US');
 
-const tsConfig = require('../src/tsconfig.json');
-require('ts-node').register({
+import {register as tsRegister} from 'ts-node';
+import {register as tsPaths} from 'tsconfig-paths';
+const tsConfig = fs.readJSONSync('src/tsconfig.json');
+tsRegister({
     transpileOnly: true,
     compilerOptions: {
         ...tsConfig.compilerOptions,
-        module: 'commonjs',
+        module: 'esnext',
     },
 });
-require('tsconfig-paths').register({
+tsPaths({
     baseUrl: './',
     paths: {
-        'malevic/*': ['node_modules/malevic/umd/*'],
-        'malevic': ['node_modules/malevic/umd/index'],
+        'malevic/*': ['node_modules/malevic/*'],
+        'malevic': ['node_modules/malevic'],
     }
 });
-const Malevic = require('malevic/umd/index');
-const MalevicString = require('malevic/umd/string');
-const DevToolsBody = require('../src/ui/devtools/components/body').default;
-const PopupBody = require('../src/ui/popup/components/body').default;
-const CSSEditorBody = require('../src/ui/stylesheet-editor/components/body').default;
-const {getMockData, getMockActiveTabInfo} = require('../src/ui/connect/mock');
+import Malevic from 'malevic';
+import MalevicString from 'malevic/string.mjs';
+import DevToolsBody from '../src/ui/devtools/components/body.tsx';
+import PopupBody from '../src/ui/popup/components/body.tsx';
+import CSSEditorBody from '../src/ui/stylesheet-editor/components/body.tsx';
+import {getMockData, getMockActiveTabInfo} from '../src/ui/connect/mock.ts';
 
 const pages = [
     {
@@ -107,7 +109,7 @@ async function rebuildHTML(changedFiles) {
     );
 }
 
-module.exports = createTask(
+export default createTask(
     'bundle-html',
     bundleHTML,
 ).addWatcher(

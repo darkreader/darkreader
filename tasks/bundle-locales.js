@@ -1,7 +1,7 @@
-const fs = require('fs-extra');
-const {getDestDir, PLATFORM} = require('./paths');
-const reload = require('./reload');
-const {createTask} = require('./task');
+import fs from 'fs-extra';
+import {getDestDir, PLATFORM} from './paths.js';
+import reload from './reload.js';
+import {createTask} from './task.js';
 
 async function bundleLocale(/** @type {string} */filePath, {debug}) {
     let file = await fs.readFile(filePath, 'utf8');
@@ -48,7 +48,7 @@ async function bundleLocales({debug}) {
     }
 }
 
-module.exports = createTask(
+export default createTask(
     'bundle-locales',
     bundleLocales,
 ).addWatcher(

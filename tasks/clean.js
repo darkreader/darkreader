@@ -1,6 +1,6 @@
-const fs = require('fs-extra');
-const {getDestDir, PLATFORM} = require('./paths');
-const {createTask} = require('./task');
+import fs from 'fs-extra';
+import {getDestDir, PLATFORM} from './paths.js';
+import {createTask} from './task.js';
 
 async function clean({debug}) {
     await fs.remove(getDestDir({debug, platform: PLATFORM.CHROME}));
@@ -9,7 +9,7 @@ async function clean({debug}) {
     await fs.remove(getDestDir({debug, platform: PLATFORM.THUNDERBIRD}));
 }
 
-module.exports = createTask(
+export default createTask(
     'clean',
     clean,
 );

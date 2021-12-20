@@ -1,14 +1,13 @@
-const fs = require('fs-extra');
-const os = require('os');
-const rollup = require('rollup');
-const rollupPluginNodeResolve = require('@rollup/plugin-node-resolve').default;
-const rollupPluginReplace = require('@rollup/plugin-replace');
-const rollupPluginTypescript = require('rollup-plugin-typescript2');
-const typescript = require('typescript');
-const {getDestDir, PLATFORM} = require('./paths');
-const reload = require('./reload');
-const {PORT} = reload;
-const {createTask} = require('./task');
+import fs from 'fs-extra';
+import os from 'os';
+import rollup from 'rollup';
+import rollupPluginNodeResolve from '@rollup/plugin-node-resolve';
+import rollupPluginReplace from '@rollup/plugin-replace';
+import rollupPluginTypescript from 'rollup-plugin-typescript2';
+import typescript from 'typescript';
+import {getDestDir, PLATFORM} from './paths.js';
+import reload, {PORT} from './reload.js';
+import {createTask} from './task.js';
 
 async function copyToBrowsers({cwdPath, debug}) {
     const destPath = `${getDestDir({debug, platform: PLATFORM.CHROME})}/${cwdPath}`;
@@ -164,7 +163,7 @@ function getWatchFiles() {
 /** @type {string[]} */
 let watchFiles;
 
-module.exports = createTask(
+export default createTask(
     'bundle-js',
     async ({debug, watch}) => await Promise.all(
         jsEntries.map((entry) => bundleJS(entry, {debug, watch}))

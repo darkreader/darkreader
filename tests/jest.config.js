@@ -1,4 +1,4 @@
-module.exports = {
+export default {
     projects: [
         'tests/config/jest.config.js',
         'tests/utils/jest.config.js',

@@ -1,7 +1,7 @@
-const WebSocket = require('ws');
-const {log} = require('./utils');
+import WebSocket from 'ws';
+import {log} from './utils.js';
 
-const PORT = 8890;
+export const PORT = 8890;
 const WAIT_FOR_CONNECTION = 2000;
 
 /** @type {import('ws').Server} */
@@ -94,8 +94,12 @@ async function reload({type}) {
         .forEach((ws) => send(ws, {type}));
 }
 
-module.exports = reload;
-module.exports.PORT = PORT;
-module.exports.CSS = 'reload:css';
-module.exports.FULL = 'reload:full';
-module.exports.UI = 'reload:ui';
+const CSS = 'reload:css';
+const FULL = 'reload:full';
+const UI = 'reload:ui';
+
+export default Object.assign(reload, {
+    CSS,
+    FULL,
+    UI,
+});

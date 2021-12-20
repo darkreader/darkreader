@@ -14,12 +14,8 @@ function logWithTime(text) {
     return console.log(`${colors.gray([hours, minutes, seconds].map(leftpad).join(':'))} ${text}`);
 }
 
-const log = Object.assign((text) => logWithTime(text), {
+export const log = Object.assign((text) => logWithTime(text), {
     ok: (text) => logWithTime(colors.green(text)),
     warn: (text) => logWithTime(colors.yellow(text)),
     error: (text) => logWithTime(colors.red(text)),
 });
-
-module.exports = {
-    log,
-};

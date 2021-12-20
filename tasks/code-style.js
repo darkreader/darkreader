@@ -1,9 +1,9 @@
-const fs = require('fs-extra');
-const globby = require('globby');
-const prettier = require('prettier');
-const {getDestDir, PLATFORM} = require('./paths');
-const {createTask} = require('./task');
-const {log} = require('./utils');
+import fs from 'fs-extra';
+import globby from 'globby';
+import prettier from 'prettier';
+import {getDestDir, PLATFORM} from './paths.js';
+import {createTask} from './task.js';
+import {log} from './utils.js';
 
 const options = {
     arrowParens: 'always',
@@ -34,7 +34,7 @@ async function codeStyle({debug}) {
     }
 }
 
-module.exports = createTask(
+export default createTask(
     'code-style',
     codeStyle,
 );

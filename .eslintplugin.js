@@ -109,7 +109,7 @@ function filterNodes(node) {
 /**
  * @type {{[ruleName: string]: import('eslint').Rule.RuleModule}}
  */
-const rules = {
+export const rules = {
     'jsx-uses-m-pragma': {
         /**
         * @param {{ name: any; }} node
@@ -278,8 +278,4 @@ const rules = {
             };
         }
     }
-};
-
-module.exports = {
-    rules
 };

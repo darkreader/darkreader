@@ -134,7 +134,7 @@ export interface DynamicThemeFix {
     css: string;
     ignoreInlineStyle: string[];
     ignoreImageAnalysis: string[];
-    disableStyleSheetsProxy: boolean;
+    disableStyleSheetsProxy?: boolean;
 }
 
 export interface InversionFix {

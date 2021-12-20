@@ -1,6 +1,6 @@
 // @ts-check
-const http = require('http');
-const url = require('url');
+import http from 'http';
+import url from 'url';
 
 const port = 1357;
 http.createServer((request, response) => {

@@ -1,8 +1,8 @@
-const fs = require('fs-extra');
-const globby = require('globby');
-const {getDestDir, PLATFORM} = require('./paths');
-const reload = require('./reload');
-const {createTask} = require('./task');
+import fs from 'fs-extra';
+import globby from 'globby';
+import {getDestDir, PLATFORM} from './paths.js';
+import reload from './reload.js';
+import {createTask} from './task.js';
 
 const srcDir = 'src';
 const cwdPaths = [
@@ -63,7 +63,7 @@ async function copy({debug}) {
     }
 }
 
-module.exports = createTask(
+export default createTask(
     'copy',
     copy,
 ).addWatcher(

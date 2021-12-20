@@ -1,7 +1,7 @@
 // @ts-check
-const http = require('http');
-const path = require('path');
-const url = require('url');
+import http from 'http';
+import path from 'path';
+import url from 'url';
 
 const mimeTypes = new Map(
     Object.entries({
@@ -15,7 +15,7 @@ const mimeTypes = new Map(
     }),
 );
 
-async function createTestServer(/** @type {number} */port) {
+export async function createTestServer(/** @type {number} */port) {
     /** @type {import('http').Server} */
     let server;
     /** @type {{[path: string]: string | import('http').RequestListener}} */
@@ -95,7 +95,3 @@ async function createTestServer(/** @type {number} */port) {
         url: `http://localhost:${port}`,
     };
 }
-
-module.exports = {
-    createTestServer,
-};

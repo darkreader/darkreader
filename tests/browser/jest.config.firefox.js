@@ -1,6 +1,6 @@
-const jestConfig = require('./jest.config.shared');
+import jestConfig from './jest.config.shared.js';
 
-module.exports = {
+export default {
     ...jestConfig,
     globals: {
         ...jestConfig.globals,

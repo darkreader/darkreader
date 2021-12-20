@@ -1,5 +1,5 @@
-const chokidar = require('chokidar');
-const {log} = require('./utils');
+import chokidar from 'chokidar';
+import {log} from './utils.js';
 
 const DEBOUNCE = 200;
 
@@ -8,7 +8,7 @@ const DEBOUNCE = 200;
  * @param {string[]} options.files
  * @param {(files: string[]) => void | Promise<void>} options.onChange
  */
-function watch(options) {
+export default function watch(options) {
     const queue = new Set();
     let timeoutId = null;
 
@@ -49,5 +49,3 @@ function watch(options) {
 
     return watcher;
 }
-
-module.exports = watch;

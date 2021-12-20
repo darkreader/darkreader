@@ -1,9 +1,8 @@
-// @ts-check
-const http = require('http');
-const url = require('url');
-const queryString = require('querystring');
+import http from 'http';
+import url from 'url';
+import queryString from 'querystring';
 
-async function createEchoServer(/** @type {number} */port) {
+export async function createEchoServer(/** @type {number} */port) {
     /** @type {import('http').Server} */
     let server;
 
@@ -72,7 +71,3 @@ async function createEchoServer(/** @type {number} */port) {
         url: `http://localhost:${port}`,
     };
 }
-
-module.exports = {
-    createEchoServer,
-};

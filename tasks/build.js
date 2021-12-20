@@ -1,16 +1,16 @@
 // @ts-check
-const bundleAPI = require('./bundle-api');
-const bundleCSS = require('./bundle-css');
-const bundleHTML = require('./bundle-html');
-const bundleJS = require('./bundle-js');
-const bundleLocales = require('./bundle-locales');
-const clean = require('./clean');
-const copy = require('./copy');
-const reload = require('./reload');
-const codeStyle = require('./code-style');
-const zip = require('./zip');
-const {runTasks} = require('./task');
-const {log} = require('./utils');
+import bundleAPI from './bundle-api.js';
+import bundleCSS from './bundle-css.js';
+import bundleHTML from './bundle-html.js';
+import bundleJS from './bundle-js.js';
+import bundleLocales from './bundle-locales.js';
+import clean from './clean.js';
+import copy from './copy.js';
+import reload from './reload.js';
+import codeStyle from './code-style.js';
+import zip from './zip.js';
+import {runTasks} from './task.js';
+import {log} from './utils.js';
 
 const standardTask = [
     clean,

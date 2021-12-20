@@ -1,4 +1,4 @@
-module.exports = {
+export default {
     testEnvironment: './environment.js',
     verbose: true,
     transform: {

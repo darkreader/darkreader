@@ -1,20 +1,19 @@
-// @ts-check
-const fs = require('fs-extra');
-const JestNodeEnvironment = require('jest-environment-node');
-const path = require('path');
-const puppeteer = require('puppeteer-core');
-const webExt = require('web-ext');
-const WebSocket = require('ws');
-const {generateHTMLCoverageReports} = require('./coverage');
-const {getChromePath, getFirefoxPath, chromeExtensionDebugDir, firefoxExtensionDebugDir} = require('./paths');
-const {createTestServer} = require('./server');
+import fs from 'fs-extra';
+import JestNodeEnvironment from 'jest-environment-node';
+import path from 'path';
+import puppeteer from 'puppeteer-core';
+import webExt from 'web-ext';
+import WebSocket from 'ws';
+import {generateHTMLCoverageReports} from './coverage.js';
+import {getChromePath, getFirefoxPath, chromeExtensionDebugDir, firefoxExtensionDebugDir} from './paths.js';
+import {createTestServer} from './server.js';
 
 const TEST_SERVER_PORT = 8891;
 const CORS_SERVER_PORT = 8892;
 const FIREFOX_DEVTOOLS_PORT = 8893;
 const POPUP_TEST_PORT = 8894;
 
-class PuppeteerEnvironment extends JestNodeEnvironment {
+export default class PuppeteerEnvironment extends JestNodeEnvironment {
     async setup() {
         await super.setup();
 
@@ -248,5 +247,3 @@ class PuppeteerEnvironment extends JestNodeEnvironment {
         // await this.browser.close();
     }
 }
-
-module.exports = PuppeteerEnvironment;

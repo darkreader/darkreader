@@ -1,8 +1,8 @@
-const fs = require('fs');
-const globby = require('globby');
-const yazl = require('yazl');
-const {getDestDir, PLATFORM} = require('./paths');
-const {createTask} = require('./task');
+import fs from 'fs';
+import globby from 'globby';
+import yazl from 'yazl';
+import {getDestDir, PLATFORM} from './paths.js';
+import {createTask} from './task.js';
 
 function archiveFiles({files, dest, cwd}) {
     return new Promise((resolve) => {
@@ -35,7 +35,7 @@ async function zip({debug}) {
     await archiveDirectory({dir: thunderBirdDir, dest: thunderbirdDest});
 }
 
-module.exports = createTask(
+export default createTask(
     'zip',
     zip,
 );

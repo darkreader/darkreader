@@ -26,6 +26,8 @@
     "test:utils:debug": "node --inspect-brk ./node_modules/jest/bin/jest --config=tests/utils/jest.config.js --runInBand --no-cache --watch"
   },
   "main": "darkreader.js",
+  "module": "darkreader.mjs",
+  "type": "module",
   "repository": {
     "type": "git",
     "url": "https://github.com/darkreader/darkreader.git"

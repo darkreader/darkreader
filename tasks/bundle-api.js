@@ -1,16 +1,17 @@
-const rollup = require('rollup');
-const rollupPluginNodeResolve = require('@rollup/plugin-node-resolve').default;
-const rollupPluginReplace = require('@rollup/plugin-replace');
-const rollupPluginTypescript = require('rollup-plugin-typescript2');
-const typescript = require('typescript');
-const packageJSON = require('../package.json');
-const fs = require('fs-extra');
-const os = require('os');
-const {createTask} = require('./task');
+import rollup from 'rollup';
+import rollupPluginNodeResolve from '@rollup/plugin-node-resolve';
+import rollupPluginReplace from '@rollup/plugin-replace';
+import rollupPluginTypescript from 'rollup-plugin-typescript2';
+import typescript from 'typescript';
+import fs from 'fs-extra';
+import os from 'os';
+import {createTask} from './task.js';
 
 async function bundleAPI({debug}) {
     const src = 'src/api/index.ts';
     const dest = 'darkreader.js';
+
+    const packageJSON = await fs.readJSON('package.json');
 
     const bundle = await rollup.rollup({
         input: src,
@@ -44,7 +45,7 @@ async function bundleAPI({debug}) {
     });
 }
 
-module.exports = createTask(
+export default createTask(
     'bundle-api',
     bundleAPI,
 );

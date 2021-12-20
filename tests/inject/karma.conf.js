@@ -1,14 +1,14 @@
-const fs = require('fs-extra');
-const os = require('os');
-const rollupPluginIstanbul = require('rollup-plugin-istanbul2');
-const rollupPluginNodeResolve = require('@rollup/plugin-node-resolve').default;
-const rollupPluginReplace = require('@rollup/plugin-replace');
-const rollupPluginTypescript = require('rollup-plugin-typescript2');
-const typescript = require('typescript');
+import fs from 'fs-extra';
+import os from 'os';
+import rollupPluginIstanbul from 'rollup-plugin-istanbul2';
+import rollupPluginNodeResolve from '@rollup/plugin-node-resolve';
+import rollupPluginReplace from '@rollup/plugin-replace';
+import rollupPluginTypescript from 'rollup-plugin-typescript2';
+import typescript from 'typescript';
 
-module.exports = (config) => {
+export default (config) => {
     config.set({
-        basePath: '../../',
+        basePath: './',
         frameworks: ['jasmine'],
         files: [
             'tests/inject/customize.ts',

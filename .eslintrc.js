@@ -1,4 +1,4 @@
-module.exports = {
+export default {
     parser: '@typescript-eslint/parser',
     plugins: ['@typescript-eslint', 'local'],
     extends: ['plugin:@typescript-eslint/recommended', 'plugin:import/recommended', 'plugin:import/typescript'],

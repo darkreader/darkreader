@@ -156,7 +156,7 @@ declare namespace DarkReader {
          * This is a API-Exclusive option, as it can break legitmate websites,
          * who are using the Dark Reader API.
          */
-        disableStyleSheetsProxy: boolean;
+        disableStyleSheetsProxy?: boolean;
     }
 }
 

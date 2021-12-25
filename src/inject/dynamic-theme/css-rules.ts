@@ -19,10 +19,10 @@ export function iterateCSSRules(rules: CSSRuleList, iterate: (rule: CSSStyleRule
             }
         } else if ((rule as CSSMediaRule).media) {
             const media = Array.from((rule as CSSMediaRule).media);
-            const isScreenOrAll = media.some((m) => m.startsWith('screen') || m.startsWith('all'));
+            const isScreenOrAllOrQuery = media.some((m) => m.startsWith('screen') || m.startsWith('all') || m.startsWith('('));
             const isPrintOrSpeech = media.some((m) => m.startsWith('print') || m.startsWith('speech'));
 
-            if (isScreenOrAll || !isPrintOrSpeech) {
+            if (isScreenOrAllOrQuery || !isPrintOrSpeech) {
                 iterateCSSRules((rule as CSSMediaRule).cssRules, iterate, onMediaRuleError);
             }
         } else if ((rule as CSSSupportsRule).conditionText) {
@@ -89,7 +89,7 @@ export function iterateCSSDeclarations(style: CSSStyleDeclaration, iterate: (pro
 }
 
 export const cssURLRegex = /url\((('.+?')|(".+?")|([^\)]*?))\)/g;
-export const cssImportRegex = /@import\s*(url\()?(('.+?')|(".+?")|([^\)]*?))\)?;?/g;
+export const cssImportRegex = /@import\s*(url\()?(('.+?')|(".+?")|([^\)]*?))\)? ?(screen)?;?/g;
 
 export function getCSSURLValue(cssURL: string) {
     return cssURL.replace(/^url\((.*)\)$/, '$1').trim().replace(/^"(.*)"$/, '$1').replace(/^'(.*)'$/, '$1');
@@ -103,7 +103,15 @@ export function getCSSBaseBath(url: string) {
 export function replaceCSSRelativeURLsWithAbsolute($css: string, cssBasePath: string) {
     return $css.replace(cssURLRegex, (match) => {
         const pathValue = getCSSURLValue(match);
-        return `url("${getAbsoluteURL(cssBasePath, pathValue)}")`;
+        // Sites can have any kind of specified URL, thus also invalid ones.
+        // To prevent the whole operation from failing, let's just skip those
+        // invalid URL's and let them be invalid.
+        try {
+            return `url("${getAbsoluteURL(cssBasePath, pathValue)}")`;
+        } catch (err) {
+            logWarn('Not able to replace relative URL with Absolute URL, skipping');
+            return match;
+        }
     });
 }
 

@@ -117,7 +117,6 @@ async function generateHTMLCoverageReport(dir, info) {
     await fs.outputFile(path.join(dir, `${name}.html`), lines.join('\n'));
 }
 
-
 /**
  * @param {string} dir
  * @param {FileCoverageInfo[]} info

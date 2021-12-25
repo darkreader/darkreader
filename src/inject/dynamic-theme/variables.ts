@@ -1,9 +1,10 @@
 import {modifyBackgroundColor, modifyBorderColor, modifyForegroundColor} from '../../generators/modify-colors';
 import {getParenthesesRange} from '../../utils/text';
 import {iterateCSSRules, iterateCSSDeclarations} from './css-rules';
-import {tryParseColor, getBgImageModifier, getShadowModifier} from './modify-css';
+import {tryParseColor, getBgImageModifier, getShadowModifierWithInfo} from './modify-css';
 import type {CSSValueModifier} from './modify-css';
 import type {Theme} from '../../definitions';
+import type {RGBA} from '../../utils/color';
 
 export interface ModifiedVarDeclaration {
     property: string;
@@ -197,6 +198,7 @@ export class VariablesStore {
                     const decs = getDeclarations();
                     onTypeChange(decs);
                 };
+
                 callbacks.add(callback);
                 this.subscribeForVarTypeChange(varName, callback);
             };
@@ -265,11 +267,15 @@ export class VariablesStore {
                     );
                     // Check if property is box-shadow and if so, do a pass-trough to modify the shadow
                     if (property === 'box-shadow') {
-                        const shadowModifier = getShadowModifier(variableReplaced);
-                        return shadowModifier(theme) || variableReplaced;
+                        const shadowModifier = getShadowModifierWithInfo(variableReplaced);
+                        const modifiedShadow = shadowModifier(theme);
+                        if (modifiedShadow.unparseableMatchesLength !== modifiedShadow.matchesLength) {
+                            return modifiedShadow.result;
+                        }
                     }
                     return variableReplaced;
                 };
+
                 const modified = modify();
                 if (unknownVars.size > 0) {
                     return new Promise<string>((resolve) => {
@@ -279,6 +285,7 @@ export class VariablesStore {
                             const newValue = modify();
                             resolve(newValue);
                         };
+
                         this.subscribeForVarTypeChange(firstUnknownVar, callback);
                     });
                 }
@@ -287,28 +294,11 @@ export class VariablesStore {
             };
         }
         if (property.startsWith('border') || property.startsWith('outline')) {
-            if (sourceValue.endsWith(')')) {
-                const colorTypeMatch = sourceValue.match(/((rgb|hsl)a?)\(/);
-                if (colorTypeMatch) {
-                    const index = colorTypeMatch.index;
-                    return (theme) => {
-                        const value = insertVarValues(sourceValue, this.unstableVarValues);
-                        if (!value) {
-                            return sourceValue;
-                        }
-                        const beginning = sourceValue.substring(0, index);
-                        const color = sourceValue.substring(index, sourceValue.length);
-                        const inserted = insertVarValues(color, this.unstableVarValues);
-                        const modified = tryModifyBorderColor(inserted, theme);
-                        return `${beginning}${modified}`;
-                    };
-                }
-            }
             return (theme) => {
                 return replaceCSSVariablesNames(
                     sourceValue,
                     (v) => wrapBorderColorVariableName(v),
-                    (fallback) => tryModifyTextColor(fallback, theme),
+                    (fallback) => tryModifyBorderColor(fallback, theme),
                 );
             };
         }
@@ -603,6 +593,7 @@ export function replaceCSSVariablesNames(
         }
         return `var(${newName}, ${newFallback})`;
     };
+
     return replaceVariablesMatches(value, matchReplacer);
 }
 
@@ -641,19 +632,54 @@ function isConstructedColorVar(value: string) {
     return value.match(/^\s*(rgb|hsl)a?\(/);
 }
 
+// ex. 131,123,132 | 1,341, 122
+const rawValueRegex = /^\d{1,3}, ?\d{1,3}, ?\d{1,3}$/;
+
+function parseRawValue(color: string) {
+    if (rawValueRegex.test(color)) {
+        // Convert the raw value into a use-able rgb(...) value, such that it can
+        // be properly used with other functions that expect such value.
+        const splitted = color.split(',');
+        let resultInRGB = 'rgb(';
+        splitted.forEach((number) => {
+            resultInRGB += `${number.trim()}, `;
+        });
+        resultInRGB = resultInRGB.substr(0, resultInRGB.length - 2);
+        resultInRGB += ')';
+        return {isRaw: true, color: resultInRGB};
+    }
+    return {isRaw: false, color: color};
+}
+
+function handleRawValue(color: string, theme: Theme, modifyFunction: (rgb: RGBA, theme: Theme) => string) {
+    const {isRaw, color: newColor} = parseRawValue(color);
+
+    const rgb = tryParseColor(newColor);
+    if (rgb) {
+        const outputColor = modifyFunction(rgb, theme);
+
+        // If it's raw, we need to convert it back to the "raw" format.
+        if (isRaw) {
+            // This should techincally never fail(returning empty string),
+            // but just to be safe we will return outputColor.
+            const outputInRGB = tryParseColor(outputColor);
+            return outputInRGB ? `${outputInRGB.r}, ${outputInRGB.g}, ${outputInRGB.b}` : outputColor;
+        }
+        return outputColor;
+    }
+    return newColor;
+}
+
 function tryModifyBgColor(color: string, theme: Theme) {
-    const rgb = tryParseColor(color);
-    return rgb ? modifyBackgroundColor(rgb, theme) : color;
+    return handleRawValue(color, theme, modifyBackgroundColor);
 }
 
 function tryModifyTextColor(color: string, theme: Theme) {
-    const rgb = tryParseColor(color);
-    return rgb ? modifyForegroundColor(rgb, theme) : color;
+    return handleRawValue(color, theme, modifyForegroundColor);
 }
 
 function tryModifyBorderColor(color: string, theme: Theme) {
-    const rgb = tryParseColor(color);
-    return rgb ? modifyBorderColor(rgb, theme) : color;
+    return handleRawValue(color, theme, modifyBorderColor);
 }
 
 function insertVarValues(source: string, varValues: Map<string, string>, stack = new Set<string>()) {
@@ -680,6 +706,7 @@ function insertVarValues(source: string, varValues: Map<string, string>, stack =
         }
         return inserted;
     };
+
     const replaced = replaceVariablesMatches(source, matchReplacer);
     if (containsUnresolvedVar) {
         return null;

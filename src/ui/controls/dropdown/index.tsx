@@ -55,6 +55,7 @@ export default function DropDown<T>(props: DropDownProps<T>) {
                     context.refresh();
                 }
             };
+
             window.addEventListener('mousedown', onOuterClick, false);
         }
     }

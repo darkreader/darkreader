@@ -144,19 +144,23 @@ export function watchForNodePosition<T extends Node>(
     const run = () => {
         observer.observe(parent, {childList: true});
     };
+
     const stop = () => {
         clearTimeout(timeoutId);
         observer.disconnect();
         restore.cancel();
     };
+
     const skip = () => {
         observer.takeRecords();
     };
+
     const updateParent = (parentNode: Node & ParentNode) => {
         parent = parentNode;
         stop();
         run();
     };
+
     run();
     return {run, stop, skip};
 }
@@ -226,6 +230,7 @@ if (!isDOMReady()) {
             }
         }
     };
+
     document.addEventListener('readystatechange', onReadyStateChange);
 }
 
@@ -267,13 +272,13 @@ function getElementsTreeOperations(mutations: MutationRecord[]): ElementsTreeOpe
             if (n instanceof Element) {
                 if (n.isConnected) {
                     moves.add(n);
+                    additions.delete(n);
                 } else {
                     deletions.add(n);
                 }
             }
         });
     });
-    moves.forEach((n) => additions.delete(n));
 
     const duplicateAdditions = [] as Element[];
     const duplicateDeletions = [] as Element[];

@@ -1,16 +1,15 @@
 import {m} from 'malevic';
 import {sync} from 'malevic/dom';
 import Body from './components/body';
-import connect from '../connect';
+import Connector from '../connect/connector';
 import type {ExtensionData, TabInfo} from '../../definitions';
-import type Connector from '../connect/connector';
 
 function renderBody(data: ExtensionData, tab: TabInfo, actions: Connector) {
     sync(document.body, <Body data={data} tab={tab} actions={actions} />);
 }
 
 async function start() {
-    const connector = connect();
+    const connector = new Connector();
     window.addEventListener('unload', () => connector.disconnect());
 
     const data = await connector.getData();
@@ -26,8 +25,8 @@ const DEBUG = __DEBUG__;
 if (DEBUG) {
     const socket = new WebSocket(`ws://localhost:8894`);
     socket.onmessage = (e) => {
-        const respond = (message: any) => socket.send(JSON.stringify(message));
-        const message = JSON.parse(e.data);
+        const respond = (message: {type: string; id: number; data?: string}) => socket.send(JSON.stringify(message));
+        const message: {type: string; id: number; data: string} = JSON.parse(e.data);
         try {
             const textarea: HTMLTextAreaElement = document.querySelector('textarea#editor');
             const [buttonReset, buttonApply] = document.querySelectorAll('button');

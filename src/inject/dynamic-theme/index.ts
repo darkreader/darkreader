@@ -53,7 +53,6 @@ function createOrUpdateScript(className: string, root: ParentNode = document.hea
     return element;
 }
 
-
 const nodePositionWatchers = new Map<string, ReturnType<typeof watchForNodePosition>>();
 
 function setupNodePositionWatcher(node: Node, alias: string) {
@@ -134,7 +133,7 @@ function createStaticStyleOverrides() {
     document.head.insertBefore(rootVarsStyle, variableStyle.nextSibling);
 
     const proxyScript = createOrUpdateScript('darkreader--proxy');
-    proxyScript.append(`(${injectProxy})()`);
+    proxyScript.append(`(${injectProxy})(!${fixes && fixes.disableStyleSheetsProxy})`);
     document.head.insertBefore(proxyScript, rootVarsStyle.nextSibling);
     proxyScript.remove();
 }
@@ -193,7 +192,7 @@ function createDynamicStyleOverrides() {
         .filter((style) => !styleManagers.has(style))
         .map((style) => createManager(style));
     newManagers
-        .map((manager) => manager.details())
+        .map((manager) => manager.details({secondRound: false}))
         .filter((detail) => detail && detail.rules.length > 0)
         .forEach((detail) => {
             variablesStore.addRulesForMatching(detail.rules);
@@ -251,7 +250,7 @@ function createManager(element: StyleElement) {
     }
 
     function update() {
-        const details = manager.details();
+        const details = manager.details({secondRound: true});
         if (!details) {
             return;
         }
@@ -265,7 +264,6 @@ function createManager(element: StyleElement) {
 
     return manager;
 }
-
 
 function removeManager(element: StyleElement) {
     const manager = styleManagers.get(element);
@@ -356,7 +354,7 @@ function watchForUpdates() {
         const newManagers = stylesToManage
             .map((style) => createManager(style));
         newManagers
-            .map((manager) => manager.details())
+            .map((manager) => manager.details({secondRound: false}))
             .filter((detail) => detail && detail.rules.length > 0)
             .forEach((detail) => {
                 variablesStore.addRulesForMatching(detail.rules);

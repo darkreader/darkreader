@@ -1,4 +1,4 @@
-export function injectProxy() {
+export function injectProxy(enableStyleSheetsProxy: boolean) {
     document.dispatchEvent(new CustomEvent('__darkreader__inlineScriptsAllowed'));
 
     const addRuleDescriptor = Object.getOwnPropertyDescriptor(CSSStyleSheet.prototype, 'addRule');
@@ -6,7 +6,8 @@ export function injectProxy() {
     const deleteRuleDescriptor = Object.getOwnPropertyDescriptor(CSSStyleSheet.prototype, 'deleteRule');
     const removeRuleDescriptor = Object.getOwnPropertyDescriptor(CSSStyleSheet.prototype, 'removeRule');
 
-    const documentStyleSheetsDescriptor = Object.getOwnPropertyDescriptor(Document.prototype, 'styleSheets');
+    const documentStyleSheetsDescriptor = enableStyleSheetsProxy ?
+        Object.getOwnPropertyDescriptor(Document.prototype, 'styleSheets') : null;
 
     // Reference:
     // https://github.com/darkreader/darkreader/issues/6480#issuecomment-897696175
@@ -22,7 +23,9 @@ export function injectProxy() {
         Object.defineProperty(CSSStyleSheet.prototype, 'removeRule', removeRuleDescriptor);
         document.removeEventListener('__darkreader__cleanUp', cleanUp);
         document.removeEventListener('__darkreader__addUndefinedResolver', addUndefinedResolver);
-        Object.defineProperty(Document.prototype, 'styleSheets', documentStyleSheetsDescriptor);
+        if (enableStyleSheetsProxy) {
+            Object.defineProperty(Document.prototype, 'styleSheets', documentStyleSheetsDescriptor);
+        }
         if (shouldWrapHTMLElement) {
             Object.defineProperty(Element.prototype, 'getElementsByTagName', getElementsByTagNameDescriptor);
         }
@@ -79,14 +82,16 @@ export function injectProxy() {
     }
 
     function proxyGetElementsByTagName(tagName: string): NodeListOf<HTMLElement> {
+        if (tagName !== 'style') {
+            return getElementsByTagNameDescriptor.value.call(this, tagName);
+        }
+
         const getCurrentElementValue = () => {
-            let elements: NodeListOf<HTMLElement> = getElementsByTagNameDescriptor.value.call(this, tagName);
-            if (tagName === 'style') {
-                elements = Object.setPrototypeOf([...elements].filter((element: HTMLElement) => {
-                    return !element.classList.contains('darkreader');
-                }), NodeList.prototype);
-            }
-            return elements;
+            const elements: NodeListOf<HTMLElement> = getElementsByTagNameDescriptor.value.call(this, tagName);
+
+            return Object.setPrototypeOf([...elements].filter((element: HTMLElement) => {
+                return !element.classList.contains('darkreader');
+            }), NodeList.prototype);
         };
 
         let elements = getCurrentElementValue();
@@ -96,7 +101,7 @@ export function injectProxy() {
         // current situation of the DOM. Instead of a static list.
         const NodeListBehavior: ProxyHandler<NodeListOf<HTMLElement>> = {
             get: function (_: NodeListOf<HTMLElement>, property: string) {
-                return getCurrentElementValue()[property];
+                return getCurrentElementValue()[Number(property)];
             }
         };
         elements = new Proxy(elements, NodeListBehavior);
@@ -107,7 +112,9 @@ export function injectProxy() {
     Object.defineProperty(CSSStyleSheet.prototype, 'insertRule', Object.assign({}, insertRuleDescriptor, {value: proxyInsertRule}));
     Object.defineProperty(CSSStyleSheet.prototype, 'deleteRule', Object.assign({}, deleteRuleDescriptor, {value: proxyDeleteRule}));
     Object.defineProperty(CSSStyleSheet.prototype, 'removeRule', Object.assign({}, removeRuleDescriptor, {value: proxyRemoveRule}));
-    Object.defineProperty(Document.prototype, 'styleSheets', Object.assign({}, documentStyleSheetsDescriptor, {get: proxyDocumentStyleSheets}));
+    if (enableStyleSheetsProxy) {
+        Object.defineProperty(Document.prototype, 'styleSheets', Object.assign({}, documentStyleSheetsDescriptor, {get: proxyDocumentStyleSheets}));
+    }
     if (shouldWrapHTMLElement) {
         Object.defineProperty(Element.prototype, 'getElementsByTagName', Object.assign({}, getElementsByTagNameDescriptor, {value: proxyGetElementsByTagName}));
     }

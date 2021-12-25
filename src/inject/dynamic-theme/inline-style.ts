@@ -310,6 +310,7 @@ export function overrideInlineStyle(element: HTMLElement, theme: FilterConfig, i
                         const isBg = (width > SMALL_SVG_LIMIT || height > SMALL_SVG_LIMIT);
                         setCustomProp('fill', isBg ? 'background-color' : 'color', value);
                     };
+
                     if (isReadyStateComplete()) {
                         handleSVGElement();
                     } else {
@@ -339,7 +340,11 @@ export function overrideInlineStyle(element: HTMLElement, theme: FilterConfig, i
             setCustomProp(property, property, value);
         } else {
             const overridenProp = normalizedPropList[property];
-            if (overridenProp && (!element.style.getPropertyValue(overridenProp) && !element.hasAttribute(overridenProp))) {
+            if (overridenProp &&
+                (!element.style.getPropertyValue(overridenProp) && !element.hasAttribute(overridenProp))) {
+                if (overridenProp === 'background-color' && element.hasAttribute('bgcolor')) {
+                    return;
+                }
                 element.style.setProperty(property, '');
             }
         }

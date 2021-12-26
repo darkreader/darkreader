@@ -1172,4 +1172,94 @@ describe('CSS VARIABLES OVERRIDE', () => {
         await timeout(0);
         expect(getComputedStyle(document.querySelector('h1')).color).toBe('rgb(255, 26, 26)');
     });
+
+    it('should modify the caret-color property', async () => {
+        container.innerHTML = multiline(
+            '<style>',
+            '    * {',
+            '        --caret-color: green;',
+            '    }',
+            '    h1 {',
+            '        caret-color: var(--caret-color);',
+            '    }',
+            '</style>',
+            '<h1>Caret Color</h1>',
+        );
+        createOrUpdateDynamicTheme(theme, null, false);
+
+        await timeout(0);
+        const elementStyle = getComputedStyle(container.querySelector('h1'));
+
+        expect(elementStyle.caretColor).toBe('rgb(140, 255, 140)');
+    });
+
+    it('should modify the box-shadow actual color values in a variable', async () => {
+        container.innerHTML = multiline(
+            '<style>',
+            '    h1 {',
+            '        --offset: 8px;',
+            '    }',
+            '    h1 {',
+            '        box-shadow: calc(var(--offset)*-1 - 1px) 0 0 0 #fff',
+            '    }',
+            '</style>',
+            '<h1>COmplicated shit :(</h1>',
+        );
+        createOrUpdateDynamicTheme(theme, null, false);
+
+        await timeout(0);
+        const elementStyle = getComputedStyle(container.querySelector('h1'));
+
+        expect(elementStyle.boxShadow).toBe('rgb(0, 0, 0) -9px 0px 0px 0px');
+    });
+
+    it(`shouldn't modify the raw value of box-shadow when their is no color`, async () => {
+        container.innerHTML = multiline(
+            '<style>',
+            '    h1 {',
+            '        --color-border-muted: green;',
+            '    }',
+            '    h1 {',
+            '        box-shadow: inset 0 -1px 0 var(--color-border-muted)',
+            '    }',
+            '</style>',
+            '<h1>COmplicated shit :(</h1>',
+        );
+        createOrUpdateDynamicTheme(theme, null, false);
+
+        await timeout(0);
+        const elementStyle = getComputedStyle(container.querySelector('h1'));
+
+        expect(elementStyle.boxShadow).toBe('rgb(0, 102, 0) 0px -1px 0px 0px inset');
+    });
+
+    it('should handle raw values within variable declarations and use proper replacement', async () => {
+        container.innerHTML = multiline(
+            '<style>',
+            '    h1 {',
+            '        border: 1px solid rgba(var(--color,240,240,240),1);',
+            '    }',
+            '    :root {',
+            '        --color: 123,123,123 !important;',
+            '    }',
+            '    div {',
+            '        --color: 0,0,0 !important;',
+            '    }',
+            '</style>',
+            '<h1>Raw values are spooky</h1>',
+        );
+        createOrUpdateDynamicTheme(theme, null, false);
+
+        await timeout(0);
+        const elementStyle = getComputedStyle(container.querySelector('h1'));
+
+        if (isFirefox) {
+            expect(elementStyle.borderTopColor).toBe('rgb(91, 91, 91)');
+            expect(elementStyle.borderRightColor).toBe('rgb(91, 91, 91)');
+            expect(elementStyle.borderBottomColor).toBe('rgb(91, 91, 91)');
+            expect(elementStyle.borderLeftColor).toBe('rgb(91, 91, 91)');
+        } else {
+            expect(elementStyle.borderColor).toBe('rgb(91, 91, 91)');
+        }
+    });
 });

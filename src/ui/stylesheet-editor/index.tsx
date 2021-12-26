@@ -1,7 +1,7 @@
 import {m} from 'malevic';
 import {sync} from 'malevic/dom';
 import Body from './components/body';
-import connect from '../connect';
+import Connector from '../connect/connector';
 import type {ExtensionActions, ExtensionData, TabInfo} from '../../definitions';
 
 function renderBody(data: ExtensionData, tab: TabInfo, actions: ExtensionActions) {
@@ -9,7 +9,7 @@ function renderBody(data: ExtensionData, tab: TabInfo, actions: ExtensionActions
 }
 
 async function start() {
-    const connector = connect();
+    const connector = new Connector();
     window.addEventListener('unload', () => connector.disconnect());
 
     const data = await connector.getData();

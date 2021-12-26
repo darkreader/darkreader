@@ -9,7 +9,7 @@ test('Unique identifier generation', () => {
     // TODO: remove any cast once type declarations are updated
     const shim1 = jest.fn();
     globalThis.crypto = {
-        getRandomValues: (buffer) => {
+        getRandomValues: (buffer: Uint8Array) => {
             shim1();
             return randomFillSync(buffer);
         },

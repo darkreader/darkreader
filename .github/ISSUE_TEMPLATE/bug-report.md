@@ -15,17 +15,26 @@ assignees: ''
 <!--
   Thank you for taking the time to create a report about a bug.
   Ensure that there are no other existing reports for this bug.
-  Also, remember to fill out every section on this report and remove any that are not needed.
+  Please check if the issue is resolved after a restart of the browser.
+  Additionally, you should check if the issue persists in a new browser profile.
+  Remember to fill out every section on this report and remove any that are not needed.
   Finally, place a brief description in the title of this report.
 -->
+
 
 # Bug Report
 
 ## Bug Description
-<!-- Provide a clear and concise description to allow us to troubleshoot this bug. -->
+<!-- Provide a clear and concise description, which will allow us to troubleshoot this bug. -->
+
+## Website Address
+<!-- 
+  If you can provide a website address, you probably have a bug with a specific website.
+  Please use the broken website template for this.
+-->
 
 ## Steps To Reproduce
-<!-- Provide steps to reproduce the problem, and allowing us to troubleshoot this bug. -->
+<!-- Provide steps to reproduce the problem. -->
 <!--
 Here is an example:
 - Go to example.com.

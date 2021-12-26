@@ -170,4 +170,17 @@ describe('MEDIA QUERIES', () => {
         expect(getComputedStyle(document.querySelector('h1 strong')).color).toBe('rgb(255, 174, 26)');
         expect(document.querySelector('.testcase-style-2').nextElementSibling.classList.contains('darkreader--sync')).toBe(false);
     });
+
+    it('should handle media query and print', () => {
+        container.innerHTML = multiline(
+            '<style class="testcase-style">',
+            '   @media (min-width: 2px), print {',
+            '       h1 { background: green; }',
+            '   }',
+            '</style>',
+            '<h1>Some test foor...... <strong>Oh uhm removing styles :(</strong>!</h1>',
+        );
+        createOrUpdateDynamicTheme(theme, null, false);
+        expect(getComputedStyle(document.querySelector('h1')).backgroundColor).toBe('rgb(0, 102, 0)');
+    });
 });

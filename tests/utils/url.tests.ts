@@ -1,4 +1,4 @@
-import {isURLEnabled, isURLMatched, isPDF, getURLHostOrProtocol, getAbsoluteURL} from '../../src/utils/url';
+import {isURLEnabled, isURLMatched, isPDF, isFullyQualifiedDomain, getURLHostOrProtocol, getAbsoluteURL} from '../../src/utils/url';
 import type {UserSettings} from '../../src/definitions';
 
 test('URL is enabled', () => {
@@ -270,12 +270,16 @@ test('Absolute URL', () => {
     expect(getAbsoluteURL('https://www.google.com/long/path/', '../another/image.jpg')).toBe('https://www.google.com/long/another/image.jpg');
     expect(getAbsoluteURL('https://www.google.com/path/page.html', 'image.jpg')).toBe('https://www.google.com/path/image.jpg');
     expect(getAbsoluteURL('https://www.google.com/path/page.html', '/image.jpg')).toBe('https://www.google.com/image.jpg');
-    expect(getAbsoluteURL('https://www.google.com', '//www.google.com/path/image.jpg')).toBe('https://www.google.com/path/image.jpg');
-    expect(getAbsoluteURL('https://www.google.com', '//www.google.com/path/../another/image.jpg')).toBe('https://www.google.com/another/image.jpg');
+    expect(getAbsoluteURL('https://www.google.com', '//www.google.com/path/image.jpg')).toBe(`${location.protocol}//www.google.com/path/image.jpg`);
     expect(getAbsoluteURL('https://www.google.com', 'https://www.google.com/path/image.jpg')).toBe('https://www.google.com/path/image.jpg');
     expect(getAbsoluteURL('https://www.google.com', 'https://www.google.com/path/../another/image.jpg')).toBe('https://www.google.com/another/image.jpg');
     expect(getAbsoluteURL('https://www.google.com/path/page.html', 'image.jpg')).toBe('https://www.google.com/path/image.jpg');
     expect(getAbsoluteURL('https://www.google.com/path/page.html', '../image.jpg')).toBe('https://www.google.com/image.jpg');
     expect(getAbsoluteURL('path/index.html', 'image.jpg')).toBe(`${location.origin}/path/image.jpg`);
     expect(getAbsoluteURL('path/index.html', '/image.jpg?size=128')).toBe(`${location.origin}/image.jpg?size=128`);
+});
+
+test('Fully qualified domain', () => {
+    expect(isFullyQualifiedDomain('www.google.com')).toBe(true);
+    expect(isFullyQualifiedDomain('*.google.com')).toBe(false);
 });

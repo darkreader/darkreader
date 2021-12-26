@@ -1,6 +1,6 @@
 import {overrideInlineStyle, getInlineOverrideStyle, watchForInlineStyles, stopWatchingForInlineStyles, INLINE_STYLE_SELECTOR} from './inline-style';
 import {changeMetaThemeColorWhenAvailable, restoreMetaThemeColor} from './meta-theme-color';
-import {getModifiedUserAgentStyle, getModifiedFallbackStyle, cleanModificationCache, parseColorWithCache, getSelectionColor} from './modify-css';
+import {getModifiedUserAgentStyle, getModifiedFallbackStyle, cleanModificationCache, getSelectionColor, tryParseColor} from './modify-css';
 import type {StyleElement, StyleManager} from './style-manager';
 import {manageStyle, getManageableStyles, cleanLoadingLinks} from './style-manager';
 import {watchForStyleChanges, stopWatchingForStyleChanges} from './watch';
@@ -52,7 +52,6 @@ function createOrUpdateScript(className: string, root: ParentNode = document.hea
     }
     return element;
 }
-
 
 const nodePositionWatchers = new Map<string, ReturnType<typeof watchForNodePosition>>();
 
@@ -134,12 +133,8 @@ function createStaticStyleOverrides() {
     document.head.insertBefore(rootVarsStyle, variableStyle.nextSibling);
 
     const proxyScript = createOrUpdateScript('darkreader--proxy');
-    const blob = new Blob([`(${injectProxy})()`], {type: 'text/javascript'});
-    const url = URL.createObjectURL(blob);
-    proxyScript.src = url;
-    proxyScript.textContent = '';
+    proxyScript.append(`(${injectProxy})(!${fixes && fixes.disableStyleSheetsProxy})`);
     document.head.insertBefore(proxyScript, rootVarsStyle.nextSibling);
-    URL.revokeObjectURL(url);
     proxyScript.remove();
 }
 
@@ -171,14 +166,13 @@ function createShadowStaticStyleOverrides(root: ShadowRoot) {
 }
 
 function replaceCSSTemplates($cssText: string) {
-    return $cssText.replace(/\${(.+?)}/g, (m0, $color) => {
-        try {
-            const color = parseColorWithCache($color);
+    return $cssText.replace(/\${(.+?)}/g, (_, $color) => {
+        const color = tryParseColor($color);
+        if (color) {
             return modifyColor(color, filter);
-        } catch (err) {
-            logWarn(err);
-            return $color;
         }
+        logWarn("Couldn't parse CSSTemplate's color.");
+        return $color;
     });
 }
 
@@ -198,7 +192,7 @@ function createDynamicStyleOverrides() {
         .filter((style) => !styleManagers.has(style))
         .map((style) => createManager(style));
     newManagers
-        .map((manager) => manager.details())
+        .map((manager) => manager.details({secondRound: false}))
         .filter((detail) => detail && detail.rules.length > 0)
         .forEach((detail) => {
             variablesStore.addRulesForMatching(detail.rules);
@@ -256,7 +250,7 @@ function createManager(element: StyleElement) {
     }
 
     function update() {
-        const details = manager.details();
+        const details = manager.details({secondRound: true});
         if (!details) {
             return;
         }
@@ -270,7 +264,6 @@ function createManager(element: StyleElement) {
 
     return manager;
 }
-
 
 function removeManager(element: StyleElement) {
     const manager = styleManagers.get(element);
@@ -361,7 +354,7 @@ function watchForUpdates() {
         const newManagers = stylesToManage
             .map((style) => createManager(style));
         newManagers
-            .map((manager) => manager.details())
+            .map((manager) => manager.details({secondRound: false}))
             .filter((detail) => detail && detail.rules.length > 0)
             .forEach((detail) => {
                 variablesStore.addRulesForMatching(detail.rules);

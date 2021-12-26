@@ -1,22 +1,17 @@
-export const PromiseBarrierState = {
-    PENDING: 'pending',
-    FULFILLED: 'fulfilled',
-    REJECTED: 'rejected',
-};
-
-export class PromiseBarrier {
-    private resolves: Array<(value?: any) => void> = [];
-    private rejects: Array<(reason?: any) => void> = [];
+export class PromiseBarrier<RESOLVUTION, REJECTION> {
+    private resolves: Array<(value?: RESOLVUTION) => void> = [];
+    private rejects: Array<(reason?: REJECTION) => void> = [];
     private wasResolved = false;
     private wasRejected = false;
-    private resolution: any;
+    private resolution: RESOLVUTION;
+    private reason: REJECTION;
 
-    async entry(){
+    async entry(): Promise<RESOLVUTION>{
         if (this.wasResolved) {
             return Promise.resolve(this.resolution);
         }
         if (this.wasRejected) {
-            return Promise.reject(this.resolution);
+            return Promise.reject(this.reason);
         }
         return new Promise((resolve, reject) => {
             this.resolves.push(resolve);
@@ -24,7 +19,7 @@ export class PromiseBarrier {
         });
     }
 
-    async resolve(value?: any){
+    async resolve(value?: RESOLVUTION){
         if (this.wasRejected || this.wasResolved) {
             return;
         }
@@ -36,24 +31,27 @@ export class PromiseBarrier {
         return new Promise<void>((resolve) => setTimeout(() => resolve()));
     }
 
-    async reject(reason?: any){
+    async reject(reason?: REJECTION){
         if (this.wasRejected || this.wasResolved) {
             return;
         }
         this.wasRejected = true;
-        this.resolution = reason;
+        this.reason = reason;
         this.rejects.forEach((reject) => reject(reason));
         this.resolves = null;
         this.rejects = null;
         return new Promise<void>((resolve) => setTimeout(() => resolve()));
     }
 
-    get state() {
-        if (this.wasResolved) {
-            return PromiseBarrierState.FULFILLED;
-        } else if (this.wasRejected) {
-            return PromiseBarrierState.REJECTED;
-        }
-        return PromiseBarrierState.PENDING;
+    isPending(): boolean {
+        return !this.wasResolved && !this.wasRejected;
+    }
+
+    isFulfilled(): boolean {
+        return this.wasResolved;
+    }
+
+    isRejected(): boolean {
+        return this.wasRejected;
     }
 }

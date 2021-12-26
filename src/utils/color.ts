@@ -138,8 +138,42 @@ export function parse($color: string): RGBA {
     throw new Error(`Unable to parse ${$color}`);
 }
 
-function getNumbersFromString(str: string, splitter: RegExp, range: number[], units: {[unit: string]: number}) {
-    const raw = str.split(splitter).filter((x) => x);
+function getNumbers($color: string) {
+    const numbers = [];
+    let prevPos = 0;
+    let isMining = false;
+    // Get the first `(`
+    const startIndex = $color.indexOf('(');
+    $color = $color.substring(startIndex + 1, $color.length - 1);
+    for (let i = 0; i < $color.length; i++) {
+        const c = $color[i];
+        // Check if `c` is a digit.
+        if (c >= '0' && c <= '9' || c === '.' || c === '+' || c === '-') {
+            // Enable the mining flag.
+            isMining = true;
+        } else if (isMining && (c === ' ' || c === ',')) {
+            // isMinig is true and we got a terminating
+            // Character. So we can push the current number
+            // into the array.
+            numbers.push($color.substring(prevPos, i));
+            // Disable the mining flag.
+            isMining = false;
+            // Ensure the prevPos is correct.
+            prevPos = i + 1;
+        } else if (!isMining) {
+            // Ensure the prevPos is correct.
+            prevPos = i + 1;
+        }
+    }
+    // Push the last number.
+    if (isMining) {
+        numbers.push($color.substring(prevPos, $color.length));
+    }
+    return numbers;
+}
+
+function getNumbersFromString(str: string, range: number[], units: {[unit: string]: number}) {
+    const raw = getNumbers(str);
     const unitsList = Object.entries(units);
     const numbers = raw.map((r) => r.trim()).map((r, i) => {
         let n: number;
@@ -157,21 +191,19 @@ function getNumbersFromString(str: string, splitter: RegExp, range: number[], un
     return numbers;
 }
 
-const rgbSplitter = /rgba?|\(|\)|\/|,|\s/ig;
 const rgbRange = [255, 255, 255, 1];
 const rgbUnits = {'%': 100};
 
 function parseRGB($rgb: string) {
-    const [r, g, b, a = 1] = getNumbersFromString($rgb, rgbSplitter, rgbRange, rgbUnits);
+    const [r, g, b, a = 1] = getNumbersFromString($rgb, rgbRange, rgbUnits);
     return {r, g, b, a};
 }
 
-const hslSplitter = /hsla?|\(|\)|\/|,|\s/ig;
 const hslRange = [360, 1, 1, 1];
 const hslUnits = {'%': 100, 'deg': 360, 'rad': 2 * Math.PI, 'turn': 1};
 
 function parseHSL($hsl: string) {
-    const [h, s, l, a = 1] = getNumbersFromString($hsl, hslSplitter, hslRange, hslUnits);
+    const [h, s, l, a = 1] = getNumbersFromString($hsl, hslRange, hslUnits);
     return hslToRGB({h, s, l, a});
 }
 
@@ -212,6 +244,111 @@ function getSystemColor($color: string) {
         b: (n >> 0) & 255,
         a: 1
     };
+}
+
+// Check if the char is a digit.
+const isCharDigit = (char: string) => char >= '0' && char <= '9';
+
+// Get the amount of digits their are in a number.
+// f(5) => 1
+// f(123) => 3
+// f(912412) => 6
+const getAmountOfDigits = (number: number) => Math.floor(Math.log10(number)) + 1;
+
+// lowerCalcExpression is a helper function that tries to remove `calc(...)`
+// expressions from the given string. It can only lower expressions to a certain
+// degree so we can keep this function easy and simple to understand.
+export function lowerCalcExpression(color: string): string {
+    // searchIndex will be used as searchIndex and as a "cursor" within
+    // the calc(...) expression.
+    let searchIndex = 0;
+
+    const replaceBetweenIndices = (start: number, end:number, replacement: string) => {
+        color = color.substring(0, start) + replacement + color.substring(end);
+    };
+
+    // Because we're talking about numbers within variables
+    // We assume that the max length of such number is 3.
+    const getNumber = () => {
+        let resultNumber = 0;
+        for (let i = 1; i < 4; i++) {
+            const char = color[searchIndex + i];
+            // If we hit a whitespace that means we hit the end of the number.
+            if (char === ' ') {
+                break;
+            }
+            // Check if the current char is numeric.
+            if (isCharDigit(char)) {
+                // Ensure that the current number is multipled by 10
+                // So that the "first" digit on that number is a 0
+                // Which is going to be filled by the `char`.
+                resultNumber *= 10;
+                resultNumber += Number(char);
+            } else {
+                break;
+            }
+        }
+        const lenDigits = getAmountOfDigits(resultNumber);
+        searchIndex += lenDigits;
+
+        // We've now got the first number, let's try to see if this number
+        // a percentage, which is the currently only supported element type.
+        const possibleType = color[searchIndex + 1];
+        if (possibleType !== '%') {
+            return;
+        }
+        searchIndex++;
+        return resultNumber;
+    };
+
+    while ((searchIndex = color.indexOf('calc(')) !== 0) {
+        const startIndex = searchIndex;
+        searchIndex += 4;
+        // Get the first number
+        const firstNumber = getNumber();
+
+        // No first number? Let's not break this while loop.
+        // And return the current state of color variable.
+        if (!firstNumber) {
+            break;
+        }
+
+        // The char after the xxx% should be a whitespace.
+        if (color[searchIndex + 1] !== ' ') {
+            break;
+        }
+        searchIndex++;
+
+        const operation = color[searchIndex + 1];
+        // Only allow - and +
+        if (operation !== '+' && operation !== '-') {
+            break;
+        }
+        searchIndex++;
+
+        // The char after the xxx% -/+ should be a whitespace.
+        if (color[searchIndex + 1] !== ' ') {
+            break;
+        }
+        searchIndex++;
+
+        // Get the second number
+        const secondNumber = getNumber();
+        if (!secondNumber) {
+            break;
+        }
+        // Create the replacement string.
+        let replacement: string;
+        if (operation === '+') {
+            replacement = `${firstNumber + secondNumber}%`;
+        } else {
+            replacement = `${firstNumber - secondNumber}%`;
+        }
+
+        // Replace the string between the indices.
+        replaceBetweenIndices(startIndex, searchIndex + 2, replacement);
+    }
+    return color;
 }
 
 const knownColors: Map<string, number> = new Map(Object.entries({

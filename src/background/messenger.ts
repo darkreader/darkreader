@@ -27,8 +27,8 @@ export default class Messenger {
     constructor(adapter: ExtensionAdapter) {
         this.adapter = adapter;
         this.changeListenerCount = 0;
-        const allowedSenderURL = [chrome.runtime.getURL('/ui/popup/index.html'), chrome.runtime.getURL('/ui/devtools/index.html')];
-        chrome.runtime.onMessage.addListener((message: Message, sender: chrome.runtime.MessageSender, sendResponse: (response: any) => void) => {
+        const allowedSenderURL = [chrome.runtime.getURL('/ui/popup/index.html'), chrome.runtime.getURL('/ui/devtools/index.html'), chrome.runtime.getURL('/ui/stylesheet-editor/index.html')];
+        chrome.runtime.onMessage.addListener((message: Message, sender: chrome.runtime.MessageSender, sendResponse: (response: {data?: ExtensionData | TabInfo; error?: string}) => void) => {
             if (allowedSenderURL.includes(sender.url)) {
                 this.onUIMessage(message, sendResponse);
                 this.adapter.onPopupOpen();
@@ -88,7 +88,7 @@ export default class Messenger {
         }
     }
 
-    private onUIMessage({type, data}: Message, sendResponse: (response: any) => void) {
+    private onUIMessage({type, data}: Message, sendResponse: (response: {data?: ExtensionData | TabInfo; error?: string}) => void) {
         switch (type) {
             case MessageType.UI_GET_DATA: {
                 this.adapter.collect().then((data) => sendResponse({data}));

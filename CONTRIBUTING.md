@@ -18,6 +18,7 @@ See the list of [language codes](https://developer.chrome.com/webstore/i18n#loca
 If a website is **already dark** and meets the following requirements:
 - All pages are dark by default regardless of the system's preferred color-scheme.
 - The URL is the actual website address. (No CNAME or URL redirects)
+- The page isn't WIP, sites will change in this phase and could afterwards not meet the requirements.
 
 Then, you can **add it to the [dark-sites.config](https://github.com/darkreader/darkreader/blob/master/src/config/dark-sites.config) file**
 *(please, preserve the alphabetical order)*.
@@ -85,11 +86,29 @@ IGNORE IMAGE ANALYSIS
 ```
 
 | Rule | Description | Notes / Examples |
-|-|-|-|
-| `INVERT` | Inverts specified elements. | **Dynamic Mode**: INVERT only for dark images that are invisible on dark backgrounds. |
-| `CSS` | Adds custom CSS to a web page. | `!important` keyword should be specified for each CSS property to prevent overrides by other stylesheets.<br>**Dynamic mode** supports `${COLOR}` template, where `COLOR` is a color value before the inversion. <br>*Example*: `${white}` will become `${black}` in dark mode. |
-| `IGNORE INLINE STYLE` | Prevents inline style analysis of matched elements. | *Example*: `<p style="color: red">` element's style attribute will not be changed. |
-| `IGNORE IMAGE ANALYSIS` | Prevents background images from being analyzed for matched selectors. |  |
+|---|---|---|
+| **INVERT** | Inverts specified elements. | **Dynamic Mode**: INVERT only for dark images that are invisible on dark backgrounds. |
+| **CSS** | Adds custom CSS to a web page. | `!important` keyword should be specified for each CSS property to prevent overrides by other stylesheets.<br>**Dynamic mode** supports `${COLOR}` template, where `COLOR` is a color value before the inversion. <br>*Example*: `${white}` will become `${black}` in dark mode. |
+| **IGNORE&nbsp;INLINE&nbsp;STYLE** | Prevents inline style analysis of matched elements. | *Example*: `<p style="color: red">` element's style attribute will not be changed. |
+| **IGNORE&nbsp;IMAGE&nbsp;ANALYSIS** | Prevents background images from being analyzed for matched selectors. |  |
+
+## Adding a new color scheme
+
+If you think you can add a new _popular_ or _unique_ but useable pre-defined colorscheme in Dark Reader you can add this to the
+`src/config/color-schemes.drconf` file. You can check the `docs/color-schemes-drconf.spec` for specific details about the file.
+Please follow the next steps to add a new color scheme:
+
+- Open
+**[color-schemes.drconf](https://github.com/darkreader/darkreader/blob/master/src/config/color-schemes.drconf) file**.
+- Click **Edit** (login to GitHub first).
+- **Insert your fix** there. Preserve **alphabetic order** by Color scheme name.
+- Provide a **short description** of what you have done.
+- Click **Propose file change**.
+- Review your changes. Click **Create pull request**.
+- Github actions will run tests to make sure it has the right code-style.
+- If you see a **red cross** click **Details** to see what is wrong and edit the existing Pull Request.
+- When you see a **green checkmark** then everything is fine.
+- Dark Reader developer will **review** and merge your changes, making them available.
 
 ## Dynamic variables
 
@@ -113,13 +132,12 @@ CSS
 ```
 
 Here is a full table of available CSS variables:
-
 | Variable | Description | Use |
-|-|-|-|
-| `--darkreader-neutral-background` | Neutral background color that corresponds to the user's settings. | Mostly used for elements that have a wrong background color |
-| `--darkreader-neutral-text` | Neutral text color that corresponds to the user's settings. | Used for elements with a wrong text color |
-| `--darkreader-selection-background` | The text color setting defined by the user. | The user's Text Color setting |
-| `--darkreader-selection-text` | The background color setting defined by the user. | The user's Background Color setting |
+|---|---|---|
+| **`--darkreader-neutral-background`** | Neutral background color that <br>corresponds to the user's settings. | Mostly used for elements that have <br>a wrong background color |
+| **`--darkreader-neutral-text`** | Neutral text color that <br>corresponds to the user's settings. | Used for elements with a wrong text color |
+| **`--darkreader-selection-background`** | The text color setting <br>defined by the user. | The user's Text Color setting |
+| **`--darkreader-selection-text`** | The background color setting <br>defined by the user. | The user's Background Color setting |
 
 ## Fixes for Filter and Filter+ mode
 

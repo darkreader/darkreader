@@ -18,6 +18,7 @@ function CollapsiblePanel({}, ...groups: Array<Malevic.ComponentSpec<Collapsible
                     store.activeGroup = spec.props.id;
                     context.refresh();
                 };
+
                 return {
                     ...spec,
                     props: {

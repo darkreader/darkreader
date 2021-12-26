@@ -6,6 +6,7 @@ import {parseInversionFixes, formatInversionFixes} from '../../src/generators/cs
 import {parseDynamicThemeFixes, formatDynamicThemeFixes} from '../../src/generators/dynamic-theme';
 import {parseStaticThemes, formatStaticThemes} from '../../src/generators/static-theme';
 import type {StaticTheme} from '../../src/definitions';
+import {ParseColorSchemeConfig} from '../../src/utils/colorscheme-parser';
 
 function readConfig(fileName: string) {
     return new Promise<string>((resolve, reject) => {
@@ -34,6 +35,10 @@ function throwIfDifferent(input: string, expected: string, message: string) {
 
 test('Dark Sites list', async () => {
     const file = await readConfig('dark-sites.config');
+
+    // there is no \r character
+    expect(file.indexOf('\r')).toEqual(-1);
+
     const sites = parseArray(file);
 
     // is not empty
@@ -51,6 +56,10 @@ test('Dark Sites list', async () => {
 
 test('Dynamic Theme Fixes config', async () => {
     const file = await readConfig('dynamic-theme-fixes.config');
+
+    // there is no \r character
+    expect(file.indexOf('\r')).toEqual(-1);
+
     const fixes = parseDynamicThemeFixes(file);
 
     // there is a common fix
@@ -89,7 +98,7 @@ test('Dynamic Theme Fixes config', async () => {
         '========',
         'duckduckgo.com',
         'IGNORE IMAGE ANALYSIS', 'img[alt="Logo"]', 'canvas',
-    ].join('\r\n'))).toEqual([
+    ].join('\n'))).toEqual([
         {url: ['inbox.google.com', 'mail.google.com'], invert: ['a', 'b'], css: '.x { color: white !important; }'},
         {url: ['twitter.com'], invert: ['c', 'd']},
         {url: ['wikipedia.org'], ignoreInlineStyle: ['a', 'b']},
@@ -99,6 +108,10 @@ test('Dynamic Theme Fixes config', async () => {
 
 test('Inversion Fixes config', async () => {
     const file = await readConfig('inversion-fixes.config');
+
+    // there is no \r character
+    expect(file.indexOf('\r')).toEqual(-1);
+
     const fixes = parseInversionFixes(file);
 
     // there is a common fix
@@ -119,6 +132,10 @@ test('Inversion Fixes config', async () => {
 
 test('Static Themes config', async () => {
     const file = await readConfig('static-themes.config');
+
+    // there is no \r character
+    expect(file.indexOf('\r')).toEqual(-1);
+
     const themes = parseStaticThemes(file);
 
     // there is a common theme
@@ -138,4 +155,22 @@ test('Static Themes config', async () => {
 
     // fixes are properly formatted
     expect(throwIfDifferent(file, formatStaticThemes(themes), 'Static theme format error')).not.toThrow();
+});
+
+test('Colorscheme config', async () => {
+    const file = await readConfig('color-schemes.drconf');
+
+    // there is no \r character
+    expect(file.indexOf('\r')).toEqual(-1);
+
+    const {result: schemes, error} = ParseColorSchemeConfig(file);
+
+    // Their is no error
+    expect(error).toBeNull();
+
+    // There is a default Dark color scheme
+    expect(schemes.dark['Default']).toBeDefined();
+
+    // There is a default Light color scheme
+    expect(schemes.light['Default']).toBeDefined();
 });

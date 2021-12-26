@@ -8,10 +8,6 @@ const ICON_PATHS = {
 };
 
 export default class IconManager {
-    constructor() {
-        this.setActive();
-    }
-
     setActive() {
         if (!chrome.browserAction.setIcon || isThunderbird) {
             // Fix for Firefox Android and Thunderbird.
@@ -41,11 +37,6 @@ export default class IconManager {
     showImportantBadge() {
         chrome.browserAction.setBadgeBackgroundColor({color: '#e96c4c'});
         chrome.browserAction.setBadgeText({text: '!'});
-    }
-
-    showUnreadReleaseNotesBadge(count: number) {
-        chrome.browserAction.setBadgeBackgroundColor({color: '#e96c4c'});
-        chrome.browserAction.setBadgeText({text: String(count)});
     }
 
     hideBadge() {

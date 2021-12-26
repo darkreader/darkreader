@@ -20,24 +20,33 @@ export interface ImageDetails {
 const imageManager = new AsyncQueue();
 
 export async function getImageDetails(url: string) {
-    return new Promise<ImageDetails>(async (resolve) => {
+    return new Promise<ImageDetails>(async (resolve, reject) => {
         let dataURL: string;
         if (url.startsWith('data:')) {
             dataURL = url;
         } else {
-            dataURL = await getImageDataURL(url);
+            try {
+                dataURL = await getImageDataURL(url);
+            } catch (error) {
+                reject(error);
+                return;
+            }
         }
 
-        const image = await urlToImage(dataURL);
-        imageManager.addToQueue(() => {
-            resolve({
-                src: url,
-                dataURL,
-                width: image.naturalWidth,
-                height: image.naturalHeight,
-                ...analyzeImage(image),
+        try {
+            const image = await urlToImage(dataURL);
+            imageManager.addToQueue(() => {
+                resolve({
+                    src: url,
+                    dataURL,
+                    width: image.naturalWidth,
+                    height: image.naturalHeight,
+                    ...analyzeImage(image),
+                });
             });
-        });
+        } catch (error) {
+            reject(error);
+        }
     });
 }
 
@@ -168,7 +177,6 @@ function analyzeImage(image: HTMLImageElement) {
         isTooLarge: false,
     };
 }
-
 
 export function getFilteredImageDataURL({dataURL, width, height}: ImageDetails, theme: FilterConfig): string {
     const matrix = getSVGFilterMatrixValue(theme);

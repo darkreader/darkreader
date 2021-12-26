@@ -1,12 +1,13 @@
+import type {ParsedColorSchemeConfig} from './utils/colorscheme-parser';
 import type {FilterMode} from './generators/css-filter';
 
 export interface ExtensionData {
     isEnabled: boolean;
     isReady: boolean;
     settings: UserSettings;
-    fonts: string[];
     news: News[];
     shortcuts: Shortcuts;
+    colorScheme: ParsedColorSchemeConfig;
     devtools: {
         dynamicFixesText: string;
         filterFixesText: string;
@@ -15,6 +16,11 @@ export interface ExtensionData {
         hasCustomFilterFixes: boolean;
         hasCustomStaticFixes: boolean;
     };
+}
+
+export interface TabData {
+    type: string;
+    data?: any;
 }
 
 export interface ExtensionActions {
@@ -55,6 +61,8 @@ export interface Theme {
     scrollbarColor: '' | 'auto' | string;
     selectionColor: '' | 'auto' | string;
     styleSystemControls: boolean;
+    lightColorScheme: string;
+    darkColorScheme: string;
 }
 
 export type FilterConfig = Theme;
@@ -73,6 +81,7 @@ export interface ThemePreset {
 
 export interface UserSettings {
     enabled: boolean;
+    fetchNews: boolean;
     theme: FilterConfig;
     presets: ThemePreset[];
     customThemes: CustomSiteConfig[];
@@ -80,7 +89,6 @@ export interface UserSettings {
     siteListEnabled: string[];
     applyToListedOnly: boolean;
     changeBrowserTheme: boolean;
-    notifyOfNews: boolean;
     syncSettings: boolean;
     syncSitesFixes: boolean;
     automation: '' | 'time' | 'system' | 'location';
@@ -90,6 +98,7 @@ export interface UserSettings {
     previewNewDesign: boolean;
     enableForPDF: boolean;
     enableForProtectedPages: boolean;
+    enableContextMenus: boolean;
 }
 
 export interface TimeSettings {
@@ -126,6 +135,7 @@ export interface DynamicThemeFix {
     css: string;
     ignoreInlineStyle: string[];
     ignoreImageAnalysis: string[];
+    disableStyleSheetsProxy: boolean;
 }
 
 export interface InversionFix {

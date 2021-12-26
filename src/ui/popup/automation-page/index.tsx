@@ -2,6 +2,7 @@ import {m} from 'malevic';
 import {getLocalMessage} from '../../../utils/locales';
 import {CheckBox, TimeRangePicker, TextBox, Button} from '../../controls';
 import type {ViewProps} from '../types';
+import DropDown from '../../controls/dropdown/index';
 
 export default function AutomationPage(props: ViewProps) {
     const isSystemAutomation = props.data.settings.automation === 'system';
@@ -133,6 +134,17 @@ export default function AutomationPage(props: ViewProps) {
             </div>
             <p class="automation-page__description">
                 {getLocalMessage('system_dark_mode_description')}
+            </p>
+            <DropDown
+                onChange={(selected: any) => props.actions.changeSettings({automationBehaviour: selected})}
+                selected={props.data.settings.automationBehaviour}
+                options={[
+                    {id: 'OnOff', content: 'Toggle on/off'},
+                    {id: 'Scheme', content: 'Toggle dark/light'},
+                ]}
+            />
+            <p class="automation-page__description">
+                Decide what dark reader should do on automation.
             </p>
         </div>
     );

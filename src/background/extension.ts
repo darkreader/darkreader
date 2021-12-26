@@ -85,7 +85,7 @@ export class Extension {
 
     private alarmListener = (alarm: chrome.alarms.Alarm): void => {
         if (alarm.name === Extension.ALARM_NAME) {
-            this.handleAutoCheck();
+            this.handleAutomationCheck();
         }
     };
 
@@ -380,7 +380,23 @@ export class Extension {
         if (this.user.settings.automation !== 'system') {
             return;
         }
-        this.handleAutoCheck();
+        this.handleAutomationCheck();
+    };
+
+    private handleAutomationCheck = () => {
+        if (this.user.settings.automationBehaviour === 'Scheme') {
+            this.recalculateIsEnabled();
+            if (this.isEnabled) {
+                // Dark
+                this.changeSettings({theme: {...this.user.settings.theme, ...{mode: 1}}});
+            } else {
+                // Light
+                this.changeSettings({theme: {...this.user.settings.theme, ...{mode: 0}}});
+            }
+        } else {
+            // Toggle on/off
+            this.handleAutoCheck();
+        }
     };
 
     private async handleAutoCheck() {
@@ -407,6 +423,7 @@ export class Extension {
         if (
             (prev.enabled !== this.user.settings.enabled) ||
             (prev.automation !== this.user.settings.automation) ||
+            (prev.automationBehaviour !== this.user.settings.automationBehaviour) ||
             (prev.time.activation !== this.user.settings.time.activation) ||
             (prev.time.deactivation !== this.user.settings.time.deactivation) ||
             (prev.location.latitude !== this.user.settings.location.latitude) ||

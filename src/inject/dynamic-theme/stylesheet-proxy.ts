@@ -74,11 +74,26 @@ export function injectProxy(enableStyleSheetsProxy: boolean) {
     }
 
     function proxyDocumentStyleSheets() {
-        const docSheets = documentStyleSheetsDescriptor.get.call(this);
-        const filtered = [...docSheets].filter((styleSheet: CSSStyleSheet) => {
-            return !(styleSheet.ownerNode as HTMLElement).classList.contains('darkreader');
-        });
-        return Object.setPrototypeOf(filtered, StyleSheetList.prototype);
+        const getCurrentValue = () => {
+            const docSheets = documentStyleSheetsDescriptor.get.call(this);
+
+            return Object.setPrototypeOf([...docSheets].filter((styleSheet: CSSStyleSheet) => {
+                return !(styleSheet.ownerNode as HTMLElement).classList.contains('darkreader');
+            }), StyleSheetList.prototype);
+        };
+
+        let elements = getCurrentValue();
+
+        // Because StyleSheetList are so called "live objects".
+        // Every time you access them, it will return all stylesheets from
+        // current situation of the DOM. Instead of a static list.
+        const styleSheetListBehavior: ProxyHandler<StyleSheetList> = {
+            get: function (_: StyleSheetList, property: string) {
+                return getCurrentValue()[property];
+            }
+        };
+        elements = new Proxy(elements, styleSheetListBehavior);
+        return elements;
     }
 
     function proxyGetElementsByTagName(tagName: string): NodeListOf<HTMLElement> {
@@ -99,12 +114,12 @@ export function injectProxy(enableStyleSheetsProxy: boolean) {
         // Because NodeListOf and HTMLCollection are so called "live objects".
         // Every time you access them, it will return all tagnames from
         // current situation of the DOM. Instead of a static list.
-        const NodeListBehavior: ProxyHandler<NodeListOf<HTMLElement>> = {
+        const nodeListBehavior: ProxyHandler<NodeListOf<HTMLElement>> = {
             get: function (_: NodeListOf<HTMLElement>, property: string) {
                 return getCurrentElementValue()[Number(property)];
             }
         };
-        elements = new Proxy(elements, NodeListBehavior);
+        elements = new Proxy(elements, nodeListBehavior);
         return elements;
     }
 

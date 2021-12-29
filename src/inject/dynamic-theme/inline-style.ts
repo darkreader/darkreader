@@ -2,6 +2,7 @@ import {forEach, push} from '../../utils/array';
 import {iterateShadowHosts, createOptimizedTreeObserver, isReadyStateComplete, addReadyStateCompleteListener} from '../utils/dom';
 import {iterateCSSDeclarations} from './css-rules';
 import {getModifiableCSSDeclaration} from './modify-css';
+import type {CSSVariableModifier} from './variables';
 import {variablesStore} from './variables';
 import type {FilterConfig} from '../../definitions';
 import {isShadowDomSupported} from '../../utils/platform';
@@ -251,7 +252,8 @@ export function overrideInlineStyle(element: HTMLElement, theme: FilterConfig, i
     const unsetProps = new Set(Object.keys(overrides));
 
     function setCustomProp(targetCSSProp: string, modifierCSSProp: string, cssVal: string) {
-        const {customProp, dataAttr} = overrides[targetCSSProp];
+        const isPropertyVariable = targetCSSProp.startsWith('--');
+        const {customProp, dataAttr} = isPropertyVariable ? ({} as Overrides['']) : overrides[targetCSSProp];
 
         const mod = getModifiableCSSDeclaration(modifierCSSProp, cssVal, {} as CSSStyleRule, variablesStore, ignoreImageSelectors, null);
         if (!mod) {
@@ -261,11 +263,25 @@ export function overrideInlineStyle(element: HTMLElement, theme: FilterConfig, i
         if (typeof value === 'function') {
             value = value(theme) as string;
         }
-        element.style.setProperty(customProp, value);
-        if (!element.hasAttribute(dataAttr)) {
-            element.setAttribute(dataAttr, '');
+
+        // typeof value === 'object' always evaluate to true when
+        // `isPropertyVariable` is true, but it serves as a type hint for typescript.
+        // Such that `as ReturnType<CSSVariableModifier>` won't error about the possible
+        // string type.
+        if (isPropertyVariable && typeof value === 'object') {
+            const typedValue = value as ReturnType<CSSVariableModifier>;
+            typedValue.declarations.forEach(({property, value}) => {
+                !(value instanceof Promise) && element.style.setProperty(property, value);
+            });
+
+            // TODO: add listener for `onTypeChange`.
+        } else {
+            element.style.setProperty(customProp, value);
+            if (!element.hasAttribute(dataAttr)) {
+                element.setAttribute(dataAttr, '');
+            }
+            unsetProps.delete(targetCSSProp);
         }
-        unsetProps.delete(targetCSSProp);
     }
 
     if (ignoreInlineSelectors.length > 0) {
@@ -336,7 +352,7 @@ export function overrideInlineStyle(element: HTMLElement, theme: FilterConfig, i
         if (property === 'background-image' && value.includes('url')) {
             return;
         }
-        if (overrides.hasOwnProperty(property)) {
+        if (overrides.hasOwnProperty(property) || (property.startsWith('--') && !normalizedPropList[property])) {
             setCustomProp(property, property, value);
         } else {
             const overridenProp = normalizedPropList[property];

@@ -3,7 +3,7 @@ const platform = typeof navigator === 'undefined' ? 'some platform' : navigator.
 
 export const isChromium = userAgent.includes('chrome') || userAgent.includes('chromium');
 export const isThunderbird = userAgent.includes('thunderbird');
-export const isFirefox = userAgent.includes('firefox') || userAgent.includes('librewolf') || isThunderbird;
+export const isFirefox = userAgent.includes('gecko') || isThunderbird;
 export const isVivaldi = userAgent.includes('vivaldi');
 export const isYaBrowser = userAgent.includes('yabrowser');
 export const isOpera = userAgent.includes('opr') || userAgent.includes('opera');

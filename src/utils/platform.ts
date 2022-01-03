@@ -3,7 +3,7 @@ const platform = typeof navigator === 'undefined' ? 'some platform' : navigator.
 
 export const isChromium = userAgent.includes('chrome') || userAgent.includes('chromium');
 export const isThunderbird = userAgent.includes('thunderbird');
-export const isFirefox = userAgent.includes('firefox') || isThunderbird;
+export const isFirefox = userAgent.includes('firefox') || userAgent.includes('librewolf') || isThunderbird;
 export const isVivaldi = userAgent.includes('vivaldi');
 export const isYaBrowser = userAgent.includes('yabrowser');
 export const isOpera = userAgent.includes('opr') || userAgent.includes('opera');
@@ -22,23 +22,13 @@ export const chromiumVersion = (() => {
     const m = userAgent.match(/chrom[e|ium]\/([^ ]+)/);
     if (m && m[1]) {
         return m[1];
-    } else {
-        return '';
     }
+    return '';
 })();
 
 export const isDefinedSelectorSupported = (() => {
     try {
         document.querySelector(':defined');
-        return true;
-    } catch (err) {
-        return false;
-    }
-})();
-
-export const isCSSStyleSheetConstructorSupported = (() => {
-    try {
-        new CSSStyleSheet();
         return true;
     } catch (err) {
         return false;
@@ -56,3 +46,8 @@ export function compareChromeVersions($a: string, $b: string) {
     return 0;
 }
 
+export const isXMLHttpRequestSupported = typeof XMLHttpRequest === 'function';
+
+export const isFetchSupported = typeof fetch === 'function';
+
+export const isMV3 = (globalThis as any).chrome && (globalThis as any).chrome.runtime && (globalThis as any).chrome.runtime.getManifest && (globalThis as any).chrome.runtime.getManifest().manifest_version === 3;

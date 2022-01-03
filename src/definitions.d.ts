@@ -1,12 +1,13 @@
+import type {ParsedColorSchemeConfig} from './utils/colorscheme-parser';
 import type {FilterMode} from './generators/css-filter';
 
 export interface ExtensionData {
     isEnabled: boolean;
     isReady: boolean;
     settings: UserSettings;
-    fonts: string[];
     news: News[];
     shortcuts: Shortcuts;
+    colorScheme: ParsedColorSchemeConfig;
     devtools: {
         dynamicFixesText: string;
         filterFixesText: string;
@@ -17,19 +18,24 @@ export interface ExtensionData {
     };
 }
 
+export interface TabData {
+    type: string;
+    data?: any;
+}
+
 export interface ExtensionActions {
-    changeSettings(settings: Partial<UserSettings>);
-    setTheme(theme: Partial<FilterConfig>);
-    setShortcut(command: string, shortcut: string);
-    toggleURL(url: string);
-    markNewsAsRead(ids: string[]);
-    loadConfig(options: {local: boolean});
+    changeSettings(settings: Partial<UserSettings>): void;
+    setTheme(theme: Partial<FilterConfig>): void;
+    setShortcut(command: string, shortcut: string): void;
+    toggleURL(url: string): void;
+    markNewsAsRead(ids: string[]): void;
+    loadConfig(options: {local: boolean}): void;
     applyDevDynamicThemeFixes(text: string): Promise<void>;
-    resetDevDynamicThemeFixes();
+    resetDevDynamicThemeFixes(): void;
     applyDevInversionFixes(text: string): Promise<void>;
-    resetDevInversionFixes();
+    resetDevInversionFixes(): void;
     applyDevStaticThemes(text: string): Promise<void>;
-    resetDevStaticThemes();
+    resetDevStaticThemes(): void;
 }
 
 export interface ExtWrapper {
@@ -55,6 +61,8 @@ export interface Theme {
     scrollbarColor: '' | 'auto' | string;
     selectionColor: '' | 'auto' | string;
     styleSystemControls: boolean;
+    lightColorScheme: string;
+    darkColorScheme: string;
 }
 
 export type FilterConfig = Theme;
@@ -73,6 +81,7 @@ export interface ThemePreset {
 
 export interface UserSettings {
     enabled: boolean;
+    fetchNews: boolean;
     theme: FilterConfig;
     presets: ThemePreset[];
     customThemes: CustomSiteConfig[];
@@ -80,15 +89,16 @@ export interface UserSettings {
     siteListEnabled: string[];
     applyToListedOnly: boolean;
     changeBrowserTheme: boolean;
-    notifyOfNews: boolean;
     syncSettings: boolean;
     syncSitesFixes: boolean;
     automation: '' | 'time' | 'system' | 'location';
+    automationBehaviour: 'OnOff' | 'Scheme';
     time: TimeSettings;
     location: LocationSettings;
     previewNewDesign: boolean;
     enableForPDF: boolean;
     enableForProtectedPages: boolean;
+    enableContextMenus: boolean;
 }
 
 export interface TimeSettings {
@@ -104,13 +114,14 @@ export interface LocationSettings {
 export interface TabInfo {
     url: string;
     isProtected: boolean;
+    isInjected: boolean;
     isInDarkList: boolean;
 }
 
 export interface Message {
     type: string;
     data?: any;
-    id?: any;
+    id?: number;
     error?: any;
 }
 
@@ -124,6 +135,7 @@ export interface DynamicThemeFix {
     css: string;
     ignoreInlineStyle: string[];
     ignoreImageAnalysis: string[];
+    disableStyleSheetsProxy: boolean;
 }
 
 export interface InversionFix {

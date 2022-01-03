@@ -1,25 +1,38 @@
 module.exports = {
     parser: '@typescript-eslint/parser',
     plugins: ['@typescript-eslint', 'local'],
-    extends: ['plugin:@typescript-eslint/recommended'],
+    extends: ['plugin:@typescript-eslint/recommended', 'plugin:import/recommended', 'plugin:import/typescript'],
     rules: {
         'array-bracket-spacing': ['error', 'never'],
         'arrow-parens': ['error', 'always'],
         'block-spacing': ['error', 'always'],
         'brace-style': 'off',
         'comma-spacing': 'off',
+        'curly': 'error',
         'eol-last': ['error', 'always'],
+        'eqeqeq': ['error', 'smart'],
         'indent': ['error', 4, {
             'SwitchCase': 1,
         }],
         'jsx-quotes': ['error', 'prefer-double'],
         'keyword-spacing': 'off',
         'object-curly-spacing': ['error', 'never'],
+        'operator-assignment': ['error', 'always'],
+        'prefer-template': 'error',
+        'no-debugger': 'error',
+        'no-else-return': 'error',
         'no-cond-assign': 'error',
+        'no-lonely-if': 'error',
         'no-multi-spaces': 'error',
+        'no-implicit-coercion': 'error',
         'no-redeclare': 'off',
+        'no-useless-concat': 'error',
+        'no-useless-return': 'error',
         'no-trailing-spaces': 'error',
         'no-whitespace-before-property': 'error',
+        'padded-blocks': ['error', 'never'],
+        'prefer-exponentiation-operator': 'error',
+        'prefer-regex-literals': 'error',
         'semi': 'off',
         'space-before-function-paren': ['error', {
             anonymous: 'always',
@@ -34,6 +47,7 @@ module.exports = {
             default: 'array-simple',
         }],
         'yoda': ['error', 'never'],
+        'local/consistent-new-lines': 'error',
         '@typescript-eslint/brace-style': 'error',
         '@typescript-eslint/camelcase': 'off',
         '@typescript-eslint/comma-spacing': ['error', {
@@ -61,13 +75,72 @@ module.exports = {
             allowTemplateLiterals: true,
             avoidEscape: true,
         }],
+        'import/no-unresolved': ['error', {
+            ignore: ['^malevic\/'],
+        }],
+        'import/no-restricted-paths': ['error', {
+            zones: [{
+                target: './src/inject/',
+                from: './src/background/',
+            },
+            {
+                target: './src/inject/',
+                from: './src/ui/',
+            },
+            {
+                target: './src/inject/',
+                from: './src/api/',
+            },
+            {
+                target: './src/inject/',
+                from: './tests/',
+            },
+            {
+                target: './src/background/',
+                from: './src/inject/',
+            },
+            {
+                target: './src/background/',
+                from: './src/ui/',
+            },
+            {
+                target: './src/background/',
+                from: './tests/',
+            },
+            {
+                target: './src/ui/',
+                from: './src/inject/',
+            },
+            {
+                target: './src/ui/',
+                from: './src/background/',
+            },
+            {
+                target: './src/ui/',
+                from: './tests/',
+            },
+            {
+                target: './src/generators/',
+                from: './src/inject/',
+            },
+            {
+                target: './src/generators/',
+                from: './src/background/',
+            },
+            {
+                target: './src/generators/',
+                from: './src/ui/',
+            }],
+        }],
     },
+
     overrides: [
         {
-            files: ['tasks/**/*.js', 'tests/**/*.js'],
+            files: ['tasks/**/*.js', 'tests/**/*.js', '.eslintplugin.js'],
             rules: {
                 '@typescript-eslint/no-var-requires': 'off',
-                '@typescript-eslint/no-implicit-any-catch': 'off'
+                '@typescript-eslint/no-implicit-any-catch': 'off',
+                '@typescript-eslint/ban-ts-comment': 'off',
             },
         },
         {

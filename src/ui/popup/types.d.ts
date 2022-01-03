@@ -4,4 +4,5 @@ export interface ViewProps {
     actions: ExtensionActions;
     data: ExtensionData;
     tab: TabInfo;
+    fonts?: string[];
 }

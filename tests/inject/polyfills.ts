@@ -15,5 +15,5 @@ if (!chrome.runtime.hasOwnProperty('onMessage')) {
             listeners.delete(listener);
         },
     } as any;
-    chrome.runtime.onMessage['__listeners__'] = listeners;
+    (chrome.runtime.onMessage as any)['__listeners__'] = listeners;
 }

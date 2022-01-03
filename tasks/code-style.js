@@ -1,7 +1,7 @@
 const fs = require('fs-extra');
 const globby = require('globby');
 const prettier = require('prettier');
-const {getDestDir} = require('./paths');
+const {getDestDir, PLATFORM} = require('./paths');
 const {createTask} = require('./task');
 const {log} = require('./utils');
 
@@ -19,7 +19,7 @@ const options = {
 const extensions = ['html', 'css', 'js'];
 
 async function codeStyle({debug}) {
-    const dir = getDestDir({debug});
+    const dir = getDestDir({debug, platform: PLATFORM.CHROME});
     const files = await globby(extensions.map((ext) => `${dir}/**/*.${ext}`));
     for (const file of files) {
         const code = await fs.readFile(file, 'utf8');

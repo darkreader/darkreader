@@ -3,6 +3,7 @@ import {DEFAULT_THEME} from '../../../src/defaults';
 import {createOrUpdateDynamicTheme, removeDynamicTheme} from '../../../src/inject/dynamic-theme';
 import {multiline} from '../../test-utils';
 import type {DynamicThemeFix} from '../../../src/definitions';
+import {FilterMode} from '../../../src/generators/css-filter';
 
 let container: HTMLElement;
 
@@ -17,6 +18,15 @@ afterEach(() => {
 });
 
 describe('FIXES', () => {
+    it('should add custom attributes to root element', () => {
+        createOrUpdateDynamicTheme(DEFAULT_THEME, null, false);
+        expect(document.documentElement.getAttribute(`data-darkreader-mode`)).toBe('dynamic');
+        expect(document.documentElement.getAttribute('data-darkreader-scheme')).toBe('dark');
+
+        createOrUpdateDynamicTheme({...DEFAULT_THEME, mode: FilterMode.light}, null, false);
+        expect(document.documentElement.getAttribute('data-darkreader-scheme')).toBe('dimmed');
+    });
+
     it('should invert selectors', async () => {
         container.innerHTML = multiline(
             '<div class="logo">Some logo</div>',
@@ -27,6 +37,7 @@ describe('FIXES', () => {
             css: '',
             ignoreInlineStyle: [],
             ignoreImageAnalysis: [],
+            disableStyleSheetsProxy: false,
 
         };
         createOrUpdateDynamicTheme(DEFAULT_THEME, fixes, false);
@@ -43,6 +54,7 @@ describe('FIXES', () => {
             css: '.text { color: red }',
             ignoreInlineStyle: [],
             ignoreImageAnalysis: [],
+            disableStyleSheetsProxy: false,
 
         };
         createOrUpdateDynamicTheme(DEFAULT_THEME, fixes, false);
@@ -59,6 +71,7 @@ describe('FIXES', () => {
             css: '',
             ignoreInlineStyle: ['.text'],
             ignoreImageAnalysis: [],
+            disableStyleSheetsProxy: false,
 
         };
         createOrUpdateDynamicTheme(DEFAULT_THEME, fixes, false);

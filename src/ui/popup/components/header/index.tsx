@@ -1,7 +1,7 @@
 import {m} from 'malevic';
 import {Shortcut, Toggle} from '../../../controls';
 import {getLocalMessage} from '../../../../utils/locales';
-import type {ExtWrapper, TabInfo} from '../../../../definitions';
+import type {ExtWrapper, TabInfo, UserSettings} from '../../../../definitions';
 import SunMoonIcon from '../../main-page/sun-moon-icon';
 import SystemIcon from '../../main-page/system-icon';
 import WatchIcon from '../../main-page/watch-icon';
@@ -18,8 +18,7 @@ type HeaderProps = ExtWrapper & {
 };
 
 function Header({data, actions, tab, onMoreToggleSettingsClick}: HeaderProps) {
-
-    function toggleExtension(enabled) {
+    function toggleExtension(enabled: UserSettings['enabled']) {
         actions.changeSettings({
             enabled,
             automation: '',
@@ -42,7 +41,7 @@ function Header({data, actions, tab, onMoreToggleSettingsClick}: HeaderProps) {
                     tab={tab}
                     actions={actions}
                 />
-                {tab.isProtected ? (
+                {tab.isProtected || !tab.isInjected ? (
                     <span class="header__site-toggle__unable-text">
                         {getLocalMessage('page_protected')}
                     </span>

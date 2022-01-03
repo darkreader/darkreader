@@ -1,107 +1,132 @@
+import {isFirefox} from '../../utils/platform';
 import type {ExtensionData, ExtensionActions, FilterConfig, TabInfo, Message, UserSettings} from '../../definitions';
+import {MessageType} from '../../utils/message';
 
 export default class Connector implements ExtensionActions {
-    private port: chrome.runtime.Port;
-    private counter: number;
+    private changeSubscribers: Set<(data: ExtensionData) => void>;
 
     constructor() {
-        this.counter = 0;
-        this.port = chrome.runtime.connect({name: 'ui'});
+        this.changeSubscribers = new Set();
     }
 
-    private getRequestId() {
-        return ++this.counter;
-    }
-
-    private async sendRequest<T>(request: Message, executor: (response: Message, resolve: (data?: T) => void, reject: (error: Error) => void) => void) {
-        const id = this.getRequestId();
+    private async sendRequest<T>(type: string, data?: string) {
         return new Promise<T>((resolve, reject) => {
-            const listener = ({id: responseId, ...response}: Message) => {
-                if (responseId === id) {
-                    executor(response, resolve, reject);
-                    this.port.onMessage.removeListener(listener);
+            chrome.runtime.sendMessage<Message>({type, data}, ({data, error}: Message) => {
+                if (error) {
+                    reject(error);
+                } else {
+                    resolve(data);
                 }
-            };
-            this.port.onMessage.addListener(listener);
-            this.port.postMessage({...request, id});
+            });
+        });
+    }
+
+    private async firefoxSendRequestWithResponse<T>(type: string, data?: string) {
+        return new Promise<T>((resolve, reject) => {
+            const dataPort = chrome.runtime.connect({name: type});
+            dataPort.onDisconnect.addListener(() => reject());
+            dataPort.onMessage.addListener(({data, error}) => {
+                if (error) {
+                    reject(error);
+                } else {
+                    resolve(data);
+                }
+                dataPort.disconnect();
+            });
+            data && dataPort.postMessage({data});
         });
     }
 
     async getData() {
-        return await this.sendRequest<ExtensionData>({type: 'get-data'}, ({data}, resolve) => resolve(data));
+        if (isFirefox) {
+            return await this.firefoxSendRequestWithResponse<ExtensionData>(MessageType.UI_GET_DATA);
+        }
+        return await this.sendRequest<ExtensionData>(MessageType.UI_GET_DATA);
     }
 
     async getActiveTabInfo() {
-        return await this.sendRequest<TabInfo>({type: 'get-active-tab-info'}, ({data}, resolve) => resolve(data));
+        if (isFirefox) {
+            return await this.firefoxSendRequestWithResponse<TabInfo>(MessageType.UI_GET_ACTIVE_TAB_INFO);
+        }
+        return await this.sendRequest<TabInfo>(MessageType.UI_GET_ACTIVE_TAB_INFO);
     }
+
+    private onChangesReceived = ({type, data}: Message) => {
+        if (type === MessageType.BG_CHANGES) {
+            this.changeSubscribers.forEach((callback) => callback(data));
+        }
+    };
 
     subscribeToChanges(callback: (data: ExtensionData) => void) {
-        const id = this.getRequestId();
-        this.port.onMessage.addListener(({id: responseId, data}: Message) => {
-            if (responseId === id) {
-                callback(data);
-            }
-        });
-        this.port.postMessage({type: 'subscribe-to-changes', id});
-    }
-
-    enable() {
-        this.port.postMessage({type: 'enable'});
-    }
-
-    disable() {
-        this.port.postMessage({type: 'disable'});
+        this.changeSubscribers.add(callback);
+        if (this.changeSubscribers.size === 1) {
+            chrome.runtime.onMessage.addListener(this.onChangesReceived);
+            chrome.runtime.sendMessage<Message>({type: MessageType.UI_SUBSCRIBE_TO_CHANGES});
+        }
     }
 
     setShortcut(command: string, shortcut: string) {
-        this.port.postMessage({type: 'set-shortcut', data: {command, shortcut}});
+        chrome.runtime.sendMessage<Message>({type: MessageType.UI_SET_SHORTCUT, data: {command, shortcut}});
     }
 
     changeSettings(settings: Partial<UserSettings>) {
-        this.port.postMessage({type: 'change-settings', data: settings});
+        chrome.runtime.sendMessage<Message>({type: MessageType.UI_CHANGE_SETTINGS, data: settings});
     }
 
     setTheme(theme: Partial<FilterConfig>) {
-        this.port.postMessage({type: 'set-theme', data: theme});
+        chrome.runtime.sendMessage<Message>({type: MessageType.UI_SET_THEME, data: theme});
     }
 
     toggleURL(url: string) {
-        this.port.postMessage({type: 'toggle-url', data: url});
+        chrome.runtime.sendMessage<Message>({type: MessageType.UI_TOGGLE_URL, data: url});
     }
 
     markNewsAsRead(ids: string[]) {
-        this.port.postMessage({type: 'mark-news-as-read', data: ids});
+        chrome.runtime.sendMessage<Message>({type: MessageType.UI_MARK_NEWS_AS_READ, data: ids});
     }
 
     loadConfig(options: {local: boolean}) {
-        this.port.postMessage({type: 'load-config', data: options});
+        chrome.runtime.sendMessage<Message>({type: MessageType.UI_LOAD_CONFIG, data: options});
     }
 
     async applyDevDynamicThemeFixes(text: string) {
-        return await this.sendRequest<void>({type: 'apply-dev-dynamic-theme-fixes', data: text}, ({error}, resolve, reject) => error ? reject(error) : resolve());
+        if (isFirefox) {
+            return await this.firefoxSendRequestWithResponse<void>(MessageType.UI_APPLY_DEV_DYNAMIC_THEME_FIXES, text);
+        }
+        return await this.sendRequest<void>(MessageType.UI_APPLY_DEV_DYNAMIC_THEME_FIXES, text);
     }
 
     resetDevDynamicThemeFixes() {
-        this.port.postMessage({type: 'reset-dev-dynamic-theme-fixes'});
+        chrome.runtime.sendMessage<Message>({type: MessageType.UI_RESET_DEV_DYNAMIC_THEME_FIXES});
     }
 
     async applyDevInversionFixes(text: string) {
-        return await this.sendRequest<void>({type: 'apply-dev-inversion-fixes', data: text}, ({error}, resolve, reject) => error ? reject(error) : resolve());
+        if (isFirefox) {
+            return await this.firefoxSendRequestWithResponse<void>(MessageType.UI_APPLY_DEV_INVERSION_FIXES, text);
+        }
+        return await this.sendRequest<void>(MessageType.UI_APPLY_DEV_INVERSION_FIXES, text);
     }
 
     resetDevInversionFixes() {
-        this.port.postMessage({type: 'reset-dev-inversion-fixes'});
+        chrome.runtime.sendMessage<Message>({type: MessageType.UI_RESET_DEV_INVERSION_FIXES});
     }
 
     async applyDevStaticThemes(text: string) {
-        return await this.sendRequest<void>({type: 'apply-dev-static-themes', data: text}, ({error}, resolve, reject) => error ? reject(error) : resolve());
+        if (isFirefox) {
+            return await this.firefoxSendRequestWithResponse<void>(MessageType.UI_APPLY_DEV_STATIC_THEMES, text);
+        }
+        return await this.sendRequest<void>(MessageType.UI_APPLY_DEV_STATIC_THEMES, text);
     }
 
     resetDevStaticThemes() {
-        this.port.postMessage({type: 'reset-dev-static-themes'});
+        chrome.runtime.sendMessage<Message>({type: MessageType.UI_RESET_DEV_STATIC_THEMES});
     }
 
     disconnect() {
-        this.port.disconnect();
+        if (this.changeSubscribers.size > 0) {
+            this.changeSubscribers.clear();
+            chrome.runtime.onMessage.removeListener(this.onChangesReceived);
+            chrome.runtime.sendMessage<Message>({type: MessageType.UI_UNSUBSCRIBE_FROM_CHANGES});
+        }
     }
 }

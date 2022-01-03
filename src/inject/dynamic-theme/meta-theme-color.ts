@@ -1,6 +1,6 @@
 import {parse} from '../../utils/color';
 import {modifyBackgroundColor} from '../../generators/modify-colors';
-import {logWarn} from '../utils/log';
+import {logWarn} from '../../utils/log';
 import type {FilterConfig} from '../../definitions';
 
 const metaThemeColorName = 'theme-color';

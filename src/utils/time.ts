@@ -27,17 +27,52 @@ function parse24HTime(time: string) {
     return time.split(':').map((x) => parseInt(x));
 }
 
-function compareTime(a: number[], b: number[]) {
-    if (a[0] === b[0] && a[1] === b[1]) {
+function compareTime(time1: number[], time2: number[]) {
+    if (time1[0] === time2[0] && time1[1] === time2[1]) {
         return 0;
     }
-    if (a[0] < b[0] || (a[0] === b[0] && a[1] < b[1])) {
+    if (time1[0] < time2[0] || (time1[0] === time2[0] && time1[1] < time2[1])) {
         return -1;
     }
     return 1;
 }
 
-export function isInTimeInterval(date: Date, time0: string, time1: string) {
+export function nextTimeInterval(time0: string, time1: string, date: Date = new Date()): number {
+    const a = parse24HTime(time0);
+    const b = parse24HTime(time1);
+    const t = [date.getHours(), date.getMinutes()];
+
+    // Ensure a <= b
+    if (compareTime(a, b) > 0) {
+        return nextTimeInterval(time1, time0, date);
+    }
+
+    if (compareTime(a, b) === 0) {
+        return null;
+    }
+
+    if (compareTime(t, a) < 0) {
+        // t < a <= b
+        // Schedule for todate at time a
+        date.setHours(a[0]);
+        date.setMinutes(a[1]);
+        return date.getTime();
+    }
+
+    if (compareTime(t, b) < 0) {
+        // a <= t < b
+        // Schedule for today at time b
+        date.setHours(b[0]);
+        date.setMinutes(b[1]);
+        return date.getTime();
+    }
+
+    // a <= b <= t
+    // Schedule for tomorrow at time a
+    return (new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1, a[0], a[1])).getTime();
+}
+
+export function isInTimeIntervalLocal(time0: string, time1: string, date: Date = new Date()): boolean {
     const a = parse24HTime(time0);
     const b = parse24HTime(time1);
     const t = [date.getHours(), date.getMinutes()];
@@ -45,6 +80,13 @@ export function isInTimeInterval(date: Date, time0: string, time1: string) {
         return compareTime(a, t) <= 0 || compareTime(t, b) < 0;
     }
     return compareTime(a, t) <= 0 && compareTime(t, b) < 0;
+}
+
+function isInTimeIntervalUTC(time0: number, time1: number, timestamp: number) {
+    if (time1 < time0) {
+        return timestamp <= time1 || time0 <= timestamp;
+    }
+    return time0 < timestamp && timestamp < time1;
 }
 
 interface Duration {
@@ -71,14 +113,18 @@ export function getDuration(time: Duration) {
     return duration;
 }
 
+export function getDurationInMinutes(time: Duration) {
+    return getDuration(time) / 1000 / 60;
+}
+
 function getSunsetSunriseUTCTime(
-    date: Date,
     latitude: number,
     longitude: number,
+    date: Date,
 ) {
-    const dec31 = new Date(date.getUTCFullYear(), 0, 0);
+    const dec31 = Date.UTC(date.getUTCFullYear(), 0, 0, 0, 0, 0, 0);
     const oneDay = getDuration({days: 1});
-    const dayOfYear = Math.floor((Number(date) - Number(dec31)) / oneDay);
+    const dayOfYear = Math.floor((date.getTime() - dec31) / oneDay);
 
     const zenith = 90.83333333333333;
     const D2R = Math.PI / 180;
@@ -96,26 +142,26 @@ function getSunsetSunriseUTCTime(
         // calculate the Sun's true longitude
         let L = M + (1.916 * Math.sin(M * D2R)) + (0.020 * Math.sin(2 * M * D2R)) + 282.634;
         if (L > 360) {
-            L = L - 360;
+            L -= 360;
         } else if (L < 0) {
-            L = L + 360;
+            L += 360;
         }
 
         // calculate the Sun's right ascension
         let RA = R2D * Math.atan(0.91764 * Math.tan(L * D2R));
         if (RA > 360) {
-            RA = RA - 360;
+            RA -= 360;
         } else if (RA < 0) {
-            RA = RA + 360;
+            RA += 360;
         }
 
         // right ascension value needs to be in the same qua
         const Lquadrant = (Math.floor(L / (90))) * 90;
         const RAquadrant = (Math.floor(RA / 90)) * 90;
-        RA = RA + (Lquadrant - RAquadrant);
+        RA += (Lquadrant - RAquadrant);
 
         // right ascension value needs to be converted into hours
-        RA = RA / 15;
+        RA /= 15;
 
         // calculate the Sun's declination
         const sinDec = 0.39782 * Math.sin(L * D2R);
@@ -147,16 +193,16 @@ function getSunsetSunriseUTCTime(
         // adjust back to UTC
         let UT = T - lnHour;
         if (UT > 24) {
-            UT = UT - 24;
+            UT -= 24;
         } else if (UT < 0) {
-            UT = UT + 24;
+            UT += 24;
         }
 
         // convert to milliseconds
         return {
             alwaysDay: false,
             alwaysNight: false,
-            time: UT * getDuration({hours: 1}),
+            time: Math.round(UT * getDuration({hours: 1})),
         };
     }
 
@@ -180,11 +226,11 @@ function getSunsetSunriseUTCTime(
 }
 
 export function isNightAtLocation(
-    date: Date,
     latitude: number,
     longitude: number,
-) {
-    const time = getSunsetSunriseUTCTime(date, latitude, longitude);
+    date: Date = new Date(),
+): boolean {
+    const time = getSunsetSunriseUTCTime(latitude, longitude, date);
 
     if (time.alwaysDay) {
         return false;
@@ -197,12 +243,51 @@ export function isNightAtLocation(
     const currentTime = (
         date.getUTCHours() * getDuration({hours: 1}) +
         date.getUTCMinutes() * getDuration({minutes: 1}) +
-        date.getUTCSeconds() * getDuration({seconds: 1})
+        date.getUTCSeconds() * getDuration({seconds: 1}) +
+        date.getUTCMilliseconds()
     );
 
-    if (sunsetTime > sunriseTime) {
-        return (currentTime > sunsetTime) || (currentTime < sunriseTime);
-    } else {
-        return (currentTime > sunsetTime) && (currentTime < sunriseTime);
+    return isInTimeIntervalUTC(sunsetTime, sunriseTime, currentTime);
+}
+
+export function nextTimeChangeAtLocation(
+    latitude: number,
+    longitude: number,
+    date: Date = new Date(),
+): number {
+    const time = getSunsetSunriseUTCTime(latitude, longitude, date);
+
+    if (time.alwaysDay) {
+        return date.getTime() + getDuration({days: 1});
+    } else if (time.alwaysNight) {
+        return date.getTime() + getDuration({days: 1});
     }
+
+    const [firstTimeOnDay, lastTimeOnDay] = time.sunriseTime < time.sunsetTime ? [time.sunriseTime, time.sunsetTime] : [time.sunsetTime, time.sunriseTime];
+    const currentTime = (
+        date.getUTCHours() * getDuration({hours: 1}) +
+        date.getUTCMinutes() * getDuration({minutes: 1}) +
+        date.getUTCSeconds() * getDuration({seconds: 1}) +
+        date.getUTCMilliseconds()
+    );
+
+    if (currentTime <= firstTimeOnDay) {
+        // Timeline:
+        // --- firstTimeOnDay <---> lastTimeOnDay ---
+        //  ^
+        // Current time
+        return Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate(), 0, 0, 0, firstTimeOnDay);
+    }
+    if (currentTime <= lastTimeOnDay) {
+        // Timeline:
+        // --- firstTimeOnDay <---> lastTimeOnDay ---
+        //                      ^
+        //                 Current time
+        return Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate(), 0, 0, 0, lastTimeOnDay);
+    }
+    // Timeline:
+    // --- firstTimeOnDay <---> lastTimeOnDay ---
+    //                                         ^
+    //                                    Current time
+    return Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate() + 1, 0, 0, 0, firstTimeOnDay);
 }

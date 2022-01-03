@@ -1,3 +1,4 @@
+import type {ParsedColorSchemeConfig} from './utils/colorscheme-parser';
 import type {Theme, UserSettings} from './definitions';
 import ThemeEngines from './generators/theme-engines';
 import {isMacOS, isWindows} from './utils/platform';
@@ -31,10 +32,28 @@ export const DEFAULT_THEME: Theme = {
     scrollbarColor: isMacOS ? '' : 'auto',
     selectionColor: 'auto',
     styleSystemControls: true,
+    lightColorScheme: 'Default',
+    darkColorScheme: 'Default',
+};
+
+export const DEFAULT_COLORSCHEME: ParsedColorSchemeConfig = {
+    light: {
+        Default: {
+            backgroundColor: DEFAULT_COLORS.lightScheme.background,
+            textColor: DEFAULT_COLORS.lightScheme.text,
+        },
+    },
+    dark: {
+        Default: {
+            backgroundColor: DEFAULT_COLORS.darkScheme.background,
+            textColor: DEFAULT_COLORS.darkScheme.text,
+        },
+    },
 };
 
 export const DEFAULT_SETTINGS: UserSettings = {
     enabled: true,
+    fetchNews: true,
     theme: DEFAULT_THEME,
     presets: [],
     customThemes: [],
@@ -42,10 +61,10 @@ export const DEFAULT_SETTINGS: UserSettings = {
     siteListEnabled: [],
     applyToListedOnly: false,
     changeBrowserTheme: false,
-    notifyOfNews: false,
     syncSettings: true,
     syncSitesFixes: false,
     automation: '',
+    automationBehaviour: 'OnOff',
     time: {
         activation: '18:00',
         deactivation: '9:00',
@@ -57,4 +76,5 @@ export const DEFAULT_SETTINGS: UserSettings = {
     previewNewDesign: false,
     enableForPDF: true,
     enableForProtectedPages: false,
+    enableContextMenus: false,
 };

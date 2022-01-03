@@ -33,9 +33,16 @@ async function getChromePath() {
     if (process.platform === 'win32') {
         return await winProgramFiles('Google\\Chrome\\Application\\chrome.exe');
     }
-    return await linuxAppPath('google-chrome');
+    const possibleLinuxPaths = ['google-chrome', 'google-chrome-stable', 'chromium'];
+    for (const possiblePath of possibleLinuxPaths) {
+        try {
+            return await linuxAppPath(possiblePath);
+        } catch (e) {
+            // ignore
+        }
+    }
+    throw new Error('Could not find Chrome');
 }
-
 
 /**
  * @returns {Promise<string>}
@@ -50,8 +57,8 @@ async function getFirefoxPath() {
     return await linuxAppPath('firefox-nightly');
 }
 
-const chromeExtensionDebugDir = path.join(__dirname, '../../debug');
-const firefoxExtensionDebugDir = path.join(__dirname, '../../debug-firefox');
+const chromeExtensionDebugDir = path.join(__dirname, '../../build/debug/chrome');
+const firefoxExtensionDebugDir = path.join(__dirname, '../../build/debug/firefox');
 
 module.exports = {
     getChromePath,

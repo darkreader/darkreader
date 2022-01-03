@@ -7,125 +7,227 @@ import Newsmaker from './newsmaker';
 import TabManager from './tab-manager';
 import UserStorage from './user-storage';
 import {setWindowTheme, resetWindowTheme} from './window-theme';
-import {getFontList, getCommands, setShortcut, canInjectScript} from './utils/extension-api';
-import {isInTimeInterval, getDuration, isNightAtLocation} from '../utils/time';
-import {isURLInList, getURLHostOrProtocol, isURLEnabled} from '../utils/url';
+import {getCommands, setShortcut, canInjectScript} from './utils/extension-api';
+import {isInTimeIntervalLocal, nextTimeInterval, isNightAtLocation, nextTimeChangeAtLocation} from '../utils/time';
+import {isURLInList, getURLHostOrProtocol, isURLEnabled, isPDF} from '../utils/url';
 import ThemeEngines from '../generators/theme-engines';
 import createCSSFilterStylesheet from '../generators/css-filter';
 import {getDynamicThemeFixesFor} from '../generators/dynamic-theme';
 import createStaticStylesheet from '../generators/static-theme';
 import {createSVGFilterStylesheet, getSVGFilterMatrixValue, getSVGReverseFilterMatrixValue} from '../generators/svg-filter';
-import type {ExtensionData, FilterConfig, News, Shortcuts, UserSettings, TabInfo} from '../definitions';
+import type {ExtensionData, FilterConfig, News, Shortcuts, UserSettings, TabInfo, TabData} from '../definitions';
 import {isSystemDarkModeEnabled} from '../utils/media-query';
-import {isFirefox, isThunderbird} from '../utils/platform';
+import {isFirefox, isMV3, isThunderbird} from '../utils/platform';
+import {MessageType} from '../utils/message';
+import {logInfo, logWarn} from '../utils/log';
+import {PromiseBarrier} from '../utils/promise-barrier';
+import {StateManager} from './utils/state-manager';
 
-const AUTO_TIME_CHECK_INTERVAL = getDuration({seconds: 10});
+interface ExtensionState {
+    isEnabled: boolean;
+    wasEnabledOnLastCheck: boolean;
+    registeredContextMenus: boolean;
+}
+
+declare const __DEBUG__: boolean;
 
 export class Extension {
-    ready: boolean;
-
     config: ConfigManager;
     devtools: DevTools;
-    fonts: string[];
     icon: IconManager;
     messenger: Messenger;
     news: Newsmaker;
     tabs: TabManager;
     user: UserStorage;
 
-    constructor() {
-        this.ready = false;
+    private isEnabled: boolean = null;
+    private wasEnabledOnLastCheck: boolean = null;
+    private registeredContextMenus: boolean = null;
+    private popupOpeningListener: () => void = null;
+    // Is used only with Firefox to bypass Firefox bug
+    private wasLastColorSchemeDark: boolean = null;
+    private startBarrier: PromiseBarrier<void, void> = null;
+    private stateManager: StateManager<ExtensionState> = null;
 
-        this.icon = new IconManager();
+    private static ALARM_NAME = 'auto-time-alarm';
+    private static LOCAL_STORAGE_KEY = 'Extension-state';
+    constructor() {
         this.config = new ConfigManager();
-        this.devtools = new DevTools(this.config, () => this.onSettingsChanged());
+        this.devtools = new DevTools(this.config, async () => this.onSettingsChanged());
         this.messenger = new Messenger(this.getMessengerAdapter());
         this.news = new Newsmaker((news) => this.onNewsUpdate(news));
         this.tabs = new TabManager({
-            getConnectionMessage: ({url, frameURL, unsupportedSender}) => {
-                if (unsupportedSender) {
-                    return this.getUnsupportedSenderMessage();
-                }
-                return this.getConnectionMessage(url, frameURL);
-            },
+            getConnectionMessage: ({url, frameURL}) => this.getConnectionMessage(url, frameURL),
+            getTabMessage: this.getTabMessage,
             onColorSchemeChange: this.onColorSchemeChange,
         });
         this.user = new UserStorage({onRemoteSettingsChange: () => this.onRemoteSettingsChange()});
-        this.awaiting = [];
+        this.startBarrier = new PromiseBarrier();
+        this.stateManager = new StateManager<ExtensionState>(Extension.LOCAL_STORAGE_KEY, this, {
+            isEnabled: null,
+            wasEnabledOnLastCheck: null,
+            registeredContextMenus: null,
+        });
+
+        chrome.alarms.onAlarm.addListener(this.alarmListener);
+
+        if (chrome.permissions.onRemoved) {
+            chrome.permissions.onRemoved.addListener((permissions) => {
+            // As far as we know, this code is never actually run because there
+            // is no browser UI for removing 'contextMenus' permission.
+            // This code exists for future-proofing in case browsers ever add such UI.
+                if (!permissions.permissions.includes('contextMenus')) {
+                    this.registeredContextMenus = false;
+                }
+            });
+        }
     }
 
-    isEnabled() {
-        const {automation} = this.user.settings;
-        if (automation === 'time') {
-            const now = new Date();
-            return isInTimeInterval(now, this.user.settings.time.activation, this.user.settings.time.deactivation);
-        } else if (automation === 'system') {
-            if (isFirefox) {
-                // BUG: Firefox background page always matches initial color scheme.
-                return this.wasLastColorSchemeDark == null
-                    ? isSystemDarkModeEnabled()
-                    : this.wasLastColorSchemeDark;
-            }
-            return isSystemDarkModeEnabled();
-        } else if (automation === 'location') {
-            const latitude = this.user.settings.location.latitude;
-            const longitude = this.user.settings.location.longitude;
+    private alarmListener = (alarm: chrome.alarms.Alarm): void => {
+        if (alarm.name === Extension.ALARM_NAME) {
+            this.handleAutomationCheck();
+        }
+    };
 
-            if (latitude != null && longitude != null) {
-                const now = new Date();
-                return isNightAtLocation(now, latitude, longitude);
-            }
+    recalculateIsEnabled(): boolean {
+        if (!this.user.settings) {
+            logWarn('Extension.isEnabled() was called before Extension.user.settings is available.');
+            return false;
         }
 
-        return this.user.settings.enabled;
-    }
+        const {automation} = this.user.settings;
+        let nextCheck: number;
+        switch (automation) {
+            case 'time':
+                this.isEnabled = isInTimeIntervalLocal(this.user.settings.time.activation, this.user.settings.time.deactivation);
+                nextCheck = nextTimeInterval(this.user.settings.time.activation, this.user.settings.time.deactivation);
+                break;
+            case 'system':
+                if (isMV3) {
+                    logWarn('system automation is not yet supported. Defaulting to ON.');
+                    this.isEnabled = true;
+                    break;
+                }
+                if (isFirefox) {
+                    // BUG: Firefox background page always matches initial color scheme.
+                    this.isEnabled = this.wasLastColorSchemeDark == null
+                        ? isSystemDarkModeEnabled()
+                        : this.wasLastColorSchemeDark;
+                } else {
+                    this.isEnabled = isSystemDarkModeEnabled();
+                }
+                break;
+            case 'location': {
+                const {latitude, longitude} = this.user.settings.location;
 
-    private awaiting: Array<() => void>;
+                if (latitude != null && longitude != null) {
+                    this.isEnabled = isNightAtLocation(latitude, longitude);
+                    nextCheck = nextTimeChangeAtLocation(latitude, longitude);
+                }
+                break;
+            }
+            default:
+                this.isEnabled = this.user.settings.enabled;
+                break;
+        }
+        if (nextCheck) {
+            chrome.alarms.create(Extension.ALARM_NAME, {when: nextCheck});
+        }
+        return this.isEnabled;
+    }
 
     async start() {
         await this.config.load({local: true});
-        this.fonts = await getFontList();
 
         await this.user.loadSettings();
+        if (this.user.settings.enableContextMenus && !this.registeredContextMenus) {
+            chrome.permissions.contains({permissions: ['contextMenus']}, (permitted) => {
+                if (permitted) {
+                    this.registerContextMenus();
+                } else {
+                    logWarn('User has enabled context menus, but did not provide permission.');
+                }
+            });
+        }
         if (this.user.settings.syncSitesFixes) {
             await this.config.load({local: false});
         }
         this.onAppToggle();
-        this.changeSettings(this.user.settings);
-        console.log('loaded', this.user.settings);
+        logInfo('loaded', this.user.settings);
 
-        this.registerCommands();
-
-        this.ready = true;
         if (isThunderbird) {
             this.tabs.registerMailDisplayScript();
         } else {
             this.tabs.updateContentScript({runOnProtectedPages: this.user.settings.enableForProtectedPages});
         }
 
-        this.awaiting.forEach((ready) => ready());
-        this.awaiting = null;
+        this.user.settings.fetchNews && this.news.subscribe();
+        this.startBarrier.resolve();
 
-        this.startAutoTimeCheck();
-        this.news.subscribe();
+        if (__DEBUG__) {
+            const socket = new WebSocket(`ws://localhost:8894`);
+            socket.onmessage = (e) => {
+                const respond = (message: {type: string; data?: ExtensionData | string | boolean | {[key: string]: string}; id?: number}) => socket.send(JSON.stringify(message));
+                try {
+                    const message: {type: string; data: Partial<UserSettings> | boolean | {[key: string]: string}; id: number} = JSON.parse(e.data);
+                    switch (message.type) {
+                        case 'changeSettings':
+                            this.changeSettings(message.data as Partial<UserSettings>);
+                            respond({type: 'changeSettings-response', id: message.id});
+                            break;
+                        case 'collectData':
+                            this.collectData().then((data) => {
+                                respond({type: 'collectData-response', id: message.id, data});
+                            });
+                            break;
+                        case 'changeLocalStorage': {
+                            const data = message.data as {[key: string]: string};
+                            for (const key in data) {
+                                localStorage[key] = data[key];
+                            }
+                            respond({type: 'changeLocalStorage-response', id: message.id});
+                            break;
+                        }
+                        case 'getLocalStorage':
+                            respond({type: 'getLocalStorage-response', id: message.id, data: localStorage ? JSON.stringify(localStorage) : null});
+                            break;
+                        case 'changeChromeStorage': {
+                            const region: 'local' | 'sync' = (message.data as any).region;
+                            chrome.storage[region].set((message.data as any).data, () => respond({type: 'changeChromeStorage-response', id: message.id}));
+                            break;
+                        }
+                        case 'getChromeStorage': {
+                            const keys = (message.data as any).keys;
+                            const region: 'local' | 'sync' = (message.data as any).region;
+                            chrome.storage[region].get(keys, (data) => respond({type: 'getChromeStorage-response', data, id: message.id}));
+                            break;
+                        }
+                        case 'setDataIsMigratedForTesting':
+                            this.devtools.setDataIsMigratedForTesting(message.data as boolean);
+                            respond({type: 'setDataIsMigratedForTesting-response', id: message.id});
+                            break;
+                    }
+                } catch (err) {
+                    respond({type: 'error', data: String(err)});
+                }
+            };
+        }
     }
-
-    private popupOpeningListener: () => void = null;
 
     private getMessengerAdapter(): ExtensionAdapter {
         return {
             collect: async () => {
-                if (!this.ready) {
-                    await new Promise<void>((resolve) => this.awaiting.push(resolve));
-                }
                 return await this.collectData();
             },
             getActiveTabInfo: async () => {
-                if (!this.ready) {
-                    await new Promise<void>((resolve) => this.awaiting.push(resolve));
+                if (!this.user.settings) {
+                    await this.user.loadSettings();
                 }
+                await this.stateManager.loadState();
                 const url = await this.tabs.getActiveTabURL();
-                return this.getURLInfo(url);
+                const info = this.getURLInfo(url);
+                info.isInjected = await this.tabs.canAccessActiveTab();
+                return info;
             },
             changeSettings: (settings) => this.changeSettings(settings),
             setTheme: (theme) => this.setTheme(theme),
@@ -143,30 +245,76 @@ export class Extension {
         };
     }
 
-    private registerCommands() {
-        if (!chrome.commands) {
-            // Fix for Firefox Android
-            return;
+    onCommand = async (command: string, frameURL?: string) => {
+        if (this.startBarrier.isPending()) {
+            await this.startBarrier.entry();
         }
-        chrome.commands.onCommand.addListener((command) => {
-            if (command === 'toggle') {
-                console.log('Toggle command entered');
+        this.stateManager.loadState();
+        switch (command) {
+            case 'toggle':
+                logInfo('Toggle command entered');
                 this.changeSettings({
-                    enabled: !this.isEnabled(),
+                    enabled: !this.isEnabled,
                     automation: '',
                 });
-            }
-            if (command === 'addSite') {
-                console.log('Add Site command entered');
-                this.toggleCurrentSite();
-            }
-            if (command === 'switchEngine') {
-                console.log('Switch Engine command entered');
+                break;
+            case 'addSite':
+                logInfo('Add Site command entered');
+                const url = frameURL || await this.tabs.getActiveTabURL();
+                if (isPDF(url)) {
+                    this.changeSettings({enableForPDF: !this.user.settings.enableForPDF});
+                } else {
+                    this.toggleURL(url);
+                }
+                break;
+            case 'switchEngine': {
+                logInfo('Switch Engine command entered');
                 const engines = Object.values(ThemeEngines);
                 const index = engines.indexOf(this.user.settings.theme.engine);
-                const next = index === engines.length - 1 ? engines[0] : engines[index + 1];
+                const next = engines[(index + 1) % engines.length];
                 this.setTheme({engine: next});
+                break;
             }
+        }
+    };
+
+    private registerContextMenus() {
+        const onCommandToggle = async () => this.onCommand('toggle');
+        const onCommandAddSite = async (data: chrome.contextMenus.OnClickData) => this.onCommand('addSite', data.frameUrl);
+        const onCommandSwitchEngine = async () => this.onCommand('switchEngine');
+        chrome.contextMenus.removeAll(() => {
+            this.registeredContextMenus = false;
+            chrome.contextMenus.create({
+                id: 'DarkReader-top',
+                title: 'Dark Reader'
+            }, () => {
+                if (chrome.runtime.lastError) {
+                    // Failed to create the context menu
+                    return;
+                }
+                const msgToggle = chrome.i18n.getMessage('toggle_extension');
+                const msgAddSite = chrome.i18n.getMessage('toggle_current_site');
+                const msgSwitchEngine = chrome.i18n.getMessage('theme_generation_mode');
+                chrome.contextMenus.create({
+                    id: 'DarkReader-toggle',
+                    parentId: 'DarkReader-top',
+                    title: msgToggle || 'Toggle everywhere',
+                    onclick: onCommandToggle,
+                });
+                chrome.contextMenus.create({
+                    id: 'DarkReader-addSite',
+                    parentId: 'DarkReader-top',
+                    title: msgAddSite || 'Toggle for current site',
+                    onclick: onCommandAddSite,
+                });
+                chrome.contextMenus.create({
+                    id: 'DarkReader-switchEngine',
+                    parentId: 'DarkReader-top',
+                    title: msgSwitchEngine || 'Switch engine',
+                    onclick: onCommandSwitchEngine,
+                });
+                this.registeredContextMenus = true;
+            });
         });
     }
 
@@ -180,89 +328,92 @@ export class Extension {
     }
 
     private async collectData(): Promise<ExtensionData> {
+        if (!this.user.settings) {
+            await this.user.loadSettings();
+        }
+        await this.stateManager.loadState();
         return {
-            isEnabled: this.isEnabled(),
-            isReady: this.ready,
+            isEnabled: this.isEnabled,
+            isReady: true,
             settings: this.user.settings,
-            fonts: this.fonts,
-            news: this.news.latest,
+            news: await this.news.getLatest(),
             shortcuts: await this.getShortcuts(),
+            colorScheme: this.config.COLOR_SCHEMES_RAW,
             devtools: {
-                dynamicFixesText: this.devtools.getDynamicThemeFixesText(),
-                filterFixesText: this.devtools.getInversionFixesText(),
-                staticThemesText: this.devtools.getStaticThemesText(),
-                hasCustomDynamicFixes: this.devtools.hasCustomDynamicThemeFixes(),
-                hasCustomFilterFixes: this.devtools.hasCustomFilterFixes(),
-                hasCustomStaticFixes: this.devtools.hasCustomStaticFixes(),
+                dynamicFixesText: await this.devtools.getDynamicThemeFixesText(),
+                filterFixesText: await this.devtools.getInversionFixesText(),
+                staticThemesText: await this.devtools.getStaticThemesText(),
+                hasCustomDynamicFixes: await this.devtools.hasCustomDynamicThemeFixes(),
+                hasCustomFilterFixes: await this.devtools.hasCustomFilterFixes(),
+                hasCustomStaticFixes: await this.devtools.hasCustomStaticFixes(),
             },
         };
     }
 
     private onNewsUpdate(news: News[]) {
+        if (!this.icon) {
+            this.icon = new IconManager();
+        }
+
         const latestNews = news.length > 0 && news[0];
         if (latestNews && latestNews.important && !latestNews.read) {
             this.icon.showImportantBadge();
             return;
         }
 
-        const unread = news.filter(({read}) => !read);
-        if (unread.length > 0 && this.user.settings.notifyOfNews) {
-            this.icon.showUnreadReleaseNotesBadge(unread.length);
-            return;
-        }
-
         this.icon.hideBadge();
     }
 
-    private getConnectionMessage(url, frameURL) {
-        if (this.ready) {
+    private getConnectionMessage(url: string, frameURL: string) {
+        if (this.user.settings) {
             return this.getTabMessage(url, frameURL);
-        } else {
-            return new Promise<{type: string; data?: any}>((resolve) => {
-                this.awaiting.push(() => {
-                    resolve(this.getTabMessage(url, frameURL));
-                });
-            });
         }
+        return new Promise<TabData>((resolve) => {
+            this.user.loadSettings().then(() => resolve(this.getTabMessage(url, frameURL)));
+        });
     }
 
-    private getUnsupportedSenderMessage() {
-        return {type: 'unsupported-sender'};
-    }
-
-    private wasEnabledOnLastCheck: boolean;
-
-    private startAutoTimeCheck() {
-        setInterval(() => {
-            if (!this.ready || this.user.settings.automation === '') {
-                return;
-            }
-            this.handleAutoCheck();
-        }, AUTO_TIME_CHECK_INTERVAL);
-    }
-
-    private wasLastColorSchemeDark = null;
-
-    private onColorSchemeChange = ({isDark}) => {
-        this.wasLastColorSchemeDark = isDark;
+    private onColorSchemeChange = ({isDark}: {isDark: boolean}) => {
+        if (isFirefox) {
+            this.wasLastColorSchemeDark = isDark;
+        }
         if (this.user.settings.automation !== 'system') {
             return;
         }
-        this.handleAutoCheck();
+        this.handleAutomationCheck();
     };
 
-    private handleAutoCheck = () => {
-        if (!this.ready) {
-            return;
-        }
-        const isEnabled = this.isEnabled();
-        if (this.wasEnabledOnLastCheck !== isEnabled) {
-            this.wasEnabledOnLastCheck = isEnabled;
-            this.onAppToggle();
-            this.tabs.sendMessage(this.getTabMessage);
-            this.reportChanges();
+    private handleAutomationCheck = () => {
+        if (this.user.settings.automationBehaviour === 'Scheme') {
+            this.recalculateIsEnabled();
+            if (this.isEnabled) {
+                // Dark
+                this.changeSettings({theme: {...this.user.settings.theme, ...{mode: 1}}});
+            } else {
+                // Light
+                this.changeSettings({theme: {...this.user.settings.theme, ...{mode: 0}}});
+            }
+        } else {
+            // Toggle on/off
+            this.handleAutoCheck();
         }
     };
+
+    private async handleAutoCheck() {
+        if (!this.user.settings) {
+            await this.user.loadSettings();
+        }
+        await this.stateManager.loadState();
+        this.recalculateIsEnabled();
+        const isEnabled = this.isEnabled;
+        if (this.wasEnabledOnLastCheck === null || this.wasEnabledOnLastCheck !== isEnabled) {
+            this.wasEnabledOnLastCheck = isEnabled;
+            this.onAppToggle();
+            this.tabs.sendMessage();
+            this.reportChanges();
+            this.stateManager.saveState();
+        }
+    }
 
     changeSettings($settings: Partial<UserSettings>) {
         const prev = {...this.user.settings};
@@ -272,6 +423,7 @@ export class Extension {
         if (
             (prev.enabled !== this.user.settings.enabled) ||
             (prev.automation !== this.user.settings.automation) ||
+            (prev.automationBehaviour !== this.user.settings.automationBehaviour) ||
             (prev.time.activation !== this.user.settings.time.activation) ||
             (prev.time.deactivation !== this.user.settings.time.deactivation) ||
             (prev.location.latitude !== this.user.settings.location.latitude) ||
@@ -282,21 +434,31 @@ export class Extension {
         if (prev.syncSettings !== this.user.settings.syncSettings) {
             this.user.saveSyncSetting(this.user.settings.syncSettings);
         }
-        if (this.isEnabled() && $settings.changeBrowserTheme != null && prev.changeBrowserTheme !== $settings.changeBrowserTheme) {
+        if (this.isEnabled && $settings.changeBrowserTheme != null && prev.changeBrowserTheme !== $settings.changeBrowserTheme) {
             if ($settings.changeBrowserTheme) {
                 setWindowTheme(this.user.settings.theme);
             } else {
                 resetWindowTheme();
             }
         }
+        if (prev.fetchNews !== this.user.settings.fetchNews) {
+            this.user.settings.fetchNews ? this.news.subscribe() : this.news.unSubscribe();
+        }
 
+        if (prev.enableContextMenus !== this.user.settings.enableContextMenus) {
+            if (this.user.settings.enableContextMenus) {
+                this.registerContextMenus();
+            } else {
+                chrome.contextMenus.removeAll();
+            }
+        }
         this.onSettingsChanged();
     }
 
     setTheme($theme: Partial<FilterConfig>) {
         this.user.set({theme: {...this.user.settings.theme, ...$theme}});
 
-        if (this.isEnabled() && this.user.settings.changeBrowserTheme) {
+        if (this.isEnabled && this.user.settings.changeBrowserTheme) {
             setWindowTheme(this.user.settings.theme);
         }
 
@@ -336,14 +498,18 @@ export class Extension {
         this.toggleURL(url);
     }
 
-
     //------------------------------------
     //
     //       Handle config changes
     //
 
     private onAppToggle() {
-        if (this.isEnabled()) {
+        if (!this.icon) {
+            this.icon = new IconManager();
+        }
+
+        this.recalculateIsEnabled();
+        if (this.isEnabled) {
             this.icon.setActive();
             if (this.user.settings.changeBrowserTheme) {
                 setWindowTheme(this.user.settings.theme);
@@ -356,22 +522,22 @@ export class Extension {
         }
     }
 
-    private onSettingsChanged() {
-        if (!this.ready) {
-            return;
+    private async onSettingsChanged() {
+        if (!this.user.settings) {
+            await this.user.loadSettings();
         }
-
-        this.wasEnabledOnLastCheck = this.isEnabled();
-        this.tabs.sendMessage(this.getTabMessage);
+        await this.stateManager.loadState();
+        this.wasEnabledOnLastCheck = this.isEnabled;
+        this.tabs.sendMessage();
         this.saveUserSettings();
         this.reportChanges();
+        this.stateManager.saveState();
     }
 
     private onRemoteSettingsChange() {
         // TODO: Requires proper handling and more testing
         // to prevent cycling across instances.
     }
-
 
     //----------------------
     //
@@ -387,35 +553,38 @@ export class Extension {
             url,
             isInDarkList,
             isProtected,
+            isInjected: null
         };
     }
 
-    private getTabMessage = (url: string, frameURL: string) => {
+    private getTabMessage = (url: string, frameURL: string): TabData => {
         const urlInfo = this.getURLInfo(url);
-        if (this.isEnabled() && isURLEnabled(url, this.user.settings, urlInfo)) {
+        if (this.isEnabled && isURLEnabled(url, this.user.settings, urlInfo)) {
             const custom = this.user.settings.customThemes.find(({url: urlList}) => isURLInList(url, urlList));
             const preset = custom ? null : this.user.settings.presets.find(({urls}) => isURLInList(url, urls));
             const theme = custom ? custom.theme : preset ? preset.theme : this.user.settings.theme;
 
-            console.log(`Creating CSS for url: ${url}`);
+            logInfo(`Creating CSS for url: ${url}`);
+            logInfo(`Custom theme ${custom ? 'was found' : 'was not found'}, Preset theme ${preset ? 'was found' : 'was not found'}
+            The theme(${custom ? 'custom' : preset ? 'preset' : 'global'} settings) used is: ${JSON.stringify(theme)}`);
             switch (theme.engine) {
                 case ThemeEngines.cssFilter: {
                     return {
-                        type: 'add-css-filter',
-                        data: createCSSFilterStylesheet(theme, url, frameURL, this.config.INVERSION_FIXES),
+                        type: MessageType.BG_ADD_CSS_FILTER,
+                        data: createCSSFilterStylesheet(theme, url, frameURL, this.config.INVERSION_FIXES_RAW, this.config.INVERSION_FIXES_INDEX),
                     };
                 }
                 case ThemeEngines.svgFilter: {
                     if (isFirefox) {
                         return {
-                            type: 'add-css-filter',
-                            data: createSVGFilterStylesheet(theme, url, frameURL, this.config.INVERSION_FIXES),
+                            type: MessageType.BG_ADD_CSS_FILTER,
+                            data: createSVGFilterStylesheet(theme, url, frameURL, this.config.INVERSION_FIXES_RAW, this.config.INVERSION_FIXES_INDEX),
                         };
                     }
                     return {
-                        type: 'add-svg-filter',
+                        type: MessageType.BG_ADD_SVG_FILTER,
                         data: {
-                            css: createSVGFilterStylesheet(theme, url, frameURL, this.config.INVERSION_FIXES),
+                            css: createSVGFilterStylesheet(theme, url, frameURL, this.config.INVERSION_FIXES_RAW, this.config.INVERSION_FIXES_INDEX),
                             svgMatrix: getSVGFilterMatrixValue(theme),
                             svgReverseMatrix: getSVGReverseFilterMatrixValue(),
                         },
@@ -423,19 +592,19 @@ export class Extension {
                 }
                 case ThemeEngines.staticTheme: {
                     return {
-                        type: 'add-static-theme',
+                        type: MessageType.BG_ADD_STATIC_THEME,
                         data: theme.stylesheet && theme.stylesheet.trim() ?
                             theme.stylesheet :
-                            createStaticStylesheet(theme, url, frameURL, this.config.STATIC_THEMES),
+                            createStaticStylesheet(theme, url, frameURL, this.config.STATIC_THEMES_RAW, this.config.STATIC_THEMES_INDEX),
                     };
                 }
                 case ThemeEngines.dynamicTheme: {
                     const filter = {...theme};
                     delete filter.engine;
-                    const fixes = getDynamicThemeFixesFor(url, frameURL, this.config.DYNAMIC_THEME_FIXES, this.user.settings.enableForPDF);
+                    const fixes = getDynamicThemeFixesFor(url, frameURL, this.config.DYNAMIC_THEME_FIXES_RAW, this.config.DYNAMIC_THEME_FIXES_INDEX, this.user.settings.enableForPDF);
                     const isIFrame = frameURL != null;
                     return {
-                        type: 'add-dynamic-theme',
+                        type: MessageType.BG_ADD_DYNAMIC_THEME,
                         data: {filter, fixes, isIFrame},
                     };
                 }
@@ -445,18 +614,17 @@ export class Extension {
             }
         }
 
-        console.log(`Site is not inverted: ${url}`);
+        logInfo(`Site is not inverted: ${url}`);
         return {
-            type: 'clean-up',
+            type: MessageType.BG_CLEAN_UP,
         };
     };
-
 
     //-------------------------------------
     //          User settings
 
     private async saveUserSettings() {
         await this.user.saveSettings();
-        console.log('saved', this.user.settings);
+        logInfo('saved', this.user.settings);
     }
 }

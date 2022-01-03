@@ -78,4 +78,15 @@ describe('COLOR PARSING', () => {
         expect(getComputedStyle(container.querySelector('h1 strong')).color).toBe('rgb(249, 250, 166)');
         expect(getComputedStyle(container).backgroundColor).toBe('rgba(0, 0, 0, 0)');
     });
+
+    it('should handle calc(...) cases', () => {
+        container.innerHTML = multiline(
+            '<style>',
+            '    h1 { background-color: hsl(0, 0%, calc(95% - 3%)) }',
+            '</style>',
+            '<h1>Weird color <strong>Power</strong>!</h1>',
+        );
+        createOrUpdateDynamicTheme(theme, null, false);
+        expect(getComputedStyle(container.querySelector('h1')).backgroundColor).toBe('rgb(35, 38, 40)');
+    });
 });

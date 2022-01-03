@@ -1,10 +1,11 @@
 import {formatSitesFixesConfig} from './utils/format';
-import {parseSitesFixesConfig} from './utils/parse';
+import {parseSitesFixesConfig, getSitesFixesFor} from './utils/parse';
+import type {SitePropsIndex} from './utils/parse';
 import {parseArray, formatArray} from '../utils/text';
 import {compareURLPatterns, isURLInList} from '../utils/url';
 import type {DynamicThemeFix} from '../definitions';
 
-const dynamicThemeFixesCommands = {
+const dynamicThemeFixesCommands: { [key: string]: keyof DynamicThemeFix } = {
     'INVERT': 'invert',
     'CSS': 'css',
     'IGNORE INLINE STYLE': 'ignoreInlineStyle',
@@ -14,7 +15,7 @@ const dynamicThemeFixesCommands = {
 export function parseDynamicThemeFixes(text: string) {
     return parseSitesFixesConfig<DynamicThemeFix>(text, {
         commands: Object.keys(dynamicThemeFixesCommands),
-        getCommandPropName: (command) => dynamicThemeFixesCommands[command] || null,
+        getCommandPropName: (command) => dynamicThemeFixesCommands[command],
         parseCommandValue: (command, value) => {
             if (command === 'CSS') {
                 return value.trim();
@@ -34,7 +35,7 @@ export function formatDynamicThemeFixes(dynamicThemeFixes: DynamicThemeFix[]) {
             if (prop === 'css') {
                 return (value as string).trim().replace(/\n+/g, '\n');
             }
-            return formatArray(value).trim();
+            return formatArray(value as string[]).trim();
         },
         shouldIgnoreProp: (prop, value) => {
             if (prop === 'css') {
@@ -45,20 +46,32 @@ export function formatDynamicThemeFixes(dynamicThemeFixes: DynamicThemeFix[]) {
     });
 }
 
-export function getDynamicThemeFixesFor(url: string, frameURL: string, fixes: DynamicThemeFix[], enabledForPDF: boolean) {
+export function getDynamicThemeFixesFor(url: string, frameURL: string, text: string, index: SitePropsIndex<DynamicThemeFix>, enabledForPDF: boolean) {
+    const fixes = getSitesFixesFor(frameURL || url, text, index, {
+        commands: Object.keys(dynamicThemeFixesCommands),
+        getCommandPropName: (command) => dynamicThemeFixesCommands[command],
+        parseCommandValue: (command, value) => {
+            if (command === 'CSS') {
+                return value.trim();
+            }
+            return parseArray(value);
+        },
+    });
+
     if (fixes.length === 0 || fixes[0].url[0] !== '*') {
         return null;
     }
+    const genericFix = fixes[0];
 
     const common = {
-        url: fixes[0].url,
-        invert: fixes[0].invert || [],
-        css: fixes[0].css || [],
-        ignoreInlineStyle: fixes[0].ignoreInlineStyle || [],
-        ignoreImageAnalysis: fixes[0].ignoreImageAnalysis || [],
+        url: genericFix.url,
+        invert: genericFix.invert || [],
+        css: genericFix.css || '',
+        ignoreInlineStyle: genericFix.ignoreInlineStyle || [],
+        ignoreImageAnalysis: genericFix.ignoreImageAnalysis || [],
     };
     if (enabledForPDF) {
-        common.invert = common.invert.concat('embed[type="application/pdf"]');
+        common.css += '\nembed[type="application/pdf"] { filter: invert(100%) contrast(90%); }';
     }
     const sortedBySpecificity = fixes
         .slice(1)

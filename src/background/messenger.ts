@@ -1,11 +1,13 @@
+import {isFirefox} from '../utils/platform';
 import type {ExtensionData, FilterConfig, TabInfo, Message, UserSettings} from '../definitions';
+import {MessageType} from '../utils/message';
 
 export interface ExtensionAdapter {
     collect: () => Promise<ExtensionData>;
     getActiveTabInfo: () => Promise<TabInfo>;
     changeSettings: (settings: Partial<UserSettings>) => void;
     setTheme: (theme: Partial<FilterConfig>) => void;
-    setShortcut: ({command, shortcut}) => void;
+    setShortcut: ({command, shortcut}: {command: string; shortcut: string}) => void;
     markNewsAsRead: (ids: string[]) => Promise<void>;
     toggleURL: (pattern: string) => void;
     onPopupOpen: () => void;
@@ -19,86 +21,139 @@ export interface ExtensionAdapter {
 }
 
 export default class Messenger {
-    private reporters: Set<(info: ExtensionData) => void>;
     private adapter: ExtensionAdapter;
+    private changeListenerCount: number;
 
     constructor(adapter: ExtensionAdapter) {
-        this.reporters = new Set();
         this.adapter = adapter;
-        chrome.runtime.onConnect.addListener((port) => {
-            if (port.name === 'ui') {
-                port.onMessage.addListener(async (message) => await this.onUIMessage(port, message));
+        this.changeListenerCount = 0;
+        const allowedSenderURL = [chrome.runtime.getURL('/ui/popup/index.html'), chrome.runtime.getURL('/ui/devtools/index.html'), chrome.runtime.getURL('/ui/stylesheet-editor/index.html')];
+        chrome.runtime.onMessage.addListener((message: Message, sender: chrome.runtime.MessageSender, sendResponse: (response: {data?: ExtensionData | TabInfo; error?: string}) => void) => {
+            if (allowedSenderURL.includes(sender.url)) {
+                this.onUIMessage(message, sendResponse);
                 this.adapter.onPopupOpen();
+                return ([
+                    MessageType.UI_GET_DATA,
+                    MessageType.UI_GET_ACTIVE_TAB_INFO
+                ].includes(message.type));
             }
         });
+
+        // This is a work-around for Firefox bug which does not let to responding to onMessage handler above.
+        if (isFirefox) {
+            chrome.runtime.onConnect.addListener((port) => {
+                let promise: Promise<ExtensionData | TabInfo>;
+                switch (port.name) {
+                    case MessageType.UI_GET_DATA:
+                        promise = this.adapter.collect();
+                        break;
+                    case MessageType.UI_GET_ACTIVE_TAB_INFO:
+                        promise = this.adapter.getActiveTabInfo();
+                        break;
+                    // These types require data, so we need to add a listener to the port.
+                    case MessageType.UI_APPLY_DEV_DYNAMIC_THEME_FIXES:
+                    case MessageType.UI_APPLY_DEV_INVERSION_FIXES:
+                    case MessageType.UI_APPLY_DEV_STATIC_THEMES:
+                        promise = new Promise((resolve, reject) => {
+                            port.onMessage.addListener((message: Message) => {
+                                const {data} = message;
+                                let error: Error;
+                                switch (port.name) {
+                                    case MessageType.UI_APPLY_DEV_DYNAMIC_THEME_FIXES:
+                                        error = this.adapter.applyDevDynamicThemeFixes(data);
+                                        break;
+                                    case MessageType.UI_APPLY_DEV_INVERSION_FIXES:
+                                        error = this.adapter.applyDevInversionFixes(data);
+                                        break;
+                                    case MessageType.UI_APPLY_DEV_STATIC_THEMES:
+                                        error = this.adapter.applyDevStaticThemes(data);
+                                        break;
+                                    default:
+                                        throw new Error(`Unknown port name: ${port.name}`);
+                                }
+                                if (error) {
+                                    reject(error);
+                                } else {
+                                    resolve(null);
+                                }
+                            });
+                        });
+                        break;
+                    default:
+                        return;
+                }
+                promise.then((data) => port.postMessage({data}))
+                    .catch((error) => port.postMessage({error}));
+            });
+        }
     }
 
-    private async onUIMessage(port: chrome.runtime.Port, {type, id, data}: Message) {
+    private onUIMessage({type, data}: Message, sendResponse: (response: {data?: ExtensionData | TabInfo; error?: string}) => void) {
         switch (type) {
-            case 'get-data': {
-                const data = await this.adapter.collect();
-                port.postMessage({id, data});
+            case MessageType.UI_GET_DATA: {
+                this.adapter.collect().then((data) => sendResponse({data}));
                 break;
             }
-            case 'get-active-tab-info': {
-                const data = await this.adapter.getActiveTabInfo();
-                port.postMessage({id, data});
+            case MessageType.UI_GET_ACTIVE_TAB_INFO: {
+                this.adapter.getActiveTabInfo().then((data) => sendResponse({data}));
                 break;
             }
-            case 'subscribe-to-changes': {
-                const report = (data) => port.postMessage({id, data});
-                this.reporters.add(report);
-                port.onDisconnect.addListener(() => this.reporters.delete(report));
+            case MessageType.UI_SUBSCRIBE_TO_CHANGES: {
+                this.changeListenerCount++;
                 break;
             }
-            case 'change-settings': {
+            case MessageType.UI_UNSUBSCRIBE_FROM_CHANGES: {
+                this.changeListenerCount--;
+                break;
+            }
+            case MessageType.UI_CHANGE_SETTINGS: {
                 this.adapter.changeSettings(data);
                 break;
             }
-            case 'set-theme': {
+            case MessageType.UI_SET_THEME: {
                 this.adapter.setTheme(data);
                 break;
             }
-            case 'set-shortcut': {
+            case MessageType.UI_SET_SHORTCUT: {
                 this.adapter.setShortcut(data);
                 break;
             }
-            case 'toggle-url': {
+            case MessageType.UI_TOGGLE_URL: {
                 this.adapter.toggleURL(data);
                 break;
             }
-            case 'mark-news-as-read': {
+            case MessageType.UI_MARK_NEWS_AS_READ: {
                 this.adapter.markNewsAsRead(data);
                 break;
             }
-            case 'load-config': {
-                await this.adapter.loadConfig(data);
+            case MessageType.UI_LOAD_CONFIG: {
+                this.adapter.loadConfig(data);
                 break;
             }
-            case 'apply-dev-dynamic-theme-fixes': {
+            case MessageType.UI_APPLY_DEV_DYNAMIC_THEME_FIXES: {
                 const error = this.adapter.applyDevDynamicThemeFixes(data);
-                port.postMessage({id, error: (error ? error.message : null)});
+                sendResponse({error: (error ? error.message : null)});
                 break;
             }
-            case 'reset-dev-dynamic-theme-fixes': {
+            case MessageType.UI_RESET_DEV_DYNAMIC_THEME_FIXES: {
                 this.adapter.resetDevDynamicThemeFixes();
                 break;
             }
-            case 'apply-dev-inversion-fixes': {
+            case MessageType.UI_APPLY_DEV_INVERSION_FIXES: {
                 const error = this.adapter.applyDevInversionFixes(data);
-                port.postMessage({id, error: (error ? error.message : null)});
+                sendResponse({error: (error ? error.message : null)});
                 break;
             }
-            case 'reset-dev-inversion-fixes': {
+            case MessageType.UI_RESET_DEV_INVERSION_FIXES: {
                 this.adapter.resetDevInversionFixes();
                 break;
             }
-            case 'apply-dev-static-themes': {
+            case MessageType.UI_APPLY_DEV_STATIC_THEMES: {
                 const error = this.adapter.applyDevStaticThemes(data);
-                port.postMessage({id, error: error ? error.message : null});
+                sendResponse({error: error ? error.message : null});
                 break;
             }
-            case 'reset-dev-static-themes': {
+            case MessageType.UI_RESET_DEV_STATIC_THEMES: {
                 this.adapter.resetDevStaticThemes();
                 break;
             }
@@ -106,6 +161,11 @@ export default class Messenger {
     }
 
     reportChanges(data: ExtensionData) {
-        this.reporters.forEach((report) => report(data));
+        if (this.changeListenerCount > 0) {
+            chrome.runtime.sendMessage<Message>({
+                type: MessageType.BG_CHANGES,
+                data
+            });
+        }
     }
 }

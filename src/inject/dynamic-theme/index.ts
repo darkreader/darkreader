@@ -371,7 +371,7 @@ function watchForUpdates() {
     watchForInlineStyles((element) => {
         overrideInlineStyle(element, filter, ignoredInlineSelectors, ignoredImageAnalysisSelectors);
         if (element === document.documentElement) {
-            const styleAttr = element.getAttribute('style');
+            const styleAttr = element.getAttribute('style') || '';
             if (styleAttr.includes('--')) {
                 variablesStore.matchVariablesAndDependants();
                 variablesStore.putRootVars(document.head.querySelector('.darkreader--root-vars'), filter);

@@ -232,7 +232,7 @@ describe('IMAGE ANALYSIS', () => {
             css: '',
             ignoreInlineStyle: ['.'],
             ignoreImageAnalysis: ['*'],
-
+            disableStyleSheetsProxy: false,
         };
         createOrUpdateDynamicTheme(theme, fixes, false);
         const backgroundImage = getComputedStyle(container.querySelector('i')).backgroundImage;

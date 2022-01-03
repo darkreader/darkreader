@@ -31,6 +31,8 @@ export function getMockData(override = {} as Partial<ExtensionData>): ExtensionD
             enableForProtectedPages: false,
             syncSettings: true,
             automation: '',
+            automationBehaviour: 'OnOff',
+            previewNewDesign: false,
             time: {
                 activation: '18:00',
                 deactivation: '9:00',

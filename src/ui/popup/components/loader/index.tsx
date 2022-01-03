@@ -18,13 +18,14 @@ function Loader({complete = false}: LoaderProps) {
 
     // Add a setTimeout for 3 seconds(in which the UI should be loaded already)
     // after the 3 seconds show a generic error message that the UI couldn't be loaded.
-    if (!state.errorOccured) {
-        setTimeout(() => {
-            if (!complete) {
-                setState({errorOccured: true});
-                context.refresh();
-            }
+    if (!state.errorOccured && !complete) {
+        context.store.loaderTimeoutID = setTimeout(() => {
+            setState({errorOccured: true});
+            context.refresh();
         }, 3000);
+    }
+    if (complete) {
+        clearTimeout(context.store.loaderTimeoutID);
     }
 
     const labelMessage = state.errorOccured ? "A unknown error has occured, the UI couldn't be loaded" : getLocalMessage('loading_please_wait');

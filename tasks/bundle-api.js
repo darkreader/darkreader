@@ -1,4 +1,4 @@
-import rollup from 'rollup';
+import {rollup} from 'rollup';
 import rollupPluginNodeResolve from '@rollup/plugin-node-resolve';
 import rollupPluginReplace from '@rollup/plugin-replace';
 import rollupPluginTypescript from 'rollup-plugin-typescript2';
@@ -13,7 +13,7 @@ async function bundleAPI({debug}) {
 
     const packageJSON = await fs.readJSON('package.json');
 
-    const bundle = await rollup.rollup({
+    const bundle = await rollup({
         input: src,
         plugins: [
             rollupPluginNodeResolve(),

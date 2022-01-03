@@ -3,82 +3,14 @@ import {getDestDir, PLATFORM} from './paths.js';
 import reload from './reload.js';
 import {createTask} from './task.js';
 
-const enLocale = fs.readFileSync('src/_locales/en.config', {encoding: 'utf8'}).replace(/^#.*?$/gm, '');
-global.chrome = global.chrome || {};
-global.chrome.i18n = global.chrome.i18n || {};
-global.chrome.i18n.getMessage = global.chrome.i18n.getMessage || ((name) => {
-    const index = enLocale.indexOf(`@${name}`);
-    if (index < 0) {
-        throw new Error(`Message @${name} not found`);
-    }
-    const start = index + name.length + 1;
-    let end = enLocale.indexOf('@', start);
-    if (end < 0) {
-        end = enLocale.length;
-    }
-    const message = enLocale.substring(start, end).trim();
-    return message;
-});
-global.chrome.i18n.getUILanguage = global.chrome.i18n.getUILanguage || (() => 'en-US');
-
-import {register as tsRegister} from 'ts-node';
-import {register as tsPaths} from 'tsconfig-paths';
-const tsConfig = fs.readJSONSync('src/tsconfig.json');
-tsRegister({
-    transpileOnly: true,
-    compilerOptions: {
-        ...tsConfig.compilerOptions,
-        module: 'esnext',
-    },
-});
-tsPaths({
-    baseUrl: './',
-    paths: {
-        'malevic/*': ['node_modules/malevic/*'],
-        'malevic': ['node_modules/malevic'],
-    }
-});
-import Malevic from 'malevic';
-import MalevicString from 'malevic/string.mjs';
-import DevToolsBody from '../src/ui/devtools/components/body.tsx';
-import PopupBody from '../src/ui/popup/components/body.tsx';
-import CSSEditorBody from '../src/ui/stylesheet-editor/components/body.tsx';
-import {getMockData, getMockActiveTabInfo} from '../src/ui/connect/mock.ts';
-
 const pages = [
-    {
-        cwdPath: 'ui/popup/index.html',
-        rootComponent: PopupBody,
-        props: {
-            data: getMockData({isReady: false}),
-            tab: getMockActiveTabInfo(),
-            actions: null,
-        },
-    },
-    {
-        cwdPath: 'ui/devtools/index.html',
-        rootComponent: DevToolsBody,
-        props: {
-            data: getMockData({isReady: false}),
-            tab: getMockActiveTabInfo(),
-            actions: null,
-        },
-    },
-    {
-        cwdPath: 'ui/stylesheet-editor/index.html',
-        rootComponent: CSSEditorBody,
-        props: {
-            data: getMockData({isReady: false}),
-            tab: getMockActiveTabInfo(),
-            actions: null,
-        },
-    },
+    'ui/popup/index.html',
+    'ui/devtools/index.html',
+    'ui/stylesheet-editor/index.html',
 ];
 
-async function bundleHTMLPage({cwdPath, rootComponent, props}, {debug}) {
+async function bundleHTMLPage({cwdPath}, {debug}) {
     let html = await fs.readFile(`src/${cwdPath}`, 'utf8');
-    const bodyText = MalevicString.stringify(Malevic.m(rootComponent, props));
-    html = html.replace('$BODY', bodyText);
 
     const getPath = (dir) => `${dir}/${cwdPath}`;
     const outPath = getPath(getDestDir({debug, platform: PLATFORM.CHROME}));
@@ -93,7 +25,7 @@ async function bundleHTMLPage({cwdPath, rootComponent, props}, {debug}) {
 
 async function bundleHTML({debug}) {
     for (const page of pages) {
-        await bundleHTMLPage(page, {debug});
+        await bundleHTMLPage({cwdPath: page}, {debug});
     }
 }
 
@@ -113,7 +45,7 @@ export default createTask(
     'bundle-html',
     bundleHTML,
 ).addWatcher(
-    pages.map((page) => getSrcPath(page.cwdPath)),
+    pages.map((page) => getSrcPath(page)),
     async (changedFiles) => {
         await rebuildHTML(changedFiles);
         reload({type: reload.UI});

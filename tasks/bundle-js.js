@@ -1,6 +1,6 @@
 import fs from 'fs-extra';
 import os from 'os';
-import rollup from 'rollup';
+import {rollup} from 'rollup';
 import rollupPluginNodeResolve from '@rollup/plugin-node-resolve';
 import rollupPluginReplace from '@rollup/plugin-replace';
 import rollupPluginTypescript from 'rollup-plugin-typescript2';
@@ -117,7 +117,7 @@ const jsEntries = [
 
 async function bundleJS(/** @type {JSEntry} */entry, {debug, watch}) {
     const {src, dest} = entry;
-    const bundle = await rollup.rollup({
+    const bundle = await rollup({
         input: src,
         plugins: [
             rollupPluginNodeResolve(),

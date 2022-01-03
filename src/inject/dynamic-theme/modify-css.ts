@@ -1,5 +1,5 @@
 import type {RGBA} from '../../utils/color';
-import {parse, rgbToHSL, hslToString} from '../../utils/color';
+import {lowerCalcExpression, parse, rgbToHSL, hslToString} from '../../utils/color';
 import {clamp} from '../../utils/math';
 import {getMatches} from '../../utils/text';
 import {getAbsoluteURL} from '../../utils/url';
@@ -8,11 +8,19 @@ import {cssURLRegex, getCSSURLValue, getCSSBaseBath} from './css-rules';
 import type {ImageDetails} from './image';
 import {getImageDetails, getFilteredImageDataURL, cleanImageProcessingCache} from './image';
 import type {CSSVariableModifier, VariablesStore} from './variables';
-import {logWarn, logInfo} from '../utils/log';
+import {logWarn, logInfo} from '../../utils/log';
 import type {FilterConfig, Theme} from '../../definitions';
 import {isFirefox} from '../../utils/platform';
 
 export type CSSValueModifier = (theme: Theme) => string | Promise<string>;
+
+export interface CSSValueModifierResult {
+    result: string;
+    matchesLength: number;
+    unparseableMatchesLength: number;
+}
+
+export type CSSValueModifierWithInfo = (theme: Theme) => CSSValueModifierResult;
 
 export interface ModifiableCSSDeclaration {
     property: string;
@@ -23,8 +31,12 @@ export interface ModifiableCSSDeclaration {
 
 export interface ModifiableCSSRule {
     selector: string;
-    parentRule: any;
+    parentRule: CSSRule;
     declarations: ModifiableCSSDeclaration[];
+}
+
+function getPriority(ruleStyle: CSSStyleDeclaration, property: string) {
+    return Boolean(ruleStyle && ruleStyle.getPropertyPriority(property));
 }
 
 export function getModifiableCSSDeclaration(
@@ -35,17 +47,15 @@ export function getModifiableCSSDeclaration(
     ignoreImageSelectors: string[],
     isCancelled: () => boolean,
 ): ModifiableCSSDeclaration {
-    const important = Boolean(rule && rule.style && rule.style.getPropertyPriority(property));
-    const sourceValue = value;
     if (property.startsWith('--')) {
         const modifier = getVariableModifier(variablesStore, property, value, rule, ignoreImageSelectors, isCancelled);
         if (modifier) {
-            return {property, value: modifier, important, sourceValue};
+            return {property, value: modifier, important: getPriority(rule.style, property), sourceValue: value};
         }
     } else if (value.includes('var(')) {
         const modifier = getVariableDependantModifier(variablesStore, property, value);
         if (modifier) {
-            return {property, value: modifier, important, sourceValue};
+            return {property, value: modifier, important: getPriority(rule.style, property), sourceValue: value};
         }
     } else if (
         (property.includes('color') && property !== '-webkit-print-color-adjust') ||
@@ -55,17 +65,17 @@ export function getModifiableCSSDeclaration(
     ) {
         const modifier = getColorModifier(property, value);
         if (modifier) {
-            return {property, value: modifier, important, sourceValue};
+            return {property, value: modifier, important: getPriority(rule.style, property), sourceValue: value};
         }
     } else if (property === 'background-image' || property === 'list-style-image') {
         const modifier = getBgImageModifier(value, rule, ignoreImageSelectors, isCancelled);
         if (modifier) {
-            return {property, value: modifier, important, sourceValue};
+            return {property, value: modifier, important: getPriority(rule.style, property), sourceValue: value};
         }
     } else if (property.includes('shadow')) {
         const modifier = getShadowModifier(value);
         if (modifier) {
-            return {property, value: modifier, important, sourceValue};
+            return {property, value: modifier, important: getPriority(rule.style, property), sourceValue: value};
         }
     }
     return null;
@@ -193,9 +203,11 @@ function getModifiedScrollbarStyle(theme: Theme) {
     return lines.join('\n');
 }
 
-export function getModifiedFallbackStyle(filter: FilterConfig, {strict}) {
+export function getModifiedFallbackStyle(filter: FilterConfig, {strict}: {strict: boolean}) {
     const lines: string[] = [];
-    lines.push(`html, body, ${strict ? 'body :not(iframe)' : 'body > :not(iframe)'} {`);
+    // https://github.com/darkreader/darkreader/issues/3618#issuecomment-895477598
+    const isMicrosoft = location.hostname.endsWith('microsoft.com');
+    lines.push(`html, body, ${strict ? `body :not(iframe)${isMicrosoft ? ':not(div[style^="position:absolute;top:0;left:-"]' : ''}` : 'body > :not(iframe)'} {`);
     lines.push(`    background-color: ${modifyBackgroundColor({r: 255, g: 255, b: 255}, filter)} !important;`);
     lines.push(`    border-color: ${modifyBorderColor({r: 64, g: 64, b: 64}, filter)} !important;`);
     lines.push(`    color: ${modifyForegroundColor({r: 0, g: 0, b: 0}, filter)} !important;`);
@@ -218,6 +230,11 @@ export function parseColorWithCache($color: string) {
     $color = $color.trim();
     if (colorParseCache.has($color)) {
         return colorParseCache.get($color);
+    }
+    // We cannot _really_ parse any color which has the calc() expression
+    // So we try our best-efforts to remove those and then parse the value.
+    if ($color.includes('calc(')) {
+        $color = lowerCalcExpression($color);
     }
     const color = parse($color);
     colorParseCache.set($color, color);
@@ -245,7 +262,6 @@ function getColorModifier(prop: string, value: string): string | CSSValueModifie
             return (filter) => modifyBorderColor(rgb, filter);
         }
         return (filter) => modifyForegroundColor(rgb, filter);
-
     } catch (err) {
         logWarn('Color parse error', err);
         return null;
@@ -295,6 +311,7 @@ export function getBgImageModifier(
                 return {match, index: valueIndex};
             });
         };
+
         const matches = getIndices(urls).map((i) => ({type: 'url', ...i}))
             .concat(getIndices(gradients).map((i) => ({type: 'gradient', ...i})))
             .sort((a, b) => a.index - b.index);
@@ -343,7 +360,7 @@ export function getBgImageModifier(
             }
             let url = getCSSURLValue(urlValue);
             const {parentStyleSheet} = rule;
-            const baseURL = parentStyleSheet.href ?
+            const baseURL = (parentStyleSheet && parentStyleSheet.href) ?
                 getCSSBaseBath(parentStyleSheet.href) :
                 parentStyleSheet.ownerNode?.baseURI || location.origin;
             url = getAbsoluteURL(baseURL, url);
@@ -387,9 +404,11 @@ export function getBgImageModifier(
         };
 
         const getBgImageValue = (imageDetails: ImageDetails, filter: FilterConfig) => {
-            const {isDark, isLight, isTransparent, isLarge, width} = imageDetails;
+            const {isDark, isLight, isTransparent, isLarge, isTooLarge, width} = imageDetails;
             let result: string;
-            if (isDark && isTransparent && filter.mode === 1 && !isLarge && width > 2) {
+            if (isTooLarge) {
+                result = `url("${imageDetails.src}")`;
+            } else if (isDark && isTransparent && filter.mode === 1 && !isLarge && width > 2) {
                 logInfo(`Inverting dark image ${imageDetails.src}`);
                 const inverted = getFilteredImageDataURL(imageDetails, {...filter, sepia: clamp(filter.sepia + 10, 0, 100)});
                 result = `url("${inverted}")`;
@@ -435,17 +454,17 @@ export function getBgImageModifier(
             }
             return results.join('');
         };
-
     } catch (err) {
         logWarn(`Unable to parse gradient ${value}`, err);
         return null;
     }
 }
 
-function getShadowModifier(value: string): CSSValueModifier {
+export function getShadowModifierWithInfo(value: string): CSSValueModifierWithInfo {
     try {
         let index = 0;
-        const colorMatches = getMatches(/(^|\s)([a-z]+\(.+?\)|#[0-9a-f]+|[a-z]+)(.*?(inset|outset)?($|,))/ig, value, 2);
+        const colorMatches = getMatches(/(^|\s)(?!calc)([a-z]+\(.+?\)|#[0-9a-f]+|[a-z]+)(.*?(inset|outset)?($|,))/ig, value, 2);
+        let notParsed = 0;
         const modifiers = colorMatches.map((match, i) => {
             const prefixIndex = index;
             const matchIndex = value.indexOf(match, index);
@@ -453,17 +472,32 @@ function getShadowModifier(value: string): CSSValueModifier {
             index = matchEnd;
             const rgb = tryParseColor(match);
             if (!rgb) {
+                notParsed++;
                 return () => value.substring(prefixIndex, matchEnd);
             }
             return (filter: FilterConfig) => `${value.substring(prefixIndex, matchIndex)}${modifyShadowColor(rgb, filter)}${i === colorMatches.length - 1 ? value.substring(matchEnd) : ''}`;
         });
 
-        return (filter: FilterConfig) => modifiers.map((modify) => modify(filter)).join('');
-
+        return (filter: FilterConfig) => {
+            const modified = modifiers.map((modify) => modify(filter)).join('');
+            return {
+                matchesLength: colorMatches.length,
+                unparseableMatchesLength: notParsed,
+                result: modified,
+            };
+        };
     } catch (err) {
         logWarn(`Unable to parse shadow ${value}`, err);
         return null;
     }
+}
+
+export function getShadowModifier(value: string): CSSValueModifier {
+    const shadowModifier = getShadowModifierWithInfo(value);
+    if (!shadowModifier) {
+        return null;
+    }
+    return (theme: Theme) => shadowModifier(theme).result;
 }
 
 function getVariableModifier(

@@ -132,5 +132,63 @@ describe('LINK STYLES', () => {
         await timeout(0);
         expect(document.querySelector('.testcase--link').nextElementSibling.classList.contains(isSafari ? 'darkreader--cors' : 'darkreader--sync')).toBe(false);
     });
+    it("Shouldn't wait on link that won't be loaded", async () => {
+        const link = createStyleLink(null);
+        link.setAttribute('data-href', `data:text/css;utf8,${encodeURIComponent(multiline(
+            'h1 { background: green !important; }',
+            'h1 strong { color: orange !important; }',
+        ))}`);
+        container.innerHTML = multiline(
+            '<style>',
+            '   h1 { background: gray; }',
+            '</style>',
+            '<h1>Link <strong>loading with non-href attribute</strong>!</h1>',
+        );
+        createOrUpdateDynamicTheme(theme, null, false);
+
+        await timeout(0);
+        const h1 = document.querySelector('h1');
+        expect(getComputedStyle(h1).backgroundColor).toBe('rgb(102, 102, 102)');
+        expect(document.querySelector('.darkreader--fallback').textContent).toBe('');
+    });
+
+    it('should handle styles with @import "..." screen;', async () => {
+        const importedCSS = 'h1 { background: gray; }';
+        const importedURL = getCSSEchoURL(importedCSS);
+        stubBackgroundFetchResponse(importedURL, importedCSS);
+        createCorsLink(multiline(
+            `@import "${importedURL}" screen;`,
+            'h1 strong { color: red; }',
+        ));
+        container.innerHTML = multiline(
+            '<h1><strong>Cross-origin import</strong> link override</h1>',
+        );
+        createOrUpdateDynamicTheme(theme, null, false);
+
+        await timeout(100);
+        expect(getComputedStyle(container.querySelector('h1')).backgroundColor).toBe('rgb(102, 102, 102)');
+        expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(255, 255, 255)');
+        expect(getComputedStyle(container.querySelector('h1 strong')).color).toBe('rgb(255, 26, 26)');
+    });
+
+    it('should handle styles with invalid url(...)', async () => {
+        const importedCSS = 'h1 { background-image: url("freecookies:3https://example.com"); background-color: gray; }';
+        const importedURL = getCSSEchoURL(importedCSS);
+        stubBackgroundFetchResponse(importedURL, importedCSS);
+        stubBackgroundFetchResponse('freecookies:3https://example.com', '');
+        createCorsLink(multiline(
+            `@import "${importedURL}" screen;`,
+            'h1 strong { color: red; }',
+        ));
+        container.innerHTML = multiline(
+            '<h1><strong>Cross-origin import</strong> link override</h1>',
+        );
+        createOrUpdateDynamicTheme(theme, null, false);
+
+        await timeout(100);
+        expect(getComputedStyle(container.querySelector('h1')).backgroundColor).toBe('rgb(102, 102, 102)');
+        expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(255, 255, 255)');
+        expect(getComputedStyle(container.querySelector('h1 strong')).color).toBe('rgb(255, 26, 26)');
+    });
 });
 

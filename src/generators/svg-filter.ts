@@ -2,8 +2,9 @@ import {createFilterMatrix, Matrix} from './utils/matrix';
 import {cssFilterStyleSheetTemplate} from './css-filter';
 import type {FilterConfig, InversionFix} from '../definitions';
 import {isFirefox} from '../utils/platform';
+import type {SitePropsIndex} from './utils/parse';
 
-export function createSVGFilterStylesheet(config: FilterConfig, url: string, frameURL: string, inversionFixes: InversionFix[]) {
+export function createSVGFilterStylesheet(config: FilterConfig, url: string, frameURL: string, fixes: string, index: SitePropsIndex<InversionFix>) {
     let filterValue: string;
     let reverseFilterValue: string;
     if (isFirefox) {
@@ -14,7 +15,7 @@ export function createSVGFilterStylesheet(config: FilterConfig, url: string, fra
         filterValue = 'url(#dark-reader-filter)';
         reverseFilterValue = 'url(#dark-reader-reverse-filter)';
     }
-    return cssFilterStyleSheetTemplate(filterValue, reverseFilterValue, config, url, frameURL, inversionFixes);
+    return cssFilterStyleSheetTemplate(filterValue, reverseFilterValue, config, url, frameURL, fixes, index);
 }
 
 function getEmbeddedSVGFilterValue(matrixValue: string) {

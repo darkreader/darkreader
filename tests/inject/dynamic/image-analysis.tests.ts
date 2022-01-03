@@ -214,7 +214,7 @@ describe('IMAGE ANALYSIS', () => {
             '<h1>Light background</h1>',
         );
         createOrUpdateDynamicTheme(theme, null, false);
-        await timeout(50);
+        await timeout(75);
         const bgImageValue = getComputedStyle(container.querySelector('h1')).backgroundImage;
         expect(bgImageValue).toBe('none');
     });
@@ -232,7 +232,7 @@ describe('IMAGE ANALYSIS', () => {
             css: '',
             ignoreInlineStyle: ['.'],
             ignoreImageAnalysis: ['*'],
-
+            disableStyleSheetsProxy: false,
         };
         createOrUpdateDynamicTheme(theme, fixes, false);
         const backgroundImage = getComputedStyle(container.querySelector('i')).backgroundImage;

@@ -4,18 +4,14 @@
 @theme-preset-picker-button-size: 1.5rem;
 
 .theme-preset-picker {
-    border-radius: @theme-preset-height / 2;
-
     .dropdown {
         &__selected {
-            border-radius: @theme-preset-height / 2;
             height: @size-control-inner;
             margin-top: 0;
         }
 
         &__list {
             border: none;
-            border-radius: @theme-preset-height / 2;
             box-shadow: 0 0 0 @size-border @color-border, 0 0 0.25rem 0.0625rem + @size-border black;
         }
     }
@@ -29,7 +25,6 @@
         width: 100%;
 
         &__remove-button {
-            border-radius: 50%;
             cursor: pointer;
             display: inline-block;
             height: @theme-preset-picker-button-size;

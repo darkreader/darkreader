@@ -1,5 +1,6 @@
 {
     "compilerOptions": {
+        "noImplicitAny": true,
         "target": "es2019",
         "baseUrl": ".",
         "module": "es2015",
@@ -11,7 +12,8 @@
             "dom.iterable"
         ],
         "types": [
-            "chrome"
+            "chrome",
+            "offscreencanvas"
         ],
         "allowJs": true,
         "downlevelIteration": true,

@@ -17,7 +17,6 @@
         background-position: center right 0.25rem;
         background-repeat: no-repeat;
         background-size: 1rem;
-        border-radius: @dropdown-item-height / 2;
         color: @color-control-fore;
         display: inline-flex;
         height: @dropdown-item-height;
@@ -41,7 +40,6 @@
         background-color: @color-control-back;
         border: @size-border solid @color-border;
         border-top: none;
-        border-radius: @dropdown-item-height / 2;
         box-shadow: 0 0 0.25rem black;
         box-sizing: border-box;
         display: none;
@@ -74,7 +72,6 @@
     }
 
     &--open &__list {
-        border-radius: @dropdown-item-active-height / 2;
         display: inline-block;
         margin-top: (@dropdown-height - @dropdown-item-active-height) / 2;
         z-index: 1;
@@ -85,7 +82,6 @@
     }
 
     &--open &__selected {
-        border-radius: @dropdown-item-active-height / 2;
         height: @dropdown-item-active-height;
         margin-top: (@dropdown-height - @dropdown-item-active-height) / 2;
         z-index: 2;

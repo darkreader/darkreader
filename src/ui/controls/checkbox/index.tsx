@@ -1,7 +1,7 @@
 import {m} from 'malevic';
 import {mergeClass, omitAttrs} from '../utils';
 
-export default function CheckBox(props: Malevic.NodeAttrs, ...children) {
+export default function CheckBox(props: Malevic.NodeAttrs, ...children: Malevic.Child[]) {
     const cls = mergeClass('checkbox', props.class);
     const attrs = omitAttrs(['class', 'checked', 'onchange'], props);
     const check = (domNode: HTMLInputElement) => domNode.checked = Boolean(props.checked);

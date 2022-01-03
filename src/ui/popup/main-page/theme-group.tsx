@@ -53,5 +53,3 @@ export default function ThemeGroup(props: ViewProps & {onThemeNavClick: () => vo
         </div>
     );
 }
-
-

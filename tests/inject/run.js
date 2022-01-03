@@ -1,14 +1,15 @@
 import karma from 'karma';
+import path from 'path';
+import url from 'url';
 import {createEchoServer} from './echo-server.js';
-import setKarmaConfig from './karma.conf.js';
 
 const ECHO_SERVER_PORT = 9966;
+const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
 
 async function run() {
     const args = process.argv.slice(2);
     const debug = args.includes('--debug');
-    // NOTE: Patching karma/lib/config.js is required to accept a function
-    const karmaConfig = karma.config.parseConfig(setKarmaConfig, {debug});
+    const karmaConfig = karma.config.parseConfig(path.join(__dirname, './karma.conf.cjs'), /** @type {any} */({debug}));
 
     const echoServer = await createEchoServer(ECHO_SERVER_PORT);
     const karmaServer = new karma.Server(/** @type {any} */(karmaConfig), () => {

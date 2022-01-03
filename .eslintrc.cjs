@@ -1,6 +1,9 @@
-export default {
+const rulesDirPlugin = require('eslint-plugin-rulesdir');
+rulesDirPlugin.RULES_DIR = 'tasks/lint/plugins';
+
+module.exports = {
     parser: '@typescript-eslint/parser',
-    plugins: ['@typescript-eslint', 'local'],
+    plugins: ['@typescript-eslint', 'rulesdir'],
     extends: ['plugin:@typescript-eslint/recommended', 'plugin:import/recommended', 'plugin:import/typescript'],
     rules: {
         'array-bracket-spacing': ['error', 'never'],
@@ -47,7 +50,7 @@ export default {
             default: 'array-simple',
         }],
         'yoda': ['error', 'never'],
-        'local/consistent-new-lines': 'error',
+        'rulesdir/consistent-new-lines': 'error',
         '@typescript-eslint/brace-style': 'error',
         '@typescript-eslint/camelcase': 'off',
         '@typescript-eslint/comma-spacing': ['error', {
@@ -146,8 +149,8 @@ export default {
         {
             files: ['**/*.tsx'],
             rules: {
-                'local/jsx-uses-m-pragma': 'error',
-                'local/jsx-uses-vars': 'error',
+                'rulesdir/jsx-uses-m-pragma': 'error',
+                'rulesdir/jsx-uses-vars': 'error',
             },
         },
         {

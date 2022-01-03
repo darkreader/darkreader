@@ -8,4 +8,4 @@ export const PLATFORM = {
 export function getDestDir({debug, platform}) {
     const buildTypeDir = `build/${debug ? 'debug' : 'release'}`;
     return `${buildTypeDir}/${platform}`;
-};
+}

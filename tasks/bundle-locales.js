@@ -1,3 +1,4 @@
+// @ts-check
 import fs from 'fs-extra';
 import {getDestDir, PLATFORM} from './paths.js';
 import reload from './reload.js';

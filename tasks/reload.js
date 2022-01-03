@@ -1,3 +1,4 @@
+// @ts-check
 import WebSocket from 'ws';
 import {log} from './utils.js';
 
@@ -25,7 +26,7 @@ function createServer() {
             sockets.add(ws);
             times.set(ws, Date.now());
             ws.on('message', async (data) => {
-                const message = JSON.parse(data);
+                const message = JSON.parse(data.toString());
                 if (message.type === 'reloading') {
                     log.ok('Extension reloading...');
                 }

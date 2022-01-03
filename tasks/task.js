@@ -1,3 +1,4 @@
+// @ts-check
 import {log} from './utils.js';
 import watch from './watch.js';
 
@@ -28,7 +29,7 @@ class Task {
     }
 
     /**
-     * @param {Promise<void>} promise
+     * @param {void | Promise<void>} promise
      */
     async _measureTime(promise) {
         const start = Date.now();
@@ -66,7 +67,7 @@ class Task {
 
 /**
  * @param {string} name
- * @param {(options: TaskOptions) => void | Promise<void>} run
+ * @param {(options: TaskOptions) => void | Promise<any>} run
  */
 export function createTask(name, run) {
     return new Task(name, run);

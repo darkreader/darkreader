@@ -1,3 +1,4 @@
+// @ts-check
 import fs from 'fs-extra';
 import globby from 'globby';
 import prettier from 'prettier';
@@ -5,6 +6,7 @@ import {getDestDir, PLATFORM} from './paths.js';
 import {createTask} from './task.js';
 import {log} from './utils.js';
 
+/** @type {import('prettier').Options} */
 const options = {
     arrowParens: 'always',
     bracketSpacing: false,

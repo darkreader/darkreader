@@ -1,3 +1,4 @@
+// @ts-check
 import fs from 'fs-extra';
 import globby from 'globby';
 import {getDestDir, PLATFORM} from './paths.js';
@@ -70,7 +71,7 @@ export default createTask(
     paths,
     async (changedFiles) => {
         for (const file of changedFiles) {
-            if (await fs.exists(file)) {
+            if (await fs.pathExists(file)) {
                 await copyFile(file, {debug: true, platform: PLATFORM.CHROME});
                 await copyFile(file, {debug: true, platform: PLATFORM.FIREFOX});
                 await copyFile(file, {debug: true, platform: PLATFORM.CHROME_MV3});

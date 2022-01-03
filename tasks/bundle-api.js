@@ -1,3 +1,4 @@
+// @ts-check
 import {rollup} from 'rollup';
 import rollupPluginNodeResolve from '@rollup/plugin-node-resolve';
 import rollupPluginReplace from '@rollup/plugin-replace';

@@ -1,3 +1,4 @@
+// @ts-check
 import fs from 'fs-extra';
 import {getDestDir, PLATFORM} from './paths.js';
 import reload from './reload.js';
@@ -36,8 +37,8 @@ function getSrcPath(cwdPath) {
 async function rebuildHTML(changedFiles) {
     await Promise.all(
         pages
-            .filter((page) => changedFiles.some((changed) => changed === getSrcPath(page.cwdPath)))
-            .map((page) => bundleHTMLPage(page, {debug: true}))
+            .filter((page) => changedFiles.some((changed) => changed === getSrcPath(page)))
+            .map((page) => bundleHTMLPage({cwdPath: page}, {debug: true}))
     );
 }
 

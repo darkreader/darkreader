@@ -1,3 +1,4 @@
+// @ts-check
 import fs from 'fs-extra';
 import less from 'less';
 import path from 'path';

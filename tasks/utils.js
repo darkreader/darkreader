@@ -1,3 +1,5 @@
+// @ts-check
+/** @type {{[color: string]: (text: string) => string}} */
 const colors = Object.entries({
     gray: '\x1b[90m',
     green: '\x1b[32m',

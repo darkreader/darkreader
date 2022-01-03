@@ -1,3 +1,4 @@
+// @ts-check
 import fs from 'fs-extra';
 import os from 'os';
 import {rollup} from 'rollup';

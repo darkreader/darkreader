@@ -1,3 +1,4 @@
+// @ts-check
 import chokidar from 'chokidar';
 import {log} from './utils.js';
 

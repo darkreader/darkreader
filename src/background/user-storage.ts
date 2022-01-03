@@ -69,11 +69,10 @@ export default class UserStorage {
             return local;
         }
 
-        const sync = await readSyncStorage(DEFAULT_SETTINGS);
-        this.fillDefaults(sync);
+        this.fillDefaults($sync);
 
-        this.loadBarrier.resolve(sync);
-        return sync;
+        this.loadBarrier.resolve($sync);
+        return $sync;
     }
 
     async saveSettings() {

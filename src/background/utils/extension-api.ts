@@ -68,7 +68,7 @@ export async function readSyncStorage<T extends {[key: string]: any}>(defaults: 
                 try {
                     sync[key] = JSON.parse(string);
                 } catch (error) {
-                    console.error('Could not parse record from sync storage', string);
+                    console.error(`sync[${key}]: Could not parse record from sync storage: ${string}`);
                 }
             }
 

@@ -279,7 +279,9 @@ export class Extension {
         }
     };
 
-    onCommand = debounce(500, this.onCommandInternal);
+    // 75 is small enough to not notice it, and still catches when someone
+    // is holding down a certain shortcut.
+    onCommand = debounce(75, this.onCommandInternal);
 
     private registerContextMenus() {
         const onCommandToggle = async () => this.onCommand('toggle');

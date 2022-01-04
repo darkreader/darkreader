@@ -24,6 +24,7 @@ async function bundleAPI({debug}) {
                 tsconfig: 'src/tsconfig.json',
                 removeComments: true,
                 target: 'es5',
+                noEmitOnError: true,
                 cacheDir: debug ? `${fs.realpathSync(os.tmpdir())}/darkreader_api_typescript_cache` : null,
             }),
             rollupPluginReplace({

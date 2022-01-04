@@ -31,6 +31,7 @@ module.exports = (config) => {
                     ],
                     removeComments: false,
                     sourceMap: true,
+                    noEmitOnError: true,
                     cacheDir: `${fs.realpathSync(os.tmpdir())}/darkreader_typescript_test_cache`,
                 }),
                 rollupPluginReplace({

@@ -130,6 +130,7 @@ async function bundleJS(/** @type {JSEntry} */entry, {debug, watch}) {
                 noImplicitAny: debug ? false : true,
                 removeComments: debug ? false : true,
                 sourceMap: debug ? true : false,
+                noEmitOnError: true,
                 cacheDir: debug ? `${fs.realpathSync(os.tmpdir())}/darkreader_typescript_cache` : null,
             }),
             rollupPluginReplace({

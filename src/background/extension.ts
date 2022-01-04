@@ -22,6 +22,7 @@ import {MessageType} from '../utils/message';
 import {logInfo, logWarn} from '../utils/log';
 import {PromiseBarrier} from '../utils/promise-barrier';
 import {StateManager} from './utils/state-manager';
+import {debounce} from '../utils/debounce';
 
 interface ExtensionState {
     isEnabled: boolean;
@@ -245,7 +246,7 @@ export class Extension {
         };
     }
 
-    onCommand = async (command: string, frameURL?: string) => {
+    private onCommandInternal = async (command: string, frameURL?: string) => {
         if (this.startBarrier.isPending()) {
             await this.startBarrier.entry();
         }
@@ -277,6 +278,10 @@ export class Extension {
             }
         }
     };
+
+    // 75 is small enough to not notice it, and still catches when someone
+    // is holding down a certain shortcut.
+    onCommand = debounce(75, this.onCommandInternal);
 
     private registerContextMenus() {
         const onCommandToggle = async () => this.onCommand('toggle');

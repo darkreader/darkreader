@@ -45,7 +45,7 @@ export async function readSyncStorage<T extends {[key: string]: any}>(defaults: 
         chrome.storage.sync.get(null, (sync: any) => {
             if (chrome.runtime.lastError) {
                 console.error(chrome.runtime.lastError.message);
-                resolve(defaults);
+                resolve(null);
                 return;
             }
 
@@ -68,7 +68,9 @@ export async function readSyncStorage<T extends {[key: string]: any}>(defaults: 
                 try {
                     sync[key] = JSON.parse(string);
                 } catch (error) {
-                    console.error('Could not parse record from sync storage', string);
+                    console.error(`sync[${key}]: Could not parse record from sync storage: ${string}`);
+                    resolve(null);
+                    return;
                 }
             }
 

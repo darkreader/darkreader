@@ -6,7 +6,7 @@ const rollupPluginNodeResolve = require('@rollup/plugin-node-resolve').default;
 /** @type {any} */
 const rollupPluginReplace = require('@rollup/plugin-replace');
 /** @type {any} */
-const rollupPluginTypescript = require('rollup-plugin-typescript2');
+const rollupPluginTypescript = require('@rollup/plugin-typescript');
 const typescript = require('typescript');
 const {getDestDir, PLATFORM} = require('./paths');
 const reload = require('./reload');
@@ -127,15 +127,11 @@ async function bundleJS(/** @type {JSEntry} */entry, {debug, watch}) {
             rollupPluginTypescript({
                 typescript,
                 tsconfig: 'src/tsconfig.json',
-                tsconfigOverride: {
-                    compilerOptions: {
-                        noImplicitAny: debug ? false : true,
-                        removeComments: debug ? false : true,
-                        sourceMap: debug ? true : false,
-                    },
-                },
-                clean: debug ? false : true,
-                cacheRoot: debug ? `${fs.realpathSync(os.tmpdir())}/darkreader_typescript_cache` : null,
+                noImplicitAny: debug ? false : true,
+                removeComments: debug ? false : true,
+                sourceMap: debug ? true : false,
+                noEmitOnError: true,
+                cacheDir: debug ? `${fs.realpathSync(os.tmpdir())}/darkreader_typescript_cache` : null,
             }),
             rollupPluginReplace({
                 preventAssignment: true,

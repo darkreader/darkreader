@@ -1,8 +1,10 @@
 // @ts-check
 const rollup = require('rollup');
 const rollupPluginNodeResolve = require('@rollup/plugin-node-resolve').default;
-const rollupPluginReplace = require('@rollup/plugin-replace').default;
-const rollupPluginTypescript = require('rollup-plugin-typescript2').default;
+/** @type {any} */
+const rollupPluginReplace = require('@rollup/plugin-replace');
+/** @type {any} */
+const rollupPluginTypescript = require('rollup-plugin-typescript2');
 const typescript = require('typescript');
 const packageJSON = require('../package.json');
 const fs = require('fs');

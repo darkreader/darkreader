@@ -34,7 +34,7 @@ async function bundleCSS({debug}) {
     });
     for (const file of Object.values(files)) {
         for (const copyDir of copyDirs) {
-            const copyTo = `${copyDir}/${file.substring(dir.length + 1)}`
+            const copyTo = `${copyDir}/${file.substring(dir.length + 1)}`;
             await copyFile(file, copyTo);
         }
     }

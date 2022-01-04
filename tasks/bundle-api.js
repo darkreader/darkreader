@@ -4,7 +4,7 @@ const rollupPluginNodeResolve = require('@rollup/plugin-node-resolve').default;
 /** @type {any} */
 const rollupPluginReplace = require('@rollup/plugin-replace');
 /** @type {any} */
-const rollupPluginTypescript = require('rollup-plugin-typescript2');
+const rollupPluginTypescript = require('@rollup/plugin-typescript');
 const typescript = require('typescript');
 const packageJSON = require('../package.json');
 const fs = require('fs');
@@ -22,14 +22,9 @@ async function bundleAPI({debug}) {
             rollupPluginTypescript({
                 typescript,
                 tsconfig: 'src/tsconfig.json',
-                tsconfigOverride: {
-                    compilerOptions: {
-                        removeComments: true,
-                        target: 'es5',
-                    },
-                },
-                clean: true,
-                cacheRoot: debug ? `${fs.realpathSync(os.tmpdir())}/darkreader_api_typescript_cache` : null,
+                removeComments: true,
+                target: 'es5',
+                cacheDir: debug ? `${fs.realpathSync(os.tmpdir())}/darkreader_api_typescript_cache` : null,
             }),
             rollupPluginReplace({
                 preventAssignment: true,

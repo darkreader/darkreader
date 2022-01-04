@@ -23,12 +23,7 @@ module.exports = (config) => {
                 rollupPluginNodeResolve(),
                 rollupPluginTypescript({
                     typescript,
-                    tsconfig: 'src/tsconfig.json',
-                    types: [
-                        'chrome',
-                        'jasmine',
-                        'offscreencanvas'
-                    ],
+                    tsconfig: 'tests/inject/tsconfig.json',
                     removeComments: false,
                     sourceMap: true,
                     noEmitOnError: true,

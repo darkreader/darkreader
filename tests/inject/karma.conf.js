@@ -1,4 +1,4 @@
-const fs = require('fs-extra');
+const fs = require('fs');
 const os = require('os');
 const rollupPluginIstanbul = require('rollup-plugin-istanbul2');
 const rollupPluginNodeResolve = require('@rollup/plugin-node-resolve').default;

@@ -1,8 +1,8 @@
 // @ts-check
-const fs = require('fs-extra');
 const {getDestDir, PLATFORM} = require('./paths');
 const reload = require('./reload');
 const {createTask} = require('./task');
+const {copyFile, readFile, writeFile} = require('./utils');
 
 const pages = [
     'ui/popup/index.html',
@@ -11,17 +11,17 @@ const pages = [
 ];
 
 async function bundleHTMLPage({cwdPath}, {debug}) {
-    let html = await fs.readFile(`src/${cwdPath}`, 'utf8');
+    let html = await readFile(`src/${cwdPath}`);
 
     const getPath = (dir) => `${dir}/${cwdPath}`;
     const outPath = getPath(getDestDir({debug, platform: PLATFORM.CHROME}));
-    const firefoxPath = getPath(getDestDir({debug, platform: PLATFORM.FIREFOX}));
-    const mv3Path = getPath(getDestDir({debug, platform: PLATFORM.CHROME_MV3}));
-    const thunderBirdPath = getPath(getDestDir({debug, platform: PLATFORM.THUNDERBIRD}));
-    await fs.outputFile(outPath, html);
-    await fs.copy(outPath, firefoxPath);
-    await fs.copy(outPath, mv3Path);
-    await fs.copy(outPath, thunderBirdPath);
+    const copyToPaths = [PLATFORM.FIREFOX, PLATFORM.CHROME_MV3, PLATFORM.THUNDERBIRD].map((platform) => {
+        return getPath(getDestDir({debug, platform}));
+    });
+    await writeFile(outPath, html);
+    for (const copyTo of copyToPaths) {
+        await copyFile(outPath, copyTo);
+    }
 }
 
 async function bundleHTML({debug}) {

@@ -10,7 +10,7 @@ assignees: ''
   ⚠⚠ Do not delete this issue template or your issue will be ignored! ⚠⚠
   Thank you for taking the time to report a bug.
   First, please check:
-  - can the issue be reproduced in a fresh browser profile?
+  - Can the issue be reproduced in a fresh browser profile?
   - is there an existing issue about this?
   Please fill out every section of this report, removing any that are not needed.
   Finally, place a brief description in the title of this report.

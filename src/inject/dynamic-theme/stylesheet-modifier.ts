@@ -19,7 +19,11 @@ const themeCacheKeys: Array<keyof Theme> = [
 ];
 
 function getThemeKey(theme: Theme) {
-    return themeCacheKeys.map((p) => `${p}:${theme[p]}`).join(';');
+    let resultKey = '';
+    themeCacheKeys.forEach((key) => {
+        resultKey += `${key}:${theme[key]};`;
+    });
+    return resultKey;
 }
 
 const asyncQueue = createAsyncTasksQueue();

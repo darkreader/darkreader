@@ -19,6 +19,9 @@ assignees: ''
 
 # Bug Report
 
+## Website Address
+<!-- Please use the "Broken Website" template to report bugs confined to a specific website. -->
+
 ## Bug Description
 <!-- Provide a clear and concise description, which will allow us to troubleshoot this bug. -->
 

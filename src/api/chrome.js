@@ -1,24 +1,31 @@
+// @ts-check
 import {MessageType} from '../utils/message';
-import type {Message} from '../definitions';
 import {readResponseAsDataURL} from '../utils/network';
 import {callFetchMethod} from './fetch';
 
+/** @typedef {import('../definitions').Message} Message */
+
 if (!window.chrome) {
-    window.chrome = {} as any;
+    window.chrome = /** @type {any} */({});
 }
 if (!chrome.runtime) {
-    chrome.runtime = {} as any;
+    chrome.runtime = /** @type {any} */({});
 }
 
-const messageListeners = new Set<(message: Message) => void>();
+/** @type {Set<(message: Message) => void>} */
+const messageListeners = new Set();
 
-async function sendMessage(...args: any[]) {
+/**
+ * @param  {...any} args
+ */
+async function sendMessage(...args) {
     if (args[0] && args[0].type === MessageType.CS_FETCH) {
         const {id} = args[0];
         try {
             const {url, responseType} = args[0].data;
             const response = await callFetchMethod(url);
-            let text: string;
+            /** @type {string} */
+            let text;
             if (responseType === 'data-url') {
                 text = await readResponseAsDataURL(response);
             } else {
@@ -32,13 +39,16 @@ async function sendMessage(...args: any[]) {
     }
 }
 
-function addMessageListener(callback: (data: any) => void) {
+/**
+ * @param {(data: any) => void} callback 
+ */
+function addMessageListener(callback) {
     messageListeners.add(callback);
 }
 
 if (typeof chrome.runtime.sendMessage === 'function') {
     const nativeSendMessage = chrome.runtime.sendMessage;
-    chrome.runtime.sendMessage = (...args: any[]) => {
+    chrome.runtime.sendMessage = (/** @type {any[]} */...args) => {
         sendMessage(...args);
         nativeSendMessage.apply(chrome.runtime, args);
     };
@@ -47,14 +57,14 @@ if (typeof chrome.runtime.sendMessage === 'function') {
 }
 
 if (!chrome.runtime.onMessage) {
-    chrome.runtime.onMessage = {} as any;
+    chrome.runtime.onMessage = /** @type {any} */({});
 }
 if (typeof chrome.runtime.onMessage.addListener === 'function') {
     const nativeAddListener = chrome.runtime.onMessage.addListener;
-    chrome.runtime.onMessage.addListener = (...args: any[]) => {
+    chrome.runtime.onMessage.addListener = (/** @type {any[]} */...args) => {
         addMessageListener(args[0]);
         nativeAddListener.apply(chrome.runtime.onMessage, args);
     };
 } else {
-    chrome.runtime.onMessage.addListener = (...args: any[]) => addMessageListener(args[0]);
+    chrome.runtime.onMessage.addListener = (/** @type {any[]} */...args) => addMessageListener(args[0]);
 }

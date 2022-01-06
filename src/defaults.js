@@ -1,7 +1,10 @@
-import type {ParsedColorSchemeConfig} from './utils/colorscheme-parser';
-import type {Theme, UserSettings} from './definitions';
+// @ts-check
 import ThemeEngines from './generators/theme-engines';
 import {isMacOS, isWindows} from './utils/platform';
+
+/** @typedef {import('./definitions').Theme} Theme */
+/** @typedef {import('./definitions').UserSettings} UserSettings */
+/** @typedef {import('./utils/colorscheme-parser').ParsedColorSchemeConfig} ParsedColorSchemeConfig */
 
 export const DEFAULT_COLORS = {
     darkScheme: {
@@ -14,7 +17,8 @@ export const DEFAULT_COLORS = {
     },
 };
 
-export const DEFAULT_THEME: Theme = {
+/** @type {Theme} */
+export const DEFAULT_THEME = {
     mode: 1,
     brightness: 100,
     contrast: 100,
@@ -36,7 +40,8 @@ export const DEFAULT_THEME: Theme = {
     darkColorScheme: 'Default',
 };
 
-export const DEFAULT_COLORSCHEME: ParsedColorSchemeConfig = {
+/** @type {ParsedColorSchemeConfig} */
+export const DEFAULT_COLORSCHEME = {
     light: {
         Default: {
             backgroundColor: DEFAULT_COLORS.lightScheme.background,
@@ -51,7 +56,8 @@ export const DEFAULT_COLORSCHEME: ParsedColorSchemeConfig = {
     },
 };
 
-export const DEFAULT_SETTINGS: UserSettings = {
+/** @type {UserSettings} */
+export const DEFAULT_SETTINGS = {
     enabled: true,
     fetchNews: true,
     theme: DEFAULT_THEME,

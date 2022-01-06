@@ -1,11 +1,14 @@
+// @ts-check
 import './chrome';
 import {setFetchMethod as setFetch} from './fetch';
 import {DEFAULT_THEME} from '../defaults';
-import type {Theme, DynamicThemeFix} from '../definitions';
 import ThemeEngines from '../generators/theme-engines';
 import {createOrUpdateDynamicTheme, removeDynamicTheme} from '../inject/dynamic-theme';
 import {collectCSS} from '../inject/dynamic-theme/css-collection';
 import {isMatchMediaChangeEventListenerSupported} from '../utils/platform';
+
+/** @typedef {import('../definitions').DynamicThemeFix} DynamicThemeFix */
+/** @typedef {import('../definitions').Theme} Theme */
 
 let isDarkReaderEnabled = false;
 const isIFrame = (() => {
@@ -17,7 +20,11 @@ const isIFrame = (() => {
     }
 })();
 
-export function enable(themeOptions: Partial<Theme> = {}, fixes: DynamicThemeFix = null) {
+/**
+ * @param {Partial<Theme>} themeOptions
+ * @param {DynamicThemeFix} fixes
+ */
+export function enable(themeOptions = {}, fixes = null) {
     const theme = {...DEFAULT_THEME, ...themeOptions};
 
     if (theme.engine !== ThemeEngines.dynamicTheme) {
@@ -38,8 +45,8 @@ export function disable() {
 
 const darkScheme = matchMedia('(prefers-color-scheme: dark)');
 let store = {
-    themeOptions: null as Partial<Theme>,
-    fixes: null as DynamicThemeFix,
+    themeOptions: /** @type {Partial<Theme>} */(null),
+    fixes: /** @type {DynamicThemeFix} */(null),
 };
 
 function handleColorScheme() {
@@ -50,7 +57,11 @@ function handleColorScheme() {
     }
 }
 
-export function auto(themeOptions: Partial<Theme> | false = {}, fixes: DynamicThemeFix = null) {
+/**
+ * @param {Partial<Theme> | false} themeOptions
+ * @param {DynamicThemeFix} fixes
+ */
+export function auto(themeOptions = {}, fixes = null) {
     if (themeOptions) {
         store = {themeOptions, fixes};
         handleColorScheme();
@@ -69,7 +80,7 @@ export function auto(themeOptions: Partial<Theme> | false = {}, fixes: DynamicTh
     }
 }
 
-export async function exportGeneratedCSS(): Promise<string> {
+export async function exportGeneratedCSS() {
     return await collectCSS();
 }
 

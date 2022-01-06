@@ -1,48 +1,48 @@
+// @ts-check
 import {logInfo, logWarn} from '../utils/log';
 import {parseInversionFixes, formatInversionFixes} from '../generators/css-filter';
 import {parseDynamicThemeFixes, formatDynamicThemeFixes} from '../generators/dynamic-theme';
 import {parseStaticThemes, formatStaticThemes} from '../generators/static-theme';
-import type ConfigManager from './config-manager';
 import {isFirefox} from '../utils/platform';
+
+/** @typedef {import('./config-manager').default} ConfigManager */
 
 // TODO(bershanskiy): Add support for reads/writes of multiple keys at once for performance.
 // TODO(bershanskiy): Popup UI heeds only hasCustom*Fixes() and nothing else. Consider storing that data separatelly.
-interface DevToolsStorage {
-    get(key: string): Promise<string>;
-    set(key: string, value: string): void;
-    remove(key: string): void;
-    has(key: string): Promise<boolean>;
-    setDataIsMigratedForTesting(value: boolean): void;
-}
+/** @typedef {{get(key: string): Promise<string>; set(key: string, value: string): void; remove(key: string): void; has(key: string): Promise<boolean>; setDataIsMigratedForTesting(value: boolean): void}} DevToolsStorage */
 
-declare const __DEBUG__: boolean;
+const __DEBUG__ = /*@replace-start:__DEBUG__*/false/*@replace-end:__DEBUG__*/;
 
-class PersistentStorageWrapper implements DevToolsStorage {
+/**
+ * @implements {DevToolsStorage}
+ */
+class PersistentStorageWrapper {
     // Cache information within background context for future use without waiting.
-    private cache: {[key: string]: string} = {};
+    /** @type {{[key: string]: string}} */
+    #cache = {};
 
     // TODO(bershanskiy): remove migrated and migrateFromLocalStorage after migration end.
     // Part 1 of 2.
-    private dataIsMigrated = false;
+    #dataIsMigrated = false;
 
-    setDataIsMigratedForTesting(value: boolean) {
+    setDataIsMigratedForTesting(/** @type {boolean} */value) {
         if (__DEBUG__) {
-            this.dataIsMigrated = value;
+            this.#dataIsMigrated = value;
         }
     }
 
     // This function moves DevTools data from loclStorage to chrome.storage.local.
     // This function is run on every backgroun context invocation, but it has effect only on the
     // first run.
-    private async migrateFromLocalStorage() {
+    async #migrateFromLocalStorage() {
         // In MV3 world we can't access localStorage, so we can not migrate anything.
         // Bail out and consider data migrated.
         if (typeof localStorage === 'undefined') {
-            this.dataIsMigrated = true;
+            this.#dataIsMigrated = true;
             return;
         }
 
-        return new Promise<void>((resolve) => {
+        return new Promise((resolve) => {
             chrome.storage.local.get([
                 DevTools.KEY_DYNAMIC,
                 DevTools.KEY_FILTER,
@@ -54,7 +54,7 @@ class PersistentStorageWrapper implements DevToolsStorage {
                 }
                 // If storage contains at least one relevant record, we consider data migrated.
                 if (data[DevTools.KEY_DYNAMIC] || data[DevTools.KEY_FILTER] || data[DevTools.KEY_STATIC]) {
-                    this.dataIsMigrated = true;
+                    this.#dataIsMigrated = true;
                     this.cache = data;
                     resolve();
                     return;
@@ -66,12 +66,12 @@ class PersistentStorageWrapper implements DevToolsStorage {
                     [DevTools.KEY_STATIC]: localStorage.getItem(DevTools.KEY_STATIC),
                 };
 
-                chrome.storage.local.set(this.cache, () => {
+                chrome.storage.local.set(this.#cache, () => {
                     if (chrome.runtime.lastError) {
                         console.error('DevTools failed to migrate data', chrome.runtime.lastError);
                         resolve();
                     }
-                    this.dataIsMigrated = true;
+                    this.#dataIsMigrated = true;
                     // Clean up localStorage after migration
                     localStorage.removeItem(DevTools.KEY_DYNAMIC);
                     localStorage.removeItem(DevTools.KEY_FILTER);
@@ -82,22 +82,26 @@ class PersistentStorageWrapper implements DevToolsStorage {
         });
     }
 
-    async get(key: string) {
-        if (!this.dataIsMigrated) {
-            await this.migrateFromLocalStorage();
+    /**
+     * @param {string} key
+     * @returns {Promise<string>}
+     */
+    async get(key) {
+        if (!this.#dataIsMigrated) {
+            await this.#migrateFromLocalStorage();
         }
 
-        if (key in this.cache) {
-            return this.cache[key];
+        if (key in this.#cache) {
+            return this.#cache[key];
         }
-        return new Promise<string>((resolve) => {
+        return new Promise((resolve) => {
             chrome.storage.local.get(key, (result) => {
                 // If cache received a new value (from call to set())
                 // before we retreived the old value from storage,
                 // return the new value.
-                if (key in this.cache) {
+                if (key in this.#cache) {
                     logInfo(`Key ${key} was written to during read operation.`);
-                    resolve(this.cache[key]);
+                    resolve(this.#cache[key]);
                     return;
                 }
 
@@ -107,14 +111,18 @@ class PersistentStorageWrapper implements DevToolsStorage {
                     return;
                 }
 
-                this.cache[key] = result.key;
+                this.#cache[key] = result.key;
                 resolve(result.key);
             });
         });
     }
 
-    set(key: string, value: string) {
-        this.cache[key] = value;
+    /**
+     * @param {string} key
+     * @param {string} value
+     */
+    set(key, value) {
+        this.#cache[key] = value;
         chrome.storage.local.set({[key]: value}, () => {
             if (chrome.runtime.lastError) {
                 console.error('Failed to write DevTools data', chrome.runtime.lastError);
@@ -122,8 +130,11 @@ class PersistentStorageWrapper implements DevToolsStorage {
         });
     }
 
-    remove(key: string) {
-        this.cache[key] = undefined;
+    /**
+     * @param {string} key
+     */
+    remove(key) {
+        this.#cache[key] = undefined;
         chrome.storage.local.remove(key, () => {
             if (chrome.runtime.lastError) {
                 console.error('Failed to delete DevTools data', chrome.runtime.lastError);
@@ -131,19 +142,29 @@ class PersistentStorageWrapper implements DevToolsStorage {
         });
     }
 
-    async has(key: string) {
+    /**
+     * @param {string} key
+     */
+    async has(key) {
         return Boolean(await this.get(key));
     }
 }
 
-class LocalStorageWrapper implements DevToolsStorage {
+/**
+ * @implements {DevToolsStorage}
+ */
+class LocalStorageWrapper {
     setDataIsMigratedForTesting() {
         if (__DEBUG__) {
             logWarn('Unexpected call to setDataIsMigratedForTesting');
         }
     }
 
-    async get(key: string) {
+    /**
+     * @param {string} key
+     * @returns {Promise<string>}
+     */
+    async get(key) {
         try {
             return localStorage.getItem(key);
         } catch (err) {
@@ -152,7 +173,11 @@ class LocalStorageWrapper implements DevToolsStorage {
         }
     }
 
-    set(key: string, value: string) {
+    /**
+     * @param {string} key
+     * @param {string} value
+     */
+    set(key, value) {
         try {
             localStorage.setItem(key, value);
         } catch (err) {
@@ -160,7 +185,10 @@ class LocalStorageWrapper implements DevToolsStorage {
         }
     }
 
-    remove(key: string) {
+    /**
+     * @param {string} key
+     */
+    remove(key) {
         try {
             localStorage.removeItem(key);
         } catch (err) {
@@ -168,7 +196,10 @@ class LocalStorageWrapper implements DevToolsStorage {
         }
     }
 
-    async has(key: string) {
+    /**
+     * @param {string} key
+     */
+    async has(key) {
         try {
             return localStorage.getItem(key) != null;
         } catch (err) {
@@ -178,38 +209,63 @@ class LocalStorageWrapper implements DevToolsStorage {
     }
 }
 
-class TempStorage implements DevToolsStorage {
+/**
+ * @implements {DevToolsStorage}
+ */
+class TempStorage {
     setDataIsMigratedForTesting() {
         if (__DEBUG__) {
             logWarn('Unexpected call to setDataIsMigratedForTesting');
         }
     }
 
-    map = new Map<string, string>();
+    /** @type {Map<string, string>} */
+    map = new Map();
 
-    async get(key: string) {
+    /**
+     * @param {string} key
+     * @returns {Promise<string>}
+     */
+    async get(key) {
         return this.map.get(key);
     }
 
-    set(key: string, value: string) {
+    /**
+     * @param {string} key
+     * @param {string} value
+     */
+    set(key, value) {
         this.map.set(key, value);
     }
 
-    remove(key: string) {
+    /**
+     * @param {string} key
+     */
+    remove(key) {
         this.map.delete(key);
     }
 
-    async has(key: string) {
+    /**
+     * @param {string} key
+     */
+    async has(key) {
         return this.map.has(key);
     }
 }
 
 export default class DevTools {
-    private config: ConfigManager;
-    private onChange: () => void;
-    private store: DevToolsStorage;
+    /** @type {ConfigManager} */
+    #config;
+    /** @type {() => void} */
+    #onChange;
+    /** @type {DevToolsStorage} */
+    #store;
 
-    constructor(config: ConfigManager, onChange: () => void) {
+    /**
+     * @param {ConfigManager} config
+     * @param {() => void} onChange
+     */
+    constructor(config, onChange) {
         // Firefox don't seem to like using storage.local to store big data on the background-extension.
         // Disabling it for now and defaulting back to localStorage.
         if (typeof chrome.storage.local !== 'undefined' && chrome.storage.local !== null && !isFirefox) {
@@ -219,9 +275,9 @@ export default class DevTools {
         } else {
             this.store = new TempStorage();
         }
-        this.config = config;
-        this.loadConfigOverrides();
-        this.onChange = onChange;
+        this.#config = config;
+        this.#loadConfigOverrides();
+        this.#onChange = onChange;
     }
 
     // TODO(bershanskiy): make private again once PersistentStorageWrapper removes migration logic.
@@ -230,124 +286,127 @@ export default class DevTools {
     static KEY_FILTER = 'dev_inversion_fixes';
     static KEY_STATIC = 'dev_static_themes';
 
-    setDataIsMigratedForTesting(value: boolean) {
-        this.store.setDataIsMigratedForTesting(value);
+    /**
+     * @param {boolean} value
+     */
+    setDataIsMigratedForTesting(value) {
+        this.#store.setDataIsMigratedForTesting(value);
     }
 
-    private async loadConfigOverrides() {
-        this.config.overrides.dynamicThemeFixes = await this.getSavedDynamicThemeFixes() || null;
-        this.config.overrides.inversionFixes = await this.getSavedInversionFixes() || null;
-        this.config.overrides.staticThemes = await this.getSavedStaticThemes() || null;
+    async #loadConfigOverrides() {
+        this.#config.overrides.dynamicThemeFixes = await this.#getSavedDynamicThemeFixes() || null;
+        this.#config.overrides.inversionFixes = await this.#getSavedInversionFixes() || null;
+        this.#config.overrides.staticThemes = await this.#getSavedStaticThemes() || null;
     }
 
-    private async getSavedDynamicThemeFixes() {
-        return this.store.get(DevTools.KEY_DYNAMIC);
+    async #getSavedDynamicThemeFixes() {
+        return this.#store.get(DevTools.KEY_DYNAMIC);
     }
 
-    private saveDynamicThemeFixes(text: string) {
-        this.store.set(DevTools.KEY_DYNAMIC, text);
+    #saveDynamicThemeFixes(/** @type {string} */text) {
+        this.#store.set(DevTools.KEY_DYNAMIC, text);
     }
 
     async hasCustomDynamicThemeFixes() {
-        return this.store.has(DevTools.KEY_DYNAMIC);
+        return this.#store.has(DevTools.KEY_DYNAMIC);
     }
 
     async getDynamicThemeFixesText() {
-        const $fixes = await this.getSavedDynamicThemeFixes();
-        const fixes = $fixes ? parseDynamicThemeFixes($fixes) : parseDynamicThemeFixes(this.config.DYNAMIC_THEME_FIXES_RAW);
+        const $fixes = await this.#getSavedDynamicThemeFixes();
+        const fixes = $fixes ? parseDynamicThemeFixes($fixes) : parseDynamicThemeFixes(this.#config.DYNAMIC_THEME_FIXES_RAW);
         return formatDynamicThemeFixes(fixes);
     }
 
     resetDynamicThemeFixes() {
-        this.store.remove(DevTools.KEY_DYNAMIC);
-        this.config.overrides.dynamicThemeFixes = null;
-        this.config.handleDynamicThemeFixes();
-        this.onChange();
+        this.#store.remove(DevTools.KEY_DYNAMIC);
+        this.#config.overrides.dynamicThemeFixes = null;
+        this.#config.handleDynamicThemeFixes();
+        this.#onChange();
     }
 
-    applyDynamicThemeFixes(text: string) {
+    applyDynamicThemeFixes(/** @type {string} */text) {
         try {
             const formatted = formatDynamicThemeFixes(parseDynamicThemeFixes(text));
-            this.config.overrides.dynamicThemeFixes = formatted;
-            this.config.handleDynamicThemeFixes();
-            this.saveDynamicThemeFixes(formatted);
-            this.onChange();
+            this.#config.overrides.dynamicThemeFixes = formatted;
+            this.#config.handleDynamicThemeFixes();
+            this.#saveDynamicThemeFixes(formatted);
+            this.#onChange();
             return null;
         } catch (err) {
             return err;
         }
     }
 
-    private async getSavedInversionFixes() {
-        return this.store.get(DevTools.KEY_FILTER);
+    async #getSavedInversionFixes() {
+        return this.#store.get(DevTools.KEY_FILTER);
     }
 
-    private saveInversionFixes(text: string) {
-        this.store.set(DevTools.KEY_FILTER, text);
+    #saveInversionFixes(/** @type {string} */text) {
+        this.#store.set(DevTools.KEY_FILTER, text);
     }
 
     async hasCustomFilterFixes() {
-        return this.store.has(DevTools.KEY_FILTER);
+        return this.#store.has(DevTools.KEY_FILTER);
     }
 
     async getInversionFixesText() {
-        const $fixes = await this.getSavedInversionFixes();
-        const fixes = $fixes ? parseInversionFixes($fixes) : parseInversionFixes(this.config.INVERSION_FIXES_RAW);
+        const $fixes = await this.#getSavedInversionFixes();
+        const fixes = $fixes ? parseInversionFixes($fixes) : parseInversionFixes(this.#config.INVERSION_FIXES_RAW);
         return formatInversionFixes(fixes);
     }
 
     resetInversionFixes() {
-        this.store.remove(DevTools.KEY_FILTER);
-        this.config.overrides.inversionFixes = null;
-        this.config.handleInversionFixes();
-        this.onChange();
+        this.#store.remove(DevTools.KEY_FILTER);
+        this.#config.overrides.inversionFixes = null;
+        this.#config.handleInversionFixes();
+        this.#onChange();
     }
 
-    applyInversionFixes(text: string) {
+    applyInversionFixes(/** @type {string} */text) {
         try {
             const formatted = formatInversionFixes(parseInversionFixes(text));
-            this.config.overrides.inversionFixes = formatted;
-            this.config.handleInversionFixes();
-            this.saveInversionFixes(formatted);
-            this.onChange();
+            this.#config.overrides.inversionFixes = formatted;
+            this.#config.handleInversionFixes();
+            this.#saveInversionFixes(formatted);
+            this.#onChange();
             return null;
         } catch (err) {
             return err;
         }
     }
 
-    private async getSavedStaticThemes() {
-        return this.store.get(DevTools.KEY_STATIC);
+    async #getSavedStaticThemes() {
+        return this.#store.get(DevTools.KEY_STATIC);
     }
 
-    private saveStaticThemes(text: string) {
-        this.store.set(DevTools.KEY_STATIC, text);
+    #saveStaticThemes(/** @type {string} */text) {
+        this.#store.set(DevTools.KEY_STATIC, text);
     }
 
     async hasCustomStaticFixes() {
-        return this.store.has(DevTools.KEY_STATIC);
+        return this.#store.has(DevTools.KEY_STATIC);
     }
 
     async getStaticThemesText() {
-        const $themes = await this.getSavedStaticThemes();
-        const themes = $themes ? parseStaticThemes($themes) : parseStaticThemes(this.config.STATIC_THEMES_RAW);
+        const $themes = await this.#getSavedStaticThemes();
+        const themes = $themes ? parseStaticThemes($themes) : parseStaticThemes(this.#config.STATIC_THEMES_RAW);
         return formatStaticThemes(themes);
     }
 
     resetStaticThemes() {
-        this.store.remove(DevTools.KEY_STATIC);
-        this.config.overrides.staticThemes = null;
-        this.config.handleStaticThemes();
-        this.onChange();
+        this.#store.remove(DevTools.KEY_STATIC);
+        this.#config.overrides.staticThemes = null;
+        this.#config.handleStaticThemes();
+        this.#onChange();
     }
 
-    applyStaticThemes(text: string) {
+    applyStaticThemes(/** @type {string} */text) {
         try {
             const formatted = formatStaticThemes(parseStaticThemes(text));
-            this.config.overrides.staticThemes = formatted;
-            this.config.handleStaticThemes();
-            this.saveStaticThemes(formatted);
-            this.onChange();
+            this.#config.overrides.staticThemes = formatted;
+            this.#config.handleStaticThemes();
+            this.#saveStaticThemes(formatted);
+            this.#onChange();
             return null;
         } catch (err) {
             return err;

@@ -1,4 +1,5 @@
-const throwCORSError = async (url: string) => {
+// @ts-check
+const throwCORSError = async (/** @type {string} */url) => {
     return Promise.reject(new Error(
         [
             'Embedded Dark Reader cannot access a cross-origin resource',
@@ -11,11 +12,15 @@ const throwCORSError = async (url: string) => {
     ));
 };
 
-type Fetcher = (url: string) => Promise<Response>;
+/** @typedef {(url: string) => Promise<Response>} Fetcher */
 
-let fetcher: Fetcher = throwCORSError;
+/** @type {Fetcher} */
+let fetcher = throwCORSError;
 
-export function setFetchMethod(fetch: Fetcher) {
+/**
+ * @param {Fetcher} fetch
+ */
+export function setFetchMethod(fetch) {
     if (fetch) {
         fetcher = fetch;
     } else {
@@ -23,6 +28,10 @@ export function setFetchMethod(fetch: Fetcher) {
     }
 }
 
-export async function callFetchMethod(url: string) {
+/**
+ * @param {string} url
+ * @returns {Promise<Response>}
+ */
+export async function callFetchMethod(url) {
     return await fetcher(url);
 }

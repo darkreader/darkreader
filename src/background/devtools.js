@@ -11,8 +11,6 @@ import {isFirefox} from '../utils/platform';
 // TODO(bershanskiy): Popup UI heeds only hasCustom*Fixes() and nothing else. Consider storing that data separatelly.
 /** @typedef {{get(key: string): Promise<string>; set(key: string, value: string): void; remove(key: string): void; has(key: string): Promise<boolean>; setDataIsMigratedForTesting(value: boolean): void}} DevToolsStorage */
 
-const __DEBUG__ = /*@replace-start:__DEBUG__*/false/*@replace-end:__DEBUG__*/;
-
 /**
  * @implements {DevToolsStorage}
  */

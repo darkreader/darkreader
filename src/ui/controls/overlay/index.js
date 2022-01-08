@@ -1,11 +1,14 @@
-import {getContext, render} from 'malevic/dom';
+// @ts-check
+import {render, component} from 'malevic/dom';
 import {isStringifying} from 'malevic/string';
 
 const DEFAULT_OVERLAY_KEY = Symbol();
-const overlayNodes = new Map<any, HTMLElement>();
-const clickListeners = new WeakMap<HTMLElement, () => void>();
+/** @type {Map<any, HTMLElement>} */
+const overlayNodes = new Map();
+/** @type {WeakMap<HTMLElement, () => void>} */
+const clickListeners = new WeakMap();
 
-function getOverlayDOMNode(key: any) {
+function getOverlayDOMNode(/** @type {any} */key) {
     if (key == null) {
         key = DEFAULT_OVERLAY_KEY;
     }
@@ -24,25 +27,20 @@ function getOverlayDOMNode(key: any) {
     return overlayNodes.get(key);
 }
 
-interface OverlayProps {
-    key?: any;
-}
+/** @typedef {{key?: any}} OverlayProps */
 
-function Overlay(props: OverlayProps) {
+/** @type {Malevic.Component<OverlayProps>} */
+function Overlay(props) {
     if (isStringifying()) {
         return null;
     }
     return getOverlayDOMNode(props.key);
 }
 
-interface OverlayPortalProps {
-    key?: any;
-    onOuterClick?: () => void;
-}
+/** @typedef {{key?: any; onOuterClick?: () => void;}} OverlayPortalProps */
 
-function Portal(props: OverlayPortalProps, ...content: Malevic.Child[]) {
-    const context = getContext();
-
+/** @type {Malevic.Component<OverlayPortalProps>} */
+const Portal = component((context, props, ...content) => {
     context.onRender(() => {
         const node = getOverlayDOMNode(props.key);
         if (props.onOuterClick) {
@@ -58,7 +56,7 @@ function Portal(props: OverlayPortalProps, ...content: Malevic.Child[]) {
         render(container, null);
     });
 
-    return context.leave() as void;
-}
+    return context.leave();
+});
 
 export default Object.assign(Overlay, {Portal});

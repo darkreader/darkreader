@@ -33,8 +33,7 @@ function compareByPath(aPath, bPath) {
 }
 
 async function getFiles() {
-    // return (await globby(['src/**/*.ts', 'src/**/*.tsx']))
-    return (await globby(['src/ui/devtools/**/*.tsx']))
+    return (await globby(['src/**/*.ts', 'src/**/*.tsx']))
         .sort(compareByPath)
         .filter((file) => !file.endsWith('.d.ts'));
 }
@@ -57,7 +56,7 @@ function convert(content) {
     lines.forEach((ln, i) => {
         const isImport = ln.startsWith('import ');
         const isTypeImport = ln.startsWith('import type ');
-        const jsxTagMatch = ln.match(/^ *<([A-Za-z0-9]+)/);
+        const jsxTagMatch = ln.match(/^ *<([A-Za-z0-9\-\.]+)/);
         if (isTypeImport) {
             const path = ln.substring(ln.indexOf(`'`) + 1, ln.lastIndexOf(`'`));
             ln
@@ -67,7 +66,7 @@ function convert(content) {
                 .map((part) => {
                     const splitIndex = part.indexOf(' as ');
                     if (splitIndex < 0) {
-                        importedTypes.push({name: part, alias: part, path})
+                        importedTypes.push({name: part, alias: part, path});
                     } else {
                         const name = part.substring(0, splitIndex);
                         const alias = part.substring(splitIndex + 5).trim();
@@ -86,7 +85,6 @@ function convert(content) {
 
     results.push('// @ts-check');
     let jsxOpened = 0;
-    let jsxAttrsListing = false;
     let jsxFirstAttrListed = false;
     lines.forEach((ln, i) => {
         const isImport = ln.startsWith('import ');
@@ -152,17 +150,18 @@ function convert(content) {
             return;
         }
 
-        const jsxTagMatch = ln.match(/^( *)<([A-Za-z0-9]+)/);
+        const jsxTagMatch = ln.match(/^( *)<([A-Za-z0-9\-\.]+)/);
         if (jsxTagMatch) {
             const spaces = jsxTagMatch[1];
             const tagName = jsxTagMatch[2];
             const isLowerCase = tagName.toLowerCase() === tagName;
-            const endTagMatch = ln.match(/<\/[A-Za-z0-9]+>$/);
+            const endTagMatch = ln.match(/<\/[A-Za-z0-9\-\.]+>$/);
             const hasSelfClosingTag = ln.match(/\/>$/) != null;
             const isOpenTagClosed = !endTagMatch && !hasSelfClosingTag && ln.match(/>$/) != null;
             const openTagEndIndex = endTagMatch ? ln.lastIndexOf('>', endTagMatch.index) : -1;
             const content = openTagEndIndex > 0 ? ln.substring(openTagEndIndex + 1, endTagMatch.index) : '';
             const attrMatches = ln.matchAll(/([A-Za-z\-]+)=((".*?")|({.*?({.*?})?}))/g);
+            const restAttrsMatches = ln.matchAll(/ {\.\.\.([A-Za-z0-9]+)}/g);
             const attrString = Array.from(attrMatches).map((m) => {
                 const attr = m[1];
                 const hasDash = attr.includes('-');
@@ -171,7 +170,9 @@ function convert(content) {
                 const propString = hasDash ? `'${attr}'` : attr;
                 const valueString = isString ? `'${value}'` : value;
                 return `${propString}: ${valueString}`;
-            }).join(', ');
+            }).concat(Array.from(restAttrsMatches).map((m) => {
+                return `...${m[1]}`;
+            })).join(', ');
             const hasAttrs = attrString !== '';
             const hasProps = hasAttrs || !isLowerCase;
 
@@ -195,10 +196,8 @@ function convert(content) {
                 res += '),';
             }
             results.push(res);
-            jsxAttrsListing = false;
             if (!hasProps && !hasSelfClosingTag && !endTagMatch) {
                 jsxFirstAttrListed = false;
-                jsxAttrsListing = true;
             }
             if (isOpenTagClosed) {
                 jsxOpened++;
@@ -219,7 +218,6 @@ function convert(content) {
                 jsxFirstAttrListed = true;
             }
             results.push(`${spaces}    ${hasDash ? `'${attr}'` : attr}: ${isString ? `'${value}'` : value},`);
-            jsxAttrsListing = true;
             return;
         }
 
@@ -227,7 +225,6 @@ function convert(content) {
         if (jsxTagEndMatch) {
             const spaces = jsxTagEndMatch[1];
             results.push(`${spaces}    },`);
-            jsxAttrsListing = false;
             jsxOpened++;
             return;
         }
@@ -238,16 +235,14 @@ function convert(content) {
             results.push(`${spaces}    },`);
             const isNextLineClosingParen = (i + 1) < lines.length && lines[i + 1].match(/^ *\)/);
             results.push(`${spaces})${isNextLineClosingParen ? '' : ','}`);
-            jsxAttrsListing = false;
             return;
         }
 
-        const jsxClosingTagMatch = ln.match(/^( *)<\/([A-Za-z0-9]+)?>$/);
+        const jsxClosingTagMatch = ln.match(/^( *)<\/([A-Za-z0-9\-\.]+)?>$/);
         if (jsxClosingTagMatch) {
             const spaces = jsxClosingTagMatch[1];
             const isNextLineClosingParen = (i + 1) < lines.length && lines[i + 1].match(/^ *\)/);
             results.push(`${spaces})${isNextLineClosingParen ? '' : ','}`);
-            jsxAttrsListing = false;
             jsxOpened--;
             return;
         }

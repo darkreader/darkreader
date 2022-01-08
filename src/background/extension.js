@@ -33,8 +33,6 @@ import {debounce} from '../utils/debounce';
 /** @typedef {import('../definitions').TabInfo} TabInfo */
 /** @typedef {import('../definitions').UserSettings} UserSettings */
 
-const __DEBUG__ = /*@replace-start:__DEBUG__*/false/*@replace-end:__DEBUG__*/;
-
 export class Extension {
     /** @type {ConfigManager} */
     config;

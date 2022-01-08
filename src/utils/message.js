@@ -1,3 +1,4 @@
+// @ts-check
 export const MessageType = {
     UI_GET_DATA: 'ui-get-data',
     UI_GET_ACTIVE_TAB_INFO: 'ui-get-active-tab-info',

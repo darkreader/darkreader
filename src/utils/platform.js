@@ -1,3 +1,4 @@
+// @ts-check
 const userAgent = typeof navigator === 'undefined' ? 'some useragent' : navigator.userAgent.toLowerCase();
 const platform = typeof navigator === 'undefined' ? 'some platform' : navigator.platform.toLowerCase();
 
@@ -35,7 +36,12 @@ export const isDefinedSelectorSupported = (() => {
     }
 })();
 
-export function compareChromeVersions($a: string, $b: string) {
+/**
+ * @param {string} $a
+ * @param {string} $b
+ * @returns {number}
+ */
+export function compareChromeVersions($a, $b) {
     const a = $a.split('.').map((x) => parseInt(x));
     const b = $b.split('.').map((x) => parseInt(x));
     for (let i = 0; i < a.length; i++) {
@@ -50,4 +56,4 @@ export const isXMLHttpRequestSupported = typeof XMLHttpRequest === 'function';
 
 export const isFetchSupported = typeof fetch === 'function';
 
-export const isMV3 = (globalThis as any).chrome && (globalThis as any).chrome.runtime && (globalThis as any).chrome.runtime.getManifest && (globalThis as any).chrome.runtime.getManifest().manifest_version === 3;
+export const isMV3 = (/** @type {any} */(globalThis)).chrome && (/** @type {any} */(globalThis)).chrome.runtime && (/** @type {any} */(globalThis)).chrome.runtime.getManifest && (/** @type {any} */(globalThis)).chrome.runtime.getManifest().manifest_version === 3;

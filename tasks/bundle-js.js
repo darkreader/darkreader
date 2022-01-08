@@ -90,7 +90,7 @@ const jsEntries = [
         watchFiles: null,
     },
     {
-        src: 'src/ui/devtools/index.tsx',
+        src: 'src/ui/devtools/index.js',
         dest: 'ui/devtools/index.js',
         reloadType: reload.UI,
         async postBuild({debug}) {
@@ -131,6 +131,7 @@ async function bundleJS(/** @type {JSEntry} */entry, {debug, watch}) {
                 removeComments: debug ? false : true,
                 sourceMap: debug ? true : false,
                 noEmitOnError: true,
+                outDir: 'build',
                 cacheDir: debug ? `${fs.realpathSync(os.tmpdir())}/darkreader_typescript_cache` : null,
             }),
             rollupPluginReplace({

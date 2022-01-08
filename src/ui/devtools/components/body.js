@@ -1,19 +1,27 @@
+// @ts-check
 import {m} from 'malevic';
-import {getContext} from 'malevic/dom';
+import {getContext, tags} from 'malevic/dom';
 import {withState, useState} from 'malevic/state';
-import {Button, MessageBox, Overlay} from '../../controls';
+import {Button, MessageBox, Overlay as OverlayLegacy} from '../../controls';
 import ThemeEngines from '../../../generators/theme-engines';
 import {DEVTOOLS_DOCS_URL} from '../../../utils/links';
-import type {ExtWrapper, TabInfo} from '../../../definitions';
 import {getCurrentThemePreset} from '../../popup/theme/utils';
 import {isFirefox} from '../../../utils/platform';
 
-type BodyProps = ExtWrapper & {tab: TabInfo};
+/** @typedef {import('../../../definitions').ExtWrapper} ExtWrapper */
+/** @typedef {import('../../../definitions').TabInfo} TabInfo */
 
-function Body({data, tab, actions}: BodyProps) {
+/** @typedef {ExtWrapper & {tab: TabInfo}} BodyProps */
+
+const {body, header, img, h1, h3, strong, a, textarea, label, div, p} = tags;
+const Overlay = (/** @type {any} */props, /** @type {Array<Malevic.Child>} */...content) => m(OverlayLegacy, props, ...content);
+
+/** @type {Malevic.Component<BodyProps>} */
+function Body({data, tab, actions}) {
     const context = getContext();
-    const {state, setState} = useState({errorText: null as string});
-    let textNode: HTMLTextAreaElement;
+    const {state, setState} = useState({errorText: /** @type {string} */(null)});
+    /** @type {HTMLTextAreaElement} */
+    let textNode;
     const previewButtonText = data.settings.previewNewDesign ? 'Switch to old design' : 'Preview new design';
     const {theme} = getCurrentThemePreset({data, tab, actions});
 
@@ -21,21 +29,22 @@ function Body({data, tab, actions}: BodyProps) {
         ? {
             header: 'Static Theme Editor',
             fixesText: data.devtools.staticThemesText,
-            apply: (text: string) => actions.applyDevStaticThemes(text),
+            apply: (/** @type {string} */text) => actions.applyDevStaticThemes(text),
             reset: () => actions.resetDevStaticThemes(),
         } : theme.engine === ThemeEngines.cssFilter || theme.engine === ThemeEngines.svgFilter ? {
             header: 'Inversion Fix Editor',
             fixesText: data.devtools.filterFixesText,
-            apply: (text: string) => actions.applyDevInversionFixes(text),
+            apply: (/** @type {string} */text) => actions.applyDevInversionFixes(text),
             reset: () => actions.resetDevInversionFixes(),
         } : {
             header: 'Dynamic Theme Editor',
             fixesText: data.devtools.dynamicFixesText,
-            apply: (text: string) => actions.applyDevDynamicThemeFixes(text),
+            apply: (/** @type {string} */text) => actions.applyDevDynamicThemeFixes(text),
             reset: () => actions.resetDevDynamicThemeFixes(),
         });
 
-    function onTextRender(node: HTMLTextAreaElement) {
+    /** @type {(node: HTMLTextAreaElement) => void} */
+    function onTextRender(node) {
         textNode = node;
         if (!state.errorText) {
             textNode.value = wrapper.fixesText;
@@ -84,11 +93,13 @@ function Body({data, tab, actions}: BodyProps) {
     }
 
     const dialog = context && context.store.isDialogVisible ? (
-        <MessageBox
-            caption="Are you sure you want to remove current changes? You cannot restore them later."
-            onOK={reset}
-            onCancel={hideDialog}
-        />
+        MessageBox(
+            {
+                caption: 'Are you sure you want to remove current changes? You cannot restore them later.',
+                onOK: reset,
+                onCancel: hideDialog,
+            },
+        )
     ) : null;
 
     function reset() {
@@ -102,36 +113,42 @@ function Body({data, tab, actions}: BodyProps) {
     }
 
     return (
-        <body>
-            <header>
-                <img id="logo" src="../assets/images/darkreader-type.svg" alt="Dark Reader" />
-                <h1 id="title">Developer Tools</h1>
-            </header>
-            <h3 id="sub-title">{wrapper.header}</h3>
-            <textarea
-                id="editor"
-                onrender={onTextRender}
-                spellcheck="false"
-                autocorrect="off"
-                autocomplete="off"
-                autocapitalize="off"
-            />
-            <label id="error-text">{state.errorText}</label>
-            <div id="buttons">
-                <Button onclick={showDialog}>
-                    Reset changes
-                    {dialog}
-                </Button>
-                <Button onclick={apply}>Apply</Button>
-                <Button class="preview-design-button" onclick={toggleDesign}>{previewButtonText}</Button>
-            </div>
-            <p id="description">
-                Read about this tool <strong><a href={DEVTOOLS_DOCS_URL} target="_blank" rel="noopener noreferrer">here</a></strong>.
-                If a <strong>popular</strong> website looks incorrect
-                e-mail to <strong>DarkReaderApp@gmail.com</strong>
-            </p>
-            <Overlay />
-        </body>
+        body(
+            header(
+                img({id: 'logo', src: '../assets/images/darkreader-type.svg', alt: 'Dark Reader'}),
+                h1({id: 'title'}, 'Developer Tools'),
+            ),
+            h3({id: 'sub-title'}, wrapper.header),
+            textarea(
+                {
+                    id: 'editor',
+                    onrender: onTextRender,
+                    spellcheck: 'false',
+                    autocorrect: 'off',
+                    autocomplete: 'off',
+                    autocapitalize: 'off',
+                },
+            ),
+            label({id: 'error-text'}, state.errorText),
+            div({id: 'buttons'},
+                Button({onclick: showDialog},
+                    'Reset changes',
+                    dialog,
+                ),
+                Button({onclick: apply}, 'Apply'),
+                Button({class: 'preview-design-button', onclick: toggleDesign}, previewButtonText),
+            ),
+            p({id: 'description'},
+                'Read about this tool ', strong(
+                    a({href: DEVTOOLS_DOCS_URL, target: '_blank', rel: 'noopener noreferrer'},
+                        'here',
+                    )
+                ), '.\n',
+                'If a ', strong('popular'), ' website looks incorrect,\n',
+                'e-mail to ', strong('DarkReaderApp@gmail.com'),
+            ),
+            Overlay(),
+        )
     );
 }
 

@@ -1,9 +1,15 @@
-export function getLocalMessage(messageName: string) {
+// @ts-check
+/**
+ * @param {string} messageName
+ * @returns {string}
+ */
+export function getLocalMessage(messageName) {
     return chrome.i18n.getMessage(messageName);
 }
 
 export function getUILanguage() {
-    let code: string;
+    /** @type {string} */
+    let code;
     if ('i18n' in chrome && 'getUILanguage' in chrome.i18n && typeof chrome.i18n.getUILanguage === 'function') {
         code = chrome.i18n.getUILanguage();
     } else {

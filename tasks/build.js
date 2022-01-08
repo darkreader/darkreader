@@ -29,7 +29,7 @@ const buildTask = [
 
 async function build({debug, watch}) {
     log.ok('BUILD');
-    try {
+    // try {
         await runTasks(debug ? standardTask : buildTask, {debug, watch});
         if (watch) {
             standardTask.forEach((task) => task.watch());
@@ -38,10 +38,10 @@ async function build({debug, watch}) {
         } else {
             log.ok('MISSION PASSED! RESPECT +');
         }
-    } catch (err) {
-        log.error(`MISSION FAILED!`);
-        process.exit(13);
-    }
+    // } catch (err) {
+    //     log.error(`MISSION FAILED!`);
+    //     process.exit(13);
+    // }
 }
 
 async function api() {

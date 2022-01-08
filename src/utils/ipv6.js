@@ -1,4 +1,9 @@
-export function isIPV6(url: string) {
+// @ts-check
+/**
+ * @param {string} url
+ * @returns {boolean}
+ */
+export function isIPV6(url) {
     const openingBracketIndex = url.indexOf('[');
     if (openingBracketIndex < 0) {
         return false;
@@ -12,7 +17,12 @@ export function isIPV6(url: string) {
 
 const ipV6HostRegex = /\[.*?\](\:\d+)?/;
 
-export function compareIPV6(firstURL: string, secondURL: string) {
+/**
+ * @param {string} firstURL
+ * @param {string} secondURL
+ * @returns {boolean}
+ */
+export function compareIPV6(firstURL, secondURL) {
     const firstHost = firstURL.match(ipV6HostRegex)[0];
     const secondHost = secondURL.match(ipV6HostRegex)[0];
     return firstHost === secondHost;

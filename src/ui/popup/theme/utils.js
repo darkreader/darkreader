@@ -1,8 +1,14 @@
-import type {Theme} from '../../../definitions';
+// @ts-check
 import {isURLInList} from '../../../utils/url';
-import type {ViewProps} from '../types';
 
-export function getCurrentThemePreset(props: ViewProps) {
+/** @typedef {import('../types').ViewProps} ViewProps */
+/** @typedef {import('../../../definitions').Theme} Theme */
+
+/**
+ * @param {ViewProps} props
+ * @returns {{theme: Theme; change: (theme: Partial<Theme>) => void}}
+ */
+export function getCurrentThemePreset(props) {
     const custom = props.data.settings.customThemes.find(
         ({url}) => isURLInList(props.tab.url, url)
     );
@@ -15,7 +21,10 @@ export function getCurrentThemePreset(props: ViewProps) {
             preset.theme :
             props.data.settings.theme;
 
-    function setTheme(config: Partial<Theme>) {
+    /**
+     * @param {Partial<Theme>} config 
+     */
+    function setTheme(config) {
         if (custom) {
             custom.theme = {...custom.theme, ...config};
             props.actions.changeSettings({

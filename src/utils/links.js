@@ -1,3 +1,4 @@
+// @ts-check
 import {getUILanguage} from './locales';
 
 export const BLOG_URL = 'https://darkreader.org/blog/';
@@ -30,6 +31,10 @@ export function getHelpURL() {
     return `https://darkreader.org/help/${matchLocale}/`;
 }
 
-export function getBlogPostURL(postId: string) {
+/**
+ * @param {string} postId
+ * @returns {string}
+ */
+export function getBlogPostURL(postId) {
     return `${BLOG_URL}${postId}/`;
 }

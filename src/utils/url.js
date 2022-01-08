@@ -1,12 +1,16 @@
-import type {UserSettings} from '../definitions';
+// @ts-check
 import {isIPV6, compareIPV6} from './ipv6';
 import {isThunderbird} from './platform';
 
-let anchor: HTMLAnchorElement;
+/** @typedef {import('../definitions').UserSettings} UserSettings */
 
-export const parsedURLCache = new Map<string, URL>();
+/** @type {HTMLAnchorElement} */
+let anchor;
 
-function fixBaseURL($url: string) {
+/** @type {Map<string, URL>} */
+export const parsedURLCache = new Map();
+
+function fixBaseURL(/** @type {string} */$url) {
     if (!anchor) {
         anchor = document.createElement('a');
     }
@@ -14,8 +18,13 @@ function fixBaseURL($url: string) {
     return anchor.href;
 }
 
-export function parseURL($url: string, $base: string = null) {
-    const key = `${$url}${$base ? `;${ $base}` : ''}`;
+/**
+ * @param {string} $url
+ * @param {string} [$base]
+ * @returns {URL}
+ */
+export function parseURL($url, $base = null) {
+    const key = `${$url}${$base ? `;${$base}` : ''}`;
     if (parsedURLCache.has(key)) {
         return parsedURLCache.get(key);
     }
@@ -29,7 +38,12 @@ export function parseURL($url: string, $base: string = null) {
     return parsedURL;
 }
 
-export function getAbsoluteURL($base: string, $relative: string) {
+/**
+ * @param {string} $base
+ * @param {string} $relative
+ * @returns {string}
+ */
+export function getAbsoluteURL($base, $relative) {
     if ($relative.match(/^data\\?\:/)) {
         return $relative;
     }
@@ -48,7 +62,11 @@ export function getAbsoluteURL($base: string, $relative: string) {
 // But https://duck.com/styles/ext.css would return false on https://duck.com/
 // Visa versa https://duck.com/ext.css should return fasle on https://duck.com/search/
 // We're checking if any relative value within ext.css could potentially not be on the same path.
-export function isRelativeHrefOnAbsolutePath(href: string): boolean {
+/**
+ * @param {string} href
+ * @returns {boolean}
+ */
+export function isRelativeHrefOnAbsolutePath(href) {
     if (href.startsWith('data:')) {
         return true;
     }
@@ -68,7 +86,11 @@ export function isRelativeHrefOnAbsolutePath(href: string): boolean {
     return url.pathname === location.pathname;
 }
 
-export function getURLHostOrProtocol($url: string) {
+/**
+ * @param {string} $url
+ * @returns {string}
+ */
+export function getURLHostOrProtocol($url) {
     const url = new URL($url);
     if (url.host) {
         return url.host;
@@ -78,16 +100,22 @@ export function getURLHostOrProtocol($url: string) {
     return url.protocol;
 }
 
-export function compareURLPatterns(a: string, b: string) {
+/**
+ * @param {string} a
+ * @param {string} b
+ * @returns {number}
+ */
+export function compareURLPatterns(a, b) {
     return a.localeCompare(b);
 }
 
 /**
  * Determines whether URL has a match in URL template list.
- * @param url Site URL.
- * @paramlist List to search into.
+ * @param {string} url Site URL.
+ * @param {string[]} list List to search into.
+ * @returns {boolean}
  */
-export function isURLInList(url: string, list: string[]) {
+export function isURLInList(url, list) {
     for (let i = 0; i < list.length; i++) {
         if (isURLMatched(url, list[i])) {
             return true;
@@ -98,10 +126,11 @@ export function isURLInList(url: string, list: string[]) {
 
 /**
  * Determines whether URL matches the template.
- * @param url URL.
- * @param urlTemplate URL template ("google.*", "youtube.com" etc).
+ * @param {string} url URL.
+ * @param {string} urlTemplate URL template ("google.*", "youtube.com" etc).
+ * @returns {boolean}
  */
-export function isURLMatched(url: string, urlTemplate: string): boolean {
+export function isURLMatched(url, urlTemplate) {
     const isFirstIPV6 = isIPV6(url);
     const isSecondIPV6 = isIPV6(urlTemplate);
     if (isFirstIPV6 && isSecondIPV6) {
@@ -113,7 +142,11 @@ export function isURLMatched(url: string, urlTemplate: string): boolean {
     return false;
 }
 
-function createUrlRegex(urlTemplate: string): RegExp {
+/**
+ * @param {string} urlTemplate
+ * @returns {RegExp}
+ */
+function createUrlRegex(urlTemplate) {
     urlTemplate = urlTemplate.trim();
     const exactBeginning = (urlTemplate[0] === '^');
     const exactEnding = (urlTemplate[urlTemplate.length - 1] === '$');
@@ -126,9 +159,12 @@ function createUrlRegex(urlTemplate: string): RegExp {
         .replace(/\/$/, '') // Remove last slash
     );
 
-    let slashIndex: number;
-    let beforeSlash: string;
-    let afterSlash: string;
+    /** @type {number} */
+    let slashIndex;
+    /** @type {string} */
+    let beforeSlash;
+    /** @type {string} */
+    let afterSlash;
     if ((slashIndex = urlTemplate.indexOf('/')) >= 0) {
         beforeSlash = urlTemplate.substring(0, slashIndex); // google.*
         afterSlash = urlTemplate.replace(/\$/g, '').substring(slashIndex); // /login/abc
@@ -177,7 +213,11 @@ function createUrlRegex(urlTemplate: string): RegExp {
     return new RegExp(result, 'i');
 }
 
-export function isPDF(url: string) {
+/**
+ * @param {string} url
+ * @returns {boolean}
+ */
+export function isPDF(url) {
     if (url.includes('.pdf')) {
         if (url.includes('?')) {
             url = url.substring(0, url.lastIndexOf('?'));
@@ -206,7 +246,13 @@ export function isPDF(url: string) {
     return false;
 }
 
-export function isURLEnabled(url: string, userSettings: UserSettings, {isProtected, isInDarkList}: {isProtected: boolean; isInDarkList: boolean}) {
+/**
+ * @param {string} url
+ * @param {UserSettings} userSettings
+ * @param {{isProtected: boolean; isInDarkList: boolean}} urlInfo
+ * @returns {boolean}
+ */
+export function isURLEnabled(url, userSettings, {isProtected, isInDarkList}) {
     if (isProtected && !userSettings.enableForProtectedPages) {
         return false;
     }
@@ -231,6 +277,10 @@ export function isURLEnabled(url: string, userSettings: UserSettings, {isProtect
     return (!isInDarkList && !isURLInUserList);
 }
 
-export function isFullyQualifiedDomain(candidate: string) {
+/**
+ * @param {string} candidate
+ * @returns {boolean}
+ */
+export function isFullyQualifiedDomain(candidate) {
     return /^[a-z0-9.-]+$/.test(candidate);
 }

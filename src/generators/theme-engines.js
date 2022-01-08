@@ -1,3 +1,4 @@
+// @ts-check
 export default {
     cssFilter: 'cssFilter',
     svgFilter: 'svgFilter',

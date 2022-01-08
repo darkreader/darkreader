@@ -2,7 +2,9 @@
 import {m} from 'malevic';
 import {getContext, tags} from 'malevic/dom';
 import {withState, useState} from 'malevic/state';
-import {Button, MessageBox, Overlay as OverlayLegacy} from '../../controls';
+import Button from '../../controls/button';
+import MessageBox from '../../controls/message-box';
+import OverlayLegacy from '../../controls/overlay';
 import ThemeEngines from '../../../generators/theme-engines';
 import {DEVTOOLS_DOCS_URL} from '../../../utils/links';
 import {getCurrentThemePreset} from '../../popup/theme/utils';

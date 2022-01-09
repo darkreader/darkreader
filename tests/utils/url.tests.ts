@@ -254,7 +254,7 @@ test('Get URL host or protocol', () => {
     expect(getURLHostOrProtocol('about:blank')).toBe('about:');
     expect(getURLHostOrProtocol('http://user:pass@www.example.org')).toBe('www.example.org');
     expect(getURLHostOrProtocol('data:text/html,<html>Hello</html>')).toBe('data:');
-    expect(getURLHostOrProtocol('file:///Users/index.html')).toBe('file:');
+    expect(getURLHostOrProtocol('file:///Users/index.html')).toBe('/Users/index.html');
 });
 
 test('Absolute URL', () => {

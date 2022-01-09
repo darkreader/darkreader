@@ -1,5 +1,4 @@
-// @ts-check
-const fs = require('fs-extra');
+const fs = require('fs').promises;
 const JestNodeEnvironment = require('jest-environment-node');
 const path = require('path');
 const puppeteer = require('puppeteer-core');

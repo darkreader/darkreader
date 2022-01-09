@@ -66,7 +66,7 @@ class Task {
 
 /**
  * @param {string} name
- * @param {(options: TaskOptions) => void | Promise<void>} run
+ * @param {(options: TaskOptions) => void | Promise<any>} run
  */
 function createTask(name, run) {
     return new Task(name, run);

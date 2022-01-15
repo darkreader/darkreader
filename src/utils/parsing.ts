@@ -50,7 +50,6 @@ export function parseGradient(value: string): parsedGradient[] {
         });
 
         if (!typeGradient) {
-            startIndex = index + conicGradientLength;
             break;
         }
 

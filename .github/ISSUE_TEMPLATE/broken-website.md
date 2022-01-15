@@ -27,8 +27,10 @@ assignees: ''
 Here is an example:
 - Go to example.com.
 - Hover over the example button.
-- Notice that when hovering over the example button, it does not change color.
 -->
+
+## Problematic Observation
+<!-- Provide a clear and concise description of the malfunction. -->
 
 ## Screenshots
 <!-- If applicable, add screenshots to help explain this website issue. -->

@@ -111,7 +111,7 @@ for specific details. Please follow the next steps to add a new color scheme:
 - When you see a **green checkmark**, everything is fine.
 - Dark Reader developer will **review** and merge your changes, making them available to everyone.
 
-## Dynamic Variables
+## Dynamic variables
 
 When making a fix for background or text colors,
 instead of using hardcoded colors (like `#fff`, `#000`, `black` or `white`),

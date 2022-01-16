@@ -24,7 +24,7 @@ If a website is **already dark** and meets these requirements:
 Then, you can add it to this file *(please preserve alphabetic order)*:  
 - **[dark-sites.config](https://github.com/darkreader/darkreader/blob/master/src/config/dark-sites.config)**
 
-## Fix Incorrect Inversions
+## Fix incorrect inversions
 
 If certain **parts** of a web page are **incorrectly inverted or styled**,
 you can fix this by specifying the appropriate [**CSS selectors**](https://developer.mozilla.org/docs/Web/CSS/CSS_Selectors)

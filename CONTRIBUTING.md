@@ -26,7 +26,7 @@ Then, you can add it to this file *(please preserve alphabetic order)*:
 
 ## Fix incorrect inversions
 
-If certain **parts** of a web page are **incorrectly inverted or styled**,
+If certain **elements** of a web page are **incorrectly inverted or styled**,
 you can fix this by specifying the appropriate [**CSS selectors**](https://developer.mozilla.org/docs/Web/CSS/CSS_Selectors)
 in the appropriate file *(please preserve alphabetic order by URL, and preserve code style)*:  
 - Fixes for Dynamic Theme mode: **[dynamic-theme-fixes.config](https://github.com/darkreader/darkreader/blob/master/src/config/dynamic-theme-fixes.config)**  

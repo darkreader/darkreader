@@ -74,9 +74,9 @@ export class Extension {
 
         if (chrome.permissions.onRemoved) {
             chrome.permissions.onRemoved.addListener((permissions) => {
-            // As far as we know, this code is never actually run because there
-            // is no browser UI for removing 'contextMenus' permission.
-            // This code exists for future-proofing in case browsers ever add such UI.
+                // As far as we know, this code is never actually run because there
+                // is no browser UI for removing 'contextMenus' permission.
+                // This code exists for future-proofing in case browsers ever add such UI.
                 if (!permissions.permissions.includes('contextMenus')) {
                     this.registeredContextMenus = false;
                 }
@@ -568,6 +568,8 @@ export class Extension {
             const custom = this.user.settings.customThemes.find(({url: urlList}) => isURLInList(url, urlList));
             const preset = custom ? null : this.user.settings.presets.find(({urls}) => isURLInList(url, urls));
             const theme = custom ? custom.theme : preset ? preset.theme : this.user.settings.theme;
+            const isIFrame = frameURL != null;
+            const detectDarkTheme = !isIFrame && this.user.settings.detectDarkTheme;
 
             logInfo(`Creating CSS for url: ${url}`);
             logInfo(`Custom theme ${custom ? 'was found' : 'was not found'}, Preset theme ${preset ? 'was found' : 'was not found'}
@@ -576,14 +578,20 @@ export class Extension {
                 case ThemeEngines.cssFilter: {
                     return {
                         type: MessageType.BG_ADD_CSS_FILTER,
-                        data: createCSSFilterStylesheet(theme, url, frameURL, this.config.INVERSION_FIXES_RAW, this.config.INVERSION_FIXES_INDEX),
+                        data: {
+                            css: createCSSFilterStylesheet(theme, url, frameURL, this.config.INVERSION_FIXES_RAW, this.config.INVERSION_FIXES_INDEX),
+                            detectDarkTheme,
+                        },
                     };
                 }
                 case ThemeEngines.svgFilter: {
                     if (isFirefox) {
                         return {
                             type: MessageType.BG_ADD_CSS_FILTER,
-                            data: createSVGFilterStylesheet(theme, url, frameURL, this.config.INVERSION_FIXES_RAW, this.config.INVERSION_FIXES_INDEX),
+                            data: {
+                                css: createSVGFilterStylesheet(theme, url, frameURL, this.config.INVERSION_FIXES_RAW, this.config.INVERSION_FIXES_INDEX),
+                                detectDarkTheme,
+                            },
                         };
                     }
                     return {
@@ -592,25 +600,31 @@ export class Extension {
                             css: createSVGFilterStylesheet(theme, url, frameURL, this.config.INVERSION_FIXES_RAW, this.config.INVERSION_FIXES_INDEX),
                             svgMatrix: getSVGFilterMatrixValue(theme),
                             svgReverseMatrix: getSVGReverseFilterMatrixValue(),
+                            detectDarkTheme,
                         },
                     };
                 }
                 case ThemeEngines.staticTheme: {
                     return {
                         type: MessageType.BG_ADD_STATIC_THEME,
-                        data: theme.stylesheet && theme.stylesheet.trim() ?
-                            theme.stylesheet :
-                            createStaticStylesheet(theme, url, frameURL, this.config.STATIC_THEMES_RAW, this.config.STATIC_THEMES_INDEX),
+                        data: {
+                            css: theme.stylesheet && theme.stylesheet.trim() ?
+                                theme.stylesheet :
+                                createStaticStylesheet(theme, url, frameURL, this.config.STATIC_THEMES_RAW, this.config.STATIC_THEMES_INDEX),
+                            detectDarkTheme: this.user.settings.detectDarkTheme,
+                        },
                     };
                 }
                 case ThemeEngines.dynamicTheme: {
-                    const filter = {...theme};
-                    delete filter.engine;
                     const fixes = getDynamicThemeFixesFor(url, frameURL, this.config.DYNAMIC_THEME_FIXES_RAW, this.config.DYNAMIC_THEME_FIXES_INDEX, this.user.settings.enableForPDF);
-                    const isIFrame = frameURL != null;
                     return {
                         type: MessageType.BG_ADD_DYNAMIC_THEME,
-                        data: {filter, fixes, isIFrame},
+                        data: {
+                            theme,
+                            fixes,
+                            isIFrame,
+                            detectDarkTheme,
+                        },
                     };
                 }
                 default: {

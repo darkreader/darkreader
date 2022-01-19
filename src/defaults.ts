@@ -77,4 +77,5 @@ export const DEFAULT_SETTINGS: UserSettings = {
     enableForPDF: true,
     enableForProtectedPages: false,
     enableContextMenus: false,
+    detectDarkTheme: false,
 };

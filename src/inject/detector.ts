@@ -14,7 +14,7 @@ function hasBuiltInDarkTheme() {
     return darkThemeDetected;
 }
 
-function runCheck(callback: (hasDarkTheme: boolean) => void, place: string) {
+function runCheck(callback: (hasDarkTheme: boolean) => void) {
     const darkThemeDetected = hasBuiltInDarkTheme();
     callback(darkThemeDetected);
 }
@@ -37,25 +37,26 @@ let readyStateListener: () => void;
 export function runDarkThemeDetector(callback: (hasDarkTheme: boolean) => void) {
     stopDarkThemeDetector();
     if (document.body && hasSomeStyle()) {
-        runCheck(callback, 'start');
-    } else {
-        observer = new MutationObserver(() => {
-            if (document.body && hasSomeStyle()) {
-                stopDarkThemeDetector();
-                runCheck(callback, 'observer');
-            }
-        });
-        observer.observe(document.documentElement, {childList: true});
+        runCheck(callback);
+        return;
+    }
 
-        if (document.readyState !== 'complete') {
-            readyStateListener = () => {
-                if (document.readyState === 'complete') {
-                    stopDarkThemeDetector();
-                    runCheck(callback, 'ready');
-                }
-            };
-            document.addEventListener('readystatechange', readyStateListener);
+    observer = new MutationObserver(() => {
+        if (document.body && hasSomeStyle()) {
+            stopDarkThemeDetector();
+            runCheck(callback);
         }
+    });
+    observer.observe(document.documentElement, {childList: true});
+
+    if (document.readyState !== 'complete') {
+        readyStateListener = () => {
+            if (document.readyState === 'complete') {
+                stopDarkThemeDetector();
+                runCheck(callback);
+            }
+        };
+        document.addEventListener('readystatechange', readyStateListener);
     }
 }
 

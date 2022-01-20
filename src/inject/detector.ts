@@ -14,9 +14,21 @@ function hasBuiltInDarkTheme() {
     return darkThemeDetected;
 }
 
-function runCheck(callback: (hasDarkTheme: boolean) => void) {
+function runCheck(callback: (hasDarkTheme: boolean) => void, place: string) {
     const darkThemeDetected = hasBuiltInDarkTheme();
     callback(darkThemeDetected);
+}
+
+function hasSomeStyle() {
+    if (document.documentElement.style.backgroundColor || (document.body && document.body.style.backgroundColor)) {
+        return true;
+    }
+    for (const style of document.styleSheets) {
+        if (style && style.ownerNode && !(style.ownerNode as HTMLElement).classList.contains('darkreader')) {
+            return true;
+        }
+    }
+    return false;
 }
 
 let observer: MutationObserver;
@@ -24,25 +36,26 @@ let readyStateListener: () => void;
 
 export function runDarkThemeDetector(callback: (hasDarkTheme: boolean) => void) {
     stopDarkThemeDetector();
-    if (document.body) {
-        runCheck(callback);
+    if (document.body && hasSomeStyle()) {
+        runCheck(callback, 'start');
     } else {
-        const observer = new MutationObserver(() => {
-            if (document.body) {
+        observer = new MutationObserver(() => {
+            if (document.body && hasSomeStyle()) {
                 stopDarkThemeDetector();
-                runCheck(callback);
+                runCheck(callback, 'observer');
             }
         });
         observer.observe(document.documentElement, {childList: true});
-    }
-    if (document.readyState !== 'complete') {
-        readyStateListener = () => {
-            if (document.readyState === 'complete') {
-                stopDarkThemeDetector();
-                runCheck(callback);
-            }
-        };
-        document.addEventListener('readystatechange', readyStateListener);
+
+        if (document.readyState !== 'complete') {
+            readyStateListener = () => {
+                if (document.readyState === 'complete') {
+                    stopDarkThemeDetector();
+                    runCheck(callback, 'ready');
+                }
+            };
+            document.addEventListener('readystatechange', readyStateListener);
+        }
     }
 }
 

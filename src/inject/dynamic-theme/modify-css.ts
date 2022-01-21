@@ -10,7 +10,7 @@ import {getImageDetails, getFilteredImageDataURL, cleanImageProcessingCache} fro
 import type {CSSVariableModifier, VariablesStore} from './variables';
 import {logWarn, logInfo} from '../../utils/log';
 import type {FilterConfig, Theme} from '../../definitions';
-import {isFirefox} from '../../utils/platform';
+import {isFirefox, isCSSColorSchemePropSupported} from '../../utils/platform';
 import type {parsedGradient} from '../../utils/parsing';
 import {parseGradient} from '../../utils/parsing';
 
@@ -88,6 +88,11 @@ export function getModifiedUserAgentStyle(theme: Theme, isIFrame: boolean, style
     if (!isIFrame) {
         lines.push('html {');
         lines.push(`    background-color: ${modifyBackgroundColor({r: 255, g: 255, b: 255}, theme)} !important;`);
+        lines.push('}');
+    }
+    if (isCSSColorSchemePropSupported) {
+        lines.push('html {');
+        lines.push(`    color-scheme: ${theme.mode === 1 ? 'dark' : 'dark light'} !important;`);
         lines.push('}');
     }
     lines.push(`${isIFrame ? '' : 'html, body, '}${styleSystemControls ? 'input, textarea, select, button' : ''} {`);

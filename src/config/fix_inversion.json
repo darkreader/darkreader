@@ -896,6 +896,10 @@
             "noinvert": [
                 ".mwe-math-fallback-image-inline",
                 ".mwe-math-fallback-image-display"
+            ],
+            "rules": [
+                ".image, .mw-mmv-image { filter: invert(1); }",
+                ".mw-mmv-image { background-color: black; }"
             ]
         },
         {

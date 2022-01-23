@@ -48,7 +48,7 @@ test('Dark Sites list', async () => {
     expect(sites.every(isURLPatternValid)).toBe(true);
 
     // sites are sorted alphabetically
-    expect(sites).toEqual(sites.slice().sort(compareURLPatterns));
+    expect(sites.slice().sort(compareURLPatterns)).toEqual(sites);
 
     // sites are properly formatted
     expect(throwIfDifferent(file, formatArray(sites), 'Dark Sites list format error')).not.toThrow();

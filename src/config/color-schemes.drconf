@@ -18,6 +18,18 @@ text: #e8e6e3
 
 ================================
 
+Gruvbox
+
+DARK
+background: #282828
+text: #8ec07c
+
+LIGHT
+background: #fbf1c7
+text: #427b58
+
+================================
+
 Nord
 
 DARK
@@ -40,14 +52,3 @@ LIGHT
 background: #fdf6e3
 text: #586e75
 
-================================
-
-Gruvbox
-
-DARK
-background: #282828
-text: #8ec07c
-
-LIGHT
-background: #fbf1c7
-text: #427b58

@@ -1,22 +1,86 @@
-import type {FilterConfig} from '../definitions';
+import type {FilterConfigFontFields} from '../definitions';
 
-export function createTextStyle(config: FilterConfig): string {
-    const lines: string[] = [];
-    // Don't target pre elements as they are preformatted element's e.g. code blocks
-    // Exclude font libraries to preserve icons
-    lines.push('*:not(pre, pre *, code, .far, .fa, .glyphicon, [class*="vjs-"], .fab, .fa-github, .fas, .material-icons, .icofont, .typcn, mu, [class*="mu-"], .glyphicon, .icon) {');
+// Selectors excluded from text styles ("Font name" and "Text stroke")
+// include the following types of elements:
+
+// Elements that display monospaced text
+const monospaceSelectors = [
+    // HTML code blocks
+    'pre',
+    'code',
+
+    // CodeMirror editor (used by GitHub)
+    // https://codemirror.net/
+    '.CodeMirror',
+    '.blob-code', // GitHub integration
+
+    // Monaco Editor (used by VS Code, Gitlab)
+    // https://github.com/microsoft/monaco-editor
+    '.monaco-editor',
+
+    // Docusaurus code blocks
+    // https://docusaurus.io/
+    '.markdown [class*="codeBlock"]',
+];
+
+// Elements that use `font-family` to display icons
+const iconSelectors = [
+    // Font Awesome icons
+    // https://fontawesome.com/
+    '[class*="fa-"]',
+    '.fa', '.fas', '.far', '.fal', '.fad', '.fab',
+    '.icon',
+
+    // GLYPHICONS
+    // https://www.glyphicons.com/
+    '.glyphicon',
+
+    // Video.js Icons
+    // https://videojs.github.io/font/
+    '[class*="vjs-"]',
+
+    // IcoFont
+    // https://icofont.com/
+    '.icofont',
+
+    // Typicons
+    // https://www.s-ings.com/typicons/
+    '.typcn',
+
+    // Microns
+    // https://www.s-ings.com/projects/microns-icon-font/
+    'mu', '[class*="mu-"]',
+
+    // Material Icons
+    // https://material.io/icons
+    '.material-icons',
+];
+
+export function createTextStyle(config: FilterConfigFontFields): string {
+    const props: string[] = buildCSSProperties(config);
+    if (props.length === 0) {
+        return '';
+    }
+
+    const monospaceSelectorList = monospaceSelectors.map((s) => `${s}, ${s} *`).join(', ');
+    const iconSelectorList = iconSelectors.join(', ');
+    const textStyleSelector = `body:not(${monospaceSelectorList}, ${iconSelectorList})`;
+    const propsBlock = props.join('\n');
+
+    return `${textStyleSelector} { ${propsBlock} }`;
+}
+
+function buildCSSProperties(config: FilterConfigFontFields): string[] {
+    const props: string[] = [];
 
     if (config.useFont && config.fontFamily) {
-        // TODO: Validate...
-        lines.push(`  font-family: ${config.fontFamily} !important;`);
+        props.push(`font-family: ${config.fontFamily} !important;`);
     }
 
     if (config.textStroke > 0) {
-        lines.push(`  -webkit-text-stroke: ${config.textStroke}px !important;`);
-        lines.push(`  text-stroke: ${config.textStroke}px !important;`);
+        props.push(`-webkit-text-stroke-width: ${config.textStroke}px !important;`);
+        props.push(`stroke-width: ${config.textStroke}px !important;`);
     }
 
-    lines.push('}');
-
-    return lines.join('\n');
+    return props;
 }

@@ -65,6 +65,8 @@ export interface Theme {
     darkColorScheme: string;
 }
 
+export type FilterConfigFontFields = Pick<FilterConfig, 'useFont' | 'fontFamily' | 'textStroke'>;
+
 export type FilterConfig = Theme;
 
 export interface CustomSiteConfig {

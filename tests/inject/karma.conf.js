@@ -45,6 +45,7 @@ module.exports = (config) => {
                 sourcemap: 'inline',
             },
         },
+        client: {jasmine: {random: !config.debug}},
         reporters: ['progress', 'coverage'],
         coverageReporter: {
             type: 'html',
@@ -52,12 +53,12 @@ module.exports = (config) => {
         },
         port: 9876,
         colors: true,
-        logLevel: config.LOG_INFO,
+        logLevel: config.debug ? config.LOG_DEBUG : config.LOG_INFO,
         autoWatch: true,
         browsers: config.debug ?
             ['Chrome'] :
             ['Chrome', 'Firefox', process.platform === 'darwin' ? 'Safari' : null].filter(Boolean),
-        singleRun: config.debug ? false : true,
-        concurrency: config.debug ? Infinity : 1,
+        singleRun: !config.debug,
+        concurrency: config.debug ? 1 : Infinity,
     });
 };

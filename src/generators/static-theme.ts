@@ -71,6 +71,7 @@ export default function createStaticStylesheet(config: FilterConfig, url: string
 
     const commonTheme = getCommonTheme(staticThemes, staticThemesIndex);
     const siteTheme = getThemeFor(frameURL || url, staticThemes, staticThemesIndex);
+    const textStyle = createTextStyle(config);
 
     const lines: string[] = [];
 
@@ -84,9 +85,9 @@ export default function createStaticStylesheet(config: FilterConfig, url: string
         lines.push(...ruleGenerators.map((gen) => gen(siteTheme, theme)));
     }
 
-    if (config.useFont || config.textStroke > 0) {
+    if (textStyle) {
         lines.push('/* Font */');
-        lines.push(createTextStyle(config));
+        lines.push(textStyle);
     }
 
     return lines

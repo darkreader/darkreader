@@ -1,5 +1,10 @@
 import {forEach, push} from '../../utils/array';
-import {iterateShadowHosts, createOptimizedTreeObserver, isReadyStateComplete, addReadyStateCompleteListener} from '../utils/dom';
+import {
+    addReadyStateCompleteListener,
+    createOptimizedTreeObserver,
+    isReadyStateComplete,
+    iterateShadowHosts
+} from '../utils/dom';
 import {iterateCSSDeclarations} from './css-rules';
 import {getModifiableCSSDeclaration} from './modify-css';
 import type {CSSVariableModifier} from './variables';
@@ -70,7 +75,7 @@ const overrides: Overrides = {
     },
     'stroke': {
         customProp: '--darkreader-inline-stroke',
-        cssProp: 'stroke',
+        cssProp: 'stroke-color',
         dataAttr: 'data-darkreader-inline-stroke',
     },
     'outline-color': {
@@ -89,7 +94,7 @@ const overridesList = Object.values(overrides);
 const normalizedPropList: { [key: string]: string } = {};
 overridesList.forEach(({cssProp, customProp}) => normalizedPropList[customProp] = cssProp);
 
-const INLINE_STYLE_ATTRS = ['style', 'fill', 'stop-color', 'stroke', 'bgcolor', 'color'];
+const INLINE_STYLE_ATTRS = ['style', 'fill', 'stop-color', 'stroke', 'stroke-color', 'bgcolor', 'color'];
 export const INLINE_STYLE_SELECTOR = INLINE_STYLE_ATTRS.map((attr) => `[${attr}]`).join(', ');
 
 export function getInlineOverrideStyle() {
@@ -341,10 +346,34 @@ export function overrideInlineStyle(element: HTMLElement, theme: FilterConfig, i
             setCustomProp('stop-color', 'background-color', element.getAttribute('stop-color'));
         }
     }
-    if (element.hasAttribute('stroke')) {
-        const value = element.getAttribute('stroke');
-        setCustomProp('stroke', element instanceof SVGLineElement || element instanceof SVGTextElement ? 'border-color' : 'color', value);
+
+    // Override stroke color
+    // The stroke color is either found in the `stroke-color` or within the `stroke` property.
+    // The stroke width, reflected in either the `stroke` or `stroke-width` properties,
+    // is not overridden here, since it's handled by the static text styles code.
+    let strokeColor: string = null;
+    if (element.hasAttribute('stroke-color')) {
+        strokeColor = element.getAttribute('stroke-color');
+    } else if (element.hasAttribute('stroke')) {
+        // The format of the `stroke` property is either "[SIZE] [COLOR]" or one of: "inherit", "initial", "unset".
+        // Browsers will accept single "[SIZE]" or "[COLOR]" values as well (untested),
+        // but instead of adding the parsing logic necessary to tell the difference,
+        // we are falling back on the previous functionality, which is to treat it as a color.
+        const strokeValue = element.getAttribute('stroke');
+        if (['inherit', 'initial', 'unset'].indexOf(strokeValue) === -1) {
+            strokeColor = strokeValue.split(' ').pop();
+        }
     }
+    if (strokeColor) {
+        let strokeColorModifier: string;
+        if (element instanceof SVGLineElement || element instanceof SVGTextElement) {
+            strokeColorModifier = 'border-color';
+        } else {
+            strokeColorModifier = 'color';
+        }
+        setCustomProp('stroke', strokeColorModifier, strokeColor);
+    }
+
     element.style && iterateCSSDeclarations(element.style, (property, value) => {
         // Temporaty ignore background images
         // due to possible performance issues

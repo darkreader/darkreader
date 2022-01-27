@@ -62,7 +62,7 @@ export function getModifiableCSSDeclaration(
     } else if (
         (property.includes('color') && property !== '-webkit-print-color-adjust') ||
         property === 'fill' ||
-        property === 'stroke' ||
+        property === 'stroke-color' ||
         property === 'stop-color'
     ) {
         const modifier = getColorModifier(property, value);
@@ -218,6 +218,8 @@ export function getModifiedFallbackStyle(filter: FilterConfig, {strict}: {strict
     lines.push(`    background-color: ${modifyBackgroundColor({r: 255, g: 255, b: 255}, filter)} !important;`);
     lines.push(`    border-color: ${modifyBorderColor({r: 64, g: 64, b: 64}, filter)} !important;`);
     lines.push(`    color: ${modifyForegroundColor({r: 0, g: 0, b: 0}, filter)} !important;`);
+    // lines.push(`    stroke-width: 0;`);
+    // lines.push(`    -webkit-text-stroke-width: 0;`);
     lines.push('}');
     return lines.join('\n');
 }

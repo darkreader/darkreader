@@ -35,7 +35,7 @@ export default function createCSSFilterStyleSheet(config: FilterConfig, url: str
 
 export function cssFilterStyleSheetTemplate(filterValue: string, reverseFilterValue: string, config: FilterConfig, url: string, frameURL: string, fixes: string, index: SitePropsIndex<InversionFix>) {
     const fix = getInversionFixesFor(frameURL || url, fixes, index);
-
+    const textStyle = createTextStyle(config);
     const lines: string[] = [];
 
     lines.push('@media screen {');
@@ -54,11 +54,11 @@ export function cssFilterStyleSheetTemplate(filterValue: string, reverseFilterVa
         lines.push(createReverseRule(reverseFilterValue, fix));
     }
 
-    if (config.useFont || config.textStroke > 0) {
-        // Add text rule
+    if (textStyle) {
+        // Add text style rule
         lines.push('');
         lines.push('/* Font */');
-        lines.push(createTextStyle(config));
+        lines.push(textStyle);
     }
 
     // Fix bad font hinting after inversion

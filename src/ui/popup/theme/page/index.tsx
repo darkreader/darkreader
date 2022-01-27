@@ -120,7 +120,7 @@ function FontGroup({theme, fonts, change}: FontGroupsProps) {
             />
             <TextStroke
                 value={theme.textStroke}
-                onChange={(textStroke) => change({textStroke})}
+                onChange={(textStroke) => change({textStroke: textStroke})}
             />
             <StyleSystemControls
                 value={theme.styleSystemControls}

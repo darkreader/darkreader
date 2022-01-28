@@ -131,7 +131,7 @@ export async function writeSyncStorage<T extends {[key: string]: any}>(values: T
                 return;
             }
             resolve();
-            setTimeout(() => mutexStorageWriting.unlock(), 500);
+            setTimeout(() => mutexStorageWriting.unlock(), 5000);
         });
     });
 }
@@ -141,7 +141,7 @@ export async function writeLocalStorage<T extends {[key: string]: any}>(values: 
         await mutexStorageWriting.lock();
         chrome.storage.local.set(values, () => {
             resolve();
-            setTimeout(() => mutexStorageWriting.unlock(), 500);
+            setTimeout(() => mutexStorageWriting.unlock(), 5000);
         });
     });
 }

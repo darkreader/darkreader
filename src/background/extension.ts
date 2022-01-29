@@ -62,7 +62,7 @@ export class Extension {
             getTabMessage: this.getTabMessage,
             onColorSchemeChange: this.onColorSchemeChange,
         });
-        this.user = new UserStorage({onRemoteSettingsChange: () => this.onRemoteSettingsChange()});
+        this.user = new UserStorage();
         this.startBarrier = new PromiseBarrier();
         this.stateManager = new StateManager<ExtensionState>(Extension.LOCAL_STORAGE_KEY, this, {
             isEnabled: null,

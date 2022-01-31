@@ -187,7 +187,7 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
         syncStyle.classList.add('darkreader');
         syncStyle.classList.add('darkreader--sync');
         syncStyle.media = 'screen';
-        if (!isChromium && element.title) {
+        if (element.title) {
             syncStyle.title = element.title;
         }
         syncStyleSet.add(syncStyle);

@@ -61,7 +61,7 @@
   "homepage": "https://darkreader.org/",
   "funding": {
     "type": "opencollective",
-    "url": "https://opencollective.com/darkreader"
+    "url": "https://opencollective.com/darkreader/donate"
   },
   "devDependencies": {
     "@rollup/plugin-node-resolve": "13.1.3",

@@ -71,7 +71,7 @@ export default function AutomationPage(props: ViewProps) {
             <div class="automation-page__line">
                 <CheckBox
                     checked={props.data.settings.automation === 'time'}
-                    onchange={(e: { target: { checked: boolean } }) => props.actions.changeSettings({automation: e.target.checked ? 'time' : ''})}
+                    onchange={(e: {target: {checked: boolean}}) => props.actions.changeSettings({automation: e.target.checked ? 'time' : ''})}
                 />
                 <TimeRangePicker
                     startTime={props.data.settings.time.activation}
@@ -85,12 +85,12 @@ export default function AutomationPage(props: ViewProps) {
             <div class="automation-page__line automation-page__location">
                 <CheckBox
                     checked={props.data.settings.automation === 'location'}
-                    onchange={(e: { target: { checked: boolean } }) => props.actions.changeSettings({automation: e.target.checked ? 'location' : ''})}
+                    onchange={(e: {target: {checked: boolean}}) => props.actions.changeSettings({automation: e.target.checked ? 'location' : ''})}
                 />
                 <TextBox
                     class="automation-page__location__latitude"
                     placeholder={getLocalMessage('latitude')}
-                    onchange={(e: { target: HTMLInputElement }) => locationChanged(e.target, e.target.value, 'latitude')}
+                    onchange={(e: {target: HTMLInputElement}) => locationChanged(e.target, e.target.value, 'latitude')}
                     oncreate={(node: HTMLInputElement) => node.value = getLocationString(locationSettings.latitude)}
                     onkeypress={(e) => {
                         if (e.key === 'Enter') {
@@ -101,7 +101,7 @@ export default function AutomationPage(props: ViewProps) {
                 <TextBox
                     class="automation-page__location__longitude"
                     placeholder={getLocalMessage('longitude')}
-                    onchange={(e: { target: HTMLInputElement }) => locationChanged(e.target, e.target.value, 'longitude')}
+                    onchange={(e: {target: HTMLInputElement}) => locationChanged(e.target, e.target.value, 'longitude')}
                     oncreate={(node: HTMLInputElement) => node.value = getLocationString(locationSettings.longitude)}
                     onkeypress={(e) => {
                         if (e.key === 'Enter') {
@@ -121,7 +121,7 @@ export default function AutomationPage(props: ViewProps) {
                 <CheckBox
                     class="automation-page__system-dark-mode__checkbox"
                     checked={isSystemAutomation}
-                    onchange={(e: { target: { checked: boolean } }) => props.actions.changeSettings({automation: e.target.checked ? 'system' : ''})}
+                    onchange={(e: {target: {checked: boolean}}) => props.actions.changeSettings({automation: e.target.checked ? 'system' : ''})}
                 />
                 <Button
                     class={{
@@ -144,7 +144,7 @@ export default function AutomationPage(props: ViewProps) {
                 ]}
             />
             <p class="automation-page__description">
-                Decide what dark reader should do on automation.
+                Automation behavior
             </p>
         </div>
     );

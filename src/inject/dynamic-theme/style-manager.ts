@@ -7,7 +7,7 @@ import {logInfo, logWarn} from '../../utils/log';
 import {replaceCSSRelativeURLsWithAbsolute, removeCSSComments, replaceCSSFontFace, getCSSURLValue, cssImportRegex, getCSSBaseBath} from './css-rules';
 import {bgFetch} from './network';
 import {createStyleSheetModifier} from './stylesheet-modifier';
-import {isShadowDomSupported, isSafari, isThunderbird, isChromium, isFirefox} from '../../utils/platform';
+import {isShadowDomSupported, isSafari, isThunderbird, isFirefox} from '../../utils/platform';
 
 declare global {
     interface Document {

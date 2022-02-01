@@ -90,51 +90,68 @@ export class Extension {
         }
     };
 
-    recalculateIsEnabled(): boolean {
+    private recalculateIsEnabled(): boolean {
+        const {isEnabled, error} = this.calculateIsEnabled();
+        if (!error) {
+            this.isEnabled = isEnabled;
+        }
+        return isEnabled;
+    }
+
+    private calculateIsEnabled(): {isEnabled: boolean; error: boolean} {
         if (!this.user.settings) {
             logWarn('Extension.isEnabled() was called before Extension.user.settings is available.');
-            return false;
+            return {isEnabled: false, error: true};
         }
 
         const {automation} = this.user.settings;
+
+        let isEnabled: boolean;
         let nextCheck: number;
         switch (automation) {
             case 'time':
-                this.isEnabled = isInTimeIntervalLocal(this.user.settings.time.activation, this.user.settings.time.deactivation);
+                isEnabled = isInTimeIntervalLocal(this.user.settings.time.activation, this.user.settings.time.deactivation);
                 nextCheck = nextTimeInterval(this.user.settings.time.activation, this.user.settings.time.deactivation);
                 break;
             case 'system':
                 if (isMV3) {
                     logWarn('system automation is not yet supported. Defaulting to ON.');
-                    this.isEnabled = true;
+                    isEnabled = true;
                     break;
                 }
                 if (isFirefox) {
                     // BUG: Firefox background page always matches initial color scheme.
-                    this.isEnabled = this.wasLastColorSchemeDark == null
+                    isEnabled = this.wasLastColorSchemeDark == null
                         ? isSystemDarkModeEnabled()
                         : this.wasLastColorSchemeDark;
                 } else {
-                    this.isEnabled = isSystemDarkModeEnabled();
+                    isEnabled = isSystemDarkModeEnabled();
                 }
                 break;
             case 'location': {
                 const {latitude, longitude} = this.user.settings.location;
 
                 if (latitude != null && longitude != null) {
-                    this.isEnabled = isNightAtLocation(latitude, longitude);
+                    isEnabled = isNightAtLocation(latitude, longitude);
                     nextCheck = nextTimeChangeAtLocation(latitude, longitude);
                 }
                 break;
             }
             default:
-                this.isEnabled = this.user.settings.enabled;
+                isEnabled = this.user.settings.enabled;
                 break;
         }
         if (nextCheck) {
             chrome.alarms.create(Extension.ALARM_NAME, {when: nextCheck});
         }
-        return this.isEnabled;
+
+        // This check is after the `switch` expression, because we still want
+        // to add a nextCheck if needed`.
+        if (this.user.settings.automationBehaviour === 'Scheme') {
+            return {isEnabled: this.user.settings.enabled, error: false};
+        }
+
+        return {isEnabled, error: false};
     }
 
     async start() {
@@ -390,8 +407,8 @@ export class Extension {
 
     private handleAutomationCheck = () => {
         if (this.user.settings.automationBehaviour === 'Scheme') {
-            this.recalculateIsEnabled();
-            if (this.isEnabled) {
+            const {isEnabled} = this.calculateIsEnabled();
+            if (isEnabled) {
                 // Dark
                 this.changeSettings({theme: {...this.user.settings.theme, ...{mode: 1}}});
             } else {

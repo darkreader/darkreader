@@ -83,6 +83,10 @@ export function getModifiableCSSDeclaration(
     return null;
 }
 
+function joinSelectors(...selectors: string[]) {
+    return selectors.filter(Boolean).join(', ');
+}
+
 export function getModifiedUserAgentStyle(theme: Theme, isIFrame: boolean, styleSystemControls: boolean) {
     const lines: string[] = [];
     if (!isIFrame) {
@@ -95,10 +99,10 @@ export function getModifiedUserAgentStyle(theme: Theme, isIFrame: boolean, style
         lines.push(`    color-scheme: ${theme.mode === 1 ? 'dark' : 'dark light'} !important;`);
         lines.push('}');
     }
-    lines.push(`${isIFrame ? '' : 'html, body, '}${styleSystemControls ? 'input, textarea, select, button' : ''} {`);
+    lines.push(`${joinSelectors(isIFrame ? '' : 'html, body', styleSystemControls ? 'input, textarea, select, button' : '')} {`);
     lines.push(`    background-color: ${modifyBackgroundColor({r: 255, g: 255, b: 255}, theme)};`);
     lines.push('}');
-    lines.push(`html, body, ${styleSystemControls ? 'input, textarea, select, button' : ''} {`);
+    lines.push(`${joinSelectors('html, body', styleSystemControls ? 'input, textarea, select, button' : '')} {`);
     lines.push(`    border-color: ${modifyBorderColor({r: 76, g: 76, b: 76}, theme)};`);
     lines.push(`    color: ${modifyForegroundColor({r: 0, g: 0, b: 0}, theme)};`);
     lines.push('}');

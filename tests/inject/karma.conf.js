@@ -26,6 +26,7 @@ module.exports = (config) => {
                     tsconfig: 'tests/inject/tsconfig.json',
                     removeComments: false,
                     sourceMap: true,
+                    inlineSources: true,
                     noEmitOnError: true,
                     cacheDir: `${fs.realpathSync(os.tmpdir())}/darkreader_typescript_test_cache`,
                 }),

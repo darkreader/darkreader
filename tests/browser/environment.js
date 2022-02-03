@@ -110,24 +110,26 @@ class PuppeteerEnvironment extends JestNodeEnvironment {
         return page;
     }
 
-    async openPopupPage() {
-        let extensionPopup;
+    /**
+     * @param {string} path
+     * @returns {puppeteer.Page}
+     */
+    async openExtensionPage(path) {
         if (this.global.product === 'chrome') {
-            extensionPopup = await this.openChromePage('/ui/popup/index.html');
-        } else if (this.global.product === 'firefox') {
-            extensionPopup = await this.openFirefoxPage('/ui/popup/index.html');
+            return await this.openChromePage(path);
         }
-        return extensionPopup;
+        if (this.global.product === 'firefox') {
+            return await this.openFirefoxPage(path);
+        }
+        return null;
+    }
+
+    async openPopupPage() {
+        return await this.openExtensionPage('/ui/popup/index.html');
     }
 
     async openDevtoolsPage() {
-        let extensionDevtools;
-        if (this.global.product === 'chrome') {
-            extensionDevtools = await this.openChromePage('/ui/devtools/index.html');
-        } else if (this.global.product === 'firefox') {
-            extensionDevtools = await this.openFirefoxPage('/ui/devtools/index.html');
-        }
-        return extensionDevtools;
+        return await this.openExtensionPage('/ui/devtools/index.html');
     }
 
     async openChromePage(path) {
@@ -241,10 +243,7 @@ class PuppeteerEnvironment extends JestNodeEnvironment {
         await this.testServer.close();
         await this.corsServer.close();
         await this.popupTestServer.close();
-        // TODO: Remove this hack, as this is a issue with clearing the tmp file of firefox profile
-        // Which will cause a error with puppeteer when it's not cleared.
-        // But the clearing currently doesn't work, so we need to wait for the issue to be fixed.
-        // await this.browser.close();
+        await this.browser.close();
     }
 }
 

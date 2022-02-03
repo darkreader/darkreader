@@ -132,11 +132,14 @@ class PuppeteerEnvironment extends JestNodeEnvironment {
         return await this.openExtensionPage('/ui/devtools/index.html');
     }
 
-    async openChromePage(path) {
+    async getBackgroundPage() {
         const targets = await this.browser.targets();
         const backgroundTarget = targets.find((t) => t.type() === 'background_page');
-        const backgroundPage = await backgroundTarget.page();
+        return await backgroundTarget.page();
+    }
 
+    async openChromePage(path) {
+        const backgroundPage = await this.getBackgroundPage();
         const pageURL = backgroundPage.url().replace('/background/index.html', path);
         const extensionPage = await this.browser.newPage();
         await extensionPage.goto(pageURL);
@@ -223,6 +226,13 @@ class PuppeteerEnvironment extends JestNodeEnvironment {
                 changeChromeStorage: async (region, data) => await sendToUIPage({type: 'changeChromeStorage', data: {region, data}}),
                 getChromeStorage: async (region, keys) => await sendToUIPage({type: 'getChromeStorage', data: {region, keys}}),
                 setDataIsMigratedForTesting: async (value) => await sendToUIPage({type: 'setDataIsMigratedForTesting', data: value}),
+                emulateMedia: async (name, value) => {
+                    if (this.global.product === 'firefox') {
+                        return;
+                    }
+                    const bg = await this.getBackgroundPage();
+                    await bg.emulateMediaFeatures([{name, value}]);
+                },
             };
         });
     }

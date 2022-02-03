@@ -365,6 +365,7 @@ export class Extension implements ExtensionState {
             news: await this.news.getLatest(),
             shortcuts: await this.getShortcuts(),
             colorScheme: this.config.COLOR_SCHEMES_RAW,
+            forcedScheme: this.autoState === 'scheme-dark' ? 'dark' : this.autoState === 'scheme-light' ? 'light' : null,
             devtools: {
                 dynamicFixesText: await this.devtools.getDynamicThemeFixesText(),
                 filterFixesText: await this.devtools.getInversionFixesText(),

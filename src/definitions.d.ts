@@ -8,6 +8,7 @@ export interface ExtensionData {
     news: News[];
     shortcuts: Shortcuts;
     colorScheme: ParsedColorSchemeConfig;
+    forcedScheme: 'dark' | 'light';
     devtools: {
         dynamicFixesText: string;
         filterFixesText: string;

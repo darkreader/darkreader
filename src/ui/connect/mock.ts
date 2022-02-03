@@ -76,7 +76,8 @@ export function getMockData(override = {} as Partial<ExtensionData>): ExtensionD
                     textColor: '#000000',
                 },
             },
-        }
+        },
+        forcedScheme: null,
     } as ExtensionData, override);
 }
 

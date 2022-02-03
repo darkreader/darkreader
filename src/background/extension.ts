@@ -24,15 +24,17 @@ import {PromiseBarrier} from '../utils/promise-barrier';
 import {StateManager} from './utils/state-manager';
 import {debounce} from '../utils/debounce';
 
+type AutomationState = 'turn-on' | 'turn-off' | 'scheme-dark' | 'scheme-light' | '';
+
 interface ExtensionState {
-    isEnabled: boolean;
+    autoState: AutomationState;
     wasEnabledOnLastCheck: boolean;
     registeredContextMenus: boolean;
 }
 
 declare const __DEBUG__: boolean;
 
-export class Extension {
+export class Extension implements ExtensionState {
     config: ConfigManager;
     devtools: DevTools;
     icon: IconManager;
@@ -41,9 +43,9 @@ export class Extension {
     tabs: TabManager;
     user: UserStorage;
 
-    private isEnabled: boolean = null;
-    private wasEnabledOnLastCheck: boolean = null;
-    private registeredContextMenus: boolean = null;
+    autoState: AutomationState = '';
+    wasEnabledOnLastCheck: boolean = null;
+    registeredContextMenus: boolean = null;
     private popupOpeningListener: () => void = null;
     // Is used only with Firefox to bypass Firefox bug
     private wasLastColorSchemeDark: boolean = null;
@@ -65,7 +67,7 @@ export class Extension {
         this.user = new UserStorage();
         this.startBarrier = new PromiseBarrier();
         this.stateManager = new StateManager<ExtensionState>(Extension.LOCAL_STORAGE_KEY, this, {
-            isEnabled: null,
+            autoState: '',
             wasEnabledOnLastCheck: null,
             registeredContextMenus: null,
         });
@@ -74,9 +76,9 @@ export class Extension {
 
         if (chrome.permissions.onRemoved) {
             chrome.permissions.onRemoved.addListener((permissions) => {
-            // As far as we know, this code is never actually run because there
-            // is no browser UI for removing 'contextMenus' permission.
-            // This code exists for future-proofing in case browsers ever add such UI.
+                // As far as we know, this code is never actually run because there
+                // is no browser UI for removing 'contextMenus' permission.
+                // This code exists for future-proofing in case browsers ever add such UI.
                 if (!permissions.permissions.includes('contextMenus')) {
                     this.registeredContextMenus = false;
                 }
@@ -86,72 +88,73 @@ export class Extension {
 
     private alarmListener = (alarm: chrome.alarms.Alarm): void => {
         if (alarm.name === Extension.ALARM_NAME) {
-            this.handleAutomationCheck();
+            this.callWhenSettingsLoaded(() => {
+                this.handleAutomationCheck();
+            });
         }
     };
 
-    private recalculateIsEnabled(): boolean {
-        const {isEnabled, error} = this.calculateIsEnabled();
-        if (!error) {
-            this.isEnabled = isEnabled;
-        }
-        return isEnabled;
+    private isExtensionSwitchedOn() {
+        return (
+            this.autoState === 'turn-on' ||
+            this.autoState === 'scheme-dark' ||
+            this.autoState === 'scheme-light' ||
+            (this.autoState === '' && this.user.settings.enabled)
+        );
     }
 
-    private calculateIsEnabled(): {isEnabled: boolean; error: boolean} {
-        if (!this.user.settings) {
-            logWarn('Extension.isEnabled() was called before Extension.user.settings is available.');
-            return {isEnabled: false, error: true};
-        }
+    private updateAutoState() {
+        const {automation, automationBehaviour: behavior} = this.user.settings;
 
-        const {automation} = this.user.settings;
-
-        let isEnabled: boolean;
+        let isAutoDark: boolean;
         let nextCheck: number;
         switch (automation) {
             case 'time':
-                isEnabled = isInTimeIntervalLocal(this.user.settings.time.activation, this.user.settings.time.deactivation);
-                nextCheck = nextTimeInterval(this.user.settings.time.activation, this.user.settings.time.deactivation);
+                const {time} = this.user.settings;
+                isAutoDark = isInTimeIntervalLocal(time.activation, time.deactivation);
+                nextCheck = nextTimeInterval(time.activation, time.deactivation);
                 break;
             case 'system':
                 if (isMV3) {
                     logWarn('system automation is not yet supported. Defaulting to ON.');
-                    isEnabled = true;
+                    isAutoDark = true;
                     break;
                 }
                 if (isFirefox) {
                     // BUG: Firefox background page always matches initial color scheme.
-                    isEnabled = this.wasLastColorSchemeDark == null
+                    isAutoDark = this.wasLastColorSchemeDark == null
                         ? isSystemDarkModeEnabled()
                         : this.wasLastColorSchemeDark;
                 } else {
-                    isEnabled = isSystemDarkModeEnabled();
+                    isAutoDark = isSystemDarkModeEnabled();
                 }
                 break;
             case 'location': {
                 const {latitude, longitude} = this.user.settings.location;
-
                 if (latitude != null && longitude != null) {
-                    isEnabled = isNightAtLocation(latitude, longitude);
+                    isAutoDark = isNightAtLocation(latitude, longitude);
                     nextCheck = nextTimeChangeAtLocation(latitude, longitude);
                 }
                 break;
             }
-            default:
-                isEnabled = this.user.settings.enabled;
+            case '': {
                 break;
+            }
         }
+
+        let state: AutomationState = '';
+        if (automation) {
+            if (behavior === 'OnOff') {
+                state = isAutoDark ? 'turn-on' : 'turn-off';
+            } else if (behavior === 'Scheme') {
+                state = isAutoDark ? 'scheme-dark' : 'scheme-light';
+            }
+        }
+        this.autoState = state;
+
         if (nextCheck) {
             chrome.alarms.create(Extension.ALARM_NAME, {when: nextCheck});
         }
-
-        // This check is after the `switch` expression, because we still want
-        // to add a nextCheck if needed`.
-        if (this.user.settings.automationBehaviour === 'Scheme') {
-            return {isEnabled: this.user.settings.enabled, error: false};
-        }
-
-        return {isEnabled, error: false};
     }
 
     async start() {
@@ -170,6 +173,7 @@ export class Extension {
         if (this.user.settings.syncSitesFixes) {
             await this.config.load({local: false});
         }
+        this.updateAutoState();
         this.onAppToggle();
         logInfo('loaded', this.user.settings);
 
@@ -272,7 +276,7 @@ export class Extension {
             case 'toggle':
                 logInfo('Toggle command entered');
                 this.changeSettings({
-                    enabled: !this.isEnabled,
+                    enabled: !this.isExtensionSwitchedOn(),
                     automation: '',
                 });
                 break;
@@ -355,12 +359,13 @@ export class Extension {
         }
         await this.stateManager.loadState();
         return {
-            isEnabled: this.isEnabled,
+            isEnabled: this.isExtensionSwitchedOn(),
             isReady: true,
             settings: this.user.settings,
             news: await this.news.getLatest(),
             shortcuts: await this.getShortcuts(),
             colorScheme: this.config.COLOR_SCHEMES_RAW,
+            forcedScheme: this.autoState === 'scheme-dark' ? 'dark' : this.autoState === 'scheme-light' ? 'light' : null,
             devtools: {
                 dynamicFixesText: await this.devtools.getDynamicThemeFixesText(),
                 filterFixesText: await this.devtools.getInversionFixesText(),
@@ -395,6 +400,18 @@ export class Extension {
         });
     }
 
+    private callWhenSettingsLoaded(callback: () => void) {
+        if (this.user.settings) {
+            callback();
+            return;
+        }
+        this.user.loadSettings()
+            .then(async () => {
+                await this.stateManager.loadState();
+                callback();
+            });
+    }
+
     private onColorSchemeChange = ({isDark}: {isDark: boolean}) => {
         if (isFirefox) {
             this.wasLastColorSchemeDark = isDark;
@@ -402,40 +419,28 @@ export class Extension {
         if (this.user.settings.automation !== 'system') {
             return;
         }
-        this.handleAutomationCheck();
+        this.callWhenSettingsLoaded(() => {
+            this.handleAutomationCheck();
+        });
     };
 
     private handleAutomationCheck = () => {
-        if (this.user.settings.automationBehaviour === 'Scheme') {
-            const {isEnabled} = this.calculateIsEnabled();
-            if (isEnabled) {
-                // Dark
-                this.changeSettings({theme: {...this.user.settings.theme, ...{mode: 1}}});
-            } else {
-                // Light
-                this.changeSettings({theme: {...this.user.settings.theme, ...{mode: 0}}});
-            }
-        } else {
-            // Toggle on/off
-            this.handleAutoCheck();
-        }
-    };
+        this.updateAutoState();
 
-    private async handleAutoCheck() {
-        if (!this.user.settings) {
-            await this.user.loadSettings();
-        }
-        await this.stateManager.loadState();
-        this.recalculateIsEnabled();
-        const isEnabled = this.isEnabled;
-        if (this.wasEnabledOnLastCheck === null || this.wasEnabledOnLastCheck !== isEnabled) {
-            this.wasEnabledOnLastCheck = isEnabled;
+        const isSwitchedOn = this.isExtensionSwitchedOn();
+        if (
+            this.wasEnabledOnLastCheck === null ||
+            this.wasEnabledOnLastCheck !== isSwitchedOn ||
+            this.autoState === 'scheme-dark' ||
+            this.autoState === 'scheme-light'
+        ) {
+            this.wasEnabledOnLastCheck = isSwitchedOn;
             this.onAppToggle();
             this.tabs.sendMessage();
             this.reportChanges();
             this.stateManager.saveState();
         }
-    }
+    };
 
     changeSettings($settings: Partial<UserSettings>) {
         const prev = {...this.user.settings};
@@ -451,12 +456,13 @@ export class Extension {
             (prev.location.latitude !== this.user.settings.location.latitude) ||
             (prev.location.longitude !== this.user.settings.location.longitude)
         ) {
+            this.updateAutoState();
             this.onAppToggle();
         }
         if (prev.syncSettings !== this.user.settings.syncSettings) {
             this.user.saveSyncSetting(this.user.settings.syncSettings);
         }
-        if (this.isEnabled && $settings.changeBrowserTheme != null && prev.changeBrowserTheme !== $settings.changeBrowserTheme) {
+        if (this.isExtensionSwitchedOn() && $settings.changeBrowserTheme != null && prev.changeBrowserTheme !== $settings.changeBrowserTheme) {
             if ($settings.changeBrowserTheme) {
                 setWindowTheme(this.user.settings.theme);
             } else {
@@ -480,7 +486,7 @@ export class Extension {
     setTheme($theme: Partial<FilterConfig>) {
         this.user.set({theme: {...this.user.settings.theme, ...$theme}});
 
-        if (this.isEnabled && this.user.settings.changeBrowserTheme) {
+        if (this.isExtensionSwitchedOn() && this.user.settings.changeBrowserTheme) {
             setWindowTheme(this.user.settings.theme);
         }
 
@@ -530,8 +536,7 @@ export class Extension {
             this.icon = new IconManager();
         }
 
-        this.recalculateIsEnabled();
-        if (this.isEnabled) {
+        if (this.isExtensionSwitchedOn()) {
             this.icon.setActive();
             if (this.user.settings.changeBrowserTheme) {
                 setWindowTheme(this.user.settings.theme);
@@ -549,7 +554,7 @@ export class Extension {
             await this.user.loadSettings();
         }
         await this.stateManager.loadState();
-        this.wasEnabledOnLastCheck = this.isEnabled;
+        this.wasEnabledOnLastCheck = this.isExtensionSwitchedOn();
         this.tabs.sendMessage();
         this.saveUserSettings();
         this.reportChanges();
@@ -581,10 +586,14 @@ export class Extension {
 
     private getTabMessage = (url: string, frameURL: string): TabData => {
         const urlInfo = this.getURLInfo(url);
-        if (this.isEnabled && isURLEnabled(url, this.user.settings, urlInfo)) {
+        if (this.isExtensionSwitchedOn() && isURLEnabled(url, this.user.settings, urlInfo)) {
             const custom = this.user.settings.customThemes.find(({url: urlList}) => isURLInList(url, urlList));
             const preset = custom ? null : this.user.settings.presets.find(({urls}) => isURLInList(url, urls));
-            const theme = custom ? custom.theme : preset ? preset.theme : this.user.settings.theme;
+            let theme = custom ? custom.theme : preset ? preset.theme : this.user.settings.theme;
+            if (this.autoState === 'scheme-dark' || this.autoState === 'scheme-light') {
+                const mode = this.autoState === 'scheme-dark' ? 1 : 0;
+                theme = {...theme, mode};
+            }
 
             logInfo(`Creating CSS for url: ${url}`);
             logInfo(`Custom theme ${custom ? 'was found' : 'was not found'}, Preset theme ${preset ? 'was found' : 'was not found'}

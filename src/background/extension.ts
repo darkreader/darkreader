@@ -406,8 +406,10 @@ export class Extension implements ExtensionState {
             return;
         }
         this.user.loadSettings()
-            .then(() => this.stateManager.loadState()
-                .then(() => callback()));
+            .then(async () => {
+                await this.stateManager.loadState();
+                callback();
+            });
     }
 
     private onColorSchemeChange = ({isDark}: {isDark: boolean}) => {

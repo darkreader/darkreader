@@ -8,5 +8,8 @@ module.exports = {
     getDestDir: function ({debug, platform}) {
         const buildTypeDir = `build/${debug ? 'debug' : 'release'}`;
         return `${buildTypeDir}/${platform}`;
-    }
+    },
+    getTestDestDir: function () {
+        return `build-tests`;
+    },
 };

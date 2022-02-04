@@ -33,7 +33,11 @@ export function getCurrentThemePreset(props: ViewProps) {
         } else {
             props.actions.setTheme(config);
         }
-        if (config.mode && props.data.settings.automation && props.data.settings.automationBehaviour === 'Scheme') {
+        if (
+            config.mode != null &&
+            props.data.settings.automation &&
+            props.data.settings.automationBehaviour === 'Scheme'
+        ) {
             props.actions.changeSettings({
                 automation: '',
             });

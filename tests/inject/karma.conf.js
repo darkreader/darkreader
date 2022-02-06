@@ -5,6 +5,7 @@ const rollupPluginNodeResolve = require('@rollup/plugin-node-resolve').default;
 const rollupPluginReplace = require('@rollup/plugin-replace');
 const rollupPluginTypescript = require('@rollup/plugin-typescript');
 const typescript = require('typescript');
+const {getTestDestDir} = require('../../tasks/paths');
 
 module.exports = (config) => {
     config.set({
@@ -41,6 +42,7 @@ module.exports = (config) => {
                 }),
             ],
             output: {
+                dir: `${getTestDestDir()}`,
                 strict: true,
                 format: 'iife',
                 sourcemap: 'inline',

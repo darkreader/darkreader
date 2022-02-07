@@ -482,7 +482,25 @@ export function getBgImageModifier(
             if (results.some((r) => r instanceof Promise)) {
                 return Promise.all(results)
                     .then((asyncResults) => {
-                        return asyncResults.join('');
+                        let result = '';
+                        let lastWasURL = false;
+                        // Go trough asyncResults and add seperators between URL's and gradients where needed.
+                        asyncResults.forEach((asyncResult) => {
+                            if (lastWasURL) {
+                                // Only add a seperator when asyncResult isn't empty.
+                                if (asyncResult) {
+                                    result += ', ';
+                                }
+                                lastWasURL = false;
+                            }
+
+                            result += asyncResult;
+
+                            if (asyncResult.startsWith('url(')) {
+                                lastWasURL = true;
+                            }
+                        });
+                        return result;
                     });
             }
             return results.join('');

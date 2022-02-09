@@ -93,11 +93,13 @@ export function getModifiedUserAgentStyle(theme: Theme, isIFrame: boolean, style
         lines.push('html {');
         lines.push(`    background-color: ${modifyBackgroundColor({r: 255, g: 255, b: 255}, theme)} !important;`);
         lines.push('}');
-    }
-    if (isCSSColorSchemePropSupported) {
-        lines.push('html {');
-        lines.push(`    color-scheme: ${theme.mode === 1 ? 'dark' : 'dark light'} !important;`);
-        lines.push('}');
+
+        // Apparantly using this on iframe's can cause issues with the background color that would be applied.
+        if (isCSSColorSchemePropSupported) {
+            lines.push('html {');
+            lines.push(`    color-scheme: ${theme.mode === 1 ? 'dark' : 'dark light'} !important;`);
+            lines.push('}');
+        }
     }
     const bgSelectors = joinSelectors(isIFrame ? '' : 'html, body', styleSystemControls ? 'input, textarea, select, button' : '');
     if (bgSelectors) {

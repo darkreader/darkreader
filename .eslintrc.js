@@ -156,6 +156,7 @@ module.exports = {
                 ecmaVersion: 2019,
                 project: 'src/tsconfig.json',
             },
+            extends: ['plugin:compat/recommended'],
             rules: {
                 '@typescript-eslint/no-implied-eval': 'error',
                 '@typescript-eslint/switch-exhaustiveness-check': 'error',

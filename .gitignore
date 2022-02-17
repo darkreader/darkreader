@@ -23,3 +23,7 @@ tests/inject/coverage/
 # Cache files
 #-----------------------------------
 .eslintcache
+
+# Secret files
+#-----------------------------------
+keys.json

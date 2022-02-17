@@ -1,0 +1,17 @@
+name: Submit build to extension marketplace
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download Github Release Assets
+        uses: plasmo-corp/download-release-asset@v1.0.0
+        with:
+          files: darkreader-*
+      - name: Browser Plugin Publish
+        uses: plasmo-corp/bpp@v1
+        with:
+          keys: ${{ secrets.SUBMIT_KEYS }}

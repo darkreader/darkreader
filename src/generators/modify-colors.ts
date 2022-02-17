@@ -149,14 +149,18 @@ function modifyBgHSL({h, s, l, a}: HSLA, pole: HSLA) {
     let hx = h;
     const isYellow = h > 45 && h < 180;
     if (isYellow) {
-        // Lower the lightness.
-        lx *= 0.75;
         const isCloserToGreen = h > 120;
         if (isCloserToGreen) {
             hx = scale(h, 120, 180, 135, 180);
         } else {
             hx = scale(h, 60, 120, 60, 105);
         }
+    }
+
+    // Lower the lightness, if the resulting
+    // hue is in lower yellow spectrum.
+    if (hx > 40 && hx < 80) {
+        lx *= 0.75;
     }
 
     return {h: hx, s, l: lx, a};

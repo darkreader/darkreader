@@ -147,7 +147,7 @@ function modifyBgHSL({h, s, l, a}: HSLA, pole: HSLA) {
     }
 
     let hx = h;
-    const isYellow = h > 45 && h < 180;
+    const isYellow = h > 60 && h < 180;
     if (isYellow) {
         const isCloserToGreen = h > 120;
         if (isCloserToGreen) {

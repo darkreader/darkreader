@@ -162,7 +162,6 @@ config.overrides.push({
                 ecmaVersion: 2019,
                 project: 'src/tsconfig.json',
             },
-            extends: ['plugin:compat/recommended'],
             rules: {
                 '@typescript-eslint/no-implied-eval': 'error',
                 '@typescript-eslint/switch-exhaustiveness-check': 'error',
@@ -191,7 +190,7 @@ config.overrides.push({
 
                 // Compatibility check
                 'compat/compat': ['error', [
-                    '>1% and supports es5',
+                    '>0.5% and supports es5 and supports promises and supports url',
                     'not Explorer > 0',
                 ].join(', ')]
             },

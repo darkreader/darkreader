@@ -40,7 +40,8 @@ function getNameOfFunction(node) {
             // @ts-ignore
             return node.id.name;
         default:
-            throw new Error('Incorrect type of node has been passed to getNameOfFunction');
+            console.warn(`Warning: Incorrect type of node has been passed to getNameOfFunction: %s`, node.type);
+            return `Unknown ${(node.type || 'function')}`;
     }
 }
 

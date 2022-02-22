@@ -9,7 +9,8 @@
     "code-style": "eslint --ignore-pattern \"!.eslintplugin.js\" --cache --fix \"src/**/*.ts\" \"src/**/*.tsx\" \"tasks/**/*.js\" \"tests/[!coverage]**/*.js\" \"tests/**/*.ts\" \".eslintrc.js\" \"index.d.ts\" \".eslintplugin.js\"",
     "debug": "node tasks/build.js --debug",
     "debug:watch": "node tasks/build.js --debug --watch",
-    "lint": "eslint --ignore-pattern \"!.eslintplugin.js\" \"src/**/*.ts\" \"src/**/*.tsx\" \"tasks/**/*.js\" \"tests/**/*.ts\" \"tests/[!coverage]**/*.js\" \"index.d.ts\" \".eslintplugin.js\"",
+    "lint": "eslint --ignore-pattern \"!.eslintplugin.js\" -- \"src/**/*.ts\" \"src/**/*.tsx\" \"tasks/**/*.js\" \"tests/**/*.ts\" \"tests/[!coverage]**/*.js\" \"index.d.ts\" \".eslintplugin.js\"",
+    "lint:bundle": "(node ./tasks/check-exists.js ./build/debug/chrome || npm run debug) && eslint 'build/debug/chrome/**/*.js' 'darkreader.js'",
     "prepublishOnly": "npm test && npm run api",
     "release": "npm test && npm run lint && node tasks/build.js --release",
     "test": "jest --config=tests/jest.config.js",
@@ -44,20 +45,6 @@
     "accessibility",
     "eye-care"
   ],
-  "browserslist": [
-    "supports es5",
-    "not ie > 0",
-    "not ie_mob > 0",
-    "not op_mini all",
-    "not op_mob < 59",
-    "not android < 50",
-    "not ios_saf < 6",
-    "not safari < 9.3",
-    "not opera < 36",
-    "not chrome < 49",
-    "not firefox < 33",
-    "not edge <= 18"
-  ],
   "homepage": "https://darkreader.org/",
   "funding": {
     "type": "opencollective",
@@ -69,6 +56,7 @@
     "@rollup/plugin-typescript": "8.3.0",
     "@rollup/pluginutils": "4.1.2",
     "@types/chrome": "0.0.176",
+    "@types/eslint": "^8.4.1",
     "@types/jasmine": "3.10.3",
     "@types/jest": "27.4.0",
     "@types/karma": "6.3.2",

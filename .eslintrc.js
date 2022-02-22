@@ -1,4 +1,10 @@
-module.exports = {
+/** @type {import('eslint').Linter.Config} */
+const config = {overrides: []};
+
+// Source code (TS, JSX, JS)
+config.overrides.push({
+    files: ['{src,tasks,tests}/**/*.{ts,tsx,js,jsx}', '.*.js', 'index.d.ts'],
+    excludedFiles: ['darkreader.js'],
     parser: '@typescript-eslint/parser',
     plugins: ['@typescript-eslint', 'local'],
     extends: ['plugin:@typescript-eslint/recommended', 'plugin:import/recommended', 'plugin:import/typescript'],
@@ -164,4 +170,51 @@ module.exports = {
             }
         },
     ],
-};
+});
+
+// Bundled JS
+
+config.overrides.push({
+    files: ['darkreader.js', 'build/debug/chrome/**/*.js'],
+    env: {browser: true},
+    extends: ['plugin:compat/recommended'],
+    parserOptions: {
+        ecmaVersion: 2019,
+        sourceType: 'module'
+    },
+    overrides: [
+
+        // API (modern clients)
+        {
+            files: ['darkreader.js'],
+            rules: {
+
+                // Compatibility check
+                'compat/compat': ['error', [
+                    '>1% and supports es5',
+                    'not Explorer > 0',
+                ].join(', ')]
+            },
+        },
+
+        // Extension (non-mobile browsers based on Firefox or Chromium)
+        {
+            files: ['build/debug/chrome/**/*.js'],
+            rules: {
+
+                // Compatibility check
+                'compat/compat': ['error', [
+                    '> 0.5% and supports es5',
+                    'Firefox ESR',
+                    'not Explorer > 0',
+                    'not Safari > 0',
+                    'not iOS > 0',
+                    'not ChromeAndroid > 0',
+                    'not OperaMini all',
+                ].join(', ')]
+            },
+        },
+    ],
+});
+
+module.exports = config;

@@ -181,6 +181,11 @@ config.overrides.push({
         ecmaVersion: 2019,
         sourceType: 'module'
     },
+    settings: {
+        polyfills: [
+            'navigator.deviceMemory',
+        ],
+    },
     overrides: [
 
         // API (modern clients)

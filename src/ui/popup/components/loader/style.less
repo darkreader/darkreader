@@ -51,6 +51,10 @@
         bottom: @popup-content-height + @popup-content-padding - @size-control-inner - @indent-small;
     }
 
+    &__error {
+        font-size: @size-text-normal; 
+    }
+
     &--complete &__message {
         color: fade(@color-heading, 0%);
         transition: color @loading-fade-duration ease-out;

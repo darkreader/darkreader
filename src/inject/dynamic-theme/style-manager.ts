@@ -7,7 +7,7 @@ import {logInfo, logWarn} from '../../utils/log';
 import {replaceCSSRelativeURLsWithAbsolute, removeCSSComments, replaceCSSFontFace, getCSSURLValue, cssImportRegex, getCSSBaseBath} from './css-rules';
 import {bgFetch} from './network';
 import {createStyleSheetModifier} from './stylesheet-modifier';
-import {isShadowDomSupported, isSafari, isThunderbird, isChromium, isFirefox} from '../../utils/platform';
+import {isShadowDomSupported, isSafari, isThunderbird, isFirefox} from '../../utils/platform';
 
 declare global {
     interface Document {
@@ -187,7 +187,7 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
         syncStyle.classList.add('darkreader');
         syncStyle.classList.add('darkreader--sync');
         syncStyle.media = 'screen';
-        if (!isChromium && element.title) {
+        if (element.title) {
             syncStyle.title = element.title;
         }
         syncStyleSet.add(syncStyle);

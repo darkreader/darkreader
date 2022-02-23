@@ -1,10 +1,11 @@
-const fs = require('fs-extra');
+const fs = require('fs');
 const os = require('os');
 const rollupPluginIstanbul = require('rollup-plugin-istanbul2');
 const rollupPluginNodeResolve = require('@rollup/plugin-node-resolve').default;
 const rollupPluginReplace = require('@rollup/plugin-replace');
-const rollupPluginTypescript = require('rollup-plugin-typescript2');
+const rollupPluginTypescript = require('@rollup/plugin-typescript');
 const typescript = require('typescript');
+const {getTestDestDir} = require('../../tasks/paths');
 
 module.exports = (config) => {
     config.set({
@@ -23,20 +24,12 @@ module.exports = (config) => {
                 rollupPluginNodeResolve(),
                 rollupPluginTypescript({
                     typescript,
-                    tsconfig: 'src/tsconfig.json',
-                    tsconfigOverride: {
-                        compilerOptions: {
-                            types: [
-                                'chrome',
-                                'jasmine',
-                                'offscreencanvas'
-                            ],
-                            removeComments: false,
-                            sourceMap: true,
-                        },
-                    },
-                    clean: false,
-                    cacheRoot: `${fs.realpathSync(os.tmpdir())}/darkreader_typescript_test_cache`,
+                    tsconfig: 'tests/inject/tsconfig.json',
+                    removeComments: false,
+                    sourceMap: true,
+                    inlineSources: true,
+                    noEmitOnError: true,
+                    cacheDir: `${fs.realpathSync(os.tmpdir())}/darkreader_typescript_test_cache`,
                 }),
                 rollupPluginReplace({
                     preventAssignment: true,
@@ -49,6 +42,7 @@ module.exports = (config) => {
                 }),
             ],
             output: {
+                dir: `${getTestDestDir()}`,
                 strict: true,
                 format: 'iife',
                 sourcemap: 'inline',

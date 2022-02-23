@@ -2,7 +2,7 @@ import {canInjectScript} from '../background/utils/extension-api';
 import {createFileLoader} from './utils/network';
 import type {FetchRequestParameters} from './utils/network';
 import type {Message} from '../definitions';
-import {isFirefox, isMV3, isThunderbird} from '../utils/platform';
+import {isFirefox, isMV3, isOpera, isThunderbird} from '../utils/platform';
 import {MessageType} from '../utils/message';
 import {logWarn} from '../utils/log';
 import {StateManager} from './utils/state-manager';
@@ -93,7 +93,8 @@ export default class TabManager {
                     // Workaround for Thunderbird and Vivaldi.
                     // On Thunderbird, sometimes sender.tab is undefined but accessing it will throw a very nice error.
                     // On Vivaldi, sometimes sender.tab is undefined as well, but error is not very helpful.
-                    const isPanel = typeof sender === 'undefined' || typeof sender.tab === 'undefined';
+                    // On Opera, sender.tab.index === -1.
+                    const isPanel = typeof sender === 'undefined' || typeof sender.tab === 'undefined' || (isOpera && sender.tab.index === -1);
                     if (isPanel) {
                         // NOTE: Vivaldi and Opera can show a page in a side panel,
                         // but it is not possible to handle messaging correctly (no tab ID, frame ID).

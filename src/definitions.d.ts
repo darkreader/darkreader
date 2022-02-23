@@ -8,6 +8,7 @@ export interface ExtensionData {
     news: News[];
     shortcuts: Shortcuts;
     colorScheme: ParsedColorSchemeConfig;
+    forcedScheme: 'dark' | 'light';
     devtools: {
         dynamicFixesText: string;
         filterFixesText: string;
@@ -92,6 +93,7 @@ export interface UserSettings {
     syncSettings: boolean;
     syncSitesFixes: boolean;
     automation: '' | 'time' | 'system' | 'location';
+    automationBehaviour: 'OnOff' | 'Scheme';
     time: TimeSettings;
     location: LocationSettings;
     previewNewDesign: boolean;
@@ -134,6 +136,7 @@ export interface DynamicThemeFix {
     css: string;
     ignoreInlineStyle: string[];
     ignoreImageAnalysis: string[];
+    disableStyleSheetsProxy: boolean;
 }
 
 export interface InversionFix {

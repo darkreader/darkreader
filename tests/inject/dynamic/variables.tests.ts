@@ -1232,4 +1232,49 @@ describe('CSS VARIABLES OVERRIDE', () => {
 
         expect(elementStyle.boxShadow).toBe('rgb(0, 102, 0) 0px -1px 0px 0px inset');
     });
+
+    it('should handle raw values within variable declarations and use proper replacement', async () => {
+        container.innerHTML = multiline(
+            '<style>',
+            '    h1 {',
+            '        border: 1px solid rgba(var(--color,240,240,240),1);',
+            '    }',
+            '    :root {',
+            '        --color: 123,123,123 !important;',
+            '    }',
+            '    div {',
+            '        --color: 0,0,0 !important;',
+            '    }',
+            '</style>',
+            '<h1>Raw values are spooky</h1>',
+        );
+        createOrUpdateDynamicTheme(theme, null, false);
+
+        await timeout(0);
+        const elementStyle = getComputedStyle(container.querySelector('h1'));
+
+        if (isFirefox) {
+            expect(elementStyle.borderTopColor).toBe('rgb(91, 91, 91)');
+            expect(elementStyle.borderRightColor).toBe('rgb(91, 91, 91)');
+            expect(elementStyle.borderBottomColor).toBe('rgb(91, 91, 91)');
+            expect(elementStyle.borderLeftColor).toBe('rgb(91, 91, 91)');
+        } else {
+            expect(elementStyle.borderColor).toBe('rgb(91, 91, 91)');
+        }
+    });
+
+    it('should modify inline variable', () => {
+        container.innerHTML = multiline(
+            '<style>',
+            '    h1 {',
+            '        background-color: var(--inline-var);',
+            '    }',
+            '</style>',
+            '<h1 style="--inline-var: red">Raw values are spooky</h1>',
+        );
+        createOrUpdateDynamicTheme(theme, null, false);
+
+        const elementStyle = getComputedStyle(container.querySelector('h1'));
+        expect(elementStyle.backgroundColor).toBe('rgb(204, 0, 0)');
+    });
 });

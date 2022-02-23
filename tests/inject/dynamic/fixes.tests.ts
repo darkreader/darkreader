@@ -37,6 +37,7 @@ describe('FIXES', () => {
             css: '',
             ignoreInlineStyle: [],
             ignoreImageAnalysis: [],
+            disableStyleSheetsProxy: false,
 
         };
         createOrUpdateDynamicTheme(DEFAULT_THEME, fixes, false);
@@ -53,6 +54,7 @@ describe('FIXES', () => {
             css: '.text { color: red }',
             ignoreInlineStyle: [],
             ignoreImageAnalysis: [],
+            disableStyleSheetsProxy: false,
 
         };
         createOrUpdateDynamicTheme(DEFAULT_THEME, fixes, false);
@@ -69,6 +71,7 @@ describe('FIXES', () => {
             css: '',
             ignoreInlineStyle: ['.text'],
             ignoreImageAnalysis: [],
+            disableStyleSheetsProxy: false,
 
         };
         createOrUpdateDynamicTheme(DEFAULT_THEME, fixes, false);

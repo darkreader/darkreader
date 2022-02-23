@@ -1262,4 +1262,19 @@ describe('CSS VARIABLES OVERRIDE', () => {
             expect(elementStyle.borderColor).toBe('rgb(91, 91, 91)');
         }
     });
+
+    it('should modify inline variable', () => {
+        container.innerHTML = multiline(
+            '<style>',
+            '    h1 {',
+            '        background-color: var(--inline-var);',
+            '    }',
+            '</style>',
+            '<h1 style="--inline-var: red">Raw values are spooky</h1>',
+        );
+        createOrUpdateDynamicTheme(theme, null, false);
+
+        const elementStyle = getComputedStyle(container.querySelector('h1'));
+        expect(elementStyle.backgroundColor).toBe('rgb(204, 0, 0)');
+    });
 });

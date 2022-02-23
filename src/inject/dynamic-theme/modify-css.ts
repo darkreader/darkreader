@@ -10,7 +10,9 @@ import {getImageDetails, getFilteredImageDataURL, cleanImageProcessingCache} fro
 import type {CSSVariableModifier, VariablesStore} from './variables';
 import {logWarn, logInfo} from '../../utils/log';
 import type {FilterConfig, Theme} from '../../definitions';
-import {isFirefox} from '../../utils/platform';
+import {isFirefox, isCSSColorSchemePropSupported} from '../../utils/platform';
+import type {parsedGradient} from '../../utils/parsing';
+import {parseGradient} from '../../utils/parsing';
 
 export type CSSValueModifier = (theme: Theme) => string | Promise<string>;
 
@@ -81,17 +83,31 @@ export function getModifiableCSSDeclaration(
     return null;
 }
 
+function joinSelectors(...selectors: string[]) {
+    return selectors.filter(Boolean).join(', ');
+}
+
 export function getModifiedUserAgentStyle(theme: Theme, isIFrame: boolean, styleSystemControls: boolean) {
     const lines: string[] = [];
     if (!isIFrame) {
         lines.push('html {');
         lines.push(`    background-color: ${modifyBackgroundColor({r: 255, g: 255, b: 255}, theme)} !important;`);
         lines.push('}');
+
+        // Apparantly using this on iframe's can cause issues with the background color that would be applied.
+        if (isCSSColorSchemePropSupported) {
+            lines.push('html {');
+            lines.push(`    color-scheme: ${theme.mode === 1 ? 'dark' : 'dark light'} !important;`);
+            lines.push('}');
+        }
     }
-    lines.push(`${isIFrame ? '' : 'html, body, '}${styleSystemControls ? 'input, textarea, select, button' : ''} {`);
-    lines.push(`    background-color: ${modifyBackgroundColor({r: 255, g: 255, b: 255}, theme)};`);
-    lines.push('}');
-    lines.push(`html, body, ${styleSystemControls ? 'input, textarea, select, button' : ''} {`);
+    const bgSelectors = joinSelectors(isIFrame ? '' : 'html, body', styleSystemControls ? 'input, textarea, select, button' : '');
+    if (bgSelectors) {
+        lines.push(`${bgSelectors} {`);
+        lines.push(`    background-color: ${modifyBackgroundColor({r: 255, g: 255, b: 255}, theme)};`);
+        lines.push('}');
+    }
+    lines.push(`${joinSelectors('html, body', styleSystemControls ? 'input, textarea, select, button' : '')} {`);
     lines.push(`    border-color: ${modifyBorderColor({r: 76, g: 76, b: 76}, theme)};`);
     lines.push(`    color: ${modifyForegroundColor({r: 0, g: 0, b: 0}, theme)};`);
     lines.push('}');
@@ -268,7 +284,6 @@ function getColorModifier(prop: string, value: string): string | CSSValueModifie
     }
 }
 
-export const gradientRegex = /[\-a-z]+gradient\(([^\(\)]*(\(([^\(\)]*(\(.*?\)))*[^\(\)]*\))){0,15}[^\(\)]*\)/g;
 const imageDetailsCache = new Map<string, ImageDetails>();
 const awaitingForImageLoading = new Map<string, Array<(imageDetails: ImageDetails) => void>>();
 
@@ -289,6 +304,19 @@ function shouldIgnoreImage(selectorText: string, selectors: string[]) {
     return false;
 }
 
+interface bgImageMatches {
+    type: 'url' | 'gradient';
+    urlInfo?: {
+        index: number;
+        match: string;
+    };
+    gradientInfo?: {
+        type: string;
+        content: string;
+        hasComma: boolean;
+    };
+}
+
 export function getBgImageModifier(
     value: string,
     rule: CSSStyleRule,
@@ -296,7 +324,7 @@ export function getBgImageModifier(
     isCancelled: () => boolean,
 ): string | CSSValueModifier {
     try {
-        const gradients = getMatches(gradientRegex, value);
+        const gradients = parseGradient(value);
         const urls = getMatches(cssURLRegex, value);
 
         if (urls.length === 0 && gradients.length === 0) {
@@ -312,14 +340,14 @@ export function getBgImageModifier(
             });
         };
 
-        const matches = getIndices(urls).map((i) => ({type: 'url', ...i}))
-            .concat(getIndices(gradients).map((i) => ({type: 'gradient', ...i})))
-            .sort((a, b) => a.index - b.index);
+        const matches: bgImageMatches[] =
+            (getIndices(urls).map((i) => ({type: 'url', urlInfo: i})) as bgImageMatches[])
+                .concat(gradients.map((i) => ({type: 'gradient', gradientInfo: i})));
 
-        const getGradientModifier = (gradient: string) => {
-            const match = gradient.match(/^(.*-gradient)\((.*)\)$/);
-            const type = match[1];
-            const content = match[2];
+        const getGradientModifier = (gradient: parsedGradient) => {
+            const type = gradient.type;
+            const content = gradient.content;
+            const hasComma = gradient.hasComma;
 
             const partsRegex = /([^\(\),]+(\([^\(\)]*(\([^\(\)]*\)*[^\(\)]*)?\))?[^\(\),]*),?/g;
             const colorStopRegex = /^(from|color-stop|to)\(([^\(\)]*?,\s*)?(.*?)\)$/;
@@ -350,7 +378,7 @@ export function getBgImageModifier(
             });
 
             return (filter: FilterConfig) => {
-                return `${type}(${parts.map((modify) => modify(filter)).join(', ')})`;
+                return `${type}(${parts.map((modify) => modify(filter)).join(', ')})${hasComma ? ', ' : ''}`;
             };
         };
 
@@ -433,14 +461,21 @@ export function getBgImageModifier(
         const modifiers: CSSValueModifier[] = [];
 
         let index = 0;
-        matches.forEach(({match, type, index: matchStart}, i) => {
-            const prefixStart = index;
-            const matchEnd = matchStart + match.length;
-            index = matchEnd;
-            modifiers.push(() => value.substring(prefixStart, matchStart));
-            modifiers.push(type === 'url' ? getURLModifier(match) : getGradientModifier(match));
-            if (i === matches.length - 1) {
-                modifiers.push(() => value.substring(matchEnd));
+        matches.forEach(({type, urlInfo, gradientInfo}, i) => {
+            if (type === 'url') {
+                const match = urlInfo.match;
+                const matchStart = urlInfo.index;
+                const prefixStart = index;
+                const matchEnd = matchStart + match.length;
+
+                index = matchEnd;
+                modifiers.push(() => value.substring(prefixStart, matchStart));
+                modifiers.push(getURLModifier(match));
+                if (i === matches.length - 1) {
+                    modifiers.push(() => value.substring(matchEnd));
+                }
+            } else if (type === 'gradient') {
+                modifiers.push(getGradientModifier(gradientInfo));
             }
         });
 
@@ -449,7 +484,25 @@ export function getBgImageModifier(
             if (results.some((r) => r instanceof Promise)) {
                 return Promise.all(results)
                     .then((asyncResults) => {
-                        return asyncResults.join('');
+                        let result = '';
+                        let lastWasURL = false;
+                        // Go trough asyncResults and add seperators between URL's and gradients where needed.
+                        asyncResults.forEach((asyncResult) => {
+                            if (lastWasURL) {
+                                // Only add a seperator when asyncResult isn't empty.
+                                if (asyncResult) {
+                                    result += ', ';
+                                }
+                                lastWasURL = false;
+                            }
+
+                            result += asyncResult;
+
+                            if (asyncResult.startsWith('url(')) {
+                                lastWasURL = true;
+                            }
+                        });
+                        return result;
                     });
             }
             return results.join('');

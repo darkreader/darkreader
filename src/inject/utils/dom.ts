@@ -183,6 +183,10 @@ export function iterateShadowHosts(root: Node, iterator: (host: Element) => void
         node != null;
         node = walker.nextNode() as Element
     ) {
+        if (node.classList.contains('surfingkeys_hints_host')) {
+            continue;
+        }
+
         iterator(node);
         iterateShadowHosts(node.shadowRoot, iterator);
     }

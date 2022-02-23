@@ -89,4 +89,15 @@ describe('COLOR PARSING', () => {
         createOrUpdateDynamicTheme(theme, null, false);
         expect(getComputedStyle(container.querySelector('h1')).backgroundColor).toBe('rgb(35, 38, 40)');
     });
+
+    it('should handle gradient\'s cases with rgb(...) xx%', async () => {
+        container.innerHTML = multiline(
+            '<style>',
+            '    h1 { background-image: -webkit-linear-gradient(bottom, rgb(255, 255, 255) 15%, rgb(246, 246, 245) 85%); }',
+            '</style>',
+            '<h1>Weird color <strong>Power</strong>!</h1>',
+        );
+        createOrUpdateDynamicTheme(theme, null, false);
+        expect(getComputedStyle(container.querySelector('h1')).backgroundImage).toBe('-webkit-linear-gradient(bottom, rgb(24, 26, 27) 15%, rgb(29, 32, 33) 85%)');
+    });
 });

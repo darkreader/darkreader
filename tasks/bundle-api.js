@@ -10,18 +10,19 @@ const packageJSON = require('../package.json');
 const fs = require('fs');
 const os = require('os');
 const {createTask} = require('./task');
+const {rootDir, rootPath} = require('./paths');
 
 async function bundleAPI({debug}) {
-    const src = 'src/api/index.ts';
+    const src = rootPath('src/api/index.ts');
     const dest = 'darkreader.js';
-
     const bundle = await rollup.rollup({
         input: src,
         plugins: [
             rollupPluginNodeResolve(),
             rollupPluginTypescript({
+                rootDir,
                 typescript,
-                tsconfig: 'src/api/tsconfig.json',
+                tsconfig: rootPath('src/api/tsconfig.json'),
                 removeComments: true,
                 noEmitOnError: true,
                 cacheDir: debug ? `${fs.realpathSync(os.tmpdir())}/darkreader_api_typescript_cache` : null,

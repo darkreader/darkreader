@@ -1,6 +1,7 @@
-const {dirname} = require('path');
+const {dirname, join} = require('path');
 const packageJson = require.resolve('../package.json');
 const rootDir = dirname(packageJson);
+const rootPath = (...paths) => join(rootDir, ...paths);
 
 module.exports = {
     PLATFORM: {
@@ -18,4 +19,5 @@ module.exports = {
     },
 
     rootDir,
+    rootPath,
 };

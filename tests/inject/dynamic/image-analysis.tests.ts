@@ -2,7 +2,7 @@ import '../polyfills';
 import {DEFAULT_THEME} from '../../../src/defaults';
 import {createOrUpdateDynamicTheme, removeDynamicTheme} from '../../../src/inject/dynamic-theme';
 import {getImageDetails} from '../../../src/inject/dynamic-theme/image';
-import {multiline, timeout} from '../../test-utils';
+import {multiline, timeout} from '../test-utils';
 import type {DynamicThemeFix} from '../../../src/definitions';
 
 const theme = {

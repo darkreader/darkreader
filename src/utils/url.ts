@@ -1,5 +1,5 @@
 import type {UserSettings} from '../definitions';
-import {isIPV6, compareIPV6} from './ipv6';
+import {isInPattern, isMatch} from './matching';
 import {isThunderbird} from './platform';
 
 let anchor: HTMLAnchorElement;
@@ -88,12 +88,7 @@ export function compareURLPatterns(a: string, b: string) {
  * @paramlist List to search into.
  */
 export function isURLInList(url: string, list: string[]) {
-    for (let i = 0; i < list.length; i++) {
-        if (isURLMatched(url, list[i])) {
-            return true;
-        }
-    }
-    return false;
+    return isInPattern(url, list);
 }
 
 /**
@@ -102,79 +97,7 @@ export function isURLInList(url: string, list: string[]) {
  * @param urlTemplate URL template ("google.*", "youtube.com" etc).
  */
 export function isURLMatched(url: string, urlTemplate: string): boolean {
-    const isFirstIPV6 = isIPV6(url);
-    const isSecondIPV6 = isIPV6(urlTemplate);
-    if (isFirstIPV6 && isSecondIPV6) {
-        return compareIPV6(url, urlTemplate);
-    } else if (!isFirstIPV6 && !isSecondIPV6) {
-        const regex = createUrlRegex(urlTemplate);
-        return Boolean(url.match(regex));
-    }
-    return false;
-}
-
-function createUrlRegex(urlTemplate: string): RegExp {
-    urlTemplate = urlTemplate.trim();
-    const exactBeginning = (urlTemplate[0] === '^');
-    const exactEnding = (urlTemplate[urlTemplate.length - 1] === '$');
-
-    urlTemplate = (urlTemplate
-        .replace(/^\^/, '') // Remove ^ at start
-        .replace(/\$$/, '') // Remove $ at end
-        .replace(/^.*?\/{2,3}/, '') // Remove scheme
-        .replace(/\?.*$/, '') // Remove query
-        .replace(/\/$/, '') // Remove last slash
-    );
-
-    let slashIndex: number;
-    let beforeSlash: string;
-    let afterSlash: string;
-    if ((slashIndex = urlTemplate.indexOf('/')) >= 0) {
-        beforeSlash = urlTemplate.substring(0, slashIndex); // google.*
-        afterSlash = urlTemplate.replace(/\$/g, '').substring(slashIndex); // /login/abc
-    } else {
-        beforeSlash = urlTemplate.replace(/\$/g, '');
-    }
-
-    //
-    // SCHEME and SUBDOMAINS
-
-    let result = (exactBeginning ?
-        '^(.*?\\:\\/{2,3})?' // Scheme
-        : '^(.*?\\:\\/{2,3})?([^\/]*?\\.)?' // Scheme and subdomains
-    );
-
-    //
-    // HOST and PORT
-
-    const hostParts = beforeSlash.split('.');
-    result += '(';
-    for (let i = 0; i < hostParts.length; i++) {
-        if (hostParts[i] === '*') {
-            hostParts[i] = '[^\\.\\/]+?';
-        }
-    }
-    result += hostParts.join('\\.');
-    result += ')';
-
-    //
-    // PATH and QUERY
-
-    if (afterSlash) {
-        result += '(';
-        result += afterSlash.replace('/', '\\/');
-        result += ')';
-    }
-
-    result += (exactEnding ?
-        '(\\/?(\\?[^\/]*?)?)$' // All following queries
-        : '(\\/?.*?)$' // All following paths and queries
-    );
-
-    //
-    // Result
-
-    return new RegExp(result, 'i');
+    return isMatch(url, urlTemplate);
 }
 
 export function isPDF(url: string) {

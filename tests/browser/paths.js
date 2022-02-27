@@ -62,7 +62,12 @@ async function getFirefoxPath() {
     if (process.platform === 'win32') {
         return await winProgramFiles('Firefox Nightly\\firefox.exe');
     }
-    return await linuxAppPath('firefox-nightly');
+    try {
+        return await linuxAppPath('firefox-nightly');
+    } catch (e) {
+        // ignore
+    }
+    throw new Error('Could not find firefox-nightly');
 }
 
 const chromeExtensionDebugDir = path.join(__dirname, '../../build/debug/chrome');

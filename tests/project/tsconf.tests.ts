@@ -18,9 +18,7 @@ const tsProjects: Array<{ tsconfig: string }> = [
     // Browser tests (Karma, Jasmine)
     {tsconfig: 'tests/inject'},
     // Unit tests (Jest, Node.js)
-    {tsconfig: 'tests/config'},
-    {tsconfig: 'tests/generators/utils'},
-    {tsconfig: 'tests/utils'},
+    {tsconfig: 'tests/unit'},
 ];
 
 describe('TypeScript project config', () => {

@@ -1,6 +1,6 @@
 import {dirname, join} from 'path';
 
-export const rootDir: string = dirname(require.resolve('../package.json'));
+export const rootDir: string = dirname(require.resolve('../../package.json'));
 
 export function rootPath(...paths: string[]) {
     return join(rootDir, ...paths);

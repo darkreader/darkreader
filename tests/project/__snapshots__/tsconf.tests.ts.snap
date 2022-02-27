@@ -424,6 +424,42 @@ Object {
 }
 `;
 
+exports[`TypeScript project config file should parse and resolve correctly: tests/unit 1`] = `
+Object {
+  "compileOnSave": false,
+  "compilerOptions": Object {
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "inlineSourceMap": true,
+    "lib": Array [
+      "esnext",
+      "dom",
+    ],
+    "module": "commonjs",
+    "noImplicitAny": true,
+    "skipLibCheck": true,
+    "target": "esnext",
+    "types": Array [
+      "node",
+      "jest",
+      "jest-extended",
+    ],
+  },
+  "files": Array [
+    "./config/config.tests.ts",
+    "./config/locales.tests.ts",
+    "./generators/utils/parse.tests.ts",
+    "./utils/color.tests.ts",
+    "./utils/math.tests.ts",
+    "./utils/parsing.tests.ts",
+    "./utils/promise-barrier.tests.ts",
+    "./utils/text.tests.ts",
+    "./utils/time.tests.ts",
+    "./utils/uid.tests.ts",
+  ],
+}
+`;
+
 exports[`TypeScript project config file should parse and resolve correctly: tests/utils 1`] = `
 Object {
   "compileOnSave": false,

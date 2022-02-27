@@ -1,4 +1,4 @@
-import {PromiseBarrier} from '../../src/utils/promise-barrier';
+import {PromiseBarrier} from '../../../src/utils/promise-barrier';
 
 describe('Promise barrier utility', () => {
     test('basic functionality', async () => {

@@ -1,5 +1,5 @@
 import {randomFillSync} from 'crypto';
-import {generateUID} from '../../src/utils/uid';
+import {generateUID} from '../../../src/utils/uid';
 
 test('Unique identifier generation', () => {
     // Make sure we are not messing up global context for somebody else

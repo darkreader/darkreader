@@ -6,7 +6,7 @@ const {createEchoServer} = require('./echo-server');
 
 const ECHO_SERVER_PORT = 9966;
 
-process.env.NODE_OPTIONS = '--max_old_space_size=3072'
+process.env.NODE_OPTIONS = '--max_old_space_size=3072';
 
 async function run() {
     const args = process.argv.slice(2);

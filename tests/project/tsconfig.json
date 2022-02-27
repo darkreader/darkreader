@@ -1,0 +1,24 @@
+{
+    "extends": "../../src/tsconfig",
+    "compilerOptions": {
+        "baseUrl": ".",
+        "noImplicitAny": true,
+        "target": "es2019",
+        "moduleResolution": "node",
+        "allowJs": true,
+        "esModuleInterop": true,
+        "module": "commonjs",
+        "outDir": "",
+        "sourceMap": true,
+        "inlineSourceMap": true,
+        "types": [
+            "jest",
+            "jest-extended",
+            "node"
+        ],
+        "lib": [
+            "ES6",
+            "dom"
+        ]
+    }
+}

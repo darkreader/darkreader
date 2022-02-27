@@ -1,3 +1,5 @@
+export {rootDir} from '../tasks/paths';
+
 export function multiline(...lines: string[]) {
     return lines.join('\n');
 }

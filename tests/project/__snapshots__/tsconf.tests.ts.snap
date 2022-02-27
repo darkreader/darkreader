@@ -409,6 +409,7 @@ Object {
     "./karma.conf.js",
     "./polyfills.ts",
     "./run.js",
+    "./test-utils.ts",
     "./dynamic/color.tests.ts",
     "./dynamic/fixes.tests.ts",
     "./dynamic/image-analysis.tests.ts",
@@ -418,6 +419,7 @@ Object {
     "./dynamic/shadow-dom.tests.ts",
     "./dynamic/style-override.tests.ts",
     "./dynamic/variables.tests.ts",
+    "./utils/url.tests.ts",
   ],
 }
 `;
@@ -460,7 +462,6 @@ Object {
     "./text.tests.ts",
     "./time.tests.ts",
     "./uid.tests.ts",
-    "./url.tests.ts",
   ],
 }
 `;

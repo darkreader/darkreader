@@ -1,7 +1,9 @@
-import {isURLEnabled, isURLMatched, isPDF, isFullyQualifiedDomain, getURLHostOrProtocol, getAbsoluteURL} from '../../src/utils/url';
-import type {UserSettings} from '../../src/definitions';
+// noinspection HttpUrlsUsage
 
-test('URL is enabled', () => {
+import {isURLEnabled, isURLMatched, isPDF, isFullyQualifiedDomain, getURLHostOrProtocol, getAbsoluteURL} from '../../../src/utils/url';
+import type {UserSettings} from '../../../src/definitions';
+
+it('URL is enabled', () => {
     // Not invert listed
     expect(isURLEnabled(
         'https://mail.google.com/mail/u/0/',
@@ -247,7 +249,7 @@ test('URL is enabled', () => {
     )).toBe(true);
 });
 
-test('Get URL host or protocol', () => {
+it('Get URL host or protocol', () => {
     expect(getURLHostOrProtocol('https://www.google.com')).toBe('www.google.com');
     expect(getURLHostOrProtocol('https://www.google.com/maps')).toBe('www.google.com');
     expect(getURLHostOrProtocol('http://localhost:8080')).toBe('localhost:8080');
@@ -257,7 +259,7 @@ test('Get URL host or protocol', () => {
     expect(getURLHostOrProtocol('file:///Users/index.html')).toBe('/Users/index.html');
 });
 
-test('Absolute URL', () => {
+it('Absolute URL', () => {
     expect(getAbsoluteURL('https://www.google.com', 'image.jpg')).toBe('https://www.google.com/image.jpg');
     expect(getAbsoluteURL('https://www.google.com', '/image.jpg')).toBe('https://www.google.com/image.jpg');
     expect(getAbsoluteURL('https://www.google.com/path', '/image.jpg')).toBe('https://www.google.com/image.jpg');
@@ -279,7 +281,7 @@ test('Absolute URL', () => {
     expect(getAbsoluteURL('path/index.html', '/image.jpg?size=128')).toBe(`${location.origin}/image.jpg?size=128`);
 });
 
-test('Fully qualified domain', () => {
+it('Fully qualified domain', () => {
     expect(isFullyQualifiedDomain('www.google.com')).toBe(true);
     expect(isFullyQualifiedDomain('*.google.com')).toBe(false);
 });

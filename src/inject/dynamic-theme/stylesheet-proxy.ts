@@ -116,7 +116,7 @@ export function injectProxy(enableStyleSheetsProxy: boolean) {
         // current situation of the DOM. Instead of a static list.
         const nodeListBehavior: ProxyHandler<NodeListOf<HTMLElement>> = {
             get: function (_: NodeListOf<HTMLElement>, property: string) {
-                return getCurrentElementValue()[Number(property)];
+                return getCurrentElementValue()[Number(property) || property];
             }
         };
         elements = new Proxy(elements, nodeListBehavior);

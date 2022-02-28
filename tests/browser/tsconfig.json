@@ -1,11 +1,10 @@
 {
-    "$schema": "https://json.schemastore.org/tsconfig",
     "compilerOptions": {
         "target": "ES2019",
         "module": "CommonJS",
         "lib": [
-            "es2015",
-            "dom"
+            "ES2015",
+            "Dom"
         ],
         "types": [
             "chrome",

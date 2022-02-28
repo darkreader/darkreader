@@ -1,5 +1,3 @@
-// noinspection HttpUrlsUsage
-
 import {isURLEnabled, isURLMatched, isPDF, isFullyQualifiedDomain, getURLHostOrProtocol, getAbsoluteURL} from '../../../src/utils/url';
 import type {UserSettings} from '../../../src/definitions';
 

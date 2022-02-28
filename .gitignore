@@ -23,3 +23,7 @@ tests/inject/coverage/
 # Cache files
 #-----------------------------------
 .eslintcache
+
+# V8 Profiler logs
+#-----------------------------------
+isolate-*-v8.log

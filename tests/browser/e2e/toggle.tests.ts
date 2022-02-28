@@ -1,4 +1,4 @@
-import {multiline, timeout} from '../../test-utils';
+import {multiline, timeout} from '../../support/test-utils';
 
 async function loadBasicPage(header = 'E2E test page') {
     await loadTestPage({

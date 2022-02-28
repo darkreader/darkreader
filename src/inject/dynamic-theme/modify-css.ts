@@ -487,7 +487,7 @@ export function getBgImageModifier(
                         let result = '';
                         let lastWasURL = false;
                         // Go trough asyncResults and add seperators between URL's and gradients where needed.
-                        asyncResults.forEach((asyncResult) => {
+                        asyncResults.filter(Boolean).forEach((asyncResult) => {
                             if (lastWasURL) {
                                 // Only add a seperator when asyncResult isn't empty.
                                 if (asyncResult) {

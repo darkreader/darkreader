@@ -1,6 +1,5 @@
 {
     "compilerOptions": {
-        "noImplicitAny": true,
         "target": "es2019",
         "baseUrl": ".",
         "module": "es2015",
@@ -17,11 +16,9 @@
         ],
         "allowJs": true,
         "downlevelIteration": true,
-        "noEmit": true,
+        "noImplicitAny": true,
+        "resolveJsonModule": true,
         "jsx": "react",
-        "jsxFactory": "m"
-    },
-    "exclude": [
-        "node_modules"
-    ]
+        "jsxFactory": "m",
+    }
 }

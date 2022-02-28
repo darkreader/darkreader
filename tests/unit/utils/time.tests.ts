@@ -1,4 +1,4 @@
-import {isInTimeIntervalLocal, nextTimeInterval, isNightAtLocation, nextTimeChangeAtLocation, parseTime, getDuration, getDurationInMinutes} from '../../src/utils/time';
+import {isInTimeIntervalLocal, nextTimeInterval, isNightAtLocation, nextTimeChangeAtLocation, parseTime, getDuration, getDurationInMinutes} from '../../../src/utils/time';
 
 test('Time interval', () => {
     // isInTimeIntervalLocal is time-zone dependent

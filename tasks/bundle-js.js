@@ -8,7 +8,7 @@ const rollupPluginReplace = require('@rollup/plugin-replace');
 /** @type {any} */
 const rollupPluginTypescript = require('@rollup/plugin-typescript');
 const typescript = require('typescript');
-const {getDestDir, PLATFORM} = require('./paths');
+const {getDestDir, PLATFORM, rootDir, rootPath} = require('./paths');
 const reload = require('./reload');
 const {PORT} = reload;
 const {createTask} = require('./task');
@@ -121,12 +121,13 @@ const jsEntries = [
 async function bundleJS(/** @type {JSEntry} */entry, {debug, watch}) {
     const {src, dest} = entry;
     const bundle = await rollup.rollup({
-        input: src,
+        input: rootPath(src),
         plugins: [
             rollupPluginNodeResolve(),
             rollupPluginTypescript({
+                rootDir,
                 typescript,
-                tsconfig: 'src/tsconfig.json',
+                tsconfig: rootPath('src/tsconfig.json'),
                 noImplicitAny: debug ? false : true,
                 removeComments: debug ? false : true,
                 sourceMap: debug ? true : false,

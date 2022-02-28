@@ -3,33 +3,28 @@
   "version": "4.9.45",
   "description": "Dark mode for every website",
   "scripts": {
-    "benchmark-server": "node tests/benchmark-server/index.js",
     "api": "node tasks/build.js --api",
+    "benchmark-server": "node tests/benchmark-server/index.js",
     "build": "node tasks/build.js --release",
     "build:all": "node tasks/build.js --debug --release --api",
+    "code-style": "eslint --ignore-pattern \"!.eslintplugin.js\" --cache --fix \"src/**/*.ts\" \"src/**/*.tsx\" \"tasks/**/*.js\" \"tests/[!coverage]**/*.js\" \"tests/**/*.ts\" \".eslintrc.js\" \"index.d.ts\" \".eslintplugin.js\"",
     "debug": "node tasks/build.js --debug",
     "debug:watch": "node tasks/build.js --debug --watch",
+    "lint": "eslint --ignore-pattern \"!.eslintplugin.js\" \"src/**/*.ts\" \"src/**/*.tsx\" \"tasks/**/*.js\" \"tests/**/*.ts\" \"tests/[!coverage]**/*.js\" \"index.d.ts\" \".eslintplugin.js\"",
     "prepublishOnly": "npm test && npm run api",
     "release": "npm test && npm run lint && node tasks/build.js --release",
-    "code-style": "eslint --ignore-pattern \"!.eslintplugin.js\" --cache --fix \"src/**/*.ts\" \"src/**/*.tsx\" \"tasks/**/*.js\" \"tests/[!coverage]**/*.js\" \"tests/**/*.ts\" \".eslintrc.js\" \"index.d.ts\" \".eslintplugin.js\"",
-    "lint": "eslint --ignore-pattern \"!.eslintplugin.js\" \"src/**/*.ts\" \"src/**/*.tsx\" \"tasks/**/*.js\" \"tests/**/*.ts\" \"tests/[!coverage]**/*.js\" \"index.d.ts\" \".eslintplugin.js\"",
-
     "test": "npm run test:unit",
-    "test:ci": "npm run test:unit",
     "test:all": "npm run test:unit; npm run test:browser; npm run test:inject; npm run test:project",
-
-    "test:unit": "jest --config=tests/unit/jest.config.js",
-    "test:unit:debug": "node --inspect-brk ./node_modules/jest/bin/jest --config=tests/unit/jest.config.js --runInBand --no-cache --watch",
-    "test:coverage": "jest --config=tests/unit/jest.config.js --coverage",
-
     "test:browser": "npm run debug && npm run test:chrome && npm run test:firefox",
-    "test:chrome": "TEST_BROWSER=chrome jest --config=tests/browser/jest.config.js --runInBand",
-    "test:firefox": "TEST_BROWSER=firefox jest --config=tests/browser/jest.config.js --runInBand",
-
+    "test:chrome": "npm run debug && TEST_BROWSER=chrome jest --config=tests/browser/jest.config.js --runInBand",
+    "test:ci": "npm run test:unit",
+    "test:coverage": "jest --config=tests/unit/jest.config.js --coverage",
+    "test:firefox": "npm run debug && TEST_BROWSER=firefox jest --config=tests/browser/jest.config.js --runInBand",
     "test:inject": "node tests/inject/run.js",
     "test:inject:debug": "node tests/inject/run.js --debug",
-
-    "test:project": "jest --config=tests/project/jest.config.js"
+    "test:project": "jest --config=tests/project/jest.config.js",
+    "test:unit": "jest --config=tests/unit/jest.config.js",
+    "test:unit:debug": "node --inspect-brk ./node_modules/jest/bin/jest --config=tests/unit/jest.config.js --runInBand --no-cache --watch"
   },
   "main": "darkreader.js",
   "repository": {

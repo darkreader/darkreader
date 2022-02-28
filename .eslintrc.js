@@ -163,4 +163,8 @@ module.exports = {
             }
         },
     ],
+
+    // Ignore temporarily since it's taking forever.
+    // It seems to be importing typescript or something.
+    ignorePatterns: ['tests/project/tsconf.tests.ts'],
 };

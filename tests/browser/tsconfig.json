@@ -1,18 +1,25 @@
 {
-    "extends": "../../src/tsconfig",
+    "$schema": "https://json.schemastore.org/tsconfig",
     "compilerOptions": {
-        "esModuleInterop": true,
-        "module": "commonjs",
-        "outDir": "",
+        "target": "ES2019",
+        "module": "CommonJS",
+        "lib": [
+            "es2015",
+            "dom"
+        ],
         "types": [
             "chrome",
             "jest",
             "offscreencanvas",
             "puppeteer-core"
         ],
-        "lib": [
-            "ES6",
-            "dom"
-        ]
+        "allowJs": true,
+        "downlevelIteration": true,
+        "esModuleInterop": true,
+        "jsx": "react",
+        "jsxFactory": "m",
+        "moduleResolution": "Node",
+        "noEmit": true,
+        "noImplicitAny": true,
     }
 }

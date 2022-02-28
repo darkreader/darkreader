@@ -1,4 +1,4 @@
-import {parseGradient} from '../../src/utils/parsing';
+import {parseGradient} from '../../../src/utils/parsing';
 
 test('type gradients', () => {
     expect(parseGradient('linear-gradient(rgb(200))')).toEqual([{

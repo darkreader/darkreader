@@ -2,7 +2,7 @@ import '../polyfills';
 import {DEFAULT_THEME} from '../../../src/defaults';
 import {createOrUpdateDynamicTheme, removeDynamicTheme} from '../../../src/inject/dynamic-theme';
 import {isChromium} from '../../../src/utils/platform';
-import {multiline, timeout} from '../../test-utils';
+import {multiline, timeout} from '../test-utils';
 
 const theme = {
     ...DEFAULT_THEME,

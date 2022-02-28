@@ -172,7 +172,7 @@ function deepWatchForInlineStyles(
     const RETRY_TIMEOUT = getDuration({seconds: 2});
     const MAX_ATTEMPTS_COUNT = 50;
     let cache: MutationRecord[] = [];
-    let timeoutId: number = null;
+    let timeoutId: ReturnType<typeof setTimeout> = null;
 
     const handleAttributeMutations = throttle((mutations: MutationRecord[]) => {
         mutations.forEach((m) => {

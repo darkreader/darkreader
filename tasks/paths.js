@@ -1,3 +1,8 @@
+const {dirname, join} = require('path');
+const packageJson = require.resolve('../package.json');
+const rootDir = dirname(packageJson);
+const rootPath = (...paths) => join(rootDir, ...paths);
+
 module.exports = {
     PLATFORM: {
         CHROME: 'chrome',
@@ -12,4 +17,7 @@ module.exports = {
     getTestDestDir: function () {
         return `build-tests`;
     },
+
+    rootDir,
+    rootPath,
 };

@@ -18,6 +18,7 @@ tests/inject/coverage/
 #-----------------------------------
 .idea/
 .vscode/
+.log/
 *.code-workspace
 
 # Cache files

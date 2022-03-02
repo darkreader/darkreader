@@ -92,7 +92,7 @@
     "karma-coverage": "2.1.0",
     "karma-firefox-launcher": "2.1.2",
     "karma-jasmine": "4.0.1",
-    "karma-rollup-preprocessor": "github:jlmakes/karma-rollup-preprocessor#master",
+    "karma-rollup-preprocessor": "7.0.8",
     "karma-safari-launcher": "1.0.0",
     "less": "4.1.2",
     "malevic": "0.18.6",

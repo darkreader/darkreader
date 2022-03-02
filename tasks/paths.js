@@ -15,7 +15,7 @@ module.exports = {
         return `${buildTypeDir}/${platform}`;
     },
     getTestDestDir: function () {
-        return `build-tests`;
+        return `build/tests`;
     },
 
     rootDir,

@@ -34,6 +34,7 @@ export const DEFAULT_THEME: Theme = {
     styleSystemControls: !isCSSColorSchemePropSupported,
     lightColorScheme: 'Default',
     darkColorScheme: 'Default',
+    immediateModify: false,
 };
 
 export const DEFAULT_COLORSCHEME: ParsedColorSchemeConfig = {

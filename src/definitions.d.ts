@@ -64,6 +64,7 @@ export interface Theme {
     styleSystemControls: boolean;
     lightColorScheme: string;
     darkColorScheme: string;
+    immediateModify: boolean;
 }
 
 export type FilterConfig = Theme;

@@ -1,6 +1,6 @@
 # Build files
 #-----------------------------------
-build
+build/
 darkreader.js
 debug.log
 

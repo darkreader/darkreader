@@ -91,6 +91,15 @@ async function writeFile(dest, content) {
     await fs.writeFile(dest, content, 'utf8');
 }
 
+/**
+ * @param {string | string[]} patterns
+ * @returns {Promise<string[]>}
+ */
+async function getPaths(patterns) {
+    const {globby} = await import('globby');
+    return await globby(patterns);
+}
+
 module.exports = {
     log,
     copyFile,
@@ -98,4 +107,5 @@ module.exports = {
     readFile,
     removeFolder,
     writeFile,
+    getPaths,
 };

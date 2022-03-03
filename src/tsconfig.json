@@ -1,7 +1,7 @@
 {
     "compilerOptions": {
         "target": "ES2019",
-        "baseUrl": ".",
+        "baseUrl": "./",
         "module": "ES2015",
         "moduleResolution": "node",
         "lib": [

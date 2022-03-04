@@ -25,6 +25,9 @@ Object {
       "offscreencanvas",
     ],
   },
+  "exclude": Array [
+    "src/ui/popup/compatibility.js",
+  ],
   "files": Array [
     "./defaults.ts",
     "./definitions.d.ts",
@@ -56,6 +59,7 @@ Object {
     "./generators/utils/format.ts",
     "./generators/utils/matrix.ts",
     "./generators/utils/parse.ts",
+    "./inject/detector.ts",
     "./inject/fallback.ts",
     "./inject/index.ts",
     "./inject/style.ts",
@@ -148,6 +152,7 @@ Object {
     "./ui/popup/settings-page/automation-button.tsx",
     "./ui/popup/settings-page/change-browser-theme.tsx",
     "./ui/popup/settings-page/context-menus.tsx",
+    "./ui/popup/settings-page/detect-dark-theme.tsx",
     "./ui/popup/settings-page/devtools.tsx",
     "./ui/popup/settings-page/enabled-by-default.tsx",
     "./ui/popup/settings-page/index.tsx",
@@ -164,6 +169,7 @@ Object {
     "./ui/popup/theme/controls/font-picker.tsx",
     "./ui/popup/theme/controls/format.ts",
     "./ui/popup/theme/controls/grayscale.tsx",
+    "./ui/popup/theme/controls/immediate-modify.tsx",
     "./ui/popup/theme/controls/index.tsx",
     "./ui/popup/theme/controls/mode.tsx",
     "./ui/popup/theme/controls/reset-button.tsx",
@@ -233,6 +239,9 @@ Object {
       "offscreencanvas",
     ],
   },
+  "exclude": Array [
+    "../src/ui/popup/compatibility.js",
+  ],
   "files": Array [
     "./chrome.ts",
     "./fetch.ts",

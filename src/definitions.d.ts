@@ -101,6 +101,7 @@ export interface UserSettings {
     enableForPDF: boolean;
     enableForProtectedPages: boolean;
     enableContextMenus: boolean;
+    detectDarkTheme: boolean;
 }
 
 export interface TimeSettings {

@@ -594,6 +594,8 @@ export class Extension implements ExtensionState {
                 const mode = this.autoState === 'scheme-dark' ? 1 : 0;
                 theme = {...theme, mode};
             }
+            const isIFrame = frameURL != null;
+            const detectDarkTheme = !isIFrame && this.user.settings.detectDarkTheme;
 
             logInfo(`Creating CSS for url: ${url}`);
             logInfo(`Custom theme ${custom ? 'was found' : 'was not found'}, Preset theme ${preset ? 'was found' : 'was not found'}
@@ -602,14 +604,20 @@ export class Extension implements ExtensionState {
                 case ThemeEngines.cssFilter: {
                     return {
                         type: MessageType.BG_ADD_CSS_FILTER,
-                        data: createCSSFilterStylesheet(theme, url, frameURL, this.config.INVERSION_FIXES_RAW, this.config.INVERSION_FIXES_INDEX),
+                        data: {
+                            css: createCSSFilterStylesheet(theme, url, frameURL, this.config.INVERSION_FIXES_RAW, this.config.INVERSION_FIXES_INDEX),
+                            detectDarkTheme,
+                        },
                     };
                 }
                 case ThemeEngines.svgFilter: {
                     if (isFirefox) {
                         return {
                             type: MessageType.BG_ADD_CSS_FILTER,
-                            data: createSVGFilterStylesheet(theme, url, frameURL, this.config.INVERSION_FIXES_RAW, this.config.INVERSION_FIXES_INDEX),
+                            data: {
+                                css: createSVGFilterStylesheet(theme, url, frameURL, this.config.INVERSION_FIXES_RAW, this.config.INVERSION_FIXES_INDEX),
+                                detectDarkTheme,
+                            },
                         };
                     }
                     return {
@@ -618,25 +626,31 @@ export class Extension implements ExtensionState {
                             css: createSVGFilterStylesheet(theme, url, frameURL, this.config.INVERSION_FIXES_RAW, this.config.INVERSION_FIXES_INDEX),
                             svgMatrix: getSVGFilterMatrixValue(theme),
                             svgReverseMatrix: getSVGReverseFilterMatrixValue(),
+                            detectDarkTheme,
                         },
                     };
                 }
                 case ThemeEngines.staticTheme: {
                     return {
                         type: MessageType.BG_ADD_STATIC_THEME,
-                        data: theme.stylesheet && theme.stylesheet.trim() ?
-                            theme.stylesheet :
-                            createStaticStylesheet(theme, url, frameURL, this.config.STATIC_THEMES_RAW, this.config.STATIC_THEMES_INDEX),
+                        data: {
+                            css: theme.stylesheet && theme.stylesheet.trim() ?
+                                theme.stylesheet :
+                                createStaticStylesheet(theme, url, frameURL, this.config.STATIC_THEMES_RAW, this.config.STATIC_THEMES_INDEX),
+                            detectDarkTheme: this.user.settings.detectDarkTheme,
+                        },
                     };
                 }
                 case ThemeEngines.dynamicTheme: {
-                    const filter = {...theme};
-                    delete filter.engine;
                     const fixes = getDynamicThemeFixesFor(url, frameURL, this.config.DYNAMIC_THEME_FIXES_RAW, this.config.DYNAMIC_THEME_FIXES_INDEX, this.user.settings.enableForPDF);
-                    const isIFrame = frameURL != null;
                     return {
                         type: MessageType.BG_ADD_DYNAMIC_THEME,
-                        data: {filter, fixes, isIFrame},
+                        data: {
+                            theme,
+                            fixes,
+                            isIFrame,
+                            detectDarkTheme,
+                        },
                     };
                 }
                 default: {

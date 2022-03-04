@@ -1,12 +1,12 @@
 import ts, {ExitStatus} from 'typescript';
 import {dirname, join} from 'path';
-import {ForkOptions} from 'child_process';
+import {fork} from 'child_process';
 import {tmpdir} from 'os';
 import {mkdtemp} from 'fs/promises';
-import {forka} from './utils';
+import {childClosed} from './utils';
 
-const rootDir = dirname(require.resolve('../../package.json'))
-const tscModule = require.resolve('typescript/bin/tsc');
+const rootDir = dirname(require.resolve('../../package.json'));
+const tsc = require.resolve('typescript/bin/tsc');
 
 const tsProjects: Array<{ tsconfig: string }> = [
     // Browser extension
@@ -26,27 +26,25 @@ describe('TypeScript project config', () => {
         // Parse config from temp dir instead of root dir
         const cwd = await mkdtemp(join(tmpdir()));
         const project = join(rootDir, tsconfig, 'tsconfig.json');
-        const {code, stdout} = await tsc(['--project', project, '--showConfig'], {cwd});
 
-        expect(stdout).toStartWith('{');
-        expect(code).toBe(ExitStatus.Success);
-        const configJson = JSON.parse(stdout);
-        const config = ts.parseJsonConfigFileContent(configJson, ts.sys, project);
+        // Fire
+        const child = fork(tsc, ['--project', project, '--showConfig'], {silent: true, cwd});
 
+        const {response} = await childClosed(child, {serialization: 'json'});
+        expect(child.exitCode).toBe(ExitStatus.Success);
+        const config = ts.parseJsonConfigFileContent(response, ts.sys, project);
         expect(config.raw).toMatchSnapshot();
-    });
+    }, 100000);
 
-    // Slow and not executed automatically
+    // Slow test (skipped by default)
     it.skip.each(tsProjects)('should compile without errors: $tsconfig', async ({tsconfig}) => {
         // Compile config from temp dir instead of root dir
         const cwd = await mkdtemp(join(tmpdir()));
         const project = join(rootDir, tsconfig, 'tsconfig.json');
-        const {code, stdout} = await tsc(['--project', project, '--noEmit'], {cwd});
-        expect(stdout).toBeUndefined();
-        expect(code).toBe(ExitStatus.Success);
+
+        // Fire
+        const child = fork(tsc, ['--project', project, '--noEmit'], {silent: true, cwd});
+        await childClosed(child);
+        expect(child.exitCode).toBe(ExitStatus.Success);
     }, 60000);
 });
-
-async function tsc(args: string[], options?: ForkOptions) {
-    return forka(tscModule, args, {silent: true, ...options});
-}

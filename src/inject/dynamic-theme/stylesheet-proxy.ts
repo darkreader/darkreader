@@ -77,9 +77,15 @@ export function injectProxy(enableStyleSheetsProxy: boolean) {
         const getCurrentValue = () => {
             const docSheets = documentStyleSheetsDescriptor.get.call(this);
 
-            return Object.setPrototypeOf([...docSheets].filter((styleSheet: CSSStyleSheet) => {
+            const filteredSheets = [...docSheets].filter((styleSheet: CSSStyleSheet) => {
                 return !(styleSheet.ownerNode as HTMLElement).classList.contains('darkreader');
-            }), StyleSheetList.prototype);
+            });
+
+            (filteredSheets as any).item = (item: number) => {
+                return filteredSheets[item];
+            };
+
+            return Object.setPrototypeOf(filteredSheets, StyleSheetList.prototype);
         };
 
         let elements = getCurrentValue();

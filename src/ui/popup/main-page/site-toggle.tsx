@@ -6,10 +6,13 @@ import type {ViewProps} from '../types';
 
 export default function SiteToggleGroup(props: ViewProps) {
     const isPageEnabled = isURLEnabled(props.tab.url, props.data.settings, props.tab);
+    const {isDarkThemeDetected} = props.tab;
     const descriptionText = isPDF(props.tab.url) ?
         isPageEnabled ?
             'Enabled for PDF files' :
             'Disabled for PDF files' :
+        isDarkThemeDetected ?
+            'Dark theme detected on page' :
         isPageEnabled ?
             'Enabled for current website' :
             'Disabled for current website';

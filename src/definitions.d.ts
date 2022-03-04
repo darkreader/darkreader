@@ -119,6 +119,7 @@ export interface TabInfo {
     isProtected: boolean;
     isInjected: boolean;
     isInDarkList: boolean;
+    isDarkThemeDetected: boolean;
 }
 
 export interface Message {

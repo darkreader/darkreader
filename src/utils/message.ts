@@ -38,4 +38,6 @@ export const MessageType = {
     CS_FRAME_RESUME: 'cs-frame-resume',
     CS_EXPORT_CSS_RESPONSE: 'cs-export-css-response',
     CS_FETCH: 'cs-fetch',
+    CS_DARK_THEME_DETECTED: 'cs-dark-theme-detected',
+    CS_DARK_THEME_NOT_DETECTED: 'cs-dark-theme-not-detected',
 };

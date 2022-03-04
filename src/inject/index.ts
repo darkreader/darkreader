@@ -67,6 +67,7 @@ function onMessage({type, data}: Message) {
                 runDarkThemeDetector((hasDarkTheme) => {
                     if (hasDarkTheme) {
                         removeStyle();
+                        onDarkThemeDetected();
                     }
                 });
             }
@@ -82,6 +83,7 @@ function onMessage({type, data}: Message) {
                     if (hasDarkTheme) {
                         removeStyle();
                         removeSVGFilter();
+                        onDarkThemeDetected();
                     }
                 });
             }
@@ -95,6 +97,7 @@ function onMessage({type, data}: Message) {
                 runDarkThemeDetector((hasDarkTheme) => {
                     if (hasDarkTheme) {
                         removeDynamicTheme();
+                        onDarkThemeDetected();
                     }
                 });
             }
@@ -134,6 +137,10 @@ function onFreeze() {
 
 function onResume() {
     sendMessage({type: MessageType.CS_FRAME_RESUME});
+}
+
+function onDarkThemeDetected() {
+    sendMessage({type: MessageType.CS_DARK_THEME_DETECTED})
 }
 
 // Thunderbird don't has "tabs", and emails aren't 'frozen' or 'cached'.

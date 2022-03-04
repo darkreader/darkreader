@@ -249,6 +249,9 @@ export class Extension implements ExtensionState {
                 const url = await this.tabs.getActiveTabURL();
                 const info = this.getURLInfo(url);
                 info.isInjected = await this.tabs.canAccessActiveTab();
+                if (this.user.settings.detectDarkTheme) {
+                    info.isDarkThemeDetected = await this.tabs.isActiveTabDarkThemeDetected();
+                }
                 return info;
             },
             changeSettings: (settings) => this.changeSettings(settings),
@@ -580,7 +583,8 @@ export class Extension implements ExtensionState {
             url,
             isInDarkList,
             isProtected,
-            isInjected: null
+            isInjected: null,
+            isDarkThemeDetected: null,
         };
     }
 

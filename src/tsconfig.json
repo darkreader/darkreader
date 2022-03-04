@@ -20,5 +20,8 @@
         "resolveJsonModule": true,
         "jsx": "react",
         "jsxFactory": "m",
-    }
+    },
+    "exclude": [
+        "src/ui/popup/compatibility.js"
+    ]
 }

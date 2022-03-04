@@ -89,7 +89,7 @@ export function iterateCSSDeclarations(style: CSSStyleDeclaration, iterate: (pro
 }
 
 export const cssURLRegex = /url\((('.+?')|(".+?")|([^\)]*?))\)/g;
-export const cssImportRegex = /@import\s*(url\()?(('.+?')|(".+?")|([^\)]*?))\)? ?(screen)?;?/g;
+export const cssImportRegex = /@import\s*(url\()?(('.+?')|(".+?")|([^\)]*?))\)? ?(screen)?;?/gi;
 
 export function getCSSURLValue(cssURL: string) {
     return cssURL.replace(/^url\((.*)\)$/, '$1').trim().replace(/^"(.*)"$/, '$1').replace(/^'(.*)'$/, '$1');

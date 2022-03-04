@@ -15,7 +15,7 @@ export type ChildClosedPayload = { stdout: string; stderr: string; response?: an
  *
  * @example
  * const child = fork('./script.js');
- * const { stdout, stderr, response } = await watchChild(child, );
+ * const { stdout, stderr, response } = await watchChild(child);
  * const { exitCode } = child;
  */
 export async function childClosed(child: ChildProcess, options?: ChildClosedOptions): Promise<ChildClosedPayload> {

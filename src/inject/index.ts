@@ -140,7 +140,7 @@ function onResume() {
 }
 
 function onDarkThemeDetected() {
-    sendMessage({type: MessageType.CS_DARK_THEME_DETECTED})
+    sendMessage({type: MessageType.CS_DARK_THEME_DETECTED});
 }
 
 // Thunderbird don't has "tabs", and emails aren't 'frozen' or 'cached'.

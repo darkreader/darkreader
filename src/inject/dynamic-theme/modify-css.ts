@@ -10,7 +10,7 @@ import {getImageDetails, getFilteredImageDataURL, cleanImageProcessingCache} fro
 import type {CSSVariableModifier, VariablesStore} from './variables';
 import {logWarn, logInfo} from '../../utils/log';
 import type {FilterConfig, Theme} from '../../definitions';
-import {isFirefox} from '../../utils/platform';
+import {isFirefox, isCSSColorSchemePropSupported} from '../../utils/platform';
 import type {parsedGradient} from '../../utils/parsing';
 import {parseGradient} from '../../utils/parsing';
 
@@ -83,17 +83,31 @@ export function getModifiableCSSDeclaration(
     return null;
 }
 
+function joinSelectors(...selectors: string[]) {
+    return selectors.filter(Boolean).join(', ');
+}
+
 export function getModifiedUserAgentStyle(theme: Theme, isIFrame: boolean, styleSystemControls: boolean) {
     const lines: string[] = [];
     if (!isIFrame) {
         lines.push('html {');
         lines.push(`    background-color: ${modifyBackgroundColor({r: 255, g: 255, b: 255}, theme)} !important;`);
         lines.push('}');
+
+        // Apparantly using this on iframe's can cause issues with the background color that would be applied.
+        if (isCSSColorSchemePropSupported) {
+            lines.push('html {');
+            lines.push(`    color-scheme: ${theme.mode === 1 ? 'dark' : 'dark light'} !important;`);
+            lines.push('}');
+        }
     }
-    lines.push(`${isIFrame ? '' : 'html, body, '}${styleSystemControls ? 'input, textarea, select, button' : ''} {`);
-    lines.push(`    background-color: ${modifyBackgroundColor({r: 255, g: 255, b: 255}, theme)};`);
-    lines.push('}');
-    lines.push(`html, body, ${styleSystemControls ? 'input, textarea, select, button' : ''} {`);
+    const bgSelectors = joinSelectors(isIFrame ? '' : 'html, body', styleSystemControls ? 'input, textarea, select, button' : '');
+    if (bgSelectors) {
+        lines.push(`${bgSelectors} {`);
+        lines.push(`    background-color: ${modifyBackgroundColor({r: 255, g: 255, b: 255}, theme)};`);
+        lines.push('}');
+    }
+    lines.push(`${joinSelectors('html, body', styleSystemControls ? 'input, textarea, select, button' : '')} {`);
     lines.push(`    border-color: ${modifyBorderColor({r: 76, g: 76, b: 76}, theme)};`);
     lines.push(`    color: ${modifyForegroundColor({r: 0, g: 0, b: 0}, theme)};`);
     lines.push('}');
@@ -470,7 +484,25 @@ export function getBgImageModifier(
             if (results.some((r) => r instanceof Promise)) {
                 return Promise.all(results)
                     .then((asyncResults) => {
-                        return asyncResults.join('');
+                        let result = '';
+                        let lastWasURL = false;
+                        // Go trough asyncResults and add seperators between URL's and gradients where needed.
+                        asyncResults.filter(Boolean).forEach((asyncResult) => {
+                            if (lastWasURL) {
+                                // Only add a seperator when asyncResult isn't empty.
+                                if (asyncResult) {
+                                    result += ', ';
+                                }
+                                lastWasURL = false;
+                            }
+
+                            result += asyncResult;
+
+                            if (asyncResult.startsWith('url(')) {
+                                lastWasURL = true;
+                            }
+                        });
+                        return result;
                     });
             }
             return results.join('');

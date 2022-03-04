@@ -1,4 +1,4 @@
-import {scale, clamp, multiplyMatrices} from '../../src/utils/math';
+import {scale, clamp, multiplyMatrices} from '../../../src/utils/math';
 
 test('Scale', () => {
     expect(scale(5, 0, 10, 0, 100)).toEqual(50);

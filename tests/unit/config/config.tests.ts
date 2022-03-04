@@ -1,16 +1,16 @@
 import {readFile} from 'fs';
-import {resolve as resolvePath} from 'path';
-import {compareURLPatterns} from '../../src/utils/url';
-import {parseArray, formatArray, getTextDiffIndex, getTextPositionMessage} from '../../src/utils/text';
-import {parseInversionFixes, formatInversionFixes} from '../../src/generators/css-filter';
-import {parseDynamicThemeFixes, formatDynamicThemeFixes} from '../../src/generators/dynamic-theme';
-import {parseStaticThemes, formatStaticThemes} from '../../src/generators/static-theme';
-import type {StaticTheme} from '../../src/definitions';
-import {ParseColorSchemeConfig} from '../../src/utils/colorscheme-parser';
+import {compareURLPatterns} from '../../../src/utils/url';
+import {parseArray, formatArray, getTextDiffIndex, getTextPositionMessage} from '../../../src/utils/text';
+import {parseInversionFixes, formatInversionFixes} from '../../../src/generators/css-filter';
+import {parseDynamicThemeFixes, formatDynamicThemeFixes} from '../../../src/generators/dynamic-theme';
+import {parseStaticThemes, formatStaticThemes} from '../../../src/generators/static-theme';
+import type {StaticTheme} from '../../../src/definitions';
+import {ParseColorSchemeConfig} from '../../../src/utils/colorscheme-parser';
+import {rootPath} from '../../support/test-utils';
 
 function readConfig(fileName: string) {
     return new Promise<string>((resolve, reject) => {
-        readFile(resolvePath(__dirname, '../../src/config/', fileName), {encoding: 'utf-8'}, (err, data) => {
+        readFile(rootPath('src/config', fileName), {encoding: 'utf-8'}, (err, data) => {
             if (err) {
                 reject(err);
                 return;
@@ -48,7 +48,7 @@ test('Dark Sites list', async () => {
     expect(sites.every(isURLPatternValid)).toBe(true);
 
     // sites are sorted alphabetically
-    expect(sites).toEqual(sites.slice().sort(compareURLPatterns));
+    expect(sites.slice().sort(compareURLPatterns)).toEqual(sites);
 
     // sites are properly formatted
     expect(throwIfDifferent(file, formatArray(sites), 'Dark Sites list format error')).not.toThrow();

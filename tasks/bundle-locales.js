@@ -1,6 +1,6 @@
 // @ts-check
 const fs = require('fs').promises;
-const {getDestDir, PLATFORM} = require('./paths');
+const {getDestDir, PLATFORM, rootPath} = require('./paths');
 const reload = require('./reload');
 const {createTask} = require('./task');
 const {readFile, writeFile} = require('./utils');
@@ -36,7 +36,7 @@ async function bundleLocale(/** @type {string} */filePath, {debug}) {
 }
 
 async function bundleLocales({debug}) {
-    const localesSrcDir = 'src/_locales';
+    const localesSrcDir = rootPath('src/_locales');
     const list = await fs.readdir(localesSrcDir);
     for (const name of list) {
         if (!name.endsWith('.config')) {

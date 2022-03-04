@@ -2,28 +2,18 @@ import {DEFAULT_SETTINGS, DEFAULT_THEME} from '../defaults';
 import {debounce} from '../utils/debounce';
 import {isURLMatched} from '../utils/url';
 import type {UserSettings} from '../definitions';
-import {readSyncStorage, readLocalStorage, writeSyncStorage, writeLocalStorage, subscribeToOuterSettingsChange} from './utils/extension-api';
+import {readSyncStorage, readLocalStorage, writeSyncStorage, writeLocalStorage} from './utils/extension-api';
 import {logWarn} from '../utils/log';
 import {PromiseBarrier} from '../utils/promise-barrier';
 
 const SAVE_TIMEOUT = 1000;
 
-interface UserStorageOptions {
-    onRemoteSettingsChange: () => void;
-}
-
 export default class UserStorage {
     private loadBarrier: PromiseBarrier<UserSettings, void>;
     private saveStorageBarrier: PromiseBarrier<void, void>;
 
-    constructor({onRemoteSettingsChange}: UserStorageOptions) {
+    constructor() {
         this.settings = null;
-        subscribeToOuterSettingsChange(async () => {
-            if (this.settings.syncSettings) {
-                await this.loadSettings();
-                onRemoteSettingsChange();
-            }
-        });
     }
 
     settings: Readonly<UserSettings>;

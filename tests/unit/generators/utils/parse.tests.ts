@@ -1,5 +1,5 @@
-import {indexSitesFixesConfig, getSitesFixesFor} from '../../../src/generators/utils/parse';
-import type {SitesFixesParserOptions} from '../../../src/generators/utils/parse';
+import {indexSitesFixesConfig, getSitesFixesFor} from '../../../../src/generators/utils/parse';
+import type {SitesFixesParserOptions} from '../../../../src/generators/utils/parse';
 
 test('Index config', () => {
     interface TestFix {

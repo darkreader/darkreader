@@ -5,11 +5,11 @@ import type {StyleElement, StyleManager} from './style-manager';
 import {manageStyle, getManageableStyles, cleanLoadingLinks} from './style-manager';
 import {watchForStyleChanges, stopWatchingForStyleChanges} from './watch';
 import {forEach, push, toArray} from '../../utils/array';
-import {removeNode, watchForNodePosition, iterateShadowHosts, isDOMReady, removeDOMReadyListener, cleanReadyStateCompleteListeners, addDOMReadyListener} from '../utils/dom';
+import {removeNode, watchForNodePosition, iterateShadowHosts, isDOMReady, removeDOMReadyListener, cleanReadyStateCompleteListeners, addDOMReadyListener, setIsDOMReady} from '../utils/dom';
 import {logInfo, logWarn} from '../../utils/log';
 import {throttle} from '../../utils/throttle';
 import {clamp} from '../../utils/math';
-import {FilterMode, getCSSFilterValue} from '../../generators/css-filter';
+import {getCSSFilterValue} from '../../generators/css-filter';
 import {modifyBackgroundColor, modifyColor, modifyForegroundColor} from '../../generators/modify-colors';
 import {createTextStyle} from '../../generators/text-style';
 import type {FilterConfig, DynamicThemeFix} from '../../definitions';
@@ -86,27 +86,18 @@ function createStaticStyleOverrides() {
     setupNodePositionWatcher(textStyle, 'text');
 
     const invertStyle = createOrUpdateStyle('darkreader--invert');
-    let invertStyleContent = '';
     if (fixes && Array.isArray(fixes.invert) && fixes.invert.length > 0) {
-        invertStyleContent += [
+        invertStyle.textContent = [
             `${fixes.invert.join(', ')} {`,
             `    filter: ${getCSSFilterValue({
                 ...filter,
                 contrast: filter.mode === 0 ? filter.contrast : clamp(filter.contrast - 10, 0, 100),
             })} !important;`,
             '}',
-            '',
         ].join('\n');
+    } else {
+        invertStyle.textContent = '';
     }
-    const imageFilter = getCSSFilterValue({
-        ...filter,
-        // Disables the invert() hue-rotate()
-        mode: FilterMode.light
-    });
-    if (imageFilter) {
-        invertStyleContent += `img { filter: ${imageFilter} !important;\n`;
-    }
-    invertStyle.textContent = invertStyleContent;
     document.head.insertBefore(invertStyle, textStyle.nextSibling);
     setupNodePositionWatcher(invertStyle, 'invert');
 
@@ -330,7 +321,7 @@ function createThemeAndWatchForUpdates() {
         watchForUpdates();
     }
 
-    if (document.hidden) {
+    if (document.hidden && !filter.immediateModify) {
         watchForDocumentVisibility(runDynamicStyle);
     } else {
         runDynamicStyle();
@@ -435,6 +426,13 @@ export function createOrUpdateDynamicTheme(filterConfig: FilterConfig, dynamicTh
         ignoredImageAnalysisSelectors = [];
         ignoredInlineSelectors = [];
     }
+
+    if (filter.immediateModify) {
+        setIsDOMReady(() => {
+            return true;
+        });
+    }
+
     isIFrame = iframe;
     if (document.head) {
         if (isAnotherDarkReaderInstanceActive()) {

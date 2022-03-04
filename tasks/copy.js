@@ -1,9 +1,8 @@
 // @ts-check
-const globby = require('globby');
 const {getDestDir, PLATFORM} = require('./paths');
 const reload = require('./reload');
 const {createTask} = require('./task');
-const {pathExists, copyFile, readFile, writeFile} = require('./utils');
+const {pathExists, copyFile, readFile, writeFile, getPaths} = require('./utils');
 
 const srcDir = 'src';
 const cwdPaths = [
@@ -65,7 +64,7 @@ async function copyManifest(path, {debug, platform}) {
 }
 
 async function copy({debug}) {
-    const files = await globby(paths);
+    const files = await getPaths(paths);
     for (const file of files) {
         for (const platform of Object.values(PLATFORM)) {
             await copyManifest(file, {debug, platform});

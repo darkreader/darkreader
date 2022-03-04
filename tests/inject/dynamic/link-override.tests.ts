@@ -1,7 +1,7 @@
 import {DEFAULT_THEME} from '../../../src/defaults';
 import {createOrUpdateDynamicTheme, removeDynamicTheme} from '../../../src/inject/dynamic-theme';
 import {isSafari} from '../../../src/utils/platform';
-import {multiline, timeout} from '../../test-utils';
+import {multiline, timeout} from '../test-utils';
 import {stubChromeRuntimeMessage, resetChromeRuntimeMessageStub, stubBackgroundFetchResponse} from '../background-stub';
 import {getCSSEchoURL} from '../echo-client';
 
@@ -82,6 +82,25 @@ describe('LINK STYLES', () => {
         stubBackgroundFetchResponse(importedURL, importedCSS);
         createCorsLink(multiline(
             `@import "${importedURL}";`,
+            'h1 strong { color: red; }',
+        ));
+        container.innerHTML = multiline(
+            '<h1><strong>Cross-origin import</strong> link override</h1>',
+        );
+        createOrUpdateDynamicTheme(theme, null, false);
+
+        await timeout(100);
+        expect(getComputedStyle(container.querySelector('h1')).backgroundColor).toBe('rgb(102, 102, 102)');
+        expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(255, 255, 255)');
+        expect(getComputedStyle(container.querySelector('h1 strong')).color).toBe('rgb(255, 26, 26)');
+    });
+
+    it('should override cross-origin imports in linked CSS with capital @import', async () => {
+        const importedCSS = 'h1 { background: gray; }';
+        const importedURL = getCSSEchoURL(importedCSS);
+        stubBackgroundFetchResponse(importedURL, importedCSS);
+        createCorsLink(multiline(
+            `@IMPORT "${importedURL}";`,
             'h1 strong { color: red; }',
         ));
         container.innerHTML = multiline(

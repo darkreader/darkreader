@@ -110,31 +110,36 @@ class PuppeteerEnvironment extends JestNodeEnvironment {
         return page;
     }
 
-    async openPopupPage() {
-        let extensionPopup;
+    /**
+     * @param {string} path
+     * @returns {puppeteer.Page}
+     */
+    async openExtensionPage(path) {
         if (this.global.product === 'chrome') {
-            extensionPopup = await this.openChromePage('/ui/popup/index.html');
-        } else if (this.global.product === 'firefox') {
-            extensionPopup = await this.openFirefoxPage('/ui/popup/index.html');
+            return await this.openChromePage(path);
         }
-        return extensionPopup;
+        if (this.global.product === 'firefox') {
+            return await this.openFirefoxPage(path);
+        }
+        return null;
+    }
+
+    async openPopupPage() {
+        return await this.openExtensionPage('/ui/popup/index.html');
     }
 
     async openDevtoolsPage() {
-        let extensionDevtools;
-        if (this.global.product === 'chrome') {
-            extensionDevtools = await this.openChromePage('/ui/devtools/index.html');
-        } else if (this.global.product === 'firefox') {
-            extensionDevtools = await this.openFirefoxPage('/ui/devtools/index.html');
-        }
-        return extensionDevtools;
+        return await this.openExtensionPage('/ui/devtools/index.html');
+    }
+
+    async getBackgroundPage() {
+        const targets = await this.browser.targets();
+        const backgroundTarget = targets.find((t) => t.type() === 'background_page');
+        return await backgroundTarget.page();
     }
 
     async openChromePage(path) {
-        const targets = await this.browser.targets();
-        const backgroundTarget = targets.find((t) => t.type() === 'background_page');
-        const backgroundPage = await backgroundTarget.page();
-
+        const backgroundPage = await this.getBackgroundPage();
         const pageURL = backgroundPage.url().replace('/background/index.html', path);
         const extensionPage = await this.browser.newPage();
         await extensionPage.goto(pageURL);
@@ -221,6 +226,13 @@ class PuppeteerEnvironment extends JestNodeEnvironment {
                 changeChromeStorage: async (region, data) => await sendToUIPage({type: 'changeChromeStorage', data: {region, data}}),
                 getChromeStorage: async (region, keys) => await sendToUIPage({type: 'getChromeStorage', data: {region, keys}}),
                 setDataIsMigratedForTesting: async (value) => await sendToUIPage({type: 'setDataIsMigratedForTesting', data: value}),
+                emulateMedia: async (name, value) => {
+                    if (this.global.product === 'firefox') {
+                        return;
+                    }
+                    const bg = await this.getBackgroundPage();
+                    await bg.emulateMediaFeatures([{name, value}]);
+                },
             };
         });
     }
@@ -228,23 +240,20 @@ class PuppeteerEnvironment extends JestNodeEnvironment {
     async teardown() {
         await super.teardown();
 
-        if (this.global.product !== 'firefox') {
+        if (this.global.product !== 'firefox' && this.page?.coverage) {
             const coverage = await this.page.coverage.stopJSCoverage();
             const dir = './tests/browser/coverage/';
             await generateHTMLCoverageReports(dir, coverage);
             console.info('Coverage reports generated in', dir);
         }
 
-        await this.extensionPopup.close();
-        await this.extensionDevtools.close();
-        await this.page.close();
-        await this.testServer.close();
-        await this.corsServer.close();
-        await this.popupTestServer.close();
-        // TODO: Remove this hack, as this is a issue with clearing the tmp file of firefox profile
-        // Which will cause a error with puppeteer when it's not cleared.
-        // But the clearing currently doesn't work, so we need to wait for the issue to be fixed.
-        // await this.browser.close();
+        await this.extensionPopup?.close();
+        await this.extensionDevtools?.close();
+        await this.page?.close();
+        await this.testServer?.close();
+        await this.corsServer?.close();
+        await this.popupTestServer?.close();
+        await this.browser?.close();
     }
 }
 

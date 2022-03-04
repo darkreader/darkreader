@@ -84,7 +84,7 @@ export function watchForNodePosition<T extends Node>(
     }
     let attempts = 0;
     let start: number = null;
-    let timeoutId: number = null;
+    let timeoutId: ReturnType<typeof setTimeout> = null;
     const restore = throttle(() => {
         if (timeoutId) {
             return;
@@ -183,13 +183,21 @@ export function iterateShadowHosts(root: Node, iterator: (host: Element) => void
         node != null;
         node = walker.nextNode() as Element
     ) {
+        if (node.classList.contains('surfingkeys_hints_host')) {
+            continue;
+        }
+
         iterator(node);
         iterateShadowHosts(node.shadowRoot, iterator);
     }
 }
 
-export function isDOMReady() {
+export let isDOMReady = () => {
     return document.readyState === 'complete' || document.readyState === 'interactive';
+};
+
+export function setIsDOMReady(newFunc: () => boolean) {
+    isDOMReady = newFunc;
 }
 
 const readyStateListeners = new Set<() => void>();

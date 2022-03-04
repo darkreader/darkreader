@@ -37,11 +37,13 @@ export function parseGradient(value: string): parsedGradient[] {
                 if (possibleGradient === possibleType) {
                     // Check if the type has a `-` before the `type-gradient` keyword.
                     // If it does, it's a repeating gradient.
-                    if (index - possibleType.length - 1 >= 9) {
-                        if (value[index - possibleType.length - 1] === '-') {
-                            typeGradient = `repeating-${possibleType}gradient`;
-                            return true;
-                        }
+                    if (value.slice(index - possibleType.length - 10, index - possibleType.length - 1) === 'repeating') {
+                        typeGradient = `repeating-${possibleType}gradient`;
+                        return true;
+                    }
+                    if (value.slice(index - possibleType.length - 8, index - possibleType.length - 1) === '-webkit') {
+                        typeGradient = `-webkit-${possibleType}gradient`;
+                        return true;
                     }
                     typeGradient = `${possibleType}gradient`;
                     return true;

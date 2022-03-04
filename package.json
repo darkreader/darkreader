@@ -84,7 +84,7 @@
     "eslint": "8.10.0",
     "eslint-plugin-import": "2.25.4",
     "eslint-plugin-local": "1.0.0",
-    "get-stream": "^6.0.1",
+    "get-stream": "6.0.1",
     "globby": "13.1.1",
     "jasmine-core": "4.0.1",
     "jest": "27.5.1",

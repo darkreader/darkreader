@@ -2,16 +2,12 @@ import {m} from 'malevic';
 import {getContext} from 'malevic/dom';
 import {Button, MessageBox, Overlay} from '../../controls';
 import {getURLHostOrProtocol, isURLInList} from '../../../utils/url';
-import type {ExtWrapper, TabInfo} from '../../../definitions';
+import type {ExtWrapper} from '../../../definitions';
 
-interface BodyProps extends ExtWrapper {
-    tab: TabInfo;
-}
-
-export default function Body({data, tab, actions}: BodyProps) {
+export default function Body({data, actions}: ExtWrapper) {
     const context = getContext();
-    const host = getURLHostOrProtocol(tab.url);
-    const custom = data.settings.customThemes.find(({url}) => isURLInList(tab.url, url));
+    const host = getURLHostOrProtocol(data.activeTab.url);
+    const custom = data.settings.customThemes.find(({url}) => isURLInList(data.activeTab.url, url));
 
     let textNode: HTMLTextAreaElement;
 

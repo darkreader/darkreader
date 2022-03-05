@@ -4,18 +4,18 @@ import {withState, useState} from 'malevic/state';
 import {Button, MessageBox, Overlay} from '../../controls';
 import ThemeEngines from '../../../generators/theme-engines';
 import {DEVTOOLS_DOCS_URL} from '../../../utils/links';
-import type {ExtWrapper, TabInfo} from '../../../definitions';
+import type {ExtWrapper} from '../../../definitions';
 import {getCurrentThemePreset} from '../../popup/theme/utils';
 import {isFirefox} from '../../../utils/platform';
 
-type BodyProps = ExtWrapper & {tab: TabInfo};
+type BodyProps = ExtWrapper;
 
-function Body({data, tab, actions}: BodyProps) {
+function Body({data, actions}: BodyProps) {
     const context = getContext();
     const {state, setState} = useState({errorText: null as string});
     let textNode: HTMLTextAreaElement;
     const previewButtonText = data.settings.previewNewDesign ? 'Switch to old design' : 'Preview new design';
-    const {theme} = getCurrentThemePreset({data, tab, actions});
+    const {theme} = getCurrentThemePreset({data, actions});
 
     const wrapper = (theme.engine === ThemeEngines.staticTheme
         ? {

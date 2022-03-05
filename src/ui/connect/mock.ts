@@ -1,4 +1,4 @@
-import type {ExtensionData, TabInfo, Theme, UserSettings} from '../../definitions';
+import type {ExtensionData, Theme, UserSettings} from '../../definitions';
 
 export function getMockData(override = {} as Partial<ExtensionData>): ExtensionData {
     return Object.assign({
@@ -41,6 +41,7 @@ export function getMockData(override = {} as Partial<ExtensionData>): ExtensionD
                 latitude: 52.4237178,
                 longitude: 31.021786,
             },
+            detectDarkTheme: false,
         } as UserSettings,
         fonts: [
             'serif',
@@ -78,15 +79,12 @@ export function getMockData(override = {} as Partial<ExtensionData>): ExtensionD
             },
         },
         forcedScheme: null,
+        activeTab: {
+            url: 'https://darkreader.org/',
+            isProtected: false,
+            isInDarkList: false,
+            isInjected: true,
+            isDarkThemeDetected: false,
+        },
     } as ExtensionData, override);
-}
-
-export function getMockActiveTabInfo(): TabInfo {
-    return {
-        url: 'https://darkreader.org/',
-        isProtected: false,
-        isInDarkList: false,
-        isInjected: true,
-        isDarkThemeDetected: false,
-    };
 }

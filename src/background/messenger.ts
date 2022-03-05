@@ -4,12 +4,11 @@ import {MessageType} from '../utils/message';
 
 export interface ExtensionAdapter {
     collect: () => Promise<ExtensionData>;
-    getActiveTabInfo: () => Promise<TabInfo>;
     changeSettings: (settings: Partial<UserSettings>) => void;
     setTheme: (theme: Partial<FilterConfig>) => void;
     setShortcut: ({command, shortcut}: {command: string; shortcut: string}) => void;
     markNewsAsRead: (ids: string[]) => Promise<void>;
-    toggleURL: (pattern: string) => void;
+    toggleActiveTab: () => void;
     onPopupOpen: () => void;
     loadConfig: (options: {local: boolean}) => Promise<void>;
     applyDevDynamicThemeFixes: (json: string) => Error;
@@ -34,7 +33,6 @@ export default class Messenger {
                 this.adapter.onPopupOpen();
                 return ([
                     MessageType.UI_GET_DATA,
-                    MessageType.UI_GET_ACTIVE_TAB_INFO
                 ].includes(message.type));
             }
         });
@@ -46,9 +44,6 @@ export default class Messenger {
                 switch (port.name) {
                     case MessageType.UI_GET_DATA:
                         promise = this.adapter.collect();
-                        break;
-                    case MessageType.UI_GET_ACTIVE_TAB_INFO:
-                        promise = this.adapter.getActiveTabInfo();
                         break;
                     // These types require data, so we need to add a listener to the port.
                     case MessageType.UI_APPLY_DEV_DYNAMIC_THEME_FIXES:
@@ -94,10 +89,6 @@ export default class Messenger {
                 this.adapter.collect().then((data) => sendResponse({data}));
                 break;
             }
-            case MessageType.UI_GET_ACTIVE_TAB_INFO: {
-                this.adapter.getActiveTabInfo().then((data) => sendResponse({data}));
-                break;
-            }
             case MessageType.UI_SUBSCRIBE_TO_CHANGES: {
                 this.changeListenerCount++;
                 break;
@@ -118,8 +109,8 @@ export default class Messenger {
                 this.adapter.setShortcut(data);
                 break;
             }
-            case MessageType.UI_TOGGLE_URL: {
-                this.adapter.toggleURL(data);
+            case MessageType.UI_TOGGLE_ACTIVE_TAB: {
+                this.adapter.toggleActiveTab();
                 break;
             }
             case MessageType.UI_MARK_NEWS_AS_READ: {

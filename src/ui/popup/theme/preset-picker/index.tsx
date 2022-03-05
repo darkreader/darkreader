@@ -46,12 +46,13 @@ function PresetItem(props: ViewProps & {preset: ThemePreset}) {
 const MAX_ALLOWED_PRESETS = 3;
 
 export default function PresetPicker(props: ViewProps) {
-    const host = getURLHostOrProtocol(props.tab.url);
+    const tab = props.data.activeTab;
+    const host = getURLHostOrProtocol(tab.url);
     const preset = props.data.settings.presets.find(
-        ({urls}) => isURLInList(props.tab.url, urls)
+        ({urls}) => isURLInList(tab.url, urls)
     );
     const custom = props.data.settings.customThemes.find(
-        ({url}) => isURLInList(props.tab.url, url)
+        ({url}) => isURLInList(tab.url, url)
     );
 
     const selectedPresetId = custom ? 'custom' : preset ? preset.id : 'default';
@@ -82,11 +83,11 @@ export default function PresetPicker(props: ViewProps) {
     ].filter(Boolean);
 
     function onPresetChange(id: string) {
-        const filteredCustomThemes = props.data.settings.customThemes.filter(({url}) => !isURLInList(props.tab.url, url));
+        const filteredCustomThemes = props.data.settings.customThemes.filter(({url}) => !isURLInList(tab.url, url));
         const filteredPresets = props.data.settings.presets.map((preset) => {
             return {
                 ...preset,
-                urls: preset.urls.filter((template) => !isURLMatched(props.tab.url, template)),
+                urls: preset.urls.filter((template) => !isURLMatched(tab.url, template)),
             };
         });
         if (id === 'default') {

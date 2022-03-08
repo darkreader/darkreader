@@ -12,7 +12,7 @@ const zip = require('./zip');
 const {runTasks} = require('./task');
 const {log} = require('./utils');
 const {fork, execSync} = require('child_process');
-const {existsSync} = require("fs");
+const {existsSync} = require('fs');
 
 const standardTask = [
     clean,

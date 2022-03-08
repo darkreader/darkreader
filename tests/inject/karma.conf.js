@@ -42,7 +42,7 @@ module.exports = (config) => {
                 }),
             ],
             output: {
-                dir: `${getTestDestDir()}`,
+                dir: getTestDestDir(),
                 strict: true,
                 format: 'iife',
                 sourcemap: 'inline',

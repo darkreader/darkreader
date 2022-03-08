@@ -19,15 +19,13 @@ Object {
     "moduleResolution": "node",
     "noEmit": true,
     "noImplicitAny": true,
+    "resolveJsonModule": true,
     "target": "es2019",
     "types": Array [
       "chrome",
       "offscreencanvas",
     ],
   },
-  "exclude": Array [
-    "node_modules",
-  ],
   "files": Array [
     "./defaults.ts",
     "./definitions.d.ts",
@@ -59,6 +57,7 @@ Object {
     "./generators/utils/format.ts",
     "./generators/utils/matrix.ts",
     "./generators/utils/parse.ts",
+    "./inject/detector.ts",
     "./inject/fallback.ts",
     "./inject/index.ts",
     "./inject/style.ts",
@@ -151,6 +150,7 @@ Object {
     "./ui/popup/settings-page/automation-button.tsx",
     "./ui/popup/settings-page/change-browser-theme.tsx",
     "./ui/popup/settings-page/context-menus.tsx",
+    "./ui/popup/settings-page/detect-dark-theme.tsx",
     "./ui/popup/settings-page/devtools.tsx",
     "./ui/popup/settings-page/enabled-by-default.tsx",
     "./ui/popup/settings-page/index.tsx",
@@ -167,6 +167,7 @@ Object {
     "./ui/popup/theme/controls/font-picker.tsx",
     "./ui/popup/theme/controls/format.ts",
     "./ui/popup/theme/controls/grayscale.tsx",
+    "./ui/popup/theme/controls/immediate-modify.tsx",
     "./ui/popup/theme/controls/index.tsx",
     "./ui/popup/theme/controls/mode.tsx",
     "./ui/popup/theme/controls/reset-button.tsx",
@@ -230,15 +231,13 @@ Object {
     "moduleResolution": "node",
     "noEmit": true,
     "noImplicitAny": true,
+    "resolveJsonModule": true,
     "target": "es5",
     "types": Array [
       "chrome",
       "offscreencanvas",
     ],
   },
-  "exclude": Array [
-    "../node_modules",
-  ],
   "files": Array [
     "./chrome.ts",
     "./fetch.ts",
@@ -252,7 +251,6 @@ Object {
   "compileOnSave": false,
   "compilerOptions": Object {
     "allowJs": true,
-    "baseUrl": "../../src",
     "downlevelIteration": true,
     "esModuleInterop": true,
     "jsx": "react",
@@ -265,7 +263,6 @@ Object {
     "moduleResolution": "node",
     "noEmit": true,
     "noImplicitAny": true,
-    "outDir": "./",
     "target": "es2019",
     "types": Array [
       "chrome",
@@ -274,17 +271,11 @@ Object {
       "puppeteer-core",
     ],
   },
-  "exclude": Array [
-    "../../src/node_modules",
-  ],
   "files": Array [
     "./coverage.js",
     "./environment.js",
     "./globals.d.ts",
-    "./jest.config.chrome.js",
-    "./jest.config.firefox.js",
     "./jest.config.js",
-    "./jest.config.shared.js",
     "./paths.js",
     "./server.js",
     "./dynamic/inline-override.tests.ts",
@@ -298,86 +289,13 @@ Object {
 }
 `;
 
-exports[`TypeScript project config file should parse and resolve correctly: tests/config 1`] = `
-Object {
-  "compileOnSave": false,
-  "compilerOptions": Object {
-    "allowJs": true,
-    "baseUrl": "../../src",
-    "downlevelIteration": true,
-    "jsx": "react",
-    "jsxFactory": "m",
-    "lib": Array [
-      "es6",
-      "es2017",
-      "dom",
-      "dom.iterable",
-    ],
-    "module": "commonjs",
-    "moduleResolution": "node",
-    "noEmit": true,
-    "noImplicitAny": true,
-    "outDir": "./",
-    "target": "es2019",
-    "types": Array [
-      "jest",
-      "node",
-    ],
-  },
-  "exclude": Array [
-    "../../src/node_modules",
-  ],
-  "files": Array [
-    "./config.tests.ts",
-    "./jest.config.js",
-    "./locales.tests.ts",
-  ],
-}
-`;
-
-exports[`TypeScript project config file should parse and resolve correctly: tests/generators/utils 1`] = `
-Object {
-  "compileOnSave": false,
-  "compilerOptions": Object {
-    "allowJs": true,
-    "baseUrl": "../../../src",
-    "downlevelIteration": true,
-    "jsx": "react",
-    "jsxFactory": "m",
-    "lib": Array [
-      "es6",
-      "es2017",
-      "dom",
-      "dom.iterable",
-    ],
-    "module": "commonjs",
-    "moduleResolution": "node",
-    "noEmit": true,
-    "noImplicitAny": true,
-    "outDir": "./",
-    "target": "es2019",
-    "types": Array [
-      "jest",
-      "node",
-    ],
-  },
-  "exclude": Array [
-    "../../../src/node_modules",
-  ],
-  "files": Array [
-    "./jest.config.js",
-    "./parse.tests.ts",
-  ],
-}
-`;
-
 exports[`TypeScript project config file should parse and resolve correctly: tests/inject 1`] = `
 Object {
   "compileOnSave": false,
   "compilerOptions": Object {
     "allowJs": true,
-    "baseUrl": "../../src",
     "downlevelIteration": true,
+    "esModuleInterop": true,
     "jsx": "react",
     "jsxFactory": "m",
     "lib": Array [
@@ -393,19 +311,18 @@ Object {
     "target": "es2019",
     "types": Array [
       "chrome",
-      "jasmine",
       "offscreencanvas",
+      "jasmine",
     ],
   },
   "exclude": Array [
-    "../../src/node_modules",
+    "./coverage",
   ],
   "files": Array [
     "./background-stub.ts",
     "./customize.ts",
     "./echo-client.ts",
     "./echo-server.js",
-    "./jest.config.js",
     "./karma.conf.js",
     "./polyfills.ts",
     "./run.js",
@@ -456,48 +373,6 @@ Object {
     "./utils/text.tests.ts",
     "./utils/time.tests.ts",
     "./utils/uid.tests.ts",
-  ],
-}
-`;
-
-exports[`TypeScript project config file should parse and resolve correctly: tests/utils 1`] = `
-Object {
-  "compileOnSave": false,
-  "compilerOptions": Object {
-    "allowJs": true,
-    "baseUrl": "../../src",
-    "downlevelIteration": true,
-    "jsx": "react",
-    "jsxFactory": "m",
-    "lib": Array [
-      "es6",
-      "es2017",
-      "dom",
-      "dom.iterable",
-    ],
-    "module": "commonjs",
-    "moduleResolution": "node",
-    "noEmit": true,
-    "noImplicitAny": true,
-    "outDir": "./",
-    "target": "es2019",
-    "types": Array [
-      "jest",
-      "node",
-    ],
-  },
-  "exclude": Array [
-    "../../src/node_modules",
-  ],
-  "files": Array [
-    "./color.tests.ts",
-    "./jest.config.js",
-    "./math.tests.ts",
-    "./parsing.tests.ts",
-    "./promise-barrier.tests.ts",
-    "./text.tests.ts",
-    "./time.tests.ts",
-    "./uid.tests.ts",
   ],
 }
 `;

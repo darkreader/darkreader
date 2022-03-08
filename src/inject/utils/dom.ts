@@ -192,8 +192,12 @@ export function iterateShadowHosts(root: Node, iterator: (host: Element) => void
     }
 }
 
-export function isDOMReady() {
+export let isDOMReady = () => {
     return document.readyState === 'complete' || document.readyState === 'interactive';
+};
+
+export function setIsDOMReady(newFunc: () => boolean) {
+    isDOMReady = newFunc;
 }
 
 const readyStateListeners = new Set<() => void>();

@@ -87,5 +87,6 @@ export function getMockActiveTabInfo(): TabInfo {
         isProtected: false,
         isInDarkList: false,
         isInjected: true,
+        isDarkThemeDetected: false,
     };
 }

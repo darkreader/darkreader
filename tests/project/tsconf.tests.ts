@@ -8,7 +8,7 @@ import {childClosed} from './utils';
 const rootDir = dirname(require.resolve('../../package.json'));
 const tsc = require.resolve('typescript/bin/tsc');
 
-const tsProjects: Array<{ tsconfig: string }> = [
+const tsProjects: Array<{tsconfig: string}> = [
     // Browser extension
     {tsconfig: 'src'},
     // API

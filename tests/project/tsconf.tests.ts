@@ -36,8 +36,8 @@ describe('TypeScript project config', () => {
         expect(config.raw).toMatchSnapshot();
     }, 100000);
 
-    // Slow test (skipped by default)
-    it.skip.each(tsProjects)('should compile without errors: $tsconfig', async ({tsconfig}) => {
+    // Slow test (run using `npm run test:project`)
+    it.each(tsProjects)('should compile without errors: $tsconfig', async ({tsconfig}) => {
         // Compile config from temp dir instead of root dir
         const cwd = await mkdtemp(join(tmpdir()));
         const project = join(rootDir, tsconfig, 'tsconfig.json');

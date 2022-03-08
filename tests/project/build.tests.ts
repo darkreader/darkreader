@@ -38,8 +38,8 @@ describe('tasks/build-js.js', () => {
 });
 
 describe('tasks/build.js', () => {
-    // Slow test (skipped by default)
-    it.skip('should build successfully from an unexpected working directory', async () => {
+    // Slow test (run using `npm run test:project`)
+    it('should build successfully from an unexpected working directory', async () => {
         const tmpDir: string = await mkdtemp(join(tmpdir()));
 
         // Fire
@@ -48,5 +48,5 @@ describe('tasks/build.js', () => {
         const {stdout} = await childClosed(child);
         expect(stdout).toInclude('MISSION PASSED');
         expect(child.exitCode).toBe(0);
-    }, 60000);
+    }, 120000);
 });

@@ -8,16 +8,15 @@ import configureCIBrowsers from '../inject/karma.conf.ci';
 const configFilePath = rootPath('tests/inject/karma.conf.js');
 
 interface Test {
-    title: string
-    params: Record<string, string>
-    browserBins?: Record<string, string>
-    wantBrowsers?: string[]
-    wantLaunchersIncluded?: string[]
-    wantError?: boolean
+    title: string;
+    params: Record<string, string>;
+    browserBins?: Record<string, string>;
+    wantBrowsers?: string[];
+    wantLaunchersIncluded?: string[];
+    wantError?: boolean;
 }
 
 describe('karma.conf.ci.js', () => {
-
     describe('configureCIBrowsers should parse test parameters sent by CI', () => {
         const tests: Test[] = [
             {

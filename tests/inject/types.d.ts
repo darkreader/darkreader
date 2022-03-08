@@ -14,9 +14,9 @@ declare module 'karma' {
     }
 }
 
-declare type ChannelName = string
+declare type ChannelName = string;
 
 export interface CIBuildContext {
-    chrome?: ChannelName
-    firefox?: ChannelName
+    chrome?: ChannelName;
+    firefox?: ChannelName;
 }

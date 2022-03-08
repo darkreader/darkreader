@@ -71,7 +71,7 @@ function configureCIBrowser(browsers, name, channel, executable, launcherName) {
     console.debug('- channel:     %s', name);
     console.debug('- executable:  %s', executable);
     assert(Boolean(executable) && typeof executable === 'string', `executable for ${name} invalid: ${executable}`);
-    assert(!executable.startsWith('/usr/bin'), 'Preinstalled executable path was passed instead of test install')
+    assert(!executable.startsWith('/usr/bin'), 'Preinstalled executable path was passed instead of test install');
     console.debug('- exe version: %s', execFileSync(executable, ['--version'], {encoding: 'utf-8'}));
     assert(launcherName in customLaunchers, `launcher ${launcherName} not available`);
     console.debug('- launcher:    %s', launcherName);

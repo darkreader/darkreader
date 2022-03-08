@@ -1,11 +1,8 @@
 import {dirname, join} from 'path';
-import {rootPath} from '../support/test-utils';
 import {mkdtemp} from 'fs/promises';
 import {tmpdir} from 'os';
 import {mkdirSync, writeFileSync} from 'fs';
 import configureCIBrowsers from '../inject/karma.conf.ci';
-
-const configFilePath = rootPath('tests/inject/karma.conf.js');
 
 interface Test {
     title: string;

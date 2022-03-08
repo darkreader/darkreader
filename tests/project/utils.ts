@@ -36,7 +36,7 @@ export async function childClosed(child: ChildProcess, options?: ChildClosedOpti
  * await watchStream(child.stdout).forMatch(/Config loaded/)
  * thisRunsAfterConfigLoads();
  */
-export const watchStream = (readable: Readable, options?: { encoding: BufferEncoding }) => {
+export const watchStream = (readable: Readable, options?: {encoding: BufferEncoding}) => {
     if (!readable.readableEncoding) {
         readable.setEncoding(options?.encoding || 'utf-8');
     }

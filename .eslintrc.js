@@ -210,6 +210,7 @@ config.overrides.push({
                 'compat/compat': ['error', [
                     '> 0.5% and supports es5',
                     'Firefox ESR',
+                    'last 2 FirefoxAndroid versions',
                     'not Explorer > 0',
                     'not Safari > 0',
                     'not iOS > 0',

@@ -24,7 +24,8 @@
     "test:inject:debug": "node tests/inject/run.js --debug",
     "test:project": "jest --config=tests/project/jest.config.js",
     "test:unit": "jest --config=tests/unit/jest.config.js",
-    "test:unit:debug": "node --inspect-brk ./node_modules/jest/bin/jest --config=tests/unit/jest.config.js --runInBand --no-cache --watch"
+    "test:unit:debug": "node --inspect-brk ./node_modules/jest/bin/jest --config=tests/unit/jest.config.js --runInBand --no-cache --watch",
+    "test:update-snapshots": "npm run test -- --updateSnapshot && npm run test:project -- --updateSnapshot"
   },
   "main": "darkreader.js",
   "repository": {
@@ -83,6 +84,7 @@
     "eslint": "8.10.0",
     "eslint-plugin-import": "2.25.4",
     "eslint-plugin-local": "1.0.0",
+    "get-stream": "6.0.1",
     "globby": "13.1.1",
     "jasmine-core": "4.0.1",
     "jest": "27.5.1",

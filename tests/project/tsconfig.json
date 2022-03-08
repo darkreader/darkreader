@@ -1,3 +1,22 @@
 {
-    "extends": "../unit/tsconfig",
+    "$schema": "https://json.schemastore.org/tsconfig",
+    "compilerOptions": {
+        "target": "ES2021",
+        "module": "CommonJS",
+        "lib": [
+            "ES2021",
+            "Dom"
+        ],
+        "types": [
+            "node",
+            "jest",
+            "jest-extended"
+        ],
+        "esModuleInterop": true,
+        "skipLibCheck": true,
+        "forceConsistentCasingInFileNames": true,
+        "noImplicitAny": true,
+        "inlineSourceMap": true,
+        "allowJs": true
+    }
 }

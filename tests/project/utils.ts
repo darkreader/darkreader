@@ -40,7 +40,7 @@ export const watchStream = (readable: Readable, options?: { encoding: BufferEnco
     if (!readable.readableEncoding) {
         readable.setEncoding(options?.encoding || 'utf-8');
     }
-    const forCondition = async (cb: { (value: string): boolean }) => await new Promise<void>((resolve, reject) => {
+    const forCondition = async (cb: {(value: string): boolean}) => await new Promise<void>((resolve, reject) => {
         readable.on('close', reject).on('data', (chunk: string) => {
             if (chunk && cb(chunk)) {
                 resolve();

@@ -8,7 +8,7 @@ on:
       - master
       - work-karma-ci
     paths-ignore:
-      - 'src/config/**'
+      - 'src/config/*'
   pull_request:
     branches:
       - master

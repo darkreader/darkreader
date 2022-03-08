@@ -11,7 +11,7 @@ const buildModule = rootPath('tasks/build.js');
 describe('tasks/build-js.js', () => {
     it('should respond to SIGINT signals by exiting immediately', async () => {
         expect.assertions(3);
-        const tmpDir: string = await mkdtemp(join(tmpdir()));
+        const tmpDir: string = await mkdtemp(join(tmpdir(), 'darkreader'));
         const wantToWaitNoMoreThan = 500;
 
         // Execute build
@@ -40,7 +40,7 @@ describe('tasks/build-js.js', () => {
 describe('tasks/build.js', () => {
     // Slow test (run using `npm run test:project`)
     it('should build successfully from an unexpected working directory', async () => {
-        const tmpDir: string = await mkdtemp(join(tmpdir()));
+        const tmpDir: string = await mkdtemp(join(tmpdir(), 'darkreader'));
 
         // Fire
         const child = fork(buildModule, ['--debug', '--release', '--api'], {cwd: tmpDir, silent: true});

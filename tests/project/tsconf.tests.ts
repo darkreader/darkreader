@@ -24,7 +24,7 @@ const tsProjects: Array<{tsconfig: string}> = [
 describe('TypeScript project config', () => {
     it.each(tsProjects)('file should parse and resolve correctly: $tsconfig', async ({tsconfig}) => {
         // Parse config from temp dir instead of root dir
-        const cwd = await mkdtemp(join(tmpdir()));
+        const cwd = await mkdtemp(join(tmpdir(), 'darkreader'));
         const project = join(rootDir, tsconfig, 'tsconfig.json');
 
         // Fire
@@ -39,7 +39,7 @@ describe('TypeScript project config', () => {
     // Slow test (run using `npm run test:project`)
     it.each(tsProjects)('should compile without errors: $tsconfig', async ({tsconfig}) => {
         // Compile config from temp dir instead of root dir
-        const cwd = await mkdtemp(join(tmpdir()));
+        const cwd = await mkdtemp(join(tmpdir(), 'darkreader'));
         const project = join(rootDir, tsconfig, 'tsconfig.json');
 
         // Fire

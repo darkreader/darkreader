@@ -1,5 +1,5 @@
-import {MessageType} from '../../src/utils/message';
-import type {Message} from '../../src/definitions';
+import {MessageType} from '../../../src/utils/message';
+import type {Message} from '../../../src/definitions';
 
 let nativeSendMessage: typeof chrome.runtime.sendMessage;
 const bgResponses = new Map<string, string>();

@@ -1,8 +1,8 @@
-import '../polyfills';
+import '../support/polyfills';
 import {DEFAULT_THEME} from '../../../src/defaults';
 import {createOrUpdateDynamicTheme, removeDynamicTheme} from '../../../src/inject/dynamic-theme';
 import {getImageDetails} from '../../../src/inject/dynamic-theme/image';
-import {multiline, timeout} from '../test-utils';
+import {multiline, timeout} from '../support/test-utils';
 import type {DynamicThemeFix} from '../../../src/definitions';
 
 const theme = {
@@ -40,7 +40,7 @@ function getSVGImageCSS(svg: string, width: number, height: number, selector: st
     );
 }
 
-export const images = {
+const images = {
     darkIcon: multiline(
         '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 8 8" width="8" height="8">',
         '    <rect fill="black" width="100%" height="100%" />',

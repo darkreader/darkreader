@@ -1,7 +1,7 @@
-import '../polyfills';
+import '../support/polyfills';
 import {DEFAULT_THEME} from '../../../src/defaults';
 import {createOrUpdateDynamicTheme, removeDynamicTheme} from '../../../src/inject/dynamic-theme';
-import {multiline, timeout} from '../test-utils';
+import {multiline, timeout} from '../support/test-utils';
 
 const theme = {
     ...DEFAULT_THEME,

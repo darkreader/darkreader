@@ -1,19 +1,40 @@
+// @ts-check
 const fs = require('fs');
 const os = require('os');
 const rollupPluginIstanbul = require('rollup-plugin-istanbul2');
 const rollupPluginNodeResolve = require('@rollup/plugin-node-resolve').default;
-const rollupPluginReplace = require('@rollup/plugin-replace');
-const rollupPluginTypescript = require('@rollup/plugin-typescript');
 const typescript = require('typescript');
 const {getTestDestDir, rootPath} = require('../../tasks/paths');
 
-module.exports = (config) => {
-    config.set({
-        basePath: '../../',
+/**
+ * @typedef {import('karma').Config} Config
+ * @typedef {import('karma').ConfigOptions} ConfigOptions
+ * @typedef {import('rollup').Plugin} RollupPlugin
+ * @typedef {import('@rollup/plugin-typescript').RollupTypescriptPluginOptions} RollupTypescriptPluginOptions
+ * @typedef {import('@rollup/plugin-replace').RollupReplaceOptions} RollupReplaceOptions
+ */
+
+/** @type {(options?: RollupReplaceOptions) => RollupPlugin} */
+// @ts-ignore
+const rollupPluginReplace = require('@rollup/plugin-replace');
+/** @type {(options?: RollupTypescriptPluginOptions) => RollupPlugin} */
+// @ts-ignore
+const rollupPluginTypescript = require('@rollup/plugin-typescript');
+
+/**
+ * @param   {Config} config
+ * @returns {ConfigOptions}
+ */
+function configureKarma(config) {
+    /**
+     * @type {ConfigOptions}
+     */
+    let options = {
+        basePath: '../..',
         frameworks: ['jasmine'],
         files: [
-            'tests/inject/customize.ts',
-            'tests/inject/polyfills.ts',
+            'tests/inject/support/customize.ts',
+            'tests/inject/support/polyfills.ts',
             {pattern: 'tests/inject/**/*.tests.ts', watched: false},
         ],
         preprocessors: {
@@ -25,10 +46,6 @@ module.exports = (config) => {
                 rollupPluginTypescript({
                     typescript,
                     tsconfig: rootPath('tests/inject/tsconfig.json'),
-                    removeComments: false,
-                    sourceMap: true,
-                    inlineSources: true,
-                    noEmitOnError: true,
                     cacheDir: `${fs.realpathSync(os.tmpdir())}/darkreader_typescript_test_cache`,
                 }),
                 rollupPluginReplace({
@@ -36,9 +53,6 @@ module.exports = (config) => {
                     '__DEBUG__': 'false',
                     '__PORT__': '-1',
                     '__WATCH__': 'false',
-                }),
-                rollupPluginIstanbul({
-                    exclude: ['tests/**/*.*', 'src/inject/dynamic-theme/stylesheet-proxy.ts'],
                 }),
             ],
             output: {
@@ -48,19 +62,52 @@ module.exports = (config) => {
                 sourcemap: 'inline',
             },
         },
-        reporters: ['progress', 'coverage'],
-        coverageReporter: {
-            type: 'html',
-            dir: 'tests/inject/coverage/'
-        },
+        reporters: ['spec'],
         port: 9876,
         colors: true,
         logLevel: config.LOG_INFO,
         autoWatch: true,
-        browsers: config.debug ?
-            ['Chrome'] :
-            ['Chrome', 'Firefox', process.platform === 'darwin' ? 'Safari' : null].filter(Boolean),
-        singleRun: config.debug ? false : true,
-        concurrency: config.debug ? Infinity : 1,
-    });
+        browsers: ['Chrome', 'Firefox', process.platform === 'darwin' ? 'Safari' : null].filter(Boolean),
+        singleRun: true,
+        concurrency: 1,
+    };
+
+    if (config.debug) {
+        options.browsers = ['Chrome'];
+        options.singleRun = false;
+        options.concurrency = Infinity;
+        options.logLevel = config.LOG_DEBUG;
+    }
+
+    if (config.ci) {
+        const {CI_BUILD_CONTEXT, CHROME_BIN, FIREFOX_BIN} = process.env;
+        const configureCIBrowsers = require('./karma.conf.ci');
+        options = {...options, ...configureCIBrowsers(CI_BUILD_CONTEXT, {CHROME_BIN, FIREFOX_BIN})};
+        options.autoWatch = false;
+        options.singleRun = true;
+        options.concurrency = 1;
+        options.logLevel = config.LOG_DEBUG;
+    }
+
+    if (config.coverage) {
+        const plugin = rollupPluginIstanbul({
+            exclude: ['tests/**/*.*', 'src/inject/dynamic-theme/stylesheet-proxy.ts'],
+        });
+        options.rollupPreprocessor.plugins.push(plugin);
+        options.reporters.push('coverage');
+        options.coverageReporter = {
+            type: 'html',
+            dir: 'tests/inject/coverage/'
+        };
+    }
+
+    return options;
+}
+
+/**
+ * @param   {Config} config
+ * @returns {void}
+ */
+module.exports = (config) => {
+    config.set(configureKarma(config));
 };

@@ -1,34 +1,17 @@
-// @ts-check
 const fs = require('fs');
 const os = require('os');
 const rollupPluginIstanbul = require('rollup-plugin-istanbul2');
 const rollupPluginNodeResolve = require('@rollup/plugin-node-resolve').default;
 const typescript = require('typescript');
 const {getTestDestDir, rootPath} = require('../../tasks/paths');
-
-/**
- * @typedef {import('karma').Config} Config
- * @typedef {import('karma').ConfigOptions} ConfigOptions
- * @typedef {import('rollup').Plugin} RollupPlugin
- * @typedef {import('@rollup/plugin-typescript').RollupTypescriptPluginOptions} RollupTypescriptPluginOptions
- * @typedef {import('@rollup/plugin-replace').RollupReplaceOptions} RollupReplaceOptions
- */
-
-/** @type {(options?: RollupReplaceOptions) => RollupPlugin} */
-// @ts-ignore
 const rollupPluginReplace = require('@rollup/plugin-replace');
-/** @type {(options?: RollupTypescriptPluginOptions) => RollupPlugin} */
-// @ts-ignore
 const rollupPluginTypescript = require('@rollup/plugin-typescript');
 
 /**
- * @param   {Config} config
- * @returns {ConfigOptions}
+ * @param   {import('karma').Config} config
+ * @returns {import('karma').ConfigOptions}
  */
 function configureKarma(config) {
-    /**
-     * @type {ConfigOptions}
-     */
     let options = {
         basePath: '../..',
         frameworks: ['jasmine'],
@@ -80,9 +63,19 @@ function configureKarma(config) {
     }
 
     if (config.ci) {
-        const {CI_BUILD_CONTEXT, CHROME_BIN, FIREFOX_BIN} = process.env;
-        const configureCIBrowsers = require('./karma.conf.ci');
-        options = {...options, ...configureCIBrowsers(CI_BUILD_CONTEXT, {CHROME_BIN, FIREFOX_BIN})};
+        options.customLaunchers = {};
+        options.browsers = [];
+        if (process.env.CHROME_BIN) {
+            options.customLaunchers['CIChromeHeadless'] = {
+                base: 'ChromeHeadless',
+                flags: ['--no-sandbox', '--disable-setuid-sandbox']
+            };
+            options.browsers.push('CIChromeHeadless');
+        }
+        if (process.env.FIREFOX_BIN) {
+            options.customLaunchers['CIFirefoxHeadless'] = {base: 'FirefoxHeadless'};
+            options.browsers.push('CIFirefoxHeadless');
+        }
         options.autoWatch = false;
         options.singleRun = true;
         options.concurrency = 1;
@@ -105,7 +98,7 @@ function configureKarma(config) {
 }
 
 /**
- * @param   {Config} config
+ * @param   {import('karma').Config} config
  * @returns {void}
  */
 module.exports = (config) => {

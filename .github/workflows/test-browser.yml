@@ -6,7 +6,6 @@ on:
   push:
     branches:
       - master
-      - work-karma-ci
     paths-ignore:
       - 'src/config/*'
   pull_request:
@@ -84,5 +83,3 @@ jobs:
 
       - name: Run tests
         run: npm run test:inject -- --ci
-        env:
-          CI_BUILD_CONTEXT: ${{ toJSON(matrix) }}

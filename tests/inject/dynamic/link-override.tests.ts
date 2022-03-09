@@ -3,6 +3,7 @@ import {createOrUpdateDynamicTheme, removeDynamicTheme} from '../../../src/injec
 import {isSafari} from '../../../src/utils/platform';
 import {multiline, timeout} from '../support/test-utils';
 import {resetChromeRuntimeMessageStub, stubBackgroundFetchResponse, stubChromeRuntimeMessage} from '../support/background-stub';
+import {getCSSEchoURL} from '../support/echo-client';
 
 const theme = {
     ...DEFAULT_THEME,
@@ -23,13 +24,9 @@ function createStyleLink(href: string) {
 }
 
 function createCorsLink(content: string) {
-    const url = getCSSDataURL(content);
+    const url = getCSSEchoURL(content);
     stubBackgroundFetchResponse(url, content);
     return createStyleLink(url);
-}
-
-function getCSSDataURL(content: string) {
-    return `data:text/css;utf8,${encodeURIComponent(content)}`;
 }
 
 beforeEach(() => {
@@ -81,7 +78,7 @@ describe('LINK STYLES', () => {
 
     it('should override cross-origin imports in linked CSS', async () => {
         const importedCSS = 'h1 { background: gray; }';
-        const importedURL = getCSSDataURL(importedCSS);
+        const importedURL = getCSSEchoURL(importedCSS);
         stubBackgroundFetchResponse(importedURL, importedCSS);
         createCorsLink(multiline(
             `@import "${importedURL}";`,
@@ -100,7 +97,7 @@ describe('LINK STYLES', () => {
 
     it('should override cross-origin imports in linked CSS with capital @import', async () => {
         const importedCSS = 'h1 { background: gray; }';
-        const importedURL = getCSSDataURL(importedCSS);
+        const importedURL = getCSSEchoURL(importedCSS);
         stubBackgroundFetchResponse(importedURL, importedCSS);
         createCorsLink(multiline(
             `@IMPORT "${importedURL}";`,
@@ -176,7 +173,7 @@ describe('LINK STYLES', () => {
 
     it('should handle styles with @import "..." screen;', async () => {
         const importedCSS = 'h1 { background: gray; }';
-        const importedURL = getCSSDataURL(importedCSS);
+        const importedURL = getCSSEchoURL(importedCSS);
         stubBackgroundFetchResponse(importedURL, importedCSS);
         createCorsLink(multiline(
             `@import "${importedURL}" screen;`,
@@ -193,9 +190,9 @@ describe('LINK STYLES', () => {
         expect(getComputedStyle(container.querySelector('h1 strong')).color).toBe('rgb(255, 26, 26)');
     });
 
-    xit('should handle styles with invalid url(...)', async () => {
+    it('should handle styles with invalid url(...)', async () => {
         const importedCSS = 'h1 { background-image: url("freecookies:3https://example.com"); background-color: gray; }';
-        const importedURL = getCSSDataURL(importedCSS);
+        const importedURL = getCSSEchoURL(importedCSS);
         stubBackgroundFetchResponse(importedURL, importedCSS);
         stubBackgroundFetchResponse('freecookies:3https://example.com', '');
         createCorsLink(multiline(

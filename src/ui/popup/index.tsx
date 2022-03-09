@@ -3,12 +3,12 @@ import {sync} from 'malevic/dom';
 import Connector from '../connect/connector';
 import Body from './components/body';
 import {popupHasBuiltInHorizontalBorders, popupHasBuiltInBorders, fixNotClosingPopupOnNavigation} from './utils/issues';
-import type {ExtensionData, ExtensionActions, TabInfo} from '../../definitions';
+import type {ExtensionData, ExtensionActions} from '../../definitions';
 import {isMobile, isFirefox} from '../../utils/platform';
 import {MessageType} from '../../utils/message';
 import {getFontList} from '../utils';
 
-function renderBody(data: ExtensionData, tab: TabInfo, fonts: string[], actions: ExtensionActions) {
+function renderBody(data: ExtensionData, fonts: string[], actions: ExtensionActions) {
     if (data.settings.previewNewDesign) {
         if (!document.documentElement.classList.contains('preview')) {
             document.documentElement.classList.add('preview');
@@ -18,7 +18,7 @@ function renderBody(data: ExtensionData, tab: TabInfo, fonts: string[], actions:
     }
 
     sync(document.body, (
-        <Body data={data} tab={tab} actions={actions} fonts={fonts}/>
+        <Body data={data} actions={actions} fonts={fonts} />
     ));
 }
 
@@ -26,13 +26,12 @@ async function start() {
     const connector = new Connector();
     window.addEventListener('unload', () => connector.disconnect());
 
-    const [data, tab, fonts] = await Promise.all([
+    const [data, fonts] = await Promise.all([
         connector.getData(),
-        connector.getActiveTabInfo(),
         getFontList()
     ]);
-    renderBody(data, tab, fonts, connector);
-    connector.subscribeToChanges((data) => renderBody(data, tab, fonts, connector));
+    renderBody(data, fonts, connector);
+    connector.subscribeToChanges((data) => renderBody(data, fonts, connector));
 }
 
 addEventListener('load', start);

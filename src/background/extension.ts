@@ -241,23 +241,10 @@ export class Extension implements ExtensionState {
             collect: async () => {
                 return await this.collectData();
             },
-            getActiveTabInfo: async () => {
-                if (!this.user.settings) {
-                    await this.user.loadSettings();
-                }
-                await this.stateManager.loadState();
-                const url = await this.tabs.getActiveTabURL();
-                const info = this.getURLInfo(url);
-                info.isInjected = await this.tabs.canAccessActiveTab();
-                if (this.user.settings.detectDarkTheme) {
-                    info.isDarkThemeDetected = await this.tabs.isActiveTabDarkThemeDetected();
-                }
-                return info;
-            },
             changeSettings: (settings) => this.changeSettings(settings),
             setTheme: (theme) => this.setTheme(theme),
             setShortcut: ({command, shortcut}) => this.setShortcut(command, shortcut),
-            toggleURL: (url) => this.toggleURL(url),
+            toggleActiveTab: async () => this.toggleActiveTab(),
             markNewsAsRead: async (ids) => await this.news.markAsRead(...ids),
             onPopupOpen: () => this.popupOpeningListener && this.popupOpeningListener(),
             loadConfig: async (options) => await this.config.load(options),
@@ -289,7 +276,7 @@ export class Extension implements ExtensionState {
                 if (isPDF(url)) {
                     this.changeSettings({enableForPDF: !this.user.settings.enableForPDF});
                 } else {
-                    this.toggleURL(url);
+                    this.toggleActiveTab();
                 }
                 break;
             case 'switchEngine': {
@@ -377,7 +364,22 @@ export class Extension implements ExtensionState {
                 hasCustomFilterFixes: await this.devtools.hasCustomFilterFixes(),
                 hasCustomStaticFixes: await this.devtools.hasCustomStaticFixes(),
             },
+            activeTab: await this.getActiveTabInfo(),
         };
+    }
+
+    private async getActiveTabInfo() {
+        if (!this.user.settings) {
+            await this.user.loadSettings();
+        }
+        await this.stateManager.loadState();
+        const url = await this.tabs.getActiveTabURL();
+        const info = this.getURLInfo(url);
+        info.isInjected = await this.tabs.canAccessActiveTab();
+        if (this.user.settings.detectDarkTheme) {
+            info.isDarkThemeDetected = await this.tabs.isActiveTabDarkThemeDetected();
+        }
+        return info;
     }
 
     private onNewsUpdate(news: News[]) {
@@ -501,32 +503,33 @@ export class Extension implements ExtensionState {
         this.messenger.reportChanges(info);
     }
 
-    toggleURL(url: string) {
+    async toggleActiveTab() {
+        const settings = this.user.settings;
+        const tab = await this.getActiveTabInfo();
+        const {url} = tab;
         const isInDarkList = isURLInList(url, this.config.DARK_SITES);
-        const siteList = isInDarkList ?
-            this.user.settings.siteListEnabled.slice() :
-            this.user.settings.siteList.slice();
-        const pattern = getURLHostOrProtocol(url);
-        const index = siteList.indexOf(pattern);
-        if (index < 0) {
-            siteList.push(pattern);
-        } else {
-            siteList.splice(index, 1);
-        }
-        if (isInDarkList) {
-            this.changeSettings({siteListEnabled: siteList});
-        } else {
-            this.changeSettings({siteList});
-        }
-    }
+        const host = getURLHostOrProtocol(url);
 
-    /**
-     * Adds host name of last focused tab
-     * into Sites List (or removes).
-     */
-    async toggleCurrentSite() {
-        const url = await this.tabs.getActiveTabURL();
-        this.toggleURL(url);
+        function getToggledList(sourceList: string[]) {
+            const list = sourceList.slice();
+            const index = list.indexOf(host);
+            if (index < 0) {
+                list.push(host);
+            } else {
+                list.splice(index, 1);
+            }
+            return list;
+        }
+
+        const darkThemeDetected = !settings.applyToListedOnly && settings.detectDarkTheme && tab.isDarkThemeDetected;
+        if (isInDarkList || darkThemeDetected || settings.siteListEnabled.includes(host)) {
+            const toggledList = getToggledList(settings.siteListEnabled);
+            this.changeSettings({siteListEnabled: toggledList});
+            return;
+        }
+
+        const toggledList = getToggledList(settings.siteList);
+        this.changeSettings({siteList: toggledList});
     }
 
     //------------------------------------
@@ -589,17 +592,18 @@ export class Extension implements ExtensionState {
     }
 
     private getTabMessage = (url: string, frameURL: string): TabData => {
+        const settings = this.user.settings;
         const urlInfo = this.getURLInfo(url);
-        if (this.isExtensionSwitchedOn() && isURLEnabled(url, this.user.settings, urlInfo)) {
-            const custom = this.user.settings.customThemes.find(({url: urlList}) => isURLInList(url, urlList));
-            const preset = custom ? null : this.user.settings.presets.find(({urls}) => isURLInList(url, urls));
-            let theme = custom ? custom.theme : preset ? preset.theme : this.user.settings.theme;
+        if (this.isExtensionSwitchedOn() && isURLEnabled(url, settings, urlInfo)) {
+            const custom = settings.customThemes.find(({url: urlList}) => isURLInList(url, urlList));
+            const preset = custom ? null : settings.presets.find(({urls}) => isURLInList(url, urls));
+            let theme = custom ? custom.theme : preset ? preset.theme : settings.theme;
             if (this.autoState === 'scheme-dark' || this.autoState === 'scheme-light') {
                 const mode = this.autoState === 'scheme-dark' ? 1 : 0;
                 theme = {...theme, mode};
             }
             const isIFrame = frameURL != null;
-            const detectDarkTheme = !isIFrame && this.user.settings.detectDarkTheme;
+            const detectDarkTheme = !isIFrame && settings.detectDarkTheme && !isURLInList(url, settings.siteListEnabled);
 
             logInfo(`Creating CSS for url: ${url}`);
             logInfo(`Custom theme ${custom ? 'was found' : 'was not found'}, Preset theme ${preset ? 'was found' : 'was not found'}
@@ -641,7 +645,7 @@ export class Extension implements ExtensionState {
                             css: theme.stylesheet && theme.stylesheet.trim() ?
                                 theme.stylesheet :
                                 createStaticStylesheet(theme, url, frameURL, this.config.STATIC_THEMES_RAW, this.config.STATIC_THEMES_INDEX),
-                            detectDarkTheme: this.user.settings.detectDarkTheme,
+                            detectDarkTheme: settings.detectDarkTheme,
                         },
                     };
                 }

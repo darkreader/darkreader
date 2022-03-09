@@ -1,4 +1,4 @@
-import type {UserSettings} from '../definitions';
+import type {UserSettings, TabInfo} from '../definitions';
 import {isIPV6, compareIPV6} from './ipv6';
 import {isThunderbird} from './platform';
 
@@ -15,7 +15,7 @@ function fixBaseURL($url: string) {
 }
 
 export function parseURL($url: string, $base: string = null) {
-    const key = `${$url}${$base ? `;${ $base}` : ''}`;
+    const key = `${$url}${$base ? `;${$base}` : ''}`;
     if (parsedURLCache.has(key)) {
         return parsedURLCache.get(key);
     }
@@ -206,7 +206,7 @@ export function isPDF(url: string) {
     return false;
 }
 
-export function isURLEnabled(url: string, userSettings: UserSettings, {isProtected, isInDarkList}: {isProtected: boolean; isInDarkList: boolean}) {
+export function isURLEnabled(url: string, userSettings: UserSettings, {isProtected, isInDarkList, isDarkThemeDetected}: Partial<TabInfo>) {
     if (isProtected && !userSettings.enableForProtectedPages) {
         return false;
     }
@@ -221,14 +221,16 @@ export function isURLEnabled(url: string, userSettings: UserSettings, {isProtect
     const isURLInUserList = isURLInList(url, userSettings.siteList);
     const isURLInEnabledList = isURLInList(url, userSettings.siteListEnabled);
 
-    if (userSettings.applyToListedOnly && !isURLInEnabledList) {
-        return isURLInUserList;
+    if (userSettings.applyToListedOnly) {
+        return isURLInEnabledList || isURLInUserList;
     }
-
-    if (isURLInEnabledList && isInDarkList) {
+    if (isURLInEnabledList) {
         return true;
     }
-    return (!isInDarkList && !isURLInUserList);
+    if (isInDarkList || (userSettings.detectDarkTheme && isDarkThemeDetected)) {
+        return false;
+    }
+    return !isURLInUserList;
 }
 
 export function isFullyQualifiedDomain(candidate: string) {

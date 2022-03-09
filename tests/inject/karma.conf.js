@@ -2,16 +2,18 @@ const fs = require('fs');
 const os = require('os');
 const rollupPluginIstanbul = require('rollup-plugin-istanbul2');
 const rollupPluginNodeResolve = require('@rollup/plugin-node-resolve').default;
-const typescript = require('typescript');
-const {getTestDestDir, rootPath} = require('../../tasks/paths');
 const rollupPluginReplace = require('@rollup/plugin-replace');
 const rollupPluginTypescript = require('@rollup/plugin-typescript');
+const typescript = require('typescript');
+const {getTestDestDir, rootPath} = require('../../tasks/paths');
 
 /**
  * @param   {import('karma').Config} config
  * @returns {import('karma').ConfigOptions}
  */
 function configureKarma(config) {
+    const headless = config.headless || process.env.KARMA_HEADLESS || false;
+
     let options = {
         basePath: '../..',
         frameworks: ['jasmine'],
@@ -50,7 +52,9 @@ function configureKarma(config) {
         colors: true,
         logLevel: config.LOG_INFO,
         autoWatch: true,
-        browsers: ['Chrome', 'Firefox', process.platform === 'darwin' ? 'Safari' : null].filter(Boolean),
+        browsers: headless
+            ? ['ChromeHeadless', 'FirefoxHeadless']
+            : ['Chrome', 'Firefox', process.platform === 'darwin' ? 'Safari' : null].filter(Boolean),
         singleRun: true,
         concurrency: 1,
     };

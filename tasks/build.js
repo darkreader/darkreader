@@ -11,6 +11,7 @@ const codeStyle = require('./code-style');
 const zip = require('./zip');
 const {runTasks} = require('./task');
 const {log} = require('./utils');
+const {fork} = require('child_process');
 
 const standardTask = [
     clean,
@@ -55,8 +56,27 @@ async function api() {
     }
 }
 
+async function executeChildProcess(args) {
+    if (process.env.BUILD_CHILD) {
+        throw new Error('Infinite loop');
+    }
+    const env = {...process.env, BUILD_CHILD: '1'};
+    const child = fork(__filename, args, {env});
+    // Send SIGINTs as SIGKILLs, which are not ignored
+    process.on('SIGINT', () => {
+        child.kill('SIGKILL');
+        process.exit(130);
+    });
+    return new Promise((resolve, reject) => child.on('error', reject).on('close', resolve));
+}
+
 async function run() {
     const args = process.argv.slice(2);
+
+    // Enable Ctrl+C to cancel the build immediately
+    if (!process.env.BUILD_CHILD) {
+        return executeChildProcess(args);
+    }
 
     if (args.includes('--release')) {
         await build({debug: false, watch: false});

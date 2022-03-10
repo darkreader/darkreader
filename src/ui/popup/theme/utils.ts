@@ -4,10 +4,10 @@ import type {ViewProps} from '../types';
 
 export function getCurrentThemePreset(props: ViewProps) {
     const custom = props.data.settings.customThemes.find(
-        ({url}) => isURLInList(props.tab.url, url)
+        ({url}) => isURLInList(props.data.activeTab.url, url)
     );
     const preset = custom ? null : props.data.settings.presets.find(
-        ({urls}) => isURLInList(props.tab.url, urls)
+        ({urls}) => isURLInList(props.data.activeTab.url, urls)
     );
     let theme = custom ?
         custom.theme :

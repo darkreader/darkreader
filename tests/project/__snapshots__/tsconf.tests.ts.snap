@@ -17,6 +17,7 @@ Object {
     ],
     "module": "es6",
     "moduleResolution": "node",
+    "noEmit": true,
     "noImplicitAny": true,
     "resolveJsonModule": true,
     "target": "es2019",
@@ -25,9 +26,6 @@ Object {
       "offscreencanvas",
     ],
   },
-  "exclude": Array [
-    "src/ui/popup/compatibility.js",
-  ],
   "files": Array [
     "./defaults.ts",
     "./definitions.d.ts",
@@ -231,6 +229,7 @@ Object {
     ],
     "module": "es6",
     "moduleResolution": "node",
+    "noEmit": true,
     "noImplicitAny": true,
     "resolveJsonModule": true,
     "target": "es5",
@@ -239,9 +238,6 @@ Object {
       "offscreencanvas",
     ],
   },
-  "exclude": Array [
-    "../src/ui/popup/compatibility.js",
-  ],
   "files": Array [
     "./chrome.ts",
     "./fetch.ts",

@@ -7,10 +7,11 @@
     "benchmark-server": "node tests/benchmark-server/index.js",
     "build": "node tasks/build.js --release",
     "build:all": "node tasks/build.js --debug --release --api",
-    "code-style": "eslint --ignore-pattern \"!.eslintplugin.js\" --cache --fix \"src/**/*.ts\" \"src/**/*.tsx\" \"tasks/**/*.js\" \"tests/[!coverage]**/*.js\" \"tests/**/*.ts\" \".eslintrc.js\" \"index.d.ts\" \".eslintplugin.js\"",
+    "code-style": "eslint --ignore-pattern '!.eslintplugin.js' --cache --fix -- 'src/**/*.ts' 'src/**/*.tsx' 'tasks/**/*.js' 'tests/[!coverage]**/*.js' 'tests/**/*.ts' '.eslintrc.js' 'index.d.ts' '.eslintplugin.js'",
     "debug": "node tasks/build.js --debug",
     "debug:watch": "node tasks/build.js --debug --watch",
-    "lint": "eslint --ignore-pattern \"!.eslintplugin.js\" \"src/**/*.ts\" \"src/**/*.tsx\" \"tasks/**/*.js\" \"tests/**/*.ts\" \"tests/[!coverage]**/*.js\" \"index.d.ts\" \".eslintplugin.js\"",
+    "lint": "eslint --ignore-pattern '!.eslintplugin.js' -- 'src/**/*.ts' 'src/**/*.tsx' 'tasks/**/*.js' 'tests/**/*.ts' 'tests/[!coverage]**/*.js' 'index.d.ts' '.eslintplugin.js'",
+    "lint:bundle": "(node ./tasks/check-exists.js ./build/debug/chrome || node tasks/build.js --debug --api) && eslint -- 'build/debug/chrome/**/*.js' 'darkreader.js'",
     "prepublishOnly": "npm test && npm run api",
     "release": "npm test && npm run lint && node tasks/build.js --release",
     "test": "npm run test:unit",
@@ -24,7 +25,8 @@
     "test:inject:debug": "node tests/inject/run.js --debug",
     "test:project": "jest --config=tests/project/jest.config.js",
     "test:unit": "jest --config=tests/unit/jest.config.js",
-    "test:unit:debug": "node --inspect-brk ./node_modules/jest/bin/jest --config=tests/unit/jest.config.js --runInBand --no-cache --watch"
+    "test:unit:debug": "node --inspect-brk ./node_modules/jest/bin/jest --config=tests/unit/jest.config.js --runInBand --no-cache --watch",
+    "test:update-snapshots": "npm run test -- --updateSnapshot && npm run test:project -- --updateSnapshot"
   },
   "main": "darkreader.js",
   "repository": {
@@ -44,20 +46,6 @@
     "nightmode",
     "accessibility",
     "eye-care"
-  ],
-  "browserslist": [
-    "supports es5",
-    "not ie > 0",
-    "not ie_mob > 0",
-    "not op_mini all",
-    "not op_mob < 59",
-    "not android < 50",
-    "not ios_saf < 6",
-    "not safari < 9.3",
-    "not opera < 36",
-    "not chrome < 49",
-    "not firefox < 33",
-    "not edge <= 18"
   ],
   "homepage": "https://darkreader.org/",
   "funding": {
@@ -81,8 +69,10 @@
     "@typescript-eslint/parser": "5.13.0",
     "chokidar": "3.5.3",
     "eslint": "8.10.0",
+    "eslint-plugin-compat": "4.0.2",
     "eslint-plugin-import": "2.25.4",
     "eslint-plugin-local": "1.0.0",
+    "get-stream": "6.0.1",
     "globby": "13.1.1",
     "jasmine-core": "4.0.1",
     "jest": "27.5.1",

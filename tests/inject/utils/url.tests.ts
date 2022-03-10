@@ -133,6 +133,28 @@ it('URL is enabled', () => {
         {isProtected: false, isInDarkList: false},
     )).toBe(false);
 
+    // Dark theme detection
+    expect(isURLEnabled(
+        'https://github.com/',
+        {siteList: [], siteListEnabled: [], applyToListedOnly: false, detectDarkTheme: true} as UserSettings,
+        {isProtected: false, isInDarkList: false, isDarkThemeDetected: true},
+    )).toBe(false);
+    expect(isURLEnabled(
+        'https://github.com/',
+        {siteList: [], siteListEnabled: [], applyToListedOnly: false, detectDarkTheme: false} as UserSettings,
+        {isProtected: false, isInDarkList: false, isDarkThemeDetected: true},
+    )).toBe(true);
+    expect(isURLEnabled(
+        'https://github.com/',
+        {siteList: [], siteListEnabled: [], applyToListedOnly: false, detectDarkTheme: true} as UserSettings,
+        {isProtected: false, isInDarkList: false, isDarkThemeDetected: false},
+    )).toBe(true);
+    expect(isURLEnabled(
+        'https://github.com/',
+        {siteList: [], siteListEnabled: ['github.com'], applyToListedOnly: false, detectDarkTheme: true} as UserSettings,
+        {isProtected: false, isInDarkList: false, isDarkThemeDetected: true},
+    )).toBe(true);
+
     // Test for PDF enabling
     expect(isPDF(
         'https://www.google.com/file.pdf'

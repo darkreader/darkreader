@@ -15,12 +15,11 @@ import {getDuration} from '../../../utils/time';
 import {DONATE_URL, GITHUB_URL, PRIVACY_URL, TWITTER_URL, getHelpURL} from '../../../utils/links';
 import {getLocalMessage} from '../../../utils/locales';
 import {compose} from '../../utils';
-import type {ExtensionData, ExtensionActions, TabInfo, News as NewsObject} from '../../../definitions';
+import type {ExtensionData, ExtensionActions, News as NewsObject} from '../../../definitions';
 import {isMobile, isFirefox, isThunderbird} from '../../../utils/platform';
 
 interface BodyProps {
     data: ExtensionData;
-    tab: TabInfo;
     actions: ExtensionActions;
 }
 
@@ -113,7 +112,6 @@ function Body(props: BodyProps & {fonts: string[]}) {
 
             <Header
                 data={props.data}
-                tab={props.tab}
                 actions={props.actions}
                 onMoreToggleSettingsClick={toggleMoreToggleSettings}
             />
@@ -123,20 +121,20 @@ function Body(props: BodyProps & {fonts: string[]}) {
                 onSwitchTab={(tab) => setState({activeTab: tab})}
                 tabs={isThunderbird ? {
                     'Filter': (
-                        <FilterSettings data={props.data} actions={props.actions} tab={props.tab} />
+                        <FilterSettings data={props.data} actions={props.actions} />
                     ),
                     'More': (
-                        <MoreSettings data={props.data} actions={props.actions} tab={props.tab} fonts={props.fonts}/>
+                        <MoreSettings data={props.data} actions={props.actions} fonts={props.fonts}/>
                     ),
                 } : {
                     'Filter': (
-                        <FilterSettings data={props.data} actions={props.actions} tab={props.tab} />
+                        <FilterSettings data={props.data} actions={props.actions} />
                     ),
                     'Site list': (
                         <SiteListSettings data={props.data} actions={props.actions} isFocused={state.activeTab === 'Site list'} />
                     ),
                     'More': (
-                        <MoreSettings data={props.data} actions={props.actions} tab={props.tab} fonts={props.fonts}/>
+                        <MoreSettings data={props.data} actions={props.actions} fonts={props.fonts}/>
                     ),
                 }}
                 tabLabels={{

@@ -68,7 +68,6 @@
     "@typescript-eslint/eslint-plugin": "5.13.0",
     "@typescript-eslint/parser": "5.13.0",
     "chokidar": "3.5.3",
-    "cross-env": "7.0.3",
     "eslint": "8.10.0",
     "eslint-plugin-compat": "4.0.2",
     "eslint-plugin-import": "2.25.4",

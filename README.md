@@ -18,16 +18,9 @@ If the help page doesn't answer your question, open up a new [discussion](https:
 
 Read more about contributing to Dark Reader in [CONTRIBUTING.md](https://github.com/darkreader/darkreader/blob/master/CONTRIBUTING.md).
 
-## Building for use
+## Building Dark Reader
 
-You can install the extension from a file.  
-Install [Node.js LTS](https://nodejs.org/en/). Download the source code (or check out from git).  
-Open terminal in the root folder and run:  
-
-- `npm install`  
-- `npm run build`  
-
-This will generate a `build/release/darkreader-chrome.zip` file that is useable in a Chromium-based browser and also a `build/release/darkreader-firefox.xpi` file that is useable in Firefox.
+See [BUILDING.md](https://github.com/arche-dev/darkreader/blob/Building-Patch/BUILDING.md) for instructions on how to build Dark Reader
 
 ## Using Dark Reader for a website
 

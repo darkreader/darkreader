@@ -11,6 +11,7 @@ const codeStyle = require('./code-style');
 const zip = require('./zip');
 const {runTasks} = require('./task');
 const {log} = require('./utils');
+const {fork} = require("child_process");
 
 const standardTask = [
     clean,

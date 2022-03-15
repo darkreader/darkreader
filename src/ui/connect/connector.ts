@@ -1,5 +1,5 @@
 import {isFirefox} from '../../utils/platform';
-import type {ExtensionData, ExtensionActions, FilterConfig, TabInfo, Message, UserSettings} from '../../definitions';
+import type {ExtensionData, ExtensionActions, FilterConfig, Message, UserSettings} from '../../definitions';
 import {MessageType} from '../../utils/message';
 
 export default class Connector implements ExtensionActions {
@@ -44,13 +44,6 @@ export default class Connector implements ExtensionActions {
         return await this.sendRequest<ExtensionData>(MessageType.UI_GET_DATA);
     }
 
-    async getActiveTabInfo() {
-        if (isFirefox) {
-            return await this.firefoxSendRequestWithResponse<TabInfo>(MessageType.UI_GET_ACTIVE_TAB_INFO);
-        }
-        return await this.sendRequest<TabInfo>(MessageType.UI_GET_ACTIVE_TAB_INFO);
-    }
-
     private onChangesReceived = ({type, data}: Message) => {
         if (type === MessageType.BG_CHANGES) {
             this.changeSubscribers.forEach((callback) => callback(data));
@@ -77,8 +70,8 @@ export default class Connector implements ExtensionActions {
         chrome.runtime.sendMessage<Message>({type: MessageType.UI_SET_THEME, data: theme});
     }
 
-    toggleURL(url: string) {
-        chrome.runtime.sendMessage<Message>({type: MessageType.UI_TOGGLE_URL, data: url});
+    toggleActiveTab() {
+        chrome.runtime.sendMessage<Message>({type: MessageType.UI_TOGGLE_ACTIVE_TAB, data: {}});
     }
 
     markNewsAsRead(ids: string[]) {

@@ -1,7 +1,7 @@
 // @ts-check
 const karma = require('karma');
 const path = require('path');
-const {createEchoServer} = require('./echo-server');
+const {createEchoServer} = require('./support/echo-server');
 
 const ECHO_SERVER_PORT = 9966;
 
@@ -10,10 +10,12 @@ process.env.NODE_OPTIONS = '--max_old_space_size=3072';
 async function run() {
     const args = process.argv.slice(2);
     const debug = args.includes('--debug');
+    const ci = args.includes('--ci');
+    const coverage = args.includes('--coverage');
 
     const configFilePath = path.join(__dirname, './karma.conf.js');
     /** @type {Object} */
-    const cliOptions = {debug};
+    const cliOptions = {debug, ci, coverage};
     const parseOptions = {throwErrors: true};
     const karmaConfig = await karma.config.parseConfig(configFilePath, cliOptions, parseOptions);
 

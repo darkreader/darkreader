@@ -2,7 +2,6 @@
 
 const {dirname} = require('path');
 const rootDir = dirname(require.resolve('../../package.json'));
-const product = process.env.TEST_BROWSER || 'chrome';
 
 /** @type {import('@jest/types').Config.InitialOptions} */
 const config = {
@@ -15,7 +14,7 @@ const config = {
     globals: {
         'ts-jest': {tsconfig: '<rootDir>/tests/browser/tsconfig.json'},
         __DEBUG__: false,
-        product,
+        product: 'chrome',
     },
     setupFilesAfterEnv: ['jest-extended/all'],
     collectCoverage: false,

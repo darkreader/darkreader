@@ -21,9 +21,13 @@
         "jsxFactory": "m",
         "moduleResolution": "Node",
         "noEmit": true,
-        "noImplicitAny": true
+        "noImplicitAny": true,
+        "removeComments": false,
+        "sourceMap": true,
+        "inlineSources": true,
+        "noEmitOnError": true
     },
     "exclude": [
-        "./coverage",
+        "./coverage"
     ]
 }

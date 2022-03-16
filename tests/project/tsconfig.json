@@ -17,6 +17,7 @@
         "forceConsistentCasingInFileNames": true,
         "noImplicitAny": true,
         "inlineSourceMap": true,
+        "noEmit": true,
         "allowJs": true
     }
 }

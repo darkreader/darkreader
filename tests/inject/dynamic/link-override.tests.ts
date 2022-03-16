@@ -1,9 +1,9 @@
 import {DEFAULT_THEME} from '../../../src/defaults';
 import {createOrUpdateDynamicTheme, removeDynamicTheme} from '../../../src/inject/dynamic-theme';
 import {isSafari} from '../../../src/utils/platform';
-import {multiline, timeout} from '../test-utils';
-import {stubChromeRuntimeMessage, resetChromeRuntimeMessageStub, stubBackgroundFetchResponse} from '../background-stub';
-import {getCSSEchoURL} from '../echo-client';
+import {multiline, timeout} from '../support/test-utils';
+import {resetChromeRuntimeMessageStub, stubBackgroundFetchResponse, stubChromeRuntimeMessage} from '../support/background-stub';
+import {getCSSEchoURL} from '../support/echo-client';
 
 const theme = {
     ...DEFAULT_THEME,

@@ -1,36 +1,31 @@
 import type {Theme} from '../../definitions';
 import {forEach} from '../../utils/array';
 import {getMatches} from '../../utils/text';
-import {getAbsoluteURL} from '../../utils/url';
-import {watchForNodePosition, removeNode, iterateShadowHosts} from '../utils/dom';
-import {logWarn} from '../utils/log';
+import {getAbsoluteURL, isRelativeHrefOnAbsolutePath} from '../../utils/url';
+import {watchForNodePosition, removeNode, iterateShadowHosts, addReadyStateCompleteListener} from '../utils/dom';
+import {logInfo, logWarn} from '../../utils/log';
 import {replaceCSSRelativeURLsWithAbsolute, removeCSSComments, replaceCSSFontFace, getCSSURLValue, cssImportRegex, getCSSBaseBath} from './css-rules';
 import {bgFetch} from './network';
 import {createStyleSheetModifier} from './stylesheet-modifier';
-import {isShadowDomSupported, isSafari, isThunderbird, isChromium} from '../../utils/platform';
+import {isShadowDomSupported, isSafari, isThunderbird, isFirefox} from '../../utils/platform';
 
 declare global {
-    interface HTMLStyleElement {
-        sheet: CSSStyleSheet;
-    }
-    interface HTMLLinkElement {
-        sheet: CSSStyleSheet;
-    }
-    interface SVGStyleElement {
-        sheet: CSSStyleSheet;
-    }
     interface Document {
         adoptedStyleSheets: CSSStyleSheet[];
     }
     interface ShadowRoot {
         adoptedStyleSheets: CSSStyleSheet[];
     }
+    interface CSSStyleSheet {
+        replaceSync(text: string): void;
+    }
 }
 
 export type StyleElement = HTMLLinkElement | HTMLStyleElement;
 
+export type detailsArgument = {secondRound: boolean};
 export interface StyleManager {
-    details(): {rules: CSSRuleList};
+    details(options: detailsArgument): {rules: CSSRuleList};
     render(theme: Theme, ignoreImageAnalysis: string[]): void;
     pause(): void;
     destroy(): void;
@@ -49,11 +44,12 @@ export function shouldManageStyle(element: Node) {
                 element instanceof HTMLLinkElement &&
                 element.rel &&
                 element.rel.toLowerCase().includes('stylesheet') &&
-                !element.disabled
+                !element.disabled &&
+                (isFirefox ? !element.href.startsWith('moz-extension://') : true)
             )
         ) &&
         !element.classList.contains('darkreader') &&
-        element.media !== 'print' &&
+        element.media.toLowerCase() !== 'print' &&
         !element.classList.contains('stylus')
     );
 }
@@ -81,7 +77,14 @@ document.addEventListener('__darkreader__inlineScriptsAllowed', () => {
     canOptimizeUsingProxy = true;
 });
 
-export function manageStyle(element: StyleElement, {update, loadingStart, loadingEnd}): StyleManager {
+let loadingLinkCounter = 0;
+const rejectorsForLoadingLinks = new Map<number, (reason?: any) => void>();
+
+export function cleanLoadingLinks() {
+    rejectorsForLoadingLinks.clear();
+}
+
+export function manageStyle(element: StyleElement, {update, loadingStart, loadingEnd}: {update: () => void; loadingStart: () => void; loadingEnd: () => void}): StyleManager {
     const prevStyles: HTMLStyleElement[] = [];
     let next: Element = element;
     while ((next = next.nextElementSibling) && next.matches('.darkreader')) {
@@ -107,14 +110,61 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
         return element instanceof HTMLStyleElement && element.textContent.trim().match(cssImportRegex);
     }
 
+    // It loops trough the cssRules and check for CSSImportRule and their `href`.
+    // If the `href` isn't local and doesn't start with the same-origin.
+    // We can be ensure that's a cross-origin import
+    // And should add a cors-sheet to this element.
+    function hasImports(cssRules: CSSRuleList, checkCrossOrigin: boolean) {
+        let result = false;
+        if (cssRules) {
+            let rule: CSSRule;
+            cssRulesLoop:
+            for (let i = 0, len = cssRules.length; i < len; i++) {
+                rule = cssRules[i];
+                if ((rule as CSSImportRule).href) {
+                    if (checkCrossOrigin) {
+                        if ((rule as CSSImportRule).href.startsWith('http') && !(rule as CSSImportRule).href.startsWith(location.origin)) {
+                            result = true;
+                            break cssRulesLoop;
+                        }
+                    } else {
+                        result = true;
+                        break cssRulesLoop;
+                    }
+                }
+            }
+        }
+        return result;
+    }
+
     function getRulesSync(): CSSRuleList {
         if (corsCopy) {
+            logInfo('[getRulesSync] Using cors-copy.');
             return corsCopy.sheet.cssRules;
         }
         if (containsCSSImport()) {
+            logInfo('[getRulesSync] CSSImport detected.');
             return null;
         }
-        return safeGetSheetRules();
+
+        const cssRules = safeGetSheetRules();
+        if (
+            element instanceof HTMLLinkElement &&
+            !isRelativeHrefOnAbsolutePath(element.href) &&
+            hasImports(cssRules, false)
+        ) {
+            logInfo('[getRulesSync] CSSImportRule detected on non-local href.');
+            return null;
+        }
+
+        if (hasImports(cssRules, true)) {
+            logInfo('[getRulesSync] Cross-Origin CSSImportRule detected.');
+            return null;
+        }
+
+        logInfo('[getRulesSync] Using cssRules.');
+        !cssRules && logWarn('[getRulesSync] cssRules is null, trying again.');
+        return cssRules;
     }
 
     function insertStyle() {
@@ -137,7 +187,7 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
         syncStyle.classList.add('darkreader');
         syncStyle.classList.add('darkreader--sync');
         syncStyle.media = 'screen';
-        if (!isChromium && element.title) {
+        if (element.title) {
             syncStyle.title = element.title;
         }
         syncStyleSet.add(syncStyle);
@@ -145,6 +195,7 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
 
     let isLoadingRules = false;
     let wasLoadingError = false;
+    const loadingLinkId = ++loadingLinkCounter;
 
     async function getRulesAsync(): Promise<CSSRuleList> {
         let cssText: string;
@@ -162,7 +213,8 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
                 isStillLoadingError(accessError)
             ) {
                 try {
-                    await linkLoading(element);
+                    logInfo(`Linkelement ${loadingLinkId} is not loaded yet and thus will be await for`, element);
+                    await linkLoading(element, loadingLinkId);
                 } catch (err) {
                     // NOTE: Some @import resources can fail,
                     // but the style sheet can still be valid.
@@ -182,8 +234,10 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
                 }
             }
 
-            if (cssRules != null) {
-                return cssRules;
+            if (cssRules) {
+                if (!hasImports(cssRules, false)) {
+                    return cssRules;
+                }
             }
 
             cssText = await loadText(element.href);
@@ -216,9 +270,18 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
         return null;
     }
 
-    function details() {
+    function details(options: detailsArgument) {
         const rules = getRulesSync();
         if (!rules) {
+            // secondRound is only true after it's
+            // has gone trough `details()` & `getRulesAsync` already
+            // So that means that `getRulesSync` shouldn't fail.
+            // However as a fail-safe to prevent loops, we should
+            // return null here and not continue to `getRulesAsync`
+            if (options.secondRound) {
+                logWarn('Detected dead-lock at details(), returning early to prevent it.');
+                return null;
+            }
             if (isLoadingRules || wasLoadingError) {
                 return null;
             }
@@ -250,6 +313,24 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
 
         cancelAsyncOperations = false;
 
+        function removeCSSRulesFromSheet(sheet: CSSStyleSheet) {
+            // Check if we can use a fastpath by using sheet.replaceSync.
+            // Because replaceSync can throw DOMExceptions we have to use try-catch.
+            try {
+                if (sheet.replaceSync) {
+                    sheet.replaceSync('');
+                    return;
+                }
+            } catch (err) {
+                logWarn('Could not use fastpath for removing rules from stylesheet', err);
+            }
+            // If we hit this point, the replaceSync didn't work
+            // and we have to iterate over the CSSRules.
+            for (let i = sheet.cssRules.length - 1; i >= 0; i--) {
+                sheet.deleteRule(i);
+            }
+        }
+
         function prepareOverridesSheet() {
             if (!syncStyle) {
                 createSyncStyle();
@@ -268,9 +349,8 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
             }
 
             const sheet = syncStyle.sheet;
-            for (let i = sheet.cssRules.length - 1; i >= 0; i--) {
-                sheet.deleteRule(i);
-            }
+
+            removeCSSRulesFromSheet(sheet);
 
             if (syncStylePositionWatcher) {
                 syncStylePositionWatcher.run();
@@ -296,6 +376,12 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
                 isAsyncCancelled: () => cancelAsyncOperations,
             });
             isOverrideEmpty = syncStyle.sheet.cssRules.length === 0;
+            if (sheetModifier.shouldRebuildStyle()) {
+                // "update" function schedules rebuilding the style
+                // ideally to wait for link loading, because some sites put links any time,
+                // but it can be complicated, so waiting for document completion can do the trick
+                addReadyStateCompleteListener(() => update());
+            }
         }
 
         buildOverrides();
@@ -365,6 +451,7 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
             }
             rulesCheckFrameId = requestAnimationFrame(checkForUpdate);
         };
+
         checkForUpdate();
     }
 
@@ -422,6 +509,12 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
         pause();
         removeNode(corsCopy);
         removeNode(syncStyle);
+        loadingEnd();
+        if (rejectorsForLoadingLinks.has(loadingLinkId)) {
+            const reject = rejectorsForLoadingLinks.get(loadingLinkId);
+            rejectorsForLoadingLinks.delete(loadingLinkId);
+            reject && reject();
+        }
     }
 
     function watch() {
@@ -465,27 +558,41 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
     };
 }
 
-async function linkLoading(link: HTMLLinkElement) {
+async function linkLoading(link: HTMLLinkElement, loadingId: number) {
     return new Promise<void>((resolve, reject) => {
         const cleanUp = () => {
             link.removeEventListener('load', onLoad);
             link.removeEventListener('error', onError);
+            rejectorsForLoadingLinks.delete(loadingId);
         };
+
         const onLoad = () => {
             cleanUp();
+            logInfo(`Linkelement ${loadingId} has been loaded`);
             resolve();
         };
+
         const onError = () => {
             cleanUp();
-            reject(`Link loading failed ${link.href}`);
+            reject(`Linkelement ${loadingId} couldn't be loaded. ${link.href}`);
         };
+
+        rejectorsForLoadingLinks.set(loadingId, () => {
+            cleanUp();
+            reject();
+        });
         link.addEventListener('load', onLoad);
         link.addEventListener('error', onError);
+        if (!link.href) {
+            onError();
+        }
     });
 }
 
 function getCSSImportURL(importDeclaration: string) {
-    return getCSSURLValue(importDeclaration.substring(8).replace(/;$/, ''));
+    // substring(7) is used to remove `@import` from the string.
+    // And then use .trim() to remove the possible whitespaces.
+    return getCSSURLValue(importDeclaration.substring(7).trim().replace(/;$/, '').replace(/screen$/, ''));
 }
 
 async function loadText(url: string) {

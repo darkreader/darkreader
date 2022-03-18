@@ -1,4 +1,4 @@
-import {multiline} from '../../test-utils';
+import {multiline} from '../../support/test-utils';
 
 describe('Style override', () => {
     it('should override user agent style', async () => {
@@ -79,7 +79,6 @@ describe('Style override', () => {
             await new Promise((resolve) => setTimeout(resolve));
             return (style.nextSibling as HTMLStyleElement).classList.contains('darkreader--sync');
         })).resolves.toBe(true);
-
     });
 
     it('should move override', async () => {
@@ -110,7 +109,6 @@ describe('Style override', () => {
             await new Promise((resolve) => setTimeout(resolve));
             return (style.nextSibling as HTMLStyleElement).classList.contains('darkreader--sync');
         })).resolves.toBe(true);
-
     });
 
     it('should remove override', async () => {
@@ -142,7 +140,6 @@ describe('Style override', () => {
             await new Promise((resolve) => setTimeout(resolve));
             return sibling.isConnected && !((sibling as HTMLStyleElement).classList.contains('darkreader--sync'));
         })).resolves.toBe(false);
-
     });
 
     it('should react to updated style', async () => {
@@ -173,7 +170,6 @@ describe('Style override', () => {
             await new Promise((resolve) => setTimeout(resolve));
             return (style.nextSibling as HTMLStyleElement).sheet.cssRules[0].cssText;
         })).resolves.toBe('html { background-color: rgb(89, 0, 16); }');
-
     });
 
     it('should react to a new style', async () => {
@@ -199,7 +195,6 @@ describe('Style override', () => {
             await new Promise((resolve) => setTimeout(resolve));
             return (styleElement.nextSibling as HTMLStyleElement).sheet.cssRules.length === 2 && (styleElement.nextSibling as HTMLStyleElement).classList.contains('darkreader--sync');
         })).resolves.toBe(true);
-
     });
 
     it('should handle defined custom elements', async () => {
@@ -236,8 +231,6 @@ describe('Style override', () => {
             await new Promise((resolve) => setTimeout(resolve, 100));
             const shadowRoot = document.querySelector('custom-element').shadowRoot;
             return getComputedStyle(shadowRoot.querySelector('p')).color;
-
         })).resolves.toBe('rgb(255, 160, 177)');
     });
-
 });

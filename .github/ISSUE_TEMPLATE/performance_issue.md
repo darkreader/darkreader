@@ -1,55 +1,62 @@
 ---
-name: Performance issues
-about: Adress a performance issue of Dark Reader
-title: "[Performance] Replace with title"
-labels:
+name: Performance Issue Report
+about: Create a report about a performance issue you experienced while using Dark Reader.
+title: "[Performance Issue] Replace with title"
+labels: Performance Issue
 assignees: ''
-
 ---
 
-<!-- 
-  ⚠⚠ Do not delete this issue template! ⚠⚠ 
-  Issues that do not use the issue template/don't fill out the essential information are likely to be ignored and closed. 
+<!--
+  ⚠⚠ Do not delete this issue template! ⚠⚠
+  Reported issues must use this template and have all the necessary information provided.
+  Incomplete reports are likely to be ignored and closed.
 -->
 
 <!--
-  Thank you for taking the time to a performance issue.
-  Please make sure there is no existing issue about this issue.
-  And make sure it's a actually performance issue, e.g. a extra 1 second to loading the website isn't a performance issue.
+  Thank you for taking the time to create a report about a performance issue.
+  Ensure that there are no other existing reports for this performance issue.
+  Please check if the issue is resolved after a restart of the browser.
+  Additionally, you should check if the issue persists in a new browser profile.
+  Remember to fill out every section on this report and remove any that are not needed.
+  Finally, place a brief description in the title of this report.
+  NOTE: Ensure that this is an actual performance issue.
+  One extra second to load the website is not a performance issue.
 -->
 
-# Performance Issue
 
-## Website
-<!-- If applicable, the link of the website where the performance issue is noticed. -->
+# Performance Issue Report
 
-## How to Reproduce
-<!-- We need to know how you encountered the bug to properly troubleshoot the issue. -->
+## Website Address
+<!-- Provide the website address. -->
+
+## Steps To Reproduce
+<!-- Provide steps to reproduce the problem, which will allow us to troubleshoot this performance issue. -->
 <!--
-  An example of this is:
-    - Go to '...'
-    - Click on '...'
-    - Notice spikes in CPU Usage
+Here is an example:
+- Go to example.com.
+- Hover over the example button.
+- Notice spikes in CPU usage.
 -->
 
-## Performance Profiler
-<!-- A link to either profile.zip *Chromium only* or a firefox profiler *Firefox only*. -->
+## Performance Profile
+<!-- Provide a link to a Chromium or a Firefox profile. -->
+
+## Screenshots
+<!-- If applicable, add screenshots to help explain this performance issue. -->
 
 ## System Information
 <!--
-  Please add a version of the browser you are using. 
-  If you don't know how to get your browser/Dark Reader version please search it up online.
+  Specify the browser name and version as well as the Dark Reader version you are using.
+  Please do an online search for help if you are not familiar with how to get this information.
 -->
 
-- OS: <!-- [e.g. Windows, macOS, Linux] -->
-- Browser: <!-- [e.g. Chrome 89, Firefox 87, Safari 14] -->
-- Dark Reader Version: <!-- [e.g. 4.9.30] -->
+- OS: <!-- e.g. Windows, macOS, Linux -->
+- Browser: <!-- e.g. Chrome 91, Firefox 90, Edge 91, Safari 14 -->
+- Dark Reader Version: <!-- e.g. 4.9.34 -->
 
-<!--
-  Do you have this performance issue with Dark Reader disabled?
-  Does it happen in other browsers?
-  Do you have hardware acceleration enabled?
--->
+## Additional Context
+- Does this happen when Dark Reader is disabled?
+- Does this happen in other browsers?
+- Do you have hardware acceleration enabled?
 
-## Additional context
-<!-- Add any other context or screenshots about the feature request here. -->
+<!-- Provide any additional information about this performance issue. -->

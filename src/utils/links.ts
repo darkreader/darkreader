@@ -1,8 +1,8 @@
 import {getUILanguage} from './locales';
 
 export const BLOG_URL = 'https://darkreader.org/blog/';
-export const DEVTOOLS_DOCS_URL = 'https://github.com/darkreader/darkreader#how-to-contribute';
-export const DONATE_URL = 'https://opencollective.com/darkreader';
+export const DEVTOOLS_DOCS_URL = 'https://github.com/darkreader/darkreader/blob/master/CONTRIBUTING.md';
+export const DONATE_URL = 'https://opencollective.com/darkreader/donate';
 export const GITHUB_URL = 'https://github.com/darkreader/darkreader';
 export const PRIVACY_URL = 'https://darkreader.org/privacy/';
 export const TWITTER_URL = 'https://twitter.com/darkreaderapp';
@@ -15,10 +15,11 @@ const helpLocales = [
     'en',
     'es',
     'fr',
-    'nl',
     'it',
+    'nl',
     'pt',
     'ru',
+    'tr',
     'zh-CN',
     'zh-TW',
 ];

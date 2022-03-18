@@ -4,16 +4,20 @@ import type {ViewProps} from '../types';
 
 export function getCurrentThemePreset(props: ViewProps) {
     const custom = props.data.settings.customThemes.find(
-        ({url}) => isURLInList(props.tab.url, url)
+        ({url}) => isURLInList(props.data.activeTab.url, url)
     );
     const preset = custom ? null : props.data.settings.presets.find(
-        ({urls}) => isURLInList(props.tab.url, urls)
+        ({urls}) => isURLInList(props.data.activeTab.url, urls)
     );
-    const theme = custom ?
+    let theme = custom ?
         custom.theme :
         preset ?
             preset.theme :
             props.data.settings.theme;
+    if (props.data.forcedScheme) {
+        const mode = props.data.forcedScheme === 'dark' ? 1 : 0;
+        theme = {...theme, mode};
+    }
 
     function setTheme(config: Partial<Theme>) {
         if (custom) {
@@ -28,6 +32,15 @@ export function getCurrentThemePreset(props: ViewProps) {
             });
         } else {
             props.actions.setTheme(config);
+        }
+        if (
+            config.mode != null &&
+            props.data.settings.automation &&
+            props.data.settings.automationBehaviour === 'Scheme'
+        ) {
+            props.actions.changeSettings({
+                automation: '',
+            });
         }
     }
 

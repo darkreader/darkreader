@@ -1,10 +1,8 @@
 .mobile {
     body {
         border: none;
-        box-sizing: border-box;
         height: auto;
-        margin: @popup-content-padding auto;
-        padding: 0;
+        position: relative;
     }
 }
 
@@ -46,7 +44,6 @@
         background-repeat: no-repeat;
         background-size: 1rem;
         border: @size-border solid @color-border;
-        border-radius: @size-control-inner / 2 + @size-border;
         display: inline-flex;
         justify-content: center;
         height: @size-control-inner;
@@ -93,23 +90,50 @@
     .m-donate-button {
         align-items: center;
         background-color: @color-control-active;
-        border-radius: @size-control-inner / 2 + @size-border;
         display: inline-flex;
-        justify-content: center;
         height: @size-control-inner + 2 * @size-border;
+        isolation: isolate;
+        justify-content: center;
         text-decoration: none;
+        position: relative;
         width: 100%;
 
         &__text {
             color: @color-control-fore;
             display: inline-block;
             font-weight: bold;
-            line-height: @size-control-inner;
             height: @size-control-inner;
+            line-height: @size-control-inner;
             text-transform: uppercase;
             transform: skewX(-10deg);
             -moz-user-select: none;
             user-select: none;
+        }
+
+        &__icon {
+            isolation: isolate;
+
+            &::before,
+            &::after {
+                border-radius: 50%;
+                content: "";
+                display: inline-block;
+                height: 1rem;
+                mix-blend-mode: screen;
+                position: absolute;
+                top: 0.375rem;
+                width: 1rem;
+            }
+    
+            &::before {
+                background-color: @color-heading;
+                left: 0.375rem;
+            }
+    
+            &::after {
+                background-color: @color-fore;
+                left: 1rem;
+            }
         }
     }
 
@@ -165,6 +189,7 @@
     @import "../control-group/style.less";
     @import "../check-button/style.less";
     @import "../main-page/style.less";
+    @import "../news-section/style.less";
     @import "../page-viewer/style.less";
     @import "../settings-page/style.less";
     @import "../automation-page/style.less";
@@ -210,5 +235,17 @@
 @media screen and (min-width: 34rem) {
     .mobile {
         font-size: 32px;
+    }
+}
+
+.firefox {
+    .darkreader-version {
+        display: none;
+    }
+}
+
+.preview:not(.mobile) {
+    body {
+        border-color: mix(@color-back, @color-control-fore);
     }
 }

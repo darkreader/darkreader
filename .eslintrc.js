@@ -1,26 +1,44 @@
-module.exports = {
+/** @type {import('eslint').Linter.Config} */
+const config = {overrides: []};
+
+// Source code (TS, JSX, JS)
+config.overrides.push({
+    files: ['{src,tasks,tests}/**/*.{ts,tsx,js,jsx}', '.*.js', 'index.d.ts'],
+    excludedFiles: ['darkreader.js'],
     parser: '@typescript-eslint/parser',
     plugins: ['@typescript-eslint', 'local'],
-    extends: ['plugin:@typescript-eslint/recommended'],
+    extends: ['plugin:@typescript-eslint/recommended', 'plugin:import/recommended', 'plugin:import/typescript'],
     rules: {
         'array-bracket-spacing': ['error', 'never'],
         'arrow-parens': ['error', 'always'],
         'block-spacing': ['error', 'always'],
         'brace-style': 'off',
         'comma-spacing': 'off',
+        'curly': 'error',
         'eol-last': ['error', 'always'],
+        'eqeqeq': ['error', 'smart'],
         'indent': ['error', 4, {
             'SwitchCase': 1,
         }],
         'jsx-quotes': ['error', 'prefer-double'],
         'keyword-spacing': 'off',
         'object-curly-spacing': ['error', 'never'],
+        'operator-assignment': ['error', 'always'],
+        'prefer-template': 'error',
         'no-debugger': 'error',
+        'no-else-return': 'error',
         'no-cond-assign': 'error',
+        'no-lonely-if': 'error',
         'no-multi-spaces': 'error',
+        'no-implicit-coercion': 'error',
         'no-redeclare': 'off',
+        'no-useless-concat': 'error',
+        'no-useless-return': 'error',
         'no-trailing-spaces': 'error',
         'no-whitespace-before-property': 'error',
+        'padded-blocks': ['error', 'never'],
+        'prefer-exponentiation-operator': 'error',
+        'prefer-regex-literals': 'error',
         'semi': 'off',
         'space-before-function-paren': ['error', {
             anonymous: 'always',
@@ -35,6 +53,7 @@ module.exports = {
             default: 'array-simple',
         }],
         'yoda': ['error', 'never'],
+        'local/consistent-new-lines': 'error',
         '@typescript-eslint/brace-style': 'error',
         '@typescript-eslint/camelcase': 'off',
         '@typescript-eslint/comma-spacing': ['error', {
@@ -62,13 +81,72 @@ module.exports = {
             allowTemplateLiterals: true,
             avoidEscape: true,
         }],
+        'import/no-unresolved': ['error', {
+            ignore: ['^malevic\/'],
+        }],
+        'import/no-restricted-paths': ['error', {
+            zones: [{
+                target: './src/inject/',
+                from: './src/background/',
+            },
+            {
+                target: './src/inject/',
+                from: './src/ui/',
+            },
+            {
+                target: './src/inject/',
+                from: './src/api/',
+            },
+            {
+                target: './src/inject/',
+                from: './tests/',
+            },
+            {
+                target: './src/background/',
+                from: './src/inject/',
+            },
+            {
+                target: './src/background/',
+                from: './src/ui/',
+            },
+            {
+                target: './src/background/',
+                from: './tests/',
+            },
+            {
+                target: './src/ui/',
+                from: './src/inject/',
+            },
+            {
+                target: './src/ui/',
+                from: './src/background/',
+            },
+            {
+                target: './src/ui/',
+                from: './tests/',
+            },
+            {
+                target: './src/generators/',
+                from: './src/inject/',
+            },
+            {
+                target: './src/generators/',
+                from: './src/background/',
+            },
+            {
+                target: './src/generators/',
+                from: './src/ui/',
+            }],
+        }],
     },
+
     overrides: [
         {
-            files: ['tasks/**/*.js', 'tests/**/*.js'],
+            files: ['tasks/**/*.js', 'tests/**/*.js', '.eslintplugin.js'],
             rules: {
                 '@typescript-eslint/no-var-requires': 'off',
-                '@typescript-eslint/no-implicit-any-catch': 'off'
+                '@typescript-eslint/no-implicit-any-catch': 'off',
+                '@typescript-eslint/ban-ts-comment': 'off',
             },
         },
         {
@@ -91,4 +169,61 @@ module.exports = {
             }
         },
     ],
-};
+});
+
+// Bundled JS
+
+config.overrides.push({
+    files: ['darkreader.js', 'build/debug/chrome/**/*.js'],
+    env: {browser: true},
+    extends: ['plugin:compat/recommended'],
+    parserOptions: {
+        ecmaVersion: 2019,
+        sourceType: 'module'
+    },
+    settings: {
+        polyfills: [
+            'navigator.deviceMemory',
+        ],
+    },
+    overrides: [
+
+        // API (modern clients)
+        {
+            files: ['darkreader.js'],
+            rules: {
+
+                // Compatibility check
+                'compat/compat': ['error', [
+                    '>0.5% and supports es5 and supports promises and supports url',
+                    'not Explorer > 0',
+                ].join(', ')]
+            },
+        },
+
+        // Extension (non-mobile browsers based on Firefox or Chromium)
+        {
+            files: ['build/debug/chrome/**/*.js'],
+            rules: {
+
+                // Compatibility check
+                'compat/compat': ['error', [
+                    '> 0.5% and supports es5',
+                    'Firefox ESR',
+                    'last 2 FirefoxAndroid versions',
+                    'not Explorer > 0',
+                    'not Safari > 0',
+                    'not iOS > 0',
+                    'not ChromeAndroid > 0',
+                    'not OperaMini all',
+                ].join(', ')]
+            },
+        },
+    ],
+});
+
+// Ignore temporarily since it's taking forever.
+// It seems to be importing typescript or something.
+config.ignorePatterns = ['tests/project/tsconf.tests.ts'];
+
+module.exports = config;

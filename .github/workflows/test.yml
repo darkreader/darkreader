@@ -11,6 +11,7 @@ on:
       - synchronize
       - reopened
       - ready_for_review
+  workflow_dispatch:
 jobs:
   test:
     name: Run tests
@@ -22,8 +23,11 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: 14.x
-      
+          node-version: 15.x
+
+      - name: Verify NPM version
+        run: npm --version
+
       - name: Set up npm cache
         uses: actions/cache@v2
         with:
@@ -41,3 +45,6 @@ jobs:
 
       - name: Lint code for code-style errors
         run: npm run lint
+
+      - name: Check for compatibility issues
+        run: npm run lint:bundle

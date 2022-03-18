@@ -1,21 +1,25 @@
-const fs = require('fs-extra');
+// @ts-check
+const fs = require('fs');
 const os = require('os');
 const rollup = require('rollup');
 const rollupPluginNodeResolve = require('@rollup/plugin-node-resolve').default;
+/** @type {any} */
 const rollupPluginReplace = require('@rollup/plugin-replace');
-const rollupPluginTypescript = require('rollup-plugin-typescript2');
+/** @type {any} */
+const rollupPluginTypescript = require('@rollup/plugin-typescript');
 const typescript = require('typescript');
-const {getDestDir} = require('./paths');
+const {getDestDir, PLATFORM, rootDir, rootPath} = require('./paths');
 const reload = require('./reload');
 const {PORT} = reload;
 const {createTask} = require('./task');
+const {copyFile, readFile, writeFile} = require('./utils');
 
 async function copyToBrowsers({cwdPath, debug}) {
-    const destPath = `${getDestDir({debug})}/${cwdPath}`;
-    const ffDestPath = `${getDestDir({debug, firefox: true})}/${cwdPath}`;
-    const tbDestPath = `${getDestDir({debug, thunderbird: true})}/${cwdPath}`;
-    await fs.copy(destPath, ffDestPath);
-    await fs.copy(destPath, tbDestPath);
+    const destPath = `${getDestDir({debug, platform: PLATFORM.CHROME})}/${cwdPath}`;
+    for (const platform of [PLATFORM.FIREFOX, PLATFORM.CHROME_MV3, PLATFORM.THUNDERBIRD]) {
+        const path = `${getDestDir({debug, platform})}/${cwdPath}`;
+        await copyFile(destPath, path);
+    }
 }
 
 function replace(str, find, replace) {
@@ -25,6 +29,15 @@ function replace(str, find, replace) {
 function patchFirefoxJS(/** @type {string} */code) {
     code = replace(code, 'chrome.fontSettings.getFontList', `chrome['font' + 'Settings']['get' + 'Font' + 'List']`);
     code = replace(code, 'chrome.fontSettings', `chrome['font' + 'Settings']`);
+    return code;
+}
+
+function patchMV3JS(/** @type {string} */code) {
+    // MV3 moves a few APIs around
+    code = replace(code, 'chrome.browserAction.setIcon', 'chrome.action.setIcon');
+    code = replace(code, 'chrome.browserAction.setBadgeBackgroundColor', 'chrome.action.setBadgeBackgroundColor');
+    code = replace(code, 'chrome.browserAction.setBadgeText', 'chrome.action.setBadgeText');
+
     return code;
 }
 
@@ -44,13 +57,17 @@ const jsEntries = [
         dest: 'background/index.js',
         reloadType: reload.FULL,
         async postBuild({debug}) {
-            const destPath = `${getDestDir({debug})}/${this.dest}`;
-            const ffDestPath = `${getDestDir({debug, firefox: true})}/${this.dest}`;
-            const tbDestPath = `${getDestDir({debug, thunderbird: true})}/${this.dest}`;
-            const code = await fs.readFile(destPath, 'utf8');
-            const patchedCode = patchFirefoxJS(code);
-            await fs.outputFile(ffDestPath, patchedCode);
-            await fs.copy(ffDestPath, tbDestPath);
+            const destPath = `${getDestDir({debug, platform: PLATFORM.CHROME})}/${this.dest}`;
+            const ffDestPath = `${getDestDir({debug, platform: PLATFORM.FIREFOX})}/${this.dest}`;
+            // Prior to Chrome 93, background service worker had to be in top-level directory
+            const mv3DestPath = `${getDestDir({debug, platform: PLATFORM.CHROME_MV3})}/background.js`;
+            const tbDestPath = `${getDestDir({debug, platform: PLATFORM.THUNDERBIRD})}/${this.dest}`;
+            const code = await readFile(destPath);
+            const patchedCodeFirefox = patchFirefoxJS(code);
+            const patchedCodeMV3 = patchMV3JS(code);
+            await writeFile(ffDestPath, patchedCodeFirefox);
+            await writeFile(mv3DestPath, patchedCodeMV3);
+            await copyFile(ffDestPath, tbDestPath);
         },
         watchFiles: null,
     },
@@ -104,20 +121,19 @@ const jsEntries = [
 async function bundleJS(/** @type {JSEntry} */entry, {debug, watch}) {
     const {src, dest} = entry;
     const bundle = await rollup.rollup({
-        input: src,
+        input: rootPath(src),
         plugins: [
             rollupPluginNodeResolve(),
             rollupPluginTypescript({
+                rootDir,
                 typescript,
-                tsconfig: 'src/tsconfig.json',
-                tsconfigOverride: {
-                    compilerOptions: {
-                        removeComments: debug ? false : true,
-                        sourceMap: debug ? true : false,
-                    },
-                },
-                clean: debug ? false : true,
-                cacheRoot: debug ? `${fs.realpathSync(os.tmpdir())}/darkreader_typescript_cache` : null,
+                tsconfig: rootPath('src/tsconfig.json'),
+                noImplicitAny: debug ? false : true,
+                removeComments: debug ? false : true,
+                sourceMap: debug ? true : false,
+                inlineSources: debug ? true : false,
+                noEmitOnError: true,
+                cacheDir: debug ? `${fs.realpathSync(os.tmpdir())}/darkreader_typescript_cache` : null,
             }),
             rollupPluginReplace({
                 preventAssignment: true,
@@ -129,7 +145,7 @@ async function bundleJS(/** @type {JSEntry} */entry, {debug, watch}) {
     });
     entry.watchFiles = bundle.watchFiles;
     await bundle.write({
-        file: `${getDestDir({debug})}/${dest}`,
+        file: `${getDestDir({debug, platform: PLATFORM.CHROME})}/${dest}`,
         strict: true,
         format: 'iife',
         sourcemap: debug ? 'inline' : false,

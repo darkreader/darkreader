@@ -1,6 +1,7 @@
 import {m} from 'malevic';
 import {getLocalMessage} from '../../../../utils/locales';
 import {withState, useState} from 'malevic/state';
+import {getContext} from 'malevic/dom';
 
 interface LoaderProps {
     complete: boolean;
@@ -8,10 +9,27 @@ interface LoaderProps {
 
 interface LoaderState {
     finished: boolean;
+    errorOccured: boolean;
 }
 
 function Loader({complete = false}: LoaderProps) {
-    const {state, setState} = useState<LoaderState>({finished: false});
+    const context = getContext();
+    const {state, setState} = useState<LoaderState>({finished: false, errorOccured: false});
+
+    // Add a setTimeout for 3 seconds(in which the UI should be loaded already)
+    // after the 3 seconds show a generic error message that the UI couldn't be loaded.
+    if (!state.errorOccured && !complete) {
+        context.store.loaderTimeoutID = setTimeout(() => {
+            setState({errorOccured: true});
+            context.refresh();
+        }, 3000);
+    }
+    if (complete) {
+        clearTimeout(context.store.loaderTimeoutID);
+    }
+
+    const labelMessage = state.errorOccured ? "A unknown error has occured, the UI couldn't be loaded" : getLocalMessage('loading_please_wait');
+
     return (
         <div
             class={{
@@ -21,7 +39,10 @@ function Loader({complete = false}: LoaderProps) {
             }}
             ontransitionend={() => setState({finished: true})}
         >
-            <label class="loader__message">{getLocalMessage('loading_please_wait')}</label>
+            <label class={{
+                'loader__message': true,
+                'loader__error': state.errorOccured,
+            }}>{labelMessage}</label>
         </div>
     );
 }

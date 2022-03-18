@@ -1,9 +1,10 @@
 import {modifyBackgroundColor, modifyBorderColor, modifyForegroundColor} from '../../generators/modify-colors';
 import {getParenthesesRange} from '../../utils/text';
 import {iterateCSSRules, iterateCSSDeclarations} from './css-rules';
-import {tryParseColor, getBgImageModifier} from './modify-css';
+import {tryParseColor, getBgImageModifier, getShadowModifierWithInfo} from './modify-css';
 import type {CSSValueModifier} from './modify-css';
 import type {Theme} from '../../definitions';
+import type {RGBA} from '../../utils/color';
 
 export interface ModifiedVarDeclaration {
     property: string;
@@ -35,6 +36,7 @@ export class VariablesStore {
     private changedTypeVars = new Set<string>();
     private typeChangeSubscriptions = new Map<string, Set<() => void>>();
     private unstableVarValues = new Map<string, string>();
+    private onRootVariableDefined: () => void;
 
     clear() {
         this.varTypes.clear();
@@ -65,8 +67,7 @@ export class VariablesStore {
         this.changedTypeVars.clear();
         this.initialVarTypes = new Map(this.varTypes);
         this.collectRootVariables();
-        this.rulesQueue.forEach((rules) => this.collectVariables(rules));
-        this.rulesQueue.forEach((rules) => this.collectVarDependants(rules));
+        this.collectVariablesAndVarDep(this.rulesQueue);
         this.rulesQueue.splice(0);
         this.collectRootVarDependants();
 
@@ -197,6 +198,7 @@ export class VariablesStore {
                     const decs = getDeclarations();
                     onTypeChange(decs);
                 };
+
                 callbacks.add(callback);
                 this.subscribeForVarTypeChange(varName, callback);
             };
@@ -217,7 +219,7 @@ export class VariablesStore {
     getModifierForVarDependant(property: string, sourceValue: string): CSSValueModifier {
         if (sourceValue.match(/^\s*(rgb|hsl)a?\(/)) {
             const isBg = property.startsWith('background');
-            const isText = property === 'color';
+            const isText = (property === 'color' || property === 'caret-color');
             return (theme) => {
                 let value = insertVarValues(sourceValue, this.unstableVarValues);
                 if (!value) {
@@ -236,7 +238,7 @@ export class VariablesStore {
                 );
             };
         }
-        if (property === 'color') {
+        if (property === 'color' || property === 'caret-color') {
             return (theme) => {
                 return replaceCSSVariablesNames(
                     sourceValue,
@@ -248,20 +250,32 @@ export class VariablesStore {
         if (property === 'background' || property === 'background-image' || property === 'box-shadow') {
             return (theme) => {
                 const unknownVars = new Set<string>();
-                const modify = () => replaceCSSVariablesNames(
-                    sourceValue,
-                    (v) => {
-                        if (this.isVarType(v, VAR_TYPE_BGCOLOR)) {
-                            return wrapBgColorVariableName(v);
+                const modify = () => {
+                    const variableReplaced = replaceCSSVariablesNames(
+                        sourceValue,
+                        (v) => {
+                            if (this.isVarType(v, VAR_TYPE_BGCOLOR)) {
+                                return wrapBgColorVariableName(v);
+                            }
+                            if (this.isVarType(v, VAR_TYPE_BGIMG)) {
+                                return wrapBgImgVariableName(v);
+                            }
+                            unknownVars.add(v);
+                            return v;
+                        },
+                        (fallback) => tryModifyBgColor(fallback, theme),
+                    );
+                    // Check if property is box-shadow and if so, do a pass-trough to modify the shadow
+                    if (property === 'box-shadow') {
+                        const shadowModifier = getShadowModifierWithInfo(variableReplaced);
+                        const modifiedShadow = shadowModifier(theme);
+                        if (modifiedShadow.unparseableMatchesLength !== modifiedShadow.matchesLength) {
+                            return modifiedShadow.result;
                         }
-                        if (this.isVarType(v, VAR_TYPE_BGIMG)) {
-                            return wrapBgImgVariableName(v);
-                        }
-                        unknownVars.add(v);
-                        return v;
-                    },
-                    (fallback) => tryModifyBgColor(fallback, theme),
-                );
+                    }
+                    return variableReplaced;
+                };
+
                 const modified = modify();
                 if (unknownVars.size > 0) {
                     return new Promise<string>((resolve) => {
@@ -271,35 +285,20 @@ export class VariablesStore {
                             const newValue = modify();
                             resolve(newValue);
                         };
+
                         this.subscribeForVarTypeChange(firstUnknownVar, callback);
                     });
                 }
+
                 return modified;
             };
         }
         if (property.startsWith('border') || property.startsWith('outline')) {
-            if (sourceValue.endsWith(')')) {
-                const colorTypeMatch = sourceValue.match(/((rgb|hsl)a?)\(/);
-                if (colorTypeMatch) {
-                    const index = colorTypeMatch.index;
-                    return (theme) => {
-                        const value = insertVarValues(sourceValue, this.unstableVarValues);
-                        if (!value) {
-                            return sourceValue;
-                        }
-                        const beginning = sourceValue.substring(0, index);
-                        const color = sourceValue.substring(index, sourceValue.length);
-                        const inserted = insertVarValues(color, this.unstableVarValues);
-                        const modified = tryModifyBorderColor(inserted, theme);
-                        return `${beginning}${modified}`;
-                    };
-                }
-            }
             return (theme) => {
                 return replaceCSSVariablesNames(
                     sourceValue,
                     (v) => wrapBorderColorVariableName(v),
-                    (fallback) => tryModifyTextColor(fallback, theme),
+                    (fallback) => tryModifyBorderColor(fallback, theme),
                 );
             };
         }
@@ -310,7 +309,10 @@ export class VariablesStore {
         if (!this.typeChangeSubscriptions.has(varName)) {
             this.typeChangeSubscriptions.set(varName, new Set());
         }
-        this.typeChangeSubscriptions.get(varName).add(callback);
+        const rootStore = this.typeChangeSubscriptions.get(varName);
+        if (!rootStore.has(callback)) {
+            rootStore.add(callback);
+        }
     }
 
     private unsubscribeFromVariableTypeChanges(varName: string, callback: () => void) {
@@ -319,9 +321,23 @@ export class VariablesStore {
         }
     }
 
-    private collectVariables(rules: CSSRuleList) {
-        iterateVariables(rules, (varName, value) => {
-            this.inspectVariable(varName, value);
+    // Because of the similair expensive task between the old `collectVariables`
+    // and `collectVarDepandant`, we only want to do it once.
+    // This function should only do the same expensive task once
+    // and ensure that the result comes to the correct task.
+    // The task is either `inspectVariable` or `inspectVarDependant`.
+    private collectVariablesAndVarDep(ruleList: CSSRuleList[]) {
+        ruleList.forEach((rules) => {
+            iterateCSSRules(rules, (rule) => {
+                rule.style && iterateCSSDeclarations(rule.style, (property, value) => {
+                    if (isVariable(property)) {
+                        this.inspectVariable(property, value);
+                    }
+                    if (isVarDependant(value)) {
+                        this.inspectVarDependant(property, value);
+                    }
+                });
+            });
         });
     }
 
@@ -370,21 +386,15 @@ export class VariablesStore {
         this.unknownBgVars.delete(varName);
     }
 
-    private collectVarDependants(rules: CSSRuleList) {
-        iterateVarDependants(rules, (property, value) => {
-            this.inspectVerDependant(property, value);
-        });
-    }
-
     private collectRootVarDependants() {
         iterateCSSDeclarations(document.documentElement.style, (property, value) => {
             if (isVarDependant(value)) {
-                this.inspectVerDependant(property, value);
+                this.inspectVarDependant(property, value);
             }
         });
     }
 
-    private inspectVerDependant(property: string, value: string) {
+    private inspectVarDependant(property: string, value: string) {
         if (isVariable(property)) {
             this.iterateVarDeps(value, (ref) => {
                 if (!this.varRefs.has(property)) {
@@ -394,7 +404,7 @@ export class VariablesStore {
             });
         } else if (property === 'background-color' || property === 'box-shadow') {
             this.iterateVarDeps(value, (v) => this.resolveVariableType(v, VAR_TYPE_BGCOLOR));
-        } else if (property === 'color') {
+        } else if (property === 'color' || property === 'caret-color') {
             this.iterateVarDeps(value, (v) => this.resolveVariableType(v, VAR_TYPE_TEXTCOLOR));
         } else if (property.startsWith('border') || property.startsWith('outline')) {
             this.iterateVarDeps(value, (v) => this.resolveVariableType(v, VAR_TYPE_BORDERCOLOR));
@@ -429,7 +439,7 @@ export class VariablesStore {
         varDeps.forEach((v) => iterator(v));
     }
 
-    private findVarRef(varName: string, iterator: (v: string) => boolean, stack = new Set<string>()) {
+    private findVarRef(varName: string, iterator: (v: string) => boolean, stack = new Set<string>()): string {
         if (stack.has(varName)) {
             return null;
         }
@@ -458,6 +468,10 @@ export class VariablesStore {
         });
     }
 
+    setOnRootVariableChange(callback: () => void) {
+        this.onRootVariableDefined = callback;
+    }
+
     putRootVars(styleElement: HTMLStyleElement, theme: Theme) {
         const sheet = styleElement.sheet;
         if (sheet.cssRules.length > 0) {
@@ -475,6 +489,7 @@ export class VariablesStore {
                 if (this.isVarType(property, VAR_TYPE_BORDERCOLOR)) {
                     declarations.set(wrapBorderColorVariableName(property), tryModifyBorderColor(value, theme));
                 }
+                this.subscribeForVarTypeChange(property, this.onRootVariableDefined);
             }
         });
         const cssLines = [] as string[];
@@ -550,7 +565,7 @@ function getVariableNameAndFallback(match: string) {
         name = match.substring(4, commaIndex).trim();
         fallback = match.substring(commaIndex + 1, match.length - 1).trim();
     } else {
-        name = match.substring(4, match.length - 1);
+        name = match.substring(4, match.length - 1).trim();
         fallback = '';
     }
     return {name, fallback};
@@ -558,19 +573,19 @@ function getVariableNameAndFallback(match: string) {
 
 export function replaceCSSVariablesNames(
     value: string,
-    nemeReplacer: (varName: string) => string,
+    nameReplacer: (varName: string) => string,
     fallbackReplacer?: (fallbackValue: string) => string,
 ): string {
     const matchReplacer = (match: string) => {
         const {name, fallback} = getVariableNameAndFallback(match);
-        const newName = nemeReplacer(name);
+        const newName = nameReplacer(name);
         if (!fallback) {
             return `var(${newName})`;
         }
 
         let newFallback: string;
         if (isVarDependant(fallback)) {
-            newFallback = replaceCSSVariablesNames(fallback, nemeReplacer, fallbackReplacer);
+            newFallback = replaceCSSVariablesNames(fallback, nameReplacer, fallbackReplacer);
         } else if (fallbackReplacer) {
             newFallback = fallbackReplacer(fallback);
         } else {
@@ -578,33 +593,8 @@ export function replaceCSSVariablesNames(
         }
         return `var(${newName}, ${newFallback})`;
     };
+
     return replaceVariablesMatches(value, matchReplacer);
-}
-
-function iterateVariables(
-    rules: CSSRuleList,
-    iterator: (varName: string, varValue: string) => void,
-) {
-    iterateCSSRules(rules, (rule) => {
-        rule.style && iterateCSSDeclarations(rule.style, (property, value) => {
-            if (property.startsWith('--')) {
-                iterator(property, value);
-            }
-        });
-    });
-}
-
-function iterateVarDependants(
-    rules: CSSRuleList,
-    iterator: (property: string, value: string) => void,
-) {
-    iterateCSSRules(rules, (rule) => {
-        rule.style && iterateCSSDeclarations(rule.style, (property, value) => {
-            if (isVarDependant(value)) {
-                iterator(property, value);
-            }
-        });
-    });
 }
 
 function iterateVarDependencies(value: string, iterator: (varName: string) => void) {
@@ -642,19 +632,54 @@ function isConstructedColorVar(value: string) {
     return value.match(/^\s*(rgb|hsl)a?\(/);
 }
 
+// ex. 131,123,132 | 1,341, 122
+const rawValueRegex = /^\d{1,3}, ?\d{1,3}, ?\d{1,3}$/;
+
+function parseRawValue(color: string) {
+    if (rawValueRegex.test(color)) {
+        // Convert the raw value into a use-able rgb(...) value, such that it can
+        // be properly used with other functions that expect such value.
+        const splitted = color.split(',');
+        let resultInRGB = 'rgb(';
+        splitted.forEach((number) => {
+            resultInRGB += `${number.trim()}, `;
+        });
+        resultInRGB = resultInRGB.substr(0, resultInRGB.length - 2);
+        resultInRGB += ')';
+        return {isRaw: true, color: resultInRGB};
+    }
+    return {isRaw: false, color: color};
+}
+
+function handleRawValue(color: string, theme: Theme, modifyFunction: (rgb: RGBA, theme: Theme) => string) {
+    const {isRaw, color: newColor} = parseRawValue(color);
+
+    const rgb = tryParseColor(newColor);
+    if (rgb) {
+        const outputColor = modifyFunction(rgb, theme);
+
+        // If it's raw, we need to convert it back to the "raw" format.
+        if (isRaw) {
+            // This should techincally never fail(returning empty string),
+            // but just to be safe we will return outputColor.
+            const outputInRGB = tryParseColor(outputColor);
+            return outputInRGB ? `${outputInRGB.r}, ${outputInRGB.g}, ${outputInRGB.b}` : outputColor;
+        }
+        return outputColor;
+    }
+    return newColor;
+}
+
 function tryModifyBgColor(color: string, theme: Theme) {
-    const rgb = tryParseColor(color);
-    return rgb ? modifyBackgroundColor(rgb, theme) : color;
+    return handleRawValue(color, theme, modifyBackgroundColor);
 }
 
 function tryModifyTextColor(color: string, theme: Theme) {
-    const rgb = tryParseColor(color);
-    return rgb ? modifyForegroundColor(rgb, theme) : color;
+    return handleRawValue(color, theme, modifyForegroundColor);
 }
 
 function tryModifyBorderColor(color: string, theme: Theme) {
-    const rgb = tryParseColor(color);
-    return rgb ? modifyBorderColor(rgb, theme) : color;
+    return handleRawValue(color, theme, modifyBorderColor);
 }
 
 function insertVarValues(source: string, varValues: Map<string, string>, stack = new Set<string>()) {
@@ -681,6 +706,7 @@ function insertVarValues(source: string, varValues: Map<string, string>, stack =
         }
         return inserted;
     };
+
     const replaced = replaceVariablesMatches(source, matchReplacer);
     if (containsUnresolvedVar) {
         return null;

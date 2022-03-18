@@ -1,8 +1,8 @@
-import '../polyfills';
+import '../support/polyfills';
 import {DEFAULT_THEME} from '../../../src/defaults';
 import {createOrUpdateDynamicTheme, removeDynamicTheme} from '../../../src/inject/dynamic-theme';
 import {getImageDetails} from '../../../src/inject/dynamic-theme/image';
-import {multiline, timeout} from '../../test-utils';
+import {multiline, timeout} from '../support/test-utils';
 import type {DynamicThemeFix} from '../../../src/definitions';
 
 const theme = {
@@ -214,7 +214,7 @@ describe('IMAGE ANALYSIS', () => {
             '<h1>Light background</h1>',
         );
         createOrUpdateDynamicTheme(theme, null, false);
-        await timeout(50);
+        await timeout(75);
         const bgImageValue = getComputedStyle(container.querySelector('h1')).backgroundImage;
         expect(bgImageValue).toBe('none');
     });
@@ -232,10 +232,22 @@ describe('IMAGE ANALYSIS', () => {
             css: '',
             ignoreInlineStyle: ['.'],
             ignoreImageAnalysis: ['*'],
-
+            disableStyleSheetsProxy: false,
         };
         createOrUpdateDynamicTheme(theme, fixes, false);
         const backgroundImage = getComputedStyle(container.querySelector('i')).backgroundImage;
         expect(backgroundImage).toContain('data:');
+    });
+
+    it('should handle background-image with URL and gradient', async () => {
+        container.innerHTML = multiline(
+            '<style>',
+            `    h1 { background-image: url("${svgToDataURL(images.lightIcon)}"), linear-gradient(red, white);`,
+            '</style>',
+            '<h1>Weird color <strong>Power</strong>!</h1>',
+        );
+        createOrUpdateDynamicTheme(theme, null, false);
+        await timeout(100);
+        expect(getComputedStyle(container.querySelector('h1')).backgroundImage).toBe('url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB3aWR0aD0iOCIgaGVpZ2h0PSI4Ij48ZGVmcz48ZmlsdGVyIGlkPSJkYXJrcmVhZGVyLWltYWdlLWZpbHRlciI+PGZlQ29sb3JNYXRyaXggdHlwZT0ibWF0cml4IiB2YWx1ZXM9IjAuMzMzIC0wLjY2NyAtMC42NjcgMC4wMDAgMS4wMDAgLTAuNjY3IDAuMzMzIC0wLjY2NyAwLjAwMCAxLjAwMCAtMC42NjcgLTAuNjY3IDAuMzMzIDAuMDAwIDEuMDAwIDAuMDAwIDAuMDAwIDAuMDAwIDEuMDAwIDAuMDAwIiAvPjwvZmlsdGVyPjwvZGVmcz48aW1hZ2Ugd2lkdGg9IjgiIGhlaWdodD0iOCIgZmlsdGVyPSJ1cmwoI2RhcmtyZWFkZXItaW1hZ2UtZmlsdGVyKSIgeGxpbms6aHJlZj0iZGF0YTppbWFnZS9zdmcreG1sO2Jhc2U2NCxQSE4yWnlCNGJXeHVjejBpYUhSMGNEb3ZMM2QzZHk1M015NXZjbWN2TWpBd01DOXpkbWNpSUhacFpYZENiM2c5SWpBZ01DQTRJRGdpSUhkcFpIUm9QU0k0SWlCb1pXbG5hSFE5SWpnaVBnb2dJQ0FnUEhKbFkzUWdabWxzYkQwaWQyaHBkR1VpSUhkcFpIUm9QU0l4TURBbElpQm9aV2xuYUhROUlqRXdNQ1VpSUM4K0Nqd3ZjM1puUGc9PSIgLz48L3N2Zz4="), linear-gradient(rgb(204, 0, 0), rgb(0, 0, 0))');
     });
 });

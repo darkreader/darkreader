@@ -1,7 +1,7 @@
-import '../polyfills';
+import '../support/polyfills';
 import {DEFAULT_THEME} from '../../../src/defaults';
 import {createOrUpdateDynamicTheme, removeDynamicTheme} from '../../../src/inject/dynamic-theme';
-import {multiline} from '../../test-utils';
+import {multiline} from '../support/test-utils';
 import type {DynamicThemeFix} from '../../../src/definitions';
 import {FilterMode} from '../../../src/generators/css-filter';
 
@@ -37,6 +37,7 @@ describe('FIXES', () => {
             css: '',
             ignoreInlineStyle: [],
             ignoreImageAnalysis: [],
+            disableStyleSheetsProxy: false,
 
         };
         createOrUpdateDynamicTheme(DEFAULT_THEME, fixes, false);
@@ -53,6 +54,7 @@ describe('FIXES', () => {
             css: '.text { color: red }',
             ignoreInlineStyle: [],
             ignoreImageAnalysis: [],
+            disableStyleSheetsProxy: false,
 
         };
         createOrUpdateDynamicTheme(DEFAULT_THEME, fixes, false);
@@ -69,6 +71,7 @@ describe('FIXES', () => {
             css: '',
             ignoreInlineStyle: ['.text'],
             ignoreImageAnalysis: [],
+            disableStyleSheetsProxy: false,
 
         };
         createOrUpdateDynamicTheme(DEFAULT_THEME, fixes, false);

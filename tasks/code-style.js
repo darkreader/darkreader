@@ -1,10 +1,10 @@
-const fs = require('fs-extra');
-const globby = require('globby');
+// @ts-check
 const prettier = require('prettier');
-const {getDestDir} = require('./paths');
+const {getDestDir, PLATFORM} = require('./paths');
 const {createTask} = require('./task');
-const {log} = require('./utils');
+const {log, readFile, writeFile, getPaths} = require('./utils');
 
+/** @type {import('prettier').Options} */
 const options = {
     arrowParens: 'always',
     bracketSpacing: false,
@@ -19,16 +19,16 @@ const options = {
 const extensions = ['html', 'css', 'js'];
 
 async function codeStyle({debug}) {
-    const dir = getDestDir({debug});
-    const files = await globby(extensions.map((ext) => `${dir}/**/*.${ext}`));
+    const dir = getDestDir({debug, platform: PLATFORM.CHROME});
+    const files = await getPaths(extensions.map((ext) => `${dir}/**/*.${ext}`));
     for (const file of files) {
-        const code = await fs.readFile(file, 'utf8');
+        const code = await readFile(file);
         const formatted = prettier.format(code, {
             ...options,
             filepath: file,
         });
         if (code !== formatted) {
-            await fs.outputFile(file, formatted);
+            await writeFile(file, formatted);
             debug && log.ok(file);
         }
     }

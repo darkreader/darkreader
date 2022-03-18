@@ -1,25 +1,26 @@
-const fs = require('fs-extra');
+// @ts-check
 const less = require('less');
 const path = require('path');
-const {getDestDir} = require('./paths');
+const {getDestDir, PLATFORM, rootPath} = require('./paths');
 const reload = require('./reload');
 const {createTask} = require('./task');
+const {copyFile, readFile, writeFile} = require('./utils');
 
 function getLessFiles({debug}) {
-    const dir = getDestDir({debug});
+    const dir = getDestDir({debug, platform: PLATFORM.CHROME});
     return {
-        'src/ui/devtools/style.less': `${dir}/ui/devtools/style.css`,
-        'src/ui/popup/style.less': `${dir}/ui/popup/style.css`,
-        'src/ui/stylesheet-editor/style.less': `${dir}/ui/stylesheet-editor/style.css`,
+        [rootPath('src/ui/devtools/style.less')]: `${dir}/ui/devtools/style.css`,
+        [rootPath('src/ui/popup/style.less')]: `${dir}/ui/popup/style.css`,
+        [rootPath('src/ui/stylesheet-editor/style.less')]: `${dir}/ui/stylesheet-editor/style.css`,
     };
 }
 
 async function bundleCSSEntry({src, dest}) {
-    const srcDir = path.join(process.cwd(), path.dirname(src));
-    const input = await fs.readFile(src, {encoding: 'utf8'});
+    const srcDir = path.dirname(src);
+    const input = await readFile(src);
     const output = await less.render(input, {paths: [srcDir], math: 'always'});
     const {css} = output;
-    await fs.outputFile(dest, css, {encoding: 'utf8'});
+    await writeFile(dest, css);
 }
 
 async function bundleCSS({debug}) {
@@ -27,14 +28,15 @@ async function bundleCSS({debug}) {
     for (const [src, dest] of Object.entries(files)) {
         await bundleCSSEntry({src, dest});
     }
-    const dir = getDestDir({debug});
-    const firefoxDir = getDestDir({debug, firefox: true});
-    const thunderBirdDir = getDestDir({debug, thunderbird: true});
-    for (const dest of Object.values(files)) {
-        const ffDest = `${firefoxDir}/${dest.substring(dir.length + 1)}`;
-        const tbDest = `${thunderBirdDir}/${dest.substring(dir.length + 1)}`;
-        await fs.copy(dest, ffDest);
-        await fs.copy(dest, tbDest);
+    const dir = getDestDir({debug, platform: PLATFORM.CHROME});
+    const copyDirs = [PLATFORM.FIREFOX, PLATFORM.CHROME_MV3, PLATFORM.THUNDERBIRD].map((platform) => {
+        return getDestDir({debug, platform});
+    });
+    for (const file of Object.values(files)) {
+        for (const copyDir of copyDirs) {
+            const copyTo = `${copyDir}/${file.substring(dir.length + 1)}`;
+            await copyFile(file, copyTo);
+        }
     }
 }
 

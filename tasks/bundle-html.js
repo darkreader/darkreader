@@ -1,95 +1,32 @@
-const fs = require('fs-extra');
-const {getDestDir} = require('./paths');
+// @ts-check
+const {getDestDir, PLATFORM, rootPath} = require('./paths');
 const reload = require('./reload');
 const {createTask} = require('./task');
-
-const enLocale = fs.readFileSync('src/_locales/en.config', {encoding: 'utf8'}).replace(/^#.*?$/gm, '');
-global.chrome = global.chrome || {};
-global.chrome.i18n = global.chrome.i18n || {};
-global.chrome.i18n.getMessage = global.chrome.i18n.getMessage || ((name) => {
-    const index = enLocale.indexOf(`@${name}`);
-    if (index < 0) {
-        throw new Error(`Message @${name} not found`);
-    }
-    const start = index + name.length + 1;
-    let end = enLocale.indexOf('@', start);
-    if (end < 0) {
-        end = enLocale.length;
-    }
-    const message = enLocale.substring(start, end).trim();
-    return message;
-});
-global.chrome.i18n.getUILanguage = global.chrome.i18n.getUILanguage || (() => 'en-US');
-
-const tsConfig = require('../src/tsconfig.json');
-require('ts-node').register({
-    transpileOnly: true,
-    compilerOptions: {
-        ...tsConfig.compilerOptions,
-        module: 'commonjs',
-    },
-});
-require('tsconfig-paths').register({
-    baseUrl: './',
-    paths: {
-        'malevic/*': ['node_modules/malevic/umd/*'],
-        'malevic': ['node_modules/malevic/umd/index'],
-    }
-});
-const Malevic = require('malevic/umd/index');
-const MalevicString = require('malevic/umd/string');
-const DevToolsBody = require('../src/ui/devtools/components/body').default;
-const PopupBody = require('../src/ui/popup/components/body').default;
-const CSSEditorBody = require('../src/ui/stylesheet-editor/components/body').default;
-const {getMockData, getMockActiveTabInfo} = require('../src/ui/connect/mock');
+const {copyFile, readFile, writeFile} = require('./utils');
 
 const pages = [
-    {
-        cwdPath: 'ui/popup/index.html',
-        rootComponent: PopupBody,
-        props: {
-            data: getMockData({isReady: false}),
-            tab: getMockActiveTabInfo(),
-            actions: null,
-        },
-    },
-    {
-        cwdPath: 'ui/devtools/index.html',
-        rootComponent: DevToolsBody,
-        props: {
-            data: getMockData({isReady: false}),
-            tab: getMockActiveTabInfo(),
-            actions: null,
-        },
-    },
-    {
-        cwdPath: 'ui/stylesheet-editor/index.html',
-        rootComponent: CSSEditorBody,
-        props: {
-            data: getMockData({isReady: false}),
-            tab: getMockActiveTabInfo(),
-            actions: null,
-        },
-    },
+    'ui/popup/index.html',
+    'ui/devtools/index.html',
+    'ui/stylesheet-editor/index.html',
 ];
 
-async function bundleHTMLPage({cwdPath, rootComponent, props}, {debug}) {
-    let html = await fs.readFile(`src/${cwdPath}`, 'utf8');
-    const bodyText = MalevicString.stringify(Malevic.m(rootComponent, props));
-    html = html.replace('$BODY', bodyText);
+async function bundleHTMLPage({cwdPath}, {debug}) {
+    let html = await readFile(rootPath(`src/${cwdPath}`));
 
     const getPath = (dir) => `${dir}/${cwdPath}`;
-    const outPath = getPath(getDestDir({debug}));
-    const firefoxPath = getPath(getDestDir({debug, firefox: true}));
-    const thunderBirdPath = getPath(getDestDir({debug, thunderbird: true}));
-    await fs.outputFile(outPath, html);
-    await fs.copy(outPath, firefoxPath);
-    await fs.copy(outPath, thunderBirdPath);
+    const outPath = getPath(getDestDir({debug, platform: PLATFORM.CHROME}));
+    const copyToPaths = [PLATFORM.FIREFOX, PLATFORM.CHROME_MV3, PLATFORM.THUNDERBIRD].map((platform) => {
+        return getPath(getDestDir({debug, platform}));
+    });
+    await writeFile(outPath, html);
+    for (const copyTo of copyToPaths) {
+        await copyFile(outPath, copyTo);
+    }
 }
 
 async function bundleHTML({debug}) {
     for (const page of pages) {
-        await bundleHTMLPage(page, {debug});
+        await bundleHTMLPage({cwdPath: page}, {debug});
     }
 }
 
@@ -100,8 +37,8 @@ function getSrcPath(cwdPath) {
 async function rebuildHTML(changedFiles) {
     await Promise.all(
         pages
-            .filter((page) => changedFiles.some((changed) => changed === getSrcPath(page.cwdPath)))
-            .map((page) => bundleHTMLPage(page, {debug: true}))
+            .filter((page) => changedFiles.some((changed) => changed === getSrcPath(page)))
+            .map((page) => bundleHTMLPage({cwdPath: page}, {debug: true}))
     );
 }
 
@@ -109,7 +46,7 @@ module.exports = createTask(
     'bundle-html',
     bundleHTML,
 ).addWatcher(
-    pages.map((page) => getSrcPath(page.cwdPath)),
+    pages.map((page) => getSrcPath(page)),
     async (changedFiles) => {
         await rebuildHTML(changedFiles);
         reload({type: reload.UI});

@@ -1,3 +1,6 @@
+/** @typedef {import('karma').Config & Record<string, unknown>} LocalConfig */
+/** @typedef {import('karma').ConfigOptions} ConfigOptions */
+
 const fs = require('fs');
 const os = require('os');
 const rollupPluginIstanbul = require('rollup-plugin-istanbul2');
@@ -6,21 +9,39 @@ const rollupPluginReplace = require('@rollup/plugin-replace');
 const rollupPluginTypescript = require('@rollup/plugin-typescript');
 const typescript = require('typescript');
 const {getTestDestDir, rootPath} = require('../../tasks/paths');
+const karmaPluginEchoServer = require('./support/echo-server');
 
 /**
- * @param   {import('karma').Config} config
- * @returns {import('karma').ConfigOptions}
+ * @param {LocalConfig} config
+ * @param {Record<string, string>} env
+ * @returns {ConfigOptions}
  */
-function configureKarma(config) {
-    const headless = config.headless || process.env.KARMA_HEADLESS || false;
+function configureKarma(config, env) {
+    const headless = config.headless || env.KARMA_HEADLESS || false;
 
+    /** @type {ConfigOptions} */
     let options = {
+        failOnFailingTestSuite: true,
+        failOnEmptyTestSuite: true,
         basePath: '../..',
         frameworks: ['jasmine'],
         files: [
             'tests/inject/support/customize.ts',
             'tests/inject/support/polyfills.ts',
+            'tests/inject/dynamic/link-override.tests.ts',
             {pattern: 'tests/inject/**/*.tests.ts', watched: false},
+        ],
+        plugins: [
+            'karma-chrome-launcher',
+            'karma-coverage',
+            'karma-firefox-launcher',
+            'karma-rollup-preprocessor',
+            'karma-jasmine',
+            'karma-spec-reporter',
+            karmaPluginEchoServer,
+        ],
+        middleware: [
+            'echo-server'
         ],
         preprocessors: {
             '**/*.+(ts|tsx)': ['rollup'],
@@ -69,17 +90,24 @@ function configureKarma(config) {
     if (config.ci) {
         options.customLaunchers = {};
         options.browsers = [];
-        if (process.env.CHROME_BIN) {
+
+        // Chrome
+        if (env.CHROME_TEST) {
             options.customLaunchers['CIChromeHeadless'] = {
                 base: 'ChromeHeadless',
                 flags: ['--no-sandbox', '--disable-setuid-sandbox']
             };
             options.browsers.push('CIChromeHeadless');
         }
-        if (process.env.FIREFOX_BIN) {
-            options.customLaunchers['CIFirefoxHeadless'] = {base: 'FirefoxHeadless'};
+
+        // Firefox
+        if (env.FIREFOX_TEST) {
+            options.customLaunchers['CIFirefoxHeadless'] = {
+                base: 'FirefoxHeadless',
+            };
             options.browsers.push('CIFirefoxHeadless');
         }
+
         options.autoWatch = false;
         options.singleRun = true;
         options.concurrency = 1;
@@ -102,9 +130,13 @@ function configureKarma(config) {
 }
 
 /**
- * @param   {import('karma').Config} config
+ * @param   {LocalConfig} config
  * @returns {void}
  */
 module.exports = (config) => {
-    config.set(configureKarma(config));
+    config.set(configureKarma(config, process.env));
 };
+
+if (process.env.NODE_ENV === 'test') {
+    module.exports.configureKarma = configureKarma;
+}

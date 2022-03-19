@@ -28,7 +28,6 @@ function configureKarma(config, env) {
         files: [
             'tests/inject/support/customize.ts',
             'tests/inject/support/polyfills.ts',
-            'tests/inject/dynamic/link-override.tests.ts',
             {pattern: 'tests/inject/**/*.tests.ts', watched: false},
         ],
         plugins: [

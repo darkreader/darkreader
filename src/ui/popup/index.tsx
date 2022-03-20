@@ -72,16 +72,16 @@ if (DEBUG) {
         try {
             const message: {type: string; id: number; data: string} = JSON.parse(e.data);
             if (message.type === 'click') {
-                const {data: selector} = message;
+                const selector = message.data;
                 const element: HTMLElement = document.querySelector(selector);
                 element.click();
                 respond({type: 'click-response', id: message.id});
             } else if (message.type === 'exists') {
-                const {data: selector} = message;
-                const element: HTMLElement = document.querySelector(selector);
+                const selector = message.data;
+                const element = document.querySelector(selector);
                 respond({type: 'exists-response', id: message.id, data: element != null});
             } else if (message.type === 'rect') {
-                const {data: selector} = message;
+                const selector = message.data;
                 const element: HTMLElement = document.querySelector(selector);
                 const rect = element.getBoundingClientRect();
                 respond({type: 'rect-response', id: message.id, data: {left: rect.left, top: rect.top, width: rect.width, height: rect.height}});

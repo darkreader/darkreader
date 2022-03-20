@@ -57,7 +57,7 @@ jobs:
         if: ${{ matrix.chrome }}
         run: |
           chrome --version
-          echo CHROME_BIN="$(which chrome)" | tee -a "$GITHUB_ENV"
+          { echo CHROME_BIN="$(which chrome)"; echo CHROME_TEST=1; } | tee -a "$GITHUB_ENV"
 
       - name: Install Firefox
         if: ${{ matrix.firefox }}
@@ -68,7 +68,7 @@ jobs:
         if: ${{ matrix.firefox }}
         run: |
           firefox --version
-          echo FIREFOX_BIN="$(which firefox)" | tee -a "$GITHUB_ENV"
+          { echo FIREFOX_BIN="$(which firefox)"; echo FIREFOX_TEST=1; } | tee -a "$GITHUB_ENV"
 
       - name: Node.js setup
         uses: actions/setup-node@v2

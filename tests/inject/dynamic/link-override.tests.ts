@@ -89,7 +89,7 @@ describe('LINK STYLES', () => {
         );
         createOrUpdateDynamicTheme(theme, null, false);
 
-        await timeout(400);
+        await timeout(500);
         expect(getComputedStyle(container.querySelector('h1')).backgroundColor).toBe('rgb(102, 102, 102)');
         expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(255, 255, 255)');
         expect(getComputedStyle(container.querySelector('h1 strong')).color).toBe('rgb(255, 26, 26)');
@@ -107,8 +107,7 @@ describe('LINK STYLES', () => {
             '<h1><strong>Cross-origin import</strong> link override</h1>',
         );
         createOrUpdateDynamicTheme(theme, null, false);
-
-        await timeout(400);
+        await timeout(500);
         expect(getComputedStyle(container.querySelector('h1')).backgroundColor).toBe('rgb(102, 102, 102)');
         expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(255, 255, 255)');
         expect(getComputedStyle(container.querySelector('h1 strong')).color).toBe('rgb(255, 26, 26)');
@@ -123,13 +122,13 @@ describe('LINK STYLES', () => {
             '<h1>Loaded <strong>cross-origin</strong> link override</h1>',
         );
 
-        await timeout(400);
+        await timeout(500);
         expect(getComputedStyle(container.querySelector('h1')).backgroundColor).toBe('rgb(128, 128, 128)');
         expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(0, 0, 0)');
         expect(getComputedStyle(container.querySelector('h1 strong')).color).toBe('rgb(255, 0, 0)');
 
         createOrUpdateDynamicTheme(theme, null, false);
-        await timeout(400);
+        await timeout(500);
         expect(getComputedStyle(container.querySelector('h1')).backgroundColor).toBe('rgb(102, 102, 102)');
         expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(255, 255, 255)');
         expect(getComputedStyle(container.querySelector('h1 strong')).color).toBe('rgb(255, 26, 26)');
@@ -184,7 +183,7 @@ describe('LINK STYLES', () => {
         );
         createOrUpdateDynamicTheme(theme, null, false);
 
-        await timeout(400);
+        await timeout(500);
         expect(getComputedStyle(container.querySelector('h1')).backgroundColor).toBe('rgb(102, 102, 102)');
         expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(255, 255, 255)');
         expect(getComputedStyle(container.querySelector('h1 strong')).color).toBe('rgb(255, 26, 26)');
@@ -204,7 +203,7 @@ describe('LINK STYLES', () => {
         );
         createOrUpdateDynamicTheme(theme, null, false);
 
-        await timeout(400);
+        await timeout(1000);
         expect(getComputedStyle(container.querySelector('h1')).backgroundColor).toBe('rgb(102, 102, 102)');
         expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(255, 255, 255)');
         expect(getComputedStyle(container.querySelector('h1 strong')).color).toBe('rgb(255, 26, 26)');

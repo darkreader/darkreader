@@ -1,8 +1,13 @@
-name: Run config tests on Pull Request or Push
+name: Run code tests on Pull Request or Push
 on:
+
+  # Runs for pushes and pull requests,
+  #  but don't run these when only some config is changed.
   push:
     branches:
       - master
+    paths-ignore:
+      - 'src/config/*'
   pull_request:
     branches:
       - master
@@ -11,6 +16,9 @@ on:
       - synchronize
       - reopened
       - ready_for_review
+    paths-ignore:
+      - 'src/config/**'
+
   workflow_dispatch:
 jobs:
   test:
@@ -36,9 +44,12 @@ jobs:
           restore-keys: |
             ${{ runner.OS }}-${{ hashFiles('package-lock.json') }}
             ${{ runner.OS }}
-      
+
       - name: Install npm dependencies
         run: npm ci
 
-      - name: Run test against code
-        run: npm run test:ci
+      - name: Lint code for code-style errors
+        run: npm run lint
+
+      - name: Check for compatibility issues
+        run: npm run lint:bundle

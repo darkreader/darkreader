@@ -2,7 +2,7 @@ name: Run browser tests in Karma
 on:
 
   # Runs for pushes and pull requests,
-  #  but if changes are config-only
+  #  but don't run these when only some config is changed.
   push:
     branches:
       - master

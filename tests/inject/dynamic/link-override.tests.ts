@@ -108,7 +108,7 @@ describe('LINK STYLES', () => {
         );
         createOrUpdateDynamicTheme(theme, null, false);
 
-        await timeout(100);
+        await timeout(250);
         expect(getComputedStyle(container.querySelector('h1')).backgroundColor).toBe('rgb(102, 102, 102)');
         expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(255, 255, 255)');
         expect(getComputedStyle(container.querySelector('h1 strong')).color).toBe('rgb(255, 26, 26)');

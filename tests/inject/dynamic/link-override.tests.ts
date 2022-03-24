@@ -107,7 +107,6 @@ describe('LINK STYLES', () => {
             '<h1><strong>Cross-origin import</strong> link override</h1>',
         );
         createOrUpdateDynamicTheme(theme, null, false);
-
         await timeout(500);
         expect(getComputedStyle(container.querySelector('h1')).backgroundColor).toBe('rgb(102, 102, 102)');
         expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(255, 255, 255)');

@@ -203,7 +203,7 @@ export function setIsDOMReady(newFunc: () => boolean) {
 const readyStateListeners = new Set<() => void>();
 
 export function addDOMReadyListener(listener: () => void) {
-    readyStateListeners.add(listener);
+    isDOMReady() ? listener() : readyStateListeners.add(listener);
 }
 
 export function removeDOMReadyListener(listener: () => void) {
@@ -219,7 +219,7 @@ export function isReadyStateComplete() {
 const readyStateCompleteListeners = new Set<() => void>();
 
 export function addReadyStateCompleteListener(listener: () => void) {
-    readyStateCompleteListeners.add(listener);
+    isReadyStateComplete() ? listener() : readyStateCompleteListeners.add(listener);
 }
 
 export function cleanReadyStateCompleteListeners() {

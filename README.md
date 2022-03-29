@@ -90,7 +90,7 @@ const CSS = await collectCSS();
 const isEnabled = isDarkReaderEnabled();
 ```
 
-Be aware that darkreader will add the chrome object onto the window object. These are to stub certain functions that the code will use. They originate from the webextension-api.
+Be aware that darkreader will add the `chrome` object onto the `window` object. These are to stub certain functions that the code will use. They originate from the webextension-api.
 
 ## Site fixes
 

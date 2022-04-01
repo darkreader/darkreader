@@ -27,7 +27,7 @@ Open the terminal in the root folder and run:
 - `npm install`
 - `npm run build`
 
-A `build/release/darkreader-chrome.zip` file will generate for use in a Chromium-based browser, and also a `build/release/darkreader-firefox.xpi` file will generate for use in Firefox.
+This will create a `build/release/darkreader-chrome.zip` file for use in a Chromium-based browser and a `build/release/darkreader-firefox.xpi` file for use in Firefox.
 
 ## Using Dark Reader for a website
 

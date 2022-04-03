@@ -8,10 +8,11 @@ import ExportTheme from './export-theme';
 import {isURLInList} from '../../../utils/url';
 import themeEngines from '../../../generators/theme-engines';
 import SyncConfigButton from './sync-config';
+import FetchNews from './fetch-news';
 
 export default function ManageSettingsPage(props: ViewProps) {
     const custom = props.data.settings.customThemes.find(
-        ({url}) => isURLInList(props.tab.url, url)
+        ({url}) => isURLInList(props.data.activeTab.url, url)
     );
     const engine = custom ?
         custom.theme.engine :
@@ -21,6 +22,7 @@ export default function ManageSettingsPage(props: ViewProps) {
         <section class="m-section">
             <SyncSettings {...props} />
             <SyncConfigButton {...props} />
+            <FetchNews {...props} />
             <ImportButton {...props} />
             <ExportButton {...props} />
             {engine === themeEngines.dynamicTheme ? <ExportTheme /> : null}

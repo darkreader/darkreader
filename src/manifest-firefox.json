@@ -9,9 +9,12 @@
         "page": "background/index.html"
     },
     "permissions": [
+        "alarms",
+        "contextMenus",
         "storage",
         "tabs",
         "theme",
         "<all_urls>"
-    ]
+    ],
+    "optional_permissions": []
 }

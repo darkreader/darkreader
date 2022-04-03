@@ -1,7 +1,10 @@
+import {MessageType} from '../utils/message';
 import {isFirefox, isOpera} from '../utils/platform';
+import type {Message} from '../definitions';
+
 
 export function classes(...args: Array<string | {[cls: string]: boolean}>) {
-    const classes = [];
+    const classes: string[] = [];
     args.filter((c) => Boolean(c)).forEach((c) => {
         if (typeof c === 'string') {
             classes.push(c);
@@ -20,7 +23,7 @@ export function openFile(options: {extensions: string[]}, callback: (content: st
     // Firefox and Opera will behave/bug to close the window on a popup.
     // When you open a file dialog, this should provide a workaround.
     if ((isFirefox || isOpera) && !window.location.href.endsWith('#import')) {
-        chrome.tabs.create({url: window.location.href + '#import', active: true});
+        chrome.tabs.create({url: `${window.location.href }#import`, active: true});
         window.close();
     }
     const input = document.createElement('input');
@@ -48,14 +51,14 @@ export function saveFile(name: string, content: string) {
         a.download = name;
         a.click();
     } else {
-        chrome.runtime.sendMessage({type: 'save-file', data: {name, content}});
+        chrome.runtime.sendMessage<Message>({type: MessageType.UI_SAVE_FILE, data: {name, content}});
     }
 }
 
 type AnyVoidFunction = (...args: any[]) => void;
 
 export function throttle<F extends AnyVoidFunction>(callback: F): F {
-    let frameId = null;
+    let frameId: number = null;
     return ((...args: any[]) => {
         if (!frameId) {
             callback(...args);
@@ -110,7 +113,7 @@ function onSwipeStart(
         moveHandler(se, e);
     });
 
-    function onPointerUp(e) {
+    function onPointerUp(e: MouseEvent) {
         unsubscribe();
         const se = getSwipeEventObject(e);
         upHandler(se, e);
@@ -127,4 +130,25 @@ function onSwipeStart(
 
 export function createSwipeHandler(startHandler: StartSwipeHandler) {
     return (e: MouseEvent | TouchEvent) => onSwipeStart(e, startHandler);
+}
+
+export async function getFontList() {
+    return new Promise<string[]>((resolve) => {
+        if (!chrome.fontSettings) {
+            // Todo: Remove it as soon as Firefox and Edge get support.
+            resolve([
+                'serif',
+                'sans-serif',
+                'monospace',
+                'cursive',
+                'fantasy',
+                'system-ui'
+            ]);
+            return;
+        }
+        chrome.fontSettings.getFontList((list) => {
+            const fonts = list.map((f) => f.fontId);
+            resolve(fonts);
+        });
+    });
 }

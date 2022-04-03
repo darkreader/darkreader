@@ -15,12 +15,11 @@ import {getDuration} from '../../../utils/time';
 import {DONATE_URL, GITHUB_URL, PRIVACY_URL, TWITTER_URL, getHelpURL} from '../../../utils/links';
 import {getLocalMessage} from '../../../utils/locales';
 import {compose} from '../../utils';
-import type {ExtensionData, ExtensionActions, TabInfo, News as NewsObject} from '../../../definitions';
+import type {ExtensionData, ExtensionActions, News as NewsObject} from '../../../definitions';
 import {isMobile, isFirefox, isThunderbird} from '../../../utils/platform';
 
 interface BodyProps {
     data: ExtensionData;
-    tab: TabInfo;
     actions: ExtensionActions;
 }
 
@@ -40,7 +39,7 @@ function openDevTools() {
     });
 }
 
-function Body(props: BodyProps) {
+function Body(props: BodyProps & {fonts: string[]}) {
     const context = getContext();
     const {state, setState} = useState<BodyState>({
         activeTab: 'Filter',
@@ -58,7 +57,7 @@ function Body(props: BodyProps) {
     }
 
     if (isMobile || props.data.settings.previewNewDesign) {
-        return <NewBody {...props} />;
+        return <NewBody {...props} fonts={props.fonts}/>;
     }
 
     const unreadNews = props.data.news.filter(({read}) => !read);
@@ -66,7 +65,7 @@ function Body(props: BodyProps) {
     const isFirstNewsUnread = latestNews && !latestNews.read;
 
     context.onRender(() => {
-        if (isFirstNewsUnread && !state.newsOpen && !state.didNewsSlideIn) {
+        if (props.data.settings.fetchNews && isFirstNewsUnread && !state.newsOpen && !state.didNewsSlideIn) {
             setTimeout(toggleNews, 750);
         }
     });
@@ -86,7 +85,7 @@ function Body(props: BodyProps) {
     }
 
     let displayedNewsCount = unreadNews.length;
-    if (unreadNews.length > 0 && !props.data.settings.notifyOfNews) {
+    if (unreadNews.length > 0) {
         const latest = new Date(unreadNews[0].date);
         const today = new Date();
         const newsWereLongTimeAgo = latest.getTime() < today.getTime() - getDuration({days: 14});
@@ -113,7 +112,6 @@ function Body(props: BodyProps) {
 
             <Header
                 data={props.data}
-                tab={props.tab}
                 actions={props.actions}
                 onMoreToggleSettingsClick={toggleMoreToggleSettings}
             />
@@ -123,20 +121,20 @@ function Body(props: BodyProps) {
                 onSwitchTab={(tab) => setState({activeTab: tab})}
                 tabs={isThunderbird ? {
                     'Filter': (
-                        <FilterSettings data={props.data} actions={props.actions} tab={props.tab} />
+                        <FilterSettings data={props.data} actions={props.actions} />
                     ),
                     'More': (
-                        <MoreSettings data={props.data} actions={props.actions} tab={props.tab} />
+                        <MoreSettings data={props.data} actions={props.actions} fonts={props.fonts}/>
                     ),
                 } : {
                     'Filter': (
-                        <FilterSettings data={props.data} actions={props.actions} tab={props.tab} />
+                        <FilterSettings data={props.data} actions={props.actions} />
                     ),
                     'Site list': (
                         <SiteListSettings data={props.data} actions={props.actions} isFocused={state.activeTab === 'Site list'} />
                     ),
                     'More': (
-                        <MoreSettings data={props.data} actions={props.actions} tab={props.tab} />
+                        <MoreSettings data={props.data} actions={props.actions} fonts={props.fonts}/>
                     ),
                 }}
                 tabLabels={{

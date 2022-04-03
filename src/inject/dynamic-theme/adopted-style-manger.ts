@@ -10,7 +10,6 @@ export interface AdoptedStyleSheetManager {
 }
 
 export function createAdoptedStyleSheetOverride(node: Document | ShadowRoot): AdoptedStyleSheetManager {
-
     let cancelAsyncOperations = false;
 
     function injectSheet(sheet: CSSStyleSheet, override: CSSStyleSheet) {
@@ -72,6 +71,7 @@ export function createAdoptedStyleSheetOverride(node: Document | ShadowRoot): Ad
             });
         });
     }
+
     return {
         render,
         destroy

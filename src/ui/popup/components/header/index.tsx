@@ -1,7 +1,7 @@
 import {m} from 'malevic';
 import {Shortcut, Toggle} from '../../../controls';
 import {getLocalMessage} from '../../../../utils/locales';
-import type {ExtWrapper, TabInfo} from '../../../../definitions';
+import type {ExtWrapper, UserSettings} from '../../../../definitions';
 import SunMoonIcon from '../../main-page/sun-moon-icon';
 import SystemIcon from '../../main-page/system-icon';
 import WatchIcon from '../../main-page/watch-icon';
@@ -13,19 +13,18 @@ function multiline(...lines: string[]) {
 }
 
 type HeaderProps = ExtWrapper & {
-    tab: TabInfo;
     onMoreToggleSettingsClick: () => void;
 };
 
-function Header({data, actions, tab, onMoreToggleSettingsClick}: HeaderProps) {
-
-    function toggleExtension(enabled) {
+function Header({data, actions, onMoreToggleSettingsClick}: HeaderProps) {
+    function toggleExtension(enabled: UserSettings['enabled']) {
         actions.changeSettings({
             enabled,
             automation: '',
         });
     }
 
+    const tab = data.activeTab;
     const isAutomation = Boolean(data.settings.automation);
     const isTimeAutomation = data.settings.automation === 'time';
     const isLocationAutomation = data.settings.automation === 'location';
@@ -39,10 +38,9 @@ function Header({data, actions, tab, onMoreToggleSettingsClick}: HeaderProps) {
             <div class="header__control header__site-toggle">
                 <SiteToggle
                     data={data}
-                    tab={tab}
                     actions={actions}
                 />
-                {tab.isProtected ? (
+                {tab.isProtected || !tab.isInjected ? (
                     <span class="header__site-toggle__unable-text">
                         {getLocalMessage('page_protected')}
                     </span>

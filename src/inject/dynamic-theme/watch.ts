@@ -24,7 +24,16 @@ function collectUndefinedElements(root: ParentNode) {
     }
     forEach(root.querySelectorAll(':not(:defined)'),
         (el) => {
-            const tag = el.tagName.toLowerCase();
+            let tag = el.tagName.toLowerCase();
+            if (!tag.includes('-')) {
+                const extendedTag = el.getAttribute('is');
+                if (extendedTag) {
+                    tag = extendedTag;
+                } else {
+                    // Happens for <template> on YouTube
+                    return;
+                }
+            }
             if (!undefinedGroups.has(tag)) {
                 undefinedGroups.set(tag, new Set());
                 customElementsWhenDefined(tag).then(() => {
@@ -59,7 +68,7 @@ async function customElementsWhenDefined(tag: string) {
         // `customElements.whenDefined` is not available in extensions
         // https://bugs.chromium.org/p/chromium/issues/detail?id=390807
         if (window.customElements && typeof customElements.whenDefined === 'function') {
-            customElements.whenDefined(tag).then(resolve);
+            customElements.whenDefined(tag).then(() => resolve());
         } else if (canOptimizeUsingProxy) {
             resolvers.set(tag, resolve);
             document.dispatchEvent(new CustomEvent('__darkreader__addUndefinedResolver', {detail: {tag}}));
@@ -74,6 +83,7 @@ async function customElementsWhenDefined(tag: string) {
                     }
                 }
             };
+
             requestAnimationFrame(checkIfDefined);
         }
     });

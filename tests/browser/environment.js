@@ -1,5 +1,4 @@
-// @ts-check
-const fs = require('fs-extra');
+const fs = require('fs').promises;
 const JestNodeEnvironment = require('jest-environment-node');
 const path = require('path');
 const puppeteer = require('puppeteer-core');
@@ -26,11 +25,20 @@ class PuppeteerEnvironment extends JestNodeEnvironment {
         this.global.browser = this.browser;
 
         this.extensionPopup = await this.openPopupPage();
+        this.extensionDevtools = await this.openDevtoolsPage();
 
         this.page = await this.createTestPage();
         this.global.page = this.page;
 
         this.assignTestGlobals();
+
+        // Close sentinel about:blank page created by Puppeteer but not used in tests.
+        this.browser.pages().then((pages) => {
+            const sentinel = pages[0];
+            if (sentinel._target._targetInfo.url === 'about:blank') {
+                sentinel.close();
+            }
+        });
     }
 
     async launchBrowser() {
@@ -47,7 +55,12 @@ class PuppeteerEnvironment extends JestNodeEnvironment {
     }
 
     async launchChrome() {
-        const executablePath = await getChromePath();
+        let executablePath;
+        try {
+            executablePath = await getChromePath();
+        } catch (e) {
+            console.error(e);
+        }
         return await puppeteer.launch({
             executablePath,
             headless: false,
@@ -97,34 +110,49 @@ class PuppeteerEnvironment extends JestNodeEnvironment {
         return page;
     }
 
-    async openPopupPage() {
-        let extensionPopup;
+    /**
+     * @param {string} path
+     * @returns {puppeteer.Page}
+     */
+    async openExtensionPage(path) {
         if (this.global.product === 'chrome') {
-            extensionPopup = await this.openChromePopupPage();
-        } else if (this.global.product === 'firefox') {
-            extensionPopup = await this.openFirefoxPopupPage();
+            return await this.openChromePage(path);
         }
-        return extensionPopup;
+        if (this.global.product === 'firefox') {
+            return await this.openFirefoxPage(path);
+        }
+        return null;
     }
 
-    async openChromePopupPage() {
+    async openPopupPage() {
+        return await this.openExtensionPage('/ui/popup/index.html');
+    }
+
+    async openDevtoolsPage() {
+        return await this.openExtensionPage('/ui/devtools/index.html');
+    }
+
+    async getBackgroundPage() {
         const targets = await this.browser.targets();
         const backgroundTarget = targets.find((t) => t.type() === 'background_page');
-        const backgroundPage = await backgroundTarget.page();
-
-        const popupURL = backgroundPage.url().replace('/background/index.html', '/ui/popup/index.html');
-        const extensionPopup = await this.browser.newPage();
-        await extensionPopup.goto(popupURL);
-
-        return extensionPopup;
+        return await backgroundTarget.page();
     }
 
-    async openFirefoxPopupPage() {
-        const extensionPopup = await this.browser.newPage();
+    async openChromePage(path) {
+        const backgroundPage = await this.getBackgroundPage();
+        const pageURL = backgroundPage.url().replace('/background/index.html', path);
+        const extensionPage = await this.browser.newPage();
+        await extensionPage.goto(pageURL);
+
+        return extensionPage;
+    }
+
+    async openFirefoxPage(path) {
+        const extensionPage = await this.browser.newPage();
         // Doesn't resolve due to https://github.com/puppeteer/puppeteer/issues/6616
-        extensionPopup.goto(`moz-extension://${this.firefoxInternalUUID}/ui/popup/index.html`);
+        extensionPage.goto(`moz-extension://${this.firefoxInternalUUID}${path}`);
         await new Promise((promise) => setTimeout(promise, 1000));
-        return extensionPopup;
+        return extensionPage;
     }
 
     assignTestGlobals() {
@@ -149,6 +177,7 @@ class PuppeteerEnvironment extends JestNodeEnvironment {
             const sockets = new Set();
             const resolvers = new Map();
             const rejectors = new Map();
+            let idCount = 0;
 
             wsServer.on('listening', () => resolve(wsServer));
 
@@ -157,32 +186,53 @@ class PuppeteerEnvironment extends JestNodeEnvironment {
                 ws.on('message', (data) => {
                     const message = JSON.parse(data);
                     if (message.type === 'error') {
-                        const reject = rejectors.get(message.type);
+                        const reject = rejectors.get(message.id);
                         reject(message.data);
                     } else {
-                        const resolve = resolvers.get(message.type);
+                        const resolve = resolvers.get(message.id);
                         resolve(message.data);
                     }
-                    resolvers.delete(message.type);
-                    rejectors.delete(message.type);
+                    resolvers.delete(message.id);
+                    rejectors.delete(message.id);
                 });
                 ws.on('close', () => sockets.delete(ws));
             });
 
-            function sendToPopup(message) {
+            function sendToUIPage(message) {
                 return new Promise((resolve, reject) => {
-                    const responseType = `${message.type}-response`;
-                    resolvers.set(responseType, resolve);
-                    rejectors.set(responseType, reject);
-                    const json = JSON.stringify(message);
+                    resolvers.set(idCount, resolve);
+                    rejectors.set(idCount, reject);
+                    const json = JSON.stringify({...message, id: idCount});
                     sockets.forEach((ws) => ws.send(json));
+                    idCount++;
                 });
             }
 
             this.global.popupUtils = {
-                click: async (selector) => await sendToPopup({type: 'click', data: selector}),
-                exists: async (selector) => await sendToPopup({type: 'exists', data: selector}),
-                getBoundingRect: async (selector) => await sendToPopup({type: 'rect', data: selector}),
+                click: async (selector) => await sendToUIPage({type: 'click', data: selector}),
+                exists: async (selector) => await sendToUIPage({type: 'exists', data: selector}),
+            };
+
+            this.global.devtoolsUtils = {
+                paste: async (fixes) => await sendToUIPage({type: 'debug-devtools-paste', data: fixes}),
+                reset: async () => await sendToUIPage({type: 'debug-devtools-reset'}),
+            };
+
+            this.global.backgroundUtils = {
+                changeSettings: async (settings) => await sendToUIPage({type: 'changeSettings', data: settings}),
+                collectData: async () => await sendToUIPage({type: 'collectData'}),
+                changeLocalStorage: async (data) => await sendToUIPage({type: 'changeLocalStorage', data}),
+                getLocalStorage: async () => await sendToUIPage({type: 'getLocalStorage'}),
+                changeChromeStorage: async (region, data) => await sendToUIPage({type: 'changeChromeStorage', data: {region, data}}),
+                getChromeStorage: async (region, keys) => await sendToUIPage({type: 'getChromeStorage', data: {region, keys}}),
+                setDataIsMigratedForTesting: async (value) => await sendToUIPage({type: 'setDataIsMigratedForTesting', data: value}),
+                emulateMedia: async (name, value) => {
+                    if (this.global.product === 'firefox') {
+                        return;
+                    }
+                    const bg = await this.getBackgroundPage();
+                    await bg.emulateMediaFeatures([{name, value}]);
+                },
             };
         });
     }
@@ -190,19 +240,20 @@ class PuppeteerEnvironment extends JestNodeEnvironment {
     async teardown() {
         await super.teardown();
 
-        if (this.global.product !== 'firefox') {
+        if (this.global.product !== 'firefox' && this.page?.coverage) {
             const coverage = await this.page.coverage.stopJSCoverage();
             const dir = './tests/browser/coverage/';
             await generateHTMLCoverageReports(dir, coverage);
             console.info('Coverage reports generated in', dir);
         }
 
-        await this.extensionPopup.close();
-        await this.page.close();
-        await this.browser.close();
-        await this.testServer.close();
-        await this.corsServer.close();
-        await this.popupTestServer.close();
+        await this.extensionPopup?.close();
+        await this.extensionDevtools?.close();
+        await this.page?.close();
+        await this.testServer?.close();
+        await this.corsServer?.close();
+        await this.popupTestServer?.close();
+        await this.browser?.close();
     }
 }
 

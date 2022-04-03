@@ -1,5 +1,5 @@
 import type {Theme} from '../../definitions';
-import {createAsyncTasksQueue} from '../utils/throttle';
+import {createAsyncTasksQueue} from '../../utils/throttle';
 import {iterateCSSRules, iterateCSSDeclarations} from './css-rules';
 import type {ModifiableCSSDeclaration, ModifiableCSSRule} from './modify-css';
 import {getModifiableCSSDeclaration} from './modify-css';
@@ -19,28 +19,37 @@ const themeCacheKeys: Array<keyof Theme> = [
 ];
 
 function getThemeKey(theme: Theme) {
-    return themeCacheKeys.map((p) => `${p}:${theme[p]}`).join(';');
+    let resultKey = '';
+    themeCacheKeys.forEach((key) => {
+        resultKey += `${key}:${theme[key]};`;
+    });
+    return resultKey;
 }
 
 const asyncQueue = createAsyncTasksQueue();
 
+interface ModifySheetOptions {
+    sourceCSSRules: CSSRuleList;
+    theme: Theme;
+    ignoreImageAnalysis: string[];
+    force: boolean;
+    prepareSheet: () => CSSStyleSheet;
+    isAsyncCancelled: () => boolean;
+}
+
 export function createStyleSheetModifier() {
     let renderId = 0;
-    const rulesTextCache = new Map<string, string>();
+    const rulesTextCache = new Set<string>();
     const rulesModCache = new Map<string, ModifiableCSSRule>();
     const varTypeChangeCleaners = new Set<() => void>();
     let prevFilterKey: string = null;
-
-    interface ModifySheetOptions {
-        sourceCSSRules: CSSRuleList;
-        theme: Theme;
-        ignoreImageAnalysis: string[];
-        force: boolean;
-        prepareSheet: () => CSSStyleSheet;
-        isAsyncCancelled: () => boolean;
+    let hasNonLoadedLink = false;
+    let wasRebuilt = false;
+    function shouldRebuildStyle() {
+        return hasNonLoadedLink && !wasRebuilt;
     }
 
-    function modifySheet(options: ModifySheetOptions): void {
+    function modifySheet(options: ModifySheetOptions) {
         const rules = options.sourceCSSRules;
         const {theme, ignoreImageAnalysis, force, prepareSheet, isAsyncCancelled} = options;
 
@@ -49,14 +58,21 @@ export function createStyleSheetModifier() {
         const themeKey = getThemeKey(theme);
         const themeChanged = (themeKey !== prevFilterKey);
 
+        if (hasNonLoadedLink) {
+            wasRebuilt = true;
+        }
+
         const modRules: ModifiableCSSRule[] = [];
         iterateCSSRules(rules, (rule) => {
-            const cssText = rule.cssText;
+            let cssText = rule.cssText;
             let textDiffersFromPrev = false;
 
             notFoundCacheKeys.delete(cssText);
+            if (rule.parentRule instanceof CSSMediaRule) {
+                cssText += `;${ (rule.parentRule as CSSMediaRule).media.mediaText}`;
+            }
             if (!rulesTextCache.has(cssText)) {
-                rulesTextCache.set(cssText, cssText);
+                rulesTextCache.add(cssText);
                 textDiffersFromPrev = true;
             }
 
@@ -82,6 +98,8 @@ export function createStyleSheetModifier() {
                 modRules.push(modRule);
             }
             rulesModCache.set(cssText, modRule);
+        }, () => {
+            hasNonLoadedLink = true;
         });
 
         notFoundCacheKeys.forEach((key) => {
@@ -98,7 +116,7 @@ export function createStyleSheetModifier() {
 
         interface ReadyGroup {
             isGroup: true;
-            rule: any;
+            rule: CSSRule;
             rules: Array<ReadyGroup | ReadyStyleRule>;
         }
 
@@ -119,11 +137,17 @@ export function createStyleSheetModifier() {
 
         function setRule(target: CSSStyleSheet | CSSGroupingRule, index: number, rule: ReadyStyleRule) {
             const {selector, declarations} = rule;
-            target.insertRule(`${selector} {}`, index);
-            const style = (target.cssRules[index] as CSSStyleRule).style;
-            declarations.forEach(({property, value, important, sourceValue}) => {
-                style.setProperty(property, value == null ? sourceValue : value as string, important ? 'important' : '');
+            const getDeclarationText = (dec: ReadyDeclaration) => {
+                const {property, value, important, sourceValue} = dec;
+                return `${property}: ${value == null ? sourceValue : value}${important ? ' !important' : ''};`;
+            };
+
+            let cssRulesText = '';
+            declarations.forEach((declarations) => {
+                cssRulesText += `${getDeclarationText(declarations)} `;
             });
+            const ruleText = `${selector} { ${cssRulesText} }`;
+            target.insertRule(ruleText, index);
         }
 
         interface RuleInfo {
@@ -297,5 +321,5 @@ export function createStyleSheetModifier() {
         buildStyleSheet();
     }
 
-    return {modifySheet};
+    return {modifySheet, shouldRebuildStyle};
 }

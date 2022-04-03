@@ -1,8 +1,10 @@
 import BackgroundColor from './background-color';
 import Brightness from './brightness';
 import Contrast from './contrast';
+import ColorSchemeDropDown from './color-scheme';
 import FontPicker from './font-picker';
 import Grayscale from './grayscale';
+import ImmediateModify from './immediate-modify';
 import Mode from './mode';
 import ResetButton from './reset-button';
 import Scheme from './scheme';
@@ -18,8 +20,10 @@ export {
     BackgroundColor,
     Brightness,
     Contrast,
+    ColorSchemeDropDown,
     FontPicker,
     Grayscale,
+    ImmediateModify,
     Mode,
     ResetButton,
     Scheme,

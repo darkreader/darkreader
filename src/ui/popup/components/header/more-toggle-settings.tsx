@@ -30,7 +30,7 @@ export default function MoreToggleSettings({data, actions, isExpanded, onClose}:
         return `${location}°`;
     }
 
-    function locationChanged(inputElement: HTMLInputElement, newValue: string, type: string) {
+    function locationChanged(inputElement: HTMLInputElement, newValue: string, type: 'latitude' | 'longitude') {
         if (newValue.trim() === '') {
             inputElement.value = '';
 
@@ -83,7 +83,7 @@ export default function MoreToggleSettings({data, actions, isExpanded, onClose}:
                 <div class="header__app-toggle__more-settings__line">
                     <CheckBox
                         checked={data.settings.automation === 'time'}
-                        onchange={(e) => actions.changeSettings({automation: e.target.checked ? 'time' : ''})}
+                        onchange={(e: {target: HTMLInputElement}) => actions.changeSettings({automation: e.target.checked ? 'time' : ''})}
                     />
                     <TimeRangePicker
                         startTime={data.settings.time.activation}
@@ -97,14 +97,14 @@ export default function MoreToggleSettings({data, actions, isExpanded, onClose}:
                 <div class="header__app-toggle__more-settings__line header__app-toggle__more-settings__location">
                     <CheckBox
                         checked={data.settings.automation === 'location'}
-                        onchange={(e) => actions.changeSettings({automation: e.target.checked ? 'location' : ''})}
+                        onchange={(e: {target: HTMLInputElement}) => actions.changeSettings({automation: e.target.checked ? 'location' : ''})}
                     />
                     <TextBox
                         class="header__app-toggle__more-settings__location__latitude"
                         placeholder={getLocalMessage('latitude')}
-                        onchange={(e) => locationChanged(e.target, e.target.value, 'latitude')}
+                        onchange={(e: {target: HTMLInputElement}) => locationChanged(e.target, e.target.value, 'latitude')}
                         oncreate={(node: HTMLInputElement) => node.value = getLocationString(locationSettings.latitude)}
-                        onkeypress={(e) => {
+                        onkeypress={(e: KeyboardEvent) => {
                             if (e.key === 'Enter') {
                                 (e.target as HTMLInputElement).blur();
                             }
@@ -133,7 +133,7 @@ export default function MoreToggleSettings({data, actions, isExpanded, onClose}:
                     <CheckBox
                         class="header__app-toggle__more-settings__system-dark-mode__checkbox"
                         checked={isSystemAutomation}
-                        onchange={(e) => actions.changeSettings({automation: e.target.checked ? 'system' : ''})}
+                        onchange={(e: {target: HTMLInputElement}) => actions.changeSettings({automation: e.target.checked ? 'system' : ''})}
                     />
                     <Button
                         class={{

@@ -2,24 +2,27 @@ import {m} from 'malevic';
 import CheckmarkIcon from './checkmark-icon';
 import {Button} from '../../../controls';
 import {getURLHostOrProtocol, isURLEnabled, isPDF} from '../../../../utils/url';
-import type {ExtWrapper, TabInfo} from '../../../../definitions';
+import type {ExtWrapper} from '../../../../definitions';
 import {isThunderbird} from '../../../../utils/platform';
 
-export default function SiteToggleButton({data, tab, actions}: ExtWrapper & {tab: TabInfo}) {
+export default function SiteToggleButton({data, actions}: ExtWrapper) {
+    const tab = data.activeTab;
 
     function onSiteToggleClick() {
         if (pdf) {
             actions.changeSettings({enableForPDF: !data.settings.enableForPDF});
         } else {
-            actions.toggleURL(tab.url);
+            actions.toggleActiveTab();
         }
     }
+
+    const pdf = isPDF(tab.url);
     const toggleHasEffect = (
         data.settings.enableForProtectedPages ||
-        !tab.isProtected
+        (!tab.isProtected && !pdf) ||
+        tab.isInjected
     );
-    const pdf = isPDF(tab.url);
-    const isSiteEnabled = isURLEnabled(tab.url, data.settings, tab);
+    const isSiteEnabled = isURLEnabled(tab.url, data.settings, tab) && tab.isInjected;
     const host = getURLHostOrProtocol(tab.url);
 
     const urlText = host

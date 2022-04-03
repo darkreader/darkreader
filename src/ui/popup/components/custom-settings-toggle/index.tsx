@@ -2,10 +2,11 @@ import {m} from 'malevic';
 import {Button} from '../../../controls';
 import {getURLHostOrProtocol, isURLInList} from '../../../../utils/url';
 import {getLocalMessage} from '../../../../utils/locales';
-import type {ExtWrapper, TabInfo} from '../../../../definitions';
+import type {ExtWrapper} from '../../../../definitions';
 import {isThunderbird} from '../../../../utils/platform';
 
-export default function CustomSettingsToggle({data, tab, actions}: ExtWrapper & {tab: TabInfo}) {
+export default function CustomSettingsToggle({data, actions}: ExtWrapper) {
+    const tab = data.activeTab;
     const host = getURLHostOrProtocol(tab.url);
 
     const isCustom = data.settings.customThemes.some(({url}) => isURLInList(tab.url, url));

@@ -1,6 +1,6 @@
 // @ts-check
-const fs = require('fs-extra');
 const path = require('path');
+const {writeFile} = require('../../tasks/utils');
 
 /** @typedef {{text: string; covered: boolean}} CodePart */
 
@@ -114,9 +114,8 @@ async function generateHTMLCoverageReport(dir, info) {
     lines.push('</body>');
     lines.push('</html>');
 
-    await fs.outputFile(path.join(dir, `${name}.html`), lines.join('\n'));
+    await writeFile(path.join(dir, `${name}.html`), lines.join('\n'));
 }
-
 
 /**
  * @param {string} dir
@@ -151,7 +150,7 @@ async function generateIndexHTMLCoveragePage(dir, info) {
     lines.push('</body>');
     lines.push('</html>');
 
-    await fs.outputFile(path.join(dir, 'index.html'), lines.join('\n'));
+    await writeFile(path.join(dir, 'index.html'), lines.join('\n'));
 }
 
 /**

@@ -1,6 +1,7 @@
 ## Unreleased
 
 - Fix PDF inversion when Auto-detect dark theme option was enabled.
+- Fix time automation when user's time zone is non-UTC.
 
 ## 4.9.47 (Mar 14, 2022)
 

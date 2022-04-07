@@ -31,7 +31,7 @@ function isRegExpMatch(regexp: RegExp) {
     };
 }
 
-const isTime = isRegExpMatch(/^(0?[0-9]|(1[0-9])|(2[0-3])):([0-5][0-9])$/);
+const isTime = isRegExpMatch(/^((0?[0-9])|(1[0-9])|(2[0-3])):([0-5][0-9])$/);
 function isNumber(x: any): x is number {
     return typeof x === 'number' && !isNaN(x);
 }

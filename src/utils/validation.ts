@@ -21,8 +21,8 @@ function isNonEmptyString(x: any): x is string {
     return x && isString(x);
 }
 
-function isArrayOfNonEmptyStrings(x: any): x is any[] {
-    return Array.isArray(x) && x.every((s) => isNonEmptyString(s));
+function isNonEmptyArrayOfNonEmptyStrings(x: any): x is any[] {
+    return Array.isArray(x) && x.length > 0 && x.every((s) => isNonEmptyString(s));
 }
 
 function isRegExpMatch(regexp: RegExp) {
@@ -31,7 +31,7 @@ function isRegExpMatch(regexp: RegExp) {
     };
 }
 
-const isTime = isRegExpMatch(/^([0-1][0-9])|(2[0-3])\:([0-5][0-9])$/);
+const isTime = isRegExpMatch(/^(0?[0-9]|(1[0-9])|(2[0-3])):([0-5][0-9])$/);
 function isNumber(x: any): x is number {
     return typeof x === 'number' && !isNaN(x);
 }
@@ -46,6 +46,10 @@ function isOneOf(...values: any[]) {
     return (x: any) => values.includes(x);
 }
 
+function hasRequiredProperties<T>(obj: T, keys: Array<keyof T>) {
+    return keys.every((key) => obj.hasOwnProperty(key));
+}
+
 function createValidator() {
     const errors: string[] = [];
 
@@ -58,6 +62,9 @@ function createValidator() {
     }
 
     function validateArray<T>(obj: T, key: keyof T, validator: (x: any) => boolean) {
+        if (!obj.hasOwnProperty(key)) {
+            return;
+        }
         const wrongValues = new Set();
         const arr: any[] = obj[key] as any;
         for (let i = 0; i < arr.length; i++) {
@@ -75,12 +82,19 @@ function createValidator() {
     return {validateProperty, validateArray, errors};
 }
 
-export function validateSettings(settings: UserSettings) {
+export function validateSettings(settings: Partial<UserSettings>) {
     if (!isPlainObject(settings)) {
         return {errors: ['Settings are not a plain object'], settings: DEFAULT_SETTINGS};
     }
 
     const {validateProperty, validateArray, errors} = createValidator();
+    const isValidPresetTheme = (theme: Theme) => {
+        if (!isPlainObject(theme)) {
+            return false;
+        }
+        const {errors: themeErrors} = validateTheme(theme);
+        return themeErrors.length === 0;
+    };
 
     validateProperty(settings, 'enabled', isBoolean, DEFAULT_SETTINGS);
     validateProperty(settings, 'fetchNews', isBoolean, DEFAULT_SETTINGS);
@@ -92,24 +106,24 @@ export function validateSettings(settings: UserSettings) {
     validateProperty(settings, 'presets', isArray, DEFAULT_SETTINGS);
     validateArray(settings, 'presets', (preset: ThemePreset) => {
         const presetValidator = createValidator();
-        presetValidator.validateProperty(preset, 'id', isNonEmptyString, null);
-        presetValidator.validateProperty(preset, 'name', isNonEmptyString, null);
-        presetValidator.validateProperty(preset, 'urls', isArrayOfNonEmptyStrings, null);
-        presetValidator.validateProperty(preset, 'theme', (theme) => {
-            const {errors: themeErrors} = validateTheme(theme);
-            return themeErrors.length === 0;
-        }, null);
+        if (!(isPlainObject(preset) && hasRequiredProperties(preset, ['id', 'name', 'urls', 'theme']))) {
+            return false;
+        }
+        presetValidator.validateProperty(preset, 'id', isNonEmptyString, preset);
+        presetValidator.validateProperty(preset, 'name', isNonEmptyString, preset);
+        presetValidator.validateProperty(preset, 'urls', isNonEmptyArrayOfNonEmptyStrings, preset);
+        presetValidator.validateProperty(preset, 'theme', isValidPresetTheme, preset);
         return presetValidator.errors.length === 0;
     });
 
     validateProperty(settings, 'customThemes', isArray, DEFAULT_SETTINGS);
     validateArray(settings, 'customThemes', (custom: CustomSiteConfig) => {
+        if (!(isPlainObject(custom) && hasRequiredProperties(custom, ['url', 'theme']))) {
+            return false;
+        }
         const presetValidator = createValidator();
-        presetValidator.validateProperty(custom, 'url', isArrayOfNonEmptyStrings, null);
-        presetValidator.validateProperty(custom, 'theme', (theme) => {
-            const {errors: themeErrors} = validateTheme(theme);
-            return themeErrors.length === 0;
-        }, null);
+        presetValidator.validateProperty(custom, 'url', isNonEmptyArrayOfNonEmptyStrings, custom);
+        presetValidator.validateProperty(custom, 'theme', isValidPresetTheme, custom);
         return presetValidator.errors.length === 0;
     });
 
@@ -130,8 +144,8 @@ export function validateSettings(settings: UserSettings) {
             return false;
         }
         const timeValidator = createValidator();
-        timeValidator.validateProperty(time, 'activation', isTime, null);
-        timeValidator.validateProperty(time, 'deactivation', isTime, null);
+        timeValidator.validateProperty(time, 'activation', isTime, time);
+        timeValidator.validateProperty(time, 'deactivation', isTime, time);
         return timeValidator.errors.length === 0;
     }, DEFAULT_SETTINGS);
 
@@ -141,8 +155,8 @@ export function validateSettings(settings: UserSettings) {
         }
         const locValidator = createValidator();
         const isValidLoc = (x: any) => x === null || isNumber(x);
-        locValidator.validateProperty(location, 'latitude', isValidLoc, null);
-        locValidator.validateProperty(location, 'longitude', isValidLoc, null);
+        locValidator.validateProperty(location, 'latitude', isValidLoc, location);
+        locValidator.validateProperty(location, 'longitude', isValidLoc, location);
         return locValidator.errors.length === 0;
     }, DEFAULT_SETTINGS);
 
@@ -155,7 +169,7 @@ export function validateSettings(settings: UserSettings) {
     return {errors, settings};
 }
 
-export function validateTheme(theme: Theme) {
+export function validateTheme(theme: Partial<Theme>) {
     if (!isPlainObject(theme)) {
         return {errors: ['Theme is not a plain object'], theme: DEFAULT_THEME};
     }
@@ -175,8 +189,8 @@ export function validateTheme(theme: Theme) {
     validateProperty(theme, 'darkSchemeTextColor', isRegExpMatch(/^#[0-9a-f]{6}$/i), DEFAULT_THEME);
     validateProperty(theme, 'lightSchemeBackgroundColor', isRegExpMatch(/^#[0-9a-f]{6}$/i), DEFAULT_THEME);
     validateProperty(theme, 'lightSchemeTextColor', isRegExpMatch(/^#[0-9a-f]{6}$/i), DEFAULT_THEME);
-    validateProperty(theme, 'scrollbarColor', isRegExpMatch(/^((auto)|(#[0-9a-f]{6}))?$/i), DEFAULT_THEME);
-    validateProperty(theme, 'selectionColor', isRegExpMatch(/^((auto)|(#[0-9a-f]{6}))?$/i), DEFAULT_THEME);
+    validateProperty(theme, 'scrollbarColor', (x: any) => x === '' || isRegExpMatch(/^(auto)|(#[0-9a-f]{6})$/i)(x), DEFAULT_THEME);
+    validateProperty(theme, 'selectionColor', isRegExpMatch(/^(auto)|(#[0-9a-f]{6})$/i), DEFAULT_THEME);
     validateProperty(theme, 'styleSystemControls', isBoolean, DEFAULT_THEME);
     validateProperty(theme, 'lightColorScheme', isNonEmptyString, DEFAULT_THEME);
     validateProperty(theme, 'darkColorScheme', isNonEmptyString, DEFAULT_THEME);

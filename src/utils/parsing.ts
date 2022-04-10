@@ -7,9 +7,11 @@ const radialGradient = 'radial-';
 const linearGradient = 'linear-';
 
 export interface parsedGradient {
-    type: string;
-    content: string;
+    typeGradient: string;
+    match: string;
     hasComma: boolean;
+    index: number;
+    offset: number;
 }
 
 // Parse the value according to the specifiction.
@@ -59,12 +61,16 @@ export function parseGradient(value: string): parsedGradient[] {
         // We can go parse the rest of the value as a gradient.
         const {start, end} = getParenthesesRange(value, index + gradientLength);
 
-        const content = value.substring(start + 1, end - 1);
+        const match = value.substring(start + 1, end - 1);
         startIndex = end + 1 + conicGradientLength;
 
         result.push({
-            type: typeGradient,
-            content,
+            typeGradient,
+            match,
+            // <type>-gradient() is not within match, so in order to still "skip" that section
+            // we add that length as offset.
+            offset: typeGradient.length + 2,
+            index: index - typeGradient.length + gradientLength,
             hasComma: true,
         });
     }

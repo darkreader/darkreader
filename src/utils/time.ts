@@ -55,22 +55,22 @@ export function nextTimeInterval(time0: string, time1: string, date: Date = new 
         // t < a <= b
         // Schedule for todate at time a
         date.setHours(a[0]);
-        date.setMinutes(a[1]);
+        // Add the timezoneOffset to ensure unix time returns it in UTC timezone.
+        date.setMinutes(a[1] + date.getTimezoneOffset());
         date.setSeconds(0);
         date.setMilliseconds(0);
-        // Convert into UTC timezone Unix time.
-        return date.getTime() + date.getTimezoneOffset() * 60 * 1000;
+        return date.getTime();
     }
 
     if (compareTime(t, b) < 0) {
         // a <= t < b
         // Schedule for today at time b
         date.setHours(b[0]);
-        date.setMinutes(b[1]);
+        // Add the timezoneOffset to ensure unix time returns it in UTC timezone.
+        date.setMinutes(b[1] + date.getTimezoneOffset());
         date.setSeconds(0);
         date.setMilliseconds(0);
-        // Convert into UTC timezone Unix time.
-        return date.getTime() + date.getTimezoneOffset() * 60 * 60 * 1000;
+        return date.getTime();
     }
 
     // a <= b <= t

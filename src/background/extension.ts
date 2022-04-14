@@ -153,7 +153,11 @@ export class Extension implements ExtensionState {
         this.autoState = state;
 
         if (nextCheck) {
-            chrome.alarms.create(Extension.ALARM_NAME, {when: nextCheck});
+            if (nextCheck < Date.now()) {
+                logWarn(`Alarm is set in the past: ${nextCheck}. The time is: ${new Date()}. ISO: ${(new Date()).toISOString()}`);
+            } else {
+                chrome.alarms.create(Extension.ALARM_NAME, {when: nextCheck});
+            }
         }
     }
 

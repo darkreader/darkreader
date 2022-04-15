@@ -1,7 +1,7 @@
 import {DEFAULT_THEME} from '../../../src/defaults';
 import {createOrUpdateDynamicTheme, removeDynamicTheme} from '../../../src/inject/dynamic-theme';
 import {isSafari} from '../../../src/utils/platform';
-import {multiline, timeout} from '../support/test-utils';
+import {multiline, timeout, waitForEvent} from '../support/test-utils';
 import {resetChromeRuntimeMessageStub, stubBackgroundFetchResponse, stubChromeRuntimeMessage} from '../support/background-stub';
 import {getCSSEchoURL} from '../support/echo-client';
 
@@ -23,10 +23,21 @@ function createStyleLink(href: string) {
     return link;
 }
 
+function selectTestStyleLink() {
+    return document.querySelector('.testcase--link') as HTMLLinkElement;
+}
+
 function createCorsLink(content: string) {
     const url = getCSSEchoURL(content);
     stubBackgroundFetchResponse(url, content);
     return createStyleLink(url);
+}
+
+async function waitForLinkLoading(link: HTMLLinkElement) {
+    return new Promise((resolve, reject) => {
+        link.addEventListener('load', resolve, {once: true});
+        link.addEventListener('error', reject, {once: true});
+    });
 }
 
 beforeEach(() => {
@@ -54,7 +65,6 @@ describe('LINK STYLES', () => {
         );
         createOrUpdateDynamicTheme(theme, null, false);
 
-        await timeout(50);
         expect(getComputedStyle(container.querySelector('h1')).backgroundColor).toBe('rgb(102, 102, 102)');
         expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(255, 255, 255)');
         expect(getComputedStyle(container.querySelector('h1 strong')).color).toBe('rgb(255, 26, 26)');
@@ -70,7 +80,7 @@ describe('LINK STYLES', () => {
         );
         createOrUpdateDynamicTheme(theme, null, false);
 
-        await timeout(50);
+        await waitForEvent('__darkreader__test__dynamicUpdateComplete');
         expect(getComputedStyle(container.querySelector('h1')).backgroundColor).toBe('rgb(102, 102, 102)');
         expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(255, 255, 255)');
         expect(getComputedStyle(container.querySelector('h1 strong')).color).toBe('rgb(255, 26, 26)');
@@ -89,7 +99,7 @@ describe('LINK STYLES', () => {
         );
         createOrUpdateDynamicTheme(theme, null, false);
 
-        await timeout(500);
+        await waitForEvent('__darkreader__test__dynamicUpdateComplete');
         expect(getComputedStyle(container.querySelector('h1')).backgroundColor).toBe('rgb(102, 102, 102)');
         expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(255, 255, 255)');
         expect(getComputedStyle(container.querySelector('h1 strong')).color).toBe('rgb(255, 26, 26)');
@@ -107,7 +117,7 @@ describe('LINK STYLES', () => {
             '<h1><strong>Cross-origin import</strong> link override</h1>',
         );
         createOrUpdateDynamicTheme(theme, null, false);
-        await timeout(500);
+        await waitForEvent('__darkreader__test__dynamicUpdateComplete');
         expect(getComputedStyle(container.querySelector('h1')).backgroundColor).toBe('rgb(102, 102, 102)');
         expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(255, 255, 255)');
         expect(getComputedStyle(container.querySelector('h1 strong')).color).toBe('rgb(255, 26, 26)');
@@ -122,13 +132,13 @@ describe('LINK STYLES', () => {
             '<h1>Loaded <strong>cross-origin</strong> link override</h1>',
         );
 
-        await timeout(500);
+        await waitForLinkLoading(selectTestStyleLink());
         expect(getComputedStyle(container.querySelector('h1')).backgroundColor).toBe('rgb(128, 128, 128)');
         expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(0, 0, 0)');
         expect(getComputedStyle(container.querySelector('h1 strong')).color).toBe('rgb(255, 0, 0)');
 
         createOrUpdateDynamicTheme(theme, null, false);
-        await timeout(500);
+        await waitForEvent('__darkreader__test__dynamicUpdateComplete');
         expect(getComputedStyle(container.querySelector('h1')).backgroundColor).toBe('rgb(102, 102, 102)');
         expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(255, 255, 255)');
         expect(getComputedStyle(container.querySelector('h1 strong')).color).toBe('rgb(255, 26, 26)');
@@ -144,7 +154,6 @@ describe('LINK STYLES', () => {
         );
         createOrUpdateDynamicTheme(theme, null, false);
 
-        await timeout(50);
         expect(document.querySelector('.testcase--link').nextElementSibling.classList.contains(isSafari ? 'darkreader--cors' : 'darkreader--sync')).toBe(true);
         link.disabled = true;
         await timeout(0);
@@ -164,7 +173,6 @@ describe('LINK STYLES', () => {
         );
         createOrUpdateDynamicTheme(theme, null, false);
 
-        await timeout(0);
         const h1 = document.querySelector('h1');
         expect(getComputedStyle(h1).backgroundColor).toBe('rgb(102, 102, 102)');
         expect(document.querySelector('.darkreader--fallback').textContent).toBe('');
@@ -183,7 +191,7 @@ describe('LINK STYLES', () => {
         );
         createOrUpdateDynamicTheme(theme, null, false);
 
-        await timeout(500);
+        await waitForEvent('__darkreader__test__dynamicUpdateComplete');
         expect(getComputedStyle(container.querySelector('h1')).backgroundColor).toBe('rgb(102, 102, 102)');
         expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(255, 255, 255)');
         expect(getComputedStyle(container.querySelector('h1 strong')).color).toBe('rgb(255, 26, 26)');
@@ -203,7 +211,7 @@ describe('LINK STYLES', () => {
         );
         createOrUpdateDynamicTheme(theme, null, false);
 
-        await timeout(1000);
+        await waitForEvent('__darkreader__test__dynamicUpdateComplete');
         expect(getComputedStyle(container.querySelector('h1')).backgroundColor).toBe('rgb(102, 102, 102)');
         expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(255, 255, 255)');
         expect(getComputedStyle(container.querySelector('h1 strong')).color).toBe('rgb(255, 26, 26)');

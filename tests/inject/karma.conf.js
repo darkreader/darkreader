@@ -9,7 +9,7 @@ const rollupPluginReplace = require('@rollup/plugin-replace');
 const rollupPluginTypescript = require('@rollup/plugin-typescript');
 const typescript = require('typescript');
 const {getTestDestDir, rootPath} = require('../../tasks/paths');
-const karmaPluginEchoServer = require('./support/echo-server');
+const {createEchoServer} = require('./support/echo-server');
 
 /**
  * @param {LocalConfig} config
@@ -37,10 +37,6 @@ function configureKarma(config, env) {
             'karma-rollup-preprocessor',
             'karma-jasmine',
             'karma-spec-reporter',
-            karmaPluginEchoServer,
-        ],
-        middleware: [
-            'echo-server'
         ],
         preprocessors: {
             '**/*.+(ts|tsx)': ['rollup'],
@@ -75,7 +71,7 @@ function configureKarma(config, env) {
         autoWatch: true,
         browsers: headless
             ? ['ChromeHeadless', 'FirefoxHeadless']
-            : ['Chrome', 'Firefox', process.platform === 'darwin' ? 'Safari' : null].filter(Boolean),
+            : ['Chrome', 'Firefox'].filter(Boolean),
         singleRun: true,
         concurrency: 1,
     };
@@ -125,6 +121,11 @@ function configureKarma(config, env) {
             dir: 'tests/inject/coverage/'
         };
     }
+
+    // HACK: Create CORS port here
+    // Previously a separate Karma runner file was used
+    const corsServerPort = 9966;
+    createEchoServer(corsServerPort).then(() => console.log(`CORS echo server running on port ${corsServerPort}`));
 
     return options;
 }

@@ -22,6 +22,7 @@ import {parse} from '../../utils/color';
 import {parsedURLCache} from '../../utils/url';
 import {variablesStore} from './variables';
 
+declare const __TEST__: boolean;
 const INSTANCE_ID = generateUID();
 const styleManagers = new Map<StyleElement, StyleManager>();
 const adoptedStyleManagers = [] as AdoptedStyleSheetManager[];
@@ -257,6 +258,9 @@ function createManager(element: StyleElement) {
         variablesStore.addRulesForMatching(details.rules);
         variablesStore.matchVariablesAndDependants();
         manager.render(filter, ignoredImageAnalysisSelectors);
+        if (__TEST__) {
+            document.dispatchEvent(new CustomEvent('__darkreader__test__dynamicUpdateComplete'));
+        }
     }
 
     const manager = manageStyle(element, {update, loadingStart, loadingEnd});

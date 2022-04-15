@@ -57,6 +57,7 @@ function configureKarma(config, env) {
                     preventAssignment: true,
                     '__DEBUG__': 'false',
                     '__PORT__': '-1',
+                    '__TEST__': 'true',
                     '__WATCH__': 'false',
                 }),
             ],

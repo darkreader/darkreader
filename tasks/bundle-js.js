@@ -139,6 +139,7 @@ async function bundleJS(/** @type {JSEntry} */entry, {debug, watch}) {
                 preventAssignment: true,
                 '__DEBUG__': debug ? 'true' : 'false',
                 '__PORT__': watch ? String(PORT) : '-1',
+                '__TEST__': 'false',
                 '__WATCH__': watch ? 'true' : 'false',
             }),
         ].filter((x) => x)

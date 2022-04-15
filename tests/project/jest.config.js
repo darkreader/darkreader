@@ -12,6 +12,7 @@ const config = {
     globals: {
         'ts-jest': {tsconfig: '<rootDir>/tests/project/tsconfig.json'},
         __DEBUG__: false,
+        __TEST__: true,
     },
     setupFilesAfterEnv: ['jest-extended/all'],
 };

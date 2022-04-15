@@ -71,7 +71,7 @@ function configureKarma(config, env) {
         autoWatch: true,
         browsers: headless
             ? ['ChromeHeadless', 'FirefoxHeadless']
-            : ['Chrome', 'Firefox'].filter(Boolean),
+            : ['Chrome', 'Firefox', process.platform === 'darwin' ? 'Safari' : null].filter(Boolean),
         singleRun: true,
         concurrency: 1,
     };
@@ -122,7 +122,7 @@ function configureKarma(config, env) {
         };
     }
 
-    // HACK: Create CORS port here
+    // HACK: Create CORS server here
     // Previously a separate Karma runner file was used
     const corsServerPort = 9966;
     createEchoServer(corsServerPort).then(() => console.log(`CORS echo server running on port ${corsServerPort}`));

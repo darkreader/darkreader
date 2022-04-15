@@ -1,4 +1,4 @@
-export function throttle<T extends (...args: any[]) => any>(callback: T) {
+export function throttle<T extends(...args: any[]) => any>(callback: T) {
     let pending = false;
     let frameId: number = null;
     let lastArgs: any[];

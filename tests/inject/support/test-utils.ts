@@ -7,3 +7,9 @@ export function multiline(...lines: string[]) {
 export function timeout(delay: number) {
     return new Promise((resolve) => setTimeout(resolve, delay));
 }
+
+export function waitForEvent(eventName: string) {
+    return new Promise((resolve) => {
+        document.addEventListener(eventName, resolve, {once: true});
+    });
+}

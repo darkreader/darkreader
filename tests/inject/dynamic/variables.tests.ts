@@ -2,7 +2,7 @@ import '../support/polyfills';
 import {DEFAULT_THEME} from '../../../src/defaults';
 import {isFirefox} from '../../../src/utils/platform';
 import {createOrUpdateDynamicTheme, removeDynamicTheme} from '../../../src/inject/dynamic-theme';
-import {multiline, timeout} from '../support/test-utils';
+import {multiline, timeout, waitForEvent} from '../support/test-utils';
 
 const theme = {
     ...DEFAULT_THEME,
@@ -844,7 +844,7 @@ describe('CSS VARIABLES OVERRIDE', () => {
             '</h1>',
         );
         createOrUpdateDynamicTheme(theme, null, false);
-        await timeout(100);
+        await waitForEvent('__darkreader__test__asyncQueueComplete');
         expect(getComputedStyle(container.querySelector('.icon1')).backgroundImage).toMatch(/^url\("data:image\/svg\+xml;base64,.*"\)$/);
         expect(getComputedStyle(container.querySelector('.icon2')).backgroundImage).toMatch(/^url\("data:image\/svg\+xml;base64,.*"\)$/);
         expect(getComputedStyle(container.querySelector('.icon3')).backgroundImage).toMatch(/^url\("data:image\/svg\+xml;base64,.*"\), url\("data:image\/svg\+xml;base64,.*"\)$/);
@@ -872,7 +872,7 @@ describe('CSS VARIABLES OVERRIDE', () => {
             '<h1><i class="icon"></i>Mixed background</h1>',
         );
         createOrUpdateDynamicTheme(theme, null, false);
-        await timeout(100);
+        await waitForEvent('__darkreader__test__asyncQueueComplete');
         expect(getComputedStyle(container.querySelector('.icon')).backgroundImage).toMatch(/^url\("data:image\/svg\+xml;base64,.*"\), linear-gradient\(rgb\(204, 0, 0\), rgb\(0, 0, 0\)\)$/);
     });
 

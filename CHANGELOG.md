@@ -1,8 +1,9 @@
-## Unreleased
+## 4.9.48 (Apr 18, 2022)
 
 - Fix PDF inversion when Auto-detect dark theme option was enabled.
-- Fix time automation when user's time zone is non-UTC.
 - Fix Jira's background.
+- User's settings validation.
+- Users' fixes for websites.
 
 ## 4.9.47 (Mar 14, 2022)
 

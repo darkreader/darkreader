@@ -55,8 +55,7 @@ export function nextTimeInterval(time0: string, time1: string, date: Date = new 
         // t < a <= b
         // Schedule for todate at time a
         date.setHours(a[0]);
-        // Add the timezoneOffset to ensure unix time returns it in UTC timezone.
-        date.setMinutes(a[1] + date.getTimezoneOffset());
+        date.setMinutes(a[1]);
         date.setSeconds(0);
         date.setMilliseconds(0);
         return date.getTime();
@@ -66,8 +65,7 @@ export function nextTimeInterval(time0: string, time1: string, date: Date = new 
         // a <= t < b
         // Schedule for today at time b
         date.setHours(b[0]);
-        // Add the timezoneOffset to ensure unix time returns it in UTC timezone.
-        date.setMinutes(b[1] + date.getTimezoneOffset());
+        date.setMinutes(b[1]);
         date.setSeconds(0);
         date.setMilliseconds(0);
         return date.getTime();

@@ -1,15 +1,14 @@
 {
     "compilerOptions": {
-        "noImplicitAny": true,
-        "target": "es2019",
-        "baseUrl": ".",
-        "module": "es2015",
+        "target": "ES2019",
+        "baseUrl": "./",
+        "module": "ES2015",
         "moduleResolution": "node",
         "lib": [
-            "es2015",
-            "es2017",
-            "dom",
-            "dom.iterable"
+            "ES2015",
+            "ES2017",
+            "Dom",
+            "DOM.Iterable"
         ],
         "types": [
             "chrome",
@@ -17,11 +16,10 @@
         ],
         "allowJs": true,
         "downlevelIteration": true,
-        "noEmit": true,
+        "noImplicitAny": true,
+        "resolveJsonModule": true,
         "jsx": "react",
-        "jsxFactory": "m"
-    },
-    "exclude": [
-        "node_modules"
-    ]
+        "jsxFactory": "m",
+        "noEmit": true
+    }
 }

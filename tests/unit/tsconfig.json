@@ -1,0 +1,21 @@
+{
+    "$schema": "https://json.schemastore.org/tsconfig",
+    "compilerOptions": {
+        "target": "ESNext",
+        "module": "CommonJS",
+        "lib": [
+            "ESNext",
+            "Dom"
+        ],
+        "types": [
+            "node",
+            "jest",
+            "jest-extended"
+        ],
+        "esModuleInterop": true,
+        "skipLibCheck": true,
+        "forceConsistentCasingInFileNames": true,
+        "noImplicitAny": true,
+        "inlineSourceMap": true
+    }
+}

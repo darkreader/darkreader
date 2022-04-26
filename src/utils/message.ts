@@ -1,12 +1,11 @@
 export const MessageType = {
     UI_GET_DATA: 'ui-get-data',
-    UI_GET_ACTIVE_TAB_INFO: 'ui-get-active-tab-info',
     UI_SUBSCRIBE_TO_CHANGES: 'ui-subscribe-to-changes',
     UI_UNSUBSCRIBE_FROM_CHANGES: 'ui-unsubscribe-from-changes',
     UI_CHANGE_SETTINGS: 'ui-change-settings',
     UI_SET_THEME: 'ui-set-theme',
     UI_SET_SHORTCUT: 'ui-set-shortcut',
-    UI_TOGGLE_URL: 'ui-toggle-url',
+    UI_TOGGLE_ACTIVE_TAB: 'ui-toggle-active-tab',
     UI_MARK_NEWS_AS_READ: 'ui-mark-news-as-read',
     UI_LOAD_CONFIG: 'ui-load-config',
     UI_APPLY_DEV_DYNAMIC_THEME_FIXES: 'ui-apply-dev-dynamic-theme-fixes',
@@ -38,4 +37,6 @@ export const MessageType = {
     CS_FRAME_RESUME: 'cs-frame-resume',
     CS_EXPORT_CSS_RESPONSE: 'cs-export-css-response',
     CS_FETCH: 'cs-fetch',
+    CS_DARK_THEME_DETECTED: 'cs-dark-theme-detected',
+    CS_DARK_THEME_NOT_DETECTED: 'cs-dark-theme-not-detected',
 };

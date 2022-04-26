@@ -1,0 +1,85 @@
+name: Run browser tests in Karma
+on:
+
+  # Runs for pushes and pull requests,
+  #  but don't run these when only some config is changed.
+  push:
+    branches:
+      - master
+    paths-ignore:
+      - 'src/config/*'
+  pull_request:
+    branches:
+      - master
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - ready_for_review
+    paths-ignore:
+      - 'src/config/**'
+
+  workflow_dispatch:
+jobs:
+  test-browser:
+    name: Run browser tests
+    strategy:
+      matrix:
+        include:
+
+          # Extended support releases
+          - channel: esr
+            firefox: latest-esr
+
+          # Stable releases
+          - channel: stable
+            chrome: stable
+            firefox: latest
+            coverage: true
+
+          # Beta releases
+          - channel: beta
+            chrome: beta
+            firefox: latest-beta
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+
+      - name: Install Chrome
+        if: ${{ matrix.chrome }}
+        uses: browser-actions/setup-chrome@latest
+        with:
+          chrome-version: ${{ matrix.chrome }}
+      - name: Configure Karma with path to Chrome executable
+        if: ${{ matrix.chrome }}
+        run: |
+          chrome --version
+          { echo CHROME_BIN="$(which chrome)"; echo CHROME_TEST=1; } | tee -a "$GITHUB_ENV"
+
+      - name: Install Firefox
+        if: ${{ matrix.firefox }}
+        uses: browser-actions/setup-firefox@latest
+        with:
+          firefox-version: ${{ matrix.firefox }}
+      - name: Configure Karma with path to Firefox executable
+        if: ${{ matrix.firefox }}
+        run: |
+          firefox --version
+          { echo FIREFOX_BIN="$(which firefox)"; echo FIREFOX_TEST=1; } | tee -a "$GITHUB_ENV"
+
+      - name: Node.js setup
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node }}
+          cache: npm
+      - name: Track Node and NPM version
+        run: node --version && npm --version
+
+      - name: Install application dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm run test:inject -- --ci

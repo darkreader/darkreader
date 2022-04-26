@@ -1,4 +1,4 @@
-name: Run tests on Pull Request or Push
+name: Run config tests on Pull Request or Push
 on:
   push:
     branches:
@@ -23,8 +23,11 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: 14.x
-      
+          node-version: 15.x
+
+      - name: Verify NPM version
+        run: npm --version
+
       - name: Set up npm cache
         uses: actions/cache@v2
         with:
@@ -39,6 +42,3 @@ jobs:
 
       - name: Run test against code
         run: npm run test:ci
-
-      - name: Lint code for code-style errors
-        run: npm run lint

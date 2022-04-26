@@ -1,7 +1,7 @@
 import type {ParsedColorSchemeConfig} from './utils/colorscheme-parser';
 import type {Theme, UserSettings} from './definitions';
 import ThemeEngines from './generators/theme-engines';
-import {isMacOS, isWindows} from './utils/platform';
+import {isMacOS, isWindows, isCSSColorSchemePropSupported} from './utils/platform';
 
 export const DEFAULT_COLORS = {
     darkScheme: {
@@ -31,9 +31,10 @@ export const DEFAULT_THEME: Theme = {
     lightSchemeTextColor: DEFAULT_COLORS.lightScheme.text,
     scrollbarColor: isMacOS ? '' : 'auto',
     selectionColor: 'auto',
-    styleSystemControls: true,
+    styleSystemControls: !isCSSColorSchemePropSupported,
     lightColorScheme: 'Default',
     darkColorScheme: 'Default',
+    immediateModify: false,
 };
 
 export const DEFAULT_COLORSCHEME: ParsedColorSchemeConfig = {
@@ -64,6 +65,7 @@ export const DEFAULT_SETTINGS: UserSettings = {
     syncSettings: true,
     syncSitesFixes: false,
     automation: '',
+    automationBehaviour: 'OnOff',
     time: {
         activation: '18:00',
         deactivation: '9:00',
@@ -76,4 +78,5 @@ export const DEFAULT_SETTINGS: UserSettings = {
     enableForPDF: true,
     enableForProtectedPages: false,
     enableContextMenus: false,
+    detectDarkTheme: false,
 };

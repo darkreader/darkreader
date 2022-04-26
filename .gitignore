@@ -18,8 +18,13 @@ tests/inject/coverage/
 #-----------------------------------
 .idea/
 .vscode/
+.log/
 *.code-workspace
 
 # Cache files
 #-----------------------------------
 .eslintcache
+
+# V8 Profiler logs
+#-----------------------------------
+isolate-*-v8.log

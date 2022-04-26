@@ -19,10 +19,23 @@ const themeCacheKeys: Array<keyof Theme> = [
 ];
 
 function getThemeKey(theme: Theme) {
-    return themeCacheKeys.map((p) => `${p}:${theme[p]}`).join(';');
+    let resultKey = '';
+    themeCacheKeys.forEach((key) => {
+        resultKey += `${key}:${theme[key]};`;
+    });
+    return resultKey;
 }
 
 const asyncQueue = createAsyncTasksQueue();
+
+interface ModifySheetOptions {
+    sourceCSSRules: CSSRuleList;
+    theme: Theme;
+    ignoreImageAnalysis: string[];
+    force: boolean;
+    prepareSheet: () => CSSStyleSheet;
+    isAsyncCancelled: () => boolean;
+}
 
 export function createStyleSheetModifier() {
     let renderId = 0;
@@ -30,15 +43,6 @@ export function createStyleSheetModifier() {
     const rulesModCache = new Map<string, ModifiableCSSRule>();
     const varTypeChangeCleaners = new Set<() => void>();
     let prevFilterKey: string = null;
-    interface ModifySheetOptions {
-        sourceCSSRules: CSSRuleList;
-        theme: Theme;
-        ignoreImageAnalysis: string[];
-        force: boolean;
-        prepareSheet: () => CSSStyleSheet;
-        isAsyncCancelled: () => boolean;
-    }
-
     let hasNonLoadedLink = false;
     let wasRebuilt = false;
     function shouldRebuildStyle() {
@@ -65,7 +69,7 @@ export function createStyleSheetModifier() {
 
             notFoundCacheKeys.delete(cssText);
             if (rule.parentRule instanceof CSSMediaRule) {
-                cssText += `;${ (rule.parentRule as CSSMediaRule).media.mediaText}`;
+                cssText += `;${(rule.parentRule as CSSMediaRule).media.mediaText}`;
             }
             if (!rulesTextCache.has(cssText)) {
                 rulesTextCache.add(cssText);
@@ -138,7 +142,11 @@ export function createStyleSheetModifier() {
                 return `${property}: ${value == null ? sourceValue : value}${important ? ' !important' : ''};`;
             };
 
-            const ruleText = `${selector} { ${declarations.map(getDeclarationText).join(' ')} }`;
+            let cssRulesText = '';
+            declarations.forEach((declarations) => {
+                cssRulesText += `${getDeclarationText(declarations)} `;
+            });
+            const ruleText = `${selector} { ${cssRulesText} }`;
             target.insertRule(ruleText, index);
         }
 

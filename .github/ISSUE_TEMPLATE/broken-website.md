@@ -7,20 +7,14 @@ assignees: ''
 ---
 
 <!--
-  ⚠⚠ Do not delete this issue template! ⚠⚠
-  Reported issues must use this template and have all the necessary information provided.
-  Incomplete reports are likely to be ignored and closed.
--->
-
-<!--
-  Thank you for taking the time to create a report about a website issue.
-  Ensure that there are no other existing reports for this website issue.
-  Please check if the issue is resolved after a restart of the browser.
-  Additionally, you should check if the issue persists in a new browser profile.
-  Remember to fill out every section on this report and remove any that are not needed.
+  ⚠⚠ Do not delete this issue template or your issue will be ignored! ⚠⚠
+  Thank you for taking the time to report a bug.
+  First, please check:
+  - Can the issue be reproduced in a fresh browser profile?
+  - Is there an existing issue about this?
+  Please fill out every section of this report, removing any that are not needed.
   Finally, place a brief description in the title of this report.
 -->
-
 
 # Broken Website Report
 
@@ -33,14 +27,10 @@ assignees: ''
 Here is an example:
 - Go to example.com.
 - Hover over the example button.
-- Notice that when hovering over the example button, it does not change color.
 -->
 
-## Expected Behavior
-<!-- Provide a clear and concise description of what you expected to happen. -->
-
-## Actual Behavior
-<!-- Provide a clear and concise description of what happened. -->
+## Problematic Observation
+<!-- Provide a clear and concise description of the malfunction. -->
 
 ## Screenshots
 <!-- If applicable, add screenshots to help explain this website issue. -->

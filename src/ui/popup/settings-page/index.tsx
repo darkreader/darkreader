@@ -5,6 +5,7 @@ import DevToolsGroup from './devtools';
 import ManageSettingsButton from './mange-settings-button';
 import SiteListButton from './site-list-button';
 import EnabledByDefaultGroup from './enabled-by-default';
+import DetectDarkThemeGroup from './detect-dark-theme';
 import ChangeBrowserTheme from './change-browser-theme';
 import ContextMenusGroup from './context-menus';
 import Version from './version';
@@ -26,6 +27,7 @@ export default function SettingsPage(props: SettingsPageProps) {
             <AutomationButton onClick={props.onAutomationNavClick} />
             <ContextMenusGroup {...props} />
             <ManageSettingsButton onClick={props.onManageSettingsClick} />
+            <DetectDarkThemeGroup {...props} />
             <Version />
         </section>
     );

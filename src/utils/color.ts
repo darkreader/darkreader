@@ -263,7 +263,7 @@ export function lowerCalcExpression(color: string): string {
     // the calc(...) expression.
     let searchIndex = 0;
 
-    const replaceBetweenIndices = (start: number, end:number, replacement: string) => {
+    const replaceBetweenIndices = (start: number, end: number, replacement: string) => {
         color = color.substring(0, start) + replacement + color.substring(end);
     };
 
@@ -533,3 +533,8 @@ const systemColors: Map<string, number> = new Map(Object.entries({
     WindowText: 0x000000,
     '-webkit-focus-ring-color': 0xe59700
 }).map(([key, value]) => [key.toLowerCase(), value] as [string, number]));
+
+// https://en.wikipedia.org/wiki/Relative_luminance
+export function getSRGBLightness(r: number, g: number, b: number) {
+    return (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
+}

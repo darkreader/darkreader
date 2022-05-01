@@ -1,4 +1,4 @@
-## 4.9.49 (May 1, 2022)
+## 4.9.50 (May 1, 2022)
 
 - Fix working in Firefox Nightly 101.
 - Users' fixes for websites.

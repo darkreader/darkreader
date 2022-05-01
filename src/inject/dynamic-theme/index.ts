@@ -335,13 +335,21 @@ function createThemeAndWatchForUpdates() {
 }
 
 function handleAdoptedStyleSheets(node: ShadowRoot | Document) {
-    if (Array.isArray(node.adoptedStyleSheets)) {
-        if (node.adoptedStyleSheets.length > 0) {
-            const newManger = createAdoptedStyleSheetOverride(node);
+    try {
+        if (Array.isArray(node.adoptedStyleSheets)) {
+            if (node.adoptedStyleSheets.length > 0) {
+                const newManger = createAdoptedStyleSheetOverride(node);
 
-            adoptedStyleManagers.push(newManger);
-            newManger.render(filter, ignoredImageAnalysisSelectors);
+                adoptedStyleManagers.push(newManger);
+                newManger.render(filter, ignoredImageAnalysisSelectors);
+            }
         }
+    } catch (err) {
+        // For future readers, well Dark Reader generally don't use `try/catch` in it's code
+        // this is a special exception due to a bug in Firefox Nightly. No harm is done
+        // by allowing this exception to happen.
+        // Ref: https://github.com/darkreader/darkreader/issues/8789#issuecomment-1114210080
+        logWarn('Error occured in handleAdoptedStyleSheets: ', err);
     }
 }
 

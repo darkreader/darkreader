@@ -345,9 +345,9 @@ function handleAdoptedStyleSheets(node: ShadowRoot | Document) {
             }
         }
     } catch (err) {
-        // For future readers, well Dark Reader generally don't use `try/catch` in it's code
-        // this is a special exception due to a bug in Firefox Nightly. No harm is done
-        // by allowing this exception to happen.
+        // For future readers, Dark Reader typically does not use 'try/catch' in its code but,
+        // due to a problem in Firefox Nightly, this is an exception. Allowing this exception
+        // to occur causes no consequence.
         // Ref: https://github.com/darkreader/darkreader/issues/8789#issuecomment-1114210080
         logWarn('Error occured in handleAdoptedStyleSheets: ', err);
     }

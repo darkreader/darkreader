@@ -1,3 +1,8 @@
+## 4.9.50 (May 1, 2022)
+
+- Fix working in Firefox Nightly 101.
+- Users' fixes for websites.
+
 ## 4.9.48 (Apr 18, 2022)
 
 - Fix PDF inversion when Auto-detect dark theme option was enabled.

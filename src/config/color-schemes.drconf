@@ -60,3 +60,15 @@ LIGHT
 background: #fdf6e3
 text: #586e75
 
+================================
+
+Tokyo Night
+
+DARK
+background: #1a1b26
+text: #a9b1d6
+
+LIGHT
+background: #d5d6db
+text: #343b58
+

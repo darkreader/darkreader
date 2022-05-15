@@ -1,6 +1,7 @@
 ## Unreleased
 
 - Fix CSS imports that contains `url(...)` and ends with `screen`.
+- Send network response to the correct frame in tab.
 
 ## 4.9.50 (May 1, 2022)
 

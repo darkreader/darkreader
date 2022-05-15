@@ -92,7 +92,7 @@ export const cssURLRegex = /url\((('.+?')|(".+?")|([^\)]*?))\)/g;
 export const cssImportRegex = /@import\s*(url\()?(('.+?')|(".+?")|([^\)]*?))\)? ?(screen)?;?/gi;
 
 export function getCSSURLValue(cssURL: string) {
-    return cssURL.replace(/^url\((.*)\)$/, '$1').trim().replace(/^"(.*)"$/, '$1').replace(/^'(.*)'$/, '$1');
+    return cssURL.trim().replace(/^url\((.*)\)$/, '$1').trim().replace(/^"(.*)"$/, '$1').replace(/^'(.*)'$/, '$1');
 }
 
 export function getCSSBaseBath(url: string) {

@@ -1,3 +1,7 @@
+## Unreleased
+
+- Fix CSS imports that contains `url(...)` and ends with `screen`.
+
 ## 4.9.50 (May 1, 2022)
 
 - Fix working in Firefox Nightly 101.

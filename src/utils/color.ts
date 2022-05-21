@@ -1,3 +1,6 @@
+import {evalMath} from './math-eval';
+import {getParenthesesRange} from './text';
+
 export interface RGBA {
     r: number;
     g: number;
@@ -246,15 +249,6 @@ function getSystemColor($color: string) {
     };
 }
 
-// Check if the char is a digit.
-const isCharDigit = (char: string) => char >= '0' && char <= '9';
-
-// Get the amount of digits their are in a number.
-// f(5) => 1
-// f(123) => 3
-// f(912412) => 6
-const getAmountOfDigits = (number: number) => Math.floor(Math.log10(number)) + 1;
-
 // lowerCalcExpression is a helper function that tries to remove `calc(...)`
 // expressions from the given string. It can only lower expressions to a certain
 // degree so we can keep this function easy and simple to understand.
@@ -267,86 +261,20 @@ export function lowerCalcExpression(color: string): string {
         color = color.substring(0, start) + replacement + color.substring(end);
     };
 
-    // Because we're talking about numbers within variables
-    // We assume that the max length of such number is 3.
-    const getNumber = () => {
-        let resultNumber = 0;
-        for (let i = 1; i < 4; i++) {
-            const char = color[searchIndex + i];
-            // If we hit a whitespace that means we hit the end of the number.
-            if (char === ' ') {
-                break;
-            }
-            // Check if the current char is numeric.
-            if (isCharDigit(char)) {
-                // Ensure that the current number is multipled by 10
-                // So that the "first" digit on that number is a 0
-                // Which is going to be filled by the `char`.
-                resultNumber *= 10;
-                resultNumber += Number(char);
-            } else {
-                break;
-            }
-        }
-        const lenDigits = getAmountOfDigits(resultNumber);
-        searchIndex += lenDigits;
-
-        // We've now got the first number, let's try to see if this number
-        // a percentage, which is the currently only supported element type.
-        const possibleType = color[searchIndex + 1];
-        if (possibleType !== '%') {
-            return;
-        }
-        searchIndex++;
-        return resultNumber;
-    };
-
-    while ((searchIndex = color.indexOf('calc(')) !== 0) {
-        const startIndex = searchIndex;
-        searchIndex += 4;
-        // Get the first number
-        const firstNumber = getNumber();
-
-        // No first number? Let's not break this while loop.
-        // And return the current state of color variable.
-        if (!firstNumber) {
+    while ((searchIndex = color.indexOf('calc(')) !== -1) {
+        const range = getParenthesesRange(color, searchIndex);
+        if (!range) {
             break;
         }
 
-        // The char after the xxx% should be a whitespace.
-        if (color[searchIndex + 1] !== ' ') {
-            break;
-        }
-        searchIndex++;
 
-        const operation = color[searchIndex + 1];
-        // Only allow - and +
-        if (operation !== '+' && operation !== '-') {
-            break;
-        }
-        searchIndex++;
+        let slice = color.slice(range.start + 1, range.end - 1);
+        const includesPercentage = slice.includes('%');
+        slice = slice.split('%').join('');
 
-        // The char after the xxx% -/+ should be a whitespace.
-        if (color[searchIndex + 1] !== ' ') {
-            break;
-        }
-        searchIndex++;
+        const output = Math.round(evalMath(slice));
 
-        // Get the second number
-        const secondNumber = getNumber();
-        if (!secondNumber) {
-            break;
-        }
-        // Create the replacement string.
-        let replacement: string;
-        if (operation === '+') {
-            replacement = `${firstNumber + secondNumber}%`;
-        } else {
-            replacement = `${firstNumber - secondNumber}%`;
-        }
-
-        // Replace the string between the indices.
-        replaceBetweenIndices(startIndex, searchIndex + 2, replacement);
+        replaceBetweenIndices(range.start - 4, range.end, output + (includesPercentage ? '%' : ''));
     }
     return color;
 }

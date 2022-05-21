@@ -100,4 +100,15 @@ describe('COLOR PARSING', () => {
         createOrUpdateDynamicTheme(theme, null, false);
         expect(getComputedStyle(container.querySelector('h1')).backgroundImage).toBe('-webkit-linear-gradient(bottom, rgb(24, 26, 27) 15%, rgb(29, 32, 33) 85%)');
     });
+
+    it('should handle complex calc(...) cases', () => {
+        container.innerHTML = multiline(
+            '<style>',
+            '    h1 { background-color: rgb(calc(216.75 + 153 * .15), calc(216.75 + 205 * .15), calc(216.75 + 255 * .15)) }',
+            '</style>',
+            '<h1>Weird color <strong>Power</strong>!</h1>',
+        );
+        createOrUpdateDynamicTheme(theme, null, false);
+        expect(getComputedStyle(container.querySelector('h1')).backgroundColor).toBe('rgb(28, 31, 32)');
+    });
 });

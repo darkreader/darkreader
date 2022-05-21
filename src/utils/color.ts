@@ -257,23 +257,30 @@ export function lowerCalcExpression(color: string): string {
     // the calc(...) expression.
     let searchIndex = 0;
 
+    // Replace the content between two indices.
     const replaceBetweenIndices = (start: number, end: number, replacement: string) => {
         color = color.substring(0, start) + replacement + color.substring(end);
     };
 
+    // Run this code until it doesn't find any `calc(...)`.
     while ((searchIndex = color.indexOf('calc(')) !== -1) {
+        // Get the parantheses ranges of `calc(...)`
         const range = getParenthesesRange(color, searchIndex);
         if (!range) {
             break;
         }
 
-
+        // Get the content between the parentheses.
         let slice = color.slice(range.start + 1, range.end - 1);
+        // Does the content include a percentage?
         const includesPercentage = slice.includes('%');
+        // Remove all percentages.
         slice = slice.split('%').join('');
 
+        // Pass the content to the evalMath library and round it's output.
         const output = Math.round(evalMath(slice));
 
+        // Replace `calc(...)` with the result.
         replaceBetweenIndices(range.start - 4, range.end, output + (includesPercentage ? '%' : ''));
     }
     return color;

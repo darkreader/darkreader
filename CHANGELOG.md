@@ -2,6 +2,7 @@
 
 - Fix CSS imports that contains `url(...)` and ends with `screen`.
 - Send network response to the correct frame in tab.
+- Handle more cases lowering `calc(...)` by using [Shunting Yard algorithm](https://en.wikipedia.org/wiki/Shunting_yard_algorithm).
 
 ## 4.9.50 (May 1, 2022)
 

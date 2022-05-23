@@ -39,6 +39,11 @@ export default class IconManager {
         chrome.browserAction.setBadgeText({text: '!'});
     }
 
+    showBadge(text: string) {
+        chrome.browserAction.setBadgeBackgroundColor({color: '#e96c4c'});
+        chrome.browserAction.setBadgeText({text});
+    }
+
     hideBadge() {
         chrome.browserAction.setBadgeText({text: ''});
     }

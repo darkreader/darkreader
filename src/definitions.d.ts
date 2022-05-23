@@ -188,4 +188,6 @@ export interface News {
     headline: string;
     important: boolean;
     read?: boolean;
+    badge?: string;
+    icon?: string;
 }

@@ -72,12 +72,12 @@ export default class Newsmaker {
     private async getNews() {
         try {
             const response = await fetch(`https://darkreader.github.io/blog/posts.json`, {cache: 'no-cache'});
-            const $news: Array<{id: string; date: string; headline: string; important?: boolean}> = await response.json();
+            const $news: Array<Omit<News, 'read' | 'url'> & {date: string}> = await response.json();
             const readNews = await this.getReadNews();
-            const news: News[] = $news.map(({id, date, headline, important}) => {
-                const url = getBlogPostURL(id);
-                const read = this.isRead(id, readNews);
-                return {id, date, headline, url, important, read};
+            const news: News[] = $news.map((n) => {
+                const url = getBlogPostURL(n.id);
+                const read = this.isRead(n.id, readNews);
+                return {...n, url, read};
             });
             for (let i = 0; i < news.length; i++) {
                 const date = new Date(news[i].date);

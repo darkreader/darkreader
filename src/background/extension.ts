@@ -397,6 +397,11 @@ export class Extension implements ExtensionState {
             return;
         }
 
+        if (latestNews && latestNews.badge && !latestNews.read) {
+            this.icon.showBadge(latestNews.badge);
+            return;
+        }
+
         this.icon.hideBadge();
     }
 

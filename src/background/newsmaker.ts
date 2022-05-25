@@ -103,9 +103,9 @@ export default class Newsmaker {
             }
         });
         if (changed) {
-            this.latest = this.latest.map(({id, date, url, headline, important}) => {
-                const read = this.isRead(id, results);
-                return {id, date, url, headline, important, read};
+            this.latest = this.latest.map((n) => {
+                const read = this.isRead(n.id, results);
+                return {...n, read};
             });
             this.onUpdate(this.latest);
             const obj = {readNews: results};

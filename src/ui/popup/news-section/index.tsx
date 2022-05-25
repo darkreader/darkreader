@@ -15,7 +15,6 @@ function isFresh(n: News) {
 
 function NewsLink(props: {news: News; isSmall?: boolean; onClick: () => void}) {
     const {news} = props;
-    debugger;
     return (
         <a
             href={news.url}

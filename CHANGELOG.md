@@ -1,8 +1,15 @@
-## Unreleased
+## 4.9.51 (May 27, 2022)
 
-- Fix CSS imports that contains `url(...)` and ends with `screen`.
-- Send network response to the correct frame in tab.
-- Handle more cases lowering `calc(...)` by using [Shunting Yard algorithm](https://en.wikipedia.org/wiki/Shunting_yard_algorithm).
+Dynamic mode improvements:
+- Fixed CSS imports that contain `url(...)` and end with `screen`.
+- Send network responses to correct frames in tabs.
+- Improved `calc(...)` color handling by using [Shunting Yard algorithm](https://en.wikipedia.org/wiki/Shunting_yard_algorithm).
+New translations:
+- Malay translation.
+- Telugu translation.
+Other:
+- UI improvements.
+- Users' fixes for websites.
 
 ## 4.9.50 (May 1, 2022)
 

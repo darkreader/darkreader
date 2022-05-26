@@ -69,15 +69,26 @@ export default class Newsmaker {
         ]));
     }
 
+    private async getDisplayedNews(): Promise<string[]> {
+        const sync = await readSyncStorage({displayedNews: []});
+        const local = await readLocalStorage({displayedNews: []});
+        return Array.from(new Set([
+            ...sync ? sync.displayedNews : [],
+            ...local ? local.displayedNews : [],
+        ]));
+    }
+
     private async getNews() {
         try {
             const response = await fetch(`https://darkreader.github.io/blog/posts.json`, {cache: 'no-cache'});
             const $news: Array<Omit<News, 'read' | 'url'> & {date: string}> = await response.json();
             const readNews = await this.getReadNews();
+            const displayedNews = await this.getDisplayedNews();
             const news: News[] = $news.map((n) => {
                 const url = getBlogPostURL(n.id);
-                const read = this.isRead(n.id, readNews);
-                return {...n, url, read};
+                const read = this.wasRead(n.id, readNews);
+                const displayed = this.wasDisplayed(n.id, displayedNews);
+                return {...n, url, read, displayed};
             });
             for (let i = 0; i < news.length; i++) {
                 const date = new Date(news[i].date);
@@ -103,9 +114,9 @@ export default class Newsmaker {
             }
         });
         if (changed) {
-            this.latest = this.latest.map(({id, date, url, headline, important}) => {
-                const read = this.isRead(id, results);
-                return {id, date, url, headline, important, read};
+            this.latest = this.latest.map((n) => {
+                const read = this.wasRead(n.id, results);
+                return {...n, read};
             });
             this.onUpdate(this.latest);
             const obj = {readNews: results};
@@ -115,7 +126,34 @@ export default class Newsmaker {
         }
     }
 
-    isRead(id: string, readNews: string[]) {
+    async markAsDisplayed(...ids: string[]) {
+        const displayedNews = await this.getDisplayedNews();
+        const results = displayedNews.slice();
+        let changed = false;
+        ids.forEach((id) => {
+            if (displayedNews.indexOf(id) < 0) {
+                results.push(id);
+                changed = true;
+            }
+        });
+        if (changed) {
+            this.latest = this.latest.map((n) => {
+                const displayed = this.wasDisplayed(n.id, results);
+                return {...n, displayed};
+            });
+            this.onUpdate(this.latest);
+            const obj = {displayedNews: results};
+            await writeLocalStorage(obj);
+            await writeSyncStorage(obj);
+            await this.stateManager.saveState();
+        }
+    }
+
+    wasRead(id: string, readNews: string[]) {
         return readNews.includes(id);
+    }
+
+    wasDisplayed(id: string, displayedNews: string[]) {
+        return displayedNews.includes(id);
     }
 }

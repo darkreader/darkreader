@@ -8,6 +8,7 @@ export interface ExtensionAdapter {
     setTheme: (theme: Partial<FilterConfig>) => void;
     setShortcut: ({command, shortcut}: {command: string; shortcut: string}) => void;
     markNewsAsRead: (ids: string[]) => Promise<void>;
+    markNewsAsDisplayed: (ids: string[]) => Promise<void>;
     toggleActiveTab: () => void;
     onPopupOpen: () => void;
     loadConfig: (options: {local: boolean}) => Promise<void>;
@@ -115,6 +116,10 @@ export default class Messenger {
             }
             case MessageType.UI_MARK_NEWS_AS_READ: {
                 this.adapter.markNewsAsRead(data);
+                break;
+            }
+            case MessageType.UI_MARK_NEWS_AS_DISPLAYED: {
+                this.adapter.markNewsAsDisplayed(data);
                 break;
             }
             case MessageType.UI_LOAD_CONFIG: {

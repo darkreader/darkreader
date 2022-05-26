@@ -7,6 +7,7 @@ export const MessageType = {
     UI_SET_SHORTCUT: 'ui-set-shortcut',
     UI_TOGGLE_ACTIVE_TAB: 'ui-toggle-active-tab',
     UI_MARK_NEWS_AS_READ: 'ui-mark-news-as-read',
+    UI_MARK_NEWS_AS_DISPLAYED: 'ui-mark-news-as-displayed',
     UI_LOAD_CONFIG: 'ui-load-config',
     UI_APPLY_DEV_DYNAMIC_THEME_FIXES: 'ui-apply-dev-dynamic-theme-fixes',
     UI_RESET_DEV_DYNAMIC_THEME_FIXES: 'ui-reset-dev-dynamic-theme-fixes',

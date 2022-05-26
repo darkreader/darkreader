@@ -31,6 +31,7 @@ export interface ExtensionActions {
     setShortcut(command: string, shortcut: string): void;
     toggleActiveTab(): void;
     markNewsAsRead(ids: string[]): void;
+    markNewsAsDisplayed(ids: string[]): void;
     loadConfig(options: {local: boolean}): void;
     applyDevDynamicThemeFixes(text: string): Promise<void>;
     resetDevDynamicThemeFixes(): void;
@@ -186,8 +187,8 @@ export interface News {
     date: string;
     url: string;
     headline: string;
-    important: boolean;
     read?: boolean;
+    displayed?: boolean;
     badge?: string;
     icon?: string;
 }

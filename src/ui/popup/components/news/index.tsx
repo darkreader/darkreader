@@ -36,7 +36,6 @@ export function NewsGroup({news, expanded, onNewsOpen, onClose}: NewsProps) {
                             class={{
                                 'news__event': true,
                                 'news__event--unread': !event.read,
-                                'news__event--important': event.important,
                                 'news__event--has-icon': event.icon,
                             }}
                         >

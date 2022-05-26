@@ -78,6 +78,10 @@ export default class Connector implements ExtensionActions {
         chrome.runtime.sendMessage<Message>({type: MessageType.UI_MARK_NEWS_AS_READ, data: ids});
     }
 
+    markNewsAsDisplayed(ids: string[]) {
+        chrome.runtime.sendMessage<Message>({type: MessageType.UI_MARK_NEWS_AS_DISPLAYED, data: ids});
+    }
+
     loadConfig(options: {local: boolean}) {
         chrome.runtime.sendMessage<Message>({type: MessageType.UI_LOAD_CONFIG, data: options});
     }

@@ -250,6 +250,7 @@ export class Extension implements ExtensionState {
             setShortcut: ({command, shortcut}) => this.setShortcut(command, shortcut),
             toggleActiveTab: async () => this.toggleActiveTab(),
             markNewsAsRead: async (ids) => await this.news.markAsRead(...ids),
+            markNewsAsDisplayed: async (ids) => await this.news.markAsDisplayed(...ids),
             onPopupOpen: () => this.popupOpeningListener && this.popupOpeningListener(),
             loadConfig: async (options) => await this.config.load(options),
             applyDevDynamicThemeFixes: (text) => this.devtools.applyDynamicThemeFixes(text),
@@ -392,12 +393,7 @@ export class Extension implements ExtensionState {
         }
 
         const latestNews = news.length > 0 && news[0];
-        if (latestNews && latestNews.important && !latestNews.read) {
-            this.icon.showImportantBadge();
-            return;
-        }
-
-        if (latestNews && latestNews.badge && !latestNews.read) {
+        if (latestNews && latestNews.badge && !latestNews.read && !latestNews.displayed) {
             this.icon.showBadge(latestNews.badge);
             return;
         }

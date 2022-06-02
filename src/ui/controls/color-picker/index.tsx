@@ -42,11 +42,16 @@ function ColorPicker(props: ColorPickerProps) {
     }
 
     function onColorChange(rawValue: string) {
-        const value = rawValue.trim();
+        let value = rawValue.trim();
         if (isValidColor(value)) {
             props.onChange(value);
         } else {
-            props.onChange(props.color);
+	    value = getComputedStyle(document.documentElement).getPropertyValue(value).trim();
+	    if (isValidColor(value)) {
+	        props.onChange(value);
+            } else {
+                props.onChange(props.color);
+            }
         }
     }
 

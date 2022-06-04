@@ -644,7 +644,7 @@ function parseRawValue(color: string) {
         splitted.forEach((number) => {
             resultInRGB += `${number.trim()}, `;
         });
-        resultInRGB = resultInRGB.substr(0, resultInRGB.length - 2);
+        resultInRGB = resultInRGB.substring(0, resultInRGB.length - 2);
         resultInRGB += ')';
         return {isRaw: true, color: resultInRGB};
     }

@@ -58,5 +58,5 @@ export const isCSSColorSchemePropSupported = (() => {
     }
     const el = document.createElement('div');
     el.setAttribute('style', 'color-scheme: dark');
-    return el.style.colorScheme === 'dark';
+    return el.style && el.style.colorScheme === 'dark';
 })();

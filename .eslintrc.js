@@ -1,4 +1,10 @@
-module.exports = {
+/** @type {import('eslint').Linter.Config} */
+const config = {overrides: []};
+
+// Source code (TS, JSX, JS)
+config.overrides.push({
+    files: ['{src,tasks,tests}/**/*.{ts,tsx,js,jsx}', '.*.js', 'index.d.ts'],
+    excludedFiles: ['darkreader.js'],
     parser: '@typescript-eslint/parser',
     plugins: ['@typescript-eslint', 'local'],
     extends: ['plugin:@typescript-eslint/recommended', 'plugin:import/recommended', 'plugin:import/typescript'],
@@ -163,4 +169,61 @@ module.exports = {
             }
         },
     ],
-};
+});
+
+// Bundled JS
+
+config.overrides.push({
+    files: ['darkreader.js', 'build/debug/chrome/**/*.js'],
+    env: {browser: true},
+    extends: ['plugin:compat/recommended'],
+    parserOptions: {
+        ecmaVersion: 2019,
+        sourceType: 'module'
+    },
+    settings: {
+        polyfills: [
+            'navigator.deviceMemory',
+        ],
+    },
+    overrides: [
+
+        // API (modern clients)
+        {
+            files: ['darkreader.js'],
+            rules: {
+
+                // Compatibility check
+                'compat/compat': ['error', [
+                    '>0.5% and supports es5 and supports promises and supports url',
+                    'not Explorer > 0',
+                ].join(', ')]
+            },
+        },
+
+        // Extension (non-mobile browsers based on Firefox or Chromium)
+        {
+            files: ['build/debug/chrome/**/*.js'],
+            rules: {
+
+                // Compatibility check
+                'compat/compat': ['error', [
+                    '> 0.5% and supports es5',
+                    'Firefox ESR',
+                    'last 2 FirefoxAndroid versions',
+                    'not Explorer > 0',
+                    'not Safari > 0',
+                    'not iOS > 0',
+                    'not ChromeAndroid > 0',
+                    'not OperaMini all',
+                ].join(', ')]
+            },
+        },
+    ],
+});
+
+// Ignore temporarily since it's taking forever.
+// It seems to be importing typescript or something.
+config.ignorePatterns = ['tests/project/tsconf.tests.ts'];
+
+module.exports = config;

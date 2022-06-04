@@ -77,9 +77,15 @@ export function injectProxy(enableStyleSheetsProxy: boolean) {
         const getCurrentValue = () => {
             const docSheets = documentStyleSheetsDescriptor.get.call(this);
 
-            return Object.setPrototypeOf([...docSheets].filter((styleSheet: CSSStyleSheet) => {
+            const filteredSheets = [...docSheets].filter((styleSheet: CSSStyleSheet) => {
                 return !(styleSheet.ownerNode as HTMLElement).classList.contains('darkreader');
-            }), StyleSheetList.prototype);
+            });
+
+            (filteredSheets as any).item = (item: number) => {
+                return filteredSheets[item];
+            };
+
+            return Object.setPrototypeOf(filteredSheets, StyleSheetList.prototype);
         };
 
         let elements = getCurrentValue();
@@ -116,7 +122,7 @@ export function injectProxy(enableStyleSheetsProxy: boolean) {
         // current situation of the DOM. Instead of a static list.
         const nodeListBehavior: ProxyHandler<NodeListOf<HTMLElement>> = {
             get: function (_: NodeListOf<HTMLElement>, property: string) {
-                return getCurrentElementValue()[Number(property)];
+                return getCurrentElementValue()[Number(property) || property];
             }
         };
         elements = new Proxy(elements, nodeListBehavior);

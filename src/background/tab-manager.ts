@@ -28,6 +28,7 @@ interface FrameInfo {
     url?: string;
     state: DocumentState;
     timestamp: number;
+    darkThemeDetected?: boolean;
 }
 
 interface TabManagerState {
@@ -174,12 +175,16 @@ export default class TabManager {
                     this.stateManager.saveState();
                     break;
                 }
+                case MessageType.CS_DARK_THEME_DETECTED: {
+                    this.tabs[sender.tab.id][sender.frameId].darkThemeDetected = true;
+                    break;
+                }
 
                 case MessageType.CS_FETCH: {
                     // Using custom response due to Chrome and Firefox incompatibility
                     // Sometimes fetch error behaves like synchronous and sends `undefined`
                     const id = message.id;
-                    const sendResponse = (response: Partial<Message>) => chrome.tabs.sendMessage<Message>(sender.tab.id, {type: MessageType.BG_FETCH_RESPONSE, id, ...response});
+                    const sendResponse = (response: Partial<Message>) => chrome.tabs.sendMessage<Message>(sender.tab.id, {type: MessageType.BG_FETCH_RESPONSE, id, ...response}, {frameId: sender.frameId});
                     if (isThunderbird) {
                         // In thunderbird some CSS is loaded on a chrome:// URL.
                         // Thunderbird restricted Add-ons to load those URL's.
@@ -292,6 +297,11 @@ export default class TabManager {
     async canAccessActiveTab(): Promise<boolean> {
         const tab = await this.getActiveTab();
         return Boolean(this.tabs[tab.id]);
+    }
+
+    async isActiveTabDarkThemeDetected() {
+        const tab = await this.getActiveTab();
+        return this.tabs[tab.id] && this.tabs[tab.id][0] && this.tabs[tab.id][0].darkThemeDetected;
     }
 
     async getActiveTabURL() {

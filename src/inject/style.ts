@@ -7,6 +7,7 @@ export function createOrUpdateStyle(css: string, type: string) {
             document.documentElement.setAttribute('data-darkreader-mode', type);
             const style = document.createElement('style');
             style.id = 'dark-reader-style';
+            style.classList.add('darkreader');
             style.type = 'text/css';
             style.textContent = css;
             target.appendChild(style);

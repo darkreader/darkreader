@@ -1,9 +1,8 @@
 // @ts-check
-const globby = require('globby');
 const prettier = require('prettier');
 const {getDestDir, PLATFORM} = require('./paths');
 const {createTask} = require('./task');
-const {log, readFile, writeFile} = require('./utils');
+const {log, readFile, writeFile, getPaths} = require('./utils');
 
 /** @type {import('prettier').Options} */
 const options = {
@@ -21,7 +20,7 @@ const extensions = ['html', 'css', 'js'];
 
 async function codeStyle({debug}) {
     const dir = getDestDir({debug, platform: PLATFORM.CHROME});
-    const files = await globby(extensions.map((ext) => `${dir}/**/*.${ext}`));
+    const files = await getPaths(extensions.map((ext) => `${dir}/**/*.${ext}`));
     for (const file of files) {
         const code = await readFile(file);
         const formatted = prettier.format(code, {

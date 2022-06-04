@@ -12,7 +12,6 @@ export function makeChromiumHappy() {
 
             // Messenger
             MessageType.UI_GET_DATA,
-            MessageType.UI_GET_ACTIVE_TAB_INFO,
             MessageType.UI_APPLY_DEV_DYNAMIC_THEME_FIXES,
             MessageType.UI_APPLY_DEV_INVERSION_FIXES,
             MessageType.UI_APPLY_DEV_STATIC_THEMES,

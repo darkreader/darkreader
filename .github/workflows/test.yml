@@ -1,4 +1,4 @@
-name: Run tests on Pull Request or Push
+name: Run config tests on Pull Request or Push
 on:
   push:
     branches:
@@ -42,6 +42,3 @@ jobs:
 
       - name: Run test against code
         run: npm run test:ci
-
-      - name: Lint code for code-style errors
-        run: npm run lint

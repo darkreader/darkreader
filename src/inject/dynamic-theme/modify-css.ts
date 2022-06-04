@@ -93,13 +93,11 @@ export function getModifiedUserAgentStyle(theme: Theme, isIFrame: boolean, style
         lines.push('html {');
         lines.push(`    background-color: ${modifyBackgroundColor({r: 255, g: 255, b: 255}, theme)} !important;`);
         lines.push('}');
-
-        // Apparantly using this on iframe's can cause issues with the background color that would be applied.
-        if (isCSSColorSchemePropSupported) {
-            lines.push('html {');
-            lines.push(`    color-scheme: ${theme.mode === 1 ? 'dark' : 'dark light'} !important;`);
-            lines.push('}');
-        }
+    }
+    if (isCSSColorSchemePropSupported) {
+        lines.push('html {');
+        lines.push(`    color-scheme: ${theme.mode === 1 ? 'dark' : 'dark light'} !important;`);
+        lines.push('}');
     }
     const bgSelectors = joinSelectors(isIFrame ? '' : 'html, body', styleSystemControls ? 'input, textarea, select, button' : '');
     if (bgSelectors) {
@@ -306,15 +304,11 @@ function shouldIgnoreImage(selectorText: string, selectors: string[]) {
 
 interface bgImageMatches {
     type: 'url' | 'gradient';
-    urlInfo?: {
-        index: number;
-        match: string;
-    };
-    gradientInfo?: {
-        type: string;
-        content: string;
-        hasComma: boolean;
-    };
+    index: number;
+    match: string;
+    offset: number;
+    typeGradient?: string;
+    hasComma?: boolean;
 }
 
 export function getBgImageModifier(
@@ -341,18 +335,17 @@ export function getBgImageModifier(
         };
 
         const matches: bgImageMatches[] =
-            (getIndices(urls).map((i) => ({type: 'url', urlInfo: i})) as bgImageMatches[])
-                .concat(gradients.map((i) => ({type: 'gradient', gradientInfo: i})));
+            (gradients.map((i) => ({type: 'gradient', ...i})) as bgImageMatches[])
+                .concat(getIndices(urls).map((i) => ({type: 'url', offset: 0, ...i})))
+                .sort((a, b) => a.index > b.index ? 1 : -1);
 
         const getGradientModifier = (gradient: parsedGradient) => {
-            const type = gradient.type;
-            const content = gradient.content;
-            const hasComma = gradient.hasComma;
+            const {typeGradient, match, hasComma} = gradient;
 
             const partsRegex = /([^\(\),]+(\([^\(\)]*(\([^\(\)]*\)*[^\(\)]*)?\))?[^\(\),]*),?/g;
             const colorStopRegex = /^(from|color-stop|to)\(([^\(\)]*?,\s*)?(.*?)\)$/;
 
-            const parts = getMatches(partsRegex, content, 1).map((part) => {
+            const parts = getMatches(partsRegex, match, 1).map((part) => {
                 part = part.trim();
 
                 let rgb = tryParseColor(part);
@@ -378,7 +371,7 @@ export function getBgImageModifier(
             });
 
             return (filter: FilterConfig) => {
-                return `${type}(${parts.map((modify) => modify(filter)).join(', ')})${hasComma ? ', ' : ''}`;
+                return `${typeGradient}(${parts.map((modify) => modify(filter)).join(', ')})${hasComma ? ', ' : ''}`;
             };
         };
 
@@ -460,50 +453,33 @@ export function getBgImageModifier(
 
         const modifiers: CSSValueModifier[] = [];
 
-        let index = 0;
-        matches.forEach(({type, urlInfo, gradientInfo}, i) => {
-            if (type === 'url') {
-                const match = urlInfo.match;
-                const matchStart = urlInfo.index;
-                const prefixStart = index;
-                const matchEnd = matchStart + match.length;
+        let matchIndex = 0;
+        matches.forEach(({type, match, index, typeGradient, hasComma, offset}, i) => {
+            const matchStart = index;
+            const prefixStart = matchIndex;
+            const matchEnd = matchStart + match.length + offset;
+            matchIndex = matchEnd;
 
-                index = matchEnd;
-                modifiers.push(() => value.substring(prefixStart, matchStart));
+            // Make sure we still push all the unrelated content between gradients and URL's.
+            prefixStart !== matchStart && modifiers.push(() => value.substring(prefixStart, matchStart));
+
+            if (type === 'url') {
                 modifiers.push(getURLModifier(match));
-                if (i === matches.length - 1) {
-                    modifiers.push(() => value.substring(matchEnd));
-                }
             } else if (type === 'gradient') {
-                modifiers.push(getGradientModifier(gradientInfo));
+                modifiers.push(getGradientModifier({match, index, typeGradient, hasComma, offset}));
+            }
+
+            if (i === matches.length - 1) {
+                modifiers.push(() => value.substring(matchEnd));
             }
         });
 
         return (filter: FilterConfig) => {
             const results = modifiers.filter(Boolean).map((modify) => modify(filter));
             if (results.some((r) => r instanceof Promise)) {
-                return Promise.all(results)
-                    .then((asyncResults) => {
-                        let result = '';
-                        let lastWasURL = false;
-                        // Go trough asyncResults and add seperators between URL's and gradients where needed.
-                        asyncResults.forEach((asyncResult) => {
-                            if (lastWasURL) {
-                                // Only add a seperator when asyncResult isn't empty.
-                                if (asyncResult) {
-                                    result += ', ';
-                                }
-                                lastWasURL = false;
-                            }
-
-                            result += asyncResult;
-
-                            if (asyncResult.startsWith('url(')) {
-                                lastWasURL = true;
-                            }
-                        });
-                        return result;
-                    });
+                return Promise.all(results).then((asyncResults) => {
+                    return asyncResults.filter(Boolean).join('');
+                });
             }
             return results.join('');
         };

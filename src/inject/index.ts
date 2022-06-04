@@ -1,7 +1,8 @@
 import {createOrUpdateStyle, removeStyle} from './style';
 import {createOrUpdateSVGFilter, removeSVGFilter} from './svg-filter';
+import {runDarkThemeDetector, stopDarkThemeDetector} from './detector';
 import {createOrUpdateDynamicTheme, removeDynamicTheme, cleanDynamicThemeCache} from './dynamic-theme';
-import {logInfo, logWarn} from '../utils/log';
+import {logInfo, logWarn, logInfoCollapsed} from '../utils/log';
 import {watchForColorSchemeChange} from './utils/watch-color-scheme';
 import {collectCSS} from './dynamic-theme/css-collection';
 import type {Message} from '../definitions';
@@ -22,6 +23,7 @@ function cleanup() {
     removeEventListener('freeze', onFreeze);
     removeEventListener('resume', onResume);
     cleanDynamicThemeCache();
+    stopDarkThemeDetector();
     if (colorSchemeWatcher) {
         colorSchemeWatcher.disconnect();
         colorSchemeWatcher = null;
@@ -54,26 +56,51 @@ function sendMessage(message: Message) {
 }
 
 function onMessage({type, data}: Message) {
-    logInfo('onMessage', type, data);
+    logInfoCollapsed(`onMessage[${type}]`, data);
     switch (type) {
         case MessageType.BG_ADD_CSS_FILTER:
         case MessageType.BG_ADD_STATIC_THEME: {
-            const css = data;
+            const {css, detectDarkTheme} = data;
             removeDynamicTheme();
             createOrUpdateStyle(css, type === MessageType.BG_ADD_STATIC_THEME ? 'static' : 'filter');
+            if (detectDarkTheme) {
+                runDarkThemeDetector((hasDarkTheme) => {
+                    if (hasDarkTheme) {
+                        removeStyle();
+                        onDarkThemeDetected();
+                    }
+                });
+            }
             break;
         }
         case MessageType.BG_ADD_SVG_FILTER: {
-            const {css, svgMatrix, svgReverseMatrix} = data;
+            const {css, svgMatrix, svgReverseMatrix, detectDarkTheme} = data;
             removeDynamicTheme();
             createOrUpdateSVGFilter(svgMatrix, svgReverseMatrix);
             createOrUpdateStyle(css, 'filter');
+            if (detectDarkTheme) {
+                runDarkThemeDetector((hasDarkTheme) => {
+                    if (hasDarkTheme) {
+                        removeStyle();
+                        removeSVGFilter();
+                        onDarkThemeDetected();
+                    }
+                });
+            }
             break;
         }
         case MessageType.BG_ADD_DYNAMIC_THEME: {
-            const {filter, fixes, isIFrame} = data;
+            const {theme, fixes, isIFrame, detectDarkTheme} = data;
             removeStyle();
-            createOrUpdateDynamicTheme(filter, fixes, isIFrame);
+            createOrUpdateDynamicTheme(theme, fixes, isIFrame);
+            if (detectDarkTheme) {
+                runDarkThemeDetector((hasDarkTheme) => {
+                    if (hasDarkTheme) {
+                        removeDynamicTheme();
+                        onDarkThemeDetected();
+                    }
+                });
+            }
             break;
         }
         case MessageType.BG_EXPORT_CSS: {
@@ -85,6 +112,7 @@ function onMessage({type, data}: Message) {
             removeStyle();
             removeSVGFilter();
             removeDynamicTheme();
+            stopDarkThemeDetector();
             break;
         }
         case MessageType.BG_RELOAD:
@@ -109,6 +137,10 @@ function onFreeze() {
 
 function onResume() {
     sendMessage({type: MessageType.CS_FRAME_RESUME});
+}
+
+function onDarkThemeDetected() {
+    sendMessage({type: MessageType.CS_DARK_THEME_DETECTED});
 }
 
 // Thunderbird don't has "tabs", and emails aren't 'frozen' or 'cached'.

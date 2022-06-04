@@ -28,21 +28,21 @@ function getThemeKey(theme: Theme) {
 
 const asyncQueue = createAsyncTasksQueue();
 
+interface ModifySheetOptions {
+    sourceCSSRules: CSSRuleList;
+    theme: Theme;
+    ignoreImageAnalysis: string[];
+    force: boolean;
+    prepareSheet: () => CSSStyleSheet;
+    isAsyncCancelled: () => boolean;
+}
+
 export function createStyleSheetModifier() {
     let renderId = 0;
     const rulesTextCache = new Set<string>();
     const rulesModCache = new Map<string, ModifiableCSSRule>();
     const varTypeChangeCleaners = new Set<() => void>();
     let prevFilterKey: string = null;
-    interface ModifySheetOptions {
-        sourceCSSRules: CSSRuleList;
-        theme: Theme;
-        ignoreImageAnalysis: string[];
-        force: boolean;
-        prepareSheet: () => CSSStyleSheet;
-        isAsyncCancelled: () => boolean;
-    }
-
     let hasNonLoadedLink = false;
     let wasRebuilt = false;
     function shouldRebuildStyle() {
@@ -69,7 +69,7 @@ export function createStyleSheetModifier() {
 
             notFoundCacheKeys.delete(cssText);
             if (rule.parentRule instanceof CSSMediaRule) {
-                cssText += `;${ (rule.parentRule as CSSMediaRule).media.mediaText}`;
+                cssText += `;${(rule.parentRule as CSSMediaRule).media.mediaText}`;
             }
             if (!rulesTextCache.has(cssText)) {
                 rulesTextCache.add(cssText);

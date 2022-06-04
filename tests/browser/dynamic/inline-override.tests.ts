@@ -1,4 +1,4 @@
-import {multiline} from '../../test-utils';
+import {multiline} from '../../support/test-utils';
 
 describe('Inline style override', () => {
     const inlineStyleMarkup = multiline(

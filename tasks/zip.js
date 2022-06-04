@@ -1,20 +1,23 @@
+// @ts-check
 const fs = require('fs');
-const globby = require('globby');
 const yazl = require('yazl');
 const {getDestDir, PLATFORM} = require('./paths');
 const {createTask} = require('./task');
+const {getPaths} = require('./utils');
 
 function archiveFiles({files, dest, cwd}) {
     return new Promise((resolve) => {
         const archive = new yazl.ZipFile();
         files.forEach((file) => archive.addFile(file, file.startsWith(`${cwd}/`) ? file.substring(cwd.length + 1) : file));
-        archive.outputStream.pipe(fs.createWriteStream(dest)).on('close', () => resolve());
+        /** @type {any} */
+        const writeStream = fs.createWriteStream(dest);
+        archive.outputStream.pipe(writeStream).on('close', () => resolve());
         archive.end();
     });
 }
 
 async function archiveDirectory({dir, dest}) {
-    const files = await globby(`${dir}/**/*.*`);
+    const files = await getPaths(`${dir}/**/*.*`);
     await archiveFiles({files, dest, cwd: dir});
 }
 

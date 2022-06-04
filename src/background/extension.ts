@@ -153,7 +153,11 @@ export class Extension implements ExtensionState {
         this.autoState = state;
 
         if (nextCheck) {
-            chrome.alarms.create(Extension.ALARM_NAME, {when: nextCheck});
+            if (nextCheck < Date.now()) {
+                logWarn(`Alarm is set in the past: ${nextCheck}. The time is: ${new Date()}. ISO: ${(new Date()).toISOString()}`);
+            } else {
+                chrome.alarms.create(Extension.ALARM_NAME, {when: nextCheck});
+            }
         }
     }
 
@@ -241,21 +245,12 @@ export class Extension implements ExtensionState {
             collect: async () => {
                 return await this.collectData();
             },
-            getActiveTabInfo: async () => {
-                if (!this.user.settings) {
-                    await this.user.loadSettings();
-                }
-                await this.stateManager.loadState();
-                const url = await this.tabs.getActiveTabURL();
-                const info = this.getURLInfo(url);
-                info.isInjected = await this.tabs.canAccessActiveTab();
-                return info;
-            },
             changeSettings: (settings) => this.changeSettings(settings),
             setTheme: (theme) => this.setTheme(theme),
             setShortcut: ({command, shortcut}) => this.setShortcut(command, shortcut),
-            toggleURL: (url) => this.toggleURL(url),
+            toggleActiveTab: async () => this.toggleActiveTab(),
             markNewsAsRead: async (ids) => await this.news.markAsRead(...ids),
+            markNewsAsDisplayed: async (ids) => await this.news.markAsDisplayed(...ids),
             onPopupOpen: () => this.popupOpeningListener && this.popupOpeningListener(),
             loadConfig: async (options) => await this.config.load(options),
             applyDevDynamicThemeFixes: (text) => this.devtools.applyDynamicThemeFixes(text),
@@ -286,7 +281,7 @@ export class Extension implements ExtensionState {
                 if (isPDF(url)) {
                     this.changeSettings({enableForPDF: !this.user.settings.enableForPDF});
                 } else {
-                    this.toggleURL(url);
+                    this.toggleActiveTab();
                 }
                 break;
             case 'switchEngine': {
@@ -374,7 +369,22 @@ export class Extension implements ExtensionState {
                 hasCustomFilterFixes: await this.devtools.hasCustomFilterFixes(),
                 hasCustomStaticFixes: await this.devtools.hasCustomStaticFixes(),
             },
+            activeTab: await this.getActiveTabInfo(),
         };
+    }
+
+    private async getActiveTabInfo() {
+        if (!this.user.settings) {
+            await this.user.loadSettings();
+        }
+        await this.stateManager.loadState();
+        const url = await this.tabs.getActiveTabURL();
+        const info = this.getURLInfo(url);
+        info.isInjected = await this.tabs.canAccessActiveTab();
+        if (this.user.settings.detectDarkTheme) {
+            info.isDarkThemeDetected = await this.tabs.isActiveTabDarkThemeDetected();
+        }
+        return info;
     }
 
     private onNewsUpdate(news: News[]) {
@@ -383,8 +393,8 @@ export class Extension implements ExtensionState {
         }
 
         const latestNews = news.length > 0 && news[0];
-        if (latestNews && latestNews.important && !latestNews.read) {
-            this.icon.showImportantBadge();
+        if (latestNews && latestNews.badge && !latestNews.read && !latestNews.displayed) {
+            this.icon.showBadge(latestNews.badge);
             return;
         }
 
@@ -498,32 +508,33 @@ export class Extension implements ExtensionState {
         this.messenger.reportChanges(info);
     }
 
-    toggleURL(url: string) {
+    async toggleActiveTab() {
+        const settings = this.user.settings;
+        const tab = await this.getActiveTabInfo();
+        const {url} = tab;
         const isInDarkList = isURLInList(url, this.config.DARK_SITES);
-        const siteList = isInDarkList ?
-            this.user.settings.siteListEnabled.slice() :
-            this.user.settings.siteList.slice();
-        const pattern = getURLHostOrProtocol(url);
-        const index = siteList.indexOf(pattern);
-        if (index < 0) {
-            siteList.push(pattern);
-        } else {
-            siteList.splice(index, 1);
-        }
-        if (isInDarkList) {
-            this.changeSettings({siteListEnabled: siteList});
-        } else {
-            this.changeSettings({siteList});
-        }
-    }
+        const host = getURLHostOrProtocol(url);
 
-    /**
-     * Adds host name of last focused tab
-     * into Sites List (or removes).
-     */
-    async toggleCurrentSite() {
-        const url = await this.tabs.getActiveTabURL();
-        this.toggleURL(url);
+        function getToggledList(sourceList: string[]) {
+            const list = sourceList.slice();
+            const index = list.indexOf(host);
+            if (index < 0) {
+                list.push(host);
+            } else {
+                list.splice(index, 1);
+            }
+            return list;
+        }
+
+        const darkThemeDetected = !settings.applyToListedOnly && settings.detectDarkTheme && tab.isDarkThemeDetected;
+        if (isInDarkList || darkThemeDetected || settings.siteListEnabled.includes(host)) {
+            const toggledList = getToggledList(settings.siteListEnabled);
+            this.changeSettings({siteListEnabled: toggledList});
+            return;
+        }
+
+        const toggledList = getToggledList(settings.siteList);
+        this.changeSettings({siteList: toggledList});
     }
 
     //------------------------------------
@@ -580,20 +591,24 @@ export class Extension implements ExtensionState {
             url,
             isInDarkList,
             isProtected,
-            isInjected: null
+            isInjected: null,
+            isDarkThemeDetected: null,
         };
     }
 
     private getTabMessage = (url: string, frameURL: string): TabData => {
+        const settings = this.user.settings;
         const urlInfo = this.getURLInfo(url);
-        if (this.isExtensionSwitchedOn() && isURLEnabled(url, this.user.settings, urlInfo)) {
-            const custom = this.user.settings.customThemes.find(({url: urlList}) => isURLInList(url, urlList));
-            const preset = custom ? null : this.user.settings.presets.find(({urls}) => isURLInList(url, urls));
-            let theme = custom ? custom.theme : preset ? preset.theme : this.user.settings.theme;
+        if (this.isExtensionSwitchedOn() && isURLEnabled(url, settings, urlInfo)) {
+            const custom = settings.customThemes.find(({url: urlList}) => isURLInList(url, urlList));
+            const preset = custom ? null : settings.presets.find(({urls}) => isURLInList(url, urls));
+            let theme = custom ? custom.theme : preset ? preset.theme : settings.theme;
             if (this.autoState === 'scheme-dark' || this.autoState === 'scheme-light') {
                 const mode = this.autoState === 'scheme-dark' ? 1 : 0;
                 theme = {...theme, mode};
             }
+            const isIFrame = frameURL != null;
+            const detectDarkTheme = !isIFrame && settings.detectDarkTheme && !isURLInList(url, settings.siteListEnabled) && !isPDF(url);
 
             logInfo(`Creating CSS for url: ${url}`);
             logInfo(`Custom theme ${custom ? 'was found' : 'was not found'}, Preset theme ${preset ? 'was found' : 'was not found'}
@@ -602,14 +617,20 @@ export class Extension implements ExtensionState {
                 case ThemeEngines.cssFilter: {
                     return {
                         type: MessageType.BG_ADD_CSS_FILTER,
-                        data: createCSSFilterStylesheet(theme, url, frameURL, this.config.INVERSION_FIXES_RAW, this.config.INVERSION_FIXES_INDEX),
+                        data: {
+                            css: createCSSFilterStylesheet(theme, url, frameURL, this.config.INVERSION_FIXES_RAW, this.config.INVERSION_FIXES_INDEX),
+                            detectDarkTheme,
+                        },
                     };
                 }
                 case ThemeEngines.svgFilter: {
                     if (isFirefox) {
                         return {
                             type: MessageType.BG_ADD_CSS_FILTER,
-                            data: createSVGFilterStylesheet(theme, url, frameURL, this.config.INVERSION_FIXES_RAW, this.config.INVERSION_FIXES_INDEX),
+                            data: {
+                                css: createSVGFilterStylesheet(theme, url, frameURL, this.config.INVERSION_FIXES_RAW, this.config.INVERSION_FIXES_INDEX),
+                                detectDarkTheme,
+                            },
                         };
                     }
                     return {
@@ -618,25 +639,31 @@ export class Extension implements ExtensionState {
                             css: createSVGFilterStylesheet(theme, url, frameURL, this.config.INVERSION_FIXES_RAW, this.config.INVERSION_FIXES_INDEX),
                             svgMatrix: getSVGFilterMatrixValue(theme),
                             svgReverseMatrix: getSVGReverseFilterMatrixValue(),
+                            detectDarkTheme,
                         },
                     };
                 }
                 case ThemeEngines.staticTheme: {
                     return {
                         type: MessageType.BG_ADD_STATIC_THEME,
-                        data: theme.stylesheet && theme.stylesheet.trim() ?
-                            theme.stylesheet :
-                            createStaticStylesheet(theme, url, frameURL, this.config.STATIC_THEMES_RAW, this.config.STATIC_THEMES_INDEX),
+                        data: {
+                            css: theme.stylesheet && theme.stylesheet.trim() ?
+                                theme.stylesheet :
+                                createStaticStylesheet(theme, url, frameURL, this.config.STATIC_THEMES_RAW, this.config.STATIC_THEMES_INDEX),
+                            detectDarkTheme: settings.detectDarkTheme,
+                        },
                     };
                 }
                 case ThemeEngines.dynamicTheme: {
-                    const filter = {...theme};
-                    delete filter.engine;
                     const fixes = getDynamicThemeFixesFor(url, frameURL, this.config.DYNAMIC_THEME_FIXES_RAW, this.config.DYNAMIC_THEME_FIXES_INDEX, this.user.settings.enableForPDF);
-                    const isIFrame = frameURL != null;
                     return {
                         type: MessageType.BG_ADD_DYNAMIC_THEME,
-                        data: {filter, fixes, isIFrame},
+                        data: {
+                            theme,
+                            fixes,
+                            isIFrame,
+                            detectDarkTheme,
+                        },
                     };
                 }
                 default: {

@@ -4,10 +4,10 @@ import CustomSettingsToggle from '../custom-settings-toggle';
 import ModeToggle from './mode-toggle';
 import {getLocalMessage} from '../../../../utils/locales';
 import {isURLInList} from '../../../../utils/url';
-import type {ExtWrapper, TabInfo, FilterConfig} from '../../../../definitions';
+import type {ExtWrapper, FilterConfig} from '../../../../definitions';
 
-export default function FilterSettings({data, actions, tab}: ExtWrapper & {tab: TabInfo}) {
-    const custom = data.settings.customThemes.find(({url}) => isURLInList(tab.url, url));
+export default function FilterSettings({data, actions}: ExtWrapper) {
+    const custom = data.settings.customThemes.find(({url}) => isURLInList(data.activeTab.url, url));
     const filterConfig = custom ? custom.theme : data.settings.theme;
 
     function setConfig(config: Partial<FilterConfig>) {
@@ -74,7 +74,7 @@ export default function FilterSettings({data, actions, tab}: ExtWrapper & {tab: 
             {contrast}
             {sepia}
             {grayscale}
-            <CustomSettingsToggle data={data} tab={tab} actions={actions} />
+            <CustomSettingsToggle data={data} actions={actions} />
         </section>
     );
 }

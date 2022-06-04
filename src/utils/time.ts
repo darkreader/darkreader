@@ -57,6 +57,7 @@ export function nextTimeInterval(time0: string, time1: string, date: Date = new 
         date.setHours(a[0]);
         date.setMinutes(a[1]);
         date.setSeconds(0);
+        date.setMilliseconds(0);
         return date.getTime();
     }
 
@@ -66,6 +67,7 @@ export function nextTimeInterval(time0: string, time1: string, date: Date = new 
         date.setHours(b[0]);
         date.setMinutes(b[1]);
         date.setSeconds(0);
+        date.setMilliseconds(0);
         return date.getTime();
     }
 

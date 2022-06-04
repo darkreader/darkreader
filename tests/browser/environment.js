@@ -240,20 +240,20 @@ class PuppeteerEnvironment extends JestNodeEnvironment {
     async teardown() {
         await super.teardown();
 
-        if (this.global.product !== 'firefox') {
+        if (this.global.product !== 'firefox' && this.page?.coverage) {
             const coverage = await this.page.coverage.stopJSCoverage();
             const dir = './tests/browser/coverage/';
             await generateHTMLCoverageReports(dir, coverage);
             console.info('Coverage reports generated in', dir);
         }
 
-        await this.extensionPopup.close();
-        await this.extensionDevtools.close();
-        await this.page.close();
-        await this.testServer.close();
-        await this.corsServer.close();
-        await this.popupTestServer.close();
-        await this.browser.close();
+        await this.extensionPopup?.close();
+        await this.extensionDevtools?.close();
+        await this.page?.close();
+        await this.testServer?.close();
+        await this.corsServer?.close();
+        await this.popupTestServer?.close();
+        await this.browser?.close();
     }
 }
 

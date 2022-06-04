@@ -1,5 +1,5 @@
 // @ts-check
-const {getDestDir, PLATFORM} = require('./paths');
+const {getDestDir, PLATFORM, rootPath} = require('./paths');
 const reload = require('./reload');
 const {createTask} = require('./task');
 const {copyFile, readFile, writeFile} = require('./utils');
@@ -11,7 +11,7 @@ const pages = [
 ];
 
 async function bundleHTMLPage({cwdPath}, {debug}) {
-    let html = await readFile(`src/${cwdPath}`);
+    let html = await readFile(rootPath(`src/${cwdPath}`));
 
     const getPath = (dir) => `${dir}/${cwdPath}`;
     const outPath = getPath(getDestDir({debug, platform: PLATFORM.CHROME}));

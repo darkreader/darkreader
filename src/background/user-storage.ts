@@ -5,6 +5,7 @@ import type {UserSettings} from '../definitions';
 import {readSyncStorage, readLocalStorage, writeSyncStorage, writeLocalStorage} from './utils/extension-api';
 import {logWarn} from '../utils/log';
 import {PromiseBarrier} from '../utils/promise-barrier';
+import {validateSettings} from '../utils/validation';
 
 const SAVE_TIMEOUT = 1000;
 
@@ -40,6 +41,8 @@ export default class UserStorage {
         this.loadBarrier = new PromiseBarrier();
 
         const local = await readLocalStorage(DEFAULT_SETTINGS);
+        const {errors: localCfgErrors} = validateSettings(local);
+        localCfgErrors.forEach((err) => logWarn(err));
         if (local.syncSettings == null) {
             local.syncSettings = DEFAULT_SETTINGS.syncSettings;
         }
@@ -58,6 +61,9 @@ export default class UserStorage {
             this.loadBarrier.resolve(local);
             return local;
         }
+
+        const {errors: syncCfgErrors} = validateSettings($sync);
+        syncCfgErrors.forEach((err) => logWarn(err));
 
         this.fillDefaults($sync);
 

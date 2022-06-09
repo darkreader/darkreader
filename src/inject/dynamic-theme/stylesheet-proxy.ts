@@ -11,7 +11,7 @@ export function injectProxy(enableStyleSheetsProxy: boolean) {
 
     // Reference:
     // https://github.com/darkreader/darkreader/issues/6480#issuecomment-897696175
-    const shouldWrapHTMLElement = location.hostname.endsWith('baidu.com');
+    const shouldWrapHTMLElement = ['baidu.com'].includes(location.hostname);
 
     const getElementsByTagNameDescriptor = shouldWrapHTMLElement ?
         Object.getOwnPropertyDescriptor(Element.prototype, 'getElementsByTagName') : null;

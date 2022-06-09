@@ -220,7 +220,7 @@ function getModifiedScrollbarStyle(theme: Theme) {
 export function getModifiedFallbackStyle(filter: FilterConfig, {strict}: {strict: boolean}) {
     const lines: string[] = [];
     // https://github.com/darkreader/darkreader/issues/3618#issuecomment-895477598
-    const isMicrosoft = location.hostname.endsWith('microsoft.com');
+    const isMicrosoft = ['microsoft.com', 'docs.microsoft.com'].includes(location.hostname);
     lines.push(`html, body, ${strict ? `body :not(iframe)${isMicrosoft ? ':not(div[style^="position:absolute;top:0;left:-"]' : ''}` : 'body > :not(iframe)'} {`);
     lines.push(`    background-color: ${modifyBackgroundColor({r: 255, g: 255, b: 255}, filter)} !important;`);
     lines.push(`    border-color: ${modifyBorderColor({r: 64, g: 64, b: 64}, filter)} !important;`);

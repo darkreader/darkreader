@@ -46,7 +46,7 @@ export function shouldManageStyle(element: Node) {
                 element.rel.toLowerCase().includes('stylesheet') &&
                 !element.disabled &&
                 (isFirefox ? !element.href.startsWith('moz-extension://') : true) &&
-                !element.href.startsWith('https://fonts.googleapis.com')
+                ((new URL(element.href)).hostname != 'fonts.googleapis.com')
             )
         ) &&
         !element.classList.contains('darkreader') &&

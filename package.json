@@ -26,7 +26,8 @@
     "test:project": "jest --config=tests/project/jest.config.js",
     "test:unit": "jest --config=tests/unit/jest.config.js",
     "test:unit:debug": "node --inspect-brk ./node_modules/jest/bin/jest --config=tests/unit/jest.config.js --runInBand --no-cache --watch",
-    "test:update-snapshots": "npm run test -- --updateSnapshot && npm run test:project -- --updateSnapshot"
+    "test:update-snapshots": "npm run test -- --updateSnapshot && npm run test:project -- --updateSnapshot",
+    "translate-line": "node ./tasks/translate.js --line"
   },
   "main": "darkreader.js",
   "repository": {

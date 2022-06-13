@@ -76,7 +76,7 @@ export const DEFAULT_SETTINGS: UserSettings = {
     },
     previewNewDesign: false,
     enableForPDF: true,
-    enableForProtectedPages: false,
+    enableForProtectedPages: true,
     enableContextMenus: false,
     detectDarkTheme: false,
 };

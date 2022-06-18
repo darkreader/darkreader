@@ -1,13 +1,22 @@
+## Unreleased
+
+- Correctly handle escaped characters in CSS `url(...)` values.
+
 ## 4.9.51 (May 27, 2022)
 
 Dynamic mode improvements:
+
 - Fixed CSS imports that contain `url(...)` and end with `screen`.
 - Send network responses to correct frames in tabs.
 - Improved `calc(...)` color handling by using [Shunting Yard algorithm](https://en.wikipedia.org/wiki/Shunting_yard_algorithm).
+
 New translations:
+
 - Malay translation.
 - Telugu translation.
+
 Other:
+
 - UI improvements.
 - Users' fixes for websites.
 

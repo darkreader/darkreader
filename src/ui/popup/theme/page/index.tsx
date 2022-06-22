@@ -75,23 +75,31 @@ function ColorsGroup({theme, change, colorSchemes}: ColorsGroupProps) {
                 value={theme[bgProp] === 'auto' ? defaultSchemeColors.background : theme[bgProp]}
                 onChange={(v) => change({[bgProp]: v, ...defaultMatrixValues, [csProp]: 'Default'})}
                 canReset={theme[bgProp] !== defaultSchemeColors.background}
-                onReset={() => change({[bgProp]: DEFAULT_SETTINGS.theme[bgProp], [csProp]: 'Default'})}
-            />
+                onReset={() => change({[bgProp]: DEFAULT_SETTINGS.theme[bgProp], [csProp]: 'Default', cssVariableBg: DEFAULT_SETTINGS.theme.cssVariableBg})}
+                cssValue={theme.cssVariableBg}
+                cssChange={(v) => change({cssVariableBg: v})}
+	    />
             <TextColor
                 value={theme[fgProp] === 'auto' ? defaultSchemeColors.text : theme[fgProp]}
                 onChange={(v) => change({[fgProp]: v, ...defaultMatrixValues, [csProp]: 'Default'})}
                 canReset={theme[fgProp] !== defaultSchemeColors.text}
-                onReset={() => change({[fgProp]: DEFAULT_SETTINGS.theme[fgProp], [csProp]: 'Default'})}
+                onReset={() => change({[fgProp]: DEFAULT_SETTINGS.theme[fgProp], [csProp]: 'Default', cssVariableText: DEFAULT_SETTINGS.theme.cssVariableText})}
+                cssValue={theme.cssVariableText}
+                cssChange={(v) => change({cssVariableText: v})}
             />
             <Scrollbar
                 value={theme.scrollbarColor}
                 onChange={(v) => change({scrollbarColor: v})}
-                onReset={() => change({scrollbarColor: DEFAULT_SETTINGS.theme.scrollbarColor})}
+                onReset={() => change({scrollbarColor: DEFAULT_SETTINGS.theme.scrollbarColor, cssVariableScrollBar: DEFAULT_SETTINGS.theme.cssVariableScrollBar})}
+                cssValue={theme.cssVariableScrollBar}
+                cssChange={(v) => change({cssVariableScrollBar: v})}
             />
             <SelectionColorEditor
                 value={theme.selectionColor}
                 onChange={(v) => change({selectionColor: v})}
-                onReset={() => change({selectionColor: DEFAULT_SETTINGS.theme.selectionColor})}
+                onReset={() => change({selectionColor: DEFAULT_SETTINGS.theme.selectionColor, cssVariableSelection: DEFAULT_SETTINGS.theme.cssVariableSelection})}
+                cssValue={theme.cssVariableSelection}
+                cssChange={(v) => change({cssVariableSelection: v})}
             />
             <ColorSchemeDropDown
                 selected={currentColorScheme}

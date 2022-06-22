@@ -163,7 +163,6 @@ export class Extension implements ExtensionState {
 
     async start() {
         await this.config.load({local: true});
-
         await this.user.loadSettings();
         if (this.user.settings.enableContextMenus && !this.registeredContextMenus) {
             chrome.permissions.contains({permissions: ['contextMenus']}, (permitted) => {
@@ -177,6 +176,8 @@ export class Extension implements ExtensionState {
         if (this.user.settings.syncSitesFixes) {
             await this.config.load({local: false});
         }
+        this.cssUpdate();
+
         this.updateAutoState();
         this.onAppToggle();
         logInfo('loaded', this.user.settings);
@@ -499,7 +500,6 @@ export class Extension implements ExtensionState {
         if (this.isExtensionSwitchedOn() && this.user.settings.changeBrowserTheme) {
             setWindowTheme(this.user.settings.theme);
         }
-
         this.onSettingsChanged();
     }
 
@@ -537,6 +537,30 @@ export class Extension implements ExtensionState {
         this.changeSettings({siteList: toggledList});
     }
 
+    
+    //------------------------------------
+    //
+    //    Fetch colors from local CSS
+    //
+    //
+ 
+    private cssUpdate() {
+    const rootVariables = getComputedStyle(document.documentElement);
+        if(this.user.settings.theme.cssVariableBg && /^#([0-9a-fA-F]{3}){1,2}$/.test(rootVariables.getPropertyValue(this.user.settings.theme.cssVariableBg).trim())){
+	        this.user.settings.theme.darkSchemeBackgroundColor = rootVariables.getPropertyValue(this.user.settings.theme.cssVariableBg).trim();
+        } 
+        if(this.user.settings.theme.cssVariableText && /^#([0-9a-fA-F]{3}){1,2}$/.test(rootVariables.getPropertyValue(this.user.settings.theme.cssVariableText).trim())){
+	        this.user.settings.theme.darkSchemeTextColor = rootVariables.getPropertyValue(this.user.settings.theme.cssVariableText).trim();
+        } 
+        if(this.user.settings.theme.cssVariableScrollBar && /^#([0-9a-fA-F]{3}){1,2}$/.test(rootVariables.getPropertyValue(this.user.settings.theme.cssVariableScrollBar).trim())){
+	        this.user.settings.theme.scrollbarColor = rootVariables.getPropertyValue(this.user.settings.theme.cssVariableScrollBar).trim();
+        } 
+        if(this.user.settings.theme.cssVariableSelection && /^#([0-9a-fA-F]{3}){1,2}$/.test(rootVariables.getPropertyValue(this.user.settings.theme.cssVariableSelection).trim())){
+	        this.user.settings.theme.selectionColor = rootVariables.getPropertyValue(this.user.settings.theme.cssVariableSelection).trim();
+        } 
+    }
+    
+
     //------------------------------------
     //
     //       Handle config changes
@@ -546,14 +570,13 @@ export class Extension implements ExtensionState {
         if (!this.icon) {
             this.icon = new IconManager();
         }
-
         if (this.isExtensionSwitchedOn()) {
             this.icon.setActive();
             if (this.user.settings.changeBrowserTheme) {
                 setWindowTheme(this.user.settings.theme);
             }
         } else {
-            this.icon.setInactive();
+	    this.icon.setInactive();
             if (this.user.settings.changeBrowserTheme) {
                 resetWindowTheme();
             }
@@ -576,6 +599,10 @@ export class Extension implements ExtensionState {
         // TODO: Requires proper handling and more testing
         // to prevent cycling across instances.
     }
+    
+
+    
+
 
     //----------------------
     //

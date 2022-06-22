@@ -4,11 +4,14 @@ import ThemeControl from './theme-control';
 
 type BgColorValue = 'auto' | string;
 
+
 interface BgColorEditorProps {
     value: BgColorValue;
     onChange: (value: BgColorValue) => void;
     canReset: boolean;
     onReset: () => void;
+    cssValue: string;
+    cssChange: (cssValue: string) => void;
 }
 
 export default function BackgroundColorEditor(props: BgColorEditorProps) {
@@ -19,6 +22,8 @@ export default function BackgroundColorEditor(props: BgColorEditorProps) {
                 onChange={props.onChange}
                 canReset={props.canReset}
                 onReset={props.onReset}
+                cssValue={props.cssValue}
+                cssChange={props.cssChange}
             />
         </ThemeControl>
     );

@@ -10,6 +10,8 @@ interface ColorPickerProps {
     onChange: (color: string) => void;
     canReset: boolean;
     onReset: () => void;
+    cssValue: string;
+    cssChange: (cssValue: string) => void;
 }
 
 function isValidColor(color: string) {
@@ -42,13 +44,14 @@ function ColorPicker(props: ColorPickerProps) {
     }
 
     function onColorChange(rawValue: string) {
-        let value = rawValue.trim();
+        const value = rawValue.trim();
         if (isValidColor(value)) {
             props.onChange(value);
         } else {
-	    value = getComputedStyle(document.documentElement).getPropertyValue(value).trim();
-	    if (isValidColor(value)) {
-	        props.onChange(value);
+	   const cssHex = getComputedStyle(document.documentElement).getPropertyValue(value).trim();
+	    if (isValidColor(cssHex)) {
+	        props.onChange(cssHex);
+                props.cssChange(value);
             } else {
                 props.onChange(props.color);
             }

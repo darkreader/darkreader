@@ -35,6 +35,10 @@ export const DEFAULT_THEME: Theme = {
     lightColorScheme: 'Default',
     darkColorScheme: 'Default',
     immediateModify: false,
+    cssVariableBg: '',
+    cssVariableText: '',
+    cssVariableScrollBar: '',
+    cssVariableSelection: '',
 };
 
 export const DEFAULT_COLORSCHEME: ParsedColorSchemeConfig = {

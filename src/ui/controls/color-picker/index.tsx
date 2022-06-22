@@ -47,6 +47,7 @@ function ColorPicker(props: ColorPickerProps) {
         const value = rawValue.trim();
         if (isValidColor(value)) {
             props.onChange(value);
+            props.cssChange('');
         } else {
 	   const cssHex = getComputedStyle(document.documentElement).getPropertyValue(value).trim();
 	    if (isValidColor(cssHex)) {
@@ -54,6 +55,7 @@ function ColorPicker(props: ColorPickerProps) {
                 props.cssChange(value);
             } else {
                 props.onChange(props.color);
+                props.cssChange(props.cssValue);
             }
         }
     }

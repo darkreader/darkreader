@@ -40,6 +40,12 @@ test('Settings Validation', () => {
         lightColorScheme: '',
         darkColorScheme: false,
         immediateModify: 1,
+        cssVariableBg: '',
+        cssVariableText: '',
+        cssVariableScrollBar: '',
+        cssVariableSelection: '',
+
+
     };
     themeValidation = validateTheme(wonkyTheme as any);
     expect(themeValidation.errors.length).toBeGreaterThan(0);
@@ -73,7 +79,12 @@ test('Settings Validation', () => {
             styleSystemControls: null as boolean,
             lightColorScheme: '',
             darkColorScheme: false,
-            immediateModify: 1,
+            immediateModify: 1, 
+            cssVariableBg: '',
+            cssVariableText: '',
+            cssVariableScrollBar: '',
+            cssVariableSelection: '',
+
         },
         presets: [
             {id: '', name: 'P1', urls: ['a.com'], theme: {brightness: 100}},
@@ -166,6 +177,10 @@ test('Settings Validation', () => {
             lightColorScheme: 'Lightness',
             darkColorScheme: 'Darkness',
             immediateModify: true,
+            cssVariableBg: '--background',
+            cssVariableText: '--foreground',
+            cssVariableScrollBar: '--color1',
+            cssVariableSelection: '--color2',
         },
         presets: [
             {id: 'p5', name: 'P5', urls: ['a.com'], theme: {brightness: 100} as Theme},

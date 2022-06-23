@@ -23,6 +23,7 @@ import {logInfo, logWarn} from '../utils/log';
 import {PromiseBarrier} from '../utils/promise-barrier';
 import {StateManager} from './utils/state-manager';
 import {debounce} from '../utils/debounce';
+import {isValidHexColor} from '../utils/colorscheme-parser';
 
 type AutomationState = 'turn-on' | 'turn-off' | 'scheme-dark' | 'scheme-light' | '';
 
@@ -177,7 +178,6 @@ export class Extension implements ExtensionState {
         if (this.user.settings.syncSitesFixes) {
             await this.config.load({local: false});
         }
-
         this.cssUpdate();
         this.updateAutoState();
         this.onAppToggle();
@@ -547,16 +547,16 @@ export class Extension implements ExtensionState {
 
     private cssUpdate() {
         const rootVariables = getComputedStyle(document.documentElement);
-        if (this.user.settings.theme.cssVariableBg && /^#([0-9a-fA-F]{3}){1,2}$/.test(rootVariables.getPropertyValue(this.user.settings.theme.cssVariableBg).trim())){
+        if (this.user.settings.theme.cssVariableBg && isValidHexColor(rootVariables.getPropertyValue(this.user.settings.theme.cssVariableBg).trim())){
 	        this.user.settings.theme.darkSchemeBackgroundColor = rootVariables.getPropertyValue(this.user.settings.theme.cssVariableBg).trim();
         }
-        if (this.user.settings.theme.cssVariableText && /^#([0-9a-fA-F]{3}){1,2}$/.test(rootVariables.getPropertyValue(this.user.settings.theme.cssVariableText).trim())){
+        if (this.user.settings.theme.cssVariableText && isValidHexColor(rootVariables.getPropertyValue(this.user.settings.theme.cssVariableText).trim())){
 	        this.user.settings.theme.darkSchemeTextColor = rootVariables.getPropertyValue(this.user.settings.theme.cssVariableText).trim();
         }
-        if (this.user.settings.theme.cssVariableScrollBar && /^#([0-9a-fA-F]{3}){1,2}$/.test(rootVariables.getPropertyValue(this.user.settings.theme.cssVariableScrollBar).trim())){
+        if (this.user.settings.theme.cssVariableScrollBar && isValidHexColor(rootVariables.getPropertyValue(this.user.settings.theme.cssVariableScrollBar).trim())){
 	        this.user.settings.theme.scrollbarColor = rootVariables.getPropertyValue(this.user.settings.theme.cssVariableScrollBar).trim();
         }
-        if (this.user.settings.theme.cssVariableSelection && /^#([0-9a-fA-F]{3}){1,2}$/.test(rootVariables.getPropertyValue(this.user.settings.theme.cssVariableSelection).trim())){
+        if (this.user.settings.theme.cssVariableSelection && isValidHexColor(rootVariables.getPropertyValue(this.user.settings.theme.cssVariableSelection).trim())){
 	        this.user.settings.theme.selectionColor = rootVariables.getPropertyValue(this.user.settings.theme.cssVariableSelection).trim();
         }
     }

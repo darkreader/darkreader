@@ -49,7 +49,7 @@ function ColorPicker(props: ColorPickerProps) {
             props.onChange(value);
             props.cssChange('');
         } else {
-	   const cssHex = getComputedStyle(document.documentElement).getPropertyValue(value).trim();
+	    const cssHex = getComputedStyle(document.documentElement).getPropertyValue(value).trim();
 	    if (isValidColor(cssHex)) {
 	        props.onChange(cssHex);
                 props.cssChange(value);

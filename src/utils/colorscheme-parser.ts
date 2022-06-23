@@ -29,7 +29,7 @@ const humanizeNumber = (number: number) => {
 };
 
 // Should return if the given string is a valid 3 or 6 digit hex color.
-const isValidHexColor = (color: string) => {
+export const isValidHexColor = (color: string) => {
     return /^#([0-9a-fA-F]{3}){1,2}$/.test(color);
 };
 

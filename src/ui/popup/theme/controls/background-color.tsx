@@ -4,7 +4,6 @@ import ThemeControl from './theme-control';
 
 type BgColorValue = 'auto' | string;
 
-
 interface BgColorEditorProps {
     value: BgColorValue;
     onChange: (value: BgColorValue) => void;

@@ -44,8 +44,6 @@ test('Settings Validation', () => {
         cssVariableText: '',
         cssVariableScrollBar: '',
         cssVariableSelection: '',
-
-
     };
     themeValidation = validateTheme(wonkyTheme as any);
     expect(themeValidation.errors.length).toBeGreaterThan(0);
@@ -79,12 +77,11 @@ test('Settings Validation', () => {
             styleSystemControls: null as boolean,
             lightColorScheme: '',
             darkColorScheme: false,
-            immediateModify: 1, 
+            immediateModify: 1,
             cssVariableBg: '',
             cssVariableText: '',
             cssVariableScrollBar: '',
             cssVariableSelection: '',
-
         },
         presets: [
             {id: '', name: 'P1', urls: ['a.com'], theme: {brightness: 100}},

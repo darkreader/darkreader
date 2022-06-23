@@ -547,11 +547,17 @@ export class Extension implements ExtensionState {
 
     private cssUpdate() {
         const rootVariables = getComputedStyle(document.documentElement);
-        if (this.user.settings.theme.cssVariableBg && isValidHexColor(rootVariables.getPropertyValue(this.user.settings.theme.cssVariableBg).trim())){
-	        this.user.settings.theme.darkSchemeBackgroundColor = rootVariables.getPropertyValue(this.user.settings.theme.cssVariableBg).trim();
+        if (this.user.settings.theme.darkSchemeCssVariableBg && isValidHexColor(rootVariables.getPropertyValue(this.user.settings.theme.darkSchemeCssVariableBg).trim())){
+                this.user.settings.theme.darkSchemeBackgroundColor = rootVariables.getPropertyValue(this.user.settings.theme.darkSchemeCssVariableBg).trim();
         }
-        if (this.user.settings.theme.cssVariableText && isValidHexColor(rootVariables.getPropertyValue(this.user.settings.theme.cssVariableText).trim())){
-	        this.user.settings.theme.darkSchemeTextColor = rootVariables.getPropertyValue(this.user.settings.theme.cssVariableText).trim();
+        if (this.user.settings.theme.darkSchemeCssVariableText && isValidHexColor(rootVariables.getPropertyValue(this.user.settings.theme.darkSchemeCssVariableText).trim())){
+	        this.user.settings.theme.darkSchemeTextColor = rootVariables.getPropertyValue(this.user.settings.theme.darkSchemeCssVariableText).trim();
+        }
+        if (this.user.settings.theme.lightSchemeCssVariableBg && isValidHexColor(rootVariables.getPropertyValue(this.user.settings.theme.lightSchemeCssVariableBg).trim())){
+                this.user.settings.theme.lightSchemeBackgroundColor = rootVariables.getPropertyValue(this.user.settings.theme.lightSchemeCssVariableBg).trim();
+        }
+        if (this.user.settings.theme.lightSchemeCssVariableText && isValidHexColor(rootVariables.getPropertyValue(this.user.settings.theme.lightSchemeCssVariableText).trim())){
+	        this.user.settings.theme.lightSchemeTextColor = rootVariables.getPropertyValue(this.user.settings.theme.lightSchemeCssVariableText).trim();
         }
         if (this.user.settings.theme.cssVariableScrollBar && isValidHexColor(rootVariables.getPropertyValue(this.user.settings.theme.cssVariableScrollBar).trim())){
 	        this.user.settings.theme.scrollbarColor = rootVariables.getPropertyValue(this.user.settings.theme.cssVariableScrollBar).trim();

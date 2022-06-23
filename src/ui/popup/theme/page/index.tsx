@@ -53,6 +53,8 @@ function ColorsGroup({theme, change, colorSchemes}: ColorsGroupProps) {
     const csProp: keyof Theme = isDarkScheme ? 'darkColorScheme' : 'lightColorScheme';
     const bgProp: keyof Theme = isDarkScheme ? 'darkSchemeBackgroundColor' : 'lightSchemeBackgroundColor';
     const fgProp: keyof Theme = isDarkScheme ? 'darkSchemeTextColor' : 'lightSchemeTextColor';
+    const variableBgProp: keyof Theme = isDarkScheme ? 'darkSchemeCssVariableBg' : 'lightSchemeCssVariableBg';
+    const variableFgProp: keyof Theme = isDarkScheme ? 'darkSchemeCssVariableText' : 'lightSchemeCssVariableText';
     const defaultSchemeColors = isDarkScheme ? DEFAULT_COLORS.darkScheme : DEFAULT_COLORS.lightScheme;
     const defaultMatrixValues: Partial<Theme> = {brightness: DEFAULT_THEME.brightness, contrast: DEFAULT_THEME.contrast, sepia: DEFAULT_THEME.sepia, grayscale: DEFAULT_THEME.grayscale};
     const currentColorScheme = isDarkScheme ? theme.darkColorScheme : theme.lightColorScheme;
@@ -75,17 +77,17 @@ function ColorsGroup({theme, change, colorSchemes}: ColorsGroupProps) {
                 value={theme[bgProp] === 'auto' ? defaultSchemeColors.background : theme[bgProp]}
                 onChange={(v) => change({[bgProp]: v, ...defaultMatrixValues, [csProp]: 'Default'})}
                 canReset={theme[bgProp] !== defaultSchemeColors.background}
-                onReset={() => change({[bgProp]: DEFAULT_SETTINGS.theme[bgProp], [csProp]: 'Default', cssVariableBg: DEFAULT_SETTINGS.theme.cssVariableBg})}
-                cssValue={theme.cssVariableBg}
-                cssChange={(v) => change({cssVariableBg: v})}
+                onReset={() => change({[bgProp]: DEFAULT_SETTINGS.theme[bgProp], [csProp]: 'Default', [variableBgProp]: DEFAULT_SETTINGS.theme[variableBgProp]})}
+                cssValue={theme[variableBgProp]}
+                cssChange={(v) => change({[variableBgProp]: v})}
 	    />
             <TextColor
                 value={theme[fgProp] === 'auto' ? defaultSchemeColors.text : theme[fgProp]}
                 onChange={(v) => change({[fgProp]: v, ...defaultMatrixValues, [csProp]: 'Default'})}
                 canReset={theme[fgProp] !== defaultSchemeColors.text}
-                onReset={() => change({[fgProp]: DEFAULT_SETTINGS.theme[fgProp], [csProp]: 'Default', cssVariableText: DEFAULT_SETTINGS.theme.cssVariableText})}
-                cssValue={theme.cssVariableText}
-                cssChange={(v) => change({cssVariableText: v})}
+                onReset={() => change({[fgProp]: DEFAULT_SETTINGS.theme[fgProp], [csProp]: 'Default', [variableFgProp]: DEFAULT_SETTINGS.theme[variableFgProp]})}
+                cssValue={theme[variableFgProp]}
+                cssChange={(v) => change({[variableFgProp]: v})}
             />
             <Scrollbar
                 value={theme.scrollbarColor}

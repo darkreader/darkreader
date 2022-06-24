@@ -65,7 +65,7 @@ function createScriptMV3(src: string, args: any = undefined) {
     const element = document.createElement('script');
     element.src = chrome.runtime.getURL(src);
     if (args !== undefined) {
-        element.setAttribute('args', JSON.stringify(args));
+        element.dataset.args = JSON.stringify(args);
     }
     return element;
 }

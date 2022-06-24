@@ -17,3 +17,6 @@ if (!chrome.runtime.hasOwnProperty('onMessage')) {
     } as any;
     (chrome.runtime.onMessage as any)['__listeners__'] = listeners;
 }
+if (!chrome.runtime.hasOwnProperty('getURL')) {
+    chrome.runtime.getURL = () => '';
+}

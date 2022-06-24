@@ -11,6 +11,7 @@ on:
   pull_request:
     branches:
       - master
+      - test
     types:
       - opened
       - synchronize

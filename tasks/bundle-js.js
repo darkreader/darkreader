@@ -81,6 +81,15 @@ const jsEntries = [
         watchFiles: null,
     },
     {
+        src: 'src/inject/dynamic-theme/stylesheet-proxy.ts',
+        dest: 'inject/proxy.js',
+        reloadType: reload.FULL,
+        async postBuild({debug}) {
+            await copyToBrowsers({cwdPath: this.dest, debug});
+        },
+        watchFiles: null,
+    },
+    {
         src: 'src/inject/fallback.ts',
         dest: 'inject/fallback.js',
         reloadType: reload.FULL,

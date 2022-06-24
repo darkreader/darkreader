@@ -17,7 +17,6 @@ import {generateUID} from '../../utils/uid';
 import type {AdoptedStyleSheetManager} from './adopted-style-manger';
 import {createAdoptedStyleSheetOverride} from './adopted-style-manger';
 import {isFirefox} from '../../utils/platform';
-import {injectProxy} from './stylesheet-proxy';
 import {parse} from '../../utils/color';
 import {parsedURLCache} from '../../utils/url';
 import {variablesStore} from './variables';
@@ -44,12 +43,21 @@ function createOrUpdateStyle(className: string, root: ParentNode = document.head
     return element;
 }
 
-function createOrUpdateScript(className: string, root: ParentNode = document.head || document) {
+/**
+ * Note: src must be included in web_accessible_resources manifest key.
+ */
+function createOrUpdateScript(className: string, src: string, args: any = undefined, root: ParentNode = document.head || document) {
     let element: HTMLScriptElement = root.querySelector(`.${className}`);
     if (!element) {
         element = document.createElement('script');
         element.classList.add('darkreader');
         element.classList.add(className);
+    }
+    element.src = chrome.runtime.getURL(src);
+    if (args !== undefined) {
+        element.setAttribute('args', JSON.stringify(args));
+    } else {
+        element.removeAttribute('args');
     }
     return element;
 }
@@ -133,10 +141,11 @@ function createStaticStyleOverrides() {
     const rootVarsStyle = createOrUpdateStyle('darkreader--root-vars');
     document.head.insertBefore(rootVarsStyle, variableStyle.nextSibling);
 
-    const proxyScript = createOrUpdateScript('darkreader--proxy');
-    proxyScript.append(`(${injectProxy})(!${fixes && fixes.disableStyleSheetsProxy})`);
+    const proxyScript = createOrUpdateScript('darkreader--proxy', 'inject/proxy.js', !(fixes && fixes.disableStyleSheetsProxy));
     document.head.insertBefore(proxyScript, rootVarsStyle.nextSibling);
-    proxyScript.remove();
+    proxyScript.onload = function () {
+        (this as HTMLScriptElement).remove();
+    };
 }
 
 const shadowRootsWithOverrides = new Set<ShadowRoot>();

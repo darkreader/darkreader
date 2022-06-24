@@ -1,4 +1,4 @@
-export function injectProxy(enableStyleSheetsProxy: boolean) {
+function injectProxy(enableStyleSheetsProxy: boolean) {
     document.dispatchEvent(new CustomEvent('__darkreader__inlineScriptsAllowed'));
 
     const addRuleDescriptor = Object.getOwnPropertyDescriptor(CSSStyleSheet.prototype, 'addRule');
@@ -140,3 +140,12 @@ export function injectProxy(enableStyleSheetsProxy: boolean) {
         Object.defineProperty(Element.prototype, 'getElementsByTagName', Object.assign({}, getElementsByTagNameDescriptor, {value: proxyGetElementsByTagName}));
     }
 }
+
+(function () {
+    let args = undefined;
+    const argsString = document.currentScript.getAttribute('args');
+    if (argsString !== null) {
+        args = JSON.parse(argsString);
+    }
+    injectProxy(args);
+})();

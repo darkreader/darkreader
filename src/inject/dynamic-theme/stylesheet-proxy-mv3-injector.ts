@@ -7,6 +7,5 @@ import {injectProxy} from './stylesheet-proxy';
     if (argsString !== null) {
         args = JSON.parse(argsString);
     }
-    console.error(args); // TODO: remove
     injectProxy(args);
 })();

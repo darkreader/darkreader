@@ -35,10 +35,27 @@ export interface StyleManager {
 
 export const STYLE_SELECTOR = 'style, link[rel*="stylesheet" i]:not([disabled])';
 
+// isFontsGoogleApiStyle returns is the given link element is a style from
+// google fonts.
+function isFontsGoogleApiStyle(element: HTMLLinkElement): boolean {
+    if (!element.href) {
+        return false;
+    }
+
+    try {
+        const elementURL = new URL(element.href);
+        return elementURL.hostname === 'fonts.googleapis.com';
+    } catch (err) {
+        logInfo(`Couldn't construct ${element.href} as URL`);
+        return false;
+    }
+}
+
 export function shouldManageStyle(element: Node) {
-    return (
-        (
-            (element instanceof HTMLStyleElement) ||
+    try {
+        return (
+            (
+                (element instanceof HTMLStyleElement) ||
             (element instanceof SVGStyleElement) ||
             (
                 element instanceof HTMLLinkElement &&
@@ -46,13 +63,16 @@ export function shouldManageStyle(element: Node) {
                 element.rel.toLowerCase().includes('stylesheet') &&
                 !element.disabled &&
                 (isFirefox ? !element.href.startsWith('moz-extension://') : true) &&
-                ((new URL(element.href)).hostname !== 'fonts.googleapis.com')
+                !isFontsGoogleApiStyle(element)
             )
-        ) &&
+            ) &&
         !element.classList.contains('darkreader') &&
         element.media.toLowerCase() !== 'print' &&
         !element.classList.contains('stylus')
-    );
+        );
+    } catch (err) {
+        console.error(err);
+    }
 }
 
 export function getManageableStyles(node: Node, results = [] as StyleElement[], deep = true) {

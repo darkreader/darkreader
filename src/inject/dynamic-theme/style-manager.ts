@@ -52,10 +52,9 @@ function isFontsGoogleApiStyle(element: HTMLLinkElement): boolean {
 }
 
 export function shouldManageStyle(element: Node) {
-    try {
-        return (
-            (
-                (element instanceof HTMLStyleElement) ||
+    return (
+        (
+            (element instanceof HTMLStyleElement) ||
             (element instanceof SVGStyleElement) ||
             (
                 element instanceof HTMLLinkElement &&
@@ -65,14 +64,11 @@ export function shouldManageStyle(element: Node) {
                 (isFirefox ? !element.href.startsWith('moz-extension://') : true) &&
                 !isFontsGoogleApiStyle(element)
             )
-            ) &&
+        ) &&
         !element.classList.contains('darkreader') &&
         element.media.toLowerCase() !== 'print' &&
         !element.classList.contains('stylus')
-        );
-    } catch (err) {
-        console.error(err);
-    }
+    );
 }
 
 export function getManageableStyles(node: Node, results = [] as StyleElement[], deep = true) {

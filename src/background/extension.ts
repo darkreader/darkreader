@@ -23,7 +23,6 @@ import {logInfo, logWarn} from '../utils/log';
 import {PromiseBarrier} from '../utils/promise-barrier';
 import {StateManager} from './utils/state-manager';
 import {debounce} from '../utils/debounce';
-import {isValidHexColor} from '../utils/colorscheme-parser';
 
 type AutomationState = 'turn-on' | 'turn-off' | 'scheme-dark' | 'scheme-light' | '';
 
@@ -178,7 +177,6 @@ export class Extension implements ExtensionState {
         if (this.user.settings.syncSitesFixes) {
             await this.config.load({local: false});
         }
-        this.cssUpdate();
         this.updateAutoState();
         this.onAppToggle();
         logInfo('loaded', this.user.settings);
@@ -537,34 +535,6 @@ export class Extension implements ExtensionState {
 
         const toggledList = getToggledList(settings.siteList);
         this.changeSettings({siteList: toggledList});
-    }
-
-    //------------------------------------
-    //
-    //    Fetch colors from local CSS
-    //
-    //
-
-    private cssUpdate() {
-        const rootVariables = getComputedStyle(document.documentElement);
-        if (this.user.settings.theme.darkSchemeCssVariableBg && isValidHexColor(rootVariables.getPropertyValue(this.user.settings.theme.darkSchemeCssVariableBg).trim())){
-                this.user.settings.theme.darkSchemeBackgroundColor = rootVariables.getPropertyValue(this.user.settings.theme.darkSchemeCssVariableBg).trim();
-        }
-        if (this.user.settings.theme.darkSchemeCssVariableText && isValidHexColor(rootVariables.getPropertyValue(this.user.settings.theme.darkSchemeCssVariableText).trim())){
-	        this.user.settings.theme.darkSchemeTextColor = rootVariables.getPropertyValue(this.user.settings.theme.darkSchemeCssVariableText).trim();
-        }
-        if (this.user.settings.theme.lightSchemeCssVariableBg && isValidHexColor(rootVariables.getPropertyValue(this.user.settings.theme.lightSchemeCssVariableBg).trim())){
-                this.user.settings.theme.lightSchemeBackgroundColor = rootVariables.getPropertyValue(this.user.settings.theme.lightSchemeCssVariableBg).trim();
-        }
-        if (this.user.settings.theme.lightSchemeCssVariableText && isValidHexColor(rootVariables.getPropertyValue(this.user.settings.theme.lightSchemeCssVariableText).trim())){
-	        this.user.settings.theme.lightSchemeTextColor = rootVariables.getPropertyValue(this.user.settings.theme.lightSchemeCssVariableText).trim();
-        }
-        if (this.user.settings.theme.cssVariableScrollBar && isValidHexColor(rootVariables.getPropertyValue(this.user.settings.theme.cssVariableScrollBar).trim())){
-	        this.user.settings.theme.scrollbarColor = rootVariables.getPropertyValue(this.user.settings.theme.cssVariableScrollBar).trim();
-        }
-        if (this.user.settings.theme.cssVariableSelection && isValidHexColor(rootVariables.getPropertyValue(this.user.settings.theme.cssVariableSelection).trim())){
-	        this.user.settings.theme.selectionColor = rootVariables.getPropertyValue(this.user.settings.theme.cssVariableSelection).trim();
-        }
     }
 
     //------------------------------------

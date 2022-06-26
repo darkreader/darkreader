@@ -553,7 +553,7 @@ export class Extension implements ExtensionState {
                 setWindowTheme(this.user.settings.theme);
             }
         } else {
-	    this.icon.setInactive();
+            this.icon.setInactive();
             if (this.user.settings.changeBrowserTheme) {
                 resetWindowTheme();
             }

@@ -114,26 +114,26 @@ export default class UserStorage {
         this.saveStorageBarrier.resolve();
         this.saveStorageBarrier = null;
     });
-   private rootVariables = getComputedStyle(document.documentElement);
-    
-   private cssUpdate(settings: Partial<UserSettings>) {
+    private rootVariables = getComputedStyle(document.documentElement);
+
+    private cssUpdate(settings: Partial<UserSettings>) {
         if (settings.theme.darkSchemeCssVariableBg && isValidHexColor(this.rootVariables.getPropertyValue(settings.theme.darkSchemeCssVariableBg).trim())){
-                settings.theme.darkSchemeBackgroundColor = this.rootVariables.getPropertyValue(settings.theme.darkSchemeCssVariableBg).trim();
+            settings.theme.darkSchemeBackgroundColor = this.rootVariables.getPropertyValue(settings.theme.darkSchemeCssVariableBg).trim();
         }
         if (settings.theme.darkSchemeCssVariableText && isValidHexColor(this.rootVariables.getPropertyValue(settings.theme.darkSchemeCssVariableText).trim())){
-	        settings.theme.darkSchemeTextColor = this.rootVariables.getPropertyValue(settings.theme.darkSchemeCssVariableText).trim();
+	    settings.theme.darkSchemeTextColor = this.rootVariables.getPropertyValue(settings.theme.darkSchemeCssVariableText).trim();
         }
         if (settings.theme.lightSchemeCssVariableBg && isValidHexColor(this.rootVariables.getPropertyValue(settings.theme.lightSchemeCssVariableBg).trim())){
-                settings.theme.lightSchemeBackgroundColor = this.rootVariables.getPropertyValue(settings.theme.lightSchemeCssVariableBg).trim();
+	    settings.theme.lightSchemeBackgroundColor = this.rootVariables.getPropertyValue(settings.theme.lightSchemeCssVariableBg).trim();
         }
         if (settings.theme.lightSchemeCssVariableText && isValidHexColor(this.rootVariables.getPropertyValue(settings.theme.lightSchemeCssVariableText).trim())){
-	        settings.theme.lightSchemeTextColor = this.rootVariables.getPropertyValue(settings.theme.lightSchemeCssVariableText).trim();
+	    settings.theme.lightSchemeTextColor = this.rootVariables.getPropertyValue(settings.theme.lightSchemeCssVariableText).trim();
         }
         if (settings.theme.cssVariableScrollBar && isValidHexColor(this.rootVariables.getPropertyValue(settings.theme.cssVariableScrollBar).trim())){
-	        settings.theme.scrollbarColor = this.rootVariables.getPropertyValue(settings.theme.cssVariableScrollBar).trim();
+	    settings.theme.scrollbarColor = this.rootVariables.getPropertyValue(settings.theme.cssVariableScrollBar).trim();
         }
         if (settings.theme.cssVariableSelection && isValidHexColor(this.rootVariables.getPropertyValue(settings.theme.cssVariableSelection).trim())){
-	        settings.theme.selectionColor = this.rootVariables.getPropertyValue(settings.theme.cssVariableSelection).trim();
+	    settings.theme.selectionColor = this.rootVariables.getPropertyValue(settings.theme.cssVariableSelection).trim();
         }
     }
 

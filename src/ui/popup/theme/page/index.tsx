@@ -80,7 +80,7 @@ function ColorsGroup({theme, change, colorSchemes}: ColorsGroupProps) {
                 onReset={() => change({[bgProp]: DEFAULT_SETTINGS.theme[bgProp], [csProp]: 'Default', [variableBgProp]: DEFAULT_SETTINGS.theme[variableBgProp]})}
                 cssValue={theme[variableBgProp]}
                 cssChange={(v) => change({[variableBgProp]: v})}
-	    />
+            />
             <TextColor
                 value={theme[fgProp] === 'auto' ? defaultSchemeColors.text : theme[fgProp]}
                 onChange={(v) => change({[fgProp]: v, ...defaultMatrixValues, [csProp]: 'Default'})}

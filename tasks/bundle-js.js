@@ -82,6 +82,13 @@ const jsEntries = [
         watchFiles: null,
     },
     {
+        src: 'src/inject/dynamic-theme/mv3-injector.ts',
+        dest: 'inject/injector.js',
+        reloadType: reload.FULL,
+        platform: PLATFORM.CHROME_MV3,
+        watchFiles: null,
+    },
+    {
         src: 'src/inject/dynamic-theme/mv3-proxy.ts',
         dest: 'inject/proxy.js',
         reloadType: reload.FULL,

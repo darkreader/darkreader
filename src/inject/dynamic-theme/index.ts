@@ -57,19 +57,6 @@ function createOrUpdateScript(className: string, root: ParentNode = document.hea
     return element;
 }
 
-/**
- * Note: This function is used only with MV3.
- * String passed as src parameter must be included in web_accessible_resources manifest key.
- */
-function createScriptMV3(src: string, args: any = undefined) {
-    const element = document.createElement('script');
-    element.src = chrome.runtime.getURL(src);
-    if (args !== undefined) {
-        element.dataset.args = JSON.stringify(args);
-    }
-    return element;
-}
-
 const nodePositionWatchers = new Map<string, ReturnType<typeof watchForNodePosition>>();
 
 function setupNodePositionWatcher(node: Node, alias: string) {
@@ -149,10 +136,7 @@ function createStaticStyleOverrides() {
     const rootVarsStyle = createOrUpdateStyle('darkreader--root-vars');
     document.head.insertBefore(rootVarsStyle, variableStyle.nextSibling);
 
-    if (isMV3) {
-        const proxyScript = createScriptMV3('inject/proxy.js', !(fixes && fixes.disableStyleSheetsProxy));
-        document.head.insertBefore(proxyScript, rootVarsStyle.nextSibling);
-    } else {
+    if (!isMV3) {
         const proxyScript = createOrUpdateScript('darkreader--proxy');
         proxyScript.append(`(${injectProxy})(!${fixes && fixes.disableStyleSheetsProxy})`);
         document.head.insertBefore(proxyScript, rootVarsStyle.nextSibling);

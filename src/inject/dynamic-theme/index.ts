@@ -150,7 +150,7 @@ function createStaticStyleOverrides() {
     if (isMV3) {
         console.log('Attempt to run proxy');
         injectProxyScriptMV3(injectProxyArg);
-        document.addEventListener('__darkreader__stylesheetProxy__request', (e: any) => {
+        document.addEventListener('__darkreader__stylesheetProxy__request', () => {
             console.log('Proxy data sent');
             document.dispatchEvent(new CustomEvent('__darkreader__stylesheetProxy__response', {detail: injectProxyArg}));
         });

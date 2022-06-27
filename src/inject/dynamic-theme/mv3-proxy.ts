@@ -1,4 +1,4 @@
-import { injectProxy } from './stylesheet-proxy';
+import {injectProxy} from './stylesheet-proxy';
 
 // TODO:
 // 1. remember when proxy was injected and do nothing on the second run
@@ -19,7 +19,7 @@ function inject() {
     const argString = document.currentScript.dataset.arg;
     if (argString !== undefined) {
         const arg: boolean = JSON.parse(argString);
-        console.log(`Executing MV3 injectProxy(${arg}) via dedicated script.`)
+        console.log(`Executing MV3 injectProxy(${arg}) via dedicated script.`);
         injectProxy(arg);
         return;
     }
@@ -28,7 +28,7 @@ function inject() {
 
     function dataReceiver(e: any) {
         document.removeEventListener('__darkreader__stylesheetProxy__response', dataReceiver);
-        console.log(`Executing MV3 injectProxy(${e.detail}) via reguler path.`)
+        console.log(`Executing MV3 injectProxy(${e.detail}) via reguler path.`);
         injectProxy(e.detail);
     }
 

@@ -5,6 +5,8 @@
  * 2. The proxy prepares everything for stylesheet-proxy and executes it.
  */
 
+console.log('Running MV3 dedicated injector...');
+
 let complete = false;
 
 /**

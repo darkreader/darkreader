@@ -61,7 +61,7 @@ function createOrUpdateScript(className: string, root: ParentNode = document.hea
  * Note: This function is used only with MV3.
  * String passed as src parameter must be included in web_accessible_resources manifest key.
  */
- function injectProxyScriptMV3(arg: boolean) {
+function injectProxyScriptMV3(arg: boolean) {
     const element = document.createElement('script');
     element.src = chrome.runtime.getURL('inject/proxy.js');
     element.dataset.arg = JSON.stringify(arg);

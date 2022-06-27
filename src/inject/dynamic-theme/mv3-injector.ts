@@ -7,17 +7,11 @@
 
 console.log('Running MV3 dedicated injector...');
 
-let complete = false;
-
 /**
  * On the first run of event loop, document.head does not exist yet, so we have to wait for the second one.
  */
 function injectScript() {
-    if (complete) {
-        return;
-    }
     if (document.head) {
-        complete = true;
         const proxyScript = document.createElement('script');
         proxyScript.src = chrome.runtime.getURL('inject/proxy.js');
         document.head.appendChild(proxyScript);

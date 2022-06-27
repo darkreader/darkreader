@@ -7,13 +7,25 @@ document.currentScript.remove();
 
 console.log('Running MV3 proxy...');
 
+const key = 'darkreaderProxyInjected';
+
+function dataReceiver(e: any) {
+    document.removeEventListener('__darkreader__stylesheetProxy__response', dataReceiver);
+    if (document.documentElement.dataset[key] !== undefined) {
+        return;
+    }
+    document.documentElement.dataset[key] = 'true';
+    console.log(`Executing MV3 injectProxy(${e.detail}) via reguler path.`);
+    injectProxy(e.detail);
+}
+
 function inject() {
     // Note: we inject this script from multiple places at once for greater chance of winning the data race,
     // so we have to prevent repeated injections.
-    if (document.documentElement.dataset.darkreaderProxyInjected !== undefined) {
+    if (document.documentElement.dataset[key] !== undefined) {
         return;
     }
-    document.documentElement.dataset.darkreaderProxyInjected = 'true';
+    document.documentElement.dataset[key] = 'true';
 
     // If script was injected via a dedicated content script.
     const argString = document.currentScript.dataset.arg;
@@ -25,12 +37,6 @@ function inject() {
     }
 
     console.log('Setting up MV3 injectProxy via reguler path.');
-
-    function dataReceiver(e: any) {
-        document.removeEventListener('__darkreader__stylesheetProxy__response', dataReceiver);
-        console.log(`Executing MV3 injectProxy(${e.detail}) via reguler path.`);
-        injectProxy(e.detail);
-    }
 
     document.addEventListener('__darkreader__stylesheetProxy__response', dataReceiver);
 

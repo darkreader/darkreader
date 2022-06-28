@@ -5,14 +5,16 @@
  * 2. The proxy prepares everything for stylesheet-proxy and executes it.
  */
 
-console.log('MV3 proxy injector: dedicated injector started...');
+import {logInfo} from "utils/log";
+
+logInfo('MV3 proxy injector: dedicated injector started...');
 
 /**
  * On the first run of event loop, document.head does not exist yet, so we have to wait for the second one.
  */
 function injectScript() {
     if (document.head) {
-        console.log('MV3 proxy injector: dedicated injector attempts to inject...');
+        logInfo('MV3 proxy injector: dedicated injector attempts to inject...');
         const script = document.createElement('script');
         script.src = chrome.runtime.getURL('inject/proxy.js');
         document.head.prepend(script);

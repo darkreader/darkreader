@@ -1,46 +1,47 @@
 import {injectProxy} from './stylesheet-proxy';
-
-// TODO:
-// 1. remember when proxy was injected and do nothing on the second run
+import {logInfo} from '../../utils/log';
 
 document.currentScript.remove();
-
-console.log('Running MV3 proxy...');
 
 const key = 'darkreaderProxyInjected';
 
 function dataReceiver(e: any) {
-    document.removeEventListener('__darkreader__stylesheetProxy__response', dataReceiver);
+    document.removeEventListener('__darkreader__stylesheetProxy__arg', dataReceiver);
     if (document.documentElement.dataset[key] !== undefined) {
+        logInfo(`MV3 proxy injector: dedicated path exits because everything is done.`);
         return;
     }
     document.documentElement.dataset[key] = 'true';
-    console.log(`Executing MV3 injectProxy(${e.detail}) via reguler path.`);
+    logInfo(`MV3 proxy injector: dedicated path runs injectProxy(${e.detail}).`);
     injectProxy(e.detail);
 }
 
-function inject() {
-    // Note: we inject this script from multiple places at once for greater chance of winning the data race,
-    // so we have to prevent repeated injections.
+function regularPath() {
     if (document.documentElement.dataset[key] !== undefined) {
         return;
     }
-    document.documentElement.dataset[key] = 'true';
-
-    // If script was injected via a dedicated content script.
     const argString = document.currentScript.dataset.arg;
     if (argString !== undefined) {
+        document.documentElement.dataset[key] = 'true';
         const arg: boolean = JSON.parse(argString);
-        console.log(`Executing MV3 injectProxy(${arg}) via dedicated script.`);
+        logInfo(`MV3 proxy injector: regular path runs injectProxy(${arg}).`);
         injectProxy(arg);
+    }
+}
+
+function dedicatedPath() {
+    logInfo('MV3 proxy injector: dedicated path setup...');
+    document.addEventListener('__darkreader__stylesheetProxy__arg', dataReceiver);
+}
+
+function inject() {
+    if (document.documentElement.dataset[key] !== undefined) {
+        logInfo('MV3 proxy injector: proxy exits because everything is done.');
         return;
     }
-
-    console.log('Setting up MV3 injectProxy via reguler path.');
-
-    document.addEventListener('__darkreader__stylesheetProxy__response', dataReceiver);
-
-    document.dispatchEvent(new CustomEvent('__darkreader__stylesheetProxy__request'));
+    logInfo('MV3 proxy injector: proxy attempts to inject...');
+    regularPath();
+    dedicatedPath();
 }
 
 inject();

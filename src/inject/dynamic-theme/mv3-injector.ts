@@ -5,7 +5,7 @@
  * 2. The proxy prepares everything for stylesheet-proxy and executes it.
  */
 
-import {logInfo} from "utils/log";
+import {logInfo} from '../../utils/log';
 
 logInfo('MV3 proxy injector: dedicated injector started...');
 

@@ -16,7 +16,7 @@ import type {FilterConfig, DynamicThemeFix} from '../../definitions';
 import {generateUID} from '../../utils/uid';
 import type {AdoptedStyleSheetManager} from './adopted-style-manger';
 import {createAdoptedStyleSheetOverride} from './adopted-style-manger';
-import {isFirefox} from '../../utils/platform';
+import {isFirefox, isMV3} from '../../utils/platform';
 import {injectProxy} from './stylesheet-proxy';
 import {parse} from '../../utils/color';
 import {parsedURLCache} from '../../utils/url';
@@ -44,6 +44,9 @@ function createOrUpdateStyle(className: string, root: ParentNode = document.head
     return element;
 }
 
+/**
+ * Note: This function is used only with MV2.
+ */
 function createOrUpdateScript(className: string, root: ParentNode = document.head || document) {
     let element: HTMLScriptElement = root.querySelector(`.${className}`);
     if (!element) {
@@ -52,6 +55,18 @@ function createOrUpdateScript(className: string, root: ParentNode = document.hea
         element.classList.add(className);
     }
     return element;
+}
+
+/**
+ * Note: This function is used only with MV3.
+ * String passed as src parameter must be included in web_accessible_resources manifest key.
+ */
+function injectProxyScriptMV3(arg: boolean) {
+    logInfo('MV3 proxy injector: regular path attempts to inject...');
+    const element = document.createElement('script');
+    element.src = chrome.runtime.getURL('inject/proxy.js');
+    element.dataset.arg = JSON.stringify(arg);
+    document.head.prepend(element);
 }
 
 const nodePositionWatchers = new Map<string, ReturnType<typeof watchForNodePosition>>();
@@ -133,10 +148,17 @@ function createStaticStyleOverrides() {
     const rootVarsStyle = createOrUpdateStyle('darkreader--root-vars');
     document.head.insertBefore(rootVarsStyle, variableStyle.nextSibling);
 
-    const proxyScript = createOrUpdateScript('darkreader--proxy');
-    proxyScript.append(`(${injectProxy})(!${fixes && fixes.disableStyleSheetsProxy})`);
-    document.head.insertBefore(proxyScript, rootVarsStyle.nextSibling);
-    proxyScript.remove();
+    const injectProxyArg = !(fixes && fixes.disableStyleSheetsProxy);
+    if (isMV3) {
+        injectProxyScriptMV3(injectProxyArg);
+        // Notify dedicated injector of the data
+        document.dispatchEvent(new CustomEvent('__darkreader__stylesheetProxy__arg', {detail: injectProxyArg}));
+    } else {
+        const proxyScript = createOrUpdateScript('darkreader--proxy');
+        proxyScript.append(`(${injectProxy})(${injectProxyArg})`);
+        document.head.insertBefore(proxyScript, rootVarsStyle.nextSibling);
+        proxyScript.remove();
+    }
 }
 
 const shadowRootsWithOverrides = new Set<ShadowRoot>();

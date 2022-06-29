@@ -1,3 +1,7 @@
+## Unreleased
+
+- Don't manage styles that have a empty `href` attribute.
+
 ## 4.9.52 (June 28, 2022)
 
 - Correctly handle escaped characters in CSS `url(...)` values.

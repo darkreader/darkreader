@@ -1,5 +1,10 @@
-const userAgent = typeof navigator === 'undefined' ? 'some useragent' : navigator.userAgent.toLowerCase();
-const platform = typeof navigator === 'undefined' ? 'some platform' : navigator.platform.toLowerCase();
+const userAgent = typeof navigator === 'undefined' ? 'some useragent' : navigator.userAgentData ?
+    navigator.userAgentData.brands.map((brand) => `${brand.brand.toLowerCase()} ${brand.version}`).join(' ')
+    : navigator.userAgent.toLowerCase();
+
+const platform = typeof navigator === 'undefined' ? 'some platform' : navigator.userAgentData ?
+    navigator.userAgentData.platform.toLowerCase()
+    : navigator.platform.toLowerCase();
 
 export const isChromium = userAgent.includes('chrome') || userAgent.includes('chromium');
 export const isThunderbird = userAgent.includes('thunderbird');
@@ -19,7 +24,7 @@ export const isMatchMediaChangeEventListenerSupported = (
 );
 
 export const chromiumVersion = (() => {
-    const m = userAgent.match(/chrom[e|ium]\/([^ ]+)/);
+    const m = userAgent.match(/chrom[e|ium](\/| )([^ ]+)/);
     if (m && m[1]) {
         return m[1];
     }

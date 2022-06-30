@@ -9,6 +9,15 @@ import {bgFetch} from './network';
 import {createStyleSheetModifier} from './stylesheet-modifier';
 import {isShadowDomSupported, isSafari, isThunderbird, isFirefox} from '../../utils/platform';
 
+interface UserAgentData {
+    brands: Array<{
+        brand: string;
+        version: string;
+    }>;
+    mobile: boolean;
+    platform: string;
+}
+
 declare global {
     interface Document {
         adoptedStyleSheets: CSSStyleSheet[];
@@ -18,6 +27,9 @@ declare global {
     }
     interface CSSStyleSheet {
         replaceSync(text: string): void;
+    }
+    interface NavigatorID {
+        userAgentData: UserAgentData;
     }
 }
 

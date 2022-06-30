@@ -103,7 +103,7 @@ function decodeOffset(offsets: string, index: number): [number, number] {
     const length = parseInt(offsets.substring(base + offsetLength, base + offsetLength + lengthLength), 36);
     return [
         offset,
-        offset + length,
+        length,
     ];
 }
 
@@ -172,8 +172,8 @@ export function indexSitesFixesConfig<T extends SiteProps>(text: string): SitePr
     return {offsets: encodeOffsets(offsets), domains, domainPatterns, cache: {}};
 }
 
-export function parseSiteFixConfig<T extends SiteProps>(text: string, options: SitesFixesParserOptions<T>, recordStart: number, recordEnd: number): T {
-    const block = text.substring(recordStart, recordEnd);
+export function parseSiteFixConfig<T extends SiteProps>(text: string, options: SitesFixesParserOptions<T>, recordStart: number, recordLength: number): T {
+    const block = text.substring(recordStart, recordStart + recordLength);
     return parseSitesFixesConfig<T>(block, options)[0];
 }
 
@@ -207,8 +207,8 @@ export function getSitesFixesFor<T extends SiteProps>(url: string, text: string,
         }
         set.add(id);
         if (!index.cache[id]) {
-            const [start, end] = decodeOffset(index.offsets, id);
-            index.cache[id] = parseSiteFixConfig<T>(text, options, start, end);
+            const [start, length] = decodeOffset(index.offsets, id);
+            index.cache[id] = parseSiteFixConfig<T>(text, options, start, length);
         }
         records.push(index.cache[id]);
     }

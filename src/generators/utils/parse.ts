@@ -66,29 +66,41 @@ function getDomain(url: string) {
 }
 
 /*
- * Encode all offsets into a string, where each record is 7 bytes long:
- *  - 4 bytes for start offset
- *  - 3 bytes for record length (end offset - start offset)
- * Both values are stored in base 36 (radix 36) notation.
- * Maximum supported numbers:
- *  - start offset must be no more than parseInt('zzzz', 36) = 1679615
- *  - length must be no more than parseInt('zzz', 36) = 46655
- *
+ * Encode all offsets into a string, with a fixed-length header and records of equal size:
+ *  - header:
+ *    - 1 char for length of record offset (offsetLength)
+ *    - 1 char for length of record length (lengthLength)
+ *  - records:
+ *    - offsetLength chars describing index of record start
+ *    - lengthLength chars describing length of record
+ * All values are stored in base 36 (radix 36) notation.
+ * This encoding scheme comfortably encodes any possible realistic values.
  * We have to encode offsets into a string to be able to save them in
- * chrome.storage.local for use in non-persistent background contexts.
+ * chrome.storage.local for use in non-persistent background contexts (in the future).
  */
 function encodeOffsets(offsets: Array<[number, number]>): string {
-    return offsets.map(([offset, length]) => {
-        const stringOffset = offset.toString(36);
-        const stringLength = length.toString(36);
-        return '0'.repeat(4 - stringOffset.length) + stringOffset + '0'.repeat(3 - stringLength.length) + stringLength;
-    }).join('');
+    let maxOffset = 0, maxLength = 0;
+    for (let i = 0; i < offsets.length; i++) {
+        maxOffset = Math.max(maxOffset, offsets[i][0]);
+        maxLength = Math.max(maxLength, offsets[i][1]);
+    }
+    const offsetLength = maxOffset.toString(36).length;
+    const lengthLength = maxLength.toString(36).length;
+    return offsetLength.toString(36)
+      + lengthLength.toString(36)
+      + offsets.map(([offset, length]) => {
+          const stringOffset = offset.toString(36);
+          const stringLength = length.toString(36);
+          return '0'.repeat(offsetLength - stringOffset.length) + stringOffset + '0'.repeat(lengthLength - stringLength.length) + stringLength;
+      }).join('');
 }
 
 function decodeOffset(offsets: string, index: number): [number, number] {
-    const base = (4 + 3) * index;
-    const offset = parseInt(offsets.substring(base + 0, base + 4), 36);
-    const length = parseInt(offsets.substring(base + 4, base + 4 + 3), 36);
+    const offsetLength = parseInt(offsets[0], 36);
+    const lengthLength = parseInt(offsets[1], 36);
+    const base = 1 + 1 + (offsetLength + lengthLength) * index;
+    const offset = parseInt(offsets.substring(base, base + offsetLength), 36);
+    const length = parseInt(offsets.substring(base + offsetLength, base + offsetLength + lengthLength), 36);
     return [
         offset,
         offset + length,

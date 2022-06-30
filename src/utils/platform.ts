@@ -16,7 +16,7 @@ export const isEdge = userAgent.includes('edg');
 export const isSafari = userAgent.includes('safari') && !isChromium;
 export const isWindows = platform.startsWith('win');
 export const isMacOS = platform.startsWith('mac');
-export const isMobile = userAgent.includes('mobile');
+export const isMobile = navigator.userAgentData ? navigator.userAgentData.mobile : userAgent.includes('mobile');
 export const isShadowDomSupported = typeof ShadowRoot === 'function';
 export const isMatchMediaChangeEventListenerSupported = (
     typeof MediaQueryList === 'function' &&

@@ -94,8 +94,6 @@ function decodeNumber(str: string) {
  *  - records:
  *    - offsetLength chars describing index of record start
  *    - lengthLength chars describing length of record
- * All values are stored in base 36 (radix 36) notation.
- * This encoding scheme comfortably encodes any possible realistic values.
  * We have to encode offsets into a string to be able to save them in
  * chrome.storage.local for use in non-persistent background contexts (in the future).
  */

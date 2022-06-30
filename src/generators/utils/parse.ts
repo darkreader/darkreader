@@ -65,6 +65,27 @@ function getDomain(url: string) {
     }
 }
 
+const radix = " !#$%&'()*+,-./0123456789:;=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[]^_`abcdefghijklmnopqrstuvwxyz{|}~";
+
+function encodeNumber(n: number, length: number | null) {
+    let s = '';
+    for (let c = n; c; c = Math.floor(c / radix.length)) {
+        s = radix[c % radix.length] + s;
+    }
+    if (length !== null) {
+        s = radix[0].repeat(length - s.length) + s;
+    }
+    return s;
+}
+
+function decodeNumber(str: string) {
+    let n = 0;
+    for (let i = 0; i < str.length; i++) {
+        n = radix.length * n + radix.indexOf(str[i]);
+    }
+    return n;
+}
+
 /*
  * Encode all offsets into a string, with a fixed-length header and records of equal size:
  *  - header:
@@ -84,23 +105,21 @@ function encodeOffsets(offsets: Array<[number, number]>): string {
         maxOffset = Math.max(maxOffset, offsets[i][0]);
         maxLength = Math.max(maxLength, offsets[i][1]);
     }
-    const offsetLength = maxOffset.toString(36).length;
-    const lengthLength = maxLength.toString(36).length;
-    return offsetLength.toString(36)
-      + lengthLength.toString(36)
+    const offsetLength = encodeNumber(maxOffset, null).length;
+    const lengthLength = encodeNumber(maxLength, null).length;
+    return encodeNumber(offsetLength, 1)
+      + encodeNumber(lengthLength, 1)
       + offsets.map(([offset, length]) => {
-          const stringOffset = offset.toString(36);
-          const stringLength = length.toString(36);
-          return '0'.repeat(offsetLength - stringOffset.length) + stringOffset + '0'.repeat(lengthLength - stringLength.length) + stringLength;
+          return encodeNumber(offset, offsetLength) + encodeNumber(length, lengthLength);
       }).join('');
 }
 
 function decodeOffset(offsets: string, index: number): [number, number] {
-    const offsetLength = parseInt(offsets[0], 36);
-    const lengthLength = parseInt(offsets[1], 36);
+    const offsetLength = decodeNumber(offsets[0]);
+    const lengthLength = decodeNumber(offsets[1]);
     const base = 1 + 1 + (offsetLength + lengthLength) * index;
-    const offset = parseInt(offsets.substring(base, base + offsetLength), 36);
-    const length = parseInt(offsets.substring(base + offsetLength, base + offsetLength + lengthLength), 36);
+    const offset = decodeNumber(offsets.substring(base, base + offsetLength));
+    const length = decodeNumber(offsets.substring(base + offsetLength, base + offsetLength + lengthLength));
     return [
         offset,
         length,

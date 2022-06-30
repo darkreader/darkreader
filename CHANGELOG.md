@@ -1,6 +1,7 @@
 ## Unreleased
 
 - Don't manage styles that have a empty `href` attribute.
+- Use `navigator.UserAgentData` when possible.
 
 ## 4.9.52 (June 28, 2022)
 

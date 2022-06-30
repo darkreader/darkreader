@@ -1,5 +1,26 @@
-const userAgent = typeof navigator === 'undefined' ? 'some useragent' : navigator.userAgent.toLowerCase();
-const platform = typeof navigator === 'undefined' ? 'some platform' : navigator.platform.toLowerCase();
+interface UserAgentData {
+    brands: Array<{
+        brand: string;
+        version: string;
+    }>;
+    mobile: boolean;
+    platform: string;
+}
+
+declare global {
+    interface NavigatorID {
+        userAgentData: UserAgentData;
+    }
+}
+
+const isNavigatorDefined = typeof navigator !== 'undefined';
+const userAgent = isNavigatorDefined ? navigator.userAgentData ?
+    navigator.userAgentData.brands.map((brand) => `${brand.brand.toLowerCase()} ${brand.version}`).join(' ') : navigator.userAgent.toLowerCase()
+    : 'some useragent';
+
+const platform = isNavigatorDefined ? navigator.userAgentData ?
+    navigator.userAgentData.platform.toLowerCase() : navigator.platform.toLowerCase()
+    : 'some platform';
 
 export const isChromium = userAgent.includes('chrome') || userAgent.includes('chromium');
 export const isThunderbird = userAgent.includes('thunderbird');
@@ -11,7 +32,7 @@ export const isEdge = userAgent.includes('edg');
 export const isSafari = userAgent.includes('safari') && !isChromium;
 export const isWindows = platform.startsWith('win');
 export const isMacOS = platform.startsWith('mac');
-export const isMobile = userAgent.includes('mobile');
+export const isMobile = (isNavigatorDefined && navigator.userAgentData) ? navigator.userAgentData.mobile : userAgent.includes('mobile');
 export const isShadowDomSupported = typeof ShadowRoot === 'function';
 export const isMatchMediaChangeEventListenerSupported = (
     typeof MediaQueryList === 'function' &&
@@ -19,7 +40,7 @@ export const isMatchMediaChangeEventListenerSupported = (
 );
 
 export const chromiumVersion = (() => {
-    const m = userAgent.match(/chrom[e|ium]\/([^ ]+)/);
+    const m = userAgent.match(/chrom(?:e|ium)(?:\/| )([^ ]+)/);
     if (m && m[1]) {
         return m[1];
     }

@@ -34,25 +34,21 @@ function sendMessage(message: Message) {
     if (unloaded) {
         return;
     }
-    try {
-        chrome.runtime.sendMessage<Message>(message, (response) => {
-            // Vivaldi bug workaround. See TabManager for details.
-            if (response === 'unsupportedSender') {
-                removeStyle();
-                removeSVGFilter();
-                removeDynamicTheme();
-                cleanup();
-            }
-        });
-    } catch (e) {
+    chrome.runtime.sendMessage<Message>(message, (response) => {
         /*
          * Background can be unreachable if:
          *  - extension was disabled
          *  - extension was uninstalled
          *  - extension was updated and this is the old instance of content script
+         *  - it is a Vivaldi sidebar. See TabManager for details.
          */
-        cleanup();
-    }
+        if (chrome.runtime.lastError || response === 'unsupportedSender') {
+            removeStyle();
+            removeSVGFilter();
+            removeDynamicTheme();
+            cleanup();
+        }
+    });
 }
 
 function onMessage({type, data}: Message) {

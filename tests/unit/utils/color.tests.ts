@@ -98,4 +98,5 @@ test('Color conversion', () => {
 test('Lower calc expressions', () => {
     expect(lowerCalcExpression('hsl(0, 0%, calc(95% - 3%))')).toEqual('hsl(0, 0%, 92%)');
     expect(lowerCalcExpression('hsl(0, calc(25% + 12%), calc(95% - 3%))')).toEqual('hsl(0, 37%, 92%)');
+    expect(lowerCalcExpression('rgb(calc(216.75 + 153 * .15), calc(216.75 + 205 * .15), calc(216.75 + 255 * .15))')).toEqual('rgb(240, 248, 255)');
 });

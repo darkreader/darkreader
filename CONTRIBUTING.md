@@ -195,7 +195,7 @@ It will after making any code changes, the project will be automatically recompi
 
 ## Tips
 
-For editing the code you can use any text editor or web IDE (like [Visual Studio Code](https://code.visualstudio.com), [Atom](https://atom.io/), or [WebStorm](https://www.jetbrains.com/webstorm/)).
+For editing the code you can use any text editor or web IDE (like [Visual Studio Code](https://code.visualstudio.com), or [WebStorm](https://www.jetbrains.com/webstorm/)).
 
 **Please preserve code style** (whitespaces etc).
 This can automatically be done by executing `npm run code-style`.

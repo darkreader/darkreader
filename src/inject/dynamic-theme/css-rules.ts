@@ -91,8 +91,10 @@ export function iterateCSSDeclarations(style: CSSStyleDeclaration, iterate: (pro
 export const cssURLRegex = /url\((('.+?')|(".+?")|([^\)]*?))\)/g;
 export const cssImportRegex = /@import\s*(url\()?(('.+?')|(".+?")|([^\)]*?))\)? ?(screen)?;?/gi;
 
+// First try to extract the CSS URL value.
+// Then do some post fixes, like unescaping backslashes in the URL. (Chromium don't handle this natively).
 export function getCSSURLValue(cssURL: string) {
-    return cssURL.replace(/^url\((.*)\)$/, '$1').trim().replace(/^"(.*)"$/, '$1').replace(/^'(.*)'$/, '$1');
+    return cssURL.trim().replace(/^url\((.*)\)$/, '$1').trim().replace(/^"(.*)"$/, '$1').replace(/^'(.*)'$/, '$1').replace(/(?:\\(.))/g, '$1');
 }
 
 export function getCSSBaseBath(url: string) {

@@ -2,7 +2,7 @@ import {createOrUpdateStyle, removeStyle} from './style';
 import {createOrUpdateSVGFilter, removeSVGFilter} from './svg-filter';
 import {runDarkThemeDetector, stopDarkThemeDetector} from './detector';
 import {createOrUpdateDynamicTheme, removeDynamicTheme, cleanDynamicThemeCache} from './dynamic-theme';
-import {logInfo, logWarn} from '../utils/log';
+import {logInfo, logWarn, logInfoCollapsed} from '../utils/log';
 import {watchForColorSchemeChange} from './utils/watch-color-scheme';
 import {collectCSS} from './dynamic-theme/css-collection';
 import type {Message} from '../definitions';
@@ -56,7 +56,7 @@ function sendMessage(message: Message) {
 }
 
 function onMessage({type, data}: Message) {
-    logInfo('onMessage', type, data);
+    logInfoCollapsed(`onMessage[${type}]`, data);
     switch (type) {
         case MessageType.BG_ADD_CSS_FILTER:
         case MessageType.BG_ADD_STATIC_THEME: {

@@ -35,6 +35,22 @@ export interface StyleManager {
 
 export const STYLE_SELECTOR = 'style, link[rel*="stylesheet" i]:not([disabled])';
 
+// isFontsGoogleApiStyle returns is the given link element is a style from
+// google fonts.
+function isFontsGoogleApiStyle(element: HTMLLinkElement): boolean {
+    if (!element.href) {
+        return false;
+    }
+
+    try {
+        const elementURL = new URL(element.href);
+        return elementURL.hostname === 'fonts.googleapis.com';
+    } catch (err) {
+        logInfo(`Couldn't construct ${element.href} as URL`);
+        return false;
+    }
+}
+
 export function shouldManageStyle(element: Node) {
     return (
         (
@@ -44,9 +60,10 @@ export function shouldManageStyle(element: Node) {
                 element instanceof HTMLLinkElement &&
                 element.rel &&
                 element.rel.toLowerCase().includes('stylesheet') &&
+                element.href &&
                 !element.disabled &&
                 (isFirefox ? !element.href.startsWith('moz-extension://') : true) &&
-                !element.href.startsWith('https://fonts.googleapis.com')
+                !isFontsGoogleApiStyle(element)
             )
         ) &&
         !element.classList.contains('darkreader') &&
@@ -315,18 +332,6 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
         cancelAsyncOperations = false;
 
         function removeCSSRulesFromSheet(sheet: CSSStyleSheet) {
-            // Check if we can use a fastpath by using sheet.replaceSync.
-            // Because replaceSync can throw DOMExceptions we have to use try-catch.
-            try {
-                if (sheet.replaceSync) {
-                    sheet.replaceSync('');
-                    return;
-                }
-            } catch (err) {
-                logWarn('Could not use fastpath for removing rules from stylesheet', err);
-            }
-            // If we hit this point, the replaceSync didn't work
-            // and we have to iterate over the CSSRules.
             for (let i = sheet.cssRules.length - 1; i >= 0; i--) {
                 sheet.deleteRule(i);
             }

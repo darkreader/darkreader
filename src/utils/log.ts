@@ -8,3 +8,11 @@ export function logInfo(...args: any[]) {
 export function logWarn(...args: any[]) {
     DEBUG && console.warn(...args);
 }
+
+export function logInfoCollapsed(title: any, ...args: any[]) {
+    if (DEBUG) {
+        console.groupCollapsed(title);
+        console.log(...args);
+        console.groupEnd();
+    }
+}

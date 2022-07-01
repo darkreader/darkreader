@@ -1,5 +1,6 @@
 // @ts-check
 const fs = require('fs').promises;
+const https = require('https');
 const path = require('path');
 
 /** @type {{[color: string]: (text: string) => string}} */
@@ -100,6 +101,37 @@ async function getPaths(patterns) {
     return await globby(patterns);
 }
 
+/**
+ * @param {number} delay
+ * @returns {Promise<void>}
+ */
+function timeout(delay) {
+    return new Promise((resolve) => setTimeout(resolve, delay));
+}
+
+/**
+ * @param {string} url
+ * @returns {Promise<{buffer(): Buffer; text(encoding?: string): string; type(): string}>}
+ */
+function httpsRequest(url) {
+    return new Promise((resolve) => {
+        /** @type {any[]} */
+        const data = [];
+        https.get(url, (response) => {
+            response
+                .on('data', (chunk) => data.push(chunk))
+                .on('end', () => {
+                    const buffer = Buffer.concat(data);
+                    resolve({
+                        buffer: () => buffer,
+                        text: (/** @type {BufferEncoding} */encoding = 'utf8') => buffer.toString(encoding),
+                        type: () => response.headers['content-type'],
+                    });
+                });
+        });
+    });
+}
+
 module.exports = {
     log,
     copyFile,
@@ -108,4 +140,6 @@ module.exports = {
     removeFolder,
     writeFile,
     getPaths,
+    httpsRequest,
+    timeout,
 };

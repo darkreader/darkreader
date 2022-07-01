@@ -63,6 +63,22 @@ export default class TabManager {
         this.tabs = {};
         this.getTabMessage = getTabMessage;
 
+        async function removeFrame(tabManager: TabManager, tabId: number, frameId: number){
+            await tabManager.stateManager.loadState();
+
+            if (frameId === 0) {
+                delete tabManager.tabs[tabId];
+            }
+
+            if (tabManager.tabs[tabId] && tabManager.tabs[tabId][frameId]) {
+                // We need to use delete here because Object.entries()
+                // in sendMessage() would enumerate undefined as well.
+                delete tabManager.tabs[tabId][frameId];
+            }
+
+            tabManager.stateManager.saveState();
+        }
+
         chrome.runtime.onMessage.addListener(async (message: Message, sender, sendResponse) => {
             function addFrame(tabs: {[tabId: number]: {[frameId: number]: FrameInfo}}, tabId: number, frameId: number, senderURL: string, timestamp: number) {
                 let frames: {[frameId: number]: FrameInfo};
@@ -130,24 +146,11 @@ export default class TabManager {
                     break;
                 }
                 case MessageType.CS_FRAME_FORGET: {
-                    await this.stateManager.loadState();
                     if (!sender.tab) {
                         logWarn('Unexpected message', message, sender);
                         break;
                     }
-                    const tabId = sender.tab.id;
-                    const frameId = sender.frameId;
-
-                    if (frameId === 0) {
-                        delete this.tabs[tabId];
-                    }
-
-                    if (this.tabs[tabId] && this.tabs[tabId][frameId]) {
-                        // We need to use delete here because Object.entries()
-                        // in sendMessage() would enumerate undefined as well.
-                        delete this.tabs[tabId][frameId];
-                    }
-                    this.stateManager.saveState();
+                    removeFrame(this, sender.tab.id, sender.frameId);
                     break;
                 }
                 case MessageType.CS_FRAME_FREEZE:
@@ -226,6 +229,8 @@ export default class TabManager {
                 }
             }
         });
+
+        chrome.tabs.onRemoved.addListener(async (tabId) => removeFrame(this, tabId, 0));
     }
 
     getTabURL(tab: chrome.tabs.Tab): string {

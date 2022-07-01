@@ -7,9 +7,6 @@ import type {Message} from '../definitions';
 export function makeChromiumHappy() {
     chrome.runtime.onMessage.addListener((message: Message, _, sendResponse) => {
         if (![
-            // TabManager
-            MessageType.CS_FRAME_CONNECT,
-
             // Messenger
             MessageType.UI_GET_DATA,
             MessageType.UI_APPLY_DEV_DYNAMIC_THEME_FIXES,

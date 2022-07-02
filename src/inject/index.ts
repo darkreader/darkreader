@@ -7,7 +7,7 @@ import {watchForColorSchemeChange} from './utils/watch-color-scheme';
 import {collectCSS} from './dynamic-theme/css-collection';
 import type {Message} from '../definitions';
 import {MessageType} from '../utils/message';
-import {isThunderbird} from '../utils/platform';
+import {isMV3, isThunderbird} from '../utils/platform';
 
 let unloaded = false;
 
@@ -34,24 +34,27 @@ function sendMessage(message: Message) {
     if (unloaded) {
         return;
     }
-    try {
-        chrome.runtime.sendMessage<Message>(message, (response) => {
-            // Vivaldi bug workaround. See TabManager for details.
-            if (response === 'unsupportedSender') {
-                removeStyle();
-                removeSVGFilter();
-                removeDynamicTheme();
-                cleanup();
-            }
-        });
-    } catch (e) {
+    const responseHandler = (response: 'unsupportedSender' | undefined) => {
+        // Vivaldi bug workaround. See TabManager for details.
+        if (response === 'unsupportedSender') {
+            removeStyle();
+            removeSVGFilter();
+            removeDynamicTheme();
+            cleanup();
+        }
+    };
+
+    if (isMV3) {
         /*
          * Background can be unreachable if:
          *  - extension was disabled
          *  - extension was uninstalled
          *  - extension was updated and this is the old instance of content script
          */
-        cleanup();
+        const promise: Promise<Message | 'unsupportedSender'> = chrome.runtime.sendMessage<Message>(message) as any;
+        promise.then(responseHandler).catch(cleanup);
+    } else {
+        chrome.runtime.sendMessage<Message, 'unsupportedSender' | undefined>(message, responseHandler);
     }
 }
 

@@ -97,6 +97,9 @@ export default class TabManager {
 
             switch (message.type) {
                 case MessageType.CS_FRAME_CONNECT: {
+                    if (isMV3) {
+                        onColorSchemeChange(message.data.isDark);
+                    }
                     await this.stateManager.loadState();
                     const reply = (options: ConnectionMessageOptions) => {
                         const message = getConnectionMessage(options);
@@ -161,6 +164,9 @@ export default class TabManager {
                     this.stateManager.saveState();
                     break;
                 case MessageType.CS_FRAME_RESUME: {
+                    if (isMV3) {
+                        onColorSchemeChange(message.data.isDark);
+                    }
                     await this.stateManager.loadState();
                     const tabId = sender.tab.id;
                     const frameId = sender.frameId;
@@ -286,6 +292,7 @@ export default class TabManager {
             .forEach((tab) => {
                 const frames = this.tabs[tab.id];
                 Object.entries(frames)
+                    .filter((frame) => Boolean(frame))
                     .filter(([, {state}]) => state === DocumentState.ACTIVE || state === DocumentState.PASSIVE)
                     .forEach(([, {url}], frameId) => {
                         const message = this.getTabMessage(this.getTabURL(tab), frameId === 0 ? null : url);

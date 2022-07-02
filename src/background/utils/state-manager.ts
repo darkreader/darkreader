@@ -84,8 +84,8 @@ export class StateManager<T> {
 
     private collectState() {
         const state = {} as T;
-        for (const key of Object.keys(this.defaults)) {
-            state[key as keyof T] = this.parent[key as keyof T] || this.defaults[key as keyof T];
+        for (const key of Object.keys(this.defaults) as Array<keyof T>) {
+            state[key] = this.parent[key] || this.defaults[key];
         }
         return state;
     }

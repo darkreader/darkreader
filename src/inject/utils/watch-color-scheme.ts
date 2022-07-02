@@ -1,20 +1,32 @@
 import {isMatchMediaChangeEventListenerSupported} from '../../utils/platform';
 
-export function watchForColorSchemeChange(callback: (isDark: boolean) => void) {
-    const query = matchMedia('(prefers-color-scheme: dark)');
-    const onChange = () => callback(query.matches);
+let query: MediaQueryList = null;
+let onChange: () => void = null;
+
+export function runColorSchemeChangeDetector(callback: (isDark: boolean) => void) {
+    query = matchMedia('(prefers-color-scheme: dark)');
+    onChange = () => callback(query.matches);
     if (isMatchMediaChangeEventListenerSupported) {
         query.addEventListener('change', onChange);
     } else {
         query.addListener(onChange);
     }
-    return {
-        disconnect() {
-            if (isMatchMediaChangeEventListenerSupported) {
-                query.removeEventListener('change', onChange);
-            } else {
-                query.removeListener(onChange);
-            }
-        },
-    };
+}
+
+export function stopColorSchemeChangeDetector() {
+    if (!query || !onChange) {
+        return;
+    }
+    if (isMatchMediaChangeEventListenerSupported) {
+        query.removeEventListener('change', onChange);
+    } else {
+        query.removeListener(onChange);
+    }
+    query = null;
+    onChange = null;
+}
+
+export function isSystemDarkScheme(): boolean {
+    const q = query || matchMedia('(prefers-color-scheme: dark)');
+    return q.matches;
 }

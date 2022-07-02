@@ -3,7 +3,7 @@ import {createOrUpdateSVGFilter, removeSVGFilter} from './svg-filter';
 import {runDarkThemeDetector, stopDarkThemeDetector} from './detector';
 import {createOrUpdateDynamicTheme, removeDynamicTheme, cleanDynamicThemeCache} from './dynamic-theme';
 import {logInfo, logWarn, logInfoCollapsed} from '../utils/log';
-import {watchForColorSchemeChange} from './utils/watch-color-scheme';
+import {isSystemDarkScheme, runColorSchemeChangeDetector, stopColorSchemeChangeDetector} from './utils/watch-color-scheme';
 import {collectCSS} from './dynamic-theme/css-collection';
 import type {Message} from '../definitions';
 import {MessageType} from '../utils/message';
@@ -12,7 +12,7 @@ import {isMV3, isThunderbird} from '../utils/platform';
 let unloaded = false;
 
 // TODO: Use background page color scheme watcher when browser bugs fixed.
-let colorSchemeWatcher = watchForColorSchemeChange((isDark) => {
+runColorSchemeChangeDetector((isDark) => {
     logInfo('Media query was changed');
     sendMessage({type: MessageType.CS_COLOR_SCHEME_CHANGE, data: {isDark}});
 });
@@ -24,10 +24,7 @@ function cleanup() {
     removeEventListener('resume', onResume);
     cleanDynamicThemeCache();
     stopDarkThemeDetector();
-    if (colorSchemeWatcher) {
-        colorSchemeWatcher.disconnect();
-        colorSchemeWatcher = null;
-    }
+    stopColorSchemeChangeDetector();
 }
 
 function sendMessage(message: Message) {
@@ -128,7 +125,7 @@ function onMessage({type, data}: Message) {
 }
 
 chrome.runtime.onMessage.addListener(onMessage);
-sendMessage({type: MessageType.CS_FRAME_CONNECT});
+sendMessage({type: MessageType.CS_FRAME_CONNECT, data: {isDark: isSystemDarkScheme()}});
 
 function onPageHide(e: PageTransitionEvent) {
     if (e.persisted === false) {
@@ -141,7 +138,7 @@ function onFreeze() {
 }
 
 function onResume() {
-    sendMessage({type: MessageType.CS_FRAME_RESUME});
+    sendMessage({type: MessageType.CS_FRAME_RESUME, data: {isDark: isSystemDarkScheme()}});
 }
 
 function onDarkThemeDetected() {

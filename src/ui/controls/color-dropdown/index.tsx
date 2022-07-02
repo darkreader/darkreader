@@ -13,7 +13,6 @@ interface ColorDropDownProps {
     onChange: (value: string) => void;
     onReset: () => void;
     cssValue: string;
-    cssChange: (cssValue: string) => void;
 }
 
 export default function ColorDropDown(props: ColorDropDownProps) {
@@ -98,7 +97,6 @@ export default function ColorDropDown(props: ColorDropDownProps) {
                 canReset={true}
                 onReset={props.onReset}
                 cssValue={props.cssValue}
-                cssChange={props.cssChange}
             />
         </span>
     );

@@ -11,7 +11,6 @@ interface ColorPickerProps {
     canReset: boolean;
     onReset: () => void;
     cssValue: string;
-    cssChange: (cssValue: string) => void;
 }
 
 function isValidColor(color: string) {
@@ -47,15 +46,15 @@ function ColorPicker(props: ColorPickerProps) {
         const value = rawValue.trim();
         if (isValidColor(value)) {
             props.onChange(value);
-            props.cssChange('');
+            props.onChange('');
         } else {
-	    const cssHex = getComputedStyle(document.documentElement).getPropertyValue(value).trim();
-	    if (isValidColor(cssHex)) {
-	        props.onChange(cssHex);
-                props.cssChange(value);
+            const cssHex = getComputedStyle(document.documentElement).getPropertyValue(value).trim();
+            if (isValidColor(cssHex)) {
+                props.onChange(cssHex);
+                props.onChange(value);
             } else {
                 props.onChange(props.color);
-                props.cssChange(props.cssValue);
+                props.onChange(props.cssValue);
             }
         }
     }

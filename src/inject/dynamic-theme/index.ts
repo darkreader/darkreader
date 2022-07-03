@@ -431,6 +431,18 @@ function stopWatchingForUpdates() {
     cleanReadyStateCompleteListeners();
 }
 
+let metaObserver: MutationObserver;
+
+function addMetaListener() {
+    metaObserver = new MutationObserver(() => {
+        if (document.querySelector('meta[name="darkreader-lock"]')) {
+            metaObserver.disconnect();
+            removeDynamicTheme();
+        }
+    });
+    metaObserver.observe(document.head, {childList: true, subtree: true});
+}
+
 function createDarkReaderInstanceMarker() {
     const metaElement: HTMLMetaElement = document.createElement('meta');
     metaElement.name = 'darkreader';
@@ -439,6 +451,10 @@ function createDarkReaderInstanceMarker() {
 }
 
 function isAnotherDarkReaderInstanceActive() {
+    if (document.querySelector('meta[name="darkreader-lock"]')) {
+        return true;
+    }
+
     const meta: HTMLMetaElement = document.querySelector('meta[name="darkreader"]');
     if (meta) {
         if (meta.content !== INSTANCE_ID) {
@@ -447,6 +463,7 @@ function isAnotherDarkReaderInstanceActive() {
         return false;
     }
     createDarkReaderInstanceMarker();
+    addMetaListener();
     return false;
 }
 
@@ -532,6 +549,8 @@ export function removeDynamicTheme() {
         manager.destroy();
     });
     adoptedStyleManagers.splice(0);
+
+    metaObserver && metaObserver.disconnect();
 }
 
 export function cleanDynamicThemeCache() {

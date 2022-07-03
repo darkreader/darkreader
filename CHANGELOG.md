@@ -2,6 +2,7 @@
 
 - Don't manage styles that have a empty `href` attribute.
 - Use `navigator.UserAgentData` when possible.
+- Add a `<meta name="darkreader-lock">` detector, to disable Dark Reader when detected (only dynamic theme).
 
 ## 4.9.52 (June 28, 2022)
 

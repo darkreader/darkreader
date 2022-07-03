@@ -153,6 +153,8 @@ export default class Messenger {
                 this.adapter.resetDevStaticThemes();
                 break;
             }
+            default:
+                break;
         }
     }
 

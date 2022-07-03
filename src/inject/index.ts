@@ -122,6 +122,8 @@ function onMessage({type, data}: Message) {
             logWarn('Cleaning up before update');
             cleanup();
             break;
+        default:
+            break;
     }
 }
 

@@ -21,7 +21,7 @@ interface ConnectionMessageOptions {
 interface TabManagerOptions {
     getConnectionMessage: (options: ConnectionMessageOptions) => Message | Promise<Message>;
     getTabMessage: (url: string, frameUrl: string) => Message;
-    onColorSchemeChange: ({isDark}: {isDark: boolean}) => void;
+    onColorSchemeChange: (isDark: boolean) => void;
 }
 
 interface FrameInfo {

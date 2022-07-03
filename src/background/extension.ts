@@ -422,7 +422,7 @@ export class Extension implements ExtensionState {
             });
     }
 
-    private onColorSchemeChange = ({isDark}: {isDark: boolean}) => {
+    private onColorSchemeChange = (isDark: boolean) => {
         if (isFirefox) {
             this.wasLastColorSchemeDark = isDark;
         }

@@ -81,8 +81,8 @@ describe('FIXES', () => {
     });
 
     it('should ignore styling when darkreader-lock detected', async () => {
-        document.head.innerHTML = multiline(
-            '<meta name="darkreader-lock"></meta>',
+        document.head.innerHTML = '<meta name="darkreader-lock"></meta>',
+        container.innerHTML = multiline(
             '<style>',
             '    body {',
             '        background-color: pink !important;',
@@ -95,7 +95,7 @@ describe('FIXES', () => {
     });
 
     it('should ignore styling when delayed darkreader-lock detected', async () => {
-        document.head.innerHTML = multiline(
+        container.innerHTML = multiline(
             '<style>',
             '    body {',
             '        background-color: pink !important;',

@@ -1,5 +1,6 @@
 import type {ParsedColorSchemeConfig} from './utils/colorscheme-parser';
 import type {FilterMode} from './generators/css-filter';
+import type {MessageType} from './utils/message';
 
 export interface ExtensionData {
     isEnabled: boolean;
@@ -21,7 +22,7 @@ export interface ExtensionData {
 }
 
 export interface TabData {
-    type: string;
+    type: MessageType;
     data?: any;
 }
 
@@ -125,7 +126,7 @@ export interface TabInfo {
 }
 
 export interface Message {
-    type: string;
+    type: MessageType;
     data?: any;
     id?: number;
     error?: any;

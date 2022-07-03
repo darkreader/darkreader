@@ -12,7 +12,7 @@ import {isMV3, isThunderbird} from '../utils/platform';
 let unloaded = false;
 
 // TODO: Use background page color scheme watcher when browser bugs fixed.
-let colorSchemeWatcher = watchForColorSchemeChange(({isDark}) => {
+let colorSchemeWatcher = watchForColorSchemeChange((isDark) => {
     logInfo('Media query was changed');
     sendMessage({type: MessageType.CS_COLOR_SCHEME_CHANGE, data: {isDark}});
 });

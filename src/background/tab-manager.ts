@@ -227,6 +227,9 @@ export default class TabManager {
                     chrome.tabs.sendMessage<Message>(activeTab.id, {type: MessageType.BG_EXPORT_CSS}, {frameId: 0});
                     break;
                 }
+
+                default:
+                    break;
             }
         });
 

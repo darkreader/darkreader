@@ -292,7 +292,6 @@ export default class TabManager {
             .forEach((tab) => {
                 const frames = this.tabs[tab.id];
                 Object.entries(frames)
-                    .filter((frame) => Boolean(frame))
                     .filter(([, {state}]) => state === DocumentState.ACTIVE || state === DocumentState.PASSIVE)
                     .forEach(([, {url}], frameId) => {
                         const message = this.getTabMessage(this.getTabURL(tab), frameId === 0 ? null : url);

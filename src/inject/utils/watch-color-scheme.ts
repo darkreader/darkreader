@@ -26,7 +26,4 @@ export function stopColorSchemeChangeDetector() {
     onChange = null;
 }
 
-export function isSystemDarkScheme(): boolean {
-    const q = query || matchMedia('(prefers-color-scheme: dark)');
-    return q.matches;
-}
+export const isSystemDarkScheme = () => (query || matchMedia('(prefers-color-scheme: dark)')).matches;

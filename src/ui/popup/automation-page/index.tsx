@@ -1,8 +1,11 @@
 import {m} from 'malevic';
 import {getLocalMessage} from '../../../utils/locales';
 import {CheckBox, TimeRangePicker, TextBox, Button} from '../../controls';
-import type {ViewProps} from '../types';
 import DropDown from '../../controls/dropdown/index';
+import {MessageType} from '../../../utils/message';
+import {isMV3} from '../../../utils/platform';
+import type {Message} from '../../../definitions';
+import type {ViewProps} from '../types';
 
 export default function AutomationPage(props: ViewProps) {
     const isSystemAutomation = props.data.settings.automation === 'system';
@@ -128,7 +131,15 @@ export default function AutomationPage(props: ViewProps) {
                         'automation-page__system-dark-mode__button': true,
                         'automation-page__system-dark-mode__button--active': isSystemAutomation,
                     }}
-                    onclick={() => props.actions.changeSettings({automation: isSystemAutomation ? '' : 'system'})}
+                    onclick={() => {
+                        if (isMV3) {
+                            chrome.runtime.sendMessage<Message>({
+                                type: MessageType.CS_COLOR_SCHEME_CHANGE,
+                                data: {isDark: matchMedia('(prefers-color-scheme: dark)').matches}
+                            });
+                        }
+                        props.actions.changeSettings({automation: isSystemAutomation ? '' : 'system'});
+                    }}
                 >{getLocalMessage('system_dark_mode')}
                 </Button>
             </div>

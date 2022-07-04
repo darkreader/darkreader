@@ -17,6 +17,7 @@ export enum MessageType {
     UI_RESET_DEV_STATIC_THEMES = 'ui-reset-dev-static-themes',
     UI_SAVE_FILE = 'ui-save-file',
     UI_REQUEST_EXPORT_CSS = 'ui-request-export-css',
+    UI_COLOR_SCHEME_CHANGE = 'ui-color-scheme-change',
 
     BG_CHANGES = 'bg-changes',
     BG_ADD_CSS_FILTER = 'bg-add-css-filter',

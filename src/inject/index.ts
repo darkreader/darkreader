@@ -11,12 +11,6 @@ import {isMV3, isThunderbird} from '../utils/platform';
 
 let unloaded = false;
 
-// TODO: Use background page color scheme watcher when browser bugs fixed.
-runColorSchemeChangeDetector((isDark) => {
-    logInfo('Media query was changed');
-    sendMessage({type: MessageType.CS_COLOR_SCHEME_CHANGE, data: {isDark}});
-});
-
 function cleanup() {
     unloaded = true;
     removeEventListener('pagehide', onPageHide);
@@ -123,6 +117,11 @@ function onMessage({type, data}: Message) {
             break;
     }
 }
+
+runColorSchemeChangeDetector((isDark) => {
+    logInfo('Media query was changed');
+    sendMessage({type: MessageType.CS_COLOR_SCHEME_CHANGE, data: {isDark}});
+});
 
 chrome.runtime.onMessage.addListener(onMessage);
 sendMessage({type: MessageType.CS_FRAME_CONNECT, data: {isDark: isSystemDarkScheme()}});

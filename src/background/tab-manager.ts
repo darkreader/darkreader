@@ -214,10 +214,11 @@ export default class TabManager {
                     break;
                 }
 
-                case MessageType.CS_COLOR_SCHEME_CHANGE: {
+                case MessageType.UI_COLOR_SCHEME_CHANGE:
+                    // fallthrough
+                case MessageType.CS_COLOR_SCHEME_CHANGE:
                     onColorSchemeChange(message.data);
                     break;
-                }
 
                 case MessageType.UI_SAVE_FILE: {
                     const {content, name} = message.data;

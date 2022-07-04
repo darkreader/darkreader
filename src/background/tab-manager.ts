@@ -148,21 +148,21 @@ export default class TabManager {
                     this.stateManager.saveState();
                     break;
                 }
-                case MessageType.CS_FRAME_FORGET: {
+                case MessageType.CS_FRAME_FORGET:
                     if (!sender.tab) {
                         logWarn('Unexpected message', message, sender);
                         break;
                     }
                     removeFrame(this, sender.tab.id, sender.frameId);
                     break;
-                }
-                case MessageType.CS_FRAME_FREEZE:
+                case MessageType.CS_FRAME_FREEZE: {
                     await this.stateManager.loadState();
                     const info = this.tabs[sender.tab.id][sender.frameId];
                     info.state = DocumentState.FROZEN;
                     info.url = null;
                     this.stateManager.saveState();
                     break;
+                }
                 case MessageType.CS_FRAME_RESUME: {
                     if (isMV3) {
                         onColorSchemeChange(message.data.isDark);
@@ -183,10 +183,9 @@ export default class TabManager {
                     this.stateManager.saveState();
                     break;
                 }
-                case MessageType.CS_DARK_THEME_DETECTED: {
+                case MessageType.CS_DARK_THEME_DETECTED:
                     this.tabs[sender.tab.id][sender.frameId].darkThemeDetected = true;
                     break;
-                }
 
                 case MessageType.CS_FETCH: {
                     // Using custom response due to Chrome and Firefox incompatibility
@@ -214,10 +213,9 @@ export default class TabManager {
                     break;
                 }
 
-                case MessageType.CS_COLOR_SCHEME_CHANGE: {
+                case MessageType.CS_COLOR_SCHEME_CHANGE:
                     onColorSchemeChange(message.data);
                     break;
-                }
 
                 case MessageType.UI_SAVE_FILE: {
                     const {content, name} = message.data;

@@ -46,15 +46,13 @@ if (WATCH) {
                 send({type: 'reloading'});
             }
             switch (message.type) {
-                case 'reload:css': {
+                case 'reload:css':
                     chrome.runtime.sendMessage<Message>({type: MessageType.BG_CSS_UPDATE});
                     break;
-                }
-                case 'reload:ui': {
+                case 'reload:ui':
                     chrome.runtime.sendMessage<Message>({type: MessageType.BG_UI_UPDATE});
                     break;
-                }
-                case 'reload:full': {
+                case 'reload:full':
                     chrome.tabs.query({}, (tabs) => {
                         for (const tab of tabs) {
                             if (canInjectScript(tab.url)) {
@@ -64,7 +62,6 @@ if (WATCH) {
                         chrome.runtime.reload();
                     });
                     break;
-                }
             }
         };
         socket.onclose = () => {

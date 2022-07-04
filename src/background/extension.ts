@@ -148,11 +148,12 @@ export class Extension implements ExtensionState {
         let isAutoDark: boolean;
         let nextCheck: number;
         switch (automation) {
-            case 'time':
+            case 'time': {
                 const {time} = this.user.settings;
                 isAutoDark = isInTimeIntervalLocal(time.activation, time.deactivation);
                 nextCheck = nextTimeInterval(time.activation, time.deactivation);
                 break;
+            }
             case 'system':
                 if (isMV3) {
                     isAutoDark = this.isDark;
@@ -179,9 +180,8 @@ export class Extension implements ExtensionState {
                 }
                 break;
             }
-            case '': {
+            case '':
                 break;
-            }
         }
 
         let state: AutomationState = '';
@@ -318,7 +318,7 @@ export class Extension implements ExtensionState {
                     automation: '',
                 });
                 break;
-            case 'addSite':
+            case 'addSite': {
                 logInfo('Add Site command entered');
                 const url = frameURL || await this.tabs.getActiveTabURL();
                 if (isPDF(url)) {
@@ -327,6 +327,7 @@ export class Extension implements ExtensionState {
                     this.toggleActiveTab();
                 }
                 break;
+            }
             case 'switchEngine': {
                 logInfo('Switch Engine command entered');
                 const engines = Object.values(ThemeEngines);
@@ -710,9 +711,8 @@ export class Extension implements ExtensionState {
                         },
                     };
                 }
-                default: {
+                default:
                     throw new Error(`Unknown engine ${theme.engine}`);
-                }
             }
         }
 

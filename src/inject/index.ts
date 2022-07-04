@@ -103,18 +103,16 @@ function onMessage({type, data}: Message) {
             }
             break;
         }
-        case MessageType.BG_EXPORT_CSS: {
+        case MessageType.BG_EXPORT_CSS:
             collectCSS().then((collectedCSS) => sendMessage({type: MessageType.CS_EXPORT_CSS_RESPONSE, data: collectedCSS}));
             break;
-        }
         case MessageType.BG_UNSUPPORTED_SENDER:
-        case MessageType.BG_CLEAN_UP: {
+        case MessageType.BG_CLEAN_UP:
             removeStyle();
             removeSVGFilter();
             removeDynamicTheme();
             stopDarkThemeDetector();
             break;
-        }
         case MessageType.BG_RELOAD:
             logWarn('Cleaning up before update');
             cleanup();

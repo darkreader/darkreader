@@ -5,12 +5,12 @@ on:
   #  but don't run these when only some config is changed.
   push:
     branches:
-      - master
+      - main
     paths-ignore:
       - 'src/config/*'
   pull_request:
     branches:
-      - master
+      - main
     types:
       - opened
       - synchronize

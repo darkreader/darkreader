@@ -32,6 +32,10 @@ interface ExtensionState {
     registeredContextMenus: boolean;
 }
 
+interface SystemColorState {
+    isDark: boolean | null;
+}
+
 declare const __DEBUG__: boolean;
 
 export class Extension implements ExtensionState {
@@ -54,6 +58,12 @@ export class Extension implements ExtensionState {
 
     private static ALARM_NAME = 'auto-time-alarm';
     private static LOCAL_STORAGE_KEY = 'Extension-state';
+
+    // Store system color theme
+    private static SYSTEM_COLOR_LOCAL_STORAGE_KEY = 'system-color-state';
+    private systemColorStateManager: StateManager<SystemColorState>;
+    private isDark: boolean | null = null;
+
     constructor() {
         this.config = new ConfigManager();
         this.devtools = new DevTools(this.config, async () => this.onSettingsChanged());
@@ -86,6 +96,35 @@ export class Extension implements ExtensionState {
         }
     }
 
+    private async MV3initSystemColorStateManager(isDark: boolean | null): Promise<void> {
+        if (!isMV3) {
+            return;
+        }
+        if (!this.systemColorStateManager) {
+            this.systemColorStateManager = new StateManager<SystemColorState>(Extension.SYSTEM_COLOR_LOCAL_STORAGE_KEY, this, {
+                isDark,
+            });
+        }
+        if (isDark === null) {
+            // Attempt to restore data from storage
+            return this.systemColorStateManager.loadState();
+        } else if (this.isDark !== isDark) {
+            this.isDark = isDark;
+            return this.systemColorStateManager.saveState();
+        }
+    }
+
+    private async MV3saveSystemColorStateManager(): Promise<void> {
+        if (!isMV3) {
+            return;
+        }
+        if (!this.systemColorStateManager) {
+            logWarn('MV3saveSystemColorStateManager() called before MV3initSystemColorStateManager()');
+            return;
+        }
+        return this.systemColorStateManager.saveState();
+    }
+
     private alarmListener = (alarm: chrome.alarms.Alarm): void => {
         if (alarm.name === Extension.ALARM_NAME) {
             this.callWhenSettingsLoaded(() => {
@@ -116,8 +155,11 @@ export class Extension implements ExtensionState {
                 break;
             case 'system':
                 if (isMV3) {
-                    logWarn('system automation is not yet supported. Defaulting to ON.');
-                    isAutoDark = true;
+                    isAutoDark = this.isDark;
+                    if (this.isDark === null) {
+                        logWarn('System color scheme is unknown. Defaulting to Dark.');
+                        isAutoDark = true;
+                    }
                     break;
                 }
                 if (isFirefox) {
@@ -163,6 +205,7 @@ export class Extension implements ExtensionState {
 
     async start() {
         await this.config.load({local: true});
+        await this.MV3initSystemColorStateManager(null);
 
         await this.user.loadSettings();
         if (this.user.settings.enableContextMenus && !this.registeredContextMenus) {
@@ -423,6 +466,7 @@ export class Extension implements ExtensionState {
     }
 
     private onColorSchemeChange = (isDark: boolean) => {
+        this.MV3initSystemColorStateManager(isDark);
         if (isFirefox) {
             this.wasLastColorSchemeDark = isDark;
         }

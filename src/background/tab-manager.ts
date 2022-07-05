@@ -2,10 +2,12 @@ import {canInjectScript} from '../background/utils/extension-api';
 import {createFileLoader} from './utils/network';
 import type {FetchRequestParameters} from './utils/network';
 import type {Message} from '../definitions';
-import {isFirefox, isMV3, isOpera, isThunderbird} from '../utils/platform';
+import {isFirefox, isOpera, isThunderbird} from '../utils/platform';
 import {MessageType} from '../utils/message';
 import {logWarn} from '../utils/log';
 import {StateManager} from './utils/state-manager';
+
+declare const __MV3__: boolean;
 
 async function queryTabs(query: chrome.tabs.QueryInfo) {
     return new Promise<chrome.tabs.Tab[]>((resolve) => {
@@ -97,7 +99,7 @@ export default class TabManager {
 
             switch (message.type) {
                 case MessageType.CS_FRAME_CONNECT: {
-                    if (isMV3) {
+                    if (__MV3__) {
                         onColorSchemeChange(message.data.isDark);
                     }
                     await this.stateManager.loadState();
@@ -164,7 +166,7 @@ export default class TabManager {
                     break;
                 }
                 case MessageType.CS_FRAME_RESUME: {
-                    if (isMV3) {
+                    if (__MV3__) {
                         onColorSchemeChange(message.data.isDark);
                     }
                     await this.stateManager.loadState();
@@ -253,7 +255,7 @@ export default class TabManager {
             .filter((tab) => !Boolean(this.tabs[tab.id]))
             .forEach((tab) => {
                 if (!tab.discarded) {
-                    if (isMV3) {
+                    if (__MV3__) {
                         chrome.scripting.executeScript({
                             target: {
                                 tabId: tab.id,

@@ -17,7 +17,7 @@ import createStaticStylesheet from '../generators/static-theme';
 import {createSVGFilterStylesheet, getSVGFilterMatrixValue, getSVGReverseFilterMatrixValue} from '../generators/svg-filter';
 import type {ExtensionData, FilterConfig, News, Shortcuts, UserSettings, TabInfo, TabData} from '../definitions';
 import {isSystemDarkModeEnabled} from '../utils/media-query';
-import {isFirefox, isMV3, isThunderbird} from '../utils/platform';
+import {isFirefox, isThunderbird} from '../utils/platform';
 import {MessageType} from '../utils/message';
 import {logInfo, logWarn} from '../utils/log';
 import {PromiseBarrier} from '../utils/promise-barrier';
@@ -37,6 +37,7 @@ interface SystemColorState {
 }
 
 declare const __DEBUG__: boolean;
+declare const __MV3__: boolean;
 
 export class Extension implements ExtensionState {
     config: ConfigManager;
@@ -97,7 +98,7 @@ export class Extension implements ExtensionState {
     }
 
     private async MV3initSystemColorStateManager(isDark: boolean | null): Promise<void> {
-        if (!isMV3) {
+        if (!__MV3__) {
             return;
         }
         if (!this.systemColorStateManager) {
@@ -115,7 +116,7 @@ export class Extension implements ExtensionState {
     }
 
     private async MV3saveSystemColorStateManager(): Promise<void> {
-        if (!isMV3) {
+        if (!__MV3__) {
             return;
         }
         if (!this.systemColorStateManager) {
@@ -155,7 +156,7 @@ export class Extension implements ExtensionState {
                 break;
             }
             case 'system':
-                if (isMV3) {
+                if (__MV3__) {
                     isAutoDark = this.isDark;
                     if (this.isDark === null) {
                         logWarn('System color scheme is unknown. Defaulting to Dark.');

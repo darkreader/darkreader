@@ -2,10 +2,10 @@ name: Run config tests on Pull Request or Push
 on:
   push:
     branches:
-      - master
+      - main
   pull_request:
     branches:
-      - master
+      - main
     types:
       - opened
       - synchronize

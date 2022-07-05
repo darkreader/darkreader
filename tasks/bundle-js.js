@@ -153,6 +153,7 @@ async function bundleJS(/** @type {JSEntry} */entry, {debug, watch}) {
             rollupPluginReplace({
                 preventAssignment: true,
                 '__DEBUG__': debug ? 'true' : 'false',
+                '__MV3__': entry.platform === PLATFORM.CHROME_MV3,
                 '__PORT__': watch ? String(PORT) : '-1',
                 '__TEST__': 'false',
                 '__WATCH__': watch ? 'true' : 'false',

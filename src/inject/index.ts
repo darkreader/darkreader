@@ -7,9 +7,11 @@ import {isSystemDarkScheme, runColorSchemeChangeDetector, stopColorSchemeChangeD
 import {collectCSS} from './dynamic-theme/css-collection';
 import type {Message} from '../definitions';
 import {MessageType} from '../utils/message';
-import {isMV3, isThunderbird} from '../utils/platform';
+import {isThunderbird} from '../utils/platform';
 
 let unloaded = false;
+
+declare const __MV3__: boolean;
 
 function cleanup() {
     unloaded = true;
@@ -35,7 +37,7 @@ function sendMessage(message: Message) {
         }
     };
 
-    if (isMV3) {
+    if (__MV3__) {
         /*
          * Background can be unreachable if:
          *  - extension was disabled
@@ -97,18 +99,16 @@ function onMessage({type, data}: Message) {
             }
             break;
         }
-        case MessageType.BG_EXPORT_CSS: {
+        case MessageType.BG_EXPORT_CSS:
             collectCSS().then((collectedCSS) => sendMessage({type: MessageType.CS_EXPORT_CSS_RESPONSE, data: collectedCSS}));
             break;
-        }
         case MessageType.BG_UNSUPPORTED_SENDER:
-        case MessageType.BG_CLEAN_UP: {
+        case MessageType.BG_CLEAN_UP:
             removeStyle();
             removeSVGFilter();
             removeDynamicTheme();
             stopDarkThemeDetector();
             break;
-        }
         case MessageType.BG_RELOAD:
             logWarn('Cleaning up before update');
             cleanup();

@@ -86,73 +86,60 @@ export default class Messenger {
 
     private onUIMessage({type, data}: Message, sendResponse: (response: {data?: ExtensionData | TabInfo; error?: string}) => void) {
         switch (type) {
-            case MessageType.UI_GET_DATA: {
+            case MessageType.UI_GET_DATA:
                 this.adapter.collect().then((data) => sendResponse({data}));
                 break;
-            }
-            case MessageType.UI_SUBSCRIBE_TO_CHANGES: {
+            case MessageType.UI_SUBSCRIBE_TO_CHANGES:
                 this.changeListenerCount++;
                 break;
-            }
-            case MessageType.UI_UNSUBSCRIBE_FROM_CHANGES: {
+            case MessageType.UI_UNSUBSCRIBE_FROM_CHANGES:
                 this.changeListenerCount--;
                 break;
-            }
-            case MessageType.UI_CHANGE_SETTINGS: {
+            case MessageType.UI_CHANGE_SETTINGS:
                 this.adapter.changeSettings(data);
                 break;
-            }
-            case MessageType.UI_SET_THEME: {
+            case MessageType.UI_SET_THEME:
                 this.adapter.setTheme(data);
                 break;
-            }
-            case MessageType.UI_SET_SHORTCUT: {
+            case MessageType.UI_SET_SHORTCUT:
                 this.adapter.setShortcut(data);
                 break;
-            }
-            case MessageType.UI_TOGGLE_ACTIVE_TAB: {
+            case MessageType.UI_TOGGLE_ACTIVE_TAB:
                 this.adapter.toggleActiveTab();
                 break;
-            }
-            case MessageType.UI_MARK_NEWS_AS_READ: {
+            case MessageType.UI_MARK_NEWS_AS_READ:
                 this.adapter.markNewsAsRead(data);
                 break;
-            }
-            case MessageType.UI_MARK_NEWS_AS_DISPLAYED: {
+            case MessageType.UI_MARK_NEWS_AS_DISPLAYED:
                 this.adapter.markNewsAsDisplayed(data);
                 break;
-            }
-            case MessageType.UI_LOAD_CONFIG: {
+            case MessageType.UI_LOAD_CONFIG:
                 this.adapter.loadConfig(data);
                 break;
-            }
             case MessageType.UI_APPLY_DEV_DYNAMIC_THEME_FIXES: {
                 const error = this.adapter.applyDevDynamicThemeFixes(data);
                 sendResponse({error: (error ? error.message : null)});
                 break;
             }
-            case MessageType.UI_RESET_DEV_DYNAMIC_THEME_FIXES: {
+            case MessageType.UI_RESET_DEV_DYNAMIC_THEME_FIXES:
                 this.adapter.resetDevDynamicThemeFixes();
                 break;
-            }
             case MessageType.UI_APPLY_DEV_INVERSION_FIXES: {
                 const error = this.adapter.applyDevInversionFixes(data);
                 sendResponse({error: (error ? error.message : null)});
                 break;
             }
-            case MessageType.UI_RESET_DEV_INVERSION_FIXES: {
+            case MessageType.UI_RESET_DEV_INVERSION_FIXES:
                 this.adapter.resetDevInversionFixes();
                 break;
-            }
             case MessageType.UI_APPLY_DEV_STATIC_THEMES: {
                 const error = this.adapter.applyDevStaticThemes(data);
                 sendResponse({error: error ? error.message : null});
                 break;
             }
-            case MessageType.UI_RESET_DEV_STATIC_THEMES: {
+            case MessageType.UI_RESET_DEV_STATIC_THEMES:
                 this.adapter.resetDevStaticThemes();
                 break;
-            }
             default:
                 break;
         }

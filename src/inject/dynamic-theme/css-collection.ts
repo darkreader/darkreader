@@ -35,7 +35,7 @@ _______|_______/__/ ____ \\__\\__|___\\__\\__|___\\__\\____
                 https://darkreader.org
 */
 
-/*! Dark reader generated CSS | Licensed under MIT https://github.com/darkreader/darkreader/blob/master/LICENSE */
+/*! Dark reader generated CSS | Licensed under MIT https://github.com/darkreader/darkreader/blob/main/LICENSE */
 `;
 
 export async function collectCSS() {

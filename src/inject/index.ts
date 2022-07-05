@@ -118,10 +118,9 @@ function onMessage({type, data}: Message) {
     }
 }
 
-runColorSchemeChangeDetector((isDark) => {
-    logInfo('Media query was changed');
-    sendMessage({type: MessageType.CS_COLOR_SCHEME_CHANGE, data: {isDark}});
-});
+runColorSchemeChangeDetector((isDark) =>
+    sendMessage({type: MessageType.CS_COLOR_SCHEME_CHANGE, data: {isDark}})
+);
 
 chrome.runtime.onMessage.addListener(onMessage);
 sendMessage({type: MessageType.CS_FRAME_CONNECT, data: {isDark: isSystemDarkScheme()}});

@@ -7,9 +7,11 @@ import {isSystemDarkScheme, runColorSchemeChangeDetector, stopColorSchemeChangeD
 import {collectCSS} from './dynamic-theme/css-collection';
 import type {Message} from '../definitions';
 import {MessageType} from '../utils/message';
-import {isMV3, isThunderbird} from '../utils/platform';
+import {isThunderbird} from '../utils/platform';
 
 let unloaded = false;
+
+declare const __MV3__: boolean;
 
 // TODO: Use background page color scheme watcher when browser bugs fixed.
 runColorSchemeChangeDetector((isDark) => {
@@ -41,7 +43,7 @@ function sendMessage(message: Message) {
         }
     };
 
-    if (isMV3) {
+    if (__MV3__) {
         /*
          * Background can be unreachable if:
          *  - extension was disabled

@@ -1,12 +1,14 @@
 import {MessageType} from '../utils/message';
 import type {Message} from '../definitions';
-import {isChromium, isMV3} from '../utils/platform';
+import {isChromium} from '../utils/platform';
+
+declare const __MV3__: boolean;
 
 // This function exists to prevent Chrome from logging an error about
 // closed conduit. It just sends a dummy message in response to incomming message
 // to utilise open conduit. This response message is not even used on the other side.
 export function makeChromiumHappy() {
-    if (isMV3 || !isChromium) {
+    if (__MV3__ || !isChromium) {
         return;
     }
     chrome.runtime.onMessage.addListener((message: Message, _, sendResponse) => {

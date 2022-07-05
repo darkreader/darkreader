@@ -47,6 +47,14 @@ export const chromiumVersion = (() => {
     return '';
 })();
 
+export const firefoxVersion = (() => {
+    const m = userAgent.match(/(?:firefox|librewolf)(?:\/| )([^ ]+)/);
+    if (m && m[1]) {
+        return m[1];
+    }
+    return '';
+})();
+
 export const isDefinedSelectorSupported = (() => {
     try {
         document.querySelector(':defined');

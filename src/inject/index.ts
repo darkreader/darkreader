@@ -43,17 +43,30 @@ function sendMessage(message: Message) {
         }
     };
 
-    if (__MV3__) {
+    try {
+        if (__MV3__) {
+            const promise: Promise<Message | 'unsupportedSender'> = chrome.runtime.sendMessage<Message>(message) as any;
+            promise.then(responseHandler).catch(cleanup);
+        } else {
+            chrome.runtime.sendMessage<Message, 'unsupportedSender' | undefined>(message, responseHandler);
+        }
+    } catch (error) {
         /*
-         * Background can be unreachable if:
+         * We get here if Background context is unreachable which occurs when:
          *  - extension was disabled
          *  - extension was uninstalled
          *  - extension was updated and this is the old instance of content script
+         *
+         * Any async operations can be ignored here, but sync ones should run to completion.
+         *
+         * Regular message passing errors are returned via rejected promise or runtime.lastError.
          */
-        const promise: Promise<Message | 'unsupportedSender'> = chrome.runtime.sendMessage<Message>(message) as any;
-        promise.then(responseHandler).catch(cleanup);
-    } else {
-        chrome.runtime.sendMessage<Message, 'unsupportedSender' | undefined>(message, responseHandler);
+        if (error.message === 'Extension context invalidated.') {
+            console.log('Dark Reader: instance of old CS detected, clening up.');
+            cleanup();
+        } else {
+            console.log('Dark Reader: unexpected error during message passing.');
+        }
     }
 }
 

@@ -3,9 +3,10 @@ import {getLocalMessage} from '../../../utils/locales';
 import {CheckBox, TimeRangePicker, TextBox, Button} from '../../controls';
 import DropDown from '../../controls/dropdown/index';
 import {MessageType} from '../../../utils/message';
-import {isMV3} from '../../../utils/platform';
 import type {Message} from '../../../definitions';
 import type {ViewProps} from '../types';
+
+declare const __MV3__: boolean;
 
 export default function AutomationPage(props: ViewProps) {
     const isSystemAutomation = props.data.settings.automation === 'system';
@@ -132,7 +133,7 @@ export default function AutomationPage(props: ViewProps) {
                         'automation-page__system-dark-mode__button--active': isSystemAutomation,
                     }}
                     onclick={() => {
-                        if (isMV3) {
+                        if (__MV3__) {
                             chrome.runtime.sendMessage<Message>({
                                 type: MessageType.CS_COLOR_SCHEME_CHANGE,
                                 data: {isDark: matchMedia('(prefers-color-scheme: dark)').matches}

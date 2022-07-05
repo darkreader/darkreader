@@ -8,7 +8,6 @@ interface ScrollbarEditorProps {
     value: ScrollbarColorValue;
     onChange: (value: ScrollbarColorValue) => void;
     onReset: () => void;
-    cssValue: string;
 }
 
 export default function ScrollbarEditor(props: ScrollbarEditorProps) {
@@ -21,7 +20,6 @@ export default function ScrollbarEditor(props: ScrollbarEditorProps) {
                 onReset={props.onReset}
                 hasAutoOption
                 hasDefaultOption
-                cssValue={props.cssValue}
             />
         </ThemeControl>
     );

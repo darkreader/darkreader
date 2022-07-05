@@ -9,7 +9,6 @@ interface TextColorEditorProps {
     onChange: (value: TextColorValue) => void;
     canReset: boolean;
     onReset: () => void;
-    cssValue: string;
 }
 
 export default function TextColorEditor(props: TextColorEditorProps) {
@@ -20,7 +19,6 @@ export default function TextColorEditor(props: TextColorEditorProps) {
                 onChange={props.onChange}
                 canReset={props.canReset}
                 onReset={props.onReset}
-                cssValue={props.cssValue}
             />
         </ThemeControl>
     );

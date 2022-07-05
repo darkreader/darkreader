@@ -10,7 +10,6 @@ interface ColorPickerProps {
     onChange: (color: string) => void;
     canReset: boolean;
     onReset: () => void;
-    cssValue: string;
 }
 
 function isValidColor(color: string) {
@@ -54,7 +53,6 @@ function ColorPicker(props: ColorPickerProps) {
                 props.onChange(value);
             } else {
                 props.onChange(props.color);
-                props.onChange(props.cssValue);
             }
         }
     }

@@ -9,7 +9,6 @@ interface BgColorEditorProps {
     onChange: (value: BgColorValue) => void;
     canReset: boolean;
     onReset: () => void;
-    cssValue: string;
 }
 
 export default function BackgroundColorEditor(props: BgColorEditorProps) {
@@ -20,7 +19,6 @@ export default function BackgroundColorEditor(props: BgColorEditorProps) {
                 onChange={props.onChange}
                 canReset={props.canReset}
                 onReset={props.onReset}
-                cssValue={props.cssValue}
             />
         </ThemeControl>
     );

@@ -8,7 +8,6 @@ interface SelectionEditorProps {
     value: SelectionColorValue;
     onChange: (value: SelectionColorValue) => void;
     onReset: () => void;
-    cssValue: string;
 }
 
 export default function SelectionColorEditor(props: SelectionEditorProps) {
@@ -21,7 +20,6 @@ export default function SelectionColorEditor(props: SelectionEditorProps) {
                 onReset={props.onReset}
                 hasAutoOption
                 hasDefaultOption
-                cssValue={props.cssValue}
             />
         </ThemeControl>
     );

@@ -7,6 +7,7 @@ import {BackgroundColor, Brightness, Contrast, FontPicker, Grayscale, Mode, Rese
 import ThemePresetPicker from '../preset-picker';
 import {getCurrentThemePreset} from '../utils';
 import Collapsible from './collapsible-panel';
+import {isValidColor} from '../../../controls/color-picker'
 
 interface ThemeGroupProps {
     theme: Theme;
@@ -75,24 +76,24 @@ function ColorsGroup({theme, change, colorSchemes}: ColorsGroupProps) {
         <Array>
             <BackgroundColor
                 value={theme[bgProp] === 'auto' ? defaultSchemeColors.background : theme[bgProp]}
-                onChange={(v) => change(v.charAt(0) == '#'?{[bgProp]: v, ...defaultMatrixValues, [csProp]: 'Default'}:{[variableBgProp]: v})}
+                onChange={(v) => change(isValidColor(v)?{[bgProp]: v, ...defaultMatrixValues, [csProp]: 'Default'}:{[variableBgProp]: v})}
                 canReset={theme[bgProp] !== defaultSchemeColors.background}
                 onReset={() => change({[bgProp]: DEFAULT_SETTINGS.theme[bgProp], [csProp]: 'Default', [variableBgProp]: DEFAULT_SETTINGS.theme[variableBgProp]})}
             />
             <TextColor
                 value={theme[fgProp] === 'auto' ? defaultSchemeColors.text : theme[fgProp]}
-                onChange={(v) => change(v.charAt(0) == '#'?{[fgProp]: v, ...defaultMatrixValues, [csProp]: 'Default'}:{[variableFgProp]: v})}
+                onChange={(v) => change(isValidColor(v)?{[fgProp]: v, ...defaultMatrixValues, [csProp]: 'Default'}:{[variableFgProp]: v})}
                 canReset={theme[fgProp] !== defaultSchemeColors.text}
                 onReset={() => change({[fgProp]: DEFAULT_SETTINGS.theme[fgProp], [csProp]: 'Default', [variableFgProp]: DEFAULT_SETTINGS.theme[variableFgProp]})}
             />
             <Scrollbar
                 value={theme.scrollbarColor}
-                onChange={(v) => change(v.charAt(0) == '#'?{scrollbarColor: v}:{cssVariableScrollBar: v})}
+                onChange={(v) => change(isValidColor(v)?{scrollbarColor: v}:{cssVariableScrollBar: v})}
                 onReset={() => change({scrollbarColor: DEFAULT_SETTINGS.theme.scrollbarColor, cssVariableScrollBar: DEFAULT_SETTINGS.theme.cssVariableScrollBar})}
             />
             <SelectionColorEditor
                 value={theme.selectionColor}
-                onChange={(v) => change(v.charAt(0) == '#'?{selectionColor: v}:{cssVariableSelection: v})}
+                onChange={(v) => change(isValidColor(v)?{selectionColor: v}:{cssVariableSelection: v})}
                 onReset={() => change({selectionColor: DEFAULT_SETTINGS.theme.selectionColor, cssVariableSelection: DEFAULT_SETTINGS.theme.cssVariableSelection})}
             />
             <ColorSchemeDropDown

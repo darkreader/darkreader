@@ -4,6 +4,7 @@
 - Use `navigator.UserAgentData` when possible.
 - Add a `<meta name="darkreader-lock">` detector, to disable Dark Reader when detected (only dynamic theme).
 - Fix filter theme for Firefox v102+
+- Correctly open static theme editor on Mobile.
 
 ## 4.9.52 (June 28, 2022)
 

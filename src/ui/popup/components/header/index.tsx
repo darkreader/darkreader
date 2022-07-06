@@ -20,14 +20,14 @@ function Header({data, actions, onMoreToggleSettingsClick}: HeaderProps) {
     function toggleExtension(enabled: UserSettings['enabled']) {
         actions.changeSettings({
             enabled,
-            automation: '',
+            automation: {...data.settings.automation, ...{enabled: false}},
         });
     }
 
     const tab = data.activeTab;
-    const isAutomation = Boolean(data.settings.automation);
-    const isTimeAutomation = data.settings.automation === 'time';
-    const isLocationAutomation = data.settings.automation === 'location';
+    const isAutomation = data.settings.automation.enabled;
+    const isTimeAutomation = data.settings.automation.mode === 'time';
+    const isLocationAutomation = data.settings.automation.mode === 'location';
     const now = new Date();
 
     return (

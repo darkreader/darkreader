@@ -64,8 +64,11 @@ export const DEFAULT_SETTINGS: UserSettings = {
     changeBrowserTheme: false,
     syncSettings: true,
     syncSitesFixes: false,
-    automation: '',
-    automationBehaviour: 'OnOff',
+    automation: {
+        enabled: false,
+        mode: '',
+        behavior: 'OnOff',
+    },
     time: {
         activation: '18:00',
         deactivation: '9:00',

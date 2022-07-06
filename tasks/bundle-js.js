@@ -191,7 +191,11 @@ module.exports = createTask(
         });
         await Promise.all(
             entries.map((entry) => {
-                return [bundleJS(entry, {debug: true, watch: true})];
+                if (entry.platform) {
+                    return [bundleJS(entry, entry.platform, {debug, watch})];
+                }
+                return [PLATFORM.CHROME, PLATFORM.CHROME_MV3, PLATFORM.FIREFOX, PLATFORM.THUNDERBIRD].map((platform) =>
+                    bundleJS(entry, platform, {debug, watch}));
             }).flat()
         );
 

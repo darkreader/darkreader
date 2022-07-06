@@ -112,7 +112,7 @@ async function bundleJS(/** @type {JSEntry} */entry, platform, {debug, watch}) {
                 preventAssignment: true,
                 ...replace,
                 '__DEBUG__': debug ? 'true' : 'false',
-                '__MV3__':  platform === PLATFORM.CHROME_MV3,
+                '__MV3__': platform === PLATFORM.CHROME_MV3,
                 '__PORT__': watch ? String(PORT) : '-1',
                 '__TEST__': 'false',
                 '__WATCH__': watch ? 'true' : 'false',

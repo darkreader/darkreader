@@ -4,7 +4,6 @@
   "description": "Dark mode for every website",
   "scripts": {
     "api": "node tasks/build.js --api",
-    "benchmark-server": "node tests/benchmark-server/index.js",
     "build": "node tasks/build.js --release",
     "build:all": "node tasks/build.js --debug --release --api",
     "code-style": "eslint --ignore-pattern '!.eslintplugin.js' --cache --fix -- 'src/**/*.ts' 'src/**/*.tsx' 'tasks/**/*.js' 'tests/[!coverage]**/*.js' 'tests/**/*.ts' '.eslintrc.js' 'index.d.ts' '.eslintplugin.js'",

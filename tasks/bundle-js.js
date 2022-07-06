@@ -13,6 +13,8 @@ const reload = require('./reload');
 const {PORT} = reload;
 const {createTask} = require('./task');
 
+process.setMaxListeners(50);
+
 /**
  * @typedef JSEntry
  * @property {string} src
@@ -144,7 +146,7 @@ function hydrateTask(/** @type {JSEntry[]} */entries, /** @type {boolean} */debu
         if (entry.platform) {
             return [bundleJS(entry, entry.platform, {debug, watch})];
         }
-        return [PLATFORM.CHROME, PLATFORM.CHROME_MV3, PLATFORM.FIREFOX, PLATFORM.THUNDERBIRD].map((platform) =>
+        return Object.values(PLATFORM).map((platform) =>
             bundleJS(entry, platform, {debug, watch}));
     }).flat();
 }

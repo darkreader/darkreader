@@ -143,7 +143,7 @@ export function validateSettings(settings: Partial<UserSettings>) {
 
         const automationValidator = createValidator();
         automationValidator.validateProperty(automation, 'enabled', isBoolean, automation);
-        automationValidator.validateProperty(automation, 'mode', isOneOf('system', 'time', 'location'), automation);
+        automationValidator.validateProperty(automation, 'mode', isOneOf('system', 'time', 'location', ''), automation);
         automationValidator.validateProperty(automation, 'behavior', isOneOf('OnOff', 'Scheme'), automation);
         return automationValidator.errors.length === 0;
     }, DEFAULT_SETTINGS);

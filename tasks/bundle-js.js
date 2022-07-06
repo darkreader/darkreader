@@ -184,7 +184,9 @@ let watchFiles;
 module.exports = createTask(
     'bundle-js',
     async ({debug, watch}) => await Promise.all(
-        jsEntries.map((entry) => bundleJS(entry, {debug, watch}))
+        jsEntries.map((entry) => {
+            return [bundleJS(entry, {debug, watch})];
+        }).flat()
     ),
 ).addWatcher(
     () => {
@@ -198,7 +200,9 @@ module.exports = createTask(
             });
         });
         await Promise.all(
-            entries.map((e) => bundleJS(e, {debug: true, watch: true}))
+            entries.map((entry) => {
+                return [bundleJS(entry, {debug: true, watch: true})];
+            }).flat()
         );
 
         const newWatchFiles = getWatchFiles();

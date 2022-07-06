@@ -14,31 +14,12 @@ const {PORT} = reload;
 const {createTask} = require('./task');
 const {copyFile, readFile, writeFile} = require('./utils');
 
-function replace(str, find, replace) {
-    return str.split(find).join(replace);
-}
-
-function patchFirefoxJS(/** @type {string} */code) {
-    code = replace(code, 'chrome.fontSettings.getFontList', `chrome['font' + 'Settings']['get' + 'Font' + 'List']`);
-    code = replace(code, 'chrome.fontSettings', `chrome['font' + 'Settings']`);
-    return code;
-}
-
-function patchMV3JS(/** @type {string} */code) {
-    // MV3 moves a few APIs around
-    code = replace(code, 'chrome.browserAction.setIcon', 'chrome.action.setIcon');
-    code = replace(code, 'chrome.browserAction.setBadgeBackgroundColor', 'chrome.action.setBadgeBackgroundColor');
-    code = replace(code, 'chrome.browserAction.setBadgeText', 'chrome.action.setBadgeText');
-
-    return code;
-}
-
 /**
  * @typedef JSEntry
  * @property {string} src
  * @property {string} dest
  * @property {string} reloadType
- * @property {(({debug}) => Promise<void>) | undefined} postBuild
+ * @property {((platform, debug) => Promise<void>) | undefined} postBuild
  * @property {string[]} watchFiles
  * @property {(typeof PLATFORM.CHROME) | undefined} platform
  */
@@ -49,20 +30,16 @@ const jsEntries = [
         src: 'src/background/index.ts',
         dest: 'background/index.js',
         reloadType: reload.FULL,
-        async postBuild({debug}) {
+        async postBuild(platform, debug) {
+            if (platform !== PLATFORM.CHROME_MV3) {
+                return;
+            }
             const destPath = `${getDestDir({debug, platform: PLATFORM.CHROME})}/${this.dest}`;
-            const ffDestPath = `${getDestDir({debug, platform: PLATFORM.FIREFOX})}/${this.dest}`;
             // Prior to Chrome 93, background service worker had to be in top-level directory
             const mv3DestPath = `${getDestDir({debug, platform: PLATFORM.CHROME_MV3})}/background.js`;
-            const tbDestPath = `${getDestDir({debug, platform: PLATFORM.THUNDERBIRD})}/${this.dest}`;
             const code = await readFile(destPath);
-            const patchedCodeFirefox = patchFirefoxJS(code);
-            const patchedCodeMV3 = patchMV3JS(code);
-            await writeFile(ffDestPath, patchedCodeFirefox);
-            await writeFile(mv3DestPath, patchedCodeMV3);
-            await copyFile(ffDestPath, tbDestPath);
+            await writeFile(mv3DestPath, code);
         },
-        platform: PLATFORM.CHROME,
         watchFiles: null,
     },
     {
@@ -113,6 +90,24 @@ const jsEntries = [
 
 async function bundleJS(/** @type {JSEntry} */entry, platform, {debug, watch}) {
     const {src, dest} = entry;
+    let replace = {};
+    switch (platform) {
+        case PLATFORM.FIREFOX:
+        case PLATFORM.THUNDERBIRD:
+            replace = {
+                'chrome.fontSettings.getFontList': `chrome['font' + 'Settings']['get' + 'Font' + 'List']`,
+                'chrome.fontSettings': `chrome['font' + 'Settings']`
+            };
+            break;
+        case PLATFORM.CHROME_MV3:
+            replace = {
+                'chrome.browserAction.setIcon': 'chrome.action.setIcon',
+                'chrome.browserAction.setBadgeBackgroundColor': 'chrome.action.setBadgeBackgroundColor',
+                'chrome.browserAction.setBadgeText': 'chrome.action.setBadgeText',
+            };
+            break;
+    }
+
     const bundle = await rollup.rollup({
         input: rootPath(src),
         plugins: [
@@ -130,6 +125,7 @@ async function bundleJS(/** @type {JSEntry} */entry, platform, {debug, watch}) {
             }),
             rollupPluginReplace({
                 preventAssignment: true,
+                ...replace,
                 '__DEBUG__': debug ? 'true' : 'false',
                 '__MV3__':  entry.platform === PLATFORM.CHROME_MV3,
                 '__PORT__': watch ? String(PORT) : '-1',
@@ -145,7 +141,7 @@ async function bundleJS(/** @type {JSEntry} */entry, platform, {debug, watch}) {
         format: 'iife',
         sourcemap: debug ? 'inline' : false,
     });
-    entry.postBuild && await entry.postBuild({debug});
+    entry.postBuild && await entry.postBuild(platform, debug);
 }
 
 function getWatchFiles() {

@@ -35,11 +35,10 @@ export function getCurrentThemePreset(props: ViewProps) {
         }
         if (
             config.mode != null &&
-            props.data.settings.automation &&
-            props.data.settings.automationBehaviour === 'Scheme'
+            props.data.settings.automation.behavior === 'Scheme'
         ) {
             props.actions.changeSettings({
-                automation: '',
+                automation: {...props.data.settings.automation, ...{enabled: false}},
             });
         }
     }

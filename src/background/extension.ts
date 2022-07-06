@@ -144,11 +144,11 @@ export class Extension implements ExtensionState {
     }
 
     private updateAutoState() {
-        const {automation, automationBehaviour: behavior} = this.user.settings;
+        const {mode, behavior, enabled} = this.user.settings.automation;
 
         let isAutoDark: boolean;
         let nextCheck: number;
-        switch (automation) {
+        switch (mode) {
             case 'time': {
                 const {time} = this.user.settings;
                 isAutoDark = isInTimeIntervalLocal(time.activation, time.deactivation);
@@ -186,7 +186,7 @@ export class Extension implements ExtensionState {
         }
 
         let state: AutomationState = '';
-        if (automation) {
+        if (enabled) {
             if (behavior === 'OnOff') {
                 state = isAutoDark ? 'turn-on' : 'turn-off';
             } else if (behavior === 'Scheme') {
@@ -316,7 +316,7 @@ export class Extension implements ExtensionState {
                 logInfo('Toggle command entered');
                 this.changeSettings({
                     enabled: !this.isExtensionSwitchedOn(),
-                    automation: '',
+                    automation: {...this.user.settings.automation, ...{enable: false}},
                 });
                 break;
             case 'addSite': {
@@ -472,7 +472,7 @@ export class Extension implements ExtensionState {
         if (isFirefox) {
             this.wasLastColorSchemeDark = isDark;
         }
-        if (this.user.settings.automation !== 'system') {
+        if (this.user.settings.automation.mode !== 'system') {
             return;
         }
         this.callWhenSettingsLoaded(() => {
@@ -505,8 +505,9 @@ export class Extension implements ExtensionState {
 
         if (
             (prev.enabled !== this.user.settings.enabled) ||
-            (prev.automation !== this.user.settings.automation) ||
-            (prev.automationBehaviour !== this.user.settings.automationBehaviour) ||
+            (prev.automation.enabled !== this.user.settings.automation.enabled) ||
+            (prev.automation.mode !== this.user.settings.automation.mode) ||
+            (prev.automation.behavior !== this.user.settings.automation.behavior) ||
             (prev.time.activation !== this.user.settings.time.activation) ||
             (prev.time.deactivation !== this.user.settings.time.deactivation) ||
             (prev.location.latitude !== this.user.settings.location.latitude) ||

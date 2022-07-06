@@ -84,6 +84,12 @@ export interface ThemePreset {
     theme: Theme;
 }
 
+export interface Automation {
+    enabled: boolean;
+    mode: '' | 'time' | 'system' | 'location';
+    behavior: 'OnOff' | 'Scheme';
+}
+
 export interface UserSettings {
     enabled: boolean;
     fetchNews: boolean;
@@ -96,8 +102,7 @@ export interface UserSettings {
     changeBrowserTheme: boolean;
     syncSettings: boolean;
     syncSitesFixes: boolean;
-    automation: '' | 'time' | 'system' | 'location';
-    automationBehaviour: 'OnOff' | 'Scheme';
+    automation: Automation;
     time: TimeSettings;
     location: LocationSettings;
     previewNewDesign: boolean;

@@ -1,41 +1,10 @@
 import {m} from 'malevic';
+import {openExtensionPage} from '../../utils';
 import ThemeEngines from '../../../generators/theme-engines';
 import {getLocalMessage} from '../../../utils/locales';
 import {NavButton} from '../../controls';
 import ControlGroup from '../control-group';
 import type {ViewProps} from '../types';
-import {isMobile, isFirefox} from '../../../utils/platform';
-import {openExtensionPage} from 'ui/utils';
-
-function getExistingDevToolsObject(): Promise<chrome.windows.Window> | Promise<chrome.tabs.Tab> {
-    if (isMobile) {
-        return new Promise<chrome.tabs.Tab>((resolve) => {
-            chrome.tabs.query({}, (t) => {
-                for (const tab of t) {
-                    if (tab.url.endsWith('ui/devtools/index.html')) {
-                        resolve(tab);
-                        return;
-                    }
-                }
-                resolve(null);
-            });
-        });
-    }
-    return new Promise<chrome.windows.Window>((resolve) => {
-        chrome.windows.getAll({
-            populate: true,
-            windowTypes: ['popup']
-        }, (w) => {
-            for (const window of w) {
-                if (window.tabs[0].url.endsWith('ui/devtools/index.html')) {
-                    resolve(window);
-                    return;
-                }
-            }
-            resolve(null);
-        });
-    });
-}
 
 async function openDevTools() {
     await openExtensionPage('devtools/index.html');

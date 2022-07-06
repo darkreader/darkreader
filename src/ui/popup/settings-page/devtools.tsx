@@ -5,6 +5,7 @@ import {NavButton} from '../../controls';
 import ControlGroup from '../control-group';
 import type {ViewProps} from '../types';
 import {isMobile, isFirefox} from '../../../utils/platform';
+import {openExtensionPage} from 'ui/utils';
 
 function getExistingDevToolsObject(): Promise<chrome.windows.Window> | Promise<chrome.tabs.Tab> {
     if (isMobile) {
@@ -37,27 +38,7 @@ function getExistingDevToolsObject(): Promise<chrome.windows.Window> | Promise<c
 }
 
 async function openDevTools() {
-    const devToolsObject = await getExistingDevToolsObject();
-    if (isMobile) {
-        if (devToolsObject) {
-            chrome.tabs.update(devToolsObject.id, {'active': true});
-            window.close();
-        } else {
-            chrome.tabs.create({
-                url: '../devtools/index.html',
-            });
-            window.close();
-        }
-    } else if (devToolsObject) {
-        chrome.windows.update(devToolsObject.id, {'focused': true});
-    } else {
-        chrome.windows.create({
-            type: 'popup',
-            url: isFirefox ? '../devtools/index.html' : 'ui/devtools/index.html',
-            width: 600,
-            height: 600,
-        });
-    }
+    await openExtensionPage('devtools/index.html');
 }
 
 export default function DevToolsGroup(props: ViewProps) {

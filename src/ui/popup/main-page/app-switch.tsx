@@ -37,7 +37,7 @@ export default function AppSwitch(props: ViewProps) {
             });
         } else if (index === 1) {
             props.actions.changeSettings({
-                automation: {... props.data.settings.automation, ...{mode: 'system'}},
+                automation: {... props.data.settings.automation, ...{mode: 'system', enabled: true}},
             });
         }
     }

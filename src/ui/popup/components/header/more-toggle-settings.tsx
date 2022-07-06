@@ -69,7 +69,7 @@ export default function MoreToggleSettings({data, actions, isExpanded, onClose}:
     }
 
     function changeAutomationMode(mode: Automation['mode']) {
-        actions.changeSettings({automation: {...data.settings.automation, ...{mode}}});
+        actions.changeSettings({automation: {...data.settings.automation, ...{mode, enabled: Boolean(mode)}}});
     }
 
     return (

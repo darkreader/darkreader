@@ -17,7 +17,7 @@ const {copyFile, readFile, writeFile} = require('./utils');
 /**
  * @typedef JSEntry
  * @property {string} src
- * @property {string} dest
+ * @property {string | ((platform: string) => string)} dest
  * @property {string} reloadType
  * @property {((platform, debug) => Promise<void>) | undefined} postBuild
  * @property {string[]} watchFiles
@@ -28,18 +28,9 @@ const {copyFile, readFile, writeFile} = require('./utils');
 const jsEntries = [
     {
         src: 'src/background/index.ts',
-        dest: 'background/index.js',
+        // Prior to Chrome 93, background service worker had to be in top-level directory
+        dest: (platform) => platform === PLATFORM.CHROME_MV3 ? 'background.js' : 'background/index.js',
         reloadType: reload.FULL,
-        async postBuild(platform, debug) {
-            if (platform !== PLATFORM.CHROME_MV3) {
-                return;
-            }
-            const destPath = `${getDestDir({debug, platform: PLATFORM.CHROME_MV3})}/${this.dest}`;
-            // Prior to Chrome 93, background service worker had to be in top-level directory
-            const mv3DestPath = `${getDestDir({debug, platform: PLATFORM.CHROME_MV3})}/background.js`;
-            const code = await readFile(destPath);
-            await writeFile(mv3DestPath, code);
-        },
         watchFiles: null,
     },
     {
@@ -90,6 +81,7 @@ const jsEntries = [
 
 async function bundleJS(/** @type {JSEntry} */entry, platform, {debug, watch}) {
     const {src, dest} = entry;
+    const destination = typeof dest === 'string' ? dest : dest(platform);
     let replace = {};
     switch (platform) {
         case PLATFORM.FIREFOX:
@@ -127,7 +119,7 @@ async function bundleJS(/** @type {JSEntry} */entry, platform, {debug, watch}) {
                 preventAssignment: true,
                 ...replace,
                 '__DEBUG__': debug ? 'true' : 'false',
-                '__MV3__':  entry.platform === PLATFORM.CHROME_MV3,
+                '__MV3__':  platform === PLATFORM.CHROME_MV3,
                 '__PORT__': watch ? String(PORT) : '-1',
                 '__TEST__': 'false',
                 '__WATCH__': watch ? 'true' : 'false',
@@ -136,12 +128,11 @@ async function bundleJS(/** @type {JSEntry} */entry, platform, {debug, watch}) {
     });
     entry.watchFiles = bundle.watchFiles;
     await bundle.write({
-        file: `${getDestDir({debug, platform})}/${dest}`,
+        file: `${getDestDir({debug, platform})}/${destination}`,
         strict: true,
         format: 'iife',
         sourcemap: debug ? 'inline' : false,
     });
-    entry.postBuild && await entry.postBuild(platform, debug);
 }
 
 function getWatchFiles() {

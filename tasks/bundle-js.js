@@ -86,6 +86,9 @@ async function bundleJS(/** @type {JSEntry} */entry, platform, {debug, watch}) {
     switch (platform) {
         case PLATFORM.FIREFOX:
         case PLATFORM.THUNDERBIRD:
+            if (entry.src === 'src/ui/popup/index.tsx') {
+                break;
+            }
             replace = {
                 'chrome.fontSettings.getFontList': `chrome['font' + 'Settings']['get' + 'Font' + 'List']`,
                 'chrome.fontSettings': `chrome['font' + 'Settings']`

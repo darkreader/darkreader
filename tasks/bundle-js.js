@@ -34,7 +34,7 @@ const jsEntries = [
             if (platform !== PLATFORM.CHROME_MV3) {
                 return;
             }
-            const destPath = `${getDestDir({debug, platform: PLATFORM.CHROME})}/${this.dest}`;
+            const destPath = `${getDestDir({debug, platform: PLATFORM.CHROME_MV3})}/${this.dest}`;
             // Prior to Chrome 93, background service worker had to be in top-level directory
             const mv3DestPath = `${getDestDir({debug, platform: PLATFORM.CHROME_MV3})}/background.js`;
             const code = await readFile(destPath);

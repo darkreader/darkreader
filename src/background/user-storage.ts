@@ -34,6 +34,33 @@ export default class UserStorage {
         });
     }
 
+    // migrateAutomationSettings migrates old automation settings to the new interface.
+    // It will move settings.automation & settings.automationBehavior into,
+    // settings.automation = { enabled, mode, behavior }.
+    // Remove this over two years(mid-2024).
+    private migrateAutomationSettings(settings: UserSettings): void {
+        console.log(settings);
+        if (typeof settings.automation === 'string') {
+            const automationMode = settings.automation as any;
+            const automationBehavior = (settings as any).automationBehaviour;
+            if ((settings.automation as any) === '') {
+                settings.automation = {
+                    enabled: false,
+                    mode: automationMode,
+                    behavior: automationBehavior,
+                };
+            } else {
+                settings.automation = {
+                    enabled: true,
+                    mode: automationMode,
+                    behavior: automationBehavior,
+                };
+            }
+            delete (settings as any).automationBehaviour;
+        }
+        console.log(settings);
+    }
+
     private async loadSettingsFromStorage(): Promise<UserSettings> {
         if (this.loadBarrier) {
             return await this.loadBarrier.entry();
@@ -47,6 +74,7 @@ export default class UserStorage {
             local.syncSettings = DEFAULT_SETTINGS.syncSettings;
         }
         if (!local.syncSettings) {
+            this.migrateAutomationSettings(local);
             this.fillDefaults(local);
             this.loadBarrier.resolve(local);
             return local;
@@ -59,12 +87,15 @@ export default class UserStorage {
             this.set({syncSettings: false});
             this.saveSyncSetting(false);
             this.loadBarrier.resolve(local);
+            this.migrateAutomationSettings($sync);
+            this.fillDefaults($sync);
             return local;
         }
 
         const {errors: syncCfgErrors} = validateSettings($sync);
         syncCfgErrors.forEach((err) => logWarn(err));
 
+        this.migrateAutomationSettings($sync);
         this.fillDefaults($sync);
 
         this.loadBarrier.resolve($sync);

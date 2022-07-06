@@ -12,16 +12,14 @@ const {getDestDir, PLATFORM, rootDir, rootPath} = require('./paths');
 const reload = require('./reload');
 const {PORT} = reload;
 const {createTask} = require('./task');
-const {copyFile, readFile, writeFile} = require('./utils');
 
 /**
  * @typedef JSEntry
  * @property {string} src
  * @property {string | ((platform: string) => string)} dest
  * @property {string} reloadType
- * @property {((platform, debug) => Promise<void>) | undefined} postBuild
- * @property {string[]} watchFiles
- * @property {(typeof PLATFORM.CHROME) | undefined} platform
+ * @property {string[]} [watchFiles]
+ * @property {(typeof PLATFORM.CHROME) | undefined} [platform]
  */
 
 /** @type {JSEntry[]} */
@@ -31,51 +29,43 @@ const jsEntries = [
         // Prior to Chrome 93, background service worker had to be in top-level directory
         dest: (platform) => platform === PLATFORM.CHROME_MV3 ? 'background.js' : 'background/index.js',
         reloadType: reload.FULL,
-        watchFiles: null,
     },
     {
         src: 'src/inject/index.ts',
         dest: 'inject/index.js',
         reloadType: reload.FULL,
-        watchFiles: null,
     },
     {
         src: 'src/inject/dynamic-theme/mv3-injector.ts',
         dest: 'inject/injector.js',
         reloadType: reload.FULL,
         platform: PLATFORM.CHROME_MV3,
-        watchFiles: null,
     },
     {
         src: 'src/inject/dynamic-theme/mv3-proxy.ts',
         dest: 'inject/proxy.js',
         reloadType: reload.FULL,
         platform: PLATFORM.CHROME_MV3,
-        watchFiles: null,
     },
     {
         src: 'src/inject/fallback.ts',
         dest: 'inject/fallback.js',
         reloadType: reload.FULL,
-        watchFiles: null,
     },
     {
         src: 'src/ui/devtools/index.tsx',
         dest: 'ui/devtools/index.js',
         reloadType: reload.UI,
-        watchFiles: null,
     },
     {
         src: 'src/ui/popup/index.tsx',
         dest: 'ui/popup/index.js',
         reloadType: reload.UI,
-        watchFiles: null,
     },
     {
         src: 'src/ui/stylesheet-editor/index.tsx',
         dest: 'ui/stylesheet-editor/index.js',
         reloadType: reload.UI,
-        watchFiles: null,
     },
 ];
 
@@ -141,7 +131,7 @@ async function bundleJS(/** @type {JSEntry} */entry, platform, {debug, watch}) {
 function getWatchFiles() {
     const watchFiles = new Set();
     jsEntries.forEach((entry) => {
-        entry.watchFiles.forEach((file) => watchFiles.add(file));
+        entry.watchFiles?.forEach((file) => watchFiles.add(file));
     });
     return Array.from(watchFiles);
 }
@@ -170,7 +160,7 @@ module.exports = createTask(
     async (changedFiles, watcher) => {
         const entries = jsEntries.filter((entry) => {
             return changedFiles.some((changed) => {
-                return entry.watchFiles.includes(changed);
+                return entry.watchFiles?.includes(changed);
             });
         });
         await Promise.all(hydrateTask(entries, true, true));

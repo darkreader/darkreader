@@ -70,6 +70,7 @@ const jsEntries = [
             await writeFile(mv3DestPath, patchedCodeMV3);
             await copyFile(ffDestPath, tbDestPath);
         },
+        platform: PLATFORM.CHROME,
         watchFiles: null,
     },
     {

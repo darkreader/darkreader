@@ -39,7 +39,6 @@ export default class UserStorage {
     // settings.automation = { enabled, mode, behavior }.
     // Remove this over two years(mid-2024).
     private migrateAutomationSettings(settings: UserSettings): void {
-        console.log(settings);
         if (typeof settings.automation === 'string') {
             const automationMode = settings.automation as any;
             const automationBehavior = (settings as any).automationBehaviour;
@@ -58,7 +57,6 @@ export default class UserStorage {
             }
             delete (settings as any).automationBehaviour;
         }
-        console.log(settings);
     }
 
     private async loadSettingsFromStorage(): Promise<UserSettings> {

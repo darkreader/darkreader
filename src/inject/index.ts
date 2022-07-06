@@ -2,7 +2,7 @@ import {createOrUpdateStyle, removeStyle} from './style';
 import {createOrUpdateSVGFilter, removeSVGFilter} from './svg-filter';
 import {runDarkThemeDetector, stopDarkThemeDetector} from './detector';
 import {createOrUpdateDynamicTheme, removeDynamicTheme, cleanDynamicThemeCache} from './dynamic-theme';
-import {logInfo, logWarn, logInfoCollapsed} from '../utils/log';
+import {logWarn, logInfoCollapsed} from '../utils/log';
 import {isSystemDarkScheme, runColorSchemeChangeDetector, stopColorSchemeChangeDetector} from './utils/watch-color-scheme';
 import {collectCSS} from './dynamic-theme/css-collection';
 import type {Message} from '../definitions';
@@ -12,12 +12,6 @@ import {isThunderbird} from '../utils/platform';
 let unloaded = false;
 
 declare const __MV3__: boolean;
-
-// TODO: Use background page color scheme watcher when browser bugs fixed.
-runColorSchemeChangeDetector((isDark) => {
-    logInfo('Media query was changed');
-    sendMessage({type: MessageType.CS_COLOR_SCHEME_CHANGE, data: {isDark}});
-});
 
 function cleanup() {
     unloaded = true;
@@ -136,6 +130,10 @@ function onMessage({type, data}: Message) {
             break;
     }
 }
+
+runColorSchemeChangeDetector((isDark) =>
+    sendMessage({type: MessageType.CS_COLOR_SCHEME_CHANGE, data: {isDark}})
+);
 
 chrome.runtime.onMessage.addListener(onMessage);
 sendMessage({type: MessageType.CS_FRAME_CONNECT, data: {isDark: isSystemDarkScheme()}});

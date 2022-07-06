@@ -215,6 +215,8 @@ export default class TabManager {
                     break;
                 }
 
+                case MessageType.UI_COLOR_SCHEME_CHANGE:
+                    // fallthrough
                 case MessageType.CS_COLOR_SCHEME_CHANGE:
                     onColorSchemeChange(message.data);
                     break;

@@ -77,9 +77,6 @@ const jsEntries = [
         src: 'src/inject/index.ts',
         dest: 'inject/index.js',
         reloadType: reload.FULL,
-        async postBuild({debug}) {
-            await copyToBrowsers({cwdPath: this.dest, debug});
-        },
         watchFiles: null,
     },
     {
@@ -100,41 +97,29 @@ const jsEntries = [
         src: 'src/inject/fallback.ts',
         dest: 'inject/fallback.js',
         reloadType: reload.FULL,
-        async postBuild({debug}) {
-            await copyToBrowsers({cwdPath: this.dest, debug});
-        },
         watchFiles: null,
     },
     {
         src: 'src/ui/devtools/index.tsx',
         dest: 'ui/devtools/index.js',
         reloadType: reload.UI,
-        async postBuild({debug}) {
-            await copyToBrowsers({cwdPath: this.dest, debug});
-        },
         watchFiles: null,
     },
     {
         src: 'src/ui/popup/index.tsx',
         dest: 'ui/popup/index.js',
         reloadType: reload.UI,
-        async postBuild({debug}) {
-            await copyToBrowsers({cwdPath: this.dest, debug});
-        },
         watchFiles: null,
     },
     {
         src: 'src/ui/stylesheet-editor/index.tsx',
         dest: 'ui/stylesheet-editor/index.js',
         reloadType: reload.UI,
-        async postBuild({debug}) {
-            await copyToBrowsers({cwdPath: this.dest, debug});
-        },
         watchFiles: null,
     },
 ];
 
-async function bundleJS(/** @type {JSEntry} */entry, {debug, watch}) {
+async function bundleJS(/** @type {JSEntry} */entry, platform, {debug, watch}) {
     const {src, dest} = entry;
     const bundle = await rollup.rollup({
         input: rootPath(src),
@@ -163,7 +148,7 @@ async function bundleJS(/** @type {JSEntry} */entry, {debug, watch}) {
     });
     entry.watchFiles = bundle.watchFiles;
     await bundle.write({
-        file: `${getDestDir({debug, platform: entry.platform || PLATFORM.CHROME})}/${dest}`,
+        file: `${getDestDir({debug, platform})}/${dest}`,
         strict: true,
         format: 'iife',
         sourcemap: debug ? 'inline' : false,
@@ -186,7 +171,11 @@ module.exports = createTask(
     'bundle-js',
     async ({debug, watch}) => await Promise.all(
         jsEntries.map((entry) => {
-            return [bundleJS(entry, {debug, watch})];
+            if (entry.platform) {
+                return [bundleJS(entry, entry.platform, {debug, watch})];
+            }
+            return [PLATFORM.CHROME, PLATFORM.CHROME_MV3, PLATFORM.FIREFOX, PLATFORM.THUNDERBIRD].map((platform) =>
+                bundleJS(entry, platform, {debug, watch}));
         }).flat()
     ),
 ).addWatcher(

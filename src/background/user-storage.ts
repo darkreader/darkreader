@@ -38,6 +38,10 @@ export default class UserStorage {
     // It will move settings.automation & settings.automationBehavior into,
     // settings.automation = { enabled, mode, behavior }.
     // Remove this over two years(mid-2024).
+    // This won't always work, because browsers can decide to instead use the default settings
+    // when they notice a different type being requested for automation, in that case it's a data-loss
+    // and not something we can encouter for, except for doing always two extra requests to explicitly
+    // check for this case which is inefficient usage of requesting storage.
     private migrateAutomationSettings(settings: UserSettings): void {
         if (typeof settings.automation === 'string') {
             const automationMode = settings.automation as any;

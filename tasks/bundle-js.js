@@ -14,14 +14,6 @@ const {PORT} = reload;
 const {createTask} = require('./task');
 const {copyFile, readFile, writeFile} = require('./utils');
 
-async function copyToBrowsers({cwdPath, debug}) {
-    const destPath = `${getDestDir({debug, platform: PLATFORM.CHROME})}/${cwdPath}`;
-    for (const platform of [PLATFORM.FIREFOX, PLATFORM.CHROME_MV3, PLATFORM.THUNDERBIRD]) {
-        const path = `${getDestDir({debug, platform})}/${cwdPath}`;
-        await copyFile(destPath, path);
-    }
-}
-
 function replace(str, find, replace) {
     return str.split(find).join(replace);
 }
@@ -139,7 +131,7 @@ async function bundleJS(/** @type {JSEntry} */entry, platform, {debug, watch}) {
             rollupPluginReplace({
                 preventAssignment: true,
                 '__DEBUG__': debug ? 'true' : 'false',
-                '__MV3__': entry.platform === PLATFORM.CHROME_MV3,
+                '__MV3__':  entry.platform === PLATFORM.CHROME_MV3,
                 '__PORT__': watch ? String(PORT) : '-1',
                 '__TEST__': 'false',
                 '__WATCH__': watch ? 'true' : 'false',
@@ -167,17 +159,19 @@ function getWatchFiles() {
 /** @type {string[]} */
 let watchFiles;
 
+function hydrateTask(/** @type {JSEntry[]} */entries, /** @type {boolean} */debug, /** @type {boolean} */watch) {
+    return entries.map((entry) => {
+        if (entry.platform) {
+            return [bundleJS(entry, entry.platform, {debug, watch})];
+        }
+        return [PLATFORM.CHROME, PLATFORM.CHROME_MV3, PLATFORM.FIREFOX, PLATFORM.THUNDERBIRD].map((platform) =>
+            bundleJS(entry, platform, {debug, watch}));
+    }).flat();
+}
+
 module.exports = createTask(
     'bundle-js',
-    async ({debug, watch}) => await Promise.all(
-        jsEntries.map((entry) => {
-            if (entry.platform) {
-                return [bundleJS(entry, entry.platform, {debug, watch})];
-            }
-            return [PLATFORM.CHROME, PLATFORM.CHROME_MV3, PLATFORM.FIREFOX, PLATFORM.THUNDERBIRD].map((platform) =>
-                bundleJS(entry, platform, {debug, watch}));
-        }).flat()
-    ),
+    async ({debug, watch}) => await Promise.all(hydrateTask(jsEntries, debug, watch)),
 ).addWatcher(
     () => {
         watchFiles = getWatchFiles();
@@ -189,15 +183,7 @@ module.exports = createTask(
                 return entry.watchFiles.includes(changed);
             });
         });
-        await Promise.all(
-            entries.map((entry) => {
-                if (entry.platform) {
-                    return [bundleJS(entry, entry.platform, {debug, watch})];
-                }
-                return [PLATFORM.CHROME, PLATFORM.CHROME_MV3, PLATFORM.FIREFOX, PLATFORM.THUNDERBIRD].map((platform) =>
-                    bundleJS(entry, platform, {debug, watch}));
-            }).flat()
-        );
+        await Promise.all(hydrateTask(entries, true, true));
 
         const newWatchFiles = getWatchFiles();
         watcher.unwatch(

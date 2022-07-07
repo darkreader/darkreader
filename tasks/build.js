@@ -34,7 +34,7 @@ async function build({platforms, debug, watch}) {
     try {
         await runTasks(debug ? standardTask : buildTask, {platforms, debug, watch});
         if (watch) {
-            standardTask.forEach((task) => task.watch());
+            standardTask.forEach((task) => task.watch(platforms));
             reload({type: reload.FULL});
             log.ok('Watching...');
         } else {

@@ -20,7 +20,7 @@ class Task {
 
     /**
      * @param {string[] | (() => string[])} files
-     * @param {(changedFiles: string[], watcher: import('chokidar').FSWatcher) => void | Promise<void>} onChange
+     * @param {(changedFiles: string[], watcher: import('chokidar').FSWatcher) => void | Promise<void>, platforms: object} onChange
      */
     addWatcher(files, onChange) {
         this._watchFiles = files;
@@ -47,7 +47,7 @@ class Task {
         );
     }
 
-    watch() {
+    watch(platforms) {
         if (!this._watchFiles || !this._onChange) {
             return;
         }
@@ -58,7 +58,7 @@ class Task {
                 this._watchFiles,
             onChange: async (files) => {
                 await this._measureTime(
-                    this._onChange(files, watcher)
+                    this._onChange(files, watcher, platforms)
                 );
             },
         });

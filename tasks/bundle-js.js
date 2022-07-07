@@ -162,13 +162,13 @@ module.exports = createTask(
         watchFiles = getWatchFiles();
         return watchFiles;
     },
-    async (changedFiles, watcher) => {
+    async (changedFiles, watcher, platforms) => {
         const entries = jsEntries.filter((entry) => {
             return changedFiles.some((changed) => {
                 return entry.watchFiles?.includes(changed);
             });
         });
-        await Promise.all(hydrateTask(entries, true, true));
+        await Promise.all(hydrateTask(entries, platforms, true, true));
 
         const newWatchFiles = getWatchFiles();
         watcher.unwatch(

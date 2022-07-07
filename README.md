@@ -105,21 +105,19 @@ However, this can be enabled using the following steps:
 
 ## Pywal colorscheme integration for Firefox
 
-- In FireFox's <code>about:config</code> set <code>toolkit.legacyUserProfileCustomizations.stylesheets</code> to <code>true</code>.
-- Find your profile's root directory in <code>about:profiles</code> and (if it doesn't already exist) create a new folder inside it called <code>chrome</code>.
-- Locate [Pywal's](https://github.com/dylanaraps/pywal) <code>colors.css</code>. By default this should be located at <code>~/.cache/wal/colors.css</code>
-- Hard link this file to inside the <code>chrome</code> directory you just created using:
-   a) <code>userContent.css</code> as your link name if this file does not already exist the folder. 
-   b) <code>colors.css</code> as your link name if <code>userContent.css</code> already exists. Additionally, add the following line to the top of your <code>userContent.css</code>:
-      ```css
-      @import "colors.css";
-      ```
-- In Firefox click on the Dark Reader icon.
-- Click on the Dev tools button (in the bottom-right corner).
-- Click on the Preview new design button.
-- Navigate to 'See all options -> Colors'.
-- In place of hex color code(s) enter a valid css variable name (E.g <code>--background</code>, <code>--foreground</code>, <code>--color4</code>).
-- To detect a change in your Pywal scheme restart firefox.
+1. In FireFox's <code>about:config</code> set <code>toolkit.legacyUserProfileCustomizations.stylesheets</code> to <code>true</code>.
+2. Find your profile's root directory in <code>about:profiles</code> and (if it doesn't already exist) create a new folder inside it called <strong>chrome</strong>.
+3. Locate [Pywal's](https://github.com/dylanaraps/pywal) <strong>colors.css</strong>. By default this should be located at <code>~/.cache/wal/colors.css</code>
+4. Hard link this file to inside the <code>chrome</code> directory you just created using either:
+   - <strong>userContent.css</strong> as your link name if this file does not already exist the folder.
+   - <strong>colors.css</strong> as your link name if <strong>userContent.css</strong> already exists. Additionally, add <code>import "colors.css"; #123456;</code> to the top of your <strong>userContent.css</strong>.
+5. In Firefox click on the Dark Reader icon.
+6. Click on the Dev tools button (in the bottom-right corner).
+7. Click on the Preview new design button.
+8. Navigate to 'See all options -> Colors'.
+9. In place of hex color code(s) enter a valid css variable name (E.g <code>--background</code>, <code>--foreground</code>, <code>--color4</code>).
+
+To detect a change in your Pywal scheme restart firefox.
 
 This will also work with other colorscheme generators as long as template is in a valid css format:
 ```css

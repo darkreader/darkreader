@@ -6,6 +6,7 @@
 - Fix filter theme for Firefox v102+
 - Correctly open static theme editor on Mobile.
 - Migrate automation settings to it's own object. WARNING: this can lead to data loss of currently used automation settings due to browser behavior.
+- Correctly handle empty URL's in `background-image` property.
 
 ## 4.9.52 (June 28, 2022)
 

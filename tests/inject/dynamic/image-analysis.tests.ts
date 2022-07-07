@@ -4,7 +4,7 @@ import {createOrUpdateDynamicTheme, removeDynamicTheme} from '../../../src/injec
 import {getImageDetails} from '../../../src/inject/dynamic-theme/image';
 import {multiline, waitForEvent} from '../support/test-utils';
 import type {DynamicThemeFix} from '../../../src/definitions';
-import {isChromium, isFirefox} from '../../../src/utils/platform';
+import {isFirefox} from '../../../src/utils/platform';
 
 const theme = {
     ...DEFAULT_THEME,

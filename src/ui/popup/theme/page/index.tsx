@@ -7,7 +7,7 @@ import {BackgroundColor, Brightness, Contrast, FontPicker, Grayscale, Mode, Rese
 import ThemePresetPicker from '../preset-picker';
 import {getCurrentThemePreset} from '../utils';
 import Collapsible from './collapsible-panel';
-import {isValidColor} from '../../../controls/color-picker'
+import {isValidColor} from '../../../controls/color-picker';
 
 interface ThemeGroupProps {
     theme: Theme;

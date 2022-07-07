@@ -103,6 +103,31 @@ However, this can be enabled using the following steps:
 - Click on the Preview new design button.
 - Enable the `Synchronize site fixes` setting under `Settings -> Manage Settings`.
 
+## Pywal colorscheme integration for Firefox
+
+- In FireFox's <code>about:config</code> set <code>toolkit.legacyUserProfileCustomizations.stylesheets</code> to <code>true</code>.
+- Find your profile's root directory in <code>about:profiles</code> and (if it doesn't already exist) create a new folder inside it called <code>chrome</code>.
+- Locate [Pywal's](https://github.com/dylanaraps/pywal) <code>colors.css</code>. By default this should be located at <code>~/.cache/wal/colors.css</code>
+- Hard link this file to inside the <code>chrome</code> directory you just created using:
+   a) <code>userContent.css</code> as your link name if this file does not already exist the folder. 
+   b) <code>colors.css</code> as your link name if <code>userContent.css</code> already exists. Additionally, add the following line to the top of your <code>userContent.css</code>:
+      ```css
+      @import "colors.css";
+      ```
+- In Firefox click on the Dark Reader icon.
+- Click on the Dev tools button (in the bottom-right corner).
+- Click on the Preview new design button.
+- Navigate to 'See all options -> Colors'.
+- In place of hex color code(s) enter a valid css variable name (E.g <code>--background</code>, <code>--foreground</code>, <code>--color4</code>).
+- To detect a change in your Pywal scheme restart firefox.
+
+This will also work with other colorscheme generators as long as template is in a valid css format:
+```css
+:root{
+--example: #123456;
+}
+```
+  
 <h2 align="center">Contributors</h2>
 <br/>
 <h3 align="center"><strong>Thank you to all our contributors! Dark Reader exists thanks to you.</strong></h3>

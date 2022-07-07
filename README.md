@@ -110,7 +110,7 @@ However, this can be enabled using the following steps:
 3. Locate [Pywal's](https://github.com/dylanaraps/pywal) <strong>colors.css</strong>. By default this should be located at <code>~/.cache/wal/colors.css</code>
 4. Hard link this file to inside the <code>chrome</code> directory you just created using either:
    - <strong>userContent.css</strong> as your link name if this file does not already exist the folder.
-   - <strong>colors.css</strong> as your link name if <strong>userContent.css</strong> already exists. Additionally, add <code>@import "colors.css"; #123456;</code> to the top of your <strong>userContent.css</strong>.
+   - <strong>colors.css</strong> as your link name if <strong>userContent.css</strong> already exists. Additionally, add <code>@import "colors.css";</code> to the top of your <strong>userContent.css</strong>.
 5. In Firefox click on the Dark Reader icon.
 6. Click on the Dev tools button (in the bottom-right corner).
 7. Click on the Preview new design button.

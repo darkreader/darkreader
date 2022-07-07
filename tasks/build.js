@@ -12,6 +12,7 @@ const zip = require('./zip');
 const {runTasks} = require('./task');
 const {log} = require('./utils');
 const {fork} = require('child_process');
+const {PLATFORM} = require('./paths');
 
 const standardTask = [
     clean,
@@ -28,10 +29,10 @@ const buildTask = [
     zip
 ];
 
-async function build({debug, watch}) {
+async function build({platforms, debug, watch}) {
     log.ok('BUILD');
     try {
-        await runTasks(debug ? standardTask : buildTask, {debug, watch});
+        await runTasks(debug ? standardTask : buildTask, {platforms, debug, watch});
         if (watch) {
             standardTask.forEach((task) => task.watch());
             reload({type: reload.FULL});
@@ -48,7 +49,7 @@ async function build({debug, watch}) {
 async function api() {
     log.ok('API');
     try {
-        await runTasks([bundleAPI], {debug: false, watch: false});
+        await runTasks([bundleAPI], {platforms: {}, debug: false, watch: false});
         log.ok('MISSION PASSED! RESPECT +');
     } catch (err) {
         log.error(`MISSION FAILED!`);
@@ -73,16 +74,24 @@ async function executeChildProcess(args) {
 async function run() {
     const args = process.argv.slice(2);
 
+    const allPlatforms = !(args.includes('--chrome') || args.includes('--chrome-mv3') || args.includes('--firefox') || args.includes('--thunderbird'));
+    const platforms = {
+        [PLATFORM.CHROME]: allPlatforms || args.includes('--chrome'),
+        [PLATFORM.CHROME_MV3]: allPlatforms || args.includes('--chrome-mv3'),
+        [PLATFORM.FIREFOX]: allPlatforms || args.includes('--firefox'),
+        [PLATFORM.THUNDERBIRD]: allPlatforms || args.includes('--thunderbird'),
+    };
+
     // Enable Ctrl+C to cancel the build immediately
     if (!process.env.BUILD_CHILD) {
         return executeChildProcess(args);
     }
 
     if (args.includes('--release')) {
-        await build({debug: false, watch: false});
+        await build({platforms, debug: false, watch: false});
     }
     if (args.includes('--debug')) {
-        await build({debug: true, watch: args.includes('--watch')});
+        await build({platforms, debug: true, watch: args.includes('--watch')});
     }
     if (args.includes('--api')) {
         await api();

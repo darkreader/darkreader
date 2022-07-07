@@ -141,19 +141,22 @@ function getWatchFiles() {
 /** @type {string[]} */
 let watchFiles;
 
-function hydrateTask(/** @type {JSEntry[]} */entries, /** @type {boolean} */debug, /** @type {boolean} */watch) {
+function hydrateTask(/** @type {JSEntry[]} */entries, platforms, /** @type {boolean} */debug, /** @type {boolean} */watch) {
     return entries.map((entry) => {
         if (entry.platform) {
-            return [bundleJS(entry, entry.platform, {debug, watch})];
+            if (platforms[entry.platform]) {
+                return [bundleJS(entry, entry.platform, {debug, watch})];
+            }
+            return [];
         }
-        return Object.values(PLATFORM).map((platform) =>
+        return Object.values(PLATFORM).filter((platform) => platforms[platform]).map((platform) =>
             bundleJS(entry, platform, {debug, watch}));
     }).flat();
 }
 
 module.exports = createTask(
     'bundle-js',
-    async ({debug, watch}) => await Promise.all(hydrateTask(jsEntries, debug, watch)),
+    async ({platforms, debug, watch}) => await Promise.all(hydrateTask(jsEntries, platforms, debug, watch)),
 ).addWatcher(
     () => {
         watchFiles = getWatchFiles();

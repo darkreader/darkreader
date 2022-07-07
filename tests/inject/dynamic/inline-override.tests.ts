@@ -1,7 +1,6 @@
 import '../support/polyfills';
 import {DEFAULT_THEME} from '../../../src/defaults';
 import {createOrUpdateDynamicTheme, removeDynamicTheme} from '../../../src/inject/dynamic-theme';
-import {isChromium} from '../../../src/utils/platform';
 import {multiline, timeout} from '../support/test-utils';
 
 const theme = {
@@ -59,7 +58,8 @@ describe('INLINE STYLES', () => {
         container.innerHTML = '<span style="color: red;">Watch inline style</span>';
         createOrUpdateDynamicTheme(theme, null, false);
         const span = document.querySelector('span');
-        expect(span.getAttribute('style')).toBe(`color: red; --darkreader-inline-color:${!isChromium ? ' ' : ''}#ff1a1a;`);
+        expect(span.getAttribute('style').startsWith('color: red; --darkreader-inline-color:')).toBeTrue();
+        expect(span.getAttribute('style').endsWith('#ff1a1a;')).toBeTrue();
 
         span.style.color = '';
         await timeout(0);

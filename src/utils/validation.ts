@@ -1,5 +1,5 @@
 import {DEFAULT_SETTINGS, DEFAULT_THEME} from '../defaults';
-import type {UserSettings, Theme, ThemePreset, CustomSiteConfig, TimeSettings, LocationSettings} from '../definitions';
+import type {UserSettings, Theme, ThemePreset, CustomSiteConfig, TimeSettings, LocationSettings, Automation} from '../definitions';
 
 function isBoolean(x: any): x is boolean {
     return typeof x === 'boolean';
@@ -136,8 +136,17 @@ export function validateSettings(settings: Partial<UserSettings>) {
     validateProperty(settings, 'changeBrowserTheme', isBoolean, DEFAULT_SETTINGS);
     validateProperty(settings, 'syncSettings', isBoolean, DEFAULT_SETTINGS);
     validateProperty(settings, 'syncSitesFixes', isBoolean, DEFAULT_SETTINGS);
-    validateProperty(settings, 'automation', isOneOf('', 'time', 'system', 'location'), DEFAULT_SETTINGS);
-    validateProperty(settings, 'automationBehaviour', isOneOf('OnOff', 'Scheme'), DEFAULT_SETTINGS);
+    validateProperty(settings, 'automation', (automation: Automation) => {
+        if (!isPlainObject(automation)) {
+            return false;
+        }
+
+        const automationValidator = createValidator();
+        automationValidator.validateProperty(automation, 'enabled', isBoolean, automation);
+        automationValidator.validateProperty(automation, 'mode', isOneOf('system', 'time', 'location', ''), automation);
+        automationValidator.validateProperty(automation, 'behavior', isOneOf('OnOff', 'Scheme'), automation);
+        return automationValidator.errors.length === 0;
+    }, DEFAULT_SETTINGS);
 
     validateProperty(settings, 'time', (time: TimeSettings) => {
         if (!isPlainObject(time)) {

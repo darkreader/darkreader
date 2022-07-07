@@ -112,8 +112,11 @@ test('Settings Validation', () => {
         changeBrowserTheme: 1,
         syncSettings: null as boolean,
         syncSitesFixes: 0,
-        automation: 'off',
-        automationBehaviour: 'Default',
+        automation: {
+            enabled: false,
+            behavior: 'OnOff',
+            mode: '',
+        },
         time: {
             activation: '10:00PM',
             deactivation: '19:00',
@@ -197,8 +200,11 @@ test('Settings Validation', () => {
         changeBrowserTheme: true,
         syncSettings: false,
         syncSitesFixes: true,
-        automation: 'time',
-        automationBehaviour: 'Scheme',
+        automation: {
+            enabled: true,
+            mode: 'location',
+            behavior: 'OnOff',
+        },
         time: {
             activation: '18:00',
             deactivation: '7:00',

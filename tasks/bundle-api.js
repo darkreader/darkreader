@@ -30,6 +30,7 @@ async function bundleAPI({debug}) {
             rollupPluginReplace({
                 preventAssignment: true,
                 '__DEBUG__': 'false',
+                '__MV3__': 'false',
                 '__TEST__': 'false',
             }),
         ].filter((x) => x)

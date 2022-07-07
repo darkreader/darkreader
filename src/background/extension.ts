@@ -17,7 +17,7 @@ import createStaticStylesheet from '../generators/static-theme';
 import {createSVGFilterStylesheet, getSVGFilterMatrixValue, getSVGReverseFilterMatrixValue} from '../generators/svg-filter';
 import type {ExtensionData, FilterConfig, News, Shortcuts, UserSettings, TabInfo, TabData} from '../definitions';
 import {isSystemDarkModeEnabled} from '../utils/media-query';
-import {isFirefox, isMV3, isThunderbird} from '../utils/platform';
+import {isFirefox, isThunderbird} from '../utils/platform';
 import {MessageType} from '../utils/message';
 import {logInfo, logWarn} from '../utils/log';
 import {PromiseBarrier} from '../utils/promise-barrier';
@@ -32,7 +32,12 @@ interface ExtensionState {
     registeredContextMenus: boolean;
 }
 
+interface SystemColorState {
+    isDark: boolean | null;
+}
+
 declare const __DEBUG__: boolean;
+declare const __MV3__: boolean;
 
 export class Extension implements ExtensionState {
     config: ConfigManager;
@@ -54,6 +59,12 @@ export class Extension implements ExtensionState {
 
     private static ALARM_NAME = 'auto-time-alarm';
     private static LOCAL_STORAGE_KEY = 'Extension-state';
+
+    // Store system color theme
+    private static SYSTEM_COLOR_LOCAL_STORAGE_KEY = 'system-color-state';
+    private systemColorStateManager: StateManager<SystemColorState>;
+    private isDark: boolean | null = null;
+
     constructor() {
         this.config = new ConfigManager();
         this.devtools = new DevTools(this.config, async () => this.onSettingsChanged());
@@ -86,6 +97,35 @@ export class Extension implements ExtensionState {
         }
     }
 
+    private async MV3initSystemColorStateManager(isDark: boolean | null): Promise<void> {
+        if (!__MV3__) {
+            return;
+        }
+        if (!this.systemColorStateManager) {
+            this.systemColorStateManager = new StateManager<SystemColorState>(Extension.SYSTEM_COLOR_LOCAL_STORAGE_KEY, this, {
+                isDark,
+            });
+        }
+        if (isDark === null) {
+            // Attempt to restore data from storage
+            return this.systemColorStateManager.loadState();
+        } else if (this.isDark !== isDark) {
+            this.isDark = isDark;
+            return this.systemColorStateManager.saveState();
+        }
+    }
+
+    private async MV3saveSystemColorStateManager(): Promise<void> {
+        if (!__MV3__) {
+            return;
+        }
+        if (!this.systemColorStateManager) {
+            logWarn('MV3saveSystemColorStateManager() called before MV3initSystemColorStateManager()');
+            return;
+        }
+        return this.systemColorStateManager.saveState();
+    }
+
     private alarmListener = (alarm: chrome.alarms.Alarm): void => {
         if (alarm.name === Extension.ALARM_NAME) {
             this.callWhenSettingsLoaded(() => {
@@ -104,20 +144,24 @@ export class Extension implements ExtensionState {
     }
 
     private updateAutoState() {
-        const {automation, automationBehaviour: behavior} = this.user.settings;
+        const {mode, behavior, enabled} = this.user.settings.automation;
 
         let isAutoDark: boolean;
         let nextCheck: number;
-        switch (automation) {
-            case 'time':
+        switch (mode) {
+            case 'time': {
                 const {time} = this.user.settings;
                 isAutoDark = isInTimeIntervalLocal(time.activation, time.deactivation);
                 nextCheck = nextTimeInterval(time.activation, time.deactivation);
                 break;
+            }
             case 'system':
-                if (isMV3) {
-                    logWarn('system automation is not yet supported. Defaulting to ON.');
-                    isAutoDark = true;
+                if (__MV3__) {
+                    isAutoDark = this.isDark;
+                    if (this.isDark === null) {
+                        logWarn('System color scheme is unknown. Defaulting to Dark.');
+                        isAutoDark = true;
+                    }
                     break;
                 }
                 if (isFirefox) {
@@ -137,13 +181,12 @@ export class Extension implements ExtensionState {
                 }
                 break;
             }
-            case '': {
+            case '':
                 break;
-            }
         }
 
         let state: AutomationState = '';
-        if (automation) {
+        if (enabled) {
             if (behavior === 'OnOff') {
                 state = isAutoDark ? 'turn-on' : 'turn-off';
             } else if (behavior === 'Scheme') {
@@ -163,6 +206,7 @@ export class Extension implements ExtensionState {
 
     async start() {
         await this.config.load({local: true});
+        await this.MV3initSystemColorStateManager(null);
 
         await this.user.loadSettings();
         if (this.user.settings.enableContextMenus && !this.registeredContextMenus) {
@@ -272,10 +316,10 @@ export class Extension implements ExtensionState {
                 logInfo('Toggle command entered');
                 this.changeSettings({
                     enabled: !this.isExtensionSwitchedOn(),
-                    automation: '',
+                    automation: {...this.user.settings.automation, ...{enable: false}},
                 });
                 break;
-            case 'addSite':
+            case 'addSite': {
                 logInfo('Add Site command entered');
                 const url = frameURL || await this.tabs.getActiveTabURL();
                 if (isPDF(url)) {
@@ -284,6 +328,7 @@ export class Extension implements ExtensionState {
                     this.toggleActiveTab();
                 }
                 break;
+            }
             case 'switchEngine': {
                 logInfo('Switch Engine command entered');
                 const engines = Object.values(ThemeEngines);
@@ -422,11 +467,12 @@ export class Extension implements ExtensionState {
             });
     }
 
-    private onColorSchemeChange = ({isDark}: {isDark: boolean}) => {
+    private onColorSchemeChange = (isDark: boolean) => {
+        this.MV3initSystemColorStateManager(isDark);
         if (isFirefox) {
             this.wasLastColorSchemeDark = isDark;
         }
-        if (this.user.settings.automation !== 'system') {
+        if (this.user.settings.automation.mode !== 'system') {
             return;
         }
         this.callWhenSettingsLoaded(() => {
@@ -459,8 +505,9 @@ export class Extension implements ExtensionState {
 
         if (
             (prev.enabled !== this.user.settings.enabled) ||
-            (prev.automation !== this.user.settings.automation) ||
-            (prev.automationBehaviour !== this.user.settings.automationBehaviour) ||
+            (prev.automation.enabled !== this.user.settings.automation.enabled) ||
+            (prev.automation.mode !== this.user.settings.automation.mode) ||
+            (prev.automation.behavior !== this.user.settings.automation.behavior) ||
             (prev.time.activation !== this.user.settings.time.activation) ||
             (prev.time.deactivation !== this.user.settings.time.deactivation) ||
             (prev.location.latitude !== this.user.settings.location.latitude) ||
@@ -666,9 +713,8 @@ export class Extension implements ExtensionState {
                         },
                     };
                 }
-                default: {
+                default:
                     throw new Error(`Unknown engine ${theme.engine}`);
-                }
             }
         }
 

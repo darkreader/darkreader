@@ -14,6 +14,7 @@ const config = {
     globals: {
         'ts-jest': {tsconfig: '<rootDir>/tests/browser/tsconfig.json'},
         __DEBUG__: false,
+        __MV3__: false,
         __TEST__: true,
         product: 'chrome',
     },

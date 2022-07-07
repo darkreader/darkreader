@@ -88,7 +88,7 @@ export function iterateCSSDeclarations(style: CSSStyleDeclaration, iterate: (pro
     }
 }
 
-export const cssURLRegex = /url\((('.+?')|(".+?")|([^\)]*?))\)/g;
+export const cssURLRegex = /url\((('.*?')|(".*?")|([^\)]*?))\)/g;
 export const cssImportRegex = /@import\s*(url\()?(('.+?')|(".+?")|([^\)]*?))\)? ?(screen)?;?/gi;
 
 // First try to extract the CSS URL value.

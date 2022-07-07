@@ -46,8 +46,9 @@ function patchMV3JS(/** @type {string} */code) {
  * @property {string} src
  * @property {string} dest
  * @property {string} reloadType
- * @property {({debug}) => Promise<void>} postBuild
+ * @property {(({debug}) => Promise<void>) | undefined} postBuild
  * @property {string[]} watchFiles
+ * @property {(typeof PLATFORM.CHROME) | undefined} platform
  */
 
 /** @type {JSEntry[]} */
@@ -78,6 +79,20 @@ const jsEntries = [
         async postBuild({debug}) {
             await copyToBrowsers({cwdPath: this.dest, debug});
         },
+        watchFiles: null,
+    },
+    {
+        src: 'src/inject/dynamic-theme/mv3-injector.ts',
+        dest: 'inject/injector.js',
+        reloadType: reload.FULL,
+        platform: PLATFORM.CHROME_MV3,
+        watchFiles: null,
+    },
+    {
+        src: 'src/inject/dynamic-theme/mv3-proxy.ts',
+        dest: 'inject/proxy.js',
+        reloadType: reload.FULL,
+        platform: PLATFORM.CHROME_MV3,
         watchFiles: null,
     },
     {
@@ -138,6 +153,7 @@ async function bundleJS(/** @type {JSEntry} */entry, {debug, watch}) {
             rollupPluginReplace({
                 preventAssignment: true,
                 '__DEBUG__': debug ? 'true' : 'false',
+                '__MV3__': entry.platform === PLATFORM.CHROME_MV3,
                 '__PORT__': watch ? String(PORT) : '-1',
                 '__TEST__': 'false',
                 '__WATCH__': watch ? 'true' : 'false',
@@ -146,12 +162,12 @@ async function bundleJS(/** @type {JSEntry} */entry, {debug, watch}) {
     });
     entry.watchFiles = bundle.watchFiles;
     await bundle.write({
-        file: `${getDestDir({debug, platform: PLATFORM.CHROME})}/${dest}`,
+        file: `${getDestDir({debug, platform: entry.platform || PLATFORM.CHROME})}/${dest}`,
         strict: true,
         format: 'iife',
         sourcemap: debug ? 'inline' : false,
     });
-    await entry.postBuild({debug});
+    entry.postBuild && await entry.postBuild({debug});
 }
 
 function getWatchFiles() {

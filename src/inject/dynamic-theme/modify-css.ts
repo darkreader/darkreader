@@ -380,6 +380,7 @@ export function getBgImageModifier(
                 return null;
             }
             let url = getCSSURLValue(urlValue);
+            const isURLEmpty = url.length === 0;
             const {parentStyleSheet} = rule;
             const baseURL = (parentStyleSheet && parentStyleSheet.href) ?
                 getCSSBaseBath(parentStyleSheet.href) :
@@ -389,6 +390,9 @@ export function getBgImageModifier(
             const absoluteValue = `url("${url}")`;
 
             return async (filter: FilterConfig) => {
+                if (isURLEmpty) {
+                    return "url('')";
+                }
                 let imageDetails: ImageDetails;
                 if (imageDetailsCache.has(url)) {
                     imageDetails = imageDetailsCache.get(url);

@@ -71,8 +71,37 @@ const jsEntries = [
     },
 ];
 
+const rollupPluginCache = {};
+
+function getRollupPluginInstance(name, key, create) {
+    if (!rollupPluginCache[name]) {
+        rollupPluginCache[name] = {};
+    }
+    if (!rollupPluginCache[name][key]) {
+        rollupPluginCache[name][key] = {};
+    }
+    if (!rollupPluginCache[name][key].instance) {
+        rollupPluginCache[name][key].count = 0;
+        rollupPluginCache[name][key].instance = create();
+    }
+    rollupPluginCache[name][key].count++;
+    return rollupPluginCache[name][key].instance;
+}
+
+function freeRollupPluginInstance(name, key) {
+    if (rollupPluginCache[name] && rollupPluginCache[name][key]) {
+        rollupPluginCache[name][key].count--;
+        if (rollupPluginCache[name][key].count === 0) {
+            rollupPluginCache[name][key] = null;
+        }
+    }
+}
+
 async function bundleJS(/** @type {JSEntry} */entry, platform, {debug, watch}) {
     const {src, dest} = entry;
+    const rollupPluginTypesctiptInstanceKey = debug;
+    const rollupPluginReplaceInstanceKey = `${entry.platform}-${debug}-${watch}-${entry.src === 'src/ui/popup/index.tsx'}`;
+
     const destination = typeof dest === 'string' ? dest : dest(platform);
     let replace = {};
     switch (platform) {
@@ -98,29 +127,36 @@ async function bundleJS(/** @type {JSEntry} */entry, platform, {debug, watch}) {
     const bundle = await rollup.rollup({
         input: rootPath(src),
         plugins: [
-            rollupPluginNodeResolve(),
-            rollupPluginTypescript({
-                rootDir,
-                typescript,
-                tsconfig: rootPath('src/tsconfig.json'),
-                noImplicitAny: debug ? false : true,
-                removeComments: debug ? false : true,
-                sourceMap: debug ? true : false,
-                inlineSources: debug ? true : false,
-                noEmitOnError: true,
-                cacheDir: debug ? `${fs.realpathSync(os.tmpdir())}/darkreader_typescript_cache` : null,
-            }),
-            rollupPluginReplace({
-                preventAssignment: true,
-                ...replace,
-                '__DEBUG__': debug ? 'true' : 'false',
-                '__MV3__': platform === PLATFORM.CHROME_MV3,
-                '__PORT__': watch ? String(PORT) : '-1',
-                '__TEST__': 'false',
-                '__WATCH__': watch ? 'true' : 'false',
-            }),
+            getRollupPluginInstance('nodeResolve', '', rollupPluginNodeResolve),
+            getRollupPluginInstance('typesctipt', rollupPluginTypesctiptInstanceKey, () =>
+                rollupPluginTypescript({
+                    rootDir,
+                    typescript,
+                    tsconfig: rootPath('src/tsconfig.json'),
+                    noImplicitAny: debug ? false : true,
+                    removeComments: debug ? false : true,
+                    sourceMap: debug ? true : false,
+                    inlineSources: debug ? true : false,
+                    noEmitOnError: true,
+                    cacheDir: debug ? `${fs.realpathSync(os.tmpdir())}/darkreader_typescript_cache` : null,
+                })
+            ),
+            getRollupPluginInstance('replace', rollupPluginReplaceInstanceKey, () =>
+                rollupPluginReplace({
+                    preventAssignment: true,
+                    ...replace,
+                    '__DEBUG__': debug ? 'true' : 'false',
+                    '__MV3__': platform === PLATFORM.CHROME_MV3,
+                    '__PORT__': watch ? String(PORT) : '-1',
+                    '__TEST__': 'false',
+                    '__WATCH__': watch ? 'true' : 'false',
+                })
+            ),
         ].filter((x) => x)
     });
+    freeRollupPluginInstance('nodeResolve', '');
+    freeRollupPluginInstance('typesctipt', rollupPluginTypesctiptInstanceKey);
+    freeRollupPluginInstance('replace', rollupPluginReplaceInstanceKey);
     entry.watchFiles = bundle.watchFiles;
     await bundle.write({
         file: `${getDestDir({debug, platform})}/${destination}`,

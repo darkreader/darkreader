@@ -12,6 +12,9 @@ const cwdPaths = [
     'ui/assets/**/*.*',
     'ui/popup/compatibility.js',
     'manifest.json',
+    'ui/popup/index.html',
+    'ui/devtools/index.html',
+    'ui/stylesheet-editor/index.html',
 ];
 const paths = cwdPaths.map((path) => `${srcDir}/${path}`);
 
@@ -47,7 +50,7 @@ async function patchManifestMV3({debug}) {
     await writeJSON(`${destDir}/manifest.json`, patched);
 }
 
-async function copyManifest(path, {debug, platform}) {
+async function copyEntry(path, {debug, platform}) {
     const cwdPath = getCwdPath(path);
     const destDir = getDestDir({debug, platform});
     if ((platform === PLATFORM.FIREFOX || platform === PLATFORM.THUNDERBIRD) && cwdPath === 'manifest.json') {
@@ -67,7 +70,7 @@ async function copy({debug}) {
     const files = await getPaths(paths);
     for (const file of files) {
         for (const platform of Object.values(PLATFORM)) {
-            await copyManifest(file, {debug, platform});
+            await copyEntry(file, {debug, platform});
         }
     }
 }
@@ -81,7 +84,7 @@ module.exports = createTask(
         for (const file of changedFiles) {
             if (await pathExists(file)) {
                 for (const platform of Object.values(PLATFORM)) {
-                    await copyManifest(file, {debug: true, platform});
+                    await copyEntry(file, {debug: true, platform});
                 }
             }
         }

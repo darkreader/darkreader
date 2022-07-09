@@ -1,7 +1,6 @@
 // @ts-check
 const bundleAPI = require('./bundle-api');
 const bundleCSS = require('./bundle-css');
-const bundleHTML = require('./bundle-html');
 const bundleJS = require('./bundle-js');
 const bundleLocales = require('./bundle-locales');
 const clean = require('./clean');
@@ -18,7 +17,6 @@ const standardTask = [
     clean,
     bundleJS,
     bundleCSS,
-    bundleHTML,
     bundleLocales,
     copy,
 ];

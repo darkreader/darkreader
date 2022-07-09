@@ -36,21 +36,20 @@ interface SystemColorState {
     isDark: boolean | null;
 }
 
-declare const __DEBUG__: boolean;
 declare const __MV3__: boolean;
 
-export class Extension implements ExtensionState {
-    config: ConfigManager;
-    devtools: DevTools;
-    icon: IconManager;
-    messenger: Messenger;
-    news: Newsmaker;
-    tabs: TabManager;
-    user: UserStorage;
+export class Extension {
+    private config: ConfigManager;
+    private devtools: DevTools;
+    private icon: IconManager;
+    private messenger: Messenger;
+    private news: Newsmaker;
+    private tabs: TabManager;
+    private user: UserStorage;
 
-    autoState: AutomationState = '';
-    wasEnabledOnLastCheck: boolean = null;
-    registeredContextMenus: boolean = null;
+    private autoState: AutomationState = '';
+    private wasEnabledOnLastCheck: boolean = null;
+    private registeredContextMenus: boolean = null;
     private popupOpeningListener: () => void = null;
     // Is used only with Firefox to bypass Firefox bug
     private wasLastColorSchemeDark: boolean = null;
@@ -233,55 +232,6 @@ export class Extension implements ExtensionState {
 
         this.user.settings.fetchNews && this.news.subscribe();
         this.startBarrier.resolve();
-
-        if (__DEBUG__) {
-            const socket = new WebSocket(`ws://localhost:8894`);
-            socket.onmessage = (e) => {
-                const respond = (message: {type: string; data?: ExtensionData | string | boolean | {[key: string]: string}; id?: number}) => socket.send(JSON.stringify(message));
-                try {
-                    const message: {type: string; data: Partial<UserSettings> | boolean | {[key: string]: string}; id: number} = JSON.parse(e.data);
-                    switch (message.type) {
-                        case 'changeSettings':
-                            this.changeSettings(message.data as Partial<UserSettings>);
-                            respond({type: 'changeSettings-response', id: message.id});
-                            break;
-                        case 'collectData':
-                            this.collectData().then((data) => {
-                                respond({type: 'collectData-response', id: message.id, data});
-                            });
-                            break;
-                        case 'changeLocalStorage': {
-                            const data = message.data as {[key: string]: string};
-                            for (const key in data) {
-                                localStorage[key] = data[key];
-                            }
-                            respond({type: 'changeLocalStorage-response', id: message.id});
-                            break;
-                        }
-                        case 'getLocalStorage':
-                            respond({type: 'getLocalStorage-response', id: message.id, data: localStorage ? JSON.stringify(localStorage) : null});
-                            break;
-                        case 'changeChromeStorage': {
-                            const region: 'local' | 'sync' = (message.data as any).region;
-                            chrome.storage[region].set((message.data as any).data, () => respond({type: 'changeChromeStorage-response', id: message.id}));
-                            break;
-                        }
-                        case 'getChromeStorage': {
-                            const keys = (message.data as any).keys;
-                            const region: 'local' | 'sync' = (message.data as any).region;
-                            chrome.storage[region].get(keys, (data) => respond({type: 'getChromeStorage-response', data, id: message.id}));
-                            break;
-                        }
-                        case 'setDataIsMigratedForTesting':
-                            this.devtools.setDataIsMigratedForTesting(message.data as boolean);
-                            respond({type: 'setDataIsMigratedForTesting-response', id: message.id});
-                            break;
-                    }
-                } catch (err) {
-                    respond({type: 'error', data: String(err)});
-                }
-            };
-        }
     }
 
     private getMessengerAdapter(): ExtensionAdapter {
@@ -389,11 +339,11 @@ export class Extension implements ExtensionState {
         return commands.reduce((map, cmd) => Object.assign(map, {[cmd.name]: cmd.shortcut}), {} as Shortcuts);
     }
 
-    setShortcut(command: string, shortcut: string) {
+    private setShortcut(command: string, shortcut: string) {
         setShortcut(command, shortcut);
     }
 
-    private async collectData(): Promise<ExtensionData> {
+    async collectData(): Promise<ExtensionData> {
         if (!this.user.settings) {
             await this.user.loadSettings();
         }
@@ -540,7 +490,7 @@ export class Extension implements ExtensionState {
         this.onSettingsChanged();
     }
 
-    setTheme($theme: Partial<FilterConfig>) {
+    private setTheme($theme: Partial<FilterConfig>) {
         this.user.set({theme: {...this.user.settings.theme, ...$theme}});
 
         if (this.isExtensionSwitchedOn() && this.user.settings.changeBrowserTheme) {
@@ -555,7 +505,7 @@ export class Extension implements ExtensionState {
         this.messenger.reportChanges(info);
     }
 
-    async toggleActiveTab() {
+    private async toggleActiveTab() {
         const settings = this.user.settings;
         const tab = await this.getActiveTabInfo();
         const {url} = tab;
@@ -723,6 +673,10 @@ export class Extension implements ExtensionState {
             type: MessageType.BG_CLEAN_UP,
         };
     };
+
+    setDevToolsDataIsMigratedForTesting(migrated: boolean) {
+        this.devtools.setDataIsMigratedForTesting(migrated);
+    }
 
     //-------------------------------------
     //          User settings

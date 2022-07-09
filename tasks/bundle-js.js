@@ -13,7 +13,6 @@ const reload = require('./reload');
 const {PORT} = reload;
 const {createTask} = require('./task');
 
-process.setMaxListeners(50);
 
 /**
  * @typedef JSEntry

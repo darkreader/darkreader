@@ -12,124 +12,61 @@ const {getDestDir, PLATFORM, rootDir, rootPath} = require('./paths');
 const reload = require('./reload');
 const {PORT} = reload;
 const {createTask} = require('./task');
-const {copyFile, readFile, writeFile} = require('./utils');
 
-async function copyToBrowsers({cwdPath, debug}) {
-    const destPath = `${getDestDir({debug, platform: PLATFORM.CHROME})}/${cwdPath}`;
-    for (const platform of [PLATFORM.FIREFOX, PLATFORM.CHROME_MV3, PLATFORM.THUNDERBIRD]) {
-        const path = `${getDestDir({debug, platform})}/${cwdPath}`;
-        await copyFile(destPath, path);
-    }
-}
-
-function replace(str, find, replace) {
-    return str.split(find).join(replace);
-}
-
-function patchFirefoxJS(/** @type {string} */code) {
-    code = replace(code, 'chrome.fontSettings.getFontList', `chrome['font' + 'Settings']['get' + 'Font' + 'List']`);
-    code = replace(code, 'chrome.fontSettings', `chrome['font' + 'Settings']`);
-    return code;
-}
-
-function patchMV3JS(/** @type {string} */code) {
-    // MV3 moves a few APIs around
-    code = replace(code, 'chrome.browserAction.setIcon', 'chrome.action.setIcon');
-    code = replace(code, 'chrome.browserAction.setBadgeBackgroundColor', 'chrome.action.setBadgeBackgroundColor');
-    code = replace(code, 'chrome.browserAction.setBadgeText', 'chrome.action.setBadgeText');
-
-    return code;
-}
 
 /**
  * @typedef JSEntry
  * @property {string} src
- * @property {string} dest
+ * @property {string | ((platform: string) => string)} dest
  * @property {string} reloadType
- * @property {(({debug}) => Promise<void>) | undefined} postBuild
- * @property {string[]} watchFiles
- * @property {(typeof PLATFORM.CHROME) | undefined} platform
+ * @property {string[]} [watchFiles]
+ * @property {(typeof PLATFORM.CHROME) | undefined} [platform]
  */
 
 /** @type {JSEntry[]} */
 const jsEntries = [
     {
         src: 'src/background/index.ts',
-        dest: 'background/index.js',
+        // Prior to Chrome 93, background service worker had to be in top-level directory
+        dest: (platform) => platform === PLATFORM.CHROME_MV3 ? 'background.js' : 'background/index.js',
         reloadType: reload.FULL,
-        async postBuild({debug}) {
-            const destPath = `${getDestDir({debug, platform: PLATFORM.CHROME})}/${this.dest}`;
-            const ffDestPath = `${getDestDir({debug, platform: PLATFORM.FIREFOX})}/${this.dest}`;
-            // Prior to Chrome 93, background service worker had to be in top-level directory
-            const mv3DestPath = `${getDestDir({debug, platform: PLATFORM.CHROME_MV3})}/background.js`;
-            const tbDestPath = `${getDestDir({debug, platform: PLATFORM.THUNDERBIRD})}/${this.dest}`;
-            const code = await readFile(destPath);
-            const patchedCodeFirefox = patchFirefoxJS(code);
-            const patchedCodeMV3 = patchMV3JS(code);
-            await writeFile(ffDestPath, patchedCodeFirefox);
-            await writeFile(mv3DestPath, patchedCodeMV3);
-            await copyFile(ffDestPath, tbDestPath);
-        },
-        watchFiles: null,
     },
     {
         src: 'src/inject/index.ts',
         dest: 'inject/index.js',
         reloadType: reload.FULL,
-        async postBuild({debug}) {
-            await copyToBrowsers({cwdPath: this.dest, debug});
-        },
-        watchFiles: null,
     },
     {
         src: 'src/inject/dynamic-theme/mv3-injector.ts',
         dest: 'inject/injector.js',
         reloadType: reload.FULL,
         platform: PLATFORM.CHROME_MV3,
-        watchFiles: null,
     },
     {
         src: 'src/inject/dynamic-theme/mv3-proxy.ts',
         dest: 'inject/proxy.js',
         reloadType: reload.FULL,
         platform: PLATFORM.CHROME_MV3,
-        watchFiles: null,
     },
     {
         src: 'src/inject/fallback.ts',
         dest: 'inject/fallback.js',
         reloadType: reload.FULL,
-        async postBuild({debug}) {
-            await copyToBrowsers({cwdPath: this.dest, debug});
-        },
-        watchFiles: null,
     },
     {
         src: 'src/ui/devtools/index.tsx',
         dest: 'ui/devtools/index.js',
         reloadType: reload.UI,
-        async postBuild({debug}) {
-            await copyToBrowsers({cwdPath: this.dest, debug});
-        },
-        watchFiles: null,
     },
     {
         src: 'src/ui/popup/index.tsx',
         dest: 'ui/popup/index.js',
         reloadType: reload.UI,
-        async postBuild({debug}) {
-            await copyToBrowsers({cwdPath: this.dest, debug});
-        },
-        watchFiles: null,
     },
     {
         src: 'src/ui/stylesheet-editor/index.tsx',
         dest: 'ui/stylesheet-editor/index.js',
         reloadType: reload.UI,
-        async postBuild({debug}) {
-            await copyToBrowsers({cwdPath: this.dest, debug});
-        },
-        watchFiles: null,
     },
 ];
 
@@ -159,10 +96,33 @@ function freeRollupPluginInstance(name, key) {
     }
 }
 
-async function bundleJS(/** @type {JSEntry} */entry, {debug, watch}) {
+async function bundleJS(/** @type {JSEntry} */entry, platform, {debug, watch}) {
     const {src, dest} = entry;
     const rollupPluginTypesctiptInstanceKey = debug;
-    const rollupPluginReplaceInstanceKey = `${entry.platform}-${debug}-${watch}`;
+    const rollupPluginReplaceInstanceKey = `${entry.platform}-${debug}-${watch}-${entry.src === 'src/ui/popup/index.tsx'}`;
+
+    const destination = typeof dest === 'string' ? dest : dest(platform);
+    let replace = {};
+    switch (platform) {
+        case PLATFORM.FIREFOX:
+        case PLATFORM.THUNDERBIRD:
+            if (entry.src === 'src/ui/popup/index.tsx') {
+                break;
+            }
+            replace = {
+                'chrome.fontSettings.getFontList': `chrome['font' + 'Settings']['get' + 'Font' + 'List']`,
+                'chrome.fontSettings': `chrome['font' + 'Settings']`
+            };
+            break;
+        case PLATFORM.CHROME_MV3:
+            replace = {
+                'chrome.browserAction.setIcon': 'chrome.action.setIcon',
+                'chrome.browserAction.setBadgeBackgroundColor': 'chrome.action.setBadgeBackgroundColor',
+                'chrome.browserAction.setBadgeText': 'chrome.action.setBadgeText',
+            };
+            break;
+    }
+
     const bundle = await rollup.rollup({
         input: rootPath(src),
         plugins: [
@@ -183,8 +143,9 @@ async function bundleJS(/** @type {JSEntry} */entry, {debug, watch}) {
             getRollupPluginInstance('replace', rollupPluginReplaceInstanceKey, () =>
                 rollupPluginReplace({
                     preventAssignment: true,
+                    ...replace,
                     '__DEBUG__': debug ? 'true' : 'false',
-                    '__MV3__': entry.platform === PLATFORM.CHROME_MV3,
+                    '__MV3__': platform === PLATFORM.CHROME_MV3,
                     '__PORT__': watch ? String(PORT) : '-1',
                     '__TEST__': 'false',
                     '__WATCH__': watch ? 'true' : 'false',
@@ -197,18 +158,17 @@ async function bundleJS(/** @type {JSEntry} */entry, {debug, watch}) {
     freeRollupPluginInstance('replace', rollupPluginReplaceInstanceKey);
     entry.watchFiles = bundle.watchFiles;
     await bundle.write({
-        file: `${getDestDir({debug, platform: entry.platform || PLATFORM.CHROME})}/${dest}`,
+        file: `${getDestDir({debug, platform})}/${destination}`,
         strict: true,
         format: 'iife',
         sourcemap: debug ? 'inline' : false,
     });
-    entry.postBuild && await entry.postBuild({debug});
 }
 
 function getWatchFiles() {
     const watchFiles = new Set();
     jsEntries.forEach((entry) => {
-        entry.watchFiles.forEach((file) => watchFiles.add(file));
+        entry.watchFiles?.forEach((file) => watchFiles.add(file));
     });
     return Array.from(watchFiles);
 }
@@ -216,25 +176,28 @@ function getWatchFiles() {
 /** @type {string[]} */
 let watchFiles;
 
+const hydrateTask = (/** @type {JSEntry[]} */entries, platforms, /** @type {boolean} */debug, /** @type {boolean} */watch) =>
+    entries.map((entry) =>
+        (entry.platform ? [entry.platform] : Object.values(PLATFORM))
+            .filter((platform) => platforms[platform])
+            .map((platform) => bundleJS(entry, platform, {debug, watch}))
+    ).flat();
+
 module.exports = createTask(
     'bundle-js',
-    async ({debug, watch}) => await Promise.all(
-        jsEntries.map((entry) => bundleJS(entry, {debug, watch}))
-    ),
+    async ({platforms, debug, watch}) => await Promise.all(hydrateTask(jsEntries, platforms, debug, watch)),
 ).addWatcher(
     () => {
         watchFiles = getWatchFiles();
         return watchFiles;
     },
-    async (changedFiles, watcher) => {
+    async (changedFiles, watcher, platforms) => {
         const entries = jsEntries.filter((entry) => {
             return changedFiles.some((changed) => {
-                return entry.watchFiles.includes(changed);
+                return entry.watchFiles?.includes(changed);
             });
         });
-        await Promise.all(
-            entries.map((e) => bundleJS(e, {debug: true, watch: true}))
-        );
+        await Promise.all(hydrateTask(entries, platforms, true, true));
 
         const newWatchFiles = getWatchFiles();
         watcher.unwatch(

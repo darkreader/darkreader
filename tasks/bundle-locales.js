@@ -5,7 +5,7 @@ const reload = require('./reload');
 const {createTask} = require('./task');
 const {readFile, writeFile} = require('./utils');
 
-async function bundleLocale(/** @type {string} */filePath, {debug}) {
+async function bundleLocale(/** @type {string} */filePath, {platforms, debug}) {
     let file = await readFile(filePath);
     file = file.replace(/^#.*?$/gm, '');
 
@@ -29,20 +29,20 @@ async function bundleLocale(/** @type {string} */filePath, {debug}) {
     const locale = fileName.substring(0, fileName.lastIndexOf('.')).replace('-', '_');
     const json = `${JSON.stringify(messages, null, 4)}\n`;
     const getOutputPath = (dir) => `${dir}/_locales/${locale}/messages.json`;
-    for (const platform of Object.values(PLATFORM)) {
+    for (const platform of Object.values(PLATFORM).filter((platform) => platforms[platform])) {
         const dir = getDestDir({debug, platform});
         await writeFile(getOutputPath(dir), json);
     }
 }
 
-async function bundleLocales({debug}) {
+async function bundleLocales({platforms, debug}) {
     const localesSrcDir = rootPath('src/_locales');
     const list = await fs.readdir(localesSrcDir);
     for (const name of list) {
         if (!name.endsWith('.config')) {
             continue;
         }
-        await bundleLocale(`${localesSrcDir}/${name}`, {debug});
+        await bundleLocale(`${localesSrcDir}/${name}`, {platforms, debug});
     }
 }
 
@@ -51,9 +51,9 @@ module.exports = createTask(
     bundleLocales,
 ).addWatcher(
     ['src/_locales/**/*.config'],
-    async (changedFiles) => {
+    async (changedFiles, _, platforms) => {
         for (const file of changedFiles) {
-            await bundleLocale(file, {debug: true});
+            await bundleLocale(file, {platforms, debug: true});
         }
         reload({type: reload.FULL});
     },

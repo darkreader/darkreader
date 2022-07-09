@@ -6,8 +6,8 @@ const reload = require('./reload');
 const {createTask} = require('./task');
 const {copyFile, readFile, writeFile} = require('./utils');
 
-function getLessFiles({debug}) {
-    const dir = getDestDir({debug, platform: PLATFORM.CHROME});
+function getLessFiles(platform, {debug}) {
+    const dir = getDestDir({debug, platform});
     return {
         [rootPath('src/ui/devtools/style.less')]: `${dir}/ui/devtools/style.css`,
         [rootPath('src/ui/popup/style.less')]: `${dir}/ui/popup/style.css`,
@@ -23,13 +23,15 @@ async function bundleCSSEntry({src, dest}) {
     await writeFile(dest, css);
 }
 
-async function bundleCSS({debug}) {
-    const files = getLessFiles({debug});
+async function bundleCSS({platforms, debug}) {
+    const platformNames = Object.values(PLATFORM).filter((platform) => platforms[platform]);
+    const platform = platformNames[0];
+    const files = getLessFiles(platform, {debug});
     for (const [src, dest] of Object.entries(files)) {
         await bundleCSSEntry({src, dest});
     }
-    const dir = getDestDir({debug, platform: PLATFORM.CHROME});
-    const copyDirs = [PLATFORM.FIREFOX, PLATFORM.CHROME_MV3, PLATFORM.THUNDERBIRD].map((platform) => {
+    const dir = getDestDir({debug, platform});
+    const copyDirs = platformNames.slice(1).map((platform) => {
         return getDestDir({debug, platform});
     });
     for (const file of Object.values(files)) {
@@ -45,8 +47,8 @@ module.exports = createTask(
     bundleCSS,
 ).addWatcher(
     ['src/**/*.less'],
-    async () => {
-        await bundleCSS({debug: true});
+    async (_0, _1, platforms) => {
+        await bundleCSS({platforms, debug: true});
         reload({type: reload.CSS});
     },
 );

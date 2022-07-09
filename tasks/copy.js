@@ -66,10 +66,10 @@ async function copyEntry(path, {debug, platform}) {
     }
 }
 
-async function copy({debug}) {
+async function copy({platforms, debug}) {
     const files = await getPaths(paths);
     for (const file of files) {
-        for (const platform of Object.values(PLATFORM)) {
+        for (const platform of Object.values(PLATFORM).filter((platform) => platforms[platform])) {
             await copyEntry(file, {debug, platform});
         }
     }
@@ -80,10 +80,10 @@ module.exports = createTask(
     copy,
 ).addWatcher(
     paths,
-    async (changedFiles) => {
+    async (changedFiles, _, platforms) => {
         for (const file of changedFiles) {
             if (await pathExists(file)) {
-                for (const platform of Object.values(PLATFORM)) {
+                for (const platform of Object.values(PLATFORM).filter((platform) => platforms[platform])) {
                     await copyEntry(file, {debug: true, platform});
                 }
             }

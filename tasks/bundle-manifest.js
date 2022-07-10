@@ -39,16 +39,14 @@ module.exports = createTask(
     manifests,
 ).addWatcher(
     ['src/manifest*.json'],
-    async (changedFiles, _, platforms) => {
-        for (const file of changedFiles) {
-            /*
-            if (await pathExists(file)) {
-                for (const platform of Object.values(PLATFORM).filter((platform) => platforms[platform])) {
-                    await copyEntry(file, {debug: true, platform});
-                }
-            }
-            */
+    async (changedFiles, _, buildPlatforms) => {
+        const chrome = changedFiles.some((file) => file.endsWith('manifest.json'));
+        const platforms = {};
+        for (const platform of Object.values(PLATFORM)) {
+            const changed = chrome || changedFiles.some((file) => file.endsWith(`manifest-${platform}.json`));
+            platforms[platform] = changed && buildPlatforms[platform];
         }
+        await manifests({platforms, debug: true});
         reload({type: reload.FULL});
     },
 );

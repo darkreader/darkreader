@@ -1,5 +1,6 @@
 // @ts-check
 const fs = require('fs').promises;
+const path = require('path');
 const {getDestDir, PLATFORM, rootPath} = require('./paths');
 const reload = require('./reload');
 const {createTask} = require('./task');
@@ -36,12 +37,12 @@ async function bundleLocales({platforms, debug}) {
             continue;
         }
         const locale = await bundleLocale(`${localesSrcDir}/${name}`);
-        await writeFiles(locale, name, {platforms, debug});
+        const fileName = name.substring(name.lastIndexOf('/') + 1);
+        await writeFiles(locale, fileName, {platforms, debug});
     }
 }
 
-async function writeFiles(data, filePath, {platforms, debug}){
-    const fileName = filePath.substring(filePath.lastIndexOf('/') + 1);
+async function writeFiles(data, fileName, {platforms, debug}){
     const locale = fileName.substring(0, fileName.lastIndexOf('.')).replace('-', '_');
     const getOutputPath = (dir) => `${dir}/_locales/${locale}/messages.json`;
     for (const platform of Object.values(PLATFORM).filter((platform) => platforms[platform])) {
@@ -56,9 +57,11 @@ module.exports = createTask(
 ).addWatcher(
     ['src/_locales/**/*.config'],
     async (changedFiles, _, platforms) => {
+        const localesSrcDir = rootPath('src/_locales');
         for (const file of changedFiles) {
-            const locale = await bundleLocale(file);
-            await writeFiles(locale, file, {platforms, debug: true});
+            const fileName = file.substring(file.lastIndexOf(path.sep) + 1);
+            const locale = await bundleLocale(`${localesSrcDir}/${fileName}`);
+            await writeFiles(locale, fileName, {platforms, debug: true});
         }
         reload({type: reload.FULL});
     },

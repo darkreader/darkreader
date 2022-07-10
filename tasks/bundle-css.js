@@ -4,51 +4,87 @@ const path = require('path');
 const {getDestDir, PLATFORM, rootPath} = require('./paths');
 const reload = require('./reload');
 const {createTask} = require('./task');
-const {copyFile, readFile, writeFile} = require('./utils');
+const {readFile, writeFile} = require('./utils');
 
-function getLessFiles(platform, {debug}) {
-    const dir = getDestDir({debug, platform});
-    return {
-        [rootPath('src/ui/devtools/style.less')]: `${dir}/ui/devtools/style.css`,
-        [rootPath('src/ui/popup/style.less')]: `${dir}/ui/popup/style.css`,
-        [rootPath('src/ui/stylesheet-editor/style.less')]: `${dir}/ui/stylesheet-editor/style.css`,
-    };
+/**
+ * @typedef CSSEntry
+ * @property {string} src
+ * @property {string} dest
+ * @property {string[]} [watchFiles]
+ */
+
+/** @type {CSSEntry[]} */
+const cssEntries = [
+    {
+        src: 'src/ui/devtools/style.less',
+        dest: 'ui/devtools/style.css',
+    },
+    {
+        src: 'src/ui/popup/style.less',
+        dest: 'ui/popup/style.css',
+    },
+    {
+        src: 'src/ui/stylesheet-editor/style.less',
+        dest: 'ui/stylesheet-editor/style.css',
+    },
+];
+
+/** @type {string[]} */
+let watchFiles;
+
+async function bundleCSSEntry(entry) {
+    const srcDir = path.dirname(rootPath(entry.src));
+    const input = await readFile(entry.src);
+    const output = await less.render(input, {paths: [srcDir], math: 'always'});
+    entry.watchFiles = output.imports;
+    return output.css;
 }
 
-async function bundleCSSEntry({src, dest}) {
-    const srcDir = path.dirname(src);
-    const input = await readFile(src);
-    const output = await less.render(input, {paths: [srcDir], math: 'always'});
-    const {css} = output;
-    await writeFile(dest, css);
+async function writeFiles(dest, platforms, debug, css) {
+    for (const platform of Object.values(PLATFORM).filter((platform) => platforms[platform])) {
+        const dir = getDestDir({debug, platform});
+        await writeFile(`${dir}/${dest}`, css);
+    }
 }
 
 async function bundleCSS({platforms, debug}) {
-    const platformNames = Object.values(PLATFORM).filter((platform) => platforms[platform]);
-    const platform = platformNames[0];
-    const files = getLessFiles(platform, {debug});
-    for (const [src, dest] of Object.entries(files)) {
-        await bundleCSSEntry({src, dest});
+    for (const entry of cssEntries) {
+        const css = await bundleCSSEntry(entry);
+        await writeFiles(entry.dest, platforms, debug, css);
     }
-    const dir = getDestDir({debug, platform});
-    const copyDirs = platformNames.slice(1).map((platform) => {
-        return getDestDir({debug, platform});
+}
+
+function getWatchFiles() {
+    const watchFiles = new Set();
+    cssEntries.forEach((entry) => {
+        entry.watchFiles?.forEach((file) => watchFiles.add(file));
     });
-    for (const file of Object.values(files)) {
-        for (const copyDir of copyDirs) {
-            const copyTo = `${copyDir}/${file.substring(dir.length + 1)}`;
-            await copyFile(file, copyTo);
-        }
-    }
+    return Array.from(watchFiles);
 }
 
 module.exports = createTask(
     'bundle-css',
     bundleCSS,
 ).addWatcher(
-    ['src/**/*.less'],
-    async (_0, _1, platforms) => {
-        await bundleCSS({platforms, debug: true});
+    () => {
+        watchFiles = getWatchFiles();
+        return watchFiles;
+    },
+    async (changedFiles, watcher, platforms) => {
+        const entries = cssEntries.filter((entry) => changedFiles.some((changed) => entry.watchFiles?.includes(changed)));
+        for (const entry of entries) {
+            const css = await bundleCSSEntry(entry);
+            await writeFiles(entry.dest, platforms, true, css);
+        }
+
+        const newWatchFiles = getWatchFiles();
+        watcher.unwatch(
+            watchFiles.filter((oldFile) => !newWatchFiles.includes(oldFile))
+        );
+        watcher.add(
+            newWatchFiles.filter((newFile) => watchFiles.includes(newFile))
+        );
+
         reload({type: reload.CSS});
     },
 );

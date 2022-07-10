@@ -5,7 +5,7 @@ import type {Message} from '../definitions';
 import {isFirefox, isOpera, isThunderbird} from '../utils/platform';
 import {MessageType} from '../utils/message';
 import {logWarn} from '../utils/log';
-import {StateManager} from './utils/state-manager';
+import {StateManager} from '../utils/state-manager';
 
 declare const __MV3__: boolean;
 

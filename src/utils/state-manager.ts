@@ -1,6 +1,6 @@
-import {logWarn} from '../../utils/log';
-import {PromiseBarrier} from '../../utils/promise-barrier';
-import {isNonPersistent} from './migration';
+import {logWarn} from './log';
+import {PromiseBarrier} from './promise-barrier';
+import {isNonPersistent} from '../background/utils/migration';
 
 /*
  * State manager is a state machine which works as follows:

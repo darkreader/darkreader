@@ -99,7 +99,7 @@ function freeRollupPluginInstance(name, key) {
 async function bundleJS(/** @type {JSEntry} */entry, platform, {debug, watch}) {
     const {src, dest} = entry;
     const rollupPluginTypesctiptInstanceKey = debug;
-    const rollupPluginReplaceInstanceKey = `${entry.platform}-${debug}-${watch}-${entry.src === 'src/ui/popup/index.tsx'}`;
+    const rollupPluginReplaceInstanceKey = `${platform}-${debug}-${watch}-${entry.src === 'src/ui/popup/index.tsx'}`;
 
     const destination = typeof dest === 'string' ? dest : dest(platform);
     let replace = {};

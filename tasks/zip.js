@@ -22,6 +22,9 @@ async function archiveDirectory({dir, dest}) {
 }
 
 async function zip({platforms, debug}) {
+    if (debug) {
+        throw new Error('zip task does not support debug builds');
+    }
     const releaseDir = 'build/release';
     const promises = [];
     for (const platform of Object.values(PLATFORM).filter((platform) => platforms[platform])) {

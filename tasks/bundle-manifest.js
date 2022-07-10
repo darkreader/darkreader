@@ -19,16 +19,16 @@ async function writeJSON(path, json) {
 async function patchManifest(platform) {
     const manifest = await readJSON(`${srcDir}/manifest.json`);
     const manifestPatch = platform === PLATFORM.CHROME ? {} : await readJSON(`${srcDir}/manifest-${platform}.json`);
-    const pached = {...manifest, manifestPatch};
+    const pacthed = {...manifest, ...manifestPatch};
     if (platform === PLATFORM.CHROME_MV3) {
-        pached.browser_action = undefined;
+        pacthed.browser_action = undefined;
     }
-    return pached;
+    return pacthed;
 }
 
 async function manifests({platforms, debug}) {
     for (const platform of Object.values(PLATFORM).filter((platform) => platforms[platform])) {
-        const manifest = patchManifest(platform);
+        const manifest = await patchManifest(platform);
         const destDir = getDestDir({debug, platform});
         await writeJSON(`${destDir}/manifest.json`, manifest);
     }

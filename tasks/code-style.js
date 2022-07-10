@@ -18,8 +18,12 @@ const options = {
 
 const extensions = ['html', 'css', 'js'];
 
-async function codeStyle({debug}) {
-    const dir = getDestDir({debug, platform: PLATFORM.CHROME});
+async function codeStyle({platforms, debug}) {
+    if (debug) {
+        throw new Error('code-style task does not support debug builds');
+    }
+    const platform = Object.values(PLATFORM).find((platform) => platforms[platform]);
+    const dir = getDestDir({debug, platform});
     const files = await getPaths(extensions.map((ext) => `${dir}/**/*.${ext}`));
     for (const file of files) {
         const code = await readFile(file);

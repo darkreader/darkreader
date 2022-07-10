@@ -5,7 +5,7 @@ const reload = require('./reload');
 const {createTask} = require('./task');
 const {readFile, writeFile} = require('./utils');
 
-async function bundleLocale(/** @type {string} */filePath, {platforms, debug}) {
+async function bundleLocale(/** @type {string} */filePath) {
     let file = await readFile(filePath);
     file = file.replace(/^#.*?$/gm, '');
 
@@ -25,14 +25,7 @@ async function bundleLocale(/** @type {string} */filePath, {platforms, debug}) {
         };
     }
 
-    const fileName = filePath.substring(filePath.lastIndexOf('/') + 1);
-    const locale = fileName.substring(0, fileName.lastIndexOf('.')).replace('-', '_');
-    const json = `${JSON.stringify(messages, null, 4)}\n`;
-    const getOutputPath = (dir) => `${dir}/_locales/${locale}/messages.json`;
-    for (const platform of Object.values(PLATFORM).filter((platform) => platforms[platform])) {
-        const dir = getDestDir({debug, platform});
-        await writeFile(getOutputPath(dir), json);
-    }
+    return `${JSON.stringify(messages, null, 4)}\n`;
 }
 
 async function bundleLocales({platforms, debug}) {
@@ -42,7 +35,18 @@ async function bundleLocales({platforms, debug}) {
         if (!name.endsWith('.config')) {
             continue;
         }
-        await bundleLocale(`${localesSrcDir}/${name}`, {platforms, debug});
+        const locale = await bundleLocale(`${localesSrcDir}/${name}`);
+        await writeFiles(locale, name, {platforms, debug});
+    }
+}
+
+async function writeFiles(data, filePath, {platforms, debug}){
+    const fileName = filePath.substring(filePath.lastIndexOf('/') + 1);
+    const locale = fileName.substring(0, fileName.lastIndexOf('.')).replace('-', '_');
+    const getOutputPath = (dir) => `${dir}/_locales/${locale}/messages.json`;
+    for (const platform of Object.values(PLATFORM).filter((platform) => platforms[platform])) {
+        const dir = getDestDir({debug, platform});
+        await writeFile(getOutputPath(dir), data);
     }
 }
 
@@ -53,7 +57,8 @@ module.exports = createTask(
     ['src/_locales/**/*.config'],
     async (changedFiles, _, platforms) => {
         for (const file of changedFiles) {
-            await bundleLocale(file, {platforms, debug: true});
+            const locale = await bundleLocale(file);
+            await writeFiles(locale, file, {platforms, debug: true});
         }
         reload({type: reload.FULL});
     },

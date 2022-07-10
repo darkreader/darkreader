@@ -3,6 +3,7 @@ const bundleAPI = require('./bundle-api');
 const bundleCSS = require('./bundle-css');
 const bundleJS = require('./bundle-js');
 const bundleLocales = require('./bundle-locales');
+const bundleManifest = require('./bundle-manifest');
 const clean = require('./clean');
 const copy = require('./copy');
 const reload = require('./reload');
@@ -18,6 +19,7 @@ const standardTask = [
     bundleJS,
     bundleCSS,
     bundleLocales,
+    bundleManifest,
     copy,
 ];
 

@@ -34,6 +34,7 @@ async function zip({platforms, debug}) {
             dest: `${releaseDir}/darkreader-${platform}.${format}`
         }));
     }
+    await Promise.all(promises);
 }
 
 module.exports = createTask(

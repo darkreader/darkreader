@@ -1,12 +1,11 @@
 import {logWarn} from './log';
 import {PromiseBarrier} from './promise-barrier';
-import {isNonPersistent} from '../background/utils/migration';
 
 /*
  * State manager is a state machine which works as follows:
- *    +-----------+       +------------+
- *    |  Initial  |------>|  Disabled  |
- *    +-----------+       +------------+
+ *    +-----------+
+ *    |  Initial  |
+ *    +-----------+
  *           |
  *           | StateManager.loadState() is called,
  *           | StateManager will call chrome.storage.local.get()
@@ -53,7 +52,6 @@ import {isNonPersistent} from '../background/utils/migration';
  */
 export enum StateManagerState {
     INITIAL = 0,
-    DISABLED = 1,
     LOADING = 2,
     READY = 3,
     SAVING = 4,
@@ -73,11 +71,6 @@ export class StateManagerImpl<T> {
     private set: (items: { [key: string]: any }, callback: () => void) => void;
 
     constructor(localStorageKey: string, parent: any, defaults: T, get: (storageKey: string, callback: (items: { [key: string]: any }) => void) => void, set: (items: { [key: string]: any }, callback: () => void) => void){
-        if (!isNonPersistent()) {
-            // Do nothing if the current build uses persistent background
-            this.meta = StateManagerState.DISABLED;
-            return;
-        }
         this.localStorageKey = localStorageKey;
         this.parent = parent;
         this.defaults = defaults;
@@ -98,8 +91,6 @@ export class StateManagerImpl<T> {
     // This function is not guaranteed to save state before returning
     async saveState(): Promise<void> {
         switch (this.meta) {
-            case StateManagerState.DISABLED:
-                return;
             case StateManagerState.LOADING:
                 // fallthrough
             case StateManagerState.INITIAL:
@@ -125,7 +116,6 @@ export class StateManagerImpl<T> {
         this.set({[this.localStorageKey]: this.collectState()}, () => {
             switch (this.meta) {
                 case StateManagerState.INITIAL:
-                case StateManagerState.DISABLED:
                 case StateManagerState.LOADING:
                 case StateManagerState.READY:
                     logWarn('Unexpected state. Possible data race!');
@@ -159,8 +149,6 @@ export class StateManagerImpl<T> {
                         resolve();
                     });
                 });
-            case StateManagerState.DISABLED:
-                // fallthrough
             case StateManagerState.READY:
                 // fallthrough
             case StateManagerState.SAVING:

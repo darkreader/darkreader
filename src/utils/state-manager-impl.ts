@@ -111,7 +111,7 @@ export class StateManagerImpl<T> {
         barrier.resolve();
     }
 
-    saveStateInternal() {
+    private saveStateInternal() {
         this.set({[this.localStorageKey]: this.collectState()}, () => {
             switch (this.meta) {
                 case StateManagerImplState.INITIAL:
@@ -155,7 +155,7 @@ export class StateManagerImpl<T> {
         }
     }
 
-    loadStateInternal() {
+    private loadStateInternal() {
         this.get(this.localStorageKey, (data: any) => {
             switch (this.meta) {
                 case StateManagerImplState.INITIAL:

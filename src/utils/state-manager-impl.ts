@@ -2,13 +2,28 @@ import {logWarn} from './log';
 import {PromiseBarrier} from './promise-barrier';
 
 /*
+ * This class synchronizes some JS object's attributes and data stored in
+ * chrome.storage.local, with minimal delay. It follows these principles:
+ *  - no debouncing, data is saved as soon as saveState() is called
+ *  - no concurrent writes (calls to s.c.l.set()): if saveState() is called
+ *    repeatedly before previous call is complete, this class will wait for
+ *    active write to complete and will save new data.
+ *  - no concurrent reads (calls to s.c.l.get()): if loadState() is called
+ *    repeatedly before previous call is complete, this class will wait for
+ *    active read to complete and will resolve all loadState() calls at once.
+ *  - all simultaniously active calls to saveState() and loadState() wait for
+ *    data to settle and resolve only after data is guaranteed to be coherent.
+ *  - data saved with the browser always wins (because JS typically has only
+ *    default values and to ensure that if the same class exists in multiple
+ *    contexts every instance of this class has the same values)
+ *
  * State manager is a state machine which works as follows:
  *    +-----------+
  *    |  Initial  |
  *    +-----------+
  *           |
- *           | StateManager.loadState() is called,
- *           | StateManager will call chrome.storage.local.get()
+ *           | StateManagerImpl.loadState() is called,
+ *           | StateManagerImpl will call chrome.storage.local.get()
  *           |
  *           v
  *    +-----------+
@@ -16,32 +31,30 @@ import {PromiseBarrier} from './promise-barrier';
  *    +-----------+
  *           |
  *           | chrome.storage.local.get() callback is called,
- *           | StateManager has loaded the data.
+ *           | StateManagerImpl has loaded the data.
  *           |
  *           v
  *     +----------+
- *     |  Ready   |<---------------------------------+
- *     +----------+                                  |
- *           |                                       |
- *           | StateManager.saveState() is called,   |
- *           | StateManager will callect data and    |
- *           | call chrome.storage.local.set()       |
- *           v                                       |
- *    +-----------+----------------------------------+
+ *     |  Ready   |<-------------------------------------+
+ *     +----------+                                      |
+ *           |                                           |
+ *           | StateManagerImpl.saveState() is called,   |
+ *           | StateManagerImpl will callect data and    |
+ *           | call chrome.storage.local.set()           |
+ *           v                                           |
+ *    +-----------+--------------------------------------+
  *    |  Saving   |
- *    +-----------+<---------------------------------+
- *           |                                       |
- *           | StateManager.saveState() is called    |
- *           | before ongoing write operation ends.  |
- *           |                                       |
- *           v                                       |
- *    +-----------------+                            |
- *    | Saving Override |----------------------------+
+ *    +-----------+<-------------------------------------+
+ *           |                                           |
+ *           | StateManagerImpl.saveState() is called    |
+ *           | before ongoing write operation ends.      |
+ *           |                                           |
+ *           v                                           |
+ *    +-----------------+                                |
+ *    | Saving Override |--------------------------------+
  *    +-----------------+
  *
  * Initial - Only constructor was called.
- * Disabled - current build and/or platform uses persistent background.
- *   Storage anager is disabled (is a NOOP).
  * Loading - loadState() is called
  * Ready - data was retreived from storage.
  * Saving - saveState() is called and there is no chrome.storage.local.set()
@@ -50,12 +63,12 @@ import {PromiseBarrier} from './promise-barrier';
  *   was complete (data became obsolete even before it was written to storage).
  *   We wait for ongoing write operation to end and only then start a new one.
  */
-export enum StateManagerState {
+enum StateManagerImplState {
     INITIAL = 0,
-    LOADING = 2,
-    READY = 3,
-    SAVING = 4,
-    SAVING_OVERRIDE = 5,
+    LOADING = 1,
+    READY = 2,
+    SAVING = 3,
+    SAVING_OVERRIDE = 4,
 }
 
 export class StateManagerImpl<T> {
@@ -63,9 +76,8 @@ export class StateManagerImpl<T> {
     private parent;
     private defaults: T;
 
-    private meta: StateManagerState = StateManagerState.INITIAL;
-    // loadStateBarrier is guaranteed to exists only when meta is LOADING.
-    private loadStateBarrier: PromiseBarrier<void, void> = null;
+    private meta: StateManagerImplState = StateManagerImplState.INITIAL;
+    private barrier: PromiseBarrier<void, void> = null;
 
     private get: (storageKey: string, callback: (items: { [key: string]: any }) => void) => void;
     private set: (items: { [key: string]: any }, callback: () => void) => void;
@@ -74,6 +86,7 @@ export class StateManagerImpl<T> {
         this.localStorageKey = localStorageKey;
         this.parent = parent;
         this.defaults = defaults;
+        this.barrier = new PromiseBarrier();
         this.get = get;
         this.set = set;
 
@@ -88,76 +101,93 @@ export class StateManagerImpl<T> {
         return state;
     }
 
+    private applyState(storage: T) {
+        Object.assign(this.parent, this.defaults, storage);
+    }
+
+    private releaseBarrier() {
+        const barrier = this.barrier;
+        this.barrier = new PromiseBarrier();
+        barrier.resolve();
+    }
+
+    saveStateInternal() {
+        this.set({[this.localStorageKey]: this.collectState()}, () => {
+            switch (this.meta) {
+                case StateManagerImplState.INITIAL:
+                case StateManagerImplState.LOADING:
+                case StateManagerImplState.READY:
+                    logWarn('Unexpected state. Possible data race!');
+                    // fallthrough
+                case StateManagerImplState.SAVING:
+                    this.meta = StateManagerImplState.READY;
+                    this.releaseBarrier();
+                    break;
+                case StateManagerImplState.SAVING_OVERRIDE:
+                    this.meta = StateManagerImplState.SAVING;
+                    this.saveStateInternal();
+                    break;
+            }
+        });
+    }
+
     // This function is not guaranteed to save state before returning
     async saveState(): Promise<void> {
         switch (this.meta) {
-            case StateManagerState.LOADING:
-                // fallthrough
-            case StateManagerState.INITIAL:
+            case StateManagerImplState.INITIAL:
                 // Make sure not to overwrite data before it is loaded
-                logWarn('StateManager.saveState is called while loading data. Possible data race!');
-                if (this.loadStateBarrier) {
-                    await this.loadStateBarrier.entry();
-                }
-                this.meta = StateManagerState.SAVING;
-                break;
-            case StateManagerState.READY:
-                this.meta = StateManagerState.SAVING;
-                break;
-            case StateManagerState.SAVING:
+                logWarn('StateManager.saveState was called before StateManager.loadState(). Possible data race! Loading data instead.');
+                return this.loadState();
+            case StateManagerImplState.LOADING:
+                logWarn('StateManager.saveState was called before StateManager.loadState() resolved. Possible data race! Loading data instead.');
+                return this.loadState();
+            case StateManagerImplState.READY:
+                this.meta = StateManagerImplState.SAVING;
+                const entry = this.barrier.entry();
+                this.saveStateInternal();
+                return entry;
+            case StateManagerImplState.SAVING:
                 // Another save is in progress
-                this.meta = StateManagerState.SAVING_OVERRIDE;
-                return;
-            case StateManagerState.SAVING_OVERRIDE:
-                // Do nothing
-                return;
+                this.meta = StateManagerImplState.SAVING_OVERRIDE;
+                return this.barrier.entry();
+            case StateManagerImplState.SAVING_OVERRIDE:
+                return this.barrier.entry();
         }
+    }
 
-        this.set({[this.localStorageKey]: this.collectState()}, () => {
+    loadStateInternal() {
+        this.get(this.localStorageKey, (data: any) => {
             switch (this.meta) {
-                case StateManagerState.INITIAL:
-                case StateManagerState.LOADING:
-                case StateManagerState.READY:
+                case StateManagerImplState.INITIAL:
+                case StateManagerImplState.READY:
+                case StateManagerImplState.SAVING:
+                case StateManagerImplState.SAVING_OVERRIDE:
                     logWarn('Unexpected state. Possible data race!');
                     // fallthrough
-                case StateManagerState.SAVING:
-                    this.meta = StateManagerState.READY;
-                    break;
-                case StateManagerState.SAVING_OVERRIDE:
-                    this.meta = StateManagerState.READY;
-                    this.saveState();
+                case StateManagerImplState.LOADING:
+                    this.meta = StateManagerImplState.READY;
+                    this.applyState(data[this.localStorageKey]);
+                    this.releaseBarrier();
             }
         });
     }
 
     async loadState(): Promise<void> {
         switch (this.meta) {
-            case StateManagerState.INITIAL:
-                // Need to load
-                this.meta = StateManagerState.LOADING;
-                this.loadStateBarrier = new PromiseBarrier();
-                return new Promise<void>((resolve) => {
-                    this.get(this.localStorageKey, (data: any) => {
-                        this.meta = StateManagerState.READY;
-                        if (data[this.localStorageKey]) {
-                            Object.assign(this.parent, data[this.localStorageKey]);
-                        } else {
-                            Object.assign(this.parent, this.defaults);
-                        }
-                        this.loadStateBarrier.resolve();
-                        this.loadStateBarrier = null;
-                        resolve();
-                    });
-                });
-            case StateManagerState.READY:
-                // fallthrough
-            case StateManagerState.SAVING:
-                // fallthrough
-            case StateManagerState.SAVING_OVERRIDE:
+            case StateManagerImplState.INITIAL:
+                // Need to load data
+                this.meta = StateManagerImplState.LOADING;
+                const entry = this.barrier.entry();
+                this.loadStateInternal();
+                return entry;
+            case StateManagerImplState.READY:
                 return;
-            case StateManagerState.LOADING:
-                // Background state is being loaded, just need to wait
-                return this.loadStateBarrier.entry();
+            case StateManagerImplState.SAVING:
+                // fallthrough
+            case StateManagerImplState.SAVING_OVERRIDE:
+                return this.barrier.entry();
+            case StateManagerImplState.LOADING:
+                return this.barrier.entry();
         }
     }
 }

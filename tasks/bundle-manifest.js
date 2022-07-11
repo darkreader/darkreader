@@ -19,11 +19,11 @@ async function writeJSON(path, json) {
 async function patchManifest(platform) {
     const manifest = await readJSON(`${srcDir}/manifest.json`);
     const manifestPatch = platform === PLATFORM.CHROME ? {} : await readJSON(`${srcDir}/manifest-${platform}.json`);
-    const pacthed = {...manifest, ...manifestPatch};
+    const patched = {...manifest, ...manifestPatch};
     if (platform === PLATFORM.CHROME_MV3) {
-        pacthed.browser_action = undefined;
+        patched.browser_action = undefined;
     }
-    return pacthed;
+    return patched;
 }
 
 async function manifests({platforms, debug}) {

@@ -1,7 +1,41 @@
 import {StateManagerImpl} from '../../../src/utils/state-manager-impl';
 
+class PromiseWrapper {
+    promises: Map<Promise<void>, 'pending' | 'resolved' | 'rejected'>;
+    constructor() {
+        this.promises = new Map();
+    }
+
+    add(promises: Promise<void> | Array<Promise<void>>) {
+        if (!Array.isArray(promises)) {
+            promises = [promises];
+        }
+        promises.forEach((promise) => {
+            if (this.promises.has(promise)) {
+                throw new Error('Already added');
+            }
+            this.promises.set(promise, 'pending');
+            promise.then(() => this.promises.set(promise, 'resolved'))
+                .catch(() => this.promises.set(promise, 'rejected'));
+        });
+    }
+
+    clear() {
+        this.promises.clear();
+    }
+
+    getState(promise: Promise<void>) {
+        return this.promises.get(promise);
+    }
+
+    all(state: 'pending' | 'resolved' | 'rejected') {
+        this.promises.forEach((s) => expect(s).toEqual(state));
+    }
+}
+
 describe('State manager utility', () => {
     const nextTick = () => new Promise((r) => setTimeout(r));
+    const noop = () => { /* noop */ };
 
     test('State manager basic functionality', async () => {
         const key = 'key';
@@ -32,7 +66,7 @@ describe('State manager utility', () => {
         const stateManager = new StateManagerImpl(key, parent, {
             fromParent: 'fromDefault',
             fromStorage: 'fromDefault'
-        }, get, set);
+        }, {get, set}, noop);
 
         expect(getMock).not.toBeCalled();
         expect(setMock).not.toBeCalled();
@@ -86,7 +120,7 @@ describe('State manager utility', () => {
 
         const stateManager = new StateManagerImpl(key, parent, {
             data: 'fromStorage',
-        }, get, setMock);
+        }, {get, set: setMock}, noop);
 
         expect(setMock).not.toBeCalled();
         expect(parent).toEqual({
@@ -95,29 +129,25 @@ describe('State manager utility', () => {
         });
 
         // Multiple calls to loadState() should result in a single call to c.s.l.get()
-        const promises = new Map();
+        const promises = new PromiseWrapper();
         for (let i = 0; i < 5; i++) {
-            const promise = stateManager.loadState();
-            promises.set(promise, 'pending');
-            promise
-                .then(() => promises.set(promise, 'resolved'))
-                .catch(() => promises.set(promise, 'rejected'));
+            promises.add(stateManager.loadState());
         }
         expect(getCount).toEqual(1);
         expect(parent).toEqual({
             noSync: true,
             data: 'fromParent',
         });
-        promises.forEach((state) => expect(state).toEqual('pending'));
+        promises.all('pending');
 
         expect(getCount).toEqual(1);
 
         getCallback({});
 
-        promises.forEach((state) => expect(state).toBe('pending'));
+        promises.all('pending');
 
         await nextTick();
-        promises.forEach((state) => expect(state).toBe('resolved'));
+        promises.all('resolved');
         expect(getCount).toEqual(1);
         expect(setMock).not.toBeCalled();
     });
@@ -131,15 +161,15 @@ describe('State manager utility', () => {
             callback({[storageKey]: storage[storageKey]});
         };
 
-        const resolveSet = () => setCallbacks.shift()();
+        const resolveSet = () => setCallback();
         let setCount = 0;
-        const setCallbacks: Array<() => void> = [];
+        let setCallback: () => void;
         const set = (items: any, callback: () => void) => {
             setCount++;
-            setCallbacks.push(() => {
+            setCallback = () => {
                 Object.assign(storage, items);
                 callback();
-            });
+            };
         };
 
         const parent: any = {
@@ -149,7 +179,7 @@ describe('State manager utility', () => {
 
         const stateManager = new StateManagerImpl(key, parent, {
             count: 0,
-        }, get, set);
+        }, {get, set}, noop);
 
         expect(parent).toEqual({
             noSync: true,
@@ -164,21 +194,17 @@ describe('State manager utility', () => {
         });
 
         // Multiple calls to loadState() should result in a single call to c.s.l.get()
-        const promises = new Map();
+        const promises = new PromiseWrapper();
         for (let i = 0; i < 5; i++) {
             parent.count++;
-            const promise = stateManager.saveState();
-            promises.set(promise, 'pending');
-            promise
-                .then(() => promises.set(promise, 'resolved'))
-                .catch(() => promises.set(promise, 'rejected'));
+            promises.add(stateManager.saveState());
         }
         expect(setCount).toEqual(1);
         expect(parent).toEqual({
             noSync: true,
             count: 5,
         });
-        promises.forEach((state) => expect(state).toEqual('pending'));
+        promises.all('pending');
 
 
         // Resolve the first write
@@ -186,10 +212,10 @@ describe('State manager utility', () => {
         resolveSet();
         expect(setCount).toEqual(2);
 
-        promises.forEach((state) => expect(state).toBe('pending'));
+        promises.all('pending');
 
         await nextTick();
-        promises.forEach((state) => expect(state).toBe('pending'));
+        promises.all('pending');
 
         expect(parent).toEqual({
             noSync: true,
@@ -207,7 +233,7 @@ describe('State manager utility', () => {
         });
 
         await nextTick();
-        promises.forEach((state) => expect(state).toBe('resolved'));
+        promises.all('resolved');
     });
 
     test('State manager handles multiple concurrent saveState() calls', async () => {
@@ -219,15 +245,15 @@ describe('State manager utility', () => {
             callback({[storageKey]: storage[storageKey]});
         };
 
-        const resolveSet = () => setCallbacks.shift()();
+        const resolveSet = () => setCallback();
         let setCount = 0;
-        const setCallbacks: Array<() => void> = [];
+        let setCallback: () => void;
         const set = (items: any, callback: () => void) => {
             setCount++;
-            setCallbacks.push(() => {
+            setCallback = () => {
                 Object.assign(storage, items);
                 callback();
-            });
+            };
         };
 
         const parent: any = {
@@ -237,7 +263,7 @@ describe('State manager utility', () => {
 
         const stateManager = new StateManagerImpl(key, parent, {
             count: 0,
-        }, get, set);
+        }, {get, set}, noop);
 
         expect(parent).toEqual({
             noSync: true,
@@ -252,21 +278,17 @@ describe('State manager utility', () => {
         });
 
         // Multiple calls to loadState() should result in a single call to c.s.l.get()
-        const promises = new Map();
+        const promises = new PromiseWrapper();
         for (let i = 0; i < 5; i++) {
             parent.count++;
-            const promise = stateManager.saveState();
-            promises.set(promise, 'pending');
-            promise
-                .then(() => promises.set(promise, 'resolved'))
-                .catch(() => promises.set(promise, 'rejected'));
+            promises.add(stateManager.saveState());
         }
         expect(setCount).toEqual(1);
         expect(parent).toEqual({
             noSync: true,
             count: 5,
         });
-        promises.forEach((state) => expect(state).toEqual('pending'));
+        promises.all('pending');
 
 
         // Resolve the first write
@@ -274,11 +296,11 @@ describe('State manager utility', () => {
         resolveSet();
         expect(setCount).toEqual(2);
 
-        promises.forEach((state) => expect(state).toBe('pending'));
+        promises.all('pending');
 
         // Wait for the next tick when all loadState promises resolve
         await nextTick();
-        promises.forEach((state) => expect(state).toBe('pending'));
+        promises.all('pending');
 
         expect(parent).toEqual({
             noSync: true,
@@ -295,7 +317,7 @@ describe('State manager utility', () => {
         });
 
         await nextTick();
-        promises.forEach((state) => expect(state).toBe('resolved'));
+        promises.all('resolved');
     });
 
     test('State manager handles saveState() before loadState()', async () => {
@@ -303,25 +325,18 @@ describe('State manager utility', () => {
         const storage: any = {};
 
         let getCount = 0;
-        const getCallbacks: Array<() => void> = [];
-        const resolveGet = () => getCallbacks.shift()();
+        let getCallback: () => void;
+        const resolveGet = () => getCallback();
         const get = (storageKey: string, callback: (data: any) => void) => {
             expect(storageKey).toEqual(key);
             getCount++;
-            getCallbacks.push(() => {
+            getCallback = () => {
                 callback({[storageKey]: storage[storageKey]});
-            });
+            };
         };
 
         let setCount = 0;
-        const setCallbacks: Array<() => void> = [];
-        const set = (items: any, callback: () => void) => {
-            setCount++;
-            setCallbacks.push(() => {
-                Object.assign(storage, items);
-                callback();
-            });
-        };
+        const set = () => setCount++;
 
         const parent: any = {
             data: 'fromParent',
@@ -329,16 +344,14 @@ describe('State manager utility', () => {
 
         const stateManager = new StateManagerImpl(key, parent, {
             data: 'fromDefault',
-        }, get, set);
+        }, {get, set}, noop);
 
         expect(parent).toEqual({
             data: 'fromParent',
         });
 
-        let savePromiseState = 'pending';
-        stateManager.saveState()
-            .then(() => savePromiseState = 'resolved')
-            .catch(() => savePromiseState = 'rejected');
+        const promise = new PromiseWrapper();
+        promise.add(stateManager.saveState());
 
         expect(parent).toEqual({
             data: 'fromParent',
@@ -347,12 +360,12 @@ describe('State manager utility', () => {
         expect(setCount).toEqual(0);
 
         await nextTick();
-        expect(savePromiseState).toEqual('pending');
+        promise.promises.forEach((state) => expect(state).toBe('pending'));
 
         resolveGet();
 
         await nextTick();
-        expect(savePromiseState).toEqual('resolved');
+        promise.promises.forEach((state) => expect(state).toBe('resolved'));
 
         expect(parent).toEqual({
             data: 'fromDefault',
@@ -372,25 +385,25 @@ describe('State manager utility', () => {
         const storage: any = {};
 
         let getCount = 0;
-        const getCallbacks: Array<() => void> = [];
-        const resolveGet = () => getCallbacks.shift()();
+        let getCallback: () => void;
+        const resolveGet = () => getCallback();
         const get = (storageKey: string, callback: (data: any) => void) => {
             expect(storageKey).toEqual(key);
             getCount++;
-            getCallbacks.push(() => {
+            getCallback = () => {
                 callback({[storageKey]: storage[storageKey]});
-            });
+            };
         };
 
         let setCount = 0;
-        const setCallbacks: Array<() => void> = [];
-        const resolveSet = () => setCallbacks.shift()();
+        let setCallback: () => void;
+        const resolveSet = () => setCallback();
         const set = (items: any, callback: () => void) => {
             setCount++;
-            setCallbacks.push(() => {
+            setCallback = () => {
                 Object.assign(storage, items);
                 callback();
-            });
+            };
         };
 
         const parent: any = {
@@ -399,14 +412,14 @@ describe('State manager utility', () => {
 
         const stateManager = new StateManagerImpl(key, parent, {
             data: 'fromDefault',
-        }, get, set);
+        }, {get, set}, noop);
 
         expect(parent).toEqual({
             data: 'fromParent',
         });
 
-        const promises = new Map();
-        [
+        const promises = new PromiseWrapper();
+        promises.add([
             stateManager.loadState(),
             stateManager.loadState(),
             stateManager.saveState(),
@@ -415,10 +428,7 @@ describe('State manager utility', () => {
             stateManager.saveState(),
             stateManager.saveState(),
             stateManager.saveState(),
-        ].forEach((p) => {
-            promises.set(p, 'pending');
-            p.then(() => promises.set(p, 'resolved')).catch(() => promises.set(p, 'rejected'));
-        });
+        ]);
 
         expect(parent).toEqual({
             data: 'fromParent',
@@ -429,7 +439,7 @@ describe('State manager utility', () => {
         await nextTick();
         expect(getCount).toEqual(1);
         expect(setCount).toEqual(0);
-        promises.forEach((state) => expect(state).toBe('pending'));
+        promises.all('pending');
 
         resolveGet();
 
@@ -439,7 +449,7 @@ describe('State manager utility', () => {
         });
         expect(getCount).toEqual(1);
         expect(setCount).toEqual(0);
-        promises.forEach((state) => expect(state).toBe('resolved'));
+        promises.all('resolved');
 
         parent.data = 'new';
         await stateManager.loadState();
@@ -449,8 +459,8 @@ describe('State manager utility', () => {
         expect(getCount).toEqual(1);
         expect(setCount).toEqual(0);
 
-        const promises2 = new Map();
-        [
+        const promises2 = new PromiseWrapper();
+        promises2.add([
             stateManager.saveState(),
             stateManager.loadState(),
             stateManager.saveState(),
@@ -459,10 +469,7 @@ describe('State manager utility', () => {
             stateManager.saveState(),
             stateManager.loadState(),
             stateManager.saveState(),
-        ].forEach((p) => {
-            promises2.set(p, 'pending');
-            p.then(() => promises.set(p, 'resolved')).catch(() => promises.set(p, 'rejected'));
-        });
+        ]);
 
         expect(getCount).toEqual(1);
         expect(setCount).toEqual(1);
@@ -479,6 +486,154 @@ describe('State manager utility', () => {
         });
         expect(getCount).toEqual(1);
         expect(setCount).toEqual(2);
-        promises.forEach((state) => expect(state).toBe('resolved'));
+
+        resolveSet();
+
+        await nextTick();
+        promises2.all('resolved');
+    });
+
+    test('State manager handles onChanged during saveState() and loadState()', async () => {
+        const key = 'key';
+        const storage: any = {};
+
+        let getCount = 0;
+        let getCallback: () => void;
+        const resolveGet = () => {
+            getCallback();
+            getCallback = undefined;
+        };
+        const get = (storageKey: string, callback: (data: any) => void) => {
+            expect(storageKey).toEqual(key);
+            getCount++;
+            getCallback = () => {
+                callback({[storageKey]: storage[storageKey]});
+            };
+        };
+
+        let setCount = 0;
+        let setCallback: () => void;
+        const resolveSet = () => {
+            setCallback();
+            setCallback = undefined;
+        };
+        const set = (items: any, callback: () => void) => {
+            setCount++;
+            setCallback = () => {
+                Object.assign(storage, items);
+                callback();
+            };
+        };
+
+        let onChangedListener: (data: any) => void = null;
+        const modifyInternalState = (data: any) => {
+            expect(onChangedListener).toBeTruthy();
+            const oldValue = storage[key];
+            storage[key] = data;
+            onChangedListener({
+                [key]: {
+                    oldValue,
+                    newValue: data
+                }
+            });
+        };
+
+        const parent: any = {
+            data: 'fromParent',
+        };
+
+        const stateManager = new StateManagerImpl(key, parent, {
+            data: 'fromDefault',
+        }, {get, set}, (listener) => onChangedListener = listener);
+
+        const c1 = jest.fn();
+        stateManager.addChangeListener(c1);
+
+        expect(parent).toEqual({
+            data: 'fromParent',
+        });
+
+        const promises = new PromiseWrapper();
+        promises.add(stateManager.loadState());
+
+        expect(parent).toEqual({
+            data: 'fromParent',
+        });
+        expect(getCount).toEqual(1);
+        expect(setCount).toEqual(0);
+
+        await nextTick();
+        expect(getCount).toEqual(1);
+        expect(setCount).toEqual(0);
+        promises.all('pending');
+
+        expect(c1).not.toBeCalled();
+
+        modifyInternalState({
+            data: 'fromStorageChange',
+        });
+
+        resolveGet();
+
+        await nextTick();
+        expect(c1).toBeCalled();
+        expect(parent).toEqual({
+            data: 'fromStorageChange',
+        });
+        expect(getCount).toEqual(2);
+        expect(setCount).toEqual(0);
+        promises.all('resolved');
+
+        expect(stateManager.getStateForTesting()).toEqual('Ready');
+
+        const c2 = jest.fn();
+        stateManager.addChangeListener(c2);
+
+        parent.data = 'new';
+        await stateManager.loadState();
+        expect(parent).toEqual({
+            data: 'new'
+        });
+        expect(getCount).toEqual(2);
+        expect(setCount).toEqual(0);
+        expect(stateManager.getStateForTesting()).toEqual('Ready');
+
+        const promises2 = new PromiseWrapper;
+        promises2.add(stateManager.saveState());
+
+        modifyInternalState({
+            data: 'fromStorageChange2',
+        });
+        expect(getCount).toEqual(2);
+        expect(setCount).toEqual(1);
+        promises2.all('pending');
+
+        // During data race the JS-world data does not get overwriten
+        expect(parent).toEqual({
+            data: 'new'
+        });
+
+        resolveSet();
+
+        await nextTick();
+        expect(parent).toEqual({
+            data: 'new',
+        });
+        expect(getCount).toEqual(3);
+        expect(setCount).toEqual(1);
+        promises2.all('pending');
+
+        expect(c2).not.toBeCalled();
+
+        resolveGet();
+
+        await nextTick();
+        expect(c2).toBeCalled();
+        expect(parent).toEqual({
+            data: 'new',
+        });
+        expect(getCount).toEqual(3);
+        expect(setCount).toEqual(1);
+        promises2.all('resolved');
     });
 });

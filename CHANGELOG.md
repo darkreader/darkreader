@@ -7,7 +7,7 @@
 - Correctly open static theme editor on Mobile.
 - Migrate automation settings to it's own object. WARNING: this can lead to data loss of currently used automation settings due to browser behavior.
 - Correctly handle empty URL's in `background-image` property.
-- Pywal/local colorschemes can now be used to set and automatically change darkreader's values in Firefox(see [README.md](https://github.com/darkreader/darkreader#pywal-colorscheme-integration-for-firefox)).
+- CSS variables can now be used to set and automatically change Dark Reader's values.
 
 ## 4.9.52 (June 28, 2022)
 

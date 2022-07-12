@@ -21,7 +21,7 @@ import {isFirefox, isThunderbird} from '../utils/platform';
 import {MessageType} from '../utils/message';
 import {logInfo, logWarn} from '../utils/log';
 import {PromiseBarrier} from '../utils/promise-barrier';
-import {StateManager} from './utils/state-manager';
+import {StateManager} from '../utils/state-manager';
 import {debounce} from '../utils/debounce';
 
 type AutomationState = 'turn-on' | 'turn-off' | 'scheme-dark' | 'scheme-light' | '';

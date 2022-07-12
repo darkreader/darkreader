@@ -2,7 +2,7 @@ import {getBlogPostURL} from '../utils/links';
 import {getDurationInMinutes} from '../utils/time';
 import type {News} from '../definitions';
 import {readSyncStorage, readLocalStorage, writeSyncStorage, writeLocalStorage} from './utils/extension-api';
-import {StateManager} from './utils/state-manager';
+import {StateManager} from '../utils/state-manager';
 
 interface NewsmakerState {
     latest: News[];

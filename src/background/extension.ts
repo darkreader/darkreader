@@ -96,7 +96,7 @@ export class Extension {
         }
     }
 
-    private async MV3initSystemColorStateManager(isDark: boolean | null): Promise<void> {
+    private async MV3syncSystemColorStateManager(isDark: boolean | null): Promise<void> {
         if (!__MV3__) {
             return;
         }
@@ -112,17 +112,6 @@ export class Extension {
             this.isDark = isDark;
             return this.systemColorStateManager.saveState();
         }
-    }
-
-    private async MV3saveSystemColorStateManager(): Promise<void> {
-        if (!__MV3__) {
-            return;
-        }
-        if (!this.systemColorStateManager) {
-            logWarn('MV3saveSystemColorStateManager() called before MV3initSystemColorStateManager()');
-            return;
-        }
-        return this.systemColorStateManager.saveState();
     }
 
     private alarmListener = (alarm: chrome.alarms.Alarm): void => {
@@ -204,10 +193,12 @@ export class Extension {
     }
 
     async start() {
-        await this.config.load({local: true});
-        await this.MV3initSystemColorStateManager(null);
+        await Promise.all([
+            this.config.load({local: true}),
+            this.MV3syncSystemColorStateManager(null),
+            this.user.loadSettings()
+        ]);
 
-        await this.user.loadSettings();
         if (this.user.settings.enableContextMenus && !this.registeredContextMenus) {
             chrome.permissions.contains({permissions: ['contextMenus']}, (permitted) => {
                 if (permitted) {
@@ -348,23 +339,44 @@ export class Extension {
             await this.user.loadSettings();
         }
         await this.stateManager.loadState();
+        const [
+            news,
+            shortcuts,
+            dynamicFixesText,
+            filterFixesText,
+            staticThemesText,
+            hasCustomDynamicFixes,
+            hasCustomFilterFixes,
+            hasCustomStaticFixes,
+            activeTab
+        ] = await Promise.all([
+            this.news.getLatest(),
+            this.getShortcuts(),
+            this.devtools.getDynamicThemeFixesText(),
+            this.devtools.getInversionFixesText(),
+            this.devtools.getStaticThemesText(),
+            this.devtools.hasCustomDynamicThemeFixes(),
+            this.devtools.hasCustomFilterFixes(),
+            this.devtools.hasCustomStaticFixes(),
+            this.getActiveTabInfo()
+        ]);
         return {
             isEnabled: this.isExtensionSwitchedOn(),
             isReady: true,
             settings: this.user.settings,
-            news: await this.news.getLatest(),
-            shortcuts: await this.getShortcuts(),
+            news,
+            shortcuts,
             colorScheme: this.config.COLOR_SCHEMES_RAW,
             forcedScheme: this.autoState === 'scheme-dark' ? 'dark' : this.autoState === 'scheme-light' ? 'light' : null,
             devtools: {
-                dynamicFixesText: await this.devtools.getDynamicThemeFixesText(),
-                filterFixesText: await this.devtools.getInversionFixesText(),
-                staticThemesText: await this.devtools.getStaticThemesText(),
-                hasCustomDynamicFixes: await this.devtools.hasCustomDynamicThemeFixes(),
-                hasCustomFilterFixes: await this.devtools.hasCustomFilterFixes(),
-                hasCustomStaticFixes: await this.devtools.hasCustomStaticFixes(),
+                dynamicFixesText,
+                filterFixesText,
+                staticThemesText,
+                hasCustomDynamicFixes,
+                hasCustomFilterFixes,
+                hasCustomStaticFixes,
             },
-            activeTab: await this.getActiveTabInfo(),
+            activeTab,
         };
     }
 
@@ -410,15 +422,14 @@ export class Extension {
             callback();
             return;
         }
-        this.user.loadSettings()
-            .then(async () => {
-                await this.stateManager.loadState();
-                callback();
-            });
+        Promise.all([
+            this.user.loadSettings(),
+            this.stateManager.loadState()
+        ]).then(callback);
     }
 
     private onColorSchemeChange = (isDark: boolean) => {
-        this.MV3initSystemColorStateManager(isDark);
+        this.MV3syncSystemColorStateManager(isDark);
         if (isFirefox) {
             this.wasLastColorSchemeDark = isDark;
         }

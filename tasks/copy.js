@@ -2,7 +2,7 @@
 const {getDestDir, PLATFORM} = require('./paths');
 const reload = require('./reload');
 const {createTask} = require('./task');
-const {pathExists, copyFile, readFile, writeFile, getPaths} = require('./utils');
+const {pathExists, copyFile, getPaths} = require('./utils');
 
 const srcDir = 'src';
 const cwdPaths = [

@@ -4,6 +4,7 @@ import {canInjectScript} from '../background/utils/extension-api';
 import type {ExtensionData, Message, UserSettings} from '../definitions';
 import {MessageType} from '../utils/message';
 import {makeChromiumHappy} from './make-chromium-happy';
+import {logInfo} from 'utils/log';
 
 // Initialize extension
 const extension = new Extension();
@@ -27,24 +28,25 @@ const WATCH = __WATCH__;
 
 if (__MV3__) {
     chrome.runtime.onInstalled.addListener(async () => {
-        (chrome.scripting as any).unregisterContentScripts(() => {
-            (chrome.scripting as any).registerContentScripts([{
-                id: 'proxy',
-                matches: [
-                    "<all_urls>"
-                ],
-                js: [
-                    "inject/proxy.js",
-                ],
-                runAt: "document_start",
-                allFrames: true,
-                persistAcrossSessions: true,
-                world: "MAIN",
-                // TODO:
-                //"match_about_blank": true
-            }]);
-        });
-
+        try {
+            (chrome.scripting as any).unregisterContentScripts(() => {
+                (chrome.scripting as any).registerContentScripts([{
+                    id: 'proxy',
+                    matches: [
+                        "<all_urls>"
+                    ],
+                    js: [
+                        "inject/proxy.js",
+                    ],
+                    runAt: "document_start",
+                    allFrames: true,
+                    persistAcrossSessions: true,
+                    world: "MAIN",
+                }], () => logInfo('Registerd direct CSS proxy injector.'));
+            });
+        } catch (e) {
+            logInfo('Failed to register direct CSS proxy injector, falling back to other injection methods.');
+        }
     });
 }
 

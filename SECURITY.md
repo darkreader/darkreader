@@ -10,18 +10,17 @@ Latest version is supported.
 
 | Version   | Supported          |
 | --------- | ------------------ |
-| 4.9.33    | :white_check_mark: |
-| < 4.9.33  | :x:                |
+| 4.9.43    | :white_check_mark: |
+| < 4.9.43  | :x:                |
 
 ## Reporting a Vulnerability
 
-In case there is a vulnerability left behind, immediately notify
-to <darkreaderapp@gmail.com>; unless you can fix it yourself,
-in which case open a pull request on
+In case there is a vulnerability, please immediately notify
+<darkreaderapp@gmail.com>.
+
+If you can fix it yourself, please also open a pull request at
 <https://github.com/darkreader/darkreader/pulls>.
 
-Alexander Shutau, owner
-
-"Gusted" William Zijl, maintainer
-
-Erkin Alp Güney, security policy author
+Alexander Shutau, owner  
+"Gusted" William Zijl, maintainer  
+Erkin Alp Güney, security policy author  

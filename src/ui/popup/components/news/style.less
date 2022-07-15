@@ -1,5 +1,7 @@
 @import "../../../theme";
 
+@size-news-icon: 2.5rem;
+
 .news {
     bottom: @size-control-inner + @size-border + @popup-content-padding;
     box-sizing: border-box;
@@ -95,6 +97,22 @@
             &:hover {
                 text-decoration: underline;
             }
+        }
+
+        &__icon {
+            background-position: center;
+            background-repeat: no-repeat;
+            background-size: contain;
+            display: inline-block;
+            height: @size-news-icon;
+            left: 0;
+            position: absolute;
+            top: calc(50% - @size-news-icon / 2);
+            width: @size-news-icon;
+        }
+
+        &--has-icon {
+            padding-left: @size-news-icon + @indent-small;
         }
 
         &--unread {

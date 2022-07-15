@@ -11,23 +11,23 @@ import {DEFAULT_COLORSCHEME} from '../defaults';
 
 const CONFIG_URLs = {
     darkSites: {
-        remote: 'https://raw.githubusercontent.com/darkreader/darkreader/master/src/config/dark-sites.config',
+        remote: 'https://raw.githubusercontent.com/darkreader/darkreader/main/src/config/dark-sites.config',
         local: '../config/dark-sites.config',
     },
     dynamicThemeFixes: {
-        remote: 'https://raw.githubusercontent.com/darkreader/darkreader/master/src/config/dynamic-theme-fixes.config',
+        remote: 'https://raw.githubusercontent.com/darkreader/darkreader/main/src/config/dynamic-theme-fixes.config',
         local: '../config/dynamic-theme-fixes.config',
     },
     inversionFixes: {
-        remote: 'https://raw.githubusercontent.com/darkreader/darkreader/master/src/config/inversion-fixes.config',
+        remote: 'https://raw.githubusercontent.com/darkreader/darkreader/main/src/config/inversion-fixes.config',
         local: '../config/inversion-fixes.config',
     },
     staticThemes: {
-        remote: 'https://raw.githubusercontent.com/darkreader/darkreader/master/src/config/static-themes.config',
+        remote: 'https://raw.githubusercontent.com/darkreader/darkreader/main/src/config/static-themes.config',
         local: '../config/static-themes.config',
     },
     colorSchemes: {
-        remote: 'https://raw.githubusercontent.com/darkreader/darkreader/master/src/config/color-schemes.drconf',
+        remote: 'https://raw.githubusercontent.com/darkreader/darkreader/main/src/config/color-schemes.drconf',
         local: '../config/color-schemes.drconf',
     },
 };

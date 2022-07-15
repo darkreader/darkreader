@@ -17,30 +17,37 @@ import createStaticStylesheet from '../generators/static-theme';
 import {createSVGFilterStylesheet, getSVGFilterMatrixValue, getSVGReverseFilterMatrixValue} from '../generators/svg-filter';
 import type {ExtensionData, FilterConfig, News, Shortcuts, UserSettings, TabInfo, TabData} from '../definitions';
 import {isSystemDarkModeEnabled} from '../utils/media-query';
-import {isFirefox, isMV3, isThunderbird} from '../utils/platform';
+import {isFirefox, isThunderbird} from '../utils/platform';
 import {MessageType} from '../utils/message';
 import {logInfo, logWarn} from '../utils/log';
 import {PromiseBarrier} from '../utils/promise-barrier';
-import {StateManager} from './utils/state-manager';
+import {StateManager} from '../utils/state-manager';
+import {debounce} from '../utils/debounce';
+
+type AutomationState = 'turn-on' | 'turn-off' | 'scheme-dark' | 'scheme-light' | '';
 
 interface ExtensionState {
-    isEnabled: boolean;
+    autoState: AutomationState;
     wasEnabledOnLastCheck: boolean;
     registeredContextMenus: boolean;
 }
 
-declare const __DEBUG__: boolean;
+interface SystemColorState {
+    isDark: boolean | null;
+}
+
+declare const __MV3__: boolean;
 
 export class Extension {
-    config: ConfigManager;
-    devtools: DevTools;
-    icon: IconManager;
-    messenger: Messenger;
-    news: Newsmaker;
-    tabs: TabManager;
-    user: UserStorage;
+    private config: ConfigManager;
+    private devtools: DevTools;
+    private icon: IconManager;
+    private messenger: Messenger;
+    private news: Newsmaker;
+    private tabs: TabManager;
+    private user: UserStorage;
 
-    private isEnabled: boolean = null;
+    private autoState: AutomationState = '';
     private wasEnabledOnLastCheck: boolean = null;
     private registeredContextMenus: boolean = null;
     private popupOpeningListener: () => void = null;
@@ -51,6 +58,12 @@ export class Extension {
 
     private static ALARM_NAME = 'auto-time-alarm';
     private static LOCAL_STORAGE_KEY = 'Extension-state';
+
+    // Store system color theme
+    private static SYSTEM_COLOR_LOCAL_STORAGE_KEY = 'system-color-state';
+    private systemColorStateManager: StateManager<SystemColorState>;
+    private isDark: boolean | null = null;
+
     constructor() {
         this.config = new ConfigManager();
         this.devtools = new DevTools(this.config, async () => this.onSettingsChanged());
@@ -61,10 +74,10 @@ export class Extension {
             getTabMessage: this.getTabMessage,
             onColorSchemeChange: this.onColorSchemeChange,
         });
-        this.user = new UserStorage({onRemoteSettingsChange: () => this.onRemoteSettingsChange()});
+        this.user = new UserStorage();
         this.startBarrier = new PromiseBarrier();
         this.stateManager = new StateManager<ExtensionState>(Extension.LOCAL_STORAGE_KEY, this, {
-            isEnabled: null,
+            autoState: '',
             wasEnabledOnLastCheck: null,
             registeredContextMenus: null,
         });
@@ -73,9 +86,9 @@ export class Extension {
 
         if (chrome.permissions.onRemoved) {
             chrome.permissions.onRemoved.addListener((permissions) => {
-            // As far as we know, this code is never actually run because there
-            // is no browser UI for removing 'contextMenus' permission.
-            // This code exists for future-proofing in case browsers ever add such UI.
+                // As far as we know, this code is never actually run because there
+                // is no browser UI for removing 'contextMenus' permission.
+                // This code exists for future-proofing in case browsers ever add such UI.
                 if (!permissions.permissions.includes('contextMenus')) {
                     this.registeredContextMenus = false;
                 }
@@ -83,63 +96,109 @@ export class Extension {
         }
     }
 
+    private async MV3syncSystemColorStateManager(isDark: boolean | null): Promise<void> {
+        if (!__MV3__) {
+            return;
+        }
+        if (!this.systemColorStateManager) {
+            this.systemColorStateManager = new StateManager<SystemColorState>(Extension.SYSTEM_COLOR_LOCAL_STORAGE_KEY, this, {
+                isDark,
+            });
+        }
+        if (isDark === null) {
+            // Attempt to restore data from storage
+            return this.systemColorStateManager.loadState();
+        } else if (this.isDark !== isDark) {
+            this.isDark = isDark;
+            return this.systemColorStateManager.saveState();
+        }
+    }
+
     private alarmListener = (alarm: chrome.alarms.Alarm): void => {
         if (alarm.name === Extension.ALARM_NAME) {
-            this.handleAutoCheck();
+            this.callWhenSettingsLoaded(() => {
+                this.handleAutomationCheck();
+            });
         }
     };
 
-    recalculateIsEnabled(): boolean {
-        if (!this.user.settings) {
-            logWarn('Extension.isEnabled() was called before Extension.user.settings is available.');
-            return false;
-        }
+    private isExtensionSwitchedOn() {
+        return (
+            this.autoState === 'turn-on' ||
+            this.autoState === 'scheme-dark' ||
+            this.autoState === 'scheme-light' ||
+            (this.autoState === '' && this.user.settings.enabled)
+        );
+    }
 
-        const {automation} = this.user.settings;
+    private updateAutoState() {
+        const {mode, behavior, enabled} = this.user.settings.automation;
+
+        let isAutoDark: boolean;
         let nextCheck: number;
-        switch (automation) {
-            case 'time':
-                this.isEnabled = isInTimeIntervalLocal(this.user.settings.time.activation, this.user.settings.time.deactivation);
-                nextCheck = nextTimeInterval(this.user.settings.time.activation, this.user.settings.time.deactivation);
+        switch (mode) {
+            case 'time': {
+                const {time} = this.user.settings;
+                isAutoDark = isInTimeIntervalLocal(time.activation, time.deactivation);
+                nextCheck = nextTimeInterval(time.activation, time.deactivation);
                 break;
+            }
             case 'system':
-                if (isMV3) {
-                    logWarn('system automation is not yet supported. Defaulting to ON.');
-                    this.isEnabled = true;
+                if (__MV3__) {
+                    isAutoDark = this.isDark;
+                    if (this.isDark === null) {
+                        logWarn('System color scheme is unknown. Defaulting to Dark.');
+                        isAutoDark = true;
+                    }
                     break;
                 }
                 if (isFirefox) {
                     // BUG: Firefox background page always matches initial color scheme.
-                    this.isEnabled = this.wasLastColorSchemeDark == null
+                    isAutoDark = this.wasLastColorSchemeDark == null
                         ? isSystemDarkModeEnabled()
                         : this.wasLastColorSchemeDark;
                 } else {
-                    this.isEnabled = isSystemDarkModeEnabled();
+                    isAutoDark = isSystemDarkModeEnabled();
                 }
                 break;
             case 'location': {
                 const {latitude, longitude} = this.user.settings.location;
-
                 if (latitude != null && longitude != null) {
-                    this.isEnabled = isNightAtLocation(latitude, longitude);
+                    isAutoDark = isNightAtLocation(latitude, longitude);
                     nextCheck = nextTimeChangeAtLocation(latitude, longitude);
                 }
                 break;
             }
-            default:
-                this.isEnabled = this.user.settings.enabled;
+            case '':
                 break;
         }
-        if (nextCheck) {
-            chrome.alarms.create(Extension.ALARM_NAME, {when: nextCheck});
+
+        let state: AutomationState = '';
+        if (enabled) {
+            if (behavior === 'OnOff') {
+                state = isAutoDark ? 'turn-on' : 'turn-off';
+            } else if (behavior === 'Scheme') {
+                state = isAutoDark ? 'scheme-dark' : 'scheme-light';
+            }
         }
-        return this.isEnabled;
+        this.autoState = state;
+
+        if (nextCheck) {
+            if (nextCheck < Date.now()) {
+                logWarn(`Alarm is set in the past: ${nextCheck}. The time is: ${new Date()}. ISO: ${(new Date()).toISOString()}`);
+            } else {
+                chrome.alarms.create(Extension.ALARM_NAME, {when: nextCheck});
+            }
+        }
     }
 
     async start() {
-        await this.config.load({local: true});
+        await Promise.all([
+            this.config.load({local: true}),
+            this.MV3syncSystemColorStateManager(null),
+            this.user.loadSettings()
+        ]);
 
-        await this.user.loadSettings();
         if (this.user.settings.enableContextMenus && !this.registeredContextMenus) {
             chrome.permissions.contains({permissions: ['contextMenus']}, (permitted) => {
                 if (permitted) {
@@ -152,6 +211,7 @@ export class Extension {
         if (this.user.settings.syncSitesFixes) {
             await this.config.load({local: false});
         }
+        this.updateAutoState();
         this.onAppToggle();
         logInfo('loaded', this.user.settings);
 
@@ -163,55 +223,6 @@ export class Extension {
 
         this.user.settings.fetchNews && this.news.subscribe();
         this.startBarrier.resolve();
-
-        if (__DEBUG__) {
-            const socket = new WebSocket(`ws://localhost:8894`);
-            socket.onmessage = (e) => {
-                const respond = (message: {type: string; data?: ExtensionData | string | boolean | {[key: string]: string}; id?: number}) => socket.send(JSON.stringify(message));
-                try {
-                    const message: {type: string; data: Partial<UserSettings> | boolean | {[key: string]: string}; id: number} = JSON.parse(e.data);
-                    switch (message.type) {
-                        case 'changeSettings':
-                            this.changeSettings(message.data as Partial<UserSettings>);
-                            respond({type: 'changeSettings-response', id: message.id});
-                            break;
-                        case 'collectData':
-                            this.collectData().then((data) => {
-                                respond({type: 'collectData-response', id: message.id, data});
-                            });
-                            break;
-                        case 'changeLocalStorage': {
-                            const data = message.data as {[key: string]: string};
-                            for (const key in data) {
-                                localStorage[key] = data[key];
-                            }
-                            respond({type: 'changeLocalStorage-response', id: message.id});
-                            break;
-                        }
-                        case 'getLocalStorage':
-                            respond({type: 'getLocalStorage-response', id: message.id, data: localStorage ? JSON.stringify(localStorage) : null});
-                            break;
-                        case 'changeChromeStorage': {
-                            const region: 'local' | 'sync' = (message.data as any).region;
-                            chrome.storage[region].set((message.data as any).data, () => respond({type: 'changeChromeStorage-response', id: message.id}));
-                            break;
-                        }
-                        case 'getChromeStorage': {
-                            const keys = (message.data as any).keys;
-                            const region: 'local' | 'sync' = (message.data as any).region;
-                            chrome.storage[region].get(keys, (data) => respond({type: 'getChromeStorage-response', data, id: message.id}));
-                            break;
-                        }
-                        case 'setDataIsMigratedForTesting':
-                            this.devtools.setDataIsMigratedForTesting(message.data as boolean);
-                            respond({type: 'setDataIsMigratedForTesting-response', id: message.id});
-                            break;
-                    }
-                } catch (err) {
-                    respond({type: 'error', data: String(err)});
-                }
-            };
-        }
     }
 
     private getMessengerAdapter(): ExtensionAdapter {
@@ -219,21 +230,12 @@ export class Extension {
             collect: async () => {
                 return await this.collectData();
             },
-            getActiveTabInfo: async () => {
-                if (!this.user.settings) {
-                    await this.user.loadSettings();
-                }
-                await this.stateManager.loadState();
-                const url = await this.tabs.getActiveTabURL();
-                const info = this.getURLInfo(url);
-                info.isInjected = await this.tabs.canAccessActiveTab();
-                return info;
-            },
             changeSettings: (settings) => this.changeSettings(settings),
             setTheme: (theme) => this.setTheme(theme),
             setShortcut: ({command, shortcut}) => this.setShortcut(command, shortcut),
-            toggleURL: (url) => this.toggleURL(url),
+            toggleActiveTab: async () => this.toggleActiveTab(),
             markNewsAsRead: async (ids) => await this.news.markAsRead(...ids),
+            markNewsAsDisplayed: async (ids) => await this.news.markAsDisplayed(...ids),
             onPopupOpen: () => this.popupOpeningListener && this.popupOpeningListener(),
             loadConfig: async (options) => await this.config.load(options),
             applyDevDynamicThemeFixes: (text) => this.devtools.applyDynamicThemeFixes(text),
@@ -245,7 +247,7 @@ export class Extension {
         };
     }
 
-    onCommand = async (command: string, frameURL?: string) => {
+    private onCommandInternal = async (command: string, frameURL?: string) => {
         if (this.startBarrier.isPending()) {
             await this.startBarrier.entry();
         }
@@ -254,19 +256,20 @@ export class Extension {
             case 'toggle':
                 logInfo('Toggle command entered');
                 this.changeSettings({
-                    enabled: !this.isEnabled,
-                    automation: '',
+                    enabled: !this.isExtensionSwitchedOn(),
+                    automation: {...this.user.settings.automation, ...{enable: false}},
                 });
                 break;
-            case 'addSite':
+            case 'addSite': {
                 logInfo('Add Site command entered');
                 const url = frameURL || await this.tabs.getActiveTabURL();
                 if (isPDF(url)) {
                     this.changeSettings({enableForPDF: !this.user.settings.enableForPDF});
                 } else {
-                    this.toggleURL(url);
+                    this.toggleActiveTab();
                 }
                 break;
+            }
             case 'switchEngine': {
                 logInfo('Switch Engine command entered');
                 const engines = Object.values(ThemeEngines);
@@ -277,6 +280,10 @@ export class Extension {
             }
         }
     };
+
+    // 75 is small enough to not notice it, and still catches when someone
+    // is holding down a certain shortcut.
+    onCommand = debounce(75, this.onCommandInternal);
 
     private registerContextMenus() {
         const onCommandToggle = async () => this.onCommand('toggle');
@@ -323,31 +330,68 @@ export class Extension {
         return commands.reduce((map, cmd) => Object.assign(map, {[cmd.name]: cmd.shortcut}), {} as Shortcuts);
     }
 
-    setShortcut(command: string, shortcut: string) {
+    private setShortcut(command: string, shortcut: string) {
         setShortcut(command, shortcut);
     }
 
-    private async collectData(): Promise<ExtensionData> {
+    async collectData(): Promise<ExtensionData> {
         if (!this.user.settings) {
             await this.user.loadSettings();
         }
         await this.stateManager.loadState();
+        const [
+            news,
+            shortcuts,
+            dynamicFixesText,
+            filterFixesText,
+            staticThemesText,
+            hasCustomDynamicFixes,
+            hasCustomFilterFixes,
+            hasCustomStaticFixes,
+            activeTab
+        ] = await Promise.all([
+            this.news.getLatest(),
+            this.getShortcuts(),
+            this.devtools.getDynamicThemeFixesText(),
+            this.devtools.getInversionFixesText(),
+            this.devtools.getStaticThemesText(),
+            this.devtools.hasCustomDynamicThemeFixes(),
+            this.devtools.hasCustomFilterFixes(),
+            this.devtools.hasCustomStaticFixes(),
+            this.getActiveTabInfo()
+        ]);
         return {
-            isEnabled: this.isEnabled,
+            isEnabled: this.isExtensionSwitchedOn(),
             isReady: true,
             settings: this.user.settings,
-            news: await this.news.getLatest(),
-            shortcuts: await this.getShortcuts(),
+            news,
+            shortcuts,
             colorScheme: this.config.COLOR_SCHEMES_RAW,
+            forcedScheme: this.autoState === 'scheme-dark' ? 'dark' : this.autoState === 'scheme-light' ? 'light' : null,
             devtools: {
-                dynamicFixesText: await this.devtools.getDynamicThemeFixesText(),
-                filterFixesText: await this.devtools.getInversionFixesText(),
-                staticThemesText: await this.devtools.getStaticThemesText(),
-                hasCustomDynamicFixes: await this.devtools.hasCustomDynamicThemeFixes(),
-                hasCustomFilterFixes: await this.devtools.hasCustomFilterFixes(),
-                hasCustomStaticFixes: await this.devtools.hasCustomStaticFixes(),
+                dynamicFixesText,
+                filterFixesText,
+                staticThemesText,
+                hasCustomDynamicFixes,
+                hasCustomFilterFixes,
+                hasCustomStaticFixes,
             },
+            activeTab,
         };
+    }
+
+    private async getActiveTabInfo() {
+        if (!this.user.settings) {
+            await this.user.loadSettings();
+        }
+        await this.stateManager.loadState();
+        const url = await this.tabs.getActiveTabURL();
+        const info = this.getURLInfo(url);
+        info.isInjected = await this.tabs.canAccessActiveTab();
+        if (this.user.settings.detectDarkTheme) {
+            info.isDarkThemeDetected = await this.tabs.isActiveTabDarkThemeDetected();
+        }
+        return info;
     }
 
     private onNewsUpdate(news: News[]) {
@@ -356,8 +400,8 @@ export class Extension {
         }
 
         const latestNews = news.length > 0 && news[0];
-        if (latestNews && latestNews.important && !latestNews.read) {
-            this.icon.showImportantBadge();
+        if (latestNews && latestNews.badge && !latestNews.read && !latestNews.displayed) {
+            this.icon.showBadge(latestNews.badge);
             return;
         }
 
@@ -373,31 +417,47 @@ export class Extension {
         });
     }
 
-    private onColorSchemeChange = ({isDark}: {isDark: boolean}) => {
+    private callWhenSettingsLoaded(callback: () => void) {
+        if (this.user.settings) {
+            callback();
+            return;
+        }
+        Promise.all([
+            this.user.loadSettings(),
+            this.stateManager.loadState()
+        ]).then(callback);
+    }
+
+    private onColorSchemeChange = (isDark: boolean) => {
+        this.MV3syncSystemColorStateManager(isDark);
         if (isFirefox) {
             this.wasLastColorSchemeDark = isDark;
         }
-        if (this.user.settings.automation !== 'system') {
+        if (this.user.settings.automation.mode !== 'system') {
             return;
         }
-        this.handleAutoCheck();
+        this.callWhenSettingsLoaded(() => {
+            this.handleAutomationCheck();
+        });
     };
 
-    private async handleAutoCheck() {
-        if (!this.user.settings) {
-            await this.user.loadSettings();
-        }
-        await this.stateManager.loadState();
-        this.recalculateIsEnabled();
-        const isEnabled = this.isEnabled;
-        if (this.wasEnabledOnLastCheck === null || this.wasEnabledOnLastCheck !== isEnabled) {
-            this.wasEnabledOnLastCheck = isEnabled;
+    private handleAutomationCheck = () => {
+        this.updateAutoState();
+
+        const isSwitchedOn = this.isExtensionSwitchedOn();
+        if (
+            this.wasEnabledOnLastCheck === null ||
+            this.wasEnabledOnLastCheck !== isSwitchedOn ||
+            this.autoState === 'scheme-dark' ||
+            this.autoState === 'scheme-light'
+        ) {
+            this.wasEnabledOnLastCheck = isSwitchedOn;
             this.onAppToggle();
             this.tabs.sendMessage();
             this.reportChanges();
             this.stateManager.saveState();
         }
-    }
+    };
 
     changeSettings($settings: Partial<UserSettings>) {
         const prev = {...this.user.settings};
@@ -406,18 +466,21 @@ export class Extension {
 
         if (
             (prev.enabled !== this.user.settings.enabled) ||
-            (prev.automation !== this.user.settings.automation) ||
+            (prev.automation.enabled !== this.user.settings.automation.enabled) ||
+            (prev.automation.mode !== this.user.settings.automation.mode) ||
+            (prev.automation.behavior !== this.user.settings.automation.behavior) ||
             (prev.time.activation !== this.user.settings.time.activation) ||
             (prev.time.deactivation !== this.user.settings.time.deactivation) ||
             (prev.location.latitude !== this.user.settings.location.latitude) ||
             (prev.location.longitude !== this.user.settings.location.longitude)
         ) {
+            this.updateAutoState();
             this.onAppToggle();
         }
         if (prev.syncSettings !== this.user.settings.syncSettings) {
             this.user.saveSyncSetting(this.user.settings.syncSettings);
         }
-        if (this.isEnabled && $settings.changeBrowserTheme != null && prev.changeBrowserTheme !== $settings.changeBrowserTheme) {
+        if (this.isExtensionSwitchedOn() && $settings.changeBrowserTheme != null && prev.changeBrowserTheme !== $settings.changeBrowserTheme) {
             if ($settings.changeBrowserTheme) {
                 setWindowTheme(this.user.settings.theme);
             } else {
@@ -438,10 +501,10 @@ export class Extension {
         this.onSettingsChanged();
     }
 
-    setTheme($theme: Partial<FilterConfig>) {
+    private setTheme($theme: Partial<FilterConfig>) {
         this.user.set({theme: {...this.user.settings.theme, ...$theme}});
 
-        if (this.isEnabled && this.user.settings.changeBrowserTheme) {
+        if (this.isExtensionSwitchedOn() && this.user.settings.changeBrowserTheme) {
             setWindowTheme(this.user.settings.theme);
         }
 
@@ -453,32 +516,33 @@ export class Extension {
         this.messenger.reportChanges(info);
     }
 
-    toggleURL(url: string) {
+    private async toggleActiveTab() {
+        const settings = this.user.settings;
+        const tab = await this.getActiveTabInfo();
+        const {url} = tab;
         const isInDarkList = isURLInList(url, this.config.DARK_SITES);
-        const siteList = isInDarkList ?
-            this.user.settings.siteListEnabled.slice() :
-            this.user.settings.siteList.slice();
-        const pattern = getURLHostOrProtocol(url);
-        const index = siteList.indexOf(pattern);
-        if (index < 0) {
-            siteList.push(pattern);
-        } else {
-            siteList.splice(index, 1);
-        }
-        if (isInDarkList) {
-            this.changeSettings({siteListEnabled: siteList});
-        } else {
-            this.changeSettings({siteList});
-        }
-    }
+        const host = getURLHostOrProtocol(url);
 
-    /**
-     * Adds host name of last focused tab
-     * into Sites List (or removes).
-     */
-    async toggleCurrentSite() {
-        const url = await this.tabs.getActiveTabURL();
-        this.toggleURL(url);
+        function getToggledList(sourceList: string[]) {
+            const list = sourceList.slice();
+            const index = list.indexOf(host);
+            if (index < 0) {
+                list.push(host);
+            } else {
+                list.splice(index, 1);
+            }
+            return list;
+        }
+
+        const darkThemeDetected = !settings.applyToListedOnly && settings.detectDarkTheme && tab.isDarkThemeDetected;
+        if (isInDarkList || darkThemeDetected || settings.siteListEnabled.includes(host)) {
+            const toggledList = getToggledList(settings.siteListEnabled);
+            this.changeSettings({siteListEnabled: toggledList});
+            return;
+        }
+
+        const toggledList = getToggledList(settings.siteList);
+        this.changeSettings({siteList: toggledList});
     }
 
     //------------------------------------
@@ -491,8 +555,7 @@ export class Extension {
             this.icon = new IconManager();
         }
 
-        this.recalculateIsEnabled();
-        if (this.isEnabled) {
+        if (this.isExtensionSwitchedOn()) {
             this.icon.setActive();
             if (this.user.settings.changeBrowserTheme) {
                 setWindowTheme(this.user.settings.theme);
@@ -510,7 +573,7 @@ export class Extension {
             await this.user.loadSettings();
         }
         await this.stateManager.loadState();
-        this.wasEnabledOnLastCheck = this.isEnabled;
+        this.wasEnabledOnLastCheck = this.isExtensionSwitchedOn();
         this.tabs.sendMessage();
         this.saveUserSettings();
         this.reportChanges();
@@ -536,16 +599,24 @@ export class Extension {
             url,
             isInDarkList,
             isProtected,
-            isInjected: null
+            isInjected: null,
+            isDarkThemeDetected: null,
         };
     }
 
     private getTabMessage = (url: string, frameURL: string): TabData => {
+        const settings = this.user.settings;
         const urlInfo = this.getURLInfo(url);
-        if (this.isEnabled && isURLEnabled(url, this.user.settings, urlInfo)) {
-            const custom = this.user.settings.customThemes.find(({url: urlList}) => isURLInList(url, urlList));
-            const preset = custom ? null : this.user.settings.presets.find(({urls}) => isURLInList(url, urls));
-            const theme = custom ? custom.theme : preset ? preset.theme : this.user.settings.theme;
+        if (this.isExtensionSwitchedOn() && isURLEnabled(url, settings, urlInfo)) {
+            const custom = settings.customThemes.find(({url: urlList}) => isURLInList(url, urlList));
+            const preset = custom ? null : settings.presets.find(({urls}) => isURLInList(url, urls));
+            let theme = custom ? custom.theme : preset ? preset.theme : settings.theme;
+            if (this.autoState === 'scheme-dark' || this.autoState === 'scheme-light') {
+                const mode = this.autoState === 'scheme-dark' ? 1 : 0;
+                theme = {...theme, mode};
+            }
+            const isIFrame = frameURL != null;
+            const detectDarkTheme = !isIFrame && settings.detectDarkTheme && !isURLInList(url, settings.siteListEnabled) && !isPDF(url);
 
             logInfo(`Creating CSS for url: ${url}`);
             logInfo(`Custom theme ${custom ? 'was found' : 'was not found'}, Preset theme ${preset ? 'was found' : 'was not found'}
@@ -554,14 +625,20 @@ export class Extension {
                 case ThemeEngines.cssFilter: {
                     return {
                         type: MessageType.BG_ADD_CSS_FILTER,
-                        data: createCSSFilterStylesheet(theme, url, frameURL, this.config.INVERSION_FIXES_RAW, this.config.INVERSION_FIXES_INDEX),
+                        data: {
+                            css: createCSSFilterStylesheet(theme, url, frameURL, this.config.INVERSION_FIXES_RAW, this.config.INVERSION_FIXES_INDEX),
+                            detectDarkTheme,
+                        },
                     };
                 }
                 case ThemeEngines.svgFilter: {
                     if (isFirefox) {
                         return {
                             type: MessageType.BG_ADD_CSS_FILTER,
-                            data: createSVGFilterStylesheet(theme, url, frameURL, this.config.INVERSION_FIXES_RAW, this.config.INVERSION_FIXES_INDEX),
+                            data: {
+                                css: createSVGFilterStylesheet(theme, url, frameURL, this.config.INVERSION_FIXES_RAW, this.config.INVERSION_FIXES_INDEX),
+                                detectDarkTheme,
+                            },
                         };
                     }
                     return {
@@ -570,30 +647,35 @@ export class Extension {
                             css: createSVGFilterStylesheet(theme, url, frameURL, this.config.INVERSION_FIXES_RAW, this.config.INVERSION_FIXES_INDEX),
                             svgMatrix: getSVGFilterMatrixValue(theme),
                             svgReverseMatrix: getSVGReverseFilterMatrixValue(),
+                            detectDarkTheme,
                         },
                     };
                 }
                 case ThemeEngines.staticTheme: {
                     return {
                         type: MessageType.BG_ADD_STATIC_THEME,
-                        data: theme.stylesheet && theme.stylesheet.trim() ?
-                            theme.stylesheet :
-                            createStaticStylesheet(theme, url, frameURL, this.config.STATIC_THEMES_RAW, this.config.STATIC_THEMES_INDEX),
+                        data: {
+                            css: theme.stylesheet && theme.stylesheet.trim() ?
+                                theme.stylesheet :
+                                createStaticStylesheet(theme, url, frameURL, this.config.STATIC_THEMES_RAW, this.config.STATIC_THEMES_INDEX),
+                            detectDarkTheme: settings.detectDarkTheme,
+                        },
                     };
                 }
                 case ThemeEngines.dynamicTheme: {
-                    const filter = {...theme};
-                    delete filter.engine;
                     const fixes = getDynamicThemeFixesFor(url, frameURL, this.config.DYNAMIC_THEME_FIXES_RAW, this.config.DYNAMIC_THEME_FIXES_INDEX, this.user.settings.enableForPDF);
-                    const isIFrame = frameURL != null;
                     return {
                         type: MessageType.BG_ADD_DYNAMIC_THEME,
-                        data: {filter, fixes, isIFrame},
+                        data: {
+                            theme,
+                            fixes,
+                            isIFrame,
+                            detectDarkTheme,
+                        },
                     };
                 }
-                default: {
+                default:
                     throw new Error(`Unknown engine ${theme.engine}`);
-                }
             }
         }
 
@@ -602,6 +684,10 @@ export class Extension {
             type: MessageType.BG_CLEAN_UP,
         };
     };
+
+    setDevToolsDataIsMigratedForTesting(migrated: boolean) {
+        this.devtools.setDataIsMigratedForTesting(migrated);
+    }
 
     //-------------------------------------
     //          User settings

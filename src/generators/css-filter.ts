@@ -6,7 +6,7 @@ import {parseArray, formatArray} from '../utils/text';
 import {compareURLPatterns, isURLInList} from '../utils/url';
 import {createTextStyle} from './text-style';
 import type {FilterConfig, InversionFix} from '../definitions';
-import {compareChromeVersions, chromiumVersion, isChromium} from '../utils/platform';
+import {compareChromeVersions, chromiumVersion, isChromium, isFirefox, firefoxVersion} from '../utils/platform';
 
 export enum FilterMode {
     light = 0,
@@ -24,6 +24,18 @@ export function hasPatchForChromiumIssue501582() {
     return Boolean(
         isChromium &&
         compareChromeVersions(chromiumVersion, '81.0.4035.0') >= 0
+    );
+}
+
+/**
+ * Since Firefox v102.0, they have changed to the new root behavior.
+ * This was already the case for Chromium v81.0.4035.0 and Firefox now
+ * switched over as well.
+ */
+export function hasFirefoxNewRootBehavior() {
+    return Boolean(
+        isFirefox &&
+        compareChromeVersions(firefoxVersion, '102.0') >= 0
     );
 }
 
@@ -81,7 +93,8 @@ export function cssFilterStyleSheetTemplate(filterValue: string, reverseFilterVa
     if (!frameURL) {
         const light = [255, 255, 255];
         // If browser affected by Chromium Issue 501582, set dark background on html
-        const bgColor = !hasPatchForChromiumIssue501582() && config.mode === FilterMode.dark ?
+        // Or if browser is Firefox v102+
+        const bgColor = (!hasPatchForChromiumIssue501582() && !hasFirefoxNewRootBehavior()) && config.mode === FilterMode.dark ?
             applyColorMatrix(light, createFilterMatrix(config)).map(Math.round) :
             light;
         lines.push('');

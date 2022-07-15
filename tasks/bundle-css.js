@@ -1,53 +1,90 @@
-const fs = require('fs-extra');
+// @ts-check
 const less = require('less');
 const path = require('path');
-const {getDestDir, PLATFORM} = require('./paths');
+const {getDestDir, PLATFORM, rootPath} = require('./paths');
 const reload = require('./reload');
 const {createTask} = require('./task');
+const {readFile, writeFile} = require('./utils');
 
-function getLessFiles({debug}) {
-    const dir = getDestDir({debug, platform: PLATFORM.CHROME});
-    return {
-        'src/ui/devtools/style.less': `${dir}/ui/devtools/style.css`,
-        'src/ui/popup/style.less': `${dir}/ui/popup/style.css`,
-        'src/ui/stylesheet-editor/style.less': `${dir}/ui/stylesheet-editor/style.css`,
-    };
-}
+/**
+ * @typedef CSSEntry
+ * @property {string} src
+ * @property {string} dest
+ * @property {string[]} [watchFiles]
+ */
 
-async function bundleCSSEntry({src, dest}) {
-    const srcDir = path.join(process.cwd(), path.dirname(src));
-    const input = await fs.readFile(src, {encoding: 'utf8'});
+/** @type {CSSEntry[]} */
+const cssEntries = [
+    {
+        src: 'src/ui/devtools/style.less',
+        dest: 'ui/devtools/style.css',
+    },
+    {
+        src: 'src/ui/popup/style.less',
+        dest: 'ui/popup/style.css',
+    },
+    {
+        src: 'src/ui/stylesheet-editor/style.less',
+        dest: 'ui/stylesheet-editor/style.css',
+    },
+];
+
+/** @type {string[]} */
+let watchFiles;
+
+async function bundleCSSEntry(entry) {
+    const srcDir = path.dirname(rootPath(entry.src));
+    const input = await readFile(entry.src);
     const output = await less.render(input, {paths: [srcDir], math: 'always'});
-    const {css} = output;
-    await fs.outputFile(dest, css, {encoding: 'utf8'});
+    entry.watchFiles = output.imports;
+    return output.css;
 }
 
-async function bundleCSS({debug}) {
-    const files = getLessFiles({debug});
-    for (const [src, dest] of Object.entries(files)) {
-        await bundleCSSEntry({src, dest});
+async function writeFiles(dest, platforms, debug, css) {
+    for (const platform of Object.values(PLATFORM).filter((platform) => platforms[platform])) {
+        const dir = getDestDir({debug, platform});
+        await writeFile(`${dir}/${dest}`, css);
     }
-    const dir = getDestDir({debug, platform: PLATFORM.CHROME});
-    const firefoxDir = getDestDir({debug, platform: PLATFORM.FIREFOX});
-    const mv3Dir = getDestDir({debug, platform: PLATFORM.CHROME_MV3});
-    const thunderBirdDir = getDestDir({debug, platform: PLATFORM.THUNDERBIRD});
-    for (const dest of Object.values(files)) {
-        const ffDest = `${firefoxDir}/${dest.substring(dir.length + 1)}`;
-        const tbDest = `${thunderBirdDir}/${dest.substring(dir.length + 1)}`;
-        const mv3Dest = `${mv3Dir}/${dest.substring(dir.length + 1)}`;
-        await fs.copy(dest, ffDest);
-        await fs.copy(dest, mv3Dest);
-        await fs.copy(dest, tbDest);
+}
+
+async function bundleCSS({platforms, debug}) {
+    for (const entry of cssEntries) {
+        const css = await bundleCSSEntry(entry);
+        await writeFiles(entry.dest, platforms, debug, css);
     }
+}
+
+function getWatchFiles() {
+    const watchFiles = new Set();
+    cssEntries.forEach((entry) => {
+        entry.watchFiles?.forEach((file) => watchFiles.add(file));
+    });
+    return Array.from(watchFiles);
 }
 
 module.exports = createTask(
     'bundle-css',
     bundleCSS,
 ).addWatcher(
-    ['src/**/*.less'],
-    async () => {
-        await bundleCSS({debug: true});
+    () => {
+        watchFiles = getWatchFiles();
+        return watchFiles;
+    },
+    async (changedFiles, watcher, platforms) => {
+        const entries = cssEntries.filter((entry) => changedFiles.some((changed) => entry.watchFiles?.includes(changed)));
+        for (const entry of entries) {
+            const css = await bundleCSSEntry(entry);
+            await writeFiles(entry.dest, platforms, true, css);
+        }
+
+        const newWatchFiles = getWatchFiles();
+        watcher.unwatch(
+            watchFiles.filter((oldFile) => !newWatchFiles.includes(oldFile))
+        );
+        watcher.add(
+            newWatchFiles.filter((newFile) => watchFiles.includes(newFile))
+        );
+
         reload({type: reload.CSS});
     },
 );

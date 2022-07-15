@@ -1,4 +1,4 @@
-import {multiline, timeout} from '../../test-utils';
+import {multiline, timeout} from '../../support/test-utils';
 
 describe('Link override', () => {
     it('should override link style', async () => {

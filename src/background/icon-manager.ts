@@ -34,9 +34,9 @@ export default class IconManager {
         });
     }
 
-    showImportantBadge() {
+    showBadge(text: string) {
         chrome.browserAction.setBadgeBackgroundColor({color: '#e96c4c'});
-        chrome.browserAction.setBadgeText({text: '!'});
+        chrome.browserAction.setBadgeText({text});
     }
 
     hideBadge() {

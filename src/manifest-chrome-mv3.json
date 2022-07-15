@@ -1,0 +1,46 @@
+{
+    "manifest_version": 3,
+    "action": {
+        "default_title": "Dark Reader",
+        "default_icon": {
+            "38": "icons/dr_active_38.png",
+            "19": "icons/dr_active_19.png"
+        },
+        "default_popup": "ui/popup/index.html"
+    },
+    "background": {
+        "service_worker": "background.js"
+    },
+    "content_scripts": [
+        {
+            "matches": [
+                "<all_urls>"
+            ],
+            "js": [
+                "inject/injector.js",
+                "inject/fallback.js",
+                "inject/index.js"
+            ],
+            "run_at": "document_start",
+            "all_frames": true,
+            "match_about_blank": true
+        }
+    ],
+    "permissions": [
+        "alarms",
+        "fontSettings",
+        "scripting",
+        "tabs",
+        "storage",
+        "unlimitedStorage"
+    ],
+    "host_permissions": [
+        "*://*/*"
+    ],
+    "web_accessible_resources": [
+        {
+            "matches": ["*://*/*"],
+            "resources": ["inject/proxy.js"]
+        }
+    ]
+}

@@ -12,7 +12,7 @@ import FetchNews from './fetch-news';
 
 export default function ManageSettingsPage(props: ViewProps) {
     const custom = props.data.settings.customThemes.find(
-        ({url}) => isURLInList(props.tab.url, url)
+        ({url}) => isURLInList(props.data.activeTab.url, url)
     );
     const engine = custom ?
         custom.theme.engine :

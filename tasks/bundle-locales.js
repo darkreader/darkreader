@@ -1,10 +1,13 @@
-const fs = require('fs-extra');
-const {getDestDir, PLATFORM} = require('./paths');
+// @ts-check
+const fs = require('fs').promises;
+const path = require('path');
+const {getDestDir, PLATFORM, rootPath} = require('./paths');
 const reload = require('./reload');
 const {createTask} = require('./task');
+const {readFile, writeFile} = require('./utils');
 
-async function bundleLocale(/** @type {string} */filePath, {debug}) {
-    let file = await fs.readFile(filePath, 'utf8');
+async function bundleLocale(/** @type {string} */filePath) {
+    let file = await readFile(filePath);
     file = file.replace(/^#.*?$/gm, '');
 
     const messages = {};
@@ -23,28 +26,28 @@ async function bundleLocale(/** @type {string} */filePath, {debug}) {
         };
     }
 
-    const fileName = filePath.substring(filePath.lastIndexOf('/') + 1);
-    const locale = fileName.substring(0, fileName.lastIndexOf('.')).replace('-', '_');
-    const json = `${JSON.stringify(messages, null, 4)}\n`;
-    const getOutputPath = (dir) => `${dir}/_locales/${locale}/messages.json`;
-    const chromeDir = getDestDir({debug, platform: PLATFORM.CHROME});
-    const firefoxDir = getDestDir({debug, platform: PLATFORM.FIREFOX});
-    const mv3Dir = getDestDir({debug, platform: PLATFORM.CHROME_MV3});
-    const thunderBirdDir = getDestDir({debug, platform: PLATFORM.THUNDERBIRD});
-    await fs.outputFile(getOutputPath(chromeDir), json);
-    await fs.outputFile(getOutputPath(mv3Dir), json);
-    await fs.outputFile(getOutputPath(firefoxDir), json);
-    await fs.outputFile(getOutputPath(thunderBirdDir), json);
+    return `${JSON.stringify(messages, null, 4)}\n`;
 }
 
-async function bundleLocales({debug}) {
-    const localesSrcDir = 'src/_locales';
+async function bundleLocales({platforms, debug}) {
+    const localesSrcDir = rootPath('src/_locales');
     const list = await fs.readdir(localesSrcDir);
     for (const name of list) {
         if (!name.endsWith('.config')) {
             continue;
         }
-        await bundleLocale(`${localesSrcDir}/${name}`, {debug});
+        const locale = await bundleLocale(`${localesSrcDir}/${name}`);
+        const fileName = name.substring(name.lastIndexOf('/') + 1);
+        await writeFiles(locale, fileName, {platforms, debug});
+    }
+}
+
+async function writeFiles(data, fileName, {platforms, debug}){
+    const locale = fileName.substring(0, fileName.lastIndexOf('.')).replace('-', '_');
+    const getOutputPath = (dir) => `${dir}/_locales/${locale}/messages.json`;
+    for (const platform of Object.values(PLATFORM).filter((platform) => platforms[platform])) {
+        const dir = getDestDir({debug, platform});
+        await writeFile(getOutputPath(dir), data);
     }
 }
 
@@ -53,9 +56,12 @@ module.exports = createTask(
     bundleLocales,
 ).addWatcher(
     ['src/_locales/**/*.config'],
-    async (changedFiles) => {
+    async (changedFiles, _, platforms) => {
+        const localesSrcDir = rootPath('src/_locales');
         for (const file of changedFiles) {
-            await bundleLocale(file, {debug: true});
+            const fileName = file.substring(file.lastIndexOf(path.sep) + 1);
+            const locale = await bundleLocale(`${localesSrcDir}/${fileName}`);
+            await writeFiles(locale, fileName, {platforms, debug: true});
         }
         reload({type: reload.FULL});
     },

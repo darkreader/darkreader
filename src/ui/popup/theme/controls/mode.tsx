@@ -3,16 +3,11 @@ import ThemeEngines from '../../../../generators/theme-engines';
 import {getLocalMessage} from '../../../../utils/locales';
 import {DropDown} from '../../../controls';
 import ThemeControl from './theme-control';
-import {isFirefox} from '../../../../utils/platform';
+import {openExtensionPage} from '../../../utils';
 
 export default function Mode(props: {mode: string; onChange: (mode: string) => void}) {
-    function openCSSEditor() {
-        chrome.windows.create({
-            type: 'panel',
-            url: isFirefox ? '../stylesheet-editor/index.html' : 'ui/stylesheet-editor/index.html',
-            width: 600,
-            height: 600,
-        });
+    async function openCSSEditor() {
+        await openExtensionPage('stylesheet-editor/index.html');
     }
 
     const modes = [

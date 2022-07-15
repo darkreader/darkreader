@@ -1,7 +1,7 @@
 import {Extension} from './extension';
 import {getHelpURL, UNINSTALL_URL} from '../utils/links';
 import {canInjectScript} from '../background/utils/extension-api';
-import type {Message} from '../definitions';
+import type {ExtensionData, Message, UserSettings} from '../definitions';
 import {MessageType} from '../utils/message';
 import {makeChromiumHappy} from './make-chromium-happy';
 
@@ -46,15 +46,13 @@ if (WATCH) {
                 send({type: 'reloading'});
             }
             switch (message.type) {
-                case 'reload:css': {
+                case 'reload:css':
                     chrome.runtime.sendMessage<Message>({type: MessageType.BG_CSS_UPDATE});
                     break;
-                }
-                case 'reload:ui': {
+                case 'reload:ui':
                     chrome.runtime.sendMessage<Message>({type: MessageType.BG_UI_UPDATE});
                     break;
-                }
-                case 'reload:full': {
+                case 'reload:full':
                     chrome.tabs.query({}, (tabs) => {
                         for (const tab of tabs) {
                             if (canInjectScript(tab.url)) {
@@ -64,7 +62,6 @@ if (WATCH) {
                         chrome.runtime.reload();
                     });
                     break;
-                }
             }
         };
         socket.onclose = () => {
@@ -82,6 +79,55 @@ if (WATCH) {
     });
 
     chrome.runtime.setUninstallURL(UNINSTALL_URL);
+}
+
+if (__DEBUG__) {
+    const socket = new WebSocket(`ws://localhost:8894`);
+    socket.onmessage = (e) => {
+        const respond = (message: {type: string; data?: ExtensionData | string | boolean | {[key: string]: string}; id?: number}) => socket.send(JSON.stringify(message));
+        try {
+            const message: {type: string; data: Partial<UserSettings> | boolean | {[key: string]: string}; id: number} = JSON.parse(e.data);
+            switch (message.type) {
+                case 'changeSettings':
+                    extension.changeSettings(message.data as Partial<UserSettings>);
+                    respond({type: 'changeSettings-response', id: message.id});
+                    break;
+                case 'collectData':
+                    extension.collectData().then((data) => {
+                        respond({type: 'collectData-response', id: message.id, data});
+                    });
+                    break;
+                case 'changeLocalStorage': {
+                    const data = message.data as {[key: string]: string};
+                    for (const key in data) {
+                        localStorage[key] = data[key];
+                    }
+                    respond({type: 'changeLocalStorage-response', id: message.id});
+                    break;
+                }
+                case 'getLocalStorage':
+                    respond({type: 'getLocalStorage-response', id: message.id, data: localStorage ? JSON.stringify(localStorage) : null});
+                    break;
+                case 'changeChromeStorage': {
+                    const region: 'local' | 'sync' = (message.data as any).region;
+                    chrome.storage[region].set((message.data as any).data, () => respond({type: 'changeChromeStorage-response', id: message.id}));
+                    break;
+                }
+                case 'getChromeStorage': {
+                    const keys = (message.data as any).keys;
+                    const region: 'local' | 'sync' = (message.data as any).region;
+                    chrome.storage[region].get(keys, (data) => respond({type: 'getChromeStorage-response', data, id: message.id}));
+                    break;
+                }
+                case 'setDataIsMigratedForTesting':
+                    extension.setDevToolsDataIsMigratedForTesting(message.data as boolean);
+                    respond({type: 'setDataIsMigratedForTesting-response', id: message.id});
+                    break;
+            }
+        } catch (err) {
+            respond({type: 'error', data: String(err)});
+        }
+    };
 }
 
 makeChromiumHappy();

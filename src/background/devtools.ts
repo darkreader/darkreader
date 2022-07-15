@@ -3,6 +3,7 @@ import {parseInversionFixes, formatInversionFixes} from '../generators/css-filte
 import {parseDynamicThemeFixes, formatDynamicThemeFixes} from '../generators/dynamic-theme';
 import {parseStaticThemes, formatStaticThemes} from '../generators/static-theme';
 import type ConfigManager from './config-manager';
+import {isFirefox} from '../utils/platform';
 
 // TODO(bershanskiy): Add support for reads/writes of multiple keys at once for performance.
 // TODO(bershanskiy): Popup UI heeds only hasCustom*Fixes() and nothing else. Consider storing that data separatelly.
@@ -54,6 +55,7 @@ class PersistentStorageWrapper implements DevToolsStorage {
                 // If storage contains at least one relevant record, we consider data migrated.
                 if (data[DevTools.KEY_DYNAMIC] || data[DevTools.KEY_FILTER] || data[DevTools.KEY_STATIC]) {
                     this.dataIsMigrated = true;
+                    this.cache = data;
                     resolve();
                     return;
                 }
@@ -208,7 +210,9 @@ export default class DevTools {
     private store: DevToolsStorage;
 
     constructor(config: ConfigManager, onChange: () => void) {
-        if (typeof chrome.storage.local !== 'undefined' && chrome.storage.local !== null) {
+        // Firefox don't seem to like using storage.local to store big data on the background-extension.
+        // Disabling it for now and defaulting back to localStorage.
+        if (typeof chrome.storage.local !== 'undefined' && chrome.storage.local !== null && !isFirefox) {
             this.store = new PersistentStorageWrapper();
         } else if (typeof localStorage !== 'undefined' && localStorage != null) {
             this.store = new LocalStorageWrapper();
@@ -231,9 +235,18 @@ export default class DevTools {
     }
 
     private async loadConfigOverrides() {
-        this.config.overrides.dynamicThemeFixes = await this.getSavedDynamicThemeFixes() || null;
-        this.config.overrides.inversionFixes = await this.getSavedInversionFixes() || null;
-        this.config.overrides.staticThemes = await this.getSavedStaticThemes() || null;
+        const [
+            dynamicThemeFixes,
+            inversionFixes,
+            staticThemes
+        ] = await Promise.all([
+            this.getSavedDynamicThemeFixes(),
+            this.getSavedInversionFixes(),
+            this.getSavedStaticThemes(),
+        ]);
+        this.config.overrides.dynamicThemeFixes = dynamicThemeFixes || null;
+        this.config.overrides.inversionFixes = inversionFixes || null;
+        this.config.overrides.staticThemes = staticThemes || null;
     }
 
     private async getSavedDynamicThemeFixes() {

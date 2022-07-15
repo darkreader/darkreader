@@ -1,5 +1,5 @@
 import {isFirefox} from '../../utils/platform';
-import type {ExtensionData, ExtensionActions, FilterConfig, TabInfo, Message, UserSettings} from '../../definitions';
+import type {ExtensionData, ExtensionActions, FilterConfig, Message, UserSettings} from '../../definitions';
 import {MessageType} from '../../utils/message';
 
 export default class Connector implements ExtensionActions {
@@ -9,7 +9,7 @@ export default class Connector implements ExtensionActions {
         this.changeSubscribers = new Set();
     }
 
-    private async sendRequest<T>(type: string, data?: string) {
+    private async sendRequest<T>(type: MessageType, data?: string) {
         return new Promise<T>((resolve, reject) => {
             chrome.runtime.sendMessage<Message>({type, data}, ({data, error}: Message) => {
                 if (error) {
@@ -21,7 +21,7 @@ export default class Connector implements ExtensionActions {
         });
     }
 
-    private async firefoxSendRequestWithResponse<T>(type: string, data?: string) {
+    private async firefoxSendRequestWithResponse<T>(type: MessageType, data?: string) {
         return new Promise<T>((resolve, reject) => {
             const dataPort = chrome.runtime.connect({name: type});
             dataPort.onDisconnect.addListener(() => reject());
@@ -42,13 +42,6 @@ export default class Connector implements ExtensionActions {
             return await this.firefoxSendRequestWithResponse<ExtensionData>(MessageType.UI_GET_DATA);
         }
         return await this.sendRequest<ExtensionData>(MessageType.UI_GET_DATA);
-    }
-
-    async getActiveTabInfo() {
-        if (isFirefox) {
-            return await this.firefoxSendRequestWithResponse<TabInfo>(MessageType.UI_GET_ACTIVE_TAB_INFO);
-        }
-        return await this.sendRequest<TabInfo>(MessageType.UI_GET_ACTIVE_TAB_INFO);
     }
 
     private onChangesReceived = ({type, data}: Message) => {
@@ -77,12 +70,16 @@ export default class Connector implements ExtensionActions {
         chrome.runtime.sendMessage<Message>({type: MessageType.UI_SET_THEME, data: theme});
     }
 
-    toggleURL(url: string) {
-        chrome.runtime.sendMessage<Message>({type: MessageType.UI_TOGGLE_URL, data: url});
+    toggleActiveTab() {
+        chrome.runtime.sendMessage<Message>({type: MessageType.UI_TOGGLE_ACTIVE_TAB, data: {}});
     }
 
     markNewsAsRead(ids: string[]) {
         chrome.runtime.sendMessage<Message>({type: MessageType.UI_MARK_NEWS_AS_READ, data: ids});
+    }
+
+    markNewsAsDisplayed(ids: string[]) {
+        chrome.runtime.sendMessage<Message>({type: MessageType.UI_MARK_NEWS_AS_DISPLAYED, data: ids});
     }
 
     loadConfig(options: {local: boolean}) {

@@ -2,7 +2,7 @@ import {getBlogPostURL} from '../utils/links';
 import {getDurationInMinutes} from '../utils/time';
 import type {News} from '../definitions';
 import {readSyncStorage, readLocalStorage, writeSyncStorage, writeLocalStorage} from './utils/extension-api';
-import {StateManager} from './utils/state-manager';
+import {StateManager} from '../utils/state-manager';
 
 interface NewsmakerState {
     latest: News[];
@@ -61,23 +61,44 @@ export default class Newsmaker {
     }
 
     private async getReadNews(): Promise<string[]> {
-        const sync = await readSyncStorage({readNews: []});
-        const local = await readLocalStorage({readNews: []});
+        const [
+            sync,
+            local
+        ] = await Promise.all([
+            readSyncStorage({readNews: []}),
+            readLocalStorage({readNews: []}),
+        ]);
         return Array.from(new Set([
             ...sync ? sync.readNews : [],
             ...local ? local.readNews : [],
         ]));
     }
 
+    private async getDisplayedNews(): Promise<string[]> {
+        const [
+            sync,
+            local
+        ] = await Promise.all([
+            readSyncStorage({displayedNews: []}),
+            readLocalStorage({displayedNews: []}),
+        ]);
+        return Array.from(new Set([
+            ...sync ? sync.displayedNews : [],
+            ...local ? local.displayedNews : [],
+        ]));
+    }
+
     private async getNews() {
         try {
             const response = await fetch(`https://darkreader.github.io/blog/posts.json`, {cache: 'no-cache'});
-            const $news: Array<{id: string; date: string; headline: string; important?: boolean}> = await response.json();
+            const $news: Array<Omit<News, 'read' | 'url'> & {date: string}> = await response.json();
             const readNews = await this.getReadNews();
-            const news: News[] = $news.map(({id, date, headline, important}) => {
-                const url = getBlogPostURL(id);
-                const read = this.isRead(id, readNews);
-                return {id, date, headline, url, important, read};
+            const displayedNews = await this.getDisplayedNews();
+            const news: News[] = $news.map((n) => {
+                const url = getBlogPostURL(n.id);
+                const read = this.wasRead(n.id, readNews);
+                const displayed = this.wasDisplayed(n.id, displayedNews);
+                return {...n, url, read, displayed};
             });
             for (let i = 0; i < news.length; i++) {
                 const date = new Date(news[i].date);
@@ -103,19 +124,50 @@ export default class Newsmaker {
             }
         });
         if (changed) {
-            this.latest = this.latest.map(({id, date, url, headline, important}) => {
-                const read = this.isRead(id, results);
-                return {id, date, url, headline, important, read};
+            this.latest = this.latest.map((n) => {
+                const read = this.wasRead(n.id, results);
+                return {...n, read};
             });
             this.onUpdate(this.latest);
             const obj = {readNews: results};
-            await writeLocalStorage(obj);
-            await writeSyncStorage(obj);
-            await this.stateManager.saveState();
+            await Promise.all([
+                writeLocalStorage(obj),
+                writeSyncStorage(obj),
+                this.stateManager.saveState(),
+            ]);
         }
     }
 
-    isRead(id: string, readNews: string[]) {
+    async markAsDisplayed(...ids: string[]) {
+        const displayedNews = await this.getDisplayedNews();
+        const results = displayedNews.slice();
+        let changed = false;
+        ids.forEach((id) => {
+            if (displayedNews.indexOf(id) < 0) {
+                results.push(id);
+                changed = true;
+            }
+        });
+        if (changed) {
+            this.latest = this.latest.map((n) => {
+                const displayed = this.wasDisplayed(n.id, results);
+                return {...n, displayed};
+            });
+            this.onUpdate(this.latest);
+            const obj = {displayedNews: results};
+            await Promise.all([
+                writeLocalStorage(obj),
+                writeSyncStorage(obj),
+                this.stateManager.saveState(),
+            ]);
+        }
+    }
+
+    wasRead(id: string, readNews: string[]) {
         return readNews.includes(id);
+    }
+
+    wasDisplayed(id: string, displayedNews: string[]) {
+        return displayedNews.includes(id);
     }
 }

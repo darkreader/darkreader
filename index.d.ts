@@ -23,6 +23,10 @@ declare namespace DarkReader {
      * @param isEnabled Boolean `false` value.
      */
     function auto(isEnabled: false): void;
+    /**
+     * Returns if darkreader is enabled.
+     */
+    function isEnabled(): boolean;
 
     /**
      * Sets a function for making CORS requests.
@@ -146,6 +150,13 @@ declare namespace DarkReader {
          * Mostly used for wrongly inverted background-images
          */
         ignoreImageAnalysis: string[];
+
+        /**
+         * A toggle to disable the proxying of `document.styleSheets`.
+         * This is a API-Exclusive option, as it can break legitmate websites,
+         * who are using the Dark Reader API.
+         */
+        disableStyleSheetsProxy: boolean;
     }
 }
 

@@ -3,7 +3,7 @@ import {DEFAULT_SETTINGS, DEFAULT_THEME, DEFAULT_COLORS} from '../../../../defau
 import type {Theme} from '../../../../definitions';
 import type {ParsedColorSchemeConfig} from '../../../../utils/colorscheme-parser';
 import type {ViewProps} from '../../types';
-import {BackgroundColor, Brightness, Contrast, FontPicker, Grayscale, Mode, ResetButton, Scheme, Scrollbar, SelectionColorEditor, Sepia, TextColor, TextStroke, UseFont, StyleSystemControls, ColorSchemeDropDown} from '../controls';
+import {BackgroundColor, Brightness, Contrast, FontPicker, Grayscale, Mode, ResetButton, Scheme, Scrollbar, SelectionColorEditor, Sepia, TextColor, TextStroke, UseFont, StyleSystemControls, ColorSchemeDropDown, ImmediateModify} from '../controls';
 import ThemePresetPicker from '../preset-picker';
 import {getCurrentThemePreset} from '../utils';
 import Collapsible from './collapsible-panel';
@@ -125,6 +125,10 @@ function FontGroup({theme, fonts, change}: FontGroupsProps) {
             <StyleSystemControls
                 value={theme.styleSystemControls}
                 onChange={(styleSystemControls) => change({styleSystemControls})}
+            />
+            <ImmediateModify
+                value={theme.immediateModify}
+                onChange={(immediateModify) => change({immediateModify})}
             />
         </Array>
     );

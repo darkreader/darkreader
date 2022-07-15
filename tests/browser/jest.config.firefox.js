@@ -1,9 +1,2 @@
-const jestConfig = require('./jest.config.shared');
-
-module.exports = {
-    ...jestConfig,
-    globals: {
-        ...jestConfig.globals,
-        product: 'firefox',
-    },
-};
+module.exports = require('./jest.config');
+module.exports.globals.product = 'firefox';

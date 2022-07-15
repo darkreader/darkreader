@@ -7,7 +7,7 @@ import {logInfo, logWarn} from '../../utils/log';
 import {replaceCSSRelativeURLsWithAbsolute, removeCSSComments, replaceCSSFontFace, getCSSURLValue, cssImportRegex, getCSSBaseBath} from './css-rules';
 import {bgFetch} from './network';
 import {createStyleSheetModifier} from './stylesheet-modifier';
-import {isShadowDomSupported, isSafari, isThunderbird, isChromium} from '../../utils/platform';
+import {isShadowDomSupported, isSafari, isThunderbird, isFirefox} from '../../utils/platform';
 
 declare global {
     interface Document {
@@ -23,8 +23,9 @@ declare global {
 
 export type StyleElement = HTMLLinkElement | HTMLStyleElement;
 
+export type detailsArgument = {secondRound: boolean};
 export interface StyleManager {
-    details(): {rules: CSSRuleList};
+    details(options: detailsArgument): {rules: CSSRuleList};
     render(theme: Theme, ignoreImageAnalysis: string[]): void;
     pause(): void;
     destroy(): void;
@@ -33,6 +34,22 @@ export interface StyleManager {
 }
 
 export const STYLE_SELECTOR = 'style, link[rel*="stylesheet" i]:not([disabled])';
+
+// isFontsGoogleApiStyle returns is the given link element is a style from
+// google fonts.
+function isFontsGoogleApiStyle(element: HTMLLinkElement): boolean {
+    if (!element.href) {
+        return false;
+    }
+
+    try {
+        const elementURL = new URL(element.href);
+        return elementURL.hostname === 'fonts.googleapis.com';
+    } catch (err) {
+        logInfo(`Couldn't construct ${element.href} as URL`);
+        return false;
+    }
+}
 
 export function shouldManageStyle(element: Node) {
     return (
@@ -43,7 +60,10 @@ export function shouldManageStyle(element: Node) {
                 element instanceof HTMLLinkElement &&
                 element.rel &&
                 element.rel.toLowerCase().includes('stylesheet') &&
-                !element.disabled
+                element.href &&
+                !element.disabled &&
+                (isFirefox ? !element.href.startsWith('moz-extension://') : true) &&
+                !isFontsGoogleApiStyle(element)
             )
         ) &&
         !element.classList.contains('darkreader') &&
@@ -185,7 +205,7 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
         syncStyle.classList.add('darkreader');
         syncStyle.classList.add('darkreader--sync');
         syncStyle.media = 'screen';
-        if (!isChromium && element.title) {
+        if (element.title) {
             syncStyle.title = element.title;
         }
         syncStyleSet.add(syncStyle);
@@ -233,9 +253,7 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
             }
 
             if (cssRules) {
-                if (isRelativeHrefOnAbsolutePath(element.href)) {
-                    return cssRules;
-                } else if (!hasImports(cssRules, false)) {
+                if (!hasImports(cssRules, false)) {
                     return cssRules;
                 }
             }
@@ -270,9 +288,18 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
         return null;
     }
 
-    function details() {
+    function details(options: detailsArgument) {
         const rules = getRulesSync();
         if (!rules) {
+            // secondRound is only true after it's
+            // has gone trough `details()` & `getRulesAsync` already
+            // So that means that `getRulesSync` shouldn't fail.
+            // However as a fail-safe to prevent loops, we should
+            // return null here and not continue to `getRulesAsync`
+            if (options.secondRound) {
+                logWarn('Detected dead-lock at details(), returning early to prevent it.');
+                return null;
+            }
             if (isLoadingRules || wasLoadingError) {
                 return null;
             }
@@ -305,18 +332,6 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
         cancelAsyncOperations = false;
 
         function removeCSSRulesFromSheet(sheet: CSSStyleSheet) {
-            // Check if we can use a fastpath by using sheet.replaceSync.
-            // Because replaceSync can throw DOMExceptions we have to use try-catch.
-            try {
-                if (sheet.replaceSync) {
-                    sheet.replaceSync('');
-                    return;
-                }
-            } catch (err) {
-                logWarn('Could not use fastpath for removing rules from stylesheet', err);
-            }
-            // If we hit this point, the replaceSync didn't work
-            // and we have to iterate over the CSSRules.
             for (let i = sheet.cssRules.length - 1; i >= 0; i--) {
                 sheet.deleteRule(i);
             }
@@ -583,7 +598,7 @@ async function linkLoading(link: HTMLLinkElement, loadingId: number) {
 function getCSSImportURL(importDeclaration: string) {
     // substring(7) is used to remove `@import` from the string.
     // And then use .trim() to remove the possible whitespaces.
-    return getCSSURLValue(importDeclaration.substring(7).trim().replace(/;$/, ''));
+    return getCSSURLValue(importDeclaration.substring(7).trim().replace(/;$/, '').replace(/screen$/, ''));
 }
 
 async function loadText(url: string) {

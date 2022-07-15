@@ -20,6 +20,8 @@ async function createTestServer(/** @type {number} */port) {
     let server;
     /** @type {{[path: string]: string | import('http').RequestListener}} */
     const paths = {};
+    /** @type {Set<import('net').Socket>} */
+    const sockets = new Set();
 
     /** @type {import('http').RequestListener} */
     function handleRequest(req, res) {
@@ -56,6 +58,11 @@ async function createTestServer(/** @type {number} */port) {
             server = http
                 .createServer(handleRequest)
                 .listen(port, () => resolve());
+
+            server.on('connection', (socket) => {
+                sockets.add(socket);
+                socket.on('close', () => sockets.delete(socket));
+            });
         });
     }
 
@@ -80,6 +87,9 @@ async function createTestServer(/** @type {number} */port) {
                 }
                 server = null;
                 resolve();
+            });
+            sockets.forEach((socket) => {
+                socket.destroy();
             });
         });
     }

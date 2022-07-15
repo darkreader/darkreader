@@ -1,5 +1,5 @@
 import {MessageType} from '../utils/message';
-import {isFirefox} from '../utils/platform';
+import {isFirefox, isMobile} from '../utils/platform';
 import type {Message} from '../definitions';
 
 export function classes(...args: Array<string | {[cls: string]: boolean}>) {
@@ -144,4 +144,58 @@ export async function getFontList() {
             resolve(fonts);
         });
     });
+}
+
+export async function getExtensionPageObject(path: string): Promise<chrome.windows.Window | chrome.tabs.Tab> {
+    if (isMobile) {
+        return new Promise<chrome.tabs.Tab>((resolve) => {
+            chrome.tabs.query({}, (t) => {
+                for (const tab of t) {
+                    if (tab.url.endsWith(path)) {
+                        resolve(tab);
+                        return;
+                    }
+                }
+                resolve(null);
+            });
+        });
+    }
+    return new Promise<chrome.windows.Window>((resolve) => {
+        chrome.windows.getAll({
+            populate: true,
+            windowTypes: ['popup']
+        }, (w) => {
+            for (const window of w) {
+                if (window.tabs[0].url.endsWith(path)) {
+                    resolve(window);
+                    return;
+                }
+            }
+            resolve(null);
+        });
+    });
+}
+
+export async function openExtensionPage(path: string) {
+    const cssEditorObject = await getExtensionPageObject(path);
+    if (isMobile) {
+        if (cssEditorObject) {
+            chrome.tabs.update(cssEditorObject.id, {'active': true});
+            window.close();
+        } else {
+            chrome.tabs.create({
+                url: `../${path}`,
+            });
+            window.close();
+        }
+    } else if (cssEditorObject) {
+        chrome.windows.update(cssEditorObject.id, {'focused': true});
+    } else {
+        chrome.windows.create({
+            type: 'popup',
+            url: isFirefox ? `../${path}` : `ui/${path}`,
+            width: 600,
+            height: 600,
+        });
+    }
 }

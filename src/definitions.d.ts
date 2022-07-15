@@ -1,5 +1,6 @@
 import type {ParsedColorSchemeConfig} from './utils/colorscheme-parser';
 import type {FilterMode} from './generators/css-filter';
+import type {MessageType} from './utils/message';
 
 export interface ExtensionData {
     isEnabled: boolean;
@@ -8,6 +9,7 @@ export interface ExtensionData {
     news: News[];
     shortcuts: Shortcuts;
     colorScheme: ParsedColorSchemeConfig;
+    forcedScheme: 'dark' | 'light';
     devtools: {
         dynamicFixesText: string;
         filterFixesText: string;
@@ -16,10 +18,11 @@ export interface ExtensionData {
         hasCustomFilterFixes: boolean;
         hasCustomStaticFixes: boolean;
     };
+    activeTab: TabInfo;
 }
 
 export interface TabData {
-    type: string;
+    type: MessageType;
     data?: any;
 }
 
@@ -27,8 +30,9 @@ export interface ExtensionActions {
     changeSettings(settings: Partial<UserSettings>): void;
     setTheme(theme: Partial<FilterConfig>): void;
     setShortcut(command: string, shortcut: string): void;
-    toggleURL(url: string): void;
+    toggleActiveTab(): void;
     markNewsAsRead(ids: string[]): void;
+    markNewsAsDisplayed(ids: string[]): void;
     loadConfig(options: {local: boolean}): void;
     applyDevDynamicThemeFixes(text: string): Promise<void>;
     resetDevDynamicThemeFixes(): void;
@@ -63,6 +67,7 @@ export interface Theme {
     styleSystemControls: boolean;
     lightColorScheme: string;
     darkColorScheme: string;
+    immediateModify: boolean;
 }
 
 export type FilterConfig = Theme;
@@ -79,6 +84,12 @@ export interface ThemePreset {
     theme: Theme;
 }
 
+export interface Automation {
+    enabled: boolean;
+    mode: '' | 'time' | 'system' | 'location';
+    behavior: 'OnOff' | 'Scheme';
+}
+
 export interface UserSettings {
     enabled: boolean;
     fetchNews: boolean;
@@ -91,13 +102,14 @@ export interface UserSettings {
     changeBrowserTheme: boolean;
     syncSettings: boolean;
     syncSitesFixes: boolean;
-    automation: '' | 'time' | 'system' | 'location';
+    automation: Automation;
     time: TimeSettings;
     location: LocationSettings;
     previewNewDesign: boolean;
     enableForPDF: boolean;
     enableForProtectedPages: boolean;
     enableContextMenus: boolean;
+    detectDarkTheme: boolean;
 }
 
 export interface TimeSettings {
@@ -115,10 +127,11 @@ export interface TabInfo {
     isProtected: boolean;
     isInjected: boolean;
     isInDarkList: boolean;
+    isDarkThemeDetected: boolean;
 }
 
 export interface Message {
-    type: string;
+    type: MessageType;
     data?: any;
     id?: number;
     error?: any;
@@ -134,6 +147,7 @@ export interface DynamicThemeFix {
     css: string;
     ignoreInlineStyle: string[];
     ignoreImageAnalysis: string[];
+    disableStyleSheetsProxy: boolean;
 }
 
 export interface InversionFix {
@@ -179,6 +193,8 @@ export interface News {
     date: string;
     url: string;
     headline: string;
-    important: boolean;
     read?: boolean;
+    displayed?: boolean;
+    badge?: string;
+    icon?: string;
 }

@@ -138,7 +138,7 @@ function modifyBgHSL({h, s, l, a}: HSLA, pole: HSLA) {
         return {h, s, l: lx, a};
     }
 
-    const lx = scale(l, 0.5, 1, MAX_BG_LIGHTNESS, pole.l);
+    let lx = scale(l, 0.5, 1, MAX_BG_LIGHTNESS, pole.l);
 
     if (isNeutral) {
         const hx = pole.h;
@@ -155,6 +155,12 @@ function modifyBgHSL({h, s, l, a}: HSLA, pole: HSLA) {
         } else {
             hx = scale(h, 60, 120, 60, 105);
         }
+    }
+
+    // Lower the lightness, if the resulting
+    // hue is in lower yellow spectrum.
+    if (hx > 40 && hx < 80) {
+        lx *= 0.75;
     }
 
     return {h: hx, s, l: lx, a};

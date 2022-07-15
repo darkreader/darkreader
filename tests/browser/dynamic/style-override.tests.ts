@@ -1,4 +1,4 @@
-import {multiline} from '../../test-utils';
+import {multiline} from '../../support/test-utils';
 
 describe('Style override', () => {
     it('should override user agent style', async () => {

@@ -1,9 +1,10 @@
-import '../polyfills';
+import '../support/polyfills';
 import {DEFAULT_THEME} from '../../../src/defaults';
 import {createOrUpdateDynamicTheme, removeDynamicTheme} from '../../../src/inject/dynamic-theme';
-import {multiline} from '../../test-utils';
+import {multiline, timeout} from '../support/test-utils';
 import type {DynamicThemeFix} from '../../../src/definitions';
 import {FilterMode} from '../../../src/generators/css-filter';
+import {removeNode} from '../../../src/inject/utils/dom';
 
 let container: HTMLElement;
 
@@ -15,6 +16,7 @@ beforeEach(() => {
 afterEach(() => {
     removeDynamicTheme();
     container.innerHTML = '';
+    removeNode(document.head.querySelector('meta[name="darkreader-lock"]'));
 });
 
 describe('FIXES', () => {
@@ -37,6 +39,7 @@ describe('FIXES', () => {
             css: '',
             ignoreInlineStyle: [],
             ignoreImageAnalysis: [],
+            disableStyleSheetsProxy: false,
 
         };
         createOrUpdateDynamicTheme(DEFAULT_THEME, fixes, false);
@@ -53,6 +56,7 @@ describe('FIXES', () => {
             css: '.text { color: red }',
             ignoreInlineStyle: [],
             ignoreImageAnalysis: [],
+            disableStyleSheetsProxy: false,
 
         };
         createOrUpdateDynamicTheme(DEFAULT_THEME, fixes, false);
@@ -69,9 +73,43 @@ describe('FIXES', () => {
             css: '',
             ignoreInlineStyle: ['.text'],
             ignoreImageAnalysis: [],
+            disableStyleSheetsProxy: false,
 
         };
         createOrUpdateDynamicTheme(DEFAULT_THEME, fixes, false);
         expect(getComputedStyle(container.querySelector('.text')).backgroundColor).toBe('rgb(128, 0, 128)');
+    });
+
+    it('should ignore styling when darkreader-lock detected', async () => {
+        document.head.innerHTML = '<meta name="darkreader-lock"></meta>',
+        container.innerHTML = multiline(
+            '<style>',
+            '    body {',
+            '        background-color: pink !important;',
+            '    }',
+            '</style>',
+        );
+        createOrUpdateDynamicTheme(DEFAULT_THEME, null, false);
+
+        expect(getComputedStyle(document.body).backgroundColor).toBe('rgb(255, 192, 203)');
+    });
+
+    it('should ignore styling when delayed darkreader-lock detected', async () => {
+        container.innerHTML = multiline(
+            '<style>',
+            '    body {',
+            '        background-color: pink !important;',
+            '    }',
+            '</style>',
+        );
+        createOrUpdateDynamicTheme(DEFAULT_THEME, null, false);
+
+        expect(getComputedStyle(container).backgroundColor).toBe('rgb(89, 0, 16)');
+        const metaElement: HTMLMetaElement = document.createElement('meta');
+        metaElement.name = 'darkreader-lock';
+        document.head.appendChild(metaElement);
+        await timeout(100);
+
+        expect(getComputedStyle(container).backgroundColor).toBe('rgb(255, 192, 203)');
     });
 });

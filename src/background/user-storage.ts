@@ -2,26 +2,19 @@ import {DEFAULT_SETTINGS, DEFAULT_THEME} from '../defaults';
 import {debounce} from '../utils/debounce';
 import {isURLMatched} from '../utils/url';
 import type {UserSettings} from '../definitions';
-import {readSyncStorage, readLocalStorage, writeSyncStorage, writeLocalStorage, subscribeToOuterSettingsChange} from './utils/extension-api';
+import {readSyncStorage, readLocalStorage, writeSyncStorage, writeLocalStorage} from './utils/extension-api';
 import {logWarn} from '../utils/log';
 import {PromiseBarrier} from '../utils/promise-barrier';
+import {validateSettings} from '../utils/validation';
 
 const SAVE_TIMEOUT = 1000;
-
-interface UserStorageOptions {
-    onRemoteSettingsChange: () => void;
-}
 
 export default class UserStorage {
     private loadBarrier: PromiseBarrier<UserSettings, void>;
     private saveStorageBarrier: PromiseBarrier<void, void>;
 
-    constructor({onRemoteSettingsChange}: UserStorageOptions) {
+    constructor() {
         this.settings = null;
-        subscribeToOuterSettingsChange(async () => {
-            await this.loadSettings();
-            onRemoteSettingsChange();
-        });
     }
 
     settings: Readonly<UserSettings>;
@@ -41,6 +34,35 @@ export default class UserStorage {
         });
     }
 
+    // migrateAutomationSettings migrates old automation settings to the new interface.
+    // It will move settings.automation & settings.automationBehavior into,
+    // settings.automation = { enabled, mode, behavior }.
+    // Remove this over two years(mid-2024).
+    // This won't always work, because browsers can decide to instead use the default settings
+    // when they notice a different type being requested for automation, in that case it's a data-loss
+    // and not something we can encouter for, except for doing always two extra requests to explicitly
+    // check for this case which is inefficient usage of requesting storage.
+    private migrateAutomationSettings(settings: UserSettings): void {
+        if (typeof settings.automation === 'string') {
+            const automationMode = settings.automation as any;
+            const automationBehavior = (settings as any).automationBehaviour;
+            if ((settings.automation as any) === '') {
+                settings.automation = {
+                    enabled: false,
+                    mode: automationMode,
+                    behavior: automationBehavior,
+                };
+            } else {
+                settings.automation = {
+                    enabled: true,
+                    mode: automationMode,
+                    behavior: automationBehavior,
+                };
+            }
+            delete (settings as any).automationBehaviour;
+        }
+    }
+
     private async loadSettingsFromStorage(): Promise<UserSettings> {
         if (this.loadBarrier) {
             return await this.loadBarrier.entry();
@@ -48,10 +70,13 @@ export default class UserStorage {
         this.loadBarrier = new PromiseBarrier();
 
         const local = await readLocalStorage(DEFAULT_SETTINGS);
+        const {errors: localCfgErrors} = validateSettings(local);
+        localCfgErrors.forEach((err) => logWarn(err));
         if (local.syncSettings == null) {
             local.syncSettings = DEFAULT_SETTINGS.syncSettings;
         }
         if (!local.syncSettings) {
+            this.migrateAutomationSettings(local);
             this.fillDefaults(local);
             this.loadBarrier.resolve(local);
             return local;
@@ -64,14 +89,19 @@ export default class UserStorage {
             this.set({syncSettings: false});
             this.saveSyncSetting(false);
             this.loadBarrier.resolve(local);
+            this.migrateAutomationSettings($sync);
+            this.fillDefaults($sync);
             return local;
         }
 
-        const sync = await readSyncStorage(DEFAULT_SETTINGS);
-        this.fillDefaults(sync);
+        const {errors: syncCfgErrors} = validateSettings($sync);
+        syncCfgErrors.forEach((err) => logWarn(err));
 
-        this.loadBarrier.resolve(sync);
-        return sync;
+        this.migrateAutomationSettings($sync);
+        this.fillDefaults($sync);
+
+        this.loadBarrier.resolve($sync);
+        return $sync;
     }
 
     async saveSettings() {

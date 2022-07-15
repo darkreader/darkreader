@@ -4,7 +4,7 @@ import {canInjectScript} from '../background/utils/extension-api';
 import type {ExtensionData, Message, UserSettings} from '../definitions';
 import {MessageType} from '../utils/message';
 import {makeChromiumHappy} from './make-chromium-happy';
-import {logInfo} from 'utils/log';
+import {logInfo} from '../utils/log';
 
 // Initialize extension
 const extension = new Extension();
@@ -33,15 +33,15 @@ if (__MV3__) {
                 (chrome.scripting as any).registerContentScripts([{
                     id: 'proxy',
                     matches: [
-                        "<all_urls>"
+                        '<all_urls>'
                     ],
                     js: [
-                        "inject/proxy.js",
+                        'inject/proxy.js',
                     ],
-                    runAt: "document_start",
+                    runAt: 'document_start',
                     allFrames: true,
                     persistAcrossSessions: true,
-                    world: "MAIN",
+                    world: 'MAIN',
                 }], () => logInfo('Registerd direct CSS proxy injector.'));
             });
         } catch (e) {

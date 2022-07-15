@@ -1,7 +1,7 @@
 import {injectProxy} from './stylesheet-proxy';
 import {logInfo} from '../../utils/log';
 
-document.currentScript.remove();
+document.currentScript && document.currentScript.remove();
 
 const key = 'darkreaderProxyInjected';
 const EVENT_DONE = '__darkreader__stylesheetProxy__done';
@@ -51,7 +51,7 @@ function inject() {
         return;
     }
     logInfo('MV3 proxy injector: proxy attempts to inject...');
-    regularPath();
+    document.currentScript && regularPath();
     dedicatedPath();
 }
 

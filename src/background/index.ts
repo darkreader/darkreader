@@ -22,7 +22,31 @@ console.log(welcome);
 declare const __DEBUG__: boolean;
 declare const __WATCH__: boolean;
 declare const __PORT__: number;
+declare const __MV3__: number;
 const WATCH = __WATCH__;
+
+if (__MV3__) {
+    chrome.runtime.onInstalled.addListener(async () => {
+        (chrome.scripting as any).unregisterContentScripts(() => {
+            (chrome.scripting as any).registerContentScripts([{
+                id: 'proxy',
+                matches: [
+                    "<all_urls>"
+                ],
+                js: [
+                    "inject/proxy.js",
+                ],
+                runAt: "document_start",
+                allFrames: true,
+                persistAcrossSessions: true,
+                world: "MAIN",
+                // TODO:
+                //"match_about_blank": true
+            }]);
+        });
+
+    });
+}
 
 if (WATCH) {
     const PORT = __PORT__;

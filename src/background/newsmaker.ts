@@ -61,8 +61,13 @@ export default class Newsmaker {
     }
 
     private async getReadNews(): Promise<string[]> {
-        const sync = await readSyncStorage({readNews: []});
-        const local = await readLocalStorage({readNews: []});
+        const [
+            sync,
+            local
+        ] = await Promise.all([
+            readSyncStorage({readNews: []}),
+            readLocalStorage({readNews: []}),
+        ]);
         return Array.from(new Set([
             ...sync ? sync.readNews : [],
             ...local ? local.readNews : [],
@@ -70,8 +75,13 @@ export default class Newsmaker {
     }
 
     private async getDisplayedNews(): Promise<string[]> {
-        const sync = await readSyncStorage({displayedNews: []});
-        const local = await readLocalStorage({displayedNews: []});
+        const [
+            sync,
+            local
+        ] = await Promise.all([
+            readSyncStorage({displayedNews: []}),
+            readLocalStorage({displayedNews: []}),
+        ]);
         return Array.from(new Set([
             ...sync ? sync.displayedNews : [],
             ...local ? local.displayedNews : [],
@@ -120,9 +130,11 @@ export default class Newsmaker {
             });
             this.onUpdate(this.latest);
             const obj = {readNews: results};
-            await writeLocalStorage(obj);
-            await writeSyncStorage(obj);
-            await this.stateManager.saveState();
+            await Promise.all([
+                writeLocalStorage(obj),
+                writeSyncStorage(obj),
+                this.stateManager.saveState(),
+            ]);
         }
     }
 
@@ -143,9 +155,11 @@ export default class Newsmaker {
             });
             this.onUpdate(this.latest);
             const obj = {displayedNews: results};
-            await writeLocalStorage(obj);
-            await writeSyncStorage(obj);
-            await this.stateManager.saveState();
+            await Promise.all([
+                writeLocalStorage(obj),
+                writeSyncStorage(obj),
+                this.stateManager.saveState(),
+            ]);
         }
     }
 

@@ -235,9 +235,18 @@ export default class DevTools {
     }
 
     private async loadConfigOverrides() {
-        this.config.overrides.dynamicThemeFixes = await this.getSavedDynamicThemeFixes() || null;
-        this.config.overrides.inversionFixes = await this.getSavedInversionFixes() || null;
-        this.config.overrides.staticThemes = await this.getSavedStaticThemes() || null;
+        const [
+            dynamicThemeFixes,
+            inversionFixes,
+            staticThemes
+        ] = await Promise.all([
+            this.getSavedDynamicThemeFixes(),
+            this.getSavedInversionFixes(),
+            this.getSavedStaticThemes(),
+        ]);
+        this.config.overrides.dynamicThemeFixes = dynamicThemeFixes || null;
+        this.config.overrides.inversionFixes = inversionFixes || null;
+        this.config.overrides.staticThemes = staticThemes || null;
     }
 
     private async getSavedDynamicThemeFixes() {

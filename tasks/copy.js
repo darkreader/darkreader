@@ -2,20 +2,55 @@
 const {getDestDir, PLATFORM} = require('./paths');
 const reload = require('./reload');
 const {createTask} = require('./task');
-const {pathExists, copyFile, readFile, writeFile, getPaths} = require('./utils');
+const {pathExists, copyFile, getPaths} = require('./utils');
 
 const srcDir = 'src';
-const cwdPaths = [
-    'background/index.html',
-    'config/**/*.{config,drconf}',
-    'icons/**/*.*',
-    'ui/assets/**/*.*',
-    'ui/popup/compatibility.js',
-    'ui/popup/index.html',
-    'ui/devtools/index.html',
-    'ui/stylesheet-editor/index.html',
+
+/**
+ * @typedef copyEntry
+ * @property {string} src
+ * @property {string} reloadType
+ * @property {(typeof PLATFORM.CHROME)[] | undefined} [platforms]
+ */
+
+/** @type {copyEntry[]} */
+const copyEntries = [
+    {
+        src: 'background/index.html',
+        reloadType: reload.FULL,
+        platforms: [PLATFORM.CHROME, PLATFORM.FIREFOX, PLATFORM.THUNDERBIRD]
+    },
+    {
+        src: 'config/**/*.{config,drconf}',
+        reloadType: reload.FULL,
+    },
+    {
+        src: 'icons/**/*.*',
+        reloadType: reload.FULL,
+    },
+    {
+        src: 'ui/assets/**/*.*',
+        reloadType: reload.UI,
+    },
+    {
+        src: 'ui/popup/compatibility.js',
+        reloadType: reload.UI,
+    },
+    {
+        src: 'ui/popup/index.html',
+        reloadType: reload.UI,
+    },
+    {
+        src: 'ui/devtools/index.html',
+        reloadType: reload.UI,
+    },
+    {
+        src: 'ui/stylesheet-editor/index.html',
+        reloadType: reload.UI,
+    },
 ];
-const paths = cwdPaths.map((path) => `${srcDir}/${path}`);
+
+const paths = copyEntries.map((entry) => entry.src).map((path) => `${srcDir}/${path}`);
 
 function getCwdPath(/** @type {string} */srcPath) {
     return srcPath.substring(srcDir.length + 1);
@@ -24,22 +59,25 @@ function getCwdPath(/** @type {string} */srcPath) {
 async function copyEntry(path, {debug, platform}) {
     const cwdPath = getCwdPath(path);
     const destDir = getDestDir({debug, platform});
-    if (platform === PLATFORM.CHROME_MV3 && cwdPath === 'background/index.html') {
-        // Do nothing
-    } else {
-        const src = `${srcDir}/${cwdPath}`;
-        const dest = `${destDir}/${cwdPath}`;
-        await copyFile(src, dest);
-    }
+    const src = `${srcDir}/${cwdPath}`;
+    const dest = `${destDir}/${cwdPath}`;
+    await copyFile(src, dest);
 }
 
 async function copy({platforms, debug}) {
-    const files = await getPaths(paths);
-    for (const file of files) {
-        for (const platform of Object.values(PLATFORM).filter((platform) => platforms[platform])) {
-            await copyEntry(file, {debug, platform});
+    const promises = [];
+    for (const entry of copyEntries) {
+        if (entry.platforms && !entry.platforms.some((platform) => platforms[platform])) {
+            continue;
+        }
+        const files = await getPaths(`${srcDir}/${entry.src}`);
+        for (const file of files) {
+            for (const platform of (entry.platforms || Object.values(PLATFORM)).filter((platform) => platforms[platform])) {
+                promises.push(copyEntry(file, {debug, platform}));
+            }
         }
     }
+    await Promise.all(promises);
 }
 
 module.exports = createTask(

@@ -1,14 +1,23 @@
 // @ts-check
 const fs = require('fs');
+const {exec} = require('child_process');
 const yazl = require('yazl');
 const {getDestDir, PLATFORM} = require('./paths');
 const {createTask} = require('./task');
 const {getPaths} = require('./utils');
 
-function archiveFiles({files, dest, cwd}) {
+/**
+ * @param {object} details
+ * @returns {Promise<void>}
+ */
+function archiveFiles({files, dest, cwd, date}) {
     return new Promise((resolve) => {
         const archive = new yazl.ZipFile();
-        files.forEach((file) => archive.addFile(file, file.startsWith(`${cwd}/`) ? file.substring(cwd.length + 1) : file));
+        files.forEach((file) => archive.addFile(
+            file,
+            file.startsWith(`${cwd}/`) ? file.substring(cwd.length + 1) : file,
+            { mtime: date }
+        ));
         /** @type {any} */
         const writeStream = fs.createWriteStream(dest);
         archive.outputStream.pipe(writeStream).on('close', () => resolve());
@@ -16,9 +25,18 @@ function archiveFiles({files, dest, cwd}) {
     });
 }
 
-async function archiveDirectory({dir, dest}) {
+async function archiveDirectory({dir, dest, date}) {
     const files = await getPaths(`${dir}/**/*.*`);
-    await archiveFiles({files, dest, cwd: dir});
+    await archiveFiles({files, dest, cwd: dir, date});
+}
+
+async function getLastCommitTime() {
+    return new Promise((resolve) => {
+        exec('git log -1 --format=%ct', (error, stdout, stderr) => {
+            let date = new Date(Number(stdout) * 1000);
+            resolve(date);
+        });
+    });
 }
 
 async function zip({platforms, debug}) {
@@ -27,11 +45,13 @@ async function zip({platforms, debug}) {
     }
     const releaseDir = 'build/release';
     const promises = [];
+    const date = await getLastCommitTime();
     for (const platform of Object.values(PLATFORM).filter((platform) => platforms[platform])) {
         const format = [PLATFORM.CHROME, PLATFORM.CHROME_MV3].includes(platform) ? 'zip' : 'xpi';
         promises.push(archiveDirectory({
             dir: getDestDir({debug, platform}),
-            dest: `${releaseDir}/darkreader-${platform}.${format}`
+            dest: `${releaseDir}/darkreader-${platform}.${format}`,
+            date,
         }));
     }
     await Promise.all(promises);

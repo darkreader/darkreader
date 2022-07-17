@@ -503,6 +503,7 @@ describe('State manager utility', () => {
             getCallback();
             getCallback = undefined;
         };
+
         const get = (storageKey: string, callback: (data: any) => void) => {
             expect(storageKey).toEqual(key);
             getCount++;
@@ -517,6 +518,7 @@ describe('State manager utility', () => {
             setCallback();
             setCallback = undefined;
         };
+
         const set = (items: any, callback: () => void) => {
             setCount++;
             setCallback = () => {

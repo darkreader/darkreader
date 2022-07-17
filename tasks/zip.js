@@ -13,6 +13,7 @@ const {getPaths} = require('./utils');
 function archiveFiles({files, dest, cwd, date}) {
     return new Promise((resolve) => {
         const archive = new yazl.ZipFile();
+        files.sort();
         files.forEach((file) => archive.addFile(
             file,
             file.startsWith(`${cwd}/`) ? file.substring(cwd.length + 1) : file,

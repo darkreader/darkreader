@@ -21,7 +21,7 @@ function archiveFiles({files, dest, cwd, date}) {
         ));
         /** @type {any} */
         const writeStream = fs.createWriteStream(dest);
-        archive.outputStream.pipe(writeStream).on('close', () => resolve());
+        archive.outputStream.pipe(writeStream).on('close', resolve);
         archive.end();
     });
 }
@@ -32,12 +32,9 @@ async function archiveDirectory({dir, dest, date}) {
 }
 
 async function getLastCommitTime() {
-    return new Promise((resolve) => {
-        exec('git log -1 --format=%ct', (error, stdout, stderr) => {
-            let date = new Date(Number(stdout) * 1000);
-            resolve(date);
-        });
-    });
+    return new Promise((resolve) => 
+        exec('git log -1 --format=%ct', (_, stdout) => resolve(new Date(Number(stdout) * 1000)))
+    );
 }
 
 async function zip({platforms, debug}) {

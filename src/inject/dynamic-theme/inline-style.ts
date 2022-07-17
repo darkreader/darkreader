@@ -251,6 +251,19 @@ export function overrideInlineStyle(element: HTMLElement, theme: FilterConfig, i
 
     const unsetProps = new Set(Object.keys(overrides));
 
+    function hasContentEditableParent() {
+        for (let parent = element.parentElement; parent; parent = parent.parentElement) {
+            if (parent.contentEditable) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    if (hasContentEditableParent()) {
+        return;
+    }
+
     function setCustomProp(targetCSSProp: string, modifierCSSProp: string, cssVal: string) {
         const isPropertyVariable = targetCSSProp.startsWith('--');
         const {customProp, dataAttr} = isPropertyVariable ? ({} as Overrides['']) : overrides[targetCSSProp];

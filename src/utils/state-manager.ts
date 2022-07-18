@@ -11,7 +11,22 @@ export class StateManager<T> {
 
     constructor(localStorageKey: string, parent: any, defaults: T){
         if (isNonPersistent()) {
-            this.stateManager = new StateManagerImpl(localStorageKey, parent, defaults, chrome.storage.local.get, chrome.storage.local.set);
+            function addListener(listener: (data: T) => void) {
+                chrome.storage.onChanged.addListener((changes, areaName) => {
+                    if (areaName !== 'local' || !changes[localStorageKey]) {
+                        return;
+                    }
+                    listener(changes[localStorageKey].newValue);
+                });
+            }
+
+            this.stateManager = new StateManagerImpl(
+                localStorageKey,
+                parent,
+                defaults,
+                chrome.storage.local,
+                addListener
+            );
         }
     }
 

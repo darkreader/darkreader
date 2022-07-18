@@ -1,6 +1,6 @@
 import {overrideInlineStyle, getInlineOverrideStyle, watchForInlineStyles, stopWatchingForInlineStyles, INLINE_STYLE_SELECTOR} from './inline-style';
 import {changeMetaThemeColorWhenAvailable, restoreMetaThemeColor} from './meta-theme-color';
-import {getModifiedUserAgentStyle, getModifiedFallbackStyle, cleanModificationCache, getSelectionColor, tryParseColor} from './modify-css';
+import {getModifiedUserAgentStyle, getModifiedFallbackStyle, cleanModificationCache, getSelectionColor} from './modify-css';
 import type {StyleElement, StyleManager} from './style-manager';
 import {manageStyle, getManageableStyles, cleanLoadingLinks} from './style-manager';
 import {watchForStyleChanges, stopWatchingForStyleChanges} from './watch';
@@ -18,7 +18,7 @@ import type {AdoptedStyleSheetManager} from './adopted-style-manger';
 import {createAdoptedStyleSheetOverride} from './adopted-style-manger';
 import {isFirefox} from '../../utils/platform';
 import {injectProxy} from './stylesheet-proxy';
-import {parse} from '../../utils/color';
+import {clearColorCache, parseColorWithCache} from '../../utils/color';
 import {parsedURLCache} from '../../utils/url';
 import {variablesStore} from './variables';
 
@@ -133,8 +133,8 @@ function createStaticStyleOverrides() {
     const {darkSchemeBackgroundColor, darkSchemeTextColor, lightSchemeBackgroundColor, lightSchemeTextColor, mode} = filter;
     let schemeBackgroundColor = mode === 0 ? lightSchemeBackgroundColor : darkSchemeBackgroundColor;
     let schemeTextColor = mode === 0 ? lightSchemeTextColor : darkSchemeTextColor;
-    schemeBackgroundColor = modifyBackgroundColor(parse(schemeBackgroundColor), filter);
-    schemeTextColor = modifyForegroundColor(parse(schemeTextColor), filter);
+    schemeBackgroundColor = modifyBackgroundColor(parseColorWithCache(schemeBackgroundColor), filter);
+    schemeTextColor = modifyForegroundColor(parseColorWithCache(schemeTextColor), filter);
     variableStyle.textContent = [
         `:root {`,
         `   --darkreader-neutral-background: ${schemeBackgroundColor};`,
@@ -191,7 +191,7 @@ function createShadowStaticStyleOverrides(root: ShadowRoot) {
 
 function replaceCSSTemplates($cssText: string) {
     return $cssText.replace(/\${(.+?)}/g, (_, $color) => {
-        const color = tryParseColor($color);
+        const color = parseColorWithCache($color);
         if (color) {
             return modifyColor(color, filter);
         }
@@ -561,4 +561,5 @@ export function cleanDynamicThemeCache() {
     cancelRendering();
     stopWatchingForUpdates();
     cleanModificationCache();
+    clearColorCache();
 }

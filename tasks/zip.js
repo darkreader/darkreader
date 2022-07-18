@@ -17,7 +17,7 @@ function archiveFiles({files, dest, cwd, date}) {
         files.forEach((file) => archive.addFile(
             file,
             file.startsWith(`${cwd}/`) ? file.substring(cwd.length + 1) : file,
-            { mtime: date }
+            {mtime: date}
         ));
         /** @type {any} */
         const writeStream = fs.createWriteStream(dest);
@@ -32,7 +32,7 @@ async function archiveDirectory({dir, dest, date}) {
 }
 
 async function getLastCommitTime() {
-    return new Promise((resolve) => 
+    return new Promise((resolve) =>
         exec('git log -1 --format=%ct', (_, stdout) => resolve(new Date(Number(stdout) * 1000)))
     );
 }

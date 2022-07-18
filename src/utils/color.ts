@@ -15,6 +15,42 @@ export interface HSLA {
     a?: number;
 }
 
+const hslaParseCache = new Map<string, HSLA>();
+const rgbaParseCache = new Map<string, RGBA>();
+
+export function parseColorWithCache($color: string) {
+    $color = $color.trim();
+    if (rgbaParseCache.has($color)) {
+        return rgbaParseCache.get($color);
+    }
+    // We cannot _really_ parse any color which has the calc() expression
+    // So we try our best-efforts to remove those and then parse the value.
+    if ($color.includes('calc(')) {
+        $color = lowerCalcExpression($color);
+    }
+    const color = parse($color);
+    color && rgbaParseCache.set($color, color);
+    return color;
+}
+
+export function parseToHSLWithCache(color: string) {
+    if (hslaParseCache.has(color)) {
+        return hslaParseCache.get(color);
+    }
+    const rgb = parseColorWithCache(color);
+    if (!rgb) {
+        return null;
+    }
+    const hsl = rgbToHSL(rgb);
+    hslaParseCache.set(color, hsl);
+    return hsl;
+}
+
+export function clearColorCache() {
+    hslaParseCache.clear();
+    rgbaParseCache.clear();
+}
+
 // https://en.wikipedia.org/wiki/HSL_and_HSV
 export function hslToRGB({h, s, l, a = 1}: HSLA): RGBA {
     if (s === 0) {
@@ -138,7 +174,7 @@ export function parse($color: string): RGBA {
         return {r: 0, g: 0, b: 0, a: 0};
     }
 
-    throw new Error(`Unable to parse ${$color}`);
+    return null;
 }
 
 function getNumbers($color: string) {

@@ -1,6 +1,6 @@
 import type {FilterConfig, Theme} from '../definitions';
 import type {RGBA, HSLA} from '../utils/color';
-import {parse, rgbToHSL, hslToRGB, rgbToString, rgbToHexString} from '../utils/color';
+import {parseToHSLWithCache, rgbToHSL, hslToRGB, rgbToString, rgbToHexString} from '../utils/color';
 import {scale} from '../utils/math';
 import {applyColorMatrix, createFilterMatrix} from './utils/matrix';
 
@@ -21,21 +21,9 @@ function getFgPole(theme: Theme) {
 }
 
 const colorModificationCache = new Map<ColorFunction, Map<string, string>>();
-const colorParseCache = new Map<string, HSLA>();
-
-function parseToHSLWithCache(color: string) {
-    if (colorParseCache.has(color)) {
-        return colorParseCache.get(color);
-    }
-    const rgb = parse(color);
-    const hsl = rgbToHSL(rgb);
-    colorParseCache.set(color, hsl);
-    return hsl;
-}
 
 export function clearColorModificationCache() {
     colorModificationCache.clear();
-    colorParseCache.clear();
 }
 
 const rgbCacheKeys: Array<keyof RGBA> = ['r', 'g', 'b', 'a'];

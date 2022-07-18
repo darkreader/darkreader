@@ -1,10 +1,11 @@
 import {modifyBackgroundColor, modifyBorderColor, modifyForegroundColor} from '../../generators/modify-colors';
 import {getParenthesesRange} from '../../utils/text';
 import {iterateCSSRules, iterateCSSDeclarations} from './css-rules';
-import {tryParseColor, getBgImageModifier, getShadowModifierWithInfo} from './modify-css';
+import {getBgImageModifier, getShadowModifierWithInfo} from './modify-css';
 import type {CSSValueModifier} from './modify-css';
 import type {Theme} from '../../definitions';
 import type {RGBA} from '../../utils/color';
+import {parseColorWithCache} from '../../utils/color';
 
 export interface ModifiedVarDeclaration {
     property: string;
@@ -361,7 +362,7 @@ export class VariablesStore {
         }
         this.definedVars.add(varName);
 
-        const color = tryParseColor(value);
+        const color = parseColorWithCache(value);
         if (color) {
             this.unknownColorVars.add(varName);
         } else if (
@@ -654,7 +655,7 @@ function parseRawValue(color: string) {
 function handleRawValue(color: string, theme: Theme, modifyFunction: (rgb: RGBA, theme: Theme) => string) {
     const {isRaw, color: newColor} = parseRawValue(color);
 
-    const rgb = tryParseColor(newColor);
+    const rgb = parseColorWithCache(newColor);
     if (rgb) {
         const outputColor = modifyFunction(rgb, theme);
 
@@ -662,7 +663,7 @@ function handleRawValue(color: string, theme: Theme, modifyFunction: (rgb: RGBA,
         if (isRaw) {
             // This should techincally never fail(returning empty string),
             // but just to be safe we will return outputColor.
-            const outputInRGB = tryParseColor(outputColor);
+            const outputInRGB = parseColorWithCache(outputColor);
             return outputInRGB ? `${outputInRGB.r}, ${outputInRGB.g}, ${outputInRGB.b}` : outputColor;
         }
         return outputColor;

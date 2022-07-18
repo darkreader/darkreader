@@ -60,9 +60,9 @@ test('Color parsing', () => {
     expect(parse('InfoBackground')).toEqual({r: 251, g: 252, b: 197, a: 1});
     expect(parse('-webkit-focus-ring-color')).toEqual({r: 229, g: 151, b: 0, a: 1});
 
-    expect(() => parse('sponge')).toThrow('Unable to parse sponge');
-    expect(() => parse('hsl(0, 0%, 0%) rgb(0, 0, 0)')).toThrow('Unable to parse hsl(0, 0%, 0%) rgb(0, 0, 0)');
-    expect(() => parse('#hello')).toThrow('Unable to parse #hello');
+    expect(parse('sponge')).toBeNull();
+    expect(parse('hsl(0, 0%, 0%) rgb(0, 0, 0)')).toBeNull();
+    expect(parse('#hello')).toBeNull();
 });
 
 test('Stringify color', () => {

@@ -266,7 +266,7 @@ export class VariablesStore {
                         },
                         (fallback) => tryModifyBgColor(fallback, theme),
                     );
-                    // Check if property is box-shadow and if so, do a pass-trough to modify the shadow
+                    // Check if the property is box-shadow and if so, do a pass-through to modify the shadow.
                     if (property === 'box-shadow') {
                         const shadowModifier = getShadowModifierWithInfo(variableReplaced);
                         const modifiedShadow = shadowModifier(theme);
@@ -322,7 +322,7 @@ export class VariablesStore {
         }
     }
 
-    // Because of the similair expensive task between the old `collectVariables`
+    // Because of the similar expensive task between the old `collectVariables`
     // and `collectVarDepandant`, we only want to do it once.
     // This function should only do the same expensive task once
     // and ensure that the result comes to the correct task.
@@ -638,7 +638,7 @@ const rawValueRegex = /^\d{1,3}, ?\d{1,3}, ?\d{1,3}$/;
 
 function parseRawValue(color: string) {
     if (rawValueRegex.test(color)) {
-        // Convert the raw value into a use-able rgb(...) value, such that it can
+        // Convert the raw value into a useable rgb(...) value, such that it can
         // be properly used with other functions that expect such value.
         const splitted = color.split(',');
         let resultInRGB = 'rgb(';
@@ -661,8 +661,8 @@ function handleRawValue(color: string, theme: Theme, modifyFunction: (rgb: RGBA,
 
         // If it's raw, we need to convert it back to the "raw" format.
         if (isRaw) {
-            // This should techincally never fail(returning empty string),
-            // but just to be safe we will return outputColor.
+            // This should technically never fail(returning an empty string),
+            // but just to be safe, we will return outputColor.
             const outputInRGB = parseColorWithCache(outputColor);
             return outputInRGB ? `${outputInRGB.r}, ${outputInRGB.g}, ${outputInRGB.b}` : outputColor;
         }

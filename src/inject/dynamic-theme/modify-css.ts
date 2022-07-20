@@ -58,6 +58,10 @@ export function getModifiableCSSDeclaration(
         if (modifier) {
             return {property, value: modifier, important: getPriority(rule.style, property), sourceValue: value};
         }
+    } else if (property === 'color-scheme') {
+        // Note: this if statement needs to be above the next one
+        logWarn('CSS property color-scheme is not supported');
+        return null;
     } else if (
         (property.includes('color') && property !== '-webkit-print-color-adjust') ||
         property === 'fill' ||

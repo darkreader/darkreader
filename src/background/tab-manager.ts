@@ -6,7 +6,7 @@ import {isFirefox, isOpera, isThunderbird} from '../utils/platform';
 import {MessageType} from '../utils/message';
 import {logWarn} from '../utils/log';
 import {StateManager} from '../utils/state-manager';
-import {getURLHostOrProtocol, parseURL} from 'utils/url';
+import {getURLHostOrProtocol} from '../utils/url';
 
 declare const __MV3__: boolean;
 

@@ -262,7 +262,7 @@ function parseHex($hex: string) {
             return {r, g, b, a};
         }
     }
-    throw new Error(`Unable to parse ${$hex}`);
+    return null;
 }
 
 function getColorByName($color: string) {

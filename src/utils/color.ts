@@ -23,8 +23,8 @@ export function parseColorWithCache($color: string) {
     if (rgbaParseCache.has($color)) {
         return rgbaParseCache.get($color);
     }
-    // We cannot _really_ parse any color which has the calc() expression
-    // So we try our best-efforts to remove those and then parse the value.
+    // We cannot _really_ parse any color which has the calc() expression,
+    // so we try our best to remove those and then parse the value.
     if ($color.includes('calc(')) {
         $color = lowerCalcExpression($color);
     }
@@ -181,7 +181,7 @@ function getNumbers($color: string) {
     const numbers = [];
     let prevPos = 0;
     let isMining = false;
-    // Get the first `(`
+    // Get the first `(`.
     const startIndex = $color.indexOf('(');
     $color = $color.substring(startIndex + 1, $color.length - 1);
     for (let i = 0; i < $color.length; i++) {
@@ -191,8 +191,8 @@ function getNumbers($color: string) {
             // Enable the mining flag.
             isMining = true;
         } else if (isMining && (c === ' ' || c === ',')) {
-            // isMinig is true and we got a terminating
-            // Character. So we can push the current number
+            // isMining is true and we got a terminating
+            // character. So we can push the current number
             // into the array.
             numbers.push($color.substring(prevPos, i));
             // Disable the mining flag.
@@ -300,7 +300,7 @@ export function lowerCalcExpression(color: string): string {
 
     // Run this code until it doesn't find any `calc(...)`.
     while ((searchIndex = color.indexOf('calc(')) !== -1) {
-        // Get the parantheses ranges of `calc(...)`
+        // Get the parentheses ranges of `calc(...)`.
         const range = getParenthesesRange(color, searchIndex);
         if (!range) {
             break;
@@ -313,7 +313,7 @@ export function lowerCalcExpression(color: string): string {
         // Remove all percentages.
         slice = slice.split('%').join('');
 
-        // Pass the content to the evalMath library and round it's output.
+        // Pass the content to the evalMath library and round its output.
         const output = Math.round(evalMath(slice));
 
         // Replace `calc(...)` with the result.

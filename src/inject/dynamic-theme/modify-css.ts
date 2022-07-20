@@ -438,7 +438,7 @@ export function getBgImageModifier(
             const matchEnd = matchStart + match.length + offset;
             matchIndex = matchEnd;
 
-            // Make sure we still push all the unrelated content between gradients and URL's.
+            // Make sure we still push all the unrelated content between gradients and URLs.
             prefixStart !== matchStart && modifiers.push(() => value.substring(prefixStart, matchStart));
 
             if (type === 'url') {

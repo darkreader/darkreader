@@ -316,7 +316,7 @@ export function getBgImageModifier(
         const getGradientModifier = (gradient: parsedGradient) => {
             const {typeGradient, match, hasComma} = gradient;
 
-            const partsRegex = /([^\(\),]+(\([^\(\)]*(\([^\(\)]*\)*[^\(\)]*)?\))?[^\(\),]*),?/g;
+            const partsRegex = /([^\(\),]+(\([^\(\)]*(\([^\(\)]*\)*[^\(\)]*)?\))?([^\(\), ]|( (?!calc)))*),?/g;
             const colorStopRegex = /^(from|color-stop|to)\(([^\(\)]*?,\s*)?(.*?)\)$/;
 
             const parts = getMatches(partsRegex, match, 1).map((part) => {
@@ -432,6 +432,7 @@ export function getBgImageModifier(
         const modifiers: CSSValueModifier[] = [];
 
         let matchIndex = 0;
+        let prevHasComma = false;
         matches.forEach(({type, match, index, typeGradient, hasComma, offset}, i) => {
             const matchStart = index;
             const prefixStart = matchIndex;
@@ -439,7 +440,21 @@ export function getBgImageModifier(
             matchIndex = matchEnd;
 
             // Make sure we still push all the unrelated content between gradients and URL's.
-            prefixStart !== matchStart && modifiers.push(() => value.substring(prefixStart, matchStart));
+            if (prefixStart !== matchStart) {
+                if (prevHasComma) {
+                    modifiers.push(() => {
+                        let betweenValue = value.substring(prefixStart, matchStart);
+                        if (betweenValue[0] === ',') {
+                            betweenValue = betweenValue.substring(1);
+                        }
+                        return betweenValue;
+                    });
+                } else {
+                    modifiers.push(() => value.substring(prefixStart, matchStart));
+                }
+            }
+            prevHasComma = hasComma || false;
+
 
             if (type === 'url') {
                 modifiers.push(getURLModifier(match));

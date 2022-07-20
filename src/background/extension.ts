@@ -459,7 +459,7 @@ export class Extension {
         }
     };
 
-    changeSettings($settings: Partial<UserSettings>) {
+    changeSettings($settings: Partial<UserSettings>, onlyUpdateActiveTab = false) {
         const prev = {...this.user.settings};
 
         this.user.set($settings);
@@ -498,7 +498,7 @@ export class Extension {
                 chrome.contextMenus.removeAll();
             }
         }
-        this.onSettingsChanged();
+        this.onSettingsChanged(onlyUpdateActiveTab);
     }
 
     private setTheme($theme: Partial<FilterConfig>) {
@@ -537,12 +537,12 @@ export class Extension {
         const darkThemeDetected = !settings.applyToListedOnly && settings.detectDarkTheme && tab.isDarkThemeDetected;
         if (isInDarkList || darkThemeDetected || settings.siteListEnabled.includes(host)) {
             const toggledList = getToggledList(settings.siteListEnabled);
-            this.changeSettings({siteListEnabled: toggledList});
+            this.changeSettings({siteListEnabled: toggledList}, true);
             return;
         }
 
         const toggledList = getToggledList(settings.siteList);
-        this.changeSettings({siteList: toggledList});
+        this.changeSettings({siteList: toggledList}, true);
     }
 
     //------------------------------------
@@ -568,13 +568,13 @@ export class Extension {
         }
     }
 
-    private async onSettingsChanged() {
+    private async onSettingsChanged(onlyUpdateActiveTab = false) {
         if (!this.user.settings) {
             await this.user.loadSettings();
         }
         await this.stateManager.loadState();
         this.wasEnabledOnLastCheck = this.isExtensionSwitchedOn();
-        this.tabs.sendMessage();
+        this.tabs.sendMessage(onlyUpdateActiveTab);
         this.saveUserSettings();
         this.reportChanges();
         this.stateManager.saveState();

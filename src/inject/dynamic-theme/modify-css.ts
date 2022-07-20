@@ -241,19 +241,19 @@ function getColorModifier(prop: string, value: string): string | CSSValueModifie
     if (unparsableColors.has(value.toLowerCase())) {
         return value;
     }
-    try {
-        const rgb = parseColorWithCache(value);
-        if (prop.includes('background')) {
-            return (filter) => modifyBackgroundColor(rgb, filter);
-        }
-        if (prop.includes('border') || prop.includes('outline')) {
-            return (filter) => modifyBorderColor(rgb, filter);
-        }
-        return (filter) => modifyForegroundColor(rgb, filter);
-    } catch (err) {
-        logWarn('Color parse error', err);
+    const rgb = parseColorWithCache(value);
+    if (!rgb) {
+        logWarn("Couldn't parse color", value);
         return null;
     }
+
+    if (prop.includes('background')) {
+        return (filter) => modifyBackgroundColor(rgb, filter);
+    }
+    if (prop.includes('border') || prop.includes('outline')) {
+        return (filter) => modifyBorderColor(rgb, filter);
+    }
+    return (filter) => modifyForegroundColor(rgb, filter);
 }
 
 const imageDetailsCache = new Map<string, ImageDetails>();

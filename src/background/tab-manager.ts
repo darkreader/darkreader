@@ -6,6 +6,7 @@ import {isFirefox, isOpera, isThunderbird} from '../utils/platform';
 import {MessageType} from '../utils/message';
 import {logWarn} from '../utils/log';
 import {StateManager} from '../utils/state-manager';
+import {getURLHostOrProtocol} from '../utils/url';
 
 declare const __MV3__: boolean;
 
@@ -286,8 +287,16 @@ export default class TabManager {
         });
     }
 
-    async sendMessage() {
+    // sendMessage will send a tab messages to all active tabs and their frames.
+    // If onlyUpdateActiveTab is specified, it will only send a new message to any
+    // tab that matches the active tab's hostname. This is to ensure that when a user
+    // has multiple tabs of the same website, it will ensure that every tab will receive
+    // the new message and not just that tab as Dark Reader currently doesn't have per-tab
+    // operations, this should be the expected behavior.
+    async sendMessage(onlyUpdateActiveTab = false) {
         this.timestamp++;
+
+        const activeTabHostname = onlyUpdateActiveTab ? getURLHostOrProtocol(await this.getActiveTabURL()) : null;
 
         (await queryTabs({}))
             .filter((tab) => Boolean(this.tabs[tab.id]))
@@ -296,7 +305,13 @@ export default class TabManager {
                 Object.entries(frames)
                     .filter(([, {state}]) => state === DocumentState.ACTIVE || state === DocumentState.PASSIVE)
                     .forEach(([, {url}], frameId) => {
-                        const message = this.getTabMessage(this.getTabURL(tab), frameId === 0 ? null : url);
+                        const tabURL = this.getTabURL(tab);
+                        // Check if hostname are equal when we only want to update active tab.
+                        if (onlyUpdateActiveTab && getURLHostOrProtocol(tabURL) !== activeTabHostname) {
+                            return;
+                        }
+
+                        const message = this.getTabMessage(tabURL, frameId === 0 ? null : url);
                         if (tab.active && frameId === 0) {
                             chrome.tabs.sendMessage<Message>(tab.id, message, {frameId});
                         } else {

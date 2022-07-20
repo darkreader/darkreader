@@ -58,6 +58,10 @@ export function getModifiableCSSDeclaration(
         if (modifier) {
             return {property, value: modifier, important: getPriority(rule.style, property), sourceValue: value};
         }
+    } else if (property === 'color-scheme') {
+        // Note: this if statement needs to be above the next one
+        logWarn('CSS property color-scheme is not supported');
+        return null;
     } else if (
         (property.includes('color') && property !== '-webkit-print-color-adjust') ||
         property === 'fill' ||
@@ -439,7 +443,7 @@ export function getBgImageModifier(
             const matchEnd = matchStart + match.length + offset;
             matchIndex = matchEnd;
 
-            // Make sure we still push all the unrelated content between gradients and URL's.
+            // Make sure we still push all the unrelated content between gradients and URLs.
             if (prefixStart !== matchStart) {
                 if (prevHasComma) {
                     modifiers.push(() => {
@@ -454,7 +458,6 @@ export function getBgImageModifier(
                 }
             }
             prevHasComma = hasComma || false;
-
 
             if (type === 'url') {
                 modifiers.push(getURLModifier(match));

@@ -111,4 +111,15 @@ describe('COLOR PARSING', () => {
         createOrUpdateDynamicTheme(theme, null, false);
         expect(getComputedStyle(container.querySelector('h1')).backgroundColor).toBe('rgb(28, 31, 32)');
     });
+
+    it('should handle gradients with calc(...) cases', () => {
+        container.innerHTML = multiline(
+            '<style>',
+            '    h1 { background-image: linear-gradient(rgb(249, 249, 251) calc(100% - 3px), transparent), linear-gradient(-90deg, rgb(255, 145, 0), rgb(241, 3, 102) 50%, rgb(97, 115, 255)) }',
+            '</style>',
+            '<h1>Weird color <strong>Power</strong>!</h1>',
+        );
+        createOrUpdateDynamicTheme(theme, null, false);
+        expect(getComputedStyle(container.querySelector('h1')).backgroundImage).toBe('linear-gradient(rgb(27, 29, 30), calc(100% - 3px), rgba(0, 0, 0, 0)), linear-gradient(-90deg, rgb(204, 116, 0), rgb(193, 2, 82) 50%, rgb(0, 17, 146))');
+    });
 });

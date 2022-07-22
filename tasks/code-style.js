@@ -1,8 +1,9 @@
 // @ts-check
-const prettier = require('prettier');
-const {getDestDir, PLATFORM} = require('./paths');
-const {createTask} = require('./task');
-const {log, readFile, writeFile, getPaths} = require('./utils');
+import prettier from 'prettier';
+import paths from './paths.js';
+import {createTask} from './task.js';
+import {log, readFile, writeFile, getPaths} from './utils.js';
+const {getDestDir, PLATFORM} = paths;
 
 /** @type {import('prettier').Options} */
 const options = {
@@ -38,7 +39,9 @@ async function codeStyle({platforms, debug}) {
     }
 }
 
-module.exports = createTask(
+const codeStyleTask = createTask(
     'code-style',
     codeStyle,
 );
+
+export default codeStyleTask;

@@ -1,18 +1,18 @@
 // @ts-check
-const fs = require('fs');
-const os = require('os');
-const rollup = require('rollup');
-const rollupPluginNodeResolve = require('@rollup/plugin-node-resolve').default;
+import fs from 'fs';
+import os from 'os';
+import * as rollup from 'rollup';
+import rollupPluginNodeResolve from '@rollup/plugin-node-resolve';
 /** @type {any} */
-const rollupPluginReplace = require('@rollup/plugin-replace');
+import rollupPluginReplace from '@rollup/plugin-replace';
 /** @type {any} */
-const rollupPluginTypescript = require('@rollup/plugin-typescript');
-const typescript = require('typescript');
-const {getDestDir, PLATFORM, rootDir, rootPath} = require('./paths');
-const reload = require('./reload');
+import rollupPluginTypescript from '@rollup/plugin-typescript';
+import typescript from 'typescript';
+import paths from './paths.js';
+import * as reload from './reload.js';
 const {PORT} = reload;
-const {createTask} = require('./task');
-
+import {createTask} from './task.js';
+const {getDestDir, PLATFORM, rootDir, rootPath} = paths;
 
 /**
  * @typedef JSEntry
@@ -183,7 +183,7 @@ const hydrateTask = (/** @type {JSEntry[]} */entries, platforms, /** @type {bool
             .map((platform) => bundleJS(entry, platform, {debug, watch}))
     ).flat();
 
-module.exports = createTask(
+const bundleJSTask = createTask(
     'bundle-js',
     async ({platforms, debug, watch}) => await Promise.all(hydrateTask(jsEntries, platforms, debug, watch)),
 ).addWatcher(
@@ -208,8 +208,10 @@ module.exports = createTask(
         );
 
         const isUIOnly = entries.every((entry) => entry.reloadType === reload.UI);
-        reload({
+        reload.reload({
             type: isUIOnly ? reload.UI : reload.FULL,
         });
     },
 );
+
+export default bundleJSTask;

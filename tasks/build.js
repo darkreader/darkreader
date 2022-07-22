@@ -1,18 +1,22 @@
 // @ts-check
-const bundleAPI = require('./bundle-api');
-const bundleCSS = require('./bundle-css');
-const bundleJS = require('./bundle-js');
-const bundleLocales = require('./bundle-locales');
-const bundleManifest = require('./bundle-manifest');
-const clean = require('./clean');
-const copy = require('./copy');
-const reload = require('./reload');
-const codeStyle = require('./code-style');
-const zip = require('./zip');
-const {runTasks} = require('./task');
-const {log} = require('./utils');
-const {fork} = require('child_process');
-const {PLATFORM} = require('./paths');
+import bundleAPI from './bundle-api.js';
+import bundleCSS from './bundle-css.js';
+import bundleJS from './bundle-js.js';
+import bundleLocales from './bundle-locales.js';
+import bundleManifest from './bundle-manifest.js';
+import clean from './clean.js';
+import copy from './copy.js';
+import * as reload from './reload.js';
+import codeStyle from './code-style.js';
+import zip from './zip.js';
+import {runTasks} from './task.js';
+import {log} from './utils.js';
+import {fork} from 'child_process';
+import paths from './paths.js';
+const {PLATFORM} = paths;
+
+import {fileURLToPath} from 'url';
+const __filename = fileURLToPath(import.meta.url);
 
 const standardTask = [
     clean,
@@ -35,7 +39,7 @@ async function build({platforms, debug, watch}) {
         await runTasks(debug ? standardTask : buildTask, {platforms, debug, watch});
         if (watch) {
             standardTask.forEach((task) => task.watch(platforms));
-            reload({type: reload.FULL});
+            reload.reload({type: reload.FULL});
             log.ok('Watching...');
         } else {
             log.ok('MISSION PASSED! RESPECT +');

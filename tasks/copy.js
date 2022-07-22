@@ -1,8 +1,9 @@
 // @ts-check
-const {getDestDir, PLATFORM} = require('./paths');
-const reload = require('./reload');
-const {createTask} = require('./task');
-const {pathExists, copyFile, getPaths} = require('./utils');
+import paths_ from './paths.js';
+import * as reload from './reload.js';
+import {createTask} from './task.js';
+import {pathExists, copyFile, getPaths} from './utils.js';
+const {getDestDir, PLATFORM} = paths_;
 
 const srcDir = 'src';
 
@@ -80,7 +81,7 @@ async function copy({platforms, debug}) {
     await Promise.all(promises);
 }
 
-module.exports = createTask(
+const copyTask = createTask(
     'copy',
     copy,
 ).addWatcher(
@@ -93,6 +94,8 @@ module.exports = createTask(
                 }
             }
         }
-        reload({type: reload.FULL});
+        reload.reload({type: reload.FULL});
     },
 );
+
+export default copyTask;

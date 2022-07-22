@@ -11,6 +11,7 @@ const rollupPluginTypescript = require('@rollup/plugin-typescript');
 const typescript = require('typescript');
 const {createEchoServer} = require('./support/echo-server');
 
+// TODO: use rootPath from '../../tasks/paths.js' after migrating Karma to ES imports
 const packageJson = require.resolve('../../package.json');
 const rootDir = dirname(packageJson);
 const rootPath = (...paths) => join(rootDir, ...paths);

@@ -3,7 +3,7 @@
 
 const fs = require('fs');
 const os = require('os');
-const {dirname} = require('path');
+const {dirname, join} = require('path');
 const rollupPluginIstanbul = require('rollup-plugin-istanbul2');
 const rollupPluginNodeResolve = require('@rollup/plugin-node-resolve').default;
 const rollupPluginReplace = require('@rollup/plugin-replace');

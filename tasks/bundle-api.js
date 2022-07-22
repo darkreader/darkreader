@@ -31,7 +31,7 @@ async function bundleAPI({debug}) {
                 tsconfig: rootPath('src/api/tsconfig.json'),
                 removeComments: true,
                 noEmitOnError: true,
-                cacheDir: debug ? `${fs.realpathSync(os.tmpdir())}/darkreader_api_typescript_cache` : null,
+                cacheDir: debug ? `${fs.realpathSync(os.tmpdir())}/darkreader_api_typescript_cache` : undefined,
             }),
             rollupPluginReplace({
                 preventAssignment: true,

@@ -137,7 +137,7 @@ async function bundleJS(/** @type {JSEntry} */entry, platform, {debug, watch}) {
                     sourceMap: debug ? true : false,
                     inlineSources: debug ? true : false,
                     noEmitOnError: true,
-                    cacheDir: debug ? `${fs.realpathSync(os.tmpdir())}/darkreader_typescript_cache` : null,
+                    cacheDir: debug ? `${fs.realpathSync(os.tmpdir())}/darkreader_typescript_cache` : undefined,
                 })
             ),
             getRollupPluginInstance('replace', rollupPluginReplaceInstanceKey, () =>

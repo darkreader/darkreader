@@ -1,7 +1,10 @@
 // @ts-check
-const {exec} = require('child_process');
-const fs = require('fs');
-const path = require('path');
+import {exec} from 'child_process';
+import fs from 'fs';
+import path from 'path';
+
+import * as url from 'url';
+const __dirname = url.fileURLToPath(new URL('.', import.meta.url));
 
 /**
  * @param {string} relPath
@@ -34,7 +37,7 @@ function linuxAppPath(app) {
 /**
  * @returns {Promise<string>}
  */
-async function getChromePath() {
+export async function getChromePath() {
     if (process.platform === 'darwin') {
         return '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
     }
@@ -55,7 +58,7 @@ async function getChromePath() {
 /**
  * @returns {Promise<string>}
  */
-async function getFirefoxPath() {
+export async function getFirefoxPath() {
     if (process.platform === 'darwin') {
         return '/Applications/Firefox Nightly.app/Contents/MacOS/firefox-bin';
     }
@@ -73,12 +76,5 @@ async function getFirefoxPath() {
     throw new Error('Could not find firefox-nightly');
 }
 
-const chromeExtensionDebugDir = path.join(__dirname, '../../build/debug/chrome');
-const firefoxExtensionDebugDir = path.join(__dirname, '../../build/debug/firefox');
-
-module.exports = {
-    getChromePath,
-    getFirefoxPath,
-    chromeExtensionDebugDir,
-    firefoxExtensionDebugDir,
-};
+export const chromeExtensionDebugDir = path.join(__dirname, '../../build/debug/chrome');
+export const firefoxExtensionDebugDir = path.join(__dirname, '../../build/debug/firefox');

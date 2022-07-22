@@ -148,7 +148,8 @@ function modifyBgHSL({h, s, l, a}: HSLA, pole: HSLA) {
     // Lower the lightness, if the resulting
     // hue is in lower yellow spectrum.
     if (hx > 40 && hx < 80) {
-        lx *= 0.75;
+        // scale's output will always be under 1.
+        lx *= scale(hx, 0, 360, 0, 3.5);
     }
 
     return {h: hx, s, l: lx, a};

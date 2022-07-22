@@ -3,13 +3,18 @@
 
 const fs = require('fs');
 const os = require('os');
+const {dirname, join} = require('path');
 const rollupPluginIstanbul = require('rollup-plugin-istanbul2');
 const rollupPluginNodeResolve = require('@rollup/plugin-node-resolve').default;
 const rollupPluginReplace = require('@rollup/plugin-replace');
 const rollupPluginTypescript = require('@rollup/plugin-typescript');
 const typescript = require('typescript');
-const {getTestDestDir, rootPath} = require('../../tasks/paths');
 const {createEchoServer} = require('./support/echo-server');
+
+// TODO: use rootPath from '../../tasks/paths.js' after migrating Karma to ES imports
+const packageJson = require.resolve('../../package.json');
+const rootDir = dirname(packageJson);
+const rootPath = (...paths) => join(rootDir, ...paths);
 
 /**
  * @param {LocalConfig} config
@@ -59,7 +64,7 @@ function configureKarma(config, env) {
                 }),
             ],
             output: {
-                dir: getTestDestDir(),
+                dir: 'build/tests',
                 strict: true,
                 format: 'iife',
                 sourcemap: 'inline',

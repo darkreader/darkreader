@@ -1,10 +1,11 @@
 // @ts-check
-const fs = require('fs').promises;
-const path = require('path');
-const {getDestDir, PLATFORM, rootPath} = require('./paths');
-const reload = require('./reload');
-const {createTask} = require('./task');
-const {readFile, writeFile} = require('./utils');
+import fs from 'fs/promises';
+import path from 'path';
+import paths from './paths.js';
+import * as reload from './reload.js';
+import {createTask} from './task.js';
+import {readFile, writeFile} from './utils.js';
+const {getDestDir, PLATFORM, rootPath} = paths;
 
 async function bundleLocale(/** @type {string} */filePath) {
     let file = await readFile(filePath);
@@ -51,7 +52,7 @@ async function writeFiles(data, fileName, {platforms, debug}){
     }
 }
 
-module.exports = createTask(
+const bundleLocalesTask = createTask(
     'bundle-locales',
     bundleLocales,
 ).addWatcher(
@@ -63,6 +64,8 @@ module.exports = createTask(
             const locale = await bundleLocale(`${localesSrcDir}/${fileName}`);
             await writeFiles(locale, fileName, {platforms, debug: true});
         }
-        reload({type: reload.FULL});
+        reload.reload({type: reload.FULL});
     },
 );
+
+export default bundleLocalesTask;

@@ -1,9 +1,9 @@
-const {dirname, join} = require('path');
-const packageJson = require.resolve('../package.json');
-const rootDir = dirname(packageJson);
+import {dirname, join} from 'path';
+import {createRequire} from 'module';
+const rootDir = dirname(createRequire(import.meta.url).resolve('../package.json'));
 const rootPath = (...paths) => join(rootDir, ...paths);
 
-module.exports = {
+export default {
     PLATFORM: {
         CHROME: 'chrome',
         CHROME_MV3: 'chrome-mv3',
@@ -13,9 +13,6 @@ module.exports = {
     getDestDir: function ({debug, platform}) {
         const buildTypeDir = `build/${debug ? 'debug' : 'release'}`;
         return `${buildTypeDir}/${platform}`;
-    },
-    getTestDestDir: function () {
-        return `build/tests`;
     },
 
     rootDir,

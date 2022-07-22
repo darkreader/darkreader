@@ -1,6 +1,6 @@
 // @ts-check
-const fs = require('fs').promises;
-const {readFile, writeFile, httpsRequest, timeout, log} = require('./utils');
+import fs from 'fs/promises';
+import {readFile, writeFile, httpsRequest, timeout, log} from './utils.js';
 
 // To use this tool:
 // 1. Edit a line in en.config.

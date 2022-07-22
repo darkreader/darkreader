@@ -1,8 +1,9 @@
 // @ts-check
-const {PLATFORM, getDestDir} = require('./paths');
-const reload = require('./reload');
-const {createTask} = require('./task');
-const {readFile, writeFile} = require('./utils');
+import path from './paths.js';
+import * as reload from './reload.js';
+import {createTask} from './task.js';
+import {readFile, writeFile} from './utils.js';
+const {PLATFORM, getDestDir} = path;
 
 const srcDir = 'src';
 
@@ -34,7 +35,7 @@ async function manifests({platforms, debug}) {
     }
 }
 
-module.exports = createTask(
+const bundleManifestTask = createTask(
     'bundle-manifest',
     manifests,
 ).addWatcher(
@@ -47,6 +48,8 @@ module.exports = createTask(
             platforms[platform] = changed && buildPlatforms[platform];
         }
         await manifests({platforms, debug: true});
-        reload({type: reload.FULL});
+        reload.reload({type: reload.FULL});
     },
 );
+
+export default bundleManifestTask;

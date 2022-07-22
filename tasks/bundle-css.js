@@ -1,10 +1,11 @@
 // @ts-check
-const less = require('less');
-const path = require('path');
-const {getDestDir, PLATFORM, rootPath} = require('./paths');
-const reload = require('./reload');
-const {createTask} = require('./task');
-const {readFile, writeFile} = require('./utils');
+import less from 'less';
+import path from 'path';
+import paths from './paths.js';
+import * as reload from './reload.js';
+import {createTask} from './task.js';
+import {readFile, writeFile} from './utils.js';
+const {getDestDir, PLATFORM, rootPath} = paths;
 
 /**
  * @typedef CSSEntry
@@ -62,7 +63,7 @@ function getWatchFiles() {
     return Array.from(watchFiles);
 }
 
-module.exports = createTask(
+const bundleCSSTask = createTask(
     'bundle-css',
     bundleCSS,
 ).addWatcher(
@@ -85,6 +86,8 @@ module.exports = createTask(
             newWatchFiles.filter((newFile) => watchFiles.includes(newFile))
         );
 
-        reload({type: reload.CSS});
+        reload.reload({type: reload.CSS});
     },
 );
+
+export default bundleCSSTask;

@@ -1,5 +1,5 @@
-const chokidar = require('chokidar');
-const {log} = require('./utils');
+import chokidar from 'chokidar';
+import {log} from './utils.js';
 
 const DEBOUNCE = 200;
 
@@ -50,4 +50,4 @@ function watch(options) {
     return watcher;
 }
 
-module.exports = watch;
+export default watch;

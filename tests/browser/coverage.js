@@ -1,6 +1,8 @@
 // @ts-check
 const path = require('path');
-const {writeFile} = require('../../tasks/utils');
+
+const utils = require('../../tasks/utils');
+const writeFile = (await utils).writeFile;
 
 /** @typedef {{text: string; covered: boolean}} CodePart */
 

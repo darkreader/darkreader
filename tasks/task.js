@@ -1,5 +1,5 @@
-const {log} = require('./utils');
-const watch = require('./watch');
+import {log} from './utils.js';
+import watch from './watch.js';
 
 /**
  * @typedef TaskOptions
@@ -69,7 +69,7 @@ class Task {
  * @param {string} name
  * @param {(options: TaskOptions) => void | Promise<any>} run
  */
-function createTask(name, run) {
+export function createTask(name, run) {
     return new Task(name, run);
 }
 
@@ -77,7 +77,7 @@ function createTask(name, run) {
  * @param {Task[]} tasks
  * @param {TaskOptions} options
  */
-async function runTasks(tasks, options) {
+export async function runTasks(tasks, options) {
     for (const task of tasks) {
         try {
             await task.run(options);
@@ -87,8 +87,3 @@ async function runTasks(tasks, options) {
         }
     }
 }
-
-module.exports = {
-    createTask,
-    runTasks,
-};

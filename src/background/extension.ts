@@ -41,7 +41,6 @@ declare const __MV3__: boolean;
 export class Extension {
     private config: ConfigManager;
     private devtools: DevTools;
-    private icon: IconManager;
     private messenger: Messenger;
     private news: Newsmaker;
     private tabs: TabManager;

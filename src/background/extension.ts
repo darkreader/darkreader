@@ -15,7 +15,7 @@ import createCSSFilterStylesheet from '../generators/css-filter';
 import {getDynamicThemeFixesFor} from '../generators/dynamic-theme';
 import createStaticStylesheet from '../generators/static-theme';
 import {createSVGFilterStylesheet, getSVGFilterMatrixValue, getSVGReverseFilterMatrixValue} from '../generators/svg-filter';
-import type {ExtensionData, FilterConfig, News, Shortcuts, UserSettings, TabInfo, TabData} from '../definitions';
+import type {ExtensionData, FilterConfig, News, Shortcuts, UserSettings, TabInfo, TabData, Command} from '../definitions';
 import {isSystemDarkModeEnabled} from '../utils/media-query';
 import {isFirefox, isThunderbird} from '../utils/platform';
 import {MessageType} from '../utils/message';
@@ -88,7 +88,7 @@ export class Extension {
                 // As far as we know, this code is never actually run because there
                 // is no browser UI for removing 'contextMenus' permission.
                 // This code exists for future-proofing in case browsers ever add such UI.
-                if (!permissions.permissions.includes('contextMenus')) {
+                if (!permissions?.permissions?.includes('contextMenus')) {
                     this.registeredContextMenus = false;
                 }
             });
@@ -244,7 +244,7 @@ export class Extension {
         };
     }
 
-    private onCommandInternal = async (command: string, frameURL?: string) => {
+    private onCommandInternal = async (command: Command, frameURL?: string) => {
         if (this.startBarrier.isPending()) {
             await this.startBarrier.entry();
         }
@@ -283,9 +283,8 @@ export class Extension {
     onCommand = debounce(75, this.onCommandInternal);
 
     private registerContextMenus() {
-        const onCommandToggle = async () => this.onCommand('toggle');
-        const onCommandAddSite = async (data: chrome.contextMenus.OnClickData) => this.onCommand('addSite', data.frameUrl);
-        const onCommandSwitchEngine = async () => this.onCommand('switchEngine');
+        chrome.contextMenus.onClicked.addListener(async ({menuItemId, frameUrl, pageUrl}) =>
+            this.onCommand(menuItemId as Command, frameUrl || pageUrl));
         chrome.contextMenus.removeAll(() => {
             this.registeredContextMenus = false;
             chrome.contextMenus.create({
@@ -300,22 +299,19 @@ export class Extension {
                 const msgAddSite = chrome.i18n.getMessage('toggle_current_site');
                 const msgSwitchEngine = chrome.i18n.getMessage('theme_generation_mode');
                 chrome.contextMenus.create({
-                    id: 'DarkReader-toggle',
+                    id: 'toggle',
                     parentId: 'DarkReader-top',
                     title: msgToggle || 'Toggle everywhere',
-                    onclick: onCommandToggle,
                 });
                 chrome.contextMenus.create({
-                    id: 'DarkReader-addSite',
+                    id: 'addSite',
                     parentId: 'DarkReader-top',
                     title: msgAddSite || 'Toggle for current site',
-                    onclick: onCommandAddSite,
                 });
                 chrome.contextMenus.create({
-                    id: 'DarkReader-switchEngine',
+                    id: 'switchEngine',
                     parentId: 'DarkReader-top',
                     title: msgSwitchEngine || 'Switch engine',
-                    onclick: onCommandSwitchEngine,
                 });
                 this.registeredContextMenus = true;
             });

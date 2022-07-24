@@ -22,7 +22,7 @@ interface ConnectionMessageOptions {
 }
 
 interface TabManagerOptions {
-    getConnectionMessage: (options: ConnectionMessageOptions) => Message | Promise<Message>;
+    getConnectionMessage: (options: ConnectionMessageOptions) => Promise<Message>;
     getTabMessage: (url: string, frameUrl: string) => Message;
     onColorSchemeChange: (isDark: boolean) => void;
 }
@@ -105,12 +105,7 @@ export default class TabManager {
                     }
                     await this.stateManager.loadState();
                     const reply = (options: ConnectionMessageOptions) => {
-                        const message = getConnectionMessage(options);
-                        if (message instanceof Promise) {
-                            message.then((asyncMessage) => asyncMessage && chrome.tabs.sendMessage<Message>(sender.tab.id, asyncMessage, {frameId: sender.frameId}));
-                        } else if (message) {
-                            chrome.tabs.sendMessage<Message>(sender.tab.id, message, {frameId: sender.frameId});
-                        }
+                        getConnectionMessage(options).then((message) => message && chrome.tabs.sendMessage<Message>(sender.tab.id, message, {frameId: sender.frameId}));
                     };
 
                     // Workaround for Thunderbird and Vivaldi.

@@ -70,7 +70,7 @@ export class Extension {
         this.messenger = new Messenger(this.getMessengerAdapter());
         this.news = new Newsmaker((news) => this.onNewsUpdate(news));
         this.tabs = new TabManager({
-            getConnectionMessage: ({url, frameURL}) => this.getConnectionMessage(url, frameURL),
+            getConnectionMessage: async ({url, frameURL}) => this.getConnectionMessage(url, frameURL),
             getTabMessage: this.getTabMessage,
             onColorSchemeChange: this.onColorSchemeChange,
         });
@@ -116,9 +116,7 @@ export class Extension {
 
     private alarmListener = (alarm: chrome.alarms.Alarm): void => {
         if (alarm.name === Extension.ALARM_NAME) {
-            this.callWhenSettingsLoaded(() => {
-                this.handleAutomationCheck();
-            });
+            this.loadData().then(() => this.handleAutomationCheck());
         }
     };
 
@@ -335,10 +333,7 @@ export class Extension {
     }
 
     async collectData(): Promise<ExtensionData> {
-        if (!this.user.settings) {
-            await this.user.loadSettings();
-        }
-        await this.stateManager.loadState();
+        await this.loadData();
         const [
             news,
             shortcuts,
@@ -381,10 +376,7 @@ export class Extension {
     }
 
     private async getActiveTabInfo() {
-        if (!this.user.settings) {
-            await this.user.loadSettings();
-        }
-        await this.stateManager.loadState();
+        await this.loadData();
         const url = await this.tabs.getActiveTabURL();
         const info = this.getURLInfo(url);
         info.isInjected = await this.tabs.canAccessActiveTab();
@@ -408,37 +400,29 @@ export class Extension {
         this.icon.hideBadge();
     }
 
-    private getConnectionMessage(url: string, frameURL: string) {
-        if (this.user.settings) {
-            return this.getTabMessage(url, frameURL);
-        }
-        return new Promise<TabData>((resolve) => {
-            this.user.loadSettings().then(() => resolve(this.getTabMessage(url, frameURL)));
-        });
+    private async getConnectionMessage(url: string, frameURL: string) {
+        await this.loadData();
+        return this.getTabMessage(url, frameURL);
     }
 
-    private callWhenSettingsLoaded(callback: () => void) {
-        if (this.user.settings) {
-            callback();
-            return;
+    private async loadData() {
+        const promises = [this.stateManager.loadState()];
+        if (!this.user.settings) {
+            promises.push(this.user.loadSettings());
         }
-        Promise.all([
-            this.user.loadSettings(),
-            this.stateManager.loadState()
-        ]).then(callback);
+        await Promise.all(promises);
     }
 
-    private onColorSchemeChange = (isDark: boolean) => {
+    private onColorSchemeChange = async (isDark: boolean) => {
         this.MV3syncSystemColorStateManager(isDark);
         if (isFirefox) {
             this.wasLastColorSchemeDark = isDark;
         }
+        await this.loadData();
         if (this.user.settings.automation.mode !== 'system') {
             return;
         }
-        this.callWhenSettingsLoaded(() => {
-            this.handleAutomationCheck();
-        });
+        this.handleAutomationCheck();
     };
 
     private handleAutomationCheck = () => {
@@ -569,10 +553,7 @@ export class Extension {
     }
 
     private async onSettingsChanged(onlyUpdateActiveTab = false) {
-        if (!this.user.settings) {
-            await this.user.loadSettings();
-        }
-        await this.stateManager.loadState();
+        await this.loadData();
         this.wasEnabledOnLastCheck = this.isExtensionSwitchedOn();
         this.tabs.sendMessage(onlyUpdateActiveTab);
         this.saveUserSettings();

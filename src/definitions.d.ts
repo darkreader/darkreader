@@ -198,3 +198,6 @@ export interface News {
     badge?: string;
     icon?: string;
 }
+
+// These values need to match those in Manifest
+export type Command = 'toggle' | 'addSite' | 'switchEngine';

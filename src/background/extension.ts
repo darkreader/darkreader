@@ -41,7 +41,6 @@ declare const __MV3__: boolean;
 export class Extension {
     private config: ConfigManager;
     private devtools: DevTools;
-    private icon: IconManager;
     private messenger: Messenger;
     private news: Newsmaker;
     private tabs: TabManager;
@@ -387,17 +386,13 @@ export class Extension {
     }
 
     private onNewsUpdate(news: News[]) {
-        if (!this.icon) {
-            this.icon = new IconManager();
-        }
-
         const latestNews = news.length > 0 && news[0];
         if (latestNews && latestNews.badge && !latestNews.read && !latestNews.displayed) {
-            this.icon.showBadge(latestNews.badge);
+            IconManager.showBadge(latestNews.badge);
             return;
         }
 
-        this.icon.hideBadge();
+        IconManager.hideBadge();
     }
 
     private async getConnectionMessage(url: string, frameURL: string) {
@@ -535,17 +530,13 @@ export class Extension {
     //
 
     private onAppToggle() {
-        if (!this.icon) {
-            this.icon = new IconManager();
-        }
-
         if (this.isExtensionSwitchedOn()) {
-            this.icon.setActive();
+            IconManager.setActive();
             if (this.user.settings.changeBrowserTheme) {
                 setWindowTheme(this.user.settings.theme);
             }
         } else {
-            this.icon.setInactive();
+            IconManager.setInactive();
             if (this.user.settings.changeBrowserTheme) {
                 resetWindowTheme();
             }

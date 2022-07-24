@@ -149,10 +149,6 @@ if (__DEBUG__) {
                     chrome.storage[region].get(keys, (data) => respond({type: 'getChromeStorage-response', data, id: message.id}));
                     break;
                 }
-                case 'setDataIsMigratedForTesting':
-                    extension.setDevToolsDataIsMigratedForTesting(message.data as boolean);
-                    respond({type: 'setDataIsMigratedForTesting-response', id: message.id});
-                    break;
             }
         } catch (err) {
             respond({type: 'error', data: String(err)});

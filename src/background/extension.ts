@@ -657,10 +657,6 @@ export class Extension {
         };
     };
 
-    setDevToolsDataIsMigratedForTesting(migrated: boolean) {
-        this.devtools.setDataIsMigratedForTesting(migrated);
-    }
-
     //-------------------------------------
     //          User settings
 

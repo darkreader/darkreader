@@ -3,14 +3,27 @@
  * which is in StateManagerImpl class.
  */
 
-import {isNonPersistent} from './migration';
+import {isChromium} from './platform';
 import {StateManagerImpl} from './state-manager-impl';
 
 export class StateManager<T> {
     private stateManager: StateManagerImpl<T> | null;
 
+    private static isNonPersistent() {
+        if (!isChromium) {
+            return false;
+        }
+        const background = chrome.runtime.getManifest().background;
+        if ('persistent' in background) {
+            return background.persistent === false;
+        }
+        if ('service_worker' in background) {
+            return true;
+        }
+    }
+
     constructor(localStorageKey: string, parent: any, defaults: T){
-        if (isNonPersistent()) {
+        if (StateManager.isNonPersistent()) {
             function addListener(listener: (data: T) => void) {
                 chrome.storage.onChanged.addListener((changes, areaName) => {
                     if (areaName !== 'local' || !changes[localStorageKey]) {

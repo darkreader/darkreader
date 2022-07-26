@@ -39,7 +39,6 @@ interface SystemColorState {
 declare const __MV3__: boolean;
 
 export class Extension {
-    private config: ConfigManager;
     private devtools: DevTools;
     private messenger: Messenger;
     private news: Newsmaker;
@@ -64,8 +63,7 @@ export class Extension {
     private isDark: boolean | null = null;
 
     constructor() {
-        this.config = new ConfigManager();
-        this.devtools = new DevTools(this.config, async () => this.onSettingsChanged());
+        this.devtools = new DevTools(async () => this.onSettingsChanged());
         this.messenger = new Messenger(this.getMessengerAdapter());
         this.news = new Newsmaker((news) => this.onNewsUpdate(news));
         this.tabs = new TabManager({
@@ -191,7 +189,7 @@ export class Extension {
 
     async start() {
         await Promise.all([
-            this.config.load({local: true}),
+            ConfigManager.load({local: true}),
             this.MV3syncSystemColorStateManager(null),
             this.user.loadSettings()
         ]);
@@ -206,7 +204,7 @@ export class Extension {
             });
         }
         if (this.user.settings.syncSitesFixes) {
-            await this.config.load({local: false});
+            await ConfigManager.load({local: false});
         }
         this.updateAutoState();
         this.onAppToggle();
@@ -234,7 +232,7 @@ export class Extension {
             markNewsAsRead: async (ids) => await this.news.markAsRead(...ids),
             markNewsAsDisplayed: async (ids) => await this.news.markAsDisplayed(...ids),
             onPopupOpen: () => this.popupOpeningListener && this.popupOpeningListener(),
-            loadConfig: async (options) => await this.config.load(options),
+            loadConfig: async (options) => await ConfigManager.load(options),
             applyDevDynamicThemeFixes: (text) => this.devtools.applyDynamicThemeFixes(text),
             resetDevDynamicThemeFixes: () => this.devtools.resetDynamicThemeFixes(),
             applyDevInversionFixes: (text) => this.devtools.applyInversionFixes(text),
@@ -356,7 +354,7 @@ export class Extension {
             settings: this.user.settings,
             news,
             shortcuts,
-            colorScheme: this.config.COLOR_SCHEMES_RAW,
+            colorScheme: ConfigManager.COLOR_SCHEMES_RAW,
             forcedScheme: this.autoState === 'scheme-dark' ? 'dark' : this.autoState === 'scheme-light' ? 'light' : null,
             devtools: {
                 dynamicFixesText,
@@ -495,7 +493,7 @@ export class Extension {
         const settings = this.user.settings;
         const tab = await this.getActiveTabInfo();
         const {url} = tab;
-        const isInDarkList = isURLInList(url, this.config.DARK_SITES);
+        const isInDarkList = isURLInList(url, ConfigManager.DARK_SITES);
         const host = getURLHostOrProtocol(url);
 
         function getToggledList(sourceList: string[]) {
@@ -560,7 +558,7 @@ export class Extension {
     //----------------------
 
     private getURLInfo(url: string): TabInfo {
-        const {DARK_SITES} = this.config;
+        const {DARK_SITES} = ConfigManager;
         const isInDarkList = isURLInList(url, DARK_SITES);
         const isProtected = !canInjectScript(url);
         return {
@@ -594,7 +592,7 @@ export class Extension {
                     return {
                         type: MessageType.BG_ADD_CSS_FILTER,
                         data: {
-                            css: createCSSFilterStylesheet(theme, url, frameURL, this.config.INVERSION_FIXES_RAW, this.config.INVERSION_FIXES_INDEX),
+                            css: createCSSFilterStylesheet(theme, url, frameURL, ConfigManager.INVERSION_FIXES_RAW, ConfigManager.INVERSION_FIXES_INDEX),
                             detectDarkTheme,
                         },
                     };
@@ -604,7 +602,7 @@ export class Extension {
                         return {
                             type: MessageType.BG_ADD_CSS_FILTER,
                             data: {
-                                css: createSVGFilterStylesheet(theme, url, frameURL, this.config.INVERSION_FIXES_RAW, this.config.INVERSION_FIXES_INDEX),
+                                css: createSVGFilterStylesheet(theme, url, frameURL, ConfigManager.INVERSION_FIXES_RAW, ConfigManager.INVERSION_FIXES_INDEX),
                                 detectDarkTheme,
                             },
                         };
@@ -612,7 +610,7 @@ export class Extension {
                     return {
                         type: MessageType.BG_ADD_SVG_FILTER,
                         data: {
-                            css: createSVGFilterStylesheet(theme, url, frameURL, this.config.INVERSION_FIXES_RAW, this.config.INVERSION_FIXES_INDEX),
+                            css: createSVGFilterStylesheet(theme, url, frameURL, ConfigManager.INVERSION_FIXES_RAW, ConfigManager.INVERSION_FIXES_INDEX),
                             svgMatrix: getSVGFilterMatrixValue(theme),
                             svgReverseMatrix: getSVGReverseFilterMatrixValue(),
                             detectDarkTheme,
@@ -625,13 +623,13 @@ export class Extension {
                         data: {
                             css: theme.stylesheet && theme.stylesheet.trim() ?
                                 theme.stylesheet :
-                                createStaticStylesheet(theme, url, frameURL, this.config.STATIC_THEMES_RAW, this.config.STATIC_THEMES_INDEX),
+                                createStaticStylesheet(theme, url, frameURL, ConfigManager.STATIC_THEMES_RAW, ConfigManager.STATIC_THEMES_INDEX),
                             detectDarkTheme: settings.detectDarkTheme,
                         },
                     };
                 }
                 case ThemeEngines.dynamicTheme: {
-                    const fixes = getDynamicThemeFixesFor(url, frameURL, this.config.DYNAMIC_THEME_FIXES_RAW, this.config.DYNAMIC_THEME_FIXES_INDEX, this.user.settings.enableForPDF);
+                    const fixes = getDynamicThemeFixesFor(url, frameURL, ConfigManager.DYNAMIC_THEME_FIXES_RAW, ConfigManager.DYNAMIC_THEME_FIXES_INDEX, this.user.settings.enableForPDF);
                     return {
                         type: MessageType.BG_ADD_DYNAMIC_THEME,
                         data: {

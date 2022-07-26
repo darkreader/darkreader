@@ -15,7 +15,7 @@ import createCSSFilterStylesheet from '../generators/css-filter';
 import {getDynamicThemeFixesFor} from '../generators/dynamic-theme';
 import createStaticStylesheet from '../generators/static-theme';
 import {createSVGFilterStylesheet, getSVGFilterMatrixValue, getSVGReverseFilterMatrixValue} from '../generators/svg-filter';
-import type {ExtensionData, FilterConfig, News, Shortcuts, UserSettings, TabInfo, TabData, Command} from '../definitions';
+import type {ExtensionData, FilterConfig, Shortcuts, UserSettings, TabInfo, TabData, Command} from '../definitions';
 import {isSystemDarkModeEnabled} from '../utils/media-query';
 import {isFirefox, isThunderbird} from '../utils/platform';
 import {MessageType} from '../utils/message';
@@ -41,7 +41,6 @@ declare const __MV3__: boolean;
 export class Extension {
     private devtools: DevTools;
     private messenger: Messenger;
-    private news: Newsmaker;
     private tabs: TabManager;
 
     private autoState: AutomationState = '';
@@ -62,9 +61,10 @@ export class Extension {
     private isDark: boolean | null = null;
 
     constructor() {
+        new Newsmaker();
+
         this.devtools = new DevTools(async () => this.onSettingsChanged());
         this.messenger = new Messenger(this.getMessengerAdapter());
-        this.news = new Newsmaker((news) => this.onNewsUpdate(news));
         this.tabs = new TabManager({
             getConnectionMessage: async ({url, frameURL}) => this.getConnectionMessage(url, frameURL),
             getTabMessage: this.getTabMessage,
@@ -214,7 +214,7 @@ export class Extension {
             this.tabs.updateContentScript({runOnProtectedPages: UserStorage.settings.enableForProtectedPages});
         }
 
-        UserStorage.settings.fetchNews && this.news.subscribe();
+        UserStorage.settings.fetchNews && Newsmaker.subscribe();
         this.startBarrier.resolve();
     }
 
@@ -227,8 +227,8 @@ export class Extension {
             setTheme: (theme) => this.setTheme(theme),
             setShortcut: ({command, shortcut}) => this.setShortcut(command, shortcut),
             toggleActiveTab: async () => this.toggleActiveTab(),
-            markNewsAsRead: async (ids) => await this.news.markAsRead(...ids),
-            markNewsAsDisplayed: async (ids) => await this.news.markAsDisplayed(...ids),
+            markNewsAsRead: async (ids) => await Newsmaker.markAsRead(...ids),
+            markNewsAsDisplayed: async (ids) => await Newsmaker.markAsDisplayed(...ids),
             onPopupOpen: () => this.popupOpeningListener && this.popupOpeningListener(),
             loadConfig: async (options) => await ConfigManager.load(options),
             applyDevDynamicThemeFixes: (text) => this.devtools.applyDynamicThemeFixes(text),
@@ -336,7 +336,7 @@ export class Extension {
             hasCustomStaticFixes,
             activeTab
         ] = await Promise.all([
-            this.news.getLatest(),
+            Newsmaker.getLatest(),
             this.getShortcuts(),
             this.devtools.getDynamicThemeFixesText(),
             this.devtools.getInversionFixesText(),
@@ -375,16 +375,6 @@ export class Extension {
             info.isDarkThemeDetected = await this.tabs.isActiveTabDarkThemeDetected();
         }
         return info;
-    }
-
-    private onNewsUpdate(news: News[]) {
-        const latestNews = news.length > 0 && news[0];
-        if (latestNews && latestNews.badge && !latestNews.read && !latestNews.displayed) {
-            IconManager.showBadge(latestNews.badge);
-            return;
-        }
-
-        IconManager.hideBadge();
     }
 
     private async getConnectionMessage(url: string, frameURL: string) {
@@ -459,7 +449,7 @@ export class Extension {
             }
         }
         if (prev.fetchNews !== UserStorage.settings.fetchNews) {
-            UserStorage.settings.fetchNews ? this.news.subscribe() : this.news.unSubscribe();
+            UserStorage.settings.fetchNews ? Newsmaker.subscribe() : Newsmaker.unSubscribe();
         }
 
         if (prev.enableContextMenus !== UserStorage.settings.enableContextMenus) {

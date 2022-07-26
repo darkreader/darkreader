@@ -3,6 +3,8 @@ import {getDurationInMinutes} from '../utils/time';
 import type {News} from '../definitions';
 import {readSyncStorage, readLocalStorage, writeSyncStorage, writeLocalStorage} from './utils/extension-api';
 import {StateManager} from '../utils/state-manager';
+import {logWarn} from '../utils/log';
+import IconManager from './icon-manager';
 
 interface NewsmakerState {
     latest: News[];
@@ -14,53 +16,67 @@ export default class Newsmaker {
     private static ALARM_NAME = 'newsmaker';
     private static LOCAL_STORAGE_KEY = 'Newsmaker-state';
 
-    private stateManager: StateManager<NewsmakerState>;
-    private latest: News[];
-    private latestTimestamp: number;
-    onUpdate: (news: News[]) => void;
+    private static initialized: boolean;
+    private static stateManager: StateManager<NewsmakerState>;
+    private static latest: News[];
+    private static latestTimestamp: number;
 
-    constructor(onUpdate: (news: News[]) => void) {
-        this.stateManager = new StateManager<NewsmakerState>(Newsmaker.LOCAL_STORAGE_KEY, this, {latest: [], latestTimestamp: null});
-        this.latest = [];
-        this.latestTimestamp = null;
-        this.onUpdate = onUpdate;
+    constructor() {
+        if (Newsmaker.initialized) {
+            // This path is never taken since Extension.constructor() ever creates one instance.
+            logWarn('Attempting to re-initialize Newsmaker. Doing nothing.');
+            return;
+        }
+        Newsmaker.stateManager = new StateManager<NewsmakerState>(Newsmaker.LOCAL_STORAGE_KEY, this, {latest: [], latestTimestamp: null});
+        Newsmaker.latest = [];
+        Newsmaker.latestTimestamp = null;
     }
 
-    async getLatest(): Promise<News[]> {
-        await this.stateManager.loadState();
-        return this.latest;
+    private static onUpdate() {
+        const latestNews = Newsmaker.latest.length > 0 && Newsmaker.latest[0];
+        if (latestNews && latestNews.badge && !latestNews.read && !latestNews.displayed) {
+            IconManager.showBadge(latestNews.badge);
+            return;
+        }
+
+        IconManager.hideBadge();
     }
 
-    private alarmListener = (alarm: chrome.alarms.Alarm): void => {
+    static async getLatest(): Promise<News[]> {
+        await Newsmaker.stateManager.loadState();
+        return Newsmaker.latest;
+    }
+
+    private static alarmListener = (alarm: chrome.alarms.Alarm): void => {
         if (alarm.name === Newsmaker.ALARM_NAME) {
-            this.updateNews();
+            Newsmaker.updateNews();
         }
     };
 
-    subscribe() {
-        if ((this.latestTimestamp === null) || (this.latestTimestamp + Newsmaker.UPDATE_INTERVAL < Date.now())) {
-            this.updateNews();
+    static subscribe() {
+        if ((Newsmaker.latestTimestamp === null) || (Newsmaker.latestTimestamp + Newsmaker.UPDATE_INTERVAL < Date.now())) {
+            Newsmaker.updateNews();
         }
-        chrome.alarms.onAlarm.addListener((alarm) => this.alarmListener(alarm));
+        chrome.alarms.onAlarm.addListener(Newsmaker.alarmListener);
         chrome.alarms.create(Newsmaker.ALARM_NAME, {periodInMinutes: Newsmaker.UPDATE_INTERVAL});
     }
 
-    unSubscribe() {
-        chrome.alarms.onAlarm.removeListener(this.alarmListener);
+    static unSubscribe() {
+        chrome.alarms.onAlarm.removeListener(Newsmaker.alarmListener);
         chrome.alarms.clear(Newsmaker.ALARM_NAME);
     }
 
-    private async updateNews() {
-        const news = await this.getNews();
+    private static async updateNews() {
+        const news = await Newsmaker.getNews();
         if (Array.isArray(news)) {
-            this.latest = news;
-            this.latestTimestamp = Date.now();
-            this.onUpdate(this.latest);
-            await this.stateManager.saveState();
+            Newsmaker.latest = news;
+            Newsmaker.latestTimestamp = Date.now();
+            Newsmaker.onUpdate();
+            await Newsmaker.stateManager.saveState();
         }
     }
 
-    private async getReadNews(): Promise<string[]> {
+    private static async getReadNews(): Promise<string[]> {
         const [
             sync,
             local
@@ -74,7 +90,7 @@ export default class Newsmaker {
         ]));
     }
 
-    private async getDisplayedNews(): Promise<string[]> {
+    private static async getDisplayedNews(): Promise<string[]> {
         const [
             sync,
             local
@@ -88,16 +104,16 @@ export default class Newsmaker {
         ]));
     }
 
-    private async getNews() {
+    private static async getNews() {
         try {
             const response = await fetch(`https://darkreader.github.io/blog/posts.json`, {cache: 'no-cache'});
             const $news: Array<Omit<News, 'read' | 'url'> & {date: string}> = await response.json();
-            const readNews = await this.getReadNews();
-            const displayedNews = await this.getDisplayedNews();
+            const readNews = await Newsmaker.getReadNews();
+            const displayedNews = await Newsmaker.getDisplayedNews();
             const news: News[] = $news.map((n) => {
                 const url = getBlogPostURL(n.id);
-                const read = this.wasRead(n.id, readNews);
-                const displayed = this.wasDisplayed(n.id, displayedNews);
+                const read = Newsmaker.wasRead(n.id, readNews);
+                const displayed = Newsmaker.wasDisplayed(n.id, displayedNews);
                 return {...n, url, read, displayed};
             });
             for (let i = 0; i < news.length; i++) {
@@ -113,8 +129,8 @@ export default class Newsmaker {
         }
     }
 
-    async markAsRead(...ids: string[]) {
-        const readNews = await this.getReadNews();
+    static async markAsRead(...ids: string[]) {
+        const readNews = await Newsmaker.getReadNews();
         const results = readNews.slice();
         let changed = false;
         ids.forEach((id) => {
@@ -124,22 +140,22 @@ export default class Newsmaker {
             }
         });
         if (changed) {
-            this.latest = this.latest.map((n) => {
-                const read = this.wasRead(n.id, results);
+            Newsmaker.latest = Newsmaker.latest.map((n) => {
+                const read = Newsmaker.wasRead(n.id, results);
                 return {...n, read};
             });
-            this.onUpdate(this.latest);
+            Newsmaker.onUpdate();
             const obj = {readNews: results};
             await Promise.all([
                 writeLocalStorage(obj),
                 writeSyncStorage(obj),
-                this.stateManager.saveState(),
+                Newsmaker.stateManager.saveState(),
             ]);
         }
     }
 
-    async markAsDisplayed(...ids: string[]) {
-        const displayedNews = await this.getDisplayedNews();
+    static async markAsDisplayed(...ids: string[]) {
+        const displayedNews = await Newsmaker.getDisplayedNews();
         const results = displayedNews.slice();
         let changed = false;
         ids.forEach((id) => {
@@ -149,25 +165,25 @@ export default class Newsmaker {
             }
         });
         if (changed) {
-            this.latest = this.latest.map((n) => {
-                const displayed = this.wasDisplayed(n.id, results);
+            Newsmaker.latest = Newsmaker.latest.map((n) => {
+                const displayed = Newsmaker.wasDisplayed(n.id, results);
                 return {...n, displayed};
             });
-            this.onUpdate(this.latest);
+            Newsmaker.onUpdate();
             const obj = {displayedNews: results};
             await Promise.all([
                 writeLocalStorage(obj),
                 writeSyncStorage(obj),
-                this.stateManager.saveState(),
+                Newsmaker.stateManager.saveState(),
             ]);
         }
     }
 
-    wasRead(id: string, readNews: string[]) {
+    static wasRead(id: string, readNews: string[]) {
         return readNews.includes(id);
     }
 
-    wasDisplayed(id: string, displayedNews: string[]) {
+    static wasDisplayed(id: string, displayedNews: string[]) {
         return displayedNews.includes(id);
     }
 }

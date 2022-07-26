@@ -477,7 +477,12 @@ export function getBgImageModifier(
                     return asyncResults.filter(Boolean).join('');
                 });
             }
-            return results.join('');
+            // Strip `, initial` suffix. This is some weird computed value by the browser
+            const combinedResult = results.join('');
+            if (combinedResult.endsWith(', initial')) {
+                return combinedResult.slice(0, -9);
+            }
+            return combinedResult;
         };
     } catch (err) {
         logWarn(`Unable to parse gradient ${value}`, err);

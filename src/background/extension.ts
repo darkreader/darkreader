@@ -43,7 +43,6 @@ export class Extension {
     private messenger: Messenger;
     private news: Newsmaker;
     private tabs: TabManager;
-    private user: UserStorage;
 
     private autoState: AutomationState = '';
     private wasEnabledOnLastCheck: boolean = null;
@@ -71,7 +70,6 @@ export class Extension {
             getTabMessage: this.getTabMessage,
             onColorSchemeChange: this.onColorSchemeChange,
         });
-        this.user = new UserStorage();
         this.startBarrier = new PromiseBarrier();
         this.stateManager = new StateManager<ExtensionState>(Extension.LOCAL_STORAGE_KEY, this, {
             autoState: '',
@@ -122,18 +120,18 @@ export class Extension {
             this.autoState === 'turn-on' ||
             this.autoState === 'scheme-dark' ||
             this.autoState === 'scheme-light' ||
-            (this.autoState === '' && this.user.settings.enabled)
+            (this.autoState === '' && UserStorage.settings.enabled)
         );
     }
 
     private updateAutoState() {
-        const {mode, behavior, enabled} = this.user.settings.automation;
+        const {mode, behavior, enabled} = UserStorage.settings.automation;
 
         let isAutoDark: boolean;
         let nextCheck: number;
         switch (mode) {
             case 'time': {
-                const {time} = this.user.settings;
+                const {time} = UserStorage.settings;
                 isAutoDark = isInTimeIntervalLocal(time.activation, time.deactivation);
                 nextCheck = nextTimeInterval(time.activation, time.deactivation);
                 break;
@@ -157,7 +155,7 @@ export class Extension {
                 }
                 break;
             case 'location': {
-                const {latitude, longitude} = this.user.settings.location;
+                const {latitude, longitude} = UserStorage.settings.location;
                 if (latitude != null && longitude != null) {
                     isAutoDark = isNightAtLocation(latitude, longitude);
                     nextCheck = nextTimeChangeAtLocation(latitude, longitude);
@@ -191,10 +189,10 @@ export class Extension {
         await Promise.all([
             ConfigManager.load({local: true}),
             this.MV3syncSystemColorStateManager(null),
-            this.user.loadSettings()
+            UserStorage.loadSettings()
         ]);
 
-        if (this.user.settings.enableContextMenus && !this.registeredContextMenus) {
+        if (UserStorage.settings.enableContextMenus && !this.registeredContextMenus) {
             chrome.permissions.contains({permissions: ['contextMenus']}, (permitted) => {
                 if (permitted) {
                     this.registerContextMenus();
@@ -203,20 +201,20 @@ export class Extension {
                 }
             });
         }
-        if (this.user.settings.syncSitesFixes) {
+        if (UserStorage.settings.syncSitesFixes) {
             await ConfigManager.load({local: false});
         }
         this.updateAutoState();
         this.onAppToggle();
-        logInfo('loaded', this.user.settings);
+        logInfo('loaded', UserStorage.settings);
 
         if (isThunderbird) {
             this.tabs.registerMailDisplayScript();
         } else {
-            this.tabs.updateContentScript({runOnProtectedPages: this.user.settings.enableForProtectedPages});
+            this.tabs.updateContentScript({runOnProtectedPages: UserStorage.settings.enableForProtectedPages});
         }
 
-        this.user.settings.fetchNews && this.news.subscribe();
+        UserStorage.settings.fetchNews && this.news.subscribe();
         this.startBarrier.resolve();
     }
 
@@ -252,14 +250,14 @@ export class Extension {
                 logInfo('Toggle command entered');
                 this.changeSettings({
                     enabled: !this.isExtensionSwitchedOn(),
-                    automation: {...this.user.settings.automation, ...{enable: false}},
+                    automation: {...UserStorage.settings.automation, ...{enable: false}},
                 });
                 break;
             case 'addSite': {
                 logInfo('Add Site command entered');
                 const url = frameURL || await this.tabs.getActiveTabURL();
                 if (isPDF(url)) {
-                    this.changeSettings({enableForPDF: !this.user.settings.enableForPDF});
+                    this.changeSettings({enableForPDF: !UserStorage.settings.enableForPDF});
                 } else {
                     this.toggleActiveTab();
                 }
@@ -268,7 +266,7 @@ export class Extension {
             case 'switchEngine': {
                 logInfo('Switch Engine command entered');
                 const engines = Object.values(ThemeEngines);
-                const index = engines.indexOf(this.user.settings.theme.engine);
+                const index = engines.indexOf(UserStorage.settings.theme.engine);
                 const next = engines[(index + 1) % engines.length];
                 this.setTheme({engine: next});
                 break;
@@ -351,7 +349,7 @@ export class Extension {
         return {
             isEnabled: this.isExtensionSwitchedOn(),
             isReady: true,
-            settings: this.user.settings,
+            settings: UserStorage.settings,
             news,
             shortcuts,
             colorScheme: ConfigManager.COLOR_SCHEMES_RAW,
@@ -373,7 +371,7 @@ export class Extension {
         const url = await this.tabs.getActiveTabURL();
         const info = this.getURLInfo(url);
         info.isInjected = await this.tabs.canAccessActiveTab();
-        if (this.user.settings.detectDarkTheme) {
+        if (UserStorage.settings.detectDarkTheme) {
             info.isDarkThemeDetected = await this.tabs.isActiveTabDarkThemeDetected();
         }
         return info;
@@ -396,8 +394,8 @@ export class Extension {
 
     private async loadData() {
         const promises = [this.stateManager.loadState()];
-        if (!this.user.settings) {
-            promises.push(this.user.loadSettings());
+        if (!UserStorage.settings) {
+            promises.push(UserStorage.loadSettings());
         }
         await Promise.all(promises);
     }
@@ -408,7 +406,7 @@ export class Extension {
             this.wasLastColorSchemeDark = isDark;
         }
         await this.loadData();
-        if (this.user.settings.automation.mode !== 'system') {
+        if (UserStorage.settings.automation.mode !== 'system') {
             return;
         }
         this.handleAutomationCheck();
@@ -433,39 +431,39 @@ export class Extension {
     };
 
     changeSettings($settings: Partial<UserSettings>, onlyUpdateActiveTab = false) {
-        const prev = {...this.user.settings};
+        const prev = {...UserStorage.settings};
 
-        this.user.set($settings);
+        UserStorage.set($settings);
 
         if (
-            (prev.enabled !== this.user.settings.enabled) ||
-            (prev.automation.enabled !== this.user.settings.automation.enabled) ||
-            (prev.automation.mode !== this.user.settings.automation.mode) ||
-            (prev.automation.behavior !== this.user.settings.automation.behavior) ||
-            (prev.time.activation !== this.user.settings.time.activation) ||
-            (prev.time.deactivation !== this.user.settings.time.deactivation) ||
-            (prev.location.latitude !== this.user.settings.location.latitude) ||
-            (prev.location.longitude !== this.user.settings.location.longitude)
+            (prev.enabled !== UserStorage.settings.enabled) ||
+            (prev.automation.enabled !== UserStorage.settings.automation.enabled) ||
+            (prev.automation.mode !== UserStorage.settings.automation.mode) ||
+            (prev.automation.behavior !== UserStorage.settings.automation.behavior) ||
+            (prev.time.activation !== UserStorage.settings.time.activation) ||
+            (prev.time.deactivation !== UserStorage.settings.time.deactivation) ||
+            (prev.location.latitude !== UserStorage.settings.location.latitude) ||
+            (prev.location.longitude !== UserStorage.settings.location.longitude)
         ) {
             this.updateAutoState();
             this.onAppToggle();
         }
-        if (prev.syncSettings !== this.user.settings.syncSettings) {
-            this.user.saveSyncSetting(this.user.settings.syncSettings);
+        if (prev.syncSettings !== UserStorage.settings.syncSettings) {
+            UserStorage.saveSyncSetting(UserStorage.settings.syncSettings);
         }
         if (this.isExtensionSwitchedOn() && $settings.changeBrowserTheme != null && prev.changeBrowserTheme !== $settings.changeBrowserTheme) {
             if ($settings.changeBrowserTheme) {
-                setWindowTheme(this.user.settings.theme);
+                setWindowTheme(UserStorage.settings.theme);
             } else {
                 resetWindowTheme();
             }
         }
-        if (prev.fetchNews !== this.user.settings.fetchNews) {
-            this.user.settings.fetchNews ? this.news.subscribe() : this.news.unSubscribe();
+        if (prev.fetchNews !== UserStorage.settings.fetchNews) {
+            UserStorage.settings.fetchNews ? this.news.subscribe() : this.news.unSubscribe();
         }
 
-        if (prev.enableContextMenus !== this.user.settings.enableContextMenus) {
-            if (this.user.settings.enableContextMenus) {
+        if (prev.enableContextMenus !== UserStorage.settings.enableContextMenus) {
+            if (UserStorage.settings.enableContextMenus) {
                 this.registerContextMenus();
             } else {
                 chrome.contextMenus.removeAll();
@@ -475,10 +473,10 @@ export class Extension {
     }
 
     private setTheme($theme: Partial<FilterConfig>) {
-        this.user.set({theme: {...this.user.settings.theme, ...$theme}});
+        UserStorage.set({theme: {...UserStorage.settings.theme, ...$theme}});
 
-        if (this.isExtensionSwitchedOn() && this.user.settings.changeBrowserTheme) {
-            setWindowTheme(this.user.settings.theme);
+        if (this.isExtensionSwitchedOn() && UserStorage.settings.changeBrowserTheme) {
+            setWindowTheme(UserStorage.settings.theme);
         }
 
         this.onSettingsChanged();
@@ -490,7 +488,7 @@ export class Extension {
     }
 
     private async toggleActiveTab() {
-        const settings = this.user.settings;
+        const settings = UserStorage.settings;
         const tab = await this.getActiveTabInfo();
         const {url} = tab;
         const isInDarkList = isURLInList(url, ConfigManager.DARK_SITES);
@@ -526,12 +524,12 @@ export class Extension {
     private onAppToggle() {
         if (this.isExtensionSwitchedOn()) {
             IconManager.setActive();
-            if (this.user.settings.changeBrowserTheme) {
-                setWindowTheme(this.user.settings.theme);
+            if (UserStorage.settings.changeBrowserTheme) {
+                setWindowTheme(UserStorage.settings.theme);
             }
         } else {
             IconManager.setInactive();
-            if (this.user.settings.changeBrowserTheme) {
+            if (UserStorage.settings.changeBrowserTheme) {
                 resetWindowTheme();
             }
         }
@@ -571,7 +569,7 @@ export class Extension {
     }
 
     private getTabMessage = (url: string, frameURL: string): TabData => {
-        const settings = this.user.settings;
+        const settings = UserStorage.settings;
         const urlInfo = this.getURLInfo(url);
         if (this.isExtensionSwitchedOn() && isURLEnabled(url, settings, urlInfo)) {
             const custom = settings.customThemes.find(({url: urlList}) => isURLInList(url, urlList));
@@ -629,7 +627,7 @@ export class Extension {
                     };
                 }
                 case ThemeEngines.dynamicTheme: {
-                    const fixes = getDynamicThemeFixesFor(url, frameURL, ConfigManager.DYNAMIC_THEME_FIXES_RAW, ConfigManager.DYNAMIC_THEME_FIXES_INDEX, this.user.settings.enableForPDF);
+                    const fixes = getDynamicThemeFixesFor(url, frameURL, ConfigManager.DYNAMIC_THEME_FIXES_RAW, ConfigManager.DYNAMIC_THEME_FIXES_INDEX, UserStorage.settings.enableForPDF);
                     return {
                         type: MessageType.BG_ADD_DYNAMIC_THEME,
                         data: {
@@ -659,7 +657,7 @@ export class Extension {
     //          User settings
 
     private async saveUserSettings() {
-        await this.user.saveSettings();
-        logInfo('saved', this.user.settings);
+        await UserStorage.saveSettings();
+        logInfo('saved', UserStorage.settings);
     }
 }

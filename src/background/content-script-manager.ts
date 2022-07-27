@@ -7,7 +7,7 @@ enum ContentScriptManagerState {
     REGISTERING,
     REGISTERED,
     NOTREGISTERED,
-};
+}
 
 export default class ContentScriptManager {
     /**
@@ -77,7 +77,7 @@ export default class ContentScriptManager {
                         ], resolve);
                     }
                 }
-        ));
+            ));
     }
 
     static async unregisterScripts() {

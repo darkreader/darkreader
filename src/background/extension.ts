@@ -23,6 +23,7 @@ import {logInfo, logWarn} from '../utils/log';
 import {PromiseBarrier} from '../utils/promise-barrier';
 import {StateManager} from '../utils/state-manager';
 import {debounce} from '../utils/debounce';
+import ContentScriptManager from './content-script-manager';
 
 type AutomationState = 'turn-on' | 'turn-off' | 'scheme-dark' | 'scheme-light' | '';
 
@@ -513,11 +514,17 @@ export class Extension {
 
     private onAppToggle() {
         if (this.isExtensionSwitchedOn()) {
+            if (__MV3__) {
+                ContentScriptManager.registerScripts();
+            }
             IconManager.setActive();
             if (UserStorage.settings.changeBrowserTheme) {
                 setWindowTheme(UserStorage.settings.theme);
             }
         } else {
+            if (__MV3__) {
+                ContentScriptManager.unregisterScripts();
+            }
             IconManager.setInactive();
             if (UserStorage.settings.changeBrowserTheme) {
                 resetWindowTheme();

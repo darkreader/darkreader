@@ -41,16 +41,16 @@ interface Config {
 }
 
 export default class ConfigManager {
-    DARK_SITES?: string[];
-    DYNAMIC_THEME_FIXES_INDEX?: SitePropsIndex<DynamicThemeFix>;
-    DYNAMIC_THEME_FIXES_RAW?: string;
-    INVERSION_FIXES_INDEX?: SitePropsIndex<InversionFix>;
-    INVERSION_FIXES_RAW?: string;
-    STATIC_THEMES_INDEX?: SitePropsIndex<StaticTheme>;
-    STATIC_THEMES_RAW?: string;
-    COLOR_SCHEMES_RAW?: ParsedColorSchemeConfig;
+    static DARK_SITES?: string[];
+    static DYNAMIC_THEME_FIXES_INDEX?: SitePropsIndex<DynamicThemeFix>;
+    static DYNAMIC_THEME_FIXES_RAW?: string;
+    static INVERSION_FIXES_INDEX?: SitePropsIndex<InversionFix>;
+    static INVERSION_FIXES_RAW?: string;
+    static STATIC_THEMES_INDEX?: SitePropsIndex<StaticTheme>;
+    static STATIC_THEMES_RAW?: string;
+    static COLOR_SCHEMES_RAW?: ParsedColorSchemeConfig;
 
-    raw = {
+    static raw = {
         darkSites: null as string,
         dynamicThemeFixes: null as string,
         inversionFixes: null as string,
@@ -58,14 +58,14 @@ export default class ConfigManager {
         colorSchemes: null as string,
     };
 
-    overrides = {
+    static overrides = {
         darkSites: null as string,
         dynamicThemeFixes: null as string,
         inversionFixes: null as string,
         staticThemes: null as string,
     };
 
-    private async loadConfig({
+    private static async loadConfig({
         name,
         local,
         localURL,
@@ -89,7 +89,7 @@ export default class ConfigManager {
         return $config;
     }
 
-    private async loadColorSchemes({local}: Config) {
+    private static async loadColorSchemes({local}: Config) {
         const $config = await this.loadConfig({
             name: 'Color Schemes',
             local,
@@ -100,7 +100,7 @@ export default class ConfigManager {
         this.handleColorSchemes();
     }
 
-    private async loadDarkSites({local}: Config) {
+    private static async loadDarkSites({local}: Config) {
         const sites = await this.loadConfig({
             name: 'Dark Sites',
             local,
@@ -111,7 +111,7 @@ export default class ConfigManager {
         this.handleDarkSites();
     }
 
-    private async loadDynamicThemeFixes({local}: Config) {
+    private static async loadDynamicThemeFixes({local}: Config) {
         const fixes = await this.loadConfig({
             name: 'Dynamic Theme Fixes',
             local,
@@ -122,7 +122,7 @@ export default class ConfigManager {
         this.handleDynamicThemeFixes();
     }
 
-    private async loadInversionFixes({local}: Config) {
+    private static async loadInversionFixes({local}: Config) {
         const fixes = await this.loadConfig({
             name: 'Inversion Fixes',
             local,
@@ -133,7 +133,7 @@ export default class ConfigManager {
         this.handleInversionFixes();
     }
 
-    private async loadStaticThemes({local}: Config) {
+    private static async loadStaticThemes({local}: Config) {
         const themes = await this.loadConfig({
             name: 'Static Themes',
             local,
@@ -144,7 +144,7 @@ export default class ConfigManager {
         this.handleStaticThemes();
     }
 
-    async load(config: Config) {
+    static async load(config: Config) {
         await Promise.all([
             this.loadColorSchemes(config),
             this.loadDarkSites(config),
@@ -154,7 +154,7 @@ export default class ConfigManager {
         ]).catch((err) => console.error('Fatality', err));
     }
 
-    private handleColorSchemes() {
+    private static handleColorSchemes() {
         const $config = this.raw.colorSchemes;
         const {result, error} = ParseColorSchemeConfig($config);
         if (error) {
@@ -165,24 +165,24 @@ export default class ConfigManager {
         this.COLOR_SCHEMES_RAW = result;
     }
 
-    private handleDarkSites() {
+    private static handleDarkSites() {
         const $sites = this.overrides.darkSites || this.raw.darkSites;
         this.DARK_SITES = parseArray($sites);
     }
 
-    handleDynamicThemeFixes() {
+    static handleDynamicThemeFixes() {
         const $fixes = this.overrides.dynamicThemeFixes || this.raw.dynamicThemeFixes;
         this.DYNAMIC_THEME_FIXES_INDEX = indexSitesFixesConfig<DynamicThemeFix>($fixes);
         this.DYNAMIC_THEME_FIXES_RAW = $fixes;
     }
 
-    handleInversionFixes() {
+    static handleInversionFixes() {
         const $fixes = this.overrides.inversionFixes || this.raw.inversionFixes;
         this.INVERSION_FIXES_INDEX = indexSitesFixesConfig<InversionFix>($fixes);
         this.INVERSION_FIXES_RAW = $fixes;
     }
 
-    handleStaticThemes() {
+    static handleStaticThemes() {
         const $themes = this.overrides.staticThemes || this.raw.staticThemes;
         this.STATIC_THEMES_INDEX = indexSitesFixesConfig<StaticTheme>($themes);
         this.STATIC_THEMES_RAW = $themes;

@@ -2,7 +2,7 @@ import {logInfo, logWarn} from '../utils/log';
 import {parseInversionFixes, formatInversionFixes} from '../generators/css-filter';
 import {parseDynamicThemeFixes, formatDynamicThemeFixes} from '../generators/dynamic-theme';
 import {parseStaticThemes, formatStaticThemes} from '../generators/static-theme';
-import type ConfigManager from './config-manager';
+import ConfigManager from './config-manager';
 import {isFirefox} from '../utils/platform';
 
 // TODO(bershanskiy): Add support for reads/writes of multiple keys at once for performance.
@@ -205,11 +205,10 @@ class TempStorage implements DevToolsStorage {
 }
 
 export default class DevTools {
-    private config: ConfigManager;
     private onChange: () => void;
     private store: DevToolsStorage;
 
-    constructor(config: ConfigManager, onChange: () => void) {
+    constructor(onChange: () => void) {
         // Firefox don't seem to like using storage.local to store big data on the background-extension.
         // Disabling it for now and defaulting back to localStorage.
         if (typeof chrome.storage.local !== 'undefined' && chrome.storage.local !== null && !isFirefox) {
@@ -219,7 +218,6 @@ export default class DevTools {
         } else {
             this.store = new TempStorage();
         }
-        this.config = config;
         this.loadConfigOverrides();
         this.onChange = onChange;
     }
@@ -244,9 +242,9 @@ export default class DevTools {
             this.getSavedInversionFixes(),
             this.getSavedStaticThemes(),
         ]);
-        this.config.overrides.dynamicThemeFixes = dynamicThemeFixes || null;
-        this.config.overrides.inversionFixes = inversionFixes || null;
-        this.config.overrides.staticThemes = staticThemes || null;
+        ConfigManager.overrides.dynamicThemeFixes = dynamicThemeFixes || null;
+        ConfigManager.overrides.inversionFixes = inversionFixes || null;
+        ConfigManager.overrides.staticThemes = staticThemes || null;
     }
 
     private async getSavedDynamicThemeFixes() {
@@ -263,22 +261,22 @@ export default class DevTools {
 
     async getDynamicThemeFixesText() {
         const $fixes = await this.getSavedDynamicThemeFixes();
-        const fixes = $fixes ? parseDynamicThemeFixes($fixes) : parseDynamicThemeFixes(this.config.DYNAMIC_THEME_FIXES_RAW);
+        const fixes = $fixes ? parseDynamicThemeFixes($fixes) : parseDynamicThemeFixes(ConfigManager.DYNAMIC_THEME_FIXES_RAW);
         return formatDynamicThemeFixes(fixes);
     }
 
     resetDynamicThemeFixes() {
         this.store.remove(DevTools.KEY_DYNAMIC);
-        this.config.overrides.dynamicThemeFixes = null;
-        this.config.handleDynamicThemeFixes();
+        ConfigManager.overrides.dynamicThemeFixes = null;
+        ConfigManager.handleDynamicThemeFixes();
         this.onChange();
     }
 
     applyDynamicThemeFixes(text: string) {
         try {
             const formatted = formatDynamicThemeFixes(parseDynamicThemeFixes(text));
-            this.config.overrides.dynamicThemeFixes = formatted;
-            this.config.handleDynamicThemeFixes();
+            ConfigManager.overrides.dynamicThemeFixes = formatted;
+            ConfigManager.handleDynamicThemeFixes();
             this.saveDynamicThemeFixes(formatted);
             this.onChange();
             return null;
@@ -301,22 +299,22 @@ export default class DevTools {
 
     async getInversionFixesText() {
         const $fixes = await this.getSavedInversionFixes();
-        const fixes = $fixes ? parseInversionFixes($fixes) : parseInversionFixes(this.config.INVERSION_FIXES_RAW);
+        const fixes = $fixes ? parseInversionFixes($fixes) : parseInversionFixes(ConfigManager.INVERSION_FIXES_RAW);
         return formatInversionFixes(fixes);
     }
 
     resetInversionFixes() {
         this.store.remove(DevTools.KEY_FILTER);
-        this.config.overrides.inversionFixes = null;
-        this.config.handleInversionFixes();
+        ConfigManager.overrides.inversionFixes = null;
+        ConfigManager.handleInversionFixes();
         this.onChange();
     }
 
     applyInversionFixes(text: string) {
         try {
             const formatted = formatInversionFixes(parseInversionFixes(text));
-            this.config.overrides.inversionFixes = formatted;
-            this.config.handleInversionFixes();
+            ConfigManager.overrides.inversionFixes = formatted;
+            ConfigManager.handleInversionFixes();
             this.saveInversionFixes(formatted);
             this.onChange();
             return null;
@@ -339,22 +337,22 @@ export default class DevTools {
 
     async getStaticThemesText() {
         const $themes = await this.getSavedStaticThemes();
-        const themes = $themes ? parseStaticThemes($themes) : parseStaticThemes(this.config.STATIC_THEMES_RAW);
+        const themes = $themes ? parseStaticThemes($themes) : parseStaticThemes(ConfigManager.STATIC_THEMES_RAW);
         return formatStaticThemes(themes);
     }
 
     resetStaticThemes() {
         this.store.remove(DevTools.KEY_STATIC);
-        this.config.overrides.staticThemes = null;
-        this.config.handleStaticThemes();
+        ConfigManager.overrides.staticThemes = null;
+        ConfigManager.handleStaticThemes();
         this.onChange();
     }
 
     applyStaticThemes(text: string) {
         try {
             const formatted = formatStaticThemes(parseStaticThemes(text));
-            this.config.overrides.staticThemes = formatted;
-            this.config.handleStaticThemes();
+            ConfigManager.overrides.staticThemes = formatted;
+            ConfigManager.handleStaticThemes();
             this.saveStaticThemes(formatted);
             this.onChange();
             return null;

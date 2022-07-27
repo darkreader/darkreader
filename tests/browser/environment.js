@@ -2,7 +2,7 @@ import fs from 'fs/promises';
 import JestNodeEnvironment from 'jest-environment-node';
 import path from 'path';
 import puppeteer from 'puppeteer-core';
-import webExt from 'web-ext';
+import {cmd} from 'web-ext';
 import {WebSocketServer} from 'ws';
 import {generateHTMLCoverageReports} from './coverage.js';
 import {getChromePath, getFirefoxPath, chromeExtensionDebugDir, firefoxExtensionDebugDir} from './paths.js';
@@ -74,7 +74,7 @@ class PuppeteerEnvironment extends JestNodeEnvironment.TestEnvironment {
 
     async launchFirefox() {
         const firefoxPath = await getFirefoxPath();
-        const webExtInstance = await webExt.cmd.run({
+        const webExtInstance = await cmd.run({
             sourceDir: firefoxExtensionDebugDir,
             firefox: firefoxPath,
             args: ['--remote-debugging-port', FIREFOX_DEVTOOLS_PORT],

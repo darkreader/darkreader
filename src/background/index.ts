@@ -27,10 +27,6 @@ declare const __MV3__: number;
 const WATCH = __WATCH__;
 
 if (__MV3__) {
-    // HACK: Force browser to rewive background context on startup (non-incognito only)
-    // so that it can set the appropriate icon.
-    chrome.runtime.onStartup.addListener(() => { /* noop */ });
-
     chrome.runtime.onInstalled.addListener(async () => {
         try {
             (chrome.scripting as any).unregisterContentScripts(() => {

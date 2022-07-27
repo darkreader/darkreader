@@ -515,7 +515,7 @@ export class Extension {
     private onAppToggle() {
         if (this.isExtensionSwitchedOn()) {
             if (__MV3__) {
-                ContentScriptManager.registerScripts();
+                ContentScriptManager.registerScripts(() => this.tabs.updateContentScript({runOnProtectedPages: UserStorage.settings.enableForProtectedPages}));
             }
             IconManager.setActive();
             if (UserStorage.settings.changeBrowserTheme) {

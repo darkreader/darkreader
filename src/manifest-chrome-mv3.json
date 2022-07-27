@@ -18,7 +18,6 @@
                 "https://example.com/doesNotExist"
             ],
             "js": [
-                "inject/injector.js",
                 "inject/fallback.js",
                 "inject/index.js"
             ],

@@ -546,11 +546,6 @@ export class Extension {
         this.stateManager.saveState();
     }
 
-    private onRemoteSettingsChange() {
-        // TODO: Requires proper handling and more testing
-        // to prevent cycling across instances.
-    }
-
     //----------------------
     //
     // Add/remove css to tab

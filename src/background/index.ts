@@ -20,7 +20,6 @@ declare const __DEBUG__: boolean;
 declare const __WATCH__: boolean;
 declare const __PORT__: number;
 declare const __MV3__: number;
-const WATCH = __WATCH__;
 
 if (__MV3__) {
     chrome.runtime.onInstalled.addListener(async () => {
@@ -46,7 +45,7 @@ if (__MV3__) {
     });
 }
 
-if (WATCH) {
+if (__WATCH__) {
     const PORT = __PORT__;
     const ALARM_NAME = 'socket-close';
     const PING_INTERVAL_IN_MINUTES = 1 / 60;

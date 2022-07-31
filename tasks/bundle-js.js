@@ -53,6 +53,12 @@ const jsEntries = [
         reloadType: reload.UI,
     },
     {
+        src: 'src/ui/devtools/loader.ts',
+        dest: 'ui/devtools/loader.js',
+        reloadType: reload.UI,
+        platform: PLATFORM.CHROME_MV3,
+    },
+    {
         src: 'src/ui/popup/index.tsx',
         dest: 'ui/popup/index.js',
         reloadType: reload.UI,

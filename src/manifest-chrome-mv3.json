@@ -26,6 +26,7 @@
             "match_about_blank": true
         }
     ],
+    "devtools_page": "ui/devtools/loader.html",
     "permissions": [
         "alarms",
         "fontSettings",

@@ -9,6 +9,7 @@
 - Correctly handle empty URL's in `background-image` property.
 - Make parsing colors use cache.
 - Only send updates to the affected tabs when toggling sites.
+- Display "Dark Reader" panel in browser DevTools
 
 ## 4.9.52 (June 28, 2022)
 

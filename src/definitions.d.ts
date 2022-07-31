@@ -28,6 +28,7 @@ export interface TabData {
 
 export interface ExtensionActions {
     changeSettings(settings: Partial<UserSettings>): void;
+    changeDevTollsPanelSettings(settings: DevToolsPanelSettings): void;
     setTheme(theme: Partial<FilterConfig>): void;
     setShortcut(command: string, shortcut: string): void;
     toggleActiveTab(): void;
@@ -44,6 +45,14 @@ export interface ExtensionActions {
 
 export interface ExtWrapper {
     data: ExtensionData;
+    actions: ExtensionActions;
+}
+
+export interface DevToolsExtWrapper {
+    data: {
+        extensionData: ExtensionData;
+        devToolsPanelSettings: DevToolsPanelSettings;
+    };
     actions: ExtensionActions;
 }
 
@@ -110,6 +119,10 @@ export interface UserSettings {
     enableForProtectedPages: boolean;
     enableContextMenus: boolean;
     detectDarkTheme: boolean;
+}
+
+export interface DevToolsPanelSettings {
+    enabled: boolean;
 }
 
 export interface TimeSettings {

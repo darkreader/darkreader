@@ -335,7 +335,8 @@ export class Extension {
             hasCustomDynamicFixes,
             hasCustomFilterFixes,
             hasCustomStaticFixes,
-            activeTab
+            activeTab,
+            colorScheme,
         ] = await Promise.all([
             Newsmaker.getLatest(),
             this.getShortcuts(),
@@ -345,7 +346,8 @@ export class Extension {
             this.devtools.hasCustomDynamicThemeFixes(),
             this.devtools.hasCustomFilterFixes(),
             this.devtools.hasCustomStaticFixes(),
-            this.getActiveTabInfo()
+            this.getActiveTabInfo(),
+            ConfigManager.getColorSchemesRaw(),
         ]);
         return {
             isEnabled: this.isExtensionSwitchedOn(),
@@ -353,7 +355,7 @@ export class Extension {
             settings: UserStorage.settings,
             news,
             shortcuts,
-            colorScheme: ConfigManager.COLOR_SCHEMES_RAW,
+            colorScheme,
             forcedScheme: this.autoState === 'scheme-dark' ? 'dark' : this.autoState === 'scheme-light' ? 'light' : null,
             devtools: {
                 dynamicFixesText,
@@ -482,7 +484,7 @@ export class Extension {
         const settings = UserStorage.settings;
         const tab = await this.getActiveTabInfo();
         const {url} = tab;
-        const isInDarkList = isURLInList(url, ConfigManager.DARK_SITES);
+        const isInDarkList = ConfigManager.isURLInDarkList(url);
         const host = getURLHostOrProtocol(url);
 
         function getToggledList(sourceList: string[]) {
@@ -553,8 +555,7 @@ export class Extension {
     //----------------------
 
     private getURLInfo(url: string): TabInfo {
-        const {DARK_SITES} = ConfigManager;
-        const isInDarkList = isURLInList(url, DARK_SITES);
+        const isInDarkList = ConfigManager.isURLInDarkList(url);
         const isProtected = !canInjectScript(url);
         return {
             url,
@@ -584,20 +585,22 @@ export class Extension {
             The theme(${custom ? 'custom' : preset ? 'preset' : 'global'} settings) used is: ${JSON.stringify(theme)}`);
             switch (theme.engine) {
                 case ThemeEngines.cssFilter: {
+                    const {raw, index} = ConfigManager.prepareInversionFixes();
                     return {
                         type: MessageType.BG_ADD_CSS_FILTER,
                         data: {
-                            css: createCSSFilterStylesheet(theme, url, frameURL, ConfigManager.INVERSION_FIXES_RAW, ConfigManager.INVERSION_FIXES_INDEX),
+                            css: createCSSFilterStylesheet(theme, url, frameURL, raw, index),
                             detectDarkTheme,
                         },
                     };
                 }
                 case ThemeEngines.svgFilter: {
+                    const {raw, index} = ConfigManager.prepareInversionFixes();
                     if (isFirefox) {
                         return {
                             type: MessageType.BG_ADD_CSS_FILTER,
                             data: {
-                                css: createSVGFilterStylesheet(theme, url, frameURL, ConfigManager.INVERSION_FIXES_RAW, ConfigManager.INVERSION_FIXES_INDEX),
+                                css: createSVGFilterStylesheet(theme, url, frameURL, raw, index),
                                 detectDarkTheme,
                             },
                         };
@@ -605,7 +608,7 @@ export class Extension {
                     return {
                         type: MessageType.BG_ADD_SVG_FILTER,
                         data: {
-                            css: createSVGFilterStylesheet(theme, url, frameURL, ConfigManager.INVERSION_FIXES_RAW, ConfigManager.INVERSION_FIXES_INDEX),
+                            css: createSVGFilterStylesheet(theme, url, frameURL, raw, index),
                             svgMatrix: getSVGFilterMatrixValue(theme),
                             svgReverseMatrix: getSVGReverseFilterMatrixValue(),
                             detectDarkTheme,
@@ -613,18 +616,20 @@ export class Extension {
                     };
                 }
                 case ThemeEngines.staticTheme: {
+                    const {raw, index} = ConfigManager.prepareStaticThemes();
                     return {
                         type: MessageType.BG_ADD_STATIC_THEME,
                         data: {
                             css: theme.stylesheet && theme.stylesheet.trim() ?
                                 theme.stylesheet :
-                                createStaticStylesheet(theme, url, frameURL, ConfigManager.STATIC_THEMES_RAW, ConfigManager.STATIC_THEMES_INDEX),
+                                createStaticStylesheet(theme, url, frameURL, raw, index),
                             detectDarkTheme: settings.detectDarkTheme,
                         },
                     };
                 }
                 case ThemeEngines.dynamicTheme: {
-                    const fixes = getDynamicThemeFixesFor(url, frameURL, ConfigManager.DYNAMIC_THEME_FIXES_RAW, ConfigManager.DYNAMIC_THEME_FIXES_INDEX, UserStorage.settings.enableForPDF);
+                    const {raw, index} = ConfigManager.prepareDynamicThemeFixes();
+                    const fixes = getDynamicThemeFixesFor(url, frameURL, raw, index, UserStorage.settings.enableForPDF);
                     return {
                         type: MessageType.BG_ADD_DYNAMIC_THEME,
                         data: {

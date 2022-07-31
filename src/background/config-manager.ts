@@ -8,6 +8,7 @@ import type {ParsedColorSchemeConfig} from '../utils/colorscheme-parser';
 import {ParseColorSchemeConfig} from '../utils/colorscheme-parser';
 import {logWarn} from '../utils/log';
 import {DEFAULT_COLORSCHEME} from '../defaults';
+import {isURLInList} from '../utils/url';
 
 const CONFIG_URLs = {
     darkSites: {
@@ -40,17 +41,18 @@ interface Config {
     remoteURL?: string;
 }
 
+// TODO: remove duplication of data
 export default class ConfigManager {
-    static DARK_SITES?: string[];
-    static DYNAMIC_THEME_FIXES_INDEX?: SitePropsIndex<DynamicThemeFix>;
-    static DYNAMIC_THEME_FIXES_RAW?: string;
-    static INVERSION_FIXES_INDEX?: SitePropsIndex<InversionFix>;
-    static INVERSION_FIXES_RAW?: string;
-    static STATIC_THEMES_INDEX?: SitePropsIndex<StaticTheme>;
-    static STATIC_THEMES_RAW?: string;
-    static COLOR_SCHEMES_RAW?: ParsedColorSchemeConfig;
+    private static DARK_SITES?: string[];
+    private static DYNAMIC_THEME_FIXES_INDEX?: SitePropsIndex<DynamicThemeFix>;
+    private static DYNAMIC_THEME_FIXES_RAW?: string;
+    private static INVERSION_FIXES_INDEX?: SitePropsIndex<InversionFix>;
+    private static INVERSION_FIXES_RAW?: string;
+    private static STATIC_THEMES_INDEX?: SitePropsIndex<StaticTheme>;
+    private static STATIC_THEMES_RAW?: string;
+    private static COLOR_SCHEMES_RAW?: ParsedColorSchemeConfig;
 
-    static raw = {
+    private static raw = {
         darkSites: null as string,
         dynamicThemeFixes: null as string,
         inversionFixes: null as string,
@@ -186,5 +188,47 @@ export default class ConfigManager {
         const $themes = this.overrides.staticThemes || this.raw.staticThemes;
         this.STATIC_THEMES_INDEX = indexSitesFixesConfig<StaticTheme>($themes);
         this.STATIC_THEMES_RAW = $themes;
+    }
+
+    // TODO: load all the data below only when needed
+    static isURLInDarkList(url: string): boolean {
+        return isURLInList(url, this.DARK_SITES);
+    }
+
+    static prepareInversionFixes() {
+        return {
+            raw: ConfigManager.INVERSION_FIXES_RAW,
+            index: ConfigManager.INVERSION_FIXES_INDEX,
+        };
+    }
+
+    static prepareStaticThemes() {
+        return {
+            raw: ConfigManager.STATIC_THEMES_RAW,
+            index: ConfigManager.STATIC_THEMES_INDEX,
+        };
+    }
+
+    static prepareDynamicThemeFixes() {
+        return {
+            raw: ConfigManager.DYNAMIC_THEME_FIXES_RAW,
+            index: ConfigManager.DYNAMIC_THEME_FIXES_INDEX,
+        };
+    }
+
+    static getRawInversionFixes() {
+        return ConfigManager.INVERSION_FIXES_RAW;
+    }
+
+    static getRawStaticThemes() {
+        return ConfigManager.STATIC_THEMES_RAW;
+    }
+
+    static getRawDynamicThemeFixes() {
+        return ConfigManager.DYNAMIC_THEME_FIXES_RAW;
+    }
+
+    static async getColorSchemesRaw() {
+        return ConfigManager.COLOR_SCHEMES_RAW;
     }
 }

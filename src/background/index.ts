@@ -9,10 +9,6 @@ import {logInfo} from '../utils/log';
 // Initialize extension
 const extension = new Extension();
 extension.start();
-if (chrome.commands) {
-    // Firefox Android does not support chrome.commands
-    chrome.commands.onCommand.addListener(async (command) => extension.onCommand(command as Command));
-}
 
 const welcome = `  /''''\\
  (0)==(0)

@@ -80,6 +80,11 @@ export class Extension {
 
         chrome.alarms.onAlarm.addListener(this.alarmListener);
 
+        if (chrome.commands) {
+            // Firefox Android does not support chrome.commands
+            chrome.commands.onCommand.addListener(async (command) => this.onCommand(command as Command));
+        }
+
         if (chrome.permissions.onRemoved) {
             chrome.permissions.onRemoved.addListener((permissions) => {
                 // As far as we know, this code is never actually run because there
@@ -277,7 +282,7 @@ export class Extension {
 
     // 75 is small enough to not notice it, and still catches when someone
     // is holding down a certain shortcut.
-    onCommand = debounce(75, this.onCommandInternal);
+    private onCommand = debounce(75, this.onCommandInternal);
 
     private registerContextMenus() {
         chrome.contextMenus.onClicked.addListener(async ({menuItemId, frameUrl, pageUrl}) =>

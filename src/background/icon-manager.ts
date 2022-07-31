@@ -2,8 +2,8 @@ import {isNonPersistent} from '../utils/migration';
 import {isThunderbird} from '../utils/platform';
 
 interface IconState {
-    text: string;
-    inactive: boolean;
+    badgeText: string;
+    active: boolean;
 }
 
 export default class IconManager {
@@ -18,30 +18,18 @@ export default class IconManager {
         },
     };
 
-    private static LOCAL_STORAGE_KEY_ICON = 'icon-off';
-    private static LOCAL_STORAGE_KEY_BADGE = 'icon-badge';
-
     private static iconState: IconState = {
-        text: '',
-        inactive: false,
+        badgeText: '',
+        active: true,
     };
 
     private static onStartup() {
-        chrome.storage.local.get([this.LOCAL_STORAGE_KEY_ICON, this.LOCAL_STORAGE_KEY_BADGE], (data) => {
-            const inactive: boolean = data[this.LOCAL_STORAGE_KEY_ICON];
-            const text: string = data[this.LOCAL_STORAGE_KEY_BADGE];
-            if (inactive) {
-                IconManager.iconState.inactive = true;
-                chrome.browserAction.setIcon({
-                    path: IconManager.ICON_PATHS.inactive,
-                });
-            }
-            if (text) {
-                IconManager.iconState.text = text;
-                chrome.browserAction.setBadgeBackgroundColor({color: '#e96c4c'});
-                chrome.browserAction.setBadgeText({text});
-            }
-        });
+        /**
+         * This empty listener invokes extension background if extension has non-default
+         * icon or badge. It is empty because all icon customizations will be initiated by
+         * Extension class.
+         * TODO: eventually, avoid running the whole Extension class on startup.
+         */
     }
 
     /**
@@ -52,17 +40,11 @@ export default class IconManager {
         if (!isNonPersistent) {
             return;
         }
-        // Note: values which are undefined are just removed from storage.
-        const storage = {
-            [this.LOCAL_STORAGE_KEY_BADGE]: IconManager.iconState.text || undefined,
-            [this.LOCAL_STORAGE_KEY_ICON]: IconManager.iconState.inactive || undefined,
-        }
-        if (IconManager.iconState.text !== '' || !IconManager.iconState.inactive) {
+        if (IconManager.iconState.badgeText !== '' || !IconManager.iconState.active) {
             chrome.runtime.onStartup.addListener(IconManager.onStartup);
         } else {
             chrome.runtime.onStartup.removeListener(IconManager.onStartup);
         }
-        chrome.storage.local.set(storage);
     }
 
     static setActive() {
@@ -70,7 +52,7 @@ export default class IconManager {
             // Fix for Firefox Android and Thunderbird.
             return;
         }
-        IconManager.iconState.inactive = false;
+        IconManager.iconState.active = true;
         chrome.browserAction.setIcon({
             path: IconManager.ICON_PATHS.active,
         });
@@ -82,7 +64,7 @@ export default class IconManager {
             // Fix for Firefox Android and Thunderbird.
             return;
         }
-        IconManager.iconState.inactive = true;
+        IconManager.iconState.active = false;
         chrome.browserAction.setIcon({
             path: IconManager.ICON_PATHS.inactive,
         });
@@ -90,14 +72,14 @@ export default class IconManager {
     }
 
     static showBadge(text: string) {
-        IconManager.iconState.text = text;
+        IconManager.iconState.badgeText = text;
         chrome.browserAction.setBadgeBackgroundColor({color: '#e96c4c'});
         chrome.browserAction.setBadgeText({text});
         IconManager.handleUpdate();
     }
 
     static hideBadge() {
-        IconManager.iconState.text = '';
+        IconManager.iconState.badgeText = '';
         chrome.browserAction.setBadgeText({text: ''});
         IconManager.handleUpdate();
     }

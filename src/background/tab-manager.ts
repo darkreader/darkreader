@@ -4,7 +4,7 @@ import type {FetchRequestParameters} from './utils/network';
 import type {Message} from '../definitions';
 import {isChromium, isFirefox, isThunderbird} from '../utils/platform';
 import {MessageType} from '../utils/message';
-import {logWarn} from '../utils/log';
+import {logWarn} from './utils/log';
 import {StateManager} from '../utils/state-manager';
 import {getURLHostOrProtocol} from '../utils/url';
 import {isPanel} from './utils/tab';
@@ -63,7 +63,7 @@ export default class TabManager {
     private static LOCAL_STORAGE_KEY = 'TabManager-state';
 
     static init({getConnectionMessage, onColorSchemeChange, getTabMessage}: TabManagerOptions) {
-        this.stateManager = new StateManager<TabManagerState>(TabManager.LOCAL_STORAGE_KEY, this, {tabs: {}, timestamp: 0});
+        this.stateManager = new StateManager<TabManagerState>(TabManager.LOCAL_STORAGE_KEY, this, {tabs: {}, timestamp: 0}, logWarn);
         this.tabs = {};
         this.getTabMessage = getTabMessage;
 

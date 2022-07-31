@@ -9,7 +9,7 @@ import {StateManagerImpl} from './state-manager-impl';
 export class StateManager<T> {
     private stateManager: StateManagerImpl<T> | null;
 
-    constructor(localStorageKey: string, parent: any, defaults: T){
+    constructor(localStorageKey: string, parent: any, defaults: T, logWarn: (log: string) => void){
         if (isNonPersistent()) {
             function addListener(listener: (data: T) => void) {
                 chrome.storage.onChanged.addListener((changes, areaName) => {
@@ -25,7 +25,8 @@ export class StateManager<T> {
                 parent,
                 defaults,
                 chrome.storage.local,
-                addListener
+                addListener,
+                logWarn,
             );
         }
     }

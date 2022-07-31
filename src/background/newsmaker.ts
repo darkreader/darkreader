@@ -3,7 +3,7 @@ import {getDurationInMinutes} from '../utils/time';
 import type {News} from '../definitions';
 import {readSyncStorage, readLocalStorage, writeSyncStorage, writeLocalStorage} from './utils/extension-api';
 import {StateManager} from '../utils/state-manager';
-import {logWarn} from '../utils/log';
+import {logWarn} from './utils/log';
 import IconManager from './icon-manager';
 
 interface NewsmakerState {
@@ -27,7 +27,7 @@ export default class Newsmaker {
             logWarn('Attempting to re-initialize Newsmaker. Doing nothing.');
             return;
         }
-        Newsmaker.stateManager = new StateManager<NewsmakerState>(Newsmaker.LOCAL_STORAGE_KEY, this, {latest: [], latestTimestamp: null});
+        Newsmaker.stateManager = new StateManager<NewsmakerState>(Newsmaker.LOCAL_STORAGE_KEY, this, {latest: [], latestTimestamp: null}, logWarn);
         Newsmaker.latest = [];
         Newsmaker.latestTimestamp = null;
     }

@@ -1,4 +1,4 @@
-import {logInfo, logWarn} from '../utils/log';
+import {logInfo, logWarn} from './utils/log';
 import {parseInversionFixes, formatInversionFixes} from '../generators/css-filter';
 import {parseDynamicThemeFixes, formatDynamicThemeFixes} from '../generators/dynamic-theme';
 import {parseStaticThemes, formatStaticThemes} from '../generators/static-theme';

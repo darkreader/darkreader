@@ -19,7 +19,7 @@ import type {ExtensionData, FilterConfig, Shortcuts, UserSettings, TabInfo, TabD
 import {isSystemDarkModeEnabled, runColorSchemeChangeDetector} from '../utils/media-query';
 import {isFirefox, isThunderbird} from '../utils/platform';
 import {MessageType} from '../utils/message';
-import {logInfo, logWarn} from '../utils/log';
+import {logInfo, logWarn} from './utils/log';
 import {PromiseBarrier} from '../utils/promise-barrier';
 import {StateManager} from '../utils/state-manager';
 import {debounce} from '../utils/debounce';
@@ -75,7 +75,7 @@ export class Extension {
             autoState: '',
             wasEnabledOnLastCheck: null,
             registeredContextMenus: null,
-        });
+        }, logWarn);
 
         chrome.alarms.onAlarm.addListener(this.alarmListener);
 
@@ -103,7 +103,7 @@ export class Extension {
         if (!this.systemColorStateManager) {
             this.systemColorStateManager = new StateManager<SystemColorState>(Extension.SYSTEM_COLOR_LOCAL_STORAGE_KEY, this, {
                 isDark,
-            });
+            }, logWarn);
         }
         if (isDark === null) {
             // Attempt to restore data from storage

@@ -7,6 +7,7 @@ import watch from './watch.js';
  * @property {boolean} debug
  * @property {boolean} watch
  * @property {boolean} test
+ * @property {string | false} log
  */
 
 class Task {

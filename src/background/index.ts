@@ -4,8 +4,9 @@ import {canInjectScript} from '../background/utils/extension-api';
 import type {ExtensionData, Message, UserSettings} from '../definitions';
 import {MessageType} from '../utils/message';
 import {makeChromiumHappy} from './make-chromium-happy';
-import {logInfo} from '../utils/log';
 import DevTools from './devtools';
+import {logInfo} from './utils/log';
+import {sendLog} from './utils/sendLog';
 
 type TestMessage = {
     type: 'changeSettings';
@@ -53,6 +54,7 @@ console.log(welcome);
 
 declare const __DEBUG__: boolean;
 declare const __WATCH__: boolean;
+declare const __LOG__: string | false;
 declare const __PORT__: number;
 declare const __TEST__: number;
 declare const __MV3__: number;
@@ -185,6 +187,14 @@ if (__TEST__) {
             respond({type: 'error', data: String(err)});
         }
     };
+}
+
+if (__DEBUG__ && __LOG__) {
+    chrome.runtime.onMessage.addListener((message: Message) => {
+        if (message.type === 'cs-log') {
+            sendLog(message.data.level, message.data.log);
+        }
+    });
 }
 
 makeChromiumHappy();

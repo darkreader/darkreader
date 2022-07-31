@@ -1,4 +1,4 @@
-import WebSocket from 'ws';
+import {WebSocketServer} from 'ws';
 import {log} from './utils.js';
 
 export const PORT = 8890;
@@ -16,7 +16,7 @@ const times = new WeakMap();
  */
 function createServer() {
     return new Promise((resolve) => {
-        const server = new WebSocket.Server({port: PORT});
+        const server = new WebSocketServer({port: PORT});
         server.on('listening', () => {
             log.ok('Auto-reloader started');
             resolve(server);

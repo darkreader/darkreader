@@ -19,6 +19,7 @@ console.log(welcome);
 declare const __DEBUG__: boolean;
 declare const __WATCH__: boolean;
 declare const __PORT__: number;
+declare const __TEST__: number;
 declare const __MV3__: number;
 
 if (__MV3__) {
@@ -102,7 +103,7 @@ if (__WATCH__) {
     chrome.runtime.setUninstallURL(UNINSTALL_URL);
 }
 
-if (__DEBUG__) {
+if (__TEST__) {
     const socket = new WebSocket(`ws://localhost:8894`);
     socket.onmessage = (e) => {
         const respond = (message: {type: string; data?: ExtensionData | string | boolean | {[key: string]: string}; id?: number}) => socket.send(JSON.stringify(message));

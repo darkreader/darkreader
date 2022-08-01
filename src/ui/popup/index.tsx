@@ -52,9 +52,8 @@ if (isFirefox) {
     fixNotClosingPopupOnNavigation();
 }
 
-declare const __DEBUG__: boolean;
-const DEBUG = __DEBUG__;
-if (DEBUG) {
+declare const __TEST__: boolean;
+if (__TEST__) {
     chrome.runtime.onMessage.addListener(({type}) => {
         if (type === MessageType.BG_CSS_UPDATE) {
             document.querySelectorAll('link[rel="stylesheet"]').forEach((link: HTMLLinkElement) => {

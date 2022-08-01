@@ -90,7 +90,7 @@ function freeRollupPluginInstance(name, key) {
     }
 }
 
-async function bundleJS(/** @type {JSEntry} */entry, platform, {debug, watch}) {
+async function bundleJS(/** @type {JSEntry} */entry, platform, debug, watch, test) {
     const {src, dest} = entry;
     const rollupPluginTypesctiptInstanceKey = debug;
     const rollupPluginReplaceInstanceKey = `${platform}-${debug}-${watch}-${entry.src === 'src/ui/popup/index.tsx'}`;
@@ -141,7 +141,7 @@ async function bundleJS(/** @type {JSEntry} */entry, platform, {debug, watch}) {
                     '__DEBUG__': debug ? 'true' : 'false',
                     '__MV3__': platform === PLATFORM.CHROME_MV3,
                     '__PORT__': watch ? String(PORT) : '-1',
-                    '__TEST__': 'false',
+                    '__TEST__': test ? 'true' : 'false',
                     '__WATCH__': watch ? 'true' : 'false',
                 })
             ),
@@ -170,16 +170,16 @@ function getWatchFiles() {
 /** @type {string[]} */
 let watchFiles;
 
-const hydrateTask = (/** @type {JSEntry[]} */entries, platforms, /** @type {boolean} */debug, /** @type {boolean} */watch) =>
+const hydrateTask = (/** @type {JSEntry[]} */entries, platforms, /** @type {boolean} */debug, /** @type {boolean} */watch, test) =>
     entries.map((entry) =>
         (entry.platform ? [entry.platform] : Object.values(PLATFORM))
             .filter((platform) => platforms[platform])
-            .map((platform) => bundleJS(entry, platform, {debug, watch}))
+            .map((platform) => bundleJS(entry, platform, debug, watch, test))
     ).flat();
 
 const bundleJSTask = createTask(
     'bundle-js',
-    async ({platforms, debug, watch}) => await Promise.all(hydrateTask(jsEntries, platforms, debug, watch)),
+    async ({platforms, debug, watch, test}) => await Promise.all(hydrateTask(jsEntries, platforms, debug, watch, test)),
 ).addWatcher(
     () => {
         watchFiles = getWatchFiles();

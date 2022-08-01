@@ -33,10 +33,10 @@ const buildTask = [
     zip
 ];
 
-async function build({platforms, debug, watch}) {
+async function build({platforms, debug, watch, test}) {
     log.ok('BUILD');
     try {
-        await runTasks(debug ? standardTask : buildTask, {platforms, debug, watch});
+        await runTasks(debug ? standardTask : buildTask, {platforms, debug, watch, test});
         if (watch) {
             standardTask.forEach((task) => task.watch(platforms));
             reload.reload({type: reload.FULL});
@@ -53,7 +53,7 @@ async function build({platforms, debug, watch}) {
 async function api() {
     log.ok('API');
     try {
-        await runTasks([bundleAPI], {platforms: {}, debug: false, watch: false});
+        await runTasks([bundleAPI], {platforms: {}, debug: false, watch: false, test: false});
         log.ok('MISSION PASSED! RESPECT +');
     } catch (err) {
         log.error(`MISSION FAILED!`);
@@ -92,10 +92,10 @@ async function run() {
     }
 
     if (args.includes('--release')) {
-        await build({platforms, debug: false, watch: false});
+        await build({platforms, debug: false, watch: false, test: false});
     }
     if (args.includes('--debug')) {
-        await build({platforms, debug: true, watch: args.includes('--watch')});
+        await build({platforms, debug: true, watch: args.includes('--watch'), test: args.includes('--test')});
     }
     if (args.includes('--api')) {
         await api();

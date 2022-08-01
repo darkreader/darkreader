@@ -17,19 +17,23 @@ async function writeJSON(path, json) {
     return await writeFile(path, content);
 }
 
-async function patchManifest(platform) {
+async function patchManifest(platform, debug, watch) {
     const manifest = await readJSON(`${srcDir}/manifest.json`);
     const manifestPatch = platform === PLATFORM.CHROME ? {} : await readJSON(`${srcDir}/manifest-${platform}.json`);
     const patched = {...manifest, ...manifestPatch};
     if (platform === PLATFORM.CHROME_MV3) {
         patched.browser_action = undefined;
     }
+    if (debug) {
+        patched.version = '0.0.0.0';
+        patched.description = `Debug build, platform: ${platform}, watch: ${watch ? 'yes' : 'no'}.`;
+    }
     return patched;
 }
 
-async function manifests({platforms, debug}) {
+async function manifests({platforms, debug, watch}) {
     for (const platform of Object.values(PLATFORM).filter((platform) => platforms[platform])) {
-        const manifest = await patchManifest(platform);
+        const manifest = await patchManifest(platform, debug, watch);
         const destDir = getDestDir({debug, platform});
         await writeJSON(`${destDir}/manifest.json`, manifest);
     }
@@ -47,7 +51,7 @@ const bundleManifestTask = createTask(
             const changed = chrome || changedFiles.some((file) => file.endsWith(`manifest-${platform}.json`));
             platforms[platform] = changed && buildPlatforms[platform];
         }
-        await manifests({platforms, debug: true});
+        await manifests({platforms, debug: true, watch: true});
         reload.reload({type: reload.FULL});
     },
 );

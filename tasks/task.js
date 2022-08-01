@@ -6,6 +6,7 @@ import watch from './watch.js';
  * @property {object} platforms
  * @property {boolean} debug
  * @property {boolean} watch
+ * @property {boolean} test
  */
 
 class Task {

@@ -19,9 +19,8 @@ async function start() {
 
 start();
 
-declare const __DEBUG__: boolean;
-const DEBUG = __DEBUG__;
-if (DEBUG) {
+declare const __TEST__: number;
+if (__TEST__) {
     const socket = new WebSocket(`ws://localhost:8894`);
     socket.onmessage = (e) => {
         const respond = (message: {type: string; id: number; data?: string}) => socket.send(JSON.stringify(message));

@@ -46,6 +46,11 @@ const copyEntries = [
         reloadType: reload.UI,
     },
     {
+        src: 'ui/devtools/loader.html',
+        reloadType: reload.FULL,
+        platforms: [PLATFORM.CHROME_MV3],
+    },
+    {
         src: 'ui/stylesheet-editor/index.html',
         reloadType: reload.UI,
     },

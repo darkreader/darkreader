@@ -4,33 +4,34 @@ import {withState, useState} from 'malevic/state';
 import {Button, MessageBox, Overlay} from '../../controls';
 import ThemeEngines from '../../../generators/theme-engines';
 import {DEVTOOLS_DOCS_URL} from '../../../utils/links';
-import type {ExtWrapper} from '../../../definitions';
+import type {DevToolsExtWrapper} from '../../../definitions';
 import {getCurrentThemePreset} from '../../popup/theme/utils';
 import {isFirefox} from '../../../utils/platform';
 
-type BodyProps = ExtWrapper;
+type BodyProps = DevToolsExtWrapper;
 
 function Body({data, actions}: BodyProps) {
     const context = getContext();
     const {state, setState} = useState({errorText: null as string});
     let textNode: HTMLTextAreaElement;
-    const previewButtonText = data.settings.previewNewDesign ? 'Switch to old design' : 'Preview new design';
-    const {theme} = getCurrentThemePreset({data, actions});
+    const previewButtonText = data.extensionData.settings.previewNewDesign ? 'Switch to old design' : 'Preview new design';
+    const integrationButtonText = data.devToolsPanelSettings.enabled ? 'Hide panel' : 'Show panel';
+    const {theme} = getCurrentThemePreset({data: data.extensionData, actions});
 
     const wrapper = (theme.engine === ThemeEngines.staticTheme
         ? {
             header: 'Static Theme Editor',
-            fixesText: data.devtools.staticThemesText,
+            fixesText: data.extensionData.devtools.staticThemesText,
             apply: (text: string) => actions.applyDevStaticThemes(text),
             reset: () => actions.resetDevStaticThemes(),
         } : theme.engine === ThemeEngines.cssFilter || theme.engine === ThemeEngines.svgFilter ? {
             header: 'Inversion Fix Editor',
-            fixesText: data.devtools.filterFixesText,
+            fixesText: data.extensionData.devtools.filterFixesText,
             apply: (text: string) => actions.applyDevInversionFixes(text),
             reset: () => actions.resetDevInversionFixes(),
         } : {
             header: 'Dynamic Theme Editor',
-            fixesText: data.devtools.dynamicFixesText,
+            fixesText: data.extensionData.devtools.dynamicFixesText,
             apply: (text: string) => actions.applyDevDynamicThemeFixes(text),
             reset: () => actions.resetDevDynamicThemeFixes(),
         });
@@ -98,7 +99,11 @@ function Body({data, actions}: BodyProps) {
     }
 
     function toggleDesign() {
-        actions.changeSettings({previewNewDesign: !data.settings.previewNewDesign});
+        actions.changeSettings({previewNewDesign: !data.extensionData.settings.previewNewDesign});
+    }
+
+    function togglDevToolsPanelIntegration() {
+        actions.changeDevTollsPanelSettings({enabled: !data.devToolsPanelSettings.enabled});
     }
 
     return (
@@ -124,6 +129,7 @@ function Body({data, actions}: BodyProps) {
                 </Button>
                 <Button onclick={apply}>Apply</Button>
                 <Button class="preview-design-button" onclick={toggleDesign}>{previewButtonText}</Button>
+                <Button class="preview-design-button" onclick={togglDevToolsPanelIntegration}>{integrationButtonText}</Button>
             </div>
             <p id="description">
                 Read about this tool <strong><a href={DEVTOOLS_DOCS_URL} target="_blank" rel="noopener noreferrer">here</a></strong>.

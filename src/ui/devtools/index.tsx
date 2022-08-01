@@ -2,9 +2,9 @@ import {m} from 'malevic';
 import {sync} from 'malevic/dom';
 import Body from './components/body';
 import Connector from '../connect/connector';
-import type {ExtensionData} from '../../definitions';
+import type {DevToolsPanelSettings, ExtensionData} from '../../definitions';
 
-function renderBody(data: ExtensionData, actions: Connector) {
+function renderBody(data: {extensionData: ExtensionData; devToolsPanelSettings: DevToolsPanelSettings}, actions: Connector) {
     sync(document.body, <Body data={data} actions={actions} />);
 }
 
@@ -12,9 +12,9 @@ async function start() {
     const connector = new Connector();
     window.addEventListener('unload', () => connector.disconnect());
 
-    const data = await connector.getData();
+    const data = await connector.getExtendedData();
     renderBody(data, connector);
-    connector.subscribeToChanges((data) => renderBody(data, connector));
+    connector.subscribeToExtendedChanges((data) => renderBody(data, connector));
 }
 
 start();

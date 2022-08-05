@@ -130,7 +130,7 @@ async function bundleJS(/** @type {JSEntry} */entry, platform, debug, watch, tes
                     removeComments: debug ? false : true,
                     sourceMap: debug ? true : false,
                     inlineSources: debug ? true : false,
-                    noEmitOnError: true,
+                    noEmitOnError: watch ? false : true,
                     cacheDir: debug ? `${fs.realpathSync(os.tmpdir())}/darkreader_typescript_cache` : undefined,
                 })
             ),

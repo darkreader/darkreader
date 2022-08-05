@@ -68,7 +68,7 @@ export function getModifiableCSSDeclaration(
         property === 'stroke' ||
         property === 'stop-color'
     ) {
-        const modifier = getColorModifier(property, value);
+        const modifier = getColorModifier(property, value, rule);
         if (modifier) {
             return {property, value: modifier, important: getPriority(rule.style, property), sourceValue: value};
         }
@@ -241,7 +241,7 @@ const unparsableColors = new Set([
     'unset',
 ]);
 
-function getColorModifier(prop: string, value: string): string | CSSValueModifier {
+function getColorModifier(prop: string, value: string, rule: CSSStyleRule): string | CSSValueModifier {
     if (unparsableColors.has(value.toLowerCase())) {
         return value;
     }
@@ -252,6 +252,14 @@ function getColorModifier(prop: string, value: string): string | CSSValueModifie
     }
 
     if (prop.includes('background')) {
+        if (
+            rule.style.mask ||
+            rule.style.webkitMask ||
+            rule.style['maskImage'] ||
+            rule.style.webkitMaskImage
+        ) {
+            return (filter) => modifyForegroundColor(rgb, filter);
+        }
         return (filter) => modifyBackgroundColor(rgb, filter);
     }
     if (prop.includes('border') || prop.includes('outline')) {

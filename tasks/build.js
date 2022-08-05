@@ -56,6 +56,7 @@ async function api() {
         await runTasks([bundleAPI], {platforms: {}, debug: false, watch: false, test: false});
         log.ok('MISSION PASSED! RESPECT +');
     } catch (err) {
+        console.log(err);
         log.error(`MISSION FAILED!`);
         process.exit(13);
     }

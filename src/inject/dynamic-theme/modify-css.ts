@@ -253,10 +253,10 @@ function getColorModifier(prop: string, value: string, rule: CSSStyleRule): stri
 
     if (prop.includes('background')) {
         if (
-            rule.style.mask ||
+            rule.style.webkitMaskImage ||
             rule.style.webkitMask ||
-            rule.style['maskImage'] ||
-            rule.style.webkitMaskImage
+            rule.style.mask ||
+            rule.style.getPropertyValue('mask-image')
         ) {
             return (filter) => modifyForegroundColor(rgb, filter);
         }

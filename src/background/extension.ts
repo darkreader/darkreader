@@ -40,24 +40,23 @@ interface SystemColorState {
 declare const __MV3__: boolean;
 
 export class Extension {
-    private autoState: AutomationState = '';
-    private wasEnabledOnLastCheck: boolean = null;
-    private registeredContextMenus: boolean = null;
-    private popupOpeningListener: () => void = null;
+    private static autoState: AutomationState = '';
+    private static wasEnabledOnLastCheck: boolean = null;
+    private static registeredContextMenus: boolean = null;
     // Is used only with Firefox to bypass Firefox bug
-    private wasLastColorSchemeDark: boolean = null;
-    private startBarrier: PromiseBarrier<void, void> = null;
-    private stateManager: StateManager<ExtensionState> = null;
+    private static wasLastColorSchemeDark: boolean = null;
+    private static startBarrier: PromiseBarrier<void, void> = null;
+    private static stateManager: StateManager<ExtensionState> = null;
 
     private static ALARM_NAME = 'auto-time-alarm';
     private static LOCAL_STORAGE_KEY = 'Extension-state';
 
     // Store system color theme
     private static SYSTEM_COLOR_LOCAL_STORAGE_KEY = 'system-color-state';
-    private systemColorStateManager: StateManager<SystemColorState>;
-    private isDark: boolean | null = null;
+    private static systemColorStateManager: StateManager<SystemColorState>;
+    private static isDark: boolean | null = null;
 
-    constructor() {
+    static init() {
         new Newsmaker();
         DevTools.init(async () => this.onSettingsChanged());
         Messenger.init(this.getMessengerAdapter());
@@ -93,7 +92,7 @@ export class Extension {
         }
     }
 
-    private async MV3syncSystemColorStateManager(isDark: boolean | null): Promise<void> {
+    private static async MV3syncSystemColorStateManager(isDark: boolean | null): Promise<void> {
         if (!__MV3__) {
             return;
         }
@@ -111,13 +110,13 @@ export class Extension {
         }
     }
 
-    private alarmListener = (alarm: chrome.alarms.Alarm): void => {
+    private static alarmListener = (alarm: chrome.alarms.Alarm): void => {
         if (alarm.name === Extension.ALARM_NAME) {
             this.loadData().then(() => this.handleAutomationCheck());
         }
     };
 
-    private isExtensionSwitchedOn() {
+    private static isExtensionSwitchedOn() {
         return (
             this.autoState === 'turn-on' ||
             this.autoState === 'scheme-dark' ||
@@ -126,7 +125,7 @@ export class Extension {
         );
     }
 
-    private updateAutoState() {
+    private static updateAutoState() {
         const {mode, behavior, enabled} = UserStorage.settings.automation;
 
         let isAutoDark: boolean;
@@ -187,7 +186,7 @@ export class Extension {
         }
     }
 
-    async start() {
+    static async start() {
         await Promise.all([
             ConfigManager.load({local: true}),
             this.MV3syncSystemColorStateManager(null),
@@ -220,7 +219,7 @@ export class Extension {
         this.startBarrier.resolve();
     }
 
-    private getMessengerAdapter(): ExtensionAdapter {
+    private static getMessengerAdapter(): ExtensionAdapter {
         return {
             collect: async () => {
                 return await this.collectData();
@@ -231,7 +230,6 @@ export class Extension {
             toggleActiveTab: async () => this.toggleActiveTab(),
             markNewsAsRead: async (ids) => await Newsmaker.markAsRead(...ids),
             markNewsAsDisplayed: async (ids) => await Newsmaker.markAsDisplayed(...ids),
-            onPopupOpen: () => this.popupOpeningListener && this.popupOpeningListener(),
             loadConfig: async (options) => await ConfigManager.load(options),
             applyDevDynamicThemeFixes: (text) => DevTools.applyDynamicThemeFixes(text),
             resetDevDynamicThemeFixes: () => DevTools.resetDynamicThemeFixes(),
@@ -242,7 +240,7 @@ export class Extension {
         };
     }
 
-    private onCommandInternal = async (command: Command, frameURL?: string) => {
+    private static onCommandInternal = async (command: Command, frameURL?: string) => {
         if (this.startBarrier.isPending()) {
             await this.startBarrier.entry();
         }
@@ -278,9 +276,9 @@ export class Extension {
 
     // 75 is small enough to not notice it, and still catches when someone
     // is holding down a certain shortcut.
-    private onCommand = debounce(75, this.onCommandInternal);
+    private static onCommand = debounce(75, this.onCommandInternal);
 
-    private registerContextMenus() {
+    private static registerContextMenus() {
         chrome.contextMenus.onClicked.addListener(async ({menuItemId, frameUrl, pageUrl}) =>
             this.onCommand(menuItemId as Command, frameUrl || pageUrl));
         chrome.contextMenus.removeAll(() => {
@@ -316,16 +314,16 @@ export class Extension {
         });
     }
 
-    private async getShortcuts() {
+    private static async getShortcuts() {
         const commands = await getCommands();
         return commands.reduce((map, cmd) => Object.assign(map, {[cmd.name]: cmd.shortcut}), {} as Shortcuts);
     }
 
-    private setShortcut(command: string, shortcut: string) {
+    private static setShortcut(command: string, shortcut: string) {
         setShortcut(command, shortcut);
     }
 
-    async collectData(): Promise<ExtensionData> {
+    static async collectData(): Promise<ExtensionData> {
         await this.loadData();
         const [
             news,
@@ -368,7 +366,7 @@ export class Extension {
         };
     }
 
-    private async getActiveTabInfo() {
+    private static async getActiveTabInfo() {
         await this.loadData();
         const url = await TabManager.getActiveTabURL();
         const info = this.getURLInfo(url);
@@ -379,12 +377,12 @@ export class Extension {
         return info;
     }
 
-    private async getConnectionMessage(url: string, frameURL: string) {
+    private static async getConnectionMessage(url: string, frameURL: string) {
         await this.loadData();
         return this.getTabMessage(url, frameURL);
     }
 
-    private async loadData() {
+    private static async loadData() {
         const promises = [this.stateManager.loadState()];
         if (!UserStorage.settings) {
             promises.push(UserStorage.loadSettings());
@@ -392,7 +390,7 @@ export class Extension {
         await Promise.all(promises);
     }
 
-    private onColorSchemeChange = async (isDark: boolean) => {
+    private static onColorSchemeChange = async (isDark: boolean) => {
         this.MV3syncSystemColorStateManager(isDark);
         if (isFirefox) {
             this.wasLastColorSchemeDark = isDark;
@@ -404,7 +402,7 @@ export class Extension {
         this.handleAutomationCheck();
     };
 
-    private handleAutomationCheck = () => {
+    private static handleAutomationCheck = () => {
         this.updateAutoState();
 
         const isSwitchedOn = this.isExtensionSwitchedOn();
@@ -422,7 +420,7 @@ export class Extension {
         }
     };
 
-    changeSettings($settings: Partial<UserSettings>, onlyUpdateActiveTab = false) {
+    static changeSettings($settings: Partial<UserSettings>, onlyUpdateActiveTab = false) {
         const prev = {...UserStorage.settings};
 
         UserStorage.set($settings);
@@ -464,7 +462,7 @@ export class Extension {
         this.onSettingsChanged(onlyUpdateActiveTab);
     }
 
-    private setTheme($theme: Partial<FilterConfig>) {
+    private static setTheme($theme: Partial<FilterConfig>) {
         UserStorage.set({theme: {...UserStorage.settings.theme, ...$theme}});
 
         if (this.isExtensionSwitchedOn() && UserStorage.settings.changeBrowserTheme) {
@@ -474,12 +472,12 @@ export class Extension {
         this.onSettingsChanged();
     }
 
-    private async reportChanges() {
+    private static async reportChanges() {
         const info = await this.collectData();
         Messenger.reportChanges(info);
     }
 
-    private async toggleActiveTab() {
+    private static async toggleActiveTab() {
         const settings = UserStorage.settings;
         const tab = await this.getActiveTabInfo();
         const {url} = tab;
@@ -513,7 +511,7 @@ export class Extension {
     //       Handle config changes
     //
 
-    private onAppToggle() {
+    private static onAppToggle() {
         if (this.isExtensionSwitchedOn()) {
             if (__MV3__) {
                 ContentScriptManager.registerScripts(async () => TabManager.updateContentScript({runOnProtectedPages: UserStorage.settings.enableForProtectedPages}));
@@ -533,7 +531,7 @@ export class Extension {
         }
     }
 
-    private async onSettingsChanged(onlyUpdateActiveTab = false) {
+    private static async onSettingsChanged(onlyUpdateActiveTab = false) {
         await this.loadData();
         this.wasEnabledOnLastCheck = this.isExtensionSwitchedOn();
         TabManager.sendMessage(onlyUpdateActiveTab);
@@ -548,7 +546,7 @@ export class Extension {
     //
     //----------------------
 
-    private getURLInfo(url: string): TabInfo {
+    private static getURLInfo(url: string): TabInfo {
         const {DARK_SITES} = ConfigManager;
         const isInDarkList = isURLInList(url, DARK_SITES);
         const isProtected = !canInjectScript(url);
@@ -561,7 +559,7 @@ export class Extension {
         };
     }
 
-    private getTabMessage = (url: string, frameURL: string): TabData => {
+    private static getTabMessage = (url: string, frameURL: string): TabData => {
         const settings = UserStorage.settings;
         const urlInfo = this.getURLInfo(url);
         if (this.isExtensionSwitchedOn() && isURLEnabled(url, settings, urlInfo)) {
@@ -645,7 +643,7 @@ export class Extension {
     //-------------------------------------
     //          User settings
 
-    private async saveUserSettings() {
+    private static async saveUserSettings() {
         await UserStorage.saveSettings();
         logInfo('saved', UserStorage.settings);
     }

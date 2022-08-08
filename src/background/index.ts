@@ -8,8 +8,8 @@ import {logInfo} from '../utils/log';
 import DevTools from './devtools';
 
 // Initialize extension
-const extension = new Extension();
-extension.start();
+Extension.init();
+Extension.start();
 
 const welcome = `  /''''\\
  (0)==(0)
@@ -112,11 +112,11 @@ if (__TEST__) {
             const message: {type: string; data: Partial<UserSettings> | boolean | {[key: string]: string}; id: number} = JSON.parse(e.data);
             switch (message.type) {
                 case 'changeSettings':
-                    extension.changeSettings(message.data as Partial<UserSettings>);
+                    Extension.changeSettings(message.data as Partial<UserSettings>);
                     respond({type: 'changeSettings-response', id: message.id});
                     break;
                 case 'collectData':
-                    extension.collectData().then((data) => {
+                    Extension.collectData().then((data) => {
                         respond({type: 'collectData-response', id: message.id, data});
                     });
                     break;

@@ -42,7 +42,6 @@ declare const __MV3__: boolean;
 export class Extension {
     private devtools: DevTools;
     private messenger: Messenger;
-    private tabs: TabManager;
 
     private autoState: AutomationState = '';
     private wasEnabledOnLastCheck: boolean = null;
@@ -66,7 +65,7 @@ export class Extension {
 
         this.devtools = new DevTools(async () => this.onSettingsChanged());
         this.messenger = new Messenger(this.getMessengerAdapter());
-        this.tabs = new TabManager({
+        TabManager.init({
             getConnectionMessage: async ({url, frameURL}) => this.getConnectionMessage(url, frameURL),
             getTabMessage: this.getTabMessage,
             onColorSchemeChange: this.onColorSchemeChange,
@@ -215,9 +214,9 @@ export class Extension {
         logInfo('loaded', UserStorage.settings);
 
         if (isThunderbird) {
-            this.tabs.registerMailDisplayScript();
+            TabManager.registerMailDisplayScript();
         } else {
-            this.tabs.updateContentScript({runOnProtectedPages: UserStorage.settings.enableForProtectedPages});
+            TabManager.updateContentScript({runOnProtectedPages: UserStorage.settings.enableForProtectedPages});
         }
 
         UserStorage.settings.fetchNews && Newsmaker.subscribe();
@@ -261,7 +260,7 @@ export class Extension {
                 break;
             case 'addSite': {
                 logInfo('Add Site command entered');
-                const url = frameURL || await this.tabs.getActiveTabURL();
+                const url = frameURL || await TabManager.getActiveTabURL();
                 if (isPDF(url)) {
                     this.changeSettings({enableForPDF: !UserStorage.settings.enableForPDF});
                 } else {
@@ -374,11 +373,11 @@ export class Extension {
 
     private async getActiveTabInfo() {
         await this.loadData();
-        const url = await this.tabs.getActiveTabURL();
+        const url = await TabManager.getActiveTabURL();
         const info = this.getURLInfo(url);
-        info.isInjected = await this.tabs.canAccessActiveTab();
+        info.isInjected = await TabManager.canAccessActiveTab();
         if (UserStorage.settings.detectDarkTheme) {
-            info.isDarkThemeDetected = await this.tabs.isActiveTabDarkThemeDetected();
+            info.isDarkThemeDetected = await TabManager.isActiveTabDarkThemeDetected();
         }
         return info;
     }
@@ -420,7 +419,7 @@ export class Extension {
         ) {
             this.wasEnabledOnLastCheck = isSwitchedOn;
             this.onAppToggle();
-            this.tabs.sendMessage();
+            TabManager.sendMessage();
             this.reportChanges();
             this.stateManager.saveState();
         }
@@ -520,7 +519,7 @@ export class Extension {
     private onAppToggle() {
         if (this.isExtensionSwitchedOn()) {
             if (__MV3__) {
-                ContentScriptManager.registerScripts(async () => this.tabs.updateContentScript({runOnProtectedPages: UserStorage.settings.enableForProtectedPages}));
+                ContentScriptManager.registerScripts(async () => TabManager.updateContentScript({runOnProtectedPages: UserStorage.settings.enableForProtectedPages}));
             }
             IconManager.setActive();
             if (UserStorage.settings.changeBrowserTheme) {
@@ -540,7 +539,7 @@ export class Extension {
     private async onSettingsChanged(onlyUpdateActiveTab = false) {
         await this.loadData();
         this.wasEnabledOnLastCheck = this.isExtensionSwitchedOn();
-        this.tabs.sendMessage(onlyUpdateActiveTab);
+        TabManager.sendMessage(onlyUpdateActiveTab);
         this.saveUserSettings();
         this.reportChanges();
         this.stateManager.saveState();

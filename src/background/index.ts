@@ -5,6 +5,7 @@ import type {ExtensionData, Message, UserSettings} from '../definitions';
 import {MessageType} from '../utils/message';
 import {makeChromiumHappy} from './make-chromium-happy';
 import {logInfo} from '../utils/log';
+import DevTools from './devtools';
 
 // Initialize extension
 const extension = new Extension();
@@ -142,7 +143,7 @@ if (__TEST__) {
                     break;
                 }
                 case 'setDataIsMigratedForTesting':
-                    extension.setDevToolsDataIsMigratedForTesting(message.data as boolean);
+                    DevTools.setDataIsMigratedForTesting(message.data as boolean);
                     respond({type: 'setDataIsMigratedForTesting-response', id: message.id});
                     break;
             }

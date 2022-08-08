@@ -10,7 +10,6 @@ export interface ExtensionAdapter {
     markNewsAsRead: (ids: string[]) => Promise<void>;
     markNewsAsDisplayed: (ids: string[]) => Promise<void>;
     toggleActiveTab: () => void;
-    onPopupOpen: () => void;
     loadConfig: (options: {local: boolean}) => Promise<void>;
     applyDevDynamicThemeFixes: (json: string) => Error;
     resetDevDynamicThemeFixes: () => void;
@@ -44,7 +43,6 @@ export default class Messenger {
         ];
         if (allowedSenderURL.includes(sender.url)) {
             this.onUIMessage(message, sendResponse);
-            this.adapter.onPopupOpen();
             return ([
                 MessageType.UI_GET_DATA,
             ].includes(message.type));

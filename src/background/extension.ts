@@ -43,7 +43,6 @@ export class Extension {
     private static autoState: AutomationState = '';
     private static wasEnabledOnLastCheck: boolean = null;
     private static registeredContextMenus: boolean = null;
-    private static popupOpeningListener: () => void = null;
     // Is used only with Firefox to bypass Firefox bug
     private static wasLastColorSchemeDark: boolean = null;
     private static startBarrier: PromiseBarrier<void, void> = null;
@@ -231,7 +230,6 @@ export class Extension {
             toggleActiveTab: async () => this.toggleActiveTab(),
             markNewsAsRead: async (ids) => await Newsmaker.markAsRead(...ids),
             markNewsAsDisplayed: async (ids) => await Newsmaker.markAsDisplayed(...ids),
-            onPopupOpen: () => this.popupOpeningListener && this.popupOpeningListener(),
             loadConfig: async (options) => await ConfigManager.load(options),
             applyDevDynamicThemeFixes: (text) => DevTools.applyDynamicThemeFixes(text),
             resetDevDynamicThemeFixes: () => DevTools.resetDynamicThemeFixes(),

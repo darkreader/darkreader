@@ -40,8 +40,6 @@ interface SystemColorState {
 declare const __MV3__: boolean;
 
 export class Extension {
-    private messenger: Messenger;
-
     private autoState: AutomationState = '';
     private wasEnabledOnLastCheck: boolean = null;
     private registeredContextMenus: boolean = null;
@@ -61,14 +59,14 @@ export class Extension {
 
     constructor() {
         new Newsmaker();
-
         DevTools.init(async () => this.onSettingsChanged());
-        this.messenger = new Messenger(this.getMessengerAdapter());
+        Messenger.init(this.getMessengerAdapter());
         TabManager.init({
             getConnectionMessage: async ({url, frameURL}) => this.getConnectionMessage(url, frameURL),
             getTabMessage: this.getTabMessage,
             onColorSchemeChange: this.onColorSchemeChange,
         });
+
         this.startBarrier = new PromiseBarrier();
         this.stateManager = new StateManager<ExtensionState>(Extension.LOCAL_STORAGE_KEY, this, {
             autoState: '',
@@ -478,7 +476,7 @@ export class Extension {
 
     private async reportChanges() {
         const info = await this.collectData();
-        this.messenger.reportChanges(info);
+        Messenger.reportChanges(info);
     }
 
     private async toggleActiveTab() {

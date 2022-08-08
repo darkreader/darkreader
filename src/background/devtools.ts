@@ -205,10 +205,10 @@ class TempStorage implements DevToolsStorage {
 }
 
 export default class DevTools {
-    private onChange: () => void;
-    private store: DevToolsStorage;
+    private static onChange: () => void;
+    private static store: DevToolsStorage;
 
-    constructor(onChange: () => void) {
+    static init(onChange: () => void) {
         // Firefox don't seem to like using storage.local to store big data on the background-extension.
         // Disabling it for now and defaulting back to localStorage.
         if (typeof chrome.storage.local !== 'undefined' && chrome.storage.local !== null && !isFirefox) {
@@ -228,11 +228,11 @@ export default class DevTools {
     static KEY_FILTER = 'dev_inversion_fixes';
     static KEY_STATIC = 'dev_static_themes';
 
-    setDataIsMigratedForTesting(value: boolean) {
+    static setDataIsMigratedForTesting(value: boolean) {
         this.store.setDataIsMigratedForTesting(value);
     }
 
-    private async loadConfigOverrides() {
+    private static async loadConfigOverrides() {
         const [
             dynamicThemeFixes,
             inversionFixes,
@@ -247,32 +247,32 @@ export default class DevTools {
         ConfigManager.overrides.staticThemes = staticThemes || null;
     }
 
-    private async getSavedDynamicThemeFixes() {
+    private static async getSavedDynamicThemeFixes() {
         return this.store.get(DevTools.KEY_DYNAMIC);
     }
 
-    private saveDynamicThemeFixes(text: string) {
+    private static saveDynamicThemeFixes(text: string) {
         this.store.set(DevTools.KEY_DYNAMIC, text);
     }
 
-    async hasCustomDynamicThemeFixes() {
+    static async hasCustomDynamicThemeFixes() {
         return this.store.has(DevTools.KEY_DYNAMIC);
     }
 
-    async getDynamicThemeFixesText() {
+    static async getDynamicThemeFixesText() {
         const $fixes = await this.getSavedDynamicThemeFixes();
         const fixes = $fixes ? parseDynamicThemeFixes($fixes) : parseDynamicThemeFixes(ConfigManager.DYNAMIC_THEME_FIXES_RAW);
         return formatDynamicThemeFixes(fixes);
     }
 
-    resetDynamicThemeFixes() {
+    static resetDynamicThemeFixes() {
         this.store.remove(DevTools.KEY_DYNAMIC);
         ConfigManager.overrides.dynamicThemeFixes = null;
         ConfigManager.handleDynamicThemeFixes();
         this.onChange();
     }
 
-    applyDynamicThemeFixes(text: string) {
+    static applyDynamicThemeFixes(text: string) {
         try {
             const formatted = formatDynamicThemeFixes(parseDynamicThemeFixes(text));
             ConfigManager.overrides.dynamicThemeFixes = formatted;
@@ -285,32 +285,32 @@ export default class DevTools {
         }
     }
 
-    private async getSavedInversionFixes() {
+    private static async getSavedInversionFixes() {
         return this.store.get(DevTools.KEY_FILTER);
     }
 
-    private saveInversionFixes(text: string) {
+    private static saveInversionFixes(text: string) {
         this.store.set(DevTools.KEY_FILTER, text);
     }
 
-    async hasCustomFilterFixes() {
+    static async hasCustomFilterFixes() {
         return this.store.has(DevTools.KEY_FILTER);
     }
 
-    async getInversionFixesText() {
+    static async getInversionFixesText() {
         const $fixes = await this.getSavedInversionFixes();
         const fixes = $fixes ? parseInversionFixes($fixes) : parseInversionFixes(ConfigManager.INVERSION_FIXES_RAW);
         return formatInversionFixes(fixes);
     }
 
-    resetInversionFixes() {
+    static resetInversionFixes() {
         this.store.remove(DevTools.KEY_FILTER);
         ConfigManager.overrides.inversionFixes = null;
         ConfigManager.handleInversionFixes();
         this.onChange();
     }
 
-    applyInversionFixes(text: string) {
+    static applyInversionFixes(text: string) {
         try {
             const formatted = formatInversionFixes(parseInversionFixes(text));
             ConfigManager.overrides.inversionFixes = formatted;
@@ -323,32 +323,32 @@ export default class DevTools {
         }
     }
 
-    private async getSavedStaticThemes() {
+    private static async getSavedStaticThemes() {
         return this.store.get(DevTools.KEY_STATIC);
     }
 
-    private saveStaticThemes(text: string) {
+    private static saveStaticThemes(text: string) {
         this.store.set(DevTools.KEY_STATIC, text);
     }
 
-    async hasCustomStaticFixes() {
+    static async hasCustomStaticFixes() {
         return this.store.has(DevTools.KEY_STATIC);
     }
 
-    async getStaticThemesText() {
+    static async getStaticThemesText() {
         const $themes = await this.getSavedStaticThemes();
         const themes = $themes ? parseStaticThemes($themes) : parseStaticThemes(ConfigManager.STATIC_THEMES_RAW);
         return formatStaticThemes(themes);
     }
 
-    resetStaticThemes() {
+    static resetStaticThemes() {
         this.store.remove(DevTools.KEY_STATIC);
         ConfigManager.overrides.staticThemes = null;
         ConfigManager.handleStaticThemes();
         this.onChange();
     }
 
-    applyStaticThemes(text: string) {
+    static applyStaticThemes(text: string) {
         try {
             const formatted = formatStaticThemes(parseStaticThemes(text));
             ConfigManager.overrides.staticThemes = formatted;

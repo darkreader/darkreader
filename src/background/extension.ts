@@ -40,7 +40,6 @@ interface SystemColorState {
 declare const __MV3__: boolean;
 
 export class Extension {
-    private devtools: DevTools;
     private messenger: Messenger;
 
     private autoState: AutomationState = '';
@@ -63,7 +62,7 @@ export class Extension {
     constructor() {
         new Newsmaker();
 
-        this.devtools = new DevTools(async () => this.onSettingsChanged());
+        DevTools.init(async () => this.onSettingsChanged());
         this.messenger = new Messenger(this.getMessengerAdapter());
         TabManager.init({
             getConnectionMessage: async ({url, frameURL}) => this.getConnectionMessage(url, frameURL),
@@ -236,12 +235,12 @@ export class Extension {
             markNewsAsDisplayed: async (ids) => await Newsmaker.markAsDisplayed(...ids),
             onPopupOpen: () => this.popupOpeningListener && this.popupOpeningListener(),
             loadConfig: async (options) => await ConfigManager.load(options),
-            applyDevDynamicThemeFixes: (text) => this.devtools.applyDynamicThemeFixes(text),
-            resetDevDynamicThemeFixes: () => this.devtools.resetDynamicThemeFixes(),
-            applyDevInversionFixes: (text) => this.devtools.applyInversionFixes(text),
-            resetDevInversionFixes: () => this.devtools.resetInversionFixes(),
-            applyDevStaticThemes: (text) => this.devtools.applyStaticThemes(text),
-            resetDevStaticThemes: () => this.devtools.resetStaticThemes(),
+            applyDevDynamicThemeFixes: (text) => DevTools.applyDynamicThemeFixes(text),
+            resetDevDynamicThemeFixes: () => DevTools.resetDynamicThemeFixes(),
+            applyDevInversionFixes: (text) => DevTools.applyInversionFixes(text),
+            resetDevInversionFixes: () => DevTools.resetInversionFixes(),
+            applyDevStaticThemes: (text) => DevTools.applyStaticThemes(text),
+            resetDevStaticThemes: () => DevTools.resetStaticThemes(),
         };
     }
 
@@ -343,12 +342,12 @@ export class Extension {
         ] = await Promise.all([
             Newsmaker.getLatest(),
             this.getShortcuts(),
-            this.devtools.getDynamicThemeFixesText(),
-            this.devtools.getInversionFixesText(),
-            this.devtools.getStaticThemesText(),
-            this.devtools.hasCustomDynamicThemeFixes(),
-            this.devtools.hasCustomFilterFixes(),
-            this.devtools.hasCustomStaticFixes(),
+            DevTools.getDynamicThemeFixesText(),
+            DevTools.getInversionFixesText(),
+            DevTools.getStaticThemesText(),
+            DevTools.hasCustomDynamicThemeFixes(),
+            DevTools.hasCustomFilterFixes(),
+            DevTools.hasCustomStaticFixes(),
             this.getActiveTabInfo()
         ]);
         return {
@@ -644,10 +643,6 @@ export class Extension {
             type: MessageType.BG_CLEAN_UP,
         };
     };
-
-    setDevToolsDataIsMigratedForTesting(migrated: boolean) {
-        this.devtools.setDataIsMigratedForTesting(migrated);
-    }
 
     //-------------------------------------
     //          User settings

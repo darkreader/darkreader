@@ -1,15 +1,16 @@
-## Unreleased
+## 4.9.53 (Aug 9, 2022)
 
-- Don't manage styles that have a empty `href` attribute.
+- Don't manage styles that have an empty `href` attribute.
 - Use `navigator.UserAgentData` when possible.
 - Add a `<meta name="darkreader-lock">` detector, to disable Dark Reader when detected (only dynamic theme).
 - Fix filter theme for Firefox v102+
 - Correctly open static theme editor on Mobile.
-- Migrate automation settings to it's own object. WARNING: this can lead to data loss of currently used automation settings due to browser behavior.
+- Migrate automation settings to its own object.
 - Correctly handle empty URL's in `background-image` property.
-- Make parsing colors use cache.
-- Only send updates to the affected tabs when toggling sites.
+- Make color parsing use cache.
+- Send updates only to affected tabs when toggling sites.
 - Fixed images with masks (Gmail icons issue).
+- Background page refactoring.
 
 ## 4.9.52 (June 28, 2022)
 

@@ -1,6 +1,7 @@
 import {MessageType} from '../utils/message';
 import type {Message} from '../definitions';
 import {isChromium} from '../utils/platform';
+import {isPanel} from './utils/tab';
 
 declare const __MV3__: boolean;
 
@@ -11,14 +12,15 @@ export function makeChromiumHappy() {
     if (__MV3__ || !isChromium) {
         return;
     }
-    chrome.runtime.onMessage.addListener((message: Message, _, sendResponse) => {
+    chrome.runtime.onMessage.addListener((message: Message, sender, sendResponse) => {
         if (![
             // Messenger
             MessageType.UI_GET_DATA,
             MessageType.UI_APPLY_DEV_DYNAMIC_THEME_FIXES,
             MessageType.UI_APPLY_DEV_INVERSION_FIXES,
             MessageType.UI_APPLY_DEV_STATIC_THEMES,
-        ].includes(message.type)) {
+        ].includes(message.type) &&
+            (message.type !== MessageType.CS_FRAME_CONNECT || !isPanel(sender))) {
             sendResponse({type: '¯\\_(ツ)_/¯'});
         }
     });

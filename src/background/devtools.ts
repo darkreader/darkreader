@@ -9,9 +9,9 @@ import {isFirefox} from '../utils/platform';
 // TODO(bershanskiy): Popup UI heeds only hasCustom*Fixes() and nothing else. Consider storing that data separatelly.
 interface DevToolsStorage {
     get(key: string): Promise<string>;
-    set(key: string, value: string): void;
-    remove(key: string): void;
-    has(key: string): Promise<boolean>;
+    set(key: string, value: string): Promise<void> | void;
+    remove(key: string): Promise<void> | void;
+    has(key: string): Promise<boolean> | boolean;
     setDataIsMigratedForTesting(value: boolean): void;
 }
 
@@ -107,28 +107,32 @@ class PersistentStorageWrapper implements DevToolsStorage {
                     return;
                 }
 
-                this.cache[key] = result.key;
-                resolve(result.key);
+                this.cache[key] = result[key];
+                resolve(result[key]);
             });
         });
     }
 
-    set(key: string, value: string) {
+    async set(key: string, value: string) {
         this.cache[key] = value;
-        chrome.storage.local.set({[key]: value}, () => {
+        return new Promise<void>((resolve) => chrome.storage.local.set({[key]: value}, () => {
             if (chrome.runtime.lastError) {
                 console.error('Failed to write DevTools data', chrome.runtime.lastError);
+            } else {
+                resolve();
             }
-        });
+        }));
     }
 
-    remove(key: string) {
+    async remove(key: string) {
         this.cache[key] = undefined;
-        chrome.storage.local.remove(key, () => {
+        return new Promise<void>((resolve) => chrome.storage.local.remove(key, () => {
             if (chrome.runtime.lastError) {
                 console.error('Failed to delete DevTools data', chrome.runtime.lastError);
+            } else {
+                resolve();
             }
-        });
+        }));
     }
 
     async has(key: string) {

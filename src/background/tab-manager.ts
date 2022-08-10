@@ -7,6 +7,7 @@ import {MessageType} from '../utils/message';
 import {logWarn} from '../utils/log';
 import {StateManager} from '../utils/state-manager';
 import {getURLHostOrProtocol} from '../utils/url';
+import {isPanel} from './utils/tab';
 
 declare const __MV3__: boolean;
 
@@ -77,12 +78,7 @@ export default class TabManager {
                         getConnectionMessage(options).then((message) => message && chrome.tabs.sendMessage<Message>(sender.tab.id, message, {frameId: sender.frameId}));
                     };
 
-                    // Workaround for Thunderbird and Vivaldi.
-                    // On Thunderbird, sometimes sender.tab is undefined but accessing it will throw a very nice error.
-                    // On Vivaldi, sometimes sender.tab is undefined as well, but error is not very helpful.
-                    // On Opera, sender.tab.index === -1.
-                    const isPanel = typeof sender === 'undefined' || typeof sender.tab === 'undefined' || (isOpera && sender.tab.index === -1);
-                    if (isPanel) {
+                    if (isPanel(sender)) {
                         // NOTE: Vivaldi and Opera can show a page in a side panel,
                         // but it is not possible to handle messaging correctly (no tab ID, frame ID).
                         if (isFirefox) {
@@ -183,7 +179,7 @@ export default class TabManager {
                 case MessageType.UI_COLOR_SCHEME_CHANGE:
                     // fallthrough
                 case MessageType.CS_COLOR_SCHEME_CHANGE:
-                    onColorSchemeChange(message.data);
+                    onColorSchemeChange(message.data.isDark);
                     break;
 
                 case MessageType.UI_SAVE_FILE: {

@@ -254,7 +254,7 @@ function getColorModifier(prop: string, value: string, rule: CSSStyleRule): stri
     if (prop.includes('background')) {
         if (
             (rule.style.webkitMaskImage && rule.style.webkitMaskImage !== 'none') ||
-            (rule.style.webkitMaskImage && rule.style.webkitMask !== 'none') ||
+            (rule.style.webkitMask && rule.style.webkitMask !== 'none') ||
             (rule.style.mask && rule.style.mask !== 'none') ||
             (rule.style.getPropertyValue('mask-image') && rule.style.getPropertyValue('mask-image') !== 'none')
         ) {

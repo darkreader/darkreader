@@ -146,14 +146,9 @@ export class Extension {
                     }
                     break;
                 }
-                if (isFirefox) {
-                    // BUG: Firefox background page always matches initial color scheme.
-                    isAutoDark = this.wasLastColorSchemeDark == null
-                        ? isSystemDarkModeEnabled()
-                        : this.wasLastColorSchemeDark;
-                } else {
-                    isAutoDark = isSystemDarkModeEnabled();
-                }
+                isAutoDark = this.wasLastColorSchemeDark == null
+                    ? isSystemDarkModeEnabled()
+                    : this.wasLastColorSchemeDark;
                 break;
             case 'location': {
                 const {latitude, longitude} = UserStorage.settings.location;
@@ -392,9 +387,7 @@ export class Extension {
 
     private static onColorSchemeChange = async (isDark: boolean) => {
         this.MV3syncSystemColorStateManager(isDark);
-        if (isFirefox) {
-            this.wasLastColorSchemeDark = isDark;
-        }
+        this.wasLastColorSchemeDark = isDark;
         await this.loadData();
         if (UserStorage.settings.automation.mode !== 'system') {
             return;

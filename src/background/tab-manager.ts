@@ -183,7 +183,7 @@ export default class TabManager {
                 case MessageType.UI_COLOR_SCHEME_CHANGE:
                     // fallthrough
                 case MessageType.CS_COLOR_SCHEME_CHANGE:
-                    onColorSchemeChange(message.data);
+                    onColorSchemeChange(message.data.isDark);
                     break;
 
                 case MessageType.UI_SAVE_FILE: {

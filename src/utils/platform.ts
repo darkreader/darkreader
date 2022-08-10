@@ -14,11 +14,11 @@ declare global {
 }
 
 const isNavigatorDefined = typeof navigator !== 'undefined';
-const userAgent = isNavigatorDefined ? navigator.userAgentData ?
+const userAgent = isNavigatorDefined ? (navigator.userAgentData && Array.isArray(navigator.userAgentData.brands)) ?
     navigator.userAgentData.brands.map((brand) => `${brand.brand.toLowerCase()} ${brand.version}`).join(' ') : navigator.userAgent.toLowerCase()
     : 'some useragent';
 
-const platform = isNavigatorDefined ? navigator.userAgentData ?
+const platform = isNavigatorDefined ? (navigator.userAgentData && typeof navigator.userAgentData.platform === 'string') ?
     navigator.userAgentData.platform.toLowerCase() : navigator.platform.toLowerCase()
     : 'some platform';
 

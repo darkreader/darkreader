@@ -1,8 +1,9 @@
-## Unreleased
+## 4.9.55 (Aug 10, 2022)
 
 - Fix Google calendar.
 - Fix Opera/Vivaldi sidebar's getting modified.
 - Fix incorrect inline background colors when `mask` is explicitly disabled.
+- Fixed breaking for some old browser versions.
 
 ## 4.9.54 (Aug 10, 2022)
 

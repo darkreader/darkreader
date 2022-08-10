@@ -1,3 +1,8 @@
+## Unreleased
+
+- Fix Google calendar.
+- Fix Opera/Vivaldi sidebar's getting modified.
+
 ## 4.9.54 (Aug 10, 2022)
 
 - Fixed System automation.

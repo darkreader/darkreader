@@ -2,6 +2,7 @@
 
 - Fix Google calendar.
 - Fix Opera/Vivaldi sidebar's getting modified.
+- Fix incorrect inline background colors when `mask` is explicitly disabled.
 
 ## 4.9.54 (Aug 10, 2022)
 

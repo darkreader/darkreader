@@ -1,3 +1,7 @@
+## 4.9.54 (Aug 10, 2022)
+
+- Fixed System automation.
+
 ## 4.9.53 (Aug 9, 2022)
 
 - Don't manage styles that have an empty `href` attribute.

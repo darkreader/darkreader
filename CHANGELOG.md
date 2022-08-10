@@ -1,5 +1,14 @@
 ## Unreleased
 
+- Fix Google calendar.
+- Fix Opera/Vivaldi sidebar's getting modified.
+
+## 4.9.54 (August 11, 2022)
+
+- Fix color scheme updates for newer versions of Chromium.
+
+## 4.9.53 (August 10, 2022)
+
 - Don't manage styles that have a empty `href` attribute.
 - Use `navigator.UserAgentData` when possible.
 - Add a `<meta name="darkreader-lock">` detector, to disable Dark Reader when detected (only dynamic theme).

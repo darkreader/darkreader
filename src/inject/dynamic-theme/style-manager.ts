@@ -7,7 +7,9 @@ import {logInfo, logWarn} from '../utils/log';
 import {replaceCSSRelativeURLsWithAbsolute, removeCSSComments, replaceCSSFontFace, getCSSURLValue, cssImportRegex, getCSSBaseBath} from './css-rules';
 import {bgFetch} from './network';
 import {createStyleSheetModifier} from './stylesheet-modifier';
-import {isShadowDomSupported, isSafari, isThunderbird, isFirefox} from '../../utils/platform';
+import {isShadowDomSupported, isSafari, isFirefox} from '../../utils/platform';
+
+declare const __THUNDERBIRD__: boolean;
 
 declare global {
     interface Document {
@@ -426,7 +428,7 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
         watchForSheetChangesUsingProxy();
         // Sometimes sheet can be null in Firefox and Safari
         // So need to watch for it using rAF
-        if (!isThunderbird && !(canOptimizeUsingProxy && element.sheet)) {
+        if (!__THUNDERBIRD__ && !(canOptimizeUsingProxy && element.sheet)) {
             watchForSheetChangesUsingRAF();
         }
     }

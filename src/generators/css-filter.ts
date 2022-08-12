@@ -6,7 +6,10 @@ import {parseArray, formatArray} from '../utils/text';
 import {compareURLPatterns, isURLInList} from '../utils/url';
 import {createTextStyle} from './text-style';
 import type {FilterConfig, InversionFix} from '../definitions';
-import {compareChromeVersions, chromiumVersion, isChromium, isFirefox, firefoxVersion} from '../utils/platform';
+import {compareChromeVersions, chromiumVersion, isFirefox, firefoxVersion} from '../utils/platform';
+
+declare const __CHROMIUM_MV2__: boolean;
+declare const __CHROMIUM_MV3__: boolean;
 
 export enum FilterMode {
     light = 0,
@@ -21,8 +24,8 @@ export enum FilterMode {
  * Patch: https://chromium-review.googlesource.com/c/chromium/src/+/1979258
  */
 export function hasPatchForChromiumIssue501582() {
-    return Boolean(
-        isChromium &&
+    return __CHROMIUM_MV3__ || Boolean(
+        __CHROMIUM_MV2__ &&
         compareChromeVersions(chromiumVersion, '81.0.4035.0') >= 0
     );
 }

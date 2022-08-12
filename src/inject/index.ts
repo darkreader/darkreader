@@ -7,11 +7,11 @@ import {isSystemDarkModeEnabled, runColorSchemeChangeDetector, stopColorSchemeCh
 import {collectCSS} from './dynamic-theme/css-collection';
 import type {Message} from '../definitions';
 import {MessageType} from '../utils/message';
-import {isThunderbird} from '../utils/platform';
 
 let unloaded = false;
 
-declare const __MV3__: boolean;
+declare const __CHROMIUM_MV3__: boolean;
+declare const __THUNDERBIRD__: boolean;
 
 function cleanup() {
     unloaded = true;
@@ -38,7 +38,7 @@ function sendMessage(message: Message) {
     };
 
     try {
-        if (__MV3__) {
+        if (__CHROMIUM_MV3__) {
             const promise: Promise<Message | 'unsupportedSender'> = chrome.runtime.sendMessage<Message>(message);
             promise.then(responseHandler).catch(cleanup);
         } else {
@@ -156,9 +156,9 @@ function onDarkThemeDetected() {
     sendMessage({type: MessageType.CS_DARK_THEME_DETECTED});
 }
 
-// Thunderbird don't has "tabs", and emails aren't 'frozen' or 'cached'.
+// Thunderbird does not have "tabs", and emails aren't 'frozen' or 'cached'.
 // And will currently error: `Promise rejected after context unloaded: Actor 'Conduits' destroyed before query 'RuntimeMessage' was resolved`
-if (!isThunderbird) {
+if (!__THUNDERBIRD__) {
     addEventListener('pagehide', onPageHide);
     addEventListener('freeze', onFreeze);
     addEventListener('resume', onResume);

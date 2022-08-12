@@ -43,7 +43,11 @@ export class Extension {
     private static autoState: AutomationState = '';
     private static wasEnabledOnLastCheck: boolean = null;
     private static registeredContextMenus: boolean = null;
-    // Is used only with Firefox to bypass Firefox bug
+    /**
+     * This value is used for two purposes:
+     *  - to bypass Firefox bug
+     *  - to filter out excessive Extension.onColorSchemeChange() invocations
+     */
     private static wasLastColorSchemeDark: boolean = null;
     private static startBarrier: PromiseBarrier<void, void> = null;
     private static stateManager: StateManager<ExtensionState> = null;
@@ -386,6 +390,10 @@ export class Extension {
     }
 
     private static onColorSchemeChange = async (isDark: boolean) => {
+        if (this.wasLastColorSchemeDark === isDark) {
+            // If color scheme was already correct, we do not need to do anyhting
+            return;
+        }
         this.MV3syncSystemColorStateManager(isDark);
         this.wasLastColorSchemeDark = isDark;
         await this.loadData();

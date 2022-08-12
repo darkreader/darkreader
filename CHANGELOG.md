@@ -1,3 +1,7 @@
+## Unreleased
+
+- Fix browser theme not changing when automation + scheme behavior was enabled.
+
 ## 4.9.55 (Aug 10, 2022)
 
 - Fix Google calendar.

@@ -510,15 +510,17 @@ export class Extension {
                 ContentScriptManager.registerScripts(async () => TabManager.updateContentScript({runOnProtectedPages: UserStorage.settings.enableForProtectedPages}));
             }
             IconManager.setActive();
-            if (UserStorage.settings.changeBrowserTheme) {
-                setWindowTheme(UserStorage.settings.theme);
-            }
         } else {
             if (__MV3__) {
                 ContentScriptManager.unregisterScripts();
             }
             IconManager.setInactive();
-            if (UserStorage.settings.changeBrowserTheme) {
+        }
+
+        if (UserStorage.settings.changeBrowserTheme) {
+            if (this.isExtensionSwitchedOn() && this.autoState !== 'scheme-light') {
+                setWindowTheme(UserStorage.settings.theme);
+            } else {
                 resetWindowTheme();
             }
         }

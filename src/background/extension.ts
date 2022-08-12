@@ -16,7 +16,7 @@ import {getDynamicThemeFixesFor} from '../generators/dynamic-theme';
 import createStaticStylesheet from '../generators/static-theme';
 import {createSVGFilterStylesheet, getSVGFilterMatrixValue, getSVGReverseFilterMatrixValue} from '../generators/svg-filter';
 import type {ExtensionData, FilterConfig, Shortcuts, UserSettings, TabInfo, TabData, Command} from '../definitions';
-import {isSystemDarkModeEnabled} from '../utils/media-query';
+import {isSystemDarkModeEnabled, runColorSchemeChangeDetector} from '../utils/media-query';
 import {isFirefox, isThunderbird} from '../utils/platform';
 import {MessageType} from '../utils/message';
 import {logInfo, logWarn} from '../utils/log';
@@ -43,7 +43,11 @@ export class Extension {
     private static autoState: AutomationState = '';
     private static wasEnabledOnLastCheck: boolean = null;
     private static registeredContextMenus: boolean = null;
-    // Is used only with Firefox to bypass Firefox bug
+    /**
+     * This value is used for two purposes:
+     *  - to bypass Firefox bug
+     *  - to filter out excessive Extension.onColorSchemeChange() invocations
+     */
     private static wasLastColorSchemeDark: boolean = null;
     private static startBarrier: PromiseBarrier<void, void> = null;
     private static stateManager: StateManager<ExtensionState> = null;
@@ -149,6 +153,9 @@ export class Extension {
                 isAutoDark = this.wasLastColorSchemeDark == null
                     ? isSystemDarkModeEnabled()
                     : this.wasLastColorSchemeDark;
+                if (isFirefox) {
+                    runColorSchemeChangeDetector(Extension.onColorSchemeChange);
+                }
                 break;
             case 'location': {
                 const {latitude, longitude} = UserStorage.settings.location;
@@ -386,6 +393,10 @@ export class Extension {
     }
 
     private static onColorSchemeChange = async (isDark: boolean) => {
+        if (this.wasLastColorSchemeDark === isDark) {
+            // If color scheme was already correct, we do not need to do anyhting
+            return;
+        }
         this.MV3syncSystemColorStateManager(isDark);
         this.wasLastColorSchemeDark = isDark;
         await this.loadData();

@@ -16,7 +16,7 @@ import {getDynamicThemeFixesFor} from '../generators/dynamic-theme';
 import createStaticStylesheet from '../generators/static-theme';
 import {createSVGFilterStylesheet, getSVGFilterMatrixValue, getSVGReverseFilterMatrixValue} from '../generators/svg-filter';
 import type {ExtensionData, FilterConfig, Shortcuts, UserSettings, TabInfo, TabData, Command} from '../definitions';
-import {isSystemDarkModeEnabled} from '../utils/media-query';
+import {isSystemDarkModeEnabled, runColorSchemeChangeDetector} from '../utils/media-query';
 import {isFirefox, isThunderbird} from '../utils/platform';
 import {MessageType} from '../utils/message';
 import {logInfo, logWarn} from '../utils/log';
@@ -153,6 +153,9 @@ export class Extension {
                 isAutoDark = this.wasLastColorSchemeDark == null
                     ? isSystemDarkModeEnabled()
                     : this.wasLastColorSchemeDark;
+                if (isFirefox) {
+                    runColorSchemeChangeDetector(Extension.onColorSchemeChange);
+                }
                 break;
             case 'location': {
                 const {latitude, longitude} = UserStorage.settings.location;

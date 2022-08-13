@@ -9,6 +9,24 @@ enum ContentScriptManagerState {
     NOTREGISTERED,
 }
 
+// TODO: remove once @types/chrome is updated
+// eslint-disable-next-line @typescript-eslint/no-namespace
+declare namespace chrome.scripting {
+    export function getRegisteredContentScripts(filter: { ids: string[] }, callback: (scripts: null[]) => void): void;
+    export function registerContentScripts(scripts: Array<{
+        id: string;
+        js: string[];
+        runAt: 'document_start';
+        persistAcrossSessions: true;
+        matches: [
+            '<all_urls>',
+        ];
+        allFrames: true;
+        world: 'MAIN' | 'ISOLATED';
+    }>, callback: () => void): void;
+    export function unregisterContentScripts(callback: () => void): void;
+}
+
 export default class ContentScriptManager {
     /**
      * TODO: migrate to using promisses directly instead of wrapping callbacks.
@@ -32,9 +50,9 @@ export default class ContentScriptManager {
         ContentScriptManager.state = ContentScriptManagerState.REGISTERING;
 
         return new Promise<void>((resolve) =>
-            (chrome.scripting as any).getRegisteredContentScripts(
+            chrome.scripting.getRegisteredContentScripts(
                 {ids: ['stylesheet-proxy', 'content-scripts']},
-                (scripts: any[]) => {
+                (scripts) => {
                     if (scripts.length === 2) {
                         ContentScriptManager.state = ContentScriptManagerState.REGISTERED;
                         resolve();
@@ -46,7 +64,7 @@ export default class ContentScriptManager {
                         // or static manifest declaration 'match_about_blank'.
                         // Therefore we need to also specify these scripts in manifes.json
                         // just for about:blank.
-                        (chrome.scripting as any).registerContentScripts([
+                        chrome.scripting.registerContentScripts([
                             {
                                 id: 'stylesheet-proxy',
                                 js: [
@@ -90,7 +108,7 @@ export default class ContentScriptManager {
             return;
         }
 
-        return new Promise<void>((resolve) => (chrome.scripting as any).unregisterContentScripts(undefined, () => {
+        return new Promise<void>((resolve) => chrome.scripting.unregisterContentScripts(() => {
             ContentScriptManager.state = ContentScriptManagerState.NOTREGISTERED;
             resolve();
         }));

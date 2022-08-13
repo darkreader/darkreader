@@ -7,6 +7,40 @@ import {makeChromiumHappy} from './make-chromium-happy';
 import {logInfo} from '../utils/log';
 import DevTools from './devtools';
 
+type TestMessage = {
+    type: 'changeSettings';
+    data: Partial<UserSettings>;
+    id: number;
+} | {
+    type: 'collectData';
+    id: number;
+} | {
+    type: 'changeLocalStorage';
+    data: {[key: string]: string};
+    id: number;
+} | {
+    type: 'getChromeStorage';
+    data: {
+        region: 'local' | 'sync';
+        keys: string | string[];
+    };
+    id: number;
+} | {
+    type: 'changeChromeStorage';
+    data: {
+        region: 'local' | 'sync';
+        data: {[key: string]: any};
+    };
+    id: number;
+} | {
+    type: 'getLocalStorage';
+    id: number;
+} | {
+    type: 'setDataIsMigratedForTesting';
+    data: boolean;
+    id: number;
+};
+
 // Initialize extension
 Extension.init();
 Extension.start();
@@ -109,10 +143,10 @@ if (__TEST__) {
     socket.onmessage = (e) => {
         const respond = (message: {type: string; data?: ExtensionData | string | boolean | {[key: string]: string}; id?: number}) => socket.send(JSON.stringify(message));
         try {
-            const message: {type: string; data: Partial<UserSettings> | boolean | {[key: string]: string}; id: number} = JSON.parse(e.data);
+            const message: TestMessage = JSON.parse(e.data);
             switch (message.type) {
                 case 'changeSettings':
-                    Extension.changeSettings(message.data as Partial<UserSettings>);
+                    Extension.changeSettings(message.data);
                     respond({type: 'changeSettings-response', id: message.id});
                     break;
                 case 'collectData':
@@ -121,7 +155,7 @@ if (__TEST__) {
                     });
                     break;
                 case 'changeLocalStorage': {
-                    const data = message.data as {[key: string]: string};
+                    const data = message.data;
                     for (const key in data) {
                         localStorage[key] = data[key];
                     }
@@ -132,18 +166,18 @@ if (__TEST__) {
                     respond({type: 'getLocalStorage-response', id: message.id, data: localStorage ? JSON.stringify(localStorage) : null});
                     break;
                 case 'changeChromeStorage': {
-                    const region: 'local' | 'sync' = (message.data as any).region;
-                    chrome.storage[region].set((message.data as any).data, () => respond({type: 'changeChromeStorage-response', id: message.id}));
+                    const region = message.data.region;
+                    chrome.storage[region].set(message.data.data, () => respond({type: 'changeChromeStorage-response', id: message.id}));
                     break;
                 }
                 case 'getChromeStorage': {
-                    const keys = (message.data as any).keys;
-                    const region: 'local' | 'sync' = (message.data as any).region;
+                    const keys = message.data.keys;
+                    const region = message.data.region;
                     chrome.storage[region].get(keys, (data) => respond({type: 'getChromeStorage-response', data, id: message.id}));
                     break;
                 }
                 case 'setDataIsMigratedForTesting':
-                    DevTools.setDataIsMigratedForTesting(message.data as boolean);
+                    DevTools.setDataIsMigratedForTesting(message.data);
                     respond({type: 'setDataIsMigratedForTesting-response', id: message.id});
                     break;
             }

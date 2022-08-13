@@ -1,4 +1,7 @@
 (function () {
+    if ('userAgentData' in navigator) {
+        return;
+    }
     var match = navigator.userAgent.toLowerCase().match(/chrom[e|ium]\/([^ \.]+)/);
     if (!match) {
         return;

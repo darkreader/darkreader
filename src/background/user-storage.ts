@@ -39,9 +39,9 @@ export default class UserStorage {
     // check for this case which is inefficient usage of requesting storage.
     private static migrateAutomationSettings(settings: UserSettings): void {
         if (typeof settings.automation === 'string') {
-            const automationMode = settings.automation as any;
-            const automationBehavior = (settings as any).automationBehaviour;
-            if ((settings.automation as any) === '') {
+            const automationMode = settings.automation;
+            const automationBehavior: UserSettings['automation']['behavior'] = (settings as any).automationBehaviour;
+            if (settings.automation === '') {
                 settings.automation = {
                     enabled: false,
                     mode: automationMode,

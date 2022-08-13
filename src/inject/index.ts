@@ -39,7 +39,7 @@ function sendMessage(message: Message) {
 
     try {
         if (__MV3__) {
-            const promise: Promise<Message | 'unsupportedSender'> = chrome.runtime.sendMessage<Message>(message) as any;
+            const promise: Promise<Message | 'unsupportedSender'> = chrome.runtime.sendMessage<Message>(message);
             promise.then(responseHandler).catch(cleanup);
         } else {
             chrome.runtime.sendMessage<Message, 'unsupportedSender' | undefined>(message, responseHandler);

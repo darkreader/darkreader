@@ -61,7 +61,7 @@ function createValidator() {
         obj[key] = fallback[key];
     }
 
-    function validateArray<T>(obj: T, key: keyof T, validator: (x: any) => boolean) {
+    function validateArray<T, V>(obj: T, key: keyof T, validator: (x: V) => boolean) {
         if (!obj.hasOwnProperty(key)) {
             return;
         }

@@ -1,10 +1,21 @@
 (function () {
+    var minChromeVersion = 63;
+    var browserBrands = navigator.userAgentData && navigator.userAgentData.brands;
+    if (browserBrands) {
+        for (var brandIndex = 0; brandIndex < browserBrands.length; brandIndex++) {
+            if (browserBrands[brandIndex].brand.includes('Chrom')) {
+                var currVersion = parseInt(browserBrands[brandIndex].version);
+                if (currVersion >= minChromeVersion) {
+                    return;
+                }
+            }
+        }
+    }
     var match = navigator.userAgent.toLowerCase().match(/chrom[e|ium]\/([^ \.]+)/);
     if (!match) {
         return;
     }
     var version = parseInt(match[1]);
-    var minChromeVersion = 63;
     if (version >= minChromeVersion) {
         return;
     }

@@ -30,7 +30,7 @@ function createServer(logLevel) {
             times.set(ws, Date.now());
             ws.on('message', async (data) => {
                 const message = data.toString();
-                stream.write(message + "\n");
+                stream.write(`${message}\n`);
             });
             ws.on('close', () => sockets.delete(ws));
             if (connectionAwaiter != null) {

@@ -1,5 +1,5 @@
 import {MessageType} from '../../utils/message';
-import {Message} from '../../definitions';
+import type {Message} from '../../definitions';
 
 declare const __DEBUG__: boolean;
 declare const __WATCH__: boolean;

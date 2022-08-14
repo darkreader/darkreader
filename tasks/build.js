@@ -6,7 +6,7 @@ import bundleLocales from './bundle-locales.js';
 import bundleManifest from './bundle-manifest.js';
 import clean from './clean.js';
 import copy from './copy.js';
-import console from './console.js';
+import saveLog from './log.js';
 import * as reload from './reload.js';
 import codeStyle from './code-style.js';
 import zip from './zip.js';
@@ -26,7 +26,7 @@ const standardTask = [
     bundleLocales,
     bundleManifest,
     copy,
-    console,
+    saveLog,
 ];
 
 const buildTask = [

@@ -1,5 +1,4 @@
 declare const __DEBUG__: boolean;
-const DEBUG = __DEBUG__;
 declare const __LOG__: 'info' | 'warn';
 
 let socket: WebSocket = null;

@@ -1,4 +1,4 @@
-import {logWarn} from '../utils/log';
+import {logWarn} from './utils/log';
 
 declare const __MV3__: boolean;
 

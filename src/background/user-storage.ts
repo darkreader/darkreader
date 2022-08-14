@@ -3,7 +3,7 @@ import {debounce} from '../utils/debounce';
 import {isURLMatched} from '../utils/url';
 import type {UserSettings} from '../definitions';
 import {readSyncStorage, readLocalStorage, writeSyncStorage, writeLocalStorage} from './utils/extension-api';
-import {logWarn} from '../utils/log';
+import {logWarn} from './utils/log';
 import {PromiseBarrier} from '../utils/promise-barrier';
 import {validateSettings} from '../utils/validation';
 

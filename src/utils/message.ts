@@ -41,4 +41,5 @@ export enum MessageType {
     CS_FETCH = 'cs-fetch',
     CS_DARK_THEME_DETECTED = 'cs-dark-theme-detected',
     CS_DARK_THEME_NOT_DETECTED = 'cs-dark-theme-not-detected',
+    CS_LOG = 'cs-log',
 }

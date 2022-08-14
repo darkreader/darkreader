@@ -1,5 +1,5 @@
 import {injectProxy} from './stylesheet-proxy';
-import {logInfo} from '../../utils/log';
+import {logInfo} from '../utils/log';
 
 document.currentScript && document.currentScript.remove();
 

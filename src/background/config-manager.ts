@@ -6,7 +6,7 @@ import type {InversionFix, StaticTheme, DynamicThemeFix} from '../definitions';
 import type {SitePropsIndex} from '../generators/utils/parse';
 import type {ParsedColorSchemeConfig} from '../utils/colorscheme-parser';
 import {ParseColorSchemeConfig} from '../utils/colorscheme-parser';
-import {logWarn} from '../utils/log';
+import {logWarn} from './utils/log';
 import {DEFAULT_COLORSCHEME} from '../defaults';
 
 const CONFIG_URLs = {

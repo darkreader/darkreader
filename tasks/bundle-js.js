@@ -90,7 +90,7 @@ function freeRollupPluginInstance(name, key) {
     }
 }
 
-async function bundleJS(/** @type {JSEntry} */entry, platform, debug, watch, test) {
+async function bundleJS(/** @type {JSEntry} */entry, platform, debug, watch, log, test) {
     const {src, dest} = entry;
     const rollupPluginTypesctiptInstanceKey = debug;
     const rollupPluginReplaceInstanceKey = `${platform}-${debug}-${watch}-${entry.src === 'src/ui/popup/index.tsx'}`;
@@ -143,6 +143,7 @@ async function bundleJS(/** @type {JSEntry} */entry, platform, debug, watch, tes
                     '__PORT__': watch ? String(PORT) : '-1',
                     '__TEST__': test ? 'true' : 'false',
                     '__WATCH__': watch ? 'true' : 'false',
+                    '__LOG__': log ? `"${log}"` : 'false',
                 })
             ),
         ].filter((x) => x)
@@ -170,16 +171,16 @@ function getWatchFiles() {
 /** @type {string[]} */
 let watchFiles;
 
-const hydrateTask = (/** @type {JSEntry[]} */entries, platforms, /** @type {boolean} */debug, /** @type {boolean} */watch, test) =>
+const hydrateTask = (/** @type {JSEntry[]} */entries, platforms, /** @type {boolean} */debug, /** @type {boolean} */watch, log, test) =>
     entries.map((entry) =>
         (entry.platform ? [entry.platform] : Object.values(PLATFORM))
             .filter((platform) => platforms[platform])
-            .map((platform) => bundleJS(entry, platform, debug, watch, test))
+            .map((platform) => bundleJS(entry, platform, debug, watch, log, test))
     ).flat();
 
 const bundleJSTask = createTask(
     'bundle-js',
-    async ({platforms, debug, watch, test}) => await Promise.all(hydrateTask(jsEntries, platforms, debug, watch, test)),
+    async ({platforms, debug, watch, log, test}) => await Promise.all(hydrateTask(jsEntries, platforms, debug, watch, log, test)),
 ).addWatcher(
     () => {
         watchFiles = getWatchFiles();

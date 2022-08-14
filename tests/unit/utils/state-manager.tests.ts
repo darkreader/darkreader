@@ -66,7 +66,7 @@ describe('State manager utility', () => {
         const stateManager = new StateManagerImpl(key, parent, {
             fromParent: 'fromDefault',
             fromStorage: 'fromDefault'
-        }, {get, set}, noop);
+        }, {get, set}, noop, noop);
 
         expect(getMock).not.toBeCalled();
         expect(setMock).not.toBeCalled();
@@ -120,7 +120,7 @@ describe('State manager utility', () => {
 
         const stateManager = new StateManagerImpl(key, parent, {
             data: 'fromStorage',
-        }, {get, set: setMock}, noop);
+        }, {get, set: setMock}, noop, noop);
 
         expect(setMock).not.toBeCalled();
         expect(parent).toEqual({
@@ -179,7 +179,7 @@ describe('State manager utility', () => {
 
         const stateManager = new StateManagerImpl(key, parent, {
             count: 0,
-        }, {get, set}, noop);
+        }, {get, set}, noop, noop);
 
         expect(parent).toEqual({
             noSync: true,
@@ -263,7 +263,7 @@ describe('State manager utility', () => {
 
         const stateManager = new StateManagerImpl(key, parent, {
             count: 0,
-        }, {get, set}, noop);
+        }, {get, set}, noop, noop);
 
         expect(parent).toEqual({
             noSync: true,
@@ -344,7 +344,7 @@ describe('State manager utility', () => {
 
         const stateManager = new StateManagerImpl(key, parent, {
             data: 'fromDefault',
-        }, {get, set}, noop);
+        }, {get, set}, noop, noop);
 
         expect(parent).toEqual({
             data: 'fromParent',
@@ -412,7 +412,7 @@ describe('State manager utility', () => {
 
         const stateManager = new StateManagerImpl(key, parent, {
             data: 'fromDefault',
-        }, {get, set}, noop);
+        }, {get, set}, noop, noop);
 
         expect(parent).toEqual({
             data: 'fromParent',
@@ -546,7 +546,7 @@ describe('State manager utility', () => {
 
         const stateManager = new StateManagerImpl(key, parent, {
             data: 'fromDefault',
-        }, {get, set}, (listener) => onChangedListener = listener);
+        }, {get, set}, (listener) => onChangedListener = listener, noop);
 
         const c1 = jest.fn();
         stateManager.addChangeListener(c1);

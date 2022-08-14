@@ -6,6 +6,7 @@ import bundleLocales from './bundle-locales.js';
 import bundleManifest from './bundle-manifest.js';
 import clean from './clean.js';
 import copy from './copy.js';
+import saveLog from './log.js';
 import * as reload from './reload.js';
 import codeStyle from './code-style.js';
 import zip from './zip.js';
@@ -25,6 +26,7 @@ const standardTask = [
     bundleLocales,
     bundleManifest,
     copy,
+    saveLog,
 ];
 
 const buildTask = [
@@ -33,10 +35,10 @@ const buildTask = [
     zip
 ];
 
-async function build({platforms, debug, watch, test}) {
+async function build({platforms, debug, watch, log: logging, test}) {
     log.ok('BUILD');
     try {
-        await runTasks(debug ? standardTask : buildTask, {platforms, debug, watch, test});
+        await runTasks(debug ? standardTask : buildTask, {platforms, debug, watch, log: logging, test});
         if (watch) {
             standardTask.forEach((task) => task.watch(platforms));
             reload.reload({type: reload.FULL});
@@ -53,7 +55,7 @@ async function build({platforms, debug, watch, test}) {
 async function api() {
     log.ok('API');
     try {
-        await runTasks([bundleAPI], {platforms: {}, debug: false, watch: false, test: false});
+        await runTasks([bundleAPI], {platforms: {}, debug: false, watch: false, log: false, test: false});
         log.ok('MISSION PASSED! RESPECT +');
     } catch (err) {
         console.log(err);
@@ -79,6 +81,14 @@ async function executeChildProcess(args) {
 async function run() {
     const args = process.argv.slice(2);
 
+    // Enable Ctrl+C to cancel the build immediately
+    if (!process.env.BUILD_CHILD) {
+        return executeChildProcess(args);
+    }
+
+    const validArgs = ['--api', '--chrome', '--chrome-mv3', '--firefox', '--thunderbird', '--release', '--debug', '--watch', '--log-info', '--log-warn', '--test'];
+    args.filter((arg) => !validArgs.includes(arg)).forEach((arg) => log.warn(`Unknown argument ${arg}`));
+
     const allPlatforms = !(args.includes('--chrome') || args.includes('--chrome-mv3') || args.includes('--firefox') || args.includes('--thunderbird'));
     const platforms = {
         [PLATFORM.CHROME]: allPlatforms || args.includes('--chrome'),
@@ -87,16 +97,17 @@ async function run() {
         [PLATFORM.THUNDERBIRD]: allPlatforms || args.includes('--thunderbird'),
     };
 
-    // Enable Ctrl+C to cancel the build immediately
-    if (!process.env.BUILD_CHILD) {
-        return executeChildProcess(args);
-    }
 
-    if (args.includes('--release')) {
-        await build({platforms, debug: false, watch: false, test: false});
+    const release = args.includes('--release');
+    const debug = args.includes('--debug');
+    const watch = args.includes('--watch');
+    const logInfo = watch && args.includes('--log-info');
+    const logWarn = watch && args.includes('--log-warn');
+    if (release) {
+        await build({platforms, debug: false, watch: false, log: null, test: false});
     }
-    if (args.includes('--debug')) {
-        await build({platforms, debug: true, watch: args.includes('--watch'), test: args.includes('--test')});
+    if (debug) {
+        await build({platforms, debug, watch, log: logWarn ? 'warn' : (logInfo ? 'info' : null), test: args.includes('--test')});
     }
     if (args.includes('--api')) {
         await api();

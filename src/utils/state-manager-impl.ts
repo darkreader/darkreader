@@ -1,4 +1,3 @@
-import {logWarn} from './log';
 import {PromiseBarrier} from './promise-barrier';
 
 /*
@@ -100,6 +99,7 @@ export class StateManagerImpl<T> {
     private localStorageKey: string;
     private parent;
     private defaults: T;
+    private logWarn: (log: string) => void;
 
     private meta: StateManagerImplState;
     private barrier: PromiseBarrier<void, void> = null;
@@ -111,12 +111,13 @@ export class StateManagerImpl<T> {
 
     private listeners: Set<() => void>;
 
-    constructor(localStorageKey: string, parent: any, defaults: T, storage: {get: (storageKey: string, callback: (items: { [key: string]: any }) => void) => void; set: (items: { [key: string]: any }, callback: () => void) => void}, addListener: (listener: (data: T) => void) => void){
+    constructor(localStorageKey: string, parent: any, defaults: T, storage: {get: (storageKey: string, callback: (items: { [key: string]: any }) => void) => void; set: (items: { [key: string]: any }, callback: () => void) => void}, addListener: (listener: (data: T) => void) => void, logWarn: (log: string) => void){
         this.localStorageKey = localStorageKey;
         this.parent = parent;
         this.defaults = defaults;
         this.storage = storage;
         addListener((change) => this.onChange(change));
+        this.logWarn = logWarn;
 
         this.meta = StateManagerImplState.INITIAL;
         this.barrier = new PromiseBarrier();
@@ -185,7 +186,7 @@ export class StateManagerImpl<T> {
                 case StateManagerImplState.READY:
                     // fallthrough
                 case StateManagerImplState.RECOVERY:
-                    logWarn('Unexpected state. Possible data race!');
+                    this.logWarn('Unexpected state. Possible data race!');
                     this.meta = StateManagerImplState.ONCHANGE_RACE;
                     this.loadStateInternal();
                     return;
@@ -209,11 +210,11 @@ export class StateManagerImpl<T> {
         switch (this.meta) {
             case StateManagerImplState.INITIAL:
                 // Make sure not to overwrite data before it is loaded
-                logWarn('StateManager.saveState was called before StateManager.loadState(). Possible data race! Loading data instead.');
+                this.logWarn('StateManager.saveState was called before StateManager.loadState(). Possible data race! Loading data instead.');
                 return this.loadState();
             case StateManagerImplState.LOADING:
                 // Need to wait for active read operation to end
-                logWarn('StateManager.saveState was called before StateManager.loadState() resolved. Possible data race! Loading data instead.');
+                this.logWarn('StateManager.saveState was called before StateManager.loadState() resolved. Possible data race! Loading data instead.');
                 return this.barrier.entry();
             case StateManagerImplState.READY:
                 this.meta = StateManagerImplState.SAVING;
@@ -227,10 +228,10 @@ export class StateManagerImpl<T> {
             case StateManagerImplState.SAVING_OVERRIDE:
                 return this.barrier.entry();
             case StateManagerImplState.ONCHANGE_RACE:
-                logWarn('StateManager.saveState was called during active read/write operation. Possible data race! Loading data instead.');
+                this.logWarn('StateManager.saveState was called during active read/write operation. Possible data race! Loading data instead.');
                 return this.barrier.entry();
             case StateManagerImplState.RECOVERY:
-                logWarn('StateManager.saveState was called during active read operation. Possible data race! Waiting for data load instead.');
+                this.logWarn('StateManager.saveState was called during active read operation. Possible data race! Waiting for data load instead.');
                 return this.barrier.entry();
         }
     }
@@ -242,7 +243,7 @@ export class StateManagerImpl<T> {
                 case StateManagerImplState.READY:
                 case StateManagerImplState.SAVING:
                 case StateManagerImplState.SAVING_OVERRIDE:
-                    logWarn('Unexpected state. Possible data race!');
+                    this.logWarn('Unexpected state. Possible data race!');
                     return;
                 case StateManagerImplState.LOADING:
                     this.meta = StateManagerImplState.READY;

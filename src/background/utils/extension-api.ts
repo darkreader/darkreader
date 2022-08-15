@@ -13,6 +13,9 @@ export function canInjectScript(url: string) {
             && !url.startsWith('about:')
             && !url.startsWith('moz')
             && !url.startsWith('view-source:')
+            && !url.startsWith('resource:')
+            && !url.startsWith('chrome:')
+            && !url.startsWith('jar:')
             && !url.startsWith('https://addons.mozilla.org/')
             && !isPDF(url)
         );

@@ -1,4 +1,4 @@
-## Unreleased
+## 4.9.56 (Aug 16, 2022)
 
 - Fix browser theme not changing when automation + scheme behavior was enabled.
 

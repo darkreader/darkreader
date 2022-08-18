@@ -1,11 +1,15 @@
 import {isMatchMediaChangeEventListenerSupported} from './platform';
 
 let query: MediaQueryList = null;
-let onChange: () => void = null;
+const onChange: ({matches}: {matches: boolean}) => void = ({matches}) => listeners.forEach((listener) => listener(matches));
+const listeners = new Set<(isDark: boolean) => void>();
 
 export function runColorSchemeChangeDetector(callback: (isDark: boolean) => void) {
+    listeners.add(callback);
+    if (query) {
+        return;
+    }
     query = matchMedia('(prefers-color-scheme: dark)');
-    onChange = () => callback(query.matches);
     if (isMatchMediaChangeEventListenerSupported) {
         query.addEventListener('change', onChange);
     } else {
@@ -22,8 +26,8 @@ export function stopColorSchemeChangeDetector() {
     } else {
         query.removeListener(onChange);
     }
+    listeners.clear();
     query = null;
-    onChange = null;
 }
 
 export const isSystemDarkModeEnabled = () => (query || matchMedia('(prefers-color-scheme: dark)')).matches;

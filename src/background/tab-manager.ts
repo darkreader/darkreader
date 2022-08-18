@@ -70,9 +70,7 @@ export default class TabManager {
         chrome.runtime.onMessage.addListener(async (message: Message, sender, sendResponse) => {
             switch (message.type) {
                 case MessageType.CS_FRAME_CONNECT: {
-                    if (isChromium) {
-                        onColorSchemeChange(message.data.isDark);
-                    }
+                    onColorSchemeChange(message.data.isDark);
                     await this.stateManager.loadState();
                     const reply = (options: ConnectionMessageOptions) => {
                         getConnectionMessage(options).then((message) => message && chrome.tabs.sendMessage<Message>(sender.tab.id, message, {frameId: sender.frameId}));
@@ -127,9 +125,7 @@ export default class TabManager {
                     break;
                 }
                 case MessageType.CS_FRAME_RESUME: {
-                    if (isChromium) {
-                        onColorSchemeChange(message.data.isDark);
-                    }
+                    onColorSchemeChange(message.data.isDark);
                     await this.stateManager.loadState();
                     const tabId = sender.tab.id;
                     const frameId = sender.frameId;
@@ -179,9 +175,7 @@ export default class TabManager {
                 case MessageType.UI_COLOR_SCHEME_CHANGE:
                     // fallthrough
                 case MessageType.CS_COLOR_SCHEME_CHANGE:
-                    if (isChromium) {
-                        onColorSchemeChange(message.data.isDark);
-                    }
+                    onColorSchemeChange(message.data.isDark);
                     break;
 
                 case MessageType.UI_SAVE_FILE: {

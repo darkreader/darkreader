@@ -2,7 +2,7 @@ import {canInjectScript} from '../background/utils/extension-api';
 import {createFileLoader} from './utils/network';
 import type {FetchRequestParameters} from './utils/network';
 import type {Message} from '../definitions';
-import {isChromium, isFirefox, isThunderbird} from '../utils/platform';
+import {isFirefox, isThunderbird} from '../utils/platform';
 import {MessageType} from '../utils/message';
 import {logWarn} from './utils/log';
 import {StateManager} from '../utils/state-manager';

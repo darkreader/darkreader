@@ -73,7 +73,9 @@ export default class TabManager {
                     onColorSchemeChange(message.data.isDark);
                     await this.stateManager.loadState();
                     const reply = (options: ConnectionMessageOptions) => {
-                        getConnectionMessage(options).then((message) => message && chrome.tabs.sendMessage<Message>(sender.tab.id, message, {frameId: sender.frameId}));
+                        getConnectionMessage(options).then((message) => {
+                            message && chrome.tabs.sendMessage<Message>(sender.tab.id, message, {frameId: sender.frameId});
+                        });
                     };
 
                     if (isPanel(sender)) {
@@ -150,7 +152,10 @@ export default class TabManager {
                     // Using custom response due to Chrome and Firefox incompatibility
                     // Sometimes fetch error behaves like synchronous and sends `undefined`
                     const id = message.id;
-                    const sendResponse = (response: Partial<Message>) => chrome.tabs.sendMessage<Message>(sender.tab.id, {type: MessageType.BG_FETCH_RESPONSE, id, ...response}, {frameId: sender.frameId});
+                    const sendResponse = (response: Partial<Message>) => {
+                        chrome.tabs.sendMessage<Message>(sender.tab.id, {type: MessageType.BG_FETCH_RESPONSE, id, ...response}, {frameId: sender.frameId});
+                    };
+
                     if (isThunderbird) {
                         // In thunderbird some CSS is loaded on a chrome:// URL.
                         // Thunderbird restricted Add-ons to load those URL's.
@@ -302,7 +307,9 @@ export default class TabManager {
                         if (tab.active && frameId === 0) {
                             chrome.tabs.sendMessage<Message>(tab.id, message, {frameId});
                         } else {
-                            setTimeout(() => chrome.tabs.sendMessage<Message>(tab.id, message, {frameId}));
+                            setTimeout(() => {
+                                chrome.tabs.sendMessage<Message>(tab.id, message, {frameId});
+                            });
                         }
                         if (this.tabs[tab.id][frameId]) {
                             this.tabs[tab.id][frameId].timestamp = this.timestamp;

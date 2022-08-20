@@ -76,7 +76,7 @@ export default class TabManager {
                     await this.stateManager.loadState();
                     const reply = (options: ConnectionMessageOptions) => {
                         getConnectionMessage(options).then((message) => {
-                            message && chrome.tabs.sendMessage<Message>(sender.tab.id, message, {frameId: sender.frameId})
+                            message && chrome.tabs.sendMessage<Message>(sender.tab.id, message, {frameId: sender.frameId});
                         });
                     };
 
@@ -157,8 +157,9 @@ export default class TabManager {
                     // Sometimes fetch error behaves like synchronous and sends `undefined`
                     const id = message.id;
                     const sendResponse = (response: Partial<Message>) => {
-                        chrome.tabs.sendMessage<Message>(sender.tab.id, {type: MessageType.BG_FETCH_RESPONSE, id, ...response}, {frameId: sender.frameId})
+                        chrome.tabs.sendMessage<Message>(sender.tab.id, {type: MessageType.BG_FETCH_RESPONSE, id, ...response}, {frameId: sender.frameId});
                     };
+
                     if (isThunderbird) {
                         // In thunderbird some CSS is loaded on a chrome:// URL.
                         // Thunderbird restricted Add-ons to load those URL's.

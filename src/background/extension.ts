@@ -34,7 +34,7 @@ interface ExtensionState {
 }
 
 interface SystemColorState {
-    isDark: boolean | null;
+    wasLastColorSchemeDark: boolean | null;
 }
 
 declare const __MV3__: boolean;
@@ -58,7 +58,6 @@ export class Extension {
     // Store system color theme
     private static SYSTEM_COLOR_LOCAL_STORAGE_KEY = 'system-color-state';
     private static systemColorStateManager: StateManager<SystemColorState>;
-    private static isDark: boolean | null = null;
 
     static init() {
         new Newsmaker();
@@ -102,14 +101,14 @@ export class Extension {
         }
         if (!this.systemColorStateManager) {
             this.systemColorStateManager = new StateManager<SystemColorState>(Extension.SYSTEM_COLOR_LOCAL_STORAGE_KEY, this, {
-                isDark,
+                wasLastColorSchemeDark: isDark,
             }, logWarn);
         }
         if (isDark === null) {
             // Attempt to restore data from storage
             return this.systemColorStateManager.loadState();
-        } else if (this.isDark !== isDark) {
-            this.isDark = isDark;
+        } else if (this.wasLastColorSchemeDark !== isDark) {
+            this.wasLastColorSchemeDark = isDark;
             return this.systemColorStateManager.saveState();
         }
     }
@@ -143,14 +142,14 @@ export class Extension {
             }
             case 'system':
                 if (__MV3__) {
-                    isAutoDark = this.isDark;
-                    if (this.isDark === null) {
+                    isAutoDark = this.wasLastColorSchemeDark;
+                    if (this.wasLastColorSchemeDark === null) {
                         logWarn('System color scheme is unknown. Defaulting to Dark.');
                         isAutoDark = true;
                     }
                     break;
                 }
-                isAutoDark = this.wasLastColorSchemeDark == null
+                isAutoDark = this.wasLastColorSchemeDark === null
                     ? isSystemDarkModeEnabled()
                     : this.wasLastColorSchemeDark;
                 if (isFirefox) {
@@ -397,8 +396,8 @@ export class Extension {
             // If color scheme was already correct, we do not need to do anyhting
             return;
         }
-        this.MV3syncSystemColorStateManager(isDark);
         this.wasLastColorSchemeDark = isDark;
+        this.MV3syncSystemColorStateManager(isDark);
         await this.loadData();
         if (UserStorage.settings.automation.mode !== 'system') {
             return;

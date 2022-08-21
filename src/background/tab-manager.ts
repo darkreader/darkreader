@@ -2,7 +2,7 @@ import {canInjectScript} from '../background/utils/extension-api';
 import {createFileLoader} from './utils/network';
 import type {FetchRequestParameters} from './utils/network';
 import type {Message} from '../definitions';
-import {isChromium, isFirefox, isThunderbird} from '../utils/platform';
+import {isFirefox, isThunderbird} from '../utils/platform';
 import {MessageType} from '../utils/message';
 import {logWarn} from './utils/log';
 import {StateManager} from '../utils/state-manager';
@@ -70,9 +70,7 @@ export default class TabManager {
         chrome.runtime.onMessage.addListener(async (message: Message, sender, sendResponse) => {
             switch (message.type) {
                 case MessageType.CS_FRAME_CONNECT: {
-                    if (isChromium) {
-                        onColorSchemeChange(message.data.isDark);
-                    }
+                    onColorSchemeChange(message.data.isDark);
                     await this.stateManager.loadState();
                     const reply = (options: ConnectionMessageOptions) => {
                         getConnectionMessage(options).then((message) => {
@@ -129,9 +127,7 @@ export default class TabManager {
                     break;
                 }
                 case MessageType.CS_FRAME_RESUME: {
-                    if (isChromium) {
-                        onColorSchemeChange(message.data.isDark);
-                    }
+                    onColorSchemeChange(message.data.isDark);
                     await this.stateManager.loadState();
                     const tabId = sender.tab.id;
                     const frameId = sender.frameId;
@@ -184,9 +180,7 @@ export default class TabManager {
                 case MessageType.UI_COLOR_SCHEME_CHANGE:
                     // fallthrough
                 case MessageType.CS_COLOR_SCHEME_CHANGE:
-                    if (isChromium) {
-                        onColorSchemeChange(message.data.isDark);
-                    }
+                    onColorSchemeChange(message.data.isDark);
                     break;
 
                 case MessageType.UI_SAVE_FILE: {

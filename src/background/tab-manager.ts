@@ -296,7 +296,8 @@ export default class TabManager {
                 const frames = this.tabs[tab.id];
                 Object.entries(frames)
                     .filter(([, {state}]) => state === DocumentState.ACTIVE || state === DocumentState.PASSIVE)
-                    .forEach(([, {url}], frameId) => {
+                    .forEach(([id, {url}]) => {
+                        const frameId = Number(id);
                         const tabURL = this.getTabURL(tab);
                         // Check if hostname are equal when we only want to update active tab.
                         if (onlyUpdateActiveTab && getURLHostOrProtocol(tabURL) !== activeTabHostname) {

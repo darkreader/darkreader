@@ -1,6 +1,7 @@
-## Unreleased
+## 4.9.57 (Aug 23, 2022)
 
 - Fix iframes not getting modified when settings were changed.
+- Fixed registering system automation handlers multiple times.
 
 ## 4.9.56 (Aug 16, 2022)
 

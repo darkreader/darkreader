@@ -255,7 +255,14 @@ export function overrideInlineStyle(element: HTMLElement, theme: FilterConfig, i
         const isPropertyVariable = targetCSSProp.startsWith('--');
         const {customProp, dataAttr} = isPropertyVariable ? ({} as Overrides['']) : overrides[targetCSSProp];
 
-        const mod = getModifiableCSSDeclaration(modifierCSSProp, cssVal, {} as CSSStyleRule, variablesStore, ignoreImageSelectors, null);
+        const mod = getModifiableCSSDeclaration(
+            modifierCSSProp,
+            cssVal,
+            {style: element.style} as CSSStyleRule,
+            variablesStore,
+            ignoreImageSelectors,
+            null,
+        );
         if (!mod) {
             return;
         }

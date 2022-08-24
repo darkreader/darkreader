@@ -1,8 +1,9 @@
 // @ts-check
-const prettier = require('prettier');
-const {getDestDir, PLATFORM} = require('./paths');
-const {createTask} = require('./task');
-const {log, readFile, writeFile, getPaths} = require('./utils');
+import prettier from 'prettier';
+import paths from './paths.js';
+import {createTask} from './task.js';
+import {log, readFile, writeFile, getPaths} from './utils.js';
+const {getDestDir, PLATFORM} = paths;
 
 /** @type {import('prettier').Options} */
 const options = {
@@ -18,8 +19,12 @@ const options = {
 
 const extensions = ['html', 'css', 'js'];
 
-async function codeStyle({debug}) {
-    const dir = getDestDir({debug, platform: PLATFORM.CHROME});
+async function codeStyle({platforms, debug}) {
+    if (debug) {
+        throw new Error('code-style task does not support debug builds');
+    }
+    const platform = Object.values(PLATFORM).find((platform) => platforms[platform]);
+    const dir = getDestDir({debug, platform});
     const files = await getPaths(extensions.map((ext) => `${dir}/**/*.${ext}`));
     for (const file of files) {
         const code = await readFile(file);
@@ -34,7 +39,9 @@ async function codeStyle({debug}) {
     }
 }
 
-module.exports = createTask(
+const codeStyleTask = createTask(
     'code-style',
     codeStyle,
 );
+
+export default codeStyleTask;

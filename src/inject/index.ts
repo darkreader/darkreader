@@ -2,8 +2,8 @@ import {createOrUpdateStyle, removeStyle} from './style';
 import {createOrUpdateSVGFilter, removeSVGFilter} from './svg-filter';
 import {runDarkThemeDetector, stopDarkThemeDetector} from './detector';
 import {createOrUpdateDynamicTheme, removeDynamicTheme, cleanDynamicThemeCache} from './dynamic-theme';
-import {logWarn, logInfoCollapsed} from '../utils/log';
-import {isSystemDarkScheme, runColorSchemeChangeDetector, stopColorSchemeChangeDetector} from './utils/watch-color-scheme';
+import {logWarn, logInfoCollapsed} from './utils/log';
+import {isSystemDarkModeEnabled, runColorSchemeChangeDetector, stopColorSchemeChangeDetector} from '../utils/media-query';
 import {collectCSS} from './dynamic-theme/css-collection';
 import type {Message} from '../definitions';
 import {MessageType} from '../utils/message';
@@ -39,7 +39,7 @@ function sendMessage(message: Message) {
 
     try {
         if (__MV3__) {
-            const promise: Promise<Message | 'unsupportedSender'> = chrome.runtime.sendMessage<Message>(message) as any;
+            const promise: Promise<Message | 'unsupportedSender'> = chrome.runtime.sendMessage<Message>(message);
             promise.then(responseHandler).catch(cleanup);
         } else {
             chrome.runtime.sendMessage<Message, 'unsupportedSender' | undefined>(message, responseHandler);
@@ -136,7 +136,7 @@ runColorSchemeChangeDetector((isDark) =>
 );
 
 chrome.runtime.onMessage.addListener(onMessage);
-sendMessage({type: MessageType.CS_FRAME_CONNECT, data: {isDark: isSystemDarkScheme()}});
+sendMessage({type: MessageType.CS_FRAME_CONNECT, data: {isDark: isSystemDarkModeEnabled()}});
 
 function onPageHide(e: PageTransitionEvent) {
     if (e.persisted === false) {
@@ -149,7 +149,7 @@ function onFreeze() {
 }
 
 function onResume() {
-    sendMessage({type: MessageType.CS_FRAME_RESUME, data: {isDark: isSystemDarkScheme()}});
+    sendMessage({type: MessageType.CS_FRAME_RESUME, data: {isDark: isSystemDarkModeEnabled()}});
 }
 
 function onDarkThemeDetected() {

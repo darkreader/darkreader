@@ -1,7 +1,8 @@
 // @ts-check
 
-const {dirname} = require('path');
-const rootDir = dirname(require.resolve('../../package.json'));
+import {dirname, join} from 'path';
+import {createRequire} from 'module';
+const rootDir = dirname(createRequire(import.meta.url).resolve('../../package.json'));
 
 /** @type {import('@jest/types').Config.InitialOptions} */
 const config = {
@@ -25,4 +26,4 @@ const config = {
     coveragePathIgnorePatterns: ['^.+\\.d\\.ts$'],
 };
 
-module.exports = config;
+export default config;

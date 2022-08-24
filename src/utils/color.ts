@@ -15,6 +15,42 @@ export interface HSLA {
     a?: number;
 }
 
+const hslaParseCache = new Map<string, HSLA>();
+const rgbaParseCache = new Map<string, RGBA>();
+
+export function parseColorWithCache($color: string) {
+    $color = $color.trim();
+    if (rgbaParseCache.has($color)) {
+        return rgbaParseCache.get($color);
+    }
+    // We cannot _really_ parse any color which has the calc() expression,
+    // so we try our best to remove those and then parse the value.
+    if ($color.includes('calc(')) {
+        $color = lowerCalcExpression($color);
+    }
+    const color = parse($color);
+    color && rgbaParseCache.set($color, color);
+    return color;
+}
+
+export function parseToHSLWithCache(color: string) {
+    if (hslaParseCache.has(color)) {
+        return hslaParseCache.get(color);
+    }
+    const rgb = parseColorWithCache(color);
+    if (!rgb) {
+        return null;
+    }
+    const hsl = rgbToHSL(rgb);
+    hslaParseCache.set(color, hsl);
+    return hsl;
+}
+
+export function clearColorCache() {
+    hslaParseCache.clear();
+    rgbaParseCache.clear();
+}
+
 // https://en.wikipedia.org/wiki/HSL_and_HSV
 export function hslToRGB({h, s, l, a = 1}: HSLA): RGBA {
     if (s === 0) {
@@ -138,14 +174,14 @@ export function parse($color: string): RGBA {
         return {r: 0, g: 0, b: 0, a: 0};
     }
 
-    throw new Error(`Unable to parse ${$color}`);
+    return null;
 }
 
 function getNumbers($color: string) {
     const numbers = [];
     let prevPos = 0;
     let isMining = false;
-    // Get the first `(`
+    // Get the first `(`.
     const startIndex = $color.indexOf('(');
     $color = $color.substring(startIndex + 1, $color.length - 1);
     for (let i = 0; i < $color.length; i++) {
@@ -155,8 +191,8 @@ function getNumbers($color: string) {
             // Enable the mining flag.
             isMining = true;
         } else if (isMining && (c === ' ' || c === ',')) {
-            // isMinig is true and we got a terminating
-            // Character. So we can push the current number
+            // isMining is true and we got a terminating
+            // character. So we can push the current number
             // into the array.
             numbers.push($color.substring(prevPos, i));
             // Disable the mining flag.
@@ -226,7 +262,7 @@ function parseHex($hex: string) {
             return {r, g, b, a};
         }
     }
-    throw new Error(`Unable to parse ${$hex}`);
+    return null;
 }
 
 function getColorByName($color: string) {
@@ -264,7 +300,7 @@ export function lowerCalcExpression(color: string): string {
 
     // Run this code until it doesn't find any `calc(...)`.
     while ((searchIndex = color.indexOf('calc(')) !== -1) {
-        // Get the parantheses ranges of `calc(...)`
+        // Get the parentheses ranges of `calc(...)`.
         const range = getParenthesesRange(color, searchIndex);
         if (!range) {
             break;
@@ -277,7 +313,7 @@ export function lowerCalcExpression(color: string): string {
         // Remove all percentages.
         slice = slice.split('%').join('');
 
-        // Pass the content to the evalMath library and round it's output.
+        // Pass the content to the evalMath library and round its output.
         const output = Math.round(evalMath(slice));
 
         // Replace `calc(...)` with the result.

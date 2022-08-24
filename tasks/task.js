@@ -1,10 +1,13 @@
-const {log} = require('./utils');
-const watch = require('./watch');
+import {log} from './utils.js';
+import watch from './watch.js';
 
 /**
  * @typedef TaskOptions
+ * @property {object} platforms
  * @property {boolean} debug
  * @property {boolean} watch
+ * @property {boolean} test
+ * @property {string | false} log
  */
 
 class Task {
@@ -19,7 +22,7 @@ class Task {
 
     /**
      * @param {string[] | (() => string[])} files
-     * @param {(changedFiles: string[], watcher: import('chokidar').FSWatcher) => void | Promise<void>} onChange
+     * @param {(changedFiles: string[], watcher: import('chokidar').FSWatcher) => void | Promise<void>, platforms: object} onChange
      */
     addWatcher(files, onChange) {
         this._watchFiles = files;
@@ -46,7 +49,7 @@ class Task {
         );
     }
 
-    watch() {
+    watch(platforms) {
         if (!this._watchFiles || !this._onChange) {
             return;
         }
@@ -57,7 +60,7 @@ class Task {
                 this._watchFiles,
             onChange: async (files) => {
                 await this._measureTime(
-                    this._onChange(files, watcher)
+                    this._onChange(files, watcher, platforms)
                 );
             },
         });
@@ -68,7 +71,7 @@ class Task {
  * @param {string} name
  * @param {(options: TaskOptions) => void | Promise<any>} run
  */
-function createTask(name, run) {
+export function createTask(name, run) {
     return new Task(name, run);
 }
 
@@ -76,7 +79,7 @@ function createTask(name, run) {
  * @param {Task[]} tasks
  * @param {TaskOptions} options
  */
-async function runTasks(tasks, options) {
+export async function runTasks(tasks, options) {
     for (const task of tasks) {
         try {
             await task.run(options);
@@ -86,8 +89,3 @@ async function runTasks(tasks, options) {
         }
     }
 }
-
-module.exports = {
-    createTask,
-    runTasks,
-};

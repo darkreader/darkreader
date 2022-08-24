@@ -1,7 +1,7 @@
 // @ts-check
-const fs = require('fs').promises;
-const https = require('https');
-const path = require('path');
+import fs from 'fs/promises';
+import https from 'https';
+import path from 'path';
 
 /** @type {{[color: string]: (text: string) => string}} */
 const colors = Object.entries({
@@ -15,7 +15,7 @@ const colors = Object.entries({
  * @param {string} text
  * @returns
  */
-function logWithTime(text) {
+export function logWithTime(text) {
     const now = new Date();
     const hours = now.getHours();
     const minutes = now.getMinutes();
@@ -24,7 +24,7 @@ function logWithTime(text) {
     return console.log(`${colors.gray([hours, minutes, seconds].map(leftpad).join(':'))} ${text}`);
 }
 
-const log = Object.assign((/** @type {string} */text) => logWithTime(text), {
+export const log = Object.assign((/** @type {string} */text) => logWithTime(text), {
     ok: (/** @type {string} */text) => logWithTime(colors.green(text)),
     warn: (/** @type {string} */text) => logWithTime(colors.yellow(text)),
     error: (/** @type {string} */text) => logWithTime(colors.red(text)),
@@ -34,7 +34,7 @@ const log = Object.assign((/** @type {string} */text) => logWithTime(text), {
  * @param {string} dest
  * @returns {Promise<boolean>}
  */
-async function pathExists(dest) {
+export async function pathExists(dest) {
     try {
         await fs.access(dest);
         return true;
@@ -47,7 +47,7 @@ async function pathExists(dest) {
  * @param {string} dir
  * @returns {Promise<void>}
  */
-async function removeFolder(dir) {
+export async function removeFolder(dir) {
     if (await pathExists(dir)) {
         await fs.rm(dir, {recursive: true});
     }
@@ -57,7 +57,7 @@ async function removeFolder(dir) {
  * @param {string} dest
  * @returns {Promise<void>}
  */
-async function mkDirIfMissing(dest) {
+export async function mkDirIfMissing(dest) {
     const dir = path.dirname(dest);
     if (!(await pathExists(dir))) {
         await fs.mkdir(dir, {recursive: true});
@@ -69,7 +69,7 @@ async function mkDirIfMissing(dest) {
  * @param {string} dest
  * @returns {Promise<void>}
  */
-async function copyFile(src, dest) {
+export async function copyFile(src, dest) {
     await mkDirIfMissing(dest);
     await fs.copyFile(src, dest);
 }
@@ -78,7 +78,7 @@ async function copyFile(src, dest) {
  * @param {string} src
  * @returns {Promise<string>}
  */
-async function readFile(src) {
+export async function readFile(src) {
     return await fs.readFile(src, 'utf8');
 }
 
@@ -87,7 +87,7 @@ async function readFile(src) {
  * @param {string} content
  * @returns {Promise<void>}
  */
-async function writeFile(dest, content) {
+export async function writeFile(dest, content) {
     await mkDirIfMissing(dest);
     await fs.writeFile(dest, content, 'utf8');
 }
@@ -96,7 +96,7 @@ async function writeFile(dest, content) {
  * @param {string | string[]} patterns
  * @returns {Promise<string[]>}
  */
-async function getPaths(patterns) {
+export async function getPaths(patterns) {
     const {globby} = await import('globby');
     return await globby(patterns);
 }
@@ -105,7 +105,7 @@ async function getPaths(patterns) {
  * @param {number} delay
  * @returns {Promise<void>}
  */
-function timeout(delay) {
+export function timeout(delay) {
     return new Promise((resolve) => setTimeout(resolve, delay));
 }
 
@@ -113,7 +113,7 @@ function timeout(delay) {
  * @param {string} url
  * @returns {Promise<{buffer(): Buffer; text(encoding?: string): string; type(): string}>}
  */
-function httpsRequest(url) {
+export function httpsRequest(url) {
     return new Promise((resolve) => {
         /** @type {any[]} */
         const data = [];
@@ -125,21 +125,9 @@ function httpsRequest(url) {
                     resolve({
                         buffer: () => buffer,
                         text: (/** @type {BufferEncoding} */encoding = 'utf8') => buffer.toString(encoding),
-                        type: () => response.headers['content-type'],
+                        type: () => response.headers['content-type'] || '',
                     });
                 });
         });
     });
 }
-
-module.exports = {
-    log,
-    copyFile,
-    pathExists,
-    readFile,
-    removeFolder,
-    writeFile,
-    getPaths,
-    httpsRequest,
-    timeout,
-};

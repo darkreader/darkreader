@@ -1,12 +1,12 @@
 import {overrideInlineStyle, getInlineOverrideStyle, watchForInlineStyles, stopWatchingForInlineStyles, INLINE_STYLE_SELECTOR} from './inline-style';
 import {changeMetaThemeColorWhenAvailable, restoreMetaThemeColor} from './meta-theme-color';
-import {getModifiedUserAgentStyle, getModifiedFallbackStyle, cleanModificationCache, getSelectionColor, tryParseColor} from './modify-css';
+import {getModifiedUserAgentStyle, getModifiedFallbackStyle, cleanModificationCache, getSelectionColor} from './modify-css';
 import type {StyleElement, StyleManager} from './style-manager';
 import {manageStyle, getManageableStyles, cleanLoadingLinks} from './style-manager';
 import {watchForStyleChanges, stopWatchingForStyleChanges} from './watch';
 import {forEach, push, toArray} from '../../utils/array';
 import {removeNode, watchForNodePosition, iterateShadowHosts, isDOMReady, removeDOMReadyListener, cleanReadyStateCompleteListeners, addDOMReadyListener, setIsDOMReady} from '../utils/dom';
-import {logInfo, logWarn} from '../../utils/log';
+import {logInfo, logWarn} from '../utils/log';
 import {throttle} from '../../utils/throttle';
 import {clamp} from '../../utils/math';
 import {getCSSFilterValue} from '../../generators/css-filter';
@@ -18,7 +18,7 @@ import type {AdoptedStyleSheetManager} from './adopted-style-manger';
 import {createAdoptedStyleSheetOverride} from './adopted-style-manger';
 import {isFirefox} from '../../utils/platform';
 import {injectProxy} from './stylesheet-proxy';
-import {parse} from '../../utils/color';
+import {clearColorCache, parseColorWithCache} from '../../utils/color';
 import {parsedURLCache} from '../../utils/url';
 import {variablesStore} from './variables';
 
@@ -60,7 +60,7 @@ function createOrUpdateScript(className: string, root: ParentNode = document.hea
 
 /**
  * Note: This function is used only with MV3.
- * String passed as src parameter must be included in web_accessible_resources manifest key.
+ * The string passed as the src parameter must be included in the web_accessible_resources manifest key.
  */
 function injectProxyScriptMV3(arg: boolean) {
     logInfo('MV3 proxy injector: regular path attempts to inject...');
@@ -133,8 +133,8 @@ function createStaticStyleOverrides() {
     const {darkSchemeBackgroundColor, darkSchemeTextColor, lightSchemeBackgroundColor, lightSchemeTextColor, mode} = filter;
     let schemeBackgroundColor = mode === 0 ? lightSchemeBackgroundColor : darkSchemeBackgroundColor;
     let schemeTextColor = mode === 0 ? lightSchemeTextColor : darkSchemeTextColor;
-    schemeBackgroundColor = modifyBackgroundColor(parse(schemeBackgroundColor), filter);
-    schemeTextColor = modifyForegroundColor(parse(schemeTextColor), filter);
+    schemeBackgroundColor = modifyBackgroundColor(parseColorWithCache(schemeBackgroundColor), filter);
+    schemeTextColor = modifyForegroundColor(parseColorWithCache(schemeTextColor), filter);
     variableStyle.textContent = [
         `:root {`,
         `   --darkreader-neutral-background: ${schemeBackgroundColor};`,
@@ -152,7 +152,7 @@ function createStaticStyleOverrides() {
     const injectProxyArg = !(fixes && fixes.disableStyleSheetsProxy);
     if (__MV3__) {
         injectProxyScriptMV3(injectProxyArg);
-        // Notify dedicated injector of the data
+        // Notify the dedicated injector of the data.
         document.dispatchEvent(new CustomEvent('__darkreader__stylesheetProxy__arg', {detail: injectProxyArg}));
     } else {
         const proxyScript = createOrUpdateScript('darkreader--proxy');
@@ -191,7 +191,7 @@ function createShadowStaticStyleOverrides(root: ShadowRoot) {
 
 function replaceCSSTemplates($cssText: string) {
     return $cssText.replace(/\${(.+?)}/g, (_, $color) => {
-        const color = tryParseColor($color);
+        const color = parseColorWithCache($color);
         if (color) {
             return modifyColor(color, filter);
         }
@@ -368,11 +368,11 @@ function handleAdoptedStyleSheets(node: ShadowRoot | Document) {
             }
         }
     } catch (err) {
-        // For future readers, Dark Reader typically does not use 'try/catch' in its code but,
-        // due to a problem in Firefox Nightly, this is an exception. Allowing this exception
-        // to occur causes no consequence.
+        // For future readers, Dark Reader typically does not use 'try/catch' in its
+        // code, but this exception is due to a problem in Firefox Nightly and does
+        // not cause any consequences.
         // Ref: https://github.com/darkreader/darkreader/issues/8789#issuecomment-1114210080
-        logWarn('Error occured in handleAdoptedStyleSheets: ', err);
+        logWarn('Error occurred in handleAdoptedStyleSheets: ', err);
     }
 }
 
@@ -561,4 +561,5 @@ export function cleanDynamicThemeCache() {
     cancelRendering();
     stopWatchingForUpdates();
     cleanModificationCache();
+    clearColorCache();
 }

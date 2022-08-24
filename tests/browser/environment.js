@@ -1,19 +1,19 @@
-const fs = require('fs').promises;
-const JestNodeEnvironment = require('jest-environment-node');
-const path = require('path');
-const puppeteer = require('puppeteer-core');
-const webExt = require('web-ext');
-const WebSocket = require('ws');
-const {generateHTMLCoverageReports} = require('./coverage');
-const {getChromePath, getFirefoxPath, chromeExtensionDebugDir, firefoxExtensionDebugDir} = require('./paths');
-const {createTestServer} = require('./server');
+import fs from 'fs/promises';
+import JestNodeEnvironment from 'jest-environment-node';
+import path from 'path';
+import puppeteer from 'puppeteer-core';
+import {cmd} from 'web-ext';
+import {WebSocketServer} from 'ws';
+import {generateHTMLCoverageReports} from './coverage.js';
+import {getChromePath, getFirefoxPath, chromeExtensionDebugDir, firefoxExtensionDebugDir} from './paths.js';
+import {createTestServer} from './server.js';
 
 const TEST_SERVER_PORT = 8891;
 const CORS_SERVER_PORT = 8892;
 const FIREFOX_DEVTOOLS_PORT = 8893;
 const POPUP_TEST_PORT = 8894;
 
-class PuppeteerEnvironment extends JestNodeEnvironment {
+class PuppeteerEnvironment extends JestNodeEnvironment.TestEnvironment {
     async setup() {
         await super.setup();
 
@@ -35,7 +35,7 @@ class PuppeteerEnvironment extends JestNodeEnvironment {
         // Close sentinel about:blank page created by Puppeteer but not used in tests.
         this.browser.pages().then((pages) => {
             const sentinel = pages[0];
-            if (sentinel._target._targetInfo.url === 'about:blank') {
+            if (sentinel.url() === 'about:blank') {
                 sentinel.close();
             }
         });
@@ -74,7 +74,7 @@ class PuppeteerEnvironment extends JestNodeEnvironment {
 
     async launchFirefox() {
         const firefoxPath = await getFirefoxPath();
-        const webExtInstance = await webExt.cmd.run({
+        const webExtInstance = await cmd.run({
             sourceDir: firefoxExtensionDebugDir,
             firefox: firefoxPath,
             args: ['--remote-debugging-port', FIREFOX_DEVTOOLS_PORT],
@@ -173,7 +173,7 @@ class PuppeteerEnvironment extends JestNodeEnvironment {
         // Puppeteer cannot evaluate scripts in moz-extension:// pages
         // https://github.com/puppeteer/puppeteer/issues/6616
         return new Promise((resolve) => {
-            const wsServer = new WebSocket.Server({port: POPUP_TEST_PORT});
+            const wsServer = new WebSocketServer({port: POPUP_TEST_PORT});
             const sockets = new Set();
             const resolvers = new Map();
             const rejectors = new Map();
@@ -257,4 +257,4 @@ class PuppeteerEnvironment extends JestNodeEnvironment {
     }
 }
 
-module.exports = PuppeteerEnvironment;
+export default PuppeteerEnvironment;

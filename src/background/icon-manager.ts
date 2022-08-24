@@ -1,45 +1,86 @@
+import {isNonPersistent} from '../utils/migration';
 import {isThunderbird} from '../utils/platform';
 
-const ICON_PATHS = {
-    active_19: '../icons/dr_active_19.png',
-    active_38: '../icons/dr_active_38.png',
-    inactive_19: '../icons/dr_inactive_19.png',
-    inactive_38: '../icons/dr_inactive_38.png',
-};
+interface IconState {
+    badgeText: string;
+    active: boolean;
+}
 
 export default class IconManager {
-    setActive() {
+    private static ICON_PATHS = {
+        active: {
+            19: '../icons/dr_active_19.png',
+            38: '../icons/dr_active_38.png',
+        },
+        inactive: {
+            19: '../icons/dr_inactive_19.png',
+            38: '../icons/dr_inactive_38.png',
+        },
+    };
+
+    private static iconState: IconState = {
+        badgeText: '',
+        active: true,
+    };
+
+    private static onStartup() {
+        /**
+         * This empty listener invokes extension background if extension has non-default
+         * icon or badge. It is empty because all icon customizations will be initiated by
+         * Extension class.
+         * TODO: eventually, avoid running the whole Extension class on startup.
+         */
+    }
+
+    /**
+     * This method registers onStartup listener only if we are in non-persistent world and
+     * icon is in non-default configuration.
+     */
+    private static handleUpdate() {
+        if (!isNonPersistent) {
+            return;
+        }
+        if (IconManager.iconState.badgeText !== '' || !IconManager.iconState.active) {
+            chrome.runtime.onStartup.addListener(IconManager.onStartup);
+        } else {
+            chrome.runtime.onStartup.removeListener(IconManager.onStartup);
+        }
+    }
+
+    static setActive() {
         if (!chrome.browserAction.setIcon || isThunderbird) {
             // Fix for Firefox Android and Thunderbird.
             return;
         }
+        IconManager.iconState.active = true;
         chrome.browserAction.setIcon({
-            path: {
-                '19': ICON_PATHS.active_19,
-                '38': ICON_PATHS.active_38
-            }
+            path: IconManager.ICON_PATHS.active,
         });
+        IconManager.handleUpdate();
     }
 
-    setInactive() {
+    static setInactive() {
         if (!chrome.browserAction.setIcon || isThunderbird) {
             // Fix for Firefox Android and Thunderbird.
             return;
         }
+        IconManager.iconState.active = false;
         chrome.browserAction.setIcon({
-            path: {
-                '19': ICON_PATHS.inactive_19,
-                '38': ICON_PATHS.inactive_38
-            }
+            path: IconManager.ICON_PATHS.inactive,
         });
+        IconManager.handleUpdate();
     }
 
-    showBadge(text: string) {
+    static showBadge(text: string) {
+        IconManager.iconState.badgeText = text;
         chrome.browserAction.setBadgeBackgroundColor({color: '#e96c4c'});
         chrome.browserAction.setBadgeText({text});
+        IconManager.handleUpdate();
     }
 
-    hideBadge() {
+    static hideBadge() {
+        IconManager.iconState.badgeText = '';
         chrome.browserAction.setBadgeText({text: ''});
+        IconManager.handleUpdate();
     }
 }

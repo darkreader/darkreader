@@ -57,11 +57,11 @@ function createValidator() {
         if (!obj.hasOwnProperty(key) || validator(obj[key])) {
             return;
         }
-        errors.push(`Unexpected value for "${key}": ${JSON.stringify(obj[key])}`);
+        errors.push(`Unexpected value for "${key as string}": ${JSON.stringify(obj[key])}`);
         obj[key] = fallback[key];
     }
 
-    function validateArray<T>(obj: T, key: keyof T, validator: (x: any) => boolean) {
+    function validateArray<T, V>(obj: T, key: keyof T, validator: (x: V) => boolean) {
         if (!obj.hasOwnProperty(key)) {
             return;
         }
@@ -75,7 +75,7 @@ function createValidator() {
             }
         }
         if (wrongValues.size > 0) {
-            errors.push(`Array "${key}" has wrong values: ${Array.from(wrongValues).map((v) => JSON.stringify(v)).join('; ')}`);
+            errors.push(`Array "${key as string}" has wrong values: ${Array.from(wrongValues).map((v) => JSON.stringify(v)).join('; ')}`);
         }
     }
 

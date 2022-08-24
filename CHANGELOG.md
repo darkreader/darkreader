@@ -1,13 +1,40 @@
 ## Unreleased
 
-- Don't manage styles that have a empty `href` attribute.
+- CSS variables can now be used to set and automatically change Dark Reader's values.
+
+## 4.9.57 (Aug 23, 2022)
+
+- Fix iframes not getting modified when settings were changed.
+- Fixed registering system automation handlers multiple times.
+
+## 4.9.56 (Aug 16, 2022)
+
+- Fix browser theme not changing when automation + scheme behavior was enabled.
+
+## 4.9.55 (Aug 10, 2022)
+
+- Fix Google calendar.
+- Fix Opera/Vivaldi sidebar's getting modified.
+- Fix incorrect inline background colors when `mask` is explicitly disabled.
+- Fixed breaking for some old browser versions.
+
+## 4.9.54 (Aug 10, 2022)
+
+- Fixed System automation.
+
+## 4.9.53 (Aug 9, 2022)
+
+- Don't manage styles that have an empty `href` attribute.
 - Use `navigator.UserAgentData` when possible.
 - Add a `<meta name="darkreader-lock">` detector, to disable Dark Reader when detected (only dynamic theme).
 - Fix filter theme for Firefox v102+
 - Correctly open static theme editor on Mobile.
-- Migrate automation settings to it's own object. WARNING: this can lead to data loss of currently used automation settings due to browser behavior.
+- Migrate automation settings to its own object.
 - Correctly handle empty URL's in `background-image` property.
-- CSS variables can now be used to set and automatically change Dark Reader's values.
+- Make color parsing use cache.
+- Send updates only to affected tabs when toggling sites.
+- Fixed images with masks (Gmail icons issue).
+- Background page refactoring.
 
 ## 4.9.52 (June 28, 2022)
 

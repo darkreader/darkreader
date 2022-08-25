@@ -16,7 +16,9 @@ import {DONATE_URL, GITHUB_URL, PRIVACY_URL, TWITTER_URL, getHelpURL} from '../.
 import {getLocalMessage} from '../../../utils/locales';
 import {compose} from '../../utils';
 import type {ExtensionData, ExtensionActions, News as NewsObject} from '../../../definitions';
-import {isMobile, isFirefox, isThunderbird} from '../../../utils/platform';
+import {isMobile, isFirefox} from '../../../utils/platform';
+
+declare const __THUNDERBIRD__: boolean;
 
 interface BodyProps {
     data: ExtensionData;
@@ -119,7 +121,7 @@ function Body(props: BodyProps & {fonts: string[]}) {
             <TabPanel
                 activeTab={state.activeTab}
                 onSwitchTab={(tab) => setState({activeTab: tab})}
-                tabs={isThunderbird ? {
+                tabs={__THUNDERBIRD__ ? {
                     'Filter': (
                         <FilterSettings data={props.data} actions={props.actions} />
                     ),

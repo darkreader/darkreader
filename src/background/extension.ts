@@ -17,7 +17,7 @@ import createStaticStylesheet from '../generators/static-theme';
 import {createSVGFilterStylesheet, getSVGFilterMatrixValue, getSVGReverseFilterMatrixValue} from '../generators/svg-filter';
 import type {ExtensionData, FilterConfig, Shortcuts, UserSettings, TabInfo, TabData, Command} from '../definitions';
 import {isSystemDarkModeEnabled, runColorSchemeChangeDetector} from '../utils/media-query';
-import {isFirefox, isThunderbird} from '../utils/platform';
+import {isFirefox} from '../utils/platform';
 import {MessageType} from '../utils/message';
 import {logInfo, logWarn} from './utils/log';
 import {PromiseBarrier} from '../utils/promise-barrier';
@@ -37,7 +37,8 @@ interface SystemColorState {
     wasLastColorSchemeDark: boolean | null;
 }
 
-declare const __MV3__: boolean;
+declare const __CHROMIUM_MV3__: boolean;
+declare const __THUNDERBIRD__: boolean;
 
 export class Extension {
     private static autoState: AutomationState = '';
@@ -96,7 +97,7 @@ export class Extension {
     }
 
     private static async MV3syncSystemColorStateManager(isDark: boolean | null): Promise<void> {
-        if (!__MV3__) {
+        if (!__CHROMIUM_MV3__) {
             return;
         }
         if (!this.systemColorStateManager) {
@@ -141,7 +142,7 @@ export class Extension {
                 break;
             }
             case 'system':
-                if (__MV3__) {
+                if (__CHROMIUM_MV3__) {
                     isAutoDark = this.wasLastColorSchemeDark;
                     if (this.wasLastColorSchemeDark === null) {
                         logWarn('System color scheme is unknown. Defaulting to Dark.');
@@ -210,7 +211,7 @@ export class Extension {
         this.onAppToggle();
         logInfo('loaded', UserStorage.settings);
 
-        if (isThunderbird) {
+        if (__THUNDERBIRD__) {
             TabManager.registerMailDisplayScript();
         } else {
             TabManager.updateContentScript({runOnProtectedPages: UserStorage.settings.enableForProtectedPages});
@@ -516,12 +517,12 @@ export class Extension {
 
     private static onAppToggle() {
         if (this.isExtensionSwitchedOn()) {
-            if (__MV3__) {
+            if (__CHROMIUM_MV3__) {
                 ContentScriptManager.registerScripts(async () => TabManager.updateContentScript({runOnProtectedPages: UserStorage.settings.enableForProtectedPages}));
             }
             IconManager.setActive();
         } else {
-            if (__MV3__) {
+            if (__CHROMIUM_MV3__) {
                 ContentScriptManager.unregisterScripts();
             }
             IconManager.setInactive();

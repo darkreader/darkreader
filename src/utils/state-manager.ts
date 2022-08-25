@@ -5,13 +5,13 @@
 
 import {StateManagerImpl} from './state-manager-impl';
 
-declare const __MV3__: boolean;
+declare const __CHROMIUM_MV3__: boolean;
 
 export class StateManager<T> {
     private stateManager: StateManagerImpl<T> | null;
 
     constructor(localStorageKey: string, parent: any, defaults: T, logWarn: (log: string) => void){
-        if (__MV3__) {
+        if (__CHROMIUM_MV3__) {
             function addListener(listener: (data: T) => void) {
                 chrome.storage.local.onChanged.addListener((changes) => {
                     listener(changes[localStorageKey].newValue);

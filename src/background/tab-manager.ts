@@ -2,14 +2,15 @@ import {canInjectScript} from '../background/utils/extension-api';
 import {createFileLoader} from './utils/network';
 import type {FetchRequestParameters} from './utils/network';
 import type {Message} from '../definitions';
-import {isFirefox, isThunderbird} from '../utils/platform';
+import {isFirefox} from '../utils/platform';
 import {MessageType} from '../utils/message';
 import {logWarn} from './utils/log';
 import {StateManager} from '../utils/state-manager';
 import {getURLHostOrProtocol} from '../utils/url';
 import {isPanel} from './utils/tab';
 
-declare const __MV3__: boolean;
+declare const __CHROMIUM_MV3__: boolean;
+declare const __THUNDERBIRD__: boolean;
 
 async function queryTabs(query: chrome.tabs.QueryInfo) {
     return new Promise<chrome.tabs.Tab[]>((resolve) => {
@@ -156,7 +157,7 @@ export default class TabManager {
                         chrome.tabs.sendMessage<Message>(sender.tab.id, {type: MessageType.BG_FETCH_RESPONSE, id, ...response}, {frameId: sender.frameId});
                     };
 
-                    if (isThunderbird) {
+                    if (__THUNDERBIRD__) {
                         // In thunderbird some CSS is loaded on a chrome:// URL.
                         // Thunderbird restricted Add-ons to load those URL's.
                         if ((message.data.url as string).startsWith('chrome://')) {
@@ -250,7 +251,7 @@ export default class TabManager {
             .filter((tab) => !Boolean(this.tabs[tab.id]))
             .forEach((tab) => {
                 if (!tab.discarded) {
-                    if (__MV3__) {
+                    if (__CHROMIUM_MV3__) {
                         chrome.scripting.executeScript({
                             target: {
                                 tabId: tab.id,

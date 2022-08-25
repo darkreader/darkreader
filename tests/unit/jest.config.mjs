@@ -12,7 +12,10 @@ const config = {
     transform: {'^.+\\.ts(x?)$': 'ts-jest'},
     globals: {
         'ts-jest': {tsconfig: '<rootDir>/tests/unit/tsconfig.json'},
-        __MV3__: false,
+        __FIREFOX__: false,
+        __CHROMIUM_MV2__: false,
+        __CHROMIUM_MV3__: false,
+        __THUNDERBIRD__: false,
         __DEBUG__: false,
         __TEST__: true,
     },

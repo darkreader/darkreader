@@ -23,7 +23,7 @@ import {parsedURLCache} from '../../utils/url';
 import {variablesStore} from './variables';
 
 declare const __TEST__: boolean;
-declare const __MV3__: boolean;
+declare const __CHROMIUM_MV3__: boolean;
 const INSTANCE_ID = generateUID();
 const styleManagers = new Map<StyleElement, StyleManager>();
 const adoptedStyleManagers = [] as AdoptedStyleSheetManager[];
@@ -150,7 +150,7 @@ function createStaticStyleOverrides() {
     document.head.insertBefore(rootVarsStyle, variableStyle.nextSibling);
 
     const injectProxyArg = !(fixes && fixes.disableStyleSheetsProxy);
-    if (__MV3__) {
+    if (__CHROMIUM_MV3__) {
         injectProxyScriptMV3(injectProxyArg);
         // Notify the dedicated injector of the data.
         document.dispatchEvent(new CustomEvent('__darkreader__stylesheetProxy__arg', {detail: injectProxyArg}));

@@ -7,7 +7,7 @@ import type {Message} from '../../../definitions';
 import type {ViewProps} from '../types';
 import type {Automation} from 'definitions';
 
-declare const __MV3__: boolean;
+declare const __CHROMIUM_MV3__: boolean;
 
 export default function AutomationPage(props: ViewProps) {
     const isSystemAutomation = props.data.settings.automation.mode === 'system';
@@ -142,7 +142,7 @@ export default function AutomationPage(props: ViewProps) {
                         'automation-page__system-dark-mode__button--active': isSystemAutomation,
                     }}
                     onclick={() => {
-                        if (__MV3__) {
+                        if (__CHROMIUM_MV3__) {
                             chrome.runtime.sendMessage<Message>({
                                 type: MessageType.UI_COLOR_SCHEME_CHANGE,
                                 data: {isDark: matchMedia('(prefers-color-scheme: dark)').matches}

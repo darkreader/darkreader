@@ -1,6 +1,7 @@
 import type {UserSettings, TabInfo} from '../definitions';
 import {isIPV6, compareIPV6} from './ipv6';
-import {isThunderbird} from './platform';
+
+declare const __THUNDERBIRD__: boolean;
 
 let anchor: HTMLAnchorElement;
 
@@ -212,7 +213,7 @@ export function isURLEnabled(url: string, userSettings: UserSettings, {isProtect
     }
     // Only URL's with emails are getting here on thunderbird
     // So we can skip the checks and just return true.
-    if (isThunderbird) {
+    if (__THUNDERBIRD__) {
         return true;
     }
     if (isPDF(url)) {

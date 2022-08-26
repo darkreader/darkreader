@@ -53,3 +53,6 @@ jobs:
 
       - name: Check for compatibility issues
         run: npm run lint:bundle
+
+      - name: Check NPM dependencies
+        run: node tests/dependencies.js

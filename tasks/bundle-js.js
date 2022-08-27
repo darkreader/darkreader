@@ -7,6 +7,7 @@ import rollupPluginNodeResolve from '@rollup/plugin-node-resolve';
 import rollupPluginReplace from '@rollup/plugin-replace';
 /** @type {any} */
 import rollupPluginTypescript from '@rollup/plugin-typescript';
+import rollupPluginTypescript2 from 'rollup-plugin-typescript2';
 import typescript from 'typescript';
 import paths from './paths.js';
 import * as reload from './reload.js';
@@ -92,7 +93,7 @@ function freeRollupPluginInstance(name, key) {
 
 async function bundleJS(/** @type {JSEntry} */entry, platform, debug, watch, log, test) {
     const {src, dest} = entry;
-    const rollupPluginTypesctiptInstanceKey = debug;
+    const rollupPluginTypesctiptInstanceKey = `${debug}`;
     const rollupPluginReplaceInstanceKey = `${platform}-${debug}-${watch}-${entry.src === 'src/ui/popup/index.tsx'}`;
 
     const destination = typeof dest === 'string' ? dest : dest(platform);
@@ -121,8 +122,9 @@ async function bundleJS(/** @type {JSEntry} */entry, platform, debug, watch, log
         input: rootPath(src),
         plugins: [
             getRollupPluginInstance('nodeResolve', '', rollupPluginNodeResolve),
-            getRollupPluginInstance('typesctipt', rollupPluginTypesctiptInstanceKey, () =>
-                rollupPluginTypescript({
+            getRollupPluginInstance('typesctipt', rollupPluginTypesctiptInstanceKey, () => {
+                const plugin = debug ? rollupPluginTypescript2 : rollupPluginTypescript;
+                const config = {
                     rootDir,
                     typescript,
                     tsconfig: rootPath('src/tsconfig.json'),
@@ -132,8 +134,12 @@ async function bundleJS(/** @type {JSEntry} */entry, platform, debug, watch, log
                     inlineSources: debug ? true : false,
                     noEmitOnError: watch ? false : true,
                     cacheDir: debug ? `${fs.realpathSync(os.tmpdir())}/darkreader_typescript_cache` : undefined,
-                })
-            ),
+                };
+                if (debug) {
+                    config.verbosty = 3;
+                }
+                return plugin(config);
+            }),
             getRollupPluginInstance('replace', rollupPluginReplaceInstanceKey, () =>
                 rollupPluginReplace({
                     preventAssignment: true,

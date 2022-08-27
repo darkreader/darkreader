@@ -524,7 +524,6 @@ export class Extension {
             IconManager.setActive();
         } else {
             if (__CHROMIUM_MV3__) {
-                const systemAutomation = UserStorage.settings.automation && UserStorage.settings.automation.mode === AutomationMode.SYSTEM;
                 ContentScriptManager.unregisterScripts();
             }
             IconManager.setInactive();

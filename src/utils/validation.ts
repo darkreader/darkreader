@@ -1,5 +1,6 @@
 import {DEFAULT_SETTINGS, DEFAULT_THEME} from '../defaults';
 import type {UserSettings, Theme, ThemePreset, CustomSiteConfig, TimeSettings, LocationSettings, Automation} from '../definitions';
+import { AutomationMode } from './automation';
 
 function isBoolean(x: any): x is boolean {
     return typeof x === 'boolean';
@@ -143,12 +144,12 @@ export function validateSettings(settings: Partial<UserSettings>) {
 
         const automationValidator = createValidator();
         automationValidator.validateProperty(automation, 'enabled', isBoolean, automation);
-        automationValidator.validateProperty(automation, 'mode', isOneOf('system', 'time', 'location', ''), automation);
+        automationValidator.validateProperty(automation, 'mode', isOneOf(AutomationMode.SYSTEM, AutomationMode.TIME, AutomationMode.LOCATION, AutomationMode.NONE), automation);
         automationValidator.validateProperty(automation, 'behavior', isOneOf('OnOff', 'Scheme'), automation);
         return automationValidator.errors.length === 0;
     }, DEFAULT_SETTINGS);
 
-    validateProperty(settings, 'time', (time: TimeSettings) => {
+    validateProperty(settings, AutomationMode.TIME, (time: TimeSettings) => {
         if (!isPlainObject(time)) {
             return false;
         }
@@ -158,7 +159,7 @@ export function validateSettings(settings: Partial<UserSettings>) {
         return timeValidator.errors.length === 0;
     }, DEFAULT_SETTINGS);
 
-    validateProperty(settings, 'location', (location: LocationSettings) => {
+    validateProperty(settings, AutomationMode.LOCATION, (location: LocationSettings) => {
         if (!isPlainObject(location)) {
             return false;
         }

@@ -6,11 +6,12 @@ import {MessageType} from '../../../utils/message';
 import type {Message} from '../../../definitions';
 import type {ViewProps} from '../types';
 import type {Automation} from 'definitions';
+import {AutomationMode} from '../../../utils/automation';
 
 declare const __CHROMIUM_MV3__: boolean;
 
 export default function AutomationPage(props: ViewProps) {
-    const isSystemAutomation = props.data.settings.automation.mode === 'system';
+    const isSystemAutomation = props.data.settings.automation.mode === AutomationMode.SYSTEM;
     const locationSettings = props.data.settings.location;
     const values = {
         'latitude': {
@@ -83,8 +84,8 @@ export default function AutomationPage(props: ViewProps) {
         >
             <div class="automation-page__line">
                 <CheckBox
-                    checked={props.data.settings.automation.mode === 'time'}
-                    onchange={(e: {target: {checked: boolean}}) => changeAutomationMode(e.target.checked ? 'time' : '')}
+                    checked={props.data.settings.automation.mode === AutomationMode.TIME}
+                    onchange={(e: {target: {checked: boolean}}) => changeAutomationMode(e.target.checked ? AutomationMode.TIME : AutomationMode.NONE)}
                 />
                 <TimeRangePicker
                     startTime={props.data.settings.time.activation}
@@ -97,8 +98,8 @@ export default function AutomationPage(props: ViewProps) {
             </p>
             <div class="automation-page__line automation-page__location">
                 <CheckBox
-                    checked={props.data.settings.automation.mode === 'location'}
-                    onchange={(e: {target: {checked: boolean}}) => changeAutomationMode(e.target.checked ? 'location' : '')}
+                    checked={props.data.settings.automation.mode === AutomationMode.LOCATION}
+                    onchange={(e: {target: {checked: boolean}}) => changeAutomationMode(e.target.checked ? AutomationMode.LOCATION : AutomationMode.NONE)}
                 />
                 <TextBox
                     class="automation-page__location__latitude"
@@ -134,7 +135,7 @@ export default function AutomationPage(props: ViewProps) {
                 <CheckBox
                     class="automation-page__system-dark-mode__checkbox"
                     checked={isSystemAutomation}
-                    onchange={(e: {target: {checked: boolean}}) => changeAutomationMode(e.target.checked ? 'system' : '')}
+                    onchange={(e: {target: {checked: boolean}}) => changeAutomationMode(e.target.checked ? AutomationMode.SYSTEM : AutomationMode.NONE)}
                 />
                 <Button
                     class={{
@@ -148,7 +149,7 @@ export default function AutomationPage(props: ViewProps) {
                                 data: {isDark: matchMedia('(prefers-color-scheme: dark)').matches}
                             });
                         }
-                        changeAutomationMode(isSystemAutomation ? '' : 'system');
+                        changeAutomationMode(isSystemAutomation ? AutomationMode.NONE : AutomationMode.SYSTEM);
                     }}
                 >{getLocalMessage('system_dark_mode')}
                 </Button>

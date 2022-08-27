@@ -24,6 +24,7 @@ import {PromiseBarrier} from '../utils/promise-barrier';
 import {StateManager} from '../utils/state-manager';
 import {debounce} from '../utils/debounce';
 import ContentScriptManager from './content-script-manager';
+import {AutomationMode} from '../utils/automation';
 
 type AutomationState = 'turn-on' | 'turn-off' | 'scheme-dark' | 'scheme-light' | '';
 
@@ -135,13 +136,13 @@ export class Extension {
         let isAutoDark: boolean;
         let nextCheck: number;
         switch (mode) {
-            case 'time': {
+            case AutomationMode.TIME: {
                 const {time} = UserStorage.settings;
                 isAutoDark = isInTimeIntervalLocal(time.activation, time.deactivation);
                 nextCheck = nextTimeInterval(time.activation, time.deactivation);
                 break;
             }
-            case 'system':
+            case AutomationMode.SYSTEM:
                 if (__CHROMIUM_MV3__) {
                     isAutoDark = this.wasLastColorSchemeDark;
                     if (this.wasLastColorSchemeDark === null) {
@@ -157,7 +158,7 @@ export class Extension {
                     runColorSchemeChangeDetector(Extension.onColorSchemeChange);
                 }
                 break;
-            case 'location': {
+            case AutomationMode.LOCATION: {
                 const {latitude, longitude} = UserStorage.settings.location;
                 if (latitude != null && longitude != null) {
                     isAutoDark = isNightAtLocation(latitude, longitude);
@@ -165,7 +166,7 @@ export class Extension {
                 }
                 break;
             }
-            case '':
+            case AutomationMode.NONE:
                 break;
         }
 
@@ -400,7 +401,7 @@ export class Extension {
         this.wasLastColorSchemeDark = isDark;
         this.MV3syncSystemColorStateManager(isDark);
         await this.loadData();
-        if (UserStorage.settings.automation.mode !== 'system') {
+        if (UserStorage.settings.automation.mode !== AutomationMode.SYSTEM) {
             return;
         }
         this.handleAutomationCheck();

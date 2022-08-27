@@ -1,6 +1,7 @@
 import type {ParsedColorSchemeConfig} from './utils/colorscheme-parser';
 import type {FilterMode} from './generators/css-filter';
 import type {MessageType} from './utils/message';
+import type {AutomationMode} from './utils/automation';
 
 export interface ExtensionData {
     isEnabled: boolean;
@@ -86,7 +87,7 @@ export interface ThemePreset {
 
 export interface Automation {
     enabled: boolean;
-    mode: '' | 'time' | 'system' | 'location';
+    mode: AutomationMode;
     behavior: 'OnOff' | 'Scheme';
 }
 

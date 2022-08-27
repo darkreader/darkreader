@@ -2,6 +2,7 @@ import type {ParsedColorSchemeConfig} from './utils/colorscheme-parser';
 import type {Theme, UserSettings} from './definitions';
 import ThemeEngines from './generators/theme-engines';
 import {isMacOS, isWindows, isCSSColorSchemePropSupported} from './utils/platform';
+import {AutomationMode} from './utils/automation';
 
 export const DEFAULT_COLORS = {
     darkScheme: {
@@ -66,7 +67,7 @@ export const DEFAULT_SETTINGS: UserSettings = {
     syncSitesFixes: false,
     automation: {
         enabled: false,
-        mode: '',
+        mode: AutomationMode.NONE,
         behavior: 'OnOff',
     },
     time: {

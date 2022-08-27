@@ -12,10 +12,10 @@ import {isPanel} from './utils/tab';
 declare const __CHROMIUM_MV3__: boolean;
 declare const __THUNDERBIRD__: boolean;
 
-async function queryTabs(query: chrome.tabs.QueryInfo) {
-    return new Promise<chrome.tabs.Tab[]>((resolve) => {
-        chrome.tabs.query(query, (tabs) => resolve(tabs));
-    });
+async function queryTabs(query: chrome.tabs.QueryInfo = {}) {
+    return new Promise<chrome.tabs.Tab[]>((resolve) =>
+        chrome.tabs.query(query, resolve)
+    );
 }
 
 interface ConnectionMessageOptions {
@@ -246,7 +246,7 @@ export default class TabManager {
     }
 
     static async updateContentScript(options: {runOnProtectedPages: boolean}) {
-        (await queryTabs({}))
+        (await queryTabs())
             .filter((tab) => options.runOnProtectedPages || canInjectScript(tab.url))
             .filter((tab) => !Boolean(this.tabs[tab.id]))
             .forEach((tab) => {
@@ -291,7 +291,7 @@ export default class TabManager {
 
         const activeTabHostname = onlyUpdateActiveTab ? getURLHostOrProtocol(await this.getActiveTabURL()) : null;
 
-        (await queryTabs({}))
+        (await queryTabs())
             .filter((tab) => Boolean(this.tabs[tab.id]))
             .forEach((tab) => {
                 const frames = this.tabs[tab.id];

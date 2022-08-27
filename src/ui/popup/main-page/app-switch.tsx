@@ -6,13 +6,14 @@ import type {ViewProps} from '../types';
 import WatchIcon from './watch-icon';
 import SunMoonIcon from './sun-moon-icon';
 import SystemIcon from './system-icon';
+import {AutomationMode} from '../../../utils/automation';
 
 export default function AppSwitch(props: ViewProps) {
     const isOn = props.data.settings.enabled === true && !props.data.settings.automation.enabled;
     const isOff = props.data.settings.enabled === false && !props.data.settings.automation.enabled;
     const isAutomation = props.data.settings.automation.enabled;
-    const isTimeAutomation = props.data.settings.automation.mode === 'time';
-    const isLocationAutomation = props.data.settings.automation.mode === 'location';
+    const isTimeAutomation = props.data.settings.automation.mode === AutomationMode.TIME;
+    const isLocationAutomation = props.data.settings.automation.mode === AutomationMode.LOCATION;
     const now = new Date();
 
     // TODO: Replace messages with some IDs.
@@ -37,7 +38,7 @@ export default function AppSwitch(props: ViewProps) {
             });
         } else if (index === 1) {
             props.actions.changeSettings({
-                automation: {... props.data.settings.automation, ...{mode: 'system', enabled: true}},
+                automation: {... props.data.settings.automation, ...{mode: AutomationMode.SYSTEM, enabled: true}},
             });
         }
     }

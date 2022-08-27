@@ -7,6 +7,7 @@ import SystemIcon from '../../main-page/system-icon';
 import WatchIcon from '../../main-page/watch-icon';
 import SiteToggle from '../site-toggle';
 import MoreToggleSettings from './more-toggle-settings';
+import {AutomationMode} from '../../../../utils/automation';
 
 function multiline(...lines: string[]) {
     return lines.join('\n');
@@ -26,8 +27,8 @@ function Header({data, actions, onMoreToggleSettingsClick}: HeaderProps) {
 
     const tab = data.activeTab;
     const isAutomation = data.settings.automation.enabled;
-    const isTimeAutomation = data.settings.automation.mode === 'time';
-    const isLocationAutomation = data.settings.automation.mode === 'location';
+    const isTimeAutomation = data.settings.automation.mode === AutomationMode.TIME;
+    const isLocationAutomation = data.settings.automation.mode === AutomationMode.LOCATION;
     const now = new Date();
 
     return (

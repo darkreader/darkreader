@@ -11,7 +11,17 @@ export function injectProxy(enableStyleSheetsProxy: boolean) {
 
     // Reference:
     // https://github.com/darkreader/darkreader/issues/6480#issuecomment-897696175
-    const shouldWrapHTMLElement = location.hostname.endsWith('baidu.com');
+    const shouldWrapHTMLElement = [
+        'baidu.com',
+        'baike.baidu.com',
+        'ditu.baidu.com',
+        'map.baidu.com',
+        'maps.baidu.com',
+        'haokan.baidu.com',
+        'pan.baidu.com',
+        'passport.baidu.com',
+        'tieba.baidu.com',
+        'www.baidu.com'].includes(location.hostname);
 
     const getElementsByTagNameDescriptor = shouldWrapHTMLElement ?
         Object.getOwnPropertyDescriptor(Element.prototype, 'getElementsByTagName') : null;
@@ -75,13 +85,13 @@ export function injectProxy(enableStyleSheetsProxy: boolean) {
 
     function proxyDocumentStyleSheets() {
         const getCurrentValue = () => {
-            const docSheets = documentStyleSheetsDescriptor.get.call(this);
+            const docSheets: StyleSheetList = documentStyleSheetsDescriptor.get.call(this);
 
-            const filteredSheets = [...docSheets].filter((styleSheet: CSSStyleSheet) => {
-                return !(styleSheet.ownerNode as HTMLElement).classList.contains('darkreader');
+            const filteredSheets = [...docSheets].filter((styleSheet) => {
+                return !(styleSheet.ownerNode as Element).classList.contains('darkreader');
             });
 
-            (filteredSheets as any).item = (item: number) => {
+            (filteredSheets as unknown as StyleSheetList).item = (item: number) => {
                 return filteredSheets[item];
             };
 

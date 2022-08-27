@@ -1,6 +1,6 @@
-import {parse} from '../../utils/color';
+import {parseColorWithCache} from '../../utils/color';
 import {modifyBackgroundColor} from '../../generators/modify-colors';
-import {logWarn} from '../../utils/log';
+import {logWarn} from '../utils/log';
 import type {FilterConfig} from '../../definitions';
 
 const metaThemeColorName = 'theme-color';
@@ -10,12 +10,12 @@ let observer: MutationObserver = null;
 
 function changeMetaThemeColor(meta: HTMLMetaElement, theme: FilterConfig) {
     srcMetaThemeColor = srcMetaThemeColor || meta.content;
-    try {
-        const color = parse(srcMetaThemeColor);
-        meta.content = modifyBackgroundColor(color, theme);
-    } catch (err) {
-        logWarn(err);
+    const color = parseColorWithCache(srcMetaThemeColor);
+    if (!color) {
+        logWarn('Invalid meta color', color);
+        return;
     }
+    meta.content = modifyBackgroundColor(color, theme);
 }
 
 export function changeMetaThemeColorWhenAvailable(theme: FilterConfig) {

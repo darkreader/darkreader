@@ -10,6 +10,14 @@ text: #e8e6e3
 
 ================================
 
+Catppuccin
+
+DARK
+background: #161320
+text: #d9e0ee
+
+================================
+
 Dracula
 
 DARK
@@ -22,11 +30,11 @@ Gruvbox
 
 DARK
 background: #282828
-text: #8ec07c
+text: #ebdbb2
 
 LIGHT
 background: #fbf1c7
-text: #427b58
+text: #3c3836
 
 ================================
 
@@ -42,6 +50,18 @@ text: #3b4252
 
 ================================
 
+Rosé Pine
+
+DARK
+background: #191724
+text: #e0def4
+
+LIGHT
+background: #faf4ed
+text: #575279
+
+================================
+
 Solarized
 
 DARK
@@ -51,4 +71,16 @@ text: #93a1a1
 LIGHT
 background: #fdf6e3
 text: #586e75
+
+================================
+
+Tokyo Night
+
+DARK
+background: #1a1b26
+text: #a9b1d6
+
+LIGHT
+background: #d5d6db
+text: #343b58
 

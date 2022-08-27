@@ -2,20 +2,16 @@ import {createOrUpdateStyle, removeStyle} from './style';
 import {createOrUpdateSVGFilter, removeSVGFilter} from './svg-filter';
 import {runDarkThemeDetector, stopDarkThemeDetector} from './detector';
 import {createOrUpdateDynamicTheme, removeDynamicTheme, cleanDynamicThemeCache} from './dynamic-theme';
-import {logInfo, logWarn} from '../utils/log';
-import {watchForColorSchemeChange} from './utils/watch-color-scheme';
+import {logWarn, logInfoCollapsed} from './utils/log';
+import {isSystemDarkModeEnabled, runColorSchemeChangeDetector, stopColorSchemeChangeDetector} from '../utils/media-query';
 import {collectCSS} from './dynamic-theme/css-collection';
 import type {Message} from '../definitions';
 import {MessageType} from '../utils/message';
-import {isThunderbird} from '../utils/platform';
 
 let unloaded = false;
 
-// TODO: Use background page color scheme watcher when browser bugs fixed.
-let colorSchemeWatcher = watchForColorSchemeChange(({isDark}) => {
-    logInfo('Media query was changed');
-    sendMessage({type: MessageType.CS_COLOR_SCHEME_CHANGE, data: {isDark}});
-});
+declare const __CHROMIUM_MV3__: boolean;
+declare const __THUNDERBIRD__: boolean;
 
 function cleanup() {
     unloaded = true;
@@ -24,39 +20,52 @@ function cleanup() {
     removeEventListener('resume', onResume);
     cleanDynamicThemeCache();
     stopDarkThemeDetector();
-    if (colorSchemeWatcher) {
-        colorSchemeWatcher.disconnect();
-        colorSchemeWatcher = null;
-    }
+    stopColorSchemeChangeDetector();
 }
 
 function sendMessage(message: Message) {
     if (unloaded) {
         return;
     }
+    const responseHandler = (response: 'unsupportedSender' | undefined) => {
+        // Vivaldi bug workaround. See TabManager for details.
+        if (response === 'unsupportedSender') {
+            removeStyle();
+            removeSVGFilter();
+            removeDynamicTheme();
+            cleanup();
+        }
+    };
+
     try {
-        chrome.runtime.sendMessage<Message>(message, (response) => {
-            // Vivaldi bug workaround. See TabManager for details.
-            if (response === 'unsupportedSender') {
-                removeStyle();
-                removeSVGFilter();
-                removeDynamicTheme();
-                cleanup();
-            }
-        });
-    } catch (e) {
+        if (__CHROMIUM_MV3__) {
+            const promise: Promise<Message | 'unsupportedSender'> = chrome.runtime.sendMessage<Message>(message);
+            promise.then(responseHandler).catch(cleanup);
+        } else {
+            chrome.runtime.sendMessage<Message, 'unsupportedSender' | undefined>(message, responseHandler);
+        }
+    } catch (error) {
         /*
-         * Background can be unreachable if:
+         * We get here if Background context is unreachable which occurs when:
          *  - extension was disabled
          *  - extension was uninstalled
          *  - extension was updated and this is the old instance of content script
+         *
+         * Any async operations can be ignored here, but sync ones should run to completion.
+         *
+         * Regular message passing errors are returned via rejected promise or runtime.lastError.
          */
-        cleanup();
+        if (error.message === 'Extension context invalidated.') {
+            console.log('Dark Reader: instance of old CS detected, clening up.');
+            cleanup();
+        } else {
+            console.log('Dark Reader: unexpected error during message passing.');
+        }
     }
 }
 
 function onMessage({type, data}: Message) {
-    logInfo('onMessage', type, data);
+    logInfoCollapsed(`onMessage[${type}]`, data);
     switch (type) {
         case MessageType.BG_ADD_CSS_FILTER:
         case MessageType.BG_ADD_STATIC_THEME: {
@@ -103,27 +112,31 @@ function onMessage({type, data}: Message) {
             }
             break;
         }
-        case MessageType.BG_EXPORT_CSS: {
+        case MessageType.BG_EXPORT_CSS:
             collectCSS().then((collectedCSS) => sendMessage({type: MessageType.CS_EXPORT_CSS_RESPONSE, data: collectedCSS}));
             break;
-        }
         case MessageType.BG_UNSUPPORTED_SENDER:
-        case MessageType.BG_CLEAN_UP: {
+        case MessageType.BG_CLEAN_UP:
             removeStyle();
             removeSVGFilter();
             removeDynamicTheme();
             stopDarkThemeDetector();
             break;
-        }
         case MessageType.BG_RELOAD:
             logWarn('Cleaning up before update');
             cleanup();
             break;
+        default:
+            break;
     }
 }
 
+runColorSchemeChangeDetector((isDark) =>
+    sendMessage({type: MessageType.CS_COLOR_SCHEME_CHANGE, data: {isDark}})
+);
+
 chrome.runtime.onMessage.addListener(onMessage);
-sendMessage({type: MessageType.CS_FRAME_CONNECT});
+sendMessage({type: MessageType.CS_FRAME_CONNECT, data: {isDark: isSystemDarkModeEnabled()}});
 
 function onPageHide(e: PageTransitionEvent) {
     if (e.persisted === false) {
@@ -136,16 +149,16 @@ function onFreeze() {
 }
 
 function onResume() {
-    sendMessage({type: MessageType.CS_FRAME_RESUME});
+    sendMessage({type: MessageType.CS_FRAME_RESUME, data: {isDark: isSystemDarkModeEnabled()}});
 }
 
 function onDarkThemeDetected() {
     sendMessage({type: MessageType.CS_DARK_THEME_DETECTED});
 }
 
-// Thunderbird don't has "tabs", and emails aren't 'frozen' or 'cached'.
+// Thunderbird does not have "tabs", and emails aren't 'frozen' or 'cached'.
 // And will currently error: `Promise rejected after context unloaded: Actor 'Conduits' destroyed before query 'RuntimeMessage' was resolved`
-if (!isThunderbird) {
+if (!__THUNDERBIRD__) {
     addEventListener('pagehide', onPageHide);
     addEventListener('freeze', onFreeze);
     addEventListener('resume', onResume);

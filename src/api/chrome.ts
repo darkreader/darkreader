@@ -38,7 +38,7 @@ function addMessageListener(callback: (data: any) => void) {
 
 if (typeof chrome.runtime.sendMessage === 'function') {
     const nativeSendMessage = chrome.runtime.sendMessage;
-    chrome.runtime.sendMessage = (...args: any[]) => {
+    (chrome.runtime.sendMessage as unknown) = (...args: any[]) => {
         sendMessage(...args);
         nativeSendMessage.apply(chrome.runtime, args);
     };

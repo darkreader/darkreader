@@ -9,7 +9,7 @@ export default class Connector implements ExtensionActions {
         this.changeSubscribers = new Set();
     }
 
-    private async sendRequest<T>(type: string, data?: string) {
+    private async sendRequest<T>(type: MessageType, data?: string) {
         return new Promise<T>((resolve, reject) => {
             chrome.runtime.sendMessage<Message>({type, data}, ({data, error}: Message) => {
                 if (error) {
@@ -21,7 +21,7 @@ export default class Connector implements ExtensionActions {
         });
     }
 
-    private async firefoxSendRequestWithResponse<T>(type: string, data?: string) {
+    private async firefoxSendRequestWithResponse<T>(type: MessageType, data?: string) {
         return new Promise<T>((resolve, reject) => {
             const dataPort = chrome.runtime.connect({name: type});
             dataPort.onDisconnect.addListener(() => reject());
@@ -76,6 +76,10 @@ export default class Connector implements ExtensionActions {
 
     markNewsAsRead(ids: string[]) {
         chrome.runtime.sendMessage<Message>({type: MessageType.UI_MARK_NEWS_AS_READ, data: ids});
+    }
+
+    markNewsAsDisplayed(ids: string[]) {
+        chrome.runtime.sendMessage<Message>({type: MessageType.UI_MARK_NEWS_AS_DISPLAYED, data: ids});
     }
 
     loadConfig(options: {local: boolean}) {

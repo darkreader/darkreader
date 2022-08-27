@@ -30,8 +30,11 @@ export function getMockData(override = {} as Partial<ExtensionData>): ExtensionD
             enableForPDF: true,
             enableForProtectedPages: false,
             syncSettings: true,
-            automation: '',
-            automationBehaviour: 'OnOff',
+            automation: {
+                enabled: false,
+                behavior: 'OnOff',
+                mode: '',
+            },
             previewNewDesign: false,
             time: {
                 activation: '18:00',

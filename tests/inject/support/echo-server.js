@@ -1,49 +1,72 @@
-/** @typedef {import('connect').NextHandleFunction} NextHandleFunction */
-/** @typedef {import('log4js').Logger} Logger */
+// @ts-check
+import http from 'http';
 
-const pluginName = 'middleware:echo-server';
+export async function createEchoServer(/** @type {number} */port) {
+    /** @type {import('http').Server} */
+    let server;
 
-/**
- * @param {string} [urlRoot]
- * @param {KarmaLogger} logger
- * @returns {NextHandleFunction}
- */
-function createEchoServer(urlRoot, logger) {
-    /** @type {Logger} */
-    const log = logger.create(pluginName);
-    log.addContext('urlRoot', urlRoot);
-    log.info('Echo server ready');
+    /** @type {import('http').RequestListener} */
+    function handleRequest(req, res) {
+        const parsedURL = new URL(req.url, `http://${req.headers.host}`);
+        const pathName = parsedURL.pathname;
 
-    return function (req, res, next) {
-        if (!req.url.startsWith(`${urlRoot}echo?`)) {
-            next();
+        if (pathName !== '/echo') {
+            res.statusCode = 500;
+            res.end('The URL path must be /echo');
             return;
         }
 
-        /** @type {Logger} */
-        const requestLog = logger.create(pluginName);
-        requestLog.addContext('request', req);
-        requestLog.debug('Handling request');
+        const {searchParams} = parsedURL;
 
-        const {searchParams} = new URL(req.url, `http://${req.headers.host}`);
-
-        let contentType = searchParams.get('type') || 'text/plain',
-            content = searchParams.get('content'),
-            statusCode = 200;
-
-        if (content === null) {
-            contentType = 'text/plain';
-            content = 'Send content like /echo?type=text%2Fplain&content=XYZ';
-            statusCode = 500;
+        const content = searchParams.get('content');
+        if (!content) {
+            res.statusCode = 500;
+            res.end('Send content like /echo?type=text%2Fplain&content=XYZ');
+            return;
         }
 
-        res.writeHead(statusCode, {'Content-Type': contentType});
-        res.end(content, 'utf-8');
+        const contentType = searchParams.get('type') || 'text/plain';
+        res.statusCode = 200;
+        res.setHeader('Content-Type', contentType);
+        res.end(content, 'utf8');
+    }
+
+    /**
+     * @returns {Promise<void>}
+     */
+    function start() {
+        return new Promise((resolve) => {
+            server = http
+                .createServer(handleRequest)
+                .listen(port, () => resolve());
+        });
+    }
+
+    /**
+     * @returns {Promise<void>}
+     */
+    function close() {
+        if (!server) {
+            return;
+        }
+        return new Promise((resolve) => {
+            server.close((err) => {
+                if (err) {
+                    console.error(err);
+                }
+                server = null;
+                resolve();
+            });
+        });
+    }
+
+    process.on('exit', close);
+    process.on('SIGINT', close);
+
+    await start();
+
+    return {
+        close,
+        url: `http://localhost:${port}`,
     };
 }
-
-createEchoServer.$inject = ['config.urlRoot', 'logger'];
-
-module.exports = {
-    [pluginName]: ['factory', createEchoServer],
-};

@@ -1,22 +1,24 @@
 /** @typedef {import('karma').Config & Record<string, unknown>} LocalConfig */
 /** @typedef {import('karma').ConfigOptions} ConfigOptions */
 
-const fs = require('fs');
-const os = require('os');
-const rollupPluginIstanbul = require('rollup-plugin-istanbul2');
-const rollupPluginNodeResolve = require('@rollup/plugin-node-resolve').default;
-const rollupPluginReplace = require('@rollup/plugin-replace');
-const rollupPluginTypescript = require('@rollup/plugin-typescript');
-const typescript = require('typescript');
-const {getTestDestDir, rootPath} = require('../../tasks/paths');
-const karmaPluginEchoServer = require('./support/echo-server');
+import fs from 'fs';
+import os from 'os';
+import rollupPluginIstanbul from 'rollup-plugin-istanbul2';
+import rollupPluginNodeResolve from '@rollup/plugin-node-resolve';
+import rollupPluginReplace from '@rollup/plugin-replace';
+import rollupPluginTypescript from '@rollup/plugin-typescript';
+import typescript from 'typescript';
+
+import {createEchoServer} from './support/echo-server.js';
+import paths from '../../tasks/paths.js';
+const {rootPath} = paths;
 
 /**
  * @param {LocalConfig} config
  * @param {Record<string, string>} env
  * @returns {ConfigOptions}
  */
-function configureKarma(config, env) {
+export function configureKarma(config, env) {
     const headless = config.headless || env.KARMA_HEADLESS || false;
 
     /** @type {ConfigOptions} */
@@ -37,10 +39,6 @@ function configureKarma(config, env) {
             'karma-rollup-preprocessor',
             'karma-jasmine',
             'karma-spec-reporter',
-            karmaPluginEchoServer,
-        ],
-        middleware: [
-            'echo-server'
         ],
         preprocessors: {
             '**/*.+(ts|tsx)': ['rollup'],
@@ -56,12 +54,17 @@ function configureKarma(config, env) {
                 rollupPluginReplace({
                     preventAssignment: true,
                     '__DEBUG__': 'false',
+                    '__FIREFOX__': 'false',
+                    '__CHROMIUM_MV2__': 'true',
+                    '__CHROMIUM_MV3__': 'false',
+                    '__THUNDERBIRD__': 'false',
                     '__PORT__': '-1',
+                    '__TEST__': 'true',
                     '__WATCH__': 'false',
                 }),
             ],
             output: {
-                dir: getTestDestDir(),
+                dir: 'build/tests',
                 strict: true,
                 format: 'iife',
                 sourcemap: 'inline',
@@ -125,17 +128,10 @@ function configureKarma(config, env) {
         };
     }
 
+    // HACK: Create CORS server here
+    // Previously a separate Karma runner file was used
+    const corsServerPort = 9966;
+    createEchoServer(corsServerPort).then(() => console.log(`CORS echo server running on port ${corsServerPort}`));
+
     return options;
-}
-
-/**
- * @param   {LocalConfig} config
- * @returns {void}
- */
-module.exports = (config) => {
-    config.set(configureKarma(config, process.env));
-};
-
-if (process.env.NODE_ENV === 'test') {
-    module.exports.configureKarma = configureKarma;
 }

@@ -1,3 +1,6 @@
+import {evalMath} from './math-eval';
+import {getParenthesesRange} from './text';
+
 export interface RGBA {
     r: number;
     g: number;
@@ -10,6 +13,42 @@ export interface HSLA {
     s: number;
     l: number;
     a?: number;
+}
+
+const hslaParseCache = new Map<string, HSLA>();
+const rgbaParseCache = new Map<string, RGBA>();
+
+export function parseColorWithCache($color: string) {
+    $color = $color.trim();
+    if (rgbaParseCache.has($color)) {
+        return rgbaParseCache.get($color);
+    }
+    // We cannot _really_ parse any color which has the calc() expression,
+    // so we try our best to remove those and then parse the value.
+    if ($color.includes('calc(')) {
+        $color = lowerCalcExpression($color);
+    }
+    const color = parse($color);
+    color && rgbaParseCache.set($color, color);
+    return color;
+}
+
+export function parseToHSLWithCache(color: string) {
+    if (hslaParseCache.has(color)) {
+        return hslaParseCache.get(color);
+    }
+    const rgb = parseColorWithCache(color);
+    if (!rgb) {
+        return null;
+    }
+    const hsl = rgbToHSL(rgb);
+    hslaParseCache.set(color, hsl);
+    return hsl;
+}
+
+export function clearColorCache() {
+    hslaParseCache.clear();
+    rgbaParseCache.clear();
 }
 
 // https://en.wikipedia.org/wiki/HSL_and_HSV
@@ -135,14 +174,14 @@ export function parse($color: string): RGBA {
         return {r: 0, g: 0, b: 0, a: 0};
     }
 
-    throw new Error(`Unable to parse ${$color}`);
+    return null;
 }
 
 function getNumbers($color: string) {
     const numbers = [];
     let prevPos = 0;
     let isMining = false;
-    // Get the first `(`
+    // Get the first `(`.
     const startIndex = $color.indexOf('(');
     $color = $color.substring(startIndex + 1, $color.length - 1);
     for (let i = 0; i < $color.length; i++) {
@@ -152,8 +191,8 @@ function getNumbers($color: string) {
             // Enable the mining flag.
             isMining = true;
         } else if (isMining && (c === ' ' || c === ',')) {
-            // isMinig is true and we got a terminating
-            // Character. So we can push the current number
+            // isMining is true and we got a terminating
+            // character. So we can push the current number
             // into the array.
             numbers.push($color.substring(prevPos, i));
             // Disable the mining flag.
@@ -223,7 +262,7 @@ function parseHex($hex: string) {
             return {r, g, b, a};
         }
     }
-    throw new Error(`Unable to parse ${$hex}`);
+    return null;
 }
 
 function getColorByName($color: string) {
@@ -246,15 +285,6 @@ function getSystemColor($color: string) {
     };
 }
 
-// Check if the char is a digit.
-const isCharDigit = (char: string) => char >= '0' && char <= '9';
-
-// Get the amount of digits their are in a number.
-// f(5) => 1
-// f(123) => 3
-// f(912412) => 6
-const getAmountOfDigits = (number: number) => Math.floor(Math.log10(number)) + 1;
-
 // lowerCalcExpression is a helper function that tries to remove `calc(...)`
 // expressions from the given string. It can only lower expressions to a certain
 // degree so we can keep this function easy and simple to understand.
@@ -263,90 +293,31 @@ export function lowerCalcExpression(color: string): string {
     // the calc(...) expression.
     let searchIndex = 0;
 
+    // Replace the content between two indices.
     const replaceBetweenIndices = (start: number, end: number, replacement: string) => {
         color = color.substring(0, start) + replacement + color.substring(end);
     };
 
-    // Because we're talking about numbers within variables
-    // We assume that the max length of such number is 3.
-    const getNumber = () => {
-        let resultNumber = 0;
-        for (let i = 1; i < 4; i++) {
-            const char = color[searchIndex + i];
-            // If we hit a whitespace that means we hit the end of the number.
-            if (char === ' ') {
-                break;
-            }
-            // Check if the current char is numeric.
-            if (isCharDigit(char)) {
-                // Ensure that the current number is multipled by 10
-                // So that the "first" digit on that number is a 0
-                // Which is going to be filled by the `char`.
-                resultNumber *= 10;
-                resultNumber += Number(char);
-            } else {
-                break;
-            }
-        }
-        const lenDigits = getAmountOfDigits(resultNumber);
-        searchIndex += lenDigits;
-
-        // We've now got the first number, let's try to see if this number
-        // a percentage, which is the currently only supported element type.
-        const possibleType = color[searchIndex + 1];
-        if (possibleType !== '%') {
-            return;
-        }
-        searchIndex++;
-        return resultNumber;
-    };
-
-    while ((searchIndex = color.indexOf('calc(')) !== 0) {
-        const startIndex = searchIndex;
-        searchIndex += 4;
-        // Get the first number
-        const firstNumber = getNumber();
-
-        // No first number? Let's not break this while loop.
-        // And return the current state of color variable.
-        if (!firstNumber) {
+    // Run this code until it doesn't find any `calc(...)`.
+    while ((searchIndex = color.indexOf('calc(')) !== -1) {
+        // Get the parentheses ranges of `calc(...)`.
+        const range = getParenthesesRange(color, searchIndex);
+        if (!range) {
             break;
         }
 
-        // The char after the xxx% should be a whitespace.
-        if (color[searchIndex + 1] !== ' ') {
-            break;
-        }
-        searchIndex++;
+        // Get the content between the parentheses.
+        let slice = color.slice(range.start + 1, range.end - 1);
+        // Does the content include a percentage?
+        const includesPercentage = slice.includes('%');
+        // Remove all percentages.
+        slice = slice.split('%').join('');
 
-        const operation = color[searchIndex + 1];
-        // Only allow - and +
-        if (operation !== '+' && operation !== '-') {
-            break;
-        }
-        searchIndex++;
+        // Pass the content to the evalMath library and round its output.
+        const output = Math.round(evalMath(slice));
 
-        // The char after the xxx% -/+ should be a whitespace.
-        if (color[searchIndex + 1] !== ' ') {
-            break;
-        }
-        searchIndex++;
-
-        // Get the second number
-        const secondNumber = getNumber();
-        if (!secondNumber) {
-            break;
-        }
-        // Create the replacement string.
-        let replacement: string;
-        if (operation === '+') {
-            replacement = `${firstNumber + secondNumber}%`;
-        } else {
-            replacement = `${firstNumber - secondNumber}%`;
-        }
-
-        // Replace the string between the indices.
-        replaceBetweenIndices(startIndex, searchIndex + 2, replacement);
+        // Replace `calc(...)` with the result.
+        replaceBetweenIndices(range.start - 4, range.end, output + (includesPercentage ? '%' : ''));
     }
     return color;
 }

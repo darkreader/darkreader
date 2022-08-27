@@ -1,11 +1,11 @@
-name: Run tests on Pull Request or Push
+name: Run config tests on Pull Request or Push
 on:
   push:
     branches:
-      - master
+      - main
   pull_request:
     branches:
-      - master
+      - main
     types:
       - opened
       - synchronize
@@ -42,9 +42,3 @@ jobs:
 
       - name: Run test against code
         run: npm run test:ci
-
-      - name: Lint code for code-style errors
-        run: npm run lint
-
-      - name: Check for compatibility issues
-        run: npm run lint:bundle

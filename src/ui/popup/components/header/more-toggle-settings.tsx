@@ -1,7 +1,8 @@
 import {m} from 'malevic';
 import {Button, CheckBox, TextBox, TimeRangePicker} from '../../../controls';
 import {getLocalMessage} from '../../../../utils/locales';
-import type {ExtWrapper} from '../../../../definitions';
+import type {Automation, ExtWrapper} from '../../../../definitions';
+import {AutomationMode} from '../../../../utils/automation';
 
 type MoreToggleSettingsProps = ExtWrapper & {
     isExpanded: boolean;
@@ -9,7 +10,7 @@ type MoreToggleSettingsProps = ExtWrapper & {
 };
 
 export default function MoreToggleSettings({data, actions, isExpanded, onClose}: MoreToggleSettingsProps) {
-    const isSystemAutomation = data.settings.automation === 'system';
+    const isSystemAutomation = data.settings.automation.mode === AutomationMode.SYSTEM;
     const locationSettings = data.settings.location;
     const values = {
         'latitude': {
@@ -68,6 +69,10 @@ export default function MoreToggleSettings({data, actions, isExpanded, onClose}:
         });
     }
 
+    function changeAutomationMode(mode: Automation['mode']) {
+        actions.changeSettings({automation: {...data.settings.automation, ...{mode, enabled: Boolean(mode)}}});
+    }
+
     return (
         <div
             class={{
@@ -82,8 +87,8 @@ export default function MoreToggleSettings({data, actions, isExpanded, onClose}:
             <div class="header__app-toggle__more-settings__content">
                 <div class="header__app-toggle__more-settings__line">
                     <CheckBox
-                        checked={data.settings.automation === 'time'}
-                        onchange={(e: {target: HTMLInputElement}) => actions.changeSettings({automation: e.target.checked ? 'time' : ''})}
+                        checked={data.settings.automation.mode === AutomationMode.TIME}
+                        onchange={(e: {target: HTMLInputElement}) => changeAutomationMode(e.target.checked ? AutomationMode.TIME : AutomationMode.NONE)}
                     />
                     <TimeRangePicker
                         startTime={data.settings.time.activation}
@@ -96,8 +101,8 @@ export default function MoreToggleSettings({data, actions, isExpanded, onClose}:
                 </p>
                 <div class="header__app-toggle__more-settings__line header__app-toggle__more-settings__location">
                     <CheckBox
-                        checked={data.settings.automation === 'location'}
-                        onchange={(e: {target: HTMLInputElement}) => actions.changeSettings({automation: e.target.checked ? 'location' : ''})}
+                        checked={data.settings.automation.mode === AutomationMode.LOCATION}
+                        onchange={(e: {target: HTMLInputElement}) => changeAutomationMode(e.target.checked ? AutomationMode.LOCATION : AutomationMode.NONE)}
                     />
                     <TextBox
                         class="header__app-toggle__more-settings__location__latitude"
@@ -133,14 +138,14 @@ export default function MoreToggleSettings({data, actions, isExpanded, onClose}:
                     <CheckBox
                         class="header__app-toggle__more-settings__system-dark-mode__checkbox"
                         checked={isSystemAutomation}
-                        onchange={(e: {target: HTMLInputElement}) => actions.changeSettings({automation: e.target.checked ? 'system' : ''})}
+                        onchange={(e: {target: HTMLInputElement}) => changeAutomationMode(e.target.checked ? AutomationMode.SYSTEM : AutomationMode.NONE)}
                     />
                     <Button
                         class={{
                             'header__app-toggle__more-settings__system-dark-mode__button': true,
                             'header__app-toggle__more-settings__system-dark-mode__button--active': isSystemAutomation,
                         }}
-                        onclick={() => actions.changeSettings({automation: isSystemAutomation ? '' : 'system'})}
+                        onclick={() =>changeAutomationMode(isSystemAutomation ? AutomationMode.NONE : AutomationMode.SYSTEM)}
                     >{getLocalMessage('system_dark_mode')}</Button>
                 </div>
                 <p class="header__app-toggle__more-settings__description">

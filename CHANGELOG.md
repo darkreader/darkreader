@@ -1,6 +1,70 @@
-## Unreleased
+## 4.9.57 (Aug 23, 2022)
+
+- Fix iframes not getting modified when settings were changed.
+- Fixed registering system automation handlers multiple times.
+
+## 4.9.56 (Aug 16, 2022)
+
+- Fix browser theme not changing when automation + scheme behavior was enabled.
+
+## 4.9.55 (Aug 10, 2022)
+
+- Fix Google calendar.
+- Fix Opera/Vivaldi sidebar's getting modified.
+- Fix incorrect inline background colors when `mask` is explicitly disabled.
+- Fixed breaking for some old browser versions.
+
+## 4.9.54 (Aug 10, 2022)
+
+- Fixed System automation.
+
+## 4.9.53 (Aug 9, 2022)
+
+- Don't manage styles that have an empty `href` attribute.
+- Use `navigator.UserAgentData` when possible.
+- Add a `<meta name="darkreader-lock">` detector, to disable Dark Reader when detected (only dynamic theme).
+- Fix filter theme for Firefox v102+
+- Correctly open static theme editor on Mobile.
+- Migrate automation settings to its own object.
+- Correctly handle empty URL's in `background-image` property.
+- Make color parsing use cache.
+- Send updates only to affected tabs when toggling sites.
+- Fixed images with masks (Gmail icons issue).
+- Background page refactoring.
+
+## 4.9.52 (June 28, 2022)
+
+- Correctly handle escaped characters in CSS `url(...)` values.
+
+## 4.9.51 (May 27, 2022)
+
+Dynamic mode improvements:
+
+- Fixed CSS imports that contain `url(...)` and end with `screen`.
+- Send network responses to correct frames in tabs.
+- Improved `calc(...)` color handling by using [Shunting Yard algorithm](https://en.wikipedia.org/wiki/Shunting_yard_algorithm).
+
+New translations:
+
+- Malay translation.
+- Telugu translation.
+
+Other:
+
+- UI improvements.
+- Users' fixes for websites.
+
+## 4.9.50 (May 1, 2022)
+
+- Fix working in Firefox Nightly 101.
+- Users' fixes for websites.
+
+## 4.9.48 (Apr 18, 2022)
 
 - Fix PDF inversion when Auto-detect dark theme option was enabled.
+- Fix Jira's background.
+- User's settings validation.
+- Users' fixes for websites.
 
 ## 4.9.47 (Mar 14, 2022)
 

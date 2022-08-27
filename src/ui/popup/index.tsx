@@ -17,6 +17,13 @@ function renderBody(data: ExtensionData, fonts: string[], actions: ExtensionActi
         document.documentElement.classList.remove('preview');
     }
 
+    if (data.news && data.news.length > 0) {
+        const latest = data.news[0];
+        if (latest && !latest.displayed) {
+            actions.markNewsAsDisplayed([latest.id]);
+        }
+    }
+
     sync(document.body, (
         <Body data={data} actions={actions} fonts={fonts} />
     ));
@@ -45,9 +52,8 @@ if (isFirefox) {
     fixNotClosingPopupOnNavigation();
 }
 
-declare const __DEBUG__: boolean;
-const DEBUG = __DEBUG__;
-if (DEBUG) {
+declare const __TEST__: boolean;
+if (__TEST__) {
     chrome.runtime.onMessage.addListener(({type}) => {
         if (type === MessageType.BG_CSS_UPDATE) {
             document.querySelectorAll('link[rel="stylesheet"]').forEach((link: HTMLLinkElement) => {

@@ -1,6 +1,7 @@
 // @ts-check
-const path = require('path');
-const {writeFile} = require('../../tasks/utils');
+import path from 'path';
+
+import {writeFile} from '../../tasks/utils.js';
 
 /** @typedef {{text: string; covered: boolean}} CodePart */
 
@@ -52,7 +53,7 @@ function green(/** @type {string} */text) {
  * @param {string} code
  * @param {{start: number; end: number}[]} ranges
  */
-function logCoverage(code, ranges) {
+export function logCoverage(code, ranges) {
     code = code.substring(0, code.indexOf('//# sourceMappingURL='));
     const parts = splitCode(code, ranges);
     const message = parts
@@ -157,7 +158,7 @@ async function generateIndexHTMLCoveragePage(dir, info) {
  * @param {string} dir
  * @param {import('puppeteer-core').CoverageEntry[]} coverage
  */
-async function generateHTMLCoverageReports(dir, coverage) {
+export async function generateHTMLCoverageReports(dir, coverage) {
     const info = coverage
         .filter(({url}) => url.startsWith('chrome-extension://'))
         .map(({url, text, ranges}) => {
@@ -168,8 +169,3 @@ async function generateHTMLCoverageReports(dir, coverage) {
     await generateIndexHTMLCoveragePage(dir, info);
     await Promise.all(info.map((i) => generateHTMLCoverageReport(dir, i)));
 }
-
-module.exports = {
-    logCoverage,
-    generateHTMLCoverageReports,
-};

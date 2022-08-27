@@ -30,6 +30,8 @@ export function throttle<T extends(...args: any[]) => any>(callback: T) {
 
 type Task = () => void;
 
+declare const __TEST__: boolean;
+
 export function createAsyncTasksQueue() {
     const tasks: Task[] = [];
     let frameId: number = null;
@@ -40,6 +42,9 @@ export function createAsyncTasksQueue() {
             task();
         }
         frameId = null;
+        if (__TEST__) {
+            document.dispatchEvent(new CustomEvent('__darkreader__test__asyncQueueComplete'));
+        }
     }
 
     function add(task: Task) {

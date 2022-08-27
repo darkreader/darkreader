@@ -10,7 +10,7 @@ Sponsor the development of Dark Reader
 
 ## Translation
 
-[Improve or suggest](https://github.com/darkreader/darkreader/tree/master/src/_locales) a translation.
+[Improve or suggest](https://github.com/darkreader/darkreader/tree/main/src/_locales) a translation.
 See the list of [language codes](https://developer.chrome.com/webstore/i18n#localeTable) that we can support.
 
 ## Adding a website that is already dark
@@ -20,16 +20,16 @@ If a website is **already dark** and meets the following requirements:
 - The URL is the actual website address. (No CNAME or URL redirects)
 - The page isn't WIP, sites will change in this phase and could afterwards not meet the requirements.
 
-Then, you can **add it to the [dark-sites.config](https://github.com/darkreader/darkreader/blob/master/src/config/dark-sites.config) file**
+Then, you can **add it to the [dark-sites.config](https://github.com/darkreader/darkreader/blob/main/src/config/dark-sites.config) file**
 *(please, preserve the alphabetical order)*.
 
 ## Fixing incorrect inversions
 
 If certain **parts** of a web page are **incorrectly inverted or styled**,
 you can fix this by specifying the appropriate [**CSS selectors**](https://developer.mozilla.org/docs/Web/CSS/CSS_Selectors) in
-**[dynamic-theme-fixes.config](https://github.com/darkreader/darkreader/blob/master/src/config/dynamic-theme-fixes.config)**
+**[dynamic-theme-fixes.config](https://github.com/darkreader/darkreader/blob/main/src/config/dynamic-theme-fixes.config)**
 (for Dynamic Theme mode)
-or **[inversion-fixes.config](https://github.com/darkreader/darkreader/blob/master/src/config/inversion-fixes.config)**
+or **[inversion-fixes.config](https://github.com/darkreader/darkreader/blob/main/src/config/inversion-fixes.config)**
 (for Filter and Filter+ modes) *(__Please, preserve alphabetical order by URL, use short selectors, and preserve code style__)*.
 
 Below you can learn how to make a fix for the appropriate mode.
@@ -51,8 +51,8 @@ For **Filter mode**, it is a common practice to invert parts of the page that ar
 - Click **Apply**.
 - Check how it looks both in **Light** and **Dark** mode.
 - If the **fix works** open
-**[dynamic-theme-fixes.config](https://github.com/darkreader/darkreader/blob/master/src/config/dynamic-theme-fixes.config) file**
-or **[inversion-fixes.config](https://github.com/darkreader/darkreader/blob/master/src/config/inversion-fixes.config) file**.
+**[dynamic-theme-fixes.config](https://github.com/darkreader/darkreader/blob/main/src/config/dynamic-theme-fixes.config) file**
+or **[inversion-fixes.config](https://github.com/darkreader/darkreader/blob/main/src/config/inversion-fixes.config) file**.
 - Click **Edit** (login to GitHub first).
 - **Insert your fix** there. Preserve **alphabetic order** by URL.
 - Provide a **short description** of what you have done.
@@ -99,7 +99,7 @@ If you think you can add a new _popular_ or _unique_ but useable pre-defined col
 Please follow the next steps to add a new color scheme:
 
 - Open
-**[color-schemes.drconf](https://github.com/darkreader/darkreader/blob/master/src/config/color-schemes.drconf) file**.
+**[color-schemes.drconf](https://github.com/darkreader/darkreader/blob/main/src/config/color-schemes.drconf) file**.
 - Click **Edit** (login to GitHub first).
 - **Insert your fix** there. Preserve **alphabetic order** by Color scheme name.
 - Provide a **short description** of what you have done.
@@ -195,7 +195,7 @@ It will after making any code changes, the project will be automatically recompi
 
 ## Tips
 
-For editing the code you can use any text editor or web IDE (like [Visual Studio Code](https://code.visualstudio.com), [Atom](https://atom.io/), or [WebStorm](https://www.jetbrains.com/webstorm/)).
+For editing the code you can use any text editor or web IDE (like [Visual Studio Code](https://code.visualstudio.com), or [WebStorm](https://www.jetbrains.com/webstorm/)).
 
 **Please preserve code style** (whitespaces etc).
 This can automatically be done by executing `npm run code-style`.

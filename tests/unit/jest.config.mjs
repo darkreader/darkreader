@@ -1,7 +1,8 @@
 // @ts-check
 
-const {dirname} = require('path');
-const rootDir = dirname(require.resolve('../../package.json'));
+import {dirname} from 'path';
+import {createRequire} from 'module';
+const rootDir = dirname(createRequire(import.meta.url).resolve('../../package.json'));
 
 /** @type {import('@jest/types').Config.InitialOptions} */
 const config = {
@@ -11,9 +12,14 @@ const config = {
     transform: {'^.+\\.ts(x?)$': 'ts-jest'},
     globals: {
         'ts-jest': {tsconfig: '<rootDir>/tests/unit/tsconfig.json'},
+        __FIREFOX__: false,
+        __CHROMIUM_MV2__: false,
+        __CHROMIUM_MV3__: false,
+        __THUNDERBIRD__: false,
         __DEBUG__: false,
+        __TEST__: true,
     },
     setupFilesAfterEnv: ['jest-extended/all'],
 };
 
-module.exports = config;
+export default config;

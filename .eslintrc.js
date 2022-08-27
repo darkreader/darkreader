@@ -184,6 +184,7 @@ config.overrides.push({
     settings: {
         polyfills: [
             'navigator.deviceMemory',
+            'navigator.userAgentData',
         ],
     },
     overrides: [

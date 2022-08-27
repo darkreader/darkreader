@@ -1,7 +1,11 @@
-import {isChromium} from '../../utils/platform';
+declare const __CHROMIUM_MV2__: boolean;
+declare const __CHROMIUM_MV3__: boolean;
 
 export function isNonPersistent() {
-    if (!isChromium) {
+    if (__CHROMIUM_MV3__) {
+        return true;
+    }
+    if (!__CHROMIUM_MV2__) {
         return false;
     }
     const background = chrome.runtime.getManifest().background;

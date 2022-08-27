@@ -1,5 +1,5 @@
 import type {RGBA} from '../utils/color';
-import {parse} from '../utils/color';
+import {parseColorWithCache} from '../utils/color';
 import {modifyBackgroundColor, modifyForegroundColor, modifyBorderColor} from '../generators/modify-colors';
 import type {FilterConfig} from '../definitions';
 
@@ -77,7 +77,7 @@ export function setWindowTheme(filter: FilterConfig) {
             'text': modifyForegroundColor,
             'border': modifyBorderColor,
         }[type];
-        const rgb = parse(value);
+        const rgb = parseColorWithCache(value);
         const modified = modify(rgb, filter);
         obj[key] = modified;
         return obj;

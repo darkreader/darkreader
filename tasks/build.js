@@ -1,25 +1,32 @@
 // @ts-check
-const bundleAPI = require('./bundle-api');
-const bundleCSS = require('./bundle-css');
-const bundleHTML = require('./bundle-html');
-const bundleJS = require('./bundle-js');
-const bundleLocales = require('./bundle-locales');
-const clean = require('./clean');
-const copy = require('./copy');
-const reload = require('./reload');
-const codeStyle = require('./code-style');
-const zip = require('./zip');
-const {runTasks} = require('./task');
-const {log} = require('./utils');
-const {fork} = require('child_process');
+import bundleAPI from './bundle-api.js';
+import bundleCSS from './bundle-css.js';
+import bundleJS from './bundle-js.js';
+import bundleLocales from './bundle-locales.js';
+import bundleManifest from './bundle-manifest.js';
+import clean from './clean.js';
+import copy from './copy.js';
+import saveLog from './log.js';
+import * as reload from './reload.js';
+import codeStyle from './code-style.js';
+import zip from './zip.js';
+import {runTasks} from './task.js';
+import {log} from './utils.js';
+import {fork} from 'child_process';
+import paths from './paths.js';
+const {PLATFORM} = paths;
+
+import {fileURLToPath} from 'url';
+const __filename = fileURLToPath(import.meta.url);
 
 const standardTask = [
     clean,
     bundleJS,
     bundleCSS,
-    bundleHTML,
     bundleLocales,
+    bundleManifest,
     copy,
+    saveLog,
 ];
 
 const buildTask = [
@@ -28,13 +35,13 @@ const buildTask = [
     zip
 ];
 
-async function build({debug, watch}) {
+async function build({platforms, debug, watch, log: logging, test}) {
     log.ok('BUILD');
     try {
-        await runTasks(debug ? standardTask : buildTask, {debug, watch});
+        await runTasks(debug ? standardTask : buildTask, {platforms, debug, watch, log: logging, test});
         if (watch) {
-            standardTask.forEach((task) => task.watch());
-            reload({type: reload.FULL});
+            standardTask.forEach((task) => task.watch(platforms));
+            reload.reload({type: reload.FULL});
             log.ok('Watching...');
         } else {
             log.ok('MISSION PASSED! RESPECT +');
@@ -48,9 +55,10 @@ async function build({debug, watch}) {
 async function api() {
     log.ok('API');
     try {
-        await runTasks([bundleAPI], {debug: false, watch: false});
+        await runTasks([bundleAPI], {platforms: {}, debug: false, watch: false, log: false, test: false});
         log.ok('MISSION PASSED! RESPECT +');
     } catch (err) {
+        console.log(err);
         log.error(`MISSION FAILED!`);
         process.exit(13);
     }
@@ -78,11 +86,28 @@ async function run() {
         return executeChildProcess(args);
     }
 
-    if (args.includes('--release')) {
-        await build({debug: false, watch: false});
+    const validArgs = ['--api', '--chrome', '--chrome-mv3', '--firefox', '--thunderbird', '--release', '--debug', '--watch', '--log-info', '--log-warn', '--test'];
+    args.filter((arg) => !validArgs.includes(arg)).forEach((arg) => log.warn(`Unknown argument ${arg}`));
+
+    const allPlatforms = !(args.includes('--chrome') || args.includes('--chrome-mv3') || args.includes('--firefox') || args.includes('--thunderbird'));
+    const platforms = {
+        [PLATFORM.CHROME]: allPlatforms || args.includes('--chrome'),
+        [PLATFORM.CHROME_MV3]: allPlatforms || args.includes('--chrome-mv3'),
+        [PLATFORM.FIREFOX]: allPlatforms || args.includes('--firefox'),
+        [PLATFORM.THUNDERBIRD]: allPlatforms || args.includes('--thunderbird'),
+    };
+
+
+    const release = args.includes('--release');
+    const debug = args.includes('--debug');
+    const watch = args.includes('--watch');
+    const logInfo = watch && args.includes('--log-info');
+    const logWarn = watch && args.includes('--log-warn');
+    if (release) {
+        await build({platforms, debug: false, watch: false, log: null, test: false});
     }
-    if (args.includes('--debug')) {
-        await build({debug: true, watch: args.includes('--watch')});
+    if (debug) {
+        await build({platforms, debug, watch, log: logWarn ? 'warn' : (logInfo ? 'info' : null), test: args.includes('--test')});
     }
     if (args.includes('--api')) {
         await api();

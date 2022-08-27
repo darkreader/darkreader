@@ -1,90 +1,101 @@
 // @ts-check
-const {getDestDir, PLATFORM} = require('./paths');
-const reload = require('./reload');
-const {createTask} = require('./task');
-const {pathExists, copyFile, readFile, writeFile, getPaths} = require('./utils');
+import paths_ from './paths.js';
+import * as reload from './reload.js';
+import {createTask} from './task.js';
+import {pathExists, copyFile, getPaths} from './utils.js';
+const {getDestDir, PLATFORM} = paths_;
 
 const srcDir = 'src';
-const cwdPaths = [
-    'background/index.html',
-    'config/**/*.{config,drconf}',
-    'icons/**/*.*',
-    'ui/assets/**/*.*',
-    'ui/popup/compatibility.js',
-    'manifest.json',
+
+/**
+ * @typedef copyEntry
+ * @property {string} src
+ * @property {string} reloadType
+ * @property {(typeof PLATFORM.CHROME)[] | undefined} [platforms]
+ */
+
+/** @type {copyEntry[]} */
+const copyEntries = [
+    {
+        src: 'background/index.html',
+        reloadType: reload.FULL,
+        platforms: [PLATFORM.CHROME, PLATFORM.FIREFOX, PLATFORM.THUNDERBIRD]
+    },
+    {
+        src: 'config/**/*.{config,drconf}',
+        reloadType: reload.FULL,
+    },
+    {
+        src: 'icons/**/*.*',
+        reloadType: reload.FULL,
+    },
+    {
+        src: 'ui/assets/**/*.*',
+        reloadType: reload.UI,
+    },
+    {
+        src: 'ui/popup/compatibility.js',
+        reloadType: reload.UI,
+    },
+    {
+        src: 'ui/popup/index.html',
+        reloadType: reload.UI,
+    },
+    {
+        src: 'ui/devtools/index.html',
+        reloadType: reload.UI,
+    },
+    {
+        src: 'ui/stylesheet-editor/index.html',
+        reloadType: reload.UI,
+    },
 ];
-const paths = cwdPaths.map((path) => `${srcDir}/${path}`);
+
+const paths = copyEntries.map((entry) => entry.src).map((path) => `${srcDir}/${path}`);
 
 function getCwdPath(/** @type {string} */srcPath) {
     return srcPath.substring(srcDir.length + 1);
 }
 
-async function readJSON(path) {
-    const file = await readFile(path);
-    return JSON.parse(file);
-}
-
-async function writeJSON(path, json) {
-    const content = JSON.stringify(json, null, 4);
-    return await writeFile(path, content);
-}
-
-async function patchManifestFirefox({debug, platform}) {
-    const manifest = await readJSON(`${srcDir}/manifest.json`);
-    const fireFoxPatch = await readJSON(`${srcDir}/manifest-firefox.json`);
-    const thunderBirdPatch = await readJSON(`${srcDir}/manifest-thunderbird.json`);
-    const patched = platform === PLATFORM.FIREFOX ? {...manifest, ...fireFoxPatch} : {...manifest, ...thunderBirdPatch};
-    const destDir = getDestDir({debug, platform});
-    await writeJSON(`${destDir}/manifest.json`, patched);
-}
-
-async function patchManifestMV3({debug}) {
-    const manifest = await readJSON(`${srcDir}/manifest.json`);
-    const mv3Patch = await readJSON(`${srcDir}/manifest-mv3.json`);
-    const patched = {...manifest, ...mv3Patch};
-    patched.browser_action = undefined;
-    const destDir = getDestDir({debug, platform: PLATFORM.CHROME_MV3});
-    await writeJSON(`${destDir}/manifest.json`, patched);
-}
-
-async function copyManifest(path, {debug, platform}) {
+async function copyEntry(path, {debug, platform}) {
     const cwdPath = getCwdPath(path);
     const destDir = getDestDir({debug, platform});
-    if ((platform === PLATFORM.FIREFOX || platform === PLATFORM.THUNDERBIRD) && cwdPath === 'manifest.json') {
-        await patchManifestFirefox({debug, platform});
-    } else if (platform === PLATFORM.CHROME_MV3 && cwdPath === 'manifest.json') {
-        await patchManifestMV3({debug});
-    } else if (platform === PLATFORM.CHROME_MV3 && cwdPath === 'background/index.html') {
-        // Do nothing
-    } else {
-        const src = `${srcDir}/${cwdPath}`;
-        const dest = `${destDir}/${cwdPath}`;
-        await copyFile(src, dest);
-    }
+    const src = `${srcDir}/${cwdPath}`;
+    const dest = `${destDir}/${cwdPath}`;
+    await copyFile(src, dest);
 }
 
-async function copy({debug}) {
-    const files = await getPaths(paths);
-    for (const file of files) {
-        for (const platform of Object.values(PLATFORM)) {
-            await copyManifest(file, {debug, platform});
+async function copy({platforms, debug}) {
+    const promises = [];
+    for (const entry of copyEntries) {
+        if (entry.platforms && !entry.platforms.some((platform) => platforms[platform])) {
+            continue;
+        }
+        const files = await getPaths(`${srcDir}/${entry.src}`);
+        for (const file of files) {
+            for (const platform of (entry.platforms || Object.values(PLATFORM)).filter((platform) => platforms[platform])) {
+                promises.push(copyEntry(file, {debug, platform}));
+            }
         }
     }
+    await Promise.all(promises);
 }
 
-module.exports = createTask(
+const copyTask = createTask(
     'copy',
     copy,
 ).addWatcher(
     paths,
-    async (changedFiles) => {
+    async (changedFiles, _, platforms) => {
         for (const file of changedFiles) {
             if (await pathExists(file)) {
-                for (const platform of Object.values(PLATFORM)) {
-                    await copyManifest(file, {debug: true, platform});
+                for (const platform of Object.values(PLATFORM).filter((platform) => platforms[platform])) {
+                    await copyEntry(file, {debug: true, platform});
                 }
             }
         }
-        reload({type: reload.FULL});
+        reload.reload({type: reload.FULL});
     },
 );
+
+export default copyTask;

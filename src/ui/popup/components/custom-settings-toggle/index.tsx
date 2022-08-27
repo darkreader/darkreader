@@ -3,7 +3,8 @@ import {Button} from '../../../controls';
 import {getURLHostOrProtocol, isURLInList} from '../../../../utils/url';
 import {getLocalMessage} from '../../../../utils/locales';
 import type {ExtWrapper} from '../../../../definitions';
-import {isThunderbird} from '../../../../utils/platform';
+
+declare const __THUNDERBIRD__: boolean;
 
 export default function CustomSettingsToggle({data, actions}: ExtWrapper) {
     const tab = data.activeTab;
@@ -23,7 +24,7 @@ export default function CustomSettingsToggle({data, actions}: ExtWrapper) {
             class={{
                 'custom-settings-toggle': true,
                 'custom-settings-toggle--checked': isCustom,
-                'custom-settings-toggle--disabled': tab.isProtected || isThunderbird,
+                'custom-settings-toggle--disabled': __THUNDERBIRD__ || tab.isProtected,
             }}
             onclick={(e) => {
                 if (isCustom) {

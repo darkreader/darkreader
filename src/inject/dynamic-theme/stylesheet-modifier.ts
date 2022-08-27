@@ -69,7 +69,7 @@ export function createStyleSheetModifier() {
 
             notFoundCacheKeys.delete(cssText);
             if (rule.parentRule instanceof CSSMediaRule) {
-                cssText += `;${ (rule.parentRule as CSSMediaRule).media.mediaText}`;
+                cssText += `;${(rule.parentRule as CSSMediaRule).media.mediaText}`;
             }
             if (!rulesTextCache.has(cssText)) {
                 rulesTextCache.add(cssText);

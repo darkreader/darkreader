@@ -2,7 +2,7 @@ import type {ParsedColorSchemeConfig} from './utils/colorscheme-parser';
 import type {Theme, UserSettings} from './definitions';
 import ThemeEngines from './generators/theme-engines';
 import {isMacOS, isWindows, isCSSColorSchemePropSupported} from './utils/platform';
-import {AutomationMode} from 'utils/automation';
+import {AutomationMode} from './utils/automation';
 
 export const DEFAULT_COLORS = {
     darkScheme: {

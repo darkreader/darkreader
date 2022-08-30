@@ -27,12 +27,14 @@ const platform = isNavigatorDefined ? (navigator.userAgentData && typeof navigat
     navigator.userAgentData.platform.toLowerCase() : navigator.platform.toLowerCase()
     : 'some platform';
 
-export const isFirefox = __FIREFOX__ || __THUNDERBIRD__ || userAgent.includes('firefox') || userAgent.includes('librewolf');
+export const isChromium = __CHROMIUM_MV2__ || __CHROMIUM_MV3__ || userAgent.includes('chrome') || userAgent.includes('chromium');
+export const isThunderbird = __THUNDERBIRD__ || userAgent.includes('thunderbird');
+export const isFirefox = __FIREFOX__ || userAgent.includes('firefox') || userAgent.includes('librewolf') || isThunderbird;
 export const isVivaldi = userAgent.includes('vivaldi');
 export const isYaBrowser = userAgent.includes('yabrowser');
 export const isOpera = userAgent.includes('opr') || userAgent.includes('opera');
 export const isEdge = userAgent.includes('edg');
-export const isSafari = !__CHROMIUM_MV2__ && !__CHROMIUM_MV3__ && !__THUNDERBIRD__ && userAgent.includes('safari');
+export const isSafari = !__CHROMIUM_MV2__ && !__CHROMIUM_MV3__ && !__FIREFOX__ && !__THUNDERBIRD__ && userAgent.includes('safari') && !isChromium;
 export const isWindows = platform.startsWith('win');
 export const isMacOS = platform.startsWith('mac');
 export const isMobile = (isNavigatorDefined && navigator.userAgentData) ? navigator.userAgentData.mobile : userAgent.includes('mobile');

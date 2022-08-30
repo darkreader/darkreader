@@ -39,7 +39,7 @@ export const isWindows = platform.startsWith('win');
 export const isMacOS = platform.startsWith('mac');
 export const isMobile = (isNavigatorDefined && navigator.userAgentData) ? navigator.userAgentData.mobile : userAgent.includes('mobile');
 export const isShadowDomSupported = typeof ShadowRoot === 'function';
-export const isMatchMediaChangeEventListenerSupported = (
+export const isMatchMediaChangeEventListenerSupported = __CHROMIUM_MV3__ || (
     typeof MediaQueryList === 'function' &&
     typeof MediaQueryList.prototype.addEventListener === 'function'
 );

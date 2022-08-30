@@ -49,6 +49,12 @@ const jsEntries = [
         reloadType: reload.FULL,
     },
     {
+        src: 'src/inject/color-scheme-watcher.ts',
+        dest: 'inject/color-scheme-watcher.js',
+        reloadType: reload.FULL,
+        platform: PLATFORM.CHROME_MV3,
+    },
+    {
         src: 'src/ui/devtools/index.tsx',
         dest: 'ui/devtools/index.js',
         reloadType: reload.UI,

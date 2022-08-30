@@ -24,6 +24,17 @@
             "run_at": "document_start",
             "all_frames": true,
             "match_about_blank": true
+        },
+        {
+            "matches": [
+                "*://*/*"
+            ],
+            "js": [
+                "inject/color-scheme-watcher.js"
+            ],
+            "run_at": "document_idle",
+            "all_frames": false,
+            "match_about_blank": false
         }
     ],
     "permissions": [

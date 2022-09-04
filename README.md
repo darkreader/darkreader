@@ -103,6 +103,12 @@ However, this can be enabled using the following steps:
 - Click on the Preview new design button.
 - Enable the `Synchronize site fixes` setting under `Settings -> Manage Settings`.
 
+To force a synchronization of the sites fixes (when the corresponding setting is enabled), use the following steps:
+
+- Click on the Dark Reader icon.
+- Click on the Dev tools button (in the bottom-right corner).
+- Click on the Reset button. This will remove any custom site fixes you may have.
+
 <h2 align="center">Contributors</h2>
 <br/>
 <h3 align="center"><strong>Thank you to all our contributors! Dark Reader exists thanks to you.</strong></h3>

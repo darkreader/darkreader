@@ -220,7 +220,7 @@ export class VariablesStore {
     getModifierForVarDependant(property: string, sourceValue: string): CSSValueModifier {
         if (sourceValue.match(/^\s*(rgb|hsl)a?\(/)) {
             const isBg = property.startsWith('background');
-            const isText = (property === 'color' || property === 'caret-color');
+            const isText = isTextColorProperty(property);
             return (theme) => {
                 let value = insertVarValues(sourceValue, this.unstableVarValues);
                 if (!value) {
@@ -239,7 +239,7 @@ export class VariablesStore {
                 );
             };
         }
-        if (property === 'color' || property === 'caret-color') {
+        if (isTextColorProperty(property)) {
             return (theme) => {
                 return replaceCSSVariablesNames(
                     sourceValue,
@@ -405,7 +405,7 @@ export class VariablesStore {
             });
         } else if (property === 'background-color' || property === 'box-shadow') {
             this.iterateVarDeps(value, (v) => this.resolveVariableType(v, VAR_TYPE_BGCOLOR));
-        } else if (property === 'color' || property === 'caret-color') {
+        } else if (isTextColorProperty(property)) {
             this.iterateVarDeps(value, (v) => this.resolveVariableType(v, VAR_TYPE_TEXTCOLOR));
         } else if (property.startsWith('border') || property.startsWith('outline')) {
             this.iterateVarDeps(value, (v) => this.resolveVariableType(v, VAR_TYPE_BORDERCOLOR));
@@ -631,6 +631,10 @@ function isVarDependant(value: string) {
 
 function isConstructedColorVar(value: string) {
     return value.match(/^\s*(rgb|hsl)a?\(/);
+}
+
+function isTextColorProperty(property: string) {
+    return property === 'color' || property === 'caret-color' || property === '-webkit-text-fill-color';
 }
 
 // ex. 131,123,132 | 1,341, 122

@@ -15,7 +15,7 @@ export class StateManager<T> {
             function addListener(listener: (data: T) => void) {
                 chrome.storage.local.onChanged.addListener((changes) => {
                     if (localStorageKey in changes) {
-                      listener(changes[localStorageKey].newValue);
+                        listener(changes[localStorageKey].newValue);
                     }
                 });
             }

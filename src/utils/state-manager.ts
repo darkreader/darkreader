@@ -5,13 +5,13 @@
 
 import {StateManagerImpl} from './state-manager-impl';
 
-declare const __CHROMIUM_MV3__: boolean;
+import {isNonPersistent} from './platform';
 
 export class StateManager<T> {
     private stateManager: StateManagerImpl<T> | null;
 
     constructor(localStorageKey: string, parent: any, defaults: T, logWarn: (log: string) => void){
-        if (__CHROMIUM_MV3__) {
+        if (isNonPersistent) {
             function addListener(listener: (data: T) => void) {
                 chrome.storage.local.onChanged.addListener((changes) => {
                     if (localStorageKey in changes) {

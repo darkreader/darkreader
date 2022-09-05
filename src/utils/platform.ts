@@ -43,6 +43,8 @@ export const isMatchMediaChangeEventListenerSupported = __CHROMIUM_MV3__ || (
     typeof MediaQueryList === 'function' &&
     typeof MediaQueryList.prototype.addEventListener === 'function'
 );
+// Note: make sure that this value matches manifest.json keys
+export const isNonPersistent = !__FIREFOX__ && !__THUNDERBIRD__ && (__CHROMIUM_MV3__ || isSafari);
 
 export const chromiumVersion = (() => {
     const m = userAgent.match(/chrom(?:e|ium)(?:\/| )([^ ]+)/);

@@ -1,4 +1,4 @@
-import {isNonPersistent} from '../utils/migration';
+import {isNonPersistent} from '../utils/platform';
 
 declare const __THUNDERBIRD__: boolean;
 

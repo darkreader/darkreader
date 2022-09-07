@@ -222,7 +222,7 @@ export class VariablesStore {
         // Simply replacing it with some definition is incorrect as variables are element-independent.
         // Fully handling this requires having a function that gives the variable's value given an
         // element's position in the DOM, but that's quite computationally hard to facilitate. We'll
-        // probably just handle edge-cases like `rgb(22, 163, 74/var(--tb-bg-opacity)` and hope that
+        // probably just handle edge-cases like `rgb(22 163 74/var(--tb-bg-opacity)` and hope that
         // lowering the opacity is enough.
         if (sourceValue.match(/^\s*(rgb|hsl)a?\(/)) {
             const isBg = property.startsWith('background');

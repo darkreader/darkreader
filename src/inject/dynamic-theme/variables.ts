@@ -218,6 +218,12 @@ export class VariablesStore {
     }
 
     getModifierForVarDependant(property: string, sourceValue: string): CSSValueModifier {
+        // TODO(gusted): This condition is incorrect, as the sourceValue still might contain a
+        // variable. And simply replacing it with some definition is incorrect as variable's
+        // are element-independent. Fully handling this, requires to have an function that gives the
+        // variable's value given an element's position in the DOM. That's expensive and "stupid", so
+        // likely handle the edge-cases like: rgb(22 163 74/var(--tb-bg-opacity)) and hope that just
+        // reducing the opacity is good enough.
         if (sourceValue.match(/^\s*(rgb|hsl)a?\(/)) {
             const isBg = property.startsWith('background');
             const isText = isTextColorProperty(property);

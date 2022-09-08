@@ -18,7 +18,9 @@ async function getVersion() {
     return p.version;
 }
 
-async function bundleAPI({debug}) {
+let watchFiles = [];
+
+async function bundleAPI({debug, watch}) {
     const src = rootPath('src/api/index.ts');
     const dest = 'darkreader.js';
     const bundle = await rollup.rollup({
@@ -29,8 +31,11 @@ async function bundleAPI({debug}) {
                 rootDir,
                 typescript,
                 tsconfig: rootPath('src/api/tsconfig.json'),
-                removeComments: true,
-                noEmitOnError: true,
+                noImplicitAny: debug ? false : true,
+                removeComments: debug ? false : true,
+                sourceMap: debug ? true : false,
+                inlineSources: debug ? true : false,
+                noEmitOnError: watch ? false : true,
                 cacheDir: debug ? `${fs.realpathSync(os.tmpdir())}/darkreader_api_typescript_cache` : undefined,
             }),
             rollupPluginReplace({
@@ -44,19 +49,35 @@ async function bundleAPI({debug}) {
             }),
         ].filter((x) => x)
     });
+    watchFiles = bundle.watchFiles;
     await bundle.write({
         banner: `/**\n * Dark Reader v${await getVersion()}\n * https://darkreader.org/\n */\n`,
         file: dest,
         strict: true,
         format: 'umd',
         name: 'DarkReader',
-        sourcemap: false,
+        sourcemap: debug ? 'inline' : false,
     });
 }
 
 const bundleAPITask = createTask(
     'bundle-api',
     bundleAPI,
+).addWatcher(
+    () => {
+        return watchFiles;
+    },
+    async (changedFiles, watcher) => {
+        const oldWatchFiles = watchFiles;
+        await bundleAPI({debug: true, watch: true});
+
+        watcher.unwatch(
+            oldWatchFiles.filter((oldFile) => !watchFiles.includes(oldFile))
+        );
+        watcher.add(
+            watchFiles.filter((newFile) => oldWatchFiles.includes(newFile))
+        );
+    },
 );
 
 export default bundleAPITask;

@@ -67,7 +67,7 @@ const bundleAPITask = createTask(
     () => {
         return watchFiles;
     },
-    async (changedFiles, watcher, platforms) => {
+    async (changedFiles, watcher) => {
         const oldWatchFiles = watchFiles;
         await bundleAPI({debug: true, watch: true});
 

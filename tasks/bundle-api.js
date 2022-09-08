@@ -64,20 +64,20 @@ const bundleAPITask = createTask(
     'bundle-api',
     bundleAPI,
 ).addWatcher(
-  () => {
-      return watchFiles;
-  },
-  async (changedFiles, watcher, platforms) => {
-      const oldWatchFiles = watchFiles;
-      await bundleAPI({debug: true, watch: true});
+    () => {
+        return watchFiles;
+    },
+    async (changedFiles, watcher, platforms) => {
+        const oldWatchFiles = watchFiles;
+        await bundleAPI({debug: true, watch: true});
 
-      watcher.unwatch(
-          oldWatchFiles.filter((oldFile) => !watchFiles.includes(oldFile))
-      );
-      watcher.add(
-          watchFiles.filter((newFile) => oldWatchFiles.includes(newFile))
-      );
-  },
+        watcher.unwatch(
+            oldWatchFiles.filter((oldFile) => !watchFiles.includes(oldFile))
+        );
+        watcher.add(
+            watchFiles.filter((newFile) => oldWatchFiles.includes(newFile))
+        );
+    },
 );
 
 export default bundleAPITask;

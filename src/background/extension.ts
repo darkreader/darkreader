@@ -334,9 +334,6 @@ export class Extension {
             dynamicFixesText,
             filterFixesText,
             staticThemesText,
-            hasCustomDynamicFixes,
-            hasCustomFilterFixes,
-            hasCustomStaticFixes,
             activeTab
         ] = await Promise.all([
             Newsmaker.getLatest(),
@@ -344,9 +341,6 @@ export class Extension {
             DevTools.getDynamicThemeFixesText(),
             DevTools.getInversionFixesText(),
             DevTools.getStaticThemesText(),
-            DevTools.hasCustomDynamicThemeFixes(),
-            DevTools.hasCustomFilterFixes(),
-            DevTools.hasCustomStaticFixes(),
             this.getActiveTabInfo()
         ]);
         return {
@@ -361,9 +355,6 @@ export class Extension {
                 dynamicFixesText,
                 filterFixesText,
                 staticThemesText,
-                hasCustomDynamicFixes,
-                hasCustomFilterFixes,
-                hasCustomStaticFixes,
             },
             activeTab,
         };

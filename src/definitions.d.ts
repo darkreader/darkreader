@@ -15,9 +15,6 @@ export interface ExtensionData {
         dynamicFixesText: string;
         filterFixesText: string;
         staticThemesText: string;
-        hasCustomDynamicFixes: boolean;
-        hasCustomFilterFixes: boolean;
-        hasCustomStaticFixes: boolean;
     };
     activeTab: TabInfo;
 }

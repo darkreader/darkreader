@@ -63,9 +63,6 @@ export function getMockData(override = {} as Partial<ExtensionData>): ExtensionD
             dynamicFixesText: '',
             filterFixesText: '',
             staticThemesText: '',
-            hasCustomDynamicFixes: false,
-            hasCustomFilterFixes: false,
-            hasCustomStaticFixes: false,
         },
         colorScheme: {
             dark: {

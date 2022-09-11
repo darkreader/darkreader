@@ -259,10 +259,6 @@ export default class DevTools {
         this.store.set(DevTools.KEY_DYNAMIC, text);
     }
 
-    static async hasCustomDynamicThemeFixes() {
-        return this.store.has(DevTools.KEY_DYNAMIC);
-    }
-
     static async getDynamicThemeFixesText() {
         const $fixes = await this.getSavedDynamicThemeFixes();
         const fixes = $fixes ? parseDynamicThemeFixes($fixes) : parseDynamicThemeFixes(ConfigManager.DYNAMIC_THEME_FIXES_RAW);
@@ -297,10 +293,6 @@ export default class DevTools {
         this.store.set(DevTools.KEY_FILTER, text);
     }
 
-    static async hasCustomFilterFixes() {
-        return this.store.has(DevTools.KEY_FILTER);
-    }
-
     static async getInversionFixesText() {
         const $fixes = await this.getSavedInversionFixes();
         const fixes = $fixes ? parseInversionFixes($fixes) : parseInversionFixes(ConfigManager.INVERSION_FIXES_RAW);
@@ -333,10 +325,6 @@ export default class DevTools {
 
     private static saveStaticThemes(text: string) {
         this.store.set(DevTools.KEY_STATIC, text);
-    }
-
-    static async hasCustomStaticFixes() {
-        return this.store.has(DevTools.KEY_STATIC);
     }
 
     static async getStaticThemesText() {

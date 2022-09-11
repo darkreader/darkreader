@@ -23,7 +23,7 @@ export default function SettingsPage(props: SettingsPageProps) {
             <EnabledByDefaultGroup {...props} />
             {isFirefox ? <ChangeBrowserTheme {...props} /> : null}
             <SiteListButton onClick={props.onSiteListNavClick} />
-            <DevToolsGroup {...props} />
+            <DevToolsGroup />
             <AutomationButton onClick={props.onAutomationNavClick} />
             <ContextMenusGroup {...props} />
             <ManageSettingsButton onClick={props.onManageSettingsClick} />

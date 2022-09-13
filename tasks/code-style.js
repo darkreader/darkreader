@@ -2,7 +2,7 @@
 import prettier from 'prettier';
 import paths from './paths.js';
 import {createTask} from './task.js';
-import {log, readFile, writeFile, getPaths} from './utils.js';
+import {readFile, writeFile, getPaths} from './utils.js';
 const {getDestDir, PLATFORM} = paths;
 
 /** @type {import('prettier').Options} */
@@ -40,8 +40,8 @@ async function codeStyle({platforms, debug}) {
     }
     const promisses = [];
     Object.values(PLATFORM)
-      .filter((platform) => platforms[platform])
-      .forEach((platform) => promisses.push(processPlatform(platform)));
+        .filter((platform) => platforms[platform])
+        .forEach((platform) => promisses.push(processPlatform(platform)));
     await Promise.all(promisses);
 }
 

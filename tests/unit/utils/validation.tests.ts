@@ -44,7 +44,7 @@ test('Settings Validation', () => {
     };
     themeValidation = validateTheme(wonkyTheme as any);
     expect(themeValidation.errors.length).toBeGreaterThan(0);
-    expect(wonkyTheme).toEqual(DEFAULT_THEME);
+    expect(wonkyTheme as any).toEqual(DEFAULT_THEME);
 
     const defaultSet = JSON.parse(JSON.stringify(DEFAULT_SETTINGS));
     let validation = validateSettings(defaultSet);
@@ -122,7 +122,7 @@ test('Settings Validation', () => {
     };
     validation = validateSettings(wonkySet as any);
     expect(validation.errors.length).toBeGreaterThan(0);
-    expect(wonkySet).toEqual({
+    expect(wonkySet as any).toEqual({
         ...DEFAULT_SETTINGS,
         siteList: ['a.com', 'b.com'],
         presets: [{id: 'p5', name: 'P5', urls: ['a.com'], theme: {brightness: 100}}],

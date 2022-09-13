@@ -1,3 +1,4 @@
+import {expect, jest, test} from '@jest/globals';
 import {PromiseBarrier} from '../../../src/utils/promise-barrier';
 
 describe('Promise barrier utility', () => {

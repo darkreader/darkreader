@@ -57,7 +57,7 @@ async function api(debug, watch) {
     try {
         const tasks = [bundleAPI];
         if (!debug) {
-          tasks.push(codeStyle);
+            tasks.push(codeStyle);
         }
         await runTasks(tasks, {platforms: {[PLATFORM.API]: true}, debug, watch, log: false, test: false});
         if (watch) {

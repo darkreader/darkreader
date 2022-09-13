@@ -9,9 +9,8 @@ const config = {
     rootDir,
     testMatch: ['<rootDir>/tests/unit/**/*.tests.ts'],
     moduleFileExtensions: ['ts', 'tsx', 'js'],
-    transform: {'^.+\\.ts(x?)$': 'ts-jest'},
+    transform: {'^.+\\.ts(x?)$': ['ts-jest', {tsconfig: '<rootDir>/tests/unit/tsconfig.json'}]},
     globals: {
-        'ts-jest': {tsconfig: '<rootDir>/tests/unit/tsconfig.json'},
         __FIREFOX__: false,
         __CHROMIUM_MV2__: false,
         __CHROMIUM_MV3__: false,

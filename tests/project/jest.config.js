@@ -8,9 +8,8 @@ const config = {
     rootDir,
     testMatch: ['<rootDir>/tests/project/**/*.tests.ts'],
     moduleFileExtensions: ['ts', 'tsx', 'js'],
-    transform: {'^.+\\.ts(x?)$': 'ts-jest'},
+    transform: {'^.+\\.ts(x?)$': ['ts-jest', {tsconfig: '<rootDir>/tests/project/tsconfig.json'}]},
     globals: {
-        'ts-jest': {tsconfig: '<rootDir>/tests/project/tsconfig.json'},
         __CHROMIUM_MV2__: true,
         __CHROMIUM_MV3__: false,
         __DEBUG__: false,

@@ -67,13 +67,14 @@ async function copyEntry(path, {debug, platform}) {
 
 async function copy({platforms, debug}) {
     const promises = [];
+    const enabledPlatforms = Object.values(PLATFORM).filter((platform) => platform !== PLATFORM.API && platforms[platform]);
     for (const entry of copyEntries) {
         if (entry.platforms && !entry.platforms.some((platform) => platforms[platform])) {
             continue;
         }
         const files = await getPaths(`${srcDir}/${entry.src}`);
         for (const file of files) {
-            for (const platform of (entry.platforms || Object.values(PLATFORM)).filter((platform) => platforms[platform])) {
+            for (const platform of (entry.platforms || enabledPlatforms)) {
                 promises.push(copyEntry(file, {debug, platform}));
             }
         }

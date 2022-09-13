@@ -45,7 +45,8 @@ async function zip({platforms, debug}) {
     const releaseDir = 'build/release';
     const promises = [];
     const date = await getLastCommitTime();
-    for (const platform of Object.values(PLATFORM).filter((platform) => platforms[platform])) {
+    const enabledPlatforms = Object.values(PLATFORM).filter((platform) => platform !== PLATFORM.API && platforms[platform]);
+    for (const platform of enabledPlatforms) {
         const format = [PLATFORM.CHROME, PLATFORM.CHROME_MV3].includes(platform) ? 'zip' : 'xpi';
         promises.push(archiveDirectory({
             dir: getDestDir({debug, platform}),

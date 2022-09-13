@@ -55,7 +55,11 @@ async function build({platforms, debug, watch, log: logging, test}) {
 async function api(debug, watch) {
     log.ok('API');
     try {
-        await runTasks([bundleAPI], {platforms: {}, debug, watch, log: false, test: false});
+        const tasks = [bundleAPI];
+        if (!debug) {
+          tasks.push(codeStyle);
+        }
+        await runTasks(tasks, {platforms: {[PLATFORM.API]: true}, debug, watch, log: false, test: false});
         if (watch) {
             bundleAPI.watch();
             log.ok('Watching...');

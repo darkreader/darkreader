@@ -42,7 +42,8 @@ async function bundleCSSEntry(entry) {
 }
 
 async function writeFiles(dest, platforms, debug, css) {
-    for (const platform of Object.values(PLATFORM).filter((platform) => platforms[platform])) {
+    const enabledPlatforms = Object.values(PLATFORM).filter((platform) => platform !== PLATFORM.API && platforms[platform]);
+    for (const platform of enabledPlatforms) {
         const dir = getDestDir({debug, platform});
         await writeFile(`${dir}/${dest}`, css);
     }

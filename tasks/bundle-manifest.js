@@ -32,7 +32,8 @@ async function patchManifest(platform, debug, watch) {
 }
 
 async function manifests({platforms, debug, watch}) {
-    for (const platform of Object.values(PLATFORM).filter((platform) => platforms[platform])) {
+    const enabledPlatforms = Object.values(PLATFORM).filter((platform) => platform !== PLATFORM.API && platforms[platform]);
+    for (const platform of enabledPlatforms) {
         const manifest = await patchManifest(platform, debug, watch);
         const destDir = getDestDir({debug, platform});
         await writeJSON(`${destDir}/manifest.json`, manifest);

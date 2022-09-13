@@ -10,7 +10,6 @@ import NewBody from '../body';
 import MoreSettings from './more-settings';
 import {NewsGroup, NewsButton} from './news';
 import SiteListSettings from './site-list-settings';
-import ThemeEngines from '../../../generators/theme-engines';
 import {getDuration} from '../../../utils/time';
 import {DONATE_URL, GITHUB_URL, PRIVACY_URL, TWITTER_URL, getHelpURL} from '../../../utils/links';
 import {getLocalMessage} from '../../../utils/locales';

@@ -11,8 +11,9 @@ const config = {
     moduleFileExtensions: ['ts', 'tsx', 'js'],
     testEnvironment: '<rootDir>/tests/browser/environment.js',
     verbose: true,
-    transform: {'^.+\\.ts(x?)$': ['ts-jest', {tsconfig: '<rootDir>/tests/browser/tsconfig.json'}]},
+    transform: {'^.+\\.ts(x?)$': 'ts-jest'},
     globals: {
+        'ts-jest': {tsconfig: '<rootDir>/tests/browser/tsconfig.json'},
         __DEBUG__: false,
         __CHROMIUM_MV2__: true,
         __CHROMIUM_MV3__: false,

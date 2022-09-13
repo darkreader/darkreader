@@ -5,6 +5,7 @@ const rootPath = (...paths) => join(rootDir, ...paths);
 
 export default {
     PLATFORM: {
+        API: 'api',
         CHROME: 'chrome',
         CHROME_MV3: 'chrome-mv3',
         FIREFOX: 'firefox',

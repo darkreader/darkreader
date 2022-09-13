@@ -188,7 +188,7 @@ let watchFiles;
 
 const hydrateTask = (/** @type {JSEntry[]} */entries, platforms, /** @type {boolean} */debug, /** @type {boolean} */watch, log, test) =>
     entries.map((entry) =>
-        (entry.platform ? [entry.platform] : Object.values(PLATFORM))
+        (entry.platform ? [entry.platform] : Object.values(PLATFORM).filter((platform) => platform !== PLATFORM.API))
             .filter((platform) => platforms[platform])
             .map((platform) => bundleJS(entry, platform, debug, watch, log, test))
     ).flat();

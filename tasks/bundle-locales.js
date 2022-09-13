@@ -46,7 +46,8 @@ async function bundleLocales({platforms, debug}) {
 async function writeFiles(data, fileName, {platforms, debug}){
     const locale = fileName.substring(0, fileName.lastIndexOf('.')).replace('-', '_');
     const getOutputPath = (dir) => `${dir}/_locales/${locale}/messages.json`;
-    for (const platform of Object.values(PLATFORM).filter((platform) => platforms[platform])) {
+    const enabledPlatforms = Object.values(PLATFORM).filter((platform) => platform !== PLATFORM.API && platforms[platform]);
+    for (const platform of enabledPlatforms) {
         const dir = getDestDir({debug, platform});
         await writeFile(getOutputPath(dir), data);
     }

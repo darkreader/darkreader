@@ -1,3 +1,4 @@
+import {ThemeEngine} from '../../generators/theme-engines';
 import type {ExtensionData, Theme, UserSettings} from '../../definitions';
 
 export function getMockData(override = {} as Partial<ExtensionData>): ExtensionData {
@@ -17,7 +18,7 @@ export function getMockData(override = {} as Partial<ExtensionData>): ExtensionD
                 useFont: false,
                 fontFamily: 'Segoe UI',
                 textStroke: 0,
-                engine: 'cssFilter',
+                engine: ThemeEngine.cssFilter,
                 stylesheet: '',
                 scrollbarColor: 'auto',
                 styleSystemControls: true,

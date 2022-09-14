@@ -1,20 +1,20 @@
 import {m} from 'malevic';
-import ThemeEngines from '../../../../generators/theme-engines';
+import {ThemeEngine} from '../../../../generators/theme-engines';
 import {getLocalMessage} from '../../../../utils/locales';
 import {DropDown} from '../../../controls';
 import ThemeControl from './theme-control';
 import {openExtensionPage} from '../../../utils';
 
-export default function Mode(props: {mode: string; onChange: (mode: string) => void}) {
+export default function Mode(props: {mode: ThemeEngine; onChange: (mode: ThemeEngine) => void}) {
     async function openCSSEditor() {
         await openExtensionPage('stylesheet-editor/index.html');
     }
 
     const modes = [
-        {id: ThemeEngines.dynamicTheme, content: getLocalMessage('engine_dynamic')},
-        {id: ThemeEngines.cssFilter, content: getLocalMessage('engine_filter')},
-        {id: ThemeEngines.svgFilter, content: getLocalMessage('engine_filter_plus')},
-        {id: ThemeEngines.staticTheme, content: getLocalMessage('engine_static')},
+        {id: ThemeEngine.dynamicTheme, content: getLocalMessage('engine_dynamic')},
+        {id: ThemeEngine.cssFilter, content: getLocalMessage('engine_filter')},
+        {id: ThemeEngine.svgFilter, content: getLocalMessage('engine_filter_plus')},
+        {id: ThemeEngine.staticTheme, content: getLocalMessage('engine_static')},
     ];
     return (
         <ThemeControl label="Mode">
@@ -27,7 +27,7 @@ export default function Mode(props: {mode: string; onChange: (mode: string) => v
                 <span
                     class={{
                         'static-edit-button': true,
-                        'static-edit-button--hidden': props.mode !== ThemeEngines.staticTheme,
+                        'static-edit-button--hidden': props.mode !== ThemeEngine.staticTheme,
                     }}
                     onclick={openCSSEditor}
                 />

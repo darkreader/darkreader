@@ -2,6 +2,7 @@ import {validateSettings, validateTheme} from '../../../src/utils/validation';
 import {DEFAULT_SETTINGS, DEFAULT_THEME} from '../../../src/defaults';
 import type {Theme, UserSettings} from '../../../src/definitions';
 import {AutomationMode} from '../../../src/utils/automation';
+import {ThemeEngine} from '../../../src/generators/theme-engines';
 
 test('Settings Validation', () => {
     const defaultTheme = JSON.parse(JSON.stringify(DEFAULT_THEME));
@@ -158,7 +159,7 @@ test('Settings Validation', () => {
             useFont: true,
             fontFamily: 'Comic Sans',
             textStroke: 0.5,
-            engine: 'dynamicTheme',
+            engine: ThemeEngine.dynamicTheme,
             stylesheet: '.x { color: red; }',
             darkSchemeBackgroundColor: '#abcdef',
             darkSchemeTextColor: '#abc123',

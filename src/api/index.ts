@@ -2,7 +2,7 @@ import './chrome';
 import {setFetchMethod as setFetch} from './fetch';
 import {DEFAULT_THEME} from '../defaults';
 import type {Theme, DynamicThemeFix} from '../definitions';
-import ThemeEngines from '../generators/theme-engines';
+import {ThemeEngine} from '../generators/theme-engines';
 import {createOrUpdateDynamicTheme, removeDynamicTheme} from '../inject/dynamic-theme';
 import {collectCSS} from '../inject/dynamic-theme/css-collection';
 import {isMatchMediaChangeEventListenerSupported} from '../utils/platform';
@@ -20,7 +20,7 @@ const isIFrame = (() => {
 export function enable(themeOptions: Partial<Theme> = {}, fixes: DynamicThemeFix = null) {
     const theme = {...DEFAULT_THEME, ...themeOptions};
 
-    if (theme.engine !== ThemeEngines.dynamicTheme) {
+    if (theme.engine !== ThemeEngine.dynamicTheme) {
         throw new Error('Theme engine is not supported.');
     }
     createOrUpdateDynamicTheme(theme, fixes, isIFrame);

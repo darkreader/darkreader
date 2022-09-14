@@ -2,6 +2,7 @@ import type {ParsedColorSchemeConfig} from './utils/colorscheme-parser';
 import type {FilterMode} from './generators/css-filter';
 import type {MessageType} from './utils/message';
 import type {AutomationMode} from './utils/automation';
+import type {ThemeEngine} from './generators/theme-engines';
 
 export interface ExtensionData {
     isEnabled: boolean;
@@ -54,7 +55,7 @@ export interface Theme {
     useFont: boolean;
     fontFamily: string;
     textStroke: number;
-    engine: string;
+    engine: ThemeEngine;
     stylesheet: string;
     darkSchemeBackgroundColor: string;
     darkSchemeTextColor: string;

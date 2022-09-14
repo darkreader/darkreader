@@ -3,4 +3,4 @@ export enum ThemeEngine {
     svgFilter = 'svgFilter',
     staticTheme = 'staticTheme',
     dynamicTheme = 'dynamicTheme',
-};
+}

@@ -4,7 +4,7 @@ import {ThemeEngine} from '../../../../generators/theme-engines';
 import {getLocalMessage} from '../../../../utils/locales';
 import {isFirefox} from '../../../../utils/platform';
 
-const engineNames: [ThemeEngine, string][] = [
+const engineNames: Array<[ThemeEngine, string]> = [
     [ThemeEngine.cssFilter, getLocalMessage('engine_filter')],
     [ThemeEngine.svgFilter, getLocalMessage('engine_filter_plus')],
     [ThemeEngine.staticTheme, getLocalMessage('engine_static')],

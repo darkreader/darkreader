@@ -2,6 +2,7 @@ import {m} from 'malevic';
 import type {ViewProps} from '../types';
 import SiteList from './site-list';
 import CheckButton from '../check-button';
+import RemoveAllButton from '../remove-all-sites-button/remove-site-list-button';
 import {isFirefox} from '../../../utils/platform';
 
 export default function SiteListPage(props: ViewProps) {
@@ -28,6 +29,7 @@ export default function SiteListPage(props: ViewProps) {
                 onChange={onSiteListChange}
             />
             <label class="site-list-page__description">Enter website name and press Enter</label>
+            <RemoveAllButton {...props} />
             {isFirefox ? null : <CheckButton
                 checked={props.data.settings.enableForPDF}
                 label="Enable for PDF files"

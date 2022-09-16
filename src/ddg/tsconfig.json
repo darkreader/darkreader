@@ -1,0 +1,11 @@
+{
+    "extends": "../tsconfig.json",
+    "compilerOptions": {
+        "esModuleInterop": true,
+        "types": [
+            "chrome",
+            "node",
+            "offscreencanvas"
+        ]
+    }
+}

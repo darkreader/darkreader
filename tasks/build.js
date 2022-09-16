@@ -1,5 +1,6 @@
 // @ts-check
 import bundleAPI from './bundle-api.js';
+import bundleDDG from './bundle-ddg.js';
 import bundleCSS from './bundle-css.js';
 import bundleJS from './bundle-js.js';
 import bundleLocales from './bundle-locales.js';
@@ -72,6 +73,22 @@ async function api(debug, watch) {
     }
 }
 
+async function ddg(debug, watch) {
+    log.ok('DDG');
+    try {
+        await runTasks([bundleDDG], {platforms: {[PLATFORM.API]: true}, debug, watch, log: false, test: false});
+        if (watch) {
+            bundleDDG.watch();
+            log.ok('Watching...');
+        }
+        log.ok('MISSION PASSED! RESPECT +');
+    } catch (err) {
+        console.log(err);
+        log.error(`MISSION FAILED!`);
+        process.exit(13);
+    }
+}
+
 async function executeChildProcess(args) {
     if (process.env.BUILD_CHILD) {
         throw new Error('Infinite loop');
@@ -94,7 +111,7 @@ async function run() {
         return executeChildProcess(args);
     }
 
-    const validArgs = ['--api', '--chrome', '--chrome-mv3', '--firefox', '--thunderbird', '--release', '--debug', '--watch', '--log-info', '--log-warn', '--test'];
+    const validArgs = ['--api', '--chrome', '--chrome-mv3', '--ddg', '--firefox', '--thunderbird', '--release', '--debug', '--watch', '--log-info', '--log-warn', '--test'];
     args.filter((arg) => !validArgs.includes(arg)).forEach((arg) => log.warn(`Unknown argument ${arg}`));
 
     const allPlatforms = !(args.includes('--api') || args.includes('--chrome') || args.includes('--chrome-mv3') || args.includes('--firefox') || args.includes('--thunderbird'));
@@ -119,6 +136,9 @@ async function run() {
     }
     if (args.includes('--api')) {
         await api(debug, watch);
+    }
+    if (args.includes('--ddg')) {
+        await ddg(debug, watch);
     }
 }
 

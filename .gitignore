@@ -29,3 +29,6 @@ coverage/
 # V8 Profiler logs
 #-----------------------------------
 isolate-*-v8.log
+
+# DDG
+/ddg/

@@ -187,8 +187,9 @@ export function isPDF(url: string) {
             url = url.substring(0, url.lastIndexOf('#'));
         }
         if (
-            (url.match(/(wikipedia|wikimedia).org/i) && url.match(/(wikipedia|wikimedia)\.org\/.*\/[a-z]+\:[^\:\/]+\.pdf/i)) ||
-            (url.match(/timetravel\.mementoweb\.org\/reconstruct/i) && url.match(/\.pdf$/i))
+            (url.match(/(wikipedia|wikimedia)\.org/i) && url.match(/(wikipedia|wikimedia)\.org\/.*\/[a-z]+\:[^\:\/]+\.pdf/i)) ||
+            (url.match(/timetravel\.mementoweb\.org\/reconstruct/i) && url.match(/\.pdf$/i)) ||
+            (url.match(/dropbox\.com\/s\//i) && url.match(/\.pdf$/i))
         ) {
             return false;
         }

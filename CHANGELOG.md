@@ -1,3 +1,7 @@
+## Unreleased
+
+- Don't style `<a>` elements without a link(href attribute) anymore. Only those with a link.
+
 ## 4.9.57 (Aug 23, 2022)
 
 - Fix iframes not getting modified when settings were changed.

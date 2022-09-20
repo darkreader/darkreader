@@ -50,15 +50,13 @@ describe('STYLE ELEMENTS', () => {
     it('should override User Agent style', async () => {
         container.innerHTML = multiline(
             '<span>Text</span>',
-            '<a href="#" class="href">Link</a>',
-            '<a class="non-href">Non-link</a>'
+            '<a href="#">Link</a>',
         );
         createOrUpdateDynamicTheme(theme, null, false);
         expect(getComputedStyle(container).backgroundColor).toBe('rgb(0, 0, 0)');
         expect(getComputedStyle(container).color).toBe('rgb(255, 255, 255)');
         expect(getComputedStyle(container.querySelector('span')).color).toBe('rgb(255, 255, 255)');
-        expect(getComputedStyle(container.querySelector('.href')).color).toBe('rgb(51, 145, 255)');
-        expect(getComputedStyle(container.querySelector('.non-href')).color).toBe('rgb(255, 255, 255)');
+        expect(getComputedStyle(container.querySelector('a')).color).toBe('rgb(51, 145, 255)');
     });
 
     it('should override static style', async () => {

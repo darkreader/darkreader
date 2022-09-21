@@ -1,3 +1,7 @@
+## Unreleased
+
+- Remove newlines from CSS URL values, before handling them.
+
 ## 4.9.57 (Aug 23, 2022)
 
 - Fix iframes not getting modified when settings were changed.

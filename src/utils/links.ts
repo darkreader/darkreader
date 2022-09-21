@@ -19,6 +19,7 @@ const helpLocales = [
     'nl',
     'pt',
     'ru',
+    'sr',
     'tr',
     'zh-CN',
     'zh-TW',

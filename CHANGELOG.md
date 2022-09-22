@@ -1,6 +1,9 @@
-## Unreleased
+## 4.9.58 (Sep 22, 2022)
 
 - Remove newlines from CSS URL values, before handling them.
+- Better detection for text color property in variables.
+- es-419 (Latin America & Caribbean Spanish) translation.
+- Updates to Hebrew and Portuguese (Brazilian) translations.
 
 ## 4.9.57 (Aug 23, 2022)
 

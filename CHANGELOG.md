@@ -1,3 +1,7 @@
+## Unreleased
+
+- Fixes a issue where `darkreader-fallback` wasn't removed from the DOM, when Dark Reader finds a `<meta name="darkreader-lock">` element.
+
 ## 4.9.58 (Sep 22, 2022)
 
 - Remove newlines from CSS URL values, before handling them.

@@ -488,6 +488,7 @@ export function createOrUpdateDynamicTheme(filterConfig: FilterConfig, dynamicTh
     isIFrame = iframe;
     if (document.head) {
         if (isAnotherDarkReaderInstanceActive()) {
+            removeDynamicTheme();
             return;
         }
         document.documentElement.setAttribute('data-darkreader-mode', 'dynamic');

@@ -260,8 +260,12 @@ export default class DevTools {
     }
 
     static async getDynamicThemeFixesText() {
-        const $fixes = await this.getSavedDynamicThemeFixes();
-        const fixes = $fixes ? parseDynamicThemeFixes($fixes) : parseDynamicThemeFixes(ConfigManager.DYNAMIC_THEME_FIXES_RAW);
+        let rawFixes = await this.getSavedDynamicThemeFixes();
+        if (!rawFixes) {
+            await ConfigManager.load();
+            rawFixes = ConfigManager.DYNAMIC_THEME_FIXES_RAW;
+        }
+        const fixes = parseDynamicThemeFixes(rawFixes);
         return formatDynamicThemeFixes(fixes);
     }
 
@@ -294,8 +298,12 @@ export default class DevTools {
     }
 
     static async getInversionFixesText() {
-        const $fixes = await this.getSavedInversionFixes();
-        const fixes = $fixes ? parseInversionFixes($fixes) : parseInversionFixes(ConfigManager.INVERSION_FIXES_RAW);
+        let rawFixes = await this.getSavedInversionFixes();
+        if (!rawFixes) {
+            await ConfigManager.load();
+            rawFixes = ConfigManager.INVERSION_FIXES_RAW;
+        }
+        const fixes = parseInversionFixes(rawFixes);
         return formatInversionFixes(fixes);
     }
 
@@ -328,8 +336,12 @@ export default class DevTools {
     }
 
     static async getStaticThemesText() {
-        const $themes = await this.getSavedStaticThemes();
-        const themes = $themes ? parseStaticThemes($themes) : parseStaticThemes(ConfigManager.STATIC_THEMES_RAW);
+        let rawThemes = await this.getSavedStaticThemes();
+        if (!rawThemes) {
+            await ConfigManager.load();
+            rawThemes = ConfigManager.STATIC_THEMES_RAW;
+        }
+        const themes = parseStaticThemes(rawThemes);
         return formatStaticThemes(themes);
     }
 

@@ -388,11 +388,10 @@ export class Extension {
 
     private static async loadData() {
         this.init();
-        const promises = [this.stateManager.loadState()];
-        if (!UserStorage.settings) {
-            promises.push(UserStorage.loadSettings());
-        }
-        await Promise.all(promises);
+        await Promise.all([
+            this.stateManager.loadState(),
+            UserStorage.loadSettings(),
+        ]);
     }
 
     private static onColorSchemeChange = async (isDark: boolean) => {

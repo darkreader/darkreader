@@ -42,8 +42,7 @@ type TestMessage = {
     id: number;
 };
 
-// Initialize extension
-Extension.init();
+// Start extension
 Extension.start();
 
 const welcome = `  /''''\\

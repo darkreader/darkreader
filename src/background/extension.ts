@@ -61,9 +61,10 @@ export class Extension {
     private static SYSTEM_COLOR_LOCAL_STORAGE_KEY = 'system-color-state';
     private static systemColorStateManager: StateManager<SystemColorState>;
 
-    // Record whether extension had initialized itself
+    // Record whether Extension.init() already ran since the last GB start
     private static initialized = false;
 
+    // This sync initializer needs to run on every BG restart before anything else can happen
     static init() {
         if (this.initialized) {
             return;

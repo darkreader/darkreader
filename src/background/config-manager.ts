@@ -8,6 +8,7 @@ import type {ParsedColorSchemeConfig} from '../utils/colorscheme-parser';
 import {ParseColorSchemeConfig} from '../utils/colorscheme-parser';
 import {logWarn} from './utils/log';
 import {DEFAULT_COLORSCHEME} from '../defaults';
+import UserStorage from './user-storage';
 
 const CONFIG_URLs = {
     darkSites: {
@@ -144,7 +145,14 @@ export default class ConfigManager {
         this.handleStaticThemes();
     }
 
-    static async load(config: Config) {
+    static async load(config?: Config) {
+        if (!config) {
+            await UserStorage.loadSettings();
+            config = {
+                local: !UserStorage.settings.syncSitesFixes
+            };
+        }
+
         await Promise.all([
             this.loadColorSchemes(config),
             this.loadDarkSites(config),

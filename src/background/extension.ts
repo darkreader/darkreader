@@ -61,7 +61,16 @@ export class Extension {
     private static SYSTEM_COLOR_LOCAL_STORAGE_KEY = 'system-color-state';
     private static systemColorStateManager: StateManager<SystemColorState>;
 
+    // Record whether Extension.init() already ran since the last GB start
+    private static initialized = false;
+
+    // This sync initializer needs to run on every BG restart before anything else can happen
     static init() {
+        if (this.initialized) {
+            return;
+        }
+        this.initialized = true;
+
         new Newsmaker();
         DevTools.init(async () => this.onSettingsChanged());
         Messenger.init(this.getMessengerAdapter());
@@ -190,6 +199,7 @@ export class Extension {
     }
 
     static async start() {
+        this.init();
         await Promise.all([
             ConfigManager.load({local: true}),
             this.MV3syncSystemColorStateManager(null),
@@ -377,6 +387,7 @@ export class Extension {
     }
 
     private static async loadData() {
+        this.init();
         const promises = [this.stateManager.loadState()];
         if (!UserStorage.settings) {
             promises.push(UserStorage.loadSettings());

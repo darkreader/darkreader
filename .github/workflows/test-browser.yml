@@ -73,7 +73,7 @@ jobs:
       - name: Node.js setup
         uses: actions/setup-node@v2
         with:
-          node-version: ${{ matrix.node }}
+          node-version: 16.x
           cache: npm
       - name: Track Node and NPM version
         run: node --version && npm --version

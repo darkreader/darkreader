@@ -1,6 +1,7 @@
 import {m} from 'malevic';
 import {getContext} from 'malevic/dom';
-import {MessageBox, ResetButton} from '../../controls';
+import DeleteAllButton from '../../controls/delete-all-button';
+import {MessageBox} from '../../controls';
 import ControlGroup from '../control-group';
 import type {ViewProps} from '../types';
 
@@ -33,14 +34,10 @@ export default function RemoveAllButton(props: ViewProps) {
     return (
         <ControlGroup>
             <ControlGroup.Control>
-                <ResetButton onClick={showDialog}>
-                    Reset list
+                <DeleteAllButton onClick={showDialog}>
                     {dialog}
-                </ResetButton>
+                </DeleteAllButton>
             </ControlGroup.Control>
-            <ControlGroup.Description>
-                Remove all sites from the list
-            </ControlGroup.Description>
         </ControlGroup>
     );
 }

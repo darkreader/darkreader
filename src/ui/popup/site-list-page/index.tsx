@@ -24,12 +24,12 @@ export default function SiteListPage(props: ViewProps) {
     return (
         <div class="site-list-page">
             <label class="site-list-page__label">{label}</label>
+            <RemoveAllButton {...props} />
             <SiteList
                 siteList={props.data.settings.siteList}
                 onChange={onSiteListChange}
             />
             <label class="site-list-page__description">Enter website name and press Enter</label>
-            <RemoveAllButton {...props} />
             {isFirefox ? null : <CheckButton
                 checked={props.data.settings.enableForPDF}
                 label="Enable for PDF files"

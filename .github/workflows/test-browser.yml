@@ -87,4 +87,4 @@ jobs:
       - name: Run browser tests
         uses: GabrielBB/xvfb-action@v1.6
         with:
-          run: npm run test:browser
+          run: rm -rf ~/.mozilla && npm run test:browser

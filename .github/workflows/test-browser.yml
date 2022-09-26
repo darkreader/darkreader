@@ -85,4 +85,6 @@ jobs:
         run: npm run test:inject -- --ci
 
       - name: Run browser tests
-        run: npm run test:browser
+        uses: GabrielBB/xvfb-action@v1.6
+        with:
+          run: npm run test:browser

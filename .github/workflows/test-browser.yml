@@ -84,7 +84,10 @@ jobs:
       - name: Run injection tests
         run: npm run test:inject -- --ci
 
+      - name: Remove Mozilla profile
+        run: rm -rf ~/.mozilla || rm -rf ~/snap/firefox/common/.mozilla/firefox/profiles.ini
+
       - name: Run browser tests
         uses: GabrielBB/xvfb-action@v1.6
         with:
-          run: rm -rf ~/.mozilla && npm run test:browser
+          run: npm run test:browser

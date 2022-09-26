@@ -15,7 +15,7 @@
     "release": "npm test && npm run lint && node tasks/build.js --release",
     "test": "npm run test:unit",
     "test:all": "npm run test:unit; npm run test:browser; npm run test:inject; npm run test:project",
-    "test:browser": "npm run debug && npm run test:chrome && npm run test:firefox",
+    "test:browser": "npm run test:chrome && npm run test:firefox && npm run test:chrome-mv3",
     "test:chrome": "npm run debug -- --test --chrome && jest --config=tests/browser/jest.config.mjs --runInBand",
     "test:ci": "npm run test:unit",
     "test:coverage": "jest --config=tests/unit/jest.config.mjs --coverage",

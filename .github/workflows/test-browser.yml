@@ -81,5 +81,8 @@ jobs:
       - name: Install application dependencies
         run: npm ci
 
-      - name: Run tests
+      - name: Run injection tests
         run: npm run test:inject -- --ci
+
+      - name: Run browser tests
+        run: npm run test:browser

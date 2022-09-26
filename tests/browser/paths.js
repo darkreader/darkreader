@@ -77,4 +77,5 @@ export async function getFirefoxPath() {
 }
 
 export const chromeExtensionDebugDir = path.join(__dirname, '../../build/debug/chrome');
+export const chromeMV3ExtensionDebugDir = path.join(__dirname, '../../build/debug/chrome-mv3');
 export const firefoxExtensionDebugDir = path.join(__dirname, '../../build/debug/firefox');

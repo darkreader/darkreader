@@ -3,6 +3,8 @@ import {getStringSize} from '../../utils/text';
 import {getDuration} from '../../utils/time';
 import {isXMLHttpRequestSupported, isFetchSupported} from '../../utils/platform';
 
+declare const __TEST__: number;
+
 interface RequestParams {
     url: string;
     timeout?: number;
@@ -72,7 +74,7 @@ interface CacheRecord {
 
 class LimitedCacheStorage {
     // TODO: remove any cast once declarations are updated
-    private static QUOTA_BYTES = ((navigator as any).deviceMemory || 4) * 16 * 1024 * 1024;
+    private static QUOTA_BYTES = ((!__TEST__ && (navigator as any).deviceMemory) || 4) * 16 * 1024 * 1024;
     private static TTL = getDuration({minutes: 10});
     private static ALARM_NAME = 'network';
 

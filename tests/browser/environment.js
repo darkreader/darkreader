@@ -5,7 +5,7 @@ import puppeteer from 'puppeteer-core';
 import {cmd} from 'web-ext';
 import {WebSocketServer} from 'ws';
 import {generateHTMLCoverageReports} from './coverage.js';
-import {getChromePath, getFirefoxPath, chromeExtensionDebugDir, firefoxExtensionDebugDir} from './paths.js';
+import {getChromePath, getFirefoxPath, chromeExtensionDebugDir, chromeMV3ExtensionDebugDir, firefoxExtensionDebugDir} from './paths.js';
 import {createTestServer} from './server.js';
 
 const TEST_SERVER_PORT = 8891;
@@ -45,7 +45,9 @@ class PuppeteerEnvironment extends JestNodeEnvironment.TestEnvironment {
         /** @type {import('puppeteer-core').Browser} */
         let browser;
         if (this.global.product === 'chrome') {
-            browser = await this.launchChrome();
+            browser = await this.launchChrome(true);
+        } else if (this.global.product === 'chrome-mv3') {
+            browser = await this.launchChrome(false);
         } else if (this.global.product === 'firefox') {
             browser = await this.launchFirefox();
         }
@@ -54,7 +56,8 @@ class PuppeteerEnvironment extends JestNodeEnvironment.TestEnvironment {
         return browser;
     }
 
-    async launchChrome() {
+    async launchChrome(mv2) {
+        const extensionDir = mv2 ? chromeExtensionDebugDir : chromeMV3ExtensionDebugDir;
         let executablePath;
         try {
             executablePath = await getChromePath();
@@ -65,8 +68,8 @@ class PuppeteerEnvironment extends JestNodeEnvironment.TestEnvironment {
             executablePath,
             headless: false,
             args: [
-                `--disable-extensions-except=${chromeExtensionDebugDir}`,
-                `--load-extension=${chromeExtensionDebugDir}`,
+                `--disable-extensions-except=${extensionDir}`,
+                `--load-extension=${extensionDir}`,
                 '--show-component-extension-options',
             ],
         });

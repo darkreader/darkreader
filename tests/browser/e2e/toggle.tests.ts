@@ -26,6 +26,9 @@ async function emulateMedia(name: string, value: string) {
 }
 
 describe('Toggling The Extension', () => {
+    // TODO: remove flakes and remove this line
+    jest.retryTimes(3, {logErrorsBeforeRetry: true});
+
     it('should turn On/Off', async () => {
         await loadBasicPage('Toggle on/off');
 

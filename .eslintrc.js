@@ -3,10 +3,13 @@ const config = {overrides: []};
 
 // Source code (TS, JSX, JS)
 config.overrides.push({
-    files: ['{src,tasks,tests}/**/*.{ts,tsx,js,jsx}', '.*.js', 'index.d.ts'],
+    files: ['{src,tasks,tests}/**/*.{ts,tsx,js,cjs,mjs,jsx}', '.*.js', 'index.d.ts'],
     excludedFiles: ['darkreader.js'],
     parser: '@typescript-eslint/parser',
     plugins: ['@typescript-eslint', 'local'],
+    parserOptions: {
+        sourceType: 'module',
+    },
     extends: ['plugin:@typescript-eslint/recommended', 'plugin:import/recommended', 'plugin:import/typescript'],
     rules: {
         'array-bracket-spacing': ['error', 'never'],
@@ -179,7 +182,7 @@ config.overrides.push({
     extends: ['plugin:compat/recommended'],
     parserOptions: {
         ecmaVersion: 2019,
-        sourceType: 'module'
+        sourceType: 'module',
     },
     settings: {
         polyfills: [

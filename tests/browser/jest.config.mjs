@@ -1,6 +1,6 @@
 // @ts-check
 
-import {dirname, join} from 'path';
+import {dirname} from 'path';
 import {createRequire} from 'module';
 const rootDir = dirname(createRequire(import.meta.url).resolve('../../package.json'));
 

@@ -3,7 +3,7 @@ const config = {overrides: []};
 
 // Source code (TS, JSX, JS)
 config.overrides.push({
- files: ['{src,tasks,tests}/**/*.{ts,tsx,js,cjs,mjs,jsx}', '.*.js', 'index.d.ts'],
+    files: ['{src,tasks,tests}/**/*.{ts,tsx,js,cjs,mjs,jsx}', '.*.js', 'index.d.ts'],
     excludedFiles: ['darkreader.js'],
     parser: '@typescript-eslint/parser',
     plugins: ['@typescript-eslint', 'local'],

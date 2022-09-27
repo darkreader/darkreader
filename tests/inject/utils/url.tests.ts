@@ -132,6 +132,16 @@ it('URL is enabled', () => {
         {enableForPDF: true, siteList: ['https://www.google.com/very/good/hidden/folder/pdf#file.pdf'], siteListEnabled: [], applyToListedOnly: false} as UserSettings,
         {isProtected: false, isInDarkList: false},
     )).toBe(false);
+    expect(isURLEnabled(
+        'https://leetcode.com/problems/two-sum/',
+        {enableForPDF: false, siteList: ['leetcode.com/problems/'], siteListEnabled: [], applyToListedOnly: false} as UserSettings,
+        {isProtected: false, isInDarkList: false},
+    )).toBe(false);
+    expect(isURLEnabled(
+        'https://leetcode.com/problemset/all/',
+        {enableForPDF: false, siteList: ['leetcode.com/problems/'], siteListEnabled: [], applyToListedOnly: false} as UserSettings,
+        {isProtected: false, isInDarkList: false},
+    )).toBe(true);
 
     // Dark theme detection
     expect(isURLEnabled(

@@ -118,7 +118,7 @@ function createUrlRegex(urlTemplate: string): RegExp {
     urlTemplate = urlTemplate.trim();
     const exactBeginning = (urlTemplate[0] === '^');
     const exactEnding = (urlTemplate[urlTemplate.length - 1] === '$');
-    const hasLastSlash = /\/\$?/.test(urlTemplate);
+    const hasLastSlash = /\/\$?$/.test(urlTemplate);
 
     urlTemplate = (urlTemplate
         .replace(/^\^/, '') // Remove ^ at start

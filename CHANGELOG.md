@@ -1,6 +1,7 @@
 ## Unreleased
 
 - Fixes a issue where `darkreader-fallback` wasn't removed from the DOM, when Dark Reader finds a `<meta name="darkreader-lock">` element.
+- Be stricter when the user specifies a last slash for a URL in the sitelist.
 
 ## 4.9.58 (Sep 22, 2022)
 

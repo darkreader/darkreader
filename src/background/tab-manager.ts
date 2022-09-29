@@ -337,13 +337,18 @@ export default class TabManager {
     static async getActiveTab() {
         let tab = (await queryTabs({
             active: true,
-            lastFocusedWindow: true
+            lastFocusedWindow: true,
+            // Explicitly exclude Dark Reader's Dev Tools and other special windows from the query
+            windowType: 'normal',
         }))[0];
-        // When Dark Reader's Dev Tools are open, query can return extension's page instead of expected page
-        const isExtensionPage = (url: string) => url.startsWith('chrome-extension:') || url.startsWith('moz-extension:');
-        if (!tab || isExtensionPage(tab.url)) {
-            const tabs = await queryTabs({active: true});
-            tab = tabs.find((t) => !isExtensionPage(t.url)) || tab;
+        if (!tab) {
+            // When Dark Reader's DevTools are open, last focused window might be the DevTools window
+            // so we lift this restriction and try again (with the best guess)
+            tab = (await queryTabs({
+                active: true,
+                windowType: 'normal',
+            }))[0];
+            logWarn('TabManager.getActiveTab() could not reliably find the active tab, picking the best guess', tab);
         }
         return tab;
     }

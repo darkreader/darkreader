@@ -5,6 +5,7 @@ export function getMockData(override = {} as Partial<ExtensionData>): ExtensionD
     return Object.assign({
         isEnabled: true,
         isReady: true,
+        isAllowedFileSchemeAccess: false,
         settings: {
             enabled: true,
             fetchNews: true,

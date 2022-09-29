@@ -7,6 +7,7 @@ import type {ThemeEngine} from './generators/theme-engines';
 export interface ExtensionData {
     isEnabled: boolean;
     isReady: boolean;
+    isAllowedFileSchemeAccess: boolean;
     settings: UserSettings;
     news: News[];
     shortcuts: Shortcuts;

@@ -209,7 +209,10 @@ export function isPDF(url: string) {
     return false;
 }
 
-export function isURLEnabled(url: string, userSettings: UserSettings, {isProtected, isInDarkList, isDarkThemeDetected}: Partial<TabInfo>) {
+export function isURLEnabled(url: string, userSettings: UserSettings, {isProtected, isInDarkList, isDarkThemeDetected}: Partial<TabInfo>, isAllowedFileSchemeAccess = true) {
+    if (isLocalFile(url) && !isAllowedFileSchemeAccess) {
+        return false;
+    }
     if (isProtected && !userSettings.enableForProtectedPages) {
         return false;
     }
@@ -238,4 +241,8 @@ export function isURLEnabled(url: string, userSettings: UserSettings, {isProtect
 
 export function isFullyQualifiedDomain(candidate: string) {
     return /^[a-z0-9.-]+$/.test(candidate);
+}
+
+export function isLocalFile(url: string) {
+    return url && url.startsWith('file:///');
 }

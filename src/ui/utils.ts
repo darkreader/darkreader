@@ -150,19 +150,26 @@ export async function getFontList() {
 
 type page = 'devtools' | 'stylesheet-editor';
 
+// TODO(Anton): There must be a better way to do this
 async function getExtensionPageTabMV3(url: string): Promise<chrome.tabs.Tab> {
     return new Promise<chrome.tabs.Tab>((resolve) => {
         chrome.windows.getAll({
             populate: true,
             windowTypes: ['popup'],
         }, (w) => {
+            let responses: Array<Promise<string>> = [];
+            let found = false;
             for (const window of w) {
-                if (window.tabs[0].url === url) {
-                    resolve(window.tabs[0]);
-                    return;
-                }
+                const response = chrome.tabs.sendMessage<string, 'getExtensionPageTabMV3_pong'>(window.tabs[0].id, 'getExtensionPageTabMV3_ping', {frameId: 0});
+                response.then((response) => {
+                    if (response === 'getExtensionPageTabMV3_pong') {
+                        found = true;
+                        resolve(window.tabs[0]);
+                    }
+                })
+                responses.push(response);
             }
-            resolve(null);
+            Promise.all(responses).then(() => !found && resolve(null));
         });
     });
 }

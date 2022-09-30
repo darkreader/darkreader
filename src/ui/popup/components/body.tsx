@@ -31,8 +31,8 @@ interface BodyState {
     moreToggleSettingsOpen: boolean;
 }
 
-function openDevTools() {
-    openExtensionPage('devtools');
+async function openDevTools() {
+    await openExtensionPage('devtools');
 }
 
 function Body(props: BodyProps & {fonts: string[]}) {

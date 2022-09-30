@@ -353,7 +353,7 @@ export class Extension {
             DevTools.getInversionFixesText(),
             DevTools.getStaticThemesText(),
             this.getActiveTabInfo(),
-            new Promise((r) => chrome.extension.isAllowedFileSchemeAccess(r)),
+            new Promise<boolean>((r) => chrome.extension.isAllowedFileSchemeAccess(r)),
         ]);
         return {
             isEnabled: this.isExtensionSwitchedOn(),

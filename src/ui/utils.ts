@@ -176,7 +176,8 @@ export async function getExtensionPageObject(path: string): Promise<chrome.windo
     });
 }
 
-export async function openExtensionPage(path: string) {
+export async function openExtensionPage(page: 'devtools' | 'stylesheet-editor') {
+    const path = `${page}/index.html`;
     const cssEditorObject = await getExtensionPageObject(path);
     if (isMobile) {
         if (cssEditorObject) {
@@ -193,6 +194,9 @@ export async function openExtensionPage(path: string) {
     } else {
         chrome.windows.create({
             type: 'popup',
+            // Note: this is a hack which works on Firefox because all
+            // UI pages have paths like ui/*/index.html
+            // See also: https://github.com/w3c/webextensions/issues/273
             url: isFirefox ? `../${path}` : `ui/${path}`,
             width: 600,
             height: 600,

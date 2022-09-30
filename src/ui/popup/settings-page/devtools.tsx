@@ -5,7 +5,7 @@ import {NavButton} from '../../controls';
 import ControlGroup from '../control-group';
 
 async function openDevTools() {
-    await openExtensionPage('devtools/index.html');
+    await openExtensionPage('devtools');
 }
 
 export default function DevToolsGroup() {

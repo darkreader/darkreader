@@ -7,7 +7,7 @@ import {openExtensionPage} from '../../../utils';
 
 export default function Mode(props: {mode: ThemeEngine; onChange: (mode: ThemeEngine) => void}) {
     async function openCSSEditor() {
-        await openExtensionPage('stylesheet-editor/index.html');
+        await openExtensionPage('stylesheet-editor');
     }
 
     const modes = [

@@ -13,9 +13,9 @@ import SiteListSettings from './site-list-settings';
 import {getDuration} from '../../../utils/time';
 import {DONATE_URL, GITHUB_URL, PRIVACY_URL, TWITTER_URL, getHelpURL} from '../../../utils/links';
 import {getLocalMessage} from '../../../utils/locales';
-import {compose} from '../../utils';
+import {compose, openExtensionPage} from '../../utils';
 import type {ExtensionData, ExtensionActions, News as NewsObject} from '../../../definitions';
-import {isMobile, isFirefox} from '../../../utils/platform';
+import {isMobile} from '../../../utils/platform';
 
 declare const __THUNDERBIRD__: boolean;
 
@@ -31,13 +31,8 @@ interface BodyState {
     moreToggleSettingsOpen: boolean;
 }
 
-function openDevTools() {
-    chrome.windows.create({
-        type: 'panel',
-        url: isFirefox ? '../devtools/index.html' : 'ui/devtools/index.html',
-        width: 600,
-        height: 600,
-    });
+async function openDevTools() {
+    await openExtensionPage('devtools');
 }
 
 function Body(props: BodyProps & {fonts: string[]}) {

@@ -49,6 +49,7 @@ if (__TEST__) {
 }
 
 if (__CHROMIUM_MV3__) {
+    // See getExtensionPageTabMV3() for explanation of what it is
     chrome.runtime.onMessage.addListener((message, _, sendResponse) => {
         if (message === 'getExtensionPageTabMV3_ping') {
             sendResponse('getExtensionPageTabMV3_pong');

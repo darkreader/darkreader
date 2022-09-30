@@ -151,13 +151,16 @@ export async function getFontList() {
 type page = 'devtools' | 'stylesheet-editor';
 
 // TODO(Anton): There must be a better way to do this
-async function getExtensionPageTabMV3(url: string): Promise<chrome.tabs.Tab> {
+// This function ping-pongs a message to possible DevTools popups.
+// This function should have reasonable performance since it sends
+// messages only to popups and not regular windows.
+async function getExtensionPageTabMV3(): Promise<chrome.tabs.Tab> {
     return new Promise<chrome.tabs.Tab>((resolve) => {
         chrome.windows.getAll({
             populate: true,
             windowTypes: ['popup'],
         }, (w) => {
-            let responses: Array<Promise<string>> = [];
+            const responses: Array<Promise<string>> = [];
             let found = false;
             for (const window of w) {
                 const response = chrome.tabs.sendMessage<string, 'getExtensionPageTabMV3_pong'>(window.tabs[0].id, 'getExtensionPageTabMV3_ping', {frameId: 0});
@@ -166,7 +169,7 @@ async function getExtensionPageTabMV3(url: string): Promise<chrome.tabs.Tab> {
                         found = true;
                         resolve(window.tabs[0]);
                     }
-                })
+                });
                 responses.push(response);
             }
             Promise.all(responses).then(() => !found && resolve(null));
@@ -176,7 +179,7 @@ async function getExtensionPageTabMV3(url: string): Promise<chrome.tabs.Tab> {
 
 async function getExtensionPageTab(url: string): Promise<chrome.tabs.Tab> {
     if (__CHROMIUM_MV3__) {
-        return getExtensionPageTabMV3(url);
+        return getExtensionPageTabMV3();
     }
     return new Promise<chrome.tabs.Tab>((resolve) => {
         chrome.tabs.query({
@@ -186,11 +189,7 @@ async function getExtensionPageTab(url: string): Promise<chrome.tabs.Tab> {
 }
 
 export async function openExtensionPage(page: page) {
-    // Note: this is a hack which works on Firefox because all
-    // UI pages have paths like ui/*/index.html
-    // See also: https://github.com/w3c/webextensions/issues/273
-    const path = isFirefox ? `../${page}/index.html` : `ui/${page}/index.html`;
-    const url = chrome.runtime.getURL(path);
+    const url = chrome.runtime.getURL(`/ui/${page}/index.html`);
     if (isMobile) {
         const extensionPageTab = await getExtensionPageTab(url);
         if (extensionPageTab !== null) {

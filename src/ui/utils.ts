@@ -2,6 +2,8 @@ import {MessageType} from '../utils/message';
 import {isFirefox, isMobile} from '../utils/platform';
 import type {Message} from '../definitions';
 
+declare const __CHROMIUM_MV3__: boolean;
+
 export function classes(...args: Array<string | {[cls: string]: boolean}>) {
     const classes: string[] = [];
     args.filter((c) => Boolean(c)).forEach((c) => {
@@ -135,7 +137,7 @@ export async function getFontList() {
                 'monospace',
                 'cursive',
                 'fantasy',
-                'system-ui'
+                'system-ui',
             ]);
             return;
         }
@@ -146,28 +148,17 @@ export async function getFontList() {
     });
 }
 
-export async function getExtensionPageObject(path: string): Promise<chrome.windows.Window | chrome.tabs.Tab> {
-    if (isMobile) {
-        return new Promise<chrome.tabs.Tab>((resolve) => {
-            chrome.tabs.query({}, (t) => {
-                for (const tab of t) {
-                    if (tab.url.endsWith(path)) {
-                        resolve(tab);
-                        return;
-                    }
-                }
-                resolve(null);
-            });
-        });
-    }
-    return new Promise<chrome.windows.Window>((resolve) => {
+type page = 'devtools' | 'stylesheet-editor';
+
+async function getExtensionPageTabMV3(url: string): Promise<chrome.tabs.Tab> {
+    return new Promise<chrome.tabs.Tab>((resolve) => {
         chrome.windows.getAll({
             populate: true,
-            windowTypes: ['popup']
+            windowTypes: ['popup'],
         }, (w) => {
             for (const window of w) {
-                if (window.tabs[0].url.endsWith(path)) {
-                    resolve(window);
+                if (window.tabs[0].url === url) {
+                    resolve(window.tabs[0]);
                     return;
                 }
             }
@@ -176,30 +167,45 @@ export async function getExtensionPageObject(path: string): Promise<chrome.windo
     });
 }
 
-export async function openExtensionPage(page: 'devtools' | 'stylesheet-editor') {
-    const path = `${page}/index.html`;
-    const cssEditorObject = await getExtensionPageObject(path);
+async function getExtensionPageTab(url: string): Promise<chrome.tabs.Tab> {
+    if (__CHROMIUM_MV3__) {
+        return getExtensionPageTabMV3(url);
+    }
+    return new Promise<chrome.tabs.Tab>((resolve) => {
+        chrome.tabs.query({
+            url,
+        }, ([tab]) => resolve(tab || null));
+    });
+}
+
+export async function openExtensionPage(page: page) {
+    // Note: this is a hack which works on Firefox because all
+    // UI pages have paths like ui/*/index.html
+    // See also: https://github.com/w3c/webextensions/issues/273
+    const path = isFirefox ? `../${page}/index.html` : `ui/${page}/index.html`;
+    const url = chrome.runtime.getURL(path);
     if (isMobile) {
-        if (cssEditorObject) {
-            chrome.tabs.update(cssEditorObject.id, {'active': true});
+        const extensionPageTab = await getExtensionPageTab(url);
+        if (extensionPageTab !== null) {
+            chrome.tabs.update(extensionPageTab.id, {active: true});
             window.close();
         } else {
-            chrome.tabs.create({
-                url: `../${path}`,
+            chrome.tabs.create({url});
+            window.close();
+        }
+    } else {
+        const extensionPageTab = await getExtensionPageTab(url);
+        if (extensionPageTab !== null) {
+            chrome.windows.update(extensionPageTab.windowId, {focused: true});
+            window.close();
+        } else {
+            chrome.windows.create({
+                type: 'popup',
+                url,
+                width: 600,
+                height: 600,
             });
             window.close();
         }
-    } else if (cssEditorObject) {
-        chrome.windows.update(cssEditorObject.id, {'focused': true});
-    } else {
-        chrome.windows.create({
-            type: 'popup',
-            // Note: this is a hack which works on Firefox because all
-            // UI pages have paths like ui/*/index.html
-            // See also: https://github.com/w3c/webextensions/issues/273
-            url: isFirefox ? `../${path}` : `ui/${path}`,
-            width: 600,
-            height: 600,
-        });
     }
 }

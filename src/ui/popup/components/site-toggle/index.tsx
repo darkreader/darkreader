@@ -23,7 +23,7 @@ export default function SiteToggleButton({data, actions}: ExtWrapper) {
         (!tab.isProtected && !pdf) ||
         tab.isInjected
     );
-    const isSiteEnabled = isURLEnabled(tab.url, data.settings, tab) && tab.isInjected;
+    const isSiteEnabled = isURLEnabled(tab.url, data.settings, tab, data.isAllowedFileSchemeAccess) && tab.isInjected;
     const host = getURLHostOrProtocol(tab.url);
 
     const urlText = host

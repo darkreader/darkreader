@@ -344,18 +344,21 @@ export class Extension {
             dynamicFixesText,
             filterFixesText,
             staticThemesText,
-            activeTab
+            activeTab,
+            isAllowedFileSchemeAccess,
         ] = await Promise.all([
             Newsmaker.getLatest(),
             this.getShortcuts(),
             DevTools.getDynamicThemeFixesText(),
             DevTools.getInversionFixesText(),
             DevTools.getStaticThemesText(),
-            this.getActiveTabInfo()
+            this.getActiveTabInfo(),
+            new Promise<boolean>((r) => chrome.extension.isAllowedFileSchemeAccess(r)),
         ]);
         return {
             isEnabled: this.isExtensionSwitchedOn(),
             isReady: true,
+            isAllowedFileSchemeAccess,
             settings: UserStorage.settings,
             news,
             shortcuts,

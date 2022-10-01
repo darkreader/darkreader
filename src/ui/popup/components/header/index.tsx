@@ -8,6 +8,8 @@ import WatchIcon from '../../main-page/watch-icon';
 import SiteToggle from '../site-toggle';
 import MoreToggleSettings from './more-toggle-settings';
 import {AutomationMode} from '../../../../utils/automation';
+import {isLocalFile} from '../../../../utils/url';
+import {isChromium} from '../../../../utils/platform';
 
 function multiline(...lines: string[]) {
     return lines.join('\n');
@@ -26,6 +28,7 @@ function Header({data, actions, onMoreToggleSettingsClick}: HeaderProps) {
     }
 
     const tab = data.activeTab;
+    const isFile = isChromium && isLocalFile(tab.url);
     const isAutomation = data.settings.automation.enabled;
     const isTimeAutomation = data.settings.automation.mode === AutomationMode.TIME;
     const isLocationAutomation = data.settings.automation.mode === AutomationMode.LOCATION;
@@ -41,9 +44,13 @@ function Header({data, actions, onMoreToggleSettingsClick}: HeaderProps) {
                     data={data}
                     actions={actions}
                 />
-                {tab.isProtected || !tab.isInjected ? (
+                {!isFile && (tab.isProtected || !tab.isInjected) ? (
                     <span class="header__site-toggle__unable-text">
                         {getLocalMessage('page_protected')}
+                    </span>
+                ) : isFile && !data.isAllowedFileSchemeAccess ? (
+                    <span class="header__site-toggle__unable-text">
+                        {getLocalMessage('local_files_forbidden')}
                     </span>
                 ) : tab.isInDarkList ? (
                     <span class="header__site-toggle__unable-text">

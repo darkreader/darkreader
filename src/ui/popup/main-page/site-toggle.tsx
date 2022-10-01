@@ -1,14 +1,19 @@
 import {m} from 'malevic';
-import {isURLEnabled, isPDF} from '../../../utils/url';
+import {isChromium} from '../../../utils/platform';
+import {getLocalMessage} from '../../../utils/locales';
+import {isURLEnabled, isPDF, isLocalFile} from '../../../utils/url';
 import SiteToggle from '../components/site-toggle';
 import ControlGroup from '../control-group';
 import type {ViewProps} from '../types';
 
 export default function SiteToggleGroup(props: ViewProps) {
     const tab = props.data.activeTab;
-    const isPageEnabled = isURLEnabled(tab.url, props.data.settings, tab);
+    const isPageEnabled = isURLEnabled(tab.url, props.data.settings, tab, props.data.isAllowedFileSchemeAccess);
+    const isFile = isChromium && isLocalFile(tab.url);
     const {isDarkThemeDetected} = tab;
-    const descriptionText = isPDF(tab.url) ? (
+    const descriptionText = (isFile && !props.data.isAllowedFileSchemeAccess) ? (
+        getLocalMessage('local_files_forbidden')
+    ) : isPDF(tab.url) ? (
         isPageEnabled ? 'Enabled for PDF files' : 'Disabled for PDF files'
     ) : isDarkThemeDetected ? 'Dark theme detected on page' : (
         isPageEnabled ? 'Enabled for current website' : 'Disabled for current website'

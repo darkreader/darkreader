@@ -4,6 +4,8 @@ import Body from './components/body';
 import Connector from '../connect/connector';
 import type {ExtensionData} from '../../definitions';
 
+declare const __CHROMIUM_MV3__: boolean;
+
 function renderBody(data: ExtensionData, actions: Connector) {
     sync(document.body, <Body data={data} actions={actions} />);
 }
@@ -44,4 +46,13 @@ if (__TEST__) {
             respond({type: 'error', id: message.id, data: String(err)});
         }
     };
+}
+
+if (__CHROMIUM_MV3__) {
+    // See getExtensionPageTabMV3() for explanation of what it is
+    chrome.runtime.onMessage.addListener((message, _, sendResponse) => {
+        if (message === 'getExtensionPageTabMV3_ping') {
+            sendResponse('getExtensionPageTabMV3_pong');
+        }
+    });
 }

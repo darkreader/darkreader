@@ -157,7 +157,7 @@ async function bundleJS(/** @type {JSEntry} */entry, platform, debug, watch, log
                     __THUNDERBIRD__: platform === PLATFORM.THUNDERBIRD,
                     __PORT__: watch ? String(PORT) : '-1',
                     __TEST__: test,
-                    __WATCH_: watch,
+                    __WATCH__: watch,
                     __LOG__: log ? `"${log}"` : false,
                 })
             ),

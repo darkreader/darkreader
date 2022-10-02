@@ -115,7 +115,7 @@ class PuppeteerEnvironment extends JestNodeEnvironment.TestEnvironment {
 
     /**
      * @param {string} path
-     * @returns {puppeteer.Page}
+     * @returns {Promise<puppeteer.Page>}
      */
     async openExtensionPage(path) {
         if (this.global.product === 'chrome') {

@@ -4,19 +4,13 @@ import type {FetchRequestParameters} from './utils/network';
 import type {Message} from '../definitions';
 import {isFirefox} from '../utils/platform';
 import {MessageType} from '../utils/message';
-import {logWarn} from './utils/log';
+import {logInfo, logWarn} from './utils/log';
 import {StateManager} from '../utils/state-manager';
 import {getURLHostOrProtocol} from '../utils/url';
 import {isPanel} from './utils/tab';
 
 declare const __CHROMIUM_MV3__: boolean;
 declare const __THUNDERBIRD__: boolean;
-
-async function queryTabs(query: chrome.tabs.QueryInfo = {}) {
-    return new Promise<chrome.tabs.Tab[]>((resolve) =>
-        chrome.tabs.query(query, resolve)
-    );
-}
 
 interface ConnectionMessageOptions {
     url: string;
@@ -52,7 +46,7 @@ enum DocumentState {
     HIDDEN = 2,
     FROZEN = 3,
     TERMINATED = 4,
-    DISCARDED = 5
+    DISCARDED = 5,
 }
 
 export default class TabManager {
@@ -134,7 +128,7 @@ export default class TabManager {
                     const frameId = sender.frameId;
                     const frameURL = sender.url;
                     if (this.tabs[tabId][frameId].timestamp < this.timestamp) {
-                        const message = this.getTabMessage(this.getTabURL(sender.tab), frameURL);
+                        const message = this.getTabMessage(await this.getTabURL(sender.tab), frameURL);
                         chrome.tabs.sendMessage<Message>(tabId, message, {frameId});
                     }
                     this.tabs[sender.tab.id][sender.frameId] = {
@@ -207,6 +201,12 @@ export default class TabManager {
         chrome.tabs.onRemoved.addListener(async (tabId) => this.removeFrame(tabId, 0));
     }
 
+    private static async queryTabs(query: chrome.tabs.QueryInfo = {}) {
+        return new Promise<chrome.tabs.Tab[]>((resolve) =>
+            chrome.tabs.query(query, resolve)
+        );
+    }
+
     private static addFrame(tabId: number, frameId: number, senderURL: string, timestamp: number) {
         let frames: {[frameId: number]: FrameInfo};
         if (this.tabs[tabId]) {
@@ -238,7 +238,23 @@ export default class TabManager {
         this.stateManager.saveState();
     }
 
-    static getTabURL(tab: chrome.tabs.Tab): string {
+    private static async getTabURL(tab: chrome.tabs.Tab): Promise<string> {
+        if (__CHROMIUM_MV3__) {
+            try {
+                if (this.tabs[tab.id] && this.tabs[tab.id][0]) {
+                    return this.tabs[tab.id][0].url || 'about:blank';
+                }
+                return (await chrome.scripting.executeScript({
+                    target: {
+                        tabId: tab.id,
+                        frameIds: [0],
+                    },
+                    func: () => window.location.href,
+                }))[0].result;
+            } catch (e) {
+                return 'about:blank';
+            }
+        }
         // It can happen in cases whereby the tab.url is empty.
         // Luckily this only and will only happen on `about:blank`-like pages.
         // Due to this we can safely use `about:blank` as fallback value.
@@ -246,8 +262,8 @@ export default class TabManager {
     }
 
     static async updateContentScript(options: {runOnProtectedPages: boolean}) {
-        (await queryTabs())
-            .filter((tab) => options.runOnProtectedPages || canInjectScript(tab.url))
+        (await this.queryTabs())
+            .filter((tab) => __CHROMIUM_MV3__ || options.runOnProtectedPages || canInjectScript(tab.url))
             .filter((tab) => !Boolean(this.tabs[tab.id]))
             .forEach((tab) => {
                 if (!tab.discarded) {
@@ -258,7 +274,7 @@ export default class TabManager {
                                 allFrames: true,
                             },
                             files: ['/inject/index.js'],
-                        });
+                        }, () => logInfo('Could not update content script in tab', tab, chrome.runtime.lastError));
                     } else {
                         chrome.tabs.executeScript(tab.id, {
                             runAt: 'document_start',
@@ -283,23 +299,23 @@ export default class TabManager {
     // sendMessage will send a tab messages to all active tabs and their frames.
     // If onlyUpdateActiveTab is specified, it will only send a new message to any
     // tab that matches the active tab's hostname. This is to ensure that when a user
-    // has multiple tabs of the same website, it will ensure that every tab will receive
-    // the new message and not just that tab as Dark Reader currently doesn't have per-tab
-    // operations, this should be the expected behavior.
+    // has multiple tabs of the same website, every tab will receive the new message
+    // and not just that tab as Dark Reader currently doesn't have per-tab operations,
+    // this should be the expected behavior.
     static async sendMessage(onlyUpdateActiveTab = false) {
         this.timestamp++;
 
         const activeTabHostname = onlyUpdateActiveTab ? getURLHostOrProtocol(await this.getActiveTabURL()) : null;
 
-        (await queryTabs())
+        (await this.queryTabs())
             .filter((tab) => Boolean(this.tabs[tab.id]))
             .forEach((tab) => {
                 const frames = this.tabs[tab.id];
                 Object.entries(frames)
                     .filter(([, {state}]) => state === DocumentState.ACTIVE || state === DocumentState.PASSIVE)
-                    .forEach(([id, {url}]) => {
+                    .forEach(async ([id, {url}]) => {
                         const frameId = Number(id);
-                        const tabURL = this.getTabURL(tab);
+                        const tabURL = await this.getTabURL(tab);
                         // Check if hostname are equal when we only want to update active tab.
                         if (onlyUpdateActiveTab && getURLHostOrProtocol(tabURL) !== activeTabHostname) {
                             return;
@@ -335,7 +351,7 @@ export default class TabManager {
     }
 
     static async getActiveTab() {
-        let tab = (await queryTabs({
+        let tab = (await this.queryTabs({
             active: true,
             lastFocusedWindow: true,
             // Explicitly exclude Dark Reader's Dev Tools and other special windows from the query
@@ -344,7 +360,7 @@ export default class TabManager {
         if (!tab) {
             // When Dark Reader's DevTools are open, last focused window might be the DevTools window
             // so we lift this restriction and try again (with the best guess)
-            tab = (await queryTabs({
+            tab = (await this.queryTabs({
                 active: true,
                 windowType: 'normal',
             }))[0];

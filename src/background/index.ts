@@ -129,7 +129,7 @@ if (__WATCH__) {
     };
 
     listen();
-} else if (!__DEBUG__){
+} else if (!__DEBUG__ && !__TEST__) {
     chrome.runtime.onInstalled.addListener(({reason}) => {
         if (reason === 'install') {
             chrome.tabs.create({url: getHelpURL()});

@@ -11,6 +11,8 @@ import {AutomationMode} from '../../../../utils/automation';
 import {isLocalFile} from '../../../../utils/url';
 import {isChromium} from '../../../../utils/platform';
 
+declare const __CHROMIUM_MV3__: boolean;
+
 function multiline(...lines: string[]) {
     return lines.join('\n');
 }
@@ -44,7 +46,7 @@ function Header({data, actions, onMoreToggleSettingsClick}: HeaderProps) {
                     data={data}
                     actions={actions}
                 />
-                {!isFile && (tab.isProtected || !tab.isInjected) ? (
+                {!isFile && ((!__CHROMIUM_MV3__ && !tab.isInjected) || tab.isProtected) ? (
                     <span class="header__site-toggle__unable-text">
                         {getLocalMessage('page_protected')}
                     </span>

@@ -46,7 +46,7 @@ function Header({data, actions, onMoreToggleSettingsClick}: HeaderProps) {
                     data={data}
                     actions={actions}
                 />
-                {!isFile && (tab.isProtected || (!__CHROMIUM_MV3__ && !tab.isInjected)) ? (
+                {!isFile && ((!__CHROMIUM_MV3__ && !tab.isInjected) || tab.isProtected) ? (
                     <span class="header__site-toggle__unable-text">
                         {getLocalMessage('page_protected')}
                     </span>

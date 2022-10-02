@@ -2,6 +2,7 @@ declare const __CHROMIUM_MV2__: boolean;
 declare const __CHROMIUM_MV3__: boolean;
 declare const __FIREFOX__: boolean;
 declare const __THUNDERBIRD__: boolean;
+declare const __TEST__: boolean;
 
 interface UserAgentData {
     brands: Array<{
@@ -27,13 +28,14 @@ const platform = isNavigatorDefined ? (navigator.userAgentData && typeof navigat
     navigator.userAgentData.platform.toLowerCase() : navigator.platform.toLowerCase()
     : 'some platform';
 
-export const isChromium = __CHROMIUM_MV2__ || __CHROMIUM_MV3__ || userAgent.includes('chrome') || userAgent.includes('chromium');
-export const isThunderbird = __THUNDERBIRD__ || userAgent.includes('thunderbird');
-export const isFirefox = __FIREFOX__ || userAgent.includes('firefox') || userAgent.includes('librewolf') || isThunderbird;
-export const isVivaldi = userAgent.includes('vivaldi');
-export const isYaBrowser = userAgent.includes('yabrowser');
-export const isOpera = userAgent.includes('opr') || userAgent.includes('opera');
-export const isEdge = userAgent.includes('edg');
+// Note: if you are using these constants in tests, make sure they are not compiled out by adding __TEST__ to them
+export const isChromium = __CHROMIUM_MV2__ || __CHROMIUM_MV3__ || (!__FIREFOX__ && !__THUNDERBIRD__ && (userAgent.includes('chrome') || userAgent.includes('chromium')));
+export const isThunderbird = __THUNDERBIRD__ || (!__CHROMIUM_MV2__ && !__CHROMIUM_MV3__ && userAgent.includes('thunderbird'));
+export const isFirefox = __FIREFOX__ || isThunderbird || ((__TEST__ || (!__CHROMIUM_MV2__ && !__CHROMIUM_MV3__)) && (userAgent.includes('firefox') || userAgent.includes('librewolf')));
+export const isVivaldi = (__CHROMIUM_MV2__ || __CHROMIUM_MV3__) && (!__FIREFOX__ && !__THUNDERBIRD__ && userAgent.includes('vivaldi'));
+export const isYaBrowser = (__CHROMIUM_MV2__ || __CHROMIUM_MV3__) && (!__FIREFOX__ && !__THUNDERBIRD__ && userAgent.includes('yabrowser'));
+export const isOpera = (__CHROMIUM_MV2__ || __CHROMIUM_MV3__) && (!__FIREFOX__ && !__THUNDERBIRD__ && (userAgent.includes('opr') || userAgent.includes('opera')));
+export const isEdge = (__CHROMIUM_MV2__ || __CHROMIUM_MV3__) && (!__FIREFOX__ && !__THUNDERBIRD__ && userAgent.includes('edg'));
 export const isSafari = !__CHROMIUM_MV2__ && !__CHROMIUM_MV3__ && !__FIREFOX__ && !__THUNDERBIRD__ && userAgent.includes('safari') && !isChromium;
 export const isWindows = platform.startsWith('win');
 export const isMacOS = platform.startsWith('mac');

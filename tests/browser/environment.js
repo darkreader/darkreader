@@ -236,7 +236,6 @@ class PuppeteerEnvironment extends JestNodeEnvironment.TestEnvironment {
                     const bg = await this.getBackgroundPage();
                     await bg.emulateMediaFeatures([{name, value}]);
                 },
-                getManifest: async () => await sendToUIPage({type: 'getManifest'}),
             };
         });
     }

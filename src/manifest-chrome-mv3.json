@@ -9,6 +9,9 @@
         },
         "default_popup": "ui/popup/index.html"
     },
+    "options_ui": {
+        "page": "ui/popup/index.html"
+    },
     "background": {
         "service_worker": "background.js"
     },

@@ -21,11 +21,11 @@ body {
     box-sizing: content-box;
     display: flex;
     flex-direction: column;
-    height: @popup-content-height;
+    min-height: @popup-content-height;
     margin: 0 auto;
     padding: @popup-content-padding;
     position: relative;
-    width: @popup-content-width;
+    min-width: @popup-content-width;
 }
 
 .header {
@@ -157,6 +157,7 @@ footer {
 
 body {
     border: 2px solid white;
+    overflow: hidden;
 }
 
 .overlay {

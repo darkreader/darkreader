@@ -7,6 +7,7 @@ import type {Message} from '../../../definitions';
 import type {ViewProps} from '../types';
 import type {Automation} from 'definitions';
 import {AutomationMode} from '../../../utils/automation';
+import {isChromium, isLinux} from '../../../utils/platform';
 
 declare const __CHROMIUM_MV3__: boolean;
 
@@ -127,36 +128,39 @@ export default function AutomationPage(props: ViewProps) {
             <p class="automation-page__location-description">
                 {getLocalMessage('set_location')}
             </p>
-            <div class={[
-                'automation-page__line',
-                'automation-page__system-dark-mode',
-            ]}
-            >
-                <CheckBox
-                    class="automation-page__system-dark-mode__checkbox"
-                    checked={isSystemAutomation}
-                    onchange={(e: {target: {checked: boolean}}) => changeAutomationMode(e.target.checked ? AutomationMode.SYSTEM : AutomationMode.NONE)}
-                />
-                <Button
-                    class={{
-                        'automation-page__system-dark-mode__button': true,
-                        'automation-page__system-dark-mode__button--active': isSystemAutomation,
-                    }}
-                    onclick={() => {
-                        if (__CHROMIUM_MV3__) {
-                            chrome.runtime.sendMessage<Message>({
-                                type: MessageType.UI_COLOR_SCHEME_CHANGE,
-                                data: {isDark: matchMedia('(prefers-color-scheme: dark)').matches}
-                            });
-                        }
-                        changeAutomationMode(isSystemAutomation ? AutomationMode.NONE : AutomationMode.SYSTEM);
-                    }}
-                >{getLocalMessage('system_dark_mode')}
-                </Button>
-            </div>
-            <p class="automation-page__description">
-                {getLocalMessage('system_dark_mode_description')}
-            </p>
+            {isLinux && isChromium ? null :
+                <div>
+                    <div class={[
+                        'automation-page__line',
+                        'automation-page__system-dark-mode',
+                    ]}
+                    >
+                        <CheckBox
+                            class="automation-page__system-dark-mode__checkbox"
+                            checked={isSystemAutomation}
+                            onchange={(e: {target: {checked: boolean}}) => changeAutomationMode(e.target.checked ? AutomationMode.SYSTEM : AutomationMode.NONE)}/>
+                        <Button
+                            class={{
+                                'automation-page__system-dark-mode__button': true,
+                                'automation-page__system-dark-mode__button--active': isSystemAutomation,
+                            }}
+                            onclick={() => {
+                                if (__CHROMIUM_MV3__) {
+                                    chrome.runtime.sendMessage<Message>({
+                                        type: MessageType.UI_COLOR_SCHEME_CHANGE,
+                                        data: {isDark: matchMedia('(prefers-color-scheme: dark)').matches}
+                                    });
+                                }
+                                changeAutomationMode(isSystemAutomation ? AutomationMode.NONE : AutomationMode.SYSTEM);
+                            } }
+                        >{getLocalMessage('system_dark_mode')}
+                        </Button>
+                    </div>
+                    <p class="automation-page__description">
+                        {getLocalMessage('system_dark_mode_description')}
+                    </p>
+                </div>
+            }
             <DropDown
                 onChange={(selected: any) => changeAutomationBehavior(selected)}
                 selected={props.data.settings.automation.behavior}

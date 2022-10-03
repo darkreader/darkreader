@@ -3,6 +3,7 @@ import {Button, CheckBox, TextBox, TimeRangePicker} from '../../../controls';
 import {getLocalMessage} from '../../../../utils/locales';
 import type {Automation, ExtWrapper} from '../../../../definitions';
 import {AutomationMode} from '../../../../utils/automation';
+import {isChromium, isLinux} from '../../../../utils/platform';
 
 type MoreToggleSettingsProps = ExtWrapper & {
     isExpanded: boolean;
@@ -130,27 +131,31 @@ export default function MoreToggleSettings({data, actions, isExpanded, onClose}:
                 <p class="header__app-toggle__more-settings__location-description">
                     {getLocalMessage('set_location')}
                 </p>
-                <div class={[
-                    'header__app-toggle__more-settings__line',
-                    'header__app-toggle__more-settings__system-dark-mode',
-                ]}
-                >
-                    <CheckBox
-                        class="header__app-toggle__more-settings__system-dark-mode__checkbox"
-                        checked={isSystemAutomation}
-                        onchange={(e: {target: HTMLInputElement}) => changeAutomationMode(e.target.checked ? AutomationMode.SYSTEM : AutomationMode.NONE)}
-                    />
-                    <Button
-                        class={{
-                            'header__app-toggle__more-settings__system-dark-mode__button': true,
-                            'header__app-toggle__more-settings__system-dark-mode__button--active': isSystemAutomation,
-                        }}
-                        onclick={() =>changeAutomationMode(isSystemAutomation ? AutomationMode.NONE : AutomationMode.SYSTEM)}
-                    >{getLocalMessage('system_dark_mode')}</Button>
-                </div>
-                <p class="header__app-toggle__more-settings__description">
-                    {getLocalMessage('system_dark_mode_description')}
-                </p>
+                {isLinux && isChromium ? null :
+                    <div>
+                        <div class={[
+                            'header__app-toggle__more-settings__line',
+                            'header__app-toggle__more-settings__system-dark-mode',
+                        ]}
+                        >
+                            <CheckBox
+                                class="header__app-toggle__more-settings__system-dark-mode__checkbox"
+                                checked={isSystemAutomation}
+                                onchange={(e: {target: HTMLInputElement}) => changeAutomationMode(e.target.checked ? AutomationMode.SYSTEM : AutomationMode.NONE)}
+                            />
+                            <Button
+                                class={{
+                                    'header__app-toggle__more-settings__system-dark-mode__button': true,
+                                    'header__app-toggle__more-settings__system-dark-mode__button--active': isSystemAutomation,
+                                }}
+                                onclick={() =>changeAutomationMode(isSystemAutomation ? AutomationMode.NONE : AutomationMode.SYSTEM)}
+                            >{getLocalMessage('system_dark_mode')}</Button>
+                        </div>
+                        <p class="header__app-toggle__more-settings__description">
+                            {getLocalMessage('system_dark_mode_description')}
+                        </p>
+                    </div>
+                }
             </div>
         </div>
     );

@@ -21,9 +21,11 @@ export default function MessageBox(props: MessageBoxProps) {
                     <Button class="message-box__button message-box__button-ok" onclick={props.onOK}>
                         OK
                     </Button>
-                    <Button class="message-box__button message-box__button-cancel" onclick={props.onCancel} style={props.hideCancel ? 'display: none' : ''}>
-                        Cancel
-                    </Button>
+                    {props.hideCancel ? null :
+                        <Button class="message-box__button message-box__button-cancel" onclick={props.onCancel}>
+                            Cancel
+                        </Button>
+                    }
                 </div>
             </div>
         </Overlay.Portal>

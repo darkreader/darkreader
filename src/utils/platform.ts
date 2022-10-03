@@ -39,6 +39,7 @@ export const isEdge = (__CHROMIUM_MV2__ || __CHROMIUM_MV3__) && (!__FIREFOX__ &&
 export const isSafari = !__CHROMIUM_MV2__ && !__CHROMIUM_MV3__ && !__FIREFOX__ && !__THUNDERBIRD__ && userAgent.includes('safari') && !isChromium;
 export const isWindows = platform.startsWith('win');
 export const isMacOS = platform.startsWith('mac');
+export const isLinux = isNavigatorDefined ? ((navigator.userAgentData && navigator.userAgentData.platform === 'Linux') || (navigator.userAgent && navigator.userAgent.includes('Linux'))) : false;
 export const isMobile = (isNavigatorDefined && navigator.userAgentData) ? navigator.userAgentData.mobile : userAgent.includes('mobile');
 export const isShadowDomSupported = typeof ShadowRoot === 'function';
 export const isMatchMediaChangeEventListenerSupported = __CHROMIUM_MV3__ || (

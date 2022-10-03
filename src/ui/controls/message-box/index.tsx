@@ -6,6 +6,7 @@ interface MessageBoxProps {
     caption: string;
     onOK?: () => void;
     onCancel?: () => void;
+    hideCancel?: boolean;
     portalKey?: any;
 }
 
@@ -20,7 +21,7 @@ export default function MessageBox(props: MessageBoxProps) {
                     <Button class="message-box__button message-box__button-ok" onclick={props.onOK}>
                         OK
                     </Button>
-                    <Button class="message-box__button message-box__button-cancel" onclick={props.onCancel}>
+                    <Button class="message-box__button message-box__button-cancel" onclick={props.onCancel} style={props.hideCancel ? 'display: none' : ''}>
                         Cancel
                     </Button>
                 </div>

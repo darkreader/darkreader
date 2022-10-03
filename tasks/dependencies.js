@@ -11,7 +11,8 @@ async function getOutdated() {
     return /** @type {Promise<object | null>} */(new Promise((resolve, reject) => {
         exec('npm outdated --json', {cwd}, (error, stdout) => {
             if (!error) {
-                reject('Nothing to upgrade');
+                log.error('Nothing to upgrade');
+                reject();
                 return;
             }
 

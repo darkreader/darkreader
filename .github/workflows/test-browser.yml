@@ -87,7 +87,7 @@ jobs:
       - name: Run browser tests on Chromium
         if: ${{ matrix.chrome }}
         # TODO: profile flaky tests and remove the next line
-        continue-on-error: true
+        continue-on-error: false
         uses: GabrielBB/xvfb-action@v1.6
         with:
           run: npm run test:chrome && npm run test:chrome-mv3

@@ -28,7 +28,8 @@ const {getDestDir, PLATFORM, rootDir, rootPath} = paths;
 const jsEntries = [
     {
         src: 'src/background/index.ts',
-        // Prior to Chrome 93, background service worker had to be in top-level directory
+        // Prior to Chrome 93, background service worker had to be in top-level directory.
+        // We keep it there for nicety of folder layout.
         dest: (platform) => platform === PLATFORM.CHROME_MV3 ? 'background.js' : 'background/index.js',
         reloadType: reload.FULL,
     },
@@ -36,6 +37,12 @@ const jsEntries = [
         src: 'src/inject/index.ts',
         dest: 'inject/index.js',
         reloadType: reload.FULL,
+    },
+    {
+        src: 'src/inject/dynamic-theme/mv2-proxy.ts',
+        dest: 'inject/proxy.js',
+        reloadType: reload.FULL,
+        platform: PLATFORM.CHROME_MV2,
     },
     {
         src: 'src/inject/dynamic-theme/mv3-proxy.ts',

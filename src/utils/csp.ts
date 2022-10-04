@@ -27,7 +27,7 @@ export function prepareCSPMV3() {
                 NEWS_URL,
                 'https://raw.githubusercontent.com/darkreader/darkreader/main/src/config/*',
             ],
-            'navigate-src': [
+            'navigate-to': [
                 CSP.SELF,
                 `${HOMEPAGE_URL}/*`,
                 DEVTOOLS_DOCS_URL,

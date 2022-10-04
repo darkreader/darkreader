@@ -22,10 +22,9 @@ export function prepareCSPMV3(): chrome.runtime.ManifestV3['content_security_pol
             'default-src': [CSP.NONE],
             'script-src': [CSP.SELF],
             'style-src': [CSP.SELF],
-            'img-src': [CSP.SELF],
-            'connect-src': [
-                NEWS_URL,
-                `${CONFIG_URL_BASE}/*`,
+            'img-src': [
+                CSP.SELF,
+                `${HOMEPAGE_URL}/*`,
             ],
             'navigate-to': [
                 CSP.SELF,

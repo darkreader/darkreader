@@ -9,7 +9,6 @@ export const GITHUB_URL = 'https://github.com/darkreader/darkreader';
 export const PRIVACY_URL = 'https://darkreader.org/privacy/';
 export const TWITTER_URL = 'https://twitter.com/darkreaderapp';
 export const UNINSTALL_URL = 'https://darkreader.org/goodluck/';
-export const NEWS_URL = 'https://darkreader.github.io/blog/posts.json';
 export const HELP_URL = 'https://darkreader.org/help';
 
 const helpLocales = [

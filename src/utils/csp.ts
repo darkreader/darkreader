@@ -13,7 +13,7 @@ function check() {
 }
 
 
-export function prepareCSPMV3() {
+export function prepareCSPMV3(): chrome.runtime.ManifestV3['content_security_policy'] {
     check();
 
     const result: any = {};
@@ -50,5 +50,3 @@ export function prepareCSPMV3() {
     }
     return result;
 }
-
-console.log(prepareCSPMV3());

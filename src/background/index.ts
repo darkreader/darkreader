@@ -40,6 +40,9 @@ type TestMessage = {
     type: 'setDataIsMigratedForTesting';
     data: boolean;
     id: number;
+} | {
+    type: 'getManifest';
+    id: number;
 };
 
 // Start extension
@@ -180,6 +183,10 @@ if (__TEST__) {
                 case 'setDataIsMigratedForTesting':
                     DevTools.setDataIsMigratedForTesting(message.data);
                     respond({type: 'setDataIsMigratedForTesting-response', id: message.id});
+                    break;
+                case 'getManifest':
+                    const data = chrome.runtime.getManifest();
+                    respond({type: 'getManifest-response', data, id: message.id});
                     break;
             }
         } catch (err) {

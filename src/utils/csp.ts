@@ -1,4 +1,4 @@
-import {HOMEPAGE_URL, BLOG_URL, DEVTOOLS_DOCS_URL, DONATE_URL, GITHUB_URL, PRIVACY_URL, TWITTER_URL, UNINSTALL_URL, NEWS_URL, HELP_URL} from './links';
+import {HOMEPAGE_URL, BLOG_URL, DEVTOOLS_DOCS_URL, DONATE_URL, GITHUB_URL, PRIVACY_URL, TWITTER_URL, UNINSTALL_URL, NEWS_URL, HELP_URL, CONFIG_URL_BASE} from './links';
 
 enum CSP {
     NONE = "'none'",
@@ -25,7 +25,7 @@ export function prepareCSPMV3() {
             'img-src': [CSP.SELF],
             'connect-src': [
                 NEWS_URL,
-                'https://raw.githubusercontent.com/darkreader/darkreader/main/src/config/*',
+                `${CONFIG_URL_BASE}/*`,
             ],
             'navigate-to': [
                 CSP.SELF,

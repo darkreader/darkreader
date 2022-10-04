@@ -15,6 +15,10 @@
     "background": {
         "service_worker": "background.js"
     },
+    "content_security_policy": {
+        "extension_pages":
+            "default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; media-src 'none'; child-src 'none'; worker-src 'none'; object-src 'none'; connect-src https://darkreader.github.io/blog/posts.json https://darkreader.org/blog/posts.json https://raw.githubusercontent.com/darkreader/darkreader/main/src/config/*; navigate-src 'self' https://darkreader.org/* https://github.com/darkreader/darkreader/blob/main/CONTRIBUTING.md https://github.com/darkreader/darkreader https://opencollective.com/darkreader/donate https://twitter.com/darkreaderapp"
+    },
     "content_scripts": [
         {
             "matches": [

@@ -3,7 +3,7 @@ import {getStringSize} from '../../utils/text';
 import {getDuration} from '../../utils/time';
 import {isXMLHttpRequestSupported, isFetchSupported} from '../../utils/platform';
 
-declare const __TEST__: number;
+declare const __TEST__: boolean;
 
 interface RequestParams {
     url: string;

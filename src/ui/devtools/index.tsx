@@ -21,7 +21,7 @@ async function start() {
 
 start();
 
-declare const __TEST__: number;
+declare const __TEST__: boolean;
 if (__TEST__) {
     const socket = new WebSocket(`ws://localhost:8894`);
     socket.onmessage = (e) => {

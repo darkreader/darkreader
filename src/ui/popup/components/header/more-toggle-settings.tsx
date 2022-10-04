@@ -5,6 +5,8 @@ import type {Automation, ExtWrapper} from '../../../../definitions';
 import {AutomationMode} from '../../../../utils/automation';
 import {isChromium, isLinux} from '../../../../utils/platform';
 
+declare const __TEST__: boolean;
+
 type MoreToggleSettingsProps = ExtWrapper & {
     isExpanded: boolean;
     onClose: () => void;
@@ -131,7 +133,7 @@ export default function MoreToggleSettings({data, actions, isExpanded, onClose}:
                 <p class="header__app-toggle__more-settings__location-description">
                     {getLocalMessage('set_location')}
                 </p>
-                {isLinux && isChromium ? null :
+                {!__TEST__ && isLinux && isChromium ? null :
                     <div>
                         <div class={[
                             'header__app-toggle__more-settings__line',

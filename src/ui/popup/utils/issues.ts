@@ -1,7 +1,7 @@
 import {compareChromeVersions, chromiumVersion, isWindows, isOpera, isYaBrowser, isVivaldi, isEdge, isMacOS} from '../../../utils/platform';
 
 declare const __THUNDERBIRD__: boolean;
-declare const __CHROMIUM_MV3__: number;
+declare const __CHROMIUM_MV3__: boolean;
 
 export function popupHasBuiltInBorders() {
     return !__CHROMIUM_MV3__ && Boolean(

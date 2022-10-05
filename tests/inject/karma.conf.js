@@ -1,4 +1,4 @@
-/** @typedef {import('karma').Config & Record<string, unknown>} LocalConfig */
+/** @typedef {import('karma').Config & {headless: boolean, debug: boolean, ci: boolean, coverage: boolean}} LocalConfig */
 /** @typedef {import('karma').ConfigOptions} ConfigOptions */
 
 import fs from 'fs';
@@ -19,7 +19,7 @@ const {rootPath} = paths;
  * @returns {ConfigOptions}
  */
 export function configureKarma(config, env) {
-    const headless = config.headless || env.KARMA_HEADLESS || false;
+    const headless = config.headless || Boolean(env.KARMA_HEADLESS) || false;
 
     /** @type {ConfigOptions} */
     let options = {
@@ -34,7 +34,6 @@ export function configureKarma(config, env) {
         ],
         plugins: [
             'karma-chrome-launcher',
-            'karma-coverage',
             'karma-firefox-launcher',
             'karma-rollup-preprocessor',
             'karma-jasmine',
@@ -93,8 +92,12 @@ export function configureKarma(config, env) {
         options.customLaunchers = {};
         options.browsers = [];
 
+        // CHROME_TEST and FIREFOX_TEST are used in CI
+        const chrome = env.CHROME_TEST;
+        const firefox = env.FIREFOX_TEST;
+        const all = !chrome && !firefox;
         // Chrome
-        if (env.CHROME_TEST) {
+        if (chrome || all) {
             options.customLaunchers['CIChromeHeadless'] = {
                 base: 'ChromeHeadless',
                 flags: ['--no-sandbox', '--disable-setuid-sandbox']
@@ -103,7 +106,7 @@ export function configureKarma(config, env) {
         }
 
         // Firefox
-        if (env.FIREFOX_TEST) {
+        if (firefox || all) {
             options.customLaunchers['CIFirefoxHeadless'] = {
                 base: 'FirefoxHeadless',
             };
@@ -117,6 +120,7 @@ export function configureKarma(config, env) {
     }
 
     if (config.coverage) {
+        options.plugins.push('karma-coverage');
         const plugin = rollupPluginIstanbul({
             exclude: ['tests/**/*.*', 'src/inject/dynamic-theme/stylesheet-proxy.ts'],
         });

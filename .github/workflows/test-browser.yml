@@ -1,4 +1,4 @@
-name: Run browser tests in Karma
+name: Run browser tests
 on:
 
   # Runs for pushes and pull requests,
@@ -84,8 +84,14 @@ jobs:
       - name: Run injection tests
         run: npm run test:inject -- --ci
 
-      - name: Run browser tests on Chromium
+      - name: Run browser tests on Chromium MV2 build
         if: ${{ matrix.chrome }}
         uses: GabrielBB/xvfb-action@v1.6
         with:
-          run: npm run test:chrome && npm run test:chrome-mv3
+          run: npm run test:chrome
+
+      - name: Run browser tests on Chromium MV3 build
+        if: ${{ matrix.chrome }}
+        uses: GabrielBB/xvfb-action@v1.6
+        with:
+          run: npm run test:chrome-mv3

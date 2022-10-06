@@ -5,3 +5,7 @@ export function getEchoURL(content: string, type = 'text/plain') {
 export function getCSSEchoURL(content: string) {
     return getEchoURL(content, 'text/css');
 }
+
+export function getJSEchoURL(script: string) {
+    return getEchoURL(script, 'application/javascript');
+}

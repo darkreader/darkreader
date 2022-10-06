@@ -19,32 +19,32 @@ class PuppeteerEnvironment extends JestNodeEnvironment.TestEnvironment {
     async setup() {
         await super.setup();
 
-        this.popupTestServer = await this.createPopupTestServer();
-        this.testServer = await createTestServer(TEST_SERVER_PORT);
-        this.corsServer = await createTestServer(CORS_SERVER_PORT);
+        const promises = [
+            this.createPopupTestServer(),
+            createTestServer(TEST_SERVER_PORT),
+            createTestServer(CORS_SERVER_PORT),
+        ];
+        promises.push();
 
         this.browser = await this.launchBrowser();
         this.global.browser = this.browser;
 
-        this.extensionPopup = await this.openPopupPage();
-        this.extensionDevtools = await this.openDevtoolsPage();
+        promises.push(
+            this.openPopupPage(),
+            this.openDevtoolsPage(),
+            this.createTestPage(),
+        );
 
-        this.page = await this.createTestPage();
+        const results = await Promise.all(promises);
+        this.popupTestServer = results[0];
+        this.testServer = results[1];
+        this.corsServer = results[2];
+        this.extensionPopup = results[3];
+        this.extensionDevtools = results[4];
+        this.page = results[5];
         this.global.page = this.page;
 
         this.assignTestGlobals();
-
-        // Close sentinel about:blank page created by Puppeteer but not used in tests.
-        this.browser.pages().then((pages) => {
-            try {
-                const sentinel = pages[0];
-                if (sentinel.url() === 'about:blank') {
-                    sentinel.close();
-                }
-            } catch (e) {
-                // Ignore error
-            }
-        });
     }
 
     async waitForStartup() {
@@ -273,20 +273,24 @@ class PuppeteerEnvironment extends JestNodeEnvironment.TestEnvironment {
     async teardown() {
         await super.teardown();
 
+        const promises = [];
         if (this.global.product !== 'firefox' && this.page?.coverage) {
             const coverage = await this.page.coverage.stopJSCoverage();
             const dir = './tests/browser/coverage/';
-            await generateHTMLCoverageReports(dir, coverage);
-            console.info('Coverage reports generated in', dir);
+            const promise = generateHTMLCoverageReports(dir, coverage);
+            promise.then(() => console.info('Coverage reports generated in', dir));
+            promises.push(promise);
         }
 
-        await this.extensionPopup?.close();
-        await this.extensionDevtools?.close();
-        await this.page?.close();
-        await this.testServer?.close();
-        await this.corsServer?.close();
-        await this.popupTestServer?.close();
-        await this.browser?.close();
+        // Note: this.browser.close() will close all tabs, so no need to close them
+        // explicitly
+        promises.push([
+            this.testServer?.close(),
+            this.corsServer?.close(),
+            this.popupTestServer?.close(),
+            this.browser?.close(),
+        ]);
+        await Promise.all(promises);
     }
 }
 

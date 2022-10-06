@@ -32,3 +32,11 @@ export function resetChromeRuntimeMessageStub() {
 export function stubBackgroundFetchResponse(url: string, content: string) {
     bgResponses.set(url, content);
 }
+
+const urlResponses = new Map<string, string>();
+export function stubChromeRuntimeGetURL(path: string, url: string) {
+    urlResponses.set(path, url);
+    (chrome.runtime as any).getURL = (path: string) => {
+        return urlResponses.get(path);
+    };
+}

@@ -2,7 +2,7 @@
 
 - Fixes a issue where `darkreader-fallback` wasn't removed from the DOM, when Dark Reader finds a `<meta name="darkreader-lock">` element.
 - Be stricter when the user specifies a last slash for a URL in the sitelist.
-- Hide "System" Automation on Chromium on Linux because Chromium on Linux does not support Media Queries.
+- Display a warning underneath "System" Automation in Chromium on Linux and Android about Chromium bug in Media Queries.
 
 ## 4.9.58 (Sep 22, 2022)
 

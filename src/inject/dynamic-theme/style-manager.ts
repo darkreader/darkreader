@@ -334,6 +334,9 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
         cancelAsyncOperations = false;
 
         function removeCSSRulesFromSheet(sheet: CSSStyleSheet) {
+            if (!sheet) {
+                return;
+            }
             for (let i = sheet.cssRules.length - 1; i >= 0; i--) {
                 sheet.deleteRule(i);
             }

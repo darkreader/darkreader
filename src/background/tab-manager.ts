@@ -179,6 +179,9 @@ export default class TabManager {
                     break;
 
                 case MessageType.UI_SAVE_FILE: {
+                    if (__CHROMIUM_MV3__) {
+                        break;
+                    }
                     const {content, name} = message.data;
                     const a = document.createElement('a');
                     a.href = URL.createObjectURL(new Blob([content]));

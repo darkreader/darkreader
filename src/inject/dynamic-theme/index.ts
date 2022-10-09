@@ -318,27 +318,53 @@ function onDOMReady() {
     logWarn(`DOM is ready, but still have styles being loaded.`, loadingStyles);
 }
 
-let documentVisibilityListener: () => void = null;
+/**
+ * The following code contains a workaround for extensions designed to brevent page from knowing when it is hidden
+ * GitHub issue: https://github.com/darkreader/darkreader/issues/10004
+ *
+ * This code exploits the fact that most such extensions block only a subset of Page Lifecycle API,
+ * which notifies page of being hidden but not of being shown, while Dark Reader really cares only about
+ * page being shown.
+ * Specifically:
+ *  - extensions block visibilitychange and blur event
+ *  - extensions do not block focus event; browsers deliver focus event when user switches to
+ *    a previously hidden tab or previously hidden window (assuming DevTools are closed so window gets the focus)
+ *    if document has focus, then we can assume that it is visible
+ *  - some extensions overwrite document.hidden but not document.visibilityState
+ */
 let didDocumentShowUp = !document.hidden;
+let documentVisibilityCallback: () => void = null;
+function onDocumentVisible() {
+    documentVisibilityCallback && documentVisibilityCallback();
+    stopWatchingForDocumentVisibility();
+    didDocumentShowUp = true;
+}
 
-function watchForDocumentVisibility(callback: () => void) {
-    const alreadyWatching = Boolean(documentVisibilityListener);
-    documentVisibilityListener = () => {
-        if (!document.hidden) {
-            stopWatchingForDocumentVisibility();
-            callback();
-            didDocumentShowUp = true;
-        }
-    };
-    if (!alreadyWatching) {
-        document.addEventListener('visibilitychange', documentVisibilityListener);
+function documentVisibilityListener() {
+    // Note: Safari supports document.visibilityState === 'prerender'
+    // which makes document.hidden === true even when document is visible to the user
+    if (!document.hidden || document.visibilityState !== 'hidden') {
+        onDocumentVisible();
     }
 }
 
-function stopWatchingForDocumentVisibility() {
-    document.removeEventListener('visibilitychange', documentVisibilityListener);
-    documentVisibilityListener = null;
+function watchForDocumentVisibility(callback: () => void) {
+    documentVisibilityCallback = callback;
+    document.addEventListener('visibilitychange', documentVisibilityListener);
+    window.addEventListener('pageshow', documentVisibilityListener);
+    window.addEventListener('focus', onDocumentVisible);
 }
+
+function stopWatchingForDocumentVisibility() {
+    documentVisibilityCallback = null;
+    document.removeEventListener('visibilitychange', documentVisibilityListener);
+    window.removeEventListener('pageshow', documentVisibilityListener);
+    window.removeEventListener('focus', onDocumentVisible);
+}
+
+/**
+ * End of Page Lifecycle API workarounds
+ */
 
 function createThemeAndWatchForUpdates() {
     createStaticStyleOverrides();

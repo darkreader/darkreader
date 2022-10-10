@@ -337,7 +337,9 @@ function onDOMReady() {
 let didDocumentShowUp = !document.hidden;
 let documentVisibilityCallback: () => void = null;
 function onDocumentVisible() {
-    documentVisibilityCallback && documentVisibilityCallback();
+    const documentVisibilityCallback_ = documentVisibilityCallback;
+    documentVisibilityCallback = null;
+    documentVisibilityCallback_ && documentVisibilityCallback_();
     stopWatchingForDocumentVisibility();
     didDocumentShowUp = true;
 }
@@ -358,7 +360,6 @@ function watchForDocumentVisibility(callback: () => void) {
 }
 
 function stopWatchingForDocumentVisibility() {
-    documentVisibilityCallback = null;
     document.removeEventListener('visibilitychange', documentVisibilityListener);
     window.removeEventListener('pageshow', documentVisibilityListener);
     window.removeEventListener('focus', onDocumentVisible);

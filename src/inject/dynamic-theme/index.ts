@@ -319,6 +319,8 @@ function onDOMReady() {
 }
 
 /**
+ * Begining of Page Lifecycle API workarounds
+ *
  * The following code contains a workaround for extensions designed to brevent page from knowing when it is hidden
  * GitHub issue: https://github.com/darkreader/darkreader/issues/10004
  *

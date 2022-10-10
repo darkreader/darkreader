@@ -337,11 +337,11 @@ function onDOMReady() {
 let didDocumentShowUp = !document.hidden;
 let documentVisibilityCallback: () => void = null;
 function onDocumentVisible() {
+    stopWatchingForDocumentVisibility();
+    didDocumentShowUp = true;
     const documentVisibilityCallback_ = documentVisibilityCallback;
     documentVisibilityCallback = null;
     documentVisibilityCallback_ && documentVisibilityCallback_();
-    stopWatchingForDocumentVisibility();
-    didDocumentShowUp = true;
 }
 
 function documentVisibilityListener() {

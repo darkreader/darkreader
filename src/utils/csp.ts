@@ -26,7 +26,10 @@ export function prepareCSPMV3(): chrome.runtime.ManifestV3['content_security_pol
                 'unsafe-hashes',
                 'sha256-Xi0E9ZtMHXUaj/gPUMMzBcxFgbc2rwmcSys1oJBVhA4=',
             ],
-            'img-src': ['*'],
+            'img-src': [
+                '*',
+                'data:',
+            ],
             'connect-src': ['*'],
             'navigate-to': [
                 CSP.SELF,

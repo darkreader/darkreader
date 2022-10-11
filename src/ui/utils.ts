@@ -40,7 +40,7 @@ export function openFile(options: {extensions: string[]}, callback: (content: st
 }
 
 export function saveFile(name: string, content: string) {
-    if (isFirefox) {
+    if (__CHROMIUM_MV3__ || isFirefox || isMobile) {
         const a = document.createElement('a');
         a.href = URL.createObjectURL(new Blob([content]));
         a.download = name;

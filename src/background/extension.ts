@@ -237,7 +237,7 @@ export class Extension {
             collect: async () => {
                 return await this.collectData();
             },
-            changeSettings: (settings) => this.changeSettings(settings),
+            changeSettings: async (settings) => this.changeSettings(settings),
             setTheme: (theme) => this.setTheme(theme),
             setShortcut: ({command, shortcut}) => this.setShortcut(command, shortcut),
             toggleActiveTab: async () => this.toggleActiveTab(),
@@ -429,7 +429,8 @@ export class Extension {
         }
     };
 
-    static changeSettings($settings: Partial<UserSettings>, onlyUpdateActiveTab = false) {
+    static async changeSettings($settings: Partial<UserSettings>, onlyUpdateActiveTab = false) {
+        const promises = [];
         const prev = {...UserStorage.settings};
 
         UserStorage.set($settings);
@@ -448,7 +449,8 @@ export class Extension {
             this.onAppToggle();
         }
         if (prev.syncSettings !== UserStorage.settings.syncSettings) {
-            UserStorage.saveSyncSetting(UserStorage.settings.syncSettings);
+            const promise = UserStorage.saveSyncSetting(UserStorage.settings.syncSettings);
+            promises.push(promise);
         }
         if (this.isExtensionSwitchedOn() && $settings.changeBrowserTheme != null && prev.changeBrowserTheme !== $settings.changeBrowserTheme) {
             if ($settings.changeBrowserTheme) {
@@ -468,7 +470,9 @@ export class Extension {
                 chrome.contextMenus.removeAll();
             }
         }
-        this.onSettingsChanged(onlyUpdateActiveTab);
+        const promise = this.onSettingsChanged(onlyUpdateActiveTab);
+        promises.push(promise);
+        await Promise.all(promises);
     }
 
     private static setTheme($theme: Partial<FilterConfig>) {

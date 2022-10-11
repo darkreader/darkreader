@@ -19,7 +19,7 @@ const {rootPath} = paths;
  * @returns {ConfigOptions}
  */
 export function configureKarma(config, env) {
-    const headless = config.headless || config.ci || Boolean(env.KARMA_HEADLESS) || false;
+    const headless = config.headless || Boolean(env.KARMA_HEADLESS) || false;
 
     /** @type {ConfigOptions} */
     let options = {
@@ -34,7 +34,6 @@ export function configureKarma(config, env) {
         ],
         plugins: [
             'karma-chrome-launcher',
-            'karma-coverage',
             'karma-firefox-launcher',
             'karma-rollup-preprocessor',
             'karma-jasmine',
@@ -121,6 +120,7 @@ export function configureKarma(config, env) {
     }
 
     if (config.coverage) {
+        options.plugins.push('karma-coverage');
         const plugin = rollupPluginIstanbul({
             exclude: ['tests/**/*.*', 'src/inject/dynamic-theme/stylesheet-proxy.ts'],
         });

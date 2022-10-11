@@ -1,4 +1,4 @@
-import {HOMEPAGE_URL, BLOG_URL, DEVTOOLS_DOCS_URL, DONATE_URL, GITHUB_URL, PRIVACY_URL, TWITTER_URL, UNINSTALL_URL, NEWS_URL, HELP_URL, CONFIG_URL_BASE} from './links';
+import {HOMEPAGE_URL, BLOG_URL, DEVTOOLS_DOCS_URL, DONATE_URL, GITHUB_URL, PRIVACY_URL, TWITTER_URL, UNINSTALL_URL, HELP_URL} from './links';
 
 enum CSP {
     NONE = "'none'",
@@ -12,7 +12,6 @@ function check() {
     }
 }
 
-
 export function prepareCSPMV3(): chrome.runtime.ManifestV3['content_security_policy'] {
     check();
 
@@ -24,7 +23,8 @@ export function prepareCSPMV3(): chrome.runtime.ManifestV3['content_security_pol
             'style-src': [
                 CSP.SELF,
                 'unsafe-hashes',
-                'sha256-Xi0E9ZtMHXUaj/gPUMMzBcxFgbc2rwmcSys1oJBVhA4=',
+                // TODO: This hash comes from Malevic, look into removing it
+                "'sha256-Xi0E9ZtMHXUaj/gPUMMzBcxFgbc2rwmcSys1oJBVhA4='",
             ],
             'img-src': [
                 '*',
@@ -44,9 +44,9 @@ export function prepareCSPMV3(): chrome.runtime.ManifestV3['content_security_pol
             'worker-src': [CSP.NONE],
             'object-src': [CSP.NONE],
         }
-    }
+    };
     for (const p in policy) {
-        let outputs: string[] = [];
+        const outputs: string[] = [];
         for (const directive in policy[p]) {
             outputs.push(`${directive} ${policy[p][directive].join(' ')}`);
         }

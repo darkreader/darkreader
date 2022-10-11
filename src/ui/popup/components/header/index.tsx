@@ -10,6 +10,7 @@ import MoreToggleSettings from './more-toggle-settings';
 import {AutomationMode} from '../../../../utils/automation';
 import {isLocalFile} from '../../../../utils/url';
 import {isChromium} from '../../../../utils/platform';
+import {HOMEPAGE_URL} from '../../../../utils/links';
 
 declare const __CHROMIUM_MV3__: boolean;
 
@@ -38,7 +39,7 @@ function Header({data, actions, onMoreToggleSettingsClick}: HeaderProps) {
 
     return (
         <header class="header">
-            <a class="header__logo" href="https://darkreader.org/" target="_blank" rel="noopener noreferrer">
+            <a class="header__logo" href={HOMEPAGE_URL} target="_blank" rel="noopener noreferrer">
                 Dark Reader
             </a>
             <div class="header__control header__site-toggle">

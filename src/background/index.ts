@@ -43,6 +43,9 @@ type TestMessage = {
     type: 'setDataIsMigratedForTesting';
     data: boolean;
     id: number;
+} | {
+    type: 'getManifest';
+    id: number;
 };
 
 // Start extension
@@ -181,10 +184,11 @@ if (__TEST__) {
                 case 'getLocalStorage':
                     respond(localStorage ? JSON.stringify(localStorage) : null);
                     break;
-                case 'getManifest':
+                case 'getManifest': {
                     const data = chrome.runtime.getManifest();
                     respond(data);
                     break;
+                }
                 case 'changeChromeStorage': {
                     const region = message.data.region;
                     chrome.storage[region].set(message.data.data, () => respond());

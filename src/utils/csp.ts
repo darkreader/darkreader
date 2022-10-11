@@ -21,11 +21,13 @@ export function prepareCSPMV3(): chrome.runtime.ManifestV3['content_security_pol
         extension_pages: {
             'default-src': [CSP.NONE],
             'script-src': [CSP.SELF],
-            'style-src': [CSP.SELF],
-            'img-src': [
+            'style-src': [
                 CSP.SELF,
-                `${HOMEPAGE_URL}/*`,
+                'unsafe-hashes',
+                'sha256-Xi0E9ZtMHXUaj/gPUMMzBcxFgbc2rwmcSys1oJBVhA4=',
             ],
+            'img-src': ['*'],
+            'connect-src': ['*'],
             'navigate-to': [
                 CSP.SELF,
                 `${HOMEPAGE_URL}/*`,

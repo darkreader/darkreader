@@ -184,10 +184,11 @@ if (__TEST__) {
                 case 'getLocalStorage':
                     respond(localStorage ? JSON.stringify(localStorage) : null);
                     break;
-                case 'getManifest':
+                case 'getManifest': {
                     const data = chrome.runtime.getManifest();
                     respond(data);
                     break;
+                }
                 case 'changeChromeStorage': {
                     const region = message.data.region;
                     chrome.storage[region].set(message.data.data, () => respond());
@@ -202,10 +203,6 @@ if (__TEST__) {
                 case 'setDataIsMigratedForTesting':
                     DevTools.setDataIsMigratedForTesting(message.data);
                     respond();
-                    break;
-                case 'getManifest':
-                    const data = chrome.runtime.getManifest();
-                    respond({type: 'getManifest-response', data, id: message.id});
                     break;
             }
         } catch (err) {

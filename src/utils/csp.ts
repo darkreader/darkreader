@@ -22,7 +22,7 @@ export function prepareCSPMV3(): chrome.runtime.ManifestV3['content_security_pol
             'script-src': [CSP.SELF],
             'style-src': [
                 CSP.SELF,
-                'unsafe-hashes',
+                "'unsafe-hashes'",
                 // TODO: This hash comes from Malevic, look into removing it
                 "'sha256-Xi0E9ZtMHXUaj/gPUMMzBcxFgbc2rwmcSys1oJBVhA4='",
             ],

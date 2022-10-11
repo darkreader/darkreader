@@ -13,7 +13,7 @@ import paths from './paths.js';
 const {rootDir, rootPath} = paths;
 
 async function getVersion() {
-    const file = await fs.promises.readFile(new URL('../package.json', import.meta.url), {encoding: 'utf-8'});
+    const file = await fs.promises.readFile(new URL('../package.json', import.meta.url));
     const p = JSON.parse(file);
     return p.version;
 }

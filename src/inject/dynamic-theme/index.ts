@@ -336,19 +336,15 @@ function onDOMReady() {
  */
 let didDocumentShowUp = !document.hidden;
 let documentVisibilityCallback: () => void = null;
-function onDocumentVisible() {
-    stopWatchingForDocumentVisibility();
-    didDocumentShowUp = true;
-    const documentVisibilityCallback_ = documentVisibilityCallback;
-    documentVisibilityCallback = null;
-    documentVisibilityCallback_ && documentVisibilityCallback_();
-}
-
 function documentVisibilityListener() {
     // Note: Safari supports document.visibilityState === 'prerender'
     // which makes document.hidden === true even when document is visible to the user
     if (!document.hidden || document.visibilityState !== 'hidden') {
-        onDocumentVisible();
+        stopWatchingForDocumentVisibility();
+        didDocumentShowUp = true;
+        const documentVisibilityCallback_ = documentVisibilityCallback;
+        documentVisibilityCallback = null;
+        documentVisibilityCallback_ && documentVisibilityCallback_();
     }
 }
 
@@ -356,13 +352,13 @@ function watchForDocumentVisibility(callback: () => void) {
     documentVisibilityCallback = callback;
     document.addEventListener('visibilitychange', documentVisibilityListener);
     window.addEventListener('pageshow', documentVisibilityListener);
-    window.addEventListener('focus', onDocumentVisible);
+    window.addEventListener('focus', documentVisibilityListener);
 }
 
 function stopWatchingForDocumentVisibility() {
     document.removeEventListener('visibilitychange', documentVisibilityListener);
     window.removeEventListener('pageshow', documentVisibilityListener);
-    window.removeEventListener('focus', onDocumentVisible);
+    window.removeEventListener('focus', documentVisibilityListener);
 }
 
 /**

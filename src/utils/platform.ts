@@ -29,7 +29,7 @@ const platform = isNavigatorDefined ? (navigator.userAgentData && typeof navigat
     : 'some platform';
 
 // Note: if you are using these constants in tests, make sure they are not compiled out by adding __TEST__ to them
-export const isChromium = __CHROMIUM_MV2__ || __CHROMIUM_MV3__ || ((__TEST__ || (!__FIREFOX__ && !__THUNDERBIRD__)) && (userAgent.includes('chrome') || userAgent.includes('chromium')));
+export const isChromium = __CHROMIUM_MV2__ || __CHROMIUM_MV3__ || (!__FIREFOX__ && !__THUNDERBIRD__ && (userAgent.includes('chrome') || userAgent.includes('chromium')));
 export const isThunderbird = __THUNDERBIRD__ || (!__CHROMIUM_MV2__ && !__CHROMIUM_MV3__ && userAgent.includes('thunderbird'));
 export const isFirefox = __FIREFOX__ || isThunderbird || ((__TEST__ || (!__CHROMIUM_MV2__ && !__CHROMIUM_MV3__)) && (userAgent.includes('firefox') || userAgent.includes('librewolf')));
 export const isVivaldi = (__CHROMIUM_MV2__ || __CHROMIUM_MV3__) && (!__FIREFOX__ && !__THUNDERBIRD__ && userAgent.includes('vivaldi'));

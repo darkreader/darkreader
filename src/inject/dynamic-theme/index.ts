@@ -224,9 +224,11 @@ function createDynamicStyleOverrides() {
 
     variablesStore.matchVariablesAndDependants();
     variablesStore.setOnRootVariableChange(() => {
-        variablesStore.putRootVars(document.head.querySelector('.darkreader--root-vars'), filter);
+        const rootVarsStyle = createOrUpdateStyle('darkreader--root-vars');
+        variablesStore.putRootVars(rootVarsStyle, filter);
     });
-    variablesStore.putRootVars(document.head.querySelector('.darkreader--root-vars'), filter);
+    const rootVarsStyle = createOrUpdateStyle('darkreader--root-vars');
+    variablesStore.putRootVars(rootVarsStyle, filter);
 
     styleManagers.forEach((manager) => manager.render(filter, ignoredImageAnalysisSelectors));
     if (loadingStyles.size === 0) {
@@ -318,27 +320,55 @@ function onDOMReady() {
     logWarn(`DOM is ready, but still have styles being loaded.`, loadingStyles);
 }
 
-let documentVisibilityListener: () => void = null;
+/**
+ * Begining of Page Lifecycle API workarounds
+ *
+ * The following code contains a workaround for extensions designed to prevent page from knowing when it is hidden
+ * GitHub issue: https://github.com/darkreader/darkreader/issues/10004
+ * GitHub PR: https://github.com/darkreader/darkreader/pull/10047
+ *
+ * This code exploits the fact that most such extensions block only a subset of Page Lifecycle API,
+ * which notifies page of being hidden but not of being shown, while Dark Reader really cares only about
+ * page being shown.
+ * Specifically:
+ *  - extensions block visibilitychange and blur event
+ *  - extensions do not block focus event; browsers deliver focus event when user switches to
+ *    a previously hidden tab or previously hidden window (assuming DevTools are closed so window gets the focus)
+ *    if document has focus, then we can assume that it is visible
+ *  - some extensions overwrite document.hidden but not document.visibilityState
+ *  - Firefox has a bug: if extension overwrites document.hidden and document.visibilityState via Object.defineProperty,
+ *    then Firefox will reset them to true and 'hidden' when tab is activated, but document.hasFocus() will be true
+ *  - Safari supports document.visibilityState === 'prerender' which makes document.hidden === true even when document
+ *    is visible to the user
+ */
 let didDocumentShowUp = !document.hidden;
+let documentVisibilityCallback: () => void = null;
+function documentVisibilityListener() {
+    if (!document.hidden || document.visibilityState !== 'hidden' || document.hasFocus()) {
+        stopWatchingForDocumentVisibility();
+        didDocumentShowUp = true;
+        const documentVisibilityCallback_ = documentVisibilityCallback;
+        documentVisibilityCallback = null;
+        documentVisibilityCallback_ && documentVisibilityCallback_();
+    }
+}
 
 function watchForDocumentVisibility(callback: () => void) {
-    const alreadyWatching = Boolean(documentVisibilityListener);
-    documentVisibilityListener = () => {
-        if (!document.hidden) {
-            stopWatchingForDocumentVisibility();
-            callback();
-            didDocumentShowUp = true;
-        }
-    };
-    if (!alreadyWatching) {
-        document.addEventListener('visibilitychange', documentVisibilityListener);
-    }
+    documentVisibilityCallback = callback;
+    document.addEventListener('visibilitychange', documentVisibilityListener);
+    window.addEventListener('pageshow', documentVisibilityListener);
+    window.addEventListener('focus', documentVisibilityListener);
 }
 
 function stopWatchingForDocumentVisibility() {
     document.removeEventListener('visibilitychange', documentVisibilityListener);
-    documentVisibilityListener = null;
+    window.removeEventListener('pageshow', documentVisibilityListener);
+    window.removeEventListener('focus', documentVisibilityListener);
 }
+
+/**
+ * End of Page Lifecycle API workarounds
+ */
 
 function createThemeAndWatchForUpdates() {
     createStaticStyleOverrides();
@@ -409,7 +439,8 @@ function watchForUpdates() {
             const styleAttr = element.getAttribute('style') || '';
             if (styleAttr.includes('--')) {
                 variablesStore.matchVariablesAndDependants();
-                variablesStore.putRootVars(document.head.querySelector('.darkreader--root-vars'), filter);
+                const rootVarsStyle = createOrUpdateStyle('darkreader--root-vars');
+                variablesStore.putRootVars(rootVarsStyle, filter);
             }
         }
     }, (root) => {

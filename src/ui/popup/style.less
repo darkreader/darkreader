@@ -1,7 +1,8 @@
 @import "../theme";
 @import "../shared";
 
-@popup-content-width: 15rem;
+@min-popup-content-width: 15rem;
+@max-popup-content-width: 25rem;
 @popup-content-height: 30rem;
 @popup-content-padding: 1rem;
 
@@ -25,7 +26,8 @@ body {
     margin: 0 auto;
     padding: @popup-content-padding;
     position: relative;
-    min-width: @popup-content-width;
+    min-width: @min-popup-content-width;
+    max-width: @max-popup-content-width;
 }
 
 .header {

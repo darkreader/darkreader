@@ -224,9 +224,11 @@ function createDynamicStyleOverrides() {
 
     variablesStore.matchVariablesAndDependants();
     variablesStore.setOnRootVariableChange(() => {
-        variablesStore.putRootVars(document.head.querySelector('.darkreader--root-vars'), filter);
+        const rootVarsStyle = createOrUpdateStyle('darkreader--root-vars');
+        variablesStore.putRootVars(rootVarsStyle, filter);
     });
-    variablesStore.putRootVars(document.head.querySelector('.darkreader--root-vars'), filter);
+    const rootVarsStyle = createOrUpdateStyle('darkreader--root-vars');
+    variablesStore.putRootVars(rootVarsStyle, filter);
 
     styleManagers.forEach((manager) => manager.render(filter, ignoredImageAnalysisSelectors));
     if (loadingStyles.size === 0) {
@@ -437,7 +439,8 @@ function watchForUpdates() {
             const styleAttr = element.getAttribute('style') || '';
             if (styleAttr.includes('--')) {
                 variablesStore.matchVariablesAndDependants();
-                variablesStore.putRootVars(document.head.querySelector('.darkreader--root-vars'), filter);
+                const rootVarsStyle = createOrUpdateStyle('darkreader--root-vars');
+                variablesStore.putRootVars(rootVarsStyle, filter);
             }
         }
     }, (root) => {

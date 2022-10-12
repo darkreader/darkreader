@@ -1,5 +1,5 @@
 import {m} from 'malevic';
-import Button from '../button';
+import IconButton from '../icon-button';
 
 interface DeleteAllButtonProps {
     onClick: () => void;
@@ -7,7 +7,7 @@ interface DeleteAllButtonProps {
 
 export default function DeleteAllButton(props: DeleteAllButtonProps, ...content: Malevic.Child[]) {
     return (
-        <Button
+        <IconButton
             class="delete-all-button"
             onclick={props.onClick}
         >
@@ -15,6 +15,6 @@ export default function DeleteAllButton(props: DeleteAllButtonProps, ...content:
                 <span class="delete-all-button-icon"></span>
                 {...content}
             </span>
-        </Button>
+        </IconButton>
     );
 }

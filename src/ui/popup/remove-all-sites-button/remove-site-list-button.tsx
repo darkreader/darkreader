@@ -32,7 +32,7 @@ export default function RemoveAllButton(props: ViewProps) {
     ) : null;
 
     return (
-        <ControlGroup>
+        <ControlGroup class="delete-all-icon-group">
             <ControlGroup.Control>
                 <DeleteAllButton onClick={showDialog}>
                     {dialog}

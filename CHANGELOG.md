@@ -2,7 +2,7 @@
 
 - Fixes a issue where `darkreader-fallback` wasn't removed from the DOM, when Dark Reader finds a `<meta name="darkreader-lock">` element.
 - Be stricter when the user specifies a last slash for a URL in the sitelist.
-- Display a warning underneath "System" Automation in Chromium on Linux and Android about Chromium bug in Media Queries.
+- Display a warning that "System" Automation might not work properly on Chromium on Linux and Kiwi on Android.
 - Improve Kiwi browser support: work around for Kiwi bug in file download during settings import, fix opening open Dark Reader DevTools
 
 ## 4.9.58 (Sep 22, 2022)

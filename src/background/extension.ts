@@ -277,6 +277,7 @@ export class Extension {
                         const {nodeName, type} = document.body.childNodes[0] as HTMLEmbedElement;
                         return nodeName === 'EMBED' && type === 'application/pdf';
                     }
+
                     if (__CHROMIUM_MV3__) {
                         return (await chrome.scripting.executeScript({
                             target: {tabId, frameIds: [frameId]},
@@ -289,7 +290,8 @@ export class Extension {
                         }, ([r]) => resolve(r)));
                     }
                     return false;
-                }
+                };
+
                 const pdf = async () => isPDF(frameURL || await TabManager.getActiveTabURL());
                 if (((__CHROMIUM_MV2__ || __CHROMIUM_MV3__) && await scriptPDF()) || await pdf()) {
                     this.changeSettings({enableForPDF: !UserStorage.settings.enableForPDF});

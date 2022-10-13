@@ -38,6 +38,7 @@ interface SystemColorState {
     wasLastColorSchemeDark: boolean | null;
 }
 
+declare const __CHROMIUM_MV2__: boolean;
 declare const __CHROMIUM_MV3__: boolean;
 declare const __THUNDERBIRD__: boolean;
 
@@ -91,7 +92,7 @@ export class Extension {
 
         if (chrome.commands) {
             // Firefox Android does not support chrome.commands
-            chrome.commands.onCommand.addListener(async (command) => this.onCommand(command as Command));
+            chrome.commands.onCommand.addListener(async (command, {id: tabId}) => this.onCommand(command as Command, tabId, 0, undefined));
         }
 
         if (chrome.permissions.onRemoved) {
@@ -253,7 +254,7 @@ export class Extension {
         };
     }
 
-    private static onCommandInternal = async (command: Command, frameURL?: string) => {
+    private static onCommandInternal = async (command: Command, tabId: number, frameId: number, frameURL: string) => {
         if (this.startBarrier.isPending()) {
             await this.startBarrier.entry();
         }
@@ -268,8 +269,29 @@ export class Extension {
                 break;
             case 'addSite': {
                 logInfo('Add Site command entered');
-                const url = frameURL || await TabManager.getActiveTabURL();
-                if (isPDF(url)) {
+                const scriptPDF = async (): Promise<boolean> => {
+                    function detectPDF(): boolean {
+                        if (document.body.childElementCount !== 1) {
+                            return false;
+                        }
+                        const {nodeName, type} = document.body.childNodes[0] as HTMLEmbedElement;
+                        return nodeName === 'EMBED' && type === 'application/pdf';
+                    }
+                    if (__CHROMIUM_MV3__) {
+                        return (await chrome.scripting.executeScript({
+                            target: {tabId, frameIds: [frameId]},
+                            func: detectPDF,
+                        }))[0].result;
+                    } else if (__CHROMIUM_MV2__) {
+                        return new Promise<boolean>((resolve) => chrome.tabs.executeScript(tabId, {
+                            frameId,
+                            code: `(${detectPDF.toString()})()`
+                        }, ([r]) => resolve(r)));
+                    }
+                    return false;
+                }
+                const pdf = async () => isPDF(frameURL || await TabManager.getActiveTabURL());
+                if (((__CHROMIUM_MV2__ || __CHROMIUM_MV3__) && await scriptPDF()) || await pdf()) {
                     this.changeSettings({enableForPDF: !UserStorage.settings.enableForPDF});
                 } else {
                     this.toggleActiveTab();
@@ -292,8 +314,8 @@ export class Extension {
     private static onCommand = debounce(75, this.onCommandInternal);
 
     private static registerContextMenus() {
-        chrome.contextMenus.onClicked.addListener(async ({menuItemId, frameUrl, pageUrl}) =>
-            this.onCommand(menuItemId as Command, frameUrl || pageUrl));
+        chrome.contextMenus.onClicked.addListener(async ({menuItemId, frameId, frameUrl, pageUrl}, {id: tabId}) =>
+            this.onCommand(menuItemId as Command, tabId, frameId, frameUrl || pageUrl));
         chrome.contextMenus.removeAll(() => {
             this.registeredContextMenus = false;
             chrome.contextMenus.create({

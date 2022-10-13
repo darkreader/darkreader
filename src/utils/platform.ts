@@ -47,7 +47,7 @@ export const isMatchMediaChangeEventListenerSupported = __CHROMIUM_MV3__ || (
 );
 // Return true if browser is known to have a bug with Media Queries, specifically Chromium on Linux and Kiwi on Android
 // We assume that if we are on Android, then we are running in Kiwi since it is the only mobile browser we can install Dark Reader in
-export const isMatchMediaChangeEventListenerBuggy = !__TEST__ && (__CHROMIUM_MV2__ || __CHROMIUM_MV3__) && !__FIREFOX__ && !__THUNDERBIRD__ &&(
+export const isMatchMediaChangeEventListenerBuggy = !__TEST__ && !__FIREFOX__ && !__THUNDERBIRD__ && (__CHROMIUM_MV2__ || __CHROMIUM_MV3__) && (
     ((isNavigatorDefined && navigator.userAgentData) && ['Linux', 'Android'].includes(navigator.userAgentData.platform))
     || platform.startsWith('linux'));
 // Note: make sure that this value matches manifest.json keys

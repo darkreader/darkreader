@@ -10,7 +10,6 @@ import {AutomationMode} from '../../../utils/automation';
 import {isMatchMediaChangeEventListenerBuggy} from '../../../utils/platform';
 
 declare const __CHROMIUM_MV3__: boolean;
-declare const __TEST__: boolean;
 
 export default function AutomationPage(props: ViewProps) {
     const isSystemAutomation = props.data.settings.automation.mode === AutomationMode.SYSTEM;

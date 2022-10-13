@@ -5,8 +5,6 @@ import type {Automation, ExtWrapper} from '../../../../definitions';
 import {AutomationMode} from '../../../../utils/automation';
 import {isMatchMediaChangeEventListenerBuggy} from '../../../../utils/platform';
 
-declare const __TEST__: boolean;
-
 type MoreToggleSettingsProps = ExtWrapper & {
     isExpanded: boolean;
     onClose: () => void;

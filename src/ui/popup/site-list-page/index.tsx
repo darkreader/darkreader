@@ -24,7 +24,7 @@ export default function SiteListPage(props: ViewProps) {
     return (
         <div class="site-list-page">
             <label class="site-list-page__label">{label}</label>
-            <RemoveAllButton {...props} />
+            {props.data.settings.siteList.length ? <RemoveAllButton {...props} /> : null}
             <SiteList
                 siteList={props.data.settings.siteList}
                 onChange={onSiteListChange}

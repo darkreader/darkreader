@@ -329,7 +329,7 @@ function runDynamicStyle() {
 function createThemeAndWatchForUpdates() {
     createStaticStyleOverrides();
 
-    if (document.hidden && !filter.immediateModify) {
+    if (!documentIsVisible() && !filter.immediateModify) {
         addDocumentVisibilityListener(runDynamicStyle);
     } else {
         runDynamicStyle();

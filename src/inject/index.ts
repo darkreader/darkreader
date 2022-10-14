@@ -136,7 +136,7 @@ runColorSchemeChangeDetector((isDark) =>
 );
 
 chrome.runtime.onMessage.addListener(onMessage);
-sendMessage({type: MessageType.CS_FRAME_CONNECT, data: {isDark: isSystemDarkModeEnabled(), isPDF: false}});
+sendMessage({type: MessageType.CS_FRAME_CONNECT, data: {isDark: isSystemDarkModeEnabled()}});
 
 function onPageHide(e: PageTransitionEvent) {
     if (e.persisted === false) {
@@ -149,7 +149,7 @@ function onFreeze() {
 }
 
 function onResume() {
-    sendMessage({type: MessageType.CS_FRAME_RESUME, data: {isDark: isSystemDarkModeEnabled(), isPDF: false}});
+    sendMessage({type: MessageType.CS_FRAME_RESUME, data: {isDark: isSystemDarkModeEnabled()}});
 }
 
 function onDarkThemeDetected() {

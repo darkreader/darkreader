@@ -1,12 +1,11 @@
 import {isSystemDarkModeEnabled, runColorSchemeChangeDetector, stopColorSchemeChangeDetector} from '../utils/media-query';
 import type {Message} from '../definitions';
 import {MessageType} from '../utils/message';
-
+import {addDocumentVisibilityListener, documentIsVisible, removeDocumentVisibilityListener} from '../utils/visibility';
 
 function cleanup() {
     stopColorSchemeChangeDetector();
-    removeEventListener('visibilitychange', updateEventListeners);
-    removeEventListener('pageshow', updateEventListeners);
+    removeDocumentVisibilityListener(updateEventListeners);
 }
 
 function sendMessage(message: Message) {
@@ -46,13 +45,12 @@ function notifyOfColorScheme(isDark: boolean) {
 
 function updateEventListeners() {
     notifyOfColorScheme(isSystemDarkModeEnabled());
-    if (document.visibilityState === 'visible') {
+    if (documentIsVisible()) {
         runColorSchemeChangeDetector(notifyOfColorScheme);
     } else {
         stopColorSchemeChangeDetector();
     }
 }
 
-addEventListener('visibilitychange', updateEventListeners);
-addEventListener('pageshow', updateEventListeners);
+addDocumentVisibilityListener(updateEventListeners);
 updateEventListeners();

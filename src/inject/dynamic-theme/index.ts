@@ -21,6 +21,7 @@ import {injectProxy} from './stylesheet-proxy';
 import {clearColorCache, parseColorWithCache} from '../../utils/color';
 import {parsedURLCache} from '../../utils/url';
 import {variablesStore} from './variables';
+import {addDocumentVisibilityListener, documentIsVisible, removeDocumentVisibilityListener} from '../../utils/visibility';
 
 declare const __TEST__: boolean;
 declare const __CHROMIUM_MV3__: boolean;
@@ -255,7 +256,7 @@ function createManager(element: StyleElement) {
     const loadingStyleId = ++loadingStylesCounter;
     logInfo(`New manager for element, with loadingStyleID ${loadingStyleId}`, element);
     function loadingStart() {
-        if (!isDOMReady() || !didDocumentShowUp) {
+        if (!isDOMReady() || !documentIsVisible()) {
             loadingStyles.add(loadingStyleId);
             logInfo(`Current amount of styles loading: ${loadingStyles.size}`);
 
@@ -320,66 +321,16 @@ function onDOMReady() {
     logWarn(`DOM is ready, but still have styles being loaded.`, loadingStyles);
 }
 
-/**
- * Begining of Page Lifecycle API workarounds
- *
- * The following code contains a workaround for extensions designed to prevent page from knowing when it is hidden
- * GitHub issue: https://github.com/darkreader/darkreader/issues/10004
- * GitHub PR: https://github.com/darkreader/darkreader/pull/10047
- *
- * This code exploits the fact that most such extensions block only a subset of Page Lifecycle API,
- * which notifies page of being hidden but not of being shown, while Dark Reader really cares only about
- * page being shown.
- * Specifically:
- *  - extensions block visibilitychange and blur event
- *  - extensions do not block focus event; browsers deliver focus event when user switches to
- *    a previously hidden tab or previously hidden window (assuming DevTools are closed so window gets the focus)
- *    if document has focus, then we can assume that it is visible
- *  - some extensions overwrite document.hidden but not document.visibilityState
- *  - Firefox has a bug: if extension overwrites document.hidden and document.visibilityState via Object.defineProperty,
- *    then Firefox will reset them to true and 'hidden' when tab is activated, but document.hasFocus() will be true
- *  - Safari supports document.visibilityState === 'prerender' which makes document.hidden === true even when document
- *    is visible to the user
- */
-let didDocumentShowUp = !document.hidden;
-let documentVisibilityCallback: () => void = null;
-function documentVisibilityListener() {
-    if (!document.hidden || document.visibilityState !== 'hidden' || document.hasFocus()) {
-        stopWatchingForDocumentVisibility();
-        didDocumentShowUp = true;
-        const documentVisibilityCallback_ = documentVisibilityCallback;
-        documentVisibilityCallback = null;
-        documentVisibilityCallback_ && documentVisibilityCallback_();
-    }
+function runDynamicStyle() {
+    createDynamicStyleOverrides();
+    watchForUpdates();
 }
-
-function watchForDocumentVisibility(callback: () => void) {
-    documentVisibilityCallback = callback;
-    document.addEventListener('visibilitychange', documentVisibilityListener);
-    window.addEventListener('pageshow', documentVisibilityListener);
-    window.addEventListener('focus', documentVisibilityListener);
-}
-
-function stopWatchingForDocumentVisibility() {
-    document.removeEventListener('visibilitychange', documentVisibilityListener);
-    window.removeEventListener('pageshow', documentVisibilityListener);
-    window.removeEventListener('focus', documentVisibilityListener);
-}
-
-/**
- * End of Page Lifecycle API workarounds
- */
 
 function createThemeAndWatchForUpdates() {
     createStaticStyleOverrides();
 
-    function runDynamicStyle() {
-        createDynamicStyleOverrides();
-        watchForUpdates();
-    }
-
     if (document.hidden && !filter.immediateModify) {
-        watchForDocumentVisibility(runDynamicStyle);
+        addDocumentVisibilityListener(runDynamicStyle);
     } else {
         runDynamicStyle();
     }
@@ -589,7 +540,7 @@ export function removeDynamicTheme() {
 export function cleanDynamicThemeCache() {
     variablesStore.clear();
     parsedURLCache.clear();
-    stopWatchingForDocumentVisibility();
+    removeDocumentVisibilityListener(runDynamicStyle);
     cancelRendering();
     stopWatchingForUpdates();
     cleanModificationCache();

@@ -4,7 +4,7 @@
 - Be stricter when the user specifies a last slash for a URL in the sitelist.
 - Display a warning that "System" Automation might not work properly in Chromium on Linux and Kiwi on Android.
 - Improve Kiwi browser support: work around for Kiwi bug in file download during settings import, fix opening open Dark Reader DevTools.
-- Add delete all button on site list.
+- Add a new button to the site list page (new UI), which sits on the top-left corner of the list. It will clear out the site list.
 
 ## 4.9.58 (Sep 22, 2022)
 

@@ -4,7 +4,7 @@ import type {FilterConfig, InversionFix} from '../definitions';
 import {isFirefox} from '../utils/platform';
 import type {SitePropsIndex} from './utils/parse';
 
-export function createSVGFilterStylesheet(config: FilterConfig, url: string, frameURL: string, fixes: string, index: SitePropsIndex<InversionFix>) {
+export function createSVGFilterStylesheet(config: FilterConfig, url: string, isTopFrame: boolean, fixes: string, index: SitePropsIndex<InversionFix>) {
     let filterValue: string;
     let reverseFilterValue: string;
     if (isFirefox) {
@@ -15,7 +15,7 @@ export function createSVGFilterStylesheet(config: FilterConfig, url: string, fra
         filterValue = 'url(#dark-reader-filter)';
         reverseFilterValue = 'url(#dark-reader-reverse-filter)';
     }
-    return cssFilterStyleSheetTemplate(filterValue, reverseFilterValue, config, url, frameURL, fixes, index);
+    return cssFilterStyleSheetTemplate(filterValue, reverseFilterValue, config, url, isTopFrame, fixes, index);
 }
 
 function getEmbeddedSVGFilterValue(matrixValue: string) {

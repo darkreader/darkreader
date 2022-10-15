@@ -49,8 +49,8 @@ export function formatDynamicThemeFixes(dynamicThemeFixes: DynamicThemeFix[]) {
     });
 }
 
-export function getDynamicThemeFixesFor(url: string, frameURL: string, text: string, index: SitePropsIndex<DynamicThemeFix>, enabledForPDF: boolean) {
-    const fixes = getSitesFixesFor(frameURL || url, text, index, {
+export function getDynamicThemeFixesFor(url: string, isTopFrame: boolean, text: string, index: SitePropsIndex<DynamicThemeFix>, enabledForPDF: boolean) {
+    const fixes = getSitesFixesFor(url, text, index, {
         commands: Object.keys(dynamicThemeFixesCommands),
         getCommandPropName: (command) => dynamicThemeFixesCommands[command],
         parseCommandValue: (command, value) => {
@@ -84,7 +84,7 @@ export function getDynamicThemeFixesFor(url: string, frameURL: string, text: str
         .slice(1)
         .map((theme) => {
             return {
-                specificity: isURLInList(frameURL || url, theme.url) ? theme.url[0].length : 0,
+                specificity: isURLInList(url, theme.url) ? theme.url[0].length : 0,
                 theme
             };
         })

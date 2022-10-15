@@ -76,7 +76,7 @@ export class Extension {
         DevTools.init(async () => this.onSettingsChanged());
         Messenger.init(this.getMessengerAdapter());
         TabManager.init({
-            getConnectionMessage: async ({url, frameURL}) => this.getConnectionMessage(url, frameURL),
+            getConnectionMessage: async (url, isTopFrame) => this.getConnectionMessage(url, isTopFrame),
             getTabMessage: this.getTabMessage,
             onColorSchemeChange: this.onColorSchemeChange,
         });
@@ -408,9 +408,9 @@ export class Extension {
         return info;
     }
 
-    private static async getConnectionMessage(url: string, frameURL: string) {
+    private static async getConnectionMessage(url: string, isTopFrame: boolean) {
         await this.loadData();
-        return this.getTabMessage(url, frameURL);
+        return this.getTabMessage(url, isTopFrame);
     }
 
     private static async loadData() {
@@ -598,7 +598,7 @@ export class Extension {
         };
     }
 
-    private static getTabMessage = (url: string, frameURL: string): TabData => {
+    private static getTabMessage = (url: string, isTopFrame: boolean): TabData => {
         const settings = UserStorage.settings;
         const urlInfo = this.getURLInfo(url);
         if (this.isExtensionSwitchedOn() && isURLEnabled(url, settings, urlInfo)) {
@@ -609,8 +609,7 @@ export class Extension {
                 const mode = this.autoState === 'scheme-dark' ? 1 : 0;
                 theme = {...theme, mode};
             }
-            const isIFrame = frameURL != null;
-            const detectDarkTheme = !isIFrame && settings.detectDarkTheme && !isURLInList(url, settings.siteListEnabled) && !isPDF(url);
+            const detectDarkTheme = isTopFrame && settings.detectDarkTheme && !isURLInList(url, settings.siteListEnabled) && !isPDF(url);
 
             logInfo(`Creating CSS for url: ${url}`);
             logInfo(`Custom theme ${custom ? 'was found' : 'was not found'}, Preset theme ${preset ? 'was found' : 'was not found'}
@@ -620,7 +619,7 @@ export class Extension {
                     return {
                         type: MessageType.BG_ADD_CSS_FILTER,
                         data: {
-                            css: createCSSFilterStylesheet(theme, url, frameURL, ConfigManager.INVERSION_FIXES_RAW, ConfigManager.INVERSION_FIXES_INDEX),
+                            css: createCSSFilterStylesheet(theme, url, isTopFrame, ConfigManager.INVERSION_FIXES_RAW, ConfigManager.INVERSION_FIXES_INDEX),
                             detectDarkTheme,
                         },
                     };
@@ -630,7 +629,7 @@ export class Extension {
                         return {
                             type: MessageType.BG_ADD_CSS_FILTER,
                             data: {
-                                css: createSVGFilterStylesheet(theme, url, frameURL, ConfigManager.INVERSION_FIXES_RAW, ConfigManager.INVERSION_FIXES_INDEX),
+                                css: createSVGFilterStylesheet(theme, url, isTopFrame, ConfigManager.INVERSION_FIXES_RAW, ConfigManager.INVERSION_FIXES_INDEX),
                                 detectDarkTheme,
                             },
                         };
@@ -638,7 +637,7 @@ export class Extension {
                     return {
                         type: MessageType.BG_ADD_SVG_FILTER,
                         data: {
-                            css: createSVGFilterStylesheet(theme, url, frameURL, ConfigManager.INVERSION_FIXES_RAW, ConfigManager.INVERSION_FIXES_INDEX),
+                            css: createSVGFilterStylesheet(theme, url, isTopFrame, ConfigManager.INVERSION_FIXES_RAW, ConfigManager.INVERSION_FIXES_INDEX),
                             svgMatrix: getSVGFilterMatrixValue(theme),
                             svgReverseMatrix: getSVGReverseFilterMatrixValue(),
                             detectDarkTheme,
@@ -651,19 +650,19 @@ export class Extension {
                         data: {
                             css: theme.stylesheet && theme.stylesheet.trim() ?
                                 theme.stylesheet :
-                                createStaticStylesheet(theme, url, frameURL, ConfigManager.STATIC_THEMES_RAW, ConfigManager.STATIC_THEMES_INDEX),
+                                createStaticStylesheet(theme, url, isTopFrame, ConfigManager.STATIC_THEMES_RAW, ConfigManager.STATIC_THEMES_INDEX),
                             detectDarkTheme: settings.detectDarkTheme,
                         },
                     };
                 }
                 case ThemeEngine.dynamicTheme: {
-                    const fixes = getDynamicThemeFixesFor(url, frameURL, ConfigManager.DYNAMIC_THEME_FIXES_RAW, ConfigManager.DYNAMIC_THEME_FIXES_INDEX, UserStorage.settings.enableForPDF);
+                    const fixes = getDynamicThemeFixesFor(url, isTopFrame, ConfigManager.DYNAMIC_THEME_FIXES_RAW, ConfigManager.DYNAMIC_THEME_FIXES_INDEX, UserStorage.settings.enableForPDF);
                     return {
                         type: MessageType.BG_ADD_DYNAMIC_THEME,
                         data: {
                             theme,
                             fixes,
-                            isIFrame,
+                            isIFrame: !isTopFrame,
                             detectDarkTheme,
                         },
                     };

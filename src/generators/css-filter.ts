@@ -42,21 +42,21 @@ export function hasFirefoxNewRootBehavior() {
     );
 }
 
-export default function createCSSFilterStyleSheet(config: FilterConfig, url: string, frameURL: string, fixes: string, index: SitePropsIndex<InversionFix>) {
+export default function createCSSFilterStyleSheet(config: FilterConfig, url: string, isTopFrame: boolean, fixes: string, index: SitePropsIndex<InversionFix>) {
     const filterValue = getCSSFilterValue(config);
     const reverseFilterValue = 'invert(100%) hue-rotate(180deg)';
-    return cssFilterStyleSheetTemplate(filterValue, reverseFilterValue, config, url, frameURL, fixes, index);
+    return cssFilterStyleSheetTemplate(filterValue, reverseFilterValue, config, url, isTopFrame, fixes, index);
 }
 
-export function cssFilterStyleSheetTemplate(filterValue: string, reverseFilterValue: string, config: FilterConfig, url: string, frameURL: string, fixes: string, index: SitePropsIndex<InversionFix>) {
-    const fix = getInversionFixesFor(frameURL || url, fixes, index);
+export function cssFilterStyleSheetTemplate(filterValue: string, reverseFilterValue: string, config: FilterConfig, url: string, isTopFrame: boolean, fixes: string, index: SitePropsIndex<InversionFix>) {
+    const fix = getInversionFixesFor(url, fixes, index);
 
     const lines: string[] = [];
 
     lines.push('@media screen {');
 
     // Add leading rule
-    if (filterValue && !frameURL) {
+    if (filterValue && isTopFrame) {
         lines.push('');
         lines.push('/* Leading rule */');
         lines.push(createLeadingRule(filterValue));
@@ -93,7 +93,7 @@ export function cssFilterStyleSheetTemplate(filterValue: string, reverseFilterVa
         lines.push('}');
     });
 
-    if (!frameURL) {
+    if (isTopFrame) {
         const light = [255, 255, 255];
         // If browser affected by Chromium Issue 501582, set dark background on html
         // Or if browser is Firefox v102+

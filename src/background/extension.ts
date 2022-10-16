@@ -76,7 +76,7 @@ export class Extension {
         DevTools.init(async () => this.onSettingsChanged());
         Messenger.init(this.getMessengerAdapter());
         TabManager.init({
-            getConnectionMessage: async (url, isTopFrame) => this.getConnectionMessage(url, isTopFrame),
+            getConnectionMessage: async (tabURL, url, isTopFrame) => this.getConnectionMessage(tabURL, url, isTopFrame),
             getTabMessage: this.getTabMessage,
             onColorSchemeChange: this.onColorSchemeChange,
         });
@@ -399,8 +399,8 @@ export class Extension {
 
     private static async getActiveTabInfo() {
         await this.loadData();
-        const url = await TabManager.getActiveTabURL();
-        const info = this.getURLInfo(url);
+        const tabURL = await TabManager.getActiveTabURL();
+        const info = this.getTabInfo(tabURL);
         info.isInjected = await TabManager.canAccessActiveTab();
         if (UserStorage.settings.detectDarkTheme) {
             info.isDarkThemeDetected = await TabManager.isActiveTabDarkThemeDetected();
@@ -408,9 +408,9 @@ export class Extension {
         return info;
     }
 
-    private static async getConnectionMessage(url: string, isTopFrame: boolean) {
+    private static async getConnectionMessage(tabURL: string, url: string, isTopFrame: boolean) {
         await this.loadData();
-        return this.getTabMessage(url, isTopFrame);
+        return this.getTabMessage(tabURL, url, isTopFrame);
     }
 
     private static async loadData() {
@@ -585,12 +585,12 @@ export class Extension {
     //
     //----------------------
 
-    private static getURLInfo(url: string): TabInfo {
+    private static getTabInfo(tabURL: string): TabInfo {
         const {DARK_SITES} = ConfigManager;
-        const isInDarkList = isURLInList(url, DARK_SITES);
-        const isProtected = !canInjectScript(url);
+        const isInDarkList = isURLInList(tabURL, DARK_SITES);
+        const isProtected = !canInjectScript(tabURL);
         return {
-            url,
+            url: tabURL,
             isInDarkList,
             isProtected,
             isInjected: null,
@@ -598,18 +598,18 @@ export class Extension {
         };
     }
 
-    private static getTabMessage = (url: string, isTopFrame: boolean): TabData => {
+    private static getTabMessage = (tabURl: string, url: string, isTopFrame: boolean): TabData => {
         const settings = UserStorage.settings;
-        const urlInfo = this.getURLInfo(url);
-        if (this.isExtensionSwitchedOn() && isURLEnabled(url, settings, urlInfo)) {
-            const custom = settings.customThemes.find(({url: urlList}) => isURLInList(url, urlList));
-            const preset = custom ? null : settings.presets.find(({urls}) => isURLInList(url, urls));
+        const tabInfo = this.getTabInfo(tabURl);
+        if (this.isExtensionSwitchedOn() && isURLEnabled(tabURl, settings, tabInfo)) {
+            const custom = settings.customThemes.find(({url: urlList}) => isURLInList(tabURl, urlList));
+            const preset = custom ? null : settings.presets.find(({urls}) => isURLInList(tabURl, urls));
             let theme = custom ? custom.theme : preset ? preset.theme : settings.theme;
             if (this.autoState === 'scheme-dark' || this.autoState === 'scheme-light') {
                 const mode = this.autoState === 'scheme-dark' ? 1 : 0;
                 theme = {...theme, mode};
             }
-            const detectDarkTheme = isTopFrame && settings.detectDarkTheme && !isURLInList(url, settings.siteListEnabled) && !isPDF(url);
+            const detectDarkTheme = isTopFrame && settings.detectDarkTheme && !isURLInList(tabURl, settings.siteListEnabled) && !isPDF(tabURl);
 
             logInfo(`Creating CSS for url: ${url}`);
             logInfo(`Custom theme ${custom ? 'was found' : 'was not found'}, Preset theme ${preset ? 'was found' : 'was not found'}
@@ -672,7 +672,7 @@ export class Extension {
             }
         }
 
-        logInfo(`Site is not inverted: ${url}`);
+        logInfo(`Site is not inverted: ${tabURl}`);
         return {
             type: MessageType.BG_CLEAN_UP,
         };

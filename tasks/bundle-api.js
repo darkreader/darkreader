@@ -52,6 +52,8 @@ async function bundleAPI({debug, watch}) {
     watchFiles = bundle.watchFiles;
     await bundle.write({
         banner: `/**\n * Dark Reader v${await getVersion()}\n * https://darkreader.org/\n */\n`,
+        // TODO: Consider remving next line
+        esModule: true,
         file: dest,
         strict: true,
         format: 'umd',

@@ -53,7 +53,7 @@ async function bundleAPI({debug, watch}) {
     await bundle.write({
         banner: `/**\n * Dark Reader v${await getVersion()}\n * https://darkreader.org/\n */\n`,
         // TODO: Consider remving next line
-        esModule: false,
+        esModule: true,
         file: dest,
         strict: true,
         format: 'umd',

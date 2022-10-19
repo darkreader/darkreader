@@ -8,6 +8,7 @@ import {logInfo, logWarn} from './utils/log';
 import {StateManager} from '../utils/state-manager';
 import {getURLHostOrProtocol} from '../utils/url';
 import {isPanel} from './utils/tab';
+import {makeFirefoxHappy} from './make-firefox-happy';
 
 declare const __CHROMIUM_MV3__: boolean;
 declare const __THUNDERBIRD__: boolean;
@@ -58,6 +59,9 @@ export default class TabManager {
         this.getTabMessage = getTabMessage;
 
         chrome.runtime.onMessage.addListener(async (message: Message, sender, sendResponse) => {
+            if (isFirefox && makeFirefoxHappy(message, sender, sendResponse)) {
+                return;
+            }
             switch (message.type) {
                 case MessageType.CS_FRAME_CONNECT: {
                     onColorSchemeChange(message.data.isDark);

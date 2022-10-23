@@ -1,8 +1,7 @@
 @import "../theme";
 @import "../shared";
 
-@min-popup-content-width: 15rem;
-@max-popup-content-width: 25rem;
+@popup-content-width: 15rem;
 @popup-content-height: 30rem;
 @popup-content-padding: 1rem;
 
@@ -22,12 +21,15 @@ body {
     box-sizing: content-box;
     display: flex;
     flex-direction: column;
-    min-height: @popup-content-height;
+    height: @popup-content-height;
     margin: 0 auto;
     padding: @popup-content-padding;
     position: relative;
-    min-width: @min-popup-content-width;
-    max-width: @max-popup-content-width;
+    width: @popup-content-width;
+    // Prevent popup from entering a feedback loop when it displays scrollbars,
+    // adjusts popup size to be larger, then hides scrollbars, adjusts popup size to be smaller,
+    // then displays scrollbars, etc.
+    overflow: hidden;
 }
 
 .header {
@@ -159,7 +161,6 @@ footer {
 
 body {
     border: 2px solid white;
-    overflow: hidden;
 }
 
 .overlay {

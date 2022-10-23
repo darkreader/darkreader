@@ -78,7 +78,7 @@ function createCanvas() {
     canvas = document.createElement('canvas');
     canvas.width = maxWidth;
     canvas.height = maxHeight;
-    context = canvas.getContext('2d');
+    context = canvas.getContext('2d', {willReadFrequently: true});
     context.imageSmoothingEnabled = false;
 }
 

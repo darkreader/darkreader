@@ -124,7 +124,7 @@ function analyzeImage(image: HTMLImageElement) {
     context.clearRect(0, 0, width, height);
 
     context.drawImage(image, 0, 0, naturalWidth, naturalHeight, 0, 0, width, height);
-    const imageData = context.getImageData(0, 0, width, height);
+    const imageData = context.getImageData(0, 0, width, height, {willReadFrequently: true} as any);
     const d = imageData.data;
 
     const TRANSPARENT_ALPHA_THRESHOLD = 0.05;

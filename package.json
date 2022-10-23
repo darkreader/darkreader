@@ -1,6 +1,6 @@
 {
   "name": "darkreader",
-  "version": "4.9.58",
+  "version": "4.9.59",
   "description": "Dark mode for every website",
   "scripts": {
     "api": "node --max-old-space-size=3072 tasks/build.js --api",

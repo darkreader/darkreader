@@ -40,7 +40,7 @@ test('Unique identifier generation (NodeJS 19+)', () => {
         return;
     }
 
-    // Make sure we are not messing up global context for somebody else
+    // Make sure crypto.randomUUID() is actually supported
     expect('crypto' in globalThis && 'randomUUID' in crypto).toEqual(true);
 
     const uid1 = generateUID();

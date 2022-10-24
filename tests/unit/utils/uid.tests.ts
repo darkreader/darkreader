@@ -1,7 +1,11 @@
 import {randomFillSync} from 'crypto';
 import {generateUID} from '../../../src/utils/uid';
 
-test('Unique identifier generation', () => {
+test('Unique identifier generation (popyfilled)', () => {
+    if ('crypto' in globalThis) {
+        return;
+    }
+
     // Make sure we are not messing up global context for somebody else
     expect('crypto' in globalThis).toEqual(false);
 
@@ -29,4 +33,16 @@ test('Unique identifier generation', () => {
     expect(shim2).toHaveBeenCalled();
 
     delete globalThis.crypto;
+});
+
+test('Unique identifier generation (NodeJS 19+)', () => {
+    if (!('crypto' in globalThis)) {
+        return;
+    }
+
+    // Make sure crypto.randomUUID() is actually supported
+    expect('crypto' in globalThis && 'randomUUID' in crypto).toEqual(true);
+
+    const uid1 = generateUID();
+    expect(/^[a-f0-9]{32}$/.test(uid1)).toEqual(true);
 });

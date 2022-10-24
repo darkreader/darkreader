@@ -234,6 +234,9 @@ it('URL is enabled', () => {
         {isProtected: false, isInDarkList: true},
     )).toEqual(false);
 
+    // Default URL matches everything
+    expect(isURLMatched('example.com', '*')).toEqual(true);
+
     // Some URLs can have unescaped [] in query
     expect(isURLMatched(
         'google.co.uk/order.php?bar=[foo]',

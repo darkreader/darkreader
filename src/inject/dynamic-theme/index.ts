@@ -19,7 +19,7 @@ import {createAdoptedStyleSheetOverride} from './adopted-style-manger';
 import {isFirefox} from '../../utils/platform';
 import {injectProxy} from './stylesheet-proxy';
 import {clearColorCache, parseColorWithCache} from '../../utils/color';
-import {parsedURLCache} from '../../utils/url';
+import {isURLInList, parsedURLCache} from '../../utils/url';
 import {variablesStore} from './variables';
 import {addDocumentVisibilityListener, documentIsVisible, removeDocumentVisibilityListener} from '../../utils/visibility';
 
@@ -30,6 +30,7 @@ const styleManagers = new Map<StyleElement, StyleManager>();
 const adoptedStyleManagers = [] as AdoptedStyleSheetManager[];
 let filter: FilterConfig = null;
 let fixes: DynamicThemeFix = null;
+let allFixes: DynamicThemeFix[] = null;
 let isIFrame: boolean = null;
 let ignoredImageAnalysisSelectors: string[] = null;
 let ignoredInlineSelectors: string[] = null;
@@ -450,9 +451,65 @@ function isAnotherDarkReaderInstanceActive() {
     return false;
 }
 
-export function createOrUpdateDynamicTheme(filterConfig: FilterConfig, dynamicThemeFixes: DynamicThemeFix, iframe: boolean) {
+/**
+ * Note: This function's behavior is identical to what we had for a long time, but it's slightly odd:
+ *  - it selects only one fix besides the default one
+ *  - it equates specificity with the length of the first(!) pattern
+ * @param documentURL The URL of the current document
+ * @param fixes The array of the fixes that could apply to this document: the generic fix
+ *        and fixes matching the document origin
+ * @returns A single fix constructed from the generic fix and a single most relevant other fix
+ */
+function selectRelevantFix(documentURL: string, fixes: DynamicThemeFix[]): DynamicThemeFix {
+    if (fixes.length === 0 || fixes[0].url[0] !== '*') {
+        logWarn('selectRelevantFix() failed to construct a single fix', documentURL, fixes);
+        return null;
+    }
+
+    const {url, invert, css, ignoreInlineStyle, ignoreImageAnalysis} = fixes[0];
+
+    const common: DynamicThemeFix = {
+        url,
+        invert: invert || [],
+        css: css || '',
+        ignoreInlineStyle: ignoreInlineStyle || [],
+        ignoreImageAnalysis: ignoreImageAnalysis || [],
+        disableStyleSheetsProxy: false,
+    };
+
+    const sortedBySpecificity = fixes
+        .slice(1)
+        .map((fix) => ({
+            specificity: isURLInList(documentURL, fix.url) ? fix.url[0].length : 0,
+            fix
+        }))
+        .filter(({specificity}) => specificity > 0)
+        .sort((a, b) => b.specificity - a.specificity);
+
+    if (sortedBySpecificity.length === 0) {
+        return common;
+    }
+
+    const match = sortedBySpecificity[0].fix;
+
+    return {
+        url: match.url,
+        invert: common.invert.concat(match.invert || []),
+        css: [common.css, match.css].filter((s) => s).join('\n'),
+        ignoreInlineStyle: common.ignoreInlineStyle.concat(match.ignoreInlineStyle || []),
+        ignoreImageAnalysis: common.ignoreImageAnalysis.concat(match.ignoreImageAnalysis || []),
+        disableStyleSheetsProxy: match.disableStyleSheetsProxy || false,
+    };
+}
+
+export function createOrUpdateDynamicTheme(filterConfig: FilterConfig, dynamicThemeFixes: DynamicThemeFix | DynamicThemeFix[], iframe: boolean) {
     filter = filterConfig;
-    fixes = dynamicThemeFixes;
+    if (Array.isArray(dynamicThemeFixes)) {
+        allFixes = dynamicThemeFixes;
+        fixes = selectRelevantFix(document.location.href, dynamicThemeFixes);
+    } else {
+        fixes = dynamicThemeFixes;
+    }
     if (fixes) {
         ignoredImageAnalysisSelectors = Array.isArray(fixes.ignoreImageAnalysis) ? fixes.ignoreImageAnalysis : [];
         ignoredInlineSelectors = Array.isArray(fixes.ignoreInlineStyle) ? fixes.ignoreInlineStyle : [];

@@ -176,10 +176,6 @@ To build and debug the extension **install the [Node.js](https://nodejs.org/)** 
 Install development dependencies by running `npm install` in the project root folder.  
 Then execute `npm run debug`.
 
-## Adding new documentation pages
-
-To add new documentation pages to the repository, please use and follow the provided **[TEMPLATE.md](https://github.com/Nguynath/darkreader/blob/DocImprovement/TEMPLATE.md) page**.
-
 #### Chrome and Edge
 - Open the `chrome://extensions` page.
 - Disable the official Dark Reader version.
@@ -196,6 +192,10 @@ To add new documentation pages to the repository, please use and follow the prov
 
 If you execute `npm run debug:watch` instead of `npm run debug`.
 It will after making any code changes, the project will be automatically recompiled.  
+
+## Adding new documentation pages
+
+To add new documentation pages to the repository, please use and follow the provided **[TEMPLATE.md](https://github.com/Nguynath/darkreader/blob/DocImprovement/TEMPLATE.md) page**.
 
 ## Tips
 

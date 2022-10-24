@@ -1,5 +1,6 @@
 import {isURLEnabled, isURLMatched, isPDF, isFullyQualifiedDomain, getURLHostOrProtocol, getAbsoluteURL} from '../../../src/utils/url';
 import type {UserSettings} from '../../../src/definitions';
+import {isIPV6} from '../../../src/utils/ipv6';
 
 it('URL is enabled', () => {
     // Not invert listed
@@ -250,6 +251,9 @@ it('URL is enabled', () => {
         'google.co.uk/order.php?bar=[foo]',
         '[2001:4860:4860::8844]',
     )).toEqual(false);
+    expect(isIPV6('file:///C:/[/test.html')).toEqual(false);
+    expect(isIPV6('file:///C:/[/test.html]')).toEqual(false);
+    expect(isIPV6('[2001:4860:4860::8844]')).toEqual(true);
 
     // Temporary Dark Sites list fix
     expect(isURLEnabled(

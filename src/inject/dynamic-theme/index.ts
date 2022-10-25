@@ -460,7 +460,7 @@ function isAnotherDarkReaderInstanceActive() {
  *        and fixes matching the document origin
  * @returns A single fix constructed from the generic fix and a single most relevant other fix
  */
-function selectRelevantFix(documentURL: string, fixes: DynamicThemeFix[]): DynamicThemeFix {
+export function selectRelevantFix(documentURL: string, fixes: DynamicThemeFix[]): DynamicThemeFix {
     if (fixes.length === 0 || fixes[0].url[0] !== '*') {
         logWarn('selectRelevantFix() failed to construct a single fix', documentURL, fixes);
         return null;

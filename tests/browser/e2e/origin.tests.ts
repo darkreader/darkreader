@@ -73,7 +73,7 @@ describe('Different paths in URL patterns', () => {
         await expect(page.evaluate(() => getComputedStyle((document.querySelector('iframe#blue') as HTMLIFrameElement).contentDocument.body).color)).resolves.toBe('rgb(232, 230, 227)');
         await expect(page.evaluate(() => getComputedStyle((document.querySelector('iframe#blue') as HTMLIFrameElement).contentDocument.documentElement.querySelector('h1')).color)).resolves.toBe('rgb(51, 125, 255)');
 
-        await devtoolsUtils.paste([
+        await devtoolsUtils.paste(multiline(
             '*',
             '',
             'CSS',
@@ -115,7 +115,7 @@ describe('Different paths in URL patterns', () => {
             '    bachground: purple',
             '}',
             '',
-        ].join('\n'));
+        ));
         await timeout(1000);
 
         await expect(page.evaluate(() => getComputedStyle(document.documentElement).backgroundColor)).resolves.toBe('rgb(24, 26, 27)');

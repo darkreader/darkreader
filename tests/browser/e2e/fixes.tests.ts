@@ -20,6 +20,8 @@ async function loadBasicPage() {
 }
 
 describe('Correct fixes are chosen', () => {
+    jest.setTimeout(10000);
+
     // Reset fixes before each test
     beforeEach(async () => {
         await devtoolsUtils.reset();

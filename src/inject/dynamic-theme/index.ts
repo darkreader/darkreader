@@ -460,7 +460,7 @@ function navigationListener(url: string) {
     }
 
     // TODO: optimize
-    createOrUpdateDynamicTheme(filter, allFixes, isIFrame);
+//    createOrUpdateDynamicTheme(filter, allFixes, isIFrame);
 }
 
 /**

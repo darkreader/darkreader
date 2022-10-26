@@ -35,7 +35,7 @@ export function findRelevantFix(documentURL: string, fixes: DynamicThemeFix[]): 
 
 /**
  * Constructs a single fix out of multiple fixes, without modifying the original fixes
- * @param fixes 
+ * @param fixes The original fixes
  * @returns The combined fix
  */
 export function combineFixes(fixes: DynamicThemeFix[]): DynamicThemeFix {

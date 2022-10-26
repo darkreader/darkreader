@@ -481,8 +481,8 @@ export function createOrUpdateDynamicTheme(filterConfig: FilterConfig, dynamicTh
     if (Array.isArray(dynamicThemeFixes)) {
         allFixes = dynamicThemeFixes;
         fixes = selectRelevantFix(document.location.href, dynamicThemeFixes);
-        // Most websites will have only the generic fix applied ('*'), some will have generic fix and a site-specific one,
-        // and very few will have multple site-specific fixes 
+        // Most websites will have only the generic fix applied ('*'), some will have generic fix and one site-specific fix (two in total),
+        // and very few will have multple site-specific fixes
         if (dynamicThemeFixes.length > 2) {
             addNavigationListener(navigationListener);
         }

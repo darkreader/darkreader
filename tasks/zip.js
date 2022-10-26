@@ -32,10 +32,16 @@ async function archiveDirectory({dir, dest, date}) {
     await archiveFiles({files, dest, cwd: dir, date});
 }
 
+/**
+ * Returns the date of the last git commit to be used as archive file timestamp
+ * @returns {Promise<Date>} JavaScript Date object with date adjusted to counterbalance user's time zone
+ */
 async function getLastCommitTime() {
+    // We need to offset the user's time zone since yazl can not represent time zone in produced archive
     return new Promise((resolve) =>
-        exec('git log -1 --format=%ct', (_, stdout) => resolve(new Date(Number(stdout) * 1000)))
-    );
+        exec('git log -1 --format=%ct', (_, stdout) => resolve(new Date(
+            (Number(stdout) + (new Date()).getTimezoneOffset() * 60) * 1000
+        ))));
 }
 
 async function zip({platforms, debug}) {

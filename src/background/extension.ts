@@ -92,7 +92,12 @@ export class Extension {
 
         if (chrome.commands) {
             // Firefox Android does not support chrome.commands
-            chrome.commands.onCommand.addListener(async (command, {id: tabId}) => this.onCommand(command as Command, tabId, 0, undefined));
+            if (isFirefox) {
+                // Firefox may not register onCommand listener on extension startup so we need to use setTimeout
+                setTimeout(() => chrome.commands.onCommand.addListener(async (command) => this.onCommand(command as Command, null, null, null)));
+            } else {
+                chrome.commands.onCommand.addListener(async (command, tab) => this.onCommand(command as Command, tab && tab.id || null, 0, null));
+            }
         }
 
         if (chrome.permissions.onRemoved) {
@@ -269,7 +274,11 @@ export class Extension {
                 break;
             case 'addSite': {
                 logInfo('Add Site command entered');
-                const scriptPDF = async (): Promise<boolean> => {
+                async function scriptPDF(tabId: number, frameId: number): Promise<boolean> {
+                    // We can not detect PDF if we do not know where we are looking for it
+                    if (!(Number.isInteger(tabId) && Number.isInteger(frameId))) {
+                        return false;
+                    }
                     function detectPDF(): boolean {
                         if (document.body.childElementCount !== 1) {
                             return false;
@@ -290,10 +299,10 @@ export class Extension {
                         }, ([r]) => resolve(r)));
                     }
                     return false;
-                };
+                }
 
                 const pdf = async () => isPDF(frameURL || await TabManager.getActiveTabURL());
-                if (((__CHROMIUM_MV2__ || __CHROMIUM_MV3__) && await scriptPDF()) || await pdf()) {
+                if (((__CHROMIUM_MV2__ || __CHROMIUM_MV3__) && await scriptPDF(tabId, frameId)) || await pdf()) {
                     this.changeSettings({enableForPDF: !UserStorage.settings.enableForPDF});
                 } else {
                     this.toggleActiveTab();
@@ -316,8 +325,8 @@ export class Extension {
     private static onCommand = debounce(75, this.onCommandInternal);
 
     private static registerContextMenus() {
-        chrome.contextMenus.onClicked.addListener(async ({menuItemId, frameId, frameUrl, pageUrl}, {id: tabId}) =>
-            this.onCommand(menuItemId as Command, tabId, frameId, frameUrl || pageUrl));
+        chrome.contextMenus.onClicked.addListener(async ({menuItemId, frameId, frameUrl, pageUrl}, tab) =>
+            this.onCommand(menuItemId as Command, tab && tab.id || null, frameId || null, frameUrl || pageUrl));
         chrome.contextMenus.removeAll(() => {
             this.registeredContextMenus = false;
             chrome.contextMenus.create({

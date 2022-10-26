@@ -19,10 +19,11 @@ import {createAdoptedStyleSheetOverride} from './adopted-style-manger';
 import {isFirefox} from '../../utils/platform';
 import {injectProxy} from './stylesheet-proxy';
 import {clearColorCache, parseColorWithCache} from '../../utils/color';
-import {isURLInList, parsedURLCache} from '../../utils/url';
+import {parsedURLCache} from '../../utils/url';
 import {variablesStore} from './variables';
 import {addDocumentVisibilityListener, documentIsVisible, removeDocumentVisibilityListener} from '../../utils/visibility';
 import {addNavigationListener} from './navigation';
+import {combineFixes, findRelevantFix} from './fixes';
 
 declare const __TEST__: boolean;
 declare const __CHROMIUM_MV3__: boolean;
@@ -455,62 +456,14 @@ function isAnotherDarkReaderInstanceActive() {
 
 function navigationListener(url: string) {
     const newRelevantFixIndex = findRelevantFix(url, allFixes);
+    /*
     if (relevantFixIndex === newRelevantFixIndex) {
         return;
     }
 
     // TODO: optimize
-//    createOrUpdateDynamicTheme(filter, allFixes, isIFrame);
-}
-
-/**
- * Note: This function's behavior is identical to what we had for a long time, but it's slightly odd:
- *  - it selects only one fix besides the default one
- *  - it equates specificity with the length of the first(!) pattern
- * @param documentURL The URL of the current document
- * @param fixes The array of the fixes that could apply to this document: the generic fix
- *        and fixes matching the document origin
- * @returns A single fix constructed from the generic fix and a single most relevant other fix
- */
-function findRelevantFix(documentURL: string, fixes: DynamicThemeFix[]): number {
-    if (fixes.length === 0 || fixes[0].url[0] !== '*') {
-        logWarn('selectRelevantFix() failed to construct a single fix', documentURL, fixes);
-        return null;
-    }
-
-    let maxSpecificity = 0;
-    let maxSpecificityIndex: number = null;
-    for (let i = 1; i < fixes.length; i++) {
-        if (isURLInList(documentURL, fixes[i].url)) {
-            // Note: this is legacy logic, a bit odd
-            const specificity = fixes[i].url[0].length;
-            if (maxSpecificity === null || maxSpecificity < specificity) {
-                maxSpecificityIndex = i;
-            }
-        }
-    }
-
-    return maxSpecificityIndex;
-}
-
-function combineFixes(fixes: DynamicThemeFix[]): DynamicThemeFix {
-    if (fixes.length === 0 || fixes[0].url[0] !== '*') {
-        logWarn('combineFixes() failed to construct a single fix', fixes);
-        return null;
-    }
-
-    function combineArrays(arrays: string[][]): string[] {
-        return [].concat.apply([], arrays.filter(Boolean));
-    }
-
-    return {
-        url: null,
-        invert: combineArrays(fixes.map((fix) => fix.invert)),
-        css: fixes.map((fix) => fix.css).filter(Boolean).join('\n'),
-        ignoreInlineStyle: combineArrays(fixes.map((fix) => fix.ignoreInlineStyle)),
-        ignoreImageAnalysis: combineArrays(fixes.map((fix) => fix.ignoreImageAnalysis)),
-        disableStyleSheetsProxy: fixes.some((fix) => fix.disableStyleSheetsProxy),
-    };
+    createOrUpdateDynamicTheme(filter, allFixes, isIFrame);
+    */
 }
 
 function selectRelevantFix(documentURL: string, fixes: DynamicThemeFix[]): DynamicThemeFix {

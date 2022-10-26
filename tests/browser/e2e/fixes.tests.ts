@@ -126,7 +126,7 @@ describe('Correct fixes are chosen', () => {
         await expect(page.evaluate(() => getComputedStyle(document.querySelector('h1')).color)).resolves.toBe('rgb(255, 165, 0)');
     });
 
-    it('BUG COMPATIBILITY: If multiple matching URL patterns found, the most specific pattern is determined by the length of first pattern', async () => {
+    it('BUG COMPATIBILITY: If multiple matching URL patterns found, the most specific fix is determined by the length of first pattern', async () => {
         await loadBasicPage();
 
         await expect(page.evaluate(() => getComputedStyle(document.documentElement).backgroundColor)).resolves.toBe('rgb(24, 26, 27)');

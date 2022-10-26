@@ -299,7 +299,7 @@ export class Extension {
                         }, ([r]) => resolve(r)));
                     }
                     return false;
-                };
+                }
 
                 const pdf = async () => isPDF(frameURL || await TabManager.getActiveTabURL());
                 if (((__CHROMIUM_MV2__ || __CHROMIUM_MV3__) && await scriptPDF(tabId, frameId)) || await pdf()) {

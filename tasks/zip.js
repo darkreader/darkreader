@@ -14,6 +14,7 @@ const {getDestDir, PLATFORM} = paths;
 function archiveFiles({files, dest, cwd, date, mode}) {
     return new Promise((resolve) => {
         const archive = new yazl.ZipFile();
+        // Rproducible builds: sort filenames so files appear in the same order in zip
         files.sort();
         files.forEach((file) => archive.addFile(
             file,
@@ -33,6 +34,7 @@ async function archiveDirectory({dir, dest, date, mode}) {
 }
 
 /**
+ * Reproducible builds: set file timestamp to last commit timestamp
  * Returns the date of the last git commit to be used as archive file timestamp
  * @returns {Promise<Date>} JavaScript Date object with date adjusted to counterbalance user's time zone
  */
@@ -58,7 +60,7 @@ async function zip({platforms, debug}) {
             dir: getDestDir({debug, platform}),
             dest: `${releaseDir}/darkreader-${platform}.${format}`,
             date,
-            // Set permission flags on file like chmod 644 or -rw-r--r--
+            // Reproducible builds: set permission flags on file like chmod 644 or -rw-r--r--
             // This is needed because the built file might have different flags on different systems
             mode: 0o644,
         }));

@@ -11,14 +11,14 @@ const {getDestDir, PLATFORM} = paths;
  * @param {object} details
  * @returns {Promise<void>}
  */
-function archiveFiles({files, dest, cwd, date}) {
+function archiveFiles({files, dest, cwd, date, mode}) {
     return new Promise((resolve) => {
         const archive = new yazl.ZipFile();
         files.sort();
         files.forEach((file) => archive.addFile(
             file,
             file.startsWith(`${cwd}/`) ? file.substring(cwd.length + 1) : file,
-            {mtime: date}
+            {mtime: date, mode}
         ));
         /** @type {any} */
         const writeStream = fs.createWriteStream(dest);
@@ -27,9 +27,9 @@ function archiveFiles({files, dest, cwd, date}) {
     });
 }
 
-async function archiveDirectory({dir, dest, date}) {
+async function archiveDirectory({dir, dest, date, mode}) {
     const files = await getPaths(`${dir}/**/*.*`);
-    await archiveFiles({files, dest, cwd: dir, date});
+    await archiveFiles({files, dest, cwd: dir, date, mode});
 }
 
 /**
@@ -58,6 +58,9 @@ async function zip({platforms, debug}) {
             dir: getDestDir({debug, platform}),
             dest: `${releaseDir}/darkreader-${platform}.${format}`,
             date,
+            // Set permission flags on file like chmod 644 or -rw-r--r--
+            // This is needed because the built file might have different flags on different systems
+            mode: 0o644,
         }));
     }
     await Promise.all(promises);

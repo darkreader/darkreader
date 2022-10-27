@@ -1,3 +1,8 @@
+## 4.9.60 (Oct 27, 2022)
+
+- Fixed broken hotkeys.
+- Improved IP v6 address support.
+
 ## 4.9.59 (Oct 23, 2022)
 
 - Fixes a issue where `darkreader-fallback` wasn't removed from the DOM, when Dark Reader finds a `<meta name="darkreader-lock">` element.

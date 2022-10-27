@@ -11,14 +11,15 @@ const {getDestDir, PLATFORM} = paths;
  * @param {object} details
  * @returns {Promise<void>}
  */
-function archiveFiles({files, dest, cwd, date}) {
+function archiveFiles({files, dest, cwd, date, mode}) {
     return new Promise((resolve) => {
         const archive = new yazl.ZipFile();
+        // Rproducible builds: sort filenames so files appear in the same order in zip
         files.sort();
         files.forEach((file) => archive.addFile(
             file,
             file.startsWith(`${cwd}/`) ? file.substring(cwd.length + 1) : file,
-            {mtime: date}
+            {mtime: date, mode}
         ));
         /** @type {any} */
         const writeStream = fs.createWriteStream(dest);
@@ -27,15 +28,22 @@ function archiveFiles({files, dest, cwd, date}) {
     });
 }
 
-async function archiveDirectory({dir, dest, date}) {
+async function archiveDirectory({dir, dest, date, mode}) {
     const files = await getPaths(`${dir}/**/*.*`);
-    await archiveFiles({files, dest, cwd: dir, date});
+    await archiveFiles({files, dest, cwd: dir, date, mode});
 }
 
+/**
+ * Reproducible builds: set file timestamp to last commit timestamp
+ * Returns the date of the last git commit to be used as archive file timestamp
+ * @returns {Promise<Date>} JavaScript Date object with date adjusted to counterbalance user's time zone
+ */
 async function getLastCommitTime() {
+    // We need to offset the user's time zone since yazl can not represent time zone in produced archive
     return new Promise((resolve) =>
-        exec('git log -1 --format=%ct', (_, stdout) => resolve(new Date(Number(stdout) * 1000)))
-    );
+        exec('git log -1 --format=%ct', (_, stdout) => resolve(new Date(
+            (Number(stdout) + (new Date()).getTimezoneOffset() * 60) * 1000
+        ))));
 }
 
 async function zip({platforms, debug}) {
@@ -52,6 +60,9 @@ async function zip({platforms, debug}) {
             dir: getDestDir({debug, platform}),
             dest: `${releaseDir}/darkreader-${platform}.${format}`,
             date,
+            // Reproducible builds: set permission flags on file like chmod 644 or -rw-r--r--
+            // This is needed because the built file might have different flags on different systems
+            mode: 0o644,
         }));
     }
     await Promise.all(promises);

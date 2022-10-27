@@ -26,10 +26,6 @@ body {
     padding: @popup-content-padding;
     position: relative;
     width: @popup-content-width;
-    // Prevent popup from entering a feedback loop when it displays scrollbars,
-    // adjusts popup size to be larger, then hides scrollbars, adjusts popup size to be smaller,
-    // then displays scrollbars, etc.
-    overflow: hidden;
 }
 
 .header {

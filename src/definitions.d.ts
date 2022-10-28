@@ -29,7 +29,7 @@ export interface TabData {
 export interface ExtensionActions {
     changeSettings(settings: Partial<UserSettings>): void;
     setTheme(theme: Partial<FilterConfig>): void;
-    setShortcut(command: string, shortcut: string): void;
+    setShortcut(command: string, shortcut: string): Promise<string>;
     toggleActiveTab(): void;
     markNewsAsRead(ids: string[]): void;
     markNewsAsDisplayed(ids: string[]): void;

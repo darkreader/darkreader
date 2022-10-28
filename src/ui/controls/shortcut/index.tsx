@@ -8,7 +8,7 @@ interface ShortcutLinkProps {
     commandName: string;
     shortcuts: Shortcuts;
     textTemplate: (shortcut: string) => string;
-    onSetShortcut: (shortcut: string) => void;
+    onSetShortcut: (shortcut: string) => Promise<string>;
 }
 
 /**
@@ -50,30 +50,32 @@ export default function ShortcutLink(props: ShortcutLinkProps) {
 
             if ((ctrl || alt || command || shift) && key) {
                 removeListeners();
-                props.onSetShortcut(shortcut);
                 node.blur();
-                setTimeout(() => {
+                props.onSetShortcut(shortcut).then((shortcut) => {
+                    console.error('SHORTCUT', shortcut);
                     enteringShortcutInProgress = false;
                     node.classList.remove('shortcut--edit');
                     node.textContent = props.textTemplate(shortcut);
-                }, 500);
+                });
             }
         }
 
         function onBlur() {
             removeListeners();
             node.classList.remove('shortcut--edit');
-            node.textContent = initialText;
+            if (enteringShortcutInProgress) {
+                node.textContent = initialText;
+            }
             enteringShortcutInProgress = false;
         }
 
         function removeListeners() {
-            window.removeEventListener('keydown', onKeyDown, true);
-            window.removeEventListener('blur', onBlur, true);
+            window.removeEventListener('keydown', onKeyDown, {capture: true, passive: false, once: false} as EventListenerOptions);
+            window.removeEventListener('blur', onBlur, {capture: true, once: true} as EventListenerOptions);
         }
 
-        window.addEventListener('keydown', onKeyDown, true);
-        window.addEventListener('blur', onBlur, true);
+        window.addEventListener('keydown', onKeyDown, {capture: true, passive: false, once: false});
+        window.addEventListener('blur', onBlur, {capture: true, once: true});
         node.classList.add('shortcut--edit');
     }
 

@@ -4,7 +4,9 @@ import type {SitePropsIndex} from './utils/parse';
 import {parseArray, formatArray} from '../utils/text';
 import {compareURLPatterns, isURLInList} from '../utils/url';
 import type {DynamicThemeFix} from '../definitions';
-import {isChromium} from '../utils/platform';
+
+declare const __CHROMIUM_MV2__: boolean;
+declare const __CHROMIUM_MV3__: boolean;
 
 const dynamicThemeFixesCommands: { [key: string]: keyof DynamicThemeFix } = {
     'INVERT': 'invert',
@@ -47,8 +49,8 @@ export function formatDynamicThemeFixes(dynamicThemeFixes: DynamicThemeFix[]) {
     });
 }
 
-export function getDynamicThemeFixesFor(url: string, frameURL: string, text: string, index: SitePropsIndex<DynamicThemeFix>, enabledForPDF: boolean) {
-    const fixes = getSitesFixesFor(frameURL || url, text, index, {
+export function getDynamicThemeFixesFor(url: string, isTopFrame: boolean, text: string, index: SitePropsIndex<DynamicThemeFix>, enabledForPDF: boolean) {
+    const fixes = getSitesFixesFor(url, text, index, {
         commands: Object.keys(dynamicThemeFixesCommands),
         getCommandPropName: (command) => dynamicThemeFixesCommands[command],
         parseCommandValue: (command, value) => {
@@ -72,7 +74,7 @@ export function getDynamicThemeFixesFor(url: string, frameURL: string, text: str
         ignoreImageAnalysis: genericFix.ignoreImageAnalysis || [],
     };
     if (enabledForPDF) {
-        if (isChromium) {
+        if (__CHROMIUM_MV2__ || __CHROMIUM_MV3__) {
             common.css += '\nembed[type="application/pdf"][src="about:blank"] { filter: invert(100%) contrast(90%); }';
         } else {
             common.css += '\nembed[type="application/pdf"] { filter: invert(100%) contrast(90%); }';
@@ -82,7 +84,7 @@ export function getDynamicThemeFixesFor(url: string, frameURL: string, text: str
         .slice(1)
         .map((theme) => {
             return {
-                specificity: isURLInList(frameURL || url, theme.url) ? theme.url[0].length : 0,
+                specificity: isURLInList(url, theme.url) ? theme.url[0].length : 0,
                 theme
             };
         })

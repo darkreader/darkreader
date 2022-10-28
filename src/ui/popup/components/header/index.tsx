@@ -7,6 +7,12 @@ import SystemIcon from '../../main-page/system-icon';
 import WatchIcon from '../../main-page/watch-icon';
 import SiteToggle from '../site-toggle';
 import MoreToggleSettings from './more-toggle-settings';
+import {AutomationMode} from '../../../../utils/automation';
+import {isLocalFile} from '../../../../utils/url';
+import {isChromium} from '../../../../utils/platform';
+import {HOMEPAGE_URL} from '../../../../utils/links';
+
+declare const __CHROMIUM_MV3__: boolean;
 
 function multiline(...lines: string[]) {
     return lines.join('\n');
@@ -25,14 +31,15 @@ function Header({data, actions, onMoreToggleSettingsClick}: HeaderProps) {
     }
 
     const tab = data.activeTab;
+    const isFile = isChromium && isLocalFile(tab.url);
     const isAutomation = data.settings.automation.enabled;
-    const isTimeAutomation = data.settings.automation.mode === 'time';
-    const isLocationAutomation = data.settings.automation.mode === 'location';
+    const isTimeAutomation = data.settings.automation.mode === AutomationMode.TIME;
+    const isLocationAutomation = data.settings.automation.mode === AutomationMode.LOCATION;
     const now = new Date();
 
     return (
         <header class="header">
-            <a class="header__logo" href="https://darkreader.org/" target="_blank" rel="noopener noreferrer">
+            <a class="header__logo" href={HOMEPAGE_URL} target="_blank" rel="noopener noreferrer">
                 Dark Reader
             </a>
             <div class="header__control header__site-toggle">
@@ -40,9 +47,13 @@ function Header({data, actions, onMoreToggleSettingsClick}: HeaderProps) {
                     data={data}
                     actions={actions}
                 />
-                {tab.isProtected || !tab.isInjected ? (
+                {!isFile && ((!__CHROMIUM_MV3__ && !tab.isInjected) || tab.isProtected) ? (
                     <span class="header__site-toggle__unable-text">
                         {getLocalMessage('page_protected')}
+                    </span>
+                ) : isFile && !data.isAllowedFileSchemeAccess ? (
+                    <span class="header__site-toggle__unable-text">
+                        {getLocalMessage('local_files_forbidden')}
                     </span>
                 ) : tab.isInDarkList ? (
                     <span class="header__site-toggle__unable-text">

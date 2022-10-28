@@ -3,6 +3,9 @@ import {DEFAULT_THEME} from '../../../src/defaults';
 import {isFirefox} from '../../../src/utils/platform';
 import {createOrUpdateDynamicTheme, removeDynamicTheme} from '../../../src/inject/dynamic-theme';
 import {multiline, timeout, waitForEvent} from '../support/test-utils';
+import {stubChromeRuntimeGetURL} from '../support/background-stub';
+import {getJSEchoURL} from '../support/echo-client';
+import {injectProxy} from '../../../src/inject/dynamic-theme/stylesheet-proxy';
 
 const theme = {
     ...DEFAULT_THEME,
@@ -10,6 +13,21 @@ const theme = {
     darkSchemeTextColor: 'white',
 };
 let container: HTMLElement;
+
+beforeAll(() => {
+    const loader = multiline(
+        '(function loader() {',
+        '    document && document.currentScript && document.currentScript.remove();',
+        '    const argString = document && document.currentScript && document.currentScript.dataset.arg;',
+        '    if (argString !== undefined) {',
+        '        const arg = JSON.parse(argString);',
+        `        (${injectProxy.toString()})(arg);`,
+        '    }',
+        '})()',
+    );
+    const url = getJSEchoURL(loader);
+    stubChromeRuntimeGetURL('inject/proxy.js', url);
+});
 
 beforeEach(() => {
     container = document.body;

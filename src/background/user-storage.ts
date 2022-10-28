@@ -16,7 +16,9 @@ export default class UserStorage {
     static settings: Readonly<UserSettings>;
 
     static async loadSettings() {
-        UserStorage.settings = await UserStorage.loadSettingsFromStorage();
+        if (!UserStorage.settings) {
+            UserStorage.settings = await UserStorage.loadSettingsFromStorage();
+        }
     }
 
     private static fillDefaults(settings: UserSettings) {

@@ -15,6 +15,16 @@ const mimeTypes = new Map(
     }),
 );
 
+/**
+ * We reuse a single listener for each of exit and SIGINT events to
+ * avoid warnings about possible event listener leaks.
+ * @type {Array<() => Promise<void>>}
+ */
+const terminationListeners = [];
+const terminationListener = () => {
+    terminationListeners.forEach((listener) => listener());
+};
+
 export async function createTestServer(/** @type {number} */port) {
     /** @type {import('http').Server} */
     let server;
@@ -94,8 +104,11 @@ export async function createTestServer(/** @type {number} */port) {
         });
     }
 
-    process.on('exit', close);
-    process.on('SIGINT', close);
+    if (terminationListeners.length === 0) {
+        process.on('exit', terminationListener);
+        process.on('SIGINT', terminationListener);
+    }
+    terminationListeners.push(close);
 
     await start();
 

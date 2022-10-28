@@ -1,6 +1,6 @@
 // @ts-check
 
-import {dirname, join} from 'path';
+import {dirname} from 'path';
 import {createRequire} from 'module';
 const rootDir = dirname(createRequire(import.meta.url).resolve('../../package.json'));
 
@@ -11,11 +11,13 @@ const config = {
     moduleFileExtensions: ['ts', 'tsx', 'js'],
     testEnvironment: '<rootDir>/tests/browser/environment.js',
     verbose: true,
-    transform: {'^.+\\.ts(x?)$': 'ts-jest'},
+    transform: {'^.+\\.ts(x?)$': ['ts-jest', {tsconfig: '<rootDir>/tests/browser/tsconfig.json'}]},
     globals: {
-        'ts-jest': {tsconfig: '<rootDir>/tests/browser/tsconfig.json'},
         __DEBUG__: false,
-        __MV3__: false,
+        __CHROMIUM_MV2__: true,
+        __CHROMIUM_MV3__: false,
+        __FIREFOX__: false,
+        __THUNDERBIRD__: false,
         __TEST__: true,
         product: 'chrome',
     },

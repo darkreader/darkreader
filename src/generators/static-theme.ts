@@ -58,7 +58,7 @@ function mix(color1: number[], color2: number[], t: number) {
     return color1.map((c, i) => Math.round(c * (1 - t) + color2[i] * t));
 }
 
-export default function createStaticStylesheet(config: FilterConfig, url: string, frameURL: string, staticThemes: string, staticThemesIndex: SitePropsIndex<StaticTheme>) {
+export default function createStaticStylesheet(config: FilterConfig, url: string, isTopFrame: boolean, staticThemes: string, staticThemesIndex: SitePropsIndex<StaticTheme>) {
     const srcTheme = config.mode === 1 ? darkTheme : lightTheme;
     const theme = Object.entries(srcTheme).reduce((t, [prop, color]) => {
         const [r, g, b, a] = color;
@@ -70,7 +70,7 @@ export default function createStaticStylesheet(config: FilterConfig, url: string
     }, {} as ThemeColors);
 
     const commonTheme = getCommonTheme(staticThemes, staticThemesIndex);
-    const siteTheme = getThemeFor(frameURL || url, staticThemes, staticThemesIndex);
+    const siteTheme = getThemeFor(url, staticThemes, staticThemesIndex);
 
     const lines: string[] = [];
 

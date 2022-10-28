@@ -31,7 +31,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: 15.x
+          node-version: 16.x
 
       - name: Verify NPM version
         run: npm --version
@@ -53,3 +53,6 @@ jobs:
 
       - name: Check for compatibility issues
         run: npm run lint:bundle
+
+      - name: Check NPM dependencies
+        run: node tests/dependencies.js

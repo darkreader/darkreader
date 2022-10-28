@@ -1,7 +1,8 @@
 import type {ParsedColorSchemeConfig} from './utils/colorscheme-parser';
 import type {Theme, UserSettings} from './definitions';
-import ThemeEngines from './generators/theme-engines';
+import {ThemeEngine} from './generators/theme-engines';
 import {isMacOS, isWindows, isCSSColorSchemePropSupported} from './utils/platform';
+import {AutomationMode} from './utils/automation';
 
 export const DEFAULT_COLORS = {
     darkScheme: {
@@ -23,7 +24,7 @@ export const DEFAULT_THEME: Theme = {
     useFont: false,
     fontFamily: isMacOS ? 'Helvetica Neue' : isWindows ? 'Segoe UI' : 'Open Sans',
     textStroke: 0,
-    engine: ThemeEngines.dynamicTheme,
+    engine: ThemeEngine.dynamicTheme,
     stylesheet: '',
     darkSchemeBackgroundColor: DEFAULT_COLORS.darkScheme.background,
     darkSchemeTextColor: DEFAULT_COLORS.darkScheme.text,
@@ -72,7 +73,7 @@ export const DEFAULT_SETTINGS: UserSettings = {
     syncSitesFixes: false,
     automation: {
         enabled: false,
-        mode: '',
+        mode: AutomationMode.NONE,
         behavior: 'OnOff',
     },
     time: {

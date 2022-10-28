@@ -2,6 +2,26 @@
 
 - CSS variables can now be used to set and automatically change Dark Reader's values.
 
+## 4.9.60 (Oct 27, 2022)
+
+- Fixed broken hotkeys.
+- Improved IP v6 address support.
+
+## 4.9.59 (Oct 23, 2022)
+
+- Fixes a issue where `darkreader-fallback` wasn't removed from the DOM, when Dark Reader finds a `<meta name="darkreader-lock">` element.
+- Be stricter when the user specifies a last slash for a URL in the Site List.
+- Display a warning that "System" Automation might not work properly in Chromium on Linux and Kiwi on Android.
+- Workaround for Kiwi file download during settings import, fix opening Dark Reader DevTools.
+- A button to clear the Site List (v5 Preview UI).
+
+## 4.9.58 (Sep 22, 2022)
+
+- Remove newlines from CSS URL values, before handling them.
+- Better detection for text color property in variables.
+- es-419 (Latin America & Caribbean Spanish) translation.
+- Updates to Hebrew and Portuguese (Brazilian) translations.
+
 ## 4.9.57 (Aug 23, 2022)
 
 - Fix iframes not getting modified when settings were changed.

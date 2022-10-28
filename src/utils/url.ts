@@ -1,6 +1,7 @@
 import type {UserSettings, TabInfo} from '../definitions';
 import {isIPV6, compareIPV6} from './ipv6';
-import {isThunderbird} from './platform';
+
+declare const __THUNDERBIRD__: boolean;
 
 let anchor: HTMLAnchorElement;
 
@@ -117,6 +118,7 @@ function createUrlRegex(urlTemplate: string): RegExp {
     urlTemplate = urlTemplate.trim();
     const exactBeginning = (urlTemplate[0] === '^');
     const exactEnding = (urlTemplate[urlTemplate.length - 1] === '$');
+    const hasLastSlash = /\/\$?$/.test(urlTemplate);
 
     urlTemplate = (urlTemplate
         .replace(/^\^/, '') // Remove ^ at start
@@ -168,7 +170,7 @@ function createUrlRegex(urlTemplate: string): RegExp {
 
     result += (exactEnding ?
         '(\\/?(\\?[^\/]*?)?)$' // All following queries
-        : '(\\/?.*?)$' // All following paths and queries
+        : `(\\/${hasLastSlash ? '' : '?'}.*?)$` // All following paths and queries
     );
 
     //
@@ -186,8 +188,9 @@ export function isPDF(url: string) {
             url = url.substring(0, url.lastIndexOf('#'));
         }
         if (
-            (url.match(/(wikipedia|wikimedia).org/i) && url.match(/(wikipedia|wikimedia)\.org\/.*\/[a-z]+\:[^\:\/]+\.pdf/i)) ||
-            (url.match(/timetravel\.mementoweb\.org\/reconstruct/i) && url.match(/\.pdf$/i))
+            (url.match(/(wikipedia|wikimedia)\.org/i) && url.match(/(wikipedia|wikimedia)\.org\/.*\/[a-z]+\:[^\:\/]+\.pdf/i)) ||
+            (url.match(/timetravel\.mementoweb\.org\/reconstruct/i) && url.match(/\.pdf$/i)) ||
+            (url.match(/dropbox\.com\/s\//i) && url.match(/\.pdf$/i))
         ) {
             return false;
         }
@@ -206,13 +209,16 @@ export function isPDF(url: string) {
     return false;
 }
 
-export function isURLEnabled(url: string, userSettings: UserSettings, {isProtected, isInDarkList, isDarkThemeDetected}: Partial<TabInfo>) {
+export function isURLEnabled(url: string, userSettings: UserSettings, {isProtected, isInDarkList, isDarkThemeDetected}: Partial<TabInfo>, isAllowedFileSchemeAccess = true) {
+    if (isLocalFile(url) && !isAllowedFileSchemeAccess) {
+        return false;
+    }
     if (isProtected && !userSettings.enableForProtectedPages) {
         return false;
     }
     // Only URL's with emails are getting here on thunderbird
     // So we can skip the checks and just return true.
-    if (isThunderbird) {
+    if (__THUNDERBIRD__) {
         return true;
     }
     if (isPDF(url)) {
@@ -235,4 +241,8 @@ export function isURLEnabled(url: string, userSettings: UserSettings, {isProtect
 
 export function isFullyQualifiedDomain(candidate: string) {
     return /^[a-z0-9.-]+$/.test(candidate);
+}
+
+export function isLocalFile(url: string) {
+    return url && url.startsWith('file:///');
 }

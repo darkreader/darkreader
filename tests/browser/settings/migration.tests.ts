@@ -6,6 +6,11 @@ describe('Migrate settings', () => {
         const filterFixes = '*\n\nINVERT\n.example\n\n================================\n\nexample.com\n\nINVERT\n.filter\n';
         const staticThemes = '*\n\nINVERT\n.example\n\n================================\n\nexample.com\n\nINVERT\n.static\n';
 
+        const manifest = await backgroundUtils.getManifest();
+        if (manifest.manifest_version === 3) {
+            return;
+        }
+
         await backgroundUtils.changeLocalStorage({
             [DevTools.KEY_DYNAMIC]: dynamicFixes,
             [DevTools.KEY_FILTER]: filterFixes,

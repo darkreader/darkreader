@@ -9,6 +9,9 @@ import {logInfo} from './utils/log';
 import {sendLog} from './utils/sendLog';
 
 type TestMessage = {
+    type: 'getManifest';
+    id: number;
+} | {
     type: 'changeSettings';
     data: Partial<UserSettings>;
     id: number;
@@ -40,11 +43,13 @@ type TestMessage = {
     type: 'setDataIsMigratedForTesting';
     data: boolean;
     id: number;
+} | {
+    type: 'getManifest';
+    id: number;
 };
 
-// Initialize extension
-Extension.init();
-Extension.start();
+// Start extension
+const extension = Extension.start();
 
 const welcome = `  /''''\\
  (0)==(0)
@@ -56,10 +61,10 @@ declare const __DEBUG__: boolean;
 declare const __WATCH__: boolean;
 declare const __LOG__: string | false;
 declare const __PORT__: number;
-declare const __TEST__: number;
-declare const __MV3__: number;
+declare const __TEST__: boolean;
+declare const __CHROMIUM_MV3__: boolean;
 
-if (__MV3__) {
+if (__CHROMIUM_MV3__) {
     chrome.runtime.onInstalled.addListener(async () => {
         try {
             (chrome.scripting as any).unregisterContentScripts(() => {
@@ -130,7 +135,7 @@ if (__WATCH__) {
     };
 
     listen();
-} else if (!__DEBUG__){
+} else if (!__DEBUG__ && !__TEST__) {
     chrome.runtime.onInstalled.addListener(({reason}) => {
         if (reason === 'install') {
             chrome.tabs.create({url: getHelpURL()});
@@ -142,49 +147,66 @@ if (__WATCH__) {
 
 if (__TEST__) {
     const socket = new WebSocket(`ws://localhost:8894`);
+    socket.onopen = async () => {
+        // Wait for extension to start
+        await extension;
+        socket.send(JSON.stringify({
+            data: {
+                extensionOrigin: chrome.runtime.getURL(''),
+            },
+            id: null,
+        }));
+    };
     socket.onmessage = (e) => {
-        const respond = (message: {type: string; data?: ExtensionData | string | boolean | {[key: string]: string}; id?: number}) => socket.send(JSON.stringify(message));
         try {
             const message: TestMessage = JSON.parse(e.data);
+            const respond = (data?: ExtensionData | string | boolean | {[key: string]: string}) => socket.send(JSON.stringify({
+                data,
+                id: message.id,
+            }));
+
             switch (message.type) {
                 case 'changeSettings':
                     Extension.changeSettings(message.data);
-                    respond({type: 'changeSettings-response', id: message.id});
+                    respond();
                     break;
                 case 'collectData':
-                    Extension.collectData().then((data) => {
-                        respond({type: 'collectData-response', id: message.id, data});
-                    });
+                    Extension.collectData().then(respond);
                     break;
                 case 'changeLocalStorage': {
                     const data = message.data;
                     for (const key in data) {
                         localStorage[key] = data[key];
                     }
-                    respond({type: 'changeLocalStorage-response', id: message.id});
+                    respond();
                     break;
                 }
                 case 'getLocalStorage':
-                    respond({type: 'getLocalStorage-response', id: message.id, data: localStorage ? JSON.stringify(localStorage) : null});
+                    respond(localStorage ? JSON.stringify(localStorage) : null);
                     break;
+                case 'getManifest': {
+                    const data = chrome.runtime.getManifest();
+                    respond(data);
+                    break;
+                }
                 case 'changeChromeStorage': {
                     const region = message.data.region;
-                    chrome.storage[region].set(message.data.data, () => respond({type: 'changeChromeStorage-response', id: message.id}));
+                    chrome.storage[region].set(message.data.data, () => respond());
                     break;
                 }
                 case 'getChromeStorage': {
                     const keys = message.data.keys;
                     const region = message.data.region;
-                    chrome.storage[region].get(keys, (data) => respond({type: 'getChromeStorage-response', data, id: message.id}));
+                    chrome.storage[region].get(keys, respond);
                     break;
                 }
                 case 'setDataIsMigratedForTesting':
                     DevTools.setDataIsMigratedForTesting(message.data);
-                    respond({type: 'setDataIsMigratedForTesting-response', id: message.id});
+                    respond();
                     break;
             }
         } catch (err) {
-            respond({type: 'error', data: String(err)});
+            socket.send(JSON.stringify({error: String(err), original: e.data}));
         }
     };
 }

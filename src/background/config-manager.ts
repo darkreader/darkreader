@@ -8,26 +8,28 @@ import type {ParsedColorSchemeConfig} from '../utils/colorscheme-parser';
 import {ParseColorSchemeConfig} from '../utils/colorscheme-parser';
 import {logWarn} from './utils/log';
 import {DEFAULT_COLORSCHEME} from '../defaults';
+import UserStorage from './user-storage';
+import {CONFIG_URL_BASE} from '../utils/links';
 
 const CONFIG_URLs = {
     darkSites: {
-        remote: 'https://raw.githubusercontent.com/darkreader/darkreader/main/src/config/dark-sites.config',
+        remote: `${CONFIG_URL_BASE}/dark-sites.config`,
         local: '../config/dark-sites.config',
     },
     dynamicThemeFixes: {
-        remote: 'https://raw.githubusercontent.com/darkreader/darkreader/main/src/config/dynamic-theme-fixes.config',
+        remote: `${CONFIG_URL_BASE}/dynamic-theme-fixes.config`,
         local: '../config/dynamic-theme-fixes.config',
     },
     inversionFixes: {
-        remote: 'https://raw.githubusercontent.com/darkreader/darkreader/main/src/config/inversion-fixes.config',
+        remote: `${CONFIG_URL_BASE}/inversion-fixes.config`,
         local: '../config/inversion-fixes.config',
     },
     staticThemes: {
-        remote: 'https://raw.githubusercontent.com/darkreader/darkreader/main/src/config/static-themes.config',
+        remote: `${CONFIG_URL_BASE}/static-themes.config`,
         local: '../config/static-themes.config',
     },
     colorSchemes: {
-        remote: 'https://raw.githubusercontent.com/darkreader/darkreader/main/src/config/color-schemes.drconf',
+        remote: `${CONFIG_URL_BASE}/color-schemes.drconf`,
         local: '../config/color-schemes.drconf',
     },
 };
@@ -144,7 +146,14 @@ export default class ConfigManager {
         this.handleStaticThemes();
     }
 
-    static async load(config: Config) {
+    static async load(config?: Config) {
+        if (!config) {
+            await UserStorage.loadSettings();
+            config = {
+                local: !UserStorage.settings.syncSitesFixes
+            };
+        }
+
         await Promise.all([
             this.loadColorSchemes(config),
             this.loadDarkSites(config),

@@ -25,5 +25,6 @@ declare global {
         getChromeStorage: (region: 'local' | 'sync', keys: string[]) => Promise<{[key: string]: any}>;
         setDataIsMigratedForTesting: (value: boolean) => Promise<void>;
         emulateMedia: (name: string, value: string) => Promise<void>;
+        getManifest: () => Promise<chrome.runtime.Manifest>;
     };
 }

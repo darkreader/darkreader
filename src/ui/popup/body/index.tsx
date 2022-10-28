@@ -1,6 +1,6 @@
 import {m} from 'malevic';
 import {getContext} from 'malevic/dom';
-import {DONATE_URL} from '../../../utils/links';
+import {DONATE_URL, HOMEPAGE_URL} from '../../../utils/links';
 import {getLocalMessage} from '../../../utils/locales';
 import {Overlay} from '../../controls';
 import AutomationPage from '../automation-page';
@@ -18,7 +18,7 @@ function Logo() {
     return (
         <a
             class="m-logo"
-            href="https://darkreader.org/"
+            href={HOMEPAGE_URL}
             target="_blank"
             rel="noopener noreferrer"
         >
@@ -36,6 +36,9 @@ type PageId = (
     | 'manage-settings'
 );
 
+let popstate: () => void = null;
+isMobile && window.addEventListener('popstate', () => popstate && popstate());
+
 function Pages(props: ViewProps) {
     const context = getContext();
     const store = context.store as {
@@ -46,31 +49,36 @@ function Pages(props: ViewProps) {
     }
 
     function onThemeNavClick() {
+        isMobile && history.pushState(undefined, undefined);
         store.activePage = 'theme';
         context.refresh();
     }
 
     function onSettingsNavClick() {
+        isMobile && history.pushState(undefined, undefined);
         store.activePage = 'settings';
         context.refresh();
     }
 
     function onAutomationNavClick() {
+        isMobile && history.pushState(undefined, undefined);
         store.activePage = 'automation';
         context.refresh();
     }
 
     function onManageSettingsClick() {
+        isMobile && history.pushState(undefined, undefined);
         store.activePage = 'manage-settings';
         context.refresh();
     }
 
     function onSiteListNavClick() {
+        isMobile && history.pushState(undefined, undefined);
         store.activePage = 'site-list';
         context.refresh();
     }
 
-    function onBackClick() {
+    function goBack() {
         const activePage = store.activePage;
         const settingsPageSubpages = ['automation', 'manage-settings', 'site-list'] as PageId[];
         if (settingsPageSubpages.includes(activePage)) {
@@ -79,6 +87,16 @@ function Pages(props: ViewProps) {
             store.activePage = 'main';
         }
         context.refresh();
+    }
+
+    popstate = goBack;
+
+    function onBackClick() {
+        if (isMobile) {
+            history.back();
+        } else {
+            goBack();
+        }
     }
 
     return (

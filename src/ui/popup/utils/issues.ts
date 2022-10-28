@@ -1,7 +1,10 @@
-import {compareChromeVersions, chromiumVersion, isWindows, isOpera, isYaBrowser, isVivaldi, isEdge, isMacOS, isThunderbird} from '../../../utils/platform';
+import {compareChromeVersions, chromiumVersion, isWindows, isOpera, isYaBrowser, isVivaldi, isEdge, isMacOS} from '../../../utils/platform';
+
+declare const __THUNDERBIRD__: boolean;
+declare const __CHROMIUM_MV3__: boolean;
 
 export function popupHasBuiltInBorders() {
-    return Boolean(
+    return !__CHROMIUM_MV3__ && Boolean(
         chromiumVersion &&
         !isVivaldi &&
         !isYaBrowser &&
@@ -12,7 +15,7 @@ export function popupHasBuiltInBorders() {
 }
 
 export function popupHasBuiltInHorizontalBorders() {
-    return Boolean(
+    return !__CHROMIUM_MV3__ && Boolean(
         chromiumVersion &&
         !isVivaldi &&
         !isYaBrowser &&
@@ -36,7 +39,7 @@ export function fixNotClosingPopupOnNavigation() {
         if (target && target.hasAttribute('href')) {
             chrome.tabs.create({url: target.getAttribute('href')});
             e.preventDefault();
-            if (!isThunderbird) {
+            if (!__THUNDERBIRD__) {
                 window.close();
             }
         }

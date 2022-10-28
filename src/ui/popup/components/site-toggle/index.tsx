@@ -3,7 +3,8 @@ import CheckmarkIcon from './checkmark-icon';
 import {Button} from '../../../controls';
 import {getURLHostOrProtocol, isURLEnabled, isPDF} from '../../../../utils/url';
 import type {ExtWrapper} from '../../../../definitions';
-import {isThunderbird} from '../../../../utils/platform';
+
+declare const __THUNDERBIRD__: boolean;
 
 export default function SiteToggleButton({data, actions}: ExtWrapper) {
     const tab = data.activeTab;
@@ -22,7 +23,7 @@ export default function SiteToggleButton({data, actions}: ExtWrapper) {
         (!tab.isProtected && !pdf) ||
         tab.isInjected
     );
-    const isSiteEnabled = isURLEnabled(tab.url, data.settings, tab) && tab.isInjected;
+    const isSiteEnabled = isURLEnabled(tab.url, data.settings, tab, data.isAllowedFileSchemeAccess) && tab.isInjected;
     const host = getURLHostOrProtocol(tab.url);
 
     const urlText = host
@@ -37,7 +38,7 @@ export default function SiteToggleButton({data, actions}: ExtWrapper) {
             class={{
                 'site-toggle': true,
                 'site-toggle--active': isSiteEnabled,
-                'site-toggle--disabled': !toggleHasEffect || isThunderbird
+                'site-toggle--disabled': __THUNDERBIRD__ || !toggleHasEffect
             }}
             onclick={onSiteToggleClick}
         >

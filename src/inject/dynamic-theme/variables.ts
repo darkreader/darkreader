@@ -218,9 +218,15 @@ export class VariablesStore {
     }
 
     getModifierForVarDependant(property: string, sourceValue: string): CSSValueModifier {
+        // TODO(gusted): This condition is incorrect, as the sourceValue still contains a variable.
+        // Simply replacing it with some definition is incorrect as variables are element-independent.
+        // Fully handling this requires having a function that gives the variable's value given an
+        // element's position in the DOM, but that's quite computationally hard to facilitate. We'll
+        // probably just handle edge-cases like `rgb(22 163 74/var(--tb-bg-opacity)` and hope that
+        // lowering the opacity is enough.
         if (sourceValue.match(/^\s*(rgb|hsl)a?\(/)) {
             const isBg = property.startsWith('background');
-            const isText = (property === 'color' || property === 'caret-color');
+            const isText = isTextColorProperty(property);
             return (theme) => {
                 let value = insertVarValues(sourceValue, this.unstableVarValues);
                 if (!value) {
@@ -239,7 +245,7 @@ export class VariablesStore {
                 );
             };
         }
-        if (property === 'color' || property === 'caret-color') {
+        if (isTextColorProperty(property)) {
             return (theme) => {
                 return replaceCSSVariablesNames(
                     sourceValue,
@@ -405,7 +411,7 @@ export class VariablesStore {
             });
         } else if (property === 'background-color' || property === 'box-shadow') {
             this.iterateVarDeps(value, (v) => this.resolveVariableType(v, VAR_TYPE_BGCOLOR));
-        } else if (property === 'color' || property === 'caret-color') {
+        } else if (isTextColorProperty(property)) {
             this.iterateVarDeps(value, (v) => this.resolveVariableType(v, VAR_TYPE_TEXTCOLOR));
         } else if (property.startsWith('border') || property.startsWith('outline')) {
             this.iterateVarDeps(value, (v) => this.resolveVariableType(v, VAR_TYPE_BORDERCOLOR));
@@ -631,6 +637,10 @@ function isVarDependant(value: string) {
 
 function isConstructedColorVar(value: string) {
     return value.match(/^\s*(rgb|hsl)a?\(/);
+}
+
+function isTextColorProperty(property: string) {
+    return property === 'color' || property === 'caret-color' || property === '-webkit-text-fill-color';
 }
 
 // ex. 131,123,132 | 1,341, 122

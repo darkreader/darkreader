@@ -52,10 +52,18 @@ async function build({platforms, debug, watch, log: logging, test}) {
     }
 }
 
-async function api() {
+async function api(debug, watch) {
     log.ok('API');
     try {
-        await runTasks([bundleAPI], {platforms: {}, debug: false, watch: false, log: false, test: false});
+        const tasks = [bundleAPI];
+        if (!debug) {
+            tasks.push(codeStyle);
+        }
+        await runTasks(tasks, {platforms: {[PLATFORM.API]: true}, debug, watch, log: false, test: false});
+        if (watch) {
+            bundleAPI.watch();
+            log.ok('Watching...');
+        }
         log.ok('MISSION PASSED! RESPECT +');
     } catch (err) {
         console.log(err);
@@ -89,7 +97,7 @@ async function run() {
     const validArgs = ['--api', '--chrome', '--chrome-mv3', '--firefox', '--thunderbird', '--release', '--debug', '--watch', '--log-info', '--log-warn', '--test'];
     args.filter((arg) => !validArgs.includes(arg)).forEach((arg) => log.warn(`Unknown argument ${arg}`));
 
-    const allPlatforms = !(args.includes('--chrome') || args.includes('--chrome-mv3') || args.includes('--firefox') || args.includes('--thunderbird'));
+    const allPlatforms = !(args.includes('--api') || args.includes('--chrome') || args.includes('--chrome-mv3') || args.includes('--firefox') || args.includes('--thunderbird'));
     const platforms = {
         [PLATFORM.CHROME]: allPlatforms || args.includes('--chrome'),
         [PLATFORM.CHROME_MV3]: allPlatforms || args.includes('--chrome-mv3'),
@@ -103,14 +111,14 @@ async function run() {
     const watch = args.includes('--watch');
     const logInfo = watch && args.includes('--log-info');
     const logWarn = watch && args.includes('--log-warn');
-    if (release) {
+    if (release && Object.values(platforms).some(Boolean)) {
         await build({platforms, debug: false, watch: false, log: null, test: false});
     }
-    if (debug) {
+    if (debug && Object.values(platforms).some(Boolean)) {
         await build({platforms, debug, watch, log: logWarn ? 'warn' : (logInfo ? 'info' : null), test: args.includes('--test')});
     }
     if (args.includes('--api')) {
-        await api();
+        await api(debug, watch);
     }
 }
 

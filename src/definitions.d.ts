@@ -1,10 +1,13 @@
 import type {ParsedColorSchemeConfig} from './utils/colorscheme-parser';
 import type {FilterMode} from './generators/css-filter';
 import type {MessageType} from './utils/message';
+import type {AutomationMode} from './utils/automation';
+import type {ThemeEngine} from './generators/theme-engines';
 
 export interface ExtensionData {
     isEnabled: boolean;
     isReady: boolean;
+    isAllowedFileSchemeAccess: boolean;
     settings: UserSettings;
     news: News[];
     shortcuts: Shortcuts;
@@ -14,9 +17,6 @@ export interface ExtensionData {
         dynamicFixesText: string;
         filterFixesText: string;
         staticThemesText: string;
-        hasCustomDynamicFixes: boolean;
-        hasCustomFilterFixes: boolean;
-        hasCustomStaticFixes: boolean;
     };
     activeTab: TabInfo;
 }
@@ -29,7 +29,7 @@ export interface TabData {
 export interface ExtensionActions {
     changeSettings(settings: Partial<UserSettings>): void;
     setTheme(theme: Partial<FilterConfig>): void;
-    setShortcut(command: string, shortcut: string): void;
+    setShortcut(command: string, shortcut: string): Promise<string>;
     toggleActiveTab(): void;
     markNewsAsRead(ids: string[]): void;
     markNewsAsDisplayed(ids: string[]): void;
@@ -56,7 +56,7 @@ export interface Theme {
     useFont: boolean;
     fontFamily: string;
     textStroke: number;
-    engine: string;
+    engine: ThemeEngine;
     stylesheet: string;
     darkSchemeBackgroundColor: string;
     darkSchemeTextColor: string;
@@ -92,7 +92,7 @@ export interface ThemePreset {
 
 export interface Automation {
     enabled: boolean;
-    mode: '' | 'time' | 'system' | 'location';
+    mode: AutomationMode;
     behavior: 'OnOff' | 'Scheme';
 }
 

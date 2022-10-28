@@ -1,4 +1,4 @@
-import {getBlogPostURL} from '../utils/links';
+import {getBlogPostURL, NEWS_URL} from '../utils/links';
 import {getDurationInMinutes} from '../utils/time';
 import type {News} from '../definitions';
 import {readSyncStorage, readLocalStorage, writeSyncStorage, writeLocalStorage} from './utils/extension-api';
@@ -106,7 +106,7 @@ export default class Newsmaker {
 
     private static async getNews() {
         try {
-            const response = await fetch(`https://darkreader.github.io/blog/posts.json`, {cache: 'no-cache'});
+            const response = await fetch(NEWS_URL, {cache: 'no-cache'});
             const $news: Array<Omit<News, 'read' | 'url'> & {date: string}> = await response.json();
             const readNews = await Newsmaker.getReadNews();
             const displayedNews = await Newsmaker.getDisplayedNews();

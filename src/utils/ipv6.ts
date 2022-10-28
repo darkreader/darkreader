@@ -1,10 +1,12 @@
+const simpleIPV6Regex = /\[[0-9:a-zA-Z]*?\]/;
+
 export function isIPV6(url: string) {
-    const openingBracketIndex = url.indexOf('[');
-    if (openingBracketIndex < 0) {
+    const openingBracketIndex = simpleIPV6Regex.exec(url);
+    if (!openingBracketIndex) {
         return false;
     }
     const queryIndex = url.indexOf('?');
-    if (queryIndex >= 0 && openingBracketIndex > queryIndex) {
+    if (queryIndex >= 0 && openingBracketIndex.index > queryIndex) {
         return false;
     }
     return true;

@@ -21,9 +21,10 @@ import {injectProxy} from './stylesheet-proxy';
 import {clearColorCache, parseColorWithCache} from '../../utils/color';
 import {parsedURLCache} from '../../utils/url';
 import {variablesStore} from './variables';
+import {addDocumentVisibilityListener, documentIsVisible, removeDocumentVisibilityListener} from '../../utils/visibility';
 
 declare const __TEST__: boolean;
-declare const __MV3__: boolean;
+declare const __CHROMIUM_MV3__: boolean;
 const INSTANCE_ID = generateUID();
 const styleManagers = new Map<StyleElement, StyleManager>();
 const adoptedStyleManagers = [] as AdoptedStyleSheetManager[];
@@ -150,7 +151,7 @@ function createStaticStyleOverrides() {
     document.head.insertBefore(rootVarsStyle, variableStyle.nextSibling);
 
     const injectProxyArg = !(fixes && fixes.disableStyleSheetsProxy);
-    if (__MV3__) {
+    if (__CHROMIUM_MV3__) {
         injectProxyScriptMV3(injectProxyArg);
         // Notify the dedicated injector of the data.
         document.dispatchEvent(new CustomEvent('__darkreader__stylesheetProxy__arg', {detail: injectProxyArg}));
@@ -224,9 +225,11 @@ function createDynamicStyleOverrides() {
 
     variablesStore.matchVariablesAndDependants();
     variablesStore.setOnRootVariableChange(() => {
-        variablesStore.putRootVars(document.head.querySelector('.darkreader--root-vars'), filter);
+        const rootVarsStyle = createOrUpdateStyle('darkreader--root-vars');
+        variablesStore.putRootVars(rootVarsStyle, filter);
     });
-    variablesStore.putRootVars(document.head.querySelector('.darkreader--root-vars'), filter);
+    const rootVarsStyle = createOrUpdateStyle('darkreader--root-vars');
+    variablesStore.putRootVars(rootVarsStyle, filter);
 
     styleManagers.forEach((manager) => manager.render(filter, ignoredImageAnalysisSelectors));
     if (loadingStyles.size === 0) {
@@ -253,7 +256,7 @@ function createManager(element: StyleElement) {
     const loadingStyleId = ++loadingStylesCounter;
     logInfo(`New manager for element, with loadingStyleID ${loadingStyleId}`, element);
     function loadingStart() {
-        if (!isDOMReady() || !didDocumentShowUp) {
+        if (!isDOMReady() || !documentIsVisible()) {
             loadingStyles.add(loadingStyleId);
             logInfo(`Current amount of styles loading: ${loadingStyles.size}`);
 
@@ -318,38 +321,16 @@ function onDOMReady() {
     logWarn(`DOM is ready, but still have styles being loaded.`, loadingStyles);
 }
 
-let documentVisibilityListener: () => void = null;
-let didDocumentShowUp = !document.hidden;
-
-function watchForDocumentVisibility(callback: () => void) {
-    const alreadyWatching = Boolean(documentVisibilityListener);
-    documentVisibilityListener = () => {
-        if (!document.hidden) {
-            stopWatchingForDocumentVisibility();
-            callback();
-            didDocumentShowUp = true;
-        }
-    };
-    if (!alreadyWatching) {
-        document.addEventListener('visibilitychange', documentVisibilityListener);
-    }
-}
-
-function stopWatchingForDocumentVisibility() {
-    document.removeEventListener('visibilitychange', documentVisibilityListener);
-    documentVisibilityListener = null;
+function runDynamicStyle() {
+    createDynamicStyleOverrides();
+    watchForUpdates();
 }
 
 function createThemeAndWatchForUpdates() {
     createStaticStyleOverrides();
 
-    function runDynamicStyle() {
-        createDynamicStyleOverrides();
-        watchForUpdates();
-    }
-
-    if (document.hidden && !filter.immediateModify) {
-        watchForDocumentVisibility(runDynamicStyle);
+    if (!documentIsVisible() && !filter.immediateModify) {
+        addDocumentVisibilityListener(runDynamicStyle);
     } else {
         runDynamicStyle();
     }
@@ -409,7 +390,8 @@ function watchForUpdates() {
             const styleAttr = element.getAttribute('style') || '';
             if (styleAttr.includes('--')) {
                 variablesStore.matchVariablesAndDependants();
-                variablesStore.putRootVars(document.head.querySelector('.darkreader--root-vars'), filter);
+                const rootVarsStyle = createOrUpdateStyle('darkreader--root-vars');
+                variablesStore.putRootVars(rootVarsStyle, filter);
             }
         }
     }, (root) => {
@@ -488,6 +470,7 @@ export function createOrUpdateDynamicTheme(filterConfig: FilterConfig, dynamicTh
     isIFrame = iframe;
     if (document.head) {
         if (isAnotherDarkReaderInstanceActive()) {
+            removeDynamicTheme();
             return;
         }
         document.documentElement.setAttribute('data-darkreader-mode', 'dynamic');
@@ -557,7 +540,7 @@ export function removeDynamicTheme() {
 export function cleanDynamicThemeCache() {
     variablesStore.clear();
     parsedURLCache.clear();
-    stopWatchingForDocumentVisibility();
+    removeDocumentVisibilityListener(runDynamicStyle);
     cancelRendering();
     stopWatchingForUpdates();
     cleanModificationCache();

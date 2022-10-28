@@ -103,7 +103,7 @@ test('Dynamic Theme Fixes config', async () => {
         {url: ['twitter.com'], invert: ['c', 'd']},
         {url: ['wikipedia.org'], ignoreInlineStyle: ['a', 'b']},
         {url: ['duckduckgo.com'], ignoreImageAnalysis: ['img[alt="Logo"]', 'canvas']},
-    ]);
+    ] as any);
 });
 
 test('Inversion Fixes config', async () => {

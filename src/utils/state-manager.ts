@@ -3,20 +3,20 @@
  * which is in StateManagerImpl class.
  */
 
-import {isNonPersistent} from './migration';
 import {StateManagerImpl} from './state-manager-impl';
+
+import {isNonPersistent} from './platform';
 
 export class StateManager<T> {
     private stateManager: StateManagerImpl<T> | null;
 
     constructor(localStorageKey: string, parent: any, defaults: T, logWarn: (log: string) => void){
-        if (isNonPersistent()) {
+        if (isNonPersistent) {
             function addListener(listener: (data: T) => void) {
-                chrome.storage.onChanged.addListener((changes, areaName) => {
-                    if (areaName !== 'local' || !changes[localStorageKey]) {
-                        return;
+                chrome.storage.local.onChanged.addListener((changes) => {
+                    if (localStorageKey in changes) {
+                        listener(changes[localStorageKey].newValue);
                     }
-                    listener(changes[localStorageKey].newValue);
                 });
             }
 

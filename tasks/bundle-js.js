@@ -7,6 +7,7 @@ import rollupPluginNodeResolve from '@rollup/plugin-node-resolve';
 import rollupPluginReplace from '@rollup/plugin-replace';
 /** @type {any} */
 import rollupPluginTypescript from '@rollup/plugin-typescript';
+import rollupPluginTypescript2 from 'rollup-plugin-typescript2';
 import typescript from 'typescript';
 import paths from './paths.js';
 import * as reload from './reload.js';
@@ -46,6 +47,12 @@ const jsEntries = [
         src: 'src/inject/fallback.ts',
         dest: 'inject/fallback.js',
         reloadType: reload.FULL,
+    },
+    {
+        src: 'src/inject/color-scheme-watcher.ts',
+        dest: 'inject/color-scheme-watcher.js',
+        reloadType: reload.FULL,
+        platform: PLATFORM.CHROME_MV3,
     },
     {
         src: 'src/ui/devtools/index.tsx',
@@ -92,7 +99,7 @@ function freeRollupPluginInstance(name, key) {
 
 async function bundleJS(/** @type {JSEntry} */entry, platform, debug, watch, log, test) {
     const {src, dest} = entry;
-    const rollupPluginTypesctiptInstanceKey = debug;
+    const rollupPluginTypesctiptInstanceKey = `${debug}`;
     const rollupPluginReplaceInstanceKey = `${platform}-${debug}-${watch}-${entry.src === 'src/ui/popup/index.tsx'}`;
 
     const destination = typeof dest === 'string' ? dest : dest(platform);
@@ -121,8 +128,9 @@ async function bundleJS(/** @type {JSEntry} */entry, platform, debug, watch, log
         input: rootPath(src),
         plugins: [
             getRollupPluginInstance('nodeResolve', '', rollupPluginNodeResolve),
-            getRollupPluginInstance('typesctipt', rollupPluginTypesctiptInstanceKey, () =>
-                rollupPluginTypescript({
+            getRollupPluginInstance('typesctipt', rollupPluginTypesctiptInstanceKey, () => {
+                const plugin = debug ? rollupPluginTypescript2 : rollupPluginTypescript;
+                const config = {
                     rootDir,
                     typescript,
                     tsconfig: rootPath('src/tsconfig.json'),
@@ -132,18 +140,25 @@ async function bundleJS(/** @type {JSEntry} */entry, platform, debug, watch, log
                     inlineSources: debug ? true : false,
                     noEmitOnError: watch ? false : true,
                     cacheDir: debug ? `${fs.realpathSync(os.tmpdir())}/darkreader_typescript_cache` : undefined,
-                })
-            ),
+                };
+                if (debug) {
+                    config.verbosty = 3;
+                }
+                return plugin(config);
+            }),
             getRollupPluginInstance('replace', rollupPluginReplaceInstanceKey, () =>
                 rollupPluginReplace({
                     preventAssignment: true,
                     ...replace,
-                    '__DEBUG__': debug ? 'true' : 'false',
-                    '__MV3__': platform === PLATFORM.CHROME_MV3,
-                    '__PORT__': watch ? String(PORT) : '-1',
-                    '__TEST__': test ? 'true' : 'false',
-                    '__WATCH__': watch ? 'true' : 'false',
-                    '__LOG__': log ? `"${log}"` : 'false',
+                    __DEBUG__: debug,
+                    __CHROMIUM_MV2__: platform === PLATFORM.CHROME,
+                    __CHROMIUM_MV3__: platform === PLATFORM.CHROME_MV3,
+                    __FIREFOX__: platform === PLATFORM.FIREFOX,
+                    __THUNDERBIRD__: platform === PLATFORM.THUNDERBIRD,
+                    __PORT__: watch ? String(PORT) : '-1',
+                    __TEST__: test,
+                    __WATCH__: watch,
+                    __LOG__: log ? `"${log}"` : false,
                 })
             ),
         ].filter((x) => x)
@@ -173,7 +188,7 @@ let watchFiles;
 
 const hydrateTask = (/** @type {JSEntry[]} */entries, platforms, /** @type {boolean} */debug, /** @type {boolean} */watch, log, test) =>
     entries.map((entry) =>
-        (entry.platform ? [entry.platform] : Object.values(PLATFORM))
+        (entry.platform ? [entry.platform] : Object.values(PLATFORM).filter((platform) => platform !== PLATFORM.API))
             .filter((platform) => platforms[platform])
             .map((platform) => bundleJS(entry, platform, debug, watch, log, test))
     ).flat();

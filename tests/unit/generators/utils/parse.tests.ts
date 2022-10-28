@@ -4,9 +4,9 @@ import type {SitesFixesParserOptions} from '../../../../src/generators/utils/par
 test('Index config', () => {
     interface TestFix {
         url: string[];
-        directive: string[];
-        multilineDirective: string[];
-        css: string;
+        directive?: string;
+        multilineDirective?: string;
+        css?: string;
     }
 
     const directiveMap: { [key: string]: keyof TestFix } = {
@@ -58,7 +58,7 @@ test('Index config', () => {
 test('Empty config', () => {
     interface TestFix {
         url: string[];
-        directive: string[];
+        directive: string;
     }
 
     const directiveMap: { [key: string]: keyof TestFix } = {
@@ -96,7 +96,7 @@ test('Empty config', () => {
 test('Domain appearing in multiple records', () => {
     interface TestFix {
         url: string[];
-        directive: string[];
+        directive: string;
     }
 
     const directiveMap: { [key: string]: keyof TestFix } = {
@@ -177,7 +177,7 @@ test('Domain appearing in multiple records', () => {
 test('Domain appearing multiple times within the same record', () => {
     interface TestFix {
         url: string[];
-        directive: string[];
+        directive: string;
     }
 
     const directiveMap: { [key: string]: keyof TestFix } = {
@@ -242,7 +242,7 @@ test('Domain appearing multiple times within the same record', () => {
 test('The generic fix appears first', () => {
     interface TestFix {
         url: string[];
-        directive: string[];
+        directive: string;
     }
 
     const directiveMap: { [key: string]: keyof TestFix } = {
@@ -305,7 +305,7 @@ test('The generic fix appears first', () => {
 test('Fixes appear only once', () => {
     interface TestFix {
         url: string[];
-        directive: string[];
+        directive: string;
     }
 
     const directiveMap: { [key: string]: keyof TestFix } = {
@@ -352,7 +352,7 @@ test('Fixes appear only once', () => {
 test('Implied wildcards', () => {
     interface TestFix {
         url: string[];
-        directive: string[];
+        directive: string;
     }
 
     const directiveMap: { [key: string]: keyof TestFix } = {
@@ -398,8 +398,8 @@ test('Implied wildcards', () => {
 test('Base64 in CSS', () => {
     interface TestFix {
         url: string[];
-        directive: string[];
-        css: string[];
+        directive?: string;
+        css?: string;
     }
 
     const directiveMap: { [key: string]: keyof TestFix } = {

@@ -13,8 +13,12 @@ text: #e8e6e3
 Catppuccin
 
 DARK
-background: #161320
-text: #d9e0ee
+background: #1e1e2e
+text: #cdd6f4
+
+LIGHT
+background: #eff1f5
+text: #4c4f69
 
 ================================
 

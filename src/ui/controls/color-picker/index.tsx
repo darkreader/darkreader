@@ -1,6 +1,6 @@
 import {m} from 'malevic';
 import {getContext} from 'malevic/dom';
-import {parseColorWithCache} from '../../../utils/color';
+import {isValidColor} from '../../../utils/color';
 import TextBox from '../textbox';
 import HSBPicker from './hsb-picker';
 
@@ -10,10 +10,6 @@ interface ColorPickerProps {
     onChange: (color: string) => void;
     canReset: boolean;
     onReset: () => void;
-}
-
-export function isValidColor(color: string) {
-    return Boolean(parseColorWithCache(color));
 }
 
 const colorPickerFocuses = new WeakMap<Node, () => void>();

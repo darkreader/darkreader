@@ -6,7 +6,9 @@ import {readSyncStorage, readLocalStorage, writeSyncStorage, writeLocalStorage} 
 import {logWarn} from './utils/log';
 import {PromiseBarrier} from '../utils/promise-barrier';
 import {validateSettings} from '../utils/validation';
-import {isValidColor} from '../ui/controls/color-picker';
+import {isValidColor} from '../utils/color';
+
+declare const __TEST__: boolean;
 
 const SAVE_TIMEOUT = 1000;
 
@@ -150,9 +152,13 @@ export default class UserStorage {
         UserStorage.saveStorageBarrier.resolve();
         UserStorage.saveStorageBarrier = null;
     });
-    private rootVariables = getComputedStyle(document.documentElement);
 
-    private cssUpdate(settings: Partial<UserSettings>) {
+    private static rootVariables = !__TEST__ && getComputedStyle(document.documentElement);
+
+    private static cssUpdate(settings: Partial<UserSettings>) {
+        if (__TEST__) {
+            return;
+        }
         if (settings.theme.darkSchemeCssVariableBg && isValidColor(this.rootVariables.getPropertyValue(settings.theme.darkSchemeCssVariableBg).trim())){
             settings.theme.darkSchemeBackgroundColor = this.rootVariables.getPropertyValue(settings.theme.darkSchemeCssVariableBg).trim();
         }

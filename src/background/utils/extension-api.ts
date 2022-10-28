@@ -1,12 +1,6 @@
 import {isPDF} from '../../utils/url';
 import {isFirefox, isEdge} from '../../utils/platform';
 
-declare const browser: {
-    commands: {
-        update({name, shortcut}: chrome.commands.Command): void;
-    };
-};
-
 export function canInjectScript(url: string) {
     if (isFirefox) {
         return (url
@@ -155,10 +149,4 @@ export async function getCommands() {
             }
         });
     });
-}
-
-export function setShortcut(command: string, shortcut: string) {
-    if (typeof browser !== 'undefined' && browser.commands && browser.commands.update) {
-        browser.commands.update({name: command, shortcut});
-    }
 }

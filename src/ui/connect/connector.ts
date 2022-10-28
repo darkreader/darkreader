@@ -1,7 +1,7 @@
 import {isFirefox} from '../../utils/platform';
 import type {ExtensionData, ExtensionActions, FilterConfig, Message, UserSettings} from '../../definitions';
 import {MessageType} from '../../utils/message';
-import {logWarn} from 'inject/utils/log';
+import {logWarn} from '../../inject/utils/log';
 
 declare const browser: {
     commands: {
@@ -75,7 +75,7 @@ export default class Connector implements ExtensionActions {
         if (isFirefox && typeof browser !== 'undefined' && browser.commands && browser.commands.update && browser.commands.getAll) {
             try {
                 await browser.commands.update({name: command, shortcut});
-            } catch(e) {
+            } catch (e) {
                 logWarn('Failed to update the shortcut', e);
             }
             // Query the real shortcut to get the exact value displayed by Firefox on about:addons
@@ -84,7 +84,7 @@ export default class Connector implements ExtensionActions {
             const cmd = commands.find((cmd) => cmd.name === command);
             return cmd && cmd.shortcut || null;
         } else {
-            logWarn('setShortcut: this function is implemented only for Firefox and Thunderbird');
+            logWarn ('setShortcut: this function is implemented only for Firefox and Thunderbird');
             return null;
         }
     }

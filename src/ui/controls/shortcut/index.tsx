@@ -2,7 +2,7 @@ import {m} from 'malevic';
 import {mergeClass} from '../utils';
 import type {Shortcuts} from '../../../definitions';
 import {isFirefox, isEdge} from '../../../utils/platform';
-import {logWarn} from 'inject/utils/log';
+import {logWarn} from '../../../inject/utils/log';
 
 interface ShortcutLinkProps {
     class?: string | {[cls: string]: any};
@@ -32,22 +32,31 @@ export default function ShortcutLink(props: ShortcutLinkProps) {
         const initialText = node.textContent;
         node.textContent = '...⌨';
 
+        // Note: these variables are function-global to be able to update shortcut display,
+        // but they are overwritten right before shortcut is set.
+        let ctrl = false, alt = false, command = false, shift = false, key: string = null;
+
+        function updateShortcut() {
+            const shortcut = `${ctrl ? 'Ctrl+' : alt ? 'Alt+' : command ? 'Command+' : ''}${shift ? 'Shift+' : ''}${key ? key : ''}`;
+            node.textContent = shortcut;
+        }
+
         function onKeyDown(e: KeyboardEvent) {
             e.preventDefault();
-            const ctrl = e.ctrlKey;
-            const alt = e.altKey;
-            const command = e.metaKey;
-            const shift = e.shiftKey;
+            ctrl = e.ctrlKey;
+            alt = e.altKey;
+            command = e.metaKey;
+            shift = e.shiftKey;
 
-            let key: string = null;
+            key = null;
             if (e.key === '.') {
                 key = 'Period';
-            } else if(e.key === ',') {
+            } else if (e.key === ',') {
                 key = 'Comma';
             } else if (/^Digit[0-9]$/.test(e.code)) {
                 // This is a digit key
                 // e.key can be inaccurate if Shift is also pressed
-                key = e.code.substring(5,6);
+                key = e.code.substring(5, 6);
             } else if (/^Key[A-Z]$/.test(e.code)) {
                 // This is a letter key
                 if (/^[A-Za-z]$/.test(e.key)) {
@@ -72,8 +81,7 @@ export default function ShortcutLink(props: ShortcutLinkProps) {
                 }
             }
 
-            const shortcut = `${ctrl ? 'Ctrl+' : alt ? 'Alt+' : command ? 'Command+' : ''}${shift ? 'Shift+' : ''}${key ? key : ''}`;
-            node.textContent = shortcut;
+            updateShortcut();
 
             if ((ctrl || alt || command || shift) && key) {
                 removeListeners();
@@ -84,6 +92,23 @@ export default function ShortcutLink(props: ShortcutLinkProps) {
                     node.textContent = props.textTemplate(shortcut);
                 });
             }
+        }
+
+        // Note: technically, there are left and right keys for all of these,
+        // but most people won't click two identical keys at once
+        function onKeyUp(e: KeyboardEvent) {
+            if (e.key === 'Control') {
+                ctrl = false;
+            } else if (e.key === 'Alt') {
+                alt = false;
+            } else if (e.key === 'Command') {
+                alt = false;
+            } else if (e.key === 'Shift') {
+                shift = false;
+            } else {
+                key = null;
+            }
+            updateShortcut();
         }
 
         function onBlur() {
@@ -97,10 +122,12 @@ export default function ShortcutLink(props: ShortcutLinkProps) {
 
         function removeListeners() {
             window.removeEventListener('keydown', onKeyDown, {capture: true, passive: false, once: false} as EventListenerOptions);
+            window.removeEventListener('keyup', onKeyUp, {capture: true, passive: false, once: false} as EventListenerOptions);
             window.removeEventListener('blur', onBlur, {capture: true, once: true} as EventListenerOptions);
         }
 
         window.addEventListener('keydown', onKeyDown, {capture: true, passive: false, once: false});
+        window.addEventListener('keyup', onKeyUp, {capture: true, passive: false, once: false});
         window.addEventListener('blur', onBlur, {capture: true, once: true});
         node.classList.add('shortcut--edit');
     }

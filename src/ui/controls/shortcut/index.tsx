@@ -2,7 +2,6 @@ import {m} from 'malevic';
 import {mergeClass} from '../utils';
 import type {Shortcuts} from '../../../definitions';
 import {isFirefox, isEdge} from '../../../utils/platform';
-import {logWarn} from '../../../inject/utils/log';
 
 interface ShortcutLinkProps {
     class?: string | {[cls: string]: any};
@@ -74,11 +73,9 @@ export default function ShortcutLink(props: ShortcutLinkProps) {
                     // implementation-dependent value. The actual key comes from non-deprecated e.code
                     // For details see https://developer.mozilla.org/docs/Web/API/KeyboardEvent/keyCode
                     key = e.code.substring(3);
-                } else {
-                    // This letter is not well-represented by Firefox, probably because it is a Latin-like
-                    // key with accent. This key will not work, even if set via about:addons
-                    logWarn('Could not use this key for a shortcut, please enter a different one', e);
                 }
+                // This letter is not well-represented by Firefox, probably because it is a Latin-like
+                // key with accent. This key will not work, even if set via about:addons
             }
 
             updateShortcut();

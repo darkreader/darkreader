@@ -36,7 +36,10 @@ export default function ShortcutLink(props: ShortcutLinkProps) {
         let ctrl = false, alt = false, command = false, shift = false, key: string = null;
 
         function updateShortcut() {
-            const shortcut = `${ctrl ? 'Ctrl+' : alt ? 'Alt+' : command ? 'Command+' : ''}${shift ? 'Shift+' : ''}${key ? key : ''}`;
+            if (!enteringShortcutInProgress) {
+                return;
+            }
+            const shortcut = `${ctrl ? 'Ctrl+' : ''}${alt ? 'Alt+' : command ? 'Command+' : ''}${shift ? 'Shift+' : ''}${key ? key : ''}`;
             node.textContent = shortcut;
         }
 
@@ -83,6 +86,7 @@ export default function ShortcutLink(props: ShortcutLinkProps) {
             if ((ctrl || alt || command || shift) && key) {
                 removeListeners();
                 node.blur();
+                const shortcut = `${ctrl ? 'Ctrl+' : ''}${alt ? 'Alt+' : command ? 'Command+' : ''}${shift ? 'Shift+' : ''}${key ? key : ''}`;
                 props.onSetShortcut(shortcut).then((shortcut) => {
                     enteringShortcutInProgress = false;
                     node.classList.remove('shortcut--edit');
@@ -99,7 +103,7 @@ export default function ShortcutLink(props: ShortcutLinkProps) {
             } else if (e.key === 'Alt') {
                 alt = false;
             } else if (e.key === 'Command') {
-                alt = false;
+                command = false;
             } else if (e.key === 'Shift') {
                 shift = false;
             } else {

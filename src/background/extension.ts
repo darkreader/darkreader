@@ -7,7 +7,7 @@ import Newsmaker from './newsmaker';
 import TabManager from './tab-manager';
 import UserStorage from './user-storage';
 import {setWindowTheme, resetWindowTheme} from './window-theme';
-import {getCommands, setShortcut, canInjectScript} from './utils/extension-api';
+import {getCommands, canInjectScript} from './utils/extension-api';
 import {isInTimeIntervalLocal, nextTimeInterval, isNightAtLocation, nextTimeChangeAtLocation} from '../utils/time';
 import {isURLInList, getURLHostOrProtocol, isURLEnabled, isPDF} from '../utils/url';
 import {ThemeEngine} from '../generators/theme-engines';
@@ -245,7 +245,6 @@ export class Extension {
             },
             changeSettings: async (settings) => this.changeSettings(settings),
             setTheme: (theme) => this.setTheme(theme),
-            setShortcut: ({command, shortcut}) => this.setShortcut(command, shortcut),
             toggleActiveTab: async () => this.toggleActiveTab(),
             markNewsAsRead: async (ids) => await Newsmaker.markAsRead(...ids),
             markNewsAsDisplayed: async (ids) => await Newsmaker.markAsDisplayed(...ids),
@@ -363,10 +362,6 @@ export class Extension {
     private static async getShortcuts() {
         const commands = await getCommands();
         return commands.reduce((map, cmd) => Object.assign(map, {[cmd.name]: cmd.shortcut}), {} as Shortcuts);
-    }
-
-    private static setShortcut(command: string, shortcut: string) {
-        setShortcut(command, shortcut);
     }
 
     static async collectData(): Promise<ExtensionData> {

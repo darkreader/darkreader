@@ -4,7 +4,6 @@ export enum MessageType {
     UI_UNSUBSCRIBE_FROM_CHANGES = 'ui-unsubscribe-from-changes',
     UI_CHANGE_SETTINGS = 'ui-change-settings',
     UI_SET_THEME = 'ui-set-theme',
-    UI_SET_SHORTCUT = 'ui-set-shortcut',
     UI_TOGGLE_ACTIVE_TAB = 'ui-toggle-active-tab',
     UI_MARK_NEWS_AS_READ = 'ui-mark-news-as-read',
     UI_MARK_NEWS_AS_DISPLAYED = 'ui-mark-news-as-displayed',

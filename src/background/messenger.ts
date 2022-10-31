@@ -7,7 +7,6 @@ export interface ExtensionAdapter {
     collect: () => Promise<ExtensionData>;
     changeSettings: (settings: Partial<UserSettings>) => void;
     setTheme: (theme: Partial<FilterConfig>) => void;
-    setShortcut: ({command, shortcut}: {command: string; shortcut: string}) => void;
     markNewsAsRead: (ids: string[]) => Promise<void>;
     markNewsAsDisplayed: (ids: string[]) => Promise<void>;
     toggleActiveTab: () => void;
@@ -111,9 +110,6 @@ export default class Messenger {
                 break;
             case MessageType.UI_SET_THEME:
                 this.adapter.setTheme(data);
-                break;
-            case MessageType.UI_SET_SHORTCUT:
-                this.adapter.setShortcut(data);
                 break;
             case MessageType.UI_TOGGLE_ACTIVE_TAB:
                 this.adapter.toggleActiveTab();

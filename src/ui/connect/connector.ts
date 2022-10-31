@@ -2,6 +2,13 @@ import {isFirefox} from '../../utils/platform';
 import type {ExtensionData, ExtensionActions, FilterConfig, Message, UserSettings} from '../../definitions';
 import {MessageType} from '../../utils/message';
 
+declare const browser: {
+    commands: {
+        update({name, shortcut}: chrome.commands.Command): Promise<void>;
+        getAll(): Promise<chrome.commands.Command[]>;
+    };
+};
+
 export default class Connector implements ExtensionActions {
     private changeSubscribers: Set<(data: ExtensionData) => void>;
 
@@ -58,8 +65,25 @@ export default class Connector implements ExtensionActions {
         }
     }
 
-    setShortcut(command: string, shortcut: string) {
-        chrome.runtime.sendMessage<Message>({type: MessageType.UI_SET_SHORTCUT, data: {command, shortcut}});
+    /**
+     *
+     * @param command The command to be updated
+     * @param shortcut The new shortcut pattern after the operation completes
+     */
+    async setShortcut(command: string, shortcut: string) {
+        if (isFirefox && typeof browser !== 'undefined' && browser.commands && browser.commands.update && browser.commands.getAll) {
+            try {
+                await browser.commands.update({name: command, shortcut});
+            } catch {
+                // Ignore this error
+            }
+            // Query the real shortcut to get the exact value displayed by Firefox on about:addons
+            // or in case user has non-standard keyboard layout
+            const commands = await browser.commands.getAll();
+            const cmd = commands.find((cmd) => cmd.name === command);
+            return cmd && cmd.shortcut || null;
+        }
+        return null;
     }
 
     changeSettings(settings: Partial<UserSettings>) {

@@ -1,11 +1,11 @@
 import {isSystemDarkModeEnabled, runColorSchemeChangeDetector, stopColorSchemeChangeDetector} from '../utils/media-query';
 import type {Message} from '../definitions';
 import {MessageType} from '../utils/message';
-import {addDocumentVisibilityListener, documentIsVisible, removeDocumentVisibilityListener} from '../utils/visibility';
+import {setDocumentVisibilityListener, documentIsVisible, removeDocumentVisibilityListener} from '../utils/visibility';
 
 function cleanup() {
     stopColorSchemeChangeDetector();
-    removeDocumentVisibilityListener(updateEventListeners);
+    removeDocumentVisibilityListener();
 }
 
 function sendMessage(message: Message) {
@@ -52,5 +52,5 @@ function updateEventListeners() {
     }
 }
 
-addDocumentVisibilityListener(updateEventListeners);
+setDocumentVisibilityListener(updateEventListeners);
 updateEventListeners();

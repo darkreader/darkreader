@@ -3,7 +3,7 @@
 /**
  * To handle PrivateIdentifier and Identifier nodes.
  * @param { {type: string, name?: string;} } node
- * @returns {string}
+ * @returns {string | undefined}
  */
 function handleIdentifier(node) {
     if (node.type === 'PrivateIdentifier' || node.type === 'Identifier') {
@@ -112,7 +112,7 @@ function filterNodes(node) {
 const rules = {
     'jsx-uses-m-pragma': {
         /**
-        * @param {{ name: any; }} node
+        * @param {import('eslint').Rule.RuleContext} context
         */
         create(context) {
             const pragma = 'm';

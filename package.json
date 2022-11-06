@@ -94,7 +94,7 @@
     "rollup-plugin-istanbul2": "2.0.2",
     "rollup-plugin-typescript2": "0.34.1",
     "ts-jest": "29.0.3",
-    "tslib": "2.4.0",
+    "tslib": "2.4.1",
     "typescript": "4.8.4",
     "web-ext": "7.3.1",
     "ws": "8.10.0",

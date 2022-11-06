@@ -19,24 +19,21 @@
  *    then Firefox will reset them to true and 'hidden' when tab is activated, but document.hasFocus() will be true
  *  - Safari supports document.visibilityState === 'prerender' which makes document.hidden === true even when document
  *    is visible to the user
+ *
+ * Note: This utility supports adding only one callback since currently calling code sets only one listener and Firefox
+ * has issues optimizing code with multiple callbacks stored in array or in a set.
  */
-let documentVisibilityCallbacks: Set<() => void> = new Set();
+
+let documentVisibilityListener: () => void = null;
+
 let documentIsVisible_ = !document.hidden;
-function documentVisibilityListener() {
-    if (!document.hidden || document.visibilityState !== 'hidden' || document.hasFocus()) {
-        stopWatchingForDocumentVisibility();
-        documentIsVisible_ = true;
-        const callbacks = documentVisibilityCallbacks;
-        documentVisibilityCallbacks = new Set();
-        callbacks.forEach((callback) => callback());
-    }
-}
 
 // TODO: use EventListenerOptions class once it is updated
 const listenerOptions: any = {
     capture: true,
     passive: true,
 };
+
 function watchForDocumentVisibility() {
     document.addEventListener('visibilitychange', documentVisibilityListener, listenerOptions);
     window.addEventListener('pageshow', documentVisibilityListener, listenerOptions);
@@ -49,17 +46,23 @@ function stopWatchingForDocumentVisibility() {
     window.removeEventListener('focus', documentVisibilityListener, listenerOptions);
 }
 
-export function addDocumentVisibilityListener(callback: () => void) {
-    if (documentVisibilityCallbacks.size === 0) {
+export function setDocumentVisibilityListener(callback: () => void) {
+    const alreadyWatching = Boolean(documentVisibilityListener);
+    documentVisibilityListener = () => {
+        if (!document.hidden) {
+            removeDocumentVisibilityListener();
+            callback();
+            documentIsVisible_ = true;
+        }
+    };
+    if (!alreadyWatching) {
         watchForDocumentVisibility();
     }
-    documentVisibilityCallbacks.add(callback);
 }
 
-export function removeDocumentVisibilityListener(callback: () => void) {
-    if (documentVisibilityCallbacks.delete(callback) && documentVisibilityCallbacks.size === 0) {
-        stopWatchingForDocumentVisibility();
-    }
+export function removeDocumentVisibilityListener() {
+    stopWatchingForDocumentVisibility();
+    documentVisibilityListener = null;
 }
 
 export function documentIsVisible() {

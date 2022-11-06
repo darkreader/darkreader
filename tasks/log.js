@@ -33,7 +33,7 @@ function createServer(logLevel) {
                 stream.write(`${message}\n`);
             });
             ws.on('close', () => sockets.delete(ws));
-            if (connectionAwaiter != null) {
+            if (connectionAwaiter !== null) {
                 connectionAwaiter();
             }
         });

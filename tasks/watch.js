@@ -15,7 +15,7 @@ function watch(options) {
     function onChange(path) {
         queue.add(path);
 
-        if (timeoutId != null) {
+        if (timeoutId !== null) {
             return;
         }
 

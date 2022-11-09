@@ -16,9 +16,9 @@ See the list of [language codes](https://developer.chrome.com/webstore/i18n#loca
 ## Adding a website that is already dark
 
 If a website is **already dark** and meets the following requirements:
-- All pages are dark by default regardless of the system's preferred color-scheme.
+- All web pages are dark by default, regardless of the system's preferred color scheme.
 - The URL is the actual website address. (No CNAME or URL redirects)
-- The page isn't WIP, sites will change in this phase and could afterwards not meet the requirements.
+- The website is not a work in progress. Includes placeholders or incomplete websites still in the development or designing phase.
 
 Then, you can **add it to the [dark-sites.config](https://github.com/darkreader/darkreader/blob/main/src/config/dark-sites.config) file**
 *(please, preserve the alphabetical order)*.

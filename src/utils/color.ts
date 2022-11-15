@@ -18,6 +18,10 @@ export interface HSLA {
 const hslaParseCache = new Map<string, HSLA>();
 const rgbaParseCache = new Map<string, RGBA>();
 
+export function isValidColor(color: string) {
+    return Boolean(parseColorWithCache(color));
+}
+
 export function parseColorWithCache($color: string) {
     $color = $color.trim();
     if (rgbaParseCache.has($color)) {

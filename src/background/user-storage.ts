@@ -6,6 +6,9 @@ import {readSyncStorage, readLocalStorage, writeSyncStorage, writeLocalStorage} 
 import {logWarn} from './utils/log';
 import {PromiseBarrier} from '../utils/promise-barrier';
 import {validateSettings} from '../utils/validation';
+import {isValidColor} from '../utils/color';
+
+declare const __TEST__: boolean;
 
 const SAVE_TIMEOUT = 1000;
 
@@ -22,12 +25,15 @@ export default class UserStorage {
 
     private static fillDefaults(settings: UserSettings) {
         settings.theme = {...DEFAULT_THEME, ...settings.theme};
+        this.cssUpdate(settings);
         settings.time = {...DEFAULT_SETTINGS.time, ...settings.time};
         settings.presets.forEach((preset) => {
             preset.theme = {...DEFAULT_THEME, ...preset.theme};
+            this.cssUpdate(preset);
         });
         settings.customThemes.forEach((site) => {
             site.theme = {...DEFAULT_THEME, ...site.theme};
+            this.cssUpdate(site);
         });
     }
 
@@ -146,6 +152,32 @@ export default class UserStorage {
         UserStorage.saveStorageBarrier.resolve();
         UserStorage.saveStorageBarrier = null;
     });
+
+    private static rootVariables = !__TEST__ && getComputedStyle(document.documentElement);
+
+    private static cssUpdate(settings: Partial<UserSettings>) {
+        if (__TEST__) {
+            return;
+        }
+        if (settings.theme.darkSchemeCssVariableBg && isValidColor(this.rootVariables.getPropertyValue(settings.theme.darkSchemeCssVariableBg).trim())){
+            settings.theme.darkSchemeBackgroundColor = this.rootVariables.getPropertyValue(settings.theme.darkSchemeCssVariableBg).trim();
+        }
+        if (settings.theme.darkSchemeCssVariableText && isValidColor(this.rootVariables.getPropertyValue(settings.theme.darkSchemeCssVariableText).trim())){
+            settings.theme.darkSchemeTextColor = this.rootVariables.getPropertyValue(settings.theme.darkSchemeCssVariableText).trim();
+        }
+        if (settings.theme.lightSchemeCssVariableBg && isValidColor(this.rootVariables.getPropertyValue(settings.theme.lightSchemeCssVariableBg).trim())){
+            settings.theme.lightSchemeBackgroundColor = this.rootVariables.getPropertyValue(settings.theme.lightSchemeCssVariableBg).trim();
+        }
+        if (settings.theme.lightSchemeCssVariableText && isValidColor(this.rootVariables.getPropertyValue(settings.theme.lightSchemeCssVariableText).trim())){
+            settings.theme.lightSchemeTextColor = this.rootVariables.getPropertyValue(settings.theme.lightSchemeCssVariableText).trim();
+        }
+        if (settings.theme.cssVariableScrollBar && isValidColor(this.rootVariables.getPropertyValue(settings.theme.cssVariableScrollBar).trim())){
+            settings.theme.scrollbarColor = this.rootVariables.getPropertyValue(settings.theme.cssVariableScrollBar).trim();
+        }
+        if (settings.theme.cssVariableSelection && isValidColor(this.rootVariables.getPropertyValue(settings.theme.cssVariableSelection).trim())){
+            settings.theme.selectionColor = this.rootVariables.getPropertyValue(settings.theme.cssVariableSelection).trim();
+        }
+    }
 
     static set($settings: Partial<UserSettings>) {
         if (!UserStorage.settings) {

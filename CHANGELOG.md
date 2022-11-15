@@ -1,3 +1,7 @@
+## Unreleased
+
+- CSS variables can now be used to set and automatically change Dark Reader's values.
+
 ## 4.9.60 (Oct 27, 2022)
 
 - Fixed broken hotkeys.

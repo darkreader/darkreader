@@ -68,6 +68,12 @@ export interface Theme {
     lightColorScheme: string;
     darkColorScheme: string;
     immediateModify: boolean;
+    darkSchemeCssVariableBg: string;
+    lightSchemeCssVariableBg: string;
+    darkSchemeCssVariableText: string;
+    lightSchemeCssVariableText: string;
+    cssVariableScrollBar: string;
+    cssVariableSelection: string;
 }
 
 export type FilterConfig = Theme;

@@ -53,6 +53,8 @@ function ColorsGroup({theme, change, colorSchemes}: ColorsGroupProps) {
     const csProp: keyof Theme = isDarkScheme ? 'darkColorScheme' : 'lightColorScheme';
     const bgProp: keyof Theme = isDarkScheme ? 'darkSchemeBackgroundColor' : 'lightSchemeBackgroundColor';
     const fgProp: keyof Theme = isDarkScheme ? 'darkSchemeTextColor' : 'lightSchemeTextColor';
+    const variableBgProp: keyof Theme = isDarkScheme ? 'darkSchemeCssVariableBg' : 'lightSchemeCssVariableBg';
+    const variableFgProp: keyof Theme = isDarkScheme ? 'darkSchemeCssVariableText' : 'lightSchemeCssVariableText';
     const defaultSchemeColors = isDarkScheme ? DEFAULT_COLORS.darkScheme : DEFAULT_COLORS.lightScheme;
     const defaultMatrixValues: Partial<Theme> = {brightness: DEFAULT_THEME.brightness, contrast: DEFAULT_THEME.contrast, sepia: DEFAULT_THEME.sepia, grayscale: DEFAULT_THEME.grayscale};
     const currentColorScheme = isDarkScheme ? theme.darkColorScheme : theme.lightColorScheme;
@@ -73,25 +75,25 @@ function ColorsGroup({theme, change, colorSchemes}: ColorsGroupProps) {
         <Array>
             <BackgroundColor
                 value={theme[bgProp] === 'auto' ? defaultSchemeColors.background : theme[bgProp]}
-                onChange={(v) => change({[bgProp]: v, ...defaultMatrixValues, [csProp]: 'Default'})}
+                onChange={(v) => change(v && v.charAt(0) !== '-' ? {[bgProp]: v, ...defaultMatrixValues, [csProp]: 'Default'} : {[variableBgProp]: v})}
                 canReset={theme[bgProp] !== defaultSchemeColors.background}
-                onReset={() => change({[bgProp]: DEFAULT_SETTINGS.theme[bgProp], [csProp]: 'Default'})}
+                onReset={() => change({[bgProp]: DEFAULT_SETTINGS.theme[bgProp], [csProp]: 'Default', [variableBgProp]: DEFAULT_SETTINGS.theme[variableBgProp]})}
             />
             <TextColor
                 value={theme[fgProp] === 'auto' ? defaultSchemeColors.text : theme[fgProp]}
-                onChange={(v) => change({[fgProp]: v, ...defaultMatrixValues, [csProp]: 'Default'})}
+                onChange={(v) => change(v && v.charAt(0) !== '-' ? {[fgProp]: v, ...defaultMatrixValues, [csProp]: 'Default'} : {[variableFgProp]: v})}
                 canReset={theme[fgProp] !== defaultSchemeColors.text}
-                onReset={() => change({[fgProp]: DEFAULT_SETTINGS.theme[fgProp], [csProp]: 'Default'})}
+                onReset={() => change({[fgProp]: DEFAULT_SETTINGS.theme[fgProp], [csProp]: 'Default', [variableFgProp]: DEFAULT_SETTINGS.theme[variableFgProp]})}
             />
             <Scrollbar
                 value={theme.scrollbarColor}
-                onChange={(v) => change({scrollbarColor: v})}
-                onReset={() => change({scrollbarColor: DEFAULT_SETTINGS.theme.scrollbarColor})}
+                onChange={(v) => change(v && v.charAt(0) !== '-' ? {scrollbarColor: v} : {cssVariableScrollBar: v})}
+                onReset={() => change({scrollbarColor: DEFAULT_SETTINGS.theme.scrollbarColor, cssVariableScrollBar: DEFAULT_SETTINGS.theme.cssVariableScrollBar})}
             />
             <SelectionColorEditor
                 value={theme.selectionColor}
-                onChange={(v) => change({selectionColor: v})}
-                onReset={() => change({selectionColor: DEFAULT_SETTINGS.theme.selectionColor})}
+                onChange={(v) => change(v && v.charAt(0) !== '-' ? {selectionColor: v} : {cssVariableSelection: v})}
+                onReset={() => change({selectionColor: DEFAULT_SETTINGS.theme.selectionColor, cssVariableSelection: DEFAULT_SETTINGS.theme.cssVariableSelection})}
             />
             <ColorSchemeDropDown
                 selected={currentColorScheme}

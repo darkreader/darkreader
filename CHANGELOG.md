@@ -1,3 +1,7 @@
+## Unreleased
+
+- Only invert PDFs on mail.google.com and drive.google.com, if the setting for PDF inversion has been enabled. (#10310)
+
 ## 4.9.60 (Oct 27, 2022)
 
 - Fixed broken hotkeys.

@@ -26,6 +26,14 @@ export function injectProxy(enableStyleSheetsProxy: boolean) {
     const getElementsByTagNameDescriptor = shouldWrapHTMLElement ?
         Object.getOwnPropertyDescriptor(Element.prototype, 'getElementsByTagName') : null;
 
+    // Reference:
+    // https://github.com/darkreader/darkreader/issues/10300#issuecomment-1317445632
+    const shouldProxyChildNodes = location.hostname === 'www.vy.no';
+
+    const childNodesDescriptor = shouldProxyChildNodes ?
+        Object.getOwnPropertyDescriptor(Node.prototype, 'childNodes') : null;
+
+
     const cleanUp = () => {
         Object.defineProperty(CSSStyleSheet.prototype, 'addRule', addRuleDescriptor);
         Object.defineProperty(CSSStyleSheet.prototype, 'insertRule', insertRuleDescriptor);
@@ -38,6 +46,9 @@ export function injectProxy(enableStyleSheetsProxy: boolean) {
         }
         if (shouldWrapHTMLElement) {
             Object.defineProperty(Element.prototype, 'getElementsByTagName', getElementsByTagNameDescriptor);
+        }
+        if (shouldProxyChildNodes) {
+            Object.defineProperty(Node.prototype, 'childNodes', childNodesDescriptor);
         }
     };
 
@@ -139,6 +150,14 @@ export function injectProxy(enableStyleSheetsProxy: boolean) {
         return elements;
     }
 
+    function proxyChildNodes(): NodeListOf<ChildNode> {
+        const childNodes: NodeListOf<ChildNode> = childNodesDescriptor.get.call(this);
+
+        return Object.setPrototypeOf([...childNodes].filter((element: ChildNode) => {
+            return !(element as HTMLElement).classList || !(element as HTMLElement).classList.contains('darkreader');
+        }), NodeList.prototype);
+    }
+
     Object.defineProperty(CSSStyleSheet.prototype, 'addRule', Object.assign({}, addRuleDescriptor, {value: proxyAddRule}));
     Object.defineProperty(CSSStyleSheet.prototype, 'insertRule', Object.assign({}, insertRuleDescriptor, {value: proxyInsertRule}));
     Object.defineProperty(CSSStyleSheet.prototype, 'deleteRule', Object.assign({}, deleteRuleDescriptor, {value: proxyDeleteRule}));
@@ -148,5 +167,8 @@ export function injectProxy(enableStyleSheetsProxy: boolean) {
     }
     if (shouldWrapHTMLElement) {
         Object.defineProperty(Element.prototype, 'getElementsByTagName', Object.assign({}, getElementsByTagNameDescriptor, {value: proxyGetElementsByTagName}));
+    }
+    if (shouldProxyChildNodes) {
+        Object.defineProperty(Node.prototype, 'childNodes', Object.assign({}, childNodesDescriptor, {get: proxyChildNodes}));
     }
 }

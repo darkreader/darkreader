@@ -68,7 +68,7 @@ export function removeNode(node: Node) {
 
 export function watchForNodePosition<T extends Node>(
     node: T,
-    mode: 'parent' | 'prev-sibling',
+    mode: 'head' | 'prev-sibling',
     onRestore = Function.prototype,
 ) {
     const MAX_ATTEMPTS_COUNT = 10;
@@ -108,7 +108,7 @@ export function watchForNodePosition<T extends Node>(
             attempts = 1;
         }
 
-        if (mode === 'parent') {
+        if (mode === 'head') {
             if (prevSibling && prevSibling.parentNode !== parent) {
                 logWarn('Unable to restore node position: sibling parent changed', node, prevSibling, parent);
                 stop();
@@ -128,14 +128,22 @@ export function watchForNodePosition<T extends Node>(
             }
         }
 
+        // If parent becomes disconnected from the DOM, fetches the new head and
+        // save that as parent. Do this only for the head mode, as those are
+        // important nodes to keep.
+        if (mode === 'head' && !parent.isConnected) {
+            parent = document.head;
+            // TODO: Set correct prevSibling, which needs to be the last `.darkreader` in <head> that isn't .darkeader--sync or .darkreader--cors.
+        }
+
         logWarn('Restoring node position', node, prevSibling, parent);
-        parent.insertBefore(node, prevSibling ? prevSibling.nextSibling : parent.firstChild);
+        parent.insertBefore(node, prevSibling && prevSibling.isConnected ? prevSibling.nextSibling : parent.firstChild);
         observer.takeRecords();
         onRestore && onRestore();
     });
     const observer = new MutationObserver(() => {
         if (
-            (mode === 'parent' && node.parentNode !== parent) ||
+            (mode === 'head' && (node.parentNode !== parent || !node.parentNode.isConnected)) ||
             (mode === 'prev-sibling' && node.previousSibling !== prevSibling)
         ) {
             restore();

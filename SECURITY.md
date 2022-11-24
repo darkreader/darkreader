@@ -9,5 +9,3 @@ Some web browser extension stores may have an older version currently published.
 ## Security Vulnerability Report
 
 If you have discovered a security vulnerability, please email us at <darkreaderapp@gmail.com> immediately.
-
-If you can fix the security vulnerability, please open a [pull request](https://github.com/darkreader/darkreader/pulls).

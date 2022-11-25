@@ -75,7 +75,7 @@ const nodePositionWatchers = new Map<string, ReturnType<typeof watchForNodePosit
 
 function setupNodePositionWatcher(node: Node, alias: string) {
     nodePositionWatchers.has(alias) && nodePositionWatchers.get(alias).stop();
-    nodePositionWatchers.set(alias, watchForNodePosition(node, 'parent'));
+    nodePositionWatchers.set(alias, watchForNodePosition(node, 'head'));
 }
 
 function stopStylePositionWatchers() {

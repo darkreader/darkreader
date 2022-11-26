@@ -22,7 +22,6 @@ import {clearColorCache, parseColorWithCache} from '../../utils/color';
 import {parsedURLCache} from '../../utils/url';
 import {variablesStore} from './variables';
 import {setDocumentVisibilityListener, documentIsVisible, removeDocumentVisibilityListener} from '../../utils/visibility';
-import {addNavigationListener} from './navigation';
 import {combineFixes, findRelevantFix} from './fixes';
 
 declare const __TEST__: boolean;
@@ -454,18 +453,6 @@ function isAnotherDarkReaderInstanceActive() {
     return false;
 }
 
-function navigationListener(url: string) {
-    const newRelevantFixIndex = findRelevantFix(url, allFixes);
-    /*
-    if (relevantFixIndex === newRelevantFixIndex) {
-        return;
-    }
-
-    // TODO: optimize
-    createOrUpdateDynamicTheme(filter, allFixes, isIFrame);
-    */
-}
-
 function selectRelevantFix(documentURL: string, fixes: DynamicThemeFix[]): DynamicThemeFix {
     if (fixes.length === 0 || fixes[0].url[0] !== '*') {
         logWarn('selectRelevantFix() failed to construct a single fix', documentURL, fixes);
@@ -483,9 +470,7 @@ export function createOrUpdateDynamicTheme(filterConfig: FilterConfig, dynamicTh
         fixes = selectRelevantFix(document.location.href, dynamicThemeFixes);
         // Most websites will have only the generic fix applied ('*'), some will have generic fix and one site-specific fix (two in total),
         // and very few will have multple site-specific fixes
-        if (dynamicThemeFixes.length > 2) {
-            addNavigationListener(navigationListener);
-        }
+        // TODO: add a navigation listener here for this case
     } else {
         fixes = dynamicThemeFixes;
     }

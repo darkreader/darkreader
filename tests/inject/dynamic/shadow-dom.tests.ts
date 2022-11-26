@@ -1,6 +1,6 @@
 import '../support/polyfills';
 import {DEFAULT_THEME} from '../../../src/defaults';
-import {createOrUpdateDynamicTheme2, removeDynamicTheme} from '../../../src/inject/dynamic-theme';
+import {createOrUpdateDynamicTheme, removeDynamicTheme} from '../../../src/inject/dynamic-theme';
 import {multiline, timeout} from '../support/test-utils';
 import {isFirefox, isSafari} from '../../../src/utils/platform';
 
@@ -27,7 +27,7 @@ describe('SHADOW DOM', () => {
             '<div class="shadow-dom-wrapper"></div>',
         );
         document.querySelector('.shadow-dom-wrapper').attachShadow({mode: 'open'});
-        createOrUpdateDynamicTheme2(theme, null, false);
+        createOrUpdateDynamicTheme(theme, null, false);
         const shadowRoot = document.querySelector('.shadow-dom-wrapper').shadowRoot;
         expect(shadowRoot.firstElementChild.classList.contains('darkreader--inline')).toBe(true);
         expect(shadowRoot.firstElementChild.nextElementSibling.classList.contains('darkreader--override')).toBe(true);
@@ -44,7 +44,7 @@ describe('SHADOW DOM', () => {
         shadow.appendChild(style);
         style.sheet.insertRule('h1 { color: gray }');
         style.sheet.insertRule('strong { color: red }');
-        createOrUpdateDynamicTheme2(theme, null, false);
+        createOrUpdateDynamicTheme(theme, null, false);
 
         const shadowRoot = document.querySelector('.shadow-dom-wrapper').shadowRoot;
         const testCase = shadowRoot.querySelector('.test-case-style');
@@ -58,7 +58,7 @@ describe('SHADOW DOM', () => {
         );
         const shadow = document.querySelector('.shadow-dom-wrapper').attachShadow({mode: 'open'});
 
-        createOrUpdateDynamicTheme2(theme, null, false);
+        createOrUpdateDynamicTheme(theme, null, false);
         const style = document.createElement('style');
         style.classList.add('test-case-style');
         shadow.appendChild(style);
@@ -80,7 +80,7 @@ describe('SHADOW DOM', () => {
         );
         const shadow = document.querySelector('.shadow-dom-wrapper').attachShadow({mode: 'open'});
 
-        createOrUpdateDynamicTheme2(theme, null, false);
+        createOrUpdateDynamicTheme(theme, null, false);
         const standardElement = document.createElement('p');
         standardElement.style.color = 'red';
         shadow.appendChild(standardElement);
@@ -110,7 +110,7 @@ describe('SHADOW DOM', () => {
         }
         customElements.define('custom-element', CustomElement);
 
-        createOrUpdateDynamicTheme2(theme, null, false);
+        createOrUpdateDynamicTheme(theme, null, false);
         const shadowRoot = document.querySelector('custom-element').shadowRoot;
         expect(getComputedStyle(shadowRoot.querySelector('p')).color).toBe('rgb(255, 198, 208)');
     });
@@ -134,7 +134,7 @@ describe('SHADOW DOM', () => {
             }
         }
 
-        createOrUpdateDynamicTheme2(theme, null, false);
+        createOrUpdateDynamicTheme(theme, null, false);
         customElements.define('delayed-custom-element', DelayedCustomElement);
         await timeout(0);
         const shadowRoot = document.querySelector('delayed-custom-element').shadowRoot;
@@ -165,7 +165,7 @@ describe('SHADOW DOM', () => {
         const h1 = document.createElement('h1');
         shadow.appendChild(h1);
 
-        createOrUpdateDynamicTheme2(theme, null, false);
+        createOrUpdateDynamicTheme(theme, null, false);
 
         const shadowRoot = document.querySelector('.shadow-dom-wrapper').shadowRoot;
         const testCase = shadowRoot.querySelector('.test-case-style');

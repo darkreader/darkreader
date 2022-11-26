@@ -1,5 +1,5 @@
 import {DEFAULT_THEME} from '../../../src/defaults';
-import {createOrUpdateDynamicTheme2, removeDynamicTheme} from '../../../src/inject/dynamic-theme';
+import {createOrUpdateDynamicTheme, removeDynamicTheme} from '../../../src/inject/dynamic-theme';
 import {isSafari} from '../../../src/utils/platform';
 import {multiline, timeout, waitForEvent} from '../support/test-utils';
 import {resetChromeRuntimeMessageStub, stubBackgroundFetchResponse, stubChromeRuntimeMessage} from '../support/background-stub';
@@ -63,7 +63,7 @@ describe('LINK STYLES', () => {
         container.innerHTML = multiline(
             '<h1>Link <strong>override</strong>!</h1>',
         );
-        createOrUpdateDynamicTheme2(theme, null, false);
+        createOrUpdateDynamicTheme(theme, null, false);
 
         await timeout(50);
         expect(getComputedStyle(container.querySelector('h1')).backgroundColor).toBe('rgb(102, 102, 102)');
@@ -79,7 +79,7 @@ describe('LINK STYLES', () => {
         container.innerHTML = multiline(
             '<h1><strong>Cross-origin</strong> link override</h1>',
         );
-        createOrUpdateDynamicTheme2(theme, null, false);
+        createOrUpdateDynamicTheme(theme, null, false);
 
         await waitForEvent('__darkreader__test__dynamicUpdateComplete');
         expect(getComputedStyle(container.querySelector('h1')).backgroundColor).toBe('rgb(102, 102, 102)');
@@ -98,7 +98,7 @@ describe('LINK STYLES', () => {
         container.innerHTML = multiline(
             '<h1><strong>Cross-origin import</strong> link override</h1>',
         );
-        createOrUpdateDynamicTheme2(theme, null, false);
+        createOrUpdateDynamicTheme(theme, null, false);
 
         await waitForEvent('__darkreader__test__dynamicUpdateComplete');
         expect(getComputedStyle(container.querySelector('h1')).backgroundColor).toBe('rgb(102, 102, 102)');
@@ -117,7 +117,7 @@ describe('LINK STYLES', () => {
         container.innerHTML = multiline(
             '<h1><strong>Cross-origin import</strong> link override</h1>',
         );
-        createOrUpdateDynamicTheme2(theme, null, false);
+        createOrUpdateDynamicTheme(theme, null, false);
         await waitForEvent('__darkreader__test__dynamicUpdateComplete');
         expect(getComputedStyle(container.querySelector('h1')).backgroundColor).toBe('rgb(102, 102, 102)');
         expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(255, 255, 255)');
@@ -138,7 +138,7 @@ describe('LINK STYLES', () => {
         expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(0, 0, 0)');
         expect(getComputedStyle(container.querySelector('h1 strong')).color).toBe('rgb(255, 0, 0)');
 
-        createOrUpdateDynamicTheme2(theme, null, false);
+        createOrUpdateDynamicTheme(theme, null, false);
         await waitForEvent('__darkreader__test__dynamicUpdateComplete');
         expect(getComputedStyle(container.querySelector('h1')).backgroundColor).toBe('rgb(102, 102, 102)');
         expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(255, 255, 255)');
@@ -153,7 +153,7 @@ describe('LINK STYLES', () => {
         container.innerHTML = multiline(
             '<h1>Link <strong>disabled</strong>!</h1>',
         );
-        createOrUpdateDynamicTheme2(theme, null, false);
+        createOrUpdateDynamicTheme(theme, null, false);
 
         await timeout(50);
         expect(selectTestStyleLink().nextElementSibling.classList.contains(isSafari ? 'darkreader--cors' : 'darkreader--sync')).toBe(true);
@@ -173,7 +173,7 @@ describe('LINK STYLES', () => {
             '</style>',
             '<h1>Link <strong>loading with non-href attribute</strong>!</h1>',
         );
-        createOrUpdateDynamicTheme2(theme, null, false);
+        createOrUpdateDynamicTheme(theme, null, false);
 
         await timeout(50);
         const h1 = document.querySelector('h1');
@@ -192,7 +192,7 @@ describe('LINK STYLES', () => {
         container.innerHTML = multiline(
             '<h1><strong>Cross-origin import</strong> link override</h1>',
         );
-        createOrUpdateDynamicTheme2(theme, null, false);
+        createOrUpdateDynamicTheme(theme, null, false);
 
         await waitForEvent('__darkreader__test__dynamicUpdateComplete');
         expect(getComputedStyle(container.querySelector('h1')).backgroundColor).toBe('rgb(102, 102, 102)');
@@ -212,7 +212,7 @@ describe('LINK STYLES', () => {
         container.innerHTML = multiline(
             '<h1><strong>Cross-origin import</strong> link override</h1>',
         );
-        createOrUpdateDynamicTheme2(theme, null, false);
+        createOrUpdateDynamicTheme(theme, null, false);
 
         await timeout(1000);
         expect(getComputedStyle(container.querySelector('h1')).backgroundColor).toBe('rgb(102, 102, 102)');

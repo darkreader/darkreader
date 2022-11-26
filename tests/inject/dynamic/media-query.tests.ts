@@ -1,6 +1,6 @@
 import '../support/polyfills';
 import {DEFAULT_THEME} from '../../../src/defaults';
-import {createOrUpdateDynamicTheme2, removeDynamicTheme} from '../../../src/inject/dynamic-theme';
+import {createOrUpdateDynamicTheme, removeDynamicTheme} from '../../../src/inject/dynamic-theme';
 import {multiline, timeout} from '../support/test-utils';
 
 const theme = {
@@ -34,7 +34,7 @@ describe('MEDIA QUERIES', () => {
             '<h1>Some test foor...... <strong>Oh uhm removing styles :(</strong>!</h1>',
         );
 
-        createOrUpdateDynamicTheme2(theme, null, false);
+        createOrUpdateDynamicTheme(theme, null, false);
         expect(getComputedStyle(document.querySelector('h1')).backgroundColor).toBe('rgb(0, 102, 0)');
         expect(getComputedStyle(document.querySelector('h1 strong')).color).toBe('rgb(255, 174, 26)');
         expect(document.querySelector('.testcase-style-2').nextElementSibling.classList.contains('darkreader--sync')).toBe(false);
@@ -49,7 +49,7 @@ describe('MEDIA QUERIES', () => {
             '<h1>Some test foor...... <strong>Oh uhm removing styles :(</strong>!</h1>',
         );
 
-        createOrUpdateDynamicTheme2(theme, null, false);
+        createOrUpdateDynamicTheme(theme, null, false);
 
         await timeout(0);
         expect(getComputedStyle(document.querySelector('h1')).backgroundColor).toBe('rgb(0, 102, 0)');
@@ -73,7 +73,7 @@ describe('MEDIA QUERIES', () => {
             '<h1>Some test foor...... <strong>Oh uhm removing styles :(</strong>!</h1>',
         );
 
-        createOrUpdateDynamicTheme2(theme, null, false);
+        createOrUpdateDynamicTheme(theme, null, false);
         expect(getComputedStyle(document.querySelector('h1')).backgroundColor).toBe('rgb(0, 102, 0)');
         expect(getComputedStyle(document.querySelector('h1 strong')).color).toBe('rgb(255, 174, 26)');
         expect(getComputedStyle(document.body).backgroundColor).toBe('rgb(0, 0, 0)');
@@ -92,7 +92,7 @@ describe('MEDIA QUERIES', () => {
             '<h1>Some test media query i guess</h1>',
         );
 
-        createOrUpdateDynamicTheme2(theme, null, false);
+        createOrUpdateDynamicTheme(theme, null, false);
         expect(getComputedStyle(document.querySelector('h1')).backgroundColor).toBe('rgb(0, 102, 0)');
         expect((document.querySelector('.testcase-style').nextElementSibling as HTMLStyleElement).sheet.cssRules.length).toBe(2);
     });
@@ -112,7 +112,7 @@ describe('MEDIA QUERIES', () => {
             '<h1>Some test media query i guess</h1>',
         );
 
-        createOrUpdateDynamicTheme2(theme, null, false);
+        createOrUpdateDynamicTheme(theme, null, false);
         expect(getComputedStyle(document.querySelector('h1')).backgroundColor).toBe('rgb(0, 102, 0)');
         expect((document.querySelector('.testcase-style').nextElementSibling as HTMLStyleElement).sheet.cssRules.length).toBe(2);
     });
@@ -129,7 +129,7 @@ describe('MEDIA QUERIES', () => {
             '</style>',
             '<h1>Some test foor...... <strong>Oh uh media query :D</strong>!</h1>',
         );
-        createOrUpdateDynamicTheme2(theme, null, false);
+        createOrUpdateDynamicTheme(theme, null, false);
         expect(getComputedStyle(document.querySelector('h1')).backgroundColor).toBe('rgb(102, 102, 102)');
         expect(getComputedStyle(document.querySelector('h1 strong')).color).toBe('rgb(255, 26, 26)');
         expect(document.querySelector('.testcase-style-2').nextElementSibling.classList.contains('darkreader--sync')).toBe(true);
@@ -148,7 +148,7 @@ describe('MEDIA QUERIES', () => {
             '<h1>Some test foor...... <strong>Oh uhm removing styles :(</strong>!</h1>',
         );
 
-        createOrUpdateDynamicTheme2(theme, null, false);
+        createOrUpdateDynamicTheme(theme, null, false);
         expect(getComputedStyle(document.querySelector('h1')).backgroundColor).toBe('rgb(0, 102, 0)');
     });
 
@@ -165,7 +165,7 @@ describe('MEDIA QUERIES', () => {
             '<h1>Some test foor...... <strong>Oh uhm removing styles :(</strong>!</h1>',
         );
 
-        createOrUpdateDynamicTheme2(theme, null, false);
+        createOrUpdateDynamicTheme(theme, null, false);
         expect(getComputedStyle(document.querySelector('h1')).backgroundColor).toBe('rgb(0, 102, 0)');
         expect(getComputedStyle(document.querySelector('h1 strong')).color).toBe('rgb(255, 174, 26)');
         expect(document.querySelector('.testcase-style-2').nextElementSibling.classList.contains('darkreader--sync')).toBe(false);
@@ -180,7 +180,7 @@ describe('MEDIA QUERIES', () => {
             '</style>',
             '<h1>Some test foor...... <strong>Oh uhm removing styles :(</strong>!</h1>',
         );
-        createOrUpdateDynamicTheme2(theme, null, false);
+        createOrUpdateDynamicTheme(theme, null, false);
         expect(getComputedStyle(document.querySelector('h1')).backgroundColor).toBe('rgb(0, 102, 0)');
     });
 });

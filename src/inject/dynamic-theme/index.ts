@@ -470,21 +470,22 @@ function selectRelevantFix(documentURL: string, fixes: DynamicThemeFix[]): Dynam
  * It enables extension/site to provice multple fixes for multiple different URLs
  * TODO: expose this function to API builds via to src/api/enable()
  */
-export function createOrUpdateDynamicTheme2(filterConfig: FilterConfig, dynamicThemeFixes: DynamicThemeFix[], iframe: boolean) {
+export function createOrUpdateDynamicTheme(filterConfig: FilterConfig, dynamicThemeFixes: DynamicThemeFix[], iframe: boolean) {
     const dynamicThemeFix = selectRelevantFix(document.location.href, dynamicThemeFixes);
 
     // Most websites will have only the generic fix applied ('*'), some will have generic fix and one site-specific fix (two in total),
     // and very few will have multple site-specific fixes
     // TODO: add a navigation listener here for this case
 
-    createOrUpdateDynamicTheme(filterConfig, dynamicThemeFix, iframe);
+    createOrUpdateDynamicThemeInternal(filterConfig, dynamicThemeFix, iframe);
 }
 
 /**
- * Note: This function should be directly used only in API builds, it is exported only for backwards compatibility,
- * extension should use only createOrUpdateDynamicTheme2()
+ * Note: This function should be directly used only in API builds, it is exported by this fle
+ * only for use in src/api/enable() for backwards compatibility,
+ * extension should use only createOrUpdateDynamicTheme()
  */
-export function createOrUpdateDynamicTheme(filterConfig: FilterConfig, dynamicThemeFixes: DynamicThemeFix, iframe: boolean) {
+export function createOrUpdateDynamicThemeInternal(filterConfig: FilterConfig, dynamicThemeFixes: DynamicThemeFix, iframe: boolean) {
     filter = filterConfig;
     fixes = dynamicThemeFixes;
     if (fixes) {

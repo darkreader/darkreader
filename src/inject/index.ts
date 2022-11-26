@@ -1,7 +1,7 @@
 import {createOrUpdateStyle, removeStyle} from './style';
 import {createOrUpdateSVGFilter, removeSVGFilter} from './svg-filter';
 import {runDarkThemeDetector, stopDarkThemeDetector} from './detector';
-import {createOrUpdateDynamicTheme2, removeDynamicTheme, cleanDynamicThemeCache} from './dynamic-theme';
+import {createOrUpdateDynamicTheme, removeDynamicTheme, cleanDynamicThemeCache} from './dynamic-theme';
 import {logWarn, logInfoCollapsed} from './utils/log';
 import {isSystemDarkModeEnabled, runColorSchemeChangeDetector, stopColorSchemeChangeDetector} from '../utils/media-query';
 import {collectCSS} from './dynamic-theme/css-collection';
@@ -101,7 +101,7 @@ function onMessage({type, data}: Message) {
         case MessageType.BG_ADD_DYNAMIC_THEME: {
             const {theme, fixes, isIFrame, detectDarkTheme} = data as {theme: Theme; fixes: DynamicThemeFix[]; isIFrame: boolean; detectDarkTheme: boolean};
             removeStyle();
-            createOrUpdateDynamicTheme2(theme, fixes, isIFrame);
+            createOrUpdateDynamicTheme(theme, fixes, isIFrame);
             if (detectDarkTheme) {
                 runDarkThemeDetector((hasDarkTheme) => {
                     if (hasDarkTheme) {

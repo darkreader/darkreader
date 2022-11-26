@@ -1,5 +1,5 @@
 import {formatSitesFixesConfig} from './utils/format';
-import {parseSitesFixesConfig, getSitesFixesFor} from './utils/parse';
+import {parseSitesFixesConfig, getSitesFixesFor, getDomain} from './utils/parse';
 import type {SitePropsIndex} from './utils/parse';
 import {parseArray, formatArray} from '../utils/text';
 import {compareURLPatterns} from '../utils/url';
@@ -70,6 +70,9 @@ export function getDynamicThemeFixesFor(url: string, isTopFrame: boolean, text: 
             fixes[0].css += '\nembed[type="application/pdf"][src="about:blank"] { filter: invert(100%) contrast(90%); }';
         } else {
             fixes[0].css += '\nembed[type="application/pdf"] { filter: invert(100%) contrast(90%); }';
+        }
+        if (['drive.google.com', 'mail.google.com'].includes(getDomain(url))) {
+            common.invert.push('div[role="dialog"] div[role="document"]');
         }
     }
 

@@ -31,7 +31,7 @@ function createServer() {
                 }
             });
             ws.on('close', () => sockets.delete(ws));
-            if (connectionAwaiter != null) {
+            if (connectionAwaiter !== null) {
                 connectionAwaiter();
             }
         });

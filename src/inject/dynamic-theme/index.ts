@@ -21,7 +21,7 @@ import {injectProxy} from './stylesheet-proxy';
 import {clearColorCache, parseColorWithCache} from '../../utils/color';
 import {parsedURLCache} from '../../utils/url';
 import {variablesStore} from './variables';
-import {addDocumentVisibilityListener, documentIsVisible, removeDocumentVisibilityListener} from '../../utils/visibility';
+import {setDocumentVisibilityListener, documentIsVisible, removeDocumentVisibilityListener} from '../../utils/visibility';
 import {addNavigationListener} from './navigation';
 import {combineFixes, findRelevantFix} from './fixes';
 
@@ -79,7 +79,7 @@ const nodePositionWatchers = new Map<string, ReturnType<typeof watchForNodePosit
 
 function setupNodePositionWatcher(node: Node, alias: string) {
     nodePositionWatchers.has(alias) && nodePositionWatchers.get(alias).stop();
-    nodePositionWatchers.set(alias, watchForNodePosition(node, 'parent'));
+    nodePositionWatchers.set(alias, watchForNodePosition(node, 'head'));
 }
 
 function stopStylePositionWatchers() {
@@ -334,7 +334,7 @@ function createThemeAndWatchForUpdates() {
     createStaticStyleOverrides();
 
     if (!documentIsVisible() && !filter.immediateModify) {
-        addDocumentVisibilityListener(runDynamicStyle);
+        setDocumentVisibilityListener(runDynamicStyle);
     } else {
         runDynamicStyle();
     }
@@ -576,7 +576,7 @@ export function removeDynamicTheme() {
 export function cleanDynamicThemeCache() {
     variablesStore.clear();
     parsedURLCache.clear();
-    removeDocumentVisibilityListener(runDynamicStyle);
+    removeDocumentVisibilityListener();
     cancelRendering();
     stopWatchingForUpdates();
     cleanModificationCache();

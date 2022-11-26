@@ -31,7 +31,7 @@ describe('Modifying config via Developer tools', () => {
         await expect(page.evaluate(() => getComputedStyle(document.querySelector('h1')).color)).resolves.toBe('rgb(255, 26, 26)');
         await expect(page.evaluate(() => getComputedStyle(document.querySelector('a')).color)).resolves.toBe('rgb(51, 145, 255)');
 
-        await devtoolsUtils.paste(multiline(
+        await devtoolsUtils.paste([
             '*',
             '',
             'CSS',
@@ -45,7 +45,7 @@ describe('Modifying config via Developer tools', () => {
             'CSS',
             'color: red',
             ''
-        ));
+        ].join('\n'));
         await timeout(1000);
 
         await expect(page.evaluate(() => getComputedStyle(document.documentElement).backgroundColor)).resolves.toBe('rgb(24, 26, 27)');

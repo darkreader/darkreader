@@ -7,16 +7,16 @@ assignees: ''
 ---
 
 <!--
-  ⚠⚠ Do not delete this issue template! ⚠⚠
-  Reported issues must use this template and have all the necessary information provided.
-  Incomplete reports are likely to be ignored and closed.
--->
+  Please do NOT delete this template.
+  Fill out every section of this report and remove any unneeded ones.
+  Failure to follow these requirements will result in this being closed.
 
-<!--
-  Thank you for taking the time to create a feature request.
-  Ensure that there are no other existing requests for this feature.
-  Also, remember to fill out every section on this request and remove any that are not needed.
-  Finally, place a brief description in the title of this request.
+  Before submitting, please perform the following steps:
+
+  1. Search for any existing request about this feature.
+  2. Place a brief description in the title of this feature request.
+
+  Thank you for taking the time to create this feature request.
 -->
 
 

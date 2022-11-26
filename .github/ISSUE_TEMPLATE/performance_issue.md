@@ -7,20 +7,18 @@ assignees: ''
 ---
 
 <!--
-  ⚠⚠ Do not delete this issue template! ⚠⚠
-  Reported issues must use this template and have all the necessary information provided.
-  Incomplete reports are likely to be ignored and closed.
--->
+  Please do NOT delete this template.
+  Fill out every section of this report and remove any unneeded ones.
+  Failure to follow these requirements will result in this being closed.
 
-<!--
-  Thank you for taking the time to create a report about a performance issue.
-  Ensure that there are no other existing reports for this performance issue.
-  Please check if the issue is resolved after a restart of the browser.
-  Additionally, you should check if the issue persists in a new browser profile.
-  Remember to fill out every section on this report and remove any that are not needed.
-  Finally, place a brief description in the title of this report.
-  NOTE: Ensure that this is an actual performance issue.
-  One extra second to load the website is not a performance issue.
+  Before submitting, please perform the following steps:
+
+  1. Search for any existing report about this issue.
+  2. Restart your web browser to check if that resolves this issue.
+  3. Make sure you can recreate this issue in a new web browser profile.
+  4. Place a brief description in the title of this report.
+
+  Thank you for taking the time to report this issue.
 -->
 
 
@@ -30,33 +28,31 @@ assignees: ''
 <!-- Provide the website address. -->
 
 ## Steps To Reproduce
-<!-- Provide steps to reproduce the problem, which will allow us to troubleshoot this performance issue. -->
-<!--
-Here is an example:
+<!-- Provide steps to reproduce this performance issue.
 - Go to example.com.
 - Hover over the example button.
 - Notice spikes in CPU usage.
 -->
 
 ## Performance Profile
-<!-- Provide a link to a Chromium or a Firefox profile. -->
+<!-- Provide a link to a Chromium or Firefox profile. -->
 
 ## Screenshots
 <!-- If applicable, add screenshots to help explain this performance issue. -->
 
 ## System Information
 <!--
-  Specify the browser name and version as well as the Dark Reader version you are using.
+  Specify the operating system, web browser name and version, and the Dark Reader version.
   Please do an online search for help if you are not familiar with how to get this information.
 -->
 
-- OS: <!-- e.g. Windows, macOS, Linux -->
-- Browser: <!-- e.g. Chrome 91, Firefox 90, Edge 91, Safari 14 -->
+- Operating System: <!-- e.g. Windows, macOS, Linux -->
+- Web Browser: <!-- e.g. Chrome 91, Firefox 90, Edge 91, Safari 14 -->
 - Dark Reader Version: <!-- e.g. 4.9.34 -->
 
 ## Additional Context
 - Does this happen when Dark Reader is disabled?
-- Does this happen in other browsers?
+- Does this happen in other web browsers?
 - Do you have hardware acceleration enabled?
 
 <!-- Provide any additional information about this performance issue. -->

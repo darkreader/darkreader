@@ -234,6 +234,23 @@ it('URL is enabled', () => {
         {isProtected: false, isInDarkList: true},
     )).toEqual(false);
 
+    // Default URL matches everything
+    expect(isURLMatched('http://example.com', '*')).toEqual(true);
+    expect(isURLMatched('https://example.com', '*')).toEqual(true);
+    expect(isURLMatched('file:///c/some_file.pdf', '*')).toEqual(true);
+    expect(isURLMatched('chrome://settings', '*')).toEqual(true);
+    expect(isURLMatched('chrome-extension://settings', '*')).toEqual(true);
+    expect(isURLMatched('edge://settings', '*')).toEqual(true);
+    expect(isURLMatched('brave://settings', '*')).toEqual(true);
+    expect(isURLMatched('kiwi://settings', '*')).toEqual(true);
+    expect(isURLMatched('about:blank', '*')).toEqual(true);
+    expect(isURLMatched('about:preferences', '*')).toEqual(true);
+    expect(isURLMatched('[::1]', '*')).toEqual(true);
+    expect(isURLMatched('[::1]:80', '*')).toEqual(true);
+    expect(isURLMatched('127.0.0.1', '*')).toEqual(true);
+    expect(isURLMatched('127.0.0.1:80', '*')).toEqual(true);
+    expect(isURLMatched('localhost', '*')).toEqual(true);
+
     // Some URLs can have unescaped [] in query
     expect(isURLMatched(
         'google.co.uk/order.php?bar=[foo]',

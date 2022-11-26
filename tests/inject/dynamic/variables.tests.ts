@@ -1,7 +1,7 @@
 import '../support/polyfills';
 import {DEFAULT_THEME} from '../../../src/defaults';
 import {isFirefox} from '../../../src/utils/platform';
-import {createOrUpdateDynamicTheme, removeDynamicTheme} from '../../../src/inject/dynamic-theme';
+import {createOrUpdateDynamicTheme2, removeDynamicTheme} from '../../../src/inject/dynamic-theme';
 import {multiline, timeout, waitForEvent} from '../support/test-utils';
 import {stubChromeRuntimeGetURL} from '../support/background-stub';
 import {getJSEchoURL} from '../support/echo-client';
@@ -53,7 +53,7 @@ describe('CSS VARIABLES OVERRIDE', () => {
             '</style>',
             '<h1>CSS <strong>variables</strong>!</h1>',
         );
-        createOrUpdateDynamicTheme(theme, null, false);
+        createOrUpdateDynamicTheme2(theme, null, false);
         expect(getComputedStyle(container).backgroundColor).toBe('rgb(0, 0, 0)');
         expect(getComputedStyle(container.querySelector('h1')).backgroundColor).toBe('rgb(102, 102, 102)');
         expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(255, 255, 255)');
@@ -72,7 +72,7 @@ describe('CSS VARIABLES OVERRIDE', () => {
             '</style>',
             '<h1>CSS <strong>variables</strong>!</h1>',
         );
-        createOrUpdateDynamicTheme(theme, null, false);
+        createOrUpdateDynamicTheme2(theme, null, false);
         expect(getComputedStyle(container).backgroundColor).toBe('rgb(0, 0, 0)');
         expect(getComputedStyle(container.querySelector('h1')).backgroundColor).toBe('rgb(102, 102, 102)');
         expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(255, 255, 255)');
@@ -93,7 +93,7 @@ describe('CSS VARIABLES OVERRIDE', () => {
             '</style>',
             '<h1>CSS <strong>variables</strong>!</h1>',
         );
-        createOrUpdateDynamicTheme(theme, null, false);
+        createOrUpdateDynamicTheme2(theme, null, false);
         expect(getComputedStyle(container).backgroundColor).toBe('rgb(0, 0, 0)');
         expect(getComputedStyle(container.querySelector('h1')).backgroundColor).toBe('rgb(102, 102, 102)');
         expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(255, 255, 255)');
@@ -108,7 +108,7 @@ describe('CSS VARIABLES OVERRIDE', () => {
             '</style>',
             '<h1>CSS <strong>variables</strong>!</h1>',
         );
-        createOrUpdateDynamicTheme(theme, null, false);
+        createOrUpdateDynamicTheme2(theme, null, false);
         expect(getComputedStyle(container).backgroundColor).toBe('rgb(0, 0, 0)');
         expect(getComputedStyle(container.querySelector('h1')).backgroundColor).toBe('rgba(0, 0, 0, 0)');
         expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(255, 255, 255)');
@@ -122,7 +122,7 @@ describe('CSS VARIABLES OVERRIDE', () => {
             '</style>',
             '<h1>CSS <strong>variables</strong>!</h1>',
         );
-        createOrUpdateDynamicTheme(theme, null, false);
+        createOrUpdateDynamicTheme2(theme, null, false);
         expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(255, 26, 26)');
     });
 
@@ -136,7 +136,7 @@ describe('CSS VARIABLES OVERRIDE', () => {
             '</style>',
             '<h1>CSS <strong>variables</strong>!</h1>',
         );
-        createOrUpdateDynamicTheme(theme, null, false);
+        createOrUpdateDynamicTheme2(theme, null, false);
         expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(140, 255, 140)');
     });
 
@@ -151,7 +151,7 @@ describe('CSS VARIABLES OVERRIDE', () => {
             '</style>',
             '<h1>CSS <strong>variables</strong>!</h1>',
         );
-        createOrUpdateDynamicTheme(theme, null, false);
+        createOrUpdateDynamicTheme2(theme, null, false);
         expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(255, 26, 26)');
     });
 
@@ -166,7 +166,7 @@ describe('CSS VARIABLES OVERRIDE', () => {
             '</style>',
             '<h1>CSS <strong>variables</strong>!</h1>',
         );
-        createOrUpdateDynamicTheme(theme, null, false);
+        createOrUpdateDynamicTheme2(theme, null, false);
         expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(255, 26, 26)');
     });
 
@@ -183,7 +183,7 @@ describe('CSS VARIABLES OVERRIDE', () => {
             '</style>',
             '<h1>CSS <strong>variables</strong></h1>',
         );
-        createOrUpdateDynamicTheme(theme, null, false);
+        createOrUpdateDynamicTheme2(theme, null, false);
         expect(getComputedStyle(container.querySelector('h1')).backgroundColor).toBe('rgb(204, 0, 0)');
     });
 
@@ -200,7 +200,7 @@ describe('CSS VARIABLES OVERRIDE', () => {
             '</style>',
             '<h1>CSS <strong>variables</strong></h1>',
         );
-        createOrUpdateDynamicTheme(theme, null, false);
+        createOrUpdateDynamicTheme2(theme, null, false);
         expect(getComputedStyle(container.querySelector('h1')).backgroundColor).toBe('rgb(204, 0, 0)');
     });
 
@@ -218,7 +218,7 @@ describe('CSS VARIABLES OVERRIDE', () => {
             '</style>',
             '<h1>CSS <strong>variables</strong></h1>',
         );
-        createOrUpdateDynamicTheme(theme, null, false);
+        createOrUpdateDynamicTheme2(theme, null, false);
         expect(getComputedStyle(container.querySelector('h1')).backgroundColor).toBe('rgb(204, 0, 0)');
         expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(255, 26, 26)');
     });
@@ -242,7 +242,7 @@ describe('CSS VARIABLES OVERRIDE', () => {
             '<h1 class="dark">Dark background light text</h1>',
             '<h1 class="light">Light background dark text</h1>',
         );
-        createOrUpdateDynamicTheme(theme, null, false);
+        createOrUpdateDynamicTheme2(theme, null, false);
         expect(getComputedStyle(container.querySelector('.dark')).backgroundColor).toBe('rgb(204, 0, 0)');
         expect(getComputedStyle(container.querySelector('.dark')).color).toBe('rgb(140, 255, 140)');
         expect(getComputedStyle(container.querySelector('.light')).backgroundColor).toBe('rgb(0, 102, 0)');
@@ -265,7 +265,7 @@ describe('CSS VARIABLES OVERRIDE', () => {
             '</style>',
             '<h1>Variables</h1>',
         );
-        createOrUpdateDynamicTheme(theme, null, false);
+        createOrUpdateDynamicTheme2(theme, null, false);
         expect(getComputedStyle(container.querySelector('h1')).backgroundImage).toBe('linear-gradient(rgb(0, 102, 0), rgb(0, 0, 0))');
         expect(getComputedStyle(container.querySelector('h1')).borderColor).toBe('rgb(0, 217, 0)');
     });
@@ -278,7 +278,7 @@ describe('CSS VARIABLES OVERRIDE', () => {
             '</style>',
             '<h1>CSS <strong>variables</strong>!</h1>',
         );
-        createOrUpdateDynamicTheme(theme, null, false);
+        createOrUpdateDynamicTheme2(theme, null, false);
         expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(140, 255, 140)');
     });
 
@@ -292,7 +292,7 @@ describe('CSS VARIABLES OVERRIDE', () => {
             '</style>',
             '<h1>CSS <strong>variables</strong>!</h1>',
         );
-        createOrUpdateDynamicTheme(theme, null, false);
+        createOrUpdateDynamicTheme2(theme, null, false);
         expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(255, 255, 255)');
     });
 
@@ -307,7 +307,7 @@ describe('CSS VARIABLES OVERRIDE', () => {
             '</style>',
             '<h1>CSS <strong>variables</strong>!</h1>',
         );
-        createOrUpdateDynamicTheme(theme, null, false);
+        createOrUpdateDynamicTheme2(theme, null, false);
         expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(255, 255, 255)');
     });
 
@@ -323,7 +323,7 @@ describe('CSS VARIABLES OVERRIDE', () => {
             '</style>',
             '<h1>CSS <strong>variables</strong>!</h1>',
         );
-        createOrUpdateDynamicTheme(theme, null, false);
+        createOrUpdateDynamicTheme2(theme, null, false);
         expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(255, 26, 26)');
 
         const styleElement = document.getElementById('variables') as HTMLStyleElement;
@@ -340,7 +340,7 @@ describe('CSS VARIABLES OVERRIDE', () => {
             '</style>',
             '<h1>CSS <strong>variables</strong>!</h1>',
         );
-        createOrUpdateDynamicTheme(theme, null, false);
+        createOrUpdateDynamicTheme2(theme, null, false);
         expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(255, 26, 26)');
 
         document.documentElement.setAttribute('style', '--text: green;');
@@ -362,7 +362,7 @@ describe('CSS VARIABLES OVERRIDE', () => {
             '<h1 class="red">Red CSS variable</h1>',
             '<h1 class="green">Green CSS variable</h1>',
         );
-        createOrUpdateDynamicTheme(theme, null, false);
+        createOrUpdateDynamicTheme2(theme, null, false);
         expect(getComputedStyle(container.querySelector('.red')).color).toBe('rgb(255, 26, 26)');
         expect(getComputedStyle(container.querySelector('.green')).color).toBe('rgb(140, 255, 140)');
     });
@@ -383,7 +383,7 @@ describe('CSS VARIABLES OVERRIDE', () => {
             '</style>',
             '<h1>Dark <strong>Theme</strong>!</h1>',
         );
-        createOrUpdateDynamicTheme(theme, null, false);
+        createOrUpdateDynamicTheme2(theme, null, false);
         expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(255, 255, 255)');
         expect(getComputedStyle(container.querySelector('h1')).backgroundColor).toBe('rgb(0, 0, 0)');
     });
@@ -404,7 +404,7 @@ describe('CSS VARIABLES OVERRIDE', () => {
             '</style>',
             '<h1>Colors with variables inside</h1>',
         );
-        createOrUpdateDynamicTheme(theme, null, false);
+        createOrUpdateDynamicTheme2(theme, null, false);
         expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(255, 255, 255)');
         expect(getComputedStyle(container.querySelector('h1')).backgroundColor).toBe('rgb(0, 0, 0)');
     });
@@ -418,7 +418,7 @@ describe('CSS VARIABLES OVERRIDE', () => {
             '</style>',
             '<h1>Colors with variables inside</h1>',
         );
-        createOrUpdateDynamicTheme(theme, null, false);
+        createOrUpdateDynamicTheme2(theme, null, false);
         expect(getComputedStyle(container.querySelector('h1')).backgroundColor).toBe('rgb(204, 0, 0)');
     });
 
@@ -440,7 +440,7 @@ describe('CSS VARIABLES OVERRIDE', () => {
             '</style>',
             '<h1>Colors with variables inside</h1>',
         );
-        createOrUpdateDynamicTheme(theme, null, false);
+        createOrUpdateDynamicTheme2(theme, null, false);
         expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(255, 26, 26)');
         expect(getComputedStyle(container.querySelector('h1')).backgroundColor).toBe('rgb(204, 0, 0)');
     });
@@ -464,7 +464,7 @@ describe('CSS VARIABLES OVERRIDE', () => {
             '</style>',
             '<h1>Colors with variables inside</h1>',
         );
-        createOrUpdateDynamicTheme(theme, null, false);
+        createOrUpdateDynamicTheme2(theme, null, false);
         expect(getComputedStyle(container.querySelector('h1')).backgroundColor).toBe('rgb(204, 0, 0)');
         expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(51, 125, 255)');
     });
@@ -482,7 +482,7 @@ describe('CSS VARIABLES OVERRIDE', () => {
             '</style>',
             '<h1>Colors with variables inside</h1>',
         );
-        createOrUpdateDynamicTheme(theme, null, false);
+        createOrUpdateDynamicTheme2(theme, null, false);
         const anotherStyle = document.createElement('style');
         anotherStyle.textContent = multiline(
             ':root {',
@@ -514,7 +514,7 @@ describe('CSS VARIABLES OVERRIDE', () => {
             '</style>',
             '<h1>Colors with variables inside</h1>',
         );
-        createOrUpdateDynamicTheme(theme, null, false);
+        createOrUpdateDynamicTheme2(theme, null, false);
         expect(getComputedStyle(container.querySelector('h1')).backgroundColor).toBe('rgb(204, 0, 0)');
     });
 
@@ -534,7 +534,7 @@ describe('CSS VARIABLES OVERRIDE', () => {
             '</style>',
             '<h1>Colors with variables inside</h1>',
         );
-        createOrUpdateDynamicTheme(theme, null, false);
+        createOrUpdateDynamicTheme2(theme, null, false);
         expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(255, 255, 255)');
         expect(getComputedStyle(container.querySelector('h1')).backgroundColor).toBe('rgb(0, 0, 0)');
     });
@@ -553,7 +553,7 @@ describe('CSS VARIABLES OVERRIDE', () => {
             '</style>',
             '<h1>Colors with variables inside</h1>',
         );
-        createOrUpdateDynamicTheme(theme, null, false);
+        createOrUpdateDynamicTheme2(theme, null, false);
         const elementStyle = getComputedStyle(container.querySelector('h1'));
         if (isFirefox) {
             expect(elementStyle.borderTopColor).toBe('rgb(179, 0, 0)');
@@ -587,7 +587,7 @@ describe('CSS VARIABLES OVERRIDE', () => {
             '<h1 class="green">Green CSS variable</h1>',
             '<h1 class="orange">Orange CSS variable</h1>',
         );
-        createOrUpdateDynamicTheme(theme, null, false);
+        createOrUpdateDynamicTheme2(theme, null, false);
         expect(getComputedStyle(container).backgroundColor).toBe('rgb(0, 0, 0)');
         expect(getComputedStyle(container.querySelector('.red')).color).toBe('rgb(255, 26, 26)');
         expect(getComputedStyle(container.querySelector('.green')).color).toBe('rgb(255, 255, 255)');
@@ -626,7 +626,7 @@ describe('CSS VARIABLES OVERRIDE', () => {
             '<h1 class="green">Green CSS variable</h1>',
             '<h1 class="orange">Orange CSS variable</h1>',
         );
-        createOrUpdateDynamicTheme(theme, null, false);
+        createOrUpdateDynamicTheme2(theme, null, false);
         expect(getComputedStyle(container).backgroundColor).toBe('rgb(0, 0, 0)');
         expect(getComputedStyle(container.querySelector('.red')).color).toBe('rgb(255, 26, 26)');
         expect(getComputedStyle(container.querySelector('.green')).color).toBe('rgb(255, 255, 255)');
@@ -650,7 +650,7 @@ describe('CSS VARIABLES OVERRIDE', () => {
             '</style>',
             '<h1>Media with same selectors</h1>',
         );
-        createOrUpdateDynamicTheme(theme, null, false);
+        createOrUpdateDynamicTheme2(theme, null, false);
         expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(140, 255, 140)');
     });
 
@@ -673,10 +673,10 @@ describe('CSS VARIABLES OVERRIDE', () => {
             '</style>',
             '<h1>Media after change</h1>',
         );
-        createOrUpdateDynamicTheme(theme, null, false);
+        createOrUpdateDynamicTheme2(theme, null, false);
         expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(140, 255, 140)');
 
-        createOrUpdateDynamicTheme(theme, null, false);
+        createOrUpdateDynamicTheme2(theme, null, false);
         expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(140, 255, 140)');
     });
 
@@ -695,7 +695,7 @@ describe('CSS VARIABLES OVERRIDE', () => {
             '</style>',
             '<h1>Media with same selectors</h1>',
         );
-        createOrUpdateDynamicTheme(theme, null, false);
+        createOrUpdateDynamicTheme2(theme, null, false);
         expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(140, 255, 140)');
         expect(getComputedStyle(container.querySelector('h1')).backgroundColor).toBe('rgb(204, 0, 0)');
     });
@@ -715,7 +715,7 @@ describe('CSS VARIABLES OVERRIDE', () => {
             '<h1>Light scheme</h1>',
         );
         const lightTheme = {...theme, mode: 0, lightSchemeBackgroundColor: '#dddddd', lightSchemeTextColor: '#222222'};
-        createOrUpdateDynamicTheme(lightTheme, null, false);
+        createOrUpdateDynamicTheme2(lightTheme, null, false);
         expect(getComputedStyle(container.querySelector('h1')).backgroundColor).toBe('rgb(221, 221, 221)');
         expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(34, 34, 34)');
     });
@@ -734,7 +734,7 @@ describe('CSS VARIABLES OVERRIDE', () => {
             '</style>',
             '<h1>Border with variable</h1>',
         );
-        createOrUpdateDynamicTheme(theme, null, false);
+        createOrUpdateDynamicTheme2(theme, null, false);
         expect(getComputedStyle(container.querySelector('h1')).borderBottomColor).toBe('rgb(179, 0, 0)');
         expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(140, 255, 140)');
     });
@@ -754,7 +754,7 @@ describe('CSS VARIABLES OVERRIDE', () => {
             '</style>',
             '<h1>Border with variable</h1>',
         );
-        createOrUpdateDynamicTheme(theme, null, false);
+        createOrUpdateDynamicTheme2(theme, null, false);
         expect(getComputedStyle(container.querySelector('h1')).borderTopColor).toBe('rgb(179, 0, 0)');
         expect(getComputedStyle(container.querySelector('h1')).borderBottomColor).toBe('rgb(179, 0, 0)');
         expect(getComputedStyle(container.querySelector('h1')).borderLeftColor).toBe('rgb(179, 0, 0)');
@@ -775,7 +775,7 @@ describe('CSS VARIABLES OVERRIDE', () => {
             '</style>',
             '<h1>Border color with variable</h1>',
         );
-        createOrUpdateDynamicTheme(theme, null, false);
+        createOrUpdateDynamicTheme2(theme, null, false);
         const elementStyle = getComputedStyle(container.querySelector('h1'));
         if (isFirefox) {
             expect(elementStyle.borderTopColor).toBe('rgb(0, 217, 0)');
@@ -807,7 +807,7 @@ describe('CSS VARIABLES OVERRIDE', () => {
             '<h1>Weow Gradients</h1>',
             '<h2>Gradient 2</h2>'
         );
-        createOrUpdateDynamicTheme(theme, null, false);
+        createOrUpdateDynamicTheme2(theme, null, false);
         expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(255, 26, 26)');
         expect(getComputedStyle(container.querySelector('h1')).backgroundColor).toBe('rgb(0, 102, 0)');
         expect(getComputedStyle(container.querySelector('h1')).backgroundImage).toBe('linear-gradient(rgb(204, 0, 0), rgb(0, 0, 0))');
@@ -861,7 +861,7 @@ describe('CSS VARIABLES OVERRIDE', () => {
             '    Icons',
             '</h1>',
         );
-        createOrUpdateDynamicTheme(theme, null, false);
+        createOrUpdateDynamicTheme2(theme, null, false);
         await waitForEvent('__darkreader__test__asyncQueueComplete');
         expect(getComputedStyle(container.querySelector('.icon1')).backgroundImage).toMatch(/^url\("data:image\/svg\+xml;base64,.*"\)$/);
         expect(getComputedStyle(container.querySelector('.icon2')).backgroundImage).toMatch(/^url\("data:image\/svg\+xml;base64,.*"\)$/);
@@ -889,7 +889,7 @@ describe('CSS VARIABLES OVERRIDE', () => {
             '</style>',
             '<h1><i class="icon"></i>Mixed background</h1>',
         );
-        createOrUpdateDynamicTheme(theme, null, false);
+        createOrUpdateDynamicTheme2(theme, null, false);
         await waitForEvent('__darkreader__test__asyncQueueComplete');
         expect(getComputedStyle(container.querySelector('.icon')).backgroundImage).toMatch(/^url\("data:image\/svg\+xml;base64,.*"\), linear-gradient\(rgb\(204, 0, 0\), rgb\(0, 0, 0\)\)$/);
     });
@@ -904,7 +904,7 @@ describe('CSS VARIABLES OVERRIDE', () => {
             '</style>',
             '<h1>Asynchronous variables</h1>',
         );
-        createOrUpdateDynamicTheme(theme, null, false);
+        createOrUpdateDynamicTheme2(theme, null, false);
         expect(getComputedStyle(container.querySelector('h1')).backgroundColor).toBe('rgba(0, 0, 0, 0)');
         expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(255, 255, 255)');
 
@@ -930,7 +930,7 @@ describe('CSS VARIABLES OVERRIDE', () => {
             '</style>',
             '<h1>Asynchronous variables with multiple types</h1>',
         );
-        createOrUpdateDynamicTheme(theme, null, false);
+        createOrUpdateDynamicTheme2(theme, null, false);
         expect(getComputedStyle(container.querySelector('h1')).backgroundColor).toBe('rgba(0, 0, 0, 0)');
         expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(255, 255, 255)');
 
@@ -967,7 +967,7 @@ describe('CSS VARIABLES OVERRIDE', () => {
             '</style>',
             '<h1>Asynchronous variables</h1>',
         );
-        createOrUpdateDynamicTheme(theme, null, false);
+        createOrUpdateDynamicTheme2(theme, null, false);
         expect(getComputedStyle(container.querySelector('h1')).backgroundColor).toBe('rgba(0, 0, 0, 0)');
         expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(255, 255, 255)');
 
@@ -1006,7 +1006,7 @@ describe('CSS VARIABLES OVERRIDE', () => {
             '</style>',
             '<h1>Asynchronous variables</h1>',
         );
-        createOrUpdateDynamicTheme(theme, null, false);
+        createOrUpdateDynamicTheme2(theme, null, false);
         expect(getComputedStyle(container.querySelector('h1')).backgroundColor).toBe('rgb(0, 102, 0)');
         expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(255, 255, 255)');
 
@@ -1031,7 +1031,7 @@ describe('CSS VARIABLES OVERRIDE', () => {
             '</style>',
             '<h1>Asynchronous variables</h1>',
         );
-        createOrUpdateDynamicTheme(theme, null, false);
+        createOrUpdateDynamicTheme2(theme, null, false);
         expect(getComputedStyle(container.querySelector('h1')).backgroundColor).toBe('rgba(0, 0, 0, 0)');
 
         const anotherStyle = document.createElement('style');
@@ -1056,7 +1056,7 @@ describe('CSS VARIABLES OVERRIDE', () => {
             '<h1 class="color1">Variables with color 1</h1>',
             '<h1 class="color2">Variables with color 2</h1>',
         );
-        createOrUpdateDynamicTheme(theme, null, false);
+        createOrUpdateDynamicTheme2(theme, null, false);
         expect(getComputedStyle(container.querySelector('.color1')).backgroundColor).toBe('rgba(0, 0, 0, 0)');
         expect(getComputedStyle(container.querySelector('.color1')).color).toBe('rgb(255, 255, 255)');
         expect(getComputedStyle(container.querySelector('.color2')).backgroundColor).toBe('rgba(0, 0, 0, 0)');
@@ -1094,7 +1094,7 @@ describe('CSS VARIABLES OVERRIDE', () => {
             '</style>',
             '<h1>Variables along with other declarations</h1>',
         );
-        createOrUpdateDynamicTheme(theme, null, false);
+        createOrUpdateDynamicTheme2(theme, null, false);
         const elementStyle = getComputedStyle(container.querySelector('h1'));
         expect(elementStyle.backgroundColor).toBe('rgba(0, 0, 0, 0)');
         expect(elementStyle.color).toBe('rgb(255, 255, 255)');
@@ -1142,7 +1142,7 @@ describe('CSS VARIABLES OVERRIDE', () => {
             '</style>',
             '<h1>Dependency variable</h1>',
         );
-        createOrUpdateDynamicTheme(theme, null, false);
+        createOrUpdateDynamicTheme2(theme, null, false);
         const elementStyle = getComputedStyle(container.querySelector('h1'));
         expect(elementStyle.backgroundColor).toBe('rgba(0, 0, 0, 0)');
         expect(elementStyle.color).toBe('rgb(255, 26, 26)');
@@ -1183,7 +1183,7 @@ describe('CSS VARIABLES OVERRIDE', () => {
             '</style>',
             '<h1>Dependency variable</h1>',
         );
-        createOrUpdateDynamicTheme(theme, null, false);
+        createOrUpdateDynamicTheme2(theme, null, false);
         const sheet = (document.querySelector('.testcase-sheet') as HTMLStyleElement).sheet;
         sheet.insertRule('h1 { color: var(--text);');
 
@@ -1203,7 +1203,7 @@ describe('CSS VARIABLES OVERRIDE', () => {
             '</style>',
             '<h1>Caret Color</h1>',
         );
-        createOrUpdateDynamicTheme(theme, null, false);
+        createOrUpdateDynamicTheme2(theme, null, false);
 
         await timeout(0);
         const elementStyle = getComputedStyle(container.querySelector('h1'));
@@ -1223,7 +1223,7 @@ describe('CSS VARIABLES OVERRIDE', () => {
             '</style>',
             '<h1>COmplicated shit :(</h1>',
         );
-        createOrUpdateDynamicTheme(theme, null, false);
+        createOrUpdateDynamicTheme2(theme, null, false);
 
         await timeout(0);
         const elementStyle = getComputedStyle(container.querySelector('h1'));
@@ -1243,7 +1243,7 @@ describe('CSS VARIABLES OVERRIDE', () => {
             '</style>',
             '<h1>COmplicated shit :(</h1>',
         );
-        createOrUpdateDynamicTheme(theme, null, false);
+        createOrUpdateDynamicTheme2(theme, null, false);
 
         await timeout(0);
         const elementStyle = getComputedStyle(container.querySelector('h1'));
@@ -1266,7 +1266,7 @@ describe('CSS VARIABLES OVERRIDE', () => {
             '</style>',
             '<h1>Raw values are spooky</h1>',
         );
-        createOrUpdateDynamicTheme(theme, null, false);
+        createOrUpdateDynamicTheme2(theme, null, false);
 
         await timeout(0);
         const elementStyle = getComputedStyle(container.querySelector('h1'));
@@ -1290,7 +1290,7 @@ describe('CSS VARIABLES OVERRIDE', () => {
             '</style>',
             '<h1 style="--inline-var: red">Raw values are spooky</h1>',
         );
-        createOrUpdateDynamicTheme(theme, null, false);
+        createOrUpdateDynamicTheme2(theme, null, false);
 
         const elementStyle = getComputedStyle(container.querySelector('h1'));
         expect(elementStyle.backgroundColor).toBe('rgb(204, 0, 0)');

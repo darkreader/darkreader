@@ -1,6 +1,6 @@
 import '../support/polyfills';
 import {DEFAULT_THEME} from '../../../src/defaults';
-import {createOrUpdateDynamicTheme, removeDynamicTheme} from '../../../src/inject/dynamic-theme';
+import {createOrUpdateDynamicTheme2, removeDynamicTheme} from '../../../src/inject/dynamic-theme';
 import {createStyleSheetModifier} from '../../../src/inject/dynamic-theme/stylesheet-modifier';
 import {multiline, timeout} from '../support/test-utils';
 
@@ -52,7 +52,7 @@ describe('STYLE ELEMENTS', () => {
             '<span>Text</span>',
             '<a href="#">Link</a>',
         );
-        createOrUpdateDynamicTheme(theme, null, false);
+        createOrUpdateDynamicTheme2(theme, null, false);
         expect(getComputedStyle(container).backgroundColor).toBe('rgb(0, 0, 0)');
         expect(getComputedStyle(container).color).toBe('rgb(255, 255, 255)');
         expect(getComputedStyle(container.querySelector('span')).color).toBe('rgb(255, 255, 255)');
@@ -67,7 +67,7 @@ describe('STYLE ELEMENTS', () => {
             '</style>',
             '<h1>Style <strong>override</strong>!</h1>',
         );
-        createOrUpdateDynamicTheme(theme, null, false);
+        createOrUpdateDynamicTheme2(theme, null, false);
         expect(getComputedStyle(container).backgroundColor).toBe('rgb(0, 0, 0)');
         expect(getComputedStyle(container.querySelector('h1')).backgroundColor).toBe('rgb(102, 102, 102)');
         expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(255, 255, 255)');
@@ -82,7 +82,7 @@ describe('STYLE ELEMENTS', () => {
             '</style>',
             '<h1>Style <strong>with @import</strong>!</h1>',
         );
-        createOrUpdateDynamicTheme(theme, null, false);
+        createOrUpdateDynamicTheme2(theme, null, false);
 
         await timeout(50);
         expect(getComputedStyle(container).backgroundColor).toBe('rgb(0, 0, 0)');
@@ -99,7 +99,7 @@ describe('STYLE ELEMENTS', () => {
             '</style>',
             '<h1>Style <strong>with @import"..."</strong>!</h1>',
         );
-        createOrUpdateDynamicTheme(theme, null, false);
+        createOrUpdateDynamicTheme2(theme, null, false);
 
         await timeout(50);
         expect(getComputedStyle(container).backgroundColor).toBe('rgb(0, 0, 0)');
@@ -116,7 +116,7 @@ describe('STYLE ELEMENTS', () => {
             '</style>',
             '<h1>Style <strong>override</strong>!</h1>',
         );
-        createOrUpdateDynamicTheme(theme, null, false);
+        createOrUpdateDynamicTheme2(theme, null, false);
         expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(141, 141, 141)');
         expect(getComputedStyle(container.querySelector('h1 strong')).color).toBe('rgb(255, 26, 26)');
 
@@ -136,7 +136,7 @@ describe('STYLE ELEMENTS', () => {
             '</style>',
             '<h1>Some test foor...... <strong>Moving styles</strong>!</h1>',
         );
-        createOrUpdateDynamicTheme(theme, null, false);
+        createOrUpdateDynamicTheme2(theme, null, false);
         expect(getComputedStyle(container.querySelector('h1')).backgroundColor).toBe('rgb(102, 102, 102)');
         expect(getComputedStyle(container.querySelector('h1 strong')).color).toBe('rgb(255, 26, 26)');
 
@@ -156,7 +156,7 @@ describe('STYLE ELEMENTS', () => {
             '</style>',
             '<h1>Some test foor...... <strong>Oh uhm removing styles :(</strong>!</h1>',
         );
-        createOrUpdateDynamicTheme(theme, null, false);
+        createOrUpdateDynamicTheme2(theme, null, false);
         const style = document.querySelector('.testcase-style');
         const sibling = style.nextSibling;
         style.remove();
@@ -172,7 +172,7 @@ describe('STYLE ELEMENTS', () => {
             '<style class="testcase-style"></style>',
             '<h1>Some test foor...... <strong>Oh uhm a pink background</strong></h1>',
         );
-        createOrUpdateDynamicTheme(theme, null, false);
+        createOrUpdateDynamicTheme2(theme, null, false);
 
         const style: HTMLStyleElement = document.querySelector('.testcase-style');
         style.sheet.insertRule('h1 { color: gray }');
@@ -192,7 +192,7 @@ describe('STYLE ELEMENTS', () => {
             '</style>',
             '<h1>Style <strong>text change</strong></h1>',
         );
-        createOrUpdateDynamicTheme(theme, null, false);
+        createOrUpdateDynamicTheme2(theme, null, false);
         expect(getComputedStyle(document.querySelector('h1 strong')).color).toBe('rgb(255, 26, 26)');
 
         document.querySelector('.testcase-style').textContent = 'h1 strong { color: green; }';
@@ -204,7 +204,7 @@ describe('STYLE ELEMENTS', () => {
         container.innerHTML = multiline(
             '<h1>Some test foor...... <strong>Oh uhm what?</strong>!</h1>',
         );
-        createOrUpdateDynamicTheme(theme, null, false);
+        createOrUpdateDynamicTheme2(theme, null, false);
 
         const style: HTMLStyleElement = document.createElement('style');
         style.classList.add('testcase-style');
@@ -231,7 +231,7 @@ describe('STYLE ELEMENTS', () => {
             '</div>',
             '<h1>Moving container</h1>',
         );
-        createOrUpdateDynamicTheme(theme, null, false);
+        createOrUpdateDynamicTheme2(theme, null, false);
         expect(getComputedStyle(container.querySelector('h1')).backgroundColor).toBe('rgb(102, 102, 102)');
         expect(getComputedStyle(container.querySelector('h1')).color).toBe('rgb(140, 255, 140)');
 

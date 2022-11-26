@@ -462,16 +462,28 @@ function selectRelevantFix(documentURL: string, fixes: DynamicThemeFix[]): Dynam
     return relevantFixIndex ? combineFixes([fixes[0], fixes[relevantFixIndex]]) : fixes[0];
 }
 
-export function createOrUpdateDynamicTheme(filterConfig: FilterConfig, dynamicThemeFixes: DynamicThemeFix | DynamicThemeFix[], iframe: boolean) {
+/**
+ * This is the new function which replaces createOrUpdateDynamicTheme()
+ * It enables extension/site to provice multple fixes for multiple different URLs
+ * TODO: expose this function to API builds via to src/api/enable()
+ */
+export function createOrUpdateDynamicTheme2(filterConfig: FilterConfig, dynamicThemeFixes: DynamicThemeFix[], iframe: boolean) {
+    const dynamicThemeFix = selectRelevantFix(document.location.href, dynamicThemeFixes);
+
+    // Most websites will have only the generic fix applied ('*'), some will have generic fix and one site-specific fix (two in total),
+    // and very few will have multple site-specific fixes
+    // TODO: add a navigation listener here for this case
+
+    createOrUpdateDynamicTheme(filterConfig, dynamicThemeFix, iframe);
+}
+
+/**
+ * Note: This function should be directly used only in API builds, it is exported only for backwards compatibility,
+ * extension should use only createOrUpdateDynamicTheme2()
+ */
+export function createOrUpdateDynamicTheme(filterConfig: FilterConfig, dynamicThemeFixes: DynamicThemeFix, iframe: boolean) {
     filter = filterConfig;
-    if (Array.isArray(dynamicThemeFixes)) {
-        fixes = selectRelevantFix(document.location.href, dynamicThemeFixes);
-        // Most websites will have only the generic fix applied ('*'), some will have generic fix and one site-specific fix (two in total),
-        // and very few will have multple site-specific fixes
-        // TODO: add a navigation listener here for this case
-    } else {
-        fixes = dynamicThemeFixes;
-    }
+    fixes = dynamicThemeFixes;
     if (fixes) {
         ignoredImageAnalysisSelectors = Array.isArray(fixes.ignoreImageAnalysis) ? fixes.ignoreImageAnalysis : [];
         ignoredInlineSelectors = Array.isArray(fixes.ignoreInlineStyle) ? fixes.ignoreInlineStyle : [];

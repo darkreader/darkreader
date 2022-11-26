@@ -23,6 +23,8 @@ export function enable(themeOptions: Partial<Theme> = {}, fixes: DynamicThemeFix
     if (theme.engine !== ThemeEngine.dynamicTheme) {
         throw new Error('Theme engine is not supported.');
     }
+    // TODO: repalce with createOrUpdateDynamicTheme() and make fixes signature
+    // DynamicThemeFix | DynamicThemeFix[]
     createOrUpdateDynamicThemeInternal(theme, fixes, isIFrame);
     isDarkReaderEnabled = true;
 }

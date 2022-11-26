@@ -72,7 +72,7 @@ export function getDynamicThemeFixesFor(url: string, isTopFrame: boolean, text: 
             fixes[0].css += '\nembed[type="application/pdf"] { filter: invert(100%) contrast(90%); }';
         }
         if (['drive.google.com', 'mail.google.com'].includes(getDomain(url))) {
-            common.invert.push('div[role="dialog"] div[role="document"]');
+            fixes[0].invert.push('div[role="dialog"] div[role="document"]');
         }
     }
 

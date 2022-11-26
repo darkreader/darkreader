@@ -467,8 +467,8 @@ function selectRelevantFix(documentURL: string, fixes: DynamicThemeFix[]): Dynam
 
 /**
  * This is the new function which replaces createOrUpdateDynamicTheme()
- * It enables extension/site to provice multple fixes for multiple different URLs
- * TODO: expose this function to API builds via to src/api/enable()
+ * It enables extension/site to provide multple fixes for multiple different URLs
+ * TODO: expose this function to API builds via src/api function enable()
  */
 export function createOrUpdateDynamicTheme(filterConfig: FilterConfig, dynamicThemeFixes: DynamicThemeFix[], iframe: boolean) {
     const dynamicThemeFix = selectRelevantFix(document.location.href, dynamicThemeFixes);

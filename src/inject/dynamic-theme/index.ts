@@ -31,7 +31,6 @@ const styleManagers = new Map<StyleElement, StyleManager>();
 const adoptedStyleManagers = [] as AdoptedStyleSheetManager[];
 let filter: FilterConfig = null;
 let fixes: DynamicThemeFix = null;
-let allFixes: DynamicThemeFix[] = null;
 let relevantFixIndex: number = null;
 let isIFrame: boolean = null;
 let ignoredImageAnalysisSelectors: string[] = null;
@@ -466,7 +465,6 @@ function selectRelevantFix(documentURL: string, fixes: DynamicThemeFix[]): Dynam
 export function createOrUpdateDynamicTheme(filterConfig: FilterConfig, dynamicThemeFixes: DynamicThemeFix | DynamicThemeFix[], iframe: boolean) {
     filter = filterConfig;
     if (Array.isArray(dynamicThemeFixes)) {
-        allFixes = dynamicThemeFixes;
         fixes = selectRelevantFix(document.location.href, dynamicThemeFixes);
         // Most websites will have only the generic fix applied ('*'), some will have generic fix and one site-specific fix (two in total),
         // and very few will have multple site-specific fixes

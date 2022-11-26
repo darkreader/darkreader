@@ -47,14 +47,14 @@ function isOneOf(...values: any[]) {
     return (x: any) => values.includes(x);
 }
 
-function hasRequiredProperties<T>(obj: T, keys: Array<keyof T>) {
+function hasRequiredProperties<T extends Record<string, unknown>>(obj: T, keys: Array<keyof T>) {
     return keys.every((key) => obj.hasOwnProperty(key));
 }
 
 function createValidator() {
     const errors: string[] = [];
 
-    function validateProperty<T>(obj: T, key: keyof T, validator: (x: any) => boolean, fallback: T) {
+    function validateProperty<T extends Record<string, unknown>>(obj: T, key: keyof T, validator: (x: any) => boolean, fallback: T) {
         if (!obj.hasOwnProperty(key) || validator(obj[key])) {
             return;
         }
@@ -62,7 +62,7 @@ function createValidator() {
         obj[key] = fallback[key];
     }
 
-    function validateArray<T, V>(obj: T, key: keyof T, validator: (x: V) => boolean) {
+    function validateArray<T extends Record<string, unknown>, V>(obj: T, key: keyof T, validator: (x: V) => boolean) {
         if (!obj.hasOwnProperty(key)) {
             return;
         }
@@ -179,7 +179,7 @@ export function validateSettings(settings: Partial<UserSettings>) {
     return {errors, settings};
 }
 
-export function validateTheme(theme: Partial<Theme>) {
+export function validateTheme(theme: Partial<Theme> | null | undefined) {
     if (!isPlainObject(theme)) {
         return {errors: ['Theme is not a plain object'], theme: DEFAULT_THEME};
     }

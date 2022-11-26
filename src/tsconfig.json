@@ -18,6 +18,7 @@
         "downlevelIteration": true,
         "noImplicitAny": true,
         "resolveJsonModule": true,
+        "strictNullChecks": true,
         "jsx": "react",
         "jsxFactory": "m",
         "noEmit": true

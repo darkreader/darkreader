@@ -9,7 +9,7 @@ interface SliderProps {
     max: number;
     step: number;
     formatValue: (value: number) => string;
-    onChange: (value: number) => void;
+    onChange: (value: number | null) => void;
 }
 
 function stickToStep(x: number, step: number) {
@@ -27,12 +27,12 @@ export default function Slider(props: SliderProps) {
     const context = getContext();
     const store = context.store as {
         isActive: boolean;
-        activeValue: number;
+        activeValue: number | null;
         activeProps: SliderProps;
         trackNode: HTMLElement;
         thumbNode: HTMLElement;
         wheelTimeoutId: number;
-        wheelValue: number;
+        wheelValue: number | null;
     };
 
     store.activeProps = props;
@@ -75,7 +75,7 @@ export default function Slider(props: SliderProps) {
                 : null;
 
             function getTouch(e: TouchEvent) {
-                const find = (touches: TouchList) => Array.from(touches).find((t) => t.identifier === touchId);
+                const find = (touches: TouchList) => Array.from(touches).find((t) => t.identifier === touchId)!;
                 return find(e.changedTouches) || find(e.touches);
             }
 
@@ -168,7 +168,7 @@ export default function Slider(props: SliderProps) {
     }
 
     const refreshOnWheel = throttle(() => {
-        store.activeValue = stickToStep(store.wheelValue, props.step);
+        store.activeValue = stickToStep(store.wheelValue!, props.step);
         store.wheelTimeoutId = setTimeout(() => {
             const {onChange} = store.activeProps;
             onChange(store.activeValue);

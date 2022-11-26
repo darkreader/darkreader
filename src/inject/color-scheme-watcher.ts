@@ -9,7 +9,7 @@ function cleanup() {
 }
 
 function sendMessage(message: Message) {
-    const responseHandler = (response: 'unsupportedSender' | undefined) => {
+    const responseHandler = (response: Message | 'unsupportedSender' | undefined) => {
         // Vivaldi bug workaround. See TabManager for details.
         if (response === 'unsupportedSender') {
             cleanup();

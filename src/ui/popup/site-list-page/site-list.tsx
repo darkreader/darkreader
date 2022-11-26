@@ -34,7 +34,7 @@ export default function SiteList(props: SiteListProps) {
     });
 
     function onTextChange(e: Event & {target: HTMLInputElement}) {
-        const index = store.indices.get(e.target);
+        const index = store.indices.get(e.target)!;
         const values = props.siteList.slice();
         const value = e.target.value.trim();
         if (values.includes(value)) {
@@ -57,7 +57,7 @@ export default function SiteList(props: SiteListProps) {
 
     function removeValue(event: MouseEvent) {
         const previousSibling = ((event.target as HTMLInputElement).previousSibling as HTMLInputElement);
-        const index = store.indices.get(previousSibling);
+        const index = store.indices.get(previousSibling)!;
         const filtered = props.siteList.slice();
         filtered.splice(index, 1);
         store.shouldFocusAtIndex = index;

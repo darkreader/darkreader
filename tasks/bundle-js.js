@@ -135,6 +135,7 @@ async function bundleJS(/** @type {JSEntry} */entry, platform, debug, watch, log
                     typescript,
                     tsconfig: rootPath('src/tsconfig.json'),
                     noImplicitAny: debug ? false : true,
+                    strictNullChecks: debug ? false : true,
                     removeComments: debug ? false : true,
                     sourceMap: debug ? true : false,
                     inlineSources: debug ? true : false,

@@ -35,36 +35,40 @@ const CONFIG_URLs = {
 };
 const REMOTE_TIMEOUT_MS = getDuration({seconds: 10});
 
-interface Config {
+interface LocalConfig {
+    local: boolean;
+}
+
+interface Config extends LocalConfig {
     name?: string;
     local: boolean;
-    localURL?: string;
+    localURL: string;
     remoteURL?: string;
 }
 
 export default class ConfigManager {
-    static DARK_SITES?: string[];
-    static DYNAMIC_THEME_FIXES_INDEX?: SitePropsIndex<DynamicThemeFix>;
-    static DYNAMIC_THEME_FIXES_RAW?: string;
-    static INVERSION_FIXES_INDEX?: SitePropsIndex<InversionFix>;
-    static INVERSION_FIXES_RAW?: string;
-    static STATIC_THEMES_INDEX?: SitePropsIndex<StaticTheme>;
-    static STATIC_THEMES_RAW?: string;
-    static COLOR_SCHEMES_RAW?: ParsedColorSchemeConfig;
+    static DARK_SITES: string[];
+    static DYNAMIC_THEME_FIXES_INDEX: SitePropsIndex<DynamicThemeFix> | null;
+    static DYNAMIC_THEME_FIXES_RAW: string | null;
+    static INVERSION_FIXES_INDEX: SitePropsIndex<InversionFix> | null;
+    static INVERSION_FIXES_RAW: string | null;
+    static STATIC_THEMES_INDEX: SitePropsIndex<StaticTheme> | null;
+    static STATIC_THEMES_RAW: string | null;
+    static COLOR_SCHEMES_RAW: ParsedColorSchemeConfig | null;
 
     static raw = {
-        darkSites: null as string,
-        dynamicThemeFixes: null as string,
-        inversionFixes: null as string,
-        staticThemes: null as string,
-        colorSchemes: null as string,
+        darkSites: null as string | null,
+        dynamicThemeFixes: null as string | null,
+        inversionFixes: null as string | null,
+        staticThemes: null as string | null,
+        colorSchemes: null as string | null,
     };
 
     static overrides = {
-        darkSites: null as string,
-        dynamicThemeFixes: null as string,
-        inversionFixes: null as string,
-        staticThemes: null as string,
+        darkSites: null as string | null,
+        dynamicThemeFixes: null as string | null,
+        inversionFixes: null as string | null,
+        staticThemes: null as string | null,
     };
 
     private static async loadConfig({
@@ -91,7 +95,7 @@ export default class ConfigManager {
         return $config;
     }
 
-    private static async loadColorSchemes({local}: Config) {
+    private static async loadColorSchemes({local}: LocalConfig) {
         const $config = await this.loadConfig({
             name: 'Color Schemes',
             local,
@@ -102,7 +106,7 @@ export default class ConfigManager {
         this.handleColorSchemes();
     }
 
-    private static async loadDarkSites({local}: Config) {
+    private static async loadDarkSites({local}: LocalConfig) {
         const sites = await this.loadConfig({
             name: 'Dark Sites',
             local,
@@ -113,7 +117,7 @@ export default class ConfigManager {
         this.handleDarkSites();
     }
 
-    private static async loadDynamicThemeFixes({local}: Config) {
+    private static async loadDynamicThemeFixes({local}: LocalConfig) {
         const fixes = await this.loadConfig({
             name: 'Dynamic Theme Fixes',
             local,
@@ -124,7 +128,7 @@ export default class ConfigManager {
         this.handleDynamicThemeFixes();
     }
 
-    private static async loadInversionFixes({local}: Config) {
+    private static async loadInversionFixes({local}: LocalConfig) {
         const fixes = await this.loadConfig({
             name: 'Inversion Fixes',
             local,
@@ -135,7 +139,7 @@ export default class ConfigManager {
         this.handleInversionFixes();
     }
 
-    private static async loadStaticThemes({local}: Config) {
+    private static async loadStaticThemes({local}: LocalConfig) {
         const themes = await this.loadConfig({
             name: 'Static Themes',
             local,
@@ -146,7 +150,7 @@ export default class ConfigManager {
         this.handleStaticThemes();
     }
 
-    static async load(config?: Config) {
+    static async load(config?: LocalConfig) {
         if (!config) {
             await UserStorage.loadSettings();
             config = {
@@ -165,7 +169,7 @@ export default class ConfigManager {
 
     private static handleColorSchemes() {
         const $config = this.raw.colorSchemes;
-        const {result, error} = ParseColorSchemeConfig($config);
+        const {result, error} = ParseColorSchemeConfig($config || '');
         if (error) {
             logWarn(`Color Schemes parse error, defaulting to fallback. ${error}.`);
             this.COLOR_SCHEMES_RAW = DEFAULT_COLORSCHEME;
@@ -176,23 +180,23 @@ export default class ConfigManager {
 
     private static handleDarkSites() {
         const $sites = this.overrides.darkSites || this.raw.darkSites;
-        this.DARK_SITES = parseArray($sites);
+        this.DARK_SITES = parseArray($sites || '');
     }
 
     static handleDynamicThemeFixes() {
-        const $fixes = this.overrides.dynamicThemeFixes || this.raw.dynamicThemeFixes;
+        const $fixes = this.overrides.dynamicThemeFixes || this.raw.dynamicThemeFixes || '';
         this.DYNAMIC_THEME_FIXES_INDEX = indexSitesFixesConfig<DynamicThemeFix>($fixes);
         this.DYNAMIC_THEME_FIXES_RAW = $fixes;
     }
 
     static handleInversionFixes() {
-        const $fixes = this.overrides.inversionFixes || this.raw.inversionFixes;
+        const $fixes = this.overrides.inversionFixes || this.raw.inversionFixes || '';
         this.INVERSION_FIXES_INDEX = indexSitesFixesConfig<InversionFix>($fixes);
         this.INVERSION_FIXES_RAW = $fixes;
     }
 
     static handleStaticThemes() {
-        const $themes = this.overrides.staticThemes || this.raw.staticThemes;
+        const $themes = this.overrides.staticThemes || this.raw.staticThemes || '';
         this.STATIC_THEMES_INDEX = indexSitesFixesConfig<StaticTheme>($themes);
         this.STATIC_THEMES_RAW = $themes;
     }

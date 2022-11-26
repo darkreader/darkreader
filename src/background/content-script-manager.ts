@@ -9,7 +9,7 @@ enum ContentScriptManagerState {
     NOTREGISTERED,
 }
 
-// TODO: remove once @types/chrome is updated
+// TODO: remove type after dependency update
 // eslint-disable-next-line @typescript-eslint/no-namespace
 declare namespace chrome.scripting {
     export function getRegisteredContentScripts(filter: { ids: string[] }, callback: (scripts: null[]) => void): void;

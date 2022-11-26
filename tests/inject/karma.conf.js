@@ -14,7 +14,7 @@ import paths from '../../tasks/paths.js';
 const {rootPath} = paths;
 
 /**
- * @param {LocalConfig} config
+ * @param {Partial<LocalConfig>} config
  * @param {Record<string, string>} env
  * @returns {ConfigOptions}
  */

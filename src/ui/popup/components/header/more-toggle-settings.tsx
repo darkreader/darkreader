@@ -24,7 +24,7 @@ export default function MoreToggleSettings({data, actions, isExpanded, onClose}:
         },
     };
 
-    function getLocationString(location: number) {
+    function getLocationString(location: number | null) {
         if (location == null) {
             return '';
         }

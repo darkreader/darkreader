@@ -122,7 +122,7 @@ export function watchForInlineStyles(
 ) {
     deepWatchForInlineStyles(document, elementStyleDidChange, shadowRootDiscovered);
     iterateShadowHosts(document.documentElement, (host) => {
-        deepWatchForInlineStyles(host.shadowRoot, elementStyleDidChange, shadowRootDiscovered);
+        deepWatchForInlineStyles(host.shadowRoot!, elementStyleDidChange, shadowRootDiscovered);
     });
 }
 
@@ -132,8 +132,8 @@ function deepWatchForInlineStyles(
     shadowRootDiscovered: (root: ShadowRoot) => void,
 ) {
     if (treeObservers.has(root)) {
-        treeObservers.get(root).disconnect();
-        attrObservers.get(root).disconnect();
+        treeObservers.get(root)!.disconnect();
+        attrObservers.get(root)!.disconnect();
     }
 
     const discoveredNodes = new WeakSet<Node>();
@@ -151,8 +151,8 @@ function deepWatchForInlineStyles(
                 return;
             }
             discoveredNodes.add(node);
-            shadowRootDiscovered(n.shadowRoot);
-            deepWatchForInlineStyles(n.shadowRoot, elementStyleDidChange, shadowRootDiscovered);
+            shadowRootDiscovered(n.shadowRoot!);
+            deepWatchForInlineStyles(n.shadowRoot!, elementStyleDidChange, shadowRootDiscovered);
         });
     }
 
@@ -167,16 +167,16 @@ function deepWatchForInlineStyles(
     treeObservers.set(root, treeObserver);
 
     let attemptCount = 0;
-    let start: number = null;
+    let start: number | null = null;
     const ATTEMPTS_INTERVAL = getDuration({seconds: 10});
     const RETRY_TIMEOUT = getDuration({seconds: 2});
     const MAX_ATTEMPTS_COUNT = 50;
     let cache: MutationRecord[] = [];
-    let timeoutId: ReturnType<typeof setTimeout> = null;
+    let timeoutId: ReturnType<typeof setTimeout> | null = null;
 
     const handleAttributeMutations = throttle((mutations: MutationRecord[]) => {
         mutations.forEach((m) => {
-            if (INLINE_STYLE_ATTRS.includes(m.attributeName)) {
+            if (INLINE_STYLE_ATTRS.includes(m.attributeName!)) {
                 elementStyleDidChange(m.target as HTMLElement);
             }
         });
@@ -301,7 +301,7 @@ export function overrideInlineStyle(element: HTMLElement, theme: FilterConfig, i
     }
 
     if (element.hasAttribute('bgcolor')) {
-        let value = element.getAttribute('bgcolor');
+        let value = element.getAttribute('bgcolor')!;
         if (value.match(/^[0-9a-f]{3}$/i) || value.match(/^[0-9a-f]{6}$/i)) {
             value = `#${value}`;
         }
@@ -312,7 +312,7 @@ export function overrideInlineStyle(element: HTMLElement, theme: FilterConfig, i
     // It's valid HTML code according to the specs, https://html.spec.whatwg.org/#attr-link-color
     // We don't want to touch such link as it cause weird behavior of the browser(Silent DOMException).
     if (element.hasAttribute('color') && (element as HTMLLinkElement).rel !== 'mask-icon') {
-        let value = element.getAttribute('color');
+        let value = element.getAttribute('color')!;
         if (value.match(/^[0-9a-f]{3}$/i) || value.match(/^[0-9a-f]{6}$/i)) {
             value = `#${value}`;
         }
@@ -321,7 +321,7 @@ export function overrideInlineStyle(element: HTMLElement, theme: FilterConfig, i
     if (element instanceof SVGElement) {
         if (element.hasAttribute('fill')) {
             const SMALL_SVG_LIMIT = 32;
-            const value = element.getAttribute('fill');
+            const value = element.getAttribute('fill')!;
             if (value !== 'none') {
                 if (!(element instanceof SVGTextElement)) {
                     // getBoundingClientRect forces a layout change. And when it so happens that.
@@ -345,11 +345,11 @@ export function overrideInlineStyle(element: HTMLElement, theme: FilterConfig, i
             }
         }
         if (element.hasAttribute('stop-color')) {
-            setCustomProp('stop-color', 'background-color', element.getAttribute('stop-color'));
+            setCustomProp('stop-color', 'background-color', element.getAttribute('stop-color')!);
         }
     }
     if (element.hasAttribute('stroke')) {
-        const value = element.getAttribute('stroke');
+        const value = element.getAttribute('stroke')!;
         setCustomProp('stroke', element instanceof SVGLineElement || element instanceof SVGTextElement ? 'border-color' : 'color', value);
     }
     element.style && iterateCSSDeclarations(element.style, (property, value) => {

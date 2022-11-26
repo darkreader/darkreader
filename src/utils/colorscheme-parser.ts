@@ -47,7 +47,7 @@ export interface ParsedColorSchemeConfig {
     dark: { [name: string]: ColorSchemeVariant };
 }
 
-export function ParseColorSchemeConfig(config: string): { result: ParsedColorSchemeConfig; error: string } {
+export function ParseColorSchemeConfig(config: string): { result: ParsedColorSchemeConfig; error: string | null } {
     // Let's first get all "possible" sections of the text.
     // We're adding `\n` so the sections "first" word is the
     // name of the color scheme. We could remove this and
@@ -72,7 +72,7 @@ export function ParseColorSchemeConfig(config: string): { result: ParsedColorSch
     // And also the reason why the parsing failed.
     // It will be the first error that is found.
     let interrupt = false;
-    let error = null;
+    let error: string | null = null;
 
     const throwError = (message: string) => {
         if (!interrupt) {
@@ -122,7 +122,7 @@ export function ParseColorSchemeConfig(config: string): { result: ParsedColorSch
             return;
         }
 
-        const checkVariant = (lineIndex: number, isSecondVariant: boolean): ColorSchemeVariant & { variant: string } => {
+        const checkVariant = (lineIndex: number, isSecondVariant: boolean): (ColorSchemeVariant & { variant?: string }) | undefined => {
             // Get the possible variant name.
             const variant = lines[lineIndex];
             if (!variant) {
@@ -182,18 +182,18 @@ export function ParseColorSchemeConfig(config: string): { result: ParsedColorSch
             };
         };
 
-        const firstVariant = checkVariant(2, false);
+        const firstVariant = checkVariant(2, false)!;
         const isFirstVariantLight = firstVariant.variant === 'LIGHT';
         delete firstVariant.variant;
         // If the interrupt variable is set, we should stop parsing.
         if (interrupt) {
             return;
         }
-        let secondVariant = null;
+        let secondVariant: typeof firstVariant | null = null;
         let isSecondVariantLight = false;
         // Check if the 7th line is defined otherwise we should stop parsing.
         if (lines[6]) {
-            secondVariant = checkVariant(6, true);
+            secondVariant = checkVariant(6, true)!;
             isSecondVariantLight = secondVariant.variant === 'LIGHT';
             delete secondVariant.variant;
             // If the interrupt variable is set, we should stop parsing.

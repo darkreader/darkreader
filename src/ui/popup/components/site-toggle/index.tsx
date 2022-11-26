@@ -23,12 +23,12 @@ export default function SiteToggleButton({data, actions}: ExtWrapper) {
         (!tab.isProtected && !pdf) ||
         tab.isInjected
     );
-    const isSiteEnabled = isURLEnabled(tab.url, data.settings, tab, data.isAllowedFileSchemeAccess) && tab.isInjected;
+    const isSiteEnabled: boolean = isURLEnabled(tab.url, data.settings, tab, data.isAllowedFileSchemeAccess) && Boolean(tab.isInjected);
     const host = getURLHostOrProtocol(tab.url);
 
     const urlText = host
         .split('.')
-        .reduce((elements, part, i) => elements.concat(
+        .reduce<string[]>((elements, part, i) => elements.concat(
             <wbr />,
             `${i > 0 ? '.' : ''}${part}`
         ), []);

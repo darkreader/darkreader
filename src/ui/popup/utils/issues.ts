@@ -34,10 +34,10 @@ export function fixNotClosingPopupOnNavigation() {
         }
         let target = e.target as HTMLElement;
         while (target && !(target instanceof HTMLAnchorElement)) {
-            target = target.parentElement;
+            target = target.parentElement!;
         }
         if (target && target.hasAttribute('href')) {
-            chrome.tabs.create({url: target.getAttribute('href')});
+            chrome.tabs.create({url: target.getAttribute('href')!});
             e.preventDefault();
             if (!__THUNDERBIRD__) {
                 window.close();

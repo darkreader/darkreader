@@ -14,8 +14,8 @@ export function isIPV6(url: string) {
 
 const ipV6HostRegex = /\[.*?\](\:\d+)?/;
 
-export function compareIPV6(firstURL: string, secondURL: string) {
-    const firstHost = firstURL.match(ipV6HostRegex)[0];
-    const secondHost = secondURL.match(ipV6HostRegex)[0];
+export function compareIPV6(firstURL: string, secondURL: string): boolean {
+    const firstHost = firstURL.match(ipV6HostRegex)![0];
+    const secondHost = secondURL.match(ipV6HostRegex)![0];
     return firstHost === secondHost;
 }

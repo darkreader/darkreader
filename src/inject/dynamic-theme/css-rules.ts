@@ -70,7 +70,7 @@ export function iterateCSSDeclarations(style: CSSStyleDeclaration, iterate: (pro
     if (cssText.includes('var(')) {
         if (isSafari) {
             // Safari doesn't show shorthand properties' values
-            shorthandVarDepPropRegexps.forEach(([prop, regexp]) => {
+            shorthandVarDepPropRegexps!.forEach(([prop, regexp]) => {
                 const match = cssText.match(regexp);
                 if (match && match[1]) {
                     const val = match[1].trim();

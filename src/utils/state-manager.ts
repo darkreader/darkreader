@@ -7,7 +7,7 @@ import {StateManagerImpl} from './state-manager-impl';
 
 import {isNonPersistent} from './platform';
 
-export class StateManager<T> {
+export class StateManager<T extends Record<string, unknown>> {
     private stateManager: StateManagerImpl<T> | null;
 
     constructor(localStorageKey: string, parent: any, defaults: T, logWarn: (log: string) => void){

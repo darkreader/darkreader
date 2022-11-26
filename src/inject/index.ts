@@ -27,7 +27,7 @@ function sendMessage(message: Message) {
     if (unloaded) {
         return;
     }
-    const responseHandler = (response: 'unsupportedSender' | undefined) => {
+    const responseHandler = (response: Message | 'unsupportedSender' | undefined) => {
         // Vivaldi bug workaround. See TabManager for details.
         if (response === 'unsupportedSender') {
             removeStyle();
@@ -39,7 +39,7 @@ function sendMessage(message: Message) {
 
     try {
         if (__CHROMIUM_MV3__) {
-            const promise: Promise<Message | 'unsupportedSender'> = chrome.runtime.sendMessage<Message>(message);
+            const promise = chrome.runtime.sendMessage<Message, Message | 'unsupportedSender'>(message);
             promise.then(responseHandler).catch(cleanup);
         } else {
             chrome.runtime.sendMessage<Message, 'unsupportedSender' | undefined>(message, responseHandler);

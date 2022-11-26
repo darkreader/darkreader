@@ -1,16 +1,16 @@
 declare const __DEBUG__: boolean;
 declare const __LOG__: 'info' | 'warn';
 
-let socket: WebSocket = null;
-let messageQueue: string[] | null = [];
+let socket: WebSocket | null = null;
+let messageQueue: string[] = [];
 function createSocket() {
     if (socket) {
         return;
     }
     socket = new WebSocket(`ws://localhost:${9000}`);
     socket.addEventListener('open', () => {
-        messageQueue.forEach((message) => socket.send(message));
-        messageQueue = null;
+        messageQueue.forEach((message) => this.send(message));
+        messageQueue = [];
     });
 }
 

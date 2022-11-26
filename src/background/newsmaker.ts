@@ -6,9 +6,9 @@ import {StateManager} from '../utils/state-manager';
 import {logWarn} from './utils/log';
 import IconManager from './icon-manager';
 
-interface NewsmakerState {
+interface NewsmakerState extends Record<string, unknown> {
     latest: News[];
-    latestTimestamp: number;
+    latestTimestamp: number | null;
 }
 
 export default class Newsmaker {
@@ -19,7 +19,7 @@ export default class Newsmaker {
     private static initialized: boolean;
     private static stateManager: StateManager<NewsmakerState>;
     private static latest: News[];
-    private static latestTimestamp: number;
+    private static latestTimestamp: number | null;
 
     constructor() {
         if (Newsmaker.initialized) {

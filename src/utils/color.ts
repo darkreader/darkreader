@@ -18,10 +18,10 @@ export interface HSLA {
 const hslaParseCache = new Map<string, HSLA>();
 const rgbaParseCache = new Map<string, RGBA>();
 
-export function parseColorWithCache($color: string) {
+export function parseColorWithCache($color: string): RGBA | null {
     $color = $color.trim();
     if (rgbaParseCache.has($color)) {
-        return rgbaParseCache.get($color);
+        return rgbaParseCache.get($color)!;
     }
     // We cannot _really_ parse any color which has the calc() expression,
     // so we try our best to remove those and then parse the value.
@@ -147,7 +147,7 @@ const rgbMatch = /^rgba?\([^\(\)]+\)$/;
 const hslMatch = /^hsla?\([^\(\)]+\)$/;
 const hexMatch = /^#[0-9a-f]+$/i;
 
-export function parse($color: string): RGBA {
+export function parse($color: string): RGBA | null {
     const c = $color.trim().toLowerCase();
 
     if (c.match(rgbMatch)) {
@@ -178,7 +178,7 @@ export function parse($color: string): RGBA {
 }
 
 function getNumbers($color: string) {
-    const numbers = [];
+    const numbers: string[] = [];
     let prevPos = 0;
     let isMining = false;
     // Get the first `(`.
@@ -266,7 +266,7 @@ function parseHex($hex: string) {
 }
 
 function getColorByName($color: string) {
-    const n = knownColors.get($color);
+    const n = knownColors.get($color)!;
     return {
         r: (n >> 16) & 255,
         g: (n >> 8) & 255,
@@ -276,7 +276,7 @@ function getColorByName($color: string) {
 }
 
 function getSystemColor($color: string) {
-    const n = systemColors.get($color);
+    const n = systemColors.get($color)!;
     return {
         r: (n >> 16) & 255,
         g: (n >> 8) & 255,

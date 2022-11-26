@@ -35,20 +35,20 @@ export function injectProxy(enableStyleSheetsProxy: boolean) {
 
 
     const cleanUp = () => {
-        Object.defineProperty(CSSStyleSheet.prototype, 'addRule', addRuleDescriptor);
-        Object.defineProperty(CSSStyleSheet.prototype, 'insertRule', insertRuleDescriptor);
-        Object.defineProperty(CSSStyleSheet.prototype, 'deleteRule', deleteRuleDescriptor);
-        Object.defineProperty(CSSStyleSheet.prototype, 'removeRule', removeRuleDescriptor);
+        Object.defineProperty(CSSStyleSheet.prototype, 'addRule', addRuleDescriptor!);
+        Object.defineProperty(CSSStyleSheet.prototype, 'insertRule', insertRuleDescriptor!);
+        Object.defineProperty(CSSStyleSheet.prototype, 'deleteRule', deleteRuleDescriptor!);
+        Object.defineProperty(CSSStyleSheet.prototype, 'removeRule', removeRuleDescriptor!);
         document.removeEventListener('__darkreader__cleanUp', cleanUp);
         document.removeEventListener('__darkreader__addUndefinedResolver', addUndefinedResolver);
         if (enableStyleSheetsProxy) {
-            Object.defineProperty(Document.prototype, 'styleSheets', documentStyleSheetsDescriptor);
+            Object.defineProperty(Document.prototype, 'styleSheets', documentStyleSheetsDescriptor!);
         }
         if (shouldWrapHTMLElement) {
-            Object.defineProperty(Element.prototype, 'getElementsByTagName', getElementsByTagNameDescriptor);
+            Object.defineProperty(Element.prototype, 'getElementsByTagName', getElementsByTagNameDescriptor!);
         }
         if (shouldProxyChildNodes) {
-            Object.defineProperty(Node.prototype, 'childNodes', childNodesDescriptor);
+            Object.defineProperty(Node.prototype, 'childNodes', childNodesDescriptor!);
         }
     };
 
@@ -64,7 +64,7 @@ export function injectProxy(enableStyleSheetsProxy: boolean) {
     const updateSheetEvent = new Event('__darkreader__updateSheet');
 
     function proxyAddRule(selector?: string, style?: string, index?: number): number {
-        addRuleDescriptor.value.call(this, selector, style, index);
+        addRuleDescriptor!.value.call(this, selector, style, index);
         if (this.ownerNode && !this.ownerNode.classList.contains('darkreader')) {
             this.ownerNode.dispatchEvent(updateSheetEvent);
         }
@@ -73,7 +73,7 @@ export function injectProxy(enableStyleSheetsProxy: boolean) {
     }
 
     function proxyInsertRule(rule: string, index?: number): number {
-        const returnValue = insertRuleDescriptor.value.call(this, rule, index);
+        const returnValue = insertRuleDescriptor!.value.call(this, rule, index);
         if (this.ownerNode && !this.ownerNode.classList.contains('darkreader')) {
             this.ownerNode.dispatchEvent(updateSheetEvent);
         }
@@ -81,14 +81,14 @@ export function injectProxy(enableStyleSheetsProxy: boolean) {
     }
 
     function proxyDeleteRule(index: number): void {
-        deleteRuleDescriptor.value.call(this, index);
+        deleteRuleDescriptor!.value.call(this, index);
         if (this.ownerNode && !this.ownerNode.classList.contains('darkreader')) {
             this.ownerNode.dispatchEvent(updateSheetEvent);
         }
     }
 
     function proxyRemoveRule(index?: number): void {
-        removeRuleDescriptor.value.call(this, index);
+        removeRuleDescriptor!.value.call(this, index);
         if (this.ownerNode && !this.ownerNode.classList.contains('darkreader')) {
             this.ownerNode.dispatchEvent(updateSheetEvent);
         }
@@ -96,7 +96,7 @@ export function injectProxy(enableStyleSheetsProxy: boolean) {
 
     function proxyDocumentStyleSheets() {
         const getCurrentValue = () => {
-            const docSheets: StyleSheetList = documentStyleSheetsDescriptor.get.call(this);
+            const docSheets: StyleSheetList = documentStyleSheetsDescriptor!.get!.call(this);
 
             const filteredSheets = [...docSheets].filter((styleSheet) => {
                 return !(styleSheet.ownerNode as Element).classList.contains('darkreader');
@@ -125,11 +125,11 @@ export function injectProxy(enableStyleSheetsProxy: boolean) {
 
     function proxyGetElementsByTagName(tagName: string): NodeListOf<HTMLElement> {
         if (tagName !== 'style') {
-            return getElementsByTagNameDescriptor.value.call(this, tagName);
+            return getElementsByTagNameDescriptor!.value.call(this, tagName);
         }
 
         const getCurrentElementValue = () => {
-            const elements: NodeListOf<HTMLElement> = getElementsByTagNameDescriptor.value.call(this, tagName);
+            const elements: NodeListOf<HTMLElement> = getElementsByTagNameDescriptor!.value.call(this, tagName);
 
             return Object.setPrototypeOf([...elements].filter((element: HTMLElement) => {
                 return !element.classList.contains('darkreader');
@@ -151,7 +151,7 @@ export function injectProxy(enableStyleSheetsProxy: boolean) {
     }
 
     function proxyChildNodes(): NodeListOf<ChildNode> {
-        const childNodes: NodeListOf<ChildNode> = childNodesDescriptor.get.call(this);
+        const childNodes: NodeListOf<ChildNode> = childNodesDescriptor!.get!.call(this);
 
         return Object.setPrototypeOf([...childNodes].filter((element: ChildNode) => {
             return !(element as HTMLElement).classList || !(element as HTMLElement).classList.contains('darkreader');

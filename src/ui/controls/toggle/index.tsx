@@ -34,13 +34,13 @@ export default function Toggle(props: ToggleProps) {
         <span class={cls}>
             <span
                 class={clsOn}
-                onclick={onChange ? () => !checked && onChange(true) : null}
+                onclick={onChange ? () => !checked && onChange(true) : undefined}
             >
                 {props.labelOn}
             </span>
             <span
                 class={clsOff}
-                onclick={onChange ? () => checked && onChange(false) : null}
+                onclick={onChange ? () => checked && onChange(false) : undefined}
             >
                 {props.labelOff}
             </span>

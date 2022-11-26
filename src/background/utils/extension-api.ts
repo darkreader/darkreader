@@ -1,7 +1,7 @@
 import {isPDF} from '../../utils/url';
 import {isFirefox, isEdge} from '../../utils/platform';
 
-export function canInjectScript(url: string) {
+export function canInjectScript(url: string | null | undefined) {
     if (isFirefox) {
         return (url
             && !url.startsWith('about:')
@@ -34,8 +34,8 @@ export function canInjectScript(url: string) {
     );
 }
 
-export async function readSyncStorage<T extends {[key: string]: any}>(defaults: T): Promise<T> {
-    return new Promise<T>((resolve) => {
+export async function readSyncStorage<T extends {[key: string]: any}>(defaults: T): Promise<T | null> {
+    return new Promise<T | null>((resolve) => {
         chrome.storage.sync.get(null, (sync: any) => {
             if (chrome.runtime.lastError) {
                 console.error(chrome.runtime.lastError.message);

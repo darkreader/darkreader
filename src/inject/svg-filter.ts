@@ -2,7 +2,7 @@ import {createNodeAsap, removeNode} from './utils/dom';
 
 export function createOrUpdateSVGFilter(svgMatrix: string, svgReverseMatrix: string) {
     createNodeAsap({
-        selectNode: () => document.getElementById('dark-reader-svg'),
+        selectNode: () => document.getElementById('dark-reader-svg')!,
         createNode: (target) => {
             const SVG_NS = 'http://www.w3.org/2000/svg';
             const createMatrixFilter = (id: string, matrix: string) => {
@@ -36,12 +36,12 @@ export function createOrUpdateSVGFilter(svgMatrix: string, svgReverseMatrix: str
             target.appendChild(svg);
         },
         updateNode: (existing) => {
-            const existingMatrix = existing.firstChild.firstChild as SVGFEColorMatrixElement;
+            const existingMatrix = existing.firstChild!.firstChild as SVGFEColorMatrixElement;
             if (existingMatrix.getAttribute('values') !== svgMatrix) {
                 existingMatrix.setAttribute('values', svgMatrix);
 
                 // Fix not triggering repaint
-                const style = document.getElementById('dark-reader-style');
+                const style = document.getElementById('dark-reader-style')!;
                 const css = style.textContent;
                 style.textContent = '';
                 style.textContent = css;

@@ -32,6 +32,8 @@ test('Unique identifier generation (popyfilled)', () => {
     expect(generateUID()).toEqual('a19cc926bf7f4d5fbf9c202bc7a4c7c6');
     expect(shim2).toHaveBeenCalled();
 
+    // eslint-disable-next-line
+    // @ts-ignore
     delete globalThis.crypto;
 });
 

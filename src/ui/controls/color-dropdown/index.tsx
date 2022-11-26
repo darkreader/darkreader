@@ -32,7 +32,7 @@ export default function ColorDropDown(props: ColorDropDownProps) {
         props.hasDefaultOption ? {id: 'default', content: labels.DEFAULT} : null,
         props.hasAutoOption ? {id: 'auto', content: labels.AUTO} : null,
         {id: 'custom', content: labels.CUSTOM},
-    ].filter((v) => v);
+    ].filter((v) => v) as Array<{id: string; content: string}>;
 
     const selectedDropDownValue = (
         props.value === '' ? 'default' :
@@ -40,7 +40,7 @@ export default function ColorDropDown(props: ColorDropDownProps) {
                 'custom'
     );
 
-    function onDropDownChange(value: string) {
+    function onDropDownChange(value: 'default' | 'auto' | 'custom') {
         const result = {
             default: '',
             auto: 'auto',
@@ -60,7 +60,7 @@ export default function ColorDropDown(props: ColorDropDownProps) {
 
     function onRootRender(root: Element) {
         if (shouldFocusOnPicker) {
-            const pickerNode = root.querySelector('.color-dropdown__picker');
+            const pickerNode = root.querySelector('.color-dropdown__picker')!;
             ColorPicker.focus(pickerNode);
         }
     }
@@ -70,7 +70,7 @@ export default function ColorDropDown(props: ColorDropDownProps) {
             class={{
                 'color-dropdown': true,
                 'color-dropdown--open': store.isOpen,
-                [props.class]: Boolean(props.class),
+                [props.class!]: Boolean(props.class),
             }}
             onrender={onRootRender}
         >

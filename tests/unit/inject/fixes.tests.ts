@@ -4,7 +4,7 @@ import {multiline} from '../../support/test-utils';
 
 describe('Select fixes via findRelevantFix()', () => {
     const emptyFix: DynamicThemeFix = {
-        url: null,
+        url: [],
         css: '',
         invert: [],
         ignoreImageAnalysis: [],
@@ -14,8 +14,6 @@ describe('Select fixes via findRelevantFix()', () => {
 
     it('If fix list is empty or invalid, findRelevantFix() returns null', () => {
         expect(findRelevantFix('https://example.com', [])).toBe(null);
-        expect(findRelevantFix('https://example.com', null)).toBe(null);
-        expect(findRelevantFix('https://example.com', undefined)).toBe(null);
         expect(findRelevantFix('https://example.com', 1 as any)).toBe(null);
         expect(findRelevantFix('https://example.com', 'a' as any)).toBe(null);
         expect(findRelevantFix('https://example.com', {} as any)).toBe(null);
@@ -169,7 +167,7 @@ describe('Select fixes via findRelevantFix()', () => {
 
 describe('Construct single fix via combineFixes()', () => {
     const emptyFix: DynamicThemeFix = {
-        url: null,
+        url: [],
         css: '',
         invert: [],
         ignoreImageAnalysis: [],
@@ -189,7 +187,7 @@ describe('Construct single fix via combineFixes()', () => {
                 url: ['example.com'],
                 css: 'h1 { color: yellow; }',
             }
-        ]).css).toBe(multiline(
+        ])!.css).toBe(multiline(
             'body { background: blue; }',
             'h1 { color: yellow; }',
         ));
@@ -206,7 +204,7 @@ describe('Construct single fix via combineFixes()', () => {
                 ...emptyFix,
                 invert: ['svg'],
             }
-        ]).invert).toStrictEqual(['img', 'svg']);
+        ])!.invert).toStrictEqual(['img', 'svg']);
     });
 
     it('Merges ignoreImageAnalysis', () => {
@@ -220,7 +218,7 @@ describe('Construct single fix via combineFixes()', () => {
                 ...emptyFix,
                 ignoreImageAnalysis: ['svg'],
             }
-        ]).ignoreImageAnalysis).toStrictEqual(['img', 'svg']);
+        ])!.ignoreImageAnalysis).toStrictEqual(['img', 'svg']);
     });
 
     it('Merges ignoreInlineStyle', () => {
@@ -234,7 +232,7 @@ describe('Construct single fix via combineFixes()', () => {
                 ...emptyFix,
                 ignoreInlineStyle: ['svg'],
             }
-        ]).ignoreInlineStyle).toStrictEqual(['img', 'svg']);
+        ])!.ignoreInlineStyle).toStrictEqual(['img', 'svg']);
     });
 
     it('disableStyleSheetsProxy is true if it is true in at least one fix', () => {
@@ -246,9 +244,8 @@ describe('Construct single fix via combineFixes()', () => {
             },
             {
                 ...emptyFix,
-                disableStyleSheetsProxy: null,
             }
-        ]).disableStyleSheetsProxy).toBe(false);
+        ])!.disableStyleSheetsProxy).toBe(false);
 
         expect(combineFixes([
             {
@@ -264,6 +261,6 @@ describe('Construct single fix via combineFixes()', () => {
                 ...emptyFix,
                 disableStyleSheetsProxy: false,
             }
-        ]).disableStyleSheetsProxy).toBe(true);
+        ])!.disableStyleSheetsProxy).toBe(true);
     });
 });

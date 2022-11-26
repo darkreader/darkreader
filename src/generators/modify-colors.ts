@@ -40,17 +40,17 @@ function getCacheId(rgb: RGBA, theme: Theme) {
     return resultId;
 }
 
-function modifyColorWithCache(rgb: RGBA, theme: Theme, modifyHSL: (hsl: HSLA, pole?: HSLA, anotherPole?: HSLA) => HSLA, poleColor?: string, anotherPoleColor?: string) {
+function modifyColorWithCache(rgb: RGBA, theme: Theme, modifyHSL: (hsl: HSLA, pole?: HSLA | null, anotherPole?: HSLA | null) => HSLA, poleColor?: string, anotherPoleColor?: string) {
     let fnCache: Map<string, string>;
     if (colorModificationCache.has(modifyHSL)) {
-        fnCache = colorModificationCache.get(modifyHSL);
+        fnCache = colorModificationCache.get(modifyHSL)!;
     } else {
         fnCache = new Map();
         colorModificationCache.set(modifyHSL, fnCache);
     }
     const id = getCacheId(rgb, theme);
     if (fnCache.has(id)) {
-        return fnCache.get(id);
+        return fnCache.get(id)!;
     }
 
     const hsl = rgbToHSL(rgb);

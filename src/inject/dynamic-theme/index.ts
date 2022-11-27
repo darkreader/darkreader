@@ -22,6 +22,7 @@ import {clearColorCache, parseColorWithCache} from '../../utils/color';
 import {parsedURLCache} from '../../utils/url';
 import {variablesStore} from './variables';
 import {setDocumentVisibilityListener, documentIsVisible, removeDocumentVisibilityListener} from '../../utils/visibility';
+import {combineFixes, findRelevantFix} from './fixes';
 
 declare const __TEST__: boolean;
 declare const __CHROMIUM_MV3__: boolean;
@@ -30,6 +31,7 @@ const styleManagers = new Map<StyleElement, StyleManager>();
 const adoptedStyleManagers = [] as AdoptedStyleSheetManager[];
 let filter: FilterConfig = null;
 let fixes: DynamicThemeFix = null;
+let relevantFixIndex: number = null;
 let isIFrame: boolean = null;
 let ignoredImageAnalysisSelectors: string[] = null;
 let ignoredInlineSelectors: string[] = null;
@@ -450,7 +452,38 @@ function isAnotherDarkReaderInstanceActive() {
     return false;
 }
 
-export function createOrUpdateDynamicTheme(filterConfig: FilterConfig, dynamicThemeFixes: DynamicThemeFix, iframe: boolean) {
+function selectRelevantFix(documentURL: string, fixes: DynamicThemeFix[]): DynamicThemeFix {
+    if (!fixes) {
+        return null;
+    }
+    if (fixes.length === 0 || fixes[0].url[0] !== '*') {
+        logWarn('selectRelevantFix() failed to construct a single fix', documentURL, fixes);
+        return null;
+    }
+
+    relevantFixIndex = findRelevantFix(documentURL, fixes);
+    return relevantFixIndex ? combineFixes([fixes[0], fixes[relevantFixIndex]]) : fixes[0];
+}
+
+/**
+ * TODO: expose this function to API builds via src/api function enable()
+ */
+export function createOrUpdateDynamicTheme(filterConfig: FilterConfig, dynamicThemeFixes: DynamicThemeFix[], iframe: boolean) {
+    const dynamicThemeFix = selectRelevantFix(document.location.href, dynamicThemeFixes);
+
+    // Most websites will have only the generic fix applied ('*'), some will have generic fix and one site-specific fix (two in total),
+    // and very few will have multple site-specific fixes
+    // TODO: add a navigation listener here for this case
+
+    createOrUpdateDynamicThemeInternal(filterConfig, dynamicThemeFix, iframe);
+}
+
+/**
+ * Note: This function should be directly used only in API builds, it is exported by this fle
+ * only for use in src/api/enable() for backwards compatibility,
+ * extension should use only createOrUpdateDynamicTheme()
+ */
+export function createOrUpdateDynamicThemeInternal(filterConfig: FilterConfig, dynamicThemeFixes: DynamicThemeFix, iframe: boolean) {
     filter = filterConfig;
     fixes = dynamicThemeFixes;
     if (fixes) {

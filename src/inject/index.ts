@@ -5,7 +5,7 @@ import {createOrUpdateDynamicTheme, removeDynamicTheme, cleanDynamicThemeCache} 
 import {logWarn, logInfoCollapsed} from './utils/log';
 import {isSystemDarkModeEnabled, runColorSchemeChangeDetector, stopColorSchemeChangeDetector} from '../utils/media-query';
 import {collectCSS} from './dynamic-theme/css-collection';
-import type {Message} from '../definitions';
+import type {DynamicThemeFix, Message, Theme} from '../definitions';
 import {MessageType} from '../utils/message';
 
 let unloaded = false;
@@ -99,7 +99,7 @@ function onMessage({type, data}: Message) {
             break;
         }
         case MessageType.BG_ADD_DYNAMIC_THEME: {
-            const {theme, fixes, isIFrame, detectDarkTheme} = data;
+            const {theme, fixes, isIFrame, detectDarkTheme} = data as {theme: Theme; fixes: DynamicThemeFix[]; isIFrame: boolean; detectDarkTheme: boolean};
             removeStyle();
             createOrUpdateDynamicTheme(theme, fixes, isIFrame);
             if (detectDarkTheme) {

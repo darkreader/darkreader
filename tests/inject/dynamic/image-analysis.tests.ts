@@ -228,14 +228,14 @@ describe('IMAGE ANALYSIS', () => {
             '</style>',
             '<h1>Dark icon <i></i></h1>',
         );
-        const fixes: DynamicThemeFix = {
+        const fixes: DynamicThemeFix[] = [{
             url: ['*'],
             invert: [''],
             css: '',
             ignoreInlineStyle: ['.'],
             ignoreImageAnalysis: ['*'],
             disableStyleSheetsProxy: false,
-        };
+        }];
         createOrUpdateDynamicTheme(theme, fixes, false);
         const backgroundImage = getComputedStyle(container.querySelector('i')).backgroundImage;
         expect(backgroundImage).toContain('data:');

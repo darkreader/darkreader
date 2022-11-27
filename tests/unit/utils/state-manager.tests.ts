@@ -143,7 +143,7 @@ describe('State manager utility', () => {
 
         expect(getCount).toEqual(1);
 
-        getCallback({});
+        getCallback!({});
 
         promises.all('pending');
 
@@ -499,9 +499,9 @@ describe('State manager utility', () => {
         const storage: any = {};
 
         let getCount = 0;
-        let getCallback: () => void;
+        let getCallback: (() => void) | undefined;
         const resolveGet = () => {
-            getCallback();
+            getCallback!();
             getCallback = undefined;
         };
 
@@ -514,9 +514,9 @@ describe('State manager utility', () => {
         };
 
         let setCount = 0;
-        let setCallback: () => void;
+        let setCallback: (() => void) | undefined;
         const resolveSet = () => {
-            setCallback();
+            setCallback!();
             setCallback = undefined;
         };
 
@@ -528,12 +528,12 @@ describe('State manager utility', () => {
             };
         };
 
-        let onChangedListener: (data: any) => void = null;
+        let onChangedListener: ((data: any) => void) | undefined;
         const modifyInternalState = (data: any) => {
             expect(onChangedListener).toBeTruthy();
             const oldValue = storage[key];
             storage[key] = data;
-            onChangedListener({
+            onChangedListener!({
                 [key]: {
                     oldValue,
                     newValue: data

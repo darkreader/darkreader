@@ -62,7 +62,7 @@ export function createNodeAsap({
     }
 }
 
-export function removeNode(node: Node) {
+export function removeNode(node: Node | null) {
     node && node.parentNode && node.parentNode.removeChild(node);
 }
 
@@ -83,8 +83,8 @@ export function watchForNodePosition<T extends Node>(
         throw new Error('Unable to watch for node position: there is no previous sibling');
     }
     let attempts = 0;
-    let start: number = null;
-    let timeoutId: ReturnType<typeof setTimeout> = null;
+    let start: number | null = null;
+    let timeoutId: ReturnType<typeof setTimeout> | null = null;
     const restore = throttle(() => {
         if (timeoutId) {
             return;
@@ -117,44 +117,46 @@ export function watchForNodePosition<T extends Node>(
         }
 
         if (mode === 'prev-sibling') {
-            if (prevSibling.parentNode == null) {
+            if (prevSibling!.parentNode == null) {
                 logWarn('Unable to restore node position: sibling was removed', node, prevSibling, parent);
                 stop();
                 return;
             }
-            if (prevSibling.parentNode !== parent) {
+            if (prevSibling!.parentNode !== parent) {
                 logWarn('Style was moved to another parent', node, prevSibling, parent);
-                updateParent(prevSibling.parentNode);
+                updateParent(prevSibling!.parentNode);
             }
         }
 
         // If parent becomes disconnected from the DOM, fetches the new head and
         // save that as parent. Do this only for the head mode, as those are
         // important nodes to keep.
-        if (mode === 'head' && !parent.isConnected) {
+        if (mode === 'head' && !parent!.isConnected) {
             parent = document.head;
             // TODO: Set correct prevSibling, which needs to be the last `.darkreader` in <head> that isn't .darkeader--sync or .darkreader--cors.
         }
 
         logWarn('Restoring node position', node, prevSibling, parent);
-        parent.insertBefore(node, prevSibling && prevSibling.isConnected ? prevSibling.nextSibling : parent.firstChild);
+        parent!.insertBefore(node, prevSibling && prevSibling.isConnected ? prevSibling.nextSibling : parent!.firstChild);
         observer.takeRecords();
         onRestore && onRestore();
     });
     const observer = new MutationObserver(() => {
         if (
-            (mode === 'head' && (node.parentNode !== parent || !node.parentNode.isConnected)) ||
+            (mode === 'head' && (node.parentNode !== parent || !node.parentNode!.isConnected)) ||
             (mode === 'prev-sibling' && node.previousSibling !== prevSibling)
         ) {
             restore();
         }
     });
     const run = () => {
-        observer.observe(parent, {childList: true});
+        // TODO: remove type cast after dependency update
+        observer.observe(parent as ParentNode, {childList: true});
     };
 
     const stop = () => {
-        clearTimeout(timeoutId);
+        // TODO: remove type cast after dependency update
+        clearTimeout(timeoutId as number);
         observer.disconnect();
         restore.cancel();
     };
@@ -163,7 +165,7 @@ export function watchForNodePosition<T extends Node>(
         observer.takeRecords();
     };
 
-    const updateParent = (parentNode: Node & ParentNode) => {
+    const updateParent = (parentNode: Node & ParentNode | null) => {
         parent = parentNode;
         stop();
         run();
@@ -173,7 +175,7 @@ export function watchForNodePosition<T extends Node>(
     return {run, stop, skip};
 }
 
-export function iterateShadowHosts(root: Node, iterator: (host: Element) => void) {
+export function iterateShadowHosts(root: Node | null, iterator: (host: Element) => void) {
     if (root == null) {
         return;
     }
@@ -296,15 +298,15 @@ function getElementsTreeOperations(mutations: MutationRecord[]): ElementsTreeOpe
         });
     });
 
-    const duplicateAdditions = [] as Element[];
-    const duplicateDeletions = [] as Element[];
+    const duplicateAdditions: Element[] = [];
+    const duplicateDeletions: Element[] = [];
     additions.forEach((node) => {
-        if (additions.has(node.parentElement)) {
+        if (additions.has(node.parentElement as HTMLElement)) {
             duplicateAdditions.push(node);
         }
     });
     deletions.forEach((node) => {
-        if (deletions.has(node.parentElement)) {
+        if (deletions.has(node.parentElement as HTMLElement)) {
             duplicateDeletions.push(node);
         }
     });
@@ -329,8 +331,8 @@ export function createOptimizedTreeObserver(root: Document | ShadowRoot, callbac
     let domReadyListener: () => void;
 
     if (optimizedTreeObservers.has(root)) {
-        observer = optimizedTreeObservers.get(root);
-        observerCallbacks = optimizedTreeCallbacks.get(observer);
+        observer = optimizedTreeObservers.get(root)!;
+        observerCallbacks = optimizedTreeCallbacks.get(observer)!;
     } else {
         let hadHugeMutationsBefore = false;
         let subscribedForReadyState = false;

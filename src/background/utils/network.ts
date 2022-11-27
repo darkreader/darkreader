@@ -34,7 +34,7 @@ export async function readText(params: RequestParams): Promise<string> {
             // XMLHttpRequest is not available in Service Worker contexts like
             // Manifest V3 background context
             let abortController: AbortController;
-            let signal: AbortSignal;
+            let signal: AbortSignal | undefined;
             let timedOut = false;
             if (params.timeout) {
                 abortController = new AbortController();
@@ -73,7 +73,7 @@ interface CacheRecord {
 }
 
 class LimitedCacheStorage {
-    // TODO: remove any cast once declarations are updated
+    // TODO: remove type cast after dependency update
     private static QUOTA_BYTES = ((!__TEST__ && (navigator as any).deviceMemory) || 4) * 16 * 1024 * 1024;
     private static TTL = getDuration({minutes: 10});
     private static ALARM_NAME = 'network';
@@ -106,7 +106,7 @@ class LimitedCacheStorage {
 
     get(url: string) {
         if (this.records.has(url)) {
-            const record = this.records.get(url);
+            const record = this.records.get(url)!;
             record.expires = Date.now() + LimitedCacheStorage.TTL;
             this.records.delete(url);
             this.records.set(url, record);

@@ -5,6 +5,7 @@ import {isURLInList, isURLMatched, getURLHostOrProtocol} from '../../../../utils
 import {DropDown, MessageBox} from '../../../controls';
 import type {ViewProps} from '../../types';
 import {generateUID} from '../../../../utils/uid';
+import type {DropDownOption} from '../../../controls/dropdown';
 
 function PresetItem(props: ViewProps & {preset: ThemePreset}) {
     const context = getContext();
@@ -80,7 +81,7 @@ export default function PresetPicker(props: ViewProps) {
         ...userPresetsOptions,
         addNewPresetOption,
         customSitePresetOption,
-    ].filter(Boolean);
+    ].filter(Boolean) as Array<DropDownOption<string>>;
 
     function onPresetChange(id: string) {
         const filteredCustomThemes = props.data.settings.customThemes.filter(({url}) => !isURLInList(tab.url, url));
@@ -115,7 +116,7 @@ export default function PresetPicker(props: ViewProps) {
 
             const extended = filteredPresets.concat({
                 id: `preset-${generateUID()}`,
-                name: newPresetName,
+                name: newPresetName!,
                 urls: [host],
                 theme: {...props.data.settings.theme},
             });

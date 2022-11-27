@@ -12,7 +12,7 @@ export interface ExtensionData {
     news: News[];
     shortcuts: Shortcuts;
     colorScheme: ParsedColorSchemeConfig;
-    forcedScheme: 'dark' | 'light';
+    forcedScheme: 'dark' | 'light' | null;
     devtools: {
         dynamicFixesText: string;
         filterFixesText: string;
@@ -29,7 +29,7 @@ export interface TabData {
 export interface ExtensionActions {
     changeSettings(settings: Partial<UserSettings>): void;
     setTheme(theme: Partial<FilterConfig>): void;
-    setShortcut(command: string, shortcut: string): Promise<string>;
+    setShortcut(command: string, shortcut: string): Promise<string | null>;
     toggleActiveTab(): void;
     markNewsAsRead(ids: string[]): void;
     markNewsAsDisplayed(ids: string[]): void;
@@ -118,16 +118,16 @@ export interface TimeSettings {
 }
 
 export interface LocationSettings {
-    latitude: number;
-    longitude: number;
+    latitude: number | null;
+    longitude: number | null;
 }
 
 export interface TabInfo {
     url: string;
     isProtected: boolean;
-    isInjected: boolean;
+    isInjected: boolean | null;
     isInDarkList: boolean;
-    isDarkThemeDetected: boolean;
+    isDarkThemeDetected: boolean | null;
 }
 
 export interface Message {

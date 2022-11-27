@@ -5,7 +5,7 @@ export type QueueEntry = () => void;
 // It's fully asyncronous and uses promises and tries to get 60FPS.
 export default class AsyncQueue {
     private queue: QueueEntry[] = [];
-    private timerId: number = null;
+    private timerId: number | null = null;
     private frameDuration = 1000 / 60;
 
     addToQueue(entry: QueueEntry) {
@@ -29,7 +29,7 @@ export default class AsyncQueue {
         this.timerId = requestAnimationFrame(() => {
             this.timerId = null;
             const start = Date.now();
-            let cb: () => void;
+            let cb: (() => void) | undefined;
             while ((cb = this.queue.shift())) {
                 cb();
                 if (Date.now() - start >= this.frameDuration) {

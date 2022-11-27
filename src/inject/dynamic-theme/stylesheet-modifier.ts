@@ -42,7 +42,7 @@ export function createStyleSheetModifier() {
     const rulesTextCache = new Set<string>();
     const rulesModCache = new Map<string, ModifiableCSSRule>();
     const varTypeChangeCleaners = new Set<() => void>();
-    let prevFilterKey: string = null;
+    let prevFilterKey: string | null = null;
     let hasNonLoadedLink = false;
     let wasRebuilt = false;
     function shouldRebuildStyle() {
@@ -79,7 +79,7 @@ export function createStyleSheetModifier() {
             if (textDiffersFromPrev) {
                 rulesChanged = true;
             } else {
-                modRules.push(rulesModCache.get(cssText));
+                modRules.push(rulesModCache.get(cssText)!);
                 return;
             }
 
@@ -91,13 +91,13 @@ export function createStyleSheetModifier() {
                 }
             });
 
-            let modRule: ModifiableCSSRule = null;
+            let modRule: ModifiableCSSRule | null = null;
             if (modDecs.length > 0) {
-                const parentRule = rule.parentRule;
+                const parentRule = rule.parentRule!;
                 modRule = {selector: rule.selectorText, declarations: modDecs, parentRule};
                 modRules.push(modRule);
             }
-            rulesModCache.set(cssText, modRule);
+            rulesModCache.set(cssText, modRule!);
         }, () => {
             hasNonLoadedLink = true;
         });
@@ -116,7 +116,7 @@ export function createStyleSheetModifier() {
 
         interface ReadyGroup {
             isGroup: true;
-            rule: CSSRule;
+            rule: CSSRule | null;
             rules: Array<ReadyGroup | ReadyStyleRule>;
         }
 
@@ -128,7 +128,7 @@ export function createStyleSheetModifier() {
 
         interface ReadyDeclaration {
             property: string;
-            value: string | Array<{property: string; value: string}>;
+            value: string | Array<{property: string; value: string}> | null;
             important: boolean;
             sourceValue: string;
             asyncKey?: number;
@@ -170,13 +170,13 @@ export function createStyleSheetModifier() {
             }
 
             if (groupRefs.has(rule)) {
-                return groupRefs.get(rule);
+                return groupRefs.get(rule)!;
             }
 
             const group: ReadyGroup = {rule, rules: [], isGroup: true};
             groupRefs.set(rule, group);
 
-            const parentGroup = getGroup(rule.parentRule);
+            const parentGroup = getGroup(rule.parentRule!);
             parentGroup.rules.push(group);
 
             return group;
@@ -191,7 +191,7 @@ export function createStyleSheetModifier() {
             const readyDeclarations = readyStyleRule.declarations;
             group.rules.push(readyStyleRule);
 
-            function handleAsyncDeclaration(property: string, modified: Promise<string>, important: boolean, sourceValue: string) {
+            function handleAsyncDeclaration(property: string, modified: Promise<string | null>, important: boolean, sourceValue: string) {
                 const asyncKey = ++asyncDeclarationCounter;
                 const asyncDeclaration: ReadyDeclaration = {property, value: null, important, asyncKey, sourceValue};
                 readyDeclarations.push(asyncDeclaration);
@@ -306,14 +306,14 @@ export function createStyleSheetModifier() {
         }
 
         function rebuildAsyncRule(key: number) {
-            const {rule, target, index} = asyncDeclarations.get(key);
+            const {rule, target, index} = asyncDeclarations.get(key)!;
             target.deleteRule(index);
             setRule(target, index, rule);
             asyncDeclarations.delete(key);
         }
 
         function rebuildVarRule(key: number) {
-            const {rule, target, index} = varDeclarations.get(key);
+            const {rule, target, index} = varDeclarations.get(key)!;
             target.deleteRule(index);
             setRule(target, index, rule);
         }

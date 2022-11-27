@@ -8,7 +8,7 @@ import {isFirefox} from '../utils/platform';
 // TODO(bershanskiy): Add support for reads/writes of multiple keys at once for performance.
 // TODO(bershanskiy): Popup UI heeds only hasCustom*Fixes() and nothing else. Consider storing that data separatelly.
 interface DevToolsStorage {
-    get(key: string): Promise<string>;
+    get(key: string): Promise<string | null>;
     set(key: string, value: string): Promise<void> | void;
     remove(key: string): Promise<void> | void;
     has(key: string): Promise<boolean> | boolean;
@@ -19,7 +19,7 @@ declare const __DEBUG__: boolean;
 
 class PersistentStorageWrapper implements DevToolsStorage {
     // Cache information within background context for future use without waiting.
-    private cache: {[key: string]: string} = {};
+    private cache: {[key: string]: string | null} = {};
 
     // TODO(bershanskiy): remove migrated and migrateFromLocalStorage after migration end.
     // Part 1 of 2.
@@ -90,7 +90,7 @@ class PersistentStorageWrapper implements DevToolsStorage {
         if (key in this.cache) {
             return this.cache[key];
         }
-        return new Promise<string>((resolve) => {
+        return new Promise<string | null>((resolve) => {
             chrome.storage.local.get(key, (result) => {
                 // If cache received a new value (from call to set())
                 // before we retreived the old value from storage,
@@ -125,7 +125,7 @@ class PersistentStorageWrapper implements DevToolsStorage {
     }
 
     async remove(key: string) {
-        this.cache[key] = undefined;
+        this.cache[key] = null;
         return new Promise<void>((resolve) => chrome.storage.local.remove(key, () => {
             if (chrome.runtime.lastError) {
                 console.error('Failed to delete DevTools data', chrome.runtime.lastError);
@@ -192,7 +192,7 @@ class TempStorage implements DevToolsStorage {
     map = new Map<string, string>();
 
     async get(key: string) {
-        return this.map.get(key);
+        return this.map.get(key) || null;
     }
 
     set(key: string, value: string) {
@@ -263,7 +263,7 @@ export default class DevTools {
         let rawFixes = await this.getSavedDynamicThemeFixes();
         if (!rawFixes) {
             await ConfigManager.load();
-            rawFixes = ConfigManager.DYNAMIC_THEME_FIXES_RAW;
+            rawFixes = ConfigManager.DYNAMIC_THEME_FIXES_RAW || '';
         }
         const fixes = parseDynamicThemeFixes(rawFixes);
         return formatDynamicThemeFixes(fixes);
@@ -301,7 +301,7 @@ export default class DevTools {
         let rawFixes = await this.getSavedInversionFixes();
         if (!rawFixes) {
             await ConfigManager.load();
-            rawFixes = ConfigManager.INVERSION_FIXES_RAW;
+            rawFixes = ConfigManager.INVERSION_FIXES_RAW || '';
         }
         const fixes = parseInversionFixes(rawFixes);
         return formatInversionFixes(fixes);
@@ -339,7 +339,7 @@ export default class DevTools {
         let rawThemes = await this.getSavedStaticThemes();
         if (!rawThemes) {
             await ConfigManager.load();
-            rawThemes = ConfigManager.STATIC_THEMES_RAW;
+            rawThemes = ConfigManager.STATIC_THEMES_RAW || '';
         }
         const themes = parseStaticThemes(rawThemes);
         return formatStaticThemes(themes);

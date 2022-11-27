@@ -10,7 +10,7 @@ export function evalMath(expression: string): number {
     // The working stack where new tokens are pushed.
     const workingStack: string[] = [];
 
-    let lastToken: string;
+    let lastToken: string | undefined;
     // Iterate over the expression.
     for (let i = 0, len = expression.length; i < len; i++) {
         const token = expression[i];
@@ -33,8 +33,8 @@ export function evalMath(expression: string): number {
 
                 // Is the current operation equal or less than the current operation?
                 // Then move that operation to the rpnStack.
-                if (op.lessOrEqualThan(currentOp)) {
-                    rpnStack.push(workingStack.shift());
+                if (op!.lessOrEqualThan(currentOp)) {
+                    rpnStack.push(workingStack.shift()!);
                 } else {
                     break;
                 }

@@ -24,7 +24,7 @@
  * has issues optimizing code with multiple callbacks stored in array or in a set.
  */
 
-let documentVisibilityListener: () => void = null;
+let documentVisibilityListener: (() => void) | null = null;
 
 let documentIsVisible_ = !document.hidden;
 
@@ -35,15 +35,15 @@ const listenerOptions: any = {
 };
 
 function watchForDocumentVisibility() {
-    document.addEventListener('visibilitychange', documentVisibilityListener, listenerOptions);
-    window.addEventListener('pageshow', documentVisibilityListener, listenerOptions);
-    window.addEventListener('focus', documentVisibilityListener, listenerOptions);
+    document.addEventListener('visibilitychange', documentVisibilityListener!, listenerOptions);
+    window.addEventListener('pageshow', documentVisibilityListener!, listenerOptions);
+    window.addEventListener('focus', documentVisibilityListener!, listenerOptions);
 }
 
 function stopWatchingForDocumentVisibility() {
-    document.removeEventListener('visibilitychange', documentVisibilityListener, listenerOptions);
-    window.removeEventListener('pageshow', documentVisibilityListener, listenerOptions);
-    window.removeEventListener('focus', documentVisibilityListener, listenerOptions);
+    document.removeEventListener('visibilitychange', documentVisibilityListener!, listenerOptions);
+    window.removeEventListener('pageshow', documentVisibilityListener!, listenerOptions);
+    window.removeEventListener('focus', documentVisibilityListener!, listenerOptions);
 }
 
 export function setDocumentVisibilityListener(callback: () => void) {

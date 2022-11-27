@@ -1,6 +1,6 @@
 import {isMatchMediaChangeEventListenerSupported} from './platform';
 
-let query: MediaQueryList = null;
+let query: MediaQueryList | null = null;
 const onChange: ({matches}: {matches: boolean}) => void = ({matches}) => listeners.forEach((listener) => listener(matches));
 const listeners = new Set<(isDark: boolean) => void>();
 

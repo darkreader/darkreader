@@ -15,10 +15,10 @@ function fixBaseURL($url: string) {
     return anchor.href;
 }
 
-export function parseURL($url: string, $base: string = null) {
+export function parseURL($url: string, $base: string | null = null): URL {
     const key = `${$url}${$base ? `;${$base}` : ''}`;
     if (parsedURLCache.has(key)) {
-        return parsedURLCache.get(key);
+        return parsedURLCache.get(key)!;
     }
     if ($base) {
         const parsedURL = new URL($url, fixBaseURL($base));
@@ -130,7 +130,7 @@ function createUrlRegex(urlTemplate: string): RegExp {
 
     let slashIndex: number;
     let beforeSlash: string;
-    let afterSlash: string;
+    let afterSlash: string | undefined;
     if ((slashIndex = urlTemplate.indexOf('/')) >= 0) {
         beforeSlash = urlTemplate.substring(0, slashIndex); // google.*
         afterSlash = urlTemplate.replace(/\$/g, '').substring(slashIndex); // /login/abc

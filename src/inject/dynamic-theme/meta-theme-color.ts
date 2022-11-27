@@ -5,8 +5,8 @@ import type {FilterConfig} from '../../definitions';
 
 const metaThemeColorName = 'theme-color';
 const metaThemeColorSelector = `meta[name="${metaThemeColorName}"]`;
-let srcMetaThemeColor: string = null;
-let observer: MutationObserver = null;
+let srcMetaThemeColor: string | null = null;
+let observer: MutationObserver | null = null;
 
 function changeMetaThemeColor(meta: HTMLMetaElement, theme: FilterConfig) {
     srcMetaThemeColor = srcMetaThemeColor || meta.content;
@@ -32,7 +32,7 @@ export function changeMetaThemeColorWhenAvailable(theme: FilterConfig) {
                 for (let j = 0; j < addedNodes.length; j++) {
                     const node = addedNodes[j];
                     if (node instanceof HTMLMetaElement && node.name === metaThemeColorName) {
-                        observer.disconnect();
+                        observer!.disconnect();
                         observer = null;
                         changeMetaThemeColor(node, theme);
                         break loop;

@@ -95,7 +95,7 @@ function Header({data, actions, onMoreToggleSettingsClick}: HeaderProps) {
                     {(isTimeAutomation
                         ? <WatchIcon hours={now.getHours()} minutes={now.getMinutes()} />
                         : (isLocationAutomation
-                            ? (<SunMoonIcon date={now} latitude={data.settings.location.latitude} longitude={data.settings.location.longitude} />)
+                            ? (<SunMoonIcon date={now} latitude={data.settings.location.latitude!} longitude={data.settings.location.longitude!} />)
                             : <SystemIcon />))}
                 </span>
             </div>

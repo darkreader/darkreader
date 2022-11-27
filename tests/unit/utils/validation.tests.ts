@@ -38,7 +38,7 @@ test('Settings Validation', () => {
         lightSchemeTextColor: '#ffffff00',
         scrollbarColor: false,
         selectionColor: 'green',
-        styleSystemControls: null as boolean,
+        styleSystemControls: null as boolean | null,
         lightColorScheme: '',
         darkColorScheme: false,
         immediateModify: 1,
@@ -54,7 +54,7 @@ test('Settings Validation', () => {
 
     const wonkySet = {
         enabled: '',
-        fetchNews: null as boolean,
+        fetchNews: null as boolean | null,
         theme: {
             mode: 'dark',
             brightness: 250,
@@ -72,7 +72,7 @@ test('Settings Validation', () => {
             lightSchemeTextColor: '#ffffff00',
             scrollbarColor: false,
             selectionColor: 'green',
-            styleSystemControls: null as boolean,
+            styleSystemControls: null as boolean | null,
             lightColorScheme: '',
             darkColorScheme: false,
             immediateModify: 1,
@@ -98,9 +98,9 @@ test('Settings Validation', () => {
         ],
         siteList: ['a.com', '', 'b.com'],
         siteListEnabled: {0: 'a.com', 1: 'b.com'},
-        applyToListedOnly: null as boolean,
+        applyToListedOnly: null as boolean | null,
         changeBrowserTheme: 1,
-        syncSettings: null as boolean,
+        syncSettings: null as boolean | null,
         syncSitesFixes: 0,
         automation: {
             enabled: false,
@@ -116,7 +116,7 @@ test('Settings Validation', () => {
             longitude: '5.3',
         },
         previewNewDesign: '',
-        enableForPDF: null as boolean,
+        enableForPDF: null as boolean | null,
         enableForProtectedPages: 'ok',
         enableContextMenus: 'yes',
         detectDarkTheme: 'no',

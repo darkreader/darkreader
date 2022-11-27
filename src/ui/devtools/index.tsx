@@ -28,7 +28,7 @@ if (__TEST__) {
         const respond = (message: {type: string; id: number; data?: string}) => socket.send(JSON.stringify(message));
         const message: {type: string; id: number; data: string} = JSON.parse(e.data);
         try {
-            const textarea: HTMLTextAreaElement = document.querySelector('textarea#editor');
+            const textarea: HTMLTextAreaElement = document.querySelector('textarea#editor')!;
             const [buttonReset, buttonApply] = document.querySelectorAll('button');
             switch (message.type) {
                 case 'debug-devtools-paste':

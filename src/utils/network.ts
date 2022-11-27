@@ -15,7 +15,7 @@ async function getOKResponse(url: string, mimeType?: string, origin?: string) {
         return response;
     }
 
-    if (mimeType && !response.headers.get('Content-Type').startsWith(mimeType)) {
+    if (mimeType && !response.headers.get('Content-Type')!.startsWith(mimeType)) {
         throw new Error(`Mime type mismatch when loading ${url}`);
     }
 

@@ -13,7 +13,7 @@ import {isFirefox, isCSSColorSchemePropSupported} from '../../utils/platform';
 import type {parsedGradient} from '../../utils/parsing';
 import {parseGradient} from '../../utils/parsing';
 
-export type CSSValueModifier = (theme: Theme) => string | Promise<string>;
+export type CSSValueModifier = (theme: Theme) => string | Promise<string | null>;
 
 export interface CSSValueModifierResult {
     result: string;
@@ -46,10 +46,10 @@ export function getModifiableCSSDeclaration(
     rule: CSSStyleRule,
     variablesStore: VariablesStore,
     ignoreImageSelectors: string[],
-    isCancelled: () => boolean,
-): ModifiableCSSDeclaration {
+    isCancelled: (() => boolean) | null,
+): ModifiableCSSDeclaration | null {
     if (property.startsWith('--')) {
-        const modifier = getVariableModifier(variablesStore, property, value, rule, ignoreImageSelectors, isCancelled);
+        const modifier = getVariableModifier(variablesStore, property, value, rule, ignoreImageSelectors, isCancelled!);
         if (modifier) {
             return {property, value: modifier, important: getPriority(rule.style, property), sourceValue: value};
         }
@@ -73,7 +73,7 @@ export function getModifiableCSSDeclaration(
             return {property, value: modifier, important: getPriority(rule.style, property), sourceValue: value};
         }
     } else if (property === 'background-image' || property === 'list-style-image') {
-        const modifier = getBgImageModifier(value, rule, ignoreImageSelectors, isCancelled);
+        const modifier = getBgImageModifier(value, rule, ignoreImageSelectors, isCancelled!);
         if (modifier) {
             return {property, value: modifier, important: getPriority(rule.style, property), sourceValue: value};
         }
@@ -143,7 +143,7 @@ export function getSelectionColor(theme: Theme) {
         backgroundColorSelection = modifyBackgroundColor({r: 0, g: 96, b: 212}, {...theme, grayscale: 0});
         foregroundColorSelection = modifyForegroundColor({r: 255, g: 255, b: 255}, {...theme, grayscale: 0});
     } else {
-        const rgb = parseColorWithCache(theme.selectionColor);
+        const rgb = parseColorWithCache(theme.selectionColor)!;
         const hsl = rgbToHSL(rgb);
         backgroundColorSelection = theme.selectionColor;
         if (hsl.l < 0.5) {
@@ -185,7 +185,7 @@ function getModifiedScrollbarStyle(theme: Theme) {
         colorThumbActive = modifyBackgroundColor({r: 96, g: 96, b: 96}, theme);
         colorCorner = modifyBackgroundColor({r: 255, g: 255, b: 255}, theme);
     } else {
-        const rgb = parseColorWithCache(theme.scrollbarColor);
+        const rgb = parseColorWithCache(theme.scrollbarColor)!;
         const hsl = rgbToHSL(rgb);
         const isLight = hsl.l > 0.5;
         const lighten = (lighter: number) => ({...hsl, l: clamp(hsl.l + lighter, 0, 1)});
@@ -210,6 +210,9 @@ function getModifiedScrollbarStyle(theme: Theme) {
     lines.push(`    background-color: ${colorThumbActive};`);
     lines.push('}');
     lines.push('::-webkit-scrollbar-corner {');
+    // TODO: assign colorCorner a value in else branch above (when theme.scrollbarColor !== 'auto')
+    // eslint-disable-next-line
+    // @ts-ignore
     lines.push(`    background-color: ${colorCorner};`);
     lines.push('}');
     if (isFirefox) {
@@ -241,7 +244,7 @@ const unparsableColors = new Set([
     'unset',
 ]);
 
-function getColorModifier(prop: string, value: string, rule: CSSStyleRule): string | CSSValueModifier {
+function getColorModifier(prop: string, value: string, rule: CSSStyleRule): string | CSSValueModifier | null {
     if (unparsableColors.has(value.toLowerCase())) {
         return value;
     }
@@ -269,7 +272,7 @@ function getColorModifier(prop: string, value: string, rule: CSSStyleRule): stri
 }
 
 const imageDetailsCache = new Map<string, ImageDetails>();
-const awaitingForImageLoading = new Map<string, Array<(imageDetails: ImageDetails) => void>>();
+const awaitingForImageLoading = new Map<string, Array<(imageDetails: ImageDetails | null) => void>>();
 
 function shouldIgnoreImage(selectorText: string, selectors: string[]) {
     if (!selectorText || selectors.length === 0) {
@@ -302,7 +305,7 @@ export function getBgImageModifier(
     rule: CSSStyleRule,
     ignoreImageSelectors: string[],
     isCancelled: () => boolean,
-): string | CSSValueModifier {
+): string | CSSValueModifier | null {
     try {
         const gradients = parseGradient(value);
         const urls = getMatches(cssURLRegex, value);
@@ -336,20 +339,20 @@ export function getBgImageModifier(
 
                 let rgb = parseColorWithCache(part);
                 if (rgb) {
-                    return (filter: FilterConfig) => modifyGradientColor(rgb, filter);
+                    return (filter: FilterConfig) => modifyGradientColor(rgb!, filter);
                 }
 
                 const space = part.lastIndexOf(' ');
                 rgb = parseColorWithCache(part.substring(0, space));
                 if (rgb) {
-                    return (filter: FilterConfig) => `${modifyGradientColor(rgb, filter)} ${part.substring(space + 1)}`;
+                    return (filter: FilterConfig) => `${modifyGradientColor(rgb!, filter)} ${part.substring(space + 1)}`;
                 }
 
                 const colorStopMatch = part.match(colorStopRegex);
                 if (colorStopMatch) {
                     rgb = parseColorWithCache(colorStopMatch[3]);
                     if (rgb) {
-                        return (filter: FilterConfig) => `${colorStopMatch[1]}(${colorStopMatch[2] ? `${colorStopMatch[2]}, ` : ''}${modifyGradientColor(rgb, filter)})`;
+                        return (filter: FilterConfig) => `${colorStopMatch[1]}(${colorStopMatch[2] ? `${colorStopMatch[2]}, ` : ''}${modifyGradientColor(rgb!, filter)})`;
                     }
                 }
 
@@ -370,23 +373,23 @@ export function getBgImageModifier(
             const {parentStyleSheet} = rule;
             const baseURL = (parentStyleSheet && parentStyleSheet.href) ?
                 getCSSBaseBath(parentStyleSheet.href) :
-                parentStyleSheet.ownerNode?.baseURI || location.origin;
+                parentStyleSheet!.ownerNode?.baseURI || location.origin;
             url = getAbsoluteURL(baseURL, url);
 
             const absoluteValue = `url("${url}")`;
 
-            return async (filter: FilterConfig) => {
+            return async (filter: FilterConfig): Promise<string | null> => {
                 if (isURLEmpty) {
                     return "url('')";
                 }
-                let imageDetails: ImageDetails;
+                let imageDetails: ImageDetails | null;
                 if (imageDetailsCache.has(url)) {
-                    imageDetails = imageDetailsCache.get(url);
+                    imageDetails = imageDetailsCache.get(url)!;
                 } else {
                     try {
                         if (awaitingForImageLoading.has(url)) {
-                            const awaiters = awaitingForImageLoading.get(url);
-                            imageDetails = await new Promise<ImageDetails>((resolve) => awaiters.push(resolve));
+                            const awaiters = awaitingForImageLoading.get(url)!;
+                            imageDetails = await new Promise<ImageDetails | null>((resolve) => awaiters.push(resolve));
                             if (!imageDetails) {
                                 return null;
                             }
@@ -394,7 +397,7 @@ export function getBgImageModifier(
                             awaitingForImageLoading.set(url, []);
                             imageDetails = await getImageDetails(url);
                             imageDetailsCache.set(url, imageDetails);
-                            awaitingForImageLoading.get(url).forEach((resolve) => resolve(imageDetails));
+                            awaitingForImageLoading.get(url)!.forEach((resolve) => resolve(imageDetails));
                             awaitingForImageLoading.delete(url);
                         }
                         if (isCancelled()) {
@@ -403,7 +406,7 @@ export function getBgImageModifier(
                     } catch (err) {
                         logWarn(err);
                         if (awaitingForImageLoading.has(url)) {
-                            awaitingForImageLoading.get(url).forEach((resolve) => resolve(null));
+                            awaitingForImageLoading.get(url)!.forEach((resolve) => resolve(null));
                             awaitingForImageLoading.delete(url);
                         }
                         return absoluteValue;
@@ -416,7 +419,7 @@ export function getBgImageModifier(
 
         const getBgImageValue = (imageDetails: ImageDetails, filter: FilterConfig) => {
             const {isDark, isLight, isTransparent, isLarge, isTooLarge, width} = imageDetails;
-            let result: string;
+            let result: string | null;
             if (isTooLarge) {
                 logInfo(`Not modifying too large image ${imageDetails.src}`);
                 result = `url("${imageDetails.src}")`;
@@ -444,7 +447,7 @@ export function getBgImageModifier(
             return result;
         };
 
-        const modifiers: CSSValueModifier[] = [];
+        const modifiers: Array<CSSValueModifier | null> = [];
 
         let matchIndex = 0;
         let prevHasComma = false;
@@ -473,7 +476,7 @@ export function getBgImageModifier(
             if (type === 'url') {
                 modifiers.push(getURLModifier(match));
             } else if (type === 'gradient') {
-                modifiers.push(getGradientModifier({match, index, typeGradient, hasComma, offset}));
+                modifiers.push(getGradientModifier({match, index, typeGradient: typeGradient as string, hasComma: hasComma || false, offset}));
             }
 
             if (i === matches.length - 1) {
@@ -482,7 +485,7 @@ export function getBgImageModifier(
         });
 
         return (filter: FilterConfig) => {
-            const results = modifiers.filter(Boolean).map((modify) => modify(filter));
+            const results = modifiers.filter(Boolean).map((modify) => modify!(filter));
             if (results.some((r) => r instanceof Promise)) {
                 return Promise.all(results).then((asyncResults) => {
                     return asyncResults.filter(Boolean).join('');
@@ -501,7 +504,7 @@ export function getBgImageModifier(
     }
 }
 
-export function getShadowModifierWithInfo(value: string): CSSValueModifierWithInfo {
+export function getShadowModifierWithInfo(value: string): CSSValueModifierWithInfo | null {
     try {
         let index = 0;
         const colorMatches = getMatches(/(^|\s)(?!calc)([a-z]+\(.+?\)|#[0-9a-f]+|[a-z]+)(.*?(inset|outset)?($|,))/ig, value, 2);
@@ -533,7 +536,7 @@ export function getShadowModifierWithInfo(value: string): CSSValueModifierWithIn
     }
 }
 
-export function getShadowModifier(value: string): CSSValueModifier {
+export function getShadowModifier(value: string): CSSValueModifier | null {
     const shadowModifier = getShadowModifierWithInfo(value);
     if (!shadowModifier) {
         return null;

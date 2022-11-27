@@ -17,7 +17,7 @@ const isIFrame = (() => {
     }
 })();
 
-export function enable(themeOptions: Partial<Theme> = {}, fixes: DynamicThemeFix = null) {
+export function enable(themeOptions: Partial<Theme> | null = {}, fixes: DynamicThemeFix | null = null) {
     const theme = {...DEFAULT_THEME, ...themeOptions};
 
     if (theme.engine !== ThemeEngine.dynamicTheme) {
@@ -40,8 +40,8 @@ export function disable() {
 
 const darkScheme = matchMedia('(prefers-color-scheme: dark)');
 let store = {
-    themeOptions: null as Partial<Theme>,
-    fixes: null as DynamicThemeFix,
+    themeOptions: null as Partial<Theme> | null,
+    fixes: null as DynamicThemeFix | null,
 };
 
 function handleColorScheme() {
@@ -52,7 +52,7 @@ function handleColorScheme() {
     }
 }
 
-export function auto(themeOptions: Partial<Theme> | false = {}, fixes: DynamicThemeFix = null) {
+export function auto(themeOptions: Partial<Theme> | false = {}, fixes: DynamicThemeFix | null = null) {
     if (themeOptions) {
         store = {themeOptions, fixes};
         handleColorScheme();

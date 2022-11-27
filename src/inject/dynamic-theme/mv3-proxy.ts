@@ -16,7 +16,7 @@ function injectProxyAndCleanup(arg: boolean) {
 }
 
 function regularPath() {
-    const argString = document.currentScript.dataset.arg;
+    const argString = document.currentScript!.dataset.arg;
     if (argString !== undefined) {
         document.documentElement.dataset[key] = 'true';
         const arg: boolean = JSON.parse(argString);

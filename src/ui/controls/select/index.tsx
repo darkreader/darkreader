@@ -16,7 +16,7 @@ interface SelectProps {
 
 interface SelectState {
     isExpanded: boolean;
-    focusedIndex: number;
+    focusedIndex: number | null;
 }
 
 function Select(props: SelectProps) {
@@ -90,11 +90,11 @@ function Select(props: SelectProps) {
     function onSelectOption(e: MouseEvent) {
         let current = e.target as HTMLElement;
         while (current && !nodesValues.has(current)) {
-            current = current.parentElement;
+            current = current.parentElement!;
         }
 
         if (current) {
-            const value = nodesValues.get(current);
+            const value = nodesValues.get(current)!;
             props.onChange(value);
         }
 
@@ -109,7 +109,7 @@ function Select(props: SelectProps) {
     function removeValueNode(value: string) {
         const el = valueNodes.get(value);
         valueNodes.delete(value);
-        nodesValues.delete(el);
+        nodesValues.delete(el!);
     }
 
     return (

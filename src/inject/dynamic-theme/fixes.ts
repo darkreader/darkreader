@@ -11,14 +11,14 @@ import {isURLInList} from '../../utils/url';
  *        and fixes matching the document origin
  * @returns A single fix constructed from the generic fix and a single most relevant other fix
  */
-export function findRelevantFix(documentURL: string, fixes: DynamicThemeFix[]): number {
+export function findRelevantFix(documentURL: string, fixes: DynamicThemeFix[]): number | null {
     if (!Array.isArray(fixes) || fixes.length === 0 || fixes[0].url[0] !== '*') {
         logWarn('selectRelevantFix() failed to construct a single fix', documentURL, fixes);
         return null;
     }
 
     let maxSpecificity = 0;
-    let maxSpecificityIndex: number = null;
+    let maxSpecificityIndex: number | null = null;
     for (let i = 1; i < fixes.length; i++) {
         if (isURLInList(documentURL, fixes[i].url)) {
             // Note: this is legacy logic, a bit odd
@@ -38,7 +38,7 @@ export function findRelevantFix(documentURL: string, fixes: DynamicThemeFix[]): 
  * @param fixes The original fixes
  * @returns The combined fix
  */
-export function combineFixes(fixes: DynamicThemeFix[]): DynamicThemeFix {
+export function combineFixes(fixes: DynamicThemeFix[]): DynamicThemeFix | null {
     if (fixes.length === 0 || fixes[0].url[0] !== '*') {
         logWarn('combineFixes() failed to construct a single fix', fixes);
         return null;
@@ -49,7 +49,7 @@ export function combineFixes(fixes: DynamicThemeFix[]): DynamicThemeFix {
     }
 
     return {
-        url: null,
+        url: [],
         invert: combineArrays(fixes.map((fix) => fix.invert)),
         css: fixes.map((fix) => fix.css).filter(Boolean).join('\n'),
         ignoreInlineStyle: combineArrays(fixes.map((fix) => fix.ignoreInlineStyle)),

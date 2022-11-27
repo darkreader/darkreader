@@ -19,7 +19,7 @@ function isValidColor(color: string) {
 const colorPickerFocuses = new WeakMap<Node, () => void>();
 
 function focusColorPicker(node: Node) {
-    const focus = colorPickerFocuses.get(node);
+    const focus = colorPickerFocuses.get(node)!;
     focus();
 }
 

@@ -27,6 +27,8 @@ export function getMockData(override = {} as Partial<ExtensionData>): ExtensionD
             customThemes: [],
             siteList: [],
             siteListEnabled: [],
+            syncSitesFixes: false,
+            enableContextMenus: false,
             applyToListedOnly: false,
             changeBrowserTheme: false,
             enableForPDF: true,

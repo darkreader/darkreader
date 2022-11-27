@@ -36,7 +36,7 @@ type PageId = (
     | 'manage-settings'
 );
 
-let popstate: () => void = null;
+let popstate: (() => void) | null = null;
 isMobile && window.addEventListener('popstate', () => popstate && popstate());
 
 function Pages(props: ViewProps) {
@@ -49,31 +49,31 @@ function Pages(props: ViewProps) {
     }
 
     function onThemeNavClick() {
-        isMobile && history.pushState(undefined, undefined);
+        isMobile && history.pushState(undefined, '');
         store.activePage = 'theme';
         context.refresh();
     }
 
     function onSettingsNavClick() {
-        isMobile && history.pushState(undefined, undefined);
+        isMobile && history.pushState(undefined, '');
         store.activePage = 'settings';
         context.refresh();
     }
 
     function onAutomationNavClick() {
-        isMobile && history.pushState(undefined, undefined);
+        isMobile && history.pushState(undefined, '');
         store.activePage = 'automation';
         context.refresh();
     }
 
     function onManageSettingsClick() {
-        isMobile && history.pushState(undefined, undefined);
+        isMobile && history.pushState(undefined, '');
         store.activePage = 'manage-settings';
         context.refresh();
     }
 
     function onSiteListNavClick() {
-        isMobile && history.pushState(undefined, undefined);
+        isMobile && history.pushState(undefined, '');
         store.activePage = 'site-list';
         context.refresh();
     }

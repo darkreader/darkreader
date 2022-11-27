@@ -7,8 +7,8 @@ interface ShortcutLinkProps {
     class?: string | {[cls: string]: any};
     commandName: string;
     shortcuts: Shortcuts;
-    textTemplate: (shortcut: string) => string;
-    onSetShortcut: (shortcut: string) => Promise<string>;
+    textTemplate: (shortcut: string | null) => string;
+    onSetShortcut: (shortcut: string) => Promise<string | null>;
 }
 
 /**
@@ -33,7 +33,7 @@ export default function ShortcutLink(props: ShortcutLinkProps) {
 
         // Note: these variables are function-global to be able to update shortcut display,
         // but they are overwritten right before shortcut is set.
-        let ctrl = false, alt = false, command = false, shift = false, key: string = null;
+        let ctrl = false, alt = false, command = false, shift = false, key: string | null = null;
 
         function updateShortcut() {
             if (!enteringShortcutInProgress) {

@@ -50,7 +50,7 @@ export function formatArray(arr: string[]) {
 
 export function getMatches(regex: RegExp, input: string, group = 0) {
     const matches: string[] = [];
-    let m: RegExpMatchArray;
+    let m: RegExpMatchArray | null;
     while ((m = regex.exec(input))) {
         matches.push(m[group]);
     }
@@ -91,7 +91,7 @@ export function formatCSS(text: string) {
         .split('\n'));
 
     let depth = 0;
-    const formatted = [];
+    const formatted: string[] = [];
 
     for (let x = 0, len = css.length; x < len; x++) {
         const line = `${css[x] }\n`;

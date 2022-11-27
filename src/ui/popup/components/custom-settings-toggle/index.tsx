@@ -14,7 +14,7 @@ export default function CustomSettingsToggle({data, actions}: ExtWrapper) {
 
     const urlText = host
         .split('.')
-        .reduce((elements, part, i) => elements.concat(
+        .reduce<string[]>((elements, part, i) => elements.concat(
             <wbr />,
             `${i > 0 ? '.' : ''}${part}`
         ), []);

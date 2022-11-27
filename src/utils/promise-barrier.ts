@@ -1,6 +1,6 @@
 export class PromiseBarrier<RESOLVUTION, REJECTION> {
-    private resolves: Array<(value?: RESOLVUTION) => void> = [];
-    private rejects: Array<(reason?: REJECTION) => void> = [];
+    private resolves: Array<(value: RESOLVUTION) => void> = [];
+    private rejects: Array<(reason: REJECTION) => void> = [];
     private wasResolved = false;
     private wasRejected = false;
     private resolution: RESOLVUTION;
@@ -19,27 +19,27 @@ export class PromiseBarrier<RESOLVUTION, REJECTION> {
         });
     }
 
-    async resolve(value?: RESOLVUTION){
+    async resolve(value: RESOLVUTION){
         if (this.wasRejected || this.wasResolved) {
             return;
         }
         this.wasResolved = true;
         this.resolution = value;
         this.resolves.forEach((resolve) => resolve(value));
-        this.resolves = null;
-        this.rejects = null;
+        this.resolves = [];
+        this.rejects = [];
         return new Promise<void>((resolve) => setTimeout(() => resolve()));
     }
 
-    async reject(reason?: REJECTION){
+    async reject(reason: REJECTION){
         if (this.wasRejected || this.wasResolved) {
             return;
         }
         this.wasRejected = true;
         this.reason = reason;
         this.rejects.forEach((reject) => reject(reason));
-        this.resolves = null;
-        this.rejects = null;
+        this.resolves = [];
+        this.rejects = [];
         return new Promise<void>((resolve) => setTimeout(() => resolve()));
     }
 

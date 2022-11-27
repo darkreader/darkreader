@@ -1,6 +1,6 @@
 export function throttle<T extends(...args: any[]) => any>(callback: T) {
     let pending = false;
-    let frameId: number = null;
+    let frameId: number | null = null;
     let lastArgs: any[];
 
     const throttled: T = ((...args: any[]) => {
@@ -20,7 +20,8 @@ export function throttle<T extends(...args: any[]) => any>(callback: T) {
     }) as any;
 
     const cancel = () => {
-        cancelAnimationFrame(frameId);
+        // TODO: reove cast once types are updated
+        cancelAnimationFrame(frameId as number);
         pending = false;
         frameId = null;
     };
@@ -34,10 +35,10 @@ declare const __TEST__: boolean;
 
 export function createAsyncTasksQueue() {
     const tasks: Task[] = [];
-    let frameId: number = null;
+    let frameId: number | null = null;
 
     function runTasks() {
-        let task: Task;
+        let task: Task | undefined;
         while ((task = tasks.shift())) {
             task();
         }
@@ -56,7 +57,8 @@ export function createAsyncTasksQueue() {
 
     function cancel() {
         tasks.splice(0);
-        cancelAnimationFrame(frameId);
+        // TODO: reove cast once types are updated
+        cancelAnimationFrame(frameId as number);
         frameId = null;
     }
 

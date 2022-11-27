@@ -120,7 +120,7 @@ if (__WATCH__) {
                     chrome.tabs.query({}, (tabs) => {
                         for (const tab of tabs) {
                             if (canInjectScript(tab.url)) {
-                                chrome.tabs.sendMessage<Message>(tab.id, {type: MessageType.BG_RELOAD});
+                                chrome.tabs.sendMessage<Message>(tab.id!, {type: MessageType.BG_RELOAD});
                             }
                         }
                         chrome.runtime.reload();
@@ -160,7 +160,7 @@ if (__TEST__) {
     socket.onmessage = (e) => {
         try {
             const message: TestMessage = JSON.parse(e.data);
-            const respond = (data?: ExtensionData | string | boolean | {[key: string]: string}) => socket.send(JSON.stringify({
+            const respond = (data?: ExtensionData | string | boolean | {[key: string]: string} | null) => socket.send(JSON.stringify({
                 data,
                 id: message.id,
             }));

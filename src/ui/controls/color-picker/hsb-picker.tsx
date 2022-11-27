@@ -21,10 +21,10 @@ interface HSBPickerProps {
 interface HSBPickerState {
     wasPrevHidden: boolean;
     hueCanvasRendered: boolean;
-    activeHSB: HSB;
-    activeChangeHandler: (color: string) => void;
-    hueTouchStartHandler: (e: TouchEvent) => void;
-    sbTouchStartHandler: (e: TouchEvent) => void;
+    activeHSB: HSB | null;
+    activeChangeHandler: ((color: string) => void) | null;
+    hueTouchStartHandler: ((e: TouchEvent) => void) | null;
+    sbTouchStartHandler: ((e: TouchEvent) => void) | null;
 }
 
 const hsbPickerDefaults: HSBPickerState = {
@@ -78,7 +78,7 @@ function hsbToString(hsb: HSB) {
 
 function render(canvas: HTMLCanvasElement, getPixel: (x: number, y: number) => Uint8ClampedArray) {
     const {width, height} = canvas;
-    const context = canvas.getContext('2d');
+    const context = canvas.getContext('2d')!;
     const imageData = context.getImageData(0, 0, width, height);
     const d = imageData.data;
     for (let y = 0; y < height; y++) {
@@ -122,19 +122,19 @@ export default function HSBPicker(props: HSBPickerProps) {
     const didColorChange = props.color !== prevColor && props.color !== prevActiveColor;
     let activeHSB: HSB;
     if (didColorChange) {
-        const rgb = parseColorWithCache(props.color);
+        const rgb = parseColorWithCache(props.color)!;
         activeHSB = rgbToHSB(rgb);
         store.activeHSB = activeHSB;
     } else {
-        activeHSB = store.activeHSB;
+        activeHSB = store.activeHSB!;
     }
 
     function onSBCanvasRender(canvas: HTMLCanvasElement) {
         if (isElementHidden(canvas)) {
             return;
         }
-        const hue = activeHSB.h;
-        const prevHue = prevColor && rgbToHSB(parseColorWithCache(prevColor)).h;
+        const hue = activeHSB!.h;
+        const prevHue = prevColor && rgbToHSB(parseColorWithCache(prevColor)!).h;
         if (store.wasPrevHidden || hue !== prevHue) {
             renderSB(hue, canvas);
         }

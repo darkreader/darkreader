@@ -11,7 +11,7 @@ const SAVE_TIMEOUT = 1000;
 
 export default class UserStorage {
     private static loadBarrier: PromiseBarrier<UserSettings, void>;
-    private static saveStorageBarrier: PromiseBarrier<void, void>;
+    private static saveStorageBarrier: PromiseBarrier<void, void> | null;
     static settings: Readonly<UserSettings>;
 
     static async loadSettings() {
@@ -86,8 +86,6 @@ export default class UserStorage {
             UserStorage.set({syncSettings: false});
             UserStorage.saveSyncSetting(false);
             UserStorage.loadBarrier.resolve(local);
-            UserStorage.migrateAutomationSettings($sync);
-            UserStorage.fillDefaults($sync);
             return local;
         }
 

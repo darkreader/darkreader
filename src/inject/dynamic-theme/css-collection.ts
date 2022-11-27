@@ -58,7 +58,7 @@ export async function collectCSS() {
 
     const modifiedCSS: string[] = [];
     document.querySelectorAll('.darkreader--sync').forEach((element: HTMLStyleElement) => {
-        forEach(element.sheet.cssRules, (rule) => {
+        forEach(element.sheet!.cssRules, (rule) => {
             rule && rule.cssText && modifiedCSS.push(rule.cssText);
         });
     });

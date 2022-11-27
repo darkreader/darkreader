@@ -43,7 +43,7 @@ export function hasFirefoxNewRootBehavior() {
 }
 
 export default function createCSSFilterStyleSheet(config: FilterConfig, url: string, isTopFrame: boolean, fixes: string, index: SitePropsIndex<InversionFix>) {
-    const filterValue = getCSSFilterValue(config);
+    const filterValue = getCSSFilterValue(config)!;
     const reverseFilterValue = 'invert(100%) hue-rotate(180deg)';
     return cssFilterStyleSheetTemplate(filterValue, reverseFilterValue, config, url, isTopFrame, fixes, index);
 }
@@ -255,7 +255,7 @@ export function formatInversionFixes(inversionFixes: InversionFix[]) {
 
     return formatSitesFixesConfig(fixes, {
         props: Object.values(inversionFixesCommands),
-        getPropCommandName: (prop) => Object.entries(inversionFixesCommands).find(([, p]) => p === prop)[0],
+        getPropCommandName: (prop) => Object.entries(inversionFixesCommands).find(([, p]) => p === prop)![0],
         formatPropValue: (prop, value) => {
             if (prop === 'css') {
                 return (value as string).trim().replace(/\n+/g, '\n');

@@ -69,8 +69,8 @@ async function urlToImage(url: string) {
 }
 
 const MAX_ANALIZE_PIXELS_COUNT = 32 * 32;
-let canvas: HTMLCanvasElement | OffscreenCanvas;
-let context: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D;
+let canvas: HTMLCanvasElement | OffscreenCanvas | null;
+let context: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D | null;
 
 function createCanvas() {
     const maxWidth = MAX_ANALIZE_PIXELS_COUNT;
@@ -78,7 +78,7 @@ function createCanvas() {
     canvas = document.createElement('canvas');
     canvas.width = maxWidth;
     canvas.height = maxHeight;
-    context = canvas.getContext('2d', {willReadFrequently: true});
+    context = canvas.getContext('2d', {willReadFrequently: true})!;
     context.imageSmoothingEnabled = false;
 }
 
@@ -97,7 +97,13 @@ function analyzeImage(image: HTMLImageElement) {
     const {naturalWidth, naturalHeight} = image;
     if (naturalHeight === 0 || naturalWidth === 0) {
         logWarn(`logWarn(Image is empty ${image.currentSrc})`);
-        return null;
+        return {
+            isDark: false,
+            isLight: false,
+            isTransparent: false,
+            isLarge: false,
+            isTooLarge: false,
+        };
     }
 
     // Get good appromized image size in memory terms.
@@ -121,10 +127,10 @@ function analyzeImage(image: HTMLImageElement) {
     const k = Math.min(1, Math.sqrt(MAX_ANALIZE_PIXELS_COUNT / naturalPixelsCount));
     const width = Math.ceil(naturalWidth * k);
     const height = Math.ceil(naturalHeight * k);
-    context.clearRect(0, 0, width, height);
+    context!.clearRect(0, 0, width, height);
 
-    context.drawImage(image, 0, 0, naturalWidth, naturalHeight, 0, 0, width, height);
-    const imageData = context.getImageData(0, 0, width, height);
+    context!.drawImage(image, 0, 0, naturalWidth, naturalHeight, 0, 0, width, height);
+    const imageData = context!.getImageData(0, 0, width, height);
     const d = imageData.data;
 
     const TRANSPARENT_ALPHA_THRESHOLD = 0.05;

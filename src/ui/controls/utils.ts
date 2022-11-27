@@ -6,7 +6,7 @@ function toArray<T>(x: T | T[]) {
 
 export function mergeClass(
     cls: string | {[cls: string]: any} | Array<string | {[cls: string]: any}>,
-    propsCls: string | {[cls: string]: any} | Array<string | {[cls: string]: any}>
+    propsCls: string | {[cls: string]: any} | Array<string | {[cls: string]: any}> | undefined
 ) {
     const normalized = toArray(cls).concat(toArray(propsCls));
     return classes(...normalized);

@@ -76,12 +76,12 @@ export default function createStaticStylesheet(config: FilterConfig, url: string
 
     if (!siteTheme || !siteTheme.noCommon) {
         lines.push('/* Common theme */');
-        lines.push(...ruleGenerators.map((gen) => gen(commonTheme, theme)));
+        lines.push(...ruleGenerators.map((gen) => gen(commonTheme, theme)!));
     }
 
     if (siteTheme) {
         lines.push(`/* Theme for ${siteTheme.url.join(' ')} */`);
-        lines.push(...ruleGenerators.map((gen) => gen(siteTheme, theme)));
+        lines.push(...ruleGenerators.map((gen) => gen(siteTheme, theme)!));
     }
 
     if (config.useFont || config.textStroke > 0) {
@@ -94,7 +94,7 @@ export default function createStaticStylesheet(config: FilterConfig, url: string
         .join('\n');
 }
 
-function createRuleGen(getSelectors: (siteTheme: StaticTheme) => string[], generateDeclarations: (theme: ThemeColors) => string[], modifySelector: ((s: string) => string) = (s) => s) {
+function createRuleGen(getSelectors: (siteTheme: StaticTheme) => string[] | undefined, generateDeclarations: (theme: ThemeColors) => string[], modifySelector: ((s: string) => string) = (s) => s) {
     return (siteTheme: StaticTheme, themeColors: ThemeColors) => {
         const selectors = getSelectors(siteTheme);
         if (selectors == null || selectors.length === 0) {

@@ -1,0 +1,92 @@
+name: Bug Report
+description: Create a report about a bug you experienced while using Dark Reader.
+title: "[Bug] Replace with title"
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Place a brief description in the title of this report.
+
+        Thank you for taking the time to report this bug.
+  - type: checkboxes
+    attributes:
+      label: Prerequisites
+      options:
+        - label: I [searched for any existing report](https://github.com/darkreader/darkreader/issues?q=is%3Aissue) about this bug to avoid opening a duplicate.
+          required: true
+        - label: I can reproduce this bug in a new, unmodified web browser profile with Dark Reader installed as the only extension.
+          required: true
+        - label: I understand I need to use the [Broken Website Report template](https://github.com/darkreader/darkreader/issues/new?assignees=&labels=Broken+Website&template=broken-website-report.yml&title=%5BBroken+Website%5D+Replace+with+title) if this bug I am reporting occurs on a single website.
+          required: true
+
+  - type: textarea
+    attributes:
+      label: Bug Description
+      description: Provide a clear and concise description of this bug.
+    validations:
+      required: true
+
+  - type: input
+    attributes:
+      label: Website Address
+      description: Provide the website address.
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Steps To Reproduce
+      description: Provide steps to reproduce this bug.
+      placeholder: |
+        1. [First Step]
+        2. [Second Step]
+        3. [and so on...]
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Expected Behavior
+      description: Provide a clear and concise description of what you expected to happen.
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Actual Behavior
+      description: Provide a clear and concise description of what happened.
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Screenshots
+      description: Add screenshots to help explain this bug, if applicable.
+    validations:
+      required: false
+
+  - type: input
+    attributes:
+      label: Operating System
+    validations:
+      required: true
+
+  - type: input
+    attributes:
+      label: Web Browser name and version
+    validations:
+      required: true
+
+  - type: input
+    attributes:
+      label: Dark Reader version
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Additional Context
+      description: Provide any additional information about this bug.
+    validations:
+      required: false

@@ -1,0 +1,103 @@
+name: Performance Issue Report
+description: Create a report about a performance issue you experienced while using Dark Reader.
+title: "[Performance Issue] Replace with title"
+labels: ["Performance Issue"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Place a brief description in the title of this report.
+
+        Thank you for taking the time to report this performance issue.
+  - type: checkboxes
+    attributes:
+      label: Prerequisites
+      options:
+        - label: I [searched for any existing report](https://github.com/darkreader/darkreader/issues?q=is%3Aissue) about this performance issue to avoid opening a duplicate.
+          required: true
+        - label: I have restarted the web browser to check if that resolved this performance issue.
+          required: true
+        - label: I can reproduce this performance issue in a new, unmodified web browser profile with Dark Reader installed as the only extension.
+          required: true
+
+  - type: textarea
+    attributes:
+      label: Performance Issue Description
+      description: Provide a clear and concise description of this performance issue.
+    validations:
+      required: true
+
+  - type: input
+    attributes:
+      label: Website Address
+      description: Provide the website address.
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Steps To Reproduce
+      description: Provide steps to reproduce this performance issue.
+      placeholder: |
+        1. [First Step]
+        2. [Second Step]
+        3. [and so on...]
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Performance Profile
+      description: Provide a link to a [Chromium](https://developer.chrome.com/docs/devtools/evaluate-performance/reference/) or [Firefox](https://profiler.firefox.com/) profile.
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Screenshots
+      description: Add screenshots to help explain this performance issue, if applicable.
+    validations:
+      required: false
+
+  - type: input
+    attributes:
+      label: Operating System
+    validations:
+      required: true
+
+  - type: input
+    attributes:
+      label: Web Browser name and version
+    validations:
+      required: true
+
+  - type: input
+    attributes:
+      label: Dark Reader version
+    validations:
+      required: true
+
+  - type: dropdown
+    attributes:
+      label: Does this happen when Dark Reader is disabled?
+      options:
+        - "Yes"
+        - "No"
+    validations:
+      required: true
+
+  - type: dropdown
+    attributes:
+      label: Does this happen in other web browsers?
+      options:
+        - "Yes"
+        - "No"
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Additional Context
+      description: Provide any additional information about this performance issue.
+    validations:
+      required: false

@@ -22,7 +22,7 @@ If a website is **already dark** and meets the following requirements:
 
 Then you can **add it to the [dark-sites.config](https://github.com/darkreader/darkreader/blob/main/src/config/dark-sites.config) file**.
 
-Please maintain the alphabetical order of the websites listed in this file.
+**Please maintain the alphabetical order of the websites listed in this file.**
 
 ## Fixing incorrect inversions
 

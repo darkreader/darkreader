@@ -83,6 +83,13 @@ export function createStyleSheetModifier() {
                 return;
             }
 
+            // A very specific case to skip. This causes a lot of calls to `getModifiableCSSDeclaration`
+            // and currently contributes nothing in real-world case.
+            // TODO: Allow `setRule` to throw a exception when we're modifying SVGs namespace styles.
+            if (rule.style.all === 'revert') {
+                return;
+            }
+
             const modDecs: ModifiableCSSDeclaration[] = [];
             rule.style && iterateCSSDeclarations(rule.style, (property, value) => {
                 const mod = getModifiableCSSDeclaration(property, value, rule, variablesStore, ignoreImageAnalysis, isAsyncCancelled);

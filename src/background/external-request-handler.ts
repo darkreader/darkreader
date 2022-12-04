@@ -1,6 +1,5 @@
 import {DEFAULT_SETTINGS, DEFAULT_THEME} from '../defaults';
 import type {Command, ExternalConnection, ExternalRequest, FilterConfig, UserSettings} from '../definitions';
-import {forEach} from '../utils/array';
 import {getPreviousObject, getValidatedObject} from '../utils/object';
 import UserStorage from './user-storage';
 import {logInfo, logWarn} from './utils/log';
@@ -17,7 +16,7 @@ export class ExternalRequestHandler {
         this.setTheme = setTheme;
     }
 
-    externalRequestsHandler(incomingData: ExternalRequest, origin: string) {
+    externalRequestsHandler(incomingData: ExternalRequest, origin: string, sendResponse: (response: any) => void) {
         const {type, data, isNative} = incomingData;
         if (type === 'toggle') {
             logInfo(`Port: ${origin}, toggled dark reader.`);
@@ -57,11 +56,7 @@ export class ExternalRequestHandler {
             logInfo(`Port: ${origin}, requested current settings.`);
             // Potentially add location settings?
             const sanitizedData = getValidatedObject(UserStorage.settings, UserStorage.settings, ['shadowCopy', 'externalConnections']);
-            if (isNative) {
-                chrome.runtime.sendNativeMessage(origin, {type: 'requestSettings-response', data: sanitizedData});
-            } else {
-                chrome.runtime.sendMessage(origin, {type: 'requestSettings-response', data: sanitizedData});
-            }
+            sendResponse(sanitizedData);
         }
         if (type === 'setTheme') {
             if (!data) {
@@ -95,28 +90,29 @@ export class ExternalRequestHandler {
         }
     }
 
-    connectToNative = (native: string[] | string) => {
-        if (Array.isArray(native)) {
-            forEach(native, this.connectToNative);
-        } else if (!this.connectedNativesPorts.has(native)) {
-            const port = chrome.runtime.connectNative(native);
-            this.connectedNativesPorts.set(native, port);
-            port.onMessage.addListener((incomingData) => this.externalRequestsHandler(incomingData, native));
-            port.onDisconnect.addListener(() => this.externalRequestsHandler({type: 'resetSettings', isNative: true}, native));
-        }
-    };
+    connectToNative(native: string[]) {
+        native.forEach((native) => {
+            if (!this.connectedNativesPorts.has(native)) {
+                const port = chrome.runtime.connectNative(native);
+                this.connectedNativesPorts.set(native, port);
+                port.onMessage.addListener((incomingData) => this.externalRequestsHandler(incomingData, native, (data: any) => {
+                    chrome.runtime.sendNativeMessage(native, {type: 'requestSettings-response', data});
+                }));
+                port.onDisconnect.addListener(() => this.externalRequestsHandler({type: 'resetSettings', isNative: true}, native, () => null));
+            }
+        });
+    }
 
     registerExternalConnections() {
         this.connectToNative(UserStorage.settings.externalConnections
-            .filter((externalConnection) => externalConnection.isNative)
-            .map((nativeConnection) => nativeConnection.id));
-        chrome.runtime.onConnectExternal.addListener((port) => {
+            .filter(({isNative}) => isNative)
+            .map(({id}) => id));
+        chrome.runtime.onMessageExternal.addListener((message, sender, sendResponse) => {
             if (UserStorage.settings.enableExternalConnections) {
-                logInfo(`Port ${port.sender!.origin} has been connected to dark reader.`);
-                port.onMessage.addListener((incomingData) => this.externalRequestsHandler(incomingData, port.sender!.origin!));
-                port.onDisconnect.addListener(() => this.externalRequestsHandler({type: 'resetSettings', isNative: false}, port.sender!.origin!));
+                logInfo(`Port ${sender!.origin} has been connected to dark reader.`);
+                this.externalRequestsHandler(message, sender!.origin!, sendResponse);
             } else {
-                logWarn(`Port: ${port.sender!.origin}, tried to make contact, but the Enable External Connections setting is not enabled and there by blocked.`);
+                logWarn(`Port: ${sender!.origin}, tried to make contact, but the Enable External Connections setting is not enabled and there by blocked.`);
             }
         });
     }

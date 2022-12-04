@@ -25,8 +25,8 @@ import {StateManager} from '../utils/state-manager';
 import {debounce} from '../utils/debounce';
 import ContentScriptManager from './content-script-manager';
 import {AutomationMode} from '../utils/automation';
-import { isArrayEqual } from '../utils/array';
-import { ExternalRequestHandler } from './external-request-handler';
+import {isArrayEqual} from '../utils/array';
+import {ExternalRequestHandler} from './external-request-handler';
 
 type AutomationState = 'turn-on' | 'turn-off' | 'scheme-dark' | 'scheme-light' | '';
 
@@ -492,7 +492,7 @@ export class Extension {
             this.externalRequestHandler.connectToNative(UserStorage.settings.externalConnections
                 .filter((externalConnection) => externalConnection.isNative)
                 .map((nativeConnection) => nativeConnection.id));
-                this.externalRequestHandler.cleanNatives(prev.externalConnections.filter((entry) => UserStorage.settings.externalConnections.includes(entry)));
+            this.externalRequestHandler.cleanNatives(prev.externalConnections.filter((entry) => UserStorage.settings.externalConnections.includes(entry)));
         }
         if (this.isExtensionSwitchedOn() && $settings.changeBrowserTheme != null && prev.changeBrowserTheme !== $settings.changeBrowserTheme) {
             if ($settings.changeBrowserTheme) {

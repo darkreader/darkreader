@@ -1,9 +1,9 @@
-import { DEFAULT_SETTINGS, DEFAULT_THEME } from "../defaults";
-import { Command, ExternalConnection, ExternalRequest, FilterConfig, UserSettings } from "../definitions";
-import { forEach } from "../utils/array";
-import { getPreviousObject, getValidatedObject } from "../utils/object";
-import UserStorage from "./user-storage";
-import { logInfo, logWarn } from "./utils/log";
+import {DEFAULT_SETTINGS, DEFAULT_THEME} from '../defaults';
+import type {Command, ExternalConnection, ExternalRequest, FilterConfig, UserSettings} from '../definitions';
+import {forEach} from '../utils/array';
+import {getPreviousObject, getValidatedObject} from '../utils/object';
+import UserStorage from './user-storage';
+import {logInfo, logWarn} from './utils/log';
 
 export class ExternalRequestHandler {
     private onCommandInternal: (command: Command, tabId: number | null, frameId: number | null, frameURL: string | null) => void;
@@ -18,7 +18,7 @@ export class ExternalRequestHandler {
     }
 
     externalRequestsHandler(incomingData: ExternalRequest, origin: string) {
-        const { type, data, isNative } = incomingData;
+        const {type, data, isNative} = incomingData;
         if (type === 'toggle') {
             logInfo(`Port: ${origin}, toggled dark reader.`);
             this.onCommandInternal('toggle', null, null, null);
@@ -58,9 +58,9 @@ export class ExternalRequestHandler {
             // Potentially add location settings?
             const sanitizedData = getValidatedObject(UserStorage.settings, UserStorage.settings, ['shadowCopy', 'externalConnections']);
             if (isNative) {
-                chrome.runtime.sendNativeMessage(origin, { type: 'requestSettings-response', data: sanitizedData });
+                chrome.runtime.sendNativeMessage(origin, {type: 'requestSettings-response', data: sanitizedData});
             } else {
-                chrome.runtime.sendMessage(origin, { type: 'requestSettings-response', data: sanitizedData });
+                chrome.runtime.sendMessage(origin, {type: 'requestSettings-response', data: sanitizedData});
             }
         }
         if (type === 'setTheme') {
@@ -73,12 +73,12 @@ export class ExternalRequestHandler {
             if (!validatedData) {
                 return;
             }
-            this.copyShadowCopy({ theme: validatedData } as UserSettings, origin);
+            this.copyShadowCopy({theme: validatedData} as UserSettings, origin);
             this.setTheme(validatedData);
             logInfo('Saved', UserStorage.settings.theme);
         }
         if (type === 'resetSettings') {
-            const shadowCopy = UserStorage.settings.shadowCopy.find(({ id }) => id === origin);
+            const shadowCopy = UserStorage.settings.shadowCopy.find(({id}) => id === origin);
             if (!shadowCopy) {
                 logWarn('No data detected to reset settings.');
                 return;
@@ -87,7 +87,7 @@ export class ExternalRequestHandler {
             const index = UserStorage.settings.shadowCopy.indexOf(shadowCopy);
             const newshadowCopy = UserStorage.settings.shadowCopy.slice();
             newshadowCopy.splice(index, 1);
-            previousSettings ? this.changeSettings({ ...previousSettings, shadowCopy: newshadowCopy }) : this.changeSettings({ shadowCopy: newshadowCopy });
+            previousSettings ? this.changeSettings({...previousSettings, shadowCopy: newshadowCopy}) : this.changeSettings({shadowCopy: newshadowCopy});
             if (isNative) {
                 this.connectedNativesPorts.delete(origin);
             }
@@ -102,7 +102,7 @@ export class ExternalRequestHandler {
             const port = chrome.runtime.connectNative(native);
             this.connectedNativesPorts.set(native, port);
             port.onMessage.addListener((incomingData) => this.externalRequestsHandler(incomingData, native));
-            port.onDisconnect.addListener(() => this.externalRequestsHandler({ type: 'resetSettings', isNative: true }, native));
+            port.onDisconnect.addListener(() => this.externalRequestsHandler({type: 'resetSettings', isNative: true}, native));
         }
     };
 
@@ -114,7 +114,7 @@ export class ExternalRequestHandler {
             if (UserStorage.settings.enableExternalConnections) {
                 logInfo(`Port ${port.sender!.origin} has been connected to dark reader.`);
                 port.onMessage.addListener((incomingData) => this.externalRequestsHandler(incomingData, port.sender!.origin!));
-                port.onDisconnect.addListener(() => this.externalRequestsHandler({ type: 'resetSettings', isNative: false }, port.sender!.origin!));
+                port.onDisconnect.addListener(() => this.externalRequestsHandler({type: 'resetSettings', isNative: false}, port.sender!.origin!));
             } else {
                 logWarn(`Port: ${port.sender!.origin}, tried to make contact, but the Enable External Connections setting is not enabled and there by blocked.`);
             }

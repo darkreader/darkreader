@@ -14,7 +14,6 @@ interface TabPanelProps {
 }
 
 export default function TabPanel(props: TabPanelProps) {
-
     const tabsNames = Object.keys(props.tabs);
 
     function isActiveTab(name: string, index: number) {

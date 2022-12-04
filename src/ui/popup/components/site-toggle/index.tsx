@@ -2,29 +2,33 @@ import {m} from 'malevic';
 import CheckmarkIcon from './checkmark-icon';
 import {Button} from '../../../controls';
 import {getURLHostOrProtocol, isURLEnabled, isPDF} from '../../../../utils/url';
-import type {ExtWrapper, TabInfo} from '../../../../definitions';
-import {isThunderbird} from '../../../../utils/platform';
+import type {ExtWrapper} from '../../../../definitions';
 
-export default function SiteToggleButton({data, tab, actions}: ExtWrapper & {tab: TabInfo}) {
+declare const __THUNDERBIRD__: boolean;
+
+export default function SiteToggleButton({data, actions}: ExtWrapper) {
+    const tab = data.activeTab;
 
     function onSiteToggleClick() {
         if (pdf) {
             actions.changeSettings({enableForPDF: !data.settings.enableForPDF});
         } else {
-            actions.toggleURL(tab.url);
+            actions.toggleActiveTab();
         }
     }
+
+    const pdf = isPDF(tab.url);
     const toggleHasEffect = (
         data.settings.enableForProtectedPages ||
-        !tab.isProtected
+        (!tab.isProtected && !pdf) ||
+        tab.isInjected
     );
-    const pdf = isPDF(tab.url);
-    const isSiteEnabled = isURLEnabled(tab.url, data.settings, tab);
+    const isSiteEnabled: boolean = isURLEnabled(tab.url, data.settings, tab, data.isAllowedFileSchemeAccess) && Boolean(tab.isInjected);
     const host = getURLHostOrProtocol(tab.url);
 
     const urlText = host
         .split('.')
-        .reduce((elements, part, i) => elements.concat(
+        .reduce<string[]>((elements, part, i) => elements.concat(
             <wbr />,
             `${i > 0 ? '.' : ''}${part}`
         ), []);
@@ -34,7 +38,7 @@ export default function SiteToggleButton({data, tab, actions}: ExtWrapper & {tab
             class={{
                 'site-toggle': true,
                 'site-toggle--active': isSiteEnabled,
-                'site-toggle--disabled': !toggleHasEffect || isThunderbird
+                'site-toggle--disabled': __THUNDERBIRD__ || !toggleHasEffect
             }}
             onclick={onSiteToggleClick}
         >

@@ -6,11 +6,11 @@ import {Toggle} from '../../../controls';
 import {isURLInList} from '../../../../utils/url';
 import {compileMarkdown} from '../../utils/markdown';
 import {getLocalMessage} from '../../../../utils/locales';
-import type {ExtWrapper, FilterConfig, TabInfo} from '../../../../definitions';
+import type {ExtWrapper, FilterConfig} from '../../../../definitions';
 import {isFirefox} from '../../../../utils/platform';
 
-export default function MoreSettings({data, actions, tab}: ExtWrapper & {tab: TabInfo}) {
-
+export default function MoreSettings({data, actions, fonts}: ExtWrapper & {fonts: string[]}) {
+    const tab = data.activeTab;
     const custom = data.settings.customThemes.find(({url}) => isURLInList(tab.url, url));
     const filterConfig = custom ? custom.theme : data.settings.theme;
 
@@ -26,7 +26,7 @@ export default function MoreSettings({data, actions, tab}: ExtWrapper & {tab: Ta
     return (
         <section class="more-settings">
             <div class="more-settings__section">
-                <FontSettings config={filterConfig} fonts={data.fonts} onChange={setConfig} />
+                <FontSettings config={filterConfig} fonts={fonts} onChange={setConfig} />
             </div>
             <div class="more-settings__section">
                 {isFirefox ? null : <p class="more-settings__description">
@@ -35,7 +35,7 @@ export default function MoreSettings({data, actions, tab}: ExtWrapper & {tab: Ta
                 <EngineSwitch engine={filterConfig.engine} onChange={(engine) => setConfig({engine})} />
             </div>
             <div class="more-settings__section">
-                <CustomSettingsToggle data={data} tab={tab} actions={actions} />
+                <CustomSettingsToggle data={data} actions={actions} />
                 {tab.isProtected ? (
                     <p class="more-settings__description more-settings__description--warning">
                         {getLocalMessage('page_protected').replace(/\n/g, ' ')}
@@ -66,4 +66,3 @@ export default function MoreSettings({data, actions, tab}: ExtWrapper & {tab: Ta
         </section>
     );
 }
-

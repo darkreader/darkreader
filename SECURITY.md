@@ -1,27 +1,11 @@
 # Security Policy
 
-Dark Reader is known to have no intentional security vulnerabilities.
-If reported, vulnerabilites will be fixed in the shortest time possible,
-with minimal impact possible.
+Any security vulnerability discovered in Dark Reader will be fixed as soon as possible with as minimal impact as possible when reported.
 
-## Supported Versions
+Please ensure you are always running the [latest version available](https://github.com/darkreader/darkreader/releases).
 
-Latest version is supported.
+Some web browser extension stores may have an older version currently published.
 
-| Version   | Supported          |
-| --------- | ------------------ |
-| 4.9.16    | :white_check_mark: |
-| < 4.9.16  | :x:                |
+## Security Vulnerability Report
 
-## Reporting a Vulnerability
-
-In case there is a vulnerability left behind, immediately notify
-to <darkreaderapp@gmail.com>; unless you can fix it yourself,
-in which case open a pull request on
-<https://github.com/darkreader/darkreader/pulls>.
-
-Alexander Shutau, owner
-
-"Gusted" William Zijl, maintainer
-
-Erkin Alp Güney, security policy author
+If you have discovered a security vulnerability, please email us at <darkreaderapp@gmail.com> immediately.

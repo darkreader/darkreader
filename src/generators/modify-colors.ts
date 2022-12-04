@@ -1,6 +1,6 @@
 import type {FilterConfig, Theme} from '../definitions';
 import type {RGBA, HSLA} from '../utils/color';
-import {parse, rgbToHSL, hslToRGB, rgbToString, rgbToHexString} from '../utils/color';
+import {parseToHSLWithCache, rgbToHSL, hslToRGB, rgbToString, rgbToHexString} from '../utils/color';
 import {scale} from '../utils/math';
 import {applyColorMatrix, createFilterMatrix} from './utils/matrix';
 
@@ -21,43 +21,36 @@ function getFgPole(theme: Theme) {
 }
 
 const colorModificationCache = new Map<ColorFunction, Map<string, string>>();
-const colorParseCache = new Map<string, HSLA>();
-
-function parseToHSLWithCache(color: string) {
-    if (colorParseCache.has(color)) {
-        return colorParseCache.get(color);
-    }
-    const rgb = parse(color);
-    const hsl = rgbToHSL(rgb);
-    colorParseCache.set(color, hsl);
-    return hsl;
-}
 
 export function clearColorModificationCache() {
     colorModificationCache.clear();
-    colorParseCache.clear();
 }
 
 const rgbCacheKeys: Array<keyof RGBA> = ['r', 'g', 'b', 'a'];
 const themeCacheKeys: Array<keyof Theme> = ['mode', 'brightness', 'contrast', 'grayscale', 'sepia', 'darkSchemeBackgroundColor', 'darkSchemeTextColor', 'lightSchemeBackgroundColor', 'lightSchemeTextColor'];
 
 function getCacheId(rgb: RGBA, theme: Theme) {
-    return rgbCacheKeys.map((k) => rgb[k] as any)
-        .concat(themeCacheKeys.map((k) => theme[k]))
-        .join(';');
+    let resultId = '';
+    rgbCacheKeys.forEach((key) => {
+        resultId += `${rgb[key]};`;
+    });
+    themeCacheKeys.forEach((key) => {
+        resultId += `${theme[key]};`;
+    });
+    return resultId;
 }
 
-function modifyColorWithCache(rgb: RGBA, theme: Theme, modifyHSL: (hsl: HSLA, pole?: HSLA, anotherPole?: HSLA) => HSLA, poleColor?: string, anotherPoleColor?: string) {
+function modifyColorWithCache(rgb: RGBA, theme: Theme, modifyHSL: (hsl: HSLA, pole?: HSLA | null, anotherPole?: HSLA | null) => HSLA, poleColor?: string, anotherPoleColor?: string) {
     let fnCache: Map<string, string>;
     if (colorModificationCache.has(modifyHSL)) {
-        fnCache = colorModificationCache.get(modifyHSL);
+        fnCache = colorModificationCache.get(modifyHSL)!;
     } else {
         fnCache = new Map();
         colorModificationCache.set(modifyHSL, fnCache);
     }
     const id = getCacheId(rgb, theme);
     if (fnCache.has(id)) {
-        return fnCache.get(id);
+        return fnCache.get(id)!;
     }
 
     const hsl = rgbToHSL(rgb);
@@ -90,7 +83,7 @@ function modifyLightSchemeColor(rgb: RGBA, theme: Theme) {
     return modifyColorWithCache(rgb, theme, modifyLightModeHSL, poleFg, poleBg);
 }
 
-function modifyLightModeHSL({h, s, l, a}, poleFg: HSLA, poleBg: HSLA) {
+function modifyLightModeHSL({h, s, l, a}: HSLA, poleFg: HSLA, poleBg: HSLA) {
     const isDark = l < 0.5;
     let isNeutral: boolean;
     if (isDark) {
@@ -133,7 +126,7 @@ function modifyBgHSL({h, s, l, a}: HSLA, pole: HSLA) {
         return {h, s, l: lx, a};
     }
 
-    const lx = scale(l, 0.5, 1, MAX_BG_LIGHTNESS, pole.l);
+    let lx = scale(l, 0.5, 1, MAX_BG_LIGHTNESS, pole.l);
 
     if (isNeutral) {
         const hx = pole.h;
@@ -150,6 +143,12 @@ function modifyBgHSL({h, s, l, a}: HSLA, pole: HSLA) {
         } else {
             hx = scale(h, 60, 120, 60, 105);
         }
+    }
+
+    // Lower the lightness, if the resulting
+    // hue is in lower yellow spectrum.
+    if (hx > 40 && hx < 80) {
+        lx *= 0.75;
     }
 
     return {h: hx, s, l: lx, a};
@@ -214,7 +213,7 @@ export function modifyForegroundColor(rgb: RGBA, theme: Theme) {
     return modifyColorWithCache(rgb, {...theme, mode: 0}, modifyFgHSL, pole);
 }
 
-function modifyBorderHSL({h, s, l, a}, poleFg: HSLA, poleBg: HSLA) {
+function modifyBorderHSL({h, s, l, a}: HSLA, poleFg: HSLA, poleBg: HSLA) {
     const isDark = l < 0.5;
     const isNeutral = l < 0.2 || s < 0.24;
 

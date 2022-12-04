@@ -1,19 +1,43 @@
-const fs = require('fs-extra');
-const os = require('os');
-const rollupPluginIstanbul = require('rollup-plugin-istanbul2');
-const rollupPluginNodeResolve = require('@rollup/plugin-node-resolve').default;
-const rollupPluginReplace = require('@rollup/plugin-replace');
-const rollupPluginTypescript = require('rollup-plugin-typescript2');
-const typescript = require('typescript');
+/** @typedef {import('karma').Config & {headless: boolean, debug: boolean, ci: boolean, coverage: boolean}} LocalConfig */
+/** @typedef {import('karma').ConfigOptions} ConfigOptions */
 
-module.exports = (config) => {
-    config.set({
-        basePath: '../../',
+import fs from 'fs';
+import os from 'os';
+import rollupPluginIstanbul from 'rollup-plugin-istanbul2';
+import rollupPluginNodeResolve from '@rollup/plugin-node-resolve';
+import rollupPluginReplace from '@rollup/plugin-replace';
+import rollupPluginTypescript from '@rollup/plugin-typescript';
+import typescript from 'typescript';
+
+import {createEchoServer} from './support/echo-server.js';
+import paths from '../../tasks/paths.js';
+const {rootPath} = paths;
+
+/**
+ * @param {Partial<LocalConfig>} config
+ * @param {Record<string, string>} env
+ * @returns {ConfigOptions}
+ */
+export function configureKarma(config, env) {
+    const headless = config.headless || Boolean(env.KARMA_HEADLESS) || false;
+
+    /** @type {ConfigOptions} */
+    let options = {
+        failOnFailingTestSuite: true,
+        failOnEmptyTestSuite: true,
+        basePath: '../..',
         frameworks: ['jasmine'],
         files: [
-            'tests/inject/customize.ts',
-            'tests/inject/polyfills.ts',
+            'tests/inject/support/customize.ts',
+            'tests/inject/support/polyfills.ts',
             {pattern: 'tests/inject/**/*.tests.ts', watched: false},
+        ],
+        plugins: [
+            'karma-chrome-launcher',
+            'karma-firefox-launcher',
+            'karma-rollup-preprocessor',
+            'karma-jasmine',
+            'karma-spec-reporter',
         ],
         preprocessors: {
             '**/*.+(ts|tsx)': ['rollup'],
@@ -23,49 +47,95 @@ module.exports = (config) => {
                 rollupPluginNodeResolve(),
                 rollupPluginTypescript({
                     typescript,
-                    tsconfig: 'src/tsconfig.json',
-                    tsconfigOverride: {
-                        compilerOptions: {
-                            types: [
-                                'chrome',
-                                'jasmine',
-                            ],
-                            removeComments: false,
-                            sourceMap: true,
-                        },
-                    },
-                    clean: false,
-                    cacheRoot: `${fs.realpathSync(os.tmpdir())}/darkreader_typescript_test_cache`,
+                    tsconfig: rootPath('tests/inject/tsconfig.json'),
+                    cacheDir: `${fs.realpathSync(os.tmpdir())}/darkreader_typescript_test_cache`,
                 }),
                 rollupPluginReplace({
                     preventAssignment: true,
-                    '__DEBUG__': 'false',
-                    '__PORT__': '-1',
-                    '__WATCH__': 'false',
-                }),
-                rollupPluginIstanbul({
-                    exclude: ['tests/**/*.*', 'src/inject/dynamic-theme/stylesheet-proxy.ts'],
+                    __DEBUG__: false,
+                    __FIREFOX__: false,
+                    __CHROMIUM_MV2__: true,
+                    __CHROMIUM_MV3__: false,
+                    __THUNDERBIRD__: false,
+                    __PORT__: '-1',
+                    __TEST__: true,
+                    __WATCH__: false,
                 }),
             ],
             output: {
+                dir: 'build/tests',
                 strict: true,
                 format: 'iife',
                 sourcemap: 'inline',
             },
         },
-        reporters: ['progress', 'coverage'],
-        coverageReporter: {
-            type: 'html',
-            dir: 'tests/inject/coverage/'
-        },
+        reporters: ['spec'],
         port: 9876,
         colors: true,
         logLevel: config.LOG_INFO,
         autoWatch: true,
-        browsers: config.debug ?
-            ['Chrome'] :
-            ['Chrome', 'Firefox', process.platform === 'darwin' ? 'Safari' : null].filter(Boolean),
-        singleRun: config.debug ? false : true,
-        concurrency: config.debug ? Infinity : 1,
-    });
-};
+        browsers: headless
+            ? ['ChromeHeadless', 'FirefoxHeadless']
+            : ['Chrome', 'Firefox', process.platform === 'darwin' ? 'Safari' : null].filter(Boolean),
+        singleRun: true,
+        concurrency: 1,
+    };
+
+    if (config.debug) {
+        options.browsers = ['Chrome'];
+        options.singleRun = false;
+        options.concurrency = Infinity;
+        options.logLevel = config.LOG_DEBUG;
+    }
+
+    if (config.ci) {
+        options.customLaunchers = {};
+        options.browsers = [];
+
+        // CHROME_TEST and FIREFOX_TEST are used in CI
+        const chrome = env.CHROME_TEST;
+        const firefox = env.FIREFOX_TEST;
+        const all = !chrome && !firefox;
+        // Chrome
+        if (chrome || all) {
+            options.customLaunchers['CIChromeHeadless'] = {
+                base: 'ChromeHeadless',
+                flags: ['--no-sandbox', '--disable-setuid-sandbox']
+            };
+            options.browsers.push('CIChromeHeadless');
+        }
+
+        // Firefox
+        if (firefox || all) {
+            options.customLaunchers['CIFirefoxHeadless'] = {
+                base: 'FirefoxHeadless',
+            };
+            options.browsers.push('CIFirefoxHeadless');
+        }
+
+        options.autoWatch = false;
+        options.singleRun = true;
+        options.concurrency = 1;
+        options.logLevel = config.LOG_DEBUG;
+    }
+
+    if (config.coverage) {
+        options.plugins.push('karma-coverage');
+        const plugin = rollupPluginIstanbul({
+            exclude: ['tests/**/*.*', 'src/inject/dynamic-theme/stylesheet-proxy.ts'],
+        });
+        options.rollupPreprocessor.plugins.push(plugin);
+        options.reporters.push('coverage');
+        options.coverageReporter = {
+            type: 'html',
+            dir: 'tests/inject/coverage/'
+        };
+    }
+
+    // HACK: Create CORS server here
+    // Previously a separate Karma runner file was used
+    const corsServerPort = 9966;
+    createEchoServer(corsServerPort).then(() => console.log(`CORS echo server running on port ${corsServerPort}`));
+
+    return options;
+}

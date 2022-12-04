@@ -1,5 +1,7 @@
-import type {UserSettings} from '../definitions';
+import type {UserSettings, TabInfo} from '../definitions';
 import {isIPV6, compareIPV6} from './ipv6';
+
+declare const __THUNDERBIRD__: boolean;
 
 let anchor: HTMLAnchorElement;
 
@@ -13,10 +15,10 @@ function fixBaseURL($url: string) {
     return anchor.href;
 }
 
-export function parseURL($url: string, $base: string = null) {
-    const key = `${$url}${$base ? ';' + $base : ''}`;
+export function parseURL($url: string, $base: string | null = null): URL {
+    const key = `${$url}${$base ? `;${$base}` : ''}`;
     if (parsedURLCache.has(key)) {
-        return parsedURLCache.get(key);
+        return parsedURLCache.get(key)!;
     }
     if ($base) {
         const parsedURL = new URL($url, fixBaseURL($base));
@@ -29,22 +31,52 @@ export function parseURL($url: string, $base: string = null) {
 }
 
 export function getAbsoluteURL($base: string, $relative: string) {
-    if ($relative.match(/^data\:/)) {
+    if ($relative.match(/^data\\?\:/)) {
         return $relative;
     }
-
+    // Check if relative starts with `//hostname...`.
+    // We have to add a protocol to make it absolute.
+    if (/^\/\//.test($relative)) {
+        return `${location.protocol}${$relative}`;
+    }
     const b = parseURL($base);
     const a = parseURL($relative, b.href);
     return a.href;
+}
+
+// Check if any relative URL is on the window.location;
+// So that https://duck.com/ext.css would return true on https://duck.com/
+// But https://duck.com/styles/ext.css would return false on https://duck.com/
+// Visa versa https://duck.com/ext.css should return fasle on https://duck.com/search/
+// We're checking if any relative value within ext.css could potentially not be on the same path.
+export function isRelativeHrefOnAbsolutePath(href: string): boolean {
+    if (href.startsWith('data:')) {
+        return true;
+    }
+    const url = parseURL(href);
+
+    if (url.protocol !== location.protocol) {
+        return false;
+    }
+    if (url.hostname !== location.hostname) {
+        return false;
+    }
+    if (url.port !== location.port) {
+        return false;
+    }
+    // Now check if the path is on the same path as the base
+    // We do this by getting the pathname up until the last slash.
+    return url.pathname === location.pathname;
 }
 
 export function getURLHostOrProtocol($url: string) {
     const url = new URL($url);
     if (url.host) {
         return url.host;
-    } else {
-        return url.protocol;
+    } else if (url.protocol === 'file:') {
+        return url.pathname;
     }
+    return url.protocol;
 }
 
 export function compareURLPatterns(a: string, b: string) {
@@ -78,15 +110,15 @@ export function isURLMatched(url: string, urlTemplate: string): boolean {
     } else if (!isFirstIPV6 && !isSecondIPV6) {
         const regex = createUrlRegex(urlTemplate);
         return Boolean(url.match(regex));
-    } else {
-        return false;
     }
+    return false;
 }
 
 function createUrlRegex(urlTemplate: string): RegExp {
     urlTemplate = urlTemplate.trim();
     const exactBeginning = (urlTemplate[0] === '^');
     const exactEnding = (urlTemplate[urlTemplate.length - 1] === '$');
+    const hasLastSlash = /\/\$?$/.test(urlTemplate);
 
     urlTemplate = (urlTemplate
         .replace(/^\^/, '') // Remove ^ at start
@@ -98,7 +130,7 @@ function createUrlRegex(urlTemplate: string): RegExp {
 
     let slashIndex: number;
     let beforeSlash: string;
-    let afterSlash: string;
+    let afterSlash: string | undefined;
     if ((slashIndex = urlTemplate.indexOf('/')) >= 0) {
         beforeSlash = urlTemplate.substring(0, slashIndex); // google.*
         afterSlash = urlTemplate.replace(/\$/g, '').substring(slashIndex); // /login/abc
@@ -138,7 +170,7 @@ function createUrlRegex(urlTemplate: string): RegExp {
 
     result += (exactEnding ?
         '(\\/?(\\?[^\/]*?)?)$' // All following queries
-        : '(\\/?.*?)$' // All following paths and queries
+        : `(\\/${hasLastSlash ? '' : '?'}.*?)$` // All following paths and queries
     );
 
     //
@@ -155,7 +187,11 @@ export function isPDF(url: string) {
         if (url.includes('#')) {
             url = url.substring(0, url.lastIndexOf('#'));
         }
-        if (url.match(/(wikipedia|wikimedia).org/i) && url.match(/(wikipedia|wikimedia)\.org\/.*\/[a-z]+\:[^\:\/]+\.pdf/i)) {
+        if (
+            (url.match(/(wikipedia|wikimedia)\.org/i) && url.match(/(wikipedia|wikimedia)\.org\/.*\/[a-z]+\:[^\:\/]+\.pdf/i)) ||
+            (url.match(/timetravel\.mementoweb\.org\/reconstruct/i) && url.match(/\.pdf$/i)) ||
+            (url.match(/dropbox\.com\/s\//i) && url.match(/\.pdf$/i))
+        ) {
             return false;
         }
         if (url.endsWith('.pdf')) {
@@ -173,22 +209,40 @@ export function isPDF(url: string) {
     return false;
 }
 
-export function isURLEnabled(url: string, userSettings: UserSettings, {isProtected, isInDarkList}) {
+export function isURLEnabled(url: string, userSettings: UserSettings, {isProtected, isInDarkList, isDarkThemeDetected}: Partial<TabInfo>, isAllowedFileSchemeAccess = true) {
+    if (isLocalFile(url) && !isAllowedFileSchemeAccess) {
+        return false;
+    }
     if (isProtected && !userSettings.enableForProtectedPages) {
         return false;
+    }
+    // Only URL's with emails are getting here on thunderbird
+    // So we can skip the checks and just return true.
+    if (__THUNDERBIRD__) {
+        return true;
     }
     if (isPDF(url)) {
         return userSettings.enableForPDF;
     }
     const isURLInUserList = isURLInList(url, userSettings.siteList);
-    if (userSettings.applyToListedOnly) {
-        return isURLInUserList;
-    }
-    // TODO: Use `siteListEnabled`, `siteListDisabled`, `enabledByDefault` options.
-    // Delete `siteList` and `applyToListedOnly` options, transfer user's values.
     const isURLInEnabledList = isURLInList(url, userSettings.siteListEnabled);
-    if (isURLInEnabledList && isInDarkList) {
+
+    if (userSettings.applyToListedOnly) {
+        return isURLInEnabledList || isURLInUserList;
+    }
+    if (isURLInEnabledList) {
         return true;
     }
-    return (!isInDarkList && !isURLInUserList);
+    if (isInDarkList || (userSettings.detectDarkTheme && isDarkThemeDetected)) {
+        return false;
+    }
+    return !isURLInUserList;
+}
+
+export function isFullyQualifiedDomain(candidate: string) {
+    return /^[a-z0-9.-]+$/.test(candidate);
+}
+
+export function isLocalFile(url: string) {
+    return url && url.startsWith('file:///');
 }

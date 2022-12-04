@@ -7,8 +7,8 @@ interface ShortcutLinkProps {
     class?: string | {[cls: string]: any};
     commandName: string;
     shortcuts: Shortcuts;
-    textTemplate: (shortcut: string) => string;
-    onSetShortcut: (shortcut: string) => void;
+    textTemplate: (shortcut: string | null) => string;
+    onSetShortcut: (shortcut: string) => Promise<string | null>;
 }
 
 /**
@@ -31,49 +31,105 @@ export default function ShortcutLink(props: ShortcutLinkProps) {
         const initialText = node.textContent;
         node.textContent = '...⌨';
 
+        // Note: these variables are function-global to be able to update shortcut display,
+        // but they are overwritten right before shortcut is set.
+        let ctrl = false, alt = false, command = false, shift = false, key: string | null = null;
+
+        function updateShortcut() {
+            if (!enteringShortcutInProgress) {
+                return;
+            }
+            const shortcut = `${ctrl ? 'Ctrl+' : ''}${alt ? 'Alt+' : command ? 'Command+' : ''}${shift ? 'Shift+' : ''}${key ? key : ''}`;
+            node.textContent = shortcut;
+        }
+
         function onKeyDown(e: KeyboardEvent) {
             e.preventDefault();
-            const ctrl = e.ctrlKey;
-            const alt = e.altKey;
-            const command = e.metaKey;
-            const shift = e.shiftKey;
+            ctrl = e.ctrlKey;
+            alt = e.altKey;
+            command = e.metaKey;
+            shift = e.shiftKey;
 
-            let key: string = null;
-            if (e.code.startsWith('Key')) {
-                key = e.code.substring(3);
-            } else if (e.code.startsWith('Digit')) {
-                key = e.code.substring(5);
+            key = null;
+            if (e.key === '.') {
+                key = 'Period';
+            } else if (e.key === ',') {
+                key = 'Comma';
+            } else if (/^Digit[0-9]$/.test(e.code)) {
+                // This is a digit key
+                // e.key can be inaccurate if Shift is also pressed
+                key = e.code.substring(5, 6);
+            } else if (/^Key[A-Z]$/.test(e.code)) {
+                // This is a letter key
+                if (/^[A-Za-z]$/.test(e.key)) {
+                    // This is a letter key, on a Latin-like layout, and has no accents
+                    // It can be used as a shortcut, but e.code does not have to match e.key
+                    // e.key matches what Firefox displays on about:addons and it represents the software
+                    // interpretation of the key considering the active keyboard layout
+                    // e.code represents the physical location of the key, ignoring the keyboard layout
+                    // Therefore we use the e.key converted to upper case.
+                    key = e.key.toUpperCase();
+                } else if (e.keyCode !== 0) {
+                    // This is a letter key on a non-latin layout or on Latin layout with accents,
+                    // but it is internally reproducible by Firefox
+                    // This check relies on deprecated e.keyCode because it actually represents the internal
+                    // implementation-dependent value. The actual key comes from non-deprecated e.code
+                    // For details see https://developer.mozilla.org/docs/Web/API/KeyboardEvent/keyCode
+                    key = e.code.substring(3);
+                }
+                // This letter is not well-represented by Firefox, probably because it is a Latin-like
+                // key with accent. This key will not work, even if set via about:addons
             }
 
-            const shortcut = `${ctrl ? 'Ctrl+' : alt ? 'Alt+' : command ? 'Command+' : ''}${shift ? 'Shift+' : ''}${key ? key : ''}`;
-            node.textContent = shortcut;
+            updateShortcut();
 
             if ((ctrl || alt || command || shift) && key) {
                 removeListeners();
-                props.onSetShortcut(shortcut);
                 node.blur();
-                setTimeout(() => {
+                const shortcut = `${ctrl ? 'Ctrl+' : ''}${alt ? 'Alt+' : command ? 'Command+' : ''}${shift ? 'Shift+' : ''}${key ? key : ''}`;
+                props.onSetShortcut(shortcut).then((shortcut) => {
                     enteringShortcutInProgress = false;
                     node.classList.remove('shortcut--edit');
                     node.textContent = props.textTemplate(shortcut);
-                }, 500);
+                });
             }
+        }
+
+        // Note: technically, there are left and right keys for all of these,
+        // but most people won't click two identical keys at once
+        function onKeyUp(e: KeyboardEvent) {
+            if (e.key === 'Control') {
+                ctrl = false;
+            } else if (e.key === 'Alt') {
+                alt = false;
+            } else if (e.key === 'Command') {
+                command = false;
+            } else if (e.key === 'Shift') {
+                shift = false;
+            } else {
+                key = null;
+            }
+            updateShortcut();
         }
 
         function onBlur() {
             removeListeners();
             node.classList.remove('shortcut--edit');
-            node.textContent = initialText;
+            if (enteringShortcutInProgress) {
+                node.textContent = initialText;
+            }
             enteringShortcutInProgress = false;
         }
 
         function removeListeners() {
-            window.removeEventListener('keydown', onKeyDown, true);
-            window.removeEventListener('blur', onBlur, true);
+            window.removeEventListener('keydown', onKeyDown, {capture: true, passive: false, once: false} as EventListenerOptions);
+            window.removeEventListener('keyup', onKeyUp, {capture: true, passive: false, once: false} as EventListenerOptions);
+            window.removeEventListener('blur', onBlur, {capture: true, once: true} as EventListenerOptions);
         }
 
-        window.addEventListener('keydown', onKeyDown, true);
-        window.addEventListener('blur', onBlur, true);
+        window.addEventListener('keydown', onKeyDown, {capture: true, passive: false, once: false});
+        window.addEventListener('keyup', onKeyUp, {capture: true, passive: false, once: false});
+        window.addEventListener('blur', onBlur, {capture: true, once: true});
         node.classList.add('shortcut--edit');
     }
 

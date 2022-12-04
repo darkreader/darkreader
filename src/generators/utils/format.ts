@@ -8,8 +8,8 @@ interface SiteFix {
 interface SitesFixesFormatOptions {
     props: string[];
     getPropCommandName: (prop: string) => string;
-    formatPropValue: (prop: string, value) => string;
-    shouldIgnoreProp: (props: string, value) => boolean;
+    formatPropValue: (prop: string, value: string | string[]) => string;
+    shouldIgnoreProp: (props: string, value: string | string[]) => boolean;
 }
 
 export function formatSitesFixesConfig(fixes: SiteFix[], options: SitesFixesFormatOptions) {

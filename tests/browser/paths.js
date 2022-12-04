@@ -1,16 +1,27 @@
 // @ts-check
-const {exec} = require('child_process');
-const fs = require('fs-extra');
-const path = require('path');
+import {exec} from 'child_process';
+import fs from 'fs';
+import path from 'path';
 
-async function winProgramFiles(relPath) {
+import * as url from 'url';
+const __dirname = url.fileURLToPath(new URL('.', import.meta.url));
+
+/**
+ * @param {string} relPath
+ * @returns {string}
+ */
+function winProgramFiles(relPath) {
     const x64Path = path.join(process.env.PROGRAMFILES, relPath);
-    if (await fs.exists(x64Path)) {
+    if (fs.existsSync(x64Path)) {
         return x64Path;
     }
     return path.join(process.env['ProgramFiles(x86)'], relPath);
 }
 
+/**
+ * @param {string} app
+ * @returns {Promise<string>}
+ */
 function linuxAppPath(app) {
     return new Promise((resolve, reject) => {
         exec(`which ${app}`, (err, result) => {
@@ -26,36 +37,45 @@ function linuxAppPath(app) {
 /**
  * @returns {Promise<string>}
  */
-async function getChromePath() {
+export async function getChromePath() {
     if (process.platform === 'darwin') {
         return '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
     }
     if (process.platform === 'win32') {
-        return await winProgramFiles('Google\\Chrome\\Application\\chrome.exe');
+        return winProgramFiles('Google\\Chrome\\Application\\chrome.exe');
     }
-    return await linuxAppPath('google-chrome');
+    const possibleLinuxPaths = ['google-chrome', 'google-chrome-stable', 'chromium'];
+    for (const possiblePath of possibleLinuxPaths) {
+        try {
+            return await linuxAppPath(possiblePath);
+        } catch (e) {
+            // ignore
+        }
+    }
+    throw new Error('Could not find Chrome');
 }
-
 
 /**
  * @returns {Promise<string>}
  */
-async function getFirefoxPath() {
+export async function getFirefoxPath() {
     if (process.platform === 'darwin') {
         return '/Applications/Firefox Nightly.app/Contents/MacOS/firefox-bin';
     }
     if (process.platform === 'win32') {
         return await winProgramFiles('Firefox Nightly\\firefox.exe');
     }
-    return await linuxAppPath('firefox-nightly');
+    const possibleLinuxPaths = ['firefox-nightly', 'firefox'];
+    for (const possiblePath of possibleLinuxPaths) {
+        try {
+            return await linuxAppPath(possiblePath);
+        } catch (e) {
+            // ignore
+        }
+    }
+    throw new Error('Could not find firefox-nightly');
 }
 
-const chromeExtensionDebugDir = path.join(__dirname, '../../debug');
-const firefoxExtensionDebugDir = path.join(__dirname, '../../debug-firefox');
-
-module.exports = {
-    getChromePath,
-    getFirefoxPath,
-    chromeExtensionDebugDir,
-    firefoxExtensionDebugDir,
-};
+export const chromeExtensionDebugDir = path.join(__dirname, '../../build/debug/chrome');
+export const chromeMV3ExtensionDebugDir = path.join(__dirname, '../../build/debug/chrome-mv3');
+export const firefoxExtensionDebugDir = path.join(__dirname, '../../build/debug/firefox');

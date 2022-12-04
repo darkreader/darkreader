@@ -1,3 +1,6 @@
+import {evalMath} from './math-eval';
+import {getParenthesesRange} from './text';
+
 export interface RGBA {
     r: number;
     g: number;
@@ -10,6 +13,42 @@ export interface HSLA {
     s: number;
     l: number;
     a?: number;
+}
+
+const hslaParseCache = new Map<string, HSLA>();
+const rgbaParseCache = new Map<string, RGBA>();
+
+export function parseColorWithCache($color: string): RGBA | null {
+    $color = $color.trim();
+    if (rgbaParseCache.has($color)) {
+        return rgbaParseCache.get($color)!;
+    }
+    // We cannot _really_ parse any color which has the calc() expression,
+    // so we try our best to remove those and then parse the value.
+    if ($color.includes('calc(')) {
+        $color = lowerCalcExpression($color);
+    }
+    const color = parse($color);
+    color && rgbaParseCache.set($color, color);
+    return color;
+}
+
+export function parseToHSLWithCache(color: string) {
+    if (hslaParseCache.has(color)) {
+        return hslaParseCache.get(color);
+    }
+    const rgb = parseColorWithCache(color);
+    if (!rgb) {
+        return null;
+    }
+    const hsl = rgbToHSL(rgb);
+    hslaParseCache.set(color, hsl);
+    return hsl;
+}
+
+export function clearColorCache() {
+    hslaParseCache.clear();
+    rgbaParseCache.clear();
 }
 
 // https://en.wikipedia.org/wiki/HSL_and_HSV
@@ -108,7 +147,7 @@ const rgbMatch = /^rgba?\([^\(\)]+\)$/;
 const hslMatch = /^hsla?\([^\(\)]+\)$/;
 const hexMatch = /^#[0-9a-f]+$/i;
 
-export function parse($color: string): RGBA {
+export function parse($color: string): RGBA | null {
     const c = $color.trim().toLowerCase();
 
     if (c.match(rgbMatch)) {
@@ -135,11 +174,45 @@ export function parse($color: string): RGBA {
         return {r: 0, g: 0, b: 0, a: 0};
     }
 
-    throw new Error(`Unable to parse ${$color}`);
+    return null;
 }
 
-function getNumbersFromString(str: string, splitter: RegExp, range: number[], units: {[unit: string]: number}) {
-    const raw = str.split(splitter).filter((x) => x);
+function getNumbers($color: string) {
+    const numbers: string[] = [];
+    let prevPos = 0;
+    let isMining = false;
+    // Get the first `(`.
+    const startIndex = $color.indexOf('(');
+    $color = $color.substring(startIndex + 1, $color.length - 1);
+    for (let i = 0; i < $color.length; i++) {
+        const c = $color[i];
+        // Check if `c` is a digit.
+        if (c >= '0' && c <= '9' || c === '.' || c === '+' || c === '-') {
+            // Enable the mining flag.
+            isMining = true;
+        } else if (isMining && (c === ' ' || c === ',')) {
+            // isMining is true and we got a terminating
+            // character. So we can push the current number
+            // into the array.
+            numbers.push($color.substring(prevPos, i));
+            // Disable the mining flag.
+            isMining = false;
+            // Ensure the prevPos is correct.
+            prevPos = i + 1;
+        } else if (!isMining) {
+            // Ensure the prevPos is correct.
+            prevPos = i + 1;
+        }
+    }
+    // Push the last number.
+    if (isMining) {
+        numbers.push($color.substring(prevPos, $color.length));
+    }
+    return numbers;
+}
+
+function getNumbersFromString(str: string, range: number[], units: {[unit: string]: number}) {
+    const raw = getNumbers(str);
     const unitsList = Object.entries(units);
     const numbers = raw.map((r) => r.trim()).map((r, i) => {
         let n: number;
@@ -157,21 +230,19 @@ function getNumbersFromString(str: string, splitter: RegExp, range: number[], un
     return numbers;
 }
 
-const rgbSplitter = /rgba?|\(|\)|\/|,|\s/ig;
 const rgbRange = [255, 255, 255, 1];
 const rgbUnits = {'%': 100};
 
 function parseRGB($rgb: string) {
-    const [r, g, b, a = 1] = getNumbersFromString($rgb, rgbSplitter, rgbRange, rgbUnits);
+    const [r, g, b, a = 1] = getNumbersFromString($rgb, rgbRange, rgbUnits);
     return {r, g, b, a};
 }
 
-const hslSplitter = /hsla?|\(|\)|\/|,|\s/ig;
 const hslRange = [360, 1, 1, 1];
 const hslUnits = {'%': 100, 'deg': 360, 'rad': 2 * Math.PI, 'turn': 1};
 
 function parseHSL($hsl: string) {
-    const [h, s, l, a = 1] = getNumbersFromString($hsl, hslSplitter, hslRange, hslUnits);
+    const [h, s, l, a = 1] = getNumbersFromString($hsl, hslRange, hslUnits);
     return hslToRGB({h, s, l, a});
 }
 
@@ -191,11 +262,11 @@ function parseHex($hex: string) {
             return {r, g, b, a};
         }
     }
-    throw new Error(`Unable to parse ${$hex}`);
+    return null;
 }
 
 function getColorByName($color: string) {
-    const n = knownColors.get($color);
+    const n = knownColors.get($color)!;
     return {
         r: (n >> 16) & 255,
         g: (n >> 8) & 255,
@@ -205,13 +276,50 @@ function getColorByName($color: string) {
 }
 
 function getSystemColor($color: string) {
-    const n = systemColors.get($color);
+    const n = systemColors.get($color)!;
     return {
         r: (n >> 16) & 255,
         g: (n >> 8) & 255,
         b: (n >> 0) & 255,
         a: 1
     };
+}
+
+// lowerCalcExpression is a helper function that tries to remove `calc(...)`
+// expressions from the given string. It can only lower expressions to a certain
+// degree so we can keep this function easy and simple to understand.
+export function lowerCalcExpression(color: string): string {
+    // searchIndex will be used as searchIndex and as a "cursor" within
+    // the calc(...) expression.
+    let searchIndex = 0;
+
+    // Replace the content between two indices.
+    const replaceBetweenIndices = (start: number, end: number, replacement: string) => {
+        color = color.substring(0, start) + replacement + color.substring(end);
+    };
+
+    // Run this code until it doesn't find any `calc(...)`.
+    while ((searchIndex = color.indexOf('calc(')) !== -1) {
+        // Get the parentheses ranges of `calc(...)`.
+        const range = getParenthesesRange(color, searchIndex);
+        if (!range) {
+            break;
+        }
+
+        // Get the content between the parentheses.
+        let slice = color.slice(range.start + 1, range.end - 1);
+        // Does the content include a percentage?
+        const includesPercentage = slice.includes('%');
+        // Remove all percentages.
+        slice = slice.split('%').join('');
+
+        // Pass the content to the evalMath library and round its output.
+        const output = Math.round(evalMath(slice));
+
+        // Replace `calc(...)` with the result.
+        replaceBetweenIndices(range.start - 4, range.end, output + (includesPercentage ? '%' : ''));
+    }
+    return color;
 }
 
 const knownColors: Map<string, number> = new Map(Object.entries({
@@ -396,3 +504,8 @@ const systemColors: Map<string, number> = new Map(Object.entries({
     WindowText: 0x000000,
     '-webkit-focus-ring-color': 0xe59700
 }).map(([key, value]) => [key.toLowerCase(), value] as [string, number]));
+
+// https://en.wikipedia.org/wiki/Relative_luminance
+export function getSRGBLightness(r: number, g: number, b: number) {
+    return (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
+}

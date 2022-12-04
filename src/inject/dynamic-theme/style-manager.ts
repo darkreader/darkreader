@@ -1,36 +1,33 @@
 import type {Theme} from '../../definitions';
 import {forEach} from '../../utils/array';
 import {getMatches} from '../../utils/text';
-import {getAbsoluteURL} from '../../utils/url';
-import {watchForNodePosition, removeNode, iterateShadowHosts} from '../utils/dom';
-import {logWarn} from '../utils/log';
+import {getAbsoluteURL, isRelativeHrefOnAbsolutePath} from '../../utils/url';
+import {watchForNodePosition, removeNode, iterateShadowHosts, addReadyStateCompleteListener} from '../utils/dom';
+import {logInfo, logWarn} from '../utils/log';
 import {replaceCSSRelativeURLsWithAbsolute, removeCSSComments, replaceCSSFontFace, getCSSURLValue, cssImportRegex, getCSSBaseBath} from './css-rules';
 import {bgFetch} from './network';
 import {createStyleSheetModifier} from './stylesheet-modifier';
-import {isShadowDomSupported, isSafari, isThunderbird, isChromium} from '../../utils/platform';
+import {isShadowDomSupported, isSafari, isFirefox} from '../../utils/platform';
+
+declare const __THUNDERBIRD__: boolean;
 
 declare global {
-    interface HTMLStyleElement {
-        sheet: CSSStyleSheet;
-    }
-    interface HTMLLinkElement {
-        sheet: CSSStyleSheet;
-    }
-    interface SVGStyleElement {
-        sheet: CSSStyleSheet;
-    }
     interface Document {
         adoptedStyleSheets: CSSStyleSheet[];
     }
     interface ShadowRoot {
         adoptedStyleSheets: CSSStyleSheet[];
     }
+    interface CSSStyleSheet {
+        replaceSync(text: string): void;
+    }
 }
 
 export type StyleElement = HTMLLinkElement | HTMLStyleElement;
 
+export type detailsArgument = {secondRound: boolean};
 export interface StyleManager {
-    details(): {rules: CSSRuleList};
+    details(options: detailsArgument): {rules: CSSRuleList} | null;
     render(theme: Theme, ignoreImageAnalysis: string[]): void;
     pause(): void;
     destroy(): void;
@@ -40,25 +37,44 @@ export interface StyleManager {
 
 export const STYLE_SELECTOR = 'style, link[rel*="stylesheet" i]:not([disabled])';
 
-export function shouldManageStyle(element: Node) {
+// isFontsGoogleApiStyle returns is the given link element is a style from
+// google fonts.
+function isFontsGoogleApiStyle(element: HTMLLinkElement): boolean {
+    if (!element.href) {
+        return false;
+    }
+
+    try {
+        const elementURL = new URL(element.href);
+        return elementURL.hostname === 'fonts.googleapis.com';
+    } catch (err) {
+        logInfo(`Couldn't construct ${element.href} as URL`);
+        return false;
+    }
+}
+
+export function shouldManageStyle(element: Node | null): boolean {
     return (
         (
             (element instanceof HTMLStyleElement) ||
             (element instanceof SVGStyleElement) ||
             (
                 element instanceof HTMLLinkElement &&
-                element.rel &&
+                Boolean(element.rel) &&
                 element.rel.toLowerCase().includes('stylesheet') &&
-                !element.disabled
+                Boolean(element.href) &&
+                !element.disabled &&
+                (isFirefox ? !element.href.startsWith('moz-extension://') : true) &&
+                !isFontsGoogleApiStyle(element)
             )
         ) &&
         !element.classList.contains('darkreader') &&
-        element.media !== 'print' &&
+        element.media.toLowerCase() !== 'print' &&
         !element.classList.contains('stylus')
     );
 }
 
-export function getManageableStyles(node: Node, results = [] as StyleElement[], deep = true) {
+export function getManageableStyles(node: Node | null, results = [] as StyleElement[], deep = true) {
     if (shouldManageStyle(node)) {
         results.push(node as StyleElement);
     } else if (node instanceof Element || (isShadowDomSupported && node instanceof ShadowRoot) || node === document) {
@@ -81,19 +97,27 @@ document.addEventListener('__darkreader__inlineScriptsAllowed', () => {
     canOptimizeUsingProxy = true;
 });
 
-export function manageStyle(element: StyleElement, {update, loadingStart, loadingEnd}): StyleManager {
+let loadingLinkCounter = 0;
+const rejectorsForLoadingLinks = new Map<number, (reason?: any) => void>();
+
+export function cleanLoadingLinks() {
+    rejectorsForLoadingLinks.clear();
+}
+
+export function manageStyle(element: StyleElement, {update, loadingStart, loadingEnd}: {update: () => void; loadingStart: () => void; loadingEnd: () => void}): StyleManager {
     const prevStyles: HTMLStyleElement[] = [];
-    let next: Element = element;
+    let next: Element | null = element;
     while ((next = next.nextElementSibling) && next.matches('.darkreader')) {
         prevStyles.push(next as HTMLStyleElement);
     }
-    let corsCopy: HTMLStyleElement = prevStyles.find((el) => el.matches('.darkreader--cors') && !corsStyleSet.has(el)) || null;
-    let syncStyle: HTMLStyleElement | SVGStyleElement = prevStyles.find((el) => el.matches('.darkreader--sync') && !syncStyleSet.has(el)) || null;
+    let corsCopy: HTMLStyleElement | null = prevStyles.find((el) => el.matches('.darkreader--cors') && !corsStyleSet.has(el)) || null;
+    let syncStyle: HTMLStyleElement | SVGStyleElement | null = prevStyles.find((el) => el.matches('.darkreader--sync') && !syncStyleSet.has(el)) || null;
 
-    let corsCopyPositionWatcher: ReturnType<typeof watchForNodePosition> = null;
-    let syncStylePositionWatcher: ReturnType<typeof watchForNodePosition> = null;
+    let corsCopyPositionWatcher: ReturnType<typeof watchForNodePosition> | null = null;
+    let syncStylePositionWatcher: ReturnType<typeof watchForNodePosition> | null = null;
 
     let cancelAsyncOperations = false;
+    let isOverrideEmpty = true;
 
     const sheetModifier = createStyleSheetModifier();
 
@@ -103,29 +127,76 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
     const observerOptions: MutationObserverInit = {attributes: true, childList: true, subtree: true, characterData: true};
 
     function containsCSSImport() {
-        return element instanceof HTMLStyleElement && element.textContent.trim().match(cssImportRegex);
+        return element instanceof HTMLStyleElement && element.textContent!.trim().match(cssImportRegex);
     }
 
-    function getRulesSync(): CSSRuleList {
+    // It loops trough the cssRules and check for CSSImportRule and their `href`.
+    // If the `href` isn't local and doesn't start with the same-origin.
+    // We can be ensure that's a cross-origin import
+    // And should add a cors-sheet to this element.
+    function hasImports(cssRules: CSSRuleList | null, checkCrossOrigin: boolean) {
+        let result = false;
+        if (cssRules) {
+            let rule: CSSRule;
+            cssRulesLoop:
+            for (let i = 0, len = cssRules.length; i < len; i++) {
+                rule = cssRules[i];
+                if ((rule as CSSImportRule).href) {
+                    if (checkCrossOrigin) {
+                        if ((rule as CSSImportRule).href.startsWith('http') && !(rule as CSSImportRule).href.startsWith(location.origin)) {
+                            result = true;
+                            break cssRulesLoop;
+                        }
+                    } else {
+                        result = true;
+                        break cssRulesLoop;
+                    }
+                }
+            }
+        }
+        return result;
+    }
+
+    function getRulesSync(): CSSRuleList | null {
         if (corsCopy) {
-            return corsCopy.sheet.cssRules;
+            logInfo('[getRulesSync] Using cors-copy.');
+            return corsCopy.sheet!.cssRules;
         }
         if (containsCSSImport()) {
+            logInfo('[getRulesSync] CSSImport detected.');
             return null;
         }
-        return safeGetSheetRules();
+
+        const cssRules = safeGetSheetRules();
+        if (
+            element instanceof HTMLLinkElement &&
+            !isRelativeHrefOnAbsolutePath(element.href) &&
+            hasImports(cssRules, false)
+        ) {
+            logInfo('[getRulesSync] CSSImportRule detected on non-local href.');
+            return null;
+        }
+
+        if (hasImports(cssRules, true)) {
+            logInfo('[getRulesSync] Cross-Origin CSSImportRule detected.');
+            return null;
+        }
+
+        logInfo('[getRulesSync] Using cssRules.');
+        !cssRules && logWarn('[getRulesSync] cssRules is null, trying again.');
+        return cssRules;
     }
 
     function insertStyle() {
         if (corsCopy) {
             if (element.nextSibling !== corsCopy) {
-                element.parentNode.insertBefore(corsCopy, element.nextSibling);
+                element.parentNode!.insertBefore(corsCopy, element.nextSibling);
             }
             if (corsCopy.nextSibling !== syncStyle) {
-                element.parentNode.insertBefore(syncStyle, corsCopy.nextSibling);
+                element.parentNode!.insertBefore(syncStyle!, corsCopy.nextSibling);
             }
         } else if (element.nextSibling !== syncStyle) {
-            element.parentNode.insertBefore(syncStyle, element.nextSibling);
+            element.parentNode!.insertBefore(syncStyle!, element.nextSibling);
         }
     }
 
@@ -136,7 +207,7 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
         syncStyle.classList.add('darkreader');
         syncStyle.classList.add('darkreader--sync');
         syncStyle.media = 'screen';
-        if (!isChromium && element.title) {
+        if (element.title) {
             syncStyle.title = element.title;
         }
         syncStyleSet.add(syncStyle);
@@ -144,8 +215,9 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
 
     let isLoadingRules = false;
     let wasLoadingError = false;
+    const loadingLinkId = ++loadingLinkCounter;
 
-    async function getRulesAsync(): Promise<CSSRuleList> {
+    async function getRulesAsync(): Promise<CSSRuleList | null> {
         let cssText: string;
         let cssBasePath: string;
 
@@ -158,10 +230,11 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
             if (
                 (!cssRules && !accessError && !isSafari) ||
                 (isSafari && !element.sheet) ||
-                isStillLoadingError(accessError)
+                isStillLoadingError(accessError!)
             ) {
                 try {
-                    await linkLoading(element);
+                    logInfo(`Linkelement ${loadingLinkId} is not loaded yet and thus will be await for`, element);
+                    await linkLoading(element, loadingLinkId);
                 } catch (err) {
                     // NOTE: Some @import resources can fail,
                     // but the style sheet can still be valid.
@@ -181,8 +254,10 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
                 }
             }
 
-            if (cssRules != null) {
-                return cssRules;
+            if (cssRules) {
+                if (!hasImports(cssRules, false)) {
+                    return cssRules;
+                }
             }
 
             cssText = await loadText(element.href);
@@ -191,7 +266,7 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
                 return null;
             }
         } else if (containsCSSImport()) {
-            cssText = element.textContent.trim();
+            cssText = element.textContent!.trim();
             cssBasePath = getCSSBaseBath(location.href);
         } else {
             return null;
@@ -208,16 +283,25 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
             }
             if (corsCopy) {
                 corsCopyPositionWatcher = watchForNodePosition(corsCopy, 'prev-sibling');
-                return corsCopy.sheet.cssRules;
+                return corsCopy.sheet!.cssRules;
             }
         }
 
         return null;
     }
 
-    function details() {
+    function details(options: detailsArgument) {
         const rules = getRulesSync();
         if (!rules) {
+            // secondRound is only true after it's
+            // has gone trough `details()` & `getRulesAsync` already
+            // So that means that `getRulesSync` shouldn't fail.
+            // However as a fail-safe to prevent loops, we should
+            // return null here and not continue to `getRulesAsync`
+            if (options.secondRound) {
+                logWarn('Detected dead-lock at details(), returning early to prevent it.');
+                return null;
+            }
             if (isLoadingRules || wasLoadingError) {
                 return null;
             }
@@ -249,7 +333,16 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
 
         cancelAsyncOperations = false;
 
-        function prepareOverridesSheet() {
+        function removeCSSRulesFromSheet(sheet: CSSStyleSheet) {
+            if (!sheet) {
+                return;
+            }
+            for (let i = sheet.cssRules.length - 1; i >= 0; i--) {
+                sheet.deleteRule(i);
+            }
+        }
+
+        function prepareOverridesSheet(): CSSStyleSheet {
             if (!syncStyle) {
                 createSyncStyle();
             }
@@ -262,25 +355,24 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
             // But for other websites (e.g. facebook.com)
             // some images disappear when `textContent`
             // is initially set to an empty string.
-            if (syncStyle.sheet == null) {
-                syncStyle.textContent = '';
+            if (syncStyle!.sheet == null) {
+                syncStyle!.textContent = '';
             }
 
-            const sheet = syncStyle.sheet;
-            for (let i = sheet.cssRules.length - 1; i >= 0; i--) {
-                sheet.deleteRule(i);
-            }
+            const sheet = syncStyle!.sheet;
+
+            removeCSSRulesFromSheet(sheet!);
 
             if (syncStylePositionWatcher) {
                 syncStylePositionWatcher.run();
             } else {
-                syncStylePositionWatcher = watchForNodePosition(syncStyle, 'prev-sibling', () => {
+                syncStylePositionWatcher = watchForNodePosition(syncStyle!, 'prev-sibling', () => {
                     forceRenderStyle = true;
                     buildOverrides();
                 });
             }
 
-            return syncStyle.sheet;
+            return syncStyle!.sheet!;
         }
 
         function buildOverrides() {
@@ -288,18 +380,25 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
             forceRenderStyle = false;
             sheetModifier.modifySheet({
                 prepareSheet: prepareOverridesSheet,
-                sourceCSSRules: rules,
+                sourceCSSRules: rules!,
                 theme,
                 ignoreImageAnalysis,
                 force,
                 isAsyncCancelled: () => cancelAsyncOperations,
             });
+            isOverrideEmpty = syncStyle!.sheet!.cssRules.length === 0;
+            if (sheetModifier.shouldRebuildStyle()) {
+                // "update" function schedules rebuilding the style
+                // ideally to wait for link loading, because some sites put links any time,
+                // but it can be complicated, so waiting for document completion can do the trick
+                addReadyStateCompleteListener(() => update());
+            }
         }
 
         buildOverrides();
     }
 
-    function getRulesOrError(): [CSSRuleList, Error] {
+    function getRulesOrError(): [CSSRuleList | null, Error | null] {
         try {
             if (element.sheet == null) {
                 return [null, null];
@@ -332,13 +431,13 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
         watchForSheetChangesUsingProxy();
         // Sometimes sheet can be null in Firefox and Safari
         // So need to watch for it using rAF
-        if (!isThunderbird && !(canOptimizeUsingProxy && element.sheet)) {
+        if (!__THUNDERBIRD__ && !(canOptimizeUsingProxy && element.sheet)) {
             watchForSheetChangesUsingRAF();
         }
     }
 
-    let rulesChangeKey: number = null;
-    let rulesCheckFrameId: number = null;
+    let rulesChangeKey: number | null = null;
+    let rulesCheckFrameId: number | null = null;
 
     function getRulesChangeKey() {
         const rules = safeGetSheetRules();
@@ -363,11 +462,13 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
             }
             rulesCheckFrameId = requestAnimationFrame(checkForUpdate);
         };
+
         checkForUpdate();
     }
 
     function stopWatchingForSheetChangesUsingRAF() {
-        cancelAnimationFrame(rulesCheckFrameId);
+        // TODO: reove cast once types are updated
+        cancelAnimationFrame(rulesCheckFrameId as number);
     }
 
     let areSheetChangesPending = false;
@@ -420,6 +521,12 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
         pause();
         removeNode(corsCopy);
         removeNode(syncStyle);
+        loadingEnd();
+        if (rejectorsForLoadingLinks.has(loadingLinkId)) {
+            const reject = rejectorsForLoadingLinks.get(loadingLinkId);
+            rejectorsForLoadingLinks.delete(loadingLinkId);
+            reject && reject();
+        }
     }
 
     function watch() {
@@ -444,11 +551,10 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
         }
 
         logWarn('Restore style', syncStyle, element);
-        const shouldForceRender = syncStyle.sheet == null || syncStyle.sheet.cssRules.length > 0;
         insertStyle();
         corsCopyPositionWatcher && corsCopyPositionWatcher.skip();
         syncStylePositionWatcher && syncStylePositionWatcher.skip();
-        if (shouldForceRender) {
+        if (!isOverrideEmpty) {
             forceRenderStyle = true;
             update();
         }
@@ -464,34 +570,48 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
     };
 }
 
-async function linkLoading(link: HTMLLinkElement) {
+async function linkLoading(link: HTMLLinkElement, loadingId: number) {
     return new Promise<void>((resolve, reject) => {
         const cleanUp = () => {
             link.removeEventListener('load', onLoad);
             link.removeEventListener('error', onError);
+            rejectorsForLoadingLinks.delete(loadingId);
         };
+
         const onLoad = () => {
             cleanUp();
+            logInfo(`Linkelement ${loadingId} has been loaded`);
             resolve();
         };
+
         const onError = () => {
             cleanUp();
-            reject(`Link loading failed ${link.href}`);
+            reject(`Linkelement ${loadingId} couldn't be loaded. ${link.href}`);
         };
+
+        rejectorsForLoadingLinks.set(loadingId, () => {
+            cleanUp();
+            reject();
+        });
         link.addEventListener('load', onLoad);
         link.addEventListener('error', onError);
+        if (!link.href) {
+            onError();
+        }
     });
 }
 
 function getCSSImportURL(importDeclaration: string) {
-    return getCSSURLValue(importDeclaration.substring(8).replace(/;$/, ''));
+    // substring(7) is used to remove `@import` from the string.
+    // And then use .trim() to remove the possible whitespaces.
+    return getCSSURLValue(importDeclaration.substring(7).trim().replace(/;$/, '').replace(/screen$/, ''));
 }
 
 async function loadText(url: string) {
     if (url.startsWith('data:')) {
         return await (await fetch(url)).text();
     }
-    return await bgFetch({url, responseType: 'text', mimeType: 'text/css'});
+    return await bgFetch({url, responseType: 'text', mimeType: 'text/css', origin: window.location.origin});
 }
 
 async function replaceCSSImports(cssText: string, basePath: string, cache = new Map<string, string>()) {
@@ -505,7 +625,7 @@ async function replaceCSSImports(cssText: string, basePath: string, cache = new 
         const absoluteURL = getAbsoluteURL(basePath, importURL);
         let importedCSS: string;
         if (cache.has(absoluteURL)) {
-            importedCSS = cache.get(absoluteURL);
+            importedCSS = cache.get(absoluteURL)!;
         } else {
             try {
                 importedCSS = await loadText(absoluteURL);
@@ -534,8 +654,8 @@ function createCORSCopy(srcElement: StyleElement, cssText: string) {
     cors.classList.add('darkreader--cors');
     cors.media = 'screen';
     cors.textContent = cssText;
-    srcElement.parentNode.insertBefore(cors, srcElement.nextSibling);
-    cors.sheet.disabled = true;
+    srcElement.parentNode!.insertBefore(cors, srcElement.nextSibling);
+    cors.sheet!.disabled = true;
     corsStyleSet.add(cors);
     return cors;
 }

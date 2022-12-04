@@ -1,6 +1,7 @@
 // @ts-check
-const fs = require('fs-extra');
-const path = require('path');
+import path from 'path';
+
+import {writeFile} from '../../tasks/utils.js';
 
 /** @typedef {{text: string; covered: boolean}} CodePart */
 
@@ -52,7 +53,7 @@ function green(/** @type {string} */text) {
  * @param {string} code
  * @param {{start: number; end: number}[]} ranges
  */
-function logCoverage(code, ranges) {
+export function logCoverage(code, ranges) {
     code = code.substring(0, code.indexOf('//# sourceMappingURL='));
     const parts = splitCode(code, ranges);
     const message = parts
@@ -114,9 +115,8 @@ async function generateHTMLCoverageReport(dir, info) {
     lines.push('</body>');
     lines.push('</html>');
 
-    await fs.outputFile(path.join(dir, `${name}.html`), lines.join('\n'));
+    await writeFile(path.join(dir, `${name}.html`), lines.join('\n'));
 }
-
 
 /**
  * @param {string} dir
@@ -151,14 +151,14 @@ async function generateIndexHTMLCoveragePage(dir, info) {
     lines.push('</body>');
     lines.push('</html>');
 
-    await fs.outputFile(path.join(dir, 'index.html'), lines.join('\n'));
+    await writeFile(path.join(dir, 'index.html'), lines.join('\n'));
 }
 
 /**
  * @param {string} dir
  * @param {import('puppeteer-core').CoverageEntry[]} coverage
  */
-async function generateHTMLCoverageReports(dir, coverage) {
+export async function generateHTMLCoverageReports(dir, coverage) {
     const info = coverage
         .filter(({url}) => url.startsWith('chrome-extension://'))
         .map(({url, text, ranges}) => {
@@ -169,8 +169,3 @@ async function generateHTMLCoverageReports(dir, coverage) {
     await generateIndexHTMLCoveragePage(dir, info);
     await Promise.all(info.map((i) => generateHTMLCoverageReport(dir, i)));
 }
-
-module.exports = {
-    logCoverage,
-    generateHTMLCoverageReports,
-};

@@ -1,0 +1,62 @@
+{
+    "manifest_version": 3,
+    "minimum_chrome_version": "102.0.0.0",
+    "action": {
+        "default_title": "Dark Reader",
+        "default_icon": {
+            "38": "icons/dr_active_38.png",
+            "19": "icons/dr_active_19.png"
+        },
+        "default_popup": "ui/popup/index.html"
+    },
+    "options_ui": {
+        "page": "ui/popup/index.html"
+    },
+    "background": {
+        "service_worker": "background.js"
+    },
+    "content_security_policy": {
+        "extension_pages": "default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-hashes' 'sha256-Xi0E9ZtMHXUaj/gPUMMzBcxFgbc2rwmcSys1oJBVhA4='; img-src * data:; connect-src *; navigate-to 'self' https://darkreader.org/* https://github.com/darkreader/darkreader/blob/main/CONTRIBUTING.md https://github.com/darkreader/darkreader https://opencollective.com/darkreader/donate https://twitter.com/darkreaderapp; media-src 'none'; child-src 'none'; worker-src 'none'; object-src 'none'"
+    },
+    "content_scripts": [
+        {
+            "matches": [
+                "https://example.com/doesNotExist"
+            ],
+            "js": [
+                "inject/fallback.js",
+                "inject/index.js"
+            ],
+            "run_at": "document_start",
+            "all_frames": true,
+            "match_about_blank": true
+        },
+        {
+            "matches": [
+                "*://*/*"
+            ],
+            "js": [
+                "inject/color-scheme-watcher.js"
+            ],
+            "run_at": "document_idle",
+            "all_frames": false,
+            "match_about_blank": false
+        }
+    ],
+    "permissions": [
+        "alarms",
+        "fontSettings",
+        "scripting",
+        "storage",
+        "unlimitedStorage"
+    ],
+    "host_permissions": [
+        "*://*/*"
+    ],
+    "web_accessible_resources": [
+        {
+            "matches": ["*://*/*"],
+            "resources": ["inject/proxy.js"]
+        }
+    ]
+}

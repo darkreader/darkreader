@@ -16,7 +16,7 @@ export default function FontSettings({config, fonts, onChange}: FontSettingsProp
                 <div class="font-settings__font-select-container__line">
                     <CheckBox
                         checked={config.useFont}
-                        onchange={(e) => onChange({useFont: e.target.checked})}
+                        onchange={(e: {target: HTMLInputElement}) => onChange({useFont: e.target.checked})}
                     />
                     <Select
                         value={config.fontFamily}

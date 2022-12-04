@@ -1,59 +1,87 @@
-// @ts-check
-const fs = require('fs-extra');
-const JestNodeEnvironment = require('jest-environment-node');
-const path = require('path');
-const puppeteer = require('puppeteer-core');
-const webExt = require('web-ext');
-const WebSocket = require('ws');
-const {generateHTMLCoverageReports} = require('./coverage');
-const {getChromePath, getFirefoxPath, chromeExtensionDebugDir, firefoxExtensionDebugDir} = require('./paths');
-const {createTestServer} = require('./server');
+import fs from 'fs/promises';
+import JestNodeEnvironment from 'jest-environment-node';
+import path from 'path';
+import puppeteer from 'puppeteer-core';
+import {cmd} from 'web-ext';
+import {WebSocketServer} from 'ws';
+import {generateHTMLCoverageReports} from './coverage.js';
+import {getChromePath, getFirefoxPath, chromeExtensionDebugDir, chromeMV3ExtensionDebugDir, firefoxExtensionDebugDir} from './paths.js';
+import {createTestServer} from './server.js';
 
 const TEST_SERVER_PORT = 8891;
 const CORS_SERVER_PORT = 8892;
 const FIREFOX_DEVTOOLS_PORT = 8893;
 const POPUP_TEST_PORT = 8894;
 
-class PuppeteerEnvironment extends JestNodeEnvironment {
+class PuppeteerEnvironment extends JestNodeEnvironment.TestEnvironment {
+    extensionStartListeners = [];
+
     async setup() {
         await super.setup();
 
-        this.popupTestServer = await this.createPopupTestServer();
-        this.testServer = await createTestServer(TEST_SERVER_PORT);
-        this.corsServer = await createTestServer(CORS_SERVER_PORT);
+        const promises = [
+            this.createPopupTestServer(),
+            createTestServer(TEST_SERVER_PORT),
+            createTestServer(CORS_SERVER_PORT),
+        ];
+        promises.push();
 
         this.browser = await this.launchBrowser();
         this.global.browser = this.browser;
 
-        this.extensionPopup = await this.openPopupPage();
+        promises.push(
+            this.openPopupPage(),
+            this.openDevtoolsPage(),
+            this.createTestPage(),
+        );
 
-        this.page = await this.createTestPage();
+        const results = await Promise.all(promises);
+        this.popupTestServer = results[0];
+        this.testServer = results[1];
+        this.corsServer = results[2];
+        this.extensionPopup = results[3];
+        this.extensionDevtools = results[4];
+        this.page = results[5];
         this.global.page = this.page;
 
         this.assignTestGlobals();
+    }
+
+    async waitForStartup() {
+        if (!this.extensionOrigin) {
+            return new Promise((ready) => this.extensionStartListeners.push(ready));
+        }
     }
 
     async launchBrowser() {
         /** @type {import('puppeteer-core').Browser} */
         let browser;
         if (this.global.product === 'chrome') {
-            browser = await this.launchChrome();
+            browser = await this.launchChrome(true);
+        } else if (this.global.product === 'chrome-mv3') {
+            browser = await this.launchChrome(false);
         } else if (this.global.product === 'firefox') {
             browser = await this.launchFirefox();
         }
-        // TODO: Find a way to wait for the extension to start
-        await new Promise((promise) => setTimeout(promise, 1000));
+        // Wait for the extension to start
+        await this.waitForStartup();
         return browser;
     }
 
-    async launchChrome() {
-        const executablePath = await getChromePath();
+    async launchChrome(mv2) {
+        const extensionDir = mv2 ? chromeExtensionDebugDir : chromeMV3ExtensionDebugDir;
+        let executablePath;
+        try {
+            executablePath = await getChromePath();
+        } catch (e) {
+            console.error(e);
+        }
         return await puppeteer.launch({
             executablePath,
             headless: false,
             args: [
-                `--disable-extensions-except=${chromeExtensionDebugDir}`,
-                `--load-extension=${chromeExtensionDebugDir}`,
+                `--disable-extensions-except=${extensionDir}`,
+                `--load-extension=${extensionDir}`,
                 '--show-component-extension-options',
             ],
         });
@@ -61,7 +89,7 @@ class PuppeteerEnvironment extends JestNodeEnvironment {
 
     async launchFirefox() {
         const firefoxPath = await getFirefoxPath();
-        const webExtInstance = await webExt.cmd.run({
+        const webExtInstance = await cmd.run({
             sourceDir: firefoxExtensionDebugDir,
             firefox: firefoxPath,
             args: ['--remote-debugging-port', FIREFOX_DEVTOOLS_PORT],
@@ -97,34 +125,56 @@ class PuppeteerEnvironment extends JestNodeEnvironment {
         return page;
     }
 
-    async openPopupPage() {
-        let extensionPopup;
-        if (this.global.product === 'chrome') {
-            extensionPopup = await this.openChromePopupPage();
-        } else if (this.global.product === 'firefox') {
-            extensionPopup = await this.openFirefoxPopupPage();
+    /**
+     * @param {string} path
+     * @returns {Promise<puppeteer.Page>}
+     */
+    async openExtensionPage(path) {
+        if (this.global.product === 'chrome' || this.global.product === 'chrome-mv3') {
+            return await this.openChromePage(path);
         }
-        return extensionPopup;
+        if (this.global.product === 'firefox') {
+            return await this.openFirefoxPage(path);
+        }
+        return null;
     }
 
-    async openChromePopupPage() {
+    async openPopupPage() {
+        return await this.openExtensionPage('/ui/popup/index.html');
+    }
+
+    async openDevtoolsPage() {
+        return await this.openExtensionPage('/ui/devtools/index.html');
+    }
+
+    async getURL(path) {
+        // By this point browser should be loaded and extension should be started, but
+        // let's wait anuway
+        await this.waitForStartup();
+        const url = new URL(path, this.extensionOrigin);
+        return url.href;
+    }
+
+    async getChromiumMV2BackgroundPage() {
         const targets = await this.browser.targets();
         const backgroundTarget = targets.find((t) => t.type() === 'background_page');
-        const backgroundPage = await backgroundTarget.page();
-
-        const popupURL = backgroundPage.url().replace('/background/index.html', '/ui/popup/index.html');
-        const extensionPopup = await this.browser.newPage();
-        await extensionPopup.goto(popupURL);
-
-        return extensionPopup;
+        return await backgroundTarget.page();
     }
 
-    async openFirefoxPopupPage() {
-        const extensionPopup = await this.browser.newPage();
+    async openChromePage(path) {
+        const pageURL = await this.getURL(path);
+        const extensionPage = await this.browser.newPage();
+        await extensionPage.goto(pageURL);
+
+        return extensionPage;
+    }
+
+    async openFirefoxPage(path) {
+        const extensionPage = await this.browser.newPage();
         // Doesn't resolve due to https://github.com/puppeteer/puppeteer/issues/6616
-        extensionPopup.goto(`moz-extension://${this.firefoxInternalUUID}/ui/popup/index.html`);
+        extensionPage.goto(`moz-extension://${this.firefoxInternalUUID}${path}`);
         await new Promise((promise) => setTimeout(promise, 1000));
-        return extensionPopup;
+        return extensionPage;
     }
 
     assignTestGlobals() {
@@ -145,10 +195,11 @@ class PuppeteerEnvironment extends JestNodeEnvironment {
         // Puppeteer cannot evaluate scripts in moz-extension:// pages
         // https://github.com/puppeteer/puppeteer/issues/6616
         return new Promise((resolve) => {
-            const wsServer = new WebSocket.Server({port: POPUP_TEST_PORT});
+            const wsServer = new WebSocketServer({port: POPUP_TEST_PORT});
             const sockets = new Set();
             const resolvers = new Map();
             const rejectors = new Map();
+            let idCount = 0;
 
             wsServer.on('listening', () => resolve(wsServer));
 
@@ -156,33 +207,65 @@ class PuppeteerEnvironment extends JestNodeEnvironment {
                 sockets.add(ws);
                 ws.on('message', (data) => {
                     const message = JSON.parse(data);
-                    if (message.type === 'error') {
-                        const reject = rejectors.get(message.type);
-                        reject(message.data);
+                    if (message.id === null && message.data.extensionOrigin) {
+                        // This is the initial message which contains extension's URL origin
+                        // and signals that extenstion is ready
+                        this.extensionOrigin = message.data.extensionOrigin;
+                        this.extensionStartListeners.forEach((ready) => ready());
+                    } else if (message.error) {
+                        const reject = rejectors.get(message.id);
+                        reject(message.error);
                     } else {
-                        const resolve = resolvers.get(message.type);
+                        const resolve = resolvers.get(message.id);
                         resolve(message.data);
                     }
-                    resolvers.delete(message.type);
-                    rejectors.delete(message.type);
+                    resolvers.delete(message.id);
+                    rejectors.delete(message.id);
                 });
                 ws.on('close', () => sockets.delete(ws));
             });
 
-            function sendToPopup(message) {
+            function sendToUIPage(type, data) {
                 return new Promise((resolve, reject) => {
-                    const responseType = `${message.type}-response`;
-                    resolvers.set(responseType, resolve);
-                    rejectors.set(responseType, reject);
-                    const json = JSON.stringify(message);
+                    resolvers.set(idCount, resolve);
+                    rejectors.set(idCount, reject);
+                    const json = JSON.stringify({type, data, id: idCount});
                     sockets.forEach((ws) => ws.send(json));
+                    idCount++;
                 });
             }
 
             this.global.popupUtils = {
-                click: async (selector) => await sendToPopup({type: 'click', data: selector}),
-                exists: async (selector) => await sendToPopup({type: 'exists', data: selector}),
-                getBoundingRect: async (selector) => await sendToPopup({type: 'rect', data: selector}),
+                click: async (selector) => await sendToUIPage('click', selector),
+                exists: async (selector) => await sendToUIPage('exists', selector),
+            };
+
+            this.global.devtoolsUtils = {
+                paste: async (fixes) => await sendToUIPage('debug-devtools-paste', fixes),
+                reset: async () => await sendToUIPage('debug-devtools-reset'),
+            };
+
+            this.global.backgroundUtils = {
+                changeSettings: async (settings) => await sendToUIPage('changeSettings', settings),
+                collectData: async () => await sendToUIPage('collectData'),
+                changeLocalStorage: async (data) => await sendToUIPage('changeLocalStorage', data),
+                getLocalStorage: async () => await sendToUIPage('getLocalStorage'),
+                changeChromeStorage: async (region, data) => await sendToUIPage('changeChromeStorage', {region, data}),
+                getChromeStorage: async (region, keys) => await sendToUIPage('getChromeStorage', {region, keys}),
+                setDataIsMigratedForTesting: async (value) => await sendToUIPage('setDataIsMigratedForTesting', value),
+                emulateMedia: async (name, value) => {
+                    if (this.global.product === 'firefox') {
+                        return;
+                    }
+                    let page;
+                    if (this.global.product === 'chrome-mv3') {
+                        page = this.page;
+                    } else if (this.global.product === 'chrome') {
+                        page = await this.getChromiumMV2BackgroundPage();
+                    }
+                    await page.emulateMediaFeatures([{name, value}]);
+                },
+                getManifest: async () => await sendToUIPage('getManifest'),
             };
         });
     }
@@ -190,20 +273,25 @@ class PuppeteerEnvironment extends JestNodeEnvironment {
     async teardown() {
         await super.teardown();
 
-        if (this.global.product !== 'firefox') {
+        const promises = [];
+        if (this.global.product !== 'firefox' && this.page?.coverage) {
             const coverage = await this.page.coverage.stopJSCoverage();
             const dir = './tests/browser/coverage/';
-            await generateHTMLCoverageReports(dir, coverage);
-            console.info('Coverage reports generated in', dir);
+            const promise = generateHTMLCoverageReports(dir, coverage);
+            promise.then(() => console.info('Coverage reports generated in', dir));
+            promises.push(promise);
         }
 
-        await this.extensionPopup.close();
-        await this.page.close();
-        await this.browser.close();
-        await this.testServer.close();
-        await this.corsServer.close();
-        await this.popupTestServer.close();
+        // Note: this.browser.close() will close all tabs, so no need to close them
+        // explicitly
+        promises.push([
+            this.testServer?.close(),
+            this.corsServer?.close(),
+            this.popupTestServer?.close(),
+            this.browser?.close(),
+        ]);
+        await Promise.all(promises);
     }
 }
 
-module.exports = PuppeteerEnvironment;
+export default PuppeteerEnvironment;

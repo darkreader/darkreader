@@ -1,11 +1,12 @@
 import {isFirefox} from './platform';
 
-async function getOKResponse(url: string, mimeType?: string) {
+async function getOKResponse(url: string, mimeType?: string, origin?: string) {
     const response = await fetch(
         url,
         {
             cache: 'force-cache',
             credentials: 'omit',
+            referrer: origin
         },
     );
 
@@ -14,7 +15,7 @@ async function getOKResponse(url: string, mimeType?: string) {
         return response;
     }
 
-    if (mimeType && !response.headers.get('Content-Type').startsWith(mimeType)) {
+    if (mimeType && !response.headers.get('Content-Type')!.startsWith(mimeType)) {
         throw new Error(`Mime type mismatch when loading ${url}`);
     }
 
@@ -40,7 +41,7 @@ export async function readResponseAsDataURL(response: Response) {
     return dataURL;
 }
 
-export async function loadAsText(url: string, mimeType?: string) {
-    const response = await getOKResponse(url, mimeType);
+export async function loadAsText(url: string, mimeType?: string, origin?: string) {
+    const response = await getOKResponse(url, mimeType, origin);
     return await response.text();
 }

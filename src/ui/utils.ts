@@ -1,7 +1,11 @@
-import {isFirefox} from '../utils/platform';
+import {MessageType} from '../utils/message';
+import {isFirefox, isMobile} from '../utils/platform';
+import type {Message} from '../definitions';
+
+declare const __CHROMIUM_MV3__: boolean;
 
 export function classes(...args: Array<string | {[cls: string]: boolean}>) {
-    const classes = [];
+    const classes: string[] = [];
     args.filter((c) => Boolean(c)).forEach((c) => {
         if (typeof c === 'string') {
             classes.push(c);
@@ -26,8 +30,8 @@ export function openFile(options: {extensions: string[]}, callback: (content: st
     const reader = new FileReader();
     reader.onloadend = () => callback(reader.result as string);
     input.onchange = () => {
-        if (input.files[0]) {
-            reader.readAsText(input.files[0]);
+        if (input.files![0]) {
+            reader.readAsText(input.files![0]);
             document.body.removeChild(input);
         }
     };
@@ -36,20 +40,20 @@ export function openFile(options: {extensions: string[]}, callback: (content: st
 }
 
 export function saveFile(name: string, content: string) {
-    if (isFirefox) {
+    if (__CHROMIUM_MV3__ || isFirefox || isMobile) {
         const a = document.createElement('a');
         a.href = URL.createObjectURL(new Blob([content]));
         a.download = name;
         a.click();
     } else {
-        chrome.runtime.sendMessage({type: 'save-file', data: {name, content}});
+        chrome.runtime.sendMessage<Message>({type: MessageType.UI_SAVE_FILE, data: {name, content}});
     }
 }
 
 type AnyVoidFunction = (...args: any[]) => void;
 
 export function throttle<F extends AnyVoidFunction>(callback: F): F {
-    let frameId = null;
+    let frameId: number | null = null;
     return ((...args: any[]) => {
         if (!frameId) {
             callback(...args);
@@ -96,7 +100,7 @@ function onSwipeStart(
     function getTouch(e: TouchEvent) {
         return Array.from(e.changedTouches).find(
             ({identifier: id}) => id === touchId,
-        );
+        )!;
     }
 
     const onPointerMove = throttle((e) => {
@@ -104,7 +108,7 @@ function onSwipeStart(
         moveHandler(se, e);
     });
 
-    function onPointerUp(e) {
+    function onPointerUp(e: MouseEvent) {
         unsubscribe();
         const se = getSwipeEventObject(e);
         upHandler(se, e);
@@ -121,4 +125,93 @@ function onSwipeStart(
 
 export function createSwipeHandler(startHandler: StartSwipeHandler) {
     return (e: MouseEvent | TouchEvent) => onSwipeStart(e, startHandler);
+}
+
+export async function getFontList() {
+    return new Promise<string[]>((resolve) => {
+        if (!chrome.fontSettings) {
+            // Todo: Remove it as soon as Firefox and Edge get support.
+            resolve([
+                'serif',
+                'sans-serif',
+                'monospace',
+                'cursive',
+                'fantasy',
+                'system-ui',
+            ]);
+            return;
+        }
+        chrome.fontSettings.getFontList((list) => {
+            const fonts = list.map((f) => f.fontId);
+            resolve(fonts);
+        });
+    });
+}
+
+type page = 'devtools' | 'stylesheet-editor';
+
+// TODO(Anton): There must be a better way to do this
+// This function ping-pongs a message to possible DevTools popups.
+// This function should have reasonable performance since it sends
+// messages only to popups and not regular windows.
+async function getExtensionPageTabMV3(): Promise<chrome.tabs.Tab | null> {
+    return new Promise((resolve) => {
+        chrome.windows.getAll({
+            populate: true,
+            windowTypes: ['popup'],
+        }, (w) => {
+            const responses: Array<Promise<string>> = [];
+            let found = false;
+            for (const window of w) {
+                const response = chrome.tabs.sendMessage<string, 'getExtensionPageTabMV3_pong'>(window.tabs![0]!.id!, 'getExtensionPageTabMV3_ping', {frameId: 0});
+                response.then((response) => {
+                    if (response === 'getExtensionPageTabMV3_pong') {
+                        found = true;
+                        resolve(window.tabs![0]);
+                    }
+                });
+                responses.push(response);
+            }
+            Promise.all(responses).then(() => !found && resolve(null));
+        });
+    });
+}
+
+async function getExtensionPageTab(url: string): Promise<chrome.tabs.Tab | null> {
+    if (__CHROMIUM_MV3__) {
+        return getExtensionPageTabMV3();
+    }
+    return new Promise<chrome.tabs.Tab>((resolve) => {
+        chrome.tabs.query({
+            url,
+        }, ([tab]) => resolve(tab || null));
+    });
+}
+
+export async function openExtensionPage(page: page) {
+    const url = chrome.runtime.getURL(`/ui/${page}/index.html`);
+    if (isMobile) {
+        const extensionPageTab = await getExtensionPageTab(url);
+        if (extensionPageTab !== null) {
+            chrome.tabs.update(extensionPageTab.id!, {active: true});
+            window.close();
+        } else {
+            chrome.tabs.create({url});
+            window.close();
+        }
+    } else {
+        const extensionPageTab = await getExtensionPageTab(url);
+        if (extensionPageTab !== null) {
+            chrome.windows.update(extensionPageTab.windowId, {focused: true});
+            window.close();
+        } else {
+            chrome.windows.create({
+                type: 'popup',
+                url,
+                width: 600,
+                height: 600,
+            });
+            window.close();
+        }
+    }
 }

@@ -5,6 +5,7 @@ import {isURLInList, isURLMatched, getURLHostOrProtocol} from '../../../../utils
 import {DropDown, MessageBox} from '../../../controls';
 import type {ViewProps} from '../../types';
 import {generateUID} from '../../../../utils/uid';
+import type {DropDownOption} from '../../../controls/dropdown';
 
 function PresetItem(props: ViewProps & {preset: ThemePreset}) {
     const context = getContext();
@@ -46,12 +47,13 @@ function PresetItem(props: ViewProps & {preset: ThemePreset}) {
 const MAX_ALLOWED_PRESETS = 3;
 
 export default function PresetPicker(props: ViewProps) {
-    const host = getURLHostOrProtocol(props.tab.url);
+    const tab = props.data.activeTab;
+    const host = getURLHostOrProtocol(tab.url);
     const preset = props.data.settings.presets.find(
-        ({urls}) => isURLInList(props.tab.url, urls)
+        ({urls}) => isURLInList(tab.url, urls)
     );
     const custom = props.data.settings.customThemes.find(
-        ({url}) => isURLInList(props.tab.url, url)
+        ({url}) => isURLInList(tab.url, url)
     );
 
     const selectedPresetId = custom ? 'custom' : preset ? preset.id : 'default';
@@ -79,14 +81,14 @@ export default function PresetPicker(props: ViewProps) {
         ...userPresetsOptions,
         addNewPresetOption,
         customSitePresetOption,
-    ].filter(Boolean);
+    ].filter(Boolean) as Array<DropDownOption<string>>;
 
     function onPresetChange(id: string) {
-        const filteredCustomThemes = props.data.settings.customThemes.filter(({url}) => !isURLInList(props.tab.url, url));
+        const filteredCustomThemes = props.data.settings.customThemes.filter(({url}) => !isURLInList(tab.url, url));
         const filteredPresets = props.data.settings.presets.map((preset) => {
             return {
                 ...preset,
-                urls: preset.urls.filter((template) => !isURLMatched(props.tab.url, template)),
+                urls: preset.urls.filter((template) => !isURLMatched(tab.url, template)),
             };
         });
         if (id === 'default') {
@@ -114,7 +116,7 @@ export default function PresetPicker(props: ViewProps) {
 
             const extended = filteredPresets.concat({
                 id: `preset-${generateUID()}`,
-                name: newPresetName,
+                name: newPresetName!,
                 urls: [host],
                 theme: {...props.data.settings.theme},
             });

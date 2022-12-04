@@ -1,5 +1,5 @@
 import type {Theme} from '../../definitions';
-import {createAsyncTasksQueue} from '../utils/throttle';
+import {createAsyncTasksQueue} from '../../utils/throttle';
 import {iterateCSSRules, iterateCSSDeclarations} from './css-rules';
 import type {ModifiableCSSDeclaration, ModifiableCSSRule} from './modify-css';
 import {getModifiableCSSDeclaration} from './modify-css';
@@ -19,28 +19,37 @@ const themeCacheKeys: Array<keyof Theme> = [
 ];
 
 function getThemeKey(theme: Theme) {
-    return themeCacheKeys.map((p) => `${p}:${theme[p]}`).join(';');
+    let resultKey = '';
+    themeCacheKeys.forEach((key) => {
+        resultKey += `${key}:${theme[key]};`;
+    });
+    return resultKey;
 }
 
 const asyncQueue = createAsyncTasksQueue();
 
+interface ModifySheetOptions {
+    sourceCSSRules: CSSRuleList;
+    theme: Theme;
+    ignoreImageAnalysis: string[];
+    force: boolean;
+    prepareSheet: () => CSSStyleSheet;
+    isAsyncCancelled: () => boolean;
+}
+
 export function createStyleSheetModifier() {
     let renderId = 0;
-    const rulesTextCache = new Map<string, string>();
+    const rulesTextCache = new Set<string>();
     const rulesModCache = new Map<string, ModifiableCSSRule>();
     const varTypeChangeCleaners = new Set<() => void>();
-    let prevFilterKey: string = null;
-
-    interface ModifySheetOptions {
-        sourceCSSRules: CSSRuleList;
-        theme: Theme;
-        ignoreImageAnalysis: string[];
-        force: boolean;
-        prepareSheet: () => CSSStyleSheet;
-        isAsyncCancelled: () => boolean;
+    let prevFilterKey: string | null = null;
+    let hasNonLoadedLink = false;
+    let wasRebuilt = false;
+    function shouldRebuildStyle() {
+        return hasNonLoadedLink && !wasRebuilt;
     }
 
-    function modifySheet(options: ModifySheetOptions): void {
+    function modifySheet(options: ModifySheetOptions) {
         const rules = options.sourceCSSRules;
         const {theme, ignoreImageAnalysis, force, prepareSheet, isAsyncCancelled} = options;
 
@@ -49,21 +58,35 @@ export function createStyleSheetModifier() {
         const themeKey = getThemeKey(theme);
         const themeChanged = (themeKey !== prevFilterKey);
 
+        if (hasNonLoadedLink) {
+            wasRebuilt = true;
+        }
+
         const modRules: ModifiableCSSRule[] = [];
         iterateCSSRules(rules, (rule) => {
-            const cssText = rule.cssText;
+            let cssText = rule.cssText;
             let textDiffersFromPrev = false;
 
             notFoundCacheKeys.delete(cssText);
+            if (rule.parentRule instanceof CSSMediaRule) {
+                cssText += `;${(rule.parentRule as CSSMediaRule).media.mediaText}`;
+            }
             if (!rulesTextCache.has(cssText)) {
-                rulesTextCache.set(cssText, cssText);
+                rulesTextCache.add(cssText);
                 textDiffersFromPrev = true;
             }
 
             if (textDiffersFromPrev) {
                 rulesChanged = true;
             } else {
-                modRules.push(rulesModCache.get(cssText));
+                modRules.push(rulesModCache.get(cssText)!);
+                return;
+            }
+
+            // A very specific case to skip. This causes a lot of calls to `getModifiableCSSDeclaration`
+            // and currently contributes nothing in real-world case.
+            // TODO: Allow `setRule` to throw a exception when we're modifying SVGs namespace styles.
+            if (rule.style.all === 'revert') {
                 return;
             }
 
@@ -75,13 +98,15 @@ export function createStyleSheetModifier() {
                 }
             });
 
-            let modRule: ModifiableCSSRule = null;
+            let modRule: ModifiableCSSRule | null = null;
             if (modDecs.length > 0) {
-                const parentRule = rule.parentRule;
+                const parentRule = rule.parentRule!;
                 modRule = {selector: rule.selectorText, declarations: modDecs, parentRule};
                 modRules.push(modRule);
             }
-            rulesModCache.set(cssText, modRule);
+            rulesModCache.set(cssText, modRule!);
+        }, () => {
+            hasNonLoadedLink = true;
         });
 
         notFoundCacheKeys.forEach((key) => {
@@ -98,7 +123,7 @@ export function createStyleSheetModifier() {
 
         interface ReadyGroup {
             isGroup: true;
-            rule: any;
+            rule: CSSRule | null;
             rules: Array<ReadyGroup | ReadyStyleRule>;
         }
 
@@ -110,7 +135,7 @@ export function createStyleSheetModifier() {
 
         interface ReadyDeclaration {
             property: string;
-            value: string | Array<{property: string; value: string}>;
+            value: string | Array<{property: string; value: string}> | null;
             important: boolean;
             sourceValue: string;
             asyncKey?: number;
@@ -119,11 +144,17 @@ export function createStyleSheetModifier() {
 
         function setRule(target: CSSStyleSheet | CSSGroupingRule, index: number, rule: ReadyStyleRule) {
             const {selector, declarations} = rule;
-            target.insertRule(`${selector} {}`, index);
-            const style = (target.cssRules[index] as CSSStyleRule).style;
-            declarations.forEach(({property, value, important, sourceValue}) => {
-                style.setProperty(property, value == null ? sourceValue : value as string, important ? 'important' : '');
+            const getDeclarationText = (dec: ReadyDeclaration) => {
+                const {property, value, important, sourceValue} = dec;
+                return `${property}: ${value == null ? sourceValue : value}${important ? ' !important' : ''};`;
+            };
+
+            let cssRulesText = '';
+            declarations.forEach((declarations) => {
+                cssRulesText += `${getDeclarationText(declarations)} `;
             });
+            const ruleText = `${selector} { ${cssRulesText} }`;
+            target.insertRule(ruleText, index);
         }
 
         interface RuleInfo {
@@ -146,13 +177,13 @@ export function createStyleSheetModifier() {
             }
 
             if (groupRefs.has(rule)) {
-                return groupRefs.get(rule);
+                return groupRefs.get(rule)!;
             }
 
             const group: ReadyGroup = {rule, rules: [], isGroup: true};
             groupRefs.set(rule, group);
 
-            const parentGroup = getGroup(rule.parentRule);
+            const parentGroup = getGroup(rule.parentRule!);
             parentGroup.rules.push(group);
 
             return group;
@@ -167,7 +198,7 @@ export function createStyleSheetModifier() {
             const readyDeclarations = readyStyleRule.declarations;
             group.rules.push(readyStyleRule);
 
-            function handleAsyncDeclaration(property: string, modified: Promise<string>, important: boolean, sourceValue: string) {
+            function handleAsyncDeclaration(property: string, modified: Promise<string | null>, important: boolean, sourceValue: string) {
                 const asyncKey = ++asyncDeclarationCounter;
                 const asyncDeclaration: ReadyDeclaration = {property, value: null, important, asyncKey, sourceValue};
                 readyDeclarations.push(asyncDeclaration);
@@ -282,14 +313,14 @@ export function createStyleSheetModifier() {
         }
 
         function rebuildAsyncRule(key: number) {
-            const {rule, target, index} = asyncDeclarations.get(key);
+            const {rule, target, index} = asyncDeclarations.get(key)!;
             target.deleteRule(index);
             setRule(target, index, rule);
             asyncDeclarations.delete(key);
         }
 
         function rebuildVarRule(key: number) {
-            const {rule, target, index} = varDeclarations.get(key);
+            const {rule, target, index} = varDeclarations.get(key)!;
             target.deleteRule(index);
             setRule(target, index, rule);
         }
@@ -297,5 +328,5 @@ export function createStyleSheetModifier() {
         buildStyleSheet();
     }
 
-    return {modifySheet};
+    return {modifySheet, shouldRebuildStyle};
 }

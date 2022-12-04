@@ -1,7 +1,7 @@
-import '../polyfills';
+import '../support/polyfills';
 import {DEFAULT_THEME} from '../../../src/defaults';
 import {createOrUpdateDynamicTheme, removeDynamicTheme} from '../../../src/inject/dynamic-theme';
-import {multiline} from '../../test-utils';
+import {multiline} from '../support/test-utils';
 
 const theme = {
     ...DEFAULT_THEME
@@ -77,5 +77,49 @@ describe('COLOR PARSING', () => {
         expect(getComputedStyle(container.querySelector('h1')).backgroundColor).toBe('rgb(82, 41, 122)');
         expect(getComputedStyle(container.querySelector('h1 strong')).color).toBe('rgb(249, 250, 166)');
         expect(getComputedStyle(container).backgroundColor).toBe('rgba(0, 0, 0, 0)');
+    });
+
+    it('should handle calc(...) cases', () => {
+        container.innerHTML = multiline(
+            '<style>',
+            '    h1 { background-color: hsl(0, 0%, calc(95% - 3%)) }',
+            '</style>',
+            '<h1>Weird color <strong>Power</strong>!</h1>',
+        );
+        createOrUpdateDynamicTheme(theme, null, false);
+        expect(getComputedStyle(container.querySelector('h1')).backgroundColor).toBe('rgb(35, 38, 40)');
+    });
+
+    it('should handle gradient\'s cases with rgb(...) xx%', async () => {
+        container.innerHTML = multiline(
+            '<style>',
+            '    h1 { background-image: -webkit-linear-gradient(bottom, rgb(255, 255, 255) 15%, rgb(246, 246, 245) 85%); }',
+            '</style>',
+            '<h1>Weird color <strong>Power</strong>!</h1>',
+        );
+        createOrUpdateDynamicTheme(theme, null, false);
+        expect(getComputedStyle(container.querySelector('h1')).backgroundImage).toBe('-webkit-linear-gradient(bottom, rgb(24, 26, 27) 15%, rgb(29, 32, 33) 85%)');
+    });
+
+    it('should handle complex calc(...) cases', () => {
+        container.innerHTML = multiline(
+            '<style>',
+            '    h1 { background-color: rgb(calc(216.75 + 153 * .15), calc(216.75 + 205 * .15), calc(216.75 + 255 * .15)) }',
+            '</style>',
+            '<h1>Weird color <strong>Power</strong>!</h1>',
+        );
+        createOrUpdateDynamicTheme(theme, null, false);
+        expect(getComputedStyle(container.querySelector('h1')).backgroundColor).toBe('rgb(28, 31, 32)');
+    });
+
+    it('should handle gradients with calc(...) cases', () => {
+        container.innerHTML = multiline(
+            '<style>',
+            '    h1 { background-image: linear-gradient(rgb(249, 249, 251) calc(100% - 3px), transparent), linear-gradient(-90deg, rgb(255, 145, 0), rgb(241, 3, 102) 50%, rgb(97, 115, 255)) }',
+            '</style>',
+            '<h1>Weird color <strong>Power</strong>!</h1>',
+        );
+        createOrUpdateDynamicTheme(theme, null, false);
+        expect(getComputedStyle(container.querySelector('h1')).backgroundImage).toBe('linear-gradient(rgb(27, 29, 30), calc(100% - 3px), rgba(0, 0, 0, 0)), linear-gradient(-90deg, rgb(204, 116, 0), rgb(193, 2, 82) 50%, rgb(0, 17, 146))');
     });
 });

@@ -1,13 +1,33 @@
-const matchesMediaQuery = (query: string) => Boolean(window.matchMedia(query).matches);
+import {isMatchMediaChangeEventListenerSupported} from './platform';
 
-const matchesDarkTheme = () => matchesMediaQuery('(prefers-color-scheme: dark)');
-const matchesLightTheme = () => matchesMediaQuery('(prefers-color-scheme: light)');
+let query: MediaQueryList | null = null;
+const onChange: ({matches}: {matches: boolean}) => void = ({matches}) => listeners.forEach((listener) => listener(matches));
+const listeners = new Set<(isDark: boolean) => void>();
 
-const isColorSchemeSupported = matchesDarkTheme() || matchesLightTheme();
-
-export function isSystemDarkModeEnabled() {
-    if (!isColorSchemeSupported) {
-        return false;
+export function runColorSchemeChangeDetector(callback: (isDark: boolean) => void) {
+    listeners.add(callback);
+    if (query) {
+        return;
     }
-    return matchesDarkTheme();
+    query = matchMedia('(prefers-color-scheme: dark)');
+    if (isMatchMediaChangeEventListenerSupported) {
+        query.addEventListener('change', onChange);
+    } else {
+        query.addListener(onChange);
+    }
 }
+
+export function stopColorSchemeChangeDetector() {
+    if (!query || !onChange) {
+        return;
+    }
+    if (isMatchMediaChangeEventListenerSupported) {
+        query.removeEventListener('change', onChange);
+    } else {
+        query.removeListener(onChange);
+    }
+    listeners.clear();
+    query = null;
+}
+
+export const isSystemDarkModeEnabled = () => (query || matchMedia('(prefers-color-scheme: dark)')).matches;

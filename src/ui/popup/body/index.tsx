@@ -1,10 +1,11 @@
 import {m} from 'malevic';
 import {getContext} from 'malevic/dom';
-import {DONATE_URL} from '../../../utils/links';
+import {DONATE_URL, HOMEPAGE_URL} from '../../../utils/links';
 import {getLocalMessage} from '../../../utils/locales';
 import {Overlay} from '../../controls';
 import AutomationPage from '../automation-page';
 import MainPage from '../main-page';
+import NewsSection from '../news-section';
 import {Page, PageViewer} from '../page-viewer';
 import SettingsPage from '../settings-page';
 import SiteListPage from '../site-list-page';
@@ -17,7 +18,7 @@ function Logo() {
     return (
         <a
             class="m-logo"
-            href="https://darkreader.org/"
+            href={HOMEPAGE_URL}
             target="_blank"
             rel="noopener noreferrer"
         >
@@ -35,6 +36,9 @@ type PageId = (
     | 'manage-settings'
 );
 
+let popstate: (() => void) | null = null;
+isMobile && window.addEventListener('popstate', () => popstate && popstate());
+
 function Pages(props: ViewProps) {
     const context = getContext();
     const store = context.store as {
@@ -45,31 +49,36 @@ function Pages(props: ViewProps) {
     }
 
     function onThemeNavClick() {
+        isMobile && history.pushState(undefined, '');
         store.activePage = 'theme';
         context.refresh();
     }
 
     function onSettingsNavClick() {
+        isMobile && history.pushState(undefined, '');
         store.activePage = 'settings';
         context.refresh();
     }
 
     function onAutomationNavClick() {
+        isMobile && history.pushState(undefined, '');
         store.activePage = 'automation';
         context.refresh();
     }
 
     function onManageSettingsClick() {
+        isMobile && history.pushState(undefined, '');
         store.activePage = 'manage-settings';
         context.refresh();
     }
 
     function onSiteListNavClick() {
+        isMobile && history.pushState(undefined, '');
         store.activePage = 'site-list';
         context.refresh();
     }
 
-    function onBackClick() {
+    function goBack() {
         const activePage = store.activePage;
         const settingsPageSubpages = ['automation', 'manage-settings', 'site-list'] as PageId[];
         if (settingsPageSubpages.includes(activePage)) {
@@ -78,6 +87,16 @@ function Pages(props: ViewProps) {
             store.activePage = 'main';
         }
         context.refresh();
+    }
+
+    popstate = goBack;
+
+    function onBackClick() {
+        if (isMobile) {
+            history.back();
+        } else {
+            goBack();
+        }
     }
 
     return (
@@ -123,6 +142,7 @@ function DonateGroup() {
     return (
         <div class="m-donate-group">
             <a class="m-donate-button" href={DONATE_URL} target="_blank" rel="noopener noreferrer">
+                <span class="m-donate-button__icon"></span>
                 <span class="m-donate-button__text">
                     {getLocalMessage('donate')}
                 </span>
@@ -131,17 +151,6 @@ function DonateGroup() {
                 This project is sponsored by you
             </label>
         </div>
-    );
-}
-
-let appVersion: string;
-
-function AppVersion() {
-    if (!appVersion) {
-        appVersion = chrome.runtime.getManifest().version;
-    }
-    return (
-        <label class="darkreader-version">Version 5 Preview ({appVersion})</label>
     );
 }
 
@@ -167,7 +176,7 @@ export default function Body(props: ViewProps) {
             <section class="m-section">
                 <DonateGroup />
             </section>
-            <AppVersion />
+            <NewsSection {...props} />
             <Overlay />
         </body>
     );

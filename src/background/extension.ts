@@ -7,180 +7,706 @@ import Newsmaker from './newsmaker';
 import TabManager from './tab-manager';
 import UserStorage from './user-storage';
 import {setWindowTheme, resetWindowTheme} from './window-theme';
-import {getFontList, getCommands, setShortcut, canInjectScript} from './utils/extension-api';
-import {isInTimeInterval, getDuration, isNightAtLocation} from '../utils/time';
-import {isURLInList, getURLHostOrProtocol, isURLEnabled} from '../utils/url';
-import ThemeEngines from '../generators/theme-engines';
+import {getCommands, canInjectScript} from './utils/extension-api';
+import {isInTimeIntervalLocal, nextTimeInterval, isNightAtLocation, nextTimeChangeAtLocation} from '../utils/time';
+import {isURLInList, getURLHostOrProtocol, isURLEnabled, isPDF} from '../utils/url';
+import {ThemeEngine} from '../generators/theme-engines';
 import createCSSFilterStylesheet from '../generators/css-filter';
 import {getDynamicThemeFixesFor} from '../generators/dynamic-theme';
 import createStaticStylesheet from '../generators/static-theme';
 import {createSVGFilterStylesheet, getSVGFilterMatrixValue, getSVGReverseFilterMatrixValue} from '../generators/svg-filter';
-import type {ExtensionData, FilterConfig, News, Shortcuts, UserSettings, TabInfo, ExternalRequest, ExternalConnection} from '../definitions';
-import {isSystemDarkModeEnabled} from '../utils/media-query';
-import {logInfo, logWarn} from '../inject/utils/log';
-import {DEFAULT_SETTINGS, DEFAULT_THEME} from '../defaults';
-import {getValidatedObject, getPreviousObject} from '../utils/object';
-import {forEach, isArrayEqual} from '../utils/array';
-import {isFirefox, isThunderbird} from '../utils/platform';
+import type {ExtensionData, FilterConfig, Shortcuts, UserSettings, TabInfo, TabData, Command, ExternalRequest, ExternalConnection} from '../definitions';
+import {isSystemDarkModeEnabled, runColorSchemeChangeDetector} from '../utils/media-query';
+import {isFirefox} from '../utils/platform';
+import {MessageType} from '../utils/message';
+import {logInfo, logWarn} from './utils/log';
+import {PromiseBarrier} from '../utils/promise-barrier';
+import {StateManager} from '../utils/state-manager';
+import {debounce} from '../utils/debounce';
+import ContentScriptManager from './content-script-manager';
+import {AutomationMode} from '../utils/automation';
+import { forEach, isArrayEqual } from 'utils/array';
+import { getPreviousObject, getValidatedObject } from 'utils/object';
+import { DEFAULT_SETTINGS, DEFAULT_THEME } from 'defaults';
 
-const AUTO_TIME_CHECK_INTERVAL = getDuration({seconds: 10});
+type AutomationState = 'turn-on' | 'turn-off' | 'scheme-dark' | 'scheme-light' | '';
+
+interface ExtensionState extends Record<string, unknown> {
+    autoState: AutomationState;
+    wasEnabledOnLastCheck: boolean | null;
+    registeredContextMenus: boolean | null;
+}
+
+interface SystemColorState extends Record<string, unknown> {
+    wasLastColorSchemeDark: boolean | null;
+}
+
+declare const __CHROMIUM_MV2__: boolean;
+declare const __CHROMIUM_MV3__: boolean;
+declare const __THUNDERBIRD__: boolean;
 
 export class Extension {
-    ready: boolean;
+    private static autoState: AutomationState = '';
+    private static wasEnabledOnLastCheck: boolean | null = null;
+    private static registeredContextMenus: boolean | null = null;
+    /**
+     * This value is used for two purposes:
+     *  - to bypass Firefox bug
+     *  - to filter out excessive Extension.onColorSchemeChange() invocations
+     */
+    private static wasLastColorSchemeDark: boolean | null = null;
+    private static startBarrier: PromiseBarrier<void, void> | null = null;
+    private static stateManager: StateManager<ExtensionState> | null = null;
 
-    config: ConfigManager;
-    devtools: DevTools;
-    fonts: string[];
-    icon: IconManager;
-    messenger: Messenger;
-    news: Newsmaker;
-    tabs: TabManager;
-    user: UserStorage;
+    private static ALARM_NAME = 'auto-time-alarm';
+    private static LOCAL_STORAGE_KEY = 'Extension-state';
 
-    constructor() {
-        this.ready = false;
+    // Store system color theme
+    private static SYSTEM_COLOR_LOCAL_STORAGE_KEY = 'system-color-state';
+    private static systemColorStateManager: StateManager<SystemColorState>;
 
-        this.icon = new IconManager();
-        this.config = new ConfigManager();
-        this.devtools = new DevTools(this.config, () => this.onSettingsChanged());
-        this.messenger = new Messenger(this.getMessengerAdapter());
-        this.news = new Newsmaker((news) => this.onNewsUpdate(news));
-        this.tabs = new TabManager({
-            getConnectionMessage: ({url, frameURL, unsupportedSender}) => {
-                if (unsupportedSender) {
-                    return this.getUnsupportedSenderMessage();
-                }
-                return this.getConnectionMessage(url, frameURL);
-            },
+    // Record whether Extension.init() already ran since the last GB start
+    private static initialized = false;
+
+    // This sync initializer needs to run on every BG restart before anything else can happen
+    static init() {
+        if (this.initialized) {
+            return;
+        }
+        this.initialized = true;
+
+        new Newsmaker();
+        DevTools.init(async () => this.onSettingsChanged());
+        Messenger.init(this.getMessengerAdapter());
+        TabManager.init({
+            getConnectionMessage: async (tabURL, url, isTopFrame) => this.getConnectionMessage(tabURL, url, isTopFrame),
+            getTabMessage: this.getTabMessage,
             onColorSchemeChange: this.onColorSchemeChange,
         });
-        this.user = new UserStorage({onRemoteSettingsChange: () => this.onRemoteSettingsChange()});
-        this.awaiting = [];
+
+        this.startBarrier = new PromiseBarrier();
+        this.stateManager = new StateManager<ExtensionState>(Extension.LOCAL_STORAGE_KEY, this, {
+            autoState: '',
+            wasEnabledOnLastCheck: null,
+            registeredContextMenus: null,
+        }, logWarn);
+
+        chrome.alarms.onAlarm.addListener(this.alarmListener);
+
+        if (chrome.commands) {
+            // Firefox Android does not support chrome.commands
+            if (isFirefox) {
+                // Firefox may not register onCommand listener on extension startup so we need to use setTimeout
+                setTimeout(() => chrome.commands.onCommand.addListener(async (command) => this.onCommand(command as Command, null, null, null)));
+            } else {
+                chrome.commands.onCommand.addListener(async (command, tab) => this.onCommand(command as Command, tab && tab.id! || null, 0, null));
+            }
+        }
+
+        if (chrome.permissions.onRemoved) {
+            chrome.permissions.onRemoved.addListener((permissions) => {
+                // As far as we know, this code is never actually run because there
+                // is no browser UI for removing 'contextMenus' permission.
+                // This code exists for future-proofing in case browsers ever add such UI.
+                if (!permissions?.permissions?.includes('contextMenus')) {
+                    this.registeredContextMenus = false;
+                }
+            });
+        }
     }
 
-    isEnabled() {
-        const {automation} = this.user.settings;
-        if (automation === 'time') {
-            const now = new Date();
-            return isInTimeInterval(now, this.user.settings.time.activation, this.user.settings.time.deactivation);
-        } else if (automation === 'system') {
-            if (isFirefox) {
-                // BUG: Firefox background page always matches initial color scheme.
-                return this.wasLastColorSchemeDark == null
+    private static async MV3syncSystemColorStateManager(isDark: boolean | null): Promise<void> {
+        if (!__CHROMIUM_MV3__) {
+            return;
+        }
+        if (!this.systemColorStateManager) {
+            this.systemColorStateManager = new StateManager<SystemColorState>(Extension.SYSTEM_COLOR_LOCAL_STORAGE_KEY, this, {
+                wasLastColorSchemeDark: isDark,
+            }, logWarn);
+        }
+        if (isDark === null) {
+            // Attempt to restore data from storage
+            return this.systemColorStateManager.loadState();
+        } else if (this.wasLastColorSchemeDark !== isDark) {
+            this.wasLastColorSchemeDark = isDark;
+            return this.systemColorStateManager.saveState();
+        }
+    }
+
+    private static alarmListener = (alarm: chrome.alarms.Alarm): void => {
+        if (alarm.name === Extension.ALARM_NAME) {
+            this.loadData().then(() => this.handleAutomationCheck());
+        }
+    };
+
+    private static isExtensionSwitchedOn() {
+        return (
+            this.autoState === 'turn-on' ||
+            this.autoState === 'scheme-dark' ||
+            this.autoState === 'scheme-light' ||
+            (this.autoState === '' && UserStorage.settings.enabled)
+        );
+    }
+
+    private static updateAutoState() {
+        const {mode, behavior, enabled} = UserStorage.settings.automation;
+
+        let isAutoDark: boolean | null | undefined;
+        let nextCheck: number | null | undefined;
+        switch (mode) {
+            case AutomationMode.TIME: {
+                const {time} = UserStorage.settings;
+                isAutoDark = isInTimeIntervalLocal(time.activation, time.deactivation);
+                nextCheck = nextTimeInterval(time.activation, time.deactivation);
+                break;
+            }
+            case AutomationMode.SYSTEM:
+                if (__CHROMIUM_MV3__) {
+                    isAutoDark = this.wasLastColorSchemeDark;
+                    if (this.wasLastColorSchemeDark === null) {
+                        logWarn('System color scheme is unknown. Defaulting to Dark.');
+                        isAutoDark = true;
+                    }
+                    break;
+                }
+                isAutoDark = this.wasLastColorSchemeDark === null
                     ? isSystemDarkModeEnabled()
                     : this.wasLastColorSchemeDark;
+                if (isFirefox) {
+                    runColorSchemeChangeDetector(Extension.onColorSchemeChange);
+                }
+                break;
+            case AutomationMode.LOCATION: {
+                const {latitude, longitude} = UserStorage.settings.location;
+                if (latitude != null && longitude != null) {
+                    isAutoDark = isNightAtLocation(latitude, longitude);
+                    nextCheck = nextTimeChangeAtLocation(latitude, longitude);
+                }
+                break;
             }
-            return isSystemDarkModeEnabled();
-        } else if (automation === 'location') {
-            const latitude = this.user.settings.location.latitude;
-            const longitude = this.user.settings.location.longitude;
-
-            if (latitude != null && longitude != null) {
-                const now = new Date();
-                return isNightAtLocation(now, latitude, longitude);
-            }
+            case AutomationMode.NONE:
+                break;
         }
 
-        return this.user.settings.enabled;
+        let state: AutomationState = '';
+        if (enabled) {
+            if (behavior === 'OnOff') {
+                state = isAutoDark ? 'turn-on' : 'turn-off';
+            } else if (behavior === 'Scheme') {
+                state = isAutoDark ? 'scheme-dark' : 'scheme-light';
+            }
+        }
+        this.autoState = state;
+
+        if (nextCheck) {
+            if (nextCheck < Date.now()) {
+                logWarn(`Alarm is set in the past: ${nextCheck}. The time is: ${new Date()}. ISO: ${(new Date()).toISOString()}`);
+            } else {
+                chrome.alarms.create(Extension.ALARM_NAME, {when: nextCheck});
+            }
+        }
     }
 
-    private awaiting: Array<() => void>;
+    static async start() {
+        this.init();
+        await Promise.all([
+            ConfigManager.load({local: true}),
+            this.MV3syncSystemColorStateManager(null),
+            UserStorage.loadSettings()
+        ]);
 
-    async start() {
-        await this.config.load({local: true});
-        this.fonts = await getFontList();
-
-        await this.user.loadSettings();
-        if (this.user.settings.syncSitesFixes) {
-            await this.config.load({local: false});
+        if (UserStorage.settings.enableContextMenus && !this.registeredContextMenus) {
+            chrome.permissions.contains({permissions: ['contextMenus']}, (permitted) => {
+                if (permitted) {
+                    this.registerContextMenus();
+                } else {
+                    logWarn('User has enabled context menus, but did not provide permission.');
+                }
+            });
         }
+        if (UserStorage.settings.syncSitesFixes) {
+            await ConfigManager.load({local: false});
+        }
+        this.updateAutoState();
         this.onAppToggle();
-        this.changeSettings(this.user.settings);
-        console.log('loaded', this.user.settings);
+        logInfo('loaded', UserStorage.settings);
 
-        this.registerCommands();
         this.registerExternalConnections();
 
-        this.ready = true;
-        if (isThunderbird) {
-            this.tabs.registerMailDisplayScript();
+        if (__THUNDERBIRD__) {
+            TabManager.registerMailDisplayScript();
         } else {
-            this.tabs.updateContentScript({runOnProtectedPages: this.user.settings.enableForProtectedPages});
+            TabManager.updateContentScript({runOnProtectedPages: UserStorage.settings.enableForProtectedPages});
         }
 
-        this.awaiting.forEach((ready) => ready());
-        this.awaiting = null;
-
-        this.startAutoTimeCheck();
-        this.news.subscribe();
+        UserStorage.settings.fetchNews && Newsmaker.subscribe();
+        this.startBarrier!.resolve();
     }
 
-    private popupOpeningListener: () => void = null;
-
-    private getMessengerAdapter(): ExtensionAdapter {
+    private static getMessengerAdapter(): ExtensionAdapter {
         return {
             collect: async () => {
-                if (!this.ready) {
-                    await new Promise<void>((resolve) => this.awaiting.push(resolve));
-                }
                 return await this.collectData();
             },
-            getActiveTabInfo: async () => {
-                if (!this.ready) {
-                    await new Promise<void>((resolve) => this.awaiting.push(resolve));
-                }
-                const url = await this.tabs.getActiveTabURL();
-                return this.getURLInfo(url);
-            },
-            changeSettings: (settings) => this.changeSettings(settings),
+            changeSettings: async (settings) => this.changeSettings(settings),
             setTheme: (theme) => this.setTheme(theme),
-            setShortcut: ({command, shortcut}) => this.setShortcut(command, shortcut),
-            toggleURL: (url) => this.toggleURL(url),
-            markNewsAsRead: async (ids) => await this.news.markAsRead(...ids),
-            onPopupOpen: () => this.popupOpeningListener && this.popupOpeningListener(),
-            loadConfig: async (options) => await this.config.load(options),
-            applyDevDynamicThemeFixes: (text) => this.devtools.applyDynamicThemeFixes(text),
-            resetDevDynamicThemeFixes: () => this.devtools.resetDynamicThemeFixes(),
-            applyDevInversionFixes: (text) => this.devtools.applyInversionFixes(text),
-            resetDevInversionFixes: () => this.devtools.resetInversionFixes(),
-            applyDevStaticThemes: (text) => this.devtools.applyStaticThemes(text),
-            resetDevStaticThemes: () => this.devtools.resetStaticThemes(),
+            toggleActiveTab: async () => this.toggleActiveTab(),
+            markNewsAsRead: async (ids) => await Newsmaker.markAsRead(...ids),
+            markNewsAsDisplayed: async (ids) => await Newsmaker.markAsDisplayed(...ids),
+            loadConfig: async (options) => await ConfigManager.load(options),
+            applyDevDynamicThemeFixes: (text) => DevTools.applyDynamicThemeFixes(text),
+            resetDevDynamicThemeFixes: () => DevTools.resetDynamicThemeFixes(),
+            applyDevInversionFixes: (text) => DevTools.applyInversionFixes(text),
+            resetDevInversionFixes: () => DevTools.resetInversionFixes(),
+            applyDevStaticThemes: (text) => DevTools.applyStaticThemes(text),
+            resetDevStaticThemes: () => DevTools.resetStaticThemes(),
         };
     }
 
-    private registerCommands() {
-        if (!chrome.commands) {
-            // Fix for Firefox Android
-            return;
+    private static onCommandInternal = async (command: Command, tabId: number | null, frameId: number | null, frameURL: string | null) => {
+        if (this.startBarrier!.isPending()) {
+            await this.startBarrier!.entry();
         }
-        chrome.commands.onCommand.addListener((command) => {
-            if (command === 'toggle') {
-                console.log('Toggle command entered');
+        this.stateManager!.loadState();
+        switch (command) {
+            case 'toggle':
+                logInfo('Toggle command entered');
                 this.changeSettings({
-                    enabled: !this.isEnabled(),
-                    automation: '',
+                    enabled: !this.isExtensionSwitchedOn(),
+                    automation: {...UserStorage.settings.automation, ...{enable: false}},
                 });
+                break;
+            case 'addSite': {
+                logInfo('Add Site command entered');
+                async function scriptPDF(tabId: number, frameId: number): Promise<boolean> {
+                    // We can not detect PDF if we do not know where we are looking for it
+                    if (!(Number.isInteger(tabId) && Number.isInteger(frameId))) {
+                        return false;
+                    }
+                    function detectPDF(): boolean {
+                        if (document.body.childElementCount !== 1) {
+                            return false;
+                        }
+                        const {nodeName, type} = document.body.childNodes[0] as HTMLEmbedElement;
+                        return nodeName === 'EMBED' && type === 'application/pdf';
+                    }
+
+                    if (__CHROMIUM_MV3__) {
+                        return (await chrome.scripting.executeScript({
+                            target: {tabId, frameIds: [frameId]},
+                            func: detectPDF,
+                        }))[0].result;
+                    } else if (__CHROMIUM_MV2__) {
+                        return new Promise<boolean>((resolve) => chrome.tabs.executeScript(tabId, {
+                            frameId,
+                            code: `(${detectPDF.toString()})()`
+                        }, ([r]) => resolve(r)));
+                    }
+                    return false;
+                }
+
+                const pdf = async () => isPDF(frameURL || await TabManager.getActiveTabURL());
+                if (((__CHROMIUM_MV2__ || __CHROMIUM_MV3__) && await scriptPDF(tabId!, frameId!)) || await pdf()) {
+                    this.changeSettings({enableForPDF: !UserStorage.settings.enableForPDF});
+                } else {
+                    this.toggleActiveTab();
+                }
+                break;
             }
-            if (command === 'addSite') {
-                console.log('Add Site command entered');
-                this.toggleCurrentSite();
-            }
-            if (command === 'switchEngine') {
-                console.log('Switch Engine command entered');
-                const engines = Object.values(ThemeEngines);
-                const index = engines.indexOf(this.user.settings.theme.engine);
-                const next = index === engines.length - 1 ? engines[0] : engines[index + 1];
+            case 'switchEngine': {
+                logInfo('Switch Engine command entered');
+                const engines = Object.values(ThemeEngine);
+                const index = engines.indexOf(UserStorage.settings.theme.engine);
+                const next = engines[(index + 1) % engines.length];
                 this.setTheme({engine: next});
+                break;
             }
+        }
+    };
+
+    // 75 is small enough to not notice it, and still catches when someone
+    // is holding down a certain shortcut.
+    private static onCommand = debounce(75, this.onCommandInternal);
+
+    private static registerContextMenus() {
+        chrome.contextMenus.onClicked.addListener(async ({menuItemId, frameId, frameUrl, pageUrl}, tab) =>
+            this.onCommand(menuItemId as Command, tab && tab.id || null, frameId || null, frameUrl || pageUrl));
+        chrome.contextMenus.removeAll(() => {
+            this.registeredContextMenus = false;
+            chrome.contextMenus.create({
+                id: 'DarkReader-top',
+                title: 'Dark Reader'
+            }, () => {
+                if (chrome.runtime.lastError) {
+                    // Failed to create the context menu
+                    return;
+                }
+                const msgToggle = chrome.i18n.getMessage('toggle_extension');
+                const msgAddSite = chrome.i18n.getMessage('toggle_current_site');
+                const msgSwitchEngine = chrome.i18n.getMessage('theme_generation_mode');
+                chrome.contextMenus.create({
+                    id: 'toggle',
+                    parentId: 'DarkReader-top',
+                    title: msgToggle || 'Toggle everywhere',
+                });
+                chrome.contextMenus.create({
+                    id: 'addSite',
+                    parentId: 'DarkReader-top',
+                    title: msgAddSite || 'Toggle for current site',
+                });
+                chrome.contextMenus.create({
+                    id: 'switchEngine',
+                    parentId: 'DarkReader-top',
+                    title: msgSwitchEngine || 'Switch engine',
+                });
+                this.registeredContextMenus = true;
+            });
         });
     }
 
-    private copyShadowCopy(setting: Partial<UserSettings>, origin: string) {
-        const newshadowCopy = this.user.settings.shadowCopy.slice();
+    private static async getShortcuts() {
+        const commands = await getCommands();
+        return commands.reduce((map, cmd) => Object.assign(map, {[cmd.name!]: cmd.shortcut}), {} as Shortcuts);
+    }
+
+    static async collectData(): Promise<ExtensionData> {
+        await this.loadData();
+        const [
+            news,
+            shortcuts,
+            dynamicFixesText,
+            filterFixesText,
+            staticThemesText,
+            activeTab,
+            isAllowedFileSchemeAccess,
+        ] = await Promise.all([
+            Newsmaker.getLatest(),
+            this.getShortcuts(),
+            DevTools.getDynamicThemeFixesText(),
+            DevTools.getInversionFixesText(),
+            DevTools.getStaticThemesText(),
+            this.getActiveTabInfo(),
+            new Promise<boolean>((r) => chrome.extension.isAllowedFileSchemeAccess(r)),
+        ]);
+        return {
+            isEnabled: this.isExtensionSwitchedOn(),
+            isReady: true,
+            isAllowedFileSchemeAccess,
+            settings: UserStorage.settings,
+            news,
+            shortcuts,
+            colorScheme: ConfigManager.COLOR_SCHEMES_RAW!,
+            forcedScheme: this.autoState === 'scheme-dark' ? 'dark' : this.autoState === 'scheme-light' ? 'light' : null,
+            devtools: {
+                dynamicFixesText,
+                filterFixesText,
+                staticThemesText,
+            },
+            activeTab,
+        };
+    }
+
+    private static async getActiveTabInfo() {
+        await this.loadData();
+        const tabURL = await TabManager.getActiveTabURL();
+        const info = this.getTabInfo(tabURL);
+        info.isInjected = await TabManager.canAccessActiveTab();
+        if (UserStorage.settings.detectDarkTheme) {
+            info.isDarkThemeDetected = await TabManager.isActiveTabDarkThemeDetected();
+        }
+        return info;
+    }
+
+    private static async getConnectionMessage(tabURL: string, url: string, isTopFrame: boolean) {
+        await this.loadData();
+        return this.getTabMessage(tabURL, url, isTopFrame);
+    }
+
+    private static async loadData() {
+        this.init();
+        await Promise.all([
+            this.stateManager!.loadState(),
+            UserStorage.loadSettings(),
+        ]);
+    }
+
+    private static onColorSchemeChange = async (isDark: boolean) => {
+        if (this.wasLastColorSchemeDark === isDark) {
+            // If color scheme was already correct, we do not need to do anyhting
+            return;
+        }
+        this.wasLastColorSchemeDark = isDark;
+        this.MV3syncSystemColorStateManager(isDark);
+        await this.loadData();
+        if (UserStorage.settings.automation.mode !== AutomationMode.SYSTEM) {
+            return;
+        }
+        this.handleAutomationCheck();
+    };
+
+    private static handleAutomationCheck = () => {
+        this.updateAutoState();
+
+        const isSwitchedOn = this.isExtensionSwitchedOn();
+        if (
+            this.wasEnabledOnLastCheck === null ||
+            this.wasEnabledOnLastCheck !== isSwitchedOn ||
+            this.autoState === 'scheme-dark' ||
+            this.autoState === 'scheme-light'
+        ) {
+            this.wasEnabledOnLastCheck = isSwitchedOn;
+            this.onAppToggle();
+            TabManager.sendMessage();
+            this.reportChanges();
+            this.stateManager!.saveState();
+        }
+    };
+
+    static async changeSettings($settings: Partial<UserSettings>, onlyUpdateActiveTab = false) {
+        const promises = [];
+        const prev = {...UserStorage.settings};
+
+        UserStorage.set($settings);
+
+        if (
+            (prev.enabled !== UserStorage.settings.enabled) ||
+            (prev.automation.enabled !== UserStorage.settings.automation.enabled) ||
+            (prev.automation.mode !== UserStorage.settings.automation.mode) ||
+            (prev.automation.behavior !== UserStorage.settings.automation.behavior) ||
+            (prev.time.activation !== UserStorage.settings.time.activation) ||
+            (prev.time.deactivation !== UserStorage.settings.time.deactivation) ||
+            (prev.location.latitude !== UserStorage.settings.location.latitude) ||
+            (prev.location.longitude !== UserStorage.settings.location.longitude)
+        ) {
+            this.updateAutoState();
+            this.onAppToggle();
+        }
+        if (prev.syncSettings !== UserStorage.settings.syncSettings) {
+            const promise = UserStorage.saveSyncSetting(UserStorage.settings.syncSettings);
+            promises.push(promise);
+        }
+        if (!isArrayEqual(prev.externalConnections, UserStorage.settings.externalConnections)) {
+            this.connectToNative(UserStorage.settings.externalConnections
+                .filter((externalConnection) => externalConnection.isNative)
+                .map((nativeConnection) => nativeConnection.id));
+            this.cleanNatives(prev.externalConnections.filter((entry) => UserStorage.settings.externalConnections.includes(entry)));
+        }
+        if (this.isExtensionSwitchedOn() && $settings.changeBrowserTheme != null && prev.changeBrowserTheme !== $settings.changeBrowserTheme) {
+            if ($settings.changeBrowserTheme) {
+                setWindowTheme(UserStorage.settings.theme);
+            } else {
+                resetWindowTheme();
+            }
+        }
+        if (prev.fetchNews !== UserStorage.settings.fetchNews) {
+            UserStorage.settings.fetchNews ? Newsmaker.subscribe() : Newsmaker.unSubscribe();
+        }
+
+        if (prev.enableContextMenus !== UserStorage.settings.enableContextMenus) {
+            if (UserStorage.settings.enableContextMenus) {
+                this.registerContextMenus();
+            } else {
+                chrome.contextMenus.removeAll();
+            }
+        }
+        const promise = this.onSettingsChanged(onlyUpdateActiveTab);
+        promises.push(promise);
+        await Promise.all(promises);
+    }
+
+    private static setTheme($theme: Partial<FilterConfig>) {
+        UserStorage.set({theme: {...UserStorage.settings.theme, ...$theme}});
+
+        if (this.isExtensionSwitchedOn() && UserStorage.settings.changeBrowserTheme) {
+            setWindowTheme(UserStorage.settings.theme);
+        }
+
+        this.onSettingsChanged();
+    }
+
+    private static async reportChanges() {
+        const info = await this.collectData();
+        Messenger.reportChanges(info);
+    }
+
+    private static async toggleActiveTab() {
+        const settings = UserStorage.settings;
+        const tab = await this.getActiveTabInfo();
+        const {url} = tab;
+        const isInDarkList = isURLInList(url, ConfigManager.DARK_SITES);
+        const host = getURLHostOrProtocol(url);
+
+        function getToggledList(sourceList: string[]) {
+            const list = sourceList.slice();
+            const index = list.indexOf(host);
+            if (index < 0) {
+                list.push(host);
+            } else {
+                list.splice(index, 1);
+            }
+            return list;
+        }
+
+        const darkThemeDetected = !settings.applyToListedOnly && settings.detectDarkTheme && tab.isDarkThemeDetected;
+        if (isInDarkList || darkThemeDetected || settings.siteListEnabled.includes(host)) {
+            const toggledList = getToggledList(settings.siteListEnabled);
+            this.changeSettings({siteListEnabled: toggledList}, true);
+            return;
+        }
+
+        const toggledList = getToggledList(settings.siteList);
+        this.changeSettings({siteList: toggledList}, true);
+    }
+
+    //------------------------------------
+    //
+    //       Handle config changes
+    //
+
+    private static onAppToggle() {
+        if (this.isExtensionSwitchedOn()) {
+            if (__CHROMIUM_MV3__) {
+                ContentScriptManager.registerScripts(async () => TabManager.updateContentScript({runOnProtectedPages: UserStorage.settings.enableForProtectedPages}));
+            }
+            IconManager.setActive();
+        } else {
+            if (__CHROMIUM_MV3__) {
+                ContentScriptManager.unregisterScripts();
+            }
+            IconManager.setInactive();
+        }
+
+        if (UserStorage.settings.changeBrowserTheme) {
+            if (this.isExtensionSwitchedOn() && this.autoState !== 'scheme-light') {
+                setWindowTheme(UserStorage.settings.theme);
+            } else {
+                resetWindowTheme();
+            }
+        }
+    }
+
+    private static async onSettingsChanged(onlyUpdateActiveTab = false) {
+        await this.loadData();
+        this.wasEnabledOnLastCheck = this.isExtensionSwitchedOn();
+        TabManager.sendMessage(onlyUpdateActiveTab);
+        this.saveUserSettings();
+        this.reportChanges();
+        this.stateManager!.saveState();
+    }
+
+    //----------------------
+    //
+    // Add/remove css to tab
+    //
+    //----------------------
+
+    private static getTabInfo(tabURL: string): TabInfo {
+        const {DARK_SITES} = ConfigManager;
+        const isInDarkList = isURLInList(tabURL, DARK_SITES);
+        const isProtected = !canInjectScript(tabURL);
+        return {
+            url: tabURL,
+            isInDarkList,
+            isProtected,
+            isInjected: null,
+            isDarkThemeDetected: null,
+        };
+    }
+
+    private static getTabMessage = (tabURl: string, url: string, isTopFrame: boolean): TabData => {
+        const settings = UserStorage.settings;
+        const tabInfo = this.getTabInfo(tabURl);
+        if (this.isExtensionSwitchedOn() && isURLEnabled(tabURl, settings, tabInfo)) {
+            const custom = settings.customThemes.find(({url: urlList}) => isURLInList(tabURl, urlList));
+            const preset = custom ? null : settings.presets.find(({urls}) => isURLInList(tabURl, urls));
+            let theme = custom ? custom.theme : preset ? preset.theme : settings.theme;
+            if (this.autoState === 'scheme-dark' || this.autoState === 'scheme-light') {
+                const mode = this.autoState === 'scheme-dark' ? 1 : 0;
+                theme = {...theme, mode};
+            }
+            const detectDarkTheme = isTopFrame && settings.detectDarkTheme && !isURLInList(tabURl, settings.siteListEnabled) && !isPDF(tabURl);
+
+            logInfo(`Creating CSS for url: ${url}`);
+            logInfo(`Custom theme ${custom ? 'was found' : 'was not found'}, Preset theme ${preset ? 'was found' : 'was not found'}
+            The theme(${custom ? 'custom' : preset ? 'preset' : 'global'} settings) used is: ${JSON.stringify(theme)}`);
+            switch (theme.engine) {
+                case ThemeEngine.cssFilter: {
+                    return {
+                        type: MessageType.BG_ADD_CSS_FILTER,
+                        data: {
+                            css: createCSSFilterStylesheet(theme, url, isTopFrame, ConfigManager.INVERSION_FIXES_RAW!, ConfigManager.INVERSION_FIXES_INDEX!),
+                            detectDarkTheme,
+                        },
+                    };
+                }
+                case ThemeEngine.svgFilter: {
+                    if (isFirefox) {
+                        return {
+                            type: MessageType.BG_ADD_CSS_FILTER,
+                            data: {
+                                css: createSVGFilterStylesheet(theme, url, isTopFrame, ConfigManager.INVERSION_FIXES_RAW!, ConfigManager.INVERSION_FIXES_INDEX!),
+                                detectDarkTheme,
+                            },
+                        };
+                    }
+                    return {
+                        type: MessageType.BG_ADD_SVG_FILTER,
+                        data: {
+                            css: createSVGFilterStylesheet(theme, url, isTopFrame, ConfigManager.INVERSION_FIXES_RAW!, ConfigManager.INVERSION_FIXES_INDEX!),
+                            svgMatrix: getSVGFilterMatrixValue(theme),
+                            svgReverseMatrix: getSVGReverseFilterMatrixValue(),
+                            detectDarkTheme,
+                        },
+                    };
+                }
+                case ThemeEngine.staticTheme: {
+                    return {
+                        type: MessageType.BG_ADD_STATIC_THEME,
+                        data: {
+                            css: theme.stylesheet && theme.stylesheet.trim() ?
+                                theme.stylesheet :
+                                createStaticStylesheet(theme, url, isTopFrame, ConfigManager.STATIC_THEMES_RAW!, ConfigManager.STATIC_THEMES_INDEX!),
+                            detectDarkTheme: settings.detectDarkTheme,
+                        },
+                    };
+                }
+                case ThemeEngine.dynamicTheme: {
+                    const fixes = getDynamicThemeFixesFor(url, isTopFrame, ConfigManager.DYNAMIC_THEME_FIXES_RAW!, ConfigManager.DYNAMIC_THEME_FIXES_INDEX!, UserStorage.settings.enableForPDF);
+                    return {
+                        type: MessageType.BG_ADD_DYNAMIC_THEME,
+                        data: {
+                            theme,
+                            fixes,
+                            isIFrame: !isTopFrame,
+                            detectDarkTheme,
+                        },
+                    };
+                }
+                default:
+                    throw new Error(`Unknown engine ${theme.engine}`);
+            }
+        }
+
+        logInfo(`Site is not inverted: ${tabURl}`);
+        return {
+            type: MessageType.BG_CLEAN_UP,
+        };
+    };
+
+    //-------------------------------------
+    //          User settings
+
+    private static async saveUserSettings() {
+        await UserStorage.saveSettings();
+        logInfo('saved', UserStorage.settings);
+    }
+
+    private static copyShadowCopy(setting: Partial<UserSettings>, origin: string) {
+        const newshadowCopy = UserStorage.settings.shadowCopy.slice();
         let shadowCopy = newshadowCopy.find(({id}) => id === origin);
         const index = shadowCopy ? newshadowCopy.indexOf(shadowCopy) : newshadowCopy.length;
         if (!shadowCopy) {
-            newshadowCopy.push({id: origin, copy: {} as UserSettings, oldSettings: this.user.settings});
+            newshadowCopy.push({id: origin, copy: {} as UserSettings, oldSettings: UserStorage.settings});
             shadowCopy = newshadowCopy[index];
         }
         shadowCopy.copy = {...shadowCopy.copy, ...setting};
@@ -188,19 +714,15 @@ export class Extension {
         this.changeSettings({shadowCopy: newshadowCopy});
     }
 
-    externalRequestsHandler(incomingData: ExternalRequest, origin: string) {
+    static externalRequestsHandler(incomingData: ExternalRequest, origin: string) {
         const {type, data, isNative} = incomingData;
         if (type === 'toggle') {
             logInfo(`Port: ${origin}, toggled dark reader.`);
-            const newSettings: Partial<UserSettings> = {
-                enabled: !this.isEnabled(),
-                automation: '',
-            };
-            this.changeSettings(newSettings);
+            this.onCommandInternal('toggle', null, null, null);
         }
         if (type === 'toggleCurrentSite') {
             logInfo(`Port: ${origin}, toggled the current site.`);
-            this.toggleCurrentSite();
+            this.onCommandInternal('addSite', null, null, null);
         }
         if (type === 'addSite') {
             if (!data) {
@@ -208,7 +730,7 @@ export class Extension {
                 return;
             }
             logInfo(`Port: ${origin}, toggled ${data}`);
-            this.toggleURL(data);
+            this.onCommandInternal('addSite', data.tabId, data.frameId, data.frameURL);
         }
         if (type === 'changeSettings') {
             if (!data) {
@@ -217,9 +739,12 @@ export class Extension {
             }
             logInfo(`Port: ${origin}, made changes to the settings.`);
             const validatedData = getValidatedObject(data, DEFAULT_SETTINGS);
+            if (!validatedData) {
+                return;
+            }
             this.copyShadowCopy(validatedData, origin);
             this.changeSettings(validatedData);
-            logInfo('Saved', this.user.settings);
+            logInfo('Saved', UserStorage.settings);
         }
         if (type === 'requestSettings') {
             if (!data) {
@@ -228,7 +753,7 @@ export class Extension {
             }
             logInfo(`Port: ${origin}, requested current settings.`);
             // Potentially add location settings?
-            const sanitizedData = getValidatedObject(this.user.settings, this.user.settings, ['shadowCopy', 'externalConnections']);
+            const sanitizedData = getValidatedObject(UserStorage.settings, UserStorage.settings, ['shadowCopy', 'externalConnections']);
             if (isNative) {
                 chrome.runtime.sendNativeMessage(origin, {type: 'requestSettings-response', data: sanitizedData});
             } else {
@@ -242,31 +767,34 @@ export class Extension {
             }
             logInfo(`Port: ${origin}, made changes to the settings.`);
             const validatedData = getValidatedObject(data, DEFAULT_THEME);
+            if (!validatedData) {
+                return;
+            }
             this.copyShadowCopy({theme: validatedData} as UserSettings, origin);
             this.setTheme(validatedData);
-            logInfo('Saved', this.user.settings.theme);
+            logInfo('Saved', UserStorage.settings.theme);
         }
         if (type === 'resetSettings') {
-            const shadowCopy = this.user.settings.shadowCopy.find(({id}) => id === origin);
+            const shadowCopy = UserStorage.settings.shadowCopy.find(({id}) => id === origin);
             if (!shadowCopy) {
                 logWarn('No data detected to reset settings.');
                 return;
             }
-            const previousSettings = getPreviousObject(shadowCopy.copy, this.user.settings, shadowCopy.oldSettings);
-            const index = this.user.settings.shadowCopy.indexOf(shadowCopy);
-            const newshadowCopy = this.user.settings.shadowCopy.slice();
+            const previousSettings = getPreviousObject(shadowCopy.copy, UserStorage.settings, shadowCopy.oldSettings);
+            const index = UserStorage.settings.shadowCopy.indexOf(shadowCopy);
+            const newshadowCopy = UserStorage.settings.shadowCopy.slice();
             newshadowCopy.splice(index, 1);
             previousSettings ? this.changeSettings({...previousSettings, shadowCopy: newshadowCopy}) : this.changeSettings({shadowCopy: newshadowCopy});
             if (isNative) {
                 this.connectedNativesPorts.delete(origin);
             }
-            logInfo('Resseted', this.user.settings);
+            logInfo('Resseted', UserStorage.settings);
         }
     }
 
-    private connectedNativesPorts: Map<string, chrome.runtime.Port> = new Map();
+    private static connectedNativesPorts: Map<string, chrome.runtime.Port> = new Map();
 
-    private connectToNative = (native: string[] | string) => {
+    private static connectToNative = (native: string[] | string) => {
         if (Array.isArray(native)) {
             forEach(native, this.connectToNative);
         } else if (!this.connectedNativesPorts.has(native)) {
@@ -277,325 +805,29 @@ export class Extension {
         }
     };
 
-    private registerExternalConnections() {
-        this.connectToNative(this.user.settings.externalConnections
+    private static registerExternalConnections() {
+        this.connectToNative(UserStorage.settings.externalConnections
             .filter((externalConnection) => externalConnection.isNative)
             .map((nativeConnection) => nativeConnection.id));
         chrome.runtime.onConnectExternal.addListener((port) => {
-            if (this.user.settings.enableExternalConnections) {
-                logInfo(`Port ${port.sender.origin} has been connected to dark reader.`);
-                port.onMessage.addListener((incomingData) => this.externalRequestsHandler(incomingData, port.sender.origin));
-                port.onDisconnect.addListener(() => this.externalRequestsHandler({type: 'resetSettings', isNative: false}, port.sender.origin));
+            if (UserStorage.settings.enableExternalConnections) {
+                logInfo(`Port ${port.sender!.origin} has been connected to dark reader.`);
+                port.onMessage.addListener((incomingData) => this.externalRequestsHandler(incomingData, port.sender!.origin!));
+                port.onDisconnect.addListener(() => this.externalRequestsHandler({type: 'resetSettings', isNative: false}, port.sender!.origin!));
             } else {
-                logWarn(`Port: ${port.sender.origin}, tried to make contact, but the Enable External Connections setting is not enabled and there by blocked.`);
+                logWarn(`Port: ${port.sender!.origin}, tried to make contact, but the Enable External Connections setting is not enabled and there by blocked.`);
             }
         });
     }
 
-    private cleanNatives(removedValues: ExternalConnection[]) {
+    private static cleanNatives(removedValues: ExternalConnection[]) {
         removedValues.map((entry) => entry.id)
             .forEach((entry) => {
                 if (!this.connectedNativesPorts.has(entry)) {
                     return;
                 }
-                this.connectedNativesPorts.get(entry).disconnect();
+                this.connectedNativesPorts.get(entry)!.disconnect();
                 this.connectedNativesPorts.delete(entry);
             });
-    }
-
-    private async getShortcuts() {
-        const commands = await getCommands();
-        return commands.reduce((map, cmd) => Object.assign(map, {[cmd.name]: cmd.shortcut}), {} as Shortcuts);
-    }
-
-    setShortcut(command: string, shortcut: string) {
-        setShortcut(command, shortcut);
-    }
-
-    private async collectData(): Promise<ExtensionData> {
-        return {
-            isEnabled: this.isEnabled(),
-            isReady: this.ready,
-            settings: this.user.settings,
-            fonts: this.fonts,
-            news: this.news.latest,
-            shortcuts: await this.getShortcuts(),
-            devtools: {
-                dynamicFixesText: this.devtools.getDynamicThemeFixesText(),
-                filterFixesText: this.devtools.getInversionFixesText(),
-                staticThemesText: this.devtools.getStaticThemesText(),
-                hasCustomDynamicFixes: this.devtools.hasCustomDynamicThemeFixes(),
-                hasCustomFilterFixes: this.devtools.hasCustomFilterFixes(),
-                hasCustomStaticFixes: this.devtools.hasCustomStaticFixes(),
-            },
-        };
-    }
-
-    private onNewsUpdate(news: News[]) {
-        const latestNews = news.length > 0 && news[0];
-        if (latestNews && latestNews.important && !latestNews.read) {
-            this.icon.showImportantBadge();
-            return;
-        }
-
-        const unread = news.filter(({read}) => !read);
-        if (unread.length > 0 && this.user.settings.notifyOfNews) {
-            this.icon.showUnreadReleaseNotesBadge(unread.length);
-            return;
-        }
-
-        this.icon.hideBadge();
-    }
-
-    private getConnectionMessage(url, frameURL) {
-        if (this.ready) {
-            return this.getTabMessage(url, frameURL);
-        } else {
-            return new Promise<{type: string; data?: any}>((resolve) => {
-                this.awaiting.push(() => {
-                    resolve(this.getTabMessage(url, frameURL));
-                });
-            });
-        }
-    }
-
-    private getUnsupportedSenderMessage() {
-        return {type: 'unsupported-sender'};
-    }
-
-    private wasEnabledOnLastCheck: boolean;
-
-    private startAutoTimeCheck() {
-        setInterval(() => {
-            if (!this.ready || this.user.settings.automation === '') {
-                return;
-            }
-            this.handleAutoCheck();
-        }, AUTO_TIME_CHECK_INTERVAL);
-    }
-
-    private wasLastColorSchemeDark = null;
-
-    private onColorSchemeChange = ({isDark}) => {
-        this.wasLastColorSchemeDark = isDark;
-        if (this.user.settings.automation !== 'system') {
-            return;
-        }
-        this.handleAutoCheck();
-    };
-
-    private handleAutoCheck = () => {
-        if (!this.ready) {
-            return;
-        }
-        const isEnabled = this.isEnabled();
-        if (this.wasEnabledOnLastCheck !== isEnabled) {
-            this.wasEnabledOnLastCheck = isEnabled;
-            this.onAppToggle();
-            this.tabs.sendMessage(this.getTabMessage);
-            this.reportChanges();
-        }
-    };
-
-    changeSettings($settings: Partial<UserSettings>) {
-        const prev = {...this.user.settings};
-
-        this.user.set($settings);
-
-        if (
-            (prev.enabled !== this.user.settings.enabled) ||
-            (prev.automation !== this.user.settings.automation) ||
-            (prev.time.activation !== this.user.settings.time.activation) ||
-            (prev.time.deactivation !== this.user.settings.time.deactivation) ||
-            (prev.location.latitude !== this.user.settings.location.latitude) ||
-            (prev.location.longitude !== this.user.settings.location.longitude)
-        ) {
-            this.onAppToggle();
-        }
-        if (prev.syncSettings !== this.user.settings.syncSettings) {
-            this.user.saveSyncSetting(this.user.settings.syncSettings);
-        }
-        if (!isArrayEqual(prev.externalConnections, this.user.settings.externalConnections)) {
-            this.connectToNative(this.user.settings.externalConnections
-                .filter((externalConnection) => externalConnection.isNative)
-                .map((nativeConnection) => nativeConnection.id));
-            this.cleanNatives(prev.externalConnections.filter((entry) => this.user.settings.externalConnections.includes(entry)));
-        }
-        if (this.isEnabled() && $settings.changeBrowserTheme != null && prev.changeBrowserTheme !== $settings.changeBrowserTheme) {
-            if ($settings.changeBrowserTheme) {
-                setWindowTheme(this.user.settings.theme);
-            } else {
-                resetWindowTheme();
-            }
-        }
-
-        this.onSettingsChanged();
-    }
-
-    setTheme($theme: Partial<FilterConfig>) {
-        this.user.set({theme: {...this.user.settings.theme, ...$theme}});
-
-        if (this.isEnabled() && this.user.settings.changeBrowserTheme) {
-            setWindowTheme(this.user.settings.theme);
-        }
-
-        this.onSettingsChanged();
-    }
-
-    private async reportChanges() {
-        const info = await this.collectData();
-        this.messenger.reportChanges(info);
-    }
-
-    toggleURL(url: string) {
-        const isInDarkList = isURLInList(url, this.config.DARK_SITES);
-        const siteList = isInDarkList ?
-            this.user.settings.siteListEnabled.slice() :
-            this.user.settings.siteList.slice();
-        const pattern = getURLHostOrProtocol(url);
-        const index = siteList.indexOf(pattern);
-        if (index < 0) {
-            siteList.push(pattern);
-        } else {
-            siteList.splice(index, 1);
-        }
-        if (isInDarkList) {
-            this.changeSettings({siteListEnabled: siteList});
-        } else {
-            this.changeSettings({siteList});
-        }
-    }
-
-    /**
-     * Adds host name of last focused tab
-     * into Sites List (or removes).
-     */
-    async toggleCurrentSite() {
-        const url = await this.tabs.getActiveTabURL();
-        this.toggleURL(url);
-    }
-
-
-    //------------------------------------
-    //
-    //       Handle config changes
-    //
-
-    private onAppToggle() {
-        if (this.isEnabled()) {
-            this.icon.setActive();
-            if (this.user.settings.changeBrowserTheme) {
-                setWindowTheme(this.user.settings.theme);
-            }
-        } else {
-            this.icon.setInactive();
-            if (this.user.settings.changeBrowserTheme) {
-                resetWindowTheme();
-            }
-        }
-    }
-
-    private onSettingsChanged() {
-        if (!this.ready) {
-            return;
-        }
-
-        this.wasEnabledOnLastCheck = this.isEnabled();
-        this.tabs.sendMessage(this.getTabMessage);
-        this.saveUserSettings();
-        this.reportChanges();
-    }
-
-    private onRemoteSettingsChange() {
-        // TODO: Requires proper handling and more testing
-        // to prevent cycling across instances.
-    }
-
-
-    //----------------------
-    //
-    // Add/remove css to tab
-    //
-    //----------------------
-
-    private getURLInfo(url: string): TabInfo {
-        const {DARK_SITES} = this.config;
-        const isInDarkList = isURLInList(url, DARK_SITES);
-        const isProtected = !canInjectScript(url);
-        return {
-            url,
-            isInDarkList,
-            isProtected,
-        };
-    }
-
-    private getTabMessage = (url: string, frameURL: string) => {
-        const urlInfo = this.getURLInfo(url);
-        if (this.isEnabled() && isURLEnabled(url, this.user.settings, urlInfo)) {
-            const custom = this.user.settings.customThemes.find(({url: urlList}) => isURLInList(url, urlList));
-            const preset = custom ? null : this.user.settings.presets.find(({urls}) => isURLInList(url, urls));
-            const theme = custom ? custom.theme : preset ? preset.theme : this.user.settings.theme;
-
-            console.log(`Creating CSS for url: ${url}`);
-            switch (theme.engine) {
-                case ThemeEngines.cssFilter: {
-                    return {
-                        type: 'add-css-filter',
-                        data: createCSSFilterStylesheet(theme, url, frameURL, this.config.INVERSION_FIXES),
-                    };
-                }
-                case ThemeEngines.svgFilter: {
-                    if (isFirefox) {
-                        return {
-                            type: 'add-css-filter',
-                            data: createSVGFilterStylesheet(theme, url, frameURL, this.config.INVERSION_FIXES),
-                        };
-                    }
-                    return {
-                        type: 'add-svg-filter',
-                        data: {
-                            css: createSVGFilterStylesheet(theme, url, frameURL, this.config.INVERSION_FIXES),
-                            svgMatrix: getSVGFilterMatrixValue(theme),
-                            svgReverseMatrix: getSVGReverseFilterMatrixValue(),
-                        },
-                    };
-                }
-                case ThemeEngines.staticTheme: {
-                    return {
-                        type: 'add-static-theme',
-                        data: theme.stylesheet && theme.stylesheet.trim() ?
-                            theme.stylesheet :
-                            createStaticStylesheet(theme, url, frameURL, this.config.STATIC_THEMES),
-                    };
-                }
-                case ThemeEngines.dynamicTheme: {
-                    const filter = {...theme};
-                    delete filter.engine;
-                    const fixes = getDynamicThemeFixesFor(url, frameURL, this.config.DYNAMIC_THEME_FIXES, this.user.settings.enableForPDF);
-                    const isIFrame = frameURL != null;
-                    return {
-                        type: 'add-dynamic-theme',
-                        data: {filter, fixes, isIFrame},
-                    };
-                }
-                default: {
-                    throw new Error(`Unknown engine ${theme.engine}`);
-                }
-            }
-        }
-
-        console.log(`Site is not inverted: ${url}`);
-        return {
-            type: 'clean-up',
-        };
-    };
-
-
-    //-------------------------------------
-    //          User settings
-
-    private async saveUserSettings() {
-        await this.user.saveSettings();
-        console.log('saved', this.user.settings);
     }
 }

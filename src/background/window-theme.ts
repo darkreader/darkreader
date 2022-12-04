@@ -1,8 +1,9 @@
 import type {RGBA} from '../utils/color';
-import {parse} from '../utils/color';
+import {parseColorWithCache} from '../utils/color';
 import {modifyBackgroundColor, modifyForegroundColor, modifyBorderColor} from '../generators/modify-colors';
 import type {FilterConfig} from '../definitions';
 
+// TODO: remove type after dependency update
 declare const browser: {
     theme: {
         update: ((theme: any) => Promise<void>);
@@ -10,7 +11,7 @@ declare const browser: {
     };
 };
 
-const themeColorTypes = {
+const themeColorTypes: { [key: string]: 'bg' | 'text' | 'border' } = {
     accentcolor: 'bg',
     button_background_active: 'text',
     button_background_hover: 'text',
@@ -46,7 +47,7 @@ const themeColorTypes = {
     toolbar_vertical_separator: 'border',
 };
 
-const $colors = {
+const $colors: { [key: string]: string } = {
     // 'accentcolor' is the deprecated predecessor of 'frame'.
     // https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json/theme#colors
     accentcolor: '#111111',
@@ -59,7 +60,6 @@ const $colors = {
     sidebar_border: '#333',
     sidebar_text: 'black',
     tab_background_text: 'white',
-    tab_line: '#23aeff',
     tab_loading: '#23aeff',
     // 'textcolor' is the predecessor of 'tab_background_text'.
     // https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json/theme#colors
@@ -70,14 +70,14 @@ const $colors = {
 };
 
 export function setWindowTheme(filter: FilterConfig) {
-    const colors = Object.entries($colors).reduce((obj, [key, value]) => {
-        const type = themeColorTypes[key];
+    const colors = Object.entries($colors).reduce((obj: { [key: string]: string }, [key, value]) => {
+        const type: 'bg' | 'text' | 'border' = themeColorTypes[key];
         const modify: ((rgb: RGBA, filter: FilterConfig) => string) = {
             'bg': modifyBackgroundColor,
             'text': modifyForegroundColor,
             'border': modifyBorderColor,
         }[type];
-        const rgb = parse(value);
+        const rgb = parseColorWithCache(value)!;
         const modified = modify(rgb, filter);
         obj[key] = modified;
         return obj;

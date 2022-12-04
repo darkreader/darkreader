@@ -1,5 +1,5 @@
-const chokidar = require('chokidar');
-const {log} = require('./utils');
+import chokidar from 'chokidar';
+import {log} from './utils.js';
 
 const DEBOUNCE = 200;
 
@@ -15,7 +15,7 @@ function watch(options) {
     function onChange(path) {
         queue.add(path);
 
-        if (timeoutId != null) {
+        if (timeoutId !== null) {
             return;
         }
 
@@ -50,4 +50,4 @@ function watch(options) {
     return watcher;
 }
 
-module.exports = watch;
+export default watch;

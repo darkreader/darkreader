@@ -1,7 +1,7 @@
 // @ts-check
-const http = require('http');
-const path = require('path');
-const url = require('url');
+import http from 'http';
+import path from 'path';
+import url from 'url';
 
 const mimeTypes = new Map(
     Object.entries({
@@ -15,11 +15,23 @@ const mimeTypes = new Map(
     }),
 );
 
-async function createTestServer(/** @type {number} */port) {
+/**
+ * We reuse a single listener for each of exit and SIGINT events to
+ * avoid warnings about possible event listener leaks.
+ * @type {Array<() => Promise<void>>}
+ */
+const terminationListeners = [];
+const terminationListener = () => {
+    terminationListeners.forEach((listener) => listener());
+};
+
+export async function createTestServer(/** @type {number} */port) {
     /** @type {import('http').Server} */
     let server;
     /** @type {{[path: string]: string | import('http').RequestListener}} */
     const paths = {};
+    /** @type {Set<import('net').Socket>} */
+    const sockets = new Set();
 
     /** @type {import('http').RequestListener} */
     function handleRequest(req, res) {
@@ -56,6 +68,11 @@ async function createTestServer(/** @type {number} */port) {
             server = http
                 .createServer(handleRequest)
                 .listen(port, () => resolve());
+
+            server.on('connection', (socket) => {
+                sockets.add(socket);
+                socket.on('close', () => sockets.delete(socket));
+            });
         });
     }
 
@@ -81,11 +98,17 @@ async function createTestServer(/** @type {number} */port) {
                 server = null;
                 resolve();
             });
+            sockets.forEach((socket) => {
+                socket.destroy();
+            });
         });
     }
 
-    process.on('exit', close);
-    process.on('SIGINT', close);
+    if (terminationListeners.length === 0) {
+        process.on('exit', terminationListener);
+        process.on('SIGINT', terminationListener);
+    }
+    terminationListeners.push(close);
 
     await start();
 
@@ -95,7 +118,3 @@ async function createTestServer(/** @type {number} */port) {
         url: `http://localhost:${port}`,
     };
 }
-
-module.exports = {
-    createTestServer,
-};

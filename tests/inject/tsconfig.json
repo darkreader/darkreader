@@ -1,11 +1,33 @@
 {
-    "extends": "../../src/tsconfig",
+    "$schema": "https://json.schemastore.org/tsconfig",
     "compilerOptions": {
-        "module": "es2015",
-        "outDir": "",
+        "target": "ES2019",
+        "module": "ES2015",
+        "lib": [
+            "ES2015",
+            "ES2017",
+            "DOM",
+            "DOM.Iterable"
+        ],
         "types": [
             "chrome",
+            "offscreencanvas",
             "jasmine"
-        ]
-    }
+        ],
+        "allowJs": true,
+        "downlevelIteration": true,
+        "esModuleInterop": true,
+        "jsx": "react",
+        "jsxFactory": "m",
+        "moduleResolution": "Node",
+        "noEmit": true,
+        "noImplicitAny": true,
+        "removeComments": false,
+        "sourceMap": true,
+        "inlineSources": true,
+        "noEmitOnError": true
+    },
+    "exclude": [
+        "./coverage"
+    ]
 }

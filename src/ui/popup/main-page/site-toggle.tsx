@@ -1,18 +1,34 @@
 import {m} from 'malevic';
-import {isURLEnabled, isPDF} from '../../../utils/url';
+import {isChromium} from '../../../utils/platform';
+import {getLocalMessage} from '../../../utils/locales';
+import {isURLEnabled, isPDF, isLocalFile} from '../../../utils/url';
 import SiteToggle from '../components/site-toggle';
 import ControlGroup from '../control-group';
 import type {ViewProps} from '../types';
 
 export default function SiteToggleGroup(props: ViewProps) {
-    const isPageEnabled = isURLEnabled(props.tab.url, props.data.settings, props.tab);
-    const descriptionText = isPDF(props.tab.url) ?
-        isPageEnabled ?
-            'Enabled for PDF files' :
-            'Disabled for PDF files' :
-        isPageEnabled ?
-            'Enabled for current website' :
-            'Disabled for current website';
+    const tab = props.data.activeTab;
+    const isPageEnabled = isURLEnabled(tab.url, props.data.settings, tab, props.data.isAllowedFileSchemeAccess);
+    const isFile = isChromium && isLocalFile(tab.url);
+    const {isDarkThemeDetected, isProtected, isInDarkList} = tab;
+    let descriptionText = '';
+
+    if (isFile && !props.data.isAllowedFileSchemeAccess) {
+        descriptionText = getLocalMessage('local_files_forbidden');
+    } else if (isPDF(tab.url)) {
+        descriptionText = isPageEnabled ? 'Enabled for PDF files' : 'Disabled for PDF files';
+    } else if (isDarkThemeDetected) {
+        descriptionText = 'Dark theme detected on page';
+    } else if (isPageEnabled) {
+        descriptionText = 'Enabled for current website';
+    } else if (isProtected) {
+        descriptionText = getLocalMessage('page_protected');
+    } else if (isInDarkList) {
+        descriptionText = getLocalMessage('page_in_dark_list');
+    } else {
+        descriptionText = 'Disabled for current website';
+    }
+
     const description = (
         <span
             class={{

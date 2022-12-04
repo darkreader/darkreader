@@ -10,17 +10,17 @@ import NewBody from '../body';
 import MoreSettings from './more-settings';
 import {NewsGroup, NewsButton} from './news';
 import SiteListSettings from './site-list-settings';
-import ThemeEngines from '../../../generators/theme-engines';
 import {getDuration} from '../../../utils/time';
 import {DONATE_URL, GITHUB_URL, PRIVACY_URL, TWITTER_URL, getHelpURL} from '../../../utils/links';
 import {getLocalMessage} from '../../../utils/locales';
-import {compose} from '../../utils';
-import type {ExtensionData, ExtensionActions, TabInfo, News as NewsObject} from '../../../definitions';
-import {isMobile, isFirefox, isThunderbird} from '../../../utils/platform';
+import {compose, openExtensionPage} from '../../utils';
+import type {ExtensionData, ExtensionActions, News as NewsObject} from '../../../definitions';
+import {isMobile} from '../../../utils/platform';
+
+declare const __THUNDERBIRD__: boolean;
 
 interface BodyProps {
     data: ExtensionData;
-    tab: TabInfo;
     actions: ExtensionActions;
 }
 
@@ -31,16 +31,11 @@ interface BodyState {
     moreToggleSettingsOpen: boolean;
 }
 
-function openDevTools() {
-    chrome.windows.create({
-        type: 'panel',
-        url: isFirefox ? '../devtools/index.html' : 'ui/devtools/index.html',
-        width: 600,
-        height: 600,
-    });
+async function openDevTools() {
+    await openExtensionPage('devtools');
 }
 
-function Body(props: BodyProps) {
+function Body(props: BodyProps & {fonts: string[]}) {
     const context = getContext();
     const {state, setState} = useState<BodyState>({
         activeTab: 'Filter',
@@ -58,7 +53,7 @@ function Body(props: BodyProps) {
     }
 
     if (isMobile || props.data.settings.previewNewDesign) {
-        return <NewBody {...props} />;
+        return <NewBody {...props} fonts={props.fonts}/>;
     }
 
     const unreadNews = props.data.news.filter(({read}) => !read);
@@ -66,7 +61,7 @@ function Body(props: BodyProps) {
     const isFirstNewsUnread = latestNews && !latestNews.read;
 
     context.onRender(() => {
-        if (isFirstNewsUnread && !state.newsOpen && !state.didNewsSlideIn) {
+        if (props.data.settings.fetchNews && isFirstNewsUnread && !state.newsOpen && !state.didNewsSlideIn) {
             setTimeout(toggleNews, 750);
         }
     });
@@ -86,7 +81,7 @@ function Body(props: BodyProps) {
     }
 
     let displayedNewsCount = unreadNews.length;
-    if (unreadNews.length > 0 && !props.data.settings.notifyOfNews) {
+    if (unreadNews.length > 0) {
         const latest = new Date(unreadNews[0].date);
         const today = new Date();
         const newsWereLongTimeAgo = latest.getTime() < today.getTime() - getDuration({days: 14});
@@ -94,14 +89,6 @@ function Body(props: BodyProps) {
             displayedNewsCount = 0;
         }
     }
-
-    const globalThemeEngine = props.data.settings.theme.engine;
-    const devtoolsData = props.data.devtools;
-    const hasCustomFixes = (
-        (globalThemeEngine === ThemeEngines.dynamicTheme && devtoolsData.hasCustomDynamicFixes) ||
-        ([ThemeEngines.cssFilter, ThemeEngines.svgFilter].includes(globalThemeEngine) && devtoolsData.hasCustomFilterFixes) ||
-        (globalThemeEngine === ThemeEngines.staticTheme && devtoolsData.hasCustomStaticFixes)
-    );
 
     function toggleMoreToggleSettings() {
         setState({moreToggleSettingsOpen: !state.moreToggleSettingsOpen});
@@ -113,7 +100,6 @@ function Body(props: BodyProps) {
 
             <Header
                 data={props.data}
-                tab={props.tab}
                 actions={props.actions}
                 onMoreToggleSettingsClick={toggleMoreToggleSettings}
             />
@@ -121,22 +107,22 @@ function Body(props: BodyProps) {
             <TabPanel
                 activeTab={state.activeTab}
                 onSwitchTab={(tab) => setState({activeTab: tab})}
-                tabs={isThunderbird ? {
+                tabs={__THUNDERBIRD__ ? {
                     'Filter': (
-                        <FilterSettings data={props.data} actions={props.actions} tab={props.tab} />
+                        <FilterSettings data={props.data} actions={props.actions} />
                     ),
                     'More': (
-                        <MoreSettings data={props.data} actions={props.actions} tab={props.tab} />
+                        <MoreSettings data={props.data} actions={props.actions} fonts={props.fonts}/>
                     ),
                 } : {
                     'Filter': (
-                        <FilterSettings data={props.data} actions={props.actions} tab={props.tab} />
+                        <FilterSettings data={props.data} actions={props.actions} />
                     ),
                     'Site list': (
                         <SiteListSettings data={props.data} actions={props.actions} isFocused={state.activeTab === 'Site list'} />
                     ),
                     'More': (
-                        <MoreSettings data={props.data} actions={props.actions} tab={props.tab} />
+                        <MoreSettings data={props.data} actions={props.actions} fonts={props.fonts}/>
                     ),
                 }}
                 tabLabels={{
@@ -158,13 +144,7 @@ function Body(props: BodyProps) {
                         <span class="donate-link__text">{getLocalMessage('donate')}</span>
                     </a>
                     <NewsButton active={state.newsOpen} count={displayedNewsCount} onClick={toggleNews} />
-                    <Button
-                        onclick={openDevTools}
-                        class={{
-                            'dev-tools-button': true,
-                            'dev-tools-button--has-custom-fixes': hasCustomFixes,
-                        }}
-                    >
+                    <Button onclick={openDevTools} class="dev-tools-button">
                         🛠 {getLocalMessage('open_dev_tools')}
                     </Button>
                 </div>

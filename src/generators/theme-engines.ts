@@ -1,6 +1,6 @@
-export default {
-    cssFilter: 'cssFilter',
-    svgFilter: 'svgFilter',
-    staticTheme: 'staticTheme',
-    dynamicTheme: 'dynamicTheme',
-};
+export enum ThemeEngine {
+    cssFilter = 'cssFilter',
+    svgFilter = 'svgFilter',
+    staticTheme = 'staticTheme',
+    dynamicTheme = 'dynamicTheme',
+}

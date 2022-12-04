@@ -1,14 +1,6 @@
 # Build files
 #-----------------------------------
-build
-debug
-build.zip
-build-firefox
-debug-firefox
-build-firefox.xpi
-build-thunderbird
-debug-thunderbird
-build-thunderbird.xpi
+build/
 darkreader.js
 debug.log
 
@@ -21,13 +13,19 @@ node_modules/
 tests/coverage/
 tests/browser/coverage/
 tests/inject/coverage/
+coverage/
 
 # IDE and editor configs
 #-----------------------------------
 .idea/
 .vscode/
+.log/
 *.code-workspace
 
 # Cache files
 #-----------------------------------
 .eslintcache
+
+# V8 Profiler logs
+#-----------------------------------
+isolate-*-v8.log

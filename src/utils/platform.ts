@@ -98,6 +98,15 @@ export const isCSSColorSchemePropSupported = (() => {
         return false;
     }
     const el = document.createElement('div');
-    el.setAttribute('style', 'color-scheme: dark');
+    if (typeof el.style.colorScheme === 'string') {
+        return true;
+    }
+    // TODO: remove the following code
+    // This feature detection method requires weak or missing CSP in manifest.json
+    try {
+        el.setAttribute('style', 'color-scheme: dark');
+    } catch (e) {
+        return false;
+    }
     return el.style && el.style.colorScheme === 'dark';
 })();

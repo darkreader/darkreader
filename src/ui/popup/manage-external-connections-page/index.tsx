@@ -8,15 +8,15 @@ import type {ViewProps} from '../types';
 import type {Automation} from 'definitions';
 import {AutomationMode} from '../../../utils/automation';
 import {isMatchMediaChangeEventListenerBuggy} from '../../../utils/platform';
-import ManageExternalConnectionsButton from './mange-external-connections-button';
+import ManageExternalConnectionsButton from '../automation-page/mange-external-connections-button';
 
 declare const __CHROMIUM_MV3__: boolean;
 
-type AutomationPageProps = ViewProps & {
-    onManageExternalConnectionsClick: () => void;
+type ManageExternalConnectionsProps = ViewProps & {
+    //onManageExternalConnectionsClick: () => void;
 };
 
-export default function AutomationPage(props: AutomationPageProps) {
+export default function ManageExternalConnectionsPage(props: ManageExternalConnectionsProps) {
     const isSystemAutomation = props.data.settings.automation.mode === AutomationMode.SYSTEM;
     const locationSettings = props.data.settings.location;
     const values = {
@@ -177,7 +177,7 @@ export default function AutomationPage(props: AutomationPageProps) {
             <p class="automation-page__description">
                 Automation behavior
             </p>
-            <ManageExternalConnectionsButton onClick={props.onManageExternalConnectionsClick} />
+            
         </div>
     );
 }

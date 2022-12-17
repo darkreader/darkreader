@@ -2,8 +2,8 @@ import {m} from 'malevic';
 import type {ViewProps} from '../types';
 import CheckButton from '../check-button';
 
-export default function EnableExternalConnections(props: ViewProps) {
-    function onEnableExternalConnections(checked: boolean) {
+export default function EnableNativeConnections(props: ViewProps) {
+    function onEnableNativeConnections(checked: boolean) {
         props.actions.changeSettings({enableExternalConnections: checked});
     }
 
@@ -14,7 +14,7 @@ export default function EnableExternalConnections(props: ViewProps) {
             description={props.data.settings.enableExternalConnections ?
                 'Permit communication with other extensions' :
                 'Communication with other extensions is forbidden'}
-            onChange={onEnableExternalConnections}
+            onChange={onEnableNativeConnections}
         />
     );
 }

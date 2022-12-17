@@ -8,7 +8,7 @@ import type {ViewProps} from '../types';
 import type {Automation} from 'definitions';
 import {AutomationMode} from '../../../utils/automation';
 import {isMatchMediaChangeEventListenerBuggy} from '../../../utils/platform';
-import ManageExternalConnectionsButton from '../automation-page/mange-external-connections-button';
+import EnableExternalConnections from './enable-external-connections';
 
 declare const __CHROMIUM_MV3__: boolean;
 
@@ -86,9 +86,11 @@ export default function ManageExternalConnectionsPage(props: ManageExternalConne
 
     return (
         <div
-            class={'automation-page'}
+            class={'manage-external-connections-page'}
         >
-            <div class="automation-page__line">
+            <EnableExternalConnections {...props}/>
+
+            <div class="manage-external-connections-page__line">
                 <CheckBox
                     checked={props.data.settings.automation.mode === AutomationMode.TIME}
                     onchange={(e: {target: {checked: boolean}}) => changeAutomationMode(e.target.checked ? AutomationMode.TIME : AutomationMode.NONE)}
@@ -99,16 +101,16 @@ export default function ManageExternalConnectionsPage(props: ManageExternalConne
                     onChange={([start, end]) => props.actions.changeSettings({time: {activation: start, deactivation: end}})}
                 />
             </div>
-            <p class="automation-page__description">
+            <p class="manage-external-connections-page__description">
                 {getLocalMessage('set_active_hours')}
             </p>
-            <div class="automation-page__line automation-page__location">
+            <div class="manage-external-connections-page__line manage-external-connections-page__location">
                 <CheckBox
                     checked={props.data.settings.automation.mode === AutomationMode.LOCATION}
                     onchange={(e: {target: {checked: boolean}}) => changeAutomationMode(e.target.checked ? AutomationMode.LOCATION : AutomationMode.NONE)}
                 />
                 <TextBox
-                    class="automation-page__location__latitude"
+                    class="manage-external-connections-page__location__latitude"
                     placeholder={getLocalMessage('latitude')}
                     onchange={(e: {target: HTMLInputElement}) => locationChanged(e.target, e.target.value, 'latitude')}
                     oncreate={(node: HTMLInputElement) => node.value = getLocationString(locationSettings.latitude!)}
@@ -119,7 +121,7 @@ export default function ManageExternalConnectionsPage(props: ManageExternalConne
                     }}
                 />
                 <TextBox
-                    class="automation-page__location__longitude"
+                    class="manage-external-connections-page__location__longitude"
                     placeholder={getLocalMessage('longitude')}
                     onchange={(e: {target: HTMLInputElement}) => locationChanged(e.target, e.target.value, 'longitude')}
                     oncreate={(node: HTMLInputElement) => node.value = getLocationString(locationSettings.longitude!)}
@@ -130,22 +132,22 @@ export default function ManageExternalConnectionsPage(props: ManageExternalConne
                     }}
                 />
             </div>
-            <p class="automation-page__location-description">
+            <p class="manage-external-connections-page__location-description">
                 {getLocalMessage('set_location')}
             </p>
             <div class={[
-                'automation-page__line',
-                'automation-page__system-dark-mode',
+                'manage-external-connections-page__line',
+                'manage-external-connections-page__system-dark-mode',
             ]}
             >
                 <CheckBox
-                    class="automation-page__system-dark-mode__checkbox"
+                    class="manage-external-connections-page__system-dark-mode__checkbox"
                     checked={isSystemAutomation}
                     onchange={(e: {target: {checked: boolean}}) => changeAutomationMode(e.target.checked ? AutomationMode.SYSTEM : AutomationMode.NONE)}/>
                 <Button
                     class={{
-                        'automation-page__system-dark-mode__button': true,
-                        'automation-page__system-dark-mode__button--active': isSystemAutomation,
+                        'manage-external-connections-page__system-dark-mode__button': true,
+                        'manage-external-connections-page__system-dark-mode__button--active': isSystemAutomation,
                     }}
                     onclick={() => {
                         if (__CHROMIUM_MV3__) {
@@ -158,11 +160,11 @@ export default function ManageExternalConnectionsPage(props: ManageExternalConne
                     } }
                 >{getLocalMessage('system_dark_mode')}</Button>
             </div>
-            <p class="automation-page__description">
+            <p class="manage-external-connections-page__description">
                 {getLocalMessage('system_dark_mode_description')}
             </p>
             {!isMatchMediaChangeEventListenerBuggy ? null :
-                <p class="automation-page__warning">
+                <p class="manage-external-connections-page__warning">
                     {getLocalMessage('system_dark_mode_chromium_warning')}
                 </p>
             }
@@ -174,10 +176,9 @@ export default function ManageExternalConnectionsPage(props: ManageExternalConne
                     {id: 'Scheme', content: 'Toggle dark/light'},
                 ]}
             />
-            <p class="automation-page__description">
+            <p class="manage-external-connections-page__description">
                 Automation behavior
             </p>
-            
         </div>
     );
 }

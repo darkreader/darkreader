@@ -50,47 +50,41 @@ function Pages(props: ViewProps) {
         store.activePage = 'main';
     }
 
-    function onThemeNavClick() {
+    function onNavigateClick(pageId: PageId) {
         isMobile && history.pushState(undefined, '');
-        store.activePage = 'theme';
+        store.activePage = pageId;
         context.refresh();
+    }
+
+    function onThemeNavClick() {
+        onNavigateClick('theme');
     }
 
     function onSettingsNavClick() {
-        isMobile && history.pushState(undefined, '');
-        store.activePage = 'settings';
-        context.refresh();
+        onNavigateClick('settings');
     }
 
     function onAutomationNavClick() {
-        isMobile && history.pushState(undefined, '');
-        store.activePage = 'automation';
-        context.refresh();
+        onNavigateClick('automation');
     }
 
     function onManageSettingsClick() {
-        isMobile && history.pushState(undefined, '');
-        store.activePage = 'manage-settings';
-        context.refresh();
+        onNavigateClick('manage-settings');
     }
 
     function onSiteListNavClick() {
-        isMobile && history.pushState(undefined, '');
-        store.activePage = 'site-list';
-        context.refresh();
+        onNavigateClick('site-list');
     }
 
     function onManageExternalConnectionsClick() {
-        isMobile && history.pushState(undefined, '');
-        store.activePage = 'manage-external-connections';
-        context.refresh();
+        onNavigateClick('manage-external-connections');
     }
 
     function goBack() {
         const activePage = store.activePage;
         const settingsPageSubpages = ['automation', 'manage-settings', 'site-list'] as PageId[];
         if (activePage === 'manage-external-connections') {
-            store.activePage = 'manage-settings';
+            store.activePage = 'automation';
         } else if (settingsPageSubpages.includes(activePage)) {
             store.activePage = 'settings';
         } else {

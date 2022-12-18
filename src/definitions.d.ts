@@ -4,6 +4,16 @@ import type {MessageType} from './utils/message';
 import type {AutomationMode} from './utils/automation';
 import type {ThemeEngine} from './generators/theme-engines';
 
+export interface DocumentInfo {
+    tabId: number | null;
+    frameId: number | null;
+    documentId: DocumentId;
+    url: string | null;
+    state: DocumentState;
+    timestamp: number;
+    darkThemeDetected: boolean | null;
+}
+
 export interface ExtensionData {
     isEnabled: boolean;
     isReady: boolean;

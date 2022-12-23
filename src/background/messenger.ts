@@ -2,7 +2,7 @@ import {isFirefox} from '../utils/platform';
 import type {ExtensionData, FilterConfig, TabInfo, Message, UserSettings, DevToolsData} from '../definitions';
 import {MessageType} from '../utils/message';
 import {makeFirefoxHappy} from './make-firefox-happy';
-import Messaging from './utils/messaging';
+import Tabs from './utils/messaging';
 
 export interface ExtensionAdapter {
     collect: () => Promise<ExtensionData>;
@@ -163,7 +163,7 @@ export default class Messenger {
 
     static reportChanges(data: ExtensionData) {
         if (this.changeListenerCount > 0) {
-            Messaging.sendMessage({
+            Tabs.sendMessage({
                 type: MessageType.BG_CHANGES,
                 data
             });

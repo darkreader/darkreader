@@ -7,7 +7,7 @@ import {makeChromiumHappy} from './make-chromium-happy';
 import DevTools from './devtools';
 import {logInfo} from './utils/log';
 import {sendLog} from './utils/sendLog';
-import Messaging from './utils/messaging';
+import Tabs from './utils/messaging';
 
 type TestMessage = {
     type: 'getManifest';
@@ -101,10 +101,10 @@ if (__WATCH__) {
             }
             switch (message.type) {
                 case 'reload:css':
-                    Messaging.sendMessage({type: MessageType.BG_CSS_UPDATE});
+                    Tabs.sendMessage({type: MessageType.BG_CSS_UPDATE});
                     break;
                 case 'reload:ui':
-                    Messaging.sendMessage({type: MessageType.BG_UI_UPDATE});
+                    Tabs.sendMessage({type: MessageType.BG_UI_UPDATE});
                     break;
                 case 'reload:full':
                     chrome.tabs.query({}, (tabs) => {

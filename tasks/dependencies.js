@@ -70,7 +70,7 @@ async function main() {
     log.ok('Installed new dependencies');
     await buildAll();
     log.ok('Built new code');
-    await command('diff -r build-old build');
+    await command('diff -r build-old/release build/release');
     await command('diff darkreader-old.js darkreader.js');
     log.ok('Dependency upgrade does not result in change to built output');
 

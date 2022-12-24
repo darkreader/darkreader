@@ -1,3 +1,6 @@
+// TODO: remove this once types are updated
+declare function cancelAnimationFrame(id: number | null | undefined): void;
+
 export function throttle<T extends(...args: any[]) => any>(callback: T) {
     let pending = false;
     let frameId: number | null = null;
@@ -20,8 +23,7 @@ export function throttle<T extends(...args: any[]) => any>(callback: T) {
     }) as any;
 
     const cancel = () => {
-        // TODO: reove cast once types are updated
-        cancelAnimationFrame(frameId as number);
+        cancelAnimationFrame(frameId);
         pending = false;
         frameId = null;
     };
@@ -57,8 +59,7 @@ export function createAsyncTasksQueue() {
 
     function cancel() {
         tasks.splice(0);
-        // TODO: reove cast once types are updated
-        cancelAnimationFrame(frameId as number);
+        cancelAnimationFrame(frameId);
         frameId = null;
     }
 

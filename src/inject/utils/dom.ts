@@ -3,6 +3,9 @@ import {throttle} from '../../utils/throttle';
 import {forEach} from '../../utils/array';
 import {getDuration} from '../../utils/time';
 
+// TODO: remove this once types are updated
+declare function clearTimeout(id: number | null | undefined): void;
+
 interface CreateNodeAsapParams {
     selectNode: () => HTMLElement;
     createNode: (target: HTMLElement) => void;
@@ -150,13 +153,11 @@ export function watchForNodePosition<T extends Node>(
         }
     });
     const run = () => {
-        // TODO: remove type cast after dependency update
         observer.observe(parent as ParentNode, {childList: true});
     };
 
     const stop = () => {
-        // TODO: remove type cast after dependency update
-        clearTimeout(timeoutId as number);
+        clearTimeout(timeoutId);
         observer.disconnect();
         restore.cancel();
     };
@@ -165,7 +166,7 @@ export function watchForNodePosition<T extends Node>(
         observer.takeRecords();
     };
 
-    const updateParent = (parentNode: Node & ParentNode | null) => {
+    const updateParent = (parentNode: Node & ParentNode) => {
         parent = parentNode;
         stop();
         run();

@@ -1,7 +1,6 @@
 // @ts-check
 import {exec} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
-import {readFile, writeFile} from 'node:fs/promises';
 import {log} from './utils.js';
 
 const cwd = fileURLToPath(new URL('../', import.meta.url));
@@ -29,12 +28,12 @@ async function buildAll() {
 }
 
 async function main() {
-    log.ok('Building with old dependencies')
+    log.ok('Building with old dependencies');
     await buildAll();
     log.ok('Built with old dependencies');
     await command('mv build build-old');
     await command('mv darkreader.js darkreader-old.js');
-    log.ok('Moved built output')
+    log.ok('Moved built output');
 
     log.ok('Installing new dependencies');
     await command('npm upgrade');

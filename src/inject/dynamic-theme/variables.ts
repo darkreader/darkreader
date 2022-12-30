@@ -368,8 +368,10 @@ export class VariablesStore {
         }
         this.definedVars.add(varName);
 
-        const color = parseColorWithCache(value);
-        if (color) {
+        // Check if the value is either a raw value or a value that can be parsed
+        // e.g. rgb, hsl.
+        const isColor = rawValueRegex.test(value) || parseColorWithCache(value);
+        if (isColor) {
             this.unknownColorVars.add(varName);
         } else if (
             value.includes('url(') ||

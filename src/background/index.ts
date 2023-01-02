@@ -19,10 +19,6 @@ type TestMessage = {
     type: 'collectData';
     id: number;
 } | {
-    type: 'changeLocalStorage';
-    data: {[key: string]: string};
-    id: number;
-} | {
     type: 'getChromeStorage';
     data: {
         region: 'local' | 'sync';
@@ -35,13 +31,6 @@ type TestMessage = {
         region: 'local' | 'sync';
         data: {[key: string]: any};
     };
-    id: number;
-} | {
-    type: 'getLocalStorage';
-    id: number;
-} | {
-    type: 'setDataIsMigratedForTesting';
-    data: boolean;
     id: number;
 } | {
     type: 'getManifest';
@@ -173,17 +162,6 @@ if (__TEST__) {
                 case 'collectData':
                     Extension.collectData().then(respond);
                     break;
-                case 'changeLocalStorage': {
-                    const data = message.data;
-                    for (const key in data) {
-                        localStorage[key] = data[key];
-                    }
-                    respond();
-                    break;
-                }
-                case 'getLocalStorage':
-                    respond(localStorage ? JSON.stringify(localStorage) : null);
-                    break;
                 case 'getManifest': {
                     const data = chrome.runtime.getManifest();
                     respond(data);
@@ -200,10 +178,6 @@ if (__TEST__) {
                     chrome.storage[region].get(keys, respond);
                     break;
                 }
-                case 'setDataIsMigratedForTesting':
-                    DevTools.setDataIsMigratedForTesting(message.data);
-                    respond();
-                    break;
             }
         } catch (err) {
             socket.send(JSON.stringify({error: String(err), original: e.data}));

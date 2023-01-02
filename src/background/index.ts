@@ -33,10 +33,6 @@ type TestMessage = {
     };
     id: number;
 } | {
-    type: 'setDataIsMigratedForTesting';
-    data: boolean;
-    id: number;
-} | {
     type: 'getManifest';
     id: number;
 };

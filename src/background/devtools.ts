@@ -75,12 +75,6 @@ class PersistentStorageWrapper implements DevToolsStorage {
 }
 
 class TempStorage implements DevToolsStorage {
-    setDataIsMigratedForTesting() {
-        if (__DEBUG__) {
-            logWarn('Unexpected call to setDataIsMigratedForTesting');
-        }
-    }
-
     map = new Map<string, string>();
 
     async get(key: string) {

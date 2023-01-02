@@ -33,9 +33,6 @@ type TestMessage = {
     };
     id: number;
 } | {
-    type: 'getLocalStorage';
-    id: number;
-} | {
     type: 'setDataIsMigratedForTesting';
     data: boolean;
     id: number;
@@ -168,9 +165,6 @@ if (__TEST__) {
                     break;
                 case 'collectData':
                     Extension.collectData().then(respond);
-                    break;
-                case 'getLocalStorage':
-                    respond(localStorage ? JSON.stringify(localStorage) : null);
                     break;
                 case 'getManifest': {
                     const data = chrome.runtime.getManifest();

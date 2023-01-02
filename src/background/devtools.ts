@@ -116,11 +116,9 @@ export default class DevTools {
         this.onChange = onChange;
     }
 
-    // TODO(bershanskiy): make private again once PersistentStorageWrapper removes migration logic.
-    // Part 2 of 2.
-    static KEY_DYNAMIC = 'dev_dynamic_theme_fixes';
-    static KEY_FILTER = 'dev_inversion_fixes';
-    static KEY_STATIC = 'dev_static_themes';
+    private static KEY_DYNAMIC = 'dev_dynamic_theme_fixes';
+    private static KEY_FILTER = 'dev_inversion_fixes';
+    private static KEY_STATIC = 'dev_static_themes';
 
     private static async loadConfigOverrides() {
         const [

@@ -1,4 +1,4 @@
-import {logInfo, logWarn} from './utils/log';
+import {logInfo} from './utils/log';
 import {parseInversionFixes, formatInversionFixes} from '../generators/css-filter';
 import {parseDynamicThemeFixes, formatDynamicThemeFixes} from '../generators/dynamic-theme';
 import {parseStaticThemes, formatStaticThemes} from '../generators/static-theme';
@@ -13,8 +13,6 @@ interface DevToolsStorage {
     remove(key: string): Promise<void> | void;
     has(key: string): Promise<boolean> | boolean;
 }
-
-declare const __DEBUG__: boolean;
 
 class PersistentStorageWrapper implements DevToolsStorage {
     // Cache information within background context for future use without waiting.

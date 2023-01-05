@@ -272,6 +272,7 @@ it('URL is enabled', () => {
     expect(isIPV6('file:///C:/[/test.html')).toEqual(false);
     expect(isIPV6('file:///C:/[/test.html]')).toEqual(false);
     expect(isIPV6('[2001:4860:4860::8844]')).toEqual(true);
+    expect(isIPV6('cplusplus.com/reference/vector/vector/operator[]/')).toEqual(false);
 
     // Temporary Dark Sites list fix
     expect(isURLEnabled(

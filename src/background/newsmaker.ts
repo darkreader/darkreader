@@ -12,9 +12,9 @@ interface NewsmakerState extends Record<string, unknown> {
 }
 
 export default class Newsmaker {
-    private static UPDATE_INTERVAL = getDurationInMinutes({hours: 4});
-    private static ALARM_NAME = 'newsmaker';
-    private static LOCAL_STORAGE_KEY = 'Newsmaker-state';
+    private static readonly UPDATE_INTERVAL = getDurationInMinutes({hours: 4});
+    private static readonly ALARM_NAME = 'newsmaker';
+    private static readonly LOCAL_STORAGE_KEY = 'Newsmaker-state';
 
     private static initialized: boolean;
     private static stateManager: StateManager<NewsmakerState>;

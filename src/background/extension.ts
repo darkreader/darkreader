@@ -55,11 +55,11 @@ export class Extension {
     private static startBarrier: PromiseBarrier<void, void> | null = null;
     private static stateManager: StateManager<ExtensionState> | null = null;
 
-    private static ALARM_NAME = 'auto-time-alarm';
-    private static LOCAL_STORAGE_KEY = 'Extension-state';
+    private static readonly ALARM_NAME = 'auto-time-alarm';
+    private static readonly LOCAL_STORAGE_KEY = 'Extension-state';
 
     // Store system color theme
-    private static SYSTEM_COLOR_LOCAL_STORAGE_KEY = 'system-color-state';
+    private static readonly SYSTEM_COLOR_LOCAL_STORAGE_KEY = 'system-color-state';
     private static systemColorStateManager: StateManager<SystemColorState>;
 
     // Record whether Extension.init() already ran since the last GB start

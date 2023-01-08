@@ -74,9 +74,9 @@ interface CacheRecord {
 
 class LimitedCacheStorage {
     // TODO: remove type cast after dependency update
-    private static QUOTA_BYTES = ((!__TEST__ && (navigator as any).deviceMemory) || 4) * 16 * 1024 * 1024;
-    private static TTL = getDuration({minutes: 10});
-    private static ALARM_NAME = 'network';
+    private static readonly QUOTA_BYTES = ((!__TEST__ && (navigator as any).deviceMemory) || 4) * 16 * 1024 * 1024;
+    private static readonly TTL = getDuration({minutes: 10});
+    private static readonly ALARM_NAME = 'network';
 
     private bytesInUse = 0;
     private records = new Map<string, CacheRecord>();

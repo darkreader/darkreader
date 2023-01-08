@@ -15,7 +15,7 @@ import createCSSFilterStylesheet from '../generators/css-filter';
 import {getDynamicThemeFixesFor} from '../generators/dynamic-theme';
 import createStaticStylesheet from '../generators/static-theme';
 import {createSVGFilterStylesheet, getSVGFilterMatrixValue, getSVGReverseFilterMatrixValue} from '../generators/svg-filter';
-import type {ExtensionData, FilterConfig, Shortcuts, UserSettings, TabInfo, TabData, Command} from '../definitions';
+import type {ExtensionData, FilterConfig, Shortcuts, UserSettings, TabInfo, TabData, Command, DevToolsData} from '../definitions';
 import {isSystemDarkModeEnabled, runColorSchemeChangeDetector} from '../utils/media-query';
 import {isFirefox} from '../utils/platform';
 import {MessageType} from '../utils/message';
@@ -243,6 +243,9 @@ export class Extension {
             collect: async () => {
                 return await this.collectData();
             },
+            collectDevToolsData: async () => {
+                return await this.collectDevToolsData();
+            },
             changeSettings: async (settings) => this.changeSettings(settings),
             setTheme: (theme) => this.setTheme(theme),
             toggleActiveTab: async () => this.toggleActiveTab(),
@@ -369,17 +372,11 @@ export class Extension {
         const [
             news,
             shortcuts,
-            dynamicFixesText,
-            filterFixesText,
-            staticThemesText,
             activeTab,
             isAllowedFileSchemeAccess,
         ] = await Promise.all([
             Newsmaker.getLatest(),
             this.getShortcuts(),
-            DevTools.getDynamicThemeFixesText(),
-            DevTools.getInversionFixesText(),
-            DevTools.getStaticThemesText(),
             this.getActiveTabInfo(),
             new Promise<boolean>((r) => chrome.extension.isAllowedFileSchemeAccess(r)),
         ]);
@@ -392,12 +389,24 @@ export class Extension {
             shortcuts,
             colorScheme: ConfigManager.COLOR_SCHEMES_RAW!,
             forcedScheme: this.autoState === 'scheme-dark' ? 'dark' : this.autoState === 'scheme-light' ? 'light' : null,
-            devtools: {
-                dynamicFixesText,
-                filterFixesText,
-                staticThemesText,
-            },
             activeTab,
+        };
+    }
+
+    static async collectDevToolsData(): Promise<DevToolsData> {
+        const [
+            dynamicFixesText,
+            filterFixesText,
+            staticThemesText
+        ] = await Promise.all([
+            DevTools.getDynamicThemeFixesText(),
+            DevTools.getInversionFixesText(),
+            DevTools.getStaticThemesText(),
+        ]);
+        return {
+            dynamicFixesText,
+            filterFixesText,
+            staticThemesText
         };
     }
 

@@ -106,6 +106,58 @@ function decodeOffset(offsets: string, index: number): [number, number] {
     ];
 }
 
+function addLabel(set: { [label: string]: number[] }, label: string, index: number) {
+    if (!set[label]) {
+        set[label] = [index];
+    } else if (!(set[label].includes(index))) {
+        set[label].push(index);
+    }
+}
+
+function processBlock(text: string, domains: { [domain: string]: number[] }, domainLabelMembers: Array<{ labels: string[], index: number }>, domainLabelFrequencies: { [domainLabel: string]: number }, offsets: Array<[number, number]>, nonstandard: number[], recordStart: number, recordEnd: number, index: number) {
+    // TODO: more formal definition of URLs and delimiters
+    const block = text.substring(recordStart, recordEnd);
+    const lines = block.split('\n');
+    const commandIndices: number[] = [];
+    lines.forEach((ln, i) => {
+        if (ln.match(/^[A-Z]+(\s[A-Z]+){0,2}$/)) {
+            commandIndices.push(i);
+        }
+    });
+
+    if (commandIndices.length === 0) {
+        return;
+    }
+
+    offsets.push([recordStart, recordEnd - recordStart]);
+
+    const urls = parseArray(lines.slice(0, commandIndices[0]).join('\n'));
+    const domainLabels = new Set<string>();
+    for (const url of urls) {
+        const domain = getDomain(url);
+        if (isFullyQualifiedDomain(domain)) {
+            addLabel(domains, domain, index);
+        } else if (isFullyQualifiedDomainWildcard(domain)) {
+            const labels = domain.split('.');
+            domainLabelMembers.push({ labels, index });
+            labels.forEach((l) => domainLabels.add(l));
+        } else {
+            logInfo(`Sitefix parser encountered non-standard URL ${url}`);
+            nonstandard.push(index);
+            break;
+        }
+    }
+
+    // Compute domain label frequencies, counting each label within each fix only once
+    for (const label of domainLabels) {
+        if (domainLabelFrequencies[label]) {
+            domainLabelFrequencies[label]++;
+        } else {
+            domainLabelFrequencies[label] = 1;
+        }
+    }
+}
+
 export function indexSitesFixesConfig<T extends SiteProps>(text: string): SitePropsIndex<T> {
     const domains: { [domain: string]: number[] } = {};
     const domainLabels: { [domainLabel: string]: number[] } = {};
@@ -116,59 +168,6 @@ export function indexSitesFixesConfig<T extends SiteProps>(text: string): SitePr
     const domainLabelFrequencies: { [domainLabel: string]: number } = {};
     const domainLabelMembers: Array<{ labels: string[], index: number }> = [];
 
-    function addLabel(set: { [label: string]: number[] }, label: string, index: number) {
-        if (!set[label]) {
-            set[label] = [index];
-        } else if (!(set[label].includes(index))) {
-            set[label].push(index);
-        }
-    }
-
-    function processBlock(recordStart: number, recordEnd: number, index: number) {
-        // TODO: more formal definition of URLs and delimiters
-        const block = text.substring(recordStart, recordEnd);
-        const lines = block.split('\n');
-        const commandIndices: number[] = [];
-        lines.forEach((ln, i) => {
-            if (ln.match(/^[A-Z]+(\s[A-Z]+){0,2}$/)) {
-                commandIndices.push(i);
-            }
-        });
-
-        if (commandIndices.length === 0) {
-            return;
-        }
-
-        offsets.push([recordStart, recordEnd - recordStart]);
-
-        const urls = parseArray(lines.slice(0, commandIndices[0]).join('\n'));
-        const domainLabels = new Set<string>();
-        for (const url of urls) {
-            const domain = getDomain(url);
-            if (isFullyQualifiedDomain(domain)) {
-                addLabel(domains, domain, index);
-            } else if (isFullyQualifiedDomainWildcard(domain)) {
-                const labels = domain.split('.');
-                domainLabelMembers.push({ labels, index });
-                labels.forEach((l) => domainLabels.add(l));
-            } else {
-                logInfo(`Sitefix parser encountered non-standard URL ${url}`);
-                nonstandard.push(index);
-                break;
-            }
-        }
-
-        // Compute domain label frequencies, counting each label within each fix only once
-        for (const label of domainLabels) {
-            if (domainLabelFrequencies[label]) {
-                domainLabelFrequencies[label]++;
-            } else {
-                domainLabelFrequencies[label] = 1;
-            }
-        }
-
-    }
-
     let recordStart = 0;
     // Delimiter between two blocks
     const delimiterRegex = /^\s*={2,}\s*$/gm;
@@ -178,12 +177,12 @@ export function indexSitesFixesConfig<T extends SiteProps>(text: string): SitePr
         const nextDelimiterStart = delimiter.index!;
         const nextDelimiterEnd = delimiter.index! + delimiter[0].length;
 
-        processBlock(recordStart, nextDelimiterStart, count);
+        processBlock(text, domains, domainLabelMembers, domainLabelFrequencies, offsets, nonstandard, recordStart, nextDelimiterStart, count);
 
         recordStart = nextDelimiterEnd;
         count++;
     }
-    processBlock(recordStart, text.length, count);
+    processBlock(text, domains, domainLabelMembers, domainLabelFrequencies, offsets, nonstandard, recordStart, text.length, count);
 
     // For each domain name, find the 
     for (const { labels, index } of domainLabelMembers) {

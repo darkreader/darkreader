@@ -114,6 +114,19 @@ function addLabel(set: { [label: string]: number[] }, label: string, index: numb
     }
 }
 
+function extractDomainLabelsFromFullyQualifiedDomainWildcard(fullyQualifiedDomainWildcard: string): string[] {
+    const postfixStart = fullyQualifiedDomainWildcard.lastIndexOf('*');
+    const postfix = fullyQualifiedDomainWildcard.substring(postfixStart + 2);
+    if (postfixStart < 0 || postfix.length === 0) {
+        return fullyQualifiedDomainWildcard.split('.');
+    } else {
+        const labels = [postfix];
+        const prefix = fullyQualifiedDomainWildcard.substring(0, postfixStart);
+        prefix.split('.').filter(Boolean).forEach((l) => labels.concat(l));
+        return labels;
+    }
+}
+
 function processBlock(text: string, domains: { [domain: string]: number[] }, domainLabelMembers: Array<{ labels: string[], index: number }>, domainLabelFrequencies: { [domainLabel: string]: number }, offsets: Array<[number, number]>, nonstandard: number[], recordStart: number, recordEnd: number, index: number) {
     // TODO: more formal definition of URLs and delimiters
     const block = text.substring(recordStart, recordEnd);
@@ -138,7 +151,7 @@ function processBlock(text: string, domains: { [domain: string]: number[] }, dom
         if (isFullyQualifiedDomain(domain)) {
             addLabel(domains, domain, index);
         } else if (isFullyQualifiedDomainWildcard(domain)) {
-            const labels = domain.split('.');
+            const labels = extractDomainLabelsFromFullyQualifiedDomainWildcard(domain);
             domainLabelMembers.push({ labels, index });
             labels.forEach((l) => domainLabels.add(l));
         } else {
@@ -283,6 +296,9 @@ export function getSitesFixesFor<T extends SiteProps>(url: string, text: string,
             const substring = labels.slice(i).join('.');
             if (index.domains[substring]) {
                 recordIds = recordIds.concat(index.domains[substring]);
+            }
+            if (index.domainLabels[substring]) {
+                recordIds = recordIds.concat(index.domainLabels[substring]);
             }
         }
         // Backwards compatibility: send over nonstandard patterns, which will be filtered out

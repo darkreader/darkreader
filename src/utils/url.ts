@@ -1,5 +1,5 @@
-import type { UserSettings, TabInfo } from '../definitions';
-import { isIPV6, compareIPV6 } from './ipv6';
+import type {UserSettings, TabInfo} from '../definitions';
+import {isIPV6, compareIPV6} from './ipv6';
 
 declare const __THUNDERBIRD__: boolean;
 
@@ -209,7 +209,7 @@ export function isPDF(url: string) {
     return false;
 }
 
-export function isURLEnabled(url: string, userSettings: UserSettings, { isProtected, isInDarkList, isDarkThemeDetected }: Partial<TabInfo>, isAllowedFileSchemeAccess = true): boolean {
+export function isURLEnabled(url: string, userSettings: UserSettings, {isProtected, isInDarkList, isDarkThemeDetected}: Partial<TabInfo>, isAllowedFileSchemeAccess = true): boolean {
     if (isLocalFile(url) && !isAllowedFileSchemeAccess) {
         return false;
     }
@@ -262,7 +262,7 @@ export function fullyQualifiedDomainMatchesWildcard(wildcard: string, candidate:
     if (candidateLabels.length < wildcardLabels.length) {
         return false;
     }
-    while(wildcardLabels.length) {
+    while (wildcardLabels.length) {
         const wildcardLabel = wildcardLabels.pop();
         const candidateLabel = candidateLabels.pop();
         if (wildcardLabel !== '*' && wildcardLabel !== candidateLabel) {

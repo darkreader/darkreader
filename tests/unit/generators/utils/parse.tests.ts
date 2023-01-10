@@ -1,5 +1,5 @@
-import { indexSitesFixesConfig, getSitesFixesFor } from '../../../../src/generators/utils/parse';
-import type { SitesFixesParserOptions } from '../../../../src/generators/utils/parse';
+import {indexSitesFixesConfig, getSitesFixesFor} from '../../../../src/generators/utils/parse';
+import type {SitesFixesParserOptions} from '../../../../src/generators/utils/parse';
 
 test('Index config', () => {
     interface TestFix {
@@ -454,11 +454,11 @@ describe('Backwards compatibility', () => {
             url: string[];
             directive: string;
         }
-    
+
         const directiveMap: { [key: string]: keyof TestFix } = {
             DIRECTIVE: 'directive',
         };
-    
+
         const config = [
             '*',
             '',
@@ -473,14 +473,14 @@ describe('Backwards compatibility', () => {
             'one',
             ''
         ].join('\n');
-    
+
         const options: SitesFixesParserOptions<TestFix> = {
             commands: Object.keys(directiveMap),
             getCommandPropName: (command) => directiveMap[command],
             parseCommandValue: (_, value) => value.trim(),
         };
         const index = indexSitesFixesConfig<TestFix>(config);
-    
+
         const fixes = getSitesFixesFor('other.net', config, index, options);
         expect(fixes).toEqual([
             {
@@ -493,7 +493,6 @@ describe('Backwards compatibility', () => {
                 'directive': 'one'
             }
         ]);
-    
     });
 });
 

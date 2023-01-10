@@ -1,6 +1,5 @@
-import { isFullyQualifiedDomain, isFullyQualifiedDomainWildcard, fullyQualifiedDomainMatchesWildcard } from '../../utils/url';
-import { parseArray } from '../../utils/text';
-import { logInfo } from '../../background/utils/log';
+import {isFullyQualifiedDomain, isFullyQualifiedDomainWildcard, fullyQualifiedDomainMatchesWildcard} from '../../utils/url';
+import {parseArray} from '../../utils/text';
 
 declare const __TEST__: boolean;
 
@@ -119,12 +118,11 @@ function extractDomainLabelsFromFullyQualifiedDomainWildcard(fullyQualifiedDomai
     const postfix = fullyQualifiedDomainWildcard.substring(postfixStart + 2);
     if (postfixStart < 0 || postfix.length === 0) {
         return fullyQualifiedDomainWildcard.split('.');
-    } else {
-        const labels = [postfix];
-        const prefix = fullyQualifiedDomainWildcard.substring(0, postfixStart);
-        prefix.split('.').filter(Boolean).forEach((l) => labels.concat(l));
-        return labels;
     }
+    const labels = [postfix];
+    const prefix = fullyQualifiedDomainWildcard.substring(0, postfixStart);
+    prefix.split('.').filter(Boolean).forEach((l) => labels.concat(l));
+    return labels;
 }
 
 function processBlock(text: string, domains: { [domain: string]: number[] }, domainLabelMembers: Array<{ labels: string[], index: number }>, domainLabelFrequencies: { [domainLabel: string]: number }, offsets: Array<[number, number]>, nonstandard: number[], recordStart: number, recordEnd: number, index: number) {
@@ -152,10 +150,10 @@ function processBlock(text: string, domains: { [domain: string]: number[] }, dom
             addLabel(domains, domain, index);
         } else if (isFullyQualifiedDomainWildcard(domain)) {
             const labels = extractDomainLabelsFromFullyQualifiedDomainWildcard(domain);
-            domainLabelMembers.push({ labels, index });
+            domainLabelMembers.push({labels, index});
             labels.forEach((l) => domainLabels.add(l));
         } else {
-            logInfo(`Sitefix parser encountered non-standard URL ${url}`);
+            // Sitefix parser encountered non-standard URL
             nonstandard.push(index);
             break;
         }
@@ -197,8 +195,8 @@ export function indexSitesFixesConfig<T extends SiteProps>(text: string): SitePr
     }
     processBlock(text, domains, domainLabelMembers, domainLabelFrequencies, offsets, nonstandard, recordStart, text.length, count);
 
-    // For each domain name, find the 
-    for (const { labels, index } of domainLabelMembers) {
+    // For each domain name, find the most specific label
+    for (const {labels, index} of domainLabelMembers) {
         let label = labels[0];
         for (const currLabel of labels) {
             if (domainLabelFrequencies[currLabel] < domainLabelFrequencies[label]) {
@@ -217,7 +215,7 @@ export function indexSitesFixesConfig<T extends SiteProps>(text: string): SitePr
  * @param index site fix index
  * @param options fix parsing options
  * @param id numeric index of the fix
- * @returns 
+ * @returns a single fix
  */
 function getSiteFix<T extends SiteProps>(text: string, index: SitePropsIndex<T>, options: SitesFixesParserOptions<T>, id: number): T {
     const cachedFix = index.cacheSiteFix[id];
@@ -237,7 +235,6 @@ function getSiteFix<T extends SiteProps>(text: string, index: SitePropsIndex<T>,
  * go incative (resulting in cleanup of all context variables) and then not be awoken
  * by the alarm.
  * @param index 
- * @returns 
  */
 function scheduleCacheCleanup<T extends SiteProps>(index: SitePropsIndex<T>) {
     if (__TEST__) {

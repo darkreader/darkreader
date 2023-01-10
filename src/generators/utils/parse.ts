@@ -125,7 +125,7 @@ function extractDomainLabelsFromFullyQualifiedDomainWildcard(fullyQualifiedDomai
     return labels;
 }
 
-function processBlock(text: string, domains: { [domain: string]: number[] }, domainLabelMembers: Array<{ labels: string[], index: number }>, domainLabelFrequencies: { [domainLabel: string]: number }, offsets: Array<[number, number]>, nonstandard: number[], recordStart: number, recordEnd: number, index: number) {
+function processBlock(text: string, domains: { [domain: string]: number[] }, domainLabelMembers: Array<{ labels: string[]; index: number }>, domainLabelFrequencies: { [domainLabel: string]: number }, offsets: Array<[number, number]>, nonstandard: number[], recordStart: number, recordEnd: number, index: number) {
     // TODO: more formal definition of URLs and delimiters
     const block = text.substring(recordStart, recordEnd);
     const lines = block.split('\n');
@@ -177,7 +177,7 @@ export function indexSitesFixesConfig<T extends SiteProps>(text: string): SitePr
     const offsets: Array<[number, number]> = [];
 
     const domainLabelFrequencies: { [domainLabel: string]: number } = {};
-    const domainLabelMembers: Array<{ labels: string[], index: number }> = [];
+    const domainLabelMembers: Array<{ labels: string[]; index: number }> = [];
 
     let recordStart = 0;
     // Delimiter between two blocks
@@ -206,7 +206,7 @@ export function indexSitesFixesConfig<T extends SiteProps>(text: string): SitePr
         addLabel(domainLabels, label, index);
     }
 
-    return { offsets: encodeOffsets(offsets), domains, domainLabels, nonstandard, cacheDomainIndex: {}, cacheSiteFix: {}, cacheCleanupTimer: null };
+    return {offsets: encodeOffsets(offsets), domains, domainLabels, nonstandard, cacheDomainIndex: {}, cacheSiteFix: {}, cacheCleanupTimer: null};
 }
 
 /**
@@ -234,7 +234,7 @@ function getSiteFix<T extends SiteProps>(text: string, index: SitePropsIndex<T>,
  * This function uses setTimeout instead of Alarms API so that background context can
  * go incative (resulting in cleanup of all context variables) and then not be awoken
  * by the alarm.
- * @param index 
+ * @param index
  */
 function scheduleCacheCleanup<T extends SiteProps>(index: SitePropsIndex<T>) {
     if (__TEST__) {
@@ -274,7 +274,7 @@ export function getSitesFixesFor<T extends SiteProps>(url: string, text: string,
         for (const label of labels) {
             // We need to use in operator because ids are 0-based and 0 is falsy
             if (label in index.domainLabels) {
-                let currRecordIds = index.domainLabels[label];
+                const currRecordIds = index.domainLabels[label];
                 for (const recordId of currRecordIds) {
                     const fix = getSiteFix<T>(text, index, options, recordId);
                     for (const ruleUrl of fix.url) {

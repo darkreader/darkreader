@@ -13,6 +13,7 @@ test('Color parsing', () => {
     expect(parse('rgb(255 0 153 / 1)')).toEqual({r: 255, g: 0, b: 153, a: 1});
     expect(parse('rgb(255 0 153 / 100%)')).toEqual({r: 255, g: 0, b: 153, a: 1});
     expect(parse('rgb(255, 0, 153.6, 1)')).toEqual({r: 255, g: 0, b: 154, a: 1});
+    expect(parse('rgb(0 0 0/0.04)')).toEqual({r: 0, g: 0, b: 0, a: 0.04});
     expect(parse('rgb(1e2, .5e1, .5e0, +.25e2%)')).toEqual({r: 100, g: 5, b: 1, a: 0.25});
 
     expect(parse('rgba(51, 170, 51, .1)')).toEqual({r: 51, g: 170, b: 51, a: 0.1});

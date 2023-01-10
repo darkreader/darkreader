@@ -57,26 +57,36 @@ async function main() {
         return;
     }
 
+    log.ok('Building with old dependencies');
     await buildAll();
+    log.ok('Built with old dependencies');
     await command('mv build build-old');
     await command('mv darkreader.js darkreader-old.js');
-    log.ok('Built old code');
+    log.ok('Moved built output');
 
     const patched = await patchPackage(outdated);
-    log.ok('Created package.json');
+    log.ok('Upgrading own dependencies');
     await writeFile(packagePath, `${JSON.stringify(patched, null, 2)}\n`);
-    log.ok('Wrote package.json');
     await command('npm i');
+    await command('git add package.json package-lock.json');
+    await command('git commit -m "Bump own dependencies"');
+
+    log.ok('Upgrading transitive dependencies');
+    await command('npm upgrade');
+    await command('git add package.json package-lock.json');
+    await command('git commit -m "Bump transitive dependencies"');
     log.ok('Installed new dependencies');
+
     await buildAll();
-    log.ok('Built new code');
-    await command('diff -r build-old build');
+    log.ok('Built with new dependencies');
+
+    await command('diff -r build-old/release/chrome build/release/chrome');
+    await command('diff -r build-old/release/chrome-mv3 build/release/chrome-mv3');
+    await command('diff -r build-old/release/firefox build/release/firefox');
+    await command('diff -r build-old/release/thunderbird build/release/thunderbird');
     await command('diff darkreader-old.js darkreader.js');
     log.ok('Dependency upgrade does not result in change to built output');
 
-    await command('git add package.json package-lock.json');
-    await command('git commit -m "Bump dependencies"');
-    log.ok('Created commit');
     // TODO: when moving this to CI, provide branch name in CI config, along with
     // a token
     await command('git push origin HEAD:bump-dependencies');

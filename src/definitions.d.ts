@@ -13,12 +13,13 @@ export interface ExtensionData {
     shortcuts: Shortcuts;
     colorScheme: ParsedColorSchemeConfig;
     forcedScheme: 'dark' | 'light' | null;
-    devtools: {
-        dynamicFixesText: string;
-        filterFixesText: string;
-        staticThemesText: string;
-    };
     activeTab: TabInfo;
+}
+
+export interface DevToolsData {
+    dynamicFixesText: string;
+    filterFixesText: string;
+    staticThemesText: string;
 }
 
 export interface TabData {

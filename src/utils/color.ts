@@ -190,7 +190,7 @@ function getNumbers($color: string) {
         if (c >= '0' && c <= '9' || c === '.' || c === '+' || c === '-') {
             // Enable the mining flag.
             isMining = true;
-        } else if (isMining && (c === ' ' || c === ',')) {
+        } else if (isMining && (c === ' ' || c === ',' || c === '/')) {
             // isMining is true and we got a terminating
             // character. So we can push the current number
             // into the array.

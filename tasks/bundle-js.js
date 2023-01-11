@@ -136,7 +136,7 @@ async function bundleJS(/** @type {JSEntry} */entry, platform, debug, watch, log
                     tsconfig: rootPath('src/tsconfig.json'),
                     compilerOptions: platform === PLATFORM.CHROME_MV3 ? {
                         target: 'ES2022',
-                    }: undefined,
+                    } : undefined,
                     noImplicitAny: debug ? false : true,
                     strictNullChecks: debug ? false : true,
                     removeComments: debug ? false : true,

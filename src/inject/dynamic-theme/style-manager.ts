@@ -11,9 +11,6 @@ import {isShadowDomSupported, isSafari, isFirefox} from '../../utils/platform';
 
 declare const __THUNDERBIRD__: boolean;
 
-// TODO: remove this once types are updated
-declare function cancelAnimationFrame(id: number | null | undefined): void;
-
 declare global {
     interface Document {
         adoptedStyleSheets: CSSStyleSheet[];
@@ -472,7 +469,8 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
     }
 
     function stopWatchingForSheetChangesUsingRAF() {
-        cancelAnimationFrame(rulesCheckFrameId);
+        // TODO: reove cast once types are updated
+        cancelAnimationFrame(rulesCheckFrameId as number);
     }
 
     let areSheetChangesPending = false;

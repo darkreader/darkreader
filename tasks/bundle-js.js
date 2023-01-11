@@ -99,7 +99,7 @@ function freeRollupPluginInstance(name, key) {
 
 async function bundleJS(/** @type {JSEntry} */entry, platform, debug, watch, log, test) {
     const {src, dest} = entry;
-    const rollupPluginTypesctiptInstanceKey = `${debug}`;
+    const rollupPluginTypesctiptInstanceKey = `${platform}-${debug}`;
     const rollupPluginReplaceInstanceKey = `${platform}-${debug}-${watch}-${entry.src === 'src/ui/popup/index.tsx'}`;
 
     const destination = typeof dest === 'string' ? dest : dest(platform);
@@ -134,6 +134,9 @@ async function bundleJS(/** @type {JSEntry} */entry, platform, debug, watch, log
                     rootDir,
                     typescript,
                     tsconfig: rootPath('src/tsconfig.json'),
+                    compilerOptions: platform === PLATFORM.CHROME_MV3 ? {
+                        target: 'ES2021',
+                    }: undefined,
                     noImplicitAny: debug ? false : true,
                     strictNullChecks: debug ? false : true,
                     removeComments: debug ? false : true,

@@ -1,4 +1,0 @@
-{
-  "extends": "../src/tsconfig.json",
-  "files": ["parse.ts"]
-}

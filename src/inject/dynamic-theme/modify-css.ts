@@ -13,6 +13,8 @@ import {isFirefox, isCSSColorSchemePropSupported} from '../../utils/platform';
 import type {parsedGradient} from '../../utils/parsing';
 import {parseGradient} from '../../utils/parsing';
 
+declare const __CHROMIUM_MV3__: boolean;
+
 export type CSSValueModifier = (theme: Theme) => string | Promise<string | null>;
 
 export interface CSSValueModifierResult {
@@ -97,7 +99,7 @@ export function getModifiedUserAgentStyle(theme: Theme, isIFrame: boolean, style
         lines.push(`    background-color: ${modifyBackgroundColor({r: 255, g: 255, b: 255}, theme)} !important;`);
         lines.push('}');
     }
-    if (isCSSColorSchemePropSupported) {
+    if (__CHROMIUM_MV3__ || isCSSColorSchemePropSupported) {
         lines.push('html {');
         lines.push(`    color-scheme: ${theme.mode === 1 ? 'dark' : 'dark light'} !important;`);
         lines.push('}');

@@ -93,7 +93,7 @@ export const isXMLHttpRequestSupported = typeof XMLHttpRequest === 'function';
 
 export const isFetchSupported = typeof fetch === 'function';
 
-export const isCSSColorSchemePropSupported = (() => {
+export const isCSSColorSchemePropSupported = __CHROMIUM_MV3__ || (() => {
     try {
         if (typeof document === 'undefined') {
             return false;

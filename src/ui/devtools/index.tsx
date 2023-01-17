@@ -31,6 +31,14 @@ start();
 declare const __TEST__: boolean;
 if (__TEST__) {
     const socket = new WebSocket(`ws://localhost:8894`);
+    socket.onopen = async () => {
+        socket.send(JSON.stringify({
+            data: {
+                type: 'devtools',
+            },
+            id: null,
+        }));
+    };
     socket.onmessage = (e) => {
         const respond = (message: {type: string; id: number; data?: string}) => socket.send(JSON.stringify(message));
         const message: {type: string; id: number; data: string} = JSON.parse(e.data);

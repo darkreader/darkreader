@@ -196,22 +196,30 @@ class PuppeteerEnvironment extends JestNodeEnvironment.TestEnvironment {
         // https://github.com/puppeteer/puppeteer/issues/6616
         return new Promise((resolve) => {
             const wsServer = new WebSocketServer({port: POPUP_TEST_PORT});
-            const sockets = new Set();
+            let backgroundSocket = null;
+            let devToolsSocket = null;
+            const popupSockets = new Set();
             const resolvers = new Map();
             const rejectors = new Map();
-            let idCount = 0;
 
             wsServer.on('listening', () => resolve(wsServer));
 
             wsServer.on('connection', async (ws) => {
-                sockets.add(ws);
                 ws.on('message', (data) => {
                     const message = JSON.parse(data);
-                    if (message.id === null && message.data.extensionOrigin) {
+                    if (message.id === null && message.data && message.data.type === 'background' && message.data.extensionOrigin) {
                         // This is the initial message which contains extension's URL origin
                         // and signals that extenstion is ready
                         this.extensionOrigin = message.data.extensionOrigin;
                         this.extensionStartListeners.forEach((ready) => ready());
+                        ws.on('close', () => backgroundSocket = null);
+                        backgroundSocket = ws;
+                    } else if (message.id === null && message.data && message.data.type === 'devtools') {
+                        ws.on('close', () => devToolsSocket = null);
+                        devToolsSocket = ws;
+                    } else if (message.id === null && message.data && message.data.type === 'popup') {
+                        ws.on('close', () => popupSockets.delete(ws));
+                        popupSockets.add(ws);
                     } else if (message.error) {
                         const reject = rejectors.get(message.id);
                         reject(message.error);
@@ -222,35 +230,51 @@ class PuppeteerEnvironment extends JestNodeEnvironment.TestEnvironment {
                     resolvers.delete(message.id);
                     rejectors.delete(message.id);
                 });
-                ws.on('close', () => sockets.delete(ws));
             });
 
-            function sendToUIPage(type, data) {
+            function generateRandomId() {
+                return Math.floor(Math.random() * 2**55);
+            }
+
+            function sendToUIPage(sockets, type, data) {
                 return new Promise((resolve, reject) => {
-                    resolvers.set(idCount, resolve);
-                    rejectors.set(idCount, reject);
-                    const json = JSON.stringify({type, data, id: idCount});
-                    sockets.forEach((ws) => ws.send(json));
-                    idCount++;
+                    const id = generateRandomId();
+                    resolvers.set(id, resolve);
+                    rejectors.set(id, reject);
+                    const json = JSON.stringify({type, data, id});
+                    for (const ws of sockets) {
+                        ws.send(json);
+                    }
                 });
             }
 
+            function sendToPopup(type, data) {
+                return sendToUIPage(Array.from(popupSockets), type, data);
+            }
+
+            function sendToDevTools(type, data) {
+                return sendToUIPage([devToolsSocket], type, data);
+            }
+
+            function sendToBackground(type, data) {
+                return sendToUIPage([backgroundSocket], type, data);
+            }
+
             this.global.popupUtils = {
-                click: async (selector) => await sendToUIPage('click', selector),
-                exists: async (selector) => await sendToUIPage('exists', selector),
+                click: async (selector) => await sendToPopup('click', selector),
+                exists: async (selector) => await sendToPopup('exists', selector),
             };
 
             this.global.devtoolsUtils = {
-                paste: async (fixes) => await sendToUIPage('debug-devtools-paste', fixes),
-                reset: async () => await sendToUIPage('debug-devtools-reset'),
+                paste: async (fixes) => await sendToDevTools('debug-devtools-paste', fixes),
+                reset: async () => await sendToDevTools('debug-devtools-reset'),
             };
 
             this.global.backgroundUtils = {
-                changeSettings: async (settings) => await sendToUIPage('changeSettings', settings),
-                collectData: async () => await sendToUIPage('collectData'),
-                changeChromeStorage: async (region, data) => await sendToUIPage('changeChromeStorage', {region, data}),
-                getChromeStorage: async (region, keys) => await sendToUIPage('getChromeStorage', {region, keys}),
-                setDataIsMigratedForTesting: async (value) => await sendToUIPage('setDataIsMigratedForTesting', value),
+                changeSettings: async (settings) => await sendToBackground('changeSettings', settings),
+                collectData: async () => await sendToBackground('collectData'),
+                changeChromeStorage: async (region, data) => await sendToBackground('changeChromeStorage', {region, data}),
+                getChromeStorage: async (region, keys) => await sendToBackground('getChromeStorage', {region, keys}),
                 emulateMedia: async (name, value) => {
                     if (this.global.product === 'firefox') {
                         return;
@@ -263,7 +287,7 @@ class PuppeteerEnvironment extends JestNodeEnvironment.TestEnvironment {
                     }
                     await page.emulateMediaFeatures([{name, value}]);
                 },
-                getManifest: async () => await sendToUIPage('getManifest'),
+                getManifest: async () => await sendToBackground('getManifest'),
             };
         });
     }

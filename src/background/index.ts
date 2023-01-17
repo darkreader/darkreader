@@ -141,6 +141,7 @@ if (__TEST__) {
         await extension;
         socket.send(JSON.stringify({
             data: {
+                type: 'background',
                 extensionOrigin: chrome.runtime.getURL(''),
             },
             id: null,

@@ -73,6 +73,14 @@ if (__TEST__) {
     });
 
     const socket = new WebSocket(`ws://localhost:8894`);
+    socket.onopen = async () => {
+        socket.send(JSON.stringify({
+            data: {
+                type: 'popup',
+            },
+            id: null,
+        }));
+    };
     socket.onmessage = (e) => {
         const respond = (message: {type: string; id?: number; data?: any}) => socket.send(JSON.stringify(message));
         try {

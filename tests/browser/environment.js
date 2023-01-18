@@ -15,12 +15,13 @@ const POPUP_TEST_PORT = 8894;
 
 class PuppeteerEnvironment extends JestNodeEnvironment.TestEnvironment {
     extensionStartListeners = [];
+    pageLoadListeners = new Map();
 
     async setup() {
         await super.setup();
 
         const promises = [
-            this.createPopupTestServer(),
+            this.createMessageServer(),
             createTestServer(TEST_SERVER_PORT),
             createTestServer(CORS_SERVER_PORT),
         ];
@@ -36,7 +37,7 @@ class PuppeteerEnvironment extends JestNodeEnvironment.TestEnvironment {
         );
 
         const results = await Promise.all(promises);
-        this.popupTestServer = results[0];
+        this.messageServer = results[0];
         this.testServer = results[1];
         this.corsServer = results[2];
         this.extensionPopup = results[3];
@@ -156,15 +157,21 @@ class PuppeteerEnvironment extends JestNodeEnvironment.TestEnvironment {
     }
 
     async getChromiumMV2BackgroundPage() {
-        const targets = await this.browser.targets();
+        const targets = this.browser.targets();
         const backgroundTarget = targets.find((t) => t.type() === 'background_page');
         return await backgroundTarget.page();
+    }
+
+    async pageGoto(page, url, gotoOptions) {
+        await page.goto(url, gotoOptions);
+        // TODO: Determine why sometimes tests are executed before content script
+        await page.evaluate(() => new Promise((resolve) => setTimeout(resolve, 1000)));
     }
 
     async openChromePage(path) {
         const pageURL = await this.getURL(path);
         const extensionPage = await this.browser.newPage();
-        await extensionPage.goto(pageURL);
+        await this.pageGoto(extensionPage, pageURL);
 
         return extensionPage;
     }
@@ -172,8 +179,8 @@ class PuppeteerEnvironment extends JestNodeEnvironment.TestEnvironment {
     async openFirefoxPage(path) {
         const extensionPage = await this.browser.newPage();
         // Doesn't resolve due to https://github.com/puppeteer/puppeteer/issues/6616
-        extensionPage.goto(`moz-extension://${this.firefoxInternalUUID}${path}`);
-        await new Promise((promise) => setTimeout(promise, 1000));
+        const url = `moz-extension://${this.firefoxInternalUUID}${path}`;
+        await this.pageGoto(extensionPage, url);
         return extensionPage;
     }
 
@@ -184,14 +191,12 @@ class PuppeteerEnvironment extends JestNodeEnvironment.TestEnvironment {
             cors && this.corsServer.setPaths(cors);
             const {page} = this;
             await page.bringToFront();
-            await page.goto(`http://localhost:${TEST_SERVER_PORT}`, gotoOptions);
-            // TODO: Determine why sometimes tests are executed before content script
-            await page.evaluate(() => new Promise((resolve) => setTimeout(resolve, 1000)));
+            await this.pageGoto(page, `http://localhost:${TEST_SERVER_PORT}`, gotoOptions);
         };
         this.global.corsURL = this.corsServer.url;
     }
 
-    async createPopupTestServer() {
+    async createMessageServer() {
         // Puppeteer cannot evaluate scripts in moz-extension:// pages
         // https://github.com/puppeteer/puppeteer/issues/6616
         return new Promise((resolve) => {
@@ -236,7 +241,7 @@ class PuppeteerEnvironment extends JestNodeEnvironment.TestEnvironment {
                 return Math.floor(Math.random() * 2**55);
             }
 
-            function sendToUIPage(sockets, type, data) {
+            function sendToContext(sockets, type, data) {
                 return new Promise((resolve, reject) => {
                     const id = generateRandomId();
                     resolvers.set(id, resolve);
@@ -249,15 +254,15 @@ class PuppeteerEnvironment extends JestNodeEnvironment.TestEnvironment {
             }
 
             function sendToPopup(type, data) {
-                return sendToUIPage(Array.from(popupSockets), type, data);
+                return sendToContext(Array.from(popupSockets), type, data);
             }
 
             function sendToDevTools(type, data) {
-                return sendToUIPage([devToolsSocket], type, data);
+                return sendToContext([devToolsSocket], type, data);
             }
 
             function sendToBackground(type, data) {
-                return sendToUIPage([backgroundSocket], type, data);
+                return sendToContext([backgroundSocket], type, data);
             }
 
             this.global.popupUtils = {
@@ -309,7 +314,7 @@ class PuppeteerEnvironment extends JestNodeEnvironment.TestEnvironment {
         promises.push([
             this.testServer?.close(),
             this.corsServer?.close(),
-            this.popupTestServer?.close(),
+            this.messageServer?.close(),
             this.browser?.close(),
         ]);
         await Promise.all(promises);

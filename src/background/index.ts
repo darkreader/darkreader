@@ -4,7 +4,6 @@ import {canInjectScript} from '../background/utils/extension-api';
 import type {ExtensionData, Message, UserSettings} from '../definitions';
 import {MessageType} from '../utils/message';
 import {makeChromiumHappy} from './make-chromium-happy';
-import DevTools from './devtools';
 import {logInfo} from './utils/log';
 import {sendLog} from './utils/sendLog';
 

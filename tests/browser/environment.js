@@ -6,7 +6,7 @@ import {cmd} from 'web-ext';
 import {WebSocketServer} from 'ws';
 import {generateHTMLCoverageReports} from './coverage.js';
 import {getChromePath, getFirefoxPath, chromeExtensionDebugDir, chromeMV3ExtensionDebugDir, firefoxExtensionDebugDir} from './paths.js';
-import {createTestServer} from './server.js';
+import {createTestServer, generateRandomId} from './server.js';
 
 const TEST_SERVER_PORT = 8891;
 const CORS_SERVER_PORT = 8892;
@@ -163,9 +163,21 @@ class PuppeteerEnvironment extends JestNodeEnvironment.TestEnvironment {
     }
 
     async pageGoto(page, url, gotoOptions) {
+        // Normalize URL
+        url = new URL(url).href;
+        // Depending on external circumstances, page may connect to server before page.goto() reolves
+        const promise = new Promise((resolve) => {
+            this.pageLoadListeners.set(url, () => setTimeout(resolve, 1000));
+        });
+        // Firefox does not resolve page.goto()
         await page.goto(url, gotoOptions);
-        // TODO: Determine why sometimes tests are executed before content script
-        await page.evaluate(() => new Promise((resolve) => setTimeout(resolve, 1000)));
+        return promise;
+    }
+
+    onPageGotoResponse(url) {
+        const resolve = this.pageLoadListeners.get(url);
+        this.pageLoadListeners.delete(url);
+        resolve && resolve();
     }
 
     async openChromePage(path) {
@@ -204,6 +216,7 @@ class PuppeteerEnvironment extends JestNodeEnvironment.TestEnvironment {
             let backgroundSocket = null;
             let devToolsSocket = null;
             const popupSockets = new Set();
+            const pageSockets = new Set();
             const resolvers = new Map();
             const rejectors = new Map();
 
@@ -219,12 +232,21 @@ class PuppeteerEnvironment extends JestNodeEnvironment.TestEnvironment {
                         this.extensionStartListeners.forEach((ready) => ready());
                         ws.on('close', () => backgroundSocket = null);
                         backgroundSocket = ws;
-                    } else if (message.id === null && message.data && message.data.type === 'devtools') {
+                    } else if (message.id === null && message.data && message.data.url && message.data.type === 'devtools') {
                         ws.on('close', () => devToolsSocket = null);
                         devToolsSocket = ws;
-                    } else if (message.id === null && message.data && message.data.type === 'popup') {
+                        const url = message.data.url;
+                        this.onPageGotoResponse(url);
+                    } else if (message.id === null && message.data && message.data.url && message.data.type === 'popup') {
                         ws.on('close', () => popupSockets.delete(ws));
                         popupSockets.add(ws);
+                        const url = message.data.url;
+                        this.onPageGotoResponse(url);
+                    } else if (message.id === null && message.data && message.data.url && message.data.type === 'page') {
+                        ws.on('close', () => pageSockets.delete(ws));
+                        pageSockets.add(ws);
+                        const url = message.data.url;
+                        this.onPageGotoResponse(url);
                     } else if (message.error) {
                         const reject = rejectors.get(message.id);
                         reject(message.error);
@@ -237,9 +259,6 @@ class PuppeteerEnvironment extends JestNodeEnvironment.TestEnvironment {
                 });
             });
 
-            function generateRandomId() {
-                return Math.floor(Math.random() * 2**55);
-            }
 
             function sendToContext(sockets, type, data) {
                 return new Promise((resolve, reject) => {
@@ -255,6 +274,10 @@ class PuppeteerEnvironment extends JestNodeEnvironment.TestEnvironment {
 
             function sendToPopup(type, data) {
                 return sendToContext(Array.from(popupSockets), type, data);
+            }
+
+            function sendToPage(type, data) {
+                return sendToContext(Array.from(pageSockets), type, data);
             }
 
             function sendToDevTools(type, data) {

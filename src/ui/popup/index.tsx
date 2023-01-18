@@ -77,6 +77,7 @@ if (__TEST__) {
         socket.send(JSON.stringify({
             data: {
                 type: 'popup',
+                url: document.location.href,
             },
             id: null,
         }));

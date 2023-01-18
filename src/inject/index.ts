@@ -8,6 +8,8 @@ import {collectCSS} from './dynamic-theme/css-collection';
 import type {DynamicThemeFix, Message, Theme} from '../definitions';
 import {MessageType} from '../utils/message';
 
+declare const __TEST__: boolean;
+
 let unloaded = false;
 
 declare const __CHROMIUM_MV3__: boolean;
@@ -162,4 +164,28 @@ if (!__THUNDERBIRD__) {
     addEventListener('pagehide', onPageHide);
     addEventListener('freeze', onFreeze);
     addEventListener('resume', onResume);
+}
+
+if (__TEST__) {
+    async function awaitDOMContentLoaded() {
+        if (document.readyState === 'loading') {
+            return new Promise<void>((resolve) => {
+                addEventListener('DOMContentLoaded', () => resolve());
+            });
+        }
+    }
+
+    const socket = new WebSocket(`ws://localhost:8894`);
+    socket.onopen = async () => {
+        // Wait for DOM to be complete
+        // Note that here we wait only for DOM parsing and not for subresource load
+        await awaitDOMContentLoaded();
+        socket.send(JSON.stringify({
+            data: {
+                type: 'page',
+                url: document.location.href,
+            },
+            id: null,
+        }));
+    };
 }

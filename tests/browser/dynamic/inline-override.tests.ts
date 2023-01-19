@@ -16,8 +16,6 @@ async function loadBasicPage() {
 }
 
 describe('Inline style override', () => {
-    const inlineStyleMarkup = 
-
     it('should override inline style', async () => {
         await loadBasicPage();
 

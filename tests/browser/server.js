@@ -26,7 +26,7 @@ const terminationListener = () => {
 };
 
 export function generateRandomId() {
-    return Math.floor(Math.random() * 2**55).toString();
+    return Math.floor(Math.random() * 2 ** 55).toString();
 }
 
 export async function createTestServer(/** @type {number} */port) {

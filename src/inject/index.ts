@@ -12,6 +12,8 @@ declare const __TEST__: boolean;
 
 let unloaded = false;
 
+let darkReaderDynamicThemeState: 'loading' | 'complete' = 'loading';
+
 declare const __CHROMIUM_MV3__: boolean;
 declare const __THUNDERBIRD__: boolean;
 
@@ -23,6 +25,10 @@ function cleanup() {
     cleanDynamicThemeCache();
     stopDarkThemeDetector();
     stopColorSchemeChangeDetector();
+}
+
+function sendTestMessage(message: any) {
+    document.dispatchEvent(new CustomEvent('test-message', {detail: message}));
 }
 
 function sendMessage(message: Message) {
@@ -101,6 +107,11 @@ function onMessage({type, data}: Message) {
             break;
         }
         case MessageType.BG_ADD_DYNAMIC_THEME: {
+            if (__TEST__) {
+                darkReaderDynamicThemeState = 'loading';
+                sendTestMessage('darkreader-dynamic-theme-state-change');
+            }
+
             const {theme, fixes, isIFrame, detectDarkTheme} = data as {theme: Theme; fixes: DynamicThemeFix[]; isIFrame: boolean; detectDarkTheme: boolean};
             removeStyle();
             createOrUpdateDynamicTheme(theme, fixes, isIFrame);
@@ -111,6 +122,10 @@ function onMessage({type, data}: Message) {
                         onDarkThemeDetected();
                     }
                 });
+            }
+            if (__TEST__) {
+                darkReaderDynamicThemeState = 'complete';
+                sendTestMessage('darkreader-dynamic-theme-state-change');
             }
             break;
         }
@@ -175,11 +190,25 @@ if (__TEST__) {
         }
     }
 
+    async function awaitDarkReaderReady() {
+        if (darkReaderDynamicThemeState !== 'complete') {
+            return new Promise<void>((resolve) => {
+                document.addEventListener('test-message', (event: CustomEvent) => {
+                    const message = event.detail;
+                    if (message === 'darkreader-dynamic-theme-state-change' && darkReaderDynamicThemeState === 'complete') {
+                        resolve();
+                    }
+                });
+            });
+        }
+    }
+
     const socket = new WebSocket(`ws://localhost:8894`);
     socket.onopen = async () => {
         // Wait for DOM to be complete
         // Note that here we wait only for DOM parsing and not for subresource load
         await awaitDOMContentLoaded();
+        await awaitDarkReaderReady();
         socket.send(JSON.stringify({
             data: {
                 type: 'page',

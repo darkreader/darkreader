@@ -167,7 +167,7 @@ class PuppeteerEnvironment extends JestNodeEnvironment.TestEnvironment {
         url = new URL(url).href;
         // Depending on external circumstances, page may connect to server before page.goto() reolves
         const promise = new Promise((resolve) => {
-            this.pageLoadListeners.set(url, () => setTimeout(resolve, 1000));
+            this.pageLoadListeners.set(url, resolve);
         });
         // Firefox does not resolve page.goto()
         await page.goto(url, gotoOptions);

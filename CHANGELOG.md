@@ -1,6 +1,8 @@
-## Unreleased
+## 4.9.62 (Jan 8, 2023)
 
-- Fixed a edge case with extracting numbers, it's now able to extract `rgb(0 0 0/0.04)`. (#10565)
+- Fixed a edge case with extracting color numbers, it's now able to extract `rgb(0 0 0/0.04)`. (#10565)
+- Improved IPv6 check. (#10564)
+- Faster UI loading. (#10589)
 
 ## 4.9.61 (Jan 2, 2023)
 

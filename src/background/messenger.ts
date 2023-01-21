@@ -1,10 +1,11 @@
 import {isFirefox} from '../utils/platform';
-import type {ExtensionData, FilterConfig, TabInfo, Message, UserSettings} from '../definitions';
+import type {ExtensionData, FilterConfig, TabInfo, Message, UserSettings, DevToolsData} from '../definitions';
 import {MessageType} from '../utils/message';
 import {makeFirefoxHappy} from './make-firefox-happy';
 
 export interface ExtensionAdapter {
     collect: () => Promise<ExtensionData>;
+    collectDevToolsData: () => Promise<DevToolsData>;
     changeSettings: (settings: Partial<UserSettings>) => void;
     setTheme: (theme: Partial<FilterConfig>) => void;
     markNewsAsRead: (ids: string[]) => Promise<void>;
@@ -35,7 +36,7 @@ export default class Messenger {
         }
     }
 
-    private static messageListener(message: Message, sender: chrome.runtime.MessageSender, sendResponse: (response: {data?: ExtensionData | TabInfo; error?: string} | 'unsupportedSender') => void) {
+    private static messageListener(message: Message, sender: chrome.runtime.MessageSender, sendResponse: (response: {data?: ExtensionData | DevToolsData | TabInfo; error?: string} | 'unsupportedSender') => void) {
         if (isFirefox && makeFirefoxHappy(message, sender, sendResponse)) {
             return;
         }
@@ -48,15 +49,19 @@ export default class Messenger {
             this.onUIMessage(message, sendResponse);
             return ([
                 MessageType.UI_GET_DATA,
+                MessageType.UI_GET_DEVTOOLS_DATA,
             ].includes(message.type));
         }
     }
 
     private static firefoxPortListener(port: chrome.runtime.Port) {
-        let promise: Promise<ExtensionData | TabInfo | null>;
+        let promise: Promise<ExtensionData | DevToolsData | TabInfo | null>;
         switch (port.name) {
             case MessageType.UI_GET_DATA:
                 promise = this.adapter.collect();
+                break;
+            case MessageType.UI_GET_DEVTOOLS_DATA:
+                promise = this.adapter.collectDevToolsData();
                 break;
             // These types require data, so we need to add a listener to the port.
             case MessageType.UI_APPLY_DEV_DYNAMIC_THEME_FIXES:
@@ -94,10 +99,13 @@ export default class Messenger {
             .catch((error) => port.postMessage({error}));
     }
 
-    private static onUIMessage({type, data}: Message, sendResponse: (response: {data?: ExtensionData | TabInfo; error?: string}) => void) {
+    private static onUIMessage({type, data}: Message, sendResponse: (response: {data?: ExtensionData | DevToolsData | TabInfo; error?: string}) => void) {
         switch (type) {
             case MessageType.UI_GET_DATA:
                 this.adapter.collect().then((data) => sendResponse({data}));
+                break;
+            case MessageType.UI_GET_DEVTOOLS_DATA:
+                this.adapter.collectDevToolsData().then((data) => sendResponse({data}));
                 break;
             case MessageType.UI_SUBSCRIBE_TO_CHANGES:
                 this.changeListenerCount++;

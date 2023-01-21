@@ -1,5 +1,5 @@
 import {isFirefox} from '../../utils/platform';
-import type {ExtensionData, ExtensionActions, FilterConfig, Message, UserSettings} from '../../definitions';
+import type {ExtensionData, ExtensionActions, FilterConfig, Message, UserSettings, DevToolsData} from '../../definitions';
 import {MessageType} from '../../utils/message';
 
 declare const browser: {
@@ -49,6 +49,13 @@ export default class Connector implements ExtensionActions {
             return await this.firefoxSendRequestWithResponse<ExtensionData>(MessageType.UI_GET_DATA);
         }
         return await this.sendRequest<ExtensionData>(MessageType.UI_GET_DATA);
+    }
+
+    async getDevToolsData() {
+        if (isFirefox) {
+            return await this.firefoxSendRequestWithResponse<DevToolsData>(MessageType.UI_GET_DEVTOOLS_DATA);
+        }
+        return await this.sendRequest<DevToolsData>(MessageType.UI_GET_DEVTOOLS_DATA);
     }
 
     private onChangesReceived = ({type, data}: Message) => {

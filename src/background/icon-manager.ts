@@ -8,7 +8,7 @@ interface IconState {
 }
 
 export default class IconManager {
-    private static ICON_PATHS = {
+    private static readonly ICON_PATHS = {
         active: {
             19: '../icons/dr_active_19.png',
             38: '../icons/dr_active_38.png',
@@ -19,7 +19,7 @@ export default class IconManager {
         },
     };
 
-    private static iconState: IconState = {
+    private static readonly iconState: IconState = {
         badgeText: '',
         active: true,
     };

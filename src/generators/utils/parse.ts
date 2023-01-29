@@ -125,7 +125,57 @@ function extractDomainLabelsFromFullyQualifiedDomainWildcard(fullyQualifiedDomai
     return labels;
 }
 
-function processBlock(text: string, domains: { [domain: string]: number[] }, domainLabelMembers: Array<{ labels: string[]; index: number }>, domainLabelFrequencies: { [domainLabel: string]: number }, offsets: Array<[number, number]>, nonstandard: number[], recordStart: number, recordEnd: number, index: number) {
+export function indexSitesFixesURLs(urls: string[][]): {domains: { [domain: string]: number[] }; domainLabels: { [domainLabel: string]: number[] }; nonstandard: number[]} {
+    const domains: { [domain: string]: number[] } = {};
+    const domainLabels: { [domainLabel: string]: number[] } = {};
+    const nonstandard: number[] = [];
+
+    const domainLabelFrequencies: { [domainLabel: string]: number } = {};
+    const domainLabelMembers: Array<{ labels: string[]; index: number }> = [];
+
+    for (let index = 0; index < urls.length; index++) {
+        const block = urls[index];
+        const blockDomainLabels = new Set<string>();
+        for (const url of block) {
+            const domain = getDomain(url);
+            if (isFullyQualifiedDomain(domain)) {
+                addLabel(domains, domain, index);
+            } else if (isFullyQualifiedDomainWildcard(domain)) {
+                const labels = extractDomainLabelsFromFullyQualifiedDomainWildcard(domain);
+                domainLabelMembers.push({labels, index});
+                labels.forEach((l) => blockDomainLabels.add(l));
+            } else {
+                // Sitefix parser encountered non-standard URL
+                nonstandard.push(index);
+                break;
+            }
+        }
+
+        // Compute domain label frequencies, counting each label within each fix only once
+        for (const label of blockDomainLabels) {
+            if (domainLabelFrequencies[label]) {
+                domainLabelFrequencies[label]++;
+            } else {
+                domainLabelFrequencies[label] = 1;
+            }
+        }
+    }
+
+    // For each domain name, find the most specific label
+    for (const {labels, index} of domainLabelMembers) {
+        let label = labels[0];
+        for (const currLabel of labels) {
+            if (domainLabelFrequencies[currLabel] < domainLabelFrequencies[label]) {
+                label = currLabel;
+            }
+        }
+        addLabel(domainLabels, label, index);
+    }
+
+    return {domains, domainLabels, nonstandard};
+}
+
+function processSiteFixesConfigBlock(text: string, offsets: Array<[number, number]>, recordStart: number, recordEnd: number, urls: string[][]) {
     // TODO: more formal definition of URLs and delimiters
     const block = text.substring(recordStart, recordEnd);
     const lines = block.split('\n');
@@ -142,70 +192,33 @@ function processBlock(text: string, domains: { [domain: string]: number[] }, dom
 
     offsets.push([recordStart, recordEnd - recordStart]);
 
-    const urls = parseArray(lines.slice(0, commandIndices[0]).join('\n'));
-    const domainLabels = new Set<string>();
-    for (const url of urls) {
-        const domain = getDomain(url);
-        if (isFullyQualifiedDomain(domain)) {
-            addLabel(domains, domain, index);
-        } else if (isFullyQualifiedDomainWildcard(domain)) {
-            const labels = extractDomainLabelsFromFullyQualifiedDomainWildcard(domain);
-            domainLabelMembers.push({labels, index});
-            labels.forEach((l) => domainLabels.add(l));
-        } else {
-            // Sitefix parser encountered non-standard URL
-            nonstandard.push(index);
-            break;
-        }
-    }
-
-    // Compute domain label frequencies, counting each label within each fix only once
-    for (const label of domainLabels) {
-        if (domainLabelFrequencies[label]) {
-            domainLabelFrequencies[label]++;
-        } else {
-            domainLabelFrequencies[label] = 1;
-        }
-    }
+    const urls_ = parseArray(lines.slice(0, commandIndices[0]).join('\n'));
+    urls.push(urls_);
 }
 
-export function indexSitesFixesConfig<T extends SiteProps>(text: string): SitePropsIndex<T> {
-    const domains: { [domain: string]: number[] } = {};
-    const domainLabels: { [domainLabel: string]: number[] } = {};
-    const nonstandard: number[] = [];
+function extractURLsFromSiteFixesConfig(text: string): {urls: string[][]; offsets: Array<[number, number]>} {
+    const urls: string[][] = [];
     // Array of tuples, where first number is an offset of record start and second number is record length.
     const offsets: Array<[number, number]> = [];
-
-    const domainLabelFrequencies: { [domainLabel: string]: number } = {};
-    const domainLabelMembers: Array<{ labels: string[]; index: number }> = [];
 
     let recordStart = 0;
     // Delimiter between two blocks
     const delimiterRegex = /^\s*={2,}\s*$/gm;
     let delimiter: RegExpMatchArray | null;
-    let count = 0;
     while ((delimiter = delimiterRegex.exec(text))) {
         const nextDelimiterStart = delimiter.index!;
         const nextDelimiterEnd = delimiter.index! + delimiter[0].length;
-
-        processBlock(text, domains, domainLabelMembers, domainLabelFrequencies, offsets, nonstandard, recordStart, nextDelimiterStart, count);
-
+        processSiteFixesConfigBlock(text, offsets, recordStart, nextDelimiterStart, urls);
         recordStart = nextDelimiterEnd;
-        count++;
     }
-    processBlock(text, domains, domainLabelMembers, domainLabelFrequencies, offsets, nonstandard, recordStart, text.length, count);
+    processSiteFixesConfigBlock(text, offsets, recordStart, text.length, urls);
 
-    // For each domain name, find the most specific label
-    for (const {labels, index} of domainLabelMembers) {
-        let label = labels[0];
-        for (const currLabel of labels) {
-            if (domainLabelFrequencies[currLabel] < domainLabelFrequencies[label]) {
-                label = currLabel;
-            }
-        }
-        addLabel(domainLabels, label, index);
-    }
+    return {urls, offsets};
+}
 
+export function indexSitesFixesConfig<T extends SiteProps>(text: string): SitePropsIndex<T> {
+    const {urls, offsets} = extractURLsFromSiteFixesConfig(text);
+    const {domains, domainLabels, nonstandard} = indexSitesFixesURLs(urls);
     return {offsets: encodeOffsets(offsets), domains, domainLabels, nonstandard, cacheDomainIndex: {}, cacheSiteFix: {}, cacheCleanupTimer: null};
 }
 

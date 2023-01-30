@@ -1,8 +1,8 @@
 import {readText} from './utils/network';
 import {getDuration} from '../utils/time';
-import {indexSiteListConfig, indexSitesFixesConfig, isURLInSiteList, SiteListIndex} from '../generators/utils/parse';
+import {indexSiteListConfig, indexSitesFixesConfig, isURLInSiteList} from '../generators/utils/parse';
 import type {InversionFix, StaticTheme, DynamicThemeFix} from '../definitions';
-import type {SitePropsIndex} from '../generators/utils/parse';
+import type {SiteListIndex, SitePropsIndex} from '../generators/utils/parse';
 import type {ParsedColorSchemeConfig} from '../utils/colorscheme-parser';
 import {ParseColorSchemeConfig} from '../utils/colorscheme-parser';
 import {logWarn} from './utils/log';

@@ -21,7 +21,7 @@ export default class Newsmaker {
     private static latest: News[];
     private static latestTimestamp: number | null;
 
-    constructor() {
+    public static init() {
         if (Newsmaker.initialized) {
             // This path is never taken since Extension.constructor() ever creates one instance.
             logWarn('Attempting to re-initialize Newsmaker. Doing nothing.');
@@ -42,7 +42,7 @@ export default class Newsmaker {
         IconManager.hideBadge();
     }
 
-    static async getLatest(): Promise<News[]> {
+    public static async getLatest(): Promise<News[]> {
         await Newsmaker.stateManager.loadState();
         return Newsmaker.latest;
     }
@@ -53,7 +53,7 @@ export default class Newsmaker {
         }
     };
 
-    static subscribe() {
+    public static subscribe() {
         if ((Newsmaker.latestTimestamp === null) || (Newsmaker.latestTimestamp + Newsmaker.UPDATE_INTERVAL < Date.now())) {
             Newsmaker.updateNews();
         }
@@ -61,7 +61,7 @@ export default class Newsmaker {
         chrome.alarms.create(Newsmaker.ALARM_NAME, {periodInMinutes: Newsmaker.UPDATE_INTERVAL});
     }
 
-    static unSubscribe() {
+    public static unSubscribe() {
         chrome.alarms.onAlarm.removeListener(Newsmaker.alarmListener);
         chrome.alarms.clear(Newsmaker.ALARM_NAME);
     }
@@ -129,7 +129,7 @@ export default class Newsmaker {
         }
     }
 
-    static async markAsRead(...ids: string[]) {
+    public static async markAsRead(...ids: string[]) {
         const readNews = await Newsmaker.getReadNews();
         const results = readNews.slice();
         let changed = false;
@@ -154,7 +154,7 @@ export default class Newsmaker {
         }
     }
 
-    static async markAsDisplayed(...ids: string[]) {
+    public static async markAsDisplayed(...ids: string[]) {
         const displayedNews = await Newsmaker.getDisplayedNews();
         const results = displayedNews.slice();
         let changed = false;
@@ -179,11 +179,11 @@ export default class Newsmaker {
         }
     }
 
-    static wasRead(id: string, readNews: string[]) {
+    public static wasRead(id: string, readNews: string[]) {
         return readNews.includes(id);
     }
 
-    static wasDisplayed(id: string, displayedNews: string[]) {
+    public static wasDisplayed(id: string, displayedNews: string[]) {
         return displayedNews.includes(id);
     }
 }

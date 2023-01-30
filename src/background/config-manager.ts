@@ -1,9 +1,8 @@
 import {readText} from './utils/network';
-import {parseArray} from '../utils/text';
 import {getDuration} from '../utils/time';
-import {indexSitesFixesConfig} from '../generators/utils/parse';
+import {indexSiteListConfig, indexSitesFixesConfig, isURLInSiteList} from '../generators/utils/parse';
 import type {InversionFix, StaticTheme, DynamicThemeFix} from '../definitions';
-import type {SitePropsIndex} from '../generators/utils/parse';
+import type {SiteListIndex, SitePropsIndex} from '../generators/utils/parse';
 import type {ParsedColorSchemeConfig} from '../utils/colorscheme-parser';
 import {ParseColorSchemeConfig} from '../utils/colorscheme-parser';
 import {logWarn} from './utils/log';
@@ -47,7 +46,7 @@ interface Config extends LocalConfig {
 }
 
 export default class ConfigManager {
-    static DARK_SITES: string[];
+    private static DARK_SITES_INDEX: SiteListIndex | null;
     static DYNAMIC_THEME_FIXES_INDEX: SitePropsIndex<DynamicThemeFix> | null;
     static DYNAMIC_THEME_FIXES_RAW: string | null;
     static INVERSION_FIXES_INDEX: SitePropsIndex<InversionFix> | null;
@@ -180,7 +179,7 @@ export default class ConfigManager {
 
     private static handleDarkSites() {
         const $sites = this.overrides.darkSites || this.raw.darkSites;
-        this.DARK_SITES = parseArray($sites || '');
+        this.DARK_SITES_INDEX = indexSiteListConfig($sites || '');
     }
 
     static handleDynamicThemeFixes() {
@@ -199,5 +198,9 @@ export default class ConfigManager {
         const $themes = this.overrides.staticThemes || this.raw.staticThemes || '';
         this.STATIC_THEMES_INDEX = indexSitesFixesConfig<StaticTheme>($themes);
         this.STATIC_THEMES_RAW = $themes;
+    }
+
+    static isURLInDarkList(url: string): boolean {
+        return isURLInSiteList(url, ConfigManager.DARK_SITES_INDEX);
     }
 }

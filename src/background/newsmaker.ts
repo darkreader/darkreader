@@ -21,7 +21,7 @@ export default class Newsmaker {
     private static latest: News[];
     private static latestTimestamp: number | null;
 
-    constructor() {
+    private static init() {
         if (Newsmaker.initialized) {
             // This path is never taken since Extension.constructor() ever creates one instance.
             logWarn('Attempting to re-initialize Newsmaker. Doing nothing.');
@@ -33,6 +33,7 @@ export default class Newsmaker {
     }
 
     private static onUpdate() {
+        Newsmaker.init();
         const latestNews = Newsmaker.latest.length > 0 && Newsmaker.latest[0];
         if (latestNews && latestNews.badge && !latestNews.read && !latestNews.displayed) {
             IconManager.showBadge(latestNews.badge);
@@ -42,18 +43,21 @@ export default class Newsmaker {
         IconManager.hideBadge();
     }
 
-    static async getLatest(): Promise<News[]> {
+    public static async getLatest(): Promise<News[]> {
+        Newsmaker.init();
         await Newsmaker.stateManager.loadState();
         return Newsmaker.latest;
     }
 
     private static alarmListener = (alarm: chrome.alarms.Alarm): void => {
+        Newsmaker.init();
         if (alarm.name === Newsmaker.ALARM_NAME) {
             Newsmaker.updateNews();
         }
     };
 
-    static subscribe() {
+    public static subscribe() {
+        Newsmaker.init();
         if ((Newsmaker.latestTimestamp === null) || (Newsmaker.latestTimestamp + Newsmaker.UPDATE_INTERVAL < Date.now())) {
             Newsmaker.updateNews();
         }
@@ -61,12 +65,14 @@ export default class Newsmaker {
         chrome.alarms.create(Newsmaker.ALARM_NAME, {periodInMinutes: Newsmaker.UPDATE_INTERVAL});
     }
 
-    static unSubscribe() {
+    public static unSubscribe() {
+        // No need to call Newsmaker.init()
         chrome.alarms.onAlarm.removeListener(Newsmaker.alarmListener);
         chrome.alarms.clear(Newsmaker.ALARM_NAME);
     }
 
     private static async updateNews() {
+        Newsmaker.init();
         const news = await Newsmaker.getNews();
         if (Array.isArray(news)) {
             Newsmaker.latest = news;
@@ -77,6 +83,7 @@ export default class Newsmaker {
     }
 
     private static async getReadNews(): Promise<string[]> {
+        Newsmaker.init();
         const [
             sync,
             local
@@ -91,6 +98,7 @@ export default class Newsmaker {
     }
 
     private static async getDisplayedNews(): Promise<string[]> {
+        Newsmaker.init();
         const [
             sync,
             local
@@ -105,6 +113,7 @@ export default class Newsmaker {
     }
 
     private static async getNews() {
+        Newsmaker.init();
         try {
             const response = await fetch(NEWS_URL, {cache: 'no-cache'});
             const $news: Array<Omit<News, 'read' | 'url'> & {date: string}> = await response.json();
@@ -129,7 +138,8 @@ export default class Newsmaker {
         }
     }
 
-    static async markAsRead(...ids: string[]) {
+    public static async markAsRead(ids: string[]) {
+        Newsmaker.init();
         const readNews = await Newsmaker.getReadNews();
         const results = readNews.slice();
         let changed = false;
@@ -154,7 +164,8 @@ export default class Newsmaker {
         }
     }
 
-    static async markAsDisplayed(...ids: string[]) {
+    public static async markAsDisplayed(ids: string[]) {
+        Newsmaker.init();
         const displayedNews = await Newsmaker.getDisplayedNews();
         const results = displayedNews.slice();
         let changed = false;
@@ -179,11 +190,11 @@ export default class Newsmaker {
         }
     }
 
-    static wasRead(id: string, readNews: string[]) {
+    private static wasRead(id: string, readNews: string[]) {
         return readNews.includes(id);
     }
 
-    static wasDisplayed(id: string, displayedNews: string[]) {
+    private static wasDisplayed(id: string, displayedNews: string[]) {
         return displayedNews.includes(id);
     }
 }

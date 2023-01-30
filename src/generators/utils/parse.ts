@@ -1,4 +1,4 @@
-import {isFullyQualifiedDomain, isFullyQualifiedDomainWildcard, fullyQualifiedDomainMatchesWildcard} from '../../utils/url';
+import {isFullyQualifiedDomain, isFullyQualifiedDomainWildcard, fullyQualifiedDomainMatchesWildcard, isURLInList} from '../../utils/url';
 import {parseArray} from '../../utils/text';
 
 declare const __TEST__: boolean;
@@ -23,6 +23,13 @@ export interface SitePropsIndex<SiteFix extends SiteProps> {
 }
 
 interface ConfigIndex {
+    domains: { [domain: string]: number[] };
+    domainLabels: { [domainLabel: string]: number[] };
+    nonstandard: number[];
+}
+
+export interface SiteListIndex {
+    urls: string[];
     domains: { [domain: string]: number[] };
     domainLabels: { [domainLabel: string]: number[] };
     nonstandard: number[];
@@ -131,7 +138,7 @@ function extractDomainLabelsFromFullyQualifiedDomainWildcard(fullyQualifiedDomai
     return labels;
 }
 
-export function indexConfigURLs(urls: string[][]): {domains: { [domain: string]: number[] }; domainLabels: { [domainLabel: string]: number[] }; nonstandard: number[]} {
+function indexConfigURLs(urls: string[][]): {domains: { [domain: string]: number[] }; domainLabels: { [domainLabel: string]: number[] }; nonstandard: number[]} {
     const domains: { [domain: string]: number[] } = {};
     const domainLabels: { [domainLabel: string]: number[] } = {};
     const nonstandard: number[] = [];
@@ -339,4 +346,29 @@ export function getSitesFixesFor<T extends SiteProps>(url: string, text: string,
 
     scheduleCacheCleanup(index);
     return records;
+}
+
+export function indexSiteListConfig(text: string): SiteListIndex {
+    const urls = parseArray(text);
+    const urls2D = urls.map((u) => [u]);
+    const {domains, domainLabels, nonstandard} = indexConfigURLs(urls2D);
+    return {domains, domainLabels, nonstandard, urls};
+}
+
+function getSiteListFor(url: string, index: SiteListIndex): string[] {
+    const domain = getDomain(url);
+    const recordIds = lookupConfigURLs(domain, index, (recordId) => [index.urls[recordId]]);
+    const result: string[] = [];
+    for (const recordId of recordIds) {
+        result.push(index.urls[recordId]);
+    }
+    return result;
+}
+
+export function isURLInSiteList(url: string, index: SiteListIndex | null): boolean {
+    if (index === null) {
+        return false;
+    }
+    const urls = getSiteListFor(url, index);
+    return isURLInList(url, urls);
 }

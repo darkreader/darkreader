@@ -531,7 +531,7 @@ export class Extension {
         const settings = UserStorage.settings;
         const tab = await this.getActiveTabInfo();
         const {url} = tab;
-        const isInDarkList = isURLInList(url, ConfigManager.DARK_SITES);
+        const isInDarkList = ConfigManager.isURLInDarkList(url);
         const host = getURLHostOrProtocol(url);
 
         function getToggledList(sourceList: string[]) {
@@ -599,8 +599,7 @@ export class Extension {
     //----------------------
 
     private static getTabInfo(tabURL: string): TabInfo {
-        const {DARK_SITES} = ConfigManager;
-        const isInDarkList = isURLInList(tabURL, DARK_SITES);
+        const isInDarkList = ConfigManager.isURLInDarkList(tabURL);
         const isProtected = !canInjectScript(tabURL);
         return {
             url: tabURL,

@@ -72,7 +72,6 @@ export class Extension {
         }
         Extension.initialized = true;
 
-        Newsmaker.init();
         DevTools.init(Extension.onSettingsChanged);
         Messenger.init(Extension.getMessengerAdapter());
         TabManager.init({
@@ -246,18 +245,18 @@ export class Extension {
             collectDevToolsData: async () => {
                 return await Extension.collectDevToolsData();
             },
-            changeSettings: async (settings) => Extension.changeSettings(settings),
-            setTheme: (theme) => Extension.setTheme(theme),
-            toggleActiveTab: async () => Extension.toggleActiveTab(),
-            markNewsAsRead: async (ids) => await Newsmaker.markAsRead(...ids),
-            markNewsAsDisplayed: async (ids) => await Newsmaker.markAsDisplayed(...ids),
-            loadConfig: async (options) => await ConfigManager.load(options),
-            applyDevDynamicThemeFixes: (text) => DevTools.applyDynamicThemeFixes(text),
-            resetDevDynamicThemeFixes: () => DevTools.resetDynamicThemeFixes(),
-            applyDevInversionFixes: (text) => DevTools.applyInversionFixes(text),
-            resetDevInversionFixes: () => DevTools.resetInversionFixes(),
-            applyDevStaticThemes: (text) => DevTools.applyStaticThemes(text),
-            resetDevStaticThemes: () => DevTools.resetStaticThemes(),
+            changeSettings: Extension.changeSettings,
+            setTheme: Extension.setTheme,
+            toggleActiveTab: Extension.toggleActiveTab,
+            markNewsAsRead: Newsmaker.markAsRead,
+            markNewsAsDisplayed: Newsmaker.markAsDisplayed,
+            loadConfig: ConfigManager.load,
+            applyDevDynamicThemeFixes: DevTools.applyDynamicThemeFixes,
+            resetDevDynamicThemeFixes: DevTools.resetDynamicThemeFixes,
+            applyDevInversionFixes: DevTools.applyInversionFixes,
+            resetDevInversionFixes: DevTools.resetInversionFixes,
+            applyDevStaticThemes: DevTools.applyStaticThemes,
+            resetDevStaticThemes: DevTools.resetStaticThemes,
         };
     }
 

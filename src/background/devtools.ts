@@ -99,7 +99,7 @@ export default class DevTools {
     public static init(onChange: () => void) {
         // Firefox don't seem to like using storage.local to store big data on the background-extension.
         // Disabling it for now and defaulting back to localStorage.
-        if (typeof chrome.storage.local !== 'undefined' && chrome.storage.local !== null && !isFirefox) {
+        if (!isFirefox && typeof chrome.storage.local !== 'undefined' && chrome.storage.local !== null) {
             DevTools.store = new PersistentStorageWrapper();
         } else {
             DevTools.store = new TempStorage();

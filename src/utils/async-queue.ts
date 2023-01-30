@@ -29,7 +29,7 @@ export default class AsyncQueue {
         this.timerId = requestAnimationFrame(() => {
             this.timerId = null;
             const start = Date.now();
-            let cb: (() => void) | undefined;
+            let cb: QueueEntry | undefined;
             while ((cb = this.queue.shift())) {
                 cb();
                 if (Date.now() - start >= this.frameDuration) {

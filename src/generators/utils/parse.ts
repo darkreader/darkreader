@@ -22,6 +22,12 @@ export interface SitePropsIndex<SiteFix extends SiteProps> {
     cacheCleanupTimer: ReturnType<typeof setTimeout> | null;
 }
 
+interface ConfigIndex {
+    domains: { [domain: string]: number[] };
+    domainLabels: { [domainLabel: string]: number[] };
+    nonstandard: number[];
+}
+
 export interface SitesFixesParserOptions<T> {
     commands: string[];
     getCommandPropName: (command: string) => keyof T;
@@ -125,7 +131,7 @@ function extractDomainLabelsFromFullyQualifiedDomainWildcard(fullyQualifiedDomai
     return labels;
 }
 
-export function indexSitesFixesURLs(urls: string[][]): {domains: { [domain: string]: number[] }; domainLabels: { [domainLabel: string]: number[] }; nonstandard: number[]} {
+export function indexConfigURLs(urls: string[][]): {domains: { [domain: string]: number[] }; domainLabels: { [domainLabel: string]: number[] }; nonstandard: number[]} {
     const domains: { [domain: string]: number[] } = {};
     const domainLabels: { [domainLabel: string]: number[] } = {};
     const nonstandard: number[] = [];
@@ -218,8 +224,56 @@ function extractURLsFromSiteFixesConfig(text: string): {urls: string[][]; offset
 
 export function indexSitesFixesConfig<T extends SiteProps>(text: string): SitePropsIndex<T> {
     const {urls, offsets} = extractURLsFromSiteFixesConfig(text);
-    const {domains, domainLabels, nonstandard} = indexSitesFixesURLs(urls);
+    const {domains, domainLabels, nonstandard} = indexConfigURLs(urls);
     return {offsets: encodeOffsets(offsets), domains, domainLabels, nonstandard, cacheDomainIndex: {}, cacheSiteFix: {}, cacheCleanupTimer: null};
+}
+
+function lookupConfigURLs(url: string, index: ConfigIndex, getAllRecordURLs: (id: number) => string[]): number[] {
+    const domain = getDomain(url);
+    const labels = domain.split('.');
+    let recordIds: number[] = [];
+
+    // Common fix
+    if ('*' in index.domainLabels) {
+        recordIds = recordIds.concat(index.domainLabels['*']);
+    }
+
+    // Wildcard fixes
+    for (const label of labels) {
+        // We need to use in operator because ids are 0-based and 0 is falsy
+        if (label in index.domainLabels) {
+            const currRecordIds = index.domainLabels[label];
+            for (const recordId of currRecordIds) {
+                const recordURLs = getAllRecordURLs(recordId);// getSiteFix<T>(text, index, options, recordId);
+                for (const ruleUrl of recordURLs) {
+                    const wildcard = getDomain(ruleUrl);
+                    if (isFullyQualifiedDomainWildcard(wildcard) && fullyQualifiedDomainMatchesWildcard(wildcard, domain)) {
+                        recordIds.push(recordId);
+                    } else {
+                        // Skip this rule, since the label match must have come from a different URL
+                    }
+                }
+            }
+        }
+    }
+
+    for (let i = 0; i < labels.length; i++) {
+        const substring = labels.slice(i).join('.');
+        if (substring in index.domains) {
+            recordIds = recordIds.concat(index.domains[substring]);
+        }
+        if (substring in index.domainLabels) {
+            recordIds = recordIds.concat(index.domainLabels[substring]);
+        }
+    }
+    // Backwards compatibility: send over nonstandard patterns, which will be filtered out
+    // via regex in content script
+    recordIds = recordIds.concat(index.nonstandard);
+
+    // Deduplicate array elements
+    recordIds = Array.from(new Set(recordIds));
+
+    return recordIds;
 }
 
 /**
@@ -231,9 +285,8 @@ export function indexSitesFixesConfig<T extends SiteProps>(text: string): SitePr
  * @returns a single fix
  */
 function getSiteFix<T extends SiteProps>(text: string, index: SitePropsIndex<T>, options: SitesFixesParserOptions<T>, id: number): T {
-    const cachedFix = index.cacheSiteFix[id];
-    if (cachedFix) {
-        return cachedFix;
+    if (id in index.cacheSiteFix) {
+        return index.cacheSiteFix[id];
     }
 
     const [blockStart, blockEnd] = decodeOffset(index.offsets, id);
@@ -275,47 +328,7 @@ export function getSitesFixesFor<T extends SiteProps>(url: string, text: string,
     const domain = getDomain(url);
 
     if (!index.cacheDomainIndex[domain]) {
-        const labels = domain.split('.');
-        let recordIds: number[] = [];
-
-        // Common fix
-        if ('*' in index.domainLabels) {
-            recordIds = recordIds.concat(index.domainLabels['*']);
-        }
-
-        // Wildcard fixes
-        for (const label of labels) {
-            // We need to use in operator because ids are 0-based and 0 is falsy
-            if (label in index.domainLabels) {
-                const currRecordIds = index.domainLabels[label];
-                for (const recordId of currRecordIds) {
-                    const fix = getSiteFix<T>(text, index, options, recordId);
-                    for (const ruleUrl of fix.url) {
-                        const wildcard = getDomain(ruleUrl);
-                        if (isFullyQualifiedDomainWildcard(wildcard) && fullyQualifiedDomainMatchesWildcard(wildcard, domain)) {
-                            recordIds.push(recordId);
-                        } else {
-                            // Skip this rule, since the label match must have come from a different URL
-                        }
-                    }
-                }
-            }
-        }
-
-        for (let i = 0; i < labels.length; i++) {
-            const substring = labels.slice(i).join('.');
-            if (index.domains[substring]) {
-                recordIds = recordIds.concat(index.domains[substring]);
-            }
-            if (index.domainLabels[substring]) {
-                recordIds = recordIds.concat(index.domainLabels[substring]);
-            }
-        }
-        // Backwards compatibility: send over nonstandard patterns, which will be filtered out
-        // via regex in content script
-        recordIds = recordIds.concat(index.nonstandard);
-        // Deduplicate array elements
-        index.cacheDomainIndex[domain] = Array.from(new Set(recordIds));
+        index.cacheDomainIndex[domain] = lookupConfigURLs(domain, index, (recordId) => getSiteFix<T>(text, index, options, recordId).url);
     }
 
     const recordIds: number[] = index.cacheDomainIndex[domain];

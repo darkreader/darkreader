@@ -190,11 +190,11 @@ export default class Newsmaker {
         }
     }
 
-    public static wasRead(id: string, readNews: string[]) {
+    private static wasRead(id: string, readNews: string[]) {
         return readNews.includes(id);
     }
 
-    public static wasDisplayed(id: string, displayedNews: string[]) {
+    private static wasDisplayed(id: string, displayedNews: string[]) {
         return displayedNews.includes(id);
     }
 }

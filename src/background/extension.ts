@@ -66,7 +66,7 @@ export class Extension {
     private static initialized = false;
 
     // This sync initializer needs to run on every BG restart before anything else can happen
-    public static init() {
+    private static init() {
         if (Extension.initialized) {
             return;
         }

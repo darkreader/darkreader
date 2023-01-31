@@ -67,6 +67,7 @@
     "@types/karma-coverage": "2.0.1",
     "@types/node": "18.11.18",
     "@types/offscreencanvas": "2019.7.0",
+    "@types/ws": "^8.5.4",
     "@typescript-eslint/eslint-plugin": "5.49.0",
     "@typescript-eslint/parser": "5.49.0",
     "chokidar": "3.5.3",

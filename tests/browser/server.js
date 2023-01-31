@@ -25,6 +25,10 @@ const terminationListener = () => {
     terminationListeners.forEach((listener) => listener());
 };
 
+export function generateRandomId() {
+    return Math.floor(Math.random() * 2 ** 55).toString();
+}
+
 export async function createTestServer(/** @type {number} */port) {
     /** @type {import('http').Server} */
     let server;

@@ -19,13 +19,7 @@ async function loadBasicPage() {
     });
 }
 
-async function resetChanges() {
-    await devtoolsUtils.reset();
-}
-
 describe('Correct fixes are chosen', () => {
-    jest.setTimeout(10000);
-
     it('If no matching URL found, returns only default fix', async () => {
         await loadBasicPage();
 
@@ -73,7 +67,7 @@ describe('Correct fixes are chosen', () => {
         await expect(page.evaluate(() => getComputedStyle(document.body).color)).resolves.toBe('rgb(255, 255, 255)');
         await expect(page.evaluate(() => getComputedStyle(document.querySelector('h1')).color)).resolves.toBe('rgb(255, 165, 0)');
 
-        await resetChanges();
+        await devtoolsUtils.reset();
     });
 
     it('If multiple matching URL patterns found, select the most specific one', async () => {
@@ -123,7 +117,7 @@ describe('Correct fixes are chosen', () => {
         await expect(page.evaluate(() => getComputedStyle(document.body).color)).resolves.toBe('rgb(255, 255, 255)');
         await expect(page.evaluate(() => getComputedStyle(document.querySelector('h1')).color)).resolves.toBe('rgb(255, 165, 0)');
 
-        await resetChanges();
+        await devtoolsUtils.reset();
     });
 
     it('BUG COMPATIBILITY: If multiple matching URL patterns found, the most specific fix is determined by the length of first pattern', async () => {
@@ -175,7 +169,7 @@ describe('Correct fixes are chosen', () => {
         await expect(page.evaluate(() => getComputedStyle(document.body).color)).resolves.toBe('rgb(255, 255, 255)');
         await expect(page.evaluate(() => getComputedStyle(document.querySelector('h1')).color)).resolves.toBe('rgb(255, 165, 0)');
 
-        await resetChanges();
+        await devtoolsUtils.reset();
     });
 
     it('BUG COMPATIBILITY: If multiple matching URL patterns of the same length are found, select the first one', async () => {
@@ -225,6 +219,6 @@ describe('Correct fixes are chosen', () => {
         await expect(page.evaluate(() => getComputedStyle(document.body).color)).resolves.toBe('rgb(255, 255, 255)');
         await expect(page.evaluate(() => getComputedStyle(document.querySelector('h1')).color)).resolves.toBe('rgb(255, 165, 0)');
 
-        await resetChanges();
+        await devtoolsUtils.reset();
     });
 });

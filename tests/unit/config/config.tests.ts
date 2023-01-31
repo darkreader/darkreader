@@ -5,7 +5,8 @@ import {parseInversionFixes, formatInversionFixes} from '../../../src/generators
 import {parseDynamicThemeFixes, formatDynamicThemeFixes} from '../../../src/generators/dynamic-theme';
 import {parseStaticThemes, formatStaticThemes} from '../../../src/generators/static-theme';
 import type {StaticTheme} from '../../../src/definitions';
-import {ParseColorSchemeConfig, ParsedColorSchemeConfig} from '../../../src/utils/colorscheme-parser';
+import {parseColorSchemeConfig} from '../../../src/utils/colorscheme-parser';
+import type {ParsedColorSchemeConfig} from '../../../src/utils/colorscheme-parser';
 import {rootPath} from '../../support/test-utils';
 
 function readConfig(fileName: string) {
@@ -35,7 +36,7 @@ function throwIfDifferent(input: string, expected: string, message: string) {
 
 function formatColorSchemeConfig(scheme: ParsedColorSchemeConfig): string {
     const names = Object.keys(scheme.dark);
-    let lines = [];
+    const lines = [];
     for (const name of names) {
         lines.push(name);
         lines.push('');
@@ -191,7 +192,7 @@ test('Colorscheme config', async () => {
     // there is no \r character
     expect(file.indexOf('\r')).toEqual(-1);
 
-    const {result: schemes, error} = ParseColorSchemeConfig(file);
+    const {result: schemes, error} = parseColorSchemeConfig(file);
 
     // Their is no error
     expect(error).toBeNull();

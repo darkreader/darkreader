@@ -47,7 +47,7 @@ export interface ParsedColorSchemeConfig {
     dark: { [name: string]: ColorSchemeVariant };
 }
 
-export function ParseColorSchemeConfig(config: string): { result: ParsedColorSchemeConfig; error: string | null } {
+export function parseColorSchemeConfig(config: string): { result: ParsedColorSchemeConfig; error: string | null } {
     // Let's first get all "possible" sections of the text.
     // We're adding `\n` so the sections "first" word is the
     // name of the color scheme. We could remove this and

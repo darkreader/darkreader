@@ -35,7 +35,7 @@ if (__TEST__) {
         socket.send(JSON.stringify({
             data: {
                 type: 'devtools',
-                url: document.location.href,
+                url: `ready-${document.location.href}`,
             },
             id: null,
         }));

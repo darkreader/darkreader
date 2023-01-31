@@ -169,7 +169,7 @@ class PuppeteerEnvironment extends JestNodeEnvironment.TestEnvironment {
         // Normalize URL
         url = new URL(url).href;
         // Depending on external circumstances, page may connect to server before page.goto() reolves
-        const promise = this.awaitForEvent(url);
+        const promise = this.awaitForEvent(`ready-${url}`);
         // Firefox does not resolve page.goto()
         await page.goto(url, gotoOptions);
         return promise;
@@ -243,13 +243,12 @@ class PuppeteerEnvironment extends JestNodeEnvironment.TestEnvironment {
                         popupSockets.add(ws);
                         const url = message.data.url;
                         this.onPageEventResponse(url);
-                    } else if (message.id === null && message.data && message.data.url && message.data.type === 'page') {
+                    } else if (message.id === null && message.data && message.data.type === 'page') {
                         if (message.data.message === 'page-ready') {
                             ws.on('close', () => pageSockets.delete(ws));
                             pageSockets.add(ws);
                         }
-                        const url = message.data.url;
-                        this.onPageEventResponse(url);
+                        this.onPageEventResponse(message.data.uuid);
                     } else if (message.error) {
                         const reject = rejectors.get(message.id);
                         reject(message.error);
@@ -291,14 +290,18 @@ class PuppeteerEnvironment extends JestNodeEnvironment.TestEnvironment {
                 return sendToContext([backgroundSocket], type, data);
             }
 
+            async function applyDevtoolsConfig(type, fixes) {
+                await sendToDevTools(type, fixes);
+            }
+
             this.global.popupUtils = {
                 click: async (selector) => await sendToPopup('click', selector),
                 exists: async (selector) => await sendToPopup('exists', selector),
             };
 
             this.global.devtoolsUtils = {
-                paste: async (fixes) => await sendToDevTools('debug-devtools-paste', fixes),
-                reset: async () => await sendToDevTools('debug-devtools-reset'),
+                paste: async (fixes) => await applyDevtoolsConfig('debug-devtools-paste', fixes),
+                reset: async () => await applyDevtoolsConfig('debug-devtools-reset'),
             };
 
             this.global.backgroundUtils = {

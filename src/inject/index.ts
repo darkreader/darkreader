@@ -27,8 +27,8 @@ function cleanup() {
     stopColorSchemeChangeDetector();
 }
 
-function sendMessageForTesting(message: any) {
-    document.dispatchEvent(new CustomEvent('test-message', {detail: message}));
+function sendMessageForTesting(uuid: string) {
+    document.dispatchEvent(new CustomEvent('test-message', {detail: uuid}));
 }
 
 function sendMessage(message: Message) {
@@ -206,11 +206,10 @@ if (__TEST__) {
     const socket = new WebSocket(`ws://localhost:8894`);
     socket.onopen = async () => {
         document.addEventListener('test-message', (e: CustomEvent) => {
-            const message = e.detail;
             socket.send(JSON.stringify({
                 data: {
                     type: 'page',
-                    message,
+                    uuid: e.detail,
                 },
                 id: null,
             }));
@@ -224,7 +223,7 @@ if (__TEST__) {
             data: {
                 type: 'page',
                 message: 'page-ready',
-                url: document.location.href,
+                uuid: `ready-${document.location.href}`,
             },
             id: null,
         }));

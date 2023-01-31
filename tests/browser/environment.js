@@ -210,6 +210,7 @@ class PuppeteerEnvironment extends JestNodeEnvironment.TestEnvironment {
     }
 
     async createMessageServer() {
+        const awaitForEvent = this.awaitForEvent.bind(this);
         // Puppeteer cannot evaluate scripts in moz-extension:// pages
         // https://github.com/puppeteer/puppeteer/issues/6616
         return new Promise((resolve) => {
@@ -233,16 +234,14 @@ class PuppeteerEnvironment extends JestNodeEnvironment.TestEnvironment {
                         this.extensionStartListeners.forEach((ready) => ready());
                         ws.on('close', () => backgroundSocket = null);
                         backgroundSocket = ws;
-                    } else if (message.id === null && message.data && message.data.url && message.data.type === 'devtools') {
+                    } else if (message.id === null && message.data && message.data.type === 'devtools') {
                         ws.on('close', () => devToolsSocket = null);
                         devToolsSocket = ws;
-                        const url = message.data.url;
-                        this.onPageEventResponse(url);
-                    } else if (message.id === null && message.data && message.data.url && message.data.type === 'popup') {
+                        this.onPageEventResponse(message.data.uuid);
+                    } else if (message.id === null && message.data && message.data.type === 'popup') {
                         ws.on('close', () => popupSockets.delete(ws));
                         popupSockets.add(ws);
-                        const url = message.data.url;
-                        this.onPageEventResponse(url);
+                        this.onPageEventResponse(message.data.uuid);
                     } else if (message.id === null && message.data && message.data.type === 'page') {
                         if (message.data.message === 'page-ready') {
                             ws.on('close', () => pageSockets.delete(ws));
@@ -291,7 +290,9 @@ class PuppeteerEnvironment extends JestNodeEnvironment.TestEnvironment {
             }
 
             async function applyDevtoolsConfig(type, fixes) {
+                const promise = awaitForEvent('darkreader-dynamic-theme-ready');
                 await sendToDevTools(type, fixes);
+                await promise;
             }
 
             this.global.popupUtils = {

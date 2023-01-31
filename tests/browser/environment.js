@@ -162,13 +162,14 @@ class PuppeteerEnvironment extends JestNodeEnvironment.TestEnvironment {
         return await backgroundTarget.page();
     }
 
+    async awaitForEvent(uuid) {
+        return new Promise((resolve) => this.pageEventListeners.set(uuid, resolve));
+    }
     async pageGoto(page, url, gotoOptions) {
         // Normalize URL
         url = new URL(url).href;
         // Depending on external circumstances, page may connect to server before page.goto() reolves
-        const promise = new Promise((resolve) => {
-            this.pageEventListeners.set(url, resolve);
-        });
+        const promise = this.awaitForEvent(url);
         // Firefox does not resolve page.goto()
         await page.goto(url, gotoOptions);
         return promise;

@@ -46,10 +46,10 @@ function formatColorSchemeConfig(scheme: ParsedColorSchemeConfig): string {
                 const {backgroundColor, textColor} = style;
                 lines.push(color.toUpperCase());
                 if (backgroundColor) {
-                    lines.push(`background: ${backgroundColor}`);
+                    lines.push(`background: ${backgroundColor.toLowerCase()}`);
                 }
                 if (textColor) {
-                    lines.push(`text: ${textColor}`);
+                    lines.push(`text: ${textColor.toLowerCase()}`);
                 }
                 lines.push('');
             }

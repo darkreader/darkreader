@@ -4,7 +4,7 @@ import {indexSiteListConfig, indexSitesFixesConfig, isURLInSiteList} from '../ge
 import type {InversionFix, StaticTheme, DynamicThemeFix} from '../definitions';
 import type {SiteListIndex, SitePropsIndex} from '../generators/utils/parse';
 import type {ParsedColorSchemeConfig} from '../utils/colorscheme-parser';
-import {ParseColorSchemeConfig} from '../utils/colorscheme-parser';
+import {parseColorSchemeConfig} from '../utils/colorscheme-parser';
 import {logWarn} from './utils/log';
 import {DEFAULT_COLORSCHEME} from '../defaults';
 import UserStorage from './user-storage';
@@ -168,7 +168,7 @@ export default class ConfigManager {
 
     private static handleColorSchemes() {
         const $config = ConfigManager.raw.colorSchemes;
-        const {result, error} = ParseColorSchemeConfig($config || '');
+        const {result, error} = parseColorSchemeConfig($config || '');
         if (error) {
             logWarn(`Color Schemes parse error, defaulting to fallback. ${error}.`);
             ConfigManager.COLOR_SCHEMES_RAW = DEFAULT_COLORSCHEME;

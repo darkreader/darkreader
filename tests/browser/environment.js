@@ -165,6 +165,7 @@ class PuppeteerEnvironment extends JestNodeEnvironment.TestEnvironment {
     async awaitForEvent(uuid) {
         return new Promise((resolve) => this.pageEventListeners.set(uuid, resolve));
     }
+
     async pageGoto(page, url, gotoOptions) {
         // Normalize URL
         url = new URL(url).href;
@@ -276,10 +277,6 @@ class PuppeteerEnvironment extends JestNodeEnvironment.TestEnvironment {
 
             function sendToPopup(type, data) {
                 return sendToContext(Array.from(popupSockets), type, data);
-            }
-
-            function sendToPage(type, data) {
-                return sendToContext(Array.from(pageSockets), type, data);
             }
 
             function sendToDevTools(type, data) {

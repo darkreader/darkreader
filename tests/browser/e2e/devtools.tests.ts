@@ -1,4 +1,4 @@
-import {multiline, timeout} from '../../support/test-utils';
+import {multiline} from '../../support/test-utils';
 
 async function loadBasicPage() {
     await loadTestPage({

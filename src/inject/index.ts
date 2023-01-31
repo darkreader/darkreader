@@ -211,7 +211,6 @@ if (__TEST__) {
                 data: {
                     type: 'page',
                     message,
-                    url: document.location.href,
                 },
                 id: null,
             }));
@@ -224,6 +223,7 @@ if (__TEST__) {
         socket.send(JSON.stringify({
             data: {
                 type: 'page',
+                message: 'page-ready',
                 url: document.location.href,
             },
             id: null,

@@ -244,8 +244,10 @@ class PuppeteerEnvironment extends JestNodeEnvironment.TestEnvironment {
                         const url = message.data.url;
                         this.onPageEventResponse(url);
                     } else if (message.id === null && message.data && message.data.url && message.data.type === 'page') {
-                        ws.on('close', () => pageSockets.delete(ws));
-                        pageSockets.add(ws);
+                        if (message.data.message === 'page-ready') {
+                            ws.on('close', () => pageSockets.delete(ws));
+                            pageSockets.add(ws);
+                        }
                         const url = message.data.url;
                         this.onPageEventResponse(url);
                     } else if (message.error) {

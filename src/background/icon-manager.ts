@@ -48,7 +48,7 @@ export default class IconManager {
         }
     }
 
-    static setActive() {
+    public static setActive() {
         if (__THUNDERBIRD__ || !chrome.browserAction.setIcon) {
             // Fix for Firefox Android and Thunderbird.
             return;
@@ -60,7 +60,7 @@ export default class IconManager {
         IconManager.handleUpdate();
     }
 
-    static setInactive() {
+    public static setInactive() {
         if (__THUNDERBIRD__ || !chrome.browserAction.setIcon) {
             // Fix for Firefox Android and Thunderbird.
             return;
@@ -72,14 +72,14 @@ export default class IconManager {
         IconManager.handleUpdate();
     }
 
-    static showBadge(text: string) {
+    public static showBadge(text: string) {
         IconManager.iconState.badgeText = text;
         chrome.browserAction.setBadgeBackgroundColor({color: '#e96c4c'});
         chrome.browserAction.setBadgeText({text});
         IconManager.handleUpdate();
     }
 
-    static hideBadge() {
+    public static hideBadge() {
         IconManager.iconState.badgeText = '';
         chrome.browserAction.setBadgeText({text: ''});
         IconManager.handleUpdate();

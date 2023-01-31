@@ -34,9 +34,9 @@ export default class ContentScriptManager {
      * to be supported already...
      */
 
-    static state: ContentScriptManagerState;
+    public static state: ContentScriptManagerState;
 
-    static async registerScripts(updateContentScripts: () => Promise<void>) {
+    public static async registerScripts(updateContentScripts: () => Promise<void>) {
         if (!__CHROMIUM_MV3__) {
             logWarn('ContentScriptManager is useful only within MV3 builds.');
             return;
@@ -98,7 +98,7 @@ export default class ContentScriptManager {
             ));
     }
 
-    static async unregisterScripts() {
+    public static async unregisterScripts() {
         if (!__CHROMIUM_MV3__) {
             logWarn('ContentScriptManager is useful only within MV3 builds.');
             return;

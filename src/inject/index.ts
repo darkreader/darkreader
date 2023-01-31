@@ -12,7 +12,7 @@ declare const __TEST__: boolean;
 
 let unloaded = false;
 
-let darkReaderDynamicThemeState: 'loading' | 'complete' = 'loading';
+let darkReaderDynamicThemeStateForTesting: 'loading' | 'ready' = 'loading';
 
 declare const __CHROMIUM_MV3__: boolean;
 declare const __THUNDERBIRD__: boolean;
@@ -27,7 +27,7 @@ function cleanup() {
     stopColorSchemeChangeDetector();
 }
 
-function sendTestMessage(message: any) {
+function sendMessageForTesting(message: any) {
     document.dispatchEvent(new CustomEvent('test-message', {detail: message}));
 }
 
@@ -108,8 +108,8 @@ function onMessage({type, data}: Message) {
         }
         case MessageType.BG_ADD_DYNAMIC_THEME: {
             if (__TEST__) {
-                darkReaderDynamicThemeState = 'loading';
-                sendTestMessage('darkreader-dynamic-theme-state-change');
+                darkReaderDynamicThemeStateForTesting = 'loading';
+                sendMessageForTesting('darkreader-dynamic-theme-loading');
             }
 
             const {theme, fixes, isIFrame, detectDarkTheme} = data as {theme: Theme; fixes: DynamicThemeFix[]; isIFrame: boolean; detectDarkTheme: boolean};
@@ -124,8 +124,8 @@ function onMessage({type, data}: Message) {
                 });
             }
             if (__TEST__) {
-                darkReaderDynamicThemeState = 'complete';
-                sendTestMessage('darkreader-dynamic-theme-state-change');
+                darkReaderDynamicThemeStateForTesting = 'ready';
+                sendMessageForTesting('darkreader-dynamic-theme-ready');
             }
             break;
         }
@@ -191,11 +191,11 @@ if (__TEST__) {
     }
 
     async function awaitDarkReaderReady() {
-        if (darkReaderDynamicThemeState !== 'complete') {
+        if (darkReaderDynamicThemeStateForTesting !== 'ready') {
             return new Promise<void>((resolve) => {
                 document.addEventListener('test-message', (event: CustomEvent) => {
                     const message = event.detail;
-                    if (message === 'darkreader-dynamic-theme-state-change' && darkReaderDynamicThemeState === 'complete') {
+                    if (message === 'darkreader-dynamic-theme-ready' && darkReaderDynamicThemeStateForTesting === 'ready') {
                         resolve();
                     }
                 });
@@ -205,6 +205,18 @@ if (__TEST__) {
 
     const socket = new WebSocket(`ws://localhost:8894`);
     socket.onopen = async () => {
+        document.addEventListener('test-message', (e: CustomEvent) => {
+            const message = e.detail;
+            socket.send(JSON.stringify({
+                data: {
+                    type: 'page',
+                    message,
+                    url: document.location.href,
+                },
+                id: null,
+            }));
+        });
+
         // Wait for DOM to be complete
         // Note that here we wait only for DOM parsing and not for subresource load
         await awaitDOMContentLoaded();

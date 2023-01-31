@@ -15,7 +15,7 @@ const POPUP_TEST_PORT = 8894;
 
 class PuppeteerEnvironment extends JestNodeEnvironment.TestEnvironment {
     extensionStartListeners = [];
-    pageLoadListeners = new Map();
+    pageEventListeners = new Map();
 
     async setup() {
         await super.setup();
@@ -167,16 +167,16 @@ class PuppeteerEnvironment extends JestNodeEnvironment.TestEnvironment {
         url = new URL(url).href;
         // Depending on external circumstances, page may connect to server before page.goto() reolves
         const promise = new Promise((resolve) => {
-            this.pageLoadListeners.set(url, resolve);
+            this.pageEventListeners.set(url, resolve);
         });
         // Firefox does not resolve page.goto()
         await page.goto(url, gotoOptions);
         return promise;
     }
 
-    onPageGotoResponse(url) {
-        const resolve = this.pageLoadListeners.get(url);
-        this.pageLoadListeners.delete(url);
+    onPageEventResponse(eventUUID) {
+        const resolve = this.pageEventListeners.get(eventUUID);
+        this.pageEventListeners.delete(eventUUID);
         resolve && resolve();
     }
 
@@ -236,17 +236,17 @@ class PuppeteerEnvironment extends JestNodeEnvironment.TestEnvironment {
                         ws.on('close', () => devToolsSocket = null);
                         devToolsSocket = ws;
                         const url = message.data.url;
-                        this.onPageGotoResponse(url);
+                        this.onPageEventResponse(url);
                     } else if (message.id === null && message.data && message.data.url && message.data.type === 'popup') {
                         ws.on('close', () => popupSockets.delete(ws));
                         popupSockets.add(ws);
                         const url = message.data.url;
-                        this.onPageGotoResponse(url);
+                        this.onPageEventResponse(url);
                     } else if (message.id === null && message.data && message.data.url && message.data.type === 'page') {
                         ws.on('close', () => pageSockets.delete(ws));
                         pageSockets.add(ws);
                         const url = message.data.url;
-                        this.onPageGotoResponse(url);
+                        this.onPageEventResponse(url);
                     } else if (message.error) {
                         const reject = rejectors.get(message.id);
                         reject(message.error);

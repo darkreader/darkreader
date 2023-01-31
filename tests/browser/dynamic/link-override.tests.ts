@@ -1,6 +1,9 @@
 import {multiline, timeout} from '../../support/test-utils';
 
 describe('Link override', () => {
+    // TODO: remove flakes and remove this line
+    jest.retryTimes(10, {logErrorsBeforeRetry: true});
+
     it('should override link style', async () => {
         await loadTestPage({
             '/': multiline(

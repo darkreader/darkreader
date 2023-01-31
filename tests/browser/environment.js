@@ -163,23 +163,29 @@ class PuppeteerEnvironment extends JestNodeEnvironment.TestEnvironment {
     }
 
     async awaitForEvent(uuid) {
-        return new Promise((resolve) => this.pageEventListeners.set(uuid, resolve));
+        return new Promise((resolve) => {
+            if (this.pageEventListeners.has(uuid)) {
+                this.pageEventListeners.get(uuid).push(resolve);
+            } else {
+                this.pageEventListeners.set(uuid, [resolve]);
+            }
+        });
     }
 
     async pageGoto(page, url, gotoOptions) {
         // Normalize URL
-        url = new URL(url).href;
+        const pathname = new URL(url).pathname;
         // Depending on external circumstances, page may connect to server before page.goto() reolves
-        const promise = this.awaitForEvent(`ready-${url}`);
+        const promise = this.awaitForEvent(`ready-${pathname}`);
         // Firefox does not resolve page.goto()
         await page.goto(url, gotoOptions);
         return promise;
     }
 
     onPageEventResponse(eventUUID) {
-        const resolve = this.pageEventListeners.get(eventUUID);
+        const resolves = this.pageEventListeners.get(eventUUID);
         this.pageEventListeners.delete(eventUUID);
-        resolve && resolve();
+        resolves && resolves.forEach((r) => r());
     }
 
     async openChromePage(path) {
@@ -322,6 +328,8 @@ class PuppeteerEnvironment extends JestNodeEnvironment.TestEnvironment {
                 },
                 getManifest: async () => await sendToBackground('getManifest'),
             };
+
+            this.global.awaitForEvent = awaitForEvent;
         });
     }
 

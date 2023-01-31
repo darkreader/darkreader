@@ -107,11 +107,6 @@ function onMessage({type, data}: Message) {
             break;
         }
         case MessageType.BG_ADD_DYNAMIC_THEME: {
-            if (__TEST__) {
-                darkReaderDynamicThemeStateForTesting = 'loading';
-                sendMessageForTesting('darkreader-dynamic-theme-loading');
-            }
-
             const {theme, fixes, isIFrame, detectDarkTheme} = data as {theme: Theme; fixes: DynamicThemeFix[]; isIFrame: boolean; detectDarkTheme: boolean};
             removeStyle();
             createOrUpdateDynamicTheme(theme, fixes, isIFrame);
@@ -126,6 +121,7 @@ function onMessage({type, data}: Message) {
             if (__TEST__) {
                 darkReaderDynamicThemeStateForTesting = 'ready';
                 sendMessageForTesting('darkreader-dynamic-theme-ready');
+                sendMessageForTesting(`darkreader-dynamic-theme-ready-${document.location.pathname}`);
             }
             break;
         }
@@ -223,7 +219,7 @@ if (__TEST__) {
             data: {
                 type: 'page',
                 message: 'page-ready',
-                uuid: `ready-${document.location.href}`,
+                uuid: `ready-${document.location.pathname}`,
             },
             id: null,
         }));

@@ -1,4 +1,4 @@
-import {multiline, timeout} from '../../support/test-utils';
+import {multiline} from '../../support/test-utils';
 
 async function loadBasicPage() {
     await loadTestPage({
@@ -53,9 +53,11 @@ async function loadBasicPage() {
 
 describe('Different paths in URL patterns', () => {
     it('Different paths upon initial load', async () => {
-        await loadBasicPage();
-
-        await timeout(1000);
+        await Promise.all([
+            awaitForEvent('ready-/red.html'),
+            awaitForEvent('ready-/blue.html'),
+            loadBasicPage(),
+        ]);
 
         await expect(page.evaluate(() => getComputedStyle(document.documentElement).backgroundColor)).resolves.toBe('rgb(24, 26, 27)');
         await expect(page.evaluate(() => getComputedStyle(document.documentElement).color)).resolves.toBe('rgb(232, 230, 227)');
@@ -138,7 +140,8 @@ describe('Different paths in URL patterns', () => {
         await expect(page.evaluate(() => getComputedStyle((document.querySelector('iframe#blue') as HTMLIFrameElement).contentDocument.body).color)).resolves.toBe('rgb(232, 230, 227)');
         await expect(page.evaluate(() => getComputedStyle((document.querySelector('iframe#blue') as HTMLIFrameElement).contentDocument.documentElement.querySelector('h1')).color)).resolves.toBe('rgb(0, 0, 128)');
 
-
+        const redPromise = awaitForEvent('darkreader-dynamic-theme-ready-/red.html');
+        const bluePromise = awaitForEvent('darkreader-dynamic-theme-ready-/blue.html');
         await devtoolsUtils.reset();
 
         await expect(page.evaluate(() => getComputedStyle(document.documentElement).backgroundColor)).resolves.toBe('rgb(24, 26, 27)');
@@ -147,12 +150,14 @@ describe('Different paths in URL patterns', () => {
         await expect(page.evaluate(() => getComputedStyle(document.body).color)).resolves.toBe('rgb(232, 230, 227)');
         await expect(page.evaluate(() => getComputedStyle(document.querySelector('h1')).color)).resolves.toBe('rgb(232, 230, 227)');
 
+        await redPromise;
         await expect(page.evaluate(() => getComputedStyle((document.querySelector('iframe#red') as HTMLIFrameElement).contentDocument.documentElement).backgroundColor)).resolves.toBe('rgba(0, 0, 0, 0)');
         await expect(page.evaluate(() => getComputedStyle((document.querySelector('iframe#red') as HTMLIFrameElement).contentDocument.documentElement).color)).resolves.toBe('rgb(232, 230, 227)');
         await expect(page.evaluate(() => getComputedStyle((document.querySelector('iframe#red') as HTMLIFrameElement).contentDocument.body).backgroundColor)).resolves.toBe('rgba(0, 0, 0, 0)');
         await expect(page.evaluate(() => getComputedStyle((document.querySelector('iframe#red') as HTMLIFrameElement).contentDocument.body).color)).resolves.toBe('rgb(232, 230, 227)');
         await expect(page.evaluate(() => getComputedStyle((document.querySelector('iframe#red') as HTMLIFrameElement).contentDocument.documentElement.querySelector('h1')).color)).resolves.toBe('rgb(255, 26, 26)');
 
+        await bluePromise;
         await expect(page.evaluate(() => getComputedStyle((document.querySelector('iframe#blue') as HTMLIFrameElement).contentDocument.documentElement).backgroundColor)).resolves.toBe('rgba(0, 0, 0, 0)');
         await expect(page.evaluate(() => getComputedStyle((document.querySelector('iframe#blue') as HTMLIFrameElement).contentDocument.documentElement).color)).resolves.toBe('rgb(232, 230, 227)');
         await expect(page.evaluate(() => getComputedStyle((document.querySelector('iframe#blue') as HTMLIFrameElement).contentDocument.body).backgroundColor)).resolves.toBe('rgba(0, 0, 0, 0)');

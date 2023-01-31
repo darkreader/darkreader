@@ -77,7 +77,7 @@ if (__TEST__) {
         socket.send(JSON.stringify({
             data: {
                 type: 'popup',
-                uuid: `ready-${document.location.href}`,
+                uuid: `ready-${document.location.pathname}`,
             },
             id: null,
         }));

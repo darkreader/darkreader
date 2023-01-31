@@ -21,7 +21,6 @@ async function loadBasicPage() {
 
 async function resetChanges() {
     await devtoolsUtils.reset();
-    await timeout(1000);
 }
 
 describe('Correct fixes are chosen', () => {
@@ -67,7 +66,6 @@ describe('Correct fixes are chosen', () => {
             '}',
             '',
         ));
-        await timeout(1000);
 
         await expect(page.evaluate(() => getComputedStyle(document.documentElement).backgroundColor)).resolves.toBe('rgb(24, 26, 27)');
         await expect(page.evaluate(() => getComputedStyle(document.documentElement).color)).resolves.toBe('rgb(232, 230, 227)');
@@ -118,7 +116,6 @@ describe('Correct fixes are chosen', () => {
             '}',
             '',
         ));
-        await timeout(1000);
 
         await expect(page.evaluate(() => getComputedStyle(document.documentElement).backgroundColor)).resolves.toBe('rgb(24, 26, 27)');
         await expect(page.evaluate(() => getComputedStyle(document.documentElement).color)).resolves.toBe('rgb(232, 230, 227)');
@@ -171,7 +168,6 @@ describe('Correct fixes are chosen', () => {
             '}',
             '',
         ));
-        await timeout(1000);
 
         await expect(page.evaluate(() => getComputedStyle(document.documentElement).backgroundColor)).resolves.toBe('rgb(24, 26, 27)');
         await expect(page.evaluate(() => getComputedStyle(document.documentElement).color)).resolves.toBe('rgb(232, 230, 227)');
@@ -222,7 +218,6 @@ describe('Correct fixes are chosen', () => {
             '}',
             '',
         ));
-        await timeout(1000);
 
         await expect(page.evaluate(() => getComputedStyle(document.documentElement).backgroundColor)).resolves.toBe('rgb(24, 26, 27)');
         await expect(page.evaluate(() => getComputedStyle(document.documentElement).color)).resolves.toBe('rgb(232, 230, 227)');

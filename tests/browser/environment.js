@@ -211,6 +211,7 @@ class PuppeteerEnvironment extends JestNodeEnvironment.TestEnvironment {
 
     async createMessageServer() {
         const awaitForEvent = this.awaitForEvent.bind(this);
+
         // Puppeteer cannot evaluate scripts in moz-extension:// pages
         // https://github.com/puppeteer/puppeteer/issues/6616
         return new Promise((resolve) => {

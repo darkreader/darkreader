@@ -46,7 +46,6 @@ describe('Modifying config via Developer tools', () => {
             'color: red',
             ''
         ].join('\n'));
-        await timeout(1000);
 
         await expect(page.evaluate(() => getComputedStyle(document.documentElement).backgroundColor)).resolves.toBe('rgb(24, 26, 27)');
         await expect(page.evaluate(() => getComputedStyle(document.documentElement).color)).resolves.toBe('rgb(232, 230, 227)');

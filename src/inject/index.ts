@@ -8,7 +8,11 @@ import {collectCSS} from './dynamic-theme/css-collection';
 import type {DynamicThemeFix, Message, Theme} from '../definitions';
 import {MessageType} from '../utils/message';
 
+declare const __TEST__: boolean;
+
 let unloaded = false;
+
+let darkReaderDynamicThemeStateForTesting: 'loading' | 'ready' = 'loading';
 
 declare const __CHROMIUM_MV3__: boolean;
 declare const __THUNDERBIRD__: boolean;
@@ -21,6 +25,10 @@ function cleanup() {
     cleanDynamicThemeCache();
     stopDarkThemeDetector();
     stopColorSchemeChangeDetector();
+}
+
+function sendMessageForTesting(uuid: string) {
+    document.dispatchEvent(new CustomEvent('test-message', {detail: uuid}));
 }
 
 function sendMessage(message: Message) {
@@ -110,6 +118,11 @@ function onMessage({type, data}: Message) {
                     }
                 });
             }
+            if (__TEST__) {
+                darkReaderDynamicThemeStateForTesting = 'ready';
+                sendMessageForTesting('darkreader-dynamic-theme-ready');
+                sendMessageForTesting(`darkreader-dynamic-theme-ready-${document.location.pathname}`);
+            }
             break;
         }
         case MessageType.BG_EXPORT_CSS:
@@ -162,4 +175,53 @@ if (!__THUNDERBIRD__) {
     addEventListener('pagehide', onPageHide);
     addEventListener('freeze', onFreeze);
     addEventListener('resume', onResume);
+}
+
+if (__TEST__) {
+    async function awaitDOMContentLoaded() {
+        if (document.readyState === 'loading') {
+            return new Promise<void>((resolve) => {
+                addEventListener('DOMContentLoaded', () => resolve());
+            });
+        }
+    }
+
+    async function awaitDarkReaderReady() {
+        if (darkReaderDynamicThemeStateForTesting !== 'ready') {
+            return new Promise<void>((resolve) => {
+                document.addEventListener('test-message', (event: CustomEvent) => {
+                    const message = event.detail;
+                    if (message === 'darkreader-dynamic-theme-ready' && darkReaderDynamicThemeStateForTesting === 'ready') {
+                        resolve();
+                    }
+                });
+            });
+        }
+    }
+
+    const socket = new WebSocket(`ws://localhost:8894`);
+    socket.onopen = async () => {
+        document.addEventListener('test-message', (e: CustomEvent) => {
+            socket.send(JSON.stringify({
+                data: {
+                    type: 'page',
+                    uuid: e.detail,
+                },
+                id: null,
+            }));
+        });
+
+        // Wait for DOM to be complete
+        // Note that here we wait only for DOM parsing and not for subresource load
+        await awaitDOMContentLoaded();
+        await awaitDarkReaderReady();
+        socket.send(JSON.stringify({
+            data: {
+                type: 'page',
+                message: 'page-ready',
+                uuid: `ready-${document.location.pathname}`,
+            },
+            id: null,
+        }));
+    };
 }

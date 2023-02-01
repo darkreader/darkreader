@@ -73,27 +73,37 @@ if (__TEST__) {
     });
 
     const socket = new WebSocket(`ws://localhost:8894`);
+    socket.onopen = async () => {
+        socket.send(JSON.stringify({
+            data: {
+                type: 'popup',
+                uuid: `ready-${document.location.pathname}`,
+            },
+            id: null,
+        }));
+    };
     socket.onmessage = (e) => {
-        const respond = (message: {type: string; id?: number; data?: any}) => socket.send(JSON.stringify(message));
+        const respond = (message: {id?: number; data?: any; error?: string}) => socket.send(JSON.stringify(message));
         try {
             const message: {type: string; id: number; data: string} = JSON.parse(e.data);
-            if (message.type === 'click') {
-                const selector = message.data;
+            const {type, id, data} = message;
+            if (type === 'click') {
+                const selector = data;
                 const element: HTMLElement = document.querySelector(selector)!;
                 element.click();
-                respond({type: 'click-response', id: message.id});
-            } else if (message.type === 'exists') {
-                const selector = message.data;
+                respond({id});
+            } else if (type === 'exists') {
+                const selector = data;
                 const element = document.querySelector(selector);
-                respond({type: 'exists-response', id: message.id, data: element != null});
-            } else if (message.type === 'rect') {
-                const selector = message.data;
+                respond({id, data: element != null});
+            } else if (type === 'rect') {
+                const selector = data;
                 const element: HTMLElement = document.querySelector(selector)!;
                 const rect = element.getBoundingClientRect();
-                respond({type: 'rect-response', id: message.id, data: {left: rect.left, top: rect.top, width: rect.width, height: rect.height}});
+                respond({id, data: {left: rect.left, top: rect.top, width: rect.width, height: rect.height}});
             }
         } catch (err) {
-            respond({type: 'error', data: String(err)});
+            respond({error: String(err)});
         }
     };
 }

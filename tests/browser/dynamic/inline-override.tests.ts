@@ -1,29 +1,29 @@
 import {multiline} from '../../support/test-utils';
 
-describe('Inline style override', () => {
-    const inlineStyleMarkup = multiline(
-        '<!DOCTYPE html>',
-        '<html>',
-        '<head>',
-        '</head>',
-        '<body>',
-        '    <span style="color: red;">Inline style override</span>',
-        '</body>',
-        '</html>',
-    );
+async function loadBasicPage() {
+    await loadTestPage({
+        '/': multiline(
+            '<!DOCTYPE html>',
+            '<html>',
+            '<head>',
+            '</head>',
+            '<body>',
+            '    <span style="color: red;">Inline style override</span>',
+            '</body>',
+            '</html>',
+        ),
+    });
+}
 
+describe('Inline style override', () => {
     it('should override inline style', async () => {
-        await loadTestPage({
-            '/': inlineStyleMarkup,
-        });
+        await loadBasicPage();
 
         await expect(page.evaluate(() => getComputedStyle(document.querySelector('span')).color)).resolves.toBe('rgb(255, 26, 26)');
     });
 
     it('should watch for inline style change', async () => {
-        await loadTestPage({
-            '/': inlineStyleMarkup,
-        });
+        await loadBasicPage();
 
         await expect(page.evaluate(() => getComputedStyle(document.querySelector('span')).color)).resolves.toBe('rgb(255, 26, 26)');
 

@@ -7,9 +7,10 @@ function createSocket() {
     if (socket) {
         return;
     }
-    socket = new WebSocket(`ws://localhost:${9000}`);
-    socket.addEventListener('open', () => {
-        messageQueue.forEach((message) => this.send(message));
+    const newSocket = new WebSocket(`ws://localhost:${9000}`);
+    socket = newSocket;
+    newSocket.addEventListener('open', () => {
+        messageQueue.forEach((message) => newSocket.send(message));
         messageQueue = [];
     });
 }

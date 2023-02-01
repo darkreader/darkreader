@@ -12,9 +12,9 @@ const SAVE_TIMEOUT = 1000;
 export default class UserStorage {
     private static loadBarrier: PromiseBarrier<UserSettings, void>;
     private static saveStorageBarrier: PromiseBarrier<void, void> | null;
-    static settings: Readonly<UserSettings>;
+    public static settings: Readonly<UserSettings>;
 
-    static async loadSettings() {
+    public static async loadSettings() {
         if (!UserStorage.settings) {
             UserStorage.settings = await UserStorage.loadSettingsFromStorage();
         }
@@ -99,7 +99,7 @@ export default class UserStorage {
         return $sync;
     }
 
-    static async saveSettings() {
+    public static async saveSettings() {
         if (!UserStorage.settings) {
             // This path is never taken because Extension always calls UserStorage.loadSettings()
             // before calling UserStorage.saveSettings().
@@ -109,7 +109,7 @@ export default class UserStorage {
         await UserStorage.saveSettingsIntoStorage();
     }
 
-    static async saveSyncSetting(sync: boolean) {
+    public static async saveSyncSetting(sync: boolean) {
         const obj = {syncSettings: sync};
         await writeLocalStorage(obj);
         try {
@@ -145,7 +145,7 @@ export default class UserStorage {
         UserStorage.saveStorageBarrier = null;
     });
 
-    static set($settings: Partial<UserSettings>) {
+    public static set($settings: Partial<UserSettings>) {
         if (!UserStorage.settings) {
             // This path is never taken because Extension always calls UserStorage.loadSettings()
             // before calling UserStorage.set().

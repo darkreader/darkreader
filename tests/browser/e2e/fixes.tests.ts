@@ -1,4 +1,4 @@
-import {multiline, timeout} from '../../support/test-utils';
+import {multiline} from '../../support/test-utils';
 
 async function loadBasicPage() {
     await loadTestPage({
@@ -19,14 +19,7 @@ async function loadBasicPage() {
     });
 }
 
-async function resetChanges() {
-    await devtoolsUtils.reset();
-    await timeout(1000);
-}
-
 describe('Correct fixes are chosen', () => {
-    jest.setTimeout(10000);
-
     it('If no matching URL found, returns only default fix', async () => {
         await loadBasicPage();
 
@@ -67,7 +60,6 @@ describe('Correct fixes are chosen', () => {
             '}',
             '',
         ));
-        await timeout(1000);
 
         await expect(page.evaluate(() => getComputedStyle(document.documentElement).backgroundColor)).resolves.toBe('rgb(24, 26, 27)');
         await expect(page.evaluate(() => getComputedStyle(document.documentElement).color)).resolves.toBe('rgb(232, 230, 227)');
@@ -75,7 +67,7 @@ describe('Correct fixes are chosen', () => {
         await expect(page.evaluate(() => getComputedStyle(document.body).color)).resolves.toBe('rgb(255, 255, 255)');
         await expect(page.evaluate(() => getComputedStyle(document.querySelector('h1')).color)).resolves.toBe('rgb(255, 165, 0)');
 
-        await resetChanges();
+        await devtoolsUtils.reset();
     });
 
     it('If multiple matching URL patterns found, select the most specific one', async () => {
@@ -118,7 +110,6 @@ describe('Correct fixes are chosen', () => {
             '}',
             '',
         ));
-        await timeout(1000);
 
         await expect(page.evaluate(() => getComputedStyle(document.documentElement).backgroundColor)).resolves.toBe('rgb(24, 26, 27)');
         await expect(page.evaluate(() => getComputedStyle(document.documentElement).color)).resolves.toBe('rgb(232, 230, 227)');
@@ -126,7 +117,7 @@ describe('Correct fixes are chosen', () => {
         await expect(page.evaluate(() => getComputedStyle(document.body).color)).resolves.toBe('rgb(255, 255, 255)');
         await expect(page.evaluate(() => getComputedStyle(document.querySelector('h1')).color)).resolves.toBe('rgb(255, 165, 0)');
 
-        await resetChanges();
+        await devtoolsUtils.reset();
     });
 
     it('BUG COMPATIBILITY: If multiple matching URL patterns found, the most specific fix is determined by the length of first pattern', async () => {
@@ -171,7 +162,6 @@ describe('Correct fixes are chosen', () => {
             '}',
             '',
         ));
-        await timeout(1000);
 
         await expect(page.evaluate(() => getComputedStyle(document.documentElement).backgroundColor)).resolves.toBe('rgb(24, 26, 27)');
         await expect(page.evaluate(() => getComputedStyle(document.documentElement).color)).resolves.toBe('rgb(232, 230, 227)');
@@ -179,7 +169,7 @@ describe('Correct fixes are chosen', () => {
         await expect(page.evaluate(() => getComputedStyle(document.body).color)).resolves.toBe('rgb(255, 255, 255)');
         await expect(page.evaluate(() => getComputedStyle(document.querySelector('h1')).color)).resolves.toBe('rgb(255, 165, 0)');
 
-        await resetChanges();
+        await devtoolsUtils.reset();
     });
 
     it('BUG COMPATIBILITY: If multiple matching URL patterns of the same length are found, select the first one', async () => {
@@ -222,7 +212,6 @@ describe('Correct fixes are chosen', () => {
             '}',
             '',
         ));
-        await timeout(1000);
 
         await expect(page.evaluate(() => getComputedStyle(document.documentElement).backgroundColor)).resolves.toBe('rgb(24, 26, 27)');
         await expect(page.evaluate(() => getComputedStyle(document.documentElement).color)).resolves.toBe('rgb(232, 230, 227)');
@@ -230,6 +219,6 @@ describe('Correct fixes are chosen', () => {
         await expect(page.evaluate(() => getComputedStyle(document.body).color)).resolves.toBe('rgb(255, 255, 255)');
         await expect(page.evaluate(() => getComputedStyle(document.querySelector('h1')).color)).resolves.toBe('rgb(255, 165, 0)');
 
-        await resetChanges();
+        await devtoolsUtils.reset();
     });
 });

@@ -24,4 +24,5 @@ declare global {
         emulateMedia: (name: string, value: string) => Promise<void>;
         getManifest: () => Promise<chrome.runtime.Manifest>;
     };
+    const awaitForEvent: (uuid: string) => Promise<void>;
 }

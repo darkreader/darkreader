@@ -140,6 +140,7 @@ if (__TEST__) {
         await extension;
         socket.send(JSON.stringify({
             data: {
+                type: 'background',
                 extensionOrigin: chrome.runtime.getURL(''),
             },
             id: null,
@@ -148,12 +149,13 @@ if (__TEST__) {
     socket.onmessage = (e) => {
         try {
             const message: TestMessage = JSON.parse(e.data);
+            const {id, type} = message;
             const respond = (data?: ExtensionData | string | boolean | {[key: string]: string} | null) => socket.send(JSON.stringify({
                 data,
-                id: message.id,
+                id,
             }));
 
-            switch (message.type) {
+            switch (type) {
                 case 'changeSettings':
                     Extension.changeSettings(message.data);
                     respond();

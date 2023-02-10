@@ -1,6 +1,6 @@
 // @ts-check
-import fs from 'fs';
-import os from 'os';
+import fs from 'node:fs';
+import os from 'node:os';
 import * as rollup from 'rollup';
 import rollupPluginNodeResolve from '@rollup/plugin-node-resolve';
 /** @type {any} */

@@ -12,11 +12,11 @@ import codeStyle from './code-style.js';
 import zip from './zip.js';
 import {runTasks} from './task.js';
 import {log} from './utils.js';
-import {fork} from 'child_process';
+import {fork} from 'node:child_process';
 import paths from './paths.js';
 const {PLATFORM} = paths;
 
-import {fileURLToPath} from 'url';
+import {fileURLToPath} from 'node:url';
 const __filename = fileURLToPath(import.meta.url);
 
 const standardTask = [

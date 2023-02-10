@@ -1,7 +1,7 @@
 // @ts-check
-import fs from 'fs/promises';
-import https from 'https';
-import path from 'path';
+import fs from 'node:fs/promises';
+import https from 'node:https';
+import path from 'node:path';
 
 /** @type {{[color: string]: (text: string) => string}} */
 const colors = Object.entries({

@@ -6,8 +6,8 @@ import rollupPluginReplace from '@rollup/plugin-replace';
 /** @type {any} */
 import rollupPluginTypescript from '@rollup/plugin-typescript';
 import typescript from 'typescript';
-import fs from 'fs';
-import os from 'os';
+import fs from 'node:fs';
+import os from 'node:os';
 import {createTask} from './task.js';
 import paths from './paths.js';
 const {rootDir, rootPath} = paths;

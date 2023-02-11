@@ -13,6 +13,7 @@ import zip from './zip.js';
 import {runTasks} from './task.js';
 import {log} from './utils.js';
 import {fork} from 'node:child_process';
+import process from 'node:process';
 import paths from './paths.js';
 const {PLATFORM} = paths;
 
@@ -86,16 +87,24 @@ async function executeChildProcess(args) {
     return new Promise((resolve, reject) => child.on('error', reject).on('close', resolve));
 }
 
+function validateArguments(args) {
+    const validArguments = ['--api', '--chrome', '--chrome-mv3', '--firefox', '--thunderbird', '--release', '--debug', '--watch', '--log-info', '--log-warn', '--test'];
+    const invalidArguments = args.filter((argument) => !validArguments.includes(argument));
+    invalidArguments.forEach((argument) => log.warn(`Invalid argument ${argument}`));
+    return invalidArguments.length === 0;
+}
+
 async function run() {
     const args = process.argv.slice(2);
+
+    if (!validateArguments(args)) {
+        process.exit(130);
+    }
 
     // Enable Ctrl+C to cancel the build immediately
     if (!process.env.BUILD_CHILD) {
         return executeChildProcess(args);
     }
-
-    const validArgs = ['--api', '--chrome', '--chrome-mv3', '--firefox', '--thunderbird', '--release', '--debug', '--watch', '--log-info', '--log-warn', '--test'];
-    args.filter((arg) => !validArgs.includes(arg)).forEach((arg) => log.warn(`Unknown argument ${arg}`));
 
     const allPlatforms = !(args.includes('--api') || args.includes('--chrome') || args.includes('--chrome-mv3') || args.includes('--firefox') || args.includes('--thunderbird'));
     const platforms = {

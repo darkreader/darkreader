@@ -2,6 +2,7 @@ import {m} from 'malevic';
 import {Shortcut, Toggle} from '../../../controls';
 import {getLocalMessage} from '../../../../utils/locales';
 import type {ExtWrapper, UserSettings} from '../../../../definitions';
+import SettingsIcon from '../../main-page/settings-icon';
 import SunMoonIcon from '../../main-page/sun-moon-icon';
 import SystemIcon from '../../main-page/system-icon';
 import WatchIcon from '../../main-page/watch-icon';
@@ -22,7 +23,7 @@ type HeaderProps = ExtWrapper & {
     onMoreToggleSettingsClick: () => void;
 };
 
-function Header({data, actions, onMoreToggleSettingsClick}: HeaderProps) {
+function Header({data, actions, onMoreToggleSettingsClick: onToggleAutoSettingsClick}: HeaderProps) {
     function toggleExtension(enabled: UserSettings['enabled']) {
         actions.changeSettings({
             enabled,
@@ -36,6 +37,16 @@ function Header({data, actions, onMoreToggleSettingsClick}: HeaderProps) {
     const isTimeAutomation = data.settings.automation.mode === AutomationMode.TIME;
     const isLocationAutomation = data.settings.automation.mode === AutomationMode.LOCATION;
     const now = new Date();
+
+    const automationMessage = isAutomation
+        ? (
+            isTimeAutomation
+            ? (data.isEnabled ? 'Auto (night time)' : 'Auto (day time)')
+            : isLocationAutomation
+            ? data.isEnabled ? 'Auto (night at location)' : 'Auto (day at location)'
+            : data.isEnabled ? 'Auto (system is dark)' : 'Auto (system is light)'
+        )
+        : 'Configure automation';
 
     return (
         <header class="header">
@@ -83,9 +94,15 @@ function Header({data, actions, onMoreToggleSettingsClick}: HeaderProps) {
                     onSetShortcut={(shortcut) => actions.setShortcut('toggle', shortcut)}
                 />
                 <span
-                    class="header__app-toggle__more-button"
-                    onclick={onMoreToggleSettingsClick}
-                ></span>
+                    class={{
+                        'header__app-toggle__auto-button': true,
+                        'header__app-toggle__auto-button__off': !data.isEnabled,
+                    }}
+                    onclick={onToggleAutoSettingsClick}
+                >
+                    <SettingsIcon class="header__app-toggle__auto-button__icon" />
+                    {automationMessage}
+                </span>
                 <span
                     class={{
                         'header__app-toggle__time': true,

@@ -1,7 +1,6 @@
 // @ts-check
 import http from 'http';
 import path from 'path';
-import url from 'url';
 
 const mimeTypes = new Map(
     Object.entries({
@@ -39,7 +38,7 @@ export async function createTestServer(/** @type {number} */port) {
 
     /** @type {import('http').RequestListener} */
     function handleRequest(req, res) {
-        const parsedURL = url.parse(req.url);
+        const parsedURL = new URL(req.url, 'https://localhost');
         const pathName = parsedURL.pathname;
 
         if (!paths.hasOwnProperty(pathName)) {

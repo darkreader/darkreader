@@ -224,6 +224,18 @@ class PuppeteerEnvironment extends JestNodeEnvironment.TestEnvironment {
             }
             return Promise.all(promises);
         };
+
+        this.global.emulateMedia = async (name, value) => {
+            if (this.global.product === 'firefox') {
+                return;
+            }
+            await this.page.emulateMediaFeatures([{name, value}]);
+            if (this.global.product === 'chrome') {
+                const page = await this.getChromiumMV2BackgroundPage();
+                await page.emulateMediaFeatures([{name, value}]);
+            }
+        };
+
         this.global.loadTestPage = async (paths, gotoOptions) => {
             const {cors, ...testPaths} = paths;
             this.testServer.setPaths(testPaths);
@@ -232,6 +244,7 @@ class PuppeteerEnvironment extends JestNodeEnvironment.TestEnvironment {
             await page.bringToFront();
             await this.pageGoto(page, `http://localhost:${TEST_SERVER_PORT}`, gotoOptions);
         };
+
         this.global.corsURL = this.corsServer.url;
     }
 
@@ -333,18 +346,6 @@ class PuppeteerEnvironment extends JestNodeEnvironment.TestEnvironment {
                 collectData: async () => await sendToBackground('collectData'),
                 changeChromeStorage: async (region, data) => await sendToBackground('changeChromeStorage', {region, data}),
                 getChromeStorage: async (region, keys) => await sendToBackground('getChromeStorage', {region, keys}),
-                emulateMedia: async (name, value) => {
-                    if (this.global.product === 'firefox') {
-                        return;
-                    }
-                    let page;
-                    if (this.global.product === 'chrome-mv3') {
-                        page = this.page;
-                    } else if (this.global.product === 'chrome') {
-                        page = await this.getChromiumMV2BackgroundPage();
-                    }
-                    await page.emulateMediaFeatures([{name, value}]);
-                },
                 getManifest: async () => await sendToBackground('getManifest'),
             };
 

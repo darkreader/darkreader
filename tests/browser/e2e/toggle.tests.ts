@@ -25,11 +25,6 @@ async function loadBasicPage(header = 'E2E test page') {
     });
 }
 
-async function emulateMedia(name: string, value: string) {
-    await page.emulateMediaFeatures([{name, value}]);
-    await backgroundUtils.emulateMedia(name, value);
-}
-
 describe('Toggling the extension', () => {
     // TODO: remove flakes and remove this line
     jest.retryTimes(10, {logErrorsBeforeRetry: true});

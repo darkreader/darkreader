@@ -11,7 +11,6 @@ type StyleExpectations = OneStyleExpectation[] | OneStyleExpectation;
 declare global {
     const loadTestPage: (paths: PathsObject & {cors?: PathsObject}, gotoOptions?: WaitForOptions) => Promise<void>;
     const corsURL: string;
-    const page: Page;
     const popupUtils: {
         click: (selector: string) => Promise<void>;
         exists: (selector: string) => Promise<boolean>;
@@ -31,4 +30,5 @@ declare global {
     const awaitForEvent: (uuid: string) => Promise<void>;
     const expectPageStyles: (expect: jest.Expect, expectations: StyleExpectations) => Promise<void>;
     const getColorScheme: () => Promise<'dark' | 'light'>;
+    const evaluateScript: (script: () => any) => Promise<any>;
 }

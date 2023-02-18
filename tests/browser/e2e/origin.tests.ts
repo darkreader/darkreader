@@ -160,7 +160,7 @@ describe('Different paths in URL patterns', () => {
             devtoolsUtils.reset(),
         ]);
 
-        await timeout(250);
+        await timeout(500);
 
         await expectStyles([
             ['document', 'background-color', 'rgb(24, 26, 27)'],

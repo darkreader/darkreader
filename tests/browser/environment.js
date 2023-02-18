@@ -208,7 +208,7 @@ class PuppeteerEnvironment extends JestNodeEnvironment.TestEnvironment {
         this.global.getColorScheme = async () => {
             const isDark = await this.page.evaluate(() => matchMedia('(prefers-color-scheme: dark)').matches);
             return isDark ? 'dark' : 'light';
-        }
+        };
 
         this.global.expectPageStyles = async (expect, expectations) => {
             if (!Array.isArray(expectations[0])) {
@@ -217,7 +217,24 @@ class PuppeteerEnvironment extends JestNodeEnvironment.TestEnvironment {
             const promises = [];
             for (const [selector, cssAttributeName, expectedValue] of expectations) {
                 const promise = expect(this.page.evaluate(
-                    (selector, cssAttributeName) => getComputedStyle(selector === 'document' ? document.documentElement : document.querySelector(selector))[cssAttributeName],
+                    (selector, cssAttributeName) => {
+                        let element = document;
+                        if (!Array.isArray(selector)) {
+                            selector = [selector];
+                        }
+                        for (const part of selector) {
+                            if (element instanceof HTMLIFrameElement) {
+                                element = element.contentDocument;
+                            }
+                            if (part === 'document') {
+                                element = element.documentElement;
+                            } else {
+                                element = element.querySelector(part);
+                            }
+                        }
+                        const style = getComputedStyle(element);
+                        return style[cssAttributeName];
+                    },
                     selector, cssAttributeName
                 )).resolves.toBe(expectedValue);
                 promises.push(promise);

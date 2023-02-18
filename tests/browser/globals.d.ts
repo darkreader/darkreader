@@ -5,7 +5,7 @@ import type {ExtensionData, UserSettings} from '../../src/definitions';
 type PathsObject = {[path: string]: string | RequestListener | PathsObject};
 
 
-type OneStyleExpectation = [selector: string, cssAttributeName: string, expectedValue: string];
+type OneStyleExpectation = [selector: string | string[], cssAttributeName: string, expectedValue: string];
 type StyleExpectations = OneStyleExpectation[] | OneStyleExpectation;
 
 declare global {

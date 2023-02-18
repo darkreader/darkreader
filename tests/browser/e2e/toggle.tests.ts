@@ -43,7 +43,7 @@ describe('Toggling the extension', () => {
             ['body', 'background-color', 'rgb(24, 26, 27)'],
             ['body', 'color', 'rgb(232, 230, 227)'],
             ['h1', 'color', 'rgb(255, 26, 26)'],
-            ['a', 'color', 'rgb(51, 145, 255)']
+            ['a', 'color', 'rgb(51, 145, 255)'],
         ]);
 
         await popupUtils.click('.toggle__off');
@@ -78,7 +78,7 @@ describe('Toggling the extension', () => {
         const automationSystemSelector = '.header__app-toggle__more-settings__system-dark-mode__checkbox .checkbox__input';
 
         await emulateMedia('prefers-color-scheme', 'light');
-        await expect(page.evaluate(() => matchMedia('(prefers-color-scheme: dark)').matches)).resolves.toBe(false);
+        await expect(getColorScheme()).resolves.toBe('light');
 
         await expectStyles([
             ['document', 'background-color', 'rgb(24, 26, 27)'],
@@ -104,7 +104,7 @@ describe('Toggling the extension', () => {
         ]);
 
         await emulateMedia('prefers-color-scheme', 'dark');
-        await expect(page.evaluate(() => matchMedia('(prefers-color-scheme: dark)').matches)).resolves.toBe(true);
+        await expect(getColorScheme()).resolves.toBe('dark');
         await timeout(250);
 
         await expectStyles([
@@ -117,7 +117,7 @@ describe('Toggling the extension', () => {
         ]);
 
         await emulateMedia('prefers-color-scheme', 'light');
-        await expect(page.evaluate(() => matchMedia('(prefers-color-scheme: dark)').matches)).resolves.toBe(false);
+        await expect(getColorScheme()).resolves.toBe('light');
         await timeout(250);
 
         await expectStyles([

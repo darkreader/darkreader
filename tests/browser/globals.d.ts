@@ -30,4 +30,5 @@ declare global {
     };
     const awaitForEvent: (uuid: string) => Promise<void>;
     const expectPageStyles: (expect: jest.Expect, expectations: StyleExpectations) => Promise<void>;
+    const getColorScheme: () => Promise<'dark' | 'light'>;
 }

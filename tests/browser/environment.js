@@ -205,6 +205,11 @@ class PuppeteerEnvironment extends JestNodeEnvironment.TestEnvironment {
 
     assignTestGlobals() {
         this.global.page = this.page;
+        this.global.getColorScheme = async () => {
+            const isDark = await this.page.evaluate(() => matchMedia('(prefers-color-scheme: dark)').matches);
+            return isDark ? 'dark' : 'light';
+        }
+
         this.global.expectPageStyles = async (expect, expectations) => {
             if (!Array.isArray(expectations[0])) {
                 expectations = [expectations];

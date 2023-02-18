@@ -203,10 +203,6 @@ class PuppeteerEnvironment extends JestNodeEnvironment.TestEnvironment {
         return extensionPage;
     }
 
-    toCamelCase(string) {
-        return string//.replace(/-./g, x=>x[1].toUpperCase());
-    }
-
     assignTestGlobals() {
         this.global.page = this.page;
         this.global.expectPageStyles = async (expect, expectations) => {
@@ -215,10 +211,9 @@ class PuppeteerEnvironment extends JestNodeEnvironment.TestEnvironment {
             }
             const promises = [];
             for (const [selector, cssAttributeName, expectedValue] of expectations) {
-                const attribute = this.toCamelCase(cssAttributeName);
                 const promise = expect(this.page.evaluate(
-                    (selector, attribute) => getComputedStyle(selector === 'document' ? document.documentElement : document.querySelector(selector))[attribute],
-                    selector, attribute
+                    (selector, cssAttributeName) => getComputedStyle(selector === 'document' ? document.documentElement : document.querySelector(selector))[cssAttributeName],
+                    selector, cssAttributeName
                 )).resolves.toBe(expectedValue);
                 promises.push(promise);
             }

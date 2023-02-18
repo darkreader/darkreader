@@ -29,8 +29,8 @@ describe('Link override', () => {
         });
 
         await expectStyles([
-            ['document', 'backgroundColor', 'rgb(24, 26, 27)'],
-            ['body', 'backgroundColor', 'rgb(96, 104, 108)'],
+            ['document', 'background-color', 'rgb(24, 26, 27)'],
+            ['body', 'background-color', 'rgb(96, 104, 108)'],
             ['body', 'color', 'rgb(232, 230, 227)'],
             ['h1', 'color', 'rgb(232, 230, 227)'],
             ['h1 strong', 'color', 'rgb(255, 26, 26)'],
@@ -59,8 +59,8 @@ describe('Link override', () => {
         });
 
         await expectStyles([
-            ['document', 'backgroundColor', 'rgb(24, 26, 27)'],
-            ['body', 'backgroundColor', 'rgb(96, 104, 108)'],
+            ['document', 'background-color', 'rgb(24, 26, 27)'],
+            ['body', 'background-color', 'rgb(96, 104, 108)'],
             ['body', 'color', 'rgb(232, 230, 227)'],
             ['h1', 'color', 'rgb(232, 230, 227)'],
             ['h1 strong', 'color', 'rgb(255, 26, 26)'],
@@ -97,23 +97,19 @@ describe('Link override', () => {
             waitUntil: 'domcontentloaded',
         });
 
-        await expectStyles([
-            ['document', 'backgroundColor', 'rgb(24, 26, 27)'],
-            ['body', 'backgroundColor', 'rgb(24, 26, 27)'],
-            ['body', 'color', 'rgb(232, 230, 227)'],
-            ['h1', 'color', 'rgb(232, 230, 227)'],
-            ['h1 strong', 'color', 'rgb(232, 230, 227)'],
-        ]);
+        await expectStyles(['document', 'background-color', 'rgb(24, 26, 27)']);
+        await expectStyles(['body', 'background-color', 'rgb(24, 26, 27)']);
+        await expectStyles(['body', 'color', 'rgb(232, 230, 227)']);
+        await expectStyles(['h1', 'color', 'rgb(232, 230, 227)']),
+        await expectStyles(['h1 strong', 'color', 'rgb(232, 230, 227)']);
 
         proceedCSSResponse();
         await timeout(500);
 
-        await expectStyles([
-            ['document', 'backgroundColor', 'rgb(24, 26, 27)'],
-            ['body', 'backgroundColor', 'rgb(96, 104, 108)'],
-            ['body', 'color', 'rgb(232, 230, 227)'],
-            ['h1', 'color', 'rgb(232, 230, 227)'],
-            ['h1 strong', 'color', 'rgb(255, 26, 26)'],
-        ]);
+        await expectStyles(['document', 'background-color', 'rgb(24, 26, 27)']);
+        await expectStyles(['body', 'background-color', 'rgb(96, 104, 108)']);
+        await expectStyles(['body', 'color', 'rgb(232, 230, 227)']);
+        await expectStyles(['h1', 'color', 'rgb(232, 230, 227)']);
+        await expectStyles(['h1 strong', 'color', 'rgb(255, 26, 26)']);
     });
 });

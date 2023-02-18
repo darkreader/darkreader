@@ -1,4 +1,9 @@
 import {multiline} from '../../support/test-utils';
+import {StyleExpectations} from '../globals';
+
+async function expectStyles(styles: StyleExpectations) {
+    expectPageStyles(expect, styles);
+}
 
 describe('Style override', () => {
     it('should override user agent style', async () => {
@@ -16,11 +21,13 @@ describe('Style override', () => {
             ),
         });
 
-        await expect(page.evaluate(() => getComputedStyle(document.documentElement).backgroundColor)).resolves.toBe('rgb(24, 26, 27)');
-        await expect(page.evaluate(() => getComputedStyle(document.documentElement).color)).resolves.toBe('rgb(232, 230, 227)');
-        await expect(page.evaluate(() => getComputedStyle(document.body).backgroundColor)).resolves.toBe('rgb(24, 26, 27)');
-        await expect(page.evaluate(() => getComputedStyle(document.body).color)).resolves.toBe('rgb(232, 230, 227)');
-        await expect(page.evaluate(() => getComputedStyle(document.querySelector('a')).color)).resolves.toBe('rgb(51, 145, 255)');
+        await expectStyles([
+            ['document', 'background-color', 'rgb(24, 26, 27)'],
+            ['document', 'color', 'rgb(232, 230, 227)'],
+            ['body', 'background-color', 'rgb(24, 26, 27)'],
+            ['body', 'color', 'rgb(232, 230, 227)'],
+            ['a', 'color', 'rgb(51, 145, 255)'],
+        ]);
     });
 
     it('should override static style', async () => {

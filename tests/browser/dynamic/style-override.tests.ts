@@ -1,5 +1,5 @@
 import {multiline} from '../../support/test-utils';
-import {StyleExpectations} from '../globals';
+import type {StyleExpectations} from '../globals';
 
 async function expectStyles(styles: StyleExpectations) {
     expectPageStyles(expect, styles);

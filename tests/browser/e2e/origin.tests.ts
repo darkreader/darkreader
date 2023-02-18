@@ -1,4 +1,9 @@
 import {multiline} from '../../support/test-utils';
+import type {StyleExpectations} from '../globals';
+
+async function expectStyles(styles: StyleExpectations) {
+    expectPageStyles(expect, styles);
+}
 
 async function loadBasicPage() {
     await loadTestPage({
@@ -59,11 +64,13 @@ describe('Different paths in URL patterns', () => {
             loadBasicPage(),
         ]);
 
-        await expect(page.evaluate(() => getComputedStyle(document.documentElement).backgroundColor)).resolves.toBe('rgb(24, 26, 27)');
-        await expect(page.evaluate(() => getComputedStyle(document.documentElement).color)).resolves.toBe('rgb(232, 230, 227)');
-        await expect(page.evaluate(() => getComputedStyle(document.body).backgroundColor)).resolves.toBe('rgb(24, 26, 27)');
-        await expect(page.evaluate(() => getComputedStyle(document.body).color)).resolves.toBe('rgb(232, 230, 227)');
-        await expect(page.evaluate(() => getComputedStyle(document.querySelector('h1')).color)).resolves.toBe('rgb(232, 230, 227)');
+        await expectStyles([
+            ['document', 'background-color', 'rgb(24, 26, 27)'],
+            ['document', 'color', 'rgb(232, 230, 227)'],
+            ['body', 'background-color', 'rgb(24, 26, 27)'],
+            ['body', 'color', 'rgb(232, 230, 227)'],
+            ['h1', 'color', 'rgb(232, 230, 227)'],
+        ]);
 
         await expect(page.evaluate(() => getComputedStyle((document.querySelector('iframe#red') as HTMLIFrameElement).contentDocument.documentElement).backgroundColor)).resolves.toBe('rgba(0, 0, 0, 0)');
         await expect(page.evaluate(() => getComputedStyle((document.querySelector('iframe#red') as HTMLIFrameElement).contentDocument.documentElement).color)).resolves.toBe('rgb(232, 230, 227)');
@@ -121,12 +128,14 @@ describe('Different paths in URL patterns', () => {
             '',
         ].join('\n'));
 
-        await expect(page.evaluate(() => getComputedStyle(document.documentElement).backgroundColor)).resolves.toBe('rgb(24, 26, 27)');
-        await expect(page.evaluate(() => getComputedStyle(document.documentElement).color)).resolves.toBe('rgb(232, 230, 227)');
-        await expect(page.evaluate(() => getComputedStyle(document.body).backgroundColor)).resolves.toBe('rgb(24, 26, 27)');
-        await expect(page.evaluate(() => getComputedStyle(document.body).color)).resolves.toBe('rgb(232, 230, 227)');
-        await expect(page.evaluate(() => getComputedStyle(document.querySelector('h1')).color)).resolves.toBe('rgb(232, 230, 227)');
-        await expect(page.evaluate(() => getComputedStyle(document.querySelector('h2')).color)).resolves.toBe('rgb(232, 230, 227)');
+        await expectStyles([
+            ['document', 'background-color', 'rgb(24, 26, 27)'],
+            ['document', 'color', 'rgb(232, 230, 227)'],
+            ['body', 'background-color', 'rgb(24, 26, 27)'],
+            ['body', 'color', 'rgb(232, 230, 227)'],
+            ['h1', 'color', 'rgb(232, 230, 227)'],
+            ['h2', 'color', 'rgb(232, 230, 227)']
+        ]);
 
         await expect(page.evaluate(() => getComputedStyle((document.querySelector('iframe#red') as HTMLIFrameElement).contentDocument.documentElement).backgroundColor)).resolves.toBe('rgba(0, 0, 0, 0)');
         await expect(page.evaluate(() => getComputedStyle((document.querySelector('iframe#red') as HTMLIFrameElement).contentDocument.documentElement).color)).resolves.toBe('rgb(232, 230, 227)');
@@ -144,11 +153,13 @@ describe('Different paths in URL patterns', () => {
         const bluePromise = awaitForEvent('darkreader-dynamic-theme-ready-/blue.html');
         await devtoolsUtils.reset();
 
-        await expect(page.evaluate(() => getComputedStyle(document.documentElement).backgroundColor)).resolves.toBe('rgb(24, 26, 27)');
-        await expect(page.evaluate(() => getComputedStyle(document.documentElement).color)).resolves.toBe('rgb(232, 230, 227)');
-        await expect(page.evaluate(() => getComputedStyle(document.body).backgroundColor)).resolves.toBe('rgb(24, 26, 27)');
-        await expect(page.evaluate(() => getComputedStyle(document.body).color)).resolves.toBe('rgb(232, 230, 227)');
-        await expect(page.evaluate(() => getComputedStyle(document.querySelector('h1')).color)).resolves.toBe('rgb(232, 230, 227)');
+        await expectStyles([
+            ['document', 'background-color', 'rgb(24, 26, 27)'],
+            ['document', 'color', 'rgb(232, 230, 227)'],
+            ['body', 'background-color', 'rgb(24, 26, 27)'],
+            ['body', 'color', 'rgb(232, 230, 227)'],
+            ['h1', 'color', 'rgb(232, 230, 227)'],
+        ]);
 
         await redPromise;
         await expect(page.evaluate(() => getComputedStyle((document.querySelector('iframe#red') as HTMLIFrameElement).contentDocument.documentElement).backgroundColor)).resolves.toBe('rgba(0, 0, 0, 0)');

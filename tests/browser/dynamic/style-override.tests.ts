@@ -48,11 +48,13 @@ describe('Style override', () => {
             ),
         });
 
-        await expect(page.evaluate(() => getComputedStyle(document.documentElement).backgroundColor)).resolves.toBe('rgb(24, 26, 27)');
-        await expect(page.evaluate(() => getComputedStyle(document.body).backgroundColor)).resolves.toBe('rgb(96, 104, 108)');
-        await expect(page.evaluate(() => getComputedStyle(document.body).color)).resolves.toBe('rgb(232, 230, 227)');
-        await expect(page.evaluate(() => getComputedStyle(document.querySelector('h1')).color)).resolves.toBe('rgb(232, 230, 227)');
-        await expect(page.evaluate(() => getComputedStyle(document.querySelector('h1 strong')).color)).resolves.toBe('rgb(255, 26, 26)');
+        await expectStyles([
+            ['document', 'background-color', 'rgb(24, 26, 27)'],
+            ['body', 'background-color', 'rgb(96, 104, 108)'],
+            ['body', 'color', 'rgb(232, 230, 227)'],
+            ['h1', 'color', 'rgb(232, 230, 227)'],
+            ['h1 strong', 'color', 'rgb(255, 26, 26)'],
+        ]);
     });
 
     it('should restore override', async () => {
@@ -77,8 +79,10 @@ describe('Style override', () => {
             styleElement.sheet.insertRule('strong { color: red }');
         });
 
-        await expect(page.evaluate(() => getComputedStyle(document.querySelector('h1')).color)).resolves.toBe('rgb(152, 143, 129)');
-        await expect(page.evaluate(() => getComputedStyle(document.querySelector('h1 strong')).color)).resolves.toBe('rgb(255, 26, 26)');
+        await expectStyles([
+            ['h1', 'color', 'rgb(152, 143, 129)'],
+            ['h1 strong', 'color', 'rgb(255, 26, 26)']
+        ]);
 
         await expect(page.evaluate(async () => {
             const style = document.querySelector('.testcase-style');

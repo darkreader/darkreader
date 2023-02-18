@@ -76,7 +76,7 @@ describe('Different paths in URL patterns', () => {
         await expect(page.evaluate(() => getComputedStyle((document.querySelector('iframe#red') as HTMLIFrameElement).contentDocument.documentElement).color)).resolves.toBe('rgb(232, 230, 227)');
         await expect(page.evaluate(() => getComputedStyle((document.querySelector('iframe#red') as HTMLIFrameElement).contentDocument.body).backgroundColor)).resolves.toBe('rgba(0, 0, 0, 0)');
         await expect(page.evaluate(() => getComputedStyle((document.querySelector('iframe#red') as HTMLIFrameElement).contentDocument.body).color)).resolves.toBe('rgb(232, 230, 227)');
-        await expect(page.evaluate(() => getComputedStyle((document.querySelector('iframe#red') as HTMLIFrameElement).contentDocument.documentElement.querySelector('h1')).color)).resolves.toBe('rgb(255, 26, 26)');
+        await expect(page.evaluate(() => getComputedStyle((document.querySelector('iframe#red') as HTMLIFrameElement).contentDocument.querySelector('h1')).color)).resolves.toBe('rgb(255, 26, 26)');
 
         await expect(page.evaluate(() => getComputedStyle((document.querySelector('iframe#blue') as HTMLIFrameElement).contentDocument.documentElement).backgroundColor)).resolves.toBe('rgba(0, 0, 0, 0)');
         await expect(page.evaluate(() => getComputedStyle((document.querySelector('iframe#blue') as HTMLIFrameElement).contentDocument.documentElement).color)).resolves.toBe('rgb(232, 230, 227)');

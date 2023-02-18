@@ -1,4 +1,5 @@
 import {multiline} from '../../support/test-utils';
+import {StyleExpectations} from '../globals';
 
 async function loadBasicPage() {
     await loadTestPage({
@@ -15,17 +16,21 @@ async function loadBasicPage() {
     });
 }
 
+async function expectStyles(styles: StyleExpectations) {
+    expectPageStyles(expect, styles);
+}
+
 describe('Inline style override', () => {
     it('should override inline style', async () => {
         await loadBasicPage();
 
-        await expect(page.evaluate(() => getComputedStyle(document.querySelector('span')).color)).resolves.toBe('rgb(255, 26, 26)');
+        await expectStyles(['span', 'color', 'rgb(255, 26, 26)']);
     });
 
     it('should watch for inline style change', async () => {
         await loadBasicPage();
 
-        await expect(page.evaluate(() => getComputedStyle(document.querySelector('span')).color)).resolves.toBe('rgb(255, 26, 26)');
+        await expectStyles(['span', 'color', 'rgb(255, 26, 26)']);
 
         await expect(page.evaluate(async () => {
             const span = document.querySelector('span');

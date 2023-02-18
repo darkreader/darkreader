@@ -4,6 +4,10 @@ import type {ExtensionData, UserSettings} from '../../src/definitions';
 
 type PathsObject = {[path: string]: string | RequestListener | PathsObject};
 
+
+type OneStyleExpectation = [selector: string, cssAttributeName: string, expectedValue: string];
+type StyleExpectations = Array<OneStyleExpectation> | OneStyleExpectation;
+
 declare global {
     const loadTestPage: (paths: PathsObject & {cors?: PathsObject}, gotoOptions?: WaitForOptions) => Promise<void>;
     const corsURL: string;
@@ -25,4 +29,5 @@ declare global {
         getManifest: () => Promise<chrome.runtime.Manifest>;
     };
     const awaitForEvent: (uuid: string) => Promise<void>;
+    const expectPageStyles: (expect: jest.Expect, expectations: StyleExpectations) => Promise<void>;
 }

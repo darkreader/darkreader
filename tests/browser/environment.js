@@ -43,7 +43,6 @@ class PuppeteerEnvironment extends JestNodeEnvironment.TestEnvironment {
         this.extensionPopup = results[3];
         this.extensionDevtools = results[4];
         this.page = results[5];
-        this.global.page = this.page;
 
         this.assignTestGlobals();
     }
@@ -204,7 +203,27 @@ class PuppeteerEnvironment extends JestNodeEnvironment.TestEnvironment {
         return extensionPage;
     }
 
+    toCamelCase(string) {
+        return string//.replace(/-./g, x=>x[1].toUpperCase());
+    }
+
     assignTestGlobals() {
+        this.global.page = this.page;
+        this.global.expectPageStyles = async (expect, expectations) => {
+            if (!Array.isArray(expectations[0])) {
+                expectations = [expectations];
+            }
+            const promises = [];
+            for (const [selector, cssAttributeName, expectedValue] of expectations) {
+                const attribute = this.toCamelCase(cssAttributeName);
+                const promise = expect(this.page.evaluate(
+                    (selector, attribute) => getComputedStyle(selector === 'document' ? document.documentElement : document.querySelector(selector))[attribute],
+                    selector, attribute
+                )).resolves.toBe(expectedValue);
+                promises.push(promise);
+            }
+            return Promise.all(promises);
+        };
         this.global.loadTestPage = async (paths, gotoOptions) => {
             const {cors, ...testPaths} = paths;
             this.testServer.setPaths(testPaths);

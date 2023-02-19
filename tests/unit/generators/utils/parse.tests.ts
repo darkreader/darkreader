@@ -567,7 +567,6 @@ describe('Backwards compatibility', () => {
                 }
             ]);
         });
-
     });
 });
 

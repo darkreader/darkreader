@@ -1,4 +1,4 @@
-import {isFullyQualifiedDomain, isFullyQualifiedDomainWildcard, fullyQualifiedDomainMatchesWildcard, isURLInList} from '../../utils/url';
+import {isFullyQualifiedDomain, isFullyQualifiedDomainWildcard, fullyQualifiedDomainMatchesWildcard, isURLInList, isURLMatched} from '../../utils/url';
 import {parseArray} from '../../utils/text';
 
 declare const __TEST__: boolean;
@@ -25,7 +25,7 @@ export interface SitePropsIndex<SiteFix extends SiteProps> {
 interface ConfigIndex {
     domains: { [domain: string]: number[] };
     domainLabels: { [domainLabel: string]: number[] };
-    nonstandard: number[];
+    nonstandard: number[] | null;
 }
 
 export interface SiteListIndex {
@@ -249,8 +249,7 @@ function lookupConfigURLsInDomainLabels(domain: string, recordIds: number[], cur
     }
 }
 
-function lookupConfigURLs(url: string, index: ConfigIndex, getAllRecordURLs: (id: number) => string[]): number[] {
-    const domain = getDomain(url);
+function lookupConfigURLs(domain: string, index: ConfigIndex, getAllRecordURLs: (id: number) => string[]): number[] {
     const labels = domain.split('.');
     let recordIds: number[] = [];
 
@@ -279,9 +278,17 @@ function lookupConfigURLs(url: string, index: ConfigIndex, getAllRecordURLs: (id
         }
     }
 
-    // Backwards compatibility: send over nonstandard patterns, which will be filtered out
+    // Backwards compatibility: check for nonssend over nonstandard patterns, which will be filtered out
     // via regex in content script
-    recordIds = recordIds.concat(index.nonstandard);
+    if (index.nonstandard) {
+        for (const currRecordId of index.nonstandard) {
+            const urls = getAllRecordURLs(currRecordId);
+            if (urls.some((url) => isURLMatched(domain, getDomain(url)))) {
+                recordIds.push(currRecordId);
+                continue;
+            }
+        }
+    }
 
     // Deduplicate array elements
     recordIds = Array.from(new Set(recordIds));

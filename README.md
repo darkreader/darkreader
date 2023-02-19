@@ -20,14 +20,16 @@ Read more about contributing to Dark Reader in [CONTRIBUTING.md](https://github.
 
 ## Building for use
 
-You can install the extension from a file.  
-Install [Node.js LTS](https://nodejs.org/en/). Download the source code (or check out from git).  
+You can install the extension from a file.
+Install [Node.js](https://nodejs.org/) (we recommend LTS or higher, but any version at or above 15 will work). Download the source code (or check out from git).
 Open the terminal in the root folder and run:
 
 - `npm install`
-- `npm run build`
+- `npm run build` or `npm run build [-- flags]`
 
 This will create a `build/release/darkreader-chrome.zip` file for use in a Chromium-based browser and a `build/release/darkreader-firefox.xpi` file for use in Firefox.
+
+You can customize build process by passing flags to build script. To see all falgs, run `npm run build -- --help`.
 
 ## Using Dark Reader for a website
 

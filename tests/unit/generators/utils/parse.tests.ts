@@ -486,11 +486,6 @@ describe('Backwards compatibility', () => {
             {
                 'url': ['*'],
                 'directive': 'hello world'
-            }, {
-                'url': [
-                    'example*.com',
-                ],
-                'directive': 'one'
             }
         ]);
     });

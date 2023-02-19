@@ -97,8 +97,6 @@ describe('Link override', () => {
             waitUntil: 'domcontentloaded',
         });
 
-        await timeout(1000);
-
         await expectStyles([
             ['document', 'background-color', 'rgb(24, 26, 27)'],
             ['body', 'background-color', 'rgb(24, 26, 27)'],
@@ -107,8 +105,9 @@ describe('Link override', () => {
             ['h1 strong', 'color', 'rgb(232, 230, 227)'],
         ]);
 
+        await timeout(200);
         proceedCSSResponse();
-        await timeout(1000);
+        await timeout(200);
 
         await expectStyles([
             ['document', 'background-color', 'rgb(24, 26, 27)'],

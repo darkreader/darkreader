@@ -1,4 +1,4 @@
-import {isFullyQualifiedDomain, isFullyQualifiedDomainWildcard, fullyQualifiedDomainMatchesWildcard, isURLInList} from '../../utils/url';
+import {isFullyQualifiedDomain, isFullyQualifiedDomainWildcard, fullyQualifiedDomainMatchesWildcard, isURLInList, isURLMatched} from '../../utils/url';
 import {parseArray} from '../../utils/text';
 
 declare const __TEST__: boolean;
@@ -25,7 +25,7 @@ export interface SitePropsIndex<SiteFix extends SiteProps> {
 interface ConfigIndex {
     domains: { [domain: string]: number[] };
     domainLabels: { [domainLabel: string]: number[] };
-    nonstandard: number[];
+    nonstandard: number[] | null;
 }
 
 export interface SiteListIndex {
@@ -235,8 +235,21 @@ export function indexSitesFixesConfig<T extends SiteProps>(text: string): SitePr
     return {offsets: encodeOffsets(offsets), domains, domainLabels, nonstandard, cacheDomainIndex: {}, cacheSiteFix: {}, cacheCleanupTimer: null};
 }
 
-function lookupConfigURLs(url: string, index: ConfigIndex, getAllRecordURLs: (id: number) => string[]): number[] {
-    const domain = getDomain(url);
+function lookupConfigURLsInDomainLabels(domain: string, recordIds: number[], currRecordIds: number[], getAllRecordURLs: (id: number) => string[]) {
+    for (const recordId of currRecordIds) {
+        const recordURLs = getAllRecordURLs(recordId);
+        for (const ruleUrl of recordURLs) {
+            const wildcard = getDomain(ruleUrl);
+            if (isFullyQualifiedDomainWildcard(wildcard) && fullyQualifiedDomainMatchesWildcard(wildcard, domain)) {
+                recordIds.push(recordId);
+            } else {
+                // Skip this rule, since the label match must have come from a different URL
+            }
+        }
+    }
+}
+
+function lookupConfigURLs(domain: string, index: ConfigIndex, getAllRecordURLs: (id: number) => string[]): number[] {
     const labels = domain.split('.');
     let recordIds: number[] = [];
 
@@ -250,17 +263,7 @@ function lookupConfigURLs(url: string, index: ConfigIndex, getAllRecordURLs: (id
         // We need to use in operator because ids are 0-based and 0 is falsy
         if (label in index.domainLabels) {
             const currRecordIds = index.domainLabels[label];
-            for (const recordId of currRecordIds) {
-                const recordURLs = getAllRecordURLs(recordId);// getSiteFix<T>(text, index, options, recordId);
-                for (const ruleUrl of recordURLs) {
-                    const wildcard = getDomain(ruleUrl);
-                    if (isFullyQualifiedDomainWildcard(wildcard) && fullyQualifiedDomainMatchesWildcard(wildcard, domain)) {
-                        recordIds.push(recordId);
-                    } else {
-                        // Skip this rule, since the label match must have come from a different URL
-                    }
-                }
-            }
+            lookupConfigURLsInDomainLabels(domain, recordIds, currRecordIds, getAllRecordURLs);
         }
     }
 
@@ -270,12 +273,22 @@ function lookupConfigURLs(url: string, index: ConfigIndex, getAllRecordURLs: (id
             recordIds = recordIds.concat(index.domains[substring]);
         }
         if (substring in index.domainLabels) {
-            recordIds = recordIds.concat(index.domainLabels[substring]);
+            const currRecordIds = index.domainLabels[substring];
+            lookupConfigURLsInDomainLabels(domain, recordIds, currRecordIds, getAllRecordURLs);
         }
     }
-    // Backwards compatibility: send over nonstandard patterns, which will be filtered out
+
+    // Backwards compatibility: check for nonssend over nonstandard patterns, which will be filtered out
     // via regex in content script
-    recordIds = recordIds.concat(index.nonstandard);
+    if (index.nonstandard) {
+        for (const currRecordId of index.nonstandard) {
+            const urls = getAllRecordURLs(currRecordId);
+            if (urls.some((url) => isURLMatched(domain, getDomain(url)))) {
+                recordIds.push(currRecordId);
+                continue;
+            }
+        }
+    }
 
     // Deduplicate array elements
     recordIds = Array.from(new Set(recordIds));

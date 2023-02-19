@@ -1,4 +1,9 @@
 import {multiline, timeout} from '../../support/test-utils';
+import type {StyleExpectations} from '../globals';
+
+async function expectStyles(styles: StyleExpectations) {
+    expectPageStyles(expect, styles);
+}
 
 describe('Link override', () => {
     // TODO: remove flakes and remove this line
@@ -23,11 +28,13 @@ describe('Link override', () => {
             ),
         });
 
-        await expect(page.evaluate(() => getComputedStyle(document.documentElement).backgroundColor)).resolves.toBe('rgb(24, 26, 27)');
-        await expect(page.evaluate(() => getComputedStyle(document.body).backgroundColor)).resolves.toBe('rgb(96, 104, 108)');
-        await expect(page.evaluate(() => getComputedStyle(document.body).color)).resolves.toBe('rgb(232, 230, 227)');
-        await expect(page.evaluate(() => getComputedStyle(document.querySelector('h1')).color)).resolves.toBe('rgb(232, 230, 227)');
-        await expect(page.evaluate(() => getComputedStyle(document.querySelector('h1 strong')).color)).resolves.toBe('rgb(255, 26, 26)');
+        await expectStyles([
+            ['document', 'background-color', 'rgb(24, 26, 27)'],
+            ['body', 'background-color', 'rgb(96, 104, 108)'],
+            ['body', 'color', 'rgb(232, 230, 227)'],
+            ['h1', 'color', 'rgb(232, 230, 227)'],
+            ['h1 strong', 'color', 'rgb(255, 26, 26)'],
+        ]);
     });
 
     it('should override CORS style', async () => {
@@ -51,11 +58,13 @@ describe('Link override', () => {
             },
         });
 
-        await expect(page.evaluate(() => getComputedStyle(document.documentElement).backgroundColor)).resolves.toBe('rgb(24, 26, 27)');
-        await expect(page.evaluate(() => getComputedStyle(document.body).backgroundColor)).resolves.toBe('rgb(96, 104, 108)');
-        await expect(page.evaluate(() => getComputedStyle(document.body).color)).resolves.toBe('rgb(232, 230, 227)');
-        await expect(page.evaluate(() => getComputedStyle(document.querySelector('h1')).color)).resolves.toBe('rgb(232, 230, 227)');
-        await expect(page.evaluate(() => getComputedStyle(document.querySelector('h1 strong')).color)).resolves.toBe('rgb(255, 26, 26)');
+        await expectStyles([
+            ['document', 'background-color', 'rgb(24, 26, 27)'],
+            ['body', 'background-color', 'rgb(96, 104, 108)'],
+            ['body', 'color', 'rgb(232, 230, 227)'],
+            ['h1', 'color', 'rgb(232, 230, 227)'],
+            ['h1 strong', 'color', 'rgb(255, 26, 26)'],
+        ]);
     });
 
     it('should wait till style is loading', async () => {
@@ -88,19 +97,24 @@ describe('Link override', () => {
             waitUntil: 'domcontentloaded',
         });
 
-        await expect(page.evaluate(() => getComputedStyle(document.documentElement).backgroundColor)).resolves.toBe('rgb(24, 26, 27)');
-        await expect(page.evaluate(() => getComputedStyle(document.body).backgroundColor)).resolves.toBe('rgb(24, 26, 27)');
-        await expect(page.evaluate(() => getComputedStyle(document.body).color)).resolves.toBe('rgb(232, 230, 227)');
-        await expect(page.evaluate(() => getComputedStyle(document.querySelector('h1')).color)).resolves.toBe('rgb(232, 230, 227)');
-        await expect(page.evaluate(() => getComputedStyle(document.querySelector('h1 strong')).color)).resolves.toBe('rgb(232, 230, 227)');
+        await expectStyles([
+            ['document', 'background-color', 'rgb(24, 26, 27)'],
+            ['body', 'background-color', 'rgb(24, 26, 27)'],
+            ['body', 'color', 'rgb(232, 230, 227)'],
+            ['h1', 'color', 'rgb(232, 230, 227)'],
+            ['h1 strong', 'color', 'rgb(232, 230, 227)'],
+        ]);
 
+        await timeout(200);
         proceedCSSResponse();
-        await timeout(500);
+        await timeout(200);
 
-        await expect(page.evaluate(() => getComputedStyle(document.documentElement).backgroundColor)).resolves.toBe('rgb(24, 26, 27)');
-        await expect(page.evaluate(() => getComputedStyle(document.body).backgroundColor)).resolves.toBe('rgb(96, 104, 108)');
-        await expect(page.evaluate(() => getComputedStyle(document.body).color)).resolves.toBe('rgb(232, 230, 227)');
-        await expect(page.evaluate(() => getComputedStyle(document.querySelector('h1')).color)).resolves.toBe('rgb(232, 230, 227)');
-        await expect(page.evaluate(() => getComputedStyle(document.querySelector('h1 strong')).color)).resolves.toBe('rgb(255, 26, 26)');
+        await expectStyles([
+            ['document', 'background-color', 'rgb(24, 26, 27)'],
+            ['body', 'background-color', 'rgb(96, 104, 108)'],
+            ['body', 'color', 'rgb(232, 230, 227)'],
+            ['h1', 'color', 'rgb(232, 230, 227)'],
+            ['h1 strong', 'color', 'rgb(255, 26, 26)'],
+        ]);
     });
 });

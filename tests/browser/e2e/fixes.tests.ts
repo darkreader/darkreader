@@ -1,4 +1,5 @@
 import {multiline} from '../../support/test-utils';
+import type {StyleExpectations} from '../globals';
 
 async function loadBasicPage() {
     await loadTestPage({
@@ -19,15 +20,21 @@ async function loadBasicPage() {
     });
 }
 
+async function expectStyles(styles: StyleExpectations) {
+    expectPageStyles(expect, styles);
+}
+
 describe('Correct fixes are chosen', () => {
     it('If no matching URL found, returns only default fix', async () => {
         await loadBasicPage();
 
-        await expect(page.evaluate(() => getComputedStyle(document.documentElement).backgroundColor)).resolves.toBe('rgb(24, 26, 27)');
-        await expect(page.evaluate(() => getComputedStyle(document.documentElement).color)).resolves.toBe('rgb(232, 230, 227)');
-        await expect(page.evaluate(() => getComputedStyle(document.body).backgroundColor)).resolves.toBe('rgb(24, 26, 27)');
-        await expect(page.evaluate(() => getComputedStyle(document.body).color)).resolves.toBe('rgb(232, 230, 227)');
-        await expect(page.evaluate(() => getComputedStyle(document.querySelector('h1')).color)).resolves.toBe('rgb(255, 26, 26)');
+        await expectStyles([
+            ['document', 'background-color', 'rgb(24, 26, 27)'],
+            ['document', 'color', 'rgb(232, 230, 227)'],
+            ['body', 'background-color', 'rgb(24, 26, 27)'],
+            ['body', 'color', 'rgb(232, 230, 227)'],
+            ['h1', 'color', 'rgb(255, 26, 26)'],
+        ]);
 
         await devtoolsUtils.paste(multiline(
             '*',
@@ -61,11 +68,13 @@ describe('Correct fixes are chosen', () => {
             '',
         ));
 
-        await expect(page.evaluate(() => getComputedStyle(document.documentElement).backgroundColor)).resolves.toBe('rgb(24, 26, 27)');
-        await expect(page.evaluate(() => getComputedStyle(document.documentElement).color)).resolves.toBe('rgb(232, 230, 227)');
-        await expect(page.evaluate(() => getComputedStyle(document.body).backgroundColor)).resolves.toBe('rgb(0, 0, 128)');
-        await expect(page.evaluate(() => getComputedStyle(document.body).color)).resolves.toBe('rgb(255, 255, 255)');
-        await expect(page.evaluate(() => getComputedStyle(document.querySelector('h1')).color)).resolves.toBe('rgb(255, 165, 0)');
+        await expectStyles([
+            ['document', 'background-color', 'rgb(24, 26, 27)'],
+            ['document', 'color', 'rgb(232, 230, 227)'],
+            ['body', 'background-color', 'rgb(0, 0, 128)'],
+            ['body', 'color', 'rgb(255, 255, 255)'],
+            ['h1', 'color', 'rgb(255, 165, 0)']
+        ]);
 
         await devtoolsUtils.reset();
     });
@@ -73,11 +82,13 @@ describe('Correct fixes are chosen', () => {
     it('If multiple matching URL patterns found, select the most specific one', async () => {
         await loadBasicPage();
 
-        await expect(page.evaluate(() => getComputedStyle(document.documentElement).backgroundColor)).resolves.toBe('rgb(24, 26, 27)');
-        await expect(page.evaluate(() => getComputedStyle(document.documentElement).color)).resolves.toBe('rgb(232, 230, 227)');
-        await expect(page.evaluate(() => getComputedStyle(document.body).backgroundColor)).resolves.toBe('rgb(24, 26, 27)');
-        await expect(page.evaluate(() => getComputedStyle(document.body).color)).resolves.toBe('rgb(232, 230, 227)');
-        await expect(page.evaluate(() => getComputedStyle(document.querySelector('h1')).color)).resolves.toBe('rgb(255, 26, 26)');
+        await expectStyles([
+            ['document', 'background-color', 'rgb(24, 26, 27)'],
+            ['document', 'color', 'rgb(232, 230, 227)'],
+            ['body', 'background-color', 'rgb(24, 26, 27)'],
+            ['body', 'color', 'rgb(232, 230, 227)'],
+            ['h1', 'color', 'rgb(255, 26, 26)']
+        ]);
 
         await devtoolsUtils.paste(multiline(
             '*',
@@ -111,11 +122,13 @@ describe('Correct fixes are chosen', () => {
             '',
         ));
 
-        await expect(page.evaluate(() => getComputedStyle(document.documentElement).backgroundColor)).resolves.toBe('rgb(24, 26, 27)');
-        await expect(page.evaluate(() => getComputedStyle(document.documentElement).color)).resolves.toBe('rgb(232, 230, 227)');
-        await expect(page.evaluate(() => getComputedStyle(document.body).backgroundColor)).resolves.toBe('rgb(0, 0, 128)');
-        await expect(page.evaluate(() => getComputedStyle(document.body).color)).resolves.toBe('rgb(255, 255, 255)');
-        await expect(page.evaluate(() => getComputedStyle(document.querySelector('h1')).color)).resolves.toBe('rgb(255, 165, 0)');
+        await expectStyles([
+            ['document', 'background-color', 'rgb(24, 26, 27)'],
+            ['document', 'color', 'rgb(232, 230, 227)'],
+            ['body', 'background-color', 'rgb(0, 0, 128)'],
+            ['body', 'color', 'rgb(255, 255, 255)'],
+            ['h1', 'color', 'rgb(255, 165, 0)']
+        ]);
 
         await devtoolsUtils.reset();
     });
@@ -123,11 +136,13 @@ describe('Correct fixes are chosen', () => {
     it('BUG COMPATIBILITY: If multiple matching URL patterns found, the most specific fix is determined by the length of first pattern', async () => {
         await loadBasicPage();
 
-        await expect(page.evaluate(() => getComputedStyle(document.documentElement).backgroundColor)).resolves.toBe('rgb(24, 26, 27)');
-        await expect(page.evaluate(() => getComputedStyle(document.documentElement).color)).resolves.toBe('rgb(232, 230, 227)');
-        await expect(page.evaluate(() => getComputedStyle(document.body).backgroundColor)).resolves.toBe('rgb(24, 26, 27)');
-        await expect(page.evaluate(() => getComputedStyle(document.body).color)).resolves.toBe('rgb(232, 230, 227)');
-        await expect(page.evaluate(() => getComputedStyle(document.querySelector('h1')).color)).resolves.toBe('rgb(255, 26, 26)');
+        await expectStyles([
+            ['document', 'background-color', 'rgb(24, 26, 27)'],
+            ['document', 'color', 'rgb(232, 230, 227)'],
+            ['body', 'background-color', 'rgb(24, 26, 27)'],
+            ['body', 'color', 'rgb(232, 230, 227)'],
+            ['h1', 'color', 'rgb(255, 26, 26)']
+        ]);
 
         await devtoolsUtils.paste(multiline(
             '*',
@@ -163,11 +178,13 @@ describe('Correct fixes are chosen', () => {
             '',
         ));
 
-        await expect(page.evaluate(() => getComputedStyle(document.documentElement).backgroundColor)).resolves.toBe('rgb(24, 26, 27)');
-        await expect(page.evaluate(() => getComputedStyle(document.documentElement).color)).resolves.toBe('rgb(232, 230, 227)');
-        await expect(page.evaluate(() => getComputedStyle(document.body).backgroundColor)).resolves.toBe('rgb(0, 0, 128)');
-        await expect(page.evaluate(() => getComputedStyle(document.body).color)).resolves.toBe('rgb(255, 255, 255)');
-        await expect(page.evaluate(() => getComputedStyle(document.querySelector('h1')).color)).resolves.toBe('rgb(255, 165, 0)');
+        await expectStyles([
+            ['document', 'background-color', 'rgb(24, 26, 27)'],
+            ['document', 'color', 'rgb(232, 230, 227)'],
+            ['body', 'background-color', 'rgb(0, 0, 128)'],
+            ['body', 'color', 'rgb(255, 255, 255)'],
+            ['h1', 'color', 'rgb(255, 165, 0)'],
+        ]);
 
         await devtoolsUtils.reset();
     });
@@ -175,11 +192,13 @@ describe('Correct fixes are chosen', () => {
     it('BUG COMPATIBILITY: If multiple matching URL patterns of the same length are found, select the first one', async () => {
         await loadBasicPage();
 
-        await expect(page.evaluate(() => getComputedStyle(document.documentElement).backgroundColor)).resolves.toBe('rgb(24, 26, 27)');
-        await expect(page.evaluate(() => getComputedStyle(document.documentElement).color)).resolves.toBe('rgb(232, 230, 227)');
-        await expect(page.evaluate(() => getComputedStyle(document.body).backgroundColor)).resolves.toBe('rgb(24, 26, 27)');
-        await expect(page.evaluate(() => getComputedStyle(document.body).color)).resolves.toBe('rgb(232, 230, 227)');
-        await expect(page.evaluate(() => getComputedStyle(document.querySelector('h1')).color)).resolves.toBe('rgb(255, 26, 26)');
+        await expectStyles([
+            ['document', 'background-color', 'rgb(24, 26, 27)'],
+            ['document', 'color', 'rgb(232, 230, 227)'],
+            ['body', 'background-color', 'rgb(24, 26, 27)'],
+            ['body', 'color', 'rgb(232, 230, 227)'],
+            ['h1', 'color', 'rgb(255, 26, 26)'],
+        ]);
 
         await devtoolsUtils.paste(multiline(
             '*',
@@ -213,11 +232,13 @@ describe('Correct fixes are chosen', () => {
             '',
         ));
 
-        await expect(page.evaluate(() => getComputedStyle(document.documentElement).backgroundColor)).resolves.toBe('rgb(24, 26, 27)');
-        await expect(page.evaluate(() => getComputedStyle(document.documentElement).color)).resolves.toBe('rgb(232, 230, 227)');
-        await expect(page.evaluate(() => getComputedStyle(document.body).backgroundColor)).resolves.toBe('rgb(0, 0, 128)');
-        await expect(page.evaluate(() => getComputedStyle(document.body).color)).resolves.toBe('rgb(255, 255, 255)');
-        await expect(page.evaluate(() => getComputedStyle(document.querySelector('h1')).color)).resolves.toBe('rgb(255, 165, 0)');
+        await expectStyles([
+            ['document', 'background-color', 'rgb(24, 26, 27)'],
+            ['document', 'color', 'rgb(232, 230, 227)'],
+            ['body', 'background-color', 'rgb(0, 0, 128)'],
+            ['body', 'color', 'rgb(255, 255, 255)'],
+            ['h1', 'color', 'rgb(255, 165, 0)'],
+        ]);
 
         await devtoolsUtils.reset();
     });

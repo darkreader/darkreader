@@ -43,7 +43,6 @@ class PuppeteerEnvironment extends JestNodeEnvironment.TestEnvironment {
         this.extensionPopup = results[3];
         this.extensionDevtools = results[4];
         this.page = results[5];
-        this.global.page = this.page;
 
         this.assignTestGlobals();
     }
@@ -205,6 +204,58 @@ class PuppeteerEnvironment extends JestNodeEnvironment.TestEnvironment {
     }
 
     assignTestGlobals() {
+        this.global.getColorScheme = async () => {
+            const isDark = await this.page.evaluate(() => matchMedia('(prefers-color-scheme: dark)').matches);
+            return isDark ? 'dark' : 'light';
+        };
+
+        this.global.evaluateScript = async (script) => {
+            return await this.page.evaluate(script);
+        };
+
+        this.global.expectPageStyles = async (expect, expectations) => {
+            if (!Array.isArray(expectations[0])) {
+                expectations = [expectations];
+            }
+            const promises = [];
+            for (const [selector, cssAttributeName, expectedValue] of expectations) {
+                const promise = expect(this.page.evaluate(
+                    (selector, cssAttributeName) => {
+                        let element = document;
+                        if (!Array.isArray(selector)) {
+                            selector = [selector];
+                        }
+                        for (const part of selector) {
+                            if (element instanceof HTMLIFrameElement) {
+                                element = element.contentDocument;
+                            }
+                            if (part === 'document') {
+                                element = element.documentElement;
+                            } else {
+                                element = element.querySelector(part);
+                            }
+                        }
+                        const style = getComputedStyle(element);
+                        return style[cssAttributeName];
+                    },
+                    selector, cssAttributeName
+                )).resolves.toBe(expectedValue);
+                promises.push(promise);
+            }
+            return Promise.all(promises);
+        };
+
+        this.global.emulateMedia = async (name, value) => {
+            if (this.global.product === 'firefox') {
+                return;
+            }
+            await this.page.emulateMediaFeatures([{name, value}]);
+            if (this.global.product === 'chrome') {
+                const page = await this.getChromiumMV2BackgroundPage();
+                await page.emulateMediaFeatures([{name, value}]);
+            }
+        };
+
         this.global.loadTestPage = async (paths, gotoOptions) => {
             const {cors, ...testPaths} = paths;
             this.testServer.setPaths(testPaths);
@@ -213,6 +264,7 @@ class PuppeteerEnvironment extends JestNodeEnvironment.TestEnvironment {
             await page.bringToFront();
             await this.pageGoto(page, `http://localhost:${TEST_SERVER_PORT}`, gotoOptions);
         };
+
         this.global.corsURL = this.corsServer.url;
     }
 
@@ -314,18 +366,6 @@ class PuppeteerEnvironment extends JestNodeEnvironment.TestEnvironment {
                 collectData: async () => await sendToBackground('collectData'),
                 changeChromeStorage: async (region, data) => await sendToBackground('changeChromeStorage', {region, data}),
                 getChromeStorage: async (region, keys) => await sendToBackground('getChromeStorage', {region, keys}),
-                emulateMedia: async (name, value) => {
-                    if (this.global.product === 'firefox') {
-                        return;
-                    }
-                    let page;
-                    if (this.global.product === 'chrome-mv3') {
-                        page = this.page;
-                    } else if (this.global.product === 'chrome') {
-                        page = await this.getChromiumMV2BackgroundPage();
-                    }
-                    await page.emulateMediaFeatures([{name, value}]);
-                },
                 getManifest: async () => await sendToBackground('getManifest'),
             };
 

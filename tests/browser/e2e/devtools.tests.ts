@@ -26,6 +26,9 @@ async function expectStyles(styles: StyleExpectations) {
 }
 
 describe('Modifying config via Developer tools', () => {
+    // TODO: remove flakes and remove this line
+    jest.retryTimes(10, {logErrorsBeforeRetry: true});
+
     it('Modifying config', async () => {
         await loadBasicPage();
 

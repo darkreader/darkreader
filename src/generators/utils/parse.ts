@@ -235,6 +235,20 @@ export function indexSitesFixesConfig<T extends SiteProps>(text: string): SitePr
     return {offsets: encodeOffsets(offsets), domains, domainLabels, nonstandard, cacheDomainIndex: {}, cacheSiteFix: {}, cacheCleanupTimer: null};
 }
 
+function lookupConfigURLsInDomainLabels(domain: string, recordIds: number[], currRecordIds: number[], getAllRecordURLs: (id: number) => string[]) {
+    for (const recordId of currRecordIds) {
+        const recordURLs = getAllRecordURLs(recordId);
+        for (const ruleUrl of recordURLs) {
+            const wildcard = getDomain(ruleUrl);
+            if (isFullyQualifiedDomainWildcard(wildcard) && fullyQualifiedDomainMatchesWildcard(wildcard, domain)) {
+                recordIds.push(recordId);
+            } else {
+                // Skip this rule, since the label match must have come from a different URL
+            }
+        }
+    }
+}
+
 function lookupConfigURLs(url: string, index: ConfigIndex, getAllRecordURLs: (id: number) => string[]): number[] {
     const domain = getDomain(url);
     const labels = domain.split('.');
@@ -250,17 +264,7 @@ function lookupConfigURLs(url: string, index: ConfigIndex, getAllRecordURLs: (id
         // We need to use in operator because ids are 0-based and 0 is falsy
         if (label in index.domainLabels) {
             const currRecordIds = index.domainLabels[label];
-            for (const recordId of currRecordIds) {
-                const recordURLs = getAllRecordURLs(recordId);// getSiteFix<T>(text, index, options, recordId);
-                for (const ruleUrl of recordURLs) {
-                    const wildcard = getDomain(ruleUrl);
-                    if (isFullyQualifiedDomainWildcard(wildcard) && fullyQualifiedDomainMatchesWildcard(wildcard, domain)) {
-                        recordIds.push(recordId);
-                    } else {
-                        // Skip this rule, since the label match must have come from a different URL
-                    }
-                }
-            }
+            lookupConfigURLsInDomainLabels(domain, recordIds, currRecordIds, getAllRecordURLs);
         }
     }
 
@@ -270,9 +274,11 @@ function lookupConfigURLs(url: string, index: ConfigIndex, getAllRecordURLs: (id
             recordIds = recordIds.concat(index.domains[substring]);
         }
         if (substring in index.domainLabels) {
-            recordIds = recordIds.concat(index.domainLabels[substring]);
+            const currRecordIds = index.domainLabels[substring];
+            lookupConfigURLsInDomainLabels(domain, recordIds, currRecordIds, getAllRecordURLs);
         }
     }
+
     // Backwards compatibility: send over nonstandard patterns, which will be filtered out
     // via regex in content script
     recordIds = recordIds.concat(index.nonstandard);

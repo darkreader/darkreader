@@ -1,9 +1,10 @@
 import {m} from 'malevic';
-import {Button, CheckBox, TextBox, TimeRangePicker} from '../../../controls';
+import {Button, CheckBox, Shortcut, TextBox, TimeRangePicker} from '../../../controls';
 import {getLocalMessage} from '../../../../utils/locales';
 import type {Automation, ExtWrapper} from '../../../../definitions';
 import {AutomationMode} from '../../../../utils/automation';
 import {isMatchMediaChangeEventListenerBuggy} from '../../../../utils/platform';
+import KeyboardIcon from '../../main-page/keyboard-icon';
 
 type MoreToggleSettingsProps = ExtWrapper & {
     isExpanded: boolean;
@@ -157,6 +158,30 @@ export default function MoreToggleSettings({data, actions, isExpanded, onClose}:
                         {getLocalMessage('system_dark_mode_chromium_warning')}
                     </p>
                 }
+                <span
+                    class={{
+                        'header__app-toggle__more-settings__shortcut-wrapper': true,
+                        'header__app-toggle__more-settings__shortcut-wrapper--set': data.shortcuts['toggle'],
+                    }}
+                >
+                    <Shortcut
+                        class={{
+                            'header__app-toggle__more-settings__shortcut': true,
+                            'header__app-toggle__more-settings__shortcut--set': data.shortcuts['toggle'],
+                        }}
+                        commandName="toggle"
+                        shortcuts={data.shortcuts}
+                        textTemplate={(hotkey) => (hotkey
+                            ? hotkey
+                            : 'Click to set the shortcut'
+                        )}
+                        onSetShortcut={(shortcut) => actions.setShortcut('toggle', shortcut)}
+                    />
+                    <KeyboardIcon />
+                </span>
+                <p class="header__app-toggle__more-settings__description">
+                    Extension on/off keyboard shortcut
+                </p>
             </div>
         </div>
     );

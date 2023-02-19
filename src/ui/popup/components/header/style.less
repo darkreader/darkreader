@@ -80,10 +80,6 @@
             }
         }
 
-        .shortcut {
-            display: none;
-        }
-
         &__time {
             background-color: @color-heading;
             border-radius: 50%;
@@ -267,6 +263,51 @@
                 &:hover &__button,
                 &:hover &__checkbox {
                     background-color: @color-control-hover;
+                }
+            }
+
+            &__shortcut-wrapper {
+                display: inline-block;
+                height: @size-control-inner + 2 * @size-border;
+                margin-top: @indent-small;
+                position: relative;
+                width: 100%;
+
+                svg {
+                    --icon-color: @color-control-fore-inactive;
+                    border-right: @size-border-inner solid @color-border;
+                    height: @size-control-inner;
+                    left: @size-border;
+                    pointer-events: none;
+                    position: absolute;
+                    top: @size-border;
+                    width: @size-control-inner;
+                }
+
+                &--set svg {
+                    --icon-color: @color-control-fore;
+                }
+            }
+
+            &__shortcut {
+                background-color: @color-control-back;
+                border: @size-border solid @color-border;
+                font-size: @size-text-normal;
+                height: @size-control-inner;
+                line-height: @size-control-inner;
+                padding-left: @size-control-inner;
+                position: relative;
+                transition: all @time-fast;
+                white-space: nowrap;
+                width: calc(100% - 2 * @size-border - @size-control-inner);
+
+                &:hover {
+                    background-color: @color-control-hover;
+                    text-decoration: none;
+
+                    &::before {
+                        display: none;
+                    }
                 }
             }
         }

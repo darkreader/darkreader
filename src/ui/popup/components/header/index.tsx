@@ -84,15 +84,6 @@ function Header({data, actions, onMoreToggleSettingsClick: onToggleAutoSettingsC
             </div>
             <div class="header__control header__app-toggle">
                 <Toggle checked={data.isEnabled} labelOn={getLocalMessage('on')} labelOff={getLocalMessage('off')} onChange={toggleExtension} />
-                <Shortcut
-                    commandName="toggle"
-                    shortcuts={data.shortcuts}
-                    textTemplate={(hotkey) => (hotkey
-                        ? multiline(getLocalMessage('toggle_extension'), hotkey)
-                        : getLocalMessage('setup_hotkey_toggle_extension')
-                    )}
-                    onSetShortcut={(shortcut) => actions.setShortcut('toggle', shortcut)}
-                />
                 <span
                     class={{
                         'header__app-toggle__auto-button': true,

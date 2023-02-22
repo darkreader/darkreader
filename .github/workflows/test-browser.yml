@@ -85,6 +85,9 @@ jobs:
       - name: Install NPM dependencies
         run: npm ci
 
+      - name: Deps
+        run: cat package-lock.json
+
       - name: Run injection tests
         run: npm run test:inject -- --ci --json --outputFile=test-results-inject.json
 

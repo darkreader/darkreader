@@ -1,6 +1,6 @@
 name: Run code tests on Pull Request or Push
-on:
 
+on:
   # Runs for pushes and pull requests,
   #  but don't run these when only some config is changed.
   push:
@@ -18,22 +18,26 @@ on:
       - ready_for_review
     paths-ignore:
       - 'src/config/**'
-
   workflow_dispatch:
+
 jobs:
   test:
     name: Run tests
     runs-on: ubuntu-latest
     steps:
+
       - name: Clone repository
         uses: actions/checkout@v3
 
-      - name: Set up Node.js
+      - name: Node setup
         uses: actions/setup-node@v3
         with:
           node-version: 16.x
 
-      - name: Verify NPM version
+      - name: Log Node version
+        run: node --version
+
+      - name: Log NPM version
         run: npm --version
 
       - name: Set up npm cache

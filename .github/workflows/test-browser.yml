@@ -82,13 +82,7 @@ jobs:
           node-version: 16.x
           cache: npm
 
-      - name: Log Node version
-        run: node --version
-
-      - name: Log NPM version
-        run: npm --version
-
-      - name: Install application dependencies
+      - name: Install NPM dependencies
         run: npm ci
 
       - name: Run injection tests

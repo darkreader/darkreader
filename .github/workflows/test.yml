@@ -32,21 +32,7 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 16.x
-
-      - name: Log Node version
-        run: node --version
-
-      - name: Log NPM version
-        run: npm --version
-
-      - name: Set up npm cache
-        uses: actions/cache@v3
-        with:
-          path: ~/.npm
-          key: ${{ runner.os }}-${{ hashFiles('package-lock.json') }}
-          restore-keys: |
-            ${{ runner.OS }}-${{ hashFiles('package-lock.json') }}
-            ${{ runner.OS }}
+          cache: npm
 
       - name: Install npm dependencies
         run: npm ci

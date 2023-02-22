@@ -106,5 +106,6 @@ jobs:
       - name: Upload test results
         uses: actions/upload-artifact@v3
         with:
+          name: test-results-chrome-${{ matrix.chrome }}-firefox-${{ matrix.firefox }}-coverage-${{ matrix.coverage }}
           path: test-results-*
           retention-days: ${{ inputs.test_results_retention_days }}

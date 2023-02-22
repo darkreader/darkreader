@@ -38,10 +38,11 @@ jobs:
         run: npm ci
 
       - name: Run test against code
-        run: npm run test:ci -- --json --outputFile=test-results-unit.json
+        run: npm run test:unit -- --json --outputFile=test-results-unit.json
 
       - name: Upload test results
         uses: actions/upload-artifact@v3
         with:
-          path: test-results-*
+          name: test-results-unit
+          path: test-results-unit.json
           retention-days: ${{ inputs.test_results_retention_days }}

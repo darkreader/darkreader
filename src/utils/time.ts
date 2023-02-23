@@ -125,18 +125,7 @@ function getSunsetSunriseUTCTime(
     latitude: number,
     longitude: number,
     date: Date,
-): {
-    alwaysDay: true;
-    alwaysNight: false;
-} | {
-    alwaysDay: false;
-    alwaysNight: true;
-} | {
-    alwaysDay: false;
-    alwaysNight: false;
-    sunriseTime: number;
-    sunsetTime: number;
-} {
+) {
     const dec31 = Date.UTC(date.getUTCFullYear(), 0, 0, 0, 0, 0, 0);
     const oneDay = getDuration({days: 1});
     const dayOfYear = Math.floor((date.getTime() - dec31) / oneDay);
@@ -228,11 +217,15 @@ function getSunsetSunriseUTCTime(
         return {
             alwaysDay: true,
             alwaysNight: false,
+            sunriseTime: 0,
+            sunsetTime: 0,
         };
     } else if (sunriseTime.alwaysNight || sunsetTime.alwaysNight) {
         return {
             alwaysDay: false,
             alwaysNight: true,
+            sunriseTime: 0,
+            sunsetTime: 0,
         };
     }
 
@@ -240,7 +233,7 @@ function getSunsetSunriseUTCTime(
         alwaysDay: false,
         alwaysNight: false,
         sunriseTime: sunriseTime.time,
-        sunsetTime: sunsetTime.time
+        sunsetTime: sunsetTime.time,
     };
 }
 

@@ -197,6 +197,7 @@ function getModifiedScrollbarStyle(theme: Theme) {
         colorThumb = hslToString(hsl);
         colorThumbHover = hslToString(lighten(0.1));
         colorThumbActive = hslToString(lighten(0.2));
+        colorCorner = hslToString(darken(0.5));
     }
     lines.push('::-webkit-scrollbar {');
     lines.push(`    background-color: ${colorTrack};`);
@@ -212,9 +213,6 @@ function getModifiedScrollbarStyle(theme: Theme) {
     lines.push(`    background-color: ${colorThumbActive};`);
     lines.push('}');
     lines.push('::-webkit-scrollbar-corner {');
-    // TODO: assign colorCorner a value in else branch above (when theme.scrollbarColor !== 'auto')
-    // eslint-disable-next-line
-    // @ts-ignore
     lines.push(`    background-color: ${colorCorner};`);
     lines.push('}');
     if (isFirefox) {

@@ -25,7 +25,7 @@ Dark Reader build script requires a JavaScript runtime, either NodeJS or Deno. W
 ### Building with NodeJS
 
 You can install the extension from a file.
-Install [Node.js](https://nodejs.org/) (we recommend LTS or higher, but any version at or above 15 will work). Download the source code (or check out from git).
+Install [Node.js](https://nodejs.org/) (we recommend LTS 16 or higher, but any version at or above 15 will work). Download the source code (or check out from git).
 Open the terminal in the root folder and run:
 
 - `npm install`

@@ -1,6 +1,6 @@
 // @ts-check
-import http from 'http';
-import path from 'path';
+import http from 'node:http';
+import path from 'node:path';
 
 const mimeTypes = new Map(
     Object.entries({

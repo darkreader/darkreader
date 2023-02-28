@@ -1,8 +1,8 @@
 /** @typedef {import('karma').Config & {headless: boolean, debug: boolean, ci: boolean, coverage: boolean}} LocalConfig */
 /** @typedef {import('karma').ConfigOptions} ConfigOptions */
 
-import fs from 'fs';
-import os from 'os';
+import fs from 'node:fs';
+import os from 'node:os';
 import rollupPluginIstanbul from 'rollup-plugin-istanbul2';
 import rollupPluginNodeResolve from '@rollup/plugin-node-resolve';
 import rollupPluginReplace from '@rollup/plugin-replace';

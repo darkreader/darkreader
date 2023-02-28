@@ -1,4 +1,4 @@
-import {readFile as fsReadFile, readdir as fsReadDir} from 'fs';
+import {readFile as fsReadFile, readdir as fsReadDir} from 'node:fs';
 import {rootPath} from '../../support/test-utils';
 
 function readDir(dir: string) {

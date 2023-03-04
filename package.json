@@ -59,7 +59,7 @@
     "@rollup/plugin-replace": "5.0.2",
     "@rollup/plugin-typescript": "11.0.0",
     "@rollup/pluginutils": "5.0.2",
-    "@types/chrome": "0.0.219",
+    "@types/chrome": "0.0.216",
     "@types/eslint": "8.21.1",
     "@types/jasmine": "4.3.1",
     "@types/jest": "29.4.0",

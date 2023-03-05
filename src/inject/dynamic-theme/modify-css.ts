@@ -484,7 +484,9 @@ export function getBgImageModifier(
             }
         });
 
+        /* eslint-disable-next-line @typescript-eslint/promise-function-async */
         return (filter: FilterConfig) => {
+            /* eslint-disable-next-line @typescript-eslint/promise-function-async */
             const results = modifiers.filter(Boolean).map((modify) => modify!(filter));
             if (results.some((r) => r instanceof Promise)) {
                 return Promise.all(results).then((asyncResults) => {

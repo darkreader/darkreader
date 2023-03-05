@@ -39,7 +39,7 @@ You can use Dark Reader to enable dark mode on your website!
 - or build from the source code (`npm run api`)
 - or include the script via a CDN such as [unpkg](https://unpkg.com/darkreader/) or [jsDelivr](https://www.jsdelivr.com/package/npm/darkreader)
 
-Then you can use the following code to control Dark Reader's API
+Then you can use the following code to control Dark Reader's API:
 ```javascript
 DarkReader.enable({
     brightness: 100,
@@ -66,7 +66,7 @@ const CSS = await DarkReader.exportGeneratedCSS();
 const isEnabled = DarkReader.isEnabled();
 ```
 
-... or if you are using ES modules
+... or if you are using ES modules:
 
 ```javascript
 import {
@@ -92,7 +92,7 @@ const CSS = await collectCSS();
 const isEnabled = isDarkReaderEnabled();
 ```
 
-Be aware that darkreader will add the `chrome` object onto the `window` object. These are to stub certain functions that the code will use. They originate from the webextension-api.
+Be aware that Dark Reader will add the `chrome` object onto the `window` object. These are to stub certain functions that the code will use. They originate from the webextension-api.
 
 ## Site fixes
 
@@ -105,7 +105,7 @@ However, this can be enabled using the following steps:
 - Click on the Preview new design button.
 - Enable the `Synchronize site fixes` setting under `Settings -> Manage Settings`.
 
-To force a synchronization of the sites fixes (when the corresponding setting is enabled), use the following steps:
+To force a synchronization of the sites fixes (when the corresponding setting is enabled), perform the following steps:
 
 - Click on the Dark Reader icon.
 - Click on the Dev tools button (in the bottom-right corner).
@@ -126,7 +126,7 @@ To force a synchronization of the sites fixes (when the corresponding setting is
 <p align="center"><a rel="noreferrer noopener" href="https://opencollective.com/darkreader#backers" target="_blank"><img src="https://opencollective.com/darkreader/backers.svg?width=890&limit=1000"></a></p>
 
 <h2 align="center">Sponsors</h2>
-<p>Does your company use Dark Reader? Ask your manager or the marketing team if your company would be interested in supporting our project. Your support will allow the maintainers to dedicate more time to maintenance and creating new features for everyone. Also, your company's logo will show on <a rel="noreferrer noopener" href="https://github.com/darkreader/darkreader#sponsors" target="_blank">GitHub</a>. Who doesn't want a little extra exposure? <a rel="noreferrer noopener" href="https://opencollective.com/darkreader" target="_blank">Here's the info</a>.</p>
+<p>Does your company use Dark Reader? Please ask your manager or the marketing team if your company would be interested in supporting our project. Your support will allow the maintainers to dedicate more time to maintenance and creating new features for everyone. Also, your company's logo will show on <a rel="noreferrer noopener" href="https://github.com/darkreader/darkreader#sponsors" target="_blank">GitHub</a>. Who doesn't want a little extra exposure? <a rel="noreferrer noopener" href="https://opencollective.com/darkreader" target="_blank">Here's the info</a>.</p>
 
 <h3 align="center"><strong>Thank you to all our wonderful sponsors!</strong></h3>
 <br/>

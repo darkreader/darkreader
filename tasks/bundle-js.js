@@ -138,6 +138,7 @@ async function bundleJS(/** @type {JSEntry} */entry, platform, debug, watch, log
                         target: 'ES2022',
                     } : undefined,
                     noImplicitAny: debug ? false : true,
+                    noUnusedLocals: debug ? false : true,
                     strictNullChecks: debug ? false : true,
                     removeComments: debug ? false : true,
                     sourceMap: debug ? true : false,

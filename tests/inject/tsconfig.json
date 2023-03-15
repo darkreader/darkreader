@@ -4,7 +4,6 @@
         "target": "ES2019",
         "module": "ES2015",
         "lib": [
-            "ES2015",
             "ES2017",
             "DOM",
             "DOM.Iterable"

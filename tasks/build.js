@@ -12,11 +12,12 @@ import codeStyle from './code-style.js';
 import zip from './zip.js';
 import {runTasks} from './task.js';
 import {log} from './utils.js';
-import {fork} from 'child_process';
+import {fork} from 'node:child_process';
+import process from 'node:process';
 import paths from './paths.js';
 const {PLATFORM} = paths;
 
-import {fileURLToPath} from 'url';
+import {fileURLToPath} from 'node:url';
 const __filename = fileURLToPath(import.meta.url);
 
 const standardTask = [
@@ -86,16 +87,56 @@ async function executeChildProcess(args) {
     return new Promise((resolve, reject) => child.on('error', reject).on('close', resolve));
 }
 
+function validateArguments(args) {
+    const validFlags = ['--api', '--chrome', '--chrome-mv3', '--firefox', '--thunderbird', '--release', '--debug', '--watch', '--log-info', '--log-warn', '--test'];
+    const invalidFlags = args.filter((flag) => !validFlags.includes(flag));
+    invalidFlags.forEach((flag) => console.error(`Invalid flag ${flag}`));
+    return invalidFlags.length === 0;
+}
+
+function printHelp() {
+    console.log([
+        'Dark Reader build utility',
+        '',
+        'To narrow down the list of build targets (for efficiency):',
+        '  --api          Library build (published to NPM)',
+        '  --chrome       MV2 for Chromium-based browsers (published to Chrome Web Store)',
+        '  --chrome-mv3   MV3 for Chromium-based browsers (will replace MV2 version eventually)',
+        '  --firefox      MV2 for Firefox (published to Mozilla Add-on store)',
+        '  --thunderbird  Thunderbird',
+        '',
+        'To specify type of build:',
+        '  --release      Release bundle for signing prior to publication',
+        '  --debug        Build for development',
+        '  --watch        Incremental build for development',
+        '',
+        'To log errors to disk (for debugging and bug reports):',
+        '  --log-info     Log lots of data',
+        '  --log-warn     Log only warnings',
+        '',
+        'Build for testing (not to be used by humans):',
+        '  --test'
+    ].join('\n'));
+}
+
 async function run() {
     const args = process.argv.slice(2);
+
+    const shouldPrintHelp = args.includes('-h') || args.includes('--help') || args.length === 0;
+    if (shouldPrintHelp) {
+        printHelp();
+        process.exit();
+    }
+
+    if (!validateArguments(args)) {
+        printHelp();
+        process.exit(130);
+    }
 
     // Enable Ctrl+C to cancel the build immediately
     if (!process.env.BUILD_CHILD) {
         return executeChildProcess(args);
     }
-
-    const validArgs = ['--api', '--chrome', '--chrome-mv3', '--firefox', '--thunderbird', '--release', '--debug', '--watch', '--log-info', '--log-warn', '--test'];
-    args.filter((arg) => !validArgs.includes(arg)).forEach((arg) => log.warn(`Unknown argument ${arg}`));
 
     const allPlatforms = !(args.includes('--api') || args.includes('--chrome') || args.includes('--chrome-mv3') || args.includes('--firefox') || args.includes('--thunderbird'));
     const platforms = {

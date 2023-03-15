@@ -113,15 +113,6 @@
             border-top: @size-border solid @color-border;
             display: flex;
             flex-direction: column;
-            height:
-                @size-control-inner
-                + @indent-large
-                + @more-settings-line-height
-                + @indent-small
-                + @more-settings-line-height
-                + @indent-small
-                + @more-settings-line-height
-                + @indent-large;
             left: 0;
             position: absolute;
             top: @popup-content-padding + @size-control-inner * 2 + @size-border + @indent-small;
@@ -205,6 +196,15 @@
                 margin: 0;
                 text-align: center;
                 white-space: nowrap;
+            }
+
+            &__warning {
+                font-size: @size-text-small;
+                line-height: @size-text-small-height;
+                margin: 0;
+                text-align: center;
+                white-space: pre;
+                color: @color-heading;
             }
 
             &__location-description {

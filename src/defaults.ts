@@ -4,6 +4,8 @@ import {ThemeEngine} from './generators/theme-engines';
 import {isMacOS, isWindows, isCSSColorSchemePropSupported} from './utils/platform';
 import {AutomationMode} from './utils/automation';
 
+declare const __CHROMIUM_MV3__: boolean;
+
 export const DEFAULT_COLORS = {
     darkScheme: {
         background: '#181a1b',
@@ -32,7 +34,7 @@ export const DEFAULT_THEME: Theme = {
     lightSchemeTextColor: DEFAULT_COLORS.lightScheme.text,
     scrollbarColor: isMacOS ? '' : 'auto',
     selectionColor: 'auto',
-    styleSystemControls: !isCSSColorSchemePropSupported,
+    styleSystemControls: __CHROMIUM_MV3__ ? false : !isCSSColorSchemePropSupported,
     lightColorScheme: 'Default',
     darkColorScheme: 'Default',
     immediateModify: false,

@@ -1,7 +1,6 @@
 // @ts-check
-import http from 'http';
-import path from 'path';
-import url from 'url';
+import http from 'node:http';
+import path from 'node:path';
 
 const mimeTypes = new Map(
     Object.entries({
@@ -25,6 +24,10 @@ const terminationListener = () => {
     terminationListeners.forEach((listener) => listener());
 };
 
+export function generateRandomId() {
+    return Math.floor(Math.random() * 2 ** 55).toString();
+}
+
 export async function createTestServer(/** @type {number} */port) {
     /** @type {import('http').Server} */
     let server;
@@ -35,7 +38,7 @@ export async function createTestServer(/** @type {number} */port) {
 
     /** @type {import('http').RequestListener} */
     function handleRequest(req, res) {
-        const parsedURL = url.parse(req.url);
+        const parsedURL = new URL(req.url, 'https://localhost');
         const pathName = parsedURL.pathname;
 
         if (!paths.hasOwnProperty(pathName)) {

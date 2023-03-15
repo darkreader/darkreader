@@ -78,6 +78,7 @@ config.overrides.push({
         '@typescript-eslint/no-explicit-any': 'off',
         '@typescript-eslint/no-redeclare': 'error',
         '@typescript-eslint/no-object-literal-type-assertion': 'off',
+        '@typescript-eslint/no-unused-vars': 'error',
         '@typescript-eslint/no-use-before-define': 'off',
         '@typescript-eslint/semi': ['error', 'always'],
         '@typescript-eslint/quotes': ['error', 'single', {

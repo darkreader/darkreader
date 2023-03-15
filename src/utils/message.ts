@@ -1,5 +1,6 @@
 export enum MessageType {
     UI_GET_DATA = 'ui-get-data',
+    UI_GET_DEVTOOLS_DATA = 'ui-get-devtools-data',
     UI_SUBSCRIBE_TO_CHANGES = 'ui-subscribe-to-changes',
     UI_UNSUBSCRIBE_FROM_CHANGES = 'ui-unsubscribe-from-changes',
     UI_CHANGE_SETTINGS = 'ui-change-settings',

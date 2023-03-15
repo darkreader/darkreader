@@ -93,20 +93,24 @@ export const isXMLHttpRequestSupported = typeof XMLHttpRequest === 'function';
 
 export const isFetchSupported = typeof fetch === 'function';
 
-export const isCSSColorSchemePropSupported = (() => {
-    if (typeof document === 'undefined') {
-        return false;
-    }
-    const el = document.createElement('div');
-    if (typeof el.style.colorScheme === 'string') {
-        return true;
-    }
-    // TODO: remove the following code
-    // This feature detection method requires weak or missing CSP in manifest.json
+export const isCSSColorSchemePropSupported = __CHROMIUM_MV3__ || (() => {
     try {
+        if (typeof document === 'undefined') {
+            return false;
+        }
+        const el = document.createElement('div');
+        if (!el || typeof el.style !== 'object') {
+            return false;
+        }
+        if (typeof el.style.colorScheme === 'string') {
+            return true;
+        }
+
+        // TODO: remove the following code after enforcing strong CSP in all builds
+        // This feature detection method requires weak or missing CSP in manifest.json
         el.setAttribute('style', 'color-scheme: dark');
+        return el.style.colorScheme === 'dark';
     } catch (e) {
         return false;
     }
-    return el.style && el.style.colorScheme === 'dark';
 })();

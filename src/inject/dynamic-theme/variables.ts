@@ -255,6 +255,7 @@ export class VariablesStore {
             };
         }
         if (property === 'background' || property === 'background-image' || property === 'box-shadow') {
+            /* eslint-disable-next-line @typescript-eslint/promise-function-async */
             return (theme) => {
                 const unknownVars = new Set<string>();
                 const modify = () => {
@@ -368,8 +369,10 @@ export class VariablesStore {
         }
         this.definedVars.add(varName);
 
-        const color = parseColorWithCache(value);
-        if (color) {
+        // Check if the value is either a raw value or a value that can be parsed
+        // e.g. rgb, hsl.
+        const isColor = rawValueRegex.test(value) || parseColorWithCache(value);
+        if (isColor) {
             this.unknownColorVars.add(varName);
         } else if (
             value.includes('url(') ||

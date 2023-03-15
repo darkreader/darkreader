@@ -1,6 +1,6 @@
 // @ts-check
-import fs from 'fs';
-import {exec} from 'child_process';
+import fs from 'node:fs';
+import {exec} from 'node:child_process';
 import yazl from 'yazl';
 import paths from './paths.js';
 import {createTask} from './task.js';

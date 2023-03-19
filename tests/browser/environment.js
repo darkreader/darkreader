@@ -1,6 +1,6 @@
-import fs from 'node:fs/promises';
+import {readFile} from 'node:fs/promises';
 import JestNodeEnvironment from 'jest-environment-node';
-import path from 'node:path';
+import {join} from 'node:path';
 import puppeteer from 'puppeteer-core';
 import {cmd} from 'web-ext';
 import {WebSocketServer} from 'ws';
@@ -25,24 +25,20 @@ class PuppeteerEnvironment extends JestNodeEnvironment.TestEnvironment {
             createTestServer(TEST_SERVER_PORT),
             createTestServer(CORS_SERVER_PORT),
         ];
-        promises.push();
 
         this.browser = await this.launchBrowser();
-        this.global.browser = this.browser;
 
         promises.push(
+            this.createTestPage(),
             this.openPopupPage(),
             this.openDevtoolsPage(),
-            this.createTestPage(),
         );
 
         const results = await Promise.all(promises);
         this.messageServer = results[0];
         this.testServer = results[1];
         this.corsServer = results[2];
-        this.extensionPopup = results[3];
-        this.extensionDevtools = results[4];
-        this.page = results[5];
+        this.page = results[3];
 
         this.assignTestGlobals();
     }
@@ -76,6 +72,8 @@ class PuppeteerEnvironment extends JestNodeEnvironment.TestEnvironment {
         } catch (e) {
             console.error(e);
         }
+        // Explanation of these options:
+        // https://pptr.dev/guides/chrome-extensions
         return await puppeteer.launch({
             executablePath,
             headless: false,
@@ -92,6 +90,7 @@ class PuppeteerEnvironment extends JestNodeEnvironment.TestEnvironment {
         const webExtInstance = await cmd.run({
             sourceDir: firefoxExtensionDebugDir,
             firefox: firefoxPath,
+            noReload: true,
             args: ['--remote-debugging-port', FIREFOX_DEVTOOLS_PORT],
         }, {
             shouldExitProgram: false,
@@ -107,7 +106,7 @@ class PuppeteerEnvironment extends JestNodeEnvironment.TestEnvironment {
         const runner = webExtInstance.extensionRunners[0];
         const firefoxArgs = runner.runningInfo.firefox.spawnargs;
         const profileDir = firefoxArgs[firefoxArgs.indexOf('-profile') + 1];
-        const prefsFile = await fs.readFile(path.join(profileDir, 'prefs.js'), 'utf8');
+        const prefsFile = await readFile(join(profileDir, 'prefs.js'), 'utf8');
         const extensionsJson = prefsFile
             .match(/user_pref\("extensions.webextensions.uuids", "(.*?)"\);/)[1]
             .replace(/\\"/g, '"');
@@ -196,10 +195,13 @@ class PuppeteerEnvironment extends JestNodeEnvironment.TestEnvironment {
     }
 
     async openFirefoxPage(path) {
+        console.error('PATH', path)
         const extensionPage = await this.browser.newPage();
         // Doesn't resolve due to https://github.com/puppeteer/puppeteer/issues/6616
         const url = `moz-extension://${this.firefoxInternalUUID}${path}`;
+        console.error('PATH gg', path)
         await this.pageGoto(extensionPage, url);
+        console.error('PATH qqq', path)
         return extensionPage;
     }
 

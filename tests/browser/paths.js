@@ -68,7 +68,11 @@ export async function getFirefoxPath() {
     const possibleLinuxPaths = ['firefox-nightly', 'firefox'];
     for (const possiblePath of possibleLinuxPaths) {
         try {
-            return await linuxAppPath(possiblePath);
+            // snap profile folders do not get loaded
+            const option = await linuxAppPath(possiblePath);
+            if (!option.includes('/snap/')) {
+                return option;
+            }
         } catch (e) {
             // ignore
         }

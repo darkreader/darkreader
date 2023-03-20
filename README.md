@@ -29,7 +29,7 @@ Open the terminal in the root folder and run:
 
 This will create a `build/release/darkreader-chrome.zip` file for use in a Chromium-based browser and a `build/release/darkreader-firefox.xpi` file for use in Firefox.
 
-You can customize build process by passing flags to build script. To see all falgs, run `npm run build -- --help`.
+You can customize build process by passing flags to build script. To see all flags, run `npm run build -- --help`.
 
 ## Using Dark Reader for a website
 

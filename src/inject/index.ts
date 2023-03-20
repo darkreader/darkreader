@@ -16,6 +16,7 @@ let darkReaderDynamicThemeStateForTesting: 'loading' | 'ready' = 'loading';
 
 declare const __CHROMIUM_MV3__: boolean;
 declare const __THUNDERBIRD__: boolean;
+declare const __FIREFOX__: boolean;
 
 function cleanup() {
     unloaded = true;
@@ -224,4 +225,67 @@ if (__TEST__) {
             id: null,
         }));
     };
+
+    if (__FIREFOX__) {
+        function expectPageStyles(data: any) {
+            const errors = [];
+            const expectations = Array.isArray(data[0]) ? data : [data];
+            for (let [selector, cssAttributeName, expectedValue] of expectations) {
+                let element: Element = document as unknown as Element;
+                if (!Array.isArray(selector)) {
+                    selector = [selector];
+                }
+                for (const part of selector) {
+                    if (element instanceof HTMLIFrameElement) {
+                        element = (element as any).contentDocument;
+                    }
+                    if (part === 'document') {
+                        element = (element as any).documentElement;
+                    } else {
+                        element = element.querySelector(part);
+                    }
+                }
+                const style = getComputedStyle(element);
+                const realValue = style[cssAttributeName];
+                if (realValue !== expectedValue) {
+                    errors.push({
+                        selector,
+                        cssAttributeName,
+                        expectedValue,
+                        realValue,
+                    })
+                }
+            }
+            return errors;
+        }
+
+        socket.onmessage = (e) => {
+            function respond(data: any) {
+                socket.send(JSON.stringify({id, data}));
+            }
+            const {id, data, type} = JSON.parse(e.data);
+            switch(type) {
+                case 'firefox-eval':
+                    const result = eval(data);
+                    if (result instanceof Promise) {
+                    result.then(respond);
+                    } else {
+                        respond(result);
+                    }
+                    break;
+                case 'firefox-expectPageStyles':
+                    // Styles may not have been applied to the document yet,
+                    // so we check once immediatelly and then on an interval.
+                    function checkPageStylesNow() {
+                        const errors = expectPageStyles(data);
+                        if (errors.length === 0) {
+                            respond([]);
+                            interval && clearInterval(interval);
+                        }
+                    }
+                    let interval: number = setInterval(checkPageStylesNow, 200);
+                    checkPageStylesNow();
+            }
+        }
+    }
 }

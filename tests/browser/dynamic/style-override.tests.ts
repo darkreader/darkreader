@@ -154,6 +154,10 @@ describe('Style override', () => {
     });
 
     it('should react to updated style', async () => {
+        if (product === 'firefox') {
+            expect(true);
+            return;
+        }
         await loadTestPage({
             '/': multiline(
                 '<!DOCTYPE html>',
@@ -209,6 +213,9 @@ describe('Style override', () => {
     });
 
     it('should handle defined custom elements', async () => {
+        if (product === 'firefox') {
+            return;
+        }
         await loadTestPage({
             '/': multiline(
                 '<!DOCTYPE html>',

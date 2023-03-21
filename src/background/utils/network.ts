@@ -74,9 +74,9 @@ interface CacheRecord {
 
 class LimitedCacheStorage {
     // TODO: remove type cast after dependency update
-    private static QUOTA_BYTES = ((!__TEST__ && (navigator as any).deviceMemory) || 4) * 16 * 1024 * 1024;
-    private static TTL = getDuration({minutes: 10});
-    private static ALARM_NAME = 'network';
+    private static readonly QUOTA_BYTES = ((!__TEST__ && (navigator as any).deviceMemory) || 4) * 16 * 1024 * 1024;
+    private static readonly TTL = getDuration({minutes: 10});
+    private static readonly ALARM_NAME = 'network';
 
     private bytesInUse = 0;
     private records = new Map<string, CacheRecord>();
@@ -100,11 +100,11 @@ class LimitedCacheStorage {
         }
     }
 
-    has(url: string) {
+    public has(url: string) {
         return this.records.has(url);
     }
 
-    get(url: string) {
+    public get(url: string) {
         if (this.records.has(url)) {
             const record = this.records.get(url)!;
             record.expires = Date.now() + LimitedCacheStorage.TTL;
@@ -115,7 +115,7 @@ class LimitedCacheStorage {
         return null;
     }
 
-    set(url: string, value: string) {
+    public set(url: string, value: string) {
         LimitedCacheStorage.ensureAlarmIsScheduled();
 
         const size = getStringSize(value);

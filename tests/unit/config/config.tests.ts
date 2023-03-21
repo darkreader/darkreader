@@ -1,11 +1,12 @@
-import {readFile} from 'fs';
+import {readFile} from 'node:fs';
 import {compareURLPatterns} from '../../../src/utils/url';
 import {parseArray, formatArray, getTextDiffIndex, getTextPositionMessage} from '../../../src/utils/text';
 import {parseInversionFixes, formatInversionFixes} from '../../../src/generators/css-filter';
 import {parseDynamicThemeFixes, formatDynamicThemeFixes} from '../../../src/generators/dynamic-theme';
 import {parseStaticThemes, formatStaticThemes} from '../../../src/generators/static-theme';
 import type {StaticTheme} from '../../../src/definitions';
-import {ParseColorSchemeConfig} from '../../../src/utils/colorscheme-parser';
+import {parseColorSchemeConfig} from '../../../src/utils/colorscheme-parser';
+import type {ParsedColorSchemeConfig} from '../../../src/utils/colorscheme-parser';
 import {rootPath} from '../../support/test-utils';
 
 function readConfig(fileName: string) {
@@ -31,6 +32,34 @@ function throwIfDifferent(input: string, expected: string, message: string) {
             throw new Error(`${message}\n${getTextPositionMessage(input, diffIndex)}`);
         }
     };
+}
+
+function formatColorSchemeConfig(scheme: ParsedColorSchemeConfig): string {
+    const names = Object.keys(scheme.dark);
+    const lines = [];
+    for (const name of names) {
+        lines.push(name);
+        lines.push('');
+        for (const color of ['dark', 'light']) {
+            const style = scheme[color as keyof ParsedColorSchemeConfig][name];
+            if (style) {
+                const {backgroundColor, textColor} = style;
+                lines.push(color.toUpperCase());
+                if (backgroundColor) {
+                    lines.push(`background: ${backgroundColor.toLowerCase()}`);
+                }
+                if (textColor) {
+                    lines.push(`text: ${textColor.toLowerCase()}`);
+                }
+                lines.push('');
+            }
+        }
+        lines.push('='.repeat(32));
+        lines.push('');
+    }
+    lines.pop();
+    lines.pop();
+    return lines.join('\n');
 }
 
 test('Dark Sites list', async () => {
@@ -163,7 +192,7 @@ test('Colorscheme config', async () => {
     // there is no \r character
     expect(file.indexOf('\r')).toEqual(-1);
 
-    const {result: schemes, error} = ParseColorSchemeConfig(file);
+    const {result: schemes, error} = parseColorSchemeConfig(file);
 
     // Their is no error
     expect(error).toBeNull();
@@ -173,4 +202,7 @@ test('Colorscheme config', async () => {
 
     // There is a default Light color scheme
     expect(schemes.light['Default']).toBeDefined();
+
+    // Check formatting
+    expect(formatColorSchemeConfig(schemes)).toEqual(file);
 });

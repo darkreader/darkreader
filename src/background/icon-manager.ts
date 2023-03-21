@@ -8,7 +8,7 @@ interface IconState {
 }
 
 export default class IconManager {
-    private static ICON_PATHS = {
+    private static readonly ICON_PATHS = {
         active: {
             19: '../icons/dr_active_19.png',
             38: '../icons/dr_active_38.png',
@@ -19,7 +19,7 @@ export default class IconManager {
         },
     };
 
-    private static iconState: IconState = {
+    private static readonly iconState: IconState = {
         badgeText: '',
         active: true,
     };
@@ -48,7 +48,7 @@ export default class IconManager {
         }
     }
 
-    static setActive() {
+    public static setActive() {
         if (__THUNDERBIRD__ || !chrome.browserAction.setIcon) {
             // Fix for Firefox Android and Thunderbird.
             return;
@@ -60,7 +60,7 @@ export default class IconManager {
         IconManager.handleUpdate();
     }
 
-    static setInactive() {
+    public static setInactive() {
         if (__THUNDERBIRD__ || !chrome.browserAction.setIcon) {
             // Fix for Firefox Android and Thunderbird.
             return;
@@ -72,14 +72,14 @@ export default class IconManager {
         IconManager.handleUpdate();
     }
 
-    static showBadge(text: string) {
+    public static showBadge(text: string) {
         IconManager.iconState.badgeText = text;
         chrome.browserAction.setBadgeBackgroundColor({color: '#e96c4c'});
         chrome.browserAction.setBadgeText({text});
         IconManager.handleUpdate();
     }
 
-    static hideBadge() {
+    public static hideBadge() {
         IconManager.iconState.badgeText = '';
         chrome.browserAction.setBadgeText({text: ''});
         IconManager.handleUpdate();

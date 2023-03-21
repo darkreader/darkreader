@@ -1,6 +1,6 @@
 // @ts-check
-import fs from 'fs';
-import os from 'os';
+import fs from 'node:fs';
+import os from 'node:os';
 import * as rollup from 'rollup';
 import rollupPluginNodeResolve from '@rollup/plugin-node-resolve';
 /** @type {any} */
@@ -99,7 +99,7 @@ function freeRollupPluginInstance(name, key) {
 
 async function bundleJS(/** @type {JSEntry} */entry, platform, debug, watch, log, test) {
     const {src, dest} = entry;
-    const rollupPluginTypesctiptInstanceKey = `${debug}`;
+    const rollupPluginTypesctiptInstanceKey = `${platform}-${debug}`;
     const rollupPluginReplaceInstanceKey = `${platform}-${debug}-${watch}-${entry.src === 'src/ui/popup/index.tsx'}`;
 
     const destination = typeof dest === 'string' ? dest : dest(platform);
@@ -134,7 +134,11 @@ async function bundleJS(/** @type {JSEntry} */entry, platform, debug, watch, log
                     rootDir,
                     typescript,
                     tsconfig: rootPath('src/tsconfig.json'),
+                    compilerOptions: platform === PLATFORM.CHROME_MV3 ? {
+                        target: 'ES2022',
+                    } : undefined,
                     noImplicitAny: debug ? false : true,
+                    noUnusedLocals: debug ? false : true,
                     strictNullChecks: debug ? false : true,
                     removeComments: debug ? false : true,
                     sourceMap: debug ? true : false,

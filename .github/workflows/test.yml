@@ -1,4 +1,5 @@
-name: Run config tests on Pull Request or Push
+name: Unit tests on Pull Request or Push
+
 on:
   push:
     branches:
@@ -12,33 +13,36 @@ on:
       - reopened
       - ready_for_review
   workflow_dispatch:
+    inputs:
+      test_results_retention_days:
+        description: 'Test results retention (in days)'
+        required: true
+        default: '7'
+
 jobs:
   test:
     name: Run tests
     runs-on: ubuntu-latest
     steps:
+
       - name: Clone repository
         uses: actions/checkout@v3
 
-      - name: Set up Node.js
+      - name: Node setup
         uses: actions/setup-node@v3
         with:
           node-version: 16.x
-
-      - name: Verify NPM version
-        run: npm --version
-
-      - name: Set up npm cache
-        uses: actions/cache@v3
-        with:
-          path: ~/.npm
-          key: ${{ runner.os }}-${{ hashFiles('package-lock.json') }}
-          restore-keys: |
-            ${{ runner.OS }}-${{ hashFiles('package-lock.json') }}
-            ${{ runner.OS }}
+          cache: npm
 
       - name: Install npm dependencies
         run: npm ci
 
       - name: Run test against code
-        run: npm run test:ci
+        run: npm run test:unit -- --json --outputFile=test-results-unit.json
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-results-unit
+          path: test-results-unit.json
+          retention-days: ${{ inputs.test_results_retention_days }}

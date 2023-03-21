@@ -1,8 +1,8 @@
 name: Run browser tests
-on:
 
-  # Runs for pushes and pull requests,
-  #  but don't run these when only some config is changed.
+on:
+  # Runs for pushes, pull requests, and manual triggers.
+  # (Dooes not run when only some config is changed.)
   push:
     branches:
       - main
@@ -18,8 +18,13 @@ on:
       - ready_for_review
     paths-ignore:
       - 'src/config/**'
-
   workflow_dispatch:
+    inputs:
+      test_results_retention_days:
+        description: 'Test results retention (in days)'
+        required: true
+        default: '7'
+
 jobs:
   test-browser:
     name: Run browser tests
@@ -53,6 +58,7 @@ jobs:
         uses: browser-actions/setup-chrome@latest
         with:
           chrome-version: ${{ matrix.chrome }}
+
       - name: Configure Karma with path to Chrome executable
         if: ${{ matrix.chrome }}
         run: |
@@ -70,28 +76,36 @@ jobs:
           firefox --version
           { echo FIREFOX_BIN="$(which firefox)"; echo FIREFOX_TEST=1; } | tee -a "$GITHUB_ENV"
 
-      - name: Node.js setup
+      - name: Node setup
         uses: actions/setup-node@v3
         with:
           node-version: 16.x
           cache: npm
-      - name: Track Node and NPM version
-        run: node --version && npm --version
 
-      - name: Install application dependencies
+      - name: Install NPM dependencies
         run: npm ci
 
+      - name: Deps
+        run: cat package-lock.json
+
       - name: Run injection tests
-        run: npm run test:inject -- --ci
+        run: npm run test:inject -- --ci --json --outputFile=test-results-inject.json
 
       - name: Run browser tests on Chromium MV2 build
         if: ${{ matrix.chrome }}
-        uses: GabrielBB/xvfb-action@v1.6
+        uses: GabrielBB/xvfb-action@v1
         with:
-          run: npm run test:chrome
+          run: npm run test:chrome -- --json --outputFile=test-results-chrome.json
 
       - name: Run browser tests on Chromium MV3 build
         if: ${{ matrix.chrome }}
-        uses: GabrielBB/xvfb-action@v1.6
+        uses: GabrielBB/xvfb-action@v1
         with:
-          run: npm run test:chrome-mv3
+          run: npm run test:chrome-mv3 -- --json --outputFile=test-results-chrome-mv3.json
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-results-chrome-${{ matrix.chrome }}-firefox-${{ matrix.firefox }}-coverage-${{ matrix.coverage }}
+          path: test-results-*
+          retention-days: ${{ inputs.test_results_retention_days }}

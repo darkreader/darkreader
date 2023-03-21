@@ -4,7 +4,6 @@ import {canInjectScript} from '../background/utils/extension-api';
 import type {ExtensionData, Message, UserSettings} from '../definitions';
 import {MessageType} from '../utils/message';
 import {makeChromiumHappy} from './make-chromium-happy';
-import DevTools from './devtools';
 import {logInfo} from './utils/log';
 import {sendLog} from './utils/sendLog';
 
@@ -19,10 +18,6 @@ type TestMessage = {
     type: 'collectData';
     id: number;
 } | {
-    type: 'changeLocalStorage';
-    data: {[key: string]: string};
-    id: number;
-} | {
     type: 'getChromeStorage';
     data: {
         region: 'local' | 'sync';
@@ -35,13 +30,6 @@ type TestMessage = {
         region: 'local' | 'sync';
         data: {[key: string]: any};
     };
-    id: number;
-} | {
-    type: 'getLocalStorage';
-    id: number;
-} | {
-    type: 'setDataIsMigratedForTesting';
-    data: boolean;
     id: number;
 } | {
     type: 'getManifest';
@@ -152,6 +140,7 @@ if (__TEST__) {
         await extension;
         socket.send(JSON.stringify({
             data: {
+                type: 'background',
                 extensionOrigin: chrome.runtime.getURL(''),
             },
             id: null,
@@ -160,29 +149,19 @@ if (__TEST__) {
     socket.onmessage = (e) => {
         try {
             const message: TestMessage = JSON.parse(e.data);
+            const {id, type} = message;
             const respond = (data?: ExtensionData | string | boolean | {[key: string]: string} | null) => socket.send(JSON.stringify({
                 data,
-                id: message.id,
+                id,
             }));
 
-            switch (message.type) {
+            switch (type) {
                 case 'changeSettings':
                     Extension.changeSettings(message.data);
                     respond();
                     break;
                 case 'collectData':
                     Extension.collectData().then(respond);
-                    break;
-                case 'changeLocalStorage': {
-                    const data = message.data;
-                    for (const key in data) {
-                        localStorage[key] = data[key];
-                    }
-                    respond();
-                    break;
-                }
-                case 'getLocalStorage':
-                    respond(localStorage ? JSON.stringify(localStorage) : null);
                     break;
                 case 'getManifest': {
                     const data = chrome.runtime.getManifest();
@@ -200,10 +179,6 @@ if (__TEST__) {
                     chrome.storage[region].get(keys, respond);
                     break;
                 }
-                case 'setDataIsMigratedForTesting':
-                    DevTools.setDataIsMigratedForTesting(message.data);
-                    respond();
-                    break;
             }
         } catch (err) {
             socket.send(JSON.stringify({error: String(err), original: e.data}));

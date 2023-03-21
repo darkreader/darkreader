@@ -8,6 +8,10 @@ debug.log
 #-----------------------------------
 node_modules/
 
+# Test results
+#-----------------------------------
+test-results-*.json
+
 # Code coverage reports
 #-----------------------------------
 tests/coverage/

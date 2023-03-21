@@ -143,7 +143,9 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
                 rule = cssRules[i];
                 if ((rule as CSSImportRule).href) {
                     if (checkCrossOrigin) {
-                        if ((rule as CSSImportRule).href.startsWith('http') && !(rule as CSSImportRule).href.startsWith(location.origin)) {
+                        if (!(rule as CSSImportRule).href.startsWith('https://fonts.googleapis.com/') &&
+                            (rule as CSSImportRule).href.startsWith('http') &&
+                            !(rule as CSSImportRule).href.startsWith(location.origin)) {
                             result = true;
                             break cssRulesLoop;
                         }

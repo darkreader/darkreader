@@ -1,6 +1,6 @@
 // @ts-check
 import less from 'less';
-import path from 'path';
+import path from 'node:path';
 import paths from './paths.js';
 import * as reload from './reload.js';
 import {createTask} from './task.js';

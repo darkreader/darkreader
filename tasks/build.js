@@ -48,6 +48,7 @@ async function build({platforms, debug, watch, log: logging, test}) {
             log.ok('MISSION PASSED! RESPECT +');
         }
     } catch (err) {
+        console.log(err);
         log.error(`MISSION FAILED!`);
         process.exit(13);
     }

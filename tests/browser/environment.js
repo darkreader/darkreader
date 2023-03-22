@@ -266,8 +266,10 @@ export default class CustomJestEnvironment extends TestEnvironment {
                 return;
             }
             await this.page.emulateMediaFeatures([{name, value}]);
-            const page = await this.getChromiumMV2BackgroundPage();
-            await page.emulateMediaFeatures([{name, value}]);
+            if (this.global.product === 'chrome') {
+                const page = await this.getChromiumMV2BackgroundPage();
+                await page.emulateMediaFeatures([{name, value}]);
+            }
         };
 
         this.global.loadTestPage = async (paths, gotoOptions) => {

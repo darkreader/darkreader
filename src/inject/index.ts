@@ -230,12 +230,10 @@ if (__TEST__) {
         function expectPageStyles(data: any) {
             const errors = [];
             const expectations = Array.isArray(data[0]) ? data : [data];
-            for (let [selector, cssAttributeName, expectedValue] of expectations) {
+            for (const [selector, cssAttributeName, expectedValue] of expectations) {
                 let element: Element = document as unknown as Element;
-                if (!Array.isArray(selector)) {
-                    selector = [selector];
-                }
-                for (const part of selector) {
+                const selector_ = Array.isArray(selector) ? selector : [selector];
+                for (const part of selector_) {
                     if (element instanceof HTMLIFrameElement) {
                         element = (element as any).contentDocument;
                     }
@@ -253,7 +251,7 @@ if (__TEST__) {
                         cssAttributeName,
                         expectedValue,
                         realValue,
-                    })
+                    });
                 }
             }
             return errors;
@@ -263,17 +261,19 @@ if (__TEST__) {
             function respond(data: any) {
                 socket.send(JSON.stringify({id, data}));
             }
+
             const {id, data, type} = JSON.parse(e.data);
-            switch(type) {
-                case 'firefox-eval':
+            switch (type) {
+                case 'firefox-eval': {
                     const result = eval(data);
                     if (result instanceof Promise) {
-                    result.then(respond);
+                        result.then(respond);
                     } else {
                         respond(result);
                     }
                     break;
-                case 'firefox-expectPageStyles':
+                }
+                case 'firefox-expectPageStyles': {
                     // Styles may not have been applied to the document yet,
                     // so we check once immediatelly and then on an interval.
                     function checkPageStylesNow() {
@@ -283,9 +283,11 @@ if (__TEST__) {
                             interval && clearInterval(interval);
                         }
                     }
-                    let interval: number = setInterval(checkPageStylesNow, 200);
+
+                    const interval: number = setInterval(checkPageStylesNow, 200);
                     checkPageStylesNow();
+                }
             }
-        }
+        };
     }
 }

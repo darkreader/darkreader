@@ -396,7 +396,7 @@ export default class CustomJestEnvironment extends TestEnvironment {
             this.global.pageUtils = {
                 evaluate: async (script) => await sendToPage('firefox-eval', script),
                 expectPageStyles: async (expectations) => await sendToPage('firefox-expectPageStyles', expectations),
-            }
+            };
 
             this.global.awaitForEvent = awaitForEvent;
         });

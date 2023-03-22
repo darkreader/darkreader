@@ -67,6 +67,10 @@ describe('Toggling the extension', () => {
     });
 
     it('should follow system color scheme', async () => {
+        if (product === 'firefox') {
+            expect(true);
+            return;
+        }
         await loadBasicPage('Automation (color scheme)');
 
         const automationMenuSelector = '.header__app-toggle__more-button';

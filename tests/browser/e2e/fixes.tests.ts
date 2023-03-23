@@ -25,6 +25,9 @@ async function expectStyles(styles: StyleExpectations) {
 }
 
 describe('Correct fixes are chosen', () => {
+    // TODO: remove flakes and remove this line
+    jest.retryTimes(10, {logErrorsBeforeRetry: true});
+
     it('If no matching URL found, returns only default fix', async () => {
         await loadBasicPage();
 

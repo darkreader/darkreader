@@ -23,10 +23,12 @@ declare global {
         changeChromeStorage: (region: 'local' | 'sync', data: {[key: string]: any}) => Promise<void>;
         getChromeStorage: (region: 'local' | 'sync', keys: string[]) => Promise<{[key: string]: any}>;
         getManifest: () => Promise<chrome.runtime.Manifest>;
+        createTab: (url: string) => Promise<void>;
     };
     const emulateMedia: (name: string, value: string) => Promise<void>;
     const awaitForEvent: (uuid: string) => Promise<void>;
     const expectPageStyles: (expect: jest.Expect, expectations: StyleExpectations) => Promise<void>;
     const getColorScheme: () => Promise<'dark' | 'light'>;
     const evaluateScript: (script: () => any) => Promise<any>;
+    const product: 'firefox';
 }

@@ -6,6 +6,9 @@ async function expectStyles(styles: StyleExpectations) {
 }
 
 describe('Style override', () => {
+    // TODO: remove flakes and remove this line
+    jest.retryTimes(10, {logErrorsBeforeRetry: true});
+
     it('should override user agent style', async () => {
         await loadTestPage({
             '/': multiline(

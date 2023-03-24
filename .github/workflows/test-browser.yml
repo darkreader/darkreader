@@ -103,6 +103,12 @@ jobs:
         with:
           run: npm run test:chrome-mv3 -- --json --outputFile=test-results-chrome-mv3.json
 
+      - name: Run browser tests on Firefox MV2 build
+        if: ${{ matrix.firefox }}
+        uses: GabrielBB/xvfb-action@v1
+        with:
+          run: npm run test:firefox -- --json --outputFile=test-results-firefox-mv2.json
+
       - name: Upload test results
         uses: actions/upload-artifact@v3
         with:

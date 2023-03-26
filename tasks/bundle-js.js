@@ -144,10 +144,10 @@ async function bundleJS(/** @type {JSEntry} */entry, platform, debug, watch, log
                     sourceMap: debug ? true : false,
                     inlineSources: debug ? true : false,
                     noEmitOnError: watch ? false : true,
-                    cacheRoot: debug ? `${fs.realpathSync(os.tmpdir())}/darkreader_typescript_cache/${rollupPluginTypesctiptInstanceKey}` : undefined,
                 };
                 if (debug) {
-                    config.verbosty = 3;
+                    config.cacheRoot = `${fs.realpathSync(os.tmpdir())}/darkreader_typescript_cache/${rollupPluginTypesctiptInstanceKey}`;
+                    config.verbosity = 3;
                 }
                 return plugin(config);
             }),

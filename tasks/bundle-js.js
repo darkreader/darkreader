@@ -144,7 +144,7 @@ async function bundleJS(/** @type {JSEntry} */entry, platform, debug, watch, log
                     sourceMap: debug ? true : false,
                     inlineSources: debug ? true : false,
                     noEmitOnError: watch ? false : true,
-                    cacheDir: debug ? `${fs.realpathSync(os.tmpdir())}/darkreader_typescript_cache` : undefined,
+                    cacheRoot: debug ? `${fs.realpathSync(os.tmpdir())}/darkreader_typescript_cache/${rollupPluginTypesctiptInstanceKey}` : undefined,
                 };
                 if (debug) {
                     config.verbosty = 3;

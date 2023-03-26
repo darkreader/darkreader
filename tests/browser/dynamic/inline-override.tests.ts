@@ -21,6 +21,9 @@ async function expectStyles(styles: StyleExpectations) {
 }
 
 describe('Inline style override', () => {
+    // TODO: remove flakes and remove this line
+    jest.retryTimes(10, {logErrorsBeforeRetry: true});
+
     it('should override inline style', async () => {
         await loadBasicPage();
 

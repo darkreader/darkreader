@@ -358,12 +358,25 @@ export default class TabManager {
             windowType: 'normal',
         }))[0];
         if (!tab) {
+            tab = (await TabManager.queryTabs({
+                active: true,
+                lastFocusedWindow: true,
+                windowType: 'app',
+            }))[0];
+        }
+        if (!tab) {
             // When Dark Reader's DevTools are open, last focused window might be the DevTools window
             // so we lift this restriction and try again (with the best guess)
             tab = (await TabManager.queryTabs({
                 active: true,
                 windowType: 'normal',
             }))[0];
+            if (!tab) {
+                tab = (await TabManager.queryTabs({
+                    active: true,
+                    windowType: 'app',
+                }))[0];
+            }
             logWarn('TabManager.getActiveTab() could not reliably find the active tab, picking the best guess', tab);
         }
         return tab;

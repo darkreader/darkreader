@@ -48,6 +48,7 @@ async function build({platforms, debug, watch, log: logging, test}) {
             log.ok('MISSION PASSED! RESPECT +');
         }
     } catch (err) {
+        console.log(err);
         log.error(`MISSION FAILED!`);
         process.exit(13);
     }
@@ -88,16 +89,48 @@ async function executeChildProcess(args) {
 }
 
 function validateArguments(args) {
-    const validArguments = ['--api', '--chrome', '--chrome-mv3', '--firefox', '--thunderbird', '--release', '--debug', '--watch', '--log-info', '--log-warn', '--test'];
-    const invalidArguments = args.filter((argument) => !validArguments.includes(argument));
-    invalidArguments.forEach((argument) => log.warn(`Invalid argument ${argument}`));
-    return invalidArguments.length === 0;
+    const validFlags = ['--api', '--chrome', '--chrome-mv3', '--firefox', '--thunderbird', '--release', '--debug', '--watch', '--log-info', '--log-warn', '--test'];
+    const invalidFlags = args.filter((flag) => !validFlags.includes(flag));
+    invalidFlags.forEach((flag) => console.error(`Invalid flag ${flag}`));
+    return invalidFlags.length === 0;
+}
+
+function printHelp() {
+    console.log([
+        'Dark Reader build utility',
+        '',
+        'To narrow down the list of build targets (for efficiency):',
+        '  --api          Library build (published to NPM)',
+        '  --chrome       MV2 for Chromium-based browsers (published to Chrome Web Store)',
+        '  --chrome-mv3   MV3 for Chromium-based browsers (will replace MV2 version eventually)',
+        '  --firefox      MV2 for Firefox (published to Mozilla Add-on store)',
+        '  --thunderbird  Thunderbird',
+        '',
+        'To specify type of build:',
+        '  --release      Release bundle for signing prior to publication',
+        '  --debug        Build for development',
+        '  --watch        Incremental build for development',
+        '',
+        'To log errors to disk (for debugging and bug reports):',
+        '  --log-info     Log lots of data',
+        '  --log-warn     Log only warnings',
+        '',
+        'Build for testing (not to be used by humans):',
+        '  --test'
+    ].join('\n'));
 }
 
 async function run() {
     const args = process.argv.slice(2);
 
+    const shouldPrintHelp = args.includes('-h') || args.includes('--help') || args.length === 0;
+    if (shouldPrintHelp) {
+        printHelp();
+        process.exit();
+    }
+
     if (!validateArguments(args)) {
+        printHelp();
         process.exit(130);
     }
 

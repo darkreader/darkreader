@@ -32,6 +32,7 @@ async function bundleAPI({debug, watch}) {
                 typescript,
                 tsconfig: rootPath('src/api/tsconfig.json'),
                 noImplicitAny: debug ? false : true,
+                noUnusedLocals: debug ? false : true,
                 strictNullChecks: debug ? false : true,
                 removeComments: debug ? false : true,
                 sourceMap: debug ? true : false,

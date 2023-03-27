@@ -125,9 +125,8 @@ async function bundleJS(/** @type {JSEntry} */entry, platform, debug, watch, log
         input: rootPath(src),
         plugins: [
             getRollupPluginInstance('nodeResolve', '', rollupPluginNodeResolve),
-            getRollupPluginInstance('typesctipt', rollupPluginTypesctiptInstanceKey, () => {
-                const plugin = rollupPluginTypescript;
-                const config = {
+            getRollupPluginInstance('typesctipt', rollupPluginTypesctiptInstanceKey, () =>
+                rollupPluginTypescript({
                     rootDir,
                     typescript,
                     tsconfig: rootPath('src/tsconfig.json'),
@@ -141,9 +140,8 @@ async function bundleJS(/** @type {JSEntry} */entry, platform, debug, watch, log
                     sourceMap: debug ? true : false,
                     inlineSources: debug ? true : false,
                     noEmitOnError: watch ? false : true,
-                };
-                return plugin(config);
-            }),
+                })
+            ),
             getRollupPluginInstance('replace', rollupPluginReplaceInstanceKey, () =>
                 rollupPluginReplace({
                     preventAssignment: true,

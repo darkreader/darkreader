@@ -7,7 +7,6 @@ import rollupPluginNodeResolve from '@rollup/plugin-node-resolve';
 import rollupPluginReplace from '@rollup/plugin-replace';
 /** @type {any} */
 import rollupPluginTypescript from '@rollup/plugin-typescript';
-import rollupPluginTypescript2 from 'rollup-plugin-typescript2';
 import typescript from 'typescript';
 import paths from './paths.js';
 import * as reload from './reload.js';
@@ -129,7 +128,7 @@ async function bundleJS(/** @type {JSEntry} */entry, platform, debug, watch, log
         plugins: [
             getRollupPluginInstance('nodeResolve', '', rollupPluginNodeResolve),
             getRollupPluginInstance('typesctipt', rollupPluginTypesctiptInstanceKey, () => {
-                const plugin = debug ? rollupPluginTypescript2 : rollupPluginTypescript;
+                const plugin = rollupPluginTypescript;
                 const config = {
                     rootDir,
                     typescript,
@@ -145,10 +144,6 @@ async function bundleJS(/** @type {JSEntry} */entry, platform, debug, watch, log
                     inlineSources: debug ? true : false,
                     noEmitOnError: watch ? false : true,
                 };
-                if (debug) {
-                    config.cacheRoot = `${fs.realpathSync(os.tmpdir())}/darkreader_typescript_cache/${rollupPluginTypesctiptInstanceKey}`;
-                    config.verbosity = 3;
-                }
                 return plugin(config);
             }),
             getRollupPluginInstance('replace', rollupPluginReplaceInstanceKey, () =>

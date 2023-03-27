@@ -32,7 +32,8 @@ type TestMessage = {
     };
     id: number;
 } | {
-    type: 'getManifest';
+    type: 'createTab';
+    data: string;
     id: number;
 };
 
@@ -51,6 +52,7 @@ declare const __LOG__: string | false;
 declare const __PORT__: number;
 declare const __TEST__: boolean;
 declare const __CHROMIUM_MV3__: boolean;
+declare const __FIREFOX__: boolean;
 
 if (__CHROMIUM_MV3__) {
     chrome.runtime.onInstalled.addListener(async () => {
@@ -134,6 +136,15 @@ if (__WATCH__) {
 }
 
 if (__TEST__) {
+    // Open popup and DevTools pages
+    chrome.tabs.create({url: chrome.runtime.getURL('/ui/popup/index.html'), active: false});
+    chrome.tabs.create({url: chrome.runtime.getURL('/ui/devtools/index.html'), active: false});
+
+    let testTabId: number | null = null;
+    if (__FIREFOX__) {
+        chrome.tabs.create({url: 'about:blank', active: true}, ({id}) => testTabId = id!);
+    }
+
     const socket = new WebSocket(`ws://localhost:8894`);
     socket.onopen = async () => {
         // Wait for extension to start
@@ -179,6 +190,9 @@ if (__TEST__) {
                     chrome.storage[region].get(keys, respond);
                     break;
                 }
+                case 'createTab':
+                    chrome.tabs.update(testTabId!, {url: message.data, active: true}, () => respond());
+                    break;
             }
         } catch (err) {
             socket.send(JSON.stringify({error: String(err), original: e.data}));

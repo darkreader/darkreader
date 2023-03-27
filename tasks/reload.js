@@ -1,3 +1,4 @@
+import process from 'node:process';
 import {WebSocketServer} from 'ws';
 import {log} from './utils.js';
 

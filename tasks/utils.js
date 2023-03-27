@@ -1,7 +1,7 @@
 // @ts-check
-import fs from 'fs/promises';
-import https from 'https';
-import path from 'path';
+import fs from 'node:fs/promises';
+import https from 'node:https';
+import path from 'node:path';
 
 /** @type {{[color: string]: (text: string) => string}} */
 const colors = Object.entries({
@@ -90,6 +90,25 @@ export async function readFile(src) {
 export async function writeFile(dest, content) {
     await mkDirIfMissing(dest);
     await fs.writeFile(dest, content, 'utf8');
+}
+
+/**
+ * @param {string} path
+ * @returns {Promise<Object>}
+ */
+export async function readJSON(path) {
+    const file = await readFile(path);
+    return JSON.parse(file);
+}
+
+/**
+ * @param {string} dest
+ * @param {string} content
+ * @returns {Promise<void>}
+ */
+export async function writeJSON(dest, content) {
+    const string = JSON.stringify(content, null, 4);
+    return await writeFile(dest, string);
 }
 
 /**

@@ -16,6 +16,7 @@
         "allowJs": true,
         "downlevelIteration": true,
         "noImplicitAny": true,
+        "noUnusedLocals": true,
         "resolveJsonModule": true,
         "strictNullChecks": true,
         "jsx": "react",

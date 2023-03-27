@@ -1,6 +1,6 @@
 // @ts-check
-import fs from 'fs/promises';
-import path from 'path';
+import fs from 'node:fs/promises';
+import path from 'node:path';
 import paths from './paths.js';
 import * as reload from './reload.js';
 import {createTask} from './task.js';

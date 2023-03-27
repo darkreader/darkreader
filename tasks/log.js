@@ -1,4 +1,5 @@
-import {createWriteStream} from 'fs';
+import {createWriteStream} from 'node:fs';
+import process from 'node:process';
 import {WebSocketServer} from 'ws';
 import {createTask} from './task.js';
 import {log} from './utils.js';

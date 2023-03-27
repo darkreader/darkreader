@@ -1,4 +1,4 @@
-import {readFile} from 'fs';
+import {readFile} from 'node:fs';
 import {compareURLPatterns} from '../../../src/utils/url';
 import {parseArray, formatArray, getTextDiffIndex, getTextPositionMessage} from '../../../src/utils/text';
 import {parseInversionFixes, formatInversionFixes} from '../../../src/generators/css-filter';

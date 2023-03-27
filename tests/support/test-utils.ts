@@ -1,4 +1,4 @@
-import {dirname, join} from 'path';
+import {dirname, join} from 'node:path';
 
 export const rootDir: string = dirname(require.resolve('../../package.json'));
 

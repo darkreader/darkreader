@@ -45,12 +45,13 @@ text: #3c3836
 Kanagawa
 
 DARK
-background: #1F1F28
-text: #DCD7BA
+background: #1f1f28
+text: #dcd7ba
 
 LIGHT
-background: #F4ECCA
-text: #1E4887
+background: #f4ecca
+text: #1e4887
+
 ================================
 
 Nord

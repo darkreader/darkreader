@@ -31,26 +31,36 @@ start();
 declare const __TEST__: boolean;
 if (__TEST__) {
     const socket = new WebSocket(`ws://localhost:8894`);
+    socket.onopen = async () => {
+        socket.send(JSON.stringify({
+            data: {
+                type: 'devtools',
+                uuid: `ready-${document.location.pathname}`,
+            },
+            id: null,
+        }));
+    };
     socket.onmessage = (e) => {
-        const respond = (message: {type: string; id: number; data?: string}) => socket.send(JSON.stringify(message));
+        const respond = (message: {id: number; data?: string; error?: string}) => socket.send(JSON.stringify(message));
         const message: {type: string; id: number; data: string} = JSON.parse(e.data);
+        const {id, data} = message;
         try {
             const textarea: HTMLTextAreaElement = document.querySelector('textarea#editor')!;
             const [buttonReset, buttonApply] = document.querySelectorAll('button');
             switch (message.type) {
                 case 'debug-devtools-paste':
-                    textarea.value = message.data;
+                    textarea.value = data;
                     buttonApply.click();
-                    respond({type: 'debug-devtools-paste-response', id: message.id});
+                    respond({id});
                     break;
                 case 'debug-devtools-reset':
-                    respond({type: 'debug-devtools-reset-response', id: message.id});
+                    respond({id});
                     buttonReset.click();
                     (document.querySelector('button.message-box__button-ok') as HTMLButtonElement).click();
                     break;
             }
         } catch (err) {
-            respond({type: 'error', id: message.id, data: String(err)});
+            respond({id, error: String(err)});
         }
     };
 }

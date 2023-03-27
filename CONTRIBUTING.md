@@ -129,8 +129,8 @@ Here is a full table of available CSS variables:
 |---|---|---|
 | **`--darkreader-neutral-background`** | Neutral background color that <br>corresponds to the user's settings. | Mostly used for elements that have <br>the wrong background color. |
 | **`--darkreader-neutral-text`** | Neutral text color that <br>corresponds to the user's settings. | Used for elements with the wrong text color. |
-| **`--darkreader-selection-background`** | The text color setting <br>defined by the user. | The user's Text Color setting. |
-| **`--darkreader-selection-text`** | The background color setting <br>defined by the user. | The user's Background Color setting. |
+| **`--darkreader-selection-background`** | The background color setting <br>defined by the user. | The user's Background Color setting. |
+| **`--darkreader-selection-text`** | The text color setting <br>defined by the user. | The user's Text Color setting. |
 
 ## Fixes for Filter and Filter+ mode
 

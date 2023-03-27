@@ -100,11 +100,11 @@ class LimitedCacheStorage {
         }
     }
 
-    has(url: string) {
+    public has(url: string) {
         return this.records.has(url);
     }
 
-    get(url: string) {
+    public get(url: string) {
         if (this.records.has(url)) {
             const record = this.records.get(url)!;
             record.expires = Date.now() + LimitedCacheStorage.TTL;
@@ -115,7 +115,7 @@ class LimitedCacheStorage {
         return null;
     }
 
-    set(url: string, value: string) {
+    public set(url: string, value: string) {
         LimitedCacheStorage.ensureAlarmIsScheduled();
 
         const size = getStringSize(value);

@@ -1,4 +1,4 @@
-import {isFullyQualifiedDomain, isFullyQualifiedDomainWildcard, fullyQualifiedDomainMatchesWildcard} from '../../utils/url';
+import {isFullyQualifiedDomain, isFullyQualifiedDomainWildcard, fullyQualifiedDomainMatchesWildcard, isURLInList, isURLMatched} from '../../utils/url';
 import {parseArray} from '../../utils/text';
 
 declare const __TEST__: boolean;
@@ -20,6 +20,19 @@ export interface SitePropsIndex<SiteFix extends SiteProps> {
     cacheSiteFix: { [offsetId: number]: SiteFix };
     cacheDomainIndex: { [domain: string]: number[] };
     cacheCleanupTimer: ReturnType<typeof setTimeout> | null;
+}
+
+interface ConfigIndex {
+    domains: { [domain: string]: number[] };
+    domainLabels: { [domainLabel: string]: number[] };
+    nonstandard: number[] | null;
+}
+
+export interface SiteListIndex {
+    urls: string[];
+    domains: { [domain: string]: number[] };
+    domainLabels: { [domainLabel: string]: number[] };
+    nonstandard: number[];
 }
 
 export interface SitesFixesParserOptions<T> {
@@ -125,7 +138,57 @@ function extractDomainLabelsFromFullyQualifiedDomainWildcard(fullyQualifiedDomai
     return labels;
 }
 
-function processBlock(text: string, domains: { [domain: string]: number[] }, domainLabelMembers: Array<{ labels: string[]; index: number }>, domainLabelFrequencies: { [domainLabel: string]: number }, offsets: Array<[number, number]>, nonstandard: number[], recordStart: number, recordEnd: number, index: number) {
+function indexConfigURLs(urls: string[][]): {domains: { [domain: string]: number[] }; domainLabels: { [domainLabel: string]: number[] }; nonstandard: number[]} {
+    const domains: { [domain: string]: number[] } = {};
+    const domainLabels: { [domainLabel: string]: number[] } = {};
+    const nonstandard: number[] = [];
+
+    const domainLabelFrequencies: { [domainLabel: string]: number } = {};
+    const domainLabelMembers: Array<{ labels: string[]; index: number }> = [];
+
+    for (let index = 0; index < urls.length; index++) {
+        const block = urls[index];
+        const blockDomainLabels = new Set<string>();
+        for (const url of block) {
+            const domain = getDomain(url);
+            if (isFullyQualifiedDomain(domain)) {
+                addLabel(domains, domain, index);
+            } else if (isFullyQualifiedDomainWildcard(domain)) {
+                const labels = extractDomainLabelsFromFullyQualifiedDomainWildcard(domain);
+                domainLabelMembers.push({labels, index});
+                labels.forEach((l) => blockDomainLabels.add(l));
+            } else {
+                // Sitefix parser encountered non-standard URL
+                nonstandard.push(index);
+                break;
+            }
+        }
+
+        // Compute domain label frequencies, counting each label within each fix only once
+        for (const label of blockDomainLabels) {
+            if (domainLabelFrequencies[label]) {
+                domainLabelFrequencies[label]++;
+            } else {
+                domainLabelFrequencies[label] = 1;
+            }
+        }
+    }
+
+    // For each domain name, find the most specific label
+    for (const {labels, index} of domainLabelMembers) {
+        let label = labels[0];
+        for (const currLabel of labels) {
+            if (domainLabelFrequencies[currLabel] < domainLabelFrequencies[label]) {
+                label = currLabel;
+            }
+        }
+        addLabel(domainLabels, label, index);
+    }
+
+    return {domains, domainLabels, nonstandard};
+}
+
+function processSiteFixesConfigBlock(text: string, offsets: Array<[number, number]>, recordStart: number, recordEnd: number, urls: string[][]) {
     // TODO: more formal definition of URLs and delimiters
     const block = text.substring(recordStart, recordEnd);
     const lines = block.split('\n');
@@ -142,71 +205,95 @@ function processBlock(text: string, domains: { [domain: string]: number[] }, dom
 
     offsets.push([recordStart, recordEnd - recordStart]);
 
-    const urls = parseArray(lines.slice(0, commandIndices[0]).join('\n'));
-    const domainLabels = new Set<string>();
-    for (const url of urls) {
-        const domain = getDomain(url);
-        if (isFullyQualifiedDomain(domain)) {
-            addLabel(domains, domain, index);
-        } else if (isFullyQualifiedDomainWildcard(domain)) {
-            const labels = extractDomainLabelsFromFullyQualifiedDomainWildcard(domain);
-            domainLabelMembers.push({labels, index});
-            labels.forEach((l) => domainLabels.add(l));
-        } else {
-            // Sitefix parser encountered non-standard URL
-            nonstandard.push(index);
-            break;
-        }
-    }
-
-    // Compute domain label frequencies, counting each label within each fix only once
-    for (const label of domainLabels) {
-        if (domainLabelFrequencies[label]) {
-            domainLabelFrequencies[label]++;
-        } else {
-            domainLabelFrequencies[label] = 1;
-        }
-    }
+    const urls_ = parseArray(lines.slice(0, commandIndices[0]).join('\n'));
+    urls.push(urls_);
 }
 
-export function indexSitesFixesConfig<T extends SiteProps>(text: string): SitePropsIndex<T> {
-    const domains: { [domain: string]: number[] } = {};
-    const domainLabels: { [domainLabel: string]: number[] } = {};
-    const nonstandard: number[] = [];
+function extractURLsFromSiteFixesConfig(text: string): {urls: string[][]; offsets: Array<[number, number]>} {
+    const urls: string[][] = [];
     // Array of tuples, where first number is an offset of record start and second number is record length.
     const offsets: Array<[number, number]> = [];
-
-    const domainLabelFrequencies: { [domainLabel: string]: number } = {};
-    const domainLabelMembers: Array<{ labels: string[]; index: number }> = [];
 
     let recordStart = 0;
     // Delimiter between two blocks
     const delimiterRegex = /^\s*={2,}\s*$/gm;
     let delimiter: RegExpMatchArray | null;
-    let count = 0;
     while ((delimiter = delimiterRegex.exec(text))) {
         const nextDelimiterStart = delimiter.index!;
         const nextDelimiterEnd = delimiter.index! + delimiter[0].length;
-
-        processBlock(text, domains, domainLabelMembers, domainLabelFrequencies, offsets, nonstandard, recordStart, nextDelimiterStart, count);
-
+        processSiteFixesConfigBlock(text, offsets, recordStart, nextDelimiterStart, urls);
         recordStart = nextDelimiterEnd;
-        count++;
     }
-    processBlock(text, domains, domainLabelMembers, domainLabelFrequencies, offsets, nonstandard, recordStart, text.length, count);
+    processSiteFixesConfigBlock(text, offsets, recordStart, text.length, urls);
 
-    // For each domain name, find the most specific label
-    for (const {labels, index} of domainLabelMembers) {
-        let label = labels[0];
-        for (const currLabel of labels) {
-            if (domainLabelFrequencies[currLabel] < domainLabelFrequencies[label]) {
-                label = currLabel;
+    return {urls, offsets};
+}
+
+export function indexSitesFixesConfig<T extends SiteProps>(text: string): SitePropsIndex<T> {
+    const {urls, offsets} = extractURLsFromSiteFixesConfig(text);
+    const {domains, domainLabels, nonstandard} = indexConfigURLs(urls);
+    return {offsets: encodeOffsets(offsets), domains, domainLabels, nonstandard, cacheDomainIndex: {}, cacheSiteFix: {}, cacheCleanupTimer: null};
+}
+
+function lookupConfigURLsInDomainLabels(domain: string, recordIds: number[], currRecordIds: number[], getAllRecordURLs: (id: number) => string[]) {
+    for (const recordId of currRecordIds) {
+        const recordURLs = getAllRecordURLs(recordId);
+        for (const ruleUrl of recordURLs) {
+            const wildcard = getDomain(ruleUrl);
+            if (isFullyQualifiedDomainWildcard(wildcard) && fullyQualifiedDomainMatchesWildcard(wildcard, domain)) {
+                recordIds.push(recordId);
+            } else {
+                // Skip this rule, since the label match must have come from a different URL
             }
         }
-        addLabel(domainLabels, label, index);
+    }
+}
+
+function lookupConfigURLs(domain: string, index: ConfigIndex, getAllRecordURLs: (id: number) => string[]): number[] {
+    const labels = domain.split('.');
+    let recordIds: number[] = [];
+
+    // Common fix
+    if ('*' in index.domainLabels) {
+        recordIds = recordIds.concat(index.domainLabels['*']);
     }
 
-    return {offsets: encodeOffsets(offsets), domains, domainLabels, nonstandard, cacheDomainIndex: {}, cacheSiteFix: {}, cacheCleanupTimer: null};
+    // Wildcard fixes
+    for (const label of labels) {
+        // We need to use in operator because ids are 0-based and 0 is falsy
+        if (label in index.domainLabels) {
+            const currRecordIds = index.domainLabels[label];
+            lookupConfigURLsInDomainLabels(domain, recordIds, currRecordIds, getAllRecordURLs);
+        }
+    }
+
+    for (let i = 0; i < labels.length; i++) {
+        const substring = labels.slice(i).join('.');
+        if (substring in index.domains) {
+            recordIds = recordIds.concat(index.domains[substring]);
+        }
+        if (substring in index.domainLabels) {
+            const currRecordIds = index.domainLabels[substring];
+            lookupConfigURLsInDomainLabels(domain, recordIds, currRecordIds, getAllRecordURLs);
+        }
+    }
+
+    // Backwards compatibility: check for nonssend over nonstandard patterns, which will be filtered out
+    // via regex in content script
+    if (index.nonstandard) {
+        for (const currRecordId of index.nonstandard) {
+            const urls = getAllRecordURLs(currRecordId);
+            if (urls.some((url) => isURLMatched(domain, getDomain(url)))) {
+                recordIds.push(currRecordId);
+                continue;
+            }
+        }
+    }
+
+    // Deduplicate array elements
+    recordIds = Array.from(new Set(recordIds));
+
+    return recordIds;
 }
 
 /**
@@ -218,9 +305,8 @@ export function indexSitesFixesConfig<T extends SiteProps>(text: string): SitePr
  * @returns a single fix
  */
 function getSiteFix<T extends SiteProps>(text: string, index: SitePropsIndex<T>, options: SitesFixesParserOptions<T>, id: number): T {
-    const cachedFix = index.cacheSiteFix[id];
-    if (cachedFix) {
-        return cachedFix;
+    if (id in index.cacheSiteFix) {
+        return index.cacheSiteFix[id];
     }
 
     const [blockStart, blockEnd] = decodeOffset(index.offsets, id);
@@ -262,47 +348,7 @@ export function getSitesFixesFor<T extends SiteProps>(url: string, text: string,
     const domain = getDomain(url);
 
     if (!index.cacheDomainIndex[domain]) {
-        const labels = domain.split('.');
-        let recordIds: number[] = [];
-
-        // Common fix
-        if ('*' in index.domainLabels) {
-            recordIds = recordIds.concat(index.domainLabels['*']);
-        }
-
-        // Wildcard fixes
-        for (const label of labels) {
-            // We need to use in operator because ids are 0-based and 0 is falsy
-            if (label in index.domainLabels) {
-                const currRecordIds = index.domainLabels[label];
-                for (const recordId of currRecordIds) {
-                    const fix = getSiteFix<T>(text, index, options, recordId);
-                    for (const ruleUrl of fix.url) {
-                        const wildcard = getDomain(ruleUrl);
-                        if (isFullyQualifiedDomainWildcard(wildcard) && fullyQualifiedDomainMatchesWildcard(wildcard, domain)) {
-                            recordIds.push(recordId);
-                        } else {
-                            // Skip this rule, since the label match must have come from a different URL
-                        }
-                    }
-                }
-            }
-        }
-
-        for (let i = 0; i < labels.length; i++) {
-            const substring = labels.slice(i).join('.');
-            if (index.domains[substring]) {
-                recordIds = recordIds.concat(index.domains[substring]);
-            }
-            if (index.domainLabels[substring]) {
-                recordIds = recordIds.concat(index.domainLabels[substring]);
-            }
-        }
-        // Backwards compatibility: send over nonstandard patterns, which will be filtered out
-        // via regex in content script
-        recordIds = recordIds.concat(index.nonstandard);
-        // Deduplicate array elements
-        index.cacheDomainIndex[domain] = Array.from(new Set(recordIds));
+        index.cacheDomainIndex[domain] = lookupConfigURLs(domain, index, (recordId) => getSiteFix<T>(text, index, options, recordId).url);
     }
 
     const recordIds: number[] = index.cacheDomainIndex[domain];
@@ -313,4 +359,29 @@ export function getSitesFixesFor<T extends SiteProps>(url: string, text: string,
 
     scheduleCacheCleanup(index);
     return records;
+}
+
+export function indexSiteListConfig(text: string): SiteListIndex {
+    const urls = parseArray(text);
+    const urls2D = urls.map((u) => [u]);
+    const {domains, domainLabels, nonstandard} = indexConfigURLs(urls2D);
+    return {domains, domainLabels, nonstandard, urls};
+}
+
+function getSiteListFor(url: string, index: SiteListIndex): string[] {
+    const domain = getDomain(url);
+    const recordIds = lookupConfigURLs(domain, index, (recordId) => [index.urls[recordId]]);
+    const result: string[] = [];
+    for (const recordId of recordIds) {
+        result.push(index.urls[recordId]);
+    }
+    return result;
+}
+
+export function isURLInSiteList(url: string, index: SiteListIndex | null): boolean {
+    if (index === null) {
+        return false;
+    }
+    const urls = getSiteListFor(url, index);
+    return isURLInList(url, urls);
 }

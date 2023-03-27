@@ -4,7 +4,6 @@ import {canInjectScript} from '../background/utils/extension-api';
 import type {ExtensionData, Message, UserSettings} from '../definitions';
 import {MessageType} from '../utils/message';
 import {makeChromiumHappy} from './make-chromium-happy';
-import DevTools from './devtools';
 import {logInfo} from './utils/log';
 import {sendLog} from './utils/sendLog';
 
@@ -33,7 +32,8 @@ type TestMessage = {
     };
     id: number;
 } | {
-    type: 'getManifest';
+    type: 'createTab';
+    data: string;
     id: number;
 };
 
@@ -52,6 +52,7 @@ declare const __LOG__: string | false;
 declare const __PORT__: number;
 declare const __TEST__: boolean;
 declare const __CHROMIUM_MV3__: boolean;
+declare const __FIREFOX__: boolean;
 
 if (__CHROMIUM_MV3__) {
     chrome.runtime.onInstalled.addListener(async () => {
@@ -135,12 +136,22 @@ if (__WATCH__) {
 }
 
 if (__TEST__) {
+    // Open popup and DevTools pages
+    chrome.tabs.create({url: chrome.runtime.getURL('/ui/popup/index.html'), active: false});
+    chrome.tabs.create({url: chrome.runtime.getURL('/ui/devtools/index.html'), active: false});
+
+    let testTabId: number | null = null;
+    if (__FIREFOX__) {
+        chrome.tabs.create({url: 'about:blank', active: true}, ({id}) => testTabId = id!);
+    }
+
     const socket = new WebSocket(`ws://localhost:8894`);
     socket.onopen = async () => {
         // Wait for extension to start
         await extension;
         socket.send(JSON.stringify({
             data: {
+                type: 'background',
                 extensionOrigin: chrome.runtime.getURL(''),
             },
             id: null,
@@ -149,12 +160,13 @@ if (__TEST__) {
     socket.onmessage = (e) => {
         try {
             const message: TestMessage = JSON.parse(e.data);
+            const {id, type} = message;
             const respond = (data?: ExtensionData | string | boolean | {[key: string]: string} | null) => socket.send(JSON.stringify({
                 data,
-                id: message.id,
+                id,
             }));
 
-            switch (message.type) {
+            switch (type) {
                 case 'changeSettings':
                     Extension.changeSettings(message.data);
                     respond();
@@ -178,6 +190,9 @@ if (__TEST__) {
                     chrome.storage[region].get(keys, respond);
                     break;
                 }
+                case 'createTab':
+                    chrome.tabs.update(testTabId!, {url: message.data, active: true}, () => respond());
+                    break;
             }
         } catch (err) {
             socket.send(JSON.stringify({error: String(err), original: e.data}));

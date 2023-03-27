@@ -2,20 +2,10 @@
 import path from './paths.js';
 import * as reload from './reload.js';
 import {createTask} from './task.js';
-import {readFile, writeFile} from './utils.js';
+import {readJSON, writeJSON} from './utils.js';
 const {PLATFORM, getDestDir} = path;
 
 const srcDir = 'src';
-
-async function readJSON(path) {
-    const file = await readFile(path);
-    return JSON.parse(file);
-}
-
-async function writeJSON(path, json) {
-    const content = JSON.stringify(json, null, 4);
-    return await writeFile(path, content);
-}
 
 async function patchManifest(platform, debug, watch, test) {
     const manifest = await readJSON(`${srcDir}/manifest.json`);

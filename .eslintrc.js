@@ -76,6 +76,7 @@ config.overrides.push({
         '@typescript-eslint/member-delimiter-style': 'error',
         '@typescript-eslint/no-duplicate-imports': 'error',
         '@typescript-eslint/no-explicit-any': 'off',
+        '@typescript-eslint/no-non-null-assertion': 'off',
         '@typescript-eslint/no-redeclare': 'error',
         '@typescript-eslint/no-object-literal-type-assertion': 'off',
         '@typescript-eslint/no-unused-vars': 'error',

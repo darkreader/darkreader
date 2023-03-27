@@ -20,6 +20,10 @@ Read more about contributing to Dark Reader in [CONTRIBUTING.md](https://github.
 
 ## Building for use
 
+Dark Reader build script requires a JavaScript runtime, either NodeJS or Deno. We recommend using NodeJS, Deno support is experimental.
+
+### Building with NodeJS
+
 You can install the extension from a file.
 Install [Node.js](https://nodejs.org/) (we recommend LTS or higher, but any version at or above 15 will work). Download the source code (or check out from git).
 Open the terminal in the root folder and run:
@@ -30,6 +34,12 @@ Open the terminal in the root folder and run:
 This will create a `build/release/darkreader-chrome.zip` file for use in a Chromium-based browser and a `build/release/darkreader-firefox.xpi` file for use in Firefox.
 
 You can customize build process by passing flags to build script. To see all flags, run `npm run build -- --help`.
+
+### Building with Deno
+
+You can build Dark Reader with alternative runtime called [Deno](https://deno.land/). For this run `deno:bootstrap` script (e.g., via `npm run deno:bootstrap` or manually copy the command from `package.json`). Then run the same commands described above.
+
+Please note that if you encounter error `Too many open files (os error 24)`, then you should use the newer version of Deno (preferably built from source or canary).
 
 ## Using Dark Reader for a website
 

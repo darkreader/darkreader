@@ -93,6 +93,25 @@ export async function writeFile(dest, content) {
 }
 
 /**
+ * @param {string} path
+ * @returns {Promise<Object>}
+ */
+export async function readJSON(path) {
+    const file = await readFile(path);
+    return JSON.parse(file);
+}
+
+/**
+ * @param {string} dest
+ * @param {string} content
+ * @returns {Promise<void>}
+ */
+export async function writeJSON(dest, content) {
+    const string = JSON.stringify(content, null, 4);
+    return await writeFile(dest, string);
+}
+
+/**
  * @param {string | string[]} patterns
  * @returns {Promise<string[]>}
  */

@@ -95,7 +95,6 @@
     "puppeteer-core": "19.8.0",
     "rollup": "3.20.2",
     "rollup-plugin-istanbul2": "2.0.2",
-    "rollup-plugin-typescript2": "0.34.1",
     "ts-jest": "29.0.5",
     "tslib": "2.5.0",
     "typescript": "5.0.2",

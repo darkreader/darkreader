@@ -1,12 +1,12 @@
 import {tmpdir} from 'node:os';
 import {promisify} from 'node:util';
-import {writeFile, readFile, stat} from 'node:fs/promises';
+import {mkdir, rm, writeFile, readFile, stat} from 'node:fs/promises';
 import {exec} from 'node:child_process';
 const execP = promisify(exec);
 import unzipper from 'adm-zip';
 import {log} from './utils.js';
 
-const tmpDirParent = `${tmpdir}/darkreader-integrity`;
+const tmpDirParent = `${tmpdir()}/darkreader-integrity`;
 
 async function fetchAllReleases() {
     try {
@@ -111,10 +111,10 @@ function extractMetaInfOrder(manifest) {
 
 async function main(noCache = false) {
     if (noCache) {
-        await execP(`rm -rf ${tmpDirParent}`);
+        await rm(tmpDirParent, {force: true, recursive: true});
     }
     try {
-        await execP(`mkdir ${tmpDirParent}`);
+        await mkdir(tmpDirParent, {recursive: true});
     } catch (e) {
         // No need to create already existing directory
     }
@@ -141,14 +141,14 @@ async function main(noCache = false) {
             log.ok(`Wrote release file (${version})`);
         }
 
-        await execP(`rm -rf ${tempDest}`);
-        await execP(`mkdir ${tempDest}`);
+        await rm(tempDest, {force: true, recursive: true});
+        await mkdir(tempDest, {recursive: true});
+        await rm(dest, {force: true, recursive: true});
+        await mkdir(dest, {recursive: true});
 
         const zip = new unzipper(fileName);
         zip.extractAllTo(tempDest);
 
-        await execP(`rm -rf ${dest}`);
-        await execP(`mkdir ${dest}`);
 
         const manifest = await readFile(`${tempDest}/META-INF/manifest.mf`, {encoding: 'utf-8'});
         const {type, order} = extractMetaInfOrder(manifest);

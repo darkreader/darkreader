@@ -2,7 +2,6 @@
 #-----------------------------------
 build/
 darkreader.js
-darkreader-v*.js
 debug.log
 
 # Node.js modules

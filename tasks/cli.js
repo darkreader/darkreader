@@ -5,15 +5,24 @@
  */
 
 // @ts-check
-import {log} from './utils.js';
+import {execute, log} from './utils.js';
 import {fork} from 'node:child_process';
 import process from 'node:process';
+
 import {fileURLToPath} from 'node:url';
 import {join} from 'node:path';
 
+import {runTasks} from './task.js';
+import zip from './zip.js';
+import signature from './bundle-signature.js';
+
+import paths from './paths.js';
+const {PLATFORM} = paths;
+
+const __filename = join(fileURLToPath(import.meta.url), '../build.js');
+
 async function executeChildProcess(args) {
-    const build = join(fileURLToPath(import.meta.url), '../build.js');
-    const child = fork(build, args);
+    const child = fork(__filename, args);
     // Send SIGINTs as SIGKILLs, which are not ignored
     process.on('SIGINT', () => {
         child.kill('SIGKILL');
@@ -48,6 +57,63 @@ function printHelp() {
         'Build for testing (not to be used by humans):',
         '  --test'
     ].join('\n'));
+}
+
+function getVersion(args) {
+    const prefix = '--version=';
+    const arg = args.find((arg) => arg.startsWith(prefix));
+    if (!arg) {
+        return null;
+    }
+    const version = arg.substring(prefix.length);
+    if (/^\d+(.\d+){0,3}$/.test(version)) {
+        return version;
+    }
+    throw new Error(`Invalid version argument ${version}`);
+}
+
+async function ensureGitClean() {
+    const diff = await execute('git diff');
+    if (diff) {
+        throw new Error('git source tree is not clean. Pease commit your work and try again');
+    }
+}
+
+/**
+ * Checks out a particular revision of source code and dependencies,
+ * audits dependencies and applies fixes to vulnerabilities.
+ * Fixes for vulnerabilities should not affect build output since most
+ * vulnerabilities reside in code which never gets reached during build.
+ * However, fixing the vulnerabilities and obtaining a build with all "clean"
+ * dependencies which is identical to already published version serves as a proof
+ * that the published version was always free of (now known) vulnerabilities.
+ *
+ * @param {string} version The desired git version, e.g., 'v4.9.62' or 'v4.9.37.1'
+ * @param {boolean} fixVulnerabilities Whether of not to attempt to fix known vulnerabilities
+ */
+async function checkoutVersion(version, fixVulnerabilities) {
+    log.ok(`Checking out version ${version}`);
+    // Use -- to disambiguate the tag (release version) and file paths
+    await execute(`git checkout v${version} -- package.json package-lock.json src/ tasks/`);
+    log.ok(`Installing dependencies`);
+    await execute('npm install --ignore-scripts');
+    if (!fixVulnerabilities) {
+        log.ok(`Skipping dependency audit`);
+        return;
+    }
+    log.ok(`Dependency audit`);
+    const deps = JSON.parse(await execute('npm audit fix --force --ignore-scripts --json'));
+    if (deps.audit.auditReportVersion !== 2) {
+        throw new Error('Could not audit dependencies');
+    }
+    if (deps.audit.metadata.vulnerabilities.total !== 0) {
+        throw new Error('Dependency vulnerability without a fix found, please audit manually');
+    }
+}
+
+async function checkoutHead() {
+    await execute('git checkout HEAD -- package.json package-lock.json src/ tasks/');
+    await execute('npm install --ignore-scripts');
 }
 
 function validateArguments(args) {
@@ -85,9 +151,37 @@ async function run() {
         process.exit(130);
     }
 
+    // We need to install new deps prior to forking for them to be loaded properly
+    const version = getVersion(args);
+    if (version) {
+        try {
+            await ensureGitClean();
+            await checkoutVersion(version, args.includes('--fix-deps'));
+        } catch (e) {
+            log.error(`Could not check out tag ${version}. ${e}`);
+            return;
+        }
+    }
+
     const childArgs = parseArguments(args);
 
     await executeChildProcess(childArgs);
+
+    if (version) {
+        log.ok('PACKING SIGNATURES');
+        await checkoutHead();
+
+        await runTasks([signature, zip], {
+            version,
+            platforms: {
+                [PLATFORM.FIREFOX]: true,
+            },
+            debug: false,
+            watch: false,
+            log: false,
+            test: false
+        });
+    }
 }
 
 run();

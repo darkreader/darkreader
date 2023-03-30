@@ -8,7 +8,6 @@ import watch from './watch.js';
  * @property {boolean} watch
  * @property {boolean} test
  * @property {string | false} log
- * @property {string | undefined} version
  */
 
 class Task {

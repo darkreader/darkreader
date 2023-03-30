@@ -8,21 +8,12 @@
 import {execute, log} from './utils.js';
 import {fork} from 'node:child_process';
 import process from 'node:process';
-
 import {fileURLToPath} from 'node:url';
 import {join} from 'node:path';
 
-import {runTasks} from './task.js';
-import zip from './zip.js';
-import signature from './bundle-signature.js';
-
-import paths from './paths.js';
-const {PLATFORM} = paths;
-
-const __filename = join(fileURLToPath(import.meta.url), '../build.js');
-
 async function executeChildProcess(args) {
-    const child = fork(__filename, args);
+    const build = join(fileURLToPath(import.meta.url), '../build.js');
+    const child = fork(build, args);
     // Send SIGINTs as SIGKILLs, which are not ignored
     process.on('SIGINT', () => {
         child.kill('SIGKILL');
@@ -59,26 +50,6 @@ function printHelp() {
     ].join('\n'));
 }
 
-function getVersion(args) {
-    const prefix = '--version=';
-    const arg = args.find((arg) => arg.startsWith(prefix));
-    if (!arg) {
-        return null;
-    }
-    const version = arg.substring(prefix.length);
-    if (/^\d+(.\d+){0,3}$/.test(version)) {
-        return version;
-    }
-    throw new Error(`Invalid version argument ${version}`);
-}
-
-async function ensureGitClean() {
-    const diff = await execute('git diff');
-    if (diff) {
-        throw new Error('git source tree is not clean. Pease commit your work and try again');
-    }
-}
-
 /**
  * Checks out a particular revision of source code and dependencies,
  * audits dependencies and applies fixes to vulnerabilities.
@@ -109,11 +80,6 @@ async function checkoutVersion(version, fixVulnerabilities) {
     if (deps.audit.metadata.vulnerabilities.total !== 0) {
         throw new Error('Dependency vulnerability without a fix found, please audit manually');
     }
-}
-
-async function checkoutHead() {
-    await execute('git checkout HEAD -- package.json package-lock.json src/ tasks/');
-    await execute('npm install --ignore-scripts');
 }
 
 function validateArguments(args) {
@@ -151,37 +117,9 @@ async function run() {
         process.exit(130);
     }
 
-    // We need to install new deps prior to forking for them to be loaded properly
-    const version = getVersion(args);
-    if (version) {
-        try {
-            await ensureGitClean();
-            await checkoutVersion(version, args.includes('--fix-deps'));
-        } catch (e) {
-            log.error(`Could not check out tag ${version}. ${e}`);
-            return;
-        }
-    }
-
     const childArgs = parseArguments(args);
 
     await executeChildProcess(childArgs);
-
-    if (version) {
-        log.ok('PACKING SIGNATURES');
-        await checkoutHead();
-
-        await runTasks([signature, zip], {
-            version,
-            platforms: {
-                [PLATFORM.FIREFOX]: true,
-            },
-            debug: false,
-            watch: false,
-            log: false,
-            test: false
-        });
-    }
 }
 
 run();

@@ -1,5 +1,4 @@
 // @ts-check
-import {exec} from 'node:child_process';
 import fs from 'node:fs/promises';
 import https from 'node:https';
 import path from 'node:path';
@@ -11,16 +10,6 @@ const colors = Object.entries({
     red: '\x1b[31m',
     yellow: '\x1b[33m',
 }).reduce((map, [key, value]) => Object.assign(map, {[key]: (/** @type {string} */text) => `${value}${text}\x1b[0m`}), {});
-
-export async function execute(command) {
-    return new Promise((resolve, reject) => exec(command, (error, stdout) => {
-        if (error) {
-            reject(`Failed to execute command ${command}`);
-        } else {
-            resolve(stdout);
-        }
-    }));
-}
 
 /**
  * @param {string} text
@@ -87,31 +76,20 @@ export async function copyFile(src, dest) {
 
 /**
  * @param {string} src
- * @param {BufferEncoding} encoding
  * @returns {Promise<string>}
  */
-export async function readFile(src, encoding = 'utf8') {
-    return await fs.readFile(src, encoding);
-}
-
-export async function fileExists(src) {
-    try {
-        await fs.access(src, fs.constants.R_OK);
-        return true;
-    } catch (e) {
-        return false;
-    }
+export async function readFile(src) {
+    return await fs.readFile(src, 'utf8');
 }
 
 /**
  * @param {string} dest
  * @param {string} content
- * @param {BufferEncoding} encoding
  * @returns {Promise<void>}
  */
-export async function writeFile(dest, content, encoding = 'utf8') {
+export async function writeFile(dest, content) {
     await mkDirIfMissing(dest);
-    await fs.writeFile(dest, content, encoding);
+    await fs.writeFile(dest, content, 'utf8');
 }
 
 /**
@@ -152,11 +130,11 @@ export function timeout(delay) {
 
 /**
  * @param {string} url
- * @returns {Promise<{buffer(): Buffer; text(encoding?: BufferEncoding): string; type(): string}>}
+ * @returns {Promise<{buffer(): Buffer; text(encoding?: string): string; type(): string}>}
  */
 export function httpsRequest(url) {
     return new Promise((resolve) => {
-        /** @type {Uint8Array[]} */
+        /** @type {any[]} */
         const data = [];
         https.get(url, (response) => {
             response
@@ -165,7 +143,7 @@ export function httpsRequest(url) {
                     const buffer = Buffer.concat(data);
                     resolve({
                         buffer: () => buffer,
-                        text: (encoding = 'utf8') => buffer.toString(encoding),
+                        text: (/** @type {BufferEncoding} */encoding = 'utf8') => buffer.toString(encoding),
                         type: () => response.headers['content-type'] || '',
                     });
                 });

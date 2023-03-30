@@ -1,12 +1,12 @@
 import {tmpdir} from 'node:os';
 import {promisify} from 'node:util';
+import {writeFile, readFile, stat} from 'node:fs/promises';
 import {exec} from 'node:child_process';
 const execP = promisify(exec);
 import unzipper from 'adm-zip';
-import {writeFile, readFile, stat} from 'node:fs/promises';
 import {log} from './utils.js';
 
-const tmpDirParent = `${tmpdir}/darkreader-attestation`;
+const tmpDirParent = `${tmpdir}/darkreader-integrity`;
 
 async function fetchAllReleases() {
     try {
@@ -125,7 +125,7 @@ async function main(noCache = false) {
 
     for (const {version, url, size} of versions) {
         const fileName = `${tmpDirParent}/firefox-${version}.xpi`;
-        const dest = `./integrity/mozilla/${version}`;
+        const dest = `./integrity/firefox/${version}`;
         const tempDest = `${tmpDirParent}/firefox-${version}`;
 
         try {

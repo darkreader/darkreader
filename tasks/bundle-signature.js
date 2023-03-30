@@ -130,14 +130,14 @@ async function createHashes(signatureVersion, version, order) {
         ...(await enumerateStandardPaths(destDir, order)),
     ];
     regular.push({
-        realPath: `./integrity/mozilla/${version}/mozilla-recommendation.json`,
+        realPath: `./integrity/firefox/${version}/mozilla-recommendation.json`,
         archivePath: 'mozilla-recommendation.json',
         isOptional: true,
     });
     await calculateHashes(types, regular);
 
     const coseManifest = serializeHashManifest(regular);
-    if (await fileExists(`./integrity/mozilla/${version}/cose.sig`)) {
+    if (await fileExists(`./integrity/firefox/${version}/cose.sig`)) {
         await writeFile(`${destDir}/META-INF/cose.manifest`, coseManifest);
         regular.push({
             archivePath: 'META-INF/cose.manifest',
@@ -145,7 +145,7 @@ async function createHashes(signatureVersion, version, order) {
         });
         regular.push({
             archivePath: 'META-INF/cose.sig',
-            integrity: await calculateHashesForFile(types, `./integrity/mozilla/${version}/cose.sig`),
+            integrity: await calculateHashesForFile(types, `./integrity/firefox/${version}/cose.sig`),
         });
     }
 
@@ -166,16 +166,16 @@ async function signature({platforms, debug, version}) {
         throw new Error('Only Firefox builds support signed packages for now.');
     }
 
-    const infoPath = `./integrity/mozilla/${version}/info.json`;
+    const infoPath = `./integrity/firefox/${version}/info.json`;
     const {type, order} = await readJSON(infoPath);
     await createHashes(type, version, order);
 
     const destDir = getDestDir({debug, platform: 'firefox'});
-    const rsa = `./integrity/mozilla/${version}/mozilla.rsa`;
+    const rsa = `./integrity/firefox/${version}/mozilla.rsa`;
     const rsaDest = `${destDir}/META-INF/mozilla.rsa`;
-    const sig = `./integrity/mozilla/${version}/cose.sig`;
+    const sig = `./integrity/firefox/${version}/cose.sig`;
     const sigDest = `${destDir}/META-INF/cose.sig`;
-    const recommendation = `./integrity/mozilla/${version}/mozilla-recommendation.json`;
+    const recommendation = `./integrity/firefox/${version}/mozilla-recommendation.json`;
     const recommendationDest = `${destDir}/mozilla-recommendation.json`;
     await copyFile(rsa, rsaDest);
     try {

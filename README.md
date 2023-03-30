@@ -41,7 +41,7 @@ You can build Dark Reader with alternative runtime called [Deno](https://deno.la
 
 Please note that if you encounter error `Too many open files (os error 24)`, then you should use the newer version of Deno (preferably built from source or canary).
 
-### Bundling official Firefox store signatures (Experimental)
+### Bundling with official Firefox store signatures (Experimental)
 
 Prior to publication, extension stores provide digital signatures for extensions. These digital signatures certify the integrity of the archive (that extension bundle did not get corrupted or bit-rotted) and that extension store preformed very basic extension validation.
 

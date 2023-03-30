@@ -5,7 +5,7 @@
  */
 
 // @ts-check
-import {execute, log} from './utils.js';
+import {log} from './utils.js';
 import {fork} from 'node:child_process';
 import process from 'node:process';
 import {fileURLToPath} from 'node:url';

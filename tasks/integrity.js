@@ -125,7 +125,7 @@ async function main(noCache = false) {
 
     for (const {version, url, size} of versions) {
         const fileName = `${tmpDirParent}/firefox-${version}.xpi`;
-        const dest = `./attestation/mozilla/${version}`;
+        const dest = `./integrity/mozilla/${version}`;
         const tempDest = `${tmpDirParent}/firefox-${version}`;
 
         try {

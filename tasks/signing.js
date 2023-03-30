@@ -18,7 +18,7 @@ async function getAllMozillaAddonsStoreVersions() {
 }
 
 async function getAlreadyPresentVersions() {
-    return readdir('./attestation/mozilla');
+    return readdir('./integrity/mozilla');
 }
 
 function filterVersions(versions, alreadyPresent) {

@@ -72,6 +72,13 @@ function getVersion(args) {
     throw new Error(`Invalid version argument ${version}`);
 }
 
+async function ensureGitClean() {
+    const diff = await execute('git diff');
+    if (diff) {
+        throw new Error('git source tree is not clean. Pease commit your work and try again');
+    }
+}
+
 /**
  * Checks out a particular revision of source code and dependencies,
  * audits dependencies and applies fixes to vulnerabilities.
@@ -148,9 +155,10 @@ async function run() {
     const version = getVersion(args);
     if (version) {
         try {
+            await ensureGitClean();
             await checkoutVersion(version, args.includes('--fix-deps'));
         } catch (e) {
-            log.error(`Could not check out tag ${version}`);
+            log.error(`Could not check out tag ${version}. ${e}`);
             return;
         }
     }

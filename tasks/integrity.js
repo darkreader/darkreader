@@ -157,6 +157,56 @@ return [
 ];
 }
 
+async function chromeFetchAllMetadata() {
+    const versions = await chromeFetchAllReleases();
+    for (const version of versions) {
+        const fileName = `${tmpDirParent}/chrome-${version}.crx`;
+        const dest = `./integrity/chrome/${version}`;
+        const tempDest = `${tmpDirParent}/chrome-${version}`;
+        const url = `https://f6.crx4chrome.com/crx.php?i=eimadpbcbfnmbkopoojfekhnkhdbieeh&v=${version}`;
+
+        try {
+            await stat(fileName);
+            log.ok(`Found release file (${version})`);
+        } catch {
+            log.ok(`Fetching release file (${version})`);
+            const file = await fetch(url);
+            await writeFile(fileName, toBuffer(await file.arrayBuffer()));
+            log.ok(`Wrote release file (${version})`);
+        }
+
+        /*
+        await rm(tempDest, {force: true, recursive: true});
+        await mkdir(tempDest, {recursive: true});
+        await rm(dest, {force: true, recursive: true});
+        await mkdir(dest, {recursive: true});
+
+        const zip = new unzipper(fileName);
+        zip.extractAllTo(tempDest);
+
+
+        /*
+
+        const manifest = await readFile(`${tempDest}/META-INF/manifest.mf`, {encoding: 'utf-8'});
+        const {type, order} = firefoxExtractMetaInfOrder(manifest);
+
+        await writeFile(`${dest}/info.json`, `${JSON.stringify({type, order})}\n`);
+        await execP(`cp -r ${tempDest}/META-INF/mozilla.rsa ${dest}/mozilla.rsa`);
+        try {
+            await execP(`cp -r ${tempDest}/META-INF/cose.sig ${dest}/cose.sig`);
+        } catch (e) {
+            // Nothing
+        }
+        try {
+            await execP(`cp -r ${tempDest}/mozilla-recommendation.json ${dest}/mozilla-recommendation.json`);
+        } catch (e) {
+            // Nothing
+            console.log(`Version ${version} does not have a recommendation file`);
+        }
+        */
+    }
+}
+
 async function firefoxFetchAllReleases() {
     try {
         const file = await readFile(`${tmpDirParent}/firefox-index.json`);
@@ -317,10 +367,6 @@ async function firefoxFetchAllMetadata(noCache = false) {
             console.log(`Version ${version} does not have a recommendation file`);
         }
     }
-}
-
-async function chromeFetchAllMetadata(noCache = false){
-
 }
 
 async function main(noCache = false) {

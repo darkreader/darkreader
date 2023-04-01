@@ -237,41 +237,67 @@ function toBuffer(arrayBuffer) {
 }
 
 function firefoxExtractMetaInfOrder(manifest) {
-    const lines = manifest.split('\n');
-
-    function getDigestAlgos() {
-        const digestLine = lines[3];
-        if (digestLine === 'Digest-Algorithms: MD5 SHA1') {
+    function getDigestAlgos(lines) {
+        const digestHeader = lines[3];
+        if (digestHeader === 'Digest-Algorithms: MD5 SHA1') {
             return {
                 type: 0,
                 lineCount: 5,
-                digestLine,
+                digestFormat: {
+                    digestHeader,
+                    digestLines: [
+                        'MD5-Digest: ',
+                        'SHA1-Digest: ',
+                    ],
+                    digestLinesLengths: [36, 41],
+                },
             };
-        } else if (digestLine === 'Digest-Algorithms: MD5 SHA1 SHA256') {
+        } else if (digestHeader === 'Digest-Algorithms: MD5 SHA1 SHA256') {
             return {
                 type: 1,
                 lineCount: 6,
-                digestLine,
+                digestFormat: {
+                    digestHeader,
+                    digestLines: [
+                        'MD5-Digest: ',
+                        'SHA1-Digest: ',
+                        'SHA256-Digest: ',
+                    ],
+                    digestLinesLengths: [36, 41, 59],
+                },
             };
-        } else if (digestLine === 'Digest-Algorithms: SHA1 SHA256') {
+        } else if (digestHeader === 'Digest-Algorithms: SHA1 SHA256') {
             return {
                 type: 2,
                 lineCount: 5,
-                digestLine,
+                digestFormat: {
+                    digestHeader,
+                    digestLines: [
+                        'SHA1-Digest: ',
+                        'SHA256-Digest: ',
+                    ],
+                    digestLinesLengths: [41, 59],
+                },
             };
         }
+        throw new Error('Unknown combination of digest algorithms');
     }
 
-    function getFileName(fileIndex, lineCount, digestLine) {
+    function getFileName(lines, fileIndex, lineCount, digestFormat) {
         const lineIndex = 2 + fileIndex * lineCount;
         assert(lines[lineIndex - 1] === '');
         assert(lines[lineIndex].startsWith('Name: '));
-        assert(lines[lineIndex + 1] === digestLine);
+        assert(lines[lineIndex + 1] === digestFormat.digestHeader);
+        for (let i = 0; i < digestFormat.digestLines.length; i++) {
+            const line = lines[lineIndex + i + 2];
+            assert(line.startsWith(digestFormat.digestLines[i]));
+            assert(line.length === digestFormat.digestLinesLengths[i]);
+        }
         const fileName = lines[lineIndex].substring('Name: '.length);
         return fileName;
     }
 
-    function getFileCount(lineCount) {
+    function getFileCount(lines, lineCount) {
         const count = (lines.length - 3) / lineCount;
         assert(Number.isInteger(count));
         return count;
@@ -281,14 +307,15 @@ function firefoxExtractMetaInfOrder(manifest) {
         return arr.every((v, i, a) => !i || a[i - 1] <= v);
     }
 
+    const lines = manifest.split('\n');
     assert(lines[0] === 'Manifest-Version: 1.0');
 
-    const {type, lineCount, digestLine} = getDigestAlgos();
-    const fileCount = getFileCount(lineCount);
+    const {type, lineCount, digestFormat} = getDigestAlgos(lines);
+    const fileCount = getFileCount(lines, lineCount);
 
     const realOrder = [];
     for (let i = 0; i < fileCount; i++) {
-        const fileName = getFileName(i, lineCount, digestLine);
+        const fileName = getFileName(lines, i, lineCount, digestFormat);
         if (fileName !== 'manifest.json' && fileName !== 'mozilla-recommendation.json' && !fileName.startsWith('META-INF/')) {
             realOrder.push(fileName);
         }
@@ -328,10 +355,11 @@ async function firefoxFetchAllMetadata(noCache = false) {
 
         try {
             const st = await stat(fileName);
+            // Fast-fail path, it is actually never taken in practice
             if (st.size !== size) {
                 throw new Error('Stored file had changed');
             }
-            log.ok(`Found release file (${version})`);
+            log.ok(`Found release file (Firefox, ${version})`);
         } catch {
             log.ok(`Fetching release file (${version})`);
             const file = await fetch(url);
@@ -362,14 +390,13 @@ async function firefoxFetchAllMetadata(noCache = false) {
             await execP(`cp -r ${tempDest}/mozilla-recommendation.json ${dest}/mozilla-recommendation.json`);
         } catch (e) {
             // Nothing
-            console.log(`Version ${version} does not have a recommendation file`);
         }
     }
 }
 
 async function main(noCache = false) {
-    //await firefoxFetchAllMetadata(noCache);
-    await chromeFetchAllMetadata(noCache);
+    await firefoxFetchAllMetadata(noCache);
+    //await chromeFetchAllMetadata(noCache);
 }
 
 main();

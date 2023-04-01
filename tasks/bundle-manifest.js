@@ -32,6 +32,8 @@ async function manifests({platforms, debug, watch, test, version}) {
     for (const platform of enabledPlatforms) {
         const manifest = await patchManifest(platform, debug, watch, test);
         const destDir = getDestDir({debug, platform});
+        // Firefox Add-ons store parses and rewrites manifest.json during signing process
+        // It only changes indentation to 2 spaces, but not the content or order of the keys
         const space = (version && platform === PLATFORM.FIREFOX) ? 2 : undefined;
         await writeJSON(`${destDir}/manifest.json`, manifest, space);
     }

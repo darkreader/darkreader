@@ -32,10 +32,10 @@ const buildTask = [
     zip,
 ];
 
-async function build({platforms, debug, watch, log: logging, test}) {
+async function build({platforms, debug, watch, log: logging, test, version}) {
     log.ok('BUILD');
     try {
-        await runTasks(debug ? standardTask : buildTask, {platforms, debug, watch, log: logging, test});
+        await runTasks(debug ? standardTask : buildTask, {platforms, debug, watch, log: logging, test, version});
         if (watch) {
             standardTask.forEach((task) => task.watch(platforms));
             reload.reload({type: reload.FULL});
@@ -70,9 +70,9 @@ async function api(debug, watch) {
     }
 }
 
-async function run({api: api_, release, debug, platforms, watch, log, test}) {
+async function run({api: api_, release, debug, platforms, watch, log, test, version}) {
     if (release && Object.values(platforms).some(Boolean)) {
-        await build({platforms, debug: false, watch: false, log: null, test: false});
+        await build({platforms, version, debug: false, watch: false, log: null, test: false});
     }
     if (debug && Object.values(platforms).some(Boolean)) {
         await build({platforms, debug, watch, log, test});
@@ -91,6 +91,8 @@ function getParams(args) {
         [PLATFORM.THUNDERBIRD]: allPlatforms || args.includes('--thunderbird'),
     };
 
+    const version = args.some((a) => a.startsWith('--version'));
+
     const release = args.includes('--release');
     const debug = args.includes('--debug');
     const watch = args.includes('--watch');
@@ -101,7 +103,7 @@ function getParams(args) {
     const test = args.includes('--test');
     const api = allPlatforms || args.includes('--api');
 
-    return {api, release, debug, platforms, watch, log, test};
+    return {api, release, debug, platforms, watch, log, test, version};
 }
 
 const args = process.argv.slice(2);

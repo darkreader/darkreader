@@ -4,6 +4,7 @@ import bundleCSS from './bundle-css.js';
 import bundleJS from './bundle-js.js';
 import bundleLocales from './bundle-locales.js';
 import bundleManifest from './bundle-manifest.js';
+import bundleSignature from './bundle-signature.js';
 import clean from './clean.js';
 import copy from './copy.js';
 import saveLog from './log.js';
@@ -32,10 +33,17 @@ const buildTask = [
     zip,
 ];
 
+const signedBuildTask = [
+    ...standardTask,
+    codeStyle,
+    bundleSignature,
+    zip,
+]
+
 async function build({platforms, debug, watch, log: logging, test, version}) {
     log.ok('BUILD');
     try {
-        await runTasks(debug ? standardTask : buildTask, {platforms, debug, watch, log: logging, test, version});
+        await runTasks(debug ? standardTask : (version ? signedBuildTask : buildTask), {platforms, debug, watch, log: logging, test, version});
         if (watch) {
             standardTask.forEach((task) => task.watch(platforms));
             reload.reload({type: reload.FULL});
@@ -92,7 +100,7 @@ function getParams(args) {
     };
 
     // Here version has a boolean value, since it is used only by bundleManifest task to determine file indentation
-    const version = args.some((a) => a.startsWith('--version'));
+    const version = args.some((a) => a.startsWith('--version='));
 
     const release = args.includes('--release');
     const debug = args.includes('--debug');

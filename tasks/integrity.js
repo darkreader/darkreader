@@ -8,7 +8,13 @@ import {log} from './utils.js';
 
 const tmpDirParent = `${tmpdir()}/darkreader-integrity`;
 
-async function fetchAllReleases() {
+function assert(claim) {
+    if (!claim) {
+        throw new Error('Assertion failed');
+    }
+}
+
+async function firefoxFetchAllReleases() {
     try {
         const file = await readFile(`${tmpDirParent}/firefox-index.json`);
         log.ok('Found previously stored index');
@@ -38,42 +44,68 @@ function toBuffer(arrayBuffer) {
     return buffer;
 }
 
-function extractMetaInfOrder(manifest) {
-    const lines = manifest.split('\n');
-
-    function assert(claim) {
-        if (!claim) {
-            throw new Error('Assertion failed');
-        }
-    }
-
-    function getDigestAlgos() {
-        const digestLine = lines[3];
-        if (digestLine === 'Digest-Algorithms: MD5 SHA1') {
+function firefoxExtractMetaInfOrder(manifest) {
+    function getDigestAlgos(lines) {
+        const digestHeader = lines[3];
+        if (digestHeader === 'Digest-Algorithms: MD5 SHA1') {
             return {
                 type: 0,
-                lineCount: 5
+                lineCount: 5,
+                digestFormat: {
+                    digestHeader,
+                    digestLines: [
+                        'MD5-Digest: ',
+                        'SHA1-Digest: ',
+                    ],
+                    digestLinesLengths: [36, 41],
+                },
             };
-        } else if (digestLine === 'Digest-Algorithms: MD5 SHA1 SHA256') {
+        } else if (digestHeader === 'Digest-Algorithms: MD5 SHA1 SHA256') {
             return {
                 type: 1,
-                lineCount: 6
+                lineCount: 6,
+                digestFormat: {
+                    digestHeader,
+                    digestLines: [
+                        'MD5-Digest: ',
+                        'SHA1-Digest: ',
+                        'SHA256-Digest: ',
+                    ],
+                    digestLinesLengths: [36, 41, 59],
+                },
             };
-        } else if (digestLine === 'Digest-Algorithms: SHA1 SHA256') {
+        } else if (digestHeader === 'Digest-Algorithms: SHA1 SHA256') {
             return {
                 type: 2,
-                lineCount: 5
+                lineCount: 5,
+                digestFormat: {
+                    digestHeader,
+                    digestLines: [
+                        'SHA1-Digest: ',
+                        'SHA256-Digest: ',
+                    ],
+                    digestLinesLengths: [41, 59],
+                },
             };
         }
+        throw new Error('Unknown combination of digest algorithms');
     }
 
-    function getFileName(fileIndex, lineCount) {
+    function getFileName(lines, fileIndex, lineCount, digestFormat) {
         const lineIndex = 2 + fileIndex * lineCount;
+        assert(lines[lineIndex - 1] === '');
+        assert(lines[lineIndex].startsWith('Name: '));
+        assert(lines[lineIndex + 1] === digestFormat.digestHeader);
+        for (let i = 0; i < digestFormat.digestLines.length; i++) {
+            const line = lines[lineIndex + i + 2];
+            assert(line.startsWith(digestFormat.digestLines[i]));
+            assert(line.length === digestFormat.digestLinesLengths[i]);
+        }
         const fileName = lines[lineIndex].substring('Name: '.length);
         return fileName;
     }
 
-    function getFileCount(lineCount) {
+    function getFileCount(lines, lineCount) {
         const count = (lines.length - 3) / lineCount;
         assert(Number.isInteger(count));
         return count;
@@ -83,14 +115,15 @@ function extractMetaInfOrder(manifest) {
         return arr.every((v, i, a) => !i || a[i - 1] <= v);
     }
 
+    const lines = manifest.split('\n');
     assert(lines[0] === 'Manifest-Version: 1.0');
 
-    const {type, lineCount} = getDigestAlgos();
-    const fileCount = getFileCount(lineCount);
+    const {type, lineCount, digestFormat} = getDigestAlgos(lines);
+    const fileCount = getFileCount(lines, lineCount);
 
     const realOrder = [];
     for (let i = 0; i < fileCount; i++) {
-        const fileName = getFileName(i, lineCount);
+        const fileName = getFileName(lines, i, lineCount, digestFormat);
         if (fileName !== 'manifest.json' && fileName !== 'mozilla-recommendation.json' && !fileName.startsWith('META-INF/')) {
             realOrder.push(fileName);
         }
@@ -109,7 +142,7 @@ function extractMetaInfOrder(manifest) {
     return {type, order};
 }
 
-async function main(noCache = false) {
+async function firefoxFetchAllMetadata(noCache = false) {
     if (noCache) {
         await rm(tmpDirParent, {force: true, recursive: true});
     }
@@ -119,7 +152,7 @@ async function main(noCache = false) {
         // No need to create already existing directory
     }
 
-    const versions = await fetchAllReleases();
+    const versions = await firefoxFetchAllReleases();
     log.ok(`Fetched release URLs (${versions.length})`);
     await writeFile(`${tmpDirParent}/firefox-index.json`, JSON.stringify(versions, null, 2));
 
@@ -130,10 +163,11 @@ async function main(noCache = false) {
 
         try {
             const st = await stat(fileName);
+            // Fast-fail path, it is actually never taken in practice
             if (st.size !== size) {
                 throw new Error('Stored file had changed');
             }
-            log.ok(`Found release file (${version})`);
+            log.ok(`Found release file (Firefox, ${version})`);
         } catch {
             log.ok(`Fetching release file (${version})`);
             const file = await fetch(url);
@@ -151,7 +185,7 @@ async function main(noCache = false) {
 
 
         const manifest = await readFile(`${tempDest}/META-INF/manifest.mf`, {encoding: 'utf-8'});
-        const {type, order} = extractMetaInfOrder(manifest);
+        const {type, order} = firefoxExtractMetaInfOrder(manifest);
 
         await writeFile(`${dest}/info.json`, `${JSON.stringify({type, order})}\n`);
         await execP(`cp -r ${tempDest}/META-INF/mozilla.rsa ${dest}/mozilla.rsa`);
@@ -164,9 +198,12 @@ async function main(noCache = false) {
             await execP(`cp -r ${tempDest}/mozilla-recommendation.json ${dest}/mozilla-recommendation.json`);
         } catch (e) {
             // Nothing
-            console.log(`Version ${version} does not have a recommendation file`);
         }
     }
+}
+
+async function main(noCache = false) {
+    await firefoxFetchAllMetadata(noCache);
 }
 
 main();

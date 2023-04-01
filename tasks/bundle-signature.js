@@ -1,9 +1,9 @@
 // @ts-check
-import paths_ from './paths.js';
+import paths from './paths.js';
 import {createTask} from './task.js';
 import {copyFile, getPaths, readJSON, readFile, writeFile, fileExists} from './utils.js';
 import {createHash} from 'node:crypto';
-const {getDestDir, PLATFORM} = paths_;
+const {getDestDir, PLATFORM} = paths;
 
 function serializeHashManifest(entries) {
     const lines = [];

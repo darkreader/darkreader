@@ -126,10 +126,11 @@ export async function readJSON(path) {
 /**
  * @param {string} dest
  * @param {string} content
+ * @param {string | number | undefined} space
  * @returns {Promise<void>}
  */
-export async function writeJSON(dest, content) {
-    const string = JSON.stringify(content, null, 4);
+export async function writeJSON(dest, content, space = 4) {
+    const string = JSON.stringify(content, null, space);
     return await writeFile(dest, string);
 }
 

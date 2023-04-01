@@ -38,7 +38,7 @@ const signedBuildTask = [
     codeStyle,
     bundleSignature,
     zip,
-]
+];
 
 async function build({platforms, debug, watch, log: logging, test, version}) {
     log.ok('BUILD');

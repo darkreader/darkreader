@@ -1,5 +1,5 @@
 import {m} from 'malevic';
-import {Shortcut, Toggle} from '../../../controls';
+import {Toggle} from '../../../controls';
 import {getLocalMessage} from '../../../../utils/locales';
 import type {ExtWrapper, UserSettings} from '../../../../definitions';
 import SettingsIcon from '../../main-page/settings-icon';
@@ -7,6 +7,7 @@ import SunMoonIcon from '../../main-page/sun-moon-icon';
 import SystemIcon from '../../main-page/system-icon';
 import WatchIcon from '../../main-page/watch-icon';
 import SiteToggle from '../site-toggle';
+import MoreSiteSettings from './more-site-settings';
 import MoreToggleSettings from './more-toggle-settings';
 import {AutomationMode} from '../../../../utils/automation';
 import {isLocalFile} from '../../../../utils/url';
@@ -15,15 +16,12 @@ import {HOMEPAGE_URL} from '../../../../utils/links';
 
 declare const __CHROMIUM_MV3__: boolean;
 
-function multiline(...lines: string[]) {
-    return lines.join('\n');
-}
-
 type HeaderProps = ExtWrapper & {
+    onMoreSiteSettingsClick: () => void;
     onMoreToggleSettingsClick: () => void;
 };
 
-function Header({data, actions, onMoreToggleSettingsClick: onToggleAutoSettingsClick}: HeaderProps) {
+function Header({data, actions, onMoreSiteSettingsClick, onMoreToggleSettingsClick}: HeaderProps) {
     function toggleExtension(enabled: UserSettings['enabled']) {
         actions.changeSettings({
             enabled,
@@ -41,12 +39,24 @@ function Header({data, actions, onMoreToggleSettingsClick: onToggleAutoSettingsC
     const automationMessage = isAutomation
         ? (
             isTimeAutomation
-            ? (data.isEnabled ? 'Auto (night time)' : 'Auto (day time)')
-            : isLocationAutomation
-            ? data.isEnabled ? 'Auto (night at location)' : 'Auto (day at location)'
-            : data.isEnabled ? 'Auto (system is dark)' : 'Auto (system is light)'
+                ? (data.isEnabled ? 'Auto (night time)' : 'Auto (day time)')
+                : isLocationAutomation
+                    ? data.isEnabled ? 'Auto (night at location)' : 'Auto (day at location)'
+                    : data.isEnabled ? 'Auto (system is dark)' : 'Auto (system is light)'
         )
         : 'Configure automation';
+
+    const isProtected = !isFile && ((!__CHROMIUM_MV3__ && !tab.isInjected) || tab.isProtected);
+    const isProtectedFile = isFile && !data.isAllowedFileSchemeAccess;
+    const isSiteEnabled = !(isProtected || isProtectedFile || tab.isInDarkList);
+
+    const siteToggleMessage = isProtected ?
+        getLocalMessage('page_protected')
+        : isFile && !data.isAllowedFileSchemeAccess ?
+            getLocalMessage('local_files_forbidden')
+            : tab.isInDarkList ?
+                getLocalMessage('page_in_dark_list')
+                : 'Configure site toggle';
 
     return (
         <header class="header">
@@ -58,40 +68,27 @@ function Header({data, actions, onMoreToggleSettingsClick: onToggleAutoSettingsC
                     data={data}
                     actions={actions}
                 />
-                {!isFile && ((!__CHROMIUM_MV3__ && !tab.isInjected) || tab.isProtected) ? (
-                    <span class="header__site-toggle__unable-text">
-                        {getLocalMessage('page_protected')}
-                    </span>
-                ) : isFile && !data.isAllowedFileSchemeAccess ? (
-                    <span class="header__site-toggle__unable-text">
-                        {getLocalMessage('local_files_forbidden')}
-                    </span>
-                ) : tab.isInDarkList ? (
-                    <span class="header__site-toggle__unable-text">
-                        {getLocalMessage('page_in_dark_list')}
-                    </span>
-                ) : (
-                    <Shortcut
-                        commandName="addSite"
-                        shortcuts={data.shortcuts}
-                        textTemplate={(hotkey) => (hotkey
-                            ? multiline(getLocalMessage('toggle_current_site'), hotkey)
-                            : getLocalMessage('setup_hotkey_toggle_site')
-                        )}
-                        onSetShortcut={(shortcut) => actions.setShortcut('addSite', shortcut)}
-                    />
-                )}
+                <span
+                    class={{
+                        'header__more-settings-button': true,
+                        'header__more-settings-button--off': !isSiteEnabled,
+                    }}
+                    onclick={onMoreSiteSettingsClick}
+                >
+                    <SettingsIcon class="header__more-settings-button__icon" />
+                    {siteToggleMessage}
+                </span>
             </div>
             <div class="header__control header__app-toggle">
                 <Toggle checked={data.isEnabled} labelOn={getLocalMessage('on')} labelOff={getLocalMessage('off')} onChange={toggleExtension} />
                 <span
                     class={{
-                        'header__app-toggle__auto-button': true,
-                        'header__app-toggle__auto-button__off': !data.isEnabled,
+                        'header__more-settings-button': true,
+                        'header__more-settings-button--off': !data.isEnabled,
                     }}
-                    onclick={onToggleAutoSettingsClick}
+                    onclick={onMoreToggleSettingsClick}
                 >
-                    <SettingsIcon class="header__app-toggle__auto-button__icon" />
+                    <SettingsIcon class="header__more-settings-button__icon" />
                     {automationMessage}
                 </span>
                 <span
@@ -113,5 +110,6 @@ function Header({data, actions, onMoreToggleSettingsClick: onToggleAutoSettingsC
 
 export {
     Header,
+    MoreSiteSettings,
     MoreToggleSettings, // TODO: Implement portals to place elements into <body>.
 };

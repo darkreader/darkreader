@@ -78,16 +78,17 @@ export default function MoreToggleSettings({data, actions, isExpanded, onClose}:
     return (
         <div
             class={{
-                'header__app-toggle__more-settings': true,
-                'header__app-toggle__more-settings--expanded': isExpanded,
+                'header__more-toggle-settings': true,
+                'header__more-settings': true,
+                'header__more-settings--expanded': isExpanded,
             }}
         >
-            <div class="header__app-toggle__more-settings__top">
-                <span class="header__app-toggle__more-settings__top__text">{getLocalMessage('automation')}</span>
-                <span class="header__app-toggle__more-settings__top__close" role="button" onclick={onClose}>✕</span>
+            <div class="header__more-settings__top">
+                <span class="header__more-settings__top__text">{getLocalMessage('automation')}</span>
+                <span class="header__more-settings__top__close" role="button" onclick={onClose}>✕</span>
             </div>
-            <div class="header__app-toggle__more-settings__content">
-                <div class="header__app-toggle__more-settings__line">
+            <div class="header__more-settings__content">
+                <div class="header__more-settings__line">
                     <CheckBox
                         checked={data.settings.automation.mode === AutomationMode.TIME}
                         onchange={(e: {target: HTMLInputElement}) => changeAutomationMode(e.target.checked ? AutomationMode.TIME : AutomationMode.NONE)}
@@ -98,16 +99,16 @@ export default function MoreToggleSettings({data, actions, isExpanded, onClose}:
                         onChange={([start, end]) => actions.changeSettings({time: {activation: start, deactivation: end}})}
                     />
                 </div>
-                <p class="header__app-toggle__more-settings__description">
+                <p class="header__more-settings__description">
                     {getLocalMessage('set_active_hours')}
                 </p>
-                <div class="header__app-toggle__more-settings__line header__app-toggle__more-settings__location">
+                <div class="header__more-settings__line header__more-settings__location">
                     <CheckBox
                         checked={data.settings.automation.mode === AutomationMode.LOCATION}
                         onchange={(e: {target: HTMLInputElement}) => changeAutomationMode(e.target.checked ? AutomationMode.LOCATION : AutomationMode.NONE)}
                     />
                     <TextBox
-                        class="header__app-toggle__more-settings__location__latitude"
+                        class="header__more-settings__location__latitude"
                         placeholder={getLocalMessage('latitude')}
                         onchange={(e: {target: HTMLInputElement}) => locationChanged(e.target, e.target.value, 'latitude')}
                         oncreate={(node: HTMLInputElement) => node.value = getLocationString(locationSettings.latitude)}
@@ -118,7 +119,7 @@ export default function MoreToggleSettings({data, actions, isExpanded, onClose}:
                         }}
                     />
                     <TextBox
-                        class="header__app-toggle__more-settings__location__longitude"
+                        class="header__more-settings__location__longitude"
                         placeholder={getLocalMessage('longitude')}
                         onchange={(e) => locationChanged(e.target, e.target.value, 'longitude')}
                         oncreate={(node: HTMLInputElement) => node.value = getLocationString(locationSettings.longitude)}
@@ -129,45 +130,45 @@ export default function MoreToggleSettings({data, actions, isExpanded, onClose}:
                         }}
                     />
                 </div>
-                <p class="header__app-toggle__more-settings__location-description">
+                <p class="header__more-settings__location-description">
                     {getLocalMessage('set_location')}
                 </p>
                 <div class={[
-                    'header__app-toggle__more-settings__line',
-                    'header__app-toggle__more-settings__system-dark-mode',
+                    'header__more-settings__line',
+                    'header__more-settings__system-dark-mode',
                 ]}
                 >
                     <CheckBox
-                        class="header__app-toggle__more-settings__system-dark-mode__checkbox"
+                        class="header__more-settings__system-dark-mode__checkbox"
                         checked={isSystemAutomation}
                         onchange={(e: {target: HTMLInputElement}) => changeAutomationMode(e.target.checked ? AutomationMode.SYSTEM : AutomationMode.NONE)}
                     />
                     <Button
                         class={{
-                            'header__app-toggle__more-settings__system-dark-mode__button': true,
-                            'header__app-toggle__more-settings__system-dark-mode__button--active': isSystemAutomation,
+                            'header__more-settings__system-dark-mode__button': true,
+                            'header__more-settings__system-dark-mode__button--active': isSystemAutomation,
                         }}
                         onclick={() =>changeAutomationMode(isSystemAutomation ? AutomationMode.NONE : AutomationMode.SYSTEM)}
                     >{getLocalMessage('system_dark_mode')}</Button>
                 </div>
-                <p class="header__app-toggle__more-settings__description">
+                <p class="header__more-settings__description">
                     {getLocalMessage('system_dark_mode_description')}
                 </p>
                 {!isMatchMediaChangeEventListenerBuggy ? null :
-                    <p class="header__app-toggle__more-settings__warning">
+                    <p class="header__more-settings__warning">
                         {getLocalMessage('system_dark_mode_chromium_warning')}
                     </p>
                 }
                 <span
                     class={{
-                        'header__app-toggle__more-settings__shortcut-wrapper': true,
-                        'header__app-toggle__more-settings__shortcut-wrapper--set': data.shortcuts['toggle'],
+                        'header__more-settings__shortcut-wrapper': true,
+                        'header__more-settings__shortcut-wrapper--set': data.shortcuts['toggle'],
                     }}
                 >
                     <Shortcut
                         class={{
-                            'header__app-toggle__more-settings__shortcut': true,
-                            'header__app-toggle__more-settings__shortcut--set': data.shortcuts['toggle'],
+                            'header__more-settings__shortcut': true,
+                            'header__more-settings__shortcut--set': data.shortcuts['toggle'],
                         }}
                         commandName="toggle"
                         shortcuts={data.shortcuts}
@@ -179,7 +180,7 @@ export default function MoreToggleSettings({data, actions, isExpanded, onClose}:
                     />
                     <KeyboardIcon />
                 </span>
-                <p class="header__app-toggle__more-settings__description">
+                <p class="header__more-settings__description">
                     Extension on/off keyboard shortcut
                 </p>
             </div>

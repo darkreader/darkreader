@@ -114,8 +114,8 @@ function serializeSfManifest(types, manifestMf) {
 async function fixManifest() {
     const destDir = getDestDir({debug: false, platform: 'firefox'});
     const realPath = `${destDir}/manifest.json`;
-    const manifest = await readJSON(realPath);
-    await writeFile(realPath, JSON.stringify(manifest, null, 2));
+    //const manifest = await readJSON(realPath);
+    //await writeFile(realPath, JSON.stringify(manifest, null, 2));
     return {
         realPath,
         archivePath: 'manifest.json'

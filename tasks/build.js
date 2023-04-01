@@ -100,7 +100,8 @@ function getParams(args) {
     };
 
     // Here version has a boolean value, since it is used only by bundleManifest task to determine file indentation
-    const version = args.some((a) => a.startsWith('--version='));
+    const versionArg = args.find((a) => a.startsWith('--version='));
+    const version = versionArg ? versionArg.substring('--version='.length) : null;
 
     const release = args.includes('--release');
     const debug = args.includes('--debug');

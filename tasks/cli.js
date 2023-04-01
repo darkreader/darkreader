@@ -132,7 +132,7 @@ function validateArguments(args) {
 }
 
 function parseArguments(args) {
-    return args.filter((arg) => !arg.startsWith('--version='));
+    return args//.filter((arg) => !arg.startsWith('--version='));
 }
 
 async function run() {
@@ -153,7 +153,7 @@ async function run() {
 
     // We need to install new deps prior to forking for them to be loaded properly
     const version = getVersion(args);
-    if (version) {
+    if (version && false) {
         try {
             await ensureGitClean();
             await checkoutVersion(version, args.includes('--fix-deps'));
@@ -169,7 +169,7 @@ async function run() {
 
     if (version) {
         log.ok('PACKING SIGNATURES');
-        await checkoutHead();
+        //await checkoutHead();
 
         await runTasks([signature, zip], {
             version,

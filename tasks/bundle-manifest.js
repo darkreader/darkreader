@@ -27,12 +27,13 @@ async function patchManifest(platform, debug, watch, test) {
     return patched;
 }
 
-async function manifests({platforms, debug, watch, test}) {
+async function manifests({platforms, debug, watch, test, version}) {
     const enabledPlatforms = Object.values(PLATFORM).filter((platform) => platform !== PLATFORM.API && platforms[platform]);
     for (const platform of enabledPlatforms) {
         const manifest = await patchManifest(platform, debug, watch, test);
         const destDir = getDestDir({debug, platform});
-        await writeJSON(`${destDir}/manifest.json`, manifest);
+        const space = (version && platform === PLATFORM.FIREFOX) ? 2 : undefined;
+        await writeJSON(`${destDir}/manifest.json`, manifest, space);
     }
 }
 
@@ -48,7 +49,7 @@ const bundleManifestTask = createTask(
             const changed = chrome || changedFiles.some((file) => file.endsWith(`manifest-${platform}.json`));
             platforms[platform] = changed && buildPlatforms[platform];
         }
-        await manifests({platforms, debug: true, watch: true, test: false});
+        await manifests({platforms, debug: true, watch: true, test: false, version: null});
         reload.reload({type: reload.FULL});
     },
 );

@@ -91,6 +91,7 @@ function getParams(args) {
         [PLATFORM.THUNDERBIRD]: allPlatforms || args.includes('--thunderbird'),
     };
 
+    // Here version has a boolean value, since it is used only by bundleManifest task to determine file indentation
     const version = args.some((a) => a.startsWith('--version'));
 
     const release = args.includes('--release');

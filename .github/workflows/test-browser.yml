@@ -93,19 +93,19 @@ jobs:
 
       - name: Run browser tests on Chromium MV2 build
         if: ${{ matrix.chrome }}
-        uses: GabrielBB/xvfb-action@v1
+        uses: coactions/setup-xvfb@v1
         with:
           run: npm run test:chrome -- --json --outputFile=test-results-chrome.json
 
       - name: Run browser tests on Chromium MV3 build
         if: ${{ matrix.chrome }}
-        uses: GabrielBB/xvfb-action@v1
+        uses: coactions/setup-xvfb@v1
         with:
           run: npm run test:chrome-mv3 -- --json --outputFile=test-results-chrome-mv3.json
 
       - name: Run browser tests on Firefox MV2 build
         if: ${{ matrix.firefox }}
-        uses: GabrielBB/xvfb-action@v1
+        uses: coactions/setup-xvfb@v1
         with:
           run: npm run test:firefox -- --json --outputFile=test-results-firefox-mv2.json
 

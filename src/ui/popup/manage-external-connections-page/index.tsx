@@ -13,7 +13,7 @@ import EnableExternalConnections from './enable-external-connections';
 declare const __CHROMIUM_MV3__: boolean;
 
 type ManageExternalConnectionsProps = ViewProps & {
-    //onManageExternalConnectionsClick: () => void;
+    // onManageExternalConnectionsClick: () => void;
 };
 
 export default function ManageExternalConnectionsPage(props: ManageExternalConnectionsProps) {

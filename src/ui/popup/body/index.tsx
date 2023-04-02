@@ -133,8 +133,8 @@ function Pages(props: ViewProps) {
             </Page>
             <Page id="automation">
                 <AutomationPage {...props}
-                onManageExternalConnectionsClick={onManageExternalConnectionsClick}
-            />
+                    onManageExternalConnectionsClick={onManageExternalConnectionsClick}
+                />
             </Page>
             <Page id="manage-settings">
                 <ManageSettingsPage {...props} />

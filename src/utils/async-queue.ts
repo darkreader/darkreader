@@ -8,12 +8,12 @@ export default class AsyncQueue {
     private timerId: number | null = null;
     private frameDuration = 1000 / 60;
 
-    addToQueue(entry: QueueEntry) {
+    public addToQueue(entry: QueueEntry) {
         this.queue.push(entry);
         this.startQueue();
     }
 
-    stopQueue() {
+    public stopQueue() {
         if (this.timerId !== null) {
             cancelAnimationFrame(this.timerId);
             this.timerId = null;
@@ -29,7 +29,7 @@ export default class AsyncQueue {
         this.timerId = requestAnimationFrame(() => {
             this.timerId = null;
             const start = Date.now();
-            let cb: (() => void) | undefined;
+            let cb: QueueEntry | undefined;
             while ((cb = this.queue.shift())) {
                 cb();
                 if (Date.now() - start >= this.frameDuration) {

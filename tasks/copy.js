@@ -74,8 +74,10 @@ async function copy({platforms, debug}) {
         }
         const files = await getPaths(`${srcDir}/${entry.src}`);
         for (const file of files) {
-            for (const platform of (entry.platforms || enabledPlatforms)) {
-                promises.push(copyEntry(file, {debug, platform}));
+            for (const platform of enabledPlatforms) {
+                if (entry.platforms === undefined || entry.platforms.includes(platform)) {
+                    promises.push(copyEntry(file, {debug, platform}));
+                }
             }
         }
     }

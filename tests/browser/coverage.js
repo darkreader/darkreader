@@ -1,5 +1,5 @@
 // @ts-check
-import path from 'path';
+import path from 'node:path';
 
 import {writeFile} from '../../tasks/utils.js';
 

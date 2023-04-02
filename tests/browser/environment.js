@@ -1,60 +1,69 @@
-import fs from 'fs/promises';
-import JestNodeEnvironment from 'jest-environment-node';
-import path from 'path';
-import puppeteer from 'puppeteer-core';
+import {TestEnvironment} from 'jest-environment-node';
+import {launch, connect} from 'puppeteer-core';
 import {cmd} from 'web-ext';
 import {WebSocketServer} from 'ws';
 import {generateHTMLCoverageReports} from './coverage.js';
 import {getChromePath, getFirefoxPath, chromeExtensionDebugDir, chromeMV3ExtensionDebugDir, firefoxExtensionDebugDir} from './paths.js';
-import {createTestServer} from './server.js';
+import {createTestServer, generateRandomId} from './server.js';
 
 const TEST_SERVER_PORT = 8891;
 const CORS_SERVER_PORT = 8892;
 const FIREFOX_DEVTOOLS_PORT = 8893;
 const POPUP_TEST_PORT = 8894;
 
-class PuppeteerEnvironment extends JestNodeEnvironment.TestEnvironment {
+export default class CustomJestEnvironment extends TestEnvironment {
+    /** @type {() => void} */
     extensionStartListeners = [];
+    pageEventListeners = new Map();
+
+    /** @type {Browser} */
+    broser;
+    /** @type {WebSocketServer} */
+    messageServer;
 
     async setup() {
         await super.setup();
 
-        const promises = [
-            this.createPopupTestServer(),
+        const promises1 = [
+            this.createMessageServer(),
+            this.launchBrowser(),
+        ];
+        const promises2 = [
             createTestServer(TEST_SERVER_PORT),
             createTestServer(CORS_SERVER_PORT),
         ];
-        promises.push();
 
-        this.browser = await this.launchBrowser();
-        this.global.browser = this.browser;
+        const results1 = await Promise.all(promises1);
+        this.messageServer = results1[0];
+        this.browser = results1[1];
 
-        promises.push(
-            this.openPopupPage(),
-            this.openDevtoolsPage(),
+        promises2.push(
             this.createTestPage(),
         );
 
-        const results = await Promise.all(promises);
-        this.popupTestServer = results[0];
-        this.testServer = results[1];
-        this.corsServer = results[2];
-        this.extensionPopup = results[3];
-        this.extensionDevtools = results[4];
-        this.page = results[5];
-        this.global.page = this.page;
+        const results2 = await Promise.all(promises2);
+        this.testServer = results2[0];
+        this.corsServer = results2[1];
+        this.page = results2[2];
+
+        // Wait for tabs to load?
 
         this.assignTestGlobals();
     }
 
+    /**
+     * @returns {Promise<void>}
+     */
     async waitForStartup() {
         if (!this.extensionOrigin) {
             return new Promise((ready) => this.extensionStartListeners.push(ready));
         }
     }
 
+    /**
+     * @returns {Promise<Browser>}
+     */
     async launchBrowser() {
-        /** @type {import('puppeteer-core').Browser} */
         let browser;
         if (this.global.product === 'chrome') {
             browser = await this.launchChrome(true);
@@ -68,6 +77,9 @@ class PuppeteerEnvironment extends JestNodeEnvironment.TestEnvironment {
         return browser;
     }
 
+    /**
+     * @returns {Promise<Browser>}
+     */
     async launchChrome(mv2) {
         const extensionDir = mv2 ? chromeExtensionDebugDir : chromeMV3ExtensionDebugDir;
         let executablePath;
@@ -76,7 +88,9 @@ class PuppeteerEnvironment extends JestNodeEnvironment.TestEnvironment {
         } catch (e) {
             console.error(e);
         }
-        return await puppeteer.launch({
+        // Explanation of these options:
+        // https://pptr.dev/guides/chrome-extensions
+        return await launch({
             executablePath,
             headless: false,
             args: [
@@ -87,64 +101,50 @@ class PuppeteerEnvironment extends JestNodeEnvironment.TestEnvironment {
         });
     }
 
+    /**
+     * @returns {Promise<Browser>}
+     */
+    async launchFirefoxPuppeteer() {
+        const retries = 100;
+        const retryIntervalInMs = 100;
+        for (let i = 0; i < retries; i++) {
+            try {
+                return await connect({
+                    browserURL: `http://localhost:${FIREFOX_DEVTOOLS_PORT}`,
+                });
+            } catch (e) {
+                await new Promise((resolve) => setTimeout(resolve, retryIntervalInMs));
+            }
+        }
+        throw new Error('Failed to connect to Puppeteer');
+    }
+
+    /**
+     * @returns {Promise<Browser>}
+     */
     async launchFirefox() {
-        const firefoxPath = await getFirefoxPath();
-        const webExtInstance = await cmd.run({
+        // We need to manually launch Firefox via cmd.run() to install extension
+        // because Firefox does not support installing via CLI arguments
+        const firefox = await getFirefoxPath();
+        await cmd.run({
             sourceDir: firefoxExtensionDebugDir,
-            firefox: firefoxPath,
+            firefox,
+            noReload: true,
             args: ['--remote-debugging-port', FIREFOX_DEVTOOLS_PORT],
         }, {
             shouldExitProgram: false,
         });
-        await new Promise((resolve) => setTimeout(resolve, 2000));
-        this.firefoxInternalUUID = await this.getFirefoxInternalUUID(webExtInstance);
-        return await puppeteer.connect({
-            browserURL: `http://localhost:${FIREFOX_DEVTOOLS_PORT}`,
-        });
-    }
-
-    async getFirefoxInternalUUID(webExtInstance) {
-        const runner = webExtInstance.extensionRunners[0];
-        const firefoxArgs = runner.runningInfo.firefox.spawnargs;
-        const profileDir = firefoxArgs[firefoxArgs.indexOf('-profile') + 1];
-        const prefsFile = await fs.readFile(path.join(profileDir, 'prefs.js'), 'utf8');
-        const extensionsJson = prefsFile
-            .match(/user_pref\("extensions.webextensions.uuids", "(.*?)"\);/)[1]
-            .replace(/\\"/g, '"');
-        const extensionsIds = JSON.parse(extensionsJson);
-        return extensionsIds['addon@darkreader.org'];
+        return await this.launchFirefoxPuppeteer();
     }
 
     async createTestPage() {
-        const page = await this.browser.newPage();
-        page.setCacheEnabled(false);
-        page.on('pageerror', (err) => process.emit('uncaughtException', err));
-        if (this.global.product !== 'firefox') {
-            await page.coverage.startJSCoverage();
-        }
-        return page;
-    }
-
-    /**
-     * @param {string} path
-     * @returns {Promise<puppeteer.Page>}
-     */
-    async openExtensionPage(path) {
-        if (this.global.product === 'chrome' || this.global.product === 'chrome-mv3') {
-            return await this.openChromePage(path);
-        }
         if (this.global.product === 'firefox') {
-            return await this.openFirefoxPage(path);
+            return;
         }
-        return null;
-    }
-
-    async openPopupPage() {
-        return await this.openExtensionPage('/ui/popup/index.html');
-    }
-
-    async openDevtoolsPage() {
-        return await this.openExtensionPage('/ui/devtools/index.html');
+        const page = await this.browser.newPage();
+        page.on('pageerror', (err) => process.emit('uncaughtException', err));
+        await page.coverage.startJSCoverage();
+        return page;
     }
 
     async getURL(path) {
@@ -156,62 +156,179 @@ class PuppeteerEnvironment extends JestNodeEnvironment.TestEnvironment {
     }
 
     async getChromiumMV2BackgroundPage() {
-        const targets = await this.browser.targets();
+        const targets = this.browser.targets();
         const backgroundTarget = targets.find((t) => t.type() === 'background_page');
         return await backgroundTarget.page();
     }
 
-    async openChromePage(path) {
-        const pageURL = await this.getURL(path);
-        const extensionPage = await this.browser.newPage();
-        await extensionPage.goto(pageURL);
-
-        return extensionPage;
+    async awaitForEvent(uuid) {
+        return new Promise((resolve) => {
+            if (this.pageEventListeners.has(uuid)) {
+                this.pageEventListeners.get(uuid).push(resolve);
+            } else {
+                this.pageEventListeners.set(uuid, [resolve]);
+            }
+        });
     }
 
-    async openFirefoxPage(path) {
-        const extensionPage = await this.browser.newPage();
+    /**
+     * @param {Page} page
+     * @param {string} url
+     * @param {WaitForOptions} gotoOptions
+     * @returns Promise which resolves when page loads
+     */
+    async pageGoto(url, gotoOptions) {
+        // Normalize URL
+        const pathname = new URL(url).pathname;
+        // Depending on external circumstances, page may connect to server before page.goto() reolves
+        const promise = this.awaitForEvent(`ready-${pathname}`);
+        // Firefox does not resolve promise returned by page.goto()
         // Doesn't resolve due to https://github.com/puppeteer/puppeteer/issues/6616
-        extensionPage.goto(`moz-extension://${this.firefoxInternalUUID}${path}`);
-        await new Promise((promise) => setTimeout(promise, 1000));
-        return extensionPage;
+        if (this.global.product !== 'firefox') {
+            await this.page.goto(url, gotoOptions);
+        } else {
+            await this.global.backgroundUtils.createTab(url);
+        }
+        await promise;
+    }
+
+    async openTestPage(url, gotoOptions) {
+        if (this.global.product !== 'firefox') {
+            await this.page.bringToFront();
+        }
+        await this.pageGoto(url, gotoOptions);
+    }
+
+    onPageEventResponse(eventUUID) {
+        const resolves = this.pageEventListeners.get(eventUUID);
+        this.pageEventListeners.delete(eventUUID);
+        resolves && resolves.forEach((r) => r());
     }
 
     assignTestGlobals() {
+        this.global.getColorScheme = async () => {
+            if (this.global.product === 'firefox') {
+                throw new Error('Firefox does not support page.evaluate()');
+            }
+            const isDark = await this.page.evaluate(() => matchMedia('(prefers-color-scheme: dark)').matches);
+            return isDark ? 'dark' : 'light';
+        };
+
+        this.global.evaluateScript = async (script) => {
+            if (this.global.product === 'firefox') {
+                if (typeof script !== 'function') {
+                    throw new Error('Not implemented');
+                }
+                return await this.global.pageUtils.evaluate(`(${script.toString()})()`);
+            }
+            return await this.page.evaluate(script);
+        };
+
+        this.global.expectPageStyles = async (expect, expectations) => {
+            if (this.global.product === 'firefox') {
+                const errors = await this.global.pageUtils.expectPageStyles(expectations);
+                expect(errors.length).toBe(0);
+                return;
+            }
+            if (!Array.isArray(expectations[0])) {
+                expectations = [expectations];
+            }
+            const promises = [];
+            for (const [selector, cssAttributeName, expectedValue] of expectations) {
+                const promise = expect(this.page.evaluate(
+                    (selector, cssAttributeName) => {
+                        let element = document;
+                        if (!Array.isArray(selector)) {
+                            selector = [selector];
+                        }
+                        for (const part of selector) {
+                            if (element instanceof HTMLIFrameElement) {
+                                element = element.contentDocument;
+                            }
+                            if (part === 'document') {
+                                element = element.documentElement;
+                            } else {
+                                element = element.querySelector(part);
+                            }
+                        }
+                        const style = getComputedStyle(element);
+                        return style[cssAttributeName];
+                    },
+                    selector, cssAttributeName
+                )).resolves.toBe(expectedValue);
+                promises.push(promise);
+            }
+            return Promise.all(promises);
+        };
+
+        this.global.emulateMedia = async (name, value) => {
+            if (this.global.product === 'firefox') {
+                return;
+            }
+            await this.page.emulateMediaFeatures([{name, value}]);
+            if (this.global.product === 'chrome') {
+                const page = await this.getChromiumMV2BackgroundPage();
+                await page.emulateMediaFeatures([{name, value}]);
+            }
+        };
+
         this.global.loadTestPage = async (paths, gotoOptions) => {
             const {cors, ...testPaths} = paths;
             this.testServer.setPaths(testPaths);
             cors && this.corsServer.setPaths(cors);
-            const {page} = this;
-            await page.bringToFront();
-            await page.goto(`http://localhost:${TEST_SERVER_PORT}`, gotoOptions);
-            // TODO: Determine why sometimes tests are executed before content script
-            await page.evaluate(() => new Promise((resolve) => setTimeout(resolve, 1000)));
+            await this.openTestPage(`http://localhost:${TEST_SERVER_PORT}`, gotoOptions);
         };
+
         this.global.corsURL = this.corsServer.url;
     }
 
-    async createPopupTestServer() {
+    /**
+     * Creates a server and returns once extension connects to it
+     * @returns {Promise<WebSocketServer>} server
+     */
+    async createMessageServer() {
+        const awaitForEvent = this.awaitForEvent.bind(this);
+
         // Puppeteer cannot evaluate scripts in moz-extension:// pages
         // https://github.com/puppeteer/puppeteer/issues/6616
         return new Promise((resolve) => {
             const wsServer = new WebSocketServer({port: POPUP_TEST_PORT});
-            const sockets = new Set();
+            let backgroundSocket = null;
+            let devToolsSocket = null;
+            const popupSockets = new Set();
+            const pageSockets = new Set();
             const resolvers = new Map();
             const rejectors = new Map();
-            let idCount = 0;
-
-            wsServer.on('listening', () => resolve(wsServer));
 
             wsServer.on('connection', async (ws) => {
-                sockets.add(ws);
                 ws.on('message', (data) => {
                     const message = JSON.parse(data);
-                    if (message.id === null && message.data.extensionOrigin) {
+                    if (message.id === null && message.data && message.data.type === 'background' && message.data.extensionOrigin) {
                         // This is the initial message which contains extension's URL origin
                         // and signals that extenstion is ready
                         this.extensionOrigin = message.data.extensionOrigin;
                         this.extensionStartListeners.forEach((ready) => ready());
+                        ws.on('close', () => backgroundSocket = null);
+                        backgroundSocket = ws;
+                        resolve(wsServer);
+                    } else if (message.id === null && message.data && message.data.type === 'devtools') {
+                        ws.on('close', () => devToolsSocket = null);
+                        devToolsSocket = ws;
+                        this.onPageEventResponse(message.data.uuid);
+                    } else if (message.id === null && message.data && message.data.type === 'popup') {
+                        ws.on('close', () => popupSockets.delete(ws));
+                        popupSockets.add(ws);
+                        this.onPageEventResponse(message.data.uuid);
+                    } else if (message.id === null && message.data && message.data.type === 'page') {
+                        if (message.data.message === 'page-ready') {
+                            ws.on('close', () => pageSockets.delete(ws));
+                            // Filter out non-top frames
+                            // this is to simplify expectPageStyle implementation
+                            if (message.data.uuid === 'ready-/') {
+                                pageSockets.add(ws);
+                            }
+                        }
+                        this.onPageEventResponse(message.data.uuid);
                     } else if (message.error) {
                         const reject = rejectors.get(message.id);
                         reject(message.error);
@@ -222,52 +339,74 @@ class PuppeteerEnvironment extends JestNodeEnvironment.TestEnvironment {
                     resolvers.delete(message.id);
                     rejectors.delete(message.id);
                 });
-                ws.on('close', () => sockets.delete(ws));
             });
 
-            function sendToUIPage(type, data) {
+
+            function sendToContext(sockets, type, data) {
                 return new Promise((resolve, reject) => {
-                    resolvers.set(idCount, resolve);
-                    rejectors.set(idCount, reject);
-                    const json = JSON.stringify({type, data, id: idCount});
-                    sockets.forEach((ws) => ws.send(json));
-                    idCount++;
+                    const id = generateRandomId();
+                    resolvers.set(id, resolve);
+                    rejectors.set(id, reject);
+                    const json = JSON.stringify({type, data, id});
+                    for (const ws of sockets) {
+                        ws.send(json);
+                    }
                 });
             }
 
+            function sendToPopup(type, data) {
+                return sendToContext(Array.from(popupSockets), type, data);
+            }
+
+            function sendToDevTools(type, data) {
+                return sendToContext([devToolsSocket], type, data);
+            }
+
+            function sendToBackground(type, data) {
+                return sendToContext([backgroundSocket], type, data);
+            }
+
+            function sendToPage(type, data) {
+                return sendToContext(Array.from(pageSockets), type, data);
+            }
+
+            async function applyDevtoolsConfig(type, fixes) {
+                const promise = awaitForEvent('darkreader-dynamic-theme-ready');
+                await sendToDevTools(type, fixes);
+                await promise;
+            }
+
             this.global.popupUtils = {
-                click: async (selector) => await sendToUIPage('click', selector),
-                exists: async (selector) => await sendToUIPage('exists', selector),
+                click: async (selector) => await sendToPopup('click', selector),
+                exists: async (selector) => await sendToPopup('exists', selector),
             };
 
             this.global.devtoolsUtils = {
-                paste: async (fixes) => await sendToUIPage('debug-devtools-paste', fixes),
-                reset: async () => await sendToUIPage('debug-devtools-reset'),
+                paste: async (fixes) => await applyDevtoolsConfig('debug-devtools-paste', fixes),
+                reset: async () => await applyDevtoolsConfig('debug-devtools-reset'),
             };
 
             this.global.backgroundUtils = {
-                changeSettings: async (settings) => await sendToUIPage('changeSettings', settings),
-                collectData: async () => await sendToUIPage('collectData'),
-                changeChromeStorage: async (region, data) => await sendToUIPage('changeChromeStorage', {region, data}),
-                getChromeStorage: async (region, keys) => await sendToUIPage('getChromeStorage', {region, keys}),
-                setDataIsMigratedForTesting: async (value) => await sendToUIPage('setDataIsMigratedForTesting', value),
-                emulateMedia: async (name, value) => {
-                    if (this.global.product === 'firefox') {
-                        return;
-                    }
-                    let page;
-                    if (this.global.product === 'chrome-mv3') {
-                        page = this.page;
-                    } else if (this.global.product === 'chrome') {
-                        page = await this.getChromiumMV2BackgroundPage();
-                    }
-                    await page.emulateMediaFeatures([{name, value}]);
-                },
-                getManifest: async () => await sendToUIPage('getManifest'),
+                changeSettings: async (settings) => await sendToBackground('changeSettings', settings),
+                collectData: async () => await sendToBackground('collectData'),
+                changeChromeStorage: async (region, data) => await sendToBackground('changeChromeStorage', {region, data}),
+                getChromeStorage: async (region, keys) => await sendToBackground('getChromeStorage', {region, keys}),
+                getManifest: async () => await sendToBackground('getManifest'),
+                createTab: async (url) => await sendToBackground('createTab', url),
             };
+
+            this.global.pageUtils = {
+                evaluate: async (script) => await sendToPage('firefox-eval', script),
+                expectPageStyles: async (expectations) => await sendToPage('firefox-expectPageStyles', expectations),
+            };
+
+            this.global.awaitForEvent = awaitForEvent;
         });
     }
 
+    /**
+     * @returns {Promise<void>}
+     */
     async teardown() {
         await super.teardown();
 
@@ -285,11 +424,9 @@ class PuppeteerEnvironment extends JestNodeEnvironment.TestEnvironment {
         promises.push([
             this.testServer?.close(),
             this.corsServer?.close(),
-            this.popupTestServer?.close(),
+            this.messageServer?.close(),
             this.browser?.close(),
         ]);
         await Promise.all(promises);
     }
 }
-
-export default PuppeteerEnvironment;

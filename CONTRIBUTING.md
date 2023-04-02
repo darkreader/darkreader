@@ -12,6 +12,28 @@ Sponsor the development of Dark Reader.
 
 [Improve or suggest](https://github.com/darkreader/darkreader/tree/main/src/_locales) a translation. See the list of [language codes](https://developer.chrome.com/webstore/i18n#localeTable) that we can support.
 
+## Disabling Dark Reader on your site
+
+Website pages can request Dark Reader to disable itself by embedding a "Dark Reader lock". The "lock" is a `<meta>` tag with `name` attribute set to `darkreader-lock` which is a child of `<head>` tag in the document.
+
+### Disabling Dark Reader statically
+
+Add `<meta name="darkreader-lock">` within your HTML document in `<head>` like so:
+```html
+<head>
+    <meta name="darkreader-lock">
+</head>
+```
+
+### Disabling Dark Reader dynamically
+
+Add the "lock" dynamically like so (assuming browser already parsed enough of the document to create a `head` attribute):
+```js
+const lock = document.createElement('meta');
+lock.name = 'darkreader-lock';
+document.head.appendChild(lock);
+```
+
 ## Adding a website that is already dark
 
 If a website is **already dark** and meets the following requirements:
@@ -129,8 +151,8 @@ Here is a full table of available CSS variables:
 |---|---|---|
 | **`--darkreader-neutral-background`** | Neutral background color that <br>corresponds to the user's settings. | Mostly used for elements that have <br>the wrong background color. |
 | **`--darkreader-neutral-text`** | Neutral text color that <br>corresponds to the user's settings. | Used for elements with the wrong text color. |
-| **`--darkreader-selection-background`** | The text color setting <br>defined by the user. | The user's Text Color setting. |
-| **`--darkreader-selection-text`** | The background color setting <br>defined by the user. | The user's Background Color setting. |
+| **`--darkreader-selection-background`** | The background color setting <br>defined by the user. | The user's Background Color setting. |
+| **`--darkreader-selection-text`** | The text color setting <br>defined by the user. | The user's Text Color setting. |
 
 ## Fixes for Filter and Filter+ mode
 

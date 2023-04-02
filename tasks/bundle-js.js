@@ -1,13 +1,10 @@
 // @ts-check
-import fs from 'fs';
-import os from 'os';
 import * as rollup from 'rollup';
 import rollupPluginNodeResolve from '@rollup/plugin-node-resolve';
 /** @type {any} */
 import rollupPluginReplace from '@rollup/plugin-replace';
 /** @type {any} */
 import rollupPluginTypescript from '@rollup/plugin-typescript';
-import rollupPluginTypescript2 from 'rollup-plugin-typescript2';
 import typescript from 'typescript';
 import paths from './paths.js';
 import * as reload from './reload.js';
@@ -99,7 +96,7 @@ function freeRollupPluginInstance(name, key) {
 
 async function bundleJS(/** @type {JSEntry} */entry, platform, debug, watch, log, test) {
     const {src, dest} = entry;
-    const rollupPluginTypesctiptInstanceKey = `${debug}`;
+    const rollupPluginTypesctiptInstanceKey = `${platform}-${debug}`;
     const rollupPluginReplaceInstanceKey = `${platform}-${debug}-${watch}-${entry.src === 'src/ui/popup/index.tsx'}`;
 
     const destination = typeof dest === 'string' ? dest : dest(platform);
@@ -128,25 +125,23 @@ async function bundleJS(/** @type {JSEntry} */entry, platform, debug, watch, log
         input: rootPath(src),
         plugins: [
             getRollupPluginInstance('nodeResolve', '', rollupPluginNodeResolve),
-            getRollupPluginInstance('typesctipt', rollupPluginTypesctiptInstanceKey, () => {
-                const plugin = debug ? rollupPluginTypescript2 : rollupPluginTypescript;
-                const config = {
+            getRollupPluginInstance('typesctipt', rollupPluginTypesctiptInstanceKey, () =>
+                rollupPluginTypescript({
                     rootDir,
                     typescript,
                     tsconfig: rootPath('src/tsconfig.json'),
+                    compilerOptions: platform === PLATFORM.CHROME_MV3 ? {
+                        target: 'ES2022',
+                    } : undefined,
                     noImplicitAny: debug ? false : true,
+                    noUnusedLocals: debug ? false : true,
                     strictNullChecks: debug ? false : true,
                     removeComments: debug ? false : true,
                     sourceMap: debug ? true : false,
                     inlineSources: debug ? true : false,
                     noEmitOnError: watch ? false : true,
-                    cacheDir: debug ? `${fs.realpathSync(os.tmpdir())}/darkreader_typescript_cache` : undefined,
-                };
-                if (debug) {
-                    config.verbosty = 3;
-                }
-                return plugin(config);
-            }),
+                })
+            ),
             getRollupPluginInstance('replace', rollupPluginReplaceInstanceKey, () =>
                 rollupPluginReplace({
                     preventAssignment: true,

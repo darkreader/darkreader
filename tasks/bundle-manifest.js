@@ -2,20 +2,10 @@
 import path from './paths.js';
 import * as reload from './reload.js';
 import {createTask} from './task.js';
-import {readFile, writeFile} from './utils.js';
+import {readJSON, writeJSON} from './utils.js';
 const {PLATFORM, getDestDir} = path;
 
 const srcDir = 'src';
-
-async function readJSON(path) {
-    const file = await readFile(path);
-    return JSON.parse(file);
-}
-
-async function writeJSON(path, json) {
-    const content = JSON.stringify(json, null, 4);
-    return await writeFile(path, content);
-}
 
 async function patchManifest(platform, debug, watch, test) {
     const manifest = await readJSON(`${srcDir}/manifest.json`);
@@ -37,12 +27,15 @@ async function patchManifest(platform, debug, watch, test) {
     return patched;
 }
 
-async function manifests({platforms, debug, watch, test}) {
+async function manifests({platforms, debug, watch, test, version}) {
     const enabledPlatforms = Object.values(PLATFORM).filter((platform) => platform !== PLATFORM.API && platforms[platform]);
     for (const platform of enabledPlatforms) {
         const manifest = await patchManifest(platform, debug, watch, test);
         const destDir = getDestDir({debug, platform});
-        await writeJSON(`${destDir}/manifest.json`, manifest);
+        // Firefox Add-ons store parses and rewrites manifest.json during signing process
+        // It only changes indentation to 2 spaces, but not the content or order of the keys
+        const space = (version && platform === PLATFORM.FIREFOX) ? 2 : undefined;
+        await writeJSON(`${destDir}/manifest.json`, manifest, space);
     }
 }
 
@@ -58,7 +51,7 @@ const bundleManifestTask = createTask(
             const changed = chrome || changedFiles.some((file) => file.endsWith(`manifest-${platform}.json`));
             platforms[platform] = changed && buildPlatforms[platform];
         }
-        await manifests({platforms, debug: true, watch: true, test: false});
+        await manifests({platforms, debug: true, watch: true, test: false, version: null});
         reload.reload({type: reload.FULL});
     },
 );

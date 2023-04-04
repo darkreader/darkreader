@@ -12,7 +12,7 @@ import {isMatchMediaChangeEventListenerBuggy} from '../../../utils/platform';
 declare const __CHROMIUM_MV3__: boolean;
 
 export default function AutomationPage(props: ViewProps) {
-    const isSystemAutomation = props.data.settings.automation.mode === AutomationMode.SYSTEM;
+    const isSystemAutomation = props.data.settings.automation.mode === AutomationMode.SYSTEM && props.data.settings.automation.enabled;
     const locationSettings = props.data.settings.location;
     const values = {
         'latitude': {

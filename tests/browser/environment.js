@@ -184,6 +184,7 @@ export default class CustomJestEnvironment extends TestEnvironment {
         const promise = this.awaitForEvent(`ready-${pathname}`);
         // Firefox does not resolve promise returned by page.goto()
         // Doesn't resolve due to https://github.com/puppeteer/puppeteer/issues/6616
+        // TODO(anton): remove this once Firefox supports tab.eval() via WebDriver BiDi
         if (this.global.product !== 'firefox') {
             await this.page.goto(url, gotoOptions);
         } else {

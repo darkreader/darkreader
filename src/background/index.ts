@@ -190,6 +190,7 @@ if (__TEST__) {
                     chrome.storage[region].get(keys, respond);
                     break;
                 }
+                // TODO(anton): remove this once Firefox supports tab.eval() via WebDriver BiDi
                 case 'createTab':
                     chrome.tabs.update(testTabId!, {url: message.data, active: true}, () => respond());
                     break;

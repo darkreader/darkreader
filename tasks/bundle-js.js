@@ -124,12 +124,12 @@ async function bundleJS(/** @type {JSEntry} */entry, platform, debug, watch, log
     const bundle = await rollup.rollup({
         input: rootPath(src),
         plugins: [
-            // Firefox does not currently support tab.eval() functions fully, so we have to manually polyfill it via
-            // regular eval().
+            // Firefox WebDriver implementation does not currently support tab.eval() functions fully,
+            // so we have to manually polyfill it via regular eval().
             // This plugin is necessary to avoid (benign) warnings in the console during builds, it just replaces
             // literally one occurence of eval() in our code even before TypeSctipt even encounters it.
             // TODO(anton): remove this once Firefox supports tab.eval() via WebDriver BiDi
-            getRollupPluginInstance('removeEval', '', () => !debug && entry.src === 'src/background/index.ts' &&
+            getRollupPluginInstance('removeEval', '', () => !test && entry.src === 'src/background/index.ts' &&
                 rollupPluginReplace({
                     preventAssignment: true,
                     'eval(': 'void(',

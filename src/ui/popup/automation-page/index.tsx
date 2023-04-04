@@ -12,12 +12,8 @@ import ManageExternalConnectionsButton from './mange-external-connections-button
 
 declare const __CHROMIUM_MV3__: boolean;
 
-type AutomationPageProps = ViewProps & {
-    onManageExternalConnectionsClick: () => void;
-};
-
-export default function AutomationPage(props: AutomationPageProps) {
-    const isSystemAutomation = props.data.settings.automation.mode === AutomationMode.SYSTEM;
+export default function AutomationPage(props: ViewProps) {
+    const isSystemAutomation = props.data.settings.automation.mode === AutomationMode.SYSTEM && props.data.settings.automation.enabled;
     const locationSettings = props.data.settings.location;
     const values = {
         'latitude': {

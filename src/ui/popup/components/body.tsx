@@ -4,7 +4,7 @@ import {withForms} from 'malevic/forms';
 import {withState, useState} from 'malevic/state';
 import {TabPanel, Button} from '../../controls';
 import FilterSettings from './filter-settings';
-import {Header, MoreToggleSettings} from './header';
+import {Header, MoreSiteSettings, MoreToggleSettings} from './header';
 import Loader from './loader';
 import NewBody from '../body';
 import MoreSettings from './more-settings';
@@ -28,6 +28,7 @@ interface BodyState {
     activeTab: string;
     newsOpen: boolean;
     didNewsSlideIn: boolean;
+    moreSiteSettingsOpen: boolean;
     moreToggleSettingsOpen: boolean;
 }
 
@@ -41,6 +42,7 @@ function Body(props: BodyProps & {fonts: string[]}) {
         activeTab: 'Filter',
         newsOpen: false,
         didNewsSlideIn: false,
+        moreSiteSettingsOpen: false,
         moreToggleSettingsOpen: false,
     });
 
@@ -53,7 +55,7 @@ function Body(props: BodyProps & {fonts: string[]}) {
     }
 
     if (isMobile || props.data.settings.previewNewDesign) {
-        return <NewBody {...props} fonts={props.fonts}/>;
+        return <NewBody {...props} fonts={props.fonts} />;
     }
 
     const unreadNews = props.data.news.filter(({read}) => !read);
@@ -90,6 +92,10 @@ function Body(props: BodyProps & {fonts: string[]}) {
         }
     }
 
+    function toggleMoreSiteSettings() {
+        setState({moreSiteSettingsOpen: !state.moreSiteSettingsOpen});
+    }
+
     function toggleMoreToggleSettings() {
         setState({moreToggleSettingsOpen: !state.moreToggleSettingsOpen});
     }
@@ -101,6 +107,7 @@ function Body(props: BodyProps & {fonts: string[]}) {
             <Header
                 data={props.data}
                 actions={props.actions}
+                onMoreSiteSettingsClick={toggleMoreSiteSettings}
                 onMoreToggleSettingsClick={toggleMoreToggleSettings}
             />
 
@@ -112,7 +119,7 @@ function Body(props: BodyProps & {fonts: string[]}) {
                         <FilterSettings data={props.data} actions={props.actions} />
                     ),
                     'More': (
-                        <MoreSettings data={props.data} actions={props.actions} fonts={props.fonts}/>
+                        <MoreSettings data={props.data} actions={props.actions} fonts={props.fonts} />
                     ),
                 } : {
                     'Filter': (
@@ -122,7 +129,7 @@ function Body(props: BodyProps & {fonts: string[]}) {
                         <SiteListSettings data={props.data} actions={props.actions} isFocused={state.activeTab === 'Site list'} />
                     ),
                     'More': (
-                        <MoreSettings data={props.data} actions={props.actions} fonts={props.fonts}/>
+                        <MoreSettings data={props.data} actions={props.actions} fonts={props.fonts} />
                     ),
                 }}
                 tabLabels={{
@@ -154,6 +161,12 @@ function Body(props: BodyProps & {fonts: string[]}) {
                 expanded={state.newsOpen}
                 onNewsOpen={onNewsOpen}
                 onClose={toggleNews}
+            />
+            <MoreSiteSettings
+                data={props.data}
+                actions={props.actions}
+                isExpanded={state.moreSiteSettingsOpen}
+                onClose={toggleMoreSiteSettings}
             />
             <MoreToggleSettings
                 data={props.data}

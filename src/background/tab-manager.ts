@@ -258,7 +258,8 @@ export default class TabManager {
         // It can happen in cases whereby the tab.url is empty.
         // Luckily this only and will only happen on `about:blank`-like pages.
         // Due to this we can safely use `about:blank` as fallback value.
-        return tab.url || 'about:blank';
+        // In some extraordinary circumstances tab may be undefined.
+        return tab && tab.url || 'about:blank';
     }
 
     public static async updateContentScript(options: {runOnProtectedPages: boolean}) {

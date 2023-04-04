@@ -73,8 +73,8 @@ describe('Toggling the extension', () => {
         }
         await loadBasicPage('Automation (color scheme)');
 
-        const automationMenuSelector = '.header__app-toggle__more-button';
-        const automationSystemSelector = '.header__app-toggle__more-settings__system-dark-mode__checkbox .checkbox__input';
+        const automationMenuSelector = '.header__more-settings-button';
+        const automationSystemSelector = '.header__more-settings__system-dark-mode__checkbox .checkbox__input';
 
         await emulateMedia('prefers-color-scheme', 'light');
         await expect(getColorScheme()).resolves.toBe('light');

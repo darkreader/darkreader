@@ -52,8 +52,8 @@ if (isFirefox) {
     fixNotClosingPopupOnNavigation();
 }
 
-declare const __TEST__: boolean;
-if (__TEST__) {
+declare const __DEBUG__: boolean;
+if (__DEBUG__) {
     chrome.runtime.onMessage.addListener(({type}) => {
         if (type === MessageType.BG_CSS_UPDATE) {
             document.querySelectorAll('link[rel="stylesheet"]').forEach((link: HTMLLinkElement) => {
@@ -71,7 +71,10 @@ if (__TEST__) {
             location.reload();
         }
     });
+}
 
+declare const __TEST__: boolean;
+if (__TEST__) {
     const socket = new WebSocket(`ws://localhost:8894`);
     socket.onopen = async () => {
         socket.send(JSON.stringify({

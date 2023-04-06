@@ -1,7 +1,8 @@
 // @ts-check
 
-const {dirname} = require('path');
-const rootDir = dirname(require.resolve('../../package.json'));
+import {dirname} from 'path';
+//const rootDir = dirname(require.resolve('../../package.json'));
+const rootDir = '../../';
 
 /** @type {import('@jest/types').Config.InitialOptions} */
 const config = {
@@ -18,4 +19,4 @@ const config = {
     setupFilesAfterEnv: ['jest-extended/all'],
 };
 
-module.exports = config;
+export default config;

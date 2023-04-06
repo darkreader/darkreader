@@ -121,8 +121,20 @@ async function bundleJS(/** @type {JSEntry} */entry, platform, debug, watch, log
             break;
     }
 
+    // See comment below
+    // TODO(anton): remove this once Firefox supports tab.eval() via WebDriver BiDi
+    const shouldPermitEval = test && (platform === PLATFORM.FIREFOX) && (entry.src === 'src/inject/index.ts');
+
     const bundle = await rollup.rollup({
         input: rootPath(src),
+        onwarn: (error) => {
+            // TODO(anton): remove this once Firefox supports tab.eval() via WebDriver BiDi
+            if (error.code === 'EVAL' && shouldPermitEval) {
+                return;
+            }
+
+            throw error;
+        },
         plugins: [
             // Firefox WebDriver implementation does not currently support tab.eval() functions fully,
             // so we have to manually polyfill it via regular eval().
@@ -130,7 +142,7 @@ async function bundleJS(/** @type {JSEntry} */entry, platform, debug, watch, log
             // literally one occurence of eval() in our code even before TypeSctipt even encounters it.
             // With this plugin, warning apprears only on Firefox test builds.
             // TODO(anton): remove this once Firefox supports tab.eval() via WebDriver BiDi
-            getRollupPluginInstance('removeEval', '', () => !(test && platform === PLATFORM.FIREFOX) && entry.src === 'src/background/index.ts' &&
+            getRollupPluginInstance('removeEval', '', () => !shouldPermitEval &&
                 rollupPluginReplace({
                     preventAssignment: true,
                     'eval(': 'void(',
@@ -169,7 +181,7 @@ async function bundleJS(/** @type {JSEntry} */entry, platform, debug, watch, log
                     __LOG__: log ? `"${log}"` : false,
                 })
             ),
-        ].filter((x) => x)
+        ].filter(Boolean)
     });
     // TODO(anton): remove this once Firefox supports tab.eval() via WebDriver BiDi
     freeRollupPluginInstance('removeEval', '');

@@ -75,16 +75,15 @@ export async function getFirefoxPath() {
             // See also: https://github.com/mozilla/web-ext/issues/1696
             if (!option.includes('/snap/')) {
                 return option;
-            } else {
-                const firefoxProfile = './build/firefox-profile-for-testing';
-                process.env.TMPDIR = firefoxProfile;
-                try {
-                    fs.mkdirSync(firefoxProfile);
-                } catch (e) {
-                    // Do nothing
-                }
-                return option;
             }
+            const firefoxProfile = './build/firefox-profile-for-testing';
+            process.env.TMPDIR = firefoxProfile;
+            try {
+                fs.mkdirSync(firefoxProfile);
+            } catch (e) {
+                // Do nothing
+            }
+            return option;
         } catch (e) {
             // ignore
         }

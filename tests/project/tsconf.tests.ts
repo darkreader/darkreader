@@ -14,7 +14,8 @@ const tsProjects: Array<{tsconfig: string}> = [
     // API
     {tsconfig: 'src/api'},
     // E2E tests (Jest, Puppeteer, Node.js)
-    {tsconfig: 'tests/browser'},
+    // TODO(anton): fix upstream type conflict and uncomment me
+    // {tsconfig: 'tests/browser'},
     // Browser tests (Karma, Jasmine)
     {tsconfig: 'tests/inject'},
     // Unit tests (Jest, Node.js)

@@ -16,7 +16,7 @@ describe('tasks/build-js.js', () => {
 
         // Execute build
         // Give it a chance to reach compilation stage
-        const child = fork(buildModule, ['build', '--debug', '--api'], {cwd: tmpDir, silent: true});
+        const child = fork(buildModule, ['build', '--debug', '--chrome'], {cwd: tmpDir, silent: true});
 
         // Wait for "clean" step to complete
         await watchStream(child.stdout).forMatch(/ clean \(\d+ms\)/);

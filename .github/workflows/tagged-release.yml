@@ -12,7 +12,8 @@ on:
         default: 1
       node_version:
         description: 'NodeJS version'
-        required: false
+        required: true
+        default: 16.x
 
 jobs:
   build:
@@ -24,7 +25,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: ${{ inputs.node_version || 16.x }}
+          node-version: ${{ inputs.node_version }}
           cache: npm
 
       - name: Install npm dependencies

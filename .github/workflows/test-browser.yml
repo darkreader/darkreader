@@ -26,7 +26,8 @@ on:
         default: 7
       node_version:
         description: 'NodeJS version'
-        required: false
+        required: true
+        default: 16.x
 
 jobs:
   test-browser:
@@ -82,7 +83,7 @@ jobs:
       - name: Node setup
         uses: actions/setup-node@v3
         with:
-          node-version: ${{ inputs.node_version || 16.x }}
+          node-version: ${{ inputs.node_version }}
           cache: npm
 
       - name: Install NPM dependencies

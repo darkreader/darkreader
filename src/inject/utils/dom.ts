@@ -156,7 +156,7 @@ export function watchForNodePosition<T extends Node>(
 
     const stop = () => {
         // TODO: remove type cast after dependency update
-        clearTimeout(timeoutId as number);
+        clearTimeout(timeoutId as unknown as number);
         observer.disconnect();
         restore.cancel();
     };

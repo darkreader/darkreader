@@ -12,6 +12,10 @@ const colors = Object.entries({
     yellow: '\x1b[33m',
 }).reduce((map, [key, value]) => Object.assign(map, {[key]: (/** @type {string} */text) => `${value}${text}\x1b[0m`}), {});
 
+/**
+ * @param {string} command
+ * @returns {Promise<string>}
+ */
 export async function execute(command) {
     return new Promise((resolve, reject) => exec(command, (error, stdout) => {
         if (error) {
@@ -94,6 +98,10 @@ export async function readFile(src, encoding = 'utf8') {
     return await fs.readFile(src, encoding);
 }
 
+/**
+ * @param {string} src
+ * @returns {Promise<boolean>}
+ */
 export async function fileExists(src) {
     try {
         await fs.access(src, fs.constants.R_OK);

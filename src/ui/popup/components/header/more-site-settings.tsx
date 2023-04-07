@@ -1,6 +1,8 @@
 import {m} from 'malevic';
 import {Button, CheckBox, Shortcut} from '../../../controls';
 import type {ExtWrapper} from '../../../../definitions';
+import {DONATE_URL} from '../../../../utils/links';
+import {getLocalMessage} from '../../../../utils/locales';
 import KeyboardIcon from '../../main-page/keyboard-icon';
 
 type MoreSiteSettingsProps = ExtWrapper & {
@@ -71,6 +73,14 @@ export default function MoreSiteSettings({data, actions, isExpanded, onClose}: M
                 <p class="header__more-settings__description">
                     Website toggle keyboard shortcut
                 </p>
+                <div class="header__more-settings__donate">
+                    <a class="donate-link" href={DONATE_URL} target="_blank" rel="noopener noreferrer">
+                        <span class="donate-link__text">{getLocalMessage('donate')}</span>
+                    </a>
+                    <p class="header__more-settings__description">
+                        Support our work
+                    </p>
+                </div>
             </div>
         </div>
     );

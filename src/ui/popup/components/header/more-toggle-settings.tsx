@@ -1,6 +1,7 @@
 import {m} from 'malevic';
 import {Button, CheckBox, Shortcut, TextBox, TimeRangePicker} from '../../../controls';
 import {getLocalMessage} from '../../../../utils/locales';
+import {DONATE_URL} from '../../../../utils/links';
 import type {Automation, ExtWrapper} from '../../../../definitions';
 import {AutomationMode} from '../../../../utils/automation';
 import {isMatchMediaChangeEventListenerBuggy} from '../../../../utils/platform';
@@ -183,6 +184,14 @@ export default function MoreToggleSettings({data, actions, isExpanded, onClose}:
                 <p class="header__more-settings__description">
                     Extension on/off keyboard shortcut
                 </p>
+                <div class="header__more-settings__donate">
+                    <a class="donate-link" href={DONATE_URL} target="_blank" rel="noopener noreferrer">
+                        <span class="donate-link__text">{getLocalMessage('donate')}</span>
+                    </a>
+                    <p class="header__more-settings__description">
+                        Support our work
+                    </p>
+                </div>
             </div>
         </div>
     );

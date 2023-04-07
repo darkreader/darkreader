@@ -9,11 +9,11 @@ on:
       retention_days:
         description: 'Retention duration (in days)'
         required: true
-        default: 1
+        default: '1'
       node_version:
         description: 'NodeJS version'
         required: true
-        default: 16.x
+        default: '16.x'
 
 jobs:
   build:

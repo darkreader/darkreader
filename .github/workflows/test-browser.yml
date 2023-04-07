@@ -23,11 +23,11 @@ on:
       test_results_retention_days:
         description: 'Test results retention (in days)'
         required: true
-        default: 7
+        default: '7'
       node_version:
         description: 'NodeJS version'
         required: true
-        default: 16.x
+        default: '16.x'
 
 jobs:
   test-browser:

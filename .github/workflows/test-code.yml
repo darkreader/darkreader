@@ -23,7 +23,7 @@ on:
       node_version:
         description: 'NodeJS version'
         required: true
-        default: 16.x
+        default: '16.x'
 
 jobs:
   test:

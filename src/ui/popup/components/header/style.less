@@ -328,4 +328,40 @@
     .shortcut {
         overflow: hidden;
     }
+
+    &__more-new-highlight {
+        height: 2rem;
+        pointer-events: none;
+        position: absolute;
+        right: 0rem;
+        top: 5.75rem;
+        width: 17rem;
+
+        &__text {
+            background: @color-heading;
+            bottom: 0;
+            color: @color-control-fore;
+            display: inline-block;
+            line-height: 0.75rem;
+            padding: 0.25rem;
+            position: absolute;
+            right: 0.5rem;
+        }
+
+        &__lines {
+            path {
+                fill: none;
+                stroke: @color-heading;
+                stroke-linecap: round;
+                stroke-linejoin: round;
+                stroke-width: 2;
+            }
+
+            circle {
+                fill: @color-heading;
+                r: 2;
+                stroke: none;
+            }
+        }
+    }
 }

@@ -7,6 +7,7 @@ import SunMoonIcon from '../../main-page/sun-moon-icon';
 import SystemIcon from '../../main-page/system-icon';
 import WatchIcon from '../../main-page/watch-icon';
 import SiteToggle from '../site-toggle';
+import MoreNewHighlight from './more-new-highlight';
 import MoreSiteSettings from './more-site-settings';
 import MoreToggleSettings from './more-toggle-settings';
 import {AutomationMode} from '../../../../utils/automation';
@@ -110,6 +111,7 @@ function Header({data, actions, onMoreSiteSettingsClick, onMoreToggleSettingsCli
 
 export {
     Header,
+    MoreNewHighlight,
     MoreSiteSettings,
     MoreToggleSettings, // TODO: Implement portals to place elements into <body>.
 };

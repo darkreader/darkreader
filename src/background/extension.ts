@@ -25,6 +25,7 @@ import {StateManager} from '../utils/state-manager';
 import {debounce} from '../utils/debounce';
 import ContentScriptManager from './content-script-manager';
 import {AutomationMode} from '../utils/automation';
+import UIHighlights from './ui-highlights';
 
 type AutomationState = 'turn-on' | 'turn-off' | 'scheme-dark' | 'scheme-light' | '';
 
@@ -257,6 +258,7 @@ export class Extension {
             resetDevInversionFixes: DevTools.resetInversionFixes,
             applyDevStaticThemes: DevTools.applyStaticThemes,
             resetDevStaticThemes: DevTools.resetStaticThemes,
+            hideHighlights: UIHighlights.hideHighlights,
         };
     }
 
@@ -373,11 +375,13 @@ export class Extension {
             shortcuts,
             activeTab,
             isAllowedFileSchemeAccess,
+            uiHighlights,
         ] = await Promise.all([
             Newsmaker.getLatest(),
             Extension.getShortcuts(),
             Extension.getActiveTabInfo(),
             new Promise<boolean>((r) => chrome.extension.isAllowedFileSchemeAccess(r)),
+            UIHighlights.getHighlightsToShow(),
         ]);
         return {
             isEnabled: Extension.isExtensionSwitchedOn(),
@@ -389,6 +393,7 @@ export class Extension {
             colorScheme: ConfigManager.COLOR_SCHEMES_RAW!,
             forcedScheme: Extension.autoState === 'scheme-dark' ? 'dark' : Extension.autoState === 'scheme-light' ? 'light' : null,
             activeTab,
+            uiHighlights,
         };
     }
 

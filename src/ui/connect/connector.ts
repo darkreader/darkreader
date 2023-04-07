@@ -150,6 +150,10 @@ export default class Connector implements ExtensionActions {
         chrome.runtime.sendMessage<Message>({type: MessageType.UI_RESET_DEV_STATIC_THEMES});
     }
 
+    async hideHighlights(ids: string[]) {
+        chrome.runtime.sendMessage<Message>({type: MessageType.UI_HIDE_HIGHLIGHTS, data: ids});
+    }
+
     disconnect() {
         if (this.changeSubscribers.size > 0) {
             this.changeSubscribers.clear();

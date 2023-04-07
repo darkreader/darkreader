@@ -14,6 +14,7 @@ export interface ExtensionData {
     colorScheme: ParsedColorSchemeConfig;
     forcedScheme: 'dark' | 'light' | null;
     activeTab: TabInfo;
+    uiHighlights: string[];
 }
 
 export interface DevToolsData {
@@ -41,6 +42,7 @@ export interface ExtensionActions {
     resetDevInversionFixes(): void;
     applyDevStaticThemes(text: string): Promise<void>;
     resetDevStaticThemes(): void;
+    hideHighlights(ids: string[]): void;
 }
 
 export interface ExtWrapper {

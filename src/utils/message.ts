@@ -18,6 +18,7 @@ export enum MessageType {
     UI_SAVE_FILE = 'ui-save-file',
     UI_REQUEST_EXPORT_CSS = 'ui-request-export-css',
     UI_COLOR_SCHEME_CHANGE = 'ui-color-scheme-change',
+    UI_HIDE_HIGHLIGHTS = 'ui-hide-highlights',
 
     BG_CHANGES = 'bg-changes',
     BG_ADD_CSS_FILTER = 'bg-add-css-filter',

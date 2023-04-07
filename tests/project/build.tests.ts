@@ -12,7 +12,7 @@ describe('tasks/build-js.js', () => {
     it('should respond to SIGINT signals by exiting immediately', async () => {
         expect.assertions(3);
         const tmpDir: string = await mkdtemp(join(tmpdir(), 'darkreader'));
-        const wantToWaitNoMoreThan = 5000;
+        const wantToWaitNoMoreThan = 500;
 
         // Execute build
         // Give it a chance to reach compilation stage

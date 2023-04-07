@@ -149,7 +149,7 @@ export default function MoreToggleSettings({data, actions, isExpanded, onClose}:
                             'header__more-settings__system-dark-mode__button': true,
                             'header__more-settings__system-dark-mode__button--active': isSystemAutomation,
                         }}
-                        onclick={() =>changeAutomationMode(isSystemAutomation ? AutomationMode.NONE : AutomationMode.SYSTEM)}
+                        onclick={() => changeAutomationMode(isSystemAutomation ? AutomationMode.NONE : AutomationMode.SYSTEM)}
                     >{getLocalMessage('system_dark_mode')}</Button>
                 </div>
                 <p class="header__more-settings__description">
@@ -175,21 +175,21 @@ export default function MoreToggleSettings({data, actions, isExpanded, onClose}:
                         shortcuts={data.shortcuts}
                         textTemplate={(hotkey) => (hotkey
                             ? hotkey
-                            : 'Click to set the shortcut'
+                            : getLocalMessage('click_to_set_shortcut')
                         )}
                         onSetShortcut={(shortcut) => actions.setShortcut('toggle', shortcut)}
                     />
                     <KeyboardIcon />
                 </span>
                 <p class="header__more-settings__description">
-                    Extension on/off keyboard shortcut
+                    {getLocalMessage('extension_toggle_shortcut')}
                 </p>
                 <div class="header__more-settings__donate">
                     <a class="donate-link" href={DONATE_URL} target="_blank" rel="noopener noreferrer">
                         <span class="donate-link__text">{getLocalMessage('donate')}</span>
                     </a>
                     <p class="header__more-settings__description">
-                        Support our work
+                        {getLocalMessage('support_out_work')}
                     </p>
                 </div>
             </div>

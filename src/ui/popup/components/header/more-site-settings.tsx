@@ -24,7 +24,7 @@ export default function MoreSiteSettings({data, actions, isExpanded, onClose}: M
             }}
         >
             <div class="header__more-settings__top">
-                <span class="header__more-settings__top__text">Site Toggle</span>
+                <span class="header__more-settings__top__text">{getLocalMessage('site_toggle')}</span>
                 <span class="header__more-settings__top__close" role="button" onclick={onClose}>✕</span>
             </div>
             <div class="header__more-settings__content">
@@ -44,10 +44,10 @@ export default function MoreSiteSettings({data, actions, isExpanded, onClose}: M
                             'header__more-settings__detect-dark-theme__button--active': data.settings.detectDarkTheme,
                         }}
                         onclick={toggleDetectDarkTheme}
-                    >Detect dark theme</Button>
+                    >{getLocalMessage('detect_dark_theme')}</Button>
                 </div>
                 <p class="header__more-settings__description">
-                    Whether to detect the website's own dark theme
+                    {getLocalMessage('detect_website_dark_theme')}
                 </p>
                 <span
                     class={{
@@ -64,21 +64,21 @@ export default function MoreSiteSettings({data, actions, isExpanded, onClose}: M
                         shortcuts={data.shortcuts}
                         textTemplate={(hotkey) => (hotkey
                             ? hotkey
-                            : 'Click to set the shortcut'
+                            : getLocalMessage('click_to_set_shortcut')
                         )}
                         onSetShortcut={(shortcut) => actions.setShortcut('addSite', shortcut)}
                     />
                     <KeyboardIcon />
                 </span>
                 <p class="header__more-settings__description">
-                    Website toggle keyboard shortcut
+                    {getLocalMessage('website_toggle_shortcut')}
                 </p>
                 <div class="header__more-settings__donate">
                     <a class="donate-link" href={DONATE_URL} target="_blank" rel="noopener noreferrer">
                         <span class="donate-link__text">{getLocalMessage('donate')}</span>
                     </a>
                     <p class="header__more-settings__description">
-                        Support our work
+                        {getLocalMessage('support_out_work')}
                     </p>
                 </div>
             </div>

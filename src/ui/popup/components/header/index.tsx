@@ -40,12 +40,12 @@ function Header({data, actions, onMoreSiteSettingsClick, onMoreToggleSettingsCli
     const automationMessage = isAutomation
         ? (
             isTimeAutomation
-                ? (data.isEnabled ? 'Auto (night time)' : 'Auto (day time)')
+                ? (data.isEnabled ? getLocalMessage('auto_night_time') : getLocalMessage('auto_day_time'))
                 : isLocationAutomation
-                    ? data.isEnabled ? 'Auto (night at location)' : 'Auto (day at location)'
-                    : data.isEnabled ? 'Auto (system is dark)' : 'Auto (system is light)'
+                    ? data.isEnabled ? getLocalMessage('auto_night_at_location') : getLocalMessage('auto_day_at_location')
+                    : data.isEnabled ? getLocalMessage('auto_system_is_dark') : getLocalMessage('auto_system_is_light')
         )
-        : 'Configure automation';
+        : getLocalMessage('configure_automation');
 
     const isProtected = !isFile && ((!__CHROMIUM_MV3__ && !tab.isInjected) || tab.isProtected);
     const isProtectedFile = isFile && !data.isAllowedFileSchemeAccess;
@@ -57,7 +57,7 @@ function Header({data, actions, onMoreSiteSettingsClick, onMoreToggleSettingsCli
             getLocalMessage('local_files_forbidden')
             : tab.isInDarkList ?
                 getLocalMessage('page_in_dark_list')
-                : 'Configure site toggle';
+                : getLocalMessage('configure_site_toggle');
 
     return (
         <header class="header">

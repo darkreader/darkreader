@@ -1,8 +1,8 @@
 // @ts-check
 
-import {dirname} from 'path';
-//const rootDir = dirname(require.resolve('../../package.json'));
-const rootDir = '../../';
+import {dirname} from 'node:path';
+import {createRequire} from 'node:module';
+const rootDir = dirname(createRequire(import.meta.url).resolve('../../package.json'));
 
 /** @type {import('@jest/types').Config.InitialOptions} */
 const config = {

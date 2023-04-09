@@ -10,6 +10,6 @@ export function timeout(delay: number) {
 
 export function waitForEvent(eventName: string) {
     return new Promise((resolve) => {
-        document.addEventListener(eventName, resolve, {once: true});
+        document.addEventListener(eventName, resolve, {once: true, passive: true});
     });
 }

@@ -182,7 +182,7 @@ if (__TEST__) {
     async function awaitDOMContentLoaded() {
         if (document.readyState === 'loading') {
             return new Promise<void>((resolve) => {
-                addEventListener('DOMContentLoaded', () => resolve());
+                addEventListener('DOMContentLoaded', () => resolve(), {once: true, capture: true, passive: true});
             });
         }
     }

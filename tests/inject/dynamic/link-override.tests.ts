@@ -35,8 +35,8 @@ function createCorsLink(content: string) {
 
 async function waitForLinkLoading(link: HTMLLinkElement) {
     return new Promise((resolve, reject) => {
-        link.addEventListener('load', resolve, {once: true});
-        link.addEventListener('error', reject, {once: true});
+        link.addEventListener('load', resolve, {once: true, passive: true});
+        link.addEventListener('error', reject, {once: true, passive: true});
     });
 }
 

@@ -12,7 +12,7 @@ function renderBody(data: ExtensionData, devToolsData: DevToolsData, actions: Co
 
 async function start(): Promise<void> {
     const connector = new Connector();
-    window.addEventListener('unload', () => connector.disconnect());
+    window.addEventListener('unload', () => connector.disconnect(), {passive: true});
 
     let [data, devToolsData] = await Promise.all([
         connector.getData(),

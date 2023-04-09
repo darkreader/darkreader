@@ -40,9 +40,10 @@ function Body({data, actions, devtools}: BodyProps) {
         if (!state.errorText) {
             textNode.value = wrapper.fixesText;
         }
-        node.addEventListener('keydown', (e) => {
-            if (e.key === 'Tab') {
-                e.preventDefault();
+        // Must not be passive because it calls preventDefault(), must not be once
+        node.addEventListener('keydown', ({key, preventDefault}) => {
+            if (key === 'Tab') {
+                preventDefault();
                 const indent = ' '.repeat(4);
                 if (isFirefox) {
                     // https://bugzilla.mozilla.org/show_bug.cgi?id=1220696

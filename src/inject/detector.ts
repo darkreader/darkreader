@@ -56,6 +56,7 @@ export function runDarkThemeDetector(callback: (hasDarkTheme: boolean) => void) 
                 runCheck(callback);
             }
         };
+        // readystatechange event is not cancellable and does not bubble
         document.addEventListener('readystatechange', readyStateListener);
     }
 }

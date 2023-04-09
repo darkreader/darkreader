@@ -56,6 +56,7 @@ export function createNodeAsap({
         if (document.readyState === 'complete') {
             ready();
         } else {
+            // readystatechange event is not cancellable and does not bubble
             document.addEventListener('readystatechange', ready);
             observer.observe(document, {childList: true, subtree: true});
         }
@@ -249,6 +250,7 @@ if (!isDOMReady()) {
         }
     };
 
+    // readystatechange event is not cancellable and does not bubble
     document.addEventListener('readystatechange', onReadyStateChange);
 }
 

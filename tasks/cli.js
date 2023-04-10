@@ -88,7 +88,7 @@ async function ensureGitClean() {
  * dependencies which is identical to already published version serves as a proof
  * that the published version was always free of (now known) vulnerabilities.
  *
- * @param {string} version The desired git version, e.g., 'v4.9.62' or 'v4.9.37.1'
+ * @param {string} version The desired git version, e.g., 'v4.9.63' or 'v4.9.37.1'
  * @param {boolean} fixVulnerabilities Whether of not to attempt to fix known vulnerabilities
  */
 async function checkoutVersion(version, fixVulnerabilities) {

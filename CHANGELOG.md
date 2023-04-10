@@ -1,3 +1,9 @@
+## 4.9.63 (Apr 10, 2023)
+
+- Site toggle panel (detect dark theme and shortcut).
+- App toggle panel (automation and shortcut).
+- Improved Site List indexing.
+
 ## 4.9.62 (Jan 8, 2023)
 
 - Fixed a edge case with extracting color numbers, it's now able to extract `rgb(0 0 0/0.04)`. (#10565)

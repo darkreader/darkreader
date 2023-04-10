@@ -379,7 +379,6 @@ export default class CustomJestEnvironment extends TestEnvironment {
 
             this.global.popupUtils = {
                 click: async (selector) => await sendToPopup('click', selector),
-                exists: async (selector) => await sendToPopup('exists', selector),
             };
 
             this.global.devtoolsUtils = {

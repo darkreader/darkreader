@@ -95,10 +95,6 @@ if (__TEST__) {
                 const element: HTMLElement = document.querySelector(selector)!;
                 element.click();
                 respond({id});
-            } else if (type === 'exists') {
-                const selector = data;
-                const element = document.querySelector(selector);
-                respond({id, data: element != null});
             } else if (type === 'rect') {
                 const selector = data;
                 const element: HTMLElement = document.querySelector(selector)!;

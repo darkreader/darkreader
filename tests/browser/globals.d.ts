@@ -11,7 +11,6 @@ declare global {
     const corsURL: string;
     const popupUtils: {
         click: (selector: string) => Promise<void>;
-        exists: (selector: string) => Promise<boolean>;
     };
     const devtoolsUtils: {
         paste: (fixes: string) => Promise<void>;

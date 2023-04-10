@@ -32,6 +32,7 @@ const CONFIG_URLs = {
         local: '../config/color-schemes.drconf',
     },
 };
+
 const REMOTE_TIMEOUT_MS = getDuration({seconds: 10});
 
 interface LocalConfig {

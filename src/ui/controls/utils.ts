@@ -1,6 +1,6 @@
 import {classes} from '../utils';
 
-function toArray<T>(x: T | T[]) {
+function toArray<T>(x: T | T[]): T[] {
     return Array.isArray(x) ? x : [x];
 }
 
@@ -22,6 +22,6 @@ export function omitAttrs(omit: string[], attrs: Malevic.NodeAttrs) {
     return result;
 }
 
-export function isElementHidden(element: HTMLElement) {
+export function isElementHidden(element: HTMLElement): boolean {
     return element.offsetParent === null;
 }

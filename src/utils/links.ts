@@ -29,12 +29,12 @@ const helpLocales = [
     'zh-TW',
 ];
 
-export function getHelpURL() {
+export function getHelpURL(): string {
     const locale = getUILanguage();
     const matchLocale = helpLocales.find((hl) => hl === locale) || helpLocales.find((hl) => locale.startsWith(hl)) || 'en';
     return `${HELP_URL}/${matchLocale}/`;
 }
 
-export function getBlogPostURL(postId: string) {
+export function getBlogPostURL(postId: string): string {
     return `${BLOG_URL}${postId}/`;
 }

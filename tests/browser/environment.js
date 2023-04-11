@@ -209,6 +209,8 @@ export default class CustomJestEnvironment extends TestEnvironment {
     /**
      * This function is evaluated within browser's page context
      * after being passed to page.evaluate()
+     * It can use methods which will be defined in the page context,
+     * but can not use variables defined in this file besides those passed into it.
      */
     async checkPageStylesInBrowserContext(expectations) {
         const check = () => {

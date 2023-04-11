@@ -206,6 +206,43 @@ export default class CustomJestEnvironment extends TestEnvironment {
         resolves && resolves.forEach((r) => r());
     }
 
+    /**
+     * This function is evaluated within browser's page context
+     * after being passed to page.evaluate()
+     */
+    async checkPageStylesInBrowserContext(expectations) {
+        const check = () => { 
+            const errors = [];
+            for (let i = 0; i < expectations.length; i++) {
+                const [selector, cssAttributeName, expectedValue] = expectations[i];
+                const selector_ = Array.isArray(selector) ? selector : [selector];
+                let element = document;
+                for (const part of selector_) {
+                    if (element instanceof HTMLIFrameElement) {
+                        element = element.contentDocument;
+                    }
+                    if (part === 'document') {
+                        element = element.documentElement;
+                    } else {
+                        element = element.querySelector(part);
+                    }
+                }
+                const style = getComputedStyle(element);
+                if (style[cssAttributeName] !== expectedValue) {
+                    errors.push(i);
+                }
+            }
+            return errors;
+        }
+
+        let results = check();
+        for (let i = 0; (results.length !== 0) && i < 1000; i++) {
+            await new Promise((r) => setTimeout(r), 10);
+            results = check();
+        }
+        return results;
+    }
+
     assignTestGlobals() {
         this.global.getColorScheme = async () => {
             if (this.global.product === 'firefox') {
@@ -234,29 +271,7 @@ export default class CustomJestEnvironment extends TestEnvironment {
             if (!Array.isArray(expectations[0])) {
                 expectations = [expectations];
             }
-            const errors = await this.page.evaluate((expectations) => {
-                const errors = [];
-                for (let i = 0; i < expectations.length; i++) {
-                    const [selector, cssAttributeName, expectedValue] = expectations[i];
-                    const selector_ = Array.isArray(selector) ? selector : [selector];
-                    let element = document;
-                    for (const part of selector_) {
-                        if (element instanceof HTMLIFrameElement) {
-                            element = element.contentDocument;
-                        }
-                        if (part === 'document') {
-                            element = element.documentElement;
-                        } else {
-                            element = element.querySelector(part);
-                        }
-                    }
-                    const style = getComputedStyle(element);
-                    if (style[cssAttributeName] !== expectedValue) {
-                        errors.push(i);
-                    }
-                }
-                return errors;
-            }, expectations);
+            const errors = await this.page.evaluate(this.checkPageStylesInBrowserContext, expectations);
             expect(errors.length).toBe(0);
         };
 

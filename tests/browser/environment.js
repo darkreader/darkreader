@@ -237,12 +237,12 @@ export default class CustomJestEnvironment extends TestEnvironment {
             return errors;
         };
 
-        let results = check();
-        for (let i = 0; (results.length !== 0) && (i < 1000); i++) {
+        let errors = check();
+        for (let i = 0; (errors.length !== 0) && (i < 1000); i++) {
             await new Promise((r) => setTimeout(r), 10);
-            results = check();
+            errors = check();
         }
-        return results;
+        return errors;
     }
 
     assignTestGlobals() {

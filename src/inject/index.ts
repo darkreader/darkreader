@@ -239,6 +239,9 @@ if (__TEST__) {
                     if (element instanceof HTMLIFrameElement) {
                         element = (element as any).contentDocument;
                     }
+                    if (element.shadowRoot instanceof ShadowRoot) {
+                        element = element.shadowRoot as unknown as Element;
+                    }
                     if (part === 'document') {
                         element = (element as any).documentElement;
                     } else {

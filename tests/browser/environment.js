@@ -236,12 +236,10 @@ export default class CustomJestEnvironment extends TestEnvironment {
             }
             const errors = await this.page.evaluate((expectations) => {
                 const errors = [];
-                for (const [selector, cssAttributeName, expectedValue] of expectations) {
+                for (let i = 0; i < expectations.length; i++) {
+                    const [selector, cssAttributeName, expectedValue] = expectations[i];
+                    const selector_ = Array.isArray(selector) ? selector : [selector];
                     let element = document;
-                    let selector_ = selector;
-                    if (!Array.isArray(selector)) {
-                        selector_ = [selector];
-                    }
                     for (const part of selector_) {
                         if (element instanceof HTMLIFrameElement) {
                             element = element.contentDocument;
@@ -254,7 +252,7 @@ export default class CustomJestEnvironment extends TestEnvironment {
                     }
                     const style = getComputedStyle(element);
                     if (style[cssAttributeName] !== expectedValue) {
-                        errors.push([cssAttributeName, expectedValue]);
+                        errors.push(i);
                     }
                 }
                 return errors;

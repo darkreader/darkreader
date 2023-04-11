@@ -211,7 +211,7 @@ export default class CustomJestEnvironment extends TestEnvironment {
      * after being passed to page.evaluate()
      */
     async checkPageStylesInBrowserContext(expectations) {
-        const check = () => { 
+        const check = () => {
             const errors = [];
             for (let i = 0; i < expectations.length; i++) {
                 const [selector, cssAttributeName, expectedValue] = expectations[i];
@@ -233,10 +233,10 @@ export default class CustomJestEnvironment extends TestEnvironment {
                 }
             }
             return errors;
-        }
+        };
 
         let results = check();
-        for (let i = 0; (results.length !== 0) && i < 1000; i++) {
+        for (let i = 0; (results.length !== 0) && (i < 1000); i++) {
             await new Promise((r) => setTimeout(r), 10);
             results = check();
         }

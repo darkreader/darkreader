@@ -89,7 +89,6 @@ describe('Toggling the extension', () => {
         ]);
 
         await popupUtils.click(automationMenuSelector);
-        await timeout(250);
         await popupUtils.click(automationSystemSelector);
         await timeout(250);
 

@@ -89,14 +89,20 @@ if (__TEST__) {
         const respond = (message: {id?: number; data?: any; error?: string}) => socket.send(JSON.stringify(message));
         try {
             const message: {type: string; id: number; data: string} = JSON.parse(e.data);
-            const {type, id, data} = message;
+            const {type, id, data: selector} = message;
             if (type === 'click') {
-                const selector = data;
-                const element: HTMLElement = document.querySelector(selector)!;
-                element.click();
-                respond({id});
+                // The required element may not exist yet
+                const process = () => {
+                    const element: HTMLElement | null = document.querySelector(selector);
+                    if (element) {
+                        element.click();
+                        respond({id});
+                    } else {
+                        requestIdleCallback(process, {timeout: 500});
+                    }
+                };
+                process();
             } else if (type === 'rect') {
-                const selector = data;
                 const element: HTMLElement = document.querySelector(selector)!;
                 const rect = element.getBoundingClientRect();
                 respond({id, data: {left: rect.left, top: rect.top, width: rect.width, height: rect.height}});

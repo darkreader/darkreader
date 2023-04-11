@@ -130,7 +130,7 @@ export class Extension {
         }
     }
 
-    private static alarmListener = (alarm: Readonly<chrome.alarms.Alarm>): void => {
+    private static alarmListener = (alarm: chrome.alarms.Alarm): void => {
         if (alarm.name === Extension.ALARM_NAME) {
             Extension.loadData().then(() => Extension.handleAutomationCheck());
         }

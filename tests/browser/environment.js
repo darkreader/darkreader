@@ -234,32 +234,32 @@ export default class CustomJestEnvironment extends TestEnvironment {
             if (!Array.isArray(expectations[0])) {
                 expectations = [expectations];
             }
-            const promises = [];
-            for (const [selector, cssAttributeName, expectedValue] of expectations) {
-                const promise = expect(this.page.evaluate(
-                    (selector, cssAttributeName) => {
-                        let element = document;
-                        if (!Array.isArray(selector)) {
-                            selector = [selector];
+            const errors = await this.page.evaluate((expectations) => {
+                const errors = [];
+                for (const [selector, cssAttributeName, expectedValue] of expectations) {
+                    let element = document;
+                    let selector_ = selector;
+                    if (!Array.isArray(selector)) {
+                        selector_ = [selector];
+                    }
+                    for (const part of selector_) {
+                        if (element instanceof HTMLIFrameElement) {
+                            element = element.contentDocument;
                         }
-                        for (const part of selector) {
-                            if (element instanceof HTMLIFrameElement) {
-                                element = element.contentDocument;
-                            }
-                            if (part === 'document') {
-                                element = element.documentElement;
-                            } else {
-                                element = element.querySelector(part);
-                            }
+                        if (part === 'document') {
+                            element = element.documentElement;
+                        } else {
+                            element = element.querySelector(part);
                         }
-                        const style = getComputedStyle(element);
-                        return style[cssAttributeName];
-                    },
-                    selector, cssAttributeName
-                )).resolves.toBe(expectedValue);
-                promises.push(promise);
-            }
-            return Promise.all(promises);
+                    }
+                    const style = getComputedStyle(element);
+                    if (style[cssAttributeName] !== expectedValue) {
+                        errors.push([cssAttributeName, expectedValue]);
+                    }
+                }
+                return errors;
+            }, expectations);
+            expect(errors.length).toBe(0);
         };
 
         this.global.emulateMedia = async (name, value) => {

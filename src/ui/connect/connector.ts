@@ -16,7 +16,7 @@ export default class Connector implements ExtensionActions {
         this.changeSubscribers = new Set();
     }
 
-    private async sendRequest<T>(type: MessageType, data?: string) {
+    private async sendRequest<T>(type: MessageType, data?: string): Promise<T> {
         return new Promise<T>((resolve, reject) => {
             chrome.runtime.sendMessage<Message>({type, data}, ({data, error}: Message) => {
                 if (error) {
@@ -28,7 +28,7 @@ export default class Connector implements ExtensionActions {
         });
     }
 
-    private async firefoxSendRequestWithResponse<T>(type: MessageType, data?: string) {
+    private async firefoxSendRequestWithResponse<T>(type: MessageType, data?: string): Promise<T> {
         return new Promise<T>((resolve, reject) => {
             const dataPort = chrome.runtime.connect({name: type});
             dataPort.onDisconnect.addListener(() => reject());
@@ -44,14 +44,14 @@ export default class Connector implements ExtensionActions {
         });
     }
 
-    async getData() {
+    async getData(): Promise<ExtensionData> {
         if (isFirefox) {
             return await this.firefoxSendRequestWithResponse<ExtensionData>(MessageType.UI_GET_DATA);
         }
         return await this.sendRequest<ExtensionData>(MessageType.UI_GET_DATA);
     }
 
-    async getDevToolsData() {
+    async getDevToolsData(): Promise<DevToolsData> {
         if (isFirefox) {
             return await this.firefoxSendRequestWithResponse<DevToolsData>(MessageType.UI_GET_DEVTOOLS_DATA);
         }
@@ -64,7 +64,7 @@ export default class Connector implements ExtensionActions {
         }
     };
 
-    subscribeToChanges(callback: (data: ExtensionData) => void) {
+    subscribeToChanges(callback: (data: ExtensionData) => void): void {
         this.changeSubscribers.add(callback);
         if (this.changeSubscribers.size === 1) {
             chrome.runtime.onMessage.addListener(this.onChangesReceived);
@@ -77,7 +77,7 @@ export default class Connector implements ExtensionActions {
      * @param command The command to be updated
      * @param shortcut The new shortcut pattern after the operation completes
      */
-    async setShortcut(command: string, shortcut: string) {
+    async setShortcut(command: string, shortcut: string): Promise<string | null> {
         if (isFirefox && typeof browser !== 'undefined' && browser.commands && browser.commands.update && browser.commands.getAll) {
             try {
                 await browser.commands.update({name: command, shortcut});
@@ -93,68 +93,68 @@ export default class Connector implements ExtensionActions {
         return null;
     }
 
-    changeSettings(settings: Partial<UserSettings>) {
+    changeSettings(settings: Partial<UserSettings>): void {
         chrome.runtime.sendMessage<Message>({type: MessageType.UI_CHANGE_SETTINGS, data: settings});
     }
 
-    setTheme(theme: Partial<FilterConfig>) {
+    setTheme(theme: Partial<FilterConfig>): void {
         chrome.runtime.sendMessage<Message>({type: MessageType.UI_SET_THEME, data: theme});
     }
 
-    toggleActiveTab() {
+    toggleActiveTab(): void {
         chrome.runtime.sendMessage<Message>({type: MessageType.UI_TOGGLE_ACTIVE_TAB, data: {}});
     }
 
-    markNewsAsRead(ids: string[]) {
+    markNewsAsRead(ids: string[]): void {
         chrome.runtime.sendMessage<Message>({type: MessageType.UI_MARK_NEWS_AS_READ, data: ids});
     }
 
-    markNewsAsDisplayed(ids: string[]) {
+    markNewsAsDisplayed(ids: string[]): void {
         chrome.runtime.sendMessage<Message>({type: MessageType.UI_MARK_NEWS_AS_DISPLAYED, data: ids});
     }
 
-    loadConfig(options: {local: boolean}) {
+    loadConfig(options: {local: boolean}): void {
         chrome.runtime.sendMessage<Message>({type: MessageType.UI_LOAD_CONFIG, data: options});
     }
 
-    async applyDevDynamicThemeFixes(text: string) {
+    async applyDevDynamicThemeFixes(text: string): Promise<void> {
         if (isFirefox) {
             return await this.firefoxSendRequestWithResponse<void>(MessageType.UI_APPLY_DEV_DYNAMIC_THEME_FIXES, text);
         }
         return await this.sendRequest<void>(MessageType.UI_APPLY_DEV_DYNAMIC_THEME_FIXES, text);
     }
 
-    resetDevDynamicThemeFixes() {
+    resetDevDynamicThemeFixes(): void {
         chrome.runtime.sendMessage<Message>({type: MessageType.UI_RESET_DEV_DYNAMIC_THEME_FIXES});
     }
 
-    async applyDevInversionFixes(text: string) {
+    async applyDevInversionFixes(text: string): Promise<void> {
         if (isFirefox) {
             return await this.firefoxSendRequestWithResponse<void>(MessageType.UI_APPLY_DEV_INVERSION_FIXES, text);
         }
         return await this.sendRequest<void>(MessageType.UI_APPLY_DEV_INVERSION_FIXES, text);
     }
 
-    resetDevInversionFixes() {
+    resetDevInversionFixes(): void {
         chrome.runtime.sendMessage<Message>({type: MessageType.UI_RESET_DEV_INVERSION_FIXES});
     }
 
-    async applyDevStaticThemes(text: string) {
+    async applyDevStaticThemes(text: string): Promise<void> {
         if (isFirefox) {
             return await this.firefoxSendRequestWithResponse<void>(MessageType.UI_APPLY_DEV_STATIC_THEMES, text);
         }
         return await this.sendRequest<void>(MessageType.UI_APPLY_DEV_STATIC_THEMES, text);
     }
 
-    resetDevStaticThemes() {
+    resetDevStaticThemes(): void {
         chrome.runtime.sendMessage<Message>({type: MessageType.UI_RESET_DEV_STATIC_THEMES});
     }
 
-    async hideHighlights(ids: string[]) {
+    async hideHighlights(ids: string[]): Promise<void> {
         chrome.runtime.sendMessage<Message>({type: MessageType.UI_HIDE_HIGHLIGHTS, data: ids});
     }
 
-    disconnect() {
+    disconnect(): void {
         if (this.changeSubscribers.size > 0) {
             this.changeSubscribers.clear();
             chrome.runtime.onMessage.removeListener(this.onChangesReceived);

@@ -61,7 +61,7 @@ function Body({data, actions, devtools}: BodyProps) {
         });
     }
 
-    async function apply() {
+    async function apply(): Promise<void> {
         const text = textNode.value;
         try {
             await wrapper.apply(text);
@@ -73,12 +73,12 @@ function Body({data, actions, devtools}: BodyProps) {
         }
     }
 
-    function showDialog() {
+    function showDialog(): void {
         context.store.isDialogVisible = true;
         context.refresh();
     }
 
-    function hideDialog() {
+    function hideDialog(): void {
         context.store.isDialogVisible = false;
         context.refresh();
     }
@@ -91,13 +91,13 @@ function Body({data, actions, devtools}: BodyProps) {
         />
     ) : null;
 
-    function reset() {
+    function reset(): void {
         context.store.isDialogVisible = false;
         wrapper.reset();
         setState({errorText: null});
     }
 
-    function toggleDesign() {
+    function toggleDesign(): void {
         actions.changeSettings({previewNewDesign: !data.settings.previewNewDesign});
     }
 

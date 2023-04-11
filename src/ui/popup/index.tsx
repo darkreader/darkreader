@@ -92,16 +92,17 @@ if (__TEST__) {
             const {type, id, data: selector} = message;
             if (type === 'click') {
                 // The required element may not exist yet
-                const process = () => {
+                const check = () => {
                     const element: HTMLElement | null = document.querySelector(selector);
                     if (element) {
                         element.click();
                         respond({id});
                     } else {
-                        requestIdleCallback(process, {timeout: 500});
+                        requestIdleCallback(check, {timeout: 500});
                     }
                 };
-                process();
+
+                check();
             } else if (type === 'rect') {
                 const element: HTMLElement = document.querySelector(selector)!;
                 const rect = element.getBoundingClientRect();

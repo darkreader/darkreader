@@ -1,4 +1,4 @@
-import {multiline, timeout} from '../../support/test-utils';
+import {multiline} from '../../support/test-utils';
 import type {StyleExpectations} from '../globals';
 
 async function expectStyles(styles: StyleExpectations) {

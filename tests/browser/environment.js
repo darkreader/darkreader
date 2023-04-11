@@ -223,6 +223,9 @@ export default class CustomJestEnvironment extends TestEnvironment {
                     if (element instanceof HTMLIFrameElement) {
                         element = element.contentDocument;
                     }
+                    if (element.shadowRoot instanceof ShadowRoot) {
+                        element = element.shadowRoot;
+                    }
                     if (part === 'document') {
                         element = element.documentElement;
                     } else {

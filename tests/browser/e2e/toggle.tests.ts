@@ -90,7 +90,6 @@ describe('Toggling the extension', () => {
 
         await popupUtils.click(automationMenuSelector);
         await popupUtils.click(automationSystemSelector);
-        await timeout(250);
 
         await expectStyles([
             ['document', 'background-color', 'rgba(0, 0, 0, 0)'],
@@ -103,7 +102,6 @@ describe('Toggling the extension', () => {
 
         await emulateMedia('prefers-color-scheme', 'dark');
         await expect(getColorScheme()).resolves.toBe('dark');
-        await timeout(250);
 
         await expectStyles([
             ['document', 'background-color', 'rgb(24, 26, 27)'],
@@ -116,7 +114,6 @@ describe('Toggling the extension', () => {
 
         await emulateMedia('prefers-color-scheme', 'light');
         await expect(getColorScheme()).resolves.toBe('light');
-        await timeout(250);
 
         await expectStyles([
             ['document', 'background-color', 'rgba(0, 0, 0, 0)'],
@@ -128,7 +125,6 @@ describe('Toggling the extension', () => {
         ]);
 
         await popupUtils.click(automationSystemSelector);
-        await timeout(250);
 
         await expectStyles([
             ['document', 'background-color', 'rgb(24, 26, 27)'],

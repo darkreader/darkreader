@@ -107,7 +107,6 @@ describe('Link override', () => {
 
         await timeout(200);
         proceedCSSResponse();
-        await timeout(200);
 
         await expectStyles([
             ['document', 'background-color', 'rgb(24, 26, 27)'],

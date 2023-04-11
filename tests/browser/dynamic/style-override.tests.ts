@@ -2,7 +2,7 @@ import {multiline} from '../../support/test-utils';
 import type {StyleExpectations} from '../globals';
 
 async function expectStyles(styles: StyleExpectations) {
-    expectPageStyles(expect, styles);
+    await expectPageStyles(expect, styles);
 }
 
 describe('Style override', () => {
@@ -233,7 +233,7 @@ describe('Style override', () => {
             ),
         });
 
-        await expect(evaluateScript(async () => {
+        evaluateScript(async () => {
             class CustomElement extends HTMLElement {
                 constructor() {
                     super();
@@ -249,9 +249,10 @@ describe('Style override', () => {
             }
 
             customElements.define('custom-element', CustomElement);
-            await new Promise((resolve) => setTimeout(resolve, 100));
-            const shadowRoot = document.querySelector('custom-element').shadowRoot;
-            return getComputedStyle(shadowRoot.querySelector('p')).color;
-        })).resolves.toBe('rgb(255, 160, 177)');
+        });
+
+        await expectStyles([
+            [['custom-element', 'p'], 'color', 'rgb(255, 160, 177)'],
+        ]);
     });
 });

@@ -1,8 +1,8 @@
-import {multiline, timeout} from '../../support/test-utils';
+import {multiline} from '../../support/test-utils';
 import type {StyleExpectations} from '../globals';
 
 async function expectStyles(styles: StyleExpectations) {
-    expectPageStyles(expect, styles);
+    await expectPageStyles(expect, styles);
 }
 
 async function loadBasicPage() {
@@ -159,8 +159,6 @@ describe('Different paths in URL patterns', () => {
             bluePromise,
             devtoolsUtils.reset(),
         ]);
-
-        await timeout(500);
 
         await expectStyles([
             ['document', 'background-color', 'rgb(24, 26, 27)'],

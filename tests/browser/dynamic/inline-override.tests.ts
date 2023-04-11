@@ -17,7 +17,7 @@ async function loadBasicPage() {
 }
 
 async function expectStyles(styles: StyleExpectations) {
-    expectPageStyles(expect, styles);
+    await expectPageStyles(expect, styles);
 }
 
 describe('Inline style override', () => {

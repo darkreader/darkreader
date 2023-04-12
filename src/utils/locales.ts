@@ -1,8 +1,8 @@
-export function getLocalMessage(messageName: string) {
+export function getLocalMessage(messageName: string): string {
     return chrome.i18n.getMessage(messageName);
 }
 
-export function getUILanguage() {
+export function getUILanguage(): string {
     let code: string;
     if ('i18n' in chrome && 'getUILanguage' in chrome.i18n && typeof chrome.i18n.getUILanguage === 'function') {
         code = chrome.i18n.getUILanguage();

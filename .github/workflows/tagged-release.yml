@@ -10,6 +10,10 @@ on:
         description: 'Retention duration (in days)'
         required: true
         default: '1'
+      node_version:
+        description: 'NodeJS version'
+        required: true
+        default: '16.x'
 
 jobs:
   build:
@@ -21,16 +25,8 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 16.x
-
-      - name: Set up npm cache
-        uses: actions/cache@v3
-        with:
-          path: ~/.npm
-          key: ${{ runner.os }}-${{ hashFiles('package-lock.json') }}
-          restore-keys: |
-            ${{ runner.OS }}-${{ hashFiles('package-lock.json') }}
-            ${{ runner.OS }}
+          node-version: ${{ inputs.node_version || '16.x' }}
+          cache: npm
 
       - name: Install npm dependencies
         run: npm ci

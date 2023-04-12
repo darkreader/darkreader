@@ -80,7 +80,7 @@ function Select(props: SelectProps) {
     function expandList() {
         setState({isExpanded: true});
         scrollToValue(props.value);
-        window.addEventListener('click', onOuterClick);
+        window.addEventListener('click', onOuterClick, {passive: true});
     }
 
     function collapseList() {

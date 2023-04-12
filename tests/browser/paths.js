@@ -70,9 +70,20 @@ export async function getFirefoxPath() {
         try {
             // snap profile folders do not get loaded
             const option = await linuxAppPath(possiblePath);
+            // Firefox snap can not access the regular system-wide temporary directory,
+            // so we create a separate one within build folder
+            // See also: https://github.com/mozilla/web-ext/issues/1696
             if (!option.includes('/snap/')) {
                 return option;
             }
+            const firefoxProfile = './build/firefox-profile-for-testing';
+            process.env.TMPDIR = firefoxProfile;
+            try {
+                fs.mkdirSync(firefoxProfile);
+            } catch (e) {
+                // Do nothing
+            }
+            return option;
         } catch (e) {
             // ignore
         }

@@ -39,7 +39,7 @@ type PageId = (
 );
 
 let popstate: (() => void) | null = null;
-isMobile && window.addEventListener('popstate', () => popstate && popstate());
+isMobile && window.addEventListener('popstate', () => popstate && popstate(), {passive: true});
 
 function Pages(props: ViewProps) {
     const context = getContext();
@@ -166,7 +166,7 @@ export default function Body(props: ViewProps) {
     const context = getContext();
     context.onCreate(() => {
         if (isMobile) {
-            window.addEventListener('contextmenu', (e) => e.preventDefault());
+            window.addEventListener('contextmenu', ({preventDefault}) => preventDefault());
         }
     });
     context.onRemove(() => {

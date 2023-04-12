@@ -51,7 +51,7 @@ function collectUndefinedElements(root: ParentNode) {
 let canOptimizeUsingProxy = false;
 document.addEventListener('__darkreader__inlineScriptsAllowed', () => {
     canOptimizeUsingProxy = true;
-});
+}, {once: true, passive: true});
 
 const resolvers = new Map<string, () => void>();
 
@@ -250,7 +250,7 @@ export function watchForStyleChanges(currentStyles: StyleElement[], update: (sty
             collectUndefinedElements(shadowRoot);
         });
     });
-    document.addEventListener('__darkreader__isDefined', handleIsDefined);
+    document.addEventListener('__darkreader__isDefined', handleIsDefined, {passive: true});
     collectUndefinedElements(document);
 }
 

@@ -1,12 +1,14 @@
-export function scale(x: number, inLow: number, inHigh: number, outLow: number, outHigh: number) {
+export function scale(x: number, inLow: number, inHigh: number, outLow: number, outHigh: number): number {
     return (x - inLow) * (outHigh - outLow) / (inHigh - inLow) + outLow;
 }
 
-export function clamp(x: number, min: number, max: number) {
+export function clamp(x: number, min: number, max: number): number {
     return Math.min(max, Math.max(min, x));
 }
 
-export function multiplyMatrices(m1: number[][], m2: number[][]) {
+type Matrix = Readonly<Array<Readonly<number[]>>>;
+
+export function multiplyMatrices(m1: Matrix, m2: Matrix): number[][] {
     const result: number[][] = [];
     for (let i = 0, len = m1.length; i < len; i++) {
         result[i] = [];

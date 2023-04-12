@@ -2,7 +2,7 @@ import {multiline, timeout} from '../../support/test-utils';
 import type {StyleExpectations} from '../globals';
 
 async function expectStyles(styles: StyleExpectations) {
-    expectPageStyles(expect, styles);
+    await expectPageStyles(expect, styles);
 }
 
 async function loadBasicPage(header = 'E2E test page') {
@@ -89,9 +89,7 @@ describe('Toggling the extension', () => {
         ]);
 
         await popupUtils.click(automationMenuSelector);
-        await timeout(250);
         await popupUtils.click(automationSystemSelector);
-        await timeout(250);
 
         await expectStyles([
             ['document', 'background-color', 'rgba(0, 0, 0, 0)'],
@@ -104,7 +102,6 @@ describe('Toggling the extension', () => {
 
         await emulateMedia('prefers-color-scheme', 'dark');
         await expect(getColorScheme()).resolves.toBe('dark');
-        await timeout(250);
 
         await expectStyles([
             ['document', 'background-color', 'rgb(24, 26, 27)'],
@@ -117,7 +114,6 @@ describe('Toggling the extension', () => {
 
         await emulateMedia('prefers-color-scheme', 'light');
         await expect(getColorScheme()).resolves.toBe('light');
-        await timeout(250);
 
         await expectStyles([
             ['document', 'background-color', 'rgba(0, 0, 0, 0)'],
@@ -129,7 +125,6 @@ describe('Toggling the extension', () => {
         ]);
 
         await popupUtils.click(automationSystemSelector);
-        await timeout(250);
 
         await expectStyles([
             ['document', 'background-color', 'rgb(24, 26, 27)'],

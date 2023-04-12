@@ -93,5 +93,6 @@ export function getMockData(override = {} as Partial<ExtensionData>): ExtensionD
             isInjected: true,
             isDarkThemeDetected: false,
         },
+        uiHighlights: [],
     } as ExtensionData, override);
 }

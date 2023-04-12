@@ -25,6 +25,9 @@ async function bundleAPI({debug, watch}) {
     const dest = 'darkreader.js';
     const bundle = await rollup.rollup({
         input: src,
+        onwarn: (error) => {
+            throw error;
+        },
         plugins: [
             rollupPluginNodeResolve(),
             rollupPluginTypescript({
@@ -49,12 +52,12 @@ async function bundleAPI({debug, watch}) {
                 __THUNDERBIRD__: false,
                 __TEST__: false,
             }),
-        ].filter((x) => x)
+        ].filter(Boolean)
     });
     watchFiles = bundle.watchFiles;
     await bundle.write({
         banner: `/**\n * Dark Reader v${await getVersion()}\n * https://darkreader.org/\n */\n`,
-        // TODO: Consider remving next line
+        // TODO: Consider removing next line
         esModule: true,
         file: dest,
         strict: true,

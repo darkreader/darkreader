@@ -1,8 +1,8 @@
-import {multiline, timeout} from '../../support/test-utils';
+import {multiline} from '../../support/test-utils';
 import type {StyleExpectations} from '../globals';
 
 async function expectStyles(styles: StyleExpectations) {
-    expectPageStyles(expect, styles);
+    await expectPageStyles(expect, styles);
 }
 
 describe('Link override', () => {
@@ -105,9 +105,7 @@ describe('Link override', () => {
             ['h1 strong', 'color', 'rgb(232, 230, 227)'],
         ]);
 
-        await timeout(200);
         proceedCSSResponse();
-        await timeout(200);
 
         await expectStyles([
             ['document', 'background-color', 'rgb(24, 26, 27)'],

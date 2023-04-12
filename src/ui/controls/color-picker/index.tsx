@@ -51,7 +51,7 @@ function ColorPicker(props: ColorPickerProps) {
         }
         store.isFocused = true;
         context.refresh();
-        window.addEventListener('mousedown', onOuterClick);
+        window.addEventListener('mousedown', onOuterClick, {passive: true});
     }
 
     function blur() {

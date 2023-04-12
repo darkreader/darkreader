@@ -43,8 +43,14 @@ function doneReceiver() {
 
 function dedicatedPath() {
     logInfo(`MV3 proxy injector: ${registerdScriptPath ? 'registerd' : 'dedicated'} path setup...`);
-    document.addEventListener(EVENT_ARG, dataReceiver);
-    document.addEventListener(EVENT_DONE, doneReceiver);
+    // TODO: use EventListenerOptions class once it is updated
+    // Note: make sure capture is not set
+    const listenerOptions: any = {
+        passive: true,
+        once: true,
+    };
+    document.addEventListener(EVENT_ARG, dataReceiver, listenerOptions);
+    document.addEventListener(EVENT_DONE, doneReceiver, listenerOptions);
 }
 
 function inject() {

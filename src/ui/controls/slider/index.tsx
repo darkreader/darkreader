@@ -135,9 +135,9 @@ export default function Slider(props: SliderProps) {
         }
 
         function subscribe() {
-            window.addEventListener(pointerMoveEvent, onPointerMove, {passive: true});
-            window.addEventListener(pointerUpEvent, onPointerUp, {passive: true});
-            window.addEventListener('keypress', onKeyPress);
+            window.addEventListener(pointerMoveEvent, onPointerMove, {once: true, passive: true});
+            window.addEventListener(pointerUpEvent, onPointerUp, {once: true, passive: true});
+            window.addEventListener('keypress', onKeyPress, {once: true, passive: true});
         }
 
         function unsubscribe() {

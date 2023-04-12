@@ -10,9 +10,9 @@ function renderBody(data: ExtensionData, devToolsData: DevToolsData, actions: Co
     sync(document.body, <Body data={data} devtools={devToolsData} actions={actions} />);
 }
 
-async function start() {
+async function start(): Promise<void> {
     const connector = new Connector();
-    window.addEventListener('unload', () => connector.disconnect());
+    window.addEventListener('unload', () => connector.disconnect(), {passive: true});
 
     let [data, devToolsData] = await Promise.all([
         connector.getData(),

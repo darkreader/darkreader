@@ -31,7 +31,7 @@ function renderBody(data: ExtensionData, fonts: string[], actions: ExtensionActi
 
 async function start() {
     const connector = new Connector();
-    window.addEventListener('unload', () => connector.disconnect());
+    window.addEventListener('unload', () => connector.disconnect(), {passive: true});
 
     const [data, fonts] = await Promise.all([
         connector.getData(),
@@ -41,7 +41,7 @@ async function start() {
     connector.subscribeToChanges((data) => renderBody(data, fonts, connector));
 }
 
-addEventListener('load', start);
+addEventListener('load', start, {passive: true});
 
 document.documentElement.classList.toggle('mobile', isMobile);
 document.documentElement.classList.toggle('firefox', isFirefox);
@@ -52,8 +52,8 @@ if (isFirefox) {
     fixNotClosingPopupOnNavigation();
 }
 
-declare const __TEST__: boolean;
-if (__TEST__) {
+declare const __DEBUG__: boolean;
+if (__DEBUG__) {
     chrome.runtime.onMessage.addListener(({type}) => {
         if (type === MessageType.BG_CSS_UPDATE) {
             document.querySelectorAll('link[rel="stylesheet"]').forEach((link: HTMLLinkElement) => {
@@ -71,7 +71,10 @@ if (__TEST__) {
             location.reload();
         }
     });
+}
 
+declare const __TEST__: boolean;
+if (__TEST__) {
     const socket = new WebSocket(`ws://localhost:8894`);
     socket.onopen = async () => {
         socket.send(JSON.stringify({
@@ -86,18 +89,21 @@ if (__TEST__) {
         const respond = (message: {id?: number; data?: any; error?: string}) => socket.send(JSON.stringify(message));
         try {
             const message: {type: string; id: number; data: string} = JSON.parse(e.data);
-            const {type, id, data} = message;
+            const {type, id, data: selector} = message;
             if (type === 'click') {
-                const selector = data;
-                const element: HTMLElement = document.querySelector(selector)!;
-                element.click();
-                respond({id});
-            } else if (type === 'exists') {
-                const selector = data;
-                const element = document.querySelector(selector);
-                respond({id, data: element != null});
+                // The required element may not exist yet
+                const check = () => {
+                    const element: HTMLElement | null = document.querySelector(selector);
+                    if (element) {
+                        element.click();
+                        respond({id});
+                    } else {
+                        requestIdleCallback(check, {timeout: 500});
+                    }
+                };
+
+                check();
             } else if (type === 'rect') {
-                const selector = data;
                 const element: HTMLElement = document.querySelector(selector)!;
                 const rect = element.getBoundingClientRect();
                 respond({id, data: {left: rect.left, top: rect.top, width: rect.width, height: rect.height}});

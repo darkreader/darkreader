@@ -18,7 +18,7 @@ function getOverlayDOMNode(key: any) {
                 const listener = clickListeners.get(node)!;
                 listener();
             }
-        });
+        }, {passive: true});
         overlayNodes.set(key, node);
     }
     return overlayNodes.get(key);

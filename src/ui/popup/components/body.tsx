@@ -4,7 +4,7 @@ import {withForms} from 'malevic/forms';
 import {withState, useState} from 'malevic/state';
 import {TabPanel, Button} from '../../controls';
 import FilterSettings from './filter-settings';
-import {Header, MoreSiteSettings, MoreToggleSettings} from './header';
+import {Header, MoreSiteSettings, MoreToggleSettings, MoreNewHighlight} from './header';
 import Loader from './loader';
 import NewBody from '../body';
 import MoreSettings from './more-settings';
@@ -30,6 +30,7 @@ interface BodyState {
     didNewsSlideIn: boolean;
     moreSiteSettingsOpen: boolean;
     moreToggleSettingsOpen: boolean;
+    newToggleMenusHighlightHidden: boolean;
 }
 
 async function openDevTools() {
@@ -44,6 +45,7 @@ function Body(props: BodyProps & {fonts: string[]}) {
         didNewsSlideIn: false,
         moreSiteSettingsOpen: false,
         moreToggleSettingsOpen: false,
+        newToggleMenusHighlightHidden: false,
     });
 
     if (!props.data.isReady) {
@@ -93,11 +95,17 @@ function Body(props: BodyProps & {fonts: string[]}) {
     }
 
     function toggleMoreSiteSettings() {
-        setState({moreSiteSettingsOpen: !state.moreSiteSettingsOpen});
+        setState({moreSiteSettingsOpen: !state.moreSiteSettingsOpen, moreToggleSettingsOpen: false, newToggleMenusHighlightHidden: true});
+        if (props.data.uiHighlights.includes('new-toggle-menus')) {
+            props.actions.hideHighlights(['new-toggle-menus']);
+        }
     }
 
     function toggleMoreToggleSettings() {
-        setState({moreToggleSettingsOpen: !state.moreToggleSettingsOpen});
+        setState({moreToggleSettingsOpen: !state.moreToggleSettingsOpen, moreSiteSettingsOpen: false, newToggleMenusHighlightHidden: true});
+        if (props.data.uiHighlights.includes('new-toggle-menus')) {
+            props.actions.hideHighlights(['new-toggle-menus']);
+        }
     }
 
     return (
@@ -174,6 +182,9 @@ function Body(props: BodyProps & {fonts: string[]}) {
                 isExpanded={state.moreToggleSettingsOpen}
                 onClose={toggleMoreToggleSettings}
             />
+            {props.data.uiHighlights.includes('new-toggle-menus') && !state.newToggleMenusHighlightHidden
+                ? <MoreNewHighlight />
+                : null}
         </body>
     );
 }

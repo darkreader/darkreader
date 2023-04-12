@@ -1,7 +1,7 @@
 import {clamp, multiplyMatrices} from '../../utils/math';
 import type {FilterConfig} from '../../definitions';
 
-export function createFilterMatrix(config: FilterConfig) {
+export function createFilterMatrix(config: FilterConfig): number[][] {
     let m = Matrix.identity();
     if (config.sepia !== 0) {
         m = multiplyMatrices(m, Matrix.sepia(config.sepia / 100));
@@ -21,7 +21,7 @@ export function createFilterMatrix(config: FilterConfig) {
     return m;
 }
 
-export function applyColorMatrix([r, g, b]: number[], matrix: number[][]) {
+export function applyColorMatrix([r, g, b]: number[], matrix: number[][]): number[] {
     const rgb = [[r / 255], [g / 255], [b / 255], [1], [1]];
     const result = multiplyMatrices(matrix, rgb);
     return [0, 1, 2].map((i) => clamp(Math.round(result[i][0] * 255), 0, 255));
@@ -35,7 +35,7 @@ export const Matrix = {
             [0, 1, 0, 0, 0],
             [0, 0, 1, 0, 0],
             [0, 0, 0, 1, 0],
-            [0, 0, 0, 0, 1]
+            [0, 0, 0, 0, 1],
         ];
     },
 
@@ -45,7 +45,7 @@ export const Matrix = {
             [-0.667, 0.333, -0.667, 0, 1],
             [-0.667, -0.667, 0.333, 0, 1],
             [0, 0, 0, 1, 0],
-            [0, 0, 0, 0, 1]
+            [0, 0, 0, 0, 1],
         ];
     },
 
@@ -55,7 +55,7 @@ export const Matrix = {
             [0, v, 0, 0, 0],
             [0, 0, v, 0, 0],
             [0, 0, 0, 1, 0],
-            [0, 0, 0, 0, 1]
+            [0, 0, 0, 0, 1],
         ];
     },
 
@@ -66,7 +66,7 @@ export const Matrix = {
             [0, v, 0, 0, t],
             [0, 0, v, 0, t],
             [0, 0, 0, 1, 0],
-            [0, 0, 0, 0, 1]
+            [0, 0, 0, 0, 1],
         ];
     },
 
@@ -76,7 +76,7 @@ export const Matrix = {
             [(0.349 - 0.349 * (1 - v)), (0.686 + 0.314 * (1 - v)), (0.168 - 0.168 * (1 - v)), 0, 0],
             [(0.272 - 0.272 * (1 - v)), (0.534 - 0.534 * (1 - v)), (0.131 + 0.869 * (1 - v)), 0, 0],
             [0, 0, 0, 1, 0],
-            [0, 0, 0, 0, 1]
+            [0, 0, 0, 0, 1],
         ];
     },
 
@@ -86,7 +86,7 @@ export const Matrix = {
             [(0.2126 - 0.2126 * (1 - v)), (0.7152 + 0.2848 * (1 - v)), (0.0722 - 0.0722 * (1 - v)), 0, 0],
             [(0.2126 - 0.2126 * (1 - v)), (0.7152 - 0.7152 * (1 - v)), (0.0722 + 0.9278 * (1 - v)), 0, 0],
             [0, 0, 0, 1, 0],
-            [0, 0, 0, 0, 1]
+            [0, 0, 0, 0, 1],
         ];
     },
 };

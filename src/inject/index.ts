@@ -231,12 +231,16 @@ if (__TEST__) {
         function expectPageStyles(data: any) {
             const errors = [];
             const expectations = Array.isArray(data[0]) ? data : [data];
-            for (const [selector, cssAttributeName, expectedValue] of expectations) {
-                let element: Element = document as unknown as Element;
+            for (let i = 0; i < expectations.length; i++) {
+                const [selector, cssAttributeName, expectedValue] = expectations[i];
                 const selector_ = Array.isArray(selector) ? selector : [selector];
+                let element: Element = document as unknown as Element;
                 for (const part of selector_) {
                     if (element instanceof HTMLIFrameElement) {
                         element = (element as any).contentDocument;
+                    }
+                    if (element.shadowRoot instanceof ShadowRoot) {
+                        element = element.shadowRoot as unknown as Element;
                     }
                     if (part === 'document') {
                         element = (element as any).documentElement;
@@ -247,12 +251,7 @@ if (__TEST__) {
                 const style = getComputedStyle(element);
                 const realValue = style[cssAttributeName];
                 if (realValue !== expectedValue) {
-                    errors.push({
-                        selector,
-                        cssAttributeName,
-                        expectedValue,
-                        realValue,
-                    });
+                    errors.push(i);
                 }
             }
             return errors;

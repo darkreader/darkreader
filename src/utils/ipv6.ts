@@ -1,6 +1,6 @@
 const simpleIPV6Regex = /\[[0-9:a-zA-Z]+?\]/;
 
-export function isIPV6(url: string) {
+export function isIPV6(url: string): boolean {
     const openingBracketIndex = simpleIPV6Regex.exec(url);
     if (!openingBracketIndex) {
         return false;

@@ -89,18 +89,21 @@ if (__TEST__) {
         const respond = (message: {id?: number; data?: any; error?: string}) => socket.send(JSON.stringify(message));
         try {
             const message: {type: string; id: number; data: string} = JSON.parse(e.data);
-            const {type, id, data} = message;
+            const {type, id, data: selector} = message;
             if (type === 'click') {
-                const selector = data;
-                const element: HTMLElement = document.querySelector(selector)!;
-                element.click();
-                respond({id});
-            } else if (type === 'exists') {
-                const selector = data;
-                const element = document.querySelector(selector);
-                respond({id, data: element != null});
+                // The required element may not exist yet
+                const check = () => {
+                    const element: HTMLElement | null = document.querySelector(selector);
+                    if (element) {
+                        element.click();
+                        respond({id});
+                    } else {
+                        requestIdleCallback(check, {timeout: 500});
+                    }
+                };
+
+                check();
             } else if (type === 'rect') {
-                const selector = data;
                 const element: HTMLElement = document.querySelector(selector)!;
                 const rect = element.getBoundingClientRect();
                 respond({id, data: {left: rect.left, top: rect.top, width: rect.width, height: rect.height}});

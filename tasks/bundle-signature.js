@@ -125,6 +125,7 @@ async function fixManifest() {
 async function createHashes(signatureVersion, version, order) {
     const types = hashTypes(signatureVersion);
     const destDir = getDestDir({debug: false, platform: 'firefox'});
+    /** @type {Array<{archivePath: string; realPath?: string; isOptional?: boolean; integrity?: any}>} */
     const regular = [
         await fixManifest(),
         ...(await enumerateStandardPaths(destDir, order)),

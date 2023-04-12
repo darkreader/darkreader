@@ -91,7 +91,7 @@ export async function copyFile(src, dest) {
 
 /**
  * @param {string} src
- * @param {BufferEncoding} encoding
+ * @param {BufferEncoding | null | undefined} encoding
  * @returns {Promise<string>}
  */
 export async function readFile(src, encoding = 'utf8') {
@@ -114,7 +114,7 @@ export async function fileExists(src) {
 /**
  * @param {string} dest
  * @param {string} content
- * @param {BufferEncoding} encoding
+ * @param {BufferEncoding | null | undefined} encoding
  * @returns {Promise<void>}
  */
 export async function writeFile(dest, content, encoding = 'utf8') {

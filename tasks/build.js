@@ -65,7 +65,7 @@ async function api(debug, watch) {
         if (!debug) {
             tasks.push(codeStyle);
         }
-        await runTasks(tasks, {platforms: {[PLATFORM.API]: true}, debug, watch, log: false, test: false});
+        await runTasks(tasks, {platforms: {[PLATFORM.API]: true}, debug, watch, version: null, log: false, test: false});
         if (watch) {
             bundleAPI.watch();
             log.ok('Watching...');
@@ -83,7 +83,7 @@ async function run({api: api_, release, debug, platforms, watch, log, test, vers
         await build({platforms, version, debug: false, watch: false, log: null, test: false});
     }
     if (debug && Object.values(platforms).some(Boolean)) {
-        await build({platforms, debug, watch, log, test});
+        await build({platforms, version, debug, watch, log, test});
     }
     if (api_) {
         await api(debug, watch);

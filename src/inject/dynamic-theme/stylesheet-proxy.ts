@@ -58,8 +58,8 @@ export function injectProxy(enableStyleSheetsProxy: boolean) {
         });
     };
 
-    document.addEventListener('__darkreader__cleanUp', cleanUp);
-    document.addEventListener('__darkreader__addUndefinedResolver', addUndefinedResolver);
+    document.addEventListener('__darkreader__cleanUp', cleanUp, {passive: true});
+    document.addEventListener('__darkreader__addUndefinedResolver', addUndefinedResolver, {passive: true});
 
     const updateSheetEvent = new Event('__darkreader__updateSheet');
 

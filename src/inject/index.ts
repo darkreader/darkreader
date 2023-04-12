@@ -173,16 +173,16 @@ function onDarkThemeDetected() {
 // Thunderbird does not have "tabs", and emails aren't 'frozen' or 'cached'.
 // And will currently error: `Promise rejected after context unloaded: Actor 'Conduits' destroyed before query 'RuntimeMessage' was resolved`
 if (!__THUNDERBIRD__) {
-    addEventListener('pagehide', onPageHide);
-    addEventListener('freeze', onFreeze);
-    addEventListener('resume', onResume);
+    addEventListener('pagehide', onPageHide, {passive: true});
+    addEventListener('freeze', onFreeze, {passive: true});
+    addEventListener('resume', onResume, {passive: true});
 }
 
 if (__TEST__) {
     async function awaitDOMContentLoaded() {
         if (document.readyState === 'loading') {
             return new Promise<void>((resolve) => {
-                addEventListener('DOMContentLoaded', () => resolve());
+                addEventListener('DOMContentLoaded', () => resolve(), {passive: true});
             });
         }
     }
@@ -195,7 +195,7 @@ if (__TEST__) {
                     if (message === 'darkreader-dynamic-theme-ready' && darkReaderDynamicThemeStateForTesting === 'ready') {
                         resolve();
                     }
-                });
+                }, {passive: true});
             });
         }
     }
@@ -210,7 +210,7 @@ if (__TEST__) {
                 },
                 id: null,
             }));
-        });
+        }, {passive: true});
 
         // Wait for DOM to be complete
         // Note that here we wait only for DOM parsing and not for subresource load

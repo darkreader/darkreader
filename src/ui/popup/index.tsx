@@ -31,7 +31,7 @@ function renderBody(data: ExtensionData, fonts: string[], actions: ExtensionActi
 
 async function start() {
     const connector = new Connector();
-    window.addEventListener('unload', () => connector.disconnect());
+    window.addEventListener('unload', () => connector.disconnect(), {passive: true});
 
     const [data, fonts] = await Promise.all([
         connector.getData(),
@@ -41,7 +41,7 @@ async function start() {
     connector.subscribeToChanges((data) => renderBody(data, fonts, connector));
 }
 
-addEventListener('load', start);
+addEventListener('load', start, {passive: true});
 
 document.documentElement.classList.toggle('mobile', isMobile);
 document.documentElement.classList.toggle('firefox', isFirefox);

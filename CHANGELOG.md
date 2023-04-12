@@ -1,3 +1,7 @@
+## 4.9.64 (TBD)
+
+- Use passive event listeners (#11047)
+
 ## 4.9.63 (Apr 10, 2023)
 
 - Site toggle panel (detect dark theme and shortcut).

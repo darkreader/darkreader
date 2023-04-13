@@ -95,7 +95,7 @@ async function ensureGitClean() {
 async function checkoutVersion(version, fixVulnerabilities) {
     log.ok(`Checking out version ${version}`);
     // Use -- to disambiguate the tag (release version) and file paths
-    await rm('src');
+    await rm('src', {force: true, recursive: true});
     await execute(`git checkout v${version} -- package.json package-lock.json src/ tasks/`);
     log.ok(`Installing dependencies`);
     await execute('npm install --ignore-scripts');

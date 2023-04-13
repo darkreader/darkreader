@@ -27,15 +27,12 @@ async function patchManifest(platform, debug, watch, test) {
     return patched;
 }
 
-async function manifests({platforms, debug, watch, test, version}) {
+async function manifests({platforms, debug, watch, test}) {
     const enabledPlatforms = Object.values(PLATFORM).filter((platform) => platform !== PLATFORM.API && platforms[platform]);
     for (const platform of enabledPlatforms) {
         const manifest = await patchManifest(platform, debug, watch, test);
         const destDir = getDestDir({debug, platform});
-        // Firefox Add-ons store parses and rewrites manifest.json during signing process
-        // It only changes indentation to 2 spaces, but not the content or order of the keys
-        const space = (version && platform === PLATFORM.FIREFOX) ? 2 : undefined;
-        await writeJSON(`${destDir}/manifest.json`, manifest, space);
+        await writeJSON(`${destDir}/manifest.json`, manifest);
     }
 }
 
@@ -51,7 +48,7 @@ const bundleManifestTask = createTask(
             const changed = chrome || changedFiles.some((file) => file.endsWith(`manifest-${platform}.json`));
             platforms[platform] = changed && buildPlatforms[platform];
         }
-        await manifests({platforms, debug: true, watch: true, test: false, version: null});
+        await manifests({platforms, debug: true, watch: true, test: false});
         reload.reload({type: reload.FULL});
     },
 );

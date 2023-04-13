@@ -111,23 +111,27 @@ function serializeSfManifest(types, manifestMf) {
     return lines.join('\n');
 }
 
-async function fixManifest() {
+async function fixManifest(indent, settings) {
     const destDir = getDestDir({debug: false, platform: 'firefox'});
     const realPath = `${destDir}/manifest.json`;
     const manifest = await readJSON(realPath);
-    await writeFile(realPath, JSON.stringify(manifest, null, 2));
+    let string = JSON.stringify(manifest, null, indent);
+    if (settings === 1) {
+        string = string.replace('applications', 'browser_specific_settings');
+    }
+    await writeFile(realPath, string);
     return {
         realPath,
-        archivePath: 'manifest.json'
+        archivePath: 'manifest.json',
     };
 }
 
-async function createHashes(signatureVersion, version, order) {
+async function createHashes(signatureVersion, version, order, manifest) {
     const types = hashTypes(signatureVersion);
     const destDir = getDestDir({debug: false, platform: 'firefox'});
     /** @type {Array<{archivePath: string; realPath?: string; isOptional?: boolean; integrity?: any}>} */
     const regular = [
-        await fixManifest(),
+        await fixManifest(manifest?.indent || 2, manifest?.settings),
         ...(await enumerateStandardPaths(destDir, order)),
     ];
     regular.push({
@@ -168,8 +172,8 @@ async function signature({platforms, debug, version}) {
     }
 
     const infoPath = `./integrity/firefox/${version}/info.json`;
-    const {type, order} = await readJSON(infoPath);
-    await createHashes(type, version, order);
+    const {type, order, manifest} = await readJSON(infoPath);
+    await createHashes(type, version, order, manifest);
 
     const destDir = getDestDir({debug, platform: 'firefox'});
     const rsa = `./integrity/firefox/${version}/mozilla.rsa`;

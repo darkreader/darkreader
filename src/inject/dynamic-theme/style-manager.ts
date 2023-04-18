@@ -230,8 +230,8 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
             }
 
             if (
-                (!cssRules && !accessError && !isSafari) ||
                 (isSafari && !element.sheet) ||
+                (!isSafari && !cssRules && !accessError) ||
                 isStillLoadingError(accessError!)
             ) {
                 try {

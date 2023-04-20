@@ -3,13 +3,11 @@ import path from './paths.js';
 import * as reload from './reload.js';
 import {createTask} from './task.js';
 import {readJSON, writeJSON} from './utils.js';
-const {PLATFORM, getDestDir} = path;
-
-const srcDir = 'src';
+const {PLATFORM, getDestDir, rootPath} = path;
 
 async function patchManifest(platform, debug, watch, test) {
-    const manifest = await readJSON(`${srcDir}/manifest.json`);
-    const manifestPatch = platform === PLATFORM.CHROME ? {} : await readJSON(`${srcDir}/manifest-${platform}.json`);
+    const manifest = await readJSON(rootPath('src/manifest.json'));
+    const manifestPatch = platform === PLATFORM.CHROME ? {} : await readJSON(rootPath(`src/manifest-${platform}.json`));
     const patched = {...manifest, ...manifestPatch};
     if (platform === PLATFORM.CHROME_MV3) {
         patched.browser_action = undefined;

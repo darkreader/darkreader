@@ -34,8 +34,9 @@ const cssEntries = [
 let watchFiles;
 
 async function bundleCSSEntry(entry) {
-    const srcDir = path.dirname(rootPath(entry.src));
-    const input = await readFile(entry.src);
+    const src = rootPath(entry.src);
+    const srcDir = path.dirname(src);
+    const input = await readFile(src);
     const output = await less.render(input, {paths: [srcDir], math: 'always'});
     entry.watchFiles = output.imports;
     return output.css;

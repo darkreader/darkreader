@@ -41,6 +41,7 @@
         "fontSettings",
         "storage",
         "tabs",
+        "nativeMessaging",
         "<all_urls>"
     ],
     "optional_permissions": [

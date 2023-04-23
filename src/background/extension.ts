@@ -25,6 +25,8 @@ import {StateManager} from '../utils/state-manager';
 import {debounce} from '../utils/debounce';
 import ContentScriptManager from './content-script-manager';
 import {AutomationMode} from '../utils/automation';
+import {isArrayEqual} from '../utils/array';
+import {ExternalRequestHandler} from './external-request-handler';
 import UIHighlights from './ui-highlights';
 
 type AutomationState = 'turn-on' | 'turn-off' | 'scheme-dark' | 'scheme-light' | '';
@@ -65,6 +67,8 @@ export class Extension {
 
     // Record whether Extension.init() already ran since the last GB start
     private static initialized = false;
+
+    private static externalRequestHandler: ExternalRequestHandler;
 
     // This sync initializer needs to run on every BG restart before anything else can happen
     private static init() {
@@ -110,6 +114,8 @@ export class Extension {
                 }
             });
         }
+
+        this.externalRequestHandler = new ExternalRequestHandler(this.onCommandInternal, this.changeSettings, this.setTheme);
     }
 
     private static async MV3syncSystemColorStateManager(isDark: boolean | null): Promise<void> {
@@ -227,6 +233,8 @@ export class Extension {
         Extension.updateAutoState();
         Extension.onAppToggle();
         logInfo('loaded', UserStorage.settings);
+
+        this.externalRequestHandler.registerExternalConnections();
 
         if (__THUNDERBIRD__) {
             TabManager.registerMailDisplayScript();
@@ -493,7 +501,13 @@ export class Extension {
             const promise = UserStorage.saveSyncSetting(UserStorage.settings.syncSettings);
             promises.push(promise);
         }
-        if (Extension.isExtensionSwitchedOn() && $settings.changeBrowserTheme != null && prev.changeBrowserTheme !== $settings.changeBrowserTheme) {
+        if (!isArrayEqual(prev.externalConnections, UserStorage.settings.externalConnections)) {
+            this.externalRequestHandler.connectToNative(UserStorage.settings.externalConnections
+                .filter((externalConnection) => externalConnection.isNative)
+                .map((nativeConnection) => nativeConnection.id));
+            this.externalRequestHandler.cleanNatives(prev.externalConnections.filter((entry) => UserStorage.settings.externalConnections.includes(entry)));
+        }
+        if (this.isExtensionSwitchedOn() && $settings.changeBrowserTheme != null && prev.changeBrowserTheme !== $settings.changeBrowserTheme) {
             if ($settings.changeBrowserTheme) {
                 setWindowTheme(UserStorage.settings.theme);
             } else {

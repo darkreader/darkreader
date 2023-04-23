@@ -87,6 +87,18 @@ export interface ThemePreset {
     theme: Theme;
 }
 
+export interface ShadowCopy {
+    id: string;
+    copy: Partial<UserSettings>;
+    oldSettings: Partial<UserSettings>;
+}
+
+export interface ExternalConnection {
+    id: string;
+    isNative: boolean;
+    blockedActions: string[];
+}
+
 export interface Automation {
     enabled: boolean;
     mode: AutomationMode;
@@ -111,6 +123,9 @@ export interface UserSettings {
     previewNewDesign: boolean;
     enableForPDF: boolean;
     enableForProtectedPages: boolean;
+    enableExternalConnections: boolean;
+    shadowCopy: ShadowCopy[];
+    externalConnections: ExternalConnection[];
     enableContextMenus: boolean;
     detectDarkTheme: boolean;
 }
@@ -200,6 +215,12 @@ export interface News {
     displayed?: boolean;
     badge?: string;
     icon?: string;
+}
+
+export interface ExternalRequest {
+    type: string;
+    isNative: boolean;
+    data?: any;
 }
 
 // These values need to match those in Manifest

@@ -13,6 +13,7 @@ import ThemePage from '../theme/page';
 import type {ViewProps} from '../types';
 import ManageSettingsPage from '../manage-settings-page';
 import {isMobile} from '../../../utils/platform';
+import ManageExternalConnectionsPage from '../manage-external-connections-page';
 
 function Logo() {
     return (
@@ -34,6 +35,7 @@ type PageId = (
     | 'site-list'
     | 'automation'
     | 'manage-settings'
+    | 'manage-external-connections'
 );
 
 let popstate: (() => void) | null = null;
@@ -44,44 +46,46 @@ function Pages(props: ViewProps) {
     const store = context.store as {
         activePage: PageId;
     };
-    if (store.activePage == null) {
+    if (!store.activePage) {
         store.activePage = 'main';
     }
 
-    function onThemeNavClick() {
+    function onNavigateClick(pageId: PageId) {
         isMobile && history.pushState(undefined, '');
-        store.activePage = 'theme';
+        store.activePage = pageId;
         context.refresh();
+    }
+
+    function onThemeNavClick() {
+        onNavigateClick('theme');
     }
 
     function onSettingsNavClick() {
-        isMobile && history.pushState(undefined, '');
-        store.activePage = 'settings';
-        context.refresh();
+        onNavigateClick('settings');
     }
 
     function onAutomationNavClick() {
-        isMobile && history.pushState(undefined, '');
-        store.activePage = 'automation';
-        context.refresh();
+        onNavigateClick('automation');
     }
 
     function onManageSettingsClick() {
-        isMobile && history.pushState(undefined, '');
-        store.activePage = 'manage-settings';
-        context.refresh();
+        onNavigateClick('manage-settings');
     }
 
     function onSiteListNavClick() {
-        isMobile && history.pushState(undefined, '');
-        store.activePage = 'site-list';
-        context.refresh();
+        onNavigateClick('site-list');
+    }
+
+    function onManageExternalConnectionsClick() {
+        onNavigateClick('manage-external-connections');
     }
 
     function goBack() {
         const activePage = store.activePage;
         const settingsPageSubpages = ['automation', 'manage-settings', 'site-list'] as PageId[];
-        if (settingsPageSubpages.includes(activePage)) {
+        if (activePage === 'manage-external-connections') {
+            store.activePage = 'automation';
+        } else if (settingsPageSubpages.includes(activePage)) {
             store.activePage = 'settings';
         } else {
             store.activePage = 'main';
@@ -128,12 +132,16 @@ function Pages(props: ViewProps) {
                 />
             </Page>
             <Page id="automation">
-                <AutomationPage {...props} />
+                <AutomationPage {...props}
+                    onManageExternalConnectionsClick={onManageExternalConnectionsClick}
+                />
             </Page>
             <Page id="manage-settings">
                 <ManageSettingsPage {...props} />
             </Page>
-
+            <Page id="manage-external-connections">
+                <ManageExternalConnectionsPage {...props} />
+            </Page>
         </PageViewer>
     );
 }

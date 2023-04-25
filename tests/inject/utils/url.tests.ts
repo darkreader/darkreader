@@ -307,6 +307,14 @@ it('URL is enabled', () => {
     // expect(isURLMatched('https://a.example.com/abc', 'ex*mple.*')).toEqual(true);
     expect(isURLMatched('https://a.example.com/abc', 'example.*a*c')).toEqual(true);
 
+    // Escapes
+    expect(isURLMatched('https://example.com/*', 'example.com/\*')).toEqual(true);
+    // expect(isURLMatched('https://example.com/*', 'example.com/a\*')).toEqual(false);
+    expect(isURLMatched('https://example.com/?q=*', 'example.com/?q=\*')).toEqual(true);
+    expect(isURLMatched('https://example.com/?q=*', 'example.com/abc?q=\*')).toEqual(false);
+    expect(isURLMatched('https://example.com/abc?q=*', 'example.com/*?q=\*')).toEqual(true);
+    // expect(isURLMatched('https://example.com/abc?q=*', 'example.com/b*?q=\*')).toEqual(false);
+
     // Some URLs can have unescaped [] in query
     expect(isURLMatched(
         'google.co.uk/order.php?bar=[foo]',

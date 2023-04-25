@@ -19,7 +19,7 @@ function changeMetaThemeColor(meta: HTMLMetaElement, theme: FilterConfig) {
 }
 
 export function changeMetaThemeColorWhenAvailable(theme: FilterConfig) {
-    const meta = document.querySelector(metaThemeColorSelector) as HTMLMetaElement;
+    const meta: HTMLMetaElement = document.querySelector(metaThemeColorSelector)!;
     if (meta) {
         changeMetaThemeColor(meta, theme);
     } else {

@@ -3,166 +3,191 @@ import type {UserSettings} from '../../../src/definitions';
 import {isIPV6} from '../../../src/utils/ipv6';
 
 it('URL is enabled', () => {
+    function fillUserSettings(settings: Partial<UserSettings>): UserSettings {
+        return {
+            enabled: false,
+            fetchNews: false,
+            theme: null,
+            presets: [],
+            customThemes: [],
+            siteList: [],
+            siteListEnabled: [],
+            applyToListedOnly: false,
+            changeBrowserTheme: false,
+            syncSettings: false,
+            syncSitesFixes: false,
+            automation: null,
+            time: null,
+            location: null,
+            previewNewDesign: false,
+            enableForPDF: false,
+            enableForProtectedPages: false,
+            enableContextMenus: false,
+            detectDarkTheme: false,
+            ...settings,
+        };
+    }
+
     // Not invert listed
     expect(isURLEnabled(
         'https://mail.google.com/mail/u/0/',
-        {siteList: ['google.com'], siteListEnabled: [], applyToListedOnly: false} as UserSettings,
+        fillUserSettings({siteList: ['google.com'], siteListEnabled: [], applyToListedOnly: false}),
         {isProtected: false, isInDarkList: false},
     )).toBe(false);
     expect(isURLEnabled(
         'https://mail.google.com/mail/u/0/',
-        {siteList: ['mail.google.com'], siteListEnabled: [], applyToListedOnly: false} as UserSettings,
+        fillUserSettings({siteList: ['mail.google.com'], siteListEnabled: [], applyToListedOnly: false}),
         {isProtected: false, isInDarkList: false},
     )).toBe(false);
     expect(isURLEnabled(
         'https://mail.google.com/mail/u/0/',
-        {siteList: ['mail.google.*'], siteListEnabled: [], applyToListedOnly: false} as UserSettings,
+        fillUserSettings({siteList: ['mail.google.*'], siteListEnabled: [], applyToListedOnly: false}),
         {isProtected: false, isInDarkList: false},
     )).toBe(false);
     expect(isURLEnabled(
         'https://mail.google.com/mail/u/0/',
-        {siteList: ['mail.google.*/mail'], siteListEnabled: [], applyToListedOnly: false} as UserSettings,
+        fillUserSettings({siteList: ['mail.google.*/mail'], siteListEnabled: [], applyToListedOnly: false}),
         {isProtected: false, isInDarkList: false},
     )).toBe(false);
     expect(isURLEnabled(
         'https://mail.google.com/mail/u/0/',
-        {siteList: [], siteListEnabled: [], applyToListedOnly: false} as UserSettings,
+        fillUserSettings({siteList: [], siteListEnabled: [], applyToListedOnly: false}),
         {isProtected: false, isInDarkList: false},
     )).toBe(true);
     expect(isURLEnabled(
         'https://mail.google.com/mail/u/0/',
-        {siteList: ['google.com/maps'], siteListEnabled: [], applyToListedOnly: false} as UserSettings,
+        fillUserSettings({siteList: ['google.com/maps'], siteListEnabled: [], applyToListedOnly: false}),
         {isProtected: false, isInDarkList: false},
     )).toBe(true);
 
     // Invert listed only
     expect(isURLEnabled(
         'https://mail.google.com/mail/u/0/',
-        {siteList: ['google.com'], siteListEnabled: [], applyToListedOnly: true} as UserSettings,
+        fillUserSettings({siteList: ['google.com'], siteListEnabled: [], applyToListedOnly: true}),
         {isProtected: false, isInDarkList: false},
     )).toBe(true);
     expect(isURLEnabled(
         'https://mail.google.com/mail/u/0/',
-        {siteList: ['google.*/mail'], siteListEnabled: [], applyToListedOnly: true} as UserSettings,
+        fillUserSettings({siteList: ['google.*/mail'], siteListEnabled: [], applyToListedOnly: true}),
         {isProtected: false, isInDarkList: false},
     )).toBe(true);
     expect(isURLEnabled(
         'https://mail.google.com/mail/u/0/',
-        {siteList: [], siteListEnabled: [], applyToListedOnly: true} as UserSettings,
+        fillUserSettings({siteList: [], siteListEnabled: [], applyToListedOnly: true}),
         {isProtected: false, isInDarkList: false},
     )).toBe(false);
     expect(isURLEnabled(
         'https://mail.google.com/mail/u/0/',
-        {siteList: ['google.com/maps'], siteListEnabled: [], applyToListedOnly: true} as UserSettings,
+        fillUserSettings({siteList: ['google.com/maps'], siteListEnabled: [], applyToListedOnly: true}),
         {isProtected: false, isInDarkList: false},
     )).toBe(false);
 
     // Special URLs
     expect(isURLEnabled(
         'https://chrome.google.com/webstore',
-        {siteList: ['chrome.google.com'], siteListEnabled: [], applyToListedOnly: false, enableForProtectedPages: true} as UserSettings,
+        fillUserSettings({siteList: ['chrome.google.com'], siteListEnabled: [], applyToListedOnly: false, enableForProtectedPages: true}),
         {isProtected: true, isInDarkList: false},
     )).toBe(false);
     expect(isURLEnabled(
         'https://chrome.google.com/webstore',
-        {siteList: ['chrome.google.com'], siteListEnabled: [], applyToListedOnly: true, enableForProtectedPages: true} as UserSettings,
+        fillUserSettings({siteList: ['chrome.google.com'], siteListEnabled: [], applyToListedOnly: true, enableForProtectedPages: true}),
         {isProtected: true, isInDarkList: false},
     )).toBe(true);
     expect(isURLEnabled(
         'https://chrome.google.com/webstore',
-        {siteList: [], siteListEnabled: [], applyToListedOnly: false, enableForProtectedPages: false} as UserSettings,
+        fillUserSettings({siteList: [], siteListEnabled: [], applyToListedOnly: false, enableForProtectedPages: false}),
         {isProtected: true, isInDarkList: false},
     )).toBe(false);
     expect(isURLEnabled(
         'https://chrome.google.com/webstore',
-        {siteList: ['chrome.google.com'], siteListEnabled: [], applyToListedOnly: false, enableForProtectedPages: true} as UserSettings,
+        fillUserSettings({siteList: ['chrome.google.com'], siteListEnabled: [], applyToListedOnly: false, enableForProtectedPages: true}),
         {isProtected: true, isInDarkList: false},
     )).toBe(false);
     expect(isURLEnabled(
         'https://microsoftedge.microsoft.com/addons',
-        {siteList: ['microsoftedge.microsoft.com'], siteListEnabled: [], applyToListedOnly: false, enableForProtectedPages: true} as UserSettings,
+        fillUserSettings({siteList: ['microsoftedge.microsoft.com'], siteListEnabled: [], applyToListedOnly: false, enableForProtectedPages: true}),
         {isProtected: true, isInDarkList: false},
     )).toBe(false);
     expect(isURLEnabled(
         'https://microsoftedge.microsoft.com/addons',
-        {siteList: ['microsoftedge.microsoft.com'], siteListEnabled: [], applyToListedOnly: true, enableForProtectedPages: true} as UserSettings,
+        fillUserSettings({siteList: ['microsoftedge.microsoft.com'], siteListEnabled: [], applyToListedOnly: true, enableForProtectedPages: true}),
         {isProtected: true, isInDarkList: false},
     )).toBe(true);
     expect(isURLEnabled(
         'https://duckduckgo.com',
-        {siteList: [], siteListEnabled: [], applyToListedOnly: false, enableForProtectedPages: true} as UserSettings,
+        fillUserSettings({siteList: [], siteListEnabled: [], applyToListedOnly: false, enableForProtectedPages: true}),
         {isProtected: false, isInDarkList: false},
     )).toBe(true);
     expect(isURLEnabled(
         'https://darkreader.org/',
-        {siteList: [], siteListEnabled: [], applyToListedOnly: false} as UserSettings,
+        fillUserSettings({siteList: [], siteListEnabled: [], applyToListedOnly: false}),
         {isProtected: false, isInDarkList: true},
     )).toBe(false);
     expect(isURLEnabled(
         'https://darkreader.org/',
-        {siteList: ['darkreader.org'], siteListEnabled: [], applyToListedOnly: true} as UserSettings,
+        fillUserSettings({siteList: ['darkreader.org'], siteListEnabled: [], applyToListedOnly: true}),
         {isProtected: false, isInDarkList: true},
     )).toBe(true);
     expect(isURLEnabled(
         'https://www.google.com/file.pdf',
-        {enableForPDF: true, siteList: ['darkreader.org'], siteListEnabled: [], applyToListedOnly: false} as UserSettings,
+        fillUserSettings({enableForPDF: true, siteList: ['darkreader.org'], siteListEnabled: [], applyToListedOnly: false}),
         {isProtected: false, isInDarkList: false},
     )).toBe(true);
     expect(isURLEnabled(
         'https://www.google.com/file.pdf',
-        {enableForPDF: true, siteList: ['darkreader.org'], siteListEnabled: [], applyToListedOnly: true} as UserSettings,
+        fillUserSettings({enableForPDF: true, siteList: ['darkreader.org'], siteListEnabled: [], applyToListedOnly: true}),
         {isProtected: false, isInDarkList: false},
     )).toBe(true);
     expect(isURLEnabled(
         'https://www.google.com/file.pdf',
-        {enableForPDF: false, siteList: ['darkreader.org'], siteListEnabled: [], applyToListedOnly: false} as UserSettings,
+        fillUserSettings({enableForPDF: false, siteList: ['darkreader.org'], siteListEnabled: [], applyToListedOnly: false}),
         {isProtected: false, isInDarkList: false},
     )).toBe(false);
     expect(isURLEnabled(
         'https://www.google.com/file.pdf/resource',
-        {enableForPDF: true, siteList: ['darkreader.org'], siteListEnabled: [], applyToListedOnly: true} as UserSettings,
+        fillUserSettings({enableForPDF: true, siteList: ['darkreader.org'], siteListEnabled: [], applyToListedOnly: true}),
         {isProtected: false, isInDarkList: false},
     )).toBe(false);
     expect(isURLEnabled(
         'https://www.google.com/file.pdf/resource',
-        {enableForPDF: true, siteList: ['darkreader.org'], siteListEnabled: [], applyToListedOnly: false} as UserSettings,
+        fillUserSettings({enableForPDF: true, siteList: ['darkreader.org'], siteListEnabled: [], applyToListedOnly: false}),
         {isProtected: false, isInDarkList: false},
     )).toBe(true);
     expect(isURLEnabled(
         'https://www.google.com/very/good/hidden/folder/pdf#file.pdf',
-        {enableForPDF: true, siteList: ['https://www.google.com/very/good/hidden/folder/pdf#file.pdf'], siteListEnabled: [], applyToListedOnly: false} as UserSettings,
+        fillUserSettings({enableForPDF: true, siteList: ['https://www.google.com/very/good/hidden/folder/pdf#file.pdf'], siteListEnabled: [], applyToListedOnly: false}),
         {isProtected: false, isInDarkList: false},
     )).toBe(false);
     expect(isURLEnabled(
         'https://leetcode.com/problems/two-sum/',
-        {enableForPDF: false, siteList: ['leetcode.com/problems/'], siteListEnabled: [], applyToListedOnly: false} as UserSettings,
+        fillUserSettings({enableForPDF: false, siteList: ['leetcode.com/problems/'], siteListEnabled: [], applyToListedOnly: false}),
         {isProtected: false, isInDarkList: false},
     )).toBe(false);
     expect(isURLEnabled(
         'https://leetcode.com/problemset/all/',
-        {enableForPDF: false, siteList: ['leetcode.com/problems/'], siteListEnabled: [], applyToListedOnly: false} as UserSettings,
+        fillUserSettings({enableForPDF: false, siteList: ['leetcode.com/problems/'], siteListEnabled: [], applyToListedOnly: false}),
         {isProtected: false, isInDarkList: false},
     )).toBe(true);
 
     // Dark theme detection
     expect(isURLEnabled(
         'https://github.com/',
-        {siteList: [], siteListEnabled: [], applyToListedOnly: false, detectDarkTheme: true} as UserSettings,
+        fillUserSettings({siteList: [], siteListEnabled: [], applyToListedOnly: false, detectDarkTheme: true}),
         {isProtected: false, isInDarkList: false, isDarkThemeDetected: true},
     )).toBe(false);
     expect(isURLEnabled(
         'https://github.com/',
-        {siteList: [], siteListEnabled: [], applyToListedOnly: false, detectDarkTheme: false} as UserSettings,
+        fillUserSettings({siteList: [], siteListEnabled: [], applyToListedOnly: false, detectDarkTheme: false}),
         {isProtected: false, isInDarkList: false, isDarkThemeDetected: true},
     )).toBe(true);
     expect(isURLEnabled(
         'https://github.com/',
-        {siteList: [], siteListEnabled: [], applyToListedOnly: false, detectDarkTheme: true} as UserSettings,
+        fillUserSettings({siteList: [], siteListEnabled: [], applyToListedOnly: false, detectDarkTheme: true}),
         {isProtected: false, isInDarkList: false, isDarkThemeDetected: false},
     )).toBe(true);
     expect(isURLEnabled(
         'https://github.com/',
-        {siteList: [], siteListEnabled: ['github.com'], applyToListedOnly: false, detectDarkTheme: true} as UserSettings,
+        fillUserSettings({siteList: [], siteListEnabled: ['github.com'], applyToListedOnly: false, detectDarkTheme: true}),
         {isProtected: false, isInDarkList: false, isDarkThemeDetected: true},
     )).toBe(true);
 
@@ -195,42 +220,42 @@ it('URL is enabled', () => {
     // IPV6 Testing
     expect(isURLEnabled(
         '[::1]:1337',
-        {siteList: ['google.com'], siteListEnabled: [], applyToListedOnly: false} as UserSettings,
+        fillUserSettings({siteList: ['google.com'], siteListEnabled: [], applyToListedOnly: false}),
         {isProtected: false, isInDarkList: false},
     )).toBe(true);
     expect(isURLEnabled(
         '[::1]:8080',
-        {siteList: ['[::1]:8080'], siteListEnabled: [], applyToListedOnly: false} as UserSettings,
+        fillUserSettings({siteList: ['[::1]:8080'], siteListEnabled: [], applyToListedOnly: false}),
         {isProtected: false, isInDarkList: false},
     )).toEqual(false);
     expect(isURLEnabled(
         '[::1]:8080',
-        {siteList: ['[::1]:8081'], siteListEnabled: [], applyToListedOnly: true} as UserSettings,
+        fillUserSettings({siteList: ['[::1]:8081'], siteListEnabled: [], applyToListedOnly: true}),
         {isProtected: false, isInDarkList: false},
     )).toEqual(false);
     expect(isURLEnabled(
         '[::1]:8080',
-        {siteList: ['[::1]:8081'], siteListEnabled: [], applyToListedOnly: false} as UserSettings,
+        fillUserSettings({siteList: ['[::1]:8081'], siteListEnabled: [], applyToListedOnly: false}),
         {isProtected: false, isInDarkList: false},
     )).toEqual(true);
     expect(isURLEnabled(
         '[::1]:17',
-        {siteList: ['[::1]'], siteListEnabled: [], applyToListedOnly: true} as UserSettings,
+        fillUserSettings({siteList: ['[::1]'], siteListEnabled: [], applyToListedOnly: true}),
         {isProtected: false, isInDarkList: false},
     )).toEqual(false);
     expect(isURLEnabled(
         '[2001:4860:4860::8888]',
-        {siteList: ['[2001:4860:4860::8888]'], siteListEnabled: [], applyToListedOnly: true} as UserSettings,
+        fillUserSettings({siteList: ['[2001:4860:4860::8888]'], siteListEnabled: [], applyToListedOnly: true}),
         {isProtected: false, isInDarkList: false},
     )).toEqual(true);
     expect(isURLEnabled(
         '[2001:4860:4860::8844]',
-        {siteList: ['[2001:4860:4860::8844]'], siteListEnabled: [], applyToListedOnly: true} as UserSettings,
+        fillUserSettings({siteList: ['[2001:4860:4860::8844]'], siteListEnabled: [], applyToListedOnly: true}),
         {isProtected: false, isInDarkList: true},
     )).toEqual(true);
     expect(isURLEnabled(
         '[2001:4860:4860::8844]',
-        {siteList: [], siteListEnabled: [], applyToListedOnly: true} as UserSettings,
+        fillUserSettings({siteList: [], siteListEnabled: [], applyToListedOnly: true}),
         {isProtected: false, isInDarkList: true},
     )).toEqual(false);
 
@@ -340,27 +365,27 @@ it('URL is enabled', () => {
     // Temporary Dark Sites list fix
     expect(isURLEnabled(
         'https://darkreader.org/',
-        {siteList: [], siteListEnabled: ['darkreader.org'], applyToListedOnly: false} as UserSettings,
+        fillUserSettings({siteList: [], siteListEnabled: ['darkreader.org'], applyToListedOnly: false}),
         {isProtected: false, isInDarkList: true},
     )).toBe(true);
     expect(isURLEnabled(
         'https://darkreader.org/',
-        {siteList: [], siteListEnabled: [], applyToListedOnly: false} as UserSettings,
+        fillUserSettings({siteList: [], siteListEnabled: [], applyToListedOnly: false}),
         {isProtected: false, isInDarkList: true},
     )).toBe(false);
     expect(isURLEnabled(
         'https://google.com/',
-        {siteList: [], siteListEnabled: ['darkreader.org'], applyToListedOnly: false} as UserSettings,
+        fillUserSettings({siteList: [], siteListEnabled: ['darkreader.org'], applyToListedOnly: false}),
         {isProtected: false, isInDarkList: false},
     )).toBe(true);
     expect(isURLEnabled(
         'https://netflix.com',
-        {enableForPDF: true, siteList: [''], siteListEnabled: ['netflix.com'], applyToListedOnly: true} as UserSettings,
+        fillUserSettings({enableForPDF: true, siteList: [''], siteListEnabled: ['netflix.com'], applyToListedOnly: true}),
         {isProtected: false, isInDarkList: true},
     )).toBe(true);
     expect(isURLEnabled(
         'https://netflix.com',
-        {enableForPDF: true, siteList: [''], siteListEnabled: ['netflix.com'], applyToListedOnly: false} as UserSettings,
+        fillUserSettings({enableForPDF: true, siteList: [''], siteListEnabled: ['netflix.com'], applyToListedOnly: false}),
         {isProtected: false, isInDarkList: true},
     )).toBe(true);
 });

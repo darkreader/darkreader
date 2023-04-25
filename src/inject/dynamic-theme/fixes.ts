@@ -45,7 +45,7 @@ export function combineFixes(fixes: DynamicThemeFix[]): DynamicThemeFix | null {
     }
 
     function combineArrays(arrays: string[][]): string[] {
-        return (arrays.filter(Boolean) as any).flat();
+        return arrays.filter(Boolean).flat();
     }
 
     return {

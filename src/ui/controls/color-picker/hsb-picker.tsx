@@ -114,7 +114,7 @@ function renderSB(hue: number, canvas: HTMLCanvasElement) {
 
 export default function HSBPicker(props: HSBPickerProps) {
     const context = getContext();
-    const store = context.getStore(hsbPickerDefaults) as HSBPickerState;
+    const store = context.getStore(hsbPickerDefaults);
     store.activeChangeHandler = props.onChange;
 
     const prevColor = context.prev && context.prev.props.color;

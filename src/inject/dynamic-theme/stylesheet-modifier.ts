@@ -218,7 +218,7 @@ export function createStyleSheetModifier() {
             }
 
             function handleVarDeclarations(property: string, modified: ReturnType<CSSVariableModifier>, important: boolean, sourceValue: string) {
-                const {declarations: varDecs, onTypeChange} = modified as ReturnType<CSSVariableModifier>;
+                const {declarations: varDecs, onTypeChange} = modified;
                 const varKey = ++varDeclarationCounter;
                 const currentRenderId = renderId;
                 const initialIndex = readyDeclarations.length;
@@ -293,7 +293,7 @@ export function createStyleSheetModifier() {
                         const t = createTarget(r, target);
                         iterateReadyRules(r, t, styleIterator);
                     } else {
-                        styleIterator(r as ReadyStyleRule, target);
+                        styleIterator(r, target);
                     }
                 });
             }

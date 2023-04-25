@@ -57,8 +57,8 @@ declare const __FIREFOX__: boolean;
 if (__CHROMIUM_MV3__) {
     chrome.runtime.onInstalled.addListener(async () => {
         try {
-            (chrome.scripting as any).unregisterContentScripts(() => {
-                (chrome.scripting as any).registerContentScripts([{
+            chrome.scripting.unregisterContentScripts(() => {
+                chrome.scripting.registerContentScripts([{
                     id: 'proxy',
                     matches: [
                         '<all_urls>'

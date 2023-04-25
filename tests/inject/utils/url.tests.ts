@@ -252,6 +252,69 @@ it('URL is enabled', () => {
     expect(isURLMatched('127.0.0.1:80', '*')).toEqual(true);
     expect(isURLMatched('localhost', '*')).toEqual(true);
 
+    // No wildcard
+    expect(isURLMatched('https://example.com/abc', 'example.com')).toEqual(true);
+    expect(isURLMatched('https://a.example.com/abc', 'example.com')).toEqual(true);
+    expect(isURLMatched('https://example.com/abc', 'a.example.com')).toEqual(false);
+    expect(isURLMatched('https://a.example.com/abc', 'b.example.com')).toEqual(false);
+
+    // Single wildcard with unbound non-extended left math
+    // expect(isURLMatched('https://example.com/abc', 'example.com/abc/*')).toEqual(false);
+    // expect(isURLMatched('https://example.com/abcd', 'example.com/abc/*')).toEqual(false);
+    // expect(isURLMatched('https://example.com/abc/def', 'example.com/*/def')).toEqual(true);
+    expect(isURLMatched('https://example.com/abcd/ef', 'example.com/*/def')).toEqual(false);
+    expect(isURLMatched('https://example.com/abc', 'example.com/*abc')).toEqual(true);
+    // expect(isURLMatched('https://example.com/aabc', 'example.com/*abc')).toEqual(true);
+    expect(isURLMatched('https://example.com/abcd', 'example.com/*abc')).toEqual(true);
+    expect(isURLMatched('https://example.com/abc', 'example.*/abc')).toEqual(true);
+    expect(isURLMatched('https://example.com/abc', 'example.*')).toEqual(true);
+    // expect(isURLMatched('https://example.com/abc', 'example.*abc')).toEqual(true);
+
+    // Single wildcard with unbound extended left math
+    expect(isURLMatched('https://a.example.com/abc', 'example.com')).toEqual(true);
+    // expect(isURLMatched('https://a.example.com/abc', 'example.com/abc/*')).toEqual(false);
+    // expect(isURLMatched('https://a.example.com/abcd', 'example.com/abc/*')).toEqual(false);
+    // expect(isURLMatched('https://a.example.com/abc/def', 'example.com/*/def')).toEqual(true);
+    expect(isURLMatched('https://a.example.com/abcd/ef', 'example.com/*/def')).toEqual(false);
+    expect(isURLMatched('https://a.example.com/abc', 'example.com/*abc')).toEqual(true);
+    // expect(isURLMatched('https://a.example.com/aabc', 'example.com/*abc')).toEqual(true);
+    expect(isURLMatched('https://a.example.com/abcd', 'example.com/*abc')).toEqual(true);
+    expect(isURLMatched('https://a.example.com/abc', 'example.*/abc')).toEqual(true);
+    expect(isURLMatched('https://a.example.com/abc', 'example.*')).toEqual(true);
+    // expect(isURLMatched('https://a.example.com/abc', 'example.*abc')).toEqual(true);
+
+    // Multiple wildcards with unbound non-extended left math
+    // expect(isURLMatched('https://example.com/abc', 'example.com/*bc/*')).toEqual(true);
+    expect(isURLMatched('https://example.com/abcd', 'example.com/*bc/*')).toEqual(false);
+    // expect(isURLMatched('https://example.com/abc/def', 'example.com/*/d*f')).toEqual(true);
+    expect(isURLMatched('https://example.com/abcd/ef', 'example.com/*/d*f')).toEqual(false);
+    // expect(isURLMatched('https://example.com/abc', 'example.com/*a*c')).toEqual(true);
+    // expect(isURLMatched('https://example.com/aabc', 'example.com/*a*c')).toEqual(true);
+    // expect(isURLMatched('https://example.com/abcd', 'example.com/*a*c')).toEqual(true);
+    // expect(isURLMatched('https://example.com/abc', 'example.*/a*c')).toEqual(true);
+    // expect(isURLMatched('https://example.com/abc', 'ex*mple.*')).toEqual(true);
+    expect(isURLMatched('https://example.com/abc', 'example.*a*c')).toEqual(true);
+
+    // Multiple wildcards with unbound extended left math
+    // expect(isURLMatched('https://a.example.com/abc', 'example.com/*bc/*')).toEqual(true);
+    expect(isURLMatched('https://a.example.com/abcd', 'example.com/*bc/*')).toEqual(false);
+    // expect(isURLMatched('https://a.example.com/abc/def', 'example.com/*/d*f')).toEqual(true);
+    expect(isURLMatched('https://a.example.com/abcd/ef', 'example.com/*/d*f')).toEqual(false);
+    // expect(isURLMatched('https://a.example.com/abc', 'example.com/*a*c')).toEqual(true);
+    // expect(isURLMatched('https://a.example.com/aabc', 'example.com/*a*c')).toEqual(true);
+    // expect(isURLMatched('https://a.example.com/abcd', 'example.com/*a*c')).toEqual(true);
+    // expect(isURLMatched('https://a.example.com/abc', 'example.*/a*c')).toEqual(true);
+    // expect(isURLMatched('https://a.example.com/abc', 'ex*mple.*')).toEqual(true);
+    expect(isURLMatched('https://a.example.com/abc', 'example.*a*c')).toEqual(true);
+
+    // Escapes
+    expect(isURLMatched('https://example.com/*', 'example.com/\*')).toEqual(true);
+    // expect(isURLMatched('https://example.com/*', 'example.com/a\*')).toEqual(false);
+    expect(isURLMatched('https://example.com/?q=*', 'example.com/?q=\*')).toEqual(true);
+    expect(isURLMatched('https://example.com/?q=*', 'example.com/abc?q=\*')).toEqual(false);
+    expect(isURLMatched('https://example.com/abc?q=*', 'example.com/*?q=\*')).toEqual(true);
+    // expect(isURLMatched('https://example.com/abc?q=*', 'example.com/b*?q=\*')).toEqual(false);
+
     // Some URLs can have unescaped [] in query
     expect(isURLMatched(
         'google.co.uk/order.php?bar=[foo]',

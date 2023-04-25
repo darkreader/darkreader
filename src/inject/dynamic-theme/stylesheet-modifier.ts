@@ -293,7 +293,7 @@ export function createStyleSheetModifier() {
                         const t = createTarget(r, target);
                         iterateReadyRules(r, t, styleIterator);
                     } else {
-                        styleIterator(r, target);
+                        styleIterator(r as ReadyStyleRule, target);
                     }
                 });
             }

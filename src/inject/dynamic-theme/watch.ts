@@ -5,7 +5,7 @@ import type {StyleElement} from './style-manager';
 import {shouldManageStyle, getManageableStyles} from './style-manager';
 import {isDefinedSelectorSupported} from '../../utils/platform';
 
-const observers = [] as Array<{disconnect(): void}>;
+const observers: Array<{disconnect(): void}> = [];
 let observedRoots: WeakSet<Node>;
 
 interface ChangedStyles {

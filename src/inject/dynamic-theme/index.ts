@@ -28,7 +28,7 @@ declare const __TEST__: boolean;
 declare const __CHROMIUM_MV3__: boolean;
 const INSTANCE_ID = generateUID();
 const styleManagers = new Map<StyleElement, StyleManager>();
-const adoptedStyleManagers = [] as AdoptedStyleSheetManager[];
+const adoptedStyleManagers: AdoptedStyleSheetManager[] = [];
 let filter: FilterConfig | null = null;
 let fixes: DynamicThemeFix | null = null;
 let isIFrame: boolean | null = null;
@@ -246,7 +246,7 @@ function createDynamicStyleOverrides() {
             push(inlineStyleElements, elements);
         }
     });
-    inlineStyleElements.forEach((el) => overrideInlineStyle(el as HTMLElement, filter!, ignoredInlineSelectors, ignoredImageAnalysisSelectors));
+    inlineStyleElements.forEach((el: HTMLElement) => overrideInlineStyle(el, filter!, ignoredInlineSelectors, ignoredImageAnalysisSelectors));
     handleAdoptedStyleSheets(document);
 }
 
@@ -399,7 +399,7 @@ function watchForUpdates() {
         createShadowStaticStyleOverrides(root);
         const inlineStyleElements = root.querySelectorAll(INLINE_STYLE_SELECTOR);
         if (inlineStyleElements.length > 0) {
-            forEach(inlineStyleElements, (el) => overrideInlineStyle(el as HTMLElement, filter!, ignoredInlineSelectors, ignoredImageAnalysisSelectors));
+            forEach(inlineStyleElements, (el: HTMLElement) => overrideInlineStyle(el, filter!, ignoredInlineSelectors, ignoredImageAnalysisSelectors));
         }
     });
 

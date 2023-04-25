@@ -276,7 +276,7 @@ export function overrideInlineStyle(element: HTMLElement, theme: FilterConfig, i
         // Such that `as ReturnType<CSSVariableModifier>` won't error about the possible
         // string type.
         if (isPropertyVariable && typeof value === 'object') {
-            const typedValue = value as ReturnType<CSSVariableModifier>;
+            const typedValue: ReturnType<CSSVariableModifier> = value;
             typedValue.declarations.forEach(({property, value}) => {
                 !(value instanceof Promise) && element.style.setProperty(property, value);
             });

@@ -10,7 +10,7 @@ exports[`TypeScript project config file should parse and resolve correctly: src 
     "jsx": "react",
     "jsxFactory": "m",
     "lib": [
-      "es2017",
+      "es2022",
       "dom",
       "dom.iterable",
     ],
@@ -243,7 +243,7 @@ exports[`TypeScript project config file should parse and resolve correctly: src/
     "jsx": "react",
     "jsxFactory": "m",
     "lib": [
-      "es2017",
+      "es2022",
       "dom",
       "dom.iterable",
     ],
@@ -279,7 +279,7 @@ exports[`TypeScript project config file should parse and resolve correctly: test
     "jsx": "react",
     "jsxFactory": "m",
     "lib": [
-      "es2017",
+      "es2022",
       "dom",
       "dom.iterable",
     ],

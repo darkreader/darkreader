@@ -252,6 +252,34 @@ it('URL is enabled', () => {
     expect(isURLMatched('127.0.0.1:80', '*')).toEqual(true);
     expect(isURLMatched('localhost', '*')).toEqual(true);
 
+    // No wildcard
+    expect(isURLMatched('https://example.com/abc', 'example.com')).toEqual(true);
+
+    // Single wildcard with unbound non-extended left math
+    expect(isURLMatched('https://example.com/abc', 'example.com/abc/*')).toEqual(true);
+    expect(isURLMatched('https://example.com/abcd', 'example.com/abc/*')).toEqual(false);
+    expect(isURLMatched('https://example.com/abc/def', 'example.com/*/def')).toEqual(true);
+    expect(isURLMatched('https://example.com/abcd/ef', 'example.com/*/def')).toEqual(false);
+    expect(isURLMatched('https://example.com/abc', 'example.com/*abc')).toEqual(true);
+    expect(isURLMatched('https://example.com/aabc', 'example.com/*abc')).toEqual(true);
+    expect(isURLMatched('https://example.com/abcd', 'example.com/*abc')).toEqual(true);
+    expect(isURLMatched('https://example.com/abc', 'example.*/abc')).toEqual(true);
+    expect(isURLMatched('https://example.com/abc', 'example.*')).toEqual(true);
+    expect(isURLMatched('https://example.com/abc', 'example.*abc')).toEqual(true);
+
+    // Single wildcard with unbound extended left math
+    expect(isURLMatched('https://a.example.com/abc', 'example.com')).toEqual(true);
+    expect(isURLMatched('https://a.example.com/abc', 'example.com/abc/*')).toEqual(true);
+    expect(isURLMatched('https://a.example.com/abcd', 'example.com/abc/*')).toEqual(false);
+    expect(isURLMatched('https://a.example.com/abc/def', 'example.com/*/def')).toEqual(true);
+    expect(isURLMatched('https://a.example.com/abcd/ef', 'example.com/*/def')).toEqual(false);
+    expect(isURLMatched('https://a.example.com/abc', 'example.com/*abc')).toEqual(true);
+    expect(isURLMatched('https://a.example.com/aabc', 'example.com/*abc')).toEqual(true);
+    expect(isURLMatched('https://a.example.com/abcd', 'example.com/*abc')).toEqual(true);
+    expect(isURLMatched('https://a.example.com/abc', 'example.*/abc')).toEqual(true);
+    expect(isURLMatched('https://a.example.com/abc', 'example.*')).toEqual(true);
+    expect(isURLMatched('https://a.example.com/abc', 'example.*abc')).toEqual(true);
+
     // Some URLs can have unescaped [] in query
     expect(isURLMatched(
         'google.co.uk/order.php?bar=[foo]',

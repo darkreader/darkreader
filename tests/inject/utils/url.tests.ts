@@ -254,6 +254,9 @@ it('URL is enabled', () => {
 
     // No wildcard
     expect(isURLMatched('https://example.com/abc', 'example.com')).toEqual(true);
+    expect(isURLMatched('https://a.example.com/abc', 'example.com')).toEqual(true);
+    expect(isURLMatched('https://example.com/abc', 'a.example.com')).toEqual(false);
+    expect(isURLMatched('https://a.example.com/abc', 'b.example.com')).toEqual(false);
 
     // Single wildcard with unbound non-extended left math
     expect(isURLMatched('https://example.com/abc', 'example.com/abc/*')).toEqual(true);

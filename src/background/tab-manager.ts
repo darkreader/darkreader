@@ -13,6 +13,11 @@ import {makeFirefoxHappy} from './make-firefox-happy';
 declare const __CHROMIUM_MV3__: boolean;
 declare const __THUNDERBIRD__: boolean;
 
+// ContextId is a number on Firefox and is a string in Chromium
+type contextId = string | number;
+type tabId = number;
+type frameId = number;
+
 interface TabManagerOptions {
     getConnectionMessage: (tabURl: string, url: string, isTopFrame: boolean) => Promise<Message>;
     getTabMessage: (tabURL: string, url: string, isTopFrame: boolean) => Message;
@@ -20,14 +25,15 @@ interface TabManagerOptions {
 }
 
 interface FrameInfo {
-    url?: string | null;
+    contextId: contextId | null;
+    url: string | null;
     state: DocumentState;
     timestamp: number;
     darkThemeDetected?: boolean;
 }
 
 interface TabManagerState extends Record<string, unknown> {
-    tabs: {[tabId: number]: {[frameId: number]: FrameInfo}};
+    tabs: {[tabId: tabId]: {[frameId: frameId]: FrameInfo}};
     timestamp: number;
 }
 
@@ -46,7 +52,7 @@ enum DocumentState {
 }
 
 export default class TabManager {
-    private static tabs: {[tabId: number]: {[frameId: number]: FrameInfo}};
+    private static tabs: {[tabId: tabId]: {[frameId: frameId]: FrameInfo}};
     private static stateManager: StateManager<TabManagerState>;
     private static fileLoader: {get: (params: FetchRequestParameters) => Promise<string | null>} | null = null;
     private static getTabMessage: (tabURL: string, url: string, isTopFrame: boolean) => Message;
@@ -96,7 +102,7 @@ export default class TabManager {
                     const {frameId} = sender;
                     const url = sender.url!;
 
-                    TabManager.addFrame(tabId, frameId!, url, TabManager.timestamp);
+                    TabManager.addFrame(tabId, frameId!, '', url, TabManager.timestamp);
 
                     reply(tabURL, url, frameId === 0);
                     TabManager.stateManager.saveState();
@@ -124,12 +130,14 @@ export default class TabManager {
                     const tabURL = sender.tab!.url!;
                     const frameId = sender.frameId!;
                     const url = sender.url!;
+                    const contextId: contextId = isFirefox ? (sender as any).contextId : (sender as any).documentId;
                     if (TabManager.tabs[tabId][frameId].timestamp < TabManager.timestamp) {
                         const message = TabManager.getTabMessage(tabURL, url, frameId === 0);
                         chrome.tabs.sendMessage<Message>(tabId, message, {frameId});
                     }
                     TabManager.tabs[sender.tab!.id!][sender.frameId!] = {
-                        url: sender.url,
+                        contextId,
+                        url,
                         state: DocumentState.ACTIVE,
                         timestamp: TabManager.timestamp,
                     };
@@ -207,8 +215,8 @@ export default class TabManager {
         );
     }
 
-    private static addFrame(tabId: number, frameId: number, url: string, timestamp: number) {
-        let frames: {[frameId: number]: FrameInfo};
+    private static addFrame(tabId: tabId, frameId: frameId, contextId: contextId, url: string, timestamp: number) {
+        let frames: {[frameId: frameId]: FrameInfo};
         if (TabManager.tabs[tabId]) {
             frames = TabManager.tabs[tabId];
         } else {
@@ -216,13 +224,14 @@ export default class TabManager {
             TabManager.tabs[tabId] = frames;
         }
         frames[frameId] = {
+            contextId,
             url,
             state: DocumentState.ACTIVE,
             timestamp,
         };
     }
 
-    private static async removeFrame(tabId: number, frameId: number) {
+    private static async removeFrame(tabId: tabId, frameId: frameId) {
         await TabManager.stateManager.loadState();
 
         if (frameId === 0) {

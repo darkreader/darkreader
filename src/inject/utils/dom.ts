@@ -152,12 +152,12 @@ export function watchForNodePosition<T extends Node>(
     });
     const run = () => {
         // TODO: remove type cast after dependency update
-        observer.observe(parent as ParentNode, {childList: true});
+        observer.observe(parent!, {childList: true});
     };
 
     const stop = () => {
         // TODO: remove type cast after dependency update
-        clearTimeout(timeoutId as unknown as number);
+        clearTimeout(timeoutId!);
         observer.disconnect();
         restore.cancel();
     };

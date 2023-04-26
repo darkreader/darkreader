@@ -80,7 +80,7 @@ function Pages(props: ViewProps) {
 
     function goBack() {
         const activePage = store.activePage;
-        const settingsPageSubpages = ['automation', 'manage-settings', 'site-list'] as PageId[];
+        const settingsPageSubpages: PageId[] = ['automation', 'manage-settings', 'site-list'];
         if (settingsPageSubpages.includes(activePage)) {
             store.activePage = 'settings';
         } else {

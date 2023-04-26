@@ -26,7 +26,7 @@ export function push<T>(array: T[], addition: Iterable<T> | ArrayLike<T>) {
 // https://jsben.ch/FJ1mO
 // https://jsben.ch/ZmViL
 export function toArray<T>(items: ArrayLike<T>) {
-    const results = [] as T[];
+    const results: T[] = [];
     for (let i = 0, len = items.length; i < len; i++) {
         results.push(items[i]);
     }

@@ -78,7 +78,7 @@ function onSwipeStart(
         typeof TouchEvent !== 'undefined' &&
         startEventObj instanceof TouchEvent;
     const touchId = isTouchEvent
-        ? (startEventObj as TouchEvent).changedTouches[0].identifier
+        ? (startEventObj).changedTouches[0].identifier
         : null;
     const pointerMoveEvent = isTouchEvent ? 'touchmove' : 'mousemove';
     const pointerUpEvent = isTouchEvent ? 'touchend' : 'mouseup';

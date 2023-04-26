@@ -21,7 +21,7 @@ export function throttle<T extends(...args: any[]) => any>(callback: T) {
 
     const cancel = () => {
         // TODO: reove cast once types are updated
-        cancelAnimationFrame(frameId as number);
+        cancelAnimationFrame(frameId!);
         pending = false;
         frameId = null;
     };
@@ -58,7 +58,7 @@ export function createAsyncTasksQueue() {
     function cancel() {
         tasks.splice(0);
         // TODO: reove cast once types are updated
-        cancelAnimationFrame(frameId as number);
+        cancelAnimationFrame(frameId!);
         frameId = null;
     }
 

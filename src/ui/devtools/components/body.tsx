@@ -12,7 +12,7 @@ type BodyProps = ExtWrapper & {devtools: DevToolsData};
 
 function Body({data, actions, devtools}: BodyProps) {
     const context = getContext();
-    const {state, setState} = useState({errorText: null as string | null});
+    const {state, setState} = useState<{errorText: string | null}>({errorText: null});
     let textNode: HTMLTextAreaElement;
     const previewButtonText = data.settings.previewNewDesign ? 'Switch to old design' : 'Preview new design';
     const {theme} = getCurrentThemePreset({data, actions});

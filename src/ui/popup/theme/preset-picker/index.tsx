@@ -9,7 +9,7 @@ import type {DropDownOption} from '../../../controls/dropdown';
 
 function PresetItem(props: ViewProps & {preset: ThemePreset}) {
     const context = getContext();
-    const store = context.store as {isConfirmationVisible: boolean};
+    const store: {isConfirmationVisible: boolean} = context.store;
 
     function onRemoveClick(e: MouseEvent) {
         e.stopPropagation();

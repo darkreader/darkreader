@@ -27,7 +27,7 @@ const VAR_TYPE_BGIMG = 1 << 3;
 
 export class VariablesStore {
     private varTypes = new Map<string, number>();
-    private rulesQueue = [] as CSSRuleList[];
+    private rulesQueue: CSSRuleList[] = [];
     private definedVars = new Set<string>();
     private varRefs = new Map<string, Set<string>>();
     private unknownColorVars = new Set<string>();
@@ -502,7 +502,7 @@ export class VariablesStore {
                 this.subscribeForVarTypeChange(property, this.onRootVariableDefined);
             }
         });
-        const cssLines = [] as string[];
+        const cssLines: string[] = [];
         cssLines.push(':root {');
         for (const [property, value] of declarations) {
             cssLines.push(`    ${property}: ${value};`);

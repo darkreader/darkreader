@@ -10,6 +10,7 @@ import {getURLHostOrProtocol} from '../utils/url';
 import {isPanel} from './utils/tab';
 import {makeFirefoxHappy} from './make-firefox-happy';
 
+declare const __CHROMIUM_MV2__: boolean;
 declare const __CHROMIUM_MV3__: boolean;
 declare const __THUNDERBIRD__: boolean;
 
@@ -74,7 +75,8 @@ export default class TabManager {
                     await TabManager.stateManager.loadState();
                     const reply = (tabURL: string, url: string, isTopFrame: boolean) => {
                         getConnectionMessage(tabURL, url, isTopFrame).then((message) => {
-                            message && chrome.tabs.sendMessage<Message>(sender.tab!.id!, message, {frameId: sender.frameId});
+                            message && chrome.tabs.sendMessage<Message>(sender.tab!.id!, message,
+                                (__CHROMIUM_MV3__ || __CHROMIUM_MV2__ && (sender as any).documentId) ? {frameId: sender.frameId, documentId: (sender as any).documentId} as chrome.tabs.MessageSendOptions : {frameId: sender.frameId});
                         });
                     };
 
@@ -85,10 +87,10 @@ export default class TabManager {
                             if (sender && sender.tab && typeof sender.tab.id === 'number') {
                                 chrome.tabs.sendMessage<Message>(sender.tab.id,
                                     {
-                                        type: MessageType.BG_UNSUPPORTED_SENDER
+                                        type: MessageType.BG_UNSUPPORTED_SENDER,
                                     },
                                     {
-                                        frameId: sender && typeof sender.frameId === 'number' ? sender.frameId : undefined
+                                        frameId: sender && typeof sender.frameId === 'number' ? sender.frameId : undefined,
                                     });
                             }
                         } else {
@@ -133,7 +135,8 @@ export default class TabManager {
                     const contextId: contextId = isFirefox ? (sender as any).contextId : (sender as any).documentId;
                     if (TabManager.tabs[tabId][frameId].timestamp < TabManager.timestamp) {
                         const message = TabManager.getTabMessage(tabURL, url, frameId === 0);
-                        chrome.tabs.sendMessage<Message>(tabId, message, {frameId});
+                        chrome.tabs.sendMessage<Message>(tabId, message,
+                            (__CHROMIUM_MV3__ || __CHROMIUM_MV2__ && (sender as any).documentId) ? {frameId, documentId: contextId} as chrome.tabs.MessageSendOptions : {frameId});
                     }
                     TabManager.tabs[sender.tab!.id!][sender.frameId!] = {
                         contextId,
@@ -153,7 +156,7 @@ export default class TabManager {
                     // Sometimes fetch error behaves like synchronous and sends `undefined`
                     const id = message.id;
                     const sendResponse = (response: Partial<Message>) => {
-                        chrome.tabs.sendMessage<Message>(sender.tab!.id!, {type: MessageType.BG_FETCH_RESPONSE, id, ...response}, {frameId: sender.frameId});
+                        chrome.tabs.sendMessage<Message>(sender.tab!.id!, {type: MessageType.BG_FETCH_RESPONSE, id, ...response}, (__CHROMIUM_MV3__ || __CHROMIUM_MV2__ && (sender as any).documentId) ? {frameId: sender.frameId, documentId: (sender as any).documentId} as chrome.tabs.MessageSendOptions : {frameId: sender.frameId});
                     };
 
                     if (__THUNDERBIRD__) {
@@ -323,7 +326,7 @@ export default class TabManager {
                 const frames = TabManager.tabs[tab.id!];
                 Object.entries(frames)
                     .filter(([, {state}]) => state === DocumentState.ACTIVE || state === DocumentState.PASSIVE)
-                    .forEach(async ([id, {url}]) => {
+                    .forEach(async ([id, {url, contextId}]) => {
                         const frameId = Number(id);
                         const tabURL = await TabManager.getTabURL(tab);
                         // Check if hostname are equal when we only want to update active tab.
@@ -333,10 +336,10 @@ export default class TabManager {
 
                         const message = TabManager.getTabMessage(tabURL, url!, frameId === 0);
                         if (tab.active && frameId === 0) {
-                            chrome.tabs.sendMessage<Message>(tab.id!, message, {frameId});
+                            chrome.tabs.sendMessage<Message>(tab.id!, message, (__CHROMIUM_MV3__ || __CHROMIUM_MV2__ && contextId) ? {frameId, documentId: contextId} as chrome.tabs.MessageSendOptions : {frameId});
                         } else {
                             setTimeout(() => {
-                                chrome.tabs.sendMessage<Message>(tab.id!, message, {frameId});
+                                chrome.tabs.sendMessage<Message>(tab.id!, message, (__CHROMIUM_MV3__ || __CHROMIUM_MV2__ && contextId) ? {frameId, documentId: contextId} as chrome.tabs.MessageSendOptions : {frameId});
                             });
                         }
                         if (TabManager.tabs[tab.id!][frameId]) {

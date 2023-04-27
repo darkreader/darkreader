@@ -110,6 +110,7 @@ export default class TabManager {
                     TabManager.stateManager.saveState();
                     break;
                 }
+
                 case MessageType.CS_FRAME_FORGET:
                     if (!sender.tab) {
                         logWarn('Unexpected message', message, sender);
@@ -117,6 +118,7 @@ export default class TabManager {
                     }
                     TabManager.removeFrame(sender.tab!.id!, sender.frameId!);
                     break;
+
                 case MessageType.CS_FRAME_FREEZE: {
                     await TabManager.stateManager.loadState();
                     const info = TabManager.tabs[sender.tab!.id!][sender.frameId!];
@@ -125,6 +127,7 @@ export default class TabManager {
                     TabManager.stateManager.saveState();
                     break;
                 }
+
                 case MessageType.CS_FRAME_RESUME: {
                     onColorSchemeChange(message.data.isDark);
                     await TabManager.stateManager.loadState();
@@ -148,6 +151,7 @@ export default class TabManager {
                     TabManager.stateManager.saveState();
                     break;
                 }
+
                 case MessageType.CS_DARK_THEME_DETECTED:
                     TabManager.tabs[sender.tab!.id!][sender.frameId!].darkThemeDetected = true;
                     break;

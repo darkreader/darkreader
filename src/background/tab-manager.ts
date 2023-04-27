@@ -16,7 +16,7 @@ declare const __FIREFOX__: boolean;
 declare const __THUNDERBIRD__: boolean;
 
 // ContextId is a number on Firefox and is a string in Chromium
-type contextId = string | number;
+type documentId = string | number;
 type tabId = number;
 type frameId = number;
 
@@ -26,8 +26,8 @@ interface TabManagerOptions {
     onColorSchemeChange: (isDark: boolean) => void;
 }
 
-interface FrameInfo {
-    contextId: contextId | null;
+interface DocumentInfo {
+    documentId: documentId | null;
     url: string | null;
     state: DocumentState;
     timestamp: number;
@@ -35,7 +35,7 @@ interface FrameInfo {
 }
 
 interface TabManagerState extends Record<string, unknown> {
-    tabs: {[tabId: tabId]: {[frameId: frameId]: FrameInfo}};
+    tabs: {[tabId: tabId]: {[frameId: frameId]: DocumentInfo}};
     timestamp: number;
 }
 
@@ -54,7 +54,7 @@ enum DocumentState {
 }
 
 export default class TabManager {
-    private static tabs: {[tabId: tabId]: {[frameId: frameId]: FrameInfo}};
+    private static tabs: {[tabId: tabId]: {[frameId: frameId]: DocumentInfo}};
     private static stateManager: StateManager<TabManagerState>;
     private static fileLoader: {get: (params: FetchRequestParameters) => Promise<string | null>} | null = null;
     private static getTabMessage: (tabURL: string, url: string, isTopFrame: boolean) => Message;
@@ -104,9 +104,9 @@ export default class TabManager {
                     const tabURL = sender.tab!.url!;
                     const {frameId} = sender;
                     const url = sender.url!;
-                    const contextId: contextId = (__CHROMIUM_MV3__ || __CHROMIUM_MV2__) ? (sender as any).documentId : ((__FIREFOX__ || __THUNDERBIRD__) ? (sender as any).contextId : null);
+                    const documentId: documentId = (__CHROMIUM_MV3__ || __CHROMIUM_MV2__) ? (sender as any).documentId : ((__FIREFOX__ || __THUNDERBIRD__) ? (sender as any).contextId : null);
 
-                    TabManager.addFrame(tabId, frameId!, contextId, url, TabManager.timestamp);
+                    TabManager.addFrame(tabId, frameId!, documentId, url, TabManager.timestamp);
 
                     reply(tabURL, url, frameId === 0);
                     TabManager.stateManager.saveState();
@@ -137,14 +137,14 @@ export default class TabManager {
                     const tabURL = sender.tab!.url!;
                     const frameId = sender.frameId!;
                     const url = sender.url!;
-                    const contextId: contextId = isFirefox ? (sender as any).contextId : (sender as any).documentId;
+                    const documentId: documentId = isFirefox ? (sender as any).contextId : (sender as any).documentId;
                     if (TabManager.tabs[tabId][frameId].timestamp < TabManager.timestamp) {
                         const message = TabManager.getTabMessage(tabURL, url, frameId === 0);
                         chrome.tabs.sendMessage<Message>(tabId, message,
-                            (__CHROMIUM_MV3__ || __CHROMIUM_MV2__ && (sender as any).documentId) ? {frameId, documentId: contextId} as chrome.tabs.MessageSendOptions : {frameId});
+                            (__CHROMIUM_MV3__ || __CHROMIUM_MV2__ && (sender as any).documentId) ? {frameId, documentId} as chrome.tabs.MessageSendOptions : {frameId});
                     }
                     TabManager.tabs[sender.tab!.id!][sender.frameId!] = {
-                        contextId,
+                        documentId,
                         url,
                         state: DocumentState.ACTIVE,
                         darkThemeDetected: false,
@@ -225,8 +225,8 @@ export default class TabManager {
         );
     }
 
-    private static addFrame(tabId: tabId, frameId: frameId, contextId: contextId, url: string, timestamp: number) {
-        let frames: {[frameId: frameId]: FrameInfo};
+    private static addFrame(tabId: tabId, frameId: frameId, documentId: documentId, url: string, timestamp: number) {
+        let frames: {[frameId: frameId]: DocumentInfo};
         if (TabManager.tabs[tabId]) {
             frames = TabManager.tabs[tabId];
         } else {
@@ -234,7 +234,7 @@ export default class TabManager {
             TabManager.tabs[tabId] = frames;
         }
         frames[frameId] = {
-            contextId,
+            documentId,
             url,
             state: DocumentState.ACTIVE,
             darkThemeDetected: false,
@@ -334,7 +334,7 @@ export default class TabManager {
                 const frames = TabManager.tabs[tab.id!];
                 Object.entries(frames)
                     .filter(([, {state}]) => state === DocumentState.ACTIVE || state === DocumentState.PASSIVE)
-                    .forEach(async ([id, {url, contextId}]) => {
+                    .forEach(async ([id, {url, documentId}]) => {
                         const frameId = Number(id);
                         const tabURL = await TabManager.getTabURL(tab);
                         // Check if hostname are equal when we only want to update active tab.
@@ -344,10 +344,10 @@ export default class TabManager {
 
                         const message = TabManager.getTabMessage(tabURL, url!, frameId === 0);
                         if (tab.active && frameId === 0) {
-                            chrome.tabs.sendMessage<Message>(tab.id!, message, (__CHROMIUM_MV3__ || __CHROMIUM_MV2__ && contextId) ? {frameId, documentId: contextId} as chrome.tabs.MessageSendOptions : {frameId});
+                            chrome.tabs.sendMessage<Message>(tab.id!, message, (__CHROMIUM_MV3__ || __CHROMIUM_MV2__ && documentId) ? {frameId, documentId} as chrome.tabs.MessageSendOptions : {frameId});
                         } else {
                             setTimeout(() => {
-                                chrome.tabs.sendMessage<Message>(tab.id!, message, (__CHROMIUM_MV3__ || __CHROMIUM_MV2__ && contextId) ? {frameId, documentId: contextId} as chrome.tabs.MessageSendOptions : {frameId});
+                                chrome.tabs.sendMessage<Message>(tab.id!, message, (__CHROMIUM_MV3__ || __CHROMIUM_MV2__ && documentId) ? {frameId, documentId} as chrome.tabs.MessageSendOptions : {frameId});
                             });
                         }
                         if (TabManager.tabs[tab.id!][frameId]) {

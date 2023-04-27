@@ -15,8 +15,9 @@ declare const __CHROMIUM_MV3__: boolean;
 declare const __FIREFOX__: boolean;
 declare const __THUNDERBIRD__: boolean;
 
-// ContextId is a number on Firefox and is a string in Chromium
-type documentId = string | number;
+// ContextId is a number on Firefox and documentId is a string in Chromium,
+// let's use string for simplicity
+type documentId = string;
 type tabId = number;
 type frameId = number;
 

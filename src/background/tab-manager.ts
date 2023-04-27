@@ -138,7 +138,7 @@ export default class TabManager {
                     const tabURL = sender.tab!.url!;
                     const frameId = sender.frameId!;
                     const url = sender.url!;
-                    const documentId: documentId = isFirefox ? (sender as any).contextId : (sender as any).documentId;
+                    const documentId: documentId = (__CHROMIUM_MV3__ || __CHROMIUM_MV2__ && (sender as any).documentId) ? (sender as any).documentId : null;
                     if (TabManager.tabs[tabId][frameId].timestamp < TabManager.timestamp) {
                         const message = TabManager.getTabMessage(tabURL, url, frameId === 0);
                         chrome.tabs.sendMessage<Message>(tabId, message,

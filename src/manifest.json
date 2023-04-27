@@ -36,6 +36,9 @@
             "match_about_blank": true
         }
     ],
+    "web_accessible_resources": [
+        "inject/proxy.js"
+    ],
     "permissions": [
         "alarms",
         "fontSettings",

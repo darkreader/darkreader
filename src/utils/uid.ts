@@ -10,3 +10,7 @@ export function generateUID(): string {
 
     return Array.from((crypto as Crypto).getRandomValues(new Uint8Array(16))).map((x) => hexify(x)).join('');
 }
+
+export function generateRandomId(): number {
+    return Math.floor(Math.random() * 2 ** 55);
+}

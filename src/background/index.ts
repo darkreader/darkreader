@@ -108,9 +108,12 @@ if (__WATCH__) {
                     break;
                 case 'reload:full':
                     chrome.tabs.query({}, (tabs) => {
+                        const message: Message = {type: MessageType.BG_RELOAD};
+                        // Some contexts are not considered to be tabs and can not receive regular messages
+                        chrome.runtime.sendMessage<Message>(message);
                         for (const tab of tabs) {
                             if (canInjectScript(tab.url)) {
-                                chrome.tabs.sendMessage<Message>(tab.id!, {type: MessageType.BG_RELOAD});
+                                chrome.tabs.sendMessage<Message>(tab.id!, message);
                             }
                         }
                         chrome.runtime.reload();

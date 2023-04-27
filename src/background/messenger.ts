@@ -44,7 +44,7 @@ export default class Messenger {
         const allowedSenderURL = [
             chrome.runtime.getURL('/ui/popup/index.html'),
             chrome.runtime.getURL('/ui/devtools/index.html'),
-            chrome.runtime.getURL('/ui/stylesheet-editor/index.html')
+            chrome.runtime.getURL('/ui/stylesheet-editor/index.html'),
         ];
         if (allowedSenderURL.includes(sender.url!)) {
             Messenger.onUIMessage(message, sendResponse);
@@ -168,7 +168,7 @@ export default class Messenger {
         if (Messenger.changeListenerCount > 0) {
             chrome.runtime.sendMessage<Message>({
                 type: MessageType.BG_CHANGES,
-                data
+                data,
             });
         }
     }

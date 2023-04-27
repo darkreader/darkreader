@@ -30,7 +30,7 @@ interface FrameInfo {
     url: string | null;
     state: DocumentState;
     timestamp: number;
-    darkThemeDetected?: boolean;
+    darkThemeDetected: boolean;
 }
 
 interface TabManagerState extends Record<string, unknown> {
@@ -142,6 +142,7 @@ export default class TabManager {
                         contextId,
                         url,
                         state: DocumentState.ACTIVE,
+                        darkThemeDetected: false,
                         timestamp: TabManager.timestamp,
                     };
                     TabManager.stateManager.saveState();
@@ -230,6 +231,7 @@ export default class TabManager {
             contextId,
             url,
             state: DocumentState.ACTIVE,
+            darkThemeDetected: false,
             timestamp,
         };
     }

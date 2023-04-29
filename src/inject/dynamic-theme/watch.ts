@@ -18,34 +18,35 @@ interface ChangedStyles {
 const undefinedGroups = new Map<string, Set<Element>>();
 let elementsDefinitionCallback: ((elements: Element[]) => void) | null;
 
-function collectUndefinedElements(root: ParentNode) {
+function recordUndefinedElement(element: Element): void {
+    let tag = element.tagName.toLowerCase();
+    if (!tag.includes('-')) {
+        const extendedTag = element.getAttribute('is');
+        if (extendedTag) {
+            tag = extendedTag;
+        } else {
+            // Happens for <template> on YouTube
+            return;
+        }
+    }
+    if (!undefinedGroups.has(tag)) {
+        undefinedGroups.set(tag, new Set());
+        customElementsWhenDefined(tag).then(() => {
+            if (elementsDefinitionCallback) {
+                const elements = undefinedGroups.get(tag);
+                undefinedGroups.delete(tag);
+                elementsDefinitionCallback(Array.from(elements!));
+            }
+        });
+    }
+    undefinedGroups.get(tag)!.add(element);
+}
+
+function collectUndefinedElements(root: ParentNode): void {
     if (!isDefinedSelectorSupported) {
         return;
     }
-    forEach(root.querySelectorAll(':not(:defined)'),
-        (el) => {
-            let tag = el.tagName.toLowerCase();
-            if (!tag.includes('-')) {
-                const extendedTag = el.getAttribute('is');
-                if (extendedTag) {
-                    tag = extendedTag;
-                } else {
-                    // Happens for <template> on YouTube
-                    return;
-                }
-            }
-            if (!undefinedGroups.has(tag)) {
-                undefinedGroups.set(tag, new Set());
-                customElementsWhenDefined(tag).then(() => {
-                    if (elementsDefinitionCallback) {
-                        const elements = undefinedGroups.get(tag);
-                        undefinedGroups.delete(tag);
-                        elementsDefinitionCallback(Array.from(elements!));
-                    }
-                });
-            }
-            undefinedGroups.get(tag)!.add(el);
-        });
+    forEach(root.querySelectorAll(':not(:defined)'), recordUndefinedElement);
 }
 
 let canOptimizeUsingProxy = false;
@@ -57,9 +58,9 @@ const resolvers = new Map<string, () => void>();
 
 function handleIsDefined(e: CustomEvent<{tag: string}>) {
     canOptimizeUsingProxy = true;
-    if (resolvers.has(e.detail.tag)) {
-        const resolve = resolvers.get(e.detail.tag)!;
-        resolve();
+    const tag = e.detail.tag;
+    if (resolvers.has(tag)) {
+        resolvers.get(tag)!();
     }
 }
 

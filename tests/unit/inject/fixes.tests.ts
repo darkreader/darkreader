@@ -10,6 +10,7 @@ describe('Select fixes via findRelevantFix()', () => {
         ignoreImageAnalysis: [],
         ignoreInlineStyle: [],
         disableStyleSheetsProxy: false,
+        disableCustomElementRegistryProxy: false,
     };
 
     it('If fix list is empty or invalid, findRelevantFix() returns null', () => {
@@ -173,6 +174,7 @@ describe('Construct single fix via combineFixes()', () => {
         ignoreImageAnalysis: [],
         ignoreInlineStyle: [],
         disableStyleSheetsProxy: false,
+        disableCustomElementRegistryProxy: false,
     };
 
     it('Merges CSS', () => {

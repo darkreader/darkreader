@@ -64,11 +64,11 @@ function createOrUpdateScript(className: string, root: ParentNode = document.hea
  * Note: This function is used only with MV3.
  * The string passed as the src parameter must be included in the web_accessible_resources manifest key.
  */
-function injectProxyScriptMV3(arg: boolean) {
+function injectProxyScriptMV3(enableStyleSheetsProxy: boolean, enableCustomElementRegistryProxy: boolean) {
     logInfo('MV3 proxy injector: regular path attempts to inject...');
     const element = document.createElement('script');
     element.src = chrome.runtime.getURL('inject/proxy.js');
-    element.dataset.arg = JSON.stringify(arg);
+    element.dataset.arg = JSON.stringify({enableStyleSheetsProxy, enableCustomElementRegistryProxy});
     document.head.prepend(element);
 }
 
@@ -151,14 +151,15 @@ function createStaticStyleOverrides() {
     const rootVarsStyle = createOrUpdateStyle('darkreader--root-vars');
     document.head.insertBefore(rootVarsStyle, variableStyle.nextSibling);
 
-    const injectProxyArg = !(fixes && fixes.disableStyleSheetsProxy);
+    const enableStyleSheetsProxy = !(fixes && fixes.disableStyleSheetsProxy);
+    const enableCustomElementRegistryProxy = !(fixes && fixes.disableCustomElementRegistryProxy);
     if (__CHROMIUM_MV3__) {
-        injectProxyScriptMV3(injectProxyArg);
+        injectProxyScriptMV3(enableStyleSheetsProxy, enableCustomElementRegistryProxy);
         // Notify the dedicated injector of the data.
-        document.dispatchEvent(new CustomEvent('__darkreader__stylesheetProxy__arg', {detail: injectProxyArg}));
+        document.dispatchEvent(new CustomEvent('__darkreader__stylesheetProxy__arg', {detail: {enableStyleSheetsProxy, enableCustomElementRegistryProxy}}));
     } else {
         const proxyScript = createOrUpdateScript('darkreader--proxy');
-        proxyScript.append(`(${injectProxy})(${injectProxyArg})`);
+        proxyScript.append(`(${injectProxy})(${enableStyleSheetsProxy}, ${enableCustomElementRegistryProxy})`);
         document.head.insertBefore(proxyScript, rootVarsStyle.nextSibling);
         proxyScript.remove();
     }

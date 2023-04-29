@@ -9,8 +9,8 @@ const EVENT_ARG = '__darkreader__stylesheetProxy__arg';
 
 const registerdScriptPath = !document.currentScript;
 
-function injectProxyAndCleanup(arg: boolean) {
-    injectProxy(arg);
+function injectProxyAndCleanup(args: {enableStyleSheetsProxy: boolean; enableCustomElementRegistryProxy: boolean}) {
+    injectProxy(args.enableStyleSheetsProxy, args.enableCustomElementRegistryProxy);
     doneReceiver();
     document.dispatchEvent(new CustomEvent(EVENT_DONE));
 }
@@ -19,9 +19,9 @@ function regularPath() {
     const argString = document.currentScript!.dataset.arg;
     if (argString !== undefined) {
         document.documentElement.dataset[key] = 'true';
-        const arg: boolean = JSON.parse(argString);
-        logInfo(`MV3 proxy injector: regular path runs injectProxy(${arg}).`);
-        injectProxyAndCleanup(arg);
+        const args: {enableStyleSheetsProxy: boolean; enableCustomElementRegistryProxy: boolean} = JSON.parse(argString);
+        logInfo(`MV3 proxy injector: regular path runs injectProxy(${argString}).`);
+        injectProxyAndCleanup(args);
     }
 }
 

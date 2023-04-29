@@ -235,6 +235,7 @@ describe('IMAGE ANALYSIS', () => {
             ignoreInlineStyle: ['.'],
             ignoreImageAnalysis: ['*'],
             disableStyleSheetsProxy: false,
+            disableCustomElementRegistryProxy: false,
         }];
         createOrUpdateDynamicTheme(theme, fixes, false);
         const backgroundImage = getComputedStyle(container.querySelector('i')).backgroundImage;

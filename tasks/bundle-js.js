@@ -173,7 +173,7 @@ async function bundleJS(/** @type {JSEntry} */entry, platform, debug, watch, log
                     __DEBUG__: debug,
                     __CHROMIUM_MV2__: platform === PLATFORM.CHROME_MV2,
                     __CHROMIUM_MV3__: platform === PLATFORM.CHROME_MV3,
-                    __FIREFOX__: platform === PLATFORM.FIREFOX_MV2,
+                    __FIREFOX_MV2__: platform === PLATFORM.FIREFOX_MV2,
                     __THUNDERBIRD__: platform === PLATFORM.THUNDERBIRD,
                     __PORT__: watch ? String(PORT) : '-1',
                     __TEST__: test,

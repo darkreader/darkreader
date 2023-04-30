@@ -72,9 +72,11 @@ function handleIsDefined(e: CustomEvent<{tag: string}>) {
 }
 
 async function customElementsWhenDefined(tag: string) {
+    // Custom element is already defined
     if (customElementsStatus.get(tag)) {
         return;
     }
+    // We need to await for element to be defined
     return new Promise<void>((resolve) => {
         // `customElements.whenDefined` is not available in extensions
         // https://bugs.chromium.org/p/chromium/issues/detail?id=390807

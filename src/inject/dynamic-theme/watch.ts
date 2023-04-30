@@ -17,7 +17,7 @@ interface ChangedStyles {
 
 // Map of lower-case custom element name to boolean stating if the element is defined
 // true - defined
-// false or undefined - may not defined yet
+// false or undefined - may not be defined yet
 const customElementsStatus = new Map<string, boolean>();
 const undefinedGroups = new Map<string, Set<Element>>();
 let elementsDefinitionCallback: ((elements: Element[]) => void) | null;

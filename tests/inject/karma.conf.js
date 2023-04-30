@@ -43,7 +43,6 @@ export function configureKarma(config, env) {
         },
         rollupPreprocessor: {
             plugins: [
-                // rollupPluginNodeResolve(),
                 rollupPluginTypescript({
                     typescript,
                     tsconfig: rootPath('tests/inject/tsconfig.json'),

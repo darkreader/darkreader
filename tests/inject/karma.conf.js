@@ -3,7 +3,7 @@
 
 import fs from 'node:fs';
 import os from 'node:os';
-import rollupPluginIstanbul from 'rollup-plugin-istanbul2';
+import rollupPluginIstanbul from 'rollup-plugin-istanbul';
 import rollupPluginNodeResolve from '@rollup/plugin-node-resolve';
 import rollupPluginReplace from '@rollup/plugin-replace';
 import rollupPluginTypescript from '@rollup/plugin-typescript';

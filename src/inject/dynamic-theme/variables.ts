@@ -255,7 +255,6 @@ export class VariablesStore {
             };
         }
         if (property === 'background' || property === 'background-image' || property === 'box-shadow') {
-            /* eslint-disable-next-line @typescript-eslint/promise-function-async */
             return (theme) => {
                 const unknownVars = new Set<string>();
                 const modify = () => {

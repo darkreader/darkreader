@@ -9,24 +9,6 @@ enum ContentScriptManagerState {
     NOTREGISTERED,
 }
 
-// TODO: remove type after dependency update
-// eslint-disable-next-line @typescript-eslint/no-namespace
-declare namespace chrome.scripting {
-    export function getRegisteredContentScripts(filter: { ids: string[] }, callback: (scripts: null[]) => void): void;
-    export function registerContentScripts(scripts: Array<{
-        id: string;
-        js: string[];
-        runAt: 'document_start';
-        persistAcrossSessions: true;
-        matches: [
-            '<all_urls>',
-        ];
-        allFrames: true;
-        world: 'MAIN' | 'ISOLATED';
-    }>, callback: () => void): void;
-    export function unregisterContentScripts(callback: () => void): void;
-}
-
 export default class ContentScriptManager {
     /**
      * TODO: migrate to using promisses directly instead of wrapping callbacks.

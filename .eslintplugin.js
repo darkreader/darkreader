@@ -1,5 +1,7 @@
 // @ts-check
 
+'use strict';
+
 /**
  * To handle PrivateIdentifier and Identifier nodes.
  * @param { {type: string, name?: string;} } node

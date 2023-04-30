@@ -4,6 +4,10 @@ import {iterateShadowHosts, createOptimizedTreeObserver} from '../utils/dom';
 import type {StyleElement} from './style-manager';
 import {shouldManageStyle, getManageableStyles} from './style-manager';
 import {isDefinedSelectorSupported} from '../../utils/platform';
+import {logAssert} from '../utils/log';
+
+declare const __DEBUG__: boolean;
+declare const __TEST__: boolean;
 
 const observers: Array<{disconnect(): void}> = [];
 let observedRoots: WeakSet<Node>;
@@ -70,6 +74,12 @@ function handleIsDefined(e: CustomEvent<{tag: string}>) {
 }
 
 async function customElementsWhenDefined(tag: string) {
+    if ((__TEST__ || __DEBUG__)) {
+        if (tag.toLowerCase() !== tag) {
+            logAssert('customElementsWhenDefined expects lower-case node names');
+            throw new Error('customElementsWhenDefined expects lower-case node names');
+        }
+    }
     // Custom element is already defined
     if (definedCustomElements.has(tag)) {
         return;

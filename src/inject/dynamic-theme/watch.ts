@@ -15,10 +15,8 @@ interface ChangedStyles {
     moved: StyleElement[];
 }
 
-// Map of lower-case custom element name to boolean stating if the element is defined
-// true - defined
-// false or undefined - may not be defined yet
-const customElementsStatus = new Map<string, boolean>();
+// Set of lower-case custom element names which were already defined
+const definedCustomElements = new Set<string>();
 const undefinedGroups = new Map<string, Set<Element>>();
 let elementsDefinitionCallback: ((elements: Element[]) => void) | null;
 
@@ -63,7 +61,7 @@ const resolvers = new Map<string, Array<() => void>>();
 function handleIsDefined(e: CustomEvent<{tag: string}>) {
     canOptimizeUsingProxy = true;
     const tag = e.detail.tag;
-    customElementsStatus.set(tag, true);
+    definedCustomElements.add(tag);
     if (resolvers.has(tag)) {
         const r = resolvers.get(tag)!;
         resolvers.delete(tag);
@@ -73,7 +71,7 @@ function handleIsDefined(e: CustomEvent<{tag: string}>) {
 
 async function customElementsWhenDefined(tag: string) {
     // Custom element is already defined
-    if (customElementsStatus.get(tag)) {
+    if (definedCustomElements.has(tag)) {
         return;
     }
     // We need to await for element to be defined

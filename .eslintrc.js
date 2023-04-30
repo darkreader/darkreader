@@ -181,7 +181,7 @@ config.overrides.push({
     env: {browser: true},
     extends: ['plugin:compat/recommended'],
     parserOptions: {
-        ecmaVersion: 2015,
+        ecmaVersion: 2019,
         sourceType: 'module',
     },
     settings: {

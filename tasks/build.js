@@ -93,9 +93,9 @@ async function run({api: api_, release, debug, platforms, watch, log, test, vers
 function getParams(args) {
     const allPlatforms = !(args.includes('--api') || args.includes('--chrome') || args.includes('--chrome-mv3') || args.includes('--firefox') || args.includes('--thunderbird'));
     const platforms = {
-        [PLATFORM.CHROME]: allPlatforms || args.includes('--chrome'),
+        [PLATFORM.CHROME_MV2]: allPlatforms || args.includes('--chrome'),
         [PLATFORM.CHROME_MV3]: allPlatforms || args.includes('--chrome-mv3'),
-        [PLATFORM.FIREFOX]: allPlatforms || args.includes('--firefox'),
+        [PLATFORM.FIREFOX_MV2]: allPlatforms || args.includes('--firefox'),
         [PLATFORM.THUNDERBIRD]: allPlatforms || args.includes('--thunderbird'),
     };
 

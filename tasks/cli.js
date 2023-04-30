@@ -176,7 +176,7 @@ async function run() {
         await runTasks([signature, zip], {
             version,
             platforms: {
-                [PLATFORM.FIREFOX]: true,
+                [PLATFORM.FIREFOX_MV2]: true,
             },
             debug: false,
             watch: false,

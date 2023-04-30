@@ -18,7 +18,7 @@ const {getDestDir, PLATFORM, rootDir, rootPath} = paths;
  * @property {string | ((platform: string) => string)} dest
  * @property {string} reloadType
  * @property {string[]} [watchFiles]
- * @property {(typeof PLATFORM.CHROME) | undefined} [platform]
+ * @property {(typeof PLATFORM.CHROME_MV3) | undefined} [platform]
  */
 
 /** @type {JSEntry[]} */
@@ -102,7 +102,7 @@ async function bundleJS(/** @type {JSEntry} */entry, platform, debug, watch, log
     const destination = typeof dest === 'string' ? dest : dest(platform);
     let replace = {};
     switch (platform) {
-        case PLATFORM.FIREFOX:
+        case PLATFORM.FIREFOX_MV2:
         case PLATFORM.THUNDERBIRD:
             if (entry.src === 'src/ui/popup/index.tsx') {
                 break;
@@ -123,7 +123,7 @@ async function bundleJS(/** @type {JSEntry} */entry, platform, debug, watch, log
 
     // See comment below
     // TODO(anton): remove this once Firefox supports tab.eval() via WebDriver BiDi
-    const mustRemoveEval = !test && (platform === PLATFORM.FIREFOX) && (entry.src === 'src/inject/index.ts');
+    const mustRemoveEval = !test && (platform === PLATFORM.FIREFOX_MV2) && (entry.src === 'src/inject/index.ts');
 
     const bundle = await rollup.rollup({
         input: rootPath(src),
@@ -171,9 +171,9 @@ async function bundleJS(/** @type {JSEntry} */entry, platform, debug, watch, log
                     preventAssignment: true,
                     ...replace,
                     __DEBUG__: debug,
-                    __CHROMIUM_MV2__: platform === PLATFORM.CHROME,
+                    __CHROMIUM_MV2__: platform === PLATFORM.CHROME_MV2,
                     __CHROMIUM_MV3__: platform === PLATFORM.CHROME_MV3,
-                    __FIREFOX__: platform === PLATFORM.FIREFOX,
+                    __FIREFOX__: platform === PLATFORM.FIREFOX_MV2,
                     __THUNDERBIRD__: platform === PLATFORM.THUNDERBIRD,
                     __PORT__: watch ? String(PORT) : '-1',
                     __TEST__: test,

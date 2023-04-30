@@ -119,7 +119,8 @@ function getParams(args) {
 
     // TODO(Anton): remove me
     if (platforms[PLATFORM.FIREFOX_MV3]) {
-        throw new Error('Firefox MV3 build is not supported yet');
+        platforms[PLATFORM.FIREFOX_MV3] = false;
+        console.log('Firefox MV3 build is not supported yet');
     }
 
     const versionArg = args.find((a) => a.startsWith('--version='));

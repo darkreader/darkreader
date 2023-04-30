@@ -11,7 +11,7 @@ const config = {
     moduleFileExtensions: ['ts', 'tsx', 'js'],
     transform: {'^.+\\.ts(x?)$': ['ts-jest', {tsconfig: '<rootDir>/tests/unit/tsconfig.json'}]},
     globals: {
-        __FIREFOX__: false,
+        __FIREFOX_MV2__: false,
         __CHROMIUM_MV2__: false,
         __CHROMIUM_MV3__: false,
         __THUNDERBIRD__: false,

@@ -12,7 +12,7 @@ import {makeFirefoxHappy} from './make-firefox-happy';
 
 declare const __CHROMIUM_MV2__: boolean;
 declare const __CHROMIUM_MV3__: boolean;
-declare const __FIREFOX__: boolean;
+declare const __FIREFOX_MV2__: boolean;
 declare const __THUNDERBIRD__: boolean;
 
 // ContextId is a number on Firefox and documentId is a string in Chromium,
@@ -105,7 +105,7 @@ export default class TabManager {
                     const tabURL = sender.tab!.url!;
                     const {frameId} = sender;
                     const url = sender.url!;
-                    const documentId: documentId = (__CHROMIUM_MV3__ || __CHROMIUM_MV2__) ? (sender as any).documentId : ((__FIREFOX__ || __THUNDERBIRD__) ? (sender as any).contextId : null);
+                    const documentId: documentId = (__CHROMIUM_MV3__ || __CHROMIUM_MV2__) ? (sender as any).documentId : ((__FIREFOX_MV2__ || __THUNDERBIRD__) ? (sender as any).contextId : null);
 
                     TabManager.addFrame(tabId, frameId!, documentId, url, TabManager.timestamp);
 

@@ -18,7 +18,7 @@ const {getDestDir, PLATFORM, rootDir, rootPath} = paths;
  * @property {string | ((platform: string) => string)} dest
  * @property {string} reloadType
  * @property {string[]} [watchFiles]
- * @property {(typeof PLATFORM.CHROME_MV3) | undefined} [platform]
+ * @property {(typeof PLATFORM.CHROMIUM_MV3) | undefined} [platform]
  */
 
 /** @type {JSEntry[]} */
@@ -26,7 +26,7 @@ const jsEntries = [
     {
         src: 'src/background/index.ts',
         // Prior to Chrome 93, background service worker had to be in top-level directory
-        dest: (platform) => platform === PLATFORM.CHROME_MV3 ? 'background.js' : 'background/index.js',
+        dest: (platform) => platform === PLATFORM.CHROMIUM_MV3 ? 'background.js' : 'background/index.js',
         reloadType: reload.FULL,
     },
     {
@@ -38,7 +38,7 @@ const jsEntries = [
         src: 'src/inject/dynamic-theme/mv3-proxy.ts',
         dest: 'inject/proxy.js',
         reloadType: reload.FULL,
-        platform: PLATFORM.CHROME_MV3,
+        platform: PLATFORM.CHROMIUM_MV3,
     },
     {
         src: 'src/inject/fallback.ts',
@@ -49,7 +49,7 @@ const jsEntries = [
         src: 'src/inject/color-scheme-watcher.ts',
         dest: 'inject/color-scheme-watcher.js',
         reloadType: reload.FULL,
-        platform: PLATFORM.CHROME_MV3,
+        platform: PLATFORM.CHROMIUM_MV3,
     },
     {
         src: 'src/ui/devtools/index.tsx',
@@ -112,7 +112,7 @@ async function bundleJS(/** @type {JSEntry} */entry, platform, debug, watch, log
                 'chrome.fontSettings': `chrome['font' + 'Settings']`
             };
             break;
-        case PLATFORM.CHROME_MV3:
+        case PLATFORM.CHROMIUM_MV3:
             replace = {
                 'chrome.browserAction.setIcon': 'chrome.action.setIcon',
                 'chrome.browserAction.setBadgeBackgroundColor': 'chrome.action.setBadgeBackgroundColor',
@@ -154,7 +154,7 @@ async function bundleJS(/** @type {JSEntry} */entry, platform, debug, watch, log
                     rootDir,
                     typescript,
                     tsconfig: rootPath('src/tsconfig.json'),
-                    compilerOptions: platform === PLATFORM.CHROME_MV3 ? {
+                    compilerOptions: platform === PLATFORM.CHROMIUM_MV3 ? {
                         target: 'ES2022',
                     } : undefined,
                     noImplicitAny: debug ? false : true,
@@ -171,8 +171,8 @@ async function bundleJS(/** @type {JSEntry} */entry, platform, debug, watch, log
                     preventAssignment: true,
                     ...replace,
                     __DEBUG__: debug,
-                    __CHROMIUM_MV2__: platform === PLATFORM.CHROME_MV2,
-                    __CHROMIUM_MV3__: platform === PLATFORM.CHROME_MV3,
+                    __CHROMIUM_MV2__: platform === PLATFORM.CHROMIUM_MV2,
+                    __CHROMIUM_MV3__: platform === PLATFORM.CHROMIUM_MV3,
                     __FIREFOX_MV2__: platform === PLATFORM.FIREFOX_MV2,
                     __THUNDERBIRD__: platform === PLATFORM.THUNDERBIRD,
                     __PORT__: watch ? String(PORT) : '-1',

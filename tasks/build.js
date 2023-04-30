@@ -91,13 +91,31 @@ async function run({api: api_, release, debug, platforms, watch, log, test, vers
 }
 
 function getParams(args) {
-    const allPlatforms = !(args.includes('--api') || args.includes('--chrome') || args.includes('--chrome-mv3') || args.includes('--firefox') || args.includes('--thunderbird'));
-    const platforms = {
-        [PLATFORM.CHROME_MV2]: allPlatforms || args.includes('--chrome'),
-        [PLATFORM.CHROME_MV3]: allPlatforms || args.includes('--chrome-mv3'),
-        [PLATFORM.FIREFOX_MV2]: allPlatforms || args.includes('--firefox'),
-        [PLATFORM.THUNDERBIRD]: allPlatforms || args.includes('--thunderbird'),
+    const argMap = {
+        '--chrome': PLATFORM.CHROMIUM_MV2,
+        '--chrome-mv2': PLATFORM.CHROMIUM_MV2,
+        '--chrome-mv3': PLATFORM.CHROMIUM_MV3,
+        '--firefox': PLATFORM.FIREFOX_MV2,
+        '--firefox-mv2': PLATFORM.FIREFOX_MV2,
+        '--firefox-mv3': PLATFORM.FIREFOX_MV3,
+        '--thunderbird': PLATFORM.THUNDERBIRD,
     };
+    const platforms = {
+        [PLATFORM.CHROMIUM_MV2]: false,
+        [PLATFORM.CHROMIUM_MV3]: false,
+        [PLATFORM.FIREFOX_MV2]: false,
+        [PLATFORM.THUNDERBIRD]: false,
+    };
+    let allPlatforms = true;
+    for (const arg of args) {
+        if (argMap[arg]) {
+            platforms[argMap[arg]] = true;
+            allPlatforms = false;
+        }
+    }
+    if (allPlatforms) {
+        Object.keys(platforms).forEach((platform) => platforms[platform] = true);
+    }
 
     const versionArg = args.find((a) => a.startsWith('--version='));
     const version = versionArg ? versionArg.substring('--version='.length) : null;

@@ -7,22 +7,22 @@ const {PLATFORM, getDestDir, rootPath} = path;
 
 async function patchManifest(platform, debug, watch, test) {
     const manifest = await readJSON(rootPath('src/manifest.json'));
-    const manifestPatch = platform === PLATFORM.CHROME_MV2 ? {} : await readJSON(rootPath(`src/manifest-${platform}.json`));
+    const manifestPatch = platform === PLATFORM.CHROMIUM_MV2 ? {} : await readJSON(rootPath(`src/manifest-${platform}.json`));
     const patched = {...manifest, ...manifestPatch};
-    if (debug && platform === PLATFORM.CHROME_MV3) {
+    if (debug && platform === PLATFORM.CHROMIUM_MV3) {
         patched.name = 'Dark Reader MV3';
     }
-    if (platform === PLATFORM.CHROME_MV3) {
+    if (platform === PLATFORM.CHROMIUM_MV3) {
         patched.browser_action = undefined;
     }
     if (debug) {
         patched.version = '1';
         patched.description = `Debug build, platform: ${platform}, watch: ${watch ? 'yes' : 'no'}.`;
     }
-    if (debug && !test && platform === PLATFORM.CHROME_MV3) {
+    if (debug && !test && platform === PLATFORM.CHROMIUM_MV3) {
         patched.permissions.push('tabs');
     }
-    if (debug && (platform === PLATFORM.CHROME_MV2 || platform === PLATFORM.CHROME_MV3)) {
+    if (debug && (platform === PLATFORM.CHROMIUM_MV2 || platform === PLATFORM.CHROMIUM_MV3)) {
         patched.version_name = 'Debug';
     }
     return patched;

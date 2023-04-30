@@ -78,20 +78,22 @@ async function api(debug, watch) {
     }
 }
 
-async function run({api: api_, release, debug, platforms, watch, log, test, version}) {
-    if (release && Object.values(platforms).some(Boolean)) {
+async function run({release, debug, platforms, watch, log, test, version}) {
+    const regular = Object.keys(platforms).some((platform) => platform !== PLATFORM.API && platforms[platform]);
+    if (release && regular) {
         await build({platforms, version, debug: false, watch: false, log: null, test: false});
     }
-    if (debug && Object.values(platforms).some(Boolean)) {
+    if (debug && regular) {
         await build({platforms, version, debug, watch, log, test});
     }
-    if (api_) {
+    if (platforms[PLATFORM.API]) {
         await api(debug, watch);
     }
 }
 
 function getParams(args) {
     const argMap = {
+        '--api': PLATFORM.API,
         '--chrome': PLATFORM.CHROMIUM_MV2,
         '--chrome-mv2': PLATFORM.CHROMIUM_MV2,
         '--chrome-mv3': PLATFORM.CHROMIUM_MV3,
@@ -106,7 +108,7 @@ function getParams(args) {
         [PLATFORM.FIREFOX_MV2]: false,
         [PLATFORM.THUNDERBIRD]: false,
     };
-    let allPlatforms = !args.includes('--api');
+    let allPlatforms = true;
     for (const arg of args) {
         if (argMap[arg]) {
             platforms[argMap[arg]] = true;
@@ -134,9 +136,8 @@ function getParams(args) {
     const log = logWarn ? 'warn' : (logInfo ? 'info' : null);
 
     const test = args.includes('--test');
-    const api = allPlatforms || args.includes('--api');
 
-    return {api, release, debug, platforms, watch, log, test, version};
+    return {release, debug, platforms, watch, log, test, version};
 }
 
 const args = process.argv.slice(2);

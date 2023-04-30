@@ -1,5 +1,6 @@
 // @ts-check
 import * as rollup from 'rollup';
+// This plugin resolves location of malevic module
 import rollupPluginNodeResolve from '@rollup/plugin-node-resolve';
 /** @type {any} */
 import rollupPluginReplace from '@rollup/plugin-replace';

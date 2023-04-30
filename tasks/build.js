@@ -106,7 +106,7 @@ function getParams(args) {
         [PLATFORM.FIREFOX_MV2]: false,
         [PLATFORM.THUNDERBIRD]: false,
     };
-    let allPlatforms = true;
+    let allPlatforms = !args.includes('--api');
     for (const arg of args) {
         if (argMap[arg]) {
             platforms[argMap[arg]] = true;

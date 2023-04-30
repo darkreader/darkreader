@@ -4,6 +4,10 @@ import {iterateShadowHosts, createOptimizedTreeObserver} from '../utils/dom';
 import type {StyleElement} from './style-manager';
 import {shouldManageStyle, getManageableStyles} from './style-manager';
 import {isDefinedSelectorSupported} from '../../utils/platform';
+import {logAssert} from '../utils/log';
+
+declare const __DEBUG__: boolean;
+declare const __TEST__: boolean;
 
 const observers: Array<{disconnect(): void}> = [];
 let observedRoots: WeakSet<Node>;
@@ -15,37 +19,40 @@ interface ChangedStyles {
     moved: StyleElement[];
 }
 
+// Set of lower-case custom element names which were already defined
+const definedCustomElements = new Set<string>();
 const undefinedGroups = new Map<string, Set<Element>>();
 let elementsDefinitionCallback: ((elements: Element[]) => void) | null;
 
-function collectUndefinedElements(root: ParentNode) {
+function recordUndefinedElement(element: Element): void {
+    let tag = element.tagName.toLowerCase();
+    if (!tag.includes('-')) {
+        const extendedTag = element.getAttribute('is');
+        if (extendedTag) {
+            tag = extendedTag;
+        } else {
+            // Happens for <template> on YouTube
+            return;
+        }
+    }
+    if (!undefinedGroups.has(tag)) {
+        undefinedGroups.set(tag, new Set());
+        customElementsWhenDefined(tag).then(() => {
+            if (elementsDefinitionCallback) {
+                const elements = undefinedGroups.get(tag);
+                undefinedGroups.delete(tag);
+                elementsDefinitionCallback(Array.from(elements!));
+            }
+        });
+    }
+    undefinedGroups.get(tag)!.add(element);
+}
+
+function collectUndefinedElements(root: ParentNode): void {
     if (!isDefinedSelectorSupported) {
         return;
     }
-    forEach(root.querySelectorAll(':not(:defined)'),
-        (el) => {
-            let tag = el.tagName.toLowerCase();
-            if (!tag.includes('-')) {
-                const extendedTag = el.getAttribute('is');
-                if (extendedTag) {
-                    tag = extendedTag;
-                } else {
-                    // Happens for <template> on YouTube
-                    return;
-                }
-            }
-            if (!undefinedGroups.has(tag)) {
-                undefinedGroups.set(tag, new Set());
-                customElementsWhenDefined(tag).then(() => {
-                    if (elementsDefinitionCallback) {
-                        const elements = undefinedGroups.get(tag);
-                        undefinedGroups.delete(tag);
-                        elementsDefinitionCallback(Array.from(elements!));
-                    }
-                });
-            }
-            undefinedGroups.get(tag)!.add(el);
-        });
+    forEach(root.querySelectorAll(':not(:defined)'), recordUndefinedElement);
 }
 
 let canOptimizeUsingProxy = false;
@@ -53,24 +60,42 @@ document.addEventListener('__darkreader__inlineScriptsAllowed', () => {
     canOptimizeUsingProxy = true;
 }, {once: true, passive: true});
 
-const resolvers = new Map<string, () => void>();
+const resolvers = new Map<string, Array<() => void>>();
 
 function handleIsDefined(e: CustomEvent<{tag: string}>) {
     canOptimizeUsingProxy = true;
-    if (resolvers.has(e.detail.tag)) {
-        const resolve = resolvers.get(e.detail.tag)!;
-        resolve();
+    const tag = e.detail.tag;
+    definedCustomElements.add(tag);
+    if (resolvers.has(tag)) {
+        const r = resolvers.get(tag)!;
+        resolvers.delete(tag);
+        r.forEach((r) => r());
     }
 }
 
 async function customElementsWhenDefined(tag: string) {
+    if ((__TEST__ || __DEBUG__)) {
+        if (tag.toLowerCase() !== tag) {
+            logAssert('customElementsWhenDefined expects lower-case node names');
+            throw new Error('customElementsWhenDefined expects lower-case node names');
+        }
+    }
+    // Custom element is already defined
+    if (definedCustomElements.has(tag)) {
+        return;
+    }
+    // We need to await for element to be defined
     return new Promise<void>((resolve) => {
         // `customElements.whenDefined` is not available in extensions
         // https://bugs.chromium.org/p/chromium/issues/detail?id=390807
         if (window.customElements && typeof customElements.whenDefined === 'function') {
             customElements.whenDefined(tag).then(() => resolve());
         } else if (canOptimizeUsingProxy) {
-            resolvers.set(tag, resolve);
+            if (resolvers.has(tag)) {
+                resolvers.get(tag)!.push(resolve);
+            } else {
+                resolvers.set(tag, [resolve]);
+            }
             document.dispatchEvent(new CustomEvent('__darkreader__addUndefinedResolver', {detail: {tag}}));
         } else {
             const checkIfDefined = () => {
@@ -157,7 +182,7 @@ export function watchForStyleChanges(currentStyles: StyleElement[], update: (sty
         handleStyleOperations({createdStyles, removedStyles, movedStyles});
 
         additions.forEach((n) => {
-            iterateShadowHosts(n, subscribeForShadowRootChanges);
+            extendedIterateShadowHosts(n);
             collectUndefinedElements(n);
         });
     }
@@ -186,7 +211,7 @@ export function watchForStyleChanges(currentStyles: StyleElement[], update: (sty
 
         handleStyleOperations({createdStyles, removedStyles, movedStyles});
 
-        iterateShadowHosts(root, subscribeForShadowRootChanges);
+        extendedIterateShadowHosts(root);
         collectUndefinedElements(root);
     }
 
@@ -233,8 +258,12 @@ export function watchForStyleChanges(currentStyles: StyleElement[], update: (sty
         shadowRootDiscovered(shadowRoot);
     }
 
+    function extendedIterateShadowHosts(node: Node) {
+        iterateShadowHosts(node, subscribeForShadowRootChanges);
+    }
+
     observe(document);
-    iterateShadowHosts(document.documentElement, subscribeForShadowRootChanges);
+    extendedIterateShadowHosts(document.documentElement);
 
     watchWhenCustomElementsDefined((hosts) => {
         const newStyles: StyleElement[] = [];
@@ -246,7 +275,7 @@ export function watchForStyleChanges(currentStyles: StyleElement[], update: (sty
                 return;
             }
             subscribeForShadowRootChanges(host);
-            iterateShadowHosts(shadowRoot, subscribeForShadowRootChanges);
+            extendedIterateShadowHosts(shadowRoot);
             collectUndefinedElements(shadowRoot);
         });
     });

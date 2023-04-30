@@ -151,6 +151,7 @@ export interface DynamicThemeFix {
     ignoreInlineStyle: string[];
     ignoreImageAnalysis: string[];
     disableStyleSheetsProxy: boolean;
+    disableCustomElementRegistryProxy: boolean;
 }
 
 export interface InversionFix {

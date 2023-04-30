@@ -55,5 +55,6 @@ export function combineFixes(fixes: DynamicThemeFix[]): DynamicThemeFix | null {
         ignoreInlineStyle: combineArrays(fixes.map((fix) => fix.ignoreInlineStyle)),
         ignoreImageAnalysis: combineArrays(fixes.map((fix) => fix.ignoreImageAnalysis)),
         disableStyleSheetsProxy: fixes.some((fix) => fix.disableStyleSheetsProxy),
+        disableCustomElementRegistryProxy: fixes.some((fix) => fix.disableCustomElementRegistryProxy),
     };
 }

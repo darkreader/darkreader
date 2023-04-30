@@ -2,6 +2,7 @@ import {MessageType} from '../../utils/message';
 import type {Message} from '../../definitions';
 
 declare const __DEBUG__: boolean;
+declare const __TEST__: boolean;
 declare const __WATCH__: boolean;
 declare const __LOG__: 'info' | 'warn';
 
@@ -22,6 +23,12 @@ export function logInfo(...args: any[]) {
 export function logWarn(...args: any[]) {
     if (__DEBUG__) {
         console.warn(...args);
+        sendLogToBG('warn', ...args);
+    }
+}
+
+export function logAssert(...args: any[]) {
+    if ((__TEST__ || __DEBUG__)) {
         sendLogToBG('warn', ...args);
     }
 }

@@ -16,7 +16,7 @@ let darkReaderDynamicThemeStateForTesting: 'loading' | 'ready' = 'loading';
 
 declare const __CHROMIUM_MV3__: boolean;
 declare const __THUNDERBIRD__: boolean;
-declare const __FIREFOX__: boolean;
+declare const __FIREFOX_MV2__: boolean;
 
 function cleanup() {
     unloaded = true;
@@ -227,7 +227,7 @@ if (__TEST__) {
     };
 
     // TODO(anton): remove this once Firefox supports tab.eval() via WebDriver BiDi
-    if (__FIREFOX__) {
+    if (__FIREFOX_MV2__) {
         function expectPageStyles(data: any) {
             const errors = [];
             const expectations = Array.isArray(data[0]) ? data : [data];

@@ -52,7 +52,7 @@ declare const __LOG__: string | false;
 declare const __PORT__: number;
 declare const __TEST__: boolean;
 declare const __CHROMIUM_MV3__: boolean;
-declare const __FIREFOX__: boolean;
+declare const __FIREFOX_MV2__: boolean;
 
 if (__CHROMIUM_MV3__) {
     chrome.runtime.onInstalled.addListener(async () => {
@@ -144,7 +144,7 @@ if (__TEST__) {
     chrome.tabs.create({url: chrome.runtime.getURL('/ui/devtools/index.html'), active: false});
 
     let testTabId: number | null = null;
-    if (__FIREFOX__) {
+    if (__FIREFOX_MV2__) {
         chrome.tabs.create({url: 'about:blank', active: true}, ({id}) => testTabId = id!);
     }
 

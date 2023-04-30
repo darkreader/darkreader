@@ -177,7 +177,7 @@ export function watchForNodePosition<T extends Node>(
 }
 
 export function iterateShadowHosts(root: Node | null, iterator: (host: Element) => void) {
-    if (!root) {
+    if (root == null) {
         return;
     }
     const walker = document.createTreeWalker(

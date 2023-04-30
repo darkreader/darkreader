@@ -4,7 +4,6 @@
 import fs from 'node:fs';
 import os from 'node:os';
 import rollupPluginIstanbul from 'rollup-plugin-istanbul';
-import rollupPluginNodeResolve from '@rollup/plugin-node-resolve';
 import rollupPluginReplace from '@rollup/plugin-replace';
 import rollupPluginTypescript from '@rollup/plugin-typescript';
 import typescript from 'typescript';
@@ -44,7 +43,6 @@ export function configureKarma(config, env) {
         },
         rollupPreprocessor: {
             plugins: [
-                rollupPluginNodeResolve(),
                 rollupPluginTypescript({
                     typescript,
                     tsconfig: rootPath('tests/inject/tsconfig.json'),

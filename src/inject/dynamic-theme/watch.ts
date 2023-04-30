@@ -60,7 +60,9 @@ function handleIsDefined(e: CustomEvent<{tag: string}>) {
     canOptimizeUsingProxy = true;
     const tag = e.detail.tag;
     if (resolvers.has(tag)) {
-        resolvers.get(tag)!();
+        const r = resolvers.get(tag)!;
+        resolvers.delete(tag);
+        r();
     }
 }
 
@@ -158,7 +160,7 @@ export function watchForStyleChanges(currentStyles: StyleElement[], update: (sty
         handleStyleOperations({createdStyles, removedStyles, movedStyles});
 
         additions.forEach((n) => {
-            iterateShadowHosts(n, subscribeForShadowRootChanges);
+            extendedIterateShadowHosts(n);
             collectUndefinedElements(n);
         });
     }
@@ -187,7 +189,7 @@ export function watchForStyleChanges(currentStyles: StyleElement[], update: (sty
 
         handleStyleOperations({createdStyles, removedStyles, movedStyles});
 
-        iterateShadowHosts(root, subscribeForShadowRootChanges);
+        extendedIterateShadowHosts(root);
         collectUndefinedElements(root);
     }
 
@@ -234,8 +236,12 @@ export function watchForStyleChanges(currentStyles: StyleElement[], update: (sty
         shadowRootDiscovered(shadowRoot);
     }
 
+    function extendedIterateShadowHosts(node: Node) {
+        iterateShadowHosts(node, subscribeForShadowRootChanges);
+    }
+
     observe(document);
-    iterateShadowHosts(document.documentElement, subscribeForShadowRootChanges);
+    extendedIterateShadowHosts(document.documentElement);
 
     watchWhenCustomElementsDefined((hosts) => {
         const newStyles: StyleElement[] = [];
@@ -247,7 +253,7 @@ export function watchForStyleChanges(currentStyles: StyleElement[], update: (sty
                 return;
             }
             subscribeForShadowRootChanges(host);
-            iterateShadowHosts(shadowRoot, subscribeForShadowRootChanges);
+            extendedIterateShadowHosts(shadowRoot);
             collectUndefinedElements(shadowRoot);
         });
     });

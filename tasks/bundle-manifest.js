@@ -9,9 +9,11 @@ async function patchManifest(platform, debug, watch, test) {
     const manifest = await readJSON(rootPath('src/manifest.json'));
     const manifestPatch = platform === PLATFORM.CHROME_MV2 ? {} : await readJSON(rootPath(`src/manifest-${platform}.json`));
     const patched = {...manifest, ...manifestPatch};
+    if (debug && platform === PLATFORM.CHROME_MV3) {
+        patched.name = 'Dark Reader MV3';
+    }
     if (platform === PLATFORM.CHROME_MV3) {
         patched.browser_action = undefined;
-        patched.name = 'Dark Reader MV3';
     }
     if (debug) {
         patched.version = '1';

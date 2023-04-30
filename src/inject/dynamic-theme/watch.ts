@@ -15,6 +15,10 @@ interface ChangedStyles {
     moved: StyleElement[];
 }
 
+// Map of lower-case custom element name to boolean stating if the element is defined
+// true - defined
+// false or undefined - may not defined yet
+const customElementsStatus = new Map<string, boolean>();
 const undefinedGroups = new Map<string, Set<Element>>();
 let elementsDefinitionCallback: ((elements: Element[]) => void) | null;
 
@@ -54,26 +58,34 @@ document.addEventListener('__darkreader__inlineScriptsAllowed', () => {
     canOptimizeUsingProxy = true;
 }, {once: true, passive: true});
 
-const resolvers = new Map<string, () => void>();
+const resolvers = new Map<string, Array<() => void>>();
 
 function handleIsDefined(e: CustomEvent<{tag: string}>) {
     canOptimizeUsingProxy = true;
     const tag = e.detail.tag;
+    customElementsStatus.set(tag, true);
     if (resolvers.has(tag)) {
         const r = resolvers.get(tag)!;
         resolvers.delete(tag);
-        r();
+        r.forEach((r) => r());
     }
 }
 
 async function customElementsWhenDefined(tag: string) {
+    if (customElementsStatus.get(tag)) {
+        return;
+    }
     return new Promise<void>((resolve) => {
         // `customElements.whenDefined` is not available in extensions
         // https://bugs.chromium.org/p/chromium/issues/detail?id=390807
         if (window.customElements && typeof customElements.whenDefined === 'function') {
             customElements.whenDefined(tag).then(() => resolve());
         } else if (canOptimizeUsingProxy) {
-            resolvers.set(tag, resolve);
+            if (resolvers.has(tag)) {
+                resolvers.get(tag)!.push(resolve);
+            } else {
+                resolvers.set(tag, [resolve]);
+            }
             document.dispatchEvent(new CustomEvent('__darkreader__addUndefinedResolver', {detail: {tag}}));
         } else {
             const checkIfDefined = () => {

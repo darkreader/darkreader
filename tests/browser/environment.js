@@ -213,37 +213,50 @@ export default class CustomJestEnvironment extends TestEnvironment {
      * but can not use variables defined in this file besides those passed into it.
      */
     async checkPageStylesInBrowserContext(expectations) {
-        const check = () => {
+        const checkOne = (expectation) => {
+            const [selector, cssAttributeName, expectedValue] = expectation;
+            const selector_ = Array.isArray(selector) ? selector : [selector];
+            let element = document;
+            for (const part of selector_) {
+                if (element instanceof HTMLIFrameElement) {
+                    element = element.contentDocument;
+                }
+                if (element.shadowRoot instanceof ShadowRoot) {
+                    element = element.shadowRoot;
+                }
+                if (part === 'document') {
+                    element = element.documentElement;
+                } else {
+                    element = element.querySelector(part);
+                }
+                if (!element) {
+                    return `Could not find element ${part}`;
+                }
+            }
+            const style = getComputedStyle(element);
+            if (style[cssAttributeName] !== expectedValue) {
+                return `Got ${style[cssAttributeName]}`;
+            }
+        };
+
+        const checkAll = () => {
+            /** @type{Array<[number, string]>} */
             const errors = [];
             for (let i = 0; i < expectations.length; i++) {
-                const [selector, cssAttributeName, expectedValue] = expectations[i];
-                const selector_ = Array.isArray(selector) ? selector : [selector];
-                let element = document;
-                for (const part of selector_) {
-                    if (element instanceof HTMLIFrameElement) {
-                        element = element.contentDocument;
-                    }
-                    if (element.shadowRoot instanceof ShadowRoot) {
-                        element = element.shadowRoot;
-                    }
-                    if (part === 'document') {
-                        element = element.documentElement;
-                    } else {
-                        element = element.querySelector(part);
-                    }
-                }
-                const style = getComputedStyle(element);
-                if (style[cssAttributeName] !== expectedValue) {
-                    errors.push(i);
+                const error = checkOne(expectations[i]);
+                if (error) {
+                    errors.push([i, error]);
                 }
             }
             return errors;
         };
 
-        let errors = check();
-        for (let i = 0; (errors.length !== 0) && (i < 1000); i++) {
-            await new Promise((r) => requestIdleCallback(r, {timeout: 100}));
-            errors = check();
+        let timeout = 10;
+        let errors = checkAll();
+        for (let i = 0; (errors.length !== 0) && (i < 10); i++) {
+            timeout *= 2;
+            await new Promise((r) => requestIdleCallback(r, {timeout}));
+            errors = checkAll();
         }
         return errors;
     }

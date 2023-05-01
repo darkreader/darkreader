@@ -167,7 +167,7 @@ function createStaticStyleOverrides() {
 
 const shadowRootsWithOverrides = new Set<ShadowRoot>();
 
-function createShadowStaticStyleOverrides(root: ShadowRoot) {
+function createShadowStaticStyleOverridesInner(root: ShadowRoot) {
     const inlineStyle = createOrUpdateStyle('darkreader--inline', root);
     inlineStyle.textContent = getInlineOverrideStyle();
     root.insertBefore(inlineStyle, root.firstChild);
@@ -190,6 +190,37 @@ function createShadowStaticStyleOverrides(root: ShadowRoot) {
     }
     root.insertBefore(invertStyle, overrideStyle.nextSibling);
     shadowRootsWithOverrides.add(root);
+}
+
+function delayedCreateShadowStaticStyleOverrides(root: ShadowRoot): void {
+    const observer = new MutationObserver((mutations, observer) => {
+        // Disconnect observer immediatelly before making any other changes
+        observer.disconnect();
+
+        // Do not make any changes unless Dark Reader's fixes have been removed
+        for (const {type, removedNodes} of mutations) {
+            if (type === 'childList') {
+                for (const {nodeName, className} of removedNodes as any) {
+                    if (nodeName === 'STYLE' && ['darkreader darkreader--inline', 'darkreader darkreader--override', 'darkreader darkreader--invert'].includes(className)) {
+                        createShadowStaticStyleOverridesInner(root);
+                        return;
+                    }
+                }
+            }
+        }
+    });
+    observer.observe(root, {childList: true});
+}
+
+function createShadowStaticStyleOverrides(root: ShadowRoot) {
+    // The shadow DOM may not be populated yet and the custom element implementation
+    // may assume that unpopulated shadow root is empty and inadvertently remove
+    // Dark Reader's overrides
+    const uninit = root.firstChild === null;
+    createShadowStaticStyleOverridesInner(root);
+    if (uninit) {
+        delayedCreateShadowStaticStyleOverrides(root);
+    }
 }
 
 function replaceCSSTemplates($cssText: string) {

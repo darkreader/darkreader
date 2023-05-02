@@ -229,29 +229,38 @@ if (__TEST__) {
     // TODO(anton): remove this once Firefox supports tab.eval() via WebDriver BiDi
     if (__FIREFOX_MV2__) {
         function expectPageStyles(data: any) {
-            const errors = [];
-            const expectations = Array.isArray(data[0]) ? data : [data];
-            for (let i = 0; i < expectations.length; i++) {
-                const [selector, cssAttributeName, expectedValue] = expectations[i];
+            const checkOne = (expectation: any) => {
+                const [selector, cssAttributeName, expectedValue] = expectation;
                 const selector_ = Array.isArray(selector) ? selector : [selector];
-                let element: Element = document as unknown as Element;
+                let element = document as any;
                 for (const part of selector_) {
                     if (element instanceof HTMLIFrameElement) {
-                        element = (element as any).contentDocument;
+                        element = element.contentDocument;
                     }
                     if (element.shadowRoot instanceof ShadowRoot) {
-                        element = element.shadowRoot as unknown as Element;
+                        element = element.shadowRoot;
                     }
                     if (part === 'document') {
-                        element = (element as any).documentElement;
+                        element = element.documentElement;
                     } else {
                         element = element.querySelector(part);
                     }
+                    if (!element) {
+                        return `Could not find element ${part}`;
+                    }
                 }
                 const style = getComputedStyle(element);
-                const realValue = style[cssAttributeName];
-                if (realValue !== expectedValue) {
-                    errors.push(i);
+                if (style[cssAttributeName] !== expectedValue) {
+                    return `Got ${style[cssAttributeName]}`;
+                }
+            };
+
+            const errors: Array<[number, string]> = [];
+            const expectations = Array.isArray(data[0]) ? data : [data];
+            for (let i = 0; i < expectations.length; i++) {
+                const error = checkOne(expectations[i]);
+                if (error) {
+                    errors.push([i, error]);
                 }
             }
             return errors;

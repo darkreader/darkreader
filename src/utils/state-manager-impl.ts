@@ -111,6 +111,7 @@ export class StateManagerImpl<T extends Record<string, unknown>> {
 
     private listeners: Set<() => void>;
 
+    // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
     constructor(localStorageKey: string, parent: any, defaults: T, storage: {get: (storageKey: string, callback: (items: { [key: string]: any }) => void) => void; set: (items: { [key: string]: any }, callback: () => void) => void}, addListener: (listener: (data: T) => void) => void, logWarn: (log: string) => void){
         this.localStorageKey = localStorageKey;
         this.parent = parent;

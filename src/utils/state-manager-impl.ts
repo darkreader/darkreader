@@ -111,8 +111,7 @@ export class StateManagerImpl<T extends Record<string, unknown>> {
 
     private listeners: Set<() => void>;
 
-    // eslint-d
-    constructor(localStorageKey: string, parent: T, defaults: T, storage: {get: (storageKey: string, callback: (items: { [key: string]: any }) => void) => void; set: (items: { [key: string]: any }, callback: () => void) => void}, addListener: (listener: (data: T) => void) => void, logWarn: (log: string) => void){
+    constructor(localStorageKey: string, parent: any, defaults: T, storage: {get: (storageKey: string, callback: (items: { [key: string]: any }) => void) => void; set: (items: { [key: string]: any }, callback: () => void) => void}, addListener: (listener: (data: T) => void) => void, logWarn: (log: string) => void){
         this.localStorageKey = localStorageKey;
         this.parent = parent;
         this.defaults = defaults;

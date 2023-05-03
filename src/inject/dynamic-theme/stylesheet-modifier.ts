@@ -37,7 +37,12 @@ interface ModifySheetOptions {
     isAsyncCancelled: () => boolean;
 }
 
-export function createStyleSheetModifier() {
+interface StyleSheetModifier {
+    modifySheet: (options: ModifySheetOptions) => void;
+    shouldRebuildStyle: () => boolean;
+}
+
+export function createStyleSheetModifier(): StyleSheetModifier {
     let renderId = 0;
     const rulesTextCache = new Set<string>();
     const rulesModCache = new Map<string, ModifiableCSSRule>();

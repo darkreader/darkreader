@@ -65,6 +65,7 @@ config.overrides.push({
         }],
         '@typescript-eslint/consistent-type-assertions': 'error',
         '@typescript-eslint/consistent-type-imports': 'error',
+        '@typescript-eslint/explicit-module-boundary-types': 'error',
         '@typescript-eslint/func-call-spacing': ['error', 'never'],
         '@typescript-eslint/keyword-spacing': ['error', {
             after: true,
@@ -145,6 +146,17 @@ config.overrides.push({
             files: ['tasks/**/*.js', 'tests/**/*.js', '.eslintplugin.js'],
             rules: {
                 '@typescript-eslint/no-var-requires': 'error',
+                '@typescript-eslint/explicit-module-boundary-types': 'off',
+            },
+        },
+        {
+            files: [
+                'src/ui/controls/**/*.tsx',
+                'src/ui/popup/**/*.tsx',
+                'src/ui/stylesheet-editor/components/body.tsx'
+            ],
+            rules: {
+                '@typescript-eslint/explicit-module-boundary-types': 'off',
             },
         },
         {

@@ -77,7 +77,7 @@ export const isDefinedSelectorSupported = (() => {
     }
 })();
 
-export function compareChromeVersions($a: string, $b: string) {
+export function compareChromeVersions($a: string, $b: string): -1 | 0 | 1 {
     const a = $a.split('.').map((x) => parseInt(x));
     const b = $b.split('.').map((x) => parseInt(x));
     for (let i = 0; i < a.length; i++) {

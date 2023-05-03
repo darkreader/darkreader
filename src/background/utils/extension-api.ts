@@ -1,7 +1,8 @@
 import {isPDF} from '../../utils/url';
 import {isFirefox, isEdge} from '../../utils/platform';
 
-export function canInjectScript(url: string | null | undefined) {
+// TODO(Anton): better types
+export function canInjectScript(url: string | null | undefined): boolean | '' | null | undefined {
     if (isFirefox) {
         return (url
             && !url.startsWith('about:')
@@ -135,7 +136,7 @@ export async function writeLocalStorage<T extends {[key: string]: any}>(values: 
     });
 }
 
-export async function getCommands() {
+export async function getCommands(): Promise<chrome.commands.Command[]> {
     return new Promise<chrome.commands.Command[]>((resolve) => {
         if (!chrome.commands) {
             resolve([]);

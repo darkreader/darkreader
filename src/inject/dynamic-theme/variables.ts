@@ -39,7 +39,7 @@ export class VariablesStore {
     private unstableVarValues = new Map<string, string>();
     private onRootVariableDefined: () => void;
 
-    clear() {
+    clear(): void {
         this.varTypes.clear();
         this.rulesQueue.splice(0);
         this.definedVars.clear();
@@ -60,11 +60,11 @@ export class VariablesStore {
         );
     }
 
-    addRulesForMatching(rules: CSSRuleList) {
+    addRulesForMatching(rules: CSSRuleList): void {
         this.rulesQueue.push(rules);
     }
 
-    matchVariablesAndDependants() {
+    matchVariablesAndDependants(): void {
         this.changedTypeVars.clear();
         this.initialVarTypes = new Map(this.varTypes);
         this.collectRootVariables();
@@ -477,11 +477,11 @@ export class VariablesStore {
         });
     }
 
-    setOnRootVariableChange(callback: () => void) {
+    setOnRootVariableChange(callback: () => void): void {
         this.onRootVariableDefined = callback;
     }
 
-    putRootVars(styleElement: HTMLStyleElement, theme: Theme) {
+    putRootVars(styleElement: HTMLStyleElement, theme: Theme): void {
         const sheet = styleElement.sheet!;
         if (sheet.cssRules.length > 0) {
             sheet.deleteRule(0);

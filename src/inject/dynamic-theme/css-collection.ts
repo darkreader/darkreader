@@ -38,7 +38,7 @@ _______|_______/__/ ____ \\__\\__|___\\__\\__|___\\__\\____
 /*! Dark reader generated CSS | Licensed under MIT https://github.com/darkreader/darkreader/blob/main/LICENSE */
 `;
 
-export async function collectCSS() {
+export async function collectCSS(): Promise<string> {
     const css = [banner];
 
     function addStaticCSS(selector: string, comment: string) {

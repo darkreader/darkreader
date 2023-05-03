@@ -123,7 +123,7 @@ function onSwipeStart(
     window.addEventListener(pointerUpEvent, onPointerUp, {passive: true});
 }
 
-export function createSwipeHandler(startHandler: StartSwipeHandler) {
+export function createSwipeHandler(startHandler: StartSwipeHandler): (e: MouseEvent | TouchEvent) => void {
     return (e: MouseEvent | TouchEvent) => onSwipeStart(e, startHandler);
 }
 

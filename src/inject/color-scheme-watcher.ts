@@ -8,7 +8,7 @@ function cleanup() {
     removeDocumentVisibilityListener();
 }
 
-function sendMessage(message: Message) {
+function sendMessage(message: Message): void {
     const responseHandler = (response: Message | 'unsupportedSender' | undefined) => {
         // Vivaldi bug workaround. See TabManager for details.
         if (response === 'unsupportedSender') {
@@ -39,11 +39,11 @@ function sendMessage(message: Message) {
     }
 }
 
-function notifyOfColorScheme(isDark: boolean) {
+function notifyOfColorScheme(isDark: boolean): void {
     sendMessage({type: MessageType.CS_COLOR_SCHEME_CHANGE, data: {isDark}});
 }
 
-function updateEventListeners() {
+function updateEventListeners(): void {
     notifyOfColorScheme(isSystemDarkModeEnabled());
     if (documentIsVisible()) {
         runColorSchemeChangeDetector(notifyOfColorScheme);

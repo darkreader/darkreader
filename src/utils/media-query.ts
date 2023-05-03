@@ -31,4 +31,4 @@ export function stopColorSchemeChangeDetector(): void {
     query = null;
 }
 
-export const isSystemDarkModeEnabled = () => (query || matchMedia('(prefers-color-scheme: dark)')).matches;
+export const isSystemDarkModeEnabled = (): boolean => (query || matchMedia('(prefers-color-scheme: dark)')).matches;

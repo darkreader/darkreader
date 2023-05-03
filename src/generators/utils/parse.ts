@@ -82,7 +82,7 @@ export function parseSitesFixesConfig<T extends SiteProps>(text: string, options
 }
 
 // URL patterns are guaranteed to not have protocol and leading '/'
-export function getDomain(url: string) {
+export function getDomain(url: string): string {
     try {
         return (new URL(url)).hostname.toLowerCase();
     } catch (error) {

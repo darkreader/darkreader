@@ -13,27 +13,27 @@ function sendLogToBG(level: 'info' | 'warn', ...args: any[]) {
     }
 }
 
-export function logInfo(...args: any[]) {
+export function logInfo(...args: any[]): void {
     if (__DEBUG__) {
         console.info(...args);
         sendLogToBG('info', ...args);
     }
 }
 
-export function logWarn(...args: any[]) {
+export function logWarn(...args: any[]): void {
     if (__DEBUG__) {
         console.warn(...args);
         sendLogToBG('warn', ...args);
     }
 }
 
-export function logAssert(...args: any[]) {
+export function logAssert(...args: any[]): void {
     if ((__TEST__ || __DEBUG__)) {
         sendLogToBG('warn', ...args);
     }
 }
 
-export function logInfoCollapsed(title: any, ...args: any[]) {
+export function logInfoCollapsed(title: any, ...args: any[]): void {
     if (__DEBUG__) {
         console.groupCollapsed(title);
         console.log(...args);

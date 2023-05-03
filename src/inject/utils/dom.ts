@@ -19,7 +19,7 @@ export function createNodeAsap({
     selectTarget,
     createTarget,
     isTargetMutation,
-}: CreateNodeAsapParams) {
+}: CreateNodeAsapParams): void {
     const target = selectTarget();
     if (target) {
         const prev = selectNode();
@@ -63,7 +63,7 @@ export function createNodeAsap({
     }
 }
 
-export function removeNode(node: Node | null) {
+export function removeNode(node: Node | null): void {
     node && node.parentNode && node.parentNode.removeChild(node);
 }
 
@@ -176,7 +176,7 @@ export function watchForNodePosition<T extends Node>(
     return {run, stop, skip};
 }
 
-export function iterateShadowHosts(root: Node | null, iterator: (host: Element) => void) {
+export function iterateShadowHosts(root: Node | null, iterator: (host: Element) => void): void {
     if (root == null) {
         return;
     }
@@ -203,37 +203,37 @@ export function iterateShadowHosts(root: Node | null, iterator: (host: Element) 
     }
 }
 
-export let isDOMReady = () => {
+export let isDOMReady: () => boolean = () => {
     return document.readyState === 'complete' || document.readyState === 'interactive';
 };
 
-export function setIsDOMReady(newFunc: () => boolean) {
+export function setIsDOMReady(newFunc: () => boolean): void {
     isDOMReady = newFunc;
 }
 
 const readyStateListeners = new Set<() => void>();
 
-export function addDOMReadyListener(listener: () => void) {
+export function addDOMReadyListener(listener: () => void): void {
     isDOMReady() ? listener() : readyStateListeners.add(listener);
 }
 
-export function removeDOMReadyListener(listener: () => void) {
+export function removeDOMReadyListener(listener: () => void): void {
     readyStateListeners.delete(listener);
 }
 
 // `interactive` can and will be fired when their are still stylesheets loading.
 // We use certain actions that can cause a forced layout change, which is bad.
-export function isReadyStateComplete() {
+export function isReadyStateComplete(): boolean {
     return document.readyState === 'complete';
 }
 
 const readyStateCompleteListeners = new Set<() => void>();
 
-export function addReadyStateCompleteListener(listener: () => void) {
+export function addReadyStateCompleteListener(listener: () => void): void {
     isReadyStateComplete() ? listener() : readyStateCompleteListeners.add(listener);
 }
 
-export function cleanReadyStateCompleteListeners() {
+export function cleanReadyStateCompleteListeners(): void {
     readyStateCompleteListeners.clear();
 }
 
@@ -327,7 +327,7 @@ const optimizedTreeObservers = new Map<Node, MutationObserver>();
 const optimizedTreeCallbacks = new WeakMap<MutationObserver, Set<OptimizedTreeObserverCallbacks>>();
 
 // TODO: Use a single function to observe all shadow roots.
-export function createOptimizedTreeObserver(root: Document | ShadowRoot, callbacks: OptimizedTreeObserverCallbacks) {
+export function createOptimizedTreeObserver(root: Document | ShadowRoot, callbacks: OptimizedTreeObserverCallbacks): {disconnect: () => void} {
     let observer: MutationObserver;
     let observerCallbacks: Set<OptimizedTreeObserverCallbacks>;
     let domReadyListener: () => void;

@@ -62,7 +62,7 @@ export default class TabManager {
     private static timestamp = 0;
     private static readonly LOCAL_STORAGE_KEY = 'TabManager-state';
 
-    public static init({getConnectionMessage, onColorSchemeChange, getTabMessage}: TabManagerOptions) {
+    public static init({getConnectionMessage, onColorSchemeChange, getTabMessage}: TabManagerOptions): void {
         TabManager.stateManager = new StateManager<TabManagerState>(TabManager.LOCAL_STORAGE_KEY, this, {tabs: {}, timestamp: 0}, logWarn);
         TabManager.tabs = {};
         TabManager.getTabMessage = getTabMessage;
@@ -283,7 +283,7 @@ export default class TabManager {
         return tab && tab.url || 'about:blank';
     }
 
-    public static async updateContentScript(options: {runOnProtectedPages: boolean}) {
+    public static async updateContentScript(options: {runOnProtectedPages: boolean}): Promise<void> {
         (await TabManager.queryTabs())
             .filter((tab) => __CHROMIUM_MV3__ || options.runOnProtectedPages || canInjectScript(tab.url))
             .filter((tab) => !Boolean(TabManager.tabs[tab.id!]))
@@ -309,7 +309,7 @@ export default class TabManager {
             });
     }
 
-    public static async registerMailDisplayScript() {
+    public static async registerMailDisplayScript(): Promise<void> {
         await (chrome as any).messageDisplayScripts.register({
             js: [
                 {file: '/inject/fallback.js'},
@@ -324,7 +324,7 @@ export default class TabManager {
     // has multiple tabs of the same website, every tab will receive the new message
     // and not just that tab as Dark Reader currently doesn't have per-tab operations,
     // this should be the expected behavior.
-    public static async sendMessage(onlyUpdateActiveTab = false) {
+    public static async sendMessage(onlyUpdateActiveTab = false): Promise<void> {
         TabManager.timestamp++;
 
         const activeTabHostname = onlyUpdateActiveTab ? getURLHostOrProtocol(await TabManager.getActiveTabURL()) : null;
@@ -368,11 +368,11 @@ export default class TabManager {
         return TabManager.tabs[tab.id!] && TabManager.tabs[tab.id!][0] && TabManager.tabs[tab.id!][0].darkThemeDetected || null;
     }
 
-    public static async getActiveTabURL() {
+    public static async getActiveTabURL(): Promise<string> {
         return TabManager.getTabURL(await TabManager.getActiveTab());
     }
 
-    public static async getActiveTab() {
+    public static async getActiveTab(): Promise<chrome.tabs.Tab> {
         let tab = (await TabManager.queryTabs({
             active: true,
             lastFocusedWindow: true,

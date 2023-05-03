@@ -69,7 +69,7 @@ const $colors: { [key: string]: string } = {
     toolbar_field_text: 'black',
 };
 
-export function setWindowTheme(filter: FilterConfig) {
+export function setWindowTheme(filter: FilterConfig): void {
     const colors = Object.entries($colors).reduce((obj: { [key: string]: string }, [key, value]) => {
         const type: 'bg' | 'text' | 'border' = themeColorTypes[key];
         const modify: ((rgb: RGBA, filter: FilterConfig) => string) = {
@@ -87,7 +87,7 @@ export function setWindowTheme(filter: FilterConfig) {
     }
 }
 
-export function resetWindowTheme() {
+export function resetWindowTheme(): void {
     if (typeof browser !== 'undefined' && browser.theme && browser.theme.reset) {
         // BUG: resets browser theme to entire
         // https://bugzilla.mozilla.org/show_bug.cgi?id=1415267

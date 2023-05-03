@@ -61,7 +61,7 @@ export function runDarkThemeDetector(callback: (hasDarkTheme: boolean) => void) 
     }
 }
 
-export function stopDarkThemeDetector() {
+export function stopDarkThemeDetector(): void {
     if (observer) {
         observer.disconnect();
         observer = null;

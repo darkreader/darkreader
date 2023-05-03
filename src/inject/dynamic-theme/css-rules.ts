@@ -3,7 +3,7 @@ import {isSafari} from '../../utils/platform';
 import {parseURL, getAbsoluteURL} from '../../utils/url';
 import {logInfo, logWarn} from '../utils/log';
 
-export function iterateCSSRules(rules: CSSRuleList, iterate: (rule: CSSStyleRule) => void, onMediaRuleError?: () => void) {
+export function iterateCSSRules(rules: CSSRuleList, iterate: (rule: CSSStyleRule) => void, onMediaRuleError?: () => void): void {
     forEach(rules, (rule) => {
         // Don't rely on prototype or instanceof, they are slow implementations within the browsers.
         // However we can rely on certain properties to indentify which CSSRule we are dealing with.
@@ -54,7 +54,7 @@ const shorthandVarDepPropRegexps = isSafari ? shorthandVarDependantProperties.ma
     return [prop, regexp] as [string, RegExp];
 }) : null;
 
-export function iterateCSSDeclarations(style: CSSStyleDeclaration, iterate: (property: string, value: string) => void) {
+export function iterateCSSDeclarations(style: CSSStyleDeclaration, iterate: (property: string, value: string) => void): void {
     forEach(style, (property) => {
         const value = style.getPropertyValue(property).trim();
         if (!value) {

@@ -73,7 +73,7 @@ function handleIsDefined(e: CustomEvent<{tag: string}>) {
     }
 }
 
-async function customElementsWhenDefined(tag: string) {
+async function customElementsWhenDefined(tag: string): Promise<void> {
     if ((__TEST__ || __DEBUG__)) {
         if (tag.toLowerCase() !== tag) {
             logAssert('customElementsWhenDefined expects lower-case node names');
@@ -114,17 +114,17 @@ async function customElementsWhenDefined(tag: string) {
     });
 }
 
-function watchWhenCustomElementsDefined(callback: (elements: Element[]) => void) {
+function watchWhenCustomElementsDefined(callback: (elements: Element[]) => void): void {
     elementsDefinitionCallback = callback;
 }
 
-function unsubscribeFromDefineCustomElements() {
+function unsubscribeFromDefineCustomElements(): void {
     elementsDefinitionCallback = null;
     undefinedGroups.clear();
     document.removeEventListener('__darkreader__isDefined', handleIsDefined);
 }
 
-export function watchForStyleChanges(currentStyles: StyleElement[], update: (styles: ChangedStyles) => void, shadowRootDiscovered: (root: ShadowRoot) => void) {
+export function watchForStyleChanges(currentStyles: StyleElement[], update: (styles: ChangedStyles) => void, shadowRootDiscovered: (root: ShadowRoot) => void): void {
     stopWatchingForStyleChanges();
 
     const prevStyles = new Set<StyleElement>(currentStyles);

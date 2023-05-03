@@ -96,7 +96,7 @@ export default class DevTools {
     private static onChange: () => void;
     private static store: DevToolsStorage;
 
-    public static init(onChange: () => void) {
+    public static init(onChange: () => void): void {
         // Firefox don't seem to like using storage.local to store big data on the background-extension.
         // Disabling it for now and defaulting back to localStorage.
         if (!isFirefox && typeof chrome.storage.local !== 'undefined' && chrome.storage.local !== null) {
@@ -112,7 +112,7 @@ export default class DevTools {
     private static KEY_FILTER = 'dev_inversion_fixes';
     private static KEY_STATIC = 'dev_static_themes';
 
-    private static async loadConfigOverrides() {
+    private static async loadConfigOverrides(): Promise<void> {
         const [
             dynamicThemeFixes,
             inversionFixes,
@@ -135,7 +135,7 @@ export default class DevTools {
         DevTools.store.set(DevTools.KEY_DYNAMIC, text);
     }
 
-    public static async getDynamicThemeFixesText() {
+    public static async getDynamicThemeFixesText(): Promise<string> {
         let rawFixes = await DevTools.getSavedDynamicThemeFixes();
         if (!rawFixes) {
             await ConfigManager.load();
@@ -145,14 +145,15 @@ export default class DevTools {
         return formatDynamicThemeFixes(fixes);
     }
 
-    public static resetDynamicThemeFixes() {
+    public static resetDynamicThemeFixes(): void {
         DevTools.store.remove(DevTools.KEY_DYNAMIC);
         ConfigManager.overrides.dynamicThemeFixes = null;
         ConfigManager.handleDynamicThemeFixes();
         DevTools.onChange();
     }
 
-    public static applyDynamicThemeFixes(text: string) {
+    // TODO(Anton): remove any
+    public static applyDynamicThemeFixes(text: string): any {
         try {
             const formatted = formatDynamicThemeFixes(parseDynamicThemeFixes(text));
             ConfigManager.overrides.dynamicThemeFixes = formatted;
@@ -165,15 +166,15 @@ export default class DevTools {
         }
     }
 
-    private static async getSavedInversionFixes() {
+    private static async getSavedInversionFixes(): Promise<string | null> {
         return this.store.get(DevTools.KEY_FILTER);
     }
 
-    private static saveInversionFixes(text: string) {
+    private static saveInversionFixes(text: string): void {
         this.store.set(DevTools.KEY_FILTER, text);
     }
 
-    public static async getInversionFixesText() {
+    public static async getInversionFixesText(): Promise<string> {
         let rawFixes = await DevTools.getSavedInversionFixes();
         if (!rawFixes) {
             await ConfigManager.load();
@@ -183,14 +184,15 @@ export default class DevTools {
         return formatInversionFixes(fixes);
     }
 
-    public static resetInversionFixes() {
+    public static resetInversionFixes(): void {
         DevTools.store.remove(DevTools.KEY_FILTER);
         ConfigManager.overrides.inversionFixes = null;
         ConfigManager.handleInversionFixes();
         DevTools.onChange();
     }
 
-    public static applyInversionFixes(text: string) {
+    // TODO(Anton): remove any
+    public static applyInversionFixes(text: string): any {
         try {
             const formatted = formatInversionFixes(parseInversionFixes(text));
             ConfigManager.overrides.inversionFixes = formatted;
@@ -203,15 +205,15 @@ export default class DevTools {
         }
     }
 
-    private static async getSavedStaticThemes() {
+    private static async getSavedStaticThemes(): Promise<string | null> {
         return DevTools.store.get(DevTools.KEY_STATIC);
     }
 
-    private static saveStaticThemes(text: string) {
+    private static saveStaticThemes(text: string): void {
         DevTools.store.set(DevTools.KEY_STATIC, text);
     }
 
-    public static async getStaticThemesText() {
+    public static async getStaticThemesText(): Promise<string> {
         let rawThemes = await DevTools.getSavedStaticThemes();
         if (!rawThemes) {
             await ConfigManager.load();
@@ -221,14 +223,15 @@ export default class DevTools {
         return formatStaticThemes(themes);
     }
 
-    public static resetStaticThemes() {
+    public static resetStaticThemes(): void {
         DevTools.store.remove(DevTools.KEY_STATIC);
         ConfigManager.overrides.staticThemes = null;
         ConfigManager.handleStaticThemes();
         DevTools.onChange();
     }
 
-    public static applyStaticThemes(text: string) {
+    // TODO(Anton): remove any
+    public static applyStaticThemes(text: string): any {
         try {
             const formatted = formatStaticThemes(parseStaticThemes(text));
             ConfigManager.overrides.staticThemes = formatted;

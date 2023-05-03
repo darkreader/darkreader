@@ -10,6 +10,7 @@ let server = null;
 
 /** @type {Set<WebSocket>} */
 const sockets = new Set();
+/** @type {WeakMap<WebSocket, number>} */
 const times = new WeakMap();
 
 /**
@@ -22,10 +23,11 @@ function createServer() {
             log.ok('Auto-reloader started');
             resolve(server);
         });
-        server.on('connection', async (ws) => {
+        server.on('connection', (ws) => {
+            log.ok('Extension connected');
             sockets.add(ws);
             times.set(ws, Date.now());
-            ws.on('message', async (data) => {
+            ws.on('message', (data) => {
                 const message = JSON.parse(data);
                 if (message.type === 'reloading') {
                     log.ok('Extension reloading...');

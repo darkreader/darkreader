@@ -150,6 +150,16 @@ config.overrides.push({
             },
         },
         {
+            files: [
+                'src/ui/controls/**/*.tsx',
+                'src/ui/popup/**/*.tsx',
+                'src/ui/stylesheet-editor/components/body.tsx'
+            ],
+            rules: {
+                '@typescript-eslint/explicit-module-boundary-types': 'off',
+            },
+        },
+        {
             files: ['.eslintplugin.js'],
             rules: {
                 '@typescript-eslint/ban-ts-comment': 'off',

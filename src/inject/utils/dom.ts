@@ -12,6 +12,12 @@ interface CreateNodeAsapParams {
     isTargetMutation: (mutation: MutationRecord) => boolean;
 }
 
+interface NodePosetionWatcher {
+    run: () => void;
+    stop: () => void;
+    skip: () => void;
+}
+
 export function createNodeAsap({
     selectNode,
     createNode,
@@ -71,7 +77,7 @@ export function watchForNodePosition<T extends Node>(
     node: T,
     mode: 'head' | 'prev-sibling',
     onRestore = Function.prototype,
-) {
+): NodePosetionWatcher {
     const MAX_ATTEMPTS_COUNT = 10;
     const RETRY_TIMEOUT = getDuration({seconds: 2});
     const ATTEMPTS_INTERVAL = getDuration({seconds: 10});

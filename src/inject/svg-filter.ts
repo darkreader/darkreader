@@ -1,6 +1,6 @@
 import {createNodeAsap, removeNode} from './utils/dom';
 
-export function createOrUpdateSVGFilter(svgMatrix: string, svgReverseMatrix: string) {
+export function createOrUpdateSVGFilter(svgMatrix: string, svgReverseMatrix: string): void {
     createNodeAsap({
         selectNode: () => document.getElementById('dark-reader-svg')!,
         createNode: (target) => {
@@ -57,6 +57,6 @@ export function createOrUpdateSVGFilter(svgMatrix: string, svgReverseMatrix: str
     });
 }
 
-export function removeSVGFilter() {
+export function removeSVGFilter(): void {
     removeNode(document.getElementById('dark-reader-svg'));
 }

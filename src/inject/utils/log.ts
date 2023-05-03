@@ -33,7 +33,7 @@ export function logAssert(...args: any[]): void {
     }
 }
 
-export function logInfoCollapsed(title: any, ...args: any[]): void {
+export function logInfoCollapsed(title: string, ...args: any[]): void {
     if (__DEBUG__) {
         console.groupCollapsed(title);
         console.log(...args);

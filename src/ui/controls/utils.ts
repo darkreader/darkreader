@@ -7,12 +7,12 @@ function toArray<T>(x: T | T[]): T[] {
 export function mergeClass(
     cls: string | {[cls: string]: any} | Array<string | {[cls: string]: any}>,
     propsCls: string | {[cls: string]: any} | Array<string | {[cls: string]: any}> | undefined
-) {
+): string {
     const normalized = toArray(cls).concat(toArray(propsCls));
     return classes(...normalized);
 }
 
-export function omitAttrs(omit: string[], attrs: Malevic.NodeAttrs) {
+export function omitAttrs(omit: string[], attrs: Malevic.NodeAttrs): Malevic.NodeAttrs<Element, Element> {
     const result: Malevic.NodeAttrs = {};
     Object.keys(attrs).forEach((key) => {
         if (omit.indexOf(key) < 0) {

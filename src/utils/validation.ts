@@ -184,7 +184,12 @@ export function validateSettings(settings: Partial<UserSettings>): SettingValida
     return {errors, settings};
 }
 
-export function validateTheme(theme: Partial<Theme> | null | undefined) {
+interface ThemeValidationResult {
+    theme: Partial<Theme>;
+    errors: string[];
+}
+
+export function validateTheme(theme: Partial<Theme> | null | undefined): ThemeValidationResult {
     if (!isPlainObject(theme)) {
         return {errors: ['Theme is not a plain object'], theme: DEFAULT_THEME};
     }

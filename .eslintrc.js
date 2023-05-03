@@ -146,6 +146,7 @@ config.overrides.push({
             files: ['tasks/**/*.js', 'tests/**/*.js', '.eslintplugin.js'],
             rules: {
                 '@typescript-eslint/no-var-requires': 'error',
+                '@typescript-eslint/explicit-module-boundary-types': 'off',
             },
         },
         {

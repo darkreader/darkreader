@@ -10,7 +10,7 @@ interface RequestParams {
     timeout?: number;
 }
 
-interface fileLoader {
+interface FileLoader {
     get: (fetchRequestParameters: FetchRequestParameters) => Promise<string | null>;
 }
 
@@ -165,7 +165,7 @@ export interface FetchRequestParameters {
     origin?: string;
 }
 
-export function createFileLoader(): fileLoader {
+export function createFileLoader(): FileLoader {
     const caches = {
         'data-url': new LimitedCacheStorage(),
         'text': new LimitedCacheStorage(),

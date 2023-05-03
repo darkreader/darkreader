@@ -83,7 +83,12 @@ function createValidator() {
     return {validateProperty, validateArray, errors};
 }
 
-export function validateSettings(settings: Partial<UserSettings>) {
+interface SettingValidationResult {
+    settings: Partial<UserSettings>;
+    errors: string[];
+}
+
+export function validateSettings(settings: Partial<UserSettings>): SettingValidationResult {
     if (!isPlainObject(settings)) {
         return {errors: ['Settings are not a plain object'], settings: DEFAULT_SETTINGS};
     }

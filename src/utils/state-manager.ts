@@ -10,7 +10,7 @@ import {isNonPersistent} from './platform';
 export class StateManager<T extends Record<string, unknown>> {
     private stateManager: StateManagerImpl<T> | null;
 
-    constructor(localStorageKey: string, parent: any, defaults: T, logWarn: (log: string) => void){
+    constructor(localStorageKey: string, parent: T, defaults: T, logWarn: (log: string) => void){
         if (isNonPersistent) {
             function addListener(listener: (data: T) => void) {
                 chrome.storage.local.onChanged.addListener((changes) => {
@@ -31,13 +31,13 @@ export class StateManager<T extends Record<string, unknown>> {
         }
     }
 
-    async saveState() {
+    async saveState(): Promise<void> {
         if (this.stateManager) {
             return this.stateManager.saveState();
         }
     }
 
-    async loadState() {
+    async loadState(): Promise<void> {
         if (this.stateManager) {
             return this.stateManager.loadState();
         }

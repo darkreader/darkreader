@@ -46,7 +46,7 @@ export function parseToHSLWithCache(color: string): HSLA | null {
     return hsl;
 }
 
-export function clearColorCache() {
+export function clearColorCache(): void {
     hslaParseCache.clear();
     rgbaParseCache.clear();
 }
@@ -129,7 +129,7 @@ export function rgbToString(rgb: RGBA): string {
     return `rgb(${toFixed(r)}, ${toFixed(g)}, ${toFixed(b)})`;
 }
 
-export function rgbToHexString({r, g, b, a}: RGBA) {
+export function rgbToHexString({r, g, b, a}: RGBA): string {
     return `#${(a != null && a < 1 ? [r, g, b, Math.round(a * 255)] : [r, g, b]).map((x) => {
         return `${x < 16 ? '0' : ''}${x.toString(16)}`;
     }).join('')}`;

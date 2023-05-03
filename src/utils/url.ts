@@ -79,7 +79,7 @@ export function getURLHostOrProtocol($url: string): string {
     return url.protocol;
 }
 
-export function compareURLPatterns(a: string, b: string) {
+export function compareURLPatterns(a: string, b: string): number {
     return a.localeCompare(b);
 }
 

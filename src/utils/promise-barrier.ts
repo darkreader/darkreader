@@ -19,7 +19,7 @@ export class PromiseBarrier<RESOLVUTION, REJECTION> {
         });
     }
 
-    async resolve(value: RESOLVUTION){
+    async resolve(value: RESOLVUTION): Promise<void> {
         if (this.wasRejected || this.wasResolved) {
             return;
         }
@@ -31,7 +31,7 @@ export class PromiseBarrier<RESOLVUTION, REJECTION> {
         return new Promise<void>((resolve) => setTimeout(() => resolve()));
     }
 
-    async reject(reason: REJECTION){
+    async reject(reason: REJECTION): Promise<void> {
         if (this.wasRejected || this.wasResolved) {
             return;
         }

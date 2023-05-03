@@ -1,4 +1,4 @@
-export function throttle<T extends(...args: any[]) => any>(callback: T) {
+export function throttle<T extends(...args: any[]) => any>(callback: T): T & {cancel: () => void} {
     let pending = false;
     let frameId: number | null = null;
     let lastArgs: any[];
@@ -33,7 +33,12 @@ type Task = () => void;
 
 declare const __TEST__: boolean;
 
-export function createAsyncTasksQueue() {
+interface AsyncTaskQueue {
+    add: (task: Task) => void;
+    cancel: () => void;
+}
+
+export function createAsyncTasksQueue(): AsyncTaskQueue {
     const tasks: Task[] = [];
     let frameId: number | null = null;
 

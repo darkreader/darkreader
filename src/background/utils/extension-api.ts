@@ -1,10 +1,9 @@
 import {isPDF} from '../../utils/url';
 import {isFirefox, isEdge} from '../../utils/platform';
 
-// TODO(Anton): better types
-export function canInjectScript(url: string | null | undefined): boolean | '' | null | undefined {
+export function canInjectScript(url: string | null | undefined): boolean {
     if (isFirefox) {
-        return (url
+        return Boolean(url
             && !url.startsWith('about:')
             && !url.startsWith('moz')
             && !url.startsWith('view-source:')
@@ -16,7 +15,7 @@ export function canInjectScript(url: string | null | undefined): boolean | '' | 
         );
     }
     if (isEdge) {
-        return (url
+        return Boolean(url
             && !url.startsWith('chrome')
             && !url.startsWith('data')
             && !url.startsWith('devtools')
@@ -26,7 +25,7 @@ export function canInjectScript(url: string | null | undefined): boolean | '' | 
             && !url.startsWith('view-source')
         );
     }
-    return (url
+    return Boolean(url
         && !url.startsWith('chrome')
         && !url.startsWith('https://chrome.google.com/webstore')
         && !url.startsWith('data')

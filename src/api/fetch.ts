@@ -15,7 +15,7 @@ type Fetcher = (url: string) => Promise<Response>;
 
 let fetcher: Fetcher = throwCORSError;
 
-export function setFetchMethod(fetch: Fetcher) {
+export function setFetchMethod(fetch: Fetcher): void {
     if (fetch) {
         fetcher = fetch;
     } else {
@@ -23,6 +23,6 @@ export function setFetchMethod(fetch: Fetcher) {
     }
 }
 
-export async function callFetchMethod(url: string) {
+export async function callFetchMethod(url: string): Promise<Response> {
     return await fetcher(url);
 }

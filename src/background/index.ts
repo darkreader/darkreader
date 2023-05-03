@@ -52,13 +52,13 @@ declare const __LOG__: string | false;
 declare const __PORT__: number;
 declare const __TEST__: boolean;
 declare const __CHROMIUM_MV3__: boolean;
-declare const __FIREFOX__: boolean;
+declare const __FIREFOX_MV2__: boolean;
 
 if (__CHROMIUM_MV3__) {
     chrome.runtime.onInstalled.addListener(async () => {
         try {
-            (chrome.scripting as any).unregisterContentScripts(() => {
-                (chrome.scripting as any).registerContentScripts([{
+            chrome.scripting.unregisterContentScripts(() => {
+                chrome.scripting.registerContentScripts([{
                     id: 'proxy',
                     matches: [
                         '<all_urls>'
@@ -108,9 +108,12 @@ if (__WATCH__) {
                     break;
                 case 'reload:full':
                     chrome.tabs.query({}, (tabs) => {
+                        const message: Message = {type: MessageType.BG_RELOAD};
+                        // Some contexts are not considered to be tabs and can not receive regular messages
+                        chrome.runtime.sendMessage<Message>(message);
                         for (const tab of tabs) {
                             if (canInjectScript(tab.url)) {
-                                chrome.tabs.sendMessage<Message>(tab.id!, {type: MessageType.BG_RELOAD});
+                                chrome.tabs.sendMessage<Message>(tab.id!, message);
                             }
                         }
                         chrome.runtime.reload();
@@ -141,7 +144,7 @@ if (__TEST__) {
     chrome.tabs.create({url: chrome.runtime.getURL('/ui/devtools/index.html'), active: false});
 
     let testTabId: number | null = null;
-    if (__FIREFOX__) {
+    if (__FIREFOX_MV2__) {
         chrome.tabs.create({url: 'about:blank', active: true}, ({id}) => testTabId = id!);
     }
 

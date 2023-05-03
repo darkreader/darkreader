@@ -57,7 +57,9 @@ function Header({data, actions, onMoreSiteSettingsClick, onMoreToggleSettingsCli
             getLocalMessage('local_files_forbidden')
             : tab.isInDarkList ?
                 getLocalMessage('page_in_dark_list')
-                : getLocalMessage('configure_site_toggle');
+                : tab.isDarkThemeDetected ?
+                    getLocalMessage('dark_theme_detected')
+                    : getLocalMessage('configure_site_toggle');
 
     return (
         <header class="header">

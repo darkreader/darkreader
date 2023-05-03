@@ -5,7 +5,7 @@
         "module": "ES2015",
         "moduleResolution": "node",
         "lib": [
-            "ES2017",
+            "ES2022",
             "Dom",
             "DOM.Iterable"
         ],

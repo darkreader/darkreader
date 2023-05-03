@@ -1,6 +1,6 @@
 {
     "manifest_version": 3,
-    "minimum_chrome_version": "102.0.0.0",
+    "minimum_chrome_version": "106.0.0.0",
     "action": {
         "default_title": "Dark Reader",
         "default_icon": {

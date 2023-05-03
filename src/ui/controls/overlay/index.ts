@@ -18,7 +18,7 @@ function getOverlayDOMNode(key: any) {
                 const listener = clickListeners.get(node)!;
                 listener();
             }
-        });
+        }, {passive: true});
         overlayNodes.set(key, node);
     }
     return overlayNodes.get(key);
@@ -40,7 +40,7 @@ interface OverlayPortalProps {
     onOuterClick?: () => void;
 }
 
-function Portal(props: OverlayPortalProps, ...content: Malevic.Child[]) {
+function Portal(props: OverlayPortalProps, ...content: Malevic.Child[]): void {
     const context = getContext();
 
     context.onRender(() => {
@@ -58,7 +58,7 @@ function Portal(props: OverlayPortalProps, ...content: Malevic.Child[]) {
         render(container, null);
     });
 
-    return context.leave() as void;
+    return context.leave();
 }
 
 export default Object.assign(Overlay, {Portal});

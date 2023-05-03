@@ -16,7 +16,7 @@ let darkReaderDynamicThemeStateForTesting: 'loading' | 'ready' = 'loading';
 
 declare const __CHROMIUM_MV3__: boolean;
 declare const __THUNDERBIRD__: boolean;
-declare const __FIREFOX__: boolean;
+declare const __FIREFOX_MV2__: boolean;
 
 function cleanup() {
     unloaded = true;
@@ -173,16 +173,16 @@ function onDarkThemeDetected() {
 // Thunderbird does not have "tabs", and emails aren't 'frozen' or 'cached'.
 // And will currently error: `Promise rejected after context unloaded: Actor 'Conduits' destroyed before query 'RuntimeMessage' was resolved`
 if (!__THUNDERBIRD__) {
-    addEventListener('pagehide', onPageHide);
-    addEventListener('freeze', onFreeze);
-    addEventListener('resume', onResume);
+    addEventListener('pagehide', onPageHide, {passive: true});
+    addEventListener('freeze', onFreeze, {passive: true});
+    addEventListener('resume', onResume, {passive: true});
 }
 
 if (__TEST__) {
     async function awaitDOMContentLoaded() {
         if (document.readyState === 'loading') {
             return new Promise<void>((resolve) => {
-                addEventListener('DOMContentLoaded', () => resolve());
+                addEventListener('DOMContentLoaded', () => resolve(), {passive: true});
             });
         }
     }
@@ -195,7 +195,7 @@ if (__TEST__) {
                     if (message === 'darkreader-dynamic-theme-ready' && darkReaderDynamicThemeStateForTesting === 'ready') {
                         resolve();
                     }
-                });
+                }, {passive: true});
             });
         }
     }
@@ -210,7 +210,7 @@ if (__TEST__) {
                 },
                 id: null,
             }));
-        });
+        }, {passive: true});
 
         // Wait for DOM to be complete
         // Note that here we wait only for DOM parsing and not for subresource load
@@ -227,32 +227,40 @@ if (__TEST__) {
     };
 
     // TODO(anton): remove this once Firefox supports tab.eval() via WebDriver BiDi
-    if (__FIREFOX__) {
+    if (__FIREFOX_MV2__) {
         function expectPageStyles(data: any) {
-            const errors = [];
-            const expectations = Array.isArray(data[0]) ? data : [data];
-            for (const [selector, cssAttributeName, expectedValue] of expectations) {
-                let element: Element = document as unknown as Element;
+            const checkOne = (expectation: any) => {
+                const [selector, cssAttributeName, expectedValue] = expectation;
                 const selector_ = Array.isArray(selector) ? selector : [selector];
+                let element = document as any;
                 for (const part of selector_) {
                     if (element instanceof HTMLIFrameElement) {
-                        element = (element as any).contentDocument;
+                        element = element.contentDocument;
+                    }
+                    if (element.shadowRoot instanceof ShadowRoot) {
+                        element = element.shadowRoot;
                     }
                     if (part === 'document') {
-                        element = (element as any).documentElement;
+                        element = element.documentElement;
                     } else {
                         element = element.querySelector(part);
                     }
+                    if (!element) {
+                        return `Could not find element ${part}`;
+                    }
                 }
                 const style = getComputedStyle(element);
-                const realValue = style[cssAttributeName];
-                if (realValue !== expectedValue) {
-                    errors.push({
-                        selector,
-                        cssAttributeName,
-                        expectedValue,
-                        realValue,
-                    });
+                if (style[cssAttributeName] !== expectedValue) {
+                    return `Got ${style[cssAttributeName]}`;
+                }
+            };
+
+            const errors: Array<[number, string]> = [];
+            const expectations = Array.isArray(data[0]) ? data : [data];
+            for (let i = 0; i < expectations.length; i++) {
+                const error = checkOne(expectations[i]);
+                if (error) {
+                    errors.push([i, error]);
                 }
             }
             return errors;

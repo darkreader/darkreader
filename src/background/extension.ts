@@ -204,7 +204,7 @@ export class Extension {
         }
     }
 
-    public static async start() {
+    public static async start(): Promise<void> {
         Extension.init();
         await Promise.all([
             ConfigManager.load({local: true}),
@@ -470,7 +470,7 @@ export class Extension {
         }
     };
 
-    public static async changeSettings($settings: Partial<UserSettings>, onlyUpdateActiveTab = false) {
+    public static async changeSettings($settings: Partial<UserSettings>, onlyUpdateActiveTab = false): Promise<void> {
         const promises = [];
         const prev = {...UserStorage.settings};
 

@@ -3,7 +3,7 @@ declare const __LOG__: 'info' | 'warn';
 
 let socket: WebSocket | null = null;
 let messageQueue: string[] = [];
-function createSocket() {
+function createSocket(): void {
     if (socket) {
         return;
     }
@@ -15,7 +15,7 @@ function createSocket() {
     });
 }
 
-export function sendLog(level: 'info' | 'warn', ...args: any[]) {
+export function sendLog(level: 'info' | 'warn', ...args: any[]): void {
     if (!__DEBUG__ || !__LOG__) {
         return;
     }

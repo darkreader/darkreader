@@ -11,6 +11,7 @@ import process from 'node:process';
 
 import {fileURLToPath} from 'node:url';
 import {join} from 'node:path';
+import {rm} from 'node:fs/promises';
 
 import {runTasks} from './task.js';
 import zip from './zip.js';
@@ -88,12 +89,13 @@ async function ensureGitClean() {
  * dependencies which is identical to already published version serves as a proof
  * that the published version was always free of (now known) vulnerabilities.
  *
- * @param {string} version The desired git version, e.g., 'v4.9.62' or 'v4.9.37.1'
+ * @param {string} version The desired git version, e.g., 'v4.9.63' or 'v4.9.37.1'
  * @param {boolean} fixVulnerabilities Whether of not to attempt to fix known vulnerabilities
  */
 async function checkoutVersion(version, fixVulnerabilities) {
     log.ok(`Checking out version ${version}`);
     // Use -- to disambiguate the tag (release version) and file paths
+    await rm('src', {force: true, recursive: true});
     await execute(`git checkout v${version} -- package.json package-lock.json src/ tasks/`);
     log.ok(`Installing dependencies`);
     await execute('npm install --ignore-scripts');
@@ -119,7 +121,7 @@ async function checkoutHead() {
 function validateArguments(args) {
     const validaionErrors = [];
 
-    const validFlags = ['--api', '--chrome', '--chrome-mv3', '--firefox', '--thunderbird', '--release', '--debug', '--watch', '--log-info', '--log-warn', '--test'];
+    const validFlags = ['--api', '--chrome', '--chrome-mv2', '--chrome-mv3', '--firefox', '--firefox-mv2', '--thunderbird', '--release', '--debug', '--watch', '--log-info', '--log-warn', '--test'];
     const invalidFlags = args.filter((flag) => !validFlags.includes(flag) && !flag.startsWith('--version='));
     invalidFlags.forEach((flag) => validaionErrors.push(`Invalid flag ${flag}`));
 
@@ -174,7 +176,7 @@ async function run() {
         await runTasks([signature, zip], {
             version,
             platforms: {
-                [PLATFORM.FIREFOX]: true,
+                [PLATFORM.FIREFOX_MV2]: true,
             },
             debug: false,
             watch: false,

@@ -26,7 +26,7 @@ function focusColorPicker(node: Node) {
 function ColorPicker(props: ColorPickerProps) {
     const context = getContext();
     context.onRender((node) => colorPickerFocuses.set(node, focus));
-    const store = context.store as {isFocused: boolean; textBoxNode: HTMLInputElement; previewNode: HTMLElement};
+    const store: {isFocused: boolean; textBoxNode: HTMLInputElement; previewNode: HTMLElement} = context.store;
 
     const isColorValid = isValidColor(props.color);
 
@@ -51,7 +51,7 @@ function ColorPicker(props: ColorPickerProps) {
         }
         store.isFocused = true;
         context.refresh();
-        window.addEventListener('mousedown', onOuterClick);
+        window.addEventListener('mousedown', onOuterClick, {passive: true});
     }
 
     function blur() {

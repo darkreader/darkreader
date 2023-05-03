@@ -12,7 +12,10 @@ const textPropertyLength = 'text: '.length;
 // humanizeNumber(2) => '2nd'
 // humanizeNumber(3) => '3rd'
 // humanizeNumber(4) => '4th'
-const humanizeNumber = (number: number) => {
+// TODO(Anton): rewrite me with case-default
+// eslint-disable-next-line
+// @ts-ignore
+const humanizeNumber = (number: number): string => {
     if (number > 3) {
         return `${number}th`;
     }
@@ -29,7 +32,7 @@ const humanizeNumber = (number: number) => {
 };
 
 // Should return if the given string is a valid 3 or 6 digit hex color.
-const isValidHexColor = (color: string) => {
+const isValidHexColor = (color: string): boolean => {
     return /^#([0-9a-fA-F]{3}){1,2}$/.test(color);
 };
 

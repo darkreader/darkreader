@@ -74,7 +74,7 @@ export function shouldManageStyle(element: Node | null): boolean {
     );
 }
 
-export function getManageableStyles(node: Node | null, results = [] as StyleElement[], deep = true) {
+export function getManageableStyles(node: Node | null, results: StyleElement[] = [], deep = true): StyleElement[] {
     if (shouldManageStyle(node)) {
         results.push(node as StyleElement);
     } else if (node instanceof Element || (isShadowDomSupported && node instanceof ShadowRoot) || node === document) {
@@ -95,12 +95,12 @@ const corsStyleSet = new WeakSet<HTMLStyleElement>();
 let canOptimizeUsingProxy = false;
 document.addEventListener('__darkreader__inlineScriptsAllowed', () => {
     canOptimizeUsingProxy = true;
-});
+}, {once: true, passive: true});
 
 let loadingLinkCounter = 0;
 const rejectorsForLoadingLinks = new Map<number, (reason?: any) => void>();
 
-export function cleanLoadingLinks() {
+export function cleanLoadingLinks(): void {
     rejectorsForLoadingLinks.clear();
 }
 
@@ -230,8 +230,8 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
             }
 
             if (
-                (!cssRules && !accessError && !isSafari) ||
                 (isSafari && !element.sheet) ||
+                (!isSafari && !cssRules && !accessError) ||
                 isStillLoadingError(accessError!)
             ) {
                 try {
@@ -499,7 +499,7 @@ export function manageStyle(element: StyleElement, {update, loadingStart, loadin
     }
 
     function watchForSheetChangesUsingProxy() {
-        element.addEventListener('__darkreader__updateSheet', onSheetChange);
+        element.addEventListener('__darkreader__updateSheet', onSheetChange, {passive: true});
     }
 
     function stopWatchingForSheetChangesUsingProxy() {
@@ -595,8 +595,8 @@ async function linkLoading(link: HTMLLinkElement, loadingId: number) {
             cleanUp();
             reject();
         });
-        link.addEventListener('load', onLoad);
-        link.addEventListener('error', onError);
+        link.addEventListener('load', onLoad, {passive: true});
+        link.addEventListener('error', onError, {passive: true});
         if (!link.href) {
             onError();
         }

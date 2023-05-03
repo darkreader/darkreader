@@ -8,12 +8,12 @@ export default class AsyncQueue {
     private timerId: number | null = null;
     private frameDuration = 1000 / 60;
 
-    public addToQueue(entry: QueueEntry) {
+    public addToQueue(entry: QueueEntry): void {
         this.queue.push(entry);
         this.startQueue();
     }
 
-    public stopQueue() {
+    public stopQueue(): void {
         if (this.timerId !== null) {
             cancelAnimationFrame(this.timerId);
             this.timerId = null;
@@ -22,7 +22,7 @@ export default class AsyncQueue {
     }
 
     // Ensures 60FPS.
-    private startQueue() {
+    private startQueue(): void {
         if (this.timerId) {
             return;
         }

@@ -1,3 +1,3 @@
-export function formatPercent(v: number) {
+export function formatPercent(v: number): string {
     return `${v}%`;
 }

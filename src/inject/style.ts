@@ -1,6 +1,6 @@
 import {createNodeAsap, removeNode} from './utils/dom';
 
-export function createOrUpdateStyle(css: string, type: string) {
+export function createOrUpdateStyle(css: string, type: string): void {
     createNodeAsap({
         selectNode: () => document.getElementById('dark-reader-style')!,
         createNode: (target) => {
@@ -27,7 +27,7 @@ export function createOrUpdateStyle(css: string, type: string) {
     });
 }
 
-export function removeStyle() {
+export function removeStyle(): void {
     removeNode(document.getElementById('dark-reader-style'));
     document.documentElement.removeAttribute('data-darkreader-mode');
 }

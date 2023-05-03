@@ -1,6 +1,5 @@
 // @ts-check
 import * as rollup from 'rollup';
-import rollupPluginNodeResolve from '@rollup/plugin-node-resolve';
 /** @type {any} */
 import rollupPluginReplace from '@rollup/plugin-replace';
 /** @type {any} */
@@ -29,7 +28,6 @@ async function bundleAPI({debug, watch}) {
             throw error;
         },
         plugins: [
-            rollupPluginNodeResolve(),
             rollupPluginTypescript({
                 rootDir,
                 typescript,
@@ -48,7 +46,7 @@ async function bundleAPI({debug, watch}) {
                 __DEBUG__: false,
                 __CHROMIUM_MV2__: false,
                 __CHROMIUM_MV3__: false,
-                __FIREFOX__: false,
+                __FIREFOX_MV2__: false,
                 __THUNDERBIRD__: false,
                 __TEST__: false,
             }),

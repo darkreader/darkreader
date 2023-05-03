@@ -1,3 +1,4 @@
+import {generateRandomId} from '../../utils/uid';
 import type {Message} from '../../definitions';
 import {MessageType} from '../../utils/message';
 
@@ -8,13 +9,12 @@ interface FetchRequest {
     origin?: string;
 }
 
-let counter = 0;
 const resolvers = new Map<number, (data: string) => void>();
 const rejectors = new Map<number, (reason?: any) => void>();
 
-export async function bgFetch(request: FetchRequest) {
+export async function bgFetch(request: FetchRequest): Promise<string> {
     return new Promise<string>((resolve, reject) => {
-        const id = ++counter;
+        const id = generateRandomId();
         resolvers.set(id, resolve);
         rejectors.set(id, reject);
         chrome.runtime.sendMessage<Message>({type: MessageType.CS_FETCH, data: request, id});

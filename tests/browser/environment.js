@@ -206,6 +206,61 @@ export default class CustomJestEnvironment extends TestEnvironment {
         resolves && resolves.forEach((r) => r());
     }
 
+    /**
+     * This function is evaluated within browser's page context
+     * after being passed to page.evaluate()
+     * It can use methods which will be defined in the page context,
+     * but can not use variables defined in this file besides those passed into it.
+     */
+    async checkPageStylesInBrowserContext(expectations) {
+        const checkOne = (expectation) => {
+            const [selector, cssAttributeName, expectedValue] = expectation;
+            const selector_ = Array.isArray(selector) ? selector : [selector];
+            let element = document;
+            for (const part of selector_) {
+                if (element instanceof HTMLIFrameElement) {
+                    element = element.contentDocument;
+                }
+                if (element.shadowRoot instanceof ShadowRoot) {
+                    element = element.shadowRoot;
+                }
+                if (part === 'document') {
+                    element = element.documentElement;
+                } else {
+                    element = element.querySelector(part);
+                }
+                if (!element) {
+                    return `Could not find element ${part}`;
+                }
+            }
+            const style = getComputedStyle(element);
+            if (style[cssAttributeName] !== expectedValue) {
+                return `Got ${style[cssAttributeName]}`;
+            }
+        };
+
+        const checkAll = () => {
+            /** @type{Array<[number, string]>} */
+            const errors = [];
+            for (let i = 0; i < expectations.length; i++) {
+                const error = checkOne(expectations[i]);
+                if (error) {
+                    errors.push([i, error]);
+                }
+            }
+            return errors;
+        };
+
+        let timeout = 10;
+        let errors = checkAll();
+        for (let i = 0; (errors.length !== 0) && (i < 10); i++) {
+            timeout *= 2;
+            await new Promise((r) => requestIdleCallback(r, {timeout}));
+            errors = checkAll();
+        }
+        return errors;
+    }
+
     assignTestGlobals() {
         this.global.getColorScheme = async () => {
             if (this.global.product === 'firefox') {
@@ -234,32 +289,8 @@ export default class CustomJestEnvironment extends TestEnvironment {
             if (!Array.isArray(expectations[0])) {
                 expectations = [expectations];
             }
-            const promises = [];
-            for (const [selector, cssAttributeName, expectedValue] of expectations) {
-                const promise = expect(this.page.evaluate(
-                    (selector, cssAttributeName) => {
-                        let element = document;
-                        if (!Array.isArray(selector)) {
-                            selector = [selector];
-                        }
-                        for (const part of selector) {
-                            if (element instanceof HTMLIFrameElement) {
-                                element = element.contentDocument;
-                            }
-                            if (part === 'document') {
-                                element = element.documentElement;
-                            } else {
-                                element = element.querySelector(part);
-                            }
-                        }
-                        const style = getComputedStyle(element);
-                        return style[cssAttributeName];
-                    },
-                    selector, cssAttributeName
-                )).resolves.toBe(expectedValue);
-                promises.push(promise);
-            }
-            return Promise.all(promises);
+            const errors = await this.page.evaluate(this.checkPageStylesInBrowserContext, expectations);
+            expect(errors.length).toBe(0);
         };
 
         this.global.emulateMedia = async (name, value) => {
@@ -379,7 +410,6 @@ export default class CustomJestEnvironment extends TestEnvironment {
 
             this.global.popupUtils = {
                 click: async (selector) => await sendToPopup('click', selector),
-                exists: async (selector) => await sendToPopup('exists', selector),
             };
 
             this.global.devtoolsUtils = {

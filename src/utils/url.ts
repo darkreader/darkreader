@@ -79,7 +79,7 @@ export function getURLHostOrProtocol($url: string): string {
     return url.protocol;
 }
 
-export function compareURLPatterns(a: string, b: string) {
+export function compareURLPatterns(a: string, b: string): number {
     return a.localeCompare(b);
 }
 
@@ -88,7 +88,7 @@ export function compareURLPatterns(a: string, b: string) {
  * @param url Site URL.
  * @paramlist List to search into.
  */
-export function isURLInList(url: string, list: string[]) {
+export function isURLInList(url: string, list: string[]): boolean {
     for (let i = 0; i < list.length; i++) {
         if (isURLMatched(url, list[i])) {
             return true;
@@ -183,7 +183,7 @@ function createUrlRegex(urlTemplate: string): RegExp | null {
     }
 }
 
-export function isPDF(url: string) {
+export function isPDF(url: string): boolean {
     if (url.includes('.pdf')) {
         if (url.includes('?')) {
             url = url.substring(0, url.lastIndexOf('?'));
@@ -260,7 +260,7 @@ export function isFullyQualifiedDomainWildcard(candidate: string): boolean {
     return true;
 }
 
-export function fullyQualifiedDomainMatchesWildcard(wildcard: string, candidate: string) {
+export function fullyQualifiedDomainMatchesWildcard(wildcard: string, candidate: string): boolean {
     const wildcardLabels = wildcard.toLowerCase().split('.');
     const candidateLabels = candidate.toLowerCase().split('.');
     if (candidateLabels.length < wildcardLabels.length) {
@@ -276,6 +276,6 @@ export function fullyQualifiedDomainMatchesWildcard(wildcard: string, candidate:
     return true;
 }
 
-export function isLocalFile(url: string) {
-    return url && url.startsWith('file:///');
+export function isLocalFile(url: string): boolean {
+    return Boolean(url) && url.startsWith('file:///');
 }

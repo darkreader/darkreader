@@ -45,7 +45,7 @@ export function combineFixes(fixes: DynamicThemeFix[]): DynamicThemeFix | null {
     }
 
     function combineArrays(arrays: string[][]): string[] {
-        return (arrays.filter(Boolean) as any).flat();
+        return arrays.filter(Boolean).flat();
     }
 
     return {
@@ -55,5 +55,6 @@ export function combineFixes(fixes: DynamicThemeFix[]): DynamicThemeFix | null {
         ignoreInlineStyle: combineArrays(fixes.map((fix) => fix.ignoreInlineStyle)),
         ignoreImageAnalysis: combineArrays(fixes.map((fix) => fix.ignoreImageAnalysis)),
         disableStyleSheetsProxy: fixes.some((fix) => fix.disableStyleSheetsProxy),
+        disableCustomElementRegistryProxy: fixes.some((fix) => fix.disableCustomElementRegistryProxy),
     };
 }

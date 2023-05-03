@@ -12,7 +12,7 @@ interface FetchRequest {
 const resolvers = new Map<number, (data: string) => void>();
 const rejectors = new Map<number, (reason?: any) => void>();
 
-export async function bgFetch(request: FetchRequest) {
+export async function bgFetch(request: FetchRequest): Promise<string> {
     return new Promise<string>((resolve, reject) => {
         const id = generateRandomId();
         resolvers.set(id, resolve);

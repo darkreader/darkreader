@@ -95,16 +95,16 @@ export const cssImportRegex = /@import\s*(url\()?(('.+?')|(".+?")|([^\)]*?))\)? 
 // backslashes in the URL. (Chromium don't handle this natively). Remove all newlines
 // beforehand, otherwise `.` will fail matching the content within the url, as it
 // doesn't match any linebreaks.
-export function getCSSURLValue(cssURL: string) {
+export function getCSSURLValue(cssURL: string): string {
     return cssURL.trim().replace(/[\n\r\\]+/g, '').replace(/^url\((.*)\)$/, '$1').trim().replace(/^"(.*)"$/, '$1').replace(/^'(.*)'$/, '$1').replace(/(?:\\(.))/g, '$1');
 }
 
-export function getCSSBaseBath(url: string) {
+export function getCSSBaseBath(url: string): string {
     const cssURL = parseURL(url);
     return `${cssURL.origin}${cssURL.pathname.replace(/\?.*$/, '').replace(/(\/)([^\/]+)$/i, '$1')}`;
 }
 
-export function replaceCSSRelativeURLsWithAbsolute($css: string, cssBasePath: string) {
+export function replaceCSSRelativeURLsWithAbsolute($css: string, cssBasePath: string): string {
     return $css.replace(cssURLRegex, (match) => {
         const pathValue = getCSSURLValue(match);
         // Sites can have any kind of specified URL, thus also invalid ones.
@@ -121,12 +121,12 @@ export function replaceCSSRelativeURLsWithAbsolute($css: string, cssBasePath: st
 
 const cssCommentsRegex = /\/\*[\s\S]*?\*\//g;
 
-export function removeCSSComments($css: string) {
+export function removeCSSComments($css: string): string {
     return $css.replace(cssCommentsRegex, '');
 }
 
 const fontFaceRegex = /@font-face\s*{[^}]*}/g;
 
-export function replaceCSSFontFace($css: string) {
+export function replaceCSSFontFace($css: string): string {
     return $css.replace(fontFaceRegex, '');
 }

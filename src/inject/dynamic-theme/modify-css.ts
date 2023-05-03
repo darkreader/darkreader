@@ -92,7 +92,7 @@ function joinSelectors(...selectors: string[]) {
     return selectors.filter(Boolean).join(', ');
 }
 
-export function getModifiedUserAgentStyle(theme: Theme, isIFrame: boolean, styleSystemControls: boolean) {
+export function getModifiedUserAgentStyle(theme: Theme, isIFrame: boolean, styleSystemControls: boolean): string {
     const lines: string[] = [];
     if (!isIFrame) {
         lines.push('html {');
@@ -138,7 +138,7 @@ export function getModifiedUserAgentStyle(theme: Theme, isIFrame: boolean, style
     return lines.join('\n');
 }
 
-export function getSelectionColor(theme: Theme) {
+export function getSelectionColor(theme: Theme): {backgroundColorSelection: string, foregroundColorSelection: string} {
     let backgroundColorSelection: string;
     let foregroundColorSelection: string;
     if (theme.selectionColor === 'auto') {

@@ -74,7 +74,7 @@ export function shouldManageStyle(element: Node | null): boolean {
     );
 }
 
-export function getManageableStyles(node: Node | null, results: StyleElement[] = [], deep = true) {
+export function getManageableStyles(node: Node | null, results: StyleElement[] = [], deep = true): StyleElement[] {
     if (shouldManageStyle(node)) {
         results.push(node as StyleElement);
     } else if (node instanceof Element || (isShadowDomSupported && node instanceof ShadowRoot) || node === document) {
@@ -100,7 +100,7 @@ document.addEventListener('__darkreader__inlineScriptsAllowed', () => {
 let loadingLinkCounter = 0;
 const rejectorsForLoadingLinks = new Map<number, (reason?: any) => void>();
 
-export function cleanLoadingLinks() {
+export function cleanLoadingLinks(): void {
     rejectorsForLoadingLinks.clear();
 }
 

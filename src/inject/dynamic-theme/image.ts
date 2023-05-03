@@ -20,7 +20,7 @@ export interface ImageDetails {
 
 const imageManager = new AsyncQueue();
 
-export async function getImageDetails(url: string) {
+export async function getImageDetails(url: string): Promise<ImageDetails> {
     return new Promise<ImageDetails>(async (resolve, reject) => {
         let dataURL: string;
         if (url.startsWith('data:')) {
@@ -51,7 +51,7 @@ export async function getImageDetails(url: string) {
     });
 }
 
-async function getImageDataURL(url: string) {
+async function getImageDataURL(url: string): Promise<string> {
     const parsedURL = new URL(url);
     if (parsedURL.origin === location.origin) {
         return await loadAsDataURL(url);
@@ -59,7 +59,7 @@ async function getImageDataURL(url: string) {
     return await bgFetch({url, responseType: 'data-url'});
 }
 
-async function urlToImage(url: string) {
+async function urlToImage(url: string): Promise<HTMLImageElement> {
     return new Promise<HTMLImageElement>((resolve, reject) => {
         const image = new Image();
         image.onload = () => resolve(image);
@@ -198,7 +198,7 @@ export function getFilteredImageDataURL({dataURL, width, height}: ImageDetails, 
     return `data:image/svg+xml;base64,${btoa(svg)}`;
 }
 
-export function cleanImageProcessingCache() {
+export function cleanImageProcessingCache(): void {
     imageManager && imageManager.stopQueue();
     removeCanvas();
 }

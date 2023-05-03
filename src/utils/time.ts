@@ -1,4 +1,4 @@
-export function parseTime($time: string): number[] {
+export function parseTime($time: string): [number, number] {
     const parts = $time.split(':').slice(0, 2);
     const lowercased = $time.trim().toLowerCase();
     const isAM = lowercased.endsWith('am') || lowercased.endsWith('a.m.');

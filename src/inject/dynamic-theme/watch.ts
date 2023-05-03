@@ -289,7 +289,7 @@ function resetObservers() {
     observedRoots = new WeakSet();
 }
 
-export function stopWatchingForStyleChanges() {
+export function stopWatchingForStyleChanges(): void {
     resetObservers();
     unsubscribeFromDefineCustomElements();
 }

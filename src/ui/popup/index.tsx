@@ -90,7 +90,7 @@ if (__TEST__) {
         try {
             const message: {type: string; id: number; data: string} = JSON.parse(e.data);
             const {type, id, data: selector} = message;
-            if (type === 'click') {
+            if (type === 'popup-click') {
                 // The required element may not exist yet
                 const check = () => {
                     const element: HTMLElement | null = document.querySelector(selector);
@@ -101,12 +101,7 @@ if (__TEST__) {
                         requestIdleCallback(check, {timeout: 500});
                     }
                 };
-
                 check();
-            } else if (type === 'rect') {
-                const element: HTMLElement = document.querySelector(selector)!;
-                const rect = element.getBoundingClientRect();
-                respond({id, data: {left: rect.left, top: rect.top, width: rect.width, height: rect.height}});
             }
         } catch (err) {
             respond({error: String(err)});

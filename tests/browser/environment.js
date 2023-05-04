@@ -409,12 +409,13 @@ export default class CustomJestEnvironment extends TestEnvironment {
             }
 
             this.global.popupUtils = {
-                click: async (selector) => await sendToPopup('click', selector),
+                click: async (selector) => await sendToPopup('popup-click', selector),
             };
 
             this.global.devtoolsUtils = {
-                paste: async (fixes) => await applyDevtoolsConfig('debug-devtools-paste', fixes),
-                reset: async () => await applyDevtoolsConfig('debug-devtools-reset'),
+                exists: async (selector) => await sendToDevTools('devtools-exists', selector),
+                paste: async (fixes) => await applyDevtoolsConfig('devtools-paste', fixes),
+                reset: async () => await applyDevtoolsConfig('devtools-reset'),
             };
 
             this.global.backgroundUtils = {

@@ -101,6 +101,7 @@ if (__TEST__) {
                         requestIdleCallback(check, {timeout: 500});
                     }
                 };
+
                 check();
             }
         } catch (err) {

@@ -3,7 +3,6 @@ import {sendLog} from './sendLog';
 declare const __DEBUG__: boolean;
 declare const __TEST__: boolean;
 
-
 export function logInfo(...args: any[]): void {
     if (__DEBUG__) {
         console.info(...args);

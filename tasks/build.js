@@ -136,7 +136,6 @@ function getParams(args) {
     const test = args.includes('--test');
     const log = logWarn ? 'warn' : (logInfo ? 'info' : (test ? null : 'assert'));
 
-
     return {release, debug, platforms, watch, log, test, version};
 }
 

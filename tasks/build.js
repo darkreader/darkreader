@@ -133,7 +133,7 @@ function getParams(args) {
     const watch = args.includes('--watch');
     const logInfo = watch && args.includes('--log-info');
     const logWarn = watch && args.includes('--log-warn');
-    const log = logWarn ? 'warn' : (logInfo ? 'info' : null);
+    const log = logWarn ? 'warn' : (logInfo ? 'info' : 'assert');
 
     const test = args.includes('--test');
 

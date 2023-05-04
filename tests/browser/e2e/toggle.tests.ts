@@ -137,4 +137,8 @@ describe('Toggling the extension', () => {
 
         await emulateMedia('prefers-color-scheme', 'dark');
     });
+
+    it('should have new design button on desktop', async () => {
+        expect(await devtoolsUtils.exists('.preview-design-button'));
+    });
 });

@@ -13,6 +13,7 @@ declare global {
         click: (selector: string) => Promise<void>;
     };
     const devtoolsUtils: {
+        exists: (selector: string) => Promise<void>;
         paste: (fixes: string) => Promise<void>;
         reset: () => Promise<void>;
     };

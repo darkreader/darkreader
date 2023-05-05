@@ -21,6 +21,13 @@ const definedCustomElements = new Set<string>();
 const undefinedGroups = new Map<string, Set<Element>>();
 let elementsDefinitionCallback: ((elements: Element[]) => void) | null;
 
+function isCustomElement(element: Element): boolean {
+    if (element.tagName.includes('-') || element.getAttribute('is')) {
+        return true;
+    }
+    return false;
+}
+
 function recordUndefinedElement(element: Element): void {
     let tag = element.tagName.toLowerCase();
     if (!tag.includes('-')) {
@@ -179,6 +186,12 @@ export function watchForStyleChanges(currentStyles: StyleElement[], update: (sty
             extendedIterateShadowHosts(n);
             collectUndefinedElements(n);
         });
+
+        // Firefox ocasionally fails to reflect existence of a node in both CSS's view of the DOM (':not(:defined)'),
+        // and in DOM walker's view of the DOM. So instead we also check these mutations just in case.
+        // In practice, at least one place reflects apperance of the node.
+        // URL for testing: https://chromestatus.com/roadmap
+        additions.forEach((node) => isCustomElement(node) && recordUndefinedElement(node));
     }
 
     function handleHugeTreeMutations(root: Document | ShadowRoot) {
@@ -233,12 +246,15 @@ export function watchForStyleChanges(currentStyles: StyleElement[], update: (sty
     }
 
     function observe(root: Document | ShadowRoot) {
+        if (observedRoots.has(root)) {
+            return;
+        }
         const treeObserver = createOptimizedTreeObserver(root, {
             onMinorMutations: handleMinorTreeMutations,
             onHugeMutations: handleHugeTreeMutations,
         });
         const attrObserver = new MutationObserver(handleAttributeMutations);
-        attrObserver.observe(root, {attributes: true, attributeFilter: ['rel', 'disabled', 'media', 'href'], subtree: true});
+        attrObserver.observe(root, {attributeFilter: ['rel', 'disabled', 'media', 'href'], subtree: true});
         observers.push(treeObserver, attrObserver);
         observedRoots.add(root);
     }

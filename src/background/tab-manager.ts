@@ -67,7 +67,7 @@ export default class TabManager {
         TabManager.tabs = {};
         TabManager.getTabMessage = getTabMessage;
 
-        chrome.runtime.onMessage.addListener(async (message: Message, sender, sendResponse) => {
+        async function onMessage(message: Message, sender: chrome.runtime.MessageSender, sendResponse: (message: 'unsupportedSender') => void) {
             if (isFirefox && makeFirefoxHappy(message, sender, sendResponse)) {
                 return;
             }
@@ -215,7 +215,9 @@ export default class TabManager {
                 default:
                     break;
             }
-        });
+        }
+
+        chrome.runtime.onMessage.addListener(onMessage);
 
         chrome.tabs.onRemoved.addListener(async (tabId) => TabManager.removeFrame(tabId, 0));
     }

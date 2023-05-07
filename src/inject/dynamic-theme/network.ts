@@ -1,4 +1,4 @@
-import {generateRandomId} from '../../utils/uid';
+import {generateUID} from '../../utils/uid';
 import type {Message} from '../../definitions';
 import {MessageType} from '../../utils/message';
 
@@ -9,12 +9,12 @@ interface FetchRequest {
     origin?: string;
 }
 
-const resolvers = new Map<number, (data: string) => void>();
-const rejectors = new Map<number, (reason?: any) => void>();
+const resolvers = new Map<string, (data: string) => void>();
+const rejectors = new Map<string, (reason?: any) => void>();
 
 export async function bgFetch(request: FetchRequest): Promise<string> {
     return new Promise<string>((resolve, reject) => {
-        const id = generateRandomId();
+        const id = generateUID();
         resolvers.set(id, resolve);
         rejectors.set(id, reject);
         chrome.runtime.sendMessage<Message>({type: MessageType.CS_FETCH, data: request, id});

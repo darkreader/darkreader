@@ -209,6 +209,15 @@ export function iterateShadowHosts(root: Node | null, iterator: (host: Element) 
     }
 }
 
+export const isTopFrame = (): boolean => {
+    try {
+        return window.self === window.top;
+    } catch (err) {
+        console.warn(err);
+        return false;
+    }
+};
+
 export let isDOMReady: () => boolean = () => {
     return document.readyState === 'complete' || document.readyState === 'interactive';
 };

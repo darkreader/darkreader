@@ -67,13 +67,21 @@ export default class TabManager {
         TabManager.tabs = {};
         TabManager.getTabMessage = getTabMessage;
 
+        const forwardColorSchemeStateFromMessage = (message: Message) => {
+            // ignore messages which do not have colorscheme information
+            // such as message from iframes
+            if (message.data.isDark !== undefined) {
+                onColorSchemeChange(message.data.isDark);
+            }
+        };
+
         chrome.runtime.onMessage.addListener(async (message: Message, sender, sendResponse) => {
             if (isFirefox && makeFirefoxHappy(message, sender, sendResponse)) {
                 return;
             }
             switch (message.type) {
                 case MessageType.CS_FRAME_CONNECT: {
-                    onColorSchemeChange(message.data.isDark);
+                    forwardColorSchemeStateFromMessage(message);
                     await TabManager.stateManager.loadState();
                     const reply = (tabURL: string, url: string, isTopFrame: boolean) => {
                         getConnectionMessage(tabURL, url, isTopFrame).then((message) => {
@@ -132,7 +140,7 @@ export default class TabManager {
                 }
 
                 case MessageType.CS_FRAME_RESUME: {
-                    onColorSchemeChange(message.data.isDark);
+                    forwardColorSchemeStateFromMessage(message);
                     await TabManager.stateManager.loadState();
                     const tabId = sender.tab!.id!;
                     const tabURL = sender.tab!.url!;
@@ -191,7 +199,7 @@ export default class TabManager {
                 case MessageType.UI_COLOR_SCHEME_CHANGE:
                     // fallthrough
                 case MessageType.CS_COLOR_SCHEME_CHANGE:
-                    onColorSchemeChange(message.data.isDark);
+                    forwardColorSchemeStateFromMessage(message);
                     break;
 
                 case MessageType.UI_SAVE_FILE: {

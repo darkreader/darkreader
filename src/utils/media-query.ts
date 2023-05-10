@@ -1,4 +1,5 @@
 import {isMatchMediaChangeEventListenerSupported} from './platform';
+import {isTopFrame} from '../inject/utils/dom';
 
 let query: MediaQueryList | null = null;
 const onChange: ({matches}: {matches: boolean}) => void = ({matches}) => listeners.forEach((listener) => listener(matches));
@@ -31,4 +32,15 @@ export function stopColorSchemeChangeDetector(): void {
     query = null;
 }
 
-export const isSystemDarkModeEnabled = (): boolean => (query || matchMedia('(prefers-color-scheme: dark)')).matches;
+export const isSystemDarkModeEnabled = (): boolean | undefined => {
+    /* prefers-color-scheme may be overridden in embedded frames, so we cannot
+     * know whether it truely reflects the system color scheme.
+     *
+     * to avoid emitting an incorrect value, we will return undefined if we are
+     * not in a top level frame.
+     */
+    if (isTopFrame()) {
+        return (query || matchMedia('(prefers-color-scheme: dark)')).matches;
+    }
+    return undefined;
+};

@@ -44,7 +44,10 @@ function notifyOfColorScheme(isDark: boolean): void {
 }
 
 function updateEventListeners(): void {
-    notifyOfColorScheme(isSystemDarkModeEnabled());
+    const isDark = isSystemDarkModeEnabled();
+    if (isDark !== undefined) {
+        notifyOfColorScheme(isDark);
+    }
     if (documentIsVisible()) {
         runColorSchemeChangeDetector(notifyOfColorScheme);
     } else {

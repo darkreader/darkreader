@@ -59,7 +59,6 @@ describe('Custom HTML elements', () => {
             'p {',
             '    color: green !important;',
             '}',
-            '',
         ));
 
         await expectStyles([

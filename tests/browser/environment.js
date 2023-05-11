@@ -293,14 +293,16 @@ export default class CustomJestEnvironment extends TestEnvironment {
             expect(errors.length).toBe(0);
         };
 
-        global.emulateColorScheme = async (value) => {
+        global.emulateColorScheme = async (colorScheme) => {
             if (global.product === 'firefox') {
+                await global.pageUtils.emulateColorScheme(colorScheme);
+                await global.backgroundUtils.emulateColorScheme(colorScheme);
                 return;
             }
-            await page.emulateMediaFeatures([{name: 'prefers-color-scheme', value}]);
+            await page.emulateMediaFeatures([{name: 'prefers-color-scheme', value: colorScheme}]);
             if (global.product === 'chrome') {
                 const page = await this.getChromiumMV2BackgroundPage();
-                await page.emulateMediaFeatures([{name: 'prefers-color-scheme', value}]);
+                await page.emulateMediaFeatures([{name: 'prefers-color-scheme', value: colorScheme}]);
             }
         };
 
@@ -435,12 +437,19 @@ export default class CustomJestEnvironment extends TestEnvironment {
                         throw new Error('Not supported');
                     }
                     await sendToBackground('firefox-createTab', url);
+                },
+                emulateColorScheme: async (colorScheme) => {
+                    if (this.global.product !== 'firefox') {
+                        throw new Error('Not supported');
+                    }
+                    await sendToBackground('firefox-emulateColorScheme', colorScheme);
                 }
             };
 
             this.global.pageUtils = {
                 evaluate: async (script) => await sendToPage('firefox-eval', script),
                 expectPageStyles: async (expectations) => await sendToPage('firefox-expectPageStyles', expectations),
+                emulateColorScheme: async (colorScheme) => await sendToPage('firefox-emulateColorScheme', colorScheme),
             };
 
             this.global.awaitForEvent = awaitForEvent;

@@ -1,12 +1,13 @@
 import {Extension} from './extension';
 import {getHelpURL, UNINSTALL_URL} from '../utils/links';
 import {canInjectScript} from '../background/utils/extension-api';
-import type {ExtensionData, Message, UserSettings} from '../definitions';
+import type {ColorScheme, ExtensionData, Message, UserSettings} from '../definitions';
 import {MessageType} from '../utils/message';
 import {makeChromiumHappy} from './make-chromium-happy';
 import {ASSERT, logInfo} from './utils/log';
 import {sendLog} from './utils/sendLog';
 import {isFirefox} from '../utils/platform';
+import {emulateColorScheme} from 'utils/media-query';
 
 type TestMessage = {
     type: 'getManifest';
@@ -38,6 +39,10 @@ type TestMessage = {
     id: number;
 } | {
     type: 'firefox-getColorScheme';
+    id: number;
+} | {
+    type: 'firefox-emulateColorScheme';
+    data: ColorScheme;
     id: number;
 };
 
@@ -206,6 +211,11 @@ if (__TEST__) {
                     ASSERT('Firefox-specific function', isFirefox);
                     const isDark = matchMedia('(prefers-color-scheme: dark)').matches;
                     respond(isDark ? 'dark' : 'light');
+                    break;
+                }
+                case 'firefox-emulateColorScheme': {
+                    emulateColorScheme(message.data);
+                    respond();
                     break;
                 }
             }

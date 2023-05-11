@@ -4,6 +4,8 @@ import type {MessageType} from './utils/message';
 import type {AutomationMode} from './utils/automation';
 import type {ThemeEngine} from './generators/theme-engines';
 
+export type ColorScheme = 'dark' | 'light';
+
 export interface ExtensionData {
     isEnabled: boolean;
     isReady: boolean;

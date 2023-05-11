@@ -1,12 +1,10 @@
 import type {RequestListener} from 'http';
 import type {WaitForOptions} from 'puppeteer-core';
-import type {ExtensionData, UserSettings} from '../../src/definitions';
+import type {ColorScheme, ExtensionData, UserSettings} from '../../src/definitions';
 
 type PathsObject = {[path: string]: string | RequestListener | PathsObject};
 type OneStyleExpectation = [selector: string | string[], cssAttributeName: string, expectedValue: string];
 type StyleExpectations = OneStyleExpectation[] | OneStyleExpectation;
-
-type ColorScheme = 'dark' | 'light';
 
 declare global {
     const loadTestPage: (paths: PathsObject & {cors?: PathsObject}, gotoOptions?: WaitForOptions) => Promise<void>;

@@ -7,7 +7,7 @@ import {makeChromiumHappy} from './make-chromium-happy';
 import {ASSERT, logInfo} from './utils/log';
 import {sendLog} from './utils/sendLog';
 import {isFirefox} from '../utils/platform';
-import {emulateColorScheme, isSystemDarkModeEnabled, } from 'utils/media-query';
+import {emulateColorScheme, isSystemDarkModeEnabled} from '../utils/media-query';
 
 type TestMessage = {
     type: 'getManifest';

@@ -34,7 +34,7 @@ export function stopColorSchemeChangeDetector(): void {
     query = null;
 }
 
-export function emulateColorScheme(colorScheme: 'light' | 'dark') {
+export function emulateColorScheme(colorScheme: 'light' | 'dark'): void {
     if (__TEST__) {
         const isDark = colorScheme === 'dark';
         override = isDark;

@@ -4,7 +4,7 @@ import type {FetchRequestParameters} from './utils/network';
 import type {Message} from '../definitions';
 import {isFirefox} from '../utils/platform';
 import {MessageType} from '../utils/message';
-import {ASSERT, logInfo, logWarn} from './utils/log';
+import {logInfo, logWarn} from './utils/log';
 import {StateManager} from '../utils/state-manager';
 import {getURLHostOrProtocol} from '../utils/url';
 import {isPanel} from './utils/tab';
@@ -58,15 +58,13 @@ export default class TabManager {
     private static tabs: {[tabId: tabId]: {[frameId: frameId]: DocumentInfo}};
     private static stateManager: StateManager<TabManagerState>;
     private static fileLoader: {get: (params: FetchRequestParameters) => Promise<string | null>} | null = null;
-    private static onColorSchemeChange: TabManagerOptions['onColorSchemeChange'];
-    private static getTabMessage: TabManagerOptions['getTabMessage'];
+    private static getTabMessage: (tabURL: string, url: string, isTopFrame: boolean) => Message;
     private static timestamp = 0;
     private static readonly LOCAL_STORAGE_KEY = 'TabManager-state';
 
     public static init({getConnectionMessage, onColorSchemeChange, getTabMessage}: TabManagerOptions): void {
         TabManager.stateManager = new StateManager<TabManagerState>(TabManager.LOCAL_STORAGE_KEY, this, {tabs: {}, timestamp: 0}, logWarn);
         TabManager.tabs = {};
-        TabManager.onColorSchemeChange = onColorSchemeChange;
         TabManager.getTabMessage = getTabMessage;
 
         chrome.runtime.onMessage.addListener(async (message: Message, sender, sendResponse) => {
@@ -75,7 +73,7 @@ export default class TabManager {
             }
             switch (message.type) {
                 case MessageType.CS_FRAME_CONNECT: {
-                    TabManager.onColorSchemeMessage(message, sender);
+                    onColorSchemeChange(message.data.isDark);
                     await TabManager.stateManager.loadState();
                     const reply = (tabURL: string, url: string, isTopFrame: boolean) => {
                         getConnectionMessage(tabURL, url, isTopFrame).then((message) => {
@@ -134,7 +132,7 @@ export default class TabManager {
                 }
 
                 case MessageType.CS_FRAME_RESUME: {
-                    TabManager.onColorSchemeMessage(message, sender);
+                    onColorSchemeChange(message.data.isDark);
                     await TabManager.stateManager.loadState();
                     const tabId = sender.tab!.id!;
                     const tabURL = sender.tab!.url!;
@@ -193,7 +191,7 @@ export default class TabManager {
                 case MessageType.UI_COLOR_SCHEME_CHANGE:
                     // fallthrough
                 case MessageType.CS_COLOR_SCHEME_CHANGE:
-                    TabManager.onColorSchemeMessage(message, sender);
+                    onColorSchemeChange(message.data.isDark);
                     break;
 
                 case MessageType.UI_SAVE_FILE: {
@@ -220,18 +218,6 @@ export default class TabManager {
         });
 
         chrome.tabs.onRemoved.addListener(async (tabId) => TabManager.removeFrame(tabId, 0));
-    }
-
-    private static onColorSchemeMessage(message: Message, sender: chrome.runtime.MessageSender) {
-        ASSERT('TabManager.onColorSchemeMessage is set', Boolean(TabManager.onColorSchemeChange));
-
-        // We honor only messages which come from tab's top frame
-        // because sub-frames color scheme can be overridden by style with prefers-color-scheme
-        // TODO(MV3): instead of dropping these messages, consider making a query to an authoritative source
-        // like offscreen document
-        if (sender && sender.frameId === 0) {
-            TabManager.onColorSchemeChange(message.data.isDark);
-        }
     }
 
     private static async queryTabs(query: chrome.tabs.QueryInfo = {}) {

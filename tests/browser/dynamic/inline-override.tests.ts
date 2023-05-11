@@ -35,7 +35,7 @@ describe('Inline style override', () => {
 
         await expectStyles(['span', 'color', 'rgb(255, 26, 26)']);
 
-        await expect(evaluateScript(async () => {
+        await expect(pageUtils.evaluateScript(async () => {
             const span = document.querySelector('span');
             span.style.color = 'green';
             await new Promise((resolve) => setTimeout(resolve));

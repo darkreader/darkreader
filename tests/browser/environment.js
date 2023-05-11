@@ -272,7 +272,7 @@ export default class CustomJestEnvironment extends TestEnvironment {
             return isDark ? 'dark' : 'light';
         };
 
-        this.global.evaluateScript = async (script) => {
+        this.global.pageUtils.evaluateScript = async (script) => {
             if (this.global.product === 'firefox') {
                 if (typeof script !== 'function') {
                     throw new Error('Not implemented');
@@ -296,14 +296,14 @@ export default class CustomJestEnvironment extends TestEnvironment {
             expect(errors.length).toBe(0);
         };
 
-        this.global.emulateMedia = async (name, value) => {
+        this.global.emulateColorScheme = async (value) => {
             if (this.global.product === 'firefox') {
                 return;
             }
-            await this.page.emulateMediaFeatures([{name, value}]);
+            await this.page.emulateMediaFeatures([{name: 'prefers-color-scheme', value}]);
             if (this.global.product === 'chrome') {
                 const page = await this.getChromiumMV2BackgroundPage();
-                await page.emulateMediaFeatures([{name, value}]);
+                await page.emulateMediaFeatures([{name: 'prefers-color-scheme', value}]);
             }
         };
 

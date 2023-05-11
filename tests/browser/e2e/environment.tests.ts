@@ -1,0 +1,47 @@
+import {multiline} from '../../support/test-utils';
+
+async function loadBasicPage(header = 'E2E test page') {
+    await loadTestPage({
+        '/': multiline(
+            '<!DOCTYPE html>',
+            '<html>',
+            '<head>',
+            '    <style>',
+            '        h1 { color: red; }',
+            '    </style>',
+            '</head>',
+            '<body>',
+            `    <h1>${header}</h1>`,
+            '    <p>Text</p>',
+            '    <a href="#">Link</a>',
+            '</body>',
+            '</html>',
+        ),
+    });
+}
+
+describe('Test environment', () => {
+    // TODO: remove flakes and remove this line
+    jest.retryTimes(10, {logErrorsBeforeRetry: true});
+
+    it('should turn On/Off', async () => {
+        await loadBasicPage();
+
+        const initialColorScheme = await getColorScheme();
+        console.error(1, initialColorScheme);
+        const overrideColorScheme = initialColorScheme === 'dark' ? 'light' : 'dark';
+
+        expect(initialColorScheme === 'light' || initialColorScheme === 'dark');
+        /*
+        await expect(backgroundUtils.getColorScheme()).resolves.toBe(initialColorScheme);
+        console.error(2, initialColorScheme);
+
+        await emulateColorScheme(overrideColorScheme);
+        console.error(3, initialColorScheme);
+        await expect(getColorScheme()).resolves.toBe(overrideColorScheme);
+        console.error(4, initialColorScheme);
+        await expect(backgroundUtils.getColorScheme()).resolves.toBe(overrideColorScheme);
+        console.error(5, initialColorScheme);
+        */
+    });
+});

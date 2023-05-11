@@ -29,6 +29,9 @@ describe('Toggling the extension', () => {
     // TODO: remove flakes and remove this line
     jest.retryTimes(10, {logErrorsBeforeRetry: true});
 
+    const automationMenuSelector = '.header__more-settings-button';
+    const automationSystemSelector = '.header__more-settings__system-dark-mode__checkbox .checkbox__input';
+
     it('should turn On/Off', async () => {
         await loadBasicPage('Toggle on/off');
 
@@ -69,8 +72,6 @@ describe('Toggling the extension', () => {
     it('should follow system color scheme', async () => {
         await loadBasicPage('Automation (color scheme)');
 
-        const automationMenuSelector = '.header__more-settings-button';
-        const automationSystemSelector = '.header__more-settings__system-dark-mode__checkbox .checkbox__input';
 
         await emulateColorScheme('light');
 
@@ -154,7 +155,17 @@ describe('Toggling the extension', () => {
             ['a', 'color', 'rgb(0, 0, 238)'],
         ];
 
-        let subframeBarrier: () => void = null;
+        const darkSubframePageExpectations: StyleExpectations = [
+            [['iframe', 'h1'], 'color', 'rgb(255, 26, 26)'],
+            [['iframe', 'a'], 'color', 'rgb(51, 145, 255)'],
+        ];
+
+        const lightSubframePageExpectations: StyleExpectations = [
+            [['iframe', 'h1'], 'color', 'rgb(255, 0, 0)'],
+            [['iframe', 'a'], 'color', 'rgb(0, 0, 238)'],
+        ];
+
+        let loadSubframe: () => void = null;
         await loadTestPage({
             '/': multiline(
                 '<!DOCTYPE html>',
@@ -168,6 +179,7 @@ describe('Toggling the extension', () => {
                 `    <h1>Color scheme detector</h1>`,
                 '    <p>Text</p>',
                 '    <a href="#">Link</a>',
+                '    <iframe src="/subframe.html" style="color-scheme: light"></iframe>',
                 '</body>',
                 '</html>',
                 ),
@@ -175,7 +187,7 @@ describe('Toggling the extension', () => {
                 res.statusCode = 200;
                 res.setHeader('Content-Type', 'text/html');
     
-                await new Promise<void>((resolve) => subframeBarrier = resolve);
+                await new Promise<void>((resolve) => loadSubframe = resolve);
     
                 res.end(
                     multiline(
@@ -187,7 +199,7 @@ describe('Toggling the extension', () => {
                         '    </style>',
                         '</head>',
                         '<body>',
-                        '    <h1>header</h1>',
+                        '    <h1>Header</h1>',
                         '    <p>Text</p>',
                         '    <a href="#">Link</a>',
                         '</body>',
@@ -201,10 +213,6 @@ describe('Toggling the extension', () => {
         });
 
         await emulateColorScheme('dark');
-
-        const automationMenuSelector = '.header__more-settings-button';
-        const automationSystemSelector = '.header__more-settings__system-dark-mode__checkbox .checkbox__input';
-
         await expectStyles(darkPageExpectations);
 
         await popupUtils.click(automationMenuSelector);
@@ -212,38 +220,21 @@ describe('Toggling the extension', () => {
 
         await expectStyles(darkPageExpectations);
 
-        await emulateColorScheme('dark');
+        loadSubframe();
 
-        await expectStyles([
-            ['document', 'background-color', 'rgb(24, 26, 27)'],
-            ['document', 'color', 'rgb(232, 230, 227)'],
-            ['body', 'background-color', 'rgb(24, 26, 27)'],
-            ['body', 'color', 'rgb(232, 230, 227)'],
-            ['h1', 'color', 'rgb(255, 26, 26)'],
-            ['a', 'color', 'rgb(51, 145, 255)'],
-        ]);
+        // Ensure that the subframe received its styles
+        await expectStyles(darkSubframePageExpectations);
+        // Ensure that the parent frame retained its styles
+        await expectStyles(darkPageExpectations);
 
         await emulateColorScheme('light');
 
-        await expectStyles([
-            ['document', 'background-color', 'rgba(0, 0, 0, 0)'],
-            ['document', 'color', 'rgb(0, 0, 0)'],
-            ['body', 'background-color', 'rgba(0, 0, 0, 0)'],
-            ['body', 'color', 'rgb(0, 0, 0)'],
-            ['h1', 'color', 'rgb(255, 0, 0)'],
-            ['a', 'color', 'rgb(0, 0, 238)'],
-        ]);
+        await expectStyles(lightPageExpectations);
+        await expectStyles(lightSubframePageExpectations);
 
         await popupUtils.click(automationSystemSelector);
 
-        await expectStyles([
-            ['document', 'background-color', 'rgb(24, 26, 27)'],
-            ['document', 'color', 'rgb(232, 230, 227)'],
-            ['body', 'background-color', 'rgb(24, 26, 27)'],
-            ['body', 'color', 'rgb(232, 230, 227)'],
-            ['h1', 'color', 'rgb(255, 26, 26)'],
-            ['a', 'color', 'rgb(51, 145, 255)'],
-        ]);
+        await expectStyles(darkPageExpectations);
 
         await emulateColorScheme('dark');
     });

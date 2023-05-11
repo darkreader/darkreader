@@ -32,16 +32,18 @@ describe('Test environment', () => {
         const overrideColorScheme = initialColorScheme === 'dark' ? 'light' : 'dark';
 
         expect(initialColorScheme === 'light' || initialColorScheme === 'dark');
-        /*
-        await expect(backgroundUtils.getColorScheme()).resolves.toBe(initialColorScheme);
+        if (product === 'firefox') {
+            await expect(backgroundUtils.getColorScheme()).resolves.toBe(initialColorScheme);
+        }
         console.error(2, initialColorScheme);
 
         await emulateColorScheme(overrideColorScheme);
         console.error(3, initialColorScheme);
         await expect(getColorScheme()).resolves.toBe(overrideColorScheme);
         console.error(4, initialColorScheme);
-        await expect(backgroundUtils.getColorScheme()).resolves.toBe(overrideColorScheme);
+        if (product === 'firefox') {
+            await expect(backgroundUtils.getColorScheme()).resolves.toBe(overrideColorScheme);
+        }
         console.error(5, initialColorScheme);
-        */
     });
 });

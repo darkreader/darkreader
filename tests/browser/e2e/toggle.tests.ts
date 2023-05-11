@@ -182,13 +182,13 @@ describe('Toggling the extension', () => {
                 '    <iframe src="/subframe.html" style="color-scheme: light"></iframe>',
                 '</body>',
                 '</html>',
-                ),
+            ),
             '/subframe.html': async (_, res) => {
                 res.statusCode = 200;
                 res.setHeader('Content-Type', 'text/html');
-    
+
                 await new Promise<void>((resolve) => loadSubframe = resolve);
-    
+
                 res.end(
                     multiline(
                         '<!DOCTYPE html>',

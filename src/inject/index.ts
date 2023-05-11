@@ -3,7 +3,7 @@ import {createOrUpdateSVGFilter, removeSVGFilter} from './svg-filter';
 import {runDarkThemeDetector, stopDarkThemeDetector} from './detector';
 import {createOrUpdateDynamicTheme, removeDynamicTheme, cleanDynamicThemeCache} from './dynamic-theme';
 import {logWarn, logInfoCollapsed} from './utils/log';
-import {isSystemDarkModeEnabled, runColorSchemeChangeDetector, stopColorSchemeChangeDetector} from '../utils/media-query';
+import {isSystemDarkModeEnabled, runColorSchemeChangeDetector, stopColorSchemeChangeDetector, emulateColorScheme} from '../utils/media-query';
 import {collectCSS} from './dynamic-theme/css-collection';
 import type {DynamicThemeFix, Message, Theme} from '../definitions';
 import {MessageType} from '../utils/message';
@@ -295,6 +295,12 @@ if (__TEST__) {
 
                     const interval: number = setInterval(checkPageStylesNow, 200);
                     checkPageStylesNow();
+                    break;
+                }
+                case 'firefox-emulateColorScheme': {
+                    emulateColorScheme(data);
+                    respond(undefined);
+                    break;
                 }
             }
         };

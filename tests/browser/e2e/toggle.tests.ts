@@ -67,16 +67,12 @@ describe('Toggling the extension', () => {
     });
 
     it('should follow system color scheme', async () => {
-        if (product === 'firefox') {
-            expect(true);
-            return;
-        }
         await loadBasicPage('Automation (color scheme)');
 
         const automationMenuSelector = '.header__more-settings-button';
         const automationSystemSelector = '.header__more-settings__system-dark-mode__checkbox .checkbox__input';
 
-        await emulateMedia('prefers-color-scheme', 'light');
+        await emulateColorScheme('light');
         await expect(getColorScheme()).resolves.toBe('light');
 
         await expectStyles([
@@ -100,7 +96,7 @@ describe('Toggling the extension', () => {
             ['a', 'color', 'rgb(0, 0, 238)'],
         ]);
 
-        await emulateMedia('prefers-color-scheme', 'dark');
+        await emulateColorScheme('dark');
         await expect(getColorScheme()).resolves.toBe('dark');
 
         await expectStyles([
@@ -112,7 +108,7 @@ describe('Toggling the extension', () => {
             ['a', 'color', 'rgb(51, 145, 255)'],
         ]);
 
-        await emulateMedia('prefers-color-scheme', 'light');
+        await emulateColorScheme('light');
         await expect(getColorScheme()).resolves.toBe('light');
 
         await expectStyles([
@@ -135,7 +131,7 @@ describe('Toggling the extension', () => {
             ['a', 'color', 'rgb(51, 145, 255)'],
         ]);
 
-        await emulateMedia('prefers-color-scheme', 'dark');
+        await emulateColorScheme('dark');
     });
 
     it('should have new design button on desktop', async () => {

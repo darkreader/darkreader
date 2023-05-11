@@ -27,7 +27,7 @@ describe('Custom HTML elements', () => {
             ),
         });
 
-        await evaluateScript(async () => {
+        await pageUtils.evaluateScript(async () => {
             class ElementWitAsync extends HTMLElement {
                 constructor() {
                     super();

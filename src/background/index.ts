@@ -213,6 +213,7 @@ if (__TEST__) {
                     break;
                 }
                 case 'firefox-emulateColorScheme': {
+                    ASSERT('Firefox-specific function', isFirefox);
                     emulateColorScheme(message.data);
                     respond();
                     break;

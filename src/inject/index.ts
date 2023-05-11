@@ -297,6 +297,10 @@ if (__TEST__) {
                     checkPageStylesNow();
                     break;
                 }
+                case 'firefox-getColorScheme': {
+                    respond(isSystemDarkModeEnabled() ? 'dark' : 'light');
+                    break;
+                }
                 case 'firefox-emulateColorScheme': {
                     emulateColorScheme(data);
                     respond(undefined);

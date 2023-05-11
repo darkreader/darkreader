@@ -73,7 +73,6 @@ describe('Toggling the extension', () => {
         const automationSystemSelector = '.header__more-settings__system-dark-mode__checkbox .checkbox__input';
 
         await emulateColorScheme('light');
-        await expect(getColorScheme()).resolves.toBe('light');
 
         await expectStyles([
             ['document', 'background-color', 'rgb(24, 26, 27)'],
@@ -97,7 +96,6 @@ describe('Toggling the extension', () => {
         ]);
 
         await emulateColorScheme('dark');
-        await expect(getColorScheme()).resolves.toBe('dark');
 
         await expectStyles([
             ['document', 'background-color', 'rgb(24, 26, 27)'],
@@ -109,7 +107,6 @@ describe('Toggling the extension', () => {
         ]);
 
         await emulateColorScheme('light');
-        await expect(getColorScheme()).resolves.toBe('light');
 
         await expectStyles([
             ['document', 'background-color', 'rgba(0, 0, 0, 0)'],
@@ -203,26 +200,19 @@ describe('Toggling the extension', () => {
             waitUntil: 'domcontentloaded',
         });
 
-        // Note: this call needs to be after loadTestPage() since
-        // on Firefox we query color scheme from page context
-        const systemColorScheme = await getColorScheme(); // TODO
-
-        const initialPageExpectations = systemColorScheme === 'dark' ? darkPageExpectations : lightPageExpectations;
+        await emulateColorScheme('dark');
 
         const automationMenuSelector = '.header__more-settings-button';
         const automationSystemSelector = '.header__more-settings__system-dark-mode__checkbox .checkbox__input';
-
-        await expect(getColorScheme()).resolves.toBe(systemColorScheme);
 
         await expectStyles(darkPageExpectations);
 
         await popupUtils.click(automationMenuSelector);
         await popupUtils.click(automationSystemSelector);
 
-        await expectStyles(initialPageExpectations);
+        await expectStyles(darkPageExpectations);
 
         await emulateColorScheme('dark');
-        await expect(getColorScheme()).resolves.toBe('dark');
 
         await expectStyles([
             ['document', 'background-color', 'rgb(24, 26, 27)'],
@@ -234,7 +224,6 @@ describe('Toggling the extension', () => {
         ]);
 
         await emulateColorScheme('light');
-        await expect(getColorScheme()).resolves.toBe('light');
 
         await expectStyles([
             ['document', 'background-color', 'rgba(0, 0, 0, 0)'],

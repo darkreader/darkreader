@@ -223,7 +223,7 @@ export default class TabManager {
     }
 
     private static onColorSchemeMessage(message: Message, sender: chrome.runtime.MessageSender) {
-        ASSERT('TabManager.onColorSchemeMessage is set', Boolean(TabManager.onColorSchemeChange));
+        ASSERT('TabManager.onColorSchemeMessage is set', () => Boolean(TabManager.onColorSchemeChange));
 
         // We honor only messages which come from tab's top frame
         // because sub-frames color scheme can be overridden by style with prefers-color-scheme

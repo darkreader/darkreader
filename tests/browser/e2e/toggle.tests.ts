@@ -25,23 +25,6 @@ async function loadBasicPage(header: string) {
     });
 }
 
-/*
-
-        '/subframe.html': multiline(
-            '<!DOCTYPE html>',
-            '<html>',
-            '<head>',
-            '</head>',
-            '<body>',
-            `    <h1>Subframe color: ${color}</h1>`,
-            '</body>',
-            '</html>',
-        ),
-    })
-];
-}
-*/
-
 describe('Toggling the extension', () => {
     // TODO: remove flakes and remove this line
     jest.retryTimes(10, {logErrorsBeforeRetry: true});
@@ -238,10 +221,7 @@ describe('Toggling the extension', () => {
 
         await expectStyles(initialPageExpectations);
 
-        console.error(123);
-
-
-        await emulateMedia('prefers-color-scheme', 'dark');
+        await emulateColorScheme('dark');
         await expect(getColorScheme()).resolves.toBe('dark');
 
         await expectStyles([
@@ -253,7 +233,7 @@ describe('Toggling the extension', () => {
             ['a', 'color', 'rgb(51, 145, 255)'],
         ]);
 
-        await emulateMedia('prefers-color-scheme', 'light');
+        await emulateColorScheme('light');
         await expect(getColorScheme()).resolves.toBe('light');
 
         await expectStyles([
@@ -276,7 +256,7 @@ describe('Toggling the extension', () => {
             ['a', 'color', 'rgb(51, 145, 255)'],
         ]);
 
-        await emulateMedia('prefers-color-scheme', 'dark');
+        await emulateColorScheme('dark');
     });
 
     it('should have new design button on desktop', async () => {

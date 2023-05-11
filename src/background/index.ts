@@ -7,7 +7,7 @@ import {makeChromiumHappy} from './make-chromium-happy';
 import {ASSERT, logInfo} from './utils/log';
 import {sendLog} from './utils/sendLog';
 import {isFirefox} from '../utils/platform';
-import {emulateColorScheme} from 'utils/media-query';
+import {emulateColorScheme, isSystemDarkModeEnabled, } from 'utils/media-query';
 
 type TestMessage = {
     type: 'getManifest';
@@ -209,8 +209,7 @@ if (__TEST__) {
                     break;
                 case 'firefox-getColorScheme': {
                     ASSERT('Firefox-specific function', isFirefox);
-                    const isDark = matchMedia('(prefers-color-scheme: dark)').matches;
-                    respond(isDark ? 'dark' : 'light');
+                    respond(isSystemDarkModeEnabled() ? 'dark' : 'light');
                     break;
                 }
                 case 'firefox-emulateColorScheme': {

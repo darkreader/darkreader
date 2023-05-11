@@ -297,6 +297,11 @@ export default class CustomJestEnvironment extends TestEnvironment {
             if (global.product === 'firefox') {
                 await global.pageUtils.emulateColorScheme(colorScheme);
                 await global.backgroundUtils.emulateColorScheme(colorScheme);
+                const newPageColorScheme = await global.backgroundUtils.getColorScheme();
+                const newBGColorScheme = await global.pageUtils.getColorScheme();
+                if (newPageColorScheme !== colorScheme || newBGColorScheme !== colorScheme) {
+                    throw new Error('Failed to apply new color scheme');
+                }
                 return;
             }
             await page.emulateMediaFeatures([{name: 'prefers-color-scheme', value: colorScheme}]);
@@ -450,6 +455,12 @@ export default class CustomJestEnvironment extends TestEnvironment {
                 evaluate: async (script) => await sendToPage('firefox-eval', script),
                 expectPageStyles: async (expectations) => await sendToPage('firefox-expectPageStyles', expectations),
                 emulateColorScheme: async (colorScheme) => await sendToPage('firefox-emulateColorScheme', colorScheme),
+                getColorScheme: async () => {
+                    if (this.global.product !== 'firefox') {
+                        throw new Error('Not supported');
+                    }
+                    return await sendToPage('firefox-getColorScheme');
+                },
             };
 
             this.global.awaitForEvent = awaitForEvent;

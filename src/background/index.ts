@@ -209,8 +209,8 @@ if (__TEST__) {
                     break;
                 case 'firefox-getColorScheme': {
                     ASSERT('Firefox-specific function', isFirefox);
-                    const isDark = matchMedia('(prefers-color-scheme: dark)').matches;
-                    respond(isDark ? 'dark' : 'light');
+                    respond(isSystemDarkModeEnabled() ? 'dark' : 'light');
+                    break;
                 }
                 case 'firefox-emulateColorScheme': {
                     emulateColorScheme(message.data);

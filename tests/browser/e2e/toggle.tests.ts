@@ -133,9 +133,6 @@ describe('Toggling the extension', () => {
     });
 
     // Note: this test is relevant only to Firefox and Thunderbird
-    // which do not support color schmeme overrides the way we use them
-    // Instead, we query the current system color scheme and adjust the test accordingly
-    // Test will fail if user changes system color scheme mid-way through the test
     it('should ignore color watcher messages from subframes', async () => {
         const darkPageExpectations: StyleExpectations = [
             ['document', 'background-color', 'rgb(24, 26, 27)'],

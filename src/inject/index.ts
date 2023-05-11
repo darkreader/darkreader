@@ -295,6 +295,7 @@ if (__TEST__) {
 
                     const interval: number = setInterval(checkPageStylesNow, 200);
                     checkPageStylesNow();
+                    break;
                 }
             }
         };

@@ -4,8 +4,9 @@ import {canInjectScript} from '../background/utils/extension-api';
 import type {ExtensionData, Message, UserSettings} from '../definitions';
 import {MessageType} from '../utils/message';
 import {makeChromiumHappy} from './make-chromium-happy';
-import {logInfo} from './utils/log';
+import {ASSERT, logInfo} from './utils/log';
 import {sendLog} from './utils/sendLog';
+import {isFirefox} from '../utils/platform';
 
 type TestMessage = {
     type: 'getManifest';
@@ -32,8 +33,11 @@ type TestMessage = {
     };
     id: number;
 } | {
-    type: 'createTab';
+    type: 'firefox-createTab';
     data: string;
+    id: number;
+} | {
+    type: 'firefox-getColorScheme';
     id: number;
 };
 
@@ -194,9 +198,16 @@ if (__TEST__) {
                     break;
                 }
                 // TODO(anton): remove this once Firefox supports tab.eval() via WebDriver BiDi
-                case 'createTab':
+                case 'firefox-createTab':
+                    ASSERT('Firefox-specific function', isFirefox);
                     chrome.tabs.update(testTabId!, {url: message.data, active: true}, () => respond());
                     break;
+                case 'firefox-getColorScheme': {
+                    ASSERT('Firefox-specific function', isFirefox);
+                    const isDark = matchMedia('(prefers-color-scheme: dark)').matches;
+                    respond(isDark ? 'dark' : 'light');
+                    break;
+                }
             }
         } catch (err) {
             socket.send(JSON.stringify({error: String(err), original: e.data}));

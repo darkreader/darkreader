@@ -264,7 +264,9 @@ export default class CustomJestEnvironment extends TestEnvironment {
     assignTestGlobals() {
         this.global.getColorScheme = async () => {
             if (this.global.product === 'firefox') {
-                throw new Error('Firefox does not support page.evaluate()');
+                console.error('HELLO');
+                //console.error(Boolean(this, this.page)
+                return await this.global.backgroundUtils.getColorScheme();
             }
             const isDark = await this.page.evaluate(() => matchMedia('(prefers-color-scheme: dark)').matches);
             return isDark ? 'dark' : 'light';
@@ -290,6 +292,7 @@ export default class CustomJestEnvironment extends TestEnvironment {
                 expectations = [expectations];
             }
             const errors = await this.page.evaluate(this.checkPageStylesInBrowserContext, expectations);
+            if (errors.length) {console.error(errors)}
             expect(errors.length).toBe(0);
         };
 
@@ -424,7 +427,8 @@ export default class CustomJestEnvironment extends TestEnvironment {
                 changeChromeStorage: async (region, data) => await sendToBackground('changeChromeStorage', {region, data}),
                 getChromeStorage: async (region, keys) => await sendToBackground('getChromeStorage', {region, keys}),
                 getManifest: async () => await sendToBackground('getManifest'),
-                createTab: async (url) => await sendToBackground('createTab', url),
+                getColorScheme: async () => await sendToBackground('firefox-getColorScheme'),
+                createTab: async (url) => await sendToBackground('firefox-createTab', url),
             };
 
             this.global.pageUtils = {

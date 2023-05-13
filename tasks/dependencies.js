@@ -10,13 +10,17 @@ const packagePath = `${cwd}/package.json`;
 async function getOutdated() {
     return /** @type {Promise<object | null>} */(new Promise((resolve, reject) => {
         exec('npm outdated --json', {cwd}, (error, stdout) => {
-            if (!error) {
-                log.error('Nothing to upgrade');
+            const packages = JSON.parse(stdout.toString());
+            if (typeof packages !== 'object') {
+                log.error('Failed to check for dependencies');
                 reject();
                 return;
             }
-
-            const packages = JSON.parse(stdout.toString());
+            if (Object.keys(packages).length === 0) {
+                log.error('All dependencies are already up to date');
+                reject();
+                return;
+            }
             resolve(packages);
         });
     }));

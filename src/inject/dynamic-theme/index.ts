@@ -143,7 +143,7 @@ function createStaticStyleOverrides() {
         `   --darkreader-neutral-text: ${schemeTextColor};`,
         `   --darkreader-selection-background: ${selectionColors.backgroundColorSelection};`,
         `   --darkreader-selection-text: ${selectionColors.foregroundColorSelection};`,
-        `}`
+        `}`,
     ].join('\n');
     document.head.insertBefore(variableStyle, inlineStyle.nextSibling);
     setupNodePositionWatcher(variableStyle, 'variables');

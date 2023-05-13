@@ -2,7 +2,7 @@ import {HOMEPAGE_URL, BLOG_URL, DEVTOOLS_DOCS_URL, DONATE_URL, GITHUB_URL, PRIVA
 
 enum CSP {
     NONE = "'none'",
-    SELF = "'self'",
+    SELF = "'self'"
 }
 
 function check() {
@@ -38,7 +38,7 @@ export function prepareCSPMV3(): chrome.runtime.ManifestV3['content_security_pol
             'child-src': [CSP.NONE],
             'worker-src': [CSP.NONE],
             'object-src': [CSP.NONE],
-        }
+        },
     };
     for (const p in policy) {
         const outputs: string[] = [];

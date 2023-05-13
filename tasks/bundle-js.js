@@ -110,7 +110,7 @@ async function bundleJS(/** @type {JSEntry} */entry, platform, debug, watch, log
             }
             replace = {
                 'chrome.fontSettings.getFontList': `chrome['font' + 'Settings']['get' + 'Font' + 'List']`,
-                'chrome.fontSettings': `chrome['font' + 'Settings']`
+                'chrome.fontSettings': `chrome['font' + 'Settings']`,
             };
             break;
         case PLATFORM.CHROMIUM_MV3:
@@ -182,7 +182,7 @@ async function bundleJS(/** @type {JSEntry} */entry, platform, debug, watch, log
                     __LOG__: log ? `"${log}"` : false,
                 })
             ),
-        ].filter(Boolean)
+        ].filter(Boolean),
     });
     // TODO(anton): remove this once Firefox supports tab.eval() via WebDriver BiDi
     freeRollupPluginInstance('removeEval', '');

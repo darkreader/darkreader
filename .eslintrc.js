@@ -59,6 +59,13 @@ config.overrides.push({
         'yoda': ['error', 'never'],
         'local/consistent-new-lines': 'error',
         '@typescript-eslint/brace-style': 'error',
+        '@typescript-eslint/comma-dangle': ['error', {
+                arrays: 'always-multiline',
+                objects: 'always-multiline',
+                imports: 'always-multiline',
+                exports: 'always-multiline',
+                functions: 'only-multiline',
+        }],
         '@typescript-eslint/comma-spacing': ['error', {
             before: false,
             after: true,

@@ -84,7 +84,7 @@ describe('Style override', () => {
 
         await expectStyles([
             ['h1', 'color', 'rgb(152, 143, 129)'],
-            ['h1 strong', 'color', 'rgb(255, 26, 26)']
+            ['h1 strong', 'color', 'rgb(255, 26, 26)'],
         ]);
 
         await expect(pageUtils.evaluateScript(async () => {

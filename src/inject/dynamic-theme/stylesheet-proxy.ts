@@ -125,7 +125,7 @@ export function injectProxy(enableStyleSheetsProxy: boolean, enableCustomElement
         const styleSheetListBehavior: ProxyHandler<StyleSheetList> = {
             get: function (_: StyleSheetList, property: string) {
                 return getCurrentValue()[property];
-            }
+            },
         };
         elements = new Proxy(elements, styleSheetListBehavior);
         return elements;
@@ -157,7 +157,7 @@ export function injectProxy(enableStyleSheetsProxy: boolean, enableCustomElement
         const nodeListBehavior: ProxyHandler<NodeListOf<HTMLElement>> = {
             get: function (_: NodeListOf<HTMLElement>, property: string) {
                 return getCurrentElementValue()[Number(property) || property];
-            }
+            },
         };
         elements = new Proxy(elements, nodeListBehavior);
         return elements;

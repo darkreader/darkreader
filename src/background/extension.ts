@@ -209,7 +209,7 @@ export class Extension {
         await Promise.all([
             ConfigManager.load({local: true}),
             Extension.MV3syncSystemColorStateManager(null),
-            UserStorage.loadSettings()
+            UserStorage.loadSettings(),
         ]);
 
         if (UserStorage.settings.enableContextMenus && !Extension.registeredContextMenus) {
@@ -298,7 +298,7 @@ export class Extension {
                     } else if (__CHROMIUM_MV2__) {
                         return new Promise<boolean>((resolve) => chrome.tabs.executeScript(tabId, {
                             frameId,
-                            code: `(${detectPDF.toString()})()`
+                            code: `(${detectPDF.toString()})()`,
                         }, ([r]) => resolve(r)));
                     }
                     return false;
@@ -334,7 +334,7 @@ export class Extension {
             Extension.registeredContextMenus = false;
             chrome.contextMenus.create({
                 id: 'DarkReader-top',
-                title: 'Dark Reader'
+                title: 'Dark Reader',
             }, () => {
                 if (chrome.runtime.lastError) {
                     // Failed to create the context menu
@@ -401,7 +401,7 @@ export class Extension {
         const [
             dynamicFixesText,
             filterFixesText,
-            staticThemesText
+            staticThemesText,
         ] = await Promise.all([
             DevTools.getDynamicThemeFixesText(),
             DevTools.getInversionFixesText(),
@@ -410,7 +410,7 @@ export class Extension {
         return {
             dynamicFixesText,
             filterFixesText,
-            staticThemesText
+            staticThemesText,
         };
     }
 

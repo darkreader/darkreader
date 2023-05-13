@@ -70,7 +70,7 @@ if (__CHROMIUM_MV3__) {
                 chrome.scripting.registerContentScripts([{
                     id: 'proxy',
                     matches: [
-                        '<all_urls>'
+                        '<all_urls>',
                     ],
                     js: [
                         'inject/proxy.js',

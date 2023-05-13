@@ -3,7 +3,7 @@ export type matrix5x5 = [
     [number, number, number, number, number],
     [number, number, number, number, number],
     [number, number, number, number, number],
-    [number, number, number, number, number],
+    [number, number, number, number, number]
 ];
 
 export type matrix5x1 = [
@@ -11,7 +11,7 @@ export type matrix5x1 = [
     [number],
     [number],
     [number],
-    [number],
+    [number]
 ];
 
 export type matrix = matrix5x5 | matrix5x1;

@@ -19,7 +19,7 @@ const copyEntries = [
     {
         src: 'background/index.html',
         reloadType: reload.FULL,
-        platforms: [PLATFORM.CHROMIUM_MV2, PLATFORM.FIREFOX_MV2, PLATFORM.THUNDERBIRD]
+        platforms: [PLATFORM.CHROMIUM_MV2, PLATFORM.FIREFOX_MV2, PLATFORM.THUNDERBIRD],
     },
     {
         src: 'config/**/*.{config,drconf}',

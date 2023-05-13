@@ -35,7 +35,7 @@ async function start() {
 
     const [data, fonts] = await Promise.all([
         connector.getData(),
-        getFontList()
+        getFontList(),
     ]);
     renderBody(data, fonts, connector);
     connector.subscribeToChanges((data) => renderBody(data, fonts, connector));

@@ -222,6 +222,7 @@ exports[`TypeScript project config file should parse and resolve correctly: src 
     "./utils/promise-barrier.ts",
     "./utils/state-manager-impl.ts",
     "./utils/state-manager.ts",
+    "./utils/tabs.ts",
     "./utils/text.ts",
     "./utils/throttle.ts",
     "./utils/time.ts",

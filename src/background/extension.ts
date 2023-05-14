@@ -633,7 +633,7 @@ export class Extension {
             switch (theme.engine) {
                 case ThemeEngine.cssFilter: {
                     return {
-                        type: MessageTypeBGtoCS.BG_ADD_CSS_FILTER,
+                        type: MessageTypeBGtoCS.ADD_CSS_FILTER,
                         data: {
                             css: createCSSFilterStylesheet(theme, url, isTopFrame, ConfigManager.INVERSION_FIXES_RAW!, ConfigManager.INVERSION_FIXES_INDEX!),
                             detectDarkTheme,
@@ -643,7 +643,7 @@ export class Extension {
                 case ThemeEngine.svgFilter: {
                     if (isFirefox) {
                         return {
-                            type: MessageTypeBGtoCS.BG_ADD_CSS_FILTER,
+                            type: MessageTypeBGtoCS.ADD_CSS_FILTER,
                             data: {
                                 css: createSVGFilterStylesheet(theme, url, isTopFrame, ConfigManager.INVERSION_FIXES_RAW!, ConfigManager.INVERSION_FIXES_INDEX!),
                                 detectDarkTheme,
@@ -651,7 +651,7 @@ export class Extension {
                         };
                     }
                     return {
-                        type: MessageTypeBGtoCS.BG_ADD_SVG_FILTER,
+                        type: MessageTypeBGtoCS.ADD_SVG_FILTER,
                         data: {
                             css: createSVGFilterStylesheet(theme, url, isTopFrame, ConfigManager.INVERSION_FIXES_RAW!, ConfigManager.INVERSION_FIXES_INDEX!),
                             svgMatrix: getSVGFilterMatrixValue(theme),
@@ -662,7 +662,7 @@ export class Extension {
                 }
                 case ThemeEngine.staticTheme: {
                     return {
-                        type: MessageTypeBGtoCS.BG_ADD_STATIC_THEME,
+                        type: MessageTypeBGtoCS.ADD_STATIC_THEME,
                         data: {
                             css: theme.stylesheet && theme.stylesheet.trim() ?
                                 theme.stylesheet :
@@ -674,7 +674,7 @@ export class Extension {
                 case ThemeEngine.dynamicTheme: {
                     const fixes = getDynamicThemeFixesFor(url, isTopFrame, ConfigManager.DYNAMIC_THEME_FIXES_RAW!, ConfigManager.DYNAMIC_THEME_FIXES_INDEX!, UserStorage.settings.enableForPDF);
                     return {
-                        type: MessageTypeBGtoCS.BG_ADD_DYNAMIC_THEME,
+                        type: MessageTypeBGtoCS.ADD_DYNAMIC_THEME,
                         data: {
                             theme,
                             fixes,
@@ -690,7 +690,7 @@ export class Extension {
 
         logInfo(`Site is not inverted: ${tabURl}`);
         return {
-            type: MessageTypeBGtoCS.BG_CLEAN_UP,
+            type: MessageTypeBGtoCS.CLEAN_UP,
         };
     };
 

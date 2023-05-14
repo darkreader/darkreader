@@ -9,7 +9,7 @@ declare const __LOG__: 'info' | 'warn';
 function sendLogToBG(level: 'info' | 'warn' | 'assert', ...args: any[]) {
     if (__WATCH__ && __LOG__ && (__LOG__ === 'info' || level === 'warn')) {
         // No need to generate contextId since we do not expect a response
-        chrome.runtime.sendMessage<MessageCStoBG>({type: MessageTypeCStoBG.CS_LOG, data: {level, log: args}});
+        chrome.runtime.sendMessage<MessageCStoBG>({type: MessageTypeCStoBG.LOG, data: {level, log: args}});
     }
 }
 

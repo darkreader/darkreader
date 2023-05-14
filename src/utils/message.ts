@@ -27,30 +27,30 @@ export enum MessageTypeBGtoUI {
 }
 
 export enum MessageTypeBGtoCS {
-    BG_ADD_CSS_FILTER = 'bg-cs-add-css-filter',
-    BG_ADD_STATIC_THEME = 'bg-cs-add-static-theme',
-    BG_ADD_SVG_FILTER = 'bg-cs-add-svg-filter',
-    BG_ADD_DYNAMIC_THEME = 'bg-cs-add-dynamic-theme',
-    BG_EXPORT_CSS = 'bg-cs-export-css',
-    BG_UNSUPPORTED_SENDER = 'bg-cs-unsupported-sender',
-    BG_CLEAN_UP = 'bg-cs-clean-up',
-    BG_RELOAD = 'bg-cs-reload',
-    BG_FETCH_RESPONSE = 'bg-cs-fetch-response',
-    BG_CSS_UPDATE = 'bg-cs-css-update'
+    ADD_CSS_FILTER = 'bg-cs-add-css-filter',
+    ADD_STATIC_THEME = 'bg-cs-add-static-theme',
+    ADD_SVG_FILTER = 'bg-cs-add-svg-filter',
+    ADD_DYNAMIC_THEME = 'bg-cs-add-dynamic-theme',
+    EXPORT_CSS = 'bg-cs-export-css',
+    UNSUPPORTED_SENDER = 'bg-cs-unsupported-sender',
+    CLEAN_UP = 'bg-cs-clean-up',
+    RELOAD = 'bg-cs-reload',
+    FETCH_RESPONSE = 'bg-cs-fetch-response',
+    CSS_UPDATE = 'bg-cs-css-update'
 }
 
 export enum MessageTypeCStoBG {
-    CS_COLOR_SCHEME_CHANGE = 'cs-bg-color-scheme-change',
-    CS_FRAME_CONNECT = 'cs-bg-frame-connect',
-    CS_FRAME_FORGET = 'cs-bg-frame-forget',
-    CS_FRAME_FREEZE = 'cs-bg-frame-freeze',
-    CS_FRAME_RESUME = 'cs-bg-frame-resume',
-    CS_FETCH = 'cs-bg-fetch',
-    CS_DARK_THEME_DETECTED = 'cs-bg-dark-theme-detected',
-    CS_DARK_THEME_NOT_DETECTED = 'cs-bg-dark-theme-not-detected',
-    CS_LOG = 'cs-bg-log'
+    COLOR_SCHEME_CHANGE = 'cs-bg-color-scheme-change',
+    FRAME_CONNECT = 'cs-bg-frame-connect',
+    FRAME_FORGET = 'cs-bg-frame-forget',
+    FRAME_FREEZE = 'cs-bg-frame-freeze',
+    FRAME_RESUME = 'cs-bg-frame-resume',
+    FETCH = 'cs-bg-fetch',
+    DARK_THEME_DETECTED = 'cs-bg-dark-theme-detected',
+    DARK_THEME_NOT_DETECTED = 'cs-bg-dark-theme-not-detected',
+    LOG = 'cs-bg-log'
 }
 
 export enum MessageTypeCStoUI {
-    CS_EXPORT_CSS_RESPONSE = 'cs-ui-export-css-response'
+    EXPORT_CSS_RESPONSE = 'cs-ui-export-css-response'
 }

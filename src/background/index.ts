@@ -110,14 +110,14 @@ if (__WATCH__) {
             }
             switch (message.type) {
                 case 'reload:css':
-                    chrome.runtime.sendMessage<MessageBGtoCS>({type: MessageTypeBGtoCS.BG_CSS_UPDATE});
+                    chrome.runtime.sendMessage<MessageBGtoCS>({type: MessageTypeBGtoCS.CSS_UPDATE});
                     break;
                 case 'reload:ui':
                     chrome.runtime.sendMessage<MessageBGtoUI>({type: MessageTypeBGtoUI.UPDATE});
                     break;
                 case 'reload:full':
                     chrome.tabs.query({}, (tabs) => {
-                        const message: MessageBGtoCS = {type: MessageTypeBGtoCS.BG_RELOAD};
+                        const message: MessageBGtoCS = {type: MessageTypeBGtoCS.RELOAD};
                         // Some contexts are not considered to be tabs and can not receive regular messages
                         chrome.runtime.sendMessage<MessageBGtoCS>(message);
                         for (const tab of tabs) {
@@ -227,7 +227,7 @@ if (__TEST__) {
 
 if (__DEBUG__ && __LOG__) {
     chrome.runtime.onMessage.addListener((message: MessageCStoBG) => {
-        if (message.type === MessageTypeCStoBG.CS_LOG) {
+        if (message.type === MessageTypeCStoBG.LOG) {
             sendLog(message.data.level, message.data.log);
         }
     });

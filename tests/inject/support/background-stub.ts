@@ -9,7 +9,7 @@ export function stubChromeRuntimeMessage(): void {
     const listeners: Array<(message: MessageBGtoCS) => void> = (chrome.runtime.onMessage as any)['__listeners__'];
 
     (chrome.runtime as any).sendMessage = (message: MessageCStoBG) => {
-        if (message.type === MessageTypeCStoBG.CS_FETCH) {
+        if (message.type === MessageTypeCStoBG.FETCH) {
             const {id, data: {url}} = message;
             setTimeout(() => {
                 listeners.forEach((listener) => {
@@ -17,7 +17,7 @@ export function stubChromeRuntimeMessage(): void {
                         throw new Error('Response is missing, use `stubBackgroundFetchResponse()`');
                     }
                     const data = bgResponses.get(url);
-                    listener({type: MessageTypeBGtoCS.BG_FETCH_RESPONSE, data, error: null, id});
+                    listener({type: MessageTypeBGtoCS.FETCH_RESPONSE, data, error: null, id});
                 });
             });
         }

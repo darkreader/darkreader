@@ -74,7 +74,7 @@ export default class TabManager {
                 return;
             }
             switch (message.type) {
-                case MessageTypeCStoBG.CS_FRAME_CONNECT: {
+                case MessageTypeCStoBG.FRAME_CONNECT: {
                     TabManager.onColorSchemeMessage(message, sender);
                     await TabManager.stateManager.loadState();
                     const reply = (tabURL: string, url: string, isTopFrame: boolean) => {
@@ -91,7 +91,7 @@ export default class TabManager {
                             if (sender && sender.tab && typeof sender.tab.id === 'number') {
                                 chrome.tabs.sendMessage<MessageBGtoCS>(sender.tab.id,
                                     {
-                                        type: MessageTypeBGtoCS.BG_UNSUPPORTED_SENDER,
+                                        type: MessageTypeBGtoCS.UNSUPPORTED_SENDER,
                                     },
                                     {
                                         frameId: sender && typeof sender.frameId === 'number' ? sender.frameId : undefined,
@@ -116,7 +116,7 @@ export default class TabManager {
                     break;
                 }
 
-                case MessageTypeCStoBG.CS_FRAME_FORGET:
+                case MessageTypeCStoBG.FRAME_FORGET:
                     if (!sender.tab) {
                         logWarn('Unexpected message', message, sender);
                         break;
@@ -124,7 +124,7 @@ export default class TabManager {
                     TabManager.removeFrame(sender.tab!.id!, sender.frameId!);
                     break;
 
-                case MessageTypeCStoBG.CS_FRAME_FREEZE: {
+                case MessageTypeCStoBG.FRAME_FREEZE: {
                     await TabManager.stateManager.loadState();
                     const info = TabManager.tabs[sender.tab!.id!][sender.frameId!];
                     info.state = DocumentState.FROZEN;
@@ -133,7 +133,7 @@ export default class TabManager {
                     break;
                 }
 
-                case MessageTypeCStoBG.CS_FRAME_RESUME: {
+                case MessageTypeCStoBG.FRAME_RESUME: {
                     TabManager.onColorSchemeMessage(message, sender);
                     await TabManager.stateManager.loadState();
                     const tabId = sender.tab!.id!;
@@ -157,16 +157,16 @@ export default class TabManager {
                     break;
                 }
 
-                case MessageTypeCStoBG.CS_DARK_THEME_DETECTED:
+                case MessageTypeCStoBG.DARK_THEME_DETECTED:
                     TabManager.tabs[sender.tab!.id!][sender.frameId!].darkThemeDetected = true;
                     break;
 
-                case MessageTypeCStoBG.CS_FETCH: {
+                case MessageTypeCStoBG.FETCH: {
                     // Using custom response due to Chrome and Firefox incompatibility
                     // Sometimes fetch error behaves like synchronous and sends `undefined`
                     const id = message.id;
                     const sendResponse = (response: Partial<MessageBGtoCS>) => {
-                        chrome.tabs.sendMessage<MessageBGtoCS>(sender.tab!.id!, {type: MessageTypeBGtoCS.BG_FETCH_RESPONSE, id, ...response}, (__CHROMIUM_MV3__ || __CHROMIUM_MV2__ && (sender as any).documentId) ? {frameId: sender.frameId, documentId: (sender as any).documentId} as chrome.tabs.MessageSendOptions : {frameId: sender.frameId});
+                        chrome.tabs.sendMessage<MessageBGtoCS>(sender.tab!.id!, {type: MessageTypeBGtoCS.FETCH_RESPONSE, id, ...response}, (__CHROMIUM_MV3__ || __CHROMIUM_MV2__ && (sender as any).documentId) ? {frameId: sender.frameId, documentId: (sender as any).documentId} as chrome.tabs.MessageSendOptions : {frameId: sender.frameId});
                     };
 
                     if (__THUNDERBIRD__) {
@@ -192,7 +192,7 @@ export default class TabManager {
 
                 case MessageTypeUItoBG.COLOR_SCHEME_CHANGE:
                     // fallthrough
-                case MessageTypeCStoBG.CS_COLOR_SCHEME_CHANGE:
+                case MessageTypeCStoBG.COLOR_SCHEME_CHANGE:
                     TabManager.onColorSchemeMessage(message as MessageCStoBG, sender);
                     break;
 
@@ -210,7 +210,7 @@ export default class TabManager {
 
                 case MessageTypeUItoBG.REQUEST_EXPORT_CSS: {
                     const activeTab = await TabManager.getActiveTab();
-                    chrome.tabs.sendMessage<MessageBGtoCS>(activeTab.id!, {type: MessageTypeBGtoCS.BG_EXPORT_CSS}, {frameId: 0});
+                    chrome.tabs.sendMessage<MessageBGtoCS>(activeTab.id!, {type: MessageTypeBGtoCS.EXPORT_CSS}, {frameId: 0});
                     break;
                 }
 

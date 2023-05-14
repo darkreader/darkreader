@@ -17,12 +17,12 @@ export async function bgFetch(request: FetchRequest): Promise<string> {
         const id = generateUID();
         resolvers.set(id, resolve);
         rejectors.set(id, reject);
-        chrome.runtime.sendMessage<MessageCStoBG>({type: MessageTypeCStoBG.CS_FETCH, data: request, id});
+        chrome.runtime.sendMessage<MessageCStoBG>({type: MessageTypeCStoBG.FETCH, data: request, id});
     });
 }
 
 chrome.runtime.onMessage.addListener(({type, data, error, id}: MessageBGtoCS) => {
-    if (type === MessageTypeBGtoCS.BG_FETCH_RESPONSE) {
+    if (type === MessageTypeBGtoCS.FETCH_RESPONSE) {
         const resolve = resolvers.get(id!);
         const reject = rejectors.get(id!);
         resolvers.delete(id!);

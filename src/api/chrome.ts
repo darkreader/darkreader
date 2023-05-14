@@ -13,7 +13,7 @@ if (!chrome.runtime) {
 const messageListeners = new Set<(message: MessageBGtoCS) => void>();
 
 async function sendMessage(...args: any[]) {
-    if (args[0] && args[0].type === MessageTypeCStoBG.CS_FETCH) {
+    if (args[0] && args[0].type === MessageTypeCStoBG.FETCH) {
         const {id} = args[0];
         try {
             const {url, responseType} = args[0].data;
@@ -24,10 +24,10 @@ async function sendMessage(...args: any[]) {
             } else {
                 text = await response.text();
             }
-            messageListeners.forEach((cb) => cb({type: MessageTypeBGtoCS.BG_FETCH_RESPONSE, data: text, error: null, id}));
+            messageListeners.forEach((cb) => cb({type: MessageTypeBGtoCS.FETCH_RESPONSE, data: text, error: null, id}));
         } catch (error) {
             console.error(error);
-            messageListeners.forEach((cb) => cb({type: MessageTypeBGtoCS.BG_FETCH_RESPONSE, data: null, error, id}));
+            messageListeners.forEach((cb) => cb({type: MessageTypeBGtoCS.FETCH_RESPONSE, data: null, error, id}));
         }
     }
 }

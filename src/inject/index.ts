@@ -76,11 +76,11 @@ function sendMessage(message: MessageCStoBG | MessageCStoUI) {
 function onMessage({type, data}: MessageBGtoCS) {
     logInfoCollapsed(`onMessage[${type}]`, data);
     switch (type) {
-        case MessageTypeBGtoCS.BG_ADD_CSS_FILTER:
-        case MessageTypeBGtoCS.BG_ADD_STATIC_THEME: {
+        case MessageTypeBGtoCS.ADD_CSS_FILTER:
+        case MessageTypeBGtoCS.ADD_STATIC_THEME: {
             const {css, detectDarkTheme} = data;
             removeDynamicTheme();
-            createOrUpdateStyle(css, type === MessageTypeBGtoCS.BG_ADD_STATIC_THEME ? 'static' : 'filter');
+            createOrUpdateStyle(css, type === MessageTypeBGtoCS.ADD_STATIC_THEME ? 'static' : 'filter');
             if (detectDarkTheme) {
                 runDarkThemeDetector((hasDarkTheme) => {
                     if (hasDarkTheme) {
@@ -91,7 +91,7 @@ function onMessage({type, data}: MessageBGtoCS) {
             }
             break;
         }
-        case MessageTypeBGtoCS.BG_ADD_SVG_FILTER: {
+        case MessageTypeBGtoCS.ADD_SVG_FILTER: {
             const {css, svgMatrix, svgReverseMatrix, detectDarkTheme} = data;
             removeDynamicTheme();
             createOrUpdateSVGFilter(svgMatrix, svgReverseMatrix);
@@ -107,7 +107,7 @@ function onMessage({type, data}: MessageBGtoCS) {
             }
             break;
         }
-        case MessageTypeBGtoCS.BG_ADD_DYNAMIC_THEME: {
+        case MessageTypeBGtoCS.ADD_DYNAMIC_THEME: {
             const {theme, fixes, isIFrame, detectDarkTheme} = data as {theme: Theme; fixes: DynamicThemeFix[]; isIFrame: boolean; detectDarkTheme: boolean};
             removeStyle();
             createOrUpdateDynamicTheme(theme, fixes, isIFrame);
@@ -126,17 +126,17 @@ function onMessage({type, data}: MessageBGtoCS) {
             }
             break;
         }
-        case MessageTypeBGtoCS.BG_EXPORT_CSS:
-            collectCSS().then((collectedCSS) => sendMessage({type: MessageTypeCStoUI.CS_EXPORT_CSS_RESPONSE, data: collectedCSS}));
+        case MessageTypeBGtoCS.EXPORT_CSS:
+            collectCSS().then((collectedCSS) => sendMessage({type: MessageTypeCStoUI.EXPORT_CSS_RESPONSE, data: collectedCSS}));
             break;
-        case MessageTypeBGtoCS.BG_UNSUPPORTED_SENDER:
-        case MessageTypeBGtoCS.BG_CLEAN_UP:
+        case MessageTypeBGtoCS.UNSUPPORTED_SENDER:
+        case MessageTypeBGtoCS.CLEAN_UP:
             removeStyle();
             removeSVGFilter();
             removeDynamicTheme();
             stopDarkThemeDetector();
             break;
-        case MessageTypeBGtoCS.BG_RELOAD:
+        case MessageTypeBGtoCS.RELOAD:
             logWarn('Cleaning up before update');
             cleanup();
             break;
@@ -146,28 +146,28 @@ function onMessage({type, data}: MessageBGtoCS) {
 }
 
 runColorSchemeChangeDetector((isDark) =>
-    sendMessage({type: MessageTypeCStoBG.CS_COLOR_SCHEME_CHANGE, data: {isDark}})
+    sendMessage({type: MessageTypeCStoBG.COLOR_SCHEME_CHANGE, data: {isDark}})
 );
 
 chrome.runtime.onMessage.addListener(onMessage);
-sendMessage({type: MessageTypeCStoBG.CS_FRAME_CONNECT, data: {isDark: isSystemDarkModeEnabled()}});
+sendMessage({type: MessageTypeCStoBG.FRAME_CONNECT, data: {isDark: isSystemDarkModeEnabled()}});
 
 function onPageHide(e: PageTransitionEvent) {
     if (e.persisted === false) {
-        sendMessage({type: MessageTypeCStoBG.CS_FRAME_FORGET});
+        sendMessage({type: MessageTypeCStoBG.FRAME_FORGET});
     }
 }
 
 function onFreeze() {
-    sendMessage({type: MessageTypeCStoBG.CS_FRAME_FREEZE});
+    sendMessage({type: MessageTypeCStoBG.FRAME_FREEZE});
 }
 
 function onResume() {
-    sendMessage({type: MessageTypeCStoBG.CS_FRAME_RESUME, data: {isDark: isSystemDarkModeEnabled()}});
+    sendMessage({type: MessageTypeCStoBG.FRAME_RESUME, data: {isDark: isSystemDarkModeEnabled()}});
 }
 
 function onDarkThemeDetected() {
-    sendMessage({type: MessageTypeCStoBG.CS_DARK_THEME_DETECTED});
+    sendMessage({type: MessageTypeCStoBG.DARK_THEME_DETECTED});
 }
 
 // Thunderbird does not have "tabs", and emails aren't 'frozen' or 'cached'.

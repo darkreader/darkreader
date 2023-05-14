@@ -8,7 +8,7 @@ import {MessageTypeCStoUI, MessageTypeUItoBG} from '../../../utils/message';
 
 export default function ExportTheme() {
     const listener = ({type, data}: MessageCStoUI, sender: chrome.runtime.MessageSender) => {
-        if (type === MessageTypeCStoUI.CS_EXPORT_CSS_RESPONSE) {
+        if (type === MessageTypeCStoUI.EXPORT_CSS_RESPONSE) {
             const url = getURLHostOrProtocol(sender.tab!.url!).replace(/[^a-z0-1\-]/g, '-');
             saveFile(`DarkReader-${url}.css`, data);
             chrome.runtime.onMessage.removeListener(listener);

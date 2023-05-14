@@ -55,7 +55,7 @@ if (isFirefox) {
 declare const __DEBUG__: boolean;
 if (__DEBUG__) {
     chrome.runtime.onMessage.addListener(({type}) => {
-        if (type === MessageTypeBGtoCS.BG_CSS_UPDATE) {
+        if (type === MessageTypeBGtoCS.CSS_UPDATE) {
             document.querySelectorAll('link[rel="stylesheet"]').forEach((link: HTMLLinkElement) => {
                 const url = link.href;
                 link.disabled = true;

@@ -190,13 +190,13 @@ export default class TabManager {
                     break;
                 }
 
-                case MessageTypeUItoBG.UI_COLOR_SCHEME_CHANGE:
+                case MessageTypeUItoBG.COLOR_SCHEME_CHANGE:
                     // fallthrough
                 case MessageTypeCStoBG.CS_COLOR_SCHEME_CHANGE:
                     TabManager.onColorSchemeMessage(message as MessageCStoBG, sender);
                     break;
 
-                case MessageTypeUItoBG.UI_SAVE_FILE: {
+                case MessageTypeUItoBG.SAVE_FILE: {
                     if (__CHROMIUM_MV3__) {
                         break;
                     }
@@ -208,7 +208,7 @@ export default class TabManager {
                     break;
                 }
 
-                case MessageTypeUItoBG.UI_REQUEST_EXPORT_CSS: {
+                case MessageTypeUItoBG.REQUEST_EXPORT_CSS: {
                     const activeTab = await TabManager.getActiveTab();
                     chrome.tabs.sendMessage<MessageBGtoCS>(activeTab.id!, {type: MessageTypeBGtoCS.BG_EXPORT_CSS}, {frameId: 0});
                     break;

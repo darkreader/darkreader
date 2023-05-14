@@ -14,11 +14,11 @@ export function makeChromiumHappy(): void {
     chrome.runtime.onMessage.addListener((message: MessageUItoBG | MessageCStoBG, sender, sendResponse) => {
         if (![
             // Messenger
-            MessageTypeUItoBG.UI_GET_DATA,
-            MessageTypeUItoBG.UI_GET_DEVTOOLS_DATA,
-            MessageTypeUItoBG.UI_APPLY_DEV_DYNAMIC_THEME_FIXES,
-            MessageTypeUItoBG.UI_APPLY_DEV_INVERSION_FIXES,
-            MessageTypeUItoBG.UI_APPLY_DEV_STATIC_THEMES,
+            MessageTypeUItoBG.GET_DATA,
+            MessageTypeUItoBG.GET_DEVTOOLS_DATA,
+            MessageTypeUItoBG.APPLY_DEV_DYNAMIC_THEME_FIXES,
+            MessageTypeUItoBG.APPLY_DEV_INVERSION_FIXES,
+            MessageTypeUItoBG.APPLY_DEV_STATIC_THEMES,
         ].includes(message.type as MessageTypeUItoBG) &&
             (message.type !== MessageTypeCStoBG.CS_FRAME_CONNECT || !isPanel(sender))) {
             sendResponse({type: '¯\\_(ツ)_/¯'});

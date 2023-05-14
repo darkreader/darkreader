@@ -67,7 +67,7 @@ if (__DEBUG__) {
             });
         }
 
-        if (type === MessageTypeBGtoUI.BG_UI_UPDATE) {
+        if (type === MessageTypeBGtoUI.UPDATE) {
             location.reload();
         }
     });

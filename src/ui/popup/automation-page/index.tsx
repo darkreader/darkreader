@@ -145,7 +145,7 @@ export default function AutomationPage(props: ViewProps) {
                     onclick={() => {
                         if (__CHROMIUM_MV3__) {
                             chrome.runtime.sendMessage<MessageUItoBG>({
-                                type: MessageTypeUItoBG.UI_COLOR_SCHEME_CHANGE,
+                                type: MessageTypeUItoBG.COLOR_SCHEME_CHANGE,
                                 data: {isDark: matchMedia('(prefers-color-scheme: dark)').matches},
                             });
                         }

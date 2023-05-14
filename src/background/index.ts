@@ -113,7 +113,7 @@ if (__WATCH__) {
                     chrome.runtime.sendMessage<MessageBGtoCS>({type: MessageTypeBGtoCS.BG_CSS_UPDATE});
                     break;
                 case 'reload:ui':
-                    chrome.runtime.sendMessage<MessageBGtoUI>({type: MessageTypeBGtoUI.BG_UI_UPDATE});
+                    chrome.runtime.sendMessage<MessageBGtoUI>({type: MessageTypeBGtoUI.UPDATE});
                     break;
                 case 'reload:full':
                     chrome.tabs.query({}, (tabs) => {

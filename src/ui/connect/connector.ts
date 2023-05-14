@@ -46,20 +46,20 @@ export default class Connector implements ExtensionActions {
 
     async getData(): Promise<ExtensionData> {
         if (isFirefox) {
-            return await this.firefoxSendRequestWithResponse<ExtensionData>(MessageTypeUItoBG.UI_GET_DATA);
+            return await this.firefoxSendRequestWithResponse<ExtensionData>(MessageTypeUItoBG.GET_DATA);
         }
-        return await this.sendRequest<ExtensionData>(MessageTypeUItoBG.UI_GET_DATA);
+        return await this.sendRequest<ExtensionData>(MessageTypeUItoBG.GET_DATA);
     }
 
     async getDevToolsData(): Promise<DevToolsData> {
         if (isFirefox) {
-            return await this.firefoxSendRequestWithResponse<DevToolsData>(MessageTypeUItoBG.UI_GET_DEVTOOLS_DATA);
+            return await this.firefoxSendRequestWithResponse<DevToolsData>(MessageTypeUItoBG.GET_DEVTOOLS_DATA);
         }
-        return await this.sendRequest<DevToolsData>(MessageTypeUItoBG.UI_GET_DEVTOOLS_DATA);
+        return await this.sendRequest<DevToolsData>(MessageTypeUItoBG.GET_DEVTOOLS_DATA);
     }
 
     private onChangesReceived = ({type, data}: MessageBGtoUI) => {
-        if (type === MessageTypeBGtoUI.BG_CHANGES) {
+        if (type === MessageTypeBGtoUI.CHANGES) {
             this.changeSubscribers.forEach((callback) => callback(data));
         }
     };
@@ -68,7 +68,7 @@ export default class Connector implements ExtensionActions {
         this.changeSubscribers.add(callback);
         if (this.changeSubscribers.size === 1) {
             chrome.runtime.onMessage.addListener(this.onChangesReceived);
-            chrome.runtime.sendMessage<MessageUItoBG>({type: MessageTypeUItoBG.UI_SUBSCRIBE_TO_CHANGES});
+            chrome.runtime.sendMessage<MessageUItoBG>({type: MessageTypeUItoBG.SUBSCRIBE_TO_CHANGES});
         }
     }
 
@@ -94,71 +94,71 @@ export default class Connector implements ExtensionActions {
     }
 
     changeSettings(settings: Partial<UserSettings>): void {
-        chrome.runtime.sendMessage<MessageUItoBG>({type: MessageTypeUItoBG.UI_CHANGE_SETTINGS, data: settings});
+        chrome.runtime.sendMessage<MessageUItoBG>({type: MessageTypeUItoBG.CHANGE_SETTINGS, data: settings});
     }
 
     setTheme(theme: Partial<FilterConfig>): void {
-        chrome.runtime.sendMessage<MessageUItoBG>({type: MessageTypeUItoBG.UI_SET_THEME, data: theme});
+        chrome.runtime.sendMessage<MessageUItoBG>({type: MessageTypeUItoBG.SET_THEME, data: theme});
     }
 
     toggleActiveTab(): void {
-        chrome.runtime.sendMessage<MessageUItoBG>({type: MessageTypeUItoBG.UI_TOGGLE_ACTIVE_TAB, data: {}});
+        chrome.runtime.sendMessage<MessageUItoBG>({type: MessageTypeUItoBG.TOGGLE_ACTIVE_TAB, data: {}});
     }
 
     markNewsAsRead(ids: string[]): void {
-        chrome.runtime.sendMessage<MessageUItoBG>({type: MessageTypeUItoBG.UI_MARK_NEWS_AS_READ, data: ids});
+        chrome.runtime.sendMessage<MessageUItoBG>({type: MessageTypeUItoBG.MARK_NEWS_AS_READ, data: ids});
     }
 
     markNewsAsDisplayed(ids: string[]): void {
-        chrome.runtime.sendMessage<MessageUItoBG>({type: MessageTypeUItoBG.UI_MARK_NEWS_AS_DISPLAYED, data: ids});
+        chrome.runtime.sendMessage<MessageUItoBG>({type: MessageTypeUItoBG.MARK_NEWS_AS_DISPLAYED, data: ids});
     }
 
     loadConfig(options: {local: boolean}): void {
-        chrome.runtime.sendMessage<MessageUItoBG>({type: MessageTypeUItoBG.UI_LOAD_CONFIG, data: options});
+        chrome.runtime.sendMessage<MessageUItoBG>({type: MessageTypeUItoBG.LOAD_CONFIG, data: options});
     }
 
     async applyDevDynamicThemeFixes(text: string): Promise<void> {
         if (isFirefox) {
-            return await this.firefoxSendRequestWithResponse<void>(MessageTypeUItoBG.UI_APPLY_DEV_DYNAMIC_THEME_FIXES, text);
+            return await this.firefoxSendRequestWithResponse<void>(MessageTypeUItoBG.APPLY_DEV_DYNAMIC_THEME_FIXES, text);
         }
-        return await this.sendRequest<void>(MessageTypeUItoBG.UI_APPLY_DEV_DYNAMIC_THEME_FIXES, text);
+        return await this.sendRequest<void>(MessageTypeUItoBG.APPLY_DEV_DYNAMIC_THEME_FIXES, text);
     }
 
     resetDevDynamicThemeFixes(): void {
-        chrome.runtime.sendMessage<MessageUItoBG>({type: MessageTypeUItoBG.UI_RESET_DEV_DYNAMIC_THEME_FIXES});
+        chrome.runtime.sendMessage<MessageUItoBG>({type: MessageTypeUItoBG.RESET_DEV_DYNAMIC_THEME_FIXES});
     }
 
     async applyDevInversionFixes(text: string): Promise<void> {
         if (isFirefox) {
-            return await this.firefoxSendRequestWithResponse<void>(MessageTypeUItoBG.UI_APPLY_DEV_INVERSION_FIXES, text);
+            return await this.firefoxSendRequestWithResponse<void>(MessageTypeUItoBG.APPLY_DEV_INVERSION_FIXES, text);
         }
-        return await this.sendRequest<void>(MessageTypeUItoBG.UI_APPLY_DEV_INVERSION_FIXES, text);
+        return await this.sendRequest<void>(MessageTypeUItoBG.APPLY_DEV_INVERSION_FIXES, text);
     }
 
     resetDevInversionFixes(): void {
-        chrome.runtime.sendMessage<MessageUItoBG>({type: MessageTypeUItoBG.UI_RESET_DEV_INVERSION_FIXES});
+        chrome.runtime.sendMessage<MessageUItoBG>({type: MessageTypeUItoBG.RESET_DEV_INVERSION_FIXES});
     }
 
     async applyDevStaticThemes(text: string): Promise<void> {
         if (isFirefox) {
-            return await this.firefoxSendRequestWithResponse<void>(MessageTypeUItoBG.UI_APPLY_DEV_STATIC_THEMES, text);
+            return await this.firefoxSendRequestWithResponse<void>(MessageTypeUItoBG.APPLY_DEV_STATIC_THEMES, text);
         }
-        return await this.sendRequest<void>(MessageTypeUItoBG.UI_APPLY_DEV_STATIC_THEMES, text);
+        return await this.sendRequest<void>(MessageTypeUItoBG.APPLY_DEV_STATIC_THEMES, text);
     }
 
     resetDevStaticThemes(): void {
-        chrome.runtime.sendMessage<MessageUItoBG>({type: MessageTypeUItoBG.UI_RESET_DEV_STATIC_THEMES});
+        chrome.runtime.sendMessage<MessageUItoBG>({type: MessageTypeUItoBG.RESET_DEV_STATIC_THEMES});
     }
 
     async hideHighlights(ids: string[]): Promise<void> {
-        chrome.runtime.sendMessage<MessageUItoBG>({type: MessageTypeUItoBG.UI_HIDE_HIGHLIGHTS, data: ids});
+        chrome.runtime.sendMessage<MessageUItoBG>({type: MessageTypeUItoBG.HIDE_HIGHLIGHTS, data: ids});
     }
 
     disconnect(): void {
         if (this.changeSubscribers.size > 0) {
             this.changeSubscribers.clear();
             chrome.runtime.onMessage.removeListener(this.onChangesReceived);
-            chrome.runtime.sendMessage<MessageUItoBG>({type: MessageTypeUItoBG.UI_UNSUBSCRIBE_FROM_CHANGES});
+            chrome.runtime.sendMessage<MessageUItoBG>({type: MessageTypeUItoBG.UNSUBSCRIBE_FROM_CHANGES});
         }
     }
 }

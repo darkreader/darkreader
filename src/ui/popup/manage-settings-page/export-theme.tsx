@@ -17,7 +17,7 @@ export default function ExportTheme() {
 
     function exportCSS() {
         chrome.runtime.onMessage.addListener(listener);
-        chrome.runtime.sendMessage<MessageUItoBG>({type: MessageTypeUItoBG.UI_REQUEST_EXPORT_CSS});
+        chrome.runtime.sendMessage<MessageUItoBG>({type: MessageTypeUItoBG.REQUEST_EXPORT_CSS});
     }
 
     return (

@@ -3,8 +3,9 @@ import {Button} from '../../controls';
 import {saveFile} from '../../utils';
 import ControlGroup from '../control-group';
 import {getURLHostOrProtocol} from '../../../utils/url';
-import type {MessageCStoUI, MessageUItoBG} from '../../../definitions';
-import {MessageTypeCStoUI, MessageTypeUItoBG} from '../../../utils/message';
+import type {MessageCStoUI, MessageUItoCS} from '../../../definitions';
+import {MessageTypeCStoUI, MessageTypeUItoCS} from '../../../utils/message';
+import {getActiveTab} from '../../../utils/tabs';
 
 export default function ExportTheme() {
     const listener = ({type, data}: MessageCStoUI, sender: chrome.runtime.MessageSender) => {
@@ -15,9 +16,13 @@ export default function ExportTheme() {
         }
     };
 
-    function exportCSS() {
+    async function exportCSS() {
+        const activeTab = await getActiveTab();
+        if (!activeTab || !activeTab.id) {
+            return;
+        }
         chrome.runtime.onMessage.addListener(listener);
-        chrome.runtime.sendMessage<MessageUItoBG>({type: MessageTypeUItoBG.REQUEST_EXPORT_CSS});
+        chrome.tabs.sendMessage<MessageUItoCS>(activeTab.id, {type: MessageTypeUItoCS.EXPORT_CSS}, {frameId: 0});
     }
 
     return (

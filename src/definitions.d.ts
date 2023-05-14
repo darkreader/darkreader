@@ -1,10 +1,16 @@
 import type {ParsedColorSchemeConfig} from './utils/colorscheme-parser';
 import type {FilterMode} from './generators/css-filter';
-import type {MessageTypeBGtoCS, MessageTypeBGtoUI, MessageTypeCStoBG, MessageTypeCStoUI, MessageTypeUItoBG} from './utils/message';
+import type {MessageTypeBGtoCS, MessageTypeBGtoUI, MessageTypeCStoBG, MessageTypeCStoUI, MessageTypeUItoBG, MessageTypeUItoCS} from './utils/message';
 import type {AutomationMode} from './utils/automation';
 import type {ThemeEngine} from './generators/theme-engines';
 
 export type ColorScheme = 'dark' | 'light';
+
+// ContextId is a number on Firefox and documentId is a string in Chromium,
+// let's use string for simplicity
+export type documentId = string;
+export type tabId = number;
+export type frameId = number;
 
 export interface ExtensionData {
     isEnabled: boolean;
@@ -139,6 +145,10 @@ export interface MessageCStoBG {
     id?: string;
     type: MessageTypeCStoBG;
     data?: any;
+}
+
+export interface MessageUItoCS {
+    type: MessageTypeUItoCS;
 }
 
 export interface MessageCStoUI {

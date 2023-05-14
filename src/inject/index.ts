@@ -5,8 +5,8 @@ import {createOrUpdateDynamicTheme, removeDynamicTheme, cleanDynamicThemeCache} 
 import {logWarn, logInfoCollapsed} from './utils/log';
 import {isSystemDarkModeEnabled, runColorSchemeChangeDetector, stopColorSchemeChangeDetector, emulateColorScheme} from '../utils/media-query';
 import {collectCSS} from './dynamic-theme/css-collection';
-import type {DynamicThemeFix, MessageBGtoCS, MessageCStoBG, MessageCStoUI, Theme} from '../definitions';
-import {MessageTypeBGtoCS, MessageTypeCStoBG, MessageTypeCStoUI} from '../utils/message';
+import type {DynamicThemeFix, MessageBGtoCS, MessageCStoBG, MessageCStoUI, MessageUItoCS, Theme} from '../definitions';
+import {MessageTypeBGtoCS, MessageTypeCStoBG, MessageTypeCStoUI, MessageTypeUItoCS} from '../utils/message';
 
 declare const __TEST__: boolean;
 
@@ -73,7 +73,7 @@ function sendMessage(message: MessageCStoBG | MessageCStoUI) {
     }
 }
 
-function onMessage({type, data}: MessageBGtoCS) {
+function onMessage({type, data}: MessageBGtoCS | MessageUItoCS & {data: any}) {
     logInfoCollapsed(`onMessage[${type}]`, data);
     switch (type) {
         case MessageTypeBGtoCS.ADD_CSS_FILTER:
@@ -126,7 +126,7 @@ function onMessage({type, data}: MessageBGtoCS) {
             }
             break;
         }
-        case MessageTypeBGtoCS.EXPORT_CSS:
+        case MessageTypeUItoCS.EXPORT_CSS:
             collectCSS().then((collectedCSS) => sendMessage({type: MessageTypeCStoUI.EXPORT_CSS_RESPONSE, data: collectedCSS}));
             break;
         case MessageTypeBGtoCS.UNSUPPORTED_SENDER:

@@ -2,7 +2,7 @@ declare const __TEST__: boolean;
 declare const __DEBUG__: boolean;
 
 // Promissified version of chrome.tabs.query
-export async function queryTabs(query: chrome.tabs.QueryInfo = {}) {
+export async function queryTabs(query: chrome.tabs.QueryInfo = {}): Promise<chrome.tabs.Tab[]> {
     return new Promise<chrome.tabs.Tab[]>((resolve) => chrome.tabs.query(query, resolve));
 }
 

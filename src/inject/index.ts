@@ -9,7 +9,6 @@ import type {DynamicThemeFix, MessageBGtoCS, MessageCStoBG, MessageCStoUI, Messa
 import {MessageTypeBGtoCS, MessageTypeCStoBG, MessageTypeCStoUI, MessageTypeUItoCS} from '../utils/message';
 
 declare const __TEST__: boolean;
-declare const __DEBUG__: boolean;
 
 let unloaded = false;
 

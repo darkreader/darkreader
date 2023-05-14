@@ -9,8 +9,7 @@ export async function queryTabs(query: chrome.tabs.QueryInfo = {}) {
 /**
  * Attempts to find the current active tab
  * Despite all efforts, sometimes active tab may not be determined so we explicitly return nullable value,
- * and handle this case 
- * @returns 
+ * and handle this case in callers explicitly
  */
 export async function getActiveTab(): Promise<chrome.tabs.Tab | null> {
     let log: string | null = null;

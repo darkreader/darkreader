@@ -136,21 +136,21 @@ export interface TabInfo {
 }
 
 export interface MessageCStoBG {
+    id?: string;
     type: MessageTypeCStoBG;
     data?: any;
-    id?: string;
 }
 
 export interface MessageCStoUI {
+    id?: string;
     type: MessageTypeCStoUI;
     data: any;
-    id?: string;
 }
 
 export interface MessageBGtoCS {
+    id?: string;
     type: MessageTypeBGtoCS;
     data?: any;
-    id?: string;
     error?: any;
 }
 
@@ -161,9 +161,9 @@ export interface MessageUItoBG {
 }
 
 export interface MessageBGtoUI {
+    id?: string;
     type: MessageTypeBGtoUI;
     data?: any;
-    id?: string;
 }
 
 export interface Shortcuts {

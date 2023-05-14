@@ -6,6 +6,12 @@ import type {ThemeEngine} from './generators/theme-engines';
 
 export type ColorScheme = 'dark' | 'light';
 
+// ContextId is a number on Firefox and documentId is a string in Chromium,
+// let's use string for simplicity
+export type documentId = string;
+export type tabId = number;
+export type frameId = number;
+
 export interface ExtensionData {
     isEnabled: boolean;
     isReady: boolean;

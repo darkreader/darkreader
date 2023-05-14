@@ -16,7 +16,6 @@ export enum MessageTypeUItoBG {
     APPLY_DEV_STATIC_THEMES = 'ui-bg-apply-dev-static-themes',
     RESET_DEV_STATIC_THEMES = 'ui-bg-reset-dev-static-themes',
     SAVE_FILE = 'ui-bg-save-file',
-    REQUEST_EXPORT_CSS = 'ui-bg-request-export-css',
     COLOR_SCHEME_CHANGE = 'ui-bg-color-scheme-change',
     HIDE_HIGHLIGHTS = 'ui-bg-hide-highlights'
 }
@@ -31,7 +30,6 @@ export enum MessageTypeBGtoCS {
     ADD_STATIC_THEME = 'bg-cs-add-static-theme',
     ADD_SVG_FILTER = 'bg-cs-add-svg-filter',
     ADD_DYNAMIC_THEME = 'bg-cs-add-dynamic-theme',
-    EXPORT_CSS = 'bg-cs-export-css',
     UNSUPPORTED_SENDER = 'bg-cs-unsupported-sender',
     CLEAN_UP = 'bg-cs-clean-up',
     RELOAD = 'bg-cs-reload',
@@ -53,4 +51,8 @@ export enum MessageTypeCStoBG {
 
 export enum MessageTypeCStoUI {
     EXPORT_CSS_RESPONSE = 'cs-ui-export-css-response'
+}
+
+export enum MessageTypeUItoCS {
+    EXPORT_CSS = 'ui-cs-export-css'
 }

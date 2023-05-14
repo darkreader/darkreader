@@ -9,6 +9,7 @@ import {StateManager} from '../utils/state-manager';
 import {getURLHostOrProtocol} from '../utils/url';
 import {isPanel} from './utils/tab';
 import {makeFirefoxHappy} from './make-firefox-happy';
+import {getActiveTab, queryTabs} from '../utils/tabs';
 
 declare const __CHROMIUM_MV2__: boolean;
 declare const __CHROMIUM_MV3__: boolean;
@@ -202,12 +203,6 @@ export default class TabManager {
                     break;
                 }
 
-                case MessageTypeUItoBG.REQUEST_EXPORT_CSS: {
-                    const activeTab = await TabManager.getActiveTab();
-                    chrome.tabs.sendMessage<MessageBGtoCS>(activeTab.id!, {type: MessageTypeBGtoCS.EXPORT_CSS}, {frameId: 0});
-                    break;
-                }
-
                 default:
                     break;
             }
@@ -226,12 +221,6 @@ export default class TabManager {
         if (sender && sender.frameId === 0) {
             TabManager.onColorSchemeChange(message.data.isDark);
         }
-    }
-
-    private static async queryTabs(query: chrome.tabs.QueryInfo = {}) {
-        return new Promise<chrome.tabs.Tab[]>((resolve) =>
-            chrome.tabs.query(query, resolve)
-        );
     }
 
     private static addDocument(documentId: documentId, tabId: tabId, frameId: frameId,  url: string, timestamp: number) {
@@ -267,8 +256,11 @@ export default class TabManager {
         TabManager.stateManager.saveState();
     }
 
-    private static async getTabURL(tab: chrome.tabs.Tab): Promise<string> {
+    private static async getTabURL(tab: chrome.tabs.Tab | null): Promise<string> {
         if (__CHROMIUM_MV3__) {
+            if (!tab) {
+                return 'abou:blank';
+            }
             try {
                 if (TabManager.tabs[tab.id!] && TabManager.tabs[tab.id!][0]) {
                     return TabManager.tabs[tab.id!][0].origin || 'about:blank';
@@ -292,7 +284,7 @@ export default class TabManager {
     }
 
     public static async updateContentScript(options: {runOnProtectedPages: boolean}): Promise<void> {
-        (await TabManager.queryTabs())
+        (await queryTabs())
             .filter((tab) => __CHROMIUM_MV3__ || options.runOnProtectedPages || canInjectScript(tab.url))
             .filter((tab) => !Boolean(TabManager.tabs[tab.id!]))
             .forEach((tab) => {
@@ -337,7 +329,7 @@ export default class TabManager {
 
         const activeTabHostname = onlyUpdateActiveTab ? getURLHostOrProtocol(await TabManager.getActiveTabURL()) : null;
 
-        (await TabManager.queryTabs())
+        (await queryTabs())
             .filter((tab) => Boolean(TabManager.tabs[tab.id!]))
             .forEach((tab) => {
                 const frames = TabManager.tabs[tab.id!];
@@ -367,48 +359,19 @@ export default class TabManager {
     }
 
     public static async canAccessActiveTab(): Promise<boolean> {
-        const tab = await TabManager.getActiveTab();
-        return Boolean(TabManager.tabs[tab.id!]);
+        const tab = await getActiveTab();
+        return tab && Boolean(TabManager.tabs[tab.id!]) || false;
     }
 
     public static async isActiveTabDarkThemeDetected(): Promise<boolean | null> {
-        const tab = await TabManager.getActiveTab();
+        const tab = await getActiveTab();
+        if (!tab) {
+            return null;
+        }
         return TabManager.tabs[tab.id!] && TabManager.tabs[tab.id!][0] && TabManager.tabs[tab.id!][0].darkThemeDetected || null;
     }
 
     public static async getActiveTabURL(): Promise<string> {
-        return TabManager.getTabURL(await TabManager.getActiveTab());
-    }
-
-    public static async getActiveTab(): Promise<chrome.tabs.Tab> {
-        let tab = (await TabManager.queryTabs({
-            active: true,
-            lastFocusedWindow: true,
-            // Explicitly exclude Dark Reader's Dev Tools and other special windows from the query
-            windowType: 'normal',
-        }))[0];
-        if (!tab) {
-            tab = (await TabManager.queryTabs({
-                active: true,
-                lastFocusedWindow: true,
-                windowType: 'app',
-            }))[0];
-        }
-        if (!tab) {
-            // When Dark Reader's DevTools are open, last focused window might be the DevTools window
-            // so we lift this restriction and try again (with the best guess)
-            tab = (await TabManager.queryTabs({
-                active: true,
-                windowType: 'normal',
-            }))[0];
-            if (!tab) {
-                tab = (await TabManager.queryTabs({
-                    active: true,
-                    windowType: 'app',
-                }))[0];
-            }
-            logWarn('TabManager.getActiveTab() could not reliably find the active tab, picking the best guess', tab);
-        }
-        return tab;
+        return TabManager.getTabURL(await getActiveTab());
     }
 }

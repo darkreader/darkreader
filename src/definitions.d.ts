@@ -143,7 +143,7 @@ export interface MessageCStoBG {
 
 export interface MessageCStoUI {
     type: MessageTypeCStoUI;
-    data?: any;
+    data: any;
     id?: string;
 }
 

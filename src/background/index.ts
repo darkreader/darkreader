@@ -1,8 +1,8 @@
 import {Extension} from './extension';
 import {getHelpURL, UNINSTALL_URL} from '../utils/links';
 import {canInjectScript} from '../background/utils/extension-api';
-import type {ColorScheme, ExtensionData, Message, UserSettings} from '../definitions';
-import {MessageType} from '../utils/message';
+import type {ColorScheme, ExtensionData, MessageBGtoCS, MessageBGtoUI, MessageCStoBG, UserSettings} from '../definitions';
+import {MessageTypeBGtoCS, MessageTypeBGtoUI, MessageTypeCStoBG} from '../utils/message';
 import {makeChromiumHappy} from './make-chromium-happy';
 import {ASSERT, logInfo} from './utils/log';
 import {sendLog} from './utils/sendLog';
@@ -110,19 +110,19 @@ if (__WATCH__) {
             }
             switch (message.type) {
                 case 'reload:css':
-                    chrome.runtime.sendMessage<Message>({type: MessageType.BG_CSS_UPDATE});
+                    chrome.runtime.sendMessage<MessageBGtoCS>({type: MessageTypeBGtoCS.BG_CSS_UPDATE});
                     break;
                 case 'reload:ui':
-                    chrome.runtime.sendMessage<Message>({type: MessageType.BG_UI_UPDATE});
+                    chrome.runtime.sendMessage<MessageBGtoUI>({type: MessageTypeBGtoUI.BG_UI_UPDATE});
                     break;
                 case 'reload:full':
                     chrome.tabs.query({}, (tabs) => {
-                        const message: Message = {type: MessageType.BG_RELOAD};
+                        const message: MessageBGtoCS = {type: MessageTypeBGtoCS.BG_RELOAD};
                         // Some contexts are not considered to be tabs and can not receive regular messages
-                        chrome.runtime.sendMessage<Message>(message);
+                        chrome.runtime.sendMessage<MessageBGtoCS>(message);
                         for (const tab of tabs) {
                             if (canInjectScript(tab.url)) {
-                                chrome.tabs.sendMessage<Message>(tab.id!, message);
+                                chrome.tabs.sendMessage<MessageBGtoCS>(tab.id!, message);
                             }
                         }
                         chrome.runtime.reload();
@@ -226,8 +226,8 @@ if (__TEST__) {
 }
 
 if (__DEBUG__ && __LOG__) {
-    chrome.runtime.onMessage.addListener((message: Message) => {
-        if (message.type === 'cs-log') {
+    chrome.runtime.onMessage.addListener((message: MessageCStoBG) => {
+        if (message.type === MessageTypeCStoBG.CS_LOG) {
             sendLog(message.data.level, message.data.log);
         }
     });

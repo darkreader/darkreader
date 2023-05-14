@@ -1,4 +1,4 @@
-export enum MessageType {
+export enum MessageTypeUItoBG {
     UI_GET_DATA = 'ui-get-data',
     UI_GET_DEVTOOLS_DATA = 'ui-get-devtools-data',
     UI_SUBSCRIBE_TO_CHANGES = 'ui-subscribe-to-changes',
@@ -19,8 +19,14 @@ export enum MessageType {
     UI_REQUEST_EXPORT_CSS = 'ui-request-export-css',
     UI_COLOR_SCHEME_CHANGE = 'ui-color-scheme-change',
     UI_HIDE_HIGHLIGHTS = 'ui-hide-highlights',
+}
 
+export enum MessageTypeBGtoUI {
     BG_CHANGES = 'bg-changes',
+    BG_UI_UPDATE = 'bg-ui-update',
+}
+
+export enum MessageTypeBGtoCS {
     BG_ADD_CSS_FILTER = 'bg-add-css-filter',
     BG_ADD_STATIC_THEME = 'bg-add-static-theme',
     BG_ADD_SVG_FILTER = 'bg-add-svg-filter',
@@ -30,17 +36,21 @@ export enum MessageType {
     BG_CLEAN_UP = 'bg-clean-up',
     BG_RELOAD = 'bg-reload',
     BG_FETCH_RESPONSE = 'bg-fetch-response',
-    BG_UI_UPDATE = 'bg-ui-update',
-    BG_CSS_UPDATE = 'bg-css-update',
+    BG_CSS_UPDATE = 'bg-css-update'
+}
 
+export enum MessageTypeCStoBG {
     CS_COLOR_SCHEME_CHANGE = 'cs-color-scheme-change',
     CS_FRAME_CONNECT = 'cs-frame-connect',
     CS_FRAME_FORGET = 'cs-frame-forget',
     CS_FRAME_FREEZE = 'cs-frame-freeze',
     CS_FRAME_RESUME = 'cs-frame-resume',
-    CS_EXPORT_CSS_RESPONSE = 'cs-export-css-response',
     CS_FETCH = 'cs-fetch',
     CS_DARK_THEME_DETECTED = 'cs-dark-theme-detected',
     CS_DARK_THEME_NOT_DETECTED = 'cs-dark-theme-not-detected',
     CS_LOG = 'cs-log'
+}
+
+export enum MessageTypeCStoUI {
+    CS_EXPORT_CSS_RESPONSE = 'cs-export-css-response',
 }

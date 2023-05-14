@@ -1,5 +1,5 @@
-import {MessageType} from '../../utils/message';
-import type {Message} from '../../definitions';
+import {MessageTypeCStoBG} from '../../utils/message';
+import type {MessageCStoBG} from '../../definitions';
 
 declare const __DEBUG__: boolean;
 declare const __TEST__: boolean;
@@ -9,7 +9,7 @@ declare const __LOG__: 'info' | 'warn';
 function sendLogToBG(level: 'info' | 'warn' | 'assert', ...args: any[]) {
     if (__WATCH__ && __LOG__ && (__LOG__ === 'info' || level === 'warn')) {
         // No need to generate contextId since we do not expect a response
-        chrome.runtime.sendMessage<Message>({type: MessageType.CS_LOG, data: {level, log: args}});
+        chrome.runtime.sendMessage<MessageCStoBG>({type: MessageTypeCStoBG.CS_LOG, data: {level, log: args}});
     }
 }
 

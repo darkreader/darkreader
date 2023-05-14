@@ -3,12 +3,12 @@ import {Button} from '../../controls';
 import {saveFile} from '../../utils';
 import ControlGroup from '../control-group';
 import {getURLHostOrProtocol} from '../../../utils/url';
-import type {Message} from '../../../definitions';
-import {MessageType} from '../../../utils/message';
+import type {MessageCStoUI, MessageUItoBG} from '../../../definitions';
+import {MessageTypeCStoUI, MessageTypeUItoBG} from '../../../utils/message';
 
 export default function ExportTheme() {
-    const listener = ({type, data}: Message, sender: chrome.runtime.MessageSender) => {
-        if (type === MessageType.CS_EXPORT_CSS_RESPONSE) {
+    const listener = ({type, data}: MessageCStoUI, sender: chrome.runtime.MessageSender) => {
+        if (type === MessageTypeCStoUI.CS_EXPORT_CSS_RESPONSE) {
             const url = getURLHostOrProtocol(sender.tab!.url!).replace(/[^a-z0-1\-]/g, '-');
             saveFile(`DarkReader-${url}.css`, data);
             chrome.runtime.onMessage.removeListener(listener);
@@ -17,7 +17,7 @@ export default function ExportTheme() {
 
     function exportCSS() {
         chrome.runtime.onMessage.addListener(listener);
-        chrome.runtime.sendMessage<Message>({type: MessageType.UI_REQUEST_EXPORT_CSS});
+        chrome.runtime.sendMessage<MessageUItoBG>({type: MessageTypeUItoBG.UI_REQUEST_EXPORT_CSS});
     }
 
     return (

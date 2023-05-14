@@ -1,6 +1,6 @@
 import type {ParsedColorSchemeConfig} from './utils/colorscheme-parser';
 import type {FilterMode} from './generators/css-filter';
-import type {MessageType} from './utils/message';
+import type {MessageTypeBGtoCS, MessageTypeBGtoUI, MessageTypeCStoBG, MessageTypeCStoUI, MessageTypeUItoBG} from './utils/message';
 import type {AutomationMode} from './utils/automation';
 import type {ThemeEngine} from './generators/theme-engines';
 
@@ -26,7 +26,7 @@ export interface DevToolsData {
 }
 
 export interface TabData {
-    type: MessageType;
+    type: MessageTypeBGtoCS;
     data?: any;
 }
 
@@ -135,8 +135,36 @@ export interface TabInfo {
     isDarkThemeDetected: boolean | null;
 }
 
-export interface Message {
-    type: MessageType;
+export interface MessageCStoBG {
+    type: MessageTypeCStoBG;
+    data?: any;
+    id?: string;
+    error?: any;
+}
+
+export interface MessageCStoUI {
+    type: MessageTypeCStoUI;
+    data?: any;
+    id?: string;
+    error?: any;
+}
+
+export interface MessageBGtoCS {
+    type: MessageTypeBGtoCS;
+    data?: any;
+    id?: string;
+    error?: any;
+}
+
+export interface MessageUItoBG {
+    type: MessageTypeUItoBG;
+    data?: any;
+    id?: string;
+    error?: any;
+}
+
+export interface MessageBGtoUI {
+    type: MessageTypeBGtoUI;
     data?: any;
     id?: string;
     error?: any;

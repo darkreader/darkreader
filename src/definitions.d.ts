@@ -139,14 +139,12 @@ export interface MessageCStoBG {
     type: MessageTypeCStoBG;
     data?: any;
     id?: string;
-    error?: any;
 }
 
 export interface MessageCStoUI {
     type: MessageTypeCStoUI;
     data?: any;
     id?: string;
-    error?: any;
 }
 
 export interface MessageBGtoCS {
@@ -159,7 +157,6 @@ export interface MessageBGtoCS {
 export interface MessageUItoBG {
     type: MessageTypeUItoBG;
     data?: any;
-    id?: string;
     error?: any;
 }
 
@@ -167,7 +164,6 @@ export interface MessageBGtoUI {
     type: MessageTypeBGtoUI;
     data?: any;
     id?: string;
-    error?: any;
 }
 
 export interface Shortcuts {

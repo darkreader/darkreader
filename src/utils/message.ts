@@ -18,12 +18,12 @@ export enum MessageTypeUItoBG {
     UI_SAVE_FILE = 'ui-save-file',
     UI_REQUEST_EXPORT_CSS = 'ui-request-export-css',
     UI_COLOR_SCHEME_CHANGE = 'ui-color-scheme-change',
-    UI_HIDE_HIGHLIGHTS = 'ui-hide-highlights',
+    UI_HIDE_HIGHLIGHTS = 'ui-hide-highlights'
 }
 
 export enum MessageTypeBGtoUI {
     BG_CHANGES = 'bg-changes',
-    BG_UI_UPDATE = 'bg-ui-update',
+    BG_UI_UPDATE = 'bg-ui-update'
 }
 
 export enum MessageTypeBGtoCS {
@@ -52,5 +52,5 @@ export enum MessageTypeCStoBG {
 }
 
 export enum MessageTypeCStoUI {
-    CS_EXPORT_CSS_RESPONSE = 'cs-export-css-response',
+    CS_EXPORT_CSS_RESPONSE = 'cs-export-css-response'
 }

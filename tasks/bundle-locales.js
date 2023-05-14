@@ -23,7 +23,7 @@ async function bundleLocale(/** @type {string} */filePath) {
             messageEnd = file.length;
         }
         messages[messageName] = {
-            message: file.substring(messageStart, messageEnd).trim()
+            message: file.substring(messageStart, messageEnd).trim(),
         };
     }
 

@@ -448,7 +448,7 @@ export default class CustomJestEnvironment extends TestEnvironment {
                         throw new Error('Not supported');
                     }
                     await sendToBackground('firefox-emulateColorScheme', colorScheme);
-                }
+                },
             };
 
             this.global.pageUtils = {

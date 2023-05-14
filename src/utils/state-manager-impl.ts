@@ -92,7 +92,7 @@ enum StateManagerImplState {
     SAVING = 3,
     SAVING_OVERRIDE = 4,
     ONCHANGE_RACE = 5,
-    RECOVERY = 6,
+    RECOVERY = 6
 }
 
 export class StateManagerImpl<T extends Record<string, unknown>> {

@@ -44,14 +44,14 @@ test('Duration', () => {
         seconds: 48,
         minutes: 24,
         hours: 8,
-        days: 3
+        days: 3,
     })).toEqual(289488000);
 
     expect(getDurationInMinutes({
         seconds: 27,
         minutes: 25,
         hours: 5,
-        days: 7
+        days: 7,
     })).toEqual(10405.45);
 });
 

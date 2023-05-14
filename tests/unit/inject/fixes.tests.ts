@@ -25,7 +25,7 @@ describe('Select fixes via findRelevantFix()', () => {
             {
                 ...emptyFix,
                 url: ['*'],
-            }
+            },
         ])).toBe(null);
 
         expect(findRelevantFix('https://example.com', [
@@ -39,7 +39,7 @@ describe('Select fixes via findRelevantFix()', () => {
                     'other.com',
                     'some.net',
                 ],
-            }
+            },
         ])).toBe(null);
 
         expect(findRelevantFix('https://example.com', [
@@ -52,7 +52,7 @@ describe('Select fixes via findRelevantFix()', () => {
                 url: [
                     'example.com/sub',
                 ],
-            }
+            },
         ])).toBe(null);
     });
 
@@ -75,7 +75,7 @@ describe('Select fixes via findRelevantFix()', () => {
                     'example.com/sub',
                     'some.net',
                 ],
-            }
+            },
         ])).toBe(2);
 
         expect(findRelevantFix('https://example.com/1/2/3', [
@@ -110,7 +110,7 @@ describe('Select fixes via findRelevantFix()', () => {
                     'example.com/1/2/3/4',
                     'some.net',
                 ],
-            }
+            },
         ])).toBe(3);
     });
 
@@ -188,7 +188,7 @@ describe('Construct single fix via combineFixes()', () => {
                 ...emptyFix,
                 url: ['example.com'],
                 css: 'h1 { color: yellow; }',
-            }
+            },
         ])!.css).toBe(multiline(
             'body { background: blue; }',
             'h1 { color: yellow; }',
@@ -205,7 +205,7 @@ describe('Construct single fix via combineFixes()', () => {
             {
                 ...emptyFix,
                 invert: ['svg'],
-            }
+            },
         ])!.invert).toStrictEqual(['img', 'svg']);
     });
 
@@ -219,7 +219,7 @@ describe('Construct single fix via combineFixes()', () => {
             {
                 ...emptyFix,
                 ignoreImageAnalysis: ['svg'],
-            }
+            },
         ])!.ignoreImageAnalysis).toStrictEqual(['img', 'svg']);
     });
 
@@ -233,7 +233,7 @@ describe('Construct single fix via combineFixes()', () => {
             {
                 ...emptyFix,
                 ignoreInlineStyle: ['svg'],
-            }
+            },
         ])!.ignoreInlineStyle).toStrictEqual(['img', 'svg']);
     });
 
@@ -246,7 +246,7 @@ describe('Construct single fix via combineFixes()', () => {
             },
             {
                 ...emptyFix,
-            }
+            },
         ])!.disableStyleSheetsProxy).toBe(false);
 
         expect(combineFixes([
@@ -262,7 +262,7 @@ describe('Construct single fix via combineFixes()', () => {
             {
                 ...emptyFix,
                 disableStyleSheetsProxy: false,
-            }
+            },
         ])!.disableStyleSheetsProxy).toBe(true);
     });
 });

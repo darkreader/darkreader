@@ -70,7 +70,7 @@ export async function readSyncStorage<T extends {[key: string]: any}>(defaults: 
 
             sync = {
                 ...defaults,
-                ...sync
+                ...sync,
             };
 
             resolve(sync);
@@ -107,7 +107,7 @@ function prepareSyncStorage<T extends {[key: string]: any}>(values: T): {[key: s
                 (values as any)[`${key}_${i.toString(36)}`] = string.substring(i * maxLength, (i + 1) * maxLength);
             }
             (values as any)[key] = {
-                __meta_split_count: minimalKeysNeeded
+                __meta_split_count: minimalKeysNeeded,
             };
         }
     }

@@ -17,7 +17,7 @@ export default function AutomationPage(props: ViewProps) {
     const values = {
         'latitude': {
             min: -90,
-            max: 90
+            max: 90,
         },
         'longitude': {
             min: -180,
@@ -146,7 +146,7 @@ export default function AutomationPage(props: ViewProps) {
                         if (__CHROMIUM_MV3__) {
                             chrome.runtime.sendMessage<Message>({
                                 type: MessageType.UI_COLOR_SCHEME_CHANGE,
-                                data: {isDark: matchMedia('(prefers-color-scheme: dark)').matches}
+                                data: {isDark: matchMedia('(prefers-color-scheme: dark)').matches},
                             });
                         }
                         changeAutomationMode(isSystemAutomation ? AutomationMode.NONE : AutomationMode.SYSTEM);

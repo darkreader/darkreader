@@ -86,7 +86,7 @@ export default class Newsmaker {
         Newsmaker.init();
         const [
             sync,
-            local
+            local,
         ] = await Promise.all([
             readSyncStorage({readNews: []}),
             readLocalStorage({readNews: []}),
@@ -101,7 +101,7 @@ export default class Newsmaker {
         Newsmaker.init();
         const [
             sync,
-            local
+            local,
         ] = await Promise.all([
             readSyncStorage({displayedNews: []}),
             readLocalStorage({displayedNews: []}),

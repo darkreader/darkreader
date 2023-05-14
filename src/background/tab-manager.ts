@@ -51,7 +51,7 @@ enum DocumentState {
     HIDDEN = 2,
     FROZEN = 3,
     TERMINATED = 4,
-    DISCARDED = 5,
+    DISCARDED = 5
 }
 
 export default class TabManager {
@@ -328,7 +328,7 @@ export default class TabManager {
             js: [
                 {file: '/inject/fallback.js'},
                 {file: '/inject/index.js'},
-            ]
+            ],
         });
     }
 

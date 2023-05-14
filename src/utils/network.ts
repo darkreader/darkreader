@@ -6,7 +6,7 @@ async function getOKResponse(url: string, mimeType?: string, origin?: string): P
         {
             cache: 'force-cache',
             credentials: 'omit',
-            referrer: origin
+            referrer: origin,
         },
     );
 

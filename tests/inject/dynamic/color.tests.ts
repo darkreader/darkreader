@@ -4,7 +4,7 @@ import {createOrUpdateDynamicTheme, removeDynamicTheme} from '../../../src/injec
 import {multiline} from '../support/test-utils';
 
 const theme = {
-    ...DEFAULT_THEME
+    ...DEFAULT_THEME,
 };
 let container: HTMLElement;
 

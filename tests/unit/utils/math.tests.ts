@@ -21,7 +21,7 @@ test('Matrix multiplication', () => {
     [
         [1], [2], [3], [4], [5],
     ])).toEqual([
-        [55], [130], [205], [280], [355]
+        [55], [130], [205], [280], [355],
     ]);
 
     expect(multiplyMatrices([

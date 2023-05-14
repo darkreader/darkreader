@@ -116,7 +116,7 @@ export default class DevTools {
         const [
             dynamicThemeFixes,
             inversionFixes,
-            staticThemes
+            staticThemes,
         ] = await Promise.all([
             DevTools.getSavedDynamicThemeFixes(),
             DevTools.getSavedInversionFixes(),

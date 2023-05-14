@@ -33,7 +33,7 @@ const hsbPickerDefaults: HSBPickerState = {
     activeHSB: null,
     activeChangeHandler: null,
     hueTouchStartHandler: null,
-    sbTouchStartHandler: null
+    sbTouchStartHandler: null,
 };
 
 function rgbToHSB({r, g, b}: RGBA) {

@@ -24,7 +24,7 @@ interface TabManagerOptions {
 
 interface DocumentInfo {
     documentId: documentId | null;
-    origin: string | null;
+    url: string | null;
     state: DocumentState;
     timestamp: number;
     darkThemeDetected: boolean;
@@ -104,7 +104,7 @@ export default class TabManager {
                     const url = sender.url!;
                     const documentId: documentId = (__CHROMIUM_MV3__ || __CHROMIUM_MV2__) ? (sender as any).documentId : ((__FIREFOX_MV2__ || __THUNDERBIRD__) ? (sender as any).contextId : null);
 
-                    TabManager.addDocument(documentId, tabId, frameId!, url, TabManager.timestamp);
+                    TabManager.addFrame(documentId, tabId, frameId!, url, TabManager.timestamp);
 
                     reply(tabURL, url, frameId === 0);
                     TabManager.stateManager.saveState();
@@ -123,7 +123,7 @@ export default class TabManager {
                     await TabManager.stateManager.loadState();
                     const info = TabManager.tabs[sender.tab!.id!][sender.frameId!];
                     info.state = DocumentState.FROZEN;
-                    info.origin = null;
+                    info.url = null;
                     TabManager.stateManager.saveState();
                     break;
                 }
@@ -143,7 +143,7 @@ export default class TabManager {
                     }
                     TabManager.tabs[sender.tab!.id!][sender.frameId!] = {
                         documentId,
-                        origin,
+                        url,
                         state: DocumentState.ACTIVE,
                         darkThemeDetected: false,
                         timestamp: TabManager.timestamp,
@@ -223,7 +223,7 @@ export default class TabManager {
         }
     }
 
-    private static addDocument(documentId: documentId, tabId: tabId, frameId: frameId,  url: string, timestamp: number) {
+    private static addFrame(documentId: documentId, tabId: tabId, frameId: frameId,  url: string, timestamp: number) {
         let frames: {[frameId: frameId]: DocumentInfo};
         if (TabManager.tabs[tabId]) {
             frames = TabManager.tabs[tabId];
@@ -233,7 +233,7 @@ export default class TabManager {
         }
         frames[frameId] = {
             documentId,
-            origin,
+            url,
             state: DocumentState.ACTIVE,
             darkThemeDetected: false,
             timestamp,
@@ -263,7 +263,7 @@ export default class TabManager {
             }
             try {
                 if (TabManager.tabs[tab.id!] && TabManager.tabs[tab.id!][0]) {
-                    return TabManager.tabs[tab.id!][0].origin || 'about:blank';
+                    return TabManager.tabs[tab.id!][0].url || 'about:blank';
                 }
                 return (await chrome.scripting.executeScript({
                     target: {
@@ -335,7 +335,7 @@ export default class TabManager {
                 const frames = TabManager.tabs[tab.id!];
                 Object.entries(frames)
                     .filter(([, {state}]) => state === DocumentState.ACTIVE || state === DocumentState.PASSIVE)
-                    .forEach(async ([id, {origin, documentId}]) => {
+                    .forEach(async ([id, {url, documentId}]) => {
                         const frameId = Number(id);
                         const tabURL = await TabManager.getTabURL(tab);
                         // Check if hostname are equal when we only want to update active tab.
@@ -343,7 +343,7 @@ export default class TabManager {
                             return;
                         }
 
-                        const message = TabManager.getTabMessage(tabURL, origin!, frameId === 0);
+                        const message = TabManager.getTabMessage(tabURL, url!, frameId === 0);
                         if (tab.active && frameId === 0) {
                             chrome.tabs.sendMessage<MessageBGtoCS>(tab.id!, message, (__CHROMIUM_MV3__ || __CHROMIUM_MV2__ && documentId) ? {frameId, documentId} as chrome.tabs.MessageSendOptions : {frameId});
                         } else {

@@ -8,7 +8,8 @@ export async function queryTabs(query: chrome.tabs.QueryInfo = {}) {
 
 /**
  * Attempts to find the current active tab
- * Despite all efforts, 
+ * Despite all efforts, sometimes active tab may not be determined so we explicitly return nullable value,
+ * and handle this case 
  * @returns 
  */
 export async function getActiveTab(): Promise<chrome.tabs.Tab | null> {
@@ -49,6 +50,7 @@ export async function getActiveTab(): Promise<chrome.tabs.Tab | null> {
     if (log) {
         console.warn(`TabManager.getActiveTab() could not reliably find the active tab, picking the best guess ${log}`, tab);
     }
+    // In rare cases tab can be null, despite what TypeScript says
     return tab || null;
 }
 

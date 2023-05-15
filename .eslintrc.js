@@ -72,6 +72,7 @@ config.overrides.push({
         }],
         '@typescript-eslint/consistent-type-assertions': 'error',
         '@typescript-eslint/consistent-type-imports': 'error',
+        '@typescript-eslint/explicit-member-accessibility': 'error',
         '@typescript-eslint/explicit-module-boundary-types': 'error',
         '@typescript-eslint/func-call-spacing': ['error', 'never'],
         '@typescript-eslint/keyword-spacing': ['error', {
@@ -154,6 +155,15 @@ config.overrides.push({
             rules: {
                 '@typescript-eslint/no-var-requires': 'error',
                 '@typescript-eslint/explicit-module-boundary-types': 'off',
+            },
+        },
+        {
+            files: [
+                'tasks/task.js',
+                'tests/browser/environment.js',
+            ],
+            rules: {
+                '@typescript-eslint/explicit-member-accessibility': 'off',
             },
         },
         {

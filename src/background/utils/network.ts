@@ -86,7 +86,7 @@ class LimitedCacheStorage {
     private records = new Map<string, CacheRecord>();
     private static alarmIsActive = false;
 
-    constructor() {
+    public constructor() {
         chrome.alarms.onAlarm.addListener(async (alarm) => {
             if (alarm.name === LimitedCacheStorage.ALARM_NAME) {
                 // We schedule only one-time alarms, so once it goes off,

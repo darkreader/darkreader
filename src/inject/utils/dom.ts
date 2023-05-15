@@ -12,6 +12,12 @@ interface CreateNodeAsapParams {
     isTargetMutation: (mutation: MutationRecord) => boolean;
 }
 
+interface NodePosetionWatcher {
+    run: () => void;
+    stop: () => void;
+    skip: () => void;
+}
+
 export function createNodeAsap({
     selectNode,
     createNode,
@@ -19,7 +25,7 @@ export function createNodeAsap({
     selectTarget,
     createTarget,
     isTargetMutation,
-}: CreateNodeAsapParams) {
+}: CreateNodeAsapParams): void {
     const target = selectTarget();
     if (target) {
         const prev = selectNode();
@@ -56,13 +62,14 @@ export function createNodeAsap({
         if (document.readyState === 'complete') {
             ready();
         } else {
+            // readystatechange event is not cancellable and does not bubble
             document.addEventListener('readystatechange', ready);
             observer.observe(document, {childList: true, subtree: true});
         }
     }
 }
 
-export function removeNode(node: Node | null) {
+export function removeNode(node: Node | null): void {
     node && node.parentNode && node.parentNode.removeChild(node);
 }
 
@@ -70,7 +77,7 @@ export function watchForNodePosition<T extends Node>(
     node: T,
     mode: 'head' | 'prev-sibling',
     onRestore = Function.prototype,
-) {
+): NodePosetionWatcher {
     const MAX_ATTEMPTS_COUNT = 10;
     const RETRY_TIMEOUT = getDuration({seconds: 2});
     const ATTEMPTS_INTERVAL = getDuration({seconds: 10});
@@ -151,12 +158,12 @@ export function watchForNodePosition<T extends Node>(
     });
     const run = () => {
         // TODO: remove type cast after dependency update
-        observer.observe(parent as ParentNode, {childList: true});
+        observer.observe(parent!, {childList: true});
     };
 
     const stop = () => {
         // TODO: remove type cast after dependency update
-        clearTimeout(timeoutId as number);
+        clearTimeout(timeoutId!);
         observer.disconnect();
         restore.cancel();
     };
@@ -175,7 +182,7 @@ export function watchForNodePosition<T extends Node>(
     return {run, stop, skip};
 }
 
-export function iterateShadowHosts(root: Node | null, iterator: (host: Element) => void) {
+export function iterateShadowHosts(root: Node | null, iterator: (host: Element) => void): void {
     if (root == null) {
         return;
     }
@@ -185,7 +192,7 @@ export function iterateShadowHosts(root: Node | null, iterator: (host: Element) 
         {
             acceptNode(node) {
                 return (node as Element).shadowRoot == null ? NodeFilter.FILTER_SKIP : NodeFilter.FILTER_ACCEPT;
-            }
+            },
         },
     );
     for (
@@ -202,37 +209,37 @@ export function iterateShadowHosts(root: Node | null, iterator: (host: Element) 
     }
 }
 
-export let isDOMReady = () => {
+export let isDOMReady: () => boolean = () => {
     return document.readyState === 'complete' || document.readyState === 'interactive';
 };
 
-export function setIsDOMReady(newFunc: () => boolean) {
+export function setIsDOMReady(newFunc: () => boolean): void {
     isDOMReady = newFunc;
 }
 
 const readyStateListeners = new Set<() => void>();
 
-export function addDOMReadyListener(listener: () => void) {
+export function addDOMReadyListener(listener: () => void): void {
     isDOMReady() ? listener() : readyStateListeners.add(listener);
 }
 
-export function removeDOMReadyListener(listener: () => void) {
+export function removeDOMReadyListener(listener: () => void): void {
     readyStateListeners.delete(listener);
 }
 
 // `interactive` can and will be fired when their are still stylesheets loading.
 // We use certain actions that can cause a forced layout change, which is bad.
-export function isReadyStateComplete() {
+export function isReadyStateComplete(): boolean {
     return document.readyState === 'complete';
 }
 
 const readyStateCompleteListeners = new Set<() => void>();
 
-export function addReadyStateCompleteListener(listener: () => void) {
+export function addReadyStateCompleteListener(listener: () => void): void {
     isReadyStateComplete() ? listener() : readyStateCompleteListeners.add(listener);
 }
 
-export function cleanReadyStateCompleteListeners() {
+export function cleanReadyStateCompleteListeners(): void {
     readyStateCompleteListeners.clear();
 }
 
@@ -249,6 +256,7 @@ if (!isDOMReady()) {
         }
     };
 
+    // readystatechange event is not cancellable and does not bubble
     document.addEventListener('readystatechange', onReadyStateChange);
 }
 
@@ -325,7 +333,7 @@ const optimizedTreeObservers = new Map<Node, MutationObserver>();
 const optimizedTreeCallbacks = new WeakMap<MutationObserver, Set<OptimizedTreeObserverCallbacks>>();
 
 // TODO: Use a single function to observe all shadow roots.
-export function createOptimizedTreeObserver(root: Document | ShadowRoot, callbacks: OptimizedTreeObserverCallbacks) {
+export function createOptimizedTreeObserver(root: Document | ShadowRoot, callbacks: OptimizedTreeObserverCallbacks): {disconnect: () => void} {
     let observer: MutationObserver;
     let observerCallbacks: Set<OptimizedTreeObserverCallbacks>;
     let domReadyListener: () => void;

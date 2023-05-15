@@ -1,11 +1,14 @@
 import {m} from 'malevic';
-import {Shortcut, Toggle} from '../../../controls';
+import {Toggle} from '../../../controls';
 import {getLocalMessage} from '../../../../utils/locales';
 import type {ExtWrapper, UserSettings} from '../../../../definitions';
+import SettingsIcon from '../../main-page/settings-icon';
 import SunMoonIcon from '../../main-page/sun-moon-icon';
 import SystemIcon from '../../main-page/system-icon';
 import WatchIcon from '../../main-page/watch-icon';
 import SiteToggle from '../site-toggle';
+import MoreNewHighlight from './more-new-highlight';
+import MoreSiteSettings from './more-site-settings';
 import MoreToggleSettings from './more-toggle-settings';
 import {AutomationMode} from '../../../../utils/automation';
 import {isLocalFile} from '../../../../utils/url';
@@ -14,15 +17,12 @@ import {HOMEPAGE_URL} from '../../../../utils/links';
 
 declare const __CHROMIUM_MV3__: boolean;
 
-function multiline(...lines: string[]) {
-    return lines.join('\n');
-}
-
 type HeaderProps = ExtWrapper & {
+    onMoreSiteSettingsClick: () => void;
     onMoreToggleSettingsClick: () => void;
 };
 
-function Header({data, actions, onMoreToggleSettingsClick}: HeaderProps) {
+function Header({data, actions, onMoreSiteSettingsClick, onMoreToggleSettingsClick}: HeaderProps) {
     function toggleExtension(enabled: UserSettings['enabled']) {
         actions.changeSettings({
             enabled,
@@ -37,6 +37,30 @@ function Header({data, actions, onMoreToggleSettingsClick}: HeaderProps) {
     const isLocationAutomation = data.settings.automation.mode === AutomationMode.LOCATION;
     const now = new Date();
 
+    const automationMessage = isAutomation
+        ? (
+            isTimeAutomation
+                ? (data.isEnabled ? getLocalMessage('auto_night_time') : getLocalMessage('auto_day_time'))
+                : isLocationAutomation
+                    ? data.isEnabled ? getLocalMessage('auto_night_at_location') : getLocalMessage('auto_day_at_location')
+                    : data.isEnabled ? getLocalMessage('auto_system_is_dark') : getLocalMessage('auto_system_is_light')
+        )
+        : getLocalMessage('configure_automation');
+
+    const isProtected = !isFile && ((!__CHROMIUM_MV3__ && !tab.isInjected) || tab.isProtected);
+    const isProtectedFile = isFile && !data.isAllowedFileSchemeAccess;
+    const isSiteEnabled = !(isProtected || isProtectedFile || tab.isInDarkList);
+
+    const siteToggleMessage = isProtected ?
+        getLocalMessage('page_protected')
+        : isFile && !data.isAllowedFileSchemeAccess ?
+            getLocalMessage('local_files_forbidden')
+            : tab.isInDarkList ?
+                getLocalMessage('page_in_dark_list')
+                : tab.isDarkThemeDetected ?
+                    getLocalMessage('dark_theme_detected')
+                    : getLocalMessage('configure_site_toggle');
+
     return (
         <header class="header">
             <a class="header__logo" href={HOMEPAGE_URL} target="_blank" rel="noopener noreferrer">
@@ -47,45 +71,29 @@ function Header({data, actions, onMoreToggleSettingsClick}: HeaderProps) {
                     data={data}
                     actions={actions}
                 />
-                {!isFile && ((!__CHROMIUM_MV3__ && !tab.isInjected) || tab.isProtected) ? (
-                    <span class="header__site-toggle__unable-text">
-                        {getLocalMessage('page_protected')}
-                    </span>
-                ) : isFile && !data.isAllowedFileSchemeAccess ? (
-                    <span class="header__site-toggle__unable-text">
-                        {getLocalMessage('local_files_forbidden')}
-                    </span>
-                ) : tab.isInDarkList ? (
-                    <span class="header__site-toggle__unable-text">
-                        {getLocalMessage('page_in_dark_list')}
-                    </span>
-                ) : (
-                    <Shortcut
-                        commandName="addSite"
-                        shortcuts={data.shortcuts}
-                        textTemplate={(hotkey) => (hotkey
-                            ? multiline(getLocalMessage('toggle_current_site'), hotkey)
-                            : getLocalMessage('setup_hotkey_toggle_site')
-                        )}
-                        onSetShortcut={(shortcut) => actions.setShortcut('addSite', shortcut)}
-                    />
-                )}
+                <span
+                    class={{
+                        'header__more-settings-button': true,
+                        'header__more-settings-button--off': !isSiteEnabled,
+                    }}
+                    onclick={onMoreSiteSettingsClick}
+                >
+                    <SettingsIcon class="header__more-settings-button__icon" />
+                    {siteToggleMessage}
+                </span>
             </div>
             <div class="header__control header__app-toggle">
                 <Toggle checked={data.isEnabled} labelOn={getLocalMessage('on')} labelOff={getLocalMessage('off')} onChange={toggleExtension} />
-                <Shortcut
-                    commandName="toggle"
-                    shortcuts={data.shortcuts}
-                    textTemplate={(hotkey) => (hotkey
-                        ? multiline(getLocalMessage('toggle_extension'), hotkey)
-                        : getLocalMessage('setup_hotkey_toggle_extension')
-                    )}
-                    onSetShortcut={(shortcut) => actions.setShortcut('toggle', shortcut)}
-                />
                 <span
-                    class="header__app-toggle__more-button"
+                    class={{
+                        'header__more-settings-button': true,
+                        'header__more-settings-button--off': !data.isEnabled,
+                    }}
                     onclick={onMoreToggleSettingsClick}
-                ></span>
+                >
+                    <SettingsIcon class="header__more-settings-button__icon" />
+                    {automationMessage}
+                </span>
                 <span
                     class={{
                         'header__app-toggle__time': true,
@@ -105,5 +113,7 @@ function Header({data, actions, onMoreToggleSettingsClick}: HeaderProps) {
 
 export {
     Header,
+    MoreNewHighlight,
+    MoreSiteSettings,
     MoreToggleSettings, // TODO: Implement portals to place elements into <body>.
 };

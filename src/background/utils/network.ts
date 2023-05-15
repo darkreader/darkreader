@@ -10,6 +10,10 @@ interface RequestParams {
     timeout?: number;
 }
 
+interface FileLoader {
+    get: (fetchRequestParameters: FetchRequestParameters) => Promise<string | null>;
+}
+
 export async function readText(params: RequestParams): Promise<string> {
     return new Promise((resolve, reject) => {
         if (isXMLHttpRequestSupported) {
@@ -100,11 +104,11 @@ class LimitedCacheStorage {
         }
     }
 
-    has(url: string) {
+    public has(url: string) {
         return this.records.has(url);
     }
 
-    get(url: string) {
+    public get(url: string) {
         if (this.records.has(url)) {
             const record = this.records.get(url)!;
             record.expires = Date.now() + LimitedCacheStorage.TTL;
@@ -115,7 +119,7 @@ class LimitedCacheStorage {
         return null;
     }
 
-    set(url: string, value: string) {
+    public set(url: string, value: string) {
         LimitedCacheStorage.ensureAlarmIsScheduled();
 
         const size = getStringSize(value);
@@ -161,7 +165,7 @@ export interface FetchRequestParameters {
     origin?: string;
 }
 
-export function createFileLoader() {
+export function createFileLoader(): FileLoader {
     const caches = {
         'data-url': new LimitedCacheStorage(),
         'text': new LimitedCacheStorage(),

@@ -1,4 +1,4 @@
-export function parseTime($time: string) {
+export function parseTime($time: string): [number, number] {
     const parts = $time.split(':').slice(0, 2);
     const lowercased = $time.trim().toLowerCase();
     const isAM = lowercased.endsWith('am') || lowercased.endsWith('a.m.');
@@ -23,11 +23,11 @@ export function parseTime($time: string) {
     return [hours, minutes];
 }
 
-function parse24HTime(time: string) {
+function parse24HTime(time: string): number[] {
     return time.split(':').map((x) => parseInt(x));
 }
 
-function compareTime(time1: number[], time2: number[]) {
+function compareTime(time1: number[], time2: number[]): -1 | 0 | 1 {
     if (time1[0] === time2[0] && time1[1] === time2[1]) {
         return 0;
     }
@@ -86,7 +86,7 @@ export function isInTimeIntervalLocal(time0: string, time1: string, date: Date =
     return compareTime(a, t) <= 0 && compareTime(t, b) < 0;
 }
 
-function isInTimeIntervalUTC(time0: number, time1: number, timestamp: number) {
+function isInTimeIntervalUTC(time0: number, time1: number, timestamp: number): boolean {
     if (time1 < time0) {
         return timestamp <= time1 || time0 <= timestamp;
     }
@@ -100,7 +100,7 @@ interface Duration {
     seconds?: number;
 }
 
-export function getDuration(time: Duration) {
+export function getDuration(time: Duration): number {
     let duration = 0;
     if (time.seconds) {
         duration += time.seconds * 1000;
@@ -117,7 +117,7 @@ export function getDuration(time: Duration) {
     return duration;
 }
 
-export function getDurationInMinutes(time: Duration) {
+export function getDurationInMinutes(time: Duration): number {
     return getDuration(time) / 1000 / 60;
 }
 
@@ -125,14 +125,7 @@ function getSunsetSunriseUTCTime(
     latitude: number,
     longitude: number,
     date: Date,
-): {
-    alwaysDay: true;
-} | {
-    alwaysNight: true;
-} | {
-    sunriseTime: number;
-    sunsetTime: number;
-} {
+) {
     const dec31 = Date.UTC(date.getUTCFullYear(), 0, 0, 0, 0, 0, 0);
     const oneDay = getDuration({days: 1});
     const dayOfYear = Math.floor((date.getTime() - dec31) / oneDay);
@@ -222,17 +215,25 @@ function getSunsetSunriseUTCTime(
 
     if (sunriseTime.alwaysDay || sunsetTime.alwaysDay) {
         return {
-            alwaysDay: true
+            alwaysDay: true,
+            alwaysNight: false,
+            sunriseTime: 0,
+            sunsetTime: 0,
         };
     } else if (sunriseTime.alwaysNight || sunsetTime.alwaysNight) {
         return {
-            alwaysNight: true
+            alwaysDay: false,
+            alwaysNight: true,
+            sunriseTime: 0,
+            sunsetTime: 0,
         };
     }
 
     return {
+        alwaysDay: false,
+        alwaysNight: false,
         sunriseTime: sunriseTime.time,
-        sunsetTime: sunsetTime.time
+        sunsetTime: sunsetTime.time,
     };
 }
 
@@ -243,21 +244,13 @@ export function isNightAtLocation(
 ): boolean {
     const time = getSunsetSunriseUTCTime(latitude, longitude, date);
 
-    // eslint-disable-next-line
-    // @ts-ignore
     if (time.alwaysDay) {
         return false;
-    // eslint-disable-next-line
-    // @ts-ignore
     } else if (time.alwaysNight) {
         return true;
     }
 
-    // eslint-disable-next-line
-    // @ts-ignore
     const sunriseTime = time.sunriseTime;
-    // eslint-disable-next-line
-    // @ts-ignore
     const sunsetTime = time.sunsetTime;
     const currentTime = (
         date.getUTCHours() * getDuration({hours: 1}) +
@@ -276,18 +269,12 @@ export function nextTimeChangeAtLocation(
 ): number {
     const time = getSunsetSunriseUTCTime(latitude, longitude, date);
 
-    // eslint-disable-next-line
-    // @ts-ignore
     if (time.alwaysDay) {
         return date.getTime() + getDuration({days: 1});
-    // eslint-disable-next-line
-    // @ts-ignore
     } else if (time.alwaysNight) {
         return date.getTime() + getDuration({days: 1});
     }
 
-    // eslint-disable-next-line
-    // @ts-ignore
     const [firstTimeOnDay, lastTimeOnDay] = time.sunriseTime < time.sunsetTime ? [time.sunriseTime, time.sunsetTime] : [time.sunsetTime, time.sunriseTime];
     const currentTime = (
         date.getUTCHours() * getDuration({hours: 1}) +

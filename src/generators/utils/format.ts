@@ -12,7 +12,7 @@ interface SitesFixesFormatOptions {
     shouldIgnoreProp: (props: string, value: string | string[]) => boolean;
 }
 
-export function formatSitesFixesConfig(fixes: SiteFix[], options: SitesFixesFormatOptions) {
+export function formatSitesFixesConfig(fixes: SiteFix[], options: SitesFixesFormatOptions): string {
     const lines: string[] = [];
 
     fixes.forEach((fix, i) => {

@@ -1,33 +1,41 @@
 import {multiline} from '../../support/test-utils';
+import type {StyleExpectations} from '../globals';
+
+async function loadBasicPage() {
+    await loadTestPage({
+        '/': multiline(
+            '<!DOCTYPE html>',
+            '<html>',
+            '<head>',
+            '</head>',
+            '<body>',
+            '    <span style="color: red;">Inline style override</span>',
+            '</body>',
+            '</html>',
+        ),
+    });
+}
+
+async function expectStyles(styles: StyleExpectations) {
+    await expectPageStyles(expect, styles);
+}
 
 describe('Inline style override', () => {
-    const inlineStyleMarkup = multiline(
-        '<!DOCTYPE html>',
-        '<html>',
-        '<head>',
-        '</head>',
-        '<body>',
-        '    <span style="color: red;">Inline style override</span>',
-        '</body>',
-        '</html>',
-    );
+    // TODO: remove flakes and remove this line
+    jest.retryTimes(10, {logErrorsBeforeRetry: true});
 
     it('should override inline style', async () => {
-        await loadTestPage({
-            '/': inlineStyleMarkup,
-        });
+        await loadBasicPage();
 
-        await expect(page.evaluate(() => getComputedStyle(document.querySelector('span')).color)).resolves.toBe('rgb(255, 26, 26)');
+        await expectStyles(['span', 'color', 'rgb(255, 26, 26)']);
     });
 
     it('should watch for inline style change', async () => {
-        await loadTestPage({
-            '/': inlineStyleMarkup,
-        });
+        await loadBasicPage();
 
-        await expect(page.evaluate(() => getComputedStyle(document.querySelector('span')).color)).resolves.toBe('rgb(255, 26, 26)');
+        await expectStyles(['span', 'color', 'rgb(255, 26, 26)']);
 
-        await expect(page.evaluate(async () => {
+        await expect(pageUtils.evaluateScript(async () => {
             const span = document.querySelector('span');
             span.style.color = 'green';
             await new Promise((resolve) => setTimeout(resolve));

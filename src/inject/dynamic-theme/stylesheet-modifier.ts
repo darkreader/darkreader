@@ -37,7 +37,12 @@ interface ModifySheetOptions {
     isAsyncCancelled: () => boolean;
 }
 
-export function createStyleSheetModifier() {
+interface StyleSheetModifier {
+    modifySheet: (options: ModifySheetOptions) => void;
+    shouldRebuildStyle: () => boolean;
+}
+
+export function createStyleSheetModifier(): StyleSheetModifier {
     let renderId = 0;
     const rulesTextCache = new Set<string>();
     const rulesModCache = new Map<string, ModifiableCSSRule>();
@@ -218,7 +223,7 @@ export function createStyleSheetModifier() {
             }
 
             function handleVarDeclarations(property: string, modified: ReturnType<CSSVariableModifier>, important: boolean, sourceValue: string) {
-                const {declarations: varDecs, onTypeChange} = modified as ReturnType<CSSVariableModifier>;
+                const {declarations: varDecs, onTypeChange} = modified;
                 const varKey = ++varDeclarationCounter;
                 const currentRenderId = renderId;
                 const initialIndex = readyDeclarations.length;

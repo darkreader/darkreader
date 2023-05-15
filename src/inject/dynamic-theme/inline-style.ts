@@ -92,7 +92,7 @@ overridesList.forEach(({cssProp, customProp}) => normalizedPropList[customProp] 
 const INLINE_STYLE_ATTRS = ['style', 'fill', 'stop-color', 'stroke', 'bgcolor', 'color'];
 export const INLINE_STYLE_SELECTOR = INLINE_STYLE_ATTRS.map((attr) => `[${attr}]`).join(', ');
 
-export function getInlineOverrideStyle() {
+export function getInlineOverrideStyle(): string {
     return overridesList.map(({dataAttr, customProp, cssProp}) => {
         return [
             `[${dataAttr}] {`,
@@ -119,7 +119,7 @@ const attrObservers = new Map<Node, MutationObserver>();
 export function watchForInlineStyles(
     elementStyleDidChange: (element: HTMLElement) => void,
     shadowRootDiscovered: (root: ShadowRoot) => void,
-) {
+): void {
     deepWatchForInlineStyles(document, elementStyleDidChange, shadowRootDiscovered);
     iterateShadowHosts(document.documentElement, (host) => {
         deepWatchForInlineStyles(host.shadowRoot!, elementStyleDidChange, shadowRootDiscovered);
@@ -130,7 +130,7 @@ function deepWatchForInlineStyles(
     root: Document | ShadowRoot,
     elementStyleDidChange: (element: HTMLElement) => void,
     shadowRootDiscovered: (root: ShadowRoot) => void,
-) {
+): void {
     if (treeObservers.has(root)) {
         treeObservers.get(root)!.disconnect();
         attrObservers.get(root)!.disconnect();
@@ -216,7 +216,7 @@ function deepWatchForInlineStyles(
     attrObservers.set(root, attrObserver);
 }
 
-export function stopWatchingForInlineStyles() {
+export function stopWatchingForInlineStyles(): void {
     treeObservers.forEach((o) => o.disconnect());
     attrObservers.forEach((o) => o.disconnect());
     treeObservers.clear();
@@ -226,14 +226,14 @@ export function stopWatchingForInlineStyles() {
 const inlineStyleCache = new WeakMap<HTMLElement, string>();
 const filterProps: Array<keyof FilterConfig> = ['brightness', 'contrast', 'grayscale', 'sepia', 'mode'];
 
-function getInlineStyleCacheKey(el: HTMLElement, theme: FilterConfig) {
+function getInlineStyleCacheKey(el: HTMLElement, theme: FilterConfig): string {
     return INLINE_STYLE_ATTRS
         .map((attr) => `${attr}="${el.getAttribute(attr)}"`)
         .concat(filterProps.map((prop) => `${prop}="${theme[prop]}"`))
         .join(' ');
 }
 
-function shouldIgnoreInlineStyle(element: HTMLElement, selectors: string[]) {
+function shouldIgnoreInlineStyle(element: HTMLElement, selectors: string[]): boolean {
     for (let i = 0, len = selectors.length; i < len; i++) {
         const ingnoredSelector = selectors[i];
         if (element.matches(ingnoredSelector)) {
@@ -243,7 +243,7 @@ function shouldIgnoreInlineStyle(element: HTMLElement, selectors: string[]) {
     return false;
 }
 
-export function overrideInlineStyle(element: HTMLElement, theme: FilterConfig, ignoreInlineSelectors: string[], ignoreImageSelectors: string[]) {
+export function overrideInlineStyle(element: HTMLElement, theme: FilterConfig, ignoreInlineSelectors: string[], ignoreImageSelectors: string[]): void {
     const cacheKey = getInlineStyleCacheKey(element, theme);
     if (cacheKey === inlineStyleCache.get(element)) {
         return;
@@ -276,7 +276,7 @@ export function overrideInlineStyle(element: HTMLElement, theme: FilterConfig, i
         // Such that `as ReturnType<CSSVariableModifier>` won't error about the possible
         // string type.
         if (isPropertyVariable && typeof value === 'object') {
-            const typedValue = value as ReturnType<CSSVariableModifier>;
+            const typedValue: ReturnType<CSSVariableModifier> = value;
             typedValue.declarations.forEach(({property, value}) => {
                 !(value instanceof Promise) && element.style.setProperty(property, value);
             });

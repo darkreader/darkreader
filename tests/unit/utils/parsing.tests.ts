@@ -30,8 +30,8 @@ test('type gradients', () => {
             match: '336deg, rgba(0,0,255,.8), rgba(0,0,255,0) 70.71%',
             hasComma: false,
             offset: 17,
-            index: 142
-        }
+            index: 142,
+        },
     ]);
     expect(parseGradient('radial-gradient(rgb(200))')).toEqual([{
         typeGradient: 'radial-gradient',
@@ -56,6 +56,6 @@ test('type gradients', () => {
             hasComma: false,
             index: 54,
             offset: 27,
-        }
+        },
     ]);
 });

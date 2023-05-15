@@ -92,7 +92,7 @@ function joinSelectors(...selectors: string[]) {
     return selectors.filter(Boolean).join(', ');
 }
 
-export function getModifiedUserAgentStyle(theme: Theme, isIFrame: boolean, styleSystemControls: boolean) {
+export function getModifiedUserAgentStyle(theme: Theme, isIFrame: boolean, styleSystemControls: boolean): string {
     const lines: string[] = [];
     if (!isIFrame) {
         lines.push('html {');
@@ -138,7 +138,7 @@ export function getModifiedUserAgentStyle(theme: Theme, isIFrame: boolean, style
     return lines.join('\n');
 }
 
-export function getSelectionColor(theme: Theme) {
+export function getSelectionColor(theme: Theme): {backgroundColorSelection: string; foregroundColorSelection: string} {
     let backgroundColorSelection: string;
     let foregroundColorSelection: string;
     if (theme.selectionColor === 'auto') {
@@ -197,6 +197,7 @@ function getModifiedScrollbarStyle(theme: Theme) {
         colorThumb = hslToString(hsl);
         colorThumbHover = hslToString(lighten(0.1));
         colorThumbActive = hslToString(lighten(0.2));
+        colorCorner = hslToString(darken(0.5));
     }
     lines.push('::-webkit-scrollbar {');
     lines.push(`    background-color: ${colorTrack};`);
@@ -212,9 +213,6 @@ function getModifiedScrollbarStyle(theme: Theme) {
     lines.push(`    background-color: ${colorThumbActive};`);
     lines.push('}');
     lines.push('::-webkit-scrollbar-corner {');
-    // TODO: assign colorCorner a value in else branch above (when theme.scrollbarColor !== 'auto')
-    // eslint-disable-next-line
-    // @ts-ignore
     lines.push(`    background-color: ${colorCorner};`);
     lines.push('}');
     if (isFirefox) {
@@ -225,7 +223,7 @@ function getModifiedScrollbarStyle(theme: Theme) {
     return lines.join('\n');
 }
 
-export function getModifiedFallbackStyle(filter: FilterConfig, {strict}: {strict: boolean}) {
+export function getModifiedFallbackStyle(filter: FilterConfig, {strict}: {strict: boolean}): string {
     const lines: string[] = [];
     // https://github.com/darkreader/darkreader/issues/3618#issuecomment-895477598
     const isMicrosoft = ['microsoft.com', 'docs.microsoft.com'].includes(location.hostname);
@@ -571,7 +569,7 @@ function getVariableDependantModifier(
     return variablesStore.getModifierForVarDependant(prop, value);
 }
 
-export function cleanModificationCache() {
+export function cleanModificationCache(): void {
     clearColorModificationCache();
     imageDetailsCache.clear();
     cleanImageProcessingCache();

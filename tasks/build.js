@@ -4,6 +4,7 @@ import bundleCSS from './bundle-css.js';
 import bundleJS from './bundle-js.js';
 import bundleLocales from './bundle-locales.js';
 import bundleManifest from './bundle-manifest.js';
+import bundleSignature from './bundle-signature.js';
 import clean from './clean.js';
 import copy from './copy.js';
 import saveLog from './log.js';
@@ -12,12 +13,9 @@ import codeStyle from './code-style.js';
 import zip from './zip.js';
 import {runTasks} from './task.js';
 import {log} from './utils.js';
-import {fork} from 'child_process';
+import process from 'node:process';
 import paths from './paths.js';
 const {PLATFORM} = paths;
-
-import {fileURLToPath} from 'url';
-const __filename = fileURLToPath(import.meta.url);
 
 const standardTask = [
     clean,
@@ -32,13 +30,24 @@ const standardTask = [
 const buildTask = [
     ...standardTask,
     codeStyle,
-    zip
+    zip,
 ];
 
-async function build({platforms, debug, watch, log: logging, test}) {
+const signedBuildTask = [
+    ...standardTask,
+    codeStyle,
+    bundleSignature,
+    zip,
+];
+
+async function build({platforms, debug, watch, log: logging, test, version}) {
     log.ok('BUILD');
+    platforms = {
+        ...platforms,
+        [PLATFORM.API]: false,
+    };
     try {
-        await runTasks(debug ? standardTask : buildTask, {platforms, debug, watch, log: logging, test});
+        await runTasks(debug ? standardTask : (version ? signedBuildTask : buildTask), {platforms, debug, watch, log: logging, test, version});
         if (watch) {
             standardTask.forEach((task) => task.watch(platforms));
             reload.reload({type: reload.FULL});
@@ -47,6 +56,7 @@ async function build({platforms, debug, watch, log: logging, test}) {
             log.ok('MISSION PASSED! RESPECT +');
         }
     } catch (err) {
+        console.log(err);
         log.error(`MISSION FAILED!`);
         process.exit(13);
     }
@@ -59,7 +69,7 @@ async function api(debug, watch) {
         if (!debug) {
             tasks.push(codeStyle);
         }
-        await runTasks(tasks, {platforms: {[PLATFORM.API]: true}, debug, watch, log: false, test: false});
+        await runTasks(tasks, {platforms: {[PLATFORM.API]: true}, debug, watch, version: null, log: false, test: false});
         if (watch) {
             bundleAPI.watch();
             log.ok('Watching...');
@@ -72,54 +82,68 @@ async function api(debug, watch) {
     }
 }
 
-async function executeChildProcess(args) {
-    if (process.env.BUILD_CHILD) {
-        throw new Error('Infinite loop');
+async function run({release, debug, platforms, watch, log, test, version}) {
+    const regular = Object.keys(platforms).some((platform) => platform !== PLATFORM.API && platforms[platform]);
+    if (release && regular) {
+        await build({platforms, version, debug: false, watch: false, log: null, test: false});
     }
-    const env = {...process.env, BUILD_CHILD: '1'};
-    const child = fork(__filename, args, {env});
-    // Send SIGINTs as SIGKILLs, which are not ignored
-    process.on('SIGINT', () => {
-        child.kill('SIGKILL');
-        process.exit(130);
-    });
-    return new Promise((resolve, reject) => child.on('error', reject).on('close', resolve));
+    if (debug && regular) {
+        await build({platforms, version, debug, watch, log, test});
+    }
+    if (platforms[PLATFORM.API]) {
+        await api(debug, watch);
+    }
 }
 
-async function run() {
-    const args = process.argv.slice(2);
-
-    // Enable Ctrl+C to cancel the build immediately
-    if (!process.env.BUILD_CHILD) {
-        return executeChildProcess(args);
+function getParams(args) {
+    const argMap = {
+        '--api': PLATFORM.API,
+        '--chrome': PLATFORM.CHROMIUM_MV2,
+        '--chrome-mv2': PLATFORM.CHROMIUM_MV2,
+        '--chrome-mv3': PLATFORM.CHROMIUM_MV3,
+        '--firefox': PLATFORM.FIREFOX_MV2,
+        '--firefox-mv2': PLATFORM.FIREFOX_MV2,
+        '--firefox-mv3': PLATFORM.FIREFOX_MV3,
+        '--thunderbird': PLATFORM.THUNDERBIRD,
+    };
+    const platforms = {
+        [PLATFORM.CHROMIUM_MV2]: false,
+        [PLATFORM.CHROMIUM_MV3]: false,
+        [PLATFORM.FIREFOX_MV2]: false,
+        [PLATFORM.THUNDERBIRD]: false,
+    };
+    let allPlatforms = true;
+    for (const arg of args) {
+        if (argMap[arg]) {
+            platforms[argMap[arg]] = true;
+            allPlatforms = false;
+        }
+    }
+    if (allPlatforms) {
+        Object.keys(platforms).forEach((platform) => platforms[platform] = true);
     }
 
-    const validArgs = ['--api', '--chrome', '--chrome-mv3', '--firefox', '--thunderbird', '--release', '--debug', '--watch', '--log-info', '--log-warn', '--test'];
-    args.filter((arg) => !validArgs.includes(arg)).forEach((arg) => log.warn(`Unknown argument ${arg}`));
+    // TODO(Anton): remove me
+    if (platforms[PLATFORM.FIREFOX_MV3]) {
+        platforms[PLATFORM.FIREFOX_MV3] = false;
+        console.log('Firefox MV3 build is not supported yet');
+    }
 
-    const allPlatforms = !(args.includes('--api') || args.includes('--chrome') || args.includes('--chrome-mv3') || args.includes('--firefox') || args.includes('--thunderbird'));
-    const platforms = {
-        [PLATFORM.CHROME]: allPlatforms || args.includes('--chrome'),
-        [PLATFORM.CHROME_MV3]: allPlatforms || args.includes('--chrome-mv3'),
-        [PLATFORM.FIREFOX]: allPlatforms || args.includes('--firefox'),
-        [PLATFORM.THUNDERBIRD]: allPlatforms || args.includes('--thunderbird'),
-    };
-
+    const versionArg = args.find((a) => a.startsWith('--version='));
+    const version = versionArg ? versionArg.substring('--version='.length) : null;
 
     const release = args.includes('--release');
     const debug = args.includes('--debug');
     const watch = args.includes('--watch');
     const logInfo = watch && args.includes('--log-info');
     const logWarn = watch && args.includes('--log-warn');
-    if (release && Object.values(platforms).some(Boolean)) {
-        await build({platforms, debug: false, watch: false, log: null, test: false});
-    }
-    if (debug && Object.values(platforms).some(Boolean)) {
-        await build({platforms, debug, watch, log: logWarn ? 'warn' : (logInfo ? 'info' : null), test: args.includes('--test')});
-    }
-    if (args.includes('--api')) {
-        await api(debug, watch);
-    }
+    const logAssert = watch && args.includes('--log-assert');
+    const log = logWarn ? 'warn' : (logInfo ? 'info' : (logAssert ? 'assert' : null));
+    const test = args.includes('--test');
+
+    return {release, debug, platforms, watch, log, test, version};
 }
 
-run();
+const args = process.argv.slice(2);
+const params = getParams(args);
+run(params);

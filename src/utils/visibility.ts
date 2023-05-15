@@ -34,19 +34,19 @@ const listenerOptions: any = {
     passive: true,
 };
 
-function watchForDocumentVisibility() {
+function watchForDocumentVisibility(): void {
     document.addEventListener('visibilitychange', documentVisibilityListener!, listenerOptions);
     window.addEventListener('pageshow', documentVisibilityListener!, listenerOptions);
     window.addEventListener('focus', documentVisibilityListener!, listenerOptions);
 }
 
-function stopWatchingForDocumentVisibility() {
+function stopWatchingForDocumentVisibility(): void {
     document.removeEventListener('visibilitychange', documentVisibilityListener!, listenerOptions);
     window.removeEventListener('pageshow', documentVisibilityListener!, listenerOptions);
     window.removeEventListener('focus', documentVisibilityListener!, listenerOptions);
 }
 
-export function setDocumentVisibilityListener(callback: () => void) {
+export function setDocumentVisibilityListener(callback: () => void): void {
     const alreadyWatching = Boolean(documentVisibilityListener);
     documentVisibilityListener = () => {
         if (!document.hidden) {
@@ -60,11 +60,11 @@ export function setDocumentVisibilityListener(callback: () => void) {
     }
 }
 
-export function removeDocumentVisibilityListener() {
+export function removeDocumentVisibilityListener(): void {
     stopWatchingForDocumentVisibility();
     documentVisibilityListener = null;
 }
 
-export function documentIsVisible() {
+export function documentIsVisible(): boolean {
     return documentIsVisible_;
 }

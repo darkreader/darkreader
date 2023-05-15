@@ -1,4 +1,4 @@
-export function injectProxy(enableStyleSheetsProxy: boolean) {
+export function injectProxy(enableStyleSheetsProxy: boolean, enableCustomElementRegistryProxy: boolean): void {
     document.dispatchEvent(new CustomEvent('__darkreader__inlineScriptsAllowed'));
 
     const addRuleDescriptor = Object.getOwnPropertyDescriptor(CSSStyleSheet.prototype, 'addRule');
@@ -8,6 +8,9 @@ export function injectProxy(enableStyleSheetsProxy: boolean) {
 
     const documentStyleSheetsDescriptor = enableStyleSheetsProxy ?
         Object.getOwnPropertyDescriptor(Document.prototype, 'styleSheets') : null;
+
+    const customElementRegistryDefineDescriptor = enableCustomElementRegistryProxy ?
+        Object.getOwnPropertyDescriptor(CustomElementRegistry.prototype, 'define') : null;
 
     // Reference:
     // https://github.com/darkreader/darkreader/issues/6480#issuecomment-897696175
@@ -44,6 +47,9 @@ export function injectProxy(enableStyleSheetsProxy: boolean) {
         if (enableStyleSheetsProxy) {
             Object.defineProperty(Document.prototype, 'styleSheets', documentStyleSheetsDescriptor!);
         }
+        if (enableCustomElementRegistryProxy) {
+            Object.defineProperty(CustomElementRegistry.prototype, 'define', customElementRegistryDefineDescriptor!);
+        }
         if (shouldWrapHTMLElement) {
             Object.defineProperty(Element.prototype, 'getElementsByTagName', getElementsByTagNameDescriptor!);
         }
@@ -52,14 +58,16 @@ export function injectProxy(enableStyleSheetsProxy: boolean) {
         }
     };
 
-    const addUndefinedResolver = (e: CustomEvent<{tag: string}>) => {
-        customElements.whenDefined(e.detail.tag).then(() => {
-            document.dispatchEvent(new CustomEvent('__darkreader__isDefined', {detail: {tag: e.detail.tag}}));
+    const addUndefinedResolverInner = (tag: string) => {
+        customElements.whenDefined(tag).then(() => {
+            document.dispatchEvent(new CustomEvent('__darkreader__isDefined', {detail: {tag}}));
         });
     };
 
-    document.addEventListener('__darkreader__cleanUp', cleanUp);
-    document.addEventListener('__darkreader__addUndefinedResolver', addUndefinedResolver);
+    const addUndefinedResolver = (e: CustomEvent<{tag: string}>) => addUndefinedResolverInner(e.detail.tag);
+
+    document.addEventListener('__darkreader__cleanUp', cleanUp, {passive: true});
+    document.addEventListener('__darkreader__addUndefinedResolver', addUndefinedResolver, {passive: true});
 
     const updateSheetEvent = new Event('__darkreader__updateSheet');
 
@@ -117,10 +125,15 @@ export function injectProxy(enableStyleSheetsProxy: boolean) {
         const styleSheetListBehavior: ProxyHandler<StyleSheetList> = {
             get: function (_: StyleSheetList, property: string) {
                 return getCurrentValue()[property];
-            }
+            },
         };
         elements = new Proxy(elements, styleSheetListBehavior);
         return elements;
+    }
+
+    function proxyCustomElementRegistryDefine(name: string, constructor: any, options: any) {
+        addUndefinedResolverInner(name);
+        customElementRegistryDefineDescriptor!.value.call(this, name, constructor, options);
     }
 
     function proxyGetElementsByTagName(tagName: string): NodeListOf<HTMLElement> {
@@ -144,7 +157,7 @@ export function injectProxy(enableStyleSheetsProxy: boolean) {
         const nodeListBehavior: ProxyHandler<NodeListOf<HTMLElement>> = {
             get: function (_: NodeListOf<HTMLElement>, property: string) {
                 return getCurrentElementValue()[Number(property) || property];
-            }
+            },
         };
         elements = new Proxy(elements, nodeListBehavior);
         return elements;
@@ -164,6 +177,9 @@ export function injectProxy(enableStyleSheetsProxy: boolean) {
     Object.defineProperty(CSSStyleSheet.prototype, 'removeRule', Object.assign({}, removeRuleDescriptor, {value: proxyRemoveRule}));
     if (enableStyleSheetsProxy) {
         Object.defineProperty(Document.prototype, 'styleSheets', Object.assign({}, documentStyleSheetsDescriptor, {get: proxyDocumentStyleSheets}));
+    }
+    if (enableCustomElementRegistryProxy) {
+        Object.defineProperty(CustomElementRegistry.prototype, 'define', Object.assign({}, customElementRegistryDefineDescriptor, {value: proxyCustomElementRegistryDefine}));
     }
     if (shouldWrapHTMLElement) {
         Object.defineProperty(Element.prototype, 'getElementsByTagName', Object.assign({}, getElementsByTagNameDescriptor, {value: proxyGetElementsByTagName}));

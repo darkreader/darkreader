@@ -6,13 +6,13 @@ import {ThemeEngine} from '../../../generators/theme-engines';
 import {DEVTOOLS_DOCS_URL} from '../../../utils/links';
 import type {DevToolsData, ExtWrapper} from '../../../definitions';
 import {getCurrentThemePreset} from '../../popup/theme/utils';
-import {isFirefox} from '../../../utils/platform';
+import {isFirefox, isMobile} from '../../../utils/platform';
 
 type BodyProps = ExtWrapper & {devtools: DevToolsData};
 
 function Body({data, actions, devtools}: BodyProps) {
     const context = getContext();
-    const {state, setState} = useState({errorText: null as string | null});
+    const {state, setState} = useState<{errorText: string | null}>({errorText: null});
     let textNode: HTMLTextAreaElement;
     const previewButtonText = data.settings.previewNewDesign ? 'Switch to old design' : 'Preview new design';
     const {theme} = getCurrentThemePreset({data, actions});
@@ -40,9 +40,10 @@ function Body({data, actions, devtools}: BodyProps) {
         if (!state.errorText) {
             textNode.value = wrapper.fixesText;
         }
-        node.addEventListener('keydown', (e) => {
-            if (e.key === 'Tab') {
-                e.preventDefault();
+        // Must not be passive because it calls preventDefault(), must not be once
+        node.addEventListener('keydown', ({key, preventDefault}) => {
+            if (key === 'Tab') {
+                preventDefault();
                 const indent = ' '.repeat(4);
                 if (isFirefox) {
                     // https://bugzilla.mozilla.org/show_bug.cgi?id=1220696
@@ -61,7 +62,7 @@ function Body({data, actions, devtools}: BodyProps) {
         });
     }
 
-    async function apply() {
+    async function apply(): Promise<void> {
         const text = textNode.value;
         try {
             await wrapper.apply(text);
@@ -73,12 +74,12 @@ function Body({data, actions, devtools}: BodyProps) {
         }
     }
 
-    function showDialog() {
+    function showDialog(): void {
         context.store.isDialogVisible = true;
         context.refresh();
     }
 
-    function hideDialog() {
+    function hideDialog(): void {
         context.store.isDialogVisible = false;
         context.refresh();
     }
@@ -91,13 +92,13 @@ function Body({data, actions, devtools}: BodyProps) {
         />
     ) : null;
 
-    function reset() {
+    function reset(): void {
         context.store.isDialogVisible = false;
         wrapper.reset();
         setState({errorText: null});
     }
 
-    function toggleDesign() {
+    function toggleDesign(): void {
         actions.changeSettings({previewNewDesign: !data.settings.previewNewDesign});
     }
 
@@ -123,7 +124,7 @@ function Body({data, actions, devtools}: BodyProps) {
                     {dialog}
                 </Button>
                 <Button onclick={apply}>Apply</Button>
-                <Button class="preview-design-button" onclick={toggleDesign}>{previewButtonText}</Button>
+                {isMobile ? null : <Button class="preview-design-button" onclick={toggleDesign}>{previewButtonText}</Button>}
             </div>
             <p id="description">
                 Read about this tool <strong><a href={DEVTOOLS_DOCS_URL} target="_blank" rel="noopener noreferrer">here</a></strong>.

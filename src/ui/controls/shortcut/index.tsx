@@ -142,13 +142,13 @@ export default function ShortcutLink(props: ShortcutLinkProps) {
         if (isEdge) {
             chrome.tabs.create({
                 url: `edge://extensions/shortcuts`,
-                active: true
+                active: true,
             });
             return;
         }
         chrome.tabs.create({
             url: `chrome://extensions/configureCommands#command-${chrome.runtime.id}-${props.commandName}`,
-            active: true
+            active: true,
         });
     }
 

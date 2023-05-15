@@ -11,7 +11,7 @@ const srcDir = 'src';
  * @typedef copyEntry
  * @property {string} src
  * @property {string} reloadType
- * @property {(typeof PLATFORM.CHROME)[] | undefined} [platforms]
+ * @property {(typeof PLATFORM.CHROMIUM_MV3)[] | undefined} [platforms]
  */
 
 /** @type {copyEntry[]} */
@@ -19,7 +19,7 @@ const copyEntries = [
     {
         src: 'background/index.html',
         reloadType: reload.FULL,
-        platforms: [PLATFORM.CHROME, PLATFORM.FIREFOX, PLATFORM.THUNDERBIRD]
+        platforms: [PLATFORM.CHROMIUM_MV2, PLATFORM.FIREFOX_MV2, PLATFORM.THUNDERBIRD],
     },
     {
         src: 'config/**/*.{config,drconf}',
@@ -74,8 +74,10 @@ async function copy({platforms, debug}) {
         }
         const files = await getPaths(`${srcDir}/${entry.src}`);
         for (const file of files) {
-            for (const platform of (entry.platforms || enabledPlatforms)) {
-                promises.push(copyEntry(file, {debug, platform}));
+            for (const platform of enabledPlatforms) {
+                if (entry.platforms === undefined || entry.platforms.includes(platform)) {
+                    promises.push(copyEntry(file, {debug, platform}));
+                }
             }
         }
     }

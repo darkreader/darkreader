@@ -18,8 +18,8 @@ function changeMetaThemeColor(meta: HTMLMetaElement, theme: FilterConfig) {
     meta.content = modifyBackgroundColor(color, theme);
 }
 
-export function changeMetaThemeColorWhenAvailable(theme: FilterConfig) {
-    const meta = document.querySelector(metaThemeColorSelector) as HTMLMetaElement;
+export function changeMetaThemeColorWhenAvailable(theme: FilterConfig): void {
+    const meta: HTMLMetaElement = document.querySelector(metaThemeColorSelector)!;
     if (meta) {
         changeMetaThemeColor(meta, theme);
     } else {
@@ -44,7 +44,7 @@ export function changeMetaThemeColorWhenAvailable(theme: FilterConfig) {
     }
 }
 
-export function restoreMetaThemeColor() {
+export function restoreMetaThemeColor(): void {
     if (observer) {
         observer.disconnect();
         observer = null;

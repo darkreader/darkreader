@@ -37,7 +37,7 @@ type PageId = (
 );
 
 let popstate: (() => void) | null = null;
-isMobile && window.addEventListener('popstate', () => popstate && popstate());
+isMobile && window.addEventListener('popstate', () => popstate && popstate(), {passive: true});
 
 function Pages(props: ViewProps) {
     const context = getContext();
@@ -80,7 +80,7 @@ function Pages(props: ViewProps) {
 
     function goBack() {
         const activePage = store.activePage;
-        const settingsPageSubpages = ['automation', 'manage-settings', 'site-list'] as PageId[];
+        const settingsPageSubpages: PageId[] = ['automation', 'manage-settings', 'site-list'];
         if (settingsPageSubpages.includes(activePage)) {
             store.activePage = 'settings';
         } else {
@@ -158,7 +158,7 @@ export default function Body(props: ViewProps) {
     const context = getContext();
     context.onCreate(() => {
         if (isMobile) {
-            window.addEventListener('contextmenu', (e) => e.preventDefault());
+            window.addEventListener('contextmenu', ({preventDefault}) => preventDefault());
         }
     });
     context.onRemove(() => {

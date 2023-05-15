@@ -49,9 +49,9 @@ export default function Track(props: TrackProps) {
             targetNode.classList.remove('track--active');
         }
 
-        window.addEventListener('mousemove', onMouseMove);
-        window.addEventListener('mouseup', onMouseUp);
-        window.addEventListener('keypress', onKeyPress);
+        window.addEventListener('mousemove', onMouseMove, {passive: true});
+        window.addEventListener('mouseup', onMouseUp, {passive: true});
+        window.addEventListener('keypress', onKeyPress, {passive: true});
 
         const value = getValue(e.clientX);
         setWidth(value);

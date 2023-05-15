@@ -66,7 +66,7 @@ describe('State manager utility', () => {
 
         const stateManager = new StateManagerImpl(key, parent, {
             fromParent: 'fromDefault',
-            fromStorage: 'fromDefault'
+            fromStorage: 'fromDefault',
         }, {get, set}, noop, noop);
 
         expect(getMock).not.toBeCalled();
@@ -230,7 +230,7 @@ describe('State manager utility', () => {
         expect(storage).toEqual({
             key: {
                 count: 5,
-            }
+            },
         });
 
         await nextTick();
@@ -314,7 +314,7 @@ describe('State manager utility', () => {
         expect(storage).toEqual({
             key: {
                 count: 5,
-            }
+            },
         });
 
         await nextTick();
@@ -375,7 +375,7 @@ describe('State manager utility', () => {
         await stateManager.loadState();
 
         expect(parent).toEqual({
-            data: 'fromDefault'
+            data: 'fromDefault',
         });
 
         expect(setCount).toEqual(0);
@@ -455,7 +455,7 @@ describe('State manager utility', () => {
         parent.data = 'new';
         await stateManager.loadState();
         expect(parent).toEqual({
-            data: 'new'
+            data: 'new',
         });
         expect(getCount).toEqual(1);
         expect(setCount).toEqual(0);
@@ -476,7 +476,7 @@ describe('State manager utility', () => {
         expect(setCount).toEqual(1);
 
         expect(parent).toEqual({
-            data: 'new'
+            data: 'new',
         });
 
         resolveSet();
@@ -536,8 +536,8 @@ describe('State manager utility', () => {
             onChangedListener!({
                 [key]: {
                     oldValue,
-                    newValue: data
-                }
+                    newValue: data,
+                },
             });
         };
 
@@ -595,7 +595,7 @@ describe('State manager utility', () => {
         parent.data = 'new';
         await stateManager.loadState();
         expect(parent).toEqual({
-            data: 'new'
+            data: 'new',
         });
         expect(getCount).toEqual(2);
         expect(setCount).toEqual(0);
@@ -613,7 +613,7 @@ describe('State manager utility', () => {
 
         // During data race the JS-world data does not get overwriten
         expect(parent).toEqual({
-            data: 'new'
+            data: 'new',
         });
 
         resolveSet();

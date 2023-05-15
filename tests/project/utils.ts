@@ -29,6 +29,11 @@ export async function childClosed(child: ChildProcess, options?: ChildClosedOpti
     return childPromises;
 }
 
+interface WatchStream {
+    forCondition: (cb: (value: string) => boolean) => Promise<void>;
+    forMatch: (regExp: RegExp) => Promise<void>;
+}
+
 /**
  * Returns a promise that resolves when a certain condition has been met, based on the content of a stream.
  *
@@ -36,7 +41,7 @@ export async function childClosed(child: ChildProcess, options?: ChildClosedOpti
  * await watchStream(child.stdout).forMatch(/Config loaded/)
  * thisRunsAfterConfigLoads();
  */
-export const watchStream = (readable: Readable, options?: {encoding: BufferEncoding}) => {
+export const watchStream = (readable: Readable, options?: {encoding: BufferEncoding}): WatchStream => {
     if (!readable.readableEncoding) {
         readable.setEncoding(options?.encoding || 'utf-8');
     }

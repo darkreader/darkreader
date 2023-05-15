@@ -29,7 +29,7 @@ describe('Custom HTML elements', () => {
 
         await pageUtils.evaluateScript(async () => {
             class ElementWitAsync extends HTMLElement {
-                constructor() {
+                public constructor() {
                     super();
                     const root = this.attachShadow({mode: 'open'});
                     setTimeout(() => root.innerHTML =

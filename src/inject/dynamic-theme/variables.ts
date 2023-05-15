@@ -39,7 +39,7 @@ export class VariablesStore {
     private unstableVarValues = new Map<string, string>();
     private onRootVariableDefined: () => void;
 
-    clear(): void {
+    public clear(): void {
         this.varTypes.clear();
         this.rulesQueue.splice(0);
         this.definedVars.clear();
@@ -60,11 +60,11 @@ export class VariablesStore {
         );
     }
 
-    addRulesForMatching(rules: CSSRuleList): void {
+    public addRulesForMatching(rules: CSSRuleList): void {
         this.rulesQueue.push(rules);
     }
 
-    matchVariablesAndDependants(): void {
+    public matchVariablesAndDependants(): void {
         this.changedTypeVars.clear();
         this.initialVarTypes = new Map(this.varTypes);
         this.collectRootVariables();
@@ -122,7 +122,7 @@ export class VariablesStore {
         this.changedTypeVars.clear();
     }
 
-    getModifierForVariable(options: {
+    public getModifierForVariable(options: {
         varName: string;
         sourceValue: string;
         rule: CSSStyleRule;
@@ -217,7 +217,7 @@ export class VariablesStore {
         };
     }
 
-    getModifierForVarDependant(property: string, sourceValue: string): CSSValueModifier | null {
+    public getModifierForVarDependant(property: string, sourceValue: string): CSSValueModifier | null {
         // TODO(gusted): This condition is incorrect, as the sourceValue still contains a variable.
         // Simply replacing it with some definition is incorrect as variables are element-independent.
         // Fully handling this requires having a function that gives the variable's value given an
@@ -477,11 +477,11 @@ export class VariablesStore {
         });
     }
 
-    setOnRootVariableChange(callback: () => void): void {
+    public setOnRootVariableChange(callback: () => void): void {
         this.onRootVariableDefined = callback;
     }
 
-    putRootVars(styleElement: HTMLStyleElement, theme: Theme): void {
+    public putRootVars(styleElement: HTMLStyleElement, theme: Theme): void {
         const sheet = styleElement.sheet!;
         if (sheet.cssRules.length > 0) {
             sheet.deleteRule(0);

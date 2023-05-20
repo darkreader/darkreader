@@ -1,6 +1,12 @@
 // Loaded with HTML/DOM only
 
 export function multiline(...lines: string[]): string {
+    if (lines.length < 1) {
+        return '\n';
+    }
+    if (lines[lines.length - 1] !== '') {
+        lines.push('');
+    }
     return lines.join('\n');
 }
 

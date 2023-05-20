@@ -187,7 +187,7 @@ describe('Construct single fix via combineFixes()', () => {
             {
                 ...emptyFix,
                 url: ['example.com'],
-                css: 'h1 { color: yellow; }',
+                css: 'h1 { color: yellow; }\n',
             },
         ])!.css).toBe(multiline(
             'body { background: blue; }',

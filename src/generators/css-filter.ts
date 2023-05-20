@@ -150,7 +150,7 @@ function createLeadingRule(filterValue: string): string {
         'html {',
         `  -webkit-filter: ${filterValue} !important;`,
         `  filter: ${filterValue} !important;`,
-        '}'
+        '}',
     ].join('\n');
 }
 
@@ -267,6 +267,6 @@ export function formatInversionFixes(inversionFixes: InversionFix[]): string {
                 return !value;
             }
             return !(Array.isArray(value) && value.length > 0);
-        }
+        },
     });
 }

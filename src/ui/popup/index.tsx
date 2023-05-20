@@ -5,7 +5,7 @@ import Body from './components/body';
 import {popupHasBuiltInHorizontalBorders, popupHasBuiltInBorders, fixNotClosingPopupOnNavigation} from './utils/issues';
 import type {ExtensionData, ExtensionActions} from '../../definitions';
 import {isMobile, isFirefox} from '../../utils/platform';
-import {MessageType} from '../../utils/message';
+import {MessageTypeBGtoCS, MessageTypeBGtoUI} from '../../utils/message';
 import {getFontList} from '../utils';
 
 function renderBody(data: ExtensionData, fonts: string[], actions: ExtensionActions) {
@@ -35,7 +35,7 @@ async function start() {
 
     const [data, fonts] = await Promise.all([
         connector.getData(),
-        getFontList()
+        getFontList(),
     ]);
     renderBody(data, fonts, connector);
     connector.subscribeToChanges((data) => renderBody(data, fonts, connector));
@@ -55,7 +55,7 @@ if (isFirefox) {
 declare const __DEBUG__: boolean;
 if (__DEBUG__) {
     chrome.runtime.onMessage.addListener(({type}) => {
-        if (type === MessageType.BG_CSS_UPDATE) {
+        if (type === MessageTypeBGtoCS.CSS_UPDATE) {
             document.querySelectorAll('link[rel="stylesheet"]').forEach((link: HTMLLinkElement) => {
                 const url = link.href;
                 link.disabled = true;
@@ -67,7 +67,7 @@ if (__DEBUG__) {
             });
         }
 
-        if (type === MessageType.BG_UI_UPDATE) {
+        if (type === MessageTypeBGtoUI.UPDATE) {
             location.reload();
         }
     });

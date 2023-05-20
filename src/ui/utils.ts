@@ -1,6 +1,6 @@
-import {MessageType} from '../utils/message';
+import {MessageTypeUItoBG} from '../utils/message';
 import {isFirefox, isMobile} from '../utils/platform';
-import type {Message} from '../definitions';
+import type {MessageUItoBG} from '../definitions';
 
 declare const __CHROMIUM_MV3__: boolean;
 
@@ -46,7 +46,7 @@ export function saveFile(name: string, content: string): void {
         a.download = name;
         a.click();
     } else {
-        chrome.runtime.sendMessage<Message>({type: MessageType.UI_SAVE_FILE, data: {name, content}});
+        chrome.runtime.sendMessage<MessageUItoBG>({type: MessageTypeUItoBG.SAVE_FILE, data: {name, content}});
     }
 }
 

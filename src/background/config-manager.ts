@@ -85,7 +85,7 @@ export default class ConfigManager {
             try {
                 $config = await readText({
                     url: `${remoteURL}?nocache=${Date.now()}`,
-                    timeout: REMOTE_TIMEOUT_MS
+                    timeout: REMOTE_TIMEOUT_MS,
                 });
             } catch (err) {
                 console.error(`${name} remote load error`, err);
@@ -154,7 +154,7 @@ export default class ConfigManager {
         if (!config) {
             await UserStorage.loadSettings();
             config = {
-                local: !UserStorage.settings.syncSitesFixes
+                local: !UserStorage.settings.syncSitesFixes,
             };
         }
 

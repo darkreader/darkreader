@@ -229,7 +229,7 @@ const rules = {
                         // Simply add a new line after the function declaration.
                         fix: (fixer) => {
                             return fixer.insertTextAfterRange(range, '\n');
-                        }
+                        },
                     });
                 }
                 // Check for the line AFTER the should be empty line.
@@ -267,7 +267,7 @@ const rules = {
                             // of all the unecassary new lines.
                             fix: (fixer) => {
                                 return fixer.removeRange(range);
-                            }
+                            },
                         });
                     }
                 }
@@ -278,10 +278,10 @@ const rules = {
                 'FunctionExpression': checkNewLine,
                 'ArrowFunctionExpression': checkNewLine,
             };
-        }
-    }
+        },
+    },
 };
 
 module.exports = {
-    rules
+    rules,
 };

@@ -6,7 +6,7 @@ enum ContentScriptManagerState {
     UNKNOWN,
     REGISTERING,
     REGISTERED,
-    NOTREGISTERED,
+    NOTREGISTERED
 }
 
 export default class ContentScriptManager {

@@ -44,7 +44,7 @@ async function build({platforms, debug, watch, log: logging, test, version}) {
     log.ok('BUILD');
     platforms = {
         ...platforms,
-        [PLATFORM.API]: false
+        [PLATFORM.API]: false,
     };
     try {
         await runTasks(debug ? standardTask : (version ? signedBuildTask : buildTask), {platforms, debug, watch, log: logging, test, version});

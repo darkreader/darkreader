@@ -74,6 +74,6 @@ export function createAdoptedStyleSheetOverride(node: Document | ShadowRoot): Ad
 
     return {
         render,
-        destroy
+        destroy,
     };
 }

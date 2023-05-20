@@ -122,6 +122,6 @@ export default function VirtualScroll(props: VirtualScrollProps) {
                 renderContent(rootNode, -1);
             },
         },
-        children: []
+        children: [],
     } as Malevic.Spec;
 }

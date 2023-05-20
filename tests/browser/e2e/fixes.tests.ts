@@ -75,7 +75,7 @@ describe('Correct fixes are chosen', () => {
             ['document', 'color', 'rgb(232, 230, 227)'],
             ['body', 'background-color', 'rgb(0, 0, 128)'],
             ['body', 'color', 'rgb(255, 255, 255)'],
-            ['h1', 'color', 'rgb(255, 165, 0)']
+            ['h1', 'color', 'rgb(255, 165, 0)'],
         ]);
 
         await devtoolsUtils.reset();
@@ -89,7 +89,7 @@ describe('Correct fixes are chosen', () => {
             ['document', 'color', 'rgb(232, 230, 227)'],
             ['body', 'background-color', 'rgb(24, 26, 27)'],
             ['body', 'color', 'rgb(232, 230, 227)'],
-            ['h1', 'color', 'rgb(255, 26, 26)']
+            ['h1', 'color', 'rgb(255, 26, 26)'],
         ]);
 
         await devtoolsUtils.paste(multiline(
@@ -128,7 +128,7 @@ describe('Correct fixes are chosen', () => {
             ['document', 'color', 'rgb(232, 230, 227)'],
             ['body', 'background-color', 'rgb(0, 0, 128)'],
             ['body', 'color', 'rgb(255, 255, 255)'],
-            ['h1', 'color', 'rgb(255, 165, 0)']
+            ['h1', 'color', 'rgb(255, 165, 0)'],
         ]);
 
         await devtoolsUtils.reset();
@@ -142,7 +142,7 @@ describe('Correct fixes are chosen', () => {
             ['document', 'color', 'rgb(232, 230, 227)'],
             ['body', 'background-color', 'rgb(24, 26, 27)'],
             ['body', 'color', 'rgb(232, 230, 227)'],
-            ['h1', 'color', 'rgb(255, 26, 26)']
+            ['h1', 'color', 'rgb(255, 26, 26)'],
         ]);
 
         await devtoolsUtils.paste(multiline(

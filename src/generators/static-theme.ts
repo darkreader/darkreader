@@ -221,7 +221,7 @@ export function parseStaticThemes($themes: string): StaticTheme[] {
                 return true;
             }
             return parseArray(value);
-        }
+        },
     });
 }
 
@@ -246,7 +246,7 @@ export function formatStaticThemes(staticThemes: StaticTheme[]): string {
                 return !value;
             }
             return !(Array.isArray(value) && value.length > 0);
-        }
+        },
     });
 }
 
@@ -265,14 +265,14 @@ function getThemeFor(url: string, staticThemes: string, staticThemesIndex: SiteP
                 return true;
             }
             return parseArray(value);
-        }
+        },
     });
     const sortedBySpecificity = themes
         .slice(1)
         .map((theme) => {
             return {
                 specificity: isURLInList(url, theme.url) ? theme.url[0].length : 0,
-                theme
+                theme,
             };
         })
         .filter(({specificity}) => specificity > 0)

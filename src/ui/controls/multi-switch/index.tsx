@@ -21,7 +21,7 @@ export default function MultiSwitch(props: MultiSwitchProps, ...children: Malevi
                 <span
                     class={{
                         'multi-switch__option': true,
-                        'multi-switch__option--selected': option === props.value
+                        'multi-switch__option--selected': option === props.value,
                     }}
                     onclick={() => option !== props.value && props.onChange(option)}
                 >

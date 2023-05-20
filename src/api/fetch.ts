@@ -6,7 +6,7 @@ const throwCORSError = async (url: string) => {
             'Overview your URLs and CORS policies or use',
             '`DarkReader.setFetchMethod(fetch: (url) => Promise<Response>))`.',
             'See if using `DarkReader.setFetchMethod(window.fetch)`',
-            'before `DarkReader.enable()` works.'
+            'before `DarkReader.enable()` works.',
         ].join(' '),
     ));
 };

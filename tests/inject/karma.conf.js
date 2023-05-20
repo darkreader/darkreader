@@ -98,7 +98,7 @@ export function configureKarma(config, env) {
         if (chrome || all) {
             options.customLaunchers['CIChromeHeadless'] = {
                 base: 'ChromeHeadless',
-                flags: ['--no-sandbox', '--disable-setuid-sandbox']
+                flags: ['--no-sandbox', '--disable-setuid-sandbox'],
             };
             options.browsers.push('CIChromeHeadless');
         }
@@ -126,7 +126,7 @@ export function configureKarma(config, env) {
         options.reporters.push('coverage');
         options.coverageReporter = {
             type: 'html',
-            dir: 'tests/inject/coverage/'
+            dir: 'tests/inject/coverage/',
         };
     }
 

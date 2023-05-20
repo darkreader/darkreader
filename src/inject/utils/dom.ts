@@ -192,7 +192,7 @@ export function iterateShadowHosts(root: Node | null, iterator: (host: Element) 
         {
             acceptNode(node) {
                 return (node as Element).shadowRoot == null ? NodeFilter.FILTER_SKIP : NodeFilter.FILTER_ACCEPT;
-            }
+            },
         },
     );
     for (

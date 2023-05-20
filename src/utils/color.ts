@@ -271,7 +271,7 @@ function getColorByName($color: string): RGBA {
         r: (n >> 16) & 255,
         g: (n >> 8) & 255,
         b: (n >> 0) & 255,
-        a: 1
+        a: 1,
     };
 }
 
@@ -281,7 +281,7 @@ function getSystemColor($color: string): RGBA {
         r: (n >> 16) & 255,
         g: (n >> 8) & 255,
         b: (n >> 0) & 255,
-        a: 1
+        a: 1,
     };
 }
 
@@ -502,7 +502,7 @@ const systemColors: Map<string, number> = new Map(Object.entries({
     Window: 0xececec,
     WindowFrame: 0xaaaaaa,
     WindowText: 0x000000,
-    '-webkit-focus-ring-color': 0xe59700
+    '-webkit-focus-ring-color': 0xe59700,
 }).map(([key, value]) => [key.toLowerCase(), value] as [string, number]));
 
 // https://en.wikipedia.org/wiki/Relative_luminance

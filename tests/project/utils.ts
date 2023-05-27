@@ -2,7 +2,8 @@ import type {Readable} from 'stream';
 import {PassThrough} from 'stream';
 import type {ChildProcess} from 'child_process';
 import {once} from 'events';
-import getStream, {OptionsWithEncoding} from 'get-stream';
+import type {OptionsWithEncoding} from 'get-stream';
+import getStream from 'get-stream';
 import {promiseWithTimeout} from '../support/test-utils';
 
 export type ChildClosedOptions = OptionsWithEncoding & {serialization?: false | 'json'; timeout?: number};

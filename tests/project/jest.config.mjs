@@ -11,7 +11,7 @@ const config = {
     moduleFileExtensions: ['ts', 'tsx', 'js'],
     transform: {
         '^.+\\.ts(x?)$': ['ts-jest', {tsconfig: '<rootDir>/tests/project/tsconfig.json'}],
-        '/get-stream/': ['ts-jest', {tsconfig: '<rootDir>/tests/project/tsconfig.json'}]
+        '/get-stream/': ['ts-jest'],
     },
     transformIgnorePatterns: [ '<rootDir>/node_modules/(?!(get-stream)/)'],
     globals: {

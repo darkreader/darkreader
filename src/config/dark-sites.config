@@ -780,6 +780,7 @@ splatoon3.ink
 sponsorshipshq.com
 spotfy.one
 spyware.neocities.org
+squidalytics.ink
 srrdb.com
 star-made.org
 starlink.com

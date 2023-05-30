@@ -9,12 +9,18 @@ import {MessageTypeCStoUI, MessageTypeUItoCS} from '../../../utils/message';
 
 declare const __CHROMIUM_MV2__: boolean;
 declare const __CHROMIUM_MV3__: boolean;
+declare const __FIREFOX_MV2__: boolean;
+declare const __THUNDERBIRD__: boolean;
 
 export default function ExportTheme({data}: ViewProps) {
     const documentId = data.activeTab.documentId!;
     const tabId = data.activeTab.id;
     const listener = ({type, data}: MessageCStoUI, sender: chrome.runtime.MessageSender) => {
-        if (type === MessageTypeCStoUI.EXPORT_CSS_RESPONSE && sender.tab && sender.tab.id === tabId) {
+        if (type === MessageTypeCStoUI.EXPORT_CSS_RESPONSE && sender.tab && sender.tab.id === tabId && (
+            __CHROMIUM_MV3__ ? sender.documentId === documentId :
+            (__CHROMIUM_MV2__ ? (!sender.documentId || sender.documentId === documentId) :
+            ((__FIREFOX_MV2__ || __THUNDERBIRD__) ? (!(sender as any).contextId || (sender as any).contextId === documentId) : true))
+        )) {
             const url = getURLHostOrProtocol(sender.tab!.url!).replace(/[^a-z0-1\-]/g, '-');
             saveFile(`DarkReader-${url}.css`, data);
             chrome.runtime.onMessage.removeListener(listener);

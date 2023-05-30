@@ -84,6 +84,8 @@ export function getMockData(override = {} as Partial<ExtensionData>): ExtensionD
         },
         forcedScheme: null,
         activeTab: {
+            id: 1,
+            documentId: 'id',
             url: 'https://darkreader.org/',
             isProtected: false,
             isInDarkList: false,

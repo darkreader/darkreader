@@ -135,6 +135,8 @@ export interface LocationSettings {
 
 export interface TabInfo {
     url: string;
+    id: tabId | null;
+    documentId: documentId | null;
     isProtected: boolean;
     isInjected: boolean | null;
     isInDarkList: boolean;

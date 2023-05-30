@@ -1,15 +1,18 @@
 import {m} from 'malevic';
+import type {ViewProps} from '../types';
 import {Button} from '../../controls';
 import {saveFile} from '../../utils';
 import ControlGroup from '../control-group';
 import {getURLHostOrProtocol} from '../../../utils/url';
 import type {MessageCStoUI, MessageUItoCS} from '../../../definitions';
 import {MessageTypeCStoUI, MessageTypeUItoCS} from '../../../utils/message';
-import {getActiveTab} from '../../../utils/tabs';
 
-export default function ExportTheme() {
+declare const __CHROMIUM_MV2__: boolean;
+declare const __CHROMIUM_MV3__: boolean;
+
+export default function ExportTheme({data}: ViewProps) {
     const listener = ({type, data}: MessageCStoUI, sender: chrome.runtime.MessageSender) => {
-        if (type === MessageTypeCStoUI.EXPORT_CSS_RESPONSE) {
+        if (type === MessageTypeCStoUI.EXPORT_CSS_RESPONSE && sender.tab && sender.tab.id === data.activeTab.id) {
             const url = getURLHostOrProtocol(sender.tab!.url!).replace(/[^a-z0-1\-]/g, '-');
             saveFile(`DarkReader-${url}.css`, data);
             chrome.runtime.onMessage.removeListener(listener);
@@ -17,12 +20,13 @@ export default function ExportTheme() {
     };
 
     async function exportCSS() {
-        const activeTab = await getActiveTab();
-        if (!activeTab || !activeTab.id) {
+        const documentId = data.activeTab.documentId!;
+        if (!data.activeTab || !data.activeTab.id) {
             return;
         }
         chrome.runtime.onMessage.addListener(listener);
-        chrome.tabs.sendMessage<MessageUItoCS>(activeTab.id, {type: MessageTypeUItoCS.EXPORT_CSS}, {frameId: 0});
+        // Here we use both frameId and documentId just in case page had already started navigation away
+        chrome.tabs.sendMessage<MessageUItoCS>(data.activeTab.id, {type: MessageTypeUItoCS.EXPORT_CSS}, (__CHROMIUM_MV3__ || __CHROMIUM_MV2__ && documentId) ? {frameId: 0, documentId} : {frameId: 0});
     }
 
     return (

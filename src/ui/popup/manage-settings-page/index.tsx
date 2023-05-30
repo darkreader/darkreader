@@ -18,6 +18,9 @@ export default function ManageSettingsPage(props: ViewProps) {
         custom.theme.engine :
         props.data.settings.theme.engine;
 
+    const {isDarkThemeDetected, isInDarkList, isInjected, isProtected, id} = props.data.activeTab;
+    const canExportTheme = (engine === ThemeEngine.dynamicTheme) && id && !isDarkThemeDetected && !isInDarkList && !isProtected && (isInjected !== false);
+
     return (
         <section class="m-section">
             <SyncSettings {...props} />
@@ -25,7 +28,7 @@ export default function ManageSettingsPage(props: ViewProps) {
             <FetchNews {...props} />
             <ImportButton {...props} />
             <ExportButton {...props} />
-            {engine === ThemeEngine.dynamicTheme ? <ExportTheme /> : null}
+            {canExportTheme ? <ExportTheme {...props} /> : null}
             <ResetButtonGroup {...props} />
         </section>
     );

@@ -5,6 +5,10 @@ import {readSyncStorage, readLocalStorage, writeSyncStorage, writeLocalStorage} 
 import {StateManager} from '../utils/state-manager';
 import {logWarn} from './utils/log';
 import IconManager from './icon-manager';
+import {scheduleChromiumAlarmFixer} from './browser-fixes/chromium-alarms';
+
+declare const __CHROMIUM_MV2__: boolean;
+declare const __CHROMIUM_MV3__: boolean;
 
 interface NewsmakerState extends Record<string, unknown> {
     latest: News[];
@@ -63,6 +67,9 @@ export default class Newsmaker {
         }
         chrome.alarms.onAlarm.addListener(Newsmaker.alarmListener);
         chrome.alarms.create(Newsmaker.ALARM_NAME, {periodInMinutes: Newsmaker.UPDATE_INTERVAL});
+        if (__CHROMIUM_MV2__ || __CHROMIUM_MV3__) {
+            scheduleChromiumAlarmFixer();
+        }
     }
 
     public static unSubscribe(): void {

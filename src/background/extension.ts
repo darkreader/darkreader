@@ -27,6 +27,7 @@ import ContentScriptManager from './content-script-manager';
 import {AutomationMode} from '../utils/automation';
 import UIHighlights from './ui-highlights';
 import {getActiveTab} from '../utils/tabs';
+import {scheduleChromiumAlarmFixer} from './browser-fixes/chromium-alarms';
 
 type AutomationState = 'turn-on' | 'turn-off' | 'scheme-dark' | 'scheme-light' | '';
 
@@ -201,6 +202,9 @@ export class Extension {
                 logWarn(`Alarm is set in the past: ${nextCheck}. The time is: ${new Date()}. ISO: ${(new Date()).toISOString()}`);
             } else {
                 chrome.alarms.create(Extension.ALARM_NAME, {when: nextCheck});
+                if (__CHROMIUM_MV2__ || __CHROMIUM_MV3__) {
+                    scheduleChromiumAlarmFixer();
+                }
             }
         }
     }

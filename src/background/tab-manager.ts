@@ -10,6 +10,7 @@ import {getURLHostOrProtocol} from '../utils/url';
 import {isPanel} from './utils/tab';
 import {makeFirefoxHappy} from './make-firefox-happy';
 import {getActiveTab, queryTabs} from '../utils/tabs';
+import {scheduleChromiumAlarmFixer} from './browser-fixes/chromium-alarms';
 
 declare const __CHROMIUM_MV2__: boolean;
 declare const __CHROMIUM_MV3__: boolean;
@@ -205,6 +206,9 @@ export default class TabManager {
 
                 default:
                     break;
+            }
+            if (__CHROMIUM_MV2__ || __CHROMIUM_MV3__) {
+                scheduleChromiumAlarmFixer();
             }
         });
 

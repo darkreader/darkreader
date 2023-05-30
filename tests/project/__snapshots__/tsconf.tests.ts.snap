@@ -47,6 +47,7 @@ exports[`TypeScript project config file should parse and resolve correctly: src 
     "./background/ui-highlights.ts",
     "./background/user-storage.ts",
     "./background/window-theme.ts",
+    "./background/browser-fixes/chromium-alarms.ts",
     "./background/utils/extension-api.ts",
     "./background/utils/log.ts",
     "./background/utils/network.ts",

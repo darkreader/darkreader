@@ -2,6 +2,10 @@ import {isFirefox} from '../utils/platform';
 import type {ExtensionData, FilterConfig, TabInfo, MessageUItoBG, UserSettings, DevToolsData, MessageCStoBG, MessageBGtoUI} from '../definitions';
 import {MessageTypeBGtoUI, MessageTypeUItoBG} from '../utils/message';
 import {makeFirefoxHappy} from './make-firefox-happy';
+import {scheduleChromiumAlarmFixer} from './browser-fixes/chromium-alarms';
+
+declare const __CHROMIUM_MV2__: boolean;
+declare const __CHROMIUM_MV3__: boolean;
 
 export interface ExtensionAdapter {
     collect: () => Promise<ExtensionData>;
@@ -52,6 +56,9 @@ export default class Messenger {
                 MessageTypeUItoBG.GET_DATA,
                 MessageTypeUItoBG.GET_DEVTOOLS_DATA,
             ].includes(message.type as MessageTypeUItoBG));
+        }
+        if (__CHROMIUM_MV2__ || __CHROMIUM_MV3__) {
+            scheduleChromiumAlarmFixer();
         }
     }
 

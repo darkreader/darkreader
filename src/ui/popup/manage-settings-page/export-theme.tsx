@@ -11,8 +11,10 @@ declare const __CHROMIUM_MV2__: boolean;
 declare const __CHROMIUM_MV3__: boolean;
 
 export default function ExportTheme({data}: ViewProps) {
+    const documentId = data.activeTab.documentId!;
+    const tabId = data.activeTab.id;
     const listener = ({type, data}: MessageCStoUI, sender: chrome.runtime.MessageSender) => {
-        if (type === MessageTypeCStoUI.EXPORT_CSS_RESPONSE && sender.tab && sender.tab.id === data.activeTab.id) {
+        if (type === MessageTypeCStoUI.EXPORT_CSS_RESPONSE && sender.tab && sender.tab.id === tabId) {
             const url = getURLHostOrProtocol(sender.tab!.url!).replace(/[^a-z0-1\-]/g, '-');
             saveFile(`DarkReader-${url}.css`, data);
             chrome.runtime.onMessage.removeListener(listener);
@@ -20,7 +22,6 @@ export default function ExportTheme({data}: ViewProps) {
     };
 
     async function exportCSS() {
-        const documentId = data.activeTab.documentId!;
         if (!data.activeTab || !data.activeTab.id) {
             return;
         }

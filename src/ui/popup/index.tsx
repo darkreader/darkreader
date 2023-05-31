@@ -3,9 +3,9 @@ import {sync} from 'malevic/dom';
 import Connector from '../connect/connector';
 import Body from './components/body';
 import {popupHasBuiltInHorizontalBorders, popupHasBuiltInBorders, fixNotClosingPopupOnNavigation} from './utils/issues';
-import type {ExtensionData, ExtensionActions} from '../../definitions';
+import type {ExtensionData, ExtensionActions, DebugMessageBGtoCS, DebugMessageBGtoUI} from '../../definitions';
 import {isMobile, isFirefox} from '../../utils/platform';
-import {MessageTypeBGtoCS, MessageTypeBGtoUI} from '../../utils/message';
+import {DebugMessageTypeBGtoCS, DebugMessageTypeBGtoUI} from '../../utils/message';
 import {getFontList} from '../utils';
 
 function renderBody(data: ExtensionData, fonts: string[], actions: ExtensionActions) {
@@ -54,8 +54,8 @@ if (isFirefox) {
 
 declare const __DEBUG__: boolean;
 if (__DEBUG__) {
-    chrome.runtime.onMessage.addListener(({type}) => {
-        if (type === MessageTypeBGtoCS.CSS_UPDATE) {
+    chrome.runtime.onMessage.addListener(({type}: DebugMessageBGtoCS | DebugMessageBGtoUI) => {
+        if (type === DebugMessageTypeBGtoCS.CSS_UPDATE) {
             document.querySelectorAll('link[rel="stylesheet"]').forEach((link: HTMLLinkElement) => {
                 const url = link.href;
                 link.disabled = true;
@@ -67,7 +67,7 @@ if (__DEBUG__) {
             });
         }
 
-        if (type === MessageTypeBGtoUI.UPDATE) {
+        if (type === DebugMessageTypeBGtoUI.UPDATE) {
             location.reload();
         }
     });

@@ -5,7 +5,7 @@ import {createOrUpdateDynamicTheme, removeDynamicTheme, cleanDynamicThemeCache} 
 import {logWarn, logInfoCollapsed} from './utils/log';
 import {isSystemDarkModeEnabled, runColorSchemeChangeDetector, stopColorSchemeChangeDetector, emulateColorScheme} from '../utils/media-query';
 import {collectCSS} from './dynamic-theme/css-collection';
-import type {DebugMessageBGtoCS, DynamicThemeFix, MessageBGtoCS, MessageCStoBG, MessageCStoUI, MessageUItoCS, Theme} from '../definitions';
+import type {DebugMessageBGtoCS, MessageBGtoCS, MessageCStoBG, MessageCStoUI, MessageUItoCS} from '../definitions';
 import {DebugMessageTypeBGtoCS, MessageTypeBGtoCS, MessageTypeCStoBG, MessageTypeCStoUI, MessageTypeUItoCS} from '../utils/message';
 
 declare const __DEBUG__: boolean;

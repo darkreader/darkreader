@@ -74,14 +74,14 @@ function sendMessage(message: MessageCStoBG | MessageCStoUI) {
     }
 }
 
-function onMessage({type, data}: MessageBGtoCS | DebugMessageBGtoCS | MessageUItoCS & {data: any}) {
-    logInfoCollapsed(`onMessage[${type}]`, data);
-    switch (type) {
+function onMessage(message: MessageBGtoCS | MessageUItoCS | DebugMessageBGtoCS) {
+    logInfoCollapsed(`onMessage[${message.type}]`, message);
+    switch (message.type) {
         case MessageTypeBGtoCS.ADD_CSS_FILTER:
         case MessageTypeBGtoCS.ADD_STATIC_THEME: {
-            const {css, detectDarkTheme} = data;
+            const {css, detectDarkTheme} = message.data;
             removeDynamicTheme();
-            createOrUpdateStyle(css, type === MessageTypeBGtoCS.ADD_STATIC_THEME ? 'static' : 'filter');
+            createOrUpdateStyle(css, message.type === MessageTypeBGtoCS.ADD_STATIC_THEME ? 'static' : 'filter');
             if (detectDarkTheme) {
                 runDarkThemeDetector((hasDarkTheme) => {
                     if (hasDarkTheme) {
@@ -93,7 +93,7 @@ function onMessage({type, data}: MessageBGtoCS | DebugMessageBGtoCS | MessageUIt
             break;
         }
         case MessageTypeBGtoCS.ADD_SVG_FILTER: {
-            const {css, svgMatrix, svgReverseMatrix, detectDarkTheme} = data;
+            const {css, svgMatrix, svgReverseMatrix, detectDarkTheme} = message.data;
             removeDynamicTheme();
             createOrUpdateSVGFilter(svgMatrix, svgReverseMatrix);
             createOrUpdateStyle(css, 'filter');
@@ -109,7 +109,7 @@ function onMessage({type, data}: MessageBGtoCS | DebugMessageBGtoCS | MessageUIt
             break;
         }
         case MessageTypeBGtoCS.ADD_DYNAMIC_THEME: {
-            const {theme, fixes, isIFrame, detectDarkTheme} = data as {theme: Theme; fixes: DynamicThemeFix[]; isIFrame: boolean; detectDarkTheme: boolean};
+            const {theme, fixes, isIFrame, detectDarkTheme} = message.data as {theme: Theme; fixes: DynamicThemeFix[]; isIFrame: boolean; detectDarkTheme: boolean};
             removeStyle();
             createOrUpdateDynamicTheme(theme, fixes, isIFrame);
             if (detectDarkTheme) {
@@ -140,7 +140,7 @@ function onMessage({type, data}: MessageBGtoCS | DebugMessageBGtoCS | MessageUIt
         default:
             break;
     }
-    if (__DEBUG__ && type === DebugMessageTypeBGtoCS.RELOAD) {
+    if (__DEBUG__ && message.type === DebugMessageTypeBGtoCS.RELOAD) {
         logWarn('Cleaning up before update');
         cleanup();
     }

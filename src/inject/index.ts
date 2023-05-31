@@ -5,9 +5,10 @@ import {createOrUpdateDynamicTheme, removeDynamicTheme, cleanDynamicThemeCache} 
 import {logWarn, logInfoCollapsed} from './utils/log';
 import {isSystemDarkModeEnabled, runColorSchemeChangeDetector, stopColorSchemeChangeDetector, emulateColorScheme} from '../utils/media-query';
 import {collectCSS} from './dynamic-theme/css-collection';
-import type {DynamicThemeFix, MessageBGtoCS, MessageCStoBG, MessageCStoUI, MessageUItoCS, Theme} from '../definitions';
-import {MessageTypeBGtoCS, MessageTypeCStoBG, MessageTypeCStoUI, MessageTypeUItoCS} from '../utils/message';
+import type {DebugMessageBGtoCS, DynamicThemeFix, MessageBGtoCS, MessageCStoBG, MessageCStoUI, MessageUItoCS, Theme} from '../definitions';
+import {DebugMessageTypeBGtoCS, MessageTypeBGtoCS, MessageTypeCStoBG, MessageTypeCStoUI, MessageTypeUItoCS} from '../utils/message';
 
+declare const __DEBUG__: boolean;
 declare const __TEST__: boolean;
 
 let unloaded = false;
@@ -73,7 +74,7 @@ function sendMessage(message: MessageCStoBG | MessageCStoUI) {
     }
 }
 
-function onMessage({type, data}: MessageBGtoCS | MessageUItoCS & {data: any}) {
+function onMessage({type, data}: MessageBGtoCS | DebugMessageBGtoCS | MessageUItoCS & {data: any}) {
     logInfoCollapsed(`onMessage[${type}]`, data);
     switch (type) {
         case MessageTypeBGtoCS.ADD_CSS_FILTER:
@@ -136,12 +137,12 @@ function onMessage({type, data}: MessageBGtoCS | MessageUItoCS & {data: any}) {
             removeDynamicTheme();
             stopDarkThemeDetector();
             break;
-        case MessageTypeBGtoCS.RELOAD:
-            logWarn('Cleaning up before update');
-            cleanup();
-            break;
         default:
             break;
+    }
+    if (__DEBUG__ && type === DebugMessageTypeBGtoCS.RELOAD) {
+        logWarn('Cleaning up before update');
+        cleanup();
     }
 }
 

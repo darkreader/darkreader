@@ -22,30 +22,39 @@ export enum MessageTypeUItoBG {
 
 export enum MessageTypeBGtoUI {
     CHANGES = 'bg-ui-changes',
+}
+
+export enum DebugMessageTypeBGtoUI {
     UPDATE = 'debug-bg-ui-update'
 }
 
 export enum MessageTypeBGtoCS {
     ADD_CSS_FILTER = 'bg-cs-add-css-filter',
+    ADD_DYNAMIC_THEME = 'bg-cs-add-dynamic-theme',
     ADD_STATIC_THEME = 'bg-cs-add-static-theme',
     ADD_SVG_FILTER = 'bg-cs-add-svg-filter',
-    ADD_DYNAMIC_THEME = 'bg-cs-add-dynamic-theme',
-    UNSUPPORTED_SENDER = 'bg-cs-unsupported-sender',
-    CLEAN_UP = 'debug-bg-cs-clean-up',
-    RELOAD = 'debug-bg-cs-reload',
+    CLEAN_UP = 'bg-cs-clean-up',
     FETCH_RESPONSE = 'bg-cs-fetch-response',
-    CSS_UPDATE = 'debug-bg-cs-css-update'
+    UNSUPPORTED_SENDER = 'bg-cs-unsupported-sender',
+}
+
+export enum DebugMessageTypeBGtoCS {
+    CSS_UPDATE = 'debug-bg-cs-css-update',
+    RELOAD = 'debug-bg-cs-reload'
 }
 
 export enum MessageTypeCStoBG {
     COLOR_SCHEME_CHANGE = 'cs-bg-color-scheme-change',
+    DARK_THEME_DETECTED = 'cs-bg-dark-theme-detected',
+    DARK_THEME_NOT_DETECTED = 'cs-bg-dark-theme-not-detected',
+    FETCH = 'cs-bg-fetch',
     FRAME_CONNECT = 'cs-bg-frame-connect',
     FRAME_FORGET = 'cs-bg-frame-forget',
     FRAME_FREEZE = 'cs-bg-frame-freeze',
-    FRAME_RESUME = 'cs-bg-frame-resume',
-    FETCH = 'cs-bg-fetch',
-    DARK_THEME_DETECTED = 'cs-bg-dark-theme-detected',
-    DARK_THEME_NOT_DETECTED = 'cs-bg-dark-theme-not-detected',
+    FRAME_RESUME = 'cs-bg-frame-resume'
+}
+
+export enum DebugMessageTypeCStoBG {
     LOG = 'debug-cs-bg-log'
 }
 

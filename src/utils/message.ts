@@ -21,7 +21,7 @@ export enum MessageTypeUItoBG {
 }
 
 export enum MessageTypeBGtoUI {
-    CHANGES = 'bg-ui-changes',
+    CHANGES = 'bg-ui-changes'
 }
 
 export enum DebugMessageTypeBGtoUI {
@@ -35,7 +35,7 @@ export enum MessageTypeBGtoCS {
     ADD_SVG_FILTER = 'bg-cs-add-svg-filter',
     CLEAN_UP = 'bg-cs-clean-up',
     FETCH_RESPONSE = 'bg-cs-fetch-response',
-    UNSUPPORTED_SENDER = 'bg-cs-unsupported-sender',
+    UNSUPPORTED_SENDER = 'bg-cs-unsupported-sender'
 }
 
 export enum DebugMessageTypeBGtoCS {

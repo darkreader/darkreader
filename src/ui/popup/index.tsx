@@ -3,7 +3,7 @@ import {sync} from 'malevic/dom';
 import Connector from '../connect/connector';
 import Body from './components/body';
 import {popupHasBuiltInHorizontalBorders, popupHasBuiltInBorders, fixNotClosingPopupOnNavigation} from './utils/issues';
-import type {ExtensionData, ExtensionActions} from '../../definitions';
+import type {ExtensionData, ExtensionActions, DebugMessageBGtoCS, DebugMessageBGtoUI} from '../../definitions';
 import {isMobile, isFirefox} from '../../utils/platform';
 import {DebugMessageTypeBGtoCS, DebugMessageTypeBGtoUI} from '../../utils/message';
 import {getFontList} from '../utils';
@@ -54,7 +54,7 @@ if (isFirefox) {
 
 declare const __DEBUG__: boolean;
 if (__DEBUG__) {
-    chrome.runtime.onMessage.addListener(({type}) => {
+    chrome.runtime.onMessage.addListener(({type}: DebugMessageBGtoCS | DebugMessageBGtoUI) => {
         if (type === DebugMessageTypeBGtoCS.CSS_UPDATE) {
             document.querySelectorAll('link[rel="stylesheet"]').forEach((link: HTMLLinkElement) => {
                 const url = link.href;

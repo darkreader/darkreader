@@ -22,7 +22,7 @@ export enum MessageTypeUItoBG {
 
 export enum MessageTypeBGtoUI {
     CHANGES = 'bg-ui-changes',
-    UPDATE = 'bg-ui-update'
+    UPDATE = 'debug-bg-ui-update'
 }
 
 export enum MessageTypeBGtoCS {
@@ -31,10 +31,10 @@ export enum MessageTypeBGtoCS {
     ADD_SVG_FILTER = 'bg-cs-add-svg-filter',
     ADD_DYNAMIC_THEME = 'bg-cs-add-dynamic-theme',
     UNSUPPORTED_SENDER = 'bg-cs-unsupported-sender',
-    CLEAN_UP = 'bg-cs-clean-up',
-    RELOAD = 'bg-cs-reload',
+    CLEAN_UP = 'debug-bg-cs-clean-up',
+    RELOAD = 'debug-bg-cs-reload',
     FETCH_RESPONSE = 'bg-cs-fetch-response',
-    CSS_UPDATE = 'bg-cs-css-update'
+    CSS_UPDATE = 'debug-bg-cs-css-update'
 }
 
 export enum MessageTypeCStoBG {
@@ -46,7 +46,7 @@ export enum MessageTypeCStoBG {
     FETCH = 'cs-bg-fetch',
     DARK_THEME_DETECTED = 'cs-bg-dark-theme-detected',
     DARK_THEME_NOT_DETECTED = 'cs-bg-dark-theme-not-detected',
-    LOG = 'cs-bg-log'
+    LOG = 'debug-cs-bg-log'
 }
 
 export enum MessageTypeCStoUI {

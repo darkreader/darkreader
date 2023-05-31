@@ -178,7 +178,6 @@ export interface MessageBGtoUI {
 
 export interface DebugMessageBGtoCS {
     type: DebugMessageTypeBGtoCS;
-    data?: any;
 }
 
 export interface DebugMessageBGtoUI {

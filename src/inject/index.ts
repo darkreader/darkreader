@@ -109,7 +109,7 @@ function onMessage(message: MessageBGtoCS | MessageUItoCS | DebugMessageBGtoCS) 
             break;
         }
         case MessageTypeBGtoCS.ADD_DYNAMIC_THEME: {
-            const {theme, fixes, isIFrame, detectDarkTheme} = message.data as {theme: Theme; fixes: DynamicThemeFix[]; isIFrame: boolean; detectDarkTheme: boolean};
+            const {theme, fixes, isIFrame, detectDarkTheme} = message.data;
             removeStyle();
             createOrUpdateDynamicTheme(theme, fixes, isIFrame);
             if (detectDarkTheme) {

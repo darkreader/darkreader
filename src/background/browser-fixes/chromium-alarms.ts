@@ -1,7 +1,6 @@
 let timer: number | null;
 function alarmFixer() {
     clearTimeout(timer!);
-    timer = null;
     timer = setTimeout(alarmFixer, 10000);
     chrome.alarms.getAll((alarms) => {
         const cutoff = Date.now() + 1000;

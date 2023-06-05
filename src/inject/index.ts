@@ -147,17 +147,21 @@ function onMessage(message: MessageBGtoCS | MessageUItoCS | DebugMessageBGtoCS) 
     }
 }
 
+function sendConnectionOrResumeMessage(type: MessageTypeCStoBG.FRAME_CONNECT | MessageTypeCStoBG.FRAME_RESUME) {
+    sendMessage({
+        type,
+        data: (__CHROMIUM_MV2__ || __CHROMIUM_MV3__) ?
+            {isDark: isSystemDarkModeEnabled(), isTopFrame: window === window.top} :
+            {isDark: isSystemDarkModeEnabled()},
+    });
+}
+
 runColorSchemeChangeDetector((isDark) =>
     sendMessage({type: MessageTypeCStoBG.COLOR_SCHEME_CHANGE, data: {isDark}})
 );
 
 chrome.runtime.onMessage.addListener(onMessage);
-sendMessage({
-    type: MessageTypeCStoBG.FRAME_CONNECT,
-    data: (__CHROMIUM_MV2__ || __CHROMIUM_MV3__) ?
-        {isDark: isSystemDarkModeEnabled(), isTopFrame: window === window.top} :
-        {isDark: isSystemDarkModeEnabled()},
-});
+sendConnectionOrResumeMessage(MessageTypeCStoBG.FRAME_CONNECT);
 
 function onPageHide(e: PageTransitionEvent) {
     if (e.persisted === false) {
@@ -170,12 +174,7 @@ function onFreeze() {
 }
 
 function onResume() {
-    sendMessage({
-        type: MessageTypeCStoBG.FRAME_RESUME,
-        data: (__CHROMIUM_MV2__ || __CHROMIUM_MV3__) ?
-            {isDark: isSystemDarkModeEnabled(), isTopFrame: window === window.top} :
-            {isDark: isSystemDarkModeEnabled()},
-    });
+    sendConnectionOrResumeMessage(MessageTypeCStoBG.FRAME_RESUME);
 }
 
 function onDarkThemeDetected() {

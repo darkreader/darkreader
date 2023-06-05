@@ -147,7 +147,7 @@ export default class TabManager {
                     if (TabManager.tabs[tabId][frameId].timestamp < TabManager.timestamp) {
                         const message = TabManager.getTabMessage(tabURL, url, frameId === 0);
                         chrome.tabs.sendMessage<MessageBGtoCS>(tabId, message,
-                            (__CHROMIUM_MV3__ || (__CHROMIUM_MV2__ && documentId)) ? {frameId, documentId} : {frameId});
+                            (__CHROMIUM_MV3__ || (__CHROMIUM_MV2__ && documentId)) ? {documentId} : {frameId});
                     }
                     TabManager.tabs[sender.tab!.id!][sender.frameId!] = {
                         documentId,

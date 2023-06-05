@@ -35,7 +35,7 @@ interface TabManagerState extends Record<string, unknown> {
     timestamp: number;
 }
 
-/*
+/**
  * These states correspond to possible document states in Page Lifecycle API:
  * https://developers.google.com/web/updates/2018/07/page-lifecycle-api#developer-recommendations-for-each-state
  * Some states are not currently used (they are declared for future-proofing).
@@ -49,6 +49,11 @@ enum DocumentState {
     DISCARDED = 5
 }
 
+/**
+ * Note: On Chromium builds, we use documentId if it is available.
+ * We avoid messaging using farmeId entirely since when document is prerendered, it gets a emporary frameId
+ * and if we attempt to send to {frameId, documentId} with old frameId, then the message will be dropped.
+ */
 export default class TabManager {
     private static tabs: TabManagerState['tabs'];
     private static stateManager: StateManager<TabManagerState>;
@@ -75,7 +80,7 @@ export default class TabManager {
                     const reply = (tabURL: string, url: string, isTopFrame: boolean) => {
                         getConnectionMessage(tabURL, url, isTopFrame).then((message) => {
                             message && chrome.tabs.sendMessage<MessageBGtoCS>(sender.tab!.id!, message,
-                                (__CHROMIUM_MV3__ || (__CHROMIUM_MV2__ && sender.documentId)) ? {frameId: sender.frameId, documentId: sender.documentId} : {frameId: sender.frameId});
+                                (__CHROMIUM_MV3__ || (__CHROMIUM_MV2__ && sender.documentId)) ? {documentId: sender.documentId} : {frameId: sender.frameId});
                         });
                     };
 
@@ -164,7 +169,7 @@ export default class TabManager {
                     // Sometimes fetch error behaves like synchronous and sends `undefined`
                     const id = message.id;
                     const sendResponse = (response: Partial<MessageBGtoCS>) => {
-                        chrome.tabs.sendMessage<MessageBGtoCS>(sender.tab!.id!, {type: MessageTypeBGtoCS.FETCH_RESPONSE, id, ...response}, (__CHROMIUM_MV3__ || (__CHROMIUM_MV2__ && sender.documentId)) ? {frameId: sender.frameId, documentId: sender.documentId} : {frameId: sender.frameId});
+                        chrome.tabs.sendMessage<MessageBGtoCS>(sender.tab!.id!, {type: MessageTypeBGtoCS.FETCH_RESPONSE, id, ...response}, (__CHROMIUM_MV3__ || (__CHROMIUM_MV2__ && sender.documentId)) ? {documentId: sender.documentId} : {frameId: sender.frameId});
                     };
 
                     if (__THUNDERBIRD__) {

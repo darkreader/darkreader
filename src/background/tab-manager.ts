@@ -80,7 +80,7 @@ export default class TabManager {
                     const reply = (tabURL: string, url: string, isTopFrame: boolean) => {
                         getConnectionMessage(tabURL, url, isTopFrame).then((message) => {
                             message && chrome.tabs.sendMessage<MessageBGtoCS>(sender.tab!.id!, message,
-                                (__CHROMIUM_MV3__ || (__CHROMIUM_MV2__ && sender.documentId)) ? {frameId: sender.frameId, documentId: sender.documentId} : {frameId: sender.frameId});
+                                (__CHROMIUM_MV3__ || __CHROMIUM_MV2__ && sender.documentId) ? {frameId: sender.frameId, documentId: sender.documentId} : {frameId: sender.frameId});
                         });
                     };
 
@@ -143,11 +143,11 @@ export default class TabManager {
                     const tabURL = sender.tab!.url!;
                     const frameId = sender.frameId!;
                     const url = sender.url!;
-                    const documentId: documentId = (__CHROMIUM_MV3__ || (__CHROMIUM_MV2__ && sender.documentId)) ? sender.documentId : ((__FIREFOX_MV2__ || __THUNDERBIRD__) ? (sender as any).contextId : null);
+                    const documentId: documentId = (__CHROMIUM_MV3__ || __CHROMIUM_MV2__ && sender.documentId) ? sender.documentId : ((__FIREFOX_MV2__ || __THUNDERBIRD__) ? (sender as any).contextId : null);
                     if (TabManager.tabs[tabId][frameId].timestamp < TabManager.timestamp) {
                         const message = TabManager.getTabMessage(tabURL, url, frameId === 0);
                         chrome.tabs.sendMessage<MessageBGtoCS>(tabId, message,
-                            (__CHROMIUM_MV3__ || (__CHROMIUM_MV2__ && documentId)) ? {frameId, documentId} : {frameId});
+                            (__CHROMIUM_MV3__ || __CHROMIUM_MV2__ && documentId) ? {frameId, documentId} : {frameId});
                     }
                     TabManager.tabs[sender.tab!.id!][sender.frameId!] = {
                         documentId,
@@ -169,7 +169,7 @@ export default class TabManager {
                     // Sometimes fetch error behaves like synchronous and sends `undefined`
                     const id = message.id;
                     const sendResponse = (response: Partial<MessageBGtoCS>) => {
-                        chrome.tabs.sendMessage<MessageBGtoCS>(sender.tab!.id!, {type: MessageTypeBGtoCS.FETCH_RESPONSE, id, ...response}, (__CHROMIUM_MV3__ || (__CHROMIUM_MV2__ && sender.documentId)) ? {documentId: sender.documentId} : {frameId: sender.frameId});
+                        chrome.tabs.sendMessage<MessageBGtoCS>(sender.tab!.id!, {type: MessageTypeBGtoCS.FETCH_RESPONSE, id, ...response}, (__CHROMIUM_MV3__ || __CHROMIUM_MV2__ && sender.documentId) ? {documentId: sender.documentId} : {frameId: sender.frameId});
                     };
 
                     if (__THUNDERBIRD__) {
@@ -351,10 +351,10 @@ export default class TabManager {
 
                         const message = TabManager.getTabMessage(tabURL, url!, frameId === 0);
                         if (tab.active && frameId === 0) {
-                            chrome.tabs.sendMessage<MessageBGtoCS>(tab.id!, message, (__CHROMIUM_MV3__ || (__CHROMIUM_MV2__ && documentId)) ? {frameId, documentId} as chrome.tabs.MessageSendOptions : {frameId});
+                            chrome.tabs.sendMessage<MessageBGtoCS>(tab.id!, message, (__CHROMIUM_MV3__ || __CHROMIUM_MV2__ && documentId) ? {frameId, documentId} as chrome.tabs.MessageSendOptions : {frameId});
                         } else {
                             setTimeout(() => {
-                                chrome.tabs.sendMessage<MessageBGtoCS>(tab.id!, message, (__CHROMIUM_MV3__ || (__CHROMIUM_MV2__ && documentId)) ? {frameId, documentId} as chrome.tabs.MessageSendOptions : {frameId});
+                                chrome.tabs.sendMessage<MessageBGtoCS>(tab.id!, message, (__CHROMIUM_MV3__ || __CHROMIUM_MV2__ && documentId) ? {frameId, documentId} as chrome.tabs.MessageSendOptions : {frameId});
                             });
                         }
                         if (TabManager.tabs[tab.id!][frameId]) {

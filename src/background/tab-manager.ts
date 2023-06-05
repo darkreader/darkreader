@@ -103,7 +103,7 @@ export default class TabManager {
                     const url = sender.url!;
                     const tabId = sender.tab!.id!;
                     // Chromium 106+ may prerender frames resulting in top-level frames with chrome.runtime.MessageSender.tab.url
-                    // chrome://newtab/ and positive chrome.runtime.MessageSender.frameId
+                    // set to chrome://newtab/ and positive chrome.runtime.MessageSender.frameId
                     const tabURL = ((__CHROMIUM_MV2__ || __CHROMIUM_MV3__) && isTopFrame) ? url : sender.tab!.url!;
                     const documentId: documentId | null = (__CHROMIUM_MV3__ || __CHROMIUM_MV2__) ? sender.documentId : ((__FIREFOX_MV2__ || __THUNDERBIRD__) ? (sender as any).contextId : null);
 

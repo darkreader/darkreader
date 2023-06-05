@@ -80,7 +80,7 @@ export default class TabManager {
                     const reply = (tabURL: string, url: string, isTopFrame: boolean) => {
                         getConnectionMessage(tabURL, url, isTopFrame).then((message) => {
                             message && chrome.tabs.sendMessage<MessageBGtoCS>(sender.tab!.id!, message,
-                                (__CHROMIUM_MV3__ || (__CHROMIUM_MV2__ && sender.documentId)) ? {documentId: sender.documentId} : {frameId: sender.frameId});
+                                (__CHROMIUM_MV3__ || (__CHROMIUM_MV2__ && sender.documentId)) ? {frameId: sender.frameId, documentId: sender.documentId} : {frameId: sender.frameId});
                         });
                     };
 
@@ -147,7 +147,7 @@ export default class TabManager {
                     if (TabManager.tabs[tabId][frameId].timestamp < TabManager.timestamp) {
                         const message = TabManager.getTabMessage(tabURL, url, frameId === 0);
                         chrome.tabs.sendMessage<MessageBGtoCS>(tabId, message,
-                            (__CHROMIUM_MV3__ || (__CHROMIUM_MV2__ && documentId)) ? {documentId} : {frameId});
+                            (__CHROMIUM_MV3__ || (__CHROMIUM_MV2__ && documentId)) ? {frameId, documentId} : {frameId});
                     }
                     TabManager.tabs[sender.tab!.id!][sender.frameId!] = {
                         documentId,
@@ -351,10 +351,10 @@ export default class TabManager {
 
                         const message = TabManager.getTabMessage(tabURL, url!, frameId === 0);
                         if (tab.active && frameId === 0) {
-                            chrome.tabs.sendMessage<MessageBGtoCS>(tab.id!, message, (__CHROMIUM_MV3__ || (__CHROMIUM_MV2__ && documentId)) ? {documentId} as chrome.tabs.MessageSendOptions : {frameId});
+                            chrome.tabs.sendMessage<MessageBGtoCS>(tab.id!, message, (__CHROMIUM_MV3__ || (__CHROMIUM_MV2__ && documentId)) ? {frameId, documentId} as chrome.tabs.MessageSendOptions : {frameId});
                         } else {
                             setTimeout(() => {
-                                chrome.tabs.sendMessage<MessageBGtoCS>(tab.id!, message, (__CHROMIUM_MV3__ || (__CHROMIUM_MV2__ && documentId)) ? {documentId} as chrome.tabs.MessageSendOptions : {frameId});
+                                chrome.tabs.sendMessage<MessageBGtoCS>(tab.id!, message, (__CHROMIUM_MV3__ || (__CHROMIUM_MV2__ && documentId)) ? {frameId, documentId} as chrome.tabs.MessageSendOptions : {frameId});
                             });
                         }
                         if (TabManager.tabs[tab.id!][frameId]) {

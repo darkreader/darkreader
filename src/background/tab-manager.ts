@@ -327,7 +327,7 @@ export default class TabManager {
 
         const activeTabHostname = onlyUpdateActiveTab ? getURLHostOrProtocol(await TabManager.getActiveTabURL()) : null;
 
-        (await queryTabs())
+        (await queryTabs({discarded: false}))
             .filter((tab) => Boolean(TabManager.tabs[tab.id!]))
             .forEach((tab) => {
                 const frames = TabManager.tabs[tab.id!];

@@ -15,6 +15,7 @@ let unloaded = false;
 
 let darkReaderDynamicThemeStateForTesting: 'loading' | 'ready' = 'loading';
 
+declare const __CHROMIUM_MV2__: boolean;
 declare const __CHROMIUM_MV3__: boolean;
 declare const __THUNDERBIRD__: boolean;
 declare const __FIREFOX_MV2__: boolean;
@@ -151,7 +152,12 @@ runColorSchemeChangeDetector((isDark) =>
 );
 
 chrome.runtime.onMessage.addListener(onMessage);
-sendMessage({type: MessageTypeCStoBG.FRAME_CONNECT, data: {isDark: isSystemDarkModeEnabled()}});
+sendMessage({
+    type: MessageTypeCStoBG.FRAME_CONNECT,
+    data: (__CHROMIUM_MV2__ || __CHROMIUM_MV3__) ?
+        {isDark: isSystemDarkModeEnabled(), isTopFrame: window === window.top} :
+        {isDark: isSystemDarkModeEnabled()},
+});
 
 function onPageHide(e: PageTransitionEvent) {
     if (e.persisted === false) {
@@ -164,7 +170,12 @@ function onFreeze() {
 }
 
 function onResume() {
-    sendMessage({type: MessageTypeCStoBG.FRAME_RESUME, data: {isDark: isSystemDarkModeEnabled()}});
+    sendMessage({
+        type: MessageTypeCStoBG.FRAME_RESUME,
+        data: (__CHROMIUM_MV2__ || __CHROMIUM_MV3__) ?
+            {isDark: isSystemDarkModeEnabled(), isTopFrame: window === window.top} :
+            {isDark: isSystemDarkModeEnabled()},
+    });
 }
 
 function onDarkThemeDetected() {

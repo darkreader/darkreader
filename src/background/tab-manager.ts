@@ -98,12 +98,14 @@ export default class TabManager {
                         return;
                     }
 
-                    const tabId = sender.tab!.id!;
-                    const tabURL = sender.tab!.url!;
                     const {frameId} = sender;
-                    const url = sender.url!;
-                    const documentId: documentId | null = (__CHROMIUM_MV3__ || __CHROMIUM_MV2__) ? sender.documentId : ((__FIREFOX_MV2__ || __THUNDERBIRD__) ? (sender as any).contextId : null);
                     const isTopFrame = (__CHROMIUM_MV2__ || __CHROMIUM_MV3__) && (frameId === 0 || message.data.isTopFrame);
+                    const url = sender.url!;
+                    const tabId = sender.tab!.id!;
+                    // Chromium 106+ may prerender frames resulting in top-level frames with chrome.runtime.MessageSender.tab.url
+                    // chrome://newtab/ and positive chrome.runtime.MessageSender.frameId
+                    const tabURL = ((__CHROMIUM_MV2__ || __CHROMIUM_MV3__) && isTopFrame) ? url : sender.tab!.url!;
+                    const documentId: documentId | null = (__CHROMIUM_MV3__ || __CHROMIUM_MV2__) ? sender.documentId : ((__FIREFOX_MV2__ || __THUNDERBIRD__) ? (sender as any).contextId : null);
 
                     TabManager.addFrame(tabId, frameId!, documentId, url, TabManager.timestamp);
 

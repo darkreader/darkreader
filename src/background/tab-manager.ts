@@ -284,27 +284,25 @@ export default class TabManager {
     }
 
     public static async updateContentScript(options: {runOnProtectedPages: boolean}): Promise<void> {
-        (await queryTabs())
+        (await queryTabs({discarded: false}))
             .filter((tab) => __CHROMIUM_MV3__ || options.runOnProtectedPages || canInjectScript(tab.url))
             .filter((tab) => !Boolean(TabManager.tabs[tab.id!]))
             .forEach((tab) => {
-                if (!tab.discarded) {
-                    if (__CHROMIUM_MV3__) {
-                        chrome.scripting.executeScript({
-                            target: {
-                                tabId: tab.id!,
-                                allFrames: true,
-                            },
-                            files: ['/inject/index.js'],
-                        }, () => logInfo('Could not update content script in tab', tab, chrome.runtime.lastError));
-                    } else {
-                        chrome.tabs.executeScript(tab.id!, {
-                            runAt: 'document_start',
-                            file: '/inject/index.js',
+                if (__CHROMIUM_MV3__) {
+                    chrome.scripting.executeScript({
+                        target: {
+                            tabId: tab.id!,
                             allFrames: true,
-                            matchAboutBlank: true,
-                        });
-                    }
+                        },
+                        files: ['/inject/index.js'],
+                    }, () => logInfo('Could not update content script in tab', tab, chrome.runtime.lastError));
+                } else {
+                    chrome.tabs.executeScript(tab.id!, {
+                        runAt: 'document_start',
+                        file: '/inject/index.js',
+                        allFrames: true,
+                        matchAboutBlank: true,
+                    });
                 }
             });
     }
@@ -329,7 +327,7 @@ export default class TabManager {
 
         const activeTabHostname = onlyUpdateActiveTab ? getURLHostOrProtocol(await TabManager.getActiveTabURL()) : null;
 
-        (await queryTabs())
+        (await queryTabs({discarded: false}))
             .filter((tab) => Boolean(TabManager.tabs[tab.id!]))
             .forEach((tab) => {
                 const frames = TabManager.tabs[tab.id!];

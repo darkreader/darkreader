@@ -82,6 +82,16 @@ function sendMessage(message: MessageCStoBG | MessageCStoUI) {
 }
 
 function onMessage(message: MessageBGtoCS | MessageUItoCS | DebugMessageBGtoCS) {
+    if (__DEBUG__ && message.type === DebugMessageTypeBGtoCS.RELOAD) {
+        logWarn('Cleaning up before update');
+        cleanup();
+        return;
+    }
+
+    if (!__CHROMIUM_MV3__ && message.type !== MessageTypeUItoCS.EXPORT_CSS && (message as MessageBGtoCS).documentId && (message as MessageBGtoCS).documentId !== documentId) {
+        return;
+    }
+
     logInfoCollapsed(`onMessage[${message.type}]`, message);
     switch (message.type) {
         case MessageTypeBGtoCS.ADD_CSS_FILTER:
@@ -146,10 +156,6 @@ function onMessage(message: MessageBGtoCS | MessageUItoCS | DebugMessageBGtoCS) 
             break;
         default:
             break;
-    }
-    if (__DEBUG__ && message.type === DebugMessageTypeBGtoCS.RELOAD) {
-        logWarn('Cleaning up before update');
-        cleanup();
     }
 }
 

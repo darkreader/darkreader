@@ -161,6 +161,7 @@ export interface MessageCStoUI {
 
 export interface MessageBGtoCS {
     id?: string;
+    documentId?: documentId;
     type: MessageTypeBGtoCS;
     data?: any;
     error?: any;

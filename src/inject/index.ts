@@ -7,6 +7,7 @@ import {isSystemDarkModeEnabled, runColorSchemeChangeDetector, stopColorSchemeCh
 import {collectCSS} from './dynamic-theme/css-collection';
 import type {DebugMessageBGtoCS, MessageBGtoCS, MessageCStoBG, MessageCStoUI, MessageUItoCS} from '../definitions';
 import {DebugMessageTypeBGtoCS, MessageTypeBGtoCS, MessageTypeCStoBG, MessageTypeCStoUI, MessageTypeUItoCS} from '../utils/message';
+import {generateUID} from '../utils/uid';
 
 declare const __DEBUG__: boolean;
 declare const __TEST__: boolean;
@@ -19,6 +20,10 @@ declare const __CHROMIUM_MV2__: boolean;
 declare const __CHROMIUM_MV3__: boolean;
 declare const __THUNDERBIRD__: boolean;
 declare const __FIREFOX_MV2__: boolean;
+
+// Virtual document id used in contexts where chrome.runtime.MessageSender.documentId may not be available,
+// that is all builds besides Chromium MV3 (since it uses Chromium 106+)
+const documentId = generateUID();
 
 function cleanup() {
     unloaded = true;
@@ -148,12 +153,27 @@ function onMessage(message: MessageBGtoCS | MessageUItoCS | DebugMessageBGtoCS) 
 }
 
 function sendConnectionOrResumeMessage(type: MessageTypeCStoBG.FRAME_CONNECT | MessageTypeCStoBG.FRAME_RESUME) {
-    sendMessage({
-        type,
-        data: (__CHROMIUM_MV2__ || __CHROMIUM_MV3__) ?
-            {isDark: isSystemDarkModeEnabled(), isTopFrame: window === window.top} :
-            {isDark: isSystemDarkModeEnabled()},
-    });
+    sendMessage(
+        __CHROMIUM_MV3__ ? {
+            type,
+            data: {
+                isDark: isSystemDarkModeEnabled(),
+                isTopFrame: window === window.top,
+            },
+        } : (__CHROMIUM_MV2__ ? {
+            type,
+            documentId,
+            data: {
+                isDark: isSystemDarkModeEnabled(),
+                isTopFrame: window === window.top,
+            },
+        } : {
+            type,
+            documentId,
+            data: {
+                isDark: isSystemDarkModeEnabled(),
+            },
+        }));
 }
 
 runColorSchemeChangeDetector((isDark) =>

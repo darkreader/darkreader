@@ -145,6 +145,7 @@ export interface TabInfo {
 
 export interface MessageCStoBG {
     id?: string;
+    documentId?: string;
     type: MessageTypeCStoBG;
     data?: any;
 }

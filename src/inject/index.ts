@@ -23,6 +23,7 @@ declare const __FIREFOX_MV2__: boolean;
 
 // Virtual document id used in contexts where chrome.runtime.MessageSender.documentId may not be available,
 // that is all builds besides Chromium MV3 (since it uses Chromium 106+)
+// Have to use placeholder value '' because Rollup does not consider generateUID() pure
 const documentId: documentId = __CHROMIUM_MV3__ ? '' : generateUID();
 
 function cleanup() {

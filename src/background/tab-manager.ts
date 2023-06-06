@@ -86,7 +86,7 @@ export default class TabManager {
                             if (!response) {
                                 return;
                             }
-                            if (!__CHROMIUM_MV3__ && !sender.documentId) {
+                            if ((TabManager as any).realDocumentId) {
                                 response.documentId = message.documentId;
                             }
                             chrome.tabs.sendMessage<MessageBGtoCS>(sender.tab!.id!, response,
@@ -115,7 +115,7 @@ export default class TabManager {
                     }
 
                     const {frameId} = sender;
-                    const isTopFrame = (__CHROMIUM_MV2__ || __CHROMIUM_MV3__) && (frameId === 0 || message.data.isTopFrame);
+                    const isTopFrame = (__CHROMIUM_MV2__ || __CHROMIUM_MV3__) ? (frameId === 0 || message.data.isTopFrame) : frameId === 0;
                     const url = sender.url!;
                     const tabId = sender.tab!.id!;
                     // Chromium 106+ may prerender frames resulting in top-level frames with chrome.runtime.MessageSender.tab.url
@@ -125,7 +125,7 @@ export default class TabManager {
 
                     TabManager.addFrame(tabId, frameId!, documentId, url);
 
-                    reply(tabURL, url, (__CHROMIUM_MV2__ || __CHROMIUM_MV3__) ? isTopFrame : frameId === 0);
+                    reply(tabURL, url, isTopFrame);
                     TabManager.stateManager.saveState();
                     break;
                 }

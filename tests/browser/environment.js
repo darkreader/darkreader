@@ -322,16 +322,40 @@ export default class CustomJestEnvironment extends TestEnvironment {
     }
 
     /**
+     * Creates a WebSocket server retrying multiple times in case the port
+     * is in use by the previous instance of test environment
+     * Learn more: https://github.com/websockets/ws/issues/1288
+     * @param {number} port
+     * @returns Promise<WebSocket.Server | undefined>
+     */
+    async createWsServer(port, delay = 100, retries = 100) {
+        return new Promise(async (resolve) => {
+            for (; retries > 0; retries--) {
+                const s = new WebSocketServer({port});
+                await new Promise((r) => {
+                    s.on('error', () => setTimeout(r, delay));
+                    s.on('close', () => setTimeout(r, delay));
+                    s.on('listening', () => {
+                        retries = 0;
+                        r();
+                        resolve(s);
+                    });
+                });
+            }
+        });
+    }
+
+    /**
      * Creates a server and returns once extension connects to it
-     * @returns {Promise<WebSocketServer>} server
+     * @returns {Promise<{close: () => Promise<void>}>} close
      */
     async createMessageServer() {
         const awaitForEvent = this.awaitForEvent.bind(this);
 
         // Puppeteer cannot evaluate scripts in moz-extension:// pages
         // https://github.com/puppeteer/puppeteer/issues/6616
-        return new Promise((resolve) => {
-            const wsServer = new WebSocketServer({port: POPUP_TEST_PORT});
+        return new Promise(async (resolve) => {
+            const wsServer = await this.createWsServer(POPUP_TEST_PORT);
             let backgroundSocket = null;
             let devToolsSocket = null;
             const popupSockets = new Set();
@@ -339,7 +363,7 @@ export default class CustomJestEnvironment extends TestEnvironment {
             const resolvers = new Map();
             const rejectors = new Map();
 
-            wsServer.on('connection', async (ws) => {
+            wsServer.on('connection', (ws) => {
                 ws.on('message', (data) => {
                     const message = JSON.parse(data);
                     if (message.id === null && message.data && message.data.type === 'background' && message.data.extensionOrigin) {
@@ -349,7 +373,10 @@ export default class CustomJestEnvironment extends TestEnvironment {
                         this.extensionStartListeners.forEach((ready) => ready());
                         ws.on('close', () => backgroundSocket = null);
                         backgroundSocket = ws;
-                        resolve(wsServer);
+                        resolve({
+                            // Convert callbacked method into a promisse method
+                            close: () => new Promise((c) => wsServer.close(c)),
+                        });
                     } else if (message.id === null && message.data && message.data.type === 'devtools') {
                         ws.on('close', () => devToolsSocket = null);
                         devToolsSocket = ws;

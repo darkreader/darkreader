@@ -65,7 +65,7 @@ export default class TabManager {
     private static readonly LOCAL_STORAGE_KEY = 'TabManager-state';
 
     public static init({getConnectionMessage, onColorSchemeChange, getTabMessage}: TabManagerOptions): void {
-        TabManager.stateManager = new StateManager<TabManagerState>(TabManager.LOCAL_STORAGE_KEY, this, {tabs: {}, timestamp: 0}, logWarn);
+        TabManager.stateManager = new StateManager<TabManagerState>(TabManager.LOCAL_STORAGE_KEY, this, __CHROMIUM_MV2__ ? {realDocumentId: false, tabs: {}, timestamp: 0} : {tabs: {}, timestamp: 0}, logWarn);
         TabManager.tabs = {};
         TabManager.onColorSchemeChange = onColorSchemeChange;
         TabManager.getTabMessage = getTabMessage;

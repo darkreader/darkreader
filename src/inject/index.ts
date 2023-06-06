@@ -5,7 +5,7 @@ import {createOrUpdateDynamicTheme, removeDynamicTheme, cleanDynamicThemeCache} 
 import {logWarn, logInfoCollapsed} from './utils/log';
 import {isSystemDarkModeEnabled, runColorSchemeChangeDetector, stopColorSchemeChangeDetector, emulateColorScheme} from '../utils/media-query';
 import {collectCSS} from './dynamic-theme/css-collection';
-import type {DebugMessageBGtoCS, MessageBGtoCS, MessageCStoBG, MessageCStoUI, MessageUItoCS, documentId} from '../definitions';
+import type {DebugMessageBGtoCS, MessageBGtoCS, MessageCStoBG, MessageCStoUI, MessageUItoCS} from '../definitions';
 import {DebugMessageTypeBGtoCS, MessageTypeBGtoCS, MessageTypeCStoBG, MessageTypeCStoUI, MessageTypeUItoCS} from '../utils/message';
 import {generateUID} from '../utils/uid';
 
@@ -24,7 +24,7 @@ declare const __FIREFOX_MV2__: boolean;
 // Virtual document id used in contexts where chrome.runtime.MessageSender.documentId may not be available,
 // that is all builds besides Chromium MV3 (since it uses Chromium 106+)
 // Have to use placeholder value '' because Rollup does not consider generateUID() pure
-const documentId: documentId = __CHROMIUM_MV3__ ? '' : generateUID();
+const documentId = __CHROMIUM_MV3__ ? '' : generateUID();
 
 function cleanup() {
     unloaded = true;

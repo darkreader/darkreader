@@ -86,7 +86,7 @@ export default class TabManager {
                             if (!response) {
                                 return;
                             }
-                            if ((TabManager as any).realDocumentId) {
+                            if (!(TabManager as any).realDocumentId) {
                                 response.documentId = message.documentId;
                             }
                             chrome.tabs.sendMessage<MessageBGtoCS>(sender.tab!.id!, response,

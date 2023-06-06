@@ -112,7 +112,7 @@ export default class TabManager {
                     const tabURL = ((__CHROMIUM_MV2__ || __CHROMIUM_MV3__) && isTopFrame) ? url : sender.tab!.url!;
                     const documentId: documentId | null = (__CHROMIUM_MV3__ || __CHROMIUM_MV2__) ? sender.documentId : ((__FIREFOX_MV2__ || __THUNDERBIRD__) ? (sender as any).contextId : null);
 
-                    TabManager.addFrame(tabId, frameId!, documentId, url, TabManager.timestamp);
+                    TabManager.addFrame(tabId, frameId!, documentId, url);
 
                     reply(tabURL, url, (__CHROMIUM_MV2__ || __CHROMIUM_MV3__) ? isTopFrame : frameId === 0);
                     TabManager.stateManager.saveState();
@@ -231,7 +231,7 @@ export default class TabManager {
         }
     }
 
-    private static addFrame(tabId: tabId, frameId: frameId, documentId: documentId | null, url: string, timestamp: number) {
+    private static addFrame(tabId: tabId, frameId: frameId, documentId: documentId | null, url: string) {
         let frames: {[frameId: frameId]: DocumentInfo};
         if (TabManager.tabs[tabId]) {
             frames = TabManager.tabs[tabId];
@@ -244,7 +244,7 @@ export default class TabManager {
             url,
             state: DocumentState.ACTIVE,
             darkThemeDetected: false,
-            timestamp,
+            timestamp: TabManager.timestamp,
         };
     }
 

@@ -88,7 +88,7 @@ function onMessage(message: MessageBGtoCS | MessageUItoCS | DebugMessageBGtoCS) 
         return;
     }
 
-    if (false && !__CHROMIUM_MV3__ && message.type !== MessageTypeUItoCS.EXPORT_CSS && (message as MessageBGtoCS).documentId && (message as MessageBGtoCS).documentId !== documentId) {
+    if (!__CHROMIUM_MV3__ && message.type !== MessageTypeUItoCS.EXPORT_CSS && (message as MessageBGtoCS).documentId && (message as MessageBGtoCS).documentId !== documentId) {
         return;
     }
 

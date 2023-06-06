@@ -71,7 +71,7 @@ export default class TabManager {
         TabManager.getTabMessage = getTabMessage;
 
         chrome.runtime.onMessage.addListener(async (message: MessageCStoBG | MessageUItoBG, sender, sendResponse) => {
-            if (!__CHROMIUM_MV3__ && sender.documentId) {
+            if (__CHROMIUM_MV2__ && sender.documentId) {
                 (TabManager as any).realDocumentId = true;
             }
             if (isFirefox && makeFirefoxHappy(message, sender, sendResponse)) {
@@ -86,7 +86,7 @@ export default class TabManager {
                             if (!response) {
                                 return;
                             }
-                            if (!(TabManager as any).realDocumentId) {
+                            if (__FIREFOX_MV2__ || __THUNDERBIRD__ || (__CHROMIUM_MV2__ && sender.documentId)) {
                                 response.documentId = message.documentId;
                             }
                             chrome.tabs.sendMessage<MessageBGtoCS>(sender.tab!.id!, response,
@@ -121,7 +121,7 @@ export default class TabManager {
                     // Chromium 106+ may prerender frames resulting in top-level frames with chrome.runtime.MessageSender.tab.url
                     // set to chrome://newtab/ and positive chrome.runtime.MessageSender.frameId
                     const tabURL = ((__CHROMIUM_MV2__ || __CHROMIUM_MV3__) && isTopFrame) ? url : sender.tab!.url!;
-                    const documentId: documentId = (__CHROMIUM_MV3__ || __CHROMIUM_MV2__ && sender.documentId) ? sender.documentId : ((__FIREFOX_MV2__ || __THUNDERBIRD__) ? (sender as any).contextId : message.documentId);
+                    const documentId: documentId = (__CHROMIUM_MV3__ || __CHROMIUM_MV2__ && sender.documentId) ? sender.documentId! : message.documentId!;
 
                     TabManager.addFrame(tabId, frameId!, documentId, url);
 
@@ -154,7 +154,7 @@ export default class TabManager {
                     const tabURL = sender.tab!.url!;
                     const frameId = sender.frameId!;
                     const url = sender.url!;
-                    const documentId: documentId = (__CHROMIUM_MV3__ || __CHROMIUM_MV2__ && sender.documentId) ? sender.documentId : ((__FIREFOX_MV2__ || __THUNDERBIRD__) ? (sender as any).contextId : message.documentId);
+                    const documentId: documentId = (__CHROMIUM_MV3__ || __CHROMIUM_MV2__ && sender.documentId) ? sender.documentId! : message.documentId!;
                     if (TabManager.tabs[tabId][frameId].timestamp < TabManager.timestamp) {
                         const response = TabManager.getTabMessage(tabURL, url, frameId === 0);
                         if (!__CHROMIUM_MV3__ && !sender.documentId) {
@@ -359,7 +359,7 @@ export default class TabManager {
                     .forEach(async ([id, {url, documentId}]) => {
                         const frameId = Number(id);
                         const tabURL = await TabManager.getTabURL(tab);
-                        const realDocumentId = __CHROMIUM_MV3__ || (TabManager as any).realDocumentId;
+                        const realDocumentId = __CHROMIUM_MV3__ || (__CHROMIUM_MV2__ && (TabManager as any).realDocumentId);
 
                         // Check if hostname are equal when we only want to update active tab.
                         if (onlyUpdateActiveTab && getURLHostOrProtocol(tabURL) !== activeTabHostname) {

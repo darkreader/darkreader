@@ -41,13 +41,6 @@ describe('MEDIA QUERIES', () => {
     });
 
     it('should style lazyloaded media', async () => {
-        // This test fails on Firefox Nightly 115
-        // TODO(Anton after 06.10.23): re-enable this test
-        if (navigator.vendor === '' && navigator.userAgent.endsWith('Firefox/115.0')) {
-            expect(true);
-            return;
-        }
-
         container.innerHTML = multiline(
             '<style class="testcase-style" media="print" onload="this.media=`screen`">',
             '    h1 { background: green; }',

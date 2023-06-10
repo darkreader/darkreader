@@ -50,7 +50,7 @@ jobs:
           - channel: beta
             chrome: beta
             # disable Firefox Beta because it fails to install extension
-            # firefox: latest-beta
+            firefox: latest-beta
 
     runs-on: ubuntu-latest
 
